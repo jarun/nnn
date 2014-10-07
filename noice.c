@@ -109,13 +109,19 @@ exitcurses(void)
 	endwin(); /* Restore terminal */
 }
 
-
-/* Warning shows up at the bottom */
+/* Messages show up at the bottom */
 void
-printwarn(char *prefix)
+printmsg(char *msg)
 {
 	move(LINES - 1, 0);
-	printw("%s: %s\n", prefix, strerror(errno));
+	printw("%s\n", msg);
+}
+
+/* Display warning as a message */
+void
+printwarn(void)
+{
+	printmsg(strerror(errno));
 }
 
 /* Kill curses and display error before exiting */
@@ -218,7 +224,7 @@ begin:
 
 	dirp = opendir(path); 
 	if (dirp == NULL) {
-		printwarn("opendir");
+		printwarn();
 		goto nochange;
 	}
 
@@ -344,7 +350,7 @@ nochange:
 					path = newpath;
 					goto out;
 				} else {
-					printwarn(newpath);
+					printwarn();
 					free(newpath);
 					goto nochange;
 				}
@@ -357,7 +363,7 @@ nochange:
 				/* Open with */
 				bin = openwith(name);
 				if (bin == NULL) {
-					printwarn("no association\n");
+					printmsg("No association");
 					goto nochange;
 				}
 
