@@ -138,7 +138,7 @@ printwarn(void)
 void
 printerr(int ret, char *prefix)
 {
-	endwin();
+	exitcurses();
 	printf("%s: %s\n", prefix, strerror(errno));
 	exit(ret);
 }
