@@ -42,8 +42,8 @@
 int die = 0;
 
 struct assoc {
-	char *ext;
-	char *bin;
+	char *ext; /* Extension */
+	char *bin; /* Program */
 } assocs[] = {
 	{ "avi", "mplayer" },
 	{ "mp4", "mplayer" },
@@ -87,6 +87,25 @@ dentcmp(const void *va, const void *vb)
 
 	return strcmp(a->d_name, b->d_name);
 }
+
+void
+initcurses(void)
+{
+	initscr();
+	cbreak();
+	noecho();
+	nonl();
+	intrflush(stdscr, FALSE);
+	keypad(stdscr, TRUE);
+	curs_set(FALSE); /* Hide cursor */
+}
+
+void
+exitcurses(void)
+{
+	endwin(); /* Restore terminal */
+}
+
 
 /* Warning shows up at the bottom */
 void
@@ -318,12 +337,16 @@ nochange:
 				DPRINTF_S(ext);
 				DPRINTF_S(bin);
 
+				exitcurses();
+
 				/* Run program */
 				pid = fork();
 				if (pid == 0)
 					execlp(bin, bin, file, NULL);
 				else
 					waitpid(pid, NULL, 0);
+
+				initcurses();
 
 				free(file);
 
@@ -360,18 +383,11 @@ main(int argc, char *argv[])
 	/* Set locale before curses setup */
 	setlocale(LC_ALL, "");
 
-	/* Init curses */
-	initscr();
-	cbreak();
-	noecho();
-	nonl();
-	intrflush(stdscr, FALSE);
-	keypad(stdscr, TRUE);
-	curs_set(FALSE); /* Hide cursor */
+	initcurses();
 
 	browse(ipath);
 
-	endwin(); /* Restore terminal */
+	exitcurses();
 
 	return 0;
 }
