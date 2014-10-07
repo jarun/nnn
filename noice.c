@@ -214,8 +214,11 @@ begin:
 	qsort(dents, n, sizeof(*dents), dentcmp);
 
 	for (;;) {
-		int nlines = MIN(LINES - 4, n);
+		int nlines;
+
 redraw:
+		nlines = MIN(LINES - 4, n);
+
 		/* Clean screen */
 		erase();
 
