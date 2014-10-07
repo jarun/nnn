@@ -50,36 +50,34 @@ struct assoc {
 	char *ext; /* Extension */
 	char *bin; /* Program */
 } assocs[] = {
-	{ "avi", "mplayer" },
-	{ "mp4", "mplayer" },
-	{ "mkv", "mplayer" },
-	{ "mp3", "mplayer" },
-	{ "ogg", "mplayer" },
-	{ "srt", "less" },
-	{ "txt", "less" },
+	{ ".avi", "mplayer" },
+	{ ".mp4", "mplayer" },
+	{ ".mkv", "mplayer" },
+	{ ".mp3", "mplayer" },
+	{ ".ogg", "mplayer" },
+	{ ".srt", "less" },
+	{ ".txt", "less" },
+	{ "README", "less" },
 };
 
 char *
-extension(char *file)
+openwith(char *file)
 {
-	char *dot;
-
-	dot = strrchr(file, '.');
-	if (dot == NULL || dot == file)
-		return NULL;
-	else
-		return dot + 1;
-}
-
-char *
-openwith(char *ext)
-{
+	char *ext = NULL;
+	char *bin = NULL;
 	int i;
 
+	ext = strrchr(file, '.');
+	if (ext == NULL)
+		ext = file;
+	DPRINTF_S(ext);
+
 	for (i = 0; i < LEN(assocs); i++)
-		if (strncmp(assocs[i].ext, ext, strlen(ext)) == 0)
-			return assocs[i].bin;
-	return NULL;
+		if (strncmp(assocs[i].ext, ext, strlen(ext) + 1) == 0)
+			bin = assocs[i].bin;
+	DPRINTF_S(bin);
+
+	return bin;
 }
 
 int
@@ -327,7 +325,7 @@ nochange:
 		if (ret == 3) {
 			char *name, *file = NULL;
 			char *newpath;
-			char *ext, *bin;
+			char *bin;
 			pid_t pid;
 
 			/* Cannot descend in empty directories */
@@ -357,18 +355,11 @@ nochange:
 				DPRINTF_S(file);
 
 				/* Open with */
-				ext = extension(name);
-				if (ext == NULL) {
-					printwarn("invalid extension\n");
-					goto nochange;
-				}
-				bin = openwith(ext);
+				bin = openwith(name);
 				if (bin == NULL) {
 					printwarn("no association\n");
 					goto nochange;
 				}
-				DPRINTF_S(ext);
-				DPRINTF_S(bin);
 
 				exitcurses();
 
