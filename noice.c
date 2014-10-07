@@ -26,6 +26,27 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define ISODD(x) ((x) & 1)
 
+struct assoc {
+	char *ext; /* Extension */
+	char *bin; /* Program */
+};
+
+/* Configuration */
+struct assoc assocs[] = {
+	{ ".avi", "mplayer" },
+	{ ".mp4", "mplayer" },
+	{ ".mkv", "mplayer" },
+	{ ".mp3", "mplayer" },
+	{ ".ogg", "mplayer" },
+	{ ".srt", "less" },
+	{ ".txt", "less" },
+	{ "README", "less" },
+};
+
+#define CWD "cwd: "
+#define CURSR " > "
+#define EMPTY "   "
+
 /*
  * Layout:
  * .---------
@@ -47,20 +68,6 @@ int die = 0;
 
 struct entry {
 	char name[MAXNAMLEN + 1];
-};
-
-struct assoc {
-	char *ext; /* Extension */
-	char *bin; /* Program */
-} assocs[] = {
-	{ ".avi", "mplayer" },
-	{ ".mp4", "mplayer" },
-	{ ".mkv", "mplayer" },
-	{ ".mp3", "mplayer" },
-	{ ".ogg", "mplayer" },
-	{ ".srt", "less" },
-	{ ".txt", "less" },
-	{ "README", "less" },
 };
 
 char *
@@ -265,10 +272,6 @@ redraw:
 
 		DPRINTF_D(cur);
 		DPRINTF_S(path);
-
-#define CWD "cwd: "
-#define CURSR " > "
-#define EMPTY "   "
 
 		/* No text wrapping in cwd line */
 		cwd = malloc(COLS * sizeof(char));
