@@ -23,6 +23,7 @@
 #endif /* DEBUG */
 
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
 
 /*
  * Layout:
@@ -187,7 +188,7 @@ browse(const char *ipath)
 	char *path = strdup(ipath);
 
 begin:
-	/* Path is a malloc(3)-ed string */
+	/* Path should be a malloc(3)-ed string at all times */
 	n = 0;
 	cur = 0;
 	dents = NULL;
@@ -213,6 +214,7 @@ begin:
 	qsort(dents, n, sizeof(*dents), dentcmp);
 
 	for (;;) {
+		int nlines = MIN(LINES - 4, n);
 redraw:
 		/* Clean screen */
 		erase();
@@ -233,10 +235,22 @@ redraw:
 		    path);
 
 		/* Print listing */
-		for (i = 0; i < n; i++)
-			printw(" %s %s\n",
-			    i == cur ? ">" : " ",
-			    dents[i]->d_name);
+		if (cur < nlines / 2) {
+			for (i = 0; i < nlines; i++)
+				printw(" %s %s\n",
+				    i == cur ? ">" : " ",
+				    dents[i]->d_name);
+		} else if (cur >= n - nlines / 2) {
+			for (i = n - nlines; i < n; i++)
+				printw(" %s %s\n",
+				    i == cur ? ">" : " ",
+				    dents[i]->d_name);
+		} else {
+			for (i = cur - nlines / 2; i <= cur + nlines / 2; i++)
+				printw(" %s %s\n",
+				    i == cur ? ">" : " ",
+				    dents[i]->d_name);
+		}
 
 nochange:
 		ret = nextsel(&cur, n);
@@ -249,7 +263,13 @@ nochange:
 			if (strncmp(path, "", 1) == 0) {
 				goto nochange;
 			} else {
-				path = dirname(path);
+				char *dir, *tmp;
+
+				dir = dirname(path);
+				tmp = malloc(strlen(dir) + 1);
+				strncpy(tmp, dir, strlen(dir) + 1);
+				free(path);
+				path = tmp;
 				goto out;
 			}
 		}
