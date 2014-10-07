@@ -263,7 +263,7 @@ redraw:
 		/* Clean screen */
 		erase();
 
-		/* Strip slashes */
+		/* Strip trailing slashes */
 		for (i = strlen(path) - 1; i > -1; i--)
 			if (path[i] == '/')
 				path[i] = '\0';
@@ -286,7 +286,9 @@ redraw:
 			tmpents[i].name[COLS - strlen(CURSR) - 1] = '\0';
 		}
 
-		/* Print cwd */
+		/* Print cwd.  If empty we are on the root.  We store it
+		 * as an empty string so that when we navigate in /mnt
+		 * is doesn't come up as //mnt. */
 		printw(CWD "%s%s\n\n",
 		    strncmp(cwd, "", 1) == 0 ? "/" : "",
 		    cwd);
