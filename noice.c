@@ -31,12 +31,15 @@
  * .---------
  * | cwd: /mnt/path
  * |
- * |  > file0
+ * |    file0
  * |    file1
+ * |  > file2
+ * |    file3
+ * |    file4
  *      ...
  * |    filen
  * |
- * | msg: invalid extension
+ * | Permission denied
  * '------
  */
 
