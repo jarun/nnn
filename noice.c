@@ -24,6 +24,7 @@
 
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
+#define ISODD(x) ((x) & 1)
 
 /*
  * Layout:
@@ -40,6 +41,10 @@
  */
 
 int die = 0;
+
+struct entry {
+	char name[MAXNAMLEN + 1];
+};
 
 struct assoc {
 	char *ext; /* Extension */
@@ -205,6 +210,7 @@ browse(const char *ipath)
 	int i, n, cur;
 	int r, ret;
 	char *path = strdup(ipath);
+	char *cwd;
 
 begin:
 	/* Path should be a malloc(3)-ed string at all times */
@@ -234,6 +240,8 @@ begin:
 
 	for (;;) {
 		int nlines;
+		struct entry *tmpents;
+		int odd;
 
 redraw:
 		nlines = MIN(LINES - 4, n);
@@ -251,28 +259,49 @@ redraw:
 		DPRINTF_D(cur);
 		DPRINTF_S(path);
 
+#define CWD "cwd: "
+#define CURSR " > "
+#define EMPTY "   "
+
+		/* No text wrapping in cwd line */
+		cwd = malloc(COLS * sizeof(char));
+		strncpy(cwd, path, COLS);
+		cwd[COLS - strlen(CWD) - 1] = '\0';
+
+		/* No text wrapping in entries */
+		tmpents = malloc(n * sizeof(*tmpents));
+		for (i = 0; i < n; i++) {
+			strncpy(tmpents[i].name, dents[i]->d_name,
+			    sizeof(tmpents[i].name));
+			tmpents[i].name[COLS - strlen(CURSR) - 1] = '\0';
+		}
+
 		/* Print cwd */
-		printw("cwd: %s%s\n\n",
-		    strncmp(path, "", 1) == 0 ? "/" : "",
-		    path);
+		printw(CWD "%s%s\n\n",
+		    strncmp(cwd, "", 1) == 0 ? "/" : "",
+		    cwd);
 
 		/* Print listing */
+		odd = ISODD(nlines);
 		if (cur < nlines / 2) {
 			for (i = 0; i < nlines; i++)
-				printw(" %s %s\n",
-				    i == cur ? ">" : " ",
-				    dents[i]->d_name);
+				printw("%s%s\n",
+				    i == cur ? CURSR : EMPTY,
+				    tmpents[i].name);
 		} else if (cur >= n - nlines / 2) {
 			for (i = n - nlines; i < n; i++)
-				printw(" %s %s\n",
-				    i == cur ? ">" : " ",
-				    dents[i]->d_name);
+				printw("%s%s\n",
+				    i == cur ? CURSR : EMPTY,
+				    tmpents[i].name);
 		} else {
-			for (i = cur - nlines / 2; i <= cur + nlines / 2; i++)
-				printw(" %s %s\n",
-				    i == cur ? ">" : " ",
-				    dents[i]->d_name);
+			for (i = cur - nlines / 2;
+			     i < cur + nlines / 2 + odd; i++)
+				printw("%s%s\n",
+				    i == cur ? CURSR : EMPTY,
+				    tmpents[i].name);
 		}
+
+		free(tmpents);
 
 nochange:
 		ret = nextsel(&cur, n);
@@ -350,10 +379,6 @@ nochange:
 
 				free(file);
 
-				/* Screen may be messed up */
-				clear();
-				/* Some programs reset this */
-				keypad(stdscr, TRUE);
 				goto redraw;
 			default:
 				DPRINTF_D(dents[cur]->d_type);
