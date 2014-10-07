@@ -330,6 +330,10 @@ nochange:
 			char *ext, *bin;
 			pid_t pid;
 
+			/* Cannot descend in empty directories */
+			if (n == 0)
+				goto nochange;
+
 			name = dents[cur]->d_name;
 
 			switch (dents[cur]->d_type) {
