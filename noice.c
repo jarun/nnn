@@ -88,7 +88,7 @@ openwith(char *file)
 	DPRINTF_S(ext);
 
 	for (i = 0; i < LEN(assocs); i++)
-		if (strncmp(assocs[i].ext, ext, strlen(ext) + 1) == 0)
+		if (strcmp(assocs[i].ext, ext) == 0)
 			bin = assocs[i].bin;
 	DPRINTF_S(bin);
 
@@ -245,8 +245,8 @@ begin:
 
 	while ((dp = readdir(dirp)) != NULL) {
 		/* Skip self and parent */
-		if (strncmp(dp->d_name, ".", 2) == 0
-		    || strncmp(dp->d_name, "..", 3) == 0)
+		if (strcmp(dp->d_name, ".") == 0
+		    || strcmp(dp->d_name, "..") == 0)
 			continue;
 		dents = realloc(dents, (n + 1) * sizeof(*dents));
 		if (dents == NULL)
@@ -295,7 +295,7 @@ redraw:
 		 * as an empty string so that when we navigate in /mnt
 		 * is doesn't come up as //mnt. */
 		printw(CWD "%s%s\n\n",
-		    strncmp(cwd, "", 1) == 0 ? "/" : "",
+		    strcmp(cwd, "") == 0 ? "/" : "",
 		    cwd);
 
 		/* Print listing */
@@ -328,7 +328,7 @@ nochange:
 		}
 		if (ret == 2) {
 			/* Handle root case */
-			if (strncmp(path, "", 1) == 0) {
+			if (strcmp(path, "") == 0) {
 				goto nochange;
 			} else {
 				char *dir, *tmp;
