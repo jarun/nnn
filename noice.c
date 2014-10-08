@@ -353,12 +353,12 @@ nochange:
 			}
 			r = fstat(fd, &sb);
 			close(fd);
-			DPRINTF_U(sb.st_mode);
 			if (r == -1) {
 				printwarn();
 				free(pathnew);
 				goto nochange;
 			}
+			DPRINTF_U(sb.st_mode);
 			/* Directory */
 			if (S_ISDIR(sb.st_mode)) {
 				free(path);
