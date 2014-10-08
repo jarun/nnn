@@ -223,7 +223,7 @@ begin:
 	cur = 0;
 	dents = NULL;
 
-	dirp = opendir(path); 
+	dirp = opendir(path);
 	if (dirp == NULL) {
 		printwarn();
 		goto nochange;
@@ -365,7 +365,7 @@ nochange:
 				path = pathnew;
 				goto out;
 			}
-			/* Regular file  */
+			/* Regular file */
 			if (S_ISREG(sb.st_mode)) {
 				/* Open with */
 				bin = openwith(name);
@@ -399,7 +399,7 @@ nochange:
 out:
 	free(dents);
 
-	r = closedir(dirp); 
+	r = closedir(dirp);
 	if (r == -1)
 		printerr(1, "closedir");
 
