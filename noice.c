@@ -234,6 +234,7 @@ begin:
 		if (strcmp(dp->d_name, ".") == 0
 		    || strcmp(dp->d_name, "..") == 0)
 			continue;
+		/* Deep copy because readdir(3) reuses the entries */
 		dents = realloc(dents, (n + 1) * sizeof(*dents));
 		if (dents == NULL)
 			printerr(1, "realloc");
