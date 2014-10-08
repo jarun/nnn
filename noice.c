@@ -193,20 +193,6 @@ nextsel(int *cur, int max)
 }
 
 int
-testopen(char *path)
-{
-	int fd;
-
-	fd = open(path, O_RDONLY);
-	if (fd == -1) {
-		return 0;
-	} else {
-		close(fd);
-		return 1;
-	}
-}
-
-int
 testopendir(char *path)
 {
 	DIR *dirp;
@@ -340,11 +326,11 @@ nochange:
 			}
 		}
 		if (ret == 3) {
-			char *pathnew, *pathtmp;
+			char *pathnew;
 			char *name;
-			u_int8_t type;
 			char *bin;
 			pid_t pid;
+			int fd;
 			struct stat sb;
 
 			/* Cannot descend in empty directories */
@@ -352,62 +338,35 @@ nochange:
 				goto nochange;
 
 			name = dents[cur].d_name;
-			type = dents[cur].d_type;
 
 			asprintf(&pathnew, "%s/%s", path, name);
 
 			DPRINTF_S(name);
-			DPRINTF_U(type);
 			DPRINTF_S(pathnew);
 
-again:
-			switch (type) {
-			case DT_LNK:
-				/* Resolve link */
-				pathtmp = realpath(pathnew, NULL);
-				if (pathtmp == NULL) {
-					printwarn();
-					free(pathnew);
-					goto nochange;
-				} else {
-					r = stat(pathtmp, &sb);
-					free(pathtmp);
-					if (r == -1) {
-						printwarn();
-						free(pathnew);
-						goto nochange;
-					}
-					/* Directory or file */
-					if (S_ISDIR(sb.st_mode)) {
-						type = DT_DIR;
-						goto again;
-					}
-					if (S_ISREG(sb.st_mode)) {
-						type = DT_REG;
-						goto again;
-					}
-					/* All the rest */
-					printmsg("Unsupported file");
-					free(pathnew);
-					goto nochange;
-				}
-			case DT_DIR:
-				/* Change to new path */
-				if (testopen(pathnew)) {
-					free(path);
-					path = pathnew;
-					goto out;
-				} else {
-					printwarn();
-					free(pathnew);
-					goto nochange;
-				}
-			case DT_REG:
-				if (!testopen(pathnew)) {
-					printwarn();
-					free(pathnew);
-					goto nochange;
-				}
+			/* Get path info */
+			fd = open(pathnew, O_RDONLY | O_NONBLOCK);
+			if (fd == -1) {
+				printwarn();
+				free(pathnew);
+				goto nochange;
+			}
+			r = fstat(fd, &sb);
+			close(fd);
+			DPRINTF_U(sb.st_mode);
+			if (r == -1) {
+				printwarn();
+				free(pathnew);
+				goto nochange;
+			}
+			/* Directory */
+			if (S_ISDIR(sb.st_mode)) {
+				free(path);
+				path = pathnew;
+				goto out;
+			}
+			/* Regular file  */
+			if (S_ISREG(sb.st_mode)) {
 				/* Open with */
 				bin = openwith(name);
 				if (bin == NULL) {
@@ -429,11 +388,11 @@ again:
 
 				free(pathnew);
 				goto redraw;
-			default:
-				printmsg("Unsupported file");
-				free(pathnew);
-				goto nochange;
 			}
+			/* All the rest */
+			printmsg("Unsupported file");
+			free(pathnew);
+			goto nochange;
 		}
 	}
 
