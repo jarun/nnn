@@ -1,3 +1,4 @@
+#include <sys/stat.h>
 #include <sys/types.h>
 
 #include <errno.h>
@@ -337,37 +338,73 @@ nochange:
 			}
 		}
 		if (ret == 3) {
-			char *name, *file = NULL;
-			char *newpath;
+			char *pathnew, *pathtmp;
+			char *name;
+			u_int8_t type;
 			char *bin;
 			pid_t pid;
+			struct stat sb;
 
 			/* Cannot descend in empty directories */
 			if (n == 0)
 				goto nochange;
 
 			name = dents[cur]->d_name;
+			type = dents[cur]->d_type;
 
-			switch (dents[cur]->d_type) {
+			pathnew = malloc(strlen(path) + 1
+			    + strlen(name) + 1);
+			sprintf(pathnew, "%s/%s", path, name);
+			DPRINTF_S(pathnew);
+
+again:
+			switch (type) {
+			case DT_LNK:
+				/* Resolve link */
+				pathtmp = realpath(pathnew, NULL);
+				if (pathtmp == NULL) {
+					printwarn();
+					free(pathnew);
+					goto nochange;
+				} else {
+					r = stat(pathtmp, &sb);
+					free(pathtmp);
+					if (r == -1) {
+						printwarn();
+						free(pathnew);
+						goto nochange;
+					}
+					/* Directory or file */
+					if (S_ISDIR(sb.st_mode)) {
+						type = DT_DIR;
+						goto again;
+					}
+					if (S_ISREG(sb.st_mode)) {
+						type = DT_REG;
+						goto again;
+					}
+					/* All the rest */
+					printmsg("Unsupported file");
+					free(pathnew);
+					goto nochange;
+				}
 			case DT_DIR:
-				newpath = malloc(strlen(path) + 1
-				    + strlen(name) + 1);
-				sprintf(newpath, "%s/%s", path, name);
-				if (testopen(newpath)) {
+				/* Change to new path */
+				if (testopen(pathnew)) {
 					free(path);
-					path = newpath;
+					path = pathnew;
 					goto out;
 				} else {
 					printwarn();
-					free(newpath);
+					free(pathnew);
 					goto nochange;
 				}
 			case DT_REG:
-				file = malloc(strlen(path) + 1
-				    + strlen(name) + 1);
-				sprintf(file, "%s/%s", path, name);
-				DPRINTF_S(file);
-
+				if (!testopen(pathnew)) {
+					printwarn();
+					free(pathnew);
+					goto nochange;
+				}
 				/* Open with */
 				bin = openwith(name);
 				if (bin == NULL) {
@@ -380,17 +417,18 @@ nochange:
 				/* Run program */
 				pid = fork();
 				if (pid == 0)
-					execlp(bin, bin, file, NULL);
+					execlp(bin, bin, pathnew, NULL);
 				else
 					waitpid(pid, NULL, 0);
 
 				initcurses();
 
-				free(file);
-
+				free(pathnew);
 				goto redraw;
 			default:
 				DPRINTF_D(dents[cur]->d_type);
+				printmsg("Unsupported file");
+				goto nochange;
 			}
 		}
 	}
