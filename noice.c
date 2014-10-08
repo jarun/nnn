@@ -75,10 +75,6 @@ struct assoc assocs[] = {
 
 int die = 0;
 
-struct entry {
-	char name[MAXNAMLEN + 1];
-};
-
 char *
 openwith(char *file)
 {
@@ -104,8 +100,8 @@ dentcmp(const void *va, const void *vb)
 {
 	const struct dirent *a, *b;
 
-	a = *(struct dirent **)va;
-	b = *(struct dirent **)vb;
+	a = (struct dirent *)va;
+	b = (struct dirent *)vb;
 
 	return strcmp(a->d_name, b->d_name);
 }
@@ -229,7 +225,7 @@ browse(const char *ipath)
 {
 	DIR *dirp;
 	struct dirent *dp;
-	struct dirent **dents;
+	struct dirent *dents;
 	int i, n, cur;
 	int r, ret;
 	char *path = strdup(ipath);
@@ -255,7 +251,7 @@ begin:
 		dents = realloc(dents, (n + 1) * sizeof(*dents));
 		if (dents == NULL)
 			printerr(1, "realloc");
-		dents[n] = dp;
+		memcpy(&dents[n], dp, sizeof(*dents));
 		n++;
 	}
 
@@ -263,7 +259,7 @@ begin:
 
 	for (;;) {
 		int nlines;
-		struct entry *tmpents;
+		struct dirent *tmpents;
 		int odd;
 
 redraw:
@@ -289,11 +285,9 @@ redraw:
 
 		/* No text wrapping in entries */
 		tmpents = malloc(n * sizeof(*tmpents));
-		for (i = 0; i < n; i++) {
-			strlcpy(tmpents[i].name, dents[i]->d_name,
-			    sizeof(tmpents[i].name));
-			tmpents[i].name[COLS - strlen(CURSR) - 1] = '\0';
-		}
+		memcpy(tmpents, dents, n * sizeof(*tmpents));
+		for (i = 0; i < n; i++)
+			tmpents[i].d_name[COLS - strlen(CURSR) - 1] = '\0';
 
 		/* Print cwd.  If empty we are on the root.  We store it
 		 * as an empty string so that when we navigate in /mnt
@@ -308,18 +302,18 @@ redraw:
 			for (i = 0; i < nlines; i++)
 				printw("%s%s\n",
 				    i == cur ? CURSR : EMPTY,
-				    tmpents[i].name);
+				    tmpents[i].d_name);
 		} else if (cur >= n - nlines / 2) {
 			for (i = n - nlines; i < n; i++)
 				printw("%s%s\n",
 				    i == cur ? CURSR : EMPTY,
-				    tmpents[i].name);
+				    tmpents[i].d_name);
 		} else {
 			for (i = cur - nlines / 2;
 			     i < cur + nlines / 2 + odd; i++)
 				printw("%s%s\n",
 				    i == cur ? CURSR : EMPTY,
-				    tmpents[i].name);
+				    tmpents[i].d_name);
 		}
 
 		free(tmpents);
@@ -358,8 +352,8 @@ nochange:
 			if (n == 0)
 				goto nochange;
 
-			name = dents[cur]->d_name;
-			type = dents[cur]->d_type;
+			name = dents[cur].d_name;
+			type = dents[cur].d_type;
 
 			pathsiz = strlen(path) + 1 + strlen(name) + 1;
 			pathnew = malloc(pathsiz);
