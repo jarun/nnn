@@ -13,6 +13,10 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef LINUX
+#include <bsd/string.h>
+#endif
+
 #ifdef DEBUG
 #define DEBUG_FD 8
 #define DPRINTF_D(x) dprintf(DEBUG_FD, #x "=%d\n", x)
@@ -280,13 +284,13 @@ redraw:
 
 		/* No text wrapping in cwd line */
 		cwd = malloc(COLS * sizeof(char));
-		strncpy(cwd, path, COLS);
+		strlcpy(cwd, path, COLS * sizeof(char));
 		cwd[COLS - strlen(CWD) - 1] = '\0';
 
 		/* No text wrapping in entries */
 		tmpents = malloc(n * sizeof(*tmpents));
 		for (i = 0; i < n; i++) {
-			strncpy(tmpents[i].name, dents[i]->d_name,
+			strlcpy(tmpents[i].name, dents[i]->d_name,
 			    sizeof(tmpents[i].name));
 			tmpents[i].name[COLS - strlen(CURSR) - 1] = '\0';
 		}
@@ -335,7 +339,7 @@ nochange:
 
 				dir = dirname(path);
 				tmp = malloc(strlen(dir) + 1);
-				strncpy(tmp, dir, strlen(dir) + 1);
+				strlcpy(tmp, dir, strlen(dir) + 1);
 				free(path);
 				path = tmp;
 				goto out;
