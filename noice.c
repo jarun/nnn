@@ -44,6 +44,7 @@ struct assoc assocs[] = {
 	{ ".ogg", "mplayer" },
 	{ ".srt", "less" },
 	{ ".txt", "less" },
+	{ ".sh", "sh" },
 	{ "README", "less" },
 };
 
