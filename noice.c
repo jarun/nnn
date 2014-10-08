@@ -341,7 +341,6 @@ nochange:
 		}
 		if (ret == 3) {
 			char *pathnew, *pathtmp;
-			size_t pathsiz;
 			char *name;
 			u_int8_t type;
 			char *bin;
@@ -355,9 +354,7 @@ nochange:
 			name = dents[cur].d_name;
 			type = dents[cur].d_type;
 
-			pathsiz = strlen(path) + 1 + strlen(name) + 1;
-			pathnew = malloc(pathsiz);
-			snprintf(pathnew, pathsiz, "%s/%s", path, name);
+			asprintf(&pathnew, "%s/%s", path, name);
 
 			DPRINTF_S(name);
 			DPRINTF_U(type);
