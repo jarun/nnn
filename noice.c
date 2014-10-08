@@ -421,6 +421,7 @@ again:
 				bin = openwith(name);
 				if (bin == NULL) {
 					printmsg("No association");
+					free(pathnew);
 					goto nochange;
 				}
 
@@ -439,6 +440,7 @@ again:
 				goto redraw;
 			default:
 				printmsg("Unsupported file");
+				free(pathnew);
 				goto nochange;
 			}
 		}
