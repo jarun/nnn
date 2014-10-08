@@ -14,11 +14,14 @@
 #include <unistd.h>
 
 #ifdef DEBUG
-#define DPRINTF_D(x) printw(#x "=%d\n", x)
-#define DPRINTF_S(x) printw(#x "=%s\n", x)
-#define DPRINTF_P(x) printw(#x "=0x%p\n", x)
+#define DEBUG_FD 8
+#define DPRINTF_D(x) dprintf(DEBUG_FD, #x "=%d\n", x)
+#define DPRINTF_U(x) dprintf(DEBUG_FD, #x "=%u\n", x)
+#define DPRINTF_S(x) dprintf(DEBUG_FD, #x "=%s\n", x)
+#define DPRINTF_P(x) dprintf(DEBUG_FD, #x "=0x%p\n", x)
 #else
 #define DPRINTF_D(x)
+#define DPRINTF_U(x)
 #define DPRINTF_S(x)
 #define DPRINTF_P(x)
 #endif /* DEBUG */
@@ -355,6 +358,9 @@ nochange:
 			pathnew = malloc(strlen(path) + 1
 			    + strlen(name) + 1);
 			sprintf(pathnew, "%s/%s", path, name);
+
+			DPRINTF_S(name);
+			DPRINTF_U(type);
 			DPRINTF_S(pathnew);
 
 again:
@@ -426,7 +432,6 @@ again:
 				free(pathnew);
 				goto redraw;
 			default:
-				DPRINTF_D(dents[cur]->d_type);
 				printmsg("Unsupported file");
 				goto nochange;
 			}
