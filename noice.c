@@ -7,6 +7,7 @@
 #include <curses.h>
 #include <libgen.h>
 #include <locale.h>
+#include <regex.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <signal.h>
@@ -35,21 +36,17 @@
 #define ISODD(x) ((x) & 1)
 
 struct assoc {
-	char *ext; /* Extension */
-	char *bin; /* Program */
+	char *regex; /* Regex to match on filename */
+	char *bin;   /* Program */
 };
 
 /* Configuration */
 struct assoc assocs[] = {
-	{ ".avi", "mplayer" },
-	{ ".mp4", "mplayer" },
-	{ ".mkv", "mplayer" },
-	{ ".mp3", "mplayer" },
-	{ ".ogg", "mplayer" },
-	{ ".srt", "less" },
-	{ ".txt", "less" },
-	{ ".sh", "sh" },
-	{ "README", "less" },
+	{ ".(avi|mp4|mkv|mp3|ogg)$", "mplayer" },
+	{ ".srt$", "less" },
+	{ ".txt$", "less" },
+	{ ".sh$", "sh" },
+	{ "^README$", "less" },
 };
 
 #define CWD "cwd: "
@@ -78,18 +75,19 @@ int die = 0;
 char *
 openwith(char *file)
 {
-	char *ext = NULL;
+	regex_t regex;
 	char *bin = NULL;
 	int i;
 
-	ext = strrchr(file, '.');
-	if (ext == NULL)
-		ext = file;
-	DPRINTF_S(ext);
-
-	for (i = 0; i < LEN(assocs); i++)
-		if (strcmp(assocs[i].ext, ext) == 0)
+	for (i = 0; i < LEN(assocs); i++) {
+		if (regcomp(&regex, assocs[i].regex,
+			    REG_NOSUB | REG_EXTENDED) != 0)
+			continue;
+		if (regexec(&regex, file, 0, NULL, 0) != REG_NOMATCH) {
 			bin = assocs[i].bin;
+			break;
+		}
+	}
 	DPRINTF_S(bin);
 
 	return bin;
