@@ -49,6 +49,11 @@ struct assoc assocs[] = {
 	{ "^README$", "less" },
 };
 
+struct entry {
+	char *name;
+	mode_t mode;
+};
+
 #define CWD "cwd: "
 #define CURSR " > "
 #define EMPTY "   "
@@ -94,14 +99,14 @@ openwith(char *file)
 }
 
 int
-dentcmp(const void *va, const void *vb)
+entrycmp(const void *va, const void *vb)
 {
-	const struct dirent *a, *b;
+	const struct entry *a, *b;
 
-	a = (struct dirent *)va;
-	b = (struct dirent *)vb;
+	a = (struct entry *)va;
+	b = (struct entry *)vb;
 
-	return strcmp(a->d_name, b->d_name);
+	return strcmp(a->name, b->name);
 }
 
 void
@@ -208,12 +213,14 @@ void
 browse(const char *ipath)
 {
 	DIR *dirp;
+	int dfd;
 	struct dirent *dp;
-	struct dirent *dents;
+	struct entry *dents;
 	int i, n, cur;
 	int r, ret;
 	char *path = strdup(ipath);
 	char *cwd;
+	struct stat sb;
 
 begin:
 	/* Path should be a malloc(3)-ed string at all times */
@@ -226,8 +233,13 @@ begin:
 		printwarn();
 		goto nochange;
 	}
+	dfd = dirfd(dirp);
+	if (dfd == -1)
+		printerr(1, "dirfd");
 
 	while ((dp = readdir(dirp)) != NULL) {
+		char *name;
+
 		/* Skip self and parent */
 		if (strcmp(dp->d_name, ".") == 0
 		    || strcmp(dp->d_name, "..") == 0)
@@ -236,15 +248,23 @@ begin:
 		dents = realloc(dents, (n + 1) * sizeof(*dents));
 		if (dents == NULL)
 			printerr(1, "realloc");
-		memcpy(&dents[n], dp, sizeof(*dents));
+		dents[n].name = strdup(dp->d_name);
+		if (dents[n].name == NULL)
+			printerr(1, "strdup");
+		/* Get mode flags */
+		r = fstatat(dfd, dents[n].name, &sb, 0);
+		if (r == -1)
+			printerr(1, "stat");
+		dents[n].mode = sb.st_mode;
 		n++;
 	}
 
-	qsort(dents, n, sizeof(*dents), dentcmp);
+	qsort(dents, n, sizeof(*dents), entrycmp);
 
 	for (;;) {
 		int nlines;
-		struct dirent *tmpents;
+		struct entry *tmpents;
+		int maxlen;
 		int odd;
 
 redraw:
@@ -270,9 +290,17 @@ redraw:
 
 		/* No text wrapping in entries */
 		tmpents = malloc(n * sizeof(*tmpents));
-		memcpy(tmpents, dents, n * sizeof(*tmpents));
-		for (i = 0; i < n; i++)
-			tmpents[i].d_name[COLS - strlen(CURSR) - 1] = '\0';
+		maxlen = COLS - strlen(CURSR) - 1;
+		for (i = 0; i < n; i++) {
+			struct entry *tmpent = &tmpents[i];
+
+			tmpent->name = strdup(dents[i].name);
+			if (tmpent->name == NULL)
+				printerr(1, "strdup tmp");
+			tmpent->mode = dents[i].mode;
+			if (strlen(tmpent->name) > maxlen)
+				tmpent->name[maxlen] = '\0';
+		}
 
 		/* Print cwd.  If empty we are on the root.  We store it
 		 * as an empty string so that when we navigate in /mnt
@@ -287,20 +315,22 @@ redraw:
 			for (i = 0; i < nlines; i++)
 				printw("%s%s\n",
 				    i == cur ? CURSR : EMPTY,
-				    tmpents[i].d_name);
+				    tmpents[i].name);
 		} else if (cur >= n - nlines / 2) {
 			for (i = n - nlines; i < n; i++)
 				printw("%s%s\n",
 				    i == cur ? CURSR : EMPTY,
-				    tmpents[i].d_name);
+				    tmpents[i].name);
 		} else {
 			for (i = cur - nlines / 2;
 			     i < cur + nlines / 2 + odd; i++)
 				printw("%s%s\n",
 				    i == cur ? CURSR : EMPTY,
-				    tmpents[i].d_name);
+				    tmpents[i].name);
 		}
 
+		for (i = 0; i < n; i++)
+			free(tmpents[i].name);
 		free(tmpents);
 
 nochange:
@@ -330,13 +360,12 @@ nochange:
 			char *bin;
 			pid_t pid;
 			int fd;
-			struct stat sb;
 
 			/* Cannot descend in empty directories */
 			if (n == 0)
 				goto nochange;
 
-			name = dents[cur].d_name;
+			name = dents[cur].name;
 
 			asprintf(&pathnew, "%s/%s", path, name);
 
@@ -396,6 +425,8 @@ nochange:
 	}
 
 out:
+	for (i = 0; i < n; i++)
+		free(dents[i].name);
 	free(dents);
 
 	r = closedir(dirp);
