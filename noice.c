@@ -210,6 +210,38 @@ testopendir(char *path)
 }
 
 void
+printent(struct entry *ent, int active)
+{
+	char *name;
+	unsigned int maxlen = COLS - strlen(CURSR) - 1;
+	char cm = 0;
+
+	/* Copy name locally */
+	name = strdup(ent->name);
+	if (name == NULL)
+		printerr(1, "strdup name");
+
+	if (S_ISDIR(ent->mode)) {
+		cm = '/';
+		maxlen--;
+	} else if (S_ISLNK(ent->mode)) {
+		cm = '@';
+		maxlen--;
+	}
+
+	/* No text wrapping in entries */
+	if (strlen(name) > maxlen)
+		name[maxlen] = '\0';
+
+	if (cm == 0)
+		printw("%s%s\n", active ? CURSR : EMPTY, name);
+	else
+		printw("%s%s%c\n", active ? CURSR : EMPTY, name, cm);
+
+	free(name);
+}
+
+void
 browse(const char *ipath)
 {
 	DIR *dirp;
@@ -233,9 +265,6 @@ begin:
 		printwarn();
 		goto nochange;
 	}
-	dfd = dirfd(dirp);
-	if (dfd == -1)
-		printerr(1, "dirfd");
 
 	while ((dp = readdir(dirp)) != NULL) {
 		char *name;
@@ -252,7 +281,9 @@ begin:
 		if (dents[n].name == NULL)
 			printerr(1, "strdup");
 		/* Get mode flags */
-		r = fstatat(dfd, dents[n].name, &sb, 0);
+		asprintf(&name, "%s/%s", path, dents[n].name);
+		r = lstat(name, &sb);
+		free(name);
 		if (r == -1)
 			printerr(1, "stat");
 		dents[n].mode = sb.st_mode;
@@ -263,7 +294,6 @@ begin:
 
 	for (;;) {
 		int nlines;
-		struct entry *tmpents;
 		int maxlen;
 		int odd;
 
@@ -288,20 +318,6 @@ redraw:
 		strlcpy(cwd, path, COLS * sizeof(char));
 		cwd[COLS - strlen(CWD) - 1] = '\0';
 
-		/* No text wrapping in entries */
-		tmpents = malloc(n * sizeof(*tmpents));
-		maxlen = COLS - strlen(CURSR) - 1;
-		for (i = 0; i < n; i++) {
-			struct entry *tmpent = &tmpents[i];
-
-			tmpent->name = strdup(dents[i].name);
-			if (tmpent->name == NULL)
-				printerr(1, "strdup tmp");
-			tmpent->mode = dents[i].mode;
-			if (strlen(tmpent->name) > maxlen)
-				tmpent->name[maxlen] = '\0';
-		}
-
 		/* Print cwd.  If empty we are on the root.  We store it
 		 * as an empty string so that when we navigate in /mnt
 		 * is doesn't come up as //mnt. */
@@ -313,25 +329,15 @@ redraw:
 		odd = ISODD(nlines);
 		if (cur < nlines / 2) {
 			for (i = 0; i < nlines; i++)
-				printw("%s%s\n",
-				    i == cur ? CURSR : EMPTY,
-				    tmpents[i].name);
+				printent(&dents[i], i == cur);
 		} else if (cur >= n - nlines / 2) {
 			for (i = n - nlines; i < n; i++)
-				printw("%s%s\n",
-				    i == cur ? CURSR : EMPTY,
-				    tmpents[i].name);
+				printent(&dents[i], i == cur);
 		} else {
 			for (i = cur - nlines / 2;
 			     i < cur + nlines / 2 + odd; i++)
-				printw("%s%s\n",
-				    i == cur ? CURSR : EMPTY,
-				    tmpents[i].name);
+				printent(&dents[i], i == cur);
 		}
-
-		for (i = 0; i < n; i++)
-			free(tmpents[i].name);
-		free(tmpents);
 
 nochange:
 		ret = nextsel(&cur, n);
