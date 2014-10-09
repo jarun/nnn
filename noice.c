@@ -42,11 +42,12 @@ struct assoc {
 
 /* Configuration */
 struct assoc assocs[] = {
-	{ ".(avi|mp4|mkv|mp3|ogg)$", "mplayer" },
-	{ ".srt$", "less" },
-	{ ".txt$", "less" },
-	{ ".sh$", "sh" },
+	{ "\\.(avi|mp4|mkv|mp3|ogg)$", "mplayer" },
+	{ "\\.srt$", "less" },
+	{ "\\.txt$", "less" },
+	{ "\\.sh$", "sh" },
 	{ "^README$", "less" },
+	{ ".*", "less" },
 };
 
 struct entry {
