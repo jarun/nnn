@@ -79,6 +79,10 @@ struct entry {
 
 int die = 0;
 
+void printmsg(char *msg);
+void printwarn(void);
+void printerr(int ret, char *prefix);
+
 char *
 openwith(char *file)
 {
@@ -98,6 +102,31 @@ openwith(char *file)
 	DPRINTF_S(bin);
 
 	return bin;
+}
+
+int
+setfilter(regex_t *regex, char *filter)
+{
+	char *errbuf;
+	int r;
+
+	r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED);
+	if (r != 0) {
+		errbuf = malloc(COLS * sizeof(char));
+		regerror(r, regex, errbuf, COLS * sizeof(char));
+		printmsg(errbuf);
+		free(errbuf);
+	}
+
+	return r;
+}
+
+int
+visible(regex_t *regex, char *file)
+{
+	if (regexec(regex, file, 0, NULL, 0) != REG_NOMATCH)
+		return 1;
+	return 0;
 }
 
 int
@@ -159,6 +188,7 @@ printerr(int ret, char *prefix)
  * Returns 1 on quit
  * Returns 2 on go in
  * Returns 3 on go up
+ * Returns 4 on search
  */
 int
 nextsel(int *cur, int max)
@@ -180,6 +210,10 @@ nextsel(int *cur, int max)
 	case KEY_RIGHT:
 	case 'l':
 		return 3;
+	/* search */
+	case '/':
+	case '&':
+		return 4;
 	/* next */
 	case 'j':
 	case KEY_DOWN:
@@ -197,6 +231,52 @@ nextsel(int *cur, int max)
 	}
 
 	return 0;
+}
+
+char *
+readln(void)
+{
+	int c;
+	int i = 0;
+	char *ln = NULL;
+	int y, x, x0;
+
+	echo();
+	curs_set(TRUE);
+
+	/* Starting point */
+	getyx(stdscr, y, x);
+	x0 = x;
+
+	while (c = getch()) {
+		if (c == KEY_ENTER || c == '\r')
+			break;
+		if (c == KEY_BACKSPACE) {
+			getyx(stdscr, y, x);
+			if (x >= x0) {
+				ln = realloc(ln, (i - 1) * sizeof(*ln));
+				i--;
+				move(y, x);
+				printw("%c", ' ');
+				move(y, x);
+			} else {
+				move(y, x0);
+			}
+			continue;
+		}
+		ln = realloc(ln, (i + 1) * sizeof(*ln));
+		ln[i] = c;
+		i++;
+	}
+	if (ln != NULL) {
+		ln = realloc(ln, (i + 1) * sizeof(*ln));
+		ln[i] = '\0';
+	}
+
+	curs_set(FALSE);
+	noecho();
+
+	return ln;
 }
 
 int
@@ -246,7 +326,7 @@ printent(struct entry *ent, int active)
 }
 
 void
-browse(const char *ipath)
+browse(const char *ipath, const char *ifilter)
 {
 	DIR *dirp;
 	int dfd;
@@ -255,6 +335,8 @@ browse(const char *ipath)
 	int i, n, cur;
 	int r, ret;
 	char *path = strdup(ipath);
+	char *filter = strdup(ifilter);
+	regex_t filter_re;
 	char *cwd;
 	struct stat sb;
 
@@ -270,12 +352,19 @@ begin:
 		goto nochange;
 	}
 
+	/* Search filter */
+	r = setfilter(&filter_re, filter);
+	if (r != 0)
+		goto nochange;
+
 	while ((dp = readdir(dirp)) != NULL) {
 		char *name;
 
 		/* Skip self and parent */
 		if (strcmp(dp->d_name, ".") == 0
 		    || strcmp(dp->d_name, "..") == 0)
+			continue;
+		if (!visible(&filter_re, dp->d_name))
 			continue;
 		/* Deep copy because readdir(3) reuses the entries */
 		dents = realloc(dents, (n + 1) * sizeof(*dents));
@@ -432,6 +521,28 @@ nochange:
 			free(pathnew);
 			goto nochange;
 		}
+		if (ret == 4) {
+			char *tmp;
+			regex_t re;
+
+			/* Read filter */
+			move(LINES - 1, 0);
+			printw("filter: ");
+			tmp = readln();
+			if (tmp == NULL) {
+				printmsg("");
+				goto nochange;
+			}
+			r = setfilter(&re, tmp);
+			if (r != 0) {
+				printmsg("");
+				goto nochange;
+			}
+			filter = tmp;
+			filter_re = re;
+			DPRINTF_S(filter);
+			goto out;
+		}
 	}
 
 out:
@@ -450,6 +561,7 @@ int
 main(int argc, char *argv[])
 {
 	char *ipath = argv[1] != NULL ? argv[1] : "/";
+	char *ifilter = "^[^.].*"; /* Hide dotfiles */
 
 	/* Test initial path */
 	if (!testopendir(ipath))
@@ -460,7 +572,7 @@ main(int argc, char *argv[])
 
 	initcurses();
 
-	browse(ipath);
+	browse(ipath, ifilter);
 
 	exitcurses();
 
