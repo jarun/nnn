@@ -34,6 +34,7 @@
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define ISODD(x) ((x) & 1)
+#define CONTROL(c) ((c) ^ 0x40)
 
 struct assoc {
 	char *regex; /* Regex to match on filename */
@@ -182,12 +183,14 @@ nextsel(int *cur, int max)
 	/* next */
 	case 'j':
 	case KEY_DOWN:
+	case CONTROL('N'):
 		if (*cur < max - 1)
 			(*cur)++;
 		break;
 	/* prev */
 	case 'k':
 	case KEY_UP:
+	case CONTROL('P'):
 		if (*cur > 0)
 			(*cur)--;
 		break;
