@@ -229,6 +229,18 @@ nextsel(int *cur, int max)
 		if (*cur > 0)
 			(*cur)--;
 		break;
+	/* Page down */
+	case KEY_NPAGE:
+	case CONTROL('D'):
+		if (*cur < max -1)
+			(*cur) += MIN((LINES - 4) / 2, max - 1 - *cur);
+		break;
+	/* Page up */
+	case KEY_PPAGE:
+	case CONTROL('U'):
+		if (*cur > 0)
+			(*cur) -= MIN((LINES - 4) / 2, *cur);
+		break;
 	}
 
 	return 0;
