@@ -342,7 +342,7 @@ browse(const char *ipath, const char *ifilter)
 	struct stat sb;
 
 begin:
-	/* Path should be a malloc(3)-ed string at all times */
+	/* Path and filter should be malloc(3)-ed strings at all times */
 	n = 0;
 	cur = 0;
 	dents = NULL;
@@ -446,6 +446,7 @@ nochange:
 		switch (ret) {
 		case SEL_QUIT:
 			free(path);
+			free(filter);
 			return;
 		case SEL_BACK:
 			/* Handle root case */
