@@ -539,6 +539,7 @@ nochange:
 			}
 			r = setfilter(&re, tmp);
 			if (r != 0) {
+				free(tmp);
 				printmsg("");
 				goto nochange;
 			}
