@@ -200,29 +200,29 @@ nextsel(int *cur, int max)
 	switch (c) {
 	case 'q':
 		return SEL_QUIT;
-	/* back */
+	/* Back */
 	case KEY_BACKSPACE:
 	case KEY_LEFT:
 	case 'h':
 		return SEL_BACK;
-	/* inside */
+	/* Inside */
 	case KEY_ENTER:
 	case '\r':
 	case KEY_RIGHT:
 	case 'l':
 		return SEL_GOIN;
-	/* filter */
+	/* Filter */
 	case '/':
 	case '&':
 		return SEL_FLTR;
-	/* next */
+	/* Next */
 	case 'j':
 	case KEY_DOWN:
 	case CONTROL('N'):
 		if (*cur < max - 1)
 			(*cur)++;
 		break;
-	/* prev */
+	/* Previous */
 	case 'k':
 	case KEY_UP:
 	case CONTROL('P'):
