@@ -374,8 +374,12 @@ begin:
 		dents[n].name = strdup(dp->d_name);
 		if (dents[n].name == NULL)
 			printerr(1, "strdup");
+		/* Handle root case */
+		if (strcmp(path, "/") == 0)
+			asprintf(&name, "/%s", dents[n].name);
+		else
+			asprintf(&name, "%s/%s", path, dents[n].name);
 		/* Get mode flags */
-		asprintf(&name, "%s/%s", path, dents[n].name);
 		r = lstat(name, &sb);
 		free(name);
 		if (r == -1)
@@ -406,7 +410,7 @@ redraw:
 		erase();
 
 		/* Strip trailing slashes */
-		for (i = strlen(path) - 1; i > -1; i--)
+		for (i = strlen(path) - 1; i > 0; i--)
 			if (path[i] == '/')
 				path[i] = '\0';
 			else
@@ -420,12 +424,7 @@ redraw:
 		strlcpy(cwd, path, COLS * sizeof(char));
 		cwd[COLS - strlen(CWD) - 1] = '\0';
 
-		/* Print cwd.  If empty we are on the root.  We store it
-		 * as an empty string so that when we navigate in /mnt
-		 * is doesn't come up as //mnt. */
-		printw(CWD "%s%s\n\n",
-		    strcmp(cwd, "") == 0 ? "/" : "",
-		    cwd);
+		printw(CWD "%s\n\n", cwd);
 
 		/* Print listing */
 		odd = ISODD(nlines);
@@ -449,8 +448,8 @@ nochange:
 			free(filter);
 			return;
 		case SEL_BACK:
-			/* Handle root case */
-			if (strcmp(path, "") == 0) {
+			/* There is no going back */
+			if (strcmp(path, "/") == 0) {
 				goto nochange;
 			} else {
 				dir = dirname(path);
