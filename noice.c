@@ -450,6 +450,8 @@ nochange:
 				strlcpy(tmp, dir, strlen(dir) + 1);
 				free(path);
 				path = tmp;
+				free(filter);
+				filter = strdup(ifilter); /* Reset filter */
 				goto out;
 			}
 		}
@@ -490,6 +492,8 @@ nochange:
 			if (S_ISDIR(sb.st_mode)) {
 				free(path);
 				path = pathnew;
+				free(filter);
+				filter = strdup(ifilter); /* Reset filter */
 				goto out;
 			}
 			/* Regular file */
@@ -538,6 +542,7 @@ nochange:
 				printmsg("");
 				goto nochange;
 			}
+			free(filter);
 			filter = tmp;
 			filter_re = re;
 			DPRINTF_S(filter);
