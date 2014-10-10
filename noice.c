@@ -185,11 +185,12 @@ printerr(int ret, char *prefix)
 /*
  * Returns 0 normally
  * On movement it updates *cur
- * Returns 1 on quit
- * Returns 2 on go in
- * Returns 3 on go up
- * Returns 4 on search
+ * Returns SEL_{QUIT,BACK,GOIN,FLTR} otherwise
  */
+#define SEL_QUIT 1
+#define SEL_BACK 2
+#define SEL_GOIN 3
+#define SEL_FLTR 4
 int
 nextsel(int *cur, int max)
 {
@@ -198,22 +199,22 @@ nextsel(int *cur, int max)
 	c = getch();
 	switch (c) {
 	case 'q':
-		return 1;
-	/* go up */
+		return SEL_QUIT;
+	/* back */
 	case KEY_BACKSPACE:
 	case KEY_LEFT:
 	case 'h':
-		return 2;
-	/* go in */
+		return SEL_BACK;
+	/* inside */
 	case KEY_ENTER:
 	case '\r':
 	case KEY_RIGHT:
 	case 'l':
-		return 3;
-	/* search */
+		return SEL_GOIN;
+	/* filter */
 	case '/':
 	case '&':
-		return 4;
+		return SEL_FLTR;
 	/* next */
 	case 'j':
 	case KEY_DOWN:
@@ -389,6 +390,14 @@ begin:
 		int nlines;
 		int maxlen;
 		int odd;
+		char *pathnew;
+		char *name;
+		char *bin;
+		pid_t pid;
+		int fd;
+		char *dir;
+		char *tmp;
+		regex_t re;
 
 redraw:
 		nlines = MIN(LINES - 4, n);
@@ -434,17 +443,15 @@ redraw:
 
 nochange:
 		ret = nextsel(&cur, n);
-		if (ret == 1) {
+		switch (ret) {
+		case SEL_QUIT:
 			free(path);
 			return;
-		}
-		if (ret == 2) {
+		case SEL_BACK:
 			/* Handle root case */
 			if (strcmp(path, "") == 0) {
 				goto nochange;
 			} else {
-				char *dir, *tmp;
-
 				dir = dirname(path);
 				tmp = malloc(strlen(dir) + 1);
 				strlcpy(tmp, dir, strlen(dir) + 1);
@@ -454,14 +461,7 @@ nochange:
 				filter = strdup(ifilter); /* Reset filter */
 				goto out;
 			}
-		}
-		if (ret == 3) {
-			char *pathnew;
-			char *name;
-			char *bin;
-			pid_t pid;
-			int fd;
-
+		case SEL_GOIN:
 			/* Cannot descend in empty directories */
 			if (n == 0)
 				goto nochange;
@@ -524,11 +524,7 @@ nochange:
 			printmsg("Unsupported file");
 			free(pathnew);
 			goto nochange;
-		}
-		if (ret == 4) {
-			char *tmp;
-			regex_t re;
-
+		case SEL_FLTR:
 			/* Read filter */
 			move(LINES - 1, 0);
 			printw("filter: ");
