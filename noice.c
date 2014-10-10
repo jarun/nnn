@@ -555,11 +555,10 @@ out:
 		free(dents[i].name);
 	free(dents);
 
-	if (dirp != NULL) {
-		r = closedir(dirp);
-		if (r == -1)
-			printerr(1, "closedir");
-	}
+	/* Should never be null */
+	r = closedir(dirp);
+	if (r == -1)
+		printerr(1, "closedir");
 
 	goto begin;
 }
