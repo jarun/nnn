@@ -18,6 +18,8 @@
 #include <bsd/string.h>
 #endif
 
+#include "queue.h"
+
 #ifdef DEBUG
 #define DEBUG_FD 8
 #define DPRINTF_D(x) dprintf(DEBUG_FD, #x "=%d\n", x)
@@ -55,6 +57,13 @@ struct entry {
 	char *name;
 	mode_t mode;
 };
+
+struct history {
+	int pos;
+	SLIST_ENTRY(history) entry;
+};
+
+SLIST_HEAD(histhead, history) histhead = SLIST_HEAD_INITIALIZER(histhead);
 
 #define CWD "cwd: "
 #define CURSR " > "
@@ -353,10 +362,10 @@ browse(const char *ipath, const char *ifilter)
 	char *cwd;
 	struct stat sb;
 
+	cur = 0;
 begin:
 	/* Path and filter should be malloc(3)-ed strings at all times */
 	n = 0;
-	cur = 0;
 	dents = NULL;
 
 	dirp = opendir(path);
@@ -400,6 +409,9 @@ begin:
 		n++;
 	}
 
+	/* Make sure cur is in range */
+	cur = MIN(cur, n - 1);
+
 	qsort(dents, n, sizeof(*dents), entrycmp);
 
 	for (;;) {
@@ -414,6 +426,7 @@ begin:
 		char *dir;
 		char *tmp;
 		regex_t re;
+		struct history *hist;
 
 redraw:
 		nlines = MIN(LINES - 4, n);
@@ -458,6 +471,12 @@ nochange:
 		case SEL_QUIT:
 			free(path);
 			free(filter);
+			/* Forget history */
+			while (!SLIST_EMPTY(&histhead)) {
+				hist = SLIST_FIRST(&histhead);
+				SLIST_REMOVE_HEAD(&histhead, entry);
+				free(hist);
+			}
 			return;
 		case SEL_BACK:
 			/* There is no going back */
@@ -471,6 +490,16 @@ nochange:
 				path = tmp;
 				free(filter);
 				filter = strdup(ifilter); /* Reset filter */
+				/* Recall history */
+				hist = SLIST_FIRST(&histhead);
+				if (hist != NULL) {
+					cur = hist->pos;
+					DPRINTF_D(hist->pos);
+					SLIST_REMOVE_HEAD(&histhead, entry);
+					free(hist);
+				} else {
+					cur = 0;
+				}
 				goto out;
 			}
 		case SEL_GOIN:
@@ -510,6 +539,11 @@ nochange:
 				path = pathnew;
 				free(filter);
 				filter = strdup(ifilter); /* Reset filter */
+				/* Save history */
+				hist = malloc(sizeof(struct history));
+				hist->pos = cur;
+				SLIST_INSERT_HEAD(&histhead, hist, entry);
+				cur = 0;
 				goto out;
 			}
 			/* Regular file */
@@ -559,6 +593,7 @@ nochange:
 			filter = tmp;
 			filter_re = re;
 			DPRINTF_S(filter);
+			cur = 0;
 			goto out;
 		}
 	}
