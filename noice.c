@@ -530,6 +530,7 @@ nochange:
 			goto nochange;
 		case SEL_FLTR:
 			/* Read filter */
+			printmsg("");
 			move(LINES - 1, 0);
 			printw("filter: ");
 			tmp = readln();
@@ -540,7 +541,6 @@ nochange:
 			r = setfilter(&re, tmp);
 			if (r != 0) {
 				free(tmp);
-				printmsg("");
 				goto nochange;
 			}
 			free(filter);
