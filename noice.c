@@ -468,7 +468,11 @@ nochange:
 
 			name = dents[cur].name;
 
-			asprintf(&pathnew, "%s/%s", path, name);
+			/* Handle root case */
+			if (strcmp(path, "/") == 0)
+				asprintf(&pathnew, "/%s", name);
+			else
+				asprintf(&pathnew, "%s/%s", path, name);
 
 			DPRINTF_S(name);
 			DPRINTF_S(pathnew);
