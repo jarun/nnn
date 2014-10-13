@@ -427,6 +427,7 @@ begin:
 		char *tmp;
 		regex_t re;
 		struct history *hist;
+		int status;
 
 redraw:
 		nlines = MIN(LINES - 4, n);
@@ -560,10 +561,16 @@ nochange:
 
 				/* Run program */
 				pid = fork();
-				if (pid == 0)
+				if (pid == 0) {
 					execlp(bin, bin, pathnew, NULL);
-				else
-					waitpid(pid, NULL, 0);
+					_exit(0);
+				} else {
+					/* Ignore interruptions */
+					while (waitpid(pid, &status,
+					    0) == -1)
+						DPRINTF_D(status);
+					DPRINTF_D(pid);
+				}
 
 				initcurses();
 
