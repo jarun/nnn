@@ -196,7 +196,7 @@ printerr(int ret, char *prefix)
 /*
  * Returns 0 normally
  * On movement it updates *cur
- * Returns SEL_{QUIT,BACK,GOIN,FLTR} otherwise
+ * Returns SEL_{QUIT,BACK,GOIN,FLTR,SH,CD} otherwise
  */
 enum {
 	SEL_QUIT = 1,
