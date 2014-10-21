@@ -1,0 +1,54 @@
+               __                  
+  ___     ___ /\_\    ___     __   
+/' _ `\  / __`\/\ \  /'___\ /'__`\ 
+/\ \/\ \/\ \L\ \ \ \/\ \__//\  __/ 
+\ \_\ \_\ \____/\ \_\ \____\ \____\
+ \/_/\/_/\/___/  \/_/\/____/\/____/
+                                    -- by lostd and sin
+=======================================================
+
+What is it?
+===========
+
+noice is a small ncurse-based file manager.
+It was first developped to be used with a tv remote control for a media center
+solution.
+
+Getting started
+===============
+
+Get the latest version from the git-repository; build and install it.
+Run noice in a directory to display its content in the form of a list, where
+each line is a file or direcotry. The currently selected item will be preceded
+with a " > " by default.
+
+Navigation
+----------
+
+You can navigate the list using the following keybinds (hardcoded):
+
++------+-------+-------+---------------------------------------------------
+| k    | UP    | ^P    | go up
+| j    | DOWN  | ^N    | go down
+|      | PGUP  | ^U    | go up (fast)
+|      | PGDN  | ^D    | go down (fast)
+| l    | RIGHT | ^M    | open file / directory (see section "File opening")
+| h    | LEFT  | ^?    | navigate up one directory
+| /    | &     |       | filter output
+| q    |       |       | exit program
+| !    |       |       | spawn shell in current directory
++------+-------+-------+---------------------------------------------------
+
+File opening
+------------
+
+Depending on the filetype, noice will open the selected file with the
+application specified in `config.h` at compilation time. The associations
+specified are regexes, so you might experience issues when trying to open a file
+that do not match those regexes.
+
+Contact
+=======
+
+You can reach us through the freenode IRC network at #2f30.
+If you have any patches, ideas or feedback feel free to join.
