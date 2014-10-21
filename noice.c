@@ -6,6 +6,7 @@
 #include <dirent.h>
 #include <curses.h>
 #include <libgen.h>
+#include <limits.h>
 #include <locale.h>
 #include <regex.h>
 #include <stdlib.h>
@@ -613,8 +614,16 @@ out:
 int
 main(int argc, char *argv[])
 {
-	char *ipath = argv[1] != NULL ? argv[1] : "/";
+	char cwd[PATH_MAX], *ipath;
 	char *ifilter = "^[^.].*"; /* Hide dotfiles */
+
+	if (argv[1] != NULL) {
+		ipath = argv[1];
+	} else {
+		ipath = getcwd(cwd, sizeof(cwd));
+		if (ipath == NULL)
+			ipath = "/";
+	}
 
 	/* Test initial path */
 	if (!testopendir(ipath))
