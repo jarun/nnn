@@ -13,7 +13,7 @@ config.h:
 	@echo copying config.def.h to $@
 	@cp config.def.h $@
 
-noice.o: noice.c util.h
+noice.o: noice.c queue.h util.h
 	$(CC) -c noice.c
 
 strlcpy.o: strlcpy.c util.h
