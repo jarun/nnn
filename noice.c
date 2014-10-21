@@ -622,7 +622,7 @@ nochange:
 				goto nochange;
 			} else {
 				free(path);
-				path = strdup(tmp);
+				path = tmp;
 				free(filter);
 				filter = strdup(ifilter); /* Reset filter */
 				DPRINTF_S(path);
