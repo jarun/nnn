@@ -11,7 +11,7 @@ What is it?
 ===========
 
 noice is a small ncurses-based file manager.
-It was first developped to be used with a tv remote control for a media center
+It was first developed to be used with a tv remote control for a media center
 solution.
 
 Getting started
@@ -19,7 +19,7 @@ Getting started
 
 Get the latest version from the git-repository; build and install it.
 Run noice in a directory to display its content in the form of a list, where
-each line is a file or direcotry. The currently selected item will be preceded
+each line is a file or directory. The currently selected item will be preceded
 with a " > " by default.
 
 Navigation
@@ -44,8 +44,8 @@ File opening
 
 Depending on the filetype, noice will open the selected file with the
 application specified in `config.h` at compilation time. The associations
-specified are regexes, so you might experience issues when trying to open a file
-that do not match those regexes.
+are specified by regexes, so you might experience issues when trying to open a file
+that does not match those regexes.
 
 The default program is less(1).  For text files, you can use the 'v'
 commaind in less(1) to open the file in your $EDITOR.
