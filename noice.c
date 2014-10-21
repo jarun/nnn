@@ -76,6 +76,24 @@ void printmsg(char *msg);
 void printwarn(void);
 void printerr(int ret, char *prefix);
 
+void
+spawn(const char *file, const char *arg)
+{
+	pid_t pid;
+	int status;
+
+	pid = fork();
+	if (pid == 0) {
+		execlp(file, file, arg, NULL);
+		_exit(1);
+	} else {
+		/* Ignore interruptions */
+		while (waitpid(pid, &status, 0) == -1)
+			DPRINTF_D(status);
+		DPRINTF_D(pid);
+	}
+}
+
 char *
 openwith(char *file)
 {
@@ -233,6 +251,11 @@ nextsel(int *cur, int max)
 	case CONTROL('U'):
 		if (*cur > 0)
 			(*cur) -= MIN((LINES - 4) / 2, *cur);
+		break;
+	case '!':
+		exitcurses();
+		spawn("/bin/sh", NULL);
+		initcurses();
 		break;
 	}
 
@@ -405,13 +428,11 @@ begin:
 		char *pathnew;
 		char *name;
 		char *bin;
-		pid_t pid;
 		int fd;
 		char *dir;
 		char *tmp;
 		regex_t re;
 		struct history *hist;
-		int status;
 
 redraw:
 		nlines = MIN(LINES - 4, n);
@@ -451,7 +472,11 @@ redraw:
 		}
 
 nochange:
+		if (chdir(path) == -1)
+			printwarn();
 		ret = nextsel(&cur, n);
+		if (chdir(ipath) == -1)
+			printwarn();
 		switch (ret) {
 		case SEL_QUIT:
 			free(path);
@@ -542,20 +567,7 @@ nochange:
 				}
 
 				exitcurses();
-
-				/* Run program */
-				pid = fork();
-				if (pid == 0) {
-					execlp(bin, bin, pathnew, NULL);
-					_exit(0);
-				} else {
-					/* Ignore interruptions */
-					while (waitpid(pid, &status,
-					    0) == -1)
-						DPRINTF_D(status);
-					DPRINTF_D(pid);
-				}
-
+				spawn(bin, pathnew);
 				initcurses();
 
 				free(pathnew);
