@@ -15,11 +15,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#ifdef LINUX
-#include <bsd/string.h>
-#endif
-
 #include "queue.h"
+#include "util.h"
 
 #ifdef DEBUG
 #define DEBUG_FD 8
