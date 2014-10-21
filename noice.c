@@ -43,15 +43,7 @@ struct assoc {
 	char *bin;   /* Program */
 };
 
-/* Configuration */
-struct assoc assocs[] = {
-	{ "\\.(avi|mp4|mkv|mp3|ogg)$", "mplayer" },
-	{ "\\.(png|jpg|gif)$", "feh" },
-	{ "\\.(html|svg)$", "firefox" },
-	{ "\\.pdf$", "mupdf" },
-	{ "\\.sh$", "sh" },
-	{ ".*", "less" },
-};
+#include "config.h"
 
 struct entry {
 	char *name;

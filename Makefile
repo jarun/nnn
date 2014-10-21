@@ -6,10 +6,14 @@ BIN = noice
 
 all: $(BIN)
 
-$(BIN): $(OBJ)
+$(BIN): config.h $(OBJ)
 	$(CC) -o $@ $(OBJ) $(LDLIBS)
 
-noice.o: noice.c queue.h util.h
+config.h:
+	@echo copying config.def.h to $@
+	@cp config.def.h $@
+
+noice.o: noice.c util.h
 	$(CC) -c noice.c
 
 strlcpy.o: strlcpy.c util.h
