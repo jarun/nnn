@@ -14,7 +14,7 @@ config.h:
 	@cp config.def.h $@
 
 noice.o: noice.c queue.h util.h
-	$(CC) $(CFLAGS) -c noice.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c noice.c
 
 strlcpy.o: strlcpy.c util.h
 	$(CC) $(CFLAGS) -c strlcpy.c
