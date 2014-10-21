@@ -47,6 +47,9 @@ application specified in `config.h` at compilation time. The associations
 specified are regexes, so you might experience issues when trying to open a file
 that do not match those regexes.
 
+The default program is less(1).  For text files, you can use the 'v'
+commaind in less(1) to open the file in your $EDITOR.
+
 Contact
 =======
 
