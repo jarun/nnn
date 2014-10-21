@@ -1,4 +1,7 @@
-/* Configuration */
+#define CWD "cwd: "
+#define CURSR " > "
+#define EMPTY "   "
+
 struct assoc assocs[] = {
 	{ "\\.(avi|mp4|mkv|mp3|ogg)$", "mplayer" },
 	{ "\\.(png|jpg|gif)$", "feh" },

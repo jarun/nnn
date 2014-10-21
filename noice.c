@@ -58,10 +58,6 @@ struct history {
 
 SLIST_HEAD(histhead, history) histhead = SLIST_HEAD_INITIALIZER(histhead);
 
-#define CWD "cwd: "
-#define CURSR " > "
-#define EMPTY "   "
-
 /*
  * Layout:
  * .---------
