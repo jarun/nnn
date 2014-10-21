@@ -1,3 +1,4 @@
+PREFIX = /usr/local
 #CPPFLAGS += -DDEBUG
 #CFLAGS += -g
 LDLIBS = -lncursesw
@@ -18,6 +19,16 @@ noice.o: noice.c queue.h util.h
 
 strlcpy.o: strlcpy.c util.h
 	$(CC) $(CFLAGS) -c strlcpy.c
+
+install: all
+	@echo installing $(BIN) to $(DESTDIR)$(PREFIX)/bin
+	@mkdir -p $(DESTDIR)$(PREFIX)/bin
+	@cp -f $(BIN) $(DESTDIR)$(PREFIX)/bin
+	@chmod 755 $(DESTDIR)$(PREFIX)/bin/$(BIN)
+
+uninstall:
+	@echo removing $(BIN) from $(DESTDIR)$(PREFIX)/bin
+	@rm -f $(DESTDIR)$(PREFIX)/bin/$(BIN)
 
 clean:
 	rm -f $(BIN) $(OBJ)
