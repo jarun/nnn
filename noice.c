@@ -287,8 +287,13 @@ readln(void)
 		if (c == KEY_BACKSPACE) {
 			getyx(stdscr, y, x);
 			if (x >= x0) {
-				ln = realloc(ln, (i - 1) * sizeof(*ln));
-				i--;
+				if (i > 0) {
+					ln = realloc(ln, (i - 1) * sizeof(*ln));
+					i--;
+				} else {
+					free(ln);
+					ln = NULL;
+				}
 				move(y, x);
 				printw("%c", ' ');
 				move(y, x);
