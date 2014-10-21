@@ -349,6 +349,9 @@ printent(struct entry *ent, int active)
 	} else if (S_ISLNK(ent->mode)) {
 		cm = '@';
 		maxlen--;
+	} else if (ent->mode & S_IXUSR) {
+		cm = '*';
+		maxlen--;
 	}
 
 	/* No text wrapping in entries */
