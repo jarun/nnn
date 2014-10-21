@@ -36,7 +36,7 @@ You can navigate the list using the following keybinds (hardcoded):
 | h    | LEFT  | ^?    | navigate up one directory
 | /    | &     |       | filter output
 | !    |       |       | spawn shell in current directory
-| c    |       |       | type and change into destination directory
+| c    |       |       | chdir into the given path
 | q    |       |       | exit program
 +------+-------+-------+---------------------------------------------------
 
