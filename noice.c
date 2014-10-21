@@ -603,6 +603,7 @@ nochange:
 			initcurses();
 			if (chdir(ipath) == -1)
 				printwarn();
+			break;
 		}
 	}
 
