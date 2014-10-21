@@ -198,10 +198,14 @@ printerr(int ret, char *prefix)
  * On movement it updates *cur
  * Returns SEL_{QUIT,BACK,GOIN,FLTR} otherwise
  */
-#define SEL_QUIT 1
-#define SEL_BACK 2
-#define SEL_GOIN 3
-#define SEL_FLTR 4
+enum {
+	SEL_QUIT = 1,
+	SEL_BACK,
+	SEL_GOIN,
+	SEL_FLTR,
+	SEL_SH,
+};
+
 int
 nextsel(int *cur, int max)
 {
@@ -253,10 +257,7 @@ nextsel(int *cur, int max)
 			(*cur) -= MIN((LINES - 4) / 2, *cur);
 		break;
 	case '!':
-		exitcurses();
-		spawn("/bin/sh", NULL);
-		initcurses();
-		break;
+		return SEL_SH;
 	}
 
 	return 0;
@@ -472,11 +473,7 @@ redraw:
 		}
 
 nochange:
-		if (chdir(path) == -1)
-			printwarn();
 		ret = nextsel(&cur, n);
-		if (chdir(ipath) == -1)
-			printwarn();
 		switch (ret) {
 		case SEL_QUIT:
 			free(path);
@@ -598,6 +595,14 @@ nochange:
 			DPRINTF_S(filter);
 			cur = 0;
 			goto out;
+		case SEL_SH:
+			if (chdir(path) == -1)
+				printwarn();
+			exitcurses();
+			spawn("/bin/sh", NULL);
+			initcurses();
+			if (chdir(ipath) == -1)
+				printwarn();
 		}
 	}
 
