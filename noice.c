@@ -375,7 +375,7 @@ browse(const char *ipath, const char *ifilter)
 	struct entry *dents;
 	int i, n, cur;
 	int r, ret;
-	char *path = strdup(ipath);
+	char *path = realpath(ipath, NULL);
 	char *filter = strdup(ifilter);
 	regex_t filter_re;
 	char *cwd;
@@ -391,6 +391,9 @@ begin:
 	if (dirp == NULL) {
 		printwarn();
 		goto nochange;
+	} else {
+		if (chdir(path) == -1)
+			printwarn();
 	}
 
 	/* Search filter */
@@ -607,13 +610,9 @@ nochange:
 			cur = 0;
 			goto out;
 		case SEL_SH:
-			if (chdir(path) == -1)
-				printwarn();
 			exitcurses();
 			spawn("/bin/sh", NULL);
 			initcurses();
-			if (chdir(ipath) == -1)
-				printwarn();
 			break;
 		case SEL_CD:
 			/* Read target dir */
@@ -630,7 +629,8 @@ nochange:
 				goto nochange;
 			} else {
 				free(path);
-				path = tmp;
+				path = realpath(tmp, NULL);
+				free(tmp);
 				free(filter);
 				filter = strdup(ifilter); /* Reset filter */
 				DPRINTF_S(path);
