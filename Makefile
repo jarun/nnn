@@ -7,18 +7,11 @@ BIN = noice
 
 all: $(BIN)
 
-$(BIN): config.h $(OBJ)
+$(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDLIBS)
 
-config.h:
-	@echo copying config.def.h to $@
-	@cp config.def.h $@
-
-noice.o: noice.c queue.h util.h
-	$(CC) $(CFLAGS) $(CPPFLAGS) -c noice.c
-
-strlcpy.o: strlcpy.c util.h
-	$(CC) $(CFLAGS) -c strlcpy.c
+noice.o: queue.h util.h config.h
+strlcpy.o: util.h
 
 install: all
 	@echo installing $(BIN) to $(DESTDIR)$(PREFIX)/bin
@@ -32,3 +25,8 @@ uninstall:
 
 clean:
 	rm -f $(BIN) $(OBJ)
+
+.SUFFIXES: .def.h
+
+.def.h.h:
+	cp $< $@
