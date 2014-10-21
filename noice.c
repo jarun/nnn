@@ -606,7 +606,12 @@ int
 main(int argc, char *argv[])
 {
 	char cwd[PATH_MAX], *ipath;
-	char *ifilter = "^[^.].*"; /* Hide dotfiles */
+	char *ifilter;
+
+	if (getuid() == 0)
+		ifilter = ".*";
+	else
+		ifilter = "^[^.].*"; /* Hide dotfiles */
 
 	if (argv[1] != NULL) {
 		ipath = argv[1];
