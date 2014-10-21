@@ -7,17 +7,17 @@ BIN = noice
 all: $(BIN)
 
 $(BIN): config.h $(OBJ)
-	$(CC) -o $@ $(OBJ) $(LDLIBS)
+	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDLIBS)
 
 config.h:
 	@echo copying config.def.h to $@
 	@cp config.def.h $@
 
 noice.o: noice.c queue.h util.h
-	$(CC) -c noice.c
+	$(CC) $(CFLAGS) -c noice.c
 
 strlcpy.o: strlcpy.c util.h
-	$(CC) -c strlcpy.c
+	$(CC) $(CFLAGS) -c strlcpy.c
 
 clean:
 	rm -f $(BIN) $(OBJ)
