@@ -75,8 +75,6 @@ SLIST_HEAD(histhead, history) histhead = SLIST_HEAD_INITIALIZER(histhead);
  * '------
  */
 
-int die = 0;
-
 void printmsg(char *msg);
 void printwarn(void);
 void printerr(int ret, char *prefix);
