@@ -204,6 +204,7 @@ enum {
 	SEL_GOIN,
 	SEL_FLTR,
 	SEL_SH,
+	SEL_CD,
 };
 
 int
@@ -258,6 +259,8 @@ nextsel(int *cur, int max)
 		break;
 	case '!':
 		return SEL_SH;
+	case 'c':
+		return SEL_CD;
 	}
 
 	return 0;
@@ -604,6 +607,28 @@ nochange:
 			if (chdir(ipath) == -1)
 				printwarn();
 			break;
+		case SEL_CD:
+			/* Read target dir */
+			printmsg("");
+			move(LINES - 1, 0);
+			printw("chdir: ");
+			tmp = readln();
+			if (tmp == NULL) {
+				printmsg("");
+				goto nochange;
+			}
+			if (testopendir(tmp) == 0) {
+				printwarn();
+				goto nochange;
+			} else {
+				free(path);
+				path = strdup(tmp);
+				free(filter);
+				filter = strdup(ifilter); /* Reset filter */
+				DPRINTF_S(path);
+				cur = 0;
+				goto out;
+			}
 		}
 	}
 

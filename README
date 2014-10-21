@@ -35,8 +35,9 @@ You can navigate the list using the following keybinds (hardcoded):
 | l    | RIGHT | ^M    | open file / directory (see section "File opening")
 | h    | LEFT  | ^?    | navigate up one directory
 | /    | &     |       | filter output
-| q    |       |       | exit program
 | !    |       |       | spawn shell in current directory
+| c    |       |       | type and change into destination directory
+| q    |       |       | exit program
 +------+-------+-------+---------------------------------------------------
 
 File opening
