@@ -14,6 +14,11 @@ as much as possible.  It was initially implemented to be controlled
 with a TV remote control.
 .Pp
 .Nm
+defaults to the current directory if
+.Ar dir
+is not specified.
+.Pp
+.Nm
 supports both vi-like and emacs-like key bindings in the default
 configuration.  The default key bindings are described below;
 their functionality is described in more detail later.
@@ -63,6 +68,11 @@ Filters do not stack on top of each other.  They are applied anew
 every time.
 .Pp
 To reset the filter you can use the match-any regex (i.e. '.').
+.Pp
+If
+.Nm
+is invoked as root the default filter will also match hidden
+files.
 .Sh EXAMPLES
 The following example shows one possible configuration for
 file associations.  This is the default configuration for
