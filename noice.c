@@ -396,7 +396,7 @@ readln(void)
 }
 
 int
-testopendir(char *path)
+canopendir(char *path)
 {
 	DIR *dirp;
 
@@ -615,7 +615,7 @@ nochange:
 			/* There is no going back */
 			if (strcmp(path, "/") == 0)
 				goto nochange;
-			if (testopendir(path) == 0) {
+			if (canopendir(path) == 0) {
 				printwarn();
 				goto nochange;
 			}
@@ -646,7 +646,7 @@ nochange:
 
 			switch (sb.st_mode & S_IFMT) {
 			case S_IFDIR:
-				if (testopendir(path) == 0) {
+				if (canopendir(path) == 0) {
 					printwarn();
 					goto nochange;
 				}
@@ -705,7 +705,7 @@ nochange:
 				clearprompt();
 				goto nochange;
 			}
-			if (testopendir(tmp) == 0) {
+			if (canopendir(tmp) == 0) {
 				printwarn();
 				goto nochange;
 			}
@@ -753,7 +753,7 @@ main(int argc, char *argv[])
 	}
 
 	/* Test initial path */
-	if (testopendir(ipath) == 0)
+	if (canopendir(ipath) == 0)
 		printerr(1, ipath);
 
 	/* Set locale before curses setup */
