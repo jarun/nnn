@@ -483,6 +483,47 @@ dentfree(struct entry *dents, int n)
 }
 
 void
+pushhist(int pos)
+{
+	struct history *hist;
+
+	hist = xmalloc(sizeof(*hist));
+	hist->pos = pos;
+	SLIST_INSERT_HEAD(&histhead, hist, entry);
+}
+
+int
+pophist(void)
+{
+	struct history *hist;
+	int pos;
+
+	/* Recall history */
+	hist = SLIST_FIRST(&histhead);
+	if (hist != NULL) {
+		pos = hist->pos;
+		SLIST_REMOVE_HEAD(&histhead, entry);
+		free(hist);
+	} else {
+		pos = 0;
+	}
+
+	return pos;
+}
+
+void
+forgethist(void)
+{
+	struct history *hist;
+
+	while (!SLIST_EMPTY(&histhead)) {
+		hist = SLIST_FIRST(&histhead);
+		SLIST_REMOVE_HEAD(&histhead, entry);
+		free(hist);
+	}
+}
+
+void
 browse(const char *ipath, const char *ifilter)
 {
 	DIR *dirp;
@@ -530,7 +571,6 @@ begin:
 		char *dir;
 		char *tmp;
 		regex_t re;
-		struct history *hist;
 
 redraw:
 		nlines = MIN(LINES - 4, n);
@@ -569,11 +609,7 @@ nochange:
 			free(path);
 			free(filter);
 			/* Forget history */
-			while (!SLIST_EMPTY(&histhead)) {
-				hist = SLIST_FIRST(&histhead);
-				SLIST_REMOVE_HEAD(&histhead, entry);
-				free(hist);
-			}
+			forgethist();
 			return;
 		case SEL_BACK:
 			/* There is no going back */
@@ -582,18 +618,11 @@ nochange:
 			dir = xdirname(path);
 			free(path);
 			path = dir;
+			/* Reset filter */
 			free(filter);
-			filter = xstrdup(ifilter); /* Reset filter */
+			filter = xstrdup(ifilter);
 			/* Recall history */
-			hist = SLIST_FIRST(&histhead);
-			if (hist != NULL) {
-				cur = hist->pos;
-				DPRINTF_D(hist->pos);
-				SLIST_REMOVE_HEAD(&histhead, entry);
-				free(hist);
-			} else {
-				cur = 0;
-			}
+			cur = pophist();
 			goto out;
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
@@ -615,12 +644,11 @@ nochange:
 			case S_IFDIR:
 				free(path);
 				path = xrealpath(name);
+				/* Reset filter */
 				free(filter);
-				filter = xstrdup(ifilter); /* Reset filter */
-				/* Save history */
-				hist = xmalloc(sizeof(struct history));
-				hist->pos = cur;
-				SLIST_INSERT_HEAD(&histhead, hist, entry);
+				filter = xstrdup(ifilter);
+				/* Remember history */
+				pushhist(cur);
 				cur = 0;
 				goto out;
 			case S_IFREG:
@@ -679,11 +707,7 @@ nochange:
 			free(filter);
 			filter = xstrdup(ifilter); /* Reset filter */
 			/* Forget history */
-			while (!SLIST_EMPTY(&histhead)) {
-				hist = SLIST_FIRST(&histhead);
-				SLIST_REMOVE_HEAD(&histhead, entry);
-				free(hist);
-			}
+			forgethist();
 			DPRINTF_S(path);
 			cur = 0;
 			goto out;
