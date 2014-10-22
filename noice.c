@@ -601,7 +601,6 @@ nochange:
 				goto nochange;
 
 			name = dents[cur].name;
-
 			DPRINTF_S(name);
 
 			/* Get path info */
@@ -611,6 +610,7 @@ nochange:
 				goto nochange;
 			}
 			DPRINTF_U(sb.st_mode);
+
 			switch (sb.st_mode & S_IFMT) {
 			case S_IFDIR:
 				free(path);
@@ -624,7 +624,6 @@ nochange:
 				cur = 0;
 				goto out;
 			case S_IFREG:
-				/* Open with */
 				bin = openwith(name);
 				if (bin == NULL) {
 					printmsg("No association");
