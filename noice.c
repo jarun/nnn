@@ -604,8 +604,10 @@ begin:
 
 	/* Find cur from history */
 	cur = dentfind(dents, n, path, hpath);
-	free(hpath);
-	hpath = NULL;
+	if (hpath != NULL) {
+		free(hpath);
+		hpath = NULL;
+	}
 
 	for (;;) {
 		int nlines;
