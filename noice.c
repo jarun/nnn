@@ -128,12 +128,11 @@ xdirname(const char *path)
 	 * original string if we lose track of it. */
 	tmp = xstrdup(path);
 	p = dirname(tmp);
-	free(tmp);
 	if (p == NULL)
 		printerr(1, "dirname");
-
 	/* Make sure this is a malloc(3)-ed string */
 	p = xstrdup(p);
+	free(tmp);
 	return p;
 }
 
