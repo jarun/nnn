@@ -577,26 +577,24 @@ nochange:
 			return;
 		case SEL_BACK:
 			/* There is no going back */
-			if (strcmp(path, "/") == 0) {
+			if (strcmp(path, "/") == 0)
 				goto nochange;
+			dir = xdirname(path);
+			free(path);
+			path = dir;
+			free(filter);
+			filter = xstrdup(ifilter); /* Reset filter */
+			/* Recall history */
+			hist = SLIST_FIRST(&histhead);
+			if (hist != NULL) {
+				cur = hist->pos;
+				DPRINTF_D(hist->pos);
+				SLIST_REMOVE_HEAD(&histhead, entry);
+				free(hist);
 			} else {
-				dir = xdirname(path);
-				free(path);
-				path = dir;
-				free(filter);
-				filter = xstrdup(ifilter); /* Reset filter */
-				/* Recall history */
-				hist = SLIST_FIRST(&histhead);
-				if (hist != NULL) {
-					cur = hist->pos;
-					DPRINTF_D(hist->pos);
-					SLIST_REMOVE_HEAD(&histhead, entry);
-					free(hist);
-				} else {
-					cur = 0;
-				}
-				goto out;
+				cur = 0;
 			}
+			goto out;
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
 			if (n == 0)
