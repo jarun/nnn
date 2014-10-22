@@ -516,7 +516,7 @@ forgethist(void)
 {
 	struct history *hist;
 
-	while (!SLIST_EMPTY(&histhead)) {
+	while (SLIST_EMPTY(&histhead) == 0) {
 		hist = SLIST_FIRST(&histhead);
 		SLIST_REMOVE_HEAD(&histhead, entry);
 		free(hist);
