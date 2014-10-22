@@ -189,7 +189,7 @@ void
 printerr(int ret, char *prefix)
 {
 	exitcurses();
-	printf("%s: %s\n", prefix, strerror(errno));
+	fprintf(stderr, "%s: %s\n", prefix, strerror(errno));
 	exit(ret);
 }
 
