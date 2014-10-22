@@ -491,13 +491,6 @@ redraw:
 		/* Clean screen */
 		erase();
 
-		/* Strip trailing slashes */
-		for (i = strlen(path) - 1; i > 0; i--)
-			if (path[i] == '/')
-				path[i] = '\0';
-			else
-				break;
-
 		DPRINTF_D(cur);
 		DPRINTF_S(path);
 
