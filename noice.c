@@ -33,6 +33,7 @@
 #endif /* DEBUG */
 
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
+#undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define ISODD(x) ((x) & 1)
 #define CONTROL(c) ((c) ^ 0x40)
