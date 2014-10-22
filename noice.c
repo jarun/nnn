@@ -359,7 +359,7 @@ readln(void)
 	getyx(stdscr, y, x);
 	x0 = x;
 
-	while (c = getch()) {
+	while ((c = getch()) != ERR) {
 		if (c == KEY_ENTER || c == '\r')
 			break;
 		if (c == KEY_BACKSPACE) {
