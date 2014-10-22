@@ -569,7 +569,7 @@ browse(const char *ipath, const char *ifilter)
 	DIR *dirp;
 	struct entry *dents;
 	int i, n, cur;
-	int r, ret;
+	int r, ret, fd;
 	char *path = xrealpath(ipath);
 	char *filter = xstrdup(ifilter);
 	regex_t filter_re;
@@ -683,6 +683,12 @@ nochange:
 			DPRINTF_S(name);
 
 			/* Get path info */
+			fd = openat(dirfd(dirp), name, O_RDONLY | O_NONBLOCK);
+			if (fd == -1) {
+				printwarn();
+				goto nochange;
+			}
+			close(fd);
 			r = fstatat(dirfd(dirp), name, &sb, 0);
 			if (r == -1) {
 				printwarn();
