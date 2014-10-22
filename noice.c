@@ -366,9 +366,9 @@ readln(void)
 		if (c == KEY_BACKSPACE) {
 			getyx(stdscr, y, x);
 			if (x >= x0) {
+				i--;
 				if (i > 0) {
-					ln = xrealloc(ln, (i - 1) * sizeof(*ln));
-					i--;
+					ln = xrealloc(ln, i * sizeof(*ln));
 				} else {
 					free(ln);
 					ln = NULL;
