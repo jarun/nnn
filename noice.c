@@ -493,7 +493,6 @@ begin:
 		char *pathnew;
 		char *name;
 		char *bin;
-		int fd;
 		char *dir;
 		char *tmp;
 		regex_t re;
@@ -583,14 +582,7 @@ nochange:
 			DPRINTF_S(pathnew);
 
 			/* Get path info */
-			fd = open(pathnew, O_RDONLY | O_NONBLOCK);
-			if (fd == -1) {
-				printwarn();
-				free(pathnew);
-				goto nochange;
-			}
-			r = fstat(fd, &sb);
-			close(fd);
+			r = stat(pathnew, &sb);
 			if (r == -1) {
 				printwarn();
 				free(pathnew);
@@ -619,11 +611,9 @@ nochange:
 					free(pathnew);
 					goto nochange;
 				}
-
 				exitcurses();
 				spawn(bin, pathnew);
 				initcurses();
-
 				free(pathnew);
 				goto redraw;
 			}
