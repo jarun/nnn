@@ -511,6 +511,7 @@ begin:
 	if (r != 0)
 		goto nochange;
 
+	dents = NULL;
 	n = dentfill(dirp, &dents, visible, &filter_re);
 
 	/* Make sure cur is in range */
