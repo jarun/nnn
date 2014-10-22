@@ -108,13 +108,27 @@ xstrdup(const char *s)
 }
 
 char *
-xrealpath(const char *pathname)
+xrealpath(const char *path)
 {
 	char *p;
 
-	p = realpath(pathname, NULL);
+	p = realpath(path, NULL);
 	if (p == NULL)
 		printerr(1, "realpath");
+	return p;
+}
+
+char *
+xdirname(const char *path)
+{
+	char *p, *tmp;
+
+	/* Some implementations of dirname(3) may modify `path' */
+	tmp = xstrdup(path);
+	p = dirname(tmp);
+	free(tmp);
+	if (p == NULL)
+		printerr(1, "dirname");
 	return p;
 }
 
@@ -533,7 +547,7 @@ nochange:
 			if (strcmp(path, "/") == 0) {
 				goto nochange;
 			} else {
-				dir = dirname(path);
+				dir = xdirname(path);
 				tmp = xmalloc(strlen(dir) + 1);
 				strlcpy(tmp, dir, strlen(dir) + 1);
 				free(path);
