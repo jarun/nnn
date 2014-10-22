@@ -118,6 +118,25 @@ xrealpath(const char *path)
 	return p;
 }
 
+char *
+xdirname(const char *path)
+{
+	char *p, *tmp;
+
+	/* Some implementations of dirname(3) may modify `path' and some
+	 * return a pointer inside `path` and we cannot free(3) the
+	 * original string if we lose track of it. */
+	tmp = xstrdup(path);
+	p = dirname(tmp);
+	free(tmp);
+	if (p == NULL)
+		printerr(1, "dirname");
+
+	/* Make sure this is a malloc(3)-ed string */
+	p = xstrdup(p);
+	return p;
+}
+
 void
 spawn(const char *file, const char *arg)
 {
@@ -532,7 +551,7 @@ nochange:
 			if (strcmp(path, "/") == 0) {
 				goto nochange;
 			} else {
-				dir = dirname(path);
+				dir = xdirname(path);
 				tmp = xmalloc(strlen(dir) + 1);
 				strlcpy(tmp, dir, strlen(dir) + 1);
 				free(path);
