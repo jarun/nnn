@@ -608,8 +608,8 @@ nochange:
 		case SEL_QUIT:
 			free(path);
 			free(filter);
-			/* Forget history */
 			forgethist();
+			dentfree(dents, n);
 			return;
 		case SEL_BACK:
 			/* There is no going back */
@@ -714,7 +714,6 @@ nochange:
 			free(tmp);
 			free(filter);
 			filter = xstrdup(ifilter); /* Reset filter */
-			/* Forget history */
 			forgethist();
 			DPRINTF_S(path);
 			cur = 0;
