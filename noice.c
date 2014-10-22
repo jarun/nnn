@@ -551,10 +551,8 @@ nochange:
 				goto nochange;
 			} else {
 				dir = xdirname(path);
-				tmp = xmalloc(strlen(dir) + 1);
-				strlcpy(tmp, dir, strlen(dir) + 1);
 				free(path);
-				path = tmp;
+				path = dir;
 				free(filter);
 				filter = xstrdup(ifilter); /* Reset filter */
 				/* Recall history */
