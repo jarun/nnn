@@ -672,22 +672,21 @@ nochange:
 			if (testopendir(tmp) == 0) {
 				printwarn();
 				goto nochange;
-			} else {
-				free(path);
-				path = xrealpath(tmp);
-				free(tmp);
-				free(filter);
-				filter = xstrdup(ifilter); /* Reset filter */
-				/* Forget history */
-				while (!SLIST_EMPTY(&histhead)) {
-					hist = SLIST_FIRST(&histhead);
-					SLIST_REMOVE_HEAD(&histhead, entry);
-					free(hist);
-				}
-				DPRINTF_S(path);
-				cur = 0;
-				goto out;
 			}
+			free(path);
+			path = xrealpath(tmp);
+			free(tmp);
+			free(filter);
+			filter = xstrdup(ifilter); /* Reset filter */
+			/* Forget history */
+			while (!SLIST_EMPTY(&histhead)) {
+				hist = SLIST_FIRST(&histhead);
+				SLIST_REMOVE_HEAD(&histhead, entry);
+				free(hist);
+			}
+			DPRINTF_S(path);
+			cur = 0;
+			goto out;
 		}
 	}
 
