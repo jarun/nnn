@@ -24,44 +24,7 @@ noice in a directory to display its content in the form of a list, where
 each line is a file or directory.  The currently selected item will be
 preceded with a " > " by default.
 
-Navigation
-----------
-
-You can navigate the list using the following keybinds (hardcoded):
-
-+------+-------+-------+---------------------------------------------------
-| k    | UP    | ^P    | go up
-| j    | DOWN  | ^N    | go down
-|      | PGUP  | ^U    | go up (fast)
-|      | PGDN  | ^D    | go down (fast)
-| l    | RIGHT | ^M    | open file / directory (see section "File opening")
-| h    | LEFT  | ^?    | navigate up one directory
-| /    | &     |       | filter output
-| !    |       |       | spawn shell in current directory
-| c    |       |       | chdir into the given path
-| q    |       |       | exit program
-+------+-------+-------+---------------------------------------------------
-
-File opening
-------------
-
-Depending on the filetype, noice will open the selected file with the
-application specified in `config.h` at compilation time.  The associations
-are specified by regexes, so you might experience issues when trying to
-open a file that does not match those regexes.
-
-The default program is `less(1)`.  For text files, you can use the 'v'
-command in `less(1)` to open the file in your $EDITOR.
-
-Filters
--------
-
-Filters narrow down the view.  This effectively allows you to easily
-search/jump to a particular file or directory.  If you want to reset the
-filter then you can just use the match-any regex (i.e. '.').  You can
-think of noice being in search mode all the time.
-
-Filters do not stack or nest.  They are applied afresh every time.
+For more information refer to the manpage.
 
 
 Contact
