@@ -255,6 +255,21 @@ printerr(int ret, char *prefix)
 	exit(ret);
 }
 
+/* Clear the last line */
+void
+clearprompt(void)
+{
+	printmsg("");
+}
+
+/* Print prompt on the last line */
+void
+printprompt(char *str)
+{
+	clearprompt();
+	printw(str);
+}
+
 /*
  * Returns 0 normally
  * On movement it updates *cur
@@ -627,12 +642,10 @@ nochange:
 			goto nochange;
 		case SEL_FLTR:
 			/* Read filter */
-			printmsg("");
-			move(LINES - 1, 0);
-			printw("filter: ");
+			printprompt("filter: ");
 			tmp = readln();
 			if (tmp == NULL) {
-				printmsg("");
+				clearprompt();
 				goto nochange;
 			}
 			r = setfilter(&re, tmp);
@@ -653,12 +666,10 @@ nochange:
 			break;
 		case SEL_CD:
 			/* Read target dir */
-			printmsg("");
-			move(LINES - 1, 0);
-			printw("chdir: ");
+			printprompt("chdir: ");
 			tmp = readln();
 			if (tmp == NULL) {
-				printmsg("");
+				clearprompt();
 				goto nochange;
 			}
 			if (testopendir(tmp) == 0) {
