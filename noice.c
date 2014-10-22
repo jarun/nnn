@@ -615,6 +615,10 @@ nochange:
 			/* There is no going back */
 			if (strcmp(path, "/") == 0)
 				goto nochange;
+			if (testopendir(path) == 0) {
+				printwarn();
+				goto nochange;
+			}
 			dir = xdirname(path);
 			free(path);
 			path = dir;
@@ -642,6 +646,10 @@ nochange:
 
 			switch (sb.st_mode & S_IFMT) {
 			case S_IFDIR:
+				if (testopendir(path) == 0) {
+					printwarn();
+					goto nochange;
+				}
 				free(path);
 				path = xrealpath(name);
 				/* Reset filter */
@@ -745,7 +753,7 @@ main(int argc, char *argv[])
 	}
 
 	/* Test initial path */
-	if (!testopendir(ipath))
+	if (testopendir(ipath) == 0)
 		printerr(1, ipath);
 
 	/* Set locale before curses setup */
