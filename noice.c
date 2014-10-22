@@ -525,7 +525,6 @@ begin:
 	for (;;) {
 		int nlines;
 		int odd;
-		char *pathnew;
 		char *name;
 		char *bin;
 		char *dir;
@@ -605,27 +604,19 @@ nochange:
 
 			name = dents[cur].name;
 
-			/* Handle root case */
-			if (strcmp(path, "/") == 0)
-				asprintf(&pathnew, "/%s", name);
-			else
-				asprintf(&pathnew, "%s/%s", path, name);
-
 			DPRINTF_S(name);
-			DPRINTF_S(pathnew);
 
 			/* Get path info */
-			r = stat(pathnew, &sb);
+			r = fstatat(dirfd(dirp), name, &sb, 0);
 			if (r == -1) {
 				printwarn();
-				free(pathnew);
 				goto nochange;
 			}
 			DPRINTF_U(sb.st_mode);
-			/* Directory */
-			if (S_ISDIR(sb.st_mode)) {
+			switch (sb.st_mode & S_IFMT) {
+			case S_IFDIR:
 				free(path);
-				path = pathnew;
+				path = xrealpath(name);
 				free(filter);
 				filter = xstrdup(ifilter); /* Reset filter */
 				/* Save history */
@@ -634,26 +625,21 @@ nochange:
 				SLIST_INSERT_HEAD(&histhead, hist, entry);
 				cur = 0;
 				goto out;
-			}
-			/* Regular file */
-			if (S_ISREG(sb.st_mode)) {
+			case S_IFREG:
 				/* Open with */
 				bin = openwith(name);
 				if (bin == NULL) {
 					printmsg("No association");
-					free(pathnew);
 					goto nochange;
 				}
 				exitcurses();
-				spawn(bin, pathnew);
+				spawn(bin, name);
 				initcurses();
-				free(pathnew);
 				goto redraw;
+			default:
+				printmsg("Unsupported file");
+				goto nochange;
 			}
-			/* All the rest */
-			printmsg("Unsupported file");
-			free(pathnew);
-			goto nochange;
 		case SEL_FLTR:
 			/* Read filter */
 			printprompt("filter: ");
