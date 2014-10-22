@@ -441,6 +441,46 @@ printent(struct entry *ent, int active)
 	free(name);
 }
 
+int
+dentfill(DIR *dirp, struct entry **dents,
+	 int (*filter)(regex_t *, char *), regex_t *re)
+{
+	struct dirent *dp;
+	struct stat sb;
+	int n = 0;
+	int r;
+
+	while ((dp = readdir(dirp)) != NULL) {
+		/* Skip self and parent */
+		if (strcmp(dp->d_name, ".") == 0
+		    || strcmp(dp->d_name, "..") == 0)
+			continue;
+		if (filter(re, dp->d_name) == 0)
+			continue;
+		*dents = xrealloc(*dents, (n + 1) * sizeof(**dents));
+		(*dents)[n].name = xstrdup(dp->d_name);
+		/* Get mode flags */
+		r = fstatat(dirfd(dirp), dp->d_name, &sb,
+			    AT_SYMLINK_NOFOLLOW);
+		if (r == -1)
+			printerr(1, "stat");
+		(*dents)[n].mode = sb.st_mode;
+		n++;
+	}
+
+	return n;
+}
+
+void
+dentfree(struct entry *dents, int n)
+{
+	int i;
+
+	for (i = 0; i < n; i++)
+		free(dents[i].name);
+	free(dents);
+}
+
 void
 browse(const char *ipath, const char *ifilter)
 {
@@ -476,31 +516,7 @@ begin:
 	if (r != 0)
 		goto nochange;
 
-	while ((dp = readdir(dirp)) != NULL) {
-		char *name;
-
-		/* Skip self and parent */
-		if (strcmp(dp->d_name, ".") == 0
-		    || strcmp(dp->d_name, "..") == 0)
-			continue;
-		if (!visible(&filter_re, dp->d_name))
-			continue;
-		/* Deep copy because readdir(3) reuses the entries */
-		dents = xrealloc(dents, (n + 1) * sizeof(*dents));
-		dents[n].name = xstrdup(dp->d_name);
-		/* Handle root case */
-		if (strcmp(path, "/") == 0)
-			asprintf(&name, "/%s", dents[n].name);
-		else
-			asprintf(&name, "%s/%s", path, dents[n].name);
-		/* Get mode flags */
-		r = lstat(name, &sb);
-		free(name);
-		if (r == -1)
-			printerr(1, "stat");
-		dents[n].mode = sb.st_mode;
-		n++;
-	}
+	n = dentfill(dirp, &dents, visible, &filter_re);
 
 	/* Make sure cur is in range */
 	cur = MIN(cur, n - 1);
@@ -695,9 +711,7 @@ nochange:
 	}
 
 out:
-	for (i = 0; i < n; i++)
-		free(dents[i].name);
-	free(dents);
+	dentfree(dents, n);
 
 	/* Should never be null */
 	r = closedir(dirp);
