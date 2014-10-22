@@ -51,7 +51,7 @@ struct entry {
 };
 
 struct history {
-	int pos;
+	char *path;
 	SLIST_ENTRY(history) entry;
 };
 
@@ -483,33 +483,71 @@ dentfree(struct entry *dents, int n)
 	free(dents);
 }
 
+char *
+makepath(char *dir, char *name)
+{
+	char *path;
+
+	/* Handle root case */
+	if (strcmp(dir, "/") == 0)
+		asprintf(&path, "/%s", name);
+	else
+		asprintf(&path, "%s/%s", dir, name);
+
+	return path;
+}
+
+/* Return the position of the matching entry or 0 otherwise */
+int
+dentfind(struct entry *dents, int n, char *cwd, char *path)
+{
+	int i;
+	char *tmp;
+
+	if (path == NULL)
+		return 0;
+
+	for (i = 0; i < n; i++) {
+		tmp = makepath(cwd, dents[i].name);
+		DPRINTF_S(path);
+		DPRINTF_S(tmp);
+		if (strcmp(tmp, path) == 0) {
+			free(tmp);
+			return i;
+		}
+		free(tmp);
+	}
+
+	return 0;
+}
+
 void
-pushhist(int pos)
+pushhist(char *path)
 {
 	struct history *hist;
 
 	hist = xmalloc(sizeof(*hist));
-	hist->pos = pos;
+	hist->path = xstrdup(path);
 	SLIST_INSERT_HEAD(&histhead, hist, entry);
 }
 
-int
+char *
 pophist(void)
 {
 	struct history *hist;
-	int pos;
+	char *path;
 
 	/* Recall history */
 	hist = SLIST_FIRST(&histhead);
 	if (hist != NULL) {
-		pos = hist->pos;
+		path = hist->path;
 		SLIST_REMOVE_HEAD(&histhead, entry);
 		free(hist);
 	} else {
-		pos = 0;
+		path = NULL;
 	}
 
-	return pos;
+	return path;
 }
 
 void
@@ -520,6 +558,7 @@ forgethist(void)
 	while (SLIST_EMPTY(&histhead) == 0) {
 		hist = SLIST_FIRST(&histhead);
 		SLIST_REMOVE_HEAD(&histhead, entry);
+		free(hist->path);
 		free(hist);
 	}
 }
@@ -536,8 +575,10 @@ browse(const char *ipath, const char *ifilter)
 	regex_t filter_re;
 	char *cwd;
 	struct stat sb;
+	char *hpath;
 
 	cur = 0;
+	hpath = NULL;
 begin:
 	/* Path and filter should be malloc(3)-ed strings at all times */
 	n = 0;
@@ -559,10 +600,12 @@ begin:
 
 	n = dentfill(dirp, &dents, visible, &filter_re);
 
-	/* Make sure cur is in range */
-	cur = MIN(cur, n - 1);
-
 	qsort(dents, n, sizeof(*dents), entrycmp);
+
+	/* Find cur from history */
+	cur = dentfind(dents, n, path, hpath);
+	free(hpath);
+	hpath = NULL;
 
 	for (;;) {
 		int nlines;
@@ -627,7 +670,7 @@ nochange:
 			free(filter);
 			filter = xstrdup(ifilter);
 			/* Recall history */
-			cur = pophist();
+			hpath = pophist();
 			goto out;
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
@@ -657,7 +700,7 @@ nochange:
 				free(filter);
 				filter = xstrdup(ifilter);
 				/* Remember history */
-				pushhist(cur);
+				pushhist(path);
 				cur = 0;
 				goto out;
 			case S_IFREG:
