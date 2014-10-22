@@ -76,6 +76,26 @@ void printmsg(char *msg);
 void printwarn(void);
 void printerr(int ret, char *prefix);
 
+void *
+xmalloc(size_t size)
+{
+	void *p;
+
+	p = malloc(size);
+	if (!p)
+		printerr(1, "malloc");
+	return p;
+}
+
+void *
+xrealloc(void *ptr, size_t size)
+{
+	ptr = realloc(ptr, size);
+	if (!ptr)
+		printerr(1, "realloc");
+	return ptr;
+}
+
 void
 spawn(const char *file, const char *arg)
 {
@@ -123,7 +143,7 @@ setfilter(regex_t *regex, char *filter)
 
 	r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED);
 	if (r != 0) {
-		errbuf = malloc(COLS * sizeof(char));
+		errbuf = xmalloc(COLS * sizeof(char));
 		regerror(r, regex, errbuf, COLS * sizeof(char));
 		printmsg(errbuf);
 		free(errbuf);
@@ -288,7 +308,7 @@ readln(void)
 			getyx(stdscr, y, x);
 			if (x >= x0) {
 				if (i > 0) {
-					ln = realloc(ln, (i - 1) * sizeof(*ln));
+					ln = xrealloc(ln, (i - 1) * sizeof(*ln));
 					i--;
 				} else {
 					free(ln);
@@ -302,12 +322,12 @@ readln(void)
 			}
 			continue;
 		}
-		ln = realloc(ln, (i + 1) * sizeof(*ln));
+		ln = xrealloc(ln, (i + 1) * sizeof(*ln));
 		ln[i] = c;
 		i++;
 	}
 	if (ln != NULL) {
-		ln = realloc(ln, (i + 1) * sizeof(*ln));
+		ln = xrealloc(ln, (i + 1) * sizeof(*ln));
 		ln[i] = '\0';
 	}
 
@@ -411,9 +431,7 @@ begin:
 		if (!visible(&filter_re, dp->d_name))
 			continue;
 		/* Deep copy because readdir(3) reuses the entries */
-		dents = realloc(dents, (n + 1) * sizeof(*dents));
-		if (dents == NULL)
-			printerr(1, "realloc");
+		dents = xrealloc(dents, (n + 1) * sizeof(*dents));
 		dents[n].name = strdup(dp->d_name);
 		if (dents[n].name == NULL)
 			printerr(1, "strdup");
@@ -466,7 +484,7 @@ redraw:
 		DPRINTF_S(path);
 
 		/* No text wrapping in cwd line */
-		cwd = malloc(COLS * sizeof(char));
+		cwd = xmalloc(COLS * sizeof(char));
 		strlcpy(cwd, path, COLS * sizeof(char));
 		cwd[COLS - strlen(CWD) - 1] = '\0';
 
@@ -505,7 +523,7 @@ nochange:
 				goto nochange;
 			} else {
 				dir = dirname(path);
-				tmp = malloc(strlen(dir) + 1);
+				tmp = xmalloc(strlen(dir) + 1);
 				strlcpy(tmp, dir, strlen(dir) + 1);
 				free(path);
 				path = tmp;
@@ -561,7 +579,7 @@ nochange:
 				free(filter);
 				filter = strdup(ifilter); /* Reset filter */
 				/* Save history */
-				hist = malloc(sizeof(struct history));
+				hist = xmalloc(sizeof(struct history));
 				hist->pos = cur;
 				SLIST_INSERT_HEAD(&histhead, hist, entry);
 				cur = 0;
