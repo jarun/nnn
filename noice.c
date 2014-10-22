@@ -82,18 +82,40 @@ xmalloc(size_t size)
 	void *p;
 
 	p = malloc(size);
-	if (!p)
+	if (p == NULL)
 		printerr(1, "malloc");
 	return p;
 }
 
 void *
-xrealloc(void *ptr, size_t size)
+xrealloc(void *p, size_t size)
 {
-	ptr = realloc(ptr, size);
-	if (!ptr)
+	p = realloc(p, size);
+	if (p == NULL)
 		printerr(1, "realloc");
-	return ptr;
+	return p;
+}
+
+char *
+xstrdup(const char *s)
+{
+	char *p;
+
+	p = strdup(s);
+	if (p == NULL)
+		printerr(1, "strdup");
+	return p;
+}
+
+char *
+xrealpath(const char *pathname)
+{
+	char *p;
+
+	p = realpath(pathname, NULL);
+	if (p == NULL)
+		printerr(1, "realpath");
+	return p;
 }
 
 void
@@ -359,9 +381,7 @@ printent(struct entry *ent, int active)
 	char cm = 0;
 
 	/* Copy name locally */
-	name = strdup(ent->name);
-	if (name == NULL)
-		printerr(1, "strdup name");
+	name = xstrdup(ent->name);
 
 	if (S_ISDIR(ent->mode)) {
 		cm = '/';
@@ -395,8 +415,8 @@ browse(const char *ipath, const char *ifilter)
 	struct entry *dents;
 	int i, n, cur;
 	int r, ret;
-	char *path = realpath(ipath, NULL);
-	char *filter = strdup(ifilter);
+	char *path = xrealpath(ipath);
+	char *filter = xstrdup(ifilter);
 	regex_t filter_re;
 	char *cwd;
 	struct stat sb;
@@ -432,9 +452,7 @@ begin:
 			continue;
 		/* Deep copy because readdir(3) reuses the entries */
 		dents = xrealloc(dents, (n + 1) * sizeof(*dents));
-		dents[n].name = strdup(dp->d_name);
-		if (dents[n].name == NULL)
-			printerr(1, "strdup");
+		dents[n].name = xstrdup(dp->d_name);
 		/* Handle root case */
 		if (strcmp(path, "/") == 0)
 			asprintf(&name, "/%s", dents[n].name);
@@ -528,7 +546,7 @@ nochange:
 				free(path);
 				path = tmp;
 				free(filter);
-				filter = strdup(ifilter); /* Reset filter */
+				filter = xstrdup(ifilter); /* Reset filter */
 				/* Recall history */
 				hist = SLIST_FIRST(&histhead);
 				if (hist != NULL) {
@@ -577,7 +595,7 @@ nochange:
 				free(path);
 				path = pathnew;
 				free(filter);
-				filter = strdup(ifilter); /* Reset filter */
+				filter = xstrdup(ifilter); /* Reset filter */
 				/* Save history */
 				hist = xmalloc(sizeof(struct history));
 				hist->pos = cur;
@@ -647,10 +665,10 @@ nochange:
 				goto nochange;
 			} else {
 				free(path);
-				path = realpath(tmp, NULL);
+				path = xrealpath(tmp);
 				free(tmp);
 				free(filter);
-				filter = strdup(ifilter); /* Reset filter */
+				filter = xstrdup(ifilter); /* Reset filter */
 				DPRINTF_S(path);
 				cur = 0;
 				goto out;
