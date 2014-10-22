@@ -497,6 +497,10 @@ browse(const char *ipath, const char *ifilter)
 
 	cur = 0;
 begin:
+	/* Path and filter should be malloc(3)-ed strings at all times */
+	n = 0;
+	dents = NULL;
+
 	dirp = opendir(path);
 	if (dirp == NULL) {
 		printwarn();
@@ -511,7 +515,6 @@ begin:
 	if (r != 0)
 		goto nochange;
 
-	dents = NULL;
 	n = dentfill(dirp, &dents, visible, &filter_re);
 
 	/* Make sure cur is in range */
