@@ -485,8 +485,6 @@ void
 browse(const char *ipath, const char *ifilter)
 {
 	DIR *dirp;
-	int dfd;
-	struct dirent *dp;
 	struct entry *dents;
 	int i, n, cur;
 	int r, ret;
@@ -498,10 +496,6 @@ browse(const char *ipath, const char *ifilter)
 
 	cur = 0;
 begin:
-	/* Path and filter should be malloc(3)-ed strings at all times */
-	n = 0;
-	dents = NULL;
-
 	dirp = opendir(path);
 	if (dirp == NULL) {
 		printwarn();
@@ -525,7 +519,6 @@ begin:
 
 	for (;;) {
 		int nlines;
-		int maxlen;
 		int odd;
 		char *pathnew;
 		char *name;
