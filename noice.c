@@ -102,17 +102,6 @@ xstrdup(const char *s)
 }
 
 char *
-xrealpath(const char *path)
-{
-	char *p;
-
-	p = realpath(path, NULL);
-	if (p == NULL)
-		printerr(1, "realpath");
-	return p;
-}
-
-char *
 xdirname(const char *path)
 {
 	char *p, *tmp;
