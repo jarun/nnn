@@ -13,7 +13,7 @@ all: $(BIN)
 $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDLIBS)
 
-noice.o: queue.h util.h config.h
+noice.o: util.h config.h
 strlcpy.o: util.h
 
 install: all
