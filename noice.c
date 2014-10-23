@@ -141,13 +141,15 @@ xdirname(const char *path)
 }
 
 void
-spawn(const char *file, const char *arg)
+spawn(const char *file, const char *arg, const char *dir)
 {
 	pid_t pid;
 	int status;
 
 	pid = fork();
 	if (pid == 0) {
+		if (dir != NULL)
+			chdir(dir);
 		execlp(file, file, arg, NULL);
 		_exit(1);
 	} else {
@@ -570,10 +572,10 @@ browse(const char *ipath, const char *ifilter)
 	struct entry *dents;
 	int i, n, cur;
 	int r, ret, fd;
-	char *path = xrealpath(ipath);
+	char *path = xstrdup(ipath);
 	char *filter = xstrdup(ifilter);
 	regex_t filter_re;
-	char *cwd;
+	char *cwd, *newpath;
 	struct stat sb;
 	char *hpath;
 
@@ -588,9 +590,6 @@ begin:
 	if (dirp == NULL) {
 		printwarn();
 		goto nochange;
-	} else {
-		if (chdir(path) == -1)
-			printwarn();
 	}
 
 	/* Search filter */
@@ -680,30 +679,35 @@ nochange:
 				goto nochange;
 
 			name = dents[cur].name;
-			DPRINTF_S(name);
+			newpath = makepath(path, name);
+			DPRINTF_S(newpath);
 
 			/* Get path info */
-			fd = openat(dirfd(dirp), name, O_RDONLY | O_NONBLOCK);
+			fd = open(newpath, O_RDONLY | O_NONBLOCK);
 			if (fd == -1) {
 				printwarn();
+				free(newpath);
+				goto nochange;
+			}
+			r = fstat(fd, &sb);
+			if (r == -1) {
+				printwarn();
+				close(fd);
+				free(newpath);
 				goto nochange;
 			}
 			close(fd);
-			r = fstatat(dirfd(dirp), name, &sb, 0);
-			if (r == -1) {
-				printwarn();
-				goto nochange;
-			}
 			DPRINTF_U(sb.st_mode);
 
 			switch (sb.st_mode & S_IFMT) {
 			case S_IFDIR:
-				if (canopendir(path) == 0) {
+				if (canopendir(newpath) == 0) {
 					printwarn();
+					free(newpath);
 					goto nochange;
 				}
 				free(path);
-				path = xrealpath(name);
+				path = newpath;
 				/* Reset filter */
 				free(filter);
 				filter = xstrdup(ifilter);
@@ -715,11 +719,13 @@ nochange:
 				bin = openwith(name);
 				if (bin == NULL) {
 					printmsg("No association");
+					free(newpath);
 					goto nochange;
 				}
 				exitcurses();
-				spawn(bin, name);
+				spawn(bin, newpath, NULL);
 				initcurses();
+				free(newpath);
 				goto redraw;
 			default:
 				printmsg("Unsupported file");
@@ -746,7 +752,7 @@ nochange:
 			goto out;
 		case SEL_SH:
 			exitcurses();
-			spawn("/bin/sh", NULL);
+			spawn("/bin/sh", NULL, path);
 			initcurses();
 			break;
 		case SEL_CD:
@@ -757,13 +763,15 @@ nochange:
 				clearprompt();
 				goto nochange;
 			}
-			if (canopendir(tmp) == 0) {
+			newpath = makepath(path, tmp);
+			free(tmp);
+			if (canopendir(newpath) == 0) {
+				free(newpath);
 				printwarn();
 				goto nochange;
 			}
 			free(path);
-			path = xrealpath(tmp);
-			free(tmp);
+			path = newpath;
 			free(filter);
 			filter = xstrdup(ifilter); /* Reset filter */
 			forgethist();
