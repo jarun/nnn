@@ -16,7 +16,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "queue.h"
 #include "util.h"
 
 #ifdef DEBUG
@@ -49,13 +48,6 @@ struct entry {
 	char *name;
 	mode_t mode;
 };
-
-struct history {
-	char *path;
-	SLIST_ENTRY(history) entry;
-};
-
-SLIST_HEAD(histhead, history) histhead = SLIST_HEAD_INITIALIZER(histhead);
 
 /*
  * Layout:
@@ -529,48 +521,6 @@ dentfind(struct entry *dents, int n, char *cwd, char *path)
 }
 
 void
-pushhist(char *path)
-{
-	struct history *hist;
-
-	hist = xmalloc(sizeof(*hist));
-	hist->path = xstrdup(path);
-	SLIST_INSERT_HEAD(&histhead, hist, entry);
-}
-
-char *
-pophist(void)
-{
-	struct history *hist;
-	char *path;
-
-	/* Recall history */
-	hist = SLIST_FIRST(&histhead);
-	if (hist != NULL) {
-		path = hist->path;
-		SLIST_REMOVE_HEAD(&histhead, entry);
-		free(hist);
-	} else {
-		path = NULL;
-	}
-
-	return path;
-}
-
-void
-forgethist(void)
-{
-	struct history *hist;
-
-	while (SLIST_EMPTY(&histhead) == 0) {
-		hist = SLIST_FIRST(&histhead);
-		SLIST_REMOVE_HEAD(&histhead, entry);
-		free(hist->path);
-		free(hist);
-	}
-}
-
-void
 browse(const char *ipath, const char *ifilter)
 {
 	DIR *dirp;
@@ -582,10 +532,10 @@ browse(const char *ipath, const char *ifilter)
 	regex_t filter_re;
 	char *cwd, *newpath;
 	struct stat sb;
-	char *hpath;
+	char *oldpath;
 
 	cur = 0;
-	hpath = NULL;
+	oldpath = NULL;
 begin:
 	/* Path and filter should be malloc(3)-ed strings at all times */
 	n = 0;
@@ -607,10 +557,10 @@ begin:
 	qsort(dents, n, sizeof(*dents), entrycmp);
 
 	/* Find cur from history */
-	cur = dentfind(dents, n, path, hpath);
-	if (hpath != NULL) {
-		free(hpath);
-		hpath = NULL;
+	cur = dentfind(dents, n, path, oldpath);
+	if (oldpath != NULL) {
+		free(oldpath);
+		oldpath = NULL;
 	}
 
 	for (;;) {
@@ -658,7 +608,6 @@ nochange:
 		case SEL_QUIT:
 			free(path);
 			free(filter);
-			forgethist();
 			dentfree(dents, n);
 			return;
 		case SEL_BACK:
@@ -672,13 +621,12 @@ nochange:
 				goto nochange;
 			}
 			dir = xdirname(path);
-			free(path);
+			/* Save history */
+			oldpath = path;
 			path = dir;
 			/* Reset filter */
 			free(filter);
 			filter = xstrdup(ifilter);
-			/* Recall history */
-			hpath = pophist();
 			goto out;
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
@@ -718,8 +666,6 @@ nochange:
 				/* Reset filter */
 				free(filter);
 				filter = xstrdup(ifilter);
-				/* Remember history */
-				pushhist(path);
 				cur = 0;
 				goto out;
 			case S_IFREG:
@@ -781,7 +727,6 @@ nochange:
 			path = newpath;
 			free(filter);
 			filter = xstrdup(ifilter); /* Reset filter */
-			forgethist();
 			DPRINTF_S(path);
 			cur = 0;
 			goto out;
