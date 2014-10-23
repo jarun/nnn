@@ -490,11 +490,16 @@ makepath(char *dir, char *name)
 {
 	char *path;
 
-	/* Handle root case */
-	if (strcmp(dir, "/") == 0)
-		asprintf(&path, "/%s", name);
-	else
-		asprintf(&path, "%s/%s", dir, name);
+	/* Handle absolute path */
+	if (name[0] == '/') {
+		path = xstrdup(name);
+	} else {
+		/* Handle root case */
+		if (strcmp(dir, "/") == 0)
+			asprintf(&path, "/%s", name);
+		else
+			asprintf(&path, "%s/%s", dir, name);
+	}
 
 	return path;
 }
