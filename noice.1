@@ -75,12 +75,8 @@ is invoked as root the default filter will also match hidden
 files.
 .Sh HISTORY
 .Nm
-keeps track of the current cursor position per directory
-level.  Backing up one directory level will restore the
-cursor position at that level.
-.Pp
-History is discarded for the backed out directory.  In other
-words, history is recorded only when entering directories.
+remembers the old path.  Backing up one directory level will set the
+cursor position at the directory you came out of.
 .Sh EXAMPLES
 The following example shows one possible configuration for
 file associations.  This is the default configuration for
