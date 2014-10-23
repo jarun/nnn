@@ -658,7 +658,9 @@ nochange:
 			return;
 		case SEL_BACK:
 			/* There is no going back */
-			if (strcmp(path, "/") == 0)
+			if (strcmp(path, "/") == 0 ||
+			    strcmp(path, ".") == 0 ||
+			    strchr(path, '/') == NULL)
 				goto nochange;
 			if (canopendir(path) == 0) {
 				printwarn();
