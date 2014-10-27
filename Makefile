@@ -19,6 +19,7 @@ strlcpy.o: util.h
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp -f $(BIN) $(DESTDIR)$(PREFIX)/bin
+	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
 	cp -f $(BIN).1 $(DESTDIR)$(MANPREFIX)/man1
 
 uninstall:
