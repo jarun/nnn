@@ -409,6 +409,12 @@ printent(struct entry *ent, int active)
 	} else if (S_ISLNK(ent->mode)) {
 		cm = '@';
 		maxlen--;
+	} else if (S_ISSOCK(ent->mode)) {
+		cm = '=';
+		maxlen--;
+	} else if (S_ISFIFO(ent->mode)) {
+		cm = '|';
+		maxlen--;
 	} else if (ent->mode & S_IXUSR) {
 		cm = '*';
 		maxlen--;
