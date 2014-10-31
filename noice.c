@@ -107,7 +107,7 @@ xdirname(const char *path)
 	char *p, *tmp;
 
 	/* Some implementations of dirname(3) may modify `path' and some
-	 * return a pointer inside `path` and we cannot free(3) the
+	 * return a pointer inside `path' and we cannot free(3) the
 	 * original string if we lose track of it. */
 	tmp = xstrdup(path);
 	p = dirname(tmp);
