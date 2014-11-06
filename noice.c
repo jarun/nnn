@@ -256,21 +256,24 @@ printprompt(char *str)
 }
 
 /*
- * Returns 0 normally
- * On movement it updates *cur
- * Returns SEL_{QUIT,BACK,GOIN,FLTR,SH,CD} otherwise
+ * Returns SEL_{QUIT,BACK,GOIN,FLTR,NEXT,PREV,PGDN,PGUP,SH,CD}
+ * Returns 0 otherwise
  */
 enum {
 	SEL_QUIT = 1,
 	SEL_BACK,
 	SEL_GOIN,
 	SEL_FLTR,
+	SEL_NEXT,
+	SEL_PREV,
+	SEL_PGDN,
+	SEL_PGUP,
 	SEL_SH,
 	SEL_CD,
 };
 
 int
-nextsel(int *cur, int max)
+nextsel(void)
 {
 	int c;
 
@@ -297,28 +300,20 @@ nextsel(int *cur, int max)
 	case 'j':
 	case KEY_DOWN:
 	case CONTROL('N'):
-		if (*cur < max - 1)
-			(*cur)++;
-		break;
+		return SEL_NEXT;
 	/* Previous */
 	case 'k':
 	case KEY_UP:
 	case CONTROL('P'):
-		if (*cur > 0)
-			(*cur)--;
-		break;
+		return SEL_PREV;
 	/* Page down */
 	case KEY_NPAGE:
 	case CONTROL('D'):
-		if (*cur < max -1)
-			(*cur) += MIN((LINES - 4) / 2, max - 1 - *cur);
-		break;
+		return SEL_PGDN;
 	/* Page up */
 	case KEY_PPAGE:
 	case CONTROL('U'):
-		if (*cur > 0)
-			(*cur) -= MIN((LINES - 4) / 2, *cur);
-		break;
+		return SEL_PGUP;
 	case '!':
 		return SEL_SH;
 	case 'c':
@@ -605,8 +600,7 @@ redraw:
 		}
 
 nochange:
-		ret = nextsel(&cur, n);
-		switch (ret) {
+		switch (nextsel()) {
 		case SEL_QUIT:
 			free(path);
 			free(filter);
@@ -705,6 +699,22 @@ nochange:
 			DPRINTF_S(filter);
 			cur = 0;
 			goto out;
+		case SEL_NEXT:
+			if (cur < n - 1)
+				cur++;
+			break;
+		case SEL_PREV:
+			if (cur > 0)
+				cur--;
+			break;
+		case SEL_PGDN:
+			if (cur < n - 1)
+				cur += MIN((LINES - 4) / 2, n - 1 - cur);
+			break;
+		case SEL_PGUP:
+			if (cur > 0)
+				cur -= MIN((LINES - 4) / 2, cur);
+			break;
 		case SEL_SH:
 			exitcurses();
 			spawn("/bin/sh", NULL, path);
