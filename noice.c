@@ -42,6 +42,25 @@ struct assoc {
 	char *bin;   /* Program */
 };
 
+/* Supported actions */
+enum action {
+	SEL_QUIT = 1,
+	SEL_BACK,
+	SEL_GOIN,
+	SEL_FLTR,
+	SEL_NEXT,
+	SEL_PREV,
+	SEL_PGDN,
+	SEL_PGUP,
+	SEL_SH,
+	SEL_CD,
+};
+
+struct key {
+	int sym;         /* Key pressed */
+	enum action act; /* Action */
+};
+
 #include "config.h"
 
 struct entry {
@@ -259,65 +278,16 @@ printprompt(char *str)
  * Returns SEL_{QUIT,BACK,GOIN,FLTR,NEXT,PREV,PGDN,PGUP,SH,CD}
  * Returns 0 otherwise
  */
-enum {
-	SEL_QUIT = 1,
-	SEL_BACK,
-	SEL_GOIN,
-	SEL_FLTR,
-	SEL_NEXT,
-	SEL_PREV,
-	SEL_PGDN,
-	SEL_PGUP,
-	SEL_SH,
-	SEL_CD,
-};
-
 int
 nextsel(void)
 {
-	int c;
+	int c, i;
 
 	c = getch();
-	switch (c) {
-	case 'q':
-		return SEL_QUIT;
-	/* Back */
-	case KEY_BACKSPACE:
-	case KEY_LEFT:
-	case 'h':
-		return SEL_BACK;
-	/* Inside */
-	case KEY_ENTER:
-	case '\r':
-	case KEY_RIGHT:
-	case 'l':
-		return SEL_GOIN;
-	/* Filter */
-	case '/':
-	case '&':
-		return SEL_FLTR;
-	/* Next */
-	case 'j':
-	case KEY_DOWN:
-	case CONTROL('N'):
-		return SEL_NEXT;
-	/* Previous */
-	case 'k':
-	case KEY_UP:
-	case CONTROL('P'):
-		return SEL_PREV;
-	/* Page down */
-	case KEY_NPAGE:
-	case CONTROL('D'):
-		return SEL_PGDN;
-	/* Page up */
-	case KEY_PPAGE:
-	case CONTROL('U'):
-		return SEL_PGUP;
-	case '!':
-		return SEL_SH;
-	case 'c':
-		return SEL_CD;
+
+	for (i = 0; i < LEN(bindings); i++) {
+		if (c == bindings[i].sym)
+			return bindings[i].act;
 	}
 
 	return 0;
