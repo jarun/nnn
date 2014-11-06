@@ -419,7 +419,7 @@ dentfill(DIR *dirp, struct entry **dents,
 		r = fstatat(dirfd(dirp), dp->d_name, &sb,
 			    AT_SYMLINK_NOFOLLOW);
 		if (r == -1)
-			printerr(1, "stat");
+			printerr(1, "fstatat");
 		(*dents)[n].mode = sb.st_mode;
 		n++;
 	}
