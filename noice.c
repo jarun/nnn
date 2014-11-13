@@ -88,6 +88,7 @@ struct entry {
 void printmsg(char *msg);
 void printwarn(void);
 void printerr(int ret, char *prefix);
+char *makepath(char *dir, char *name);
 
 void *
 xmalloc(size_t size)
@@ -398,13 +399,19 @@ printent(struct entry *ent, int active)
 }
 
 int
-dentfill(DIR *dirp, struct entry **dents,
+dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
 {
+	DIR *dirp;
 	struct dirent *dp;
 	struct stat sb;
+	char *newpath;
 	int n = 0;
-	int r;
+	int fd, r;
+
+	dirp = opendir(path);
+	if (dirp == NULL)
+		return 0;
 
 	while ((dp = readdir(dirp)) != NULL) {
 		/* Skip self and parent */
@@ -416,13 +423,18 @@ dentfill(DIR *dirp, struct entry **dents,
 		*dents = xrealloc(*dents, (n + 1) * sizeof(**dents));
 		(*dents)[n].name = xstrdup(dp->d_name);
 		/* Get mode flags */
-		r = fstatat(dirfd(dirp), dp->d_name, &sb,
-			    AT_SYMLINK_NOFOLLOW);
+		newpath = makepath(path, dp->d_name);
+		r = lstat(newpath, &sb);
 		if (r == -1)
-			printerr(1, "fstatat");
+			printerr(1, "lstat");
 		(*dents)[n].mode = sb.st_mode;
 		n++;
 	}
+
+	/* Should never be null */
+	r = closedir(dirp);
+	if (r == -1)
+		printerr(1, "closedir");
 
 	return n;
 }
@@ -483,7 +495,6 @@ dentfind(struct entry *dents, int n, char *cwd, char *path)
 void
 browse(const char *ipath, const char *ifilter)
 {
-	DIR *dirp;
 	struct entry *dents;
 	int i, n, cur;
 	int r, ret, fd;
@@ -501,8 +512,7 @@ begin:
 	n = 0;
 	dents = NULL;
 
-	dirp = opendir(path);
-	if (dirp == NULL) {
+	if (canopendir(path) == 0) {
 		printwarn();
 		goto nochange;
 	}
@@ -512,7 +522,7 @@ begin:
 	if (r != 0)
 		goto nochange;
 
-	n = dentfill(dirp, &dents, visible, &filter_re);
+	n = dentfill(path, &dents, visible, &filter_re);
 
 	qsort(dents, n, sizeof(*dents), entrycmp);
 
@@ -717,11 +727,6 @@ nochange:
 
 out:
 	dentfree(dents, n);
-
-	/* Should never be null */
-	r = closedir(dirp);
-	if (r == -1)
-		printerr(1, "closedir");
 
 	goto begin;
 }
