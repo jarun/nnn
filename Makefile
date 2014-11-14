@@ -1,3 +1,5 @@
+VERSION = 0.0
+
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/man
 
@@ -27,8 +29,15 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/$(BIN)
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
 
+dist:
+	mkdir -p noice-$(VERSION)
+	cp LICENSE Makefile README config.def.h noice.1 noice.c queue.h strlcat.c strlcpy.c util.h noice-$(VERSION)
+	tar -cf noice-$(VERSION).tar noice-$(VERSION)
+	gzip noice-$(VERSION).tar
+	rm -rf noice-$(VERSION)
+
 clean:
-	rm -f $(BIN) $(OBJ)
+	rm -f $(BIN) $(OBJ) noice-$(VERSION).tar.gz
 
 .SUFFIXES: .def.h
 
