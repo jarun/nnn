@@ -3,8 +3,8 @@ VERSION = 0.0
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/man
 
-#CPPFLAGS += -DDEBUG
-#CFLAGS += -g
+#CPPFLAGS = -DDEBUG
+#CFLAGS = -g
 LDLIBS = -lcurses
 
 DISTFILES = noice.c strlcat.c strlcpy.c util.h config.def.h\
