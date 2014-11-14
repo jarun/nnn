@@ -35,13 +35,16 @@ cases you just do:
 
     make
 
-It is known to work on OpenBSD, Arch Linux, Slackware, NetBSD, IRIX.  Some notes
-for building on certain systems follow.
+It is known to work on OpenBSD, NetBSD, Arch Linux, Slackware, IRIX 6.5
+and Haiku.  Some notes for building on certain systems follow.
 
- * IRIX:
+ * IRIX 6.5:
 
     make CC="gcc" LDLIBS="-lgen"
 
+ * Haiku:
+
+    make LDLIBS="-lncurses"
 
 Contact
 =======
