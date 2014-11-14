@@ -28,28 +28,27 @@ supports both vi-like and emacs-like key bindings in the default
 configuration.  The default key bindings are described below;
 their functionality is described in more detail later.
 .Pp
-.Bl -tag -width "l | Right | Return | C-mXXXX" -offset indent -compact
-.It Ic k | Up | C-p
+.Bl -tag -width "l, [Right], [Return] or C-mXXXX" -offset indent -compact
+.It Ic k, [Up] or C-p
 Move to previous entry.
-.It Ic j | Down | C-n
+.It Ic j, [Down] or C-n
 Move to next entry.
-.It Ic Pgup | C-u
-Scroll backwards one page.
-.It Ic Pgdown | C-d
-Scroll forwards one page.
-.It Ic l | Right | Return | C-m
+.It Ic [Pgup] or C-u
+Scroll up half a page.
+.It Ic [Pgdown] or C-d
+Scroll down half a page.
+.It Ic l, [Right], [Return] or C-m
 Open file or enter directory.
-.It Ic h | Left | Backspace
+.It Ic h, [Left] or [Backspace]
 Back up one directory level.
-.It Ic / | &
-Filter view (see below for more information).
-.It Ic !
-Spawn shell in current directory.
+.It Ic / or &
+Change filter (see below for more information).
 .It Ic c
 Change into the given directory.
+.It Ic !
+Spawn shell in current directory.
 .It Ic q
-Quit
-.Nm .
+Quit.
 .El
 .Sh CONFIGURATION
 .Nm
@@ -60,8 +59,11 @@ and recompiling the code.
 The file associations are specified by regexes
 matching on the currently selected filename.  If a match is found the associated
 program is executed with the filename passed in as the argument.  If no match
-is found the program less(1) is invoked.  This is useful for editing text files
-as one can use the 'v' command in less(1) to edit the file in $EDITOR.
+is found the program
+.Xr less 1
+is invoked.  This is useful for editing text files
+as one can use the 'v' command in
+.Xr less 1 to edit the file in $EDITOR.
 .Pp
 See the examples section below for more information.
 .Sh FILTERS
@@ -84,8 +86,7 @@ remembers the old path.  Backing up one directory level will set the
 cursor position at the directory you came out of.
 .Sh EXAMPLES
 The following example shows one possible configuration for
-file associations.  This is the default configuration for
-.Nm .
+file associations which is also the default:
 .Bd -literal
 struct assoc assocs[] = {
         { "\\.(avi|mp4|mkv|mp3|ogg|flac)$", "mplayer" },
