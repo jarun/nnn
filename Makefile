@@ -7,6 +7,8 @@ MANPREFIX = $(PREFIX)/man
 #CFLAGS += -g
 LDLIBS = -lncursesw
 
+DISTFILES = noice.c strlcat.c strlcpy.c util.h config.def.h\
+    noice.1 Makefile README LICENSE
 OBJ = noice.o strlcat.o strlcpy.o
 BIN = noice
 
@@ -31,7 +33,7 @@ uninstall:
 
 dist:
 	mkdir -p noice-$(VERSION)
-	cp LICENSE Makefile README config.def.h noice.1 noice.c queue.h strlcat.c strlcpy.c util.h noice-$(VERSION)
+	cp $(DISTFILES) noice-$(VERSION)
 	tar -cf noice-$(VERSION).tar noice-$(VERSION)
 	gzip noice-$(VERSION).tar
 	rm -rf noice-$(VERSION)
