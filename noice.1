@@ -16,7 +16,12 @@ with a TV remote control.
 .Nm
 defaults to the current directory if
 .Ar dir
-is not specified.
+is not specified.  As an extra feature, if
+.Ar dir
+is a relative path,
+.Nm
+will not go back beyond the first component of the path using standard
+navigation key presses.
 .Pp
 .Nm
 supports both vi-like and emacs-like key bindings in the default
