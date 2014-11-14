@@ -36,15 +36,24 @@ cases you just do:
     make
 
 It is known to work on OpenBSD, NetBSD, FreeBSD, Arch Linux, Slackware,
-IRIX 6.5 and Haiku.  Some notes for building on certain systems follow.
+IRIX 6.5, Haiku, Solaris 9.  Some notes for building on certain systems
+follow.
 
  * IRIX 6.5:
+   Tested with gcc from http://freeware.sgi.com/.
 
     make CC="gcc" LDLIBS="-lgen"
 
  * Haiku:
 
     make LDLIBS="-lncurses"
+
+ * Solaris 9:
+   Tested with gcc from http://www.opencsw.org/.
+
+    export PATH=/usr/ccs/bin:/opt/csw/bin
+    make CC="gcc"
+
 
 Contact
 =======
