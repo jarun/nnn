@@ -10,6 +10,7 @@ test -e test && {
 mkdir test && cd test
 
 echo 'It works!' > normal.txt
+echo 'Με δουλέβει;' > 'κοινό.txt'
 ln -s normal.txt ln-normal.txt
 ln -s normal.txt ln-normal
 mkdir normal-dir
