@@ -458,13 +458,17 @@ makepath(char *dir, char *name)
 	if (name[0] == '/') {
 		path = xstrdup(name);
 	} else {
+		path = xmalloc(PATH_MAX);
 		/* Handle root case */
-		if (strcmp(dir, "/") == 0)
-			asprintf(&path, "/%s", name);
-		else
-			asprintf(&path, "%s/%s", dir, name);
+		if (strcmp(dir, "/") == 0) {
+			strlcpy(path, "/", PATH_MAX);
+			strlcat(path, name, PATH_MAX);
+		} else {
+			strlcpy(path, dir, PATH_MAX);
+			strlcat(path, "/", PATH_MAX);
+			strlcat(path, name, PATH_MAX);
+		}
 	}
-
 	return path;
 }
 

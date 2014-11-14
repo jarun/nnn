@@ -5,7 +5,7 @@ MANPREFIX = $(PREFIX)/man
 #CFLAGS += -g
 LDLIBS = -lncursesw
 
-OBJ = noice.o strlcpy.o
+OBJ = noice.o strlcat.o strlcpy.o
 BIN = noice
 
 all: $(BIN)
@@ -14,6 +14,7 @@ $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDLIBS)
 
 noice.o: util.h config.h
+strlcat.o: util.h
 strlcpy.o: util.h
 
 install: all
