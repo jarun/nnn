@@ -452,24 +452,23 @@ dentfree(struct entry *dents, int n)
 char *
 makepath(char *dir, char *name)
 {
-	char *path;
+	char path[PATH_MAX];
 
 	/* Handle absolute path */
 	if (name[0] == '/') {
-		path = xstrdup(name);
+		strlcpy(path, name, sizeof(path));
 	} else {
-		path = xmalloc(PATH_MAX);
 		/* Handle root case */
 		if (strcmp(dir, "/") == 0) {
-			strlcpy(path, "/", PATH_MAX);
-			strlcat(path, name, PATH_MAX);
+			strlcpy(path, "/", sizeof(path));
+			strlcat(path, name, sizeof(path));
 		} else {
-			strlcpy(path, dir, PATH_MAX);
-			strlcat(path, "/", PATH_MAX);
-			strlcat(path, name, PATH_MAX);
+			strlcpy(path, dir, sizeof(path));
+			strlcat(path, "/", sizeof(path));
+			strlcat(path, name, sizeof(path));
 		}
 	}
-	return path;
+	return xstrdup(path);
 }
 
 /* Return the position of the matching entry or 0 otherwise */
