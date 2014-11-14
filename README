@@ -35,8 +35,8 @@ cases you just do:
 
     make
 
-It is known to work on OpenBSD, NetBSD, Arch Linux, Slackware, IRIX 6.5
-and Haiku.  Some notes for building on certain systems follow.
+It is known to work on OpenBSD, NetBSD, FreeBSD, Arch Linux, Slackware,
+IRIX 6.5 and Haiku.  Some notes for building on certain systems follow.
 
  * IRIX 6.5:
 
