@@ -50,6 +50,9 @@ Spawn shell in current directory.
 .It Ic q
 Quit.
 .El
+.Pp
+Backing up one directory level will set the cursor position at the
+directory you came out of.
 .Sh CONFIGURATION
 .Nm
 is configured by modifying
@@ -80,10 +83,6 @@ If
 .Nm
 is invoked as root the default filter will also match hidden
 files.
-.Sh HISTORY
-.Nm
-remembers the old path.  Backing up one directory level will set the
-cursor position at the directory you came out of.
 .Sh EXAMPLES
 The following example shows one possible configuration for
 file associations which is also the default:
