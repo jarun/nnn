@@ -27,6 +27,26 @@ preceded with a " > " by default.
 For more information refer to the manpage.
 
 
+Building
+========
+
+To build noice you need a curses implementation available.  In most
+cases you just do:
+
+    make
+
+It is known to work on OpenBSD, Arch Linux, Slackware, NetBSD, IRIX.  Some notes
+for building on certain systems follow.
+
+ * NetBSD:
+
+    make LDLIBS="-lcurses"
+
+ * IRIX:
+
+    make CC="gcc" LDLIBS="-lgen -lcurses"
+
+
 Contact
 =======
 
