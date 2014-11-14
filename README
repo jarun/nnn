@@ -38,13 +38,9 @@ cases you just do:
 It is known to work on OpenBSD, Arch Linux, Slackware, NetBSD, IRIX.  Some notes
 for building on certain systems follow.
 
- * NetBSD:
-
-    make LDLIBS="-lcurses"
-
  * IRIX:
 
-    make CC="gcc" LDLIBS="-lgen -lcurses"
+    make CC="gcc" LDLIBS="-lgen"
 
 
 Contact
