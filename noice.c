@@ -758,9 +758,9 @@ main(int argc, char *argv[])
 	char *ifilter;
 
 	if (getuid() == 0)
-		ifilter = ".*";
+		ifilter = ".";
 	else
-		ifilter = "^[^.].*"; /* Hide dotfiles */
+		ifilter = "^[^.]"; /* Hide dotfiles */
 
 	if (argv[1] != NULL) {
 		ipath = argv[1];

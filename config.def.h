@@ -8,7 +8,7 @@ struct assoc assocs[] = {
 	{ "\\.(html|svg)$", "firefox" },
 	{ "\\.pdf$", "mupdf" },
 	{ "\\.sh$", "sh" },
-	{ ".*", "less" },
+	{ ".", "less" },
 };
 
 struct key bindings[] = {
