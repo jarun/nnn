@@ -525,7 +525,6 @@ browse(const char *ipath, const char *ifilter)
 	struct stat sb;
 	char *oldpath;
 
-	cur = 0;
 	oldpath = NULL;
 begin:
 	/* Path and filter should be malloc(3)-ed strings at all times */
@@ -662,7 +661,6 @@ nochange:
 				/* Reset filter */
 				free(filter);
 				filter = xstrdup(ifilter);
-				cur = 0;
 				goto out;
 			case S_IFREG:
 				bin = openwith(name);
@@ -697,7 +695,6 @@ nochange:
 			filter = tmp;
 			filter_re = re;
 			DPRINTF_S(filter);
-			cur = 0;
 			goto out;
 		case SEL_NEXT:
 			if (cur < n - 1)
@@ -740,7 +737,6 @@ nochange:
 			free(filter);
 			filter = xstrdup(ifilter); /* Reset filter */
 			DPRINTF_S(path);
-			cur = 0;
 			goto out;
 		}
 	}
