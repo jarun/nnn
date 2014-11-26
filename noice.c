@@ -695,6 +695,8 @@ nochange:
 			filter = tmp;
 			filter_re = re;
 			DPRINTF_S(filter);
+			/* Save current  */
+			oldpath = makepath(path, dents[cur].name);
 			goto out;
 		case SEL_NEXT:
 			if (cur < n - 1)
