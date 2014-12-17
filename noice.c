@@ -423,8 +423,7 @@ dentfill(char *path, struct entry **dents,
 	struct dirent *dp;
 	struct stat sb;
 	char *newpath;
-	int n = 0;
-	int fd, r;
+	int r, n = 0;
 
 	dirp = opendir(path);
 	if (dirp == NULL)
@@ -517,7 +516,7 @@ browse(const char *ipath, const char *ifilter)
 {
 	struct entry *dents;
 	int i, n, cur;
-	int r, ret, fd;
+	int r, fd;
 	char *path = xstrdup(ipath);
 	char *filter = xstrdup(ifilter);
 	regex_t filter_re;
