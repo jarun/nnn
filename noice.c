@@ -515,16 +515,15 @@ void
 browse(const char *ipath, const char *ifilter)
 {
 	struct entry *dents;
-	int i, n, cur;
-	int r, fd;
+	int i, n, cur, r, fd;
+	int nlines, odd;
 	char *path = xstrdup(ipath);
 	char *filter = xstrdup(ifilter);
-	regex_t filter_re;
-	char *cwd, *newpath;
+	regex_t filter_re, re;
+	char *cwd, *newpath, *oldpath = NULL;
 	struct stat sb;
-	char *oldpath;
+	char *name, *bin, *dir, *tmp;
 
-	oldpath = NULL;
 begin:
 	/* Path and filter should be malloc(3)-ed strings at all times */
 	n = 0;
@@ -552,14 +551,6 @@ begin:
 	}
 
 	for (;;) {
-		int nlines;
-		int odd;
-		char *name;
-		char *bin;
-		char *dir;
-		char *tmp;
-		regex_t re;
-
 redraw:
 		nlines = MIN(LINES - 4, n);
 
