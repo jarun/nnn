@@ -189,7 +189,7 @@ openwith(char *file)
 		if (regcomp(&regex, assocs[i].regex,
 			    REG_NOSUB | REG_EXTENDED) != 0)
 			continue;
-		if (regexec(&regex, file, 0, NULL, 0) != REG_NOMATCH) {
+		if (regexec(&regex, file, 0, NULL, 0) == 0) {
 			bin = assocs[i].bin;
 			break;
 		}
@@ -219,7 +219,7 @@ setfilter(regex_t *regex, char *filter)
 int
 visible(regex_t *regex, char *file)
 {
-	if (regexec(regex, file, 0, NULL, 0) != REG_NOMATCH)
+	if (regexec(regex, file, 0, NULL, 0) == 0)
 		return 1;
 	return 0;
 }
