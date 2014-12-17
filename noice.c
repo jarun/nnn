@@ -545,10 +545,8 @@ begin:
 
 	/* Find cur from history */
 	cur = dentfind(dents, n, path, oldpath);
-	if (oldpath != NULL) {
-		free(oldpath);
-		oldpath = NULL;
-	}
+	free(oldpath);
+	oldpath = NULL;
 
 	for (;;) {
 redraw:
