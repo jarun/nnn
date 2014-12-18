@@ -549,7 +549,6 @@ begin:
 	oldpath = NULL;
 
 	for (;;) {
-redraw:
 		nlines = MIN(LINES - 4, n);
 
 		/* Clean screen */
@@ -661,7 +660,7 @@ nochange:
 				spawn(bin, newpath, NULL);
 				initcurses();
 				free(newpath);
-				goto redraw;
+				continue;
 			default:
 				printmsg("Unsupported file");
 				goto nochange;
