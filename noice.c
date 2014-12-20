@@ -365,12 +365,10 @@ canopendir(char *path)
 	DIR *dirp;
 
 	dirp = opendir(path);
-	if (dirp == NULL) {
+	if (dirp == NULL)
 		return 0;
-	} else {
-		closedir(dirp);
-		return 1;
-	}
+	closedir(dirp);
+	return 1;
 }
 
 void
