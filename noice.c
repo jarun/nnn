@@ -219,9 +219,7 @@ setfilter(regex_t *regex, char *filter)
 int
 visible(regex_t *regex, char *file)
 {
-	if (regexec(regex, file, 0, NULL, 0) == 0)
-		return 1;
-	return 0;
+	return regexec(regex, file, 0, NULL, 0) == 0;
 }
 
 int
