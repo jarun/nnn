@@ -303,10 +303,9 @@ nextsel(void)
 
 	c = getch();
 
-	for (i = 0; i < LEN(bindings); i++) {
+	for (i = 0; i < LEN(bindings); i++)
 		if (c == bindings[i].sym)
 			return bindings[i].act;
-	}
 
 	return 0;
 }
