@@ -645,7 +645,7 @@ nochange:
 				filter = xstrdup(ifilter);
 				goto out;
 			case S_IFREG:
-				bin = openwith(name);
+				bin = openwith(newpath);
 				if (bin == NULL) {
 					printmsg("No association");
 					free(newpath);
