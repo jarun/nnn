@@ -20,3 +20,6 @@ mkfifo mk-fifo
 touch no-access && chmod 000 no-access
 ln -s ../normal.txt normal-dir/ln-normal.txt
 ln -s ../normal.txt normal-dir/ln-normal
+echo 'int main(void) { *((char *)0) = 0; }' > ill.c
+make ill > /dev/null
+echo 'test/ill' > ill.sh
