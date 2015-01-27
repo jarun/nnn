@@ -666,6 +666,7 @@ nochange:
 			tmp = readln();
 			if (tmp == NULL)
 				tmp = xstrdup(ifilter);
+			/* Check and report regex errors */
 			r = setfilter(&re, tmp);
 			if (r != 0) {
 				free(tmp);
@@ -673,7 +674,6 @@ nochange:
 			}
 			free(filter);
 			filter = tmp;
-			filter_re = re;
 			DPRINTF_S(filter);
 			/* Save current */
 			if (n > 0)
