@@ -49,6 +49,7 @@ enum action {
 	SEL_BACK,
 	SEL_GOIN,
 	SEL_FLTR,
+	SEL_TYPE,
 	SEL_NEXT,
 	SEL_PREV,
 	SEL_PGDN,
@@ -359,6 +360,55 @@ readln(void)
 	return ln;
 }
 
+/*
+ * Read one key and modify the provided string accordingly.
+ * Returns 0 when more input is expected and 1 on completion.
+ */
+int
+readmore(char **str)
+{
+	int c;
+	int i;
+	char *ln = *str;
+	int ret = 0;
+
+	if (ln != NULL)
+		i = strlen(ln);
+	else
+		i = 0;
+
+	DPRINTF_D(i);
+
+	curs_set(TRUE);
+
+	c = getch();
+	if (c == KEY_ENTER || c == '\r') {
+		ret = 1;
+		goto out;
+	}
+	if (c == KEY_BACKSPACE) {
+		i--;
+		if (i > 0) {
+			ln = xrealloc(ln, (i + 1) * sizeof(*ln));
+			ln[i] = '\0';
+		} else {
+			free(ln);
+			ln = NULL;
+		}
+		goto out;
+	}
+	ln = xrealloc(ln, (i + 2) * sizeof(*ln));
+	ln[i] = c;
+	i++;
+	ln[i] = '\0';
+out:
+	curs_set(FALSE);
+
+	*str = ln;
+
+	return ret;
+}
+
 int
 canopendir(char *path)
 {
@@ -518,6 +568,7 @@ browse(const char *ipath, const char *ifilter)
 	char *cwd, *newpath, *oldpath = NULL;
 	struct stat sb;
 	char *name, *bin, *dir, *tmp;
+	int nowtyping = 0;
 
 begin:
 	/* Path and filter should be malloc(3)-ed strings at all times */
@@ -579,6 +630,10 @@ begin:
 			     i < cur + nlines / 2 + odd; i++)
 				printent(&dents[i], i == cur);
 		}
+
+		/* Handle filter-as-you-type mode */
+		if (nowtyping)
+			goto moretyping;
 
 nochange:
 		switch (nextsel()) {
@@ -678,6 +733,35 @@ nochange:
 			/* Save current */
 			if (n > 0)
 				oldpath = makepath(path, dents[cur].name);
+			goto out;
+		case SEL_TYPE:
+			nowtyping = 1;
+			tmp = NULL;
+moretyping:
+			printprompt("type: ");
+			if (tmp != NULL)
+				printw("%s", tmp);
+			r = readmore(&tmp);
+			DPRINTF_D(r);
+			DPRINTF_S(tmp);
+			if (r == 1)
+				nowtyping = 0;
+			/* Check regex errors */
+			if (tmp != NULL)
+				r = setfilter(&re, tmp);
+			if (r != 0 && nowtyping)
+				goto moretyping;
+			/* Copy or reset filter */
+			free(filter);
+			if (tmp != NULL)
+				filter = xstrdup(tmp);
+			else
+				filter = xstrdup(ifilter);
+			/* Save current */
+			if (n > 0)
+				oldpath = makepath(path, dents[cur].name);
+			if (!nowtyping)
+				free(tmp);
 			goto out;
 		case SEL_NEXT:
 			if (cur < n - 1)

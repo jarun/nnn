@@ -26,6 +26,8 @@ struct key bindings[] = {
 	/* Filter */
 	{ '/',            SEL_FLTR },
 	{ '&',            SEL_FLTR },
+	/* Type */
+	{ '?',            SEL_TYPE },
 	/* Next */
 	{ 'j',            SEL_NEXT },
 	{ KEY_DOWN,       SEL_NEXT },
