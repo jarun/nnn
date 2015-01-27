@@ -18,6 +18,7 @@ struct key bindings[] = {
 	{ KEY_BACKSPACE,  SEL_BACK },
 	{ KEY_LEFT,       SEL_BACK },
 	{ 'h',            SEL_BACK },
+	{ CONTROL('H'),   SEL_BACK },
 	/* Inside */
 	{ KEY_ENTER,      SEL_GOIN },
 	{ '\r',           SEL_GOIN },

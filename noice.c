@@ -327,7 +327,7 @@ readln(void)
 	while ((c = getch()) != ERR) {
 		if (c == KEY_ENTER || c == '\r')
 			break;
-		if (c == KEY_BACKSPACE) {
+		if (c == KEY_BACKSPACE || c == CONTROL('H')) {
 			getyx(stdscr, y, x);
 			if (x >= x0) {
 				i--;
@@ -386,7 +386,7 @@ readmore(char **str)
 		ret = 1;
 		goto out;
 	}
-	if (c == KEY_BACKSPACE) {
+	if (c == KEY_BACKSPACE || c == CONTROL('H')) {
 		i--;
 		if (i > 0) {
 			ln = xrealloc(ln, (i + 1) * sizeof(*ln));
