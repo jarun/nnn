@@ -749,8 +749,13 @@ moretyping:
 			/* Check regex errors */
 			if (tmp != NULL)
 				r = setfilter(&re, tmp);
-			if (r != 0 && nowtyping)
-				goto moretyping;
+			if (r != 0)
+				if (nowtyping) {
+					goto moretyping;
+				} else {
+					free(tmp);
+					goto nochange;
+				}
 			/* Copy or reset filter */
 			free(filter);
 			if (tmp != NULL)
