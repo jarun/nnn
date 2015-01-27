@@ -664,10 +664,8 @@ nochange:
 			/* Read filter */
 			printprompt("filter: ");
 			tmp = readln();
-			if (tmp == NULL) {
-				clearprompt();
-				goto nochange;
-			}
+			if (tmp == NULL)
+				tmp = xstrdup(ifilter);
 			r = setfilter(&re, tmp);
 			if (r != 0) {
 				free(tmp);
