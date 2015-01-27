@@ -1,4 +1,4 @@
-.Dd November 14, 2014
+.Dd January 27, 2015
 .Dt NOICE 1
 .Os
 .Sh NAME
@@ -43,6 +43,8 @@ Open file or enter directory.
 Back up one directory level.
 .It Ic / or &
 Change filter (see below for more information).
+.It Ic ?
+Enter filter-as-you-type mode.
 .It Ic c
 Change into the given directory.
 .It Ic !
@@ -77,7 +79,7 @@ searching through the directory tree for a particular entry.
 Filters do not stack on top of each other.  They are applied anew
 every time.
 .Pp
-To reset the filter you can use the match-any regex (i.e. '.').
+To reset the filter you can input an empty filter expression.
 .Pp
 If
 .Nm
