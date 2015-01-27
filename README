@@ -42,7 +42,7 @@ follow.
  * IRIX 6.5:
    Tested with gcc from http://freeware.sgi.com/.
 
-    make CC="gcc" LDLIBS="-lgen"
+    make CC="gcc" LDLIBS="-lgen -lcurses"
 
  * Haiku:
 
