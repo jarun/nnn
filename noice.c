@@ -291,10 +291,7 @@ printprompt(char *str)
 	printw(str);
 }
 
-/*
- * Returns SEL_{QUIT,BACK,GOIN,FLTR,NEXT,PREV,PGDN,PGUP,SH,CD}
- * Returns 0 otherwise
- */
+/* Returns SEL_* if key is bound and 0 otherwise */
 int
 nextsel(void)
 {
