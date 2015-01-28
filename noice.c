@@ -748,15 +748,16 @@ moretyping:
 			if (r == 1)
 				nowtyping = 0;
 			/* Check regex errors */
-			if (tmp != NULL)
+			if (tmp != NULL) {
 				r = setfilter(&re, tmp);
-			if (r != 0)
-				if (nowtyping) {
-					goto moretyping;
-				} else {
-					free(tmp);
-					goto nochange;
-				}
+				if (r != 0)
+					if (nowtyping) {
+						goto moretyping;
+					} else {
+						free(tmp);
+						goto nochange;
+					}
+			}
 			/* Copy or reset filter */
 			free(filter);
 			if (tmp != NULL)
