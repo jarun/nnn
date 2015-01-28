@@ -367,26 +367,26 @@ readln(void)
 int
 readmore(char **str)
 {
-	int c;
-	int i;
+	int c, ret = 0;
+	size_t i;
 	char *ln = *str;
-	int ret = 0;
 
 	if (ln != NULL)
 		i = strlen(ln);
 	else
 		i = 0;
-
 	DPRINTF_D(i);
 
 	curs_set(TRUE);
 
 	c = getch();
-	if (c == KEY_ENTER || c == '\r') {
+	switch (c) {
+	case KEY_ENTER:
+	case '\r':
 		ret = 1;
-		goto out;
-	}
-	if (c == KEY_BACKSPACE || c == CONTROL('H')) {
+		break;
+	case KEY_BACKSPACE:
+	case CONTROL('H'):
 		i--;
 		if (i > 0) {
 			ln = xrealloc(ln, (i + 1) * sizeof(*ln));
@@ -395,13 +395,14 @@ readmore(char **str)
 			free(ln);
 			ln = NULL;
 		}
-		goto out;
+		break;
+	default:
+		i++;
+		ln = xrealloc(ln, (i + 1) * sizeof(*ln));
+		ln[i - 1] = c;
+		ln[i] = '\0';
 	}
-	ln = xrealloc(ln, (i + 2) * sizeof(*ln));
-	ln[i] = c;
-	i++;
-	ln[i] = '\0';
-out:
+
 	curs_set(FALSE);
 
 	*str = ln;
