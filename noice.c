@@ -56,6 +56,7 @@ enum action {
 	SEL_PGUP,
 	SEL_SH,
 	SEL_CD,
+	SEL_MTIME,
 };
 
 struct key {
@@ -68,7 +69,10 @@ struct key {
 struct entry {
 	char *name;
 	mode_t mode;
+	time_t t;
 };
+
+int mtimeorder;
 
 /*
  * Layout:
@@ -231,6 +235,8 @@ entrycmp(const void *va, const void *vb)
 	a = (struct entry *)va;
 	b = (struct entry *)vb;
 
+	if (mtimeorder)
+		return b->t - a->t;
 	return strcmp(a->name, b->name);
 }
 
@@ -487,6 +493,7 @@ dentfill(char *path, struct entry **dents,
 		if (r == -1)
 			printerr(1, "lstat");
 		(*dents)[n].mode = sb.st_mode;
+		(*dents)[n].t = sb.st_mtime;
 		n++;
 	}
 
@@ -808,6 +815,9 @@ moretyping:
 			free(filter);
 			filter = xstrdup(ifilter); /* Reset filter */
 			DPRINTF_S(path);
+			goto out;
+		case SEL_MTIME:
+			mtimeorder = !mtimeorder;
 			goto out;
 		}
 	}

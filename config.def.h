@@ -47,4 +47,5 @@ struct key bindings[] = {
 	{ '!',            SEL_SH },
 	/* Change dir */
 	{ 'c',            SEL_CD },
+	{ 't',            SEL_MTIME },
 };
