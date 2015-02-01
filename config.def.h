@@ -27,7 +27,7 @@ struct key bindings[] = {
 	/* Filter */
 	{ '/',            SEL_FLTR },
 	{ '&',            SEL_FLTR },
-	/* Type */
+	/* Filter as you type */
 	{ '?',            SEL_TYPE },
 	/* Next */
 	{ 'j',            SEL_NEXT },
@@ -47,5 +47,6 @@ struct key bindings[] = {
 	{ '!',            SEL_SH },
 	/* Change dir */
 	{ 'c',            SEL_CD },
+	/* Sort by time */
 	{ 't',            SEL_MTIME },
 };
