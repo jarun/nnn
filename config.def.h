@@ -2,6 +2,8 @@
 #define CURSR " > "
 #define EMPTY "   "
 
+int mtimeorder = 0;		/* set to 1 to sort by time in the default case */
+
 struct assoc assocs[] = {
 	{ "\\.(avi|mp4|mkv|mp3|ogg|flac)$", "mplayer" },
 	{ "\\.(png|jpg|gif)$", "feh" },

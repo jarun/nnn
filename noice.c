@@ -72,8 +72,6 @@ struct entry {
 	time_t t;
 };
 
-int mtimeorder;
-
 /*
  * Layout:
  * .---------
