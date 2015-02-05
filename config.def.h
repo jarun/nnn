@@ -2,7 +2,7 @@
 #define CURSR " > "
 #define EMPTY "   "
 
-int mtimeorder = 0;		/* set to 1 to sort by time in the default case */
+int mtimeorder = 0; /* Set to 1 to sort by time in the default case */
 
 struct assoc assocs[] = {
 	{ "\\.(avi|mp4|mkv|mp3|ogg|flac)$", "mplayer" },
@@ -49,6 +49,6 @@ struct key bindings[] = {
 	{ '!',            SEL_SH },
 	/* Change dir */
 	{ 'c',            SEL_CD },
-	/* Sort by time */
+	/* Toggle sort by time */
 	{ 't',            SEL_MTIME },
 };
