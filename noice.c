@@ -369,7 +369,7 @@ int
 readmore(char **str)
 {
 	int c, ret = 0;
-	size_t i;
+	int i;
 	char *ln = *str;
 
 	if (ln != NULL)
