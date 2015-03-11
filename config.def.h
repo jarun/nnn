@@ -51,4 +51,5 @@ struct key bindings[] = {
 	{ 'c',            SEL_CD },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME },
+	{ CONTROL('L'),   SEL_REDRAW },
 };

@@ -57,6 +57,7 @@ enum action {
 	SEL_SH,
 	SEL_CD,
 	SEL_MTIME,
+	SEL_REDRAW,
 };
 
 struct key {
@@ -816,6 +817,8 @@ moretyping:
 			goto out;
 		case SEL_MTIME:
 			mtimeorder = !mtimeorder;
+			goto out;
+		case SEL_REDRAW:
 			goto out;
 		}
 	}
