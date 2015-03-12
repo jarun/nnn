@@ -835,6 +835,10 @@ main(int argc, char *argv[])
 	char cwd[PATH_MAX], *ipath;
 	char *ifilter;
 
+	/* Confirm we are in a terminal */
+	if (!isatty(STDIN_FILENO))
+		printerr(1, "isatty");
+
 	if (getuid() == 0)
 		ifilter = ".";
 	else
