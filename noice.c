@@ -54,15 +54,17 @@ enum action {
 	SEL_PREV,
 	SEL_PGDN,
 	SEL_PGUP,
-	SEL_SH,
 	SEL_CD,
 	SEL_MTIME,
 	SEL_REDRAW,
+	SEL_RUN,
+	SEL_RUNARG,
 };
 
 struct key {
 	int sym;         /* Key pressed */
 	enum action act; /* Action */
+	char *run;       /* Program to run */
 };
 
 #include "config.h"
@@ -296,17 +298,20 @@ printprompt(char *str)
 	printw(str);
 }
 
-/* Returns SEL_* if key is bound and 0 otherwise */
+/* Returns SEL_* if key is bound and 0 otherwise
+   Also modifies the run pointer (used on SEL_{RUN,RUNARG}) */
 int
-nextsel(void)
+nextsel(char **run)
 {
 	int c, i;
 
 	c = getch();
 
 	for (i = 0; i < LEN(bindings); i++)
-		if (c == bindings[i].sym)
+		if (c == bindings[i].sym) {
+			*run = bindings[i].run;
 			return bindings[i].act;
+		}
 
 	return 0;
 }
@@ -571,7 +576,7 @@ browse(const char *ipath, const char *ifilter)
 	regex_t filter_re, re;
 	char *cwd, *newpath, *oldpath = NULL;
 	struct stat sb;
-	char *name, *bin, *dir, *tmp;
+	char *name, *bin, *dir, *tmp, *run;
 	int nowtyping = 0;
 
 begin:
@@ -640,7 +645,7 @@ begin:
 			goto moretyping;
 
 nochange:
-		switch (nextsel()) {
+		switch (nextsel(&run)) {
 		case SEL_QUIT:
 			free(path);
 			free(filter);
@@ -789,11 +794,6 @@ moretyping:
 			if (cur > 0)
 				cur -= MIN((LINES - 4) / 2, cur);
 			break;
-		case SEL_SH:
-			exitcurses();
-			spawn("/bin/sh", NULL, path);
-			initcurses();
-			break;
 		case SEL_CD:
 			/* Read target dir */
 			printprompt("chdir: ");
@@ -820,6 +820,17 @@ moretyping:
 			goto out;
 		case SEL_REDRAW:
 			goto out;
+		case SEL_RUN:
+			exitcurses();
+			spawn(run, NULL, path);
+			initcurses();
+			break;
+		case SEL_RUNARG:
+			name = dents[cur].name;
+			exitcurses();
+			spawn(run, name, path);
+			initcurses();
+			break;
 		}
 	}
 

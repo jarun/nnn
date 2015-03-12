@@ -45,11 +45,14 @@ struct key bindings[] = {
 	/* Page up */
 	{ KEY_PPAGE,      SEL_PGUP },
 	{ CONTROL('U'),   SEL_PGUP },
-	/* Shell */
-	{ '!',            SEL_SH },
 	/* Change dir */
 	{ 'c',            SEL_CD },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME },
 	{ CONTROL('L'),   SEL_REDRAW },
+	/* Run command */
+	{ '!',            SEL_RUN,    "sh" },
+	{ 'z',            SEL_RUN,    "top" },
+	/* Run command with argument */
+	{ 'e',            SEL_RUNARG, "vi" },
 };
