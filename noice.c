@@ -193,7 +193,7 @@ openwith(char *file)
 
 	for (i = 0; i < LEN(assocs); i++) {
 		if (regcomp(&regex, assocs[i].regex,
-			    REG_NOSUB | REG_EXTENDED) != 0)
+			    REG_NOSUB | REG_EXTENDED | REG_ICASE) != 0)
 			continue;
 		if (regexec(&regex, file, 0, NULL, 0) == 0) {
 			bin = assocs[i].bin;
