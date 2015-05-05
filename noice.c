@@ -211,7 +211,7 @@ setfilter(regex_t *regex, char *filter)
 	char *errbuf;
 	int r;
 
-	r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED);
+	r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
 	if (r != 0) {
 		errbuf = xmalloc(COLS * sizeof(char));
 		regerror(r, regex, errbuf, COLS * sizeof(char));
