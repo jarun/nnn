@@ -21,6 +21,9 @@ noice.o: util.h config.h
 strlcat.o: util.h
 strlcpy.o: util.h
 
+config.h:
+	cp config.def.h $@
+
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp -f $(BIN) $(DESTDIR)$(PREFIX)/bin
@@ -40,8 +43,3 @@ dist:
 
 clean:
 	rm -f $(BIN) $(OBJ) noice-$(VERSION).tar.gz
-
-.SUFFIXES: .def.h
-
-.def.h.h:
-	cp $< $@
