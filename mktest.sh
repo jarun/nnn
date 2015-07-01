@@ -18,8 +18,11 @@ ln -s normal-dir ln-normal-dir
 ln -s nowhere ln-nowhere
 mkfifo mk-fifo
 touch no-access && chmod 000 no-access
+mkdir no-access-dir && chmod 000 no-access-dir
 ln -s ../normal.txt normal-dir/ln-normal.txt
 ln -s ../normal.txt normal-dir/ln-normal
 echo 'int main(void) { *((char *)0) = 0; }' > ill.c
 make ill > /dev/null
 echo 'test/ill' > ill.sh
+mkdir empty-dir
+echo 'chmod 000 test' > lock.sh
