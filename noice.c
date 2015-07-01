@@ -75,6 +75,12 @@ struct entry {
 	time_t t;
 };
 
+/* Global context */
+struct entry *dents;
+int n, cur;
+char *path, *oldpath;
+char *fltr;
+
 /*
  * Layout:
  * .---------
@@ -565,36 +571,29 @@ dentfind(struct entry *dents, int n, char *cwd, char *path)
 	return 0;
 }
 
-void
-browse(const char *ipath, const char *ifilter)
+int
+populate(void)
 {
-	struct entry *dents;
-	int i, n, cur, r, fd;
-	int nlines, odd;
-	char *path = xstrdup(ipath);
-	char *filter = xstrdup(ifilter);
-	regex_t filter_re, re;
-	char *cwd, *newpath, *oldpath = NULL;
-	struct stat sb;
-	char *name, *bin, *dir, *tmp, *run;
-	int nowtyping = 0;
+	regex_t re;
+	int r;
 
-begin:
-	/* Path and filter should be malloc(3)-ed strings at all times */
-	n = 0;
-	dents = NULL;
-
+	/* Can fail when permissions change while browsing */
 	if (canopendir(path) == 0) {
 		printwarn();
-		goto nochange;
+		return -1;
 	}
 
 	/* Search filter */
-	r = setfilter(&filter_re, filter);
+	r = setfilter(&re, fltr);
 	if (r != 0)
-		goto nochange;
+		return -1;
 
-	n = dentfill(path, &dents, visible, &filter_re);
+	dentfree(dents, n);
+
+	n = 0;
+	dents = NULL;
+
+	n = dentfill(path, &dents, visible, &re);
 
 	qsort(dents, n, sizeof(*dents), entrycmp);
 
@@ -603,52 +602,85 @@ begin:
 	free(oldpath);
 	oldpath = NULL;
 
+	return 0;
+}
+
+void
+redraw(void)
+{
+	int nlines, odd;
+	char *cwd;
+	int i;
+
+	nlines = MIN(LINES - 4, n);
+
+	/* Clean screen */
+	erase();
+
+	/* Strip trailing slashes */
+	for (i = strlen(path) - 1; i > 0; i--)
+		if (path[i] == '/')
+			path[i] = '\0';
+		else
+			break;
+
+	DPRINTF_D(cur);
+	DPRINTF_S(path);
+
+	/* No text wrapping in cwd line */
+	cwd = xmalloc(COLS * sizeof(char));
+	strlcpy(cwd, path, COLS * sizeof(char));
+	cwd[COLS - strlen(CWD) - 1] = '\0';
+
+	printw(CWD "%s\n\n", cwd);
+
+	/* Print listing */
+	odd = ISODD(nlines);
+	if (cur < nlines / 2) {
+		for (i = 0; i < nlines; i++)
+			printent(&dents[i], i == cur);
+	} else if (cur >= n - nlines / 2) {
+		for (i = n - nlines; i < n; i++)
+			printent(&dents[i], i == cur);
+	} else {
+		for (i = cur - nlines / 2;
+		     i < cur + nlines / 2 + odd; i++)
+			printent(&dents[i], i == cur);
+	}
+}
+
+void
+browse(const char *ipath, const char *ifilter)
+{
+	int r, fd;
+	regex_t re;
+	char *newpath;
+	struct stat sb;
+	char *name, *bin, *dir, *tmp, *run;
+	int nowtyping = 0;
+
+	oldpath = NULL;
+	path = xstrdup(ipath);
+	fltr = xstrdup(ifilter);
+begin:
+	/* Path and filter should be malloc(3)-ed strings at all times */
+	r = populate();
+	if (r == -1) {
+		nowtyping = 0;
+		goto nochange;
+	}
+
 	for (;;) {
-		nlines = MIN(LINES - 4, n);
-
-		/* Clean screen */
-		erase();
-
-		/* Strip trailing slashes */
-		for (i = strlen(path) - 1; i > 0; i--)
-			if (path[i] == '/')
-				path[i] = '\0';
-			else
-				break;
-
-		DPRINTF_D(cur);
-		DPRINTF_S(path);
-
-		/* No text wrapping in cwd line */
-		cwd = xmalloc(COLS * sizeof(char));
-		strlcpy(cwd, path, COLS * sizeof(char));
-		cwd[COLS - strlen(CWD) - 1] = '\0';
-
-		printw(CWD "%s\n\n", cwd);
-
-		/* Print listing */
-		odd = ISODD(nlines);
-		if (cur < nlines / 2) {
-			for (i = 0; i < nlines; i++)
-				printent(&dents[i], i == cur);
-		} else if (cur >= n - nlines / 2) {
-			for (i = n - nlines; i < n; i++)
-				printent(&dents[i], i == cur);
-		} else {
-			for (i = cur - nlines / 2;
-			     i < cur + nlines / 2 + odd; i++)
-				printent(&dents[i], i == cur);
-		}
+		redraw();
 
 		/* Handle filter-as-you-type mode */
 		if (nowtyping)
 			goto moretyping;
-
 nochange:
 		switch (nextsel(&run)) {
 		case SEL_QUIT:
 			free(path);
-			free(filter);
+			free(fltr);
 			dentfree(dents, n);
 			return;
 		case SEL_BACK:
@@ -666,9 +698,9 @@ nochange:
 			oldpath = path;
 			path = dir;
 			/* Reset filter */
-			free(filter);
-			filter = xstrdup(ifilter);
-			goto out;
+			free(fltr);
+			fltr = xstrdup(ifilter);
+			goto begin;
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
 			if (n == 0)
@@ -705,9 +737,9 @@ nochange:
 				free(path);
 				path = newpath;
 				/* Reset filter */
-				free(filter);
-				filter = xstrdup(ifilter);
-				goto out;
+				free(fltr);
+				fltr = xstrdup(ifilter);
+				goto begin;
 			case S_IFREG:
 				bin = openwith(newpath);
 				if (bin == NULL) {
@@ -736,13 +768,13 @@ nochange:
 				free(tmp);
 				goto nochange;
 			}
-			free(filter);
-			filter = tmp;
-			DPRINTF_S(filter);
+			free(fltr);
+			fltr = tmp;
+			DPRINTF_S(fltr);
 			/* Save current */
 			if (n > 0)
 				oldpath = makepath(path, dents[cur].name);
-			goto out;
+			goto begin;
 		case SEL_TYPE:
 			nowtyping = 1;
 			tmp = NULL;
@@ -767,17 +799,17 @@ moretyping:
 					}
 			}
 			/* Copy or reset filter */
-			free(filter);
+			free(fltr);
 			if (tmp != NULL)
-				filter = xstrdup(tmp);
+				fltr = xstrdup(tmp);
 			else
-				filter = xstrdup(ifilter);
+				fltr = xstrdup(ifilter);
 			/* Save current */
 			if (n > 0)
 				oldpath = makepath(path, dents[cur].name);
 			if (!nowtyping)
 				free(tmp);
-			goto out;
+			goto begin;
 		case SEL_NEXT:
 			if (cur < n - 1)
 				cur++;
@@ -811,15 +843,15 @@ moretyping:
 			}
 			free(path);
 			path = newpath;
-			free(filter);
-			filter = xstrdup(ifilter); /* Reset filter */
+			free(fltr);
+			fltr = xstrdup(ifilter); /* Reset filter */
 			DPRINTF_S(path);
-			goto out;
+			goto begin;
 		case SEL_MTIME:
 			mtimeorder = !mtimeorder;
-			goto out;
+			goto begin;
 		case SEL_REDRAW:
-			goto out;
+			goto begin;
 		case SEL_RUN:
 			exitcurses();
 			spawn(run, NULL, path);
@@ -833,11 +865,6 @@ moretyping:
 			break;
 		}
 	}
-
-out:
-	dentfree(dents, n);
-
-	goto begin;
 }
 
 int
