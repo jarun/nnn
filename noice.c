@@ -578,10 +578,8 @@ populate(void)
 	int r;
 
 	/* Can fail when permissions change while browsing */
-	if (canopendir(path) == 0) {
-		printwarn();
+	if (canopendir(path) == 0)
 		return -1;
-	}
 
 	/* Search filter */
 	r = setfilter(&re, fltr);
@@ -666,8 +664,10 @@ begin:
 	/* Path and filter should be malloc(3)-ed strings at all times */
 	r = populate();
 	if (r == -1) {
-		nowtyping = 0;
-		goto nochange;
+		if (!nowtyping) {
+			printwarn();
+			goto nochange;
+		}
 	}
 
 	for (;;) {
