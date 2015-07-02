@@ -28,3 +28,5 @@ mkdir empty-dir
 mkdir cage
 echo 'chmod 000 test/cage' > cage/lock.sh
 echo 'chmod 755 test/cage' > cage-unlock.sh
+mkdir cage/lion
+echo 'chmod 000 test/cage' > cage/lion/lock.sh
