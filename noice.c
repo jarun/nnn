@@ -689,11 +689,12 @@ nochange:
 			    strcmp(path, ".") == 0 ||
 			    strchr(path, '/') == NULL)
 				goto nochange;
-			if (canopendir(path) == 0) {
+			dir = xdirname(path);
+			if (canopendir(dir) == 0) {
+				free(dir);
 				printwarn();
 				goto nochange;
 			}
-			dir = xdirname(path);
 			/* Save history */
 			oldpath = path;
 			path = dir;
