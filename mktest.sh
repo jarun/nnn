@@ -25,4 +25,6 @@ echo 'int main(void) { *((char *)0) = 0; }' > ill.c
 make ill > /dev/null
 echo 'test/ill' > ill.sh
 mkdir empty-dir
-echo 'chmod 000 test' > lock.sh
+mkdir cage
+echo 'chmod 000 test/cage' > cage/lock.sh
+echo 'chmod 755 test/cage' > cage-unlock.sh
