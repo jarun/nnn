@@ -858,8 +858,14 @@ moretyping:
 			goto begin;
 		case SEL_MTIME:
 			mtimeorder = !mtimeorder;
+			/* Save current */
+			if (n > 0)
+				oldpath = makepath(path, dents[cur].name);
 			goto begin;
 		case SEL_REDRAW:
+			/* Save current */
+			if (n > 0)
+				oldpath = makepath(path, dents[cur].name);
 			goto begin;
 		case SEL_RUN:
 			exitcurses();
