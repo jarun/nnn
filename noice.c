@@ -54,6 +54,8 @@ enum action {
 	SEL_PREV,
 	SEL_PGDN,
 	SEL_PGUP,
+	SEL_HOME,
+	SEL_END,
 	SEL_CD,
 	SEL_MTIME,
 	SEL_REDRAW,
@@ -826,6 +828,12 @@ moretyping:
 		case SEL_PGUP:
 			if (cur > 0)
 				cur -= MIN((LINES - 4) / 2, cur);
+			break;
+		case SEL_HOME:
+			cur = 0;
+			break;
+		case SEL_END:
+			cur = n - 1;
 			break;
 		case SEL_CD:
 			/* Read target dir */
