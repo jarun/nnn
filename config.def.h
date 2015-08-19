@@ -5,7 +5,7 @@
 int mtimeorder = 0; /* Set to 1 to sort by time in the default case */
 
 struct assoc assocs[] = {
-	{ "\\.(avi|mp4|mkv|mp3|ogg|flac)$", "mplayer" },
+	{ "\\.(avi|mp4|mkv|mp3|ogg|flac|mov)$", "mplayer" },
 	{ "\\.(png|jpg|gif)$", "feh" },
 	{ "\\.(html|svg)$", "firefox" },
 	{ "\\.pdf$", "mupdf" },
