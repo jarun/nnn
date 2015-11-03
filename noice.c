@@ -918,6 +918,8 @@ main(int argc, char *argv[])
 			ipath = "/";
 	}
 
+	signal(SIGINT, SIG_IGN);
+
 	/* Test initial path */
 	if (canopendir(ipath) == 0)
 		printerr(1, ipath);
