@@ -82,7 +82,6 @@ struct entry *dents;
 int n, cur;
 char *path, *oldpath;
 char *fltr;
-int idle;
 
 /*
  * Layout:
@@ -260,7 +259,6 @@ initcurses(void)
 	intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
 	curs_set(FALSE); /* Hide cursor */
-	timeout(1000); /* One second */
 }
 
 void
@@ -316,10 +314,6 @@ nextsel(char **run)
 	int c, i;
 
 	c = getch();
-	if (c == -1)
-		idle++;
-	else
-		idle = 0;
 
 	for (i = 0; i < LEN(bindings); i++)
 		if (c == bindings[i].sym) {
@@ -884,13 +878,6 @@ moretyping:
 			spawn(run, name, path);
 			initcurses();
 			break;
-		}
-		/* Screensaver */
-		if (idletimeout != 0 && idle == idletimeout) {
-			idle = 0;
-			exitcurses();
-			spawn(idlecmd, NULL, NULL);
-			initcurses();
 		}
 	}
 }
