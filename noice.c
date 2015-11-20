@@ -1,3 +1,4 @@
+/* See LICENSE file for copyright and license details. */
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>

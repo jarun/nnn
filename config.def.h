@@ -1,3 +1,4 @@
+/* See LICENSE file for copyright and license details. */
 #define CWD "cwd: "
 #define CURSR " > "
 #define EMPTY "   "
