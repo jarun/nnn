@@ -68,6 +68,7 @@ struct key {
 	int sym;         /* Key pressed */
 	enum action act; /* Action */
 	char *run;       /* Program to run */
+	char *env;       /* Environment variable to run */
 };
 
 #include "config.h"
@@ -195,6 +196,17 @@ spawn(const char *file, const char *arg, const char *dir)
 }
 
 char *
+xgetenv(char *name, char *fallback)
+{
+	if (name == NULL)
+		return fallback;
+	char *value = getenv(name);
+	if (value)
+		return value;
+	return fallback;
+}
+
+char *
 openwith(char *file)
 {
 	regex_t regex;
@@ -310,9 +322,9 @@ printprompt(char *str)
 }
 
 /* Returns SEL_* if key is bound and 0 otherwise
-   Also modifies the run pointer (used on SEL_{RUN,RUNARG}) */
+   Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}) */
 int
-nextsel(char **run)
+nextsel(char **run, char **env)
 {
 	int c, i;
 
@@ -325,6 +337,7 @@ nextsel(char **run)
 	for (i = 0; i < LEN(bindings); i++)
 		if (c == bindings[i].sym) {
 			*run = bindings[i].run;
+			*env = bindings[i].env;
 			return bindings[i].act;
 		}
 
@@ -630,7 +643,7 @@ browse(const char *ipath, const char *ifilter)
 	regex_t re;
 	char *newpath;
 	struct stat sb;
-	char *name, *bin, *dir, *tmp, *run;
+	char *name, *bin, *dir, *tmp, *run, *env;
 	int nowtyping = 0;
 
 	oldpath = NULL;
@@ -653,7 +666,7 @@ begin:
 		if (nowtyping)
 			goto moretyping;
 nochange:
-		switch (nextsel(&run)) {
+		switch (nextsel(&run, &env)) {
 		case SEL_QUIT:
 			free(path);
 			free(fltr);
@@ -842,12 +855,14 @@ moretyping:
 				oldpath = makepath(path, dents[cur].name);
 			goto begin;
 		case SEL_RUN:
+			run = xgetenv(env, run);
 			exitcurses();
 			spawn(run, NULL, path);
 			initcurses();
 			break;
 		case SEL_RUNARG:
 			name = dents[cur].name;
+			run = xgetenv(env, run);
 			exitcurses();
 			spawn(run, name, path);
 			initcurses();

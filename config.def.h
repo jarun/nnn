@@ -62,8 +62,9 @@ struct key bindings[] = {
 	{ 't',            SEL_MTIME },
 	{ CONTROL('L'),   SEL_REDRAW },
 	/* Run command */
-	{ '!',            SEL_RUN,    "sh" },
-	{ 'z',            SEL_RUN,    "top" },
+	{ 'z',            SEL_RUN, "top" },
+	{ '!',            SEL_RUN, "sh", "SHELL" },
 	/* Run command with argument */
-	{ 'e',            SEL_RUNARG, "vi" },
+	{ 'e',            SEL_RUNARG, "vi", "EDITOR" },
+	{ 'p',            SEL_RUNARG, "less", "PAGER" },
 };
