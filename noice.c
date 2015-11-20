@@ -331,7 +331,7 @@ readln(void)
 
 	echo();
 	curs_set(TRUE);
-	getnstr(ln, sizeof(ln));
+	getnstr(ln, sizeof(ln) - 1);
 	noecho();
 	curs_set(FALSE);
 	return strdup(ln);
