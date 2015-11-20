@@ -327,52 +327,14 @@ nextsel(char **run)
 char *
 readln(void)
 {
-	int c;
-	int i = 0;
-	char *ln = NULL;
-	int y, x, x0;
+	char ln[LINE_MAX];
 
 	echo();
 	curs_set(TRUE);
-
-	/* Starting point */
-	getyx(stdscr, y, x);
-	x0 = x;
-
-	while ((c = getch()) != ERR) {
-		if (c == KEY_ENTER || c == '\r')
-			break;
-		if (c == KEY_BACKSPACE || c == CONTROL('H')) {
-			getyx(stdscr, y, x);
-			if (x >= x0) {
-				i--;
-				if (i > 0) {
-					ln = xrealloc(ln, i * sizeof(*ln));
-				} else {
-					free(ln);
-					ln = NULL;
-				}
-				move(y, x);
-				printw("%c", ' ');
-				move(y, x);
-			} else {
-				move(y, x0);
-			}
-			continue;
-		}
-		ln = xrealloc(ln, (i + 1) * sizeof(*ln));
-		ln[i] = c;
-		i++;
-	}
-	if (ln != NULL) {
-		ln = xrealloc(ln, (i + 1) * sizeof(*ln));
-		ln[i] = '\0';
-	}
-
-	curs_set(FALSE);
+	getnstr(ln, sizeof(ln));
 	noecho();
-
-	return ln;
+	curs_set(FALSE);
+	return strdup(ln);
 }
 
 /*
