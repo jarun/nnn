@@ -331,10 +331,11 @@ readln(void)
 
 	echo();
 	curs_set(TRUE);
+	memset(ln, 0, sizeof(ln));
 	getnstr(ln, sizeof(ln) - 1);
 	noecho();
 	curs_set(FALSE);
-	return strdup(ln);
+	return strlen(ln) ? strdup(ln) : NULL;
 }
 
 /*
