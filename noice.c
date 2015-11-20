@@ -344,7 +344,7 @@ readln(void)
 	noecho();
 	curs_set(FALSE);
 	timeout(1000);
-	return strlen(ln) ? strdup(ln) : NULL;
+	return ln[0] ? strdup(ln) : NULL;
 }
 
 /*
