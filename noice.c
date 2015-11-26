@@ -885,8 +885,10 @@ main(int argc, char *argv[])
 	char *ifilter;
 
 	/* Confirm we are in a terminal */
-	if (!isatty(STDIN_FILENO))
-		printerr(1, "isatty");
+	if (!isatty(0) || !isatty(1)) {
+		fprintf(stderr, "stdin or stdout is not a tty\n");
+		exit(1);
+	}
 
 	if (getuid() == 0)
 		ifilter = ".";
@@ -904,8 +906,10 @@ main(int argc, char *argv[])
 	signal(SIGINT, SIG_IGN);
 
 	/* Test initial path */
-	if (canopendir(ipath) == 0)
-		printerr(1, ipath);
+	if (canopendir(ipath) == 0) {
+		fprintf(stderr, "%s: %s\n", ipath, strerror(errno));
+		exit(1);
+	}
 
 	/* Set locale before curses setup */
 	setlocale(LC_ALL, "");
@@ -916,5 +920,5 @@ main(int argc, char *argv[])
 
 	exitcurses();
 
-	return 0;
+	exit(0);
 }
