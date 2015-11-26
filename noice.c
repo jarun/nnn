@@ -103,10 +103,10 @@ int idle;
  * '------
  */
 
-void printmsg(char *msg);
+void printmsg(char *);
 void printwarn(void);
-void printerr(int ret, char *prefix);
-char *mkpath(char *dir, char *name);
+void printerr(int, char *);
+char *mkpath(char *, char *);
 
 #undef dprintf
 int
