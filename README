@@ -51,7 +51,7 @@ follow.
  * Solaris 9:
    Tested with gcc from http://www.opencsw.org/.
 
-    export PATH=/usr/ccs/bin:/opt/csw/bin
+    export PATH=/usr/ccs/bin:/opt/csw/bin:$PATH
     make CC="gcc"
 
 
