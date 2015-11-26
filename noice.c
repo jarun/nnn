@@ -878,11 +878,21 @@ moretyping:
 	}
 }
 
+void
+usage(char *argv0)
+{
+	fprintf(stderr, "usage: %s [dir]\n", argv0);
+	exit(1);
+}
+
 int
 main(int argc, char *argv[])
 {
 	char cwd[PATH_MAX], *ipath;
 	char *ifilter;
+
+	if (argc > 2)
+		usage(argv[0]);
 
 	/* Confirm we are in a terminal */
 	if (!isatty(0) || !isatty(1)) {
