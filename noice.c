@@ -106,7 +106,7 @@ int idle;
 void printmsg(char *msg);
 void printwarn(void);
 void printerr(int ret, char *prefix);
-char *makepath(char *dir, char *name);
+char *mkpath(char *dir, char *name);
 
 #undef dprintf
 int
@@ -487,7 +487,7 @@ dentfill(char *path, struct entry **dents,
 		*dents = xrealloc(*dents, (n + 1) * sizeof(**dents));
 		(*dents)[n].name = xstrdup(dp->d_name);
 		/* Get mode flags */
-		newpath = makepath(path, dp->d_name);
+		newpath = mkpath(path, dp->d_name);
 		r = lstat(newpath, &sb);
 		if (r == -1)
 			printerr(1, "lstat");
@@ -515,7 +515,7 @@ dentfree(struct entry *dents, int n)
 }
 
 char *
-makepath(char *dir, char *name)
+mkpath(char *dir, char *name)
 {
 	char path[PATH_MAX];
 
@@ -547,7 +547,7 @@ dentfind(struct entry *dents, int n, char *cwd, char *path)
 		return 0;
 
 	for (i = 0; i < n; i++) {
-		tmp = makepath(cwd, dents[i].name);
+		tmp = mkpath(cwd, dents[i].name);
 		DPRINTF_S(path);
 		DPRINTF_S(tmp);
 		if (strcmp(tmp, path) == 0) {
@@ -697,7 +697,7 @@ nochange:
 				goto nochange;
 
 			name = dents[cur].name;
-			newpath = makepath(path, name);
+			newpath = mkpath(path, name);
 			DPRINTF_S(newpath);
 
 			/* Get path info */
@@ -763,7 +763,7 @@ nochange:
 			DPRINTF_S(fltr);
 			/* Save current */
 			if (n > 0)
-				oldpath = makepath(path, dents[cur].name);
+				oldpath = mkpath(path, dents[cur].name);
 			goto begin;
 		case SEL_TYPE:
 			nowtyping = 1;
@@ -796,7 +796,7 @@ moretyping:
 				fltr = xstrdup(ifilter);
 			/* Save current */
 			if (n > 0)
-				oldpath = makepath(path, dents[cur].name);
+				oldpath = mkpath(path, dents[cur].name);
 			if (!nowtyping)
 				free(tmp);
 			goto begin;
@@ -830,7 +830,7 @@ moretyping:
 				clearprompt();
 				goto nochange;
 			}
-			newpath = makepath(path, tmp);
+			newpath = mkpath(path, tmp);
 			free(tmp);
 			if (canopendir(newpath) == 0) {
 				free(newpath);
@@ -847,12 +847,12 @@ moretyping:
 			mtimeorder = !mtimeorder;
 			/* Save current */
 			if (n > 0)
-				oldpath = makepath(path, dents[cur].name);
+				oldpath = mkpath(path, dents[cur].name);
 			goto begin;
 		case SEL_REDRAW:
 			/* Save current */
 			if (n > 0)
-				oldpath = makepath(path, dents[cur].name);
+				oldpath = mkpath(path, dents[cur].name);
 			goto begin;
 		case SEL_RUN:
 			run = xgetenv(env, run);
