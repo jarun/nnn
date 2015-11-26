@@ -3,7 +3,7 @@
 #define CURSR " > "
 #define EMPTY "   "
 
-int mtimeorder = 0; /* Set to 1 to sort by time in the default case */
+int mtimeorder = 0; /* Set to 1 to sort by time modified */
 int idletimeout = 0; /* Screensaver timeout in seconds, 0 to disable */
 char *idlecmd = "rain"; /* The screensaver program */
 
