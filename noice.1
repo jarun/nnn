@@ -1,4 +1,4 @@
-.Dd March 12, 2015
+.Dd November 26, 2015
 .Dt NOICE 1
 .Os
 .Sh NAME
@@ -37,13 +37,13 @@ Move to next entry.
 Scroll up half a page.
 .It Ic [Pgdown] or C-d
 Scroll down half a page.
-.It Ic [Home] or C-a or ^
+.It Ic [Home], ^ or C-a
 Move to the first entry.
-.It Ic [End] or C-e or $
+.It Ic [End], $ or C-e
 Move to the last entry.
 .It Ic l, [Right], [Return] or C-m
 Open file or enter directory.
-.It Ic h, [Left] or [Backspace]
+.It Ic h, C-h, [Left] or [Backspace]
 Back up one directory level.
 .It Ic / or &
 Change filter (see below for more information).
@@ -53,7 +53,7 @@ Enter filter-as-you-type mode.
 Change into the given directory.
 .It Ic t
 Toggle sort by time modified.
-.It Ic l
+.It Ic C-l
 Force a redraw.
 .It Ic \&!
 Spawn an sh shell in current directory.
@@ -61,6 +61,8 @@ Spawn an sh shell in current directory.
 Run the system top utility.
 .It Ic e
 Open selected entry with the vi editor.
+.It Ic p
+Open selected entry with the less pager.
 .It Ic q
 Quit.
 .El
@@ -97,6 +99,9 @@ If
 .Nm
 is invoked as root the default filter will also match hidden
 files.
+.Sh ENVIRONMENT
+The SHELL, EDITOR and PAGER environment variables take precedence
+when dealing with the !, e and p commands respectively.
 .Sh EXAMPLES
 The following example shows one possible configuration for
 file associations which is also the default:
