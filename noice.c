@@ -198,12 +198,12 @@ spawn(const char *file, const char *arg, const char *dir)
 char *
 xgetenv(char *name, char *fallback)
 {
+	char *value;
+
 	if (name == NULL)
 		return fallback;
-	char *value = getenv(name);
-	if (value)
-		return value;
-	return fallback;
+	value = getenv(name);
+	return value ? value : fallback;
 }
 
 char *
