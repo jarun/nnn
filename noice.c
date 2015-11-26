@@ -203,7 +203,7 @@ xgetenv(char *name, char *fallback)
 	if (name == NULL)
 		return fallback;
 	value = getenv(name);
-	return value ? value : fallback;
+	return value && value[0] ? value : fallback;
 }
 
 char *
