@@ -158,21 +158,17 @@ xstrdup(const char *s)
 char *
 xdirname(const char *path)
 {
-	char *p, *tmp;
+	char tmp[PATH_MAX], *p;
 
 	/* Some implementations of dirname(3) may modify `path' and some
 	 * return a pointer inside `path' and we cannot free(3) the
 	 * original string if we lose track of it. */
-	tmp = xstrdup(path);
+	strlcpy(tmp, path, sizeof(tmp));
 	p = dirname(tmp);
-	if (p == NULL) {
-		free(tmp);
+	if (p == NULL)
 		printerr(1, "dirname");
-	}
 	/* Make sure this is a malloc(3)-ed string */
-	p = xstrdup(p);
-	free(tmp);
-	return p;
+	return xstrdup(p);
 }
 
 void
