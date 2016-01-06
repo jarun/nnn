@@ -423,12 +423,12 @@ canopendir(char *path)
 void
 printent(struct entry *ent, int active)
 {
-	char *name;
+	char name[PATH_MAX];
 	unsigned int maxlen = COLS - strlen(CURSR) - 1;
 	char cm = 0;
 
 	/* Copy name locally */
-	name = xstrdup(ent->name);
+	strlcpy(name, ent->name, sizeof(name));
 
 	if (S_ISDIR(ent->mode)) {
 		cm = '/';
@@ -455,8 +455,6 @@ printent(struct entry *ent, int active)
 		printw("%s%s\n", active ? CURSR : EMPTY, name);
 	else
 		printw("%s%s%c\n", active ? CURSR : EMPTY, name, cm);
-
-	free(name);
 }
 
 int
