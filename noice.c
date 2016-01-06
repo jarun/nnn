@@ -485,6 +485,7 @@ dentfill(char *path, struct entry **dents,
 		r = lstat(newpath, &sb);
 		if (r == -1)
 			printerr(1, "lstat");
+		free(newpath);
 		(*dents)[n].mode = sb.st_mode;
 		(*dents)[n].t = sb.st_mtime;
 		n++;
