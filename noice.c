@@ -595,8 +595,9 @@ populate(void)
 void
 redraw(void)
 {
+	char cwd[PATH_MAX], cwdresolved[PATH_MAX];
+	size_t ncols;
 	int nlines, odd;
-	char *cwd;
 	int i;
 
 	nlines = MIN(LINES - 4, n);
@@ -615,11 +616,14 @@ redraw(void)
 	DPRINTF_S(path);
 
 	/* No text wrapping in cwd line */
-	cwd = xmalloc(COLS * sizeof(char));
-	strlcpy(cwd, path, COLS * sizeof(char));
-	cwd[COLS - strlen(CWD) - 1] = '\0';
+	ncols = COLS;
+	if (ncols > PATH_MAX)
+		ncols = PATH_MAX;
+	strlcpy(cwd, path, ncols);
+	cwd[ncols - strlen(CWD) - 1] = '\0';
+	realpath(cwd, cwdresolved);
 
-	printw(CWD "%s\n\n", cwd);
+	printw(CWD "%s\n\n", cwdresolved);
 
 	/* Print listing */
 	odd = ISODD(nlines);
