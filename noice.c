@@ -235,8 +235,8 @@ setfilter(regex_t *regex, char *filter)
 
 	r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
 	if (r != 0) {
-		errbuf = xmalloc(COLS * sizeof(char));
-		regerror(r, regex, errbuf, COLS * sizeof(char));
+		errbuf = xmalloc(COLS);
+		regerror(r, regex, errbuf, COLS);
 		printmsg(errbuf);
 		free(errbuf);
 	}
