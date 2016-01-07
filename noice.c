@@ -74,7 +74,7 @@ struct key {
 #include "config.h"
 
 struct entry {
-	char *name;
+	char name[PATH_MAX];
 	mode_t mode;
 	time_t t;
 };
@@ -82,8 +82,8 @@ struct entry {
 /* Global context */
 struct entry *dents;
 int n, cur;
-char *path, *oldpath;
-char *fltr;
+char path[PATH_MAX], oldpath[PATH_MAX];
+char fltr[LINE_MAX];
 int idle;
 
 /*
@@ -106,7 +106,7 @@ int idle;
 void printmsg(char *);
 void printwarn(void);
 void printerr(int, char *);
-char *mkpath(char *, char *);
+char *mkpath(char *, char *, char *, size_t);
 
 #undef dprintf
 int
@@ -155,20 +155,20 @@ xstrdup(const char *s)
 	return p;
 }
 
+/* Some implementations of dirname(3) may modify `path' and some
+ * return a pointer inside `path'. */
 char *
 xdirname(const char *path)
 {
+	static char out[PATH_MAX];
 	char tmp[PATH_MAX], *p;
 
-	/* Some implementations of dirname(3) may modify `path' and some
-	 * return a pointer inside `path' and we cannot free(3) the
-	 * original string if we lose track of it. */
 	strlcpy(tmp, path, sizeof(tmp));
 	p = dirname(tmp);
 	if (p == NULL)
 		printerr(1, "dirname");
-	/* Make sure this is a malloc(3)-ed string */
-	return xstrdup(p);
+	strlcpy(out, p, sizeof(out));
+	return out;
 }
 
 void
@@ -226,15 +226,17 @@ openwith(char *file)
 int
 setfilter(regex_t *regex, char *filter)
 {
-	char *errbuf;
+	char errbuf[LINE_MAX];
+	size_t len;
 	int r;
 
 	r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
 	if (r != 0) {
-		errbuf = xmalloc(COLS);
-		regerror(r, regex, errbuf, COLS);
+		len = COLS;
+		if (len > sizeof(errbuf))
+			len = sizeof(errbuf);
+		regerror(r, regex, errbuf, len);
 		printmsg(errbuf);
-		free(errbuf);
 	}
 
 	return r;
@@ -461,10 +463,10 @@ int
 dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
 {
+	char newpath[PATH_MAX];
 	DIR *dirp;
 	struct dirent *dp;
 	struct stat sb;
-	char *newpath;
 	int r, n = 0;
 
 	dirp = opendir(path);
@@ -479,13 +481,12 @@ dentfill(char *path, struct entry **dents,
 		if (filter(re, dp->d_name) == 0)
 			continue;
 		*dents = xrealloc(*dents, (n + 1) * sizeof(**dents));
-		(*dents)[n].name = xstrdup(dp->d_name);
+		strlcpy((*dents)[n].name, dp->d_name, sizeof((*dents)[n].name));
 		/* Get mode flags */
-		newpath = mkpath(path, dp->d_name);
+		mkpath(path, dp->d_name, newpath, sizeof(newpath));
 		r = lstat(newpath, &sb);
 		if (r == -1)
 			printerr(1, "lstat");
-		free(newpath);
 		(*dents)[n].mode = sb.st_mode;
 		(*dents)[n].t = sb.st_mtime;
 		n++;
@@ -500,58 +501,47 @@ dentfill(char *path, struct entry **dents,
 }
 
 void
-dentfree(struct entry *dents, int n)
+dentfree(struct entry *dents)
 {
-	int i;
-
-	for (i = 0; i < n; i++)
-		free(dents[i].name);
 	free(dents);
 }
 
 char *
-mkpath(char *dir, char *name)
+mkpath(char *dir, char *name, char *out, size_t n)
 {
-	char path[PATH_MAX];
-
 	/* Handle absolute path */
 	if (name[0] == '/') {
-		strlcpy(path, name, sizeof(path));
+		strlcpy(out, name, n);
 	} else {
 		/* Handle root case */
 		if (strcmp(dir, "/") == 0) {
-			strlcpy(path, "/", sizeof(path));
-			strlcat(path, name, sizeof(path));
+			strlcpy(out, "/", n);
+			strlcat(out, name, n);
 		} else {
-			strlcpy(path, dir, sizeof(path));
-			strlcat(path, "/", sizeof(path));
-			strlcat(path, name, sizeof(path));
+			strlcpy(out, dir, n);
+			strlcat(out, "/", n);
+			strlcat(out, name, n);
 		}
 	}
-	return xstrdup(path);
+	return out;
 }
 
 /* Return the position of the matching entry or 0 otherwise */
 int
 dentfind(struct entry *dents, int n, char *cwd, char *path)
 {
+	char tmp[PATH_MAX];
 	int i;
-	char *tmp;
 
 	if (path == NULL)
 		return 0;
-
 	for (i = 0; i < n; i++) {
-		tmp = mkpath(cwd, dents[i].name);
+		mkpath(cwd, dents[i].name, tmp, sizeof(tmp));
 		DPRINTF_S(path);
 		DPRINTF_S(tmp);
-		if (strcmp(tmp, path) == 0) {
-			free(tmp);
+		if (strcmp(tmp, path) == 0)
 			return i;
-		}
-		free(tmp);
 	}
-
 	return 0;
 }
 
@@ -570,7 +560,7 @@ populate(void)
 	if (r != 0)
 		return -1;
 
-	dentfree(dents, n);
+	dentfree(dents);
 
 	n = 0;
 	dents = NULL;
@@ -581,9 +571,6 @@ populate(void)
 
 	/* Find cur from history */
 	cur = dentfind(dents, n, path, oldpath);
-	free(oldpath);
-	oldpath = NULL;
-
 	return 0;
 }
 
@@ -638,18 +625,16 @@ redraw(void)
 void
 browse(const char *ipath, const char *ifilter)
 {
-	int r, fd;
-	regex_t re;
-	char *newpath;
-	struct stat sb;
+	char newpath[PATH_MAX];
 	char *name, *bin, *dir, *tmp, *run, *env;
+	struct stat sb;
+	regex_t re;
+	int r, fd;
 	int nowtyping = 0;
 
-	oldpath = NULL;
-	path = xstrdup(ipath);
-	fltr = xstrdup(ifilter);
+	strlcpy(path, ipath, sizeof(path));
+	strlcpy(fltr, ifilter, sizeof(fltr));
 begin:
-	/* Path and filter should be malloc(3)-ed strings at all times */
 	r = populate();
 	if (r == -1) {
 		if (!nowtyping) {
@@ -667,9 +652,7 @@ begin:
 nochange:
 		switch (nextsel(&run, &env)) {
 		case SEL_QUIT:
-			free(path);
-			free(fltr);
-			dentfree(dents, n);
+			dentfree(dents);
 			return;
 		case SEL_BACK:
 			/* There is no going back */
@@ -679,16 +662,14 @@ nochange:
 				goto nochange;
 			dir = xdirname(path);
 			if (canopendir(dir) == 0) {
-				free(dir);
 				printwarn();
 				goto nochange;
 			}
 			/* Save history */
-			oldpath = path;
-			path = dir;
+			strlcpy(oldpath, path, sizeof(path));
+			strlcpy(path, dir, sizeof(path));
 			/* Reset filter */
-			free(fltr);
-			fltr = xstrdup(ifilter);
+			strlcpy(fltr, ifilter, sizeof(fltr));
 			goto begin;
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
@@ -696,21 +677,19 @@ nochange:
 				goto nochange;
 
 			name = dents[cur].name;
-			newpath = mkpath(path, name);
+			mkpath(path, name, newpath, sizeof(newpath));
 			DPRINTF_S(newpath);
 
 			/* Get path info */
 			fd = open(newpath, O_RDONLY | O_NONBLOCK);
 			if (fd == -1) {
 				printwarn();
-				free(newpath);
 				goto nochange;
 			}
 			r = fstat(fd, &sb);
 			if (r == -1) {
 				printwarn();
 				close(fd);
-				free(newpath);
 				goto nochange;
 			}
 			close(fd);
@@ -720,26 +699,21 @@ nochange:
 			case S_IFDIR:
 				if (canopendir(newpath) == 0) {
 					printwarn();
-					free(newpath);
 					goto nochange;
 				}
-				free(path);
-				path = newpath;
+				strlcpy(path, newpath, sizeof(path));
 				/* Reset filter */
-				free(fltr);
-				fltr = xstrdup(ifilter);
+				strlcpy(fltr, ifilter, sizeof(fltr));
 				goto begin;
 			case S_IFREG:
 				bin = openwith(newpath);
 				if (bin == NULL) {
 					printmsg("No association");
-					free(newpath);
 					goto nochange;
 				}
 				exitcurses();
 				spawn(bin, newpath, NULL);
 				initcurses();
-				free(newpath);
 				continue;
 			default:
 				printmsg("Unsupported file");
@@ -757,12 +731,11 @@ nochange:
 				free(tmp);
 				goto nochange;
 			}
-			free(fltr);
-			fltr = tmp;
+			strlcpy(fltr, tmp, sizeof(fltr));
 			DPRINTF_S(fltr);
 			/* Save current */
 			if (n > 0)
-				oldpath = mkpath(path, dents[cur].name);
+				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 			goto begin;
 		case SEL_TYPE:
 			nowtyping = 1;
@@ -788,14 +761,13 @@ moretyping:
 					}
 			}
 			/* Copy or reset filter */
-			free(fltr);
 			if (tmp != NULL)
-				fltr = xstrdup(tmp);
+				strlcpy(fltr, tmp, sizeof(fltr));
 			else
-				fltr = xstrdup(ifilter);
+				strlcpy(fltr, ifilter, sizeof(fltr));
 			/* Save current */
 			if (n > 0)
-				oldpath = mkpath(path, dents[cur].name);
+				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 			if (!nowtyping)
 				free(tmp);
 			goto begin;
@@ -829,29 +801,27 @@ moretyping:
 				clearprompt();
 				goto nochange;
 			}
-			newpath = mkpath(path, tmp);
+			mkpath(path, tmp, newpath, sizeof(newpath));
 			free(tmp);
 			if (canopendir(newpath) == 0) {
-				free(newpath);
 				printwarn();
 				goto nochange;
 			}
-			free(path);
-			path = newpath;
-			free(fltr);
-			fltr = xstrdup(ifilter); /* Reset filter */
+			strlcpy(path, newpath, sizeof(path));
+			/* Reset filter */
+			strlcpy(fltr, ifilter, sizeof(fltr))
 			DPRINTF_S(path);
 			goto begin;
 		case SEL_MTIME:
 			mtimeorder = !mtimeorder;
 			/* Save current */
 			if (n > 0)
-				oldpath = mkpath(path, dents[cur].name);
+				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 			goto begin;
 		case SEL_REDRAW:
 			/* Save current */
 			if (n > 0)
-				oldpath = mkpath(path, dents[cur].name);
+				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 			goto begin;
 		case SEL_RUN:
 			run = xgetenv(env, run);
