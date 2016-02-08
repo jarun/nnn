@@ -251,10 +251,7 @@ visible(regex_t *regex, char *file)
 int
 entrycmp(const void *va, const void *vb)
 {
-	const struct entry *a, *b;
-
-	a = (struct entry *)va;
-	b = (struct entry *)vb;
+	const struct entry *a = va, *b = vb;
 
 	if (mtimeorder)
 		return b->t - a->t;
