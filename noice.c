@@ -171,7 +171,7 @@ xdirname(const char *path)
 }
 
 void
-spawn(const char *file, const char *arg, const char *dir)
+spawn(char *file, char *arg, char *dir)
 {
 	pid_t pid;
 	int status;
