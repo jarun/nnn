@@ -315,8 +315,8 @@ printprompt(char *str)
 	printw(str);
 }
 
-/* Returns SEL_* if key is bound and 0 otherwise
-   Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}) */
+/* Returns SEL_* if key is bound and 0 otherwise.
+ * Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}) */
 int
 nextsel(char **run, char **env)
 {
