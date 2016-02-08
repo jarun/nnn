@@ -341,7 +341,7 @@ nextsel(char **run, char **env)
 char *
 readln(void)
 {
-	char ln[LINE_MAX];
+	static char ln[LINE_MAX];
 
 	timeout(-1);
 	echo();
@@ -351,7 +351,7 @@ readln(void)
 	noecho();
 	curs_set(FALSE);
 	timeout(1000);
-	return ln[0] ? strdup(ln) : NULL;
+	return ln[0] ? ln : NULL;
 }
 
 int
@@ -567,7 +567,7 @@ redraw(void)
 }
 
 void
-browse(const char *ipath, const char *ifilter)
+browse(char *ipath, char *ifilter)
 {
 	char newpath[PATH_MAX];
 	char *name, *bin, *dir, *tmp, *run, *env;
@@ -661,13 +661,11 @@ nochange:
 			printprompt("filter: ");
 			tmp = readln();
 			if (tmp == NULL)
-				tmp = xstrdup(ifilter);
+				tmp = ifilter;
 			/* Check and report regex errors */
 			r = setfilter(&re, tmp);
-			if (r != 0) {
-				free(tmp);
+			if (r != 0)
 				goto nochange;
-			}
 			strlcpy(fltr, tmp, sizeof(fltr));
 			DPRINTF_S(fltr);
 			/* Save current */
@@ -705,7 +703,6 @@ nochange:
 				goto nochange;
 			}
 			mkpath(path, tmp, newpath, sizeof(newpath));
-			free(tmp);
 			if (canopendir(newpath) == 0) {
 				printwarn();
 				goto nochange;
