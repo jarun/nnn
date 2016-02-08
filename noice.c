@@ -50,7 +50,6 @@ enum action {
 	SEL_BACK,
 	SEL_GOIN,
 	SEL_FLTR,
-	SEL_TYPE,
 	SEL_NEXT,
 	SEL_PREV,
 	SEL_PGDN,
@@ -355,58 +354,6 @@ readln(void)
 	return ln[0] ? strdup(ln) : NULL;
 }
 
-/*
- * Read one key and modify the provided string accordingly.
- * Returns 0 when more input is expected and 1 on completion.
- */
-int
-readmore(char **str)
-{
-	int c, ret = 0;
-	int i;
-	char *ln = *str;
-
-	timeout(-1);
-	if (ln != NULL)
-		i = strlen(ln);
-	else
-		i = 0;
-	DPRINTF_D(i);
-
-	curs_set(TRUE);
-
-	c = getch();
-	switch (c) {
-	case KEY_ENTER:
-	case '\r':
-		ret = 1;
-		break;
-	case KEY_BACKSPACE:
-	case CONTROL('H'):
-		i--;
-		if (i > 0) {
-			ln = xrealloc(ln, (i + 1) * sizeof(*ln));
-			ln[i] = '\0';
-		} else {
-			free(ln);
-			ln = NULL;
-		}
-		break;
-	default:
-		i++;
-		ln = xrealloc(ln, (i + 1) * sizeof(*ln));
-		ln[i - 1] = c;
-		ln[i] = '\0';
-	}
-
-	curs_set(FALSE);
-
-	*str = ln;
-	timeout(1000);
-
-	return ret;
-}
-
 int
 canopendir(char *path)
 {
@@ -627,25 +574,18 @@ browse(const char *ipath, const char *ifilter)
 	struct stat sb;
 	regex_t re;
 	int r, fd;
-	int nowtyping = 0;
 
 	strlcpy(path, ipath, sizeof(path));
 	strlcpy(fltr, ifilter, sizeof(fltr));
 begin:
 	r = populate();
 	if (r == -1) {
-		if (!nowtyping) {
-			printwarn();
-			goto nochange;
-		}
+		printwarn();
+		goto nochange;
 	}
 
 	for (;;) {
 		redraw();
-
-		/* Handle filter-as-you-type mode */
-		if (nowtyping)
-			goto moretyping;
 nochange:
 		switch (nextsel(&run, &env)) {
 		case SEL_QUIT:
@@ -733,40 +673,6 @@ nochange:
 			/* Save current */
 			if (n > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
-			goto begin;
-		case SEL_TYPE:
-			nowtyping = 1;
-			tmp = NULL;
-moretyping:
-			printprompt("type: ");
-			if (tmp != NULL)
-				printw("%s", tmp);
-			r = readmore(&tmp);
-			DPRINTF_D(r);
-			DPRINTF_S(tmp);
-			if (r == 1)
-				nowtyping = 0;
-			/* Check regex errors */
-			if (tmp != NULL) {
-				r = setfilter(&re, tmp);
-				if (r != 0)
-					if (nowtyping) {
-						goto moretyping;
-					} else {
-						free(tmp);
-						goto nochange;
-					}
-			}
-			/* Copy or reset filter */
-			if (tmp != NULL)
-				strlcpy(fltr, tmp, sizeof(fltr));
-			else
-				strlcpy(fltr, ifilter, sizeof(fltr));
-			/* Save current */
-			if (n > 0)
-				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
-			if (!nowtyping)
-				free(tmp);
 			goto begin;
 		case SEL_NEXT:
 			if (cur < n - 1)
