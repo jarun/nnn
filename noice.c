@@ -792,12 +792,8 @@ main(int argc, char *argv[])
 
 	/* Set locale before curses setup */
 	setlocale(LC_ALL, "");
-
 	initcurses();
-
 	browse(ipath, ifilter);
-
 	exitcurses();
-
 	exit(0);
 }
