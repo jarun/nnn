@@ -570,7 +570,7 @@ void
 browse(char *ipath, char *ifilter)
 {
 	char newpath[PATH_MAX];
-	char *name, *bin, *dir, *tmp, *run, *env;
+	char *bin, *dir, *tmp, *run, *env;
 	struct stat sb;
 	regex_t re;
 	int r, fd;
@@ -613,8 +613,7 @@ nochange:
 			if (n == 0)
 				goto nochange;
 
-			name = dents[cur].name;
-			mkpath(path, name, newpath, sizeof(newpath));
+			mkpath(path, dents[cur].name, newpath, sizeof(newpath));
 			DPRINTF_S(newpath);
 
 			/* Get path info */
@@ -730,10 +729,9 @@ nochange:
 			initcurses();
 			break;
 		case SEL_RUNARG:
-			name = dents[cur].name;
 			run = xgetenv(env, run);
 			exitcurses();
-			spawn(run, name, path);
+			spawn(run, dents[cur].name, path);
 			initcurses();
 			break;
 		}
