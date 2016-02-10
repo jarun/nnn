@@ -81,8 +81,6 @@ struct entry {
 /* Global context */
 struct entry *dents;
 int ndents, cur;
-char path[PATH_MAX], oldpath[PATH_MAX];
-char fltr[LINE_MAX];
 int idle;
 
 /*
@@ -486,7 +484,7 @@ dentfind(struct entry *dents, int n, char *cwd, char *path)
 }
 
 int
-populate(void)
+populate(char *path, char *oldpath, char *fltr)
 {
 	regex_t re;
 	int r;
@@ -515,7 +513,7 @@ populate(void)
 }
 
 void
-redraw(void)
+redraw(char *path)
 {
 	char cwd[PATH_MAX], cwdresolved[PATH_MAX];
 	size_t ncols;
@@ -565,7 +563,8 @@ redraw(void)
 void
 browse(char *ipath, char *ifilter)
 {
-	char newpath[PATH_MAX];
+	char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX];
+	char fltr[LINE_MAX];
 	char *bin, *dir, *tmp, *run, *env;
 	struct stat sb;
 	regex_t re;
@@ -573,15 +572,16 @@ browse(char *ipath, char *ifilter)
 
 	strlcpy(path, ipath, sizeof(path));
 	strlcpy(fltr, ifilter, sizeof(fltr));
+	oldpath[0] = '\0';
 begin:
-	r = populate();
+	r = populate(path, oldpath, fltr);
 	if (r == -1) {
 		printwarn();
 		goto nochange;
 	}
 
 	for (;;) {
-		redraw();
+		redraw(path);
 nochange:
 		switch (nextsel(&run, &env)) {
 		case SEL_QUIT:
