@@ -103,7 +103,6 @@ int idle;
 void printmsg(char *);
 void printwarn(void);
 void printerr(int, char *);
-char *mkpath(char *, char *, char *, size_t);
 
 #undef dprintf
 int
@@ -361,6 +360,26 @@ canopendir(char *path)
 	return 1;
 }
 
+char *
+mkpath(char *dir, char *name, char *out, size_t n)
+{
+	/* Handle absolute path */
+	if (name[0] == '/') {
+		strlcpy(out, name, n);
+	} else {
+		/* Handle root case */
+		if (strcmp(dir, "/") == 0) {
+			strlcpy(out, "/", n);
+			strlcat(out, name, n);
+		} else {
+			strlcpy(out, dir, n);
+			strlcat(out, "/", n);
+			strlcat(out, name, n);
+		}
+	}
+	return out;
+}
+
 void
 printent(struct entry *ent, int active)
 {
@@ -442,26 +461,6 @@ void
 dentfree(struct entry *dents)
 {
 	free(dents);
-}
-
-char *
-mkpath(char *dir, char *name, char *out, size_t n)
-{
-	/* Handle absolute path */
-	if (name[0] == '/') {
-		strlcpy(out, name, n);
-	} else {
-		/* Handle root case */
-		if (strcmp(dir, "/") == 0) {
-			strlcpy(out, "/", n);
-			strlcat(out, name, n);
-		} else {
-			strlcpy(out, dir, n);
-			strlcat(out, "/", n);
-			strlcat(out, name, n);
-		}
-	}
-	return out;
 }
 
 /* Return the position of the matching entry or 0 otherwise */
