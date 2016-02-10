@@ -80,7 +80,7 @@ struct entry {
 
 /* Global context */
 struct entry *dents;
-int n, cur;
+int ndents, cur;
 char path[PATH_MAX], oldpath[PATH_MAX];
 char fltr[LINE_MAX];
 int idle;
@@ -506,15 +506,15 @@ populate(void)
 
 	dentfree(dents);
 
-	n = 0;
+	ndents = 0;
 	dents = NULL;
 
-	n = dentfill(path, &dents, visible, &re);
+	ndents = dentfill(path, &dents, visible, &re);
 
-	qsort(dents, n, sizeof(*dents), entrycmp);
+	qsort(dents, ndents, sizeof(*dents), entrycmp);
 
 	/* Find cur from history */
-	cur = dentfind(dents, n, path, oldpath);
+	cur = dentfind(dents, ndents, path, oldpath);
 	return 0;
 }
 
@@ -526,7 +526,7 @@ redraw(void)
 	int nlines, odd;
 	int i;
 
-	nlines = MIN(LINES - 4, n);
+	nlines = MIN(LINES - 4, ndents);
 
 	/* Clean screen */
 	erase();
@@ -556,8 +556,8 @@ redraw(void)
 	if (cur < nlines / 2) {
 		for (i = 0; i < nlines; i++)
 			printent(&dents[i], i == cur);
-	} else if (cur >= n - nlines / 2) {
-		for (i = n - nlines; i < n; i++)
+	} else if (cur >= ndents - nlines / 2) {
+		for (i = ndents - nlines; i < ndents; i++)
 			printent(&dents[i], i == cur);
 	} else {
 		for (i = cur - nlines / 2;
@@ -610,7 +610,7 @@ nochange:
 			goto begin;
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
-			if (n == 0)
+			if (ndents == 0)
 				goto nochange;
 
 			mkpath(path, dents[cur].name, newpath, sizeof(newpath));
@@ -668,11 +668,11 @@ nochange:
 			strlcpy(fltr, tmp, sizeof(fltr));
 			DPRINTF_S(fltr);
 			/* Save current */
-			if (n > 0)
+			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 			goto begin;
 		case SEL_NEXT:
-			if (cur < n - 1)
+			if (cur < ndents - 1)
 				cur++;
 			break;
 		case SEL_PREV:
@@ -680,8 +680,8 @@ nochange:
 				cur--;
 			break;
 		case SEL_PGDN:
-			if (cur < n - 1)
-				cur += MIN((LINES - 4) / 2, n - 1 - cur);
+			if (cur < ndents - 1)
+				cur += MIN((LINES - 4) / 2, ndents - 1 - cur);
 			break;
 		case SEL_PGUP:
 			if (cur > 0)
@@ -691,7 +691,7 @@ nochange:
 			cur = 0;
 			break;
 		case SEL_END:
-			cur = n - 1;
+			cur = ndents - 1;
 			break;
 		case SEL_CD:
 			/* Read target dir */
@@ -714,12 +714,12 @@ nochange:
 		case SEL_MTIME:
 			mtimeorder = !mtimeorder;
 			/* Save current */
-			if (n > 0)
+			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 			goto begin;
 		case SEL_REDRAW:
 			/* Save current */
-			if (n > 0)
+			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 			goto begin;
 		case SEL_RUN:
