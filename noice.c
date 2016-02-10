@@ -218,7 +218,6 @@ openwith(char *file)
 		}
 	}
 	DPRINTF_S(bin);
-
 	return bin;
 }
 
@@ -237,7 +236,6 @@ setfilter(regex_t *regex, char *filter)
 		regerror(r, regex, errbuf, len);
 		printmsg(errbuf);
 	}
-
 	return r;
 }
 
@@ -334,7 +332,6 @@ nextsel(char **run, char **env)
 			*env = bindings[i].env;
 			return bindings[i].act;
 		}
-
 	return 0;
 }
 
@@ -440,7 +437,6 @@ dentfill(char *path, struct entry **dents,
 	r = closedir(dirp);
 	if (r == -1)
 		printerr(1, "closedir");
-
 	return n;
 }
 
