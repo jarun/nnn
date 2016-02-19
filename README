@@ -35,7 +35,7 @@ cases you just do:
 
     make
 
-It is known to work on OpenBSD, NetBSD, FreeBSD, DragonFly BSD, Linux,
+It is known to work on OpenBSD, NetBSD, FreeBSD, DragonFly BSD, Linux, OSX,
 IRIX 6.5, Haiku and Solaris 9.  Some notes for building on certain systems
 follow.
 
