@@ -598,7 +598,7 @@ nochange:
 				goto nochange;
 			}
 			/* Save history */
-			strlcpy(oldpath, path, sizeof(path));
+			strlcpy(oldpath, path, sizeof(oldpath));
 			strlcpy(path, dir, sizeof(path));
 			/* Reset filter */
 			strlcpy(fltr, ifilter, sizeof(fltr));
