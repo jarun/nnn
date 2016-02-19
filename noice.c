@@ -433,8 +433,8 @@ dentfill(char *path, struct entry **dents,
 
 	while ((dp = readdir(dirp)) != NULL) {
 		/* Skip self and parent */
-		if (strcmp(dp->d_name, ".") == 0
-		    || strcmp(dp->d_name, "..") == 0)
+		if (strcmp(dp->d_name, ".") == 0 ||
+		    strcmp(dp->d_name, "..") == 0)
 			continue;
 		if (filter(re, dp->d_name) == 0)
 			continue;
