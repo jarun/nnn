@@ -57,6 +57,7 @@ enum action {
 	SEL_HOME,
 	SEL_END,
 	SEL_CD,
+	SEL_CDHOME,
 	SEL_TOGGLEDOT,
 	SEL_MTIME,
 	SEL_REDRAW,
@@ -705,6 +706,21 @@ nochange:
 			strlcpy(path, newpath, sizeof(path));
 			/* Reset filter */
 			strlcpy(fltr, ifilter, sizeof(fltr))
+			DPRINTF_S(path);
+			goto begin;
+		case SEL_CDHOME:
+			tmp = getenv("HOME");
+			if (tmp == NULL) {
+				clearprompt();
+				goto nochange;
+			}
+			if (canopendir(tmp) == 0) {
+				printwarn();
+				goto nochange;
+			}
+			strlcpy(path, tmp, sizeof(path));
+			/* Reset filter */
+			strlcpy(fltr, ifilter, sizeof(fltr));
 			DPRINTF_S(path);
 			goto begin;
 		case SEL_TOGGLEDOT:
