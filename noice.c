@@ -57,6 +57,7 @@ enum action {
 	SEL_HOME,
 	SEL_END,
 	SEL_CD,
+	SEL_TOGGLEDOT,
 	SEL_MTIME,
 	SEL_REDRAW,
 	SEL_RUN,
@@ -705,6 +706,12 @@ nochange:
 			/* Reset filter */
 			strlcpy(fltr, ifilter, sizeof(fltr))
 			DPRINTF_S(path);
+			goto begin;
+		case SEL_TOGGLEDOT:
+			if (strcmp(fltr, ifilter) != 0)
+				strlcpy(fltr, ifilter, sizeof(fltr));
+			else
+				strlcpy(fltr, ".", sizeof(fltr));
 			goto begin;
 		case SEL_MTIME:
 			mtimeorder = !mtimeorder;
