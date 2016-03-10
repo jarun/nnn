@@ -257,7 +257,16 @@ entrycmp(const void *va, const void *vb)
 void
 initcurses(void)
 {
-	initscr();
+	char *term;
+
+	if (initscr() == NULL) {
+		term = getenv("TERM");
+		if (term != NULL)
+			fprintf(stderr, "error opening terminal: %s\n", term);
+		else
+			fprintf(stderr, "failed to initialize curses\n");
+		exit(1);
+	}
 	cbreak();
 	noecho();
 	nonl();
