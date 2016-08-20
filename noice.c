@@ -118,7 +118,7 @@ dprintf(int fd, const char *fmt, ...)
 	va_start(ap, fmt);
 	r = vsnprintf(buf, sizeof(buf), fmt, ap);
 	if (r > 0)
-		write(fd, buf, r);
+		r = write(fd, buf, r);
 	va_end(ap);
 	return r;
 }
@@ -179,7 +179,7 @@ spawn(char *file, char *arg, char *dir)
 	pid = fork();
 	if (pid == 0) {
 		if (dir != NULL)
-			chdir(dir);
+			status = chdir(dir);
 		execlp(file, file, arg, NULL);
 		_exit(1);
 	} else {
@@ -218,7 +218,6 @@ openwith(char *file)
 	DPRINTF_S(mime);
 
 	if (strcmp(mime, "text/plain") == 0)
-		magic_close(magic);
 		return "vim";
 	magic_close(magic);
 
@@ -566,7 +565,10 @@ redraw(char *path)
 		ncols = PATH_MAX;
 	strlcpy(cwd, path, ncols);
 	cwd[ncols - strlen(CWD) - 1] = '\0';
-	realpath(cwd, cwdresolved);
+	if (!realpath(cwd, cwdresolved)) {
+		printmsg("Cannot resolve path");
+		return;
+	}
 
 	printw(CWD "%s\n\n", cwdresolved);
 
@@ -665,11 +667,11 @@ nochange:
 			case S_IFREG:
 				bin = openwith(newpath);
 				if (bin == NULL) {
-                                        char cmd[512];
-                                        sprintf(cmd, "xdg-open \"%s\" > /dev/null 2>&1", newpath);
-                                        system(cmd);
-					printmsg("No association");
-					goto nochange;
+					char cmd[512];
+					int status;
+					sprintf(cmd, "xdg-open \"%s\" > /dev/null 2>&1", newpath);
+					status = system(cmd);
+					continue;
 				}
 				exitcurses();
 				spawn(bin, newpath, NULL);
