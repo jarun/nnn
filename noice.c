@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <magic.h>
 
 #include "util.h"
 
@@ -206,6 +207,20 @@ openwith(char *file)
 	regex_t regex;
 	char *bin = NULL;
 	int i;
+
+	const char *mime;
+	magic_t magic;
+
+	magic = magic_open(MAGIC_MIME_TYPE);
+	magic_load(magic, NULL);
+	magic_compile(magic, NULL);
+	mime = magic_file(magic, file);
+	DPRINTF_S(mime);
+
+	if (strcmp(mime, "text/plain") == 0)
+		magic_close(magic);
+		return "vim";
+	magic_close(magic);
 
 	for (i = 0; i < LEN(assocs); i++) {
 		if (regcomp(&regex, assocs[i].regex,
@@ -650,6 +665,9 @@ nochange:
 			case S_IFREG:
 				bin = openwith(newpath);
 				if (bin == NULL) {
+                                        char cmd[512];
+                                        sprintf(cmd, "xdg-open \"%s\" > /dev/null 2>&1", newpath);
+                                        system(cmd);
 					printmsg("No association");
 					goto nochange;
 				}

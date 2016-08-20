@@ -8,12 +8,13 @@ int idletimeout = 0; /* Screensaver timeout in seconds, 0 to disable */
 char *idlecmd = "rain"; /* The screensaver program */
 
 struct assoc assocs[] = {
-	{ "\\.(avi|mp4|mkv|mp3|ogg|flac|mov)$", "mplayer" },
-	{ "\\.(png|jpg|gif)$", "feh" },
-	{ "\\.(html|svg)$", "firefox" },
-	{ "\\.pdf$", "mupdf" },
+	//{ "\\.(avi|mp4|mkv|mp3|ogg|flac|mov)$", "mpv" },
+	{ "\\.(wma|mp3|ogg|flac)$", "fmedia" },
+	//{ "\\.(png|jpg|gif)$", "feh" },
+	//{ "\\.(html|svg)$", "firefox" },
+	{ "\\.pdf$", "zathura" },
 	{ "\\.sh$", "sh" },
-	{ ".", "less" },
+	//{ ".", "less" },
 };
 
 struct key bindings[] = {
