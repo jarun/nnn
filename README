@@ -1,0 +1,62 @@
+               __
+  ___     ___ /\_\    ___     __
+/' _ `\  / __`\/\ \  /'___\ /'__`\
+/\ \/\ \/\ \L\ \ \ \/\ \__//\  __/
+\ \_\ \_\ \____/\ \_\ \____\ \____\
+ \/_/\/_/\/___/  \/_/\/____/\/____/
+                                    -- by lostd and sin
+=======================================================
+
+
+What is it?
+===========
+
+noice is a small curses-based file browser.
+It was first developed to be used with a TV remote control for a media
+center solution.
+
+
+Getting started
+===============
+
+Get the latest version from the git-repository; build and install it.  Run
+noice in a directory to display its content in the form of a list, where
+each line is a file or directory.  The currently selected item will be
+preceded with a " > " by default.
+
+For more information refer to the manpage.
+
+
+Building
+========
+
+To build noice you need a curses implementation available.  In most
+cases you just do:
+
+    make
+
+It is known to work on OpenBSD, NetBSD, FreeBSD, DragonFly BSD, Linux, OSX,
+IRIX 6.5, Haiku and Solaris 9.  Some notes for building on certain systems
+follow.
+
+ * IRIX 6.5:
+   Tested with gcc from http://freeware.sgi.com/.
+
+    make CC="gcc" LDLIBS="-lgen -lcurses"
+
+ * Haiku:
+
+    make LDLIBS="-lncurses"
+
+ * Solaris 9:
+   Tested with gcc from http://www.opencsw.org/.
+
+    export PATH=/usr/ccs/bin:/opt/csw/bin:$PATH
+    make CC="gcc"
+
+
+Contact
+=======
+
+To report bugs and/or submit patches, you can reach us through
+the freenode IRC network at #2f30.
