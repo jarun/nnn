@@ -43,4 +43,4 @@ dist:
 	rm -rf noice-$(VERSION)
 
 clean:
-	rm -f $(BIN) $(OBJ) noice-$(VERSION).tar.gz
+	rm -f config.h $(BIN) $(OBJ) noice-$(VERSION).tar.gz
