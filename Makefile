@@ -6,7 +6,7 @@ MANPREFIX = $(PREFIX)/man
 #CPPFLAGS = -DDEBUG
 #CFLAGS = -g
 CFLAGS = -O3 -march=native
-LDLIBS = -lcurses -lmagic
+LDLIBS = -lcurses
 
 DISTFILES = noice.c strlcat.c strlcpy.c util.h config.def.h\
     noice.1 Makefile README LICENSE

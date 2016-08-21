@@ -17,7 +17,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <magic.h>
 
 #include "util.h"
 
@@ -39,6 +38,7 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define ISODD(x) ((x) & 1)
 #define CONTROL(c) ((c) ^ 0x40)
+#define MAX_PATH_LEN 1024
 
 struct assoc {
 	char *regex; /* Regex to match on filename */
@@ -207,19 +207,6 @@ openwith(char *file)
 	regex_t regex;
 	char *bin = NULL;
 	int i;
-
-	const char *mime;
-	magic_t magic;
-
-	magic = magic_open(MAGIC_MIME_TYPE);
-	magic_load(magic, NULL);
-	magic_compile(magic, NULL);
-	mime = magic_file(magic, file);
-	DPRINTF_S(mime);
-
-	if (strcmp(mime, "text/plain") == 0)
-		return "vim";
-	magic_close(magic);
 
 	for (i = 0; i < LEN(assocs); i++) {
 		if (regcomp(&regex, assocs[i].regex,
@@ -666,12 +653,30 @@ nochange:
 				goto begin;
 			case S_IFREG:
 				bin = openwith(newpath);
+				char *execvim = "vim";
+
 				if (bin == NULL) {
-					char cmd[512];
+					FILE *fp;
+					char cmd[MAX_PATH_LEN];
 					int status;
-					sprintf(cmd, "xdg-open \"%s\" > /dev/null 2>&1", newpath);
-					status = system(cmd);
-					continue;
+
+					snprintf(cmd, MAX_PATH_LEN, "file \"%s\"", newpath);
+					fp = popen(cmd, "r");
+					if (fp == NULL)
+						goto nochange;
+					if (fgets(cmd, MAX_PATH_LEN, fp) == NULL) {
+						pclose(fp);
+						goto nochange;
+					}
+					pclose(fp);
+
+					if (strstr(cmd, "ASCII text") != NULL)
+						bin = execvim;
+					else {
+						snprintf(cmd, MAX_PATH_LEN, "xdg-open \"%s\" > /dev/null 2>&1", newpath);
+						status = system(cmd);
+						continue;
+					}
 				}
 				exitcurses();
 				spawn(bin, newpath, NULL);
