@@ -19,6 +19,8 @@ Additional customization to make it more friendly towards major distros (which `
 
 ## Modifications
 
+- Behaviour
+    - List files alphabetically instead of upper case first. Same as `ls -l` output.
 - File associations
     - Environment variable **NOICE_OPENER** to override all associations and open all files with your desktop environments default file opener. Examples:
 
