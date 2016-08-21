@@ -2,14 +2,14 @@
 
 A fork of noice file browser: http://git.2f30.org/noice/
 
-Added some customizations to make it more friendly towards major distros.
+Additional customization to make it more friendly towards major distros (which `suck more` by some standards).
 
 ## Modifications
 
 - File associations
     - Associate plain text files with vim (using `file` command)
-    - Associate video files with mpv
-    - Associate common audio file types with fmedia (http://fmedia.firmdev.com/)
+    - Remove video file associations (to each his own favourite video player)
+    - Associate common audio file types with lightweight fmedia (http://fmedia.firmdev.com/)
     - Associate PDF files with zathura
     - Removed less
     - Use `xdg-open` to open other unrecognised files
