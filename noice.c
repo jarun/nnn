@@ -38,7 +38,7 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define ISODD(x) ((x) & 1)
 #define CONTROL(c) ((c) ^ 0x40)
-#define MAX_PATH_LEN 1024
+#define MAX_LEN 1024
 
 struct assoc {
 	char *regex; /* Regex to match on filename */
@@ -85,6 +85,7 @@ struct entry {
 struct entry *dents;
 int ndents, cur;
 int idle;
+char *opener = NULL;
 
 /*
  * Layout:
@@ -652,19 +653,32 @@ nochange:
 				strlcpy(fltr, ifilter, sizeof(fltr));
 				goto begin;
 			case S_IFREG:
+				/* If default mime opener is set, use it */
+				if (opener) {
+					char cmd[MAX_LEN];
+					int status;
+
+					snprintf(cmd, MAX_LEN, "%s \"%s\" > /dev/null 2>&1", opener, newpath);
+					status = system(cmd);
+					continue;
+				}
+
+				/* Try custom applications */
 				bin = openwith(newpath);
 				char *execvim = "vim";
 
 				if (bin == NULL) {
+					/* If a custom hander application is not set, open
+					   plain text files with vim, then try xdg-open */
 					FILE *fp;
-					char cmd[MAX_PATH_LEN];
+					char cmd[MAX_LEN];
 					int status;
 
-					snprintf(cmd, MAX_PATH_LEN, "file \"%s\"", newpath);
+					snprintf(cmd, MAX_LEN, "file \"%s\"", newpath);
 					fp = popen(cmd, "r");
 					if (fp == NULL)
 						goto nochange;
-					if (fgets(cmd, MAX_PATH_LEN, fp) == NULL) {
+					if (fgets(cmd, MAX_LEN, fp) == NULL) {
 						pclose(fp);
 						goto nochange;
 					}
@@ -673,7 +687,7 @@ nochange:
 					if (strstr(cmd, "ASCII text") != NULL)
 						bin = execvim;
 					else {
-						snprintf(cmd, MAX_PATH_LEN, "xdg-open \"%s\" > /dev/null 2>&1", newpath);
+						snprintf(cmd, MAX_LEN, "xdg-open \"%s\" > /dev/null 2>&1", newpath);
 						status = system(cmd);
 						continue;
 					}
@@ -831,6 +845,9 @@ main(int argc, char *argv[])
 		if (ipath == NULL)
 			ipath = "/";
 	}
+
+	/* Get the default desktop mime opener, if set */
+	opener = getenv("NOICE_OPENER");
 
 	signal(SIGINT, SIG_IGN);
 
