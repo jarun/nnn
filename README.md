@@ -7,12 +7,12 @@ Added some customizations to make it more friendly towards major distros.
 ## Modifications
 
 - File associations
-    - Associate mime 'text/plain' with vim (using libmagic)
+    - Associate plain text files with vim (using `file` command)
     - Associate video files with mpv
     - Associate common audio file types with fmedia (http://fmedia.firmdev.com/)
     - Associate PDF files with zathura
     - Removed less
-    - Use xdg-open to open other files
+    - Use `xdg-open` to open other unrecognised files
 - Compilation
     - Use `-O3` for compilation, fixed warnings
     - Added compilation flag `-march=native` (compile only, no plans to package).
