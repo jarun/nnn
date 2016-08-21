@@ -104,9 +104,15 @@ files.
 .Sh ENVIRONMENT
 The SHELL, EDITOR and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively.
+.Pp
+\fBNOICE_OPENER:\fR set to your desktop environment's default
+mime opener to override all custom mime associations.
+.br
+Examples: xdg-open, gnome-open, gvfs-open.
 .Sh EXAMPLES
 The following example shows one possible configuration for
-file associations which is also the default:
+file associations which is also the default if environment
+variable NOICE_OPENER is not set:
 .Bd -literal
 struct assoc assocs[] = {
 	{ "\\.(c|cpp|h|txt|log)$", "vim" },
