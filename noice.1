@@ -1,4 +1,4 @@
-.Dd February 25, 2016
+.Dd August 21, 2016
 .Dt NOICE 1
 .Os
 .Sh NAME
@@ -109,16 +109,20 @@ The following example shows one possible configuration for
 file associations which is also the default:
 .Bd -literal
 struct assoc assocs[] = {
-	{ "\\.(avi|mp4|mkv|mp3|ogg|flac|mov)$", "mplayer" },
-	{ "\\.(png|jpg|gif)$", "feh" },
-	{ "\\.(html|svg)$", "firefox" },
-	{ "\\.pdf$", "mupdf" },
+	{ "\\.(c|cpp|h|txt|log)$", "vim" },
+	{ "\\.pdf$", "zathura" },
 	{ "\\.sh$", "sh" },
-	{ ".", "less" },
 };
+Plain text files are opened with vim.
+.br
+Any other file types are opened with the 'xdg-open' command.
 .Ed
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspacekey to DEC.
 .Sh AUTHORS
 .An Lazaros Koromilas Aq Mt lostd@2f30.org ,
 .An Dimitris Papastamos Aq Mt sin@2f30.org .
+.Pp
+** The current non-mainstream version is a modified one patched by Arun Prakash Jana <engineerarun@gmail.com>.
+.br
+More details: https://github.com/jarun/noice
