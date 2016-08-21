@@ -86,6 +86,7 @@ struct entry *dents;
 int ndents, cur;
 int idle;
 char *opener = NULL;
+char *fallback_opener = NULL;
 
 /*
  * Layout:
@@ -658,7 +659,8 @@ nochange:
 					char cmd[MAX_LEN];
 					int status;
 
-					snprintf(cmd, MAX_LEN, "%s \"%s\" > /dev/null 2>&1", opener, newpath);
+					snprintf(cmd, MAX_LEN, "%s \"%s\" > /dev/null 2>&1",
+						opener, newpath);
 					status = system(cmd);
 					continue;
 				}
@@ -686,10 +688,14 @@ nochange:
 
 					if (strstr(cmd, "ASCII text") != NULL)
 						bin = execvim;
-					else {
-						snprintf(cmd, MAX_LEN, "xdg-open \"%s\" > /dev/null 2>&1", newpath);
+					else if (fallback_opener) {
+						snprintf(cmd, MAX_LEN, "%s \"%s\" > /dev/null 2>&1",
+							fallback_opener, newpath);
 						status = system(cmd);
 						continue;
+					} else {
+						printmsg("No association");
+						goto nochange;
 					}
 				}
 				exitcurses();
@@ -848,6 +854,9 @@ main(int argc, char *argv[])
 
 	/* Get the default desktop mime opener, if set */
 	opener = getenv("NOICE_OPENER");
+
+	/* Get the fallback desktop mime opener, if set */
+	fallback_opener = getenv("NOICE_FALLBACK_OPENER");
 
 	signal(SIGINT, SIG_IGN);
 
