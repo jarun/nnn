@@ -38,6 +38,8 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define ISODD(x) ((x) & 1)
 #define CONTROL(c) ((c) ^ 0x40)
+#define TOUPPER(ch) \
+	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define MAX_LEN 1024
 
 struct assoc {
@@ -203,6 +205,19 @@ xgetenv(char *name, char *fallback)
 	return value && value[0] ? value : fallback;
 }
 
+int
+xstricmp(const char *s1, const char *s2)
+{
+	while (*s2 != 0 && TOUPPER(*s1) == TOUPPER(*s2))
+		s1++, s2++;
+
+	/* In case of alphabetically same names, make sure
+	   lower case one comes before upper case one */
+	if (!*s1 && !*s2)
+		return 1;
+	return (int) (TOUPPER(*s1) - TOUPPER(*s2));
+}
+
 char *
 openwith(char *file)
 {
@@ -254,7 +269,7 @@ entrycmp(const void *va, const void *vb)
 
 	if (mtimeorder)
 		return b->t - a->t;
-	return strcmp(a->name, b->name);
+	return xstricmp(a->name, b->name);
 }
 
 void
