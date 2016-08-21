@@ -670,8 +670,8 @@ nochange:
 				char *execvim = "vim";
 
 				if (bin == NULL) {
-					/* If a custom hander application is not set, open
-					   plain text files with vim, then try xdg-open */
+					/* If a custom handler application is not set, open
+					   plain text files with vim, then try fallback_opener */
 					FILE *fp;
 					char cmd[MAX_LEN];
 					int status;
