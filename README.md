@@ -11,6 +11,7 @@ Additional customization to make it more friendly towards major distros (which `
 - Jump to first or last entry
 - Open files with default-associated programs
 - Jump to home directory
+- Filter contents in current directory
 - Show/hide hidden files
 - Sort entries by time modified
 - Spawn a shell in current directory
