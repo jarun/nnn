@@ -4,6 +4,19 @@ A fork of noice file browser: http://git.2f30.org/noice/
 
 Additional customization to make it more friendly towards major distros (which `suck more` by some standards).
 
+## Default features
+
+- Browse current or specified directory
+- Navigate to parent or child directories
+- Jump to first or last entry
+- Open files with default-associated programs
+- Jump to home directory
+- Show/hide hidden files
+- Sort entries by time modified
+- Spawn a shell in current directory
+- Run `top`
+- Open a file with `vim` or `less`
+
 ## Modifications
 
 - File associations
