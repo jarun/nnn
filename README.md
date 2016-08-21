@@ -22,12 +22,12 @@ Additional customization to make it more friendly towards major distros (which `
 - Behaviour
     - Case-insensitive alphabetic content listing instead of upper case first.
 - File associations
-    - Environment variable **NOICE_OPENER** to override all associations and open all files with your desktop environments default file opener. Examples:
+    - Environment variable `NOICE_OPENER` to override all associations and open all files with your desktop environments default file opener. Examples:
 
             export NOICE_OPENER=xdg-open
             export NOICE_OPENER=gnome-open
             export NOICE_OPENER=gvfs-open
-    All the following associations are ignored if **NOICE_OPENER** is exported.
+    All the following associations are ignored if `NOICE_OPENER` is exported.
     - Associate plain text files with vim (using `file` command)
     - Remove video file associations (to each his own favourite video player)
     - Associate common audio file types with lightweight fmedia (http://fmedia.firmdev.com/)
