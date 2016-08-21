@@ -31,7 +31,7 @@ Additional customization to make it more friendly towards major distros (which `
     All the following associations are ignored if `NOICE_OPENER` is exported.
     - Associate plain text files with vim (using `file` command)
     - Remove video file associations (to each his own favourite video player)
-    - Associate common audio file types with lightweight fmedia (http://fmedia.firmdev.com/)
+    - Associate common audio file types with lightweight [fmedia](http://fmedia.firmdev.com/)
     - Associate PDF files with zathura
     - Removed less
     - Use environment variable `NOICE_FALLBACK_OPENER` to open other non-associated files
