@@ -733,10 +733,9 @@ nochange:
 			DPRINTF_S(path);
 			goto begin;
 		case SEL_TOGGLEDOT:
-			if (strcmp(fltr, ifilter) != 0)
-				strlcpy(fltr, ifilter, sizeof(fltr));
-			else
-				strlcpy(fltr, ".", sizeof(fltr));
+			showhidden ^= 1;
+			ifilter = showhidden ? "." : "^[^.]";
+			strlcpy(fltr, ifilter, sizeof(fltr));
 			goto begin;
 		case SEL_MTIME:
 			mtimeorder = !mtimeorder;
@@ -795,9 +794,12 @@ main(int argc, char *argv[])
 	}
 
 	if (getuid() == 0)
+		showhidden = 1;
+
+	if (showhidden)
 		ifilter = ".";
 	else
-		ifilter = "^[^.]"; /* Hide dotfiles */
+		ifilter = "^[^.]";
 
 	if (argv[1] != NULL) {
 		ipath = argv[1];

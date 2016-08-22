@@ -5,6 +5,7 @@
 
 int mtimeorder  = 0; /* Set to 1 to sort by time modified */
 int idletimeout = 0; /* Screensaver timeout in seconds, 0 to disable */
+int showhidden  = 0; /* Set to 1 to show hidden files by default */
 char *idlecmd   = "rain"; /* The screensaver program */
 
 struct assoc assocs[] = {
