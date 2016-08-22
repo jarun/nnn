@@ -15,7 +15,7 @@ BIN = noice
 all: $(BIN)
 
 $(BIN): $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDLIBS)
+	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDFLAGS) $(LDLIBS)
 
 noice.o: util.h config.h
 strlcat.o: util.h
