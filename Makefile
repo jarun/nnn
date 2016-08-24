@@ -1,4 +1,4 @@
-VERSION = 0.5
+VERSION = 0.6
 
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/man
