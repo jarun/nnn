@@ -1,11 +1,12 @@
 /* See LICENSE file for copyright and license details. */
-#define CWD "cwd: "
+#define CWD   "cwd: "
 #define CURSR " > "
 #define EMPTY "   "
 
-int mtimeorder = 0; /* Set to 1 to sort by time modified */
+int mtimeorder  = 0; /* Set to 1 to sort by time modified */
 int idletimeout = 0; /* Screensaver timeout in seconds, 0 to disable */
-char *idlecmd = "rain"; /* The screensaver program */
+int showhidden  = 0; /* Set to 1 to show hidden files by default */
+char *idlecmd   = "rain"; /* The screensaver program */
 
 struct assoc assocs[] = {
 	//{ "\\.(avi|mp4|mkv|mp3|ogg|flac|mov)$", "mpv" },

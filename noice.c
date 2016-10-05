@@ -256,6 +256,12 @@ setfilter(regex_t *regex, char *filter)
 	return r;
 }
 
+void
+initfilter(int dot, char **ifilter)
+{
+	*ifilter = dot ? "." : "^[^.]";
+}
+
 int
 visible(regex_t *regex, char *file)
 {
@@ -793,10 +799,9 @@ nochange:
 			DPRINTF_S(path);
 			goto begin;
 		case SEL_TOGGLEDOT:
-			if (strcmp(fltr, ifilter) != 0)
-				strlcpy(fltr, ifilter, sizeof(fltr));
-			else
-				strlcpy(fltr, ".", sizeof(fltr));
+			showhidden ^= 1;
+			initfilter(showhidden, &ifilter);
+			strlcpy(fltr, ifilter, sizeof(fltr));
 			goto begin;
 		case SEL_MTIME:
 			mtimeorder = !mtimeorder;
@@ -855,9 +860,8 @@ main(int argc, char *argv[])
 	}
 
 	if (getuid() == 0)
-		ifilter = ".";
-	else
-		ifilter = "^[^.]"; /* Hide dotfiles */
+		showhidden = 1;
+	initfilter(showhidden, &ifilter);
 
 	if (argv[1] != NULL) {
 		ipath = argv[1];
