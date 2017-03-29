@@ -281,10 +281,8 @@ entrycmp(const void *va, const void *vb)
 void
 initcurses(void)
 {
-	char *term;
-
 	if (initscr() == NULL) {
-		term = getenv("TERM");
+		char *term = getenv("TERM");
 		if (term != NULL)
 			fprintf(stderr, "error opening terminal: %s\n", term);
 		else
@@ -399,18 +397,14 @@ char *
 mkpath(char *dir, char *name, char *out, size_t n)
 {
 	/* Handle absolute path */
-	if (name[0] == '/') {
+	if (name[0] == '/')
 		strlcpy(out, name, n);
-	} else {
+	else {
 		/* Handle root case */
-		if (strcmp(dir, "/") == 0) {
-			strlcpy(out, "/", n);
-			strlcat(out, name, n);
-		} else {
-			strlcpy(out, dir, n);
-			strlcat(out, "/", n);
-			strlcat(out, name, n);
-		}
+		if (strcmp(dir, "/") == 0)
+			snprintf(out, n, "/%s", name);
+		else
+			snprintf(out, n, "%s/%s", dir, name);
 	}
 	return out;
 }
@@ -584,15 +578,15 @@ redraw(char *path)
 
 	/* Print listing */
 	odd = ISODD(nlines);
-	if (cur < nlines / 2) {
+	if (cur < (nlines >> 1)) {
 		for (i = 0; i < nlines; i++)
 			printent(&dents[i], i == cur);
-	} else if (cur >= ndents - nlines / 2) {
+	} else if (cur >= ndents - (nlines >> 1)) {
 		for (i = ndents - nlines; i < ndents; i++)
 			printent(&dents[i], i == cur);
 	} else {
-		for (i = cur - nlines / 2;
-		     i < cur + nlines / 2 + odd; i++)
+		nlines >>= 1;
+		for (i = cur - nlines; i < cur + nlines + odd; i++)
 			printent(&dents[i], i == cur);
 	}
 }

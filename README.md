@@ -16,7 +16,7 @@ A fork of the [noice](http://git.2f30.org/noice/) file browser to make it more f
 
 ### Introduction
 
-noice is a blazing-fast terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed with terminal based systems in mind. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
+noice is a blazing-fast terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed with terminal based systems in mind. However, the incredible user-friendliness and speed make it a perfect utility on modern distros. Navigate to `/usr/bin` from your regular file browser and noice to feel the difference.
 
 The only issue with noice is hard-coded file association. There is no config file (better performance and simpler to maintain) and you have to modify the source to change associations (see [how to change file associations](#change-file-associations)). This fork solves the problem by adding the flexibility of using the default desktop opener at runtime. There are several other improvements too (see [fork-toppings](#fork-toppings)).
 
