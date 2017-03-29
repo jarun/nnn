@@ -78,7 +78,7 @@ No plans of packaging at the time.
 Start noice (default: current directory):
 
     $ noice [path_to_dir]
-`>` indicates the currently selected item.
+`>` indicates the currently selected entry.
 
 ### Keyboard shortcuts
 
@@ -94,12 +94,12 @@ Start noice (default: current directory):
 | `End`, `Ctrl-e`, `$` | jump to last dir entry |
 | `~` | jump to home dir |
 | `/`, `&` | filter dir contents |
-| `c` | change dir |
+| `c` | show change dir prompt |
 | `.` | toggle hide dot files |
 | `t` | toggle sort by modified time |
 | `!` | spawn a shell in current dir |
-| `e` | edit item in `vim` |
-| `p` | open item with `less` pager |
+| `e` | edit entry in `vim` |
+| `p` | open entry with `less` pager |
 | `z` | run `top` |
 | `Ctrl-l` | redraw window |
 | `q` | quit noice |

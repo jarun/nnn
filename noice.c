@@ -819,7 +819,8 @@ nochange:
 			exitcurses();
 			spawn(run, NULL, path);
 			initcurses();
-			break;
+			/* Re-populate as directory content may have changed */
+			goto begin;
 		case SEL_RUNARG:
 			run = xgetenv(env, run);
 			exitcurses();
