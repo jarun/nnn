@@ -42,8 +42,9 @@ I chose to fork noice because:
 
 ### Fork toppings
 
-- Behaviour
+- Behaviour and navigation
   - Case-insensitive alphabetic content listing instead of upper case first.
+  - Roll over at the first and last entries of a directory (with Up/Down keys).
 - File associations
   - Environment variable `NOICE_OPENER` to override all associations and open all files with your desktop environments default file opener. Examples:
 
@@ -97,7 +98,7 @@ Start noice (default: current directory):
 | `.` | toggle hide dot files |
 | `t` | toggle sort by modified time |
 | `!` | spawn a shell in current dir |
-| `e` | edit item in `vi` |
+| `e` | edit item in `vim` |
 | `p` | open item with `less` pager |
 | `z` | run `top` |
 | `Ctrl-l` | redraw window |

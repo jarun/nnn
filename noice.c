@@ -746,10 +746,16 @@ nochange:
 		case SEL_NEXT:
 			if (cur < ndents - 1)
 				cur++;
+			else if (ndents)
+				/* Roll over, set cursor to first entry */
+				cur = 0;
 			break;
 		case SEL_PREV:
 			if (cur > 0)
 				cur--;
+			else if (ndents)
+				/* Roll over, set cursor to last entry */
+				cur = ndents - 1;
 			break;
 		case SEL_PGDN:
 			if (cur < ndents - 1)
