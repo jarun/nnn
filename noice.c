@@ -614,7 +614,7 @@ redraw(char *path)
 		ncols = PATH_MAX;
 	strlcpy(cwd, path, ncols);
 	cwd[ncols - strlen(CWD) - 1] = '\0';
-	if (!realpath(cwd, cwdresolved)) {
+	if (!realpath(path, cwdresolved)) {
 		printmsg("Cannot resolve path");
 		return;
 	}
