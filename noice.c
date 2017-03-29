@@ -420,38 +420,18 @@ mkpath(char *dir, char *name, char *out, size_t n)
 void
 printent(struct entry *ent, int active)
 {
-	char name[PATH_MAX];
-	unsigned int maxlen = COLS - strlen(CURSR) - 1;
-	char cm = 0;
-
-	/* Copy name locally */
-	strlcpy(name, ent->name, sizeof(name));
-
-	if (S_ISDIR(ent->mode)) {
-		cm = '/';
-		maxlen--;
-	} else if (S_ISLNK(ent->mode)) {
-		cm = '@';
-		maxlen--;
-	} else if (S_ISSOCK(ent->mode)) {
-		cm = '=';
-		maxlen--;
-	} else if (S_ISFIFO(ent->mode)) {
-		cm = '|';
-		maxlen--;
-	} else if (ent->mode & S_IXUSR) {
-		cm = '*';
-		maxlen--;
-	}
-
-	/* No text wrapping in entries */
-	if (strlen(name) > maxlen)
-		name[maxlen] = '\0';
-
-	if (cm == 0)
-		printw("%s%s\n", active ? CURSR : EMPTY, name);
+	if (S_ISDIR(ent->mode))
+		printw("%s%s/\n", active ? CURSR : EMPTY, ent->name);
+	else if (S_ISLNK(ent->mode))
+		printw("%s%s@\n", active ? CURSR : EMPTY, ent->name);
+	else if (S_ISSOCK(ent->mode))
+		printw("%s%s=\n", active ? CURSR : EMPTY, ent->name);
+	else if (S_ISFIFO(ent->mode))
+		printw("%s%s|\n", active ? CURSR : EMPTY, ent->name);
+	else if (ent->mode & S_IXUSR)
+		printw("%s%s*\n", active ? CURSR : EMPTY, ent->name);
 	else
-		printw("%s%s%c\n", active ? CURSR : EMPTY, name, cm);
+		printw("%s%s\n", active ? CURSR : EMPTY, ent->name);
 }
 
 char*
@@ -485,9 +465,11 @@ printent_long(struct entry *ent, int active)
 	else if (S_ISCHR(ent->mode))
 		printw("%s%-32.32s C\n", active ? CURSR : EMPTY, ent->name);
 	else if (ent->mode & S_IXUSR)
-		printw("%s%-32.32s E %s\n", active ? CURSR : EMPTY, ent->name, coolsize(ent->size));
+		printw("%s%-32.32s E %s\n", active ? CURSR : EMPTY, ent->name,
+		       coolsize(ent->size));
 	else
-		printw("%s%-32.32s R %s\n", active ? CURSR : EMPTY, ent->name, coolsize(ent->size));
+		printw("%s%-32.32s R %s\n", active ? CURSR : EMPTY, ent->name,
+		       coolsize(ent->size));
 }
 
 int

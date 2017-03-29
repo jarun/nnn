@@ -44,7 +44,7 @@ I chose to fork noice because:
 ### Fork toppings
 
 - Behaviour and navigation
-  - Optional detailed view with file type and size (default: disabled)
+  - Optional detail view with file type and size (default: disabled)
   - Case-insensitive alphabetic content listing instead of upper case first
   - Roll over at the first and last entries of a directory (with Up/Down keys)
   - Sort entries by file size (largest to smallest)
@@ -98,7 +98,7 @@ Start noice (default: current directory):
 | `~` | jump to home dir |
 | `/`, `&` | filter dir contents |
 | `c` | show change dir prompt |
-| 'd' | toggle detail view |
+| `d` | toggle detail view |
 | `.` | toggle hide dot files |
 | `s` | toggle sort by file size |
 | `t` | toggle sort by modified time |
