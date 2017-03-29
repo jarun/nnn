@@ -44,7 +44,7 @@ I chose to fork noice because:
 ### Fork toppings
 
 - Behaviour and navigation
-  - Optional detail view with file type and size (default: disabled)
+  - Detail view with file type, size and number of entries in dir (default: disabled)
   - Case-insensitive alphabetic content listing instead of upper case first
   - Roll over at the first and last entries of a directory (with Up/Down keys)
   - Sort entries by file size (largest to smallest)

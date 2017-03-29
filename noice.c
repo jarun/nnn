@@ -616,6 +616,11 @@ redraw(char *path)
 		for (i = cur - nlines; i < cur + nlines + odd; i++)
 			printptr(&dents[i], i == cur);
 	}
+
+	if (showdetail) {
+		sprintf(cwd, "%d items", ndents);
+		printmsg(cwd);
+	}
 }
 
 void
