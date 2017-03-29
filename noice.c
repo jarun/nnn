@@ -473,21 +473,21 @@ void
 printent_long(struct entry *ent, int active)
 {
 	if (S_ISDIR(ent->mode))
-		printw("%s%-32.32s DIR\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%-32.32s D\n", active ? CURSR : EMPTY, ent->name);
 	else if (S_ISLNK(ent->mode))
-		printw("%s%-32.32s SYM\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%-32.32s L\n", active ? CURSR : EMPTY, ent->name);
 	else if (S_ISSOCK(ent->mode))
-		printw("%s%-32.32s SOCK\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%-32.32s S\n", active ? CURSR : EMPTY, ent->name);
 	else if (S_ISFIFO(ent->mode))
-		printw("%s%-32.32s FIFO\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%-32.32s F\n", active ? CURSR : EMPTY, ent->name);
 	else if (S_ISBLK(ent->mode))
-		printw("%s%-32.32s BLK\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%-32.32s B\n", active ? CURSR : EMPTY, ent->name);
 	else if (S_ISCHR(ent->mode))
-		printw("%s%-32.32s CHR\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%-32.32s C\n", active ? CURSR : EMPTY, ent->name);
 	else if (ent->mode & S_IXUSR)
-		printw("%s%-32.32s EXE %s\n", active ? CURSR : EMPTY, ent->name, coolsize(ent->size));
+		printw("%s%-32.32s E %s\n", active ? CURSR : EMPTY, ent->name, coolsize(ent->size));
 	else
-		printw("%s%-32.32s REG %s\n", active ? CURSR : EMPTY, ent->name, coolsize(ent->size));
+		printw("%s%-32.32s R %s\n", active ? CURSR : EMPTY, ent->name, coolsize(ent->size));
 }
 
 int

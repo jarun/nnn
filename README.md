@@ -11,6 +11,7 @@ A fork of the [noice](http://git.2f30.org/noice/) file browser to make it more f
 - [Installation](#installation)
 - [Usage](#usage)
 - [Keyboard shortcuts](#keyboard-shortcuts)
+- [File type abbreviations](#file-type-abbreviations)
 - [Help](#help)
 - [Change file associations](#change-file-associations)
 
@@ -107,6 +108,21 @@ Start noice (default: current directory):
 | `z` | run `top` |
 | `Ctrl-l` | redraw window |
 | `q` | quit noice |
+
+### File type abbreviations
+
+The following abbreviations are used in the detail view:
+
+| Symbol | File Type |
+| --- | --- |
+| B | Block Device |
+| C | Character Device |
+| D | Directory |
+| E | Executable |
+| F | Fifo |
+| L | Symbolic Link |
+| R | Regular File |
+| S | Socket |
 
 ### Help
 
