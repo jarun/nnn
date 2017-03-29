@@ -17,6 +17,7 @@ all: $(BIN)
 
 $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDFLAGS) $(LDLIBS)
+	strip $(BIN)
 
 noice.o: util.h config.h
 strlcat.o: util.h

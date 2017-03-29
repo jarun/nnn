@@ -65,6 +65,7 @@ I chose to fork noice because:
   - Use `-O3` for compilation, fixed warnings
   - Added compilation flag `-march=native`
   - Remove generated config.h on `make clean`
+  - strip the final binary
 
 ### Installation
 
