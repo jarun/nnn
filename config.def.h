@@ -4,8 +4,10 @@
 #define EMPTY "   "
 
 int mtimeorder  = 0; /* Set to 1 to sort by time modified */
+int sizeorder   = 0; /* Set to 1 to sort by file size */
 int idletimeout = 0; /* Screensaver timeout in seconds, 0 to disable */
 int showhidden  = 0; /* Set to 1 to show hidden files by default */
+int showdetail  = 0; /* Set to show additional file info */
 char *idlecmd   = "rain"; /* The screensaver program */
 
 struct assoc assocs[] = {
@@ -62,6 +64,10 @@ struct key bindings[] = {
 	{ '~',            SEL_CDHOME },
 	/* Toggle hide .dot files */
 	{ '.',            SEL_TOGGLEDOT },
+	/* Detailed listing */
+	{ 'd',            SEL_DETAIL },
+	/* Toggle sort by size */
+	{ 's',            SEL_FSIZE },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME },
 	{ CONTROL('L'),   SEL_REDRAW },

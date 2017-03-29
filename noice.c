@@ -62,6 +62,8 @@ enum action {
 	SEL_CD,
 	SEL_CDHOME,
 	SEL_TOGGLEDOT,
+	SEL_DETAIL,
+	SEL_FSIZE,
 	SEL_MTIME,
 	SEL_REDRAW,
 	SEL_RUN,
@@ -81,6 +83,7 @@ struct entry {
 	char name[PATH_MAX];
 	mode_t mode;
 	time_t t;
+	off_t size;
 };
 
 /* Global context */
@@ -89,6 +92,8 @@ int ndents, cur;
 int idle;
 char *opener = NULL;
 char *fallback_opener = NULL;
+char size_buf[12]; /* Buffer to hold human readable size */
+const char* size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 
 /*
  * Layout:
@@ -107,6 +112,7 @@ char *fallback_opener = NULL;
  * '------
  */
 
+void (*printptr)(struct entry *ent, int active);
 void printmsg(char *);
 void printwarn(void);
 void printerr(int, char *);
@@ -271,11 +277,13 @@ visible(regex_t *regex, char *file)
 int
 entrycmp(const void *va, const void *vb)
 {
-	const struct entry *a = va, *b = vb;
-
 	if (mtimeorder)
-		return b->t - a->t;
-	return xstricmp(a->name, b->name);
+		return ((struct entry *)vb)->t - ((struct entry *)va)->t;
+
+	if (sizeorder)
+		return ((struct entry *)vb)->size - ((struct entry *)va)->size;
+
+	return xstricmp(((struct entry *)va)->name, ((struct entry *)vb)->name);
 }
 
 void
@@ -446,6 +454,42 @@ printent(struct entry *ent, int active)
 		printw("%s%s%c\n", active ? CURSR : EMPTY, name, cm);
 }
 
+char*
+coolsize(off_t size)
+{
+	int i = 0;
+	long double fsize = (double)size;
+
+	while (fsize > 1024) {
+		fsize /= 1024;
+		i++;
+	}
+
+	snprintf(size_buf, 12, "%.*Lf%s", i, fsize, size_units[i]);
+	return size_buf;
+}
+
+void
+printent_long(struct entry *ent, int active)
+{
+	if (S_ISDIR(ent->mode))
+		printw("%s%-32.32s DIR\n", active ? CURSR : EMPTY, ent->name);
+	else if (S_ISLNK(ent->mode))
+		printw("%s%-32.32s SYM\n", active ? CURSR : EMPTY, ent->name);
+	else if (S_ISSOCK(ent->mode))
+		printw("%s%-32.32s SOCK\n", active ? CURSR : EMPTY, ent->name);
+	else if (S_ISFIFO(ent->mode))
+		printw("%s%-32.32s FIFO\n", active ? CURSR : EMPTY, ent->name);
+	else if (S_ISBLK(ent->mode))
+		printw("%s%-32.32s BLK\n", active ? CURSR : EMPTY, ent->name);
+	else if (S_ISCHR(ent->mode))
+		printw("%s%-32.32s CHR\n", active ? CURSR : EMPTY, ent->name);
+	else if (ent->mode & S_IXUSR)
+		printw("%s%-32.32s EXE %s\n", active ? CURSR : EMPTY, ent->name, coolsize(ent->size));
+	else
+		printw("%s%-32.32s REG %s\n", active ? CURSR : EMPTY, ent->name, coolsize(ent->size));
+}
+
 int
 dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
@@ -476,6 +520,7 @@ dentfill(char *path, struct entry **dents,
 			printerr(1, "lstat");
 		(*dents)[n].mode = sb.st_mode;
 		(*dents)[n].t = sb.st_mtime;
+		(*dents)[n].size = sb.st_size;
 		n++;
 	}
 
@@ -580,14 +625,14 @@ redraw(char *path)
 	odd = ISODD(nlines);
 	if (cur < (nlines >> 1)) {
 		for (i = 0; i < nlines; i++)
-			printent(&dents[i], i == cur);
+			printptr(&dents[i], i == cur);
 	} else if (cur >= ndents - (nlines >> 1)) {
 		for (i = ndents - nlines; i < ndents; i++)
-			printent(&dents[i], i == cur);
+			printptr(&dents[i], i == cur);
 	} else {
 		nlines >>= 1;
 		for (i = cur - nlines; i < cur + nlines + odd; i++)
-			printent(&dents[i], i == cur);
+			printptr(&dents[i], i == cur);
 	}
 }
 
@@ -803,8 +848,20 @@ nochange:
 			initfilter(showhidden, &ifilter);
 			strlcpy(fltr, ifilter, sizeof(fltr));
 			goto begin;
+		case SEL_DETAIL:
+			showdetail = !showdetail;
+			showdetail ? (printptr = &printent_long) : (printptr = &printent);
+			goto begin;
+		case SEL_FSIZE:
+			sizeorder = !sizeorder;
+			mtimeorder = 0;
+			/* Save current */
+			if (ndents > 0)
+				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
+			goto begin;
 		case SEL_MTIME:
 			mtimeorder = !mtimeorder;
+			sizeorder = 0;
 			/* Save current */
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
@@ -863,6 +920,8 @@ main(int argc, char *argv[])
 	if (getuid() == 0)
 		showhidden = 1;
 	initfilter(showhidden, &ifilter);
+
+	printptr = &printent;
 
 	if (argv[1] != NULL) {
 		ipath = argv[1];
