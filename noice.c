@@ -456,6 +456,7 @@ printent_long(struct entry *ent, int active)
 {
 	static char buf[18];
 	const static struct tm *p;
+	static char name[PATH_MAX + 2];
 
 	p = localtime(&ent->t);
 	strftime(buf, 18, "%b %d %H:%M %Y", p);
@@ -463,23 +464,28 @@ printent_long(struct entry *ent, int active)
 	if (active)
 		attron(A_REVERSE);
 
-	if (S_ISDIR(ent->mode))
-		printw("%s%-32.32s D  %-18.18s\n", cur(active), ent->name, buf);
-	else if (S_ISLNK(ent->mode))
-		printw("%s%-32.32s L  %-18.18s\n", cur(active), ent->name, buf);
-	else if (S_ISSOCK(ent->mode))
-		printw("%s%-32.32s S  %-18.18s\n", cur(active), ent->name, buf);
-	else if (S_ISFIFO(ent->mode))
-		printw("%s%-32.32s F  %-18.18s\n", cur(active), ent->name, buf);
-	else if (S_ISBLK(ent->mode))
-		printw("%s%-32.32s B  %-18.18s\n", cur(active), ent->name, buf);
+	if (S_ISDIR(ent->mode)) {
+		sprintf(name, "%s/", ent->name);
+		printw("%s%-32.32s   %-18.18s\n", cur(active), name, buf);
+	} else if (S_ISLNK(ent->mode)) {
+		sprintf(name, "%s@", ent->name);
+		printw("%s%-32.32s   %-18.18s\n", cur(active), name, buf);
+	} else if (S_ISSOCK(ent->mode)) {
+		sprintf(name, "%s=", ent->name);
+		printw("%s%-32.32s   %-18.18s\n", cur(active), name, buf);
+	} else if (S_ISFIFO(ent->mode)) {
+		sprintf(name, "%s|", ent->name);
+		printw("%s%-32.32s   %-18.18s\n", cur(active), name, buf);
+	} else if (S_ISBLK(ent->mode))
+		printw("%s%-32.32s b %-18.18s\n", cur(active), ent->name, buf);
 	else if (S_ISCHR(ent->mode))
-		printw("%s%-32.32s C  %-18.18s\n", cur(active), ent->name, buf);
-	else if (ent->mode & S_IXUSR)
-		printw("%s%-32.32s E  %-18.18s %s\n", cur(active), ent->name,
+		printw("%s%-32.32s c %-18.18s\n", cur(active), ent->name, buf);
+	else if (ent->mode & S_IXUSR) {
+		sprintf(name, "%s*", ent->name);
+		printw("%s%-32.32s   %-18.18s %s\n", cur(active), name,
 		       buf, coolsize(ent->size));
-	else
-		printw("%s%-32.32s R  %-18.18s %s\n", cur(active), ent->name,
+	} else
+		printw("%s%-32.32s   %-18.18s %s\n", cur(active), ent->name,
 		       buf, coolsize(ent->size));
 
 	if (active)
@@ -632,8 +638,11 @@ redraw(char *path)
 	}
 
 	if (showdetail) {
-		sprintf(cwd, "%d items", ndents);
-		printmsg(cwd);
+		if (ndents) {
+			sprintf(cwd, "%d items [%s]", ndents, dents[cur].name);
+			printmsg(cwd);
+		} else
+			printmsg("0 items");
 	}
 }
 

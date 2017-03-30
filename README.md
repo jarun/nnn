@@ -48,8 +48,9 @@ I chose to fork noice because:
     - file type
     - modification time
     - human-readable file size
-    - number of entries in current directory
     - current item in reverse video
+    - number of items in current directory
+    - full name of currently selected file
   - Case-insensitive alphabetic content listing instead of upper case first
   - Roll over at the first and last entries of a directory (with Up/Down keys)
   - Sort entries by file size (largest to smallest)
@@ -121,14 +122,13 @@ The following abbreviations are used in the detail view:
 
 | Symbol | File Type |
 | --- | --- |
-| B | Block Device |
-| C | Character Device |
-| D | Directory |
-| E | Executable |
-| F | Fifo |
-| L | Symbolic Link |
-| R | Regular File |
-| S | Socket |
+| `/` | Directory |
+| `*` | Executable |
+| `|` | Fifo |
+| `=` | Socket |
+| `@` | Symbolic Link |
+| `b` | Block Device |
+| `c` | Character Device |
 
 ### Help
 
