@@ -952,7 +952,11 @@ main(int argc, char *argv[])
 	printptr = &printent;
 
 	if (argv[1] != NULL) {
-		ipath = argv[1];
+		ipath = realpath(argv[1], cwd);
+		if (!ipath) {
+			fprintf(stderr, "%s: no such dir\n", argv[1]);
+			exit(1);
+		}
 	} else {
 		ipath = getcwd(cwd, sizeof(cwd));
 		if (ipath == NULL)
