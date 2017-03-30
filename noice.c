@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 
 #include "util.h"
 
@@ -452,24 +453,30 @@ coolsize(off_t size)
 void
 printent_long(struct entry *ent, int active)
 {
+	static char buf[18];
+	static struct tm *p;
+
+	p = localtime(&ent->t);
+	strftime(buf, 18, "%b %d %H:%M %Y", p);
+
 	if (S_ISDIR(ent->mode))
-		printw("%s%-32.32s D\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%-32.32s D  %-18.18s\n", active ? CURSR : EMPTY, ent->name, buf);
 	else if (S_ISLNK(ent->mode))
-		printw("%s%-32.32s L\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%-32.32s L  %-18.18s\n", active ? CURSR : EMPTY, ent->name, buf);
 	else if (S_ISSOCK(ent->mode))
-		printw("%s%-32.32s S\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%-32.32s S  %-18.18s\n", active ? CURSR : EMPTY, ent->name, buf);
 	else if (S_ISFIFO(ent->mode))
-		printw("%s%-32.32s F\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%-32.32s F  %-18.18s\n", active ? CURSR : EMPTY, ent->name, buf);
 	else if (S_ISBLK(ent->mode))
-		printw("%s%-32.32s B\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%-32.32s B  %-18.18s\n", active ? CURSR : EMPTY, ent->name, buf);
 	else if (S_ISCHR(ent->mode))
-		printw("%s%-32.32s C\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%-32.32s C  %-18.18s\n", active ? CURSR : EMPTY, ent->name, buf);
 	else if (ent->mode & S_IXUSR)
-		printw("%s%-32.32s E %s\n", active ? CURSR : EMPTY, ent->name,
-		       coolsize(ent->size));
+		printw("%s%-32.32s E  %-18.18s %s\n", active ? CURSR : EMPTY, ent->name,
+		       buf, coolsize(ent->size));
 	else
-		printw("%s%-32.32s R %s\n", active ? CURSR : EMPTY, ent->name,
-		       coolsize(ent->size));
+		printw("%s%-32.32s R  %-18.18s %s\n", active ? CURSR : EMPTY, ent->name,
+		       buf, coolsize(ent->size));
 }
 
 int

@@ -36,7 +36,7 @@ I chose to fork noice because:
 - Jump to home directory
 - Filter contents in current directory
 - Show/hide hidden files
-- Sort entries by time modified (newest to oldest)
+- Sort entries by modification time (newest to oldest)
 - Spawn a shell in current directory
 - Run `top`
 - Open a file with `vim` or `less`
@@ -44,7 +44,11 @@ I chose to fork noice because:
 ### Fork toppings
 
 - Behaviour and navigation
-  - Detail view with file type, size and number of entries in dir (default: disabled)
+  - Detail view (default: disabled) with:
+    - file type
+    - modification time
+    - human-readable file size
+    - number of entries in current directory
   - Case-insensitive alphabetic content listing instead of upper case first
   - Roll over at the first and last entries of a directory (with Up/Down keys)
   - Sort entries by file size (largest to smallest)
