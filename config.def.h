@@ -71,6 +71,8 @@ struct key bindings[] = {
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME },
 	{ CONTROL('L'),   SEL_REDRAW },
+	/* Copy currently selected file path */
+	{ CONTROL('K'),   SEL_COPY },
 	/* Run command */
 	{ 'z',            SEL_RUN, "top" },
 	{ '!',            SEL_RUN, "sh", "SHELL" },

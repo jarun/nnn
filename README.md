@@ -13,6 +13,7 @@ A fork of the [noice](http://git.2f30.org/noice/) file browser to make it more f
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [File type abbreviations](#file-type-abbreviations)
 - [Help](#help)
+- [Copy current file path to clipboard](#copy-current-file-path-to-clipboard)
 - [Change file associations](#change-file-associations)
 
 ### Introduction
@@ -54,8 +55,9 @@ I chose to fork noice because:
   - Case-insensitive alphabetic content listing instead of upper case first
   - Roll over at the first and last entries of a directory (with Up/Down keys)
   - Sort entries by file size (largest to smallest)
+  - Shortcut to invoke file name copier (set using environment variable `NOICE_COPIER`)
 - File associations
-  - Environment variable `NOICE_OPENER` to override all associations and open all files with your desktop environments default file opener. Examples:
+  - Environment variable `NOICE_OPENER` to override all associations and open all files with your desktop environment's default file opener. Examples:
 
         export NOICE_OPENER=xdg-open
         export NOICE_OPENER=gnome-open
@@ -113,6 +115,7 @@ Start noice (default: current directory):
 | `e` | edit entry in `vim` |
 | `p` | open entry with `less` pager |
 | `z` | run `top` |
+| `Ctrl-k` | invoke file name copier |
 | `Ctrl-l` | redraw window |
 | `q` | quit noice |
 
@@ -133,6 +136,22 @@ The following abbreviations are used in the detail view:
 ### Help
 
     $ man noice
+
+### Copy current file path to clipboard
+
+noice can pipe the absolute path of the current file to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
+
+Sample Linux copier script:
+
+    #!/bin/sh
+
+    echo -n $1 | xsel --clipboard --input
+
+export `NOICE_OPENER`:
+
+    export NOICE_COPIER="/home/vaio/copier.sh"
+
+Start noice and use `Ctrl-k` to copy the absolute path (from `/`) of the file under the cursor to clipboard.
 
 ### Change file associations
 

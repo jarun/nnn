@@ -68,6 +68,7 @@ enum action {
 	SEL_FSIZE,
 	SEL_MTIME,
 	SEL_REDRAW,
+	SEL_COPY,
 	SEL_RUN,
 	SEL_RUNARG,
 };
@@ -94,6 +95,7 @@ int ndents, cur;
 int idle;
 char *opener = NULL;
 char *fallback_opener = NULL;
+char *copier = NULL;
 char size_buf[12]; /* Buffer to hold human readable size */
 const char* size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 
@@ -884,6 +886,19 @@ nochange:
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 			goto begin;
+		case SEL_COPY:
+			if (copier && ndents) {
+				char abspath[PATH_MAX];
+
+				if (strcmp(path, "/") == 0)
+					snprintf(abspath, PATH_MAX, "/%s", dents[cur].name);
+				else
+					snprintf(abspath, PATH_MAX, "%s/%s", path, dents[cur].name);
+				spawn(copier, abspath, NULL);
+				printmsg(abspath);
+			} else if (!copier)
+					printmsg("NOICE_COPIER is not set");
+			goto nochange;
 		case SEL_RUN:
 			run = xgetenv(env, run);
 			exitcurses();
@@ -949,6 +964,9 @@ main(int argc, char *argv[])
 
 	/* Get the fallback desktop mime opener, if set */
 	fallback_opener = getenv("NOICE_FALLBACK_OPENER");
+
+	/* Get the default copier, if set */
+	copier = getenv("NOICE_COPIER");
 
 	signal(SIGINT, SIG_IGN);
 
