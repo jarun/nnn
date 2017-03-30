@@ -8,10 +8,10 @@ MANPREFIX = $(PREFIX)/man
 CFLAGS = -O3 -march=native
 LDLIBS = -lcurses
 
-DISTFILES = noice.c strlcat.c strlcpy.c util.h config.def.h\
-    noice.1 Makefile README LICENSE
-OBJ = noice.o strlcat.o strlcpy.o
-BIN = noice
+DISTFILES = nnn.c strlcat.c strlcpy.c util.h config.def.h\
+    nnn.1 Makefile README.md LICENSE
+OBJ = nnn.o strlcat.o strlcpy.o
+BIN = nnn
 
 all: $(BIN)
 
@@ -19,7 +19,7 @@ $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDFLAGS) $(LDLIBS)
 	strip $(BIN)
 
-noice.o: util.h config.h
+nnn.o: util.h config.h
 strlcat.o: util.h
 strlcpy.o: util.h
 
@@ -37,11 +37,11 @@ uninstall:
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
 
 dist:
-	mkdir -p noice-$(VERSION)
-	cp $(DISTFILES) noice-$(VERSION)
-	tar -cf noice-$(VERSION).tar noice-$(VERSION)
-	gzip noice-$(VERSION).tar
-	rm -rf noice-$(VERSION)
+	mkdir -p nnn-$(VERSION)
+	cp $(DISTFILES) nnn-$(VERSION)
+	tar -cf nnn-$(VERSION).tar nnn-$(VERSION)
+	gzip nnn-$(VERSION).tar
+	rm -rf nnn-$(VERSION)
 
 clean:
-	rm -f config.h $(BIN) $(OBJ) noice-$(VERSION).tar.gz
+	rm -f config.h $(BIN) $(OBJ) nnn-$(VERSION).tar.gz

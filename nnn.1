@@ -1,11 +1,11 @@
 .Dd August 21, 2016
-.Dt NOICE 1
+.Dt NNN 1
 .Os
 .Sh NAME
-.Nm noice
+.Nm nnn
 .Nd small file browser
 .Sh SYNOPSIS
-.Nm noice
+.Nm nnn
 .Op Ar dir
 .Sh DESCRIPTION
 .Nm
@@ -105,24 +105,30 @@ files.
 The SHELL, EDITOR and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively.
 .Pp
-\fBNOICE_OPENER:\fR set to your desktop environment's default
+\fBNNN_OPENER:\fR set to your desktop environment's default
 mime opener to override all custom mime associations.
 .br
 Examples: xdg-open, gnome-open, gvfs-open.
 .Pp
-\fBNOICE_FALLBACK_OPENER:\fR set to your desktop environment's default
+\fBNNN_FALLBACK_OPENER:\fR set to your desktop environment's default
 mime opener to use as a fallback when no association is set for a file
 type. Custom associations are listed in the EXAMPLES section below.
+.Pp
+\fBNNN_COPIER:\fR set to a clipboard copier script. For example, on Linux:
+.Bd -literal
+        #!/bin/sh
+
+        echo -n $1 | xsel --clipboard --input
 .Sh EXAMPLES
 The following example shows one possible configuration for
 file associations which is also the default if environment
-variable NOICE_OPENER is not set:
+variable NNN_OPENER is not set:
 .Bd -literal
-struct assoc assocs[] = {
-	{ "\\.(c|cpp|h|txt|log)$", "vim" },
-	{ "\\.pdf$", "zathura" },
-	{ "\\.sh$", "sh" },
-};
+        struct assoc assocs[] = {
+	        { "\\.(c|cpp|h|txt|log)$", "vim" },
+	        { "\\.pdf$", "zathura" },
+	        { "\\.sh$", "sh" },
+        };
 Plain text files are opened with vim.
 .br
 Any other file types are opened with the 'xdg-open' command.
@@ -135,4 +141,4 @@ If you are using urxvt you might have to set backspacekey to DEC.
 .Pp
 ** The current non-mainstream version is a modified one patched by Arun Prakash Jana <engineerarun@gmail.com>.
 .br
-More details: https://github.com/jarun/noice
+More details: https://github.com/jarun/nnn

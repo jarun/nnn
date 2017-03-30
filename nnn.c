@@ -897,7 +897,7 @@ nochange:
 				spawn(copier, abspath, NULL);
 				printmsg(abspath);
 			} else if (!copier)
-					printmsg("NOICE_COPIER is not set");
+					printmsg("NNN_COPIER is not set");
 			goto nochange;
 		case SEL_RUN:
 			run = xgetenv(env, run);
@@ -960,13 +960,13 @@ main(int argc, char *argv[])
 	}
 
 	/* Get the default desktop mime opener, if set */
-	opener = getenv("NOICE_OPENER");
+	opener = getenv("NNN_OPENER");
 
 	/* Get the fallback desktop mime opener, if set */
-	fallback_opener = getenv("NOICE_FALLBACK_OPENER");
+	fallback_opener = getenv("NNN_FALLBACK_OPENER");
 
 	/* Get the default copier, if set */
-	copier = getenv("NOICE_COPIER");
+	copier = getenv("NNN_COPIER");
 
 	signal(SIGINT, SIG_IGN);
 

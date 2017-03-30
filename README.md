@@ -1,13 +1,13 @@
-## noice
+## nnn
 
-A fork of the [noice](http://git.2f30.org/noice/) file browser to make it more friendly towards major distros (which `suck more` by some standards).
+Noice is Not Noice, a noicer fork...
 
 ### Table of Contents
 
 - [Introduction](#introduction)
 - [Why fork?](#why-fork)
-- [Default features](#default-features)
-- [Fork toppings](#fork-toppings)
+- [Original features](#original-features)
+- [nnn toppings](#nnn-toppings)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -18,19 +18,19 @@ A fork of the [noice](http://git.2f30.org/noice/) file browser to make it more f
 
 ### Introduction
 
-noice is a blazing-fast terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed with terminal based systems in mind. However, the incredible user-friendliness and speed make it a perfect utility on modern distros. Navigate to `/usr/bin` from your regular file browser and noice to feel the difference.
+nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. It is developed with terminal based systems in mind. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
 
-The only issue with noice is hard-coded file association. There is no config file (better performance and simpler to maintain) and you have to modify the source to change associations (see [how to change file associations](#change-file-associations)). This fork solves the problem by adding the flexibility of using the default desktop opener at runtime. There are several other improvements too (see [fork-toppings](#fork-toppings)).
+The only issue with noice is hard-coded file associations. There is no config file (better performance and simpler to maintain) and one has to modify the source to change associations (see [how to change file associations](#change-file-associations)). nnn solves the problem by adding the flexibility of using the default desktop opener at runtime. There are several other improvements too (see [fork-toppings](#fork-toppings)).
 
-Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/noice/issues/1).
+Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
 
 ### Why fork?
 
-I chose to fork noice because:
+I chose to fork because:
 - one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. In my opinion evolution is the taste of time.
 - I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind.
 
-### Default features
+### Original features
 
 - Super-easy navigation
 - Open files with default-associated programs
@@ -42,7 +42,7 @@ I chose to fork noice because:
 - Run `top`
 - Open a file with `vim` or `less`
 
-### Fork toppings
+### nnn toppings
 
 - Behaviour and navigation
   - Detail view (default: disabled) with:
@@ -55,20 +55,20 @@ I chose to fork noice because:
   - Case-insensitive alphabetic content listing instead of upper case first
   - Roll over at the first and last entries of a directory (with Up/Down keys)
   - Sort entries by file size (largest to smallest)
-  - Shortcut to invoke file name copier (set using environment variable `NOICE_COPIER`)
+  - Shortcut to invoke file name copier (set using environment variable `NNN_COPIER`)
 - File associations
-  - Environment variable `NOICE_OPENER` to override all associations and open all files with your desktop environment's default file opener. Examples:
+  - Environment variable `NNN_OPENER` to override all associations and open all files with your desktop environment's default file opener. Examples:
 
-        export NOICE_OPENER=xdg-open
-        export NOICE_OPENER=gnome-open
-        export NOICE_OPENER=gvfs-open
-  - Selective file associations (ignored if `NOICE_OPENER` is set):
+        export NNN_OPENER=xdg-open
+        export NNN_OPENER=gnome-open
+        export NNN_OPENER=gvfs-open
+  - Selective file associations (ignored if `NNN_OPENER` is set):
     - Associate plain text files with vim (using `file` command)
     - Remove video file associations (to each his own favourite video player)
     - Associate common audio mimes with lightweight [fmedia](http://fmedia.firmdev.com/)
     - Associate PDF files with [zathura](https://pwmt.org/projects/zathura/)
     - Removed `less` as default file opener
-    - Use environment variable `NOICE_FALLBACK_OPENER` to open other non-associated files
+    - Use environment variable `NNN_FALLBACK_OPENER` to open other non-associated files
 - Compilation
   - Use `-O3` for compilation, fixed warnings
   - Added compilation flag `-march=native`
@@ -77,9 +77,9 @@ I chose to fork noice because:
 
 ### Installation
 
-noice needs a curses implementation and standard libc.
+nnn needs a curses implementation and standard libc.
 
-Download the [latest master](https://github.com/jarun/noice/archive/master.zip) or clone this repository. Compile and install:
+Download the [latest master](https://github.com/jarun/nnn/archive/master.zip) or clone this repository. Compile and install:
 
     $ make
     $ sudo make install
@@ -87,9 +87,9 @@ No plans of packaging at the time.
 
 ### Usage
 
-Start noice (default: current directory):
+Start nnn (default: current directory):
 
-    $ noice [path_to_dir]
+    $ nnn [path_to_dir]
 `>` indicates the currently selected entry.
 
 ### Keyboard shortcuts
@@ -117,7 +117,7 @@ Start noice (default: current directory):
 | `z` | run `top` |
 | `Ctrl-k` | invoke file name copier |
 | `Ctrl-l` | redraw window |
-| `q` | quit noice |
+| `q` | quit |
 
 ### File type abbreviations
 
@@ -135,11 +135,11 @@ The following abbreviations are used in the detail view:
 
 ### Help
 
-    $ man noice
+    $ man nnn
 
 ### Copy current file path to clipboard
 
-noice can pipe the absolute path of the current file to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
+nnn can pipe the absolute path of the current file to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
 
 Sample Linux copier script:
 
@@ -147,12 +147,12 @@ Sample Linux copier script:
 
     echo -n $1 | xsel --clipboard --input
 
-export `NOICE_OPENER`:
+export `NNN_OPENER`:
 
-    export NOICE_COPIER="/home/vaio/copier.sh"
+    export NNN_COPIER="/home/vaio/copier.sh"
 
-Start noice and use `Ctrl-k` to copy the absolute path (from `/`) of the file under the cursor to clipboard.
+Start nnn and use `Ctrl-k` to copy the absolute path (from `/`) of the file under the cursor to clipboard.
 
 ### Change file associations
 
-If you want to set custom applications for certain mime types, or change the ones set already (e.g. vim, fmedia, zathura), modify the `assocs` structure in [config.def.h](https://github.com/jarun/noice/blob/master/config.def.h) (it's easy). Then re-compile and install.
+If you want to set custom applications for certain mime types, or change the ones set already (e.g. vim, fmedia, zathura), modify the `assocs` structure in [config.def.h](https://github.com/jarun/nnn/blob/master/config.def.h) (it's easy). Then re-compile and install.
