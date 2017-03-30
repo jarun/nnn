@@ -42,6 +42,7 @@
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define MAX_LEN 1024
+#define cur(flag) (flag ? CURSR : EMPTY)
 
 struct assoc {
 	char *regex; /* Regex to match on filename */
@@ -454,29 +455,35 @@ void
 printent_long(struct entry *ent, int active)
 {
 	static char buf[18];
-	static struct tm *p;
+	const static struct tm *p;
 
 	p = localtime(&ent->t);
 	strftime(buf, 18, "%b %d %H:%M %Y", p);
 
+	if (active)
+		attron(A_REVERSE);
+
 	if (S_ISDIR(ent->mode))
-		printw("%s%-32.32s D  %-18.18s\n", active ? CURSR : EMPTY, ent->name, buf);
+		printw("%s%-32.32s D  %-18.18s\n", cur(active), ent->name, buf);
 	else if (S_ISLNK(ent->mode))
-		printw("%s%-32.32s L  %-18.18s\n", active ? CURSR : EMPTY, ent->name, buf);
+		printw("%s%-32.32s L  %-18.18s\n", cur(active), ent->name, buf);
 	else if (S_ISSOCK(ent->mode))
-		printw("%s%-32.32s S  %-18.18s\n", active ? CURSR : EMPTY, ent->name, buf);
+		printw("%s%-32.32s S  %-18.18s\n", cur(active), ent->name, buf);
 	else if (S_ISFIFO(ent->mode))
-		printw("%s%-32.32s F  %-18.18s\n", active ? CURSR : EMPTY, ent->name, buf);
+		printw("%s%-32.32s F  %-18.18s\n", cur(active), ent->name, buf);
 	else if (S_ISBLK(ent->mode))
-		printw("%s%-32.32s B  %-18.18s\n", active ? CURSR : EMPTY, ent->name, buf);
+		printw("%s%-32.32s B  %-18.18s\n", cur(active), ent->name, buf);
 	else if (S_ISCHR(ent->mode))
-		printw("%s%-32.32s C  %-18.18s\n", active ? CURSR : EMPTY, ent->name, buf);
+		printw("%s%-32.32s C  %-18.18s\n", cur(active), ent->name, buf);
 	else if (ent->mode & S_IXUSR)
-		printw("%s%-32.32s E  %-18.18s %s\n", active ? CURSR : EMPTY, ent->name,
+		printw("%s%-32.32s E  %-18.18s %s\n", cur(active), ent->name,
 		       buf, coolsize(ent->size));
 	else
-		printw("%s%-32.32s R  %-18.18s %s\n", active ? CURSR : EMPTY, ent->name,
+		printw("%s%-32.32s R  %-18.18s %s\n", cur(active), ent->name,
 		       buf, coolsize(ent->size));
+
+	if (active)
+		attroff(A_REVERSE);
 }
 
 int
@@ -845,6 +852,9 @@ nochange:
 		case SEL_DETAIL:
 			showdetail = !showdetail;
 			showdetail ? (printptr = &printent_long) : (printptr = &printent);
+			/* Save current */
+			if (ndents > 0)
+				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 			goto begin;
 		case SEL_FSIZE:
 			sizeorder = !sizeorder;

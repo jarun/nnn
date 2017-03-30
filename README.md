@@ -49,6 +49,7 @@ I chose to fork noice because:
     - modification time
     - human-readable file size
     - number of entries in current directory
+    - current item in reverse video
   - Case-insensitive alphabetic content listing instead of upper case first
   - Roll over at the first and last entries of a directory (with Up/Down keys)
   - Sort entries by file size (largest to smallest)
