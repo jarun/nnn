@@ -22,49 +22,49 @@ configuration.  The default key bindings are listed below.
 .Pp
 .Bl -tag -width "l, [Right], [Return] or C-mXXXX" -offset indent -compact
 .It Ic k, [Up] or C-p
-Move to previous entry.
+Move to previous entry
 .It Ic j, [Down] or C-n
-Move to next entry.
+Move to next entry
 .It Ic [Pgup] or C-u
-Scroll up half a page.
+Scroll up half a page
 .It Ic [Pgdown] or C-d
-Scroll down half a page.
+Scroll down half a page
 .It Ic [Home], ^ or C-a
-Move to the first entry.
+Move to the first entry
 .It Ic [End], $ or C-e
-Move to the last entry.
+Move to the last entry
 .It Ic l, [Right], [Return] or C-m
-Open file or enter directory.
+Open file or enter directory
 .It Ic h, C-h, [Left] or [Backspace]
-Back up one directory level.
+Back up one directory level
 .It Ic ~
-Change to the HOME directory.
+Change to the HOME directory
 .It Ic / or &
-Change filter (see below for more information).
+Change filter (more information below)
 .It Ic c
-Change into the given directory.
+Change into the given directory
 .It Ic d
-Toggle detail view.
+Toggle detail view
 .It Ic \&.
-Toggle hide .dot files.
+Toggle hide .dot files
 .It Ic s
-Toggle sort by file size.
+Toggle sort by file size
 .It Ic t
-Toggle sort by time modified.
+Toggle sort by time modified
 .It Ic \&!
-Spawn a shell in current directory.
+Spawn SHELL in PWD (fallback sh)
 .It Ic z
 Run the system top utility.
 .It Ic e
-Open selected entry with EDITOR (fallback vi).
+Open current entry in EDITOR (fallback vi)
 .It Ic p
-Open selected entry with PAGER (fallback less).
+Open current entry in PAGER (fallback less)
 .It Ic C-k
-Invoke file name copier.
+Invoke file name copier
 .It Ic C-l
-Force a redraw.
+Force a redraw
 .It Ic q
-Quit.
+Quit
 .El
 .Pp
 Backing up one directory level will set the cursor position at the
@@ -127,10 +127,9 @@ variable NNN_OPENER is not set:
 .Bd -literal
         -----------------------------------------------
         struct assoc assocs[] = {
-	        { "\\.(c|cpp|h|txt|log)$", "vi" },
+	        { "\\.(c|cpp|h|txt|log|sh)$", "vi" },
 	        { "\\.(wma|mp3|ogg|flac)$", "fmedia" },
 	        { "\\.pdf$", "zathura" },
-	        { "\\.sh$", "sh" },
         };
         -----------------------------------------------
 Plain text files are opened with vi.

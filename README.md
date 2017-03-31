@@ -39,7 +39,7 @@ I chose to fork because:
 - Filter contents in current directory
 - Show/hide hidden files
 - Sort entries by modification time (newest to oldest)
-- Spawn a shell in current directory
+- Spawn a `SHELL` in current directory (fallback sh)
 - Run `top`
 - Edit a file with `EDITOR` (fallback vi)
 - Page through a file in `PAGER` (fallback less)
@@ -114,7 +114,7 @@ Start nnn (default: current directory):
 | `.` | toggle hide dot files |
 | `s` | toggle sort by file size |
 | `t` | toggle sort by modified time |
-| `!` | spawn a shell in current dir |
+| `!` | spawn `SHELL` in `PWD` (fallback sh) |
 | `z` | run `top` |
 | `e` | edit entry in `EDITOR` (fallback vi) |
 | `p` | open entry with `PAGER` (fallback less) |

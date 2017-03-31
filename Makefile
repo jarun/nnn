@@ -23,7 +23,7 @@ nnn.o: util.h config.h
 strlcat.o: util.h
 strlcpy.o: util.h
 
-config.h:
+config.h: config.def.h
 	cp config.def.h $@
 
 install: all
