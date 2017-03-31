@@ -56,9 +56,9 @@ Spawn a shell in current directory.
 .It Ic z
 Run the system top utility.
 .It Ic e
-Open selected entry with the vi editor.
+Open selected entry with EDITOR (fallback vi).
 .It Ic p
-Open selected entry with the less pager.
+Open selected entry with PAGER (fallback less).
 .It Ic C-k
 Invoke file name copier.
 .It Ic C-l
@@ -127,13 +127,13 @@ variable NNN_OPENER is not set:
 .Bd -literal
         -----------------------------------------------
         struct assoc assocs[] = {
-	        { "\\.(c|cpp|h|txt|log)$", "vim" },
+	        { "\\.(c|cpp|h|txt|log)$", "vi" },
 	        { "\\.(wma|mp3|ogg|flac)$", "fmedia" },
 	        { "\\.pdf$", "zathura" },
 	        { "\\.sh$", "sh" },
         };
         -----------------------------------------------
-Plain text files are opened with vim.
+Plain text files are opened with vi.
 .br
 Any other file types are opened with the 'xdg-open' command.
 .Ed

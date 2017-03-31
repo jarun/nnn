@@ -41,7 +41,8 @@ I chose to fork because:
 - Sort entries by modification time (newest to oldest)
 - Spawn a shell in current directory
 - Run `top`
-- Open a file with `vim` or `less`
+- Edit a file with `EDITOR` (fallback vi)
+- Page through a file in `PAGER` (fallback less)
 
 ### nnn toppings
 
@@ -65,7 +66,7 @@ I chose to fork because:
         export NNN_OPENER=gnome-open
         export NNN_OPENER=gvfs-open
   - Selective file associations (ignored if `NNN_OPENER` is set):
-    - Associate plain text files with vim (using `file` command)
+    - Associate plain text files with vi (using `file` command)
     - Remove video file associations (to each his own favourite video player)
     - Associate common audio mimes with lightweight [fmedia](http://fmedia.firmdev.com/)
     - Associate PDF files with [zathura](https://pwmt.org/projects/zathura/)
@@ -115,8 +116,8 @@ Start nnn (default: current directory):
 | `t` | toggle sort by modified time |
 | `!` | spawn a shell in current dir |
 | `z` | run `top` |
-| `e` | edit entry in `vim` |
-| `p` | open entry with `less` pager |
+| `e` | edit entry in `EDITOR` (fallback vi) |
+| `p` | open entry with `PAGER` (fallback less) |
 | `^K` | invoke file name copier |
 | `^L` | redraw window |
 | `q` | quit |
@@ -165,4 +166,4 @@ Start nnn and use `Ctrl-k` to copy the absolute path (from `/`) of the file unde
 
 ### Change file associations
 
-If you want to set custom applications for certain mime types, or change the ones set already (e.g. vim, fmedia, zathura), modify the `assocs` structure in [config.def.h](https://github.com/jarun/nnn/blob/master/config.def.h) (it's easy). Then re-compile and install.
+If you want to set custom applications for certain mime types, or change the ones set already (e.g. vi, fmedia, zathura), modify the `assocs` structure in [config.def.h](https://github.com/jarun/nnn/blob/master/config.def.h) (it's easy). Then re-compile and install.

@@ -748,11 +748,11 @@ nochange:
 
 				/* Try custom applications */
 				bin = openwith(newpath);
-				char *execvim = "vim";
+				char *execvi = "vi";
 
 				if (bin == NULL) {
 					/* If a custom handler application is not set, open
-					   plain text files with vim, then try fallback_opener */
+					   plain text files with vi, then try fallback_opener */
 					FILE *fp;
 					char cmd[MAX_LEN];
 					int status;
@@ -768,7 +768,7 @@ nochange:
 					pclose(fp);
 
 					if (strstr(cmd, "ASCII text") != NULL)
-						bin = execvim;
+						bin = execvi;
 					else if (fallback_opener) {
 						snprintf(cmd, MAX_LEN, "%s \"%s\" > /dev/null 2>&1",
 							fallback_opener, newpath);
