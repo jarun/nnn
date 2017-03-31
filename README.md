@@ -11,6 +11,7 @@ Noice is Not Noice, a noicer fork...
 - [Installation](#installation)
 - [Usage](#usage)
 - [Keyboard shortcuts](#keyboard-shortcuts)
+- [Filters](#filters)
 - [File type abbreviations](#file-type-abbreviations)
 - [Help](#help)
 - [Copy current file path to clipboard](#copy-current-file-path-to-clipboard)
@@ -54,10 +55,11 @@ I chose to fork because:
     - full name of currently selected file
   - Case-insensitive alphabetic content listing instead of upper case first
   - Roll over at the first and last entries of a directory (with Up/Down keys)
+  - Removed navigation restriction with relative paths (and let permissions handle it)
   - Sort entries by file size (largest to smallest)
   - Shortcut to invoke file name copier (set using environment variable `NNN_COPIER`)
 - File associations
-  - Environment variable `NNN_OPENER` to override all associations and open all files with your desktop environment's default file opener. Examples:
+  - Environment variable `NNN_OPENER` to let desktop opener handle it all. E.g.:
 
         export NNN_OPENER=xdg-open
         export NNN_OPENER=gnome-open
@@ -67,8 +69,8 @@ I chose to fork because:
     - Remove video file associations (to each his own favourite video player)
     - Associate common audio mimes with lightweight [fmedia](http://fmedia.firmdev.com/)
     - Associate PDF files with [zathura](https://pwmt.org/projects/zathura/)
-    - Removed `less` as default file opener
     - Use environment variable `NNN_FALLBACK_OPENER` to open other non-associated files
+    - Removed `less` as default file opener (there is no universal standalone opener utility)
 - Compilation
   - Use `-O3` for compilation, fixed warnings
   - Added compilation flag `-march=native`
@@ -96,14 +98,14 @@ Start nnn (default: current directory):
 
 | Key | Function |
 | --- | --- |
-| `Down`, `j`, `Ctrl-n` | next entry |
-| `Up`, `k`, `Ctrl-p` | previous entry |
-| `>`, `Enter`, `l` | open file or enter dir |
-| `<`, `Backspace`, `h` | parent dir |
-| `Page Down`, `Ctrl-d` | one page down |
-| `Page Up`, `Ctrl-u` | one page up |
-| `Home`, `Ctrl-a`, `^` | jump to first dir entry |
-| `End`, `Ctrl-e`, `$` | jump to last dir entry |
+| `Up`, `k`, `^P` | previous entry |
+| `Down`, `j`, `^N` | next entry |
+| `PgUp`, `^U` | scroll half page up |
+| `PgDn`, `^D` | scroll half page down |
+| `Home`, `^`, `^A` | jump to first dir entry |
+| `End`, `$`, `^E` | jump to last dir entry |
+| `Right`, `Enter`, `l`, `^M` | open file or enter dir |
+| `Left`, `Backspace`, `h`, `^H` | parent dir |
 | `~` | jump to home dir |
 | `/`, `&` | filter dir contents |
 | `c` | show change dir prompt |
@@ -112,12 +114,20 @@ Start nnn (default: current directory):
 | `s` | toggle sort by file size |
 | `t` | toggle sort by modified time |
 | `!` | spawn a shell in current dir |
+| `z` | run `top` |
 | `e` | edit entry in `vim` |
 | `p` | open entry with `less` pager |
-| `z` | run `top` |
-| `Ctrl-k` | invoke file name copier |
-| `Ctrl-l` | redraw window |
+| `^K` | invoke file name copier |
+| `^L` | redraw window |
 | `q` | quit |
+
+### Filters
+
+Filters support regexes to display only the matched entries in the current directory view. This effectively allows searching through the directory tree for a particular entry.
+
+Filters do not stack on top of each other. They are applied anew every time. An empty filter expression resets the filter.
+
+If nnn is invoked as root the default filter will also match hidden files.
 
 ### File type abbreviations
 

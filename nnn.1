@@ -3,30 +3,22 @@
 .Os
 .Sh NAME
 .Nm nnn
-.Nd small file browser
+.Nd free, fast, friendly file browser
 .Sh SYNOPSIS
 .Nm nnn
 .Op Ar dir
 .Sh DESCRIPTION
 .Nm
-is a simple and efficient file browser that gets out of your way
-as much as possible.  It was initially implemented to be controlled
-with a TV remote control.
+(Noice is Not Noice) is a fork of the noice terminal file browser with improved desktop integration, file associations and navigation. It remains a simple and efficient file browser that stays out of your way.
 .Pp
 .Nm
 defaults to the current directory if
 .Ar dir
-is not specified.  As an extra feature, if
-.Ar dir
-is a relative path,
-.Nm
-will not go back beyond the first component of the path using standard
-navigation key presses.
+is not specified.
 .Pp
 .Nm
 supports both vi-like and emacs-like key bindings in the default
-configuration.  The default key bindings are described below;
-their functionality is described in more detail later.
+configuration.  The default key bindings are listed below.
 .Pp
 .Bl -tag -width "l, [Right], [Return] or C-mXXXX" -offset indent -compact
 .It Ic k, [Up] or C-p
@@ -45,18 +37,20 @@ Move to the last entry.
 Open file or enter directory.
 .It Ic h, C-h, [Left] or [Backspace]
 Back up one directory level.
+.It Ic ~
+Change to the HOME directory.
 .It Ic / or &
 Change filter (see below for more information).
 .It Ic c
 Change into the given directory.
-.It Ic ~
-Change to the HOME directory.
+.It Ic d
+Toggle detail view.
 .It Ic \&.
 Toggle hide .dot files.
+.It Ic s
+Toggle sort by file size.
 .It Ic t
 Toggle sort by time modified.
-.It Ic C-l
-Force a redraw.
 .It Ic \&!
 Spawn a shell in current directory.
 .It Ic z
@@ -65,6 +59,10 @@ Run the system top utility.
 Open selected entry with the vi editor.
 .It Ic p
 Open selected entry with the less pager.
+.It Ic C-k
+Invoke file name copier.
+.It Ic C-l
+Force a redraw.
 .It Ic q
 Quit.
 .El
@@ -77,18 +75,19 @@ is configured by modifying
 .Pa config.h
 and recompiling the code.
 .Pp
-The file associations are specified by regexes
-matching on the currently selected filename.  If a match is found the associated
-program is executed with the filename passed in as the argument.  If no match
-is found the program
-.Xr less 1
-is invoked.  This is useful for editing text files
-as one can use the 'v' command in
-.Xr less 1 to edit the file using the EDITOR environment variable.
+Environment variable
+.Ar NNN_OPENER
+overrides all hard-coded file associations.
+.Pp
+Hard-coded associations are specified by regexes matching on the currently selected filename. If a match is found the associated program is executed with the filename passed in as the argument. If no match is found the environment variable
+.Ar NNN_FALLBACK_OPENER
+is invoked, if set.
+.Pp
+No particular utility is set as the default opener as no standalone universal opener for all mime types exists.
 .Pp
 See the examples section below for more information.
 .Sh FILTERS
-Filters allow you to use regexes to display only the matched
+Filters support regexes to display only the matched
 entries in the current directory view.  This effectively allows
 searching through the directory tree for a particular entry.
 .Pp
@@ -116,19 +115,24 @@ type. Custom associations are listed in the EXAMPLES section below.
 .Pp
 \fBNNN_COPIER:\fR set to a clipboard copier script. For example, on Linux:
 .Bd -literal
+        -------------------------------------
         #!/bin/sh
 
         echo -n $1 | xsel --clipboard --input
+        -------------------------------------
 .Sh EXAMPLES
 The following example shows one possible configuration for
 file associations which is also the default if environment
 variable NNN_OPENER is not set:
 .Bd -literal
+        -----------------------------------------------
         struct assoc assocs[] = {
 	        { "\\.(c|cpp|h|txt|log)$", "vim" },
+	        { "\\.(wma|mp3|ogg|flac)$", "fmedia" },
 	        { "\\.pdf$", "zathura" },
 	        { "\\.sh$", "sh" },
         };
+        -----------------------------------------------
 Plain text files are opened with vim.
 .br
 Any other file types are opened with the 'xdg-open' command.
@@ -137,8 +141,7 @@ Any other file types are opened with the 'xdg-open' command.
 If you are using urxvt you might have to set backspacekey to DEC.
 .Sh AUTHORS
 .An Lazaros Koromilas Aq Mt lostd@2f30.org ,
-.An Dimitris Papastamos Aq Mt sin@2f30.org .
-.Pp
-** The current non-mainstream version is a modified one patched by Arun Prakash Jana <engineerarun@gmail.com>.
-.br
-More details: https://github.com/jarun/nnn
+.An Dimitris Papastamos Aq Mt sin@2f30.org ,
+.An Arun Prakash Jana Aq Mt engineerarun@gmail.com .
+.Sh HOME
+https://github.com/jarun/nnn
