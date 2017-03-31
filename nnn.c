@@ -641,7 +641,24 @@ redraw(char *path)
 
 	if (showdetail) {
 		if (ndents) {
-			sprintf(cwd, "%d items [%s]", ndents, dents[cur].name);
+			static char ind;
+			ind = '\0';
+
+			if (S_ISDIR(dents[cur].mode))
+				ind = '/';
+			else if (S_ISLNK(dents[cur].mode))
+				ind = '@';
+			else if (S_ISSOCK(dents[cur].mode))
+				ind = '=';
+			else if (S_ISFIFO(dents[cur].mode))
+				ind = '|';
+			else if (dents[cur].mode & S_IXUSR)
+				ind = '*';
+
+			ind
+			? sprintf(cwd, "%d items [%s%c]", ndents, dents[cur].name, ind)
+			: sprintf(cwd, "%d items [%s]", ndents, dents[cur].name);
+
 			printmsg(cwd);
 		} else
 			printmsg("0 items");
