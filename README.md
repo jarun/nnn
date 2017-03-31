@@ -68,7 +68,7 @@ I chose to fork because:
   - Selective file associations (ignored if `NNN_OPENER` is set):
     - Associate plain text files with vi (using `file` command)
     - Remove video file associations (to each his own favourite video player)
-    - Associate common audio mimes with lightweight [fmedia](http://fmedia.firmdev.com/)
+    - Associate common audio mimes with mpv
     - Associate PDF files with [zathura](https://pwmt.org/projects/zathura/)
     - Use environment variable `NNN_FALLBACK_OPENER` to open other non-associated files
     - Removed `less` as default file opener (there is no universal standalone opener utility)
@@ -166,4 +166,4 @@ Start nnn and use `Ctrl-k` to copy the absolute path (from `/`) of the file unde
 
 ### Change file associations
 
-If you want to set custom applications for certain mime types, or change the ones set already (e.g. vi, fmedia, zathura), modify the `assocs` structure in [config.def.h](https://github.com/jarun/nnn/blob/master/config.def.h) (it's easy). Then re-compile and install.
+If you want to set custom applications for certain mime types, or change the ones set already (e.g. vi, mpv, zathura), modify the `assocs` structure in [config.def.h](https://github.com/jarun/nnn/blob/master/config.def.h) (it's easy). Then re-compile and install.
