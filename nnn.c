@@ -41,8 +41,8 @@
 #define CONTROL(c) ((c) ^ 0x40)
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
-#define MAX_LEN 1024
-#define cur(flag) (flag ? CURSR : EMPTY)
+#define MAX_CMD_LEN (PATH_MAX << 1)
+#define CURSYM(flag) (flag ? CURSR : EMPTY)
 
 struct assoc {
 	char *regex; /* Regex to match on filename */
@@ -82,12 +82,12 @@ struct key {
 
 #include "config.h"
 
-struct entry {
+typedef struct entry {
 	char name[PATH_MAX];
 	mode_t mode;
 	time_t t;
 	off_t size;
-};
+} *pEntry;
 
 /* Global context */
 struct entry *dents;
@@ -96,7 +96,6 @@ int idle;
 char *opener = NULL;
 char *fallback_opener = NULL;
 char *copier = NULL;
-char size_buf[12]; /* Buffer to hold human readable size */
 const char* size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 
 /*
@@ -281,12 +280,12 @@ int
 entrycmp(const void *va, const void *vb)
 {
 	if (mtimeorder)
-		return ((struct entry *)vb)->t - ((struct entry *)va)->t;
+		return ((pEntry)vb)->t - ((pEntry)va)->t;
 
 	if (sizeorder)
-		return ((struct entry *)vb)->size - ((struct entry *)va)->size;
+		return ((pEntry)vb)->size - ((pEntry)va)->size;
 
-	return xstricmp(((struct entry *)va)->name, ((struct entry *)vb)->name);
+	return xstricmp(((pEntry)va)->name, ((pEntry)vb)->name);
 }
 
 void
@@ -442,6 +441,7 @@ void (*printptr)(struct entry *ent, int active) = &printent;
 char*
 coolsize(off_t size)
 {
+	static char size_buf[12]; /* Buffer to hold human readable size */
 	int i = 0;
 	long double fsize = (double)size;
 
@@ -467,21 +467,29 @@ printent_long(struct entry *ent, int active)
 		attron(A_REVERSE);
 
 	if (S_ISDIR(ent->mode))
-		printw("%s%-17.17s           %s/\n", cur(active), buf, ent->name);
+		printw("%s%-17.17s        /  %s/\n",
+		       CURSYM(active), buf, ent->name);
 	else if (S_ISLNK(ent->mode))
-		printw("%s%-17.17s           %s@\n", cur(active), buf, ent->name);
+		printw("%s%-17.17s        @  %s@\n",
+		       CURSYM(active), buf, ent->name);
 	else if (S_ISSOCK(ent->mode))
-		printw("%s%-17.17s           %s=\n", cur(active), buf, ent->name);
+		printw("%s%-17.17s        =  %s=\n",
+		       CURSYM(active), buf, ent->name);
 	else if (S_ISFIFO(ent->mode))
-		printw("%s%-17.17s           %s|\n", cur(active), buf, ent->name);
+		printw("%s%-17.17s        |  %s|\n",
+		       CURSYM(active), buf, ent->name);
 	else if (S_ISBLK(ent->mode))
-		printw("%s%-17.17s        b  %s\n", cur(active), buf, ent->name);
+		printw("%s%-17.17s        b  %s\n",
+		       CURSYM(active), buf, ent->name);
 	else if (S_ISCHR(ent->mode))
-		printw("%s%-17.17s        c  %s\n", cur(active), buf, ent->name);
+		printw("%s%-17.17s        c  %s\n",
+		       CURSYM(active), buf, ent->name);
 	else if (ent->mode & S_IXUSR)
-		printw("%s%-17.17s %8.8s  %s*\n", cur(active), buf, coolsize(ent->size), ent->name);
+		printw("%s%-17.17s %8.8s* %s*\n", CURSYM(active),
+		       buf, coolsize(ent->size), ent->name);
 	else
-		printw("%s%-17.17s %8.8s  %s\n", cur(active), buf, coolsize(ent->size), ent->name);
+		printw("%s%-17.17s %8.8s  %s\n", CURSYM(active),
+		       buf, coolsize(ent->size), ent->name);
 
 	if (active)
 		attroff(A_REVERSE);
@@ -585,10 +593,9 @@ populate(char *path, char *oldpath, char *fltr)
 void
 redraw(char *path)
 {
-	char cwd[PATH_MAX], cwdresolved[PATH_MAX];
-	size_t ncols;
-	int nlines, odd;
-	int i;
+	static char cwd[PATH_MAX];
+	static int nlines, odd;
+	static int i;
 
 	nlines = MIN(LINES - 4, ndents);
 
@@ -606,17 +613,12 @@ redraw(char *path)
 	DPRINTF_S(path);
 
 	/* No text wrapping in cwd line */
-	ncols = COLS;
-	if (ncols > PATH_MAX)
-		ncols = PATH_MAX;
-	strlcpy(cwd, path, ncols);
-	cwd[ncols - strlen(CWD) - 1] = '\0';
-	if (!realpath(path, cwdresolved)) {
+	if (!realpath(path, cwd)) {
 		printmsg("Cannot resolve path");
 		return;
 	}
 
-	printw(CWD "%s\n\n", cwdresolved);
+	printw(CWD "%s\n\n", cwd);
 
 	/* Print listing */
 	odd = ISODD(nlines);
@@ -648,9 +650,10 @@ redraw(char *path)
 			else if (dents[cur].mode & S_IXUSR)
 				ind = '*';
 
-			ind
-			? sprintf(cwd, "%d items [%s%c]", ndents, dents[cur].name, ind)
-			: sprintf(cwd, "%d items [%s]", ndents, dents[cur].name);
+			ind ? sprintf(cwd, "%d items [%s%c]",
+				      ndents, dents[cur].name, ind)
+			    : sprintf(cwd, "%d items [%s]",
+				      ndents, dents[cur].name);
 
 			printmsg(cwd);
 		} else
@@ -661,8 +664,8 @@ redraw(char *path)
 void
 browse(char *ipath, char *ifilter)
 {
-	char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX];
-	char fltr[LINE_MAX];
+	static char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX];
+	static char fltr[LINE_MAX];
 	char *bin, *dir, *tmp, *run, *env;
 	struct stat sb;
 	regex_t re;
@@ -671,6 +674,7 @@ browse(char *ipath, char *ifilter)
 	strlcpy(path, ipath, sizeof(path));
 	strlcpy(fltr, ifilter, sizeof(fltr));
 	oldpath[0] = '\0';
+	newpath[0] = '\0';
 begin:
 	r = populate(path, oldpath, fltr);
 	if (r == -1) {
@@ -736,43 +740,47 @@ nochange:
 				strlcpy(fltr, ifilter, sizeof(fltr));
 				goto begin;
 			case S_IFREG:
+			{
+				static char cmd[MAX_CMD_LEN];
+				static char *runvi = "vi";
+				static int status;
+				static FILE *fp;
+
 				/* If default mime opener is set, use it */
 				if (opener) {
-					char cmd[MAX_LEN];
-					int status;
-
-					snprintf(cmd, MAX_LEN, "%s \"%s\" > /dev/null 2>&1",
-						opener, newpath);
+					snprintf(cmd, MAX_CMD_LEN,
+						 "%s \"%s\" > /dev/null 2>&1",
+						 opener, newpath);
 					status = system(cmd);
 					continue;
 				}
 
 				/* Try custom applications */
 				bin = openwith(newpath);
-				char *execvi = "vi";
 
 				if (bin == NULL) {
-					/* If a custom handler application is not set, open
-					   plain text files with vi, then try fallback_opener */
-					FILE *fp;
-					char cmd[MAX_LEN];
-					int status;
-
-					snprintf(cmd, MAX_LEN, "file \"%s\"", newpath);
+					/* If a custom handler application is
+					   not set, open plain text files with
+					   vi, then try fallback_opener */
+					snprintf(cmd, MAX_CMD_LEN,
+						 "file \"%s\"", newpath);
 					fp = popen(cmd, "r");
 					if (fp == NULL)
 						goto nochange;
-					if (fgets(cmd, MAX_LEN, fp) == NULL) {
+					if (fgets(cmd, MAX_CMD_LEN, fp) == NULL) {
 						pclose(fp);
 						goto nochange;
 					}
 					pclose(fp);
 
 					if (strstr(cmd, "ASCII text") != NULL)
-						bin = execvi;
+						bin = runvi;
 					else if (fallback_opener) {
-						snprintf(cmd, MAX_LEN, "%s \"%s\" > /dev/null 2>&1",
-							fallback_opener, newpath);
+						snprintf(cmd, MAX_CMD_LEN,
+							 "%s \"%s\" > \
+							 /dev/null 2>&1",
+							 fallback_opener,
+							 newpath);
 						status = system(cmd);
 						continue;
 					} else {
@@ -784,6 +792,7 @@ nochange:
 				spawn(bin, newpath, NULL);
 				initcurses();
 				continue;
+			}
 			default:
 				printmsg("Unsupported file");
 				goto nochange;
@@ -872,7 +881,8 @@ nochange:
 			goto begin;
 		case SEL_DETAIL:
 			showdetail = !showdetail;
-			showdetail ? (printptr = &printent_long) : (printptr = &printent);
+			showdetail ? (printptr = &printent_long)
+				   : (printptr = &printent);
 			/* Save current */
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
@@ -901,9 +911,11 @@ nochange:
 				char abspath[PATH_MAX];
 
 				if (strcmp(path, "/") == 0)
-					snprintf(abspath, PATH_MAX, "/%s", dents[cur].name);
+					snprintf(abspath, PATH_MAX, "/%s",
+						 dents[cur].name);
 				else
-					snprintf(abspath, PATH_MAX, "%s/%s", path, dents[cur].name);
+					snprintf(abspath, PATH_MAX, "%s/%s",
+						 path, dents[cur].name);
 				spawn(copier, abspath, NULL);
 				printmsg(abspath);
 			} else if (!copier)
