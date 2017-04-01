@@ -6,6 +6,7 @@
 .Nd free, fast, friendly file browser
 .Sh SYNOPSIS
 .Nm nnn
+.Op Ar -d
 .Op Ar dir
 .Sh DESCRIPTION
 .Nm
@@ -69,6 +70,12 @@ Quit
 .Pp
 Backing up one directory level will set the cursor position at the
 directory you came out of.
+.Pp
+.Nm
+supports the following option:
+.Pp
+.Fl d
+        Open in detail view mode.
 .Sh CONFIGURATION
 .Nm
 is configured by modifying
@@ -143,4 +150,4 @@ If you are using urxvt you might have to set backspacekey to DEC.
 .An Dimitris Papastamos Aq Mt sin@2f30.org ,
 .An Arun Prakash Jana Aq Mt engineerarun@gmail.com .
 .Sh HOME
-https://github.com/jarun/nnn
+.Em https://github.com/jarun/nnn

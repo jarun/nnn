@@ -116,7 +116,6 @@ const char* size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
  * '------
  */
 
-void (*printptr)(struct entry *ent, int active);
 void printmsg(char *);
 void printwarn(void);
 void printerr(int, char *);
@@ -437,6 +436,8 @@ printent(struct entry *ent, int active)
 	else
 		printw("%s%s\n", active ? CURSR : EMPTY, ent->name);
 }
+
+void (*printptr)(struct entry *ent, int active) = &printent;
 
 char*
 coolsize(off_t size)
@@ -933,9 +934,9 @@ nochange:
 }
 
 void
-usage(char *argv0)
+usage(void)
 {
-	fprintf(stderr, "usage: %s [dir]\n", argv0);
+	fprintf(stderr, "usage: nnn [-d] [dir]\n");
 	exit(1);
 }
 
@@ -944,9 +945,7 @@ main(int argc, char *argv[])
 {
 	char cwd[PATH_MAX], *ipath;
 	char *ifilter;
-
-	if (argc > 2)
-		usage(argv[0]);
+	int opt = 0;
 
 	/* Confirm we are in a terminal */
 	if (!isatty(0) || !isatty(1)) {
@@ -954,23 +953,37 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (getuid() == 0)
-		showhidden = 1;
-	initfilter(showhidden, &ifilter);
+	if (argc > 3)
+		usage();
 
-	printptr = &printent;
-
-	if (argv[1] != NULL) {
-		ipath = realpath(argv[1], cwd);
-		if (!ipath) {
-			fprintf(stderr, "%s: no such dir\n", argv[1]);
-			exit(1);
+	while ((opt = getopt(argc, argv, "d")) != -1) {
+		switch (opt) {
+		case 'd':
+			/* Open in detail mode, if set */
+			showdetail = 1;
+			printptr = &printent_long;
+			break;
+		default:
+			usage();
 		}
-	} else {
+	}
+
+	if (argc == optind) {
+		/* Start in the current directory */
 		ipath = getcwd(cwd, sizeof(cwd));
 		if (ipath == NULL)
 			ipath = "/";
+	} else {
+		ipath = realpath(argv[optind], cwd);
+		if (!ipath) {
+			fprintf(stderr, "%s: no such dir\n", argv[optind]);
+			exit(1);
+		}
 	}
+
+	if (getuid() == 0)
+		showhidden = 1;
+	initfilter(showhidden, &ifilter);
 
 	/* Get the default desktop mime opener, if set */
 	opener = getenv("NNN_OPENER");

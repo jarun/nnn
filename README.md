@@ -92,8 +92,10 @@ No plans of packaging at the time.
 
 Start nnn (default: current directory):
 
-    $ nnn [path_to_dir]
-`>` indicates the currently selected entry.
+    $ nnn [-d] [path_to_dir]
+
+    -d: open in detail view mode
+`>` indicates the currently selected entry in nnn.
 
 ### Keyboard shortcuts
 
