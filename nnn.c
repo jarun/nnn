@@ -90,13 +90,13 @@ typedef struct entry {
 } *pEntry;
 
 /* Global context */
-struct entry *dents;
-int ndents, cur;
-int idle;
-char *opener = NULL;
-char *fallback_opener = NULL;
-char *copier = NULL;
-const char* size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
+static struct entry *dents;
+static int ndents, cur;
+static int idle;
+static char *opener = NULL;
+static char *fallback_opener = NULL;
+static char *copier = NULL;
+static const char* size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 
 /*
  * Layout:
@@ -115,12 +115,12 @@ const char* size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
  * '------
  */
 
-void printmsg(char *);
-void printwarn(void);
-void printerr(int, char *);
+static void printmsg(char *);
+static void printwarn(void);
+static void printerr(int, char *);
 
 #undef dprintf
-int
+static int
 dprintf(int fd, const char *fmt, ...)
 {
 	char buf[BUFSIZ];
@@ -135,18 +135,7 @@ dprintf(int fd, const char *fmt, ...)
 	return r;
 }
 
-void *
-xmalloc(size_t size)
-{
-	void *p;
-
-	p = malloc(size);
-	if (p == NULL)
-		printerr(1, "malloc");
-	return p;
-}
-
-void *
+static void *
 xrealloc(void *p, size_t size)
 {
 	p = realloc(p, size);
@@ -155,20 +144,9 @@ xrealloc(void *p, size_t size)
 	return p;
 }
 
-char *
-xstrdup(const char *s)
-{
-	char *p;
-
-	p = strdup(s);
-	if (p == NULL)
-		printerr(1, "strdup");
-	return p;
-}
-
 /* Some implementations of dirname(3) may modify `path' and some
  * return a pointer inside `path'. */
-char *
+static char *
 xdirname(const char *path)
 {
 	static char out[PATH_MAX];
@@ -182,7 +160,7 @@ xdirname(const char *path)
 	return out;
 }
 
-void
+static void
 spawn(char *file, char *arg, char *dir)
 {
 	pid_t pid;
@@ -202,7 +180,7 @@ spawn(char *file, char *arg, char *dir)
 	}
 }
 
-char *
+static char *
 xgetenv(char *name, char *fallback)
 {
 	char *value;
@@ -213,7 +191,7 @@ xgetenv(char *name, char *fallback)
 	return value && value[0] ? value : fallback;
 }
 
-int
+static int
 xstricmp(const char *s1, const char *s2)
 {
 	while (*s2 != 0 && TOUPPER(*s1) == TOUPPER(*s2))
@@ -226,12 +204,12 @@ xstricmp(const char *s1, const char *s2)
 	return (int) (TOUPPER(*s1) - TOUPPER(*s2));
 }
 
-char *
+static char *
 openwith(char *file)
 {
 	regex_t regex;
 	char *bin = NULL;
-	int i;
+	unsigned int i;
 
 	for (i = 0; i < LEN(assocs); i++) {
 		if (regcomp(&regex, assocs[i].regex,
@@ -246,7 +224,7 @@ openwith(char *file)
 	return bin;
 }
 
-int
+static int
 setfilter(regex_t *regex, char *filter)
 {
 	char errbuf[LINE_MAX];
@@ -264,19 +242,19 @@ setfilter(regex_t *regex, char *filter)
 	return r;
 }
 
-void
+static void
 initfilter(int dot, char **ifilter)
 {
 	*ifilter = dot ? "." : "^[^.]";
 }
 
-int
+static int
 visible(regex_t *regex, char *file)
 {
 	return regexec(regex, file, 0, NULL, 0) == 0;
 }
 
-int
+static int
 entrycmp(const void *va, const void *vb)
 {
 	if (mtimeorder)
@@ -288,7 +266,7 @@ entrycmp(const void *va, const void *vb)
 	return xstricmp(((pEntry)va)->name, ((pEntry)vb)->name);
 }
 
-void
+static void
 initcurses(void)
 {
 	if (initscr() == NULL) {
@@ -308,14 +286,14 @@ initcurses(void)
 	timeout(1000); /* One second */
 }
 
-void
+static void
 exitcurses(void)
 {
 	endwin(); /* Restore terminal */
 }
 
 /* Messages show up at the bottom */
-void
+static void
 printmsg(char *msg)
 {
 	move(LINES - 1, 0);
@@ -323,14 +301,14 @@ printmsg(char *msg)
 }
 
 /* Display warning as a message */
-void
+static void
 printwarn(void)
 {
 	printmsg(strerror(errno));
 }
 
 /* Kill curses and display error before exiting */
-void
+static void
 printerr(int ret, char *prefix)
 {
 	exitcurses();
@@ -339,14 +317,14 @@ printerr(int ret, char *prefix)
 }
 
 /* Clear the last line */
-void
+static void
 clearprompt(void)
 {
 	printmsg("");
 }
 
 /* Print prompt on the last line */
-void
+static void
 printprompt(char *str)
 {
 	clearprompt();
@@ -355,10 +333,11 @@ printprompt(char *str)
 
 /* Returns SEL_* if key is bound and 0 otherwise.
  * Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}) */
-int
+static int
 nextsel(char **run, char **env)
 {
-	int c, i;
+	int c;
+	unsigned int i;
 
 	c = getch();
 	if (c == -1)
@@ -375,7 +354,7 @@ nextsel(char **run, char **env)
 	return 0;
 }
 
-char *
+static char *
 readln(void)
 {
 	static char ln[LINE_MAX];
@@ -391,7 +370,7 @@ readln(void)
 	return ln[0] ? ln : NULL;
 }
 
-int
+static int
 canopendir(char *path)
 {
 	DIR *dirp;
@@ -403,7 +382,7 @@ canopendir(char *path)
 	return 1;
 }
 
-char *
+static char *
 mkpath(char *dir, char *name, char *out, size_t n)
 {
 	/* Handle absolute path */
@@ -419,7 +398,7 @@ mkpath(char *dir, char *name, char *out, size_t n)
 	return out;
 }
 
-void
+static void
 printent(struct entry *ent, int active)
 {
 	if (S_ISDIR(ent->mode))
@@ -436,9 +415,9 @@ printent(struct entry *ent, int active)
 		printw("%s%s\n", active ? CURSR : EMPTY, ent->name);
 }
 
-void (*printptr)(struct entry *ent, int active) = &printent;
+static void (*printptr)(struct entry *ent, int active) = &printent;
 
-char*
+static char*
 coolsize(off_t size)
 {
 	static char size_buf[12]; /* Buffer to hold human readable size */
@@ -454,11 +433,11 @@ coolsize(off_t size)
 	return size_buf;
 }
 
-void
+static void
 printent_long(struct entry *ent, int active)
 {
 	static char buf[18];
-	const static struct tm *p;
+	static const struct tm *p;
 
 	p = localtime(&ent->t);
 	strftime(buf, 18, "%b %d %H:%M %Y", p);
@@ -495,7 +474,7 @@ printent_long(struct entry *ent, int active)
 		attroff(A_REVERSE);
 }
 
-int
+static int
 dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
 {
@@ -536,14 +515,14 @@ dentfill(char *path, struct entry **dents,
 	return n;
 }
 
-void
+static void
 dentfree(struct entry *dents)
 {
 	free(dents);
 }
 
 /* Return the position of the matching entry or 0 otherwise */
-int
+static int
 dentfind(struct entry *dents, int n, char *cwd, char *path)
 {
 	char tmp[PATH_MAX];
@@ -561,7 +540,7 @@ dentfind(struct entry *dents, int n, char *cwd, char *path)
 	return 0;
 }
 
-int
+static int
 populate(char *path, char *oldpath, char *fltr)
 {
 	regex_t re;
@@ -590,7 +569,7 @@ populate(char *path, char *oldpath, char *fltr)
 	return 0;
 }
 
-void
+static void
 redraw(char *path)
 {
 	static char cwd[PATH_MAX];
@@ -661,7 +640,7 @@ redraw(char *path)
 	}
 }
 
-void
+static void
 browse(char *ipath, char *ifilter)
 {
 	static char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX];
@@ -945,7 +924,7 @@ nochange:
 	}
 }
 
-void
+static void
 usage(void)
 {
 	fprintf(stderr, "usage: nnn [-d] [dir]\n");

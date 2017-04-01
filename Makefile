@@ -5,10 +5,11 @@ MANPREFIX = $(PREFIX)/man
 
 #CPPFLAGS = -DDEBUG
 #CFLAGS = -g
-CFLAGS = -O3 -march=native
+CFLAGS = -O3 -march=native -fno-asynchronous-unwind-tables -fdata-sections \
+    -ffunction-sections -Wl,--gc-sections
 LDLIBS = -lcurses
 
-DISTFILES = nnn.c strlcat.c strlcpy.c util.h config.def.h\
+DISTFILES = nnn.c strlcat.c strlcpy.c util.h config.def.h \
     nnn.1 Makefile README.md LICENSE
 OBJ = nnn.o strlcat.o strlcpy.o
 BIN = nnn
@@ -17,7 +18,9 @@ all: $(BIN)
 
 $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDFLAGS) $(LDLIBS)
-	strip $(BIN)
+	strip -S --strip-unneeded --remove-section=.note.gnu.gold-version \
+    --remove-section=.comment --remove-section=.note \
+    --remove-section=.note.gnu.build-id --remove-section=.note.ABI-tag $(BIN)
 
 nnn.o: util.h config.h
 strlcat.o: util.h
