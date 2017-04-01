@@ -702,25 +702,31 @@ redraw(char *path)
 
 	if (showdetail) {
 		if (ndents) {
-			static char ind;
-			ind = '\0';
+			static char ind[2] = "\0\0";
+			static char sort[9];
+
+			if (mtimeorder)
+				sprintf(sort, "by time ");
+			else if (sizeorder)
+				sprintf(sort, "by size ");
+			else
+				sort[0] = '\0';
 
 			if (S_ISDIR(dents[cur].mode))
-				ind = '/';
+				ind[0] = '/';
 			else if (S_ISLNK(dents[cur].mode))
-				ind = '@';
+				ind[0] = '@';
 			else if (S_ISSOCK(dents[cur].mode))
-				ind = '=';
+				ind[0] = '=';
 			else if (S_ISFIFO(dents[cur].mode))
-				ind = '|';
+				ind[0] = '|';
 			else if (dents[cur].mode & S_IXUSR)
-				ind = '*';
+				ind[0] = '*';
+			else
+				ind[0] = '\0';
 
-			ind ? sprintf(cwd, "%d items [%s%c]",
-				      ndents, dents[cur].name, ind)
-			    : sprintf(cwd, "%d items [%s]",
-				      ndents, dents[cur].name);
-
+			sprintf(cwd, "total %d %s[%s%s]", ndents, sort,
+				dents[cur].name, ind);
 			printmsg(cwd);
 		} else
 			printmsg("0 items");
