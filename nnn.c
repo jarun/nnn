@@ -828,8 +828,10 @@ nochange:
 			/* There is no going back */
 			if (strcmp(path, "/") == 0 ||
 			    strcmp(path, ".") == 0 ||
-			    strchr(path, '/') == NULL)
+			    strchr(path, '/') == NULL) {
+				printmsg("You are at /");
 				goto nochange;
+			}
 			dir = xdirname(path);
 			if (canopendir(dir) == 0) {
 				printwarn();
