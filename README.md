@@ -58,6 +58,7 @@ I chose to fork because:
   - Roll over at the first and last entries of a directory (with Up/Down keys)
   - Removed navigation restriction with relative paths (and let permissions handle it)
   - Sort entries by file size (largest to smallest)
+  - Sort numeric names in numeric order
   - Shortcut to invoke file name copier (set using environment variable `NNN_COPIER`)
 - File associations
   - Environment variable `NNN_OPENER` to let desktop opener handle it all. E.g.:

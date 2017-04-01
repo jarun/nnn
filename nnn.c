@@ -278,16 +278,67 @@ xgetenv(char *name, char *fallback)
 	return value && value[0] ? value : fallback;
 }
 
+int xisdigit(const char c) {
+	if (c >= '0' && c <= '9')  \
+		return 1; \
+
+	return 0;
+}
+
+/*
+ * We assume none of the strings are NULL.
+ *
+ * Let's have the logic to sort numeric names in numeric order.
+ * E.g., the order '1, 10, 2' doesn't make sense to human eyes.
+ *
+ * If the absolute numeric values are same, we fallback to alphasort.
+ */
 static int
 xstricmp(const char *s1, const char *s2)
 {
-	while (*s2 != 0 && TOUPPER(*s1) == TOUPPER(*s2))
+	static int s1_num, s2_num;
+	static const char *ps1, *ps2;
+	static long long num1, num2;
+
+	s1_num = s2_num = 0;
+
+	ps1 = s1;
+	if (*ps1 == '-')
+		ps1++;
+	while (*ps1 && xisdigit(*ps1))
+		ps1++;
+	if (!*ps1)
+		s1_num = 1;
+
+
+	ps2 = s2;
+	if (*ps2 == '-')
+		ps2++;
+	while (*ps2 && xisdigit(*ps2))
+		ps2++;
+	if (!*ps2)
+		s2_num = 1;
+
+	if (s1_num && s2_num) {
+		num1 = strtoll(s1, NULL, 10);
+		num2 = strtoll(s2, NULL, 10);
+
+		if (num1 != num2) {
+			if (num1 > num2)
+				return 1;
+			else
+				return -1;
+		}
+	}
+
+	while (*s2 && *s1 && TOUPPER(*s1) == TOUPPER(*s2))
 		s1++, s2++;
 
 	/* In case of alphabetically same names, make sure
 	   lower case one comes before upper case one */
 	if (!*s1 && !*s2)
 		return 1;
+
 	return (int) (TOUPPER(*s1) - TOUPPER(*s2));
 }
 
@@ -489,17 +540,17 @@ static void
 printent(struct entry *ent, int active)
 {
 	if (S_ISDIR(ent->mode))
-		printw("%s%s/\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%s/\n", CURSYM(active), ent->name);
 	else if (S_ISLNK(ent->mode))
-		printw("%s%s@\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%s@\n", CURSYM(active), ent->name);
 	else if (S_ISSOCK(ent->mode))
-		printw("%s%s=\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%s=\n", CURSYM(active), ent->name);
 	else if (S_ISFIFO(ent->mode))
-		printw("%s%s|\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%s|\n", CURSYM(active), ent->name);
 	else if (ent->mode & S_IXUSR)
-		printw("%s%s*\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%s*\n", CURSYM(active), ent->name);
 	else
-		printw("%s%s\n", active ? CURSR : EMPTY, ent->name);
+		printw("%s%s\n", CURSYM(active), ent->name);
 }
 
 static void (*printptr)(struct entry *ent, int active) = &printent;
@@ -928,7 +979,7 @@ nochange:
 			}
 			strlcpy(path, newpath, sizeof(path));
 			/* Reset filter */
-			strlcpy(fltr, ifilter, sizeof(fltr))
+			strlcpy(fltr, ifilter, sizeof(fltr));
 			DPRINTF_S(path);
 			goto begin;
 		case SEL_CDHOME:
