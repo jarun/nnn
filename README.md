@@ -72,9 +72,15 @@ I chose to fork because:
     - Associate PDF files with [zathura](https://pwmt.org/projects/zathura/)
     - Use environment variable `NNN_FALLBACK_OPENER` to open other non-associated files
     - Removed `less` as default file opener (there is no universal standalone opener utility)
-- Compilation
-  - Use `-O3` for compilation, fixed warnings
+- Optimizations
+  - Efficient memory usage, 0 malloc()
+  - Complete redundant buffer removal
+  - All frequently used local chunks now static
+  - Removed some redundant string allocation and manipulation
+  - Simplified some roundabout procedures
+  - `-O3` level optimization, warning fixes
   - Added compilation flag `-march=native`
+  - Massive binary size optimization
   - Remove generated config.h on `make clean`
   - strip the final binary
 

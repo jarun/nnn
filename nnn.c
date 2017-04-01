@@ -7,7 +7,6 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <libgen.h>
 #include <limits.h>
 #include <locale.h>
 #include <regex.h>
@@ -93,9 +92,9 @@ typedef struct entry {
 static struct entry *dents;
 static int ndents, cur;
 static int idle;
-static char *opener = NULL;
-static char *fallback_opener = NULL;
-static char *copier = NULL;
+static char *opener;
+static char *fallback_opener;
+static char *copier;
 static const char* size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 
 /*
@@ -144,6 +143,29 @@ xrealloc(void *p, size_t size)
 	return p;
 }
 
+/*
+ * The poor man's implementation of memrchr().
+ * We are only looking for '/' in this program.
+ */
+static void *
+xmemrchr(const void *s, int c, size_t n)
+{
+	unsigned char *p;
+	unsigned char ch = (unsigned char)c;
+
+	if (!s || !n)
+		return NULL;
+
+	p = (unsigned char *)s + n - 1;
+
+	while(n--)
+		if ((*p--) == ch)
+			return ++p;
+
+	return NULL;
+}
+
+#if 0
 /* Some implementations of dirname(3) may modify `path' and some
  * return a pointer inside `path'. */
 static char *
@@ -158,6 +180,71 @@ xdirname(const char *path)
 		printerr(1, "dirname");
 	strlcpy(out, p, sizeof(out));
 	return out;
+}
+#endif
+
+/*
+ * The following dirname() implementation does not
+ * change the input. We use a copy of the original.
+ *
+ * Modified from the glibc (GNU LGPL) version.
+ */
+static char *
+xdirname(const char *path)
+{
+	static char name[PATH_MAX];
+	char *last_slash;
+
+	strlcpy(name, path, PATH_MAX);
+
+	/* Find last '/'. */
+	last_slash = name != NULL ? strrchr(name, '/') : NULL;
+
+	if (last_slash != NULL && last_slash != name && last_slash[1] == '\0') {
+		/* Determine whether all remaining characters are slashes. */
+		char *runp;
+
+		for (runp = last_slash; runp != name; --runp)
+			if (runp[-1] != '/')
+				break;
+
+		/* The '/' is the last character, we have to look further. */
+		if (runp != name)
+			last_slash = xmemrchr(name, '/', runp - name);
+	}
+
+	if (last_slash != NULL) {
+		/* Determine whether all remaining characters are slashes. */
+		char *runp;
+
+		for (runp = last_slash; runp != name; --runp)
+			if (runp[-1] != '/')
+				break;
+
+		/* Terminate the name. */
+		if (runp == name) {
+			/* The last slash is the first character in the string.
+			   We have to return "/". As a special case we have to
+			   return "//" if there are exactly two slashes at the
+			   beginning of the string. See XBD 4.10 Path Name
+			   Resolution for more information. */
+			if (last_slash == name + 1)
+				++last_slash;
+			else
+				last_slash = name + 1;
+		} else
+			last_slash = runp;
+
+		last_slash[0] = '\0';
+	} else {
+		/* This assignment is ill-designed but the XPG specs require to
+		   return a string containing "." in any case no directory part
+		   is found and so a static and constant string is required. */
+		name[0] = '.';
+		name[1] = '\0';
+	}
+
+	return name;
 }
 
 static void
