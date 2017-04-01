@@ -395,13 +395,25 @@ visible(regex_t *regex, char *file)
 static int
 entrycmp(const void *va, const void *vb)
 {
+	static pEntry pa, pb;
+
+	pa = (pEntry)va;
+	pb = (pEntry)vb;
+
+	/* Sort directories first */
+	if (S_ISDIR(pb->mode) && !S_ISDIR(pa->mode))
+		return 1;
+	else if (S_ISDIR(pa->mode) && !S_ISDIR(pb->mode))
+		return -1;
+
+	/* Do the actual sorting */
 	if (mtimeorder)
-		return ((pEntry)vb)->t - ((pEntry)va)->t;
+		return pb->t - pa->t;
 
 	if (sizeorder)
-		return ((pEntry)vb)->size - ((pEntry)va)->size;
+		return pb->size - pa->size;
 
-	return xstricmp(((pEntry)va)->name, ((pEntry)vb)->name);
+	return xstricmp(pa->name, pb->name);
 }
 
 static void
