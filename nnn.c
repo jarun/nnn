@@ -515,6 +515,9 @@ canopendir(char *path)
 	return 1;
 }
 
+/*
+ * Returns "dir/name or "/name"
+ */
 static char *
 mkpath(char *dir, char *name, char *out, size_t n)
 {
@@ -656,20 +659,25 @@ dentfree(struct entry *dents)
 
 /* Return the position of the matching entry or 0 otherwise */
 static int
-dentfind(struct entry *dents, int n, char *cwd, char *path)
+dentfind(struct entry *dents, int n, char *path)
 {
-	char tmp[PATH_MAX];
-	int i;
-
-	if (path == NULL)
+	if (!path)
 		return 0;
-	for (i = 0; i < n; i++) {
-		mkpath(cwd, dents[i].name, tmp, sizeof(tmp));
-		DPRINTF_S(path);
-		DPRINTF_S(tmp);
-		if (strcmp(tmp, path) == 0)
+
+	char *p = xmemrchr(path, '/', strlen(path));
+	if (!p)
+		p = path;
+	else
+		/* We are assuming an entry with actual
+		   name ending in '/' will not appear */
+		p++;
+
+	DPRINTF_S(p);
+
+	for (int i = 0; i < n; i++)
+		if (strcmp(p, dents[i].name) == 0)
 			return i;
-	}
+
 	return 0;
 }
 
@@ -698,7 +706,7 @@ populate(char *path, char *oldpath, char *fltr)
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
 
 	/* Find cur from history */
-	cur = dentfind(dents, ndents, path, oldpath);
+	cur = dentfind(dents, ndents, oldpath);
 	return 0;
 }
 
