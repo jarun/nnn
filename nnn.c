@@ -295,40 +295,23 @@ int xisdigit(const char c) {
 static int
 xstricmp(const char *s1, const char *s2)
 {
-	static int s1_num, s2_num;
-	static const char *ps1, *ps2;
+	static char *c1, *c2;
 	static long long num1, num2;
 
-	s1_num = s2_num = 0;
+	num1 = strtoll(s1, &c1, 10);
+	num2 = strtoll(s2, &c2, 10);
 
-	ps1 = s1;
-	if (*ps1 == '-')
-		ps1++;
-	while (*ps1 && xisdigit(*ps1))
-		ps1++;
-	if (!*ps1)
-		s1_num = 1;
-
-
-	ps2 = s2;
-	if (*ps2 == '-')
-		ps2++;
-	while (*ps2 && xisdigit(*ps2))
-		ps2++;
-	if (!*ps2)
-		s2_num = 1;
-
-	if (s1_num && s2_num) {
-		num1 = strtoll(s1, NULL, 10);
-		num2 = strtoll(s2, NULL, 10);
-
+	if (*c1 == '\0' && *c2 == '\0') {
 		if (num1 != num2) {
 			if (num1 > num2)
 				return 1;
 			else
 				return -1;
 		}
-	}
+	} else if (*c1 == '\0' && *c2 != '\0')
+		return -1;
+	else if (*c1 != '\0' && *c2 == '\0')
+		return 1;
 
 	while (*s2 && *s1 && TOUPPER(*s1) == TOUPPER(*s2))
 		s1++, s2++;
@@ -410,7 +393,8 @@ entrycmp(const void *va, const void *vb)
 		return pb->t - pa->t;
 
 	if (sizeorder)
-		return pb->size - pa->size;
+		if (pb->size != pa->size)
+			return pb->size - pa->size;
 
 	return xstricmp(pa->name, pb->name);
 }
