@@ -18,8 +18,6 @@
 #include <unistd.h>
 #include <time.h>
 
-#include "util.h"
-
 #ifdef DEBUG
 #define DEBUG_FD 8
 #define DPRINTF_D(x) xprintf(DEBUG_FD, #x "=%d\n", x)
@@ -142,6 +140,29 @@ xrealloc(void *p, size_t size)
 	return p;
 }
 
+static size_t
+xstrlcpy(char *dest, const char *src, size_t n)
+{
+	size_t i;
+
+	for (i = 0; i < n && *src; i++)
+		*dest++ = *src++;
+
+	if (n) {
+		*dest = '\0';
+
+#ifdef CHECK_XSTRLCPY_RET
+		/* Compiling this out as we are not checking
+		   the return value anywhere (controlled case).
+		   Just returning the number of bytes copied. */
+		while(*src++)
+			i++;
+#endif
+	}
+
+	return i;
+}
+
 /*
  * The poor man's implementation of memrchr().
  * We are only looking for '/' in this program.
@@ -173,11 +194,11 @@ xdirname(const char *path)
 	static char out[PATH_MAX];
 	char tmp[PATH_MAX], *p;
 
-	strlcpy(tmp, path, sizeof(tmp));
+	xstrlcpy(tmp, path, sizeof(tmp));
 	p = dirname(tmp);
 	if (p == NULL)
 		printerr(1, "dirname");
-	strlcpy(out, p, sizeof(out));
+	xstrlcpy(out, p, sizeof(out));
 	return out;
 }
 #endif
@@ -194,10 +215,10 @@ xdirname(const char *path)
 	static char name[PATH_MAX];
 	char *last_slash;
 
-	strlcpy(name, path, PATH_MAX);
+	xstrlcpy(name, path, PATH_MAX);
 
 	/* Find last '/'. */
-	last_slash = name != NULL ? strrchr(name, '/') : NULL;
+	last_slash = strrchr(name, '/');
 
 	if (last_slash != NULL && last_slash != name && last_slash[1] == '\0') {
 		/* Determine whether all remaining characters are slashes. */
@@ -523,7 +544,7 @@ mkpath(char *dir, char *name, char *out, size_t n)
 {
 	/* Handle absolute path */
 	if (name[0] == '/')
-		strlcpy(out, name, n);
+		xstrlcpy(out, name, n);
 	else {
 		/* Handle root case */
 		if (strcmp(dir, "/") == 0)
@@ -632,7 +653,7 @@ dentfill(char *path, struct entry **dents,
 		if (filter(re, dp->d_name) == 0)
 			continue;
 		*dents = xrealloc(*dents, (n + 1) * sizeof(**dents));
-		strlcpy((*dents)[n].name, dp->d_name, sizeof((*dents)[n].name));
+		xstrlcpy((*dents)[n].name, dp->d_name, sizeof((*dents)[n].name));
 		/* Get mode flags */
 		mkpath(path, dp->d_name, newpath, sizeof(newpath));
 		r = lstat(newpath, &sb);
@@ -797,8 +818,8 @@ browse(char *ipath, char *ifilter)
 	regex_t re;
 	int r, fd;
 
-	strlcpy(path, ipath, sizeof(path));
-	strlcpy(fltr, ifilter, sizeof(fltr));
+	xstrlcpy(path, ipath, sizeof(path));
+	xstrlcpy(fltr, ifilter, sizeof(fltr));
 	oldpath[0] = '\0';
 	newpath[0] = '\0';
 begin:
@@ -829,10 +850,10 @@ nochange:
 				goto nochange;
 			}
 			/* Save history */
-			strlcpy(oldpath, path, sizeof(oldpath));
-			strlcpy(path, dir, sizeof(path));
+			xstrlcpy(oldpath, path, sizeof(oldpath));
+			xstrlcpy(path, dir, sizeof(path));
 			/* Reset filter */
-			strlcpy(fltr, ifilter, sizeof(fltr));
+			xstrlcpy(fltr, ifilter, sizeof(fltr));
 			goto begin;
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
@@ -863,9 +884,9 @@ nochange:
 					printwarn();
 					goto nochange;
 				}
-				strlcpy(path, newpath, sizeof(path));
+				xstrlcpy(path, newpath, sizeof(path));
 				/* Reset filter */
-				strlcpy(fltr, ifilter, sizeof(fltr));
+				xstrlcpy(fltr, ifilter, sizeof(fltr));
 				goto begin;
 			case S_IFREG:
 			{
@@ -935,7 +956,7 @@ nochange:
 			r = setfilter(&re, tmp);
 			if (r != 0)
 				goto nochange;
-			strlcpy(fltr, tmp, sizeof(fltr));
+			xstrlcpy(fltr, tmp, sizeof(fltr));
 			DPRINTF_S(fltr);
 			/* Save current */
 			if (ndents > 0)
@@ -982,9 +1003,9 @@ nochange:
 				printwarn();
 				goto nochange;
 			}
-			strlcpy(path, newpath, sizeof(path));
+			xstrlcpy(path, newpath, sizeof(path));
 			/* Reset filter */
-			strlcpy(fltr, ifilter, sizeof(fltr));
+			xstrlcpy(fltr, ifilter, sizeof(fltr));
 			DPRINTF_S(path);
 			goto begin;
 		case SEL_CDHOME:
@@ -997,15 +1018,15 @@ nochange:
 				printwarn();
 				goto nochange;
 			}
-			strlcpy(path, tmp, sizeof(path));
+			xstrlcpy(path, tmp, sizeof(path));
 			/* Reset filter */
-			strlcpy(fltr, ifilter, sizeof(fltr));
+			xstrlcpy(fltr, ifilter, sizeof(fltr));
 			DPRINTF_S(path);
 			goto begin;
 		case SEL_TOGGLEDOT:
 			showhidden ^= 1;
 			initfilter(showhidden, &ifilter);
-			strlcpy(fltr, ifilter, sizeof(fltr));
+			xstrlcpy(fltr, ifilter, sizeof(fltr));
 			goto begin;
 		case SEL_DETAIL:
 			showdetail = !showdetail;

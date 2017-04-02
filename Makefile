@@ -5,25 +5,24 @@ MANPREFIX = $(PREFIX)/man
 
 #CPPFLAGS = -DDEBUG
 #CFLAGS = -g
-CFLAGS = -O3 -march=native -s
+CFLAGS = -O3 -march=native
 LDLIBS = -lcurses
 
-DISTFILES = nnn.c strlcat.c strlcpy.c util.h config.def.h \
-    nnn.1 Makefile README.md LICENSE
-OBJ = nnn.o strlcat.o strlcpy.o
+DISTFILES = nnn.c config.def.h nnn.1 Makefile README.md LICENSE
+LOCALCONFIG = config.h
+SRC = nnn.c
 BIN = nnn
 
 all: $(BIN)
 
-$(BIN): $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDFLAGS) $(LDLIBS)
-
-nnn.o: util.h config.h
-strlcat.o: util.h
-strlcpy.o: util.h
-
-config.h: config.def.h
+$(LOCALCONFIG): config.def.h
 	cp config.def.h $@
+
+$(SRC): $(LOCALCONFIG)
+
+$(BIN): $(SRC)
+	$(CC) $(CFLAGS) -o $@ $(SRC) $(LDFLAGS) $(LDLIBS)
+	strip $(BIN)
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
@@ -43,4 +42,4 @@ dist:
 	rm -rf nnn-$(VERSION)
 
 clean:
-	rm -f $(BIN) $(OBJ) nnn-$(VERSION).tar.gz
+	rm -f $(BIN) nnn-$(VERSION).tar.gz
