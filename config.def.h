@@ -66,6 +66,8 @@ struct key bindings[] = {
 	{ '.',            SEL_TOGGLEDOT, "\0",  "\0" },
 	/* Detailed listing */
 	{ 'd',            SEL_DETAIL,    "\0",  "\0" },
+	/* File details */
+	{ 'D',            SEL_STATS,     "\0",  "\0" },
 	/* Toggle sort by size */
 	{ 's',            SEL_FSIZE,     "\0",  "\0" },
 	/* Toggle sort by time */

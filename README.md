@@ -54,6 +54,7 @@ I chose to fork because:
     - current item in reverse video
     - number of items in current directory
     - full name of currently selected file
+  - Show details of the currently selected file
   - Directories first
   - Sort numeric names in numeric order
   - Case-insensitive alphabetic content listing instead of upper case first
@@ -120,6 +121,7 @@ Start nnn (default: current directory):
 | `/`, `&` | filter dir contents |
 | `c` | show change dir prompt |
 | `d` | toggle detail view |
+| `D` | show details of selected file |
 | `.` | toggle hide dot files |
 | `s` | toggle sort by file size |
 | `t` | toggle sort by modified time |

@@ -17,6 +17,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <pwd.h>
+#include <grp.h>
 
 #ifdef DEBUG
 #define DEBUG_FD 8
@@ -62,6 +64,7 @@ enum action {
 	SEL_CDHOME,
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
+	SEL_STATS,
 	SEL_FSIZE,
 	SEL_MTIME,
 	SEL_REDRAW,
@@ -164,7 +167,7 @@ xstrlcpy(char *dest, const char *src, size_t n)
 }
 
 /*
- * The poor man's implementation of memrchr().
+ * The poor man's implementation of memrchr(3).
  * We are only looking for '/' in this program.
  */
 static void *
@@ -204,7 +207,7 @@ xdirname(const char *path)
 #endif
 
 /*
- * The following dirname() implementation does not
+ * The following dirname(3) implementation does not
  * change the input. We use a copy of the original.
  *
  * Modified from the glibc (GNU LGPL) version.
@@ -594,10 +597,7 @@ static void
 printent_long(struct entry *ent, int active)
 {
 	static char buf[18];
-	static const struct tm *p;
-
-	p = localtime(&ent->t);
-	strftime(buf, 18, "%b %d %H:%M %Y", p);
+	strftime(buf, 18, "%b %d %H:%M %Y", localtime(&ent->t));
 
 	if (active)
 		attron(A_REVERSE);
@@ -629,6 +629,140 @@ printent_long(struct entry *ent, int active)
 
 	if (active)
 		attroff(A_REVERSE);
+}
+
+static char
+get_fileind(mode_t mode, char *desc)
+{
+	char c;
+
+	if (S_ISREG(mode)) {
+		c = '-';
+		sprintf(desc, "%s", "regular file");
+	} else if (S_ISDIR(mode)) {
+		c = 'd';
+		sprintf(desc, "%s", "directory");
+	} else if (S_ISBLK(mode)) {
+		c = 'b';
+		sprintf(desc, "%s", "block special device");
+	} else if (S_ISCHR(mode)) {
+		c = 'c';
+		sprintf(desc, "%s", "character special device");
+#ifdef S_ISFIFO
+	} else if (S_ISFIFO(mode)) {
+		c = 'p';
+		sprintf(desc, "%s", "FIFO");
+#endif  /* S_ISFIFO */
+#ifdef S_ISLNK
+	} else if (S_ISLNK(mode)) {
+		c = 'l';
+		sprintf(desc, "%s", "symbolic link");
+#endif  /* S_ISLNK */
+#ifdef S_ISSOCK
+	} else if (S_ISSOCK(mode)) {
+		c = 's';
+		sprintf(desc, "%s", "socket");
+#endif  /* S_ISSOCK */
+#ifdef S_ISDOOR
+    /* Solaris 2.6, etc. */
+	} else if (S_ISDOOR(mode)) {
+		c = 'D';
+		desc[0] = '\0';
+#endif  /* S_ISDOOR */
+	} else {
+		/* Unknown type -- possibly a regular file? */
+		c = '?';
+		desc[0] = '\0';
+	}
+
+	return(c);
+}
+
+/* Convert a mode field into "ls -l" type perms field. */
+static char *
+get_lsperms(mode_t mode, char *desc)
+{
+	static const char *rwx[] = {"---", "--x", "-w-", "-wx",
+				    "r--", "r-x", "rw-", "rwx"};
+	static char bits[11];
+
+	bits[0] = get_fileind(mode, desc);
+	strcpy(&bits[1], rwx[(mode >> 6) & 7]);
+	strcpy(&bits[4], rwx[(mode >> 3) & 7]);
+	strcpy(&bits[7], rwx[(mode & 7)]);
+
+	if (mode & S_ISUID)
+		bits[3] = (mode & S_IXUSR) ? 's' : 'S';
+	if (mode & S_ISGID)
+		bits[6] = (mode & S_IXGRP) ? 's' : 'l';
+	if (mode & S_ISVTX)
+		bits[9] = (mode & S_IXOTH) ? 't' : 'T';
+
+	bits[10] = '\0';
+
+	return(bits);
+}
+
+/*
+ * Follows the stat(1) output closely
+ */
+void
+show_stats(char* fpath, char* fname, struct stat *sb)
+{
+	char buf[40];
+	char *perms = get_lsperms(sb->st_mode, buf);
+
+	clear();
+
+	/* Show file name or 'symlink' -> 'target' */
+	if (perms[0] == 'l') {
+		char symtgt[PATH_MAX];
+		ssize_t len = readlink(fpath, symtgt, PATH_MAX);
+		if (len == -1)
+			printerr(1, "readlink");
+		printw("\n\n    File: '%s' -> '%s'", fname, symtgt);
+	} else
+		printw("\n\n    File: '%s'", fname);
+
+	/* Show size, blocks, file type */
+	printw("\n    Size: %-15llu Blocks: %-10llu IO Block: %-6llu %s",
+	       sb->st_size, sb->st_blocks, sb->st_blksize, buf);
+
+	/* Show containing device, inode, hardlink count */
+	sprintf(buf, "%lxh/%lud", sb->st_dev, sb->st_dev);
+	printw("\n  Device: %-15s Inode: %-11lu Links: %-9lu",
+	       buf, sb->st_ino, sb->st_nlink);
+
+	/* Show major, minor number for block or char device */
+	if (perms[0] == 'b' || perms[0] == 'c')
+		printw(" Device type: %lx,%lx",
+		       major(sb->st_rdev), minor(sb->st_rdev));
+
+	/* Show permissions, owner, group */
+	printw("\n  Access: 0%d%d%d/%s Uid: (%lu/%s)  Gid: (%lu/%s)",
+	       (sb->st_mode >> 6) & 7, (sb->st_mode >> 3) & 7, sb->st_mode & 7,
+	       perms,
+	       sb->st_uid, (getpwuid(sb->st_uid))->pw_name,
+	       sb->st_gid, (getgrgid(sb->st_gid))->gr_name);
+
+	/* Show last access time */
+	strftime(buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_atime));
+	printw("\n\n  Access: %s", buf);
+
+	/* Show last modification time */
+	strftime(buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_mtime));
+	printw("\n  Modify: %s", buf);
+
+	/* Show last status change time */
+	strftime(buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_ctime));
+	printw("\n  Change: %s", buf);
+
+	/* Show exit keys */
+	printw("\n\n\n\n  < (q/Esc)");
+
+	while (*buf = getch())
+		if (*buf == 'q' || *buf == 27)
+			return;
 }
 
 static int
@@ -1036,6 +1170,21 @@ nochange:
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 			goto begin;
+		case SEL_STATS:
+		{
+			struct stat sb;
+
+			if (ndents > 0)
+				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
+
+			r = lstat(oldpath, &sb);
+			if (r == -1)
+				printerr(1, "lstat");
+			else
+				show_stats(oldpath, dents[cur].name, &sb);
+
+			goto begin;
+		}
 		case SEL_FSIZE:
 			sizeorder = !sizeorder;
 			mtimeorder = 0;
