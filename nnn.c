@@ -22,10 +22,10 @@
 
 #ifdef DEBUG
 #define DEBUG_FD 8
-#define DPRINTF_D(x) dprintf(DEBUG_FD, #x "=%d\n", x)
-#define DPRINTF_U(x) dprintf(DEBUG_FD, #x "=%u\n", x)
-#define DPRINTF_S(x) dprintf(DEBUG_FD, #x "=%s\n", x)
-#define DPRINTF_P(x) dprintf(DEBUG_FD, #x "=0x%p\n", x)
+#define DPRINTF_D(x) xprintf(DEBUG_FD, #x "=%d\n", x)
+#define DPRINTF_U(x) xprintf(DEBUG_FD, #x "=%u\n", x)
+#define DPRINTF_S(x) xprintf(DEBUG_FD, #x "=%s\n", x)
+#define DPRINTF_P(x) xprintf(DEBUG_FD, #x "=0x%p\n", x)
 #else
 #define DPRINTF_D(x)
 #define DPRINTF_U(x)
@@ -118,9 +118,8 @@ static void printmsg(char *);
 static void printwarn(void);
 static void printerr(int, char *);
 
-#undef dprintf
 static int
-dprintf(int fd, const char *fmt, ...)
+xprintf(int fd, const char *fmt, ...)
 {
 	char buf[BUFSIZ];
 	int r;

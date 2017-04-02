@@ -5,8 +5,7 @@ MANPREFIX = $(PREFIX)/man
 
 #CPPFLAGS = -DDEBUG
 #CFLAGS = -g
-CFLAGS = -O3 -march=native -fno-asynchronous-unwind-tables -fdata-sections \
-    -ffunction-sections -Wl,--gc-sections
+CFLAGS = -O3 -march=native -s
 LDLIBS = -lcurses
 
 DISTFILES = nnn.c strlcat.c strlcpy.c util.h config.def.h \
@@ -18,9 +17,6 @@ all: $(BIN)
 
 $(BIN): $(OBJ)
 	$(CC) $(CFLAGS) -o $@ $(OBJ) $(LDFLAGS) $(LDLIBS)
-	strip -S --strip-unneeded --remove-section=.note.gnu.gold-version \
-    --remove-section=.comment --remove-section=.note \
-    --remove-section=.note.gnu.build-id --remove-section=.note.ABI-tag $(BIN)
 
 nnn.o: util.h config.h
 strlcat.o: util.h
@@ -47,4 +43,4 @@ dist:
 	rm -rf nnn-$(VERSION)
 
 clean:
-	rm -f config.h $(BIN) $(OBJ) nnn-$(VERSION).tar.gz
+	rm -f $(BIN) $(OBJ) nnn-$(VERSION).tar.gz

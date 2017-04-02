@@ -82,7 +82,6 @@ I chose to fork because:
   - Simplified some roundabout procedures
   - `-O3` level optimization, warning fixes
   - Added compilation flag `-march=native`
-  - Massive binary size optimization
   - Remove generated config.h on `make clean`
   - strip the final binary
 
