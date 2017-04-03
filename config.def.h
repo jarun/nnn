@@ -11,9 +11,9 @@ static int showdetail  = 0; /* Set to show additional file info */
 static char *idlecmd   = "rain"; /* The screensaver program */
 
 struct assoc assocs[] = {
-	//{ "\\.(avi|mp4|mkv|mp3|ogg|flac|mov)$", "mpv" },
 	{ "\\.(c|cpp|h|txt|log|sh)$", "vi" },
-	{ "\\.(wma|mp3|ogg|flac)$", "mpv" },
+	//{ "\\.(avi|mp4|mkv|3gp|mov)$", "mpv" },
+	{ "\\.(wma|mp3|ogg|flac|m4a)$", "mpv" },
 	//{ "\\.(png|jpg|gif)$", "feh" },
 	//{ "\\.(html|svg)$", "firefox" },
 	{ "\\.pdf$", "zathura" },
