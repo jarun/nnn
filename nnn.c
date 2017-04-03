@@ -639,6 +639,8 @@ get_fileind(mode_t mode, char *desc)
 	if (S_ISREG(mode)) {
 		c = '-';
 		sprintf(desc, "%s", "regular file");
+		if (mode & S_IXUSR)
+			strcat(desc, ", executable");
 	} else if (S_ISDIR(mode)) {
 		c = 'd';
 		sprintf(desc, "%s", "directory");
@@ -703,14 +705,30 @@ get_lsperms(mode_t mode, char *desc)
 	return(bits);
 }
 
+char *
+get_output(char *buf, size_t bytes)
+{
+	char *ret;
+	FILE *pf = popen(buf, "r");
+	if (pf) {
+		ret = fgets(buf, bytes, pf);
+		pclose(pf);
+		return ret;
+	}
+
+	return NULL;
+}
+
 /*
  * Follows the stat(1) output closely
  */
 void
 show_stats(char* fpath, char* fname, struct stat *sb)
 {
-	char buf[40];
+	char buf[PATH_MAX + 48];
 	char *perms = get_lsperms(sb->st_mode, buf);
+	FILE *pf;
+	char *p, *begin = buf;
 
 	clear();
 
@@ -718,11 +736,12 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	if (perms[0] == 'l') {
 		char symtgt[PATH_MAX];
 		ssize_t len = readlink(fpath, symtgt, PATH_MAX);
-		if (len == -1)
-			printerr(1, "readlink");
-		printw("\n\n    File: '%s' -> '%s'", fname, symtgt);
+		if (len != -1) {
+			symtgt[len] = '\0';
+			printw("\n\n    File: '%s' -> '%s'", fname, symtgt);
+		}
 	} else
-		printw("\n\n    File: '%s'", fname);
+		printw("\n    File: '%s'", fname);
 
 	/* Show size, blocks, file type */
 	printw("\n    Size: %-15llu Blocks: %-10llu IO Block: %-6llu %s",
@@ -757,8 +776,39 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	strftime(buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_ctime));
 	printw("\n  Change: %s", buf);
 
+	if (S_ISREG(sb->st_mode)) {
+		/* Show file(1) output */
+		sprintf(buf, "file -b %s 2>&1", fpath);
+		p = get_output(buf, PATH_MAX + 48);
+		if (p) {
+			printw("\n\n ");
+			while (*p) {
+				if (*p == ',') {
+					*p = '\0';
+					printw(" %s\n", begin);
+					begin = p + 1;
+				}
+
+				p++;
+			}
+			printw(" %s", begin);
+		}
+
+		/* Show md5 */
+		sprintf(buf, "openssl md5 %s 2>&1 | cut -d' ' -f2", fpath);
+		p = get_output(buf, PATH_MAX + 48);
+		if (p)
+			printw("\n     md5: %s", p);
+
+		/* Show sha256 */
+		sprintf(buf, "openssl sha256 %s 2>&1| cut -d' ' -f2", fpath);
+		p = get_output(buf, PATH_MAX + 48);
+		if (p)
+			printw("  sha256: %s", p);
+	}
+
 	/* Show exit keys */
-	printw("\n\n\n\n  < (q/Esc)");
+	printw("\n\n  << (q/Esc)");
 
 	while (*buf = getch())
 		if (*buf == 'q' || *buf == 27)
