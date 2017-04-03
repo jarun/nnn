@@ -3,9 +3,7 @@ VERSION = 0.6
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/man
 
-#CPPFLAGS = -DDEBUG
-#CFLAGS = -g
-CFLAGS = -O3 -march=native
+CFLAGS += -O3 -march=native
 LDLIBS = -lcurses
 
 DISTFILES = nnn.c config.def.h nnn.1 Makefile README.md LICENSE
@@ -21,8 +19,8 @@ $(LOCALCONFIG): config.def.h
 $(SRC): $(LOCALCONFIG)
 
 $(BIN): $(SRC)
-	$(CC) $(CFLAGS) -o $@ $(SRC) $(LDFLAGS) $(LDLIBS)
-	strip $(BIN)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	strip $@
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin

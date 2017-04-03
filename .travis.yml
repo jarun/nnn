@@ -1,0 +1,17 @@
+language: c
+matrix:
+  include:
+    # Access more recent gcc and clang via a Trusty image
+    - os: linux
+      dist: trusty
+      compiler: gcc
+    - os: linux
+      dist: trusty
+      compiler: clang
+    - os: osx
+      compiler: gcc
+    - os: osx
+      compiler: clang
+script:
+  - make CFLAGS='-Werror'
+  - make CFLAGS='-Wall -Wextra -Werror'
