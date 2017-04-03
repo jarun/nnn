@@ -779,7 +779,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
-		sprintf(buf, "file -b %s 2>&1", fpath);
+		sprintf(buf, "file -b \"%s\" 2>&1", fpath);
 		p = get_output(buf, PATH_MAX + 48);
 		if (p) {
 			printw("\n\n ");
@@ -796,16 +796,30 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 		}
 
 		/* Show md5 */
-		sprintf(buf, "openssl md5 %s 2>&1 | cut -d' ' -f2", fpath);
+		sprintf(buf, "openssl md5 \"%s\" 2>&1", fpath);
 		p = get_output(buf, PATH_MAX + 48);
-		if (p)
+		if (p) {
+			p = xmemrchr(buf, ' ', strlen(buf));
+			if (!p)
+				p = buf;
+			else
+				p++;
+
 			printw("\n     md5: %s", p);
+		}
 
 		/* Show sha256 */
-		sprintf(buf, "openssl sha256 %s 2>&1| cut -d' ' -f2", fpath);
+		sprintf(buf, "openssl sha256 \"%s\" 2>&1", fpath);
 		p = get_output(buf, PATH_MAX + 48);
-		if (p)
+		if (p) {
+			p = xmemrchr(buf, ' ', strlen(buf));
+			if (!p)
+				p = buf;
+			else
+				p++;
+
 			printw("  sha256: %s", p);
+		}
 	}
 
 	/* Show exit keys */
