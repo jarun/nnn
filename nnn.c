@@ -21,6 +21,21 @@
 #include <grp.h>
 
 #ifdef DEBUG
+static int
+xprintf(int fd, const char *fmt, ...)
+{
+	char buf[BUFSIZ];
+	int r;
+	va_list ap;
+
+	va_start(ap, fmt);
+	r = vsnprintf(buf, sizeof(buf), fmt, ap);
+	if (r > 0)
+		r = write(fd, buf, r);
+	va_end(ap);
+	return r;
+}
+
 #define DEBUG_FD 8
 #define DPRINTF_D(x) xprintf(DEBUG_FD, #x "=%d\n", x)
 #define DPRINTF_U(x) xprintf(DEBUG_FD, #x "=%u\n", x)
@@ -90,6 +105,8 @@ typedef struct entry {
 	off_t size;
 } *pEntry;
 
+typedef unsigned long ulong;
+
 /* Global context */
 static struct entry *dents;
 static int ndents, cur;
@@ -119,21 +136,6 @@ static const char* size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 static void printmsg(char *);
 static void printwarn(void);
 static void printerr(int, char *);
-
-static int
-xprintf(int fd, const char *fmt, ...)
-{
-	char buf[BUFSIZ];
-	int r;
-	va_list ap;
-
-	va_start(ap, fmt);
-	r = vsnprintf(buf, sizeof(buf), fmt, ap);
-	if (r > 0)
-		r = write(fd, buf, r);
-	va_end(ap);
-	return r;
-}
 
 static void *
 xrealloc(void *p, size_t size)
@@ -729,7 +731,6 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 {
 	char buf[PATH_MAX + 48];
 	char *perms = get_lsperms(sb->st_mode, buf);
-	FILE *pf;
 	char *p, *begin = buf;
 
 	clear();
@@ -750,7 +751,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	       sb->st_size, sb->st_blocks, sb->st_blksize, buf);
 
 	/* Show containing device, inode, hardlink count */
-	sprintf(buf, "%lxh/%lud", sb->st_dev, sb->st_dev);
+	sprintf(buf, "%lxh/%lud", (ulong)sb->st_dev, (ulong)sb->st_dev);
 	printw("\n  Device: %-15s Inode: %-11lu Links: %-9lu",
 	       buf, sb->st_ino, sb->st_nlink);
 
@@ -826,7 +827,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	/* Show exit keys */
 	printw("\n\n  << (q/Esc)");
 
-	while (*buf = getch())
+	for (*buf = getch(); *buf != 'q' && *buf != 27; *buf = getch())
 		if (*buf == 'q' || *buf == 27)
 			return;
 }
@@ -868,7 +869,7 @@ show_help(void)
 	/* Show exit keys */
 	printw("\n\n    << (q/Esc)");
 
-	while (c = getch())
+	for (c = getch(); c != 'q' && c != 27; c = getch())
 		if (c == 'q' || c == 27)
 			return;
 }
@@ -927,6 +928,7 @@ dentfind(struct entry *dents, int n, char *path)
 	if (!path)
 		return 0;
 
+	int i;
 	char *p = xmemrchr(path, '/', strlen(path));
 	if (!p)
 		p = path;
@@ -937,7 +939,7 @@ dentfind(struct entry *dents, int n, char *path)
 
 	DPRINTF_S(p);
 
-	for (int i = 0; i < n; i++)
+	for (i = 0; i < n; i++)
 		if (strcmp(p, dents[i].name) == 0)
 			return i;
 
@@ -1175,6 +1177,7 @@ nochange:
 						status = system(cmd);
 						continue;
 					} else {
+						status++; /* Dummy operation */
 						printmsg("No association");
 						goto nochange;
 					}

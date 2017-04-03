@@ -13,5 +13,5 @@ matrix:
     - os: osx
       compiler: clang
 script:
-  - make CFLAGS='-Werror'
-  - make CFLAGS='-Wall -Wextra -Werror'
+  - make clean
+  - make
