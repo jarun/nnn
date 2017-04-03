@@ -22,25 +22,25 @@ supports both vi-like and emacs-like key bindings in the default
 configuration.  The default key bindings are listed below.
 .Pp
 .Bl -tag -width "l, [Right], [Return] or C-mXXXX" -offset indent -compact
-.It Ic k, [Up] or C-p
+.It Ic [Up], k, ^P
 Move to previous entry
-.It Ic j, [Down] or C-n
+.It Ic [Down], j, ^N
 Move to next entry
-.It Ic [Pgup] or C-u
+.It Ic [PgUp], ^U
 Scroll up half a page
-.It Ic [Pgdown] or C-d
+.It Ic [PgDn], ^D
 Scroll down half a page
-.It Ic [Home], ^ or C-a
+.It Ic [Home], ^, ^A
 Move to the first entry
-.It Ic [End], $ or C-e
+.It Ic [End], $, ^E
 Move to the last entry
-.It Ic l, [Right], [Return] or C-m
+.It Ic [Right], [Enter], l, ^M
 Open file or enter directory
-.It Ic h, C-h, [Left] or [Backspace]
+.It Ic [Left], [Backspace], h, ^H
 Back up one directory level
 .It Ic ~
 Change to the HOME directory
-.It Ic / or &
+.It Ic /, &
 Change filter (more information below)
 .It Ic c
 Change into the given directory
@@ -62,10 +62,12 @@ Run the system top utility.
 Open current entry in EDITOR (fallback vi)
 .It Ic p
 Open current entry in PAGER (fallback less)
-.It Ic C-k
+.It Ic ^K
 Invoke file name copier
-.It Ic C-l
+.It Ic ^L
 Force a redraw
+.It Ic \&?
+Show help
 .It Ic q
 Quit
 .El

@@ -109,29 +109,30 @@ Start nnn (default: current directory):
 
 | Key | Function |
 | --- | --- |
-| `Up`, `k`, `^P` | previous entry |
-| `Down`, `j`, `^N` | next entry |
-| `PgUp`, `^U` | scroll half page up |
-| `PgDn`, `^D` | scroll half page down |
-| `Home`, `^`, `^A` | jump to first dir entry |
-| `End`, `$`, `^E` | jump to last dir entry |
-| `Right`, `Enter`, `l`, `^M` | open file or enter dir |
-| `Left`, `Backspace`, `h`, `^H` | parent dir |
-| `~` | jump to home dir |
-| `/`, `&` | filter dir contents |
-| `c` | show change dir prompt |
-| `d` | toggle detail view |
-| `D` | show details of selected file |
-| `.` | toggle hide dot files |
-| `s` | toggle sort by file size |
-| `t` | toggle sort by modified time |
-| `!` | spawn `SHELL` in `PWD` (fallback sh) |
-| `z` | run `top` |
-| `e` | edit entry in `EDITOR` (fallback vi) |
-| `p` | open entry with `PAGER` (fallback less) |
-| `^K` | invoke file name copier |
-| `^L` | redraw window |
-| `q` | quit |
+| `Up`, `k`, `^P` | Previous entry |
+| `Down`, `j`, `^N` | Next entry |
+| `PgUp`, `^U` | Scroll half page up |
+| `PgDn`, `^D` | Scroll half page down |
+| `Home`, `^`, `^A` | Jump to first dir entry |
+| `End`, `$`, `^E` | Jump to last dir entry |
+| `Right`, `Enter`, `l`, `^M` | Open file or enter dir |
+| `Left`, `Backspace`, `h`, `^H` | Go to parent dir |
+| `~` | Jump to HOME dir |
+| `/`, `&` | Filter dir contents |
+| `c` | Show change dir prompt |
+| `d` | Toggle detail view |
+| `D` | Show details of selected file |
+| `.` | Toggle hide .dot files |
+| `s` | Toggle sort by file size |
+| `t` | Toggle sort by modified time |
+| `!` | Spawn `SHELL` in `PWD` (fallback sh) |
+| `z` | Run `top` |
+| `e` | Edit entry in `EDITOR` (fallback vi) |
+| `p` | Open entry in `PAGER` (fallback less) |
+| `^K` | Invoke file name copier |
+| `^L` | Force a redraw |
+| `?` | Show help |
+| `q` | Quit |
 
 ### Filters
 

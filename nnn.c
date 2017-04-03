@@ -69,6 +69,7 @@ enum action {
 	SEL_MTIME,
 	SEL_REDRAW,
 	SEL_COPY,
+	SEL_HELP,
 	SEL_RUN,
 	SEL_RUNARG,
 };
@@ -815,6 +816,48 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 			return;
 }
 
+void
+show_help(void)
+{
+	char c;
+
+	clear();
+
+	printw("\n\
+    << Key >>                   << Function >>\n\n\
+    [Up], k, ^P                 Previous entry\n\
+    [Down], j, ^N               Next entry\n\
+    [PgUp], ^U                  Scroll half page up\n\
+    [PgDn], ^D                  Scroll half page down\n\
+    [Home], ^, ^A               Jump to first dir entry\n\
+    [End], $, ^E                Jump to last dir entry\n\
+    [Right], [Enter], l, ^M     Open file or enter dir\n\
+    [Left], [Backspace], h, ^H  Go to parent dir\n\
+    ~                           Jump to HOME dir\n\
+    /, &                        Filter dir contents\n\
+    c                           Show change dir prompt\n\
+    d                           Toggle detail view\n\
+    D                           Show details of selected file\n\
+    .                           Toggle hide .dot files\n\
+    s                           Toggle sort by file size\n\
+    t                           Toggle sort by modified time\n\
+    !                           Spawn SHELL in PWD (fallback sh)\n\
+    z                           Run top\n\
+    e                           Edit entry in EDITOR (fallback vi)\n\
+    p                           Open entry in PAGER (fallback less)\n\
+    ^K                          Invoke file name copier\n\
+    ^L                          Force a redraw\n\
+    ?                           Show help\n\
+    q                           Quit\n");
+
+	/* Show exit keys */
+	printw("\n\n    << (q/Esc)");
+
+	while (c = getch())
+		if (c == 'q' || c == 27)
+			return;
+}
+
 static int
 dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
@@ -1269,6 +1312,12 @@ nochange:
 			} else if (!copier)
 					printmsg("NNN_COPIER is not set");
 			goto nochange;
+		case SEL_HELP:
+			show_help();
+			/* Save current */
+			if (ndents > 0)
+				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
+			goto begin;
 		case SEL_RUN:
 			run = xgetenv(env, run);
 			exitcurses();
