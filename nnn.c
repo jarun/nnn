@@ -281,6 +281,7 @@ spawn(char *file, char *arg, char *dir)
 	if (pid == 0) {
 		if (dir != NULL)
 			status = chdir(dir);
+		fprintf(stdout, "\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
 		execlp(file, file, arg, NULL);
 		_exit(1);
 	} else {
