@@ -23,6 +23,11 @@ nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast terminal fi
 
 The only issue with noice is hard-coded file associations. There is no config file (better performance and simpler to maintain) and one has to modify the source to change associations (see [how to change file associations](#change-file-associations)). nnn solves the problem by adding the flexibility of using the default desktop opener at runtime. There are several other improvements too (see [fork-toppings](#fork-toppings)).
 
+You can try
+
+    alias n='nnn -d'
+and see how nnn simplifies those long desktop sessions.
+
 Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
 
 ### Why fork?
@@ -113,8 +118,8 @@ Start nnn (default: current directory):
 | `Down`, `j`, `^N` | Next entry |
 | `PgUp`, `^U` | Scroll half page up |
 | `PgDn`, `^D` | Scroll half page down |
-| `Home`, `^`, `^A` | Jump to first dir entry |
-| `End`, `$`, `^E` | Jump to last dir entry |
+| `Home`, `g`, `^`, `^A` | Jump to first entry |
+| `End`, `G`, `$`, `^E` | Jump to last entry |
 | `Right`, `Enter`, `l`, `^M` | Open file or enter dir |
 | `Left`, `Backspace`, `h`, `^H` | Go to parent dir |
 | `~` | Jump to HOME dir |

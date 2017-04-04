@@ -845,8 +845,8 @@ show_help(void)
     [Down], j, ^N               Next entry\n\
     [PgUp], ^U                  Scroll half page up\n\
     [PgDn], ^D                  Scroll half page down\n\
-    [Home], ^, ^A               Jump to first dir entry\n\
-    [End], $, ^E                Jump to last dir entry\n\
+    [Home], g, ^, ^A            Jump to first entry\n\
+    [End], G, $, ^E             Jump to last entry\n\
     [Right], [Enter], l, ^M     Open file or enter dir\n\
     [Left], [Backspace], h, ^H  Go to parent dir\n\
     ~                           Jump to HOME dir\n\
