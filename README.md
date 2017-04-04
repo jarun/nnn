@@ -59,7 +59,7 @@ I chose to fork because:
     - current item in reverse video
     - number of items in current directory
     - full name of currently selected file
-  - Show details of the currently selected file (stat, file, md5, sha256)
+  - Show details of the currently selected file (stat, file)
   - Directories first
   - Sort numeric names in numeric order
   - Case-insensitive alphabetic content listing instead of upper case first

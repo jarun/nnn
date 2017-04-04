@@ -796,6 +796,8 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 			}
 			printw(" %s", begin);
 		}
+#ifdef SUPPORT_CHKSUM
+		/* Calculating checksums can take VERY long */
 
 		/* Show md5 */
 		sprintf(buf, "openssl md5 \"%s\" 2>&1", fpath);
@@ -822,6 +824,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 
 			printw("  sha256: %s", p);
 		}
+#endif
 	}
 
 	/* Show exit keys */
