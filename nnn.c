@@ -274,7 +274,7 @@ xdirname(const char *path)
 }
 
 static void
-spawn(char *file, char *arg, char *dir)
+spawn(char *file, char *arg, char *dir, int notify)
 {
 	pid_t pid;
 	int status;
@@ -283,7 +283,8 @@ spawn(char *file, char *arg, char *dir)
 	if (pid == 0) {
 		if (dir != NULL)
 			status = chdir(dir);
-		fprintf(stdout, "\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
+		if (notify)
+			fprintf(stdout, "\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
 		execlp(file, file, arg, NULL);
 		_exit(1);
 	} else {
@@ -1186,7 +1187,7 @@ nochange:
 					}
 				}
 				exitcurses();
-				spawn(bin, newpath, NULL);
+				spawn(bin, newpath, NULL, 1);
 				initcurses();
 				continue;
 			}
@@ -1328,7 +1329,7 @@ nochange:
 				else
 					snprintf(abspath, PATH_MAX, "%s/%s",
 						 path, dents[cur].name);
-				spawn(copier, abspath, NULL);
+				spawn(copier, abspath, NULL, 0);
 				printmsg(abspath);
 			} else if (!copier)
 					printmsg("NNN_COPIER is not set");
@@ -1342,14 +1343,14 @@ nochange:
 		case SEL_RUN:
 			run = xgetenv(env, run);
 			exitcurses();
-			spawn(run, NULL, path);
+			spawn(run, NULL, path, 0);
 			initcurses();
 			/* Re-populate as directory content may have changed */
 			goto begin;
 		case SEL_RUNARG:
 			run = xgetenv(env, run);
 			exitcurses();
-			spawn(run, dents[cur].name, path);
+			spawn(run, dents[cur].name, path, 0);
 			initcurses();
 			break;
 		}
@@ -1357,7 +1358,7 @@ nochange:
 		if (idletimeout != 0 && idle == idletimeout) {
 			idle = 0;
 			exitcurses();
-			spawn(idlecmd, NULL, NULL);
+			spawn(idlecmd, NULL, NULL, 0);
 			initcurses();
 		}
 	}

@@ -2,6 +2,8 @@
 
 Noice is Not Noice, a noicer fork...
 
+[![nnn_demo.gif](http://s23.postimg.org/fjmcngsux/nnn_demo.gif)](http://postimg.org/image/6olicy42f/)
+
 ### Table of Contents
 
 - [Introduction](#introduction)
@@ -143,7 +145,9 @@ Start nnn (default: current directory):
 
 Filters support regexes to display only the matched entries in the current directory view. This effectively allows searching through the directory tree for a particular entry.
 
-Filters do not stack on top of each other. They are applied anew every time. An empty filter expression resets the filter.
+Filters do not stack on top of each other. They are applied anew every time.
+
+An empty filter expression resets the filter.
 
 If nnn is invoked as root the default filter will also match hidden files.
 
