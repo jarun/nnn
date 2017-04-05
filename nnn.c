@@ -1141,7 +1141,6 @@ nochange:
 				static char cmd[MAX_CMD_LEN];
 				static char *runvi = "vi";
 				static int status;
-				static FILE *fp;
 
 				/* If default mime opener is set, use it */
 				if (opener) {
@@ -1155,20 +1154,19 @@ nochange:
 				/* Try custom applications */
 				bin = openwith(newpath);
 
+				/* If custom app doesn't exist try fallback */
+				snprintf(cmd, MAX_CMD_LEN, "which \"%s\"", bin);
+				if (get_output(cmd, MAX_CMD_LEN) == NULL)
+					bin = NULL;
+
 				if (bin == NULL) {
 					/* If a custom handler application is
 					   not set, open plain text files with
 					   vi, then try fallback_opener */
 					snprintf(cmd, MAX_CMD_LEN,
 						 "file \"%s\"", newpath);
-					fp = popen(cmd, "r");
-					if (fp == NULL)
+					if (get_output(cmd, MAX_CMD_LEN) == NULL)
 						goto nochange;
-					if (fgets(cmd, MAX_CMD_LEN, fp) == NULL) {
-						pclose(fp);
-						goto nochange;
-					}
-					pclose(fp);
 
 					if (strstr(cmd, "ASCII text") != NULL)
 						bin = runvi;
