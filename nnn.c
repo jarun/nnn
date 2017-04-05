@@ -1247,7 +1247,17 @@ nochange:
 				clearprompt();
 				goto nochange;
 			}
-			mkpath(path, tmp, newpath, sizeof(newpath));
+
+			if (tmp[0] == '~') {
+				char *home = getenv("HOME");
+				if (home)
+					snprintf(newpath, PATH_MAX,
+						"%s%s", home, tmp + 1);
+				else
+					mkpath(path, tmp, newpath, sizeof(newpath));
+			} else
+				mkpath(path, tmp, newpath, sizeof(newpath));
+
 			if (canopendir(newpath) == 0) {
 				printwarn();
 				goto nochange;

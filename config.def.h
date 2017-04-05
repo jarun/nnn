@@ -12,9 +12,9 @@ static char *idlecmd   = "rain"; /* The screensaver program */
 
 struct assoc assocs[] = {
 	{ "\\.(c|cpp|h|txt|log|sh)$", "vi" },
-	//{ "\\.(avi|mp4|mkv|3gp|mov)$", "mpv" },
+	{ "\\.(avi|mp4|mkv|3gp|mov)$", "mpv" },
 	{ "\\.(wma|mp3|ogg|flac|m4a)$", "mpv" },
-	//{ "\\.(png|jpg|gif)$", "feh" },
+	{ "\\.(png|jpg|gif)$", "viewnior" },
 	//{ "\\.(html|svg)$", "firefox" },
 	{ "\\.pdf$", "zathura" },
 	//{ "\\.sh$", "sh" },
