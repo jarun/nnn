@@ -2,7 +2,11 @@
 
 Noice is Not Noice, a noicer fork...
 
-[![nnn_demo.gif](http://s23.postimg.org/fjmcngsux/nnn_demo.gif)](http://postimg.org/image/6olicy42f/)
+<br>
+
+[![nnn-demo-20170405.mp4](https://i.imgur.com/VGA6IcB.png)](https://static.zhimingwang.org/nnn-demo-20170405.mp4 "Click for some action!")
+
+<p align="center"><a href="https://static.zhimingwang.org/nnn-demo-20170405.mp4">Click for some action!</a></p>
 
 ### Table of Contents
 
