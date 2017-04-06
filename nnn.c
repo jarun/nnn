@@ -1185,7 +1185,7 @@ nochange:
 					}
 				}
 				exitcurses();
-				spawn(bin, newpath, NULL, 1);
+				spawn(bin, newpath, NULL, 0);
 				initcurses();
 				continue;
 			}
@@ -1351,7 +1351,7 @@ nochange:
 		case SEL_RUN:
 			run = xgetenv(env, run);
 			exitcurses();
-			spawn(run, NULL, path, 0);
+			spawn(run, NULL, path, 1);
 			initcurses();
 			/* Re-populate as directory content may have changed */
 			goto begin;
