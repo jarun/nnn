@@ -45,7 +45,7 @@ I chose to fork because:
 ### Original features
 
 - Super-easy navigation
-- Open files with default-associated programs
+- Pre-defined associaitons for different file types
 - Jump to home directory
 - Filter contents in current directory
 - Show/hide hidden files
@@ -59,12 +59,12 @@ I chose to fork because:
 
 - Behaviour and navigation
   - Detail view (default: disabled) with:
-    - file type
+    - file type (directory, regular, symlink etc.)
     - modification time
     - human-readable file size
     - current item in reverse video
     - number of items in current directory
-    - full name of currently selected file
+    - full name of currently selected file in 'bar'
   - Show details of the currently selected file (stat, file)
   - Directories first
   - Sort numeric names in numeric order
@@ -80,16 +80,18 @@ I chose to fork because:
         export NNN_OPENER=gnome-open
         export NNN_OPENER=gvfs-open
   - Selective file associations (ignored if `NNN_OPENER` is set):
-    - Associate plain text files with vi (using `file` command)
-    - Remove video file associations (to each his own favourite video player)
-    - Associate common audio mimes with mpv
+    - Associate plain text files (determined using file) with vi
+    - Associate common audio and video mimes with mpv
     - Associate PDF files with [zathura](https://pwmt.org/projects/zathura/)
-    - Use environment variable `NNN_FALLBACK_OPENER` to open other non-associated files
     - Removed `less` as default file opener (there is no universal standalone opener utility)
+  - Environment variable `NNN_FALLBACK_OPENER` is the last line of defense:
+    - If the executable in static file association is missing
+    - If a file type was not handled in static file association
+    - This may be the best option to set your desktop opener to
 - Optimizations
-  - Efficient memory usage, 0 malloc()
-  - Complete redundant buffer removal
+  - All redundant buffer removal
   - All frequently used local chunks now static
+  - No runtime surprises (0 malloc/free)
   - Removed some redundant string allocation and manipulation
   - Simplified some roundabout procedures
   - `-O3` level optimization, warning fixes
