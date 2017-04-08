@@ -1065,13 +1065,18 @@ browse(char *ipath, char *ifilter)
 	struct stat sb;
 	regex_t re;
 	int r, fd;
+	enum action sel = SEL_RUNARG + 1;
 
 	xstrlcpy(path, ipath, sizeof(path));
 	xstrlcpy(fltr, ifilter, sizeof(fltr));
 	oldpath[0] = '\0';
 	newpath[0] = '\0';
 begin:
-	r = populate(path, oldpath, fltr);
+
+	if (sel == SEL_GOIN && S_ISDIR(sb.st_mode))
+		r = populate(path, NULL, fltr);
+	else
+		r = populate(path, oldpath, fltr);
 	if (r == -1) {
 		printwarn();
 		goto nochange;
@@ -1080,7 +1085,8 @@ begin:
 	for (;;) {
 		redraw(path);
 nochange:
-		switch (nextsel(&run, &env)) {
+		sel = nextsel(&run, &env);
+		switch (sel) {
 		case SEL_QUIT:
 			dentfree(dents);
 			return;
