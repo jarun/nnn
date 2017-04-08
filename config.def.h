@@ -63,7 +63,10 @@ struct key bindings[] = {
 	{ '$',            SEL_END,       "",     "" },
 	/* Change dir */
 	{ 'c',            SEL_CD,        "",     "" },
+	/* HOME */
 	{ '~',            SEL_CDHOME,    "",     "" },
+	/* Last visited dir */
+	{ '-',            SEL_LAST,      "",     "" },
 	/* Toggle hide .dot files */
 	{ '.',            SEL_TOGGLEDOT, "",     "" },
 	/* Detailed listing */

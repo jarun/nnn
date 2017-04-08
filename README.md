@@ -69,6 +69,7 @@ I chose to fork because:
   - Directories first
   - Sort numeric names in numeric order
   - Case-insensitive alphabetic content listing instead of upper case first
+  - Key `-` to jump to last visited directory
   - Roll over at the first and last entries of a directory (with Up/Down keys)
   - Removed navigation restriction with relative paths (and let permissions handle it)
   - Sort entries by file size (largest to smallest)
@@ -131,6 +132,7 @@ Start nnn (default: current directory):
 | `Right`, `Enter`, `l`, `^M` | Open file or enter dir |
 | `Left`, `Backspace`, `h`, `^H` | Go to parent dir |
 | `~` | Jump to HOME dir |
+| `-` | Jump to last visited dir |
 | `/`, `&` | Filter dir contents |
 | `c` | Show change dir prompt |
 | `d` | Toggle detail view |

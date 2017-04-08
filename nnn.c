@@ -77,6 +77,7 @@ enum action {
 	SEL_END,
 	SEL_CD,
 	SEL_CDHOME,
+	SEL_LAST,
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
 	SEL_STATS,
@@ -854,6 +855,7 @@ show_help(void)
     [Right], [Enter], l, ^M     Open file or enter dir\n\
     [Left], [Backspace], h, ^H  Go to parent dir\n\
     ~                           Jump to HOME dir\n\
+    -                           Jump to last visited dir\n\
     /, &                        Filter dir contents\n\
     c                           Show change dir prompt\n\
     d                           Toggle detail view\n\
@@ -1060,6 +1062,7 @@ static void
 browse(char *ipath, char *ifilter)
 {
 	static char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX];
+	static char lastdir[PATH_MAX];
 	static char fltr[LINE_MAX];
 	char *bin, *dir, *tmp, *run, *env;
 	struct stat sb;
@@ -1068,6 +1071,7 @@ browse(char *ipath, char *ifilter)
 	enum action sel = SEL_RUNARG + 1;
 
 	xstrlcpy(path, ipath, sizeof(path));
+	xstrlcpy(lastdir, ipath, sizeof(lastdir));
 	xstrlcpy(fltr, ifilter, sizeof(fltr));
 	oldpath[0] = '\0';
 	newpath[0] = '\0';
@@ -1105,6 +1109,10 @@ nochange:
 			}
 			/* Save history */
 			xstrlcpy(oldpath, path, sizeof(oldpath));
+
+			/* Save last working directory */
+			xstrlcpy(lastdir, path, sizeof(lastdir));
+
 			xstrlcpy(path, dir, sizeof(path));
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, sizeof(fltr));
@@ -1138,6 +1146,10 @@ nochange:
 					printwarn();
 					goto nochange;
 				}
+
+				/* Save last working directory */
+				xstrlcpy(lastdir, path, sizeof(lastdir));
+
 				xstrlcpy(path, newpath, sizeof(path));
 				/* Reset filter */
 				xstrlcpy(fltr, ifilter, sizeof(fltr));
@@ -1259,13 +1271,19 @@ nochange:
 						"%s%s", home, tmp + 1);
 				else
 					mkpath(path, tmp, newpath, sizeof(newpath));
-			} else
+			} else if (tmp[0] == '-' && tmp[1] == '\0')
+				xstrlcpy(newpath, lastdir, sizeof(newpath));
+			else
 				mkpath(path, tmp, newpath, sizeof(newpath));
 
 			if (canopendir(newpath) == 0) {
 				printwarn();
 				goto nochange;
 			}
+
+			/* Save last working directory */
+			xstrlcpy(lastdir, path, sizeof(lastdir));
+
 			xstrlcpy(path, newpath, sizeof(path));
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, sizeof(fltr));
@@ -1281,9 +1299,19 @@ nochange:
 				printwarn();
 				goto nochange;
 			}
+
+			/* Save last working directory */
+			xstrlcpy(lastdir, path, sizeof(lastdir));
+
 			xstrlcpy(path, tmp, sizeof(path));
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, sizeof(fltr));
+			DPRINTF_S(path);
+			goto begin;
+		case SEL_LAST:
+			xstrlcpy(newpath, lastdir, sizeof(newpath));
+			xstrlcpy(lastdir, path, sizeof(lastdir));
+			xstrlcpy(path, newpath, sizeof(path));
 			DPRINTF_S(path);
 			goto begin;
 		case SEL_TOGGLEDOT:
