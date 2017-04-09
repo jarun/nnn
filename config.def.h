@@ -5,6 +5,7 @@
 
 static int mtimeorder  = 0; /* Set to 1 to sort by time modified */
 static int sizeorder   = 0; /* Set to 1 to sort by file size */
+static int bsizeorder  = 0; /* Set to 1 to sort by blocks used including content */
 static int idletimeout = 0; /* Screensaver timeout in seconds, 0 to disable */
 static int showhidden  = 0; /* Set to 1 to show hidden files by default */
 static int showdetail  = 0; /* Set to show additional file info */
@@ -75,6 +76,8 @@ struct key bindings[] = {
 	{ 'D',            SEL_STATS,     "",     "" },
 	/* Toggle sort by size */
 	{ 's',            SEL_FSIZE,     "",     "" },
+	/* Sort by total block size including dir contents */
+	{ 'S',            SEL_BSIZE,    "",     "" },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME,     "",     "" },
 	{ CONTROL('L'),   SEL_REDRAW,    "",     "" },

@@ -66,7 +66,8 @@ I chose to fork because:
     - number of items in current directory
     - full name of currently selected file in 'bar'
   - Show details of the currently selected file (stat, file)
-  - Directories first
+  - Disk usage analyzer mode
+  - Directories first (even with sorting)
   - Sort numeric names in numeric order
   - Case-insensitive alphabetic content listing instead of upper case first
   - Key `-` to jump to last visited directory
@@ -139,6 +140,7 @@ Start nnn (default: current directory):
 | `D` | Show details of selected file |
 | `.` | Toggle hide .dot files |
 | `s` | Toggle sort by file size |
+| `S` | Toggle disk usage analyzer mode |
 | `t` | Toggle sort by modified time |
 | `!` | Spawn `SHELL` in `PWD` (fallback sh) |
 | `z` | Run `top` |

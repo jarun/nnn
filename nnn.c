@@ -20,6 +20,9 @@
 #include <pwd.h>
 #include <grp.h>
 
+#define __USE_XOPEN_EXTENDED
+#include <ftw.h>
+
 #ifdef DEBUG
 static int
 xprintf(int fd, const char *fmt, ...)
@@ -82,6 +85,7 @@ enum action {
 	SEL_DETAIL,
 	SEL_STATS,
 	SEL_FSIZE,
+	SEL_BSIZE,
 	SEL_MTIME,
 	SEL_REDRAW,
 	SEL_COPY,
@@ -104,6 +108,7 @@ typedef struct entry {
 	mode_t mode;
 	time_t t;
 	off_t size;
+	off_t bsize;
 } *pEntry;
 
 typedef unsigned long ulong;
@@ -422,9 +427,19 @@ entrycmp(const void *va, const void *vb)
 	if (mtimeorder)
 		return pb->t - pa->t;
 
-	if (sizeorder)
-		if (pb->size != pa->size)
-			return pb->size - pa->size;
+	if (sizeorder) {
+		if (pb->size > pa->size)
+			return 1;
+		else if (pb->size < pa->size)
+			return -1;
+	}
+
+	if (bsizeorder) {
+		if (pb->bsize > pa->bsize)
+			return 1;
+		else if (pb->bsize < pa->bsize)
+			return -1;
+	}
 
 	return xstricmp(pa->name, pb->name);
 }
@@ -582,20 +597,25 @@ printent(struct entry *ent, int active)
 }
 
 static void (*printptr)(struct entry *ent, int active) = &printent;
+static const double div_2_pow_10 = 1.0 / 1024.0;
 
 static char*
 coolsize(off_t size)
 {
 	static char size_buf[12]; /* Buffer to hold human readable size */
 	int i = 0;
-	long double fsize = (double)size;
+	off_t fsize = size, tmp;
+	long double rem = 0;
 
 	while (fsize > 1024) {
-		fsize /= 1024;
+		tmp = fsize;
+		//fsize *= div_2_pow_10;
+		fsize >>= 10;
+		rem = tmp - (fsize << 10);
 		i++;
 	}
 
-	snprintf(size_buf, 12, "%.*Lf%s", i, fsize, size_units[i]);
+	snprintf(size_buf, 12, "%.*Lf%s", i, fsize + rem * div_2_pow_10, size_units[i]);
 	return size_buf;
 }
 
@@ -608,30 +628,57 @@ printent_long(struct entry *ent, int active)
 	if (active)
 		attron(A_REVERSE);
 
-	if (S_ISDIR(ent->mode))
-		printw("%s%-17.17s        /  %s/\n",
-		       CURSYM(active), buf, ent->name);
-	else if (S_ISLNK(ent->mode))
-		printw("%s%-17.17s        @  %s@\n",
-		       CURSYM(active), buf, ent->name);
-	else if (S_ISSOCK(ent->mode))
-		printw("%s%-17.17s        =  %s=\n",
-		       CURSYM(active), buf, ent->name);
-	else if (S_ISFIFO(ent->mode))
-		printw("%s%-17.17s        |  %s|\n",
-		       CURSYM(active), buf, ent->name);
-	else if (S_ISBLK(ent->mode))
-		printw("%s%-17.17s        b  %s\n",
-		       CURSYM(active), buf, ent->name);
-	else if (S_ISCHR(ent->mode))
-		printw("%s%-17.17s        c  %s\n",
-		       CURSYM(active), buf, ent->name);
-	else if (ent->mode & S_IXUSR)
-		printw("%s%-17.17s %8.8s* %s*\n", CURSYM(active),
-		       buf, coolsize(ent->size), ent->name);
-	else
-		printw("%s%-17.17s %8.8s  %s\n", CURSYM(active),
-		       buf, coolsize(ent->size), ent->name);
+	if (!bsizeorder) {
+		if (S_ISDIR(ent->mode))
+			printw("%s%-17.17s        /  %s/\n",
+			       CURSYM(active), buf, ent->name);
+		else if (S_ISLNK(ent->mode))
+			printw("%s%-17.17s        @  %s@\n",
+			       CURSYM(active), buf, ent->name);
+		else if (S_ISSOCK(ent->mode))
+			printw("%s%-17.17s        =  %s=\n",
+			       CURSYM(active), buf, ent->name);
+		else if (S_ISFIFO(ent->mode))
+			printw("%s%-17.17s        |  %s|\n",
+			       CURSYM(active), buf, ent->name);
+		else if (S_ISBLK(ent->mode))
+			printw("%s%-17.17s        b  %s\n",
+			       CURSYM(active), buf, ent->name);
+		else if (S_ISCHR(ent->mode))
+			printw("%s%-17.17s        c  %s\n",
+			       CURSYM(active), buf, ent->name);
+		else if (ent->mode & S_IXUSR)
+			printw("%s%-17.17s %8.8s* %s*\n", CURSYM(active),
+			       buf, coolsize(ent->size), ent->name);
+		else
+			printw("%s%-17.17s %8.8s  %s\n", CURSYM(active),
+			       buf, coolsize(ent->size), ent->name);
+	} else {
+		if (S_ISDIR(ent->mode))
+			printw("%s%-17.17s %8.8s/ %s/\n", CURSYM(active),
+			       buf, coolsize(ent->bsize << 9), ent->name);
+		else if (S_ISLNK(ent->mode))
+			printw("%s%-17.17s        @  %s@\n",
+			       CURSYM(active), buf, ent->name);
+		else if (S_ISSOCK(ent->mode))
+			printw("%s%-17.17s        =  %s=\n",
+			       CURSYM(active), buf, ent->name);
+		else if (S_ISFIFO(ent->mode))
+			printw("%s%-17.17s        |  %s|\n",
+			       CURSYM(active), buf, ent->name);
+		else if (S_ISBLK(ent->mode))
+			printw("%s%-17.17s        b  %s\n",
+			       CURSYM(active), buf, ent->name);
+		else if (S_ISCHR(ent->mode))
+			printw("%s%-17.17s        c  %s\n",
+			       CURSYM(active), buf, ent->name);
+		else if (ent->mode & S_IXUSR)
+			printw("%s%-17.17s %8.8s* %s*\n", CURSYM(active),
+			       buf, coolsize(ent->bsize << 9), ent->name);
+		else
+			printw("%s%-17.17s %8.8s  %s\n", CURSYM(active),
+			       buf, coolsize(ent->bsize << 9), ent->name);
+	}
 
 	if (active)
 		attroff(A_REVERSE);
@@ -862,6 +909,7 @@ show_help(void)
     D                           Show details of selected file\n\
     .                           Toggle hide .dot files\n\
     s                           Toggle sort by file size\n\
+    S                           Toggle disk usage analyzer mode\n\
     t                           Toggle sort by modified time\n\
     !                           Spawn SHELL in PWD (fallback sh)\n\
     z                           Run top\n\
@@ -880,11 +928,30 @@ show_help(void)
 			return;
 }
 
+off_t blk_size;
+
+static int
+sum_sizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+{
+	if (!fpath || !ftwbuf)
+		printmsg("fpath or ftwbuf NULL"); /* TODO: on %s", fpath); */
+
+	/* Handle permission problems */
+	if(typeflag == FTW_NS) {
+		printmsg("No stats (permissions ?)"); /* TODO: on %s", fpath); */
+		return 0;
+	}
+
+	blk_size += sb->st_blocks;
+
+	return 0;
+}
+
 static int
 dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
 {
-	char newpath[PATH_MAX];
+	static char newpath[PATH_MAX];
 	DIR *dirp;
 	struct dirent *dp;
 	struct stat sb;
@@ -911,6 +978,19 @@ dentfill(char *path, struct entry **dents,
 		(*dents)[n].mode = sb.st_mode;
 		(*dents)[n].t = sb.st_mtime;
 		(*dents)[n].size = sb.st_size;
+
+		if (bsizeorder) {
+			if (S_ISDIR(sb.st_mode)) {
+				blk_size = 0;
+				if (nftw(newpath, sum_sizes, 128, FTW_MOUNT | FTW_PHYS) == -1) {
+					printmsg("nftw(3) failed"); /* TODO: , newpath); */
+					(*dents)[n].bsize = sb.st_blocks;
+				} else
+					(*dents)[n].bsize = blk_size;
+			} else
+				(*dents)[n].bsize = sb.st_blocks;
+		}
+
 		n++;
 	}
 
@@ -1028,12 +1108,14 @@ redraw(char *path)
 	if (showdetail) {
 		if (ndents) {
 			static char ind[2] = "\0\0";
-			static char sort[9];
+			static char sort[17];
 
 			if (mtimeorder)
 				sprintf(sort, "by time ");
 			else if (sizeorder)
 				sprintf(sort, "by size ");
+			else if (bsizeorder)
+				sprintf(sort, "by content size ");
 			else
 				sort[0] = '\0';
 
@@ -1345,6 +1427,15 @@ nochange:
 		case SEL_FSIZE:
 			sizeorder = !sizeorder;
 			mtimeorder = 0;
+			bsizeorder = 0;
+			/* Save current */
+			if (ndents > 0)
+				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
+			goto begin;
+		case SEL_BSIZE:
+			bsizeorder = !bsizeorder;
+			mtimeorder = 0;
+			sizeorder = 0;
 			/* Save current */
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
@@ -1352,6 +1443,7 @@ nochange:
 		case SEL_MTIME:
 			mtimeorder = !mtimeorder;
 			sizeorder = 0;
+			bsizeorder = 0;
 			/* Save current */
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
@@ -1387,7 +1479,7 @@ nochange:
 			exitcurses();
 			spawn(run, NULL, path, 1);
 			initcurses();
-			/* Re-populate as directory content may have changed */
+			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_RUNARG:
 			run = xgetenv(env, run);
