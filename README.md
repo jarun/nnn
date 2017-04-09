@@ -14,6 +14,9 @@ Noice is Not Noice, a noicer fork...
 - [Why fork?](#why-fork)
 - [Original features](#original-features)
 - [nnn toppings](#nnn-toppings)
+  - [Behaviour and navigation](#behaviour-and-navigation)
+  - [File associations](#file-associations)
+  - [Optimizations](#optimizations)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -25,9 +28,9 @@ Noice is Not Noice, a noicer fork...
 
 ### Introduction
 
-nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. It is developed with terminal based systems in mind. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
+nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
 
-The only issue with noice is hard-coded file associations. There is no config file (better performance and simpler to maintain) and one has to modify the source to change associations (see [how to change file associations](#change-file-associations)). nnn solves the problem by adding the flexibility of using the default desktop opener at runtime. There are several other improvements too (see [fork-toppings](#fork-toppings)).
+nnn can use the default desktop opener at runtime. It also adds new navigation options, a disk usage analyzer mode, comprehensive file details and much more. For a complete list, see [nnn-toppings](#nnn-toppings).
 
 You can try
 
@@ -57,7 +60,7 @@ I chose to fork because:
 
 ### nnn toppings
 
-- Behaviour and navigation
+#### Behaviour and navigation
   - Detail view (default: disabled) with:
     - file type (directory, regular, symlink etc.)
     - modification time
@@ -66,7 +69,7 @@ I chose to fork because:
     - number of items in current directory
     - full name of currently selected file in 'bar'
   - Show details of the currently selected file (stat, file)
-  - Disk usage analyzer mode
+  - Disk usage analyzer mode (within the same fs, doesn't follow symlinks)
   - Directories first (even with sorting)
   - Sort numeric names in numeric order
   - Case-insensitive alphabetic content listing instead of upper case first
@@ -75,7 +78,7 @@ I chose to fork because:
   - Removed navigation restriction with relative paths (and let permissions handle it)
   - Sort entries by file size (largest to smallest)
   - Shortcut to invoke file name copier (set using environment variable `NNN_COPIER`)
-- File associations
+#### File associations
   - Environment variable `NNN_OPENER` to let desktop opener handle it all. E.g.:
 
         export NNN_OPENER=xdg-open
@@ -86,11 +89,12 @@ I chose to fork because:
     - Associate common audio and video mimes with mpv
     - Associate PDF files with [zathura](https://pwmt.org/projects/zathura/)
     - Removed `less` as default file opener (there is no universal standalone opener utility)
+    - You can customize further (see [how to change file associations](#change-file-associations))
   - Environment variable `NNN_FALLBACK_OPENER` is the last line of defense:
     - If the executable in static file association is missing
     - If a file type was not handled in static file association
     - This may be the best option to set your desktop opener to
-- Optimizations
+#### Optimizations
   - All redundant buffer removal
   - All frequently used local chunks now static
   - No runtime surprises (0 malloc/free)
@@ -100,6 +104,14 @@ I chose to fork because:
   - Added compilation flag `-march=native`
   - Remove generated config.h on `make clean`
   - strip the final binary
+
+The following top excerpt shows the difference in nnn and ncdu memory usage while listing `/usr/bin` with 1439 entries in disk usage analyzer mode, sorted by total content size:
+
+```
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+ 6054 vaio      20   0   56768  45268   2300 S   0.0  0.9   0:02.82 ncdu
+10806 vaio      20   0   21228   8572   2432 S   0.0  0.2   0:00.07 nnn -d
+```
 
 ### Installation
 
