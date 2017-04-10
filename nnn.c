@@ -121,6 +121,9 @@ static int idle;
 static char *opener;
 static char *fallback_opener;
 static char *copier;
+static off_t blk_size;
+static size_t fs_free;
+static const double div_2_pow_10 = 1.0 / 1024.0;
 static const char* size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 
 /*
@@ -311,13 +314,6 @@ xgetenv(char *name, char *fallback)
 		return fallback;
 	value = getenv(name);
 	return value && value[0] ? value : fallback;
-}
-
-int xisdigit(const char c) {
-	if (c >= '0' && c <= '9')  \
-		return 1; \
-
-	return 0;
 }
 
 /*
@@ -552,7 +548,7 @@ readln(void)
 static int
 canopendir(char *path)
 {
-	DIR *dirp;
+	static DIR *dirp;
 
 	dirp = opendir(path);
 	if (dirp == NULL)
@@ -598,15 +594,18 @@ printent(struct entry *ent, int active)
 }
 
 static void (*printptr)(struct entry *ent, int active) = &printent;
-static const double div_2_pow_10 = 1.0 / 1024.0;
 
 static char*
 coolsize(off_t size)
 {
 	static char size_buf[12]; /* Buffer to hold human readable size */
-	int i = 0;
-	off_t fsize = size, tmp;
-	long double rem = 0;
+	static int i;
+	static off_t fsize, tmp;
+	static long double rem;
+
+	i = 0;
+	fsize = size;
+	rem = 0;
 
 	while (fsize > 1024) {
 		tmp = fsize;
@@ -688,7 +687,7 @@ printent_long(struct entry *ent, int active)
 static char
 get_fileind(mode_t mode, char *desc)
 {
-	char c;
+	static char c;
 
 	if (S_ISREG(mode)) {
 		c = '-';
@@ -759,7 +758,7 @@ get_lsperms(mode_t mode, char *desc)
 	return(bits);
 }
 
-char *
+static char *
 get_output(char *buf, size_t bytes)
 {
 	char *ret;
@@ -776,7 +775,7 @@ get_output(char *buf, size_t bytes)
 /*
  * Follows the stat(1) output closely
  */
-void
+static void
 show_stats(char* fpath, char* fname, struct stat *sb)
 {
 	char buf[PATH_MAX + 48];
@@ -885,7 +884,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 			return;
 }
 
-void
+static void
 show_help(void)
 {
 	char c;
@@ -929,9 +928,6 @@ show_help(void)
 			return;
 }
 
-off_t blk_size;
-size_t fs_free = 0;
-
 static int
 sum_sizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
@@ -954,11 +950,12 @@ dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
 {
 	static char newpath[PATH_MAX];
-	DIR *dirp;
-	struct dirent *dp;
-	struct stat sb;
-	struct statvfs svb;
-	int r, n = 0;
+	static DIR *dirp;
+	static struct dirent *dp;
+	static struct stat sb;
+	static struct statvfs svb;
+	static int r, n;
+	r = n = 0;
 
 	dirp = opendir(path);
 	if (dirp == NULL)
@@ -1023,8 +1020,10 @@ dentfind(struct entry *dents, int n, char *path)
 	if (!path)
 		return 0;
 
-	int i;
-	char *p = xmemrchr(path, '/', strlen(path));
+	static int i;
+	static char *p;
+
+	p = xmemrchr(path, '/', strlen(path));
 	if (!p)
 		p = path;
 	else
@@ -1044,8 +1043,8 @@ dentfind(struct entry *dents, int n, char *path)
 static int
 populate(char *path, char *oldpath, char *fltr)
 {
-	regex_t re;
-	int r;
+	static regex_t re;
+	static int r;
 
 	/* Can fail when permissions change while browsing */
 	if (canopendir(path) == 0)
