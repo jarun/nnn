@@ -877,11 +877,9 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	}
 
 	/* Show exit keys */
-	printw("\n\n  << (q/Esc)");
-
-	for (*buf = getch(); *buf != 'q' && *buf != 27; *buf = getch())
-		if (*buf == 'q' || *buf == 27)
-			return;
+	printw("\n\n  << (D)");
+	while ((*buf = getch()) != 'D');
+	return;
 }
 
 static void
@@ -906,7 +904,7 @@ show_help(void)
     /, &                        Filter dir contents\n\
     c                           Show change dir prompt\n\
     d                           Toggle detail view\n\
-    D                           Show details of selected file\n\
+    D                           Toggle current file details screen\n\
     .                           Toggle hide .dot files\n\
     s                           Toggle sort by file size\n\
     S                           Toggle disk usage analyzer mode\n\
@@ -917,15 +915,13 @@ show_help(void)
     p                           Open entry in PAGER (fallback less)\n\
     ^K                          Invoke file name copier\n\
     ^L                          Force a redraw\n\
-    ?                           Show help\n\
+    ?                           Toggle help screen\n\
     q                           Quit\n");
 
 	/* Show exit keys */
-	printw("\n\n    << (q/Esc)");
-
-	for (c = getch(); c != 'q' && c != 27; c = getch())
-		if (c == 'q' || c == 27)
-			return;
+	printw("\n\n    << (?)");
+	while ((c = getch()) != '?');
+	return;
 }
 
 static int

@@ -149,7 +149,7 @@ Start nnn (default: current directory):
 | `/`, `&` | Filter dir contents |
 | `c` | Show change dir prompt |
 | `d` | Toggle detail view |
-| `D` | Show details of selected file |
+| `D` | Toggle current file details screen |
 | `.` | Toggle hide .dot files |
 | `s` | Toggle sort by file size |
 | `S` | Toggle disk usage analyzer mode |
@@ -160,7 +160,7 @@ Start nnn (default: current directory):
 | `p` | Open entry in `PAGER` (fallback less) |
 | `^K` | Invoke file name copier |
 | `^L` | Force a redraw |
-| `?` | Show help |
+| `?` | Toggle help screen |
 | `q` | Quit |
 
 ### Filters
