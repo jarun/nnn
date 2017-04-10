@@ -148,6 +148,16 @@ static void printwarn(void);
 static void printerr(int, char *);
 
 static void *
+xmalloc(size_t size)
+{
+	void *p = malloc(size);
+	if (p == NULL)
+		printerr(1, "malloc");
+	return p;
+}
+
+#if 0
+static void *
 xrealloc(void *p, size_t size)
 {
 	p = realloc(p, size);
@@ -155,6 +165,7 @@ xrealloc(void *p, size_t size)
 		printerr(1, "realloc");
 	return p;
 }
+#endif
 
 static size_t
 xstrlcpy(char *dest, const char *src, size_t n)
@@ -942,6 +953,39 @@ sum_sizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ft
 }
 
 static int
+getorder(size_t size)
+{
+	switch (size) {
+	case 4096:
+		return 12;
+	case 512:
+		return 9;
+	case 8192:
+		return 13;
+	case 16384:
+		return 14;
+	case 32768:
+		return 15;
+	case 65536:
+		return 16;
+	case 131072:
+		return 17;
+	case 262144:
+		return 18;
+	case 524288:
+		return 19;
+	case 1048576:
+		return 20;
+	case 2048:
+		return 11;
+	case 1024:
+		return 10;
+	default:
+		return 0;
+	}
+}
+
+static int
 dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
 {
@@ -957,20 +1001,34 @@ dentfill(char *path, struct entry **dents,
 	if (dirp == NULL)
 		return 0;
 
-	r = statvfs(path, &svb);
-	if (r == -1)
-		fs_free = 0;
-	else
-		fs_free = svb.f_bsize * svb.f_bavail;
+	long pos = telldir(dirp);
+	while ((dp = readdir(dirp)) != NULL) {
+		if (filter(re, dp->d_name) == 0)
+			continue;
+
+		n++;
+	}
+
+	if (filter(re, ".") != 0)
+		n--;
+	if (filter(re, "..") != 0)
+		n--;
+	if (n == 0)
+		return n;
+
+	*dents = xmalloc(n * sizeof(**dents));
+	n = 0;
+
+	seekdir(dirp, pos);
 
 	while ((dp = readdir(dirp)) != NULL) {
 		/* Skip self and parent */
-		if (strcmp(dp->d_name, ".") == 0 ||
-		    strcmp(dp->d_name, "..") == 0)
+		if ((dp->d_name[0] == '.' && dp->d_name[1] == '\0') ||
+		    (dp->d_name[0] == '.' && dp->d_name[1] == '.' && dp->d_name[2] == '\0'))
 			continue;
 		if (filter(re, dp->d_name) == 0)
 			continue;
-		*dents = xrealloc(*dents, (n + 1) * sizeof(**dents));
+		//*dents = xrealloc(*dents, (n + 1) * sizeof(**dents));
 		xstrlcpy((*dents)[n].name, dp->d_name, sizeof((*dents)[n].name));
 		/* Get mode flags */
 		mkpath(path, dp->d_name, newpath, sizeof(newpath));
@@ -994,6 +1052,14 @@ dentfill(char *path, struct entry **dents,
 		}
 
 		n++;
+	}
+
+	if (bsizeorder) {
+		r = statvfs(path, &svb);
+		if (r == -1)
+			fs_free = 0;
+		else
+			fs_free = svb.f_bavail << getorder(svb.f_bsize);
 	}
 
 	/* Should never be null */

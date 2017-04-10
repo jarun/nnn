@@ -97,7 +97,6 @@ I chose to fork because:
 #### Optimizations
   - All redundant buffer removal
   - All frequently used local chunks now static
-  - No runtime surprises (0 malloc/free)
   - Removed some redundant string allocation and manipulation
   - Simplified some roundabout procedures
   - `-O3` level optimization, warning fixes
