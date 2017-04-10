@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/statvfs.h>
 
 #include <curses.h>
 #include <dirent.h>
@@ -929,6 +930,7 @@ show_help(void)
 }
 
 off_t blk_size;
+size_t fs_free = 0;
 
 static int
 sum_sizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
@@ -955,11 +957,18 @@ dentfill(char *path, struct entry **dents,
 	DIR *dirp;
 	struct dirent *dp;
 	struct stat sb;
+	struct statvfs svb;
 	int r, n = 0;
 
 	dirp = opendir(path);
 	if (dirp == NULL)
 		return 0;
+
+	r = statvfs(path, &svb);
+	if (r == -1)
+		fs_free = 0;
+	else
+		fs_free = svb.f_bsize * svb.f_bavail;
 
 	while ((dp = readdir(dirp)) != NULL) {
 		/* Skip self and parent */
@@ -1114,8 +1123,6 @@ redraw(char *path)
 				sprintf(sort, "by time ");
 			else if (sizeorder)
 				sprintf(sort, "by size ");
-			else if (bsizeorder)
-				sprintf(sort, "by content size ");
 			else
 				sort[0] = '\0';
 
@@ -1132,8 +1139,13 @@ redraw(char *path)
 			else
 				ind[0] = '\0';
 
-			sprintf(cwd, "total %d %s[%s%s]", ndents, sort,
-				dents[cur].name, ind);
+			if (!bsizeorder)
+				sprintf(cwd, "total %d %s[%s%s]", ndents, sort,
+					dents[cur].name, ind);
+			else
+				sprintf(cwd, "total %d by disk usage, %s free [%s%s]",
+					ndents, coolsize(fs_free), dents[cur].name, ind);
+
 			printmsg(cwd);
 		} else
 			printmsg("0 items");
