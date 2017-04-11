@@ -48,7 +48,7 @@ I chose to fork because:
 ### Original features
 
 - Super-easy navigation
-- Pre-defined associaitons for different file types
+- Pre-defined associations for different file types
 - Jump to home directory
 - Filter contents in current directory
 - Show/hide hidden files
@@ -108,8 +108,8 @@ The following top excerpt shows the difference in nnn and ncdu memory usage whil
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
- 6054 vaio      20   0   56768  45268   2300 S   0.0  0.9   0:02.82 ncdu
-10806 vaio      20   0   21228   8572   2432 S   0.0  0.2   0:00.07 nnn -d
+10406 vaio      20   0   53808  42284   2248 S   0.0  0.8   0:00.82 ncdu
+10409 vaio      20   0   20452   9172   2356 S   0.0  0.2   0:00.83 nnn -d
 ```
 
 ### Installation

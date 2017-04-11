@@ -149,26 +149,6 @@ static void printmsg(char *);
 static void printwarn(void);
 static void printerr(int, char *);
 
-static void *
-xmalloc(size_t size)
-{
-	void *p = malloc(size);
-	if (p == NULL)
-		printerr(1, "malloc");
-	return p;
-}
-
-#if 0
-static void *
-xrealloc(void *p, size_t size)
-{
-	p = realloc(p, size);
-	if (p == NULL)
-		printerr(1, "realloc");
-	return p;
-}
-#endif
-
 static rlim_t
 max_openfds()
 {
@@ -1022,34 +1002,21 @@ dentfill(char *path, struct entry **dents,
 	if (dirp == NULL)
 		return 0;
 
-	long pos = telldir(dirp);
-	while ((dp = readdir(dirp)) != NULL) {
-		if (filter(re, dp->d_name) == 0)
-			continue;
-
-		n++;
-	}
-
-	if (filter(re, ".") != 0)
-		n--;
-	if (filter(re, "..") != 0)
-		n--;
-	if (n == 0)
-		return n;
-
-	*dents = xmalloc(n * sizeof(**dents));
-	n = 0;
-
-	seekdir(dirp, pos);
-
 	while ((dp = readdir(dirp)) != NULL) {
 		/* Skip self and parent */
 		if ((dp->d_name[0] == '.' && (dp->d_name[1] == '\0' ||
 		    (dp->d_name[1] == '.' && dp->d_name[2] == '\0'))))
 			continue;
+
 		if (filter(re, dp->d_name) == 0)
 			continue;
-		//*dents = xrealloc(*dents, (n + 1) * sizeof(**dents));
+
+		if (((n >> 5) << 5) == n) {
+			*dents = realloc(*dents, (n + 32) * sizeof(**dents));
+			if (*dents == NULL)
+				printerr(1, "realloc");
+		}
+
 		xstrlcpy((*dents)[n].name, dp->d_name, sizeof((*dents)[n].name));
 		/* Get mode flags */
 		mkpath(path, dp->d_name, newpath, sizeof(newpath));
