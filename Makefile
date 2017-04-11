@@ -3,7 +3,7 @@ VERSION = 0.6
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/man
 
-CFLAGS += -O3 -march=native -Wall -Wextra
+CFLAGS += -O3 -march=native -Wall -Wextra -Wno-unused-parameter
 LDLIBS = -lcurses
 
 DISTFILES = nnn.c config.def.h nnn.1 Makefile README.md LICENSE

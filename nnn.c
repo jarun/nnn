@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/statvfs.h>
+#include <sys/resource.h>
 
 #include <curses.h>
 #include <dirent.h>
@@ -123,6 +124,7 @@ static char *fallback_opener;
 static char *copier;
 static off_t blk_size;
 static size_t fs_free;
+static int open_max;
 static const double div_2_pow_10 = 1.0 / 1024.0;
 static const char* size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 
@@ -166,6 +168,28 @@ xrealloc(void *p, size_t size)
 	return p;
 }
 #endif
+
+static rlim_t
+max_openfds()
+{
+	struct rlimit rl;
+        rlim_t limit;
+
+	limit = getrlimit(RLIMIT_NOFILE, &rl);
+	if (limit != 0)
+		return 32;
+
+	limit = rl.rlim_cur;
+	rl.rlim_cur = rl.rlim_max;
+
+	if (setrlimit(RLIMIT_NOFILE, &rl) == 0)
+		return rl.rlim_max - 64;
+
+	if (limit > 128)
+		return limit - 64;
+
+	return 32;
+}
 
 static size_t
 xstrlcpy(char *dest, const char *src, size_t n)
@@ -936,14 +960,11 @@ show_help(void)
 }
 
 static int
-sum_sizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+sum_bsizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
-	if (!fpath || !ftwbuf)
-		printmsg("fpath or ftwbuf NULL"); /* TODO: on %s", fpath); */
-
 	/* Handle permission problems */
 	if(typeflag == FTW_NS) {
-		printmsg("No stats (permissions ?)"); /* TODO: on %s", fpath); */
+		printmsg("No stats (permissions ?)");
 		return 0;
 	}
 
@@ -1023,8 +1044,8 @@ dentfill(char *path, struct entry **dents,
 
 	while ((dp = readdir(dirp)) != NULL) {
 		/* Skip self and parent */
-		if ((dp->d_name[0] == '.' && dp->d_name[1] == '\0') ||
-		    (dp->d_name[0] == '.' && dp->d_name[1] == '.' && dp->d_name[2] == '\0'))
+		if ((dp->d_name[0] == '.' && (dp->d_name[1] == '\0' ||
+		    (dp->d_name[1] == '.' && dp->d_name[2] == '\0'))))
 			continue;
 		if (filter(re, dp->d_name) == 0)
 			continue;
@@ -1042,8 +1063,8 @@ dentfill(char *path, struct entry **dents,
 		if (bsizeorder) {
 			if (S_ISDIR(sb.st_mode)) {
 				blk_size = 0;
-				if (nftw(newpath, sum_sizes, 128, FTW_MOUNT | FTW_PHYS) == -1) {
-					printmsg("nftw(3) failed"); /* TODO: , newpath); */
+				if (nftw(newpath, sum_bsizes, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
+					printmsg("nftw(3) failed");
 					(*dents)[n].bsize = sb.st_blocks;
 				} else
 					(*dents)[n].bsize = blk_size;
@@ -1507,6 +1528,10 @@ nochange:
 			goto begin;
 		case SEL_BSIZE:
 			bsizeorder = !bsizeorder;
+			if (bsizeorder) {
+				showdetail = 1;
+				printptr = &printent_long;
+			}
 			mtimeorder = 0;
 			sizeorder = 0;
 			/* Save current */
@@ -1618,6 +1643,8 @@ main(int argc, char *argv[])
 			exit(1);
 		}
 	}
+
+	open_max = max_openfds();
 
 	if (getuid() == 0)
 		showhidden = 1;
