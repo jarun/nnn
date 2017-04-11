@@ -13,5 +13,6 @@ matrix:
     - os: osx
       compiler: clang
 script:
+  - export CFLAGS=-Werror
   - make clean
   - make
