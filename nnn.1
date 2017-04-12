@@ -42,6 +42,8 @@ Back up one directory level
 Change to the HOME directory
 .It Ic -
 Change to the last visited directory
+.It Ic o
+Open directory in desktop file manager
 .It Ic /, &
 Change filter (more information below)
 .It Ic c
@@ -90,17 +92,7 @@ is configured by modifying
 .Pa config.h
 and recompiling the code.
 .Pp
-Environment variable
-.Ar NNN_OPENER
-overrides all hard-coded file associations.
-.Pp
-Hard-coded associations are specified by regexes matching on the currently selected filename. If a match is found the associated program is executed with the filename passed in as the argument. If no match is found the environment variable
-.Ar NNN_FALLBACK_OPENER
-is invoked, if set.
-.Pp
-No particular utility is set as the default opener as no standalone universal opener for all mime types exists.
-.Pp
-See the examples section below for more information.
+See the environment and examples sections below for more options and information.
 .Sh FILTERS
 Filters support regexes to display only the matched
 entries in the current directory view.  This effectively allows
@@ -118,6 +110,9 @@ files.
 .Sh ENVIRONMENT
 The SHELL, EDITOR and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively.
+.Pp
+\fBNNN_DE_FILE_MANAGER:\fR set to a desktop file manager to open the current
+directory with.
 .Pp
 \fBNNN_OPENER:\fR set to your desktop environment's default
 mime opener to override all custom mime associations.

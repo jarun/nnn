@@ -86,6 +86,7 @@ enum action {
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
 	SEL_STATS,
+	SEL_DFB,
 	SEL_FSIZE,
 	SEL_BSIZE,
 	SEL_MTIME,
@@ -122,6 +123,7 @@ static int idle;
 static char *opener;
 static char *fallback_opener;
 static char *copier;
+static char *desktop_manager;
 static off_t blk_size;
 static size_t fs_free;
 static int open_max;
@@ -916,6 +918,7 @@ show_help(void)
     [Left], [Backspace], h, ^H  Go to parent dir\n\
     ~                           Jump to HOME dir\n\
     -                           Jump to last visited dir\n\
+    o                           Open dir in desktop file manager\n\
     /, &                        Filter dir contents\n\
     c                           Show change dir prompt\n\
     d                           Toggle detail view\n\
@@ -1485,6 +1488,14 @@ nochange:
 
 			goto begin;
 		}
+		case SEL_DFB:
+			if (!desktop_manager)
+				goto nochange;
+
+			exitcurses();
+			spawn(desktop_manager, path, path, 0);
+			initcurses();
+			goto nochange;
 		case SEL_FSIZE:
 			sizeorder = !sizeorder;
 			mtimeorder = 0;
@@ -1622,6 +1633,9 @@ main(int argc, char *argv[])
 
 	/* Get the fallback desktop mime opener, if set */
 	fallback_opener = getenv("NNN_FALLBACK_OPENER");
+
+	/* Get the desktop file browser, if set */
+	desktop_manager = getenv("NNN_DE_FILE_MANAGER");
 
 	/* Get the default copier, if set */
 	copier = getenv("NNN_COPIER");

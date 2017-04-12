@@ -74,6 +74,8 @@ struct key bindings[] = {
 	{ 'd',            SEL_DETAIL,    "",     "" },
 	/* File details */
 	{ 'D',            SEL_STATS,     "",     "" },
+	/* Open dir in desktop file manager */
+	{ 'o',            SEL_DFB,       "",     "" },
 	/* Toggle sort by size */
 	{ 's',            SEL_FSIZE,     "",     "" },
 	/* Sort by total block size including dir contents */

@@ -79,7 +79,10 @@ I chose to fork because:
   - Sort entries by file size (largest to smallest)
   - Shortcut to invoke file name copier (set using environment variable `NNN_COPIER`)
 #### File associations
-  - Environment variable `NNN_OPENER` to let desktop opener handle it all. E.g.:
+  - To open the current directory in a desktop file manager, set `NNN_DE_FILE_MANAGER`. E.g.:
+
+        export NNN_DE_FILE_MANAGER=thunar
+  - Set `NNN_OPENER` to let a desktop opener handle it all. E.g.:
 
         export NNN_OPENER=xdg-open
         export NNN_OPENER=gnome-open
@@ -90,7 +93,7 @@ I chose to fork because:
     - Associate PDF files with [zathura](https://pwmt.org/projects/zathura/)
     - Removed `less` as default file opener (there is no universal standalone opener utility)
     - You can customize further (see [how to change file associations](#change-file-associations))
-  - Environment variable `NNN_FALLBACK_OPENER` is the last line of defense:
+  - `NNN_FALLBACK_OPENER` is the last line of defense:
     - If the executable in static file association is missing
     - If a file type was not handled in static file association
     - This may be the best option to set your desktop opener to
@@ -145,6 +148,7 @@ Start nnn (default: current directory):
 | `Left`, `Backspace`, `h`, `^H` | Go to parent dir |
 | `~` | Jump to HOME dir |
 | `-` | Jump to last visited dir |
+| `o` | Open dir in desktop file manager |
 | `/`, `&` | Filter dir contents |
 | `c` | Show change dir prompt |
 | `d` | Toggle detail view |
