@@ -180,7 +180,7 @@ The following abbreviations are used in the detail view:
 | --- | --- |
 | `/` | Directory |
 | `*` | Executable |
-| `|` | Fifo |
+| <code>&#124;</code> | Fifo |
 | `=` | Socket |
 | `@` | Symbolic Link |
 | `b` | Block Device |
@@ -189,6 +189,7 @@ The following abbreviations are used in the detail view:
 ### Help
 
     $ man nnn
+To lookup keyboard shortcuts at runtime, press `?`.
 
 ### Copy current file path to clipboard
 
