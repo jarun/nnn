@@ -79,6 +79,7 @@ I chose to fork because:
   - Removed navigation restriction with relative paths (and let permissions handle it)
   - Sort entries by file size (largest to smallest)
   - Shortcut to invoke file name copier (set using environment variable `NNN_COPIER`)
+
 #### File association
   - Set `NNN_OPENER` to let a desktop opener handle it all. E.g.:
 
@@ -98,6 +99,7 @@ I chose to fork because:
   - To enable the desktop file manager key, set `NNN_DE_FILE_MANAGER`. E.g.:
 
         export NNN_DE_FILE_MANAGER=thunar
+
 #### Optimization
   - All redundant buffer removal
   - All frequently used local chunks now static
@@ -128,10 +130,16 @@ nnn vs. ranger memory usage while viewing a directory with 10,178 files, sorted 
 
 nnn needs a curses implementation and standard libc.
 
-Download the [latest master](https://github.com/jarun/nnn/archive/master.zip) or clone this repository. Compile and install:
+- If you are using Homebrew, run:
 
-    $ make
-    $ sudo make install
+      brew install jarun/nnn/nnn
+- Packages are available on
+  - [AUR](https://aur.archlinux.org/packages/nnn/)
+  - [Ubuntu PPA](https://launchpad.net/~twodopeshaggy/+archive/ubuntu/jarun/)
+- To compile and install, download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*). Run:
+
+      $ make
+      $ sudo make install
 
 ### Usage
 
