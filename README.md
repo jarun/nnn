@@ -126,9 +126,10 @@ Download the [latest master](https://github.com/jarun/nnn/archive/master.zip) or
 
 Start nnn (default: current directory):
 
-    $ nnn [-d] [path_to_dir]
+    $ nnn [-d] [-v] [path_to_dir]
 
     -d: open in detail view mode
+    -v: show version and exit
 `>` indicates the currently selected entry in nnn.
 
 ### Keyboard shortcuts

@@ -53,6 +53,7 @@ xprintf(int fd, const char *fmt, ...)
 #define DPRINTF_P(x)
 #endif /* DEBUG */
 
+#define VERSION "v1.0"
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -1577,7 +1578,7 @@ nochange:
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: nnn [-d] [dir]\n");
+	fprintf(stderr, "usage: nnn [-d] [-v] [dir]\n");
 	exit(1);
 }
 
@@ -1597,13 +1598,16 @@ main(int argc, char *argv[])
 	if (argc > 3)
 		usage();
 
-	while ((opt = getopt(argc, argv, "d")) != -1) {
+	while ((opt = getopt(argc, argv, "dv")) != -1) {
 		switch (opt) {
 		case 'd':
 			/* Open in detail mode, if set */
 			showdetail = 1;
 			printptr = &printent_long;
 			break;
+		case 'v':
+			fprintf(stderr, "%s\n", VERSION);
+			return 0;
 		default:
 			usage();
 		}

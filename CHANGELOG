@@ -1,0 +1,48 @@
+nnn v1.0
+2017-04-13
+
+Modifications
+- Behaviour and navigation
+  - Detail view (default: disabled) with:
+    - file type (directory, regular, symlink etc.)
+    - modification time
+    - human-readable file size
+    - current item in reverse video
+    - number of items in current directory
+    - full name of currently selected file in 'bar'
+  - Show details of the currently selected file (stat, file)
+  - Disk usage analyzer mode (within the same fs, doesn't follow symlinks)
+  - Directories first (even with sorting)
+  - Sort numeric names in numeric order
+  - Case-insensitive alphabetic content listing instead of upper case first
+  - Key `-` to jump to last visited directory
+  - Roll over at the first and last entries of a directory (with Up/Down keys)
+  - Removed navigation restriction with relative paths (and let permissions handle it)
+  - Sort entries by file size (largest to smallest)
+  - Shortcut to invoke file name copier (set using environment variable `NNN_COPIER`)
+- File association
+  - Set `NNN_OPENER` to let a desktop opener handle it all. E.g.:
+        export NNN_OPENER=xdg-open
+        export NNN_OPENER=gnome-open
+        export NNN_OPENER=gvfs-open
+  - Selective file associations (ignored if `NNN_OPENER` is set):
+    - Associate plain text files (determined using file) with vi
+    - Associate common audio and video mimes with mpv
+    - Associate PDF files with [zathura](https://pwmt.org/projects/zathura/)
+    - Removed `less` as default file opener (there is no universal standalone opener utility)
+    - You can customize further (see [how to change file associations](#change-file-associations))
+  - `NNN_FALLBACK_OPENER` is the last line of defense:
+    - If the executable in static file association is missing
+    - If a file type was not handled in static file association
+    - This may be the best option to set your desktop opener to
+  - To enable the desktop file manager key, set `NNN_DE_FILE_MANAGER`. E.g.:
+        export NNN_DE_FILE_MANAGER=thunar
+- Optimization
+  - All redundant buffer removal
+  - All frequently used local chunks now static
+  - Removed some redundant string allocation and manipulation
+  - Simplified some roundabout procedures
+  - Compiler warnings fixed
+  - strip the final binary
+
+-------------------------------------------------------------------------------
