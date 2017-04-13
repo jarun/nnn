@@ -17,6 +17,7 @@ Noice is Not Noice, a noicer fork...
   - [Behaviour and navigation](#behaviour-and-navigation)
   - [File association](#file-association)
   - [Optimization](#optimization)
+- [Performance](#performance)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -105,12 +106,22 @@ I chose to fork because:
   - Compiler warnings fixed
   - strip the final binary
 
-The following top excerpt shows the difference in nnn and ncdu memory usage while listing `/usr/bin` with 1439 entries in disk usage analyzer mode, sorted by total content size:
+### Performance
+
+nnn vs. ncdu memory usage while listing `/usr/bin` with 1439 entries in disk usage analyzer mode, sorted by total content size:
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
 10406 vaio      20   0   53808  42284   2248 S   0.0  0.8   0:00.82 ncdu
 10409 vaio      20   0   20452   9172   2356 S   0.0  0.2   0:00.83 nnn -d
+```
+
+nnn vs. ranger memory usage while viewing a directory with 10,178 files, sorted by size:
+
+```
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+22465 vaio      20   0  233956 192136   7896 S   0.0  3.9   0:05.31 /usr/bin/python -O /usr/bin/ranger
+21743 vaio      20   0   55984  44648   2468 S   0.0  0.9   0:01.17 nnn -d
 ```
 
 ### Installation
