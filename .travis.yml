@@ -16,3 +16,5 @@ script:
   - export CFLAGS=-Werror
   - make clean
   - make
+  - make clean
+  - make -f Makefile.generic

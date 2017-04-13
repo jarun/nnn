@@ -15,8 +15,8 @@ Noice is Not Noice, a noicer fork...
 - [Original features](#original-features)
 - [nnn toppings](#nnn-toppings)
   - [Behaviour and navigation](#behaviour-and-navigation)
-  - [File associations](#file-associations)
-  - [Optimizations](#optimizations)
+  - [File association](#file-association)
+  - [Optimization](#optimization)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -30,7 +30,7 @@ Noice is Not Noice, a noicer fork...
 
 nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
 
-nnn can use the default desktop opener at runtime. It also adds new navigation options, a disk usage analyzer mode, comprehensive file details and much more. For a complete list, see [nnn-toppings](#nnn-toppings).
+nnn can use the default desktop opener at runtime. It adds new navigation options, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. For a complete list, see [nnn-toppings](#nnn-toppings).
 
 You can try
 
@@ -78,10 +78,7 @@ I chose to fork because:
   - Removed navigation restriction with relative paths (and let permissions handle it)
   - Sort entries by file size (largest to smallest)
   - Shortcut to invoke file name copier (set using environment variable `NNN_COPIER`)
-#### File associations
-  - To open the current directory in a desktop file manager, set `NNN_DE_FILE_MANAGER`. E.g.:
-
-        export NNN_DE_FILE_MANAGER=thunar
+#### File association
   - Set `NNN_OPENER` to let a desktop opener handle it all. E.g.:
 
         export NNN_OPENER=xdg-open
@@ -97,14 +94,15 @@ I chose to fork because:
     - If the executable in static file association is missing
     - If a file type was not handled in static file association
     - This may be the best option to set your desktop opener to
-#### Optimizations
+  - To enable the desktop file manager key, set `NNN_DE_FILE_MANAGER`. E.g.:
+
+        export NNN_DE_FILE_MANAGER=thunar
+#### Optimization
   - All redundant buffer removal
   - All frequently used local chunks now static
   - Removed some redundant string allocation and manipulation
   - Simplified some roundabout procedures
-  - `-O3` level optimization, warning fixes
-  - Added compilation flag `-march=native`
-  - Remove generated config.h on `make clean`
+  - Compiler warnings fixed
   - strip the final binary
 
 The following top excerpt shows the difference in nnn and ncdu memory usage while listing `/usr/bin` with 1439 entries in disk usage analyzer mode, sorted by total content size:
@@ -123,7 +121,6 @@ Download the [latest master](https://github.com/jarun/nnn/archive/master.zip) or
 
     $ make
     $ sudo make install
-No plans of packaging at the time.
 
 ### Usage
 
