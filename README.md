@@ -19,6 +19,7 @@ Noice is Not Noice, a noicer fork...
   - [Optimization](#optimization)
 - [Performance](#performance)
 - [Installation](#installation)
+- [Quickstart](#quickstart)
 - [Usage](#usage)
 - [Keyboard shortcuts](#keyboard-shortcuts)
 - [Filters](#filters)
@@ -31,14 +32,15 @@ Noice is Not Noice, a noicer fork...
 
 nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
 
-nnn can use the default desktop opener at runtime. It adds new navigation options, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. For a complete list, see [nnn-toppings](#nnn-toppings).
+nnn can use the default desktop opener at runtime. It adds new navigation options, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. For a complete list, see [nnn toppings](#nnn-toppings).
 
-You can try
-
-    alias n='nnn -d'
-and see how nnn simplifies those long desktop sessions.
+Follow the instructions in the [quickstart](#quickstart) section and see how nnn simplifies those long desktop sessions.
 
 Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
+
+<p align="right">
+<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://tuxtricks.files.wordpress.com/2016/12/donate.png" alt="Donate via PayPal!" title="Donate via PayPal!" /></a>
+</p>
 
 ### Why fork?
 
@@ -84,7 +86,7 @@ I chose to fork because:
   - Set `NNN_OPENER` to let a desktop opener handle it all. E.g.:
 
         export NNN_OPENER=xdg-open
-        export NNN_OPENER=gnome-open
+        export NNN_OPENER="gio open"
         export NNN_OPENER=gvfs-open
   - Selective file associations (ignored if `NNN_OPENER` is set):
     - Associate plain text files (determined using file) with vi
@@ -140,6 +142,23 @@ nnn needs a curses implementation and standard libc.
 
       $ make
       $ sudo make install
+
+### Quickstart
+
+Add the following to your shell's rc file for the best experience:
+
+- If you want to open nnn in detail mode each time:
+
+      alias n='nnn -d'
+- Set your preferred desktop opener as fallback. E.g.:
+
+      export NNN_FALLBACK_OPENER=xdg-open
+- Set a desktop file manager to open directories with (if you need). E.g.:
+
+      export NNN_DE_FILE_MANAGER=thunar
+- Start nnn.
+
+      n
 
 ### Usage
 
@@ -226,7 +245,7 @@ export `NNN_OPENER`:
 
     export NNN_COPIER="/home/vaio/copier.sh"
 
-Start nnn and use `Ctrl-k` to copy the absolute path (from `/`) of the file under the cursor to clipboard.
+Start nnn and use `^K` to copy the absolute path (from `/`) of the file under the cursor to clipboard.
 
 ### Change file associations
 
