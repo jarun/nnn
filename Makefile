@@ -1,7 +1,7 @@
 VERSION = 1.0
 
 PREFIX = /usr/local
-MANPREFIX = $(PREFIX)/man
+MANPREFIX = $(PREFIX)/share/man
 
 CFLAGS += -O3 -march=native -Wall -Wextra -Wno-unused-parameter
 LDLIBS = -lcurses
