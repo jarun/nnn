@@ -27,10 +27,11 @@ Noice is Not Noice, a noicer fork...
 - [Installation](#installation)
 - [Quickstart](#quickstart)
 - [Usage](#usage)
-- [Keyboard shortcuts](#keyboard-shortcuts)
-- [Filters](#filters)
-- [File type abbreviations](#file-type-abbreviations)
-- [Help](#help)
+  - [Cmdline options](#cmdline-options)
+  - [Keyboard shortcuts](#keyboard-shortcuts)
+  - [Filters](#filters)
+  - [File type abbreviations](#file-type-abbreviations)
+  - [Help](#help)
 - [Copy current file path to clipboard](#copy-current-file-path-to-clipboard)
 - [Change file associations](#change-file-associations)
 
@@ -168,16 +169,24 @@ Add the following to your shell's rc file for the best experience:
 
 ### Usage
 
-Start nnn (default dir: current directory):
+#### Cmdline options
 
-    $ nnn [-d] [-S] [-v] [dir]
+    usage: nnn [-d] [-S] [-v] [h] [PATH]
 
-    -d: start in detail view mode
-    -S: start in disk usage analyzer mode
-    -v: show version and exit
+    The missing terminal file browser for X.
+
+    positional arguments:
+      PATH           directory to open [default: current dir]
+
+    optional arguments:
+      -d             start in detail view mode
+      -S             start in disk usage analyzer mode
+      -v             show program version and exit
+      -h             show this help and exit
+
 `>` indicates the currently selected entry in nnn.
 
-### Keyboard shortcuts
+#### Keyboard shortcuts
 
 | Key | Function |
 | --- | --- |
@@ -209,7 +218,7 @@ Start nnn (default dir: current directory):
 | `?` | Toggle help screen |
 | `q` | Quit |
 
-### Filters
+#### Filters
 
 Filters support regexes to display only the matched entries in the current directory view. This effectively allows searching through the directory tree for a particular entry.
 
@@ -219,7 +228,7 @@ An empty filter expression resets the filter.
 
 If nnn is invoked as root the default filter will also match hidden files.
 
-### File type abbreviations
+#### File type abbreviations
 
 The following abbreviations are used in the detail view:
 
@@ -233,7 +242,7 @@ The following abbreviations are used in the detail view:
 | `b` | Block Device |
 | `c` | Character Device |
 
-### Help
+#### Help
 
     $ man nnn
 To lookup keyboard shortcuts at runtime, press `?`.

@@ -1585,8 +1585,20 @@ nochange:
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: nnn [-d] [-S] [-v] [dir]\n");
-	exit(1);
+	fprintf(stdout, "usage: nnn [-d] [-S] [-v] [h] [PATH]\n\n\
+The missing terminal file browser for X.\n\n\
+positional arguments:\n\
+  PATH           directory to open [default: current dir]\n\n\
+optional arguments:\n\
+  -d             start in detail view mode\n\
+  -S             start in disk usage analyzer mode\n\
+  -v             show program version and exit\n\
+  -h             show this help and exit\n\n\
+Version: %s\n\
+License: BSD 2-Clause\n\
+Webpage: https://github.com/jarun/nnn\n", VERSION);
+
+	exit(0);
 }
 
 int
@@ -1605,7 +1617,7 @@ main(int argc, char *argv[])
 	if (argc > 3)
 		usage();
 
-	while ((opt = getopt(argc, argv, "dSv")) != -1) {
+	while ((opt = getopt(argc, argv, "dSvh")) != -1) {
 		switch (opt) {
 		case 'S':
 			bsizeorder = 1;
@@ -1615,8 +1627,9 @@ main(int argc, char *argv[])
 			printptr = &printent_long;
 			break;
 		case 'v':
-			fprintf(stderr, "%s\n", VERSION);
+			fprintf(stdout, "%s\n", VERSION);
 			return 0;
+		case 'h':
 		default:
 			usage();
 		}

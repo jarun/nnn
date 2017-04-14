@@ -3,18 +3,21 @@
 .Os
 .Sh NAME
 .Nm nnn
-.Nd free, fast, friendly file browser
+.Nd the missing terminal file browser for X
 .Sh SYNOPSIS
 .Nm nnn
 .Op Ar -d
-.Op Ar dir
+.Op Ar -S
+.Op Ar -v
+.Op Ar -h
+.Op Ar PATH
 .Sh DESCRIPTION
 .Nm
 (Noice is Not Noice) is a fork of the noice terminal file browser with improved desktop integration, navigation, disk usage analyzer mode, comprehensive file details and much more. It remains a simple and efficient file browser that stays out of your way.
 .Pp
 .Nm
 defaults to the current directory if
-.Ar dir
+.Ar PATH
 is not specified.
 .Pp
 .Nm
@@ -92,6 +95,9 @@ supports the following options:
 .Pp
 .Fl v
         show version and exit
+.Pp
+.Fl h
+        show program help and exit
 .Sh CONFIGURATION
 .Nm
 is configured by modifying
