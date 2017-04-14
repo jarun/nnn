@@ -644,60 +644,60 @@ static void
 printent_long(struct entry *ent, int active)
 {
 	static char buf[18];
-	strftime(buf, 18, "%b %d %H:%M %Y", localtime(&ent->t));
+	strftime(buf, 18, "%d %m %Y %H:%M", localtime(&ent->t));
 
 	if (active)
 		attron(A_REVERSE);
 
 	if (!bsizeorder) {
 		if (S_ISDIR(ent->mode))
-			printw("%s%-17.17s        /  %s/\n",
+			printw("%s%-16.16s        /  %s/\n",
 			       CURSYM(active), buf, ent->name);
 		else if (S_ISLNK(ent->mode))
-			printw("%s%-17.17s        @  %s@\n",
+			printw("%s%-16.16s        @  %s@\n",
 			       CURSYM(active), buf, ent->name);
 		else if (S_ISSOCK(ent->mode))
-			printw("%s%-17.17s        =  %s=\n",
+			printw("%s%-16.16s        =  %s=\n",
 			       CURSYM(active), buf, ent->name);
 		else if (S_ISFIFO(ent->mode))
-			printw("%s%-17.17s        |  %s|\n",
+			printw("%s%-16.16s        |  %s|\n",
 			       CURSYM(active), buf, ent->name);
 		else if (S_ISBLK(ent->mode))
-			printw("%s%-17.17s        b  %s\n",
+			printw("%s%-16.16s        b  %s\n",
 			       CURSYM(active), buf, ent->name);
 		else if (S_ISCHR(ent->mode))
-			printw("%s%-17.17s        c  %s\n",
+			printw("%s%-16.16s        c  %s\n",
 			       CURSYM(active), buf, ent->name);
 		else if (ent->mode & S_IXUSR)
-			printw("%s%-17.17s %8.8s* %s*\n", CURSYM(active),
+			printw("%s%-16.16s %8.8s* %s*\n", CURSYM(active),
 			       buf, coolsize(ent->size), ent->name);
 		else
-			printw("%s%-17.17s %8.8s  %s\n", CURSYM(active),
+			printw("%s%-16.16s %8.8s  %s\n", CURSYM(active),
 			       buf, coolsize(ent->size), ent->name);
 	} else {
 		if (S_ISDIR(ent->mode))
-			printw("%s%-17.17s %8.8s/ %s/\n", CURSYM(active),
+			printw("%s%-16.16s %8.8s/ %s/\n", CURSYM(active),
 			       buf, coolsize(ent->bsize << 9), ent->name);
 		else if (S_ISLNK(ent->mode))
-			printw("%s%-17.17s        @  %s@\n",
+			printw("%s%-16.16s        @  %s@\n",
 			       CURSYM(active), buf, ent->name);
 		else if (S_ISSOCK(ent->mode))
-			printw("%s%-17.17s        =  %s=\n",
+			printw("%s%-16.16s        =  %s=\n",
 			       CURSYM(active), buf, ent->name);
 		else if (S_ISFIFO(ent->mode))
-			printw("%s%-17.17s        |  %s|\n",
+			printw("%s%-16.16s        |  %s|\n",
 			       CURSYM(active), buf, ent->name);
 		else if (S_ISBLK(ent->mode))
-			printw("%s%-17.17s        b  %s\n",
+			printw("%s%-16.16s        b  %s\n",
 			       CURSYM(active), buf, ent->name);
 		else if (S_ISCHR(ent->mode))
-			printw("%s%-17.17s        c  %s\n",
+			printw("%s%-16.16s        c  %s\n",
 			       CURSYM(active), buf, ent->name);
 		else if (ent->mode & S_IXUSR)
-			printw("%s%-17.17s %8.8s* %s*\n", CURSYM(active),
+			printw("%s%-16.16s %8.8s* %s*\n", CURSYM(active),
 			       buf, coolsize(ent->bsize << 9), ent->name);
 		else
-			printw("%s%-17.17s %8.8s  %s\n", CURSYM(active),
+			printw("%s%-16.16s %8.8s  %s\n", CURSYM(active),
 			       buf, coolsize(ent->bsize << 9), ent->name);
 	}
 
