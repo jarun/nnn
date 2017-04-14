@@ -162,11 +162,12 @@ Add the following to your shell's rc file for the best experience:
 
 ### Usage
 
-Start nnn (default: current directory):
+Start nnn (default dir: current directory):
 
-    $ nnn [-d] [-v] [path_to_dir]
+    $ nnn [-d] [-S] [-v] [dir]
 
-    -d: open in detail view mode
+    -d: start in detail view mode
+    -S: start in disk usage analyzer mode
     -v: show version and exit
 `>` indicates the currently selected entry in nnn.
 

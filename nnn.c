@@ -1578,7 +1578,7 @@ nochange:
 static void
 usage(void)
 {
-	fprintf(stderr, "usage: nnn [-d] [-v] [dir]\n");
+	fprintf(stderr, "usage: nnn [-d] [-S] [-v] [dir]\n");
 	exit(1);
 }
 
@@ -1598,8 +1598,10 @@ main(int argc, char *argv[])
 	if (argc > 3)
 		usage();
 
-	while ((opt = getopt(argc, argv, "dv")) != -1) {
+	while ((opt = getopt(argc, argv, "dSv")) != -1) {
 		switch (opt) {
+		case 'S':
+			bsizeorder = 1;
 		case 'd':
 			/* Open in detail mode, if set */
 			showdetail = 1;
