@@ -477,6 +477,9 @@ initcurses(void)
 	keypad(stdscr, TRUE);
 	curs_set(FALSE); /* Hide cursor */
 	timeout(1000); /* One second */
+
+	/* Set locale */
+	setlocale(LC_ALL, "");
 }
 
 static void
@@ -1654,8 +1657,6 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	/* Set locale before curses setup */
-	setlocale(LC_ALL, "");
 	initcurses();
 	browse(ipath, ifilter);
 	exitcurses();
