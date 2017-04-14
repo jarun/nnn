@@ -898,8 +898,10 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	}
 
 	/* Show exit keys */
-	printw("\n\n  << (D)");
-	while ((*buf = getch()) != 'D');
+	printw("\n\n  << (D/q)");
+	while ((*buf = getch()))
+		if (*buf == 'D' || *buf == 'q')
+			break;
 	return;
 }
 
@@ -941,8 +943,10 @@ show_help(void)
     q                           Quit\n");
 
 	/* Show exit keys */
-	printw("\n\n    << (?)");
-	while ((c = getch()) != '?');
+	printw("\n\n    << (?/q)");
+	while ((c = getch()))
+		if (c == '?' || c == 'q')
+			break;
 	return;
 }
 
