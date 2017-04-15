@@ -32,8 +32,10 @@ Noice is Not Noice, a noicer fork...
   - [Filters](#filters)
   - [File type abbreviations](#file-type-abbreviations)
   - [Help](#help)
-- [Copy current file path to clipboard](#copy-current-file-path-to-clipboard)
-- [Change file associations](#change-file-associations)
+- [How to](#how-to)
+  - [Copy current file path to clipboard](#copy-current-file-path-to-clipboard)
+  - [Change file associations](#change-file-associations)
+- [Developers](#developers)
 
 ### Introduction
 
@@ -247,7 +249,9 @@ The following abbreviations are used in the detail view:
     $ man nnn
 To lookup keyboard shortcuts at runtime, press `?`.
 
-### Copy current file path to clipboard
+### How to
+
+#### Copy current file path to clipboard
 
 nnn can pipe the absolute path of the current file to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
 
@@ -263,6 +267,12 @@ export `NNN_OPENER`:
 
 Start nnn and use `^K` to copy the absolute path (from `/`) of the file under the cursor to clipboard.
 
-### Change file associations
+#### Change file associations
 
 If you want to set custom applications for certain mime types, or change the ones set already (e.g. vi, mpv, zathura), modify the `assocs` structure in [config.def.h](https://github.com/jarun/nnn/blob/master/config.def.h) (it's easy). Then re-compile and install.
+
+### Developers
+
+1. Copyright © 2014-2016 Lazaros Koromilas
+2. Copyright © 2014-2016 Dimitris Papastamos
+3. Copyright © 2016-2017 [Arun Prakash Jana](https://github.com/jarun)
