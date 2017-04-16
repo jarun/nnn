@@ -4,7 +4,7 @@ PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/share/man
 
 CFLAGS += -O3 -march=native -Wall -Wextra -Wno-unused-parameter
-LDLIBS = -lcurses
+LDLIBS = -lncursesw
 
 DISTFILES = nnn.c config.def.h nnn.1 Makefile README.md LICENSE
 LOCALCONFIG = config.h
