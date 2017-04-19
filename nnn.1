@@ -79,6 +79,8 @@ Force a redraw
 Toggle help screen
 .It Ic q
 Quit
+.It Ic Q
+Quit and change directory
 .El
 .Pp
 Backing up one directory level will set the cursor position at the
@@ -105,6 +107,12 @@ is configured by modifying
 and recompiling the code.
 .Pp
 See the environment and examples sections below for more options and information.
+.Pp
+Configuring
+.Nm
+to change to the last visited directory on quit requires shell integration in a
+few easy steps. Please visit the project page (linked below) for the
+instructions.
 .Sh FILTERS
 Filters support regexes to display only the matched
 entries in the current directory view.  This effectively allows
@@ -117,8 +125,7 @@ An empty filter expression resets the filter.
 .Pp
 If
 .Nm
-is invoked as root the default filter will also match hidden
-files.
+is invoked as root the default filter will also match hidden files.
 .Sh ENVIRONMENT
 The SHELL, EDITOR and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively.

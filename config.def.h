@@ -25,6 +25,7 @@ struct assoc assocs[] = {
 struct key bindings[] = {
 	/* Quit */
 	{ 'q',            SEL_QUIT,      "",     "" },
+	{ 'Q',            SEL_CDQUIT,    "",     "" },
 	/* Back */
 	{ KEY_BACKSPACE,  SEL_BACK,      "",     "" },
 	{ KEY_LEFT,       SEL_BACK,      "",     "" },

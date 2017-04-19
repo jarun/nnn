@@ -72,6 +72,7 @@ struct assoc {
 /* Supported actions */
 enum action {
 	SEL_QUIT = 1,
+	SEL_CDQUIT,
 	SEL_BACK,
 	SEL_GOIN,
 	SEL_FLTR,
@@ -129,7 +130,7 @@ static off_t blk_size;
 static size_t fs_free;
 static int open_max;
 static const double div_2_pow_10 = 1.0 / 1024.0;
-static const char* size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
+static const char *size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 
 /*
  * Layout:
@@ -937,7 +938,8 @@ show_help(void)
     ^K                          Invoke file name copier\n\
     ^L                          Force a redraw\n\
     ?                           Toggle help screen\n\
-    q                           Quit\n");
+    q                           Quit\n\
+    Q                           Quit and change directory\n");
 
 	/* Show exit keys */
 	printw("\n\n    << (?/q)");
@@ -1242,6 +1244,17 @@ begin:
 nochange:
 		sel = nextsel(&run, &env);
 		switch (sel) {
+		case SEL_CDQUIT:
+		{
+			char *tmpfile = getenv("NNN_TMPFILE");
+			if (tmpfile) {
+				FILE *fp = fopen(tmpfile, "w");
+				if (fp) {
+					fprintf(fp, "cd \"%s\"", path);
+					fclose(fp);
+				}
+			}
+		}
 		case SEL_QUIT:
 			dentfree(dents);
 			return;

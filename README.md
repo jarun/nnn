@@ -33,6 +33,7 @@ Noice is Not Noice, a noicer fork...
   - [File type abbreviations](#file-type-abbreviations)
   - [Help](#help)
 - [How to](#how-to)
+  - [cd on quit](#cd-on-quit)
   - [Copy current file path to clipboard](#copy-current-file-path-to-clipboard)
   - [Change file associations](#change-file-associations)
 - [Developers](#developers)
@@ -90,6 +91,7 @@ I chose to fork because:
   - Removed navigation restriction with relative paths (and let permissions handle it)
   - Sort entries by file size (largest to smallest)
   - Shortcut to invoke file name copier (set using environment variable `NNN_COPIER`)
+  - Change to last visited directory on quit
 
 #### File association
   - Set `NNN_OPENER` to let a desktop opener handle it all. E.g.:
@@ -141,7 +143,7 @@ nnn vs. ranger memory usage while viewing a directory with 10,178 files, sorted 
 
 nnn needs libncursesw on Linux (or ncurses on OS X) and standard libc.
 
-- If you are using Homebrew, run:
+- If you are using **Homebrew**, run:
 
       brew install jarun/nnn/nnn
 - Packages are available on
@@ -219,6 +221,7 @@ Add the following to your shell's rc file for the best experience:
 | `^L` | Force a redraw |
 | `?` | Toggle help screen |
 | `q` | Quit |
+| `Q` | Quit and change directory |
 
 #### Filters
 
@@ -250,6 +253,12 @@ The following abbreviations are used in the detail view:
 To lookup keyboard shortcuts at runtime, press `?`.
 
 ### How to
+
+#### cd on quit
+
+Pick the appropriate file for your shell from [misc/quitcd](https://github.com/jarun/nnn/tree/master/misc/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start nnn as `n` (or modify the function name to something else).
+
+As you might notice, nnn uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
 
 #### Copy current file path to clipboard
 
