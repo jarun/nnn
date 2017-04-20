@@ -1292,7 +1292,6 @@ nochange:
 		case SEL_BACK:
 			/* There is no going back */
 			if (strcmp(path, "/") == 0 ||
-			    strcmp(path, ".") == 0 ||
 			    strchr(path, '/') == NULL) {
 				printmsg("You are at /");
 				goto nochange;
@@ -1302,12 +1301,12 @@ nochange:
 				printwarn();
 				goto nochange;
 			}
+
 			/* Save history */
 			xstrlcpy(oldpath, path, sizeof(oldpath));
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, sizeof(lastdir));
-
 			xstrlcpy(path, dir, sizeof(path));
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, sizeof(fltr));
@@ -1468,21 +1467,25 @@ nochange:
 			exitcurses();
 			char *tmp = readline("chdir: ");
 			initcurses();
-			tmp = tmp[0] ? tmp : NULL;
+
 			if (chdir(cwd) == -1)
 				printwarn();
 
-			if (tmp == NULL) {
-				/* Save current */
-				if (ndents > 0)
-					mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
+			/* Save current */
+			if (ndents > 0)
+				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 
+			if (tmp[0] == '\0')
 				goto begin;
-			} else
+			else
 				add_history(tmp);
 
 			char *input = tmp;
 			tmp = strstrip(tmp);
+			if (tmp[0] == '\0') {
+				free(input);
+				goto begin;
+			}
 
 			if (tmp[0] == '~') {
 				char *home = getenv("HOME");
@@ -1491,10 +1494,35 @@ nochange:
 						"%s%s", home, tmp + 1);
 				else
 					mkpath(path, tmp, newpath, sizeof(newpath));
-			} else if (tmp[0] == '-' && tmp[1] == '\0')
+
+				oldpath[0] = '\0';
+			} else if (tmp[0] == '-' && tmp[1] == '\0') {
 				xstrlcpy(newpath, lastdir, sizeof(newpath));
-			else
+				oldpath[0] = '\0';
+			} else if (tmp[0] == '.' && tmp[1] == '\0')
+				xstrlcpy(newpath, path, sizeof(newpath));
+			else if (tmp[0] == '.' && tmp[1] == '.' && tmp[2] == '\0') {
+				/* There is no going back */
+				if (strcmp(path, "/") == 0 ||
+				    strchr(path, '/') == NULL) {
+					printmsg("You are at /");
+					free(input);
+					goto nochange;
+				}
+				dir = xdirname(path);
+				if (canopendir(dir) == 0) {
+					printwarn();
+					free(input);
+					goto nochange;
+				}
+
+				/* Save history */
+				xstrlcpy(oldpath, path, sizeof(oldpath));
+				xstrlcpy(newpath, dir, sizeof(newpath));
+			} else {
 				mkpath(path, tmp, newpath, sizeof(newpath));
+				oldpath[0] = '\0';
+			}
 
 			if (canopendir(newpath) == 0) {
 				/* Save current */
@@ -1513,7 +1541,6 @@ nochange:
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, sizeof(fltr));
 			DPRINTF_S(path);
-			oldpath[0] = '\0';
 			free(input);
 			goto begin;
 		}
@@ -1540,6 +1567,7 @@ nochange:
 			xstrlcpy(newpath, lastdir, sizeof(newpath));
 			xstrlcpy(lastdir, path, sizeof(lastdir));
 			xstrlcpy(path, newpath, sizeof(path));
+			oldpath[0] = '\0';
 			DPRINTF_S(path);
 			goto begin;
 		case SEL_TOGGLEDOT:
