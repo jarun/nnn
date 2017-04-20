@@ -63,7 +63,7 @@ xprintf(int fd, const char *fmt, ...)
 #define CONTROL(c) ((c) ^ 0x40)
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
-#define MAX_CMD_LEN (PATH_MAX << 1)
+#define MAX_CMD_LEN 5120
 #define CURSYM(flag) (flag ? CURSR : EMPTY)
 
 struct assoc {
@@ -111,7 +111,7 @@ struct key {
 #include "config.h"
 
 typedef struct entry {
-	char name[PATH_MAX];
+	char name[NAME_MAX];
 	mode_t mode;
 	time_t t;
 	off_t size;
@@ -229,73 +229,55 @@ xmemrchr(const void *s, int c, size_t n)
 	return NULL;
 }
 
-#if 0
-/* Some implementations of dirname(3) may modify `path' and some
- * return a pointer inside `path'. */
-static char *
-xdirname(const char *path)
-{
-	static char out[PATH_MAX];
-	char tmp[PATH_MAX], *p;
-
-	xstrlcpy(tmp, path, sizeof(tmp));
-	p = dirname(tmp);
-	if (p == NULL)
-		printerr(1, "dirname");
-	xstrlcpy(out, p, sizeof(out));
-	return out;
-}
-#endif
-
 /*
  * The following dirname(3) implementation does not
- * change the input. We use a copy of the original.
+ * modify the input. We use a copy of the original.
  *
  * Modified from the glibc (GNU LGPL) version.
  */
 static char *
 xdirname(const char *path)
 {
-	static char name[PATH_MAX];
+	static char buf[PATH_MAX];
 	char *last_slash;
 
-	xstrlcpy(name, path, PATH_MAX);
+	xstrlcpy(buf, path, PATH_MAX);
 
 	/* Find last '/'. */
-	last_slash = strrchr(name, '/');
+	last_slash = strrchr(buf, '/');
 
-	if (last_slash != NULL && last_slash != name && last_slash[1] == '\0') {
+	if (last_slash != NULL && last_slash != buf && last_slash[1] == '\0') {
 		/* Determine whether all remaining characters are slashes. */
 		char *runp;
 
-		for (runp = last_slash; runp != name; --runp)
+		for (runp = last_slash; runp != buf; --runp)
 			if (runp[-1] != '/')
 				break;
 
 		/* The '/' is the last character, we have to look further. */
-		if (runp != name)
-			last_slash = xmemrchr(name, '/', runp - name);
+		if (runp != buf)
+			last_slash = xmemrchr(buf, '/', runp - buf);
 	}
 
 	if (last_slash != NULL) {
 		/* Determine whether all remaining characters are slashes. */
 		char *runp;
 
-		for (runp = last_slash; runp != name; --runp)
+		for (runp = last_slash; runp != buf; --runp)
 			if (runp[-1] != '/')
 				break;
 
-		/* Terminate the name. */
-		if (runp == name) {
+		/* Terminate the buffer. */
+		if (runp == buf) {
 			/* The last slash is the first character in the string.
 			   We have to return "/". As a special case we have to
 			   return "//" if there are exactly two slashes at the
 			   beginning of the string. See XBD 4.10 Path Name
 			   Resolution for more information. */
-			if (last_slash == name + 1)
+			if (last_slash == buf + 1)
 				++last_slash;
 			else
-				last_slash = name + 1;
+				last_slash = buf + 1;
 		} else
 			last_slash = runp;
 
@@ -304,11 +286,11 @@ xdirname(const char *path)
 		/* This assignment is ill-designed but the XPG specs require to
 		   return a string containing "." in any case no directory part
 		   is found and so a static and constant string is required. */
-		name[0] = '.';
-		name[1] = '\0';
+		buf[0] = '.';
+		buf[1] = '\0';
 	}
 
-	return name;
+	return buf;
 }
 
 static void
@@ -1452,8 +1434,7 @@ nochange:
 		case SEL_CD:
 		{
 			/* Read target dir */
-			char cwd[PATH_MAX];
-			tmp = getcwd(cwd, PATH_MAX);
+			tmp = getcwd(newpath, PATH_MAX);
 			if (tmp == NULL) {
 				printwarn();
 				goto nochange;
@@ -1468,7 +1449,7 @@ nochange:
 			char *tmp = readline("chdir: ");
 			initcurses();
 
-			if (chdir(cwd) == -1)
+			if (chdir(newpath) == -1)
 				printwarn();
 
 			/* Save current */
@@ -1641,16 +1622,14 @@ nochange:
 			goto begin;
 		case SEL_COPY:
 			if (copier && ndents) {
-				char abspath[PATH_MAX];
-
 				if (strcmp(path, "/") == 0)
-					snprintf(abspath, PATH_MAX, "/%s",
+					snprintf(newpath, PATH_MAX, "/%s",
 						 dents[cur].name);
 				else
-					snprintf(abspath, PATH_MAX, "%s/%s",
+					snprintf(newpath, PATH_MAX, "%s/%s",
 						 path, dents[cur].name);
-				spawn(copier, abspath, NULL, 0);
-				printmsg(abspath);
+				spawn(copier, newpath, NULL, 0);
+				printmsg(newpath);
 			} else if (!copier)
 					printmsg("NNN_COPIER is not set");
 			goto nochange;

@@ -123,20 +123,21 @@ I chose to fork because:
 
 ### Performance
 
-nnn vs. ncdu memory usage while listing `/usr/bin` with 1439 entries in disk usage analyzer mode, sorted by total content size:
+nnn vs. ncdu memory usage while listing an external disk with 13,790 files in disk usage analyzer mode:
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
-10406 vaio      20   0   53808  42284   2248 S   0.0  0.8   0:00.82 ncdu
-10409 vaio      20   0   20452   9172   2356 S   0.0  0.2   0:00.83 nnn -d
+31163 vaio      20   0   65508  53980   2320 S   0.0  1.1   0:01.96 ncdu /
+28863 vaio      20   0   24276  11088   2776 S   0.3  0.2   0:02.61 nnn -d
 ```
 
-nnn vs. ranger memory usage while viewing a directory with 10,178 files, sorted by size:
+nnn vs. mc vs. ranger memory usage while viewing a directory with 10,178 files, sorted by size:
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
 22465 vaio      20   0  233956 192136   7896 S   0.0  3.9   0:05.31 /usr/bin/python -O /usr/bin/ranger
-21743 vaio      20   0   55984  44648   2468 S   0.0  0.9   0:01.17 nnn -d
+20369 vaio      20   0   64664  10980   6888 S   0.0  0.2   0:00.70 mc
+28863 vaio      20   0   20600   7220   2648 S   0.0  0.1   0:00.36 nnn -d
 ```
 
 ### Installation
