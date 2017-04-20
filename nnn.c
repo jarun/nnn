@@ -1,26 +1,28 @@
 /* See LICENSE file for copyright and license details. */
+#include <readline/readline.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/statvfs.h>
 #include <sys/resource.h>
 
+#include <ctype.h>
 #include <curses.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <grp.h>
 #include <limits.h>
 #include <locale.h>
+#include <pwd.h>
 #include <regex.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <time.h>
-#include <pwd.h>
-#include <grp.h>
+#include <unistd.h>
 
 #define __USE_XOPEN_EXTENDED
 #include <ftw.h>
@@ -117,6 +119,13 @@ typedef struct entry {
 } *pEntry;
 
 typedef unsigned long ulong;
+
+/* Externs */
+#ifdef __APPLE__
+extern int add_history(const char *);
+#else
+extern void add_history(const char *string);
+#endif
 
 /* Global context */
 static struct entry *dents;
@@ -373,6 +382,28 @@ xstricmp(const char *s1, const char *s2)
 		return 1;
 
 	return (int) (TOUPPER(*s1) - TOUPPER(*s2));
+}
+
+static char *
+strstrip(char *s)
+{
+	size_t size;
+	char *end;
+
+	size = strlen(s);
+
+	if (!size)
+		return s;
+
+	end = s + size - 1;
+	while (end >= s && isspace(*end))
+		end--;
+	*(end + 1) = '\0';
+
+	while (*s && isspace(*s))
+		s++;
+
+	return s;
 }
 
 static char *
@@ -1420,13 +1451,38 @@ nochange:
 			cur = ndents - 1;
 			break;
 		case SEL_CD:
+		{
 			/* Read target dir */
-			printprompt("chdir: ");
-			tmp = readln();
+			char cwd[PATH_MAX];
+			tmp = getcwd(cwd, PATH_MAX);
 			if (tmp == NULL) {
-				clearprompt();
+				printwarn();
 				goto nochange;
 			}
+
+			if (chdir(path) == -1) {
+				printwarn();
+				goto nochange;
+			}
+
+			exitcurses();
+			char *tmp = readline("chdir: ");
+			initcurses();
+			tmp = tmp[0] ? tmp : NULL;
+			if (chdir(cwd) == -1)
+				printwarn();
+
+			if (tmp == NULL) {
+				/* Save current */
+				if (ndents > 0)
+					mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
+
+				goto begin;
+			} else
+				add_history(tmp);
+
+			char *input = tmp;
+			tmp = strstrip(tmp);
 
 			if (tmp[0] == '~') {
 				char *home = getenv("HOME");
@@ -1441,8 +1497,13 @@ nochange:
 				mkpath(path, tmp, newpath, sizeof(newpath));
 
 			if (canopendir(newpath) == 0) {
+				/* Save current */
+				if (ndents > 0)
+					mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
+
 				printwarn();
-				goto nochange;
+				free(input);
+				goto begin;
 			}
 
 			/* Save last working directory */
@@ -1452,7 +1513,10 @@ nochange:
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, sizeof(fltr));
 			DPRINTF_S(path);
+			oldpath[0] = '\0';
+			free(input);
 			goto begin;
+		}
 		case SEL_CDHOME:
 			tmp = getenv("HOME");
 			if (tmp == NULL) {

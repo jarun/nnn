@@ -141,7 +141,7 @@ nnn vs. ranger memory usage while viewing a directory with 10,178 files, sorted 
 
 ### Installation
 
-nnn needs libncursesw on Linux (or ncurses on OS X) and standard libc.
+nnn needs libreadline and libncursesw (on Linux or ncurses on OS X) and standard libc.
 
 - If you are using **Homebrew**, run:
 
