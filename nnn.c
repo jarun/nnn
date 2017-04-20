@@ -129,7 +129,7 @@ extern void add_history(const char *string);
 
 /* Global context */
 static struct entry *dents;
-static int ndents, cur;
+static int ndents, cur, total_dents;
 static int idle;
 static char *opener;
 static char *fallback_opener;
@@ -239,7 +239,7 @@ static char *
 xdirname(const char *path)
 {
 	static char buf[PATH_MAX];
-	char *last_slash;
+	static char *last_slash;
 
 	xstrlcpy(buf, path, PATH_MAX);
 
@@ -366,6 +366,7 @@ xstricmp(const char *s1, const char *s2)
 	return (int) (TOUPPER(*s1) - TOUPPER(*s2));
 }
 
+/* Trim all white space from both ends */
 static char *
 strstrip(char *s)
 {
@@ -411,9 +412,9 @@ openwith(char *file)
 static int
 setfilter(regex_t *regex, char *filter)
 {
-	char errbuf[LINE_MAX];
-	size_t len;
-	int r;
+	static char errbuf[LINE_MAX];
+	static size_t len;
+	static int r;
 
 	r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
 	if (r != 0) {
@@ -1034,8 +1035,9 @@ dentfill(char *path, struct entry **dents,
 		if (filter(re, dp->d_name) == 0)
 			continue;
 
-		if (((n >> 5) << 5) == n) {
-			*dents = realloc(*dents, (n + 32) * sizeof(**dents));
+		if (n == total_dents) {
+			total_dents += 64;
+			*dents = realloc(*dents, total_dents * sizeof(**dents));
 			if (*dents == NULL)
 				printerr(1, "realloc");
 		}
@@ -1044,8 +1046,11 @@ dentfill(char *path, struct entry **dents,
 		/* Get mode flags */
 		mkpath(path, dp->d_name, newpath, sizeof(newpath));
 		r = lstat(newpath, &sb);
-		if (r == -1)
+		if (r == -1) {
+			if (*dents)
+				free(*dents);
 			printerr(1, "lstat");
+		}
 		(*dents)[n].mode = sb.st_mode;
 		(*dents)[n].t = sb.st_mtime;
 		(*dents)[n].size = sb.st_size;
@@ -1075,8 +1080,11 @@ dentfill(char *path, struct entry **dents,
 
 	/* Should never be null */
 	r = closedir(dirp);
-	if (r == -1)
+	if (r == -1) {
+		if (*dents)
+			free(*dents);
 		printerr(1, "closedir");
+	}
 	return n;
 }
 
@@ -1127,11 +1135,6 @@ populate(char *path, char *oldpath, char *fltr)
 	r = setfilter(&re, fltr);
 	if (r != 0)
 		return -1;
-
-	dentfree(dents);
-
-	ndents = 0;
-	dents = NULL;
 
 	ndents = dentfill(path, &dents, visible, &re);
 
@@ -1334,14 +1337,13 @@ nochange:
 			{
 				static char cmd[MAX_CMD_LEN];
 				static char *runvi = "vi";
-				static int status;
 
 				/* If default mime opener is set, use it */
 				if (opener) {
 					snprintf(cmd, MAX_CMD_LEN,
 						 "%s \"%s\" > /dev/null 2>&1",
 						 opener, newpath);
-					status = system(cmd);
+					r = system(cmd);
 					continue;
 				}
 
@@ -1370,10 +1372,9 @@ nochange:
 							 /dev/null 2>&1",
 							 fallback_opener,
 							 newpath);
-						status = system(cmd);
+						r = system(cmd);
 						continue;
 					} else {
-						status++; /* Dummy operation */
 						printmsg("No association");
 						goto nochange;
 					}
@@ -1572,9 +1573,11 @@ nochange:
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 
 			r = lstat(oldpath, &sb);
-			if (r == -1)
+			if (r == -1) {
+				if (dents)
+					dentfree(dents);
 				printerr(1, "lstat");
-			else
+			} else
 				show_stats(oldpath, dents[cur].name, &sb);
 
 			goto begin;

@@ -42,7 +42,7 @@ Noice is Not Noice, a noicer fork...
 
 nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
 
-nnn can use the default desktop opener at runtime. It adds new navigation options, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. For a complete list, see [nnn toppings](#nnn-toppings).
+nnn can use the default desktop opener at runtime. It adds new navigation options, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. For a complete list, see [nnn toppings](#nnn-toppings). Add to it a huge [performance](#performance) boost.
 
 Follow the instructions in the [quickstart](#quickstart) section and see how nnn simplifies those long desktop sessions.
 
@@ -128,7 +128,7 @@ nnn vs. ncdu memory usage while listing an external disk with 13,790 files in di
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
 31163 vaio      20   0   65508  53980   2320 S   0.0  1.1   0:01.96 ncdu /
-28863 vaio      20   0   24276  11088   2776 S   0.3  0.2   0:02.61 nnn -d
+28863 vaio      20   0   21348   7812   2476 S   0.0  0.2   0:01.75 nnn -d
 ```
 
 nnn vs. mc vs. ranger memory usage while viewing a directory with 10,178 files, sorted by size:
@@ -137,7 +137,7 @@ nnn vs. mc vs. ranger memory usage while viewing a directory with 10,178 files, 
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
 22465 vaio      20   0  233956 192136   7896 S   0.0  3.9   0:05.31 /usr/bin/python -O /usr/bin/ranger
 20369 vaio      20   0   64664  10980   6888 S   0.0  0.2   0:00.70 mc
-28863 vaio      20   0   20600   7220   2648 S   0.0  0.1   0:00.36 nnn -d
+28863 vaio      20   0   19876   6436   2620 S   0.0  0.1   0:00.19 nnn -d
 ```
 
 ### Installation
