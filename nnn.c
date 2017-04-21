@@ -187,27 +187,12 @@ max_openfds()
 	return 32;
 }
 
-static size_t
+/* Just a safe strncpy(3) */
+static void
 xstrlcpy(char *dest, const char *src, size_t n)
 {
-	size_t i;
-
-	for (i = 0; i < n && *src; i++)
-		*dest++ = *src++;
-
-	if (n) {
-		*dest = '\0';
-
-#ifdef CHECK_XSTRLCPY_RET
-		/* Compiling this out as we are not checking
-		   the return value anywhere (controlled case).
-		   Just returning the number of bytes copied. */
-		while(*src++)
-			i++;
-#endif
-	}
-
-	return i;
+	strncpy(dest, src, n - 1);
+	dest[n - 1] = '\0';
 }
 
 /*
@@ -615,18 +600,28 @@ mkpath(char *dir, char *name, char *out, size_t n)
 static void
 printent(struct entry *ent, int active)
 {
-	if (S_ISDIR(ent->mode))
-		printw("%s%s/\n", CURSYM(active), ent->name);
-	else if (S_ISLNK(ent->mode))
-		printw("%s%s@\n", CURSYM(active), ent->name);
-	else if (S_ISSOCK(ent->mode))
-		printw("%s%s=\n", CURSYM(active), ent->name);
-	else if (S_ISFIFO(ent->mode))
-		printw("%s%s|\n", CURSYM(active), ent->name);
-	else if (ent->mode & S_IXUSR)
-		printw("%s%s*\n", CURSYM(active), ent->name);
+	static int ncols;
+	static char str[PATH_MAX + 16];
+
+	if (COLS > PATH_MAX + 16)
+		ncols = PATH_MAX + 16;
 	else
-		printw("%s%s\n", CURSYM(active), ent->name);
+		ncols = COLS;
+
+	if (S_ISDIR(ent->mode))
+		snprintf(str, ncols, "%s%s/", CURSYM(active), ent->name);
+	else if (S_ISLNK(ent->mode))
+		snprintf(str, ncols, "%s%s@", CURSYM(active), ent->name);
+	else if (S_ISSOCK(ent->mode))
+		snprintf(str, ncols, "%s%s=", CURSYM(active), ent->name);
+	else if (S_ISFIFO(ent->mode))
+		snprintf(str, ncols, "%s%s|", CURSYM(active), ent->name);
+	else if (ent->mode & S_IXUSR)
+		snprintf(str, ncols, "%s%s*", CURSYM(active), ent->name);
+	else
+		snprintf(str, ncols, "%s%s", CURSYM(active), ent->name);
+
+	printw("%s\n", str);
 }
 
 static void (*printptr)(struct entry *ent, int active) = &printent;
@@ -658,7 +653,15 @@ coolsize(off_t size)
 static void
 printent_long(struct entry *ent, int active)
 {
+	static int ncols;
+	static char str[PATH_MAX + 32];
 	static char buf[18];
+
+	if (COLS > PATH_MAX + 32)
+		ncols = PATH_MAX + 32;
+	else
+		ncols = COLS;
+
 	strftime(buf, 18, "%d %m %Y %H:%M", localtime(&ent->t));
 
 	if (active)
@@ -666,55 +669,57 @@ printent_long(struct entry *ent, int active)
 
 	if (!bsizeorder) {
 		if (S_ISDIR(ent->mode))
-			printw("%s%-16.16s        /  %s/\n",
-			       CURSYM(active), buf, ent->name);
+			snprintf(str, ncols, "%s%-16.16s        /  %s/",
+				 CURSYM(active), buf, ent->name);
 		else if (S_ISLNK(ent->mode))
-			printw("%s%-16.16s        @  %s@\n",
-			       CURSYM(active), buf, ent->name);
+			snprintf(str, ncols, "%s%-16.16s        @  %s@",
+				 CURSYM(active), buf, ent->name);
 		else if (S_ISSOCK(ent->mode))
-			printw("%s%-16.16s        =  %s=\n",
-			       CURSYM(active), buf, ent->name);
+			snprintf(str, ncols, "%s%-16.16s        =  %s=",
+				 CURSYM(active), buf, ent->name);
 		else if (S_ISFIFO(ent->mode))
-			printw("%s%-16.16s        |  %s|\n",
-			       CURSYM(active), buf, ent->name);
+			snprintf(str, ncols, "%s%-16.16s        |  %s|",
+				 CURSYM(active), buf, ent->name);
 		else if (S_ISBLK(ent->mode))
-			printw("%s%-16.16s        b  %s\n",
-			       CURSYM(active), buf, ent->name);
+			snprintf(str, ncols, "%s%-16.16s        b  %s",
+				 CURSYM(active), buf, ent->name);
 		else if (S_ISCHR(ent->mode))
-			printw("%s%-16.16s        c  %s\n",
-			       CURSYM(active), buf, ent->name);
+			snprintf(str, ncols, "%s%-16.16s        c  %s",
+				 CURSYM(active), buf, ent->name);
 		else if (ent->mode & S_IXUSR)
-			printw("%s%-16.16s %8.8s* %s*\n", CURSYM(active),
-			       buf, coolsize(ent->size), ent->name);
+			snprintf(str, ncols, "%s%-16.16s %8.8s* %s*",
+				 CURSYM(active), buf, coolsize(ent->size), ent->name);
 		else
-			printw("%s%-16.16s %8.8s  %s\n", CURSYM(active),
-			       buf, coolsize(ent->size), ent->name);
+			snprintf(str, ncols, "%s%-16.16s %8.8s  %s",
+				 CURSYM(active), buf, coolsize(ent->size), ent->name);
 	} else {
 		if (S_ISDIR(ent->mode))
-			printw("%s%-16.16s %8.8s/ %s/\n", CURSYM(active),
-			       buf, coolsize(ent->bsize << 9), ent->name);
+			snprintf(str, ncols, "%s%-16.16s %8.8s/ %s/",
+				 CURSYM(active), buf, coolsize(ent->bsize << 9), ent->name);
 		else if (S_ISLNK(ent->mode))
-			printw("%s%-16.16s        @  %s@\n",
-			       CURSYM(active), buf, ent->name);
+			snprintf(str, ncols, "%s%-16.16s        @  %s@",
+				 CURSYM(active), buf, ent->name);
 		else if (S_ISSOCK(ent->mode))
-			printw("%s%-16.16s        =  %s=\n",
-			       CURSYM(active), buf, ent->name);
+			snprintf(str, ncols, "%s%-16.16s        =  %s=",
+				 CURSYM(active), buf, ent->name);
 		else if (S_ISFIFO(ent->mode))
-			printw("%s%-16.16s        |  %s|\n",
-			       CURSYM(active), buf, ent->name);
+			snprintf(str, ncols, "%s%-16.16s        |  %s|",
+				 CURSYM(active), buf, ent->name);
 		else if (S_ISBLK(ent->mode))
-			printw("%s%-16.16s        b  %s\n",
-			       CURSYM(active), buf, ent->name);
+			snprintf(str, ncols, "%s%-16.16s        b  %s",
+				 CURSYM(active), buf, ent->name);
 		else if (S_ISCHR(ent->mode))
-			printw("%s%-16.16s        c  %s\n",
-			       CURSYM(active), buf, ent->name);
+			snprintf(str, ncols, "%s%-16.16s        c  %s",
+				 CURSYM(active), buf, ent->name);
 		else if (ent->mode & S_IXUSR)
-			printw("%s%-16.16s %8.8s* %s*\n", CURSYM(active),
-			       buf, coolsize(ent->bsize << 9), ent->name);
+			snprintf(str, ncols, "%s%-16.16s %8.8s* %s*",
+				 CURSYM(active), buf, coolsize(ent->bsize << 9), ent->name);
 		else
-			printw("%s%-16.16s %8.8s  %s\n", CURSYM(active),
-			       buf, coolsize(ent->bsize << 9), ent->name);
+			snprintf(str, ncols, "%s%-16.16s %8.8s  %s",
+				 CURSYM(active), buf, coolsize(ent->bsize << 9), ent->name);
 	}
+
+	printw("%s\n", str);
 
 	if (active)
 		attroff(A_REVERSE);
@@ -1179,6 +1184,7 @@ redraw(char *path)
 	static char cwd[PATH_MAX];
 	static int nlines, odd;
 	static int i;
+	static size_t ncols;
 
 	nlines = MIN(LINES - 4, ndents);
 
@@ -1201,6 +1207,10 @@ redraw(char *path)
 		return;
 	}
 
+	ncols = COLS;
+	if (ncols > PATH_MAX)
+		ncols = PATH_MAX;
+	cwd[ncols - strlen(CWD) - 1] = '\0';
 	printw(CWD "%s\n\n", cwd);
 
 	/* Print listing */
