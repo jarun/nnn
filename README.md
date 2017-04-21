@@ -17,32 +17,29 @@ Noice is Not Noice, a noicer fork...
 ### Table of Contents
 
 - [Introduction](#introduction)
-- [Why fork?](#why-fork)
-- [Original features](#original-features)
-- [nnn toppings](#nnn-toppings)
-  - [Behaviour and navigation](#behaviour-and-navigation)
-  - [File association](#file-association)
-  - [Optimization](#optimization)
+- [Features](#features)
 - [Performance](#performance)
 - [Installation](#installation)
-- [Quickstart](#quickstart)
 - [Usage](#usage)
   - [Cmdline options](#cmdline-options)
   - [Keyboard shortcuts](#keyboard-shortcuts)
   - [Filters](#filters)
   - [File type abbreviations](#file-type-abbreviations)
+  - [File association](#file-association)
   - [Help](#help)
+- [Quickstart](#quickstart)
 - [How to](#how-to)
   - [cd on quit](#cd-on-quit)
   - [Copy current file path to clipboard](#copy-current-file-path-to-clipboard)
   - [Change file associations](#change-file-associations)
+- [Why fork?](#why-fork)
 - [Developers](#developers)
 
 ### Introduction
 
 nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
 
-nnn can use the default desktop opener at runtime. It adds new navigation options, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. For a complete list, see [nnn toppings](#nnn-toppings). Add to it a huge [performance](#performance) boost.
+nnn can use the default desktop opener at runtime. It adds new navigation options, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
 
 Follow the instructions in the [quickstart](#quickstart) section and see how nnn simplifies those long desktop sessions.
 
@@ -52,74 +49,22 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://tuxtricks.files.wordpress.com/2016/12/donate.png" alt="Donate via PayPal!" title="Donate via PayPal!" /></a>
 </p>
 
-### Why fork?
+### Features
 
-I chose to fork because:
-- one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. In my opinion evolution is the taste of time.
-- I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind.
-
-### Original features
-
-- Super-easy navigation
-- Pre-defined associations for different file types
-- Jump to home directory
-- Filter contents in current directory
-- Show/hide hidden files
-- Sort entries by modification time (newest to oldest)
-- Spawn a `SHELL` in current directory (fallback sh)
-- Run `top`
-- Edit a file with `EDITOR` (fallback vi)
-- Page through a file in `PAGER` (fallback less)
-
-### nnn toppings
-
-#### Behaviour and navigation
-  - Detail view (default: disabled) with:
-    - file type (directory, regular, symlink etc.)
-    - modification time
-    - human-readable file size
-    - current item in reverse video
-    - number of items in current directory
-    - full name of currently selected file in 'bar'
-  - Show details of the currently selected file (stat, file)
-  - Disk usage analyzer mode (within the same fs, doesn't follow symlinks)
-  - Directories first (even with sorting)
-  - Sort numeric names in numeric order
-  - Case-insensitive alphabetic content listing instead of upper case first
-  - Key `-` to jump to last visited directory
-  - Roll over at the first and last entries of a directory (with Up/Down keys)
-  - Removed navigation restriction with relative paths (and let permissions handle it)
-  - Sort entries by file size (largest to smallest)
-  - Shortcut to invoke file name copier (set using environment variable `NNN_COPIER`)
-  - Change to last visited directory on quit
-
-#### File association
-  - Set `NNN_OPENER` to let a desktop opener handle it all. E.g.:
-
-        export NNN_OPENER=xdg-open
-        export NNN_OPENER="gio open"
-        export NNN_OPENER=gvfs-open
-  - Selective file associations (ignored if `NNN_OPENER` is set):
-    - Associate plain text files (determined using file) with vi
-    - Associate common audio and video mimes with mpv
-    - Associate PDF files with [zathura](https://pwmt.org/projects/zathura/)
-    - Removed `less` as default file opener (there is no universal standalone opener utility)
-    - You can customize further (see [how to change file associations](#change-file-associations))
-  - `NNN_FALLBACK_OPENER` is the last line of defense:
-    - If the executable in static file association is missing
-    - If a file type was not handled in static file association
-    - This may be the best option to set your desktop opener to
-  - To enable the desktop file manager key, set `NNN_DE_FILE_MANAGER`. E.g.:
-
-        export NNN_DE_FILE_MANAGER=thunar
-
-#### Optimization
-  - All redundant buffer removal
-  - All frequently used local chunks now static
-  - Removed some redundant string allocation and manipulation
-  - Simplified some roundabout procedures
-  - Compiler warnings fixed
-  - strip the final binary
+- Super-easy navigation with roll-over at edges
+- Jump HOME or back to the last visited directory (as you normally do!)
+- Desktop opener integration to handle mime types
+- Disk usage analyzer mode
+- Basic and detail views
+- Sort by modificaton time, size
+- Sort numeric names in numeric order (1, 2, ... 10, 11, ...)
+- Search directory contents using regex expressions
+- Spawn a shell in the current directory
+- Invoke file path copier (*easy* shell integration)
+- Quit and change directory (*easy* shell integration)
+- Open any file in EDITOR (fallback vi) or PAGER (fallback less)
+- VIM-ish keybinds
+- UTF-8 support
 
 ### Performance
 
@@ -154,23 +99,6 @@ nnn needs libreadline and libncursesw (on Linux or ncurses on OS X) and standard
 
       $ make
       $ sudo make install
-
-### Quickstart
-
-Add the following to your shell's rc file for the best experience:
-
-- If you want to open nnn in detail mode each time:
-
-      alias n='nnn -d'
-- Set your preferred desktop opener as fallback. E.g.:
-
-      export NNN_FALLBACK_OPENER=xdg-open
-- Set a desktop file manager to open directories with (if you need). E.g.:
-
-      export NNN_DE_FILE_MANAGER=thunar
-- Start nnn.
-
-      n
 
 ### Usage
 
@@ -248,10 +176,45 @@ The following abbreviations are used in the detail view:
 | `b` | Block Device |
 | `c` | Character Device |
 
+#### File association
+  - Set `NNN_OPENER` to let a desktop opener handle it all. E.g.:
+
+        export NNN_OPENER=xdg-open
+        export NNN_OPENER="gio open"
+        export NNN_OPENER=gvfs-open
+  - Selective file associations (ignored if `NNN_OPENER` is set):
+    - vi - plain text files (determined using file)
+    - mpv - common audio and video mimes
+    - [zathura](https://pwmt.org/projects/zathura/) - pdf files
+    - to customize further see [how to change file associations](#change-file-associations)
+  - Set `NNN_FALLBACK_OPENER` as the fallback opener:
+    - if the executable in static file association is missing
+    - if a file type was not handled in static file association
+  - To enable the desktop file manager key, set `NNN_DE_FILE_MANAGER`. E.g.:
+
+        export NNN_DE_FILE_MANAGER=thunar
+
 #### Help
 
     $ man nnn
 To lookup keyboard shortcuts at runtime, press `?`.
+
+### Quickstart
+
+Add the following to your shell's rc file for the best experience:
+
+- If you want to open nnn in detail mode each time:
+
+      alias n='nnn -d'
+- Set your preferred desktop opener as fallback. E.g.:
+
+      export NNN_FALLBACK_OPENER=xdg-open
+- Set a desktop file manager to open directories with (if you need). E.g.:
+
+      export NNN_DE_FILE_MANAGER=thunar
+- Start nnn.
+
+      n
 
 ### How to
 
@@ -280,6 +243,12 @@ Start nnn and use `^K` to copy the absolute path (from `/`) of the file under th
 #### Change file associations
 
 If you want to set custom applications for certain mime types, or change the ones set already (e.g. vi, mpv, zathura), modify the `assocs` structure in [config.def.h](https://github.com/jarun/nnn/blob/master/config.def.h) (it's easy). Then re-compile and install.
+
+### Why fork?
+
+I chose to fork because:
+- one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. In my opinion evolution is the taste of time.
+- I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind. Check out [nnn design considerations](https://github.com/jarun/nnn/wiki/nnn-design-considerations) for more details.
 
 ### Developers
 
