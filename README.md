@@ -5,6 +5,7 @@ Noice is Not Noice, a noicer fork...
 <p align="center">
 <a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600" alt="Latest release" /></a>
 <a href="https://aur.archlinux.org/packages/nnn"><img src="https://img.shields.io/aur/version/nnn.svg?maxAge=600" alt="AUR" /></a>
+<a href="http://braumeister.org/formula/nnn"><img src="https://img.shields.io/homebrew/v/nnn.svg?maxAge=600" alt="Homebrew" /></a>
 <a href="https://launchpad.net/~twodopeshaggy/+archive/ubuntu/jarun/"><img src="https://img.shields.io/badge/ubuntu-PPA-blue.svg?maxAge=2592000" alt="Ubuntu PPA" /></a>
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow.svg?maxAge=2592000" alt="License" /></a>
 <a href="https://travis-ci.org/jarun/nnn"><img src="https://travis-ci.org/jarun/nnn.svg?branch=master" alt="Build Status" /></a>
@@ -89,13 +90,11 @@ nnn vs. mc vs. ranger memory usage while viewing a directory with 10,178 files, 
 
 ### Installation
 
-nnn needs libreadline and libncursesw (on Linux or ncurses on OS X) and standard libc.
+nnn needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard libc.
 
-- If you are using **Homebrew**, run:
-
-      brew install jarun/nnn/nnn
 - Packages are available on
   - [AUR](https://aur.archlinux.org/packages/nnn/)
+  - [Homebrew](http://braumeister.org/formula/nnn)
   - [Ubuntu PPA](https://launchpad.net/~twodopeshaggy/+archive/ubuntu/jarun/)
 - To compile and install, download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*). Run:
 
@@ -197,6 +196,7 @@ The following abbreviations are used in the detail view:
   - To enable the desktop file manager key, set `NNN_DE_FILE_MANAGER`. E.g.:
 
         export NNN_DE_FILE_MANAGER=thunar
+  - [mediainfo](https://mediaarea.net/en/MediaInfo) is required to view media information
 
 #### Help
 
