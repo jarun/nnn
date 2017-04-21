@@ -25,7 +25,7 @@ Noice is Not Noice, a noicer fork...
   - [Keyboard shortcuts](#keyboard-shortcuts)
   - [Filters](#filters)
   - [File type abbreviations](#file-type-abbreviations)
-  - [File association](#file-association)
+  - [File handling](#file-handling)
   - [Help](#help)
 - [Quickstart](#quickstart)
 - [How to](#how-to)
@@ -133,7 +133,7 @@ nnn needs libreadline and libncursesw (on Linux or ncurses on OS X) and standard
 | `Left`, `Backspace`, `h`, `^H` | Go to parent dir |
 | `~` | Jump to HOME dir |
 | `-` | Jump to last visited dir |
-| `o` | Open dir in desktop file manager |
+| `o` | Open dir in `NNN_DE_FILE_MANAGER` |
 | `/`, `&` | Filter dir contents |
 | `c` | Show change dir prompt |
 | `d` | Toggle detail view |
@@ -176,7 +176,7 @@ The following abbreviations are used in the detail view:
 | `b` | Block Device |
 | `c` | Character Device |
 
-#### File association
+#### File handling
   - Set `NNN_OPENER` to let a desktop opener handle it all. E.g.:
 
         export NNN_OPENER=xdg-open

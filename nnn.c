@@ -936,7 +936,7 @@ show_help(void)
     [Left], [Backspace], h, ^H  Go to parent dir\n\
     ~                           Jump to HOME dir\n\
     -                           Jump to last visited dir\n\
-    o                           Open dir in desktop file manager\n\
+    o                           Open dir in NNN_DE_FILE_MANAGER\n\
     /, &                        Filter dir contents\n\
     c                           Show change dir prompt\n\
     d                           Toggle detail view\n\
