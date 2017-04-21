@@ -56,7 +56,9 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - Desktop opener integration to handle mime types
 - Disk usage analyzer mode
 - Basic and detail views
-- Sort by modificaton time, size
+- Show stat and file information
+- Show media information (needs mediainfo)
+- Sort by modification time, size
 - Sort numeric names in numeric order (1, 2, ... 10, 11, ...)
 - Search directory contents using regex expressions
 - Spawn a shell in the current directory
@@ -138,6 +140,8 @@ nnn needs libreadline and libncursesw (on Linux or ncurses on OS X) and standard
 | `c` | Show change dir prompt |
 | `d` | Toggle detail view |
 | `D` | Toggle current file details screen |
+| `m` | Show concise mediainfo in less |
+| `M` | Show full mediainfo in less |
 | `.` | Toggle hide .dot files |
 | `s` | Toggle sort by file size |
 | `S` | Toggle disk usage analyzer mode |

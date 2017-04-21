@@ -75,6 +75,10 @@ struct key bindings[] = {
 	{ 'd',            SEL_DETAIL,    "",     "" },
 	/* File details */
 	{ 'D',            SEL_STATS,     "",     "" },
+	/* Show mediainfo short */
+	{ 'm',            SEL_MEDIA,     "",     "" },
+	/* Show mediainfo full */
+	{ 'M',            SEL_FMEDIA,    "",     "" },
 	/* Open dir in desktop file manager */
 	{ 'o',            SEL_DFB,       "",     "" },
 	/* Toggle sort by size */

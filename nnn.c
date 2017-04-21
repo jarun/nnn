@@ -90,6 +90,8 @@ enum action {
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
 	SEL_STATS,
+	SEL_MEDIA,
+	SEL_FMEDIA,
 	SEL_DFB,
 	SEL_FSIZE,
 	SEL_BSIZE,
@@ -135,6 +137,7 @@ static char *opener;
 static char *fallback_opener;
 static char *copier;
 static char *desktop_manager;
+static char *nnn_tmpfile = "/tmp/nnn";
 static off_t blk_size;
 static size_t fs_free;
 static int open_max;
@@ -816,6 +819,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	char *p, *begin = buf;
 
 	clear();
+	scrollok(stdscr, TRUE);
 
 	/* Show file name or 'symlink' -> 'target' */
 	if (perms[0] == 'l') {
@@ -823,7 +827,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 		ssize_t len = readlink(fpath, symtgt, PATH_MAX);
 		if (len != -1) {
 			symtgt[len] = '\0';
-			printw("\n\n    File: '%s' -> '%s'", fname, symtgt);
+			printw("\n    File: '%s' -> '%s'", fname, symtgt);
 		}
 	} else
 		printw("\n    File: '%s'", fname);
@@ -910,11 +914,30 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	}
 
 	/* Show exit keys */
-	printw("\n\n  << (D/q)");
+	printw("\n  << (D/q)");
 	while ((*buf = getch()))
 		if (*buf == 'D' || *buf == 'q')
 			break;
+
+	scrollok(stdscr, FALSE);
 	return;
+}
+
+static int
+show_mediainfo(const char* fpath, int full)
+{
+	static char buf[MAX_CMD_LEN];
+
+	snprintf(buf, MAX_CMD_LEN, "which mediainfo");
+	if (get_output(buf, MAX_CMD_LEN) == NULL)
+		return -1;
+
+	if (full)
+		sprintf(buf, "mediainfo -f \"%s\" 2>&1 | less", fpath);
+	else
+		sprintf(buf, "mediainfo \"%s\" 2>&1 | less", fpath);
+
+	return system(buf);
 }
 
 static void
@@ -923,8 +946,9 @@ show_help(void)
 	char c;
 
 	clear();
+	scrollok(stdscr, TRUE);
 
-	printw("\n\
+	printw("\
     << Key >>                   << Function >>\n\n\
     [Up], k, ^P                 Previous entry\n\
     [Down], j, ^N               Next entry\n\
@@ -941,6 +965,8 @@ show_help(void)
     c                           Show change dir prompt\n\
     d                           Toggle detail view\n\
     D                           Toggle current file details screen\n\
+    m                           Show concise mediainfo in less\n\
+    M                           Show full mediainfo in less\n\
     .                           Toggle hide .dot files\n\
     s                           Toggle sort by file size\n\
     S                           Toggle disk usage analyzer mode\n\
@@ -956,10 +982,12 @@ show_help(void)
     Q                           Quit and change directory\n");
 
 	/* Show exit keys */
-	printw("\n\n    << (?/q)");
+	printw("\n    << (?/q)");
 	while ((c = getch()))
 		if (c == '?' || c == 'q')
 			break;
+
+	scrollok(stdscr, FALSE);
 	return;
 }
 
@@ -1262,13 +1290,10 @@ nochange:
 		switch (sel) {
 		case SEL_CDQUIT:
 		{
-			char *tmpfile = getenv("NNN_TMPFILE");
-			if (tmpfile) {
-				FILE *fp = fopen(tmpfile, "w");
-				if (fp) {
-					fprintf(fp, "cd \"%s\"", path);
-					fclose(fp);
-				}
+			FILE *fp = fopen(nnn_tmpfile, "w");
+			if (fp) {
+				fprintf(fp, "cd \"%s\"", path);
+				fclose(fp);
 			}
 		}
 		case SEL_QUIT:
@@ -1458,7 +1483,7 @@ nochange:
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 
 			if (tmp[0] == '\0')
-				goto begin;
+				break;
 			else
 				add_history(tmp);
 
@@ -1466,7 +1491,7 @@ nochange:
 			tmp = strstrip(tmp);
 			if (tmp[0] == '\0') {
 				free(input);
-				goto begin;
+				break;
 			}
 
 			if (tmp[0] == '~') {
@@ -1513,7 +1538,7 @@ nochange:
 
 				printwarn();
 				free(input);
-				goto begin;
+				break;
 			}
 
 			/* Save last working directory */
@@ -1582,6 +1607,26 @@ nochange:
 
 			goto begin;
 		}
+		case SEL_MEDIA:
+			if (ndents > 0)
+				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
+
+			exitcurses();
+			r = show_mediainfo(oldpath, FALSE);
+			initcurses();
+			if (r < 0)
+				printmsg("mediainfo missing");
+			goto nochange;
+		case SEL_FMEDIA:
+			if (ndents > 0)
+				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
+
+			exitcurses();
+			r = show_mediainfo(oldpath, TRUE);
+			initcurses();
+			if (r < 0)
+				printmsg("mediainfo missing");
+			goto nochange;
 		case SEL_DFB:
 			if (!desktop_manager)
 				goto nochange;
@@ -1733,6 +1778,10 @@ main(int argc, char *argv[])
 	}
 
 	open_max = max_openfds();
+
+	/* Get temporary file name (ifilter used as temporary variable) */
+	if ((ifilter = getenv("NNN_TMPFILE")) != NULL)
+		nnn_tmpfile = ifilter;
 
 	if (getuid() == 0)
 		showhidden = 1;
