@@ -945,15 +945,10 @@ show_mediainfo(const char* fpath, int full)
 	return system(buf);
 }
 
-static void
+static int
 show_help(void)
 {
-	char c;
-
-	clear();
-	scrollok(stdscr, TRUE);
-
-	printw("\
+	char helpstr[] = ("echo \"\
     << Key >>                   << Function >>\n\n\
     [Up], k, ^P                 Previous entry\n\
     [Down], j, ^N               Next entry\n\
@@ -984,16 +979,9 @@ show_help(void)
     ^L                          Force a redraw\n\
     ?                           Toggle help screen\n\
     q                           Quit\n\
-    Q                           Quit and change directory\n");
+    Q                           Quit and change directory\n\n\" | less");
 
-	/* Show exit keys */
-	printw("\n    << (?/q)");
-	while ((c = getch()))
-		if (c == '?' || c == 'q')
-			break;
-
-	scrollok(stdscr, FALSE);
-	return;
+	return system(helpstr);
 }
 
 static int
@@ -1615,7 +1603,7 @@ nochange:
 			} else
 				show_stats(oldpath, dents[cur].name, &sb);
 
-			goto begin;
+			break;
 		}
 		case SEL_MEDIA:
 			if (ndents > 0)
@@ -1624,9 +1612,11 @@ nochange:
 			exitcurses();
 			r = show_mediainfo(oldpath, FALSE);
 			initcurses();
-			if (r < 0)
+			if (r < 0) {
 				printmsg("mediainfo missing");
-			goto nochange;
+				goto nochange;
+			}
+			break;
 		case SEL_FMEDIA:
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
@@ -1634,17 +1624,21 @@ nochange:
 			exitcurses();
 			r = show_mediainfo(oldpath, TRUE);
 			initcurses();
-			if (r < 0)
+			if (r < 0) {
 				printmsg("mediainfo missing");
-			goto nochange;
-		case SEL_DFB:
-			if (!desktop_manager)
 				goto nochange;
+			}
+			break;
+		case SEL_DFB:
+			if (!desktop_manager) {
+				printmsg("NNN_DE_FILE_MANAGER not set");
+				goto nochange;
+			}
 
 			exitcurses();
 			spawn(desktop_manager, path, path, 0);
 			initcurses();
-			goto nochange;
+			break;
 		case SEL_FSIZE:
 			sizeorder = !sizeorder;
 			mtimeorder = 0;
@@ -1692,11 +1686,10 @@ nochange:
 					printmsg("NNN_COPIER is not set");
 			goto nochange;
 		case SEL_HELP:
+			exitcurses();
 			show_help();
-			/* Save current */
-			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
-			goto begin;
+			initcurses();
+			break;
 		case SEL_RUN:
 			run = xgetenv(env, run);
 			exitcurses();
