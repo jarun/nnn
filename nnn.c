@@ -280,8 +280,13 @@ xdirname(const char *path)
 	return buf;
 }
 
+/*
+ * Spawns a child process. Behaviour can be controlled using flag:
+ * flag = 1: draw a marker to indicate nnn spawned e.g., a shell
+ * flag = 2: do not wait in parent for child process e.g. DE file manager
+ */
 static void
-spawn(char *file, char *arg, char *dir, int notify)
+spawn(char *file, char *arg, char *dir, int flag)
 {
 	pid_t pid;
 	int status;
@@ -290,14 +295,16 @@ spawn(char *file, char *arg, char *dir, int notify)
 	if (pid == 0) {
 		if (dir != NULL)
 			status = chdir(dir);
-		if (notify)
+		if (flag == 1)
 			fprintf(stdout, "\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
 		execlp(file, file, arg, NULL);
 		_exit(1);
 	} else {
-		/* Ignore interruptions */
-		while (waitpid(pid, &status, 0) == -1)
-			DPRINTF_D(status);
+		if (flag != 2) {
+			/* Ignore interruptions */
+			while (waitpid(pid, &status, 0) == -1)
+				DPRINTF_D(status);
+		}
 		DPRINTF_D(pid);
 	}
 }
@@ -937,8 +944,8 @@ show_help(void)
     c                           Show change dir prompt\n\
     d                           Toggle detail view\n\
     D                           Toggle current file details screen\n\
-    m                           Show concise mediainfo in less\n\
-    M                           Show full mediainfo in less\n\
+    m                           Show concise mediainfo\n\
+    M                           Show full mediainfo\n\
     .                           Toggle hide .dot files\n\
     s                           Toggle sort by file size\n\
     S                           Toggle disk usage analyzer mode\n\
@@ -1618,9 +1625,7 @@ nochange:
 				goto nochange;
 			}
 
-			exitcurses();
-			spawn(desktop_manager, path, path, 0);
-			initcurses();
+			spawn(desktop_manager, path, path, 2);
 			break;
 		case SEL_FSIZE:
 			sizeorder = !sizeorder;

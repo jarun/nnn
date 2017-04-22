@@ -139,8 +139,8 @@ nnn needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard li
 | `c` | Show change dir prompt |
 | `d` | Toggle detail view |
 | `D` | Toggle current file details screen |
-| `m` | Show concise mediainfo in less |
-| `M` | Show full mediainfo in less |
+| `m` | Show concise mediainfo |
+| `M` | Show full mediainfo |
 | `.` | Toggle hide .dot files |
 | `s` | Toggle sort by file size |
 | `S` | Toggle disk usage analyzer mode |
