@@ -137,7 +137,6 @@ static char *opener;
 static char *fallback_opener;
 static char *copier;
 static char *desktop_manager;
-static char *nnn_tmpfile = "/tmp/nnn";
 static off_t blk_size;
 static size_t fs_free;
 static int open_max;
@@ -816,15 +815,17 @@ get_output(char *buf, size_t bytes)
 /*
  * Follows the stat(1) output closely
  */
-static void
+static int
 show_stats(char* fpath, char* fname, struct stat *sb)
 {
-	char buf[PATH_MAX + 48];
+	char buf[PATH_MAX + 16];
 	char *perms = get_lsperms(sb->st_mode, buf);
 	char *p, *begin = buf;
 
-	clear();
-	scrollok(stdscr, TRUE);
+	char tmp[] = "/tmp/nnnXXXXXX";
+	int fd = mkstemp(tmp);
+	if (fd == -1)
+		return -1;
 
 	/* Show file name or 'symlink' -> 'target' */
 	if (perms[0] == 'l') {
@@ -832,27 +833,27 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 		ssize_t len = readlink(fpath, symtgt, PATH_MAX);
 		if (len != -1) {
 			symtgt[len] = '\0';
-			printw("\n    File: '%s' -> '%s'", fname, symtgt);
+			dprintf(fd, "    File: '%s' -> '%s'", fname, symtgt);
 		}
 	} else
-		printw("\n    File: '%s'", fname);
+		dprintf(fd, "    File: '%s'", fname);
 
 	/* Show size, blocks, file type */
-	printw("\n    Size: %-15llu Blocks: %-10llu IO Block: %-6llu %s",
+	dprintf(fd, "\n    Size: %-15ld Blocks: %-10ld IO Block: %-6ld %s",
 	       sb->st_size, sb->st_blocks, sb->st_blksize, buf);
 
 	/* Show containing device, inode, hardlink count */
 	sprintf(buf, "%lxh/%lud", (ulong)sb->st_dev, (ulong)sb->st_dev);
-	printw("\n  Device: %-15s Inode: %-11lu Links: %-9lu",
+	dprintf(fd, "\n  Device: %-15s Inode: %-11lu Links: %-9lu",
 	       buf, sb->st_ino, sb->st_nlink);
 
 	/* Show major, minor number for block or char device */
 	if (perms[0] == 'b' || perms[0] == 'c')
-		printw(" Device type: %lx,%lx",
+		dprintf(fd, " Device type: %x,%x",
 		       major(sb->st_rdev), minor(sb->st_rdev));
 
 	/* Show permissions, owner, group */
-	printw("\n  Access: 0%d%d%d/%s Uid: (%lu/%s)  Gid: (%lu/%s)",
+	dprintf(fd, "\n  Access: 0%d%d%d/%s Uid: (%u/%s)  Gid: (%u/%s)",
 	       (sb->st_mode >> 6) & 7, (sb->st_mode >> 3) & 7, sb->st_mode & 7,
 	       perms,
 	       sb->st_uid, (getpwuid(sb->st_uid))->pw_name,
@@ -860,72 +861,43 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 
 	/* Show last access time */
 	strftime(buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_atime));
-	printw("\n\n  Access: %s", buf);
+	dprintf(fd, "\n\n  Access: %s", buf);
 
 	/* Show last modification time */
 	strftime(buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_mtime));
-	printw("\n  Modify: %s", buf);
+	dprintf(fd, "\n  Modify: %s", buf);
 
 	/* Show last status change time */
 	strftime(buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_ctime));
-	printw("\n  Change: %s", buf);
+	dprintf(fd, "\n  Change: %s", buf);
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
 		sprintf(buf, "file -b \"%s\" 2>&1", fpath);
-		p = get_output(buf, PATH_MAX + 48);
+		p = get_output(buf, PATH_MAX + 16);
 		if (p) {
-			printw("\n\n ");
+			dprintf(fd, "\n\n ");
 			while (*p) {
 				if (*p == ',') {
 					*p = '\0';
-					printw(" %s\n", begin);
+					dprintf(fd, " %s\n", begin);
 					begin = p + 1;
 				}
 
 				p++;
 			}
-			printw(" %s", begin);
+			dprintf(fd, " %s", begin);
 		}
-#ifdef SUPPORT_CHKSUM
-		/* Calculating checksums can take VERY long */
-
-		/* Show md5 */
-		sprintf(buf, "openssl md5 \"%s\" 2>&1", fpath);
-		p = get_output(buf, PATH_MAX + 48);
-		if (p) {
-			p = xmemrchr(buf, ' ', strlen(buf));
-			if (!p)
-				p = buf;
-			else
-				p++;
-
-			printw("\n     md5: %s", p);
-		}
-
-		/* Show sha256 */
-		sprintf(buf, "openssl sha256 \"%s\" 2>&1", fpath);
-		p = get_output(buf, PATH_MAX + 48);
-		if (p) {
-			p = xmemrchr(buf, ' ', strlen(buf));
-			if (!p)
-				p = buf;
-			else
-				p++;
-
-			printw("  sha256: %s", p);
-		}
-#endif
 	}
 
-	/* Show exit keys */
-	printw("\n  << (D/q)");
-	while ((*buf = getch()))
-		if (*buf == 'D' || *buf == 'q')
-			break;
+	dprintf(fd, "\n\n");
+	close(fd);
 
-	scrollok(stdscr, FALSE);
-	return;
+	sprintf(buf, "cat %s | less", tmp);
+	fd = system(buf);
+
+	unlink(tmp);
+	return fd;
 }
 
 static int
@@ -1288,7 +1260,11 @@ nochange:
 		switch (sel) {
 		case SEL_CDQUIT:
 		{
-			FILE *fp = fopen(nnn_tmpfile, "w");
+			char *tmpfile = "/tmp/nnn";
+			if ((tmp = getenv("NNN_TMPFILE")) != NULL)
+				tmpfile = tmp;
+
+			FILE *fp = fopen(tmpfile, "w");
 			if (fp) {
 				fprintf(fp, "cd \"%s\"", path);
 				fclose(fp);
@@ -1600,8 +1576,15 @@ nochange:
 				if (dents)
 					dentfree(dents);
 				printerr(1, "lstat");
-			} else
-				show_stats(oldpath, dents[cur].name, &sb);
+			} else {
+				exitcurses();
+				r = show_stats(oldpath, dents[cur].name, &sb);
+				initcurses();
+				if (r < 0) {
+					printmsg(strerror(errno));
+					goto nochange;
+				}
+			}
 
 			break;
 		}
@@ -1781,10 +1764,6 @@ main(int argc, char *argv[])
 	}
 
 	open_max = max_openfds();
-
-	/* Get temporary file name (ifilter used as temporary variable) */
-	if ((ifilter = getenv("NNN_TMPFILE")) != NULL)
-		nnn_tmpfile = ifilter;
 
 	if (getuid() == 0)
 		showhidden = 1;
