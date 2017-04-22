@@ -297,14 +297,14 @@ spawn(char *file, char *arg, char *dir, int flag)
 			status = chdir(dir);
 		if (flag == 1)
 			fprintf(stdout, "\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
+
 		execlp(file, file, arg, NULL);
 		_exit(1);
 	} else {
-		if (flag != 2) {
+		if (flag != 2)
 			/* Ignore interruptions */
 			while (waitpid(pid, &status, 0) == -1)
 				DPRINTF_D(status);
-		}
 		DPRINTF_D(pid);
 	}
 }
@@ -805,6 +805,7 @@ get_lsperms(mode_t mode, char *desc)
 	return(bits);
 }
 
+/* Gets only a single line, that's what we need for now */
 static char *
 get_output(char *buf, size_t bytes)
 {
@@ -846,12 +847,21 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 		dprintf(fd, "    File: '%s'", fname);
 
 	/* Show size, blocks, file type */
+#ifdef __APPLE__
+	dprintf(fd, "\n    Size: %-15lld Blocks: %-10lld IO Block: %-6d %s",
+#else
 	dprintf(fd, "\n    Size: %-15ld Blocks: %-10ld IO Block: %-6ld %s",
+#endif
 	       sb->st_size, sb->st_blocks, sb->st_blksize, buf);
 
 	/* Show containing device, inode, hardlink count */
-	sprintf(buf, "%lxh/%lud", (ulong)sb->st_dev, (ulong)sb->st_dev);
+#ifdef __APPLE__
+	sprintf(buf, "%xh/%ud", sb->st_dev, sb->st_dev);
+	dprintf(fd, "\n  Device: %-15s Inode: %-11llu Links: %-9hu",
+#else
+	sprintf(buf, "%lxh/%lud", sb->st_dev, sb->st_dev);
 	dprintf(fd, "\n  Device: %-15s Inode: %-11lu Links: %-9lu",
+#endif
 	       buf, sb->st_ino, sb->st_nlink);
 
 	/* Show major, minor number for block or char device */
