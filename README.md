@@ -41,7 +41,7 @@ Noice is Not Noice, a noicer fork...
 
 nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
 
-nnn can use the default desktop opener at runtime. It adds new navigation options, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
+nnn can use the default desktop opener at runtime. It also comes with `nlay` - a customizable bash script to handle media types. It adds new navigation options, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
 
 Follow the instructions in the [quickstart](#quickstart) section and see how nnn simplifies those long desktop sessions.
 
@@ -92,7 +92,7 @@ nnn vs. mc vs. ranger memory usage while viewing a directory with 10,178 files, 
 
 ### nlay
 
-nnn comes with an easily customizable bash shell script to handle files - nlay. To know more about it, visit [nlay on wiki](https://github.com/jarun/nnn/wiki/all-about-nlay).
+nnn comes with an easily customizable bash shell script to media types - nlay. To know more about it, visit [nlay on wiki](https://github.com/jarun/nnn/wiki/all-about-nlay).
 
 ### Installation
 
