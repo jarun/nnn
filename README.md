@@ -20,6 +20,7 @@ Noice is Not Noice, a noicer fork...
 - [Introduction](#introduction)
 - [Features](#features)
 - [Performance](#performance)
+- [nlay](#nlay)
 - [Installation](#installation)
 - [Usage](#usage)
   - [Cmdline options](#cmdline-options)
@@ -55,6 +56,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - Super-easy navigation with roll-over at edges
 - Jump HOME or back to the last visited directory (as you normally do!)
 - Desktop opener integration to handle mime types
+- Customizable bash script nlay to handle known file types
 - Disk usage analyzer mode
 - Basic and detail views
 - Show stat and file information
@@ -87,6 +89,10 @@ nnn vs. mc vs. ranger memory usage while viewing a directory with 10,178 files, 
 20369 vaio      20   0   64664  10980   6888 S   0.0  0.2   0:00.70 mc
 28863 vaio      20   0   19876   6436   2620 S   0.0  0.1   0:00.19 nnn -d
 ```
+
+### nlay
+
+nnn comes with an easily customizable bash shell script to handle files - nlay. To know more about it, visit [nlay on wiki](https://github.com/jarun/nnn/wiki/all-about-nlay).
 
 ### Installation
 
@@ -180,22 +186,29 @@ The following abbreviations are used in the detail view:
 | `c` | Character Device |
 
 #### File handling
+
+nnn is designed to play files using multiple strategies (in order of decreasing priority):
   - Set `NNN_OPENER` to let a desktop opener handle it all. E.g.:
 
         export NNN_OPENER=xdg-open
         export NNN_OPENER="gio open"
         export NNN_OPENER=gvfs-open
-  - Selective file associations (ignored if `NNN_OPENER` is set):
-    - vi - plain text files (determined using file)
-    - mpv - common audio and video mimes
-    - [zathura](https://pwmt.org/projects/zathura/) - pdf files
-    - to customize further see [how to change file associations](#change-file-associations)
-  - Set `NNN_FALLBACK_OPENER` as the fallback opener:
-    - if the executable in static file association is missing
-    - if a file type was not handled in static file association
+  - If nnn recognizes the file extension, it invokes nlay (which invokes the players). Default players:
+    - mpv - audio and video
+    - viewnior - image
+    - [zathura](https://pwmt.org/projects/zathura/) - pdf
+    - vim - plain text
+    - to add, remove recognized extensions in nnn, see [how to change file associations](#change-file-associations)
+  - If a file without any extension is a plain text file, it is opened in vi
+  - Set `NNN_FALLBACK_OPENER` as the fallback opener. E.g.:
+
+        export NNN_FALLBACK_OPENER=xdg-open
+        export NNN_FALLBACK_OPENER="gio open"
+        export NNN_FALLBACK_OPENER=gvfs-open
   - To enable the desktop file manager key, set `NNN_DE_FILE_MANAGER`. E.g.:
 
         export NNN_DE_FILE_MANAGER=thunar
+        export NNN_DE_FILE_MANAGER=nautilus
   - [mediainfo](https://mediaarea.net/en/MediaInfo) is required to view media information
 
 #### Help
@@ -246,7 +259,11 @@ Start nnn and use `^K` to copy the absolute path (from `/`) of the file under th
 
 #### Change file associations
 
-If you want to set custom applications for certain mime types, or change the ones set already (e.g. vi, mpv, zathura), modify the `assocs` structure in [config.def.h](https://github.com/jarun/nnn/blob/master/config.def.h) (it's easy). Then re-compile and install.
+If `NNN_OPENER` is not set, nnn tries to recognize a file by the file extension and invokes nlay. To change the extensions recognized by nnn, modify the `assocs` structure in [config.def.h](https://github.com/jarun/nnn/blob/master/config.def.h) (it's easy). Then re-compile and install.
+
+If you want to add a file extension mainline, please raise a bug. Without it nnn will not invoke nlay.
+
+nlay has provisions (disabled by default) to handle a specific file extension too. However, the extension should be recognized by nnn first.
 
 ### Why fork?
 

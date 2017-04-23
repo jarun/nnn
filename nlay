@@ -1,0 +1,119 @@
+#!/bin/bash
+
+# #############################################################################
+# nlay: a customizable script to play files in different apps by file type
+#
+# usage: nlay file type
+#
+# MUST READ:
+#
+# 1. Feel free to change the default apps to your favourite ones.
+#    If you change the app for a group you may also need to modify the bg
+#    setting. If bg is set the app is detached and started in the background in
+#    silent mode.
+#
+#    The bg setting depends on personal preference and type of app, e.g.,
+#    I would start vim (CLI) in the foreground but Sublime Text (GUI) in the
+#    background.
+#
+#    Check (and TOGGLE as you wish) the default bg settings.
+#
+# 2. Detached apps are not killed when nnn exits. Use kill(1) or killall(1) to
+#    to stop console based background apps.
+#
+# 3. Assuming you don't to play multiple audio/video files simultaneously,
+#    nlay kills any running instances of the audio/video player in bg mode.
+#
+# 4. Keep a personal backup (on GitHub Gist maybe?) of this file if you modify
+#    it. nlay is OVERWRITTEN during nnn upgrade.
+#
+# Author: Arun Prakash Jana
+# Email: engineerarun@gmail.com
+# #############################################################################
+
+
+# Enable the lines below to handle file by extension
+# This is provided for using a custom player for specific files
+# $ext holds the extension
+<<ENABLE_FILE_TYPE_HANDLING
+fname=$(basename "$1")
+if [[ $fname != *"."* ]]; then
+    exit 1
+fi
+
+ext="${fname##*.}"
+if [ -z "$ext" ]; then
+    exit 1
+fi
+
+# bash 4.0 way to switch to lowercase
+ext="${ext,,}"
+
+# handle this extension and exit
+ENABLE_FILE_TYPE_HANDLING
+
+
+#------------------ AUDIO -------------------
+if [ "$2" == "audio" ]; then
+    app=mpv
+    # To start mpv in a window enable audio_opts
+    #audio_opts="--no-terminal --force-window"
+
+    #bg=">/dev/null 2>&1 &"
+
+    if [ -n "$bg" ]; then
+        killall -9 $app >/dev/null 2>&1
+    fi
+
+    eval $app $audio_opts "\"$1\"" $bg
+    exit 0
+fi
+
+#------------------ VIDEO -------------------
+if [ "$2" == "video" ]; then
+    app=mpv
+    # To start mpv in a window enable video_opts
+    #video_opts="--no-terminal --force-window"
+
+    #bg=">/dev/null 2>&1 &"
+
+    if [ -n "$bg" ]; then
+        killall -9 $app >/dev/null 2>&1
+    fi
+
+    eval $app $video_opts "\"$1\"" $bg
+    exit 0
+fi
+
+#------------------ IMAGE -------------------
+if [ "$2" == "image" ]; then
+    app=viewnior
+    #image_opts=
+
+    bg=">/dev/null 2>&1 &"
+
+    eval $app $image_opts "\"$1\"" $bg
+    exit 0
+fi
+
+#------------------- PDF --------------------
+if [ "$2" == "pdf" ]; then
+    app=zathura
+    #pdf_opts=
+
+    bg=">/dev/null 2>&1 &"
+
+    eval $app $pdf_opts "\"$1\"" $bg
+    exit 0
+fi
+
+#---------------- PLAINTEXT -----------------
+if [ "$2" == "text" ]; then
+    app=vim
+    #txt_opts=
+
+    #bg=">/dev/null 2>&1 &"
+
+    eval $app $txt_opts "\"$1\"" $bg
+    exit 0
+fi

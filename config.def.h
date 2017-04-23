@@ -11,18 +11,15 @@ static int showhidden  = 0; /* Set to 1 to show hidden files by default */
 static int showdetail  = 0; /* Set to show additional file info */
 static char *idlecmd   = "rain"; /* The screensaver program */
 
-struct assoc assocs[] = {
-	{ "\\.(c|cpp|h|txt|log|sh)$", "vi" },
-	{ "\\.(avi|mp4|mkv|3gp|mov)$", "mpv" },
-	{ "\\.(wma|mp3|ogg|flac|m4a)$", "mpv" },
-	{ "\\.(png|jpg|gif)$", "viewnior" },
-	//{ "\\.(html|svg)$", "firefox" },
-	{ "\\.pdf$", "zathura" },
-	//{ "\\.sh$", "sh" },
-	//{ ".", "less" },
+static struct assoc assocs[] = {
+	{ "\\.(c|cpp|h|log|md|py|sh|txt)$", "text" },
+	{ "\\.(3g2|3gp|asf|avi|divx|flv|m2v|m4v|mkv|mov|mp4|mp4v|mpeg|mpg|ogv|qt|rm|rmvb|vob|webm|wmv)$", "video" },
+	{ "\\.(aac|ac3|amr|flac|m4a|m4b|m4p|mp3|mp4a|ogg|opus|ra|wav|wma)$", "audio" },
+	{ "\\.(bmp|gif|jpeg|jpg|pbm|pgm|png|svg|tiff|webp)$", "image" },
+	{ "\\.pdf$", "pdf" },
 };
 
-struct key bindings[] = {
+static struct key bindings[] = {
 	/* Quit */
 	{ 'q',            SEL_QUIT,      "",     "" },
 	{ 'Q',            SEL_CDQUIT,    "",     "" },

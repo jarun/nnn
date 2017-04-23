@@ -6,17 +6,18 @@ MANPREFIX = $(PREFIX)/share/man
 CFLAGS += -O2 -Wall -Wextra -Wno-unused-parameter
 LDLIBS = -lreadline
 ifeq ($(shell uname), Darwin)
-  LDLIBS += -lncurses
+    LDLIBS += -lncurses
 else
-  LDLIBS += -lncursesw
+    LDLIBS += -lncursesw
 endif
 
-DISTFILES = nnn.c config.def.h nnn.1 Makefile README.md LICENSE
+DISTFILES = nlay nnn.c config.def.h nnn.1 Makefile README.md LICENSE
 LOCALCONFIG = config.h
 SRC = nnn.c
 BIN = nnn
+PLAYER = nlay
 
-all: $(BIN)
+all: $(BIN) $(PLAYER)
 
 $(LOCALCONFIG): config.def.h
 	cp config.def.h $@
@@ -30,11 +31,13 @@ $(BIN): $(SRC)
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	cp -f $(BIN) $(DESTDIR)$(PREFIX)/bin
+	cp -f $(PLAYER) $(DESTDIR)$(PREFIX)/bin
 	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
 	cp -f $(BIN).1 $(DESTDIR)$(MANPREFIX)/man1
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/$(BIN)
+	rm -f $(DESTDIR)$(PREFIX)/bin/$(PLAYER)
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
 
 dist:

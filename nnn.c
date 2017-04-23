@@ -68,7 +68,7 @@ xprintf(int fd, const char *fmt, ...)
 
 struct assoc {
 	char *regex; /* Regex to match on filename */
-	char *bin;   /* Program */
+	char *mime; /* File type */
 };
 
 /* Supported actions */
@@ -134,7 +134,7 @@ static struct entry *dents;
 static int ndents, cur, total_dents;
 static int idle;
 static char *opener;
-static char *fallback_opener;
+static char *fb_opener;
 static char *copier;
 static char *desktop_manager;
 static off_t blk_size;
@@ -384,23 +384,20 @@ strstrip(char *s)
 }
 
 static char *
-openwith(char *file)
+getmime(char *file)
 {
 	regex_t regex;
-	char *bin = NULL;
 	unsigned int i;
+	static unsigned int len = LEN(assocs);
 
-	for (i = 0; i < LEN(assocs); i++) {
+	for (i = 0; i < len; i++) {
 		if (regcomp(&regex, assocs[i].regex,
 			    REG_NOSUB | REG_EXTENDED | REG_ICASE) != 0)
 			continue;
-		if (regexec(&regex, file, 0, NULL, 0) == 0) {
-			bin = assocs[i].bin;
-			break;
-		}
+		if (regexec(&regex, file, 0, NULL, 0) == 0)
+			return assocs[i].mime;
 	}
-	DPRINTF_S(bin);
-	return bin;
+	return NULL;
 }
 
 static int
@@ -540,6 +537,7 @@ nextsel(char **run, char **env)
 {
 	int c;
 	unsigned int i;
+	static unsigned int len = LEN(bindings);
 
 	c = getch();
 	if (c == -1)
@@ -547,7 +545,7 @@ nextsel(char **run, char **env)
 	else
 		idle = 0;
 
-	for (i = 0; i < LEN(bindings); i++)
+	for (i = 0; i < len; i++)
 		if (c == bindings[i].sym) {
 			*run = bindings[i].run;
 			*env = bindings[i].env;
@@ -1248,7 +1246,7 @@ browse(char *ipath, char *ifilter)
 	static char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX];
 	static char lastdir[PATH_MAX];
 	static char fltr[LINE_MAX];
-	char *bin, *dir, *tmp, *run, *env;
+	char *mime, *dir, *tmp, *run, *env;
 	struct stat sb;
 	regex_t re;
 	int r, fd;
@@ -1352,9 +1350,8 @@ nochange:
 			case S_IFREG:
 			{
 				static char cmd[MAX_CMD_LEN];
-				static char *runvi = "vi";
 
-				/* If default mime opener is set, use it */
+				/* If NNN_OPENER is set, use it */
 				if (opener) {
 					snprintf(cmd, MAX_CMD_LEN,
 						 "%s \"%s\" > /dev/null 2>&1",
@@ -1363,42 +1360,38 @@ nochange:
 					continue;
 				}
 
-				/* Try custom applications */
-				bin = openwith(newpath);
-
-				/* If custom app doesn't exist try fallback */
-				snprintf(cmd, MAX_CMD_LEN, "which \"%s\"", bin);
-				if (get_output(cmd, MAX_CMD_LEN) == NULL)
-					bin = NULL;
-
-				if (bin == NULL) {
-					/* If a custom handler application is
-					   not set, open plain text files with
-					   vi, then try fallback_opener */
-					snprintf(cmd, MAX_CMD_LEN,
-						 "file \"%s\"", newpath);
-					if (get_output(cmd, MAX_CMD_LEN) == NULL)
-						goto nochange;
-
-					if (strstr(cmd, "ASCII text") != NULL)
-						bin = runvi;
-					else if (fallback_opener) {
-						snprintf(cmd, MAX_CMD_LEN,
-							 "%s \"%s\" > \
-							 /dev/null 2>&1",
-							 fallback_opener,
-							 newpath);
-						r = system(cmd);
-						continue;
-					} else {
-						printmsg("No association");
-						goto nochange;
-					}
+				/* Play with nlay if identified */
+				mime = getmime(dents[cur].name);
+				if (mime) {
+					snprintf(cmd, MAX_CMD_LEN, "nlay \"%s\" %s",
+						 newpath, mime);
+					exitcurses();
+					r = system(cmd);
+					initcurses();
+					continue;
 				}
-				exitcurses();
-				spawn(bin, newpath, NULL, 0);
-				initcurses();
-				continue;
+
+				/* If nlay doesn't handle it, open plain text
+				   files with vi, then try NNN_FALLBACK_OPENER */
+				snprintf(cmd, MAX_CMD_LEN,
+					 "file \"%s\"", newpath);
+				if (get_output(cmd, MAX_CMD_LEN) == NULL)
+					continue;
+
+				if (strstr(cmd, "ASCII text") != NULL) {
+					exitcurses();
+					spawn("vi", newpath, NULL, 0);
+					initcurses();
+					continue;
+				} else if (fb_opener) {
+					snprintf(cmd, MAX_CMD_LEN, "%s \"%s\" > /dev/null 2>&1",
+						 fb_opener, newpath);
+					r = system(cmd);
+					continue;
+				}
+
+				printmsg("No association");
+				goto nochange;
 			}
 			default:
 				printmsg("Unsupported file");
@@ -1788,7 +1781,7 @@ main(int argc, char *argv[])
 	opener = getenv("NNN_OPENER");
 
 	/* Get the fallback desktop mime opener, if set */
-	fallback_opener = getenv("NNN_FALLBACK_OPENER");
+	fb_opener = getenv("NNN_FALLBACK_OPENER");
 
 	/* Get the desktop file browser, if set */
 	desktop_manager = getenv("NNN_DE_FILE_MANAGER");

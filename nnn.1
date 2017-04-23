@@ -106,9 +106,22 @@ supports the following options:
         show program help and exit
 .Sh CONFIGURATION
 .Nm
+invokes
+.Pa nlay
+to play a file if it recognizes a file by extension.
+.Pa nlay
+is a
+highly customizable bash shell script which invokes a player depending on the
+type of file. Read more on
+.Pa nlay
+at:
+.br
+.Em https://github.com/jarun/nnn/wiki/all-about-nlay
+.Pp
+.Nm
 is configured by modifying
-.Pa config.h
-and recompiling the code.
+.Pa config.def.h
+and recompiling the code. config.h is generated as a backup of config.def.h.
 .Pp
 See the environment and examples sections below for more options and information.
 .Pp
@@ -153,22 +166,6 @@ type. Custom associations are listed in the EXAMPLES section below.
 
         echo -n $1 | xsel --clipboard --input
         -------------------------------------
-.Ed
-.Sh EXAMPLES
-The following example shows one possible configuration for
-file associations which is also the default if environment
-variable NNN_OPENER is not set:
-.Bd -literal
-        -----------------------------------------------
-        struct assoc assocs[] = {
-	        { "\\.(c|cpp|h|txt|log|sh)$", "vi" },
-	        { "\\.(wma|mp3|ogg|flac)$", "mpv" },
-	        { "\\.pdf$", "zathura" },
-        };
-        -----------------------------------------------
-Plain text files are opened with vi.
-.br
-Any other file types are opened with the 'xdg-open' command.
 .Ed
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspacekey to DEC.
