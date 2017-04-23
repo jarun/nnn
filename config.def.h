@@ -35,7 +35,6 @@ static struct key bindings[] = {
 	{ 'l',            SEL_GOIN,      "",     "" },
 	/* Filter */
 	{ '/',            SEL_FLTR,      "",     "" },
-	{ '&',            SEL_FLTR,      "",     "" },
 	/* Next */
 	{ 'j',            SEL_NEXT,      "",     "" },
 	{ KEY_DOWN,       SEL_NEXT,      "",     "" },
@@ -50,12 +49,12 @@ static struct key bindings[] = {
 	/* Page up */
 	{ KEY_PPAGE,      SEL_PGUP,      "",     "" },
 	{ CONTROL('U'),   SEL_PGUP,      "",     "" },
-	/* Home */
+	/* First entry */
 	{ KEY_HOME,       SEL_HOME,      "",     "" },
 	{ 'g',            SEL_HOME,      "",     "" },
 	{ CONTROL('A'),   SEL_HOME,      "",     "" },
 	{ '^',            SEL_HOME,      "",     "" },
-	/* End */
+	/* Last entry */
 	{ KEY_END,        SEL_END,       "",     "" },
 	{ 'G',            SEL_END,       "",     "" },
 	{ CONTROL('E'),   SEL_END,       "",     "" },
@@ -64,6 +63,8 @@ static struct key bindings[] = {
 	{ 'c',            SEL_CD,        "",     "" },
 	/* HOME */
 	{ '~',            SEL_CDHOME,    "",     "" },
+	/* Initial directory */
+	{ '&',            SEL_CDBEGIN,   "",     "" },
 	/* Last visited dir */
 	{ '-',            SEL_LAST,      "",     "" },
 	/* Toggle hide .dot files */

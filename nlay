@@ -14,7 +14,8 @@
 #
 #    The bg setting depends on personal preference and type of app, e.g.,
 #    I would start vim (CLI) in the foreground but Sublime Text (GUI) in the
-#    background.
+#    background. I also prefer mpv running in the background without disturbing
+#    my ongoing activity in nnn by blocking navigation.
 #
 #    Check (and TOGGLE as you wish) the default bg settings.
 #

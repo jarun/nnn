@@ -139,9 +139,10 @@ nnn needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard li
 | `Right`, `Enter`, `l`, `^M` | Open file or enter dir |
 | `Left`, `Backspace`, `h`, `^H` | Go to parent dir |
 | `~` | Jump to HOME dir |
+| `&` | Jump to initial dir |
 | `-` | Jump to last visited dir |
 | `o` | Open dir in `NNN_DE_FILE_MANAGER` |
-| `/`, `&` | Filter dir contents |
+| `/` | Filter dir contents |
 | `c` | Show change dir prompt |
 | `d` | Toggle detail view |
 | `D` | Toggle current file details screen |

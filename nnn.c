@@ -86,6 +86,7 @@ enum action {
 	SEL_END,
 	SEL_CD,
 	SEL_CDHOME,
+	SEL_CDBEGIN,
 	SEL_LAST,
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
@@ -946,9 +947,10 @@ show_help(void)
     [Right], [Enter], l, ^M     Open file or enter dir\n\
     [Left], [Backspace], h, ^H  Go to parent dir\n\
     ~                           Jump to HOME dir\n\
+    &                           Jump to initial dir\n\
     -                           Jump to last visited dir\n\
     o                           Open dir in NNN_DE_FILE_MANAGER\n\
-    /, &                        Filter dir contents\n\
+    /                           Filter dir contents\n\
     c                           Show change dir prompt\n\
     d                           Toggle detail view\n\
     D                           Toggle current file details screen\n\
@@ -1550,6 +1552,20 @@ nochange:
 			xstrlcpy(lastdir, path, sizeof(lastdir));
 
 			xstrlcpy(path, tmp, sizeof(path));
+			/* Reset filter */
+			xstrlcpy(fltr, ifilter, sizeof(fltr));
+			DPRINTF_S(path);
+			goto begin;
+		case SEL_CDBEGIN:
+			if (canopendir(ipath) == 0) {
+				printwarn();
+				goto nochange;
+			}
+
+			/* Save last working directory */
+			xstrlcpy(lastdir, path, sizeof(lastdir));
+
+			xstrlcpy(path, ipath, sizeof(path));
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, sizeof(fltr));
 			DPRINTF_S(path);
