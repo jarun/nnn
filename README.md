@@ -128,39 +128,41 @@ nnn needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard li
 
 #### Keyboard shortcuts
 
-| Key | Function |
-| --- | --- |
-| `Up`, `k`, `^P` | Previous entry |
-| `Down`, `j`, `^N` | Next entry |
-| `PgUp`, `^U` | Scroll half page up |
-| `PgDn`, `^D` | Scroll half page down |
-| `Home`, `g`, `^`, `^A` | Jump to first entry |
-| `End`, `G`, `$`, `^E` | Jump to last entry |
-| `Right`, `Enter`, `l`, `^M` | Open file or enter dir |
-| `Left`, `Backspace`, `h`, `^H` | Go to parent dir |
-| `~` | Jump to HOME dir |
-| `&` | Jump to initial dir |
-| `-` | Jump to last visited dir |
-| `o` | Open dir in `NNN_DE_FILE_MANAGER` |
-| `/` | Filter dir contents |
-| `c` | Show change dir prompt |
-| `d` | Toggle detail view |
-| `D` | Toggle current file details screen |
-| `m` | Show concise mediainfo |
-| `M` | Show full mediainfo |
-| `.` | Toggle hide .dot files |
-| `s` | Toggle sort by file size |
-| `S` | Toggle disk usage analyzer mode |
-| `t` | Toggle sort by modified time |
-| `!` | Spawn `SHELL` in `PWD` (fallback sh) |
-| `z` | Run `top` |
-| `e` | Edit entry in `EDITOR` (fallback vi) |
-| `p` | Open entry in `PAGER` (fallback less) |
-| `^K` | Invoke file name copier |
-| `^L` | Force a redraw |
-| `?` | Toggle help screen |
-| `q` | Quit |
-| `Q` | Quit and change directory |
+```
+                Key | Function
+                   -+-
+          Up, k, ^P | Previous entry
+        Down, j, ^N | Next entry
+           PgUp, ^U | Scroll half page up
+           PgDn, ^D | Scroll half page down
+     Home, g, ^, ^A | Jump to first entry
+      End, G, $, ^E | Jump to last entry
+Right, Enter, l, ^M | Open file or enter dir
+  Left, Bksp, h, ^H | Go to parent dir
+                  ~ | Jump to HOME dir
+                  & | Jump to initial dir
+                  - | Jump to last visited dir
+                  o | Open dir in NNN_DE_FILE_MANAGER
+                  / | Filter dir contents
+                  c | Show change dir prompt
+                  d | Toggle detail view
+                  D | Toggle current file details screen
+                  m | Show concise mediainfo
+                  M | Show full mediainfo
+                  . | Toggle hide .dot files
+                  s | Toggle sort by file size
+                  S | Toggle disk usage analyzer mode
+                  t | Toggle sort by modified time
+                  ! | Spawn SHELL in PWD (fallback sh)
+                  z | Run top
+                  e | Edit entry in EDITOR (fallback vi)
+                  p | Open entry in PAGER (fallback less)
+                 ^K | Invoke file name copier
+                 ^L | Force a redraw
+                  ? | Toggle help screen
+                  q | Quit
+                  Q | Quit and change directory
+```
 
 #### Filters
 

@@ -937,38 +937,39 @@ static int
 show_help(void)
 {
 	char helpstr[] = ("echo \"\
-    << Key >>                   << Function >>\n\n\
-    [Up], k, ^P                 Previous entry\n\
-    [Down], j, ^N               Next entry\n\
-    [PgUp], ^U                  Scroll half page up\n\
-    [PgDn], ^D                  Scroll half page down\n\
-    [Home], g, ^, ^A            Jump to first entry\n\
-    [End], G, $, ^E             Jump to last entry\n\
-    [Right], [Enter], l, ^M     Open file or enter dir\n\
-    [Left], [Backspace], h, ^H  Go to parent dir\n\
-    ~                           Jump to HOME dir\n\
-    &                           Jump to initial dir\n\
-    -                           Jump to last visited dir\n\
-    o                           Open dir in NNN_DE_FILE_MANAGER\n\
-    /                           Filter dir contents\n\
-    c                           Show change dir prompt\n\
-    d                           Toggle detail view\n\
-    D                           Toggle current file details screen\n\
-    m                           Show concise mediainfo\n\
-    M                           Show full mediainfo\n\
-    .                           Toggle hide .dot files\n\
-    s                           Toggle sort by file size\n\
-    S                           Toggle disk usage analyzer mode\n\
-    t                           Toggle sort by modified time\n\
-    !                           Spawn SHELL in PWD (fallback sh)\n\
-    z                           Run top\n\
-    e                           Edit entry in EDITOR (fallback vi)\n\
-    p                           Open entry in PAGER (fallback less)\n\
-    ^K                          Invoke file name copier\n\
-    ^L                          Force a redraw\n\
-    ?                           Toggle help screen\n\
-    q                           Quit\n\
-    Q                           Quit and change directory\n\n\" | less");
+                  Key | Function\n\
+                     -+-\n\
+            Up, k, ^P | Previous entry\n\
+          Down, j, ^N | Next entry\n\
+             PgUp, ^U | Scroll half page up\n\
+             PgDn, ^D | Scroll half page down\n\
+       Home, g, ^, ^A | Jump to first entry\n\
+        End, G, $, ^E | Jump to last entry\n\
+  Right, Enter, l, ^M | Open file or enter dir\n\
+    Left, Bksp, h, ^H | Go to parent dir\n\
+                    ~ | Jump to HOME dir\n\
+                    & | Jump to initial dir\n\
+                    - | Jump to last visited dir\n\
+                    o | Open dir in NNN_DE_FILE_MANAGER\n\
+                    / | Filter dir contents\n\
+                    c | Show change dir prompt\n\
+                    d | Toggle detail view\n\
+                    D | Toggle current file details screen\n\
+                    m | Show concise mediainfo\n\
+                    M | Show full mediainfo\n\
+                    . | Toggle hide .dot files\n\
+                    s | Toggle sort by file size\n\
+                    S | Toggle disk usage analyzer mode\n\
+                    t | Toggle sort by modified time\n\
+                    ! | Spawn SHELL in PWD (fallback sh)\n\
+                    z | Run top\n\
+                    e | Edit entry in EDITOR (fallback vi)\n\
+                    p | Open entry in PAGER (fallback less)\n\
+                   ^K | Invoke file name copier\n\
+                   ^L | Force a redraw\n\
+                    ? | Toggle help screen\n\
+                    q | Quit\n\
+                    Q | Quit and change directory\n\n\" | less");
 
 	return system(helpstr);
 }
