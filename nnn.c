@@ -13,6 +13,9 @@
 #include <fcntl.h>
 #include <grp.h>
 #include <limits.h>
+#ifdef __gnu_hurd__
+#define PATH_MAX 4096
+#endif
 #include <locale.h>
 #include <pwd.h>
 #include <regex.h>
