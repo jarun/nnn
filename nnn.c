@@ -285,7 +285,29 @@ xdirname(const char *path)
 }
 
 /*
+ * Return number of dots of all chars in a string are dots, else 0
+ */
+static int
+all_dots(const char* ptr)
+{
+	if (!ptr)
+		return FALSE;
+
+	int count = 0;
+	while (*ptr == '.') {
+		count++;
+		ptr++;
+	}
+
+	if (*ptr)
+		return 0;
+
+	return count;
+}
+
+/*
  * Spawns a child process. Behaviour can be controlled using flag:
+ * Limited to a single argument to program, use system(3) if you need more
  * flag = 1: draw a marker to indicate nnn spawned e.g., a shell
  * flag = 2: do not wait in parent for child process e.g. DE file manager
  */
@@ -1496,21 +1518,35 @@ nochange:
 			} else if (tmp[0] == '-' && tmp[1] == '\0') {
 				xstrlcpy(newpath, lastdir, sizeof(newpath));
 				oldpath[0] = '\0';
-			} else if (tmp[0] == '.' && tmp[1] == '\0')
-				xstrlcpy(newpath, path, sizeof(newpath));
-			else if (tmp[0] == '.' && tmp[1] == '.' && tmp[2] == '\0') {
-				/* There is no going back */
-				if (strcmp(path, "/") == 0 ||
-				    strchr(path, '/') == NULL) {
-					printmsg("You are at /");
+
+			} else if ((r = all_dots(tmp))) {
+				if (r == 1) {
 					free(input);
-					goto nochange;
+					break;
 				}
-				dir = xdirname(path);
-				if (canopendir(dir) == 0) {
-					printwarn();
-					free(input);
-					goto nochange;
+
+				r--;
+				dir = path;
+
+				for (fd = 0; fd < r; fd++) {
+					/* There is no going back */
+					if (strcmp(path, "/") == 0 ||
+					    strchr(path, '/') == NULL) {
+						if (fd == 0) {
+							printmsg("You are at /");
+							free(input);
+							goto nochange;
+						}
+
+						break;
+					} else {
+						dir = xdirname(dir);
+						if (canopendir(dir) == 0) {
+							printwarn();
+							free(input);
+							goto nochange;
+						}
+					}
 				}
 
 				/* Save history */
