@@ -45,7 +45,7 @@ nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight
 
 nnn can use the default desktop opener at runtime. It also comes with `nlay` - a customizable bash script to handle media types. It adds new navigation options, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
 
-Follow the instructions in the [quickstart](#quickstart) section and see how nnn simplifies those long desktop sessions.
+Follow the instructions in the [quickstart](#quickstart) section and see how nnn simplifies those long desktop sessions... If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, nnn got it! All from the same terminal session.
 
 Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
 
@@ -104,8 +104,9 @@ nnn needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard li
   - [AUR](https://aur.archlinux.org/packages/nnn/)
   - [Homebrew](http://braumeister.org/formula/nnn)
   - [Ubuntu PPA](https://launchpad.net/~twodopeshaggy/+archive/ubuntu/jarun/)
-- To compile and install, download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*). Run:
+- To cook yourself, download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*). Then install the dependencies and compile (e.g. on Ubuntu 16.04):
 
+      $ sudo apt-get install libncursesw5-dev libreadline6-dev
       $ make
       $ sudo make install
 
