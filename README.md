@@ -33,6 +33,7 @@ Noice is Not Noice, a noicer fork...
 - [How to](#how-to)
   - [cd on quit](#cd-on-quit)
   - [Copy current file path to clipboard](#copy-current-file-path-to-clipboard)
+  - [Boost chdir prompt](#boost-chdir-prompt)
   - [Change file associations](#change-file-associations)
 - [Why fork?](#why-fork)
 - [Developers](#developers)
@@ -54,12 +55,12 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 ### Features
 
 - Super-easy navigation with roll-over at edges
-- Jump HOME or back to the last visited directory (as you normally do!)
+- Jump HOME or back to the last visited directory (as usual!)
+- Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
 - Desktop opener integration to handle mime types
 - Customizable bash script nlay to handle known file types
 - Disk usage analyzer mode
-- Basic and detail views
-- Show stat and file information
+- Basic and detail view (with stat and file information)
 - Show media information (needs mediainfo)
 - Sort by modification time, size
 - Sort numeric names in numeric order (1, 2, ... 10, 11, ...)
@@ -259,6 +260,10 @@ export `NNN_OPENER`:
     export NNN_COPIER="/home/vaio/copier.sh"
 
 Start nnn and use `^K` to copy the absolute path (from `/`) of the file under the cursor to clipboard.
+
+#### Boost chdir prompt
+
+nnn uses libreadline for the chdir prompt input. So all the flexibility of readline (e.g. case insensitive tab completion, history) is available to you based on your readline [configuration](https://cnswww.cns.cwru.edu/php/chet/readline/readline.html#SEC9).
 
 #### Change file associations
 
