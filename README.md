@@ -36,6 +36,7 @@ Noice is Not Noice, a noicer fork...
   - [Boost chdir prompt](#boost-chdir-prompt)
   - [Change file associations](#change-file-associations)
 - [Why fork?](#why-fork)
+- [Mentions](#mentions)
 - [Developers](#developers)
 
 ### Introduction
@@ -278,6 +279,11 @@ nlay has provisions (disabled by default) to handle a specific file extension to
 I chose to fork because:
 - one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. In my opinion evolution is the taste of time.
 - I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind. Check out [nnn design considerations](https://github.com/jarun/nnn/wiki/nnn-design-considerations) for more details.
+
+### Mentions
+
+- [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
+- [FOSSMint](https://www.fossmint.com/nnn-linux-terminal-file-browser/)
 
 ### Developers
 
