@@ -90,7 +90,7 @@ enum action {
 	SEL_CD,
 	SEL_CDHOME,
 	SEL_CDBEGIN,
-	SEL_LAST,
+	SEL_CDLAST,
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
 	SEL_STATS,
@@ -386,22 +386,18 @@ xstricmp(const char *s1, const char *s2)
 	return (int) (TOUPPER(*s1) - TOUPPER(*s2));
 }
 
-/* Trim all white space from both ends */
+/* Trim all whitespace from both ends, / from end */
 static char *
 strstrip(char *s)
 {
-	size_t size;
-	char *end;
-
-	size = strlen(s);
-
-	if (!size)
+	if (!s || !*s)
 		return s;
 
-	end = s + size - 1;
-	while (end >= s && isspace(*end))
-		end--;
-	*(end + 1) = '\0';
+	size_t len = strlen(s) - 1;
+
+	while (len != 0 && (isspace(s[len]) || s[len] == '/'))
+		len--;
+	s[len + 1] = '\0';
 
 	while (*s && isspace(*s))
 		s++;
@@ -1281,10 +1277,10 @@ browse(char *ipath, char *ifilter)
 	enum action sel = SEL_RUNARG + 1;
 
 	xstrlcpy(path, ipath, sizeof(path));
-	xstrlcpy(lastdir, ipath, sizeof(lastdir));
 	xstrlcpy(fltr, ifilter, sizeof(fltr));
 	oldpath[0] = '\0';
 	newpath[0] = '\0';
+	lastdir[0] = '\0'; /* Can't move back from initial directory */
 begin:
 
 	if (sel == SEL_GOIN && S_ISDIR(sb.st_mode))
@@ -1471,56 +1467,66 @@ nochange:
 			break;
 		case SEL_CD:
 		{
-			/* Read target dir */
+			static char *tmp, *input;
+			static int truecd;
+
+			/* Save the program start dir */
 			tmp = getcwd(newpath, PATH_MAX);
 			if (tmp == NULL) {
 				printwarn();
 				goto nochange;
 			}
 
+			/* Switch to current path for readline(3) */
 			if (chdir(path) == -1) {
 				printwarn();
 				goto nochange;
 			}
 
 			exitcurses();
-			char *tmp = readline("chdir: ");
+			tmp = readline("chdir: ");
 			initcurses();
 
+			/* Change back to program start dir */
 			if (chdir(newpath) == -1)
 				printwarn();
-
-			/* Save current */
-			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
 
 			if (tmp[0] == '\0')
 				break;
 			else
+				/* Add to readline(3) history */
 				add_history(tmp);
 
-			char *input = tmp;
+			input = tmp;
 			tmp = strstrip(tmp);
 			if (tmp[0] == '\0') {
 				free(input);
 				break;
 			}
 
+			truecd = 0;
+
 			if (tmp[0] == '~') {
+				/* Expand ~ to HOME absolute path */
 				char *home = getenv("HOME");
 				if (home)
-					snprintf(newpath, PATH_MAX,
-						"%s%s", home, tmp + 1);
-				else
-					mkpath(path, tmp, newpath, sizeof(newpath));
-
-				oldpath[0] = '\0';
+					snprintf(newpath, PATH_MAX, "%s%s", home, tmp + 1);
+				else {
+					free(input);
+					break;
+				}
 			} else if (tmp[0] == '-' && tmp[1] == '\0') {
-				xstrlcpy(newpath, lastdir, sizeof(newpath));
-				oldpath[0] = '\0';
+				if (lastdir[0] == '\0') {
+					free(input);
+					break;
+				}
 
+				/* Switch to last visited dir */
+				xstrlcpy(newpath, lastdir, sizeof(newpath));
+				truecd = 1;
 			} else if ((r = all_dots(tmp))) {
 				if (r == 1) {
+					/* Always in the current dir */
 					free(input);
 					break;
 				}
@@ -1529,15 +1535,17 @@ nochange:
 				dir = path;
 
 				for (fd = 0; fd < r; fd++) {
-					/* There is no going back */
+					/* Reached / ? */
 					if (strcmp(path, "/") == 0 ||
 					    strchr(path, '/') == NULL) {
+						/* If it's a cd .. at / */
 						if (fd == 0) {
 							printmsg("You are at /");
 							free(input);
 							goto nochange;
 						}
 
+						/* Can't cd beyond / anyway */
 						break;
 					} else {
 						dir = xdirname(dir);
@@ -1549,28 +1557,44 @@ nochange:
 					}
 				}
 
-				/* Save history */
-				xstrlcpy(oldpath, path, sizeof(oldpath));
+				truecd = 1;
+
+				/* Save the path in case of cd ..
+				   We mark the current dir in parent dir */
+				if (r == 1) {
+					xstrlcpy(oldpath, path, sizeof(oldpath));
+					truecd = 2;
+				}
+
 				xstrlcpy(newpath, dir, sizeof(newpath));
-			} else {
+			} else
 				mkpath(path, tmp, newpath, sizeof(newpath));
-				oldpath[0] = '\0';
-			}
 
 			if (canopendir(newpath) == 0) {
-				/* Save current */
-				if (ndents > 0)
-					mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
-
 				printwarn();
 				free(input);
 				break;
 			}
 
+			if (truecd == 0) {
+				/* Probable change in dir */
+				/* No-op if it's the same directory */
+				if (strcmp(path, newpath) == 0) {
+					free(input);
+					break;
+				}
+
+				oldpath[0] = '\0';
+			} else if (truecd == 1)
+				/* Sure change in dir */
+				oldpath[0] = '\0';
+
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, sizeof(lastdir));
 
+			/* Save the newly opted dir in path */
 			xstrlcpy(path, newpath, sizeof(path));
+
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, sizeof(fltr));
 			DPRINTF_S(path);
@@ -1583,15 +1607,20 @@ nochange:
 				clearprompt();
 				goto nochange;
 			}
+
 			if (canopendir(tmp) == 0) {
 				printwarn();
 				goto nochange;
 			}
 
+			if (strcmp(path, tmp) == 0)
+				break;
+
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, sizeof(lastdir));
 
 			xstrlcpy(path, tmp, sizeof(path));
+			oldpath[0] = '\0';
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, sizeof(fltr));
 			DPRINTF_S(path);
@@ -1602,19 +1631,33 @@ nochange:
 				goto nochange;
 			}
 
+			if (strcmp(path, ipath) == 0)
+				break;
+
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, sizeof(lastdir));
 
 			xstrlcpy(path, ipath, sizeof(path));
+			oldpath[0] = '\0';
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, sizeof(fltr));
 			DPRINTF_S(path);
 			goto begin;
-		case SEL_LAST:
+		case SEL_CDLAST:
+			if (lastdir[0] == '\0')
+				break;
+
+			if (canopendir(lastdir) == 0) {
+				printwarn();
+				goto nochange;
+			}
+
 			xstrlcpy(newpath, lastdir, sizeof(newpath));
 			xstrlcpy(lastdir, path, sizeof(lastdir));
 			xstrlcpy(path, newpath, sizeof(path));
 			oldpath[0] = '\0';
+			/* Reset filter */
+			xstrlcpy(fltr, ifilter, sizeof(fltr));
 			DPRINTF_S(path);
 			goto begin;
 		case SEL_TOGGLEDOT:

@@ -66,7 +66,7 @@ static struct key bindings[] = {
 	/* Initial directory */
 	{ '&',            SEL_CDBEGIN,   "",     "" },
 	/* Last visited dir */
-	{ '-',            SEL_LAST,      "",     "" },
+	{ '-',            SEL_CDLAST,    "",     "" },
 	/* Toggle hide .dot files */
 	{ '.',            SEL_TOGGLEDOT, "",     "" },
 	/* Detailed listing */
