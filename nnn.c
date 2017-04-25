@@ -331,6 +331,9 @@ spawn(char *file, char *arg, char *dir, int flag)
 			/* Ignore interruptions */
 			while (waitpid(pid, &status, 0) == -1)
 				DPRINTF_D(status);
+		/* Exit if parent process exited */
+		if (getppid() == 1)
+			_exit(0);
 		DPRINTF_D(pid);
 	}
 }
@@ -1295,6 +1298,9 @@ begin:
 	for (;;) {
 		redraw(path);
 nochange:
+		/* Exit if parent process exited */
+		if (getppid() == 1)
+			_exit(0);
 		sel = nextsel(&run, &env);
 		switch (sel) {
 		case SEL_CDQUIT:
