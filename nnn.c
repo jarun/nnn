@@ -1295,6 +1295,9 @@ begin:
 	for (;;) {
 		redraw(path);
 nochange:
+		/* Exit if parent has exited */
+		if (getppid() == 1)
+			_exit(0);
 		sel = nextsel(&run, &env);
 		switch (sel) {
 		case SEL_CDQUIT:
