@@ -204,7 +204,7 @@ nnn is designed to play files using multiple strategies (in order of decreasing 
     - [zathura](https://pwmt.org/projects/zathura/) - pdf
     - vim - plain text
     - to add, remove recognized extensions in nnn, see [how to change file associations](#change-file-associations)
-  - If a file without any extension is a plain text file, it is opened in vi
+  - If a file without any extension is a plain text file, it is opened in EDITOR (fallback vi)
   - Set `NNN_FALLBACK_OPENER` as the fallback opener. E.g.:
 
         export NNN_FALLBACK_OPENER=xdg-open

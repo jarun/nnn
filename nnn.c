@@ -930,7 +930,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	dprintf(fd, "\n\n");
 	close(fd);
 
-	sprintf(buf, "cat %s | less", tmp);
+	sprintf(buf, "cat %s | %s", tmp, xgetenv("PAGER", "less"));
 	fd = system(buf);
 
 	unlink(tmp);
@@ -947,9 +947,9 @@ show_mediainfo(const char* fpath, int full)
 		return -1;
 
 	if (full)
-		sprintf(buf, "mediainfo -f \"%s\" 2>&1 | less", fpath);
+		sprintf(buf, "mediainfo -f \"%s\" 2>&1 | %s", fpath, xgetenv("PAGER", "less"));
 	else
-		sprintf(buf, "mediainfo \"%s\" 2>&1 | less", fpath);
+		sprintf(buf, "mediainfo \"%s\" 2>&1 | %s", fpath, xgetenv("PAGER", "less"));
 
 	return system(buf);
 }
@@ -957,7 +957,7 @@ show_mediainfo(const char* fpath, int full)
 static int
 show_help(void)
 {
-	char helpstr[] = ("echo \"\
+	char helpstr[2048] = ("echo \"\
                   Key | Function\n\
                      -+-\n\
             Up, k, ^P | Previous entry\n\
@@ -990,9 +990,9 @@ show_help(void)
                    ^L | Force a redraw\n\
                     ? | Toggle help screen\n\
                     q | Quit\n\
-                    Q | Quit and change directory\n\n\" | less");
+                    Q | Quit and change directory\n\n\" | ");
 
-	return system(helpstr);
+	return system(strcat(helpstr, xgetenv("PAGER", "less")));
 }
 
 static int
@@ -1404,7 +1404,8 @@ nochange:
 
 				if (strstr(cmd, "ASCII text") != NULL) {
 					exitcurses();
-					spawn("vi", newpath, NULL, 0);
+					run = xgetenv("EDITOR", "vi");
+					spawn(run, newpath, NULL, 0);
 					initcurses();
 					continue;
 				} else if (fb_opener) {
