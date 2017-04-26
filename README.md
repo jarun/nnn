@@ -20,7 +20,6 @@ Noice is Not Noice, a noicer fork...
 - [Introduction](#introduction)
 - [Features](#features)
 - [Performance](#performance)
-- [nlay](#nlay)
 - [Installation](#installation)
 - [Usage](#usage)
   - [Cmdline options](#cmdline-options)
@@ -31,10 +30,12 @@ Noice is Not Noice, a noicer fork...
   - [Help](#help)
 - [Quickstart](#quickstart)
 - [How to](#how-to)
+  - [use cd .....](#use-cd-)
   - [cd on quit](#cd-on-quit)
-  - [Copy current file path to clipboard](#copy-current-file-path-to-clipboard)
-  - [Boost chdir prompt](#boost-chdir-prompt)
-  - [Change file associations](#change-file-associations)
+  - [customize nlay](#customize-nlay)
+  - [copy current file path to clipboard](#copy-current-file-path-to-clipboard)
+  - [boost chdir prompt](#boost-chdir-prompt)
+  - [change file associations](#change-file-associations)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
@@ -45,7 +46,7 @@ nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight
 
 nnn can use the default desktop opener at runtime. It also comes with `nlay` - a customizable bash script to handle media types. It adds new navigation options, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
 
-Follow the instructions in the [quickstart](#quickstart) section and see how nnn simplifies those long desktop sessions... If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, nnn got it! All from the same terminal session.
+If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, nnn got it! All from the same terminal session. Follow the instructions in the [quickstart](#quickstart) section and see how nnn simplifies those long desktop sessions...
 
 Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
 
@@ -91,10 +92,6 @@ nnn vs. mc vs. ranger memory usage while viewing a directory with 10,178 files, 
 20369 vaio      20   0   64664  10980   6888 S   0.0  0.2   0:00.70 mc
 28863 vaio      20   0   19876   6436   2620 S   0.0  0.1   0:00.19 nnn -d
 ```
-
-### nlay
-
-nnn comes with an easily customizable bash shell script to media types - nlay. To know more about it, visit [nlay on wiki](https://github.com/jarun/nnn/wiki/all-about-nlay).
 
 ### Installation
 
@@ -241,13 +238,21 @@ Add the following to your shell's rc file for the best experience:
 
 ### How to
 
+#### use cd .....
+
+To jump to the n<sup>th</sup> level parent, with PWD at level 0, use `n + 1` dots. For example, to jump to the 6<th> parent of the current directory, use 7 dots. If the number of dots would take you *beyond* `/` (which isn't possible), you'll be placed at `/`.
+
 #### cd on quit
 
 Pick the appropriate file for your shell from [misc/quitcd](https://github.com/jarun/nnn/tree/master/misc/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start nnn as `n` (or modify the function name to something else).
 
 As you might notice, nnn uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
 
-#### Copy current file path to clipboard
+#### customize nlay
+
+nlay is a tiny standalone media type *player* by itself. To know how to customize or extend its functionality, please visit [nlay on wiki](https://github.com/jarun/nnn/wiki/all-about-nlay).
+
+#### copy current file path to clipboard
 
 nnn can pipe the absolute path of the current file to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
 
@@ -263,11 +268,11 @@ export `NNN_OPENER`:
 
 Start nnn and use `^K` to copy the absolute path (from `/`) of the file under the cursor to clipboard.
 
-#### Boost chdir prompt
+#### boost chdir prompt
 
 nnn uses libreadline for the chdir prompt input. So all the fantastic features of readline (e.g. case insensitive tab completion, history, reverse-i-search) is available to you based on your readline [configuration](https://cnswww.cns.cwru.edu/php/chet/readline/readline.html#SEC9).
 
-#### Change file associations
+#### change file associations
 
 If `NNN_OPENER` is not set, nnn tries to recognize a file by the file extension and invokes nlay. To change the extensions recognized by nnn, modify the `assocs` structure in [config.def.h](https://github.com/jarun/nnn/blob/master/config.def.h) (it's easy). Then re-compile and install.
 
