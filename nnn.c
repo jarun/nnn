@@ -508,6 +508,8 @@ initcurses(void)
 	intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
 	curs_set(FALSE); /* Hide cursor */
+	start_color();
+	use_default_colors();
 	timeout(1000); /* One second */
 }
 
@@ -1286,12 +1288,7 @@ browse(char *ipath, char *ifilter)
 	newpath[0] = '\0';
 	lastdir[0] = '\0'; /* Can't move back from initial directory */
 begin:
-
-	if (sel == SEL_GOIN && S_ISDIR(sb.st_mode))
-		r = populate(path, NULL, fltr);
-	else
-		r = populate(path, oldpath, fltr);
-	if (r == -1) {
+	if (populate(path, oldpath, fltr) == -1) {
 		printwarn();
 		goto nochange;
 	}
@@ -1375,6 +1372,7 @@ nochange:
 				xstrlcpy(lastdir, path, sizeof(lastdir));
 
 				xstrlcpy(path, newpath, sizeof(path));
+				oldpath[0] = '\0';
 				/* Reset filter */
 				xstrlcpy(fltr, ifilter, sizeof(fltr));
 				goto begin;
