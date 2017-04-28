@@ -28,4 +28,5 @@ deploy:
     - dist/*.rpm
   on:
     repo: jarun/nnn
+    tags: true
 tags: true
