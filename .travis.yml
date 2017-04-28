@@ -10,7 +10,7 @@ services:
 before_install:
     - sudo docker pull $OS_TYPE:$OS_VERSION
 
-script: 
+script:
     - ./build-docker $OS_TYPE $OS_VERSION
     - sudo chown -R $(id -un).$(id -gn) dist
 
@@ -21,9 +21,9 @@ deploy:
   skip_cleanup: true
   provider: releases
   api-key:
-    secure: ZtMbo/H21MoodNvw7+tvPId97meS4Xs2beUzqOhI166iuaLSWtjXxQgeC7vdYTWgPNacN6gxwhnXTLMXpt81a7g0NWxjRQ72/Rwh7aCdgQkJI/Y+0c7RNNVdLOtAWBM8csPoJy0jFdI34yHRj053tm9x65V4fMEKC9ArRm7pbTjNNovYXbW2KmRh6kr3dJdB/7tpoCpiMov6l4uHyWIcniFx97P+3dGnGqBd8SpR3IxeEypm8fzIGiX7NIJqwyG5MbLaWoyloBu21ilwh07dDifF6MI4mrkxtGY0yQ9GtHVp5cr7qyMgCt60hUGtrKhTtPQWwpzK0GSZ5eeYiLt6I/kkcj8FkWP+OazRLy/MydjGtG7q8tnbgNcmGqsbv+g1jJMEfZsnTfozeGOPPsYlhB/7kCi2BVqguXlKMRmpNPMZsc4HYK9yjV4HNsEkmwJcXgD350XS5iFu/koIGiT2PJ+/msdwPir74JpgRn00iGC0fD25V8M2TRnKn43g6jNRAZYMITaYDx+ML0SkdWIjksalW0759BgLfQopNbs9a9PbsKiNbfRRRF3xA8j2fQI6my7hXx0TzRwWTC7aMAuJkdjKn5UYOrMAZ+VXhHSOcX5LPiefwgtoU0YGjgWQdgTkQ7aR13rKuDSKepGonnkyiHWnM9gGftnNbNFi7WZRk5w=
+    secure: bdw73zBeBEZtDZGEyFpAksnpwLHTBaC7VP1pONmnsXv4qmMcynASz0LfE4krEdAsRnvxQvqPZXviy/SZ3bmaLpVQmJIC1uRWIyOBE6K/7ddf+wfLy+1uO9EPd/zDF/D28Xy8QJLDGDZI08BY5Fist4XowyvtdW3GRwwDL7TwyZyigr0fkqLJwYcqCpojsHsjXjhkpGZqB5XRztaJ4kIEVz8du03ZU1l5kA9lI8Pdk9+mntOOt6emlaJl+Wr81QkwA8TvGPlZ1VP/+h9YCtlRy/4OuiU+bg5/Atxjh8M6rsq+WpZ3ZdYbR6x5vP78p9f6TsJa4ymGhhW6MhYrKPwdT4oITzZcOXJl6AEoIvrWHQWLY7K3WaEfRbT+DODnXks0ToFKls7wyWfi/AHI0ejeDD5Na5/XhY0jdVYOVvovoY2n8LBaqRTFJDYKoCbJ1S+6myUvvmFVwiZWcgOv9gVX1aaIl4wh+XuzUtPDJTcJtUOE8Q2MWl0bdYVtEkHVRznPXN5u3odrDaeTD3vo+pEaEpshLoSKhCyyWvslSzN7T98ez3aw3KFXoFhXPEg5MEJWy7u359MaVwJIsOGUDAFhy/Y7h83LjQYnu8cmX2wuVrQIRIlGVB0f10GYZzPffZz98I/T0xv75NzpyRs31/wMxvdXz35c8m/yTup4kAkG/1s=
   file_glob: true
-  file: 
+  file:
     - dist/*.deb
     - dist/*.rpm
   on:
