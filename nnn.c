@@ -29,6 +29,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <wchar.h>
 #include <readline/readline.h>
 
 #define __USE_XOPEN_EXTENDED
@@ -137,6 +138,8 @@ extern int add_history(const char *);
 extern void add_history(const char *string);
 #endif
 
+extern int wget_wch(WINDOW *, wint_t *);
+
 /* Global context */
 static struct entry *dents;
 static int ndents, cur, total_dents;
@@ -171,6 +174,8 @@ static const char *size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 static void printmsg(char *);
 static void printwarn(void);
 static void printerr(int, char *);
+static int dentfind(struct entry *dents, int n, char *path);
+static void redraw(char *path);
 
 static rlim_t
 max_openfds()
@@ -561,13 +566,16 @@ printprompt(char *str)
 /* Returns SEL_* if key is bound and 0 otherwise.
  * Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}) */
 static int
-nextsel(char **run, char **env)
+nextsel(char **run, char **env, int *ch)
 {
-	int c;
+	int c = *ch;
 	unsigned int i;
 	static unsigned int len = LEN(bindings);
 
-	c = getch();
+	if (c == 0)
+		c = getch();
+	else
+		*ch = 0;
 	if (c == -1)
 		idle++;
 	else
@@ -582,20 +590,159 @@ nextsel(char **run, char **env)
 	return 0;
 }
 
-static char *
-readln(void)
+static int
+fill(struct entry **dents,
+	 int (*filter)(regex_t *, char *), regex_t *re)
 {
-	static char ln[LINE_MAX];
+	static struct entry _dent;
+	static int count, n;
+	n = 0;
+
+	for (count = 0; count < ndents; count++) {
+		if (filter(re, (*dents)[count].name) == 0)
+			continue;
+
+		if (n != count) {
+			/* Copy to tmp */
+			xstrlcpy(_dent.name, (*dents)[n].name, NAME_MAX);
+			_dent.mode = (*dents)[n].mode;
+			_dent.t = (*dents)[n].t;
+			_dent.size = (*dents)[n].size;
+			_dent.bsize = (*dents)[n].bsize;
+
+			/* Copy count to n */
+			xstrlcpy((*dents)[n].name, (*dents)[count].name, NAME_MAX);
+			(*dents)[n].mode = (*dents)[count].mode;
+			(*dents)[n].t = (*dents)[count].t;
+			(*dents)[n].size = (*dents)[count].size;
+			(*dents)[n].bsize = (*dents)[count].bsize;
+
+			/* Copy tmp to count */
+			xstrlcpy((*dents)[count].name, _dent.name, NAME_MAX);
+			(*dents)[count].mode = _dent.mode;
+			(*dents)[count].t = _dent.t;
+			(*dents)[count].size = _dent.size;
+			(*dents)[count].bsize = _dent.bsize;
+		}
+
+		n++;
+	}
+
+	return n;
+}
+
+static int
+matches(char *fltr)
+{
+	static regex_t re;
+
+	/* Search filter */
+	if (setfilter(&re, fltr) != 0)
+		return -1;
+
+	ndents = fill(&dents, visible, &re);
+	qsort(dents, ndents, sizeof(*dents), entrycmp);
+
+	return 0;
+}
+
+static int
+readln(char *path)
+{
+	static char ln[LINE_MAX << 2];
+	static wchar_t wln[LINE_MAX];
+	static wint_t ch[2] = {0};
+	int r, total = ndents;
+	int oldcur = cur;
+	int len = 1;
+	char *pln = ln + 1;
+
+	memset(wln, 0, LINE_MAX << 2);
+	wln[0] = '/';
+	ln[0] = '/';
+	ln[1] = '\0';
+	cur = 0;
 
 	timeout(-1);
 	echo();
 	curs_set(TRUE);
-	memset(ln, 0, sizeof(ln));
-	wgetnstr(stdscr, ln, sizeof(ln) - 1);
+	printprompt(ln);
+
+	while ((r = wget_wch(stdscr, ch)) != ERR) {
+		if (r == OK) {
+			switch(*ch) {
+			case '\r':  // with nonl(), this is ENTER key value
+				if (len == 1) {
+					cur = oldcur;
+					*ch = CONTROL('L');
+					goto end;
+				}
+
+
+				if (matches(pln) == -1)
+					goto end;
+
+				redraw(path);
+				goto end;
+			case 127: // handle DEL
+				if (len == 1) {
+					cur = oldcur;
+					*ch = CONTROL('L');
+					goto end;
+				}
+
+				if (len == 2)
+					cur = oldcur;
+
+				wln[--len] = '\0';
+				wcstombs(ln, wln, LINE_MAX << 2);
+				ndents = total;
+				if (matches(pln) == -1)
+					continue;
+				redraw(path);
+				printprompt(ln);
+				break;
+			default:
+				wln[len++] = (wchar_t)*ch;
+				wln[len] = '\0';
+				wcstombs(ln, wln, LINE_MAX << 2);
+				ndents = total;
+				if (matches(pln) == -1)
+					continue;
+				redraw(path);
+				printprompt(ln);
+			}
+		} else if (r == KEY_CODE_YES) {
+			switch(*ch) {
+			case KEY_DC:
+			case KEY_BACKSPACE:
+				if (len == 1) {
+					cur = oldcur;
+					*ch = CONTROL('L');
+					goto end;
+				}
+
+				if (len == 2)
+					cur = oldcur;
+
+				wln[--len] = '\0';
+				wcstombs(ln, wln, LINE_MAX << 2);
+				ndents = total;
+				if (matches(pln) == -1)
+					continue;
+				redraw(path);
+				printprompt(ln);
+				break;
+			default:
+				goto end;
+			}
+		}
+	}
+end:
 	noecho();
 	curs_set(FALSE);
 	timeout(1000);
-	return ln[0] ? ln : NULL;
+	return *ch;
 }
 
 static int
@@ -1278,8 +1425,7 @@ browse(char *ipath, char *ifilter)
 	static char fltr[LINE_MAX];
 	char *mime, *dir, *tmp, *run, *env;
 	struct stat sb;
-	regex_t re;
-	int r, fd;
+	int r, fd, filtered = FALSE;
 	enum action sel = SEL_RUNARG + 1;
 
 	xstrlcpy(path, ipath, sizeof(path));
@@ -1299,7 +1445,9 @@ nochange:
 		/* Exit if parent has exited */
 		if (getppid() == 1)
 			_exit(0);
-		sel = nextsel(&run, &env);
+
+		sel = nextsel(&run, &env, &filtered);
+
 		switch (sel) {
 		case SEL_CDQUIT:
 		{
@@ -1341,7 +1489,7 @@ nochange:
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
 			if (ndents == 0)
-				goto nochange;
+				goto begin;
 
 			mkpath(path, dents[cur].name, newpath, sizeof(newpath));
 			DPRINTF_S(newpath);
@@ -1428,21 +1576,13 @@ nochange:
 				goto nochange;
 			}
 		case SEL_FLTR:
-			/* Read filter */
-			printprompt("filter: ");
-			tmp = readln();
-			if (tmp == NULL)
-				tmp = ifilter;
-			/* Check and report regex errors */
-			r = setfilter(&re, tmp);
-			if (r != 0)
-				goto nochange;
-			xstrlcpy(fltr, tmp, sizeof(fltr));
+			filtered = readln(path);
+			xstrlcpy(fltr, ifilter, sizeof(fltr));
 			DPRINTF_S(fltr);
 			/* Save current */
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, sizeof(oldpath));
-			goto begin;
+			goto nochange;
 		case SEL_NEXT:
 			if (cur < ndents - 1)
 				cur++;

@@ -59,6 +59,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - Super-easy navigation with roll-over at edges
 - Jump HOME or back to the last visited directory (as usual!)
 - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
+- Search-as-you-type
 - Desktop opener integration to handle mime types
 - Customizable bash script nlay to handle known file types
 - Disk usage analyzer mode
@@ -66,7 +67,6 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - Show media information (needs mediainfo)
 - Sort by modification time, size
 - Sort numeric names in numeric order (1, 2, ... 10, 11, ...)
-- Search directory contents using regex expressions
 - Spawn a shell in the current directory
 - Invoke file path copier (*easy* shell integration)
 - Quit and change directory (*easy* shell integration)
@@ -168,9 +168,11 @@ Right, Enter, l, ^M | Open file or enter dir
 
 Filters support regexes to display only the matched entries in the current directory view. This effectively allows searching through the directory tree for a particular entry.
 
-Filters do not stack on top of each other. They are applied anew every time.
+Filters do not stack on top of each other. They are applied anew every time. There are 3 ways to reset a filter:
 
-An empty filter expression resets the filter.
+An empty filter expression, a search with no results or an extra backspace at the filter prompt (like vi).
+
+If you want to list all matches starting with the filter expression (a common use case), start the expression with a `^` (caret) symbol.
 
 If nnn is invoked as root the default filter will also match hidden files.
 
