@@ -1,5 +1,4 @@
 /* See LICENSE file for copyright and license details. */
-#include <readline/readline.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -26,6 +25,7 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <readline/readline.h>
 
 #define __USE_XOPEN_EXTENDED
 #include <ftw.h>
