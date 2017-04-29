@@ -59,7 +59,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - Super-easy navigation with roll-over at edges
 - Jump HOME or back to the last visited directory (as usual!)
 - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
-- Search-as-you-type
+- Filter directory contents with search-as-you-type
 - Desktop opener integration to handle mime types
 - Customizable bash script nlay to handle known file types
 - Disk usage analyzer mode
