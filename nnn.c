@@ -1149,13 +1149,8 @@ show_help(void)
 static int
 sum_bsizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
-	/* Handle permission problems */
-	if(typeflag == FTW_NS) {
-		printmsg("No stats (permissions ?)");
-		return 0;
-	}
-
-	blk_size += sb->st_blocks;
+	if(typeflag == FTW_F || typeflag == FTW_D)
+		blk_size += sb->st_blocks;
 
 	return 0;
 }
