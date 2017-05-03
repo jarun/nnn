@@ -1103,7 +1103,9 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
-		sprintf(buf, "file -b \"%s\" 2>&1", fpath);
+		strcpy(buf, "file -b \"");
+		xstrlcpy(buf + strlen(buf), fpath, strlen(fpath) + 1);
+		strcat(buf, "\" 2>&1");
 		p = get_output(buf, PATH_MAX + 16);
 		if (p) {
 			dprintf(fd, "\n\n ");
@@ -1135,14 +1137,17 @@ show_mediainfo(const char* fpath, int full)
 {
 	static char buf[MAX_CMD_LEN];
 
-	snprintf(buf, MAX_CMD_LEN, "which mediainfo");
+	strcpy(buf, "which mediainfo");
 	if (get_output(buf, MAX_CMD_LEN) == NULL)
 		return -1;
 
+	strcpy(buf, "mediainfo \"");
+	xstrlcpy(buf + strlen(buf), fpath, strlen(fpath) + 1);
 	if (full)
-		sprintf(buf, "mediainfo -f \"%s\" 2>&1 | %s", fpath, xgetenv("PAGER", "less"));
+		strcat(buf, "\" -f ");
 	else
-		sprintf(buf, "mediainfo \"%s\" 2>&1 | %s", fpath, xgetenv("PAGER", "less"));
+		strcat(buf, "\" ");
+	sprintf(buf + strlen(buf), "2>&1 | %s", xgetenv("PAGER", "less"));
 
 	return system(buf);
 }
@@ -1566,9 +1571,9 @@ nochange:
 
 				/* If NNN_OPENER is set, use it */
 				if (opener) {
-					snprintf(cmd, MAX_CMD_LEN,
-						 "%s \"%s\" > /dev/null 2>&1",
-						 opener, newpath);
+					sprintf(cmd, "%s \"", opener);
+					xstrlcpy(cmd + strlen(cmd), newpath, strlen(newpath) + 1);
+					strcat(cmd, "\" > /dev/null 2>&1");
 					r = system(cmd);
 					continue;
 				}
@@ -1576,8 +1581,9 @@ nochange:
 				/* Play with nlay if identified */
 				mime = getmime(dents[cur].name);
 				if (mime) {
-					snprintf(cmd, MAX_CMD_LEN, "nlay \"%s\" %s",
-						 newpath, mime);
+					strcpy(cmd, "nlay \"");
+					xstrlcpy(cmd + strlen(cmd), newpath, strlen(newpath) + 1);
+					sprintf(cmd + strlen(cmd), "\" %s", mime);
 					exitcurses();
 					r = system(cmd);
 					initcurses();
@@ -1586,8 +1592,9 @@ nochange:
 
 				/* If nlay doesn't handle it, open plain text
 				   files with vi, then try NNN_FALLBACK_OPENER */
-				snprintf(cmd, MAX_CMD_LEN,
-					 "file \"%s\"", newpath);
+				strcpy(cmd, "file -b \"");
+				xstrlcpy(cmd + strlen(cmd), newpath, strlen(newpath) + 1);
+				strcat(cmd, "\"");
 				if (get_output(cmd, MAX_CMD_LEN) == NULL)
 					continue;
 
@@ -1598,8 +1605,9 @@ nochange:
 					initcurses();
 					continue;
 				} else if (fb_opener) {
-					snprintf(cmd, MAX_CMD_LEN, "%s \"%s\" > /dev/null 2>&1",
-						 fb_opener, newpath);
+					sprintf(cmd, "%s \"", fb_opener);
+					xstrlcpy(cmd + strlen(cmd), newpath, strlen(newpath) + 1);
+					strcat(cmd, "\" > /dev/null 2>&1");
 					r = system(cmd);
 					continue;
 				}
