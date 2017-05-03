@@ -787,7 +787,7 @@ replace_escape(const char *str)
 	mbstowcs(wbuf, str, PATH_MAX);
 
 	while (*buf) {
-		if ((*buf >= '\x01' && *buf <= '\x1f') || *buf == '\x7f')
+		if (*buf <= '\x1f' || *buf == '\x7f')
 			*buf = '\?';
 
 		buf++;
