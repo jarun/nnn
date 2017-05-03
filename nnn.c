@@ -774,6 +774,30 @@ mkpath(char *dir, char *name, char *out, size_t n)
 	return out;
 }
 
+static char *
+replace_escape(const char *str)
+{
+	static char buffer[PATH_MAX];
+	static wchar_t wbuf[PATH_MAX];
+	static wchar_t *buf;
+	buffer[0] = '\0';
+	buf = wbuf;
+
+	/* Convert multi-byte to wide char */
+	mbstowcs(wbuf, str, PATH_MAX);
+
+	while (*buf) {
+		if ((*buf >= '\x01' && *buf <= '\x1f') || *buf == '\x7f')
+			*buf = '\?';
+
+		buf++;
+	}
+
+	/* Convert wide char to multi-byte */
+	wcstombs(buffer, wbuf, PATH_MAX);
+	return buffer;
+}
+
 static void
 printent(struct entry *ent, int active)
 {
@@ -786,17 +810,23 @@ printent(struct entry *ent, int active)
 		ncols = COLS;
 
 	if (S_ISDIR(ent->mode))
-		snprintf(str, ncols, "%s%s/", CURSYM(active), ent->name);
+		snprintf(str, ncols, "%s%s/", CURSYM(active),
+			 replace_escape(ent->name));
 	else if (S_ISLNK(ent->mode))
-		snprintf(str, ncols, "%s%s@", CURSYM(active), ent->name);
+		snprintf(str, ncols, "%s%s@", CURSYM(active),
+			 replace_escape(ent->name));
 	else if (S_ISSOCK(ent->mode))
-		snprintf(str, ncols, "%s%s=", CURSYM(active), ent->name);
+		snprintf(str, ncols, "%s%s=", CURSYM(active),
+			 replace_escape(ent->name));
 	else if (S_ISFIFO(ent->mode))
-		snprintf(str, ncols, "%s%s|", CURSYM(active), ent->name);
+		snprintf(str, ncols, "%s%s|", CURSYM(active),
+			 replace_escape(ent->name));
 	else if (ent->mode & S_IXUSR)
-		snprintf(str, ncols, "%s%s*", CURSYM(active), ent->name);
+		snprintf(str, ncols, "%s%s*", CURSYM(active),
+			 replace_escape(ent->name));
 	else
-		snprintf(str, ncols, "%s%s", CURSYM(active), ent->name);
+		snprintf(str, ncols, "%s%s", CURSYM(active),
+			 replace_escape(ent->name));
 
 	printw("%s\n", str);
 }
@@ -847,53 +877,63 @@ printent_long(struct entry *ent, int active)
 	if (!bsizeorder) {
 		if (S_ISDIR(ent->mode))
 			snprintf(str, ncols, "%s%-16.16s        /  %s/",
-				 CURSYM(active), buf, ent->name);
+				 CURSYM(active), buf, replace_escape(ent->name));
 		else if (S_ISLNK(ent->mode))
 			snprintf(str, ncols, "%s%-16.16s        @  %s@",
-				 CURSYM(active), buf, ent->name);
+				 CURSYM(active), buf, replace_escape(ent->name));
 		else if (S_ISSOCK(ent->mode))
 			snprintf(str, ncols, "%s%-16.16s        =  %s=",
-				 CURSYM(active), buf, ent->name);
+				 CURSYM(active), buf, replace_escape(ent->name));
 		else if (S_ISFIFO(ent->mode))
 			snprintf(str, ncols, "%s%-16.16s        |  %s|",
-				 CURSYM(active), buf, ent->name);
+				 CURSYM(active), buf, replace_escape(ent->name));
 		else if (S_ISBLK(ent->mode))
 			snprintf(str, ncols, "%s%-16.16s        b  %s",
-				 CURSYM(active), buf, ent->name);
+				 CURSYM(active), buf, replace_escape(ent->name));
 		else if (S_ISCHR(ent->mode))
 			snprintf(str, ncols, "%s%-16.16s        c  %s",
-				 CURSYM(active), buf, ent->name);
+				 CURSYM(active), buf, replace_escape(ent->name));
 		else if (ent->mode & S_IXUSR)
 			snprintf(str, ncols, "%s%-16.16s %8.8s* %s*",
-				 CURSYM(active), buf, coolsize(ent->size), ent->name);
+				 CURSYM(active), buf, coolsize(ent->size),
+				 replace_escape(ent->name));
 		else
 			snprintf(str, ncols, "%s%-16.16s %8.8s  %s",
-				 CURSYM(active), buf, coolsize(ent->size), ent->name);
+				 CURSYM(active), buf, coolsize(ent->size),
+				 replace_escape(ent->name));
 	} else {
 		if (S_ISDIR(ent->mode))
 			snprintf(str, ncols, "%s%-16.16s %8.8s/ %s/",
-				 CURSYM(active), buf, coolsize(ent->bsize << 9), ent->name);
+				 CURSYM(active), buf, coolsize(ent->bsize << 9),
+				 replace_escape(ent->name));
 		else if (S_ISLNK(ent->mode))
 			snprintf(str, ncols, "%s%-16.16s        @  %s@",
-				 CURSYM(active), buf, ent->name);
+				 CURSYM(active), buf,
+				 replace_escape(ent->name));
 		else if (S_ISSOCK(ent->mode))
 			snprintf(str, ncols, "%s%-16.16s        =  %s=",
-				 CURSYM(active), buf, ent->name);
+				 CURSYM(active), buf,
+				 replace_escape(ent->name));
 		else if (S_ISFIFO(ent->mode))
 			snprintf(str, ncols, "%s%-16.16s        |  %s|",
-				 CURSYM(active), buf, ent->name);
+				 CURSYM(active), buf,
+				 replace_escape(ent->name));
 		else if (S_ISBLK(ent->mode))
 			snprintf(str, ncols, "%s%-16.16s        b  %s",
-				 CURSYM(active), buf, ent->name);
+				 CURSYM(active), buf,
+				 replace_escape(ent->name));
 		else if (S_ISCHR(ent->mode))
 			snprintf(str, ncols, "%s%-16.16s        c  %s",
-				 CURSYM(active), buf, ent->name);
+				 CURSYM(active), buf,
+				 replace_escape(ent->name));
 		else if (ent->mode & S_IXUSR)
 			snprintf(str, ncols, "%s%-16.16s %8.8s* %s*",
-				 CURSYM(active), buf, coolsize(ent->bsize << 9), ent->name);
+				 CURSYM(active), buf, coolsize(ent->bsize << 9),
+				 replace_escape(ent->name));
 		else
 			snprintf(str, ncols, "%s%-16.16s %8.8s  %s",
-				 CURSYM(active), buf, coolsize(ent->bsize << 9), ent->name);
+				 CURSYM(active), buf, coolsize(ent->bsize << 9),
+				 replace_escape(ent->name));
 	}
 
 	printw("%s\n", str);
@@ -1012,10 +1052,12 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 		ssize_t len = readlink(fpath, symtgt, PATH_MAX);
 		if (len != -1) {
 			symtgt[len] = '\0';
-			dprintf(fd, "    File: '%s' -> '%s'", fname, symtgt);
+			dprintf(fd, "    File: '%s' -> '%s'",
+				replace_escape(fname),
+				replace_escape(symtgt));
 		}
 	} else
-		dprintf(fd, "    File: '%s'", fname);
+		dprintf(fd, "    File: '%s'", replace_escape(fname));
 
 	/* Show size, blocks, file type */
 #ifdef __APPLE__
@@ -1399,10 +1441,11 @@ redraw(char *path)
 
 			if (!bsizeorder)
 				sprintf(cwd, "total %d %s[%s%s]", ndents, sort,
-					dents[cur].name, ind);
+					replace_escape(dents[cur].name), ind);
 			else
 				sprintf(cwd, "total %d by disk usage, %s free [%s%s]",
-					ndents, coolsize(fs_free), dents[cur].name, ind);
+					ndents, coolsize(fs_free),
+					replace_escape(dents[cur].name), ind);
 
 			printmsg(cwd);
 		} else
