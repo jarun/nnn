@@ -13,7 +13,7 @@ Noice is Not Noice, a noicer fork...
 
 [![nnn screencast](https://s16.postimg.org/h8ha5z69x/nnn_demo.png)](https://vimeo.com/215489406 "Click for some action!")
 
-<p align="center"><a href="https://static.zhimingwang.org/nnn-demo-20170405.mp4">Click for some action!</a></p>
+<p align="center"><a href="https://vimeo.com/215489406">Click for some action!</a></p>
 
 ### Table of Contents
 
@@ -50,8 +50,9 @@ If you want to edit a file in vim with some soothing music in the background whi
 
 Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
 
-<p align="right">
-<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://tuxtricks.files.wordpress.com/2016/12/donate.png" alt="Donate via PayPal!" title="Donate via PayPal!" /></a>
+<p align="center">
+<a href="https://saythanks.io/to/jarun"><img src="https://img.shields.io/badge/say-thanks!-ff69b4.svg" /></a>
+<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-5DADE2.svg" alt="Donate via PayPal!" /></a>
 </p>
 
 ### Features
