@@ -1,3 +1,24 @@
+nnn v1.1
+2017-05-12
+
+News
+- Introducing nlay - a highly customizable bash script to handle media type
+- nnn is on [Homebrew](http://braumeister.org/formula/nnn) now
+- RPM packages for CentOS 7 and Fedora 24
+
+Modifications
+- *Search-as-you-type* support
+- Unicode support
+- Option `-S` to start in disk usage analyzer mode
+- Show media information (using mediainfo)
+- Use readline at change directory prompt
+- Jump to prev directories using `cd .....` (with `.` as PWD)
+- Jump to initial directory using `&`
+- Show help, mediainfo and file info in PAGER
+- Several optimizations
+
+-------------------------------------------------------------------------------
+
 nnn v1.0
 2017-04-13
 

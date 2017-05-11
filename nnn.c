@@ -63,7 +63,7 @@ xprintf(int fd, const char *fmt, ...)
 #define DPRINTF_P(x)
 #endif /* DEBUG */
 
-#define VERSION "v1.0"
+#define VERSION "v1.1"
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))

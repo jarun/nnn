@@ -73,7 +73,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - Quit and change directory (*easy* shell integration)
 - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
 - VIM-ish keybinds
-- UTF-8 support
+- Unicode support
 
 ### Performance
 
