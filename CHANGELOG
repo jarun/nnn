@@ -4,10 +4,10 @@ nnn v1.1
 News
 - Introducing nlay - a highly customizable bash script to handle media type
 - nnn is on [Homebrew](http://braumeister.org/formula/nnn) now
-- RPM packages for CentOS 7 and Fedora 24
+- RPM packages for CentOS 7 and Fedora 24 generated on release
 
-Modifications
-- *Search-as-you-type* support
+What's in?
+- *Search-as-you-type*
 - Unicode support
 - Option `-S` to start in disk usage analyzer mode
 - Show media information (using mediainfo)

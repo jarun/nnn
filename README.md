@@ -77,21 +77,21 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 
 ### Performance
 
-nnn vs. ncdu memory usage while listing an external disk with 13,790 files in disk usage analyzer mode:
+nnn vs. ncdu memory usage while listing 438767 files in disk usage analyzer mode:
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
-31163 vaio      20   0   65508  53980   2320 S   0.0  1.1   0:01.96 ncdu /
-28863 vaio      20   0   21348   7812   2476 S   0.0  0.2   0:01.75 nnn -d
+22515 vaio      20   0   60348  48712   2240 S   0.0  0.6   0:01.11 ncdu /
+22574 vaio      20   0   17588   4320   2584 S   0.3  0.1   0:00.44 nnn -d /
 ```
 
-nnn vs. mc vs. ranger memory usage while viewing a directory with 10,178 files, sorted by size:
+nnn vs. mc vs. ranger memory usage while viewing a directory with 1500 files:
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
-22465 vaio      20   0  233956 192136   7896 S   0.0  3.9   0:05.31 /usr/bin/python -O /usr/bin/ranger
-20369 vaio      20   0   64664  10980   6888 S   0.0  0.2   0:00.70 mc
-28863 vaio      20   0   19876   6436   2620 S   0.0  0.1   0:00.19 nnn -d
+22614 vaio      20   0   67848  25960   7880 S   0.0  0.3   0:00.32 /usr/bin/python -O /usr/bin/ranger /usr/bin/
+22700 vaio      20   0   62320   8384   6516 S   0.0  0.1   0:00.01 mc /usr/bin
+22646 vaio      20   0   17608   4016   2380 S   0.0  0.0   0:00.03 nnn -d /usr/bin/
 ```
 
 ### Installation
