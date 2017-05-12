@@ -6,11 +6,7 @@
 #include <sys/resource.h>
 
 #include <ctype.h>
-#ifdef __linux__
-#include <ncursesw/curses.h>
-#else
 #include <curses.h>
-#endif
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
