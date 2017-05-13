@@ -3,7 +3,7 @@ VERSION = 1.1
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/share/man
 
-CFLAGS += -O3 -march=native -Wall -Wextra -Wno-unused-parameter
+CFLAGS += -O2 -Wall -Wextra -Wno-unused-parameter
 LDLIBS = -lreadline
 
 ifeq ($(shell pkg-config ncursesw && echo 1),1)
@@ -12,7 +12,6 @@ ifeq ($(shell pkg-config ncursesw && echo 1),1)
 else
 	LDLIBS += -lncurses
 endif
-
 
 DISTFILES = nlay nnn.c config.def.h nnn.1 Makefile README.md LICENSE
 LOCALCONFIG = config.h

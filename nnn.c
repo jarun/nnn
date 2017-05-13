@@ -28,7 +28,9 @@
 #include <wchar.h>
 #include <readline/readline.h>
 
-#define __USE_XOPEN_EXTENDED
+#ifndef __USE_XOPEN_EXTENDED
+#define __USE_XOPEN_EXTENDED 1
+#endif
 #include <ftw.h>
 
 #ifdef DEBUG
