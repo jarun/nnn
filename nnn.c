@@ -1592,13 +1592,13 @@ nochange:
 
 				/* If nlay doesn't handle it, open plain text
 				   files with vi, then try NNN_FALLBACK_OPENER */
-				strcpy(cmd, "file -b \"");
+				strcpy(cmd, "file -bi \"");
 				xstrlcpy(cmd + strlen(cmd), newpath, strlen(newpath) + 1);
 				strcat(cmd, "\"");
 				if (get_output(cmd, MAX_CMD_LEN) == NULL)
 					continue;
 
-				if (strstr(cmd, "ASCII text") != NULL) {
+				if (strstr(cmd, "text/") == cmd) {
 					exitcurses();
 					run = xgetenv("EDITOR", "vi");
 					spawn(run, newpath, NULL, 0);
