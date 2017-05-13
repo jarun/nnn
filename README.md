@@ -85,13 +85,13 @@ nnn vs. ncdu memory usage while listing 438767 files in disk usage analyzer mode
 22574 vaio      20   0   17588   4320   2584 S   0.3  0.1   0:00.44 nnn -d /
 ```
 
-nnn vs. mc vs. ranger memory usage while viewing a directory with 1500 files:
+nnn vs. mc vs. ranger memory usage while viewing a directory with 11244 files, sorted by size:
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
-22614 vaio      20   0   67848  25960   7880 S   0.0  0.3   0:00.32 /usr/bin/python -O /usr/bin/ranger /usr/bin/
-22700 vaio      20   0   62320   8384   6516 S   0.0  0.1   0:00.01 mc /usr/bin
-22646 vaio      20   0   17608   4016   2380 S   0.0  0.0   0:00.03 nnn -d /usr/bin/
+28450 vaio      20   0   93848  51548   7724 S   0.0  0.6   0:00.64 /usr/bin/python -O /usr/bin/ranger
+27265 vaio      20   0   67188  13620   6908 S   0.0  0.2   0:00.16 mc
+28360 vaio      20   0   20520   6932   2512 S   0.3  0.1   0:00.20 nnn
 ```
 
 ### Installation
