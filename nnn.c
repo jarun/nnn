@@ -1114,9 +1114,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
-		strcpy(buf, "file -b \"");
-		xstrlcpy(buf + strlen(buf), fpath, sizeof(buf) - strlen(buf));
-		strcat(buf, "\" 2>&1");
+		sprintf(buf, "file -b \'%s\' 2>&1", fpath);
 		p = get_output(buf, sizeof(buf));
 		if (p) {
 			dprintf(fd, "\n\n ");
@@ -1136,7 +1134,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	dprintf(fd, "\n\n");
 	close(fd);
 
-	sprintf(buf, "cat %s | %s", tmp, xgetenv("PAGER", "less"));
+	sprintf(buf, "cat %s | less", tmp);
 	fd = system(buf);
 
 	unlink(tmp);
@@ -1152,13 +1150,11 @@ show_mediainfo(const char* fpath, int full)
 	if (get_output(buf, MAX_CMD_LEN) == NULL)
 		return -1;
 
-	strcpy(buf, "mediainfo \'");
-	xstrlcpy(buf + strlen(buf), fpath, sizeof(buf) - strlen(buf));
+	sprintf(buf, "mediainfo \'%s\' ", fpath);
 	if (full)
-		strcat(buf, "\' -f ");
+		strcat(buf, "-f 2>&1 | less");
 	else
-		strcat(buf, "\' ");
-	sprintf(buf + strlen(buf), "2>&1 | %s", xgetenv("PAGER", "less"));
+		strcat(buf, "2>&1 | less");
 
 	return system(buf);
 }
@@ -1166,7 +1162,7 @@ show_mediainfo(const char* fpath, int full)
 static int
 show_help(void)
 {
-	char helpstr[2048] = ("echo \"\
+	char helpstr[] = ("echo \"\
                   Key | Function\n\
                      -+-\n\
             Up, k, ^P | Previous entry\n\
@@ -1199,9 +1195,9 @@ show_help(void)
                    ^L | Force a redraw\n\
                     ? | Toggle help screen\n\
                     q | Quit\n\
-                    Q | Quit and change directory\n\n\" | ");
+                    Q | Quit and change directory\n\n\" | less");
 
-	return system(strcat(helpstr, xgetenv("PAGER", "less")));
+	return system(helpstr);
 }
 
 static int
@@ -1600,9 +1596,7 @@ nochange:
 
 				/* If nlay doesn't handle it, open plain text
 				   files with vi, then try NNN_FALLBACK_OPENER */
-				strcpy(cmd, "file -bi \'");
-				xstrlcpy(cmd + strlen(cmd), newpath, MAX_CMD_LEN - strlen(cmd));
-				strcat(cmd, "\'");
+				sprintf(cmd, "file -bi \'%s\'", newpath);
 				if (get_output(cmd, MAX_CMD_LEN) == NULL)
 					continue;
 
