@@ -25,8 +25,10 @@
 # 3. Assuming you don't to play multiple audio/video files simultaneously,
 #    nlay kills any running instances of the audio/video player in bg mode.
 #
-# 4. Keep a personal backup (on GitHub Gist maybe?) of this file if you modify
-#    it. nlay is OVERWRITTEN during nnn upgrade.
+# 4. nlay is OVERWRITTEN during nnn upgrade. You can store your custom nlay in a
+#    location other than the default and have an alias with nnn option '-p' to
+#    invoke it. Remember it might break or lack new capabilities added to nlay
+#    in future releases. Check the file diff once in a while.
 #
 # Author: Arun Prakash Jana
 # Email: engineerarun@gmail.com

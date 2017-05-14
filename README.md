@@ -121,6 +121,7 @@ nnn needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard li
 
     optional arguments:
       -d             start in detail view mode
+      -p             path to custom nlay
       -S             start in disk usage analyzer mode
       -v             show program version and exit
       -h             show this help and exit

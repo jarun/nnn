@@ -144,6 +144,7 @@ static int ndents, cur, total_dents;
 static int idle;
 static char *opener;
 static char *fb_opener;
+static char *player;
 static char *copier;
 static char *desktop_manager;
 static off_t blk_size;
@@ -1570,7 +1571,7 @@ nochange:
 				/* If NNN_OPENER is set, use it */
 				if (opener) {
 					sprintf(cmd, "%s \'", opener);
-					xstrlcpy(cmd + strlen(cmd), newpath, sizeof(cmd) - strlen(cmd));
+					xstrlcpy(cmd + strlen(cmd), newpath, MAX_CMD_LEN - strlen(cmd));
 					strcat(cmd, "\' > /dev/null 2>&1");
 					r = system(cmd);
 					continue;
@@ -1579,8 +1580,13 @@ nochange:
 				/* Play with nlay if identified */
 				mime = getmime(dents[cur].name);
 				if (mime) {
-					strcpy(cmd, "nlay \'");
-					xstrlcpy(cmd + strlen(cmd), newpath, sizeof(cmd) - strlen(cmd));
+					if (player) {
+						cmd[0] = '\'';
+						xstrlcpy(cmd + 1, player, MAX_CMD_LEN);
+						strcat(cmd, "\' \'");
+					} else
+						strcpy(cmd, "nlay \'");
+					xstrlcpy(cmd + strlen(cmd), newpath, MAX_CMD_LEN - strlen(cmd));
 					sprintf(cmd + strlen(cmd), "\' %s", mime);
 					exitcurses();
 					r = system(cmd);
@@ -1591,7 +1597,7 @@ nochange:
 				/* If nlay doesn't handle it, open plain text
 				   files with vi, then try NNN_FALLBACK_OPENER */
 				strcpy(cmd, "file -bi \'");
-				xstrlcpy(cmd + strlen(cmd), newpath, sizeof(cmd) - strlen(cmd));
+				xstrlcpy(cmd + strlen(cmd), newpath, MAX_CMD_LEN - strlen(cmd));
 				strcat(cmd, "\'");
 				if (get_output(cmd, MAX_CMD_LEN) == NULL)
 					continue;
@@ -1604,7 +1610,7 @@ nochange:
 					continue;
 				} else if (fb_opener) {
 					sprintf(cmd, "%s \'", fb_opener);
-					xstrlcpy(cmd + strlen(cmd), newpath, sizeof(cmd) - strlen(cmd));
+					xstrlcpy(cmd + strlen(cmd), newpath, MAX_CMD_LEN - strlen(cmd));
 					strcat(cmd, "\' > /dev/null 2>&1");
 					r = system(cmd);
 					continue;
@@ -2001,6 +2007,7 @@ positional arguments:\n\
   PATH           directory to open [default: current dir]\n\n\
 optional arguments:\n\
   -d             start in detail view mode\n\
+  -p             path to custom nlay\n\
   -S             start in disk usage analyzer mode\n\
   -v             show program version and exit\n\
   -h             show this help and exit\n\n\
@@ -2027,7 +2034,7 @@ main(int argc, char *argv[])
 	if (argc > 3)
 		usage();
 
-	while ((opt = getopt(argc, argv, "dSvh")) != -1) {
+	while ((opt = getopt(argc, argv, "dSp:vh")) != -1) {
 		switch (opt) {
 		case 'S':
 			bsizeorder = 1;
@@ -2035,6 +2042,13 @@ main(int argc, char *argv[])
 			/* Open in detail mode, if set */
 			showdetail = 1;
 			printptr = &printent_long;
+			break;
+		case 'p':
+			player = optarg;
+			if (strlen(player) > 512) {
+				fprintf(stderr, "path to player must be <= 512 characters\n");
+				exit(1);
+			}
 			break;
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
