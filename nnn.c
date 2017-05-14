@@ -315,12 +315,14 @@ all_dots(const char* ptr)
 
 /*
  * Spawns a child process. Behaviour can be controlled using flag:
- * Limited to a single argument to program, use system(3) if you need more
- * flag = 1: draw a marker to indicate nnn spawned e.g., a shell
- * flag = 2: do not wait in parent for child process e.g. DE file manager
+ * Limited to 2 arguments to a program
+ * flag works on bit set:
+ *    - 0b1: draw a marker to indicate nnn spawned e.g., a shell
+ *    - 0b10: do not wait in parent for child process e.g. DE file manager
+ *    - 0b100: suppress stdout and stderr
  */
 static void
-spawn(char *file, char *arg, char *dir, int flag)
+spawn(char *file, char *arg1, char *arg2, char *dir, unsigned char flag)
 {
 	pid_t pid;
 	int status;
@@ -329,13 +331,23 @@ spawn(char *file, char *arg, char *dir, int flag)
 	if (pid == 0) {
 		if (dir != NULL)
 			status = chdir(dir);
-		if (flag == 1)
+
+		/* Show a marker (to indicate nnn spawned shell) */
+		if (flag & 0b1)
 			fprintf(stdout, "\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
 
-		execlp(file, file, arg, NULL);
+		/* Suppress stdout and stderr */
+		if (flag & 0b100) {
+			int fd = open("/dev/null", O_WRONLY, S_IWUSR);
+			dup2(fd, 1);
+			dup2(fd, 2);
+			close(fd);
+		}
+
+		execlp(file, file, arg1, arg2, NULL);
 		_exit(1);
 	} else {
-		if (flag != 2)
+		if (!(flag & 0b10))
 			/* Ignore interruptions */
 			while (waitpid(pid, &status, 0) == -1)
 				DPRINTF_D(status);
@@ -1570,26 +1582,18 @@ nochange:
 
 				/* If NNN_OPENER is set, use it */
 				if (opener) {
-					sprintf(cmd, "%s \'", opener);
-					xstrlcpy(cmd + strlen(cmd), newpath, MAX_CMD_LEN - strlen(cmd));
-					strcat(cmd, "\' > /dev/null 2>&1");
-					r = system(cmd);
+					spawn(opener, newpath, NULL, NULL, 4);
 					continue;
 				}
 
 				/* Play with nlay if identified */
 				mime = getmime(dents[cur].name);
 				if (mime) {
-					if (player) {
-						cmd[0] = '\'';
-						xstrlcpy(cmd + 1, player, MAX_CMD_LEN);
-						strcat(cmd, "\' \'");
-					} else
-						strcpy(cmd, "nlay \'");
-					xstrlcpy(cmd + strlen(cmd), newpath, MAX_CMD_LEN - strlen(cmd));
-					sprintf(cmd + strlen(cmd), "\' %s", mime);
 					exitcurses();
-					r = system(cmd);
+					if (player)
+						spawn(player, newpath, mime, NULL, 0);
+					else
+						spawn("nlay", newpath, mime, NULL, 0);
 					initcurses();
 					continue;
 				}
@@ -1605,14 +1609,11 @@ nochange:
 				if (strstr(cmd, "text/") == cmd) {
 					exitcurses();
 					run = xgetenv("EDITOR", "vi");
-					spawn(run, newpath, NULL, 0);
+					spawn(run, newpath, NULL, NULL, 0);
 					initcurses();
 					continue;
 				} else if (fb_opener) {
-					sprintf(cmd, "%s \'", fb_opener);
-					xstrlcpy(cmd + strlen(cmd), newpath, MAX_CMD_LEN - strlen(cmd));
-					strcat(cmd, "\' > /dev/null 2>&1");
-					r = system(cmd);
+					spawn(fb_opener, newpath, NULL, NULL, 4);
 					continue;
 				}
 
@@ -1921,7 +1922,7 @@ nochange:
 				goto nochange;
 			}
 
-			spawn(desktop_manager, path, path, 2);
+			spawn(desktop_manager, path, NULL, path, 2);
 			break;
 		case SEL_FSIZE:
 			sizeorder = !sizeorder;
@@ -1964,7 +1965,7 @@ nochange:
 				else
 					snprintf(newpath, PATH_MAX, "%s/%s",
 						 path, dents[cur].name);
-				spawn(copier, newpath, NULL, 0);
+				spawn(copier, newpath, NULL, NULL, 0);
 				printmsg(newpath);
 			} else if (!copier)
 					printmsg("NNN_COPIER is not set");
@@ -1977,14 +1978,14 @@ nochange:
 		case SEL_RUN:
 			run = xgetenv(env, run);
 			exitcurses();
-			spawn(run, NULL, path, 1);
+			spawn(run, NULL, NULL, path, 1);
 			initcurses();
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_RUNARG:
 			run = xgetenv(env, run);
 			exitcurses();
-			spawn(run, dents[cur].name, path, 0);
+			spawn(run, dents[cur].name, NULL, path, 0);
 			initcurses();
 			break;
 		}
@@ -1992,7 +1993,7 @@ nochange:
 		if (idletimeout != 0 && idle == idletimeout) {
 			idle = 0;
 			exitcurses();
-			spawn(idlecmd, NULL, NULL, 0);
+			spawn(idlecmd, NULL, NULL, NULL, 0);
 			initcurses();
 		}
 	}
@@ -2045,10 +2046,6 @@ main(int argc, char *argv[])
 			break;
 		case 'p':
 			player = optarg;
-			if (strlen(player) > 512) {
-				fprintf(stderr, "path to player must be <= 512 characters\n");
-				exit(1);
-			}
 			break;
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
