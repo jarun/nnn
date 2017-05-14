@@ -151,7 +151,9 @@ static off_t blk_size;
 static size_t fs_free;
 static int open_max;
 static const double div_2_pow_10 = 1.0 / 1024.0;
-static const char *size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
+
+/* For use in functions which are isolated and don't return the buffer */
+static char g_buf[MAX_CMD_LEN];
 
 /*
  * Layout:
@@ -445,7 +447,6 @@ getmime(char *file)
 static int
 setfilter(regex_t *regex, char *filter)
 {
-	static char errbuf[LINE_MAX];
 	static size_t len;
 	static int r;
 
@@ -454,8 +455,8 @@ setfilter(regex_t *regex, char *filter)
 		len = COLS;
 		if (len > LINE_MAX)
 			len = LINE_MAX;
-		regerror(r, regex, errbuf, len);
-		printmsg(errbuf);
+		regerror(r, regex, g_buf, len);
+		printmsg(g_buf);
 	}
 	return r;
 }
@@ -813,7 +814,6 @@ static void
 printent(struct entry *ent, int active)
 {
 	static int ncols;
-	static char str[PATH_MAX + 16];
 
 	if (COLS > PATH_MAX + 16)
 		ncols = PATH_MAX + 16;
@@ -821,25 +821,25 @@ printent(struct entry *ent, int active)
 		ncols = COLS;
 
 	if (S_ISDIR(ent->mode))
-		snprintf(str, ncols, "%s%s/", CURSYM(active),
+		snprintf(g_buf, ncols, "%s%s/", CURSYM(active),
 			 replace_escape(ent->name));
 	else if (S_ISLNK(ent->mode))
-		snprintf(str, ncols, "%s%s@", CURSYM(active),
+		snprintf(g_buf, ncols, "%s%s@", CURSYM(active),
 			 replace_escape(ent->name));
 	else if (S_ISSOCK(ent->mode))
-		snprintf(str, ncols, "%s%s=", CURSYM(active),
+		snprintf(g_buf, ncols, "%s%s=", CURSYM(active),
 			 replace_escape(ent->name));
 	else if (S_ISFIFO(ent->mode))
-		snprintf(str, ncols, "%s%s|", CURSYM(active),
+		snprintf(g_buf, ncols, "%s%s|", CURSYM(active),
 			 replace_escape(ent->name));
 	else if (ent->mode & S_IXUSR)
-		snprintf(str, ncols, "%s%s*", CURSYM(active),
+		snprintf(g_buf, ncols, "%s%s*", CURSYM(active),
 			 replace_escape(ent->name));
 	else
-		snprintf(str, ncols, "%s%s", CURSYM(active),
+		snprintf(g_buf, ncols, "%s%s", CURSYM(active),
 			 replace_escape(ent->name));
 
-	printw("%s\n", str);
+	printw("%s\n", g_buf);
 }
 
 static void (*printptr)(struct entry *ent, int active) = &printent;
@@ -847,6 +847,7 @@ static void (*printptr)(struct entry *ent, int active) = &printent;
 static char*
 coolsize(off_t size)
 {
+	static const char *size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 	static char size_buf[12]; /* Buffer to hold human readable size */
 	static int i;
 	static off_t fsize, tmp;
@@ -872,7 +873,6 @@ static void
 printent_long(struct entry *ent, int active)
 {
 	static int ncols;
-	static char str[PATH_MAX + 32];
 	static char buf[18];
 
 	if (COLS > PATH_MAX + 32)
@@ -887,67 +887,67 @@ printent_long(struct entry *ent, int active)
 
 	if (!bsizeorder) {
 		if (S_ISDIR(ent->mode))
-			snprintf(str, ncols, "%s%-16.16s        /  %s/",
+			snprintf(g_buf, ncols, "%s%-16.16s        /  %s/",
 				 CURSYM(active), buf, replace_escape(ent->name));
 		else if (S_ISLNK(ent->mode))
-			snprintf(str, ncols, "%s%-16.16s        @  %s@",
+			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@",
 				 CURSYM(active), buf, replace_escape(ent->name));
 		else if (S_ISSOCK(ent->mode))
-			snprintf(str, ncols, "%s%-16.16s        =  %s=",
+			snprintf(g_buf, ncols, "%s%-16.16s        =  %s=",
 				 CURSYM(active), buf, replace_escape(ent->name));
 		else if (S_ISFIFO(ent->mode))
-			snprintf(str, ncols, "%s%-16.16s        |  %s|",
+			snprintf(g_buf, ncols, "%s%-16.16s        |  %s|",
 				 CURSYM(active), buf, replace_escape(ent->name));
 		else if (S_ISBLK(ent->mode))
-			snprintf(str, ncols, "%s%-16.16s        b  %s",
+			snprintf(g_buf, ncols, "%s%-16.16s        b  %s",
 				 CURSYM(active), buf, replace_escape(ent->name));
 		else if (S_ISCHR(ent->mode))
-			snprintf(str, ncols, "%s%-16.16s        c  %s",
+			snprintf(g_buf, ncols, "%s%-16.16s        c  %s",
 				 CURSYM(active), buf, replace_escape(ent->name));
 		else if (ent->mode & S_IXUSR)
-			snprintf(str, ncols, "%s%-16.16s %8.8s* %s*",
+			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*",
 				 CURSYM(active), buf, coolsize(ent->size),
 				 replace_escape(ent->name));
 		else
-			snprintf(str, ncols, "%s%-16.16s %8.8s  %s",
+			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s",
 				 CURSYM(active), buf, coolsize(ent->size),
 				 replace_escape(ent->name));
 	} else {
 		if (S_ISDIR(ent->mode))
-			snprintf(str, ncols, "%s%-16.16s %8.8s/ %s/",
+			snprintf(g_buf, ncols, "%s%-16.16s %8.8s/ %s/",
 				 CURSYM(active), buf, coolsize(ent->bsize << 9),
 				 replace_escape(ent->name));
 		else if (S_ISLNK(ent->mode))
-			snprintf(str, ncols, "%s%-16.16s        @  %s@",
+			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@",
 				 CURSYM(active), buf,
 				 replace_escape(ent->name));
 		else if (S_ISSOCK(ent->mode))
-			snprintf(str, ncols, "%s%-16.16s        =  %s=",
+			snprintf(g_buf, ncols, "%s%-16.16s        =  %s=",
 				 CURSYM(active), buf,
 				 replace_escape(ent->name));
 		else if (S_ISFIFO(ent->mode))
-			snprintf(str, ncols, "%s%-16.16s        |  %s|",
+			snprintf(g_buf, ncols, "%s%-16.16s        |  %s|",
 				 CURSYM(active), buf,
 				 replace_escape(ent->name));
 		else if (S_ISBLK(ent->mode))
-			snprintf(str, ncols, "%s%-16.16s        b  %s",
+			snprintf(g_buf, ncols, "%s%-16.16s        b  %s",
 				 CURSYM(active), buf,
 				 replace_escape(ent->name));
 		else if (S_ISCHR(ent->mode))
-			snprintf(str, ncols, "%s%-16.16s        c  %s",
+			snprintf(g_buf, ncols, "%s%-16.16s        c  %s",
 				 CURSYM(active), buf,
 				 replace_escape(ent->name));
 		else if (ent->mode & S_IXUSR)
-			snprintf(str, ncols, "%s%-16.16s %8.8s* %s*",
+			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*",
 				 CURSYM(active), buf, coolsize(ent->bsize << 9),
 				 replace_escape(ent->name));
 		else
-			snprintf(str, ncols, "%s%-16.16s %8.8s  %s",
+			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s",
 				 CURSYM(active), buf, coolsize(ent->bsize << 9),
 				 replace_escape(ent->name));
 	}
 
-	printw("%s\n", str);
+	printw("%s\n", g_buf);
 
 	if (active)
 		attroff(A_REVERSE);
@@ -1048,9 +1048,8 @@ get_output(char *buf, size_t bytes)
 static int
 show_stats(char* fpath, char* fname, struct stat *sb)
 {
-	char buf[PATH_MAX + 16];
-	char *perms = get_lsperms(sb->st_mode, buf);
-	char *p, *begin = buf;
+	char *perms = get_lsperms(sb->st_mode, g_buf);
+	char *p, *begin = g_buf;
 
 	char tmp[] = "/tmp/nnnXXXXXX";
 	int fd = mkstemp(tmp);
@@ -1076,17 +1075,17 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 #else
 	dprintf(fd, "\n    Size: %-15ld Blocks: %-10ld IO Block: %-6ld %s",
 #endif
-	       sb->st_size, sb->st_blocks, sb->st_blksize, buf);
+	       sb->st_size, sb->st_blocks, sb->st_blksize, g_buf);
 
 	/* Show containing device, inode, hardlink count */
 #ifdef __APPLE__
-	sprintf(buf, "%xh/%ud", sb->st_dev, sb->st_dev);
+	sprintf(g_buf, "%xh/%ud", sb->st_dev, sb->st_dev);
 	dprintf(fd, "\n  Device: %-15s Inode: %-11llu Links: %-9hu",
 #else
-	sprintf(buf, "%lxh/%lud", sb->st_dev, sb->st_dev);
+	sprintf(g_buf, "%lxh/%lud", sb->st_dev, sb->st_dev);
 	dprintf(fd, "\n  Device: %-15s Inode: %-11lu Links: %-9lu",
 #endif
-	       buf, sb->st_ino, sb->st_nlink);
+	       g_buf, sb->st_ino, sb->st_nlink);
 
 	/* Show major, minor number for block or char device */
 	if (perms[0] == 'b' || perms[0] == 'c')
@@ -1101,21 +1100,21 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	       sb->st_gid, (getgrgid(sb->st_gid))->gr_name);
 
 	/* Show last access time */
-	strftime(buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_atime));
-	dprintf(fd, "\n\n  Access: %s", buf);
+	strftime(g_buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_atime));
+	dprintf(fd, "\n\n  Access: %s", g_buf);
 
 	/* Show last modification time */
-	strftime(buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_mtime));
-	dprintf(fd, "\n  Modify: %s", buf);
+	strftime(g_buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_mtime));
+	dprintf(fd, "\n  Modify: %s", g_buf);
 
 	/* Show last status change time */
-	strftime(buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_ctime));
-	dprintf(fd, "\n  Change: %s", buf);
+	strftime(g_buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_ctime));
+	dprintf(fd, "\n  Change: %s", g_buf);
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
-		sprintf(buf, "file -b \'%s\' 2>&1", fpath);
-		p = get_output(buf, sizeof(buf));
+		sprintf(g_buf, "file -b \'%s\' 2>&1", fpath);
+		p = get_output(g_buf, sizeof(g_buf));
 		if (p) {
 			dprintf(fd, "\n\n ");
 			while (*p) {
@@ -1134,8 +1133,8 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	dprintf(fd, "\n\n");
 	close(fd);
 
-	sprintf(buf, "cat %s | less", tmp);
-	fd = system(buf);
+	sprintf(g_buf, "cat %s | less", tmp);
+	fd = system(g_buf);
 
 	unlink(tmp);
 	return fd;
@@ -1144,25 +1143,23 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 static int
 show_mediainfo(const char* fpath, int full)
 {
-	static char buf[MAX_CMD_LEN];
-
-	strcpy(buf, "which mediainfo");
-	if (get_output(buf, MAX_CMD_LEN) == NULL)
+	strcpy(g_buf, "which mediainfo");
+	if (get_output(g_buf, MAX_CMD_LEN) == NULL)
 		return -1;
 
-	sprintf(buf, "mediainfo \'%s\' ", fpath);
+	sprintf(g_buf, "mediainfo \'%s\' ", fpath);
 	if (full)
-		strcat(buf, "-f 2>&1 | less");
+		strcat(g_buf, "-f 2>&1 | less");
 	else
-		strcat(buf, "2>&1 | less");
+		strcat(g_buf, "2>&1 | less");
 
-	return system(buf);
+	return system(g_buf);
 }
 
 static int
 show_help(void)
 {
-	char helpstr[] = ("echo \"\
+	static char helpstr[] = ("echo \"\
                   Key | Function\n\
                      -+-\n\
             Up, k, ^P | Previous entry\n\
@@ -1574,8 +1571,6 @@ nochange:
 				goto begin;
 			case S_IFREG:
 			{
-				static char cmd[MAX_CMD_LEN];
-
 				/* If NNN_OPENER is set, use it */
 				if (opener) {
 					spawn(opener, newpath, NULL, NULL, 4);
@@ -1596,11 +1591,11 @@ nochange:
 
 				/* If nlay doesn't handle it, open plain text
 				   files with vi, then try NNN_FALLBACK_OPENER */
-				sprintf(cmd, "file -bi \'%s\'", newpath);
-				if (get_output(cmd, MAX_CMD_LEN) == NULL)
+				sprintf(g_buf, "file -bi \'%s\'", newpath);
+				if (get_output(g_buf, MAX_CMD_LEN) == NULL)
 					continue;
 
-				if (strstr(cmd, "text/") == cmd) {
+				if (strstr(g_buf, "text/") == g_buf) {
 					exitcurses();
 					run = xgetenv("EDITOR", "vi");
 					spawn(run, newpath, NULL, NULL, 0);
