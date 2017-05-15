@@ -1027,11 +1027,16 @@ get_lsperms(mode_t mode, char *desc)
 	return(bits);
 }
 
-/* Gets only a single line, that's what we need for now */
+/*
+ * Gets only a single line (that's what we need
+ * for now) or shows full command output in pager.
+ *
+ * If pager is valid, returns NULL
+ */
 static char *
-get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2)
+get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int pager)
 {
-	pid_t pid = 0;
+	pid_t pid;
 	int pipefd[2];
 	FILE* pf;
 	int status;
@@ -1041,7 +1046,6 @@ get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2)
 		printerr(1, "pipe(2)");
 
 	pid = fork();
-
 	if (pid == 0) {
 		/* In child */
 		close(pipefd[0]);
@@ -1052,15 +1056,30 @@ get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2)
 	}
 
 	/* In parent */
+	waitpid(pid, &status, 0);
 	close(pipefd[1]);
-	if ((pf = fdopen(pipefd[0], "r"))) {
-		ret = fgets(buf, bytes, pf);
-		close(pipefd[0]);
+	if (!pager) {
+		if ((pf = fdopen(pipefd[0], "r"))) {
+			ret = fgets(buf, bytes, pf);
+			close(pipefd[0]);
+		}
+
+		return ret;
 	}
 
+	pid = fork();
+	if (pid == 0) {
+		/* Show in pager in child */
+		dup2(pipefd[0], STDIN_FILENO);
+		execlp("less", "less", NULL);
+		close(pipefd[0]);
+		_exit(1);
+	}
+
+	/* In parent */
 	waitpid(pid, &status, 0);
 
-	return ret;
+	return NULL;
 }
 
 /*
@@ -1135,7 +1154,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
-		p = get_output(g_buf, MAX_CMD_LEN, "file", "-b", fpath);
+		p = get_output(g_buf, MAX_CMD_LEN, "file", "-b", fpath, 0);
 		if (p) {
 			dprintf(fd, "\n\n ");
 			while (*p) {
@@ -1149,32 +1168,29 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 			}
 			dprintf(fd, " %s", begin);
 		}
-	}
 
-	dprintf(fd, "\n\n");
+		dprintf(fd, "\n\n");
+	} else
+		dprintf(fd, "\n\n\n");
+
 	close(fd);
 
-	sprintf(g_buf, "cat %s | less", tmp);
-	fd = system(g_buf);
-
+	get_output(NULL, 0, "cat", tmp, NULL, 1);
 	unlink(tmp);
-	return fd;
+	return 0;
 }
 
 static int
-show_mediainfo(const char* fpath, int full)
+show_mediainfo(char* fpath, char *arg)
 {
-	strcpy(g_buf, "which mediainfo");
-	if (get_output(g_buf, MAX_CMD_LEN, "which", "mediainfo", NULL) == NULL)
+	if (get_output(g_buf, MAX_CMD_LEN, "which", "mediainfo", NULL, 0) == NULL)
 		return -1;
 
-	sprintf(g_buf, "mediainfo \'%s\' ", fpath);
-	if (full)
-		strcat(g_buf, "-f 2>&1 | less");
-	else
-		strcat(g_buf, "2>&1 | less");
+	exitcurses();
+	get_output(NULL, 0, "mediainfo", fpath, arg, 1);
+	initcurses();
 
-	return system(g_buf);
+	return 0;
 }
 
 static int
@@ -1612,7 +1628,8 @@ nochange:
 
 				/* If nlay doesn't handle it, open plain text
 				   files with vi, then try NNN_FALLBACK_OPENER */
-				if (get_output(g_buf, MAX_CMD_LEN, "file", "-bi", newpath) == NULL)
+				if (get_output(g_buf, MAX_CMD_LEN, "file", "-bi",
+					       newpath, 0) == NULL)
 					continue;
 
 				if (strstr(g_buf, "text/") == g_buf) {
@@ -1881,48 +1898,45 @@ nochange:
 		{
 			struct stat sb;
 
-			if (ndents > 0)
+			if (ndents > 0) {
 				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 
-			r = lstat(oldpath, &sb);
-			if (r == -1) {
-				if (dents)
-					dentfree(dents);
-				printerr(1, "lstat");
-			} else {
-				exitcurses();
-				r = show_stats(oldpath, dents[cur].name, &sb);
-				initcurses();
-				if (r < 0) {
-					printmsg(strerror(errno));
-					goto nochange;
+				r = lstat(oldpath, &sb);
+				if (r == -1) {
+					if (dents)
+						dentfree(dents);
+					printerr(1, "lstat");
+				} else {
+					exitcurses();
+					r = show_stats(oldpath, dents[cur].name, &sb);
+					initcurses();
+					if (r < 0) {
+						printmsg(strerror(errno));
+						goto nochange;
+					}
 				}
 			}
 
 			break;
 		}
 		case SEL_MEDIA:
-			if (ndents > 0)
+			if (ndents > 0) {
 				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 
-			exitcurses();
-			r = show_mediainfo(oldpath, FALSE);
-			initcurses();
-			if (r < 0) {
-				printmsg("mediainfo missing");
-				goto nochange;
+				if(show_mediainfo(oldpath, NULL) == -1) {
+					printmsg("mediainfo missing");
+					goto nochange;
+				}
 			}
 			break;
 		case SEL_FMEDIA:
-			if (ndents > 0)
+			if (ndents > 0) {
 				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 
-			exitcurses();
-			r = show_mediainfo(oldpath, TRUE);
-			initcurses();
-			if (r < 0) {
-				printmsg("mediainfo missing");
-				goto nochange;
+				if(show_mediainfo(oldpath, "-f") == -1) {
+					printmsg("mediainfo missing");
+					goto nochange;
+				}
 			}
 			break;
 		case SEL_DFB:
