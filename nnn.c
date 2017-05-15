@@ -1029,17 +1029,38 @@ get_lsperms(mode_t mode, char *desc)
 
 /* Gets only a single line, that's what we need for now */
 static char *
-get_output(char *buf, size_t bytes)
+get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2)
 {
-	char *ret;
-	FILE *pf = popen(buf, "r");
-	if (pf) {
-		ret = fgets(buf, bytes, pf);
-		pclose(pf);
-		return ret;
+	pid_t pid = 0;
+	int pipefd[2];
+	FILE* pf;
+	int status;
+	char *ret = NULL;
+
+	if (pipe(pipefd) == -1)
+		printerr(1, "pipe(2)");
+
+	pid = fork();
+
+	if (pid == 0) {
+		/* In child */
+		close(pipefd[0]);
+		dup2(pipefd[1], STDOUT_FILENO);
+		dup2(pipefd[1], STDERR_FILENO);
+		execlp(file, file, arg1, arg2, NULL);
+		_exit(1);
 	}
 
-	return NULL;
+	/* In parent */
+	close(pipefd[1]);
+	if ((pf = fdopen(pipefd[0], "r"))) {
+		ret = fgets(buf, bytes, pf);
+		close(pipefd[0]);
+	}
+
+	waitpid(pid, &status, 0);
+
+	return ret;
 }
 
 /*
@@ -1113,8 +1134,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
-		sprintf(g_buf, "file -b \'%s\' 2>&1", fpath);
-		p = get_output(g_buf, sizeof(g_buf));
+		p = get_output(g_buf, MAX_CMD_LEN, "file", "-b", fpath);
 		if (p) {
 			dprintf(fd, "\n\n ");
 			while (*p) {
@@ -1144,7 +1164,7 @@ static int
 show_mediainfo(const char* fpath, int full)
 {
 	strcpy(g_buf, "which mediainfo");
-	if (get_output(g_buf, MAX_CMD_LEN) == NULL)
+	if (get_output(g_buf, MAX_CMD_LEN, "which", "mediainfo", NULL) == NULL)
 		return -1;
 
 	sprintf(g_buf, "mediainfo \'%s\' ", fpath);
@@ -1591,8 +1611,7 @@ nochange:
 
 				/* If nlay doesn't handle it, open plain text
 				   files with vi, then try NNN_FALLBACK_OPENER */
-				sprintf(g_buf, "file -bi \'%s\'", newpath);
-				if (get_output(g_buf, MAX_CMD_LEN) == NULL)
+				if (get_output(g_buf, MAX_CMD_LEN, "file", "-bi", newpath) == NULL)
 					continue;
 
 				if (strstr(g_buf, "text/") == g_buf) {
