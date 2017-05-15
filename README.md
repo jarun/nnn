@@ -57,22 +57,30 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 
 ### Features
 
-- Super-easy navigation with roll-over at edges
-- Jump HOME or back to the last visited directory (as usual!)
-- Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
-- Filter directory contents with search-as-you-type
-- Desktop opener integration to handle mime types
-- Customizable bash script nlay to handle known file types
+- Navigation
+  - Familiar shortcuts
+  - Jump HOME or to the last visited directory (as usual!)
+  - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
+  - Roll-over at edges, page through entries
 - Disk usage analyzer mode
-- Basic and detail view (with stat and file information)
-- Show media information (needs mediainfo)
-- Sort by modification time, size
-- Sort numeric names in numeric order (1, 2, ... 10, 11, ...)
-- Spawn a shell in the current directory
-- Invoke file path copier (*easy* shell integration)
-- Quit and change directory (*easy* shell integration)
-- Open any file in EDITOR (fallback vi) or PAGER (fallback less)
-- VIM-ish keybinds
+- Search
+  - Filter directory contents with search-as-you-type
+  - Desktop search (default catfish, customizable) integration
+- Mimes
+  - Desktop opener integration
+  - Customizable bash script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) to handle media type or action
+- Information
+  - Basic and detail view
+  - Detailed file information
+  - Media information (needs mediainfo)
+- Ordering
+  - Numeric order (1, 2, ... 10, 11, ...) for numeric names
+  - Sort by modification time, size
+- Convenience
+  - Spawn a shell in the current directory
+  - Invoke file path copier (*easy* shell integration)
+  - Change directory at exit (*easy* shell integration)
+  - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
 - Unicode support
 
 ### Performance
