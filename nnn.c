@@ -1079,13 +1079,14 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 
 	/* Show file name or 'symlink' -> 'target' */
 	if (perms[0] == 'l') {
-		char symtgt[PATH_MAX];
-		ssize_t len = readlink(fpath, symtgt, PATH_MAX);
+		/* Note that MAX_CMD_LEN > PATH_MAX */
+		ssize_t len = readlink(fpath, g_buf, MAX_CMD_LEN);
 		if (len != -1) {
-			symtgt[len] = '\0';
-			dprintf(fd, "    File: '%s' -> '%s'",
-				replace_escape(fname),
-				replace_escape(symtgt));
+			g_buf[len] = '\0';
+			dprintf(fd, "    File: '%s' -> ",
+				replace_escape(fname));
+			dprintf(fd, "'%s'",
+				replace_escape(g_buf));
 		}
 	} else
 		dprintf(fd, "    File: '%s'", replace_escape(fname));
