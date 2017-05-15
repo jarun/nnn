@@ -35,6 +35,8 @@ static struct key bindings[] = {
 	{ 'l',            SEL_GOIN,      "",     "" },
 	/* Filter */
 	{ '/',            SEL_FLTR,      "",     "" },
+	/* Desktop search */
+	{ CONTROL('_'),   SEL_SEARCH,    "",     "" },
 	/* Next */
 	{ 'j',            SEL_NEXT,      "",     "" },
 	{ KEY_DOWN,       SEL_NEXT,      "",     "" },

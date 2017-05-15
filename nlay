@@ -120,3 +120,14 @@ if [ "$2" == "text" ]; then
     eval $app $txt_opts "\"$1\"" $bg
     exit 0
 fi
+
+#----------------- SEARCH -------------------
+if [ "$2" == "search" ]; then
+    app=catfish
+    #search_opts=
+
+    bg=">/dev/null 2>&1 &"
+
+    eval $app $search_opts "\"$1\"" $bg
+    exit 0
+fi

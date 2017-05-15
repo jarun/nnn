@@ -84,6 +84,7 @@ enum action {
 	SEL_BACK,
 	SEL_GOIN,
 	SEL_FLTR,
+	SEL_SEARCH,
 	SEL_NEXT,
 	SEL_PREV,
 	SEL_PGDN,
@@ -1212,6 +1213,7 @@ show_help(void)
                     - | Jump to last visited dir\n\
                     o | Open dir in NNN_DE_FILE_MANAGER\n\
                     / | Filter dir contents\n\
+		   ^/ | Search dir in catfish\n\
                     c | Show change dir prompt\n\
                     d | Toggle detail view\n\
                     D | Toggle current file details screen\n\
@@ -1658,6 +1660,14 @@ nochange:
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 			goto nochange;
+		case SEL_SEARCH:
+			exitcurses();
+			if (player)
+				spawn(player, path, "search", NULL, 0);
+			else
+				spawn("nlay", path, "search", NULL, 0);
+			initcurses();
+			break;
 		case SEL_NEXT:
 			if (cur < ndents - 1)
 				cur++;

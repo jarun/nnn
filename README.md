@@ -146,6 +146,7 @@ Right, Enter, l, ^M | Open file or enter dir
                   - | Jump to last visited dir
                   o | Open dir in NNN_DE_FILE_MANAGER
                   / | Filter dir contents
+                 ^/ | Search dir in catfish
                   c | Show change dir prompt
                   d | Toggle detail view
                   D | Toggle current file details screen
@@ -200,11 +201,12 @@ nnn is designed to play files using multiple strategies (in order of decreasing 
         export NNN_OPENER=xdg-open
         export NNN_OPENER="gio open"
         export NNN_OPENER=gvfs-open
-  - If nnn recognizes the file extension, it invokes nlay (which invokes the players). Default players:
+  - If nnn recognizes the file extension, it invokes nlay (which invokes the players). Default apps:
     - mpv - audio and video
     - viewnior - image
     - [zathura](https://pwmt.org/projects/zathura/) - pdf
     - vim - plain text
+    - catfish - search
     - to add, remove recognized extensions in nnn, see [how to change file associations](#change-file-associations)
   - If a file without any extension is a plain text file, it is opened in EDITOR (fallback vi)
   - Set `NNN_FALLBACK_OPENER` as the fallback opener. E.g.:
