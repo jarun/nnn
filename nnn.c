@@ -2035,7 +2035,7 @@ nochange:
 static void
 usage(void)
 {
-	fprintf(stdout, "usage: nnn [-d] [-S] [-v] [h] [PATH]\n\n\
+	fprintf(stdout, "usage: nnn [-d] [-p custom_nlay] [-S] [-v] [-h] [PATH]\n\n\
 The missing terminal file browser for X.\n\n\
 positional arguments:\n\
   PATH           directory to open [default: current dir]\n\n\
