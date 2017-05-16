@@ -378,15 +378,31 @@ xgetenv(char *name, char *fallback)
  * If the absolute numeric values are same, we fallback to alphasort.
  */
 static int
-xstricmp(const char *s1, const char *s2)
+xstricmp(char *s1, char *s2)
 {
 	static char *c1, *c2;
-	static long long num1, num2;
 
-	num1 = strtoll(s1, &c1, 10);
-	num2 = strtoll(s2, &c2, 10);
+	c1 = s1;
+	while (isspace(*c1))
+		c1++;
+	if (*c1 == '-' || *c1 == '+')
+		c1++;
+	while(*c1 >= '0' && *c1 <= '9')
+		c1++;
+
+	c2 = s2;
+	while (isspace(*c2))
+		c2++;
+	if (*c2 == '-' || *c2 == '+')
+		c2++;
+	while(*c2 >= '0' && *c2 <= '9')
+		c2++;
 
 	if (*c1 == '\0' && *c2 == '\0') {
+		static long long num1, num2;
+
+		num1 = strtoll(s1, &c1, 10);
+		num2 = strtoll(s2, &c2, 10);
 		if (num1 != num2) {
 			if (num1 > num2)
 				return 1;
