@@ -2082,9 +2082,6 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if (argc > 3)
-		usage();
-
 	while ((opt = getopt(argc, argv, "dSp:vh")) != -1) {
 		switch (opt) {
 		case 'S':
