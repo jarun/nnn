@@ -205,8 +205,9 @@ max_openfds()
 static void
 xstrlcpy(char *dest, const char *src, size_t n)
 {
-	strncpy(dest, src, n - 1);
-	dest[n - 1] = '\0';
+	while (--n && (*dest++ = *src++));
+	if (!n)
+		*dest = '\0';
 }
 
 /*
