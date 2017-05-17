@@ -620,44 +620,47 @@ nextsel(char **run, char **env, int *ch)
 	return 0;
 }
 
-static int
+/*
+ * Move non-matching entries to the end
+ */
+static void
 fill(struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
 {
-	static struct entry _dent;
-	static int count, n;
+	static int count;
 
-	for (count = 0, n = 0; count < ndents; count++) {
-		if (filter(re, (*dents)[count].name) == 0)
+	for (count = 0; count < ndents; count++) {
+		if (filter(re, (*dents)[count].name) == 0) {
+			if (count != --ndents) {
+				static struct entry _dent;
+
+				/* Copy count to tmp */
+				xstrlcpy(_dent.name, (*dents)[count].name, NAME_MAX);
+				_dent.mode = (*dents)[count].mode;
+				_dent.t = (*dents)[count].t;
+				_dent.size = (*dents)[count].size;
+				_dent.bsize = (*dents)[count].bsize;
+
+				/* Copy ndents - 1 to count */
+				xstrlcpy((*dents)[count].name, (*dents)[ndents].name, NAME_MAX);
+				(*dents)[count].mode = (*dents)[ndents].mode;
+				(*dents)[count].t = (*dents)[ndents].t;
+				(*dents)[count].size = (*dents)[ndents].size;
+				(*dents)[count].bsize = (*dents)[ndents].bsize;
+
+				/* Copy tmp to ndents - 1 */
+				xstrlcpy((*dents)[ndents].name, _dent.name, NAME_MAX);
+				(*dents)[ndents].mode = _dent.mode;
+				(*dents)[ndents].t = _dent.t;
+				(*dents)[ndents].size = _dent.size;
+				(*dents)[ndents].bsize = _dent.bsize;
+
+				count--;
+			}
+
 			continue;
-
-		if (n != count) {
-			/* Copy to tmp */
-			xstrlcpy(_dent.name, (*dents)[n].name, NAME_MAX);
-			_dent.mode = (*dents)[n].mode;
-			_dent.t = (*dents)[n].t;
-			_dent.size = (*dents)[n].size;
-			_dent.bsize = (*dents)[n].bsize;
-
-			/* Copy count to n */
-			xstrlcpy((*dents)[n].name, (*dents)[count].name, NAME_MAX);
-			(*dents)[n].mode = (*dents)[count].mode;
-			(*dents)[n].t = (*dents)[count].t;
-			(*dents)[n].size = (*dents)[count].size;
-			(*dents)[n].bsize = (*dents)[count].bsize;
-
-			/* Copy tmp to count */
-			xstrlcpy((*dents)[count].name, _dent.name, NAME_MAX);
-			(*dents)[count].mode = _dent.mode;
-			(*dents)[count].t = _dent.t;
-			(*dents)[count].size = _dent.size;
-			(*dents)[count].bsize = _dent.bsize;
 		}
-
-		n++;
 	}
-
-	return n;
 }
 
 static int
@@ -669,7 +672,7 @@ matches(char *fltr)
 	if (setfilter(&re, fltr) != 0)
 		return -1;
 
-	ndents = fill(&dents, visible, &re);
+	fill(&dents, visible, &re);
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
 
 	return 0;
