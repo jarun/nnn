@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <grp.h>
+#include <libgen.h>
 #include <limits.h>
 #ifdef __gnu_hurd__
 #define PATH_MAX 4096
@@ -176,7 +177,6 @@ static char g_buf[MAX_CMD_LEN];
 static void printmsg(char *);
 static void printwarn(void);
 static void printerr(int, char *);
-static int dentfind(struct entry *dents, int n, char *path);
 static void redraw(char *path);
 
 static rlim_t
@@ -225,7 +225,7 @@ xmemrchr(const void *s, int c, size_t n)
 
 	p = (unsigned char *)s + n - 1;
 
-	while(n--)
+	while (n--)
 		if ((*p--) == ch)
 			return ++p;
 
@@ -388,7 +388,7 @@ xstricmp(char *s1, char *s2)
 		c1++;
 	if (*c1 == '-' || *c1 == '+')
 		c1++;
-	while(*c1 >= '0' && *c1 <= '9')
+	while (*c1 >= '0' && *c1 <= '9')
 		c1++;
 
 	c2 = s2;
@@ -617,6 +617,7 @@ nextsel(char **run, char **env, int *ch)
 			*env = bindings[i].env;
 			return bindings[i].act;
 		}
+
 	return 0;
 }
 
@@ -871,22 +872,20 @@ coolsize(off_t size)
 	static const char *size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 	static char size_buf[12]; /* Buffer to hold human readable size */
 	static int i;
-	static off_t fsize, tmp;
+	static off_t tmp;
 	static long double rem;
 
 	i = 0;
-	fsize = size;
 	rem = 0;
 
-	while (fsize > 1024) {
-		tmp = fsize;
-		//fsize *= div_2_pow_10;
-		fsize >>= 10;
-		rem = tmp - (fsize << 10);
+	while (size > 1024) {
+		tmp = size;
+		size >>= 10;
+		rem = tmp - (size << 10);
 		i++;
 	}
 
-	snprintf(size_buf, 12, "%.*Lf%s", i, fsize + rem * div_2_pow_10, size_units[i]);
+	snprintf(size_buf, 12, "%.*Lf%s", i, size + rem * div_2_pow_10, size_units[i]);
 	return size_buf;
 }
 
@@ -1259,7 +1258,7 @@ show_help(void)
 static int
 sum_bsizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
-	if(typeflag == FTW_F || typeflag == FTW_D)
+	if (typeflag == FTW_F || typeflag == FTW_D)
 		blk_size += sb->st_blocks;
 
 	return 0;
@@ -1306,9 +1305,8 @@ dentfill(char *path, struct entry **dents,
 	static DIR *dirp;
 	static struct dirent *dp;
 	static struct stat sb;
-	static struct statvfs svb;
-	static int r, n;
-	r = n = 0;
+	static int n;
+	n = 0;
 
 	dirp = opendir(path);
 	if (dirp == NULL)
@@ -1333,8 +1331,7 @@ dentfill(char *path, struct entry **dents,
 		xstrlcpy((*dents)[n].name, dp->d_name, NAME_MAX);
 		/* Get mode flags */
 		mkpath(path, dp->d_name, newpath, PATH_MAX);
-		r = lstat(newpath, &sb);
-		if (r == -1) {
+		if (lstat(newpath, &sb) == -1) {
 			if (*dents)
 				free(*dents);
 			printerr(1, "lstat");
@@ -1359,20 +1356,20 @@ dentfill(char *path, struct entry **dents,
 	}
 
 	if (bsizeorder) {
-		r = statvfs(path, &svb);
-		if (r == -1)
+		static struct statvfs svb;
+		if (statvfs(path, &svb) == -1)
 			fs_free = 0;
 		else
 			fs_free = svb.f_bavail << getorder(svb.f_bsize);
 	}
 
 	/* Should never be null */
-	r = closedir(dirp);
-	if (r == -1) {
+	if (closedir(dirp) == -1) {
 		if (*dents)
 			free(*dents);
 		printerr(1, "closedir");
 	}
+
 	return n;
 }
 
@@ -1392,14 +1389,7 @@ dentfind(struct entry *dents, int n, char *path)
 	static int i;
 	static char *p;
 
-	p = xmemrchr(path, '/', strlen(path));
-	if (!p)
-		p = path;
-	else
-		/* We are assuming an entry with actual
-		   name ending in '/' will not appear */
-		p++;
-
+	p = basename(path);
 	DPRINTF_S(p);
 
 	for (i = 0; i < n; i++)
@@ -1413,15 +1403,13 @@ static int
 populate(char *path, char *oldpath, char *fltr)
 {
 	static regex_t re;
-	static int r;
 
 	/* Can fail when permissions change while browsing */
 	if (canopendir(path) == 0)
 		return -1;
 
 	/* Search filter */
-	r = setfilter(&re, fltr);
-	if (r != 0)
+	if (setfilter(&re, fltr) != 0)
 		return -1;
 
 	ndents = dentfill(path, &dents, visible, &re);
@@ -1437,8 +1425,7 @@ static void
 redraw(char *path)
 {
 	static char cwd[PATH_MAX];
-	static int nlines, odd;
-	static int i;
+	static int nlines, i;
 	static size_t ncols;
 
 	nlines = MIN(LINES - 4, ndents);
@@ -1469,7 +1456,6 @@ redraw(char *path)
 	printw(CWD "%s\n\n", cwd);
 
 	/* Print listing */
-	odd = ISODD(nlines);
 	if (cur < (nlines >> 1)) {
 		for (i = 0; i < nlines; i++)
 			printptr(&dents[i], i == cur);
@@ -1477,6 +1463,8 @@ redraw(char *path)
 		for (i = ndents - nlines; i < ndents; i++)
 			printptr(&dents[i], i == cur);
 	} else {
+		static int odd;
+		odd = ISODD(nlines);
 		nlines >>= 1;
 		for (i = cur - nlines; i < cur + nlines + odd; i++)
 			printptr(&dents[i], i == cur);
@@ -1564,17 +1552,19 @@ nochange:
 				fprintf(fp, "cd \"%s\"", path);
 				fclose(fp);
 			}
+
+			/* Fall through to exit */
 		}
 		case SEL_QUIT:
 			dentfree(dents);
 			return;
 		case SEL_BACK:
 			/* There is no going back */
-			if (strcmp(path, "/") == 0 ||
-			    strchr(path, '/') == NULL) {
+			if (path[0] == '/' && path[1] == '\0') {
 				printmsg("You are at /");
 				goto nochange;
 			}
+
 			dir = xdirname(path);
 			if (canopendir(dir) == 0) {
 				printwarn();
