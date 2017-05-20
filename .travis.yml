@@ -1,21 +1,47 @@
 language: c
 sudo: required
-env:
-    matrix:
-        - OS_TYPE=centos OS_VERSION=7
-        - OS_TYPE=fedora OS_VERSION=24
-services:
-    - docker
+matrix:
+  include:
+    # Access more recent gcc and clang via a Trusty image
+    - os: linux
+      dist: trusty
+      compiler: gcc
+    - os: linux
+      dist: trusty
+      compiler: clang
+    - os: osx
+      compiler: gcc
+    - os: osx
+      compiler: clang
+    - os: linux
+      dist: trusty
+      env: USE_DOCKER=1 OS_TYPE=centos OS_VERSION=7
+    - os: linux
+      dist: trusty
+      env: USE_DOCKER=1 OS_TYPE=fedora OS_VERSION=24
 
 before_install:
-    - sudo docker pull $OS_TYPE:$OS_VERSION
+    - if [ "$USE_DOCKER" = "1" ]; then
+          sudo systemctl start docker.service;
+          sudo docker pull $OS_TYPE:$OS_VERSION;
+      fi
 
 script:
-    - ./build-docker $OS_TYPE $OS_VERSION
-    - sudo chown -R $(id -un).$(id -gn) dist
+    - if [ "$USE_DOCKER" = "1" ]; then
+          ./build-docker $OS_TYPE $OS_VERSION;
+          sudo chown -R $(id -un).$(id -gn) dist;
+      else
+          export CFLAGS=-Werror;
+          make clean;
+          make;
+          make clean;
+          make -f Makefile.native;
+      fi
 
 after_success:
-- ls -l dist
+    - if [ "$USE_DOCKER" = "1" ]; then
+          ls -l dist;
+      fi
 
 deploy:
   skip_cleanup: true
@@ -27,6 +53,8 @@ deploy:
     - dist/*.deb
     - dist/*.rpm
   on:
+    condition: $USE_DOCKER = 1
     repo: jarun/nnn
     tags: true
+
 tags: true
