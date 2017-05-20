@@ -22,25 +22,25 @@ matrix:
 
 before_install:
     - if [ "$USE_DOCKER" = "1" ]; then
-          sudo systemctl start docker.service
-          sudo docker pull $OS_TYPE:$OS_VERSION
+          sudo systemctl start docker.service;
+          sudo docker pull $OS_TYPE:$OS_VERSION;
       fi
 
 script:
     - if [ "$USE_DOCKER" = "1" ]; then
-          ./build-docker $OS_TYPE $OS_VERSION
-          sudo chown -R $(id -un).$(id -gn) dist
+          ./build-docker $OS_TYPE $OS_VERSION;
+          sudo chown -R $(id -un).$(id -gn) dist;
       else
-          export CFLAGS=-Werror
-          make clean
-          make
-          make clean
-          make -f Makefile.native
+          export CFLAGS=-Werror;
+          make clean;
+          make;
+          make clea;n
+          make -f Makefile.native;
       fi
 
 after_success:
     - if [ "$USE_DOCKER" = "1" ]; then
-          ls -l dist
+          ls -l dist;
       fi
 
 deploy:
