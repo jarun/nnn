@@ -34,7 +34,7 @@ script:
           export CFLAGS=-Werror;
           make clean;
           make;
-          make clea;n
+          make clean;
           make -f Makefile.native;
       fi
 
