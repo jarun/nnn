@@ -1,7 +1,7 @@
 language: c
 sudo: required
 matrix:
-    include:
+  include:
     # Access more recent gcc and clang via a Trusty image
     - os: linux
       dist: trusty
@@ -53,6 +53,8 @@ deploy:
     - dist/*.deb
     - dist/*.rpm
   on:
+    condition: $USE_DOCKER = 1
     repo: jarun/nnn
     tags: true
+
 tags: true
