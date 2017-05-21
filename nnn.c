@@ -215,10 +215,9 @@ xstrlcpy(char *dest, const char *src, size_t n)
  * We are only looking for '/' in this program.
  */
 static void *
-xmemrchr(const void *s, int c, size_t n)
+xmemrchr(const void *s, unsigned char ch, size_t n)
 {
-	unsigned char *p;
-	unsigned char ch = (unsigned char)c;
+	static unsigned char *p;
 
 	if (!s || !n)
 		return NULL;
