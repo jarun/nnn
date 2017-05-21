@@ -1,6 +1,11 @@
 /* See LICENSE file for copyright and license details. */
 #include <sys/stat.h>
-#include <sys/types.h>
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) \
+ || defined(__APPLE__)
+# include <sys/types.h>
+#else
+# include <sys/sysmacros.h>
+#endif
 #include <sys/wait.h>
 #include <sys/statvfs.h>
 #include <sys/resource.h>
