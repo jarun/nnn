@@ -81,6 +81,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Invoke file path copier (*easy* shell integration)
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
+  - Open current directory in a custom GUI file browser
 - Unicode support
 - Highly optimized code, minimal resource usage
 
