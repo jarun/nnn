@@ -65,7 +65,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - Disk usage analyzer mode
 - Search
   - Filter directory contents with search-as-you-type
-  - Desktop search (default catfish, customizable) integration
+  - Desktop search (default gnome-search-tool, customizable) integration
 - Mimes
   - Desktop opener integration
   - Customizable bash script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) to handle media type or action
@@ -156,7 +156,7 @@ Right, Enter, l, ^M | Open file or enter dir
                   - | Jump to last visited dir
                   o | Open dir in NNN_DE_FILE_MANAGER
                   / | Filter dir contents
-                 ^/ | Search dir in catfish
+                 ^/ | Search dir in gnome-search-tool
                   c | Show change dir prompt
                   d | Toggle detail view
                   D | Toggle current file details screen
@@ -216,7 +216,7 @@ nnn is designed to play files using multiple strategies (in order of decreasing 
     - viewnior - image
     - [zathura](https://pwmt.org/projects/zathura/) - pdf
     - vim - plain text
-    - catfish - search
+    - gnome-search-tool - search
     - to add, remove recognized extensions in nnn, see [how to change file associations](#change-file-associations)
   - If a file without any extension is a plain text file, it is opened in EDITOR (fallback vi)
   - Set `NNN_FALLBACK_OPENER` as the fallback opener. E.g.:

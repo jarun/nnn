@@ -1236,7 +1236,7 @@ show_help(void)
                     - | Jump to last visited dir\n\
                     o | Open dir in NNN_DE_FILE_MANAGER\n\
                     / | Filter dir contents\n\
-		   ^/ | Search dir in catfish\n\
+		   ^/ | Search dir in gnome-search-tool\n\
                     c | Show change dir prompt\n\
                     d | Toggle detail view\n\
                     D | Toggle current file details screen\n\
