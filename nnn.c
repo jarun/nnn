@@ -1558,7 +1558,7 @@ nochange:
 			}
 
 			/* Fall through to exit */
-		}
+		} // fallthrough
 		case SEL_QUIT:
 			dentfree(dents);
 			return;
@@ -2082,7 +2082,7 @@ main(int argc, char *argv[])
 	while ((opt = getopt(argc, argv, "dSp:vh")) != -1) {
 		switch (opt) {
 		case 'S':
-			bsizeorder = 1;
+			bsizeorder = 1; // fallthrough
 		case 'd':
 			/* Open in detail mode, if set */
 			showdetail = 1;
