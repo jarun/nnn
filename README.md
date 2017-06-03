@@ -112,6 +112,8 @@ nnn needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard li
   - [AUR](https://aur.archlinux.org/packages/nnn/)
   - [Homebrew](http://braumeister.org/formula/nnn)
   - [Ubuntu PPA](https://launchpad.net/~twodopeshaggy/+archive/ubuntu/jarun/)
+  - [Debian](https://packages.debian.org/search?keywords=nnn)
+- Packages for **Fedora 24** and **CentOS 7** are available with the [latest release](https://github.com/jarun/nnn/releases/latest)
 - To cook yourself, download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*). Then install the dependencies and compile (e.g. on Ubuntu 16.04):
 
       $ sudo apt-get install libncursesw5-dev libreadline6-dev
@@ -239,18 +241,18 @@ To lookup keyboard shortcuts at runtime, press `?`.
 
 Add the following to your shell's rc file for the best experience:
 
-- If you want to open nnn in detail mode each time:
+1. If you want to open nnn in detail mode each time:
 
-      alias n='nnn -d'
-- Set your preferred desktop opener as fallback. E.g.:
+        alias n='nnn -d'
+2. Set your preferred desktop opener as fallback. E.g.:
 
-      export NNN_FALLBACK_OPENER=xdg-open
-- Set a desktop file manager to open directories with (if you need). E.g.:
+        export NNN_FALLBACK_OPENER=xdg-open
+3. Set a desktop file manager to open directories with (if you need). E.g.:
 
-      export NNN_DE_FILE_MANAGER=thunar
-- Start nnn.
+        export NNN_DE_FILE_MANAGER=thunar
+4. Start nnn.
 
-      n
+        n
 
 ### How to
 
@@ -283,6 +285,14 @@ export `NNN_OPENER`:
     export NNN_COPIER="/home/vaio/copier.sh"
 
 Start nnn and use `^K` to copy the absolute path (from `/`) of the file under the cursor to clipboard.
+
+#### file copy, move, delete
+
+nnn doesn't support file copy, move, delete inherently. However, it simplifies the workflow:
+
+1. copy the absolute path to a file by invoking the file path copier (`^K`)
+2. spawn a shell in the current directory (`!`)
+3. while typing the desired command, copy the file path (usually `^-Shift-V`)
 
 #### boost chdir prompt
 
