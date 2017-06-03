@@ -7,13 +7,15 @@
 .Sh SYNOPSIS
 .Nm nnn
 .Op Ar -d
+.Op Ar -f
+.Op Ar -p
 .Op Ar -S
 .Op Ar -v
 .Op Ar -h
 .Op Ar PATH
 .Sh DESCRIPTION
 .Nm
-(Noice is Not Noice) is a performance-optimized fork of the noice terminal file browser with improved desktop integration, navigation, disk usage analyzer mode, comprehensive file details and much more. It remains a simple and efficient file browser that stays out of your way.
+(Noice is Not Noice) is a performance-optimized fork of the noice terminal file browser with improved desktop integration, navigation, navigate-as-you-type mode, disk usage analyzer mode, comprehensive file details and much more. It remains a simple and efficient file browser that stays out of your way.
 .Pp
 .Nm
 defaults to the current directory if
@@ -47,24 +49,24 @@ Change to the HOME directory
 Change to initial directory
 .It Ic -
 Change to the last visited directory
-.It Ic o
-Open directory in NNN_DE_FILE_MANAGER
 .It Ic /
 Change filter (more information below)
 .It Ic ^/
 Search directory in gnome-search-tool
+.It Ic \&.
+Toggle hide .dot files
 .It Ic c
 Change into the given directory
 .It Ic d
 Toggle detail view
 .It Ic D
 Toggle current file details screen
+.It Ic f
+Toggle navigate-as-you-type mode
 .It Ic m
 Show concise mediainfo
 .It Ic M
 Show full mediainfo
-.It Ic \&.
-Toggle hide .dot files
 .It Ic s
 Toggle sort by file size
 .It Ic S
@@ -77,6 +79,8 @@ Spawn SHELL in PWD (fallback sh)
 Run the system top utility.
 .It Ic e
 Open current entry in EDITOR (fallback vi)
+.It Ic o
+Open directory in NNN_DE_FILE_MANAGER
 .It Ic p
 Open current entry in PAGER (fallback less)
 .It Ic ^K
@@ -99,6 +103,12 @@ supports the following options:
 .Pp
 .Fl d
         start in detail view mode
+.Pp
+.Fl f
+        start in navigate-as-you-type mode
+.Pp
+.Fl p
+        path to custom nlay
 .Pp
 .Fl S
         start in disk usage analyzer mode
@@ -137,13 +147,14 @@ instructions.
 .Sh FILTERS
 Filters support regexes to display only the matched
 entries in the current directory view.  This effectively allows
-searching through the directory tree for a particular entry.
+searching through the directory tree for a particular entry. Matching entries
+are shown instantly (search-as-you-type).
 .Pp
 Filters do not stack on top of each other.  They are applied anew
-every time. There are 3 ways to reset a filter:
+every time. There are 4 ways to reset a filter:
 .Pp
-An empty filter expression, a search with no results or an extra backspace at
-the filter prompt (like vi).
+The \fIInsert\fR key, an empty filter expression, a search with no results or an
+extra backspace at the filter prompt (like vi).
 .Pp
 If you want to list all matches starting with the filter expression (a common
 use case), start the expression with a
@@ -153,6 +164,9 @@ use case), start the expression with a
 If
 .Nm
 is invoked as root the default filter will also match hidden files.
+.Pp
+In the navigate-as-you-type mode directories are opened in filter mode,
+allowing instant navigation. Works best with the arrow keys.
 .Sh ENVIRONMENT
 The SHELL, EDITOR and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively.

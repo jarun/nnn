@@ -3,6 +3,7 @@
 #define CURSR " > "
 #define EMPTY "   "
 
+static int filtermode  = 0; /* Set to 1 to enter filter mode */
 static int mtimeorder  = 0; /* Set to 1 to sort by time modified */
 static int sizeorder   = 0; /* Set to 1 to sort by file size */
 static int bsizeorder  = 0; /* Set to 1 to sort by blocks used including content */
@@ -35,6 +36,8 @@ static struct key bindings[] = {
 	{ 'l',            SEL_GOIN,      "",     "" },
 	/* Filter */
 	{ '/',            SEL_FLTR,      "",     "" },
+	/* Toggle filter mode */
+	{ 'f',            SEL_MFLTR,     "",     "" },
 	/* Desktop search */
 	{ CONTROL('_'),   SEL_SEARCH,    "",     "" },
 	/* Next */

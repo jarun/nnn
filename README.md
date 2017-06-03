@@ -44,7 +44,7 @@ Noice is Not Noice, a noicer fork...
 
 nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
 
-nnn can use the default desktop opener at runtime. It also comes with `nlay` - a customizable bash script to handle media types. It adds new navigation options, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
+nnn can use the default desktop opener at runtime. It also comes with `nlay` - a customizable bash script to handle media types. It adds new navigation options, a navigate-as-you-type mode, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
 
 If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, nnn got it! All from the same terminal session. Follow the instructions in the [quickstart](#quickstart) section and see how nnn simplifies those long desktop sessions...
 
@@ -62,6 +62,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Jump HOME or to the last visited directory (as usual!)
   - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
   - Roll-over at edges, page through entries
+  - Navigate as you type with filters
 - Disk usage analyzer mode
 - Search
   - Filter directory contents with search-as-you-type
@@ -133,6 +134,7 @@ nnn needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard li
 
     optional arguments:
       -d             start in detail view mode
+      -f             start in navigate-as-you-type mode
       -p             path to custom nlay
       -S             start in disk usage analyzer mode
       -v             show program version and exit
@@ -156,21 +158,22 @@ Right, Enter, l, ^M | Open file or enter dir
                   ~ | Jump to HOME dir
                   & | Jump to initial dir
                   - | Jump to last visited dir
-                  o | Open dir in NNN_DE_FILE_MANAGER
                   / | Filter dir contents
                  ^/ | Search dir in gnome-search-tool
+                  . | Toggle hide .dot files
                   c | Show change dir prompt
                   d | Toggle detail view
                   D | Toggle current file details screen
+                  f | Toggle navigate-as-you-type mode
                   m | Show concise mediainfo
                   M | Show full mediainfo
-                  . | Toggle hide .dot files
                   s | Toggle sort by file size
                   S | Toggle disk usage analyzer mode
                   t | Toggle sort by modified time
                   ! | Spawn SHELL in PWD (fallback sh)
                   z | Run top
                   e | Edit entry in EDITOR (fallback vi)
+                  o | Open dir in NNN_DE_FILE_MANAGER
                   p | Open entry in PAGER (fallback less)
                  ^K | Invoke file name copier
                  ^L | Force a redraw
@@ -181,15 +184,17 @@ Right, Enter, l, ^M | Open file or enter dir
 
 #### Filters
 
-Filters support regexes to display only the matched entries in the current directory view. This effectively allows searching through the directory tree for a particular entry.
+Filters support regexes to display only the matched entries in the current directory view. This effectively allows searching through the directory tree for a particular entry. Matching entries are shown instantly (search-as-you-type).
 
-Filters do not stack on top of each other. They are applied anew every time. There are 3 ways to reset a filter:
+Filters do not stack on top of each other. They are applied anew every time. There are 4 ways to reset a filter:
 
-An empty filter expression, a search with no results or an extra backspace at the filter prompt (like vi).
+The `Insert` key, an empty filter expression, a search with no results or an extra backspace at the filter prompt (like vi).
 
 If you want to list all matches starting with the filter expression (a common use case), start the expression with a `^` (caret) symbol.
 
 If nnn is invoked as root the default filter will also match hidden files.
+
+In the navigate-as-you-type mode directories are opened in filter mode, allowing instant navigation. Works best with the arrow keys.
 
 #### File type abbreviations
 

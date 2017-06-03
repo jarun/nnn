@@ -77,6 +77,7 @@ xprintf(int fd, const char *fmt, ...)
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define MAX_CMD_LEN 5120
 #define CURSYM(flag) (flag ? CURSR : EMPTY)
+#define FILTER '/'
 
 struct assoc {
 	char *regex; /* Regex to match on filename */
@@ -90,6 +91,7 @@ enum action {
 	SEL_BACK,
 	SEL_GOIN,
 	SEL_FLTR,
+	SEL_MFLTR,
 	SEL_SEARCH,
 	SEL_NEXT,
 	SEL_PREV,
@@ -598,18 +600,21 @@ printprompt(char *str)
 }
 
 /* Returns SEL_* if key is bound and 0 otherwise.
- * Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}) */
+ * Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}).
+ * The next keyboard input can be simulated by presel.
+ */
 static int
-nextsel(char **run, char **env, int *ch)
+nextsel(char **run, char **env, int *presel)
 {
-	int c = *ch;
+	int c = *presel;
 	unsigned int i;
 	static unsigned int len = LEN(bindings);
 
 	if (c == 0)
 		c = getch();
 	else
-		*ch = 0;
+		*presel = 0;
+
 	if (c == -1)
 		idle++;
 	else
@@ -695,8 +700,8 @@ readln(char *path)
 	char *pln = ln + 1;
 
 	memset(wln, 0, LINE_MAX << 2);
-	wln[0] = '/';
-	ln[0] = '/';
+	wln[0] = FILTER;
+	ln[0] = FILTER;
 	ln[1] = '\0';
 	cur = 0;
 
@@ -750,7 +755,7 @@ readln(char *path)
 			}
 		} else {
 			switch(*ch) {
-			case KEY_DC:
+			case KEY_DC: // fallthrough
 			case KEY_BACKSPACE:
 				if (len == 1) {
 					cur = oldcur;
@@ -769,6 +774,16 @@ readln(char *path)
 				redraw(path);
 				printprompt(ln);
 				break;
+			case KEY_IC:
+				cur = oldcur;
+				*ch = CONTROL('L');
+				goto end;
+			case KEY_DOWN: // fallthrough
+			case KEY_UP: // fallthrough
+			case KEY_LEFT: // fallthrough
+			case KEY_RIGHT:
+				if (len == 1)
+					cur = oldcur; // fallthrough
 			default:
 				goto end;
 			}
@@ -778,6 +793,8 @@ end:
 	noecho();
 	curs_set(FALSE);
 	timeout(1000);
+
+	/* Return keys for navigation etc. */
 	return *ch;
 }
 
@@ -1234,21 +1251,22 @@ show_help(void)
                     ~ | Jump to HOME dir\n\
                     & | Jump to initial dir\n\
                     - | Jump to last visited dir\n\
-                    o | Open dir in NNN_DE_FILE_MANAGER\n\
                     / | Filter dir contents\n\
-		   ^/ | Search dir in gnome-search-tool\n\
+                   ^/ | Search dir in gnome-search-tool\n\
+                    . | Toggle hide .dot files\n\
                     c | Show change dir prompt\n\
                     d | Toggle detail view\n\
                     D | Toggle current file details screen\n\
+                    f | Toggle navigate-as-you-type mode\n\
                     m | Show concise mediainfo\n\
                     M | Show full mediainfo\n\
-                    . | Toggle hide .dot files\n\
                     s | Toggle sort by file size\n\
                     S | Toggle disk usage analyzer mode\n\
                     t | Toggle sort by modified time\n\
                     ! | Spawn SHELL in PWD (fallback sh)\n\
                     z | Run top\n\
                     e | Edit entry in EDITOR (fallback vi)\n\
+                    o | Open dir in NNN_DE_FILE_MANAGER\n\
                     p | Open entry in PAGER (fallback less)\n\
                    ^K | Invoke file name copier\n\
                    ^L | Force a redraw\n\
@@ -1521,7 +1539,7 @@ browse(char *ipath, char *ifilter)
 	static char fltr[LINE_MAX];
 	char *mime, *dir, *tmp, *run, *env;
 	struct stat sb;
-	int r, fd, filtered = FALSE;
+	int r, fd, presel;
 	enum action sel = SEL_RUNARG + 1;
 
 	xstrlcpy(path, ipath, PATH_MAX);
@@ -1529,6 +1547,12 @@ browse(char *ipath, char *ifilter)
 	oldpath[0] = '\0';
 	newpath[0] = '\0';
 	lastdir[0] = '\0'; /* Can't move back from initial directory */
+
+	if (filtermode)
+		presel = FILTER;
+	else
+		presel = 0;
+
 begin:
 	if (populate(path, oldpath, fltr) == -1) {
 		printwarn();
@@ -1542,7 +1566,7 @@ nochange:
 		if (getppid() == 1)
 			_exit(0);
 
-		sel = nextsel(&run, &env, &filtered);
+		sel = nextsel(&run, &env, &presel);
 
 		switch (sel) {
 		case SEL_CDQUIT:
@@ -1583,6 +1607,8 @@ nochange:
 			xstrlcpy(path, dir, PATH_MAX);
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
+			if (filtermode)
+				presel = FILTER;
 			goto begin;
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
@@ -1621,6 +1647,8 @@ nochange:
 				oldpath[0] = '\0';
 				/* Reset filter */
 				xstrlcpy(fltr, ifilter, LINE_MAX);
+				if (filtermode)
+					presel = FILTER;
 				goto begin;
 			case S_IFREG:
 			{
@@ -1667,12 +1695,19 @@ nochange:
 				goto nochange;
 			}
 		case SEL_FLTR:
-			filtered = readln(path);
+			presel = readln(path);
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(fltr);
 			/* Save current */
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+			goto nochange;
+		case SEL_MFLTR:
+			filtermode = !filtermode;
+			if (filtermode)
+				presel = FILTER;
+			else
+				printmsg("navigate-as-you-type off");
 			goto nochange;
 		case SEL_SEARCH:
 			exitcurses();
@@ -1844,6 +1879,8 @@ nochange:
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
 			free(input);
+			if (filtermode)
+				presel = FILTER;
 			goto begin;
 		}
 		case SEL_CDHOME:
@@ -1869,6 +1906,8 @@ nochange:
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
+			if (filtermode)
+				presel = FILTER;
 			goto begin;
 		case SEL_CDBEGIN:
 			if (canopendir(ipath) == 0) {
@@ -1887,6 +1926,8 @@ nochange:
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
+			if (filtermode)
+				presel = FILTER;
 			goto begin;
 		case SEL_CDLAST:
 			if (lastdir[0] == '\0')
@@ -1904,6 +1945,8 @@ nochange:
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
+			if (filtermode)
+				presel = FILTER;
 			goto begin;
 		case SEL_TOGGLEDOT:
 			showhidden ^= 1;
@@ -2055,6 +2098,7 @@ positional arguments:\n\
   PATH           directory to open [default: current dir]\n\n\
 optional arguments:\n\
   -d             start in detail view mode\n\
+  -f             start in navigate-as-you-type mode\n\
   -p             path to custom nlay\n\
   -S             start in disk usage analyzer mode\n\
   -v             show program version and exit\n\
@@ -2079,7 +2123,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	while ((opt = getopt(argc, argv, "dSp:vh")) != -1) {
+	while ((opt = getopt(argc, argv, "dSfp:vh")) != -1) {
 		switch (opt) {
 		case 'S':
 			bsizeorder = 1; // fallthrough
@@ -2087,6 +2131,9 @@ main(int argc, char *argv[])
 			/* Open in detail mode, if set */
 			showdetail = 1;
 			printptr = &printent_long;
+			break;
+		case 'f':
+			filtermode = 1;
 			break;
 		case 'p':
 			player = optarg;
