@@ -1270,7 +1270,6 @@ show_help(void)
                     S | Toggle disk usage analyzer mode\n\
                     t | Toggle sort by modified time\n\
                     ! | Spawn SHELL in PWD (fallback sh)\n\
-                    z | Run top\n\
                     e | Edit entry in EDITOR (fallback vi)\n\
                     o | Open dir in NNN_DE_FILE_MANAGER\n\
                     p | Open entry in PAGER (fallback less)\n\

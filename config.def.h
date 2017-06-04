@@ -97,7 +97,6 @@ static struct key bindings[] = {
 	/* Show help */
 	{ '?',            SEL_HELP,      "",     "" },
 	/* Run command */
-	{ 'z',            SEL_RUN,       "top",  "" },
 	{ '!',            SEL_RUN,       "sh",   "SHELL" },
 	/* Run command with argument */
 	{ 'e',            SEL_RUNARG,    "vi",   "EDITOR" },

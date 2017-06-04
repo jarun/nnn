@@ -175,7 +175,6 @@ Right, Enter, l, ^M | Open file or enter dir
                   S | Toggle disk usage analyzer mode
                   t | Toggle sort by modified time
                   ! | Spawn SHELL in PWD (fallback sh)
-                  z | Run top
                   e | Edit entry in EDITOR (fallback vi)
                   o | Open dir in NNN_DE_FILE_MANAGER
                   p | Open entry in PAGER (fallback less)
