@@ -62,10 +62,10 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Jump HOME or to the last visited directory (as usual!)
   - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
   - Roll-over at edges, page through entries
-  - Navigate as you type with filters
+  - *Navigate-as-you-type* with filters
 - Disk usage analyzer mode
 - Search
-  - Filter directory contents with search-as-you-type
+  - Filter directory contents with *search-as-you-type*
   - Desktop search (default gnome-search-tool, customizable) integration
 - Mimes
   - Desktop opener integration
@@ -134,7 +134,7 @@ nnn needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard li
 
     optional arguments:
       -d             start in detail view mode
-      -f             start in navigate-as-you-type mode
+      -i             start in navigate-as-you-type mode
       -p             path to custom nlay
       -S             start in disk usage analyzer mode
       -v             show program version and exit
@@ -155,6 +155,7 @@ nnn needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard li
       End, G, $, ^E | Jump to last entry
 Right, Enter, l, ^M | Open file or enter dir
   Left, Bksp, h, ^H | Go to parent dir
+             Insert | Toggle navigate-as-you-type mode
                   ~ | Jump to HOME dir
                   & | Jump to initial dir
                   - | Jump to last visited dir
@@ -164,7 +165,6 @@ Right, Enter, l, ^M | Open file or enter dir
                   c | Show change dir prompt
                   d | Toggle detail view
                   D | Toggle current file details screen
-                  f | Toggle navigate-as-you-type mode
                   m | Show concise mediainfo
                   M | Show full mediainfo
                   s | Toggle sort by file size

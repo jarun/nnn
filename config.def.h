@@ -37,7 +37,7 @@ static struct key bindings[] = {
 	/* Filter */
 	{ '/',            SEL_FLTR,      "",     "" },
 	/* Toggle filter mode */
-	{ 'f',            SEL_MFLTR,     "",     "" },
+	{ KEY_IC,         SEL_MFLTR,     "",     "" },
 	/* Desktop search */
 	{ CONTROL('_'),   SEL_SEARCH,    "",     "" },
 	/* Next */

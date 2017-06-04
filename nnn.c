@@ -1248,6 +1248,7 @@ show_help(void)
         End, G, $, ^E | Jump to last entry\n\
   Right, Enter, l, ^M | Open file or enter dir\n\
     Left, Bksp, h, ^H | Go to parent dir\n\
+               Insert | Toggle navigate-as-you-type mode\n\
                     ~ | Jump to HOME dir\n\
                     & | Jump to initial dir\n\
                     - | Jump to last visited dir\n\
@@ -1257,7 +1258,6 @@ show_help(void)
                     c | Show change dir prompt\n\
                     d | Toggle detail view\n\
                     D | Toggle current file details screen\n\
-                    f | Toggle navigate-as-you-type mode\n\
                     m | Show concise mediainfo\n\
                     M | Show full mediainfo\n\
                     s | Toggle sort by file size\n\
@@ -2092,13 +2092,13 @@ nochange:
 static void
 usage(void)
 {
-	fprintf(stdout, "usage: nnn [-d] [-p custom_nlay] [-S] [-v] [-h] [PATH]\n\n\
+	fprintf(stdout, "usage: nnn [-d] [-i] [-p custom_nlay] [-S] [-v] [-h] [PATH]\n\n\
 The missing terminal file browser for X.\n\n\
 positional arguments:\n\
   PATH           directory to open [default: current dir]\n\n\
 optional arguments:\n\
   -d             start in detail view mode\n\
-  -f             start in navigate-as-you-type mode\n\
+  -i             start in navigate-as-you-type mode\n\
   -p             path to custom nlay\n\
   -S             start in disk usage analyzer mode\n\
   -v             show program version and exit\n\
@@ -2123,7 +2123,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	while ((opt = getopt(argc, argv, "dSfp:vh")) != -1) {
+	while ((opt = getopt(argc, argv, "dSip:vh")) != -1) {
 		switch (opt) {
 		case 'S':
 			bsizeorder = 1; // fallthrough
@@ -2132,7 +2132,7 @@ main(int argc, char *argv[])
 			showdetail = 1;
 			printptr = &printent_long;
 			break;
-		case 'f':
+		case 'i':
 			filtermode = 1;
 			break;
 		case 'p':
