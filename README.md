@@ -34,7 +34,8 @@ Noice is Not Noice, a noicer fork...
   - [use cd .....](#use-cd-)
   - [cd on quit](#cd-on-quit)
   - [customize nlay](#customize-nlay)
-  - [copy current file path to clipboard](#copy-current-file-path-to-clipboard)
+  - [copy file path to clipboard](#copy-file-path-to-clipboard)
+  - [file copy. move. delete](#file-copy-move-delete)
   - [boost chdir prompt](#boost-chdir-prompt)
   - [change file associations](#change-file-associations)
 - [Why fork?](#why-fork)
@@ -187,9 +188,7 @@ Right, Enter, l, ^M | Open file or enter dir
 
 Filters support regexes to display only the matched entries in the current directory view. This effectively allows searching through the directory tree for a particular entry. Matching entries are shown instantly (search-as-you-type).
 
-Filters do not stack on top of each other. They are applied anew every time. There are 4 ways to reset a filter:
-
-The `Insert` key, an empty filter expression, a search with no results or an extra backspace at the filter prompt (like vi).
+Filters do not stack on top of each other. They are applied anew every time. There are 4 ways to reset a filter: `^L`, an empty filter expression, a search with no results or an extra backspace at the filter prompt (like vi).
 
 If you want to list all matches starting with the filter expression (a common use case), start the expression with a `^` (caret) symbol.
 
@@ -278,7 +277,7 @@ As you might notice, nnn uses the environment variable `NNN_TMPFILE` to write th
 
 nlay is a tiny standalone media type *player* by itself. To know how to customize or extend its functionality, please visit [nlay on wiki](https://github.com/jarun/nnn/wiki/all-about-nlay).
 
-#### copy current file path to clipboard
+#### copy file path to clipboard
 
 nnn can pipe the absolute path of the current file to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
 

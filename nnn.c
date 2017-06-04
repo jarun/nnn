@@ -743,6 +743,10 @@ readln(char *path)
 				redraw(path);
 				printprompt(ln);
 				break;
+			case CONTROL('L'):
+				cur = oldcur;
+				*ch = CONTROL('L');
+				goto end;
 			default:
 				wln[len++] = (wchar_t)*ch;
 				wln[len] = '\0';
@@ -774,10 +778,6 @@ readln(char *path)
 				redraw(path);
 				printprompt(ln);
 				break;
-			case KEY_IC:
-				cur = oldcur;
-				*ch = CONTROL('L');
-				goto end;
 			case KEY_DOWN: // fallthrough
 			case KEY_UP: // fallthrough
 			case KEY_LEFT: // fallthrough
