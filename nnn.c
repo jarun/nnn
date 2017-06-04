@@ -153,6 +153,7 @@ static int ndents, cur, total_dents;
 static int idle;
 static char *opener;
 static char *fb_opener;
+static char *nlay="nlay";
 static char *player;
 static char *copier;
 static char *desktop_manager;
@@ -330,6 +331,7 @@ all_dots(const char* ptr)
  *    - 0b1: draw a marker to indicate nnn spawned e.g., a shell
  *    - 0b10: do not wait in parent for child process e.g. DE file manager
  *    - 0b100: suppress stdout and stderr
+ *    - 0b1000: restore default SIGINT handler
  */
 static void
 spawn(char *file, char *arg1, char *arg2, char *dir, unsigned char flag)
@@ -354,6 +356,8 @@ spawn(char *file, char *arg1, char *arg2, char *dir, unsigned char flag)
 			close(fd);
 		}
 
+		if (flag & 0b1000)
+			signal(SIGINT, SIG_DFL);
 		execlp(file, file, arg1, arg2, NULL);
 		_exit(1);
 	} else {
@@ -746,8 +750,8 @@ readln(char *path)
 				printprompt(ln);
 				break;
 			case CONTROL('L'):
-				cur = oldcur;
-				*ch = CONTROL('L');
+				cur = oldcur; // fallthrough
+			case CONTROL('Q'):
 				goto end;
 			default:
 				wln[len++] = (wchar_t)*ch;
@@ -1273,8 +1277,8 @@ show_help(void)
                    ^K | Invoke file name copier\n\
                    ^L | Force a redraw\n\
                     ? | Toggle help screen\n\
-                    q | Quit\n\
-                    Q | Quit and change directory\n\n\" | less");
+                    Q | Quit and change directory\n\
+		q, ^Q | Quit\n\n\" | less");
 
 	return system(helpstr);
 }
@@ -1664,10 +1668,7 @@ nochange:
 				mime = getmime(dents[cur].name);
 				if (mime) {
 					exitcurses();
-					if (player)
-						spawn(player, newpath, mime, NULL, 0);
-					else
-						spawn("nlay", newpath, mime, NULL, 0);
+					spawn(player, newpath, mime, NULL, 0);
 					initcurses();
 					continue;
 				}
@@ -1713,10 +1714,7 @@ nochange:
 			goto nochange;
 		case SEL_SEARCH:
 			exitcurses();
-			if (player)
-				spawn(player, path, "search", NULL, 0);
-			else
-				spawn("nlay", path, "search", NULL, 0);
+			spawn(player, path, "search", NULL, 0);
 			initcurses();
 			break;
 		case SEL_NEXT:
@@ -2085,7 +2083,7 @@ nochange:
 		if (idletimeout != 0 && idle == idletimeout) {
 			idle = 0;
 			exitcurses();
-			spawn(idlecmd, NULL, NULL, NULL, 0);
+			spawn(player, "", "screensaver", NULL, 8);
 			initcurses();
 		}
 	}
@@ -2143,7 +2141,7 @@ main(int argc, char *argv[])
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
 			return 0;
-		case 'h':
+		case 'h': // fallthrough
 		default:
 			usage();
 		}
@@ -2171,11 +2169,20 @@ main(int argc, char *argv[])
 	/* Get the default desktop mime opener, if set */
 	opener = getenv("NNN_OPENER");
 
+	/* Set player if not set already */
+	if (!player)
+		player = nlay;
+
 	/* Get the fallback desktop mime opener, if set */
 	fb_opener = getenv("NNN_FALLBACK_OPENER");
 
 	/* Get the desktop file browser, if set */
 	desktop_manager = getenv("NNN_DE_FILE_MANAGER");
+
+	/* Get screensaver wait time, if set; copier used as tmp var */
+	copier = getenv("NNN_IDLE_TIMEOUT");
+	if (copier)
+		idletimeout = abs(atoi(copier));
 
 	/* Get the default copier, if set */
 	copier = getenv("NNN_COPIER");

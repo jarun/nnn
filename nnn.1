@@ -89,10 +89,10 @@ Invoke file name copier
 Force a redraw
 .It Ic \&?
 Toggle help screen
-.It Ic q
-Quit
 .It Ic Q
 Quit and change directory
+.It Ic q, ^Q
+Quit
 .El
 .Pp
 Backing up one directory level will set the cursor position at the
@@ -179,6 +179,9 @@ Examples: xdg-open, gio open, gvfs-open.
 \fBNNN_FALLBACK_OPENER:\fR set to your desktop environment's default
 mime opener to use as a fallback when no association is set for a file
 type. Custom associations are listed in the EXAMPLES section below.
+.Pp
+\fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal
+screensaver.
 .Pp
 \fBNNN_COPIER:\fR set to a clipboard copier script. For example, on Linux:
 .Bd -literal

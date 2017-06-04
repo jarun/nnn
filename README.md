@@ -35,9 +35,10 @@ Noice is Not Noice, a noicer fork...
   - [cd on quit](#cd-on-quit)
   - [customize nlay](#customize-nlay)
   - [copy file path to clipboard](#copy-file-path-to-clipboard)
-  - [file copy. move. delete](#file-copy-move-delete)
+  - [file copy, move, delete](#file-copy-move-delete)
   - [boost chdir prompt](#boost-chdir-prompt)
   - [change file associations](#change-file-associations)
+  - [set idle timeout](#set-idle-timeout)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
@@ -85,6 +86,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
   - Open current directory in a custom GUI file browser
+  - Terminal screensaver (default vlock, customizable) integration
 - Unicode support
 - Highly optimized code, minimal resource usage
 
@@ -180,8 +182,8 @@ Right, Enter, l, ^M | Open file or enter dir
                  ^K | Invoke file name copier
                  ^L | Force a redraw
                   ? | Toggle help screen
-                  q | Quit
                   Q | Quit and change directory
+              q, ^Q | Quit
 ```
 
 #### Filters
@@ -226,6 +228,7 @@ The following abbreviations are used in the detail view:
     - [zathura](https://pwmt.org/projects/zathura/) - pdf
     - vim - plain text
     - gnome-search-tool - search
+    - vlock - terminal screensaver
     - to add, remove recognized extensions in `nnn`, see [how to change file associations](#change-file-associations)
   - If a file without any extension is a plain text file, it is opened in EDITOR (fallback vi)
   - Set `NNN_FALLBACK_OPENER` as the fallback opener. E.g.:
@@ -312,6 +315,10 @@ If `NNN_OPENER` is not set, `nnn` tries to recognize a file by the file extensio
 If you want to add a file extension mainline, please raise a bug. Without it `nnn` will not invoke nlay.
 
 nlay has provisions (disabled by default) to handle a specific file extension too. However, the extension should be recognized by `nnn` first.
+
+#### set idle timeout
+
+The terminal screensaver is disabled by default. To set the wait time in seconds, use environment variable `NNN_IDLE_TIMEOUT`.
 
 ### Why fork?
 

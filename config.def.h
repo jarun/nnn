@@ -10,7 +10,6 @@ static int bsizeorder  = 0; /* Set to 1 to sort by blocks used including content
 static int idletimeout = 0; /* Screensaver timeout in seconds, 0 to disable */
 static int showhidden  = 0; /* Set to 1 to show hidden files by default */
 static int showdetail  = 0; /* Set to show additional file info */
-static char *idlecmd   = "rain"; /* The screensaver program */
 
 static struct assoc assocs[] = {
 	{ "\\.(c|cpp|h|log|md|py|sh|txt)$", "text" },
@@ -23,6 +22,8 @@ static struct assoc assocs[] = {
 static struct key bindings[] = {
 	/* Quit */
 	{ 'q',            SEL_QUIT,      "",     "" },
+	{ CONTROL('Q'),   SEL_QUIT,      "",     "" },
+	/* Change dir on quit */
 	{ 'Q',            SEL_CDQUIT,    "",     "" },
 	/* Back */
 	{ KEY_BACKSPACE,  SEL_BACK,      "",     "" },

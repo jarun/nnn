@@ -59,8 +59,8 @@ ENABLE_FILE_TYPE_HANDLING
 #------------------ AUDIO -------------------
 if [ "$2" == "audio" ]; then
     app=mpv
-    # To start mpv in a window enable audio_opts
-    #audio_opts="--no-terminal --force-window"
+    # To start mpv in a window enable opts
+    #opts="--no-terminal --force-window"
 
     #bg=">/dev/null 2>&1 &"
 
@@ -68,15 +68,15 @@ if [ "$2" == "audio" ]; then
         killall -9 $app >/dev/null 2>&1
     fi
 
-    eval $app $audio_opts "\"$1\"" $bg
+    eval $app $opts "\"$1\"" $bg
     exit 0
 fi
 
 #------------------ VIDEO -------------------
 if [ "$2" == "video" ]; then
     app=mpv
-    # To start mpv in a window enable video_opts
-    #video_opts="--no-terminal --force-window"
+    # To start mpv in a window enable opts
+    #opts="--no-terminal --force-window"
 
     #bg=">/dev/null 2>&1 &"
 
@@ -84,50 +84,61 @@ if [ "$2" == "video" ]; then
         killall -9 $app >/dev/null 2>&1
     fi
 
-    eval $app $video_opts "\"$1\"" $bg
+    eval $app $opts "\"$1\"" $bg
     exit 0
 fi
 
 #------------------ IMAGE -------------------
 if [ "$2" == "image" ]; then
     app=viewnior
-    #image_opts=
+    #opts=
 
     bg=">/dev/null 2>&1 &"
 
-    eval $app $image_opts "\"$1\"" $bg
+    eval $app $opts "\"$1\"" $bg
     exit 0
 fi
 
 #------------------- PDF --------------------
 if [ "$2" == "pdf" ]; then
     app=zathura
-    #pdf_opts=
+    #opts=
 
     bg=">/dev/null 2>&1 &"
 
-    eval $app $pdf_opts "\"$1\"" $bg
+    eval $app $opts "\"$1\"" $bg
     exit 0
 fi
 
 #---------------- PLAINTEXT -----------------
 if [ "$2" == "text" ]; then
     app=vim
-    #txt_opts=
+    #opts=
 
     #bg=">/dev/null 2>&1 &"
 
-    eval $app $txt_opts "\"$1\"" $bg
+    eval $app $opts "\"$1\"" $bg
     exit 0
 fi
 
 #----------------- SEARCH -------------------
 if [ "$2" == "search" ]; then
     app=gnome-search-tool
-    #search_opts=
+    #opts=
 
     bg=">/dev/null 2>&1 &"
 
-    eval $app $search_opts --path "\"$1\"" $bg
+    eval $app $opts --path "\"$1\"" $bg
+    exit 0
+fi
+
+#--------------- SCREENSAVER ----------------
+if [ "$2" == "screensaver" ]; then
+    app=vlock
+    #opts=
+
+    #bg=">/dev/null 2>&1 &"
+
+    eval $app $opts $bg
     exit 0
 fi
