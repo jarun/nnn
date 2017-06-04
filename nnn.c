@@ -475,7 +475,7 @@ setfilter(regex_t *regex, char *filter)
 	static int r;
 
 	r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
-	if (r != 0) {
+	if (r != 0 && filter && filter[0] != '\0') {
 		len = COLS;
 		if (len > LINE_MAX)
 			len = LINE_MAX;
@@ -738,8 +738,10 @@ readln(char *path)
 				wln[--len] = '\0';
 				wcstombs(ln, wln, LINE_MAX << 2);
 				ndents = total;
-				if (matches(pln) == -1)
+				if (matches(pln) == -1) {
+					printprompt(ln);
 					continue;
+				}
 				redraw(path);
 				printprompt(ln);
 				break;
