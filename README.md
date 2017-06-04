@@ -25,6 +25,7 @@ Noice is Not Noice, a noicer fork...
   - [Cmdline options](#cmdline-options)
   - [Keyboard shortcuts](#keyboard-shortcuts)
   - [Filters](#filters)
+  - [Navigate-as-you-type mode](#navigate-as-you-type-mode)
   - [File type abbreviations](#file-type-abbreviations)
   - [File handling](#file-handling)
   - [Help](#help)
@@ -44,7 +45,7 @@ Noice is Not Noice, a noicer fork...
 
 nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
 
-nnn can use the default desktop opener at runtime. It also comes with `nlay` - a customizable bash script to handle media types. It adds new navigation options, a navigate-as-you-type mode, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
+nnn can use the default desktop opener at runtime and handle media types with `nlay`, a customizable bash script. nnn adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
 
 If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, nnn got it! All from the same terminal session. Follow the instructions in the [quickstart](#quickstart) section and see how nnn simplifies those long desktop sessions...
 
@@ -59,10 +60,10 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 
 - Navigation
   - Familiar shortcuts
+  - *Navigate-as-you-type* mode
   - Jump HOME or to the last visited directory (as usual!)
   - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
   - Roll-over at edges, page through entries
-  - *Navigate-as-you-type* with filters
 - Disk usage analyzer mode
 - Search
   - Filter directory contents with *search-as-you-type*
@@ -194,7 +195,9 @@ If you want to list all matches starting with the filter expression (a common us
 
 If nnn is invoked as root the default filter will also match hidden files.
 
-In the navigate-as-you-type mode directories are opened in filter mode, allowing instant navigation. Works best with the arrow keys.
+#### Navigate-as-you-type mode
+
+In this mode directories are opened in filter mode, allowing continuous navigation. Works best with the arrow keys.
 
 #### File type abbreviations
 

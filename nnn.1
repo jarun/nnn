@@ -15,7 +15,7 @@
 .Op Ar PATH
 .Sh DESCRIPTION
 .Nm
-(Noice is Not Noice) is a performance-optimized fork of the noice terminal file browser with improved desktop integration, navigation, navigate-as-you-type mode, disk usage analyzer mode, comprehensive file details and much more. It remains a simple and efficient file browser that stays out of your way.
+(Noice is Not Noice) is a performance-optimized fork of the noice terminal file browser with improved desktop integration, customizable media type handler, simplified navigation, navigate-as-you-type mode, disk usage analyzer mode, comprehensive file details and much more. It remains a simple and efficient file browser that stays out of your way.
 .Pp
 .Nm
 defaults to the current directory if
@@ -122,10 +122,8 @@ supports the following options:
 .Nm
 invokes
 .Pa nlay
-to play a file if it recognizes a file by extension.
-.Pa nlay
-is a
-highly customizable bash shell script which invokes a player depending on the
+to play files recognized by extension. It is a highly customizable bash shell
+script which invokes a player depending on the
 type of file. Read more on
 .Pa nlay
 at:
@@ -165,8 +163,8 @@ If
 .Nm
 is invoked as root the default filter will also match hidden files.
 .Pp
-In the navigate-as-you-type mode directories are opened in filter mode,
-allowing instant navigation. Works best with the arrow keys.
+In the \fInavigate-as-you-type mode\fR directories are opened in filter mode,
+allowing continuous navigation. Works best with the arrow keys.
 .Sh ENVIRONMENT
 The SHELL, EDITOR and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively.
