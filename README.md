@@ -44,11 +44,11 @@ Noice is Not Noice, a noicer fork...
 
 ### Introduction
 
-nnn is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
+`nnn` is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
 
-nnn can use the default desktop opener at runtime and handle media types with `nlay`, a customizable bash script. nnn adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
+`nnn` can use the default desktop opener at runtime and handle media types with `nlay`, a customizable bash script. `nnn` adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
 
-If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, nnn got it! All from the same terminal session. Follow the instructions in the [quickstart](#quickstart) section and see how nnn simplifies those long desktop sessions...
+If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! All from the same terminal session. Follow the instructions in the [quickstart](#quickstart) section and see how `nnn` simplifies those long desktop sessions...
 
 Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
 
@@ -90,7 +90,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 
 ### Performance
 
-nnn vs. ncdu memory usage while listing 438767 files in disk usage analyzer mode:
+`nnn` vs. ncdu memory usage while listing 438767 files in disk usage analyzer mode:
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
@@ -98,7 +98,7 @@ nnn vs. ncdu memory usage while listing 438767 files in disk usage analyzer mode
 22574 vaio      20   0   17588   4320   2584 S   0.0  0.1   0:00.44 nnn -d /
 ```
 
-nnn vs. mc vs. ranger memory usage while viewing a directory with 11244 files, sorted by size:
+`nnn` vs. mc vs. ranger memory usage while viewing a directory with 11244 files, sorted by size:
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
@@ -109,7 +109,7 @@ nnn vs. mc vs. ranger memory usage while viewing a directory with 11244 files, s
 
 ### Installation
 
-nnn needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard libc.
+`nnn` needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard libc.
 
 - Packages are available on
   - [AUR](https://aur.archlinux.org/packages/nnn/)
@@ -142,7 +142,7 @@ nnn needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard li
       -v             show program version and exit
       -h             show this help and exit
 
-`>` indicates the currently selected entry in nnn.
+`>` indicates the currently selected entry in `nnn`.
 
 #### Keyboard shortcuts
 
@@ -188,15 +188,15 @@ Right, Enter, l, ^M | Open file or enter dir
 
 Filters support regexes to display only the matched entries in the current directory view. This effectively allows searching through the directory tree for a particular entry. Matching entries are shown instantly (search-as-you-type).
 
-Filters do not stack on top of each other. They are applied anew every time. There are 4 ways to reset a filter: `^L`, an empty filter expression, a search with no results or an extra backspace at the filter prompt (like vi).
+Filters do not stack on top of each other. They are applied anew every time. There are 4 ways to reset a filter: <kbd>^L</kbd>, an empty filter expression, a search with no results or an extra backspace at the filter prompt (like vi).
 
 If you want to list all matches starting with the filter expression (a common use case), start the expression with a `^` (caret) symbol.
 
-If nnn is invoked as root the default filter will also match hidden files.
+If `nnn` is invoked as root the default filter will also match hidden files.
 
 #### Navigate-as-you-type mode
 
-In this mode directories are opened in filter mode, allowing continuous navigation. Works best with the arrow keys.
+In this mode directories are opened in filter mode, allowing continuous navigation. Works best with the **arrow keys**.
 
 #### File type abbreviations
 
@@ -214,19 +214,19 @@ The following abbreviations are used in the detail view:
 
 #### File handling
 
-nnn is designed to play files using multiple strategies (in order of decreasing priority):
+`nnn` is designed to play files using multiple strategies (in order of decreasing priority):
   - Set `NNN_OPENER` to let a desktop opener handle it all. E.g.:
 
         export NNN_OPENER=xdg-open
         export NNN_OPENER="gio open"
         export NNN_OPENER=gvfs-open
-  - If nnn recognizes the file extension, it invokes nlay (which invokes the players). Default apps:
+  - If `nnn` recognizes the file extension, it invokes nlay (which invokes the players). Default apps:
     - mpv - audio and video
     - viewnior - image
     - [zathura](https://pwmt.org/projects/zathura/) - pdf
     - vim - plain text
     - gnome-search-tool - search
-    - to add, remove recognized extensions in nnn, see [how to change file associations](#change-file-associations)
+    - to add, remove recognized extensions in `nnn`, see [how to change file associations](#change-file-associations)
   - If a file without any extension is a plain text file, it is opened in EDITOR (fallback vi)
   - Set `NNN_FALLBACK_OPENER` as the fallback opener. E.g.:
 
@@ -242,22 +242,22 @@ nnn is designed to play files using multiple strategies (in order of decreasing 
 #### Help
 
     $ man nnn
-To lookup keyboard shortcuts at runtime, press `?`.
+To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 ### Quickstart
 
 Add the following to your shell's rc file for the best experience:
 
-1. If you want to open nnn in detail mode each time:
+1. Always open `nnn` in detail mode:
 
         alias n='nnn -d'
-2. Set your preferred desktop opener as fallback. E.g.:
+2. Set preferred desktop opener as fallback. E.g.:
 
         export NNN_FALLBACK_OPENER=xdg-open
-3. Set a desktop file manager to open directories with (if you need). E.g.:
+3. Set a desktop file manager to open directories with (if you need one). E.g.:
 
         export NNN_DE_FILE_MANAGER=thunar
-4. Start nnn.
+4. Start `nnn`.
 
         n
 
@@ -269,9 +269,9 @@ To jump to the n<sup>th</sup> level parent, with PWD at level 0, use `n + 1` dot
 
 #### cd on quit
 
-Pick the appropriate file for your shell from [misc/quitcd](https://github.com/jarun/nnn/tree/master/misc/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start nnn as `n` (or modify the function name to something else).
+Pick the appropriate file for your shell from [misc/quitcd](https://github.com/jarun/nnn/tree/master/misc/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start `nnn` as `n` (or modify the function name to something else).
 
-As you might notice, nnn uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
+As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
 
 #### customize nlay
 
@@ -279,7 +279,7 @@ nlay is a tiny standalone media type *player* by itself. To know how to customiz
 
 #### copy file path to clipboard
 
-nnn can pipe the absolute path of the current file to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
+`nnn` can pipe the absolute path of the current file to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
 
 Sample Linux copier script:
 
@@ -291,27 +291,27 @@ export `NNN_OPENER`:
 
     export NNN_COPIER="/home/vaio/copier.sh"
 
-Start nnn and use `^K` to copy the absolute path (from `/`) of the file under the cursor to clipboard.
+Start `nnn` and use <kbd>^K</kbd> to copy the absolute path (from `/`) of the file under the cursor to clipboard.
 
 #### file copy, move, delete
 
-nnn doesn't support file copy, move, delete inherently. However, it simplifies the workflow:
+`nnn` doesn't support file copy, move, delete inherently. However, it simplifies the workflow:
 
-1. copy the absolute path to a file by invoking the file path copier (`^K`)
-2. spawn a shell in the current directory (`!`)
-3. while typing the desired command, copy the file path (usually `^-Shift-V`)
+1. copy the absolute path to a file by invoking the file path copier (<kbd>^K</kbd>)
+2. spawn a shell in the current directory (<kbd>!</kbd>)
+3. while typing the desired command, copy the file path (usually <kbd>^-Shift-V</kbd>)
 
 #### boost chdir prompt
 
-nnn uses libreadline for the chdir prompt input. So all the fantastic features of readline (e.g. case insensitive tab completion, history, reverse-i-search) is available to you based on your readline [configuration](https://cnswww.cns.cwru.edu/php/chet/readline/readline.html#SEC9).
+`nnn` uses libreadline for the chdir prompt input. So all the fantastic features of readline (e.g. case insensitive tab completion, history, reverse-i-search) is available to you based on your readline [configuration](https://cnswww.cns.cwru.edu/php/chet/readline/readline.html#SEC9).
 
 #### change file associations
 
-If `NNN_OPENER` is not set, nnn tries to recognize a file by the file extension and invokes nlay. To change the extensions recognized by nnn, modify the `assocs` structure in [config.def.h](https://github.com/jarun/nnn/blob/master/config.def.h) (it's easy). Then re-compile and install.
+If `NNN_OPENER` is not set, `nnn` tries to recognize a file by the file extension and invokes nlay. To change the extensions recognized by `nnn`, modify the `assocs` structure in [config.def.h](https://github.com/jarun/nnn/blob/master/config.def.h) (it's easy). Then re-compile and install.
 
-If you want to add a file extension mainline, please raise a bug. Without it nnn will not invoke nlay.
+If you want to add a file extension mainline, please raise a bug. Without it `nnn` will not invoke nlay.
 
-nlay has provisions (disabled by default) to handle a specific file extension too. However, the extension should be recognized by nnn first.
+nlay has provisions (disabled by default) to handle a specific file extension too. However, the extension should be recognized by `nnn` first.
 
 ### Why fork?
 
