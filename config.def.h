@@ -13,10 +13,6 @@ static int showdetail  = 0; /* Set to show additional file info */
 
 static struct assoc assocs[] = {
 	{ "\\.(c|cpp|h|log|md|py|sh|txt)$", "text" },
-	{ "\\.(3g2|3gp|asf|avi|divx|flv|m2v|m4v|mkv|mov|mp4|mp4v|mpeg|mpg|ogv|qt|rm|rmvb|vob|webm|wmv)$", "video" },
-	{ "\\.(aac|ac3|amr|flac|m4a|m4b|m4p|mp3|mp4a|ogg|opus|ra|wav|wma)$", "audio" },
-	{ "\\.(bmp|gif|jpeg|jpg|pbm|pgm|png|svg|tiff|webp)$", "image" },
-	{ "\\.pdf$", "pdf" },
 };
 
 static struct key bindings[] = {

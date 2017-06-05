@@ -151,9 +151,7 @@ extern int wget_wch(WINDOW *, wint_t *);
 static struct entry *dents;
 static int ndents, cur, total_dents;
 static int idle;
-static char *opener;
-static char *fb_opener;
-static char *nlay="nlay";
+static int opener;
 static char *player;
 static char *copier;
 static char *desktop_manager;
@@ -161,6 +159,15 @@ static off_t blk_size;
 static size_t fs_free;
 static int open_max;
 static const double div_2_pow_10 = 1.0 / 1024.0;
+
+static char *utils[] = {
+#ifdef __APPLE__
+	"/usr/bin/open",
+#else
+	"/usr/bin/xdg-open",
+#endif
+	"nlay"
+};
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[MAX_CMD_LEN];
@@ -1659,11 +1666,11 @@ nochange:
 			{
 				/* If NNN_OPENER is set, use it */
 				if (opener) {
-					spawn(opener, newpath, NULL, NULL, 4);
+					spawn(utils[0], newpath, NULL, NULL, 4);
 					continue;
 				}
 
-				/* Play with nlay if identified */
+				/* Play text-based files with nlay */
 				mime = getmime(dents[cur].name);
 				if (mime) {
 					exitcurses();
@@ -1672,8 +1679,7 @@ nochange:
 					continue;
 				}
 
-				/* If nlay doesn't handle it, open plain text
-				   files with vi, then try NNN_FALLBACK_OPENER */
+				/* Recognize and open plain text files with vi */
 				if (get_output(g_buf, MAX_CMD_LEN, "file", "-bi",
 					       newpath, 0) == NULL)
 					continue;
@@ -1684,13 +1690,11 @@ nochange:
 					spawn(run, newpath, NULL, NULL, 0);
 					initcurses();
 					continue;
-				} else if (fb_opener) {
-					spawn(fb_opener, newpath, NULL, NULL, 4);
-					continue;
 				}
 
-				printmsg("No association");
-				goto nochange;
+				/* Invoke desktop opener as last resort */
+				spawn(utils[0], newpath, NULL, NULL, 4);
+				continue;
 			}
 			default:
 				printmsg("Unsupported file");
@@ -2165,15 +2169,13 @@ main(int argc, char *argv[])
 		showhidden = 1;
 	initfilter(showhidden, &ifilter);
 
-	/* Get the default desktop mime opener, if set */
-	opener = getenv("NNN_OPENER");
+	/* Always use desktop opener, if opted */
+	if (getenv("NNN_OPENER"))
+		opener = 1;
 
 	/* Set player if not set already */
 	if (!player)
-		player = nlay;
-
-	/* Get the fallback desktop mime opener, if set */
-	fb_opener = getenv("NNN_FALLBACK_OPENER");
+		player = utils[1];
 
 	/* Get the desktop file browser, if set */
 	desktop_manager = getenv("NNN_DE_FILE_MANAGER");

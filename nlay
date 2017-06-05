@@ -22,10 +22,7 @@
 # 2. Detached apps are not killed when nnn exits. Use kill(1) or killall(1) to
 #    to stop console based background apps.
 #
-# 3. Assuming you don't to play multiple audio/video files simultaneously,
-#    nlay kills any running instances of the audio/video player in bg mode.
-#
-# 4. nlay is OVERWRITTEN during nnn upgrade. You can store your custom nlay in a
+# 3. nlay is OVERWRITTEN during nnn upgrade. You can store your custom nlay in a
 #    location other than the default and have an alias with nnn option '-p' to
 #    invoke it. Remember it might break or lack new capabilities added to nlay
 #    in future releases. Check the file diff once in a while.
@@ -56,59 +53,8 @@ ext="${ext,,}"
 ENABLE_FILE_TYPE_HANDLING
 
 
-#------------------ AUDIO -------------------
-if [ "$2" == "audio" ]; then
-    app=mpv
-
-    # To start mpv in a window enable opts
-    #opts="--no-terminal --force-window"
-
-    #bg=">/dev/null 2>&1 &"
-
-    if [ -n "$bg" ]; then
-        killall -9 $app >/dev/null 2>&1
-    fi
-
-    eval $app $opts "\"$1\"" $bg
-    exit 0
-
-#------------------ VIDEO -------------------
-elif [ "$2" == "video" ]; then
-    app=mpv
-
-    # To start mpv in a window enable opts
-    #opts="--no-terminal --force-window"
-
-    #bg=">/dev/null 2>&1 &"
-
-    if [ -n "$bg" ]; then
-        killall -9 $app >/dev/null 2>&1
-    fi
-
-    eval $app $opts "\"$1\"" $bg
-    exit 0
-
-#------------------ IMAGE -------------------
-elif [ "$2" == "image" ]; then
-    app=("viewnior"
-         "fim")
-
-    opts=(""
-          "-a --cd-and-readdir")
-
-    bg=(">/dev/null 2>&1 &"
-        ">/dev/null 2>&1 &")
-
-#------------------- PDF --------------------
-elif [ "$2" == "pdf" ]; then
-    app=("zathura")
-
-    opts=("")
-
-    bg=(">/dev/null 2>&1 &")
-
 #---------------- PLAINTEXT -----------------
-elif [ "$2" == "text" ]; then
+if [ "$2" == "text" ]; then
     app=("vim")
 
     opts=("")

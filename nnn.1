@@ -15,7 +15,7 @@
 .Op Ar PATH
 .Sh DESCRIPTION
 .Nm
-(Noice is Not Noice) is a performance-optimized fork of the noice terminal file browser with improved desktop integration, customizable media type handler, simplified navigation, navigate-as-you-type mode, disk usage analyzer mode, comprehensive file details and much more. It remains a simple and efficient file browser that stays out of your way.
+(Noice is Not Noice) is a performance-optimized fork of the noice terminal file browser with extensive desktop integration, customizable text file or action handler, simplified navigation, navigate-as-you-type mode, disk usage analyzer mode, comprehensive file details and much more. It remains a simple and efficient file browser that stays out of your way.
 .Pp
 .Nm
 defaults to the current directory if
@@ -118,22 +118,17 @@ supports the following options:
         show program help and exit
 .Sh CONFIGURATION
 .Nm
+uses \fIxdg-open\fR (on Linux) and \fIopen(1)\fR (on OS X) as the desktop
+opener. If \fBNNN_OPENER\fR (see ENVIRONMENT section below) is not set,
+.Nm
 invokes
 .Pa nlay
-to play files recognized by extension. It is a highly customizable bash shell
-script which invokes a player depending on the
-type of file. Read more on
+to view text files (recognized by extension) or run actions. It is a highly
+customizable bash shell script. Read more on
 .Pa nlay
 at:
 .br
 .Em https://github.com/jarun/nnn/wiki/all-about-nlay
-.Pp
-.Nm
-is configured by modifying
-.Pa config.def.h
-and recompiling the code. config.h is generated as a backup of config.def.h.
-.Pp
-See the environment and examples sections below for more options and information.
 .Pp
 Configuring
 .Nm
@@ -169,14 +164,11 @@ when dealing with the !, e and p commands respectively.
 \fBNNN_DE_FILE_MANAGER:\fR set to a desktop file manager to open the current
 directory with.
 .Pp
-\fBNNN_OPENER:\fR set to your desktop environment's default
-mime opener to override all custom mime associations.
-.br
-Examples: xdg-open, gio open, gvfs-open.
-.Pp
-\fBNNN_FALLBACK_OPENER:\fR set to your desktop environment's default
-mime opener to use as a fallback when no association is set for a file
-type. Custom associations are listed in the EXAMPLES section below.
+\fBNNN_OPENER:\fR set \fIxdg-open\fR (on Linux) or \fIopen(1)\fR desktop opener
+to handle all file types.
+.Bd -literal
+        export NNN_OPENER=1
+.Ed
 .Pp
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal
 screensaver.
