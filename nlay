@@ -8,9 +8,9 @@
 # MUST READ:
 #
 # 1. Feel free to change the default apps to your favourite ones.
-#    If you change the app for a group you may also need to modify the bg
-#    setting. If bg is set the app is detached and started in the background in
-#    silent mode.
+#    If you change the app for a group you may also need to modify the opts and
+#    bg settings. If bg is set the app is detached and started in the background
+#    in silent mode.
 #
 #    The bg setting depends on personal preference and type of app, e.g.,
 #    I would start vim (CLI) in the foreground but Sublime Text (GUI) in the
@@ -59,6 +59,7 @@ ENABLE_FILE_TYPE_HANDLING
 #------------------ AUDIO -------------------
 if [ "$2" == "audio" ]; then
     app=mpv
+
     # To start mpv in a window enable opts
     #opts="--no-terminal --force-window"
 
@@ -70,11 +71,11 @@ if [ "$2" == "audio" ]; then
 
     eval $app $opts "\"$1\"" $bg
     exit 0
-fi
 
 #------------------ VIDEO -------------------
-if [ "$2" == "video" ]; then
+elif [ "$2" == "video" ]; then
     app=mpv
+
     # To start mpv in a window enable opts
     #opts="--no-terminal --force-window"
 
@@ -86,59 +87,61 @@ if [ "$2" == "video" ]; then
 
     eval $app $opts "\"$1\"" $bg
     exit 0
-fi
 
 #------------------ IMAGE -------------------
-if [ "$2" == "image" ]; then
-    app=viewnior
-    #opts=
+elif [ "$2" == "image" ]; then
+    app=("viewnior"
+         "fim")
 
-    bg=">/dev/null 2>&1 &"
+    opts=(""
+          "-a --cd-and-readdir")
 
-    eval $app $opts "\"$1\"" $bg
-    exit 0
-fi
+    bg=(">/dev/null 2>&1 &"
+        ">/dev/null 2>&1 &")
 
 #------------------- PDF --------------------
-if [ "$2" == "pdf" ]; then
-    app=zathura
-    #opts=
+elif [ "$2" == "pdf" ]; then
+    app=("zathura")
 
-    bg=">/dev/null 2>&1 &"
+    opts=("")
 
-    eval $app $opts "\"$1\"" $bg
-    exit 0
-fi
+    bg=(">/dev/null 2>&1 &")
 
 #---------------- PLAINTEXT -----------------
-if [ "$2" == "text" ]; then
-    app=vim
-    #opts=
+elif [ "$2" == "text" ]; then
+    app=("vim")
 
-    #bg=">/dev/null 2>&1 &"
+    opts=("")
 
-    eval $app $opts "\"$1\"" $bg
-    exit 0
-fi
+    bg=("")
 
 #----------------- SEARCH -------------------
-if [ "$2" == "search" ]; then
-    app=gnome-search-tool
-    #opts=
+elif [ "$2" == "search" ]; then
+    app=("gnome-search-tool"
+         "catfish")
 
-    bg=">/dev/null 2>&1 &"
+    opts=(""
+          "--path")
 
-    eval $app $opts --path "\"$1\"" $bg
-    exit 0
-fi
+    bg=(">/dev/null 2>&1 &"
+        ">/dev/null 2>&1 &")
 
 #--------------- SCREENSAVER ----------------
-if [ "$2" == "screensaver" ]; then
+elif [ "$2" == "screensaver" ]; then
     app=vlock
+
     #opts=
 
     #bg=">/dev/null 2>&1 &"
 
+    type -P $app &>/dev/null &&
     eval $app $opts $bg
     exit 0
 fi
+
+#------------------- PLAY -------------------
+for index in ${!app[@]}
+do
+    type -P ${app[$index]} &>/dev/null &&
+    eval ${app[$index]} ${opts[$index]} "\"$1\"" ${bg[$index]}
+done

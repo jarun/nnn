@@ -47,7 +47,7 @@ Noice is Not Noice, a noicer fork...
 
 `nnn` is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
 
-`nnn` can use the default desktop opener at runtime and handle media types with `nlay`, a customizable bash script. `nnn` adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
+`nnn` can use the default desktop opener at runtime and handle media types with [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay), a customizable bash script. `nnn` adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
 
 If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! All from the same terminal session. Follow the instructions in the [quickstart](#quickstart) section and see how `nnn` simplifies those long desktop sessions...
 
@@ -164,7 +164,7 @@ Right, Enter, l, ^M | Open file or enter dir
                   & | Jump to initial dir
                   - | Jump to last visited dir
                   / | Filter dir contents
-                 ^/ | Search dir in gnome-search-tool
+                 ^/ | Search dir in desktop search tool
                   . | Toggle hide .dot files
                   c | Show change dir prompt
                   d | Toggle detail view
@@ -223,10 +223,10 @@ The following abbreviations are used in the detail view:
         export NNN_OPENER=gvfs-open
   - If `nnn` recognizes the file extension, it invokes nlay (which invokes the players). Default apps:
     - mpv - audio and video
-    - viewnior - image
+    - viewnior, fim - image
     - [zathura](https://pwmt.org/projects/zathura/) - pdf
     - vim - plain text
-    - gnome-search-tool - search
+    - gnome-search-tool, catfish - search
     - vlock - terminal screensaver
     - to add, remove recognized extensions in `nnn`, see [how to change file associations](#change-file-associations)
   - If a file without any extension is a plain text file, it is opened in EDITOR (fallback vi)

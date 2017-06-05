@@ -1259,7 +1259,7 @@ show_help(void)
                     & | Jump to initial dir\n\
                     - | Jump to last visited dir\n\
                     / | Filter dir contents\n\
-                   ^/ | Search dir in gnome-search-tool\n\
+                   ^/ | Search dir in desktop search tool\n\
                     . | Toggle hide .dot files\n\
                     c | Show change dir prompt\n\
                     d | Toggle detail view\n\
