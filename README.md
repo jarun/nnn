@@ -96,7 +96,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
 22515 vaio      20   0   60348  48712   2240 S   0.0  0.6   0:01.11 ncdu /
-22574 vaio      20   0   17588   4320   2584 S   0.0  0.1   0:00.44 nnn -d /
+22574 vaio      20   0   17588   4320   2584 S   0.0  0.1   0:00.44 nnn /
 ```
 
 `nnn` vs. mc vs. ranger memory usage while viewing a directory with 11244 files, sorted by size:
@@ -128,7 +128,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 
 #### Cmdline options
 
-    usage: nnn [-d] [-S] [-v] [h] [PATH]
+    usage: nnn [-l] [-i] [-p custom_nlay] [-S] [-v] [-h] [PATH]
 
     The missing terminal file browser for X.
 
@@ -136,7 +136,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
       PATH           directory to open [default: current dir]
 
     optional arguments:
-      -d             start in detail view mode
+      -l             start in light mode (fewer details)
       -i             start in navigate-as-you-type mode
       -p             path to custom nlay
       -S             start in disk usage analyzer mode
@@ -233,13 +233,16 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 Add the following to your shell's rc file for the best experience:
 
-1. Always open `nnn` in detail mode:
+1. Use a shorter and sweeter alias:
 
-        alias n='nnn -d'
-2. Set a desktop file manager to open directories with (if you need one). E.g.:
+        alias n=nnn
+2. Optionally open all text files in EDITOR (fallback vi):
+
+        export NNN_USE_EDITOR=1
+3. Set a desktop file manager to open directories with (if you ever need to). E.g.:
 
         export NNN_DE_FILE_MANAGER=thunar
-3. Start `nnn`.
+4. Start `nnn`.
 
         n
 

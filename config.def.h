@@ -9,7 +9,7 @@ static int sizeorder   = 0; /* Set to 1 to sort by file size */
 static int bsizeorder  = 0; /* Set to 1 to sort by blocks used including content */
 static int idletimeout = 0; /* Screensaver timeout in seconds, 0 to disable */
 static int showhidden  = 0; /* Set to 1 to show hidden files by default */
-static int showdetail  = 0; /* Set to show additional file info */
+static int showdetail  = 1; /* Set to 0 to show fewer file info */
 
 static struct assoc assocs[] = {
 	{ "\\.(c|cpp|h|log|md|py|sh|txt)$", "text" },

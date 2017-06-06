@@ -898,8 +898,6 @@ printent(struct entry *ent, int active)
 	printw("%s\n", g_buf);
 }
 
-static void (*printptr)(struct entry *ent, int active) = &printent;
-
 static char*
 coolsize(off_t size)
 {
@@ -1006,6 +1004,8 @@ printent_long(struct entry *ent, int active)
 	if (active)
 		attroff(A_REVERSE);
 }
+
+static void (*printptr)(struct entry *ent, int active) = &printent_long;
 
 static char
 get_fileind(mode_t mode, char *desc)
@@ -2090,12 +2090,12 @@ nochange:
 static void
 usage(void)
 {
-	fprintf(stdout, "usage: nnn [-d] [-i] [-p custom_nlay] [-S] [-v] [-h] [PATH]\n\n\
+	fprintf(stdout, "usage: nnn [-l] [-i] [-p custom_nlay] [-S] [-v] [-h] [PATH]\n\n\
 The missing terminal file browser for X.\n\n\
 positional arguments:\n\
   PATH           directory to open [default: current dir]\n\n\
 optional arguments:\n\
-  -d             start in detail view mode\n\
+  -l             start in light mode (fewer details)\n\
   -i             start in navigate-as-you-type mode\n\
   -p             path to custom nlay\n\
   -S             start in disk usage analyzer mode\n\
@@ -2121,14 +2121,14 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	while ((opt = getopt(argc, argv, "dSip:vh")) != -1) {
+	while ((opt = getopt(argc, argv, "dlSip:vh")) != -1) {
 		switch (opt) {
 		case 'S':
-			bsizeorder = 1; // fallthrough
-		case 'd':
-			/* Open in detail mode, if set */
-			showdetail = 1;
-			printptr = &printent_long;
+			bsizeorder = 1;
+			break;
+		case 'l':
+			showdetail = 0;
+			printptr = &printent;
 			break;
 		case 'i':
 			filtermode = 1;
@@ -2139,6 +2139,9 @@ main(int argc, char *argv[])
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
 			return 0;
+		case 'd':
+			fprintf(stderr, "option -d is deprecated, detail view mode is default now.\n");
+			break;
 		case 'h': // fallthrough
 		default:
 			usage();

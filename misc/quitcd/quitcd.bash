@@ -3,9 +3,9 @@ export NNN_TMPFILE="/tmp/nnn"
 n()
 {
         if [ -n "$1" ]; then
-                nnn -d "$1"
+                nnn "$1"
         else
-                nnn -d
+                nnn
         fi
 
         if [ -f $NNN_TMPFILE ]; then
