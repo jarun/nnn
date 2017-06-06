@@ -757,7 +757,8 @@ readln(char *path)
 				printprompt(ln);
 				break;
 			case CONTROL('L'):
-				cur = oldcur; // fallthrough
+				if (len == 1)
+					cur = oldcur; // fallthrough
 			case CONTROL('Q'):
 				goto end;
 			default:
