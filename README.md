@@ -177,7 +177,7 @@ Right, Enter, l, ^M | Open file or enter dir
                   e | Edit entry in EDITOR (fallback vi)
                   o | Open dir in NNN_DE_FILE_MANAGER
                   p | Open entry in PAGER (fallback less)
-                 ^K | Invoke file name copier
+                 ^K | Invoke file path copier
                  ^L | Force a redraw
                   ? | Toggle help screen
                   Q | Quit and change directory

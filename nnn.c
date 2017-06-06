@@ -1280,7 +1280,7 @@ show_help(void)
                     e | Edit entry in EDITOR (fallback vi)\n\
                     o | Open dir in NNN_DE_FILE_MANAGER\n\
                     p | Open entry in PAGER (fallback less)\n\
-                   ^K | Invoke file name copier\n\
+                   ^K | Invoke file path copier\n\
                    ^L | Force a redraw\n\
                     ? | Toggle help screen\n\
                     Q | Quit and change directory\n\
