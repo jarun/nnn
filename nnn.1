@@ -15,7 +15,7 @@
 .Op Ar PATH
 .Sh DESCRIPTION
 .Nm
-(Noice is Not Noice) is a performance-optimized fork of the noice terminal file browser with extensive desktop integration, customizable text file or action handler, simplified navigation, navigate-as-you-type mode, disk usage analyzer mode, comprehensive file details and much more. It remains a simple and efficient file browser that stays out of your way.
+(Noice is Not Noice) is a performance-optimized fork of the noice terminal file browser with extensive desktop integration, simplified navigation, \fInavigate-as-you-type\fR mode, disk usage analyzer mode, comprehensive file details and much more. It remains a simple and efficient file browser that stays out of your way.
 .Pp
 .Nm
 defaults to the current directory if
@@ -119,12 +119,9 @@ supports the following options:
 .Sh CONFIGURATION
 .Nm
 uses \fIxdg-open\fR (on Linux) and \fIopen(1)\fR (on OS X) as the desktop
-opener. If \fBNNN_OPENER\fR (see ENVIRONMENT section below) is not set,
-.Nm
-invokes
+opener. It invokes
 .Pa nlay
-to view text files (recognized by extension) or run actions. It is a highly
-customizable bash shell script. Read more on
+to run desktop search utility or screensaver. Read more on
 .Pa nlay
 at:
 .br
@@ -161,13 +158,16 @@ allowing continuous navigation. Works best with the \fBarrow keys\fR.
 The SHELL, EDITOR and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively.
 .Pp
-\fBNNN_DE_FILE_MANAGER:\fR set to a desktop file manager to open the current
-directory with.
-.Pp
-\fBNNN_OPENER:\fR set \fIxdg-open\fR (on Linux) or \fIopen(1)\fR desktop opener
-to handle all file types.
+\fBNNN_USE_EDITOR:\fR use EDITOR (preferably CLI, fallback vi) to handle text
+files.
 .Bd -literal
-        export NNN_OPENER=1
+        export NNN_USE_EDITOR=1
+.Ed
+.Pp
+\fBNNN_DE_FILE_MANAGER:\fR set to a desktop file manager to open the current
+directory with. E.g.:
+.Bd -literal
+        export NNN_DE_FILE_MANAGER=thunar
 .Ed
 .Pp
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal

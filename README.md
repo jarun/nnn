@@ -33,11 +33,9 @@ Noice is Not Noice, a noicer fork...
 - [How to](#how-to)
   - [use cd .....](#use-cd-)
   - [cd on quit](#cd-on-quit)
-  - [customize nlay](#customize-nlay)
   - [copy file path to clipboard](#copy-file-path-to-clipboard)
   - [file copy, move, delete](#file-copy-move-delete)
   - [boost chdir prompt](#boost-chdir-prompt)
-  - [change text file association](#change-text-file-association)
   - [set idle timeout](#set-idle-timeout)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
@@ -47,7 +45,7 @@ Noice is Not Noice, a noicer fork...
 
 `nnn` is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect utility on modern distros.
 
-`nnn` can use the desktop opener at runtime and handle text files or actions with [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay), a customizable bash script. `nnn` adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
+`nnn` invokes the desktop opener at runtime, adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
 
 If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! All from the same terminal session. Follow the instructions in the [quickstart](#quickstart) section and see how `nnn` simplifies those long desktop sessions...
 
@@ -72,7 +70,8 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Desktop search (default gnome-search-tool, customizable) integration
 - Mimes
   - Desktop opener integration
-  - Customizable bash script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) to handle text files or actions
+  - Optionally open text files in EDITOR (fallback vi)
+  - Customizable bash script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) to handle actions
 - Information
   - Basic and detail view
   - Detailed file information
@@ -191,7 +190,7 @@ Filters support regexes to display only the matched entries in the current direc
 
 Filters do not stack on top of each other. They are applied anew every time. There are 4 ways to reset a filter: <kbd>^L</kbd>, an empty filter expression, a search with no results or an extra backspace at the filter prompt (like vi).
 
-If you want to list all matches starting with the filter expression (a common use case), start the expression with a `^` (caret) symbol.
+Examples: If you want to list all matches starting with the filter expression (a common use case), start the expression with a `^` (caret) symbol. To list all MKV files type `\.mkv`.
 
 If `nnn` is invoked as root the default filter will also match hidden files.
 
@@ -215,13 +214,10 @@ The following abbreviations are used in the detail view:
 
 #### File handling
 
-- `nnn` uses `xdg-open` on Linux and `open(1)` on OS X as the desktop opener. To let the desktop opener handle everything:
+- `nnn` uses `xdg-open` on Linux and `open(1)` on OS X as the desktop opener.
+- To edit all text files in EDITOR (preferably CLI, fallback vi):
 
-        export NNN_OPENER=1
-- If `NNN_OPENER` is not set:
-  - If `nnn` recognizes a text file by extension, it invokes nlay, which in turn opens the file in vim.
-  - If a file without any extension is a plain text file, it is opened in EDITOR (fallback vi)
-  - All other files are handled by desktop opener
+        export NNN_USE_EDITOR=1
 - To enable the desktop file manager key, set `NNN_DE_FILE_MANAGER`. E.g.:
 
         export NNN_DE_FILE_MANAGER=thunar
@@ -240,13 +236,10 @@ Add the following to your shell's rc file for the best experience:
 1. Always open `nnn` in detail mode:
 
         alias n='nnn -d'
-2. Set desktop opener as default:
-
-        export NNN_OPENER=1
-3. Set a desktop file manager to open directories with (if you need one). E.g.:
+2. Set a desktop file manager to open directories with (if you need one). E.g.:
 
         export NNN_DE_FILE_MANAGER=thunar
-4. Start `nnn`.
+3. Start `nnn`.
 
         n
 
@@ -261,10 +254,6 @@ To jump to the n<sup>th</sup> level parent, with PWD at level 0, use `n + 1` dot
 Pick the appropriate file for your shell from [misc/quitcd](https://github.com/jarun/nnn/tree/master/misc/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start `nnn` as `n` (or modify the function name to something else).
 
 As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
-
-#### customize nlay
-
-nlay is a tiny standalone text file and action handler. To know how to customize or extend its functionality, please visit [nlay on wiki](https://github.com/jarun/nnn/wiki/all-about-nlay).
 
 #### copy file path to clipboard
 
@@ -293,14 +282,6 @@ Start `nnn` and use <kbd>^K</kbd> to copy the absolute path (from `/`) of the fi
 #### boost chdir prompt
 
 `nnn` uses libreadline for the chdir prompt input. So all the fantastic features of readline (e.g. case insensitive tab completion, history, reverse-i-search) is available to you based on your readline [configuration](https://cnswww.cns.cwru.edu/php/chet/readline/readline.html#SEC9).
-
-#### change text file association
-
-If `NNN_OPENER` is not set, `nnn` tries to recognize text files by extension and invokes nlay. To add a new extension mainline, please raise a bug. Without it `nnn` will not invoke nlay.
-
-Text files are opened in vim by default. You can easily change it in nlay.
-
-nlay has provisions (disabled by default) to handle a specific file extension too. However, the extension should be recognized by `nnn` first.
 
 #### set idle timeout
 

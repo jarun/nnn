@@ -151,9 +151,9 @@ extern int wget_wch(WINDOW *, wint_t *);
 static struct entry *dents;
 static int ndents, cur, total_dents;
 static int idle;
-static int opener;
 static char *player;
 static char *copier;
+static char *editor;
 static char *desktop_manager;
 static off_t blk_size;
 static size_t fs_free;
@@ -1664,32 +1664,27 @@ nochange:
 				goto begin;
 			case S_IFREG:
 			{
-				/* If NNN_OPENER is set, use it */
-				if (opener) {
-					spawn(utils[0], newpath, NULL, NULL, 4);
-					continue;
-				}
+				/* If NNN_USE_EDITOR is set, open text in EDITOR */
+				if (editor) {
+					mime = getmime(dents[cur].name);
+					if (mime) {
+						exitcurses();
+						spawn(editor, newpath, NULL, NULL, 0);
+						initcurses();
+						continue;
+					}
 
-				/* Play text-based files with nlay */
-				mime = getmime(dents[cur].name);
-				if (mime) {
-					exitcurses();
-					spawn(player, newpath, mime, NULL, 0);
-					initcurses();
-					continue;
-				}
+					/* Recognize and open plain text files with vi */
+					if (get_output(g_buf, MAX_CMD_LEN, "file", "-bi",
+						       newpath, 0) == NULL)
+						continue;
 
-				/* Recognize and open plain text files with vi */
-				if (get_output(g_buf, MAX_CMD_LEN, "file", "-bi",
-					       newpath, 0) == NULL)
-					continue;
-
-				if (strstr(g_buf, "text/") == g_buf) {
-					exitcurses();
-					run = xgetenv("EDITOR", "vi");
-					spawn(run, newpath, NULL, NULL, 0);
-					initcurses();
-					continue;
+					if (strstr(g_buf, "text/") == g_buf) {
+						exitcurses();
+						spawn(editor, newpath, NULL, NULL, 0);
+						initcurses();
+						continue;
+					}
 				}
 
 				/* Invoke desktop opener as last resort */
@@ -2169,9 +2164,9 @@ main(int argc, char *argv[])
 		showhidden = 1;
 	initfilter(showhidden, &ifilter);
 
-	/* Always use desktop opener, if opted */
-	if (getenv("NNN_OPENER"))
-		opener = 1;
+	/* Edit text in EDITOR, if opted */
+	if (getenv("NNN_USE_EDITOR"))
+		editor = xgetenv("EDITOR", "vi");
 
 	/* Set player if not set already */
 	if (!player)
