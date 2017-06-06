@@ -727,7 +727,6 @@ readln(char *path)
 			case '\r':  // with nonl(), this is ENTER key value
 				if (len == 1) {
 					cur = oldcur;
-					*ch = CONTROL('L');
 					goto end;
 				}
 

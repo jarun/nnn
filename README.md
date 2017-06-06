@@ -188,7 +188,7 @@ Right, Enter, l, ^M | Open file or enter dir
 
 Filters support regexes to display only the matched entries in the current directory view. This effectively allows searching through the directory tree for a particular entry. Matching entries are shown instantly (search-as-you-type).
 
-Filters do not stack on top of each other. They are applied anew every time. There are 4 ways to reset a filter: <kbd>^L</kbd>, an empty filter expression, a search with no results or an extra backspace at the filter prompt (like vi).
+Filters do not stack on top of each other. They are applied anew every time. There are 3 ways to reset a filter: <kbd>^L</kbd>, a search with no matches or an extra backspace at the filter prompt (like vi).
 
 Examples: If you want to list all matches starting with the filter expression (a common use case), start the expression with a `^` (caret) symbol. To list all MKV files type `\.mkv`.
 
