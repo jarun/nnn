@@ -178,7 +178,7 @@ Right, Enter, l, ^M | Open file or enter dir
                   o | Open dir in NNN_DE_FILE_MANAGER
                   p | Open entry in PAGER (fallback less)
                  ^K | Invoke file path copier
-                 ^L | Force a redraw
+                 ^L | Force a redraw, exit filter prompt
                   ? | Toggle help screen
                   Q | Quit and change directory
               q, ^Q | Quit

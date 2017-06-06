@@ -1282,7 +1282,7 @@ show_help(void)
                     o | Open dir in NNN_DE_FILE_MANAGER\n\
                     p | Open entry in PAGER (fallback less)\n\
                    ^K | Invoke file path copier\n\
-                   ^L | Force a redraw\n\
+                   ^L | Force a redraw, exit filter prompt\n\
                     ? | Toggle help screen\n\
                     Q | Quit and change directory\n\
 		q, ^Q | Quit\n\n\" | less");
@@ -2141,7 +2141,7 @@ main(int argc, char *argv[])
 			fprintf(stdout, "%s\n", VERSION);
 			return 0;
 		case 'd':
-			fprintf(stderr, "option -d is deprecated, detail view mode is default now.\n");
+			fprintf(stderr, "Option -d is deprecated and will be removed, detail view mode is default now.\n");
 			break;
 		case 'h': // fallthrough
 		default:

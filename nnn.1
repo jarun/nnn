@@ -84,7 +84,7 @@ Open current entry in PAGER (fallback less)
 .It Ic ^K
 Invoke file path copier
 .It Ic ^L
-Force a redraw
+Force a redraw, exit filter prompt
 .It Ic \&?
 Toggle help screen
 .It Ic Q
@@ -136,7 +136,7 @@ instructions.
 Filters support regexes to display only the matched
 entries in the current directory view. This effectively allows
 searching through the directory tree for a particular entry. Matching entries
-are shown instantly (search-as-you-type).
+are shown instantly (\fIsearch-as-you-type\fR).
 .Pp
 Filters do not stack on top of each other. They are applied anew
 every time. There are 4 ways to reset a filter: \fI^L\fR, an empty filter
@@ -152,7 +152,7 @@ If
 .Nm
 is invoked as root the default filter will also match hidden files.
 .Pp
-In the \fInavigate-as-you-type mode\fR directories are opened in filter mode,
+In the \fInavigate-as-you-type\fR mode directories are opened in filter mode,
 allowing continuous navigation. Works best with the \fBarrow keys\fR.
 .Sh ENVIRONMENT
 The SHELL, EDITOR and PAGER environment variables take precedence
