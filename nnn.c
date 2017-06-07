@@ -2010,7 +2010,7 @@ nochange:
 				goto nochange;
 			}
 
-			spawn(desktop_manager, path, NULL, path, 2);
+			spawn(desktop_manager, path, NULL, path, 0b110);
 			break;
 		case SEL_FSIZE:
 			sizeorder = !sizeorder;
