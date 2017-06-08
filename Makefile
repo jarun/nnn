@@ -3,7 +3,7 @@ VERSION = 1.1
 PREFIX = /usr/local
 MANPREFIX = $(PREFIX)/share/man
 
-CFLAGS += -O2 -Wall -Wextra -Wno-unused-parameter
+CFLAGS += -O2 -Wall -Wextra -Werror -Wno-unused-parameter
 LDLIBS = -lreadline
 
 ifeq ($(shell pkg-config ncursesw && echo 1),1)
