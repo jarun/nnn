@@ -1311,7 +1311,12 @@ show_mediainfo(char* fpath, char *arg)
 static int
 show_help(void)
 {
-	static char helpstr[] = ("echo \"\
+	char tmp[] = "/tmp/nnnXXXXXX";
+	int fd = mkstemp(tmp);
+	if (fd == -1)
+		return -1;
+
+	static char helpstr[] = ("\
                   Key | Function\n\
                      -+-\n\
             Up, k, ^P | Previous entry\n\
@@ -1344,11 +1349,40 @@ show_help(void)
                     p | Open entry in PAGER (fallback less)\n\
                    ^K | Invoke file path copier\n\
                    ^L | Force a redraw, exit filter prompt\n\
-                    ? | Toggle help screen\n\
+                    ? | Toggle help and settings screen\n\
                     Q | Quit and change directory\n\
-		q, ^Q | Quit\n\n\" | less");
+		q, ^Q | Quit\n\n\n");
 
-	return system(helpstr);
+	dprintf(fd, "%s", helpstr);
+
+	if (getenv("NNN_BMS")) {
+		dprintf(fd, "BOOKMARKS\n");
+		for (int i = 0; i < MAX_BM; i++)
+			if (bookmark[i].key)
+				dprintf(fd, "    %s: %s\n", bookmark[i].key, bookmark[i].loc);
+			else
+				break;
+		dprintf(fd, "\n");
+	}
+
+	if (editor)
+		dprintf(fd, "NNN_USE_EDITOR: %s\n", editor);
+
+	if (desktop_manager)
+		dprintf(fd, "NNN_DE_FILE_MANAGER: %s\n", desktop_manager);
+
+	if (idletimeout)
+		dprintf(fd, "NNN_IDLE_TIMEOUT: %d secs\n", idletimeout);
+
+	if (copier)
+		dprintf(fd, "NNN_COPIER: %s\n", copier);
+
+	dprintf(fd, "\n");
+	close(fd);
+
+	get_output(NULL, 0, "cat", tmp, NULL, 1);
+	unlink(tmp);
+	return 0;
 }
 
 static int
@@ -2285,6 +2319,11 @@ main(int argc, char *argv[])
 		showhidden = 1;
 	initfilter(showhidden, &ifilter);
 
+	/* Parse bookmarks string, if available */
+	char *bms = getenv("NNN_BMS");
+	if (bms)
+		parsebmstr(bms);
+
 	/* Edit text in EDITOR, if opted */
 	if (getenv("NNN_USE_EDITOR"))
 		editor = xgetenv("EDITOR", "vi");
@@ -2303,11 +2342,6 @@ main(int argc, char *argv[])
 
 	/* Get the default copier, if set */
 	copier = getenv("NNN_COPIER");
-
-	/* Parse bookmarks string, if available */
-	char *bms = getenv("NNN_BMS");
-	if (bms)
-		parsebmstr(bms);
 
 	signal(SIGINT, SIG_IGN);
 

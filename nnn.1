@@ -88,7 +88,7 @@ Invoke file path copier
 .It Ic ^L
 Force a redraw, exit filter prompt
 .It Ic \&?
-Toggle help screen
+Toggle help and settings screen
 .It Ic Q
 Quit and change directory
 .It Ic q, ^Q
@@ -129,6 +129,9 @@ at:
 .br
 .Em https://github.com/jarun/nnn/wiki/all-about-nlay
 .Pp
+There is no configuration file. Settings work on environment variables. Please
+refer to the ENVIRONMENT section below.
+.Pp
 Configuring
 .Nm
 to change to the last visited directory on quit requires shell integration in a
@@ -158,16 +161,16 @@ allowing continuous navigation. Works best with the \fBarrow keys\fR.
 The SHELL, EDITOR and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively.
 .Pp
-\fBNNN_USE_EDITOR:\fR use EDITOR (preferably CLI, fallback vi) to handle text
-files.
-.Bd -literal
-        export NNN_USE_EDITOR=1
-.Ed
-.Pp
 \fBNNN_BMS:\fR bookmark string as \fIkey:location\fR pairs (max 10) separated by
 \fI;\fR:
 .Bd -literal
         export NNN_BMS='doc:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
+.Ed
+.Pp
+\fBNNN_USE_EDITOR:\fR use EDITOR (preferably CLI, fallback vi) to handle text
+files.
+.Bd -literal
+        export NNN_USE_EDITOR=1
 .Ed
 .Pp
 \fBNNN_DE_FILE_MANAGER:\fR set to a desktop file manager to open the current
