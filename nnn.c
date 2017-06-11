@@ -78,6 +78,7 @@ xprintf(int fd, const char *fmt, ...)
 #define MAX_CMD_LEN 5120
 #define CURSYM(flag) (flag ? CURSR : EMPTY)
 #define FILTER '/'
+#define MAX_BM 10
 
 struct assoc {
 	char *regex; /* Regex to match on filename */
@@ -103,6 +104,7 @@ enum action {
 	SEL_CDHOME,
 	SEL_CDBEGIN,
 	SEL_CDLAST,
+	SEL_CDBM,
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
 	SEL_STATS,
@@ -136,6 +138,11 @@ typedef struct entry {
 	off_t bsize;
 } *pEntry;
 
+typedef struct {
+	char *key;
+	char *loc;
+} bm;
+
 typedef unsigned long ulong;
 
 /* Externs */
@@ -158,7 +165,9 @@ static char *desktop_manager;
 static off_t blk_size;
 static size_t fs_free;
 static int open_max;
+static bm bookmark[MAX_BM];
 static const double div_2_pow_10 = 1.0 / 1024.0;
+
 
 static char *utils[] = {
 #ifdef __APPLE__
@@ -842,6 +851,58 @@ mkpath(char *dir, char *name, char *out, size_t n)
 	return out;
 }
 
+static void
+parsebmstr(char *bms)
+{
+	int i = 0;
+
+	while (*bms && i < MAX_BM) {
+		bookmark[i].key = bms;
+
+		bms++;
+		while (*bms && *bms != ':')
+			bms++;
+
+		if (!*bms) {
+			bookmark[i].key = NULL;
+			break;
+		}
+
+		*bms = '\0';
+
+		bookmark[i].loc = ++bms;
+		if (bookmark[i].loc[0] == '\0' || bookmark[i].loc[0] == ';') {
+			bookmark[i].key = NULL;
+			break;
+		}
+
+		while (*bms && *bms != ';')
+			bms++;
+
+		if (*bms)
+			*bms = '\0';
+		else
+			break;
+
+		bms++;
+		i++;
+	}
+}
+
+static char *
+readinput(void)
+{
+        timeout(-1);
+        echo();
+        curs_set(TRUE);
+        memset(g_buf, 0, LINE_MAX);
+        wgetnstr(stdscr, g_buf, LINE_MAX - 1);
+        noecho();
+        curs_set(FALSE);
+        timeout(1000);
+        return g_buf[0] ? g_buf : NULL;
+}
+
 static char *
 replace_escape(const char *str)
 {
@@ -1268,6 +1329,7 @@ show_help(void)
                     / | Filter dir contents\n\
                    ^/ | Search dir in desktop search tool\n\
                     . | Toggle hide .dot files\n\
+                    b | Show bookmark key prompt\n\
                     c | Show change dir prompt\n\
                     d | Toggle detail view\n\
                     D | Toggle current file details screen\n\
@@ -1745,7 +1807,7 @@ nochange:
 			break;
 		case SEL_CD:
 		{
-			static char *tmp, *input;
+			static char *input;
 			static int truecd;
 
 			/* Save the program start dir */
@@ -1791,7 +1853,8 @@ nochange:
 					snprintf(newpath, PATH_MAX, "%s%s", home, tmp + 1);
 				else {
 					free(input);
-					break;
+					printmsg("HOME not set");
+					goto nochange;
 				}
 			} else if (tmp[0] == '-' && tmp[1] == '\0') {
 				if (lastdir[0] == '\0') {
@@ -1943,6 +2006,61 @@ nochange:
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
+			if (filtermode)
+				presel = FILTER;
+			goto begin;
+		case SEL_CDBM:
+			printprompt("key: ");
+			tmp = readinput();
+			if (tmp == NULL) {
+				clearprompt();
+				goto nochange;
+			}
+
+			clearprompt();
+
+			for (r = 0; bookmark[r].key && r < MAX_BM; r++) {
+				if (strcmp(bookmark[r].key, tmp) == 0) {
+					if (bookmark[r].loc[0] == '~') {
+						/* Expand ~ to HOME absolute path */
+						char *home = getenv("HOME");
+						if (home)
+							snprintf(newpath, PATH_MAX, "%s%s", home, bookmark[r].loc + 1);
+						else {
+							printmsg("HOME not set");
+							goto nochange;
+						}
+					} else
+						mkpath(path, bookmark[r].loc, newpath, PATH_MAX);
+
+					if (canopendir(newpath) == 0) {
+						printwarn();
+						goto nochange;
+					}
+
+					if (strcmp(path, newpath) == 0)
+						break;
+
+					oldpath[0] = '\0';
+					break;
+				}
+			}
+
+			if (!bookmark[r].key) {
+				printmsg("No matching bookmark");
+				goto nochange;
+			}
+
+			/* Save last working directory */
+			xstrlcpy(lastdir, path, PATH_MAX);
+
+			/* Save the newly opted dir in path */
+			xstrlcpy(path, newpath, PATH_MAX);
+
+			/* Reset filter */
+			xstrlcpy(fltr, ifilter, LINE_MAX);
+			DPRINTF_S(path);
+
 			if (filtermode)
 				presel = FILTER;
 			goto begin;
@@ -2185,6 +2303,11 @@ main(int argc, char *argv[])
 
 	/* Get the default copier, if set */
 	copier = getenv("NNN_COPIER");
+
+	/* Parse bookmarks string, if available */
+	char *bms = getenv("NNN_BMS");
+	if (bms)
+		parsebmstr(bms);
 
 	signal(SIGINT, SIG_IGN);
 

@@ -31,6 +31,7 @@ Noice is Not Noice, a noicer fork...
   - [Help](#help)
 - [Quickstart](#quickstart)
 - [How to](#how-to)
+  - [add bookmarks](#add-bookmarks)
   - [use cd .....](#use-cd-)
   - [cd on quit](#cd-on-quit)
   - [copy file path to clipboard](#copy-file-path-to-clipboard)
@@ -45,7 +46,7 @@ Noice is Not Noice, a noicer fork...
 
 `nnn` is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect candidate for modern distros.
 
-`nnn` works with the desktop opener, adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
+`nnn` works with the desktop opener, adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, bookmarks, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
 
 If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
 
@@ -61,6 +62,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - Navigation
   - Familiar shortcuts
   - *Navigate-as-you-type* mode
+  - Bookmarks
   - Jump HOME or to the last visited directory (as usual!)
   - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
   - Roll-over at edges, page through entries
@@ -165,6 +167,7 @@ Right, Enter, l, ^M | Open file or enter dir
                   / | Filter dir contents
                  ^/ | Search dir in desktop search tool
                   . | Toggle hide .dot files
+                  b | Show bookmark key prompt
                   c | Show change dir prompt
                   d | Toggle detail view
                   D | Toggle current file details screen
@@ -246,6 +249,12 @@ Add the following to your shell's rc file for the best experience:
 Run `n`.
 
 ### How to
+
+#### add bookmarks
+
+Set environment variable `NNN_BMS` as a string of `key:location` pairs (max 10) separated by semicolons (`;`):
+
+    export NNN_BMS='doc:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
 
 #### use cd .....
 

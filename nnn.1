@@ -15,7 +15,7 @@
 .Op Ar PATH
 .Sh DESCRIPTION
 .Nm
-(Noice is Not Noice) is a performance-optimized fork of the noice terminal file browser with extensive desktop integration, simplified navigation, \fInavigate-as-you-type\fR mode, disk usage analyzer mode, comprehensive file details and much more. It remains a simple and efficient file browser that stays out of your way.
+(Noice is Not Noice) is a performance-optimized fork of the noice terminal file browser with extensive desktop integration, simplified navigation, \fInavigate-as-you-type\fR mode, bookmarks, disk usage analyzer mode, comprehensive file details and much more. It remains a simple and efficient file browser that stays out of your way.
 .Pp
 .Nm
 defaults to the current directory if
@@ -57,8 +57,10 @@ Change filter (more information below)
 Search directory in desktop search tool
 .It Ic \&.
 Toggle hide .dot files
+.It Ic b
+Show bookmark key prompt
 .It Ic c
-Change into the given directory
+Show change dir prompt
 .It Ic d
 Toggle detail view
 .It Ic D
@@ -160,6 +162,12 @@ when dealing with the !, e and p commands respectively.
 files.
 .Bd -literal
         export NNN_USE_EDITOR=1
+.Ed
+.Pp
+\fBNNN_BMS:\fR bookmark string as \fIkey:location\fR pairs (max 10) separated by
+\fI;\fR:
+.Bd -literal
+        export NNN_BMS='doc:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
 .Ed
 .Pp
 \fBNNN_DE_FILE_MANAGER:\fR set to a desktop file manager to open the current

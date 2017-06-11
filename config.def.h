@@ -69,6 +69,8 @@ static struct key bindings[] = {
 	{ '&',            SEL_CDBEGIN,   "",     "" },
 	/* Last visited dir */
 	{ '-',            SEL_CDLAST,    "",     "" },
+	/* Change dir using bookmark */
+	{ 'b',            SEL_CDBM,      "",     "" },
 	/* Toggle hide .dot files */
 	{ '.',            SEL_TOGGLEDOT, "",     "" },
 	/* Detailed listing */
