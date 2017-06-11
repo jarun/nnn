@@ -1312,7 +1312,7 @@ static int
 show_help(void)
 {
 	char tmp[] = "/tmp/nnnXXXXXX";
-	int fd = mkstemp(tmp);
+	int i = 0, fd = mkstemp(tmp);
 	if (fd == -1)
 		return -1;
 
@@ -1357,7 +1357,7 @@ show_help(void)
 
 	if (getenv("NNN_BMS")) {
 		dprintf(fd, "BOOKMARKS\n");
-		for (int i = 0; i < MAX_BM; i++)
+		for (; i < MAX_BM; i++)
 			if (bookmark[i].key)
 				dprintf(fd, "    %s: %s\n", bookmark[i].key, bookmark[i].loc);
 			else
