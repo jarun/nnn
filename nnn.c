@@ -343,6 +343,35 @@ all_dots(const char *ptr)
 	return count;
 }
 
+static void
+initcurses(void)
+{
+	if (initscr() == NULL) {
+		char *term = getenv("TERM");
+
+		if (term != NULL)
+			fprintf(stderr, "error opening terminal: %s\n", term);
+		else
+			fprintf(stderr, "failed to initialize curses\n");
+		exit(1);
+	}
+	cbreak();
+	noecho();
+	nonl();
+	intrflush(stdscr, FALSE);
+	keypad(stdscr, TRUE);
+	curs_set(FALSE); /* Hide cursor */
+	start_color();
+	use_default_colors();
+	timeout(1000); /* One second */
+}
+
+static void
+exitcurses(void)
+{
+	endwin(); /* Restore terminal */
+}
+
 /*
  * Spawns a child process. Behaviour can be controlled using flag:
  * Limited to 2 arguments to a program
@@ -351,6 +380,7 @@ all_dots(const char *ptr)
  *    - 0b10: do not wait in parent for child process e.g. DE file manager
  *    - 0b100: suppress stdout and stderr
  *    - 0b1000: restore default SIGINT handler
+ *    - 0b10000000: exit curses mode
  */
 static void
 spawn(char *file, char *arg1, char *arg2, char *dir, unsigned char flag)
@@ -358,17 +388,20 @@ spawn(char *file, char *arg1, char *arg2, char *dir, unsigned char flag)
 	pid_t pid;
 	int status;
 
+	if (flag & 0b10000000)
+		exitcurses();
+
 	pid = fork();
 	if (pid == 0) {
 		if (dir != NULL)
 			status = chdir(dir);
 
 		/* Show a marker (to indicate nnn spawned shell) */
-		if (flag & 0x01)
+		if (flag & 0b1)
 			printf("\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
 
 		/* Suppress stdout and stderr */
-		if (flag & 0x04) {
+		if (flag & 0b100) {
 			int fd = open("/dev/null", O_WRONLY, 0200);
 
 			dup2(fd, 1);
@@ -376,16 +409,19 @@ spawn(char *file, char *arg1, char *arg2, char *dir, unsigned char flag)
 			close(fd);
 		}
 
-		if (flag & 0x08)
+		if (flag & 0b1000)
 			signal(SIGINT, SIG_DFL);
 		execlp(file, file, arg1, arg2, NULL);
 		_exit(1);
 	} else {
-		if (!(flag & 0x02))
+		if (!(flag & 0b10))
 			/* Ignore interruptions */
 			while (waitpid(pid, &status, 0) == -1)
 				DPRINTF_D(status);
+
 		DPRINTF_D(pid);
+		if (flag & 0b10000000)
+			initcurses();
 	}
 }
 
@@ -555,35 +591,6 @@ entrycmp(const void *va, const void *vb)
 	}
 
 	return xstricmp(pa->name, pb->name);
-}
-
-static void
-initcurses(void)
-{
-	if (initscr() == NULL) {
-		char *term = getenv("TERM");
-
-		if (term != NULL)
-			fprintf(stderr, "error opening terminal: %s\n", term);
-		else
-			fprintf(stderr, "failed to initialize curses\n");
-		exit(1);
-	}
-	cbreak();
-	noecho();
-	nonl();
-	intrflush(stdscr, FALSE);
-	keypad(stdscr, TRUE);
-	curs_set(FALSE); /* Hide cursor */
-	start_color();
-	use_default_colors();
-	timeout(1000); /* One second */
-}
-
-static void
-exitcurses(void)
-{
-	endwin(); /* Restore terminal */
 }
 
 /* Messages show up at the bottom */
@@ -1304,8 +1311,10 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 
 	close(fd);
 
+	exitcurses();
 	get_output(NULL, 0, "cat", tmp, NULL, 1);
 	unlink(tmp);
+	initcurses();
 	return 0;
 }
 
@@ -1318,7 +1327,6 @@ show_mediainfo(char *fpath, char *arg)
 	exitcurses();
 	get_output(NULL, 0, "mediainfo", fpath, arg, 1);
 	initcurses();
-
 	return 0;
 }
 
@@ -1396,8 +1404,10 @@ show_help(void)
 	dprintf(fd, "\n");
 	close(fd);
 
+	exitcurses();
 	get_output(NULL, 0, "cat", tmp, NULL, 1);
 	unlink(tmp);
+	initcurses();
 	return 0;
 }
 
@@ -1791,10 +1801,8 @@ nochange:
 				if (editor) {
 					mime = getmime(dents[cur].name);
 					if (mime) {
-						exitcurses();
 						spawn(editor, newpath, NULL,
-						      NULL, 0);
-						initcurses();
+						      NULL, 0b10000000);
 						continue;
 					}
 
@@ -1807,16 +1815,14 @@ nochange:
 						continue;
 
 					if (strstr(g_buf, "text/") == g_buf) {
-						exitcurses();
 						spawn(editor, newpath, NULL,
-						      NULL, 0);
-						initcurses();
+						      NULL, 0b10000000);
 						continue;
 					}
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(utils[0], newpath, NULL, NULL, 4);
+				spawn(utils[0], newpath, NULL, NULL, 0b100);
 				continue;
 			}
 			default:
@@ -1840,9 +1846,7 @@ nochange:
 				printmsg("navigate-as-you-type off");
 			goto nochange;
 		case SEL_SEARCH:
-			exitcurses();
-			spawn(player, path, "search", NULL, 0);
-			initcurses();
+			spawn(player, path, "search", NULL, 0b10000000);
 			break;
 		case SEL_NEXT:
 			if (cur < ndents - 1)
@@ -2166,10 +2170,8 @@ nochange:
 						dentfree(dents);
 					printerr(1, "lstat");
 				} else {
-					exitcurses();
 					r = show_stats(oldpath, dents[cur].name,
 						       &sb);
-					initcurses();
 					if (r < 0) {
 						printmsg(strerror(errno));
 						goto nochange;
@@ -2207,7 +2209,7 @@ nochange:
 				goto nochange;
 			}
 
-			spawn(desktop_manager, path, NULL, path, 0x06);
+			spawn(desktop_manager, path, NULL, path, 0b110);
 			break;
 		case SEL_FSIZE:
 			sizeorder = !sizeorder;
@@ -2254,36 +2256,28 @@ nochange:
 				else
 					snprintf(newpath, PATH_MAX, "%s/%s",
 						 path, dents[cur].name);
-				spawn(copier, newpath, NULL, NULL, 0);
+				spawn(copier, newpath, NULL, NULL, 0b0);
 				printmsg(newpath);
 			} else if (!copier)
 				printmsg("NNN_COPIER is not set");
 			goto nochange;
 		case SEL_HELP:
-			exitcurses();
 			show_help();
-			initcurses();
 			break;
 		case SEL_RUN:
 			run = xgetenv(env, run);
-			exitcurses();
-			spawn(run, NULL, NULL, path, 1);
-			initcurses();
+			spawn(run, NULL, NULL, path, 0b10000001);
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_RUNARG:
 			run = xgetenv(env, run);
-			exitcurses();
-			spawn(run, dents[cur].name, NULL, path, 0);
-			initcurses();
+			spawn(run, dents[cur].name, NULL, path, 0b10000000);
 			break;
 		}
 		/* Screensaver */
 		if (idletimeout != 0 && idle == idletimeout) {
 			idle = 0;
-			exitcurses();
-			spawn(player, "", "screensaver", NULL, 8);
-			initcurses();
+			spawn(player, "", "screensaver", NULL, 0b10001000);
 		}
 	}
 }
