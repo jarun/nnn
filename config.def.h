@@ -3,12 +3,12 @@
 #define CURSR " > "
 #define EMPTY "   "
 
-static int filtermode  = 0; /* Set to 1 to enter filter mode */
-static int mtimeorder  = 0; /* Set to 1 to sort by time modified */
-static int sizeorder   = 0; /* Set to 1 to sort by file size */
-static int bsizeorder  = 0; /* Set to 1 to sort by blocks used including content */
-static int idletimeout = 0; /* Screensaver timeout in seconds, 0 to disable */
-static int showhidden  = 0; /* Set to 1 to show hidden files by default */
+static int filtermode;      /* Set to 1 to enter filter mode */
+static int mtimeorder;      /* Set to 1 to sort by time modified */
+static int sizeorder;       /* Set to 1 to sort by file size */
+static int bsizeorder;      /* Set to 1 to sort by blocks used (disk usage) */
+static int idletimeout;     /* Idle timeout in seconds, 0 to disable */
+static int showhidden;      /* Set to 1 to show hidden files by default */
 static int showdetail  = 1; /* Set to 0 to show fewer file info */
 
 static struct assoc assocs[] = {

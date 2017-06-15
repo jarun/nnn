@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 #include <sys/stat.h>
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) \
- || defined(__APPLE__)
+	|| defined(__APPLE__)
 # include <sys/types.h>
 #else
 # include <sys/sysmacros.h>
@@ -147,12 +147,12 @@ typedef unsigned long ulong;
 
 /* Externs */
 #ifdef __APPLE__
-extern int add_history(const char *);
+extern int add_history(const char *string);
 #else
 extern void add_history(const char *string);
 #endif
 
-extern int wget_wch(WINDOW *, wint_t *);
+extern int wget_wch(WINDOW *win, wint_t *wch);
 
 /* Global context */
 static struct entry *dents;
@@ -207,9 +207,8 @@ static rlim_t
 max_openfds()
 {
 	struct rlimit rl;
-        rlim_t limit;
+	rlim_t limit = getrlimit(RLIMIT_NOFILE, &rl);
 
-	limit = getrlimit(RLIMIT_NOFILE, &rl);
 	if (limit != 0)
 		return 32;
 
@@ -229,7 +228,8 @@ max_openfds()
 static void
 xstrlcpy(char *dest, const char *src, size_t n)
 {
-	while (--n && (*dest++ = *src++));
+	while (--n && (*dest++ = *src++))
+		;
 	if (!n)
 		*dest = '\0';
 }
@@ -296,10 +296,11 @@ xdirname(const char *path)
 		/* Terminate the buffer. */
 		if (runp == buf) {
 			/* The last slash is the first character in the string.
-			   We have to return "/". As a special case we have to
-			   return "//" if there are exactly two slashes at the
-			   beginning of the string. See XBD 4.10 Path Name
-			   Resolution for more information. */
+			 * We have to return "/". As a special case we have to
+			 * return "//" if there are exactly two slashes at the
+			 * beginning of the string. See XBD 4.10 Path Name
+			 * Resolution for more information.
+			 */
 			if (last_slash == buf + 1)
 				++last_slash;
 			else
@@ -310,8 +311,9 @@ xdirname(const char *path)
 		last_slash[0] = '\0';
 	} else {
 		/* This assignment is ill-designed but the XPG specs require to
-		   return a string containing "." in any case no directory part
-		   is found and so a static and constant string is required. */
+		 * return a string containing "." in any case no directory part
+		 * is found and so a static and constant string is required.
+		 */
 		buf[0] = '.';
 		buf[1] = '\0';
 	}
@@ -323,12 +325,13 @@ xdirname(const char *path)
  * Return number of dots of all chars in a string are dots, else 0
  */
 static int
-all_dots(const char* ptr)
+all_dots(const char *ptr)
 {
 	if (!ptr)
 		return FALSE;
 
 	int count = 0;
+
 	while (*ptr == '.') {
 		count++;
 		ptr++;
@@ -361,23 +364,24 @@ spawn(char *file, char *arg1, char *arg2, char *dir, unsigned char flag)
 			status = chdir(dir);
 
 		/* Show a marker (to indicate nnn spawned shell) */
-		if (flag & 0b1)
-			fprintf(stdout, "\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
+		if (flag & 0x01)
+			printf("\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
 
 		/* Suppress stdout and stderr */
-		if (flag & 0b100) {
-			int fd = open("/dev/null", O_WRONLY, S_IWUSR);
+		if (flag & 0x04) {
+			int fd = open("/dev/null", O_WRONLY, 0200);
+
 			dup2(fd, 1);
 			dup2(fd, 2);
 			close(fd);
 		}
 
-		if (flag & 0b1000)
+		if (flag & 0x08)
 			signal(SIGINT, SIG_DFL);
 		execlp(file, file, arg1, arg2, NULL);
 		_exit(1);
 	} else {
-		if (!(flag & 0b10))
+		if (!(flag & 0x02))
 			/* Ignore interruptions */
 			while (waitpid(pid, &status, 0) == -1)
 				DPRINTF_D(status);
@@ -422,7 +426,7 @@ xstricmp(char *s1, char *s2)
 		c2++;
 	if (*c2 == '-' || *c2 == '+')
 		c2++;
-	while(*c2 >= '0' && *c2 <= '9')
+	while (*c2 >= '0' && *c2 <= '9')
 		c2++;
 
 	if (*c1 == '\0' && *c2 == '\0') {
@@ -445,7 +449,8 @@ xstricmp(char *s1, char *s2)
 		s1++, s2++;
 
 	/* In case of alphabetically same names, make sure
-	   lower case one comes before upper case one */
+	 * lower case one comes before upper case one
+	 */
 	if (!*s1 && !*s2)
 		return 1;
 
@@ -557,6 +562,7 @@ initcurses(void)
 {
 	if (initscr() == NULL) {
 		char *term = getenv("TERM");
+
 		if (term != NULL)
 			fprintf(stderr, "error opening terminal: %s\n", term);
 		else
@@ -665,21 +671,24 @@ fill(struct entry **dents,
 				static struct entry _dent;
 
 				/* Copy count to tmp */
-				xstrlcpy(_dent.name, (*dents)[count].name, NAME_MAX);
+				xstrlcpy(_dent.name, (*dents)[count].name,
+					 NAME_MAX);
 				_dent.mode = (*dents)[count].mode;
 				_dent.t = (*dents)[count].t;
 				_dent.size = (*dents)[count].size;
 				_dent.bsize = (*dents)[count].bsize;
 
 				/* Copy ndents - 1 to count */
-				xstrlcpy((*dents)[count].name, (*dents)[ndents].name, NAME_MAX);
+				xstrlcpy((*dents)[count].name,
+					 (*dents)[ndents].name, NAME_MAX);
 				(*dents)[count].mode = (*dents)[ndents].mode;
 				(*dents)[count].t = (*dents)[ndents].t;
 				(*dents)[count].size = (*dents)[ndents].size;
 				(*dents)[count].bsize = (*dents)[ndents].bsize;
 
 				/* Copy tmp to ndents - 1 */
-				xstrlcpy((*dents)[ndents].name, _dent.name, NAME_MAX);
+				xstrlcpy((*dents)[ndents].name, _dent.name,
+					 NAME_MAX);
 				(*dents)[ndents].mode = _dent.mode;
 				(*dents)[ndents].t = _dent.t;
 				(*dents)[ndents].size = _dent.size;
@@ -732,7 +741,7 @@ readln(char *path)
 
 	while ((r = wget_wch(stdscr, ch)) != ERR) {
 		if (r == OK) {
-			switch(*ch) {
+			switch (*ch) {
 			case '\r':  // with nonl(), this is ENTER key value
 				if (len == 1) {
 					cur = oldcur;
@@ -780,7 +789,7 @@ readln(char *path)
 				printprompt(ln);
 			}
 		} else {
-			switch(*ch) {
+			switch (*ch) {
 			case KEY_DC: // fallthrough
 			case KEY_BACKSPACE:
 				if (len == 1) {
@@ -892,15 +901,15 @@ parsebmstr(char *bms)
 static char *
 readinput(void)
 {
-        timeout(-1);
-        echo();
-        curs_set(TRUE);
-        memset(g_buf, 0, LINE_MAX);
-        wgetnstr(stdscr, g_buf, LINE_MAX - 1);
-        noecho();
-        curs_set(FALSE);
-        timeout(1000);
-        return g_buf[0] ? g_buf : NULL;
+	timeout(-1);
+	echo();
+	curs_set(TRUE);
+	memset(g_buf, 0, LINE_MAX);
+	wgetnstr(stdscr, g_buf, LINE_MAX - 1);
+	noecho();
+	curs_set(FALSE);
+	timeout(1000);
+	return g_buf[0] ? g_buf : NULL;
 }
 
 static char *
@@ -909,6 +918,7 @@ replace_escape(const char *str)
 	static char buffer[PATH_MAX];
 	static wchar_t wbuf[PATH_MAX];
 	static wchar_t *buf;
+
 	buffer[0] = '\0';
 	buf = wbuf;
 
@@ -928,32 +938,32 @@ replace_escape(const char *str)
 }
 
 static void
-printent(struct entry *ent, int active)
+printent(struct entry *ent, int sel)
 {
 	static int ncols;
 
-	if (COLS > PATH_MAX + 16)
+	if (PATH_MAX + 16 < COLS)
 		ncols = PATH_MAX + 16;
 	else
 		ncols = COLS;
 
 	if (S_ISDIR(ent->mode))
-		snprintf(g_buf, ncols, "%s%s/", CURSYM(active),
+		snprintf(g_buf, ncols, "%s%s/", CURSYM(sel),
 			 replace_escape(ent->name));
 	else if (S_ISLNK(ent->mode))
-		snprintf(g_buf, ncols, "%s%s@", CURSYM(active),
+		snprintf(g_buf, ncols, "%s%s@", CURSYM(sel),
 			 replace_escape(ent->name));
 	else if (S_ISSOCK(ent->mode))
-		snprintf(g_buf, ncols, "%s%s=", CURSYM(active),
+		snprintf(g_buf, ncols, "%s%s=", CURSYM(sel),
 			 replace_escape(ent->name));
 	else if (S_ISFIFO(ent->mode))
-		snprintf(g_buf, ncols, "%s%s|", CURSYM(active),
+		snprintf(g_buf, ncols, "%s%s|", CURSYM(sel),
 			 replace_escape(ent->name));
-	else if (ent->mode & S_IXUSR)
-		snprintf(g_buf, ncols, "%s%s*", CURSYM(active),
+	else if (ent->mode & 0100)
+		snprintf(g_buf, ncols, "%s%s*", CURSYM(sel),
 			 replace_escape(ent->name));
 	else
-		snprintf(g_buf, ncols, "%s%s", CURSYM(active),
+		snprintf(g_buf, ncols, "%s%s", CURSYM(sel),
 			 replace_escape(ent->name));
 
 	printw("%s\n", g_buf);
@@ -962,7 +972,8 @@ printent(struct entry *ent, int active)
 static char*
 coolsize(off_t size)
 {
-	static const char *size_units[] = {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
+	static const char * const U[]
+		= {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
 	static char size_buf[12]; /* Buffer to hold human readable size */
 	static int i;
 	static off_t tmp;
@@ -978,95 +989,95 @@ coolsize(off_t size)
 		i++;
 	}
 
-	snprintf(size_buf, 12, "%.*Lf%s", i, size + rem * div_2_pow_10, size_units[i]);
+	snprintf(size_buf, 12, "%.*Lf%s", i, size + rem * div_2_pow_10, U[i]);
 	return size_buf;
 }
 
 static void
-printent_long(struct entry *ent, int active)
+printent_long(struct entry *ent, int sel)
 {
 	static int ncols;
 	static char buf[18];
 
-	if (COLS > PATH_MAX + 32)
+	if (PATH_MAX + 32 < COLS)
 		ncols = PATH_MAX + 32;
 	else
 		ncols = COLS;
 
 	strftime(buf, 18, "%d %m %Y %H:%M", localtime(&ent->t));
 
-	if (active)
+	if (sel)
 		attron(A_REVERSE);
 
 	if (!bsizeorder) {
 		if (S_ISDIR(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        /  %s/",
-				 CURSYM(active), buf, replace_escape(ent->name));
+				 CURSYM(sel), buf, replace_escape(ent->name));
 		else if (S_ISLNK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@",
-				 CURSYM(active), buf, replace_escape(ent->name));
+				 CURSYM(sel), buf, replace_escape(ent->name));
 		else if (S_ISSOCK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        =  %s=",
-				 CURSYM(active), buf, replace_escape(ent->name));
+				 CURSYM(sel), buf, replace_escape(ent->name));
 		else if (S_ISFIFO(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        |  %s|",
-				 CURSYM(active), buf, replace_escape(ent->name));
+				 CURSYM(sel), buf, replace_escape(ent->name));
 		else if (S_ISBLK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        b  %s",
-				 CURSYM(active), buf, replace_escape(ent->name));
+				 CURSYM(sel), buf, replace_escape(ent->name));
 		else if (S_ISCHR(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        c  %s",
-				 CURSYM(active), buf, replace_escape(ent->name));
-		else if (ent->mode & S_IXUSR)
+				 CURSYM(sel), buf, replace_escape(ent->name));
+		else if (ent->mode & 0100)
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*",
-				 CURSYM(active), buf, coolsize(ent->size),
+				 CURSYM(sel), buf, coolsize(ent->size),
 				 replace_escape(ent->name));
 		else
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s",
-				 CURSYM(active), buf, coolsize(ent->size),
+				 CURSYM(sel), buf, coolsize(ent->size),
 				 replace_escape(ent->name));
 	} else {
 		if (S_ISDIR(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s/ %s/",
-				 CURSYM(active), buf, coolsize(ent->bsize << 9),
+				 CURSYM(sel), buf, coolsize(ent->bsize << 9),
 				 replace_escape(ent->name));
 		else if (S_ISLNK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@",
-				 CURSYM(active), buf,
+				 CURSYM(sel), buf,
 				 replace_escape(ent->name));
 		else if (S_ISSOCK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        =  %s=",
-				 CURSYM(active), buf,
+				 CURSYM(sel), buf,
 				 replace_escape(ent->name));
 		else if (S_ISFIFO(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        |  %s|",
-				 CURSYM(active), buf,
+				 CURSYM(sel), buf,
 				 replace_escape(ent->name));
 		else if (S_ISBLK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        b  %s",
-				 CURSYM(active), buf,
+				 CURSYM(sel), buf,
 				 replace_escape(ent->name));
 		else if (S_ISCHR(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        c  %s",
-				 CURSYM(active), buf,
+				 CURSYM(sel), buf,
 				 replace_escape(ent->name));
-		else if (ent->mode & S_IXUSR)
+		else if (ent->mode & 0100)
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*",
-				 CURSYM(active), buf, coolsize(ent->bsize << 9),
+				 CURSYM(sel), buf, coolsize(ent->bsize << 9),
 				 replace_escape(ent->name));
 		else
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s",
-				 CURSYM(active), buf, coolsize(ent->bsize << 9),
+				 CURSYM(sel), buf, coolsize(ent->bsize << 9),
 				 replace_escape(ent->name));
 	}
 
 	printw("%s\n", g_buf);
 
-	if (active)
+	if (sel)
 		attroff(A_REVERSE);
 }
 
-static void (*printptr)(struct entry *ent, int active) = &printent_long;
+static void (*printptr)(struct entry *ent, int sel) = &printent_long;
 
 static char
 get_fileind(mode_t mode, char *desc)
@@ -1076,7 +1087,7 @@ get_fileind(mode_t mode, char *desc)
 	if (S_ISREG(mode)) {
 		c = '-';
 		sprintf(desc, "%s", "regular file");
-		if (mode & S_IXUSR)
+		if (mode & 0100)
 			strcat(desc, ", executable");
 	} else if (S_ISDIR(mode)) {
 		c = 'd';
@@ -1114,15 +1125,15 @@ get_fileind(mode_t mode, char *desc)
 		desc[0] = '\0';
 	}
 
-	return(c);
+	return c;
 }
 
 /* Convert a mode field into "ls -l" type perms field. */
 static char *
 get_lsperms(mode_t mode, char *desc)
 {
-	static const char *rwx[] = {"---", "--x", "-w-", "-wx",
-				    "r--", "r-x", "rw-", "rwx"};
+	static const char * const rwx[] = {"---", "--x", "-w-", "-wx",
+					   "r--", "r-x", "rw-", "rwx"};
 	static char bits[11];
 
 	bits[0] = get_fileind(mode, desc);
@@ -1131,15 +1142,15 @@ get_lsperms(mode_t mode, char *desc)
 	strcpy(&bits[7], rwx[(mode & 7)]);
 
 	if (mode & S_ISUID)
-		bits[3] = (mode & S_IXUSR) ? 's' : 'S';
+		bits[3] = (mode & 0100) ? 's' : 'S';  /* user executable */
 	if (mode & S_ISGID)
-		bits[6] = (mode & S_IXGRP) ? 's' : 'l';
+		bits[6] = (mode & 0010) ? 's' : 'l';  /* group executable */
 	if (mode & S_ISVTX)
-		bits[9] = (mode & S_IXOTH) ? 't' : 'T';
+		bits[9] = (mode & 0001) ? 't' : 'T';  /* others executable */
 
 	bits[10] = '\0';
 
-	return(bits);
+	return bits;
 }
 
 /*
@@ -1149,11 +1160,12 @@ get_lsperms(mode_t mode, char *desc)
  * If pager is valid, returns NULL
  */
 static char *
-get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int pager)
+get_output(char *buf, size_t bytes, char *file,
+	   char *arg1, char *arg2, int pager)
 {
 	pid_t pid;
 	int pipefd[2];
-	FILE* pf;
+	FILE *pf;
 	int status;
 	char *ret = NULL;
 
@@ -1174,7 +1186,8 @@ get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int page
 	waitpid(pid, &status, 0);
 	close(pipefd[1]);
 	if (!pager) {
-		if ((pf = fdopen(pipefd[0], "r"))) {
+		pf = fdopen(pipefd[0], "r");
+		if (pf) {
 			ret = fgets(buf, bytes, pf);
 			close(pipefd[0]);
 		}
@@ -1201,13 +1214,13 @@ get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int page
  * Follows the stat(1) output closely
  */
 static int
-show_stats(char* fpath, char* fname, struct stat *sb)
+show_stats(char *fpath, char *fname, struct stat *sb)
 {
 	char *perms = get_lsperms(sb->st_mode, g_buf);
 	char *p, *begin = g_buf;
-
 	char tmp[] = "/tmp/nnnXXXXXX";
 	int fd = mkstemp(tmp);
+
 	if (fd == -1)
 		return -1;
 
@@ -1215,6 +1228,7 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 	if (perms[0] == 'l') {
 		/* Note that MAX_CMD_LEN > PATH_MAX */
 		ssize_t len = readlink(fpath, g_buf, MAX_CMD_LEN);
+
 		if (len != -1) {
 			g_buf[len] = '\0';
 			dprintf(fd, "    File: '%s' -> ",
@@ -1296,9 +1310,9 @@ show_stats(char* fpath, char* fname, struct stat *sb)
 }
 
 static int
-show_mediainfo(char* fpath, char *arg)
+show_mediainfo(char *fpath, char *arg)
 {
-	if (get_output(g_buf, MAX_CMD_LEN, "which", "mediainfo", NULL, 0) == NULL)
+	if (!get_output(g_buf, MAX_CMD_LEN, "which", "mediainfo", NULL, 0))
 		return -1;
 
 	exitcurses();
@@ -1312,10 +1326,6 @@ static int
 show_help(void)
 {
 	char tmp[] = "/tmp/nnnXXXXXX";
-	int i = 0, fd = mkstemp(tmp);
-	if (fd == -1)
-		return -1;
-
 	static char helpstr[] = ("\
                   Key | Function\n\
                      -+-\n\
@@ -1353,13 +1363,19 @@ show_help(void)
                     Q | Quit and change directory\n\
 		q, ^Q | Quit\n\n\n");
 
+	int i = 0, fd = mkstemp(tmp);
+
+	if (fd == -1)
+		return -1;
+
 	dprintf(fd, "%s", helpstr);
 
 	if (getenv("NNN_BMS")) {
 		dprintf(fd, "BOOKMARKS\n");
 		for (; i < MAX_BM; i++)
 			if (bookmark[i].key)
-				dprintf(fd, "    %s: %s\n", bookmark[i].key, bookmark[i].loc);
+				dprintf(fd, "    %s: %s\n",
+					bookmark[i].key, bookmark[i].loc);
 			else
 				break;
 		dprintf(fd, "\n");
@@ -1386,7 +1402,8 @@ show_help(void)
 }
 
 static int
-sum_bsizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+sum_bsizes(const char *fpath, const struct stat *sb,
+	   int typeflag, struct FTW *ftwbuf)
 {
 	if (typeflag == FTW_F || typeflag == FTW_D)
 		blk_size += sb->st_blocks;
@@ -1436,6 +1453,7 @@ dentfill(char *path, struct entry **dents,
 	static struct dirent *dp;
 	static struct stat sb;
 	static int n;
+
 	n = 0;
 
 	dirp = opendir(path);
@@ -1473,7 +1491,8 @@ dentfill(char *path, struct entry **dents,
 		if (bsizeorder) {
 			if (S_ISDIR(sb.st_mode)) {
 				blk_size = 0;
-				if (nftw(newpath, sum_bsizes, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
+				if (nftw(newpath, sum_bsizes, open_max,
+					 FTW_MOUNT | FTW_PHYS) == -1) {
 					printmsg("nftw(3) failed");
 					(*dents)[n].bsize = sb.st_blocks;
 				} else
@@ -1487,6 +1506,7 @@ dentfill(char *path, struct entry **dents,
 
 	if (bsizeorder) {
 		static struct statvfs svb;
+
 		if (statvfs(path, &svb) == -1)
 			fs_free = 0;
 		else
@@ -1594,6 +1614,7 @@ redraw(char *path)
 			printptr(&dents[i], i == cur);
 	} else {
 		static int odd;
+
 		odd = ISODD(nlines);
 		nlines >>= 1;
 		for (i = cur - nlines; i < cur + nlines + odd; i++)
@@ -1620,7 +1641,7 @@ redraw(char *path)
 				ind[0] = '=';
 			else if (S_ISFIFO(dents[cur].mode))
 				ind[0] = '|';
-			else if (dents[cur].mode & S_IXUSR)
+			else if (dents[cur].mode & 0100)
 				ind[0] = '*';
 			else
 				ind[0] = '\0';
@@ -1629,7 +1650,8 @@ redraw(char *path)
 				sprintf(cwd, "total %d %s[%s%s]", ndents, sort,
 					replace_escape(dents[cur].name), ind);
 			else
-				sprintf(cwd, "total %d by disk usage, %s free [%s%s]",
+				sprintf(cwd,
+					"total %d by disk usage, %s free [%s%s]",
 					ndents, coolsize(fs_free),
 					replace_escape(dents[cur].name), ind);
 
@@ -1680,10 +1702,13 @@ nochange:
 		case SEL_CDQUIT:
 		{
 			char *tmpfile = "/tmp/nnn";
-			if ((tmp = getenv("NNN_TMPFILE")) != NULL)
+
+			tmp = getenv("NNN_TMPFILE");
+			if (tmp)
 				tmpfile = tmp;
 
 			FILE *fp = fopen(tmpfile, "w");
+
 			if (fp) {
 				fprintf(fp, "cd \"%s\"", path);
 				fclose(fp);
@@ -1760,24 +1785,31 @@ nochange:
 				goto begin;
 			case S_IFREG:
 			{
-				/* If NNN_USE_EDITOR is set, open text in EDITOR */
+				/* If NNN_USE_EDITOR is set,
+				 * open text in EDITOR
+				 */
 				if (editor) {
 					mime = getmime(dents[cur].name);
 					if (mime) {
 						exitcurses();
-						spawn(editor, newpath, NULL, NULL, 0);
+						spawn(editor, newpath, NULL,
+						      NULL, 0);
 						initcurses();
 						continue;
 					}
 
-					/* Recognize and open plain text files with vi */
-					if (get_output(g_buf, MAX_CMD_LEN, "file", "-bi",
+					/* Recognize and open plain
+					 * text files with vi
+					 */
+					if (get_output(g_buf, MAX_CMD_LEN,
+						       "file", "-bi",
 						       newpath, 0) == NULL)
 						continue;
 
 					if (strstr(g_buf, "text/") == g_buf) {
 						exitcurses();
-						spawn(editor, newpath, NULL, NULL, 0);
+						spawn(editor, newpath, NULL,
+						      NULL, 0);
 						initcurses();
 						continue;
 					}
@@ -1797,7 +1829,8 @@ nochange:
 			DPRINTF_S(fltr);
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath,
+				       PATH_MAX);
 			goto nochange;
 		case SEL_MFLTR:
 			filtermode = !filtermode;
@@ -1867,9 +1900,9 @@ nochange:
 
 			if (tmp[0] == '\0')
 				break;
-			else
-				/* Add to readline(3) history */
-				add_history(tmp);
+
+			/* Add to readline(3) history */
+			add_history(tmp);
 
 			input = tmp;
 			tmp = strstrip(tmp);
@@ -1883,8 +1916,10 @@ nochange:
 			if (tmp[0] == '~') {
 				/* Expand ~ to HOME absolute path */
 				char *home = getenv("HOME");
+
 				if (home)
-					snprintf(newpath, PATH_MAX, "%s%s", home, tmp + 1);
+					snprintf(newpath, PATH_MAX, "%s%s",
+						 home, tmp + 1);
 				else {
 					free(input);
 					printmsg("HOME not set");
@@ -1911,8 +1946,7 @@ nochange:
 
 				for (fd = 0; fd < r; fd++) {
 					/* Reached / ? */
-					if (strcmp(path, "/") == 0 ||
-					    strchr(path, '/') == NULL) {
+					if (path[0] == '/' && path[1] == '\0') {
 						/* If it's a cd .. at / */
 						if (fd == 0) {
 							printmsg("You are at /");
@@ -1922,20 +1956,21 @@ nochange:
 
 						/* Can't cd beyond / anyway */
 						break;
-					} else {
-						dir = xdirname(dir);
-						if (canopendir(dir) == 0) {
-							printwarn();
-							free(input);
-							goto nochange;
-						}
+					}
+
+					dir = xdirname(dir);
+					if (canopendir(dir) == 0) {
+						printwarn();
+						free(input);
+						goto nochange;
 					}
 				}
 
 				truecd = 1;
 
 				/* Save the path in case of cd ..
-				   We mark the current dir in parent dir */
+				 * We mark the current dir in parent dir
+				 */
 				if (r == 1) {
 					xstrlcpy(oldpath, path, PATH_MAX);
 					truecd = 2;
@@ -1945,19 +1980,18 @@ nochange:
 			} else
 				mkpath(path, tmp, newpath, PATH_MAX);
 
+			free(input);
+
 			if (canopendir(newpath) == 0) {
 				printwarn();
-				free(input);
 				break;
 			}
 
 			if (truecd == 0) {
 				/* Probable change in dir */
 				/* No-op if it's the same directory */
-				if (strcmp(path, newpath) == 0) {
-					free(input);
+				if (strcmp(path, newpath) == 0)
 					break;
-				}
 
 				oldpath[0] = '\0';
 			} else if (truecd == 1)
@@ -1973,7 +2007,6 @@ nochange:
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
-			free(input);
 			if (filtermode)
 				presel = FILTER;
 			goto begin;
@@ -2056,16 +2089,23 @@ nochange:
 			for (r = 0; bookmark[r].key && r < MAX_BM; r++) {
 				if (strcmp(bookmark[r].key, tmp) == 0) {
 					if (bookmark[r].loc[0] == '~') {
-						/* Expand ~ to HOME absolute path */
+						/* Expand ~ to HOME */
 						char *home = getenv("HOME");
+
 						if (home)
-							snprintf(newpath, PATH_MAX, "%s%s", home, bookmark[r].loc + 1);
+							snprintf(newpath,
+								 PATH_MAX,
+								 "%s%s",
+								 home,
+								 bookmark[r].loc
+								 + 1);
 						else {
 							printmsg("HOME not set");
 							goto nochange;
 						}
 					} else
-						mkpath(path, bookmark[r].loc, newpath, PATH_MAX);
+						mkpath(path, bookmark[r].loc,
+						       newpath, PATH_MAX);
 
 					if (canopendir(newpath) == 0) {
 						printwarn();
@@ -2109,14 +2149,16 @@ nochange:
 				   : (printptr = &printent);
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath,
+				       PATH_MAX);
 			goto begin;
 		case SEL_STATS:
 		{
 			struct stat sb;
 
 			if (ndents > 0) {
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath,
+				       PATH_MAX);
 
 				r = lstat(oldpath, &sb);
 				if (r == -1) {
@@ -2125,7 +2167,8 @@ nochange:
 					printerr(1, "lstat");
 				} else {
 					exitcurses();
-					r = show_stats(oldpath, dents[cur].name, &sb);
+					r = show_stats(oldpath, dents[cur].name,
+						       &sb);
 					initcurses();
 					if (r < 0) {
 						printmsg(strerror(errno));
@@ -2138,9 +2181,10 @@ nochange:
 		}
 		case SEL_MEDIA:
 			if (ndents > 0) {
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath,
+				       PATH_MAX);
 
-				if(show_mediainfo(oldpath, NULL) == -1) {
+				if (show_mediainfo(oldpath, NULL) == -1) {
 					printmsg("mediainfo missing");
 					goto nochange;
 				}
@@ -2148,9 +2192,10 @@ nochange:
 			break;
 		case SEL_FMEDIA:
 			if (ndents > 0) {
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath,
+				       PATH_MAX);
 
-				if(show_mediainfo(oldpath, "-f") == -1) {
+				if (show_mediainfo(oldpath, "-f") == -1) {
 					printmsg("mediainfo missing");
 					goto nochange;
 				}
@@ -2162,7 +2207,7 @@ nochange:
 				goto nochange;
 			}
 
-			spawn(desktop_manager, path, NULL, path, 0b110);
+			spawn(desktop_manager, path, NULL, path, 0x06);
 			break;
 		case SEL_FSIZE:
 			sizeorder = !sizeorder;
@@ -2170,7 +2215,8 @@ nochange:
 			bsizeorder = 0;
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath,
+				       PATH_MAX);
 			goto begin;
 		case SEL_BSIZE:
 			bsizeorder = !bsizeorder;
@@ -2182,7 +2228,8 @@ nochange:
 			sizeorder = 0;
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath,
+				       PATH_MAX);
 			goto begin;
 		case SEL_MTIME:
 			mtimeorder = !mtimeorder;
@@ -2190,12 +2237,14 @@ nochange:
 			bsizeorder = 0;
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath,
+				       PATH_MAX);
 			goto begin;
 		case SEL_REDRAW:
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath,
+				       PATH_MAX);
 			goto begin;
 		case SEL_COPY:
 			if (copier && ndents) {
@@ -2208,7 +2257,7 @@ nochange:
 				spawn(copier, newpath, NULL, NULL, 0);
 				printmsg(newpath);
 			} else if (!copier)
-					printmsg("NNN_COPIER is not set");
+				printmsg("NNN_COPIER is not set");
 			goto nochange;
 		case SEL_HELP:
 			exitcurses();
@@ -2242,7 +2291,7 @@ nochange:
 static void
 usage(void)
 {
-	fprintf(stdout, "usage: nnn [-l] [-i] [-p custom_nlay] [-S] [-v] [-h] [PATH]\n\n\
+	printf("usage: nnn [-l] [-i] [-p custom_nlay] [-S] [-v] [-h] [PATH]\n\n\
 The missing terminal file browser for X.\n\n\
 positional arguments:\n\
   PATH           directory to open [default: current dir]\n\n\
@@ -2264,7 +2313,7 @@ int
 main(int argc, char *argv[])
 {
 	char cwd[PATH_MAX], *ipath;
-	char *ifilter;
+	char *ifilter, *bmstr;
 	int opt = 0;
 
 	/* Confirm we are in a terminal */
@@ -2289,7 +2338,7 @@ main(int argc, char *argv[])
 			player = optarg;
 			break;
 		case 'v':
-			fprintf(stdout, "%s\n", VERSION);
+			printf("%s\n", VERSION);
 			return 0;
 		case 'd':
 			fprintf(stderr, "Option -d is deprecated and will be removed, detail view mode is default now.\n");
@@ -2320,9 +2369,9 @@ main(int argc, char *argv[])
 	initfilter(showhidden, &ifilter);
 
 	/* Parse bookmarks string, if available */
-	char *bms = getenv("NNN_BMS");
-	if (bms)
-		parsebmstr(bms);
+	bmstr = getenv("NNN_BMS");
+	if (bmstr)
+		parsebmstr(bmstr);
 
 	/* Edit text in EDITOR, if opted */
 	if (getenv("NNN_USE_EDITOR"))
