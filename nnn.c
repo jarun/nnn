@@ -228,8 +228,9 @@ max_openfds()
 static void
 xstrlcpy(char *dest, const char *src, size_t n)
 {
-	while (--n && (*dest++ = *src++))
-		;
+	while (--n && (*dest = *src))
+		++dest, ++src;
+
 	if (!n)
 		*dest = '\0';
 }
@@ -248,9 +249,13 @@ xmemrchr(const void *s, unsigned char ch, size_t n)
 
 	p = (unsigned char *)s + n - 1;
 
-	while (n--)
-		if ((*p--) == ch)
-			return ++p;
+	while (n) {
+		if (*p == ch)
+			return p;
+
+		--p;
+		--n;
+	}
 
 	return NULL;
 }
@@ -332,10 +337,8 @@ all_dots(const char *ptr)
 
 	int count = 0;
 
-	while (*ptr == '.') {
-		count++;
-		ptr++;
-	}
+	while (*ptr == '.')
+		++count, ++ptr;
 
 	if (*ptr)
 		return 0;
@@ -451,19 +454,19 @@ xstricmp(char *s1, char *s2)
 
 	c1 = s1;
 	while (isspace(*c1))
-		c1++;
+		++c1;
 	if (*c1 == '-' || *c1 == '+')
-		c1++;
+		++c1;
 	while (*c1 >= '0' && *c1 <= '9')
-		c1++;
+		++c1;
 
 	c2 = s2;
 	while (isspace(*c2))
-		c2++;
+		++c2;
 	if (*c2 == '-' || *c2 == '+')
-		c2++;
+		++c2;
 	while (*c2 >= '0' && *c2 <= '9')
-		c2++;
+		++c2;
 
 	if (*c1 == '\0' && *c2 == '\0') {
 		static long long num1, num2;
@@ -482,7 +485,7 @@ xstricmp(char *s1, char *s2)
 		return 1;
 
 	while (*s2 && *s1 && TOUPPER(*s1) == TOUPPER(*s2))
-		s1++, s2++;
+		++s1, ++s2;
 
 	/* In case of alphabetically same names, make sure
 	 * lower case one comes before upper case one
@@ -503,11 +506,11 @@ strstrip(char *s)
 	size_t len = strlen(s) - 1;
 
 	while (len != 0 && (isspace(s[len]) || s[len] == '/'))
-		len--;
+		--len;
 	s[len + 1] = '\0';
 
 	while (*s && isspace(*s))
-		s++;
+		++s;
 
 	return s;
 }
@@ -519,7 +522,7 @@ getmime(char *file)
 	unsigned int i;
 	static unsigned int len = LEN(assocs);
 
-	for (i = 0; i < len; i++) {
+	for (i = 0; i < len; ++i) {
 		if (regcomp(&regex, assocs[i].regex,
 			    REG_NOSUB | REG_EXTENDED | REG_ICASE) != 0)
 			continue;
@@ -649,11 +652,11 @@ nextsel(char **run, char **env, int *presel)
 		*presel = 0;
 
 	if (c == -1)
-		idle++;
+		++idle;
 	else
 		idle = 0;
 
-	for (i = 0; i < len; i++)
+	for (i = 0; i < len; ++i)
 		if (c == bindings[i].sym) {
 			*run = bindings[i].run;
 			*env = bindings[i].env;
@@ -672,7 +675,7 @@ fill(struct entry **dents,
 {
 	static int count;
 
-	for (count = 0; count < ndents; count++) {
+	for (count = 0; count < ndents; ++count) {
 		if (filter(re, (*dents)[count].name) == 0) {
 			if (count != --ndents) {
 				static struct entry _dent;
@@ -701,7 +704,7 @@ fill(struct entry **dents,
 				(*dents)[ndents].size = _dent.size;
 				(*dents)[ndents].bsize = _dent.bsize;
 
-				count--;
+				--count;
 			}
 
 			continue;
@@ -786,7 +789,8 @@ readln(char *path)
 			case CONTROL('Q'):
 				goto end;
 			default:
-				wln[len++] = (wchar_t)*ch;
+				wln[len] = (wchar_t)*ch;
+				++len;
 				wln[len] = '\0';
 				wcstombs(ln, wln, LINE_MAX << 2);
 				ndents = total;
@@ -875,9 +879,9 @@ parsebmstr(char *bms)
 	while (*bms && i < MAX_BM) {
 		bookmark[i].key = bms;
 
-		bms++;
+		++bms;
 		while (*bms && *bms != ':')
-			bms++;
+			++bms;
 
 		if (!*bms) {
 			bookmark[i].key = NULL;
@@ -893,15 +897,15 @@ parsebmstr(char *bms)
 		}
 
 		while (*bms && *bms != ';')
-			bms++;
+			++bms;
 
 		if (*bms)
 			*bms = '\0';
 		else
 			break;
 
-		bms++;
-		i++;
+		++bms;
+		++i;
 	}
 }
 
@@ -936,7 +940,7 @@ replace_escape(const char *str)
 		if (*buf <= '\x1f' || *buf == '\x7f')
 			*buf = '\?';
 
-		buf++;
+		++buf;
 	}
 
 	/* Convert wide char to multi-byte */
@@ -993,7 +997,7 @@ coolsize(off_t size)
 		tmp = size;
 		size >>= 10;
 		rem = tmp - (size << 10);
-		i++;
+		++i;
 	}
 
 	snprintf(size_buf, 12, "%.*Lf%s", i, size + rem * div_2_pow_10, U[i]);
@@ -1300,7 +1304,7 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 					begin = p + 1;
 				}
 
-				p++;
+				++p;
 			}
 			dprintf(fd, " %s", begin);
 		}
@@ -1380,7 +1384,7 @@ show_help(void)
 
 	if (getenv("NNN_BMS")) {
 		dprintf(fd, "BOOKMARKS\n");
-		for (; i < MAX_BM; i++)
+		for (; i < MAX_BM; ++i)
 			if (bookmark[i].key)
 				dprintf(fd, "    %s: %s\n",
 					bookmark[i].key, bookmark[i].loc);
@@ -1511,7 +1515,7 @@ dentfill(char *path, struct entry **dents,
 				(*dents)[n].bsize = sb.st_blocks;
 		}
 
-		n++;
+		++n;
 	}
 
 	if (bsizeorder) {
@@ -1552,7 +1556,7 @@ dentfind(struct entry *dents, int n, char *path)
 	p = basename(path);
 	DPRINTF_S(p);
 
-	for (i = 0; i < n; i++)
+	for (i = 0; i < n; ++i)
 		if (strcmp(p, dents[i].name) == 0)
 			return i;
 
@@ -1594,7 +1598,7 @@ redraw(char *path)
 	erase();
 
 	/* Strip trailing slashes */
-	for (i = strlen(path) - 1; i > 0; i--)
+	for (i = strlen(path) - 1; i > 0; --i)
 		if (path[i] == '/')
 			path[i] = '\0';
 		else
@@ -1617,17 +1621,17 @@ redraw(char *path)
 
 	/* Print listing */
 	if (cur < (nlines >> 1)) {
-		for (i = 0; i < nlines; i++)
+		for (i = 0; i < nlines; ++i)
 			printptr(&dents[i], i == cur);
 	} else if (cur >= ndents - (nlines >> 1)) {
-		for (i = ndents - nlines; i < ndents; i++)
+		for (i = ndents - nlines; i < ndents; ++i)
 			printptr(&dents[i], i == cur);
 	} else {
 		static int odd;
 
 		odd = ISODD(nlines);
 		nlines >>= 1;
-		for (i = cur - nlines; i < cur + nlines + odd; i++)
+		for (i = cur - nlines; i < cur + nlines + odd; ++i)
 			printptr(&dents[i], i == cur);
 	}
 
@@ -1850,14 +1854,14 @@ nochange:
 			break;
 		case SEL_NEXT:
 			if (cur < ndents - 1)
-				cur++;
+				++cur;
 			else if (ndents)
 				/* Roll over, set cursor to first entry */
 				cur = 0;
 			break;
 		case SEL_PREV:
 			if (cur > 0)
-				cur--;
+				--cur;
 			else if (ndents)
 				/* Roll over, set cursor to last entry */
 				cur = ndents - 1;
@@ -1945,10 +1949,10 @@ nochange:
 					break;
 				}
 
-				r--;
+				--r;
 				dir = path;
 
-				for (fd = 0; fd < r; fd++) {
+				for (fd = 0; fd < r; ++fd) {
 					/* Reached / ? */
 					if (path[0] == '/' && path[1] == '\0') {
 						/* If it's a cd .. at / */
@@ -2090,7 +2094,7 @@ nochange:
 
 			clearprompt();
 
-			for (r = 0; bookmark[r].key && r < MAX_BM; r++) {
+			for (r = 0; bookmark[r].key && r < MAX_BM; ++r) {
 				if (strcmp(bookmark[r].key, tmp) == 0) {
 					if (bookmark[r].loc[0] == '~') {
 						/* Expand ~ to HOME */
