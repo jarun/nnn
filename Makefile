@@ -1,6 +1,6 @@
 VERSION = 1.1
 
-PREFIX = /usr/local
+PREFIX ?= /usr/local
 MANPREFIX = $(PREFIX)/share/man
 
 CFLAGS += -O2 -Wall -Wextra -Wno-unused-parameter
@@ -27,8 +27,11 @@ $(LOCALCONFIG): config.def.h
 $(SRC): $(LOCALCONFIG)
 
 $(BIN): $(SRC)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 	strip $@
+
+debug: $(SRC)
+	$(CC) -DDEBUGMODE -g $(CFLAGS) -o nnndbg $^ $(LDFLAGS) $(LDLIBS)
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin

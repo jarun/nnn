@@ -39,7 +39,9 @@
 #endif
 #include <ftw.h>
 
-#ifdef DEBUG
+#ifdef DEBUGMODE
+static int DEBUG_FD;
+
 static int
 xprintf(int fd, const char *fmt, ...)
 {
@@ -55,7 +57,29 @@ xprintf(int fd, const char *fmt, ...)
 	return r;
 }
 
-#define DEBUG_FD 8
+static int enabledbg()
+{
+	FILE *fp = fopen("/tmp/nnn_debug", "w");
+
+	if (!fp) {
+		fprintf(stderr, "Cannot open debug file\n");
+		return -1;
+	}
+
+	DEBUG_FD = fileno(fp);
+	if (DEBUG_FD == -1) {
+		fprintf(stderr, "Cannot open debug file descriptor\n");
+		return -1;
+	}
+
+	return 0;
+}
+
+static void disabledbg()
+{
+	close(DEBUG_FD);
+}
+
 #define DPRINTF_D(x) xprintf(DEBUG_FD, #x "=%d\n", x)
 #define DPRINTF_U(x) xprintf(DEBUG_FD, #x "=%u\n", x)
 #define DPRINTF_S(x) xprintf(DEBUG_FD, #x "=%s\n", x)
@@ -82,7 +106,7 @@ xprintf(int fd, const char *fmt, ...)
 
 struct assoc {
 	char *regex; /* Regex to match on filename */
-	char *mime; /* File type */
+	char *mime;  /* File type */
 };
 
 /* Supported actions */
@@ -2398,11 +2422,18 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
+#ifdef DEBUGMODE
+	enabledbg();
+#endif
+
 	/* Set locale */
 	setlocale(LC_ALL, "");
 
 	initcurses();
 	browse(ipath, ifilter);
 	exitcurses();
+#ifdef DEBUGMODE
+	disabledbg();
+#endif
 	exit(0);
 }
