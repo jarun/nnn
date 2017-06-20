@@ -106,6 +106,9 @@ static void disabledbg()
 #define FILTER '/'
 #define MAX_BM 10
 
+typedef unsigned long ulong;
+typedef unsigned char uchar;
+
 /* Directory entry */
 typedef struct entry {
 	char name[NAME_MAX];
@@ -121,7 +124,17 @@ typedef struct {
 	char *loc;
 } bm;
 
-typedef unsigned long ulong;
+/* Settings */
+typedef struct
+{
+	uchar filtermode : 1;  /* Set to enter filter mode */
+	uchar mtimeorder : 1;  /* Set to sort by time modified */
+	uchar sizeorder  : 1;  /* Set to sort by file size */
+	uchar bsizeorder : 1;  /* Set to sort by blocks used (disk usage) */
+	uchar showhidden : 1;  /* Set to show hidden files */
+	uchar showdetail : 1;  /* Clear to show fewer file info */
+	uchar reserved   : 2;
+} settings;
 
 /* Externs */
 #ifdef __APPLE__
@@ -132,14 +145,11 @@ extern void add_history(const char *string);
 
 extern int wget_wch(WINDOW *win, wint_t *wch);
 
-/* Global context */
-static int filtermode;      /* Set to 1 to enter filter mode */
-static int mtimeorder;      /* Set to 1 to sort by time modified */
-static int sizeorder;       /* Set to 1 to sort by file size */
-static int bsizeorder;      /* Set to 1 to sort by blocks used (disk usage) */
-static int idletimeout;     /* Idle timeout in seconds, 0 to disable */
-static int showhidden;      /* Set to 1 to show hidden files by default */
-static int showdetail  = 1; /* Set to 0 to show fewer file info */
+/* Globals */
+static settings cfg = {0, 0, 0, 0, 0, 1, 0};
+
+/* Idle timeout in seconds, 0 to disable */
+static int idletimeout;
 
 static struct entry *dents;
 static int ndents, cur, total_dents;
@@ -230,14 +240,14 @@ xstrlcpy(char *dest, const char *src, size_t n)
  * We are only looking for '/' in this program.
  */
 static void *
-xmemrchr(const void *s, unsigned char ch, size_t n)
+xmemrchr(const void *s, uchar ch, size_t n)
 {
 	if (!s || !n)
 		return NULL;
 
-	static unsigned char *p;
+	static uchar *p;
 
-	p = (unsigned char *)s + n - 1;
+	p = (uchar *)s + n - 1;
 
 	while (n) {
 		if (*p == ch)
@@ -378,7 +388,7 @@ exitcurses(void)
  *    - 0b10000000: exit curses mode
  */
 static void
-spawn(char *file, char *arg1, char *arg2, char *dir, unsigned char flag)
+spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 {
 	pid_t pid;
 	int status;
@@ -569,17 +579,17 @@ entrycmp(const void *va, const void *vb)
 		return -1;
 
 	/* Do the actual sorting */
-	if (mtimeorder)
+	if (cfg.mtimeorder)
 		return pb->t - pa->t;
 
-	if (sizeorder) {
+	if (cfg.sizeorder) {
 		if (pb->size > pa->size)
 			return 1;
 		else if (pb->size < pa->size)
 			return -1;
 	}
 
-	if (bsizeorder) {
+	if (cfg.bsizeorder) {
 		if (pb->bsize > pa->bsize)
 			return 1;
 		else if (pb->bsize < pa->bsize)
@@ -1013,7 +1023,7 @@ printent_long(struct entry *ent, int sel)
 	if (sel)
 		attron(A_REVERSE);
 
-	if (!bsizeorder) {
+	if (!cfg.bsizeorder) {
 		if (S_ISDIR(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        /  %s/",
 				 CURSYM(sel), buf, replace_escape(ent->name));
@@ -1495,7 +1505,7 @@ dentfill(char *path, struct entry **dents,
 		(*dents)[n].t = sb.st_mtime;
 		(*dents)[n].size = sb.st_size;
 
-		if (bsizeorder) {
+		if (cfg.bsizeorder) {
 			if (S_ISDIR(sb.st_mode)) {
 				blk_size = 0;
 				if (nftw(newpath, sum_bsizes, open_max,
@@ -1511,7 +1521,7 @@ dentfill(char *path, struct entry **dents,
 		++n;
 	}
 
-	if (bsizeorder) {
+	if (cfg.bsizeorder) {
 		static struct statvfs svb;
 
 		if (statvfs(path, &svb) == -1)
@@ -1628,14 +1638,14 @@ redraw(char *path)
 			printptr(&dents[i], i == cur);
 	}
 
-	if (showdetail) {
+	if (cfg.showdetail) {
 		if (ndents) {
 			static char ind[2] = "\0\0";
 			static char sort[17];
 
-			if (mtimeorder)
+			if (cfg.mtimeorder)
 				sprintf(sort, "by time ");
-			else if (sizeorder)
+			else if (cfg.sizeorder)
 				sprintf(sort, "by size ");
 			else
 				sort[0] = '\0';
@@ -1653,7 +1663,7 @@ redraw(char *path)
 			else
 				ind[0] = '\0';
 
-			if (!bsizeorder)
+			if (!cfg.bsizeorder)
 				sprintf(cwd, "total %d %s[%s%s]", ndents, sort,
 					replace_escape(dents[cur].name), ind);
 			else
@@ -1685,7 +1695,7 @@ browse(char *ipath, char *ifilter)
 	newpath[0] = '\0';
 	lastdir[0] = '\0'; /* Can't move back from initial directory */
 
-	if (filtermode)
+	if (cfg.filtermode)
 		presel = FILTER;
 	else
 		presel = 0;
@@ -1747,7 +1757,7 @@ nochange:
 			xstrlcpy(path, dir, PATH_MAX);
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
-			if (filtermode)
+			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
 		case SEL_GOIN:
@@ -1787,7 +1797,7 @@ nochange:
 				oldpath[0] = '\0';
 				/* Reset filter */
 				xstrlcpy(fltr, ifilter, LINE_MAX);
-				if (filtermode)
+				if (cfg.filtermode)
 					presel = FILTER;
 				goto begin;
 			case S_IFREG:
@@ -1836,8 +1846,8 @@ nochange:
 				       PATH_MAX);
 			goto nochange;
 		case SEL_MFLTR:
-			filtermode = !filtermode;
-			if (filtermode)
+			cfg.filtermode ^= 1;
+			if (cfg.filtermode)
 				presel = FILTER;
 			else
 				printmsg("navigate-as-you-type off");
@@ -2008,7 +2018,7 @@ nochange:
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
-			if (filtermode)
+			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
 		}
@@ -2035,7 +2045,7 @@ nochange:
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
-			if (filtermode)
+			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
 		case SEL_CDBEGIN:
@@ -2055,7 +2065,7 @@ nochange:
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
-			if (filtermode)
+			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
 		case SEL_CDLAST:
@@ -2074,7 +2084,7 @@ nochange:
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
-			if (filtermode)
+			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
 		case SEL_CDBM:
@@ -2136,17 +2146,17 @@ nochange:
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
 
-			if (filtermode)
+			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
 		case SEL_TOGGLEDOT:
-			showhidden ^= 1;
-			initfilter(showhidden, &ifilter);
+			cfg.showhidden ^= 1;
+			initfilter(cfg.showhidden, &ifilter);
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			goto begin;
 		case SEL_DETAIL:
-			showdetail = !showdetail;
-			showdetail ? (printptr = &printent_long)
+			cfg.showdetail ^= 1;
+			cfg.showdetail ? (printptr = &printent_long)
 				   : (printptr = &printent);
 			/* Save current */
 			if (ndents > 0)
@@ -2209,31 +2219,31 @@ nochange:
 			spawn(desktop_manager, path, NULL, path, 0b110);
 			break;
 		case SEL_FSIZE:
-			sizeorder = !sizeorder;
-			mtimeorder = 0;
-			bsizeorder = 0;
+			cfg.sizeorder ^= 1;
+			cfg.mtimeorder = 0;
+			cfg.bsizeorder = 0;
 			/* Save current */
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath,
 				       PATH_MAX);
 			goto begin;
 		case SEL_BSIZE:
-			bsizeorder = !bsizeorder;
-			if (bsizeorder) {
-				showdetail = 1;
+			cfg.bsizeorder ^= 1;
+			if (cfg.bsizeorder) {
+				cfg.showdetail = 1;
 				printptr = &printent_long;
 			}
-			mtimeorder = 0;
-			sizeorder = 0;
+			cfg.mtimeorder = 0;
+			cfg.sizeorder = 0;
 			/* Save current */
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath,
 				       PATH_MAX);
 			goto begin;
 		case SEL_MTIME:
-			mtimeorder = !mtimeorder;
-			sizeorder = 0;
-			bsizeorder = 0;
+			cfg.mtimeorder ^= 1;
+			cfg.sizeorder = 0;
+			cfg.bsizeorder = 0;
 			/* Save current */
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath,
@@ -2316,14 +2326,14 @@ main(int argc, char *argv[])
 	while ((opt = getopt(argc, argv, "dlSip:vh")) != -1) {
 		switch (opt) {
 		case 'S':
-			bsizeorder = 1;
+			cfg.bsizeorder = 1;
 			break;
 		case 'l':
-			showdetail = 0;
+			cfg.showdetail = 0;
 			printptr = &printent;
 			break;
 		case 'i':
-			filtermode = 1;
+			cfg.filtermode = 1;
 			break;
 		case 'p':
 			player = optarg;
@@ -2356,8 +2366,8 @@ main(int argc, char *argv[])
 	open_max = max_openfds();
 
 	if (getuid() == 0)
-		showhidden = 1;
-	initfilter(showhidden, &ifilter);
+		cfg.showhidden = 1;
+	initfilter(cfg.showhidden, &ifilter);
 
 	/* Parse bookmarks string, if available */
 	bmstr = getenv("NNN_BMS");
