@@ -39,6 +39,8 @@
 #endif
 #include <ftw.h>
 
+#include "config.h"
+
 #ifdef DEBUGMODE
 static int DEBUG_FD;
 
@@ -89,14 +91,14 @@ static void disabledbg()
 #define DPRINTF_U(x)
 #define DPRINTF_S(x)
 #define DPRINTF_P(x)
-#endif /* DEBUG */
+#endif /* DEBUGMODE */
 
+/* Macro definitions */
 #define VERSION "v1.1"
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define ISODD(x) ((x) & 1)
-#define CONTROL(c) ((c) ^ 0x40)
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define MAX_CMD_LEN 5120
@@ -104,56 +106,7 @@ static void disabledbg()
 #define FILTER '/'
 #define MAX_BM 10
 
-struct assoc {
-	char *regex; /* Regex to match on filename */
-	char *mime;  /* File type */
-};
-
-/* Supported actions */
-enum action {
-	SEL_QUIT = 1,
-	SEL_CDQUIT,
-	SEL_BACK,
-	SEL_GOIN,
-	SEL_FLTR,
-	SEL_MFLTR,
-	SEL_SEARCH,
-	SEL_NEXT,
-	SEL_PREV,
-	SEL_PGDN,
-	SEL_PGUP,
-	SEL_HOME,
-	SEL_END,
-	SEL_CD,
-	SEL_CDHOME,
-	SEL_CDBEGIN,
-	SEL_CDLAST,
-	SEL_CDBM,
-	SEL_TOGGLEDOT,
-	SEL_DETAIL,
-	SEL_STATS,
-	SEL_MEDIA,
-	SEL_FMEDIA,
-	SEL_DFB,
-	SEL_FSIZE,
-	SEL_BSIZE,
-	SEL_MTIME,
-	SEL_REDRAW,
-	SEL_COPY,
-	SEL_HELP,
-	SEL_RUN,
-	SEL_RUNARG,
-};
-
-struct key {
-	int sym;         /* Key pressed */
-	enum action act; /* Action */
-	char *run;       /* Program to run */
-	char *env;       /* Environment variable to run */
-};
-
-#include "config.h"
-
+/* Directory entry */
 typedef struct entry {
 	char name[NAME_MAX];
 	mode_t mode;
@@ -162,6 +115,7 @@ typedef struct entry {
 	off_t bsize;
 } *pEntry;
 
+/* Bookmark */
 typedef struct {
 	char *key;
 	char *loc;
@@ -179,6 +133,14 @@ extern void add_history(const char *string);
 extern int wget_wch(WINDOW *win, wint_t *wch);
 
 /* Global context */
+static int filtermode;      /* Set to 1 to enter filter mode */
+static int mtimeorder;      /* Set to 1 to sort by time modified */
+static int sizeorder;       /* Set to 1 to sort by file size */
+static int bsizeorder;      /* Set to 1 to sort by blocks used (disk usage) */
+static int idletimeout;     /* Idle timeout in seconds, 0 to disable */
+static int showhidden;      /* Set to 1 to show hidden files by default */
+static int showdetail  = 1; /* Set to 0 to show fewer file info */
+
 static struct entry *dents;
 static int ndents, cur, total_dents;
 static int idle;
@@ -188,11 +150,11 @@ static char *editor;
 static char *desktop_manager;
 static off_t blk_size;
 static size_t fs_free;
-static int open_max;
+static unsigned int open_max;
 static bm bookmark[MAX_BM];
 static const double div_2_pow_10 = 1.0 / 1024.0;
 
-
+/* Utilities to open files, run actions */
 static char *utils[] = {
 #ifdef __APPLE__
 	"/usr/bin/open",
@@ -222,11 +184,15 @@ static char g_buf[MAX_CMD_LEN];
  * '------
  */
 
+/* Forward declarations */
 static void printmsg(char *);
 static void printwarn(void);
 static void printerr(int, char *);
 static void redraw(char *path);
 
+/* Functions */
+
+/* Increase the limit on open file descriptors, if possible */
 static rlim_t
 max_openfds()
 {
@@ -266,10 +232,10 @@ xstrlcpy(char *dest, const char *src, size_t n)
 static void *
 xmemrchr(const void *s, unsigned char ch, size_t n)
 {
-	static unsigned char *p;
-
 	if (!s || !n)
 		return NULL;
+
+	static unsigned char *p;
 
 	p = (unsigned char *)s + n - 1;
 
@@ -351,7 +317,7 @@ xdirname(const char *path)
 }
 
 /*
- * Return number of dots of all chars in a string are dots, else 0
+ * Return number of dots if all chars in a string are dots, else 0
  */
 static int
 all_dots(const char *ptr)
@@ -370,6 +336,7 @@ all_dots(const char *ptr)
 	return count;
 }
 
+/* Initialize curses mode */
 static void
 initcurses(void)
 {
@@ -393,6 +360,7 @@ initcurses(void)
 	timeout(1000); /* One second */
 }
 
+/* Exit curses mode */
 static void
 exitcurses(void)
 {
@@ -452,6 +420,7 @@ spawn(char *file, char *arg1, char *arg2, char *dir, unsigned char flag)
 	}
 }
 
+/* Get program name from env var, else return fallback program */
 static char *
 xgetenv(char *name, char *fallback)
 {

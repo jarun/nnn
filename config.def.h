@@ -2,14 +2,57 @@
 #define CWD   "cwd: "
 #define CURSR " > "
 #define EMPTY "   "
+#define CONTROL(c) ((c) ^ 0x40)
 
-static int filtermode;      /* Set to 1 to enter filter mode */
-static int mtimeorder;      /* Set to 1 to sort by time modified */
-static int sizeorder;       /* Set to 1 to sort by file size */
-static int bsizeorder;      /* Set to 1 to sort by blocks used (disk usage) */
-static int idletimeout;     /* Idle timeout in seconds, 0 to disable */
-static int showhidden;      /* Set to 1 to show hidden files by default */
-static int showdetail  = 1; /* Set to 0 to show fewer file info */
+/* Supported actions */
+enum action {
+	SEL_QUIT = 1,
+	SEL_CDQUIT,
+	SEL_BACK,
+	SEL_GOIN,
+	SEL_FLTR,
+	SEL_MFLTR,
+	SEL_SEARCH,
+	SEL_NEXT,
+	SEL_PREV,
+	SEL_PGDN,
+	SEL_PGUP,
+	SEL_HOME,
+	SEL_END,
+	SEL_CD,
+	SEL_CDHOME,
+	SEL_CDBEGIN,
+	SEL_CDLAST,
+	SEL_CDBM,
+	SEL_TOGGLEDOT,
+	SEL_DETAIL,
+	SEL_STATS,
+	SEL_MEDIA,
+	SEL_FMEDIA,
+	SEL_DFB,
+	SEL_FSIZE,
+	SEL_BSIZE,
+	SEL_MTIME,
+	SEL_REDRAW,
+	SEL_COPY,
+	SEL_HELP,
+	SEL_RUN,
+	SEL_RUNARG,
+};
+
+/* Associate a pressed key to an action */
+struct key {
+	int sym;         /* Key pressed */
+	enum action act; /* Action */
+	char *run;       /* Program to run */
+	char *env;       /* Environment variable to run */
+};
+
+/* Extension pattern and mime combination */
+struct assoc {
+	char *regex; /* Regex to match on filename */
+	char *mime;  /* File type */
+};
 
 static struct assoc assocs[] = {
 	{ "\\.(c|cpp|h|log|md|py|sh|txt)$", "text" },
