@@ -106,6 +106,14 @@ static void disabledbg()
 #define FILTER '/'
 #define MAX_BM 10
 
+/* Macros to define process spawn behaviour as flags */
+#define SP_NONE     0x00  /* no flag set */
+#define SP_MARKER   0x01  /* draw marker to indicate nnn spawned (e.g. shell) */
+#define SP_NOWAIT   0x02  /* don't wait for child process (e.g. file manager) */
+#define SP_NOTRACE  0x04  /* suppress stdout and strerr (no traces) */
+#define SP_SIGINT   0x08  /* restore default SIGINT handler */
+#define SP_NORMAL   0x80  /* spawn child process in non-curses regular mode */
+
 typedef unsigned long ulong;
 typedef unsigned char uchar;
 
@@ -378,14 +386,8 @@ exitcurses(void)
 }
 
 /*
- * Spawns a child process. Behaviour can be controlled using flag:
- * Limited to 2 arguments to a program
- * flag works on bit set:
- *    - 0b1: draw a marker to indicate nnn spawned e.g., a shell
- *    - 0b10: do not wait in parent for child process e.g. DE file manager
- *    - 0b100: suppress stdout and stderr
- *    - 0b1000: restore default SIGINT handler
- *    - 0b10000000: exit curses mode
+ * Spawns a child process. Behaviour can be controlled using flag.
+ * Limited to 2 arguments to a program, flag works on bit set.
  */
 static void
 spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
@@ -393,7 +395,7 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 	pid_t pid;
 	int status;
 
-	if (flag & 0b10000000)
+	if (flag & SP_NORMAL)
 		exitcurses();
 
 	pid = fork();
@@ -402,11 +404,11 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 			status = chdir(dir);
 
 		/* Show a marker (to indicate nnn spawned shell) */
-		if (flag & 0b1)
+		if (flag & SP_MARKER)
 			printf("\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
 
 		/* Suppress stdout and stderr */
-		if (flag & 0b100) {
+		if (flag & SP_NOTRACE) {
 			int fd = open("/dev/null", O_WRONLY, 0200);
 
 			dup2(fd, 1);
@@ -414,18 +416,18 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 			close(fd);
 		}
 
-		if (flag & 0b1000)
+		if (flag & SP_SIGINT)
 			signal(SIGINT, SIG_DFL);
 		execlp(file, file, arg1, arg2, NULL);
 		_exit(1);
 	} else {
-		if (!(flag & 0b10))
+		if (!(flag & SP_NOWAIT))
 			/* Ignore interruptions */
 			while (waitpid(pid, &status, 0) == -1)
 				DPRINTF_D(status);
 
 		DPRINTF_D(pid);
-		if (flag & 0b10000000)
+		if (flag & SP_NORMAL)
 			initcurses();
 	}
 }
@@ -1809,7 +1811,7 @@ nochange:
 					mime = getmime(dents[cur].name);
 					if (mime) {
 						spawn(editor, newpath, NULL,
-						      NULL, 0b10000000);
+						      NULL, SP_NORMAL);
 						continue;
 					}
 
@@ -1823,13 +1825,13 @@ nochange:
 
 					if (strstr(g_buf, "text/") == g_buf) {
 						spawn(editor, newpath, NULL,
-						      NULL, 0b10000000);
+						      NULL, SP_NORMAL);
 						continue;
 					}
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(utils[0], newpath, NULL, NULL, 0b100);
+				spawn(utils[0], newpath, NULL, NULL, SP_NOTRACE);
 				continue;
 			}
 			default:
@@ -1853,7 +1855,7 @@ nochange:
 				printmsg("navigate-as-you-type off");
 			goto nochange;
 		case SEL_SEARCH:
-			spawn(player, path, "search", NULL, 0b10000000);
+			spawn(player, path, "search", NULL, SP_NORMAL);
 			break;
 		case SEL_NEXT:
 			if (cur < ndents - 1)
@@ -2216,7 +2218,7 @@ nochange:
 				goto nochange;
 			}
 
-			spawn(desktop_manager, path, NULL, path, 0b110);
+			spawn(desktop_manager, path, NULL, path, SP_NOTRACE | SP_NOWAIT);
 			break;
 		case SEL_FSIZE:
 			cfg.sizeorder ^= 1;
@@ -2263,7 +2265,7 @@ nochange:
 				else
 					snprintf(newpath, PATH_MAX, "%s/%s",
 						 path, dents[cur].name);
-				spawn(copier, newpath, NULL, NULL, 0b0);
+				spawn(copier, newpath, NULL, NULL, SP_NONE);
 				printmsg(newpath);
 			} else if (!copier)
 				printmsg("NNN_COPIER is not set");
@@ -2273,18 +2275,18 @@ nochange:
 			break;
 		case SEL_RUN:
 			run = xgetenv(env, run);
-			spawn(run, NULL, NULL, path, 0b10000001);
+			spawn(run, NULL, NULL, path, SP_NORMAL | SP_MARKER);
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_RUNARG:
 			run = xgetenv(env, run);
-			spawn(run, dents[cur].name, NULL, path, 0b10000000);
+			spawn(run, dents[cur].name, NULL, path, SP_NORMAL);
 			break;
 		}
 		/* Screensaver */
 		if (idletimeout != 0 && idle == idletimeout) {
 			idle = 0;
-			spawn(player, "", "screensaver", NULL, 0b10001000);
+			spawn(player, "", "screensaver", NULL, SP_NORMAL | SP_SIGINT);
 		}
 	}
 }
