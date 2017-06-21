@@ -436,11 +436,11 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 static char *
 xgetenv(char *name, char *fallback)
 {
-	char *value;
-
 	if (name == NULL)
 		return fallback;
-	value = getenv(name);
+
+	char *value = getenv(name);
+
 	return value && value[0] ? value : fallback;
 }
 
@@ -1683,9 +1683,9 @@ redraw(char *path)
 static void
 browse(char *ipath, char *ifilter)
 {
-	static char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX];
-	static char lastdir[PATH_MAX];
-	static char fltr[LINE_MAX];
+	char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX];
+	char lastdir[PATH_MAX];
+	char fltr[LINE_MAX];
 	char *mime, *dir, *tmp, *run, *env;
 	struct stat sb;
 	int r, fd, presel;
@@ -2317,7 +2317,7 @@ main(int argc, char *argv[])
 {
 	char cwd[PATH_MAX], *ipath;
 	char *ifilter, *bmstr;
-	int opt = 0;
+	int opt;
 
 	/* Confirm we are in a terminal */
 	if (!isatty(0) || !isatty(1)) {
