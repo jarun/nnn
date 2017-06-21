@@ -115,6 +115,7 @@ static void disabledbg()
 #define SP_NORMAL   0x80  /* spawn child process in non-curses regular mode */
 
 typedef unsigned long ulong;
+typedef unsigned int uint;
 typedef unsigned char uchar;
 
 /* Directory entry */
@@ -167,8 +168,9 @@ static char *copier;
 static char *editor;
 static char *desktop_manager;
 static off_t blk_size;
+static off_t dir_size;
 static size_t fs_free;
-static unsigned int open_max;
+static uint open_max;
 static bm bookmark[MAX_BM];
 static const double div_2_pow_10 = 1.0 / 1024.0;
 
@@ -524,8 +526,8 @@ static char *
 getmime(char *file)
 {
 	regex_t regex;
-	unsigned int i;
-	static unsigned int len = LEN(assocs);
+	uint i;
+	static uint len = LEN(assocs);
 
 	for (i = 0; i < len; ++i) {
 		if (regcomp(&regex, assocs[i].regex,
@@ -647,9 +649,11 @@ printprompt(char *str)
 static int
 nextsel(char **run, char **env, int *presel)
 {
-	int c = *presel;
-	unsigned int i;
-	static unsigned int len = LEN(bindings);
+	static int c;
+	static uchar i;
+	static uint len = LEN(bindings);
+
+	c = *presel;
 
 	if (c == 0)
 		c = getch();
@@ -1475,6 +1479,9 @@ dentfill(char *path, struct entry **dents,
 
 	n = 0;
 
+	if (cfg.bsizeorder)
+		dir_size = 0;
+
 	dirp = opendir(path);
 	if (dirp == NULL)
 		return 0;
@@ -1485,8 +1492,31 @@ dentfill(char *path, struct entry **dents,
 		    (dp->d_name[1] == '.' && dp->d_name[2] == '\0'))))
 			continue;
 
-		if (filter(re, dp->d_name) == 0)
+		mkpath(path, dp->d_name, newpath, PATH_MAX);
+		if (lstat(newpath, &sb) == -1) {
 			continue;
+			/* if (*dents)
+				free(*dents);
+			printerr(1, "lstat"); */
+		}
+
+		if (filter(re, dp->d_name) == 0) {
+			if (!cfg.bsizeorder)
+				continue;
+
+			if (S_ISDIR(sb.st_mode)) {
+				blk_size = 0;
+				if (nftw(newpath, sum_bsizes, open_max,
+					 FTW_MOUNT | FTW_PHYS) == -1) {
+					printmsg("nftw(3) failed");
+					dir_size += sb.st_blocks;
+				} else
+					dir_size += blk_size;
+			} else
+				dir_size += sb.st_blocks;
+
+			continue;
+		}
 
 		if (n == total_dents) {
 			total_dents += 64;
@@ -1496,13 +1526,7 @@ dentfill(char *path, struct entry **dents,
 		}
 
 		xstrlcpy((*dents)[n].name, dp->d_name, NAME_MAX);
-		/* Get mode flags */
-		mkpath(path, dp->d_name, newpath, PATH_MAX);
-		if (lstat(newpath, &sb) == -1) {
-			if (*dents)
-				free(*dents);
-			printerr(1, "lstat");
-		}
+
 		(*dents)[n].mode = sb.st_mode;
 		(*dents)[n].t = sb.st_mtime;
 		(*dents)[n].size = sb.st_size;
@@ -1518,6 +1542,8 @@ dentfill(char *path, struct entry **dents,
 					(*dents)[n].bsize = blk_size;
 			} else
 				(*dents)[n].bsize = sb.st_blocks;
+
+			dir_size += (*dents)[n].bsize;
 		}
 
 		++n;
@@ -1593,7 +1619,6 @@ populate(char *path, char *oldpath, char *fltr)
 static void
 redraw(char *path)
 {
-	static char cwd[PATH_MAX];
 	static int nlines, i;
 	static size_t ncols;
 
@@ -1613,7 +1638,7 @@ redraw(char *path)
 	DPRINTF_S(path);
 
 	/* No text wrapping in cwd line */
-	if (!realpath(path, cwd)) {
+	if (!realpath(path, g_buf)) {
 		printmsg("Cannot resolve path");
 		return;
 	}
@@ -1621,8 +1646,8 @@ redraw(char *path)
 	ncols = COLS;
 	if (ncols > PATH_MAX)
 		ncols = PATH_MAX;
-	cwd[ncols - strlen(CWD) - 1] = '\0';
-	printw(CWD "%s\n\n", cwd);
+	g_buf[ncols - strlen(CWD) - 1] = '\0';
+	printw(CWD "%s\n\n", g_buf);
 
 	/* Print listing */
 	if (cur < (nlines >> 1)) {
@@ -1666,15 +1691,16 @@ redraw(char *path)
 				ind[0] = '\0';
 
 			if (!cfg.bsizeorder)
-				sprintf(cwd, "total %d %s[%s%s]", ndents, sort,
+				sprintf(g_buf, "total %d %s[%s%s]", ndents, sort,
 					replace_escape(dents[cur].name), ind);
-			else
-				sprintf(cwd,
-					"total %d by disk usage, %s free [%s%s]",
-					ndents, coolsize(fs_free),
+			else {
+				i = sprintf(g_buf, "du: %s in dir, ",
+					    coolsize(dir_size << 9));
+				sprintf(g_buf + i, "%s free [%s%s]", coolsize(fs_free),
 					replace_escape(dents[cur].name), ind);
+			}
 
-			printmsg(cwd);
+			printmsg(g_buf);
 		} else
 			printmsg("0 items");
 	}
