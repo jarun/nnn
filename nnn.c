@@ -1473,11 +1473,10 @@ static int
 dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
 {
-	static char newpath[PATH_MAX];
 	static DIR *dirp;
 	static struct dirent *dp;
 	static struct stat sb;
-	static int n;
+	static int fd, n;
 
 	n = 0;
 
@@ -1490,6 +1489,8 @@ dentfill(char *path, struct entry **dents,
 	if (dirp == NULL)
 		return 0;
 
+	fd = dirfd(dirp);
+
 	while ((dp = readdir(dirp)) != NULL) {
 		/* Skip self and parent */
 		if ((dp->d_name[0] == '.' && (dp->d_name[1] == '\0' ||
@@ -1500,13 +1501,14 @@ dentfill(char *path, struct entry **dents,
 			if (!cfg.blkorder)
 				continue;
 
-			mkpath(path, dp->d_name, newpath, PATH_MAX);
-			if (lstat(newpath, &sb) == -1)
+			if (fstatat(fd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
 				continue;
 
 			if (S_ISDIR(sb.st_mode)) {
 				ent_blocks = 0;
-				if (nftw(newpath, sum_bsizes, open_max,
+				mkpath(path, dp->d_name, g_buf, PATH_MAX);
+
+				if (nftw(g_buf, sum_bsizes, open_max,
 					 FTW_MOUNT | FTW_PHYS) == -1) {
 					printmsg("nftw(3) failed");
 					dir_blocks += sb.st_blocks;
@@ -1522,11 +1524,10 @@ dentfill(char *path, struct entry **dents,
 			continue;
 		}
 
-		mkpath(path, dp->d_name, newpath, PATH_MAX);
-		if (lstat(newpath, &sb) == -1) {
+		if (fstatat(fd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1) {
 			if (*dents)
 				free(*dents);
-			printerr(1, "lstat");
+			printerr(1, "fstatat");
 		}
 
 		if (n == total_dents) {
@@ -1545,7 +1546,9 @@ dentfill(char *path, struct entry **dents,
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
 				ent_blocks = 0;
-				if (nftw(newpath, sum_bsizes, open_max,
+				mkpath(path, dp->d_name, g_buf, PATH_MAX);
+
+				if (nftw(g_buf, sum_bsizes, open_max,
 					 FTW_MOUNT | FTW_PHYS) == -1) {
 					printmsg("nftw(3) failed");
 					(*dents)[n].blocks = sb.st_blocks;
