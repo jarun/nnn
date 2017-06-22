@@ -168,7 +168,7 @@ static char *copier;
 static char *editor;
 static char *desktop_manager;
 static off_t blk_size;
-static off_t dir_size;
+static off_t dir_blocks;
 static size_t fs_free;
 static uint open_max;
 static bm bookmark[MAX_BM];
@@ -1428,7 +1428,7 @@ static int
 sum_bsizes(const char *fpath, const struct stat *sb,
 	   int typeflag, struct FTW *ftwbuf)
 {
-	if (typeflag == FTW_F || typeflag == FTW_D)
+	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D))
 		blk_size += sb->st_blocks;
 
 	return 0;
@@ -1480,7 +1480,7 @@ dentfill(char *path, struct entry **dents,
 	n = 0;
 
 	if (cfg.bsizeorder)
-		dir_size = 0;
+		dir_blocks = 0;
 
 	dirp = opendir(path);
 	if (dirp == NULL)
@@ -1509,11 +1509,11 @@ dentfill(char *path, struct entry **dents,
 				if (nftw(newpath, sum_bsizes, open_max,
 					 FTW_MOUNT | FTW_PHYS) == -1) {
 					printmsg("nftw(3) failed");
-					dir_size += sb.st_blocks;
+					dir_blocks += sb.st_blocks;
 				} else
-					dir_size += blk_size;
-			} else
-				dir_size += sb.st_blocks;
+					dir_blocks += blk_size;
+			} else if (sb.st_blocks)
+				dir_blocks += sb.st_blocks;
 
 			continue;
 		}
@@ -1543,7 +1543,8 @@ dentfill(char *path, struct entry **dents,
 			} else
 				(*dents)[n].bsize = sb.st_blocks;
 
-			dir_size += (*dents)[n].bsize;
+			if ((*dents)[n].bsize)
+				dir_blocks += (*dents)[n].bsize;
 		}
 
 		++n;
@@ -1695,7 +1696,7 @@ redraw(char *path)
 					replace_escape(dents[cur].name), ind);
 			else {
 				i = sprintf(g_buf, "du: %s in dir, ",
-					    coolsize(dir_size << 9));
+					    coolsize(dir_blocks << 9));
 				sprintf(g_buf + i, "%s free [%s%s]", coolsize(fs_free),
 					replace_escape(dents[cur].name), ind);
 			}
