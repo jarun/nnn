@@ -124,7 +124,7 @@ typedef struct entry {
 	mode_t mode;
 	time_t t;
 	off_t size;
-	off_t bsize;
+	blkcnt_t blocks; /* number of 512B blocks allocated */
 } *pEntry;
 
 /* Bookmark */
@@ -139,7 +139,7 @@ typedef struct
 	uchar filtermode : 1;  /* Set to enter filter mode */
 	uchar mtimeorder : 1;  /* Set to sort by time modified */
 	uchar sizeorder  : 1;  /* Set to sort by file size */
-	uchar bsizeorder : 1;  /* Set to sort by blocks used (disk usage) */
+	uchar blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
 	uchar showhidden : 1;  /* Set to show hidden files */
 	uchar showdetail : 1;  /* Clear to show fewer file info */
 	uchar reserved   : 2;
@@ -167,8 +167,8 @@ static char *player;
 static char *copier;
 static char *editor;
 static char *desktop_manager;
-static off_t blk_size;
-static off_t dir_blocks;
+static blkcnt_t ent_blocks;
+static blkcnt_t dir_blocks;
 static size_t fs_free;
 static uint open_max;
 static bm bookmark[MAX_BM];
@@ -593,10 +593,10 @@ entrycmp(const void *va, const void *vb)
 			return -1;
 	}
 
-	if (cfg.bsizeorder) {
-		if (pb->bsize > pa->bsize)
+	if (cfg.blkorder) {
+		if (pb->blocks > pa->blocks)
 			return 1;
-		else if (pb->bsize < pa->bsize)
+		else if (pb->blocks < pa->blocks)
 			return -1;
 	}
 
@@ -695,7 +695,7 @@ fill(struct entry **dents,
 				_dent.mode = (*dents)[count].mode;
 				_dent.t = (*dents)[count].t;
 				_dent.size = (*dents)[count].size;
-				_dent.bsize = (*dents)[count].bsize;
+				_dent.blocks = (*dents)[count].blocks;
 
 				/* Copy ndents - 1 to count */
 				xstrlcpy((*dents)[count].name,
@@ -703,7 +703,7 @@ fill(struct entry **dents,
 				(*dents)[count].mode = (*dents)[ndents].mode;
 				(*dents)[count].t = (*dents)[ndents].t;
 				(*dents)[count].size = (*dents)[ndents].size;
-				(*dents)[count].bsize = (*dents)[ndents].bsize;
+				(*dents)[count].blocks = (*dents)[ndents].blocks;
 
 				/* Copy tmp to ndents - 1 */
 				xstrlcpy((*dents)[ndents].name, _dent.name,
@@ -711,7 +711,7 @@ fill(struct entry **dents,
 				(*dents)[ndents].mode = _dent.mode;
 				(*dents)[ndents].t = _dent.t;
 				(*dents)[ndents].size = _dent.size;
-				(*dents)[ndents].bsize = _dent.bsize;
+				(*dents)[ndents].blocks = _dent.blocks;
 
 				--count;
 			}
@@ -1029,7 +1029,7 @@ printent_long(struct entry *ent, int sel)
 	if (sel)
 		attron(A_REVERSE);
 
-	if (!cfg.bsizeorder) {
+	if (!cfg.blkorder) {
 		if (S_ISDIR(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        /  %s/",
 				 CURSYM(sel), buf, replace_escape(ent->name));
@@ -1059,7 +1059,7 @@ printent_long(struct entry *ent, int sel)
 	} else {
 		if (S_ISDIR(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s/ %s/",
-				 CURSYM(sel), buf, coolsize(ent->bsize << 9),
+				 CURSYM(sel), buf, coolsize(ent->blocks << 9),
 				 replace_escape(ent->name));
 		else if (S_ISLNK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@",
@@ -1083,11 +1083,11 @@ printent_long(struct entry *ent, int sel)
 				 replace_escape(ent->name));
 		else if (ent->mode & 0100)
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*",
-				 CURSYM(sel), buf, coolsize(ent->bsize << 9),
+				 CURSYM(sel), buf, coolsize(ent->blocks << 9),
 				 replace_escape(ent->name));
 		else
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s",
-				 CURSYM(sel), buf, coolsize(ent->bsize << 9),
+				 CURSYM(sel), buf, coolsize(ent->blocks << 9),
 				 replace_escape(ent->name));
 	}
 
@@ -1429,7 +1429,7 @@ sum_bsizes(const char *fpath, const struct stat *sb,
 	   int typeflag, struct FTW *ftwbuf)
 {
 	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D))
-		blk_size += sb->st_blocks;
+		ent_blocks += sb->st_blocks;
 
 	return 0;
 }
@@ -1479,7 +1479,7 @@ dentfill(char *path, struct entry **dents,
 
 	n = 0;
 
-	if (cfg.bsizeorder)
+	if (cfg.blkorder)
 		dir_blocks = 0;
 
 	dirp = opendir(path);
@@ -1501,17 +1501,17 @@ dentfill(char *path, struct entry **dents,
 		}
 
 		if (filter(re, dp->d_name) == 0) {
-			if (!cfg.bsizeorder)
+			if (!cfg.blkorder)
 				continue;
 
 			if (S_ISDIR(sb.st_mode)) {
-				blk_size = 0;
+				ent_blocks = 0;
 				if (nftw(newpath, sum_bsizes, open_max,
 					 FTW_MOUNT | FTW_PHYS) == -1) {
 					printmsg("nftw(3) failed");
 					dir_blocks += sb.st_blocks;
 				} else
-					dir_blocks += blk_size;
+					dir_blocks += ent_blocks;
 			} else if (sb.st_blocks)
 				dir_blocks += sb.st_blocks;
 
@@ -1531,26 +1531,26 @@ dentfill(char *path, struct entry **dents,
 		(*dents)[n].t = sb.st_mtime;
 		(*dents)[n].size = sb.st_size;
 
-		if (cfg.bsizeorder) {
+		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
-				blk_size = 0;
+				ent_blocks = 0;
 				if (nftw(newpath, sum_bsizes, open_max,
 					 FTW_MOUNT | FTW_PHYS) == -1) {
 					printmsg("nftw(3) failed");
-					(*dents)[n].bsize = sb.st_blocks;
+					(*dents)[n].blocks = sb.st_blocks;
 				} else
-					(*dents)[n].bsize = blk_size;
+					(*dents)[n].blocks = ent_blocks;
 			} else
-				(*dents)[n].bsize = sb.st_blocks;
+				(*dents)[n].blocks = sb.st_blocks;
 
-			if ((*dents)[n].bsize)
-				dir_blocks += (*dents)[n].bsize;
+			if ((*dents)[n].blocks)
+				dir_blocks += (*dents)[n].blocks;
 		}
 
 		++n;
 	}
 
-	if (cfg.bsizeorder) {
+	if (cfg.blkorder) {
 		static struct statvfs svb;
 
 		if (statvfs(path, &svb) == -1)
@@ -1691,7 +1691,7 @@ redraw(char *path)
 			else
 				ind[0] = '\0';
 
-			if (!cfg.bsizeorder)
+			if (!cfg.blkorder)
 				sprintf(g_buf, "total %d %s[%s%s]", ndents, sort,
 					replace_escape(dents[cur].name), ind);
 			else {
@@ -2250,15 +2250,15 @@ nochange:
 		case SEL_FSIZE:
 			cfg.sizeorder ^= 1;
 			cfg.mtimeorder = 0;
-			cfg.bsizeorder = 0;
+			cfg.blkorder = 0;
 			/* Save current */
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath,
 				       PATH_MAX);
 			goto begin;
 		case SEL_BSIZE:
-			cfg.bsizeorder ^= 1;
-			if (cfg.bsizeorder) {
+			cfg.blkorder ^= 1;
+			if (cfg.blkorder) {
 				cfg.showdetail = 1;
 				printptr = &printent_long;
 			}
@@ -2272,7 +2272,7 @@ nochange:
 		case SEL_MTIME:
 			cfg.mtimeorder ^= 1;
 			cfg.sizeorder = 0;
-			cfg.bsizeorder = 0;
+			cfg.blkorder = 0;
 			/* Save current */
 			if (ndents > 0)
 				mkpath(path, dents[cur].name, oldpath,
@@ -2355,7 +2355,7 @@ main(int argc, char *argv[])
 	while ((opt = getopt(argc, argv, "dlSip:vh")) != -1) {
 		switch (opt) {
 		case 'S':
-			cfg.bsizeorder = 1;
+			cfg.blkorder = 1;
 			break;
 		case 'l':
 			cfg.showdetail = 0;
