@@ -169,6 +169,7 @@ static char *editor;
 static char *desktop_manager;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
+static ulong num_files;
 static size_t fs_free;
 static uint open_max;
 static bm bookmark[MAX_BM];
@@ -1431,6 +1432,7 @@ sum_bsizes(const char *fpath, const struct stat *sb,
 	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D))
 		ent_blocks += sb->st_blocks;
 
+	++num_files;
 	return 0;
 }
 
@@ -1479,8 +1481,10 @@ dentfill(char *path, struct entry **dents,
 
 	n = 0;
 
-	if (cfg.blkorder)
+	if (cfg.blkorder) {
+		num_files = 0;
 		dir_blocks = 0;
+	}
 
 	dirp = opendir(path);
 	if (dirp == NULL)
@@ -1492,16 +1496,12 @@ dentfill(char *path, struct entry **dents,
 		    (dp->d_name[1] == '.' && dp->d_name[2] == '\0'))))
 			continue;
 
-		mkpath(path, dp->d_name, newpath, PATH_MAX);
-		if (lstat(newpath, &sb) == -1) {
-			continue;
-			/* if (*dents)
-				free(*dents);
-			printerr(1, "lstat"); */
-		}
-
 		if (filter(re, dp->d_name) == 0) {
 			if (!cfg.blkorder)
+				continue;
+
+			mkpath(path, dp->d_name, newpath, PATH_MAX);
+			if (lstat(newpath, &sb) == -1)
 				continue;
 
 			if (S_ISDIR(sb.st_mode)) {
@@ -1512,10 +1512,21 @@ dentfill(char *path, struct entry **dents,
 					dir_blocks += sb.st_blocks;
 				} else
 					dir_blocks += ent_blocks;
-			} else if (sb.st_blocks)
-				dir_blocks += sb.st_blocks;
+			} else {
+				if (sb.st_blocks)
+					dir_blocks += sb.st_blocks;
+
+				++num_files;
+			}
 
 			continue;
+		}
+
+		mkpath(path, dp->d_name, newpath, PATH_MAX);
+		if (lstat(newpath, &sb) == -1) {
+			if (*dents)
+				free(*dents);
+			printerr(1, "lstat");
 		}
 
 		if (n == total_dents) {
@@ -1540,8 +1551,10 @@ dentfill(char *path, struct entry **dents,
 					(*dents)[n].blocks = sb.st_blocks;
 				} else
 					(*dents)[n].blocks = ent_blocks;
-			} else
+			} else {
 				(*dents)[n].blocks = sb.st_blocks;
+				++num_files;
+			}
 
 			if ((*dents)[n].blocks)
 				dir_blocks += (*dents)[n].blocks;
@@ -1695,9 +1708,9 @@ redraw(char *path)
 				sprintf(g_buf, "total %d %s[%s%s]", ndents, sort,
 					replace_escape(dents[cur].name), ind);
 			else {
-				i = sprintf(g_buf, "du: %s in dir, ",
-					    coolsize(dir_blocks << 9));
-				sprintf(g_buf + i, "%s free [%s%s]", coolsize(fs_free),
+				i = sprintf(g_buf, "du: %s (%lu files) ",
+					    coolsize(dir_blocks << 9), num_files);
+				sprintf(g_buf + i, "vol: %s free [%s%s]", coolsize(fs_free),
 					replace_escape(dents[cur].name), ind);
 			}
 

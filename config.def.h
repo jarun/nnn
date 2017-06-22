@@ -128,7 +128,7 @@ static struct key bindings[] = {
 	{ 'o',            SEL_DFB,       "",     "" },
 	/* Toggle sort by size */
 	{ 's',            SEL_FSIZE,     "",     "" },
-	/* Sort by total block size including dir contents */
+	/* Sort by total block count including dir contents */
 	{ 'S',            SEL_BSIZE,    "",     "" },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME,     "",     "" },
