@@ -1624,6 +1624,13 @@ populate(char *path, char *oldpath, char *fltr)
 	if (setfilter(&re, fltr) != 0)
 		return -1;
 
+	if (cfg.blkorder) {
+		timeout(0);
+		printmsg("Calculating...");
+		getch();
+		timeout(1000);
+	}
+
 	ndents = dentfill(path, &dents, visible, &re);
 
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
