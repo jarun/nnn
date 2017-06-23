@@ -608,8 +608,7 @@ entrycmp(const void *va, const void *vb)
 static void
 printmsg(char *msg)
 {
-	move(LINES - 1, 0);
-	printw("%s\n", msg);
+	mvprintw(LINES - 1, 0, "%s\n", msg);
 }
 
 /* Display warning as a message */
@@ -1625,10 +1624,8 @@ populate(char *path, char *oldpath, char *fltr)
 		return -1;
 
 	if (cfg.blkorder) {
-		timeout(0);
 		printmsg("Calculating...");
-		getch();
-		timeout(1000);
+		refresh();
 	}
 
 	ndents = dentfill(path, &dents, visible, &re);
