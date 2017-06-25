@@ -409,8 +409,10 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 			status = chdir(dir);
 
 		/* Show a marker (to indicate nnn spawned shell) */
-		if (flag & SP_MARKER)
+		if (flag & SP_MARKER) {
 			printf("\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
+			printf("Shell Level %s\n", getenv("SHLVL"));
+		}
 
 		/* Suppress stdout and stderr */
 		if (flag & SP_NOTRACE) {
