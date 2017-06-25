@@ -59,7 +59,8 @@ xprintf(int fd, const char *fmt, ...)
 	return r;
 }
 
-static int enabledbg()
+static int
+enabledbg()
 {
 	FILE *fp = fopen("/tmp/nnn_debug", "w");
 
@@ -77,7 +78,8 @@ static int enabledbg()
 	return 0;
 }
 
-static void disabledbg()
+static void
+disabledbg()
 {
 	close(DEBUG_FD);
 }
@@ -832,7 +834,8 @@ readln(char *path)
 			case KEY_DOWN: // fallthrough
 			case KEY_UP: // fallthrough
 			case KEY_LEFT: // fallthrough
-			case KEY_RIGHT:
+			case KEY_RIGHT: // fallthrough
+			case KEY_F(2):
 				if (len == 1)
 					cur = oldcur; // fallthrough
 			default:
@@ -1379,7 +1382,7 @@ show_help(void)
                     o | Open dir in NNN_DE_FILE_MANAGER\n\
                     p | Open entry in PAGER (fallback less)\n\
                    ^K | Invoke file path copier\n\
-                   ^L | Force a redraw, exit filter prompt\n\
+               ^L, F2 | Force a redraw, exit filter prompt\n\
                     ? | Toggle help and settings screen\n\
                     Q | Quit and change directory\n\
 		q, ^Q | Quit\n\n\n");
@@ -2450,13 +2453,11 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
+	/* Set locale */
+	setlocale(LC_ALL, "");
 #ifdef DEBUGMODE
 	enabledbg();
 #endif
-
-	/* Set locale */
-	setlocale(LC_ALL, "");
-
 	initcurses();
 	browse(ipath, ifilter);
 	exitcurses();

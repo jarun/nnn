@@ -181,7 +181,7 @@ Right, Enter, l, ^M | Open file or enter dir
                   o | Open dir in NNN_DE_FILE_MANAGER
                   p | Open entry in PAGER (fallback less)
                  ^K | Invoke file path copier
-                 ^L | Force a redraw, exit filter prompt
+             ^L, F2 | Force a redraw, exit filter prompt
                   ? | Toggle help and settings screen
                   Q | Quit and change directory
               q, ^Q | Quit
@@ -191,7 +191,7 @@ Right, Enter, l, ^M | Open file or enter dir
 
 Filters support regexes to instantly (search-as-you-type) list the matching entries in the current directory.
 
-There are 3 ways to reset a filter: <kbd>^L</kbd>, a search with no matches or an extra backspace at the filter prompt (like vi).
+There are 3 ways to reset a filter: <kbd>^L</kbd> (or <kbd>F2</kbd>), a search with no matches or an extra backspace at the filter prompt (like vi).
 
 Common examples: If you want to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol. Type `\.mkv` to list all MKV files.
 
