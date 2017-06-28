@@ -411,7 +411,7 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 		/* Show a marker (to indicate nnn spawned shell) */
 		if (flag & SP_MARKER) {
 			printf("\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
-			printf("Shell Level %s\n", getenv("SHLVL"));
+			printf("Spawned shell level: %d\n", atoi(getenv("SHLVL")) + 1);
 		}
 
 		/* Suppress stdout and stderr */
