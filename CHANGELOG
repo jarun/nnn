@@ -1,3 +1,23 @@
+nnn v1.2
+2017-06-29
+
+What's in?
+- Use the desktop opener (xdg-open on Linux, open(1) on OS X) to open files
+- Option `NNN_USE_EDITOR` to open text files in EDITOR (fallback vi)
+- Bookmark support (maximum 10, key `b`)
+- *Navigate-as-you-type* mode (key `Insert` or option `-i`)
+- Subtree search: gnome-search-tool, fallback catfish (key `^/`) (customizable)
+- Show current directory content size and file count in disk usage mode
+- Add detail view mode as default, use `-l` to start in light mode
+- Shortcuts `F2` and `^L` to refresh and unfilter
+  Note: if filter is empty, `Enter` *opens* the currently selected file now
+- Help screen shows bookmarks and configuration
+- Show a message when calculating disk usage
+- Show the spawned shell level
+- Linux only: use vlock as the locker on timeout (set using `NNN_IDLE_TIMEOUT`)
+
+-------------------------------------------------------------------------------
+
 nnn v1.1
 2017-05-12
 
