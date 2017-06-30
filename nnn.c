@@ -996,7 +996,7 @@ printent(struct entry *ent, int sel)
 
 	/* Dirs are always shown on top */
 	if (cfg.dircolor && !S_ISDIR(ent->mode)) {
-		attroff(COLOR_PAIR(1));
+		attroff(COLOR_PAIR(1) | A_BOLD);
 		cfg.dircolor = 0;
 	}
 
@@ -1107,7 +1107,7 @@ printent_long(struct entry *ent, int sel)
 
 	/* Dirs are always shown on top */
 	if (cfg.dircolor && !S_ISDIR(ent->mode)) {
-		attroff(COLOR_PAIR(1));
+		attroff(COLOR_PAIR(1) | A_BOLD);
 		cfg.dircolor = 0;
 	}
 
@@ -1691,7 +1691,7 @@ redraw(char *path)
 	printw(CWD "%s\n\n", g_buf);
 
 	if (cfg.showcolor) {
-		attron(COLOR_PAIR(1));
+		attron(COLOR_PAIR(1) | A_BOLD);
 		cfg.dircolor = 1;
 	}
 
@@ -1709,6 +1709,12 @@ redraw(char *path)
 		nlines >>= 1;
 		for (i = cur - nlines; i < cur + nlines + odd; ++i)
 			printptr(&dents[i], i == cur);
+	}
+
+	/* Must reset e.g. no files in dir */
+	if (cfg.dircolor) {
+		attroff(COLOR_PAIR(1) | A_BOLD);
+		cfg.dircolor = 0;
 	}
 
 	if (cfg.showdetail) {
