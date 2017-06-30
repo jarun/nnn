@@ -857,18 +857,6 @@ end:
 	return *ch;
 }
 
-static int
-canopendir(char *path)
-{
-	static DIR *dirp;
-
-	dirp = opendir(path);
-	if (dirp == NULL)
-		return 0;
-	closedir(dirp);
-	return 1;
-}
-
 /*
  * Returns "dir/name or "/name"
  */
@@ -1003,7 +991,7 @@ printent(struct entry *ent, int sel)
 	printw("%s\n", g_buf);
 }
 
-static char*
+static char *
 coolsize(off_t size)
 {
 	static const char * const U[]
@@ -1636,7 +1624,7 @@ populate(char *path, char *oldpath, char *fltr)
 	static regex_t re;
 
 	/* Can fail when permissions change while browsing */
-	if (canopendir(path) == 0)
+	if (access(path, R_OK) == -1)
 		return -1;
 
 	/* Search filter */
@@ -1824,7 +1812,7 @@ nochange:
 			}
 
 			dir = xdirname(path);
-			if (canopendir(dir) == 0) {
+			if (access(dir, R_OK) == -1) {
 				printwarn();
 				goto nochange;
 			}
@@ -1865,7 +1853,7 @@ nochange:
 
 			switch (sb.st_mode & S_IFMT) {
 			case S_IFDIR:
-				if (canopendir(newpath) == 0) {
+				if (access(newpath, R_OK) == -1) {
 					printwarn();
 					goto nochange;
 				}
@@ -2050,7 +2038,7 @@ nochange:
 					}
 
 					dir = xdirname(dir);
-					if (canopendir(dir) == 0) {
+					if (access(dir, R_OK) == -1) {
 						printwarn();
 						free(input);
 						goto nochange;
@@ -2073,7 +2061,7 @@ nochange:
 
 			free(input);
 
-			if (canopendir(newpath) == 0) {
+			if (access(newpath, R_OK) == -1) {
 				printwarn();
 				break;
 			}
@@ -2109,7 +2097,7 @@ nochange:
 				goto nochange;
 			}
 
-			if (canopendir(tmp) == 0) {
+			if (access(tmp, R_OK) == -1) {
 				printwarn();
 				goto nochange;
 			}
@@ -2129,7 +2117,7 @@ nochange:
 				presel = FILTER;
 			goto begin;
 		case SEL_CDBEGIN:
-			if (canopendir(ipath) == 0) {
+			if (access(ipath, R_OK) == -1) {
 				printwarn();
 				goto nochange;
 			}
@@ -2152,7 +2140,7 @@ nochange:
 			if (lastdir[0] == '\0')
 				break;
 
-			if (canopendir(lastdir) == 0) {
+			if (access(lastdir, R_OK) == -1) {
 				printwarn();
 				goto nochange;
 			}
@@ -2198,7 +2186,7 @@ nochange:
 						mkpath(path, bookmark[r].loc,
 						       newpath, PATH_MAX);
 
-					if (canopendir(newpath) == 0) {
+					if (access(newpath, R_OK) == -1) {
 						printwarn();
 						goto nochange;
 					}
@@ -2480,7 +2468,7 @@ main(int argc, char *argv[])
 	signal(SIGINT, SIG_IGN);
 
 	/* Test initial path */
-	if (canopendir(ipath) == 0) {
+	if (access(ipath, R_OK) == -1) {
 		fprintf(stderr, "%s: %s\n", ipath, strerror(errno));
 		exit(1);
 	}
