@@ -144,7 +144,8 @@ typedef struct
 	uchar blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
 	uchar showhidden : 1;  /* Set to show hidden files */
 	uchar showdetail : 1;  /* Clear to show fewer file info */
-	uchar reserved   : 2;
+	uchar showcolor  : 1;  /* Set to show dirs in blue */
+	uchar dircolor   : 1;  /* Current status of dir color */
 } settings;
 
 /* Externs */
@@ -157,7 +158,8 @@ extern void add_history(const char *string);
 extern int wget_wch(WINDOW *win, wint_t *wch);
 
 /* Globals */
-static settings cfg = {0, 0, 0, 0, 0, 1, 0};
+/* Configuration */
+static settings cfg = {0, 0, 0, 0, 0, 1, 1, 0};
 
 /* Idle timeout in seconds, 0 to disable */
 static int idletimeout;
@@ -380,6 +382,7 @@ initcurses(void)
 	curs_set(FALSE); /* Hide cursor */
 	start_color();
 	use_default_colors();
+	init_pair(1, COLOR_BLUE, -1);
 	timeout(1000); /* One second */
 }
 
@@ -991,6 +994,12 @@ printent(struct entry *ent, int sel)
 		snprintf(g_buf, ncols, "%s%s", CURSYM(sel),
 			 replace_escape(ent->name));
 
+	/* Dirs are always shown on top */
+	if (cfg.dircolor && !S_ISDIR(ent->mode)) {
+		attroff(COLOR_PAIR(1));
+		cfg.dircolor = 0;
+	}
+
 	printw("%s\n", g_buf);
 }
 
@@ -1094,6 +1103,12 @@ printent_long(struct entry *ent, int sel)
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s",
 				 CURSYM(sel), buf, coolsize(ent->blocks << 9),
 				 replace_escape(ent->name));
+	}
+
+	/* Dirs are always shown on top */
+	if (cfg.dircolor && !S_ISDIR(ent->mode)) {
+		attroff(COLOR_PAIR(1));
+		cfg.dircolor = 0;
 	}
 
 	printw("%s\n", g_buf);
@@ -1674,6 +1689,11 @@ redraw(char *path)
 		ncols = PATH_MAX;
 	g_buf[ncols - strlen(CWD) - 1] = '\0';
 	printw(CWD "%s\n\n", g_buf);
+
+	if (cfg.showcolor) {
+		attron(COLOR_PAIR(1));
+		cfg.dircolor = 1;
+	}
 
 	/* Print listing */
 	if (cur < (nlines >> 1)) {
@@ -2353,6 +2373,7 @@ positional arguments:\n\
 optional arguments:\n\
   -l             start in light mode (fewer details)\n\
   -i             start in navigate-as-you-type mode\n\
+  -n             disable color for directory entries\n\
   -p             path to custom nlay\n\
   -S             start in disk usage analyzer mode\n\
   -v             show program version and exit\n\
@@ -2377,7 +2398,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	while ((opt = getopt(argc, argv, "dlSip:vh")) != -1) {
+	while ((opt = getopt(argc, argv, "dlSinp:vh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -2388,6 +2409,9 @@ main(int argc, char *argv[])
 			break;
 		case 'i':
 			cfg.filtermode = 1;
+			break;
+		case 'n':
+			cfg.showcolor = 0;
 			break;
 		case 'p':
 			player = optarg;

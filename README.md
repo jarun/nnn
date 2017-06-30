@@ -67,6 +67,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Jump HOME or to the last visited directory (as usual!)
   - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
   - Roll-over at edges, page through entries
+  - Show directories in blue (default: enabled)
 - Disk usage analyzer mode
 - Search
   - Filter directory contents with *search-as-you-type*
@@ -141,6 +142,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
     optional arguments:
       -l             start in light mode (fewer details)
       -i             start in navigate-as-you-type mode
+      -n             disable color for directory entries
       -p             path to custom nlay
       -S             start in disk usage analyzer mode
       -v             show program version and exit
