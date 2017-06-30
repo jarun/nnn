@@ -178,6 +178,7 @@ static size_t fs_free;
 static uint open_max;
 static bm bookmark[MAX_BM];
 static const double div_2_pow_10 = 1.0 / 1024.0;
+static uint _WSHIFT;
 
 /* Utilities to open files, run actions */
 static char *utils[] = {
@@ -239,15 +240,96 @@ max_openfds()
 	return 32;
 }
 
-/* Just a safe strncpy(3) */
-static void
+/*
+ * Custom xstrlen()
+ */
+static size_t
+xstrlen(const char *s)
+{
+	static size_t len;
+
+	if (!s)
+		return 0;
+
+	len = 0;
+	while (*s) {
+		++len, ++s;
+	}
+
+	return len;
+}
+
+/*
+ * Just a safe strncpy(3)
+ * Always null ('\0') terminates if both src and dest are valid pointers.
+ * Returns the number of bytes copied including terminating null byte.
+ */
+static size_t
 xstrlcpy(char *dest, const char *src, size_t n)
 {
+	static size_t len, blocks;
+
+	if (!src || !dest)
+		return 0;
+
+	len = xstrlen(src) + 1;
+	if (n > len)
+		n = len;
+	else if (len > n)
+		/* Save total number of bytes to copy in len */
+		len = n;
+
+	blocks = n >> _WSHIFT;
+	n -= (blocks << _WSHIFT);
+
+	if (blocks) {
+		static ulong *s, *d;
+
+		s = (ulong *)src;
+		d = (ulong *)dest;
+
+		while (blocks) {
+			*d = *s;
+			++d, ++s;
+			--blocks;
+		}
+
+		if (!n) {
+			dest = (char *)d;
+			*--dest = '\0';
+			return len;
+		}
+
+		src = (char *)s;
+		dest = (char *)d;
+	}
+
 	while (--n && (*dest = *src))
 		++dest, ++src;
 
 	if (!n)
 		*dest = '\0';
+
+	return len;
+}
+
+/*
+ * Custom strcmp(), just what we need.
+ * Returns 0 if same, else -1
+ */
+static int
+xstrcmp(const char *s1, const char *s2)
+{
+	if (!s1 || !s2)
+		return -1;
+
+	while (*s1 && *s1 == *s2)
+		++s1, ++s2;
+
+	if (*s1 != *s2)
+		return -1;
+
+	return 0;
 }
 
 /*
@@ -518,7 +600,7 @@ strstrip(char *s)
 	if (!s || !*s)
 		return s;
 
-	size_t len = strlen(s) - 1;
+	size_t len = xstrlen(s) - 1;
 
 	while (len != 0 && (isspace(s[len]) || s[len] == '/'))
 		--len;
@@ -868,7 +950,7 @@ mkpath(char *dir, char *name, char *out, size_t n)
 		xstrlcpy(out, name, n);
 	else {
 		/* Handle root case */
-		if (strcmp(dir, "/") == 0)
+		if (dir[0] == '/' && dir[1] == '\0')
 			snprintf(out, n, "/%s", name);
 		else
 			snprintf(out, n, "%s/%s", dir, name);
@@ -1612,7 +1694,7 @@ dentfind(struct entry *dents, int n, char *path)
 	DPRINTF_S(p);
 
 	for (i = 0; i < n; ++i)
-		if (strcmp(p, dents[i].name) == 0)
+		if (xstrcmp(p, dents[i].name) == 0)
 			return i;
 
 	return 0;
@@ -1657,7 +1739,7 @@ redraw(char *path)
 	erase();
 
 	/* Strip trailing slashes */
-	for (i = strlen(path) - 1; i > 0; --i)
+	for (i = xstrlen(path) - 1; i > 0; --i)
 		if (path[i] == '/')
 			path[i] = '\0';
 		else
@@ -1675,7 +1757,8 @@ redraw(char *path)
 	ncols = COLS;
 	if (ncols > PATH_MAX)
 		ncols = PATH_MAX;
-	g_buf[ncols - strlen(CWD) - 1] = '\0';
+	/* - xstrlen(CWD) - 1 = 6 */
+	g_buf[ncols - 6] = '\0';
 	printw(CWD "%s\n\n", g_buf);
 
 	if (cfg.showcolor) {
@@ -2069,7 +2152,7 @@ nochange:
 			if (truecd == 0) {
 				/* Probable change in dir */
 				/* No-op if it's the same directory */
-				if (strcmp(path, newpath) == 0)
+				if (xstrcmp(path, newpath) == 0)
 					break;
 
 				oldpath[0] = '\0';
@@ -2102,7 +2185,7 @@ nochange:
 				goto nochange;
 			}
 
-			if (strcmp(path, tmp) == 0)
+			if (xstrcmp(path, tmp) == 0)
 				break;
 
 			/* Save last working directory */
@@ -2122,7 +2205,7 @@ nochange:
 				goto nochange;
 			}
 
-			if (strcmp(path, ipath) == 0)
+			if (xstrcmp(path, ipath) == 0)
 				break;
 
 			/* Save last working directory */
@@ -2166,7 +2249,7 @@ nochange:
 			clearprompt();
 
 			for (r = 0; bookmark[r].key && r < MAX_BM; ++r) {
-				if (strcmp(bookmark[r].key, tmp) == 0) {
+				if (xstrcmp(bookmark[r].key, tmp) == 0) {
 					if (bookmark[r].loc[0] == '~') {
 						/* Expand ~ to HOME */
 						char *home = getenv("HOME");
@@ -2191,7 +2274,7 @@ nochange:
 						goto nochange;
 					}
 
-					if (strcmp(path, newpath) == 0)
+					if (xstrcmp(path, newpath) == 0)
 						break;
 
 					oldpath[0] = '\0';
@@ -2325,7 +2408,7 @@ nochange:
 			goto begin;
 		case SEL_COPY:
 			if (copier && ndents) {
-				if (strcmp(path, "/") == 0)
+				if (path[0] == '/' && path[1] == '\0')
 					snprintf(newpath, PATH_MAX, "/%s",
 						 dents[cur].name);
 				else
@@ -2435,6 +2518,14 @@ main(int argc, char *argv[])
 		}
 	}
 
+	/* Set the word shift */
+	_WSHIFT = sizeof(ulong);
+	if (_WSHIFT == 8)
+		_WSHIFT = 3;
+	else
+		_WSHIFT = 2;
+
+	/* Increase current open file descriptor limit */
 	open_max = max_openfds();
 
 	if (getuid() == 0)
