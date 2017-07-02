@@ -1279,11 +1279,22 @@ get_output(char *buf, size_t bytes, char *file,
 	pid_t pid;
 	int pipefd[2];
 	FILE *pf;
-	int status;
+	int tmp, flags;
 	char *ret = NULL;
 
 	if (pipe(pipefd) == -1)
 		printerr(1, "pipe(2)");
+
+	for (tmp = 0; tmp < 2; ++tmp) {
+		/* Get previous flags */
+		flags = fcntl(pipefd[tmp], F_GETFL, 0);
+
+		/* Set bit for non-blocking flag */
+		flags |= O_NONBLOCK;
+
+		/* Change flags on fd */
+		fcntl(pipefd[tmp], F_SETFL, flags);
+	}
 
 	pid = fork();
 	if (pid == 0) {
@@ -1291,13 +1302,15 @@ get_output(char *buf, size_t bytes, char *file,
 		close(pipefd[0]);
 		dup2(pipefd[1], STDOUT_FILENO);
 		dup2(pipefd[1], STDERR_FILENO);
+		close(pipefd[1]);
 		execlp(file, file, arg1, arg2, NULL);
 		_exit(1);
 	}
 
 	/* In parent */
-	waitpid(pid, &status, 0);
+	waitpid(pid, &tmp, 0);
 	close(pipefd[1]);
+
 	if (!pager) {
 		pf = fdopen(pipefd[0], "r");
 		if (pf) {
@@ -1312,13 +1325,14 @@ get_output(char *buf, size_t bytes, char *file,
 	if (pid == 0) {
 		/* Show in pager in child */
 		dup2(pipefd[0], STDIN_FILENO);
-		execlp("less", "less", NULL);
 		close(pipefd[0]);
+		execlp("less", "less", NULL);
 		_exit(1);
 	}
 
 	/* In parent */
-	waitpid(pid, &status, 0);
+	waitpid(pid, &tmp, 0);
+	close(pipefd[0]);
 
 	return NULL;
 }
