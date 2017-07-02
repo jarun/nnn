@@ -1861,7 +1861,7 @@ browse(char *ipath, char *ifilter)
 	char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX];
 	char lastdir[PATH_MAX];
 	char fltr[LINE_MAX];
-	char *dir, *tmp, *run, *env;
+	char *dir, *tmp, *run, *env, *tgt=NULL;
 	struct stat sb;
 	int r, fd, presel;
 	enum action sel = SEL_RUNARG + 1;
@@ -2200,54 +2200,43 @@ nochange:
 			goto begin;
 		}
 		case SEL_CDHOME:
-			tmp = getenv("HOME");
-			if (tmp == NULL) {
+			tgt = getenv("HOME");
+			if (tgt == NULL) {
 				clearprompt();
 				goto nochange;
-			}
-
-			if (access(tmp, R_OK) == -1) {
-				printwarn();
-				goto nochange;
-			}
-
-			if (xstrcmp(path, tmp) == 0)
-				break;
-
-			/* Save last working directory */
-			xstrlcpy(lastdir, path, PATH_MAX);
-
-			xstrlcpy(path, tmp, PATH_MAX);
-			oldpath[0] = '\0';
-			/* Reset filter */
-			xstrlcpy(fltr, ifilter, LINE_MAX);
-			DPRINTF_S(path);
-			if (cfg.filtermode)
-				presel = FILTER;
-			goto begin;
+			} // fallthrough
 		case SEL_CDBEGIN:
-			if (access(ipath, R_OK) == -1) {
+			if (!tgt)
+				tgt = ipath;
+
+			if (access(tgt, R_OK) == -1) {
 				printwarn();
+				tgt = NULL;
 				goto nochange;
 			}
 
-			if (xstrcmp(path, ipath) == 0)
+			if (xstrcmp(path, tgt) == 0) {
+				tgt = NULL;
 				break;
+			}
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
 
-			xstrlcpy(path, ipath, PATH_MAX);
+			xstrlcpy(path, tgt, PATH_MAX);
 			oldpath[0] = '\0';
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
 			if (cfg.filtermode)
 				presel = FILTER;
+			tgt = NULL;
 			goto begin;
 		case SEL_CDLAST:
-			if (lastdir[0] == '\0')
-				break;
+			if (lastdir[0] == '\0') {
+				printmsg("Hit end of history...");
+				goto nochange;
+			}
 
 			if (access(lastdir, R_OK) == -1) {
 				printwarn();
@@ -2363,7 +2352,7 @@ nochange:
 
 			break;
 		}
-		case SEL_MEDIA:
+		case SEL_MEDIA: // fallthrough
 		case SEL_FMEDIA:
 			if (ndents > 0) {
 				mkpath(path, dents[cur].name, oldpath,
