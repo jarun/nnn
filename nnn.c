@@ -851,8 +851,8 @@ readln(char *path)
 	curs_set(TRUE);
 	printprompt(ln);
 
-	while ((r = wget_wch(stdscr, ch)) != ERR) {
-		if (r == OK) {
+	while ((r = wget_wch(stdscr, ch)) != ERR)
+		if (r == OK)
 			switch (*ch) {
 			case '\r':  // with nonl(), this is ENTER key value
 				if (len == 1) {
@@ -872,10 +872,10 @@ readln(char *path)
 					goto end;
 				}
 
-				if (len == 2)
+				wln[--len] = '\0';
+				if (len == 1)
 					cur = oldcur;
 
-				wln[--len] = '\0';
 				wcstombs(ln, wln, LINE_MAX << 2);
 				ndents = total;
 				if (matches(pln) == -1) {
@@ -891,9 +891,12 @@ readln(char *path)
 			case CONTROL('Q'):
 				goto end;
 			default:
+				/* Reset cur in case it's a repeat search */
+				if (len == 1)
+					cur = 0;
+
 				wln[len] = (wchar_t)*ch;
-				++len;
-				wln[len] = '\0';
+				wln[++len] = '\0';
 				wcstombs(ln, wln, LINE_MAX << 2);
 				ndents = total;
 				if (matches(pln) == -1)
@@ -901,7 +904,7 @@ readln(char *path)
 				redraw(path);
 				printprompt(ln);
 			}
-		} else {
+		else
 			switch (*ch) {
 			case KEY_DC: // fallthrough
 			case KEY_BACKSPACE:
@@ -911,10 +914,10 @@ readln(char *path)
 					goto end;
 				}
 
-				if (len == 2)
+				wln[--len] = '\0';
+				if (len == 1)
 					cur = oldcur;
 
-				wln[--len] = '\0';
 				wcstombs(ln, wln, LINE_MAX << 2);
 				ndents = total;
 				if (matches(pln) == -1)
@@ -932,8 +935,6 @@ readln(char *path)
 			default:
 				goto end;
 			}
-		}
-	}
 end:
 	noecho();
 	curs_set(FALSE);
