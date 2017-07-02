@@ -161,11 +161,11 @@ extern int wget_wch(WINDOW *win, wint_t *wch);
 static settings cfg = {0, 0, 0, 0, 0, 1, 1, 0};
 
 /* Idle timeout in seconds, 0 to disable */
-static int idletimeout;
+static uint idletimeout;
 
 static struct entry *dents;
 static int ndents, cur, total_dents;
-static int idle;
+static uint idle;
 static char *player;
 static char *copier;
 static char *editor;
@@ -177,7 +177,7 @@ static size_t fs_free;
 static uint open_max;
 static bm bookmark[MAX_BM];
 static const double div_2_pow_10 = 1.0 / 1024.0;
-static uint _WSHIFT;
+static uint _WSHIFT = (sizeof(ulong) == 8) ? 3 : 2;
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -2465,7 +2465,6 @@ optional arguments:\n\
 Version: %s\n\
 License: BSD 2-Clause\n\
 Webpage: https://github.com/jarun/nnn\n", VERSION);
-
 	exit(0);
 }
 
@@ -2524,13 +2523,6 @@ main(int argc, char *argv[])
 			exit(1);
 		}
 	}
-
-	/* Set the word shift */
-	_WSHIFT = sizeof(ulong);
-	if (_WSHIFT == 8)
-		_WSHIFT = 3;
-	else
-		_WSHIFT = 2;
 
 	/* Increase current open file descriptor limit */
 	open_max = max_openfds();
