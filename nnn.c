@@ -109,12 +109,12 @@ disabledbg()
 #define MAX_BM 10
 
 /* Macros to define process spawn behaviour as flags */
-#define SP_NONE     0x00  /* no flag set */
-#define SP_MARKER   0x01  /* draw marker to indicate nnn spawned (e.g. shell) */
-#define SP_NOWAIT   0x02  /* don't wait for child process (e.g. file manager) */
-#define SP_NOTRACE  0x04  /* suppress stdout and strerr (no traces) */
-#define SP_SIGINT   0x08  /* restore default SIGINT handler */
-#define SP_NORMAL   0x80  /* spawn child process in non-curses regular mode */
+#define F_NONE     0x00  /* no flag set */
+#define F_MARKER   0x01  /* draw marker to indicate nnn spawned (e.g. shell) */
+#define F_NOWAIT   0x02  /* don't wait for child process (e.g. file manager) */
+#define F_NOTRACE  0x04  /* suppress stdout and strerr (no traces) */
+#define F_SIGINT   0x08  /* restore default SIGINT handler */
+#define F_NORMAL   0x80  /* spawn child process in non-curses regular mode */
 
 typedef unsigned long ulong;
 typedef unsigned int uint;
@@ -136,8 +136,7 @@ typedef struct {
 } bm;
 
 /* Settings */
-typedef struct
-{
+typedef struct {
 	uchar filtermode : 1;  /* Set to enter filter mode */
 	uchar mtimeorder : 1;  /* Set to sort by time modified */
 	uchar sizeorder  : 1;  /* Set to sort by file size */
@@ -252,9 +251,8 @@ xstrlen(const char *s)
 		return 0;
 
 	len = 0;
-	while (*s) {
+	while (*s)
 		++len, ++s;
-	}
 
 	return len;
 }
@@ -485,7 +483,7 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 	pid_t pid;
 	int status;
 
-	if (flag & SP_NORMAL)
+	if (flag & F_NORMAL)
 		exitcurses();
 
 	pid = fork();
@@ -494,13 +492,14 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 			status = chdir(dir);
 
 		/* Show a marker (to indicate nnn spawned shell) */
-		if (flag & SP_MARKER) {
+		if (flag & F_MARKER) {
 			printf("\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
-			printf("Spawned shell level: %d\n", atoi(getenv("SHLVL")) + 1);
+			printf("Spawned shell level: %d\n",
+			       atoi(getenv("SHLVL")) + 1);
 		}
 
 		/* Suppress stdout and stderr */
-		if (flag & SP_NOTRACE) {
+		if (flag & F_NOTRACE) {
 			int fd = open("/dev/null", O_WRONLY, 0200);
 
 			dup2(fd, 1);
@@ -508,18 +507,18 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 			close(fd);
 		}
 
-		if (flag & SP_SIGINT)
+		if (flag & F_SIGINT)
 			signal(SIGINT, SIG_DFL);
 		execlp(file, file, arg1, arg2, NULL);
 		_exit(1);
 	} else {
-		if (!(flag & SP_NOWAIT))
+		if (!(flag & F_NOWAIT))
 			/* Ignore interruptions */
 			while (waitpid(pid, &status, 0) == -1)
 				DPRINTF_D(status);
 
 		DPRINTF_D(pid);
-		if (flag & SP_NORMAL)
+		if (flag & F_NORMAL)
 			initcurses();
 	}
 }
@@ -792,7 +791,8 @@ fill(struct entry **dents,
 				(*dents)[count].mode = (*dents)[ndents].mode;
 				(*dents)[count].t = (*dents)[ndents].t;
 				(*dents)[count].size = (*dents)[ndents].size;
-				(*dents)[count].blocks = (*dents)[ndents].blocks;
+				(*dents)[count].blocks
+						= (*dents)[ndents].blocks;
 
 				/* Copy tmp to ndents - 1 */
 				xstrlcpy((*dents)[ndents].name, _dent.name,
@@ -1010,8 +1010,11 @@ readinput(void)
 	return g_buf[0] ? g_buf : NULL;
 }
 
+/*
+ * Replace escape characters in a string with '?'
+ */
 static char *
-replace_escape(const char *str)
+unescape(const char *str)
 {
 	static char buffer[PATH_MAX];
 	static wchar_t wbuf[PATH_MAX];
@@ -1047,22 +1050,22 @@ printent(struct entry *ent, int sel)
 
 	if (S_ISDIR(ent->mode))
 		snprintf(g_buf, ncols, "%s%s/", CURSYM(sel),
-			 replace_escape(ent->name));
+			 unescape(ent->name));
 	else if (S_ISLNK(ent->mode))
 		snprintf(g_buf, ncols, "%s%s@", CURSYM(sel),
-			 replace_escape(ent->name));
+			 unescape(ent->name));
 	else if (S_ISSOCK(ent->mode))
 		snprintf(g_buf, ncols, "%s%s=", CURSYM(sel),
-			 replace_escape(ent->name));
+			 unescape(ent->name));
 	else if (S_ISFIFO(ent->mode))
 		snprintf(g_buf, ncols, "%s%s|", CURSYM(sel),
-			 replace_escape(ent->name));
+			 unescape(ent->name));
 	else if (ent->mode & 0100)
 		snprintf(g_buf, ncols, "%s%s*", CURSYM(sel),
-			 replace_escape(ent->name));
+			 unescape(ent->name));
 	else
 		snprintf(g_buf, ncols, "%s%s", CURSYM(sel),
-			 replace_escape(ent->name));
+			 unescape(ent->name));
 
 	/* Dirs are always shown on top */
 	if (cfg.dircolor && !S_ISDIR(ent->mode)) {
@@ -1116,63 +1119,63 @@ printent_long(struct entry *ent, int sel)
 	if (!cfg.blkorder) {
 		if (S_ISDIR(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        /  %s/",
-				 CURSYM(sel), buf, replace_escape(ent->name));
+				 CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISLNK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@",
-				 CURSYM(sel), buf, replace_escape(ent->name));
+				 CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISSOCK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        =  %s=",
-				 CURSYM(sel), buf, replace_escape(ent->name));
+				 CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISFIFO(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        |  %s|",
-				 CURSYM(sel), buf, replace_escape(ent->name));
+				 CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISBLK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        b  %s",
-				 CURSYM(sel), buf, replace_escape(ent->name));
+				 CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISCHR(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        c  %s",
-				 CURSYM(sel), buf, replace_escape(ent->name));
+				 CURSYM(sel), buf, unescape(ent->name));
 		else if (ent->mode & 0100)
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*",
 				 CURSYM(sel), buf, coolsize(ent->size),
-				 replace_escape(ent->name));
+				 unescape(ent->name));
 		else
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s",
 				 CURSYM(sel), buf, coolsize(ent->size),
-				 replace_escape(ent->name));
+				 unescape(ent->name));
 	} else {
 		if (S_ISDIR(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s/ %s/",
 				 CURSYM(sel), buf, coolsize(ent->blocks << 9),
-				 replace_escape(ent->name));
+				 unescape(ent->name));
 		else if (S_ISLNK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@",
 				 CURSYM(sel), buf,
-				 replace_escape(ent->name));
+				 unescape(ent->name));
 		else if (S_ISSOCK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        =  %s=",
 				 CURSYM(sel), buf,
-				 replace_escape(ent->name));
+				 unescape(ent->name));
 		else if (S_ISFIFO(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        |  %s|",
 				 CURSYM(sel), buf,
-				 replace_escape(ent->name));
+				 unescape(ent->name));
 		else if (S_ISBLK(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        b  %s",
 				 CURSYM(sel), buf,
-				 replace_escape(ent->name));
+				 unescape(ent->name));
 		else if (S_ISCHR(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s        c  %s",
 				 CURSYM(sel), buf,
-				 replace_escape(ent->name));
+				 unescape(ent->name));
 		else if (ent->mode & 0100)
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*",
 				 CURSYM(sel), buf, coolsize(ent->blocks << 9),
-				 replace_escape(ent->name));
+				 unescape(ent->name));
 		else
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s",
 				 CURSYM(sel), buf, coolsize(ent->blocks << 9),
-				 replace_escape(ent->name));
+				 unescape(ent->name));
 	}
 
 	/* Dirs are always shown on top */
@@ -1341,13 +1344,11 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 
 		if (len != -1) {
 			g_buf[len] = '\0';
-			dprintf(fd, "    File: '%s' -> ",
-				replace_escape(fname));
-			dprintf(fd, "'%s'",
-				replace_escape(g_buf));
+			dprintf(fd, "    File: '%s' -> ", unescape(fname));
+			dprintf(fd, "'%s'", unescape(g_buf));
 		}
 	} else
-		dprintf(fd, "    File: '%s'", replace_escape(fname));
+		dprintf(fd, "    File: '%s'", unescape(fname));
 
 	/* Show size, blocks, file type */
 #ifdef __APPLE__
@@ -1590,7 +1591,8 @@ dentfill(char *path, struct entry **dents,
 			if (!cfg.blkorder)
 				continue;
 
-			if (fstatat(fd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
+			if (fstatat(fd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW)
+					== -1)
 				continue;
 
 			if (S_ISDIR(sb.st_mode)) {
@@ -1791,7 +1793,7 @@ redraw(char *path)
 	if (cfg.showdetail) {
 		if (ndents) {
 			static char ind[2] = "\0\0";
-			static char sort[17];
+			static char sort[9];
 
 			if (cfg.mtimeorder)
 				sprintf(sort, "by time ");
@@ -1813,14 +1815,19 @@ redraw(char *path)
 			else
 				ind[0] = '\0';
 
+			/* We need to show filename as it may
+			 * be truncated in directory listing
+			 */
 			if (!cfg.blkorder)
-				sprintf(g_buf, "total %d %s[%s%s]", ndents, sort,
-					replace_escape(dents[cur].name), ind);
+				sprintf(g_buf, "total %d %s[%s%s]", ndents,
+					sort, unescape(dents[cur].name), ind);
 			else {
 				i = sprintf(g_buf, "du: %s (%lu files) ",
-					    coolsize(dir_blocks << 9), num_files);
-				sprintf(g_buf + i, "vol: %s free [%s%s]", coolsize(fs_free),
-					replace_escape(dents[cur].name), ind);
+					    coolsize(dir_blocks << 9),
+					    num_files);
+				sprintf(g_buf + i, "vol: %s free [%s%s]",
+					coolsize(fs_free),
+					unescape(dents[cur].name), ind);
 			}
 
 			printmsg(g_buf);
@@ -1835,7 +1842,7 @@ browse(char *ipath, char *ifilter)
 	char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX];
 	char lastdir[PATH_MAX];
 	char fltr[LINE_MAX];
-	char *mime, *dir, *tmp, *run, *env;
+	char *dir, *tmp, *run, *env;
 	struct stat sb;
 	int r, fd, presel;
 	enum action sel = SEL_RUNARG + 1;
@@ -1957,10 +1964,9 @@ nochange:
 				 * open text in EDITOR
 				 */
 				if (editor) {
-					mime = getmime(dents[cur].name);
-					if (mime) {
+					if (getmime(dents[cur].name)) {
 						spawn(editor, newpath, NULL,
-						      NULL, SP_NORMAL);
+						      NULL, F_NORMAL);
 						continue;
 					}
 
@@ -1974,13 +1980,13 @@ nochange:
 
 					if (strstr(g_buf, "text/") == g_buf) {
 						spawn(editor, newpath, NULL,
-						      NULL, SP_NORMAL);
+						      NULL, F_NORMAL);
 						continue;
 					}
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(utils[0], newpath, NULL, NULL, SP_NOTRACE);
+				spawn(utils[0], newpath, NULL, NULL, F_NOTRACE);
 				continue;
 			}
 			default:
@@ -2004,7 +2010,7 @@ nochange:
 				printmsg("navigate-as-you-type off");
 			goto nochange;
 		case SEL_SEARCH:
-			spawn(player, path, "search", NULL, SP_NORMAL);
+			spawn(player, path, "search", NULL, F_NORMAL);
 			break;
 		case SEL_NEXT:
 			if (cur < ndents - 1)
@@ -2103,20 +2109,21 @@ nochange:
 					break;
 				}
 
-				--r;
+				/* Show a message if already at / */
+				if (path[0] == '/' && path[1] == '\0') {
+					printmsg("You are at /");
+					free(input);
+					goto nochange;
+				}
+
+				--r; /* One . for the current dir */
 				dir = path;
 
+				/* Note: fd is used as a tmp variable here */
 				for (fd = 0; fd < r; ++fd) {
 					/* Reached / ? */
 					if (path[0] == '/' && path[1] == '\0') {
-						/* If it's a cd .. at / */
-						if (fd == 0) {
-							printmsg("You are at /");
-							free(input);
-							goto nochange;
-						}
-
-						/* Can't cd beyond / anyway */
+						/* Can't cd beyond / */
 						break;
 					}
 
@@ -2241,45 +2248,43 @@ nochange:
 		case SEL_CDBM:
 			printprompt("key: ");
 			tmp = readinput();
-			if (tmp == NULL) {
-				clearprompt();
-				goto nochange;
-			}
-
 			clearprompt();
+			if (tmp == NULL)
+				goto nochange;
 
 			for (r = 0; bookmark[r].key && r < MAX_BM; ++r) {
-				if (xstrcmp(bookmark[r].key, tmp) == 0) {
-					if (bookmark[r].loc[0] == '~') {
-						/* Expand ~ to HOME */
-						char *home = getenv("HOME");
+				if (xstrcmp(bookmark[r].key, tmp) == -1)
+					continue;
 
-						if (home)
-							snprintf(newpath,
-								 PATH_MAX,
-								 "%s%s",
-								 home,
-								 bookmark[r].loc
-								 + 1);
-						else {
-							printmsg("HOME not set");
-							goto nochange;
-						}
-					} else
-						mkpath(path, bookmark[r].loc,
-						       newpath, PATH_MAX);
+				if (bookmark[r].loc[0] == '~') {
+					/* Expand ~ to HOME */
+					char *home = getenv("HOME");
 
-					if (access(newpath, R_OK) == -1) {
-						printwarn();
+					if (home)
+						snprintf(newpath,
+							 PATH_MAX,
+							 "%s%s",
+							 home,
+							 bookmark[r].loc
+							 + 1);
+					else {
+						printmsg("HOME not set");
 						goto nochange;
 					}
+				} else
+					mkpath(path, bookmark[r].loc,
+					       newpath, PATH_MAX);
 
-					if (xstrcmp(path, newpath) == 0)
-						break;
-
-					oldpath[0] = '\0';
-					break;
+				if (access(newpath, R_OK) == -1) {
+					printwarn();
+					goto nochange;
 				}
+
+				if (xstrcmp(path, newpath) == 0)
+					break;
+
+				oldpath[0] = '\0';
+				break;
 			}
 
 			if (!bookmark[r].key) {
@@ -2367,7 +2372,8 @@ nochange:
 				goto nochange;
 			}
 
-			spawn(desktop_manager, path, NULL, path, SP_NOTRACE | SP_NOWAIT);
+			spawn(desktop_manager, path, NULL, path,
+			      F_NOTRACE | F_NOWAIT);
 			break;
 		case SEL_FSIZE:
 			cfg.sizeorder ^= 1;
@@ -2414,7 +2420,7 @@ nochange:
 				else
 					snprintf(newpath, PATH_MAX, "%s/%s",
 						 path, dents[cur].name);
-				spawn(copier, newpath, NULL, NULL, SP_NONE);
+				spawn(copier, newpath, NULL, NULL, F_NONE);
 				printmsg(newpath);
 			} else if (!copier)
 				printmsg("NNN_COPIER is not set");
@@ -2424,18 +2430,19 @@ nochange:
 			break;
 		case SEL_RUN:
 			run = xgetenv(env, run);
-			spawn(run, NULL, NULL, path, SP_NORMAL | SP_MARKER);
+			spawn(run, NULL, NULL, path, F_NORMAL | F_MARKER);
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_RUNARG:
 			run = xgetenv(env, run);
-			spawn(run, dents[cur].name, NULL, path, SP_NORMAL);
+			spawn(run, dents[cur].name, NULL, path, F_NORMAL);
 			break;
 		}
 		/* Screensaver */
 		if (idletimeout != 0 && idle == idletimeout) {
 			idle = 0;
-			spawn(player, "", "screensaver", NULL, SP_NORMAL | SP_SIGINT);
+			spawn(player, "", "screensaver", NULL,
+			      F_NORMAL | F_SIGINT);
 		}
 	}
 }
@@ -2475,7 +2482,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	while ((opt = getopt(argc, argv, "dlSinp:vh")) != -1) {
+	while ((opt = getopt(argc, argv, "lSinp:vh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -2496,9 +2503,6 @@ main(int argc, char *argv[])
 		case 'v':
 			printf("%s\n", VERSION);
 			return 0;
-		case 'd':
-			fprintf(stderr, "Option -d is deprecated and will be removed, detail view mode is default now.\n");
-			break;
 		case 'h': // fallthrough
 		default:
 			usage();
