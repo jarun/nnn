@@ -1346,6 +1346,7 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 			g_buf[len] = '\0';
 			dprintf(fd, "    File: '%s' -> ", unescape(fname));
 			dprintf(fd, "'%s'", unescape(g_buf));
+			xstrlcpy(g_buf, "symbolic link", MAX_CMD_LEN);
 		}
 	} else
 		dprintf(fd, "    File: '%s'", unescape(fname));
