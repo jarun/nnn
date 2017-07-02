@@ -178,6 +178,7 @@ static uint open_max;
 static bm bookmark[MAX_BM];
 static const double div_2_pow_10 = 1.0 / 1024.0;
 static uint _WSHIFT = (sizeof(ulong) == 8) ? 3 : 2;
+static uchar color = 4;
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -466,7 +467,8 @@ initcurses(void)
 	curs_set(FALSE); /* Hide cursor */
 	start_color();
 	use_default_colors();
-	init_pair(1, COLOR_BLUE, -1);
+	if (cfg.showcolor)
+		init_pair(1, color, -1);
 	timeout(1000); /* One second */
 }
 
@@ -2455,6 +2457,7 @@ The missing terminal file browser for X.\n\n\
 positional arguments:\n\
   PATH           directory to open [default: current dir]\n\n\
 optional arguments:\n\
+  -c N           specify dir color, disables if N>7\n\
   -e             use exiftool instead of mediainfo\n\
   -i             start in navigate-as-you-type mode\n\
   -l             start in light mode (fewer details)\n\
@@ -2482,7 +2485,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	while ((opt = getopt(argc, argv, "lSinep:vh")) != -1) {
+	while ((opt = getopt(argc, argv, "Slic:ep:vh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -2494,8 +2497,10 @@ main(int argc, char *argv[])
 		case 'i':
 			cfg.filtermode = 1;
 			break;
-		case 'n':
-			cfg.showcolor = 0;
+		case 'c':
+			color = (uchar)atoi(optarg);
+			if (color > 7)
+				cfg.showcolor = 0;
 			break;
 		case 'e':
 			metaviewer = utils[3];

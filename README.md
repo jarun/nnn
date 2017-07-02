@@ -36,6 +36,7 @@ Noice is Not Noice, a noicer fork...
   - [use cd .....](#use-cd-)
   - [cd on quit](#cd-on-quit)
   - [copy file path to clipboard](#copy-file-path-to-clipboard)
+  - [change dir color](#change-dir-color)
   - [file copy, move, delete](#file-copy-move-delete)
   - [boost chdir prompt](#boost-chdir-prompt)
   - [set idle timeout](#set-idle-timeout)
@@ -67,7 +68,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Jump HOME or to the last visited directory (as usual!)
   - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
   - Roll-over at edges, page through entries
-  - Show directories in blue (default: enabled)
+  - Show directories in custom color (default: enabled in blue)
 - Disk usage analyzer mode
 - Search
   - Filter directory contents with *search-as-you-type*
@@ -140,6 +141,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
       PATH           directory to open [default: current dir]
 
     optional arguments:
+      -c N           specify dir color, disables if N>7
       -e             use exiftool instead of mediainfo
       -i             start in navigate-as-you-type mode
       -l             start in light mode (fewer details)
@@ -285,6 +287,14 @@ export `NNN_COPIER`:
     export NNN_COPIER="/path/to/copier.sh"
 
 Start `nnn` and use <kbd>^K</kbd> to copy the absolute path (from `/`) of the file under the cursor to clipboard.
+
+#### change dir color
+
+The default color for directories is blue. Option `-c` accepts color codes from 0 to 7 to use a different color:
+
+0-black, 1-red, 2-green, 3-yellow, 4-blue, 5-magenta, 6-cyan, 7-white
+
+Any other value disables colored directories.
 
 #### file copy, move, delete
 
