@@ -79,7 +79,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - Information
   - Basic and detail view
   - Detailed file information
-  - Media information (needs mediainfo)
+  - Media information (needs mediainfo or exiftool, if specified)
 - Ordering
   - Numeric order (1, 2, ... 10, 11, ...) for numeric names
   - Sort by modification time, size
@@ -140,8 +140,9 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
       PATH           directory to open [default: current dir]
 
     optional arguments:
-      -l             start in light mode (fewer details)
+      -e             use exiftool instead of mediainfo
       -i             start in navigate-as-you-type mode
+      -l             start in light mode (fewer details)
       -n             disable color for directory entries
       -p             path to custom nlay
       -S             start in disk usage analyzer mode
@@ -174,8 +175,8 @@ Right, Enter, l, ^M | Open file or enter dir
                   c | Show change dir prompt
                   d | Toggle detail view
                   D | Toggle current file details screen
-                  m | Show concise mediainfo
-                  M | Show full mediainfo
+                  m | Show concise media info
+                  M | Show full media info
                   s | Toggle sort by file size
                   S | Toggle disk usage analyzer mode
                   t | Toggle sort by modified time
@@ -228,7 +229,7 @@ The following abbreviations are used in the detail view:
 
         export NNN_DE_FILE_MANAGER=thunar
         export NNN_DE_FILE_MANAGER=nautilus
-- [mediainfo](https://mediaarea.net/en/MediaInfo) is required to view media information
+- [mediainfo](https://mediaarea.net/en/MediaInfo) (or exiftool, if specified) is required to view media information
 
 #### Help
 

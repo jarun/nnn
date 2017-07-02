@@ -180,14 +180,18 @@ static const double div_2_pow_10 = 1.0 / 1024.0;
 static uint _WSHIFT;
 
 /* Utilities to open files, run actions */
-static char *utils[] = {
+static char * const utils[] = {
 #ifdef __APPLE__
 	"/usr/bin/open",
 #else
 	"/usr/bin/xdg-open",
 #endif
-	"nlay"
+	"nlay",
+	"mediainfo",
+	"exiftool"
 };
+
+static char *metaviewer;
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[MAX_CMD_LEN];
@@ -1440,11 +1444,11 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 static int
 show_mediainfo(char *fpath, char *arg)
 {
-	if (!get_output(g_buf, MAX_CMD_LEN, "which", "mediainfo", NULL, 0))
+	if (!get_output(g_buf, MAX_CMD_LEN, "which", metaviewer, NULL, 0))
 		return -1;
 
 	exitcurses();
-	get_output(NULL, 0, "mediainfo", fpath, arg, 1);
+	get_output(NULL, 0, metaviewer, fpath, arg, 1);
 	initcurses();
 	return 0;
 }
@@ -1475,8 +1479,8 @@ show_help(void)
                     c | Show change dir prompt\n\
                     d | Toggle detail view\n\
                     D | Toggle current file details screen\n\
-                    m | Show concise mediainfo\n\
-                    M | Show full mediainfo\n\
+                    m | Show concise media info\n\
+                    M | Show full media info\n\
                     s | Toggle sort by file size\n\
                     S | Toggle disk usage analyzer mode\n\
                     t | Toggle sort by modified time\n\
@@ -2360,23 +2364,14 @@ nochange:
 			break;
 		}
 		case SEL_MEDIA:
-			if (ndents > 0) {
-				mkpath(path, dents[cur].name, oldpath,
-				       PATH_MAX);
-
-				if (show_mediainfo(oldpath, NULL) == -1) {
-					printmsg("mediainfo missing");
-					goto nochange;
-				}
-			}
-			break;
 		case SEL_FMEDIA:
 			if (ndents > 0) {
 				mkpath(path, dents[cur].name, oldpath,
 				       PATH_MAX);
 
-				if (show_mediainfo(oldpath, "-f") == -1) {
-					printmsg("mediainfo missing");
+				if (show_mediainfo(oldpath, run) == -1) {
+					sprintf(g_buf, "%s missing", metaviewer);
+					printmsg(g_buf);
 					goto nochange;
 				}
 			}
@@ -2470,8 +2465,9 @@ The missing terminal file browser for X.\n\n\
 positional arguments:\n\
   PATH           directory to open [default: current dir]\n\n\
 optional arguments:\n\
-  -l             start in light mode (fewer details)\n\
+  -e             use exiftool instead of mediainfo\n\
   -i             start in navigate-as-you-type mode\n\
+  -l             start in light mode (fewer details)\n\
   -n             disable color for directory entries\n\
   -p             path to custom nlay\n\
   -S             start in disk usage analyzer mode\n\
@@ -2497,7 +2493,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	while ((opt = getopt(argc, argv, "lSinp:vh")) != -1) {
+	while ((opt = getopt(argc, argv, "lSinep:vh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -2511,6 +2507,9 @@ main(int argc, char *argv[])
 			break;
 		case 'n':
 			cfg.showcolor = 0;
+			break;
+		case 'e':
+			metaviewer = utils[3];
 			break;
 		case 'p':
 			player = optarg;
@@ -2559,6 +2558,10 @@ main(int argc, char *argv[])
 	/* Edit text in EDITOR, if opted */
 	if (getenv("NNN_USE_EDITOR"))
 		editor = xgetenv("EDITOR", "vi");
+
+	/* Set metadata viewer if not set */
+	if (!metaviewer)
+		metaviewer = utils[2];
 
 	/* Set player if not set already */
 	if (!player)

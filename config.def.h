@@ -120,16 +120,16 @@ static struct key bindings[] = {
 	{ 'd',            SEL_DETAIL,    "",     "" },
 	/* File details */
 	{ 'D',            SEL_STATS,     "",     "" },
-	/* Show mediainfo short */
-	{ 'm',            SEL_MEDIA,     "",     "" },
-	/* Show mediainfo full */
-	{ 'M',            SEL_FMEDIA,    "",     "" },
+	/* Show media info short, run is hacked */
+	{ 'm',            SEL_MEDIA,     NULL,   "" },
+	/* Show media info full, run is hacked */
+	{ 'M',            SEL_FMEDIA,    "-f",   "" },
 	/* Open dir in desktop file manager */
 	{ 'o',            SEL_DFB,       "",     "" },
 	/* Toggle sort by size */
 	{ 's',            SEL_FSIZE,     "",     "" },
 	/* Sort by total block count including dir contents */
-	{ 'S',            SEL_BSIZE,    "",     "" },
+	{ 'S',            SEL_BSIZE,     "",     "" },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME,     "",     "" },
 	{ CONTROL('L'),   SEL_REDRAW,    "",     "" },
