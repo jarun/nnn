@@ -372,7 +372,7 @@ xmemrchr(const void *s, uchar ch, size_t n)
 static char *
 xdirname(const char *path)
 {
-	static char buf[PATH_MAX];
+	static char *buf = g_buf;
 	static char *last_slash;
 
 	xstrlcpy(buf, path, PATH_MAX);
