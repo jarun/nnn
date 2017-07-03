@@ -104,6 +104,9 @@ disabledbg()
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define MAX_CMD_LEN 5120
+#define CWD   "cwd: "
+#define CURSR " > "
+#define EMPTY "   "
 #define CURSYM(flag) (flag ? CURSR : EMPTY)
 #define FILTER '/'
 #define MAX_BM 10
@@ -1461,41 +1464,41 @@ show_help(void)
 {
 	char tmp[] = "/tmp/nnnXXXXXX";
 	static char helpstr[] = ("\
-                  Key | Function\n\
-                     -+-\n\
-            Up, k, ^P | Previous entry\n\
-          Down, j, ^N | Next entry\n\
-             PgUp, ^U | Scroll half page up\n\
-             PgDn, ^D | Scroll half page down\n\
-       Home, g, ^, ^A | Jump to first entry\n\
-        End, G, $, ^E | Jump to last entry\n\
-  Right, Enter, l, ^M | Open file or enter dir\n\
-    Left, Bksp, h, ^H | Go to parent dir\n\
-               Insert | Toggle navigate-as-you-type mode\n\
-                    ~ | Jump to HOME dir\n\
-                    & | Jump to initial dir\n\
-                    - | Jump to last visited dir\n\
-                    / | Filter dir contents\n\
-                   ^/ | Search dir in desktop search tool\n\
-                    . | Toggle hide .dot files\n\
-                    b | Show bookmark key prompt\n\
-                    c | Show change dir prompt\n\
-                    d | Toggle detail view\n\
-                    D | Toggle current file details screen\n\
-                    m | Show concise media info\n\
-                    M | Show full media info\n\
-                    s | Toggle sort by file size\n\
-                    S | Toggle disk usage analyzer mode\n\
-                    t | Toggle sort by modified time\n\
-                    ! | Spawn SHELL in PWD (fallback sh)\n\
-                    e | Edit entry in EDITOR (fallback vi)\n\
-                    o | Open dir in NNN_DE_FILE_MANAGER\n\
-                    p | Open entry in PAGER (fallback less)\n\
-                   ^K | Invoke file path copier\n\
-               ^L, F2 | Force a redraw, exit filter prompt\n\
-                    ? | Toggle help and settings screen\n\
-                    Q | Quit and change directory\n\
-		q, ^Q | Quit\n\n\n");
+            Key | Function\n\
+               -+-\n\
+       ↑, k, ^P | Previous entry\n\
+       ↓, j, ^N | Next entry\n\
+       PgUp, ^U | Scroll half page up\n\
+       PgDn, ^D | Scroll half page down\n\
+ Home, g, ^, ^A | Jump to first entry\n\
+  End, G, $, ^E | Jump to last entry\n\
+    →, ↵, l, ^M | Open file or enter dir\n\
+ ←, Bksp, h, ^H | Go to parent dir\n\
+         Insert | Toggle navigate-as-you-type mode\n\
+              ~ | Jump to HOME dir\n\
+              & | Jump to initial dir\n\
+              - | Jump to last visited dir\n\
+              / | Filter dir contents\n\
+             ^/ | Search dir in desktop search tool\n\
+              . | Toggle hide .dot files\n\
+              b | Show bookmark key prompt\n\
+              c | Show change dir prompt\n\
+              d | Toggle detail view\n\
+              D | Show current file details screen\n\
+              m | Show concise media info\n\
+              M | Show full media info\n\
+              s | Toggle sort by file size\n\
+              S | Toggle disk usage analyzer mode\n\
+              t | Toggle sort by modified time\n\
+              ! | Spawn SHELL in PWD (fallback sh)\n\
+              e | Edit entry in EDITOR (fallback vi)\n\
+              o | Open dir in NNN_DE_FILE_MANAGER\n\
+              p | Open entry in PAGER (fallback less)\n\
+             ^K | Invoke file path copier\n\
+         ^L, F2 | Force a redraw, unfilter\n\
+              ? | Toggle help and settings screen\n\
+              Q | Quit and change directory\n\
+          q, ^Q | Quit\n\n\n");
 
 	int i = 0, fd = mkstemp(tmp);
 
@@ -1508,7 +1511,7 @@ show_help(void)
 		dprintf(fd, "BOOKMARKS\n");
 		for (; i < MAX_BM; ++i)
 			if (bookmark[i].key)
-				dprintf(fd, "    %s: %s\n",
+				dprintf(fd, "\t%s: %s\n",
 					bookmark[i].key, bookmark[i].loc);
 			else
 				break;
@@ -2452,20 +2455,21 @@ nochange:
 static void
 usage(void)
 {
-	printf("usage: nnn [-l] [-i] [-p custom_nlay] [-S] [-v] [-h] [PATH]\n\n\
+	printf("usage: nnn [-c N] [-e] [-i] [-l] [n]\n\
+           [-p nlay] [-S] [-v] [-h] [PATH]\n\n\
 The missing terminal file browser for X.\n\n\
 positional arguments:\n\
-  PATH           directory to open [default: current dir]\n\n\
+  PATH	 directory to open [default: current dir]\n\n\
 optional arguments:\n\
-  -c N           specify dir color, disables if N>7\n\
-  -e             use exiftool instead of mediainfo\n\
-  -i             start in navigate-as-you-type mode\n\
-  -l             start in light mode (fewer details)\n\
-  -n             disable color for directory entries\n\
-  -p             path to custom nlay\n\
-  -S             start in disk usage analyzer mode\n\
-  -v             show program version and exit\n\
-  -h             show this help and exit\n\n\
+ -c N    specify dir color, disables if N>7\n\
+ -e      use exiftool instead of mediainfo\n\
+ -i      start in navigate-as-you-type mode\n\
+ -l      start in light mode (fewer details)\n\
+ -n      disable color for directory entries\n\
+ -p nlay path to custom nlay\n\
+ -S      start in disk usage analyzer mode\n\
+ -v      show program version and exit\n\
+ -h      show this help and exit\n\n\
 Version: %s\n\
 License: BSD 2-Clause\n\
 Webpage: https://github.com/jarun/nnn\n", VERSION);

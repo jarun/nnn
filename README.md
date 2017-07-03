@@ -133,64 +133,65 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 
 #### Cmdline options
 
-    usage: nnn [-l] [-i] [-p custom_nlay] [-S] [-v] [-h] [PATH]
+    usage: nnn [-c N] [-e] [-i] [-l] [n]
+               [-p nlay] [-S] [-v] [-h] [PATH]
 
     The missing terminal file browser for X.
 
     positional arguments:
-      PATH           directory to open [default: current dir]
+      PATH   directory to open [default: current dir]
 
     optional arguments:
-      -c N           specify dir color, disables if N>7
-      -e             use exiftool instead of mediainfo
-      -i             start in navigate-as-you-type mode
-      -l             start in light mode (fewer details)
-      -n             disable color for directory entries
-      -p             path to custom nlay
-      -S             start in disk usage analyzer mode
-      -v             show program version and exit
-      -h             show this help and exit
+      -c N    specify dir color, disables if N>7
+      -e      use exiftool instead of mediainfo
+      -i      start in navigate-as-you-type mode
+      -l      start in light mode (fewer details)
+      -n      disable color for directory entries
+      -p nlay path to custom nlay
+      -S      start in disk usage analyzer mode
+      -v      show program version and exit
+      -h      show this help and exit
 
 `>` indicates the currently selected entry in `nnn`.
 
 #### Keyboard shortcuts
 
 ```
-                Key | Function
-                   -+-
-          Up, k, ^P | Previous entry
-        Down, j, ^N | Next entry
-           PgUp, ^U | Scroll half page up
-           PgDn, ^D | Scroll half page down
-     Home, g, ^, ^A | Jump to first entry
-      End, G, $, ^E | Jump to last entry
-Right, Enter, l, ^M | Open file or enter dir
-  Left, Bksp, h, ^H | Go to parent dir
-             Insert | Toggle navigate-as-you-type mode
-                  ~ | Jump to HOME dir
-                  & | Jump to initial dir
-                  - | Jump to last visited dir
-                  / | Filter dir contents
-                 ^/ | Search dir in desktop search tool
-                  . | Toggle hide .dot files
-                  b | Show bookmark key prompt
-                  c | Show change dir prompt
-                  d | Toggle detail view
-                  D | Toggle current file details screen
-                  m | Show concise media info
-                  M | Show full media info
-                  s | Toggle sort by file size
-                  S | Toggle disk usage analyzer mode
-                  t | Toggle sort by modified time
-                  ! | Spawn SHELL in PWD (fallback sh)
-                  e | Edit entry in EDITOR (fallback vi)
-                  o | Open dir in NNN_DE_FILE_MANAGER
-                  p | Open entry in PAGER (fallback less)
-                 ^K | Invoke file path copier
-             ^L, F2 | Force a redraw, exit filter prompt
-                  ? | Toggle help and settings screen
-                  Q | Quit and change directory
-              q, ^Q | Quit
+            Key | Function
+               -+-
+       ↑, k, ^P | Previous entry
+       ↓, j, ^N | Next entry
+       PgUp, ^U | Scroll half page up
+       PgDn, ^D | Scroll half page down
+ Home, g, ^, ^A | Jump to first entry
+  End, G, $, ^E | Jump to last entry
+    →, ↵, l, ^M | Open file or enter dir
+ ←, Bksp, h, ^H | Go to parent dir
+         Insert | Toggle navigate-as-you-type mode
+              ~ | Jump to HOME dir
+              & | Jump to initial dir
+              - | Jump to last visited dir
+              / | Filter dir contents
+             ^/ | Search dir in desktop search tool
+              . | Toggle hide .dot files
+              b | Show bookmark key prompt
+              c | Show change dir prompt
+              d | Toggle detail view
+              D | Toggle current file details screen
+              m | Show concise media info
+              M | Show full media info
+              s | Toggle sort by file size
+              S | Toggle disk usage analyzer mode
+              t | Toggle sort by modified time
+              ! | Spawn SHELL in PWD (fallback sh)
+              e | Edit entry in EDITOR (fallback vi)
+              o | Open dir in NNN_DE_FILE_MANAGER
+              p | Open entry in PAGER (fallback less)
+             ^K | Invoke file path copier
+         ^L, F2 | Force a redraw, unfilter
+              ? | Toggle help and settings screen
+              Q | Quit and change directory
+          q, ^Q | Quit
 ```
 
 #### Filters

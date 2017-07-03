@@ -6,9 +6,12 @@
 .Nd the missing terminal file browser for X
 .Sh SYNOPSIS
 .Nm
-.Op Ar -l
+.Op Ar -c N
+.Op Ar -e
 .Op Ar -i
-.Op Ar -p custom_nlay
+.Op Ar -l
+.Op Ar -n
+.Op Ar -p nlay
 .Op Ar -S
 .Op Ar -v
 .Op Ar -h
@@ -64,7 +67,7 @@ Show change dir prompt
 .It Ic d
 Toggle detail view
 .It Ic D
-Toggle current file details screen
+Show current file details screen
 .It Ic m
 Show concise media info
 .It Ic M
@@ -86,7 +89,7 @@ Open current entry in PAGER (fallback less)
 .It Ic ^K
 Invoke file path copier
 .It Ic ^L, [F2]
-Force a redraw, exit filter prompt
+Force a redraw, unfilter
 .It Ic \&?
 Toggle help and settings screen
 .It Ic Q
@@ -117,7 +120,7 @@ supports the following options:
 .Fl n
         disable color for directory entries
 .Pp
-.Fl "p custom_nlay"
+.Fl "p nlay"
         path to custom nlay
 .Pp
 .Fl S
