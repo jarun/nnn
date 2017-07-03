@@ -163,12 +163,10 @@ extern int wget_wch(WINDOW *win, wint_t *wch);
 /* Configuration */
 static settings cfg = {0, 0, 0, 0, 0, 1, 1, 0};
 
-/* Idle timeout in seconds, 0 to disable */
-static uint idletimeout;
-
 static struct entry *dents;
 static int ndents, cur, total_dents;
 static uint idle;
+static uint idletimeout;
 static char *player;
 static char *copier;
 static char *editor;
@@ -199,6 +197,11 @@ static char *metaviewer;
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[MAX_CMD_LEN];
+
+/* Common message strings */
+static char *STR_NFTWFAIL = "nftw(3) failed";
+static char *STR_ATROOT = "You are at /";
+static char *STR_NOHOME = "HOME not set";
 
 /*
  * Layout:
@@ -457,9 +460,9 @@ initcurses(void)
 		char *term = getenv("TERM");
 
 		if (term != NULL)
-			fprintf(stderr, "error opening terminal: %s\n", term);
+			fprintf(stderr, "error opening TERM: %s\n", term);
 		else
-			fprintf(stderr, "failed to initialize curses\n");
+			fprintf(stderr, "initscr() failed\n");
 		exit(1);
 	}
 	cbreak();
@@ -475,13 +478,6 @@ initcurses(void)
 	timeout(1000); /* One second */
 }
 
-/* Exit curses mode */
-static void
-exitcurses(void)
-{
-	endwin(); /* Restore terminal */
-}
-
 /*
  * Spawns a child process. Behaviour can be controlled using flag.
  * Limited to 2 arguments to a program, flag works on bit set.
@@ -493,7 +489,7 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 	int status;
 
 	if (flag & F_NORMAL)
-		exitcurses();
+		endwin();
 
 	pid = fork();
 	if (pid == 0) {
@@ -719,7 +715,7 @@ printwarn(void)
 static void
 printerr(int ret, char *prefix)
 {
-	exitcurses();
+	endwin();
 	fprintf(stderr, "%s: %s\n", prefix, strerror(errno));
 	exit(ret);
 }
@@ -772,6 +768,16 @@ nextsel(char **run, char **env, int *presel)
 	return 0;
 }
 
+static void
+dentcpy(struct entry *dst, struct entry *src)
+{
+	xstrlcpy(dst->name, src->name, NAME_MAX);
+	dst->mode = src->mode;
+	dst->t = src->t;
+	dst->size = src->size;
+	dst->blocks = src->blocks;
+}
+
 /*
  * Move non-matching entries to the end
  */
@@ -787,29 +793,13 @@ fill(struct entry **dents,
 				static struct entry _dent;
 
 				/* Copy count to tmp */
-				xstrlcpy(_dent.name, (*dents)[count].name,
-					 NAME_MAX);
-				_dent.mode = (*dents)[count].mode;
-				_dent.t = (*dents)[count].t;
-				_dent.size = (*dents)[count].size;
-				_dent.blocks = (*dents)[count].blocks;
+				dentcpy(&_dent, &(*dents)[count]);
 
 				/* Copy ndents - 1 to count */
-				xstrlcpy((*dents)[count].name,
-					 (*dents)[ndents].name, NAME_MAX);
-				(*dents)[count].mode = (*dents)[ndents].mode;
-				(*dents)[count].t = (*dents)[ndents].t;
-				(*dents)[count].size = (*dents)[ndents].size;
-				(*dents)[count].blocks
-						= (*dents)[ndents].blocks;
+				dentcpy(&(*dents)[count], &(*dents)[ndents]);
 
 				/* Copy tmp to ndents - 1 */
-				xstrlcpy((*dents)[ndents].name, _dent.name,
-					 NAME_MAX);
-				(*dents)[ndents].mode = _dent.mode;
-				(*dents)[ndents].t = _dent.t;
-				(*dents)[ndents].size = _dent.size;
-				(*dents)[ndents].blocks = _dent.blocks;
+				dentcpy(&(*dents)[ndents], &_dent);
 
 				--count;
 			}
@@ -1089,8 +1079,7 @@ printent(struct entry *ent, int sel)
 static char *
 coolsize(off_t size)
 {
-	static const char * const U[]
-		= {"B", "K", "M", "G", "T", "P", "E", "Z", "Y"};
+	static const char * const U = "BKMGTPEZY";
 	static char size_buf[12]; /* Buffer to hold human readable size */
 	static int i;
 	static off_t tmp;
@@ -1106,7 +1095,7 @@ coolsize(off_t size)
 		++i;
 	}
 
-	snprintf(size_buf, 12, "%.*Lf%s", i, size + rem * div_2_pow_10, U[i]);
+	snprintf(size_buf, 12, "%.*Lf%c", i, size + rem * div_2_pow_10, U[i]);
 	return size_buf;
 }
 
@@ -1440,7 +1429,7 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 
 	close(fd);
 
-	exitcurses();
+	endwin();
 	get_output(NULL, 0, "cat", tmp, NULL, 1);
 	unlink(tmp);
 	initcurses();
@@ -1453,7 +1442,7 @@ show_mediainfo(char *fpath, char *arg)
 	if (!get_output(g_buf, MAX_CMD_LEN, "which", metaviewer, NULL, 0))
 		return -1;
 
-	exitcurses();
+	endwin();
 	get_output(NULL, 0, metaviewer, fpath, arg, 1);
 	initcurses();
 	return 0;
@@ -1533,7 +1522,7 @@ show_help(void)
 	dprintf(fd, "\n");
 	close(fd);
 
-	exitcurses();
+	endwin();
 	get_output(NULL, 0, "cat", tmp, NULL, 1);
 	unlink(tmp);
 	initcurses();
@@ -1626,7 +1615,7 @@ dentfill(char *path, struct entry **dents,
 
 				if (nftw(g_buf, sum_bsizes, open_max,
 					 FTW_MOUNT | FTW_PHYS) == -1) {
-					printmsg("nftw(3) failed");
+					printmsg(STR_NFTWFAIL);
 					dir_blocks += sb.st_blocks;
 				} else
 					dir_blocks += ent_blocks;
@@ -1666,7 +1655,7 @@ dentfill(char *path, struct entry **dents,
 
 				if (nftw(g_buf, sum_bsizes, open_max,
 					 FTW_MOUNT | FTW_PHYS) == -1) {
-					printmsg("nftw(3) failed");
+					printmsg(STR_NFTWFAIL);
 					(*dents)[n].blocks = sb.st_blocks;
 				} else
 					(*dents)[n].blocks = ent_blocks;
@@ -1922,7 +1911,7 @@ nochange:
 		case SEL_BACK:
 			/* There is no going back */
 			if (path[0] == '/' && path[1] == '\0') {
-				printmsg("You are at /");
+				printmsg(STR_ATROOT);
 				goto nochange;
 			}
 
@@ -2083,7 +2072,7 @@ nochange:
 				goto nochange;
 			}
 
-			exitcurses();
+			endwin();
 			tmp = readline("chdir: ");
 			initcurses();
 
@@ -2115,7 +2104,7 @@ nochange:
 						 home, tmp + 1);
 				else {
 					free(input);
-					printmsg("HOME not set");
+					printmsg(STR_NOHOME);
 					goto nochange;
 				}
 			} else if (tmp[0] == '-' && tmp[1] == '\0') {
@@ -2136,7 +2125,7 @@ nochange:
 
 				/* Show a message if already at / */
 				if (path[0] == '/' && path[1] == '\0') {
-					printmsg("You are at /");
+					printmsg(STR_ATROOT);
 					free(input);
 					goto nochange;
 				}
@@ -2282,7 +2271,7 @@ nochange:
 							 bookmark[r].loc
 							 + 1);
 					else {
-						printmsg("HOME not set");
+						printmsg(STR_NOHOME);
 						goto nochange;
 					}
 				} else
@@ -2584,7 +2573,7 @@ main(int argc, char *argv[])
 #endif
 	initcurses();
 	browse(ipath, ifilter);
-	exitcurses();
+	endwin();
 #ifdef DEBUGMODE
 	disabledbg();
 #endif
