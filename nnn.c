@@ -1453,41 +1453,41 @@ show_help(void)
 {
 	char tmp[] = "/tmp/nnnXXXXXX";
 	static char helpstr[] = ("\
-            Key | Function\n\
-               -+-\n\
-       ↑, k, ^P | Previous entry\n\
-       ↓, j, ^N | Next entry\n\
-       PgUp, ^U | Scroll half page up\n\
-       PgDn, ^D | Scroll half page down\n\
- Home, g, ^, ^A | Jump to first entry\n\
-  End, G, $, ^E | Jump to last entry\n\
-    →, ↵, l, ^M | Open file or enter dir\n\
- ←, Bksp, h, ^H | Go to parent dir\n\
-         Insert | Toggle navigate-as-you-type mode\n\
-              ~ | Jump to HOME dir\n\
-              & | Jump to initial dir\n\
-              - | Jump to last visited dir\n\
-              / | Filter dir contents\n\
-             ^/ | Search dir in desktop search tool\n\
-              . | Toggle hide .dot files\n\
-              b | Show bookmark key prompt\n\
-              c | Show change dir prompt\n\
-              d | Toggle detail view\n\
-              D | Show current file details screen\n\
-              m | Show concise media info\n\
-              M | Show full media info\n\
-              s | Toggle sort by file size\n\
-              S | Toggle disk usage analyzer mode\n\
-              t | Toggle sort by modified time\n\
-              ! | Spawn SHELL in PWD (fallback sh)\n\
-              e | Edit entry in EDITOR (fallback vi)\n\
-              o | Open dir in NNN_DE_FILE_MANAGER\n\
-              p | Open entry in PAGER (fallback less)\n\
-             ^K | Invoke file path copier\n\
-         ^L, F2 | Force a redraw, unfilter\n\
-              ? | Toggle help and settings screen\n\
-              Q | Quit and change directory\n\
-          q, ^Q | Quit\n\n\n");
+           Key | Function\n\
+              -+-\n\
+      ↑, k, ^P | Previous entry\n\
+      ↓, j, ^N | Next entry\n\
+      PgUp, ^U | Scroll half page up\n\
+      PgDn, ^D | Scroll half page down\n\
+Home, g, ^, ^A | Jump to first entry\n\
+ End, G, $, ^E | Jump to last entry\n\
+   →, ↵, l, ^M | Open file or enter dir\n\
+←, Bksp, h, ^H | Go to parent dir\n\
+        Insert | Toggle navigate-as-you-type\n\
+             ~ | Jump to HOME dir\n\
+             & | Jump to initial dir\n\
+             - | Jump to last visited dir\n\
+             / | Filter dir contents\n\
+            ^/ | Open desktop search tool\n\
+             . | Toggle hide .dot files\n\
+             b | Show bookmark key prompt\n\
+             c | Show change dir prompt\n\
+             d | Toggle detail view\n\
+             D | Show current file details\n\
+             m | Show concise media info\n\
+             M | Show full media info\n\
+             s | Toggle sort by file size\n\
+             S | Toggle disk usage mode\n\
+             t | Toggle sort by mtime\n\
+             ! | Spawn SHELL in current dir\n\
+             e | Edit entry in EDITOR\n\
+             o | Open dir in file manager\n\
+             p | Open entry in PAGER\n\
+            ^K | Invoke file path copier\n\
+        ^L, F2 | Force a redraw, unfilter\n\
+             ? | Show help, settings\n\
+             Q | Quit and change dir\n\
+         q, ^Q | Quit\n\n");
 
 	int i = 0, fd = mkstemp(tmp);
 

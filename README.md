@@ -85,7 +85,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Numeric order (1, 2, ... 10, 11, ...) for numeric names
   - Sort by modification time, size
 - Convenience
-  - Spawn a shell in the current directory
+  - Spawn SHELL (fallback sh) in the current directory
   - Invoke file path copier (*easy* shell integration)
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
@@ -157,41 +157,41 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 #### Keyboard shortcuts
 
 ```
-            Key | Function
-               -+-
-       ↑, k, ^P | Previous entry
-       ↓, j, ^N | Next entry
-       PgUp, ^U | Scroll half page up
-       PgDn, ^D | Scroll half page down
- Home, g, ^, ^A | Jump to first entry
-  End, G, $, ^E | Jump to last entry
-    →, ↵, l, ^M | Open file or enter dir
- ←, Bksp, h, ^H | Go to parent dir
-         Insert | Toggle navigate-as-you-type mode
-              ~ | Jump to HOME dir
-              & | Jump to initial dir
-              - | Jump to last visited dir
-              / | Filter dir contents
-             ^/ | Search dir in desktop search tool
-              . | Toggle hide .dot files
-              b | Show bookmark key prompt
-              c | Show change dir prompt
-              d | Toggle detail view
-              D | Toggle current file details screen
-              m | Show concise media info
-              M | Show full media info
-              s | Toggle sort by file size
-              S | Toggle disk usage analyzer mode
-              t | Toggle sort by modified time
-              ! | Spawn SHELL in PWD (fallback sh)
-              e | Edit entry in EDITOR (fallback vi)
-              o | Open dir in NNN_DE_FILE_MANAGER
-              p | Open entry in PAGER (fallback less)
-             ^K | Invoke file path copier
-         ^L, F2 | Force a redraw, unfilter
-              ? | Toggle help and settings screen
-              Q | Quit and change directory
-          q, ^Q | Quit
+           Key | Function
+              -+-
+      ↑, k, ^P | Previous entry
+      ↓, j, ^N | Next entry
+      PgUp, ^U | Scroll half page up
+      PgDn, ^D | Scroll half page down
+Home, g, ^, ^A | Jump to first entry
+ End, G, $, ^E | Jump to last entry
+   →, ↵, l, ^M | Open file or enter dir
+←, Bksp, h, ^H | Go to parent dir
+        Insert | Toggle navigate-as-you-type
+             ~ | Jump to HOME dir
+             & | Jump to initial dir
+             - | Jump to last visited dir
+             / | Filter dir contents
+            ^/ | Open desktop search tool
+             . | Toggle hide .dot files
+             b | Show bookmark key prompt
+             c | Show change dir prompt
+             d | Toggle detail view
+             D | Show current file details
+             m | Show concise media info
+             M | Show full media info
+             s | Toggle sort by file size
+             S | Toggle disk usage mode
+             t | Toggle sort by mtime
+             ! | Spawn SHELL in current dir
+             e | Edit entry in EDITOR
+             o | Open dir in file manager
+             p | Open entry in PAGER
+            ^K | Invoke file path copier
+        ^L, F2 | Force a redraw, unfilter
+             ? | Show help, settings
+             Q | Quit and change dir
+         q, ^Q | Quit
 ```
 
 #### Filters
