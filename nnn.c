@@ -122,6 +122,7 @@ disabledbg()
 #define exitcurses() endwin()
 #define clearprompt() printmsg("")
 #define printwarn() printmsg(strerror(errno))
+#define istopdir(path) (path[1] == '\0' && path[0] == '/')
 
 typedef unsigned long ulong;
 typedef unsigned int uint;
@@ -437,17 +438,17 @@ xdirname(const char *path)
  * Return number of dots if all chars in a string are dots, else 0
  */
 static int
-all_dots(const char *ptr)
+all_dots(const char *path)
 {
-	if (!ptr)
+	if (!path)
 		return FALSE;
 
 	int count = 0;
 
-	while (*ptr == '.')
-		++count, ++ptr;
+	while (*path == '.')
+		++count, ++path;
 
-	if (*ptr)
+	if (*path)
 		return 0;
 
 	return count;
@@ -755,16 +756,6 @@ nextsel(char **run, char **env, int *presel)
 	return 0;
 }
 
-static void
-dentcpy(struct entry *dst, struct entry *src)
-{
-	xstrlcpy(dst->name, src->name, NAME_MAX);
-	dst->mode = src->mode;
-	dst->t = src->t;
-	dst->size = src->size;
-	dst->blocks = src->blocks;
-}
-
 /*
  * Move non-matching entries to the end
  */
@@ -776,16 +767,31 @@ fill(struct entry **dents, int (*filter)(regex_t *, char *), regex_t *re)
 	for (count = 0; count < ndents; ++count) {
 		if (filter(re, (*dents)[count].name) == 0) {
 			if (count != --ndents) {
-				static struct entry _dent;
+				static struct entry _dent, *dentp1, *dentp2;
+
+				dentp1 = &(*dents)[count];
+				dentp2 = &(*dents)[ndents];
 
 				/* Copy count to tmp */
-				dentcpy(&_dent, &(*dents)[count]);
+				xstrlcpy(_dent.name, dentp1->name, NAME_MAX);
+				_dent.mode = dentp1->mode;
+				_dent.t = dentp1->t;
+				_dent.size = dentp1->size;
+				_dent.blocks = dentp1->blocks;
 
 				/* Copy ndents - 1 to count */
-				dentcpy(&(*dents)[count], &(*dents)[ndents]);
+				xstrlcpy(dentp1->name, dentp2->name, NAME_MAX);
+				dentp1->mode = dentp2->mode;
+				dentp1->t = dentp2->t;
+				dentp1->size = dentp2->size;
+				dentp1->blocks = dentp2->blocks;
 
 				/* Copy tmp to ndents - 1 */
-				dentcpy(&(*dents)[ndents], &_dent);
+				xstrlcpy(dentp2->name, _dent.name, NAME_MAX);
+				dentp2->mode = _dent.mode;
+				dentp2->t = _dent.t;
+				dentp2->size = _dent.size;
+				dentp2->blocks = _dent.blocks;
 
 				--count;
 			}
@@ -936,7 +942,7 @@ mkpath(char *dir, char *name, char *out, size_t n)
 		xstrlcpy(out, name, n);
 	else {
 		/* Handle root case */
-		if (dir[0] == '/' && dir[1] == '\0')
+		if (istopdir(dir))
 			snprintf(out, n, "/%s", name);
 		else
 			snprintf(out, n, "%s/%s", dir, name);
@@ -1258,8 +1264,8 @@ get_lsperms(mode_t mode, char *desc)
  * If pager is valid, returns NULL
  */
 static char *
-get_output(char *buf, size_t bytes, char *file,
-	   char *arg1, char *arg2, int pager)
+get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2,
+	   int pager)
 {
 	pid_t pid;
 	int pipefd[2];
@@ -1567,13 +1573,8 @@ dentfill(char *path, struct entry **dents,
 	static struct dirent *dp;
 	static struct stat sb;
 	static int fd, n;
-
-	n = 0;
-
-	if (cfg.blkorder) {
-		num_files = 0;
-		dir_blocks = 0;
-	}
+	static char *namep;
+	static struct entry *dentp;
 
 	dirp = opendir(path);
 	if (dirp == NULL)
@@ -1581,23 +1582,39 @@ dentfill(char *path, struct entry **dents,
 
 	fd = dirfd(dirp);
 
-	while ((dp = readdir(dirp)) != NULL) {
-		/* Skip self and parent */
-		if ((dp->d_name[0] == '.' && (dp->d_name[1] == '\0' ||
-		    (dp->d_name[1] == '.' && dp->d_name[2] == '\0'))))
-			continue;
+	n = 0;
 
-		if (filter(re, dp->d_name) == 0) {
+	if (cfg.blkorder) {
+		static struct statvfs svb;
+
+		if (statvfs(path, &svb) == -1)
+			fs_free = 0;
+		else
+			fs_free = svb.f_bavail << getorder(svb.f_bsize);
+
+		num_files = 0;
+		dir_blocks = 0;
+	}
+
+	while ((dp = readdir(dirp)) != NULL) {
+		namep = dp->d_name;
+
+		if (filter(re, namep) == 0) {
 			if (!cfg.blkorder)
 				continue;
 
-			if (fstatat(fd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW)
+			/* Skip self and parent */
+			if ((namep[0] == '.' && (namep[1] == '\0' ||
+			    (namep[1] == '.' && namep[2] == '\0'))))
+				continue;
+
+			if (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW)
 					== -1)
 				continue;
 
 			if (S_ISDIR(sb.st_mode)) {
 				ent_blocks = 0;
-				mkpath(path, dp->d_name, g_buf, PATH_MAX);
+				mkpath(path, namep, g_buf, PATH_MAX);
 
 				if (nftw(g_buf, sum_bsizes, open_max,
 					 FTW_MOUNT | FTW_PHYS) == -1) {
@@ -1615,7 +1632,12 @@ dentfill(char *path, struct entry **dents,
 			continue;
 		}
 
-		if (fstatat(fd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1) {
+		/* Skip self and parent */
+		if ((namep[0] == '.' && (namep[1] == '\0' ||
+		    (namep[1] == '.' && namep[2] == '\0'))))
+			continue;
+
+		if (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW) == -1) {
 			if (*dents)
 				free(*dents);
 			printerr(1, "fstatat");
@@ -1628,42 +1650,34 @@ dentfill(char *path, struct entry **dents,
 				printerr(1, "realloc");
 		}
 
-		xstrlcpy((*dents)[n].name, dp->d_name, NAME_MAX);
+		dentp = &(*dents)[n];
+		xstrlcpy(dentp->name, namep, NAME_MAX);
 
-		(*dents)[n].mode = sb.st_mode;
-		(*dents)[n].t = sb.st_mtime;
-		(*dents)[n].size = sb.st_size;
+		dentp->mode = sb.st_mode;
+		dentp->t = sb.st_mtime;
+		dentp->size = sb.st_size;
 
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
 				ent_blocks = 0;
-				mkpath(path, dp->d_name, g_buf, PATH_MAX);
+				mkpath(path, namep, g_buf, PATH_MAX);
 
 				if (nftw(g_buf, sum_bsizes, open_max,
 					 FTW_MOUNT | FTW_PHYS) == -1) {
 					printmsg(STR_NFTWFAIL);
-					(*dents)[n].blocks = sb.st_blocks;
+					dentp->blocks = sb.st_blocks;
 				} else
-					(*dents)[n].blocks = ent_blocks;
+					dentp->blocks = ent_blocks;
 			} else {
-				(*dents)[n].blocks = sb.st_blocks;
+				dentp->blocks = sb.st_blocks;
 				++num_files;
 			}
 
-			if ((*dents)[n].blocks)
-				dir_blocks += (*dents)[n].blocks;
+			if (dentp->blocks)
+				dir_blocks += dentp->blocks;
 		}
 
 		++n;
-	}
-
-	if (cfg.blkorder) {
-		static struct statvfs svb;
-
-		if (statvfs(path, &svb) == -1)
-			fs_free = 0;
-		else
-			fs_free = svb.f_bavail << getorder(svb.f_bsize);
 	}
 
 	/* Should never be null */
@@ -1896,7 +1910,7 @@ nochange:
 			return;
 		case SEL_BACK:
 			/* There is no going back */
-			if (path[0] == '/' && path[1] == '\0') {
+			if (istopdir(path)) {
 				printmsg(STR_ATROOT);
 				goto nochange;
 			}
@@ -2110,7 +2124,7 @@ nochange:
 				}
 
 				/* Show a message if already at / */
-				if (path[0] == '/' && path[1] == '\0') {
+				if (istopdir(path)) {
 					printmsg(STR_ATROOT);
 					free(input);
 					goto nochange;
@@ -2122,7 +2136,7 @@ nochange:
 				/* Note: fd is used as a tmp variable here */
 				for (fd = 0; fd < r; ++fd) {
 					/* Reached / ? */
-					if (path[0] == '/' && path[1] == '\0') {
+					if (istopdir(path)) {
 						/* Can't cd beyond / */
 						break;
 					}
@@ -2394,7 +2408,7 @@ nochange:
 			goto begin;
 		case SEL_COPY:
 			if (copier && ndents) {
-				if (path[0] == '/' && path[1] == '\0')
+				if (istopdir(path))
 					snprintf(newpath, PATH_MAX, "/%s",
 						 dents[cur].name);
 				else
