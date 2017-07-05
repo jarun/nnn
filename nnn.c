@@ -119,6 +119,10 @@ disabledbg()
 #define F_SIGINT   0x08  /* restore default SIGINT handler */
 #define F_NORMAL   0x80  /* spawn child process in non-curses regular mode */
 
+#define exitcurses() endwin()
+#define clearprompt() printmsg("")
+#define printwarn() printmsg(strerror(errno))
+
 typedef unsigned long ulong;
 typedef unsigned int uint;
 typedef unsigned char uchar;
@@ -222,7 +226,6 @@ static char *STR_NOHOME = "HOME not set";
 
 /* Forward declarations */
 static void printmsg(char *);
-static void printwarn(void);
 static void printerr(int, char *);
 static void redraw(char *path);
 
@@ -489,7 +492,7 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 	int status;
 
 	if (flag & F_NORMAL)
-		endwin();
+		exitcurses();
 
 	pid = fork();
 	if (pid == 0) {
@@ -704,27 +707,13 @@ printmsg(char *msg)
 	mvprintw(LINES - 1, 0, "%s\n", msg);
 }
 
-/* Display warning as a message */
-static void
-printwarn(void)
-{
-	printmsg(strerror(errno));
-}
-
 /* Kill curses and display error before exiting */
 static void
 printerr(int ret, char *prefix)
 {
-	endwin();
+	exitcurses();
 	fprintf(stderr, "%s: %s\n", prefix, strerror(errno));
 	exit(ret);
-}
-
-/* Clear the last line */
-static void
-clearprompt(void)
-{
-	printmsg("");
 }
 
 /* Print prompt on the last line */
@@ -1428,7 +1417,7 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 
 	close(fd);
 
-	endwin();
+	exitcurses();
 	get_output(NULL, 0, "cat", tmp, NULL, 1);
 	unlink(tmp);
 	initcurses();
@@ -1441,7 +1430,7 @@ show_mediainfo(char *fpath, char *arg)
 	if (!get_output(g_buf, MAX_CMD_LEN, "which", metaviewer, NULL, 0))
 		return -1;
 
-	endwin();
+	exitcurses();
 	get_output(NULL, 0, metaviewer, fpath, arg, 1);
 	initcurses();
 	return 0;
@@ -1521,7 +1510,7 @@ Home, g, ^, ^A | Jump to first entry\n\
 	dprintf(fd, "\n");
 	close(fd);
 
-	endwin();
+	exitcurses();
 	get_output(NULL, 0, "cat", tmp, NULL, 1);
 	unlink(tmp);
 	initcurses();
@@ -2071,7 +2060,7 @@ nochange:
 				goto nochange;
 			}
 
-			endwin();
+			exitcurses();
 			tmp = readline("chdir: ");
 			initcurses();
 
@@ -2572,7 +2561,7 @@ main(int argc, char *argv[])
 #endif
 	initcurses();
 	browse(ipath, ifilter);
-	endwin();
+	exitcurses();
 #ifdef DEBUGMODE
 	disabledbg();
 #endif
