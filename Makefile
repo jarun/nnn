@@ -13,18 +13,14 @@ else
 	LDLIBS += -lncurses
 endif
 
-DISTFILES = nlay nnn.c config.def.h nnn.1 Makefile README.md LICENSE
-LOCALCONFIG = config.h
+DISTFILES = nlay nnn.c config.h nnn.1 Makefile README.md LICENSE
 SRC = nnn.c
 BIN = nnn
 PLAYER = nlay
 
 all: $(BIN) $(PLAYER)
 
-$(LOCALCONFIG): config.def.h
-	cp config.def.h $@
-
-$(SRC): $(LOCALCONFIG)
+$(SRC): config.h
 
 $(BIN): $(SRC)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)

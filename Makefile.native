@@ -1,6 +1,6 @@
 VERSION = 1.2
 
-PREFIX = /usr/local
+PREFIX ?= /usr/local
 MANPREFIX = $(PREFIX)/share/man
 
 CFLAGS += -O3 -march=native -Wall -Wextra -Wno-unused-parameter
@@ -13,21 +13,17 @@ else
 	LDLIBS += -lncurses
 endif
 
-DISTFILES = nlay nnn.c config.def.h nnn.1 Makefile README.md LICENSE
-LOCALCONFIG = config.h
+DISTFILES = nlay nnn.c config.h nnn.1 Makefile README.md LICENSE
 SRC = nnn.c
 BIN = nnn
 PLAYER = nlay
 
 all: $(BIN) $(PLAYER)
 
-$(LOCALCONFIG): config.def.h
-	cp config.def.h $@
-
-$(SRC): $(LOCALCONFIG)
+$(SRC): config.h
 
 $(BIN): $(SRC)
-	$(CC) $(CFLAGS) $(CPPFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 	strip $@
 
 install: all
