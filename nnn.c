@@ -347,23 +347,21 @@ xstrcmp(const char *s1, const char *s2)
 /*
  * The poor man's implementation of memrchr(3).
  * We are only looking for '/' in this program.
+ * Ideally 0 < n <= strlen(s).
  */
 static void *
-xmemrchr(const void *s, uchar ch, size_t n)
+xmemrchr(uchar *s, uchar ch, size_t n)
 {
 	if (!s || !n)
 		return NULL;
 
-	static uchar *p;
-
-	p = (uchar *)s + n - 1;
+	s = s + n - 1;
 
 	while (n) {
-		if (*p == ch)
-			return p;
+		if (*s == ch)
+			return s;
 
-		--p;
-		--n;
+		--n, --s;
 	}
 
 	return NULL;
@@ -384,7 +382,7 @@ xdirname(const char *path)
 	xstrlcpy(buf, path, PATH_MAX);
 
 	/* Find last '/'. */
-	last_slash = strrchr(buf, '/');
+	last_slash = xmemrchr((uchar *)buf, '/', strlen(buf));
 
 	if (last_slash != NULL && last_slash != buf && last_slash[1] == '\0') {
 		/* Determine whether all remaining characters are slashes. */
@@ -396,7 +394,7 @@ xdirname(const char *path)
 
 		/* The '/' is the last character, we have to look further. */
 		if (runp != buf)
-			last_slash = xmemrchr(buf, '/', runp - buf);
+			last_slash = xmemrchr((uchar *)buf, '/', runp - buf);
 	}
 
 	if (last_slash != NULL) {
