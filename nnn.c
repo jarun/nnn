@@ -782,8 +782,7 @@ dentcpy(struct entry *dst, struct entry *src)
  * Move non-matching entries to the end
  */
 static void
-fill(struct entry **dents,
-	 int (*filter)(regex_t *, char *), regex_t *re)
+fill(struct entry **dents, int (*filter)(regex_t *, char *), regex_t *re)
 {
 	static int count;
 
@@ -1856,7 +1855,7 @@ browse(char *ipath, char *ifilter)
 	char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX];
 	char lastdir[PATH_MAX];
 	char fltr[LINE_MAX];
-	char *dir, *tmp, *run, *env, *tgt=NULL;
+	char *dir, *tmp, *run, *env, *tgt = NULL;
 	struct stat sb;
 	int r, fd, presel;
 	enum action sel = SEL_RUNARG + 1;
