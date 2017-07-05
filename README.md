@@ -133,8 +133,8 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 
 #### Cmdline options
 
-    usage: nnn [-c N] [-e] [-i] [-l] [n]
-               [-p nlay] [-S] [-v] [-h] [PATH]
+    usage: nnn [-c N] [-e] [-i] [-l] [n] [-p nlay] [-S]
+               [-v] [-h] [PATH]
 
     The missing terminal file browser for X.
 
@@ -146,7 +146,6 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
       -e      use exiftool instead of mediainfo
       -i      start in navigate-as-you-type mode
       -l      start in light mode (fewer details)
-      -n      disable color for directory entries
       -p nlay path to custom nlay
       -S      start in disk usage analyzer mode
       -v      show program version and exit

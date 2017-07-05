@@ -2444,8 +2444,8 @@ nochange:
 static void
 usage(void)
 {
-	printf("usage: nnn [-c N] [-e] [-i] [-l] [n]\n\
-           [-p nlay] [-S] [-v] [-h] [PATH]\n\n\
+	printf("usage: nnn [-c N] [-e] [-i] [-l] [-p nlay] [-S]\n\
+           [-v] [-h] [PATH]\n\n\
 The missing terminal file browser for X.\n\n\
 positional arguments:\n\
   PATH	 directory to open [default: current dir]\n\n\
@@ -2454,7 +2454,6 @@ optional arguments:\n\
  -e      use exiftool instead of mediainfo\n\
  -i      start in navigate-as-you-type mode\n\
  -l      start in light mode (fewer details)\n\
- -n      disable color for directory entries\n\
  -p nlay path to custom nlay\n\
  -S      start in disk usage analyzer mode\n\
  -v      show program version and exit\n\
