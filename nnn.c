@@ -912,14 +912,9 @@ readln(char *path)
 				redraw(path);
 				printprompt(ln);
 				break;
-			case KEY_DOWN: // fallthrough
-			case KEY_UP: // fallthrough
-			case KEY_LEFT: // fallthrough
-			case KEY_RIGHT: // fallthrough
-			case KEY_F(2):
-				if (len == 1)
-					cur = oldcur; // fallthrough
 			default:
+				if (len == 1)
+					cur = oldcur;
 				goto end;
 			}
 end:
