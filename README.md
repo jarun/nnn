@@ -139,7 +139,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
     The missing terminal file browser for X.
 
     positional arguments:
-      PATH   directory to open [default: current dir]
+      PATH    directory to open [default: current dir]
 
     optional arguments:
       -c N    specify dir color, disables if N>7

@@ -2443,7 +2443,7 @@ usage(void)
            [-v] [-h] [PATH]\n\n\
 The missing terminal file browser for X.\n\n\
 positional arguments:\n\
-  PATH	 directory to open [default: current dir]\n\n\
+  PATH   directory to open [default: current dir]\n\n\
 optional arguments:\n\
  -c N    specify dir color, disables if N>7\n\
  -e      use exiftool instead of mediainfo\n\
