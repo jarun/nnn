@@ -18,7 +18,7 @@ matrix:
       env: USE_DOCKER=1 OS_TYPE=centos OS_VERSION=7
     - os: linux
       dist: trusty
-      env: USE_DOCKER=1 OS_TYPE=fedora OS_VERSION=24
+      env: USE_DOCKER=1 OS_TYPE=fedora OS_VERSION=26
 
 before_install:
     - if [ "$USE_DOCKER" = "1" ]; then
