@@ -245,11 +245,9 @@ max_openfds()
 	limit = rl.rlim_cur;
 	rl.rlim_cur = rl.rlim_max;
 
+	/* Return ~75% of max possible */
 	if (setrlimit(RLIMIT_NOFILE, &rl) == 0)
-		return rl.rlim_max - 64;
-
-	if (limit > 128)
-		return limit - 64;
+		return (rl.rlim_max - (rl.rlim_max >> 2));
 
 	return 32;
 }
