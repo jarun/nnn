@@ -96,7 +96,7 @@ disabledbg()
 #endif /* DEBUGMODE */
 
 /* Macro definitions */
-#define VERSION "1.2"
+#define VERSION "1.3"
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))

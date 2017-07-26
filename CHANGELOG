@@ -1,3 +1,14 @@
+nnn v1.3
+2017-07-26
+
+What's in?
+- Show directories in custom color (default: enabled in blue)
+- Option `-e` to use exiftool instead of mediainfo
+- Fixed #34: nftw(3) broken with too many open descriptors
+- More concise help screen
+
+-------------------------------------------------------------------------------
+
 nnn v1.2
 2017-06-29
 
