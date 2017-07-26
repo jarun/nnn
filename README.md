@@ -122,7 +122,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - [Homebrew](http://braumeister.org/formula/nnn)
   - [Debian](https://packages.debian.org/search?keywords=nnn)
   - [Ubuntu PPA](https://launchpad.net/~twodopeshaggy/+archive/ubuntu/jarun/)
-- Packages for **Fedora 24** and **CentOS 7** are available with the [latest release](https://github.com/jarun/nnn/releases/latest)
+- Packages for latest **Fedora** and **CentOS** distributions are available with the [latest release](https://github.com/jarun/nnn/releases/latest)
 - To cook yourself, download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*). Then install the dependencies and compile (e.g. on Ubuntu 16.04):
 
       $ sudo apt-get install libncursesw5-dev libreadline6-dev
