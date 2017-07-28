@@ -50,6 +50,20 @@ Noice is Not Noice, a noicer fork...
 
 `nnn` works with the desktop opener, adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, bookmarks, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
 
+Cool things you can do with `nnn`:
+
+- open any file in the default desktop application for the mime
+- *navigate-as-you-type* (*search-as-you-type* enabled even on directory switch)
+- check disk usage with number of files in current directory tree
+- run desktop search utility (gnome-search-tool or catfish) in any directory
+- copy absolute file path to clipboard, spawn a terminal and use the file path
+- navigate instantly using shortcuts like `~`, `-`, `&` or handy bookmarks
+- use `cd .....` at chdir prompt to go to a parent directory
+- see detailed file stats or mediainfo information
+- open a (supported) archive in vim to view its contents
+- set timeout to lock the current terminal
+- change directory on exit
+
 If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
 
 Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
