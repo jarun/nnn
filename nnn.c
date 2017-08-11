@@ -1422,6 +1422,50 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 }
 
 static int
+getorder(size_t size)
+{
+	switch (size) {
+	case 4096:
+		return 12;
+	case 512:
+		return 9;
+	case 8192:
+		return 13;
+	case 16384:
+		return 14;
+	case 32768:
+		return 15;
+	case 65536:
+		return 16;
+	case 131072:
+		return 17;
+	case 262144:
+		return 18;
+	case 524288:
+		return 19;
+	case 1048576:
+		return 20;
+	case 2048:
+		return 11;
+	case 1024:
+		return 10;
+	default:
+		return 0;
+	}
+}
+
+static void
+update_fs_free(char *path)
+{
+	static struct statvfs svb;
+
+	if (statvfs(path, &svb) == -1)
+		fs_free = 0;
+	else
+		fs_free = svb.f_bavail << getorder(svb.f_bsize);
+}
+
+static int
 show_mediainfo(char *fpath, char *arg)
 {
 	if (!get_output(g_buf, MAX_CMD_LEN, "which", metaviewer, NULL, 0))
@@ -1434,7 +1478,7 @@ show_mediainfo(char *fpath, char *arg)
 }
 
 static int
-show_help(void)
+show_help(char *path)
 {
 	char tmp[] = "/tmp/nnnXXXXXX";
 	static char helpstr[] = ("\
@@ -1485,7 +1529,7 @@ Home, g, ^, ^A | Jump to first entry\n\
 		dprintf(fd, "BOOKMARKS\n");
 		for (; i < MAX_BM; ++i)
 			if (bookmark[i].key)
-				dprintf(fd, "\t%s: %s\n",
+				dprintf(fd, " %s: %s\n",
 					bookmark[i].key, bookmark[i].loc);
 			else
 				break;
@@ -1503,6 +1547,9 @@ Home, g, ^, ^A | Jump to first entry\n\
 
 	if (copier)
 		dprintf(fd, "NNN_COPIER: %s\n", copier);
+
+	update_fs_free(path);
+	dprintf(fd, "\nVolume: %s free\n", coolsize(fs_free));
 
 	dprintf(fd, "\n");
 	close(fd);
@@ -1526,39 +1573,6 @@ sum_bsizes(const char *fpath, const struct stat *sb,
 }
 
 static int
-getorder(size_t size)
-{
-	switch (size) {
-	case 4096:
-		return 12;
-	case 512:
-		return 9;
-	case 8192:
-		return 13;
-	case 16384:
-		return 14;
-	case 32768:
-		return 15;
-	case 65536:
-		return 16;
-	case 131072:
-		return 17;
-	case 262144:
-		return 18;
-	case 524288:
-		return 19;
-	case 1048576:
-		return 20;
-	case 2048:
-		return 11;
-	case 1024:
-		return 10;
-	default:
-		return 0;
-	}
-}
-
-static int
 dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
 {
@@ -1578,15 +1592,9 @@ dentfill(char *path, struct entry **dents,
 	n = 0;
 
 	if (cfg.blkorder) {
-		static struct statvfs svb;
-
-		if (statvfs(path, &svb) == -1)
-			fs_free = 0;
-		else
-			fs_free = svb.f_bavail << getorder(svb.f_bsize);
-
 		num_files = 0;
 		dir_blocks = 0;
+		update_fs_free(path);
 	}
 
 	while ((dp = readdir(dirp)) != NULL) {
@@ -2413,7 +2421,7 @@ nochange:
 				printmsg("NNN_COPIER is not set");
 			goto nochange;
 		case SEL_HELP:
-			show_help();
+			show_help(path);
 			break;
 		case SEL_RUN:
 			run = xgetenv(env, run);
