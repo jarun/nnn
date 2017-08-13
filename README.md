@@ -22,6 +22,7 @@ Noice is Not Noice, a noicer fork...
 - [Features](#features)
 - [Performance](#performance)
 - [Installation](#installation)
+  - [Release packages](#release-packages)
 - [Usage](#usage)
   - [Cmdline options](#cmdline-options)
   - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -133,15 +134,18 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 
 - Packages are available on
   - [AUR](https://aur.archlinux.org/packages/nnn/)
-  - [Homebrew](http://braumeister.org/formula/nnn)
   - [Debian](https://packages.debian.org/search?keywords=nnn)
+  - [Homebrew](http://braumeister.org/formula/nnn)
   - [Ubuntu PPA](https://launchpad.net/~twodopeshaggy/+archive/ubuntu/jarun/)
-- Packages for latest **Fedora** and **CentOS** distributions are available with the [latest release](https://github.com/jarun/nnn/releases/latest)
 - To cook yourself, download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*). Then install the dependencies and compile (e.g. on Ubuntu 16.04):
 
       $ sudo apt-get install libncursesw5-dev libreadline6-dev
       $ make
       $ sudo make install
+
+#### Release packages
+
+Packages for Arch Linux, CentOS, Fedora and Ubuntu are available with the [latest stable release](https://github.com/jarun/nnn/releases/latest).
 
 ### Usage
 
