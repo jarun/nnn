@@ -65,7 +65,7 @@ elif [ "$2" == "search" ]; then
     app=("gnome-search-tool"
          "catfish")
 
-    opts=(""
+    opts=("--path"
           "--path")
 
     bg=(">/dev/null 2>&1 &"
@@ -84,7 +84,7 @@ elif [ "$2" == "screensaver" ]; then
     exit 0
 fi
 
-#------------------- PLAY -------------------
+#----------------- RUN APP ------------------
 for index in ${!app[@]}
 do
     type -P ${app[$index]} &>/dev/null &&
