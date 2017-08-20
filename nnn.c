@@ -246,10 +246,16 @@ max_openfds()
 	rl.rlim_cur = rl.rlim_max;
 
 	/* Return ~75% of max possible */
-	if (setrlimit(RLIMIT_NOFILE, &rl) == 0)
-		return (rl.rlim_max - (rl.rlim_max >> 2));
+	if (setrlimit(RLIMIT_NOFILE, &rl) == 0) {
+		limit = rl.rlim_max - (rl.rlim_max >> 2);
+		/*
+		 * 20K is arbitrary> If the limit is set to max possible
+		 * value, the memory usage increases to more than double.
+		 */
+		return limit > 20480 ?  20480 : limit;
+	}
 
-	return 32;
+	return limit;
 }
 
 /*
