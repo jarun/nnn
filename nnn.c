@@ -1500,6 +1500,8 @@ Home, g, ^, ^A | Jump to first entry\n\
             ^/ | Open desktop search tool\n\
              . | Toggle hide .dot files\n\
              b | Show bookmark key prompt\n\
+            ^B | Mark current dir\n\
+            ^V | Visit marked dir\n\
              c | Show change dir prompt\n\
              d | Toggle detail view\n\
              D | Show current file details\n\
@@ -1854,9 +1856,8 @@ redraw(char *path)
 static void
 browse(char *ipath, char *ifilter)
 {
-	char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX];
-	char lastdir[PATH_MAX];
-	char fltr[LINE_MAX];
+	static char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX], lastdir[PATH_MAX], mark[PATH_MAX];
+	static char fltr[LINE_MAX];
 	char *dir, *tmp, *run, *env, *tgt = NULL;
 	struct stat sb;
 	int r, fd, presel;
@@ -1864,9 +1865,7 @@ browse(char *ipath, char *ifilter)
 
 	xstrlcpy(path, ipath, PATH_MAX);
 	xstrlcpy(fltr, ifilter, LINE_MAX);
-	oldpath[0] = '\0';
-	newpath[0] = '\0';
-	lastdir[0] = '\0'; /* Can't move back from initial directory */
+	oldpath[0] = newpath[0] = lastdir[0] = mark[0] = '\0';
 
 	if (cfg.filtermode)
 		presel = FILTER;
@@ -2228,18 +2227,27 @@ nochange:
 				presel = FILTER;
 			tgt = NULL;
 			goto begin;
-		case SEL_CDLAST:
-			if (lastdir[0] == '\0') {
-				printmsg("Hit end of history...");
+		case SEL_CDLAST: // fallthrough
+		case SEL_VISIT:
+			if (sel == SEL_VISIT) {
+				if (xstrcmp(mark, path) == 0)
+					break;
+
+				tmp = mark;
+			} else
+				tmp = lastdir;
+
+			if (tmp[0] == '\0') {
+				printmsg("Not set...");
 				goto nochange;
 			}
 
-			if (access(lastdir, R_OK) == -1) {
+			if (access(tmp, R_OK) == -1) {
 				printwarn();
 				goto nochange;
 			}
 
-			xstrlcpy(newpath, lastdir, PATH_MAX);
+			xstrlcpy(newpath, tmp, PATH_MAX);
 			xstrlcpy(lastdir, path, PATH_MAX);
 			xstrlcpy(path, newpath, PATH_MAX);
 			oldpath[0] = '\0';
@@ -2309,6 +2317,10 @@ nochange:
 			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
+		case SEL_MARK:
+			xstrlcpy(mark, path, PATH_MAX);
+			printmsg(mark);
+			goto nochange;
 		case SEL_TOGGLEDOT:
 			cfg.showhidden ^= 1;
 			initfilter(cfg.showhidden, &ifilter);
@@ -2468,8 +2480,8 @@ Webpage: https://github.com/jarun/nnn\n", VERSION);
 int
 main(int argc, char *argv[])
 {
-	char cwd[PATH_MAX], *ipath;
-	char *ifilter, *bmstr;
+	static char cwd[PATH_MAX];
+	char *ipath, *ifilter, *bmstr;
 	int opt;
 
 	/* Confirm we are in a terminal */

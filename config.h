@@ -21,6 +21,8 @@ enum action {
 	SEL_CDBEGIN,
 	SEL_CDLAST,
 	SEL_CDBM,
+	SEL_MARK,
+	SEL_VISIT,
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
 	SEL_STATS,
@@ -111,6 +113,10 @@ static struct key bindings[] = {
 	{ '-',            SEL_CDLAST,    "",     "" },
 	/* Change dir using bookmark */
 	{ 'b',            SEL_CDBM,      "",     "" },
+	/* Mark a path to visit later */
+	{ CONTROL('B'),   SEL_MARK,      "",     "" },
+	/* Visit marked directory */
+	{ CONTROL('V'),   SEL_VISIT,     "",     "" },
 	/* Toggle hide .dot files */
 	{ '.',            SEL_TOGGLEDOT, "",     "" },
 	/* Detailed listing */
@@ -129,6 +135,7 @@ static struct key bindings[] = {
 	{ 'S',            SEL_BSIZE,     "",     "" },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME,     "",     "" },
+	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW,    "",     "" },
 	{ KEY_F(2),       SEL_REDRAW,    "",     "" },
 	/* Copy currently selected file path */

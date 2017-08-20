@@ -203,6 +203,8 @@ Home, g, ^, ^A | Jump to first entry
             ^/ | Open desktop search tool
              . | Toggle hide .dot files
              b | Show bookmark key prompt
+            ^B | Mark current dir
+            ^V | Visit marked dir
              c | Show change dir prompt
              d | Toggle detail view
              D | Show current file details
