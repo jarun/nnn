@@ -1,5 +1,11 @@
 /* See LICENSE file for copyright and license details. */
+#ifdef __linux__
+#include <sys/inotify.h>
+#define LINUX_INOTIFY
+#endif
+#include <sys/resource.h>
 #include <sys/stat.h>
+#include <sys/statvfs.h>
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) \
 	|| defined(__APPLE__)
 # include <sys/types.h>
@@ -7,8 +13,6 @@
 # include <sys/sysmacros.h>
 #endif
 #include <sys/wait.h>
-#include <sys/statvfs.h>
-#include <sys/resource.h>
 
 #include <ctype.h>
 #include <curses.h>
@@ -124,6 +128,11 @@ disabledbg()
 #define printwarn() printmsg(strerror(errno))
 #define istopdir(path) (path[1] == '\0' && path[0] == '/')
 
+#ifdef LINUX_INOTIFY
+#define EVENT_SIZE (sizeof(struct inotify_event))
+#define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
+#endif
+
 typedef unsigned long ulong;
 typedef unsigned int uint;
 typedef unsigned char uchar;
@@ -185,6 +194,11 @@ static bm bookmark[MAX_BM];
 static const double div_2_pow_10 = 1.0 / 1024.0;
 static uint _WSHIFT = (sizeof(ulong) == 8) ? 3 : 2;
 static uchar color = 4;
+
+#ifdef LINUX_INOTIFY
+static int inotify_fd, inotify_wd = -1;
+static uint INOTIFY_MASK = IN_ATTRIB | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MODIFY | IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
+#endif
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -741,7 +755,8 @@ printprompt(char *str)
 	printw(str);
 }
 
-/* Returns SEL_* if key is bound and 0 otherwise.
+/*
+ * Returns SEL_* if key is bound and 0 otherwise.
  * Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}).
  * The next keyboard input can be simulated by presel.
  */
@@ -751,6 +766,9 @@ nextsel(char **run, char **env, int *presel)
 	static int c;
 	static uchar i;
 	static uint len = LEN(bindings);
+#ifdef LINUX_INOTIFY
+	static char inotify_buf[EVENT_BUF_LEN];
+#endif
 
 	c = *presel;
 
@@ -759,9 +777,18 @@ nextsel(char **run, char **env, int *presel)
 	else
 		*presel = 0;
 
-	if (c == -1)
+	if (c == -1) {
 		++idle;
-	else
+#ifdef LINUX_INOTIFY
+		/* Do not check for directory changes in du
+		 * mode. A redraw forces du calculation.
+		 * Check for changes every odd second.
+		 */
+		if (!cfg.blkorder && inotify_wd >= 0 && idle & 1)
+			if (read(inotify_fd, inotify_buf, EVENT_BUF_LEN) > 0)
+				c = CONTROL('L');
+#endif
+	} else
 		idle = 0;
 
 	for (i = 0; i < len; ++i)
@@ -1811,7 +1838,7 @@ redraw(char *path)
 
 	/* No text wrapping in cwd line */
 	if (!realpath(path, g_buf)) {
-		printmsg("Cannot resolve path");
+		printwarn();
 		return;
 	}
 
@@ -1915,10 +1942,19 @@ browse(char *ipath, char *ifilter)
 		presel = 0;
 
 begin:
+#ifdef LINUX_INOTIFY
+	if (inotify_wd >= 0)
+		inotify_rm_watch(inotify_fd, inotify_wd);
+#endif
+
 	if (populate(path, oldpath, fltr) == -1) {
 		printwarn();
 		goto nochange;
 	}
+
+#ifdef LINUX_INOTIFY
+	inotify_wd = inotify_add_watch(inotify_fd, path, INOTIFY_MASK);
+#endif
 
 	for (;;) {
 		redraw(path);
@@ -2584,6 +2620,15 @@ main(int argc, char *argv[])
 		cfg.showhidden = 1;
 	initfilter(cfg.showhidden, &ifilter);
 
+#ifdef LINUX_INOTIFY
+	/* Initialize inotify */
+	inotify_fd = inotify_init1(IN_NONBLOCK);
+	if (inotify_fd < 0) {
+		fprintf(stderr, "Cannot initialize inotify: %s\n", strerror(errno));
+		exit(1);
+	}
+#endif
+
 	/* Parse bookmarks string, if available */
 	bmstr = getenv("NNN_BMS");
 	if (bmstr)
@@ -2628,6 +2673,13 @@ main(int argc, char *argv[])
 	initcurses();
 	browse(ipath, ifilter);
 	exitcurses();
+
+#ifdef LINUX_INOTIFY
+	/* Shutdown inotify */
+	if (inotify_wd >= 0)
+		inotify_rm_watch(inotify_fd, inotify_wd);
+	close(inotify_fd);
+#endif
 #ifdef DEBUGMODE
 	disabledbg();
 #endif
