@@ -597,6 +597,20 @@ xstricmp(char *s1, char *s2)
 	return (int) (TOUPPER(*s1) - TOUPPER(*s2));
 }
 
+/* Return the integer value of a char representing HEX */
+static char
+xchartohex(char c)
+{
+	if (c >= '0' && c <= '9')
+		return c - '0';
+
+	c = TOUPPER(c);
+	if (c >= 'A' && c <= 'F')
+		return c - 'A' + 10;
+
+	return c;
+}
+
 /* Trim all whitespace from both ends, / from end */
 static char *
 strstrip(char *s)
@@ -1477,55 +1491,77 @@ show_mediainfo(char *fpath, char *arg)
 	return 0;
 }
 
+/*
+ * The help string tokens (each line) start with a HEX value
+ * which indicates the number of spaces to print before the
+ * particular token. This method was chosen instead of a flat
+ * string because the number of bytes in help was increasing
+ * the binary size by around a hundred bytes. This would only
+ * have increased as we keep adding new options.
+ */
 static int
 show_help(char *path)
 {
 	char tmp[] = "/tmp/nnnXXXXXX";
-	static char helpstr[] = ("\
-           Key | Function\n\
-              -+-\n\
-      ↑, k, ^P | Previous entry\n\
-      ↓, j, ^N | Next entry\n\
-      PgUp, ^U | Scroll half page up\n\
-      PgDn, ^D | Scroll half page down\n\
-Home, g, ^, ^A | Jump to first entry\n\
- End, G, $, ^E | Jump to last entry\n\
-   →, ↵, l, ^M | Open file or enter dir\n\
-←, Bksp, h, ^H | Go to parent dir\n\
-        Insert | Toggle navigate-as-you-type\n\
-             ~ | Jump to HOME dir\n\
-             & | Jump to initial dir\n\
-             - | Jump to last visited dir\n\
-             / | Filter dir contents\n\
-            ^/ | Open desktop search tool\n\
-             . | Toggle hide .dot files\n\
-             b | Show bookmark key prompt\n\
-            ^B | Mark current dir\n\
-            ^V | Visit marked dir\n\
-             c | Show change dir prompt\n\
-             d | Toggle detail view\n\
-             D | Show current file details\n\
-             m | Show concise media info\n\
-             M | Show full media info\n\
-             s | Toggle sort by file size\n\
-             S | Toggle disk usage mode\n\
-             t | Toggle sort by mtime\n\
-             ! | Spawn SHELL in current dir\n\
-             e | Edit entry in EDITOR\n\
-             o | Open dir in file manager\n\
-             p | Open entry in PAGER\n\
-            ^K | Invoke file path copier\n\
-        ^L, F2 | Force a redraw, unfilter\n\
-             ? | Show help, settings\n\
-             Q | Quit and change dir\n\
-         q, ^Q | Quit\n\n");
-
 	int i = 0, fd = mkstemp(tmp);
+	char *start, *end;
+	static char helpstr[] = (
+           "cKey | Function\n"
+             "e- + -\n"
+      "7↑, k, ^P | Previous entry\n"
+      "7↓, j, ^N | Next entry\n"
+      "7PgUp, ^U | Scroll half page up\n"
+      "7PgDn, ^D | Scroll half page down\n"
+"1Home, g, ^, ^A | Jump to first entry\n"
+ "2End, G, $, ^E | Jump to last entry\n"
+   "4→, ↵, l, ^M | Open file or enter dir\n"
+"1←, Bksp, h, ^H | Go to parent dir\n"
+        "9Insert | Toggle navigate-as-you-type\n"
+             "e~ | Jump to HOME dir\n"
+             "e& | Jump to initial dir\n"
+             "e- | Jump to last visited dir\n"
+             "e/ | Filter dir contents\n"
+            "d^/ | Open desktop search tool\n"
+             "e. | Toggle hide .dot files\n"
+             "eb | Show bookmark key prompt\n"
+            "d^B | Mark current dir\n"
+            "d^V | Visit marked dir\n"
+             "ec | Show change dir prompt\n"
+             "ed | Toggle detail view\n"
+             "eD | Show current file details\n"
+             "em | Show concise media info\n"
+             "eM | Show full media info\n"
+             "es | Toggle sort by file size\n"
+             "eS | Toggle disk usage mode\n"
+             "et | Toggle sort by mtime\n"
+             "e! | Spawn SHELL in current dir\n"
+             "ee | Edit entry in EDITOR\n"
+             "eo | Open dir in file manager\n"
+             "ep | Open entry in PAGER\n"
+            "d^K | Invoke file path copier\n"
+        "9^L, F2 | Force a redraw, unfilter\n"
+             "e? | Show help, settings\n"
+             "eQ | Quit and change dir\n"
+         "aq, ^Q | Quit\n\n");
 
 	if (fd == -1)
 		return -1;
 
-	dprintf(fd, "%s", helpstr);
+	start = end = helpstr;
+	while (*end) {
+		while (*end != '\n')
+			++end;
+
+		if (start == end) {
+			++end;
+			continue;
+		}
+
+		dprintf(fd, "%*c%.*s", xchartohex(*start), ' ', (int)(end - start), start + 1);
+		start = ++end;
+	}
+
+	dprintf(fd, "\n");
 
 	if (getenv("NNN_BMS")) {
 		dprintf(fd, "BOOKMARKS\n");
