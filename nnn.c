@@ -9,6 +9,9 @@
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) \
 	|| defined(__APPLE__)
 # include <sys/types.h>
+#include <sys/event.h>
+#include <sys/time.h>
+#define BSD_KQUEUE
 #else
 # include <sys/sysmacros.h>
 #endif
@@ -131,6 +134,9 @@ disabledbg()
 #ifdef LINUX_INOTIFY
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
+#elif defined(BSD_KQUEUE)
+#define NUM_EVENT_SLOTS 1
+#define NUM_EVENT_FDS 1
 #endif
 
 typedef unsigned long ulong;
@@ -198,6 +204,11 @@ static uchar color = 4;
 #ifdef LINUX_INOTIFY
 static int inotify_fd, inotify_wd = -1;
 static uint INOTIFY_MASK = IN_ATTRIB | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MODIFY | IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
+#elif defined(BSD_KQUEUE)
+static int kq, event_fd = -1;
+static struct kevent events_to_monitor[NUM_EVENT_FDS];
+static uint KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
+static struct timespec gtimeout;
 #endif
 
 /* Utilities to open files, run actions */
@@ -768,6 +779,8 @@ nextsel(char **run, char **env, int *presel)
 	static uint len = LEN(bindings);
 #ifdef LINUX_INOTIFY
 	static char inotify_buf[EVENT_BUF_LEN];
+#elif defined(BSD_KQUEUE)
+	static struct kevent event_data[NUM_EVENT_SLOTS];
 #endif
 
 	c = *presel;
@@ -786,8 +799,11 @@ nextsel(char **run, char **env, int *presel)
 		 */
 		if (!cfg.blkorder && inotify_wd >= 0 && idle & 1)
 			if (read(inotify_fd, inotify_buf, EVENT_BUF_LEN) > 0)
-				c = CONTROL('L');
+#elif defined(BSD_KQUEUE)
+		if (!cfg.blkorder && event_fd >= 0 && idle & 1)
+			if (kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, event_data, NUM_EVENT_FDS, &gtimeout) > 0)
 #endif
+				c = CONTROL('L');
 	} else
 		idle = 0;
 
@@ -1945,6 +1961,9 @@ begin:
 #ifdef LINUX_INOTIFY
 	if (inotify_wd >= 0)
 		inotify_rm_watch(inotify_fd, inotify_wd);
+#elif defined(BSD_KQUEUE)
+	if (event_fd >= 0)
+		close(event_fd);
 #endif
 
 	if (populate(path, oldpath, fltr) == -1) {
@@ -1954,6 +1973,10 @@ begin:
 
 #ifdef LINUX_INOTIFY
 	inotify_wd = inotify_add_watch(inotify_fd, path, INOTIFY_MASK);
+#elif defined(BSD_KQUEUE)
+	event_fd = open(path, O_EVTONLY);
+	if (event_fd >= 0)
+		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE, EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, path);
 #endif
 
 	for (;;) {
@@ -2627,6 +2650,15 @@ main(int argc, char *argv[])
 		fprintf(stderr, "Cannot initialize inotify: %s\n", strerror(errno));
 		exit(1);
 	}
+#elif defined(BSD_KQUEUE)
+	kq = kqueue();
+	if (kq < 0) {
+		fprintf(stderr, "Cannot initialize kqueue: %s\n", strerror(errno));
+		exit(1);
+	}
+
+	gtimeout.tv_sec = 0;
+	gtimeout.tv_nsec = 50; /* 50 ns delay */
 #endif
 
 	/* Parse bookmarks string, if available */
@@ -2679,7 +2711,12 @@ main(int argc, char *argv[])
 	if (inotify_wd >= 0)
 		inotify_rm_watch(inotify_fd, inotify_wd);
 	close(inotify_fd);
+#elif defined(BSD_KQUEUE)
+	if (event_fd >= 0)
+		close(event_fd);
+	close(kq);
 #endif
+
 #ifdef DEBUGMODE
 	disabledbg();
 #endif
