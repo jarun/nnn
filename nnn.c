@@ -6,8 +6,7 @@
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) \
-	|| defined(__APPLE__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
 # include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
@@ -496,6 +495,7 @@ initcurses(void)
 			fprintf(stderr, "initscr() failed\n");
 		exit(1);
 	}
+
 	cbreak();
 	noecho();
 	nonl();
@@ -530,8 +530,7 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 		/* Show a marker (to indicate nnn spawned shell) */
 		if (flag & F_MARKER) {
 			printf("\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
-			printf("Spawned shell level: %d\n",
-			       atoi(getenv("SHLVL")) + 1);
+			printf("Spawned shell level: %d\n", atoi(getenv("SHLVL")) + 1);
 		}
 
 		/* Suppress stdout and stderr */
@@ -669,8 +668,7 @@ getmime(char *file)
 	static uint len = LEN(assocs);
 
 	for (i = 0; i < len; ++i) {
-		if (regcomp(&regex, assocs[i].regex,
-			    REG_NOSUB | REG_EXTENDED | REG_ICASE) != 0)
+		if (regcomp(&regex, assocs[i].regex, REG_NOSUB | REG_EXTENDED | REG_ICASE) != 0)
 			continue;
 		if (regexec(&regex, file, 0, NULL, 0) == 0)
 			return assocs[i].mime;
@@ -1097,23 +1095,17 @@ printent(struct entry *ent, int sel)
 		ncols = COLS;
 
 	if (S_ISDIR(ent->mode))
-		snprintf(g_buf, ncols, "%s%s/", CURSYM(sel),
-			 unescape(ent->name));
+		snprintf(g_buf, ncols, "%s%s/", CURSYM(sel), unescape(ent->name));
 	else if (S_ISLNK(ent->mode))
-		snprintf(g_buf, ncols, "%s%s@", CURSYM(sel),
-			 unescape(ent->name));
+		snprintf(g_buf, ncols, "%s%s@", CURSYM(sel), unescape(ent->name));
 	else if (S_ISSOCK(ent->mode))
-		snprintf(g_buf, ncols, "%s%s=", CURSYM(sel),
-			 unescape(ent->name));
+		snprintf(g_buf, ncols, "%s%s=", CURSYM(sel), unescape(ent->name));
 	else if (S_ISFIFO(ent->mode))
-		snprintf(g_buf, ncols, "%s%s|", CURSYM(sel),
-			 unescape(ent->name));
+		snprintf(g_buf, ncols, "%s%s|", CURSYM(sel), unescape(ent->name));
 	else if (ent->mode & 0100)
-		snprintf(g_buf, ncols, "%s%s*", CURSYM(sel),
-			 unescape(ent->name));
+		snprintf(g_buf, ncols, "%s%s*", CURSYM(sel), unescape(ent->name));
 	else
-		snprintf(g_buf, ncols, "%s%s", CURSYM(sel),
-			 unescape(ent->name));
+		snprintf(g_buf, ncols, "%s%s", CURSYM(sel), unescape(ent->name));
 
 	/* Dirs are always shown on top */
 	if (cfg.dircolor && !S_ISDIR(ent->mode)) {
@@ -1165,64 +1157,38 @@ printent_long(struct entry *ent, int sel)
 
 	if (!cfg.blkorder) {
 		if (S_ISDIR(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        /  %s/",
-				 CURSYM(sel), buf, unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s        /  %s/", CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISLNK(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@",
-				 CURSYM(sel), buf, unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@", CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISSOCK(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        =  %s=",
-				 CURSYM(sel), buf, unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s        =  %s=", CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISFIFO(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        |  %s|",
-				 CURSYM(sel), buf, unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s        |  %s|", CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISBLK(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        b  %s",
-				 CURSYM(sel), buf, unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s        b  %s", CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISCHR(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        c  %s",
-				 CURSYM(sel), buf, unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s        c  %s", CURSYM(sel), buf, unescape(ent->name));
 		else if (ent->mode & 0100)
-			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*",
-				 CURSYM(sel), buf, coolsize(ent->size),
-				 unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*", CURSYM(sel), buf, coolsize(ent->size), unescape(ent->name));
 		else
-			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s",
-				 CURSYM(sel), buf, coolsize(ent->size),
-				 unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s", CURSYM(sel), buf, coolsize(ent->size), unescape(ent->name));
 	} else {
 		if (S_ISDIR(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s %8.8s/ %s/",
-				 CURSYM(sel), buf, coolsize(ent->blocks << 9),
-				 unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s %8.8s/ %s/", CURSYM(sel), buf, coolsize(ent->blocks << 9), unescape(ent->name));
 		else if (S_ISLNK(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@",
-				 CURSYM(sel), buf,
-				 unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@", CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISSOCK(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        =  %s=",
-				 CURSYM(sel), buf,
-				 unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s        =  %s=", CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISFIFO(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        |  %s|",
-				 CURSYM(sel), buf,
-				 unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s        |  %s|", CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISBLK(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        b  %s",
-				 CURSYM(sel), buf,
-				 unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s        b  %s", CURSYM(sel), buf, unescape(ent->name));
 		else if (S_ISCHR(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        c  %s",
-				 CURSYM(sel), buf,
-				 unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s        c  %s", CURSYM(sel), buf, unescape(ent->name));
 		else if (ent->mode & 0100)
-			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*",
-				 CURSYM(sel), buf, coolsize(ent->blocks << 9),
-				 unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*", CURSYM(sel), buf, coolsize(ent->blocks << 9), unescape(ent->name));
 		else
-			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s",
-				 CURSYM(sel), buf, coolsize(ent->blocks << 9),
-				 unescape(ent->name));
+			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s", CURSYM(sel), buf, coolsize(ent->blocks << 9), unescape(ent->name));
 	}
 
 	/* Dirs are always shown on top */
@@ -1292,8 +1258,7 @@ get_fileind(mode_t mode, char *desc)
 static char *
 get_lsperms(mode_t mode, char *desc)
 {
-	static const char * const rwx[] = {"---", "--x", "-w-", "-wx",
-					   "r--", "r-x", "rw-", "rwx"};
+	static const char * const rwx[] = {"---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx"};
 	static char bits[11];
 
 	bits[0] = get_fileind(mode, desc);
@@ -1432,15 +1397,11 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 
 	/* Show major, minor number for block or char device */
 	if (perms[0] == 'b' || perms[0] == 'c')
-		dprintf(fd, " Device type: %x,%x",
-		       major(sb->st_rdev), minor(sb->st_rdev));
+		dprintf(fd, " Device type: %x,%x", major(sb->st_rdev), minor(sb->st_rdev));
 
 	/* Show permissions, owner, group */
-	dprintf(fd, "\n  Access: 0%d%d%d/%s Uid: (%u/%s)  Gid: (%u/%s)",
-	       (sb->st_mode >> 6) & 7, (sb->st_mode >> 3) & 7, sb->st_mode & 7,
-	       perms,
-	       sb->st_uid, (getpwuid(sb->st_uid))->pw_name,
-	       sb->st_gid, (getgrgid(sb->st_gid))->gr_name);
+	dprintf(fd, "\n  Access: 0%d%d%d/%s Uid: (%u/%s)  Gid: (%u/%s)", (sb->st_mode >> 6) & 7, (sb->st_mode >> 3) & 7,
+		sb->st_mode & 7, perms, sb->st_uid, (getpwuid(sb->st_uid))->pw_name, sb->st_gid, (getgrgid(sb->st_gid))->gr_name);
 
 	/* Show last access time */
 	strftime(g_buf, 40, "%a %d-%b-%Y %T %z,%Z", localtime(&sb->st_atime));
@@ -1698,8 +1659,7 @@ dentfill(char *path, struct entry **dents,
 				continue;
 
 			/* Skip self and parent */
-			if ((namep[0] == '.' && (namep[1] == '\0' ||
-			    (namep[1] == '.' && namep[2] == '\0'))))
+			if ((namep[0] == '.' && (namep[1] == '\0' || (namep[1] == '.' && namep[2] == '\0'))))
 				continue;
 
 			if (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW)
@@ -1711,8 +1671,7 @@ dentfill(char *path, struct entry **dents,
 					ent_blocks = 0;
 					mkpath(path, namep, g_buf, PATH_MAX);
 
-					if (nftw(g_buf, sum_bsizes, open_max,
-						 FTW_MOUNT | FTW_PHYS) == -1) {
+					if (nftw(g_buf, sum_bsizes, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
 						printmsg(STR_NFTWFAIL);
 						dir_blocks += sb.st_blocks;
 					} else
@@ -1759,8 +1718,7 @@ dentfill(char *path, struct entry **dents,
 				num_saved = num_files + 1;
 				mkpath(path, namep, g_buf, PATH_MAX);
 
-				if (nftw(g_buf, sum_bsizes, open_max,
-					 FTW_MOUNT | FTW_PHYS) == -1) {
+				if (nftw(g_buf, sum_bsizes, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
 					printmsg(STR_NFTWFAIL);
 					dentp->blocks = sb.st_blocks;
 				} else
@@ -1933,15 +1891,10 @@ redraw(char *path)
 			 * be truncated in directory listing
 			 */
 			if (!cfg.blkorder)
-				sprintf(g_buf, "total %d %s[%s%s]", ndents,
-					sort, unescape(dents[cur].name), ind);
+				sprintf(g_buf, "total %d %s[%s%s]", ndents, sort, unescape(dents[cur].name), ind);
 			else {
-				i = sprintf(g_buf, "du: %s (%lu files) ",
-					    coolsize(dir_blocks << 9),
-					    num_files);
-				sprintf(g_buf + i, "vol: %s free [%s%s]",
-					coolsize(fs_free),
-					unescape(dents[cur].name), ind);
+				i = sprintf(g_buf, "du: %s (%lu files) ", coolsize(dir_blocks << 9), num_files);
+				sprintf(g_buf + i, "vol: %s free [%s%s]", coolsize(fs_free), unescape(dents[cur].name), ind);
 			}
 
 			printmsg(g_buf);
@@ -2092,22 +2045,18 @@ nochange:
 				 */
 				if (editor) {
 					if (getmime(dents[cur].name)) {
-						spawn(editor, newpath, NULL,
-						      NULL, F_NORMAL);
+						spawn(editor, newpath, NULL, NULL, F_NORMAL);
 						continue;
 					}
 
 					/* Recognize and open plain
 					 * text files with vi
 					 */
-					if (get_output(g_buf, MAX_CMD_LEN,
-						       "file", "-bi",
-						       newpath, 0) == NULL)
+					if (get_output(g_buf, MAX_CMD_LEN, "file", "-bi", newpath, 0) == NULL)
 						continue;
 
 					if (strstr(g_buf, "text/") == g_buf) {
-						spawn(editor, newpath, NULL,
-						      NULL, F_NORMAL);
+						spawn(editor, newpath, NULL, NULL, F_NORMAL);
 						continue;
 					}
 				}
@@ -2126,8 +2075,7 @@ nochange:
 			DPRINTF_S(fltr);
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath,
-				       PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 			goto nochange;
 		case SEL_MFLTR:
 			cfg.filtermode ^= 1;
@@ -2213,8 +2161,7 @@ nochange:
 				char *home = getenv("HOME");
 
 				if (home)
-					snprintf(newpath, PATH_MAX, "%s%s",
-						 home, tmp + 1);
+					snprintf(newpath, PATH_MAX, "%s%s", home, tmp + 1);
 				else {
 					free(input);
 					printmsg(STR_NOHOME);
@@ -2386,12 +2333,7 @@ nochange:
 					char *home = getenv("HOME");
 
 					if (home)
-						snprintf(newpath,
-							 PATH_MAX,
-							 "%s%s",
-							 home,
-							 bookmark[r].loc
-							 + 1);
+						snprintf(newpath, PATH_MAX, "%s%s", home, bookmark[r].loc + 1);
 					else {
 						printmsg(STR_NOHOME);
 						goto nochange;
@@ -2441,20 +2383,17 @@ nochange:
 			goto begin;
 		case SEL_DETAIL:
 			cfg.showdetail ^= 1;
-			cfg.showdetail ? (printptr = &printent_long)
-				   : (printptr = &printent);
+			cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath,
-				       PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 			goto begin;
 		case SEL_STATS:
 		{
 			struct stat sb;
 
 			if (ndents > 0) {
-				mkpath(path, dents[cur].name, oldpath,
-				       PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 
 				r = lstat(oldpath, &sb);
 				if (r == -1) {
@@ -2462,8 +2401,7 @@ nochange:
 						dentfree(dents);
 					printerr(1, "lstat");
 				} else {
-					r = show_stats(oldpath, dents[cur].name,
-						       &sb);
+					r = show_stats(oldpath, dents[cur].name, &sb);
 					if (r < 0) {
 						printmsg(strerror(errno));
 						goto nochange;
@@ -2476,8 +2414,7 @@ nochange:
 		case SEL_MEDIA: // fallthrough
 		case SEL_FMEDIA:
 			if (ndents > 0) {
-				mkpath(path, dents[cur].name, oldpath,
-				       PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 
 				if (show_mediainfo(oldpath, run) == -1) {
 					sprintf(g_buf, "%s missing", metaviewer);
@@ -2492,8 +2429,7 @@ nochange:
 				goto nochange;
 			}
 
-			spawn(desktop_manager, path, NULL, path,
-			      F_NOTRACE | F_NOWAIT);
+			spawn(desktop_manager, path, NULL, path, F_NOTRACE | F_NOWAIT);
 			break;
 		case SEL_FSIZE:
 			cfg.sizeorder ^= 1;
@@ -2501,8 +2437,7 @@ nochange:
 			cfg.blkorder = 0;
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath,
-				       PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 			goto begin;
 		case SEL_BSIZE:
 			cfg.blkorder ^= 1;
@@ -2514,8 +2449,7 @@ nochange:
 			cfg.sizeorder = 0;
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath,
-				       PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 			goto begin;
 		case SEL_MTIME:
 			cfg.mtimeorder ^= 1;
@@ -2523,23 +2457,19 @@ nochange:
 			cfg.blkorder = 0;
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath,
-				       PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 			goto begin;
 		case SEL_REDRAW:
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath,
-				       PATH_MAX);
+				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 			goto begin;
 		case SEL_COPY:
 			if (copier && ndents) {
 				if (istopdir(path))
-					snprintf(newpath, PATH_MAX, "/%s",
-						 dents[cur].name);
+					snprintf(newpath, PATH_MAX, "/%s", dents[cur].name);
 				else
-					snprintf(newpath, PATH_MAX, "%s/%s",
-						 path, dents[cur].name);
+					snprintf(newpath, PATH_MAX, "%s/%s", path, dents[cur].name);
 				spawn(copier, newpath, NULL, NULL, F_NONE);
 				printmsg(newpath);
 			} else if (!copier)
@@ -2561,8 +2491,7 @@ nochange:
 		/* Screensaver */
 		if (idletimeout != 0 && idle == idletimeout) {
 			idle = 0;
-			spawn(player, "", "screensaver", NULL,
-			      F_NORMAL | F_SIGINT);
+			spawn(player, "", "screensaver", NULL, F_NORMAL | F_SIGINT);
 		}
 	}
 }
