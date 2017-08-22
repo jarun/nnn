@@ -1665,9 +1665,10 @@ dentfill(char *path, struct entry **dents,
 {
 	static DIR *dirp;
 	static struct dirent *dp;
-	static struct stat sb;
+	static struct stat sb_path, sb;
 	static int fd, n;
 	static char *namep;
+	static ulong num_saved;
 	static struct entry *dentp;
 
 	dirp = opendir(path);
@@ -1682,6 +1683,11 @@ dentfill(char *path, struct entry **dents,
 		num_files = 0;
 		dir_blocks = 0;
 		update_fs_free(path);
+
+		if (fstatat(fd, ".", &sb_path, 0) == -1) {
+			printwarn();
+			return 0;
+		}
 	}
 
 	while ((dp = readdir(dirp)) != NULL) {
@@ -1701,15 +1707,17 @@ dentfill(char *path, struct entry **dents,
 				continue;
 
 			if (S_ISDIR(sb.st_mode)) {
-				ent_blocks = 0;
-				mkpath(path, namep, g_buf, PATH_MAX);
+				if (sb_path.st_dev == sb.st_dev) {
+					ent_blocks = 0;
+					mkpath(path, namep, g_buf, PATH_MAX);
 
-				if (nftw(g_buf, sum_bsizes, open_max,
-					 FTW_MOUNT | FTW_PHYS) == -1) {
-					printmsg(STR_NFTWFAIL);
-					dir_blocks += sb.st_blocks;
-				} else
-					dir_blocks += ent_blocks;
+					if (nftw(g_buf, sum_bsizes, open_max,
+						 FTW_MOUNT | FTW_PHYS) == -1) {
+						printmsg(STR_NFTWFAIL);
+						dir_blocks += sb.st_blocks;
+					} else
+						dir_blocks += ent_blocks;
+				}
 			} else {
 				if (sb.st_blocks)
 					dir_blocks += sb.st_blocks;
@@ -1748,6 +1756,7 @@ dentfill(char *path, struct entry **dents,
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
 				ent_blocks = 0;
+				num_saved = num_files + 1;
 				mkpath(path, namep, g_buf, PATH_MAX);
 
 				if (nftw(g_buf, sum_bsizes, open_max,
@@ -1756,13 +1765,16 @@ dentfill(char *path, struct entry **dents,
 					dentp->blocks = sb.st_blocks;
 				} else
 					dentp->blocks = ent_blocks;
+
+				if (sb_path.st_dev == sb.st_dev)
+					dir_blocks += dentp->blocks;
+				else
+					num_files = num_saved;
 			} else {
 				dentp->blocks = sb.st_blocks;
+				dir_blocks += dentp->blocks;
 				++num_files;
 			}
-
-			if (dentp->blocks)
-				dir_blocks += dentp->blocks;
 		}
 
 		++n;
