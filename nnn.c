@@ -785,21 +785,35 @@ nextsel(char **run, char **env, int *presel)
 
 	if (c == 0)
 		c = getch();
-	else
+	else {
 		*presel = 0;
+
+		/* Unwatch dir if we are still in a filtered view */
+#ifdef LINUX_INOTIFY
+		if (inotify_wd >= 0) {
+			inotify_rm_watch(inotify_fd, inotify_wd);
+			inotify_wd = -1;
+		}
+#elif defined(BSD_KQUEUE)
+		if (event_fd >= 0) {
+			close(event_fd);
+			event_fd = -1;
+		}
+#endif
+	}
 
 	if (c == -1) {
 		++idle;
-#ifdef LINUX_INOTIFY
+
 		/* Do not check for directory changes in du
 		 * mode. A redraw forces du calculation.
 		 * Check for changes every odd second.
 		 */
-		if (!cfg.blkorder && inotify_wd >= 0 && idle & 1)
-			if (read(inotify_fd, inotify_buf, EVENT_BUF_LEN) > 0)
+#ifdef LINUX_INOTIFY
+		if (!cfg.blkorder && inotify_wd >= 0 && idle & 1 && read(inotify_fd, inotify_buf, EVENT_BUF_LEN) > 0)
 #elif defined(BSD_KQUEUE)
-		if (!cfg.blkorder && event_fd >= 0 && idle & 1)
-			if (kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, event_data, NUM_EVENT_FDS, &gtimeout) > 0)
+		if (!cfg.blkorder && event_fd >= 0 && idle & 1
+		    && kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, event_data, NUM_EVENT_FDS, &gtimeout) > 0)
 #endif
 				c = CONTROL('L');
 	} else
@@ -2492,7 +2506,7 @@ nochange:
 				break;
 
 			/* Open the descriptor to currently open directory */
-			fd = open(path, O_RDONLY | O_DIRECTORY | O_NOATIME);
+			fd = open(path, O_RDONLY | O_DIRECTORY);
 			if (fd == -1) {
 				printwarn();
 				goto nochange;
