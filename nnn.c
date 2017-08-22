@@ -1150,7 +1150,7 @@ printent_long(struct entry *ent, int sel)
 	else
 		ncols = COLS;
 
-	strftime(buf, 18, "%d %m %Y %H:%M", localtime(&ent->t));
+	strftime(buf, 18, "%d-%m-%Y %H:%M", localtime(&ent->t));
 
 	if (sel)
 		attron(A_REVERSE);
