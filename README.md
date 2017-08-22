@@ -82,7 +82,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - Navigation
   - Familiar shortcuts
   - *Navigate-as-you-type* mode
-  - Bookmarks
+  - Bookmarks support; mark and visit a directory
   - Jump HOME or to the last visited directory (as usual!)
   - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
   - Roll-over at edges, page through entries
@@ -103,11 +103,13 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Numeric order (1, 2, ... 10, 11, ...) for numeric names
   - Sort by modification time, size
 - Convenience
+  - Rename files
   - Spawn SHELL (fallback sh) in the current directory
   - Invoke file path copier (*easy* shell integration)
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
   - Open current directory in a custom GUI file browser
+  - Real-time directory content modification updates
   - Terminal screensaver (default vlock, customizable) integration
 - Unicode support
 - Highly optimized code, minimal resource usage
