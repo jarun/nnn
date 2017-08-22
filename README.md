@@ -210,6 +210,7 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
               D | Show current file details
               m | Show concise media info
               M | Show full media info
+             ^R | Rename selected entry
               s | Toggle sort by file size
               S | Toggle disk usage mode
               t | Toggle sort by mtime

@@ -1541,6 +1541,7 @@ show_help(char *path)
              "eD | Show current file details\n"
              "em | Show concise media info\n"
              "eM | Show full media info\n"
+            "d^R | Rename selected entry\n"
              "es | Toggle sort by file size\n"
              "eS | Toggle disk usage mode\n"
              "et | Toggle sort by mtime\n"
@@ -2322,7 +2323,7 @@ nochange:
 			tmp = readinput();
 			clearprompt();
 			if (tmp == NULL)
-				goto nochange;
+				break;
 
 			for (r = 0; bookmark[r].key && r < MAX_BM; ++r) {
 				if (xstrcmp(bookmark[r].key, tmp) == -1)
@@ -2389,9 +2390,6 @@ nochange:
 				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 			goto begin;
 		case SEL_STATS:
-		{
-			struct stat sb;
-
 			if (ndents > 0) {
 				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 
@@ -2403,14 +2401,12 @@ nochange:
 				} else {
 					r = show_stats(oldpath, dents[cur].name, &sb);
 					if (r < 0) {
-						printmsg(strerror(errno));
+						printwarn();
 						goto nochange;
 					}
 				}
 			}
-
 			break;
-		}
 		case SEL_MEDIA: // fallthrough
 		case SEL_FMEDIA:
 			if (ndents > 0) {
@@ -2475,6 +2471,59 @@ nochange:
 			} else if (!copier)
 				printmsg("NNN_COPIER is not set");
 			goto nochange;
+		case SEL_RENAME:
+			if (ndents <= 0)
+				break;
+
+			printprompt("rename to: ");
+			tmp = readinput();
+			clearprompt();
+			if (tmp == NULL)
+				break;
+
+			/* Allow only relative paths */
+			if (tmp[0] == '/' || basename(tmp) != tmp) {
+				printmsg("relative paths only");
+				goto nochange;
+			}
+
+			/* Skip renaming to same name */
+			if (xstrcmp(tmp, dents[cur].name) == 0)
+				break;
+
+			/* Open the descriptor to currently open directory */
+			fd = open(path, O_RDONLY | O_DIRECTORY | O_NOATIME);
+			if (fd == -1) {
+				printwarn();
+				goto nochange;
+			}
+
+			/* Check if another file with same name exists */
+			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
+				/* File with the same name exists */
+				xstrlcpy(g_buf, tmp, NAME_MAX);
+
+				printprompt("overwrite? (y): ");
+				tmp = readinput();
+				if (tmp == NULL || tmp[0] != 'y' || tmp[1] != '\0') {
+					close(fd);
+					break;
+				}
+
+				tmp = g_buf;
+			}
+
+			/* Rename the file */
+			r = renameat(fd, dents[cur].name, fd, tmp);
+			if (r != 0) {
+				printwarn();
+				close(fd);
+				goto nochange;
+			}
+
+			close(fd);
+			mkpath(path, tmp, oldpath, PATH_MAX);
+			goto begin;
 		case SEL_HELP:
 			show_help(path);
 			break;

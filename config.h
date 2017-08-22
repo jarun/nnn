@@ -34,6 +34,7 @@ enum action {
 	SEL_MTIME,
 	SEL_REDRAW,
 	SEL_COPY,
+	SEL_RENAME,
 	SEL_HELP,
 	SEL_RUN,
 	SEL_RUNARG,
@@ -140,6 +141,8 @@ static struct key bindings[] = {
 	{ KEY_F(2),       SEL_REDRAW,    "",     "" },
 	/* Copy currently selected file path */
 	{ CONTROL('K'),   SEL_COPY,      "",     "" },
+	/* Show rename prompt */
+	{ CONTROL('R'),   SEL_RENAME,    "",     "" },
 	/* Show help */
 	{ '?',            SEL_HELP,      "",     "" },
 	/* Run command */
