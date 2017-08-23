@@ -1564,7 +1564,7 @@ show_help(char *path)
              "eo | Open dir in file manager\n"
              "ep | Open entry in PAGER\n"
             "d^K | Invoke file path copier\n"
-        "9^L, F2 | Force a redraw, unfilter\n"
+            "d^L | Force a redraw, unfilter\n"
              "e? | Show help, settings\n"
              "eQ | Quit and change dir\n"
          "aq, ^Q | Quit\n\n");

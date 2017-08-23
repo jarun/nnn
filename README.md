@@ -221,7 +221,7 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
               o | Open dir in file manager
               p | Open entry in PAGER
              ^K | Invoke file path copier
-         ^L, F2 | Force a redraw, unfilter
+             ^L | Force a redraw, unfilter
               ? | Show help, settings
               Q | Quit and change dir
           q, ^Q | Quit
@@ -231,7 +231,7 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
 Filters support regexes to instantly (search-as-you-type) list the matching entries in the current directory.
 
-There are 3 ways to reset a filter: <kbd>^L</kbd> (or <kbd>F2</kbd>), a search with no matches or an extra backspace at the filter prompt (like vi).
+There are 3 ways to reset a filter: <kbd>^L</kbd>, a search with no matches or an extra backspace at the filter prompt (like vi).
 
 Common examples: If you want to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol. Type `\.mkv` to list all MKV files.
 
