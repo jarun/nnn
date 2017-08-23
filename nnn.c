@@ -570,6 +570,22 @@ xgetenv(char *name, char *fallback)
 	return value && value[0] ? value : fallback;
 }
 
+/* Check if a dir exists, IS a dir and is readable */
+static bool
+xdiraccess(char *path)
+{
+	static DIR *dirp;
+
+	dirp = opendir(path);
+	if (dirp == NULL) {
+		printwarn();
+		return FALSE;
+	}
+
+	closedir(dirp);
+	return TRUE;
+}
+
 /*
  * We assume none of the strings are NULL.
  *
@@ -1794,7 +1810,9 @@ populate(char *path, char *oldpath, char *fltr)
 {
 	static regex_t re;
 
-	/* Can fail when permissions change while browsing */
+	/* Can fail when permissions change while browsing.
+	 * It's assumed that path IS a directory when we are here.
+	 */
 	if (access(path, R_OK) == -1)
 		return -1;
 
@@ -1923,7 +1941,7 @@ browse(char *ipath, char *ifilter)
 {
 	static char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX], lastdir[PATH_MAX], mark[PATH_MAX];
 	static char fltr[LINE_MAX];
-	char *dir, *tmp, *run, *env, *tgt = NULL;
+	char *dir, *tmp, *run, *env, *dstdir = NULL;
 	struct stat sb;
 	int r, fd, presel;
 	enum action sel = SEL_RUNARG + 1;
@@ -2132,8 +2150,8 @@ nochange:
 			break;
 		case SEL_CD:
 		{
-			static char *input;
-			static int truecd;
+			char *input;
+			int truecd;
 
 			/* Save the program start dir */
 			tmp = getcwd(newpath, PATH_MAX);
@@ -2240,10 +2258,8 @@ nochange:
 
 			free(input);
 
-			if (access(newpath, R_OK) == -1) {
-				printwarn();
-				break;
-			}
+			if (!xdiraccess(newpath))
+				goto nochange;
 
 			if (truecd == 0) {
 				/* Probable change in dir */
@@ -2270,37 +2286,36 @@ nochange:
 			goto begin;
 		}
 		case SEL_CDHOME:
-			tgt = getenv("HOME");
-			if (tgt == NULL) {
+			dstdir = getenv("HOME");
+			if (dstdir == NULL) {
 				clearprompt();
 				goto nochange;
 			} // fallthrough
 		case SEL_CDBEGIN:
-			if (!tgt)
-				tgt = ipath;
+			if (!dstdir)
+				dstdir = ipath;
 
-			if (access(tgt, R_OK) == -1) {
-				printwarn();
-				tgt = NULL;
+			if (!xdiraccess(dstdir)) {
+				dstdir = NULL;
 				goto nochange;
 			}
 
-			if (xstrcmp(path, tgt) == 0) {
-				tgt = NULL;
+			if (xstrcmp(path, dstdir) == 0) {
+				dstdir = NULL;
 				break;
 			}
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
 
-			xstrlcpy(path, tgt, PATH_MAX);
+			xstrlcpy(path, dstdir, PATH_MAX);
 			oldpath[0] = '\0';
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
 			if (cfg.filtermode)
 				presel = FILTER;
-			tgt = NULL;
+			dstdir = NULL;
 			goto begin;
 		case SEL_CDLAST: // fallthrough
 		case SEL_VISIT:
@@ -2317,10 +2332,8 @@ nochange:
 				goto nochange;
 			}
 
-			if (access(tmp, R_OK) == -1) {
-				printwarn();
+			if (!xdiraccess(tmp))
 				goto nochange;
-			}
 
 			xstrlcpy(newpath, tmp, PATH_MAX);
 			xstrlcpy(lastdir, path, PATH_MAX);
@@ -2357,10 +2370,8 @@ nochange:
 					mkpath(path, bookmark[r].loc,
 					       newpath, PATH_MAX);
 
-				if (access(newpath, R_OK) == -1) {
-					printwarn();
+				if (!xdiraccess(newpath))
 					goto nochange;
-				}
 
 				if (xstrcmp(path, newpath) == 0)
 					break;
@@ -2696,7 +2707,7 @@ main(int argc, char *argv[])
 	signal(SIGINT, SIG_IGN);
 
 	/* Test initial path */
-	if (access(ipath, R_OK) == -1) {
+	if (!xdiraccess(ipath)) {
 		fprintf(stderr, "%s: %s\n", ipath, strerror(errno));
 		exit(1);
 	}
