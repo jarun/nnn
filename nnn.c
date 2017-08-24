@@ -47,6 +47,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <wchar.h>
+#include <readline/history.h>
 #include <readline/readline.h>
 #ifndef __USE_XOPEN_EXTENDED
 #define __USE_XOPEN_EXTENDED 1
@@ -181,10 +182,12 @@ typedef struct {
 } settings;
 
 /* Externs */
+#if 0
 #ifdef __APPLE__
 extern int add_history(const char *string);
 #else
 extern void add_history(const char *string);
+#endif
 #endif
 
 extern int wget_wch(WINDOW *win, wint_t *wch);
