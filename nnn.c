@@ -116,7 +116,7 @@ disabledbg()
 #define CURSYM(flag) (flag ? CURSR : EMPTY)
 #define FILTER '/'
 #define REGEX_MAX 128
-#define MAX_BM 10
+#define BM_MAX 10
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE     0x00  /* no flag set */
@@ -198,7 +198,7 @@ static blkcnt_t dir_blocks;
 static ulong num_files;
 static size_t fs_free;
 static uint open_max;
-static bm bookmark[MAX_BM];
+static bm bookmark[BM_MAX];
 static const double div_2_pow_10 = 1.0 / 1024.0;
 static uint _WSHIFT = (sizeof(ulong) == 8) ? 3 : 2;
 static uchar color = 4;
@@ -1118,7 +1118,7 @@ parsebmstr(char *bms)
 {
 	int i = 0;
 
-	while (*bms && i < MAX_BM) {
+	while (*bms && i < BM_MAX) {
 		bookmark[i].key = bms;
 
 		++bms;
@@ -1685,7 +1685,7 @@ show_help(char *path)
 
 	if (getenv("NNN_BMS")) {
 		dprintf(fd, "BOOKMARKS\n");
-		for (; i < MAX_BM; ++i)
+		for (; i < BM_MAX; ++i)
 			if (bookmark[i].key)
 				dprintf(fd, " %s: %s\n",
 					bookmark[i].key, bookmark[i].loc);
@@ -2431,7 +2431,7 @@ nochange:
 			if (tmp == NULL)
 				break;
 
-			for (r = 0; bookmark[r].key && r < MAX_BM; ++r) {
+			for (r = 0; bookmark[r].key && r < BM_MAX; ++r) {
 				if (xstrcmp(bookmark[r].key, tmp) == -1)
 					continue;
 
