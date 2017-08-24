@@ -188,9 +188,8 @@ extern int add_history(const char *string);
 #else
 extern void add_history(const char *string);
 #endif
-#endif
-
 extern int wget_wch(WINDOW *win, wint_t *wch);
+#endif
 
 /* Globals */
 /* Configuration */
