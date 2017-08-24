@@ -17,6 +17,15 @@
 #include <sys/wait.h>
 
 #include <ctype.h>
+#ifdef __linux__ /* Fix failure due to mvaddnwstr() */
+#ifndef NCURSES_WIDECHAR
+#define NCURSES_WIDECHAR 1
+#endif
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+#ifndef _XOPEN_SOURCE_EXTENDED
+#define _XOPEN_SOURCE_EXTENDED
+#endif
+#endif
 #include <curses.h>
 #include <dirent.h>
 #include <errno.h>
@@ -39,7 +48,6 @@
 #include <unistd.h>
 #include <wchar.h>
 #include <readline/readline.h>
-
 #ifndef __USE_XOPEN_EXTENDED
 #define __USE_XOPEN_EXTENDED 1
 #endif
