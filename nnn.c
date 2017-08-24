@@ -129,6 +129,8 @@ disabledbg()
 #define clearprompt() printmsg("")
 #define printwarn() printmsg(strerror(errno))
 #define istopdir(path) (path[1] == '\0' && path[0] == '/')
+#define settimeout() timeout(1000)
+#define cleartimeout() timeout(-1)
 
 #ifdef LINUX_INOTIFY
 #define EVENT_SIZE (sizeof(struct inotify_event))
@@ -411,7 +413,7 @@ xdirname(const char *path)
 	xstrlcpy(buf, path, PATH_MAX);
 
 	/* Find last '/'. */
-	last_slash = xmemrchr((uchar *)buf, '/', strlen(buf));
+	last_slash = xmemrchr((uchar *)buf, '/', xstrlen(buf));
 
 	if (last_slash != NULL && last_slash != buf && last_slash[1] == '\0') {
 		/* Determine whether all remaining characters are slashes. */
@@ -506,7 +508,7 @@ initcurses(void)
 	use_default_colors();
 	if (cfg.showcolor)
 		init_pair(1, color, -1);
-	timeout(1000); /* One second */
+	settimeout(); /* One second */
 }
 
 /*
@@ -922,7 +924,7 @@ readln(char *path)
 	ln[1] = '\0';
 	cur = 0;
 
-	timeout(-1);
+	cleartimeout();
 	echo();
 	curs_set(TRUE);
 	printprompt(ln);
@@ -1009,10 +1011,81 @@ readln(char *path)
 end:
 	noecho();
 	curs_set(FALSE);
-	timeout(1000);
+	settimeout();
 
 	/* Return keys for navigation etc. */
 	return *ch;
+}
+
+/* Show a prompt with input string and return the changes */
+static char *
+xreadline(char *fname)
+{
+	int old_curs = curs_set(1);
+	int len, pos;
+	int c, x, y;
+	char *buf = g_buf;
+	int buflen = NAME_MAX;
+
+	DPRINTF_S(fname)
+	len = pos = xstrlcpy(buf, fname, NAME_MAX) - 1;
+	if (len < 0) {
+		buf[0] = '\0';
+		len = pos = 0;
+	}
+
+	getyx(stdscr, y, x);
+	cleartimeout();
+
+	while (1) {
+		buf[len] = ' ';
+		mvaddnstr(y, x, buf, len + 1);
+		move(y, x + pos);
+
+		c = getch();
+
+		if (c == KEY_ENTER || c == '\n' || c == '\r')
+			break;
+
+		if (isprint(c) && pos < buflen - 1) {
+			memmove(buf + pos + 1, buf + pos, len - pos);
+			buf[pos] = c;
+			++len, ++pos;
+			continue;
+		}
+
+		switch (c) {
+		case KEY_LEFT:
+			if (pos > 0)
+				--pos;
+			break;
+		case KEY_RIGHT:
+			if (pos < len)
+				++pos;
+			break;
+		case KEY_BACKSPACE:
+			if (pos > 0) {
+				memmove(buf + pos - 1, buf + pos, len - pos);
+				--len, --pos;
+			}
+			break;
+		case KEY_DC:
+			if (pos < len) {
+				memmove(buf + pos, buf + pos + 1, len - pos - 1);
+				--len;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	buf[len] = '\0';
+	if (old_curs != ERR) curs_set(old_curs);
+
+	settimeout();
+	DPRINTF_S(buf)
+	return buf;
 }
 
 /*
@@ -1075,14 +1148,14 @@ parsebmstr(char *bms)
 static char *
 readinput(void)
 {
-	timeout(-1);
+	cleartimeout();
 	echo();
 	curs_set(TRUE);
 	memset(g_buf, 0, LINE_MAX);
 	wgetnstr(stdscr, g_buf, LINE_MAX - 1);
 	noecho();
 	curs_set(FALSE);
-	timeout(1000);
+	settimeout();
 	return g_buf[0] ? g_buf : NULL;
 }
 
@@ -2500,10 +2573,10 @@ nochange:
 			if (ndents <= 0)
 				break;
 
-			printprompt("rename to: ");
-			tmp = readinput();
+			printprompt("> ");
+			tmp = xreadline(dents[cur].name);
 			clearprompt();
-			if (tmp == NULL)
+			if (tmp == NULL || tmp[0] == '\0')
 				break;
 
 			/* Allow only relative paths */
@@ -2526,16 +2599,14 @@ nochange:
 			/* Check if another file with same name exists */
 			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
 				/* File with the same name exists */
-				xstrlcpy(g_buf, tmp, NAME_MAX);
-
-				printprompt("overwrite? (y): ");
-				tmp = readinput();
-				if (tmp == NULL || tmp[0] != 'y' || tmp[1] != '\0') {
+				printprompt("Press 'y' to overwrite: ");
+				cleartimeout();
+				r = getch();
+				settimeout();
+				if (r != 'y') {
 					close(fd);
 					break;
 				}
-
-				tmp = g_buf;
 			}
 
 			/* Rename the file */
