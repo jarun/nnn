@@ -159,6 +159,7 @@ disabledbg()
 #define istopdir(path) (path[1] == '\0' && path[0] == '/')
 #define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
+#define errexit() printerr(__LINE__)
 
 #ifdef LINUX_INOTIFY
 #define EVENT_SIZE (sizeof(struct inotify_event))
@@ -267,11 +268,11 @@ printmsg(char *msg)
 
 /* Kill curses and display error before exiting */
 static void
-printerr(int ret, char *prefix)
+printerr(int linenum)
 {
 	exitcurses();
-	fprintf(stderr, "%s: %s\n", prefix, strerror(errno));
-	exit(ret);
+	fprintf(stderr, "line %d: (%d) %s\n", linenum, errno, strerror(errno));
+	exit(1);
 }
 
 /* Print prompt on the last line */
@@ -1405,7 +1406,7 @@ get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2,
 	char *ret = NULL;
 
 	if (pipe(pipefd) == -1)
-		printerr(1, "pipe(2)");
+		errexit();
 
 	for (tmp = 0; tmp < 2; ++tmp) {
 		/* Get previous flags */
@@ -1816,14 +1817,14 @@ dentfill(char *path, struct entry **dents,
 		if (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW) == -1) {
 			if (*dents)
 				free(*dents);
-			printerr(1, "fstatat");
+			errexit();
 		}
 
 		if (n == total_dents) {
 			total_dents += 64;
 			*dents = realloc(*dents, total_dents * sizeof(**dents));
 			if (*dents == NULL)
-				printerr(1, "realloc");
+				errexit();
 		}
 
 		dentp = &(*dents)[n];
@@ -1863,7 +1864,7 @@ dentfill(char *path, struct entry **dents,
 	if (closedir(dirp) == -1) {
 		if (*dents)
 			free(*dents);
-		printerr(1, "closedir");
+		errexit();
 	}
 
 	return n;
@@ -2512,7 +2513,7 @@ nochange:
 				if (r == -1) {
 					if (dents)
 						dentfree(dents);
-					printerr(1, "lstat");
+					errexit();
 				} else {
 					r = show_stats(oldpath, dents[cur].name, &sb);
 					if (r < 0) {
