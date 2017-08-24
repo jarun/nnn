@@ -196,7 +196,6 @@ static char *desktop_manager;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
-static size_t fs_free;
 static uint open_max;
 static bm bookmark[BM_MAX];
 static const double div_2_pow_10 = 1.0 / 1024.0;
@@ -1587,15 +1586,26 @@ getorder(size_t size)
 	}
 }
 
-static void
-update_fs_free(char *path)
+static size_t
+get_fs_free(char *path)
 {
 	static struct statvfs svb;
 
 	if (statvfs(path, &svb) == -1)
-		fs_free = 0;
+		return 0;
 	else
-		fs_free = svb.f_bavail << getorder(svb.f_bsize);
+		return svb.f_bavail << getorder(svb.f_frsize);
+}
+
+static size_t
+get_fs_capacity(char *path)
+{
+	struct statvfs svb;
+
+	if (statvfs(path, &svb) == -1)
+		return 0;
+	else
+		return svb.f_blocks << getorder(svb.f_bsize);
 }
 
 static int
@@ -1706,8 +1716,8 @@ show_help(char *path)
 	if (copier)
 		dprintf(fd, "NNN_COPIER: %s\n", copier);
 
-	update_fs_free(path);
-	dprintf(fd, "\nVolume: %s free\n", coolsize(fs_free));
+	dprintf(fd, "\nVolume: %s of ", coolsize(get_fs_free(path)));
+	dprintf(fd, "%s free\n", coolsize(get_fs_capacity(path)));
 
 	dprintf(fd, "\n");
 	close(fd);
@@ -1753,7 +1763,6 @@ dentfill(char *path, struct entry **dents,
 	if (cfg.blkorder) {
 		num_files = 0;
 		dir_blocks = 0;
-		update_fs_free(path);
 
 		if (fstatat(fd, ".", &sb_path, 0) == -1) {
 			printwarn();
@@ -2006,7 +2015,7 @@ redraw(char *path)
 				sprintf(g_buf, "total %d %s[%s%s]", ndents, sort, unescape(dents[cur].name), ind);
 			else {
 				i = sprintf(g_buf, "du: %s (%lu files) ", coolsize(dir_blocks << 9), num_files);
-				sprintf(g_buf + i, "vol: %s free [%s%s]", coolsize(fs_free), unescape(dents[cur].name), ind);
+				sprintf(g_buf + i, "vol: %s free [%s%s]", coolsize(get_fs_free(path)), unescape(dents[cur].name), ind);
 			}
 
 			printmsg(g_buf);
