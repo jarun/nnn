@@ -115,6 +115,7 @@ disabledbg()
 #define EMPTY "   "
 #define CURSYM(flag) (flag ? CURSR : EMPTY)
 #define FILTER '/'
+#define REGEX_MAX 128
 #define MAX_BM 10
 
 /* Macros to define process spawn behaviour as flags */
@@ -908,20 +909,19 @@ matches(char *fltr)
 }
 
 static int
-readln(char *path)
+filterentries(char *path)
 {
-	static char ln[LINE_MAX << 2];
-	static wchar_t wln[LINE_MAX];
+	static char ln[REGEX_MAX];
+	static wchar_t wln[REGEX_MAX];
 	static wint_t ch[2] = {0};
+	static int maxlen = REGEX_MAX - 1;
 	int r, total = ndents;
 	int oldcur = cur;
 	int len = 1;
 	char *pln = ln + 1;
 
-	memset(wln, 0, LINE_MAX << 2);
-	wln[0] = FILTER;
-	ln[0] = FILTER;
-	ln[1] = '\0';
+	ln[0] = wln[0] = FILTER;
+	ln[1] = wln[1] = '\0';
 	cur = 0;
 
 	cleartimeout();
@@ -954,7 +954,7 @@ readln(char *path)
 				if (len == 1)
 					cur = oldcur;
 
-				wcstombs(ln, wln, LINE_MAX << 2);
+				wcstombs(ln, wln, REGEX_MAX);
 				ndents = total;
 				if (matches(pln) == -1) {
 					printprompt(ln);
@@ -973,9 +973,12 @@ readln(char *path)
 				if (len == 1)
 					cur = 0;
 
+				if (len == maxlen || !isprint(*ch))
+					break;
+
 				wln[len] = (wchar_t)*ch;
 				wln[++len] = '\0';
-				wcstombs(ln, wln, LINE_MAX << 2);
+				wcstombs(ln, wln, REGEX_MAX);
 				ndents = total;
 				if (matches(pln) == -1)
 					continue;
@@ -996,7 +999,7 @@ readln(char *path)
 				if (len == 1)
 					cur = oldcur;
 
-				wcstombs(ln, wln, LINE_MAX << 2);
+				wcstombs(ln, wln, REGEX_MAX);
 				ndents = total;
 				if (matches(pln) == -1)
 					continue;
@@ -1022,14 +1025,16 @@ static char *
 xreadline(char *fname)
 {
 	int old_curs = curs_set(1);
-	int len, pos;
+	size_t len, pos;
 	int c, x, y;
-	char *buf = g_buf;
-	int buflen = NAME_MAX;
+	wchar_t *buf = (wchar_t *)g_buf;
+	size_t buflen = NAME_MAX - 1;
 
 	DPRINTF_S(fname)
-	len = pos = xstrlcpy(buf, fname, NAME_MAX) - 1;
-	if (len < 0) {
+	mbstowcs(buf, fname, NAME_MAX);
+	len = pos = wcslen(buf);
+	/* For future: handle NULL, say for a new name */
+	if (len <= 0) {
 		buf[0] = '\0';
 		len = pos = 0;
 	}
@@ -1039,7 +1044,7 @@ xreadline(char *fname)
 
 	while (1) {
 		buf[len] = ' ';
-		mvaddnstr(y, x, buf, len + 1);
+		mvaddnwstr(y, x, buf, len + 1);
 		move(y, x + pos);
 
 		c = getch();
@@ -1047,8 +1052,8 @@ xreadline(char *fname)
 		if (c == KEY_ENTER || c == '\n' || c == '\r')
 			break;
 
-		if (isprint(c) && pos < buflen - 1) {
-			memmove(buf + pos + 1, buf + pos, len - pos);
+		if (isprint(c) && pos < buflen) {
+			memmove(buf + pos + 1, buf + pos, (len - pos) << 2);
 			buf[pos] = c;
 			++len, ++pos;
 			continue;
@@ -1065,13 +1070,13 @@ xreadline(char *fname)
 			break;
 		case KEY_BACKSPACE:
 			if (pos > 0) {
-				memmove(buf + pos - 1, buf + pos, len - pos);
+				memmove(buf + pos - 1, buf + pos, (len - pos) << 2);
 				--len, --pos;
 			}
 			break;
 		case KEY_DC:
 			if (pos < len) {
-				memmove(buf + pos, buf + pos + 1, len - pos - 1);
+				memmove(buf + pos, buf + pos + 1, (len - pos - 1) << 2);
 				--len;
 			}
 			break;
@@ -1085,7 +1090,8 @@ xreadline(char *fname)
 
 	settimeout();
 	DPRINTF_S(buf)
-	return buf;
+	wcstombs(g_buf, buf, NAME_MAX);
+	return g_buf;
 }
 
 /*
@@ -2176,7 +2182,7 @@ nochange:
 				goto nochange;
 			}
 		case SEL_FLTR:
-			presel = readln(path);
+			presel = filterentries(path);
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(fltr);
 			/* Save current */
