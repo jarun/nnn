@@ -1,4 +1,22 @@
 /* See LICENSE file for copyright and license details. */
+
+/*
+ * Visual layout:
+ * .---------
+ * | cwd: /mnt/path
+ * |
+ * |    file0
+ * |    file1
+ * |  > file2
+ * |    file3
+ * |    file4
+ *      ...
+ * |    filen
+ * |
+ * | Permission denied
+ * '------
+ */
+
 #ifdef __linux__
 #include <sys/inotify.h>
 #define LINUX_INOTIFY
@@ -150,9 +168,12 @@ disabledbg()
 #define NUM_EVENT_FDS 1
 #endif
 
+/* TYPE DEFINITIONS */
 typedef unsigned long ulong;
 typedef unsigned int uint;
 typedef unsigned char uchar;
+
+/* STRUCTURES */
 
 /* Directory entry */
 typedef struct entry {
@@ -181,17 +202,8 @@ typedef struct {
 	uchar dircolor   : 1;  /* Current status of dir color */
 } settings;
 
-/* Externs */
-#if 0
-#ifdef __APPLE__
-extern int add_history(const char *string);
-#else
-extern void add_history(const char *string);
-#endif
-extern int wget_wch(WINDOW *win, wint_t *wch);
-#endif
+/* GLOBALS */
 
-/* Globals */
 /* Configuration */
 static settings cfg = {0, 0, 0, 0, 0, 1, 1, 0};
 
@@ -203,13 +215,12 @@ static char *player;
 static char *copier;
 static char *editor;
 static char *desktop_manager;
+static char *metaviewer;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
 static uint open_max;
 static bm bookmark[BM_MAX];
-static const double div_2_pow_10 = 1.0 / 1024.0;
-static uint _WSHIFT = (sizeof(ulong) == 8) ? 3 : 2;
 static uchar color = 4;
 
 #ifdef LINUX_INOTIFY
@@ -234,39 +245,42 @@ static char * const utils[] = {
 	"exiftool"
 };
 
-static char *metaviewer;
-
-/* For use in functions which are isolated and don't return the buffer */
-static char g_buf[MAX_CMD_LEN];
-
 /* Common message strings */
 static char *STR_NFTWFAIL = "nftw(3) failed";
 static char *STR_ATROOT = "You are at /";
 static char *STR_NOHOME = "HOME not set";
 
-/*
- * Layout:
- * .---------
- * | cwd: /mnt/path
- * |
- * |    file0
- * |    file1
- * |  > file2
- * |    file3
- * |    file4
- *      ...
- * |    filen
- * |
- * | Permission denied
- * '------
- */
+/* For use in functions which are isolated and don't return the buffer */
+static char g_buf[MAX_CMD_LEN];
 
 /* Forward declarations */
-static void printmsg(char *);
-static void printerr(int, char *);
 static void redraw(char *path);
 
 /* Functions */
+
+/* Messages show up at the bottom */
+static void
+printmsg(char *msg)
+{
+	mvprintw(LINES - 1, 0, "%s\n", msg);
+}
+
+/* Kill curses and display error before exiting */
+static void
+printerr(int ret, char *prefix)
+{
+	exitcurses();
+	fprintf(stderr, "%s: %s\n", prefix, strerror(errno));
+	exit(ret);
+}
+
+/* Print prompt on the last line */
+static void
+printprompt(char *str)
+{
+	clearprompt();
+	printw(str);
+}
 
 /* Increase the limit on open file descriptors, if possible */
 static rlim_t
@@ -321,6 +335,7 @@ static size_t
 xstrlcpy(char *dest, const char *src, size_t n)
 {
 	static size_t len, blocks;
+	static const uint _WSHIFT = (sizeof(ulong) == 8) ? 3 : 2;
 
 	if (!src || !dest)
 		return 0;
@@ -766,30 +781,6 @@ entrycmp(const void *va, const void *vb)
 	}
 
 	return xstricmp(pa->name, pb->name);
-}
-
-/* Messages show up at the bottom */
-static void
-printmsg(char *msg)
-{
-	mvprintw(LINES - 1, 0, "%s\n", msg);
-}
-
-/* Kill curses and display error before exiting */
-static void
-printerr(int ret, char *prefix)
-{
-	exitcurses();
-	fprintf(stderr, "%s: %s\n", prefix, strerror(errno));
-	exit(ret);
-}
-
-/* Print prompt on the last line */
-static void
-printprompt(char *str)
-{
-	clearprompt();
-	printw(str);
 }
 
 /*
@@ -1242,6 +1233,7 @@ coolsize(off_t size)
 	static int i;
 	static off_t tmp;
 	static long double rem;
+	static const double div_2_pow_10 = 1.0 / 1024.0;
 
 	i = 0;
 	rem = 0;
