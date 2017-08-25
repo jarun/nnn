@@ -930,7 +930,7 @@ filterentries(char *path)
 	curs_set(TRUE);
 	printprompt(ln);
 
-	while ((r = wget_wch(stdscr, ch)) != ERR)
+	while ((r = get_wch(ch)) != ERR)
 		if (r == OK)
 			switch (*ch) {
 			case '\r':  // with nonl(), this is ENTER key value
@@ -974,7 +974,7 @@ filterentries(char *path)
 				if (len == 1)
 					cur = 0;
 
-				if (len == maxlen || !isprint(*ch))
+				if (len == maxlen)
 					break;
 
 				wln[len] = (wchar_t)*ch;
@@ -1027,7 +1027,8 @@ xreadline(char *fname)
 {
 	int old_curs = curs_set(1);
 	size_t len, pos;
-	int c, x, y;
+	int x, y, r;
+	wint_t ch[2] = {0};
 	wchar_t *buf = (wchar_t *)g_buf;
 	size_t buflen = NAME_MAX - 1;
 
@@ -1048,41 +1049,44 @@ xreadline(char *fname)
 		mvaddnwstr(y, x, buf, len + 1);
 		move(y, x + pos);
 
-		c = getch();
+		if ((r = get_wch(ch)) != ERR) {
+			if (r == OK) {
+				if (*ch == KEY_ENTER || *ch == '\n' || *ch == '\r')
+					break;
 
-		if (c == KEY_ENTER || c == '\n' || c == '\r')
-			break;
+				if (pos < buflen) {
+					memmove(buf + pos + 1, buf + pos, (len - pos) << 2);
+					buf[pos] = *ch;
+					++len, ++pos;
+					continue;
+				}
 
-		if (isprint(c) && pos < buflen) {
-			memmove(buf + pos + 1, buf + pos, (len - pos) << 2);
-			buf[pos] = c;
-			++len, ++pos;
-			continue;
-		}
-
-		switch (c) {
-		case KEY_LEFT:
-			if (pos > 0)
-				--pos;
-			break;
-		case KEY_RIGHT:
-			if (pos < len)
-				++pos;
-			break;
-		case KEY_BACKSPACE:
-			if (pos > 0) {
-				memmove(buf + pos - 1, buf + pos, (len - pos) << 2);
-				--len, --pos;
+			} else {
+				switch (*ch) {
+				case KEY_LEFT:
+					if (pos > 0)
+						--pos;
+					break;
+				case KEY_RIGHT:
+					if (pos < len)
+						++pos;
+					break;
+				case KEY_BACKSPACE:
+					if (pos > 0) {
+						memmove(buf + pos - 1, buf + pos, (len - pos) << 2);
+						--len, --pos;
+					}
+					break;
+				case KEY_DC:
+					if (pos < len) {
+						memmove(buf + pos, buf + pos + 1, (len - pos - 1) << 2);
+						--len;
+					}
+					break;
+				default:
+					break;
+				}
 			}
-			break;
-		case KEY_DC:
-			if (pos < len) {
-				memmove(buf + pos, buf + pos + 1, (len - pos - 1) << 2);
-				--len;
-			}
-			break;
-		default:
-			break;
 		}
 	}
 
