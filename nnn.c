@@ -2574,7 +2574,7 @@ nochange:
 			if (ndents <= 0)
 				break;
 
-			printprompt("> ");
+			printprompt("");
 			tmp = xreadline(dents[cur].name);
 			clearprompt();
 			if (tmp == NULL || tmp[0] == '\0')
