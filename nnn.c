@@ -1013,10 +1013,9 @@ xreadline(char *fname)
 	size_t buflen = NAME_MAX - 1;
 
 	DPRINTF_S(fname)
-	mbstowcs(buf, fname, NAME_MAX);
-	len = pos = wcslen(buf);
+	len = pos = mbstowcs(buf, fname, NAME_MAX);
 	/* For future: handle NULL, say for a new name */
-	if (len <= 0) {
+	if (len == (size_t)-1) {
 		buf[0] = '\0';
 		len = pos = 0;
 	}
