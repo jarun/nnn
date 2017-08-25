@@ -198,15 +198,15 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
     →, ↵, l, ^M | Open file or enter dir
  ←, Bksp, h, ^H | Go to parent dir
          Insert | Toggle navigate-as-you-type
-              ~ | Jump to HOME dir
-              & | Jump to initial dir
-              - | Jump to last visited dir
+              ~ | Go HOME
+              & | Go to initial dir
+              - | Go to last visited dir
               / | Filter dir contents
              ^/ | Open desktop search tool
               . | Toggle hide .dot files
-              b | Show bookmark key prompt
+              b | Show bookmark prompt
              ^B | Mark current dir
-             ^V | Visit marked dir
+             ^V | Go to marked dir
               c | Show change dir prompt
               d | Toggle detail view
               D | Show current file details
@@ -216,7 +216,7 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
               s | Toggle sort by file size
               S | Toggle disk usage mode
               t | Toggle sort by mtime
-              ! | Spawn SHELL in current dir
+              ! | Spawn SHELL in dir
               e | Edit entry in EDITOR
               o | Open dir in file manager
               p | Open entry in PAGER
