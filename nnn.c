@@ -930,21 +930,8 @@ filterentries(char *path)
 	curs_set(TRUE);
 	printprompt(ln);
 
-	while ((r = get_wch(ch)) != ERR)
-		if (r == OK)
-			switch (*ch) {
-			case '\r':  // with nonl(), this is ENTER key value
-				if (len == 1) {
-					cur = oldcur;
-					goto end;
-				}
-
-				if (matches(pln) == -1)
-					goto end;
-
-				redraw(path);
-				goto end;
-			case 127: // handle DEL
+	while ((r = get_wch(ch)) != ERR) {
+		if (*ch == 127 /* handle DEL */ || *ch == KEY_DC || *ch == KEY_BACKSPACE) {
 				if (len == 1) {
 					cur = oldcur;
 					*ch = CONTROL('L');
@@ -957,13 +944,26 @@ filterentries(char *path)
 
 				wcstombs(ln, wln, REGEX_MAX);
 				ndents = total;
-				if (matches(pln) == -1) {
-					printprompt(ln);
+				if (matches(pln) == -1)
 					continue;
-				}
 				redraw(path);
 				printprompt(ln);
-				break;
+				continue;
+		}
+
+		if (r == OK) {
+			switch (*ch) {
+			case '\r':  // with nonl(), this is ENTER key value
+				if (len == 1) {
+					cur = oldcur;
+					goto end;
+				}
+
+				if (matches(pln) == -1)
+					goto end;
+
+				redraw(path);
+				goto end;
 			case CONTROL('L'):
 				if (len == 1)
 					cur = oldcur; // fallthrough
@@ -986,32 +986,12 @@ filterentries(char *path)
 				redraw(path);
 				printprompt(ln);
 			}
-		else
-			switch (*ch) {
-			case KEY_DC: // fallthrough
-			case KEY_BACKSPACE:
-				if (len == 1) {
-					cur = oldcur;
-					*ch = CONTROL('L');
-					goto end;
-				}
-
-				wln[--len] = '\0';
-				if (len == 1)
-					cur = oldcur;
-
-				wcstombs(ln, wln, REGEX_MAX);
-				ndents = total;
-				if (matches(pln) == -1)
-					continue;
-				redraw(path);
-				printprompt(ln);
-				break;
-			default:
-				if (len == 1)
-					cur = oldcur;
-				goto end;
-			}
+		} else {
+			if (len == 1)
+				cur = oldcur;
+			goto end;
+		}
+	}
 end:
 	noecho();
 	curs_set(FALSE);
