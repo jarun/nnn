@@ -1033,6 +1033,12 @@ xreadline(char *fname)
 				if (*ch == KEY_ENTER || *ch == '\n' || *ch == '\r')
 					break;
 
+				if (*ch == CONTROL('L')) {
+					clearprompt();
+					len = pos = 0;
+					continue;
+				}
+
 				if (pos < buflen) {
 					memmove(buf + pos + 1, buf + pos, (len - pos) << 2);
 					buf[pos] = *ch;
@@ -1655,7 +1661,7 @@ show_help(char *path)
              "eo | Open dir in file manager\n"
              "ep | Open entry in PAGER\n"
             "d^K | Invoke file path copier\n"
-            "d^L | Force a redraw, unfilter\n"
+            "d^L | Redraw, clear prompt\n"
              "e? | Show help, settings\n"
              "eQ | Quit and change dir\n"
          "aq, ^Q | Quit\n\n");

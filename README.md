@@ -221,7 +221,7 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
               o | Open dir in file manager
               p | Open entry in PAGER
              ^K | Invoke file path copier
-             ^L | Force a redraw, unfilter
+             ^L | Redraw, clear prompt
               ? | Show help, settings
               Q | Quit and change dir
           q, ^Q | Quit
