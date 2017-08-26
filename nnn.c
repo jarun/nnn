@@ -44,6 +44,9 @@
 #define _XOPEN_SOURCE_EXTENDED
 #endif
 #endif
+#ifndef __USE_XOPEN /* Fix failure due to wcswidth(), ncursesw/curses.h includes whcar.h on Ubuntu 14.04 */
+#define __USE_XOPEN
+#endif
 #include <curses.h>
 #include <dirent.h>
 #include <errno.h>
@@ -64,13 +67,13 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <wchar.h>
 #include <readline/history.h>
 #include <readline/readline.h>
 #ifndef __USE_XOPEN_EXTENDED
 #define __USE_XOPEN_EXTENDED 1
 #endif
 #include <ftw.h>
+#include <wchar.h>
 
 #include "config.h"
 
@@ -1026,7 +1029,7 @@ xreadline(char *fname)
 	while (1) {
 		buf[len] = ' ';
 		mvaddnwstr(y, x, buf, len + 1);
-		move(y, x + pos);
+		move(y, x + wcswidth(buf, pos));
 
 		if ((r = get_wch(ch)) != ERR) {
 			if (r == OK) {
