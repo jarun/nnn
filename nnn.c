@@ -2606,7 +2606,7 @@ nochange:
 			/* Check if another file with same name exists */
 			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
 				/* File with the same name exists */
-				printprompt("Press 'y' to overwrite: ");
+				printprompt("Press 'y' to overwrite");
 				cleartimeout();
 				r = getch();
 				settimeout();
