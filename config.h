@@ -138,10 +138,12 @@ static struct key bindings[] = {
 	{ 't',            SEL_MTIME,     "",     "" },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW,    "",     "" },
+	{ KEY_F(5),       SEL_REDRAW,    "",     "" },
 	/* Copy currently selected file path */
 	{ CONTROL('K'),   SEL_COPY,      "",     "" },
 	/* Show rename prompt */
 	{ CONTROL('R'),   SEL_RENAME,    "",     "" },
+	{ KEY_F(2),       SEL_RENAME,    "",     "" },
 	/* Show help */
 	{ '?',            SEL_HELP,      "",     "" },
 	/* Run command */
