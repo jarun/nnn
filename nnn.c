@@ -1189,6 +1189,7 @@ unescape(const char *str)
 static void
 printent(struct entry *ent, int sel)
 {
+    return;
 	static int ncols;
 
 	if (PATH_MAX + 16 < COLS)
@@ -1197,7 +1198,7 @@ printent(struct entry *ent, int sel)
 		ncols = COLS;
 
 	if (S_ISDIR(ent->mode))
-		snprintf(g_buf, ncols, "%s%s/", CURSYM(sel), unescape(ent->name));
+        snprintf(g_buf, ncols, "%s%s/", CURSYM(sel), unescape(ent->name));
 	else if (S_ISLNK(ent->mode))
 		snprintf(g_buf, ncols, "%s%s@", CURSYM(sel), unescape(ent->name));
 	else if (S_ISSOCK(ent->mode))
@@ -1274,7 +1275,17 @@ printent_long(struct entry *ent, int sel)
 		else if (ent->mode & 0100)
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*", CURSYM(sel), buf, coolsize(ent->size), unescape(ent->name));
 		else
-			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s", CURSYM(sel), buf, coolsize(ent->size), unescape(ent->name));
+        {
+            // experimenting in this section
+            const char *c = unescape(ent->name);
+            unsigned int i;
+            int count=0;
+            for(i=0;i<strlen(c);i++)
+                count+=mblen(c+i, MB_CUR_MAX);
+
+			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s--%d", CURSYM(sel), buf, coolsize(ent->size), unescape(ent->name), count);
+
+        }
 	} else {
 		if (S_ISDIR(ent->mode))
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s/ %s/", CURSYM(sel), buf, coolsize(ent->blocks << 9), unescape(ent->name));
