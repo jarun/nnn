@@ -1189,7 +1189,6 @@ unescape(const char *str)
 static void
 printent(struct entry *ent, int sel)
 {
-    return;
 	static int ncols;
 
 	if (PATH_MAX + 16 < COLS)
@@ -1278,13 +1277,14 @@ printent_long(struct entry *ent, int sel)
         {
             // experimenting in this section
             const char *c = unescape(ent->name);
-            unsigned int i;
-            int count=0;
-            for(i=0;i<strlen(c);i++)
-                count+=mblen(c+i, MB_CUR_MAX);
 
-			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s--%d", CURSYM(sel), buf, coolsize(ent->size), unescape(ent->name), count);
+            int count = 30;
+            int goback=0;
+            if(ncols+goback>count)
+                while((ncols+goback)>count && mblen(c+(ncols+goback)-count, MB_CUR_MAX)==-1)
+                    goback--;
 
+            snprintf(g_buf, ncols+goback, "%s%-16.16s %8.8s %s", CURSYM(sel), buf, coolsize(ent->size), unescape(ent->name));
         }
 	} else {
 		if (S_ISDIR(ent->mode))
