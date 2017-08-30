@@ -1186,6 +1186,21 @@ unescape(const char *str)
 	return buffer;
 }
 
+int
+getgoback(struct entry *ent,int sel, int ncols)
+{
+    const char *c = unescape(ent->name);
+
+    // counts the number of columns before it enounters the filename
+    int count = snprintf(g_buf, ncols, "%s ", CURSYM(sel));
+
+    int goback = 0;
+    while((ncols + goback) > count && mblen(c + (ncols + goback) - count, MB_CUR_MAX) == -1)
+        --goback;
+
+    return goback;
+}
+
 static void
 printent(struct entry *ent, int sel)
 {
@@ -1197,7 +1212,7 @@ printent(struct entry *ent, int sel)
 		ncols = COLS;
 
 	if (S_ISDIR(ent->mode))
-        snprintf(g_buf, ncols, "%s%s/", CURSYM(sel), unescape(ent->name));
+		snprintf(g_buf, ncols, "%s%s/", CURSYM(sel), unescape(ent->name));
 	else if (S_ISLNK(ent->mode))
 		snprintf(g_buf, ncols, "%s%s@", CURSYM(sel), unescape(ent->name));
 	else if (S_ISSOCK(ent->mode))
@@ -1206,9 +1221,10 @@ printent(struct entry *ent, int sel)
 		snprintf(g_buf, ncols, "%s%s|", CURSYM(sel), unescape(ent->name));
 	else if (ent->mode & 0100)
 		snprintf(g_buf, ncols, "%s%s*", CURSYM(sel), unescape(ent->name));
-	else
-		snprintf(g_buf, ncols, "%s%s", CURSYM(sel), unescape(ent->name));
-
+	else {
+		int goback = getgoback(ent, sel, ncols);
+		snprintf(g_buf, ncols + goback, "%s%s", CURSYM(sel), unescape(ent->name));
+    }
 	/* Dirs are always shown on top */
 	if (cfg.dircolor && !S_ISDIR(ent->mode)) {
 		attroff(COLOR_PAIR(1) | A_BOLD);
@@ -1242,6 +1258,21 @@ coolsize(off_t size)
 	return size_buf;
 }
 
+int
+getgoback_long(struct entry *ent, int sel, int ncols, char buf[18])
+{
+    const char *c = unescape(ent->name);
+
+    // counts the number of columns before it enounters the filename
+    int count = snprintf(g_buf, ncols, "%s%-16.16s %8.8s  ", CURSYM(sel), buf, coolsize(ent->size));
+
+    int goback = 0;
+    while((ncols + goback) > count && mblen(c + (ncols + goback) - count, MB_CUR_MAX) == -1)
+        --goback;
+
+    return goback;
+}
+
 static void
 printent_long(struct entry *ent, int sel)
 {
@@ -1252,6 +1283,12 @@ printent_long(struct entry *ent, int sel)
 		ncols = PATH_MAX + 32;
 	else
 		ncols = COLS;
+
+    // if ncols is not enough to accomodate the file details, fall back to the short version
+    if(ncols <= snprintf(g_buf, ncols, "%s%-16.16s %8.8s  ", CURSYM(sel), buf, coolsize(ent->size))){
+        printent(ent, sel);
+        return;
+    }
 
 	strftime(buf, 18, "%d-%m-%Y %H:%M", localtime(&ent->t));
 
@@ -1273,18 +1310,9 @@ printent_long(struct entry *ent, int sel)
 			snprintf(g_buf, ncols, "%s%-16.16s        c  %s", CURSYM(sel), buf, unescape(ent->name));
 		else if (ent->mode & 0100)
 			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*", CURSYM(sel), buf, coolsize(ent->size), unescape(ent->name));
-		else
-        {
-            // experimenting in this section
-            const char *c = unescape(ent->name);
-
-            int count = 30;
-            int goback=0;
-            if(ncols+goback>count)
-                while((ncols+goback)>count && mblen(c+(ncols+goback)-count, MB_CUR_MAX)==-1)
-                    goback--;
-
-            snprintf(g_buf, ncols+goback, "%s%-16.16s %8.8s %s", CURSYM(sel), buf, coolsize(ent->size), unescape(ent->name));
+		else {
+			int goback = getgoback_long(ent, sel, ncols, buf);
+			snprintf(g_buf, ncols + goback, "%s%-16.16s %8.8s %s", CURSYM(sel), buf, coolsize(ent->size), unescape(ent->name));
         }
 	} else {
 		if (S_ISDIR(ent->mode))
