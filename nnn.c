@@ -1196,11 +1196,11 @@ unescape(const char *str, uint maxcols)
 }
 
 static void
-printent(struct entry *ent, int sel)
+printent(struct entry *ent, int sel, uint namecols)
 {
 	static char *pname;
 
-	pname = unescape(ent->name, COLS - 5);
+	pname = unescape(ent->name, namecols);
 
 	if (S_ISDIR(ent->mode))
 		printw("%s%s/\n", CURSYM(sel), pname);
@@ -1247,12 +1247,12 @@ coolsize(off_t size)
 }
 
 static void
-printent_long(struct entry *ent, int sel)
+printent_long(struct entry *ent, int sel, uint namecols)
 {
 	static char buf[18], *pname;
 
 	strftime(buf, 18, "%d-%m-%Y %H:%M", localtime(&ent->t));
-	pname = unescape(ent->name, COLS - 32);
+	pname = unescape(ent->name, namecols);
 
 	if (sel)
 		attron(A_REVERSE);
@@ -1303,7 +1303,7 @@ printent_long(struct entry *ent, int sel)
 		attroff(A_REVERSE);
 }
 
-static void (*printptr)(struct entry *ent, int sel) = &printent_long;
+static void (*printptr)(struct entry *ent, int sel, uint namecols) = &printent_long;
 
 static char
 get_fileind(mode_t mode, char *desc)
@@ -1943,7 +1943,6 @@ redraw(char *path)
 	DPRINTF_D(cur);
 	DPRINTF_S(path);
 
-	/* No text wrapping in cwd line */
 	if (!realpath(path, g_buf)) {
 		printwarn();
 		return;
@@ -1953,6 +1952,11 @@ redraw(char *path)
 	if (ncols > PATH_MAX)
 		ncols = PATH_MAX;
 
+	/* No text wrapping in cwd line */
+	/* Show CWD: - xstrlen(CWD) - 1 = 6 */
+	g_buf[ncols - 6] = '\0';
+	printw(CWD "%s\n\n", g_buf);
+
 	/* Fallback to light mode if less than 35 columns */
 	if (ncols < 35 && cfg.showdetail) {
 		cfg.showdetail ^= 1;
@@ -1960,10 +1964,11 @@ redraw(char *path)
 		mode_changed = TRUE;
 	}
 
-
-	/* Show CWD: - xstrlen(CWD) - 1 = 6 */
-	g_buf[ncols - 6] = '\0';
-	printw(CWD "%s\n\n", g_buf);
+	/* Calculate the number of cols available to print entry name */
+	if (cfg.showdetail)
+		ncols -= 32;
+	else
+		ncols -= 5;
 
 	if (cfg.showcolor) {
 		attron(COLOR_PAIR(1) | A_BOLD);
@@ -1973,17 +1978,17 @@ redraw(char *path)
 	/* Print listing */
 	if (cur < (nlines >> 1)) {
 		for (i = 0; i < nlines; ++i)
-			printptr(&dents[i], i == cur);
+			printptr(&dents[i], i == cur, ncols);
 	} else if (cur >= ndents - (nlines >> 1)) {
 		for (i = ndents - nlines; i < ndents; ++i)
-			printptr(&dents[i], i == cur);
+			printptr(&dents[i], i == cur, ncols);
 	} else {
 		static int odd;
 
 		odd = ISODD(nlines);
 		nlines >>= 1;
 		for (i = cur - nlines; i < cur + nlines + odd; ++i)
-			printptr(&dents[i], i == cur);
+			printptr(&dents[i], i == cur, ncols);
 	}
 
 	/* Must reset e.g. no files in dir */
