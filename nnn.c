@@ -1645,8 +1645,8 @@ show_help(char *path)
             "d^/ | Open desktop search tool\n"
              "e. | Toggle hide .dot files\n"
              "eb | Show bookmark prompt\n"
-            "d^B | Mark current dir\n"
-            "d^V | Go to marked dir\n"
+            "d^B | Pin current dir\n"
+            "d^V | Go to pinned dir\n"
              "ec | Show change dir prompt\n"
              "ed | Toggle detail view\n"
              "eD | Show current file details\n"
@@ -2505,7 +2505,7 @@ nochange:
 			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
-		case SEL_MARK:
+		case SEL_PIN:
 			xstrlcpy(mark, path, PATH_MAX);
 			printmsg(mark);
 			goto nochange;

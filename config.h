@@ -21,7 +21,7 @@ enum action {
 	SEL_CDBEGIN,
 	SEL_CDLAST,
 	SEL_CDBM,
-	SEL_MARK,
+	SEL_PIN,
 	SEL_VISIT,
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
@@ -115,7 +115,7 @@ static struct key bindings[] = {
 	/* Change dir using bookmark */
 	{ 'b',            SEL_CDBM,      "",     "" },
 	/* Mark a path to visit later */
-	{ CONTROL('B'),   SEL_MARK,      "",     "" },
+	{ CONTROL('B'),   SEL_PIN,       "",     "" },
 	/* Visit marked directory */
 	{ CONTROL('V'),   SEL_VISIT,     "",     "" },
 	/* Toggle hide .dot files */

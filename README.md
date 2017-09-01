@@ -82,7 +82,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - Navigation
   - Familiar shortcuts
   - *Navigate-as-you-type* mode
-  - Bookmarks support; mark and visit a directory
+  - Bookmarks support; pin and visit a directory
   - Jump HOME or to the last visited directory (as usual!)
   - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
   - Roll-over at edges, page through entries
@@ -205,8 +205,8 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
              ^/ | Open desktop search tool
               . | Toggle hide .dot files
               b | Show bookmark prompt
-             ^B | Mark current dir
-             ^V | Go to marked dir
+             ^B | Pin current dir
+             ^V | Go to pinned dir
               c | Show change dir prompt
               d | Toggle detail view
               D | Show current file details
