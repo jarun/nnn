@@ -1168,7 +1168,7 @@ unescape(const char *str, uint maxcols)
 	static char buffer[PATH_MAX];
 	static wchar_t wbuf[PATH_MAX];
 	static wchar_t *buf;
-	static size_t len, width;
+	static size_t len;
 
 	buffer[0] = '\0';
 	buf = wbuf;
@@ -1176,10 +1176,10 @@ unescape(const char *str, uint maxcols)
 	/* Convert multi-byte to wide char */
 	len = mbstowcs(wbuf, str, PATH_MAX);
 
-	if (maxcols) {
-		width = wcswidth(wbuf, len);
+	if (maxcols && len > maxcols) {
+		len = wcswidth(wbuf, len);
 
-		if (width > maxcols)
+		if (len > maxcols)
 			wbuf[maxcols] = 0;
 	}
 
