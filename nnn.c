@@ -1198,15 +1198,9 @@ unescape(const char *str, uint maxcols)
 static void
 printent(struct entry *ent, int sel)
 {
-	static int ncols;
 	static char *pname;
 
-	if (PATH_MAX + 16 < COLS)
-		ncols = PATH_MAX + 16;
-	else
-		ncols = COLS;
-
-	pname = unescape(ent->name, ncols - 5);
+	pname = unescape(ent->name, COLS - 5);
 
 	if (S_ISDIR(ent->mode))
 		printw("%s%s/\n", CURSYM(sel), pname);
@@ -1255,16 +1249,10 @@ coolsize(off_t size)
 static void
 printent_long(struct entry *ent, int sel)
 {
-	static int ncols;
 	static char buf[18], *pname;
 
-	if (PATH_MAX + 32 < COLS)
-		ncols = PATH_MAX + 32;
-	else
-		ncols = COLS;
-
 	strftime(buf, 18, "%d-%m-%Y %H:%M", localtime(&ent->t));
-	pname = unescape(ent->name, ncols - 32);
+	pname = unescape(ent->name, COLS - 32);
 
 	if (sel)
 		attron(A_REVERSE);
