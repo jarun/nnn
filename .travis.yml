@@ -1,5 +1,7 @@
 language: c
 sudo: required
+services:
+  - docker
 matrix:
   include:
     # Access more recent gcc and clang via a Trusty image
@@ -13,48 +15,32 @@ matrix:
       compiler: gcc
     - os: osx
       compiler: clang
-    - os: linux
-      dist: trusty
-      env: USE_DOCKER=1 OS_TYPE=centos OS_VERSION=7
-    - os: linux
-      dist: trusty
-      env: USE_DOCKER=1 OS_TYPE=fedora OS_VERSION=26
-
-before_install:
-    - if [ "$USE_DOCKER" = "1" ]; then
-          sudo systemctl start docker.service;
-          sudo docker pull $OS_TYPE:$OS_VERSION;
-      fi
 
 script:
-    - if [ "$USE_DOCKER" = "1" ]; then
-          ./build-docker $OS_TYPE $OS_VERSION;
-          sudo chown -R $(id -un).$(id -gn) dist;
-      else
-          export CFLAGS=-Werror;
-          make clean;
-          make;
-          make clean;
-          make -f Makefile.native;
-      fi
+  export CFLAGS=-Werror;
+  make clean;
+  make;
+  make clean;
+  make -f Makefile.native;
 
-after_success:
-    - if [ "$USE_DOCKER" = "1" ]; then
-          ls -l dist;
-      fi
+before_deploy:
+  - sudo apt-get update -qy
+  - sudo apt-get install -qy python3 python3-pip
+  - python3 -m pip install packagecore
+  - packagecore -o dist/ "${TRAVIS_TAG#v}"
 
 deploy:
-  skip_cleanup: true
   provider: releases
   api-key:
     secure: bdw73zBeBEZtDZGEyFpAksnpwLHTBaC7VP1pONmnsXv4qmMcynASz0LfE4krEdAsRnvxQvqPZXviy/SZ3bmaLpVQmJIC1uRWIyOBE6K/7ddf+wfLy+1uO9EPd/zDF/D28Xy8QJLDGDZI08BY5Fist4XowyvtdW3GRwwDL7TwyZyigr0fkqLJwYcqCpojsHsjXjhkpGZqB5XRztaJ4kIEVz8du03ZU1l5kA9lI8Pdk9+mntOOt6emlaJl+Wr81QkwA8TvGPlZ1VP/+h9YCtlRy/4OuiU+bg5/Atxjh8M6rsq+WpZ3ZdYbR6x5vP78p9f6TsJa4ymGhhW6MhYrKPwdT4oITzZcOXJl6AEoIvrWHQWLY7K3WaEfRbT+DODnXks0ToFKls7wyWfi/AHI0ejeDD5Na5/XhY0jdVYOVvovoY2n8LBaqRTFJDYKoCbJ1S+6myUvvmFVwiZWcgOv9gVX1aaIl4wh+XuzUtPDJTcJtUOE8Q2MWl0bdYVtEkHVRznPXN5u3odrDaeTD3vo+pEaEpshLoSKhCyyWvslSzN7T98ez3aw3KFXoFhXPEg5MEJWy7u359MaVwJIsOGUDAFhy/Y7h83LjQYnu8cmX2wuVrQIRIlGVB0f10GYZzPffZz98I/T0xv75NzpyRs31/wMxvdXz35c8m/yTup4kAkG/1s=
   file_glob: true
   file:
-    - dist/*.deb
-    - dist/*.rpm
+    - dist/*
+  skip_cleanup: true
+  python: "3.6"
   on:
-    condition: $USE_DOCKER = 1
-    repo: jarun/nnn
+    condition:
+      - "$TRAVIS_OS_NAME == linux"
+      - "$CC == gcc"
     tags: true
-
-tags: true
+    repo: jarun/nnn

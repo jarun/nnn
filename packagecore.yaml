@@ -1,0 +1,61 @@
+name: nnn
+metadata:
+  maintainer: Arun Prakash Jana <engineerarun@gmail.com>
+  license: BSD 2-Clause
+  summary: The missing terminal file browser for X.
+  homepage: https://github.com/jarun/nnn
+commands:
+  install:
+    - make PREFIX="/usr" install DESTDIR="${BP_DESTDIR}"
+packages:
+  archlinux:
+    builddeps:
+      - make
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+  fedora26:
+    builddeps:
+      - make
+      - ncursesw-devel
+      - readline-devel
+    deps:
+      - libncursesw
+      - libreadline
+  centos7.3:
+    builddeps:
+      - make
+      - ncursesw-devel
+      - readline-devel
+    deps:
+      - libncursesw
+      - libreadline
+    commands:
+      pre:
+        - yum install epel-release
+  ubuntu16.04:
+    builddeps:
+      - make
+      - libncursesw5-dev
+      - libreadline6-dev
+    deps:
+      - libncursesw5
+      - libreadline6
+  ubuntu17.10:
+    builddeps:
+      - make
+      - libncursesw5-dev
+      - libreadline6-dev
+    deps:
+      - libncursesw5
+      - libreadline6
+  debian9:
+    builddeps:
+      - make
+      - libncursesw5-dev
+      - libreadline6-dev
+    deps:
+      - libncursesw5
+      - libreadline6
