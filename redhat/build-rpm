@@ -15,7 +15,7 @@ git archive --prefix=nnn-$vers/ --format=tar.gz -o $rpmdir/SOURCES/nnn-$vers.tar
 # do the build
 ( cd $rpmdir/SPECS && rpmbuild --define="%_topdir $rpmdir" -ba nnn.spec )
 
-# retreive the artifacts
+# retrieve the artifacts
 mkdir -p dist
 cp $rpmdir/{SRPMS,RPMS/*}/*.rpm dist/
 
