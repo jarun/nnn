@@ -1160,19 +1160,28 @@ readinput(void)
 
 /*
  * Replace escape characters in a string with '?'
+ * Adjust string length to maxcols if > 0;
  */
 static char *
-unescape(const char *str)
+unescape(const char *str, uint maxcols)
 {
 	static char buffer[PATH_MAX];
 	static wchar_t wbuf[PATH_MAX];
 	static wchar_t *buf;
+	static size_t len, width;
 
 	buffer[0] = '\0';
 	buf = wbuf;
 
 	/* Convert multi-byte to wide char */
-	mbstowcs(wbuf, str, PATH_MAX);
+	len = mbstowcs(wbuf, str, PATH_MAX);
+
+	if (maxcols) {
+		width = wcswidth(wbuf, len);
+
+		if (width > maxcols)
+			wbuf[maxcols] = 0;
+	}
 
 	while (*buf) {
 		if (*buf <= '\x1f' || *buf == '\x7f')
@@ -1190,32 +1199,33 @@ static void
 printent(struct entry *ent, int sel)
 {
 	static int ncols;
+	static char *pname;
 
 	if (PATH_MAX + 16 < COLS)
 		ncols = PATH_MAX + 16;
 	else
 		ncols = COLS;
 
+	pname = unescape(ent->name, ncols - 5);
+
 	if (S_ISDIR(ent->mode))
-		snprintf(g_buf, ncols, "%s%s/", CURSYM(sel), unescape(ent->name));
+		printw("%s%s/\n", CURSYM(sel), pname);
 	else if (S_ISLNK(ent->mode))
-		snprintf(g_buf, ncols, "%s%s@", CURSYM(sel), unescape(ent->name));
+		printw("%s%s@\n", CURSYM(sel), pname);
 	else if (S_ISSOCK(ent->mode))
-		snprintf(g_buf, ncols, "%s%s=", CURSYM(sel), unescape(ent->name));
+		printw("%s%s=\n", CURSYM(sel), pname);
 	else if (S_ISFIFO(ent->mode))
-		snprintf(g_buf, ncols, "%s%s|", CURSYM(sel), unescape(ent->name));
+		printw("%s%s|\n", CURSYM(sel), pname);
 	else if (ent->mode & 0100)
-		snprintf(g_buf, ncols, "%s%s*", CURSYM(sel), unescape(ent->name));
+		printw("%s%s*\n", CURSYM(sel), pname);
 	else
-		snprintf(g_buf, ncols, "%s%s", CURSYM(sel), unescape(ent->name));
+		printw("%s%s\n", CURSYM(sel), pname);
 
 	/* Dirs are always shown on top */
 	if (cfg.dircolor && !S_ISDIR(ent->mode)) {
 		attroff(COLOR_PAIR(1) | A_BOLD);
 		cfg.dircolor = 0;
 	}
-
-	printw("%s\n", g_buf);
 }
 
 static char *
@@ -1246,7 +1256,7 @@ static void
 printent_long(struct entry *ent, int sel)
 {
 	static int ncols;
-	static char buf[18];
+	static char buf[18], *pname;
 
 	if (PATH_MAX + 32 < COLS)
 		ncols = PATH_MAX + 32;
@@ -1254,44 +1264,45 @@ printent_long(struct entry *ent, int sel)
 		ncols = COLS;
 
 	strftime(buf, 18, "%d-%m-%Y %H:%M", localtime(&ent->t));
+	pname = unescape(ent->name, ncols - 32);
 
 	if (sel)
 		attron(A_REVERSE);
 
 	if (!cfg.blkorder) {
 		if (S_ISDIR(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        /  %s/", CURSYM(sel), buf, unescape(ent->name));
+			printw("%s%-16.16s        /  %s/\n", CURSYM(sel), buf, pname);
 		else if (S_ISLNK(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@", CURSYM(sel), buf, unescape(ent->name));
+			printw("%s%-16.16s        @  %s@\n", CURSYM(sel), buf, pname);
 		else if (S_ISSOCK(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        =  %s=", CURSYM(sel), buf, unescape(ent->name));
+			printf("%s%-16.16s        =  %s=\n", CURSYM(sel), buf, pname);
 		else if (S_ISFIFO(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        |  %s|", CURSYM(sel), buf, unescape(ent->name));
+			printw("%s%-16.16s        |  %s|\n", CURSYM(sel), buf, pname);
 		else if (S_ISBLK(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        b  %s", CURSYM(sel), buf, unescape(ent->name));
+			printw("%s%-16.16s        b  %s\n", CURSYM(sel), buf, pname);
 		else if (S_ISCHR(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        c  %s", CURSYM(sel), buf, unescape(ent->name));
+			printw("%s%-16.16s        c  %s\n", CURSYM(sel), buf, pname);
 		else if (ent->mode & 0100)
-			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*", CURSYM(sel), buf, coolsize(ent->size), unescape(ent->name));
+			printw("%s%-16.16s %8.8s* %s*\n", CURSYM(sel), buf, coolsize(ent->size), pname);
 		else
-			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s", CURSYM(sel), buf, coolsize(ent->size), unescape(ent->name));
+			printw("%s%-16.16s %8.8s  %s\n", CURSYM(sel), buf, coolsize(ent->size), pname);
 	} else {
 		if (S_ISDIR(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s %8.8s/ %s/", CURSYM(sel), buf, coolsize(ent->blocks << 9), unescape(ent->name));
+			printw("%s%-16.16s %8.8s/ %s/\n", CURSYM(sel), buf, coolsize(ent->blocks << 9), pname);
 		else if (S_ISLNK(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        @  %s@", CURSYM(sel), buf, unescape(ent->name));
+			printw("%s%-16.16s        @  %s@\n", CURSYM(sel), buf, pname);
 		else if (S_ISSOCK(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        =  %s=", CURSYM(sel), buf, unescape(ent->name));
+			printw("%s%-16.16s        =  %s=\n", CURSYM(sel), buf, pname);
 		else if (S_ISFIFO(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        |  %s|", CURSYM(sel), buf, unescape(ent->name));
+			printw("%s%-16.16s        |  %s|\n", CURSYM(sel), buf, pname);
 		else if (S_ISBLK(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        b  %s", CURSYM(sel), buf, unescape(ent->name));
+			printw("%s%-16.16s        b  %s\n", CURSYM(sel), buf, pname);
 		else if (S_ISCHR(ent->mode))
-			snprintf(g_buf, ncols, "%s%-16.16s        c  %s", CURSYM(sel), buf, unescape(ent->name));
+			printw("%s%-16.16s        c  %s\n", CURSYM(sel), buf, pname);
 		else if (ent->mode & 0100)
-			snprintf(g_buf, ncols, "%s%-16.16s %8.8s* %s*", CURSYM(sel), buf, coolsize(ent->blocks << 9), unescape(ent->name));
+			printw("%s%-16.16s %8.8s* %s*\n", CURSYM(sel), buf, coolsize(ent->blocks << 9), pname);
 		else
-			snprintf(g_buf, ncols, "%s%-16.16s %8.8s  %s", CURSYM(sel), buf, coolsize(ent->blocks << 9), unescape(ent->name));
+			printw("%s%-16.16s %8.8s  %s\n", CURSYM(sel), buf, coolsize(ent->blocks << 9), pname);
 	}
 
 	/* Dirs are always shown on top */
@@ -1299,8 +1310,6 @@ printent_long(struct entry *ent, int sel)
 		attroff(COLOR_PAIR(1) | A_BOLD);
 		cfg.dircolor = 0;
 	}
-
-	printw("%s\n", g_buf);
 
 	if (sel)
 		attroff(A_REVERSE);
@@ -1473,12 +1482,12 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 
 		if (len != -1) {
 			g_buf[len] = '\0';
-			dprintf(fd, "    File: '%s' -> ", unescape(fname));
-			dprintf(fd, "'%s'", unescape(g_buf));
+			dprintf(fd, "    File: '%s' -> ", unescape(fname, 0));
+			dprintf(fd, "'%s'", unescape(g_buf, 0));
 			xstrlcpy(g_buf, "symbolic link", MAX_CMD_LEN);
 		}
 	} else
-		dprintf(fd, "    File: '%s'", unescape(fname));
+		dprintf(fd, "    File: '%s'", unescape(fname, 0));
 
 	/* Show size, blocks, file type */
 #ifdef __APPLE__
@@ -2007,10 +2016,10 @@ redraw(char *path)
 			 * be truncated in directory listing
 			 */
 			if (!cfg.blkorder)
-				sprintf(g_buf, "total %d %s[%s%s]", ndents, sort, unescape(dents[cur].name), ind);
+				sprintf(g_buf, "total %d %s[%s%s]", ndents, sort, unescape(dents[cur].name, 0), ind);
 			else {
 				i = sprintf(g_buf, "du: %s (%lu files) ", coolsize(dir_blocks << 9), num_files);
-				sprintf(g_buf + i, "vol: %s free [%s%s]", coolsize(get_fs_free(path)), unescape(dents[cur].name), ind);
+				sprintf(g_buf + i, "vol: %s free [%s%s]", coolsize(get_fs_free(path)), unescape(dents[cur].name, 0), ind);
 			}
 
 			printmsg(g_buf);
