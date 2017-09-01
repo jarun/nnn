@@ -1919,11 +1919,19 @@ redraw(char *path)
 {
 	static int nlines, i;
 	static size_t ncols;
+	static bool mode_changed;
 
+	mode_changed = FALSE;
 	nlines = MIN(LINES - 4, ndents);
 
 	/* Clean screen */
 	erase();
+
+	/* Fail redraw if < than 10 columns */
+	if (COLS < 10) {
+		printmsg("Too few columns!");
+		return;
+	}
 
 	/* Strip trailing slashes */
 	for (i = xstrlen(path) - 1; i > 0; --i)
@@ -1944,7 +1952,16 @@ redraw(char *path)
 	ncols = COLS;
 	if (ncols > PATH_MAX)
 		ncols = PATH_MAX;
-	/* - xstrlen(CWD) - 1 = 6 */
+
+	/* Fallback to light mode if less than 35 columns */
+	if (ncols < 35 && cfg.showdetail) {
+		cfg.showdetail ^= 1;
+		printptr = &printent;
+		mode_changed = TRUE;
+	}
+
+
+	/* Show CWD: - xstrlen(CWD) - 1 = 6 */
 	g_buf[ncols - 6] = '\0';
 	printw(CWD "%s\n\n", g_buf);
 
@@ -2013,6 +2030,11 @@ redraw(char *path)
 			printmsg(g_buf);
 		} else
 			printmsg("0 items");
+	}
+
+	if (mode_changed) {
+		cfg.showdetail ^= 1;
+		printptr = &printent_long;
 	}
 }
 
