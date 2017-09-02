@@ -1158,6 +1158,15 @@ readinput(void)
 	return g_buf[0] ? g_buf : NULL;
 }
 
+static void
+resetdircolor(mode_t mode)
+{
+	if (cfg.dircolor && !S_ISDIR(mode)) {
+		attroff(COLOR_PAIR(1) | A_BOLD);
+		cfg.dircolor = 0;
+	}
+}
+
 /*
  * Replace escape characters in a string with '?'
  * Adjust string length to maxcols if > 0;
@@ -1202,6 +1211,9 @@ printent(struct entry *ent, int sel, uint namecols)
 
 	pname = unescape(ent->name, namecols);
 
+	/* Directories are always shown on top */
+	resetdircolor(ent->mode);
+
 	if (S_ISDIR(ent->mode))
 		printw("%s%s/\n", CURSYM(sel), pname);
 	else if (S_ISLNK(ent->mode))
@@ -1214,12 +1226,6 @@ printent(struct entry *ent, int sel, uint namecols)
 		printw("%s%s*\n", CURSYM(sel), pname);
 	else
 		printw("%s%s\n", CURSYM(sel), pname);
-
-	/* Dirs are always shown on top */
-	if (cfg.dircolor && !S_ISDIR(ent->mode)) {
-		attroff(COLOR_PAIR(1) | A_BOLD);
-		cfg.dircolor = 0;
-	}
 }
 
 static char *
@@ -1253,6 +1259,9 @@ printent_long(struct entry *ent, int sel, uint namecols)
 
 	strftime(buf, 18, "%d-%m-%Y %H:%M", localtime(&ent->t));
 	pname = unescape(ent->name, namecols);
+
+	/* Directories are always shown on top */
+	resetdircolor(ent->mode);
 
 	if (sel)
 		attron(A_REVERSE);
@@ -1291,12 +1300,6 @@ printent_long(struct entry *ent, int sel, uint namecols)
 			printw("%s%-16.16s %8.8s* %s*\n", CURSYM(sel), buf, coolsize(ent->blocks << 9), pname);
 		else
 			printw("%s%-16.16s %8.8s  %s\n", CURSYM(sel), buf, coolsize(ent->blocks << 9), pname);
-	}
-
-	/* Dirs are always shown on top */
-	if (cfg.dircolor && !S_ISDIR(ent->mode)) {
-		attroff(COLOR_PAIR(1) | A_BOLD);
-		cfg.dircolor = 0;
 	}
 
 	if (sel)
