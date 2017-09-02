@@ -26,6 +26,7 @@ Noice is Not Noice, a noicer fork...
   - [From a package manager](#from-a-package-manager)
   - [Release packages](#release-packages)
   - [From source](#from-source)
+- [Shell completion](#shell-completion)
 - [Usage](#usage)
   - [Cmdline options](#cmdline-options)
   - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -159,6 +160,10 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
       $ sudo make install
 
 `PREFIX` is supported, in case you want to install to a different location.
+
+### Shell completion
+
+Search keyword and option completion scripts for Bash, Fish and Zsh can be found in respective subdirectories of [`scripts/auto-completion/`](scripts/auto-completion). Please refer to your shell's manual for installation instructions.
 
 ### Usage
 

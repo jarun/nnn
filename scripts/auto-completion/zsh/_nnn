@@ -1,0 +1,22 @@
+#compdef nnn
+#
+# Completion definition for nnn.
+#
+# Author:
+#   Arun Prakash Jana <engineerarun@gmail.com>
+#
+
+setopt localoptions noshwordsplit noksharrays
+local -a args
+args=(
+    '(-c)-c[specify dir color, disables if N>7]:color code'
+    '(-e)-e[use exiftool instead of mediainfo]'
+    '(-h)-h[show this help and exit]'
+    '(-i)-i[start in navigate-as-you-type mode]'
+    '(-l)-l[start in light mode (fewer details)]'
+    '(-p)-p[specify custom nlay]:path to nlay'
+    '(-S)-S[start in disk usage analyzer mode]'
+    '(-v)-v[show program version and exit]'
+    '*: :_guard "^-*" keyword'
+)
+_arguments -S -s $args
