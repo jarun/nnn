@@ -66,6 +66,7 @@ Cool things you can do with `nnn`:
 - use `cd .....` at chdir prompt to go to a parent directory
 - see detailed file stats or mediainfo information
 - open a (supported) archive in vim to view its contents
+- pin a directory you may need to revisit and jump to it anytime
 - set timeout to lock the current terminal
 - change directory on exit
 
