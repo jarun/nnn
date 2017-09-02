@@ -302,7 +302,7 @@ To jump to the n<sup>th</sup> level parent, with PWD at level 0, use `n + 1` dot
 
 #### cd on quit
 
-Pick the appropriate file for your shell from [misc/quitcd](https://github.com/jarun/nnn/tree/master/misc/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start `nnn` as `n` (or modify the function name to something else).
+Pick the appropriate file for your shell from [scripts/quitcd](https://github.com/jarun/nnn/tree/master/scripts/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start `nnn` as `n` (or modify the function name to something else).
 
 As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
 
