@@ -1087,6 +1087,20 @@ xreadline(char *fname)
 	return g_buf;
 }
 
+static char *
+readinput(void)
+{
+	cleartimeout();
+	echo();
+	curs_set(TRUE);
+	memset(g_buf, 0, LINE_MAX);
+	wgetnstr(stdscr, g_buf, LINE_MAX - 1);
+	noecho();
+	curs_set(FALSE);
+	settimeout();
+	return g_buf[0] ? g_buf : NULL;
+}
+
 /*
  * Returns "dir/name or "/name"
  */
@@ -1144,20 +1158,6 @@ parsebmstr(char *bms)
 	}
 }
 
-static char *
-readinput(void)
-{
-	cleartimeout();
-	echo();
-	curs_set(TRUE);
-	memset(g_buf, 0, LINE_MAX);
-	wgetnstr(stdscr, g_buf, LINE_MAX - 1);
-	noecho();
-	curs_set(FALSE);
-	settimeout();
-	return g_buf[0] ? g_buf : NULL;
-}
-
 static void
 resetdircolor(mode_t mode)
 {
@@ -1204,30 +1204,6 @@ unescape(const char *str, uint maxcols)
 	return buffer;
 }
 
-static void
-printent(struct entry *ent, int sel, uint namecols)
-{
-	static char *pname;
-
-	pname = unescape(ent->name, namecols);
-
-	/* Directories are always shown on top */
-	resetdircolor(ent->mode);
-
-	if (S_ISDIR(ent->mode))
-		printw("%s%s/\n", CURSYM(sel), pname);
-	else if (S_ISLNK(ent->mode))
-		printw("%s%s@\n", CURSYM(sel), pname);
-	else if (S_ISSOCK(ent->mode))
-		printw("%s%s=\n", CURSYM(sel), pname);
-	else if (S_ISFIFO(ent->mode))
-		printw("%s%s|\n", CURSYM(sel), pname);
-	else if (ent->mode & 0100)
-		printw("%s%s*\n", CURSYM(sel), pname);
-	else
-		printw("%s%s\n", CURSYM(sel), pname);
-}
-
 static char *
 coolsize(off_t size)
 {
@@ -1250,6 +1226,30 @@ coolsize(off_t size)
 
 	snprintf(size_buf, 12, "%.*Lf%c", i, size + rem * div_2_pow_10, U[i]);
 	return size_buf;
+}
+
+static void
+printent(struct entry *ent, int sel, uint namecols)
+{
+	static char *pname;
+
+	pname = unescape(ent->name, namecols);
+
+	/* Directories are always shown on top */
+	resetdircolor(ent->mode);
+
+	if (S_ISDIR(ent->mode))
+		printw("%s%s/\n", CURSYM(sel), pname);
+	else if (S_ISLNK(ent->mode))
+		printw("%s%s@\n", CURSYM(sel), pname);
+	else if (S_ISSOCK(ent->mode))
+		printw("%s%s=\n", CURSYM(sel), pname);
+	else if (S_ISFIFO(ent->mode))
+		printw("%s%s|\n", CURSYM(sel), pname);
+	else if (ent->mode & 0100)
+		printw("%s%s*\n", CURSYM(sel), pname);
+	else
+		printw("%s%s\n", CURSYM(sel), pname);
 }
 
 static void
