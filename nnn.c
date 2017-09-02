@@ -75,7 +75,7 @@
 #include <ftw.h>
 #include <wchar.h>
 
-#include "config.h"
+#include "nnn.h"
 
 #ifdef DEBUGMODE
 static int DEBUG_FD;
