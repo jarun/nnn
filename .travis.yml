@@ -22,6 +22,7 @@ script:
   make;
   make clean;
   make -f scripts/make_native/Makefile.native;
+  make clean;
 
 before_deploy:
   - unset CFLAGS
