@@ -11,12 +11,16 @@ packages:
   archlinux:
     builddeps:
       - make
+      - gcc
+      - pkg-config
     deps:
       - ncurses
       - readline
   fedora26:
     builddeps:
       - make
+      - gcc
+      - pkg-config
       - ncurses-devel
       - readline-devel
     deps:
@@ -25,6 +29,8 @@ packages:
   centos7.3:
     builddeps:
       - make
+      - gcc
+      - pkgconfig
       - ncurses-devel
       - readline-devel
     deps:
@@ -36,6 +42,8 @@ packages:
   ubuntu16.04:
     builddeps:
       - make
+      - gcc
+      - pkg-config
       - libncursesw5-dev
       - libreadline6-dev
     deps:
@@ -44,6 +52,8 @@ packages:
   ubuntu17.10:
     builddeps:
       - make
+      - gcc
+      - pkg-config
       - libncursesw5-dev
       - libreadline6-dev
     deps:
@@ -52,6 +62,8 @@ packages:
   debian9:
     builddeps:
       - make
+      - gcc
+      - pkg-config
       - libncursesw5-dev
       - libreadline-dev
     deps:
