@@ -1,3 +1,20 @@
+nnn v1.4
+2017-09-04
+
+What's in?
+- Monitor directory changes
+- In-place file rename
+- Pin (`Ctrl-B`) a directory and visit (`Ctrl-V`) it anytime
+- Auto-completion scripts
+- Show volume capacity and free in help
+- Auto-fallback to light mode if too few columns (< 35)
+- PackageCore integration
+- Unsupported Function keys (they never work universally):
+  - `F2` (rename), use `Ctrl-R`
+  - `F5` (refresh), use `Ctrl-L`
+
+-------------------------------------------------------------------------------
+
 nnn v1.3
 2017-07-26
 
