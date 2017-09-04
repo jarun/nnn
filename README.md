@@ -14,7 +14,7 @@ Noice is Not Noice, a noicer fork...
 
 [![nnn screencast](https://s16.postimg.org/h8ha5z69x/nnn_demo.png)](https://vimeo.com/215489406 "Click for some action!")
 
-<p align="center"><a href="https://vimeo.com/215489406">Click for some action!</a></p>
+<p align="center"><a href="https://vimeo.com/215489406"><i>Click for some action!</i></a></p>
 
 ### Table of Contents
 
