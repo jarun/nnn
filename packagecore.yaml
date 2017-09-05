@@ -1,9 +1,8 @@
 name: nnn
-metadata:
-  maintainer: Arun Prakash Jana <engineerarun@gmail.com>
-  license: BSD 2-Clause
-  summary: The missing terminal file browser for X.
-  homepage: https://github.com/jarun/nnn
+maintainer: Arun Prakash Jana <engineerarun@gmail.com>
+license: BSD 2-Clause
+summary: The missing terminal file browser for X.
+homepage: https://github.com/jarun/nnn
 commands:
   install:
     - make PREFIX="/usr" install DESTDIR="${BP_DESTDIR}"
