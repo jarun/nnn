@@ -133,6 +133,7 @@ disabledbg()
 
 /* Macro definitions */
 #define VERSION "1.4"
+#define GENERAL_INFO "License: BSD 2-Clause\nWebpage: https://github.com/jarun/nnn"
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -1714,7 +1715,7 @@ show_help(char *path)
 	dprintf(fd, "\nVolume: %s of ", coolsize(get_fs_free(path)));
 	dprintf(fd, "%s free\n", coolsize(get_fs_capacity(path)));
 
-	dprintf(fd, "\n");
+	dprintf(fd, "\nVersion: %s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
 
 	exitcurses();
@@ -2695,9 +2696,7 @@ optional arguments:\n\
  -S      start in disk usage analyzer mode\n\
  -v      show program version and exit\n\
  -h      show this help and exit\n\n\
-Version: %s\n\
-License: BSD 2-Clause\n\
-Webpage: https://github.com/jarun/nnn\n", VERSION);
+Version: %s\n%s\n", VERSION, GENERAL_INFO);
 	exit(0);
 }
 
