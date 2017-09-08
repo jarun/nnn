@@ -197,20 +197,22 @@ typedef struct {
 
 /* Settings */
 typedef struct {
-	uchar filtermode : 1;  /* Set to enter filter mode */
-	uchar mtimeorder : 1;  /* Set to sort by time modified */
-	uchar sizeorder  : 1;  /* Set to sort by file size */
-	uchar blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
-	uchar showhidden : 1;  /* Set to show hidden files */
-	uchar showdetail : 1;  /* Clear to show fewer file info */
-	uchar showcolor  : 1;  /* Set to show dirs in blue */
-	uchar dircolor   : 1;  /* Current status of dir color */
+	ushort filtermode : 1;  /* Set to enter filter mode */
+	ushort mtimeorder : 1;  /* Set to sort by time modified */
+	ushort sizeorder  : 1;  /* Set to sort by file size */
+	ushort blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
+	ushort showhidden : 1;  /* Set to show hidden files */
+	ushort showdetail : 1;  /* Clear to show fewer file info */
+	ushort showcolor  : 1;  /* Set to show dirs in blue */
+	ushort dircolor   : 1;  /* Current status of dir color */
+	ushort metaviewer : 1;  /* Index of metadata viewer in utils[] */
+	ushort color      : 3;  /* Color code for directories */
 } settings;
 
 /* GLOBALS */
 
 /* Configuration */
-static settings cfg = {0, 0, 0, 0, 0, 1, 1, 0};
+static settings cfg = {0, 0, 0, 0, 0, 1, 1, 0, 0, 4};
 
 static struct entry *dents;
 static int ndents, cur, total_dents;
@@ -220,13 +222,11 @@ static char *player;
 static char *copier;
 static char *editor;
 static char *desktop_manager;
-static char *metaviewer;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
 static uint open_max;
 static bm bookmark[BM_MAX];
-static uchar color = 4;
 
 #ifdef LINUX_INOTIFY
 static int inotify_fd, inotify_wd = -1;
@@ -240,14 +240,14 @@ static struct timespec gtimeout;
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
+	"mediainfo",
+	"exiftool",
 #ifdef __APPLE__
 	"/usr/bin/open",
 #else
 	"/usr/bin/xdg-open",
 #endif
-	"nlay",
-	"mediainfo",
-	"exiftool"
+	"nlay"
 };
 
 /* Common message strings */
@@ -537,7 +537,7 @@ initcurses(void)
 	start_color();
 	use_default_colors();
 	if (cfg.showcolor)
-		init_pair(1, color, -1);
+		init_pair(1, cfg.color, -1);
 	settimeout(); /* One second */
 }
 
@@ -1607,11 +1607,11 @@ get_fs_capacity(char *path)
 static int
 show_mediainfo(char *fpath, char *arg)
 {
-	if (!get_output(g_buf, MAX_CMD_LEN, "which", metaviewer, NULL, 0))
+	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[cfg.metaviewer], NULL, 0))
 		return -1;
 
 	exitcurses();
-	get_output(NULL, 0, metaviewer, fpath, arg, 1);
+	get_output(NULL, 0, utils[cfg.metaviewer], fpath, arg, 1);
 	initcurses();
 	return 0;
 }
@@ -2206,7 +2206,7 @@ nochange:
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(utils[0], newpath, NULL, NULL, F_NOTRACE);
+				spawn(utils[2], newpath, NULL, NULL, F_NOTRACE);
 				continue;
 			}
 			default:
@@ -2549,7 +2549,7 @@ nochange:
 				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 
 				if (show_mediainfo(oldpath, run) == -1) {
-					sprintf(g_buf, "%s missing", metaviewer);
+					sprintf(g_buf, "%s missing", utils[cfg.metaviewer]);
 					printmsg(g_buf);
 					goto nochange;
 				}
@@ -2726,12 +2726,13 @@ main(int argc, char *argv[])
 			cfg.filtermode = 1;
 			break;
 		case 'c':
-			color = (uchar)atoi(optarg);
-			if (color > 7)
+			if ((uchar)atoi(optarg) > 7)
 				cfg.showcolor = 0;
+			else
+				cfg.color = (uchar)atoi(optarg);
 			break;
 		case 'e':
-			metaviewer = utils[3];
+			cfg.metaviewer = 1;
 			break;
 		case 'p':
 			player = optarg;
@@ -2792,13 +2793,9 @@ main(int argc, char *argv[])
 	if (getenv("NNN_USE_EDITOR"))
 		editor = xgetenv("EDITOR", "vi");
 
-	/* Set metadata viewer if not set */
-	if (!metaviewer)
-		metaviewer = utils[2];
-
 	/* Set player if not set already */
 	if (!player)
-		player = utils[1];
+		player = utils[3];
 
 	/* Get the desktop file browser, if set */
 	desktop_manager = getenv("NNN_DE_FILE_MANAGER");
