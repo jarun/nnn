@@ -105,7 +105,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Numeric order (1, 2, ... 10, 11, ...) for numeric names
   - Sort by modification time, size
 - Convenience
-  - Rename files
+  - Create, rename files and directories
   - Spawn SHELL (fallback sh) in the current directory
   - Invoke file path copier (*easy* shell integration)
   - Change directory at exit (*easy* shell integration)
@@ -209,17 +209,18 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
               - | Go to last visited dir
               / | Filter dir contents
              ^/ | Open desktop search tool
-              . | Toggle hide .dot files
-              b | Show bookmark prompt
+              . | Toggle hide . files
+              b | Bookmark prompt
              ^B | Pin current dir
              ^V | Go to pinned dir
-              c | Show change dir prompt
+              c | Change dir prompt
               d | Toggle detail view
-              D | Show current file details
-              m | Show concise media info
-              M | Show full media info
+              D | File details
+              m | Brief media info
+              M | Full media info
+              n | Create new
              ^R | Rename selected entry
-              s | Toggle sort by file size
+              s | Toggle sort by size
               S | Toggle disk usage mode
               t | Toggle sort by mtime
               ! | Spawn SHELL in dir
@@ -228,7 +229,7 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
               p | Open entry in PAGER
              ^K | Invoke file path copier
              ^L | Redraw, clear prompt
-              ? | Show help, settings
+              ? | Help, settings
               Q | Quit and change dir
           q, ^Q | Quit
 ```

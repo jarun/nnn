@@ -254,6 +254,7 @@ static char * const utils[] = {
 static char *STR_NFTWFAIL = "nftw(3) failed";
 static char *STR_ATROOT = "You are at /";
 static char *STR_NOHOME = "HOME not set";
+static char *STR_INPUT = "No traversal delimiter allowed";
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[MAX_CMD_LEN];
@@ -1016,8 +1017,12 @@ xreadline(char *fname)
 	wchar_t *buf = (wchar_t *)g_buf;
 	size_t buflen = NAME_MAX - 1;
 
-	DPRINTF_S(fname)
-	len = pos = mbstowcs(buf, fname, NAME_MAX);
+	if (fname) {
+		DPRINTF_S(fname);
+		len = pos = mbstowcs(buf, fname, NAME_MAX);
+	} else
+		len = (size_t)-1;
+
 	/* For future: handle NULL, say for a new name */
 	if (len == (size_t)-1) {
 		buf[0] = '\0';
@@ -1083,7 +1088,7 @@ xreadline(char *fname)
 	if (old_curs != ERR) curs_set(old_curs);
 
 	settimeout();
-	DPRINTF_S(buf)
+	DPRINTF_S(buf);
 	wcstombs(g_buf, buf, NAME_MAX);
 	return g_buf;
 }
@@ -1647,17 +1652,18 @@ show_help(char *path)
              "e- | Go to last visited dir\n"
              "e/ | Filter dir contents\n"
             "d^/ | Open desktop search tool\n"
-             "e. | Toggle hide .dot files\n"
-             "eb | Show bookmark prompt\n"
+             "e. | Toggle hide . files\n"
+             "eb | Bookmark prompt\n"
             "d^B | Pin current dir\n"
             "d^V | Go to pinned dir\n"
-             "ec | Show change dir prompt\n"
+             "ec | Change dir prompt\n"
              "ed | Toggle detail view\n"
-             "eD | Show current file details\n"
-             "em | Show concise media info\n"
-             "eM | Show full media info\n"
+             "eD | File details\n"
+             "em | Brief media info\n"
+             "eM | Full media info\n"
+	     "en | Create new\n"
             "d^R | Rename selected entry\n"
-             "es | Toggle sort by file size\n"
+             "es | Toggle sort by size\n"
              "eS | Toggle disk usage mode\n"
              "et | Toggle sort by mtime\n"
              "e! | Spawn SHELL in dir\n"
@@ -1666,7 +1672,7 @@ show_help(char *path)
              "ep | Open entry in PAGER\n"
             "d^K | Invoke file path copier\n"
             "d^L | Redraw, clear prompt\n"
-             "e? | Show help, settings\n"
+             "e? | Help, settings\n"
              "eQ | Quit and change dir\n"
          "aq, ^Q | Quit\n\n");
 
@@ -2607,6 +2613,56 @@ nochange:
 			} else if (!copier)
 				printmsg("NNN_COPIER is not set");
 			goto nochange;
+		case SEL_NEW:
+			printprompt("name: ");
+			tmp = xreadline(NULL);
+			clearprompt();
+			if (tmp == NULL || tmp[0] == '\0')
+				break;
+
+			/* Allow only relative, same dir paths */
+			if (tmp[0] == '/' || basename(tmp) != tmp) {
+				printmsg(STR_INPUT);
+				goto nochange;
+			}
+
+			/* Open the descriptor to currently open directory */
+			fd = open(path, O_RDONLY | O_DIRECTORY);
+			if (fd == -1) {
+				printwarn();
+				goto nochange;
+			}
+
+			/* Check if another file with same name exists */
+			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
+				printmsg("Entry exists");
+				goto nochange;
+			}
+
+			/* Check if it's a dir or file */
+			printprompt("Press 'f' for file or 'd' for dir");
+			cleartimeout();
+			r = getch();
+			settimeout();
+			if (r == 'f') {
+				r = openat(fd, tmp, O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+				close(r);
+			} else if (r == 'd')
+				r = mkdirat(fd, tmp, S_IRWXU | S_IRWXG | S_IRWXO);
+			else {
+				close(fd);
+				break;
+			}
+
+			if (r == -1) {
+				printwarn();
+				close(fd);
+				goto nochange;
+			}
+
+			close(fd);
+			mkpath(path, tmp, oldpath, PATH_MAX);
+			goto begin;
 		case SEL_RENAME:
 			if (ndents <= 0)
 				break;
@@ -2617,9 +2673,9 @@ nochange:
 			if (tmp == NULL || tmp[0] == '\0')
 				break;
 
-			/* Allow only relative paths */
+			/* Allow only relative, same dir paths */
 			if (tmp[0] == '/' || basename(tmp) != tmp) {
-				printmsg("relative paths only");
+				printmsg(STR_INPUT);
 				goto nochange;
 			}
 
