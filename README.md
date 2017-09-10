@@ -12,9 +12,9 @@ Noice is Not Noice, a noicer fork...
 <a href="https://travis-ci.org/jarun/nnn"><img src="https://travis-ci.org/jarun/nnn.svg?branch=master" alt="Build Status" /></a>
 </p>
 
-[![nnn screencast](https://s16.postimg.org/h8ha5z69x/nnn_demo.png)](https://vimeo.com/215489406 "Click for some action!")
+[![nnn screencast](https://s26.postimg.org/9pjzvc9g9/nnn_demo.jpg)](https://vimeo.com/233223942 "Click to see nnn in action!")
 
-<p align="center"><a href="https://vimeo.com/215489406"><i>Click for some action!</i></a></p>
+<p align="center"><i>nnn in action!</i></a></p>
 
 ### Table of Contents
 
