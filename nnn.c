@@ -1814,9 +1814,8 @@ dentfill(char *path, struct entry **dents,
 			continue;
 
 		if (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW) == -1) {
-			if (*dents)
-				free(*dents);
-			errexit();
+			DPRINTF_S(namep);
+			continue;
 		}
 
 		if (n == total_dents) {
