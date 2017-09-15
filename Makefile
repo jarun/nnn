@@ -2,6 +2,7 @@ VERSION = 1.4
 
 PREFIX ?= /usr/local
 MANPREFIX = $(PREFIX)/share/man
+LICENSEPREFIX = $(PREFIX)/share/licenses/$(BIN)
 
 CFLAGS += -O2 -Wall -Wextra -Wno-unused-parameter
 LDLIBS = -lreadline
@@ -35,11 +36,14 @@ install: all
 	cp -f $(PLAYER) $(DESTDIR)$(PREFIX)/bin
 	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
 	cp -f $(BIN).1 $(DESTDIR)$(MANPREFIX)/man1
+	install -d $(LICENSEPREFIX)
+	install LICENSE $(LICENSEPREFIX)
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/$(BIN)
 	rm -f $(DESTDIR)$(PREFIX)/bin/$(PLAYER)
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
+	rm -rf $(DESTDIR)$(LICENSEPREFIX)
 
 dist:
 	mkdir -p nnn-$(VERSION)
