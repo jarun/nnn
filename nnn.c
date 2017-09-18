@@ -222,6 +222,7 @@ static char *player;
 static char *copier;
 static char *editor;
 static char *desktop_manager;
+static char nowait;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -2211,7 +2212,7 @@ nochange:
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(utils[2], newpath, NULL, NULL, F_NOTRACE|F_NOWAIT);
+				spawn(utils[2], newpath, NULL, NULL, F_NOTRACE|nowait);
 				continue;
 			}
 			default:
@@ -2862,6 +2863,9 @@ main(int argc, char *argv[])
 
 	/* Get the default copier, if set */
 	copier = getenv("NNN_COPIER");
+
+	/* Get nowait flag */
+	nowait = getenv("NNN_NOWAIT") ? F_NOWAIT : 0;
 
 	signal(SIGINT, SIG_IGN);
 
