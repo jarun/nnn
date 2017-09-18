@@ -2211,7 +2211,7 @@ nochange:
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(utils[2], newpath, NULL, NULL, F_NOTRACE);
+				spawn(utils[2], newpath, NULL, NULL, F_NOTRACE|F_NOWAIT);
 				continue;
 			}
 			default:
