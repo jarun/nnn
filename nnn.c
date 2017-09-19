@@ -2212,7 +2212,7 @@ nochange:
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(utils[2], newpath, NULL, NULL, F_NOTRACE|nowait);
+				spawn(utils[2], newpath, NULL, NULL, nowait);
 				continue;
 			}
 			default:
@@ -2865,7 +2865,7 @@ main(int argc, char *argv[])
 	copier = getenv("NNN_COPIER");
 
 	/* Get nowait flag */
-	nowait = getenv("NNN_NOWAIT") ? F_NOWAIT : 0;
+	nowait = F_NOTRACE | (getenv("NNN_NOWAIT") ? F_NOWAIT : 0);
 
 	signal(SIGINT, SIG_IGN);
 
