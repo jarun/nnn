@@ -45,6 +45,8 @@ Noice is Not Noice, a noicer fork...
   - [file copy, move, delete](#file-copy-move-delete)
   - [boost chdir prompt](#boost-chdir-prompt)
   - [set idle timeout](#set-idle-timeout)
+- [Troubleshooting](#troubleshooting)
+  - [nnn blocks on opening files](#nnn-blocks-on-opening-files)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
@@ -333,7 +335,7 @@ Start `nnn` and use <kbd>^K</kbd> to copy the absolute path (from `/`) of the fi
 
 The default color for directories is blue. Option `-c` accepts color codes from 0 to 7 to use a different color:
 
-0-black, 1-red, 2-green, 3-yellow, 4-blue, 5-magenta, 6-cyan, 7-white
+    0-black, 1-red, 2-green, 3-yellow, 4-blue, 5-magenta, 6-cyan, 7-white
 
 Any other value disables colored directories.
 
@@ -353,11 +355,13 @@ Any other value disables colored directories.
 
 The terminal screensaver is disabled by default. To set the wait time in seconds, use environment variable `NNN_IDLE_TIMEOUT`.
 
-#### open file in new process and make the nnn not block
+### Troubleshooting
 
-The desktop file opener should take care of opening files in new processes without causing `nnn` to block.
-If `nnn` does block/freeze when a file is open, then set the environment variable `NNN_NOWAIT` to any
-non-zero value.
+#### nnn blocks on opening files
+
+Ideally nnn should not block. Unfortunately, sometimes even the same desktop opener behaves differently on different Linux desktop environments. If `nnn` does block when a file is open, set the environment variable `NNN_NOWAIT` to any non-zero value. For example,
+
+    export NNN_NOWAIT=1
 
 ### Why fork?
 

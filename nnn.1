@@ -181,19 +181,19 @@ when dealing with the !, e and p commands respectively.
 \fBNNN_BMS:\fR bookmark string as \fIkey:location\fR pairs (max 10) separated by
 \fI;\fR:
 .Bd -literal
-        export NNN_BMS='doc:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
+    export NNN_BMS='doc:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
 .Ed
 .Pp
 \fBNNN_USE_EDITOR:\fR use EDITOR (preferably CLI, fallback vi) to handle text
 files.
 .Bd -literal
-        export NNN_USE_EDITOR=1
+    export NNN_USE_EDITOR=1
 .Ed
 .Pp
 \fBNNN_DE_FILE_MANAGER:\fR set to a desktop file manager to open the current
 directory with. E.g.:
 .Bd -literal
-        export NNN_DE_FILE_MANAGER=thunar
+    export NNN_DE_FILE_MANAGER=thunar
 .Ed
 .Pp
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal
@@ -201,17 +201,16 @@ screensaver.
 .Pp
 \fBNNN_COPIER:\fR set to a clipboard copier script. For example, on Linux:
 .Bd -literal
-        -------------------------------------
-        #!/bin/sh
+    -------------------------------------
+    #!/bin/sh
 
-        echo -n $1 | xsel --clipboard --input
-        -------------------------------------
+    echo -n $1 | xsel --clipboard --input
+    -------------------------------------
 .Ed
 .Pp
-\fBNNN_NOWAIT:\fR make nnn not block while a file is open. Only necessary if
-nnn is blocking while a file is open.
+\fBNNN_NOWAIT:\fR necessary only if nnn blocks while a file is open.
 .Bd -literal
-	export NNN_NOWAIT=1
+    export NNN_NOWAIT=1
 .Ed
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspacekey to DEC.

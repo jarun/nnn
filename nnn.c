@@ -222,7 +222,7 @@ static char *player;
 static char *copier;
 static char *editor;
 static char *desktop_manager;
-static char nowait;
+static char nowait = F_NOTRACE;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -2865,7 +2865,7 @@ main(int argc, char *argv[])
 	copier = getenv("NNN_COPIER");
 
 	/* Get nowait flag */
-	nowait = F_NOTRACE | (getenv("NNN_NOWAIT") ? F_NOWAIT : 0);
+	nowait |= getenv("NNN_NOWAIT") ? F_NOWAIT : 0;
 
 	signal(SIGINT, SIG_IGN);
 
