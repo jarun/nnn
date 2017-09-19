@@ -207,6 +207,12 @@ screensaver.
         echo -n $1 | xsel --clipboard --input
         -------------------------------------
 .Ed
+.Pp
+\fBNNN_NOWAIT:\fR make nnn not block while a file is open. Only necessary if
+nnn is blocking while a file is open.
+.Bd -literal
+	export NNN_NOWAIT=1
+.Ed
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspacekey to DEC.
 .Sh AUTHORS
