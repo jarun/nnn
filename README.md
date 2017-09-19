@@ -353,6 +353,12 @@ Any other value disables colored directories.
 
 The terminal screensaver is disabled by default. To set the wait time in seconds, use environment variable `NNN_IDLE_TIMEOUT`.
 
+#### open file in new process and make the nnn not block
+
+The desktop file opener should take care of opening files in new processes without causing `nnn` to block.
+If `nnn` does block/freeze when a file is open, then set the environment variable `NNN_NOWAIT` to any
+non-zero value.
+
 ### Why fork?
 
 I chose to fork because:
