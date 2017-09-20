@@ -295,7 +295,9 @@ Add the following to your shell's rc file for the best experience:
 
         export NNN_DE_FILE_MANAGER=thunar
 
-Run `n`.
+4. Run `n`.
+
+5. Set `NNN_NOWAIT`, if nnn [blocks on your desktop environment](#nnn-blocks-on-opening-files) when a file is open.
 
 ### How to
 
