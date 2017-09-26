@@ -2039,7 +2039,7 @@ redraw(char *path)
 			 * be truncated in directory listing
 			 */
 			if (!cfg.blkorder)
-				sprintf(g_buf, "total %d %s[%s%s]", ndents, sort, unescape(dents[cur].name, 0), ind);
+				sprintf(g_buf, "%d/%d %s[%s%s]", cur + 1, ndents, sort, unescape(dents[cur].name, 0), ind);
 			else {
 				i = sprintf(g_buf, "du: %s (%lu files) ", coolsize(dir_blocks << 9), num_files);
 				sprintf(g_buf + i, "vol: %s free [%s%s]", coolsize(get_fs_free(path)), unescape(dents[cur].name, 0), ind);
