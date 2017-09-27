@@ -251,7 +251,8 @@ static char * const utils[] = {
 #else
 	"/usr/bin/xdg-open",
 #endif
-	"nlay"
+	"nlay",
+	"atool"
 };
 
 /* Common message strings */
@@ -1625,6 +1626,23 @@ show_mediainfo(char *fpath, char *arg)
 	return 0;
 }
 
+static int
+handle_archive(char *fpath, char *arg, char *dir)
+{
+	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[4], NULL, 0))
+		return -1;
+
+	if (arg[1] == 'x')
+		spawn(utils[4], arg, fpath, dir, F_NORMAL);
+	else {
+		exitcurses();
+		get_output(NULL, 0, utils[4], arg, fpath, 1);
+		initcurses();
+	}
+
+	return 0;
+}
+
 /*
  * The help string tokens (each line) start with a HEX value
  * which indicates the number of spaces to print before the
@@ -1674,6 +1692,8 @@ show_help(char *path)
              "ee | Edit entry in EDITOR\n"
              "eo | Open dir in file manager\n"
              "ep | Open entry in PAGER\n"
+             "ef | List archive\n"
+            "d^X | Extract archive\n"
             "d^K | Invoke file path copier\n"
             "d^L | Redraw, clear prompt\n"
              "e? | Help, settings\n"
@@ -2550,13 +2570,24 @@ nochange:
 				}
 			}
 			break;
+		case SEL_LIST: // fallthrough
+		case SEL_EXTRACT: // fallthrough
 		case SEL_MEDIA: // fallthrough
 		case SEL_FMEDIA:
 			if (ndents > 0) {
 				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 
-				if (show_mediainfo(oldpath, run) == -1) {
-					sprintf(g_buf, "%s missing", utils[cfg.metaviewer]);
+				if (sel == SEL_MEDIA || sel == SEL_FMEDIA)
+					r = show_mediainfo(oldpath, run);
+				else
+					r = handle_archive(oldpath, run, path);
+
+				if (r == -1) {
+					if (sel == SEL_MEDIA || sel == SEL_FMEDIA)
+						sprintf(g_buf, "%s missing", utils[cfg.metaviewer]);
+					else
+						sprintf(g_buf, "%s missing", utils[4]);
+
 					printmsg(g_buf);
 					goto nochange;
 				}

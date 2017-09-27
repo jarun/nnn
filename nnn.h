@@ -29,6 +29,8 @@ enum action {
 	SEL_MEDIA,
 	SEL_FMEDIA,
 	SEL_DFB,
+	SEL_LIST,
+	SEL_EXTRACT,
 	SEL_FSIZE,
 	SEL_BSIZE,
 	SEL_MTIME,
@@ -45,7 +47,7 @@ enum action {
 struct key {
 	int sym;         /* Key pressed */
 	enum action act; /* Action */
-	char *run;       /* Program to run */
+	char *run;       /* Program to run or program option */
 	char *env;       /* Environment variable to run */
 };
 
@@ -131,6 +133,10 @@ static struct key bindings[] = {
 	{ 'M',            SEL_FMEDIA,    "-f",   "" },
 	/* Open dir in desktop file manager */
 	{ 'o',            SEL_DFB,       "",     "" },
+	/* List archive */
+	{ 'f',            SEL_LIST,      "-l",   "" },
+	/* Extract archive */
+	{ CONTROL('X'),   SEL_EXTRACT,   "-x",   "" },
 	/* Toggle sort by size */
 	{ 's',            SEL_FSIZE,     "",     "" },
 	/* Sort by total block count including dir contents */

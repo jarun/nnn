@@ -67,7 +67,7 @@ Cool things you can do with `nnn`:
 - copy absolute file path to clipboard, spawn a terminal and use the file path
 - navigate instantly using shortcuts like `~`, `-`, `&` or handy bookmarks
 - use `cd .....` at chdir prompt to go to a parent directory
-- see detailed file stats or mediainfo information
+- detailed file stats, media info, list and extract archives
 - open a (supported) archive in vim to view its contents
 - pin a directory you may need to revisit and jump to it anytime
 - set timeout to lock the current terminal
@@ -113,6 +113,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Invoke file path copier (*easy* shell integration)
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
+  - List and extract archives (needs atool)
   - Open current directory in a custom GUI file browser
   - Monitor directory changes
   - Terminal screensaver (default vlock, customizable) integration
@@ -276,6 +277,7 @@ The following abbreviations are used in the detail view:
         export NNN_DE_FILE_MANAGER=thunar
         export NNN_DE_FILE_MANAGER=nautilus
 - [mediainfo](https://mediaarea.net/en/MediaInfo) (or exiftool, if specified) is required to view media information
+- [atool](http://www.nongnu.org/atool/) is required to list and extract archives
 
 #### Help
 
