@@ -252,12 +252,7 @@ static char * const utils[] = {
 	"/usr/bin/xdg-open",
 #endif
 	"nlay",
-#ifdef __APPLE__
-	"unar",
-	"lsar"
-#else
 	"atool"
-#endif
 };
 
 /* Common message strings */
@@ -1634,21 +1629,6 @@ show_mediainfo(char *fpath, char *arg)
 static int
 handle_archive(char *fpath, char *arg, char *dir)
 {
-#ifdef __APPLE__
-	if (arg[1] == 'x') {
-		if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[4], NULL, 0))
-			return -1;
-
-		spawn(utils[4], fpath, NULL, dir, F_NORMAL);
-	} else {
-		if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[5], NULL, 0))
-			return -1;
-
-		exitcurses();
-		get_output(NULL, 0, utils[5], fpath, NULL, 1);
-		initcurses();
-	}
-#else
 	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[4], NULL, 0))
 		return -1;
 
@@ -1659,7 +1639,6 @@ handle_archive(char *fpath, char *arg, char *dir)
 		get_output(NULL, 0, utils[4], arg, fpath, 1);
 		initcurses();
 	}
-#endif
 
 	return 0;
 }
@@ -2606,14 +2585,8 @@ nochange:
 				if (r == -1) {
 					if (sel == SEL_MEDIA || sel == SEL_FMEDIA)
 						sprintf(g_buf, "%s missing", utils[cfg.metaviewer]);
-					else {
-#ifdef __APPLE__
-						if (sel == SEL_LIST)
-							sprintf(g_buf, "%s missing", utils[5]);
-						else
-#endif
-							sprintf(g_buf, "%s missing", utils[4]);
-					}
+					else
+						sprintf(g_buf, "%s missing", utils[4]);
 
 					printmsg(g_buf);
 					goto nochange;

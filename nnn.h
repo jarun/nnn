@@ -134,9 +134,9 @@ static struct key bindings[] = {
 	/* Open dir in desktop file manager */
 	{ 'o',            SEL_DFB,       "",     "" },
 	/* List archive */
-	{ 'f',            SEL_LIST,      "-l",   "" },
+	{ 'f',            SEL_LIST,      "-l", "" },
 	/* Extract archive */
-	{ CONTROL('X'),   SEL_EXTRACT,   "-x",   "" },
+	{ CONTROL('X'),   SEL_EXTRACT,   "-x", "" },
 	/* Toggle sort by size */
 	{ 's',            SEL_FSIZE,     "",     "" },
 	/* Sort by total block count including dir contents */
