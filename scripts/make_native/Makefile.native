@@ -1,5 +1,4 @@
 # This Makefile optimizes native builds. It
-#   - enables -O3 optimization
 #   - builds for native architecture (-march=native)
 #   - does not have debug build option
 #
