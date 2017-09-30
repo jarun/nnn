@@ -231,6 +231,8 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
               e | Edit entry in EDITOR
               o | Open dir in file manager
               p | Open entry in PAGER
+              F | List archive
+             ^X | Extract archive
              ^K | Invoke file path copier
              ^L | Redraw, clear prompt
               ? | Help, settings

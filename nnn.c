@@ -1692,7 +1692,7 @@ show_help(char *path)
              "ee | Edit entry in EDITOR\n"
              "eo | Open dir in file manager\n"
              "ep | Open entry in PAGER\n"
-             "ef | List archive\n"
+             "eF | List archive\n"
             "d^X | Extract archive\n"
             "d^K | Invoke file path copier\n"
             "d^L | Redraw, clear prompt\n"
