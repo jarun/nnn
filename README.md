@@ -238,6 +238,8 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
           q, ^Q | Quit
 ```
 
+Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
+
 #### Filters
 
 Filters support regexes to instantly (search-as-you-type) list the matching entries in the current directory.
