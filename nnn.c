@@ -2831,7 +2831,7 @@ main(int argc, char *argv[])
 			cfg.filtermode = 1;
 			break;
 		case 'c':
-			if ((uchar)atoi(optarg) > 7)
+			if (atoi(optarg) > 7)
 				cfg.showcolor = 0;
 			else
 				cfg.color = (uchar)atoi(optarg);
