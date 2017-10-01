@@ -2083,6 +2083,7 @@ browse(char *ipath, char *ifilter)
 	struct stat sb;
 	int r, fd, presel;
 	enum action sel = SEL_RUNARG + 1;
+	bool dir_changed = FALSE;
 
 	xstrlcpy(path, ipath, PATH_MAX);
 	xstrlcpy(fltr, ifilter, LINE_MAX);
@@ -2095,11 +2096,17 @@ browse(char *ipath, char *ifilter)
 
 begin:
 #ifdef LINUX_INOTIFY
-	if (inotify_wd >= 0)
+	if (dir_changed && inotify_wd >= 0) {
 		inotify_rm_watch(inotify_fd, inotify_wd);
+		inotify_wd = -1;
+		dir_changed = FALSE;
+	}
 #elif defined(BSD_KQUEUE)
-	if (event_fd >= 0)
+	if (dir_changed && event_fd >= 0) {
 		close(event_fd);
+		event_fd = -1;
+		dir_changed = FALSE;
+	}
 #endif
 
 	if (populate(path, oldpath, fltr) == -1) {
@@ -2108,11 +2115,14 @@ begin:
 	}
 
 #ifdef LINUX_INOTIFY
-	inotify_wd = inotify_add_watch(inotify_fd, path, INOTIFY_MASK);
+	if (inotify_wd == -1)
+		inotify_wd = inotify_add_watch(inotify_fd, path, INOTIFY_MASK);
 #elif defined(BSD_KQUEUE)
-	event_fd = open(path, O_EVTONLY);
-	if (event_fd >= 0)
-		EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE, EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, path);
+	if (event_fd == -1) {
+		event_fd = open(path, O_EVTONLY);
+		if (event_fd >= 0)
+		    EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE, EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, path);
+	}
 #endif
 
 	for (;;) {
@@ -2163,6 +2173,8 @@ nochange:
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
+			dir_changed = TRUE;
+
 			xstrlcpy(path, dir, PATH_MAX);
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
@@ -2201,6 +2213,7 @@ nochange:
 
 				/* Save last working directory */
 				xstrlcpy(lastdir, path, PATH_MAX);
+				dir_changed = TRUE;
 
 				xstrlcpy(path, newpath, PATH_MAX);
 				oldpath[0] = '\0';
@@ -2412,6 +2425,7 @@ nochange:
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
+			dir_changed = TRUE;
 
 			/* Save the newly opted dir in path */
 			xstrlcpy(path, newpath, PATH_MAX);
@@ -2445,6 +2459,7 @@ nochange:
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
+			dir_changed = TRUE;
 
 			xstrlcpy(path, dstdir, PATH_MAX);
 			oldpath[0] = '\0';
@@ -2475,6 +2490,7 @@ nochange:
 
 			xstrlcpy(newpath, tmp, PATH_MAX);
 			xstrlcpy(lastdir, path, PATH_MAX);
+			dir_changed = TRUE;
 			xstrlcpy(path, newpath, PATH_MAX);
 			oldpath[0] = '\0';
 			/* Reset filter */
@@ -2525,6 +2541,7 @@ nochange:
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
+			dir_changed = TRUE;
 
 			/* Save the newly opted dir in path */
 			xstrlcpy(path, newpath, PATH_MAX);
