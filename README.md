@@ -287,6 +287,7 @@ The following abbreviations are used in the detail view:
 
 #### Help
 
+    $ nnn -h
     $ man nnn
 To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
