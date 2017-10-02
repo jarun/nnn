@@ -160,9 +160,9 @@ Packages for Arch Linux, CentOS, Fedora and Ubuntu are available with the [lates
 
 To cook yourself, download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*). Then install the dependencies and compile (e.g. on Ubuntu 16.04):
 
-      $ sudo apt-get install libncursesw5-dev libreadline6-dev
-      $ make
-      $ sudo make install
+    $ sudo apt-get install libncursesw5-dev libreadline6-dev
+    $ make
+    $ sudo make install
 
 `PREFIX` is supported, in case you want to install to a different location.
 
@@ -174,23 +174,25 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
 
 #### Cmdline options
 
-    usage: nnn [-c N] [-e] [-i] [-l] [n] [-p nlay] [-S]
-               [-v] [-h] [PATH]
+```
+usage: nnn [-c N] [-e] [-i] [-l] [-p nlay] [-S]
+           [-v] [-h] [PATH]
 
-    The missing terminal file browser for X.
+The missing terminal file browser for X.
 
-    positional arguments:
-      PATH    directory to open [default: current dir]
+positional arguments:
+  PATH   directory to open [default: current dir]
 
-    optional arguments:
-      -c N    specify dir color, disables if N>7
-      -e      use exiftool instead of mediainfo
-      -i      start in navigate-as-you-type mode
-      -l      start in light mode (fewer details)
-      -p nlay path to custom nlay
-      -S      start in disk usage analyzer mode
-      -v      show program version and exit
-      -h      show this help and exit
+optional arguments:
+ -c N    specify dir color, disables if N>7
+ -e      use exiftool instead of mediainfo
+ -i      start in navigate-as-you-type mode
+ -l      start in light mode (fewer details)
+ -p nlay path to custom nlay
+ -S      start in disk usage analyzer mode
+ -v      show program version and exit
+ -h      show this help and exit
+```
 
 `>` indicates the currently selected entry in `nnn`.
 
@@ -275,11 +277,11 @@ The following abbreviations are used in the detail view:
 - `nnn` uses `xdg-open` on Linux and `open(1)` on OS X as the desktop opener.
 - To edit all text files in EDITOR (preferably CLI, fallback vi):
 
-        export NNN_USE_EDITOR=1
+      export NNN_USE_EDITOR=1
 - To enable the desktop file manager key, set `NNN_DE_FILE_MANAGER`. E.g.:
 
-        export NNN_DE_FILE_MANAGER=thunar
-        export NNN_DE_FILE_MANAGER=nautilus
+      export NNN_DE_FILE_MANAGER=thunar
+      export NNN_DE_FILE_MANAGER=nautilus
 - [mediainfo](https://mediaarea.net/en/MediaInfo) (or exiftool, if specified) is required to view media information
 - [atool](http://www.nongnu.org/atool/) is required to list and extract archives
 
@@ -294,13 +296,13 @@ Add the following to your shell's rc file for the best experience:
 
 1. Use a shorter and sweeter alias:
 
-        alias n=nnn
+       alias n=nnn
 2. Optionally open all text files in EDITOR (fallback vi):
 
-        export NNN_USE_EDITOR=1
+       export NNN_USE_EDITOR=1
 3. Set a desktop file manager to open directories with (if you ever need to). E.g.:
 
-        export NNN_DE_FILE_MANAGER=thunar
+       export NNN_DE_FILE_MANAGER=thunar
 
 4. Run `n`.
 
