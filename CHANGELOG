@@ -1,3 +1,15 @@
+nnn v1.5
+2017-10-05
+
+What's in?
+- File and directory creation (`n`)
+- Env variable `NNN_NOWAIT` to unblock nnn when opening files (DE-specific)
+- Show current entry number in status bar
+- Support archive listing (`F`) and extraction (`Ctrl-X`) [using `atool`]
+- Show correct file size on i386 for large files (> 2GB)
+
+-------------------------------------------------------------------------------
+
 nnn v1.4
 2017-09-04
 
