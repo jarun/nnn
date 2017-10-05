@@ -28,7 +28,7 @@ before_deploy:
   - unset CFLAGS
   - sudo apt-get update -qy
   - sudo apt-get install -qy python3 python3-pip
-  - python3 -m pip install packagecore
+  - sudo python3 -m pip install packagecore
   - packagecore -o dist/ "${TRAVIS_TAG#v}"
 
 deploy:
