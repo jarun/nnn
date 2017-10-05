@@ -1,7 +1,7 @@
-export NNN_TMPFILE="/tmp/nnn"
-
 n()
 {
+        export NNN_TMPFILE="$(mktemp -u nnn.XXXXXXXX)"
+
         nnn "$@"
 
         if [ -f $NNN_TMPFILE ]; then
