@@ -23,6 +23,9 @@
 #endif
 #include <sys/inotify.h>
 #define LINUX_INOTIFY
+#if !defined(__GLIBC__)
+#include <sys/types.h>
+#endif
 #endif
 #include <sys/resource.h>
 #include <sys/stat.h>
