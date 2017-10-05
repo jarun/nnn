@@ -1,4 +1,4 @@
-export NNN_TMPFILE="/tmp/nnn"
+export NNN_TMPFILE="$(mktemp -u nnn.XXXXXXXX)"
 
 n()
 {
