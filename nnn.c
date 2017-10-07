@@ -2893,7 +2893,7 @@ main(int argc, char *argv[])
 	}
 
 	gtimeout.tv_sec = 0;
-	gtimeout.tv_nsec = 50; /* 50 ns delay */
+	gtimeout.tv_nsec = 0;
 #endif
 
 	/* Parse bookmarks string, if available */
