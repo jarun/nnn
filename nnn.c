@@ -2122,7 +2122,11 @@ begin:
 		inotify_wd = inotify_add_watch(inotify_fd, path, INOTIFY_MASK);
 #elif defined(BSD_KQUEUE)
 	if (event_fd == -1) {
+#if defined(O_EVTONLY)
 		event_fd = open(path, O_EVTONLY);
+#else
+		event_fd = open(path, O_RDONLY);
+#endif
 		if (event_fd >= 0)
 		    EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE, EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, path);
 	}
