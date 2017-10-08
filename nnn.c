@@ -559,6 +559,7 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 {
 	pid_t pid;
 	int status;
+	char *shlvl;
 
 	if (flag & F_NORMAL)
 		exitcurses();
@@ -568,10 +569,12 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 		if (dir != NULL)
 			status = chdir(dir);
 
+		shlvl = getenv("SHLVL");
+
 		/* Show a marker (to indicate nnn spawned shell) */
-		if (flag & F_MARKER) {
+		if (flag & F_MARKER && shlvl != NULL) {
 			printf("\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
-			printf("Spawned shell level: %d\n", atoi(getenv("SHLVL")) + 1);
+			printf("Spawned shell level: %d\n", atoi(shlvl) + 1);
 		}
 
 		/* Suppress stdout and stderr */
