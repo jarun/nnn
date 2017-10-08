@@ -282,7 +282,7 @@ The following abbreviations are used in the detail view:
 
       export NNN_DE_FILE_MANAGER=thunar
       export NNN_DE_FILE_MANAGER=nautilus
-- [mediainfo](https://mediaarea.net/en/MediaInfo) (or exiftool, if specified) is required to view media information
+- [mediainfo](https://mediaarea.net/en/MediaInfo) (or [exiftool](https://sno.phy.queensu.ca/~phil/exiftool/), if specified) is required to view media information
 - [atool](http://www.nongnu.org/atool/) is required to list and extract archives
 
 #### Help
