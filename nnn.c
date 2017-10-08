@@ -1498,7 +1498,7 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 		dprintf(fd, "    File: '%s'", unescape(fname, 0));
 
 	/* Show size, blocks, file type */
-#ifdef __APPLE__
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
 	dprintf(fd, "\n    Size: %-15lld Blocks: %-10lld IO Block: %-6d %s",
 #else
 	dprintf(fd, "\n    Size: %-15ld Blocks: %-10ld IO Block: %-6ld %s",
@@ -1506,7 +1506,7 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	       sb->st_size, sb->st_blocks, sb->st_blksize, g_buf);
 
 	/* Show containing device, inode, hardlink count */
-#ifdef __APPLE__
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
 	sprintf(g_buf, "%xh/%ud", sb->st_dev, sb->st_dev);
 	dprintf(fd, "\n  Device: %-15s Inode: %-11llu Links: %-9hu",
 #else
