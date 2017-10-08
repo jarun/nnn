@@ -2677,7 +2677,7 @@ nochange:
 				break;
 
 			/* Allow only relative, same dir paths */
-			if (tmp[0] == '/' || basename(tmp) != tmp) {
+			if (tmp[0] == '/' || xstrcmp(basename(tmp), tmp) != 0) {
 				printmsg(STR_INPUT);
 				goto nochange;
 			}
@@ -2730,7 +2730,7 @@ nochange:
 				break;
 
 			/* Allow only relative, same dir paths */
-			if (tmp[0] == '/' || basename(tmp) != tmp) {
+			if (tmp[0] == '/' || xstrcmp(basename(tmp), tmp) != 0) {
 				printmsg(STR_INPUT);
 				goto nochange;
 			}
