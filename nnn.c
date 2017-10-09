@@ -1059,6 +1059,10 @@ xreadline(char *fname)
 					continue;
 				}
 
+				/* TAB breaks cursor position, ignore it */
+				if (*ch == TAB || *ch == '\t')
+					continue;
+
 				if (pos < buflen) {
 					memmove(buf + pos + 1, buf + pos, (len - pos) << 2);
 					buf[pos] = *ch;
