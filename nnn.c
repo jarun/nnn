@@ -23,15 +23,11 @@
 #endif
 #include <sys/inotify.h>
 #define LINUX_INOTIFY
-#if !defined(__GLIBC__)
-#include <sys/types.h>
-#endif
 #endif
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
-# include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
 #define BSD_KQUEUE
@@ -72,6 +68,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <readline/history.h>
 #include <readline/readline.h>
