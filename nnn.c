@@ -1034,7 +1034,6 @@ xreadline(char *fname)
 	} else
 		len = (size_t)-1;
 
-	/* For future: handle NULL, say for a new name */
 	if (len == (size_t)-1) {
 		buf[0] = '\0';
 		len = pos = 0;
@@ -1069,7 +1068,6 @@ xreadline(char *fname)
 					++len, ++pos;
 					continue;
 				}
-
 			} else {
 				switch (*ch) {
 				case KEY_LEFT:
@@ -1409,8 +1407,7 @@ get_lsperms(mode_t mode, char *desc)
  * If pager is valid, returns NULL
  */
 static char *
-get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2,
-	   int pager)
+get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int pager)
 {
 	pid_t pid;
 	int pipefd[2];
@@ -1733,8 +1730,7 @@ show_help(char *path)
 		dprintf(fd, "BOOKMARKS\n");
 		for (; i < BM_MAX; ++i)
 			if (bookmark[i].key)
-				dprintf(fd, " %s: %s\n",
-					bookmark[i].key, bookmark[i].loc);
+				dprintf(fd, " %s: %s\n", bookmark[i].key, bookmark[i].loc);
 			else
 				break;
 		dprintf(fd, "\n");
@@ -1817,8 +1813,7 @@ dentfill(char *path, struct entry **dents,
 			if ((namep[0] == '.' && (namep[1] == '\0' || (namep[1] == '.' && namep[2] == '\0'))))
 				continue;
 
-			if (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW)
-					== -1)
+			if (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW) == -1)
 				continue;
 
 			if (S_ISDIR(sb.st_mode)) {
@@ -2135,7 +2130,7 @@ begin:
 		event_fd = open(path, O_RDONLY);
 #endif
 		if (event_fd >= 0)
-		    EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE, EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, path);
+			EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE, EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, path);
 	}
 #endif
 
@@ -2535,8 +2530,7 @@ nochange:
 						goto nochange;
 					}
 				} else
-					mkpath(path, bookmark[r].loc,
-					       newpath, PATH_MAX);
+					mkpath(path, bookmark[r].loc, newpath, PATH_MAX);
 
 				if (!xdiraccess(newpath))
 					goto nochange;
