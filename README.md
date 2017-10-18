@@ -46,6 +46,7 @@ Noice is Not Noice, a noicer fork...
   - [file copy, move, delete](#file-copy-move-delete)
   - [boost chdir prompt](#boost-chdir-prompt)
   - [set idle timeout](#set-idle-timeout)
+  - [show hot plugged drives](#show-hot-plugged-drives)
 - [Troubleshooting](#troubleshooting)
   - [nnn blocks on opening files](#nnn-blocks-on-opening-files)
 - [Why fork?](#why-fork)
@@ -365,6 +366,10 @@ Any other value disables colored directories.
 #### set idle timeout
 
 The terminal screensaver is disabled by default. To set the wait time in seconds, use environment variable `NNN_IDLE_TIMEOUT`.
+
+#### show hot plugged drives
+
+Enable volume management in your DE file manager and set removable drives or media to be auto-mounted when inserted. Then visit the usual mount point location (`/mnt` or `/media/user`) in `nnn`.
 
 ### Troubleshooting
 
