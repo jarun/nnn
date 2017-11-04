@@ -70,7 +70,7 @@ Cool things you can do with `nnn`:
 - use `cd .....` at chdir prompt to go to a parent directory
 - detailed file stats, media info, list and extract archives
 - pin a directory you may need to revisit and jump to it anytime
-- set timeout to lock the current terminal
+- lock the current terminal after a specified idle time
 - change directory on exit
 
 If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
