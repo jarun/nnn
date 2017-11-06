@@ -151,6 +151,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - [Debian](https://packages.debian.org/search?keywords=nnn)
 - [Homebrew](http://braumeister.org/formula/nnn)
 - [Ubuntu PPA](https://launchpad.net/~twodopeshaggy/+archive/ubuntu/jarun/)
+- [Void Linux](https://github.com/voidlinux/void-packages/tree/master/srcpkgs/nnn) (`sudo xbps-install -S nnn`)
 
 #### Release packages
 
