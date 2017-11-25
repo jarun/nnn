@@ -151,6 +151,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1)
 - [Homebrew](http://braumeister.org/formula/nnn)
 - [NixOS](https://github.com/NixOS/nixpkgs/tree/master/pkgs/applications/misc/nnn) (`sudo nix-env -i nnn`)
+- [Source Mage](http://codex.sourcemage.org/test/shell-term-fm/nnn/) (`cast nnn`)
 - [Ubuntu](https://packages.ubuntu.com/search?keywords=nnn&searchon=names&exact=1)
 - [Ubuntu PPA](https://launchpad.net/~twodopeshaggy/+archive/ubuntu/jarun/)
 - [Void Linux](https://github.com/voidlinux/void-packages/tree/master/srcpkgs/nnn) (`sudo xbps-install -S nnn`)
