@@ -37,3 +37,4 @@ touch 'unicode/Malgudi Days - मालगुडी डेज - E05. Swami and F
 chmod +x 'unicode/Malgudi Days - मालगुडी डेज - E05. Swami and Friends - स्वामी और उसके दोस्त (Part 2)'
 touch 'unicode/Führer'
 touch 'unicode/Eso eso aamar ghare eso ♫ এসো এসো আমার ঘরে এসো ♫ Swagatalakshmi Dasgupta'
+touch 'max_chars_filename_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
