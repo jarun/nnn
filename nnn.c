@@ -31,12 +31,12 @@
 #include <sys/stat.h>
 #include <sys/statvfs.h>
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
-# include <sys/types.h>
+#include <sys/types.h>
 #include <sys/event.h>
 #include <sys/time.h>
 #define BSD_KQUEUE
 #else
-# include <sys/sysmacros.h>
+#include <sys/sysmacros.h>
 #endif
 #include <sys/wait.h>
 
@@ -1514,7 +1514,7 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	sprintf(g_buf, "%lxh/%lud", sb->st_dev, sb->st_dev);
 	dprintf(fd, "\n  Device: %-15s Inode: %-11lu Links: %-9lu",
 #endif
-	       g_buf, sb->st_ino, sb->st_nlink);
+		g_buf, sb->st_ino, sb->st_nlink);
 
 	/* Show major, minor number for block or char device */
 	if (perms[0] == 'b' || perms[0] == 'c')
