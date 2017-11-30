@@ -27,7 +27,7 @@ $(BIN): $(SRC)
 	strip $@
 
 debug: $(SRC)
-	$(CC) -DDEBUGMODE -g $(CFLAGS) -o nnndbg $^ $(LDFLAGS) $(LDLIBS)
+	$(CC) -DDEBUGMODE -g $(CFLAGS) -o nnn $^ $(LDFLAGS) $(LDLIBS)
 
 install: all
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
