@@ -2084,7 +2084,7 @@ browse(char *ipath, char *ifilter)
 {
 	static char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX], lastdir[PATH_MAX], mark[PATH_MAX];
 	static char fltr[LINE_MAX];
-	char *dir, *tmp, *run, *env, *dstdir = NULL;
+	char *dir, *tmp, *run = NULL, *env = NULL, *dstdir = NULL;
 	struct stat sb;
 	int r, fd, presel;
 	enum action sel = SEL_RUNARG + 1;
