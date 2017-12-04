@@ -188,11 +188,11 @@ typedef unsigned char uchar;
 
 /* Directory entry */
 typedef struct entry {
-	char name[NAME_MAX];
-	mode_t mode;
+	char name[NAME_MAX + 1];
 	time_t t;
 	off_t size;
 	blkcnt_t blocks; /* number of 512B blocks allocated */
+	mode_t mode;
 } *pEntry;
 
 /* Bookmark */
@@ -348,7 +348,7 @@ xstrlen(const char *s)
 static size_t
 xstrlcpy(char *dest, const char *src, size_t n)
 {
-	static size_t len, blocks;
+	static size_t len, blocks, lsize = sizeof(ulong);
 	static const uint _WSHIFT = (sizeof(ulong) == 8) ? 3 : 2;
 
 	if (!src || !dest)
@@ -361,8 +361,11 @@ xstrlcpy(char *dest, const char *src, size_t n)
 		/* Save total number of bytes to copy in len */
 		len = n;
 
-	blocks = n >> _WSHIFT;
-	n -= (blocks << _WSHIFT);
+	if (n >= lsize) {
+		blocks = n >> _WSHIFT;
+		n -= (blocks << _WSHIFT);
+	} else
+		blocks = 0;
 
 	if (blocks) {
 		static ulong *s, *d;
@@ -872,12 +875,11 @@ static void
 fill(struct entry **dents, int (*filter)(regex_t *, char *), regex_t *re)
 {
 	static int count;
+	static struct entry _dent, *dentp1, *dentp2;
 
 	for (count = 0; count < ndents; ++count) {
 		if (filter(re, (*dents)[count].name) == 0) {
 			if (count != --ndents) {
-				static struct entry _dent, *dentp1, *dentp2;
-
 				dentp1 = &(*dents)[count];
 				dentp2 = &(*dents)[ndents];
 
