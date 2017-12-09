@@ -17,9 +17,37 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action!</i></a></p>
 
+`nnn` is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect candidate for modern distros.
+
+`nnn` works with the desktop opener, adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, bookmarks, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
+
+Cool things you can do with `nnn`:
+
+- open any file in the default desktop application for the mime
+- *navigate-as-you-type* (*search-as-you-type* enabled even on directory switch)
+- check disk usage with number of files in current directory tree
+- run desktop search utility (gnome-search-tool or catfish) in any directory
+- copy absolute file path to clipboard, spawn a terminal and use the file path
+- navigate instantly using shortcuts like `~`, `-`, `&` or handy bookmarks
+- use `cd .....` at chdir prompt to go to a parent directory
+- detailed file stats, media info, list and extract archives
+- pin a directory you may need to revisit and jump to it anytime
+- lock the current terminal after a specified idle time
+- change directory on exit
+
+If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
+
+Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
+
+*Love smart and efficient terminal utilities? Explore my repositories. Buy me a cup of coffee if they help you.*
+
+<p align="center">
+<a href="https://saythanks.io/to/jarun"><img src="https://img.shields.io/badge/say-thanks!-ff69b4.svg" /></a>
+<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/Donate-$5-green.svg" alt="Donate via PayPal!" /></a>
+</p>
+
 ### Table of Contents
 
-- [Introduction](#introduction)
 - [Features](#features)
 - [Performance](#performance)
 - [Installation](#installation)
@@ -52,35 +80,6 @@ Noice is Not Noice, a noicer fork...
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
-
-### Introduction
-
-`nnn` is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect candidate for modern distros.
-
-`nnn` works with the desktop opener, adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, bookmarks, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
-
-Cool things you can do with `nnn`:
-
-- open any file in the default desktop application for the mime
-- *navigate-as-you-type* (*search-as-you-type* enabled even on directory switch)
-- check disk usage with number of files in current directory tree
-- run desktop search utility (gnome-search-tool or catfish) in any directory
-- copy absolute file path to clipboard, spawn a terminal and use the file path
-- navigate instantly using shortcuts like `~`, `-`, `&` or handy bookmarks
-- use `cd .....` at chdir prompt to go to a parent directory
-- detailed file stats, media info, list and extract archives
-- pin a directory you may need to revisit and jump to it anytime
-- lock the current terminal after a specified idle time
-- change directory on exit
-
-If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
-
-Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
-
-<p align="center">
-<a href="https://saythanks.io/to/jarun"><img src="https://img.shields.io/badge/say-thanks!-ff69b4.svg" /></a>
-<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/Donate-$5-green.svg" alt="Donate via PayPal!" /></a>
-</p>
 
 ### Features
 
