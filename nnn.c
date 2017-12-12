@@ -2186,8 +2186,7 @@ nochange:
 				printwarn();
 				goto nochange;
 			}
-			r = fstat(fd, &sb);
-			if (r == -1) {
+			if (fstat(fd, &sb) == -1) {
 				printwarn();
 				close(fd);
 				goto nochange;
@@ -2563,14 +2562,12 @@ nochange:
 			if (ndents > 0) {
 				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
 
-				r = lstat(oldpath, &sb);
-				if (r == -1) {
+				if (lstat(oldpath, &sb) == -1) {
 					if (dents)
 						dentfree(dents);
 					errexit();
 				} else {
-					r = show_stats(oldpath, dents[cur].name, &sb);
-					if (r < 0) {
+					if (show_stats(oldpath, dents[cur].name, &sb) < 0) {
 						printwarn();
 						goto nochange;
 					}
@@ -2743,8 +2740,7 @@ nochange:
 			}
 
 			/* Rename the file */
-			r = renameat(fd, dents[cur].name, fd, tmp);
-			if (r != 0) {
+			if (renameat(fd, dents[cur].name, fd, tmp) != 0) {
 				printwarn();
 				close(fd);
 				goto nochange;
