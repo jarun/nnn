@@ -2146,26 +2146,6 @@ nochange:
 		sel = nextsel(&run, &env, &presel);
 
 		switch (sel) {
-		case SEL_CDQUIT:
-		{
-			char *tmpfile = "/tmp/nnn";
-
-			tmp = getenv("NNN_TMPFILE");
-			if (tmp)
-				tmpfile = tmp;
-
-			FILE *fp = fopen(tmpfile, "w");
-
-			if (fp) {
-				fprintf(fp, "cd \"%s\"", path);
-				fclose(fp);
-			}
-
-			/* Fall through to exit */
-		} // fallthrough
-		case SEL_QUIT:
-			dentfree(dents);
-			return;
 		case SEL_BACK:
 			/* There is no going back */
 			if (istopdir(path)) {
@@ -2264,24 +2244,6 @@ nochange:
 				printmsg("Unsupported file");
 				goto nochange;
 			}
-		case SEL_FLTR:
-			presel = filterentries(path);
-			xstrlcpy(fltr, ifilter, LINE_MAX);
-			DPRINTF_S(fltr);
-			/* Save current */
-			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
-			goto nochange;
-		case SEL_MFLTR:
-			cfg.filtermode ^= 1;
-			if (cfg.filtermode)
-				presel = FILTER;
-			else
-				printmsg("navigate-as-you-type off");
-			goto nochange;
-		case SEL_SEARCH:
-			spawn(player, path, "search", NULL, F_NORMAL);
-			break;
 		case SEL_NEXT:
 			if (cur < ndents - 1)
 				++cur;
@@ -2567,6 +2529,24 @@ nochange:
 			xstrlcpy(mark, path, PATH_MAX);
 			printmsg(mark);
 			goto nochange;
+		case SEL_FLTR:
+			presel = filterentries(path);
+			xstrlcpy(fltr, ifilter, LINE_MAX);
+			DPRINTF_S(fltr);
+			/* Save current */
+			if (ndents > 0)
+				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+			goto nochange;
+		case SEL_MFLTR:
+			cfg.filtermode ^= 1;
+			if (cfg.filtermode)
+				presel = FILTER;
+			else
+				printmsg("navigate-as-you-type off");
+			goto nochange;
+		case SEL_SEARCH:
+			spawn(player, path, "search", NULL, F_NORMAL);
+			break;
 		case SEL_TOGGLEDOT:
 			cfg.showhidden ^= 1;
 			initfilter(cfg.showhidden, &ifilter);
@@ -2785,6 +2765,26 @@ nochange:
 			run = xgetenv(env, run);
 			spawn(run, dents[cur].name, NULL, path, F_NORMAL);
 			break;
+		case SEL_CDQUIT:
+		{
+			char *tmpfile = "/tmp/nnn";
+
+			tmp = getenv("NNN_TMPFILE");
+			if (tmp)
+				tmpfile = tmp;
+
+			FILE *fp = fopen(tmpfile, "w");
+
+			if (fp) {
+				fprintf(fp, "cd \"%s\"", path);
+				fclose(fp);
+			}
+
+			/* Fall through to exit */
+		} // fallthrough
+		case SEL_QUIT:
+			dentfree(dents);
+			return;
 		}
 		/* Screensaver */
 		if (idletimeout != 0 && idle == idletimeout) {

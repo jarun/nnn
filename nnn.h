@@ -3,13 +3,8 @@
 
 /* Supported actions */
 enum action {
-	SEL_QUIT = 1,
-	SEL_CDQUIT,
-	SEL_BACK,
+	SEL_BACK = 1,
 	SEL_GOIN,
-	SEL_FLTR,
-	SEL_MFLTR,
-	SEL_SEARCH,
 	SEL_NEXT,
 	SEL_PREV,
 	SEL_PGDN,
@@ -23,6 +18,9 @@ enum action {
 	SEL_CDBM,
 	SEL_PIN,
 	SEL_VISIT,
+	SEL_FLTR,
+	SEL_MFLTR,
+	SEL_SEARCH,
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
 	SEL_STATS,
@@ -41,6 +39,8 @@ enum action {
 	SEL_HELP,
 	SEL_RUN,
 	SEL_RUNARG,
+	SEL_CDQUIT,
+	SEL_QUIT,
 };
 
 /* Associate a pressed key to an action */
@@ -62,11 +62,6 @@ static struct assoc assocs[] = {
 };
 
 static struct key bindings[] = {
-	/* Quit */
-	{ 'q',            SEL_QUIT,      "",     "" },
-	{ CONTROL('Q'),   SEL_QUIT,      "",     "" },
-	/* Change dir on quit */
-	{ 'Q',            SEL_CDQUIT,    "",     "" },
 	/* Back */
 	{ KEY_BACKSPACE,  SEL_BACK,      "",     "" },
 	{ KEY_LEFT,       SEL_BACK,      "",     "" },
@@ -77,12 +72,6 @@ static struct key bindings[] = {
 	{ '\r',           SEL_GOIN,      "",     "" },
 	{ KEY_RIGHT,      SEL_GOIN,      "",     "" },
 	{ 'l',            SEL_GOIN,      "",     "" },
-	/* Filter */
-	{ '/',            SEL_FLTR,      "",     "" },
-	/* Toggle filter mode */
-	{ KEY_IC,         SEL_MFLTR,     "",     "" },
-	/* Desktop search */
-	{ CONTROL('_'),   SEL_SEARCH,    "",     "" },
 	/* Next */
 	{ 'j',            SEL_NEXT,      "",     "" },
 	{ KEY_DOWN,       SEL_NEXT,      "",     "" },
@@ -121,6 +110,12 @@ static struct key bindings[] = {
 	{ CONTROL('B'),   SEL_PIN,       "",     "" },
 	/* Visit marked directory */
 	{ CONTROL('V'),   SEL_VISIT,     "",     "" },
+	/* Filter */
+	{ '/',            SEL_FLTR,      "",     "" },
+	/* Toggle filter mode */
+	{ KEY_IC,         SEL_MFLTR,     "",     "" },
+	/* Desktop search */
+	{ CONTROL('_'),   SEL_SEARCH,    "",     "" },
 	/* Toggle hide .dot files */
 	{ '.',            SEL_TOGGLEDOT, "",     "" },
 	/* Detailed listing */
@@ -160,4 +155,9 @@ static struct key bindings[] = {
 	/* Run command with argument */
 	{ 'e',            SEL_RUNARG,    "vi",   "EDITOR" },
 	{ 'p',            SEL_RUNARG,    "less", "PAGER" },
+	/* Change dir on quit */
+	{ 'Q',            SEL_CDQUIT,    "",     "" },
+	/* Quit */
+	{ 'q',            SEL_QUIT,      "",     "" },
+	{ CONTROL('Q'),   SEL_QUIT,      "",     "" },
 };
