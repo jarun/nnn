@@ -450,7 +450,8 @@ static char *
 xdirname(const char *path)
 {
 	static char *buf = g_buf;
-	static char *last_slash;
+	static char *last_slash, *runp;
+
 
 	xstrlcpy(buf, path, PATH_MAX);
 
@@ -459,8 +460,6 @@ xdirname(const char *path)
 
 	if (last_slash != NULL && last_slash != buf && last_slash[1] == '\0') {
 		/* Determine whether all remaining characters are slashes. */
-		char *runp;
-
 		for (runp = last_slash; runp != buf; --runp)
 			if (runp[-1] != '/')
 				break;
@@ -472,8 +471,6 @@ xdirname(const char *path)
 
 	if (last_slash != NULL) {
 		/* Determine whether all remaining characters are slashes. */
-		char *runp;
-
 		for (runp = last_slash; runp != buf; --runp)
 			if (runp[-1] != '/')
 				break;
@@ -609,10 +606,12 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 static char *
 xgetenv(char *name, char *fallback)
 {
+	static char *value;
+
 	if (name == NULL)
 		return fallback;
 
-	char *value = getenv(name);
+	value = getenv(name);
 
 	return value && value[0] ? value : fallback;
 }
@@ -726,8 +725,8 @@ strstrip(char *s)
 static char *
 getmime(char *file)
 {
-	regex_t regex;
-	uint i;
+	static regex_t regex;
+	static uint i;
 	static uint len = LEN(assocs);
 
 	for (i = 0; i < len; ++i) {
