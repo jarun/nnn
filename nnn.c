@@ -452,7 +452,6 @@ xdirname(const char *path)
 	static char *buf = g_buf;
 	static char *last_slash, *runp;
 
-
 	xstrlcpy(buf, path, PATH_MAX);
 
 	/* Find last '/'. */
@@ -949,23 +948,23 @@ filterentries(char *path)
 
 	while ((r = get_wch(ch)) != ERR) {
 		if (*ch == 127 /* handle DEL */ || *ch == KEY_DC || *ch == KEY_BACKSPACE) {
-				if (len == 1) {
-					cur = oldcur;
-					*ch = CONTROL('L');
-					goto end;
-				}
+			if (len == 1) {
+				cur = oldcur;
+				*ch = CONTROL('L');
+				goto end;
+			}
 
-				wln[--len] = '\0';
-				if (len == 1)
-					cur = oldcur;
+			wln[--len] = '\0';
+			if (len == 1)
+				cur = oldcur;
 
-				wcstombs(ln, wln, REGEX_MAX);
-				ndents = total;
-				if (matches(pln) == -1)
-					continue;
-				redraw(path);
-				printprompt(ln);
+			wcstombs(ln, wln, REGEX_MAX);
+			ndents = total;
+			if (matches(pln) == -1)
 				continue;
+			redraw(path);
+			printprompt(ln);
+			continue;
 		}
 
 		if (r == OK) {
