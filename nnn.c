@@ -1278,7 +1278,7 @@ printent_long(struct entry *ent, int sel, uint namecols)
 		else if (S_ISLNK(ent->mode))
 			printw("%s%-16.16s        @  %s@\n", CURSYM(sel), buf, pname);
 		else if (S_ISSOCK(ent->mode))
-			printf("%s%-16.16s        =  %s=\n", CURSYM(sel), buf, pname);
+			printw("%s%-16.16s        =  %s=\n", CURSYM(sel), buf, pname);
 		else if (S_ISFIFO(ent->mode))
 			printw("%s%-16.16s        |  %s|\n", CURSYM(sel), buf, pname);
 		else if (S_ISBLK(ent->mode))
