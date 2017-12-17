@@ -3,7 +3,7 @@ VERSION = 1.5
 PREFIX ?= /usr/local
 MANPREFIX = $(PREFIX)/share/man
 
-CFLAGS += -O2 -Wall -Wextra -Wno-unused-parameter
+CFLAGS += -Wall -Wextra -Wno-unused-parameter
 LDLIBS = -lreadline
 
 ifeq ($(shell pkg-config ncursesw && echo 1),1)
@@ -23,7 +23,7 @@ all: $(BIN) $(PLAYER)
 $(SRC): nnn.h
 
 $(BIN): $(SRC)
-	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	$(CC) -O2 $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 	strip $@
 
 debug: $(SRC)
