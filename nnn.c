@@ -188,12 +188,16 @@ typedef unsigned char uchar;
 
 /* Directory entry */
 typedef struct entry {
-	char name[NAME_MAX + 1];
+	char *name;
 	time_t t;
 	off_t size;
 	blkcnt_t blocks; /* number of 512B blocks allocated */
 	mode_t mode;
 } *pEntry;
+
+typedef struct {
+	char pname[NAME_MAX + 1];
+} namebuf;
 
 /* Bookmark */
 typedef struct {
@@ -221,6 +225,7 @@ typedef struct {
 static settings cfg = {0, 0, 0, 0, 0, 1, 1, 0, 0, 4};
 
 static struct entry *dents;
+static namebuf *pnamebuf;
 static int ndents, cur, total_dents;
 static uint idle;
 static uint idletimeout;
@@ -881,27 +886,9 @@ fill(struct entry **dents, int (*filter)(regex_t *, char *), regex_t *re)
 				dentp1 = &(*dents)[count];
 				dentp2 = &(*dents)[ndents];
 
-				/* Copy count to tmp */
-				xstrlcpy(_dent.name, dentp1->name, NAME_MAX);
-				_dent.mode = dentp1->mode;
-				_dent.t = dentp1->t;
-				_dent.size = dentp1->size;
-				_dent.blocks = dentp1->blocks;
-
-				/* Copy ndents - 1 to count */
-				xstrlcpy(dentp1->name, dentp2->name, NAME_MAX);
-				dentp1->mode = dentp2->mode;
-				dentp1->t = dentp2->t;
-				dentp1->size = dentp2->size;
-				dentp1->blocks = dentp2->blocks;
-
-				/* Copy tmp to ndents - 1 */
-				xstrlcpy(dentp2->name, _dent.name, NAME_MAX);
-				dentp2->mode = _dent.mode;
-				dentp2->t = _dent.t;
-				dentp2->size = _dent.size;
-				dentp2->blocks = _dent.blocks;
-
+				memcpy(&_dent, dentp1, sizeof(struct entry));
+				memcpy(dentp1, dentp2, sizeof(struct entry));
+				memcpy(dentp2, &_dent, sizeof(struct entry));
 				--count;
 			}
 
@@ -1779,10 +1766,11 @@ dentfill(char *path, struct entry **dents,
 	static DIR *dirp;
 	static struct dirent *dp;
 	static struct stat sb_path, sb;
-	static int fd, n;
+	static int fd, n, count;
 	static char *namep;
 	static ulong num_saved;
 	static struct entry *dentp;
+	static namebuf *pnb;
 
 	dirp = opendir(path);
 	if (dirp == NULL)
@@ -1852,10 +1840,23 @@ dentfill(char *path, struct entry **dents,
 			*dents = realloc(*dents, total_dents * sizeof(**dents));
 			if (*dents == NULL)
 				errexit();
+
+			pnb = pnamebuf;
+			pnamebuf = (namebuf *)realloc(pnamebuf, total_dents * sizeof(namebuf));
+			if (pnamebuf == NULL) {
+				free(*dents);
+				errexit();
+			}
+
+			/* realloc() may result in memory move, we must re-adjust if that happens */
+			if (pnb && pnb != pnamebuf)
+				for (count = 0; count < n; ++count)
+					(&(*dents)[count])->name = pnamebuf[count].pname;
 		}
 
 		dentp = &(*dents)[n];
-		xstrlcpy(dentp->name, namep, NAME_MAX);
+		xstrlcpy(pnamebuf[n].pname, namep, NAME_MAX);
+		dentp->name = pnamebuf[n].pname;
 
 		dentp->mode = sb.st_mode;
 		dentp->t = sb.st_mtime;
@@ -1889,8 +1890,10 @@ dentfill(char *path, struct entry **dents,
 
 	/* Should never be null */
 	if (closedir(dirp) == -1) {
-		if (*dents)
+		if (*dents) {
+			free(pnamebuf);
 			free(*dents);
+		}
 		errexit();
 	}
 
@@ -1900,6 +1903,7 @@ dentfill(char *path, struct entry **dents,
 static void
 dentfree(struct entry *dents)
 {
+	free(pnamebuf);
 	free(dents);
 }
 
