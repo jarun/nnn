@@ -1855,7 +1855,7 @@ dentfill(char *path, struct entry **dents,
 		}
 
 		dentp = &(*dents)[n];
-		xstrlcpy(pnamebuf[n].pname, namep, NAME_MAX);
+		xstrlcpy(pnamebuf[n].pname, namep, NAME_MAX + 1);
 		dentp->name = pnamebuf[n].pname;
 
 		dentp->mode = sb.st_mode;
