@@ -129,7 +129,7 @@ disabledbg()
 #define DPRINTF_D(x) xprintf(DEBUG_FD, #x "=%d\n", x)
 #define DPRINTF_U(x) xprintf(DEBUG_FD, #x "=%u\n", x)
 #define DPRINTF_S(x) xprintf(DEBUG_FD, #x "=%s\n", x)
-#define DPRINTF_P(x) xprintf(DEBUG_FD, #x "=0x%p\n", x)
+#define DPRINTF_P(x) xprintf(DEBUG_FD, #x "=%p\n", x)
 #else
 #define DPRINTF_D(x)
 #define DPRINTF_U(x)
@@ -140,6 +140,7 @@ disabledbg()
 /* Macro definitions */
 #define VERSION "1.5"
 #define GENERAL_INFO "License: BSD 2-Clause\nWebpage: https://github.com/jarun/nnn"
+
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -154,6 +155,8 @@ disabledbg()
 #define FILTER '/'
 #define REGEX_MAX 128
 #define BM_MAX 10
+#define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
+#define NAMEBUF_INCR 0x1000 /* 64 dir entries at a time, avg. 64 chars per filename = 64*64B = 4KB */
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE     0x00  /* no flag set */
@@ -192,12 +195,9 @@ typedef struct entry {
 	time_t t;
 	off_t size;
 	blkcnt_t blocks; /* number of 512B blocks allocated */
+	size_t noff;
 	mode_t mode;
 } *pEntry;
-
-typedef struct {
-	char pname[NAME_MAX + 1];
-} namebuf;
 
 /* Bookmark */
 typedef struct {
@@ -225,7 +225,7 @@ typedef struct {
 static settings cfg = {0, 0, 0, 0, 0, 1, 1, 0, 0, 4};
 
 static struct entry *dents;
-static namebuf *pnamebuf;
+static char *pnamebuf;
 static int ndents, cur, total_dents;
 static uint idle;
 static uint idletimeout;
@@ -1765,12 +1765,14 @@ dentfill(char *path, struct entry **dents,
 {
 	static DIR *dirp;
 	static struct dirent *dp;
-	static struct stat sb_path, sb;
-	static int fd, n, count;
-	static char *namep;
-	static ulong num_saved;
+	static char *namep, *pnb;
 	static struct entry *dentp;
-	static namebuf *pnb;
+	static size_t off, namebuflen = NAMEBUF_INCR;
+	static ulong num_saved;
+	static int fd, n, count;
+	static struct stat sb_path, sb;
+
+	off = 0;
 
 	dirp = opendir(path);
 	if (dirp == NULL)
@@ -1836,28 +1838,41 @@ dentfill(char *path, struct entry **dents,
 		}
 
 		if (n == total_dents) {
-			total_dents += 64;
+			total_dents += ENTRY_INCR;
 			*dents = realloc(*dents, total_dents * sizeof(**dents));
-			if (*dents == NULL)
+			if (*dents == NULL) {
+				if (pnamebuf)
+					free(pnamebuf);
 				errexit();
+			}
+		}
+
+		/* If there's not enough bytes left to copy a file name of length NAME_MAX, re-allocate */
+		if (namebuflen - off < NAME_MAX + 1) {
+			namebuflen += NAMEBUF_INCR;
 
 			pnb = pnamebuf;
-			pnamebuf = (namebuf *)realloc(pnamebuf, total_dents * sizeof(namebuf));
+			pnamebuf = (char *)realloc(pnamebuf, namebuflen);
+			DPRINTF_P(pnamebuf);
 			if (pnamebuf == NULL) {
 				free(*dents);
 				errexit();
 			}
 
 			/* realloc() may result in memory move, we must re-adjust if that happens */
-			if (pnb && pnb != pnamebuf)
+			if (pnb != pnamebuf)
 				for (count = 0; count < n; ++count)
-					(&(*dents)[count])->name = pnamebuf[count].pname;
+					(*dents + count)->name = pnamebuf + (*dents + count)->noff;
 		}
 
-		dentp = &(*dents)[n];
-		xstrlcpy(pnamebuf[n].pname, namep, NAME_MAX + 1);
-		dentp->name = pnamebuf[n].pname;
+		dentp = *dents + n;
 
+		/* Copy file name */
+		dentp->name = pnamebuf + off;
+		dentp->noff = off;
+		off += xstrlcpy(dentp->name, namep, NAME_MAX + 1);
+
+		/* Copy other fields */
 		dentp->mode = sb.st_mode;
 		dentp->t = sb.st_mtime;
 		dentp->size = sb.st_size;
@@ -1947,9 +1962,19 @@ populate(char *path, char *oldpath, char *fltr)
 		refresh();
 	}
 
+#ifdef DEBUGMODE
+	struct timespec ts1, ts2;
+	clock_gettime(CLOCK_REALTIME, &ts1); /* Use CLOCK_MONOTONIC on FreeBSD */
+#endif
+
 	ndents = dentfill(path, &dents, visible, &re);
 
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
+
+#ifdef DEBUGMODE
+	clock_gettime(CLOCK_REALTIME, &ts2);
+	DPRINTF_U(ts2.tv_nsec - ts1.tv_nsec);
+#endif
 
 	/* Find cur from history */
 	cur = dentfind(dents, ndents, oldpath);
@@ -2102,6 +2127,11 @@ browse(char *ipath, char *ifilter)
 		presel = FILTER;
 	else
 		presel = 0;
+
+	/* Allocate buffer to hold names */
+	pnamebuf = (char *)malloc(NAMEBUF_INCR);
+	if (pnamebuf == NULL)
+		errexit();
 
 begin:
 #ifdef LINUX_INOTIFY
