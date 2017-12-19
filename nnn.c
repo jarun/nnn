@@ -454,8 +454,7 @@ xmemrchr(uchar *s, uchar ch, size_t n)
 static char *
 xdirname(const char *path)
 {
-	static char *buf = g_buf;
-	static char *last_slash, *runp;
+	static char *buf = g_buf, *last_slash, *runp;
 
 	xstrlcpy(buf, path, PATH_MAX);
 
@@ -513,10 +512,10 @@ xdirname(const char *path)
 static int
 all_dots(const char *path)
 {
+	int count = 0;
+
 	if (!path)
 		return FALSE;
-
-	int count = 0;
 
 	while (*path == '.')
 		++count, ++path;
@@ -561,9 +560,9 @@ initcurses(void)
 static void
 spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 {
-	pid_t pid;
-	int status;
-	char *shlvl;
+	static char *shlvl;
+	static pid_t pid;
+	static int status;
 
 	if (flag & F_NORMAL)
 		exitcurses();
@@ -1176,20 +1175,29 @@ resetdircolor(mode_t mode)
 /*
  * Replace escape characters in a string with '?'
  * Adjust string length to maxcols if > 0;
+ *
+ * Interestingly, note that buffer points to g_buf. What happens if
+ * str also points to g_buf? In this case we assume that the caller
+ * acknowledges that it's OK to lose the data in g_buf after this
+ * call to unescape().
+ * The API, on its part, first converts str to multibyte (after which
+ * it doesn't touch str anymore). Only after that it starts modifying
+ * buffer. This works like a phased operation.
  */
 static char *
 unescape(const char *str, uint maxcols)
 {
-	static char buffer[PATH_MAX];
 	static wchar_t wbuf[PATH_MAX];
+	static char *buffer;
 	static wchar_t *buf;
 	static size_t len;
 
-	buffer[0] = '\0';
-	buf = wbuf;
-
 	/* Convert multi-byte to wide char */
 	len = mbstowcs(wbuf, str, PATH_MAX);
+
+	buffer = g_buf;
+	buffer[0] = '\0';
+	buf = wbuf;
 
 	if (maxcols && len > maxcols) {
 		len = wcswidth(wbuf, len);
@@ -1368,7 +1376,7 @@ static char *
 get_lsperms(mode_t mode, char *desc)
 {
 	static const char * const rwx[] = {"---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx"};
-	static char bits[11];
+	static char bits[11] = {'\0'};
 
 	bits[0] = get_fileind(mode, desc);
 	strcpy(&bits[1], rwx[(mode >> 6) & 7]);
@@ -1381,8 +1389,6 @@ get_lsperms(mode_t mode, char *desc)
 		bits[6] = (mode & 0010) ? 's' : 'l';  /* group executable */
 	if (mode & S_ISVTX)
 		bits[9] = (mode & 0001) ? 't' : 'T';  /* others executable */
-
-	bits[10] = '\0';
 
 	return bits;
 }
@@ -1463,7 +1469,8 @@ get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int page
 static int
 show_stats(char *fpath, char *fname, struct stat *sb)
 {
-	char *perms = get_lsperms(sb->st_mode, g_buf);
+	char desc[32];
+	char *perms = get_lsperms(sb->st_mode, desc);
 	char *p, *begin = g_buf;
 	char tmp[] = "/tmp/nnnXXXXXX";
 	int fd = mkstemp(tmp);
@@ -1479,8 +1486,12 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 		if (len != -1) {
 			g_buf[len] = '\0';
 			dprintf(fd, "    File: '%s' -> ", unescape(fname, 0));
+
+			/*
+			 * We pass g_buf but unescape() operates on g_buf too!
+			 * Read the API notes for information on how this works.
+			 */
 			dprintf(fd, "'%s'", unescape(g_buf, 0));
-			xstrlcpy(g_buf, "symbolic link", MAX_CMD_LEN);
 		}
 	} else
 		dprintf(fd, "    File: '%s'", unescape(fname, 0));
@@ -1491,7 +1502,7 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 #else
 	dprintf(fd, "\n    Size: %-15ld Blocks: %-10ld IO Block: %-6ld %s",
 #endif
-	       sb->st_size, sb->st_blocks, sb->st_blksize, g_buf);
+	       sb->st_size, sb->st_blocks, sb->st_blksize, desc);
 
 	/* Show containing device, inode, hardlink count */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
@@ -1984,8 +1995,9 @@ populate(char *path, char *oldpath, char *fltr)
 static void
 redraw(char *path)
 {
-	static int nlines, i;
+	static char buf[(NAME_MAX + 1) << 1];
 	static size_t ncols;
+	static int nlines, i;
 	static bool mode_changed;
 
 	mode_changed = FALSE;
@@ -2091,13 +2103,13 @@ redraw(char *path)
 
 			/* We need to show filename as it may be truncated in directory listing */
 			if (!cfg.blkorder)
-				sprintf(g_buf, "%d/%d %s[%s%s]", cur + 1, ndents, sort, unescape(dents[cur].name, 0), ind);
+				sprintf(buf, "%d/%d %s[%s%s]", cur + 1, ndents, sort, unescape(dents[cur].name, 0), ind);
 			else {
-				i = sprintf(g_buf, "%d/%d du: %s (%lu files) ", cur + 1, ndents, coolsize(dir_blocks << 9), num_files);
-				sprintf(g_buf + i, "vol: %s free [%s%s]", coolsize(get_fs_free(path)), unescape(dents[cur].name, 0), ind);
+				i = sprintf(buf, "%d/%d du: %s (%lu files) ", cur + 1, ndents, coolsize(dir_blocks << 9), num_files);
+				sprintf(buf + i, "vol: %s free [%s%s]", coolsize(get_fs_free(path)), unescape(dents[cur].name, 0), ind);
 			}
 
-			printmsg(g_buf);
+			printmsg(buf);
 		} else
 			printmsg("0 items");
 	}
