@@ -917,10 +917,7 @@ filterentries(char *path)
 	static char ln[REGEX_MAX];
 	static wchar_t wln[REGEX_MAX];
 	static wint_t ch[2] = {0};
-	static int maxlen = REGEX_MAX - 1;
-	int r, total = ndents;
-	int oldcur = cur;
-	int len = 1;
+	int r, total = ndents, oldcur = cur, len = 1;
 	char *pln = ln + 1;
 
 	ln[0] = wln[0] = FILTER;
@@ -976,7 +973,7 @@ filterentries(char *path)
 				if (len == 1)
 					cur = 0;
 
-				if (len == maxlen)
+				if (len == REGEX_MAX - 1)
 					break;
 
 				wln[len] = (wchar_t)*ch;
