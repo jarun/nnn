@@ -1564,37 +1564,20 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	return 0;
 }
 
+/*
+ * Get the order of 2 for this size
+ * In brief - return the number of trailing zeroes
+ */
 static int
 getorder(size_t size)
 {
-	switch (size) {
-	case 4096:
-		return 12;
-	case 512:
-		return 9;
-	case 8192:
-		return 13;
-	case 16384:
-		return 14;
-	case 32768:
-		return 15;
-	case 65536:
-		return 16;
-	case 131072:
-		return 17;
-	case 262144:
-		return 18;
-	case 524288:
-		return 19;
-	case 1048576:
-		return 20;
-	case 2048:
-		return 11;
-	case 1024:
-		return 10;
-	default:
-		return 0;
-	}
+	static int count, mask;
+
+	for (mask = 1, count = 0; count < 32; mask <<= 1, ++count)
+		if ((size & mask) != 0)
+			return count;
+
+	return 32;
 }
 
 static size_t
