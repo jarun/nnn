@@ -138,6 +138,8 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 27925 vaio      20   0   20608   7168   2648 S   0.0  0.1   0:00.30 nnn
 ```
 
+Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors).
+
 ### Installation
 
 #### Dependencies
