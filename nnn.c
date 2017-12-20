@@ -195,7 +195,6 @@ typedef struct entry {
 	time_t t;
 	off_t size;
 	blkcnt_t blocks; /* number of 512B blocks allocated */
-	size_t noff;
 	mode_t mode;
 } *pEntry;
 
@@ -1853,14 +1852,14 @@ dentfill(char *path, struct entry **dents,
 			/* realloc() may result in memory move, we must re-adjust if that happens */
 			if (pnb != pnamebuf)
 				for (count = 0; count < n; ++count)
-					(*dents + count)->name = pnamebuf + (*dents + count)->noff;
+					/* Add file name start offset to new buffer start */
+					(*dents + count)->name = pnamebuf + ((ulong)(*dents + count)->name - (ulong)pnb);
 		}
 
 		dentp = *dents + n;
 
 		/* Copy file name */
 		dentp->name = pnamebuf + off;
-		dentp->noff = off;
 		off += xstrlcpy(dentp->name, namep, NAME_MAX + 1);
 
 		/* Copy other fields */
