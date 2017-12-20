@@ -19,7 +19,7 @@ Noice is Not Noice, a noicer fork...
 
 `nnn` is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect candidate for modern distros.
 
-`nnn` works with the desktop opener, adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, enhanced DE integration, bookmarks, a disk usage analyzer mode, comprehensive file details and much more. Add to that a huge [performance](#performance) boost. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
+`nnn` is faster and friendlier! It's probably the [fastest and most resource-sensitive](#performance) (with all its capabilities) file browser you have ever used. It's extremely flexible too - integrates with your DE and favourite GUI utilities, works with the desktop opener, adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, bookmarks, a disk usage analyzer mode, comprehensive file details and much more. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
 
 Cool things you can do with `nnn`:
 
@@ -121,21 +121,21 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 
 ### Performance
 
-`nnn` vs. ncdu memory usage in disk usage analyzer mode (438767 files on disk):
+`nnn` vs. ncdu memory usage in disk usage analyzer mode (401385 files on disk):
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
-22515 vaio      20   0   60348  48712   2240 S   0.0  0.6   0:01.11 ncdu /
-28306 vaio      20   0   17644   4500   2708 S   0.0  0.1   0:00.52 nnn -S /
+ 5034 vaio      20   0   70360  58764   2244 S   0.0  0.7   0:00.80 ncdu /
+ 4949 vaio      20   0   17520   4224   2584 S   0.0  0.1   0:00.54 nnn -S /
 ```
 
-`nnn` vs. mc vs. ranger memory usage while viewing a directory with 11244 files, sorted by size:
+`nnn` vs. mc vs. ranger memory usage while viewing a directory with 13790 files, sorted by size:
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
-28450 vaio      20   0   93848  51548   7724 S   0.0  0.6   0:00.64 /usr/bin/python -O /usr/bin/ranger
-27265 vaio      20   0   67188  13620   6908 S   0.0  0.2   0:00.16 mc
-27925 vaio      20   0   20608   7168   2648 S   0.0  0.1   0:00.30 nnn
+16255 vaio      20   0  101392  59304   7928 S   0.0  0.7   0:00.68 /usr/bin/python -O /usr/bin/ranger
+15971 vaio      20   0   65732  11784   6848 S   0.0  0.1   0:00.56 mc
+16198 vaio      20   0   18520   4900   2536 S   0.3  0.1   0:00.14 nnn
 ```
 
 Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors).
