@@ -196,6 +196,7 @@ typedef struct entry {
 	off_t size;
 	blkcnt_t blocks; /* number of 512B blocks allocated */
 	mode_t mode;
+	uchar nlen; /* Length of file name */
 } *pEntry;
 
 /* Bookmark */
@@ -1850,17 +1851,22 @@ dentfill(char *path, struct entry **dents,
 			}
 
 			/* realloc() may result in memory move, we must re-adjust if that happens */
-			if (pnb != pnamebuf)
-				for (count = 0; count < n; ++count)
-					/* Add file name start offset to new buffer start */
-					(*dents + count)->name = pnamebuf + ((ulong)(*dents + count)->name - (ulong)pnb);
+			if (pnb != pnamebuf) {
+				dentp = *dents;
+				dentp->name = pnamebuf;
+
+				for (count = 1; count < n; ++dentp, ++count)
+					/* Current filename starts at last filename start + length */
+					(dentp + 1)->name = (char *)((size_t)dentp->name + dentp->nlen);
+			}
 		}
 
 		dentp = *dents + n;
 
 		/* Copy file name */
-		dentp->name = pnamebuf + off;
-		off += xstrlcpy(dentp->name, namep, NAME_MAX + 1);
+		dentp->name = (char *)((size_t)pnamebuf + off);
+		dentp->nlen = xstrlcpy(dentp->name, namep, NAME_MAX + 1);
+		off += dentp->nlen;
 
 		/* Copy other fields */
 		dentp->mode = sb.st_mode;
