@@ -405,7 +405,7 @@ xstrlcpy(char *dest, const char *src, size_t n)
 
 /*
  * Custom strcmp(), just what we need.
- * Returns 0 if same, else -1
+ * Returns 0 if same, -ve if s1 < s2, +ve if s1 > s2.
  */
 static int
 xstrcmp(const char *s1, const char *s2)
@@ -416,10 +416,7 @@ xstrcmp(const char *s1, const char *s2)
 	while (*s1 && *s1 == *s2)
 		++s1, ++s2;
 
-	if (*s1 != *s2)
-		return -1;
-
-	return 0;
+	return *s1 - *s2;
 }
 
 /*
@@ -646,25 +643,30 @@ xdiraccess(char *path)
 static int
 xstricmp(char *s1, char *s2)
 {
-	static char *c1, *c2;
+	static char *str1, *str2, *c1, *c2;
+	static int diff, nsyms1, nsyms2;
 
-	c1 = s1;
-	while (isspace(*c1))
-		++c1;
+	str1 = c1 = s1;
+	nsyms1 = 0;
+	while (isspace(*c1) || ispunct(*c1)) /* Same weight to spaces and punctuations */
+		++nsyms1, ++c1;
 	if (*c1 == '-' || *c1 == '+')
 		++c1;
 	while (*c1 >= '0' && *c1 <= '9')
 		++c1;
 
-	c2 = s2;
-	while (isspace(*c2))
-		++c2;
+	str2 = c2 = s2;
+	nsyms2 = 0;
+	while (isspace(*c2) || ispunct(*c2))
+		++nsyms2, ++c2;
 	if (*c2 == '-' || *c2 == '+')
 		++c2;
 	while (*c2 >= '0' && *c2 <= '9')
 		++c2;
 
-	if (*c1 == '\0' && *c2 == '\0') {
+	if (*c1 && *c2)
+		s1 = c1, s2 = c2;
+	else if (*c1 == '\0' && *c2 == '\0') {
 		static long long num1, num2;
 
 		num1 = strtoll(s1, &c1, 10);
@@ -675,6 +677,8 @@ xstricmp(char *s1, char *s2)
 			else
 				return -1;
 		}
+
+		*c1 = 0, *c2 = 0;
 	} else if (*c1 == '\0' && *c2 != '\0')
 		return -1;
 	else if (*c1 != '\0' && *c2 == '\0')
@@ -686,8 +690,21 @@ xstricmp(char *s1, char *s2)
 	/* In case of alphabetically same names, make sure
 	 * lower case one comes before upper case one
 	 */
-	if (!*s1 && !*s2)
-		return 1;
+	if (!*s1 && !*s2) {
+		/* First compare ignoring symbols */
+		if (*c1 && *c2) {
+			diff = xstrcmp(c1, c2);
+			if (diff != 0)
+				return -diff;
+		}
+
+		/* Sort the string with lesser prefix symbols on top */
+		if (nsyms1 != nsyms2)
+			return (nsyms1 - nsyms2);
+
+		/* Same number of symbols in both strings */
+		return -xstrcmp(str1, str2);
+	}
 
 	return (int) (TOUPPER(*s1) - TOUPPER(*s2));
 }
@@ -2508,7 +2525,7 @@ nochange:
 				break;
 
 			for (r = 0; bookmark[r].key && r < BM_MAX; ++r) {
-				if (xstrcmp(bookmark[r].key, tmp) == -1)
+				if (xstrcmp(bookmark[r].key, tmp) != 0)
 					continue;
 
 				if (bookmark[r].loc[0] == '~') {
