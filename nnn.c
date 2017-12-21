@@ -2150,7 +2150,7 @@ browse(char *ipath, char *ifilter)
 {
 	static char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX], lastdir[PATH_MAX], mark[PATH_MAX];
 	static char fltr[LINE_MAX];
-	char *dir, *tmp, *run = NULL, *env = NULL, *dstdir = NULL;
+	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
 	int r, fd, presel;
 	enum action sel = SEL_RUNARG + 1;
@@ -2479,22 +2479,20 @@ nochange:
 			goto begin;
 		}
 		case SEL_CDHOME:
-			dstdir = getenv("HOME");
-			if (dstdir == NULL) {
+			dir = getenv("HOME");
+			if (dir == NULL) {
 				clearprompt();
 				goto nochange;
 			} // fallthrough
 		case SEL_CDBEGIN:
-			if (!dstdir)
-				dstdir = ipath;
+			if (sel == SEL_CDBEGIN)
+				dir = ipath;
 
-			if (!xdiraccess(dstdir)) {
-				dstdir = NULL;
+			if (!xdiraccess(dir)) {
 				goto nochange;
 			}
 
-			if (xstrcmp(path, dstdir) == 0) {
-				dstdir = NULL;
+			if (xstrcmp(path, dir) == 0) {
 				break;
 			}
 
@@ -2502,14 +2500,13 @@ nochange:
 			xstrlcpy(lastdir, path, PATH_MAX);
 			dir_changed = TRUE;
 
-			xstrlcpy(path, dstdir, PATH_MAX);
+			xstrlcpy(path, dir, PATH_MAX);
 			oldpath[0] = '\0';
 			/* Reset filter */
 			xstrlcpy(fltr, ifilter, LINE_MAX);
 			DPRINTF_S(path);
 			if (cfg.filtermode)
 				presel = FILTER;
-			dstdir = NULL;
 			goto begin;
 		case SEL_CDLAST: // fallthrough
 		case SEL_VISIT:
