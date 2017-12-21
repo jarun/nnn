@@ -645,28 +645,45 @@ xstricmp(char *s1, char *s2)
 {
 	static char *str1, *str2, *c1, *c2;
 	static int diff, nsyms1, nsyms2;
+	static bool symbolic1, symbolic2, numeric1, numeric2;
+
+	symbolic1 = symbolic2 = numeric1 = numeric2 = FALSE;
 
 	str1 = c1 = s1;
 	nsyms1 = 0;
-	while (isspace(*c1) || ispunct(*c1)) /* Same weight to spaces and punctuations */
+	while (isspace(*c1) || ispunct(*c1)) { /* Same weight to spaces and punctuations */
 		++nsyms1, ++c1;
-	if (*c1 == '-' || *c1 == '+')
-		++c1;
-	while (*c1 >= '0' && *c1 <= '9')
-		++c1;
+		if (!symbolic1)
+			symbolic1 = TRUE;
+	}
 
 	str2 = c2 = s2;
 	nsyms2 = 0;
-	while (isspace(*c2) || ispunct(*c2))
+	while (isspace(*c2) || ispunct(*c2)) {
 		++nsyms2, ++c2;
+		if (!symbolic2)
+			symbolic2 = TRUE;
+	}
+
+	if (!*c1 && *c2) {
+		if (symbolic1)
+			return -1;
+	} else if (*c1 && !*c2) {
+		if (symbolic2)
+			return 1;
+	}
+
+	if (*c1 == '-' || *c1 == '+')
+		++c1;
+	if (*c1 >= '0' && *c1 <= '9')
+		numeric1 = TRUE;
+
 	if (*c2 == '-' || *c2 == '+')
 		++c2;
-	while (*c2 >= '0' && *c2 <= '9')
-		++c2;
+	if (*c2 >= '0' && *c2 <= '9')
+		numeric2 = TRUE;
 
-	if (*c1 && *c2)
-		s1 = c1, s2 = c2;
-	else if (*c1 == '\0' && *c2 == '\0') {
+	if (numeric1 && numeric2) {
 		static long long num1, num2;
 
 		num1 = strtoll(s1, NULL, 10);
@@ -677,10 +694,18 @@ xstricmp(char *s1, char *s2)
 			else
 				return -1;
 		}
+	} else if (numeric1)
+		return -1;
+	else if (numeric2)
+		return 1;
+
+#if 0
 	} else if (*c1 == '\0' && *c2 != '\0')
 		return -1;
 	else if (*c1 != '\0' && *c2 == '\0')
 		return 1;
+#endif
+	s1 = c1, s2 = c2;
 
 	while (*s2 && *s1 && TOUPPER(*s1) == TOUPPER(*s2))
 		++s1, ++s2;
