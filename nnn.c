@@ -632,6 +632,7 @@ xdiraccess(char *path)
 	return TRUE;
 }
 
+#if 0
 /*
  * We assume none of the strings are NULL.
  *
@@ -639,6 +640,8 @@ xdiraccess(char *path)
  * E.g., the order '1, 10, 2' doesn't make sense to human eyes.
  *
  * If the absolute numeric values are same, we fallback to alphasort.
+ *
+ * NOTE: This API is replaced by strcoll().
  */
 static int
 xstricmp(char *s1, char *s2)
@@ -731,6 +734,7 @@ xstricmp(char *s1, char *s2)
 
 	return (int) (TOUPPER(*s1) - TOUPPER(*s2));
 }
+#endif
 
 /* Return the integer value of a char representing HEX */
 static char
@@ -842,7 +846,7 @@ entrycmp(const void *va, const void *vb)
 			return -1;
 	}
 
-	return xstricmp(pa->name, pb->name);
+	return strcoll(pa->name, pb->name);
 }
 
 /*

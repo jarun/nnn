@@ -104,7 +104,6 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Detailed file information
   - Media information (needs mediainfo or exiftool, if specified)
 - Ordering
-  - Numeric order (1, 2, ... 10, 11, ...) for numeric names
   - Sort by modification time, size
 - Convenience
   - Create, rename files and directories
