@@ -669,16 +669,14 @@ xstricmp(char *s1, char *s2)
 	else if (*c1 == '\0' && *c2 == '\0') {
 		static long long num1, num2;
 
-		num1 = strtoll(s1, &c1, 10);
-		num2 = strtoll(s2, &c2, 10);
+		num1 = strtoll(s1, NULL, 10);
+		num2 = strtoll(s2, NULL, 10);
 		if (num1 != num2) {
 			if (num1 > num2)
 				return 1;
 			else
 				return -1;
 		}
-
-		*c1 = 0, *c2 = 0;
 	} else if (*c1 == '\0' && *c2 != '\0')
 		return -1;
 	else if (*c1 != '\0' && *c2 == '\0')
