@@ -104,7 +104,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Detailed file information
   - Media information (needs mediainfo or exiftool, if specified)
 - Ordering
-  - Sort by modification time, size
+  - Sort by file name, modification time, size
 - Convenience
   - Create, rename files and directories
   - Spawn SHELL (fallback sh) in the current directory
