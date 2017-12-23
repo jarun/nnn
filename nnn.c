@@ -632,7 +632,6 @@ xdiraccess(char *path)
 	return TRUE;
 }
 
-#if 0
 /*
  * We assume none of the strings are NULL.
  *
@@ -640,53 +639,39 @@ xdiraccess(char *path)
  * E.g., the order '1, 10, 2' doesn't make sense to human eyes.
  *
  * If the absolute numeric values are same, we fallback to alphasort.
- *
- * NOTE: This API is replaced by strcoll().
  */
 static int
 xstricmp(char *s1, char *s2)
 {
-	static char *str1, *str2, *c1, *c2;
-	static int diff, nsyms1, nsyms2;
-	static bool symbolic1, symbolic2, numeric1, numeric2;
+	static char *c1, *c2;
 
-	symbolic1 = symbolic2 = numeric1 = numeric2 = FALSE;
+	c1 = s1;
+	while (isspace(*c1))
+		++c1;
 
-	str1 = c1 = s1;
-	nsyms1 = 0;
-	while (isspace(*c1) || ispunct(*c1)) { /* Same weight to spaces and punctuations */
-		++nsyms1, ++c1;
-		if (!symbolic1)
-			symbolic1 = TRUE;
-	}
-
-	str2 = c2 = s2;
-	nsyms2 = 0;
-	while (isspace(*c2) || ispunct(*c2)) {
-		++nsyms2, ++c2;
-		if (!symbolic2)
-			symbolic2 = TRUE;
-	}
-
-	if (!*c1 && *c2) {
-		if (symbolic1)
-			return -1;
-	} else if (*c1 && !*c2) {
-		if (symbolic2)
-			return 1;
-	}
+	c2 = s2;
+	while (isspace(*c2))
+		++c2;
 
 	if (*c1 == '-' || *c1 == '+')
 		++c1;
-	if (*c1 >= '0' && *c1 <= '9')
-		numeric1 = TRUE;
 
 	if (*c2 == '-' || *c2 == '+')
 		++c2;
-	if (*c2 >= '0' && *c2 <= '9')
-		numeric2 = TRUE;
 
-	if (numeric1 && numeric2) {
+	if (isdigit(*c1) && isdigit(*c2)) {
+		while (*c1 >= '0' && *c1 <= '9')
+			++c1;
+		while (isspace(*c1))
+			++c1;
+
+		while (*c2 >= '0' && *c2 <= '9')
+			++c2;
+		while (isspace(*c2))
+			++c2;
+	}
+
+	if (!*c1 && !*c2) {
 		static long long num1, num2;
 
 		num1 = strtoll(s1, NULL, 10);
@@ -697,44 +682,10 @@ xstricmp(char *s1, char *s2)
 			else
 				return -1;
 		}
-	} else if (numeric1)
-		return -1;
-	else if (numeric2)
-		return 1;
-
-#if 0
-	} else if (*c1 == '\0' && *c2 != '\0')
-		return -1;
-	else if (*c1 != '\0' && *c2 == '\0')
-		return 1;
-#endif
-	s1 = c1, s2 = c2;
-
-	while (*s2 && *s1 && TOUPPER(*s1) == TOUPPER(*s2))
-		++s1, ++s2;
-
-	/* In case of alphabetically same names, make sure
-	 * lower case one comes before upper case one
-	 */
-	if (!*s1 && !*s2) {
-		/* First compare ignoring symbols */
-		if (*c1 && *c2) {
-			diff = xstrcmp(c1, c2);
-			if (diff != 0)
-				return -diff;
-		}
-
-		/* Sort the string with lesser prefix symbols on top */
-		if (nsyms1 != nsyms2)
-			return (nsyms1 - nsyms2);
-
-		/* Same number of symbols in both strings */
-		return -xstrcmp(str1, str2);
 	}
 
-	return (int) (TOUPPER(*s1) - TOUPPER(*s2));
+	return strcoll(s1, s2);
 }
-#endif
 
 /* Return the integer value of a char representing HEX */
 static char
@@ -846,7 +797,7 @@ entrycmp(const void *va, const void *vb)
 			return -1;
 	}
 
-	return strcoll(pa->name, pb->name);
+	return xstricmp(pa->name, pb->name);
 }
 
 /*
