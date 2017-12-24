@@ -87,6 +87,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Familiar shortcuts
   - *Navigate-as-you-type* mode
   - Bookmarks support; pin and visit a directory
+  - Open a bookmarked directory on start
   - Jump HOME or to the last visited directory (as usual!)
   - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
   - Roll-over at edges, page through entries
@@ -189,6 +190,7 @@ positional arguments:
   PATH   directory to open [default: current dir]
 
 optional arguments:
+ -b key  specify bookmark key to open
  -c N    specify dir color, disables if N>7
  -e      use exiftool instead of mediainfo
  -i      start in navigate-as-you-type mode

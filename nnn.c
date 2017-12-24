@@ -268,6 +268,7 @@ static char *STR_NFTWFAIL = "nftw(3) failed";
 static char *STR_ATROOT = "You are at /";
 static char *STR_NOHOME = "HOME not set";
 static char *STR_INPUT = "No traversal delimiter allowed";
+static char *STR_INVBM = "Invalid bookmark";
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[MAX_CMD_LEN];
@@ -1153,6 +1154,39 @@ parsebmstr(char *bms)
 		++bms;
 		++i;
 	}
+}
+
+/*
+ * Get the real path to a bookmark
+ *
+ * NULL is returned in case of no match, path resolution failure etc.
+ * buf would be modified, so check return value before access
+ */
+static char *
+get_bm_loc(char *key, char *buf)
+{
+	if (!key || !key[0])
+		return NULL;
+
+	for (int r = 0; bookmark[r].key && r < BM_MAX; ++r) {
+		if (xstrcmp(bookmark[r].key, key) == 0) {
+			if (bookmark[r].loc[0] == '~') {
+				char *home = getenv("HOME");
+				if (!home) {
+					DPRINTF_S(STR_NOHOME);
+					return NULL;
+				}
+
+				snprintf(buf, PATH_MAX, "%s%s", home, bookmark[r].loc + 1);
+			} else
+				xstrlcpy(buf, bookmark[r].loc, PATH_MAX);
+
+			return buf;
+		}
+	}
+
+	DPRINTF_S("Invalid key");
+	return NULL;
 }
 
 static void
@@ -2499,37 +2533,18 @@ nochange:
 			if (tmp == NULL)
 				break;
 
-			for (r = 0; bookmark[r].key && r < BM_MAX; ++r) {
-				if (xstrcmp(bookmark[r].key, tmp) != 0)
-					continue;
-
-				if (bookmark[r].loc[0] == '~') {
-					/* Expand ~ to HOME */
-					char *home = getenv("HOME");
-
-					if (home)
-						snprintf(newpath, PATH_MAX, "%s%s", home, bookmark[r].loc + 1);
-					else {
-						printmsg(STR_NOHOME);
-						goto nochange;
-					}
-				} else
-					mkpath(path, bookmark[r].loc, newpath, PATH_MAX);
-
-				if (!xdiraccess(newpath))
-					goto nochange;
-
-				if (xstrcmp(path, newpath) == 0)
-					break;
-
-				oldpath[0] = '\0';
-				break;
-			}
-
-			if (!bookmark[r].key) {
-				printmsg("No matching bookmark");
+			if (get_bm_loc(tmp, newpath) == NULL) {
+				printmsg(STR_INVBM);
 				goto nochange;
 			}
+
+			if (!xdiraccess(newpath))
+				goto nochange;
+
+			if (xstrcmp(path, newpath) == 0)
+				break;
+
+			oldpath[0] = '\0';
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
@@ -2820,6 +2835,7 @@ The missing terminal file browser for X.\n\n\
 positional arguments:\n\
   PATH   directory to open [default: current dir]\n\n\
 optional arguments:\n\
+ -b key  specify bookmark key to open\n\
  -c N    specify dir color, disables if N>7\n\
  -e      use exiftool instead of mediainfo\n\
  -i      start in navigate-as-you-type mode\n\
@@ -2836,7 +2852,7 @@ int
 main(int argc, char *argv[])
 {
 	static char cwd[PATH_MAX];
-	char *ipath, *ifilter, *bmstr;
+	char *ipath = NULL, *ifilter, *bmstr;
 	int opt;
 
 	/* Confirm we are in a terminal */
@@ -2845,7 +2861,7 @@ main(int argc, char *argv[])
 		exit(1);
 	}
 
-	while ((opt = getopt(argc, argv, "Slic:ep:vh")) != -1) {
+	while ((opt = getopt(argc, argv, "Slib:c:ep:vh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -2856,6 +2872,9 @@ main(int argc, char *argv[])
 			break;
 		case 'i':
 			cfg.filtermode = 1;
+			break;
+		case 'b':
+			ipath = optarg;
 			break;
 		case 'c':
 			if (atoi(optarg) > 7)
@@ -2878,7 +2897,19 @@ main(int argc, char *argv[])
 		}
 	}
 
-	if (argc == optind) {
+	/* Parse bookmarks string, if available */
+	bmstr = getenv("NNN_BMS");
+	if (bmstr)
+		parsebmstr(bmstr);
+
+	if (ipath) { /* Open a bookmark directly */
+		if (get_bm_loc(ipath, cwd) == NULL) {
+			fprintf(stderr, "%s\n", STR_INVBM);
+			exit(1);
+		}
+
+		ipath = cwd;
+	} else if (argc == optind) {
 		/* Start in the current directory */
 		ipath = getcwd(cwd, PATH_MAX);
 		if (ipath == NULL)
@@ -2915,11 +2946,6 @@ main(int argc, char *argv[])
 	gtimeout.tv_sec = 0;
 	gtimeout.tv_nsec = 0;
 #endif
-
-	/* Parse bookmarks string, if available */
-	bmstr = getenv("NNN_BMS");
-	if (bmstr)
-		parsebmstr(bmstr);
 
 	/* Edit text in EDITOR, if opted */
 	if (getenv("NNN_USE_EDITOR"))
