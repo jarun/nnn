@@ -170,6 +170,7 @@ disabledbg()
 #define clearprompt() printmsg("")
 #define printwarn() printmsg(strerror(errno))
 #define istopdir(path) (path[1] == '\0' && path[0] == '/')
+#define copyfilter() xstrlcpy(fltr, ifilter, NAME_MAX)
 #define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
@@ -748,8 +749,8 @@ setfilter(regex_t *regex, char *filter)
 	r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
 	if (r != 0 && filter && filter[0] != '\0') {
 		len = COLS;
-		if (len > LINE_MAX)
-			len = LINE_MAX;
+		if (len > NAME_MAX)
+			len = NAME_MAX;
 		regerror(r, regex, g_buf, len);
 		printmsg(g_buf);
 	}
@@ -1093,8 +1094,8 @@ readinput(void)
 	cleartimeout();
 	echo();
 	curs_set(TRUE);
-	memset(g_buf, 0, LINE_MAX);
-	wgetnstr(stdscr, g_buf, LINE_MAX - 1);
+	memset(g_buf, 0, NAME_MAX + 1);
+	wgetnstr(stdscr, g_buf, NAME_MAX);
 	noecho();
 	curs_set(FALSE);
 	settimeout();
@@ -2140,7 +2141,7 @@ static void
 browse(char *ipath, char *ifilter)
 {
 	static char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX], lastdir[PATH_MAX], mark[PATH_MAX];
-	static char fltr[LINE_MAX];
+	static char fltr[NAME_MAX + 1];
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
 	int r, fd, presel;
@@ -2148,7 +2149,7 @@ browse(char *ipath, char *ifilter)
 	bool dir_changed = FALSE;
 
 	xstrlcpy(path, ipath, PATH_MAX);
-	xstrlcpy(fltr, ifilter, LINE_MAX);
+	copyfilter();
 	oldpath[0] = newpath[0] = lastdir[0] = mark[0] = '\0';
 
 	if (cfg.filtermode)
@@ -2228,7 +2229,7 @@ nochange:
 
 			xstrlcpy(path, dir, PATH_MAX);
 			/* Reset filter */
-			xstrlcpy(fltr, ifilter, LINE_MAX);
+			copyfilter();
 			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
@@ -2268,7 +2269,7 @@ nochange:
 				xstrlcpy(path, newpath, PATH_MAX);
 				oldpath[0] = '\0';
 				/* Reset filter */
-				xstrlcpy(fltr, ifilter, LINE_MAX);
+				copyfilter();
 				if (cfg.filtermode)
 					presel = FILTER;
 				goto begin;
@@ -2463,7 +2464,7 @@ nochange:
 			xstrlcpy(path, newpath, PATH_MAX);
 
 			/* Reset filter */
-			xstrlcpy(fltr, ifilter, LINE_MAX);
+			copyfilter();
 			DPRINTF_S(path);
 			if (cfg.filtermode)
 				presel = FILTER;
@@ -2494,7 +2495,7 @@ nochange:
 			xstrlcpy(path, dir, PATH_MAX);
 			oldpath[0] = '\0';
 			/* Reset filter */
-			xstrlcpy(fltr, ifilter, LINE_MAX);
+			copyfilter();
 			DPRINTF_S(path);
 			if (cfg.filtermode)
 				presel = FILTER;
@@ -2523,7 +2524,7 @@ nochange:
 			xstrlcpy(path, newpath, PATH_MAX);
 			oldpath[0] = '\0';
 			/* Reset filter */
-			xstrlcpy(fltr, ifilter, LINE_MAX);
+			copyfilter();
 			DPRINTF_S(path);
 			if (cfg.filtermode)
 				presel = FILTER;
@@ -2556,7 +2557,7 @@ nochange:
 			xstrlcpy(path, newpath, PATH_MAX);
 
 			/* Reset filter */
-			xstrlcpy(fltr, ifilter, LINE_MAX);
+			copyfilter();
 			DPRINTF_S(path);
 
 			if (cfg.filtermode)
@@ -2568,7 +2569,7 @@ nochange:
 			goto nochange;
 		case SEL_FLTR:
 			presel = filterentries(path);
-			xstrlcpy(fltr, ifilter, LINE_MAX);
+			copyfilter();
 			DPRINTF_S(fltr);
 			/* Save current */
 			if (ndents > 0)
@@ -2587,7 +2588,7 @@ nochange:
 		case SEL_TOGGLEDOT:
 			cfg.showhidden ^= 1;
 			initfilter(cfg.showhidden, &ifilter);
-			xstrlcpy(fltr, ifilter, LINE_MAX);
+			copyfilter();
 			goto begin;
 		case SEL_DETAIL:
 			cfg.showdetail ^= 1;
