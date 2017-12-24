@@ -196,7 +196,7 @@ typedef struct entry {
 	off_t size;
 	blkcnt_t blocks; /* number of 512B blocks allocated */
 	mode_t mode;
-	uchar nlen; /* Length of file name */
+	uint nlen; /* Length of file name; can be uchar (< NAME_MAX + 1) */
 } *pEntry;
 
 /* Bookmark */
@@ -264,11 +264,11 @@ static char * const utils[] = {
 };
 
 /* Common message strings */
-static char *STR_NFTWFAIL = "nftw(3) failed";
-static char *STR_ATROOT = "You are at /";
-static char *STR_NOHOME = "HOME not set";
-static char *STR_INPUT = "No traversal delimiter allowed";
-static char *STR_INVBM = "Invalid bookmark";
+static const char *STR_NFTWFAIL = "nftw(3) failed";
+static const char *STR_ATROOT = "You are at /";
+static const char *STR_NOHOME = "HOME not set";
+static const char *STR_INPUT = "No traversal delimiter allowed";
+static const char *STR_INVBM = "Invalid bookmark";
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[MAX_CMD_LEN];
@@ -280,7 +280,7 @@ static void redraw(char *path);
 
 /* Messages show up at the bottom */
 static void
-printmsg(char *msg)
+printmsg(const char *msg)
 {
 	mvprintw(LINES - 1, 0, "%s\n", msg);
 }
@@ -319,7 +319,7 @@ max_openfds()
 	if (setrlimit(RLIMIT_NOFILE, &rl) == 0) {
 		limit = rl.rlim_max - (rl.rlim_max >> 2);
 		/*
-		 * 20K is arbitrary> If the limit is set to max possible
+		 * 20K is arbitrary. If the limit is set to max possible
 		 * value, the memory usage increases to more than double.
 		 */
 		return limit > 20480 ?  20480 : limit;
@@ -354,7 +354,8 @@ xstrlen(const char *s)
 static size_t
 xstrlcpy(char *dest, const char *src, size_t n)
 {
-	static size_t len, blocks, lsize = sizeof(ulong);
+	static size_t len, blocks;
+	static const uint lsize = sizeof(ulong);
 	static const uint _WSHIFT = (sizeof(ulong) == 8) ? 3 : 2;
 
 	if (!src || !dest)
@@ -452,7 +453,7 @@ xmemrchr(uchar *s, uchar ch, size_t n)
 static char *
 xdirname(const char *path)
 {
-	static char *buf = g_buf, *last_slash, *runp;
+	static char * const buf = g_buf, *last_slash, *runp;
 
 	xstrlcpy(buf, path, PATH_MAX);
 
@@ -556,7 +557,7 @@ initcurses(void)
  * Limited to 2 arguments to a program, flag works on bit set.
  */
 static void
-spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
+spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uchar flag)
 {
 	static char *shlvl;
 	static pid_t pid;
@@ -605,7 +606,7 @@ spawn(char *file, char *arg1, char *arg2, char *dir, uchar flag)
 
 /* Get program name from env var, else return fallback program */
 static char *
-xgetenv(char *name, char *fallback)
+xgetenv(const char *name, char *fallback)
 {
 	static char *value;
 
@@ -619,7 +620,7 @@ xgetenv(char *name, char *fallback)
 
 /* Check if a dir exists, IS a dir and is readable */
 static bool
-xdiraccess(char *path)
+xdiraccess(const char *path)
 {
 	static DIR *dirp;
 
@@ -642,9 +643,9 @@ xdiraccess(char *path)
  * If the absolute numeric values are same, we fallback to alphasort.
  */
 static int
-xstricmp(char *s1, char *s2)
+xstricmp(const char * const s1, const char * const s2)
 {
-	static char *c1, *c2;
+	static const char *c1, *c2;
 
 	c1 = s1;
 	while (isspace(*c1))
@@ -722,11 +723,11 @@ strstrip(char *s)
 }
 
 static char *
-getmime(char *file)
+getmime(const char *file)
 {
 	static regex_t regex;
 	static uint i;
-	static uint len = LEN(assocs);
+	static const uint len = LEN(assocs);
 
 	for (i = 0; i < len; ++i) {
 		if (regcomp(&regex, assocs[i].regex, REG_NOSUB | REG_EXTENDED | REG_ICASE) != 0)
@@ -734,6 +735,7 @@ getmime(char *file)
 		if (regexec(&regex, file, 0, NULL, 0) == 0)
 			return assocs[i].mime;
 	}
+
 	return NULL;
 }
 
@@ -810,8 +812,8 @@ static int
 nextsel(char **run, char **env, int *presel)
 {
 	static int c;
-	static uchar i;
-	static uint len = LEN(bindings);
+	static uint i;
+	static const uint len = LEN(bindings);
 #ifdef LINUX_INOTIFY
 	static char inotify_buf[EVENT_BUF_LEN];
 #elif defined(BSD_KQUEUE)
@@ -1607,7 +1609,7 @@ getorder(size_t size)
 }
 
 static size_t
-get_fs_free(char *path)
+get_fs_free(const char *path)
 {
 	static struct statvfs svb;
 
@@ -1618,7 +1620,7 @@ get_fs_free(char *path)
 }
 
 static size_t
-get_fs_capacity(char *path)
+get_fs_capacity(const char *path)
 {
 	struct statvfs svb;
 
@@ -1949,13 +1951,13 @@ dentfree(struct entry *dents)
 
 /* Return the position of the matching entry or 0 otherwise */
 static int
-dentfind(struct entry *dents, int n, char *path)
+dentfind(struct entry *dents, char *path, int n)
 {
-	if (!path)
-		return 0;
-
 	static int i;
 	static char *p;
+
+	if (!path)
+		return 0;
 
 	p = basename(path);
 	DPRINTF_S(p);
@@ -2002,7 +2004,7 @@ populate(char *path, char *oldpath, char *fltr)
 #endif
 
 	/* Find cur from history */
-	cur = dentfind(dents, ndents, oldpath);
+	cur = dentfind(dents, oldpath, ndents);
 	return 0;
 }
 
