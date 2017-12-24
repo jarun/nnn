@@ -433,17 +433,19 @@ xstrcmp(const char *s1, const char *s2)
 static void *
 xmemrchr(uchar *s, uchar ch, size_t n)
 {
+	static uchar *ptr;
+
 	if (!s || !n)
 		return NULL;
 
-	s = s + n - 1;
+	ptr = s + n;
 
-	while (n) {
-		if (*s == ch)
-			return s;
+	do {
+		--ptr;
 
-		--n, --s;
-	}
+		if (*ptr == ch)
+			return ptr;
+	} while (s != ptr);
 
 	return NULL;
 }
