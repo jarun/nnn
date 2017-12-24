@@ -171,6 +171,7 @@ disabledbg()
 #define printwarn() printmsg(strerror(errno))
 #define istopdir(path) (path[1] == '\0' && path[0] == '/')
 #define copyfilter() xstrlcpy(fltr, ifilter, NAME_MAX)
+#define copycurname() xstrlcpy(oldname, dents[cur].name, NAME_MAX + 1)
 #define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
@@ -425,6 +426,7 @@ xstrcmp(const char *s1, const char *s2)
 /*
  * The poor man's implementation of memrchr(3).
  * We are only looking for '/' in this program.
+ * And we are NOT expecting a '/' at the end.
  * Ideally 0 < n <= strlen(s).
  */
 static void *
@@ -504,6 +506,15 @@ xdirname(const char *path)
 	}
 
 	return buf;
+}
+
+static char *
+xbasename(char *path)
+{
+	static char *base;
+
+	base = xmemrchr((uchar *)path, '/', xstrlen(path));
+	return base ? base + 1 : path;
 }
 
 /*
@@ -1952,26 +1963,24 @@ dentfree(struct entry *dents)
 
 /* Return the position of the matching entry or 0 otherwise */
 static int
-dentfind(struct entry *dents, char *path, int n)
+dentfind(struct entry *dents, const char *fname, int n)
 {
 	static int i;
-	static char *p;
 
-	if (!path)
+	if (!fname)
 		return 0;
 
-	p = basename(path);
-	DPRINTF_S(p);
+	DPRINTF_S(fname);
 
 	for (i = 0; i < n; ++i)
-		if (xstrcmp(p, dents[i].name) == 0)
+		if (xstrcmp(fname, dents[i].name) == 0)
 			return i;
 
 	return 0;
 }
 
 static int
-populate(char *path, char *oldpath, char *fltr)
+populate(char *path, char *oldname, char *fltr)
 {
 	static regex_t re;
 
@@ -2005,7 +2014,7 @@ populate(char *path, char *oldpath, char *fltr)
 #endif
 
 	/* Find cur from history */
-	cur = dentfind(dents, oldpath, ndents);
+	cur = dentfind(dents, oldname, ndents);
 	return 0;
 }
 
@@ -2140,8 +2149,9 @@ redraw(char *path)
 static void
 browse(char *ipath, char *ifilter)
 {
-	static char path[PATH_MAX], oldpath[PATH_MAX], newpath[PATH_MAX], lastdir[PATH_MAX], mark[PATH_MAX];
+	static char path[PATH_MAX], newpath[PATH_MAX], lastdir[PATH_MAX], mark[PATH_MAX];
 	static char fltr[NAME_MAX + 1];
+	static char oldname[NAME_MAX + 1];
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
 	int r, fd, presel;
@@ -2150,7 +2160,7 @@ browse(char *ipath, char *ifilter)
 
 	xstrlcpy(path, ipath, PATH_MAX);
 	copyfilter();
-	oldpath[0] = newpath[0] = lastdir[0] = mark[0] = '\0';
+	oldname[0] = newpath[0] = lastdir[0] = mark[0] = '\0';
 
 	if (cfg.filtermode)
 		presel = FILTER;
@@ -2177,7 +2187,7 @@ begin:
 	}
 #endif
 
-	if (populate(path, oldpath, fltr) == -1) {
+	if (populate(path, oldname, fltr) == -1) {
 		printwarn();
 		goto nochange;
 	}
@@ -2221,7 +2231,7 @@ nochange:
 			}
 
 			/* Save history */
-			xstrlcpy(oldpath, path, PATH_MAX);
+			xstrlcpy(oldname, xbasename(path), NAME_MAX + 1);
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
@@ -2267,7 +2277,7 @@ nochange:
 				dir_changed = TRUE;
 
 				xstrlcpy(path, newpath, PATH_MAX);
-				oldpath[0] = '\0';
+				oldname[0] = '\0';
 				/* Reset filter */
 				copyfilter();
 				if (cfg.filtermode)
@@ -2432,7 +2442,7 @@ nochange:
 				 * We mark the current dir in parent dir
 				 */
 				if (r == 1) {
-					xstrlcpy(oldpath, path, PATH_MAX);
+					xstrlcpy(oldname, xbasename(path), NAME_MAX + 1);
 					truecd = 2;
 				}
 
@@ -2451,10 +2461,10 @@ nochange:
 				if (xstrcmp(path, newpath) == 0)
 					break;
 
-				oldpath[0] = '\0';
+				oldname[0] = '\0';
 			} else if (truecd == 1)
 				/* Sure change in dir */
-				oldpath[0] = '\0';
+				oldname[0] = '\0';
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
@@ -2493,7 +2503,7 @@ nochange:
 			dir_changed = TRUE;
 
 			xstrlcpy(path, dir, PATH_MAX);
-			oldpath[0] = '\0';
+			oldname[0] = '\0';
 			/* Reset filter */
 			copyfilter();
 			DPRINTF_S(path);
@@ -2522,7 +2532,7 @@ nochange:
 			xstrlcpy(lastdir, path, PATH_MAX);
 			dir_changed = TRUE;
 			xstrlcpy(path, newpath, PATH_MAX);
-			oldpath[0] = '\0';
+			oldname[0] = '\0';
 			/* Reset filter */
 			copyfilter();
 			DPRINTF_S(path);
@@ -2547,7 +2557,7 @@ nochange:
 			if (xstrcmp(path, newpath) == 0)
 				break;
 
-			oldpath[0] = '\0';
+			oldname[0] = '\0';
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
@@ -2573,7 +2583,7 @@ nochange:
 			DPRINTF_S(fltr);
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				copycurname();
 			goto nochange;
 		case SEL_MFLTR:
 			cfg.filtermode ^= 1;
@@ -2595,18 +2605,18 @@ nochange:
 			cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				copycurname();
 			goto begin;
 		case SEL_STATS:
 			if (ndents > 0) {
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 
-				if (lstat(oldpath, &sb) == -1) {
+				if (lstat(newpath, &sb) == -1) {
 					if (dents)
 						dentfree(dents);
 					errexit();
 				} else {
-					if (show_stats(oldpath, dents[cur].name, &sb) < 0) {
+					if (show_stats(newpath, dents[cur].name, &sb) < 0) {
 						printwarn();
 						goto nochange;
 					}
@@ -2618,12 +2628,12 @@ nochange:
 		case SEL_MEDIA: // fallthrough
 		case SEL_FMEDIA:
 			if (ndents > 0) {
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 
 				if (sel == SEL_MEDIA || sel == SEL_FMEDIA)
-					r = show_mediainfo(oldpath, run);
+					r = show_mediainfo(newpath, run);
 				else
-					r = handle_archive(oldpath, run, path);
+					r = handle_archive(newpath, run, path);
 
 				if (r == -1) {
 					if (sel == SEL_MEDIA || sel == SEL_FMEDIA)
@@ -2650,7 +2660,7 @@ nochange:
 			cfg.blkorder = 0;
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				copycurname();
 			goto begin;
 		case SEL_BSIZE:
 			cfg.blkorder ^= 1;
@@ -2662,7 +2672,7 @@ nochange:
 			cfg.sizeorder = 0;
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				copycurname();
 			goto begin;
 		case SEL_MTIME:
 			cfg.mtimeorder ^= 1;
@@ -2670,12 +2680,12 @@ nochange:
 			cfg.blkorder = 0;
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				copycurname();
 			goto begin;
 		case SEL_REDRAW:
 			/* Save current */
 			if (ndents > 0)
-				mkpath(path, dents[cur].name, oldpath, PATH_MAX);
+				copycurname();
 			goto begin;
 		case SEL_COPY:
 			if (copier && ndents) {
@@ -2696,7 +2706,7 @@ nochange:
 				break;
 
 			/* Allow only relative, same dir paths */
-			if (tmp[0] == '/' || xstrcmp(basename(tmp), tmp) != 0) {
+			if (tmp[0] == '/' || xstrcmp(xbasename(tmp), tmp) != 0) {
 				printmsg(STR_INPUT);
 				goto nochange;
 			}
@@ -2736,7 +2746,7 @@ nochange:
 			}
 
 			close(fd);
-			mkpath(path, tmp, oldpath, PATH_MAX);
+			xstrlcpy(oldname, tmp, NAME_MAX + 1);
 			goto begin;
 		case SEL_RENAME:
 			if (ndents <= 0)
@@ -2749,7 +2759,7 @@ nochange:
 				break;
 
 			/* Allow only relative, same dir paths */
-			if (tmp[0] == '/' || xstrcmp(basename(tmp), tmp) != 0) {
+			if (tmp[0] == '/' || xstrcmp(xbasename(tmp), tmp) != 0) {
 				printmsg(STR_INPUT);
 				goto nochange;
 			}
@@ -2786,7 +2796,7 @@ nochange:
 			}
 
 			close(fd);
-			mkpath(path, tmp, oldpath, PATH_MAX);
+			xstrlcpy(oldname, tmp, NAME_MAX + 1);
 			goto begin;
 		case SEL_HELP:
 			show_help(path);
