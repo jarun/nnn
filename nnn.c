@@ -2936,13 +2936,13 @@ main(int argc, char *argv[])
 	/* Initialize inotify */
 	inotify_fd = inotify_init1(IN_NONBLOCK);
 	if (inotify_fd < 0) {
-		fprintf(stderr, "Cannot initialize inotify: %s\n", strerror(errno));
+		fprintf(stderr, "inotify init! %s\n", strerror(errno));
 		exit(1);
 	}
 #elif defined(BSD_KQUEUE)
 	kq = kqueue();
 	if (kq < 0) {
-		fprintf(stderr, "Cannot initialize kqueue: %s\n", strerror(errno));
+		fprintf(stderr, "kqueue init! %s\n", strerror(errno));
 		exit(1);
 	}
 
