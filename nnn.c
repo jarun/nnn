@@ -157,6 +157,7 @@ disabledbg()
 #define BM_MAX 10
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR 0x1000 /* 64 dir entries at a time, avg. 64 chars per filename = 64*64B = 4KB */
+#define DESCRIPTOR_LEN 32
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE     0x00  /* no flag set */
@@ -1369,32 +1370,32 @@ get_fileind(mode_t mode, char *desc)
 
 	if (S_ISREG(mode)) {
 		c = '-';
-		sprintf(desc, "%s", "regular file");
+		xstrlcpy(desc, "regular file", DESCRIPTOR_LEN);
 		if (mode & 0100)
-			strcat(desc, ", executable");
+			xstrlcpy(desc + 12, ", executable", DESCRIPTOR_LEN - 12); /* Length of string "regular file" is 12 */
 	} else if (S_ISDIR(mode)) {
 		c = 'd';
-		sprintf(desc, "%s", "directory");
+		xstrlcpy(desc, "directory", DESCRIPTOR_LEN);
 	} else if (S_ISBLK(mode)) {
 		c = 'b';
-		sprintf(desc, "%s", "block special device");
+		xstrlcpy(desc, "block special device", DESCRIPTOR_LEN);
 	} else if (S_ISCHR(mode)) {
 		c = 'c';
-		sprintf(desc, "%s", "character special device");
+		xstrlcpy(desc, "character special device", DESCRIPTOR_LEN);
 #ifdef S_ISFIFO
 	} else if (S_ISFIFO(mode)) {
 		c = 'p';
-		sprintf(desc, "%s", "FIFO");
+		xstrlcpy(desc, "FIFO", DESCRIPTOR_LEN);
 #endif  /* S_ISFIFO */
 #ifdef S_ISLNK
 	} else if (S_ISLNK(mode)) {
 		c = 'l';
-		sprintf(desc, "%s", "symbolic link");
+		xstrlcpy(desc, "symbolic link", DESCRIPTOR_LEN);
 #endif  /* S_ISLNK */
 #ifdef S_ISSOCK
 	} else if (S_ISSOCK(mode)) {
 		c = 's';
-		sprintf(desc, "%s", "socket");
+		xstrlcpy(desc, "socket", DESCRIPTOR_LEN);
 #endif  /* S_ISSOCK */
 #ifdef S_ISDOOR
     /* Solaris 2.6, etc. */
@@ -1419,9 +1420,9 @@ get_lsperms(mode_t mode, char *desc)
 	static char bits[11] = {'\0'};
 
 	bits[0] = get_fileind(mode, desc);
-	strcpy(&bits[1], rwx[(mode >> 6) & 7]);
-	strcpy(&bits[4], rwx[(mode >> 3) & 7]);
-	strcpy(&bits[7], rwx[(mode & 7)]);
+	xstrlcpy(&bits[1], rwx[(mode >> 6) & 7], 4);
+	xstrlcpy(&bits[4], rwx[(mode >> 3) & 7], 4);
+	xstrlcpy(&bits[7], rwx[(mode & 7)], 4);
 
 	if (mode & S_ISUID)
 		bits[3] = (mode & 0100) ? 's' : 'S';  /* user executable */
@@ -1509,7 +1510,7 @@ get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int page
 static int
 show_stats(char *fpath, char *fname, struct stat *sb)
 {
-	char desc[32];
+	char desc[DESCRIPTOR_LEN];
 	char *perms = get_lsperms(sb->st_mode, desc);
 	char *p, *begin = g_buf;
 	char tmp[] = "/tmp/nnnXXXXXX";
@@ -2108,9 +2109,9 @@ redraw(char *path)
 			static char sort[9];
 
 			if (cfg.mtimeorder)
-				sprintf(sort, "by time ");
+				xstrlcpy(sort, "by time ", 9);
 			else if (cfg.sizeorder)
-				sprintf(sort, "by size ");
+				xstrlcpy(sort, "by size ", 9);
 			else
 				sort[0] = '\0';
 
@@ -2636,12 +2637,13 @@ nochange:
 					r = handle_archive(newpath, run, path);
 
 				if (r == -1) {
+					xstrlcpy(newpath, "missing ", PATH_MAX);
 					if (sel == SEL_MEDIA || sel == SEL_FMEDIA)
-						sprintf(g_buf, "%s missing", utils[cfg.metaviewer]);
+						xstrlcpy(newpath + 8, utils[cfg.metaviewer], 32);
 					else
-						sprintf(g_buf, "%s missing", utils[4]);
+						xstrlcpy(newpath + 8, utils[4], 32);
 
-					printmsg(g_buf);
+					printmsg(newpath);
 					goto nochange;
 				}
 			}
@@ -2689,10 +2691,7 @@ nochange:
 			goto begin;
 		case SEL_COPY:
 			if (copier && ndents) {
-				if (istopdir(path))
-					snprintf(newpath, PATH_MAX, "/%s", dents[cur].name);
-				else
-					snprintf(newpath, PATH_MAX, "%s/%s", path, dents[cur].name);
+				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				spawn(copier, newpath, NULL, NULL, F_NONE);
 				printmsg(newpath);
 			} else if (!copier)
