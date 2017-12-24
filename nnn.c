@@ -3,7 +3,7 @@
 /*
  * Visual layout:
  * .---------
- * | cwd: /mnt/path
+ * | DIR: /mnt/path
  * |
  * |    file0
  * |    file1
@@ -148,7 +148,7 @@ disabledbg()
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define MAX_CMD_LEN 5120
-#define CWD   "cwd: "
+#define CWD   "DIR: "
 #define CURSR " > "
 #define EMPTY "   "
 #define CURSYM(flag) (flag ? CURSR : EMPTY)
