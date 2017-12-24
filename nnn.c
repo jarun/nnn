@@ -1678,8 +1678,8 @@ show_help(char *path)
       "7↓, j, ^N | Next entry\n"
       "7PgUp, ^U | Scroll half page up\n"
       "7PgDn, ^D | Scroll half page down\n"
-"1Home, g, ^, ^A | Jump to first entry\n"
- "2End, G, $, ^E | Jump to last entry\n"
+"1Home, g, ^, ^A | First entry\n"
+ "2End, G, $, ^E | Last entry\n"
    "4→, ↵, l, ^M | Open file or enter dir\n"
 "1←, Bksp, h, ^H | Go to parent dir\n"
         "9Insert | Toggle navigate-as-you-type\n"
@@ -1698,9 +1698,9 @@ show_help(char *path)
              "em | Brief media info\n"
              "eM | Full media info\n"
 	     "en | Create new\n"
-            "d^R | Rename selected entry\n"
+            "d^R | Rename entry\n"
              "es | Toggle sort by size\n"
-             "eS | Toggle disk usage mode\n"
+             "eS | Toggle du mode\n"
              "et | Toggle sort by mtime\n"
              "e! | Spawn SHELL in dir\n"
              "ee | Edit entry in EDITOR\n"
@@ -1711,7 +1711,7 @@ show_help(char *path)
             "d^K | Invoke file path copier\n"
             "d^L | Redraw, clear prompt\n"
              "e? | Help, settings\n"
-             "eQ | Quit and change dir\n"
+             "eQ | Quit and cd\n"
          "aq, ^Q | Quit\n\n");
 
 	if (fd == -1)
@@ -2829,11 +2829,11 @@ nochange:
 static void
 usage(void)
 {
-	printf("usage: nnn [-c N] [-e] [-i] [-l] [-p nlay] [-S]\n\
-           [-v] [-h] [PATH]\n\n\
+	printf("usage: nnn [-b key] [-c N] [-e] [-i] [-l]\n\
+           [-p nlay] [-S] [-v] [-h] [PATH]\n\n\
 The missing terminal file browser for X.\n\n\
 positional arguments:\n\
-  PATH   directory to open [default: current dir]\n\n\
+  PATH   start dir [default: current dir]\n\n\
 optional arguments:\n\
  -b key  specify bookmark key to open\n\
  -c N    specify dir color, disables if N>7\n\

@@ -181,13 +181,13 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
 #### Cmdline options
 
 ```
-usage: nnn [-c N] [-e] [-i] [-l] [-p nlay] [-S]
-           [-v] [-h] [PATH]
+usage: nnn [-b key] [-c N] [-e] [-i] [-l]
+           [-p nlay] [-S] [-v] [-h] [PATH]
 
 The missing terminal file browser for X.
 
 positional arguments:
-  PATH   directory to open [default: current dir]
+  PATH   start dir [default: current dir]
 
 optional arguments:
  -b key  specify bookmark key to open
@@ -212,8 +212,8 @@ optional arguments:
        ↓, j, ^N | Next entry
        PgUp, ^U | Scroll half page up
        PgDn, ^D | Scroll half page down
- Home, g, ^, ^A | Jump to first entry
-  End, G, $, ^E | Jump to last entry
+ Home, g, ^, ^A | First entry
+  End, G, $, ^E | Fast entry
     →, ↵, l, ^M | Open file or enter dir
  ←, Bksp, h, ^H | Go to parent dir
          Insert | Toggle navigate-as-you-type
@@ -232,9 +232,9 @@ optional arguments:
               m | Brief media info
               M | Full media info
               n | Create new
-             ^R | Rename selected entry
+             ^R | Rename entry
               s | Toggle sort by size
-              S | Toggle disk usage mode
+              S | Toggle du mode
               t | Toggle sort by mtime
               ! | Spawn SHELL in dir
               e | Edit entry in EDITOR
@@ -245,7 +245,7 @@ optional arguments:
              ^K | Invoke file path copier
              ^L | Redraw, clear prompt
               ? | Help, settings
-              Q | Quit and change dir
+              Q | Quit and cd
           q, ^Q | Quit
 ```
 
