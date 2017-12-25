@@ -1609,22 +1609,6 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	return 0;
 }
 
-/*
- * Get the order of 2 for this size
- * In brief - return the number of trailing zeroes
- */
-static int
-getorder(size_t size)
-{
-	static int count, mask;
-
-	for (mask = 1, count = 0; count < 32; mask <<= 1, ++count)
-		if ((size & mask) != 0)
-			return count;
-
-	return 32;
-}
-
 static size_t
 get_fs_free(const char *path)
 {
@@ -1633,7 +1617,7 @@ get_fs_free(const char *path)
 	if (statvfs(path, &svb) == -1)
 		return 0;
 	else
-		return svb.f_bavail << getorder(svb.f_frsize);
+		return svb.f_bavail << (ffsl(svb.f_frsize) - 1);
 }
 
 static size_t
@@ -1644,7 +1628,7 @@ get_fs_capacity(const char *path)
 	if (statvfs(path, &svb) == -1)
 		return 0;
 	else
-		return svb.f_blocks << getorder(svb.f_bsize);
+		return svb.f_blocks << (ffsl(svb.f_bsize) - 1);
 }
 
 static int
