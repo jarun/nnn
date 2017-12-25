@@ -15,16 +15,6 @@ packages:
     deps:
       - ncurses
       - readline
-  fedora26:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - ncurses-devel
-      - readline-devel
-    deps:
-      - ncurses
-      - readline
   centos7.3:
     builddeps:
       - make
@@ -38,6 +28,36 @@ packages:
     commands:
       pre:
         - yum install epel-release
+  debian9:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - libncursesw5-dev
+      - libreadline-dev
+    deps:
+      - libncursesw5
+      - readline-common
+  fedora26:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+  opensuse42.3:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
   ubuntu16.04:
     builddeps:
       - make
@@ -58,13 +78,3 @@ packages:
     deps:
       - libncursesw5
       - libreadline6
-  debian9:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - libncursesw5-dev
-      - libreadline-dev
-    deps:
-      - libncursesw5
-      - readline-common
