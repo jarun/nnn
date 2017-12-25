@@ -23,7 +23,7 @@ all: $(BIN) $(PLAYER)
 $(SRC): nnn.h
 
 $(BIN): $(SRC)
-	$(CC) -O3 -fno-tree-loop-vectorize $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	$(CC) -O2 $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 	strip $@
 
 debug: $(SRC)

@@ -1182,10 +1182,12 @@ parsebmstr(char *bms)
 static char *
 get_bm_loc(char *key, char *buf)
 {
+	int r;
+
 	if (!key || !key[0])
 		return NULL;
 
-	for (int r = 0; bookmark[r].key && r < BM_MAX; ++r) {
+	for (r = 0; bookmark[r].key && r < BM_MAX; ++r) {
 		if (xstrcmp(bookmark[r].key, key) == 0) {
 			if (bookmark[r].loc[0] == '~') {
 				char *home = getenv("HOME");
