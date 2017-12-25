@@ -98,6 +98,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Desktop search (default gnome-search-tool, customizable) integration
 - Mimes
   - Desktop opener integration
+  - Open file with a custom application
   - Optionally open text files in EDITOR (fallback vi)
   - Customizable bash script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) to handle actions
 - Information
@@ -105,6 +106,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Detailed file information
   - Media information (needs mediainfo or exiftool, if specified)
 - Ordering
+  - Numeric order (1, 2, ... 10, 11, ...) for numeric names
   - Sort by file name, modification time, size
 - Convenience
   - Create, rename files and directories
@@ -216,6 +218,7 @@ optional arguments:
   End, G, $, ^E | Fast entry
     →, ↵, l, ^M | Open file or enter dir
  ←, Bksp, h, ^H | Go to parent dir
+             ^O | Open with...
          Insert | Toggle navigate-as-you-type
               ~ | Go HOME
               & | Go to initial dir

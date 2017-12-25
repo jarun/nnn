@@ -1699,6 +1699,7 @@ show_help(char *path)
  "2End, G, $, ^E | Last entry\n"
    "4→, ↵, l, ^M | Open file or enter dir\n"
 "1←, Bksp, h, ^H | Go to parent dir\n"
+            "d^O | Open with...\n"
         "9Insert | Toggle navigate-as-you-type\n"
              "e~ | Go HOME\n"
              "e& | Go to initial dir\n"
@@ -1714,7 +1715,7 @@ show_help(char *path)
              "eD | File details\n"
              "em | Brief media info\n"
              "eM | Full media info\n"
-	     "en | Create new\n"
+             "en | Create new\n"
             "d^R | Rename entry\n"
              "es | Toggle sort by size\n"
              "eS | Toggle du mode\n"
@@ -2699,8 +2700,12 @@ nochange:
 			} else if (!copier)
 				printmsg("NNN_COPIER is not set");
 			goto nochange;
+		case SEL_OPEN:
+				printprompt("open with: "); // fallthrough
 		case SEL_NEW:
-			printprompt("name: ");
+			if (sel == SEL_NEW)
+				printprompt("name: ");
+
 			tmp = xreadline(NULL);
 			clearprompt();
 			if (tmp == NULL || tmp[0] == '\0')
@@ -2710,6 +2715,22 @@ nochange:
 			if (tmp[0] == '/' || xstrcmp(xbasename(tmp), tmp) != 0) {
 				printmsg(STR_INPUT);
 				goto nochange;
+			}
+
+			if (sel == SEL_OPEN) {
+				printprompt("Press 'c' for cli mode");
+				cleartimeout();
+				r = getch();
+				settimeout();
+				if (r == 'c')
+					r = F_NORMAL;
+				else
+					r = F_NOWAIT;
+
+				mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				spawn(tmp, newpath, NULL, path, r);
+
+				continue;
 			}
 
 			/* Open the descriptor to currently open directory */
