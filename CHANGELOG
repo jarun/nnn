@@ -1,3 +1,15 @@
+nnn v1.6
+2017-12-25
+
+What's in?
+- Shortcut `^O` to open file with custom application
+- Option `-b` to open bookmarks directly at start
+- Huge performance improvements around file name storing and handling
+- Several large static buffers removed or reduced
+- Several internal algorithms fine tuned for performance/resource usage
+
+-------------------------------------------------------------------------------
+
 nnn v1.5
 2017-10-05
 

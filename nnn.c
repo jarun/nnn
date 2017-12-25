@@ -138,7 +138,7 @@ disabledbg()
 #endif /* DEBUGMODE */
 
 /* Macro definitions */
-#define VERSION "1.5"
+#define VERSION "1.6"
 #define GENERAL_INFO "License: BSD 2-Clause\nWebpage: https://github.com/jarun/nnn"
 
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
