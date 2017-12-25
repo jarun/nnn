@@ -171,15 +171,11 @@ instructions.
 Filters support regexes to instantly (search-as-you-type) list the matching
 entries in the current directory.
 .Pp
-There are 3 ways to reset a filter: \fI^L\fR, a search with no matches or an
-extra backspace at the filter prompt (like vi).
+There are 3 ways to reset a filter: (1) pressing \fI^L\fR, (2) a search with no matches or
+(3) an extra backspace at the filter prompt (like vi).
 .Pp
-Common examples: If you want to list all matches starting with the filter
-expression, start the expression with a
-.Pa ^
-(caret) symbol. Type
-.Pa \.mkv
-to list all MKV files.
+Common use cases: (1) To list all matches starting with the filter expression,
+start the expression with a '^' (caret) symbol. (2) Type '\\.mkv' to list all MKV files.
 .Pp
 If
 .Nm

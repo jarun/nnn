@@ -10,7 +10,7 @@ ifeq ($(shell pkg-config ncursesw && echo 1),1)
 	CFLAGS += $(shell pkg-config --cflags ncursesw)
 	LDLIBS += $(shell pkg-config --libs   ncursesw)
 else
-	LDLIBS += -lncurses
+	LDLIBS += -lncursesw
 endif
 
 DISTFILES = nlay nnn.c nnn.h nnn.1 Makefile README.md LICENSE
@@ -23,7 +23,7 @@ all: $(BIN) $(PLAYER)
 $(SRC): nnn.h
 
 $(BIN): $(SRC)
-	$(CC) -O3 -fno-tree-loop-vectorize $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
+	$(CC) -O2 $(CFLAGS) -o $@ $^ $(LDFLAGS) $(LDLIBS)
 	strip $@
 
 debug: $(SRC)

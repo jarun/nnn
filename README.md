@@ -17,13 +17,11 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action!</i></a></p>
 
-`nnn` is a fork of [noice](http://git.2f30.org/noice/), a blazing-fast lightweight terminal file browser with easy keyboard shortcuts for navigation, opening files and running tasks. noice is developed considering terminal based systems. There is no config file and mime associations are hard-coded. However, the incredible user-friendliness and speed make it a perfect candidate for modern distros.
-
-`nnn` is faster and friendlier! It's probably the [fastest and most resource-sensitive](#performance) (with all its capabilities) file browser you have ever used. It's extremely flexible too - integrates with your DE and favourite GUI utilities, works with the desktop opener, adds new navigation options, [navigate-as-you-type](#navigate-as-you-type-mode) mode, bookmarks, a disk usage analyzer mode, comprehensive file details and much more. For a detailed comparison, visit [nnn vs. noice](https://github.com/jarun/nnn/wiki/nnn-vs.-noice).
+`nnn` is probably the [fastest and most resource-sensitive](#performance) (with all its capabilities) file browser you have ever used. It's extremely flexible too - integrates with your DE and favourite GUI utilities, works with the desktop opener, supports bookmarks, has smart navigation shortcuts, [navigate-as-you-type](#navigate-as-you-type-mode) mode, disk usage analyzer mode, comprehensive file details and much more. `nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today.
 
 Cool things you can do with `nnn`:
 
-- open any file in the default desktop application for the mime
+- open any file in the default desktop application or a custom one
 - *navigate-as-you-type* (*search-as-you-type* enabled even on directory switch)
 - check disk usage with number of files in current directory tree
 - run desktop search utility (gnome-search-tool or catfish) in any directory
@@ -131,7 +129,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
  4949 vaio      20   0   17520   4224   2584 S   0.0  0.1   0:00.54 nnn -S /
 ```
 
-`nnn` vs. mc vs. ranger memory usage while viewing a directory with 13790 files, sorted by size:
+`nnn` vs. midnight commander vs. ranger memory usage while viewing a directory with 13790 files, sorted by size:
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
@@ -258,9 +256,14 @@ Help & settings, file details, media info and archive listing are shown in the P
 
 Filters support regexes to instantly (search-as-you-type) list the matching entries in the current directory.
 
-There are 3 ways to reset a filter: <kbd>^L</kbd>, a search with no matches or an extra backspace at the filter prompt (like vi).
+There are 3 ways to reset a filter:
+- pressing <kbd>^L</kbd>
+- a search with no matches
+- an extra backspace at the filter prompt (like vi)
 
-Common examples: If you want to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol. Type `\.mkv` to list all MKV files.
+Common use cases:
+- to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol
+- type `\.mkv` to list all MKV files
 
 If `nnn` is invoked as root the default filter will also match hidden files.
 
