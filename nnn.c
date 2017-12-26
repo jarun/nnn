@@ -260,7 +260,7 @@ static char * const utils[] = {
 #ifdef __APPLE__
 	"/usr/bin/open",
 #else
-	"/usr/bin/xdg-open",
+	"xdg-open",
 #endif
 	"nlay",
 	"atool"
