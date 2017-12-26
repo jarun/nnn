@@ -1547,7 +1547,7 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	       (long long)sb->st_size, (long long)sb->st_blocks, sb->st_blksize, desc);
 #else
 	dprintf(fd, "\n    Size: %-15ld Blocks: %-10ld IO Block: %-6ld %s",
-	       sb->st_size, sb->st_blocks, sb->st_blksize, desc);
+	       sb->st_size, sb->st_blocks, (long)sb->st_blksize, desc);
 #endif
 
 	/* Show containing device, inode, hardlink count */
@@ -1556,9 +1556,9 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	dprintf(fd, "\n  Device: %-15s Inode: %-11llu Links: %-9hu",
 		g_buf, (unsigned long long)sb->st_ino, sb->st_nlink);
 #else
-	sprintf(g_buf, "%lxh/%lud", sb->st_dev, sb->st_dev);
+	sprintf(g_buf, "%lxh/%lud", (ulong)sb->st_dev, (ulong)sb->st_dev);
 	dprintf(fd, "\n  Device: %-15s Inode: %-11lu Links: %-9lu",
-		g_buf, sb->st_ino, sb->st_nlink);
+		g_buf, sb->st_ino, (ulong)sb->st_nlink);
 #endif
 
 	/* Show major, minor number for block or char device */
