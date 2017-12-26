@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 2.6)
-project(nnn LANGUAGES C)
+project(nnn)
+
+# not using cmake_cxx_compiler.
+set(CMAKE_CXX_COMPILER "")
 
 # find curses
 find_path( CURSES_INCLUDE_PATH NAMES curses.h )
