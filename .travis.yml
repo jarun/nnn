@@ -11,16 +11,6 @@ matrix:
     - os: linux
       dist: trusty
       compiler: clang
-    - os: linux
-      compiler: arm-linux-gnueabihf-gcc
-      addons:
-          apt:
-              packages: ['gcc-arm-linux-gnueabihf', 'libc6-dev-armhf-cross']
-    - os: linux
-      compiler: aarch64-linux-gnu-gcc
-      addons:
-          apt:
-              packages: ['gcc-aarch64-linux-gnu', 'libc6-dev-arm64-cross']
     - os: osx
       compiler: gcc
     - os: osx
