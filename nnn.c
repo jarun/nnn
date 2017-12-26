@@ -1055,7 +1055,7 @@ xreadline(char *fname)
 				}
 
 				/* TAB breaks cursor position, ignore it */
-				if (*ch == TAB || *ch == '\t')
+				if (*ch == '\t')
 					continue;
 
 				if (pos < buflen) {
