@@ -10,7 +10,7 @@ ifeq ($(shell pkg-config ncursesw && echo 1),1)
 	CFLAGS += $(shell pkg-config --cflags ncursesw)
 	LDLIBS += $(shell pkg-config --libs   ncursesw)
 else
-	LDLIBS += -lncurses
+	LDLIBS += -lncursesw
 endif
 
 DISTFILES = nlay nnn.c nnn.h nnn.1 Makefile README.md LICENSE
