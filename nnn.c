@@ -1619,7 +1619,7 @@ get_fs_free(const char *path)
 	if (statvfs(path, &svb) == -1)
 		return 0;
 	else
-		return svb.f_bavail << (ffs(svb.f_frsize) - 1);
+		return svb.f_bavail << ffs(svb.f_frsize >> 1);
 }
 
 static size_t
@@ -1630,7 +1630,7 @@ get_fs_capacity(const char *path)
 	if (statvfs(path, &svb) == -1)
 		return 0;
 	else
-		return svb.f_blocks << (ffs(svb.f_bsize) - 1);
+		return svb.f_blocks << ffs(svb.f_bsize >> 1);
 }
 
 static int
