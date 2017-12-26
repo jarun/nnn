@@ -3,7 +3,7 @@ project(nnn)
 
 # find curses
 find_path( CURSES_INCLUDE_PATH NAMES curses.h )
-find_library( CURSES_LIBRARY NAMES ncurses )
+find_library( CURSES_LIBRARY NAMES ncursesw ncurses )
 include_directories( ${CURSES_INCLUDE_PATHS} )
 
 # realine.
