@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.6)
-project(nnn)
+project(nnn LANGUAGES C)
 
 # find curses
 find_path( CURSES_INCLUDE_PATH NAMES curses.h )
@@ -19,3 +19,8 @@ message( STATUS "CURSES library ${CURSES_LIBRARY}" )
 
 add_executable(nnn nnn.c)
 target_link_libraries(nnn ${CURSES_LIBRARY} ${READLINE_LIBRARY} )
+
+# install 
+install( TARGETS nnn DESTINATION bin )
+install( PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/nlay DESTINATION bin)
+install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/nnn.1 DESTINATION share/man1)
