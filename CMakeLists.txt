@@ -23,4 +23,4 @@ target_link_libraries(nnn ${CURSES_LIBRARY} ${READLINE_LIBRARY} )
 # install 
 install( TARGETS nnn DESTINATION bin )
 install( PROGRAMS ${CMAKE_CURRENT_SOURCE_DIR}/nlay DESTINATION bin)
-install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/nnn.1 DESTINATION share/man/man1/)
+install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/nnn.1 DESTINATION share/man/man1/nnn.1)
