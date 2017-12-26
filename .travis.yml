@@ -27,12 +27,9 @@ matrix:
       compiler: clang
 
 script:
-  export CFLAGS=-Werror;
-  make clean;
-  make;
-  make clean;
-  make -f scripts/make_native/Makefile.native;
-  make clean;
+  - export CFLAGS=-Werror;
+  - make clean; make;
+  - make clean;
 
 before_deploy:
   - unset CFLAGS
