@@ -129,7 +129,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
  4949 vaio      20   0   17520   4224   2584 S   0.0  0.1   0:00.54 nnn -S /
 ```
 
-`nnn` vs. mc vs. ranger memory usage while viewing a directory with 13790 files, sorted by size:
+`nnn` vs. midnight commander vs. ranger memory usage while viewing a directory with 13790 files, sorted by size:
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
@@ -256,9 +256,14 @@ Help & settings, file details, media info and archive listing are shown in the P
 
 Filters support regexes to instantly (search-as-you-type) list the matching entries in the current directory.
 
-There are 3 ways to reset a filter: <kbd>^L</kbd>, a search with no matches or an extra backspace at the filter prompt (like vi).
+There are 3 ways to reset a filter:
+- pressing <kbd>^L</kbd>
+- a search with no matches
+- an extra backspace at the filter prompt (like vi)
 
-Common examples: If you want to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol. Type `\.mkv` to list all MKV files.
+Common use cases:
+- to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol
+- type `\.mkv` to list all MKV files
 
 If `nnn` is invoked as root the default filter will also match hidden files.
 
