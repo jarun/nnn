@@ -1094,7 +1094,8 @@ xreadline(char *fname)
 	}
 
 	buf[len] = '\0';
-	if (old_curs != ERR) curs_set(old_curs);
+	if (old_curs != ERR)
+		curs_set(old_curs);
 
 	settimeout();
 	DPRINTF_S(buf);
@@ -1191,6 +1192,7 @@ get_bm_loc(char *key, char *buf)
 		if (xstrcmp(bookmark[r].key, key) == 0) {
 			if (bookmark[r].loc[0] == '~') {
 				char *home = getenv("HOME");
+
 				if (!home) {
 					DPRINTF_S(STR_NOHOME);
 					return NULL;
@@ -1270,6 +1272,7 @@ coolsize(off_t size)
 	static char size_buf[12]; /* Buffer to hold human readable size */
 	static int i;
 	static off_t tmp;
+
 	static long double rem;
 	static const double div_2_pow_10 = 1.0 / 1024.0;
 
@@ -1677,8 +1680,8 @@ show_help(char *path)
 	int i = 0, fd = mkstemp(tmp);
 	char *start, *end;
 	static char helpstr[] = (
-           "cKey | Function\n"
-             "e- + -\n"
+	   "cKey | Function\n"
+	     "e- + -\n"
       "7↑, k, ^P | Previous entry\n"
       "7↓, j, ^N | Next entry\n"
       "7PgUp, ^U | Scroll half page up\n"
@@ -1687,38 +1690,38 @@ show_help(char *path)
  "2End, G, $, ^E | Last entry\n"
    "4→, ↵, l, ^M | Open file or enter dir\n"
 "1←, Bksp, h, ^H | Go to parent dir\n"
-            "d^O | Open with...\n"
-        "9Insert | Toggle navigate-as-you-type\n"
-             "e~ | Go HOME\n"
-             "e& | Go to initial dir\n"
-             "e- | Go to last visited dir\n"
-             "e/ | Filter dir contents\n"
-            "d^/ | Open desktop search tool\n"
-             "e. | Toggle hide . files\n"
-             "eb | Bookmark prompt\n"
-            "d^B | Pin current dir\n"
-            "d^V | Go to pinned dir\n"
-             "ec | Change dir prompt\n"
-             "ed | Toggle detail view\n"
-             "eD | File details\n"
-             "em | Brief media info\n"
-             "eM | Full media info\n"
-             "en | Create new\n"
-            "d^R | Rename entry\n"
-             "es | Toggle sort by size\n"
-             "eS | Toggle du mode\n"
-             "et | Toggle sort by mtime\n"
-             "e! | Spawn SHELL in dir\n"
-             "ee | Edit entry in EDITOR\n"
-             "eo | Open dir in file manager\n"
-             "ep | Open entry in PAGER\n"
-             "eF | List archive\n"
-            "d^X | Extract archive\n"
-            "d^K | Invoke file path copier\n"
-            "d^L | Redraw, clear prompt\n"
-             "e? | Help, settings\n"
-             "eQ | Quit and cd\n"
-         "aq, ^Q | Quit\n\n");
+	    "d^O | Open with...\n"
+	"9Insert | Toggle navigate-as-you-type\n"
+	     "e~ | Go HOME\n"
+	     "e& | Go to initial dir\n"
+	     "e- | Go to last visited dir\n"
+	     "e/ | Filter dir contents\n"
+	    "d^/ | Open desktop search tool\n"
+	     "e. | Toggle hide . files\n"
+	     "eb | Bookmark prompt\n"
+	    "d^B | Pin current dir\n"
+	    "d^V | Go to pinned dir\n"
+	     "ec | Change dir prompt\n"
+	     "ed | Toggle detail view\n"
+	     "eD | File details\n"
+	     "em | Brief media info\n"
+	     "eM | Full media info\n"
+	     "en | Create new\n"
+	    "d^R | Rename entry\n"
+	     "es | Toggle sort by size\n"
+	     "eS | Toggle du mode\n"
+	     "et | Toggle sort by mtime\n"
+	     "e! | Spawn SHELL in dir\n"
+	     "ee | Edit entry in EDITOR\n"
+	     "eo | Open dir in file manager\n"
+	     "ep | Open entry in PAGER\n"
+	     "eF | List archive\n"
+	    "d^X | Extract archive\n"
+	    "d^K | Invoke file path copier\n"
+	    "d^L | Redraw, clear prompt\n"
+	     "e? | Help, settings\n"
+	     "eQ | Quit and cd\n"
+	 "aq, ^Q | Quit\n\n");
 
 	if (fd == -1)
 		return -1;
@@ -1993,6 +1996,7 @@ populate(char *path, char *oldname, char *fltr)
 
 #ifdef DEBUGMODE
 	struct timespec ts1, ts2;
+
 	clock_gettime(CLOCK_REALTIME, &ts1); /* Use CLOCK_MONOTONIC on FreeBSD */
 #endif
 
@@ -2741,10 +2745,10 @@ nochange:
 			r = getch();
 			settimeout();
 			if (r == 'f') {
-				r = openat(fd, tmp, O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+				r = openat(fd, tmp, O_CREAT, 0666);
 				close(r);
 			} else if (r == 'd')
-				r = mkdirat(fd, tmp, S_IRWXU | S_IRWXG | S_IRWXO);
+				r = mkdirat(fd, tmp, 0777);
 			else {
 				close(fd);
 				break;
