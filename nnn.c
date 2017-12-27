@@ -2007,6 +2007,7 @@ populate(char *path, char *oldname, char *fltr)
 
 	/* Find cur from history */
 	cur = dentfind(dents, oldname, ndents);
+	regfree(&re);
 	return 0;
 }
 
