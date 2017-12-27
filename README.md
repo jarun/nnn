@@ -150,6 +150,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 
 - [AUR](https://aur.archlinux.org/packages/nnn/)
 - [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1)
+- [FreeBSD](https://www.freshports.org/misc/nnn)
 - [Homebrew](http://formulae.brew.sh/formula/nnn)
 - [NixOS](https://github.com/NixOS/nixpkgs/tree/master/pkgs/applications/misc/nnn) (`sudo nix-env -i nnn`)
 - [openSUSE](https://software.opensuse.org/package/nnn)
