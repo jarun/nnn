@@ -357,11 +357,12 @@ xstrlen(const char *s)
 static size_t
 xstrlcpy(char *dest, const char *src, size_t n)
 {
+	static ulong *s, *d;
 	static size_t len, blocks;
 	static const uint lsize = sizeof(ulong);
 	static const uint _WSHIFT = (sizeof(ulong) == 8) ? 3 : 2;
 
-	if (!src || !dest)
+	if (!src || !dest || !n)
 		return 0;
 
 	len = xstrlen(src) + 1;
@@ -371,17 +372,15 @@ xstrlcpy(char *dest, const char *src, size_t n)
 		/* Save total number of bytes to copy in len */
 		len = n;
 
-	if (n >= lsize) {
-		blocks = n >> _WSHIFT;
-		n -= (blocks << _WSHIFT);
-	} else
-		blocks = 0;
-
-	if (blocks) {
-		static ulong *s, *d;
-
+	/*
+	 * To enable -O3 ensure src and dest are 16-byte aligned
+	 * More info: http://www.felixcloutier.com/x86/MOVDQA.html
+	 */
+	if ((n >= lsize) && !((ulong)src & (ulong)dest & 0xF)) {
 		s = (ulong *)src;
 		d = (ulong *)dest;
+		blocks = n >> _WSHIFT;
+		n -= (blocks << _WSHIFT);
 
 		while (blocks) {
 			*d = *s;
