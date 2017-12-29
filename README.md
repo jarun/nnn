@@ -259,7 +259,7 @@ Help & settings, file details, media info and archive listing are shown in the P
 Filters support regexes to instantly (search-as-you-type) list the matching entries in the current directory.
 
 There are 3 ways to reset a filter:
-- pressing <kbd>^L</kbd>
+- pressing <kbd>^L</kbd> (at the new/rename prompt <kbd>^L</kbd> followed by <kbd>Enter</kbd> discards all changes and exits prompt)
 - a search with no matches
 - an extra backspace at the filter prompt (like vi)
 
