@@ -274,7 +274,7 @@ static const char *STR_INPUT = "No traversal delimiter allowed";
 static const char *STR_INVBM = "Invalid bookmark";
 
 /* For use in functions which are isolated and don't return the buffer */
-static char g_buf[MAX_CMD_LEN];
+static char g_buf[MAX_CMD_LEN] __attribute__ ((aligned));
 
 /* Forward declarations */
 static void redraw(char *path);
@@ -926,8 +926,8 @@ matches(char *fltr)
 static int
 filterentries(char *path)
 {
-	static char ln[REGEX_MAX];
-	static wchar_t wln[REGEX_MAX];
+	static char ln[REGEX_MAX] __attribute__ ((aligned));
+	static wchar_t wln[REGEX_MAX] __attribute__ ((aligned));
 	static wint_t ch[2] = {0};
 	int r, total = ndents, oldcur = cur, len = 1;
 	char *pln = ln + 1;
@@ -1233,7 +1233,7 @@ resetdircolor(mode_t mode)
 static char *
 unescape(const char *str, uint maxcols)
 {
-	static wchar_t wbuf[PATH_MAX];
+	static wchar_t wbuf[PATH_MAX] __attribute__ ((aligned));
 	static char *buffer;
 	static wchar_t *buf;
 	static size_t len;
@@ -2017,7 +2017,7 @@ populate(char *path, char *oldname, char *fltr)
 static void
 redraw(char *path)
 {
-	static char buf[(NAME_MAX + 1) << 1];
+	static char buf[(NAME_MAX + 1) << 1] __attribute__ ((aligned));
 	static size_t ncols;
 	static int nlines, i;
 	static bool mode_changed;
@@ -2145,9 +2145,12 @@ redraw(char *path)
 static void
 browse(char *ipath, char *ifilter)
 {
-	static char path[PATH_MAX], newpath[PATH_MAX], lastdir[PATH_MAX], mark[PATH_MAX];
-	static char fltr[NAME_MAX + 1];
-	static char oldname[NAME_MAX + 1];
+	static char path[PATH_MAX] __attribute__ ((aligned));
+	static char newpath[PATH_MAX] __attribute__ ((aligned));
+	static char lastdir[PATH_MAX] __attribute__ ((aligned));
+	static char mark[PATH_MAX] __attribute__ ((aligned));
+	static char fltr[NAME_MAX + 1] __attribute__ ((aligned));
+	static char oldname[NAME_MAX + 1] __attribute__ ((aligned));
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
 	int r, fd, presel;
@@ -2878,7 +2881,7 @@ Version: %s\n%s\n", VERSION, GENERAL_INFO);
 int
 main(int argc, char *argv[])
 {
-	static char cwd[PATH_MAX];
+	static char cwd[PATH_MAX] __attribute__ ((aligned));
 	char *ipath = NULL, *ifilter, *bmstr;
 	int opt;
 
