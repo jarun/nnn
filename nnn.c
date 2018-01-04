@@ -1535,6 +1535,8 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	if (fd == -1)
 		return -1;
 
+	dprintf(fd, "    File: '%s'", unescape(fname, 0));
+
 	/* Show file name or 'symlink' -> 'target' */
 	if (perms[0] == 'l') {
 		/* Note that MAX_CMD_LEN > PATH_MAX */
@@ -1542,16 +1544,14 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 
 		if (len != -1) {
 			g_buf[len] = '\0';
-			dprintf(fd, "    File: '%s' -> ", unescape(fname, 0));
 
 			/*
 			 * We pass g_buf but unescape() operates on g_buf too!
 			 * Read the API notes for information on how this works.
 			 */
-			dprintf(fd, "'%s'", unescape(g_buf, 0));
+			dprintf(fd, " -> '%s'", unescape(g_buf, 0));
 		}
-	} else
-		dprintf(fd, "    File: '%s'", unescape(fname, 0));
+	}
 
 	/* Show size, blocks, file type */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
