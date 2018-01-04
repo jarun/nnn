@@ -158,6 +158,8 @@ disabledbg()
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR 0x1000 /* 64 dir entries at a time, avg. 64 chars per filename = 64*64B = 4KB */
 #define DESCRIPTOR_LEN 32
+#define _ALIGNMENT 0x10
+#define _ALIGNMENT_MASK 0xF
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE     0x00  /* no flag set */
@@ -200,7 +202,7 @@ typedef struct entry {
 	blkcnt_t blocks; /* number of 512B blocks allocated */
 	mode_t mode;
 	uint nlen; /* Length of file name; can be uchar (< NAME_MAX + 1) */
-} *pEntry;
+}__attribute__ ((packed, aligned(_ALIGNMENT))) *pEntry;
 
 /* Bookmark */
 typedef struct {
@@ -343,6 +345,7 @@ xstrlen(const char *s)
 		return 0;
 
 	len = 0;
+
 	while (*s)
 		++len, ++s;
 
@@ -376,7 +379,7 @@ xstrlcpy(char *dest, const char *src, size_t n)
 	 * To enable -O3 ensure src and dest are 16-byte aligned
 	 * More info: http://www.felixcloutier.com/x86/MOVDQA.html
 	 */
-	if ((n >= lsize) && !((ulong)src & (ulong)dest & 0xF)) {
+	if ((n >= lsize) && !((ulong)src & (ulong)dest & _ALIGNMENT_MASK)) {
 		s = (ulong *)src;
 		d = (ulong *)dest;
 		blocks = n >> _WSHIFT;
@@ -889,17 +892,17 @@ static void
 fill(struct entry **dents, int (*filter)(regex_t *, char *), regex_t *re)
 {
 	static int count;
-	static struct entry _dent, *dentp1, *dentp2;
+	static struct entry _dent, *pdent1, *pdent2;
 
 	for (count = 0; count < ndents; ++count) {
 		if (filter(re, (*dents)[count].name) == 0) {
 			if (count != --ndents) {
-				dentp1 = &(*dents)[count];
-				dentp2 = &(*dents)[ndents];
+				pdent1 = &(*dents)[count];
+				pdent2 = &(*dents)[ndents];
 
-				memcpy(&_dent, dentp1, sizeof(struct entry));
-				memcpy(dentp1, dentp2, sizeof(struct entry));
-				memcpy(dentp2, &_dent, sizeof(struct entry));
+				*(&_dent) = *pdent1;
+				*pdent1 = *pdent2;
+				*pdent2 = *(&_dent);
 				--count;
 			}
 
@@ -1020,8 +1023,7 @@ xreadline(char *fname)
 	size_t len, pos;
 	int x, y, r;
 	wint_t ch[2] = {0};
-	wchar_t *buf = (wchar_t *)g_buf;
-	size_t buflen = NAME_MAX - 1;
+	static wchar_t * const buf = (wchar_t *)g_buf;
 
 	if (fname) {
 		DPRINTF_S(fname);
@@ -1057,7 +1059,7 @@ xreadline(char *fname)
 				if (*ch == '\t')
 					continue;
 
-				if (pos < buflen) {
+				if (pos < NAME_MAX - 1) {
 					memmove(buf + pos + 1, buf + pos, (len - pos) << 2);
 					buf[pos] = *ch;
 					++len, ++pos;
@@ -1234,14 +1236,13 @@ static char *
 unescape(const char *str, uint maxcols)
 {
 	static wchar_t wbuf[PATH_MAX] __attribute__ ((aligned));
-	static char *buffer;
+	static char * const buffer = g_buf;
 	static wchar_t *buf;
 	static size_t len;
 
 	/* Convert multi-byte to wide char */
 	len = mbstowcs(wbuf, str, PATH_MAX);
 
-	buffer = g_buf;
 	buffer[0] = '\0';
 	buf = wbuf;
 
@@ -1289,6 +1290,27 @@ coolsize(off_t size)
 	return size_buf;
 }
 
+static char *
+get_file_sym(mode_t mode)
+{
+	static char ind[2] = "\0\0";
+
+	if (S_ISDIR(mode))
+		ind[0] = '/';
+	else if (S_ISLNK(mode))
+		ind[0] = '@';
+	else if (S_ISSOCK(mode))
+		ind[0] = '=';
+	else if (S_ISFIFO(mode))
+		ind[0] = '|';
+	else if (mode & 0100)
+		ind[0] = '*';
+	else
+		ind[0] = '\0';
+
+	return ind;
+}
+
 static void
 printent(struct entry *ent, int sel, uint namecols)
 {
@@ -1299,18 +1321,7 @@ printent(struct entry *ent, int sel, uint namecols)
 	/* Directories are always shown on top */
 	resetdircolor(ent->mode);
 
-	if (S_ISDIR(ent->mode))
-		printw("%s%s/\n", CURSYM(sel), pname);
-	else if (S_ISLNK(ent->mode))
-		printw("%s%s@\n", CURSYM(sel), pname);
-	else if (S_ISSOCK(ent->mode))
-		printw("%s%s=\n", CURSYM(sel), pname);
-	else if (S_ISFIFO(ent->mode))
-		printw("%s%s|\n", CURSYM(sel), pname);
-	else if (ent->mode & 0100)
-		printw("%s%s*\n", CURSYM(sel), pname);
-	else
-		printw("%s%s\n", CURSYM(sel), pname);
+	printw("%s%s%s\n", CURSYM(sel), pname, get_file_sym(ent->mode));
 }
 
 static void
@@ -1787,6 +1798,31 @@ sum_bsizes(const char *fpath, const struct stat *sb,
 	return 0;
 }
 
+/*
+ * Wrapper to realloc() to ensure 16-byte alignment
+ * Frees current memory if realloc() fails and returns NULL.
+ */
+static void *
+aligned_realloc(void *pcur, size_t curlen, size_t newlen)
+{
+	void *pmem;
+
+	pmem = realloc(pcur, newlen);
+	if (!pmem && pcur)
+		free(pcur);
+
+	if (!((size_t)pmem & _ALIGNMENT_MASK)) {
+		pcur = aligned_alloc(_ALIGNMENT, newlen);
+		if (pcur)
+			memcpy(pcur, pmem, curlen);
+
+		free(pmem);
+		pmem = pcur;
+	}
+
+	return pmem;
+}
+
 static int
 dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
@@ -1867,12 +1903,13 @@ dentfill(char *path, struct entry **dents,
 
 		if (n == total_dents) {
 			total_dents += ENTRY_INCR;
-			*dents = realloc(*dents, total_dents * sizeof(**dents));
+			*dents = aligned_realloc(*dents, (total_dents - ENTRY_INCR) * sizeof(**dents), total_dents * sizeof(**dents));
 			if (*dents == NULL) {
 				if (pnamebuf)
 					free(pnamebuf);
 				errexit();
 			}
+			DPRINTF_P(*dents);
 		}
 
 		/* If there's not enough bytes left to copy a file name of length NAME_MAX, re-allocate */
@@ -1880,12 +1917,12 @@ dentfill(char *path, struct entry **dents,
 			namebuflen += NAMEBUF_INCR;
 
 			pnb = pnamebuf;
-			pnamebuf = (char *)realloc(pnamebuf, namebuflen);
-			DPRINTF_P(pnamebuf);
+			pnamebuf = (char *)aligned_realloc(pnamebuf, namebuflen - NAMEBUF_INCR, namebuflen);
 			if (pnamebuf == NULL) {
 				free(*dents);
 				errexit();
 			}
+			DPRINTF_P(pnamebuf);
 
 			/* realloc() may result in memory move, we must re-adjust if that happens */
 			if (pnb != pnamebuf) {
@@ -2100,7 +2137,6 @@ redraw(char *path)
 
 	if (cfg.showdetail) {
 		if (ndents) {
-			static char ind[2] = "\0\0";
 			static char sort[9];
 
 			if (cfg.mtimeorder)
@@ -2110,25 +2146,13 @@ redraw(char *path)
 			else
 				sort[0] = '\0';
 
-			if (S_ISDIR(dents[cur].mode))
-				ind[0] = '/';
-			else if (S_ISLNK(dents[cur].mode))
-				ind[0] = '@';
-			else if (S_ISSOCK(dents[cur].mode))
-				ind[0] = '=';
-			else if (S_ISFIFO(dents[cur].mode))
-				ind[0] = '|';
-			else if (dents[cur].mode & 0100)
-				ind[0] = '*';
-			else
-				ind[0] = '\0';
-
 			/* We need to show filename as it may be truncated in directory listing */
 			if (!cfg.blkorder)
-				sprintf(buf, "%d/%d %s[%s%s]", cur + 1, ndents, sort, unescape(dents[cur].name, 0), ind);
+				sprintf(buf, "%d/%d %s[%s%s]", cur + 1, ndents, sort, unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
 			else {
 				i = sprintf(buf, "%d/%d du: %s (%lu files) ", cur + 1, ndents, coolsize(dir_blocks << 9), num_files);
-				sprintf(buf + i, "vol: %s free [%s%s]", coolsize(get_fs_free(path)), unescape(dents[cur].name, 0), ind);
+				sprintf(buf + i, "vol: %s free [%s%s]",
+					coolsize(get_fs_free(path)), unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
 			}
 
 			printmsg(buf);
@@ -2166,10 +2190,19 @@ browse(char *ipath, char *ifilter)
 	else
 		presel = 0;
 
-	/* Allocate buffer to hold names */
-	pnamebuf = (char *)malloc(NAMEBUF_INCR);
-	if (pnamebuf == NULL)
+	total_dents += ENTRY_INCR;
+	dents = aligned_realloc(dents, 0, total_dents * sizeof(struct entry));
+	if (dents == NULL)
 		errexit();
+	DPRINTF_P(dents);
+
+	/* Allocate buffer to hold names */
+	pnamebuf = (char *)aligned_realloc(pnamebuf, 0, NAMEBUF_INCR);
+	if (pnamebuf == NULL) {
+		free(dents);
+		errexit();
+	}
+	DPRINTF_P(pnamebuf);
 
 begin:
 #ifdef LINUX_INOTIFY
