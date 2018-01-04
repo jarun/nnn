@@ -231,7 +231,7 @@ static settings cfg = {0, 0, 0, 0, 0, 1, 1, 0, 0, 4};
 
 static struct entry *dents;
 static char *pnamebuf;
-static int ndents, cur, total_dents;
+static int ndents, cur, total_dents = ENTRY_INCR;
 static uint idle;
 static uint idletimeout;
 static char *player;
@@ -1224,26 +1224,25 @@ resetdircolor(mode_t mode)
  * Replace escape characters in a string with '?'
  * Adjust string length to maxcols if > 0;
  *
- * Interestingly, note that buffer points to g_buf. What happens if
+ * Interestingly, note that unescape() uses g_buf. What happens if
  * str also points to g_buf? In this case we assume that the caller
  * acknowledges that it's OK to lose the data in g_buf after this
  * call to unescape().
  * The API, on its part, first converts str to multibyte (after which
  * it doesn't touch str anymore). Only after that it starts modifying
- * buffer. This works like a phased operation.
+ * g_buf. This is a phased operation.
  */
 static char *
 unescape(const char *str, uint maxcols)
 {
 	static wchar_t wbuf[PATH_MAX] __attribute__ ((aligned));
-	static char * const buffer = g_buf;
 	static wchar_t *buf;
 	static size_t len;
 
 	/* Convert multi-byte to wide char */
 	len = mbstowcs(wbuf, str, PATH_MAX);
 
-	buffer[0] = '\0';
+	g_buf[0] = '\0';
 	buf = wbuf;
 
 	if (maxcols && len > maxcols) {
@@ -1261,8 +1260,8 @@ unescape(const char *str, uint maxcols)
 	}
 
 	/* Convert wide char to multi-byte */
-	wcstombs(buffer, wbuf, PATH_MAX);
-	return buffer;
+	wcstombs(g_buf, wbuf, PATH_MAX);
+	return g_buf;
 }
 
 static char *
@@ -1799,26 +1798,21 @@ sum_bsizes(const char *fpath, const struct stat *sb,
 }
 
 /*
- * Wrapper to realloc() to ensure 16-byte alignment
+ * Wrapper to realloc()
  * Frees current memory if realloc() fails and returns NULL.
+ *
+ * As per the docs, the *alloc() family is supposed to be memory aligned:
+ * Ubuntu: http://manpages.ubuntu.com/manpages/xenial/man3/malloc.3.html
+ * OS X: https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/malloc.3.html
  */
 static void *
-aligned_realloc(void *pcur, size_t curlen, size_t newlen)
+xrealloc(void *pcur, size_t len)
 {
-	void *pmem;
+	static void *pmem;
 
-	pmem = realloc(pcur, newlen);
+	pmem = realloc(pcur, len);
 	if (!pmem && pcur)
 		free(pcur);
-
-	if (!((size_t)pmem & _ALIGNMENT_MASK)) {
-		pcur = aligned_alloc(_ALIGNMENT, newlen);
-		if (pcur)
-			memcpy(pcur, pmem, curlen);
-
-		free(pmem);
-		pmem = pcur;
-	}
 
 	return pmem;
 }
@@ -1903,7 +1897,7 @@ dentfill(char *path, struct entry **dents,
 
 		if (n == total_dents) {
 			total_dents += ENTRY_INCR;
-			*dents = aligned_realloc(*dents, (total_dents - ENTRY_INCR) * sizeof(**dents), total_dents * sizeof(**dents));
+			*dents = xrealloc(*dents, total_dents * sizeof(**dents));
 			if (*dents == NULL) {
 				if (pnamebuf)
 					free(pnamebuf);
@@ -1917,7 +1911,7 @@ dentfill(char *path, struct entry **dents,
 			namebuflen += NAMEBUF_INCR;
 
 			pnb = pnamebuf;
-			pnamebuf = (char *)aligned_realloc(pnamebuf, namebuflen - NAMEBUF_INCR, namebuflen);
+			pnamebuf = (char *)xrealloc(pnamebuf, namebuflen);
 			if (pnamebuf == NULL) {
 				free(*dents);
 				errexit();
@@ -2190,14 +2184,13 @@ browse(char *ipath, char *ifilter)
 	else
 		presel = 0;
 
-	total_dents += ENTRY_INCR;
-	dents = aligned_realloc(dents, 0, total_dents * sizeof(struct entry));
+	dents = xrealloc(dents, total_dents * sizeof(struct entry));
 	if (dents == NULL)
 		errexit();
 	DPRINTF_P(dents);
 
 	/* Allocate buffer to hold names */
-	pnamebuf = (char *)aligned_realloc(pnamebuf, 0, NAMEBUF_INCR);
+	pnamebuf = (char *)xrealloc(pnamebuf, NAMEBUF_INCR);
 	if (pnamebuf == NULL) {
 		free(dents);
 		errexit();
