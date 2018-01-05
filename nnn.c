@@ -274,6 +274,7 @@ static const char *STR_ATROOT = "You are at /";
 static const char *STR_NOHOME = "HOME not set";
 static const char *STR_INPUT = "No traversal delimiter allowed";
 static const char *STR_INVBM = "Invalid bookmark";
+static const char *STR_DATE = "%a %b %d %Y %T %z";
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[MAX_CMD_LEN] __attribute__ ((aligned));
@@ -1582,15 +1583,15 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 		sb->st_mode & 7, perms, sb->st_uid, (getpwuid(sb->st_uid))->pw_name, sb->st_gid, (getgrgid(sb->st_gid))->gr_name);
 
 	/* Show last access time */
-	strftime(g_buf, 40, "%a %b %d %Y %T %z", localtime(&sb->st_atime));
+	strftime(g_buf, 40, STR_DATE, localtime(&sb->st_atime));
 	dprintf(fd, "\n\n  Access: %s", g_buf);
 
 	/* Show last modification time */
-	strftime(g_buf, 40, "%a %b %d %Y %T %z", localtime(&sb->st_mtime));
+	strftime(g_buf, 40, STR_DATE, localtime(&sb->st_mtime));
 	dprintf(fd, "\n  Modify: %s", g_buf);
 
 	/* Show last status change time */
-	strftime(g_buf, 40, "%a %b %d %Y %T %z", localtime(&sb->st_ctime));
+	strftime(g_buf, 40, STR_DATE, localtime(&sb->st_ctime));
 	dprintf(fd, "\n  Change: %s", g_buf);
 
 	if (S_ISREG(sb->st_mode)) {
