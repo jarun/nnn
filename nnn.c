@@ -274,7 +274,7 @@ static const char *STR_ATROOT = "You are at /";
 static const char *STR_NOHOME = "HOME not set";
 static const char *STR_INPUT = "No traversal delimiter allowed";
 static const char *STR_INVBM = "Invalid bookmark";
-static const char *STR_DATE = "%a %b %d %Y %T %z";
+static const char *STR_DATE = "%a %d %b %Y %T %z";
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[MAX_CMD_LEN] __attribute__ ((aligned));
