@@ -982,6 +982,13 @@ filterentries(char *path)
 			case CONTROL('L'):
 				if (len == 1)
 					cur = oldcur; // fallthrough
+			case CONTROL('K'): // fallthrough
+			case CONTROL('O'): // fallthrough
+			case CONTROL('B'): // fallthrough
+			case CONTROL('V'): // fallthrough
+			case CONTROL('R'): // fallthrough
+			case CONTROL('X'): // fallthrough
+			case CONTROL('_'): // fallthrough
 			case CONTROL('Q'):
 				goto end;
 			default:
