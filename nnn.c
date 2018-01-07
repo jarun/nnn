@@ -167,7 +167,7 @@ disabledbg()
 #define F_NOWAIT   0x02  /* don't wait for child process (e.g. file manager) */
 #define F_NOTRACE  0x04  /* suppress stdout and strerr (no traces) */
 #define F_SIGINT   0x08  /* restore default SIGINT handler */
-#define F_NORMAL   0x80  /* spawn child process in non-curses regular mode */
+#define F_NORMAL   0x80  /* spawn child process in non-curses regular CLI mode */
 
 #define exitcurses() endwin()
 #define clearprompt() printmsg("")
@@ -2746,7 +2746,7 @@ nochange:
 				if (r == 'c')
 					r = F_NORMAL;
 				else
-					r = F_NOWAIT;
+					r = F_NOWAIT | F_NOTRACE;
 
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				spawn(tmp, newpath, NULL, path, r);
