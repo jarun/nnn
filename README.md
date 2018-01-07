@@ -226,8 +226,8 @@ optional arguments:
               / | Filter dir contents
              ^/ | Open desktop search tool
               . | Toggle hide . files
-              b | Bookmark prompt
-             ^B | Pin current dir
+             ^B | Bookmark prompt
+              B | Pin current dir
              ^V | Go to pinned dir
               c | Change dir prompt
               d | Toggle detail view
