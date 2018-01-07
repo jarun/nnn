@@ -31,8 +31,10 @@ debug: $(SRC)
 	$(CC) -DDEBUGMODE -g $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS)
 
 install: all
-	install -m 0755 -D -t $(DESTDIR)$(PREFIX)/bin $(BIN) $(PLAYER)
-	install -m 0644 -D -t $(DESTDIR)$(MANPREFIX)/man1 $(BIN).1
+	install -m 0755 -d $(DESTDIR)$(PREFIX)/bin
+	install -m 0755 -t $(DESTDIR)$(PREFIX)/bin $(BIN) $(PLAYER)
+	install -m 0755 -d $(DESTDIR)$(MANPREFIX)/man1
+	install -m 0644 -t $(DESTDIR)$(MANPREFIX)/man1 $(BIN).1
 
 uninstall:
 	$(RM) $(DESTDIR)$(PREFIX)/bin/$(BIN)
@@ -52,4 +54,4 @@ dist:
 clean:
 	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz
 
-.PHONY: install uninstall clean debug strip dist
+.PHONY: all debug install uninstall strip dist clean
