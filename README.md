@@ -237,7 +237,7 @@ optional arguments:
               n | Create new
              ^R | Rename entry
               s | Toggle sort by size
-              S | Toggle du mode
+          S, ^S | Toggle du mode
               t | Toggle sort by mtime
               ! | Spawn SHELL in dir
               e | Edit entry in EDITOR

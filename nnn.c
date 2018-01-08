@@ -988,6 +988,7 @@ filterentries(char *path)
 			case CONTROL('O'): // fallthrough
 			case CONTROL('B'): // fallthrough
 			case CONTROL('V'): // fallthrough
+			case CONTROL('S'): // fallthrough
 			case CONTROL('X'): // fallthrough
 			case CONTROL('Q'):
 				goto end;
@@ -1716,7 +1717,7 @@ show_help(char *path)
 	     "en | Create new\n"
 	    "d^R | Rename entry\n"
 	     "es | Toggle sort by size\n"
-	     "eS | Toggle du mode\n"
+	 "aS, ^S | Toggle du mode\n"
 	     "et | Toggle sort by mtime\n"
 	     "e! | Spawn SHELL in dir\n"
 	     "ee | Edit entry in EDITOR\n"

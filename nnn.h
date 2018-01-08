@@ -137,6 +137,7 @@ static struct key bindings[] = {
 	{ 's',            SEL_FSIZE,     "",     "" },
 	/* Sort by total block count including dir contents */
 	{ 'S',            SEL_BSIZE,     "",     "" },
+	{ CONTROL('S'),   SEL_BSIZE,     "",     "" },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME,     "",     "" },
 	/* Redraw window */
