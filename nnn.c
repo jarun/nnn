@@ -384,7 +384,7 @@ xstrlcpy(char *dest, const char *src, size_t n)
 		s = (ulong *)src;
 		d = (ulong *)dest;
 		blocks = n >> _WSHIFT;
-		n -= (blocks << _WSHIFT);
+		n &= lsize - 1;
 
 		while (blocks) {
 			*d = *s;
@@ -1278,7 +1278,6 @@ coolsize(off_t size)
 	static const char * const U = "BKMGTPEZY";
 	static char size_buf[12]; /* Buffer to hold human readable size */
 	static int i;
-	static off_t tmp;
 
 	static long double rem;
 	static const double div_2_pow_10 = 1.0 / 1024.0;
@@ -1287,9 +1286,8 @@ coolsize(off_t size)
 	rem = 0;
 
 	while (size > 1024) {
-		tmp = size;
+		rem = size & (0x3FF); /* 1024 - 1 = 0x3FF */
 		size >>= 10;
-		rem = tmp - (size << 10);
 		++i;
 	}
 
