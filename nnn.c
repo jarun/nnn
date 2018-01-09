@@ -988,9 +988,9 @@ filterentries(char *path)
 			case CONTROL('O'): // fallthrough
 			case CONTROL('B'): // fallthrough
 			case CONTROL('V'): // fallthrough
-			case CONTROL('S'): // fallthrough
+			case CONTROL('J'): // fallthrough
 			case CONTROL('X'): // fallthrough
-			case CONTROL('Q'):
+			case CONTROL('Y'):
 				goto end;
 			default:
 				/* Reset cur in case it's a repeat search */
@@ -1717,7 +1717,7 @@ show_help(char *path)
 	     "en | Create new\n"
 	    "d^R | Rename entry\n"
 	     "es | Toggle sort by size\n"
-	 "aS, ^S | Toggle du mode\n"
+	 "aS, ^J | Toggle du mode\n"
 	     "et | Toggle sort by mtime\n"
 	     "e! | Spawn SHELL in dir\n"
 	     "ee | Edit entry in EDITOR\n"
@@ -1729,7 +1729,7 @@ show_help(char *path)
 	    "d^L | Redraw, clear prompt\n"
 	     "e? | Help, settings\n"
 	     "eQ | Quit and cd\n"
-	 "aq, ^Q | Quit\n\n");
+	 "aq, ^Y | Quit\n\n");
 
 	if (fd == -1)
 		return -1;

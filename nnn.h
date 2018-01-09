@@ -137,7 +137,7 @@ static struct key bindings[] = {
 	{ 's',            SEL_FSIZE,     "",     "" },
 	/* Sort by total block count including dir contents */
 	{ 'S',            SEL_BSIZE,     "",     "" },
-	{ CONTROL('S'),   SEL_BSIZE,     "",     "" },
+	{ CONTROL('J'),   SEL_BSIZE,     "",     "" },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME,     "",     "" },
 	/* Redraw window */
@@ -163,5 +163,5 @@ static struct key bindings[] = {
 	{ 'Q',            SEL_CDQUIT,    "",     "" },
 	/* Quit */
 	{ 'q',            SEL_QUIT,      "",     "" },
-	{ CONTROL('Q'),   SEL_QUIT,      "",     "" },
+	{ CONTROL('Y'),   SEL_QUIT,      "",     "" },
 };

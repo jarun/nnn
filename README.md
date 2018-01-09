@@ -237,7 +237,7 @@ optional arguments:
               n | Create new
              ^R | Rename entry
               s | Toggle sort by size
-          S, ^S | Toggle du mode
+          S, ^J | Toggle du mode
               t | Toggle sort by mtime
               ! | Spawn SHELL in dir
               e | Edit entry in EDITOR
@@ -249,7 +249,7 @@ optional arguments:
              ^L | Redraw, clear prompt
               ? | Help, settings
               Q | Quit and cd
-          q, ^Q | Quit
+          q, ^Y | Quit
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
