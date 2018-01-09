@@ -618,7 +618,7 @@ spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uch
 
 		DPRINTF_D(pid);
 		if (flag & F_NORMAL)
-			initcurses();
+			refresh();
 	}
 }
 
@@ -1618,7 +1618,7 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	exitcurses();
 	get_output(NULL, 0, "cat", tmp, NULL, 1);
 	unlink(tmp);
-	initcurses();
+	refresh();
 	return 0;
 }
 
@@ -1652,7 +1652,7 @@ show_mediainfo(char *fpath, char *arg)
 
 	exitcurses();
 	get_output(NULL, 0, utils[cfg.metaviewer], fpath, arg, 1);
-	initcurses();
+	refresh();
 	return 0;
 }
 
@@ -1667,7 +1667,7 @@ handle_archive(char *fpath, char *arg, char *dir)
 	else {
 		exitcurses();
 		get_output(NULL, 0, utils[4], arg, fpath, 1);
-		initcurses();
+		refresh();
 	}
 
 	return 0;
@@ -1781,7 +1781,7 @@ show_help(char *path)
 	exitcurses();
 	get_output(NULL, 0, "cat", tmp, NULL, 1);
 	unlink(tmp);
-	initcurses();
+	refresh();
 	return 0;
 }
 
@@ -2386,7 +2386,7 @@ nochange:
 
 			exitcurses();
 			tmp = readline("chdir: ");
-			initcurses();
+			refresh();
 
 			/* Change back to program start dir */
 			if (chdir(newpath) == -1)
