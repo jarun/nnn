@@ -5,7 +5,7 @@ summary: The missing terminal file browser for X.
 homepage: https://github.com/jarun/nnn
 commands:
   install:
-    - make PREFIX="/usr" install DESTDIR="${BP_DESTDIR}"
+    - make PREFIX="/usr" strip install DESTDIR="${BP_DESTDIR}"
 packages:
   archlinux:
     builddeps:
