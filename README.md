@@ -244,12 +244,12 @@ optional arguments:
               o | Open dir in file manager
               p | Open entry in PAGER
               F | List archive
-             ^X | Extract archive
+             ^F | Extract archive
              ^K | Invoke file path copier
              ^L | Redraw, clear prompt
               ? | Help, settings
               Q | Quit and cd
-          q, ^Y | Quit
+          q, ^X | Quit
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.

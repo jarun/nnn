@@ -132,7 +132,7 @@ static struct key bindings[] = {
 	/* List archive */
 	{ 'F',            SEL_LIST,      "-l", "" },
 	/* Extract archive */
-	{ CONTROL('X'),   SEL_EXTRACT,   "-x", "" },
+	{ CONTROL('F'),   SEL_EXTRACT,   "-x", "" },
 	/* Toggle sort by size */
 	{ 's',            SEL_FSIZE,     "",     "" },
 	/* Sort by total block count including dir contents */
@@ -163,5 +163,5 @@ static struct key bindings[] = {
 	{ 'Q',            SEL_CDQUIT,    "",     "" },
 	/* Quit */
 	{ 'q',            SEL_QUIT,      "",     "" },
-	{ CONTROL('Y'),   SEL_QUIT,      "",     "" },
+	{ CONTROL('X'),   SEL_QUIT,      "",     "" },
 };

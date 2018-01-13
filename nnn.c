@@ -1724,12 +1724,12 @@ show_help(char *path)
 	     "eo | Open dir in file manager\n"
 	     "ep | Open entry in PAGER\n"
 	     "eF | List archive\n"
-	    "d^X | Extract archive\n"
+	    "d^F | Extract archive\n"
 	    "d^K | Invoke file path copier\n"
 	    "d^L | Redraw, clear prompt\n"
 	     "e? | Help, settings\n"
 	     "eQ | Quit and cd\n"
-	 "aq, ^Y | Quit\n\n");
+	 "aq, ^X | Quit\n\n");
 
 	if (fd == -1)
 		return -1;
