@@ -169,6 +169,12 @@ disabledbg()
 #define F_SIGINT   0x08  /* restore default SIGINT handler */
 #define F_NORMAL   0x80  /* spawn child process in non-curses regular CLI mode */
 
+/* CRC8 macros */
+#define WIDTH  (8 * sizeof(unsigned char))
+#define TOPBIT (1 << (WIDTH - 1))
+#define POLYNOMIAL 0xD8  /* 11011 followed by 0's */
+
+/* Function macros */
 #define exitcurses() endwin()
 #define clearprompt() printmsg("")
 #define printwarn() printmsg(strerror(errno))
@@ -217,6 +223,7 @@ typedef struct {
 	ushort sizeorder  : 1;  /* Set to sort by file size */
 	ushort blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
 	ushort showhidden : 1;  /* Set to show hidden files */
+	ushort copymode   : 1;  /* Set when copying files */
 	ushort showdetail : 1;  /* Clear to show fewer file info */
 	ushort showcolor  : 1;  /* Set to show dirs in blue */
 	ushort dircolor   : 1;  /* Current status of dir color */
@@ -227,13 +234,13 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration */
-static settings cfg = {0, 0, 0, 0, 0, 1, 1, 0, 0, 4};
+static settings cfg = {0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 4};
 
 static struct entry *dents;
-static char *pnamebuf;
+static char *pnamebuf, *pcopybuf;
 static int ndents, cur, total_dents = ENTRY_INCR;
 static uint idle;
-static uint idletimeout;
+static uint idletimeout, copybufpos, copybuflen;
 static char *player;
 static char *copier;
 static char *editor;
@@ -244,6 +251,9 @@ static blkcnt_t dir_blocks;
 static ulong num_files;
 static uint open_max;
 static bm bookmark[BM_MAX];
+
+static uchar crc8table[256];
+static uchar g_crc;
 
 #ifdef LINUX_INOTIFY
 static int inotify_fd, inotify_wd = -1;
@@ -274,6 +284,7 @@ static const char *STR_ATROOT = "You are at /";
 static const char *STR_NOHOME = "HOME not set";
 static const char *STR_INPUT = "No traversal delimiter allowed";
 static const char *STR_INVBM = "Invalid bookmark";
+static const char *STR_COPY = "NNN_COPIER is not set";
 static const char *STR_DATE = "%a %d %b %Y %T %z";
 
 /* For use in functions which are isolated and don't return the buffer */
@@ -283,6 +294,57 @@ static char g_buf[MAX_CMD_LEN] __attribute__ ((aligned));
 static void redraw(char *path);
 
 /* Functions */
+
+/*
+ * CRC8 source:
+ *   https://barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code
+ */
+static void
+crc8init()
+{
+	uchar remainder, bit;
+	uint dividend;
+
+	/* Compute the remainder of each possible dividend  */
+	for (dividend = 0; dividend < 256; ++dividend)
+	{
+		/* Start with the dividend followed by zeros */
+		remainder = dividend << (WIDTH - 8);
+
+		/* Perform modulo-2 division, a bit at a time */
+		for (bit = 8; bit > 0; --bit)
+		{
+			/* Try to divide the current data bit */
+			if (remainder & TOPBIT)
+				remainder = (remainder << 1) ^ POLYNOMIAL;
+			else
+				remainder = (remainder << 1);
+		}
+
+		/* Store the result into the table */
+		crc8table[dividend] = remainder;
+	}
+}
+
+static uchar
+crc8fast(uchar const message[], size_t n)
+{
+    uchar data;
+    uchar remainder = 0;
+    size_t byte;
+
+
+    /* Divide the message by the polynomial, a byte at a time */
+    for (byte = 0; byte < n; ++byte)
+    {
+        data = message[byte] ^ (remainder >> (WIDTH - 8));
+        remainder = crc8table[data] ^ (remainder << 8);
+    }
+
+    /* The final remainder is the CRC */
+    return (remainder);
+
+}
 
 /* Messages show up at the bottom */
 static void
@@ -332,6 +394,26 @@ max_openfds()
 	}
 
 	return limit;
+}
+
+/*
+ * Wrapper to realloc()
+ * Frees current memory if realloc() fails and returns NULL.
+ *
+ * As per the docs, the *alloc() family is supposed to be memory aligned:
+ * Ubuntu: http://manpages.ubuntu.com/manpages/xenial/man3/malloc.3.html
+ * OS X: https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/malloc.3.html
+ */
+static void *
+xrealloc(void *pcur, size_t len)
+{
+	static void *pmem;
+
+	pmem = realloc(pcur, len);
+	if (!pmem && pcur)
+		free(pcur);
+
+	return pmem;
 }
 
 /*
@@ -521,6 +603,25 @@ xbasename(char *path)
 
 	base = xmemrchr((uchar *)path, '/', xstrlen(path));
 	return base ? base + 1 : path;
+}
+
+static bool
+appendfilepath(const char *path, const size_t len)
+{
+	if ((copybufpos >= copybuflen) || (len > (copybuflen - (copybufpos + 1)))) {
+		copybuflen += PATH_MAX;
+		pcopybuf = xrealloc(pcopybuf, copybuflen);
+		if (!pcopybuf) {
+			printmsg("No memory!\n");
+			return FALSE;
+		}
+	}
+
+	if (copybufpos)
+		pcopybuf[copybufpos - 1] = '\n';
+
+	copybufpos += xstrlcpy(pcopybuf + copybufpos, path, len);
+	return TRUE;
 }
 
 /*
@@ -1128,22 +1229,24 @@ readinput(void)
 }
 
 /*
- * Returns "dir/name or "/name"
+ * Updates out with "dir/name or "/name"
+ * Returns the number of bytes in out including the terminating NULL byte
  */
-static char *
+size_t
 mkpath(char *dir, char *name, char *out, size_t n)
 {
 	/* Handle absolute path */
 	if (name[0] == '/')
-		xstrlcpy(out, name, n);
+		return xstrlcpy(out, name, n);
 	else {
 		/* Handle root case */
 		if (istopdir(dir))
-			snprintf(out, n, "/%s", name);
+			return (snprintf(out, n, "/%s", name) + 1);
 		else
-			snprintf(out, n, "%s/%s", dir, name);
+			return (snprintf(out, n, "%s/%s", dir, name) + 1);
 	}
-	return out;
+
+	return 0;
 }
 
 static void
@@ -1726,6 +1829,7 @@ show_help(char *path)
 	     "eF | List archive\n"
 	    "d^F | Extract archive\n"
 	    "d^K | Invoke file path copier\n"
+	    "d^Y | Toggle multi-copy mode\n"
 	    "d^L | Redraw, clear prompt\n"
 	     "e? | Help, settings\n"
 	     "eQ | Quit and cd\n"
@@ -1794,26 +1898,6 @@ sum_bsizes(const char *fpath, const struct stat *sb,
 
 	++num_files;
 	return 0;
-}
-
-/*
- * Wrapper to realloc()
- * Frees current memory if realloc() fails and returns NULL.
- *
- * As per the docs, the *alloc() family is supposed to be memory aligned:
- * Ubuntu: http://manpages.ubuntu.com/manpages/xenial/man3/malloc.3.html
- * OS X: https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/malloc.3.html
- */
-static void *
-xrealloc(void *pcur, size_t len)
-{
-	static void *pmem;
-
-	pmem = realloc(pcur, len);
-	if (!pmem && pcur)
-		free(pcur);
-
-	return pmem;
 }
 
 static int
@@ -2057,6 +2141,11 @@ redraw(char *path)
 
 	/* Clean screen */
 	erase();
+	if (cfg.copymode)
+		if (g_crc != crc8fast((uchar *)dents, ndents * sizeof(struct entry))) {
+			cfg.copymode = 0;
+			DPRINTF_S("copymode off");
+		}
 
 	/* Fail redraw if < than 10 columns */
 	if (COLS < 10) {
@@ -2170,7 +2259,7 @@ browse(char *ipath, char *ifilter)
 	static char oldname[NAME_MAX + 1] __attribute__ ((aligned));
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
-	int r, fd, presel;
+	int r, fd, presel, copystartid = 0, copyendid = 0;
 	enum action sel = SEL_RUNARG + 1;
 	bool dir_changed = FALSE;
 
@@ -2683,6 +2772,7 @@ nochange:
 			cfg.sizeorder ^= 1;
 			cfg.mtimeorder = 0;
 			cfg.blkorder = 0;
+			cfg.copymode = 0;
 			/* Save current */
 			if (ndents > 0)
 				copycurname();
@@ -2695,6 +2785,7 @@ nochange:
 			}
 			cfg.mtimeorder = 0;
 			cfg.sizeorder = 0;
+			cfg.copymode = 0;
 			/* Save current */
 			if (ndents > 0)
 				copycurname();
@@ -2703,6 +2794,7 @@ nochange:
 			cfg.mtimeorder ^= 1;
 			cfg.sizeorder = 0;
 			cfg.blkorder = 0;
+			cfg.copymode = 0;
 			/* Save current */
 			if (ndents > 0)
 				copycurname();
@@ -2714,14 +2806,65 @@ nochange:
 			goto begin;
 		case SEL_COPY:
 			if (copier && ndents) {
-				mkpath(path, dents[cur].name, newpath, PATH_MAX);
-				spawn(copier, newpath, NULL, NULL, F_NONE);
+				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				if (cfg.copymode) {
+					if (!appendfilepath(newpath, r))
+						goto nochange;
+				} else
+					spawn(copier, newpath, NULL, NULL, F_NONE);
 				printmsg(newpath);
 			} else if (!copier)
-				printmsg("NNN_COPIER is not set");
+				printmsg(STR_COPY);
+			goto nochange;
+		case SEL_COPYMUL:
+			if (!copier) {
+				printmsg(STR_COPY);
+				goto nochange;
+			} else if (!ndents) {
+				goto nochange;
+			}
+
+			cfg.copymode ^= 1;
+			if (cfg.copymode) {
+				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
+				copystartid = cur;
+				copybufpos = 0;
+				DPRINTF_S("copymode on");
+			} else {
+				static size_t len;
+				len = 0;
+
+				/* Handle range selection */
+				if (copybufpos == 0) {
+
+					if (cur < copystartid) {
+						copyendid = copystartid;
+						copystartid = cur;
+					} else
+						copyendid = cur;
+
+					if (copystartid < copyendid) {
+						for (r = copystartid; r <= copyendid; ++r) {
+							len = mkpath(path, dents[r].name, newpath, PATH_MAX);
+							if (!appendfilepath(newpath, len))
+								goto nochange;;
+						}
+
+						sprintf(newpath, "%d files copied", copyendid - copystartid + 1);
+						printmsg(newpath);
+					}
+				}
+
+				if (copybufpos) {
+					spawn(copier, pcopybuf, NULL, NULL, F_NONE);
+					DPRINTF_S(pcopybuf);
+					if (!len)
+						printmsg("files copied");
+				}
+			}
 			goto nochange;
 		case SEL_OPEN:
-				printprompt("open with: "); // fallthrough
+			printprompt("open with: "); // fallthrough
 		case SEL_NEW:
 			if (sel == SEL_NEW)
 				printprompt("name: ");
@@ -3034,6 +3177,8 @@ main(int argc, char *argv[])
 
 	/* Set locale */
 	setlocale(LC_ALL, "");
+	crc8init();
+
 #ifdef DEBUGMODE
 	enabledbg();
 #endif

@@ -102,6 +102,8 @@ List files in archive
 Extract archive in current directory
 .It Ic ^K
 Invoke file path copier
+.It Ic ^Y
+Toggle multiple file path copy mode
 .It Ic ^L
 Force a redraw, clear rename or filter prompt
 .It Ic \&?
@@ -171,12 +173,21 @@ instructions.
 Filters support regexes to instantly (search-as-you-type) list the matching
 entries in the current directory.
 .Pp
-There are 3 ways to reset a filter: (1) pressing \fI^L\fR (at the new/rename
-prompt \fI^L\fR followed by \fIEnter\fR discards all changes and exits prompt),
-(2) a search with no matches or (3) an extra backspace at the filter prompt (like vi).
+There are 3 ways to reset a filter:
 .Pp
-Common use cases: (1) To list all matches starting with the filter expression,
-start the expression with a '^' (caret) symbol. (2) Type '\\.mkv' to list all MKV files.
+(1) pressing \fI^L\fR (at the new/rename prompt \fI^L\fR followed by \fIEnter\fR
+discards all changes and exits prompt),
+.br
+(2) a search with no matches or
+.br
+(3) an extra backspace at the filter prompt (like vi).
+.Pp
+Common use cases:
+.Pp
+(1) To list all matches starting with the filter expression, start the expression
+with a '^' (caret) symbol.
+.br
+(2) Type '\\.mkv' to list all MKV files.
 .Pp
 If
 .Nm
@@ -184,6 +195,18 @@ is invoked as root the default filter will also match hidden files.
 .Pp
 In the \fInavigate-as-you-type\fR mode directories are opened in filter mode,
 allowing continuous navigation. Works best with the \fBarrow keys\fR.
+.Sh MULTI-COPY MODE
+The absolute path of a single file can be copied to clipboard by pressing \fI^K\fR if
+NNN_COPIER is set (see ENVIRONMENT section below).
+.Pp
+To copy multiple file paths the multi-copy mode should be enabled using \fI^Y\fR.
+In this mode it's possible to
+.Pp
+(1) select multiple files one by one by pressing \fI^K\fR on each entry; or,
+.br
+(2) navigate to another file in the same directory to select a range of files.
+.Pp
+Pressing \fI^Y\fR again copies the paths to clipboard and exits the multi-copy mode.
 .Sh ENVIRONMENT
 The SHELL, EDITOR and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively.
@@ -214,6 +237,8 @@ screensaver.
     -------------------------------------
     #!/bin/sh
 
+    # comment the next line to convert newlines to spaces
+    IFS=
     echo -n $1 | xsel --clipboard --input
     -------------------------------------
 .Ed

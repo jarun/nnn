@@ -34,6 +34,7 @@ enum action {
 	SEL_MTIME,
 	SEL_REDRAW,
 	SEL_COPY,
+	SEL_COPYMUL,
 	SEL_OPEN,
 	SEL_NEW,
 	SEL_RENAME,
@@ -145,6 +146,8 @@ static struct key bindings[] = {
 	{ KEY_F(5),       SEL_REDRAW,    "",     "" }, /* Undocumented */
 	/* Copy currently selected file path */
 	{ CONTROL('K'),   SEL_COPY,      "",     "" },
+	/* Toggle copy multiple file paths */
+	{ CONTROL('Y'),   SEL_COPYMUL,   "",     "" },
 	/* Open in a custom application */
 	{ CONTROL('O'),   SEL_OPEN,      "",     "" },
 	/* Create a new file */

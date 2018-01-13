@@ -25,7 +25,7 @@ Cool things you can do with `nnn`:
 - *navigate-as-you-type* (*search-as-you-type* enabled even on directory switch)
 - check disk usage with number of files in current directory tree
 - run desktop search utility (gnome-search-tool or catfish) in any directory
-- copy absolute file path to clipboard, spawn a terminal and use the file path
+- copy absolute file paths to clipboard, spawn a terminal and use the paths
 - navigate instantly using shortcuts like `~`, `-`, `&` or handy bookmarks
 - use `cd .....` at chdir prompt to go to a parent directory
 - detailed file stats, media info, list and extract archives
@@ -67,7 +67,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - [add bookmarks](#add-bookmarks)
   - [use cd .....](#use-cd-)
   - [cd on quit](#cd-on-quit)
-  - [copy file path to clipboard](#copy-file-path-to-clipboard)
+  - [copy file paths to clipboard](#copy-file-paths-to-clipboard)
   - [change dir color](#change-dir-color)
   - [file copy, move, delete](#file-copy-move-delete)
   - [boost chdir prompt](#boost-chdir-prompt)
@@ -246,6 +246,7 @@ optional arguments:
               F | List archive
              ^F | Extract archive
              ^K | Invoke file path copier
+             ^Y | Toggle multi-copy mode
              ^L | Redraw, clear prompt
               ? | Help, settings
               Q | Quit and cd
@@ -342,13 +343,16 @@ Pick the appropriate file for your shell from [`scripts/quitcd`](scripts/quitcd)
 
 As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
 
-#### copy file path to clipboard
+#### copy file paths to clipboard
 
-`nnn` can pipe the absolute path of the current file to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
+`nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
 
 Sample Linux copier script:
 
     #!/bin/sh
+
+    # comment the next line to convert newlines to spaces
+    IFS=
 
     echo -n $1 | xsel --clipboard --input
 
@@ -356,7 +360,14 @@ export `NNN_COPIER`:
 
     export NNN_COPIER="/path/to/copier.sh"
 
-Start `nnn` and use <kbd>^K</kbd> to copy the absolute path (from `/`) of the file under the cursor to clipboard.
+Use <kbd>^K</kbd> to copy the absolute path (from `/`) of the file under the cursor to clipboard.
+
+To copy multiple file paths, switch to the multi-copy mode using <kbd>^Y</kbd>. In this mode you can
+
+- select multiple files one by one by pressing <kbd>^K</kbd> on each entry; or,
+- navigate to another file in the same directory to select a range of files.
+
+Pressing <kbd>^Y</kbd> again copies the paths to clipboard and exits the multi-copy mode.
 
 #### change dir color
 
