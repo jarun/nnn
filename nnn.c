@@ -342,8 +342,7 @@ crc8fast(uchar const message[], size_t n)
     }
 
     /* The final remainder is the CRC */
-    return (remainder);
-
+    return remainder;
 }
 
 /* Messages show up at the bottom */
@@ -1230,23 +1229,26 @@ readinput(void)
 
 /*
  * Updates out with "dir/name or "/name"
- * Returns the number of bytes in out including the terminating NULL byte
+ * Returns the number of bytes copied including the terminating NULL byte
  */
 size_t
 mkpath(char *dir, char *name, char *out, size_t n)
 {
+	static size_t len;
+
 	/* Handle absolute path */
 	if (name[0] == '/')
 		return xstrlcpy(out, name, n);
 	else {
 		/* Handle root case */
 		if (istopdir(dir))
-			return (snprintf(out, n, "/%s", name) + 1);
+			len = 1;
 		else
-			return (snprintf(out, n, "%s/%s", dir, name) + 1);
+			len = xstrlcpy(out, dir, n);
 	}
 
-	return 0;
+	out[len - 1] = '/';
+	return (xstrlcpy(out + len, name, n - len) + len);
 }
 
 static void
