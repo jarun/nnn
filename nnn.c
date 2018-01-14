@@ -280,11 +280,11 @@ static char * const utils[] = {
 
 /* Common message strings */
 static const char *STR_NFTWFAIL = "nftw(3) failed";
-static const char *STR_ATROOT = "You are at /";
+static const char *STR_ATROOT = "at /";
 static const char *STR_NOHOME = "HOME not set";
-static const char *STR_INPUT = "No traversal delimiter allowed";
-static const char *STR_INVBM = "Invalid bookmark";
-static const char *STR_COPY = "NNN_COPIER is not set";
+static const char *STR_INPUT = "remove traversal delimiter";
+static const char *STR_INVBM = "invalid bookmark";
+static const char *STR_COPY = "set NNN_COPIER";
 static const char *STR_DATE = "%a %d %b %Y %T %z";
 
 /* For use in functions which are isolated and don't return the buffer */
@@ -611,7 +611,7 @@ appendfilepath(const char *path, const size_t len)
 		copybuflen += PATH_MAX;
 		pcopybuf = xrealloc(pcopybuf, copybuflen);
 		if (!pcopybuf) {
-			printmsg("No memory!\n");
+			printmsg("no memory!\n");
 			return FALSE;
 		}
 	}
@@ -2105,7 +2105,7 @@ populate(char *path, char *oldname, char *fltr)
 		return -1;
 
 	if (cfg.blkorder) {
-		printmsg("Calculating...");
+		printmsg("calculating...");
 		refresh();
 	}
 
@@ -2151,7 +2151,7 @@ redraw(char *path)
 
 	/* Fail redraw if < than 10 columns */
 	if (COLS < 10) {
-		printmsg("Too few columns!");
+		printmsg("too few columns!");
 		return;
 	}
 
@@ -2426,7 +2426,7 @@ nochange:
 				continue;
 			}
 			default:
-				printmsg("Unsupported file");
+				printmsg("unsupported file");
 				goto nochange;
 			}
 		case SEL_NEXT:
@@ -2636,7 +2636,7 @@ nochange:
 				tmp = lastdir;
 
 			if (tmp[0] == '\0') {
-				printmsg("Not set...");
+				printmsg("not set...");
 				goto nochange;
 			}
 
@@ -2764,7 +2764,7 @@ nochange:
 			break;
 		case SEL_DFB:
 			if (!desktop_manager) {
-				printmsg("NNN_DE_FILE_MANAGER not set");
+				printmsg("set NNN_DE_FILE_MANAGER");
 				goto nochange;
 			}
 
@@ -2883,7 +2883,7 @@ nochange:
 			}
 
 			if (sel == SEL_OPEN) {
-				printprompt("Press 'c' for cli mode");
+				printprompt("press 'c' for cli mode");
 				cleartimeout();
 				r = getch();
 				settimeout();
@@ -2907,12 +2907,12 @@ nochange:
 
 			/* Check if another file with same name exists */
 			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
-				printmsg("Entry exists");
+				printmsg("entry exists");
 				goto nochange;
 			}
 
 			/* Check if it's a dir or file */
-			printprompt("Press 'f' for file or 'd' for dir");
+			printprompt("press 'f' (file) or 'd' (dir)");
 			cleartimeout();
 			r = getch();
 			settimeout();
@@ -2965,7 +2965,7 @@ nochange:
 			/* Check if another file with same name exists */
 			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
 				/* File with the same name exists */
-				printprompt("Press 'y' to overwrite");
+				printprompt("press 'y' to overwrite");
 				cleartimeout();
 				r = getch();
 				settimeout();
