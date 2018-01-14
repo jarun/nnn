@@ -1090,9 +1090,7 @@ filterentries(char *path)
 
 				redraw(path);
 				goto end;
-			case CONTROL('L'):
-				if (len == 1)
-					cur = oldcur; // fallthrough
+			case CONTROL('L'): // fallthrough
 			case CONTROL('K'): // fallthrough
 			case CONTROL('_'): // fallthrough
 			case CONTROL('R'): // fallthrough
@@ -1102,6 +1100,8 @@ filterentries(char *path)
 			case CONTROL('J'): // fallthrough
 			case CONTROL('X'): // fallthrough
 			case CONTROL('Y'):
+				if (len == 1)
+					cur = oldcur; // fallthrough
 				goto end;
 			default:
 				/* Reset cur in case it's a repeat search */
