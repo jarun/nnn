@@ -295,7 +295,7 @@ static const char messages[][16] =
 	"no traversal",
 	"invalid key",
 	"set NNN_COPIER",
-	"%a %F %T %z",
+	"%F %T %z",
 };
 
 /* For use in functions which are isolated and don't return the buffer */
@@ -1451,7 +1451,7 @@ printent_long(struct entry *ent, int sel, uint namecols)
 {
 	static char buf[18], *pname;
 
-	strftime(buf, 18, "%Y-%m-%d %H:%M", localtime(&ent->t));
+	strftime(buf, 18, "%F %R", localtime(&ent->t));
 	pname = unescape(ent->name, namecols);
 
 	/* Directories are always shown on top */
