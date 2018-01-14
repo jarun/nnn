@@ -278,14 +278,25 @@ static char * const utils[] = {
 	"atool"
 };
 
-/* Common message strings */
-static const char *STR_NFTWFAIL = "nftw(3) failed";
-static const char *STR_ATROOT = "at /";
-static const char *STR_NOHOME = "HOME not set";
-static const char *STR_INPUT = "remove traversal delimiter";
-static const char *STR_INVBM = "invalid bookmark";
-static const char *STR_COPY = "set NNN_COPIER";
-static const char *STR_DATE = "%a %d %b %Y %T %z";
+/* Common strings */
+#define STR_NFTWFAIL_ID 0
+#define STR_ATROOT_ID 1
+#define STR_NOHOME_ID 2
+#define STR_INPUT_ID 3
+#define STR_INVBM_ID 4
+#define STR_COPY_ID 5
+#define STR_DATE_ID 6
+
+static const char messages[][16] =
+{
+	"nftw(3) failed",
+	"already at /",
+	"HOME not set",
+	"no traversal",
+	"invalid key",
+	"set NNN_COPIER",
+	"%a %F %T %z",
+};
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[MAX_CMD_LEN] __attribute__ ((aligned));
@@ -1309,7 +1320,7 @@ get_bm_loc(char *key, char *buf)
 				char *home = getenv("HOME");
 
 				if (!home) {
-					DPRINTF_S(STR_NOHOME);
+					DPRINTF_S(messages[STR_NOHOME_ID]);
 					return NULL;
 				}
 
@@ -1686,15 +1697,15 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 		sb->st_mode & 7, perms, sb->st_uid, (getpwuid(sb->st_uid))->pw_name, sb->st_gid, (getgrgid(sb->st_gid))->gr_name);
 
 	/* Show last access time */
-	strftime(g_buf, 40, STR_DATE, localtime(&sb->st_atime));
+	strftime(g_buf, 40, messages[STR_DATE_ID], localtime(&sb->st_atime));
 	dprintf(fd, "\n\n  Access: %s", g_buf);
 
 	/* Show last modification time */
-	strftime(g_buf, 40, STR_DATE, localtime(&sb->st_mtime));
+	strftime(g_buf, 40, messages[STR_DATE_ID], localtime(&sb->st_mtime));
 	dprintf(fd, "\n  Modify: %s", g_buf);
 
 	/* Show last status change time */
-	strftime(g_buf, 40, STR_DATE, localtime(&sb->st_ctime));
+	strftime(g_buf, 40, messages[STR_DATE_ID], localtime(&sb->st_ctime));
 	dprintf(fd, "\n  Change: %s", g_buf);
 
 	if (S_ISREG(sb->st_mode)) {
@@ -1955,7 +1966,7 @@ dentfill(char *path, struct entry **dents,
 					mkpath(path, namep, g_buf, PATH_MAX);
 
 					if (nftw(g_buf, sum_bsizes, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
-						printmsg(STR_NFTWFAIL);
+						printmsg(messages[STR_NFTWFAIL_ID]);
 						dir_blocks += sb.st_blocks;
 					} else
 						dir_blocks += ent_blocks;
@@ -2033,7 +2044,7 @@ dentfill(char *path, struct entry **dents,
 				mkpath(path, namep, g_buf, PATH_MAX);
 
 				if (nftw(g_buf, sum_bsizes, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
-					printmsg(STR_NFTWFAIL);
+					printmsg(messages[STR_NFTWFAIL_ID]);
 					dentp->blocks = sb.st_blocks;
 				} else
 					dentp->blocks = ent_blocks;
@@ -2335,7 +2346,7 @@ nochange:
 		case SEL_BACK:
 			/* There is no going back */
 			if (istopdir(path)) {
-				printmsg(STR_ATROOT);
+				printmsg(messages[STR_ATROOT_ID]);
 				goto nochange;
 			}
 
@@ -2506,7 +2517,7 @@ nochange:
 					snprintf(newpath, PATH_MAX, "%s%s", home, tmp + 1);
 				else {
 					free(input);
-					printmsg(STR_NOHOME);
+					printmsg(messages[STR_NOHOME_ID]);
 					goto nochange;
 				}
 			} else if (tmp[0] == '-' && tmp[1] == '\0') {
@@ -2527,7 +2538,7 @@ nochange:
 
 				/* Show a message if already at / */
 				if (istopdir(path)) {
-					printmsg(STR_ATROOT);
+					printmsg(messages[STR_ATROOT_ID]);
 					free(input);
 					goto nochange;
 				}
@@ -2662,7 +2673,7 @@ nochange:
 				break;
 
 			if (get_bm_loc(tmp, newpath) == NULL) {
-				printmsg(STR_INVBM);
+				printmsg(messages[STR_INVBM_ID]);
 				goto nochange;
 			}
 
@@ -2816,11 +2827,11 @@ nochange:
 					spawn(copier, newpath, NULL, NULL, F_NONE);
 				printmsg(newpath);
 			} else if (!copier)
-				printmsg(STR_COPY);
+				printmsg(messages[STR_COPY_ID]);
 			goto nochange;
 		case SEL_COPYMUL:
 			if (!copier) {
-				printmsg(STR_COPY);
+				printmsg(messages[STR_COPY_ID]);
 				goto nochange;
 			} else if (!ndents) {
 				goto nochange;
@@ -2878,7 +2889,7 @@ nochange:
 
 			/* Allow only relative, same dir paths */
 			if (tmp[0] == '/' || xstrcmp(xbasename(tmp), tmp) != 0) {
-				printmsg(STR_INPUT);
+				printmsg(messages[STR_INPUT_ID]);
 				goto nochange;
 			}
 
@@ -2912,7 +2923,7 @@ nochange:
 			}
 
 			/* Check if it's a dir or file */
-			printprompt("press 'f' (file) or 'd' (dir)");
+			printprompt("press 'f'(ile) or 'd'(ir)");
 			cleartimeout();
 			r = getch();
 			settimeout();
@@ -2947,7 +2958,7 @@ nochange:
 
 			/* Allow only relative, same dir paths */
 			if (tmp[0] == '/' || xstrcmp(xbasename(tmp), tmp) != 0) {
-				printmsg(STR_INPUT);
+				printmsg(messages[STR_INPUT_ID]);
 				goto nochange;
 			}
 
@@ -3104,7 +3115,7 @@ main(int argc, char *argv[])
 
 	if (ipath) { /* Open a bookmark directly */
 		if (get_bm_loc(ipath, cwd) == NULL) {
-			fprintf(stderr, "%s\n", STR_INVBM);
+			fprintf(stderr, "%s\n", messages[STR_INVBM_ID]);
 			exit(1);
 		}
 
