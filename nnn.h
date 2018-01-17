@@ -109,7 +109,7 @@ static struct key bindings[] = {
 	/* Change dir using bookmark */
 	{ CONTROL('B'),   SEL_CDBM,      "",     "" },
 	/* Mark a path to visit later */
-	{ 'B',            SEL_PIN,       "",     "" },
+	{ 'b',            SEL_PIN,       "",     "" },
 	/* Visit marked directory */
 	{ CONTROL('V'),   SEL_VISIT,     "",     "" },
 	/* Filter */

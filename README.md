@@ -227,7 +227,7 @@ optional arguments:
              ^/ | Open desktop search tool
               . | Toggle hide . files
              ^B | Bookmark prompt
-              B | Pin current dir
+              b | Pin current dir
              ^V | Go to pinned dir
               c | Change dir prompt
               d | Toggle detail view

@@ -1823,7 +1823,7 @@ show_help(char *path)
 	    "d^/ | Open desktop search tool\n"
 	     "e. | Toggle hide . files\n"
 	    "d^B | Bookmark prompt\n"
-	     "eB | Pin current dir\n"
+	     "eb | Pin current dir\n"
 	    "d^V | Go to pinned dir\n"
 	     "ec | Change dir prompt\n"
 	     "ed | Toggle detail view\n"
