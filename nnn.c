@@ -2715,6 +2715,9 @@ nochange:
 			cfg.filtermode ^= 1;
 			if (cfg.filtermode)
 				presel = FILTER;
+			else if (!ndents)
+				/* If there are no entries refresh to start watching dir */
+				goto begin;
 			else
 				printmsg("navigate-as-you-type off");
 			goto nochange;
