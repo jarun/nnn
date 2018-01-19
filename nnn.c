@@ -173,6 +173,7 @@ disabledbg()
 #define WIDTH  (8 * sizeof(unsigned char))
 #define TOPBIT (1 << (WIDTH - 1))
 #define POLYNOMIAL 0xD8  /* 11011 followed by 0's */
+#define CRC8_TABLE_LEN 256
 
 /* Function macros */
 #define exitcurses() endwin()
@@ -252,7 +253,7 @@ static ulong num_files;
 static uint open_max;
 static bm bookmark[BM_MAX];
 
-static uchar crc8table[256];
+static uchar crc8table[CRC8_TABLE_LEN];
 static uchar g_crc;
 
 #ifdef LINUX_INOTIFY
@@ -317,7 +318,7 @@ crc8init()
 	uint dividend;
 
 	/* Compute the remainder of each possible dividend  */
-	for (dividend = 0; dividend < 256; ++dividend)
+	for (dividend = 0; dividend < CRC8_TABLE_LEN; ++dividend)
 	{
 		/* Start with the dividend followed by zeros */
 		remainder = dividend << (WIDTH - 8);
