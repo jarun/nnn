@@ -3,14 +3,15 @@ VERSION = 1.6
 PREFIX ?= /usr/local
 MANPREFIX ?= $(PREFIX)/share/man
 STRIP ?= strip
+PKG_CONFIG ?= pkg-config
 
 CFLAGS ?= -O3
 CFLAGS += -Wall -Wextra -Wno-unused-parameter
 LDLIBS = -lreadline
 
-ifeq ($(shell pkg-config ncursesw && echo 1),1)
-	CFLAGS += $(shell pkg-config --cflags ncursesw)
-	LDLIBS += $(shell pkg-config --libs   ncursesw)
+ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
+	CFLAGS += $(shell $(PKG_CONFIG) --cflags ncursesw)
+	LDLIBS += $(shell $(PKG_CONFIG) --libs   ncursesw)
 else
 	LDLIBS += -lncurses
 endif
