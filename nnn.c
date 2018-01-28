@@ -1115,9 +1115,10 @@ filterentries(char *path)
 			case CONTROL('V'): // fallthrough
 			case CONTROL('J'): // fallthrough
 			case CONTROL('X'): // fallthrough
-			case CONTROL('Y'):
+			case CONTROL('Y'): // fallthrough
+			case CONTROL('T'):
 				if (len == 1)
-					cur = oldcur; // fallthrough
+					cur = oldcur;
 				goto end;
 			default:
 				/* Reset cur in case it's a repeat search */
