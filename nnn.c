@@ -229,13 +229,14 @@ typedef struct {
 	ushort showcolor  : 1;  /* Set to show dirs in blue */
 	ushort dircolor   : 1;  /* Current status of dir color */
 	ushort metaviewer : 1;  /* Index of metadata viewer in utils[] */
+	ushort quote      : 1;  /* Copy paths within quotes */
 	ushort color      : 3;  /* Color code for directories */
 } settings;
 
 /* GLOBALS */
 
 /* Configuration */
-static settings cfg = {0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 4};
+static settings cfg = {0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 4};
 
 static struct entry *dents;
 static char *pnamebuf, *pcopybuf;
@@ -619,7 +620,7 @@ xbasename(char *path)
 static bool
 appendfilepath(const char *path, const size_t len)
 {
-	if ((copybufpos >= copybuflen) || (len > (copybuflen - (copybufpos + 1)))) {
+	if ((copybufpos >= copybuflen) || (len > (copybuflen - (copybufpos + 3)))) {
 		copybuflen += PATH_MAX;
 		pcopybuf = xrealloc(pcopybuf, copybuflen);
 		if (!pcopybuf) {
@@ -628,10 +629,24 @@ appendfilepath(const char *path, const size_t len)
 		}
 	}
 
-	if (copybufpos)
+	if (copybufpos) {
 		pcopybuf[copybufpos - 1] = '\n';
+		if (cfg.quote) {
+			pcopybuf[copybufpos] = '\'';
+			++copybufpos;
+		}
+	} else if (cfg.quote) {
+		pcopybuf[copybufpos] = '\'';
+		++copybufpos;
+	}
 
 	copybufpos += xstrlcpy(pcopybuf + copybufpos, path, len);
+	if (cfg.quote) {
+		pcopybuf[copybufpos - 1] = '\'';
+		pcopybuf[copybufpos] = '\0';
+		++copybufpos;
+	}
+
 	return TRUE;
 }
 
@@ -1844,6 +1859,7 @@ show_help(char *path)
 	    "d^F | Extract archive\n"
 	    "d^K | Invoke file path copier\n"
 	    "d^Y | Toggle multi-copy mode\n"
+	    "d^T | Toggle path quote\n"
 	    "d^L | Redraw, clear prompt\n"
 	     "e? | Help, settings\n"
 	     "eQ | Quit and cd\n"
@@ -2880,6 +2896,14 @@ nochange:
 				}
 			}
 			goto nochange;
+		case SEL_QUOTE:
+			cfg.quote ^= 1;
+			DPRINTF_D(cfg.quote);
+			if (cfg.quote)
+				printmsg("quotes on");
+			else
+				printmsg("quotes off");
+			goto nochange;
 		case SEL_OPEN:
 			printprompt("open with: "); // fallthrough
 		case SEL_NEW:
@@ -3183,6 +3207,10 @@ main(int argc, char *argv[])
 
 	/* Get nowait flag */
 	nowait |= getenv("NNN_NOWAIT") ? F_NOWAIT : 0;
+
+	/* Enable quotes if opted */
+	if (getenv("NNN_QUOTE_ON"))
+		cfg.quote = 1;
 
 	signal(SIGINT, SIG_IGN);
 

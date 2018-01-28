@@ -247,6 +247,7 @@ optional arguments:
              ^F | Extract archive
              ^K | Invoke file path copier
              ^Y | Toggle multi-copy mode
+             ^T | Toggle path quote
              ^L | Redraw, clear prompt
               ? | Help, settings
               Q | Quit and cd
@@ -368,6 +369,11 @@ To copy multiple file paths, switch to the multi-copy mode using <kbd>^Y</kbd>. 
 - navigate to another file in the same directory to select a range of files.
 
 Pressing <kbd>^Y</kbd> again copies the paths to clipboard and exits the multi-copy mode.
+
+To wrap each file path within single quotes, export `NNN_QUOTE_ON`:
+
+    export NNN_QUOTE_ON=1
+This is particularly useful if you are planning to copy the whole string to the shell to run a command. Quotes can be toggled at runtime using <kbd>^T</kbd>.
 
 #### change dir color
 

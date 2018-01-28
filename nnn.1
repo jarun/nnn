@@ -104,6 +104,8 @@ Extract archive in current directory
 Invoke file path copier
 .It Ic ^Y
 Toggle multiple file path copy mode
+.It Ic ^T
+Toggle path quote
 .It Ic ^L
 Force a redraw, clear rename or filter prompt
 .It Ic \&?
@@ -247,6 +249,9 @@ screensaver.
 .Bd -literal
     export NNN_NOWAIT=1
 .Ed
+.Pp
+\fBNNN_QUOTE_ON:\fR wrap copied paths within single quotes. Useful for pasting
+names in the shell.
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspacekey to DEC.
 .Sh AUTHORS
