@@ -2839,13 +2839,24 @@ nochange:
 			goto begin;
 		case SEL_COPY:
 			if (copier && ndents) {
-				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				if (cfg.copymode) {
+					r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
 					if (!appendfilepath(newpath, r))
 						goto nochange;
-				} else
+					printmsg(newpath);
+				} else if (cfg.quote) {
+					g_buf[0] = '\'';
+					r = mkpath(path, dents[cur].name, g_buf + 1, PATH_MAX);
+					g_buf[r] = '\'';
+					g_buf[r + 1] = '\0';
+
+					spawn(copier, g_buf, NULL, NULL, F_NONE);
+					printmsg(g_buf);
+				} else {
+					mkpath(path, dents[cur].name, newpath, PATH_MAX);
 					spawn(copier, newpath, NULL, NULL, F_NONE);
-				printmsg(newpath);
+					printmsg(newpath);
+				}
 			} else if (!copier)
 				printmsg(messages[STR_COPY_ID]);
 			goto nochange;
