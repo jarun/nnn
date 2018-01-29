@@ -2852,7 +2852,8 @@ nochange:
 					g_buf[r + 1] = '\0';
 
 					spawn(copier, g_buf, NULL, NULL, F_NONE);
-					printmsg(g_buf);
+					g_buf[r] = '\0';
+					printmsg(g_buf + 1);
 				} else {
 					mkpath(path, dents[cur].name, newpath, PATH_MAX);
 					spawn(copier, newpath, NULL, NULL, F_NONE);
