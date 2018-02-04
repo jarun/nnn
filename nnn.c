@@ -2875,7 +2875,7 @@ nochange:
 				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
 				copystartid = cur;
 				copybufpos = 0;
-				printmsg("copymode on");
+				printmsg("multi-copy on");
 				DPRINTF_S("copymode on");
 			} else {
 				static size_t len;
@@ -2908,7 +2908,7 @@ nochange:
 					if (!len)
 						printmsg("files copied");
 				} else
-					printmsg("copymode off");
+					printmsg("multi-copy off");
 			}
 			goto nochange;
 		case SEL_QUOTE:
