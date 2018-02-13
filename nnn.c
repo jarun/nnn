@@ -2733,11 +2733,14 @@ nochange:
 			cfg.filtermode ^= 1;
 			if (cfg.filtermode)
 				presel = FILTER;
-			else if (!ndents)
-				/* If there are no entries refresh to start watching dir */
+			else {
+				/* Save current */
+				if (ndents > 0)
+					copycurname();
+
+				/* Start watching the directory */
 				goto begin;
-			else
-				printmsg("navigate-as-you-type off");
+			}
 			goto nochange;
 		case SEL_SEARCH:
 			spawn(player, path, "search", NULL, F_NORMAL);
