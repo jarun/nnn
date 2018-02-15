@@ -3049,6 +3049,9 @@ nochange:
 			run = xgetenv(env, run);
 			spawn(run, NULL, NULL, path, F_NORMAL | F_MARKER);
 			/* Repopulate as directory content may have changed */
+			/* Save current */
+			if (ndents > 0)
+				copycurname();
 			goto begin;
 		case SEL_RUNARG:
 			run = xgetenv(env, run);
