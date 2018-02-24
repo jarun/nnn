@@ -11,6 +11,7 @@ What's in?
   - <kbd>^B</kbd> - show bookmark prompt (replaces <kbd>b</kbd>)
   - <kbd>b</kbd> - pin current dir (replaces <kbd>^B</kbd>)
   - <kbd>^J</kbd> - toggle du mode
+  - <kbd>R</kbd> - batch rename files in vidir
   - <kbd>^F</kbd> - extract archive (replaces <kbd>^X</kbd>)
   - <kbd>^X</kbd> - quit nnn (replaces <kbd>^Q</kbd>)
 - Extra shortcuts enabled in nav-as-you-type mode:
