@@ -1,3 +1,32 @@
+nnn v1.7
+2018-02-nn
+
+What's in?
+- Copy multiple file paths
+- Copy file paths when X is unavailable
+- Optionally quote individual file paths with single quotes on copy
+- Use ISO 8601 date format in file details
+- New/changed/remapped shortcuts:
+  - <kbd>^B</kbd> - show bookmark prompt (replaces <kbd>b</kbd>)
+  - <kbd>b</kbd> - pin current dir (replaces <kbd>^B</kbd>)
+  - <kbd>^J</kbd> - toggle du mode
+  - <kbd>^F</kbd> - extract archive (replaces <kbd>^X</kbd>)
+  - <kbd>^X</kbd> - quit nnn (replaces <kbd>^Q</kbd>)
+- Extra shortcuts enabled in nav-as-you-type mode:
+  - <kbd>^K</kbd>, <kbd>^Y</kbd> (file path copy)
+  - <kbd>^T</kbd> (toggles quoted file path copy)
+  - <kbd>^R</kbd> (rename)
+  - <kbd>^O</kbd> (open with...)
+  - <kbd>^B</kbd> (show bookmark prompt)
+  - <kbd>^V</kbd> (visit pinned dir)
+  - <kbd>^J</kbd> (toggle du mode)
+  - <kbd>^/</kbd> (open desktop opener)
+  - <kbd>^F</kbd> (extract archive)
+  - <kbd>^L</kbd> (refresh)
+  - <kbd>^X</kbd> (quit nnn)
+
+-------------------------------------------------------------------------------
+
 nnn v1.6
 2017-12-25
 
