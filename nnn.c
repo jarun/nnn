@@ -271,6 +271,14 @@ static uint KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK | NOTE_RENAME 
 static struct timespec gtimeout;
 #endif
 
+/* Macros for utilities */
+#define MEDIAINFO 0
+#define EXIFTOOL 1
+#define OPENER 2
+#define NLAY 3
+#define ATOOL 4
+#define VIDIR 5
+
 /* Utilities to open files, run actions */
 static char * const utils[] = {
 	"mediainfo",
@@ -1811,14 +1819,14 @@ show_mediainfo(char *fpath, char *arg)
 static int
 handle_archive(char *fpath, char *arg, char *dir)
 {
-	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[4], NULL, 0))
+	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[ATOOL], NULL, 0))
 		return -1;
 
 	if (arg[1] == 'x')
-		spawn(utils[4], arg, fpath, dir, F_NORMAL);
+		spawn(utils[ATOOL], arg, fpath, dir, F_NORMAL);
 	else {
 		exitcurses();
-		get_output(NULL, 0, utils[4], arg, fpath, 1);
+		get_output(NULL, 0, utils[ATOOL], arg, fpath, 1);
 		refresh();
 	}
 
@@ -2471,7 +2479,7 @@ nochange:
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(utils[2], newpath, NULL, NULL, nowait);
+				spawn(utils[OPENER], newpath, NULL, NULL, nowait);
 				continue;
 			}
 			default:
@@ -2810,7 +2818,7 @@ nochange:
 					if (sel == SEL_MEDIA || sel == SEL_FMEDIA)
 						xstrlcpy(newpath + 8, utils[cfg.metaviewer], 32);
 					else
-						xstrlcpy(newpath + 8, utils[4], 32);
+						xstrlcpy(newpath + 8, utils[ATOOL], 32);
 
 					printmsg(newpath);
 					goto nochange;
@@ -3073,7 +3081,7 @@ nochange:
 			xstrlcpy(oldname, tmp, NAME_MAX + 1);
 			goto begin;
 		case SEL_RENAMEALL:
-			if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[5], NULL, 0)) {
+			if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[VIDIR], NULL, 0)) {
 				printmsg("vidir missing");
 				goto nochange;
 			}
@@ -3091,7 +3099,7 @@ nochange:
 				goto nochange;
 			}
 
-			spawn(utils[5], ".", NULL, NULL, F_NORMAL);
+			spawn(utils[VIDIR], ".", NULL, NULL, F_NORMAL);
 
 			/* Change back to program start dir */
 			if (chdir(newpath) == -1)
@@ -3202,7 +3210,7 @@ main(int argc, char *argv[])
 				cfg.color = (uchar)atoi(optarg);
 			break;
 		case 'e':
-			cfg.metaviewer = 1;
+			cfg.metaviewer = EXIFTOOL;
 			break;
 		case 'p':
 			player = optarg;
@@ -3272,7 +3280,7 @@ main(int argc, char *argv[])
 
 	/* Set player if not set already */
 	if (!player)
-		player = utils[3];
+		player = utils[NLAY];
 
 	/* Get the desktop file browser, if set */
 	desktop_manager = getenv("NNN_DE_FILE_MANAGER");
