@@ -68,6 +68,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - [use cd .....](#use-cd-)
   - [cd on quit](#cd-on-quit)
   - [copy file paths to clipboard](#copy-file-paths-to-clipboard)
+  - [copy file paths when X is missing](#copy-file-paths-when-x-is-missing)
   - [change dir color](#change-dir-color)
   - [file copy, move, delete](#file-copy-move-delete)
   - [boost chdir prompt](#boost-chdir-prompt)
@@ -375,6 +376,34 @@ To wrap each file path within single quotes, export `NNN_QUOTE_ON`:
 
     export NNN_QUOTE_ON=1
 This is particularly useful if you are planning to copy the whole string to the shell to run a command. Quotes can be toggled at runtime using <kbd>^T</kbd>.
+
+#### copy file paths when X is missing
+
+A very common scenario on headless remote servers connected via SSH. As the clipboard is missing, `nnn` copies the path names to the tmp file `/tmp/nnncp`.
+
+To use the copied paths from the cmdline, use command substitution:
+
+    # bash/zsh
+    ls -ltr `cat /tmp/nnncp`
+    ls -ltr $(cat /tmp/nnncp)
+
+    # fish
+    ls -ltr (cat /tmp/nnncp)
+
+An alias may be handy:
+
+    alias ncp='cat /tmp/nnncp'
+
+so you can -
+
+    # bash/zsh
+    ls -ltr `ncp`
+    ls -ltr $(ncp)
+
+    # fish
+    ls -ltr (ncp)
+
+Note that you may want to keep quotes disabled in this case.
 
 #### change dir color
 
