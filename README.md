@@ -91,7 +91,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
   - Roll-over at edges, page through entries
   - Show directories in custom color (default: enabled in blue)
-- Disk usage analyzer mode
+- Disk usage analyzer (du) mode
 - Search
   - Filter directory contents with *search-as-you-type*
   - Desktop search (default gnome-search-tool, customizable) integration
@@ -102,7 +102,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Customizable bash script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) to handle actions
 - Information
   - Basic and detail view
-  - Detailed file information
+  - Detailed stat-like file information
   - Media information (needs mediainfo or exiftool, if specified)
 - Ordering
   - Numeric order (1, 2, ... 10, 11, ...) for numeric names
@@ -110,15 +110,15 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 - Convenience
   - Create, rename files and directories
   - Spawn SHELL (fallback sh) in the current directory
-  - Invoke file path copier (*easy* shell integration)
+  - Copy absolute file paths with/without X (*easy* shell integration)
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
   - List and extract archives (needs atool)
   - Open current directory in a custom GUI file browser
-  - Monitor directory changes
   - Terminal screensaver (default vlock, customizable) integration
 - Unicode support
 - Highly optimized code, minimal resource usage
+- Minimal dependencies
 
 ### Performance
 
@@ -423,7 +423,7 @@ Any other value disables colored directories.
 
 #### boost chdir prompt
 
-`nnn` uses libreadline for the chdir prompt input. So all the fantastic features of readline (e.g. case insensitive tab completion, history, reverse-i-search) is available to you based on your readline [configuration](https://cnswww.cns.cwru.edu/php/chet/readline/readline.html#SEC9).
+`nnn` uses libreadline for the chdir prompt input. So all the fantastic features of readline (e.g. case insensitive tab completion, history, reverse-i-search) are available to you based on your readline [configuration](https://cnswww.cns.cwru.edu/php/chet/readline/readline.html#SEC9).
 
 #### set idle timeout
 
