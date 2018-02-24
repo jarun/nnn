@@ -15,6 +15,19 @@ packages:
     deps:
       - ncurses
       - readline
+  centos7.2:
+    builddeps:
+      - make
+      - gcc
+      - pkgconfig
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+    commands:
+      pre:
+        - yum install epel-release
   centos7.3:
     builddeps:
       - make
@@ -38,7 +51,27 @@ packages:
     deps:
       - libncursesw5
       - readline-common
+  fedora25:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
   fedora26:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+  fedora27:
     builddeps:
       - make
       - gcc
