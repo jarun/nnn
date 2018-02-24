@@ -1141,6 +1141,7 @@ filterentries(char *path)
 			case CONTROL('B'): // fallthrough
 			case CONTROL('V'): // fallthrough
 			case CONTROL('J'): // fallthrough
+			case CONTROL('G'): // fallthrough
 			case CONTROL('X'): // fallthrough
 			case CONTROL('F'): // fallthrough
 			case CONTROL('T'):
@@ -1891,7 +1892,7 @@ show_help(char *path)
 	    "d^T | Toggle path quote\n"
 	    "d^L | Redraw, clear prompt\n"
 	     "e? | Help, settings\n"
-	     "eQ | Quit and cd\n"
+	 "aQ, ^G | Quit and cd\n"
 	 "aq, ^X | Quit\n\n");
 
 	if (fd == -1)

@@ -119,7 +119,6 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Terminal screensaver (default vlock, customizable) integration
 - Unicode support
 - Highly optimized code, minimal resource usage
-- Minimal dependencies
 
 ### Performance
 
@@ -254,7 +253,7 @@ optional arguments:
              ^T | Toggle path quote
              ^L | Redraw, clear prompt
               ? | Help, settings
-              Q | Quit and cd
+          Q, ^G | Quit and cd
           q, ^X | Quit
 ```
 
@@ -330,6 +329,8 @@ Add the following to your shell's rc file for the best experience:
 4. Run `n`.
 
 5. Set `NNN_NOWAIT`, if nnn [blocks on your desktop environment](#nnn-blocks-on-opening-files) when a file is open.
+
+6. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 
 ### How to
 

@@ -170,6 +170,7 @@ static struct key bindings[] = {
 	{ 'p',            SEL_RUNARG,    "less", "PAGER" },
 	/* Change dir on quit */
 	{ 'Q',            SEL_CDQUIT,    "",     "" },
+	{ CONTROL('G'),   SEL_CDQUIT,    "",     "" },
 	/* Quit */
 	{ 'q',            SEL_QUIT,      "",     "" },
 	{ CONTROL('X'),   SEL_QUIT,      "",     "" },
