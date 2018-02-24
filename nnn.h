@@ -39,6 +39,7 @@ enum action {
 	SEL_OPEN,
 	SEL_NEW,
 	SEL_RENAME,
+	SEL_RENAMEALL,
 	SEL_HELP,
 	SEL_RUN,
 	SEL_RUNARG,
@@ -158,6 +159,8 @@ static struct key bindings[] = {
 	/* Show rename prompt */
 	{ CONTROL('R'),   SEL_RENAME,    "",     "" },
 	{ KEY_F(2),       SEL_RENAME,    "",     "" }, /* Undocumented */
+	/* Rename contents of current dir */
+	{ 'R',            SEL_RENAMEALL, "",     "" },
 	/* Show help */
 	{ '?',            SEL_HELP,      "",     "" },
 	/* Run command */

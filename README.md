@@ -109,6 +109,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Sort by file name, modification time, size
 - Convenience
   - Create, rename files and directories
+  - Batch rename current directory entries in vidir (from moreutils)
   - Spawn SHELL (fallback sh) in the current directory
   - Copy absolute file paths with/without X (*easy* shell integration)
   - Change directory at exit (*easy* shell integration)
@@ -238,6 +239,7 @@ optional arguments:
               M | Full media info
               n | Create new
              ^R | Rename entry
+              R | Rename dir entries
               s | Toggle sort by size
           S, ^J | Toggle du mode
               t | Toggle sort by mtime
@@ -303,6 +305,7 @@ The following abbreviations are used in the detail view:
       export NNN_DE_FILE_MANAGER=nautilus
 - [mediainfo](https://mediaarea.net/en/MediaInfo) (or [exiftool](https://sno.phy.queensu.ca/~phil/exiftool/), if specified) is required to view media information
 - [atool](http://www.nongnu.org/atool/) is required to list and extract archives
+- vidir from [moreutils](https://joeyh.name/code/moreutils/) is used to batch rename entries in current directory
 
 #### Help
 

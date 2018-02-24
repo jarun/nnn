@@ -281,7 +281,8 @@ static char * const utils[] = {
 	"xdg-open",
 #endif
 	"nlay",
-	"atool"
+	"atool",
+	"vidir"
 };
 
 /* Common strings */
@@ -641,7 +642,7 @@ appendfilepath(const char *path, const size_t len)
 		copybuflen += PATH_MAX;
 		pcopybuf = xrealloc(pcopybuf, copybuflen);
 		if (!pcopybuf) {
-			printmsg("no memory!\n");
+			printmsg("no memory!");
 			return FALSE;
 		}
 	}
@@ -1867,6 +1868,7 @@ show_help(char *path)
 	     "eM | Full media info\n"
 	     "en | Create new\n"
 	    "d^R | Rename entry\n"
+	     "eR | Rename dir entries\n"
 	     "es | Toggle sort by size\n"
 	 "aS, ^J | Toggle du mode\n"
 	     "et | Toggle sort by mtime\n"
@@ -3069,6 +3071,35 @@ nochange:
 
 			close(fd);
 			xstrlcpy(oldname, tmp, NAME_MAX + 1);
+			goto begin;
+		case SEL_RENAMEALL:
+			if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[5], NULL, 0)) {
+				printmsg("vidir missing");
+				goto nochange;
+			}
+
+			/* Save the program start dir */
+			tmp = getcwd(newpath, PATH_MAX);
+			if (tmp == NULL) {
+				printwarn();
+				goto nochange;
+			}
+
+			/* Switch to current path for readline(3) */
+			if (chdir(path) == -1) {
+				printwarn();
+				goto nochange;
+			}
+
+			spawn(utils[5], ".", NULL, NULL, F_NORMAL);
+
+			/* Change back to program start dir */
+			if (chdir(newpath) == -1)
+				printwarn();
+
+			/* Save current */
+			if (ndents > 0)
+				copycurname();
 			goto begin;
 		case SEL_HELP:
 			show_help(path);
