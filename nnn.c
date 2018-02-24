@@ -194,6 +194,9 @@ disabledbg()
 #define NUM_EVENT_FDS 1
 #endif
 
+/* File path to copy file names when X is not available */
+#define TMP_CP_PATH "/tmp/nnncp"
+
 /* TYPE DEFINITIONS */
 typedef unsigned long ulong;
 typedef unsigned int uint;
@@ -230,13 +233,14 @@ typedef struct {
 	ushort dircolor   : 1;  /* Current status of dir color */
 	ushort metaviewer : 1;  /* Index of metadata viewer in utils[] */
 	ushort quote      : 1;  /* Copy paths within quotes */
+	ushort noxdisplay : 1;  /* X11 is not available */
 	ushort color      : 3;  /* Color code for directories */
 } settings;
 
 /* GLOBALS */
 
 /* Configuration */
-static settings cfg = {0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 4};
+static settings cfg = {0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 4};
 
 static struct entry *dents;
 static char *pnamebuf, *pcopybuf;
@@ -615,6 +619,19 @@ xbasename(char *path)
 
 	base = xmemrchr((uchar *)path, '/', xstrlen(path));
 	return base ? base + 1 : path;
+}
+
+/* Writes buflen char(s) from buf to a file */
+static void
+writecp(const char *buf, const size_t buflen)
+{
+	FILE *fp = fopen(TMP_CP_PATH, "w");
+
+	if (fp) {
+		fwrite(buf, 1, buflen, fp);
+		fclose(fp);
+	} else
+		printwarn();
 }
 
 static bool
@@ -2854,12 +2871,19 @@ nochange:
 					g_buf[r] = '\'';
 					g_buf[r + 1] = '\0';
 
-					spawn(copier, g_buf, NULL, NULL, F_NONE);
+					if (cfg.noxdisplay)
+						writecp(g_buf, r + 1); /* Truncate NULL from end */
+					else
+						spawn(copier, g_buf, NULL, NULL, F_NONE);
+
 					g_buf[r] = '\0';
 					printmsg(g_buf + 1);
 				} else {
-					mkpath(path, dents[cur].name, newpath, PATH_MAX);
-					spawn(copier, newpath, NULL, NULL, F_NONE);
+					r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
+					if (cfg.noxdisplay)
+						writecp(newpath, r - 1); /* Truncate NULL from end */
+					else
+						spawn(copier, newpath, NULL, NULL, F_NONE);
 					printmsg(newpath);
 				}
 			} else if (!copier)
@@ -2906,7 +2930,10 @@ nochange:
 				}
 
 				if (copybufpos) {
-					spawn(copier, pcopybuf, NULL, NULL, F_NONE);
+					if (cfg.noxdisplay)
+						writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
+					else
+						spawn(copier, pcopybuf, NULL, NULL, F_NONE);
 					DPRINTF_S(pcopybuf);
 					if (!len)
 						printmsg("files copied");
@@ -3232,6 +3259,10 @@ main(int argc, char *argv[])
 	/* Enable quotes if opted */
 	if (getenv("NNN_QUOTE_ON"))
 		cfg.quote = 1;
+
+	/* Check if X11 is available */
+	if (getenv("NNN_NO_X"))
+		cfg.noxdisplay = 1;
 
 	signal(SIGINT, SIG_IGN);
 
