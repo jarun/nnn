@@ -385,7 +385,11 @@ This is particularly useful if you are planning to copy the whole string to the 
 
 A very common scenario on headless remote servers connected via SSH. As the clipboard is missing, `nnn` copies the path names to the tmp file `/tmp/nnncp`.
 
-To use the copied paths from the cmdline, use command substitution:
+`nnn` needs to know X is unavailable:
+
+    export NNN_NO_X=1
+
+Use <kbd>^Y</kbd> and/or <kbd>^K</kbd> to copy file paths as usual. To use the copied paths from the cmdline, use command substitution:
 
     # bash/zsh
     ls -ltr `cat /tmp/nnncp`
