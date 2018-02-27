@@ -1,11 +1,11 @@
 nnn v1.7
-2018-02-nn
+2018-02-28
 
 What's in?
+- Batch rename/move/delete files in vidir from [moreutils](https://joeyh.name/code/moreutils/)
 - Copy multiple file paths
 - Copy file paths when X is unavailable
 - Optionally quote individual file paths with single quotes on copy
-- Batch rename/move/delete files in vidir from [moreutils](https://joeyh.name/code/moreutils/)
 - Use ISO 8601 date format in file details
 - New/changed/remapped shortcuts:
   - <kbd>^B</kbd> - show bookmark prompt (replaces <kbd>b</kbd>)
