@@ -5,7 +5,7 @@ What's in?
 - Copy multiple file paths
 - Copy file paths when X is unavailable
 - Optionally quote individual file paths with single quotes on copy
-- Batch rename files in vidir from [moreutils](https://joeyh.name/code/moreutils/)
+- Batch rename/move/delete files in vidir from [moreutils](https://joeyh.name/code/moreutils/)
 - Use ISO 8601 date format in file details
 - New/changed/remapped shortcuts:
   - <kbd>^B</kbd> - show bookmark prompt (replaces <kbd>b</kbd>)

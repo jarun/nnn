@@ -109,7 +109,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Sort by file name, modification time, size
 - Convenience
   - Create, rename files and directories
-  - Batch rename current directory entries in vidir (from moreutils)
+  - Batch rename/move/delete current directory entries in vidir (from moreutils)
   - Spawn SHELL (fallback sh) in the current directory
   - Copy absolute file paths with/without X (*easy* shell integration)
   - Change directory at exit (*easy* shell integration)
@@ -423,11 +423,13 @@ Any other value disables colored directories.
 
 #### file copy, move, delete
 
-`nnn` doesn't support file copy, move, delete inherently. However, it simplifies the workflow:
+`nnn` doesn't support file copy, move, delete natively. However, it simplifies the workflow:
 
-1. copy the absolute path to a file by invoking the file path copier (<kbd>^K</kbd>)
+1. copy the absolute paths using <kbd>^Y</kbd> and/or <kbd>^K</kbd>
 2. spawn a shell in the current directory (<kbd>!</kbd>)
-3. while typing the desired command, copy the file path (usually <kbd>^-Shift-V</kbd>)
+3. while typing the desired command, copy the file paths (usually <kbd>^-Shift-V</kbd>)
+
+In addition, nnn integrates with vidir. vidir supports batch file move and delete.
 
 #### boost chdir prompt
 
