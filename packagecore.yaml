@@ -55,7 +55,7 @@ packages:
     builddeps:
       - make
       - gcc
-      - pkg-config
+      - pkgconfig
       - ncurses-devel
       - readline-devel
     deps:
