@@ -80,6 +80,7 @@
 #endif
 #include <ftw.h>
 #include <wchar.h>
+#include <inttypes.h>
 
 #include "nnn.h"
 
@@ -1439,10 +1440,8 @@ coolsize(off_t size)
 {
 	static const char * const U = "BKMGTPEZY";
 	static char size_buf[12]; /* Buffer to hold human readable size */
-	static int i;
-
-	static long double rem;
-	static const double div_2_pow_10 = 1.0 / 1024.0;
+	static int rem, i;
+	static int fdig; /* number of fractional digits to show */
 
 	i = 0;
 	rem = 0;
@@ -1453,7 +1452,18 @@ coolsize(off_t size)
 		++i;
 	}
 
-	snprintf(size_buf, 12, "%.*Lf%c", i, size + rem * div_2_pow_10, U[i]);
+	rem = (1000 * rem) >> 10; /* convert 1024th fractions to 1000th */
+	fdig = 3;
+
+	/* Show 1 decimal for KB sizes and 2 decimals for MBs. */
+	if (i < 3) { --fdig; rem = (rem + 5) / 10; }
+	if (i < 2) { --fdig; rem = (rem + 5) / 10; }
+
+	if (i > 0)
+		snprintf(size_buf, 12, "%" PRId64 ".%0*i%c", size, fdig, rem, U[i]);
+	else
+		snprintf(size_buf, 12, "%" PRId64 "%c", size, U[i]);
+
 	return size_buf;
 }
 
