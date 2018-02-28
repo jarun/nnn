@@ -33,9 +33,9 @@ debug: $(SRC)
 
 install: all
 	install -m 0755 -d $(DESTDIR)$(PREFIX)/bin
-	install -m 0755 -t $(DESTDIR)$(PREFIX)/bin $(BIN) $(PLAYER)
+	install -m 0755 $(BIN) $(PLAYER) $(DESTDIR)$(PREFIX)/bin
 	install -m 0755 -d $(DESTDIR)$(MANPREFIX)/man1
-	install -m 0644 -t $(DESTDIR)$(MANPREFIX)/man1 $(BIN).1
+	install -m 0644 $(BIN).1 $(DESTDIR)$(MANPREFIX)/man1
 
 uninstall:
 	$(RM) $(DESTDIR)$(PREFIX)/bin/$(BIN)
