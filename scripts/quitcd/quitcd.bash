@@ -6,6 +6,6 @@ n()
 
         if [ -f $NNN_TMPFILE ]; then
                 . $NNN_TMPFILE
-                rm $NNN_TMPFILE
+                rm -f $NNN_TMPFILE > /dev/null
         fi
 }
