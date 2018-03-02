@@ -488,7 +488,7 @@ xstrlcpy(char *dest, const char *src, size_t n)
 	 * To enable -O3 ensure src and dest are 16-byte aligned
 	 * More info: http://www.felixcloutier.com/x86/MOVDQA.html
 	 */
-	if ((n >= lsize) && !((ulong)src & (ulong)dest & _ALIGNMENT_MASK)) {
+	if ((n >= lsize) && (((ulong)src & _ALIGNMENT_MASK) == 0 && ((ulong)dest & _ALIGNMENT_MASK) == 0)) {
 		s = (ulong *)src;
 		d = (ulong *)dest;
 		blocks = n >> _WSHIFT;
