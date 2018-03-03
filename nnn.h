@@ -62,7 +62,7 @@ struct assoc {
 };
 
 static struct assoc assocs[] = {
-	{ "\\.(c|cpp|h|log|md|py|sh|txt)$", "text" },
+	{ "\\.(c|cpp|h|log|md|py|rb|sh|txt)$", "text" },
 };
 
 static struct key bindings[] = {
