@@ -2726,8 +2726,14 @@ nochange:
 			printprompt("key: ");
 			tmp = readinput();
 			clearprompt();
-			if (tmp == NULL)
+			if (tmp == NULL || tmp[0] == '\0')
 				break;
+
+			/* Interpret ~, - and & keys */
+			if ((tmp[1] == '\0') && (tmp[0] == '~' || tmp[0] == '-' || tmp[0] == '&')) {
+				presel = tmp[0];
+				goto begin;
+			}
 
 			if (get_bm_loc(tmp, newpath) == NULL) {
 				printmsg(messages[STR_INVBM_ID]);

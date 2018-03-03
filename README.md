@@ -340,6 +340,8 @@ Set environment variable `NNN_BMS` as a string of `key:location` pairs (max 10) 
 
     export NNN_BMS='doc:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
 
+The bookmark prompt also understands the <kbd>~</kbd> (HOME), <kbd>-</kbd> (last visited directory) and <kbd>&</kbd> (start directory) shortcuts.
+
 #### use cd .....
 
 To jump to the n<sup>th</sup> level parent, with PWD at level 0, use `n + 1` dots. For example, to jump to the 6<th> parent of the current directory, use 7 dots. If the number of dots would take you *beyond* `/` (which isn't possible), you'll be placed at `/`.
