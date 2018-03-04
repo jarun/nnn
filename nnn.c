@@ -1465,9 +1465,9 @@ coolsize(off_t size)
 	if (i < 3 && rem >= frac) { size++; rem = 0; }
 
 	if (i > 0)
-		snprintf(size_buf, 12, "%lu.%0*i%c", size, fdig, rem, U[i]);
+		snprintf(size_buf, 12, "%" PRId64 ".%0*i%c", size, fdig, rem, U[i]);
 	else
-		snprintf(size_buf, 12, "%lu%c", size, U[i]);
+		snprintf(size_buf, 12, "%" PRId64 "%c", size, U[i]);
 
 	return size_buf;
 }
