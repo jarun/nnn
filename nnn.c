@@ -1442,6 +1442,7 @@ coolsize(off_t size)
 	static char size_buf[12]; /* Buffer to hold human readable size */
 	static int rem, i;
 	static int fdig; /* number of fractional digits to show */
+	static int frac;
 
 	i = 0;
 	rem = 0;
@@ -1452,12 +1453,16 @@ coolsize(off_t size)
 		++i;
 	}
 
-	rem = (1000 * rem) >> 10; /* convert 1024th fractions to 1000th */
 	fdig = 3;
+	frac = 1000;
+	rem = (10000 * rem) >> 10; /* convert 1024th fractions to 10000th */
+	rem = (rem / 10) + (rem % 10 >= 5 ? 1 : 0); /* round to 1000th */
 
 	/* Show 1 decimal for KB sizes and 2 decimals for MBs. */
-	if (i < 3) { --fdig; rem = (rem + 5) / 10; }
-	if (i < 2) { --fdig; rem = (rem + 5) / 10; }
+	if (i < 3) { --fdig; rem = (rem + 5) / 10; frac /= 10; }
+	if (i < 2) { --fdig; rem = (rem + 5) / 10; frac /= 10; }
+	/* carry, in case rounding above overflows the fractional part */
+	if (i < 3 && rem >= frac) { size++; rem = 0; }
 
 	if (i > 0)
 		snprintf(size_buf, 12, "%" PRId64 ".%0*i%c", size, fdig, rem, U[i]);
