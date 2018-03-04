@@ -195,9 +195,6 @@ disabledbg()
 #define NUM_EVENT_FDS 1
 #endif
 
-/* File path to copy file names when X is not available */
-#define TMP_CP_PATH "/tmp/nnncp"
-
 /* TYPE DEFINITIONS */
 typedef unsigned long ulong;
 typedef unsigned int uint;
@@ -316,6 +313,9 @@ static const char messages[][16] =
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[MAX_CMD_LEN] __attribute__ ((aligned));
+
+/* Buffer for file path copy file */
+static char g_cppath[48] __attribute__ ((aligned));
 
 /* Forward declarations */
 static void redraw(char *path);
@@ -635,7 +635,7 @@ xbasename(char *path)
 static void
 writecp(const char *buf, const size_t buflen)
 {
-	FILE *fp = fopen(TMP_CP_PATH, "w");
+	FILE *fp = fopen(g_cppath, "w");
 
 	if (fp) {
 		fwrite(buf, 1, buflen, fp);
@@ -3318,8 +3318,13 @@ main(int argc, char *argv[])
 		cfg.quote = 1;
 
 	/* Check if X11 is available */
-	if (getenv("NNN_NO_X"))
+	if (getenv("NNN_NO_X")) {
 		cfg.noxdisplay = 1;
+
+		struct passwd *pass = getpwuid(getuid());
+		xstrlcpy(g_cppath, "/tmp/nnncp", 11);
+		xstrlcpy(g_cppath + 10, pass->pw_name, 33);
+	}
 
 	signal(SIGINT, SIG_IGN);
 
