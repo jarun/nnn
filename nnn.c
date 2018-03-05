@@ -1439,10 +1439,8 @@ coolsize(off_t size)
 {
 	static const char * const U = "BKMGTPEZY";
 	static char size_buf[12]; /* Buffer to hold human readable size */
-	static int i;
-
 	static off_t rem;
-	static const double div_2_pow_10 = 1.0 / 1024.0;
+	static int i;
 
 	i = 0;
 	rem = 0;
@@ -1453,7 +1451,47 @@ coolsize(off_t size)
 		++i;
 	}
 
-	snprintf(size_buf, 12, "%.*f%c", i, size + (float)rem * div_2_pow_10, U[i]);
+	if (i == 1) {
+		rem = (rem * 1000) >> 10;
+
+		rem /= 10;
+		if (rem % 10 >= 5) {
+			rem = (rem / 10) + 1;
+			if (rem == 10) {
+				++size;
+				rem = 0;
+			}
+		} else
+			rem /= 10;
+	} else if (i == 2) {
+		rem = (rem * 1000) >> 10;
+
+		if (rem % 10 >= 5) {
+			rem = (rem / 10) + 1;
+			if (rem == 100) {
+				++size;
+				rem = 0;
+			}
+		} else
+			rem /= 10;
+	} else if (i > 0) {
+		rem = (rem * 10000) >> 10;
+
+		if (rem % 10 >= 5) {
+			rem = (rem / 10) + 1;
+			if (rem == 1000) {
+				++size;
+				rem = 0;
+			}
+		} else
+			rem /= 10;
+	}
+
+	if (i > 0)
+		snprintf(size_buf, 12, "%lu.%0*lu%c", (ulong)size, i, (ulong)rem, U[i]);
+	else
+		snprintf(size_buf, 12, "%lu%c", (ulong)size, U[i]);
+
 	return size_buf;
 }
 
@@ -3151,7 +3189,8 @@ nochange:
 		case SEL_QUIT:
 			dentfree(dents);
 			return;
-		}
+		} /* switch (sel) */
+
 		/* Screensaver */
 		if (idletimeout != 0 && idle == idletimeout) {
 			idle = 0;
