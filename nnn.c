@@ -1441,7 +1441,7 @@ coolsize(off_t size)
 	static char size_buf[12]; /* Buffer to hold human readable size */
 	static int i;
 
-	static long double rem;
+	static off_t rem;
 	static const double div_2_pow_10 = 1.0 / 1024.0;
 
 	i = 0;
@@ -1453,7 +1453,7 @@ coolsize(off_t size)
 		++i;
 	}
 
-	snprintf(size_buf, 12, "%.*Lf%c", i, size + rem * div_2_pow_10, U[i]);
+	snprintf(size_buf, 12, "%.*f%c", i, size + (float)rem * div_2_pow_10, U[i]);
 	return size_buf;
 }
 
