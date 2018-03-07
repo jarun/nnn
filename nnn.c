@@ -1144,6 +1144,7 @@ filterentries(char *path)
 			case CONTROL('G'): // fallthrough
 			case CONTROL('X'): // fallthrough
 			case CONTROL('F'): // fallthrough
+			case CONTROL('I'): // fallthrough
 			case CONTROL('T'):
 				if (len == 1)
 					cur = oldcur;
@@ -1898,7 +1899,7 @@ show_help(char *path)
    "4→, ↵, l, ^M | Open file or enter dir\n"
 "1←, Bksp, h, ^H | Go to parent dir\n"
 	    "d^O | Open with...\n"
-	"9Insert | Toggle navigate-as-you-type\n"
+    "5Insert, ^I | Toggle navigate-as-you-type\n"
 	     "e~ | Go HOME\n"
 	     "e& | Go to initial dir\n"
 	     "e- | Go to last visited dir\n"

@@ -221,7 +221,7 @@ optional arguments:
     →, ↵, l, ^M | Open file or enter dir
  ←, Bksp, h, ^H | Go to parent dir
              ^O | Open with...
-         Insert | Toggle navigate-as-you-type
+     Insert, ^I | Toggle navigate-as-you-type
               ~ | Go HOME
               & | Go to initial dir
               - | Go to last visited dir
