@@ -1763,11 +1763,11 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 
 	/* Show containing device, inode, hardlink count */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
-	sprintf(g_buf, "%xh/%ud", sb->st_dev, sb->st_dev);
+	snprintf(g_buf, 32, "%xh/%ud", sb->st_dev, sb->st_dev);
 	dprintf(fd, "\n  Device: %-15s Inode: %-11llu Links: %-9hu",
 		g_buf, (unsigned long long)sb->st_ino, sb->st_nlink);
 #else
-	sprintf(g_buf, "%lxh/%lud", (ulong)sb->st_dev, (ulong)sb->st_dev);
+	snprintf(g_buf, 32, "%lxh/%lud", (ulong)sb->st_dev, (ulong)sb->st_dev);
 	dprintf(fd, "\n  Device: %-15s Inode: %-11lu Links: %-9lu",
 		g_buf, sb->st_ino, (ulong)sb->st_nlink);
 #endif
@@ -2329,11 +2329,12 @@ redraw(char *path)
 
 			/* We need to show filename as it may be truncated in directory listing */
 			if (!cfg.blkorder)
-				sprintf(buf, "%d/%d %s[%s%s]", cur + 1, ndents, sort, unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
+				snprintf(buf, (NAME_MAX + 1) << 1, "%d/%d %s[%s%s]",
+					 cur + 1, ndents, sort, unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
 			else {
-				i = sprintf(buf, "%d/%d du: %s (%lu files) ", cur + 1, ndents, coolsize(dir_blocks << 9), num_files);
-				sprintf(buf + i, "vol: %s free [%s%s]",
-					coolsize(get_fs_free(path)), unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
+				i = snprintf(buf, 128, "%d/%d du: %s (%lu files) ", cur + 1, ndents, coolsize(dir_blocks << 9), num_files);
+				snprintf(buf + i, ((NAME_MAX + 1) << 1) - 128, "vol: %s free [%s%s]",
+					 coolsize(get_fs_free(path)), unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
 			}
 
 			printmsg(buf);
@@ -2981,7 +2982,7 @@ nochange:
 								goto nochange;;
 						}
 
-						sprintf(newpath, "%d files copied", copyendid - copystartid + 1);
+						snprintf(newpath, PATH_MAX, "%d files copied", copyendid - copystartid + 1);
 						printmsg(newpath);
 					}
 				}
