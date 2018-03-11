@@ -12,14 +12,13 @@
 #    bg settings. If bg is set the app is detached and started in the background
 #    in silent mode.
 #
-#    The bg setting depends on personal preference and type of app, e.g.,
-#    I would start vim (CLI) in the foreground but Sublime Text (GUI) in the
-#    background.
+#    The bg setting depends on personal preferences and type of utility, e.g., I
+#    would start vi (CLI) in the foreground but Sublime Text (GUI) in background.
 #
 #    Check (and TOGGLE as you wish) the default bg settings.
 #
 # 2. Detached apps are not killed when nnn exits. Use kill(1) or killall(1) to
-#    to stop console based background apps.
+#    stop console based background apps.
 #
 # 3. nlay is OVERWRITTEN during nnn upgrade. You can store your custom nlay in a
 #    location other than the default and have an alias with nnn option '-p' to
@@ -56,7 +55,7 @@ ENABLE_FILE_TYPE_HANDLING
 
 #------------ PLAINTEXT (UNUSED) ------------
 if [ "$2" == "text" ]; then
-    app=("vim")
+    app=("vi")
 
     opts=("")
 

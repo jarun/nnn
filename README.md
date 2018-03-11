@@ -33,7 +33,7 @@ Cool things you can do with `nnn`:
 - lock the current terminal after a specified idle time
 - change directory on exit
 
-If you want to edit a file in vim with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
+If you want to edit a file in vi with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
 
 Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
 
@@ -294,7 +294,18 @@ The following abbreviations are used in the detail view:
 
 #### File handling
 
-- `nnn` uses `xdg-open` on Linux and `open(1)` on OS X as the desktop opener.
+| External dependency | Operation |
+| --- | --- |
+| xdg-open (Linux), open(1) (OS X) | desktop opener |
+| mediainfo, exiftool | multimedia file details |
+| gnome-search-tool, catfish | desktop search utility |
+| atool | list and extract archives |
+| vidir from moreutils | batch rename, move, delete dir entries |
+| vlock (Linux) | terminal locker |
+| $EDITOR | edit files (fallback vi) |
+| $PAGER | page through files (fallback less) |
+| $SHELL | spawn a shell in dir (fallback sh) |
+
 - To edit all text files in EDITOR (preferably CLI, fallback vi):
 
       export NNN_USE_EDITOR=1
@@ -302,9 +313,6 @@ The following abbreviations are used in the detail view:
 
       export NNN_DE_FILE_MANAGER=thunar
       export NNN_DE_FILE_MANAGER=nautilus
-- [mediainfo](https://mediaarea.net/en/MediaInfo) (or [exiftool](https://sno.phy.queensu.ca/~phil/exiftool/), if specified) is required to view media information
-- [atool](http://www.nongnu.org/atool/) is required to list and extract archives
-- vidir from [moreutils](https://joeyh.name/code/moreutils/) is used to batch rename entries in current directory
 
 #### Help
 
