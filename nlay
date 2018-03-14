@@ -3,7 +3,7 @@
 # #############################################################################
 # nlay: a customizable script to play files in different apps by file type
 #
-# usage: nlay file type
+# usage: nlay file/path type/action
 #
 # MUST READ:
 #

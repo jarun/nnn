@@ -17,7 +17,7 @@ else
 	LDLIBS += -lncurses
 endif
 
-DISTFILES = nlay nnn.c nnn.h nnn.1 Makefile README.md LICENSE
+DISTFILES = nlay nlay.1 nnn.c nnn.h nnn.1 Makefile README.md LICENSE
 SRC = nnn.c
 BIN = nnn
 PLAYER = nlay
@@ -37,11 +37,13 @@ install: all
 	$(INSTALL) -m 0755 $(BIN) $(PLAYER) $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(MANPREFIX)/man1
 	$(INSTALL) -m 0644 $(BIN).1 $(DESTDIR)$(MANPREFIX)/man1
+	$(INSTALL) -m 0644 $(PLAYER).1 $(DESTDIR)$(MANPREFIX)/man1
 
 uninstall:
 	$(RM) $(DESTDIR)$(PREFIX)/bin/$(BIN)
 	$(RM) $(DESTDIR)$(PREFIX)/bin/$(PLAYER)
 	$(RM) $(DESTDIR)$(MANPREFIX)/man1/$(BIN).1
+	$(RM) $(DESTDIR)$(MANPREFIX)/man1/$(PLAYER).1
 
 strip: $(BIN)
 	$(STRIP) $^
