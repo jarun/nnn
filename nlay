@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # #############################################################################
 # nlay: a customizable script to play files in different apps by file type
