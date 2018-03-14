@@ -4,6 +4,7 @@ PREFIX ?= /usr/local
 MANPREFIX ?= $(PREFIX)/share/man
 STRIP ?= strip
 PKG_CONFIG ?= pkg-config
+INSTALL ?= install
 
 CFLAGS ?= -O3
 CFLAGS += -Wall -Wextra -Wno-unused-parameter
@@ -32,10 +33,10 @@ debug: $(SRC)
 	$(CC) -DDEBUGMODE -g $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS)
 
 install: all
-	install -m 0755 -d $(DESTDIR)$(PREFIX)/bin
-	install -m 0755 $(BIN) $(PLAYER) $(DESTDIR)$(PREFIX)/bin
-	install -m 0755 -d $(DESTDIR)$(MANPREFIX)/man1
-	install -m 0644 $(BIN).1 $(DESTDIR)$(MANPREFIX)/man1
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL) -m 0755 $(BIN) $(PLAYER) $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(MANPREFIX)/man1
+	$(INSTALL) -m 0644 $(BIN).1 $(DESTDIR)$(MANPREFIX)/man1
 
 uninstall:
 	$(RM) $(DESTDIR)$(PREFIX)/bin/$(BIN)
