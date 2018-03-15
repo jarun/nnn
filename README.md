@@ -334,9 +334,7 @@ Add the following to your shell's rc file for the best experience:
 
 4. Run `n`.
 
-5. Set `NNN_NOWAIT`, if nnn [blocks on your desktop environment](#nnn-blocks-on-opening-files) when a file is open.
-
-6. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
+5. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 
 ### How to
 
