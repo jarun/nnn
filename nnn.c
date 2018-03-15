@@ -248,7 +248,6 @@ static char *player;
 static char *copier;
 static char *editor;
 static char *desktop_manager;
-static char nowait = F_NOTRACE;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -757,6 +756,12 @@ spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uch
 			dup2(fd, 1);
 			dup2(fd, 2);
 			close(fd);
+		}
+
+		if (flag & F_NOWAIT) {
+			signal(SIGHUP, SIG_IGN);
+			signal(SIGPIPE, SIG_IGN);
+			setsid();
 		}
 
 		if (flag & F_SIGINT)
@@ -2520,7 +2525,7 @@ nochange:
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(utils[OPENER], newpath, NULL, NULL, nowait);
+				spawn(utils[OPENER], newpath, NULL, NULL, F_NOWAIT | F_NOTRACE);
 				continue;
 			}
 			default:
@@ -2878,7 +2883,7 @@ nochange:
 				goto nochange;
 			}
 
-			spawn(desktop_manager, path, NULL, path, F_NOTRACE | F_NOWAIT);
+			spawn(desktop_manager, path, NULL, path, F_NOWAIT | F_NOTRACE);
 			break;
 		case SEL_FSIZE:
 			cfg.sizeorder ^= 1;
@@ -3340,9 +3345,6 @@ main(int argc, char *argv[])
 
 	/* Get the default copier, if set */
 	copier = getenv("NNN_COPIER");
-
-	/* Get nowait flag */
-	nowait |= getenv("NNN_NOWAIT") ? F_NOWAIT : 0;
 
 	/* Enable quotes if opted */
 	if (getenv("NNN_QUOTE_ON"))

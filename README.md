@@ -74,8 +74,6 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - [boost chdir prompt](#boost-chdir-prompt)
   - [set idle timeout](#set-idle-timeout)
   - [show hot plugged drives](#show-hot-plugged-drives)
-- [Troubleshooting](#troubleshooting)
-  - [nnn blocks on opening files](#nnn-blocks-on-opening-files)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
@@ -452,14 +450,6 @@ The terminal screensaver is disabled by default. To set the wait time in seconds
 #### show hot plugged drives
 
 Enable volume management in your DE file manager and set removable drives or media to be auto-mounted when inserted. Then visit the usual mount point location (`/mnt` or `/media/user`) in `nnn`.
-
-### Troubleshooting
-
-#### nnn blocks on opening files
-
-Ideally nnn should not block. Unfortunately, sometimes even the same desktop opener behaves differently on different Linux desktop environments. If `nnn` does block when a file is open, set the environment variable `NNN_NOWAIT` to any non-zero value. For example,
-
-    export NNN_NOWAIT=1
 
 ### Why fork?
 
