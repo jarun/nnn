@@ -3167,10 +3167,16 @@ nochange:
 		case SEL_RUN:
 			run = xgetenv(env, run);
 			spawn(run, NULL, NULL, path, F_NORMAL | F_MARKER);
-			/* Repopulate as directory content may have changed */
+
+			/* Continue in navigate-as-you-type mode, if enabled */
+			if (cfg.filtermode)
+				presel = FILTER;
+
 			/* Save current */
 			if (ndents > 0)
 				copycurname();
+
+			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_RUNARG:
 			run = xgetenv(env, run);
