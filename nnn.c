@@ -908,10 +908,13 @@ getmime(const char *file)
 	for (i = 0; i < len; ++i) {
 		if (regcomp(&regex, assocs[i].regex, REG_NOSUB | REG_EXTENDED | REG_ICASE) != 0)
 			continue;
-		if (regexec(&regex, file, 0, NULL, 0) == 0)
+		if (regexec(&regex, file, 0, NULL, 0) == 0) {
+			regfree(&regex);
 			return assocs[i].mime;
+		}
 	}
 
+	regfree(&regex);
 	return NULL;
 }
 
@@ -1080,6 +1083,8 @@ matches(char *fltr)
 		return -1;
 
 	fill(&dents, visible, &re);
+	regfree(&re);
+
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
 
 	return 0;
@@ -2218,6 +2223,7 @@ populate(char *path, char *oldname, char *fltr)
 #endif
 
 	ndents = dentfill(path, &dents, visible, &re);
+	regfree(&re);
 
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
 
@@ -2228,7 +2234,6 @@ populate(char *path, char *oldname, char *fltr)
 
 	/* Find cur from history */
 	cur = dentfind(dents, oldname, ndents);
-	regfree(&re);
 	return 0;
 }
 
