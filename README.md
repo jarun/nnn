@@ -23,20 +23,6 @@ Noice is Not Noice, a noicer fork...
 
 `nnn` is probably the [fastest and most resource-sensitive](#performance) (with all its capabilities) file browser you have ever used. It's extremely flexible too - integrates with your DE and favourite GUI utilities, works with the desktop opener, supports bookmarks, has smart navigation shortcuts, [navigate-as-you-type](#navigate-as-you-type-mode) mode, disk usage analyzer mode, comprehensive file details and much more. `nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today.
 
-Cool things you can do with `nnn`:
-
-- open any file in the default desktop application or a custom one
-- *navigate-as-you-type* (*search-as-you-type* enabled even on directory switch)
-- check disk usage with number of files in current directory tree
-- run desktop search utility (gnome-search-tool or catfish) in any directory
-- copy absolute file paths to clipboard, spawn a terminal and use the paths
-- navigate instantly using shortcuts like `~`, `-`, `&` or handy bookmarks
-- use `cd .....` at chdir prompt to go to a parent directory
-- detailed file stats, media info, list and extract archives
-- pin a directory you may need to revisit and jump to it anytime
-- lock the current terminal after a specified idle time
-- change directory on exit
-
 If you want to edit a file in vi with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
 
 Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
@@ -84,31 +70,29 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
 
 ### Features
 
+- Modes - basic, detail, disk usage analyzer (du)
 - Navigation
-  - Familiar shortcuts
-  - *Navigate-as-you-type* mode
-  - Bookmarks support; pin and visit a directory
-  - Open a bookmarked directory on start
-  - Jump HOME or to the last visited directory (as usual!)
-  - Jump to initial dir, chdir prompt, cd ..... (with . as PWD)
+  - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
+  - *Navigate-as-you-type* mode for the maverick
+  - Handy bookmarks, start at bookmark, pin and visit directory
+  - chdir prompt with tab completion (interprets cd ..... too!)
   - Roll-over at edges, page through entries
   - Show directories in custom color (default: enabled in blue)
-- Disk usage analyzer (du) mode
+- Sorting
+  - Directories always listed on top
+  - Sort by file name, modification time, size
+  - Numeric order (1, 2, ... 10, 11, ...) for numeric names
 - Search
-  - Filter directory contents with *search-as-you-type*
-  - Desktop search (default gnome-search-tool, customizable) integration
+  - Superfast directory content filtering with *search-as-you-type*
+  - Desktop search (gnome-search-tool, catfish) integration
 - Mimes
-  - Desktop opener integration
-  - Open file with a custom application
+  - Open with desktop opener (default) or specify a custom app
+  - List and extract archives (needs atool)
   - Optionally open text files in EDITOR (fallback vi)
   - Customizable bash script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) to handle actions
 - Information
-  - Basic and detail view
   - Detailed stat-like file information
   - Media information (needs mediainfo or exiftool, if specified)
-- Ordering
-  - Numeric order (1, 2, ... 10, 11, ...) for numeric names
-  - Sort by file name, modification time, size
 - Convenience
   - Create, rename files and directories
   - Batch rename/move/delete current directory entries in vidir (from moreutils)
@@ -116,9 +100,8 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Copy absolute file paths with/without X (*easy* shell integration)
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
-  - List and extract archives (needs atool)
   - Open current directory in a custom GUI file browser
-  - Terminal screensaver (default vlock, customizable) integration
+  - Terminal screensaver/locker (default vlock, customizable) integration
 - Unicode support
 - Highly optimized code, minimal resource usage
 
@@ -353,7 +336,7 @@ The bookmark prompt also understands the <kbd>~</kbd> (HOME), <kbd>-</kbd> (last
 
 #### use cd .....
 
-To jump to the n<sup>th</sup> level parent, with PWD at level 0, use `n + 1` dots. For example, to jump to the 6<th> parent of the current directory, use 7 dots. If the number of dots would take you *beyond* `/` (which isn't possible), you'll be placed at `/`.
+To jump to the n<sup>th</sup> level parent, use `n + 1` dots (the first `.` denotes PWD). For example, to jump to the 6<th> parent of the current directory, use 7 dots. If the number of dots would take you *beyond* `/` (which isn't possible), you'll be placed at `/`.
 
 #### cd on quit
 
