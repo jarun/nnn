@@ -1050,7 +1050,7 @@ nextsel(char **run, char **env, int *presel)
 /*
  * Move non-matching entries to the end
  */
-static void
+static int
 fill(struct entry **dents, int (*filter)(regex_t *, char *), regex_t *re)
 {
 	static int count;
@@ -1071,6 +1071,8 @@ fill(struct entry **dents, int (*filter)(regex_t *, char *), regex_t *re)
 			continue;
 		}
 	}
+
+	return ndents;
 }
 
 static int
@@ -1082,8 +1084,10 @@ matches(char *fltr)
 	if (setfilter(&re, fltr) != 0)
 		return -1;
 
-	fill(&dents, visible, &re);
+	ndents = fill(&dents, visible, &re);
 	regfree(&re);
+	if (ndents == 0)
+		return 0;
 
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
 
@@ -2224,6 +2228,8 @@ populate(char *path, char *oldname, char *fltr)
 
 	ndents = dentfill(path, &dents, visible, &re);
 	regfree(&re);
+	if (ndents == 0)
+		return 0;
 
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
 
