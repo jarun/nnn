@@ -2520,7 +2520,7 @@ nochange:
 				 */
 				if (editor) {
 					if (getmime(dents[cur].name)) {
-						spawn(editor, newpath, NULL, NULL, F_NORMAL);
+						spawn(editor, newpath, NULL, path, F_NORMAL);
 						continue;
 					}
 
@@ -2531,7 +2531,7 @@ nochange:
 						continue;
 
 					if (strstr(g_buf, "text/") == g_buf) {
-						spawn(editor, newpath, NULL, NULL, F_NORMAL);
+						spawn(editor, newpath, NULL, path, F_NORMAL);
 						continue;
 					}
 				}
@@ -3150,24 +3150,7 @@ nochange:
 				goto nochange;
 			}
 
-			/* Save the program start dir */
-			tmp = getcwd(newpath, PATH_MAX);
-			if (tmp == NULL) {
-				printwarn();
-				goto nochange;
-			}
-
-			/* Switch to current path for readline(3) */
-			if (chdir(path) == -1) {
-				printwarn();
-				goto nochange;
-			}
-
-			spawn(utils[VIDIR], ".", NULL, NULL, F_NORMAL);
-
-			/* Change back to program start dir */
-			if (chdir(newpath) == -1)
-				printwarn();
+			spawn(utils[VIDIR], ".", NULL, path, F_NORMAL);
 
 			/* Save current */
 			if (ndents > 0)
