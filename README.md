@@ -59,6 +59,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - [cd on quit](#cd-on-quit)
   - [copy file paths to clipboard](#copy-file-paths-to-clipboard)
   - [copy file paths when X is missing](#copy-file-paths-when-x-is-missing)
+  - [run a custom script](#run-a-custom-script)
   - [change dir color](#change-dir-color)
   - [file copy, move, delete](#file-copy-move-delete)
   - [boost chdir prompt](#boost-chdir-prompt)
@@ -97,6 +98,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - Create, rename files and directories
   - Batch rename/move/delete current directory entries in vidir (from moreutils)
   - Spawn SHELL (fallback sh) in the current directory
+  - Run a custom script in the current directory
   - Copy absolute file paths with/without X (*easy* shell integration)
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
@@ -224,11 +226,12 @@ optional arguments:
               M | Full media info
               n | Create new
              ^R | Rename entry
-              R | Rename dir entries
+              r | Open dir in vidir
               s | Toggle sort by size
           S, ^J | Toggle du mode
               t | Toggle sort by mtime
               ! | Spawn SHELL in dir
+              R | Run custom script
               e | Edit entry in EDITOR
               o | Open dir in file manager
               p | Open entry in PAGER
@@ -290,7 +293,7 @@ The following abbreviations are used in the detail view:
 | vlock (Linux) | terminal locker |
 | $EDITOR | edit files (fallback vi) |
 | $PAGER | page through files (fallback less) |
-| $SHELL | spawn a shell in dir (fallback sh) |
+| $SHELL | spawn a shell, run script (fallback sh) |
 
 - To edit all text files in EDITOR (preferably CLI, fallback vi):
 
@@ -406,6 +409,14 @@ so you can -
     ls -ltr (ncp)
 
 Note that you may want to keep quotes disabled in this case.
+
+#### run a custom script
+
+Export the path to the custom script:
+
+    export NNN_SCRIPT=/usr/local/bin/script.sh
+
+Press <kbd>R</kbd> to run the script in the current directory.
 
 #### change dir color
 

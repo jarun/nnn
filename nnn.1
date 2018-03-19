@@ -82,8 +82,8 @@ Show full media info
 Create a new file or directory
 .It Ic ^R
 Rename selected entry
-.It Ic R
-Rename directory entries
+.It Ic r
+Open directory in vidir
 .It Ic s
 Toggle sort by file size
 .It Ic S, ^J
@@ -92,6 +92,8 @@ Toggle disk usage analyzer mode
 Toggle sort by time modified
 .It Ic \&!
 Spawn SHELL in PWD (fallback sh)
+.It Ic R
+Run a custom script
 .It Ic e
 Open current entry in EDITOR (fallback vi)
 .It Ic o
@@ -255,6 +257,11 @@ screensaver.
 .Pp
 \fBNNN_QUOTE_ON:\fR wrap copied paths within single quotes. Useful for pasting
 names in the shell.
+.Pp
+\fBNNN_SCRIPT:\fR path to a custom script to run.
+.Bd -literal
+    export NNN_SCRIPT=/usr/local/bin/script.sh
+.Ed
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspacekey to DEC.
 .Sh AUTHORS

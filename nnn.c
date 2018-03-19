@@ -1930,11 +1930,12 @@ show_help(char *path)
 	     "eM | Full media info\n"
 	     "en | Create new\n"
 	    "d^R | Rename entry\n"
-	     "eR | Rename dir entries\n"
+	     "er | Open dir in vidir\n"
 	     "es | Toggle sort by size\n"
 	 "aS, ^J | Toggle du mode\n"
 	     "et | Toggle sort by mtime\n"
 	     "e! | Spawn SHELL in dir\n"
+	     "eR | Run custom script\n"
 	     "ee | Edit entry in EDITOR\n"
 	     "eo | Open dir in file manager\n"
 	     "ep | Open entry in PAGER\n"
@@ -3175,13 +3176,21 @@ nochange:
 		case SEL_HELP:
 			show_help(path);
 			break;
-		case SEL_RUN:
+		case SEL_RUN: // fallthorugh
+		case SEL_RUNSCRIPT:
 			run = xgetenv(env, run);
-			spawn(run, NULL, NULL, path, F_NORMAL | F_MARKER);
 
-			/* Continue in navigate-as-you-type mode, if enabled */
-			if (cfg.filtermode)
-				presel = FILTER;
+			if (sel == SEL_RUNSCRIPT) {
+				tmp = getenv("NNN_SCRIPT");
+				if (tmp)
+					spawn(run, tmp, NULL, path, F_NORMAL | F_SIGINT);
+			} else {
+				spawn(run, NULL, NULL, path, F_NORMAL | F_MARKER);
+
+				/* Continue in navigate-as-you-type mode, if enabled */
+				if (cfg.filtermode)
+					presel = FILTER;
+			}
 
 			/* Save current */
 			if (ndents > 0)

@@ -42,6 +42,7 @@ enum action {
 	SEL_RENAMEALL,
 	SEL_HELP,
 	SEL_RUN,
+	SEL_RUNSCRIPT,
 	SEL_RUNARG,
 	SEL_CDQUIT,
 	SEL_QUIT,
@@ -161,11 +162,13 @@ static struct key bindings[] = {
 	{ CONTROL('R'),   SEL_RENAME,    "",     "" },
 	{ KEY_F(2),       SEL_RENAME,    "",     "" }, /* Undocumented */
 	/* Rename contents of current dir */
-	{ 'R',            SEL_RENAMEALL, "",     "" },
+	{ 'r',            SEL_RENAMEALL, "",     "" },
 	/* Show help */
 	{ '?',            SEL_HELP,      "",     "" },
 	/* Run command */
 	{ '!',            SEL_RUN,       "sh",   "SHELL" },
+	/* Run a custom script */
+	{ 'R',            SEL_RUNSCRIPT, "sh",   "SHELL" },
 	/* Run command with argument */
 	{ 'e',            SEL_RUNARG,    "vi",   "EDITOR" },
 	{ 'p',            SEL_RUNARG,    "less", "PAGER" },

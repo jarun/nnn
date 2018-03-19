@@ -83,6 +83,16 @@ elif [ "$2" == "screensaver" ]; then
     type -P $app &>/dev/null &&
     eval $app $opts $bg
     exit 0
+
+#------------------ SCRIPT ------------------
+elif [ "$2" == "script" ]; then
+    # add commands or a custom script below
+
+    # echo "my commands or custom script"
+    # sh "path_to_script.sh"
+    $SHELL "$1"
+
+    exit 0
 fi
 
 #----------------- RUN APP ------------------
