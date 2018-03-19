@@ -2,8 +2,8 @@
 
 # Create test files and directories
 
-test -e test && {
-    echo "Remove test and try again"
+test -e outdir && {
+    echo "Remove 'outdir' and try again"
     exit 1
 }
 
