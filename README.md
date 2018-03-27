@@ -63,6 +63,7 @@ Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/i
   - [change dir color](#change-dir-color)
   - [file copy, move, delete](#file-copy-move-delete)
   - [boost chdir prompt](#boost-chdir-prompt)
+  - [work faster at rename prompt](#work-faster-at-rename-prompt)
   - [set idle timeout](#set-idle-timeout)
   - [show hot plugged drives](#show-hot-plugged-drives)
 - [Why fork?](#why-fork)
@@ -439,6 +440,10 @@ In addition, nnn integrates with vidir. vidir supports batch file move and delet
 #### boost chdir prompt
 
 `nnn` uses libreadline for the chdir prompt input. So all the fantastic features of readline (e.g. case insensitive tab completion, history, reverse-i-search) are available to you based on your readline [configuration](https://cnswww.cns.cwru.edu/php/chet/readline/readline.html#SEC9).
+
+#### work faster at rename prompt
+
+The rename prompt supports some bash-like command-line shortcuts - <kbd>^A</kbd>, <kbd>^E</kbd>, <kbd>^U</kbd>. <kbd>^L</kbd> clears the name.
 
 #### set idle timeout
 

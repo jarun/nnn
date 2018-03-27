@@ -1235,6 +1235,28 @@ xreadline(char *fname)
 					continue;
 				}
 
+				if (*ch == CONTROL('A')) {
+					pos = 0;
+					continue;
+				}
+
+				if (*ch == CONTROL('E')) {
+					pos = len;
+					continue;
+				}
+
+				if (*ch == CONTROL('U')) {
+					clearprompt();
+					memmove(buf, buf + pos, (len - pos) << 2);
+					len -= pos;
+					pos = 0;
+					continue;
+				}
+
+				/* Filter out all other control chars */
+				if (keyname(*ch)[0] == '^')
+					continue;
+
 				/* TAB breaks cursor position, ignore it */
 				if (*ch == '\t')
 					continue;
