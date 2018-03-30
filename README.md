@@ -418,6 +418,12 @@ Export the path to the custom script:
 
     export NNN_SCRIPT=/usr/local/bin/script.sh
 
+Sample script to open image files in current dir in sxiv:
+
+    #!/usr/bin/env sh
+
+    sxiv -q * >/dev/null 2>&1
+
 Press <kbd>R</kbd> to run the script in the current directory.
 
 #### change dir color
