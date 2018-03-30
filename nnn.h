@@ -44,6 +44,9 @@ enum action {
 	SEL_RUN,
 	SEL_RUNSCRIPT,
 	SEL_RUNARG,
+#ifdef __linux__
+	SEL_LOCK,
+#endif
 	SEL_CDQUIT,
 	SEL_QUIT,
 };
@@ -135,9 +138,9 @@ static struct key bindings[] = {
 	/* Open dir in desktop file manager */
 	{ 'o',            SEL_DFB,       "",     "" },
 	/* List archive */
-	{ 'F',            SEL_LIST,      "-l", "" },
+	{ 'F',            SEL_LIST,      "-l",   "" },
 	/* Extract archive */
-	{ CONTROL('F'),   SEL_EXTRACT,   "-x", "" },
+	{ CONTROL('F'),   SEL_EXTRACT,   "-x",   "" },
 	/* Toggle sort by size */
 	{ 's',            SEL_FSIZE,     "",     "" },
 	/* Sort by total block count including dir contents */
@@ -173,6 +176,10 @@ static struct key bindings[] = {
 	/* Run command with argument */
 	{ 'e',            SEL_RUNARG,    "vi",   "EDITOR" },
 	{ 'p',            SEL_RUNARG,    "less", "PAGER" },
+#ifdef __linux__
+	/* Lock screen */
+	{ 'L',            SEL_LOCK,      "",     "" },
+#endif
 	/* Change dir on quit */
 	{ 'Q',            SEL_CDQUIT,    "",     "" },
 	{ CONTROL('G'),   SEL_CDQUIT,    "",     "" },

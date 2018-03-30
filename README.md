@@ -242,6 +242,7 @@ optional arguments:
              ^Y | Toggle multi-copy mode
              ^T | Toggle path quote
              ^L | Redraw, clear prompt
+              L | Lock terminal (on Linux)
               ? | Help, settings
           Q, ^G | Quit and cd
           q, ^X | Quit
