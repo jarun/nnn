@@ -1155,6 +1155,7 @@ filterentries(char *path)
 			case CONTROL('B'): // fallthrough
 			case CONTROL('V'): // fallthrough
 			case CONTROL('J'): // fallthrough
+			case CONTROL(']'): // fallthrough
 			case CONTROL('G'): // fallthrough
 			case CONTROL('X'): // fallthrough
 			case CONTROL('F'): // fallthrough
@@ -1956,7 +1957,7 @@ show_help(char *path)
 	     "es | Toggle sort by size\n"
 	 "aS, ^J | Toggle du mode\n"
 	     "et | Toggle sort by mtime\n"
-	     "e! | Spawn SHELL in dir\n"
+	 "a!, ^] | Spawn SHELL in dir\n"
 	     "eR | Run custom script\n"
 	     "ee | Edit entry in EDITOR\n"
 	     "eo | Open dir in file manager\n"

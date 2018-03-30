@@ -167,6 +167,7 @@ static struct key bindings[] = {
 	{ '?',            SEL_HELP,      "",     "" },
 	/* Run command */
 	{ '!',            SEL_RUN,       "sh",   "SHELL" },
+	{ CONTROL(']'),   SEL_RUN,       "sh",   "SHELL" },
 	/* Run a custom script */
 	{ 'R',            SEL_RUNSCRIPT, "sh",   "SHELL" },
 	/* Run command with argument */

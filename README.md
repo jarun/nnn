@@ -231,7 +231,7 @@ optional arguments:
               s | Toggle sort by size
           S, ^J | Toggle du mode
               t | Toggle sort by mtime
-              ! | Spawn SHELL in dir
+          !, ^] | Spawn SHELL in dir
               R | Run custom script
               e | Edit entry in EDITOR
               o | Open dir in file manager
