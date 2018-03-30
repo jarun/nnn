@@ -137,19 +137,19 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 
 #### From a package manager
 
-- [AUR](https://aur.archlinux.org/packages/nnn/)
-- [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1)
+- [AUR](https://aur.archlinux.org/packages/nnn/) (`pacman -S nnn`)
+- [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
 - [Fedora](https://apps.fedoraproject.org/packages/nnn) (`dnf install nnn`)
 - [FreeBSD](https://www.freshports.org/misc/nnn) (`pkg install nnn`)
 - [Gentoo](https://packages.gentoo.org/packages/app-misc/nnn) (`emerge nnn`)
-- [Homebrew](http://formulae.brew.sh/formula/nnn)
-- [NixOS](https://github.com/NixOS/nixpkgs/tree/master/pkgs/applications/misc/nnn) (`sudo nix-env -i nnn`)
-- [openSUSE](https://software.opensuse.org/package/nnn) (and packages for several other distros)
-- [Slackware](http://slackbuilds.org/repository/14.2/system/nnn/)
+- [Homebrew](http://formulae.brew.sh/formula/nnn) (`brew install nnn`)
+- [NixOS](https://github.com/NixOS/nixpkgs/tree/master/pkgs/applications/misc/nnn) (`nix-env -i nnn`)
+- [openSUSE](https://software.opensuse.org/package/nnn) (and packages for several other distros) (`zypper in nnn`)
+- [Slackware](http://slackbuilds.org/repository/14.2/system/nnn/) (`slackpkg install nnn`)
 - [Source Mage](http://codex.sourcemage.org/test/shell-term-fm/nnn/) (`cast nnn`)
-- [Ubuntu](https://packages.ubuntu.com/search?keywords=nnn&searchon=names&exact=1)
-- [Ubuntu PPA](https://launchpad.net/~twodopeshaggy/+archive/ubuntu/jarun/)
-- [Void Linux](https://github.com/voidlinux/void-packages/tree/master/srcpkgs/nnn) (`sudo xbps-install -S nnn`)
+- [Ubuntu](https://packages.ubuntu.com/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
+- [Ubuntu PPA](https://launchpad.net/~twodopeshaggy/+archive/ubuntu/jarun/) (`apt-get install nnn`)
+- [Void Linux](https://github.com/voidlinux/void-packages/tree/master/srcpkgs/nnn) (`xbps-install -S nnn`)
 
 #### Release packages
 
