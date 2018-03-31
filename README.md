@@ -25,7 +25,7 @@ Noice is Not Noice, a noicer fork...
 
 If you want to edit a file in vi with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
 
-Have fun with it! PRs are welcome. Check out [#1](https://github.com/jarun/nnn/issues/1).
+Have fun with it! Missing a feature? Want to contribute? Head to the rolling [ToDo list](https://github.com/jarun/nnn/issues/58).
 
 *Love smart and efficient terminal utilities? Explore my repositories. Buy me a cup of coffee if they help you.*
 
