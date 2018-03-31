@@ -1164,6 +1164,11 @@ filterentries(char *path)
 				if (len == 1)
 					cur = oldcur;
 				goto end;
+			case '?':  // '?' is an invalid regex, show help instead
+				if (len == 1) {
+					cur = oldcur;
+					goto end;
+				} // fallthrough
 			default:
 				/* Reset cur in case it's a repeat search */
 				if (len == 1)
@@ -3184,8 +3189,12 @@ nochange:
 			goto begin;
 		case SEL_HELP:
 			show_help(path);
+
+			/* Continue in navigate-as-you-type mode, if enabled */
+			if (cfg.filtermode)
+				presel = FILTER;
 			break;
-		case SEL_RUN: // fallthorugh
+		case SEL_RUN: // fallthrough
 		case SEL_RUNSCRIPT:
 			run = xgetenv(env, run);
 
