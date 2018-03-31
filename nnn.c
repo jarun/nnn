@@ -2021,8 +2021,25 @@ show_help(char *path)
 	if (copier)
 		dprintf(fd, "NNN_COPIER: %s\n", copier);
 
+	if (getenv("NNN_NO_X"))
+		dprintf(fd, "NNN_NO_X: %s\n", getenv("NNN_NO_X"));
+
+	if (getenv("NNN_SCRIPT"))
+		dprintf(fd, "NNN_SCRIPT: %s\n", getenv("NNN_SCRIPT"));
+
 	dprintf(fd, "\nVolume: %s of ", coolsize(get_fs_free(path)));
-	dprintf(fd, "%s free\n", coolsize(get_fs_capacity(path)));
+	dprintf(fd, "%s free\n\n", coolsize(get_fs_capacity(path)));
+
+	if (getenv("PWD"))
+		dprintf(fd, "PWD: %s\n", getenv("PWD"));
+	if (getenv("SHELL"))
+		dprintf(fd, "SHELL: %s\n", getenv("SHELL"));
+	if (getenv("SHLVL"))
+		dprintf(fd, "SHLVL: %s\n", getenv("SHLVL"));
+	if (getenv("EDITOR"))
+		dprintf(fd, "EDITOR: %s\n", getenv("EDITOR"));
+	if (getenv("PAGER"))
+		dprintf(fd, "PAGER: %s\n", getenv("PAGER"));
 
 	dprintf(fd, "\nVersion: %s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
