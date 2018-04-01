@@ -201,22 +201,22 @@ optional arguments:
 ```
             Key | Function
               - + -
-       ↑, k, ^P | Previous entry
+       ↑, k, ^P | Prev entry
        ↓, j, ^N | Next entry
        PgUp, ^U | Scroll half page up
        PgDn, ^D | Scroll half page down
  Home, g, ^, ^A | First entry
-  End, G, $, ^E | Fast entry
-    →, ↵, l, ^M | Open file or enter dir
- ←, Bksp, h, ^H | Go to parent dir
+  End, G, $, ^E | Last entry
+    →, ↵, l, ^M | Open file/enter dir
+ ←, Bksp, h, ^H | Parent dir
              ^O | Open with...
-     Insert, ^I | Toggle navigate-as-you-type
+     Insert, ^I | Toggle nav-as-you-type
               ~ | Go HOME
-              & | Go to initial dir
-              - | Go to last visited dir
-              / | Filter dir contents
-             ^/ | Open desktop search tool
-              . | Toggle hide . files
+              & | Start-up dir
+              - | Last visited dir
+              / | Filter entries
+             ^/ | Open desktop search app
+              . | Toggle show . files
              ^B | Bookmark prompt
               b | Pin current dir
              ^V | Go to pinned dir
@@ -234,15 +234,15 @@ optional arguments:
           !, ^] | Spawn SHELL in dir
               R | Run custom script
               e | Edit entry in EDITOR
-              o | Open dir in file manager
+              o | Open DE filemanager
               p | Open entry in PAGER
               F | List archive
              ^F | Extract archive
-             ^K | Invoke file path copier
-             ^Y | Toggle multi-copy mode
+             ^K | Copy file path
+             ^Y | Toggle multi-copy
              ^T | Toggle path quote
              ^L | Redraw, clear prompt
-              L | Lock terminal (on Linux)
+              L | Lock terminal
               ? | Help, settings
           Q, ^G | Quit and cd
           q, ^X | Quit
