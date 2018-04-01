@@ -331,14 +331,12 @@ crc8init()
 	uint dividend;
 
 	/* Compute the remainder of each possible dividend  */
-	for (dividend = 0; dividend < CRC8_TABLE_LEN; ++dividend)
-	{
+	for (dividend = 0; dividend < CRC8_TABLE_LEN; ++dividend) {
 		/* Start with the dividend followed by zeros */
 		remainder = dividend << (WIDTH - 8);
 
 		/* Perform modulo-2 division, a bit at a time */
-		for (bit = 8; bit > 0; --bit)
-		{
+		for (bit = 8; bit > 0; --bit) {
 			/* Try to divide the current data bit */
 			if (remainder & TOPBIT)
 				remainder = (remainder << 1) ^ POLYNOMIAL;
@@ -360,8 +358,7 @@ crc8fast(uchar const message[], size_t n)
 
 
     /* Divide the message by the polynomial, a byte at a time */
-    for (byte = 0; byte < n; ++byte)
-    {
+    for (byte = 0; byte < n; ++byte) {
         data = message[byte] ^ (remainder >> (WIDTH - 8));
         remainder = crc8table[data] ^ (remainder << 8);
     }
@@ -908,6 +905,7 @@ getmime(const char *file)
 	for (i = 0; i < len; ++i) {
 		if (regcomp(&regex, assocs[i].regex, REG_NOSUB | REG_EXTENDED | REG_ICASE) != 0)
 			continue;
+
 		if (regexec(&regex, file, 0, NULL, 0) == 0) {
 			regfree(&regex);
 			return assocs[i].mime;
@@ -932,6 +930,7 @@ setfilter(regex_t *regex, char *filter)
 		regerror(r, regex, g_buf, len);
 		printmsg(g_buf);
 	}
+
 	return r;
 }
 
@@ -1330,7 +1329,7 @@ readinput(void)
  * Updates out with "dir/name or "/name"
  * Returns the number of bytes copied including the terminating NULL byte
  */
-size_t
+static size_t
 mkpath(char *dir, char *name, char *out, size_t n)
 {
 	static size_t len;

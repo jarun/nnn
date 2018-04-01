@@ -58,4 +58,4 @@ dist:
 clean:
 	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz
 
-.PHONY: all debug install uninstall strip dist clean
+.PHONY: $(BIN) $(SRC) all debug install uninstall strip dist clean
