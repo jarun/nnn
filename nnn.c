@@ -2026,6 +2026,9 @@ show_help(char *path)
 	if (getenv("NNN_SCRIPT"))
 		dprintf(fd, "NNN_SCRIPT: %s\n", getenv("NNN_SCRIPT"));
 
+	if (getenv("NNN_SHOW_HIDDEN"))
+		dprintf(fd, "NNN_SHOW_HIDDEN: %s\n", getenv("NNN_SHOW_HIDDEN"));
+
 	dprintf(fd, "\nVolume: %s of ", coolsize(get_fs_free(path)));
 	dprintf(fd, "%s free\n\n", coolsize(get_fs_capacity(path)));
 
@@ -3370,7 +3373,7 @@ main(int argc, char *argv[])
 	/* Increase current open file descriptor limit */
 	open_max = max_openfds();
 
-	if (getuid() == 0)
+	if (getuid() == 0 || getenv("NNN_SHOW_HIDDEN"))
 		cfg.showhidden = 1;
 	initfilter(cfg.showhidden, &ifilter);
 

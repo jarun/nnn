@@ -263,7 +263,7 @@ Common use cases:
 - to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol
 - type `\.mkv` to list all MKV files
 
-If `nnn` is invoked as root the default filter will also match hidden files.
+If `nnn` is invoked as root or the environment variable `NNN_SHOW_HIDDEN` is set the default filter will also match hidden files.
 
 #### Navigate-as-you-type mode
 
