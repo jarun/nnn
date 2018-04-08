@@ -293,7 +293,7 @@ The following abbreviations are used in the detail view:
 | atool | list and extract archives |
 | vidir from moreutils | batch rename, move, delete dir entries |
 | vlock (Linux) | terminal locker |
-| $EDITOR | edit files (fallback vi) |
+| $EDITOR ($VISUAL, if defined) | edit files (fallback vi) |
 | $PAGER | page through files (fallback less) |
 | $SHELL | spawn a shell, run script (fallback sh) |
 

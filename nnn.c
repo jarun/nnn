@@ -2038,7 +2038,9 @@ show_help(char *path)
 		dprintf(fd, "SHELL: %s\n", getenv("SHELL"));
 	if (getenv("SHLVL"))
 		dprintf(fd, "SHLVL: %s\n", getenv("SHLVL"));
-	if (getenv("EDITOR"))
+	if (getenv("VISUAL"))
+		dprintf(fd, "VISUAL: %s\n", getenv("VISUAL"));
+	else if (getenv("EDITOR"))
 		dprintf(fd, "EDITOR: %s\n", getenv("EDITOR"));
 	if (getenv("PAGER"))
 		dprintf(fd, "PAGER: %s\n", getenv("PAGER"));
@@ -3237,6 +3239,8 @@ nochange:
 			goto begin;
 		case SEL_RUNARG:
 			run = xgetenv(env, run);
+			if ((!run || !run[0]) && (xstrcmp("VISUAL", env) == 0))
+				run = editor ? editor : xgetenv("EDITOR", "vi");
 			spawn(run, dents[cur].name, NULL, path, F_NORMAL);
 			break;
 #ifdef __linux__
@@ -3396,8 +3400,11 @@ main(int argc, char *argv[])
 #endif
 
 	/* Edit text in EDITOR, if opted */
-	if (getenv("NNN_USE_EDITOR"))
-		editor = xgetenv("EDITOR", "vi");
+	if (getenv("NNN_USE_EDITOR")) {
+		editor = xgetenv("VISUAL", NULL);
+		if (!editor)
+			editor = xgetenv("EDITOR", "vi");
+	}
 
 	/* Set player if not set already */
 	if (!player)

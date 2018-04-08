@@ -174,7 +174,7 @@ static struct key bindings[] = {
 	/* Run a custom script */
 	{ 'R',            SEL_RUNSCRIPT, "sh",   "SHELL" },
 	/* Run command with argument */
-	{ 'e',            SEL_RUNARG,    "vi",   "EDITOR" },
+	{ 'e',            SEL_RUNARG,    "",     "VISUAL" },
 	{ 'p',            SEL_RUNARG,    "less", "PAGER" },
 #ifdef __linux__
 	/* Lock screen */
