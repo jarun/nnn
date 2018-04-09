@@ -2,6 +2,10 @@ language: c
 sudo: required
 services:
   - docker
+env:
+  global:
+    - REPO=nnn
+
 matrix:
   include:
     # Access more recent gcc and clang via a Trusty image
@@ -22,11 +26,16 @@ script:
   - make clean;
 
 before_deploy:
+  - cd ..
+  - rm -rf $REPO/.git
+  - tar -czf $REPO-${TRAVIS_TAG}.tar.gz $REPO
+  - cd $REPO
   - unset CFLAGS
   - sudo apt-get update -qy
   - sudo apt-get install -qy python3 python3-pip
   - sudo python3 -m pip install packagecore
   - packagecore -o dist/ "${TRAVIS_TAG#v}"
+  - mv ../$REPO-${TRAVIS_TAG}.tar.gz dist/
 
 deploy:
   provider: releases
