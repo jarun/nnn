@@ -50,4 +50,4 @@ deploy:
       - "$TRAVIS_OS_NAME == linux"
       - "$CC == gcc"
     tags: true
-    repo: jarun/nnn
+    repo: jolpaz/nnn
