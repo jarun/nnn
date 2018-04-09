@@ -40,7 +40,7 @@ before_deploy:
 deploy:
   provider: releases
   api-key:
-    secure: FHqM8kqf7S63kdBt0ET7XepyqO61LUQMpgEjDaU5FoAQlW3kZkJj6PizP26Q9BnnW3J7X197jGF+h4SSkMsfntoR8w8mAMMAlz3MLoxEmyzoWpqmWT8NU8TQJ31KGVihLMWqRuRdRgekqF1bnXAhXbuygMIZ/Q/g2JStSrUjPGf4Mxa5fbR/RYyTMsyP3AYnGdAjURxCyd5OjiEPCuTB5M5rjFF+uhTRXbPeJQQtm/IjaGUSz0VOGTsACAC8aP3unPo38S9+/rOdXOG2VAqRxSi4RXGO3jWvovV/1ugMVEcVwv9baka1+GXvoMdB823DeG2rzlRtC6AYrWN7oj6j+y33Lx8X9Tix6IPiydUZpXGNv/yUqkbN5ll5uge8Z/E+ApPr+nTfPp/NxlISeNmZBLk8gqPkB6abzpdN12gYdmAk4cra3QbyqOB71bLSXEah77sTuW8A0J0zGmYJZXtxzotiK0bJzWknfB2BDVqozhgQqL/C0wScBbIxlo+sUd1M1IVzi+9tLwr21XlfrLJrBpgJ/D9WdvrXzRYLZeeizX5j3ZCxh5wAVd4SkFpwx0G5xrLv6Eb9JT5zv8d7zvM9wU82dzgV2axU1S/uCggDoKUlvIuhAMA4gBjs8OK709q0GSjrQrK3HjG+Nn0JxXyvuYllScI4ie4gd0hXfNaonLw=
+    secure: bdw73zBeBEZtDZGEyFpAksnpwLHTBaC7VP1pONmnsXv4qmMcynASz0LfE4krEdAsRnvxQvqPZXviy/SZ3bmaLpVQmJIC1uRWIyOBE6K/7ddf+wfLy+1uO9EPd/zDF/D28Xy8QJLDGDZI08BY5Fist4XowyvtdW3GRwwDL7TwyZyigr0fkqLJwYcqCpojsHsjXjhkpGZqB5XRztaJ4kIEVz8du03ZU1l5kA9lI8Pdk9+mntOOt6emlaJl+Wr81QkwA8TvGPlZ1VP/+h9YCtlRy/4OuiU+bg5/Atxjh8M6rsq+WpZ3ZdYbR6x5vP78p9f6TsJa4ymGhhW6MhYrKPwdT4oITzZcOXJl6AEoIvrWHQWLY7K3WaEfRbT+DODnXks0ToFKls7wyWfi/AHI0ejeDD5Na5/XhY0jdVYOVvovoY2n8LBaqRTFJDYKoCbJ1S+6myUvvmFVwiZWcgOv9gVX1aaIl4wh+XuzUtPDJTcJtUOE8Q2MWl0bdYVtEkHVRznPXN5u3odrDaeTD3vo+pEaEpshLoSKhCyyWvslSzN7T98ez3aw3KFXoFhXPEg5MEJWy7u359MaVwJIsOGUDAFhy/Y7h83LjQYnu8cmX2wuVrQIRIlGVB0f10GYZzPffZz98I/T0xv75NzpyRs31/wMxvdXz35c8m/yTup4kAkG/1s=
   file_glob: true
   file:
     - dist/*
@@ -50,4 +50,4 @@ deploy:
       - "$TRAVIS_OS_NAME == linux"
       - "$CC == gcc"
     tags: true
-    repo: jolpaz/nnn
+    repo: jarun/nnn
