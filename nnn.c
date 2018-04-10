@@ -1928,7 +1928,7 @@ show_help(char *path)
 	char tmp[] = "/tmp/nnnXXXXXX";
 	int i = 0, fd = mkstemp(tmp);
 	char *start, *end;
-	static char helpstr[] = (
+	static char helpstr[] = {
 	   "cKey | Function\n"
 	     "e- + -\n"
       "7↑, k, ^P | Prev entry\n"
@@ -1977,7 +1977,7 @@ show_help(char *path)
 #endif
 	     "e? | Help, settings\n"
 	 "aQ, ^G | Quit and cd\n"
-	 "aq, ^X | Quit\n\n");
+	 "aq, ^X | Quit\n\n"};
 
 	if (fd == -1)
 		return -1;
