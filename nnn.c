@@ -642,7 +642,7 @@ writecp(const char *buf, const size_t buflen)
 static bool
 appendfilepath(const char *path, const size_t len)
 {
-	if ((copybufpos >= copybuflen) || (len > (copybuflen - (copybufpos + 3)))) {
+	if ((copybufpos >= copybuflen) || ((len + 3) > (copybuflen - copybufpos))) {
 		copybuflen += PATH_MAX;
 		pcopybuf = xrealloc(pcopybuf, copybuflen);
 		if (!pcopybuf) {
@@ -3055,7 +3055,6 @@ nochange:
 						writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
 					else
 						spawn(copier, pcopybuf, NULL, NULL, F_NOTRACE);
-					DPRINTF_S(pcopybuf);
 					if (!len)
 						printmsg("files copied");
 				} else
