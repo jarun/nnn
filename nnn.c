@@ -1996,7 +1996,8 @@ show_help(char *path)
 		start = ++end;
 	}
 
-	dprintf(fd, "\n");
+	dprintf(fd, "\nVolume: %s of ", coolsize(get_fs_free(path)));
+	dprintf(fd, "%s free\n\n", coolsize(get_fs_capacity(path)));
 
 	if (getenv("NNN_BMS")) {
 		dprintf(fd, "BOOKMARKS\n");
@@ -2010,27 +2011,20 @@ show_help(char *path)
 
 	if (editor)
 		dprintf(fd, "NNN_USE_EDITOR: %s\n", editor);
-
 	if (desktop_manager)
 		dprintf(fd, "NNN_DE_FILE_MANAGER: %s\n", desktop_manager);
-
 	if (idletimeout)
 		dprintf(fd, "NNN_IDLE_TIMEOUT: %d secs\n", idletimeout);
-
 	if (copier)
 		dprintf(fd, "NNN_COPIER: %s\n", copier);
-
 	if (getenv("NNN_NO_X"))
 		dprintf(fd, "NNN_NO_X: %s\n", getenv("NNN_NO_X"));
-
 	if (getenv("NNN_SCRIPT"))
 		dprintf(fd, "NNN_SCRIPT: %s\n", getenv("NNN_SCRIPT"));
-
 	if (getenv("NNN_SHOW_HIDDEN"))
 		dprintf(fd, "NNN_SHOW_HIDDEN: %s\n", getenv("NNN_SHOW_HIDDEN"));
 
-	dprintf(fd, "\nVolume: %s of ", coolsize(get_fs_free(path)));
-	dprintf(fd, "%s free\n\n", coolsize(get_fs_capacity(path)));
+	dprintf(fd, "\n");
 
 	if (getenv("PWD"))
 		dprintf(fd, "PWD: %s\n", getenv("PWD"));
