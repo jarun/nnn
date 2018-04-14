@@ -2995,7 +2995,7 @@ nochange:
 					if (cfg.noxdisplay)
 						writecp(g_buf, r + 1); /* Truncate NULL from end */
 					else
-						spawn(copier, g_buf, NULL, NULL, F_NONE);
+						spawn(copier, g_buf, NULL, NULL, F_NOTRACE);
 
 					g_buf[r] = '\0';
 					printmsg(g_buf + 1);
@@ -3004,7 +3004,7 @@ nochange:
 					if (cfg.noxdisplay)
 						writecp(newpath, r - 1); /* Truncate NULL from end */
 					else
-						spawn(copier, newpath, NULL, NULL, F_NONE);
+						spawn(copier, newpath, NULL, NULL, F_NOTRACE);
 					printmsg(newpath);
 				}
 			} else if (!copier)
@@ -3054,7 +3054,7 @@ nochange:
 					if (cfg.noxdisplay)
 						writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
 					else
-						spawn(copier, pcopybuf, NULL, NULL, F_NONE);
+						spawn(copier, pcopybuf, NULL, NULL, F_NOTRACE);
 					DPRINTF_S(pcopybuf);
 					if (!len)
 						printmsg("files copied");
