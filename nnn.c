@@ -305,7 +305,7 @@ static const char messages[][16] =
 	"HOME not set",
 	"no traversal",
 	"invalid key",
-	"set NNN_COPIER",
+	"set copy method",
 	"%F %T %z",
 };
 
@@ -2980,7 +2980,9 @@ nochange:
 				copycurname();
 			goto begin;
 		case SEL_COPY:
-			if (copier && ndents) {
+			if (!(cfg.noxdisplay || copier))
+				printmsg(messages[STR_COPY_ID]);
+			else if (ndents) {
 				if (cfg.copymode) {
 					r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
 					if (!appendfilepath(newpath, r))
@@ -3007,58 +3009,54 @@ nochange:
 						spawn(copier, newpath, NULL, NULL, F_NOTRACE);
 					printmsg(newpath);
 				}
-			} else if (!copier)
-				printmsg(messages[STR_COPY_ID]);
+			}
 			goto nochange;
 		case SEL_COPYMUL:
-			if (!copier) {
+			if (!(cfg.noxdisplay || copier))
 				printmsg(messages[STR_COPY_ID]);
-				goto nochange;
-			} else if (!ndents) {
-				goto nochange;
-			}
+			else if (ndents) {
+				cfg.copymode ^= 1;
+				if (cfg.copymode) {
+					g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
+					copystartid = cur;
+					copybufpos = 0;
+					printmsg("multi-copy on");
+					DPRINTF_S("copymode on");
+				} else {
+					static size_t len;
+					len = 0;
 
-			cfg.copymode ^= 1;
-			if (cfg.copymode) {
-				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
-				copystartid = cur;
-				copybufpos = 0;
-				printmsg("multi-copy on");
-				DPRINTF_S("copymode on");
-			} else {
-				static size_t len;
-				len = 0;
+					/* Handle range selection */
+					if (copybufpos == 0) {
 
-				/* Handle range selection */
-				if (copybufpos == 0) {
+						if (cur < copystartid) {
+							copyendid = copystartid;
+							copystartid = cur;
+						} else
+							copyendid = cur;
 
-					if (cur < copystartid) {
-						copyendid = copystartid;
-						copystartid = cur;
-					} else
-						copyendid = cur;
+						if (copystartid < copyendid) {
+							for (r = copystartid; r <= copyendid; ++r) {
+								len = mkpath(path, dents[r].name, newpath, PATH_MAX);
+								if (!appendfilepath(newpath, len))
+									goto nochange;;
+							}
 
-					if (copystartid < copyendid) {
-						for (r = copystartid; r <= copyendid; ++r) {
-							len = mkpath(path, dents[r].name, newpath, PATH_MAX);
-							if (!appendfilepath(newpath, len))
-								goto nochange;;
+							snprintf(newpath, PATH_MAX, "%d files copied", copyendid - copystartid + 1);
+							printmsg(newpath);
 						}
-
-						snprintf(newpath, PATH_MAX, "%d files copied", copyendid - copystartid + 1);
-						printmsg(newpath);
 					}
-				}
 
-				if (copybufpos) {
-					if (cfg.noxdisplay)
-						writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
-					else
-						spawn(copier, pcopybuf, NULL, NULL, F_NOTRACE);
-					if (!len)
-						printmsg("files copied");
-				} else
-					printmsg("multi-copy off");
+					if (copybufpos) {
+						if (cfg.noxdisplay)
+							writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
+						else
+							spawn(copier, pcopybuf, NULL, NULL, F_NOTRACE);
+						if (!len)
+							printmsg("files copied");
+					} else
+						printmsg("multi-copy off");
+				}
 			}
 			goto nochange;
 		case SEL_QUOTE:
