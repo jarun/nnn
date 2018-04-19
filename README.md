@@ -443,7 +443,7 @@ Any other value disables colored directories.
 2. spawn a shell in the current directory (<kbd>!</kbd>)
 3. while typing the desired command, copy the file paths (usually <kbd>^-Shift-V</kbd>)
 
-In addition, nnn integrates with vidir. vidir supports batch file move and delete.
+In addition, `nnn` integrates with vidir. vidir supports batch file move and delete.
 
 #### boost chdir prompt
 
@@ -463,7 +463,7 @@ Enable volume management in your DE file manager and set removable drives or med
 
 #### tmux config
 
-nnn might not handle keypresses correctly when used with tmux (see issue #104 for more details). Set `TERM=xterm-256color` to address it.
+`nnn` might not handle keypresses correctly when used with tmux (see issue #104 for more details). Set `TERM=xterm-256color` to address it.
 
 ### Why fork?
 
