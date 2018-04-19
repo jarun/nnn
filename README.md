@@ -66,6 +66,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - [work faster at rename prompt](#work-faster-at-rename-prompt)
   - [set idle timeout](#set-idle-timeout)
   - [show hot plugged drives](#show-hot-plugged-drives)
+  - [tmux config](#tmux-config)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
@@ -459,6 +460,10 @@ The terminal screensaver is disabled by default. To set the wait time in seconds
 #### show hot plugged drives
 
 Enable volume management in your DE file manager and set removable drives or media to be auto-mounted when inserted. Then visit the usual mount point location (`/mnt` or `/media/user`) in `nnn`.
+
+#### tmux config
+
+nnn might not handle keypresses correctly when used with tmux (see issue #104 for more details). Set `TERM=xterm-256color` to address it.
 
 ### Why fork?
 
