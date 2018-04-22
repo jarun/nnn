@@ -640,7 +640,7 @@ writecp(const char *buf, const size_t buflen)
 }
 
 static bool
-appendfilepath(const char *path, const size_t len)
+appendfpath(const char *path, const size_t len)
 {
 	if ((copybufpos >= copybuflen) || ((len + 3) > (copybuflen - copybufpos))) {
 		copybuflen += PATH_MAX;
@@ -2422,7 +2422,7 @@ browse(char *ipath, char *ifilter)
 	static char oldname[NAME_MAX + 1] __attribute__ ((aligned));
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
-	int r, fd, presel, copystartid = 0, copyendid = 0;
+	int r, fd, presel, ncp, copystartid = 0, copyendid = 0;
 	enum action sel = SEL_RUNARG + 1;
 	bool dir_changed = FALSE;
 
@@ -2985,8 +2985,9 @@ nochange:
 			else if (ndents) {
 				if (cfg.copymode) {
 					r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
-					if (!appendfilepath(newpath, r))
+					if (!appendfpath(newpath, r))
 						goto nochange;
+					++ncp;
 					printmsg(newpath);
 				} else if (cfg.quote) {
 					g_buf[0] = '\'';
@@ -3020,15 +3021,11 @@ nochange:
 					g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
 					copystartid = cur;
 					copybufpos = 0;
+					ncp = 0;
 					printmsg("multi-copy on");
 					DPRINTF_S("copymode on");
 				} else {
-					static size_t len;
-					len = 0;
-
-					/* Handle range selection */
-					if (copybufpos == 0) {
-
+					if (!ncp) { /* Handle range selection */
 						if (cur < copystartid) {
 							copyendid = copystartid;
 							copystartid = cur;
@@ -3036,24 +3033,26 @@ nochange:
 							copyendid = cur;
 
 						if (copystartid < copyendid) {
-							for (r = copystartid; r <= copyendid; ++r) {
-								len = mkpath(path, dents[r].name, newpath, PATH_MAX);
-								if (!appendfilepath(newpath, len))
-									goto nochange;;
-							}
+							for (r = copystartid; r <= copyendid; ++r)
+								if (!appendfpath(newpath, mkpath(path, dents[r].name, newpath, PATH_MAX)))
+									goto nochange;
 
 							snprintf(newpath, PATH_MAX, "%d files copied", copyendid - copystartid + 1);
 							printmsg(newpath);
 						}
 					}
 
-					if (copybufpos) {
+					if (copybufpos) { /* File path(s) written to the buffer */
 						if (cfg.noxdisplay)
 							writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
 						else
 							spawn(copier, pcopybuf, NULL, NULL, F_NOTRACE);
-						if (!len)
-							printmsg("files copied");
+
+						if (ncp) /* Some files cherry picked */
+						{
+							snprintf(newpath, PATH_MAX, "%d files copied", ncp);
+							printmsg(newpath);
+						}
 					} else
 						printmsg("multi-copy off");
 				}
