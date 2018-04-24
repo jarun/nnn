@@ -300,12 +300,12 @@ static char * const utils[] = {
 
 static const char messages[][16] =
 {
-	"nftw(3) failed",
+	"nftw failed",
 	"already at /",
 	"HOME not set",
 	"no traversal",
 	"invalid key",
-	"set copy method",
+	"copy not set",
 	"%F %T %z",
 };
 
@@ -743,7 +743,7 @@ spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uch
 		/* Show a marker (to indicate nnn spawned shell) */
 		if (flag & F_MARKER && shlvl != NULL) {
 			printf("\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
-			printf("Spawned shell level: %d\n", atoi(shlvl) + 1);
+			printf("Next shell level: %d\n", atoi(shlvl) + 1);
 		}
 
 		/* Suppress stdout and stderr */
