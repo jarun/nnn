@@ -273,7 +273,8 @@ static struct timespec gtimeout;
 #define OPENER 2
 #define NLAY 3
 #define ATOOL 4
-#define VIDIR 5
+#define APACK 5
+#define VIDIR 6
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -286,6 +287,7 @@ static char * const utils[] = {
 #endif
 	"nlay",
 	"atool",
+	"apack",
 	"vidir"
 };
 
@@ -1966,6 +1968,7 @@ show_help(char *path)
 	     "ee | Edit entry in EDITOR\n"
 	     "eo | Open DE filemanager\n"
 	     "ep | Open entry in PAGER\n"
+	     "ef | Archive entry\n"
 	     "eF | List archive\n"
 	    "d^F | Extract archive\n"
 	    "d^K | Copy file path\n"
@@ -3068,8 +3071,9 @@ nochange:
 			goto nochange;
 		case SEL_OPEN:
 			printprompt("open with: "); // fallthrough
+		case SEL_ARCHIVE: // fallthrough
 		case SEL_NEW:
-			if (sel == SEL_NEW)
+			if (sel != SEL_OPEN)
 				printprompt("name: ");
 
 			tmp = xreadline(NULL);
@@ -3095,7 +3099,15 @@ nochange:
 
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				spawn(tmp, newpath, NULL, path, r);
+				continue;
+			} else if (sel == SEL_ARCHIVE) {
+				/* newpath is used as temporary buffer */
+				if (!get_output(newpath, PATH_MAX, "which", utils[APACK], NULL, 0)) {
+					printmsg("apack missing");
+					continue;
+				}
 
+				spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
 				continue;
 			}
 

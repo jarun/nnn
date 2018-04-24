@@ -27,6 +27,7 @@ enum action {
 	SEL_MEDIA,
 	SEL_FMEDIA,
 	SEL_DFB,
+	SEL_ARCHIVE,
 	SEL_LIST,
 	SEL_EXTRACT,
 	SEL_FSIZE,
@@ -137,6 +138,8 @@ static struct key bindings[] = {
 	{ 'M',            SEL_FMEDIA,    "-f",   "" },
 	/* Open dir in desktop file manager */
 	{ 'o',            SEL_DFB,       "",     "" },
+	/* Create archive */
+	{ 'f',            SEL_ARCHIVE,   "",     "" },
 	/* List archive */
 	{ 'F',            SEL_LIST,      "-l",   "" },
 	/* Extract archive */

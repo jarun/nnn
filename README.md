@@ -90,7 +90,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Desktop search (gnome-search-tool, catfish) integration
 - Mimes
   - Open with desktop opener (default) or specify a custom app
-  - List and extract archives (needs atool)
+  - Create, list and extract archives (needs atool)
   - Optionally open text files in EDITOR (fallback vi)
   - Customizable bash script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) to handle actions
 - Information
@@ -237,6 +237,7 @@ optional arguments:
               e | Edit entry in EDITOR
               o | Open DE filemanager
               p | Open entry in PAGER
+              f | Archive entry
               F | List archive
              ^F | Extract archive
              ^K | Copy file path
@@ -291,7 +292,7 @@ The following abbreviations are used in the detail view:
 | xdg-open (Linux), open(1) (OS X) | desktop opener |
 | mediainfo, exiftool | multimedia file details |
 | gnome-search-tool, catfish | desktop search utility |
-| atool | list and extract archives |
+| atool | create, list and extract archives |
 | vidir from moreutils | batch rename, move, delete dir entries |
 | vlock (Linux) | terminal locker |
 | $EDITOR ($VISUAL, if defined) | edit files (fallback vi) |
