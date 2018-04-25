@@ -2936,6 +2936,19 @@ nochange:
 					printmsg(newpath);
 					goto nochange;
 				}
+
+				/* In case of successful archive extract, reload contents */
+				if (sel == SEL_EXTRACT) {
+					/* Continue in navigate-as-you-type mode, if enabled */
+					if (cfg.filtermode)
+						presel = FILTER;
+
+					/* Save current */
+					copycurname();
+
+					/* Repopulate as directory content may have changed */
+					goto begin;
+				}
 			}
 			break;
 		case SEL_DFB:
@@ -3108,7 +3121,16 @@ nochange:
 				}
 
 				spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
-				continue;
+
+				/* Continue in navigate-as-you-type mode, if enabled */
+				if (cfg.filtermode)
+					presel = FILTER;
+
+				/* Save current */
+				copycurname();
+
+				/* Repopulate as directory content may have changed */
+				goto begin;
 			}
 
 			/* Open the descriptor to currently open directory */
