@@ -175,6 +175,10 @@ disabledbg()
 #define POLYNOMIAL 0xD8  /* 11011 followed by 0's */
 #define CRC8_TABLE_LEN 256
 
+/* Volume info */
+#define FREE 0
+#define CAPACITY 1
+
 /* Function macros */
 #define exitcurses() endwin()
 #define clearprompt() printmsg("")
@@ -1863,25 +1867,17 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 }
 
 static size_t
-get_fs_free(const char *path)
+get_fs_info(const char *path, bool type)
 {
 	static struct statvfs svb;
 
 	if (statvfs(path, &svb) == -1)
 		return 0;
+
+	if (type == CAPACITY)
+		return svb.f_blocks << ffs(svb.f_bsize >> 1);
 	else
 		return svb.f_bavail << ffs(svb.f_frsize >> 1);
-}
-
-static size_t
-get_fs_capacity(const char *path)
-{
-	struct statvfs svb;
-
-	if (statvfs(path, &svb) == -1)
-		return 0;
-	else
-		return svb.f_blocks << ffs(svb.f_bsize >> 1);
 }
 
 static int
@@ -1996,8 +1992,8 @@ show_help(char *path)
 		start = ++end;
 	}
 
-	dprintf(fd, "\nVolume: %s of ", coolsize(get_fs_free(path)));
-	dprintf(fd, "%s free\n\n", coolsize(get_fs_capacity(path)));
+	dprintf(fd, "\nVolume: %s of ", coolsize(get_fs_info(path, FREE)));
+	dprintf(fd, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
 
 	if (getenv("NNN_BMS")) {
 		dprintf(fd, "BOOKMARKS\n");
@@ -2397,7 +2393,7 @@ redraw(char *path)
 			else {
 				i = snprintf(buf, 64, "%d/%d du: %s (%lu files) ", cur + 1, ndents, coolsize(dir_blocks << 9), num_files);
 				snprintf(buf + i, NAME_MAX, "vol: %s free [%s%s]",
-					 coolsize(get_fs_free(path)), unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
+					 coolsize(get_fs_info(path, FREE)), unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
 			}
 
 			printmsg(buf);
