@@ -1135,6 +1135,13 @@ filterentries(char *path)
 		}
 
 		if (r == OK) {
+			/* Handle all control chars in main loop */
+			if (keyname(*ch)[0] == '^') {
+				if (len == 1)
+					cur = oldcur;
+				goto end;
+			}
+
 			switch (*ch) {
 			case '\r':  // with nonl(), this is ENTER key value
 				if (len == 1) {
@@ -1147,6 +1154,7 @@ filterentries(char *path)
 
 				redraw(path);
 				goto end;
+#if 0
 			case CONTROL('L'): // fallthrough
 			case CONTROL('K'): // fallthrough
 			case CONTROL('Y'): // fallthrough
@@ -1165,6 +1173,7 @@ filterentries(char *path)
 				if (len == 1)
 					cur = oldcur;
 				goto end;
+#endif
 			case '?':  // '?' is an invalid regex, show help instead
 				if (len == 1) {
 					cur = oldcur;
