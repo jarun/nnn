@@ -1213,13 +1213,15 @@ end:
 
 /* Show a prompt with input string and return the changes */
 static char *
-xreadline(char *fname)
+xreadline(char *fname, char *prompt)
 {
 	int old_curs = curs_set(1);
 	size_t len, pos;
 	int x, y, r;
 	wint_t ch[2] = {0};
 	static wchar_t * const buf = (wchar_t *)g_buf;
+
+	printprompt(prompt);
 
 	if (fname) {
 		DPRINTF_S(fname);
@@ -1247,6 +1249,7 @@ xreadline(char *fname)
 
 				if (*ch == CONTROL('L')) {
 					clearprompt();
+					printprompt(prompt);
 					len = pos = 0;
 					continue;
 				}
@@ -1263,6 +1266,7 @@ xreadline(char *fname)
 
 				if (*ch == CONTROL('U')) {
 					clearprompt();
+					printprompt(prompt);
 					memmove(buf, buf + pos, (len - pos) << 2);
 					len -= pos;
 					pos = 0;
@@ -1319,6 +1323,7 @@ xreadline(char *fname)
 	settimeout();
 	DPRINTF_S(buf);
 	wcstombs(g_buf, buf, NAME_MAX);
+	clearprompt();
 	return g_buf;
 }
 
@@ -3091,15 +3096,14 @@ nochange:
 			else
 				printmsg("quotes off");
 			goto nochange;
-		case SEL_OPEN:
-			printprompt("open with: "); // fallthrough
+		case SEL_OPEN: // fallthrough
 		case SEL_ARCHIVE: // fallthrough
 		case SEL_NEW:
-			if (sel != SEL_OPEN)
-				printprompt("name: ");
+			if (sel == SEL_OPEN)
+				tmp = xreadline(NULL, "open with: ");
+			else
+				tmp = xreadline(NULL, "name: ");
 
-			tmp = xreadline(NULL);
-			clearprompt();
 			if (tmp == NULL || tmp[0] == '\0')
 				break;
 
@@ -3183,9 +3187,7 @@ nochange:
 			if (ndents <= 0)
 				break;
 
-			printprompt("");
-			tmp = xreadline(dents[cur].name);
-			clearprompt();
+			tmp = xreadline(dents[cur].name, "");
 			if (tmp == NULL || tmp[0] == '\0')
 				break;
 
