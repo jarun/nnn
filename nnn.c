@@ -1327,20 +1327,6 @@ xreadline(char *fname, char *prompt)
 	return g_buf;
 }
 
-static char *
-readinput(void)
-{
-	cleartimeout();
-	echo();
-	curs_set(TRUE);
-	memset(g_buf, 0, NAME_MAX + 1);
-	wgetnstr(stdscr, g_buf, NAME_MAX);
-	noecho();
-	curs_set(FALSE);
-	settimeout();
-	return g_buf[0] ? g_buf : NULL;
-}
-
 /*
  * Updates out with "dir/name or "/name"
  * Returns the number of bytes copied including the terminating NULL byte
@@ -2833,9 +2819,7 @@ nochange:
 				presel = FILTER;
 			goto begin;
 		case SEL_CDBM:
-			printprompt("key: ");
-			tmp = readinput();
-			clearprompt();
+			tmp = xreadline(NULL, "key: ");
 			if (tmp == NULL || tmp[0] == '\0')
 				break;
 
