@@ -354,13 +354,11 @@ crc8init()
 static uchar
 crc8fast(uchar const message[], size_t n)
 {
-    uchar data;
-    uchar remainder = 0;
-    size_t byte;
-
+    static uchar data, remainder;
+    static size_t byte;
 
     /* Divide the message by the polynomial, a byte at a time */
-    for (byte = 0; byte < n; ++byte) {
+    for (remainder = byte = 0; byte < n; ++byte) {
         data = message[byte] ^ (remainder >> (WIDTH - 8));
         remainder = crc8table[data] ^ (remainder << 8);
     }
