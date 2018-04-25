@@ -446,11 +446,10 @@ static size_t
 xstrlen(const char *s)
 {
 	static size_t len;
+	len = 0;
 
 	if (!s)
-		return 0;
-
-	len = 0;
+		return len;
 
 	while (*s)
 		++len, ++s;
@@ -2021,7 +2020,7 @@ show_help(char *path)
 	if (copier)
 		dprintf(fd, "NNN_COPIER: %s\n", copier);
 	if (getenv("NNN_NO_X"))
-		dprintf(fd, "NNN_NO_X: %s\n", getenv("NNN_NO_X"));
+		dprintf(fd, "NNN_NO_X: %s (%s)\n", getenv("NNN_NO_X"), g_cppath);
 	if (getenv("NNN_SCRIPT"))
 		dprintf(fd, "NNN_SCRIPT: %s\n", getenv("NNN_SCRIPT"));
 	if (getenv("NNN_SHOW_HIDDEN"))
