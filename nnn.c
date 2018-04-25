@@ -2639,7 +2639,7 @@ nochange:
 			}
 
 			exitcurses();
-			tmp = readline("chdir: ");
+			tmp = readline("cd: ");
 			refresh();
 
 			/* Change back to program start dir */
