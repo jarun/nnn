@@ -1,3 +1,29 @@
+nnn v1.8
+2018-05-02
+
+What's in?
+- Run a custom script
+- Archive selected file/directory
+- Show number of cherry-picked files in multi-copy mode
+- Env var `NNN_SHOW_HIDDEN` to show hidden files by default
+- Additional information in help screen
+- Give preference to env var VISUAL, if defined, over EDITOR
+- New/changed/remapped shortcuts
+  - <kbd>^]</kbd> - spawn a new shell in current directory
+  - <kbd>r</kbd> - edit directory entries in vidir
+  - <kbd>R</kbd> - run a custom script
+  - <kbd>^I</kbd> - toggle navigate-as-you-type mode
+  - <kbd>L</kbd> - lock the current terminal (Linux-only)
+- All Ctrl shortcuts enabled in navigate-as-you-type mode
+- Fix: GUI programs closing when parent terminal is closed
+- Recognize `~`, `-` and `&` at bookmark prompt
+- Recognize ruby (.rb) files as text files
+- Efficient integer-only file size calculation
+- Official inclusion on openSUSE and Fedora
+- Package generation for Ubuntu 18.04
+
+-------------------------------------------------------------------------------
+
 nnn v1.7
 2018-02-28
 
