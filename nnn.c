@@ -286,6 +286,8 @@ static char * const utils[] = {
 	"exiftool",
 #ifdef __APPLE__
 	"/usr/bin/open",
+#elif defined __CYGWIN__
+	"cygstart",
 #else
 	"xdg-open",
 #endif
