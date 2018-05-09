@@ -444,24 +444,6 @@ xrealloc(void *pcur, size_t len)
 }
 
 /*
- * Custom xstrlen()
- */
-static size_t
-xstrlen(const char *s)
-{
-	static size_t len;
-	len = 0;
-
-	if (!s)
-		return len;
-
-	while (*s)
-		++len, ++s;
-
-	return len;
-}
-
-/*
  * Just a safe strncpy(3)
  * Always null ('\0') terminates if both src and dest are valid pointers.
  * Returns the number of bytes copied including terminating null byte.
@@ -477,7 +459,7 @@ xstrlcpy(char *dest, const char *src, size_t n)
 	if (!src || !dest || !n)
 		return 0;
 
-	len = xstrlen(src) + 1;
+	len = strlen(src) + 1;
 	if (n > len)
 		n = len;
 	else if (len > n)
@@ -520,22 +502,6 @@ xstrlcpy(char *dest, const char *src, size_t n)
 }
 
 /*
- * Custom strcmp(), just what we need.
- * Returns 0 if same, -ve if s1 < s2, +ve if s1 > s2.
- */
-static int
-xstrcmp(const char *s1, const char *s2)
-{
-	if (!s1 || !s2)
-		return -1;
-
-	while (*s1 && *s1 == *s2)
-		++s1, ++s2;
-
-	return *s1 - *s2;
-}
-
-/*
  * The poor man's implementation of memrchr(3).
  * We are only looking for '/' in this program.
  * And we are NOT expecting a '/' at the end.
@@ -575,7 +541,7 @@ xdirname(const char *path)
 	xstrlcpy(buf, path, PATH_MAX);
 
 	/* Find last '/'. */
-	last_slash = xmemrchr((uchar *)buf, '/', xstrlen(buf));
+	last_slash = xmemrchr((uchar *)buf, '/', strlen(buf));
 
 	if (last_slash != NULL && last_slash != buf && last_slash[1] == '\0') {
 		/* Determine whether all remaining characters are slashes. */
@@ -627,7 +593,7 @@ xbasename(char *path)
 {
 	static char *base;
 
-	base = xmemrchr((uchar *)path, '/', xstrlen(path));
+	base = xmemrchr((uchar *)path, '/', strlen(path));
 	return base ? base + 1 : path;
 }
 
@@ -888,7 +854,7 @@ strstrip(char *s)
 	if (!s || !*s)
 		return s;
 
-	size_t len = xstrlen(s) - 1;
+	size_t len = strlen(s) - 1;
 
 	while (len != 0 && (isspace(s[len]) || s[len] == '/'))
 		--len;
@@ -1407,7 +1373,7 @@ get_bm_loc(char *key, char *buf)
 		return NULL;
 
 	for (r = 0; bookmark[r].key && r < BM_MAX; ++r) {
-		if (xstrcmp(bookmark[r].key, key) == 0) {
+		if (strcmp(bookmark[r].key, key) == 0) {
 			if (bookmark[r].loc[0] == '~') {
 				char *home = getenv("HOME");
 
@@ -2239,7 +2205,7 @@ dentfind(struct entry *dents, const char *fname, int n)
 	DPRINTF_S(fname);
 
 	for (i = 0; i < n; ++i)
-		if (xstrcmp(fname, dents[i].name) == 0)
+		if (strcmp(fname, dents[i].name) == 0)
 			return i;
 
 	return 0;
@@ -2314,7 +2280,7 @@ redraw(char *path)
 	}
 
 	/* Strip trailing slashes */
-	for (i = xstrlen(path) - 1; i > 0; --i)
+	for (i = strlen(path) - 1; i > 0; --i)
 		if (path[i] == '/')
 			path[i] = '\0';
 		else
@@ -2333,7 +2299,7 @@ redraw(char *path)
 		ncols = PATH_MAX;
 
 	/* No text wrapping in cwd line */
-	/* Show CWD: - xstrlen(CWD) - 1 = 6 */
+	/* Show CWD: - strlen(CWD) - 1 = 6 */
 	g_buf[ncols - 6] = '\0';
 	printw(CWD "%s\n\n", g_buf);
 
@@ -2732,7 +2698,7 @@ nochange:
 			if (truecd == 0) {
 				/* Probable change in dir */
 				/* No-op if it's the same directory */
-				if (xstrcmp(path, newpath) == 0)
+				if (strcmp(path, newpath) == 0)
 					break;
 
 				oldname[0] = '\0';
@@ -2768,7 +2734,7 @@ nochange:
 				goto nochange;
 			}
 
-			if (xstrcmp(path, dir) == 0) {
+			if (strcmp(path, dir) == 0) {
 				break;
 			}
 
@@ -2787,7 +2753,7 @@ nochange:
 		case SEL_CDLAST: // fallthrough
 		case SEL_VISIT:
 			if (sel == SEL_VISIT) {
-				if (xstrcmp(mark, path) == 0)
+				if (strcmp(mark, path) == 0)
 					break;
 
 				tmp = mark;
@@ -2832,7 +2798,7 @@ nochange:
 			if (!xdiraccess(newpath))
 				goto nochange;
 
-			if (xstrcmp(path, newpath) == 0)
+			if (strcmp(path, newpath) == 0)
 				break;
 
 			oldname[0] = '\0';
@@ -3087,7 +3053,7 @@ nochange:
 				break;
 
 			/* Allow only relative, same dir paths */
-			if (tmp[0] == '/' || xstrcmp(xbasename(tmp), tmp) != 0) {
+			if (tmp[0] == '/' || strcmp(xbasename(tmp), tmp) != 0) {
 				printmsg(messages[STR_INPUT_ID]);
 				goto nochange;
 			}
@@ -3171,13 +3137,13 @@ nochange:
 				break;
 
 			/* Allow only relative, same dir paths */
-			if (tmp[0] == '/' || xstrcmp(xbasename(tmp), tmp) != 0) {
+			if (tmp[0] == '/' || strcmp(xbasename(tmp), tmp) != 0) {
 				printmsg(messages[STR_INPUT_ID]);
 				goto nochange;
 			}
 
 			/* Skip renaming to same name */
-			if (xstrcmp(tmp, dents[cur].name) == 0)
+			if (strcmp(tmp, dents[cur].name) == 0)
 				break;
 
 			/* Open the descriptor to currently open directory */
@@ -3253,7 +3219,7 @@ nochange:
 			goto begin;
 		case SEL_RUNARG:
 			run = xgetenv(env, run);
-			if ((!run || !run[0]) && (xstrcmp("VISUAL", env) == 0))
+			if ((!run || !run[0]) && (strcmp("VISUAL", env) == 0))
 				run = editor ? editor : xgetenv("EDITOR", "vi");
 			spawn(run, dents[cur].name, NULL, path, F_NORMAL);
 			break;
