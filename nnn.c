@@ -299,17 +299,15 @@ static char * const utils[] = {
 
 /* Common strings */
 #define STR_NFTWFAIL_ID 0
-#define STR_ATROOT_ID 1
-#define STR_NOHOME_ID 2
-#define STR_INPUT_ID 3
-#define STR_INVBM_ID 4
-#define STR_COPY_ID 5
-#define STR_DATE_ID 6
+#define STR_NOHOME_ID 1
+#define STR_INPUT_ID 2
+#define STR_INVBM_ID 3
+#define STR_COPY_ID 4
+#define STR_DATE_ID 5
 
 static const char messages[][16] =
 {
 	"nftw failed",
-	"already at /",
 	"HOME not set",
 	"no traversal",
 	"invalid key",
@@ -2460,7 +2458,10 @@ nochange:
 		case SEL_BACK:
 			/* There is no going back */
 			if (istopdir(path)) {
-				printmsg(messages[STR_ATROOT_ID]);
+				/* Continue in navigate-as-you-type mode, if enabled */
+				if (cfg.filtermode)
+					presel = FILTER;
+
 				goto nochange;
 			}
 
@@ -2652,8 +2653,12 @@ nochange:
 
 				/* Show a message if already at / */
 				if (istopdir(path)) {
-					printmsg(messages[STR_ATROOT_ID]);
 					free(input);
+
+					/* Continue in navigate-as-you-type mode, if enabled */
+					if (cfg.filtermode)
+						presel = FILTER;
+
 					goto nochange;
 				}
 
