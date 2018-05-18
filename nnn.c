@@ -279,6 +279,7 @@ static struct timespec gtimeout;
 #define ATOOL 4
 #define APACK 5
 #define VIDIR 6
+#define UNKNOWN 7
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -294,7 +295,8 @@ static char * const utils[] = {
 	"nlay",
 	"atool",
 	"apack",
-	"vidir"
+	"vidir",
+	"UNKNOWN"
 };
 
 /* Common strings */
@@ -1729,6 +1731,26 @@ get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int page
 	return NULL;
 }
 
+static char *
+xgetpwuid(uid_t uid)
+{
+	struct passwd *pwd = getpwuid(uid);
+	if (!pwd)
+		return utils[7];
+
+	return pwd->pw_name;
+}
+
+static char *
+xgetgrgid(gid_t gid)
+{
+	struct group *grp = getgrgid(gid);
+	if (!grp)
+		return utils[7];
+
+	return grp->gr_name;
+}
+
 /*
  * Follows the stat(1) output closely
  */
@@ -1788,7 +1810,7 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 
 	/* Show permissions, owner, group */
 	dprintf(fd, "\n  Access: 0%d%d%d/%s Uid: (%u/%s)  Gid: (%u/%s)", (sb->st_mode >> 6) & 7, (sb->st_mode >> 3) & 7,
-		sb->st_mode & 7, perms, sb->st_uid, (getpwuid(sb->st_uid))->pw_name, sb->st_gid, (getgrgid(sb->st_gid))->gr_name);
+		sb->st_mode & 7, perms, sb->st_uid, xgetpwuid(sb->st_uid), sb->st_gid, xgetgrgid(sb->st_gid));
 
 	/* Show last access time */
 	strftime(g_buf, 40, messages[STR_DATE_ID], localtime(&sb->st_atime));
