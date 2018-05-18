@@ -1736,7 +1736,7 @@ xgetpwuid(uid_t uid)
 {
 	struct passwd *pwd = getpwuid(uid);
 	if (!pwd)
-		return utils[7];
+		return utils[UNKNOWN];
 
 	return pwd->pw_name;
 }
@@ -1746,7 +1746,7 @@ xgetgrgid(gid_t gid)
 {
 	struct group *grp = getgrgid(gid);
 	if (!grp)
-		return utils[7];
+		return utils[UNKNOWN];
 
 	return grp->gr_name;
 }
