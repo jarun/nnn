@@ -478,6 +478,7 @@ I chose to fork because:
 
 - [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
 - [FOSSMint](https://www.fossmint.com/nnn-linux-terminal-file-browser/)
+- [LinuxLinks](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)
 
 ### Developers
 
