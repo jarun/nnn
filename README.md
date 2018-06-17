@@ -422,18 +422,6 @@ Export the path to the custom executable script:
 
     export NNN_SCRIPT=/usr/local/bin/nscript
 
-Sample script to open image files in current dir in sxiv:
-
-    #!/usr/bin/env sh
-
-    sxiv -q * >/dev/null 2>&1
-
-Sample (fish shell) script to fuzzy find files in fzy and open with xdg-open:
-
-    #!/usr/bin/env sh
-
-    xdg-open (find -type f | fzy) > /dev/null 2>&1
-
 Press <kbd>R</kbd> to run the script in the current directory.
 
 It's possible to run multiple scripts with `nnn` as long as the scripts are in the same location and share the same prefix. To enable multiple scripts,
@@ -449,6 +437,18 @@ With the example of `NNN_SCRIPT` above, some more scripts could be:
     and so on...
 
 Type the correct suffix  when prompted on pressing the keybind <kbd>R</kbd>. To use the base script (`NNN_SCRIPT`), just press <kbd>Enter</kbd>.
+
+Sample script to open image files in current dir in sxiv:
+
+    #!/usr/bin/env sh
+
+    sxiv -q * >/dev/null 2>&1
+
+Sample (fish shell) script to fuzzy find files in fzy and open with xdg-open:
+
+    #!/usr/bin/env sh
+
+    xdg-open (find -type f | fzy) >/dev/null 2>&1
 
 #### change dir color
 
