@@ -59,7 +59,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - [cd on quit](#cd-on-quit)
   - [copy file paths to clipboard](#copy-file-paths-to-clipboard)
   - [copy file paths when X is missing](#copy-file-paths-when-x-is-missing)
-  - [run a custom script](#run-a-custom-script)
+  - [run custom scripts](#run-custom-scripts)
   - [change dir color](#change-dir-color)
   - [file copy, move, delete](#file-copy-move-delete)
   - [boost chdir prompt](#boost-chdir-prompt)
@@ -100,7 +100,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Create, rename files and directories
   - Batch rename/move/delete current directory entries in vidir (from moreutils)
   - Spawn SHELL (fallback sh) in the current directory
-  - Run a custom script in the current directory
+  - Run custom scripts in the current directory
   - Copy absolute file paths with/without X (*easy* shell integration)
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
@@ -416,7 +416,7 @@ so you can -
 
 Note that you may want to keep quotes disabled in this case.
 
-#### run a custom script
+#### run custom scripts
 
 Export the path to the custom executable script:
 
@@ -435,6 +435,20 @@ Sample (fish shell) script to fuzzy find files in fzy and open with xdg-open:
     xdg-open (find -type f | fzy) > /dev/null 2>&1
 
 Press <kbd>R</kbd> to run the script in the current directory.
+
+It's possible to run multiple scripts with `nnn` as long as the scripts are in the same location and share the same prefix. To enable multiple scripts,
+
+    export NNN_MULTISCRIPT=1
+
+With the example of `NNN_SCRIPT` above, some more scripts could be:
+
+    /usr/local/bin/nscript1
+    /usr/local/bin/nscript2
+    /usr/local/bin/nscriptcustom1
+    /usr/local/bin/nscriptcustom2
+    and so on...
+
+Type the correct suffix  when prompted on pressing the keybind <kbd>R</kbd>. To use the base script (`NNN_SCRIPT`), just press <kbd>Enter</kbd>.
 
 #### change dir color
 

@@ -2005,6 +2005,8 @@ show_help(char *path)
 		dprintf(fd, "NNN_NO_X: %s (%s)\n", getenv("NNN_NO_X"), g_cppath);
 	if (getenv("NNN_SCRIPT"))
 		dprintf(fd, "NNN_SCRIPT: %s\n", getenv("NNN_SCRIPT"));
+	if (getenv("NNN_MULTISCRIPT"))
+		dprintf(fd, "NNN_MULTISCRIPT: %s\n", getenv("NNN_MULTISCRIPT"));
 	if (getenv("NNN_SHOW_HIDDEN"))
 		dprintf(fd, "NNN_SHOW_HIDDEN: %s\n", getenv("NNN_SHOW_HIDDEN"));
 
@@ -3228,8 +3230,17 @@ nochange:
 
 			if (sel == SEL_RUNSCRIPT) {
 				tmp = getenv("NNN_SCRIPT");
-				if (tmp)
+				if (tmp) {
+					if (getenv("NNN_MULTISCRIPT")) {
+						size_t _len = xstrlcpy(newpath, tmp, PATH_MAX);
+						tmp = xreadline(NULL, "script suffix: ");
+						if (tmp && tmp[0])
+							xstrlcpy(newpath + _len - 1, tmp, PATH_MAX - _len);
+
+						tmp = newpath;
+					}
 					spawn(run, tmp, NULL, path, F_NORMAL | F_SIGINT);
+				}
 			} else {
 				spawn(run, NULL, NULL, path, F_NORMAL | F_MARKER);
 
