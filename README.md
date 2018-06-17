@@ -418,15 +418,21 @@ Note that you may want to keep quotes disabled in this case.
 
 #### run a custom script
 
-Export the path to the custom script:
+Export the path to the custom executable script:
 
-    export NNN_SCRIPT=/usr/local/bin/script.sh
+    export NNN_SCRIPT=/usr/local/bin/nscript
 
 Sample script to open image files in current dir in sxiv:
 
     #!/usr/bin/env sh
 
     sxiv -q * >/dev/null 2>&1
+
+Sample (fish shell) script to fuzzy find files in fzy and open with xdg-open:
+
+    #!/usr/bin/env sh
+
+    xdg-open (find -type f | fzy) > /dev/null 2>&1
 
 Press <kbd>R</kbd> to run the script in the current directory.
 
