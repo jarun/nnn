@@ -25,6 +25,8 @@ Noice is Not Noice, a noicer fork...
 
 If you want to edit a file in vi with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
 
+`nnn` supports as many scripts as you want to run! So you can [integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv (to view images in a directory) or fzy (to fuzzy find files in a directory tree) easily.
+
 Have fun with it! Missing a feature? Want to contribute? Head to the rolling [ToDo list](https://github.com/jarun/nnn/issues/58).
 
 *Love smart and efficient terminal utilities? Explore my repositories. Buy me a cup of coffee if they help you.*
@@ -60,6 +62,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - [copy file paths to clipboard](#copy-file-paths-to-clipboard)
   - [copy file paths when X is missing](#copy-file-paths-when-x-is-missing)
   - [run custom scripts](#run-custom-scripts)
+    - [sample scripts](#sample-scripts)
   - [change dir color](#change-dir-color)
   - [file copy, move, delete](#file-copy-move-delete)
   - [boost chdir prompt](#boost-chdir-prompt)
@@ -438,17 +441,19 @@ With the example of `NNN_SCRIPT` above, some more scripts could be:
 
 Type the correct suffix  when prompted on pressing the keybind <kbd>R</kbd>. To use the base script (`NNN_SCRIPT`), just press <kbd>Enter</kbd>.
 
-Sample script to open image files in current dir in sxiv:
+##### sample scripts
 
-    #!/usr/bin/env sh
+- Open image files in current dir in **sxiv**:
 
-    sxiv -q * >/dev/null 2>&1
+      #!/usr/bin/env sh
 
-Sample (fish shell) script to fuzzy find files in fzy and open with xdg-open:
+      sxiv -q * >/dev/null 2>&1
 
-    #!/usr/bin/env sh
+- Fuzzy find files in **fzy** and open with xdg-open:
 
-    xdg-open (find -type f | fzy) >/dev/null 2>&1
+      #!/usr/bin/env sh
+
+      xdg-open $(find -type f | fzy) >/dev/null 2>&1
 
 #### change dir color
 
