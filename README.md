@@ -244,7 +244,7 @@ optional arguments:
               f | Archive entry
               F | List archive
              ^F | Extract archive
-             ^K | Copy file path
+      Space, ^K | Copy file path
              ^Y | Toggle multi-copy
              ^T | Toggle path quote
              ^L | Redraw, clear prompt

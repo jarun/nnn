@@ -1952,7 +1952,7 @@ show_help(char *path)
 	     "ef | Archive entry\n"
 	     "eF | List archive\n"
 	    "d^F | Extract archive\n"
-	    "d^K | Copy file path\n"
+     "6Space, ^K | Copy file path\n"
 	    "d^Y | Toggle multi-copy\n"
 	    "d^T | Toggle path quote\n"
 	    "d^L | Redraw, clear prompt\n"
