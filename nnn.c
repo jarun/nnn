@@ -1213,35 +1213,30 @@ xreadline(char *fname, char *prompt)
 
 		if ((r = get_wch(ch)) != ERR) {
 			if (r == OK) {
-				if (*ch == KEY_ENTER || *ch == '\n' || *ch == '\r')
-					break;
-
-				if (*ch == '\b') {
+				switch (*ch) {
+				case KEY_ENTER: //fallthrough
+				case '\n': //fallthrough
+				case '\r':
+					goto END;
+				case '\b': /* some old curses (e.g. rhel25) still send '\b' for backspace */
 					if (pos > 0) {
 						memmove(buf + pos - 1, buf + pos, (len - pos) << 2);
 						--len, --pos;
-					}
+					} //fallthrough
+				case '\t': /* TAB breaks cursor position, ignore it */
 					continue;
-				}
-
-				if (*ch == CONTROL('L')) {
+				case CONTROL('L'):
 					clearprompt();
 					printprompt(prompt);
 					len = pos = 0;
 					continue;
-				}
-
-				if (*ch == CONTROL('A')) {
+				case CONTROL('A'):
 					pos = 0;
 					continue;
-				}
-
-				if (*ch == CONTROL('E')) {
+				case CONTROL('E'):
 					pos = len;
 					continue;
-				}
-
-				if (*ch == CONTROL('U')) {
+				case CONTROL('U'):
 					clearprompt();
 					printprompt(prompt);
 					memmove(buf, buf + pos, (len - pos) << 2);
@@ -1252,10 +1247,6 @@ xreadline(char *fname, char *prompt)
 
 				/* Filter out all other control chars */
 				if (keyname(*ch)[0] == '^')
-					continue;
-
-				/* TAB breaks cursor position, ignore it */
-				if (*ch == '\t')
 					continue;
 
 				if (pos < NAME_MAX - 1) {
@@ -1293,6 +1284,7 @@ xreadline(char *fname, char *prompt)
 		}
 	}
 
+END:
 	buf[len] = '\0';
 	if (old_curs != ERR)
 		curs_set(old_curs);
