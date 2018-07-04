@@ -27,7 +27,7 @@ If you want to edit a file in vi with some soothing music in the background whil
 
 `nnn` supports as many scripts as you want to run! So you can [integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv (to view images in a directory) or fzy (to fuzzy find files in a directory tree) easily.
 
-Have fun with it! Missing a feature? Want to contribute? Head to the rolling [ToDo list](https://github.com/jarun/nnn/issues/58).
+Have fun with it! Missing a feature? Want to contribute? Head to the rolling [ToDo list](https://github.com/jarun/nnn/issues/110).
 
 *Love smart and efficient terminal utilities? Explore my repositories. Buy me a cup of coffee if they help you.*
 
