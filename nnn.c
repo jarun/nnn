@@ -1083,7 +1083,7 @@ filterentries(char *path)
 	printprompt(ln);
 
 	while ((r = get_wch(ch)) != ERR) {
-		if (*ch == 127 /* handle DEL */ || *ch == KEY_DC || *ch == KEY_BACKSPACE) {
+		if (*ch == 127 /* handle DEL */ || *ch == KEY_DC || *ch == KEY_BACKSPACE || *ch == '\b') {
 			if (len == 1) {
 				cur = oldcur;
 				*ch = CONTROL('L');
@@ -1215,6 +1215,14 @@ xreadline(char *fname, char *prompt)
 			if (r == OK) {
 				if (*ch == KEY_ENTER || *ch == '\n' || *ch == '\r')
 					break;
+
+				if (*ch == '\b') {
+					if (pos > 0) {
+						memmove(buf + pos - 1, buf + pos, (len - pos) << 2);
+						--len, --pos;
+					}
+					continue;
+				}
 
 				if (*ch == CONTROL('L')) {
 					clearprompt();
@@ -2408,7 +2416,7 @@ browse(char *ipath, char *ifilter)
 	static char oldname[NAME_MAX + 1] __attribute__ ((aligned));
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
-	int r, fd, presel, ncp, copystartid = 0, copyendid = 0;
+	int r, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
 	enum action sel = SEL_RUNARG + 1;
 	bool dir_changed = FALSE;
 
