@@ -3239,7 +3239,12 @@ nochange:
 
 						tmp = newpath;
 					}
-					spawn(run, tmp, NULL, path, F_NORMAL | F_SIGINT);
+
+					char *curfile = NULL;
+					if (ndents > 0)
+						curfile = dents[cur].name;
+
+					spawn(run, tmp, curfile, path, F_NORMAL | F_SIGINT);
 				}
 			} else {
 				spawn(run, NULL, NULL, path, F_NORMAL | F_MARKER);

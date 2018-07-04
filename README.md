@@ -421,6 +421,8 @@ Note that you may want to keep quotes disabled in this case.
 
 #### run custom scripts
 
+`nnn` can invoke custom scripts with the currently selected file name as argument 1.
+
 Export the path to the custom executable script:
 
     export NNN_SCRIPT=/usr/local/bin/nscript
