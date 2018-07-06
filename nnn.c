@@ -307,8 +307,7 @@ static char * const utils[] = {
 #define STR_COPY_ID 4
 #define STR_DATE_ID 5
 
-static const char messages[][16] =
-{
+static const char messages[][16] = {
 	"nftw failed",
 	"HOME not set",
 	"no traversal",
@@ -360,17 +359,17 @@ crc8init()
 static uchar
 crc8fast(uchar const message[], size_t n)
 {
-    static uchar data, remainder;
-    static size_t byte;
+	static uchar data, remainder;
+	static size_t byte;
 
-    /* Divide the message by the polynomial, a byte at a time */
-    for (remainder = byte = 0; byte < n; ++byte) {
-        data = message[byte] ^ (remainder >> (WIDTH - 8));
-        remainder = crc8table[data] ^ (remainder << 8);
-    }
+	/* Divide the message by the polynomial, a byte at a time */
+	for (remainder = byte = 0; byte < n; ++byte) {
+		data = message[byte] ^ (remainder >> (WIDTH - 8));
+		remainder = crc8table[data] ^ (remainder << 8);
+	}
 
-    /* The final remainder is the CRC */
-    return remainder;
+	/* The final remainder is the CRC */
+	return remainder;
 }
 
 /* Messages show up at the bottom */
