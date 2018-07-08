@@ -213,7 +213,7 @@ typedef struct entry {
 	blkcnt_t blocks; /* number of 512B blocks allocated */
 	mode_t mode;
 	uint nlen; /* Length of file name; can be uchar (< NAME_MAX + 1) */
-}__attribute__ ((packed, aligned(_ALIGNMENT))) *pEntry;
+} __attribute__ ((packed, aligned(_ALIGNMENT))) *pEntry;
 
 /* Bookmark */
 typedef struct {
@@ -1307,13 +1307,12 @@ mkpath(char *dir, char *name, char *out, size_t n)
 	/* Handle absolute path */
 	if (name[0] == '/')
 		return xstrlcpy(out, name, n);
-	else {
-		/* Handle root case */
-		if (istopdir(dir))
-			len = 1;
-		else
-			len = xstrlcpy(out, dir, n);
-	}
+
+	/* Handle root case */
+	if (istopdir(dir))
+		len = 1;
+	else
+		len = xstrlcpy(out, dir, n);
 
 	out[len - 1] = '/';
 	return (xstrlcpy(out + len, name, n - len) + len);
@@ -1734,6 +1733,7 @@ static char *
 xgetpwuid(uid_t uid)
 {
 	struct passwd *pwd = getpwuid(uid);
+
 	if (!pwd)
 		return utils[UNKNOWN];
 
@@ -1744,6 +1744,7 @@ static char *
 xgetgrgid(gid_t gid)
 {
 	struct group *grp = getgrgid(gid);
+
 	if (!grp)
 		return utils[UNKNOWN];
 
@@ -2758,13 +2759,11 @@ nochange:
 			if (sel == SEL_CDBEGIN)
 				dir = ipath;
 
-			if (!xdiraccess(dir)) {
+			if (!xdiraccess(dir))
 				goto nochange;
-			}
 
-			if (strcmp(path, dir) == 0) {
+			if (strcmp(path, dir) == 0)
 				break;
-			}
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
@@ -3051,8 +3050,7 @@ nochange:
 						else
 							spawn(copier, pcopybuf, NULL, NULL, F_NOTRACE);
 
-						if (ncp) /* Some files cherry picked */
-						{
+						if (ncp) { /* Some files cherry picked */
 							snprintf(newpath, PATH_MAX, "%d files copied", ncp);
 							printmsg(newpath);
 						}
@@ -3232,6 +3230,7 @@ nochange:
 				if (tmp) {
 					if (getenv("NNN_MULTISCRIPT")) {
 						size_t _len = xstrlcpy(newpath, tmp, PATH_MAX);
+
 						tmp = xreadline(NULL, "script suffix: ");
 						if (tmp && tmp[0])
 							xstrlcpy(newpath + _len - 1, tmp, PATH_MAX - _len);
@@ -3240,6 +3239,7 @@ nochange:
 					}
 
 					char *curfile = NULL;
+
 					if (ndents > 0)
 						curfile = dents[cur].name;
 
@@ -3452,6 +3452,7 @@ main(int argc, char *argv[])
 		cfg.noxdisplay = 1;
 
 		struct passwd *pass = getpwuid(getuid());
+
 		xstrlcpy(g_cppath, "/tmp/nnncp", 11);
 		xstrlcpy(g_cppath + 10, pass->pw_name, 33);
 	}
