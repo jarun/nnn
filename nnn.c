@@ -1210,7 +1210,8 @@ xreadline(char *fname, char *prompt)
 		mvaddnwstr(y, x, buf, len + 1);
 		move(y, x + wcswidth(buf, pos));
 
-		if ((r = get_wch(ch)) != ERR) {
+		r = get_wch(ch);
+		if (r != ERR) {
 			if (r == OK) {
 				switch (*ch) {
 				case KEY_ENTER: //fallthrough
@@ -2982,82 +2983,91 @@ nochange:
 				copycurname();
 			goto begin;
 		case SEL_COPY:
-			if (!(cfg.noxdisplay || copier))
+			if (!(cfg.noxdisplay || copier)) {
 				printmsg(messages[STR_COPY_ID]);
-			else if (ndents) {
-				if (cfg.copymode) {
-					r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
-					if (!appendfpath(newpath, r))
-						goto nochange;
-					++ncp;
-					printmsg(newpath);
-				} else if (cfg.quote) {
-					g_buf[0] = '\'';
-					r = mkpath(path, dents[cur].name, g_buf + 1, PATH_MAX);
-					g_buf[r] = '\'';
-					g_buf[r + 1] = '\0';
+				goto nochange;
+			}
 
-					if (cfg.noxdisplay)
-						writecp(g_buf, r + 1); /* Truncate NULL from end */
-					else
-						spawn(copier, g_buf, NULL, NULL, F_NOTRACE);
+			if (!ndents)
+				goto nochange;
 
-					g_buf[r] = '\0';
-					printmsg(g_buf + 1);
-				} else {
-					r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
-					if (cfg.noxdisplay)
-						writecp(newpath, r - 1); /* Truncate NULL from end */
-					else
-						spawn(copier, newpath, NULL, NULL, F_NOTRACE);
-					printmsg(newpath);
-				}
+			if (cfg.copymode) {
+				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				if (!appendfpath(newpath, r))
+					goto nochange;
+				++ncp;
+				printmsg(newpath);
+			} else if (cfg.quote) {
+				g_buf[0] = '\'';
+				r = mkpath(path, dents[cur].name, g_buf + 1, PATH_MAX);
+				g_buf[r] = '\'';
+				g_buf[r + 1] = '\0';
+
+				if (cfg.noxdisplay)
+					writecp(g_buf, r + 1); /* Truncate NULL from end */
+				else
+					spawn(copier, g_buf, NULL, NULL, F_NOTRACE);
+
+				g_buf[r] = '\0';
+				printmsg(g_buf + 1);
+			} else {
+				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				if (cfg.noxdisplay)
+					writecp(newpath, r - 1); /* Truncate NULL from end */
+				else
+					spawn(copier, newpath, NULL, NULL, F_NOTRACE);
+				printmsg(newpath);
 			}
 			goto nochange;
 		case SEL_COPYMUL:
-			if (!(cfg.noxdisplay || copier))
+			if (!(cfg.noxdisplay || copier)) {
 				printmsg(messages[STR_COPY_ID]);
-			else if (ndents) {
-				cfg.copymode ^= 1;
-				if (cfg.copymode) {
-					g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
+				goto nochange;
+			}
+
+			if (!ndents)
+				goto nochange;
+
+			cfg.copymode ^= 1;
+			if (cfg.copymode) {
+				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
+				copystartid = cur;
+				copybufpos = 0;
+				ncp = 0;
+				printmsg("multi-copy on");
+				DPRINTF_S("copymode on");
+				goto nochange;
+			}
+
+			if (!ncp) { /* Handle range selection */
+				if (cur < copystartid) {
+					copyendid = copystartid;
 					copystartid = cur;
-					copybufpos = 0;
-					ncp = 0;
-					printmsg("multi-copy on");
-					DPRINTF_S("copymode on");
-				} else {
-					if (!ncp) { /* Handle range selection */
-						if (cur < copystartid) {
-							copyendid = copystartid;
-							copystartid = cur;
-						} else
-							copyendid = cur;
+				} else
+					copyendid = cur;
 
-						if (copystartid < copyendid) {
-							for (r = copystartid; r <= copyendid; ++r)
-								if (!appendfpath(newpath, mkpath(path, dents[r].name, newpath, PATH_MAX)))
-									goto nochange;
+				if (copystartid < copyendid) {
+					for (r = copystartid; r <= copyendid; ++r)
+						if (!appendfpath(newpath, mkpath(path, dents[r].name, newpath, PATH_MAX)))
+							goto nochange;
 
-							snprintf(newpath, PATH_MAX, "%d files copied", copyendid - copystartid + 1);
-							printmsg(newpath);
-						}
-					}
-
-					if (copybufpos) { /* File path(s) written to the buffer */
-						if (cfg.noxdisplay)
-							writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
-						else
-							spawn(copier, pcopybuf, NULL, NULL, F_NOTRACE);
-
-						if (ncp) { /* Some files cherry picked */
-							snprintf(newpath, PATH_MAX, "%d files copied", ncp);
-							printmsg(newpath);
-						}
-					} else
-						printmsg("multi-copy off");
+					snprintf(newpath, PATH_MAX, "%d files copied", copyendid - copystartid + 1);
+					printmsg(newpath);
 				}
 			}
+
+			if (copybufpos) { /* File path(s) written to the buffer */
+				if (cfg.noxdisplay)
+					writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
+				else
+					spawn(copier, pcopybuf, NULL, NULL, F_NOTRACE);
+
+				if (ncp) { /* Some files cherry picked */
+					snprintf(newpath, PATH_MAX, "%d files copied", ncp);
+					printmsg(newpath);
+				}
+			} else
+				printmsg("multi-copy off");
 			goto nochange;
 		case SEL_QUOTE:
 			cfg.quote ^= 1;

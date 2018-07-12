@@ -51,7 +51,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - [Keyboard shortcuts](#keyboard-shortcuts)
   - [Filters](#filters)
   - [Navigate-as-you-type mode](#navigate-as-you-type-mode)
-  - [File type abbreviations](#file-type-abbreviations)
+  - [File indicators](#file-indicators)
   - [File handling](#file-handling)
   - [Help](#help)
 - [Quickstart](#quickstart)
@@ -276,11 +276,11 @@ If `nnn` is invoked as root or the environment variable `NNN_SHOW_HIDDEN` is set
 
 In this mode directories are opened in filter mode, allowing continuous navigation. Works best with the **arrow keys**.
 
-#### File type abbreviations
+#### File indicators
 
-The following abbreviations are used in the detail view:
+The following indicators are used in the detail view:
 
-| Symbol | File Type |
+| Indicator | File Type |
 | --- | --- |
 | `/` | Directory |
 | `*` | Executable |
