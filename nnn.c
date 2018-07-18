@@ -3078,10 +3078,14 @@ nochange:
 				printmsg("quotes off");
 			goto nochange;
 		case SEL_OPEN: // fallthrough
-		case SEL_ARCHIVE: // fallthrough
+		case SEL_ARCHIVE:
+			if (ndents <= 0)
+				break; // fallthrough
 		case SEL_NEW:
 			if (sel == SEL_OPEN)
 				tmp = xreadline(NULL, "open with: ");
+			else if (sel == SEL_ARCHIVE)
+				tmp = xreadline(dents[cur].name, "name: ");
 			else
 				tmp = xreadline(NULL, "name: ");
 
