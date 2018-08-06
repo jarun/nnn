@@ -3317,22 +3317,22 @@ nochange:
 static void
 usage(void)
 {
-	printf("usage: nnn [-b key] [-c N] [-e] [-i] [-l]\n\
-           [-p nlay] [-S] [-v] [-h] [PATH]\n\n\
-The missing terminal file browser for X.\n\n\
-positional arguments:\n\
-  PATH   start dir [default: current dir]\n\n\
-optional arguments:\n\
- -b key  specify bookmark key to open\n\
- -c N    specify dir color, disables if N>7\n\
- -e      use exiftool instead of mediainfo\n\
- -i      start in navigate-as-you-type mode\n\
- -l      start in light mode (fewer details)\n\
- -p nlay path to custom nlay\n\
- -S      start in disk usage analyzer mode\n\
- -v      show program version and exit\n\
- -h      show this help and exit\n\n\
-Version: %s\n%s\n", VERSION, GENERAL_INFO);
+	printf("usage: nnn [-b key] [-c N] [-e] [-i] [-l]\n"
+		"           [-p nlay] [-S] [-v] [-h] [PATH]\n\n"
+		"The missing terminal file browser for X.\n\n"
+		"positional arguments:\n"
+		"  PATH   start dir [default: current dir]\n\n"
+		"optional arguments:\n"
+		" -b key  specify bookmark key to open\n"
+		" -c N    specify dir color, disables if N>7\n"
+		" -e      use exiftool instead of mediainfo\n"
+		" -i      start in navigate-as-you-type mode\n"
+		" -l      start in light mode (fewer details)\n"
+		" -p nlay path to custom nlay\n"
+		" -S      start in disk usage analyser mode\n"
+		" -v      show program version and exit\n"
+		" -h      show this help and exit\n\n"
+		"Version: %s\n%s\n", VERSION, GENERAL_INFO);
 	exit(0);
 }
 
