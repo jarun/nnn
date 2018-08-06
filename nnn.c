@@ -3319,7 +3319,7 @@ usage(void)
 {
 	printf("usage: nnn [-b key] [-c N] [-e] [-i] [-l]\n"
 		"           [-p nlay] [-S] [-v] [-h] [PATH]\n\n"
-		"The missing terminal file browser for X.\n\n"
+		"The missing terminal file manager for X.\n\n"
 		"positional arguments:\n"
 		"  PATH   start dir [default: current dir]\n\n"
 		"optional arguments:\n"
@@ -3446,7 +3446,7 @@ main(int argc, char *argv[])
 	if (!player)
 		player = utils[NLAY];
 
-	/* Get the desktop file browser, if set */
+	/* Get the desktop file manager, if set */
 	desktop_manager = getenv("NNN_DE_FILE_MANAGER");
 
 	/* Get screensaver wait time, if set; copier used as tmp var */

@@ -21,7 +21,7 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (click to play video)</i></a></p>
 
-`nnn` is probably the [fastest and most resource-sensitive](#performance) (with all its capabilities) file browser you have ever used. It's extremely flexible too - integrates with your DE and favourite GUI utilities, works with the desktop opener, supports bookmarks, has smart navigation shortcuts, [navigate-as-you-type](#navigate-as-you-type-mode) mode, disk usage analyzer mode, comprehensive file details and much more. `nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today.
+`nnn` is probably the [fastest and most resource-sensitive](#performance) (with all its capabilities) file manager you have ever used. It's extremely flexible too - integrates with your DE and favourite GUI utilities, works with the desktop opener, supports bookmarks, has smart navigation shortcuts, [navigate-as-you-type](#navigate-as-you-type-mode) mode, disk usage analyzer mode, comprehensive file details and much more. `nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today.
 
 If you want to edit a file in vi with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
 
@@ -107,7 +107,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Copy absolute file paths with/without X (*easy* shell integration)
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
-  - Open current directory in a custom GUI file browser
+  - Open current directory in a custom GUI file manager
   - Terminal screensaver/locker (default vlock, customizable) integration
 - Unicode support
 - Highly optimized code, minimal resource usage
@@ -182,7 +182,7 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
 usage: nnn [-b key] [-c N] [-e] [-i] [-l]
            [-p nlay] [-S] [-v] [-h] [PATH]
 
-The missing terminal file browser for X.
+The missing terminal file manager for X.
 
 positional arguments:
   PATH   start dir [default: current dir]
