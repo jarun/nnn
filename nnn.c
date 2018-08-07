@@ -1158,7 +1158,12 @@ filterentries(char *path)
 				wln[len] = (wchar_t)*ch;
 				wln[++len] = '\0';
 				wcstombs(ln, wln, REGEX_MAX);
-				ndents = total;
+
+				/* Forward-filtering optimization:
+				 * - new matches can only be a subset of current matches.
+				 */
+				/* ndents = total; */
+
 				if (matches(pln) == -1)
 					continue;
 
