@@ -477,7 +477,7 @@ In addition, `nnn` integrates with vidir. vidir supports batch file move and del
 
 #### boost chdir prompt
 
-`nnn` uses libreadline for the chdir prompt input. So all the fantastic features of readline (e.g. case insensitive tab completion, history, reverse-i-search) are available to you based on your readline [configuration](https://cnswww.cns.cwru.edu/php/chet/readline/readline.html#SEC9).
+`nnn` uses libreadline for the chdir prompt input. So all the fantastic features of readline (e.g. case insensitive tab completion, history, reverse-i-search) are available to you based on your readline [configuration](https://wiki.archlinux.org/index.php/Readline).
 
 #### work faster at rename prompt
 
