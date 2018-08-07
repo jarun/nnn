@@ -79,7 +79,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
 - Modes - basic, detail, disk usage analyzer (du)
 - Navigation
   - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
-  - *Navigate-as-you-type* mode for the maverick
+  - *Navigate-as-you-type* mode with dir auto-select for the maverick
   - Handy bookmarks, start at bookmark, pin and visit directory
   - chdir prompt with tab completion (interprets cd ..... too!)
   - Roll-over at edges, page through entries
