@@ -1161,6 +1161,21 @@ filterentries(char *path)
 				ndents = total;
 				if (matches(pln) == -1)
 					continue;
+
+				/* If the only match is a dir, auto-select and cd into it */
+				if (cfg.filtermode && ndents == 1 && S_ISDIR(dents[0].mode)) {
+					*ch = KEY_ENTER;
+					cur = 0;
+					goto end;
+				}
+
+				/*
+				 * redraw() should be above the auto-select optimization, for
+				 * the case where there's an issue with dir auto-select, say,
+				 * due to a permission problem. The transition is jumpy in
+				 * case of such an error. However, we optimize for successful
+				 * cases where the dir has permissions. This skips a redraw().
+				 */
 				redraw(path);
 				printprompt(ln);
 			}
