@@ -1122,26 +1122,6 @@ filterentries(char *path)
 
 				redraw(path);
 				goto end;
-#if 0
-			case CONTROL('L'): // fallthrough
-			case CONTROL('K'): // fallthrough
-			case CONTROL('Y'): // fallthrough
-			case CONTROL('_'): // fallthrough
-			case CONTROL('R'): // fallthrough
-			case CONTROL('O'): // fallthrough
-			case CONTROL('B'): // fallthrough
-			case CONTROL('V'): // fallthrough
-			case CONTROL('J'): // fallthrough
-			case CONTROL(']'): // fallthrough
-			case CONTROL('G'): // fallthrough
-			case CONTROL('X'): // fallthrough
-			case CONTROL('F'): // fallthrough
-			case CONTROL('I'): // fallthrough
-			case CONTROL('T'):
-				if (len == 1)
-					cur = oldcur;
-				goto end;
-#endif
 			case '?':  // '?' is an invalid regex, show help instead
 				if (len == 1) {
 					cur = oldcur;
