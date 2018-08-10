@@ -10,10 +10,10 @@ matrix:
   include:
     # Access more recent gcc and clang via a Trusty image
     - os: linux
-      dist: xenial
+      dist: trusty
       compiler: gcc
     - os: linux
-      dist: xenial
+      dist: trusty
       compiler: clang
     - os: osx
       compiler: gcc
