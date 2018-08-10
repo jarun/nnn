@@ -1,3 +1,18 @@
+nnn v1.9
+2018-08-10
+
+What's in?
+- Support unlimited number of scripts
+- Pass currently selected filename as first argument to custom scripts
+- Support directory auto-select in _navigate-as-you-type_ mode
+- Show selection name in archive name prompt
+- Support Cygwin opener
+- Better support on RHEL 25 with earlier version on curses
+- Sample script for `fzy` integration
+- Now available on OpenBSD
+
+-------------------------------------------------------------------------------
+
 nnn v1.8
 2018-05-02
 
