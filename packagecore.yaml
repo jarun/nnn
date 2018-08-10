@@ -101,16 +101,6 @@ packages:
     deps:
       - libncursesw5
       - libreadline6
-  ubuntu17.10:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - libncursesw5-dev
-      - libreadline6-dev
-    deps:
-      - libncursesw5
-      - libreadline6
   ubuntu18.04:
     builddeps:
       - make

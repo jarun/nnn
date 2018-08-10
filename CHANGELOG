@@ -10,6 +10,7 @@ What's in?
 - Better support on RHEL 25 with earlier version on curses
 - Sample script for `fzy` integration
 - Now available on OpenBSD
+- Disabled package generation for Ubuntu 17.10
 
 -------------------------------------------------------------------------------
 
