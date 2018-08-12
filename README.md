@@ -141,7 +141,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 
 #### From a package manager
 
-- [AUR](https://aur.archlinux.org/packages/nnn/) (`pacman -S nnn`)
+- [AUR](https://aur.archlinux.org/packages/nnn/) (`yaourt -S nnn`)
 - [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
 - [Fedora](https://apps.fedoraproject.org/packages/nnn) (`dnf install nnn`)
 - [FreeBSD](https://www.freshports.org/misc/nnn) (`pkg install nnn`)
