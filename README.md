@@ -389,6 +389,8 @@ To wrap each file path within single quotes, export `NNN_QUOTE_ON`:
     export NNN_QUOTE_ON=1
 This is particularly useful if you are planning to copy the whole string to the shell to run a command. Quotes can be toggled at runtime using <kbd>^T</kbd>.
 
+Note that the filename is not escaped. So copying may still fail for filenames having quote(s) in them.
+
 #### copy file paths when X is missing
 
 A very common scenario on headless remote servers connected via SSH. As the clipboard is missing, `nnn` copies the path names to the tmp file `/tmp/nnncp$USER`.

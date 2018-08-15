@@ -1752,6 +1752,19 @@ xgetgrgid(gid_t gid)
 	return grp->gr_name;
 }
 
+static bool
+istgtdir(const char *tgtpath)
+{
+	if (tgtpath) {
+		struct stat tgtsb;
+		int r = stat(tgtpath, &tgtsb);
+		if ((r == 0) && (tgtsb.st_mode & S_IFMT) == S_IFDIR)
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
 /*
  * Follows the stat(1) output closely
  */
@@ -1772,16 +1785,19 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	/* Show file name or 'symlink' -> 'target' */
 	if (perms[0] == 'l') {
 		/* Note that MAX_CMD_LEN > PATH_MAX */
-		ssize_t len = readlink(fpath, g_buf, MAX_CMD_LEN);
-
-		if (len != -1) {
-			g_buf[len] = '\0';
+		char *tgt = realpath(fpath, g_buf);
+		if (tgt) {
+			char ch[] = {'\'', '\0', '\0'};
+			if (istgtdir(g_buf)) {
+				ch[1] = ch[0];
+				ch[0] = '/';
+			}
 
 			/*
 			 * We pass g_buf but unescape() operates on g_buf too!
 			 * Read the API notes for information on how this works.
 			 */
-			dprintf(fd, " -> '%s'", unescape(g_buf, 0));
+			dprintf(fd, " -> '%s%s", unescape(g_buf, 0), ch);
 		}
 	}
 
