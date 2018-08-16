@@ -289,6 +289,7 @@ The following indicators are used in the detail view:
 | <code>&#124;</code> | Fifo |
 | `=` | Socket |
 | `@` | Symbolic Link |
+| `@/` | Symbolic Link to directory |
 | `b` | Block Device |
 | `c` | Character Device |
 

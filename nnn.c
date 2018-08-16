@@ -160,6 +160,7 @@ disabledbg()
 #define DESCRIPTOR_LEN 32
 #define _ALIGNMENT 0x10
 #define _ALIGNMENT_MASK 0xF
+#define SYMLINK_TO_DIR 0x1
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE     0x00  /* no flag set */
@@ -202,6 +203,7 @@ disabledbg()
 typedef unsigned long ulong;
 typedef unsigned int uint;
 typedef unsigned char uchar;
+typedef unsigned short ushort;
 
 /* STRUCTURES */
 
@@ -212,7 +214,8 @@ typedef struct entry {
 	off_t size;
 	blkcnt_t blocks; /* number of 512B blocks allocated */
 	mode_t mode;
-	uint nlen; /* Length of file name; can be uchar (< NAME_MAX + 1) */
+	ushort nlen; /* Length of file name; can be uchar (< NAME_MAX + 1) */
+	uchar flags; /* Flags specific to the file */
 } __attribute__ ((packed, aligned(_ALIGNMENT))) *pEntry;
 
 /* Bookmark */
@@ -1560,9 +1563,12 @@ printent_long(struct entry *ent, int sel, uint namecols)
 			printw("%s%-16.16s %8.8s/ %s/\n", CURSYM(sel), buf, coolsize(ent->blocks << 9), pname);
 		else
 			printw("%s%-16.16s        /  %s/\n", CURSYM(sel), buf, pname);
-	} else if (S_ISLNK(ent->mode))
-		printw("%s%-16.16s        @  %s@\n", CURSYM(sel), buf, pname);
-	else if (S_ISSOCK(ent->mode))
+	} else if (S_ISLNK(ent->mode)) {
+		if (ent->flags & SYMLINK_TO_DIR)
+			printw("%s%-16.16s       @/  %s@\n", CURSYM(sel), buf, pname);
+		else
+			printw("%s%-16.16s        @  %s@\n", CURSYM(sel), buf, pname);
+	} else if (S_ISSOCK(ent->mode))
 		printw("%s%-16.16s        =  %s=\n", CURSYM(sel), buf, pname);
 	else if (S_ISFIFO(ent->mode))
 		printw("%s%-16.16s        |  %s|\n", CURSYM(sel), buf, pname);
@@ -1752,19 +1758,6 @@ xgetgrgid(gid_t gid)
 	return grp->gr_name;
 }
 
-static bool
-istgtdir(const char *tgtpath)
-{
-	if (tgtpath) {
-		struct stat tgtsb;
-		int r = stat(tgtpath, &tgtsb);
-		if ((r == 0) && (tgtsb.st_mode & S_IFMT) == S_IFDIR)
-			return TRUE;
-	}
-
-	return FALSE;
-}
-
 /*
  * Follows the stat(1) output closely
  */
@@ -1785,19 +1778,16 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	/* Show file name or 'symlink' -> 'target' */
 	if (perms[0] == 'l') {
 		/* Note that MAX_CMD_LEN > PATH_MAX */
-		char *tgt = realpath(fpath, g_buf);
-		if (tgt) {
-			char ch[] = {'\'', '\0', '\0'};
-			if (istgtdir(g_buf)) {
-				ch[1] = ch[0];
-				ch[0] = '/';
-			}
+		ssize_t len = readlink(fpath, g_buf, MAX_CMD_LEN);
+
+		if (len != -1) {
+			g_buf[len] = '\0';
 
 			/*
 			 * We pass g_buf but unescape() operates on g_buf too!
 			 * Read the API notes for information on how this works.
 			 */
-			dprintf(fd, " -> '%s%s", unescape(g_buf, 0), ch);
+			dprintf(fd, " -> '%s'", unescape(g_buf, 0));
 		}
 	}
 
@@ -2209,6 +2199,15 @@ dentfill(char *path, struct entry **dents,
 				++num_files;
 			}
 		}
+
+		/* Flag if this is a symlink to a dir */
+		if (S_ISLNK(sb.st_mode))
+			if (!fstatat(fd, namep, &sb, 0)) {
+				if (S_ISDIR(sb.st_mode))
+					dentp->flags |= SYMLINK_TO_DIR;
+				else
+					dentp->flags &= ~SYMLINK_TO_DIR;
+			}
 
 		++n;
 	}
