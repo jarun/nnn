@@ -283,7 +283,7 @@ In case of only one match and it's a directory, `nnn` auto selects the directory
 The following indicators are used in the detail view:
 
 | Indicator | File Type |
-| --- | --- |
+|:---:| --- |
 | `/` | Directory |
 | `*` | Executable |
 | <code>&#124;</code> | Fifo |
