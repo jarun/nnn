@@ -8,7 +8,6 @@ INSTALL ?= install
 
 CFLAGS ?= -O3
 CFLAGS += -Wall -Wextra -Wno-unused-parameter
-LDLIBS = -lreadline
 
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
 	CFLAGS += $(shell $(PKG_CONFIG) --cflags ncursesw)

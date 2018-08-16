@@ -65,7 +65,6 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
     - [sample scripts](#sample-scripts)
   - [change dir color](#change-dir-color)
   - [file copy, move, delete](#file-copy-move-delete)
-  - [boost chdir prompt](#boost-chdir-prompt)
   - [work faster at rename prompt](#work-faster-at-rename-prompt)
   - [set idle timeout](#set-idle-timeout)
   - [show hot plugged drives](#show-hot-plugged-drives)
@@ -137,7 +136,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 
 #### Dependencies
 
-`nnn` needs libreadline, libncursesw (on Linux or ncurses on OS X) and standard libc.
+`nnn` needs libncursesw (on Linux or ncurses on OS X) and standard libc.
 
 #### From a package manager
 
@@ -164,7 +163,7 @@ Packages for Arch Linux, CentOS, Debian, Fedora and Ubuntu are available with th
 
 To cook yourself, download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*). Then install the dependencies and compile (e.g. on Ubuntu 16.04):
 
-    $ sudo apt-get install libncursesw5-dev libreadline6-dev
+    $ sudo apt-get install libncursesw5-dev
     $ make
     $ sudo make install
 
@@ -479,10 +478,6 @@ Any other value disables colored directories.
 3. while typing the desired command, copy the file paths (usually <kbd>^-Shift-V</kbd>)
 
 In addition, `nnn` integrates with vidir. vidir supports batch file move and delete.
-
-#### boost chdir prompt
-
-`nnn` uses libreadline for the chdir prompt input. So all the fantastic features of readline (e.g. case insensitive tab completion, history, reverse-i-search) are available to you based on your readline [configuration](https://wiki.archlinux.org/index.php/Readline).
 
 #### work faster at rename prompt
 

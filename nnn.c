@@ -73,8 +73,6 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-#include <readline/history.h>
-#include <readline/readline.h>
 #ifndef __USE_XOPEN_EXTENDED
 #define __USE_XOPEN_EXTENDED 1
 #endif
@@ -847,25 +845,6 @@ xchartohex(char c)
 		return c - 'A' + 10;
 
 	return c;
-}
-
-/* Trim all whitespace from both ends, / from end */
-static char *
-strstrip(char *s)
-{
-	if (!s || !*s)
-		return s;
-
-	size_t len = strlen(s) - 1;
-
-	while (len != 0 && (isspace(s[len]) || s[len] == '/'))
-		--len;
-	s[len + 1] = '\0';
-
-	while (*s && isspace(*s))
-		++s;
-
-	return s;
 }
 
 static char *
@@ -2625,44 +2604,11 @@ nochange:
 			break;
 		case SEL_CD:
 		{
-			char *input;
-			int truecd;
+			int truecd = 0;
 
-			/* Save the program start dir */
-			tmp = getcwd(newpath, PATH_MAX);
-			if (tmp == NULL) {
-				printwarn();
-				goto nochange;
-			}
-
-			/* Switch to current path for readline(3) */
-			if (chdir(path) == -1) {
-				printwarn();
-				goto nochange;
-			}
-
-			exitcurses();
-			tmp = readline("cd: ");
-			refresh();
-
-			/* Change back to program start dir */
-			if (chdir(newpath) == -1)
-				printwarn();
-
-			if (tmp[0] == '\0')
+			tmp = xreadline(NULL, "cd: ");
+			if (tmp == NULL || tmp[0] == '\0')
 				break;
-
-			/* Add to readline(3) history */
-			add_history(tmp);
-
-			input = tmp;
-			tmp = strstrip(tmp);
-			if (tmp[0] == '\0') {
-				free(input);
-				break;
-			}
-
-			truecd = 0;
 
 			if (tmp[0] == '~') {
 				/* Expand ~ to HOME absolute path */
@@ -2671,30 +2617,23 @@ nochange:
 				if (home)
 					snprintf(newpath, PATH_MAX, "%s%s", home, tmp + 1);
 				else {
-					free(input);
 					printmsg(messages[STR_NOHOME_ID]);
 					goto nochange;
 				}
 			} else if (tmp[0] == '-' && tmp[1] == '\0') {
-				if (lastdir[0] == '\0') {
-					free(input);
+				if (lastdir[0] == '\0')
 					break;
-				}
 
 				/* Switch to last visited dir */
 				xstrlcpy(newpath, lastdir, PATH_MAX);
 				truecd = 1;
 			} else if ((r = all_dots(tmp))) {
-				if (r == 1) {
+				if (r == 1)
 					/* Always in the current dir */
-					free(input);
 					break;
-				}
 
 				/* Show a message if already at / */
 				if (istopdir(path)) {
-					free(input);
-
 					/* Continue in navigate-as-you-type mode, if enabled */
 					if (cfg.filtermode)
 						presel = FILTER;
@@ -2716,7 +2655,6 @@ nochange:
 					dir = xdirname(dir);
 					if (access(dir, R_OK) == -1) {
 						printwarn();
-						free(input);
 						goto nochange;
 					}
 				}
@@ -2734,8 +2672,6 @@ nochange:
 				xstrlcpy(newpath, dir, PATH_MAX);
 			} else
 				mkpath(path, tmp, newpath, PATH_MAX);
-
-			free(input);
 
 			if (!xdiraccess(newpath))
 				goto nochange;
