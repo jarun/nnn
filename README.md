@@ -184,17 +184,17 @@ usage: nnn [-b key] [-c N] [-e] [-i] [-l]
 
 The missing terminal file manager for X.
 
-positional arguments:
+positional args:
   PATH   start dir [default: current dir]
 
-optional arguments:
+optional args:
  -b key  specify bookmark key to open
  -c N    specify dir color, disables if N>7
  -e      use exiftool instead of mediainfo
  -i      start in navigate-as-you-type mode
- -l      start in light mode (fewer details)
+ -l      start in light mode
  -p nlay path to custom nlay
- -S      start in disk usage analyzer mode
+ -S      start in disk usage analyser mode
  -v      show program version and exit
  -h      show this help and exit
 ```
