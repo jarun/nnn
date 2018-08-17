@@ -1760,6 +1760,10 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 		ssize_t len = readlink(fpath, g_buf, MAX_CMD_LEN);
 
 		if (len != -1) {
+			struct stat tgtsb;
+			if (!stat(fpath, &tgtsb) && S_ISDIR(tgtsb.st_mode))
+				g_buf[len++] = '/';
+
 			g_buf[len] = '\0';
 
 			/*
