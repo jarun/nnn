@@ -63,6 +63,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - [copy file paths when X is missing](#copy-file-paths-when-x-is-missing)
   - [run custom scripts](#run-custom-scripts)
     - [sample scripts](#sample-scripts)
+  - [dual-pane or multi-pane](#dual-pane-or-multi-pane)
   - [change dir color](#change-dir-color)
   - [file copy, move, delete](#file-copy-move-delete)
   - [work faster at rename prompt](#work-faster-at-rename-prompt)
@@ -460,6 +461,10 @@ Type the correct suffix  when prompted on pressing the keybind <kbd>R</kbd>. To 
       #!/usr/bin/env sh
 
       xdg-open $(find -type f | fzy) >/dev/null 2>&1
+
+#### dual-pane or multi-pane
+
+`nnn` doesn't have a native dual-pane or multi-pane mode. Use it with tmux, GNU Screen, Terminator or Tilix.
 
 #### change dir color
 
