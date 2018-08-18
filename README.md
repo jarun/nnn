@@ -503,9 +503,10 @@ I chose to fork because:
 
 ### Mentions
 
-- [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
 - [FOSSMint](https://www.fossmint.com/nnn-linux-terminal-file-browser/)
+- [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
 - [LinuxLinks](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)
+- [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
 
 ### Developers
 
