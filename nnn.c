@@ -2318,11 +2318,11 @@ redraw(char *path)
 	if (ncols > PATH_MAX)
 		ncols = PATH_MAX;
 
-	attron(A_REVERSE);
+	attron(A_UNDERLINE);
 	/* No text wrapping in cwd line */
 	g_buf[ncols - 1] = '\0';
 	printw("%s\n\n", g_buf);
-	attroff(A_REVERSE);
+	attroff(A_UNDERLINE);
 
 	/* Fallback to light mode if less than 35 columns */
 	if (ncols < 35 && cfg.showdetail) {
