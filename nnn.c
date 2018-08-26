@@ -146,7 +146,6 @@ disabledbg()
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define MAX_CMD_LEN 5120
-#define CWD   "DIR: "
 #define CURSR " > "
 #define EMPTY "   "
 #define CURSYM(flag) (flag ? CURSR : EMPTY)
@@ -2319,10 +2318,11 @@ redraw(char *path)
 	if (ncols > PATH_MAX)
 		ncols = PATH_MAX;
 
+	attron(A_REVERSE);
 	/* No text wrapping in cwd line */
-	/* Show CWD: - strlen(CWD) - 1 = 6 */
-	g_buf[ncols - 6] = '\0';
-	printw(CWD "%s\n\n", g_buf);
+	g_buf[ncols - 1] = '\0';
+	printw("%s\n\n", g_buf);
+	attroff(A_REVERSE);
 
 	/* Fallback to light mode if less than 35 columns */
 	if (ncols < 35 && cfg.showdetail) {
