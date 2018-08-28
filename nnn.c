@@ -1077,9 +1077,9 @@ filterentries(char *path)
 
 			wcstombs(ln, wln, REGEX_MAX);
 			ndents = total;
-			if (matches(pln) == -1)
-				continue;
-			redraw(path);
+			if (matches(pln) != -1)
+				redraw(path);
+
 			printprompt(ln);
 			continue;
 		}
