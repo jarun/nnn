@@ -1077,8 +1077,13 @@ filterentries(char *path)
 
 			wcstombs(ln, wln, REGEX_MAX);
 			ndents = total;
-			if (matches(pln) == -1)
-				continue;
+			char *tmppln = pln;
+			if (strcmp(pln, "") == 0) {
+				tmppln=".*"; //otherwise setfilter will fail for the empty string.
+			}
+			if (matches(tmppln) == -1) {
+				goto end;
+			}
 			redraw(path);
 			printprompt(ln);
 			continue;
