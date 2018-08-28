@@ -297,7 +297,7 @@ The following indicators are used in the detail view:
 
 | External dependency | Operation |
 | --- | --- |
-| xdg-open (Linux), open(1) (OS X) | desktop opener |
+| xdg-open (Linux), open(1) (OS X), cygstart (Cygwin) | desktop opener |
 | mediainfo, exiftool | multimedia file details |
 | gnome-search-tool, catfish | desktop search utility |
 | atool | create, list and extract archives |
