@@ -331,13 +331,9 @@ Add the following to your shell's rc file for the best experience:
 2. Optionally open all text files in EDITOR (fallback vi):
 
        export NNN_USE_EDITOR=1
-3. Set a desktop file manager to open directories with (if you ever need to). E.g.:
+3. Run `n`.
 
-       export NNN_DE_FILE_MANAGER=thunar
-
-4. Run `n`.
-
-5. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
+4. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 
 ### How to
 
