@@ -2408,7 +2408,7 @@ browse(char *ipath, char *ifilter)
 	static char oldname[NAME_MAX + 1] __attribute__ ((aligned));
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
-	int r, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
+	int r, fd, truecd, presel, ncp = 0, copystartid = 0, copyendid = 0;
 	enum action sel = SEL_RUNARG + 1;
 	bool dir_changed = FALSE;
 
@@ -2609,18 +2609,17 @@ nochange:
 			break;
 		case SEL_CD:
 		{
-			int truecd = 0;
-
+			truecd = 0;
 			tmp = xreadline(NULL, "cd: ");
 			if (tmp == NULL || tmp[0] == '\0')
 				break;
 
 			if (tmp[0] == '~') {
 				/* Expand ~ to HOME absolute path */
-				char *home = getenv("HOME");
+				char *dir = getenv("HOME");
 
-				if (home)
-					snprintf(newpath, PATH_MAX, "%s%s", home, tmp + 1);
+				if (dir)
+					snprintf(newpath, PATH_MAX, "%s%s", dir, tmp + 1);
 				else {
 					printmsg(messages[STR_NOHOME_ID]);
 					goto nochange;
@@ -3242,13 +3241,13 @@ nochange:
 #endif
 		case SEL_CDQUIT:
 		{
-			char *tmpfile = "/tmp/nnn";
-
 			tmp = getenv("NNN_TMPFILE");
-			if (tmp)
-				tmpfile = tmp;
+			if (!tmp) {
+				printmsg("set NNN_TMPFILE");
+				goto nochange;
+			}
 
-			FILE *fp = fopen(tmpfile, "w");
+			FILE *fp = fopen(tmp, "w");
 
 			if (fp) {
 				fprintf(fp, "cd \"%s\"", path);
@@ -3386,9 +3385,6 @@ main(int argc, char *argv[])
 		fprintf(stderr, "kqueue init! %s\n", strerror(errno));
 		exit(1);
 	}
-
-	gtimeout.tv_sec = 0;
-	gtimeout.tv_nsec = 0;
 #endif
 
 	/* Edit text in EDITOR, if opted */
