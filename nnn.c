@@ -252,7 +252,7 @@ static uint idletimeout, copybufpos, copybuflen;
 static char *player;
 static char *copier;
 static char *editor;
-static char *desktop_manager;
+static char *dmanager; /* desktop file manager */
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -1037,7 +1037,7 @@ matches(char *fltr)
 
 	ndents = fill(&dents, visible, &re);
 	regfree(&re);
-	if (ndents == 0)
+	if (!ndents)
 		return 0;
 
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
@@ -1985,8 +1985,8 @@ show_help(char *path)
 
 	if (editor)
 		dprintf(fd, "NNN_USE_EDITOR: %s\n", editor);
-	if (desktop_manager)
-		dprintf(fd, "NNN_DE_FILE_MANAGER: %s\n", desktop_manager);
+	if (dmanager)
+		dprintf(fd, "NNN_DE_FILE_MANAGER: %s\n", dmanager);
 	if (idletimeout)
 		dprintf(fd, "NNN_IDLE_TIMEOUT: %d secs\n", idletimeout);
 	if (copier)
@@ -2260,7 +2260,7 @@ populate(char *path, char *oldname, char *fltr)
 
 	ndents = dentfill(path, &dents, visible, &re);
 	regfree(&re);
-	if (ndents == 0)
+	if (!ndents)
 		return 0;
 
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
@@ -2510,7 +2510,7 @@ nochange:
 			goto begin;
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
-			if (ndents == 0)
+			if (!ndents)
 				goto begin;
 
 			mkpath(path, dents[cur].name, newpath, PATH_MAX);
@@ -2608,7 +2608,6 @@ nochange:
 			cur = ndents - 1;
 			break;
 		case SEL_CD:
-		{
 			truecd = 0;
 			tmp = xreadline(NULL, "cd: ");
 			if (tmp == NULL || tmp[0] == '\0')
@@ -2616,8 +2615,7 @@ nochange:
 
 			if (tmp[0] == '~') {
 				/* Expand ~ to HOME absolute path */
-				char *dir = getenv("HOME");
-
+				dir = getenv("HOME");
 				if (dir)
 					snprintf(newpath, PATH_MAX, "%s%s", dir, tmp + 1);
 				else {
@@ -2704,7 +2702,6 @@ nochange:
 			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
-		}
 		case SEL_CDHOME:
 			dir = getenv("HOME");
 			if (dir == NULL) {
@@ -2809,7 +2806,7 @@ nochange:
 			copyfilter();
 			DPRINTF_S(fltr);
 			/* Save current */
-			if (ndents > 0)
+			if (ndents)
 				copycurname();
 			goto nochange;
 		case SEL_MFLTR:
@@ -2818,7 +2815,7 @@ nochange:
 				presel = FILTER;
 			else {
 				/* Save current */
-				if (ndents > 0)
+				if (ndents)
 					copycurname();
 
 				/* Start watching the directory */
@@ -2837,69 +2834,71 @@ nochange:
 			cfg.showdetail ^= 1;
 			cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
 			/* Save current */
-			if (ndents > 0)
+			if (ndents)
 				copycurname();
 			goto begin;
 		case SEL_STATS:
-			if (ndents > 0) {
-				mkpath(path, dents[cur].name, newpath, PATH_MAX);
+			if (!ndents)
+				break;
 
-				if (lstat(newpath, &sb) == -1) {
-					if (dents)
-						dentfree(dents);
-					errexit();
-				} else {
-					if (show_stats(newpath, dents[cur].name, &sb) < 0) {
-						printwarn();
-						goto nochange;
-					}
-				}
+			mkpath(path, dents[cur].name, newpath, PATH_MAX);
+
+			if (lstat(newpath, &sb) == -1) {
+				if (dents)
+					dentfree(dents);
+				errexit();
+			}
+
+			if (show_stats(newpath, dents[cur].name, &sb) < 0) {
+				printwarn();
+				goto nochange;
 			}
 			break;
 		case SEL_LIST: // fallthrough
 		case SEL_EXTRACT: // fallthrough
 		case SEL_MEDIA: // fallthrough
 		case SEL_FMEDIA:
-			if (ndents > 0) {
-				mkpath(path, dents[cur].name, newpath, PATH_MAX);
+			if (!ndents)
+				break;
 
+			mkpath(path, dents[cur].name, newpath, PATH_MAX);
+
+			if (sel == SEL_MEDIA || sel == SEL_FMEDIA)
+				r = show_mediainfo(newpath, run);
+			else
+				r = handle_archive(newpath, run, path);
+
+			if (r == -1) {
+				xstrlcpy(newpath, "missing ", PATH_MAX);
 				if (sel == SEL_MEDIA || sel == SEL_FMEDIA)
-					r = show_mediainfo(newpath, run);
+					xstrlcpy(newpath + 8, utils[cfg.metaviewer], 32);
 				else
-					r = handle_archive(newpath, run, path);
+					xstrlcpy(newpath + 8, utils[ATOOL], 32);
 
-				if (r == -1) {
-					xstrlcpy(newpath, "missing ", PATH_MAX);
-					if (sel == SEL_MEDIA || sel == SEL_FMEDIA)
-						xstrlcpy(newpath + 8, utils[cfg.metaviewer], 32);
-					else
-						xstrlcpy(newpath + 8, utils[ATOOL], 32);
+				printmsg(newpath);
+				goto nochange;
+			}
 
-					printmsg(newpath);
-					goto nochange;
-				}
+			/* In case of successful archive extract, reload contents */
+			if (sel == SEL_EXTRACT) {
+				/* Continue in navigate-as-you-type mode, if enabled */
+				if (cfg.filtermode)
+					presel = FILTER;
 
-				/* In case of successful archive extract, reload contents */
-				if (sel == SEL_EXTRACT) {
-					/* Continue in navigate-as-you-type mode, if enabled */
-					if (cfg.filtermode)
-						presel = FILTER;
+				/* Save current */
+				copycurname();
 
-					/* Save current */
-					copycurname();
-
-					/* Repopulate as directory content may have changed */
-					goto begin;
-				}
+				/* Repopulate as directory content may have changed */
+				goto begin;
 			}
 			break;
 		case SEL_DFB:
-			if (!desktop_manager) {
+			if (!dmanager) {
 				printmsg("set NNN_DE_FILE_MANAGER");
 				goto nochange;
 			}
 
-			spawn(desktop_manager, path, NULL, path, F_NOWAIT | F_NOTRACE);
+			spawn(dmanager, path, NULL, path, F_NOWAIT | F_NOTRACE);
 			break;
 		case SEL_FSIZE:
 			cfg.sizeorder ^= 1;
@@ -2907,7 +2906,7 @@ nochange:
 			cfg.blkorder = 0;
 			cfg.copymode = 0;
 			/* Save current */
-			if (ndents > 0)
+			if (ndents)
 				copycurname();
 			goto begin;
 		case SEL_BSIZE:
@@ -2920,7 +2919,7 @@ nochange:
 			cfg.sizeorder = 0;
 			cfg.copymode = 0;
 			/* Save current */
-			if (ndents > 0)
+			if (ndents)
 				copycurname();
 			goto begin;
 		case SEL_MTIME:
@@ -2929,12 +2928,12 @@ nochange:
 			cfg.blkorder = 0;
 			cfg.copymode = 0;
 			/* Save current */
-			if (ndents > 0)
+			if (ndents)
 				copycurname();
 			goto begin;
 		case SEL_REDRAW:
 			/* Save current */
-			if (ndents > 0)
+			if (ndents)
 				copycurname();
 			goto begin;
 		case SEL_COPY:
@@ -3034,7 +3033,7 @@ nochange:
 			goto nochange;
 		case SEL_OPEN: // fallthrough
 		case SEL_ARCHIVE:
-			if (ndents <= 0)
+			if (!ndents)
 				break; // fallthrough
 		case SEL_NEW:
 			if (sel == SEL_OPEN)
@@ -3124,7 +3123,7 @@ nochange:
 			xstrlcpy(oldname, tmp, NAME_MAX + 1);
 			goto begin;
 		case SEL_RENAME:
-			if (ndents <= 0)
+			if (!ndents)
 				break;
 
 			tmp = xreadline(dents[cur].name, "");
@@ -3180,7 +3179,7 @@ nochange:
 			spawn(utils[VIDIR], ".", NULL, path, F_NORMAL);
 
 			/* Save current */
-			if (ndents > 0)
+			if (ndents)
 				copycurname();
 			goto begin;
 		case SEL_HELP:
@@ -3209,11 +3208,12 @@ nochange:
 
 					char *curfile = NULL;
 
-					if (ndents > 0)
+					if (ndents)
 						curfile = dents[cur].name;
 
 					spawn(run, tmp, curfile, path, F_NORMAL | F_SIGINT);
-				}
+				} else
+					printmsg("set NNN_SCRIPT");
 			} else {
 				spawn(run, NULL, NULL, path, F_NORMAL | F_MARKER);
 
@@ -3223,7 +3223,7 @@ nochange:
 			}
 
 			/* Save current */
-			if (ndents > 0)
+			if (ndents)
 				copycurname();
 
 			/* Repopulate as directory content may have changed */
@@ -3399,7 +3399,7 @@ main(int argc, char *argv[])
 		player = utils[NLAY];
 
 	/* Get the desktop file manager, if set */
-	desktop_manager = getenv("NNN_DE_FILE_MANAGER");
+	dmanager = getenv("NNN_DE_FILE_MANAGER");
 
 	/* Get screensaver wait time, if set; copier used as tmp var */
 	copier = getenv("NNN_IDLE_TIMEOUT");
