@@ -66,6 +66,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - [dual-pane or multi-pane](#dual-pane-or-multi-pane)
   - [change dir color](#change-dir-color)
   - [file copy, move, delete](#file-copy-move-delete)
+  - [integrate patool](#integrate-patool)
   - [work faster at rename prompt](#work-faster-at-rename-prompt)
   - [set idle timeout](#set-idle-timeout)
   - [show hot plugged drives](#show-hot-plugged-drives)
@@ -479,6 +480,10 @@ Any other value disables colored directories.
 3. while typing the desired command, copy the file paths (usually <kbd>^-Shift-V</kbd>)
 
 In addition, `nnn` integrates with vidir. vidir supports batch file move and delete.
+
+#### integrate patool
+
+On systems where `atool` is not available but `patool` is, drop two copies of the Python3 script [natool](https://github.com/jarun/nnn/blob/master/scripts/natool) as `atool` and `apack` somewhere in `$PATH`.
 
 #### work faster at rename prompt
 

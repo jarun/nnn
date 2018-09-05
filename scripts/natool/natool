@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+
+# #############################################################################
+# natool: a wrapper script to patool to list, extract and create archives
+#
+# usage: natool [-l] [-x] [archive] [file/dir]
+#
+# Examples:
+# - list archive   : natool -l archive.7z
+# - extract archive: natool -x archive.7z
+# - create archive : natool archive.7z archive_dir
+#
+# Brief:
+# natool is written to integrate patool (instead of the default atool) with nnn
+# Two copies of this file should be dropped somewhere in $PATH - atool, apack
+#
+# Author: Arun Prakash Jana
+# Email: engineerarun@gmail.com
+# Homepage: https://github.com/jarun/nnn
+# Copyright © 2018 Arun Prakash Jana
+# #############################################################################
+
+import sys
+from subprocess import Popen, PIPE, DEVNULL
+
+if len(sys.argv) != 3:
+    print('usage: natool [-l] [-x] [archive] [file/dir]')
+    sys.exit(0)
+
+if sys.argv[1] == '-x':
+    cmd = ['patool', '--non-interactive', 'extract', sys.argv[2]]
+elif sys.argv[1] == '-l':
+    cmd = ['patool', '--non-interactive', 'list', sys.argv[2]]
+else:
+    cmd = ['patool', '--non-interactive', 'create', sys.argv[1], sys.argv[2]]
+
+pipe = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+out, err = pipe.communicate()
+print(out.decode())
+print(err.decode())
