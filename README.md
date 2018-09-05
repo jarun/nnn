@@ -94,7 +94,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Desktop search (gnome-search-tool, catfish) integration
 - Mimes
   - Open with desktop opener (default) or specify a custom app
-  - Create, list and extract archives (needs atool)
+  - Create, list and extract archives (needs atool/patool)
   - Optionally open text files in EDITOR (fallback vi)
   - Customizable bash script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) to handle actions
 - Information
@@ -301,7 +301,7 @@ The following indicators are used in the detail view:
 | xdg-open (Linux), open(1) (OS X), cygstart (Cygwin) | desktop opener |
 | mediainfo, exiftool | multimedia file details |
 | gnome-search-tool, catfish | desktop search utility |
-| atool | create, list and extract archives |
+| atool, patool ([integration](#integrate-patool)) | create, list and extract archives |
 | vidir from moreutils | batch rename, move, delete dir entries |
 | vlock (Linux) | terminal locker |
 | $EDITOR ($VISUAL, if defined) | edit files (fallback vi) |
