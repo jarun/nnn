@@ -303,8 +303,8 @@ The following indicators are used in the detail view:
 | gnome-search-tool, catfish | desktop search utility |
 | atool, patool ([integration](#integrate-patool)) | create, list and extract archives |
 | vidir from moreutils | batch rename, move, delete dir entries |
-| vlock (Linux), bashlock (OS X), lock (BSD) | terminal locker |
-| $EDITOR ($VISUAL, if defined) | edit files (fallback vi) |
+| vlock (Linux), bashlock (OS X), lock(1) (BSD) | terminal locker |
+| $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
 | $PAGER | page through files (fallback less) |
 | $SHELL | spawn a shell, run script (fallback sh) |
 
