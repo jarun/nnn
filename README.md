@@ -109,7 +109,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
   - Open current directory in a custom GUI file manager
-  - Terminal screensaver/locker (default vlock, customizable) integration
+  - Terminal screensaver/locker integration
 - Unicode support
 - Highly optimized code, minimal resource usage
 
@@ -303,7 +303,7 @@ The following indicators are used in the detail view:
 | gnome-search-tool, catfish | desktop search utility |
 | atool, patool ([integration](#integrate-patool)) | create, list and extract archives |
 | vidir from moreutils | batch rename, move, delete dir entries |
-| vlock (Linux) | terminal locker |
+| vlock (Linux), bashlock (OS X), lock (BSD) | terminal locker |
 | $EDITOR ($VISUAL, if defined) | edit files (fallback vi) |
 | $PAGER | page through files (fallback less) |
 | $SHELL | spawn a shell, run script (fallback sh) |

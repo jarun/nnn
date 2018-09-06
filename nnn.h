@@ -45,9 +45,7 @@ enum action {
 	SEL_RUN,
 	SEL_RUNSCRIPT,
 	SEL_RUNARG,
-#ifdef __linux__
 	SEL_LOCK,
-#endif
 	SEL_CDQUIT,
 	SEL_QUIT,
 };
@@ -180,10 +178,8 @@ static struct key bindings[] = {
 	/* Run command with argument */
 	{ 'e',            SEL_RUNARG,    "",     "VISUAL" },
 	{ 'p',            SEL_RUNARG,    "less", "PAGER" },
-#ifdef __linux__
 	/* Lock screen */
 	{ 'L',            SEL_LOCK,      "",     "" },
-#endif
 	/* Change dir on quit */
 	{ 'Q',            SEL_CDQUIT,    "",     "" },
 	{ CONTROL('G'),   SEL_CDQUIT,    "",     "" },

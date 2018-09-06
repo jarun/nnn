@@ -74,15 +74,16 @@ elif [ "$2" == "search" ]; then
 
 #--------------- SCREENSAVER ----------------
 elif [ "$2" == "screensaver" ]; then
-    app=vlock
+    app=("vlock"
+         "bashlock"
+         "lock")
 
-    #opts=
-
-    #bg=">/dev/null 2>&1 &"
-
-    type -P $app &>/dev/null &&
-    eval $app $opts $bg
+for index in ${!app[@]}
+do
+    type -P ${app[$index]} &>/dev/null &&
+    eval ${app[$index]} &&
     exit 0
+done
 
 #------------------ SCRIPT ------------------
 elif [ "$2" == "script" ]; then

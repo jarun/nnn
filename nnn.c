@@ -1953,9 +1953,7 @@ show_help(char *path)
 	    "d^Y | Toggle multi-copy\n"
 	    "d^T | Toggle path quote\n"
 	    "d^L | Redraw, clear prompt\n"
-#ifdef __linux__
 	     "eL | Lock terminal\n"
-#endif
 	     "e? | Help, settings\n"
 	 "aQ, ^G | Quit and cd\n"
 	 "aq, ^X | Quit\n\n"};
@@ -3241,11 +3239,9 @@ nochange:
 				run = editor ? editor : xgetenv("EDITOR", "vi");
 			spawn(run, dents[cur].name, NULL, path, F_NORMAL);
 			break;
-#ifdef __linux__
 		case SEL_LOCK:
 			spawn(player, "", "screensaver", NULL, F_NORMAL | F_SIGINT);
 			break;
-#endif
 		case SEL_CDQUIT:
 		{
 			tmp = getenv("NNN_TMPFILE");
