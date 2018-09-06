@@ -106,13 +106,18 @@ enabledbg()
 	FILE *fp = fopen("/tmp/nnn_debug", "w");
 
 	if (!fp) {
-		fprintf(stderr, "Cannot open debug file\n");
-		return -1;
+		fprintf(stderr, "debug: open failed! (1)\n");
+
+		fp = fopen("./nnn_debug", "w");
+		if (!fp) {
+			fprintf(stderr, "debug: open failed! (2)\n");
+			return -1;
+		}
 	}
 
 	DEBUG_FD = fileno(fp);
 	if (DEBUG_FD == -1) {
-		fprintf(stderr, "Cannot open debug file descriptor\n");
+		fprintf(stderr, "debug: open fd failed!\n");
 		return -1;
 	}
 
@@ -603,11 +608,21 @@ writecp(const char *buf, const size_t buflen)
 {
 	FILE *fp = fopen(g_cppath, "w");
 
+	if (!fp) {
+		struct passwd *pass = getpwuid(getuid());
+
+		xstrlcpy(g_cppath, "./nnncp", 11);
+		xstrlcpy(g_cppath + 10, pass->pw_name, 33);
+
+		fp = fopen(g_cppath, "w");
+		if (!fp)
+			printwarn();
+	}
+
 	if (fp) {
 		fwrite(buf, 1, buflen, fp);
 		fclose(fp);
-	} else
-		printwarn();
+	}
 }
 
 static bool
