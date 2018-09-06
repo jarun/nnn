@@ -391,6 +391,8 @@ printerr(int linenum)
 {
 	exitcurses();
 	fprintf(stderr, "line %d: (%d) %s\n", linenum, errno, strerror(errno));
+	if (cfg.noxdisplay)
+		unlink(g_cppath);
 	exit(1);
 }
 
@@ -608,21 +610,11 @@ writecp(const char *buf, const size_t buflen)
 {
 	FILE *fp = fopen(g_cppath, "w");
 
-	if (!fp) {
-		struct passwd *pass = getpwuid(getuid());
-
-		xstrlcpy(g_cppath, "./nnncp", 11);
-		xstrlcpy(g_cppath + 10, pass->pw_name, 33);
-
-		fp = fopen(g_cppath, "w");
-		if (!fp)
-			printwarn();
-	}
-
 	if (fp) {
 		fwrite(buf, 1, buflen, fp);
 		fclose(fp);
-	}
+	} else
+		printwarn();
 }
 
 static bool
@@ -3431,11 +3423,8 @@ main(int argc, char *argv[])
 	/* Check if X11 is available */
 	if (getenv("NNN_NO_X")) {
 		cfg.noxdisplay = 1;
-
-		struct passwd *pass = getpwuid(getuid());
-
-		xstrlcpy(g_cppath, "/tmp/nnncp", 11);
-		xstrlcpy(g_cppath + 10, pass->pw_name, 33);
+		size_t len = xstrlcpy(g_cppath, getenv("HOME"), 48);
+		xstrlcpy(g_cppath + len - 1, "/.nnncp", 48 - len);
 	}
 
 	signal(SIGINT, SIG_IGN);
@@ -3456,6 +3445,9 @@ main(int argc, char *argv[])
 	initcurses();
 	browse(ipath, ifilter);
 	exitcurses();
+
+	if (cfg.noxdisplay)
+		unlink(g_cppath);
 
 #ifdef LINUX_INOTIFY
 	/* Shutdown inotify */

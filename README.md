@@ -391,7 +391,7 @@ Note that the filename is not escaped. So copying may still fail for filenames h
 
 #### copy file paths when X is missing
 
-A very common scenario on headless remote servers connected via SSH. As the clipboard is missing, `nnn` copies the path names to the tmp file `/tmp/nnncp$USER`.
+A very common scenario on headless remote servers connected via SSH. As the clipboard is missing, `nnn` copies the path names to the tmp file `$HOME/.nnncp`.
 
 `nnn` needs to know X is unavailable:
 
@@ -400,15 +400,15 @@ A very common scenario on headless remote servers connected via SSH. As the clip
 Use <kbd>^Y</kbd> and/or <kbd>^K</kbd> to copy file paths as usual. To use the copied paths from the cmdline, use command substitution:
 
     # bash/zsh
-    ls -ltr `cat /tmp/nnncpuser`
-    ls -ltr $(cat /tmp/nnncpuser)
+    ls -ltr `cat /home/user/.nnncp`
+    ls -ltr $(cat /home/user/.nnncp)
 
     # fish
-    ls -ltr (cat /tmp/nnncpuser)
+    ls -ltr (cat /home/user/.nnncp)
 
 An alias may be handy:
 
-    alias ncp='cat /tmp/nnncpuser'
+    alias ncp='cat /home/user/.nnncp'
 
 so you can -
 
