@@ -391,7 +391,7 @@ printerr(int linenum)
 {
 	exitcurses();
 	fprintf(stderr, "line %d: (%d) %s\n", linenum, errno, strerror(errno));
-	if (cfg.noxdisplay)
+	if (cfg.noxdisplay && g_cppath[0])
 		unlink(g_cppath);
 	exit(1);
 }
@@ -608,6 +608,9 @@ xbasename(char *path)
 static void
 writecp(const char *buf, const size_t buflen)
 {
+	if (!g_cppath[0])
+		return;
+
 	FILE *fp = fopen(g_cppath, "w");
 
 	if (fp) {
@@ -3417,7 +3420,7 @@ main(int argc, char *argv[])
 		cfg.quote = 1;
 
 	/* Check if X11 is available */
-	if (getenv("NNN_NO_X")) {
+	if (getenv("NNN_NO_X") && getenv("HOME")) {
 		cfg.noxdisplay = 1;
 		size_t len = xstrlcpy(g_cppath, getenv("HOME"), 48);
 		xstrlcpy(g_cppath + len - 1, "/.nnncp", 48 - len);
@@ -3442,7 +3445,7 @@ main(int argc, char *argv[])
 	browse(ipath, ifilter);
 	exitcurses();
 
-	if (cfg.noxdisplay)
+	if (cfg.noxdisplay && g_cppath[0])
 		unlink(g_cppath);
 
 #ifdef LINUX_INOTIFY
