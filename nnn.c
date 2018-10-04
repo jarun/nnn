@@ -241,6 +241,7 @@ typedef struct {
 	ushort filtermode : 1;  /* Set to enter filter mode */
 	ushort mtimeorder : 1;  /* Set to sort by time modified */
 	ushort sizeorder  : 1;  /* Set to sort by file size */
+	ushort apparentsz : 1;  /* Set to sort by apparent size (disk usage) */
 	ushort blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
 	ushort showhidden : 1;  /* Set to show hidden files */
 	ushort copymode   : 1;  /* Set when copying files */
@@ -256,7 +257,7 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration */
-static settings cfg = {0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 4};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 4};
 
 static struct entry *dents;
 static char *pnamebuf, *pcopybuf;
@@ -272,6 +273,7 @@ static blkcnt_t dir_blocks;
 static ulong num_files;
 static uint open_max;
 static bm bookmark[BM_MAX];
+static uchar BLK_SHIFT = 9;
 
 static uchar crc8table[CRC8_TABLE_LEN];
 static uchar g_crc;
@@ -1558,7 +1560,7 @@ printent_long(struct entry *ent, int sel, uint namecols)
 
 	if (S_ISDIR(ent->mode)) {
 		if (cfg.blkorder)
-			printw("%s%-16.16s %8.8s/ %s/\n", CURSYM(sel), buf, coolsize(ent->blocks << 9), pname);
+			printw("%s%-16.16s %8.8s/ %s/\n", CURSYM(sel), buf, coolsize(ent->blocks << BLK_SHIFT), pname);
 		else
 			printw("%s%-16.16s        /  %s/\n", CURSYM(sel), buf, pname);
 	} else if (S_ISLNK(ent->mode)) {
@@ -1576,12 +1578,12 @@ printent_long(struct entry *ent, int sel, uint namecols)
 		printw("%s%-16.16s        c  %s\n", CURSYM(sel), buf, pname);
 	else if (ent->mode & 0100) {
 		if (cfg.blkorder)
-			printw("%s%-16.16s %8.8s* %s*\n", CURSYM(sel), buf, coolsize(ent->blocks << 9), pname);
+			printw("%s%-16.16s %8.8s* %s*\n", CURSYM(sel), buf, coolsize(ent->blocks << BLK_SHIFT), pname);
 		else
 			printw("%s%-16.16s %8.8s* %s*\n", CURSYM(sel), buf, coolsize(ent->size), pname);
 	} else {
 		if (cfg.blkorder)
-			printw("%s%-16.16s %8.8s  %s\n", CURSYM(sel), buf, coolsize(ent->blocks << 9), pname);
+			printw("%s%-16.16s %8.8s  %s\n", CURSYM(sel), buf, coolsize(ent->blocks << BLK_SHIFT), pname);
 		else
 			printw("%s%-16.16s %8.8s  %s\n", CURSYM(sel), buf, coolsize(ent->size), pname);
 	}
@@ -1951,7 +1953,8 @@ show_help(char *path)
 	    "d^R | Rename entry\n"
 	     "er | Open dir in vidir\n"
 	     "es | Toggle sort by size\n"
-	 "aS, ^J | Toggle du mode\n"
+	     "eS | Toggle apparent size\n"
+	    "d^J | Toggle du mode\n"
 	     "et | Toggle sort by mtime\n"
 	 "a!, ^] | Spawn SHELL in dir\n"
 	     "eR | Run custom script\n"
@@ -2042,12 +2045,25 @@ show_help(char *path)
 	return 0;
 }
 
+int (*nftw_fn) (const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
+
 static int
 sum_bsizes(const char *fpath, const struct stat *sb,
 	   int typeflag, struct FTW *ftwbuf)
 {
 	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D))
 		ent_blocks += sb->st_blocks;
+
+	++num_files;
+	return 0;
+}
+
+static int
+sum_sizes(const char *fpath, const struct stat *sb,
+	   int typeflag, struct FTW *ftwbuf)
+{
+	if (sb->st_size && (typeflag == FTW_F || typeflag == FTW_D))
+		ent_blocks += sb->st_size;
 
 	++num_files;
 	return 0;
@@ -2105,16 +2121,14 @@ dentfill(char *path, struct entry **dents,
 					ent_blocks = 0;
 					mkpath(path, namep, g_buf, PATH_MAX);
 
-					if (nftw(g_buf, sum_bsizes, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
+					if (nftw(g_buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
 						printmsg(messages[STR_NFTWFAIL_ID]);
-						dir_blocks += sb.st_blocks;
+						dir_blocks += (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 					} else
 						dir_blocks += ent_blocks;
 				}
 			} else {
-				if (sb.st_blocks)
-					dir_blocks += sb.st_blocks;
-
+				dir_blocks += (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				++num_files;
 			}
 
@@ -2183,9 +2197,9 @@ dentfill(char *path, struct entry **dents,
 				num_saved = num_files + 1;
 				mkpath(path, namep, g_buf, PATH_MAX);
 
-				if (nftw(g_buf, sum_bsizes, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
+				if (nftw(g_buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
 					printmsg(messages[STR_NFTWFAIL_ID]);
-					dentp->blocks = sb.st_blocks;
+					dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				} else
 					dentp->blocks = ent_blocks;
 
@@ -2194,7 +2208,7 @@ dentfill(char *path, struct entry **dents,
 				else
 					num_files = num_saved;
 			} else {
-				dentp->blocks = sb.st_blocks;
+				dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				dir_blocks += dentp->blocks;
 				++num_files;
 			}
@@ -2920,14 +2934,30 @@ nochange:
 		case SEL_FSIZE:
 			cfg.sizeorder ^= 1;
 			cfg.mtimeorder = 0;
+			cfg.apparentsz = 0;
 			cfg.blkorder = 0;
 			cfg.copymode = 0;
 			/* Save current */
 			if (ndents)
 				copycurname();
 			goto begin;
+		case SEL_ASIZE:
+			cfg.apparentsz ^= 1;
+			if (cfg.apparentsz) {
+				nftw_fn = &sum_sizes;
+				cfg.blkorder = 1;
+				BLK_SHIFT = 0;
+			} else
+				cfg.blkorder = 0; // fallthrough
 		case SEL_BSIZE:
-			cfg.blkorder ^= 1;
+			if (sel == SEL_BSIZE) {
+				if (!cfg.apparentsz)
+					cfg.blkorder ^= 1;
+				nftw_fn = &sum_bsizes;
+				cfg.apparentsz = 0;
+				BLK_SHIFT = 9;
+			}
+
 			if (cfg.blkorder) {
 				cfg.showdetail = 1;
 				printptr = &printent_long;
@@ -2942,6 +2972,7 @@ nochange:
 		case SEL_MTIME:
 			cfg.mtimeorder ^= 1;
 			cfg.sizeorder = 0;
+			cfg.apparentsz = 0;
 			cfg.blkorder = 0;
 			cfg.copymode = 0;
 			/* Save current */

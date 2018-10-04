@@ -57,8 +57,9 @@ enum action {
 	SEL_ARCHIVE,
 	SEL_LIST,
 	SEL_EXTRACT,
-	SEL_FSIZE,
-	SEL_BSIZE,
+	SEL_FSIZE,  /* file size */
+	SEL_ASIZE,  /* apparent size */
+	SEL_BSIZE,  /* block size */
 	SEL_MTIME,
 	SEL_REDRAW,
 	SEL_COPY,
@@ -171,8 +172,9 @@ static struct key bindings[] = {
 	{ CONTROL('F'),   SEL_EXTRACT,   "-x",   "" },
 	/* Toggle sort by size */
 	{ 's',            SEL_FSIZE,     "",     "" },
+	/* Sort by apparent size including dir contents */
+	{ 'S',            SEL_ASIZE,     "",     "" },
 	/* Sort by total block count including dir contents */
-	{ 'S',            SEL_BSIZE,     "",     "" },
 	{ CONTROL('J'),   SEL_BSIZE,     "",     "" },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME,     "",     "" },
