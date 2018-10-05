@@ -155,7 +155,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 - [Source Mage](http://codex.sourcemage.org/test/shell-term-fm/nnn/) (`cast nnn`)
 - [Ubuntu](https://packages.ubuntu.com/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
 - [Ubuntu PPA](https://launchpad.net/~twodopeshaggy/+archive/ubuntu/jarun/) (`apt-get install nnn`)
-- [Void Linux](https://github.com/voidlinux/void-packages/tree/master/srcpkgs/nnn) (`xbps-install -S nnn`)
+- [Void Linux](https://github.com/void-linux/void-packages/tree/master/srcpkgs/nnn) (`xbps-install -S nnn`)
 
 #### Release packages
 
@@ -165,7 +165,7 @@ Packages for Arch Linux, CentOS, Debian, Fedora and Ubuntu are available with th
 
 To cook yourself, download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*). Then install the dependencies and compile (e.g. on Ubuntu 16.04):
 
-    $ sudo apt-get install libncursesw5-dev
+    $ sudo apt-get install pkg-config libncursesw5-dev
     $ make
     $ sudo make install
 
