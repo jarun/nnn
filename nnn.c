@@ -175,6 +175,7 @@ disabledbg()
 #define _ALIGNMENT 0x10
 #define _ALIGNMENT_MASK 0xF
 #define SYMLINK_TO_DIR 0x1
+#define MAX_HOME_LEN 64
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE     0x00  /* no flag set */
@@ -339,7 +340,11 @@ static const char messages[][16] = {
 static char g_buf[MAX_CMD_LEN] __attribute__ ((aligned));
 
 /* Buffer for file path copy file */
-static char g_cppath[48] __attribute__ ((aligned));
+static char g_cppath[MAX_HOME_LEN] __attribute__ ((aligned));
+
+/* Buffer to store HOME path, for help and file details */
+static char g_homepath[MAX_HOME_LEN] __attribute__ ((aligned));
+static size_t g_homelen;
 
 /* Forward declarations */
 static void redraw(char *path);
@@ -1769,8 +1774,15 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	char desc[DESCRIPTOR_LEN];
 	char *perms = get_lsperms(sb->st_mode, desc);
 	char *p, *begin = g_buf;
-	char tmp[] = "/tmp/nnnXXXXXX";
-	int fd = mkstemp(tmp);
+
+	if (g_homepath[0])
+		xstrlcpy(g_homepath + g_homelen - 1, "/.nnnXXXXXX", MAX_HOME_LEN - g_homelen);
+	else {
+		printmsg(messages[STR_NOHOME_ID]);
+		return -1;
+	}
+
+	int fd = mkstemp(g_homepath);
 
 	if (fd == -1)
 		return -1;
@@ -1861,8 +1873,8 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	close(fd);
 
 	exitcurses();
-	get_output(NULL, 0, "cat", tmp, NULL, 1);
-	unlink(tmp);
+	get_output(NULL, 0, "cat", g_homepath, NULL, 1);
+	unlink(g_homepath);
 	refresh();
 	return 0;
 }
@@ -1921,8 +1933,14 @@ handle_archive(char *fpath, char *arg, char *dir)
 static int
 show_help(char *path)
 {
-	char tmp[] = "/tmp/nnnXXXXXX";
-	int i = 0, fd = mkstemp(tmp);
+	if (g_homepath[0])
+		xstrlcpy(g_homepath + g_homelen - 1, "/.nnnXXXXXX", MAX_HOME_LEN - g_homelen);
+	else {
+		printmsg(messages[STR_NOHOME_ID]);
+		return -1;
+	}
+
+	int i = 0, fd = mkstemp(g_homepath);
 	char *start, *end;
 	static char helpstr[] = {
 	   "cKey | Function\n"
@@ -2041,8 +2059,8 @@ show_help(char *path)
 	close(fd);
 
 	exitcurses();
-	get_output(NULL, 0, "cat", tmp, NULL, 1);
-	unlink(tmp);
+	get_output(NULL, 0, "cat", g_homepath, NULL, 1);
+	unlink(g_homepath);
 	refresh();
 	return 0;
 }
@@ -3461,11 +3479,15 @@ main(int argc, char *argv[])
 	if (getenv("NNN_QUOTE_ON"))
 		cfg.quote = 1;
 
-	/* Check if X11 is available */
-	if (getenv("NNN_NO_X") && getenv("HOME")) {
-		cfg.noxdisplay = 1;
-		size_t len = xstrlcpy(g_cppath, getenv("HOME"), 48);
-		xstrlcpy(g_cppath + len - 1, "/.nnncp", 48 - len);
+	if (getenv("HOME")) {
+		g_homelen = xstrlcpy(g_homepath, getenv("HOME"), MAX_HOME_LEN);
+
+		/* Check if X11 is available */
+		if (getenv("NNN_NO_X")) {
+			cfg.noxdisplay = 1;
+			xstrlcpy(g_cppath, g_homepath, MAX_HOME_LEN);
+			xstrlcpy(g_cppath + g_homelen - 1, "/.nnncp", MAX_HOME_LEN - g_homelen);
+		}
 	}
 
 	signal(SIGINT, SIG_IGN);
