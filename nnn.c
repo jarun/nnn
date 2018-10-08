@@ -2432,7 +2432,14 @@ redraw(char *path)
 				snprintf(buf, NAME_MAX + 65, "%d/%d %s[%s%s]",
 					 cur + 1, ndents, sort, unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
 			else {
-				i = snprintf(buf, 64, "%d/%d du: %s (%lu files) ", cur + 1, ndents, coolsize(dir_blocks << 9), num_files);
+				i = snprintf(buf, 64, "%d/%d ", cur + 1, ndents);
+
+				if (cfg.apparentsz)
+					buf[i++] = 'a', buf[i++] = 'p';
+				else
+					buf[i++] = 'd', buf[i++] = 'u';
+
+				i += snprintf(buf + i, 64, ": %s (%lu files) ", coolsize(dir_blocks << BLK_SHIFT), num_files);
 				snprintf(buf + i, NAME_MAX, "vol: %s free [%s%s]",
 					 coolsize(get_fs_info(path, FREE)), unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
 			}
