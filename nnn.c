@@ -1330,9 +1330,12 @@ mkpath(char *dir, char *name, char *out, size_t n)
 }
 
 static void
-parsebmstr(char *bms)
+parsebmstr()
 {
 	int i = 0;
+	char *bms = getenv("NNN_BMS");
+	if (!bms)
+		return;
 
 	while (*bms && i < BM_MAX) {
 		bookmark[i].key = bms;
@@ -3368,7 +3371,7 @@ int
 main(int argc, char *argv[])
 {
 	static char cwd[PATH_MAX] __attribute__ ((aligned));
-	char *ipath = NULL, *ifilter, *bmstr;
+	char *ipath = NULL, *ifilter;
 	int opt;
 
 	/* Confirm we are in a terminal */
@@ -3413,10 +3416,8 @@ main(int argc, char *argv[])
 		}
 	}
 
-	/* Parse bookmarks string, if available */
-	bmstr = getenv("NNN_BMS");
-	if (bmstr)
-		parsebmstr(bmstr);
+	/* Parse bookmarks string */
+	parsebmstr();
 
 	if (ipath) { /* Open a bookmark directly */
 		if (get_bm_loc(ipath, cwd) == NULL) {
