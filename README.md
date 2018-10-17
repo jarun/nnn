@@ -325,17 +325,15 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 ### Quickstart
 
-Add the following to your shell's rc file for the best experience:
-
-1. Use a shorter and sweeter alias:
-
-       alias n=nnn
-2. Optionally open all text files in EDITOR (fallback vi):
+1. Install the [utilities required](#file-handling) for your regular activities.
+2. Configure file path copy [using X clipboard](#copy-file-paths-to-clipboard) or [without X](#copy-file-paths-when-x-is-missing).
+3. Configure [cd on quit](#cd-on-quit).
+4. Optionally open all text files in EDITOR (fallback vi):
 
        export NNN_USE_EDITOR=1
-3. Run `n`.
-
-4. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
+5. Run `n`.
+6. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
+7. For additional functionality [setup custom scripts](#run-custom-scripts).
 
 ### How to
 
@@ -352,6 +350,8 @@ The bookmark prompt also understands the <kbd>~</kbd> (HOME), <kbd>-</kbd> (last
 To jump to the n<sup>th</sup> level parent, use `n + 1` dots (the first `.` denotes PWD). For example, to jump to the 6<th> parent of the current directory, use 7 dots. If the number of dots would take you *beyond* `/` (which isn't possible), you'll be placed at `/`.
 
 #### cd on quit
+
+To quit `nnn` and switch to the directory last opened follow the instructions below.
 
 Pick the appropriate file for your shell from [`scripts/quitcd`](scripts/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start `nnn` as `n` (or modify the function name to something else).
 
