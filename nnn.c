@@ -741,8 +741,8 @@ spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uch
 
 		/* Show a marker (to indicate nnn spawned shell) */
 		if (flag & F_MARKER && shlvl != NULL) {
-			printf("\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
-			printf("Next shell level: %d\n", atoi(shlvl) + 1);
+			fprintf(stdout, "\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
+			fprintf(stdout, "Next shell level: %d\n", atoi(shlvl) + 1);
 		}
 
 		/* Suppress stdout and stderr */
@@ -3348,7 +3348,8 @@ nochange:
 static void
 usage(void)
 {
-	printf("usage: nnn [-b key] [-c N] [-e] [-i] [-l]\n"
+	fprintf(stdout,
+		"usage: nnn [-b key] [-c N] [-e] [-i] [-l]\n"
 		"           [-p nlay] [-S] [-v] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
@@ -3408,7 +3409,7 @@ main(int argc, char *argv[])
 			player = optarg;
 			break;
 		case 'v':
-			printf("%s\n", VERSION);
+			fprintf(stdout, "%s\n", VERSION);
 			return 0;
 		case 'h': // fallthrough
 		default:
