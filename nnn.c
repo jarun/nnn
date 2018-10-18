@@ -3477,8 +3477,10 @@ main(int argc, char *argv[])
 
 	/* Get screensaver wait time, if set; copier used as tmp var */
 	copier = getenv("NNN_IDLE_TIMEOUT");
-	if (copier)
-		idletimeout = abs(atoi(copier));
+	if (copier) {
+		opt = atoi(copier);
+		idletimeout = opt * ((opt > 0) - (opt < 0));
+	}
 
 	/* Get the default copier, if set */
 	copier = getenv("NNN_COPIER");
