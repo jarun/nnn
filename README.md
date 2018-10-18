@@ -205,55 +205,55 @@ optional args:
 #### Keyboard shortcuts
 
 ```
-            Key | Function
-              - + -
-       ↑, k, ^P | Prev entry
-       ↓, j, ^N | Next entry
-       PgUp, ^U | Scroll half page up
-       PgDn, ^D | Scroll half page down
- Home, g, ^, ^A | First entry
-  End, G, $, ^E | Last entry
-    →, ↵, l, ^M | Open file/enter dir
- ←, Bksp, h, ^H | Parent dir
-             ^O | Open with...
-     Insert, ^I | Toggle nav-as-you-type
-              ~ | Go HOME
-              & | Start-up dir
-              - | Last visited dir
-              / | Filter entries
-             ^/ | Open desktop search app
-              . | Toggle show . files
-             ^B | Bookmark prompt
-              b | Pin current dir
-             ^V | Go to pinned dir
-              c | Change dir prompt
-              d | Toggle detail view
-              D | File details
-              m | Brief media info
-              M | Full media info
-              n | Create new
-             ^R | Rename entry
-              r | Open dir in vidir
-              s | Toggle sort by size
-              S | Toggle apparent size
-             ^J | Toggle du mode
-              t | Toggle sort by mtime
-          !, ^] | Spawn SHELL in dir
-              R | Run custom script
-              e | Edit entry in EDITOR
-              o | Open DE filemanager
-              p | Open entry in PAGER
-              f | Archive entry
-              F | List archive
-             ^F | Extract archive
-      Space, ^K | Copy file path
-             ^Y | Toggle multi-copy
-             ^T | Toggle path quote
-             ^L | Redraw, clear prompt
-              L | Lock terminal
-              ? | Help, settings
-          Q, ^G | Quit and cd
-          q, ^X | Quit
+            Key  Function
+              ----
+       ↑, k, ^P  Prev entry
+       ↓, j, ^N  Next entry
+       PgUp, ^U  Scroll half page up
+       PgDn, ^D  Scroll half page down
+ Home, g, ^, ^A  First entry
+  End, G, $, ^E  Last entry
+    →, ↵, l, ^M  Open file/enter dir
+ ←, Bksp, h, ^H  Parent dir
+             ^O  Open with...
+     Insert, ^I  Toggle nav-as-you-type
+              ~  Go HOME
+              &  Start-up dir
+              -  Last visited dir
+              /  Filter entries
+             ^/  Open desktop search app
+              .  Toggle show . files
+             ^B  Bookmark prompt
+              b  Pin current dir
+             ^V  Go to pinned dir
+              c  Change dir prompt
+              d  Toggle detail view
+              D  File details
+              m  Brief media info
+              M  Full media info
+              n  Create new
+             ^R  Rename entry
+              r  Open dir in vidir
+              s  Toggle sort by size
+              S  Toggle apparent size
+             ^J  Toggle du mode
+              t  Toggle sort by mtime
+          !, ^]  Spawn SHELL in dir
+              R  Run custom script
+              e  Edit entry in EDITOR
+              o  Open DE filemanager
+              p  Open entry in PAGER
+              f  Archive entry
+              F  List archive
+             ^F  Extract archive
+      Space, ^K  Copy file path
+             ^Y  Toggle multi-copy
+             ^T  Toggle path quote
+             ^L  Redraw, clear prompt
+              L  Lock terminal
+              ?  Help, settings
+          Q, ^G  Quit and cd
+          q, ^X  Quit
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
