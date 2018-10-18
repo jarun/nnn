@@ -189,15 +189,15 @@ positional args:
   PATH   start dir [default: current dir]
 
 optional args:
- -b key  specify bookmark key to open
- -c N    specify dir color, disables if N>7
+ -b key  bookmark key to open
+ -c N    dir color, disables if N>7
  -e      use exiftool instead of mediainfo
  -i      start in navigate-as-you-type mode
  -l      start in light mode
  -p nlay path to custom nlay
  -S      start in disk usage analyser mode
- -v      show program version and exit
- -h      show this help and exit
+ -v      show program version
+ -h      show this help
 ```
 
 `>` indicates the currently selected entry in `nnn`.
