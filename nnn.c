@@ -276,10 +276,21 @@ static blkcnt_t dir_blocks;
 static ulong num_files;
 static uint open_max;
 static bm bookmark[BM_MAX];
+static size_t g_homelen;
+static uchar g_crc;
 static uchar BLK_SHIFT = 9;
 
+/* CRC data */
 static uchar crc8table[CRC8_TABLE_LEN] __attribute__ ((aligned));
-static uchar g_crc;
+
+/* For use in functions which are isolated and don't return the buffer */
+static char g_buf[MAX_CMD_LEN] __attribute__ ((aligned));
+
+/* Buffer for file path copy file */
+static char g_cppath[MAX_HOME_LEN] __attribute__ ((aligned));
+
+/* Buffer to store HOME path, for help and file details */
+static char g_homepath[MAX_HOME_LEN] __attribute__ ((aligned));
 
 #ifdef LINUX_INOTIFY
 static int inotify_fd, inotify_wd = -1;
@@ -335,16 +346,6 @@ static const char messages[][16] = {
 	"copy not set",
 	"%F %T %z",
 };
-
-/* For use in functions which are isolated and don't return the buffer */
-static char g_buf[MAX_CMD_LEN] __attribute__ ((aligned));
-
-/* Buffer for file path copy file */
-static char g_cppath[MAX_HOME_LEN] __attribute__ ((aligned));
-
-/* Buffer to store HOME path, for help and file details */
-static char g_homepath[MAX_HOME_LEN] __attribute__ ((aligned));
-static size_t g_homelen;
 
 /* Forward declarations */
 static void redraw(char *path);
