@@ -1,4 +1,16 @@
 nnn v1.9
+2018-10-19
+
+What's in?
+- Mode to show apparent size (key `S`)
+- Script to integrate `patool` instead of `atool`
+- Support `bashlock` (OS X) and `lock` (BSD) as terminal locker
+- Symbol `@/` for symlink to dir
+- Dependency on `libreadline` removed
+
+-------------------------------------------------------------------------------
+
+nnn v1.9
 2018-08-10
 
 What's in?
