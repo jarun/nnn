@@ -186,7 +186,7 @@ disabledbg()
 #define F_NORMAL   0x80  /* spawn child process in non-curses regular CLI mode */
 
 /* CRC8 macros */
-#define WIDTH  (8 * sizeof(unsigned char))
+#define WIDTH  (sizeof(unsigned char) << 3)
 #define TOPBIT (1 << (WIDTH - 1))
 #define POLYNOMIAL 0xD8  /* 11011 followed by 0's */
 #define CRC8_TABLE_LEN 256
@@ -278,7 +278,7 @@ static uint open_max;
 static bm bookmark[BM_MAX];
 static uchar BLK_SHIFT = 9;
 
-static uchar crc8table[CRC8_TABLE_LEN];
+static uchar crc8table[CRC8_TABLE_LEN] __attribute__ ((aligned));
 static uchar g_crc;
 
 #ifdef LINUX_INOTIFY
