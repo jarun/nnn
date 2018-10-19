@@ -2439,11 +2439,11 @@ redraw(char *path)
 				i = snprintf(buf, 64, "%d/%d ", cur + 1, ndents);
 
 				if (cfg.apparentsz)
-					buf[i++] = 'a', buf[i++] = 'p';
+					buf[i++] = 'a';
 				else
-					buf[i++] = 'd', buf[i++] = 'u';
+					buf[i++] = 'd';
 
-				i += snprintf(buf + i, 64, ": %s (%lu files) ", coolsize(dir_blocks << BLK_SHIFT), num_files);
+				i += snprintf(buf + i, 64, "u: %s (%lu files) ", coolsize(dir_blocks << BLK_SHIFT), num_files);
 				snprintf(buf + i, NAME_MAX, "vol: %s free [%s%s]",
 					 coolsize(get_fs_info(path, FREE)), unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
 			}
