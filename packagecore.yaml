@@ -36,6 +36,17 @@ packages:
     commands:
       pre:
         - yum install epel-release
+  centos7.4:
+    builddeps:
+      - make
+      - gcc
+      - pkgconfig
+      - ncurses-devel
+    deps:
+      - ncurses
+    commands:
+      pre:
+        - yum install epel-release
   debian9:
     builddeps:
       - make
@@ -61,6 +72,14 @@ packages:
     deps:
       - ncurses
   fedora27:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+    deps:
+      - ncurses
+  fedora28:
     builddeps:
       - make
       - gcc
