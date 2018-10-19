@@ -115,21 +115,21 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
 
 ### Performance
 
-`nnn` vs. ncdu memory usage in disk usage analyzer mode (401385 files on disk):
+`nnn` vs. ncdu memory usage in disk usage analyzer mode (400K files on disk):
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
- 5034 vaio      20   0   70360  58764   2244 S   0.0  0.7   0:00.80 ncdu /
- 4949 vaio      20   0   17520   4224   2584 S   0.0  0.1   0:00.54 nnn -S /
+ 5034 vaio      20   0   71628  59932   2412 S   0.0  0.7   0:01.22 ncdu /
+ 4949 vaio      20   0   14812   3616   2560 S   0.0  0.0   0:00.83 nnn -S /
 ```
 
-`nnn` vs. midnight commander vs. ranger memory usage while viewing a directory with 13790 files, sorted by size:
+`nnn` vs. midnight commander vs. ranger memory usage while viewing a directory with 13.5K files, sorted by size:
 
 ```
   PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
-16255 vaio      20   0  101392  59304   7928 S   0.0  0.7   0:00.68 /usr/bin/python -O /usr/bin/ranger
-15971 vaio      20   0   65732  11784   6848 S   0.0  0.1   0:00.56 mc
-16198 vaio      20   0   18520   4900   2536 S   0.3  0.1   0:00.14 nnn
+31885 vaio      20   0  139720  91220   8460 S   0.0  1.1   0:02.96 /usr/bin/python -O /usr/bin/ranger
+30108 vaio      20   0   72152  12468   7336 S   0.0  0.2   0:00.06 mc
+30168 vaio      20   0   16476   5072   2640 S   0.0  0.1   0:00.22 nnn -c 1 -i
 ```
 
 Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors).
