@@ -3385,6 +3385,7 @@ main(int argc, char *argv[])
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
+			nftw_fn = sum_bsizes;
 			break;
 		case 'l':
 			cfg.showdetail = 0;
