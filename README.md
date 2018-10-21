@@ -278,7 +278,9 @@ If `nnn` is invoked as root or the environment variable `NNN_SHOW_HIDDEN` is set
 
 In this mode directories are opened in filter mode, allowing continuous navigation. Works best with the **arrow keys**.
 
-In case of only one match and it's a directory, `nnn` auto selects the directory and enters it in this mode.
+In case of only one match and it's a directory, `nnn` auto selects the directory and enters it in this mode. To disable this behaviour,
+
+    export NNN_NO_AUTOSELECT=1
 
 #### File indicators
 

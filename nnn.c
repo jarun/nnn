@@ -241,26 +241,28 @@ typedef struct {
 
 /* Settings */
 typedef struct {
-	ushort filtermode : 1;  /* Set to enter filter mode */
-	ushort mtimeorder : 1;  /* Set to sort by time modified */
-	ushort sizeorder  : 1;  /* Set to sort by file size */
-	ushort apparentsz : 1;  /* Set to sort by apparent size (disk usage) */
-	ushort blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
-	ushort showhidden : 1;  /* Set to show hidden files */
-	ushort copymode   : 1;  /* Set when copying files */
-	ushort showdetail : 1;  /* Clear to show fewer file info */
-	ushort showcolor  : 1;  /* Set to show dirs in blue */
-	ushort dircolor   : 1;  /* Current status of dir color */
-	ushort metaviewer : 1;  /* Index of metadata viewer in utils[] */
-	ushort quote      : 1;  /* Copy paths within quotes */
-	ushort noxdisplay : 1;  /* X11 is not available */
-	ushort color      : 3;  /* Color code for directories */
+	uint filtermode : 1;  /* Set to enter filter mode */
+	uint mtimeorder : 1;  /* Set to sort by time modified */
+	uint sizeorder  : 1;  /* Set to sort by file size */
+	uint apparentsz : 1;  /* Set to sort by apparent size (disk usage) */
+	uint blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
+	uint showhidden : 1;  /* Set to show hidden files */
+	uint copymode   : 1;  /* Set when copying files */
+	uint autoselect : 1;  /* Auto-select dir in nav-as-you-type mode */
+	uint showdetail : 1;  /* Clear to show fewer file info */
+	uint showcolor  : 1;  /* Set to show dirs in blue */
+	uint dircolor   : 1;  /* Current status of dir color */
+	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
+	uint quote      : 1;  /* Copy paths within quotes */
+	uint noxdisplay : 1;  /* X11 is not available */
+	uint color      : 3;  /* Color code for directories */
+	uint reserved   : 15;
 } settings;
 
 /* GLOBALS */
 
 /* Configuration */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 4};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 4, 0};
 
 static struct entry *dents;
 static char *pnamebuf, *pcopybuf;
@@ -1159,7 +1161,7 @@ filterentries(char *path)
 					continue;
 
 				/* If the only match is a dir, auto-select and cd into it */
-				if (cfg.filtermode && ndents == 1 && S_ISDIR(dents[0].mode)) {
+				if (ndents == 1 && cfg.filtermode && cfg.autoselect && S_ISDIR(dents[0].mode)) {
 					*ch = KEY_ENTER;
 					cur = 0;
 					goto end;
@@ -3500,11 +3502,15 @@ main(int argc, char *argv[])
 		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", MAX_HOME_LEN);
 
 	/* Check if X11 is available */
-	if (g_tmpfplen && getenv("NNN_NO_X")) {
+	if (!copier && g_tmpfplen && getenv("NNN_NO_X")) {
 		cfg.noxdisplay = 1;
 		xstrlcpy(g_cppath, g_tmpfpath, MAX_HOME_LEN);
 		xstrlcpy(g_cppath + g_tmpfplen - 1, "/.nnncp", MAX_HOME_LEN - g_tmpfplen);
 	}
+
+	/* Disable auto-select if opted */
+	if (getenv("NNN_NO_AUTOSELECT"))
+		cfg.autoselect = 0;
 
 	signal(SIGINT, SIG_IGN);
 
