@@ -392,13 +392,19 @@ Note that the filename is not escaped. So copying may still fail for filenames h
 
 #### copy file paths when X is missing
 
-A very common scenario on headless remote servers connected via SSH. As the clipboard is missing, `nnn` copies the path names to the tmp file `$HOME/.nnncp`.
+A very common scenario on headless remote servers connected via SSH. As the clipboard is missing, `nnn` copies the path names to the tmp file `DIR/.nnncp`, where `DIR` (by priority) is:
+
+    $HOME or,
+    $TMPDIR or,
+    /tmp
 
 `nnn` needs to know X is unavailable:
 
     export NNN_NO_X=1
 
-Use <kbd>^Y</kbd> and/or <kbd>^K</kbd> to copy file paths as usual. To use the copied paths from the cmdline, use command substitution:
+To see the path to the copy file, run `nnn`, press `?` and look up `NNN_NO_X`.
+
+Use <kbd>^Y</kbd> and/or <kbd>^K</kbd> to copy file paths as usual. To use the copied paths from the cmdline, use command substitution. For example, if `DIR` above is `/home/user`:
 
     # bash/zsh
     ls -ltr `cat /home/user/.nnncp`
