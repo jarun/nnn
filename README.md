@@ -77,7 +77,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
 
 ### Features
 
-- Modes - basic, detail, disk usage analyzer (du)
+- Modes - basic, detail (default), disk usage analyzer (du)
 - Navigation
   - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
   - *Navigate-as-you-type* mode with dir auto-select for the maverick
