@@ -57,16 +57,16 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
 - [Quickstart](#quickstart)
 - [How to](#how-to)
   - [add bookmarks](#add-bookmarks)
-  - [use cd .....](#use-cd-)
-  - [cd on quit](#cd-on-quit)
   - [copy file paths](#copy-file-paths)
     - [to clipboard](#to-clipboard)
     - [when X is missing](#when-x-is-missing)
+  - [copy, move, delete files](#copy-move-delete-files)
+  - [cd on quit](#cd-on-quit)
   - [run custom scripts](#run-custom-scripts)
     - [sample scripts](#sample-scripts)
   - [dual-pane or multi-pane](#dual-pane-or-multi-pane)
   - [change dir color](#change-dir-color)
-  - [file copy, move, delete](#file-copy-move-delete)
+  - [use cd .....](#use-cd-)
   - [integrate patool](#integrate-patool)
   - [work faster at rename prompt](#work-faster-at-rename-prompt)
   - [set idle timeout](#set-idle-timeout)
@@ -329,7 +329,7 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 ### Quickstart
 
 1. Install the [utilities required](#file-handling) for your regular activities.
-2. Configure file path copy [using X clipboard](#copy-file-paths-to-clipboard) or [without X](#copy-file-paths-when-x-is-missing).
+2. Configure file path copy [using X clipboard](#to-clipboard) or [without X](#when-x-is-missing).
 3. Configure [cd on quit](#cd-on-quit).
 4. Optionally open all text files in EDITOR (fallback vi):
 
@@ -347,18 +347,6 @@ Set environment variable `NNN_BMS` as a string of `key:location` pairs (max 10) 
     export NNN_BMS='doc:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
 
 The bookmark prompt also understands the <kbd>~</kbd> (HOME), <kbd>-</kbd> (last visited directory) and <kbd>&</kbd> (start directory) shortcuts.
-
-#### use cd .....
-
-To jump to the n<sup>th</sup> level parent, use `n + 1` dots (the first `.` denotes PWD). For example, to jump to the 6<th> parent of the current directory, use 7 dots. If the number of dots would take you *beyond* `/` (which isn't possible), you'll be placed at `/`.
-
-#### cd on quit
-
-To quit `nnn` and switch to the directory last opened follow the instructions below.
-
-Pick the appropriate file for your shell from [`scripts/quitcd`](scripts/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start `nnn` as `n` (or modify the function name to something else). To change directory on quit press `Q` (it's _capital_) or `^G` while exiting.
-
-As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
 
 #### copy file paths
 
@@ -411,6 +399,8 @@ A very common scenario on headless remote servers connected via SSH. As the clip
 
 To see the path to the copy file, run `nnn`, press `?` and look up `NNN_NO_X`.
 
+Note: despite the name of the environment variable, this method works even if X is available.
+
 Use <kbd>^Y</kbd> and/or <kbd>^K</kbd> to copy file paths as usual. To use the copied paths from the cmdline, use command substitution. For example, if `DIR` above is `/home/user`:
 
     # bash/zsh
@@ -424,16 +414,41 @@ An alias may be handy:
 
     alias ncp='cat /home/user/.nnncp'
 
-so you can -
+so you can easily copy, move or delete multiple files together:
 
     # bash/zsh
     ls -ltr `ncp`
     ls -ltr $(ncp)
+    cp -rvf `ncp` .
+    mv `ncp` .
+    rm `ncp` -rf
 
     # fish
     ls -ltr (ncp)
+    cp -rvf (ncp) .
+    mv (ncp) .
+    rm (ncp) -rf
 
 Note that you may want to keep quotes disabled in this case.
+
+#### copy, move, delete files
+
+The `nnn` workflow to copy, move or delete files is:
+
+1. Copy the absolute paths using <kbd>^Y</kbd> and/or <kbd>^K</kbd>
+2. To copy or move files navigate to the destination directory. You can also fire a new instance of `nnn` in another tab of your terminal emulator and open the destination directory.
+3. Spawn a subshell in the destination directory (<kbd>!</kbd>)
+4. While typing the desired command, copy the file paths (usually <kbd>^-Shift-V</kbd>) from the clipboard. If X is unavailable, refer to [this section](#when-x-is-missing).
+
+In addition, `nnn` integrates with vidir. vidir supports batch file move and delete.
+
+#### cd on quit
+
+To quit `nnn` and switch to the directory last opened follow the instructions below.
+
+Pick the appropriate file for your shell from [`scripts/quitcd`](scripts/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start `nnn` as `n` (or modify the function name to something else). To change directory on quit press `Q` (it's _capital_) or `^G` while exiting.
+
+As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
 
 #### run custom scripts
 
@@ -485,15 +500,9 @@ The default color for directories is blue. Option `-c` accepts color codes from 
 
 Any other value disables colored directories.
 
-#### file copy, move, delete
+#### use cd .....
 
-`nnn` doesn't support file copy, move, delete natively. However, it simplifies the workflow:
-
-1. copy the absolute paths using <kbd>^Y</kbd> and/or <kbd>^K</kbd>
-2. spawn a shell in the current directory (<kbd>!</kbd>)
-3. while typing the desired command, copy the file paths (usually <kbd>^-Shift-V</kbd>)
-
-In addition, `nnn` integrates with vidir. vidir supports batch file move and delete.
+To jump to the n<sup>th</sup> level parent, use `n + 1` dots (the first `.` denotes PWD). For example, to jump to the 6<th> parent of the current directory, use 7 dots. If the number of dots would take you *beyond* `/` (which isn't possible), you'll be placed at `/`.
 
 #### integrate patool
 
