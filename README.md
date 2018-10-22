@@ -208,10 +208,10 @@ optional args:
 ```
             Key  Function
               ----
-       ↑, k, ^P  Prev entry
-       ↓, j, ^N  Next entry
-       PgUp, ^U  Scroll half page up
-       PgDn, ^D  Scroll half page down
+       ↑, k, ^P  Up
+       ↓, j, ^N  Down
+       PgUp, ^U  Scroll up
+       PgDn, ^D  Scroll down
  Home, g, ^, ^A  First entry
   End, G, $, ^E  Last entry
     →, ↵, l, ^M  Open file/enter dir
@@ -219,19 +219,17 @@ optional args:
              ^O  Open with...
      Insert, ^I  Toggle nav-as-you-type
               ~  Go HOME
-              &  Start-up dir
+              &  Start dir
               -  Last visited dir
               /  Filter entries
-             ^/  Open desktop search app
-              .  Toggle show . files
+              .  Toggle show hidden
              ^B  Bookmark prompt
               b  Pin current dir
              ^V  Go to pinned dir
-              c  Change dir prompt
+              c  cd prompt
               d  Toggle detail view
               D  File details
-              m  Brief media info
-              M  Full media info
+           m, M  Brief/full media info
               n  Create new
              ^R  Rename entry
               r  Open dir in vidir
@@ -241,9 +239,8 @@ optional args:
               t  Toggle sort by mtime
           !, ^]  Spawn SHELL in dir
               R  Run custom script
-              e  Edit entry in EDITOR
-              o  Open DE filemanager
-              p  Open entry in PAGER
+              e  Edit in EDITOR
+              p  Open in PAGER
               f  Archive entry
               F  List archive
              ^F  Extract archive
@@ -253,6 +250,8 @@ optional args:
              ^T  Toggle path quote
              ^L  Redraw, clear prompt
               L  Lock terminal
+              o  Open DE filemanager
+             ^/  Open DE search app
               ?  Help, settings
           Q, ^G  Quit and cd
           q, ^X  Quit
