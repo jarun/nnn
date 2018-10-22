@@ -21,11 +21,11 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (click to play video)</i></a></p>
 
-`nnn` is probably the [fastest and most resource-sensitive](#performance) (with all its capabilities) file manager you have ever used. It's extremely flexible too - integrates with your DE and favourite GUI utilities, works with the desktop opener, supports bookmarks, has smart navigation shortcuts, [navigate-as-you-type](#navigate-as-you-type-mode) mode, disk usage analyzer mode, comprehensive file details and much more. `nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today.
+`nnn` is probably the [fastest and most resource-sensitive](#performance) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, familiar navigation shortcuts, subshell spawning and much more.
 
-If you want to edit a file in vi with some soothing music in the background while referring to a spec in your GUI PDF viewer, `nnn` got it! [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
+`nnn` supports as many scripts as you need! You can [integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv (to view images in a directory) or fzy (to fuzzy find files in a directory tree) easily.
 
-`nnn` supports as many scripts as you want to run! So you can [integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv (to view images in a directory) or fzy (to fuzzy find files in a directory tree) easily.
+[Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions...
 
 Have fun with it! Missing a feature? Want to contribute? Head to the rolling [ToDo list](https://github.com/jarun/nnn/issues/110).
 
@@ -355,7 +355,7 @@ To jump to the n<sup>th</sup> level parent, use `n + 1` dots (the first `.` deno
 
 To quit `nnn` and switch to the directory last opened follow the instructions below.
 
-Pick the appropriate file for your shell from [`scripts/quitcd`](scripts/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start `nnn` as `n` (or modify the function name to something else). To change directory on quit press `Q` or `^G` while exiting.
+Pick the appropriate file for your shell from [`scripts/quitcd`](scripts/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start `nnn` as `n` (or modify the function name to something else). To change directory on quit press `Q` (it's _capital_) or `^G` while exiting.
 
 As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
 
@@ -512,7 +512,7 @@ Enable volume management in your DE file manager and set removable drives or med
 
 ### Why fork?
 
-I chose to fork because:
+`nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today. I chose to fork because:
 - one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. In my opinion evolution is the taste of time.
 - I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind. Check out [nnn design considerations](https://github.com/jarun/nnn/wiki/nnn-design-considerations) for more details.
 
