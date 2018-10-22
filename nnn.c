@@ -351,7 +351,8 @@ static const char messages[][16] = {
 
 /* Forward declarations */
 static void redraw(char *path);
-static char * get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int pager);
+static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int pager);
+int (*nftw_fn) (const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 
 /* Functions */
 
@@ -359,8 +360,7 @@ static char * get_output(char *buf, size_t bytes, char *file, char *arg1, char *
  * CRC8 source:
  *   https://barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code
  */
-static void
-crc8init()
+static void crc8init()
 {
 	uchar remainder, bit;
 	uint dividend;
@@ -384,8 +384,7 @@ crc8init()
 	}
 }
 
-static uchar
-crc8fast(uchar const message[], size_t n)
+static uchar crc8fast(uchar const message[], size_t n)
 {
 	static uchar data, remainder;
 	static size_t byte;
@@ -401,15 +400,13 @@ crc8fast(uchar const message[], size_t n)
 }
 
 /* Messages show up at the bottom */
-static void
-printmsg(const char *msg)
+static void printmsg(const char *msg)
 {
 	mvprintw(LINES - 1, 0, "%s\n", msg);
 }
 
 /* Kill curses and display error before exiting */
-static void
-printerr(int linenum)
+static void printerr(int linenum)
 {
 	exitcurses();
 	fprintf(stderr, "line %d: (%d) %s\n", linenum, errno, strerror(errno));
@@ -419,16 +416,14 @@ printerr(int linenum)
 }
 
 /* Print prompt on the last line */
-static void
-printprompt(char *str)
+static void printprompt(char *str)
 {
 	clearprompt();
 	printw(str);
 }
 
 /* Increase the limit on open file descriptors, if possible */
-static rlim_t
-max_openfds()
+static rlim_t max_openfds()
 {
 	struct rlimit rl;
 	rlim_t limit = getrlimit(RLIMIT_NOFILE, &rl);
@@ -460,8 +455,7 @@ max_openfds()
  * Ubuntu: http://manpages.ubuntu.com/manpages/xenial/man3/malloc.3.html
  * OS X: https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/malloc.3.html
  */
-static void *
-xrealloc(void *pcur, size_t len)
+static void *xrealloc(void *pcur, size_t len)
 {
 	static void *pmem;
 
@@ -477,8 +471,7 @@ xrealloc(void *pcur, size_t len)
  * Always null ('\0') terminates if both src and dest are valid pointers.
  * Returns the number of bytes copied including terminating null byte.
  */
-static size_t
-xstrlcpy(char *dest, const char *src, size_t n)
+static size_t xstrlcpy(char *dest, const char *src, size_t n)
 {
 	static ulong *s, *d;
 	static size_t len, blocks;
@@ -536,8 +529,7 @@ xstrlcpy(char *dest, const char *src, size_t n)
  * And we are NOT expecting a '/' at the end.
  * Ideally 0 < n <= strlen(s).
  */
-static void *
-xmemrchr(uchar *s, uchar ch, size_t n)
+static void *xmemrchr(uchar *s, uchar ch, size_t n)
 {
 	static uchar *ptr;
 
@@ -562,8 +554,7 @@ xmemrchr(uchar *s, uchar ch, size_t n)
  *
  * Modified from the glibc (GNU LGPL) version.
  */
-static char *
-xdirname(const char *path)
+static char *xdirname(const char *path)
 {
 	static char * const buf = g_buf, *last_slash, *runp;
 
@@ -617,8 +608,7 @@ xdirname(const char *path)
 	return buf;
 }
 
-static char *
-xbasename(char *path)
+static char *xbasename(char *path)
 {
 	static char *base;
 
@@ -627,8 +617,7 @@ xbasename(char *path)
 }
 
 /* Writes buflen char(s) from buf to a file */
-static void
-writecp(const char *buf, const size_t buflen)
+static void writecp(const char *buf, const size_t buflen)
 {
 	if (!g_cppath[0])
 		return;
@@ -642,8 +631,7 @@ writecp(const char *buf, const size_t buflen)
 		printwarn();
 }
 
-static bool
-appendfpath(const char *path, const size_t len)
+static bool appendfpath(const char *path, const size_t len)
 {
 	if ((copybufpos >= copybuflen) || ((len + 3) > (copybuflen - copybufpos))) {
 		copybuflen += PATH_MAX;
@@ -675,8 +663,7 @@ appendfpath(const char *path, const size_t len)
 	return TRUE;
 }
 
-static bool
-showcplist()
+static bool showcplist()
 {
 	ssize_t len;
 
@@ -708,8 +695,7 @@ showcplist()
 /*
  * Return number of dots if all chars in a string are dots, else 0
  */
-static int
-all_dots(const char *path)
+static int all_dots(const char *path)
 {
 	int count = 0;
 
@@ -726,8 +712,7 @@ all_dots(const char *path)
 }
 
 /* Initialize curses mode */
-static void
-initcurses(void)
+static void initcurses(void)
 {
 	if (initscr() == NULL) {
 		char *term = getenv("TERM");
@@ -756,8 +741,7 @@ initcurses(void)
  * Spawns a child process. Behaviour can be controlled using flag.
  * Limited to 2 arguments to a program, flag works on bit set.
  */
-static void
-spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uchar flag)
+static void spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uchar flag)
 {
 	static char *shlvl;
 	static pid_t pid;
@@ -811,8 +795,7 @@ spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uch
 }
 
 /* Get program name from env var, else return fallback program */
-static char *
-xgetenv(const char *name, char *fallback)
+static char *xgetenv(const char *name, char *fallback)
 {
 	static char *value;
 
@@ -825,8 +808,7 @@ xgetenv(const char *name, char *fallback)
 }
 
 /* Check if a dir exists, IS a dir and is readable */
-static bool
-xdiraccess(const char *path)
+static bool xdiraccess(const char *path)
 {
 	static DIR *dirp;
 
@@ -848,8 +830,7 @@ xdiraccess(const char *path)
  *
  * If the absolute numeric values are same, we fallback to alphasort.
  */
-static int
-xstricmp(const char * const s1, const char * const s2)
+static int xstricmp(const char * const s1, const char * const s2)
 {
 	static const char *c1, *c2;
 
@@ -896,8 +877,7 @@ xstricmp(const char * const s1, const char * const s2)
 }
 
 /* Return the integer value of a char representing HEX */
-static char
-xchartohex(char c)
+static char xchartohex(char c)
 {
 	if (c >= '0' && c <= '9')
 		return c - '0';
@@ -909,8 +889,7 @@ xchartohex(char c)
 	return c;
 }
 
-static char *
-getmime(const char *file)
+static char *getmime(const char *file)
 {
 	static regex_t regex;
 	static uint i;
@@ -930,8 +909,7 @@ getmime(const char *file)
 	return NULL;
 }
 
-static int
-setfilter(regex_t *regex, char *filter)
+static int setfilter(regex_t *regex, char *filter)
 {
 	static size_t len;
 	static int r;
@@ -948,20 +926,17 @@ setfilter(regex_t *regex, char *filter)
 	return r;
 }
 
-static void
-initfilter(int dot, char **ifilter)
+static void initfilter(int dot, char **ifilter)
 {
 	*ifilter = dot ? "." : "^[^.]";
 }
 
-static int
-visible(regex_t *regex, char *file)
+static int visible(regex_t *regex, char *file)
 {
 	return regexec(regex, file, 0, NULL, 0) == 0;
 }
 
-static int
-entrycmp(const void *va, const void *vb)
+static int entrycmp(const void *va, const void *vb)
 {
 	static pEntry pa, pb;
 
@@ -1000,8 +975,7 @@ entrycmp(const void *va, const void *vb)
  * Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}).
  * The next keyboard input can be simulated by presel.
  */
-static int
-nextsel(char **run, char **env, int *presel)
+static int nextsel(char **run, char **env, int *presel)
 {
 	static int c;
 	static uint i;
@@ -1063,8 +1037,7 @@ nextsel(char **run, char **env, int *presel)
 /*
  * Move non-matching entries to the end
  */
-static int
-fill(struct entry **dents, int (*filter)(regex_t *, char *), regex_t *re)
+static int fill(struct entry **dents, int (*filter)(regex_t *, char *), regex_t *re)
 {
 	static int count;
 	static struct entry _dent, *pdent1, *pdent2;
@@ -1088,8 +1061,7 @@ fill(struct entry **dents, int (*filter)(regex_t *, char *), regex_t *re)
 	return ndents;
 }
 
-static int
-matches(char *fltr)
+static int matches(char *fltr)
 {
 	static regex_t re;
 
@@ -1107,8 +1079,7 @@ matches(char *fltr)
 	return 0;
 }
 
-static int
-filterentries(char *path)
+static int filterentries(char *path)
 {
 	static char ln[REGEX_MAX] __attribute__ ((aligned));
 	static wchar_t wln[REGEX_MAX] __attribute__ ((aligned));
@@ -1224,8 +1195,7 @@ end:
 }
 
 /* Show a prompt with input string and return the changes */
-static char *
-xreadline(char *fname, char *prompt)
+static char *xreadline(char *fname, char *prompt)
 {
 	int old_curs = curs_set(1);
 	size_t len, pos;
@@ -1344,8 +1314,7 @@ END:
  * Updates out with "dir/name or "/name"
  * Returns the number of bytes copied including the terminating NULL byte
  */
-static size_t
-mkpath(char *dir, char *name, char *out, size_t n)
+static size_t mkpath(char *dir, char *name, char *out, size_t n)
 {
 	static size_t len;
 
@@ -1363,8 +1332,7 @@ mkpath(char *dir, char *name, char *out, size_t n)
 	return (xstrlcpy(out + len, name, n - len) + len);
 }
 
-static void
-parsebmstr()
+static void parsebmstr()
 {
 	int i = 0;
 	char *bms = getenv("NNN_BMS");
@@ -1410,8 +1378,7 @@ parsebmstr()
  * NULL is returned in case of no match, path resolution failure etc.
  * buf would be modified, so check return value before access
  */
-static char *
-get_bm_loc(char *key, char *buf)
+static char *get_bm_loc(char *key, char *buf)
 {
 	int r;
 
@@ -1440,8 +1407,7 @@ get_bm_loc(char *key, char *buf)
 	return NULL;
 }
 
-static void
-resetdircolor(mode_t mode)
+static void resetdircolor(mode_t mode)
 {
 	if (cfg.dircolor && !S_ISDIR(mode)) {
 		attroff(COLOR_PAIR(1) | A_BOLD);
@@ -1461,8 +1427,7 @@ resetdircolor(mode_t mode)
  * it doesn't touch str anymore). Only after that it starts modifying
  * g_buf. This is a phased operation.
  */
-static char *
-unescape(const char *str, uint maxcols)
+static char *unescape(const char *str, uint maxcols)
 {
 	static wchar_t wbuf[PATH_MAX] __attribute__ ((aligned));
 	static wchar_t *buf;
@@ -1493,8 +1458,7 @@ unescape(const char *str, uint maxcols)
 	return g_buf;
 }
 
-static char *
-coolsize(off_t size)
+static char *coolsize(off_t size)
 {
 	static const char * const U = "BKMGTPEZY";
 	static char size_buf[12]; /* Buffer to hold human readable size */
@@ -1554,8 +1518,7 @@ coolsize(off_t size)
 	return size_buf;
 }
 
-static char *
-get_file_sym(mode_t mode)
+static char *get_file_sym(mode_t mode)
 {
 	static char ind[2] = "\0\0";
 
@@ -1575,8 +1538,7 @@ get_file_sym(mode_t mode)
 	return ind;
 }
 
-static void
-printent(struct entry *ent, int sel, uint namecols)
+static void printent(struct entry *ent, int sel, uint namecols)
 {
 	static char *pname;
 
@@ -1588,8 +1550,7 @@ printent(struct entry *ent, int sel, uint namecols)
 	printw("%s%s%s\n", CURSYM(sel), pname, get_file_sym(ent->mode));
 }
 
-static void
-printent_long(struct entry *ent, int sel, uint namecols)
+static void printent_long(struct entry *ent, int sel, uint namecols)
 {
 	static char buf[18], *pname;
 
@@ -1638,8 +1599,7 @@ printent_long(struct entry *ent, int sel, uint namecols)
 
 static void (*printptr)(struct entry *ent, int sel, uint namecols) = &printent_long;
 
-static char
-get_fileind(mode_t mode, char *desc)
+static char get_fileind(mode_t mode, char *desc)
 {
 	static char c;
 
@@ -1688,8 +1648,7 @@ get_fileind(mode_t mode, char *desc)
 }
 
 /* Convert a mode field into "ls -l" type perms field. */
-static char *
-get_lsperms(mode_t mode, char *desc)
+static char *get_lsperms(mode_t mode, char *desc)
 {
 	static const char * const rwx[] = {"---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx"};
 	static char bits[11] = {'\0'};
@@ -1715,8 +1674,7 @@ get_lsperms(mode_t mode, char *desc)
  *
  * If pager is valid, returns NULL
  */
-static char *
-get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int pager)
+static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int pager)
 {
 	pid_t pid;
 	int pipefd[2];
@@ -1780,8 +1738,7 @@ get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int page
 	return NULL;
 }
 
-static char *
-xgetpwuid(uid_t uid)
+static char *xgetpwuid(uid_t uid)
 {
 	struct passwd *pwd = getpwuid(uid);
 
@@ -1791,8 +1748,7 @@ xgetpwuid(uid_t uid)
 	return pwd->pw_name;
 }
 
-static char *
-xgetgrgid(gid_t gid)
+static char *xgetgrgid(gid_t gid)
 {
 	struct group *grp = getgrgid(gid);
 
@@ -1805,8 +1761,7 @@ xgetgrgid(gid_t gid)
 /*
  * Follows the stat(1) output closely
  */
-static int
-show_stats(char *fpath, char *fname, struct stat *sb)
+static int show_stats(char *fpath, char *fname, struct stat *sb)
 {
 	char desc[DESCRIPTOR_LEN];
 	char *perms = get_lsperms(sb->st_mode, desc);
@@ -1916,8 +1871,7 @@ show_stats(char *fpath, char *fname, struct stat *sb)
 	return 0;
 }
 
-static size_t
-get_fs_info(const char *path, bool type)
+static size_t get_fs_info(const char *path, bool type)
 {
 	static struct statvfs svb;
 
@@ -1930,8 +1884,7 @@ get_fs_info(const char *path, bool type)
 		return svb.f_bavail << ffs(svb.f_frsize >> 1);
 }
 
-static int
-show_mediainfo(char *fpath, char *arg)
+static int show_mediainfo(char *fpath, char *arg)
 {
 	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[cfg.metaviewer], NULL, 0))
 		return -1;
@@ -1942,8 +1895,7 @@ show_mediainfo(char *fpath, char *arg)
 	return 0;
 }
 
-static int
-handle_archive(char *fpath, char *arg, char *dir)
+static int handle_archive(char *fpath, char *arg, char *dir)
 {
 	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[ATOOL], NULL, 0))
 		return -1;
@@ -1967,8 +1919,7 @@ handle_archive(char *fpath, char *arg, char *dir)
  * the binary size by around a hundred bytes. This would only
  * have increased as we keep adding new options.
  */
-static int
-show_help(char *path)
+static int show_help(char *path)
 {
 	if (g_tmpfpath[0])
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", MAX_HOME_LEN - g_tmpfplen);
@@ -2103,10 +2054,7 @@ show_help(char *path)
 	return 0;
 }
 
-int (*nftw_fn) (const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
-
-static int
-sum_bsizes(const char *fpath, const struct stat *sb,
+static int sum_bsizes(const char *fpath, const struct stat *sb,
 	   int typeflag, struct FTW *ftwbuf)
 {
 	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D))
@@ -2116,8 +2064,7 @@ sum_bsizes(const char *fpath, const struct stat *sb,
 	return 0;
 }
 
-static int
-sum_sizes(const char *fpath, const struct stat *sb,
+static int sum_sizes(const char *fpath, const struct stat *sb,
 	   int typeflag, struct FTW *ftwbuf)
 {
 	if (sb->st_size && (typeflag == FTW_F || typeflag == FTW_D))
@@ -2127,8 +2074,7 @@ sum_sizes(const char *fpath, const struct stat *sb,
 	return 0;
 }
 
-static int
-dentfill(char *path, struct entry **dents,
+static int dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
 {
 	static DIR *dirp;
@@ -2296,16 +2242,14 @@ dentfill(char *path, struct entry **dents,
 	return n;
 }
 
-static void
-dentfree(struct entry *dents)
+static void dentfree(struct entry *dents)
 {
 	free(pnamebuf);
 	free(dents);
 }
 
 /* Return the position of the matching entry or 0 otherwise */
-static int
-dentfind(struct entry *dents, const char *fname, int n)
+static int dentfind(struct entry *dents, const char *fname, int n)
 {
 	static int i;
 
@@ -2321,8 +2265,7 @@ dentfind(struct entry *dents, const char *fname, int n)
 	return 0;
 }
 
-static int
-populate(char *path, char *oldname, char *fltr)
+static int populate(char *path, char *oldname, char *fltr)
 {
 	static regex_t re;
 
@@ -2364,8 +2307,7 @@ populate(char *path, char *oldname, char *fltr)
 	return 0;
 }
 
-static void
-redraw(char *path)
+static void redraw(char *path)
 {
 	static char buf[NAME_MAX + 65] __attribute__ ((aligned));
 	static size_t ncols;
@@ -2493,8 +2435,7 @@ redraw(char *path)
 	}
 }
 
-static void
-browse(char *ipath, char *ifilter)
+static void browse(char *ipath, char *ifilter)
 {
 	static char path[PATH_MAX] __attribute__ ((aligned));
 	static char newpath[PATH_MAX] __attribute__ ((aligned));
@@ -3386,8 +3327,7 @@ nochange:
 	}
 }
 
-static void
-usage(void)
+static void usage(void)
 {
 	fprintf(stdout,
 		"usage: nnn [-b key] [-c N] [-e] [-i] [-l]\n"
@@ -3409,8 +3349,7 @@ usage(void)
 	exit(0);
 }
 
-int
-main(int argc, char *argv[])
+int main(int argc, char *argv[])
 {
 	static char cwd[PATH_MAX] __attribute__ ((aligned));
 	char *ipath = NULL, *ifilter;
