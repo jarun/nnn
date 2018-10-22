@@ -351,6 +351,7 @@ static const char messages[][16] = {
 
 /* Forward declarations */
 static void redraw(char *path);
+static char * get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int pager);
 
 /* Functions */
 
@@ -671,6 +672,36 @@ appendfpath(const char *path, const size_t len)
 		++copybufpos;
 	}
 
+	return TRUE;
+}
+
+static bool
+showcplist()
+{
+	ssize_t len;
+
+	if (!copybufpos)
+		return FALSE;
+
+	if (g_tmpfpath[0])
+		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", MAX_HOME_LEN - g_tmpfplen);
+	else {
+		printmsg(messages[STR_NOHOME_ID]);
+		return -1;
+	}
+
+	int fd = mkstemp(g_tmpfpath);
+	if (fd == -1)
+		return FALSE;
+
+	len = write(fd, pcopybuf, copybufpos - 1);
+	close(fd);
+
+	exitcurses();
+	if (len == copybufpos - 1)
+		get_output(NULL, 0, "cat", g_tmpfpath, NULL, 1);
+	unlink(g_tmpfpath);
+	refresh();
 	return TRUE;
 }
 
@@ -1992,6 +2023,7 @@ show_help(char *path)
 	    "d^F  Extract archive\n"
      "6Space, ^K  Copy file path\n"
 	    "d^Y  Toggle multi-copy\n"
+	     "ey  Show copy buffer\n"
 	    "d^T  Toggle path quote\n"
 	    "d^L  Redraw, clear prompt\n"
 	     "eL  Lock terminal\n"
@@ -3102,6 +3134,12 @@ nochange:
 					printmsg(newpath);
 				}
 			} else
+				printmsg("multi-copy off");
+			goto nochange;
+		case SEL_COPYLIST:
+			if (cfg.copymode)
+				showcplist();
+			else
 				printmsg("multi-copy off");
 			goto nochange;
 		case SEL_QUOTE:

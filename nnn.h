@@ -66,6 +66,7 @@ enum action {
 	SEL_REDRAW,
 	SEL_COPY,
 	SEL_COPYMUL,
+	SEL_COPYLIST,
 	SEL_QUOTE,
 	SEL_OPEN,
 	SEL_NEW,
@@ -188,6 +189,8 @@ static struct key bindings[] = {
 	{ ' ',            SEL_COPY,      "",     "" },
 	/* Toggle copy multiple file paths */
 	{ CONTROL('Y'),   SEL_COPYMUL,   "",     "" },
+	/* Show list of copied files */
+	{ 'y',            SEL_COPYLIST,  "",     "" },
 	/* Toggle quote on while copy */
 	{ CONTROL('T'),   SEL_QUOTE,     "",     "" },
 	/* Open in a custom application */

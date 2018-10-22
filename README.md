@@ -59,8 +59,9 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - [add bookmarks](#add-bookmarks)
   - [use cd .....](#use-cd-)
   - [cd on quit](#cd-on-quit)
-  - [copy file paths to clipboard](#copy-file-paths-to-clipboard)
-  - [copy file paths when X is missing](#copy-file-paths-when-x-is-missing)
+  - [copy file paths](#copy-file-paths)
+    - [to clipboard](#to-clipboard)
+    - [when X is missing](#when-x-is-missing)
   - [run custom scripts](#run-custom-scripts)
     - [sample scripts](#sample-scripts)
   - [dual-pane or multi-pane](#dual-pane-or-multi-pane)
@@ -248,6 +249,7 @@ optional args:
              ^F  Extract archive
       Space, ^K  Copy file path
              ^Y  Toggle multi-copy
+              y  Show copy buffer
              ^T  Toggle path quote
              ^L  Redraw, clear prompt
               L  Lock terminal
@@ -359,7 +361,11 @@ Pick the appropriate file for your shell from [`scripts/quitcd`](scripts/quitcd)
 
 As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
 
-#### copy file paths to clipboard
+#### copy file paths
+
+File paths can be copied to the clipboard or to a specific temporary file (if X is unavailable, for example). When in multi-copy mode, currently copied file paths can be listed by pressing `y`.
+
+##### to clipboard
 
 `nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
 
@@ -392,7 +398,7 @@ This is particularly useful if you are planning to copy the whole string to the 
 
 Note that the filename is not escaped. So copying may still fail for filenames having quote(s) in them.
 
-#### copy file paths when X is missing
+##### when X is missing
 
 A very common scenario on headless remote servers connected via SSH. As the clipboard is missing, `nnn` copies the path names to the tmp file `DIR/.nnncp`, where `DIR` (by priority) is:
 
