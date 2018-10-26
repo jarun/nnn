@@ -97,7 +97,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Open with desktop opener (default) or specify a custom app
   - Create, list and extract archives (needs atool/patool)
   - Optionally open text files in EDITOR (fallback vi)
-  - Customizable bash script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) to handle actions
+  - Customizable script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) to handle actions (sparsely used)
 - Information
   - Detailed stat-like file information
   - Media information (needs mediainfo or exiftool, if specified)
@@ -118,20 +118,20 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
 
 `nnn` vs. ncdu memory usage in disk usage analyzer mode (400K files on disk):
 
-```
-  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
- 5034 vaio      20   0   71628  59932   2412 S   0.0  0.7   0:01.22 ncdu /
- 4949 vaio      20   0   14812   3616   2560 S   0.0  0.0   0:00.83 nnn -S /
-```
+<pre>
+  PID USER      PR  NI    VIRT    <b>RES</b>    SHR S  %CPU %MEM     TIME+ COMMAND
+ 5034 vaio      20   0   71628  <b>59932</b>   2412 S   0.0  0.7   0:01.22 ncdu /
+ 4949 vaio      20   0   14812   <b>3616</b>   2560 S   0.0  0.0   0:00.83 nnn -S /
+</pre>
 
 `nnn` vs. midnight commander vs. ranger memory usage while viewing a directory with 13.5K files, sorted by size:
 
-```
-  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
-31885 vaio      20   0  139720  91220   8460 S   0.0  1.1   0:02.96 /usr/bin/python -O /usr/bin/ranger
-30108 vaio      20   0   72152  12468   7336 S   0.0  0.2   0:00.06 mc
-30168 vaio      20   0   16476   5072   2640 S   0.0  0.1   0:00.22 nnn -c 1 -i
-```
+<pre>
+  PID USER      PR  NI    VIRT    <b>RES</b>    SHR S  %CPU %MEM     TIME+ COMMAND
+31885 vaio      20   0  139720  <b>91220</b>   8460 S   0.0  1.1   0:02.96 /usr/bin/python -O /usr/bin/ranger
+30108 vaio      20   0   72152  <b>12468</b>   7336 S   0.0  0.2   0:00.06 mc
+30168 vaio      20   0   16476   <b>5072</b>   2640 S   0.0  0.1   0:00.22 nnn -c 1 -i
+</pre>
 
 Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors).
 
