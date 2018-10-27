@@ -460,7 +460,7 @@ static void *xrealloc(void *pcur, size_t len)
 	static void *pmem;
 
 	pmem = realloc(pcur, len);
-	if (!pmem && pcur)
+	if (!pmem)
 		free(pcur);
 
 	return pmem;
@@ -2081,6 +2081,12 @@ static int sum_sizes(const char *fpath, const struct stat *sb,
 	return 0;
 }
 
+static void dentfree(struct entry *dents)
+{
+	free(pnamebuf);
+	free(dents);
+}
+
 static int dentfill(char *path, struct entry **dents,
 	 int (*filter)(regex_t *, char *), regex_t *re)
 {
@@ -2238,20 +2244,11 @@ static int dentfill(char *path, struct entry **dents,
 
 	/* Should never be null */
 	if (closedir(dirp) == -1) {
-		if (*dents) {
-			free(pnamebuf);
-			free(*dents);
-		}
+		dentfree(*dents);
 		errexit();
 	}
 
 	return n;
-}
-
-static void dentfree(struct entry *dents)
-{
-	free(pnamebuf);
-	free(dents);
 }
 
 /* Return the position of the matching entry or 0 otherwise */
@@ -2887,8 +2884,7 @@ nochange:
 			mkpath(path, dents[cur].name, newpath, PATH_MAX);
 
 			if (lstat(newpath, &sb) == -1) {
-				if (dents)
-					dentfree(dents);
+				dentfree(dents);
 				errexit();
 			}
 
