@@ -2160,8 +2160,7 @@ static int dentfill(char *path, struct entry **dents,
 			total_dents += ENTRY_INCR;
 			*dents = xrealloc(*dents, total_dents * sizeof(**dents));
 			if (*dents == NULL) {
-				if (pnamebuf)
-					free(pnamebuf);
+				free(pnamebuf);
 				errexit();
 			}
 			DPRINTF_P(*dents);
