@@ -265,10 +265,10 @@ Help & settings, file details, media info and archive listing are shown in the P
 
 Filters support regexes to instantly (search-as-you-type) list the matching entries in the current directory.
 
-There are 3 ways to reset a filter:
-- pressing <kbd>^L</kbd> (at the new/rename prompt <kbd>^L</kbd> followed by <kbd>Enter</kbd> discards all changes and exits prompt)
-- a search with no matches
-- an extra backspace at the filter prompt (like vi)
+Ways to exit filter prompt:
+- press <kbd>^L</kbd> to clear filter followed by <kbd>Bksp</kbd> (to clear the filter symbol, like vi)
+  - at other prompts <kbd>^L</kbd> followed by <kbd>Enter</kbd> discards all changes and exits prompt
+- run a search with no matches and press <kbd>Enter</kbd>
 
 Common use cases:
 - to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol

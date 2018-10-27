@@ -188,14 +188,13 @@ instructions.
 Filters support regexes to instantly (search-as-you-type) list the matching
 entries in the current directory.
 .Pp
-There are 3 ways to reset a filter:
+Ways to exit filter prompt:
 .Pp
-(1) pressing \fI^L\fR (at the new/rename prompt \fI^L\fR followed by \fIEnter\fR
-discards all changes and exits prompt),
+(1) press \fI^L\fR to clear filter followed by \fIBksp\fR (to clear the filter symbol, like vi)
 .br
-(2) a search with no matches or
+  - at other prompts \fI^L\fR followed by \fIEnter\fR discards all changes and exits prompt
 .br
-(3) an extra backspace at the filter prompt (like vi).
+(2) run a search with no matches and press \fIEnter\fR
 .Pp
 Common use cases:
 .Pp

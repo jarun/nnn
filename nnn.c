@@ -1096,14 +1096,24 @@ static int filterentries(char *path)
 	printprompt(ln);
 
 	while ((r = get_wch(ch)) != ERR) {
-		if (*ch == 127 /* handle DEL */ || *ch == KEY_DC || *ch == KEY_BACKSPACE || *ch == '\b') {
-			if (len == 1) {
+		switch (*ch) {
+		case KEY_DC: // fallthrough
+		case  KEY_BACKSPACE: // fallthrough
+		case '\b': // fallthrough
+		case CONTROL('L'): // fallthrough
+		case 127: /* handle DEL */
+			if (len == 1 && *ch != CONTROL('L')) {
 				cur = oldcur;
 				*ch = CONTROL('L');
 				goto end;
 			}
 
-			wln[--len] = '\0';
+			if (*ch == CONTROL('L'))
+				while (len > 1)
+					wln[--len] = '\0';
+			else
+				wln[--len] = '\0';
+
 			if (len == 1)
 				cur = oldcur;
 
@@ -1114,9 +1124,7 @@ static int filterentries(char *path)
 
 			printprompt(ln);
 			continue;
-		}
-
-		if (*ch == 27) { /* Exit filter mode on Escape */
+		case 27: /* Exit filter mode on Escape */
 			cur = oldcur;
 			*ch = CONTROL('L');
 			goto end;
