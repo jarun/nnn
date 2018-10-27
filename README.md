@@ -249,6 +249,7 @@ optional args:
               y  Show copy buffer
              ^T  Toggle path quote
              ^L  Redraw, clear prompt
+            Esc  Exit prompt
               L  Lock terminal
               o  Open DE filemanager
              ^/  Open DE search app

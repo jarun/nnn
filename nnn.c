@@ -1092,7 +1092,6 @@ static int filterentries(char *path)
 	cur = 0;
 
 	cleartimeout();
-	echo();
 	curs_set(TRUE);
 	printprompt(ln);
 
@@ -1115,6 +1114,12 @@ static int filterentries(char *path)
 
 			printprompt(ln);
 			continue;
+		}
+
+		if (*ch == 27) { /* Exit filter mode on Escape */
+			cur = oldcur;
+			*ch = CONTROL('L');
+			goto end;
 		}
 
 		if (r == OK) {
@@ -1186,7 +1191,6 @@ static int filterentries(char *path)
 		}
 	}
 end:
-	noecho();
 	curs_set(FALSE);
 	settimeout();
 
@@ -1197,7 +1201,6 @@ end:
 /* Show a prompt with input string and return the changes */
 static char *xreadline(char *fname, char *prompt)
 {
-	int old_curs = curs_set(1);
 	size_t len, pos;
 	int x, y, r;
 	wint_t ch[2] = {0};
@@ -1217,6 +1220,7 @@ static char *xreadline(char *fname, char *prompt)
 	}
 
 	getyx(stdscr, y, x);
+	curs_set(TRUE);
 	cleartimeout();
 
 	while (1) {
@@ -1257,6 +1261,9 @@ static char *xreadline(char *fname, char *prompt)
 					len -= pos;
 					pos = 0;
 					continue;
+				case 27: /* Exit prompt on Escape */
+					len = 0;
+					goto END;
 				}
 
 				/* Filter out all other control chars */
@@ -1300,10 +1307,10 @@ static char *xreadline(char *fname, char *prompt)
 
 END:
 	buf[len] = '\0';
-	if (old_curs != ERR)
-		curs_set(old_curs);
 
+	curs_set(FALSE);
 	settimeout();
+
 	DPRINTF_S(buf);
 	wcstombs(g_buf, buf, NAME_MAX);
 	clearprompt();
@@ -1974,6 +1981,7 @@ static int show_help(char *path)
 	     "ey  Show copy buffer\n"
 	    "d^T  Toggle path quote\n"
 	    "d^L  Redraw, clear prompt\n"
+	   "cEsc  Exit prompt\n"
 	     "eL  Lock terminal\n"
 	     "eo  Open DE filemanager\n"
 	    "d^/  Open DE search app\n"
