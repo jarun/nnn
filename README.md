@@ -97,7 +97,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Open with desktop opener (default) or specify a custom app
   - Create, list and extract archives (needs atool/patool)
   - Optionally open text files in EDITOR (fallback vi)
-  - Customizable script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) to handle actions (sparsely used)
+  - Customizable script to handle actions (sparsely used)
 - Information
   - Detailed stat-like file information
   - Media information (needs mediainfo or exiftool, if specified)
@@ -321,6 +321,8 @@ The following indicators are used in the detail view:
 
       export NNN_DE_FILE_MANAGER=thunar
       export NNN_DE_FILE_MANAGER=nautilus
+
+Customizable script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) is used to run desktop search utility and terminal locker.
 
 #### Help
 
