@@ -20,10 +20,14 @@ matrix:
     - os: osx
       compiler: clang
 
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then if [[ "$CC" == "clang" ]]; then brew update; brew install llvm; export PATH="/usr/local/opt/llvm/bin:$PATH"; fi; fi
+
 script:
   - export CFLAGS=-Werror;
   - make clean; make;
   - make clean;
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then if [[ "$CC" == "clang" ]]; then clang-tidy *.h *.c -- -I/usr/include; fi; fi
 
 before_deploy:
   - cd ..

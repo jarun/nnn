@@ -64,7 +64,6 @@
 #ifndef __USE_XOPEN /* Fix failure due to wcswidth(), ncursesw/curses.h includes whcar.h on Ubuntu 14.04 */
 #define __USE_XOPEN
 #endif
-#include <curses.h>
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>

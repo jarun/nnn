@@ -28,6 +28,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#pragma once
+
+#include <curses.h>
+
 #define CONTROL(c) ((c) ^ 0x40)
 
 /* Supported actions */
