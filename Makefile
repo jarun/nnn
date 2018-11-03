@@ -57,4 +57,6 @@ dist:
 clean:
 	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz
 
+skip: ;
+
 .PHONY: $(BIN) $(SRC) all debug install uninstall strip dist clean
