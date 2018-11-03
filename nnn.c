@@ -164,7 +164,7 @@ disabledbg()
 #define MAX_CMD_LEN 5120
 #define CURSR " > "
 #define EMPTY "   "
-#define CURSYM(flag) (flag ? CURSR : EMPTY)
+#define CURSYM(flag) ((flag) ? CURSR : EMPTY)
 #define FILTER '/'
 #define REGEX_MAX 128
 #define BM_MAX 10
@@ -198,7 +198,7 @@ disabledbg()
 #define exitcurses() endwin()
 #define clearprompt() printmsg("")
 #define printwarn() printmsg(strerror(errno))
-#define istopdir(path) (path[1] == '\0' && path[0] == '/')
+#define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
 #define copyfilter() xstrlcpy(fltr, ifilter, NAME_MAX)
 #define copycurname() xstrlcpy(oldname, dents[cur].name, NAME_MAX + 1)
 #define settimeout() timeout(1000)
@@ -867,8 +867,8 @@ static int xstricmp(const char * const s1, const char * const s2)
 		if (num1 != num2) {
 			if (num1 > num2)
 				return 1;
-			else
-				return -1;
+
+			return -1;
 		}
 	}
 
@@ -945,7 +945,8 @@ static int entrycmp(const void *va, const void *vb)
 	/* Sort directories first */
 	if (S_ISDIR(pb->mode) && !S_ISDIR(pa->mode))
 		return 1;
-	else if (S_ISDIR(pa->mode) && !S_ISDIR(pb->mode))
+
+	if (S_ISDIR(pa->mode) && !S_ISDIR(pb->mode))
 		return -1;
 
 	/* Do the actual sorting */
@@ -955,14 +956,16 @@ static int entrycmp(const void *va, const void *vb)
 	if (cfg.sizeorder) {
 		if (pb->size > pa->size)
 			return 1;
-		else if (pb->size < pa->size)
+
+		if (pb->size < pa->size)
 			return -1;
 	}
 
 	if (cfg.blkorder) {
 		if (pb->blocks > pa->blocks)
 			return 1;
-		else if (pb->blocks < pa->blocks)
+
+		if (pb->blocks < pa->blocks)
 			return -1;
 	}
 
@@ -1894,8 +1897,8 @@ static size_t get_fs_info(const char *path, bool type)
 
 	if (type == CAPACITY)
 		return svb.f_blocks << ffs(svb.f_bsize >> 1);
-	else
-		return svb.f_bavail << ffs(svb.f_frsize >> 1);
+
+	return svb.f_bavail << ffs(svb.f_frsize >> 1);
 }
 
 static int show_mediainfo(char *fpath, char *arg)
@@ -2067,6 +2070,9 @@ static int show_help(char *path)
 	refresh();
 	return 0;
 }
+
+static int sum_bsizes(const char */*fpath*/, const struct stat *sb,
+	   int typeflag, struct FTW */*ftwbuf*/);
 
 static int sum_bsizes(const char *fpath, const struct stat *sb,
 	   int typeflag, struct FTW *ftwbuf)
@@ -3134,7 +3140,9 @@ nochange:
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				spawn(tmp, newpath, NULL, path, r);
 				continue;
-			} else if (sel == SEL_ARCHIVE) {
+			}
+
+			if (sel == SEL_ARCHIVE) {
 				/* newpath is used as temporary buffer */
 				if (!get_output(newpath, PATH_MAX, "which", utils[APACK], NULL, 0)) {
 					printmsg("apack missing");
