@@ -4,8 +4,8 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center">
 <a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600" alt="Latest release" /></a>
-<a href="https://aur.archlinux.org/packages/nnn"><img src="https://img.shields.io/aur/version/nnn.svg?maxAge=600" alt="AUR" /></a>
 <a href="http://formulae.brew.sh/formula/nnn"><img src="https://img.shields.io/homebrew/v/nnn.svg?maxAge=600" alt="Homebrew" /></a>
+<a href="https://www.archlinux.org/packages/community/x86_64/nnn/"><img src="https://img.shields.io/badge/archlinux-rolling-blue.svg?maxAge=600" alt="Arch Linux" /></a>
 <a href="https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1"><img src="https://img.shields.io/badge/debian-10+-blue.svg?maxAge=2592000" alt="Debian Buster+" /></a>
 <a href="https://apps.fedoraproject.org/packages/nnn"><img src="https://img.shields.io/badge/fedora-27+-blue.svg?maxAge=2592000" alt="Fedora 27+" /></a>
 <a href="https://software.opensuse.org/package/nnn"><img src="https://img.shields.io/badge/opensuse%20leap-15.0+-blue.svg?maxAge=2592000" alt="openSUSE Leap 15.0+" /></a>
@@ -13,8 +13,8 @@ Noice is Not Noice, a noicer fork...
 </p>
 
 <p align="center">
+<a href="https://travis-ci.org/jarun/nnn"><img src="https://img.shields.io/travis/jarun/nnn.svg" alt="Build Status" /></a>
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow.svg?maxAge=2592000" alt="License" /></a>
-<a href="https://travis-ci.org/jarun/nnn"><img src="https://travis-ci.org/jarun/nnn.svg?branch=master" alt="Build Status" /></a>
 </p>
 
 [![nnn screencast](https://i.imgur.com/wNtI24c.jpg)](https://vimeo.com/233223942 "Click to see nnn in action!")
@@ -143,7 +143,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 
 #### From a package manager
 
-- [AUR](https://aur.archlinux.org/packages/nnn/) (`yaourt -S nnn`)
+- [Arch Linux](https://www.archlinux.org/packages/community/x86_64/nnn/) (`pacman -S nnn`)
 - [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
 - [Fedora](https://apps.fedoraproject.org/packages/nnn) (`dnf install nnn`)
 - [FreeBSD](https://www.freshports.org/misc/nnn) (`pkg install nnn`)
