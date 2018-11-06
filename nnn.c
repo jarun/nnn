@@ -2406,7 +2406,7 @@ static void redraw(char *path)
 			/* We need to show filename as it may be truncated in directory listing */
 			if (!cfg.blkorder)
 				snprintf(buf, NAME_MAX + 65, "%d/%d %s[%s%s]",
-					 cur + 1, ndents, sort, unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
+					 cur + 1, ndents, sort, unescape(dents[cur].name, NAME_MAX), get_file_sym(dents[cur].mode));
 			else {
 				i = snprintf(buf, 64, "%d/%d ", cur + 1, ndents);
 
@@ -2417,7 +2417,7 @@ static void redraw(char *path)
 
 				i += snprintf(buf + i, 64, "u: %s (%lu files) ", coolsize(dir_blocks << BLK_SHIFT), num_files);
 				snprintf(buf + i, NAME_MAX, "vol: %s free [%s%s]",
-					 coolsize(get_fs_info(path, FREE)), unescape(dents[cur].name, 0), get_file_sym(dents[cur].mode));
+					 coolsize(get_fs_info(path, FREE)), unescape(dents[cur].name, NAME_MAX), get_file_sym(dents[cur].mode));
 			}
 
 			printmsg(buf);
