@@ -67,7 +67,6 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
     - [sample scripts](#sample-scripts)
   - [dual-pane or multi-pane](#dual-pane-or-multi-pane)
   - [change dir color](#change-dir-color)
-  - [use cd .....](#use-cd-)
   - [integrate patool](#integrate-patool)
   - [work faster at rename prompt](#work-faster-at-rename-prompt)
   - [set idle timeout](#set-idle-timeout)
@@ -84,7 +83,6 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
   - *Navigate-as-you-type* mode with dir auto-select for the maverick
   - Handy bookmarks, start at bookmark, pin and visit directory
-  - chdir prompt with tab completion (interprets cd ..... too!)
   - Roll-over at edges, page through entries
   - Show directories in custom color (default: enabled in blue)
 - Sorting
@@ -228,7 +226,6 @@ optional args:
              ^B  Bookmark prompt
               b  Pin current dir
              ^V  Go to pinned dir
-              c  cd prompt
               d  Toggle detail view
               D  File details
            m, M  Brief/full media info
@@ -504,10 +501,6 @@ The default color for directories is blue. Option `-c` accepts color codes from 
     0-black, 1-red, 2-green, 3-yellow, 4-blue, 5-magenta, 6-cyan, 7-white
 
 Any other value disables colored directories.
-
-#### use cd .....
-
-To jump to the n<sup>th</sup> level parent, use `n + 1` dots (the first `.` denotes PWD). For example, to jump to the 6<th> parent of the current directory, use 7 dots. If the number of dots would take you *beyond* `/` (which isn't possible), you'll be placed at `/`.
 
 #### integrate patool
 

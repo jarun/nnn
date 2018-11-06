@@ -44,7 +44,6 @@ enum action {
 	SEL_PGUP,
 	SEL_HOME,
 	SEL_END,
-	SEL_CD,
 	SEL_CDHOME,
 	SEL_CDBEGIN,
 	SEL_CDLAST,
@@ -140,8 +139,6 @@ static struct key bindings[] = {
 	{ 'G',            SEL_END,       "",     "" },
 	{ CONTROL('E'),   SEL_END,       "",     "" },
 	{ '$',            SEL_END,       "",     "" },
-	/* Change dir */
-	{ 'c',            SEL_CD,        "",     "" },
 	/* HOME */
 	{ '~',            SEL_CDHOME,    "",     "" },
 	/* Initial directory */

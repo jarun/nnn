@@ -691,25 +691,6 @@ static bool showcplist()
 	return TRUE;
 }
 
-/*
- * Return number of dots if all chars in a string are dots, else 0
- */
-static int all_dots(const char *path)
-{
-	int count = 0;
-
-	if (!path)
-		return FALSE;
-
-	while (*path == '.')
-		++count, ++path;
-
-	if (*path)
-		return 0;
-
-	return count;
-}
-
 /* Initialize curses mode */
 static void initcurses(void)
 {
@@ -1968,7 +1949,6 @@ static int show_help(char *path)
 	    "d^B  Bookmark prompt\n"
 	     "eb  Pin current dir\n"
 	    "d^V  Go to pinned dir\n"
-	     "ec  cd prompt\n"
 	     "ed  Toggle detail view\n"
 	     "eD  File details\n"
 	  "bm, M  Brief/full media info\n"
@@ -2461,7 +2441,7 @@ static void browse(char *ipath, char *ifilter)
 	static char oldname[NAME_MAX + 1] __attribute__ ((aligned));
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
-	int r, fd, truecd, presel, ncp = 0, copystartid = 0, copyendid = 0;
+	int r, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
 	enum action sel = SEL_RUNARG + 1;
 	bool dir_changed = FALSE;
 
@@ -2660,101 +2640,6 @@ nochange:
 		case SEL_END:
 			cur = ndents - 1;
 			break;
-		case SEL_CD:
-			truecd = 0;
-			tmp = xreadline(NULL, "cd: ");
-			if (tmp == NULL || tmp[0] == '\0')
-				break;
-
-			if (tmp[0] == '~') {
-				/* Expand ~ to HOME absolute path */
-				dir = getenv("HOME");
-				if (dir)
-					snprintf(newpath, PATH_MAX, "%s%s", dir, tmp + 1);
-				else {
-					printmsg(messages[STR_NOHOME_ID]);
-					goto nochange;
-				}
-			} else if (tmp[0] == '-' && tmp[1] == '\0') {
-				if (lastdir[0] == '\0')
-					break;
-
-				/* Switch to last visited dir */
-				xstrlcpy(newpath, lastdir, PATH_MAX);
-				truecd = 1;
-			} else if ((r = all_dots(tmp))) {
-				if (r == 1)
-					/* Always in the current dir */
-					break;
-
-				/* Show a message if already at / */
-				if (istopdir(path)) {
-					/* Continue in navigate-as-you-type mode, if enabled */
-					if (cfg.filtermode)
-						presel = FILTER;
-
-					goto nochange;
-				}
-
-				--r; /* One . for the current dir */
-				dir = path;
-
-				/* Note: fd is used as a tmp variable here */
-				for (fd = 0; fd < r; ++fd) {
-					/* Reached / ? */
-					if (istopdir(path)) {
-						/* Can't cd beyond / */
-						break;
-					}
-
-					dir = xdirname(dir);
-					if (access(dir, R_OK) == -1) {
-						printwarn();
-						goto nochange;
-					}
-				}
-
-				truecd = 1;
-
-				/* Save the path in case of cd ..
-				 * We mark the current dir in parent dir
-				 */
-				if (r == 1) {
-					xstrlcpy(oldname, xbasename(path), NAME_MAX + 1);
-					truecd = 2;
-				}
-
-				xstrlcpy(newpath, dir, PATH_MAX);
-			} else
-				mkpath(path, tmp, newpath, PATH_MAX);
-
-			if (!xdiraccess(newpath))
-				goto nochange;
-
-			if (truecd == 0) {
-				/* Probable change in dir */
-				/* No-op if it's the same directory */
-				if (strcmp(path, newpath) == 0)
-					break;
-
-				oldname[0] = '\0';
-			} else if (truecd == 1)
-				/* Sure change in dir */
-				oldname[0] = '\0';
-
-			/* Save last working directory */
-			xstrlcpy(lastdir, path, PATH_MAX);
-			dir_changed = TRUE;
-
-			/* Save the newly opted dir in path */
-			xstrlcpy(path, newpath, PATH_MAX);
-
-			/* Reset filter */
-			copyfilter();
-			DPRINTF_S(path);
-			if (cfg.filtermode)
-				presel = FILTER;
-			goto begin;
 		case SEL_CDHOME:
 			dir = getenv("HOME");
 			if (dir == NULL) {
