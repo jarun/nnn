@@ -1303,9 +1303,9 @@ END:
 	settimeout();
 
 	DPRINTF_S(buf);
-	wcstombs(g_buf, buf, NAME_MAX);
+	wcstombs(g_buf + ((NAME_MAX + 1) << 4), buf, NAME_MAX);
 	clearprompt();
-	return g_buf;
+	return g_buf + ((NAME_MAX + 1) << 4);
 }
 
 /*
