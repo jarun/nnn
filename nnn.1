@@ -259,11 +259,8 @@ screensaver.
     echo -n $1 | xsel --clipboard --input
     -------------------------------------
 .Ed
-.Pp
-\fBNNN_NO_X:\fR X display is unavailable. Copy file path(s) to \fI$HOME/.nnncp\fR.
-.Bd -literal
-    export NNN_NO_X=1
-.Ed
+.br
+If it's not set, by default file paths are copied to the tmp file \fBDIR/.nnncp\fR, where 'DIR' (by priority) is: \fI$HOME\fR or, \fI$TMPDIR\fR or, \fI/tmp\fR.
 .Pp
 \fBNNN_QUOTE_ON:\fR wrap copied paths within single quotes. Useful for pasting
 names in the shell. Note that the filename is not escaped. So copying may still fail

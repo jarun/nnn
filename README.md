@@ -58,8 +58,9 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
 - [How to](#how-to)
   - [add bookmarks](#add-bookmarks)
   - [copy file paths](#copy-file-paths)
+    - [selection shortcuts](#selection-shortcuts)
+    - [default copy](#default-copy)
     - [to clipboard](#to-clipboard)
-    - [when X is missing](#when-x-is-missing)
   - [copy, move, delete files](#copy-move-delete-files)
   - [cd on quit](#cd-on-quit)
   - [run custom scripts](#run-custom-scripts)
@@ -104,7 +105,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Batch rename/move/delete current directory entries in vidir (from moreutils)
   - Spawn SHELL (fallback sh) in the current directory
   - Run custom scripts in the current directory
-  - Copy absolute file paths with/without X (*easy* shell integration)
+  - Copy absolute file paths with quotes
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
   - Open current directory in a custom GUI file manager
@@ -330,14 +331,13 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 ### Quickstart
 
 1. Install the [utilities required](#file-handling) for your regular activities.
-2. Configure file path copy [using X clipboard](#to-clipboard) or [without X](#when-x-is-missing).
-3. Configure [cd on quit](#cd-on-quit).
-4. Optionally open all text files in EDITOR (fallback vi):
+2. Configure [cd on quit](#cd-on-quit).
+3. Optionally open all text files in EDITOR (fallback vi):
 
        export NNN_USE_EDITOR=1
-5. Run `n`.
-6. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
-7. For additional functionality [setup custom scripts](#run-custom-scripts).
+4. Run `n`.
+5. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
+6. For additional functionality [setup custom scripts](#run-custom-scripts).
 
 ### How to
 
@@ -351,24 +351,7 @@ The bookmark prompt also understands the <kbd>~</kbd> (HOME), <kbd>-</kbd> (last
 
 #### copy file paths
 
-File paths can be copied to the clipboard or to a specific temporary file (if X is unavailable, for example). When in multi-copy mode, currently copied file paths can be listed by pressing `y`.
-
-##### to clipboard
-
-`nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
-
-Sample Linux copier script:
-
-    #!/bin/sh
-
-    # comment the next line to convert newlines to spaces
-    IFS=
-
-    echo -n $1 | xsel --clipboard --input
-
-export `NNN_COPIER`:
-
-    export NNN_COPIER="/path/to/copier.sh"
+##### selection shortcuts
 
 Use <kbd>^K</kbd> to copy the absolute path (from `/`) of the file under the cursor to clipboard.
 
@@ -376,6 +359,7 @@ To copy multiple file paths, switch to the multi-copy mode using <kbd>^Y</kbd>. 
 
 - select multiple files one by one by pressing <kbd>^K</kbd> on each entry; or,
 - navigate to another file in the same directory to select a range of files.
+- list the currently copied file paths by pressing `y`.
 
 Pressing <kbd>^Y</kbd> again copies the paths to clipboard and exits the multi-copy mode.
 
@@ -386,21 +370,15 @@ This is particularly useful if you are planning to copy the whole string to the 
 
 Note that the filename is not escaped. So copying may still fail for filenames having quote(s) in them.
 
-##### when X is missing
+##### default copy
 
-A very common scenario on headless remote servers connected via SSH. As the clipboard is missing, `nnn` copies the path names to the tmp file `DIR/.nnncp`, where `DIR` (by priority) is:
+By default file paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priority) is:
 
     $HOME or,
     $TMPDIR or,
     /tmp
 
-`nnn` needs to know X is unavailable:
-
-    export NNN_NO_X=1
-
-To see the path to the copy file, run `nnn`, press `?` and look up `NNN_NO_X`.
-
-Note: despite the name of the environment variable, this method works even if X is available.
+To see the path to the temporary copy file, run `nnn`, press `?` and look up `copy file`.
 
 Use <kbd>^Y</kbd> and/or <kbd>^K</kbd> to copy file paths as usual. To use the copied paths from the cmdline, use command substitution. For example, if `DIR` above is `/home/user`:
 
@@ -430,7 +408,24 @@ so you can easily copy, move or delete multiple files together:
     mv (ncp) .
     rm (ncp) -rf
 
-Note that you may want to keep quotes disabled in this case.
+Note that you may want to keep quotes disabled (as it is by default) in this case.
+
+##### to clipboard
+
+`nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
+
+Sample Linux copier script:
+
+    #!/bin/sh
+
+    # comment the next line to convert newlines to spaces
+    IFS=
+
+    echo -n $1 | xsel --clipboard --input
+
+export `NNN_COPIER`:
+
+    export NNN_COPIER="/path/to/copier.sh"
 
 #### copy, move, delete files
 

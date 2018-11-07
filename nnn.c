@@ -240,28 +240,26 @@ typedef struct {
 
 /* Settings */
 typedef struct {
-	uint filtermode : 1;  /* Set to enter filter mode */
-	uint mtimeorder : 1;  /* Set to sort by time modified */
-	uint sizeorder  : 1;  /* Set to sort by file size */
-	uint apparentsz : 1;  /* Set to sort by apparent size (disk usage) */
-	uint blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
-	uint showhidden : 1;  /* Set to show hidden files */
-	uint copymode   : 1;  /* Set when copying files */
-	uint autoselect : 1;  /* Auto-select dir in nav-as-you-type mode */
-	uint showdetail : 1;  /* Clear to show fewer file info */
-	uint showcolor  : 1;  /* Set to show dirs in blue */
-	uint dircolor   : 1;  /* Current status of dir color */
-	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
-	uint quote      : 1;  /* Copy paths within quotes */
-	uint noxdisplay : 1;  /* X11 is not available */
-	uint color      : 3;  /* Color code for directories */
-	uint reserved   : 15;
+	ushort filtermode : 1;  /* Set to enter filter mode */
+	ushort mtimeorder : 1;  /* Set to sort by time modified */
+	ushort sizeorder  : 1;  /* Set to sort by file size */
+	ushort apparentsz : 1;  /* Set to sort by apparent size (disk usage) */
+	ushort blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
+	ushort showhidden : 1;  /* Set to show hidden files */
+	ushort copymode   : 1;  /* Set when copying files */
+	ushort autoselect : 1;  /* Auto-select dir in nav-as-you-type mode */
+	ushort showdetail : 1;  /* Clear to show fewer file info */
+	ushort showcolor  : 1;  /* Set to show dirs in blue */
+	ushort dircolor   : 1;  /* Current status of dir color */
+	ushort metaviewer : 1;  /* Index of metadata viewer in utils[] */
+	ushort quote      : 1;  /* Copy paths within quotes */
+	ushort color      : 3;  /* Color code for directories */
 } settings;
 
 /* GLOBALS */
 
 /* Configuration */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 4, 0};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 4};
 
 static struct entry *dents;
 static char *pnamebuf, *pcopybuf;
@@ -409,7 +407,7 @@ static void printerr(int linenum)
 {
 	exitcurses();
 	fprintf(stderr, "line %d: (%d) %s\n", linenum, errno, strerror(errno));
-	if (cfg.noxdisplay && g_cppath[0])
+	if (g_cppath[0])
 		unlink(g_cppath);
 	exit(1);
 }
@@ -618,8 +616,10 @@ static char *xbasename(char *path)
 /* Writes buflen char(s) from buf to a file */
 static void writecp(const char *buf, const size_t buflen)
 {
-	if (!g_cppath[0])
+	if (!g_cppath[0]) {
+		printmsg(messages[STR_COPY_ID]);
 		return;
+	}
 
 	FILE *fp = fopen(g_cppath, "w");
 
@@ -2016,8 +2016,8 @@ static int show_help(char *path)
 		dprintf(fd, "NNN_IDLE_TIMEOUT: %d secs\n", idletimeout);
 	if (copier)
 		dprintf(fd, "NNN_COPIER: %s\n", copier);
-	if (getenv("NNN_NO_X"))
-		dprintf(fd, "NNN_NO_X: %s (%s)\n", getenv("NNN_NO_X"), g_cppath);
+	else if (g_cppath[0])
+		dprintf(fd, "copy file: %s\n", g_cppath);
 	if (getenv("NNN_SCRIPT"))
 		dprintf(fd, "NNN_SCRIPT: %s\n", getenv("NNN_SCRIPT"));
 	if (getenv("NNN_MULTISCRIPT"))
@@ -2890,11 +2890,6 @@ nochange:
 				copycurname();
 			goto begin;
 		case SEL_COPY:
-			if (!(cfg.noxdisplay || copier)) {
-				printmsg(messages[STR_COPY_ID]);
-				goto nochange;
-			}
-
 			if (!ndents)
 				goto nochange;
 
@@ -2910,7 +2905,7 @@ nochange:
 				g_buf[r] = '\'';
 				g_buf[r + 1] = '\0';
 
-				if (cfg.noxdisplay)
+				if (!copier)
 					writecp(g_buf, r + 1); /* Truncate NULL from end */
 				else
 					spawn(copier, g_buf, NULL, NULL, F_NOTRACE);
@@ -2919,7 +2914,7 @@ nochange:
 				printmsg(g_buf + 1);
 			} else {
 				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
-				if (cfg.noxdisplay)
+				if (!copier)
 					writecp(newpath, r - 1); /* Truncate NULL from end */
 				else
 					spawn(copier, newpath, NULL, NULL, F_NOTRACE);
@@ -2927,11 +2922,6 @@ nochange:
 			}
 			goto nochange;
 		case SEL_COPYMUL:
-			if (!(cfg.noxdisplay || copier)) {
-				printmsg(messages[STR_COPY_ID]);
-				goto nochange;
-			}
-
 			if (!ndents)
 				goto nochange;
 
@@ -2964,7 +2954,7 @@ nochange:
 			}
 
 			if (copybufpos) { /* File path(s) written to the buffer */
-				if (cfg.noxdisplay)
+				if (!copier)
 					writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
 				else
 					spawn(copier, pcopybuf, NULL, NULL, F_NOTRACE);
@@ -3380,8 +3370,7 @@ int main(int argc, char *argv[])
 		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", MAX_HOME_LEN);
 
 	/* Check if X11 is available */
-	if (!copier && g_tmpfplen && getenv("NNN_NO_X")) {
-		cfg.noxdisplay = 1;
+	if (!copier && g_tmpfplen) {
 		xstrlcpy(g_cppath, g_tmpfpath, MAX_HOME_LEN);
 		xstrlcpy(g_cppath + g_tmpfplen - 1, "/.nnncp", MAX_HOME_LEN - g_tmpfplen);
 	}
@@ -3409,7 +3398,7 @@ int main(int argc, char *argv[])
 	browse(ipath, ifilter);
 	exitcurses();
 
-	if (cfg.noxdisplay && g_cppath[0])
+	if (g_cppath[0])
 		unlink(g_cppath);
 
 #ifdef LINUX_INOTIFY
