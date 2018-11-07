@@ -486,7 +486,7 @@ Type the correct suffix  when prompted on pressing the keybind <kbd>R</kbd>. To 
 
 #### dual-pane or multi-pane
 
-`nnn` doesn't have a native dual-pane or multi-pane mode. Use it with tmux, GNU Screen, Terminator or Tilix.
+`nnn` doesn't have a native dual-pane or multi-pane mode. On most modern DEs the default terminal emulator handles that. Other options are tmux, GNU Screen, Terminator, Tilix, AltYo and Byobu.
 
 #### change dir color
 
