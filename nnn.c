@@ -1297,14 +1297,13 @@ static char *xreadline(char *fname, char *prompt)
 	}
 
 END:
-	buf[len] = '\0';
-
 	curs_set(FALSE);
 	settimeout();
+	clearprompt();
 
+	buf[len] = '\0';
 	DPRINTF_S(buf);
 	wcstombs(g_buf + ((NAME_MAX + 1) << 4), buf, NAME_MAX);
-	clearprompt();
 	return g_buf + ((NAME_MAX + 1) << 4);
 }
 
