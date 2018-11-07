@@ -14,7 +14,6 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center">
 <a href="https://travis-ci.org/jarun/nnn"><img src="https://img.shields.io/travis/jarun/nnn/master.svg" alt="Build Status" /></a>
-<a href="https://scan.coverity.com/projects/jarun-nnn"><img src="https://img.shields.io/coverity/scan/17149.svg" alt="Coverity Scan Build Status" /></a>
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
