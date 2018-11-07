@@ -1507,7 +1507,7 @@ static char *coolsize(off_t size)
 			rem /= 10;
 	}
 
-	if (i > 0)
+	if (i > 0 && i < 6)
 		snprintf(size_buf, 12, "%lu.%0*lu%c", (ulong)size, i, (ulong)rem, U[i]);
 	else
 		snprintf(size_buf, 12, "%lu%c", (ulong)size, U[i]);
