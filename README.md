@@ -107,7 +107,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Copy absolute file paths with quotes
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
-  - GUI app launcher
+  - GUI app launcher (maximum 2 space-separated arguments)
   - Terminal screensaver/locker integration
 - Unicode support
 - Highly optimized code, minimal resource usage

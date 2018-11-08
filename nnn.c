@@ -2046,9 +2046,6 @@ static int show_help(char *path)
 	return 0;
 }
 
-static int sum_bsizes(const char */*fpath*/, const struct stat *sb,
-	   int typeflag, struct FTW */*ftwbuf*/);
-
 static int sum_bsizes(const char *fpath, const struct stat *sb,
 	   int typeflag, struct FTW *ftwbuf)
 {
@@ -2984,7 +2981,8 @@ nochange:
 				break;
 
 			/* Allow only relative, same dir paths */
-			if (tmp[0] == '/' || strcmp(xbasename(tmp), tmp) != 0) {
+			if ((sel != SEL_LAUNCH) &&
+			    (tmp[0] == '/' || strcmp(xbasename(tmp), tmp) != 0)) {
 				printmsg(messages[STR_INPUT_ID]);
 				goto nochange;
 			}
@@ -3005,7 +3003,26 @@ nochange:
 			}
 
 			if (sel == SEL_LAUNCH) {
-				spawn(tmp, NULL, NULL, path, F_NOWAIT | F_NOTRACE);
+				uint args = 0;
+				char *ptr = tmp, *ptr1 = NULL, *ptr2 = NULL;
+
+				while (*ptr) {
+					if (*ptr == ' ') {
+						*ptr = '\0';
+						if (args == 0)
+							ptr1 = ptr + 1;
+						else if (args == 1)
+							ptr2 = ptr + 1;
+						else
+							break;
+
+						++args;
+					}
+
+					++ptr;
+				}
+
+				spawn(tmp, ptr1, ptr2, path, F_NOWAIT | F_NOTRACE);
 				break;
 			}
 
