@@ -166,7 +166,7 @@ supports the following options:
 uses \fIxdg-open\fR (on Linux) and \fIopen(1)\fR (on OS X) as the desktop
 opener. It invokes
 .Pa nlay
-to run desktop search utility or terminal locker. Read more on
+to run the terminal locker. Read more on
 .Pa nlay
 at:
 .br
@@ -180,6 +180,20 @@ Configuring
 to change to the last visited directory on quit requires shell integration in a
 few easy steps. Please visit the project page (linked below) for the
 instructions.
+.Sh CONTEXTS
+Contexts (aka \fItabs\fR aka \fIworkspaces\fR) serve the purpose of exploring multiple directories in parallel.
+.Nm
+provides 4 contexts simultaneously. The status of the contexts are shown in the top left corner:
+.Pp
+- the current context is in reverse
+.br
+- other used contexts are underlined
+.br
+- rest are unused
+.Pp
+The bookmark prompt understands contexts. To switch contexts press \fI^B\fR and enter the context number (1-4).
+.Pp
+The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
 .Sh FILTERS
 Filters support regexes to instantly (search-as-you-type) list the matching
 entries in the current directory.

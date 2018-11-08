@@ -49,6 +49,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
 - [Usage](#usage)
   - [Cmdline options](#cmdline-options)
   - [Keyboard shortcuts](#keyboard-shortcuts)
+  - [Contexts](#contexts)
   - [Filters](#filters)
   - [Navigate-as-you-type mode](#navigate-as-you-type-mode)
   - [File indicators](#file-indicators)
@@ -57,7 +58,6 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
 - [Quickstart](#quickstart)
 - [How to](#how-to)
   - [add bookmarks](#add-bookmarks)
-  - [contexts](#contexts)
   - [copy file paths](#copy-file-paths)
     - [selection shortcuts](#selection-shortcuts)
     - [default copy](#default-copy)
@@ -258,6 +258,18 @@ optional args:
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
 
+#### Contexts
+
+Contexts (aka _tabs_ aka _workspaces_) serve the purpose of exploring multiple directories in parallel. `nnn` provides 4 contexts simultaneously. The status of the contexts are shown in the top left corner:
+
+- the current context is in reverse
+- other used contexts are underlined
+- rest are unused
+
+The bookmark prompt understands contexts. To switch contexts press `^B` and enter the context number (1-4).
+
+The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
+
 #### Filters
 
 Filters support regexes to instantly (search-as-you-type) list the matching entries in the current directory.
@@ -342,18 +354,6 @@ Set environment variable `NNN_BMS` as a string of `key:location` pairs (max 10) 
     export NNN_BMS='doc:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
 
 The bookmark prompt also understands the <kbd>~</kbd> (HOME), <kbd>-</kbd> (last visited directory) and <kbd>&</kbd> (start directory) shortcuts.
-
-#### contexts
-
-Contexts (aka _tabs_ aka _workspaces_) serve the purpose of exploring multiple directories in parallel. `nnn` provides 4 contexts simultaneously. The status of the contexts are shown in the top left corner:
-
-- the current context is in reverse
-- other used contexts are underlined
-- rest are unused
-
-The bookmark prompt understands contexts. To switch contexts press `^B` and enter the context number (1-4).
-
-The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
 
 #### copy file paths
 
