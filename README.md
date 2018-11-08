@@ -267,7 +267,7 @@ Contexts (aka _tabs_ aka _workspaces_) serve the purpose of exploring multiple d
 - other used contexts are underlined
 - rest are unused
 
-The bookmark prompt understands contexts. To switch contexts press <kbd>^B</kbd> and enter the context number (1-4).
+The bookmark prompt understands contexts. To switch contexts press <kbd>^B</kbd> and enter the context number (1-4). <kbd>>/.</kbd> and <kbd></.</kbd> at the bookmark prompt cycles between active contexts.
 
 The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
 

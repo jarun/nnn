@@ -2485,6 +2485,7 @@ static void browse(char *ipath, char *ifilter)
 
 	/* setup first context */
 	xstrlcpy(g_ctx[0].c_init, ipath, PATH_MAX);
+	g_ctx[0].c_cfg = cfg;
 
 	xstrlcpy(path, ipath, PATH_MAX);
 	copyfilter();
@@ -2751,6 +2752,20 @@ nochange:
 				case '&':
 					presel = tmp[0];
 					goto begin;
+				case '>':
+				case '.':
+				case '<':
+				case ',':
+					r = cfg.curctx;
+					if (tmp[0] == '>' || tmp[0] == '.')
+						do
+							(r == MAX_CTX - 1) ? (r = 0) : ++r;
+						while (!g_ctx[r].c_cfg.ctxactive);
+					else
+						do
+							(r == 0) ? (r = MAX_CTX - 1) : --r;
+						while (!g_ctx[r].c_cfg.ctxactive); //fallthrough
+					tmp[0] = '1' + r; //fallthrough
 				case '1': //fallthrough
 				case '2': //fallthrough
 				case '3': //fallthrough
@@ -3298,10 +3313,7 @@ nochange:
 			uint iter = 1;
 			r = cfg.curctx;
 			while (iter < MAX_CTX) {
-				++r;
-				r %= MAX_CTX;
-				DPRINTF_D(r);
-				DPRINTF_U(g_ctx[r].c_cfg.ctxactive);
+				(r == MAX_CTX - 1) ? (r = 0) : ++r;
 				if (g_ctx[r].c_cfg.ctxactive) {
 					g_ctx[cfg.curctx].c_cfg.ctxactive = 0;
 
