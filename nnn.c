@@ -2763,7 +2763,7 @@ nochange:
 					g_crc = 0;
 
 					/* Save current context */
-					xstrlcpy(g_ctx[cfg.curctx].c_name, oldname, NAME_MAX + 1);
+					xstrlcpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
 					xstrlcpy(g_ctx[cfg.curctx].c_fltr, fltr, NAME_MAX + 1);
 					xstrlcpy(g_ctx[cfg.curctx].c_path, path, PATH_MAX);
 					xstrlcpy(g_ctx[cfg.curctx].c_last, lastdir, PATH_MAX);
@@ -2772,7 +2772,7 @@ nochange:
 					if (!g_ctx[r].c_cfg.ctxactive) {
 						/* Setup a new context  from current context */
 						g_ctx[r].c_cfg.ctxactive = 1;
-						xstrlcpy(g_ctx[r].c_name, oldname, NAME_MAX + 1);
+						xstrlcpy(g_ctx[r].c_name, dents[cur].name, NAME_MAX + 1);
 						xstrlcpy(g_ctx[r].c_fltr, fltr, NAME_MAX + 1);
 						xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
 						xstrlcpy(g_ctx[r].c_init, path, PATH_MAX);
