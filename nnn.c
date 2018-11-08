@@ -2755,7 +2755,6 @@ nochange:
 				case '2': //fallthrough
 				case '3': //fallthrough
 				case '4':
-				{
 					r = tmp[0] - '1'; /* Save the next context id */
 					if (cfg.curctx == r)
 						continue;
@@ -2793,7 +2792,6 @@ nochange:
 					if (cfg.filtermode)
 						presel = FILTER;
 					goto begin;
-				}
 				}
 			}
 
