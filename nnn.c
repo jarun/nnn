@@ -256,7 +256,10 @@ typedef struct {
 	uint quote      : 1;  /* Copy paths within quotes */
 	uint color      : 3;  /* Color code for directories */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 15;
+	uint reserved   : 12;
+	/* The following settings are global */
+	uint curctx     : 2;  /* Current context number */
+	uint char_key   : 1;  /* All keys are single character long */
 } settings;
 
 /* Contexts or workspaces */
@@ -272,9 +275,8 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 4, 1, 0};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 4, 1, 0, 0, 1};
 static context g_ctx[MAX_CTX] __attribute__ ((aligned));
-static uchar g_curctx;
 
 static struct entry *dents;
 static char *pnamebuf, *pcopybuf;
@@ -1204,12 +1206,19 @@ end:
 }
 
 /* Show a prompt with input string and return the changes */
-static char *xreadline(char *fname, char *prompt)
+static char *xreadline(char *fname, char *prompt, bool single)
 {
 	size_t len, pos;
 	int x, y, r;
 	wint_t ch[2] = {0};
 	static wchar_t * const buf = (wchar_t *)g_buf;
+
+	cleartimeout();
+	if (single) {
+		buf[0] = getch();
+		len = 1;
+		goto END;
+	}
 
 	printprompt(prompt);
 
@@ -1226,7 +1235,6 @@ static char *xreadline(char *fname, char *prompt)
 
 	getyx(stdscr, y, x);
 	curs_set(TRUE);
-	cleartimeout();
 
 	while (1) {
 		buf[len] = ' ';
@@ -1354,8 +1362,12 @@ static void parsebmstr()
 		bookmark[i].key = bms;
 
 		++bms;
-		while (*bms && *bms != ':')
+		while (*bms && *bms != ':') {
 			++bms;
+
+			if (cfg.char_key)
+				cfg.char_key = 0;
+		}
 
 		if (!*bms) {
 			bookmark[i].key = NULL;
@@ -2357,7 +2369,7 @@ static void redraw(char *path)
 	printw("[");
 	for (i = 0; i < MAX_CTX; ++i) {
 		/* Print current context in reverse */
-		if (g_curctx == i) {
+		if (cfg.curctx == i) {
 			attron(A_REVERSE);
 			printw("%d", i + 1);
 			attroff(A_REVERSE);
@@ -2472,7 +2484,6 @@ static void browse(char *ipath, char *ifilter)
 	bool dir_changed = FALSE;
 
 	/* setup first context */
-	g_curctx = 0;
 	xstrlcpy(g_ctx[0].c_init, ipath, PATH_MAX);
 
 	xstrlcpy(path, ipath, PATH_MAX);
@@ -2728,7 +2739,7 @@ nochange:
 				presel = FILTER;
 			goto begin;
 		case SEL_CDBM:
-			tmp = xreadline(NULL, "key: ");
+			tmp = xreadline(NULL, "key: ", cfg.char_key);
 			if (tmp == NULL || tmp[0] == '\0')
 				break;
 
@@ -2746,17 +2757,17 @@ nochange:
 				case '4':
 				{
 					r = tmp[0] - '1'; /* Save the next context id */
-					if (g_curctx == r)
+					if (cfg.curctx == r)
 						continue;
 
 					g_crc = 0;
 
 					/* Save current context */
-					xstrlcpy(g_ctx[g_curctx].c_name, oldname, NAME_MAX + 1);
-					xstrlcpy(g_ctx[g_curctx].c_fltr, fltr, NAME_MAX + 1);
-					xstrlcpy(g_ctx[g_curctx].c_path, path, PATH_MAX);
-					xstrlcpy(g_ctx[g_curctx].c_last, lastdir, PATH_MAX);
-					g_ctx[g_curctx].c_cfg = cfg;
+					xstrlcpy(g_ctx[cfg.curctx].c_name, oldname, NAME_MAX + 1);
+					xstrlcpy(g_ctx[cfg.curctx].c_fltr, fltr, NAME_MAX + 1);
+					xstrlcpy(g_ctx[cfg.curctx].c_path, path, PATH_MAX);
+					xstrlcpy(g_ctx[cfg.curctx].c_last, lastdir, PATH_MAX);
+					g_ctx[cfg.curctx].c_cfg = cfg;
 
 					if (!g_ctx[r].c_cfg.ctxactive) {
 						/* Setup a new context  from current context */
@@ -2778,7 +2789,7 @@ nochange:
 						cfg = g_ctx[r].c_cfg;
 					}
 
-					g_curctx = r;
+					cfg.curctx = r;
 					if (cfg.filtermode)
 						presel = FILTER;
 					goto begin;
@@ -3055,13 +3066,13 @@ nochange:
 		case SEL_LAUNCH: // fallthrough
 		case SEL_NEW:
 			if (sel == SEL_OPEN)
-				tmp = xreadline(NULL, "open with: ");
+				tmp = xreadline(NULL, "open with: ", FALSE);
 			else if (sel == SEL_LAUNCH)
-				tmp = xreadline(NULL, "launch: ");
+				tmp = xreadline(NULL, "launch: ", FALSE);
 			else if (sel == SEL_ARCHIVE)
-				tmp = xreadline(dents[cur].name, "name: ");
+				tmp = xreadline(dents[cur].name, "name: ", FALSE);
 			else
-				tmp = xreadline(NULL, "name: ");
+				tmp = xreadline(NULL, "name: ", FALSE);
 
 			if (tmp == NULL || tmp[0] == '\0')
 				break;
@@ -3173,7 +3184,7 @@ nochange:
 			if (!ndents)
 				break;
 
-			tmp = xreadline(dents[cur].name, "");
+			tmp = xreadline(dents[cur].name, "", FALSE);
 			if (tmp == NULL || tmp[0] == '\0')
 				break;
 
@@ -3246,7 +3257,7 @@ nochange:
 					if (getenv("NNN_MULTISCRIPT")) {
 						size_t _len = xstrlcpy(newpath, tmp, PATH_MAX);
 
-						tmp = xreadline(NULL, "script suffix: ");
+						tmp = xreadline(NULL, "script suffix: ", FALSE);
 						if (tmp && tmp[0])
 							xstrlcpy(newpath + _len - 1, tmp, PATH_MAX - _len);
 
@@ -3287,14 +3298,14 @@ nochange:
 		case SEL_QUITCTX:
 		{
 			uint iter = 1;
-			r = g_curctx;
+			r = cfg.curctx;
 			while (iter < MAX_CTX) {
 				++r;
 				r %= MAX_CTX;
 				DPRINTF_D(r);
 				DPRINTF_U(g_ctx[r].c_cfg.ctxactive);
 				if (g_ctx[r].c_cfg.ctxactive) {
-					g_ctx[g_curctx].c_cfg.ctxactive = 0;
+					g_ctx[cfg.curctx].c_cfg.ctxactive = 0;
 
 					/* Switch to next active context */
 					xstrlcpy(oldname, g_ctx[r].c_name, NAME_MAX + 1);
@@ -3304,7 +3315,7 @@ nochange:
 					xstrlcpy(lastdir, g_ctx[r].c_last, PATH_MAX);
 					cfg = g_ctx[r].c_cfg;
 
-					g_curctx = r;
+					cfg.curctx = r;
 					if (cfg.filtermode)
 						presel = FILTER;
 					goto begin;
