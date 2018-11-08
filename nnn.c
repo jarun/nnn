@@ -269,7 +269,6 @@ static uint idletimeout, copybufpos, copybuflen;
 static char *player;
 static char *copier;
 static char *editor;
-static char *dmanager; /* desktop file manager */
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -1972,8 +1971,7 @@ static int show_help(char *path)
 	    "d^L  Redraw, clear prompt\n"
 	   "cEsc  Exit prompt\n"
 	     "eL  Lock terminal\n"
-	     "eo  Open DE filemanager\n"
-	    "d^/  Open DE search app\n"
+	     "eo  Launch GUI app\n"
 	     "e?  Help, settings\n"
 	 "aQ, ^G  Quit and cd\n"
 	 "aq, ^X  Quit\n\n"};
@@ -2010,8 +2008,6 @@ static int show_help(char *path)
 
 	if (editor)
 		dprintf(fd, "NNN_USE_EDITOR: %s\n", editor);
-	if (dmanager)
-		dprintf(fd, "NNN_DE_FILE_MANAGER: %s\n", dmanager);
 	if (idletimeout)
 		dprintf(fd, "NNN_IDLE_TIMEOUT: %d secs\n", idletimeout);
 	if (copier)
@@ -2759,9 +2755,6 @@ nochange:
 				goto begin;
 			}
 			goto nochange;
-		case SEL_SEARCH:
-			spawn(player, path, "search", NULL, F_NORMAL);
-			break;
 		case SEL_TOGGLEDOT:
 			cfg.showhidden ^= 1;
 			initfilter(cfg.showhidden, &ifilter);
@@ -2827,14 +2820,6 @@ nochange:
 				/* Repopulate as directory content may have changed */
 				goto begin;
 			}
-			break;
-		case SEL_DFB:
-			if (!dmanager) {
-				printmsg("set NNN_DE_FILE_MANAGER");
-				goto nochange;
-			}
-
-			spawn(dmanager, path, NULL, path, F_NOWAIT | F_NOTRACE);
 			break;
 		case SEL_FSIZE:
 			cfg.sizeorder ^= 1;
@@ -2984,9 +2969,12 @@ nochange:
 		case SEL_ARCHIVE:
 			if (!ndents)
 				break; // fallthrough
+		case SEL_LAUNCH: // fallthrough
 		case SEL_NEW:
 			if (sel == SEL_OPEN)
 				tmp = xreadline(NULL, "open with: ");
+			else if (sel == SEL_LAUNCH)
+				tmp = xreadline(NULL, "launch: ");
 			else if (sel == SEL_ARCHIVE)
 				tmp = xreadline(dents[cur].name, "name: ");
 			else
@@ -3014,6 +3002,11 @@ nochange:
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				spawn(tmp, newpath, NULL, path, r);
 				continue;
+			}
+
+			if (sel == SEL_LAUNCH) {
+				spawn(tmp, NULL, NULL, path, F_NOWAIT | F_NOTRACE);
+				break;
 			}
 
 			if (sel == SEL_ARCHIVE) {
@@ -3344,9 +3337,6 @@ int main(int argc, char *argv[])
 	/* Set player if not set already */
 	if (!player)
 		player = utils[NLAY];
-
-	/* Get the desktop file manager, if set */
-	dmanager = getenv("NNN_DE_FILE_MANAGER");
 
 	/* Get screensaver wait time, if set; copier used as tmp var */
 	copier = getenv("NNN_IDLE_TIMEOUT");

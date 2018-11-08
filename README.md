@@ -91,7 +91,6 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Numeric order (1, 2, ... 10, 11, ...) for numeric names
 - Search
   - Superfast directory content filtering with *search-as-you-type*
-  - Desktop search (gnome-search-tool, catfish) integration
 - Mimes
   - Open with desktop opener (default) or specify a custom app
   - Create, list and extract archives (needs atool/patool)
@@ -108,7 +107,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Copy absolute file paths with quotes
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
-  - Open current directory in a custom GUI file manager
+  - GUI app launcher
   - Terminal screensaver/locker integration
 - Unicode support
 - Highly optimized code, minimal resource usage
@@ -250,8 +249,7 @@ optional args:
              ^L  Redraw, clear prompt
             Esc  Exit prompt
               L  Lock terminal
-              o  Open DE filemanager
-             ^/  Open DE search app
+              o  Launch GUI app
               ?  Help, settings
           Q, ^G  Quit and cd
           q, ^X  Quit
@@ -304,7 +302,6 @@ The following indicators are used in the detail view:
 | --- | --- |
 | xdg-open (Linux), open(1) (OS X), cygstart (Cygwin) | desktop opener |
 | mediainfo, exiftool | multimedia file details |
-| gnome-search-tool, catfish | desktop search utility |
 | atool, patool ([integration](#integrate-patool)) | create, list and extract archives |
 | vidir from moreutils | batch rename, move, delete dir entries |
 | vlock (Linux), bashlock (OS X), lock(1) (BSD) | terminal locker |
@@ -315,12 +312,8 @@ The following indicators are used in the detail view:
 - To edit all text files in EDITOR (preferably CLI, fallback vi):
 
       export NNN_USE_EDITOR=1
-- To enable the desktop file manager key, set `NNN_DE_FILE_MANAGER`. E.g.:
 
-      export NNN_DE_FILE_MANAGER=thunar
-      export NNN_DE_FILE_MANAGER=nautilus
-
-Customizable script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) is used to run desktop search utility and terminal locker.
+Customizable script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) is used to run terminal locker.
 
 #### Help
 

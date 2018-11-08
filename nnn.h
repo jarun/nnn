@@ -52,13 +52,12 @@ enum action {
 	SEL_VISIT,
 	SEL_FLTR,
 	SEL_MFLTR,
-	SEL_SEARCH,
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
 	SEL_STATS,
 	SEL_MEDIA,
 	SEL_FMEDIA,
-	SEL_DFB,
+	SEL_LAUNCH,
 	SEL_ARCHIVE,
 	SEL_LIST,
 	SEL_EXTRACT,
@@ -156,8 +155,6 @@ static struct key bindings[] = {
 	/* Toggle filter mode */
 	{ KEY_IC,         SEL_MFLTR,     "",     "" },
 	{ CONTROL('I'),   SEL_MFLTR,     "",     "" },
-	/* Desktop search */
-	{ CONTROL('_'),   SEL_SEARCH,    "",     "" },
 	/* Toggle hide .dot files */
 	{ '.',            SEL_TOGGLEDOT, "",     "" },
 	/* Detailed listing */
@@ -168,8 +165,8 @@ static struct key bindings[] = {
 	{ 'm',            SEL_MEDIA,     NULL,   "" },
 	/* Show media info full, run is hacked */
 	{ 'M',            SEL_FMEDIA,    "-f",   "" },
-	/* Open dir in desktop file manager */
-	{ 'o',            SEL_DFB,       "",     "" },
+	/* Launch a GUI application */
+	{ 'o',            SEL_LAUNCH,    "",     "" },
 	/* Create archive */
 	{ 'f',            SEL_ARCHIVE,   "",     "" },
 	/* List archive */

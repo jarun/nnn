@@ -57,8 +57,6 @@ Change to initial directory
 Change to the last visited directory
 .It Ic /
 Change filter (more information below)
-.It Ic ^/
-Search directory in desktop search tool
 .It Ic \&.
 Toggle show hidden . (dot) files
 .It Ic ^B
@@ -95,8 +93,6 @@ Spawn SHELL in PWD (fallback sh)
 Run a custom script
 .It Ic e
 Open current entry in EDITOR (fallback vi)
-.It Ic o
-Open directory in NNN_DE_FILE_MANAGER
 .It Ic p
 Open current entry in PAGER (fallback less)
 .It Ic f
@@ -119,6 +115,8 @@ Force a redraw, clear prompt
 Exit prompt
 .It Ic L
 Lock terminal (Linux only)
+.It Ic o
+Launch a GUI application
 .It Ic \&?
 Toggle help and settings screen
 .It Ic Q, ^G
@@ -238,12 +236,6 @@ The bookmark prompt also understands the \fI~\fR (HOME), \fI-\fR (last visited d
 files.
 .Bd -literal
     export NNN_USE_EDITOR=1
-.Ed
-.Pp
-\fBNNN_DE_FILE_MANAGER:\fR set to a desktop file manager to open the current
-directory with. E.g.:
-.Bd -literal
-    export NNN_DE_FILE_MANAGER=thunar
 .Ed
 .Pp
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal
