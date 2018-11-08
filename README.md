@@ -49,6 +49,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
 - [Usage](#usage)
   - [Cmdline options](#cmdline-options)
   - [Keyboard shortcuts](#keyboard-shortcuts)
+  - [Key prompt](#key-prompt)
   - [Contexts](#contexts)
   - [Filters](#filters)
   - [Navigate-as-you-type mode](#navigate-as-you-type-mode)
@@ -223,7 +224,7 @@ optional args:
               -  Last visited dir
               /  Filter entries
               .  Toggle show hidden
-             ^B  Bookmark prompt
+             ^B  Key prompt
               b  Pin current dir
              ^V  Go to pinned dir
               d  Toggle detail view
@@ -259,6 +260,22 @@ optional args:
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
 
+#### Key prompt
+
+The key prompt, invoked by <kbd>^B</kbd>, provides a powerful multi-functional navigation mechanism. It understands contexts, bookmarks and handy location shortcuts.
+
+| Key | Function |
+|:---:| --- |
+| <kbd>1-4</kbd> | Go to selected context |
+| <kbd>></kbd>, <kbd>.</kbd> | Go to next active context |
+| <kbd><</kbd>, <kbd>,</kbd> | Go to previous active context |
+| key | Go to bookmarked location |
+| <kbd>~</kbd> | Go to HOME directory |
+| <kbd>-</kbd> | Go to last visited directory |
+| <kbd>&</kbd> | Go to start directory |
+
+If all the configured bookmark keys are single character, the prompt is not shown and <kbd>Enter</kbd> is not required; just press <kbd>^B</kbd> followed by the key.
+
 #### Contexts
 
 Contexts (aka _tabs_ aka _workspaces_) serve the purpose of exploring multiple directories simultaneously. 4 contexts are available. The status of the contexts are shown in the top left corner:
@@ -266,8 +283,6 @@ Contexts (aka _tabs_ aka _workspaces_) serve the purpose of exploring multiple d
 - the current context is in reverse
 - other used contexts are underlined
 - rest are unused
-
-The bookmark prompt understands contexts. To switch contexts press <kbd>^B</kbd> and enter the context number (1-4). <kbd>>/.</kbd> and <kbd></.</kbd> at the bookmark prompt cycles between active contexts.
 
 The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
 
@@ -355,10 +370,6 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 Set environment variable `NNN_BMS` as a string of `key:location` pairs (max 10) separated by semicolons (`;`):
 
     export NNN_BMS='doc:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
-
-The bookmark prompt also understands the <kbd>~</kbd> (HOME), <kbd>-</kbd> (last visited directory) and <kbd>&</kbd> (start directory) shortcuts.
-
-If all the configured bookmark keys are single character, the prompt is disabled and <kbd>Enter</kbd> is not required; just press <kbd>^B</kbd> followed by the key.
 
 #### copy file paths
 

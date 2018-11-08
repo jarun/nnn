@@ -1971,7 +1971,7 @@ static int show_help(char *path)
 	     "e-  Last visited dir\n"
 	     "e/  Filter entries\n"
 	     "e.  Toggle show hidden\n"
-	    "d^B  Bookmark prompt\n"
+	    "d^B  Key prompt\n"
 	     "eb  Pin current dir\n"
 	    "d^V  Go to pinned dir\n"
 	     "ed  Toggle detail view\n"

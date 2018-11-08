@@ -18,7 +18,7 @@
 .Op Ar PATH
 .Sh DESCRIPTION
 .Nm
-(Noice is Not Noice) is a performance-optimized, feature-packed fork of noice (http://git.2f30.org/noice/) with seamless desktop integration, simplified navigation, \fInavigate-as-you-type\fR mode, bookmarks, disk usage analyzer mode, comprehensive file details and much more. It remains a simple and efficient file manager that stays out of your way.
+(Noice is Not Noice) is a performance-optimized, feature-packed fork of noice (http://git.2f30.org/noice/) with seamless desktop integration, simplified navigation, \fInavigate-as-you-type\fR mode, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more. It remains a simple and efficient file manager that stays out of your way.
 .Pp
 .Nm
 opens the current working directory by default if
@@ -60,7 +60,7 @@ Change filter (more information below)
 .It Ic \&.
 Toggle show hidden . (dot) files
 .It Ic ^B
-Show bookmark key prompt (understands ~, -, &)
+Show key prompt (recognizes bookmark keys, ~, -, & and context IDs)
 .It Ic b
 Pin current directory
 .It Ic ^V
@@ -192,7 +192,7 @@ simultaneously. 4 contexts are available. The status of the contexts are shown i
 .br
 - rest are unused
 .Pp
-The bookmark prompt understands contexts. To switch contexts press \fI^B\fR and enter the context number (1-4).
+The key prompt understands contexts. To switch contexts press \fI^B\fR and enter the context number (1-4).
 .Pp
 The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
 .Pp
@@ -247,7 +247,6 @@ when dealing with the !, e and p commands respectively.
 .Bd -literal
     export NNN_BMS='doc:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
 .Ed
-The bookmark prompt also understands the \fI~\fR (HOME), \fI-\fR (last visited directory) and \fI&\fR shortcuts.
 .Pp
 \fBNNN_USE_EDITOR:\fR use EDITOR (preferably CLI, fallback vi) to handle text
 files.
