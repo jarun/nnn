@@ -1988,8 +1988,9 @@ static int show_help(char *path)
 	     "eL  Lock terminal\n"
 	     "eo  Launch GUI app\n"
 	     "e?  Help, settings\n"
-	 "aQ, ^G  Quit and cd\n"
-	 "aq, ^X  Quit\n\n"};
+	     "eq  Quit context\n"
+	    "d^G  Quit and cd\n"
+	 "aQ, ^X  Quit\n\n"};
 
 	if (fd == -1)
 		return -1;
@@ -2708,7 +2709,7 @@ nochange:
 				tmp = lastdir;
 
 			if (tmp[0] == '\0') {
-				printmsg("not set...");
+				printmsg("not set");
 				goto nochange;
 			}
 
@@ -2744,8 +2745,8 @@ nochange:
 				case '3': //fallthrough
 				case '4':
 				{
-					uint nextctx = tmp[0] - '1';
-					if (g_curctx == nextctx)
+					r = tmp[0] - '1'; /* Save the next context id */
+					if (g_curctx == r)
 						continue;
 
 					g_crc = 0;
@@ -2757,27 +2758,29 @@ nochange:
 					xstrlcpy(g_ctx[g_curctx].c_last, lastdir, PATH_MAX);
 					g_ctx[g_curctx].c_cfg = cfg;
 
-					if (!g_ctx[nextctx].c_cfg.ctxactive) {
+					if (!g_ctx[r].c_cfg.ctxactive) {
 						/* Setup a new context  from current context */
-						g_ctx[nextctx].c_cfg.ctxactive = 1;
-						xstrlcpy(g_ctx[nextctx].c_name, oldname, NAME_MAX + 1);
-						xstrlcpy(g_ctx[nextctx].c_fltr, fltr, NAME_MAX + 1);
-						xstrlcpy(g_ctx[nextctx].c_path, path, PATH_MAX);
-						xstrlcpy(g_ctx[nextctx].c_init, path, PATH_MAX);
-						ipath = g_ctx[nextctx].c_init;
-						g_ctx[nextctx].c_last[0] = lastdir[0] = '\0';
-						g_ctx[nextctx].c_cfg = cfg;
+						g_ctx[r].c_cfg.ctxactive = 1;
+						xstrlcpy(g_ctx[r].c_name, oldname, NAME_MAX + 1);
+						xstrlcpy(g_ctx[r].c_fltr, fltr, NAME_MAX + 1);
+						xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
+						xstrlcpy(g_ctx[r].c_init, path, PATH_MAX);
+						ipath = g_ctx[r].c_init;
+						g_ctx[r].c_last[0] = lastdir[0] = '\0';
+						g_ctx[r].c_cfg = cfg;
 					} else {
 						/* Switch to saved context */
-						xstrlcpy(oldname, g_ctx[nextctx].c_name, NAME_MAX + 1);
-						xstrlcpy(fltr, g_ctx[nextctx].c_fltr, NAME_MAX + 1);
-						xstrlcpy(path, g_ctx[nextctx].c_path, PATH_MAX);
-						ipath = g_ctx[nextctx].c_init;
-						xstrlcpy(lastdir, g_ctx[nextctx].c_last, PATH_MAX);
-						cfg = g_ctx[nextctx].c_cfg;
+						xstrlcpy(oldname, g_ctx[r].c_name, NAME_MAX + 1);
+						xstrlcpy(fltr, g_ctx[r].c_fltr, NAME_MAX + 1);
+						xstrlcpy(path, g_ctx[r].c_path, PATH_MAX);
+						ipath = g_ctx[r].c_init;
+						xstrlcpy(lastdir, g_ctx[r].c_last, PATH_MAX);
+						cfg = g_ctx[r].c_cfg;
 					}
 
-					g_curctx = nextctx;
+					g_curctx = r;
+					if (cfg.filtermode)
+						presel = FILTER;
 					goto begin;
 				}
 				}
@@ -3281,6 +3284,38 @@ nochange:
 		case SEL_LOCK:
 			spawn(player, "", "screensaver", NULL, F_NORMAL | F_SIGINT);
 			break;
+		case SEL_QUITCTX:
+		{
+			uint iter = 1;
+			r = g_curctx;
+			while (iter < MAX_CTX) {
+				++r;
+				r %= MAX_CTX;
+				DPRINTF_D(r);
+				DPRINTF_U(g_ctx[r].c_cfg.ctxactive);
+				if (g_ctx[r].c_cfg.ctxactive) {
+					g_ctx[g_curctx].c_cfg.ctxactive = 0;
+
+					/* Switch to next active context */
+					xstrlcpy(oldname, g_ctx[r].c_name, NAME_MAX + 1);
+					xstrlcpy(fltr, g_ctx[r].c_fltr, NAME_MAX + 1);
+					xstrlcpy(path, g_ctx[r].c_path, PATH_MAX);
+					ipath = g_ctx[r].c_init;
+					xstrlcpy(lastdir, g_ctx[r].c_last, PATH_MAX);
+					cfg = g_ctx[r].c_cfg;
+
+					g_curctx = r;
+					if (cfg.filtermode)
+						presel = FILTER;
+					goto begin;
+				}
+
+				++iter;
+			}
+
+			dentfree(dents);
+			return;
+		}
 		case SEL_CDQUIT:
 		{
 			tmp = getenv("NNN_TMPFILE");

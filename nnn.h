@@ -79,6 +79,7 @@ enum action {
 	SEL_RUNSCRIPT,
 	SEL_RUNARG,
 	SEL_LOCK,
+	SEL_QUITCTX,
 	SEL_CDQUIT,
 	SEL_QUIT,
 };
@@ -214,10 +215,11 @@ static struct key bindings[] = {
 	{ 'p',            SEL_RUNARG,    "less", "PAGER" },
 	/* Lock screen */
 	{ 'L',            SEL_LOCK,      "",     "" },
+	/* Quit a context */
+	{ 'q',            SEL_QUITCTX,   "",     "" },
 	/* Change dir on quit */
-	{ 'Q',            SEL_CDQUIT,    "",     "" },
 	{ CONTROL('G'),   SEL_CDQUIT,    "",     "" },
 	/* Quit */
-	{ 'q',            SEL_QUIT,      "",     "" },
+	{ 'Q',            SEL_QUIT,    "",     "" },
 	{ CONTROL('X'),   SEL_QUIT,      "",     "" },
 };

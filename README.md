@@ -252,15 +252,16 @@ optional args:
               L  Lock terminal
               o  Launch GUI app
               ?  Help, settings
-          Q, ^G  Quit and cd
-          q, ^X  Quit
+              q  Quit context
+             ^G  Quit and cd
+          Q, ^X  Quit
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
 
 #### Contexts
 
-Contexts (aka _tabs_ aka _workspaces_) serve the purpose of exploring multiple directories in parallel. `nnn` provides 4 contexts simultaneously. The status of the contexts are shown in the top left corner:
+Contexts (aka _tabs_ aka _workspaces_) serve the purpose of exploring multiple directories simultaneously. 4 contexts are available. The status of the contexts are shown in the top left corner:
 
 - the current context is in reverse
 - other used contexts are underlined
@@ -269,6 +270,8 @@ Contexts (aka _tabs_ aka _workspaces_) serve the purpose of exploring multiple d
 The bookmark prompt understands contexts. To switch contexts press `^B` and enter the context number (1-4).
 
 The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
+
+When a context is quit, the next active context is selected. If the last active context is quit, the program quits.
 
 #### Filters
 

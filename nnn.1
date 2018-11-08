@@ -119,9 +119,11 @@ Lock terminal (Linux only)
 Launch a GUI application
 .It Ic \&?
 Toggle help and settings screen
-.It Ic Q, ^G
+.It Ic q
+Quit the current context
+.It Ic ^G
 Quit and change directory
-.It Ic q, ^X
+.It Ic Q, ^X
 Quit
 .El
 .Pp
@@ -181,9 +183,8 @@ to change to the last visited directory on quit requires shell integration in a
 few easy steps. Please visit the project page (linked below) for the
 instructions.
 .Sh CONTEXTS
-Contexts (aka \fItabs\fR aka \fIworkspaces\fR) serve the purpose of exploring multiple directories in parallel.
-.Nm
-provides 4 contexts simultaneously. The status of the contexts are shown in the top left corner:
+Contexts (aka \fItabs\fR aka \fIworkspaces\fR) serve the purpose of exploring multiple directories
+simultaneously. 4 contexts are available. The status of the contexts are shown in the top left corner:
 .Pp
 - the current context is in reverse
 .br
@@ -194,6 +195,8 @@ provides 4 contexts simultaneously. The status of the contexts are shown in the 
 The bookmark prompt understands contexts. To switch contexts press \fI^B\fR and enter the context number (1-4).
 .Pp
 The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
+.Pp
+When a context is quit, the next active context is selected. If the last active context is quit, the program quits.
 .Sh FILTERS
 Filters support regexes to instantly (search-as-you-type) list the matching
 entries in the current directory.
