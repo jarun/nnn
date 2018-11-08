@@ -21,7 +21,7 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (click to play video)</i></a></p>
 
-`nnn` is probably the [fastest and most resource-sensitive](#performance) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, familiar navigation shortcuts, subshell spawning and much more.
+`nnn` is probably the [fastest and most resource-sensitive](#performance) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, familiar navigation shortcuts, subshell spawning and much more.
 
 [Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily; `nnn` supports as many scripts as you need!
 
@@ -57,6 +57,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
 - [Quickstart](#quickstart)
 - [How to](#how-to)
   - [add bookmarks](#add-bookmarks)
+  - [contexts](#contexts)
   - [copy file paths](#copy-file-paths)
     - [selection shortcuts](#selection-shortcuts)
     - [default copy](#default-copy)
@@ -65,7 +66,6 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - [cd on quit](#cd-on-quit)
   - [run custom scripts](#run-custom-scripts)
     - [sample scripts](#sample-scripts)
-  - [dual-pane or multi-pane](#dual-pane-or-multi-pane)
   - [change dir color](#change-dir-color)
   - [integrate patool](#integrate-patool)
   - [work faster at rename prompt](#work-faster-at-rename-prompt)
@@ -83,6 +83,7 @@ Have fun with it! Missing a feature? Want to contribute? Head to the rolling [To
   - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
   - *Navigate-as-you-type* mode with dir auto-select for the maverick
   - Handy bookmarks, start at bookmark, pin and visit directory
+  - Multiple contexts
   - Roll-over at edges, page through entries
   - Show directories in custom color (default: enabled in blue)
 - Sorting
@@ -342,6 +343,18 @@ Set environment variable `NNN_BMS` as a string of `key:location` pairs (max 10) 
 
 The bookmark prompt also understands the <kbd>~</kbd> (HOME), <kbd>-</kbd> (last visited directory) and <kbd>&</kbd> (start directory) shortcuts.
 
+#### contexts
+
+Contexts (aka _tabs_ aka _workspaces_) serve the purpose of exploring multiple directories in parallel. `nnn` provides 4 contexts simultaneously. The status of the contexts are shown in the top left corner:
+
+- the current context is in reverse
+- other used contexts are underlined
+- rest are unused
+
+The bookmark prompt understands contexts. To switch contexts press `^B` and enter the context number (1-4).
+
+The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
+
 #### copy file paths
 
 ##### selection shortcuts
@@ -476,10 +489,6 @@ Type the correct suffix  when prompted on pressing the keybind <kbd>R</kbd>. To 
       #!/usr/bin/env sh
 
       xdg-open $(find -type f | fzy) >/dev/null 2>&1
-
-#### dual-pane or multi-pane
-
-`nnn` doesn't have a native dual-pane or multi-pane mode. On most modern DEs the default terminal emulator handles that. Other options are tmux, GNU Screen, Terminator, Tilix, AltYo and Byobu.
 
 #### change dir color
 

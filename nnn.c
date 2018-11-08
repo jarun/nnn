@@ -175,6 +175,7 @@ disabledbg()
 #define _ALIGNMENT_MASK 0xF
 #define SYMLINK_TO_DIR 0x1
 #define MAX_HOME_LEN 64
+#define MAX_CTX 4
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE     0x00  /* no flag set */
@@ -240,26 +241,40 @@ typedef struct {
 
 /* Settings */
 typedef struct {
-	ushort filtermode : 1;  /* Set to enter filter mode */
-	ushort mtimeorder : 1;  /* Set to sort by time modified */
-	ushort sizeorder  : 1;  /* Set to sort by file size */
-	ushort apparentsz : 1;  /* Set to sort by apparent size (disk usage) */
-	ushort blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
-	ushort showhidden : 1;  /* Set to show hidden files */
-	ushort copymode   : 1;  /* Set when copying files */
-	ushort autoselect : 1;  /* Auto-select dir in nav-as-you-type mode */
-	ushort showdetail : 1;  /* Clear to show fewer file info */
-	ushort showcolor  : 1;  /* Set to show dirs in blue */
-	ushort dircolor   : 1;  /* Current status of dir color */
-	ushort metaviewer : 1;  /* Index of metadata viewer in utils[] */
-	ushort quote      : 1;  /* Copy paths within quotes */
-	ushort color      : 3;  /* Color code for directories */
+	uint filtermode : 1;  /* Set to enter filter mode */
+	uint mtimeorder : 1;  /* Set to sort by time modified */
+	uint sizeorder  : 1;  /* Set to sort by file size */
+	uint apparentsz : 1;  /* Set to sort by apparent size (disk usage) */
+	uint blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
+	uint showhidden : 1;  /* Set to show hidden files */
+	uint copymode   : 1;  /* Set when copying files */
+	uint autoselect : 1;  /* Auto-select dir in nav-as-you-type mode */
+	uint showdetail : 1;  /* Clear to show fewer file info */
+	uint showcolor  : 1;  /* Set to show dirs in blue */
+	uint dircolor   : 1;  /* Current status of dir color */
+	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
+	uint quote      : 1;  /* Copy paths within quotes */
+	uint color      : 3;  /* Color code for directories */
+	uint ctxactive  : 1;  /* Context active or not */
+	uint reserved   : 15;
 } settings;
+
+/* Contexts or workspaces */
+typedef struct {
+	char c_name[NAME_MAX + 1];
+	char c_fltr[NAME_MAX + 1];
+	char c_path[PATH_MAX];
+	char c_init[PATH_MAX];
+	char c_last[PATH_MAX];
+	settings c_cfg;
+} context;
 
 /* GLOBALS */
 
-/* Configuration */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 4};
+/* Configuration, contexts */
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 4, 1, 0};
+static context g_ctx[MAX_CTX] __attribute__ ((aligned));
+static uchar g_curctx;
 
 static struct entry *dents;
 static char *pnamebuf, *pcopybuf;
@@ -2313,8 +2328,8 @@ static void redraw(char *path)
 			DPRINTF_S("copymode off");
 		}
 
-	/* Fail redraw if < than 10 columns */
-	if (COLS < 10) {
+	/* Fail redraw if < than 11 columns, context info prints 10 chars */
+	if (COLS < 11) {
 		printmsg("too few columns!");
 		return;
 	}
@@ -2338,9 +2353,27 @@ static void redraw(char *path)
 	if (ncols > PATH_MAX)
 		ncols = PATH_MAX;
 
+	printw("[");
+	for (i = 0; i < MAX_CTX; ++i) {
+		/* Print current context in reverse */
+		if (g_curctx == i) {
+			attron(A_REVERSE);
+			printw("%d", i + 1);
+			attroff(A_REVERSE);
+			printw(" ");
+		} else if (g_ctx[i].c_cfg.ctxactive) {
+			attron(A_UNDERLINE);
+			printw("%d", i + 1);
+			attroff(A_UNDERLINE);
+			printw(" ");
+		} else
+			printw("%d ", i + 1);
+	}
+	printw("\b] "); /* 10 chars printed in total for contexts - "[1 2 3 4] " */
+
 	attron(A_UNDERLINE);
 	/* No text wrapping in cwd line */
-	g_buf[ncols - 1] = '\0';
+	g_buf[ncols - 11] = '\0';
 	printw("%s\n\n", g_buf);
 	attroff(A_UNDERLINE);
 
@@ -2436,6 +2469,10 @@ static void browse(char *ipath, char *ifilter)
 	int r, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
 	enum action sel = SEL_RUNARG + 1;
 	bool dir_changed = FALSE;
+
+	/* setup first context */
+	g_curctx = 0;
+	xstrlcpy(g_ctx[0].c_init, ipath, PATH_MAX);
 
 	xstrlcpy(path, ipath, PATH_MAX);
 	copyfilter();
@@ -2695,9 +2732,55 @@ nochange:
 				break;
 
 			/* Interpret ~, - and & keys */
-			if ((tmp[1] == '\0') && (tmp[0] == '~' || tmp[0] == '-' || tmp[0] == '&')) {
-				presel = tmp[0];
-				goto begin;
+			if (tmp[1] == '\0') {
+				switch (tmp[0]) {
+				case '~': //fallthrough
+				case '-': //fallthrough
+				case '&':
+					presel = tmp[0];
+					goto begin;
+				case '1': //fallthrough
+				case '2': //fallthrough
+				case '3': //fallthrough
+				case '4':
+				{
+					uint nextctx = tmp[0] - '1';
+					if (g_curctx == nextctx)
+						continue;
+
+					g_crc = 0;
+
+					/* Save current context */
+					xstrlcpy(g_ctx[g_curctx].c_name, oldname, NAME_MAX + 1);
+					xstrlcpy(g_ctx[g_curctx].c_fltr, fltr, NAME_MAX + 1);
+					xstrlcpy(g_ctx[g_curctx].c_path, path, PATH_MAX);
+					xstrlcpy(g_ctx[g_curctx].c_last, lastdir, PATH_MAX);
+					g_ctx[g_curctx].c_cfg = cfg;
+
+					if (!g_ctx[nextctx].c_cfg.ctxactive) {
+						/* Setup a new context  from current context */
+						g_ctx[nextctx].c_cfg.ctxactive = 1;
+						xstrlcpy(g_ctx[nextctx].c_name, oldname, NAME_MAX + 1);
+						xstrlcpy(g_ctx[nextctx].c_fltr, fltr, NAME_MAX + 1);
+						xstrlcpy(g_ctx[nextctx].c_path, path, PATH_MAX);
+						xstrlcpy(g_ctx[nextctx].c_init, path, PATH_MAX);
+						ipath = g_ctx[nextctx].c_init;
+						g_ctx[nextctx].c_last[0] = lastdir[0] = '\0';
+						g_ctx[nextctx].c_cfg = cfg;
+					} else {
+						/* Switch to saved context */
+						xstrlcpy(oldname, g_ctx[nextctx].c_name, NAME_MAX + 1);
+						xstrlcpy(fltr, g_ctx[nextctx].c_fltr, NAME_MAX + 1);
+						xstrlcpy(path, g_ctx[nextctx].c_path, PATH_MAX);
+						ipath = g_ctx[nextctx].c_init;
+						xstrlcpy(lastdir, g_ctx[nextctx].c_last, PATH_MAX);
+						cfg = g_ctx[nextctx].c_cfg;
+					}
+
+					g_curctx = nextctx;
+					goto begin;
+				}
+				}
 			}
 
 			if (get_bm_loc(tmp, newpath) == NULL) {
