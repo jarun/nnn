@@ -205,6 +205,7 @@ disabledbg()
 #define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
+#define setdirwatch() (cfg.filtermode ? (presel = FILTER) : (dir_changed = TRUE))
 
 #ifdef LINUX_INOTIFY
 #define EVENT_SIZE (sizeof(struct inotify_event))
@@ -990,20 +991,19 @@ static int nextsel(char **run, char **env, int *presel)
 	if (c == 0)
 		c = getch();
 	else {
-		*presel = 0;
-
 		/* Unwatch dir if we are still in a filtered view */
 #ifdef LINUX_INOTIFY
-		if (inotify_wd >= 0) {
+		if (*presel == FILTER && inotify_wd >= 0) {
 			inotify_rm_watch(inotify_fd, inotify_wd);
 			inotify_wd = -1;
 		}
 #elif defined(BSD_KQUEUE)
-		if (event_fd >= 0) {
+		if (*presel == FILTER && event_fd >= 0) {
 			close(event_fd);
 			event_fd = -1;
 		}
 #endif
+		*presel = 0;
 	}
 
 	if (c == -1) {
@@ -2511,13 +2511,13 @@ static void browse(char *ipath)
 
 begin:
 #ifdef LINUX_INOTIFY
-	if (dir_changed && inotify_wd >= 0) {
+	if ((presel == FILTER || dir_changed) && inotify_wd >= 0) {
 		inotify_rm_watch(inotify_fd, inotify_wd);
 		inotify_wd = -1;
 		dir_changed = FALSE;
 	}
 #elif defined(BSD_KQUEUE)
-	if (dir_changed && event_fd >= 0) {
+	if ((presel == FILTER || dir_changed) && event_fd >= 0) {
 		close(event_fd);
 		event_fd = -1;
 		dir_changed = FALSE;
@@ -2560,7 +2560,6 @@ nochange:
 				/* Continue in navigate-as-you-type mode, if enabled */
 				if (cfg.filtermode)
 					presel = FILTER;
-
 				goto nochange;
 			}
 
@@ -2575,11 +2574,10 @@ nochange:
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
-			dir_changed = TRUE;
 
 			xstrlcpy(path, dir, PATH_MAX);
-			if (cfg.filtermode)
-				presel = FILTER;
+
+			setdirwatch();
 			goto begin;
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
@@ -2612,12 +2610,10 @@ nochange:
 
 				/* Save last working directory */
 				xstrlcpy(lastdir, path, PATH_MAX);
-				dir_changed = TRUE;
 
 				xstrlcpy(path, newpath, PATH_MAX);
 				lastname[0] = '\0';
-				if (cfg.filtermode)
-					presel = FILTER;
+				setdirwatch();
 				goto begin;
 			case S_IFREG:
 			{
@@ -2696,13 +2692,11 @@ nochange:
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
-			dir_changed = TRUE;
 
 			xstrlcpy(path, dir, PATH_MAX);
 			lastname[0] = '\0';
 			DPRINTF_S(path);
-			if (cfg.filtermode)
-				presel = FILTER;
+			setdirwatch();
 			goto begin;
 		case SEL_CDLAST: // fallthrough
 		case SEL_VISIT:
@@ -2724,12 +2718,10 @@ nochange:
 
 			xstrlcpy(newpath, tmp, PATH_MAX);
 			xstrlcpy(lastdir, path, PATH_MAX);
-			dir_changed = TRUE;
 			xstrlcpy(path, newpath, PATH_MAX);
 			lastname[0] = '\0';
 			DPRINTF_S(path);
-			if (cfg.filtermode)
-				presel = FILTER;
+			setdirwatch();
 			goto begin;
 		case SEL_CDBM:
 			tmp = xreadline(NULL, "key: ", cfg.char_key);
@@ -2739,11 +2731,12 @@ nochange:
 			/* Interpret ~, - and & keys */
 			if (tmp[1] == '\0') {
 				switch (tmp[0]) {
+				case 'q':
 				case '~': //fallthrough
 				case '-': //fallthrough
 				case '&':
 					presel = tmp[0];
-					goto begin;
+					goto nochange;
 				case '>':
 				case '.':
 				case '<':
@@ -2792,12 +2785,8 @@ nochange:
 					hfltr = g_ctx[r].c_fltr;
 
 					cfg.curctx = r;
-					if (cfg.filtermode)
-						presel = FILTER;
+					setdirwatch();
 					goto begin;
-				case 'q':
-					presel = 'q';
-					goto nochange;
 				}
 			}
 
@@ -2816,14 +2805,12 @@ nochange:
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
-			dir_changed = TRUE;
 
 			/* Save the newly opted dir in path */
 			xstrlcpy(path, newpath, PATH_MAX);
 			DPRINTF_S(path);
 
-			if (cfg.filtermode)
-				presel = FILTER;
+			setdirwatch();
 			goto begin;
 		case SEL_PIN:
 			xstrlcpy(mark, path, PATH_MAX);
@@ -2837,17 +2824,18 @@ nochange:
 			goto nochange;
 		case SEL_MFLTR:
 			cfg.filtermode ^= 1;
-			if (cfg.filtermode)
+			if (cfg.filtermode) {
 				presel = FILTER;
-			else {
-				/* Save current */
-				if (ndents)
-					copycurname();
-
-				/* Start watching the directory */
-				goto begin;
+				goto nochange;
 			}
-			goto nochange;
+
+			/* Save current */
+			if (ndents)
+				copycurname();
+
+			dir_changed = TRUE;
+			/* Start watching the directory */
+			goto begin;
 		case SEL_TOGGLEDOT:
 			cfg.showhidden ^= 1;
 			initfilter(cfg.showhidden, hfltr);
@@ -3314,8 +3302,7 @@ nochange:
 					hfltr = g_ctx[r].c_fltr;
 
 					cfg.curctx = r;
-					if (cfg.filtermode)
-						presel = FILTER;
+					setdirwatch();
 					goto begin;
 				}
 
