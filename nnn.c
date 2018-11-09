@@ -2807,6 +2807,9 @@ nochange:
 					if (cfg.filtermode)
 						presel = FILTER;
 					goto begin;
+				case 'q':
+					presel = 'q';
+					goto nochange;
 				}
 			}
 

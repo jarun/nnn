@@ -273,6 +273,7 @@ The key prompt, invoked by <kbd>^B</kbd>, provides a powerful multi-functional n
 | <kbd>~</kbd> | Go to HOME directory |
 | <kbd>-</kbd> | Go to last visited directory |
 | <kbd>&</kbd> | Go to start directory |
+| <kbd>q</kbd> | Quit context |
 
 If all the configured bookmark keys are single character, the prompt is not shown and <kbd>Enter</kbd> is not required; just press <kbd>^B</kbd> followed by the key.
 
