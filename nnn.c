@@ -2469,11 +2469,11 @@ static void redraw(char *path)
 	}
 }
 
-static void browse(char *ipath, char *hfilter)
+static void browse(char *ipath)
 {
-	static char *path, *lastdir, *lastname;
 	static char newpath[PATH_MAX] __attribute__ ((aligned));
 	static char mark[PATH_MAX] __attribute__ ((aligned));
+	char *path, *lastdir, *lastname, *hfilter;
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
 	int r, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
@@ -2484,12 +2484,12 @@ static void browse(char *ipath, char *hfilter)
 	xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
 	path = g_ctx[0].c_path;
 	xstrlcpy(g_ctx[0].c_init, ipath, PATH_MAX); /* start directory */
+	g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = newpath[0] = mark[0] = '\0';
 	lastdir = g_ctx[0].c_last; /* last visited directory */
 	lastname = g_ctx[0].c_name; /* last visited filename */
 	g_ctx[0].c_cfg = cfg; /* current configuration */
-
-	xstrlcpy(path, ipath, PATH_MAX);
-	lastname[0] = newpath[0] = lastdir[0] = mark[0] = '\0';
+	initfilter(cfg.showhidden, g_ctx[0].c_fltr); /* Show hidden filter */
+	hfilter = g_ctx[0].c_fltr;
 
 	if (cfg.filtermode)
 		presel = FILTER;
@@ -2771,22 +2771,17 @@ nochange:
 					/* Save current context */
 					xstrlcpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
 					g_ctx[cfg.curctx].c_cfg = cfg;
-					xstrlcpy(g_ctx[cfg.curctx].c_fltr, hfilter, DOT_FILTER_LEN);
 
-					if (!g_ctx[r].c_cfg.ctxactive) {
+					if (g_ctx[r].c_cfg.ctxactive) /* Switch to saved context */
+						cfg = g_ctx[r].c_cfg;
+					else { /* Setup a new context from current context */
 						g_ctx[r].c_cfg.ctxactive = 1;
-
-						/* Setup a new context from current context */
 						xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
 						xstrlcpy(g_ctx[r].c_init, path, PATH_MAX);
 						g_ctx[r].c_last[0] = '\0';
 						xstrlcpy(g_ctx[r].c_name, dents[cur].name, NAME_MAX + 1);
 						g_ctx[r].c_cfg = cfg;
 						xstrlcpy(g_ctx[r].c_fltr, hfilter, DOT_FILTER_LEN);
-					} else {
-						/* Switch to saved context */
-						cfg = g_ctx[r].c_cfg;
-						xstrlcpy(hfilter, g_ctx[r].c_fltr, DOT_FILTER_LEN);
 					}
 
 					/* Reset the pointers */
@@ -2794,6 +2789,7 @@ nochange:
 					ipath = g_ctx[r].c_init;
 					lastdir = g_ctx[r].c_last;
 					lastname = g_ctx[r].c_name;
+					hfilter = g_ctx[r].c_fltr;
 
 					cfg.curctx = r;
 					if (cfg.filtermode)
@@ -3315,7 +3311,7 @@ nochange:
 					lastdir = g_ctx[r].c_last;
 					lastname = g_ctx[r].c_name;
 					cfg = g_ctx[r].c_cfg;
-					xstrlcpy(hfilter, g_ctx[r].c_fltr, NAME_MAX + 1);
+					hfilter = g_ctx[r].c_fltr;
 
 					cfg.curctx = r;
 					if (cfg.filtermode)
@@ -3384,7 +3380,7 @@ static void usage(void)
 int main(int argc, char *argv[])
 {
 	static char cwd[PATH_MAX] __attribute__ ((aligned));
-	char *ipath = NULL, hfilter[DOT_FILTER_LEN] = {'\0'}; /* Hidden file filter */
+	char *ipath = NULL;
 	int opt;
 
 	/* Confirm we are in a terminal */
@@ -3458,7 +3454,6 @@ int main(int argc, char *argv[])
 
 	if (getuid() == 0 || getenv("NNN_SHOW_HIDDEN"))
 		cfg.showhidden = 1;
-	initfilter(cfg.showhidden, hfilter);
 
 #ifdef LINUX_INOTIFY
 	/* Initialize inotify */
@@ -3533,7 +3528,7 @@ int main(int argc, char *argv[])
 	enabledbg();
 #endif
 	initcurses();
-	browse(ipath, hfilter);
+	browse(ipath);
 	exitcurses();
 
 	if (g_cppath[0])
