@@ -176,6 +176,7 @@ disabledbg()
 #define SYMLINK_TO_DIR 0x1
 #define MAX_HOME_LEN 64
 #define MAX_CTX 4
+#define DOT_FILTER_LEN 8
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE     0x00  /* no flag set */
@@ -200,7 +201,6 @@ disabledbg()
 #define clearprompt() printmsg("")
 #define printwarn() printmsg(strerror(errno))
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
-#define copyfilter() xstrlcpy(fltr, ifilter, NAME_MAX)
 #define copycurname() xstrlcpy(oldname, dents[cur].name, NAME_MAX + 1)
 #define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
@@ -265,11 +265,11 @@ typedef struct {
 /* Contexts or workspaces */
 typedef struct {
 	char c_name[NAME_MAX + 1];
-	char c_fltr[NAME_MAX + 1];
 	char c_path[PATH_MAX];
 	char c_init[PATH_MAX];
 	char c_last[PATH_MAX];
 	settings c_cfg;
+	char c_fltr[DOT_FILTER_LEN];
 } context;
 
 /* GLOBALS */
@@ -922,9 +922,9 @@ static int setfilter(regex_t *regex, char *filter)
 	return r;
 }
 
-static void initfilter(int dot, char **ifilter)
+static void initfilter(int dot, char *hfilter)
 {
-	*ifilter = dot ? "." : "^[^.]";
+	dot ? (hfilter[0] = '.', hfilter[1] = '\0') : xstrlcpy(hfilter, "^[^.]", DOT_FILTER_LEN);
 }
 
 static int visible(regex_t *regex, char *file)
@@ -2469,13 +2469,12 @@ static void redraw(char *path)
 	}
 }
 
-static void browse(char *ipath, char *ifilter)
+static void browse(char *ipath, char *hfilter)
 {
 	static char path[PATH_MAX] __attribute__ ((aligned));
 	static char newpath[PATH_MAX] __attribute__ ((aligned));
 	static char lastdir[PATH_MAX] __attribute__ ((aligned));
 	static char mark[PATH_MAX] __attribute__ ((aligned));
-	static char fltr[NAME_MAX + 1] __attribute__ ((aligned));
 	static char oldname[NAME_MAX + 1] __attribute__ ((aligned));
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
@@ -2488,7 +2487,6 @@ static void browse(char *ipath, char *ifilter)
 	g_ctx[0].c_cfg = cfg;
 
 	xstrlcpy(path, ipath, PATH_MAX);
-	copyfilter();
 	oldname[0] = newpath[0] = lastdir[0] = mark[0] = '\0';
 
 	if (cfg.filtermode)
@@ -2524,7 +2522,7 @@ begin:
 	}
 #endif
 
-	if (populate(path, oldname, fltr) == -1) {
+	if (populate(path, oldname, hfilter) == -1) {
 		printwarn();
 		goto nochange;
 	}
@@ -2578,8 +2576,6 @@ nochange:
 			dir_changed = TRUE;
 
 			xstrlcpy(path, dir, PATH_MAX);
-			/* Reset filter */
-			copyfilter();
 			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
@@ -2618,8 +2614,6 @@ nochange:
 
 				xstrlcpy(path, newpath, PATH_MAX);
 				oldname[0] = '\0';
-				/* Reset filter */
-				copyfilter();
 				if (cfg.filtermode)
 					presel = FILTER;
 				goto begin;
@@ -2704,8 +2698,6 @@ nochange:
 
 			xstrlcpy(path, dir, PATH_MAX);
 			oldname[0] = '\0';
-			/* Reset filter */
-			copyfilter();
 			DPRINTF_S(path);
 			if (cfg.filtermode)
 				presel = FILTER;
@@ -2733,8 +2725,6 @@ nochange:
 			dir_changed = TRUE;
 			xstrlcpy(path, newpath, PATH_MAX);
 			oldname[0] = '\0';
-			/* Reset filter */
-			copyfilter();
 			DPRINTF_S(path);
 			if (cfg.filtermode)
 				presel = FILTER;
@@ -2778,29 +2768,29 @@ nochange:
 
 					/* Save current context */
 					xstrlcpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
-					xstrlcpy(g_ctx[cfg.curctx].c_fltr, fltr, NAME_MAX + 1);
 					xstrlcpy(g_ctx[cfg.curctx].c_path, path, PATH_MAX);
 					xstrlcpy(g_ctx[cfg.curctx].c_last, lastdir, PATH_MAX);
 					g_ctx[cfg.curctx].c_cfg = cfg;
+					xstrlcpy(g_ctx[cfg.curctx].c_fltr, hfilter, DOT_FILTER_LEN);
 
 					if (!g_ctx[r].c_cfg.ctxactive) {
 						/* Setup a new context  from current context */
 						g_ctx[r].c_cfg.ctxactive = 1;
 						xstrlcpy(g_ctx[r].c_name, dents[cur].name, NAME_MAX + 1);
-						xstrlcpy(g_ctx[r].c_fltr, fltr, NAME_MAX + 1);
 						xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
 						xstrlcpy(g_ctx[r].c_init, path, PATH_MAX);
 						ipath = g_ctx[r].c_init;
 						g_ctx[r].c_last[0] = lastdir[0] = '\0';
 						g_ctx[r].c_cfg = cfg;
+						xstrlcpy(g_ctx[r].c_fltr, hfilter, DOT_FILTER_LEN);
 					} else {
 						/* Switch to saved context */
 						xstrlcpy(oldname, g_ctx[r].c_name, NAME_MAX + 1);
-						xstrlcpy(fltr, g_ctx[r].c_fltr, NAME_MAX + 1);
 						xstrlcpy(path, g_ctx[r].c_path, PATH_MAX);
 						ipath = g_ctx[r].c_init;
 						xstrlcpy(lastdir, g_ctx[r].c_last, PATH_MAX);
 						cfg = g_ctx[r].c_cfg;
+						xstrlcpy(hfilter, g_ctx[r].c_fltr, DOT_FILTER_LEN);
 					}
 
 					cfg.curctx = r;
@@ -2832,9 +2822,6 @@ nochange:
 
 			/* Save the newly opted dir in path */
 			xstrlcpy(path, newpath, PATH_MAX);
-
-			/* Reset filter */
-			copyfilter();
 			DPRINTF_S(path);
 
 			if (cfg.filtermode)
@@ -2846,8 +2833,6 @@ nochange:
 			goto nochange;
 		case SEL_FLTR:
 			presel = filterentries(path);
-			copyfilter();
-			DPRINTF_S(fltr);
 			/* Save current */
 			if (ndents)
 				copycurname();
@@ -2867,8 +2852,7 @@ nochange:
 			goto nochange;
 		case SEL_TOGGLEDOT:
 			cfg.showhidden ^= 1;
-			initfilter(cfg.showhidden, &ifilter);
-			copyfilter();
+			initfilter(cfg.showhidden, hfilter);
 			goto begin;
 		case SEL_DETAIL:
 			cfg.showdetail ^= 1;
@@ -3322,7 +3306,7 @@ nochange:
 
 					/* Switch to next active context */
 					xstrlcpy(oldname, g_ctx[r].c_name, NAME_MAX + 1);
-					xstrlcpy(fltr, g_ctx[r].c_fltr, NAME_MAX + 1);
+					xstrlcpy(hfilter, g_ctx[r].c_fltr, NAME_MAX + 1);
 					xstrlcpy(path, g_ctx[r].c_path, PATH_MAX);
 					ipath = g_ctx[r].c_init;
 					xstrlcpy(lastdir, g_ctx[r].c_last, PATH_MAX);
@@ -3395,7 +3379,7 @@ static void usage(void)
 int main(int argc, char *argv[])
 {
 	static char cwd[PATH_MAX] __attribute__ ((aligned));
-	char *ipath = NULL, *ifilter;
+	char *ipath = NULL, hfilter[DOT_FILTER_LEN] = {'\0'}; /* Hidden file filter */
 	int opt;
 
 	/* Confirm we are in a terminal */
@@ -3469,7 +3453,7 @@ int main(int argc, char *argv[])
 
 	if (getuid() == 0 || getenv("NNN_SHOW_HIDDEN"))
 		cfg.showhidden = 1;
-	initfilter(cfg.showhidden, &ifilter);
+	initfilter(cfg.showhidden, hfilter);
 
 #ifdef LINUX_INOTIFY
 	/* Initialize inotify */
@@ -3544,7 +3528,7 @@ int main(int argc, char *argv[])
 	enabledbg();
 #endif
 	initcurses();
-	browse(ipath, ifilter);
+	browse(ipath, hfilter);
 	exitcurses();
 
 	if (g_cppath[0])
