@@ -201,7 +201,7 @@ disabledbg()
 #define clearprompt() printmsg("")
 #define printwarn() printmsg(strerror(errno))
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
-#define copycurname() xstrlcpy(oldname, dents[cur].name, NAME_MAX + 1)
+#define copycurname() xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1)
 #define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
@@ -264,12 +264,12 @@ typedef struct {
 
 /* Contexts or workspaces */
 typedef struct {
-	char c_name[NAME_MAX + 1];
-	char c_path[PATH_MAX];
-	char c_init[PATH_MAX];
-	char c_last[PATH_MAX];
-	settings c_cfg;
-	char c_fltr[DOT_FILTER_LEN];
+	char c_path[PATH_MAX]; /* Current dir */
+	char c_init[PATH_MAX]; /* Initial dir */
+	char c_last[PATH_MAX]; /* Last visited dir */
+	char c_name[NAME_MAX + 1]; /* Current file name */
+	settings c_cfg; /* Current configuration */
+	char c_fltr[DOT_FILTER_LEN]; /* Hidden filter */
 } context;
 
 /* GLOBALS */
@@ -2281,7 +2281,7 @@ static int dentfind(struct entry *dents, const char *fname, int n)
 	return 0;
 }
 
-static int populate(char *path, char *oldname, char *fltr)
+static int populate(char *path, char *lastname, char *fltr)
 {
 	static regex_t re;
 
@@ -2319,7 +2319,7 @@ static int populate(char *path, char *oldname, char *fltr)
 #endif
 
 	/* Find cur from history */
-	cur = dentfind(dents, oldname, ndents);
+	cur = dentfind(dents, lastname, ndents);
 	return 0;
 }
 
@@ -2471,11 +2471,9 @@ static void redraw(char *path)
 
 static void browse(char *ipath, char *hfilter)
 {
-	static char path[PATH_MAX] __attribute__ ((aligned));
+	static char *path, *lastdir, *lastname;
 	static char newpath[PATH_MAX] __attribute__ ((aligned));
-	static char lastdir[PATH_MAX] __attribute__ ((aligned));
 	static char mark[PATH_MAX] __attribute__ ((aligned));
-	static char oldname[NAME_MAX + 1] __attribute__ ((aligned));
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
 	int r, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
@@ -2483,11 +2481,15 @@ static void browse(char *ipath, char *hfilter)
 	bool dir_changed = FALSE;
 
 	/* setup first context */
-	xstrlcpy(g_ctx[0].c_init, ipath, PATH_MAX);
-	g_ctx[0].c_cfg = cfg;
+	xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
+	path = g_ctx[0].c_path;
+	xstrlcpy(g_ctx[0].c_init, ipath, PATH_MAX); /* start directory */
+	lastdir = g_ctx[0].c_last; /* last visited directory */
+	lastname = g_ctx[0].c_name; /* last visited filename */
+	g_ctx[0].c_cfg = cfg; /* current configuration */
 
 	xstrlcpy(path, ipath, PATH_MAX);
-	oldname[0] = newpath[0] = lastdir[0] = mark[0] = '\0';
+	lastname[0] = newpath[0] = lastdir[0] = mark[0] = '\0';
 
 	if (cfg.filtermode)
 		presel = FILTER;
@@ -2522,7 +2524,7 @@ begin:
 	}
 #endif
 
-	if (populate(path, oldname, hfilter) == -1) {
+	if (populate(path, lastname, hfilter) == -1) {
 		printwarn();
 		goto nochange;
 	}
@@ -2569,7 +2571,7 @@ nochange:
 			}
 
 			/* Save history */
-			xstrlcpy(oldname, xbasename(path), NAME_MAX + 1);
+			xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
@@ -2613,7 +2615,7 @@ nochange:
 				dir_changed = TRUE;
 
 				xstrlcpy(path, newpath, PATH_MAX);
-				oldname[0] = '\0';
+				lastname[0] = '\0';
 				if (cfg.filtermode)
 					presel = FILTER;
 				goto begin;
@@ -2697,7 +2699,7 @@ nochange:
 			dir_changed = TRUE;
 
 			xstrlcpy(path, dir, PATH_MAX);
-			oldname[0] = '\0';
+			lastname[0] = '\0';
 			DPRINTF_S(path);
 			if (cfg.filtermode)
 				presel = FILTER;
@@ -2724,7 +2726,7 @@ nochange:
 			xstrlcpy(lastdir, path, PATH_MAX);
 			dir_changed = TRUE;
 			xstrlcpy(path, newpath, PATH_MAX);
-			oldname[0] = '\0';
+			lastname[0] = '\0';
 			DPRINTF_S(path);
 			if (cfg.filtermode)
 				presel = FILTER;
@@ -2768,30 +2770,30 @@ nochange:
 
 					/* Save current context */
 					xstrlcpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
-					xstrlcpy(g_ctx[cfg.curctx].c_path, path, PATH_MAX);
-					xstrlcpy(g_ctx[cfg.curctx].c_last, lastdir, PATH_MAX);
 					g_ctx[cfg.curctx].c_cfg = cfg;
 					xstrlcpy(g_ctx[cfg.curctx].c_fltr, hfilter, DOT_FILTER_LEN);
 
 					if (!g_ctx[r].c_cfg.ctxactive) {
-						/* Setup a new context  from current context */
 						g_ctx[r].c_cfg.ctxactive = 1;
-						xstrlcpy(g_ctx[r].c_name, dents[cur].name, NAME_MAX + 1);
+
+						/* Setup a new context from current context */
 						xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
 						xstrlcpy(g_ctx[r].c_init, path, PATH_MAX);
-						ipath = g_ctx[r].c_init;
-						g_ctx[r].c_last[0] = lastdir[0] = '\0';
+						g_ctx[r].c_last[0] = '\0';
+						xstrlcpy(g_ctx[r].c_name, dents[cur].name, NAME_MAX + 1);
 						g_ctx[r].c_cfg = cfg;
 						xstrlcpy(g_ctx[r].c_fltr, hfilter, DOT_FILTER_LEN);
 					} else {
 						/* Switch to saved context */
-						xstrlcpy(oldname, g_ctx[r].c_name, NAME_MAX + 1);
-						xstrlcpy(path, g_ctx[r].c_path, PATH_MAX);
-						ipath = g_ctx[r].c_init;
-						xstrlcpy(lastdir, g_ctx[r].c_last, PATH_MAX);
 						cfg = g_ctx[r].c_cfg;
 						xstrlcpy(hfilter, g_ctx[r].c_fltr, DOT_FILTER_LEN);
 					}
+
+					/* Reset the pointers */
+					path = g_ctx[r].c_path;
+					ipath = g_ctx[r].c_init;
+					lastdir = g_ctx[r].c_last;
+					lastname = g_ctx[r].c_name;
 
 					cfg.curctx = r;
 					if (cfg.filtermode)
@@ -2814,7 +2816,7 @@ nochange:
 			if (strcmp(path, newpath) == 0)
 				break;
 
-			oldname[0] = '\0';
+			lastname[0] = '\0';
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
@@ -2853,6 +2855,9 @@ nochange:
 		case SEL_TOGGLEDOT:
 			cfg.showhidden ^= 1;
 			initfilter(cfg.showhidden, hfilter);
+			/* Save current */
+			if (ndents)
+				copycurname();
 			goto begin;
 		case SEL_DETAIL:
 			cfg.showdetail ^= 1;
@@ -3178,7 +3183,7 @@ nochange:
 			}
 
 			close(fd);
-			xstrlcpy(oldname, tmp, NAME_MAX + 1);
+			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
 		case SEL_RENAME:
 			if (!ndents)
@@ -3226,7 +3231,7 @@ nochange:
 			}
 
 			close(fd);
-			xstrlcpy(oldname, tmp, NAME_MAX + 1);
+			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
 		case SEL_RENAMEALL:
 			if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[VIDIR], NULL, 0)) {
@@ -3305,12 +3310,12 @@ nochange:
 					g_ctx[cfg.curctx].c_cfg.ctxactive = 0;
 
 					/* Switch to next active context */
-					xstrlcpy(oldname, g_ctx[r].c_name, NAME_MAX + 1);
-					xstrlcpy(hfilter, g_ctx[r].c_fltr, NAME_MAX + 1);
-					xstrlcpy(path, g_ctx[r].c_path, PATH_MAX);
+					path = g_ctx[r].c_path;
 					ipath = g_ctx[r].c_init;
-					xstrlcpy(lastdir, g_ctx[r].c_last, PATH_MAX);
+					lastdir = g_ctx[r].c_last;
+					lastname = g_ctx[r].c_name;
 					cfg = g_ctx[r].c_cfg;
+					xstrlcpy(hfilter, g_ctx[r].c_fltr, NAME_MAX + 1);
 
 					cfg.curctx = r;
 					if (cfg.filtermode)
