@@ -922,9 +922,9 @@ static int setfilter(regex_t *regex, char *filter)
 	return r;
 }
 
-static void initfilter(int dot, char *hfilter)
+static void initfilter(int dot, char *hfltr)
 {
-	dot ? (hfilter[0] = '.', hfilter[1] = '\0') : xstrlcpy(hfilter, "^[^.]", DOT_FILTER_LEN);
+	dot ? (hfltr[0] = '.', hfltr[1] = '\0') : xstrlcpy(hfltr, "^[^.]", DOT_FILTER_LEN);
 }
 
 static int visible(regex_t *regex, char *file)
@@ -1184,7 +1184,7 @@ static int filterentries(char *path)
 				/*
 				 * redraw() should be above the auto-select optimization, for
 				 * the case where there's an issue with dir auto-select, say,
-				 * due to a permission problem. The transition is jumpy in
+				 * due to a permission problem. The transition is _jumpy_ in
 				 * case of such an error. However, we optimize for successful
 				 * cases where the dir has permissions. This skips a redraw().
 				 */
@@ -2333,7 +2333,7 @@ static void redraw(char *path)
 	mode_changed = FALSE;
 	nlines = MIN(LINES - 4, ndents);
 
-	/* Clean screen */
+	/* Clear screen */
 	erase();
 	if (cfg.copymode)
 		if (g_crc != crc8fast((uchar *)dents, ndents * sizeof(struct entry))) {
@@ -2473,7 +2473,7 @@ static void browse(char *ipath)
 {
 	static char newpath[PATH_MAX] __attribute__ ((aligned));
 	static char mark[PATH_MAX] __attribute__ ((aligned));
-	char *path, *lastdir, *lastname, *hfilter;
+	char *path, *lastdir, *lastname, *hfltr;
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
 	int r, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
@@ -2489,7 +2489,7 @@ static void browse(char *ipath)
 	lastname = g_ctx[0].c_name; /* last visited filename */
 	g_ctx[0].c_cfg = cfg; /* current configuration */
 	initfilter(cfg.showhidden, g_ctx[0].c_fltr); /* Show hidden filter */
-	hfilter = g_ctx[0].c_fltr;
+	hfltr = g_ctx[0].c_fltr;
 
 	if (cfg.filtermode)
 		presel = FILTER;
@@ -2524,7 +2524,7 @@ begin:
 	}
 #endif
 
-	if (populate(path, lastname, hfilter) == -1) {
+	if (populate(path, lastname, hfltr) == -1) {
 		printwarn();
 		goto nochange;
 	}
@@ -2781,7 +2781,7 @@ nochange:
 						g_ctx[r].c_last[0] = '\0';
 						xstrlcpy(g_ctx[r].c_name, dents[cur].name, NAME_MAX + 1);
 						g_ctx[r].c_cfg = cfg;
-						xstrlcpy(g_ctx[r].c_fltr, hfilter, DOT_FILTER_LEN);
+						xstrlcpy(g_ctx[r].c_fltr, hfltr, DOT_FILTER_LEN);
 					}
 
 					/* Reset the pointers */
@@ -2789,7 +2789,7 @@ nochange:
 					ipath = g_ctx[r].c_init;
 					lastdir = g_ctx[r].c_last;
 					lastname = g_ctx[r].c_name;
-					hfilter = g_ctx[r].c_fltr;
+					hfltr = g_ctx[r].c_fltr;
 
 					cfg.curctx = r;
 					if (cfg.filtermode)
@@ -2850,7 +2850,7 @@ nochange:
 			goto nochange;
 		case SEL_TOGGLEDOT:
 			cfg.showhidden ^= 1;
-			initfilter(cfg.showhidden, hfilter);
+			initfilter(cfg.showhidden, hfltr);
 			/* Save current */
 			if (ndents)
 				copycurname();
@@ -3311,7 +3311,7 @@ nochange:
 					lastdir = g_ctx[r].c_last;
 					lastname = g_ctx[r].c_name;
 					cfg = g_ctx[r].c_cfg;
-					hfilter = g_ctx[r].c_fltr;
+					hfltr = g_ctx[r].c_fltr;
 
 					cfg.curctx = r;
 					if (cfg.filtermode)
