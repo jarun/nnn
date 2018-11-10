@@ -782,6 +782,7 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 
 		if (flag & F_SIGINT)
 			signal(SIGINT, SIG_DFL);
+
 		execlp(file, file, arg1, arg2, NULL);
 		_exit(1);
 	} else {
@@ -2007,7 +2008,7 @@ static int show_help(char *path)
 	     "e?  Help, settings\n"
 	     "eq  Quit context\n"
 	    "d^G  Quit and cd\n"
-	 "aQ, ^X  Quit\n\n"};
+	 "aQ, ^Q  Quit\n\n"};
 
 	if (fd == -1)
 		return -1;
@@ -2984,6 +2985,7 @@ nochange:
 				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				if (!appendfpath(newpath, r))
 					goto nochange;
+
 				++ncp;
 				printmsg(newpath);
 			} else if (cfg.quote) {
@@ -3013,6 +3015,7 @@ nochange:
 					writecp(newpath, r - 1); /* Truncate NULL from end */
 				else
 					spawn(copier, newpath, NULL, NULL, F_NOTRACE);
+
 				printmsg(newpath);
 			}
 			goto nochange;
@@ -3067,6 +3070,41 @@ nochange:
 			else
 				printmsg("multi-copy off");
 			goto nochange;
+		case SEL_CP:
+		case SEL_MV:
+		case SEL_RMMUL:
+		{
+			char *cmd;
+
+			if (!g_cppath[0]) {
+				printmsg("copy file not found");
+				goto nochange;
+			}
+
+			if (sel == SEL_CP)
+				r = asprintf(&cmd, "xargs -0 -d \'\n\' -a %s cp -ir --preserve=all -t .", g_cppath);
+			else if (sel == SEL_MV)
+				r = asprintf(&cmd, "xargs -0 -d \'\n\' -a %s mv -i -t .", g_cppath);
+			else /* SEL_RMMUL */
+				r = asprintf(&cmd, "xargs -0 -d \'\n\' -a %s rm -Ir", g_cppath);
+
+			if (r == -1) {
+				printwarn();
+				goto nochange;
+			}
+			spawn("sh", "-c", cmd, path, F_NORMAL | F_SIGINT);
+			free(cmd);
+
+			copycurname();
+			if (cfg.filtermode)
+				presel = FILTER;
+			goto begin;
+		}
+		case SEL_RM:
+			lastname[0] = '\0';
+			if (cfg.filtermode)
+				presel = FILTER;
+			goto begin;
 		case SEL_QUOTE:
 			cfg.quote ^= 1;
 			DPRINTF_D(cfg.quote);

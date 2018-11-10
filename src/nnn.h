@@ -69,6 +69,10 @@ enum action {
 	SEL_COPY,
 	SEL_COPYMUL,
 	SEL_COPYLIST,
+	SEL_CP,
+	SEL_MV,
+	SEL_RMMUL,
+	SEL_RM,
 	SEL_QUOTE,
 	SEL_OPEN,
 	SEL_NEW,
@@ -192,6 +196,14 @@ static struct key bindings[] = {
 	{ CONTROL('Y'),   SEL_COPYMUL,   "",     "" },
 	/* Show list of copied files */
 	{ 'y',            SEL_COPYLIST,  "",     "" },
+	/* Copy from copy buffer */
+	{ 'P',            SEL_CP,        "",     "" },
+	/* Move from copy buffer */
+	{ 'V',            SEL_MV,        "",     "" },
+	/* Delete from copy buffer */
+	{ CONTROL('X'),   SEL_RMMUL,     "",     "" },
+	/* Delete currently selected */
+	{ 'X',            SEL_RM,        "",     "" },
 	/* Toggle quote on while copy */
 	{ CONTROL('T'),   SEL_QUOTE,     "",     "" },
 	/* Open in a custom application */
@@ -220,6 +232,6 @@ static struct key bindings[] = {
 	/* Change dir on quit */
 	{ CONTROL('G'),   SEL_CDQUIT,    "",     "" },
 	/* Quit */
-	{ 'Q',            SEL_QUIT,    "",     "" },
-	{ CONTROL('X'),   SEL_QUIT,      "",     "" },
+	{ 'Q',            SEL_QUIT,      "",     "" },
+	{ CONTROL('Q'),   SEL_QUIT,      "",     "" },
 };

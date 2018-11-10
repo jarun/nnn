@@ -254,7 +254,7 @@ optional args:
               ?  Help, settings
               q  Quit context
              ^G  Quit and cd
-          Q, ^X  Quit
+          Q, ^Q  Quit
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
