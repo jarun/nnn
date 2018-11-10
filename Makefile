@@ -16,13 +16,13 @@ else
 	LDLIBS += -lncurses
 endif
 
-DISTFILES = nnn.c nnn.h nnn.1 Makefile README.md LICENSE
-SRC = nnn.c
+DISTFILES = src nnn.1 Makefile README.md LICENSE
+SRC = src/nnn.c
 BIN = nnn
 
 all: $(BIN)
 
-$(SRC): nnn.h
+$(SRC): src/nnn.h
 
 $(BIN): $(SRC)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
@@ -45,7 +45,7 @@ strip: $(BIN)
 
 dist:
 	mkdir -p nnn-$(VERSION)
-	$(CP) $(DISTFILES) nnn-$(VERSION)
+	$(CP) -r $(DISTFILES) nnn-$(VERSION)
 	tar -cf nnn-$(VERSION).tar nnn-$(VERSION)
 	gzip nnn-$(VERSION).tar
 	$(RM) -r nnn-$(VERSION)

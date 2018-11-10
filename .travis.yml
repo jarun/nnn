@@ -27,7 +27,7 @@ script:
   - export CFLAGS=-Werror;
   - make clean; make;
   - make clean;
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then if [[ "$CC" == "clang" ]]; then clang-tidy *.h *.c -- -I/usr/include; fi; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then if [[ "$CC" == "clang" ]]; then clang-tidy src/* -- -I/usr/include; fi; fi
 
 before_deploy:
   - cd ..
