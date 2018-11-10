@@ -11,7 +11,6 @@
 .Op Ar -e
 .Op Ar -i
 .Op Ar -l
-.Op Ar -p nlay
 .Op Ar -S
 .Op Ar -v
 .Op Ar -h
@@ -152,9 +151,6 @@ supports the following options:
 .Fl l
         start in light mode (fewer details)
 .Pp
-.Fl "p nlay"
-        path to custom nlay
-.Pp
 .Fl S
         start in disk usage analyzer mode
 .Pp
@@ -165,14 +161,7 @@ supports the following options:
         show program help and exit
 .Sh CONFIGURATION
 .Nm
-uses \fIxdg-open\fR (on Linux) and \fIopen(1)\fR (on OS X) as the desktop
-opener. It invokes
-.Pa nlay
-to run the terminal locker. Read more on
-.Pa nlay
-at:
-.br
-.Em https://github.com/jarun/nnn/wiki/all-about-nlay
+uses \fIxdg-open\fR (on Linux) and \fIopen(1)\fR (on OS X) as the desktop opener.
 .Pp
 There is no configuration file. Settings work on environment variables. Please
 refer to the ENVIRONMENT section below.

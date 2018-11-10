@@ -184,7 +184,7 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
 
 ```
 usage: nnn [-b key] [-c N] [-e] [-i] [-l]
-           [-p nlay] [-S] [-v] [-h] [PATH]
+           [-S] [-v] [-h] [PATH]
 
 The missing terminal file manager for X.
 
@@ -197,7 +197,6 @@ optional args:
  -e      use exiftool instead of mediainfo
  -i      start in navigate-as-you-type mode
  -l      start in light mode
- -p nlay path to custom nlay
  -S      start in disk usage analyser mode
  -v      show program version
  -h      show this help
@@ -345,8 +344,6 @@ The following indicators are used in the detail view:
 - To edit all text files in EDITOR (preferably CLI, fallback vi):
 
       export NNN_USE_EDITOR=1
-
-Customizable script [nlay](https://github.com/jarun/nnn/wiki/all-about-nlay) is used to run terminal locker.
 
 #### Help
 

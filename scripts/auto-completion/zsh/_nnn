@@ -14,7 +14,6 @@ args=(
     '(-h)-h[show this help and exit]'
     '(-i)-i[start in navigate-as-you-type mode]'
     '(-l)-l[start in light mode (fewer details)]'
-    '(-p)-p[specify custom nlay]:path to nlay'
     '(-S)-S[start in disk usage analyzer mode]'
     '(-v)-v[show program version and exit]'
     '*:filename:_files'

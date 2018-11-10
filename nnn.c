@@ -284,7 +284,6 @@ static char *pnamebuf, *pcopybuf;
 static int ndents, cur, total_dents = ENTRY_INCR;
 static uint idle;
 static uint idletimeout, copybufpos, copybuflen;
-static char *player;
 static char *copier;
 static char *editor;
 static blkcnt_t ent_blocks;
@@ -322,10 +321,10 @@ static struct timespec gtimeout;
 #define MEDIAINFO 0
 #define EXIFTOOL 1
 #define OPENER 2
-#define NLAY 3
-#define ATOOL 4
-#define APACK 5
-#define VIDIR 6
+#define ATOOL 3
+#define APACK 4
+#define VIDIR 5
+#define LOCKER 6
 #define UNKNOWN 7
 
 /* Utilities to open files, run actions */
@@ -339,10 +338,16 @@ static char * const utils[] = {
 #else
 	"xdg-open",
 #endif
-	"nlay",
 	"atool",
 	"apack",
 	"vidir",
+#ifdef __APPLE__
+	"bashlock",
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+	"lock",
+#else
+	"vlock",
+#endif
 	"UNKNOWN"
 };
 
@@ -3282,7 +3287,7 @@ nochange:
 			spawn(run, dents[cur].name, NULL, path, F_NORMAL);
 			break;
 		case SEL_LOCK:
-			spawn(player, "", "screensaver", NULL, F_NORMAL | F_SIGINT);
+			spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
 			break;
 		case SEL_QUITCTX:
 		{
@@ -3337,7 +3342,7 @@ nochange:
 		/* Screensaver */
 		if (idletimeout != 0 && idle == idletimeout) {
 			idle = 0;
-			spawn(player, "", "screensaver", NULL, F_NORMAL | F_SIGINT);
+			spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
 		}
 	}
 }
@@ -3346,7 +3351,7 @@ static void usage(void)
 {
 	fprintf(stdout,
 		"usage: nnn [-b key] [-c N] [-e] [-i] [-l]\n"
-		"           [-p nlay] [-S] [-v] [-h] [PATH]\n\n"
+		"           [-S] [-v] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
@@ -3356,7 +3361,6 @@ static void usage(void)
 		" -e      use exiftool instead of mediainfo\n"
 		" -i      start in navigate-as-you-type mode\n"
 		" -l      start in light mode\n"
-		" -p nlay path to custom nlay\n"
 		" -S      start in disk usage analyser mode\n"
 		" -v      show program version\n"
 		" -h      show this help\n\n"
@@ -3376,7 +3380,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	while ((opt = getopt(argc, argv, "Slib:c:ep:vh")) != -1) {
+	while ((opt = getopt(argc, argv, "Slib:c:evh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -3400,9 +3404,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'e':
 			cfg.metaviewer = EXIFTOOL;
-			break;
-		case 'p':
-			player = optarg;
 			break;
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
@@ -3463,10 +3464,6 @@ int main(int argc, char *argv[])
 		if (!editor)
 			editor = xgetenv("EDITOR", "vi");
 	}
-
-	/* Set player if not set already */
-	if (!player)
-		player = utils[NLAY];
 
 	/* Get screensaver wait time, if set; copier used as tmp var */
 	copier = getenv("NNN_IDLE_TIMEOUT");

@@ -16,13 +16,11 @@ _nnn () {
         -h
         -i
         -l
-        -p
         -S
         -v
     )
     opts_with_arg=(
         -c
-        -p
     )
 
     # Do not complete non option names
