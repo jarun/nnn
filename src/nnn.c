@@ -1014,8 +1014,8 @@ static int nextsel(char **run, char **env, int *presel)
 	if (c == -1) {
 		++idle;
 
-		/* Do not check for directory changes in du
-		 * mode. A redraw forces du calculation.
+		/*
+		 * Do not check for directory changes in du mode. A redraw forces du calculation.
 		 * Check for changes every odd second.
 		 */
 #ifdef LINUX_INOTIFY

@@ -97,7 +97,6 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - Open with desktop opener (default) or specify a custom app
   - Create, list and extract archives (needs atool/patool)
   - Optionally open text files in EDITOR (fallback vi)
-  - Customizable script to handle actions (sparsely used)
 - Information
   - Detailed stat-like file information
   - Media information (needs mediainfo or exiftool, if specified)
