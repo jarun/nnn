@@ -2967,6 +2967,20 @@ nochange:
 				goto nochange;
 
 			if (cfg.copymode) {
+				/*
+				 * Clear the tmp copy path file on first copy.
+				 *
+				 * This ensures that when the first file path is
+				 * copied into memory (but not written to tmp file
+				 * yet to save on writes), the tmp file is cleared.
+				 * The user may be in the middle of a multicopy op
+				 * and issue a cp, mv of multi-rm assuming the files
+				 * in the copy list would be affected. However, these
+				 * ops read the source file paths from the tmp file.
+				 */
+				if (!ncp)
+					writecp(NULL, 0);
+
 				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				if (!appendfpath(newpath, r))
 					goto nochange;
