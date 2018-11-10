@@ -2975,6 +2975,10 @@ nochange:
 			} else if (cfg.quote) {
 				g_buf[0] = '\'';
 				r = mkpath(path, dents[cur].name, g_buf + 1, PATH_MAX);
+				/* Keep the copy buf in sync */
+				copybufpos = 0;
+				appendfpath(g_buf + 1, r);
+
 				g_buf[r] = '\'';
 				g_buf[r + 1] = '\0';
 
@@ -2987,6 +2991,10 @@ nochange:
 				printmsg(g_buf + 1);
 			} else {
 				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				/* Keep the copy buf in sync */
+				copybufpos = 0;
+				appendfpath(newpath, r);
+
 				if (!copier)
 					writecp(newpath, r - 1); /* Truncate NULL from end */
 				else
