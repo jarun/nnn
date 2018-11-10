@@ -377,11 +377,12 @@ Use <kbd>^K</kbd> to copy the absolute path (from `/`) of the file under the cur
 
 To copy multiple file paths, switch to the multi-copy mode using <kbd>^Y</kbd>. In this mode you can
 
-- select multiple files one by one by pressing <kbd>^K</kbd> on each entry; or,
+- cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry; or,
 - navigate to another file in the same directory to select a range of files.
-- list the currently copied file paths by pressing `y`.
 
 Pressing <kbd>^Y</kbd> again copies the paths to clipboard and exits the multi-copy mode.
+
+To list the file paths copied to memory press <kbd>y</kbd>.
 
 To wrap each file path within single quotes, export `NNN_QUOTE_ON`:
 

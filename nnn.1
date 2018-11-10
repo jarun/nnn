@@ -222,11 +222,13 @@ NNN_COPIER is set (see ENVIRONMENT section below).
 To copy multiple file paths the multi-copy mode should be enabled using \fI^Y\fR.
 In this mode it's possible to
 .Pp
-(1) select multiple files one by one by pressing \fI^K\fR on each entry; or,
+(1) cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry; or,
 .br
 (2) navigate to another file in the same directory to select a range of files.
 .Pp
 Pressing \fI^Y\fR again copies the paths to clipboard and exits the multi-copy mode.
+.Pp
+To list the file paths copied to memory press \fIy\fR.
 .Sh ENVIRONMENT
 The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively.

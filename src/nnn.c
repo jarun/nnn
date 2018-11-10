@@ -3040,7 +3040,7 @@ nochange:
 				printmsg("multi-copy off");
 			goto nochange;
 		case SEL_COPYLIST:
-			if (cfg.copymode)
+			if (copybufpos)
 				showcplist();
 			else
 				printmsg("multi-copy off");
