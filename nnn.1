@@ -103,9 +103,18 @@ Extract archive in current directory
 .It Ic Space, ^K
 Invoke file path copier
 .It Ic ^Y
-Toggle multiple file path copy mode
+Toggle selection mode
 .It Ic y
 Show copy buffer
+.It Ic P
+Copy files from selection
+.It Ic V
+Move files from selection
+.It Ic ^X
+Delete files from selection
+.It Ic X
+Delete the current entry
+, ^Q  Quit
 .It Ic ^T
 Toggle path quote
 .It Ic ^L
@@ -215,18 +224,19 @@ In the \fInavigate-as-you-type\fR mode directories are opened in filter mode,
 allowing continuous navigation. Works best with the \fBarrow keys\fR.
 .br
 In case of only one match and it's a directory, `nnn` auto selects the directory and enters it in this mode.
-.Sh MULTI-COPY MODE
+.Sh SELECTION MODE
 The absolute path of a single file can be copied to clipboard by pressing \fI^K\fR if
 NNN_COPIER is set (see ENVIRONMENT section below).
 .Pp
-To copy multiple file paths the multi-copy mode should be enabled using \fI^Y\fR.
+To copy multiple file paths the selection mode should be enabled using \fI^Y\fR.
 In this mode it's possible to
 .Pp
 (1) cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry; or,
 .br
 (2) navigate to another file in the same directory to select a range of files.
 .Pp
-Pressing \fI^Y\fR again copies the paths to clipboard and exits the multi-copy mode.
+Pressing \fI^Y\fR again copies the paths and exits the selection mode. The files in the list can now
+be copied, moved or removed using respective keyboard shortcuts.
 .Pp
 To list the file paths copied to memory press \fIy\fR.
 .Sh ENVIRONMENT

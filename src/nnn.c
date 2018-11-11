@@ -1998,8 +1998,12 @@ static int show_help(char *path)
 	     "eF  List archive\n"
 	    "d^F  Extract archive\n"
      "6Space, ^K  Copy file path\n"
-	    "d^Y  Toggle multi-copy\n"
+	    "d^Y  Toggle selection mode\n"
 	     "ey  Show copy buffer\n"
+	     "eP  Copy selection\n"
+	     "eV  Move selection\n"
+	    "d^X  Delete selection\n"
+	     "eX  Delete entry\n"
 	    "d^T  Toggle path quote\n"
 	    "d^L  Redraw, clear prompt\n"
 	   "cEsc  Exit prompt\n"
@@ -2974,7 +2978,7 @@ nochange:
 				 * This ensures that when the first file path is
 				 * copied into memory (but not written to tmp file
 				 * yet to save on writes), the tmp file is cleared.
-				 * The user may be in the middle of a multicopy op
+				 * The user may be in the middle of selection mode op
 				 * and issue a cp, mv of multi-rm assuming the files
 				 * in the copy list would be affected. However, these
 				 * ops read the source file paths from the tmp file.
@@ -3029,7 +3033,7 @@ nochange:
 				copystartid = cur;
 				copybufpos = 0;
 				ncp = 0;
-				printmsg("multi-copy on");
+				printmsg("selection on");
 				DPRINTF_S("copymode on");
 				goto nochange;
 			}
@@ -3062,13 +3066,13 @@ nochange:
 					printmsg(newpath);
 				}
 			} else
-				printmsg("multi-copy off");
+				printmsg("selection off");
 			goto nochange;
 		case SEL_COPYLIST:
 			if (copybufpos)
 				showcplist();
 			else
-				printmsg("multi-copy off");
+				printmsg("selection off");
 			goto nochange;
 		case SEL_CP:
 		case SEL_MV:

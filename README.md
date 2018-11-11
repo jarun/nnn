@@ -60,10 +60,9 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
 - [How to](#how-to)
   - [add bookmarks](#add-bookmarks)
   - [copy file paths](#copy-file-paths)
-    - [selection shortcuts](#selection-shortcuts)
+    - [selection mode](#selection-mode)
     - [default copy](#default-copy)
     - [to clipboard](#to-clipboard)
-  - [copy, move, delete files](#copy-move-delete-files)
   - [cd on quit](#cd-on-quit)
   - [run custom scripts](#run-custom-scripts)
     - [sample scripts](#sample-scripts)
@@ -101,11 +100,12 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - Detailed stat-like file information
   - Media information (needs mediainfo or exiftool, if specified)
 - Convenience
+  - Copy absolute file paths (optionally with quotes) in selection mode
+  - Copy, mode, delete multiple files by selection
   - Create, rename files and directories
   - Batch rename/move/delete current directory entries in vidir (from moreutils)
   - Spawn SHELL (fallback sh) in the current directory
   - Run custom scripts in the current directory
-  - Copy absolute file paths with quotes
   - Change directory at exit (*easy* shell integration)
   - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
   - GUI app launcher (maximum 2 space-separated arguments)
@@ -206,7 +206,7 @@ optional args:
 #### Keyboard shortcuts
 
 ```
-            Key  Function
+            Key  Desc
               ----
        ↑, k, ^P  Up
        ↓, j, ^N  Down
@@ -244,8 +244,12 @@ optional args:
               F  List archive
              ^F  Extract archive
       Space, ^K  Copy file path
-             ^Y  Toggle multi-copy
+             ^Y  Toggle selection mode
               y  Show copy buffer
+              P  Copy selection
+              V  Move selection
+             ^X  Delete selection
+              X  Delete entry
              ^T  Toggle path quote
              ^L  Redraw, clear prompt
             Esc  Exit prompt
@@ -371,16 +375,16 @@ Set environment variable `NNN_BMS` as a string of `key:location` pairs (max 10) 
 
 #### copy file paths
 
-##### selection shortcuts
+##### selection mode
 
 Use <kbd>^K</kbd> to copy the absolute path (from `/`) of the file under the cursor to clipboard.
 
-To copy multiple file paths, switch to the multi-copy mode using <kbd>^Y</kbd>. In this mode you can
+To copy multiple file paths the selection mode should be enabled using <kbd>^Y</kbd>. In this mode it's possible to
 
 - cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry; or,
 - navigate to another file in the same directory to select a range of files.
 
-Pressing <kbd>^Y</kbd> again copies the paths to clipboard and exits the multi-copy mode.
+Pressing <kbd>^Y</kbd> again copies the paths to clipboard and exits the selection mode. The files in the list can now be copied, moved or removed using respective keyboard shortcuts.
 
 To list the file paths copied to memory press <kbd>y</kbd>.
 
@@ -393,7 +397,7 @@ Note that the filename is not escaped. So copying may still fail for filenames h
 
 ##### default copy
 
-By default file paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priority) is:
+File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priority) is:
 
     $HOME or,
     $TMPDIR or,
@@ -433,7 +437,7 @@ Note that you may want to keep quotes disabled (as it is by default) in this cas
 
 ##### to clipboard
 
-`nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
+Along with default copy, `nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
 
 Sample Linux copier script:
 
@@ -447,17 +451,6 @@ Sample Linux copier script:
 export `NNN_COPIER`:
 
     export NNN_COPIER="/path/to/copier.sh"
-
-#### copy, move, delete files
-
-The `nnn` workflow to copy, move or delete files is:
-
-1. Copy the absolute paths using <kbd>^Y</kbd> and/or <kbd>^K</kbd>
-2. To copy or move files navigate to the destination directory. You can also fire a new instance of `nnn` in another tab of your terminal emulator and open the destination directory.
-3. Spawn a subshell in the destination directory (<kbd>!</kbd>)
-4. While typing the desired command, copy the file paths (usually <kbd>^-Shift-V</kbd>) from the clipboard. If X is unavailable, refer to [this section](#when-x-is-missing).
-
-In addition, `nnn` integrates with vidir. vidir supports batch file move and delete.
 
 #### cd on quit
 
