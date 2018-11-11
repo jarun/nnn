@@ -60,8 +60,8 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
 - [How to](#how-to)
   - [add bookmarks](#add-bookmarks)
   - [copy file paths](#copy-file-paths)
-    - [selection mode](#selection-mode)
-    - [default copy](#default-copy)
+    - [selection](#selection)
+    - [quote paths](#quote-paths)
     - [to clipboard](#to-clipboard)
   - [cd on quit](#cd-on-quit)
   - [run custom scripts](#run-custom-scripts)
@@ -100,8 +100,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - Detailed stat-like file information
   - Media information (needs mediainfo or exiftool, if specified)
 - Convenience
-  - Copy absolute file paths (optionally with quotes) in selection mode
-  - Copy, mode, delete multiple files by selection
+  - Copy, move, delete multiple files by selection
   - Create, rename files and directories
   - Batch rename/move/delete current directory entries in vidir (from moreutils)
   - Spawn SHELL (fallback sh) in the current directory
@@ -375,11 +374,9 @@ Set environment variable `NNN_BMS` as a string of `key:location` pairs (max 10) 
 
 #### copy file paths
 
-##### selection mode
+##### selection
 
-Use <kbd>^K</kbd> to copy the absolute path (from `/`) of the file under the cursor to clipboard.
-
-To copy multiple file paths the selection mode should be enabled using <kbd>^Y</kbd>. In this mode it's possible to
+Use <kbd>^K</kbd> to copy the absolute path (from `/`) of the file under the cursor to clipboard. To copy multiple absolute file paths the selection mode should be enabled using <kbd>^Y</kbd>. In this mode it's possible to
 
 - cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry; or,
 - navigate to another file in the same directory to select a range of files.
@@ -387,15 +384,6 @@ To copy multiple file paths the selection mode should be enabled using <kbd>^Y</
 Pressing <kbd>^Y</kbd> again copies the paths to clipboard and exits the selection mode. The files in the list can now be copied, moved or removed using respective keyboard shortcuts.
 
 To list the file paths copied to memory press <kbd>y</kbd>.
-
-To wrap each file path within single quotes, export `NNN_QUOTE_ON`:
-
-    export NNN_QUOTE_ON=1
-This is particularly useful if you are planning to copy the whole string to the shell to run a command. Quotes can be toggled at runtime using <kbd>^T</kbd>.
-
-Note that the filename is not escaped. So copying may still fail for filenames having quote(s) in them.
-
-##### default copy
 
 File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priority) is:
 
@@ -405,7 +393,7 @@ File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priori
 
 To see the path to the temporary copy file, run `nnn`, press `?` and look up `copy file`.
 
-Use <kbd>^Y</kbd> and/or <kbd>^K</kbd> to copy file paths as usual. To use the copied paths from the cmdline, use command substitution. For example, if `DIR` above is `/home/user`:
+To use the copied paths from the cmdline, use command substitution. For example, if `DIR` above is `/home/user`:
 
     # bash/zsh
     ls -ltr `cat /home/user/.nnncp`
@@ -418,22 +406,23 @@ An alias may be handy:
 
     alias ncp='cat /home/user/.nnncp'
 
-so you can easily copy, move or delete multiple files together:
+so you can easily handle files together:
 
     # bash/zsh
     ls -ltr `ncp`
     ls -ltr $(ncp)
-    cp -rvf `ncp` .
-    mv `ncp` .
-    rm `ncp` -rf
 
     # fish
     ls -ltr (ncp)
-    cp -rvf (ncp) .
-    mv (ncp) .
-    rm (ncp) -rf
 
-Note that you may want to keep quotes disabled (as it is by default) in this case.
+##### quote paths
+
+To wrap each file path within single quotes while selecting:
+
+    export NNN_QUOTE_ON=1
+This is particularly useful if you are planning to copy the whole string to the shell to run a command. Quotes can be toggled at runtime using <kbd>^T</kbd>.
+
+Note that the filename is not escaped. So copying may still fail for filenames having quote(s) in them.
 
 ##### to clipboard
 
