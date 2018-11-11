@@ -3078,26 +3078,19 @@ nochange:
 		case SEL_MV:
 		case SEL_RMMUL:
 		{
-			char *cmd;
-
 			if (!g_cppath[0]) {
 				printmsg("copy file not found");
 				goto nochange;
 			}
 
 			if (sel == SEL_CP)
-				r = asprintf(&cmd, "xargs -0 -d \'\n\' -a %s cp -ir --preserve=all -t .", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -d \'\n\' -a %s cp -ir --preserve=all -t .", g_cppath);
 			else if (sel == SEL_MV)
-				r = asprintf(&cmd, "xargs -0 -d \'\n\' -a %s mv -i -t .", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -d \'\n\' -a %s mv -i -t .", g_cppath);
 			else /* SEL_RMMUL */
-				r = asprintf(&cmd, "xargs -0 -d \'\n\' -a %s rm -Ir", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -d \'\n\' -a %s rm -Ir", g_cppath);
 
-			if (r == -1) {
-				printwarn();
-				goto nochange;
-			}
-			spawn("sh", "-c", cmd, path, F_NORMAL | F_SIGINT);
-			free(cmd);
+			spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
 
 			copycurname();
 			if (cfg.filtermode)
@@ -3105,6 +3098,12 @@ nochange:
 			goto begin;
 		}
 		case SEL_RM:
+			if (!ndents)
+				break;
+
+			mkpath(path, dents[cur].name, newpath, PATH_MAX);
+			spawn("rm", "-Ir", newpath, NULL, F_NORMAL | F_SIGINT);
+
 			lastname[0] = '\0';
 			if (cfg.filtermode)
 				presel = FILTER;
