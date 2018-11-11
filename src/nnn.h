@@ -150,7 +150,8 @@ static struct key bindings[] = {
 	/* Last visited dir */
 	{ '-',            SEL_CDLAST,    "",     "" },
 	/* Leader key */
-	{ CONTROL('B'),   SEL_LEADER,    "",     "" },
+	{ CONTROL('_'),   SEL_LEADER,    "",     "" },
+	{ '`',            SEL_LEADER,    "",     "" },
 	/* Mark a path to visit later */
 	{ 'b',            SEL_PIN,       "",     "" },
 	/* Visit marked directory */

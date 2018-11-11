@@ -218,7 +218,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
     →, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden
               /  Filter          Ins, ^I  Toggle nav-as-you-type
               b  Pin current dir      ^V  Go to pinned dir
-             ^B  Leader key      LeaderN  Switch to context N
+          `, ^/  Leader key      LeaderN  Switch to context N
             Esc  Exit prompt          ^L  Redraw, clear prompt
              ^G  Quit and cd           q  Quit context
           Q, ^Q  Quit                  ?  Help, settings
@@ -245,7 +245,7 @@ Help & settings, file details, media info and archive listing are shown in the P
 
 #### Leader key
 
-The Leader key <kbd>^B</kbd> provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and handy location shortcuts.
+The Leader key (<kbd>`</kbd> or <kbd>^/</kbd>) provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and handy location shortcuts.
 
 | Key | Function |
 |:---:| --- |
@@ -265,6 +265,8 @@ Contexts serve the purpose of exploring multiple directories simultaneously. 4 c
 - the current context is in reverse
 - other used contexts are underlined
 - rest are unused
+
+To switch to a context press the Leader key followed by the context number (1-4).
 
 The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
 

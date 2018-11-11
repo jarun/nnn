@@ -63,7 +63,7 @@ Toggle navigate-as-you-type mode
 Pin current directory
 .It Ic ^V
 Visit pinned directory
-.It Ic ^B
+.It Ic `, ^/
 Leader key
 .It Ic LeaderN
 Switch to context N
@@ -199,8 +199,8 @@ to change to the last visited directory on quit requires shell integration in a
 few easy steps. Please visit the project page (linked below) for the
 instructions.
 .Sh CONTEXTS
-Contexts (aka \fItabs\fR aka \fIworkspaces\fR) serve the purpose of exploring multiple directories
-simultaneously. 4 contexts are available. The status of the contexts are shown in the top left corner:
+Contexts serve the purpose of exploring multiple directories simultaneously. 4 contexts
+are available. The status of the contexts are shown in the top left corner:
 .Pp
 - the current context is in reverse
 .br
@@ -208,7 +208,7 @@ simultaneously. 4 contexts are available. The status of the contexts are shown i
 .br
 - rest are unused
 .Pp
-The key prompt understands contexts. To switch contexts press \fI^B\fR and enter the context number (1-4).
+To switch to a context press the Leader key followed by the context number (1-4).
 .Pp
 The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
 .Pp

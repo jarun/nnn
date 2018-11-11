@@ -1371,7 +1371,7 @@ static int parsebmstr()
 			++bms;
 
 			/*
-			 * Use single-char keys to use ^B like vim Leader key.
+			 * Use single-char keys to combine with Leader key.
 			 * Fail here to ensure keys are single char.
 			 * To support multiple char keys remove the return
 			 * and add appropriate check to enable smart-detect.
@@ -1976,7 +1976,7 @@ static int show_help(char *path)
    "4→, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden\n"
              "e/  Filter          Ins, ^I  Toggle nav-as-you-type\n"
              "eb  Pin current dir      ^V  Go to pinned dir\n"
-            "d^B  Leader key      LeaderN  Switch to context N\n"
+         "a`, ^/  Leader key      LeaderN  Switch to context N\n"
            "cEsc  Exit prompt          ^L  Redraw, clear prompt\n"
             "d^G  Quit and cd           q  Quit context\n"
          "aQ, ^Q  Quit                  ?  Help, settings\n"
