@@ -36,7 +36,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-green.svg" alt="Donate via PayPal!" /></a>
 </p>
 
-### Table of Contents
+#### TABLE OF CONTENTS
 
 - [Features](#features)
 - [Performance](#performance)
@@ -71,48 +71,49 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - [work faster at rename prompt](#work-faster-at-rename-prompt)
   - [set idle timeout](#set-idle-timeout)
   - [show hot plugged drives](#show-hot-plugged-drives)
-  - [tmux config](#tmux-config)
+  - [tmux configuration](#tmux-configuration)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
 
-### Features
+#### FEATURES
 
-- Modes - basic, detail (default), disk usage analyzer (du)
+- Modes
+  - Basic, detail (default), disk usage analyzer (du)
 - Navigation
   - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
-  - *Navigate-as-you-type* mode with dir auto-select for the maverick
-  - Handy bookmarks, start at bookmark, pin and visit directory
-  - Multiple contexts
-  - Roll-over at edges, page through entries
-  - Show directories in custom color (default: enabled in blue)
+  - *Navigate-as-you-type* with auto-select directory
+  - Contexts (_aka_ tabs _aka_ workspaces)
+  - Bookmarks, pin and visit directory
 - Sorting
   - Directories always listed on top
   - Sort by file name, modification time, size
-  - Numeric order (1, 2, ... 10, 11, ...) for numeric names
+  - Numeric order for numeric names (visit _/proc_)
 - Search
-  - Superfast directory content filtering with *search-as-you-type*
+  - Instant filtering with *search-as-you-type*
 - Mimes
-  - Open with desktop opener (default) or specify a custom app
-  - Create, list and extract archives (needs atool/patool)
-  - Optionally open text files in EDITOR (fallback vi)
+  - Open with desktop opener or specify a custom app
+  - Create, list, extract archives (needs (p)atool)
+  - Open all text files in EDITOR (optional)
 - Information
   - Detailed stat-like file information
-  - Media information (needs mediainfo or exiftool, if specified)
+  - Media information (needs mediainfo/exiftool)
 - Convenience
-  - Copy, move, delete multiple files by selection
   - Create, rename files and directories
-  - Batch rename/move/delete current directory entries in vidir (from moreutils)
-  - Spawn SHELL (fallback sh) in the current directory
+  - Select multiple files; copy, move, delete selection
+  - Batch rename/move/delete (needs vidir)
+  - Show directories in custom color (default: blue)
+  - Spawn SHELL in the current directory
   - Run custom scripts in the current directory
   - Change directory at exit (*easy* shell integration)
-  - Open any file in EDITOR (fallback vi) or PAGER (fallback less)
-  - GUI app launcher (maximum 2 space-separated arguments)
-  - Terminal screensaver/locker integration
+  - Edit file in EDITOR or open in PAGER
+  - GUI app launcher (up to 2 space-separated args)
+  - Terminal locker integration
 - Unicode support
 - Highly optimized code, minimal resource usage
+- Available on many distros
 
-### Performance
+#### PERFORMANCE
 
 `nnn` vs. ncdu memory usage in disk usage analyzer mode (400K files on disk):
 
@@ -133,7 +134,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
 
 Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors).
 
-### Installation
+#### INSTALLATION
 
 #### Dependencies
 
@@ -172,11 +173,11 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
 `PREFIX` is supported, in case you want to install to a different location.
 
-### Shell completion
+#### SHELL COMPLETION
 
 Search keyword and option completion scripts for Bash, Fish and Zsh can be found in respective subdirectories of [`scripts/auto-completion/`](scripts/auto-completion). Please refer to your shell's manual for installation instructions.
 
-### Usage
+#### USAGE
 
 #### Cmdline options
 
@@ -260,7 +261,7 @@ If all the configured bookmark keys are single character, the prompt is not show
 
 #### Contexts
 
-Contexts (aka _tabs_ aka _workspaces_) serve the purpose of exploring multiple directories simultaneously. 4 contexts are available. The status of the contexts are shown in the top left corner:
+Contexts serve the purpose of exploring multiple directories simultaneously. 4 contexts are available. The status of the contexts are shown in the top left corner:
 
 - the current context is in reverse
 - other used contexts are underlined
@@ -314,9 +315,10 @@ The following indicators are used in the detail view:
 | External dependency | Operation |
 | --- | --- |
 | xdg-open (Linux), open(1) (OS X), cygstart (Cygwin) | desktop opener |
+| cp, mv, rm | copy, move and remove files |
 | mediainfo, exiftool | multimedia file details |
 | atool, patool ([integration](#integrate-patool)) | create, list and extract archives |
-| vidir from moreutils | batch rename, move, delete dir entries |
+| vidir (from moreutils) | batch rename, move, delete dir entries |
 | vlock (Linux), bashlock (OS X), lock(1) (BSD) | terminal locker |
 | $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
 | $PAGER | page through files (fallback less) |
@@ -332,7 +334,7 @@ The following indicators are used in the detail view:
     $ man nnn
 To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
-### Quickstart
+#### QUICKSTART
 
 1. Install the [utilities required](#file-handling) for your regular activities.
 2. Configure [cd on quit](#cd-on-quit).
@@ -343,7 +345,7 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 5. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 6. For additional functionality [setup custom scripts](#run-custom-scripts).
 
-### How to
+#### HOW TO
 
 #### add bookmarks
 
@@ -484,30 +486,30 @@ The rename prompt supports some bash-like command-line shortcuts - <kbd>^A</kbd>
 
 #### set idle timeout
 
-The terminal screensaver is disabled by default. To set the wait time in seconds, use environment variable `NNN_IDLE_TIMEOUT`.
+The terminal locker is disabled by default. To set the wait time in seconds, use environment variable `NNN_IDLE_TIMEOUT`.
 
 #### show hot plugged drives
 
 Enable volume management in your DE file manager and set removable drives or media to be auto-mounted when inserted. Then visit the usual mount point location (`/mnt` or `/media/user`) in `nnn`.
 
-#### tmux config
+#### tmux configuration
 
 `nnn` might not handle keypresses correctly when used with tmux (see issue #104 for more details). Set `TERM=xterm-256color` to address it.
 
-### Why fork?
+#### WHY FORK?
 
 `nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today. I chose to fork because:
-- one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. In my opinion evolution is the taste of time.
+- one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. `noice` was rudimentary. In my opinion evolution is the taste of time.
 - I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind. Check out [nnn design considerations](https://github.com/jarun/nnn/wiki/nnn-design-considerations) for more details.
 
-### Mentions
+#### MENTIONS
 
 - [FOSSMint](https://www.fossmint.com/nnn-linux-terminal-file-browser/)
 - [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
 - [LinuxLinks](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)
 - [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
 
-### Developers
+#### DEVELOPERS
 
 1. Copyright © 2014-2016 Lazaros Koromilas
 2. Copyright © 2014-2016 Dimitris Papastamos

@@ -3503,7 +3503,7 @@ int main(int argc, char *argv[])
 			editor = xgetenv("EDITOR", "vi");
 	}
 
-	/* Get screensaver wait time, if set; copier used as tmp var */
+	/* Get locker wait time, if set; copier used as tmp var */
 	copier = getenv("NNN_IDLE_TIMEOUT");
 	if (copier) {
 		opt = atoi(copier);

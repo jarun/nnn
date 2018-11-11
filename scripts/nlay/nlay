@@ -72,8 +72,8 @@ elif [ "$2" == "search" ]; then
     bg=(">/dev/null 2>&1 &"
         ">/dev/null 2>&1 &")
 
-#--------------- SCREENSAVER ----------------
-elif [ "$2" == "screensaver" ]; then
+#------------------ LOCKER ------------------
+elif [ "$2" == "locker" ]; then
     app=("vlock"
          "bashlock"
          "lock")
