@@ -3002,9 +3002,8 @@ nochange:
 				g_buf[r] = '\'';
 				g_buf[r + 1] = '\0';
 
-				if (!copier)
-					writecp(g_buf, r + 1); /* Truncate NULL from end */
-				else
+				writecp(g_buf, r + 1); /* Truncate NULL from end */
+				if (copier)
 					spawn(copier, g_buf, NULL, NULL, F_NOTRACE);
 
 				g_buf[r] = '\0';
@@ -3015,9 +3014,8 @@ nochange:
 				copybufpos = 0;
 				appendfpath(newpath, r);
 
-				if (!copier)
-					writecp(newpath, r - 1); /* Truncate NULL from end */
-				else
+				writecp(newpath, r - 1); /* Truncate NULL from end */
+				if (copier)
 					spawn(copier, newpath, NULL, NULL, F_NOTRACE);
 
 				printmsg(newpath);
@@ -3056,9 +3054,8 @@ nochange:
 			}
 
 			if (copybufpos) { /* File path(s) written to the buffer */
-				if (!copier)
-					writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
-				else
+				writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
+				if (copier)
 					spawn(copier, pcopybuf, NULL, NULL, F_NOTRACE);
 
 				if (ncp) { /* Some files cherry picked */
@@ -3549,8 +3546,7 @@ int main(int argc, char *argv[])
 	else if (xdiraccess("/tmp"))
 		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", MAX_HOME_LEN);
 
-	/* Check if X11 is available */
-	if (!copier && g_tmpfplen) {
+	if (g_tmpfplen) {
 		xstrlcpy(g_cppath, g_tmpfpath, MAX_HOME_LEN);
 		xstrlcpy(g_cppath + g_tmpfplen - 1, "/.nnncp", MAX_HOME_LEN - g_tmpfplen);
 	}
