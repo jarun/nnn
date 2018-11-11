@@ -64,13 +64,13 @@ Pin current directory
 .It Ic ^V
 Visit pinned directory
 .It Ic ^B
-Show key prompt (recognizes bookmark keys, ~, -, & and context IDs)
-.It Ic ^L
-Force a redraw, clear prompt
+Leader key
+.It Ic LeaderN
+Switch to context N
 .It Ic Esc
 Exit prompt
-.It Ic ^Bn
-Switch to context n
+.It Ic ^L
+Force a redraw, clear prompt
 .It Ic q
 Quit the current context
 .It Ic ^G
@@ -261,10 +261,12 @@ To list the file paths copied to memory press \fIy\fR.
 The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively.
 .Pp
-\fBNNN_BMS:\fR bookmark string as \fIkey:location\fR pairs (max 10) separated by
+\fBNNN_BMS:\fR bookmark string as \fIkey_char:location\fR pairs (max 10) separated by
 \fI;\fR:
 .Bd -literal
-    export NNN_BMS='doc:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
+    export NNN_BMS='d:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
+
+    NOTE: Bookmark keys should be single-character to use them in combination with the Leader key.
 .Ed
 .Pp
 \fBNNN_USE_EDITOR:\fR use EDITOR (preferably CLI, fallback vi) to handle text
@@ -284,9 +286,9 @@ files.
     IFS=
     echo -n $1 | xsel --clipboard --input
     -------------------------------------
+
+    If it's not set, by default file paths are copied to the tmp file \fBDIR/.nnncp\fR, where 'DIR' (by priority) is: \fI$HOME\fR or, \fI$TMPDIR\fR or, \fI/tmp\fR.
 .Ed
-.br
-If it's not set, by default file paths are copied to the tmp file \fBDIR/.nnncp\fR, where 'DIR' (by priority) is: \fI$HOME\fR or, \fI$TMPDIR\fR or, \fI/tmp\fR.
 .Pp
 \fBNNN_QUOTE_ON:\fR wrap copied paths within single quotes. Useful for pasting
 names in the shell. Note that the filename is not escaped. So copying may still fail

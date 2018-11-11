@@ -257,10 +257,9 @@ typedef struct {
 	uint quote      : 1;  /* Copy paths within quotes */
 	uint color      : 3;  /* Color code for directories */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 12;
+	uint reserved   : 13;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
-	uint char_key   : 1;  /* All keys are single character long */
 } settings;
 
 /* Contexts or workspaces */
@@ -276,7 +275,7 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 4, 1, 0, 0, 1};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 4, 1, 0, 0};
 static context g_ctx[MAX_CTX] __attribute__ ((aligned));
 
 static struct entry *dents;
@@ -1357,12 +1356,12 @@ static size_t mkpath(char *dir, char *name, char *out, size_t n)
 	return (xstrlcpy(out + len, name, n - len) + len);
 }
 
-static void parsebmstr()
+static int parsebmstr()
 {
 	int i = 0;
 	char *bms = getenv("NNN_BMS");
 	if (!bms)
-		return;
+		return 0;
 
 	while (*bms && i < BM_MAX) {
 		bookmark[i].key = bms;
@@ -1371,8 +1370,13 @@ static void parsebmstr()
 		while (*bms && *bms != ':') {
 			++bms;
 
-			if (cfg.char_key)
-				cfg.char_key = 0;
+			/*
+			 * Use single-char keys to use ^B like vim Leader key.
+			 * Fail here to ensure keys are single char.
+			 * To support multiple char keys remove the return
+			 * and add appropriate check to enable smart-detect.
+			 */
+			return -1;
 		}
 
 		if (!*bms) {
@@ -1399,6 +1403,8 @@ static void parsebmstr()
 		++bms;
 		++i;
 	}
+
+	return 0;
 }
 
 /*
@@ -1970,8 +1976,8 @@ static int show_help(char *path)
    "4→, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden\n"
              "e/  Filter          Ins, ^I  Toggle nav-as-you-type\n"
              "eb  Pin current dir      ^V  Go to pinned dir\n"
-            "d^B  Key prompt           ^L  Redraw, clear prompt\n"
-           "cEsc  Exit prompt         ^Bn  Switch to context n\n"
+            "d^B  Leader key      LeaderN  Switch to context N\n"
+           "cEsc  Exit prompt          ^L  Redraw, clear prompt\n"
             "d^G  Quit and cd           q  Quit context\n"
          "aQ, ^Q  Quit                  ?  Help, settings\n"
 "1FILES\n"
@@ -2711,8 +2717,8 @@ nochange:
 			DPRINTF_S(path);
 			setdirwatch();
 			goto begin;
-		case SEL_CDBM:
-			tmp = xreadline(NULL, "key: ", cfg.char_key);
+		case SEL_LEADER:
+			tmp = xreadline(NULL, "key: ", TRUE);
 			if (tmp == NULL || tmp[0] == '\0')
 				break;
 
@@ -3453,7 +3459,10 @@ int main(int argc, char *argv[])
 	}
 
 	/* Parse bookmarks string */
-	parsebmstr();
+	 if (parsebmstr() < 0) {
+		fprintf(stderr, "ERROR parsing NNN_BMS: set single-char bookmark keys only\n");
+		exit(1);
+	 }
 
 	if (ipath) { /* Open a bookmark directly */
 		if (get_bm_loc(ipath, cwd) == NULL) {

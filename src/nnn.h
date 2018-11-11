@@ -47,7 +47,7 @@ enum action {
 	SEL_CDHOME,
 	SEL_CDBEGIN,
 	SEL_CDLAST,
-	SEL_CDBM,
+	SEL_LEADER,
 	SEL_PIN,
 	SEL_VISIT,
 	SEL_FLTR,
@@ -149,8 +149,8 @@ static struct key bindings[] = {
 	{ '&',            SEL_CDBEGIN,   "",     "" },
 	/* Last visited dir */
 	{ '-',            SEL_CDLAST,    "",     "" },
-	/* Change dir using bookmark */
-	{ CONTROL('B'),   SEL_CDBM,      "",     "" },
+	/* Leader key */
+	{ CONTROL('B'),   SEL_LEADER,    "",     "" },
 	/* Mark a path to visit later */
 	{ 'b',            SEL_PIN,       "",     "" },
 	/* Visit marked directory */

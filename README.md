@@ -49,7 +49,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
 - [Usage](#usage)
   - [Cmdline options](#cmdline-options)
   - [Keyboard shortcuts](#keyboard-shortcuts)
-  - [Key prompt](#key-prompt)
+  - [Leader key](#leader-key)
   - [Contexts](#contexts)
   - [Filters](#filters)
   - [Navigate-as-you-type mode](#navigate-as-you-type-mode)
@@ -84,7 +84,8 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
   - *Navigate-as-you-type* with auto-select directory
   - Contexts (_aka_ tabs _aka_ workspaces)
-  - Bookmarks, pin and visit directory
+  - Bookmarks
+  - Pin and visit a directory
 - Sorting
   - Directories always listed on top
   - Sort by file name, modification time, size
@@ -103,7 +104,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - Select multiple files; copy, move, delete selection
   - Batch rename/move/delete (needs vidir)
   - Show directories in custom color (default: blue)
-  - Spawn SHELL in the current directory
+  - Spawn a subshell in the current directory
   - Run custom scripts in the current directory
   - Change directory at exit (*easy* shell integration)
   - Edit file in EDITOR or open in PAGER
@@ -217,8 +218,8 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
     →, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden
               /  Filter          Ins, ^I  Toggle nav-as-you-type
               b  Pin current dir      ^V  Go to pinned dir
-             ^B  Key prompt           ^L  Redraw, clear prompt
-            Esc  Exit prompt         ^Bn  Switch to context n
+             ^B  Leader key      LeaderN  Switch to context N
+            Esc  Exit prompt          ^L  Redraw, clear prompt
              ^G  Quit and cd           q  Quit context
           Q, ^Q  Quit                  ?  Help, settings
  FILES
@@ -242,9 +243,9 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
 
-#### Key prompt
+#### Leader key
 
-The key prompt, invoked by <kbd>^B</kbd>, provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and handy location shortcuts.
+The Leader key <kbd>^B</kbd> provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and handy location shortcuts.
 
 | Key | Function |
 |:---:| --- |
@@ -256,8 +257,6 @@ The key prompt, invoked by <kbd>^B</kbd>, provides a powerful multi-functional n
 | <kbd>-</kbd> | Go to last visited directory |
 | <kbd>&</kbd> | Go to start directory |
 | <kbd>q</kbd> | Quit context |
-
-If all the configured bookmark keys are single character, the prompt is not shown and <kbd>Enter</kbd> is not required; just press <kbd>^B</kbd> followed by the key (like the vim Leader key).
 
 #### Contexts
 
@@ -349,9 +348,11 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 #### add bookmarks
 
-Set environment variable `NNN_BMS` as a string of `key:location` pairs (max 10) separated by semicolons (`;`):
+Set environment variable `NNN_BMS` as a string of `key_char:location` pairs (max 10) separated by semicolons (`;`):
 
-    export NNN_BMS='doc:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
+    export NNN_BMS='d:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
+
+NOTE: Bookmark keys should be single-character to use them in combination with the Leader key.
 
 #### copy file paths
 
