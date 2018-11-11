@@ -204,60 +204,39 @@ optional args:
 
 #### Keyboard shortcuts
 
+Press <kbd>?</kbd> in `nnn` to see the list anytime.
+
 ```
-            Key  Desc
-              ----
-       ↑, k, ^P  Up
-       ↓, j, ^N  Down
-       PgUp, ^U  Scroll up
-       PgDn, ^D  Scroll down
- Home, g, ^, ^A  First entry
-  End, G, $, ^E  Last entry
-    →, ↵, l, ^M  Open file/enter dir
- ←, Bksp, h, ^H  Parent dir
-             ^O  Open with...
-     Insert, ^I  Toggle nav-as-you-type
-              ~  Go HOME
-              &  Start dir
-              -  Last visited dir
-              /  Filter entries
-              .  Toggle show hidden
-             ^B  Key prompt
-              b  Pin current dir
-             ^V  Go to pinned dir
-              d  Toggle detail view
-              D  File details
-           m, M  Brief/full media info
-              n  Create new
-             ^R  Rename entry
-              r  Open dir in vidir
-              s  Toggle sort by size
-              S  Toggle apparent size
-             ^J  Toggle du mode
-              t  Toggle sort by mtime
-          !, ^]  Spawn SHELL in dir
-              R  Run custom script
-              e  Edit in EDITOR
-              p  Open in PAGER
-              f  Archive entry
-              F  List archive
-             ^F  Extract archive
-      Space, ^K  Copy file path
-             ^Y  Toggle selection mode
-              y  Show copy buffer
-              P  Copy selection
-              V  Move selection
-             ^X  Delete selection
-              X  Delete entry
-             ^T  Toggle path quote
-             ^L  Redraw, clear prompt
-            Esc  Exit prompt
-              L  Lock terminal
-              o  Launch GUI app
-              ?  Help, settings
-              q  Quit context
-             ^G  Quit and cd
-          Q, ^Q  Quit
+ NAVIGATION
+       ↑, k, ^P  Up             PgUp, ^U  Scroll up
+       ↓, j, ^N  Down           PgDn, ^D  Scroll down
+ Home, g, ^, ^A  First entry           ~  Go HOME
+  End, G, $, ^E  Last entry            &  Start dir
+ ←, Bksp, h, ^H  Parent dir            -  Last visited dir
+    →, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden
+              /  Filter          Ins, ^I  Toggle nav-as-you-type
+              b  Pin current dir      ^V  Go to pinned dir
+             ^B  Key prompt           ^L  Redraw, clear prompt
+            Esc  Exit prompt         ^Bn  Switch to context n
+             ^G  Quit and cd           q  Quit context
+          Q, ^Q  Quit                  ?  Help, settings
+ FILES
+             ^O  Open with...          n  Create new
+              D  File details          d  Toggle detail view
+             ^R  Rename entry          r  Open dir in vidir
+             ^Y  Toggle selection      y  List selection
+          ⎵, ^K  Copy entry path      ^T  Toggle path quote
+              P  Copy selection       ^X  Delete selection
+              V  Move selection        X  Delete entry
+              f  Archive entry         F  List archive
+             ^F  Extract archive    m, M  Brief/full media info
+              e  Edit in EDITOR        p  Open in PAGER
+ ORDER
+             ^J  Toggle du mode        S  Toggle apparent size
+              s  Toggle sort by size   t  Toggle sort by mtime
+ MISC
+              o  Launch GUI app    !, ^]  Spawn SHELL in dir
+              R  Run custom script     L  Lock terminal
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
@@ -277,7 +256,7 @@ The key prompt, invoked by <kbd>^B</kbd>, provides a powerful multi-functional n
 | <kbd>&</kbd> | Go to start directory |
 | <kbd>q</kbd> | Quit context |
 
-If all the configured bookmark keys are single character, the prompt is not shown and <kbd>Enter</kbd> is not required; just press <kbd>^B</kbd> followed by the key.
+If all the configured bookmark keys are single character, the prompt is not shown and <kbd>Enter</kbd> is not required; just press <kbd>^B</kbd> followed by the key (like the vim Leader key).
 
 #### Contexts
 

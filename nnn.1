@@ -23,9 +23,12 @@
 opens the current working directory by default if
 .Ar PATH
 is not specified.
+.Sh KEYBINDS
 .Pp
 .Nm
 supports both vi-like and emacs-like key bindings as listed below.
+.Pp
+NAVIGATION
 .Pp
 .Bl -tag -width "l, [Right], [Return] or C-mXXXX" -offset indent -compact
 .It Ic [Up], k, ^P
@@ -40,72 +43,67 @@ Scroll down half a page
 Move to the first entry
 .It Ic [End], G, $, ^E
 Move to the last entry
+.It Ic [Left], [Backspace], h, ^H
+Go to parent directory
 .It Ic [Right], [Enter], l, ^M
 Open file or enter directory
-.It Ic [Left], [Backspace], h, ^H
-Back up one directory level
-.It Ic ^O
-Open with a custom application
-.It Ic [Insert], ^I
-Toggle navigate-as-you-type mode
 .It Ic ~
 Change to the HOME directory
 .It Ic &
 Change to initial directory
 .It Ic \-
 Change to the last visited directory
-.It Ic /
-Change filter (more information below)
 .It Ic \&.
 Toggle show hidden . (dot) files
-.It Ic ^B
-Show key prompt (recognizes bookmark keys, ~, -, & and context IDs)
+.It Ic /
+Change filter (more information below)
+.It Ic [Insert], ^I
+Toggle navigate-as-you-type mode
 .It Ic b
 Pin current directory
 .It Ic ^V
 Visit pinned directory
-.It Ic d
-Toggle detail view
-.It Ic D
-Show current file details screen
-.It Ic m
-Show brief media info
-.It Ic M
-Show full media info
+.It Ic ^B
+Show key prompt (recognizes bookmark keys, ~, -, & and context IDs)
+.It Ic ^L
+Force a redraw, clear prompt
+.It Ic Esc
+Exit prompt
+.It Ic ^Bn
+Switch to context n
+.It Ic q
+Quit the current context
+.It Ic ^G
+Quit and change directory
+.It Ic Q, ^Q
+Quit
+.It Ic \&?
+Toggle help and settings screen
+.El
+.Pp
+FILES
+.Pp
+.Bl -tag -width "l, [Right], [Return] or C-mXXXX" -offset indent -compact
+.It Ic ^O
+Open with an application
 .It Ic n
 Create a new file or directory
+.It Ic D
+Show entry details
+.It Ic d
+Toggle detail view
 .It Ic ^R
 Rename selected entry
 .It Ic r
 Open directory in vidir
-.It Ic s
-Toggle sort by file size
-.It Ic S
-Toggle sort by apparent size
-.It Ic ^J
-Toggle disk usage analyzer mode
-.It Ic t
-Toggle sort by time modified
-.It Ic \&!, ^]
-Spawn SHELL in PWD (fallback sh)
-.It Ic R
-Run a custom script
-.It Ic e
-Open current entry in EDITOR (fallback vi)
-.It Ic p
-Open current entry in PAGER (fallback less)
-.It Ic f
-Archive current entry
-.It Ic F
-List files in archive
-.It Ic ^F
-Extract archive in current directory
-.It Ic Space, ^K
-Invoke file path copier
 .It Ic ^Y
 Toggle selection mode
+.It Ic Space, ^K
+Copy entry absolute path
 .It Ic y
-Show copy buffer
+Show selection list
+.It Ic ^T
+Toggle path quote
 .It Ic P
 Copy files from selection
 .It Ic V
@@ -113,26 +111,45 @@ Move files from selection
 .It Ic ^X
 Delete files from selection
 .It Ic X
-Delete the current entry
-, ^Q  Quit
-.It Ic ^T
-Toggle path quote
-.It Ic ^L
-Force a redraw, clear prompt
-.It Ic Esc
-Exit prompt
-.It Ic L
-Lock terminal (Linux only)
+Delete entry
+.It Ic f
+Archive entry
+.It Ic F
+List files in archive
+.It Ic ^F
+Extract archive in current directory
+.It Ic m, M
+Show brief/full media info
+.It Ic e
+Open entry in EDITOR (fallback vi)
+.It Ic p
+Open entry in PAGER (fallback less)
+.El
+.Pp
+ORDER
+.Pp
+.Bl -tag -width "l, [Right], [Return] or C-mXXXX" -offset indent -compact
+.It Ic ^J
+Toggle disk usage analyzer mode
+.It Ic S
+Toggle sort by apparent size
+.It Ic s
+Toggle sort by file size
+.It Ic t
+Toggle sort by time modified
+.El
+.Pp
+MISC
+.Pp
+.Bl -tag -width "l, [Right], [Return] or C-mXXXX" -offset indent -compact
 .It Ic o
 Launch a GUI application
-.It Ic \&?
-Toggle help and settings screen
-.It Ic q
-Quit the current context
-.It Ic ^G
-Quit and change directory
-.It Ic Q, ^X
-Quit
+.It Ic \&!, ^]
+Spawn SHELL in current directory (fallback sh)
+.It Ic R
+Run a custom script
+.It Ic L
+Lock terminal (Linux only)
 .El
 .Pp
 Backing up one directory level will set the cursor position at the
@@ -140,6 +157,7 @@ directory you came out of.
 .Pp
 Help & settings, file details, media info and archive listing are shown in the
 PAGER. Please use the PAGER-specific keys in these screens.
+.Sh OPTIONS
 .Pp
 .Nm
 supports the following options:
