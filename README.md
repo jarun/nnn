@@ -264,7 +264,7 @@ Help & settings, file details, media info and archive listing are shown in the P
 
 #### Key prompt
 
-The key prompt, invoked by <kbd>^B</kbd>, provides a powerful multi-functional navigation mechanism. It understands contexts, bookmarks and handy location shortcuts.
+The key prompt, invoked by <kbd>^B</kbd>, provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and handy location shortcuts.
 
 | Key | Function |
 |:---:| --- |
