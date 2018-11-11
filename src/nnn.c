@@ -3543,6 +3543,7 @@ int main(int argc, char *argv[])
 		cfg.autoselect = 0;
 
 	signal(SIGINT, SIG_IGN);
+	signal(SIGQUIT, SIG_IGN);
 
 	/* Test initial path */
 	if (!xdiraccess(ipath)) {
