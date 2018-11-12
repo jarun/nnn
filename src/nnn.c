@@ -3338,11 +3338,11 @@ nochange:
 		case SEL_QUIT:
 			for (r = 0; r < MAX_CTX; ++r)
 				if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
-					r = get_input("press 'y' to quit all contexts");
+					r = get_input("Quit all contexts? ('Enter' confirms)");
 					break;
 				}
 
-			if (!(r == MAX_CTX || r == 'y'))
+			if (!(r == MAX_CTX || r == 13))
 				break;
 
 			if (sel == SEL_CDQUIT) {
