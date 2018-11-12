@@ -236,7 +236,7 @@ typedef struct entry {
 
 /* Bookmark */
 typedef struct {
-	char *key;
+	int key;
 	char *loc;
 } bm;
 
@@ -1368,31 +1368,19 @@ static int parsebmstr()
 		return 0;
 
 	while (*bms && i < BM_MAX) {
-		bookmark[i].key = bms;
+		bookmark[i].key = *bms;
 
-		++bms;
-		while (*bms && *bms != ':') {
-			++bms;
-
-			/*
-			 * Use single-char keys to combine with Leader key.
-			 * Fail here to ensure keys are single char.
-			 * To support multiple char keys remove the return
-			 * and add appropriate check to enable smart-detect.
-			 */
-			return -1;
-		}
-
-		if (!*bms) {
-			bookmark[i].key = NULL;
+		if (!*++bms) {
+			bookmark[i].key = '\0';
 			break;
 		}
 
-		*bms = '\0';
+		if (*bms != ':')
+			return -1; /* We support single char keys only */
 
 		bookmark[i].loc = ++bms;
 		if (bookmark[i].loc[0] == '\0' || bookmark[i].loc[0] == ';') {
-			bookmark[i].key = NULL;
+			bookmark[i].key = '\0';
 			break;
 		}
 
@@ -1417,15 +1405,12 @@ static int parsebmstr()
  * NULL is returned in case of no match, path resolution failure etc.
  * buf would be modified, so check return value before access
  */
-static char *get_bm_loc(char *key, char *buf)
+static char *get_bm_loc(int key, char *buf)
 {
 	int r;
 
-	if (!key || !key[0])
-		return NULL;
-
 	for (r = 0; bookmark[r].key && r < BM_MAX; ++r) {
-		if (strcmp(bookmark[r].key, key) == 0) {
+		if (bookmark[r].key == key) {
 			if (bookmark[r].loc[0] == '~') {
 				char *home = getenv("HOME");
 
@@ -2026,7 +2011,7 @@ static int show_help(char *path)
 		dprintf(fd, "BOOKMARKS\n");
 		for (; i < BM_MAX; ++i)
 			if (bookmark[i].key)
-				dprintf(fd, " %s: %s\n", bookmark[i].key, bookmark[i].loc);
+				dprintf(fd, " %c: %s\n", (char)bookmark[i].key, bookmark[i].loc);
 			else
 				break;
 		dprintf(fd, "\n");
@@ -2728,7 +2713,7 @@ nochange:
 			case '~': //fallthrough
 			case '-': //fallthrough
 			case '&':
-				presel = (char)fd;
+				presel = fd;
 				goto nochange;
 			case '>':
 			case '.':
@@ -2782,7 +2767,7 @@ nochange:
 				goto begin;
 			}
 
-			if (get_bm_loc((char)fd, newpath) == NULL) {
+			if (get_bm_loc(fd, newpath) == NULL) {
 				printmsg(messages[STR_INVBM_KEY]);
 				goto nochange;
 			}
@@ -3461,7 +3446,7 @@ int main(int argc, char *argv[])
 	 }
 
 	if (ipath) { /* Open a bookmark directly */
-		if (get_bm_loc(ipath, cwd) == NULL) {
+		if (ipath[1] || get_bm_loc(*ipath, cwd) == NULL) {
 			fprintf(stderr, "%s\n", messages[STR_INVBM_KEY]);
 			exit(1);
 		}
