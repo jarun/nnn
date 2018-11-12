@@ -434,10 +434,20 @@ static void printerr(int linenum)
 }
 
 /* Print prompt on the last line */
-static void printprompt(char *str)
+static void printprompt(const char *str)
 {
 	clearprompt();
-	printw(str);
+	if (str)
+		printw(str);
+}
+
+static int get_input(const char *prompt)
+{
+	printprompt(prompt);
+	cleartimeout();
+	int r = getch();
+	settimeout();
+	return r;
 }
 
 /* Increase the limit on open file descriptors, if possible */
@@ -3123,10 +3133,7 @@ nochange:
 			}
 
 			if (sel == SEL_OPEN) {
-				printprompt("press 'c' for cli mode");
-				cleartimeout();
-				r = getch();
-				settimeout();
+				r = get_input("press 'c' for cli mode");
 				if (r == 'c')
 					r = F_NORMAL;
 				else
@@ -3195,10 +3202,7 @@ nochange:
 			}
 
 			/* Check if it's a dir or file */
-			printprompt("press 'f'(ile) or 'd'(ir)");
-			cleartimeout();
-			r = getch();
-			settimeout();
+			r = get_input("press 'f'(ile) or 'd'(ir)");
 			if (r == 'f') {
 				r = openat(fd, tmp, O_CREAT, 0666);
 				close(r);
@@ -3246,11 +3250,7 @@ nochange:
 			/* Check if another file with same name exists */
 			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
 				/* File with the same name exists */
-				printprompt("press 'y' to overwrite");
-				cleartimeout();
-				r = getch();
-				settimeout();
-				if (r != 'y') {
+				if (get_input("press 'y' to overwrite") != 'y') {
 					close(fd);
 					break;
 				}
@@ -3361,24 +3361,32 @@ nochange:
 			dentfree(dents);
 			return;
 		}
-		case SEL_CDQUIT:
-		{
-			tmp = getenv("NNN_TMPFILE");
-			if (!tmp) {
-				printmsg("set NNN_TMPFILE");
-				goto nochange;
-			}
-
-			FILE *fp = fopen(tmp, "w");
-
-			if (fp) {
-				fprintf(fp, "cd \"%s\"", path);
-				fclose(fp);
-			}
-
-			/* Fall through to exit */
-		} // fallthrough
+		case SEL_CDQUIT: // fallthrough
 		case SEL_QUIT:
+			for (r = 0; r < MAX_CTX; ++r)
+				if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
+					r = get_input("press 'y' to quit all contexts");
+					break;
+				}
+
+			if (!(r == MAX_CTX || r == 'y'))
+				break;
+
+			if (sel == SEL_CDQUIT) {
+				tmp = getenv("NNN_TMPFILE");
+				if (!tmp) {
+					printmsg("set NNN_TMPFILE");
+					goto nochange;
+				}
+
+				FILE *fp = fopen(tmp, "w");
+
+				if (fp) {
+					fprintf(fp, "cd \"%s\"", path);
+					fclose(fp);
+				}
+			}
+
 			dentfree(dents);
 			return;
 		} /* switch (sel) */
