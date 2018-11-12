@@ -354,7 +354,7 @@ static char * const utils[] = {
 #define STR_NFTWFAIL_ID 0
 #define STR_NOHOME_ID 1
 #define STR_INPUT_ID 2
-#define STR_INVBM_ID 3
+#define STR_INVBM_KEY 3
 #define STR_COPY_ID 4
 #define STR_DATE_ID 5
 
@@ -437,13 +437,13 @@ static void printerr(int linenum)
 static void printprompt(const char *str)
 {
 	clearprompt();
-	if (str)
-		printw(str);
+	printw(str);
 }
 
 static int get_input(const char *prompt)
 {
-	printprompt(prompt);
+	if (prompt)
+		printprompt(prompt);
 	cleartimeout();
 	int r = getch();
 	settimeout();
@@ -1221,7 +1221,7 @@ end:
 }
 
 /* Show a prompt with input string and return the changes */
-static char *xreadline(char *fname, char *prompt, bool single)
+static char *xreadline(char *fname, char *prompt)
 {
 	size_t len, pos;
 	int x, y, r;
@@ -1229,12 +1229,6 @@ static char *xreadline(char *fname, char *prompt, bool single)
 	static wchar_t * const buf = (wchar_t *)g_buf;
 
 	cleartimeout();
-	if (single) {
-		buf[0] = getch();
-		len = 1;
-		goto END;
-	}
-
 	printprompt(prompt);
 
 	if (fname) {
@@ -2728,74 +2722,68 @@ nochange:
 			setdirwatch();
 			goto begin;
 		case SEL_LEADER:
-			tmp = xreadline(NULL, "key: ", TRUE);
-			if (tmp == NULL || tmp[0] == '\0')
-				break;
+			fd = get_input(NULL);
+			switch (fd) {
+			case 'q': //fallthrough
+			case '~': //fallthrough
+			case '-': //fallthrough
+			case '&':
+				presel = (char)fd;
+				goto nochange;
+			case '>':
+			case '.':
+			case '<':
+			case ',':
+				r = cfg.curctx;
+				if (fd == '>' || fd == '.')
+					do
+						(r == MAX_CTX - 1) ? (r = 0) : ++r;
+					while (!g_ctx[r].c_cfg.ctxactive);
+				else
+					do
+						(r == 0) ? (r = MAX_CTX - 1) : --r;
+					while (!g_ctx[r].c_cfg.ctxactive); //fallthrough
+				fd = '1' + r; //fallthrough
+			case '1': //fallthrough
+			case '2': //fallthrough
+			case '3': //fallthrough
+			case '4':
+				r = fd - '1'; /* Save the next context id */
+				if (cfg.curctx == r)
+					continue;
 
-			/* Interpret ~, - and & keys */
-			if (tmp[1] == '\0') {
-				switch (tmp[0]) {
-				case 'q':
-				case '~': //fallthrough
-				case '-': //fallthrough
-				case '&':
-					presel = tmp[0];
-					goto nochange;
-				case '>':
-				case '.':
-				case '<':
-				case ',':
-					r = cfg.curctx;
-					if (tmp[0] == '>' || tmp[0] == '.')
-						do
-							(r == MAX_CTX - 1) ? (r = 0) : ++r;
-						while (!g_ctx[r].c_cfg.ctxactive);
-					else
-						do
-							(r == 0) ? (r = MAX_CTX - 1) : --r;
-						while (!g_ctx[r].c_cfg.ctxactive); //fallthrough
-					tmp[0] = '1' + r; //fallthrough
-				case '1': //fallthrough
-				case '2': //fallthrough
-				case '3': //fallthrough
-				case '4':
-					r = tmp[0] - '1'; /* Save the next context id */
-					if (cfg.curctx == r)
-						continue;
+				g_crc = 0;
 
-					g_crc = 0;
+				/* Save current context */
+				xstrlcpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
+				g_ctx[cfg.curctx].c_cfg = cfg;
 
-					/* Save current context */
-					xstrlcpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
-					g_ctx[cfg.curctx].c_cfg = cfg;
-
-					if (g_ctx[r].c_cfg.ctxactive) /* Switch to saved context */
-						cfg = g_ctx[r].c_cfg;
-					else { /* Setup a new context from current context */
-						g_ctx[r].c_cfg.ctxactive = 1;
-						xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
-						xstrlcpy(g_ctx[r].c_init, path, PATH_MAX);
-						g_ctx[r].c_last[0] = '\0';
-						xstrlcpy(g_ctx[r].c_name, dents[cur].name, NAME_MAX + 1);
-						g_ctx[r].c_cfg = cfg;
-						xstrlcpy(g_ctx[r].c_fltr, hfltr, DOT_FILTER_LEN);
-					}
-
-					/* Reset the pointers */
-					path = g_ctx[r].c_path;
-					ipath = g_ctx[r].c_init;
-					lastdir = g_ctx[r].c_last;
-					lastname = g_ctx[r].c_name;
-					hfltr = g_ctx[r].c_fltr;
-
-					cfg.curctx = r;
-					setdirwatch();
-					goto begin;
+				if (g_ctx[r].c_cfg.ctxactive) /* Switch to saved context */
+					cfg = g_ctx[r].c_cfg;
+				else { /* Setup a new context from current context */
+					g_ctx[r].c_cfg.ctxactive = 1;
+					xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
+					xstrlcpy(g_ctx[r].c_init, path, PATH_MAX);
+					g_ctx[r].c_last[0] = '\0';
+					xstrlcpy(g_ctx[r].c_name, dents[cur].name, NAME_MAX + 1);
+					g_ctx[r].c_cfg = cfg;
+					xstrlcpy(g_ctx[r].c_fltr, hfltr, DOT_FILTER_LEN);
 				}
+
+				/* Reset the pointers */
+				path = g_ctx[r].c_path;
+				ipath = g_ctx[r].c_init;
+				lastdir = g_ctx[r].c_last;
+				lastname = g_ctx[r].c_name;
+				hfltr = g_ctx[r].c_fltr;
+
+				cfg.curctx = r;
+				setdirwatch();
+				goto begin;
 			}
 
-			if (get_bm_loc(tmp, newpath) == NULL) {
-				printmsg(messages[STR_INVBM_ID]);
+			if (get_bm_loc((char)fd, newpath) == NULL) {
+				printmsg(messages[STR_INVBM_KEY]);
 				goto nochange;
 			}
 
@@ -3114,13 +3102,13 @@ nochange:
 		case SEL_LAUNCH: // fallthrough
 		case SEL_NEW:
 			if (sel == SEL_OPEN)
-				tmp = xreadline(NULL, "open with: ", FALSE);
+				tmp = xreadline(NULL, "open with: ");
 			else if (sel == SEL_LAUNCH)
-				tmp = xreadline(NULL, "launch: ", FALSE);
+				tmp = xreadline(NULL, "launch: ");
 			else if (sel == SEL_ARCHIVE)
-				tmp = xreadline(dents[cur].name, "name: ", FALSE);
+				tmp = xreadline(dents[cur].name, "name: ");
 			else
-				tmp = xreadline(NULL, "name: ", FALSE);
+				tmp = xreadline(NULL, "name: ");
 
 			if (tmp == NULL || tmp[0] == '\0')
 				break;
@@ -3226,7 +3214,7 @@ nochange:
 			if (!ndents)
 				break;
 
-			tmp = xreadline(dents[cur].name, "", FALSE);
+			tmp = xreadline(dents[cur].name, "");
 			if (tmp == NULL || tmp[0] == '\0')
 				break;
 
@@ -3295,7 +3283,7 @@ nochange:
 					if (getenv("NNN_MULTISCRIPT")) {
 						size_t _len = xstrlcpy(newpath, tmp, PATH_MAX);
 
-						tmp = xreadline(NULL, "script suffix: ", FALSE);
+						tmp = xreadline(NULL, "script suffix: ");
 						if (tmp && tmp[0])
 							xstrlcpy(newpath + _len - 1, tmp, PATH_MAX - _len);
 
@@ -3474,7 +3462,7 @@ int main(int argc, char *argv[])
 
 	if (ipath) { /* Open a bookmark directly */
 		if (get_bm_loc(ipath, cwd) == NULL) {
-			fprintf(stderr, "%s\n", messages[STR_INVBM_ID]);
+			fprintf(stderr, "%s\n", messages[STR_INVBM_KEY]);
 			exit(1);
 		}
 
