@@ -45,7 +45,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - [From a package manager](#from-a-package-manager)
   - [Release packages](#release-packages)
   - [From source](#from-source)
-- [Shell completion](#shell-completion)
+  - [Shell completion](#shell-completion)
 - [Usage](#usage)
   - [Cmdline options](#cmdline-options)
   - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -111,7 +111,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - GUI app launcher (up to 2 space-separated args)
   - Terminal locker integration
 - Unicode support
-- Highly optimized code, minimal resource usage
+- Highly optimized, static analysis integrated code
 - Available on many distros
 
 #### PERFORMANCE
@@ -174,7 +174,7 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
 `PREFIX` is supported, in case you want to install to a different location.
 
-#### SHELL COMPLETION
+#### Shell completion
 
 Search keyword and option completion scripts for Bash, Fish and Zsh can be found in respective subdirectories of [`scripts/auto-completion/`](scripts/auto-completion). Please refer to your shell's manual for installation instructions.
 
