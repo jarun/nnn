@@ -217,7 +217,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  ←, Bksp, h, ^H  Parent dir            -  Last visited dir
     →, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden
               /  Filter          Ins, ^I  Toggle nav-as-you-type
-              b  Pin current dir      ^V  Go to pinned dir
+              b  Pin current dir      ^B  Go to pinned dir
           `, ^/  Leader key      LeaderN  Switch to context N
             Esc  Exit prompt          ^L  Redraw, clear prompt
              ^G  Quit and cd           q  Quit context
