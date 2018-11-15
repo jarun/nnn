@@ -155,7 +155,7 @@ static struct key bindings[] = {
 	/* Mark a path to visit later */
 	{ 'b',            SEL_PIN,       "",     "" },
 	/* Visit marked directory */
-	{ CONTROL('B'),   SEL_VISIT,     "",     "" },
+	{ CONTROL('W'),   SEL_VISIT,     "",     "" },
 	/* Filter */
 	{ '/',            SEL_FLTR,      "",     "" },
 	/* Toggle filter mode */

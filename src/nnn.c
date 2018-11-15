@@ -1964,7 +1964,7 @@ static int show_help(char *path)
 "1←, Bksp, h, ^H  Parent dir            -  Last visited dir\n"
    "4→, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden\n"
              "e/  Filter          Ins, ^I  Toggle nav-as-you-type\n"
-             "eb  Pin current dir      ^B  Go to pinned dir\n"
+             "eb  Pin current dir      ^W  Go to pinned dir\n"
          "a`, ^/  Leader key      LeaderN  Switch to context N\n"
            "cEsc  Exit prompt          ^L  Redraw, clear prompt\n"
             "d^G  Quit and cd           q  Quit context\n"
