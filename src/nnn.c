@@ -3399,9 +3399,6 @@ int main(int argc, char *argv[])
 	char *ipath = NULL;
 	int opt;
 
-	// Get platform block shift
-	BLK_SHIFT = ffs(S_BLKSIZE) - 1;
-
 	/* Confirm we are in a terminal */
 	if (!isatty(0) || !isatty(1)) {
 		fprintf(stderr, "stdin or stdout is not a tty\n");
@@ -3413,6 +3410,7 @@ int main(int argc, char *argv[])
 		case 'S':
 			cfg.blkorder = 1;
 			nftw_fn = sum_bsizes;
+			BLK_SHIFT = ffs(S_BLKSIZE) - 1;
 			break;
 		case 'l':
 			cfg.showdetail = 0;
