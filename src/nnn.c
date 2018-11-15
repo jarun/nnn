@@ -2905,7 +2905,7 @@ nochange:
 					cfg.blkorder ^= 1;
 				nftw_fn = &sum_bsizes;
 				cfg.apparentsz = 0;
-				BLK_SHIFT = 9;
+				BLK_SHIFT = ffs(S_BLKSIZE) - 1;
 			}
 
 			if (cfg.blkorder) {
@@ -3410,6 +3410,7 @@ int main(int argc, char *argv[])
 		case 'S':
 			cfg.blkorder = 1;
 			nftw_fn = sum_bsizes;
+			BLK_SHIFT = ffs(S_BLKSIZE) - 1;
 			break;
 		case 'l':
 			cfg.showdetail = 0;
