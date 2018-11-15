@@ -417,6 +417,18 @@ static uchar crc8fast(uchar const message[], size_t n)
 	return remainder;
 }
 
+/* Get platform block shift */
+static int get_blk_shift(void)
+{
+	int shift;
+	for (shift = 0; shift < 32; ++shift)
+	{
+		if ((1<<shift) & S_BLKSIZE)
+			break;
+	}
+	return shift;
+}
+
 /* Messages show up at the bottom */
 static void printmsg(const char *msg)
 {
@@ -2905,7 +2917,7 @@ nochange:
 					cfg.blkorder ^= 1;
 				nftw_fn = &sum_bsizes;
 				cfg.apparentsz = 0;
-				BLK_SHIFT = 9;
+				BLK_SHIFT = get_blk_shift();
 			}
 
 			if (cfg.blkorder) {
@@ -3398,6 +3410,9 @@ int main(int argc, char *argv[])
 	static char cwd[PATH_MAX] __attribute__ ((aligned));
 	char *ipath = NULL;
 	int opt;
+
+	// Get platform block shift
+	BLK_SHIFT = get_blk_shift();
 
 	/* Confirm we are in a terminal */
 	if (!isatty(0) || !isatty(1)) {
