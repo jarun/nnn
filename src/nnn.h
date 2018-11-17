@@ -202,9 +202,9 @@ static struct key bindings[] = {
 	/* Move from copy buffer */
 	{ 'V',            SEL_MV,        "",     "" },
 	/* Delete from copy buffer */
-	{ CONTROL('X'),   SEL_RMMUL,     "",     "" },
+	{ 'X',   SEL_RMMUL,     "",     "" },
 	/* Delete currently selected */
-	{ 'X',            SEL_RM,        "",     "" },
+	{ CONTROL('X'),   SEL_RM,        "",     "" },
 	/* Toggle quote on while copy */
 	{ CONTROL('T'),   SEL_QUOTE,     "",     "" },
 	/* Open in a custom application */

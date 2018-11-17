@@ -228,8 +228,8 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
              ^R  Rename entry          r  Open dir in vidir
              ^Y  Toggle selection      y  List selection
           ⎵, ^K  Copy entry path      ^T  Toggle path quote
-              P  Copy selection       ^X  Delete selection
-              V  Move selection        X  Delete entry
+              P  Copy selection        X  Delete selection
+              V  Move selection       ^X  Delete entry
               f  Archive entry         F  List archive
              ^F  Extract archive    m, M  Brief/full media info
               e  Edit in EDITOR        p  Open in PAGER
