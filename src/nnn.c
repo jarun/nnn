@@ -3046,8 +3046,21 @@ nochange:
 		case SEL_MV:
 		case SEL_RMMUL:
 		{
+			/* Fail if copy file path not generated */
 			if (!g_cppath[0]) {
 				printmsg("copy file not found");
+				goto nochange;
+			}
+
+			/* Warn if selection not completed */
+			if (cfg.copymode) {
+				printmsg("finish selection first");
+				goto nochange;
+			}
+
+			/* Fail if copy file path isn't created */
+			if (access(g_cppath, R_OK) == -1) {
+				printmsg("empty selection list");
 				goto nochange;
 			}
 
