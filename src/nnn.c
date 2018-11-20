@@ -90,6 +90,10 @@
 #include <ftw.h>
 #include <wchar.h>
 
+#ifndef S_BLKSIZE
+#define S_BLKSIZE 512 /* S_BLKSIZE is missing on Android NDK (Termux) */
+#endif
+
 #include "nnn.h"
 
 #ifdef DEBUGMODE
