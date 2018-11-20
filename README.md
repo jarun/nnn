@@ -360,12 +360,16 @@ NOTE: Bookmark keys should be single-character to use them in combination with t
 
 ##### selection
 
-Use <kbd>^K</kbd> to copy the absolute path (from `/`) of the file under the cursor to clipboard. To copy multiple absolute file paths the selection mode should be enabled using <kbd>^Y</kbd>. In this mode it's possible to
+Use <kbd>^K</kbd> to copy the absolute path of the file under the cursor.
 
-- cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry; or,
-- navigate to another file in the same directory to select a range of files.
+To copy multiple absolute file paths:
 
-Pressing <kbd>^Y</kbd> again copies the paths to clipboard and exits the selection mode. The files in the list can now be copied, moved or removed using respective keyboard shortcuts.
+- press <kbd>^Y</kbd> to enter selection mode. In this mode it's possible to
+  - cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry; or,
+  - navigate to another file in the same directory to select a range of files
+- press <kbd>^Y</kbd> _again_ to copy the paths and exit the selection mode
+
+The files in the list can now be copied (<kbd>P</kbd>), moved (<kbd>V</kbd>) or removed (<kbd>X</kbd>).
 
 To list the file paths copied to memory press <kbd>y</kbd>.
 
