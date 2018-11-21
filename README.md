@@ -316,6 +316,7 @@ The following indicators are used in the detail view:
 | External dependency | Operation |
 | --- | --- |
 | xdg-open (Linux), open(1) (OS X), cygstart (Cygwin) | desktop opener |
+| file | determine file type |
 | cp, mv, rm | copy, move and remove files |
 | mediainfo, exiftool | multimedia file details |
 | atool, patool ([integration](#integrate-patool)) | create, list and extract archives |

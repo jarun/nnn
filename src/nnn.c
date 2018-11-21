@@ -175,7 +175,7 @@ disabledbg()
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR 0x1000 /* 64 dir entries at a time, avg. 64 chars per filename = 64*64B = 4KB */
 #define DESCRIPTOR_LEN 32
-#define _ALIGNMENT 0x10
+#define _ALIGNMENT 0x10 /* 16-byte alignment */
 #define _ALIGNMENT_MASK 0xF
 #define SYMLINK_TO_DIR 0x1
 #define MAX_HOME_LEN 64
