@@ -3379,9 +3379,6 @@ nochange:
 
 			dentfree(dents);
 			return;
-		default:
-			if (sel && cfg.filtermode)
-				presel = FILTER;
 		} /* switch (sel) */
 
 		/* Screensaver */
