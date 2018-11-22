@@ -3381,7 +3381,7 @@ nochange:
 			return;
 		} /* switch (sel) */
 
-		/* Screensaver */
+		/* Locker */
 		if (idletimeout != 0 && idle == idletimeout) {
 			idle = 0;
 			spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
@@ -3518,7 +3518,7 @@ int main(int argc, char *argv[])
 		idletimeout = opt * ((opt > 0) - (opt < 0));
 	}
 
-	/* Get the default copier, if set */
+	/* Get the clipboard copier, if set */
 	copier = getenv("NNN_COPIER");
 
 	/* Enable quotes if opted */
