@@ -63,6 +63,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
     - [quote paths](#quote-paths)
     - [to clipboard](#to-clipboard)
   - [cd on quit](#cd-on-quit)
+  - [vim plugin](#vim-plugin)
   - [run custom scripts](#run-custom-scripts)
     - [sample scripts](#sample-scripts)
   - [change dir color](#change-dir-color)
@@ -80,6 +81,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
 
 - Modes
   - Basic, detail (default), disk usage analyzer (du)
+  - Vim file picker (as a vim plugin)
 - Navigation
   - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
   - *Navigate-as-you-type* with auto-select directory
@@ -438,6 +440,10 @@ To quit `nnn` and switch to the directory last opened follow the instructions be
 Pick the appropriate file for your shell from [`scripts/quitcd`](scripts/quitcd) and add the contents to your shell's rc file. You'll need to spawn a new shell for the change to take effect. You should start `nnn` as `n` (or modify the function name to something else). To change directory on quit press `^G` while exiting.
 
 As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
+
+#### vim plugin
+
+`nnn` can be used as a file picker/chooser within vim. The instructions are available in the [nnn-picker.vim](https://github.com/jarun/nnn/blob/master/scripts/vim-plugin/nnn-picker.vim) plugin.
 
 #### run custom scripts
 
