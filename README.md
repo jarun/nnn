@@ -184,7 +184,7 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
 
 ```
 usage: nnn [-b key] [-c N] [-e] [-i] [-l]
-           [-S] [-v] [-h] [PATH]
+           [-p file] [-S] [-v] [-h] [PATH]
 
 The missing terminal file manager for X.
 
@@ -197,6 +197,7 @@ optional args:
  -e      use exiftool instead of mediainfo
  -i      start in navigate-as-you-type mode
  -l      start in light mode
+ -p file copy selection to file (stdout if '-')
  -S      start in disk usage analyser mode
  -v      show program version
  -h      show this help

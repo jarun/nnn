@@ -261,9 +261,11 @@ typedef struct {
 	uint quote      : 1;  /* Copy paths within quotes */
 	uint color      : 3;  /* Color code for directories */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 13;
+	uint reserved   : 11;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
+	uint picker     : 1;  /* Write selection to user-specified file */
+	uint pickraw    : 1;  /* Write selection to sdtout before exit */
 } settings;
 
 /* Contexts or workspaces */
@@ -279,7 +281,7 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 4, 1, 0, 0};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 4, 1, 0, 0, 0, 0};
 static context g_ctx[MAX_CTX] __attribute__ ((aligned));
 
 static struct entry *dents;
@@ -305,7 +307,7 @@ static uchar crc8table[CRC8_TABLE_LEN] __attribute__ ((aligned));
 static char g_buf[MAX_CMD_LEN] __attribute__ ((aligned));
 
 /* Buffer for file path copy file */
-static char g_cppath[MAX_HOME_LEN] __attribute__ ((aligned));
+static char g_cppath[PATH_MAX] __attribute__ ((aligned));
 
 /* Buffer to store tmp file path */
 static char g_tmpfpath[MAX_HOME_LEN] __attribute__ ((aligned));
@@ -432,7 +434,7 @@ static void printerr(int linenum)
 {
 	exitcurses();
 	fprintf(stderr, "line %d: (%d) %s\n", linenum, errno, strerror(errno));
-	if (g_cppath[0])
+	if (!cfg.picker && g_cppath[0])
 		unlink(g_cppath);
 	exit(1);
 }
@@ -651,6 +653,10 @@ static char *xbasename(char *path)
 /* Writes buflen char(s) from buf to a file */
 static void writecp(const char *buf, const size_t buflen)
 {
+	if (cfg.pickraw) {
+		return;
+	}
+
 	if (!g_cppath[0]) {
 		printmsg(messages[STR_COPY_ID]);
 		return;
@@ -3393,7 +3399,7 @@ static void usage(void)
 {
 	fprintf(stdout,
 		"usage: nnn [-b key] [-c N] [-e] [-i] [-l]\n"
-		"           [-S] [-v] [-h] [PATH]\n\n"
+		"           [-p file] [-S] [-v] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
@@ -3403,6 +3409,7 @@ static void usage(void)
 		" -e      use exiftool instead of mediainfo\n"
 		" -i      start in navigate-as-you-type mode\n"
 		" -l      start in light mode\n"
+		" -p file copy selection to file (stdout if '-')\n"
 		" -S      start in disk usage analyser mode\n"
 		" -v      show program version\n"
 		" -h      show this help\n\n"
@@ -3422,7 +3429,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	while ((opt = getopt(argc, argv, "Slib:c:evh")) != -1) {
+	while ((opt = getopt(argc, argv, "Slib:c:ep:vh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -3447,6 +3454,19 @@ int main(int argc, char *argv[])
 			break;
 		case 'e':
 			cfg.metaviewer = EXIFTOOL;
+			break;
+		case 'p':
+			cfg.picker = 1;
+			if (optarg[0] == '-' && optarg[1] == '\0')
+				cfg.pickraw = 1;
+			else {
+				/* copier used as tmp var */
+				copier = realpath(optarg, g_cppath);
+				if (!g_cppath[0]) {
+					fprintf(stderr, "%s\n", strerror(errno));
+					exit(1);
+				}
+			}
 			break;
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
@@ -3532,7 +3552,7 @@ int main(int argc, char *argv[])
 	else if (xdiraccess("/tmp"))
 		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", MAX_HOME_LEN);
 
-	if (g_tmpfplen) {
+	if (!cfg.picker && g_tmpfplen) {
 		xstrlcpy(g_cppath, g_tmpfpath, MAX_HOME_LEN);
 		xstrlcpy(g_cppath + g_tmpfplen - 1, "/.nnncp", MAX_HOME_LEN - g_tmpfplen);
 	}
@@ -3561,7 +3581,9 @@ int main(int argc, char *argv[])
 	browse(ipath);
 	exitcurses();
 
-	if (g_cppath[0])
+	if (cfg.pickraw)
+		opt = write(1, pcopybuf, copybufpos - 1);
+	else if (!cfg.picker && g_cppath[0])
 		unlink(g_cppath);
 
 #ifdef LINUX_INOTIFY

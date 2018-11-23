@@ -11,6 +11,7 @@
 .Op Ar -e
 .Op Ar -i
 .Op Ar -l
+.Op Ar -p file
 .Op Ar -S
 .Op Ar -v
 .Op Ar -h
@@ -177,6 +178,9 @@ supports the following options:
 .Pp
 .Fl l
         start in light mode (fewer details)
+.Pp
+.Fl "p file"
+        copy (or \fIpick\fR) selection to file, or stdout if file='-'
 .Pp
 .Fl S
         start in disk usage analyzer mode
