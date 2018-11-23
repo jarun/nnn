@@ -72,6 +72,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - [set idle timeout](#set-idle-timeout)
   - [show hot plugged drives](#show-hot-plugged-drives)
   - [tmux configuration](#tmux-configuration)
+  - [BSD terminal issue](#bsd-terminal-issue)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
@@ -226,7 +227,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
              ^O  Open with...          n  Create new
               D  File details          d  Toggle detail view
              ^R  Rename entry          r  Open dir in vidir
-             ^Y  Toggle selection      y  List selection
+          Y, ^Y  Toggle selection      y  List selection
           ⎵, ^K  Copy entry path      ^T  Toggle path quote
               P  Copy selection        X  Delete selection
               V  Move selection       ^X  Delete entry
@@ -365,10 +366,10 @@ Use <kbd>^K</kbd> to copy the absolute path of the file under the cursor.
 
 To copy multiple absolute file paths:
 
-- press <kbd>^Y</kbd> to enter selection mode. In this mode it's possible to
+- press <kbd>^Y</kbd> (or <kbd>Y</kbd>) to enter selection mode. In this mode it's possible to
   - cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry; or,
   - navigate to another file in the same directory to select a range of files
-- press <kbd>^Y</kbd> _again_ to copy the paths and exit the selection mode
+- press <kbd>^Y</kbd> (or <kbd>Y</kbd>) _again_ to copy the paths and exit the selection mode
 
 The files in the list can now be copied (<kbd>P</kbd>), moved (<kbd>V</kbd>) or removed (<kbd>X</kbd>).
 
@@ -506,7 +507,7 @@ Enable volume management in your DE file manager and set removable drives or med
 
 #### BSD terminal issue
 
-By default in OpenBSD & FreeBSD, `stty` maps `^Y` to `DSUSP`. This means that typing `^Y` will suspend `nnn` as if you typed `^Z` (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-copy mode. You can check this with `stty -a`. If it includes the text "`dsusp = ^Y`", issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the `^Y` instead.
+By default in OpenBSD & FreeBSD, `stty` maps <kbd>^Y</kbd> to `DSUSP`. This means that typing <kbd>^Y</kbd> will suspend `nnn` as if you typed <kbd>^Z</kbd> (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-copy mode. You can check this with `stty -a`. If it includes the text "`dsusp = ^Y`", issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the <kbd>^Y</kbd> instead.
 
 #### WHY FORK?
 

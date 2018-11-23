@@ -195,6 +195,7 @@ static struct key bindings[] = {
 	{ ' ',            SEL_COPY,      "",     "" },
 	/* Toggle copy multiple file paths */
 	{ CONTROL('Y'),   SEL_COPYMUL,   "",     "" },
+	{ 'Y',            SEL_COPYMUL,   "",     "" },
 	/* Show list of copied files */
 	{ 'y',            SEL_COPYLIST,  "",     "" },
 	/* Copy from copy buffer */

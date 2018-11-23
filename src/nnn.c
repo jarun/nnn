@@ -1977,7 +1977,7 @@ static int show_help(char *path)
             "d^O  Open with...          n  Create new\n"
              "eD  File details          d  Toggle detail view\n"
             "d^R  Rename entry          r  Open dir in vidir\n"
-            "d^Y  Toggle selection      y  List selection\n"
+         "aY, ^Y  Toggle selection      y  List selection\n"
          "a⎵, ^K  Copy entry path      ^T  Toggle path quote\n"
              "eP  Copy selection        X  Delete selection\n"
              "eV  Move selection       ^X  Delete entry\n"
