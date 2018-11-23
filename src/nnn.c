@@ -3581,9 +3581,10 @@ int main(int argc, char *argv[])
 	browse(ipath);
 	exitcurses();
 
-	if (cfg.pickraw)
+	if (cfg.pickraw) {
 		opt = write(1, pcopybuf, copybufpos - 1);
-	else if (!cfg.picker && g_cppath[0])
+		DPRINTF_D(opt);
+	} else if (!cfg.picker && g_cppath[0])
 		unlink(g_cppath);
 
 #ifdef LINUX_INOTIFY
