@@ -1972,7 +1972,7 @@ static int show_help(char *path)
          "a`, ^/  Leader key      LeaderN  Switch to context N\n"
            "cEsc  Exit prompt          ^L  Redraw, clear prompt\n"
             "d^G  Quit and cd           q  Quit context\n"
-         "aQ, ^Q  Quit                  ?  Help, settings\n"
+         "aQ, ^Q  Quit                  ?  Help, config\n"
 "1FILES\n"
             "d^O  Open with...          n  Create new\n"
              "eD  File details          d  Toggle detail view\n"

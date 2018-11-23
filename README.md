@@ -222,7 +222,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
           `, ^/  Leader key      LeaderN  Switch to context N
             Esc  Exit prompt          ^L  Redraw, clear prompt
              ^G  Quit and cd           q  Quit context
-          Q, ^Q  Quit                  ?  Help, settings
+          Q, ^Q  Quit                  ?  Help, config
  FILES
              ^O  Open with...          n  Create new
               D  File details          d  Toggle detail view
