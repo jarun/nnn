@@ -381,7 +381,7 @@ File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priori
     $TMPDIR or,
     /tmp
 
-To see the path to the temporary copy file, run `nnn`, press `?` and look up `copy file`.
+To see the path to the temporary copy file, run `nnn`, press <kbd>?</kbd> and look up `copy file`.
 
 To use the copied paths from the cmdline, use command substitution. For example, if `DIR` above is `/home/user`:
 
