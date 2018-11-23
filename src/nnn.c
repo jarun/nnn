@@ -1269,6 +1269,7 @@ static char *xreadline(char *fname, char *prompt)
 				case '\n': // fallthrough
 				case '\r':
 					goto END;
+				case 127: /* Handle DEL */ // fallthrough
 				case '\b': /* some old curses (e.g. rhel25) still send '\b' for backspace */
 					if (pos > 0) {
 						memmove(buf + pos - 1, buf + pos, (len - pos) << 2);
