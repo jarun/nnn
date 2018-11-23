@@ -1,3 +1,29 @@
+nnn v2.1
+2018-11-23
+
+What's in?
+- Inclusion in several distros including Arch Linux official repo
+- Multiple contexts (_aka_ tabs _aka_ workspaces) [max 4]
+- Copy, move, remove selected files, remove current file
+- [Leader key](https://github.com/jarun/nnn#leader-key) (like vim)
+- In-built  GUI app launcher with up to 2 arguments (key <kbd>o</kbd>)
+- List copy selection (key <kbd>y</kbd>)
+- Env var `NNN_NO_AUTOSELECT` to disable dir auto-select
+- Key <kbd>Esc</kbd> exits prompt, <kbd>^L</kbd> clears prompt
+- Program runtime help revamped
+- Static code analysis integration
+- gcc-8 warnings fixed
+- Remapped keys:
+  - <kbd>^W</kbd> - go to pinned dir
+  - <kbd>^X</kbd> - delete current entry
+  - <kbd>^Q</kbd> - quit program
+- `nlay` is retired (functionality built into `nnn`)
+- `chdir` prompt is retired
+- Env var `NNN_NO_X` retired, selection now works out of the box
+- Only single-char bookmark keys (to work with Leader key)
+
+-------------------------------------------------------------------------------
+
 nnn v2.0
 2018-10-19
 
