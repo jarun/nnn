@@ -504,6 +504,10 @@ Enable volume management in your DE file manager and set removable drives or med
 
 `nnn` might not handle keypresses correctly when used with tmux (see issue #104 for more details). Set `TERM=xterm-256color` to address it.
 
+#### BSD terminal issue
+
+By default in OpenBSD & FreeBSD, `stty` maps `^Y` to `DSUSP`. This means that typing `^Y` will suspend `nnn` as if you typed `^Z` (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-copy mode. You can check this with `stty -a`. If it includes the text "`dsusp = ^Y`", issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the `^Y` instead.
+
 #### WHY FORK?
 
 `nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today. I chose to fork because:
