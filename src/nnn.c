@@ -436,6 +436,7 @@ static void printerr(int linenum)
 	fprintf(stderr, "line %d: (%d) %s\n", linenum, errno, strerror(errno));
 	if (!cfg.picker && g_cppath[0])
 		unlink(g_cppath);
+	free(pcopybuf);
 	exit(1);
 }
 
@@ -1264,15 +1265,15 @@ static char *xreadline(char *fname, char *prompt)
 		if (r != ERR) {
 			if (r == OK) {
 				switch (*ch) {
-				case KEY_ENTER: //fallthrough
-				case '\n': //fallthrough
+				case KEY_ENTER: // fallthrough
+				case '\n': // fallthrough
 				case '\r':
 					goto END;
 				case '\b': /* some old curses (e.g. rhel25) still send '\b' for backspace */
 					if (pos > 0) {
 						memmove(buf + pos - 1, buf + pos, (len - pos) << 2);
 						--len, --pos;
-					} //fallthrough
+					} // fallthrough
 				case '\t': /* TAB breaks cursor position, ignore it */
 					continue;
 				case CONTROL('L'):
@@ -2719,9 +2720,9 @@ nochange:
 		case SEL_LEADER:
 			fd = get_input(NULL);
 			switch (fd) {
-			case 'q': //fallthrough
-			case '~': //fallthrough
-			case '-': //fallthrough
+			case 'q': // fallthrough
+			case '~': // fallthrough
+			case '-': // fallthrough
 			case '&':
 				presel = fd;
 				goto nochange;
@@ -2737,11 +2738,11 @@ nochange:
 				else
 					do
 						(r == 0) ? (r = MAX_CTX - 1) : --r;
-					while (!g_ctx[r].c_cfg.ctxactive); //fallthrough
-				fd = '1' + r; //fallthrough
-			case '1': //fallthrough
-			case '2': //fallthrough
-			case '3': //fallthrough
+					while (!g_ctx[r].c_cfg.ctxactive); // fallthrough
+				fd = '1' + r; // fallthrough
+			case '1': // fallthrough
+			case '2': // fallthrough
+			case '3': // fallthrough
 			case '4':
 				r = fd - '1'; /* Save the next context id */
 				if (cfg.curctx == r)
@@ -3329,34 +3330,6 @@ nochange:
 		case SEL_LOCK:
 			spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
 			break;
-		case SEL_QUITCTX:
-		{
-			uint iter = 1;
-			r = cfg.curctx;
-			while (iter < MAX_CTX) {
-				(r == MAX_CTX - 1) ? (r = 0) : ++r;
-				if (g_ctx[r].c_cfg.ctxactive) {
-					g_ctx[cfg.curctx].c_cfg.ctxactive = 0;
-
-					/* Switch to next active context */
-					path = g_ctx[r].c_path;
-					ipath = g_ctx[r].c_init;
-					lastdir = g_ctx[r].c_last;
-					lastname = g_ctx[r].c_name;
-					cfg = g_ctx[r].c_cfg;
-					hfltr = g_ctx[r].c_fltr;
-
-					cfg.curctx = r;
-					setdirwatch();
-					goto begin;
-				}
-
-				++iter;
-			}
-
-			dentfree(dents);
-			return;
-		}
 		case SEL_CDQUIT: // fallthrough
 		case SEL_QUIT:
 			for (r = 0; r < MAX_CTX; ++r)
@@ -3381,6 +3354,37 @@ nochange:
 					fprintf(fp, "cd \"%s\"", path);
 					fclose(fp);
 				}
+			} // fallthrough
+		case SEL_QUITCTX:
+			if (sel == SEL_QUITCTX) {
+				uint iter = 1;
+				r = cfg.curctx;
+				while (iter < MAX_CTX) {
+					(r == MAX_CTX - 1) ? (r = 0) : ++r;
+					if (g_ctx[r].c_cfg.ctxactive) {
+						g_ctx[cfg.curctx].c_cfg.ctxactive = 0;
+
+						/* Switch to next active context */
+						path = g_ctx[r].c_path;
+						ipath = g_ctx[r].c_init;
+						lastdir = g_ctx[r].c_last;
+						lastname = g_ctx[r].c_name;
+						cfg = g_ctx[r].c_cfg;
+						hfltr = g_ctx[r].c_fltr;
+
+						cfg.curctx = r;
+						setdirwatch();
+						goto begin;
+					}
+
+					++iter;
+				}
+			}
+
+			if (cfg.picker && copybufpos == 0 && ndents) {
+				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				appendfpath(newpath, r);
+				writecp(newpath, r - 1);
 			}
 
 			dentfree(dents);
@@ -3582,10 +3586,16 @@ int main(int argc, char *argv[])
 	exitcurses();
 
 	if (cfg.pickraw) {
-		opt = write(1, pcopybuf, copybufpos - 1);
-		DPRINTF_D(opt);
+		if (copybufpos) {
+			opt = write(1, pcopybuf, copybufpos - 1);
+			if (opt != (int)(copybufpos - 1))
+				fprintf(stderr, "%s\n", strerror(errno));
+		}
 	} else if (!cfg.picker && g_cppath[0])
 		unlink(g_cppath);
+
+	/* Free the copy buffer */
+	free(pcopybuf);
 
 #ifdef LINUX_INOTIFY
 	/* Shutdown inotify */
