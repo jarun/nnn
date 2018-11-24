@@ -3343,6 +3343,13 @@ nochange:
 				break;
 
 			if (sel == SEL_CDQUIT) {
+				/* In vim picker mode, clear selection and exit */
+				if (cfg.picker) {
+					copybufpos = 0;
+					dentfree(dents);
+					return;
+				}
+
 				tmp = getenv("NNN_TMPFILE");
 				if (!tmp) {
 					printmsg("set NNN_TMPFILE");
