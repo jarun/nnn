@@ -27,7 +27,7 @@ Noice is Not Noice, a noicer fork...
 
 It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Termux.
 
-[Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions... Missing a feature? Want to contribute? Head to the rolling [ToDo list](https://github.com/jarun/nnn/issues/110).
+[Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions... Missing a feature? Want to contribute? Head to the rolling [ToDo list](https://github.com/jarun/nnn/issues/137).
 
 *Love smart and efficient utilities? Explore [my repositories](https://github.com/jarun?tab=repositories). Buy me a cup of coffee if they help you.*
 
