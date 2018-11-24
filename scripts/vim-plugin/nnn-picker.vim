@@ -1,4 +1,4 @@
-" vim plugin to use nnn as a file picker
+" vim/neovim plugin to use nnn as a file picker
 " Closely follows and inspired by the vim_file_chooser plugin for ranger.
 "
 " Author: Arun Prakash Jana
@@ -7,26 +7,30 @@
 " Copyright © 2018 Arun Prakash Jana
 "
 " Usage:
-" Copy this file to the vim plugin directory.
-" To open nnn as a file picker in vim, use the command ":NnnPicker" or ":Np"
-" or the key-binding "<leader>n". Once you select one or more files and quit
-" nnn, vim will open the first selected file and add the remaining files to
-" the arg list/buffer list.
-" If no file is explicitly selected, the last selected entry is picked.
+" Copy this file to the vim/neovim plugin directory.
+" To open nnn as a file picker in vim/neovim, use the command ":NnnPicker" or
+" ":Np" or the key-binding "<leader>n". Once you select one or more files and
+" quit nnn, vim/neovim will open the first selected file and add the remaining
+" files to the arg list/buffer list.  If no file is explicitly selected, the
+" last selected entry is picked.
 
-function! NnnPicker()
-    let temp = tempname()
-    if has("gui_running")
-        exec 'silent !xterm -e nnn -p ' . shellescape(temp)
-    else
-        exec 'silent !nnn -p ' . shellescape(temp)
+let s:temp = ""
+
+fun! s:T_OnExit(job_id, code, event) dict
+    if a:code == 0
+        bd!
+        call s:evaluate_temp()
     endif
-    if !filereadable(temp)
+endfun
+
+fun! s:evaluate_temp()
+    if !filereadable(s:temp)
+        echoerr 'Temp file ' . s:temp . 'not readable!'
         redraw!
         " Nothing to read.
         return
     endif
-    let names = readfile(temp)
+    let names = readfile(s:temp)
     if empty(names)
         redraw!
         " Nothing to open.
@@ -39,7 +43,24 @@ function! NnnPicker()
         exec 'argadd ' . fnameescape(name)
     endfor
     redraw!
+endfun
+
+function! NnnPicker()
+    let s:temp = tempname()
+    let l:cmd = 'nnn -p ' . shellescape(s:temp)
+    
+    if has("nvim")
+      enew
+      call termopen(l:cmd, {'on_exit': function('s:T_OnExit')}) | startinsert
+    elseif has("gui_running")
+        exec 'silent !xterm -e ' . l:cmd
+        call s:evaluate_temp()
+    else
+        exec 'silent !' . l:cmd
+        call s:evaluate_temp()
+    endif
 endfunction
+
 command! -bar NnnPicker call NnnPicker()
 nnoremap <leader>n :<C-U>NnnPicker<CR>
 command! -nargs=* -complete=file Np :call NnnPicker()
