@@ -21,7 +21,7 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (click to play video)</i></a></p>
 
-`nnn` is probably the [fastest and most resource-sensitive](#performance) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
+`nnn` is probably the [fastest and most resource-sensitive](#memory-usage) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
 
 [Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, or use it as a [vim file picker](https://github.com/jarun/nnn#neovim-plugin); `nnn` supports as many scripts as you need!
 
@@ -38,7 +38,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
 #### TABLE OF CONTENTS
 
 - [Features](#features)
-- [Performance](#performance)
+- [Memory usage](#memory-usage)
 - [Installation](#installation)
   - [Dependencies](#dependencies)
   - [From a package manager](#from-a-package-manager)
@@ -116,7 +116,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
 - Highly optimized, static analysis integrated code
 - Available on many distros
 
-#### PERFORMANCE
+#### MEMORY USAGE
 
 `nnn` vs. ncdu memory usage in disk usage analyzer mode (400K files on disk):
 
