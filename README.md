@@ -23,7 +23,7 @@ Noice is Not Noice, a noicer fork...
 
 `nnn` is probably the [fastest and most resource-sensitive](#performance) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
 
-[Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, or use it as a [vim file picker](https://github.com/jarun/nnn#vim-plugin); `nnn` supports as many scripts as you need!
+[Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, or use it as a [vim file picker](https://github.com/jarun/nnn#neovim-plugin); `nnn` supports as many scripts as you need!
 
 It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Termux.
 
@@ -63,7 +63,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
     - [quote paths](#quote-paths)
     - [to clipboard](#to-clipboard)
   - [cd on quit](#cd-on-quit)
-  - [vim plugin](#vim-plugin)
+  - [(neo)vim plugin](#neovim-plugin)
   - [run custom scripts](#run-custom-scripts)
     - [sample scripts](#sample-scripts)
   - [change dir color](#change-dir-color)
@@ -81,7 +81,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
 
 - Modes
   - Basic, detail (default), disk usage analyzer (du)
-  - Vim file picker (as a vim plugin)
+  - Vim (or neovim) file picker (as a plugin)
 - Navigation
   - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
   - *Navigate-as-you-type* with auto-select directory
@@ -441,9 +441,9 @@ Pick the appropriate file for your shell from [`scripts/quitcd`](scripts/quitcd)
 
 As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write the last visited directory path. You can change it.
 
-#### vim plugin
+#### (neo)vim plugin
 
-`nnn` can be used as a file picker/chooser within vim. The instructions are available in the [nnn-picker.vim](https://github.com/jarun/nnn/blob/master/scripts/vim-plugin/nnn-picker.vim) plugin.
+`nnn` can be used as a file picker/chooser within vim or neovim. Find the plugin [here](https://github.com/mcchrish/nnn.vim).
 
 #### run custom scripts
 
