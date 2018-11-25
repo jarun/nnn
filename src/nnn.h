@@ -84,7 +84,7 @@ enum action {
 	SEL_RUNARG,
 	SEL_LOCK,
 	SEL_QUITCTX,
-	SEL_CDQUIT,
+	SEL_QUITCD,
 	SEL_QUIT,
 };
 
@@ -232,7 +232,7 @@ static struct key bindings[] = {
 	/* Quit a context */
 	{ 'q',            SEL_QUITCTX,   "",     "" },
 	/* Change dir on quit */
-	{ CONTROL('G'),   SEL_CDQUIT,    "",     "" },
+	{ CONTROL('G'),   SEL_QUITCD,    "",     "" },
 	/* Quit */
 	{ 'Q',            SEL_QUIT,      "",     "" },
 	{ CONTROL('Q'),   SEL_QUIT,      "",     "" },

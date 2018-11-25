@@ -3331,7 +3331,7 @@ nochange:
 		case SEL_LOCK:
 			spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
 			break;
-		case SEL_CDQUIT: // fallthrough
+		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
 			for (r = 0; r < MAX_CTX; ++r)
 				if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
@@ -3342,7 +3342,7 @@ nochange:
 			if (!(r == MAX_CTX || r == 13))
 				break;
 
-			if (sel == SEL_CDQUIT) {
+			if (sel == SEL_QUITCD) {
 				/* In vim picker mode, clear selection and exit */
 				if (cfg.picker) {
 					copybufpos = 0;
