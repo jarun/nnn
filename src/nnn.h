@@ -49,6 +49,7 @@ enum action {
 	SEL_CDBEGIN,
 	SEL_CDLAST,
 	SEL_LEADER,
+	SEL_CYCLE,
 	SEL_PIN,
 	SEL_VISIT,
 	SEL_FLTR,
@@ -153,6 +154,8 @@ static struct key bindings[] = {
 	/* Leader key */
 	{ CONTROL('_'),   SEL_LEADER,    "",     "" },
 	{ '`',            SEL_LEADER,    "",     "" },
+	/* Cycle contexts in forward direction */
+	{ CONTROL('B'),   SEL_CYCLE,     "",     "" },
 	/* Mark a path to visit later */
 	{ 'b',            SEL_PIN,       "",     "" },
 	/* Visit marked directory */

@@ -222,6 +222,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
     →, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden
               /  Filter          Ins, ^I  Toggle nav-as-you-type
               b  Pin current dir      ^W  Go to pinned dir
+             ^B  Next active context
           `, ^/  Leader key      LeaderN  Switch to context N
             Esc  Exit prompt          ^L  Redraw, clear prompt
              ^G  Quit and cd           q  Quit context

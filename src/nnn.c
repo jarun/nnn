@@ -1015,9 +1015,10 @@ static int nextsel(char **run, char **env, int *presel)
 
 	c = *presel;
 
-	if (c == 0)
+	if (c == 0) {
 		c = getch();
-	else {
+		DPRINTF_D(c);
+	} else {
 		/* Unwatch dir if we are still in a filtered view */
 #ifdef LINUX_INOTIFY
 		if (*presel == FILTER && inotify_wd >= 0) {
@@ -1978,7 +1979,8 @@ static int show_help(char *path)
    "4→, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden\n"
              "e/  Filter          Ins, ^I  Toggle nav-as-you-type\n"
              "eb  Pin current dir      ^W  Go to pinned dir\n"
-         "a`, ^/  Leader key      LeaderN  Switch to context N\n"
+            "d^B  Next active context\n"
+         "a`, ^/  Leader key      LeaderN  Go to context N\n"
            "cEsc  Exit prompt          ^L  Redraw, clear prompt\n"
             "d^G  Quit and cd           q  Quit context\n"
          "aQ, ^Q  Quit                  ?  Help, config\n"
@@ -2729,7 +2731,11 @@ nochange:
 			setdirwatch();
 			goto begin;
 		case SEL_LEADER:
-			fd = get_input(NULL);
+			fd = get_input(NULL); // fallthrough
+		case SEL_CYCLE:
+			if (sel == SEL_CYCLE)
+				fd = '>';
+
 			switch (fd) {
 			case 'q': // fallthrough
 			case '~': // fallthrough
