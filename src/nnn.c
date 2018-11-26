@@ -261,11 +261,12 @@ typedef struct {
 	uint quote      : 1;  /* Copy paths within quotes */
 	uint color      : 3;  /* Color code for directories */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 11;
+	uint reserved   : 10;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint picker     : 1;  /* Write selection to user-specified file */
 	uint pickraw    : 1;  /* Write selection to sdtout before exit */
+	uint nonavopen  : 1;  /* Open file on right arrow or `l` */
 } settings;
 
 /* Contexts or workspaces */
@@ -281,7 +282,7 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 4, 1, 0, 0, 0, 0};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 4, 1, 0, 0, 0, 0, 0};
 static context g_ctx[MAX_CTX] __attribute__ ((aligned));
 
 static struct entry *dents;
@@ -2040,9 +2041,13 @@ static int show_help(char *path)
 	if (getenv("NNN_SCRIPT"))
 		dprintf(fd, "NNN_SCRIPT: %s\n", getenv("NNN_SCRIPT"));
 	if (getenv("NNN_MULTISCRIPT"))
-		dprintf(fd, "NNN_MULTISCRIPT: %s\n", getenv("NNN_MULTISCRIPT"));
+		dprintf(fd, "NNN_MULTISCRIPT: 1\n");
 	if (getenv("NNN_SHOW_HIDDEN"))
-		dprintf(fd, "NNN_SHOW_HIDDEN: %s\n", getenv("NNN_SHOW_HIDDEN"));
+		dprintf(fd, "NNN_SHOW_HIDDEN: 1\n");
+	if (getenv("NNN_NO_AUTOSELECT"))
+		dprintf(fd, "NNN_NO_AUTOSELECT: 1\n");
+	if (getenv("DISABLE_FILE_OPEN_ON_NAV"))
+		dprintf(fd, "DISABLE_FILE_OPEN_ON_NAV: 1\n");
 
 	dprintf(fd, "\n");
 
@@ -2574,6 +2579,7 @@ nochange:
 
 			setdirwatch();
 			goto begin;
+		case SEL_NAV_IN: // fallthrough
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
 			if (!ndents)
@@ -2612,6 +2618,10 @@ nochange:
 				goto begin;
 			case S_IFREG:
 			{
+				/* If open file is disabled on right arrow or `l`, return */
+				if (cfg.nonavopen && sel == SEL_NAV_IN)
+					continue;
+
 				/* If NNN_USE_EDITOR is set,
 				 * open text in EDITOR
 				 */
@@ -3572,6 +3582,10 @@ int main(int argc, char *argv[])
 	/* Disable auto-select if opted */
 	if (getenv("NNN_NO_AUTOSELECT"))
 		cfg.autoselect = 0;
+
+	/* Disable opening files on right arrow and `l` */
+	if (getenv("DISABLE_FILE_OPEN_ON_NAV"))
+		cfg.nonavopen = 1;
 
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);

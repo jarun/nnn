@@ -73,6 +73,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - [show hot plugged drives](#show-hot-plugged-drives)
   - [tmux configuration](#tmux-configuration)
   - [BSD terminal issue](#bsd-terminal-issue)
+  - [Disable file open on navigation](#disable-file-open-on-navigation)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
@@ -514,6 +515,14 @@ Enable volume management in your DE file manager and set removable drives or med
 #### BSD terminal issue
 
 By default in OpenBSD & FreeBSD, `stty` maps <kbd>^Y</kbd> to `DSUSP`. This means that typing <kbd>^Y</kbd> will suspend `nnn` as if you typed <kbd>^Z</kbd> (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-copy mode. You can check this with `stty -a`. If it includes the text `dsusp = ^Y`, issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the <kbd>^Y</kbd> instead.
+
+#### Disable file open on navigation
+
+In order to disable opening files on accidental navigation key (<kbd>→</kbd> or <kbd>l</kbd>) press:
+
+    export DISABLE_FILE_OPEN_ON_NAV=1
+
+To open files with this setting, press <kbd>Enter</kbd>.
 
 #### WHY FORK?
 

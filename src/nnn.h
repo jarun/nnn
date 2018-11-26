@@ -38,6 +38,7 @@
 enum action {
 	SEL_BACK = 1,
 	SEL_GOIN,
+	SEL_NAV_IN,
 	SEL_NEXT,
 	SEL_PREV,
 	SEL_PGDN,
@@ -117,8 +118,8 @@ static struct key bindings[] = {
 	/* Inside */
 	{ KEY_ENTER,      SEL_GOIN,      "",     "" },
 	{ '\r',           SEL_GOIN,      "",     "" },
-	{ KEY_RIGHT,      SEL_GOIN,      "",     "" },
-	{ 'l',            SEL_GOIN,      "",     "" },
+	{ KEY_RIGHT,      SEL_NAV_IN,    "",     "" },
+	{ 'l',            SEL_NAV_IN,    "",     "" },
 	/* Next */
 	{ 'j',            SEL_NEXT,      "",     "" },
 	{ KEY_DOWN,       SEL_NEXT,      "",     "" },
