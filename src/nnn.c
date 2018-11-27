@@ -2641,7 +2641,7 @@ nochange:
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
 				if (editor) {
 					if (getmime(dents[cur].name)) {
-						spawn(editor, editor_arg, newpath, path, F_NORMAL);
+						spawn(editor, newpath, editor_arg, path, F_NORMAL);
 						continue;
 					}
 
@@ -2652,7 +2652,7 @@ nochange:
 						continue;
 
 					if (strstr(g_buf, "text/") == g_buf) {
-						spawn(editor, editor_arg, newpath, path, F_NORMAL);
+						spawn(editor, newpath, editor_arg, path, F_NORMAL);
 						continue;
 					}
 				}
