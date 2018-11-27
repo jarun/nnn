@@ -364,6 +364,13 @@ static char * const utils[] = {
 #define STR_COPY_ID 4
 #define STR_DATE_ID 5
 
+/* rm args */
+#ifdef __APPLE__
+#define RM_ARGS "-ir" // macOS doesn't support -I
+#else
+#define RM_ARGS "-Ir"
+#endif
+
 static const char messages[][16] = {
 	"nftw failed",
 	"HOME not set",
@@ -3089,7 +3096,7 @@ nochange:
 			else if (sel == SEL_MV)
 				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 mv -i -t .", g_cppath);
 			else /* SEL_RMMUL */
-				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 rm -Ir", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 rm " RM_ARGS, g_cppath);
 
 			spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
 
@@ -3103,7 +3110,7 @@ nochange:
 				break;
 
 			mkpath(path, dents[cur].name, newpath, PATH_MAX);
-			spawn("rm", "-Ir", newpath, NULL, F_NORMAL | F_SIGINT);
+			spawn("rm", RM_ARGS, newpath, NULL, F_NORMAL | F_SIGINT);
 
 			lastname[0] = '\0';
 			if (cfg.filtermode)
