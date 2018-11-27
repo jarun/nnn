@@ -683,17 +683,46 @@ static bool appendfpath(const char *path, const size_t len)
 		}
 	}
 
-	if (copybufpos)
-		pcopybuf[copybufpos - 1] = '\n';
+	/* Enabling the following will miss files with newlines */
+	/* if (copybufpos)
+		pcopybuf[copybufpos - 1] = '\n'; */
 
 	copybufpos += xstrlcpy(pcopybuf + copybufpos, path, len);
 
 	return TRUE;
 }
 
+/* Write selected file paths to fd, linefeed separated */
+static ssize_t selectiontofd(int fd)
+{
+	char *pbuf = pcopybuf;
+	ssize_t pos = 0, len, r, lastpos = copybufpos - 1;
+
+	while (pos < copybufpos) {
+		while(pcopybuf[pos])
+			++pos;
+
+		len = strlen(pbuf);
+
+		r = write(fd, pbuf, len);
+		if (r != len)
+			return pos;
+
+		if (pos != lastpos) {
+			if (write(fd, "\n", 1) != 1)
+				return pos;
+			pbuf = pbuf + len + 1;
+		}
+		++pos;
+	}
+
+	return pos;
+}
+
 static bool showcplist()
 {
-	ssize_t len;
+	int fd;
+	ssize_t pos;
 
 	if (!copybufpos)
 		return FALSE;
@@ -705,15 +734,15 @@ static bool showcplist()
 		return -1;
 	}
 
-	int fd = mkstemp(g_tmpfpath);
+	fd = mkstemp(g_tmpfpath);
 	if (fd == -1)
 		return FALSE;
 
-	len = write(fd, pcopybuf, copybufpos - 1);
-	close(fd);
+	pos = selectiontofd(fd);
 
+	close(fd);
 	exitcurses();
-	if (len == copybufpos - 1)
+	if (pos && pos == copybufpos)
 		get_output(NULL, 0, "cat", g_tmpfpath, NULL, 1);
 	unlink(g_tmpfpath);
 	refresh();
@@ -3056,11 +3085,11 @@ nochange:
 			}
 
 			if (sel == SEL_CP)
-				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -d \'\n\' -a %s cp -ir --preserve=all -t .", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -a %s cp -ir --preserve=all -t .", g_cppath);
 			else if (sel == SEL_MV)
-				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -d \'\n\' -a %s mv -i -t .", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -a %s mv -i -t .", g_cppath);
 			else /* SEL_RMMUL */
-				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -d \'\n\' -a %s rm -Ir", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -a %s rm -Ir", g_cppath);
 
 			spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
 
@@ -3570,8 +3599,8 @@ int main(int argc, char *argv[])
 
 	if (cfg.pickraw) {
 		if (copybufpos) {
-			opt = write(1, pcopybuf, copybufpos - 1);
-			if (opt != (int)(copybufpos - 1))
+			opt = selectiontofd(1);
+			if (opt != (int)(copybufpos))
 				fprintf(stderr, "%s\n", strerror(errno));
 		}
 	} else if (!cfg.picker && g_cppath[0])
