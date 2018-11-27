@@ -283,15 +283,13 @@ files.
 .Pp
 \fBNNN_COPIER:\fR set to a clipboard copier script. For example, on Linux:
 .Bd -literal
-    -------------------------------------
+    -----------------------------------------
     #!/bin/sh
 
-    # comment the next line to convert newlines to spaces
-    IFS=
-    echo -n $1 | xsel --clipboard --input
-    -------------------------------------
+    cat /path/to/.nnncp | xargs -0 | xsel -bi
+    -----------------------------------------
 
-    If it's not set, by default file paths are copied to the tmp file \fBDIR/.nnncp\fR, where 'DIR' (by priority) is: \fI$HOME\fR or, \fI$TMPDIR\fR or, \fI/tmp\fR.
+    Note: By default file paths are copied to the tmp file \fBDIR/.nnncp\fR, where 'DIR' (by priority) is: \fI$HOME\fR or, \fI$TMPDIR\fR or, \fI/tmp\fR.
 .Ed
 .Pp
 \fBNNN_SCRIPT:\fR path to a custom script to invoke with currently selected file name as argument 1.

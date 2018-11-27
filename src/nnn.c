@@ -3008,7 +3008,7 @@ nochange:
 
 				writecp(newpath, r - 1); /* Truncate NULL from end */
 				if (copier)
-					spawn(copier, newpath, NULL, NULL, F_NOTRACE);
+					spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 			}
 			printmsg(newpath);
 			goto nochange;
@@ -3047,7 +3047,7 @@ nochange:
 			if (copybufpos) { /* File path(s) written to the buffer */
 				writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
 				if (copier)
-					spawn(copier, pcopybuf, NULL, NULL, F_NOTRACE);
+					spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
 				if (ncp) { /* Some files cherry picked */
 					snprintf(newpath, PATH_MAX, "%d files copied", ncp);
@@ -3085,11 +3085,11 @@ nochange:
 			}
 
 			if (sel == SEL_CP)
-				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 cp -ir --preserve=all -t .", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -a %s cp -ir --preserve=all -t .", g_cppath);
 			else if (sel == SEL_MV)
-				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 mv -i -t .", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -a %s mv -i -t .", g_cppath);
 			else /* SEL_RMMUL */
-				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 rm -Ir", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -a %s rm -Ir", g_cppath);
 
 			spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
 
