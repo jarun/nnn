@@ -332,6 +332,8 @@ The following indicators are used in the detail view:
 - To edit all text files in EDITOR (preferably CLI, fallback vi):
 
       export NNN_USE_EDITOR=1
+      Note: Arguments to the editor should be combined together, e.g.,
+      export EDITOR='vim -xR'
 
 #### Help
 

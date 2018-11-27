@@ -290,7 +290,7 @@ static int ndents, cur, total_dents = ENTRY_INCR;
 static uint idle;
 static uint idletimeout, copybufpos, copybuflen;
 static char *copier;
-static char *editor;
+static char *editor, *editor_arg;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -2638,12 +2638,10 @@ nochange:
 				if (cfg.nonavopen && sel == SEL_NAV_IN)
 					continue;
 
-				/* If NNN_USE_EDITOR is set,
-				 * open text in EDITOR
-				 */
+				/* If NNN_USE_EDITOR is set, open text in EDITOR */
 				if (editor) {
 					if (getmime(dents[cur].name)) {
-						spawn(editor, newpath, NULL, path, F_NORMAL);
+						spawn(editor, editor_arg, newpath, path, F_NORMAL);
 						continue;
 					}
 
@@ -2654,7 +2652,7 @@ nochange:
 						continue;
 
 					if (strstr(g_buf, "text/") == g_buf) {
-						spawn(editor, newpath, NULL, path, F_NORMAL);
+						spawn(editor, editor_arg, newpath, path, F_NORMAL);
 						continue;
 					}
 				}
@@ -3545,6 +3543,18 @@ int main(int argc, char *argv[])
 		editor = xgetenv("VISUAL", NULL);
 		if (!editor)
 			editor = xgetenv("EDITOR", "vi");
+		if (editor) {
+			/* copier used as a temp var */
+			copier = editor;
+			while (*copier) {
+				if (*copier == ' ') {
+					*copier = '\0';
+					editor_arg = ++copier;
+					break;
+				}
+				++copier;
+			}
+		}
 	}
 
 	/* Get locker wait time, if set; copier used as tmp var */
