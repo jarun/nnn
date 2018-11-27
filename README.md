@@ -60,7 +60,6 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - [add bookmarks](#add-bookmarks)
   - [copy file paths](#copy-file-paths)
     - [selection](#selection)
-    - [quote paths](#quote-paths)
     - [to clipboard](#to-clipboard)
   - [cd on quit](#cd-on-quit)
   - [(neo)vim plugin](#neovim-plugin)
@@ -222,17 +221,16 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
     →, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden
               /  Filter          Ins, ^I  Toggle nav-as-you-type
               b  Pin current dir      ^W  Go to pinned dir
-             ^B  Next active context
-          `, ^/  Leader key      LeaderN  Switch to context N
+              d  Toggle detail view   ^B  Next active context
+          `, ^/  Leader key      LeaderN  Go to context N
             Esc  Exit prompt          ^L  Redraw, clear prompt
              ^G  Quit and cd           q  Quit context
           Q, ^Q  Quit                  ?  Help, config
  FILES
              ^O  Open with...          n  Create new
-              D  File details          d  Toggle detail view
-             ^R  Rename entry          r  Open dir in vidir
+              D  File details         ^R  Rename entry
+          ⎵, ^K  Copy entry path       r  Open dir in vidir
           Y, ^Y  Toggle selection      y  List selection
-          ⎵, ^K  Copy entry path      ^T  Toggle path quote
               P  Copy selection        X  Delete selection
               V  Move selection       ^X  Delete entry
               f  Archive entry         F  List archive
@@ -408,15 +406,6 @@ so you can easily handle files together:
 
     # fish
     ls -ltr (ncp)
-
-##### quote paths
-
-To wrap each file path within single quotes while selecting:
-
-    export NNN_QUOTE_ON=1
-This is particularly useful if you are planning to copy the whole string to the shell to run a command. Quotes can be toggled at runtime using <kbd>^T</kbd>.
-
-Note that the filename is not escaped. So copying may still fail for filenames having quote(s) in them.
 
 ##### to clipboard
 

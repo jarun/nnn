@@ -258,10 +258,9 @@ typedef struct {
 	uint showcolor  : 1;  /* Set to show dirs in blue */
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
-	uint quote      : 1;  /* Copy paths within quotes */
 	uint color      : 3;  /* Color code for directories */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 10;
+	uint reserved   : 11;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint picker     : 1;  /* Write selection to user-specified file */
@@ -282,7 +281,7 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 4, 1, 0, 0, 0, 0, 0};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 4, 1, 0, 0, 0, 0, 0};
 static context g_ctx[MAX_CTX] __attribute__ ((aligned));
 
 static struct entry *dents;
@@ -684,23 +683,10 @@ static bool appendfpath(const char *path, const size_t len)
 		}
 	}
 
-	if (copybufpos) {
+	if (copybufpos)
 		pcopybuf[copybufpos - 1] = '\n';
-		if (cfg.quote) {
-			pcopybuf[copybufpos] = '\'';
-			++copybufpos;
-		}
-	} else if (cfg.quote) {
-		pcopybuf[copybufpos] = '\'';
-		++copybufpos;
-	}
 
 	copybufpos += xstrlcpy(pcopybuf + copybufpos, path, len);
-	if (cfg.quote) {
-		pcopybuf[copybufpos - 1] = '\'';
-		pcopybuf[copybufpos] = '\0';
-		++copybufpos;
-	}
 
 	return TRUE;
 }
@@ -1979,17 +1965,16 @@ static int show_help(char *path)
    "4→, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden\n"
              "e/  Filter          Ins, ^I  Toggle nav-as-you-type\n"
              "eb  Pin current dir      ^W  Go to pinned dir\n"
-            "d^B  Next active context\n"
+             "ed  Toggle detail view   ^B  Next active context\n"
          "a`, ^/  Leader key      LeaderN  Go to context N\n"
            "cEsc  Exit prompt          ^L  Redraw, clear prompt\n"
             "d^G  Quit and cd           q  Quit context\n"
          "aQ, ^Q  Quit                  ?  Help, config\n"
 "1FILES\n"
             "d^O  Open with...          n  Create new\n"
-             "eD  File details          d  Toggle detail view\n"
-            "d^R  Rename entry          r  Open dir in vidir\n"
+             "eD  File details         ^R  Rename entry\n"
+         "a⎵, ^K  Copy entry path       r  Open dir in vidir\n"
          "aY, ^Y  Toggle selection      y  List selection\n"
-         "a⎵, ^K  Copy entry path      ^T  Toggle path quote\n"
              "eP  Copy selection        X  Delete selection\n"
              "eV  Move selection       ^X  Delete entry\n"
              "ef  Archive entry         F  List archive\n"
@@ -2986,23 +2971,6 @@ nochange:
 					goto nochange;
 
 				++ncp;
-				printmsg(newpath);
-			} else if (cfg.quote) {
-				g_buf[0] = '\'';
-				r = mkpath(path, dents[cur].name, g_buf + 1, PATH_MAX);
-				/* Keep the copy buf in sync */
-				copybufpos = 0;
-				appendfpath(g_buf + 1, r);
-
-				g_buf[r] = '\'';
-				g_buf[r + 1] = '\0';
-
-				writecp(g_buf, r + 1); /* Truncate NULL from end */
-				if (copier)
-					spawn(copier, g_buf, NULL, NULL, F_NOTRACE);
-
-				g_buf[r] = '\0';
-				printmsg(g_buf + 1);
 			} else {
 				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				/* Keep the copy buf in sync */
@@ -3012,9 +2980,8 @@ nochange:
 				writecp(newpath, r - 1); /* Truncate NULL from end */
 				if (copier)
 					spawn(copier, newpath, NULL, NULL, F_NOTRACE);
-
-				printmsg(newpath);
 			}
+			printmsg(newpath);
 			goto nochange;
 		case SEL_COPYMUL:
 			if (!ndents)
@@ -3113,14 +3080,6 @@ nochange:
 			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
-		case SEL_QUOTE:
-			cfg.quote ^= 1;
-			DPRINTF_D(cfg.quote);
-			if (cfg.quote)
-				printmsg("quotes on");
-			else
-				printmsg("quotes off");
-			goto nochange;
 		case SEL_OPEN: // fallthrough
 		case SEL_ARCHIVE:
 			if (!ndents)
@@ -3568,10 +3527,6 @@ int main(int argc, char *argv[])
 
 	/* Get the clipboard copier, if set */
 	copier = getenv("NNN_COPIER");
-
-	/* Enable quotes if opted */
-	if (getenv("NNN_QUOTE_ON"))
-		cfg.quote = 1;
 
 	if (getenv("HOME"))
 		g_tmpfplen = xstrlcpy(g_tmpfpath, getenv("HOME"), MAX_HOME_LEN);

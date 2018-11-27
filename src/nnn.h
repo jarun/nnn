@@ -75,7 +75,6 @@ enum action {
 	SEL_MV,
 	SEL_RMMUL,
 	SEL_RM,
-	SEL_QUOTE,
 	SEL_OPEN,
 	SEL_NEW,
 	SEL_RENAME,
@@ -210,8 +209,6 @@ static struct key bindings[] = {
 	{ 'X',   SEL_RMMUL,     "",     "" },
 	/* Delete currently selected */
 	{ CONTROL('X'),   SEL_RM,        "",     "" },
-	/* Toggle quote on while copy */
-	{ CONTROL('T'),   SEL_QUOTE,     "",     "" },
 	/* Open in a custom application */
 	{ CONTROL('O'),   SEL_OPEN,      "",     "" },
 	/* Create a new file */

@@ -105,8 +105,6 @@ Toggle selection mode
 Copy entry absolute path
 .It Ic y
 Show selection list
-.It Ic ^T
-Toggle path quote
 .It Ic P
 Copy files from selection
 .It Ic V
@@ -295,10 +293,6 @@ files.
 
     If it's not set, by default file paths are copied to the tmp file \fBDIR/.nnncp\fR, where 'DIR' (by priority) is: \fI$HOME\fR or, \fI$TMPDIR\fR or, \fI/tmp\fR.
 .Ed
-.Pp
-\fBNNN_QUOTE_ON:\fR wrap copied paths within single quotes. Useful for pasting
-names in the shell. Note that the filename is not escaped. So copying may still fail
-for filenames having quote(s) in them.
 .Pp
 \fBNNN_SCRIPT:\fR path to a custom script to invoke with currently selected file name as argument 1.
 .Bd -literal
