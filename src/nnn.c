@@ -3083,11 +3083,11 @@ nochange:
 			}
 
 			if (sel == SEL_CP)
-				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -a %s cp -iRp -t .", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 -o cp -iRp -t .", g_cppath);
 			else if (sel == SEL_MV)
-				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -a %s mv -i -t .", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 -o mv -i -t .", g_cppath);
 			else /* SEL_RMMUL */
-				snprintf(g_buf, MAX_CMD_LEN, "xargs -0 -a %s rm -Ir", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 -o rm -ir", g_cppath);
 
 			spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
 
