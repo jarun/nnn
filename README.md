@@ -53,7 +53,7 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - [Filters](#filters)
   - [Navigate-as-you-type mode](#navigate-as-you-type-mode)
   - [File indicators](#file-indicators)
-  - [File handling](#file-handling)
+  - [Utility dependencies](#utility-dependencies)
   - [Help](#help)
 - [Quickstart](#quickstart)
 - [How to](#how-to)
@@ -314,13 +314,13 @@ The following indicators are used in the detail view:
 | `b` | Block Device |
 | `c` | Character Device |
 
-#### File handling
+#### Utility dependencies
 
 | External dependency | Operation |
 | --- | --- |
 | xdg-open (Linux), open(1) (OS X), cygstart (Cygwin) | desktop opener |
 | file | determine file type |
-| cp, mv, rm | copy, move and remove files |
+| cp, mv, rm, xargs (from findutils)  | copy, move and remove files |
 | mediainfo, exiftool | multimedia file details |
 | atool, patool ([integration](#integrate-patool)) | create, list and extract archives |
 | vidir (from moreutils) | batch rename, move, delete dir entries |
