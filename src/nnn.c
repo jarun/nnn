@@ -322,6 +322,15 @@ static uint KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK | NOTE_RENAME 
 static struct timespec gtimeout;
 #endif
 
+/* Replace-str for xargs on different platforms */
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+#define REPLACE_STR 'J'
+#elif defined(__linux__) || defined(__CYGWIN__)
+#define REPLACE_STR 'I'
+#else
+#define REPLACE_STR 'I'
+#endif
+
 /* Macros for utilities */
 #define MEDIAINFO 0
 #define EXIFTOOL 1
@@ -3083,9 +3092,9 @@ nochange:
 			}
 
 			if (sel == SEL_CP)
-				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 -o cp -iRp -t .", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 -o -%c src cp -iRp src .", g_cppath, REPLACE_STR);
 			else if (sel == SEL_MV)
-				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 -o mv -i -t .", g_cppath);
+				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 -o -%c src mv -i src .", g_cppath, REPLACE_STR);
 			else /* SEL_RMMUL */
 				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 -o rm -ir", g_cppath);
 
