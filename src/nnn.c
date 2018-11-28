@@ -331,6 +331,13 @@ static struct timespec gtimeout;
 #define REPLACE_STR 'I'
 #endif
 
+/* Options to identify file mime */
+#ifdef __APPLE__
+#define FILE_OPTS "-bI"
+#else
+#define FILE_OPTS "-bi"
+#endif
+
 /* Macros for utilities */
 #define MEDIAINFO 0
 #define EXIFTOOL 1
@@ -2657,7 +2664,7 @@ nochange:
 					/* Recognize and open plain
 					 * text files with vi
 					 */
-					if (get_output(g_buf, MAX_CMD_LEN, "file", "-bi", newpath, 0) == NULL)
+					if (get_output(g_buf, MAX_CMD_LEN, "file", FILE_OPTS, newpath, 0) == NULL)
 						continue;
 
 					if (strstr(g_buf, "text/") == g_buf) {
