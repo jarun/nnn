@@ -3098,12 +3098,31 @@ nochange:
 				goto nochange;
 			}
 
-			if (sel == SEL_CP)
-				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 -o -%c src cp -iRp src .", g_cppath, REPLACE_STR);
-			else if (sel == SEL_MV)
-				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 -o -%c src mv -i src .", g_cppath, REPLACE_STR);
-			else /* SEL_RMMUL */
-				snprintf(g_buf, MAX_CMD_LEN, "cat %s | xargs -0 -o rm -ir", g_cppath);
+			if (sel == SEL_CP) {
+				snprintf(g_buf, MAX_CMD_LEN,
+#ifdef __linux__
+                         "xargs -0 -a %s -%c src cp -iRp src .",
+#else
+                         "cat %s | xargs -0 -o -%c src cp -iRp src .",
+#endif
+                         g_cppath, REPLACE_STR);
+            } else if (sel == SEL_MV) {
+				snprintf(g_buf, MAX_CMD_LEN,
+#ifdef __linux__
+                         "xargs -0 -a %s -%c src mv -i src .",
+#else
+                         "cat %s | xargs -0 -o -%c src mv -i src .",
+#endif
+                         g_cppath, REPLACE_STR);
+            } else { /* SEL_RMMUL */
+				snprintf(g_buf, MAX_CMD_LEN,
+#ifdef __linux__
+                         "xargs -0 -a %s rm -ir",
+#else
+                         "cat %s | xargs -0 -o rm -ir",
+#endif
+                         g_cppath);
+            }
 
 			spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
 
