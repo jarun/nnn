@@ -3577,20 +3577,14 @@ int main(int argc, char *argv[])
 
 	/* Edit text in EDITOR, if opted */
 	if (getenv("NNN_USE_EDITOR")) {
-		editor = xgetenv("VISUAL", NULL);
-		if (!editor)
-			editor = xgetenv("EDITOR", "vi");
-		if (editor) {
-			/* copier used as a temp var */
-			copier = editor;
-			while (*copier) {
-				if (*copier == ' ') {
-					*copier = '\0';
-					editor_arg = ++copier;
-					break;
-				}
-				++copier;
-			}
+		editor = xgetenv("VISUAL", xgetenv("EDITOR", "vi"));
+		/* copier used as a temp var */
+		copier = editor;
+		while (*copier && *copier != ' ')
+			++copier;
+		if (*copier == ' ') {
+			*copier = '\0';
+			editor_arg = ++copier;
 		}
 	}
 
