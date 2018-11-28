@@ -3437,7 +3437,6 @@ static void usage(void)
 		" -v      show program version\n"
 		" -h      show this help\n\n"
 		"Version: %s\n%s\n", VERSION, GENERAL_INFO);
-	exit(0);
 }
 
 int main(int argc, char *argv[])
@@ -3494,9 +3493,12 @@ int main(int argc, char *argv[])
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
 			return 0;
-		case 'h': // fallthrough
+		case 'h':
+			usage();
+			return 0;
 		default:
 			usage();
+			exit(1);
 		}
 	}
 
