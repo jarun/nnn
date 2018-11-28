@@ -3110,7 +3110,7 @@ nochange:
 				break;
 
 			mkpath(path, dents[cur].name, newpath, PATH_MAX);
-			spawn("rm", "-Ir", newpath, NULL, F_NORMAL | F_SIGINT);
+			spawn("rm", "-ir", newpath, NULL, F_NORMAL | F_SIGINT);
 
 			lastname[0] = '\0';
 			if (cfg.filtermode)
