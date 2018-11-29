@@ -320,7 +320,7 @@ The following indicators are used in the detail view:
 | --- | --- |
 | xdg-open (Linux), open(1) (OS X), cygstart (Cygwin) | desktop opener |
 | file | determine file type |
-| cp, mv, rm, xargs (from findutils)  | copy, move and remove files |
+| cp, mv, rm, xargs (from findutils on Linux)  | copy, move and remove files |
 | mediainfo, exiftool | multimedia file details |
 | atool, patool ([integration](#integrate-patool)) | create, list and extract archives |
 | vidir (from moreutils) | batch rename, move, delete dir entries |
