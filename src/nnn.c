@@ -3113,28 +3113,28 @@ nochange:
 			if (sel == SEL_CP) {
 				snprintf(g_buf, MAX_CMD_LEN,
 #ifdef __linux__
-                         "xargs -0 -a %s -%c src cp -iRp src .",
+					 "xargs -0 -a %s -%c src cp -iRp src .",
 #else
-                         "cat %s | xargs -0 -o -%c src cp -iRp src .",
+					 "cat %s | xargs -0 -o -%c src cp -iRp src .",
 #endif
-                         g_cppath, REPLACE_STR);
-            } else if (sel == SEL_MV) {
+					 g_cppath, REPLACE_STR);
+			} else if (sel == SEL_MV) {
 				snprintf(g_buf, MAX_CMD_LEN,
 #ifdef __linux__
-                         "xargs -0 -a %s -%c src mv -i src .",
+					 "xargs -0 -a %s -%c src mv -i src .",
 #else
-                         "cat %s | xargs -0 -o -%c src mv -i src .",
+					 "cat %s | xargs -0 -o -%c src mv -i src .",
 #endif
-                         g_cppath, REPLACE_STR);
-            } else { /* SEL_RMMUL */
+					 g_cppath, REPLACE_STR);
+			} else { /* SEL_RMMUL */
 				snprintf(g_buf, MAX_CMD_LEN,
 #ifdef __linux__
-                         "xargs -0 -a %s rm -ir",
+					 "xargs -0 -a %s rm -ir",
 #else
-                         "cat %s | xargs -0 -o rm -ir",
+					 "cat %s | xargs -0 -o rm -ir",
 #endif
-                         g_cppath);
-            }
+					 g_cppath);
+			}
 
 			spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
 
