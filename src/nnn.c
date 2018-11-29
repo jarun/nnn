@@ -3394,7 +3394,12 @@ nochange:
 			if (sel == SEL_QUITCD) {
 				/* In vim picker mode, clear selection and exit */
 				if (cfg.picker) {
-					copybufpos = 0;
+					if (copybufpos) {
+						if (cfg.pickraw) /* Reset for for raw pick */
+							copybufpos = 0;
+						else /* Clear the picker file */
+							writecp(NULL, 0);
+					}
 					dentfree(dents);
 					return;
 				}
