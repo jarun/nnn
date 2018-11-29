@@ -2650,6 +2650,18 @@ nochange:
 				goto begin;
 			case S_IFREG:
 			{
+				/* If opened as vim plugin and Enter/^M pressed, pick */
+				if (cfg.picker && sel == SEL_GOIN) {
+					r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
+					/* NOTE: This overrides any previous selection */
+					copybufpos = 0;
+					appendfpath(newpath, r);
+					writecp(newpath, r - 1);
+
+					dentfree(dents);
+					return;
+				}
+
 				/* If open file is disabled on right arrow or `l`, return */
 				if (cfg.nonavopen && sel == SEL_NAV_IN)
 					continue;
@@ -3424,12 +3436,6 @@ nochange:
 
 					++iter;
 				}
-			}
-
-			if (cfg.picker && copybufpos == 0 && ndents) {
-				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
-				appendfpath(newpath, r);
-				writecp(newpath, r - 1);
 			}
 
 			dentfree(dents);
