@@ -2370,7 +2370,7 @@ static void redraw(char *path)
 	if (cfg.copymode)
 		if (g_crc != crc8fast((uchar *)dents, ndents * sizeof(struct entry))) {
 			cfg.copymode = 0;
-			DPRINTF_S("copymode off");
+			DPRINTF_S("selection off");
 		}
 
 	/* Fail redraw if < than 11 columns, context info prints 10 chars */
@@ -3047,7 +3047,7 @@ nochange:
 				copybufpos = 0;
 				ncp = 0;
 				printmsg("selection on");
-				DPRINTF_S("copymode on");
+				DPRINTF_S("selection on");
 				goto nochange;
 			}
 
