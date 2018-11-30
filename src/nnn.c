@@ -2653,10 +2653,8 @@ nochange:
 				/* If opened as vim plugin and Enter/^M pressed, pick */
 				if (cfg.picker && sel == SEL_GOIN) {
 					r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
-					/* NOTE: This overrides any previous selection */
-					copybufpos = 0;
 					appendfpath(newpath, r);
-					writecp(newpath, r - 1);
+					writecp(pcopybuf, copybufpos - 1);
 
 					dentfree(dents);
 					return;
