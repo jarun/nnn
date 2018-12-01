@@ -23,9 +23,9 @@ Noice is Not Noice, a noicer fork...
 
 `nnn` is probably the [fastest and most resource-sensitive](#memory-usage) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
 
-[Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, or use it as a [vim file picker](https://github.com/jarun/nnn#neovim-plugin); `nnn` supports as many scripts as you need!
+[Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, or use it as a [(neo)vim plugin](https://github.com/jarun/nnn#neovim-plugin); `nnn` supports as many scripts as you need!
 
-It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Termux.
+It runs on Linux, macOS, Raspberry Pi, Cygwin, Linux subsystem for Windows and Termux.
 
 [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions... Missing a feature? Want to contribute? Head to the rolling [ToDo list](https://github.com/jarun/nnn/issues/137).
 
@@ -142,7 +142,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 
 #### Dependencies
 
-`nnn` needs libncursesw (on Linux or ncurses on OS X) and standard libc.
+`nnn` needs libncursesw (on Linux or ncurses on macOS) and standard libc.
 
 #### From a package manager
 
@@ -322,13 +322,13 @@ The following indicators are used in the detail view:
 
 | External dependency | Operation |
 | --- | --- |
-| xdg-open (Linux), open(1) (OS X), cygstart (Cygwin) | desktop opener |
+| xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | desktop opener |
 | file | determine file type |
 | cp, mv, rm, xargs (from findutils on Linux)  | copy, move and remove files |
 | mediainfo, exiftool | multimedia file details |
 | atool, patool ([integration](#integrate-patool)) | create, list and extract archives |
 | vidir (from moreutils) | batch rename, move, delete dir entries |
-| vlock (Linux), bashlock (OS X), lock(1) (BSD) | terminal locker |
+| vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
 | $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
 | $PAGER | page through files (fallback less) |
 | $SHELL | spawn a shell, run script (fallback sh) |
@@ -417,7 +417,7 @@ so you can easily handle files together:
 
 ##### to clipboard
 
-Along with default copy, `nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X. Here's a sample [copier script](https://github.com/jarun/nnn/tree/master/scripts/copier).
+Along with default copy, `nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on macOS. Here's a sample [copier script](https://github.com/jarun/nnn/tree/master/scripts/copier).
 
 To inform `nnn` of the executable copier script location:
 
