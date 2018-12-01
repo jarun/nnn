@@ -222,10 +222,10 @@ static struct key bindings[] = {
 	/* Show help */
 	{ '?',            SEL_HELP,      "",     "" },
 	/* Run command */
-	{ '!',            SEL_RUN,       "sh",   "SHELL" },
-	{ CONTROL(']'),   SEL_RUN,       "sh",   "SHELL" },
+	{ '!',            SEL_RUN,       "",     "" },
+	{ CONTROL(']'),   SEL_RUN,       "",     "" },
 	/* Run a custom script */
-	{ 'R',            SEL_RUNSCRIPT, "sh",   "SHELL" },
+	{ 'R',            SEL_RUNSCRIPT, "",     "" },
 	/* Run command with argument */
 	{ 'e',            SEL_RUNEDIT,   "",     "" },
 	{ 'p',            SEL_RUNPAGE,   "",     "" },

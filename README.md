@@ -330,10 +330,12 @@ The following indicators are used in the detail view:
 | $PAGER | page through files (fallback less) |
 | $SHELL | spawn a shell, run script (fallback sh) |
 
-- To edit all text files in EDITOR (preferably CLI, fallback vi):
+To edit all text files in EDITOR (preferably CLI, fallback vi):
 
       export NNN_USE_EDITOR=1
-      Note: Arguments to the editor should be combined together, e.g.,
+
+Arguments to the `$EDITOR`, `$PAGER` and `$SHELL` should be combined together, e.g.,
+
       export EDITOR='vim -xR'
 
 #### Help

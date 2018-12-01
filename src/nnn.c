@@ -293,6 +293,7 @@ static uint idletimeout, copybufpos, copybuflen;
 static char *copier;
 static char *editor, *editor_arg;
 static char *pager, *pager_arg;
+static char *shell, *shell_arg;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -872,7 +873,7 @@ static void getprogarg(char *prog, char **arg)
 {
 	char *argptr;
 
-	while (*prog && *prog != ' ')
+	while (*prog && !isblank(*prog))
 		++prog;
 
 	if (*prog) {
@@ -882,7 +883,7 @@ static void getprogarg(char *prog, char **arg)
 
 		/* Make sure there are no more args */
 		while (*argptr) {
-			if (*argptr == ' ') {
+			if (isblank(*argptr)) {
 				fprintf(stderr, "Too many args [%s]\n", prog);
 				exit(1);
 			}
@@ -2115,15 +2116,15 @@ static int show_help(char *path)
 	if (getenv("PWD"))
 		dprintf(fd, "PWD: %s\n", getenv("PWD"));
 	if (getenv("SHELL"))
-		dprintf(fd, "SHELL: %s\n", getenv("SHELL"));
+		dprintf(fd, "SHELL: %s\n", shell);
 	if (getenv("SHLVL"))
 		dprintf(fd, "SHLVL: %s\n", getenv("SHLVL"));
 	if (getenv("VISUAL"))
-		dprintf(fd, "VISUAL: %s\n", getenv("VISUAL"));
+		dprintf(fd, "VISUAL: %s\n", editor);
 	else if (getenv("EDITOR"))
-		dprintf(fd, "EDITOR: %s\n", getenv("EDITOR"));
+		dprintf(fd, "EDITOR: %s\n", editor);
 	if (getenv("PAGER"))
-		dprintf(fd, "PAGER: %s\n", getenv("PAGER"));
+		dprintf(fd, "PAGER: %s\n", pager);
 
 	dprintf(fd, "\nVersion: %s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
@@ -3351,8 +3352,6 @@ nochange:
 			break;
 		case SEL_RUN: // fallthrough
 		case SEL_RUNSCRIPT:
-			run = xgetenv(env, run);
-
 			if (sel == SEL_RUNSCRIPT) {
 				tmp = getenv("NNN_SCRIPT");
 				if (tmp) {
@@ -3371,11 +3370,11 @@ nochange:
 					if (ndents)
 						curfile = dents[cur].name;
 
-					spawn(run, tmp, curfile, path, F_NORMAL | F_SIGINT);
+					spawn(shell, tmp, curfile, path, F_NORMAL | F_SIGINT);
 				} else
 					printmsg("set NNN_SCRIPT");
 			} else {
-				spawn(run, NULL, NULL, path, F_NORMAL | F_MARKER);
+				spawn(shell, shell_arg, NULL, path, F_NORMAL | F_MARKER);
 
 				/* Continue in navigate-as-you-type mode, if enabled */
 				if (cfg.filtermode)
@@ -3599,6 +3598,10 @@ int main(int argc, char *argv[])
 	/* Get PAGER */
 	pager = xgetenv("PAGER", "less");
 	getprogarg(pager, &pager_arg);
+
+	/* Get SHELL */
+	shell = xgetenv("SHELL", "sh");
+	getprogarg(shell, &shell_arg);
 
 #ifdef LINUX_INOTIFY
 	/* Initialize inotify */
