@@ -333,11 +333,11 @@ The following indicators are used in the detail view:
 
 To edit all text files in EDITOR (preferably CLI, fallback vi):
 
-      export NNN_USE_EDITOR=1
+    export NNN_USE_EDITOR=1
 
 Arguments to the `$EDITOR`, `$PAGER` and `$SHELL` should be combined together, e.g.,
 
-      export EDITOR='vim -xR'
+    export EDITOR='vim -xR'
 
 #### Help
 
@@ -389,7 +389,7 @@ File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priori
     $TMPDIR or,
     /tmp
 
-To see the path to the temporary copy file, run `nnn`, press <kbd>?</kbd> and look up `copy file`.
+The path is shown in the help and configuration screen..
 
 To use the copied paths from the cmdline, use command substitution. For example, if `DIR` above is `/home/user`:
 
@@ -415,18 +415,9 @@ so you can easily handle files together:
 
 ##### to clipboard
 
-Along with default copy, `nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X.
+Along with default copy, `nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on OS X. Here's a sample [copier script](https://github.com/jarun/nnn/tree/master/scripts/copier).
 
-Sample Linux copier script:
-
-    #!/bin/sh
-
-    # comment the next line to convert newlines to spaces
-    IFS=
-
-    echo -n $1 | xsel --clipboard --input
-
-export `NNN_COPIER`:
+To inform `nnn` of the executable copier script location:
 
     export NNN_COPIER="/path/to/copier.sh"
 
@@ -490,7 +481,7 @@ Any other value disables colored directories.
 
 #### integrate patool
 
-On systems where `atool` is not available but `patool` is, drop two copies of the Python3 script [natool](https://github.com/jarun/nnn/blob/master/scripts/natool) as `atool` and `apack` somewhere in `$PATH`.
+On systems where `atool` is not available but `patool` is, drop two copies of the Python3 script [natool](https://github.com/jarun/nnn/tree/master/scripts/natool) as `atool` and `apack` somewhere in `$PATH`.
 
 #### work faster at rename prompt
 

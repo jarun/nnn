@@ -1,7 +1,13 @@
 #!/bin/sh
 
-cat /path/to/.nnncp | xargs -0 | xsel -bi
+# Linux
+cat ~/.nnncp | xargs -0 | xsel -bi
+
+# macOS
+# cat ~/.nnncp | xargs -0 | pbcopy
 
 # Termux
-# cat /path/to/.nnncp | xargs -0 | termux-clipboard-set
-# e.g.: cat /data/data/com.termux/files/home/.nnncp | xargs -0 | termux-clipboard-set
+# cat /data/data/com.termux/files/home/.nnncp | xargs -0 | termux-clipboard-set
+
+# Cygwin
+# cat ~/.nnncp | xargs -0 | clip

@@ -284,15 +284,11 @@ files.
 .Pp
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal locker.
 .Pp
-\fBNNN_COPIER:\fR set to a clipboard copier script. For example, on Linux:
+\fBNNN_COPIER:\fR set to a clipboard copier script.
 .Bd -literal
-    -----------------------------------------
-    #!/bin/sh
-
-    cat /path/to/.nnncp | xargs -0 | xsel -bi
-    -----------------------------------------
-
-    NOTE: By default file paths are copied to the tmp file \fBDIR/.nnncp\fR, where 'DIR' (by priority) is: \fI$HOME\fR or, \fI$TMPDIR\fR or, \fI/tmp\fR.
+    NOTE: By default file paths are copied to the tmp file \fBDIR/.nnncp\fR, where 'DIR' (by priority) is:
+    \fI$HOME\fR or, \fI$TMPDIR\fR or, \fI/tmp\fR.
+    The path is shown in the help and configuration screen.
 .Ed
 .Pp
 \fBNNN_SCRIPT:\fR path to a custom script to invoke with currently selected file name as argument 1.
