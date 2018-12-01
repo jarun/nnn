@@ -227,7 +227,7 @@ static struct key bindings[] = {
 	{ 'R',            SEL_RUNSCRIPT, "sh",   "SHELL" },
 	/* Run command with argument */
 	{ 'e',            SEL_RUNARG,    "",     "VISUAL" },
-	{ 'p',            SEL_RUNARG,    "less", "PAGER" },
+	{ 'p',            SEL_RUNARG,    "",     "PAGER" },
 	/* Lock screen */
 	{ 'L',            SEL_LOCK,      "",     "" },
 	/* Quit a context */

@@ -292,6 +292,7 @@ static uint idle;
 static uint idletimeout, copybufpos, copybuflen;
 static char *copier;
 static char *editor, *editor_arg;
+static char *pager, *pager_arg;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -863,8 +864,11 @@ static char *xgetenv(const char *name, char *fallback)
 	return value && value[0] ? value : fallback;
 }
 
-/* Parse a string to return program and argument */
-static int getprogarg(char *prog, char **arg)
+/*
+ * Parse a string to get program and argument
+ * NOTE: original string may be modified
+ */
+static void getprogarg(char *prog, char **arg)
 {
 	char *argptr;
 
@@ -878,13 +882,13 @@ static int getprogarg(char *prog, char **arg)
 
 		/* Make sure there are no more args */
 		while (*argptr) {
-			if (*argptr == ' ')
-				return -1;
+			if (*argptr == ' ') {
+				fprintf(stderr, "Too many %s args\n", prog);
+				exit(1);
+			}
 			++argptr;
 		}
 	}
-
-	return 0;
 }
 
 /* Check if a dir exists, IS a dir and is readable */
@@ -3597,11 +3601,13 @@ int main(int argc, char *argv[])
 	if (getuid() == 0 || getenv("NNN_SHOW_HIDDEN"))
 		cfg.showhidden = 1;
 
+	/* Get VISUAL/EDITOR */
 	editor = xgetenv("VISUAL", xgetenv("EDITOR", "vi"));
-	if (getprogarg(editor, &editor_arg) < 0) {
-		fprintf(stderr, "Too many editor args\n");
-		exit(1);
-	}
+	getprogarg(editor, &editor_arg);
+
+	/* Get PAGER */
+	pager = xgetenv("PAGER", "less");
+	getprogarg(pager, &pager_arg);
 
 	/* Edit text in EDITOR, if opted */
 	if (getenv("NNN_USE_EDITOR"))
