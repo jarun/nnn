@@ -883,7 +883,7 @@ static void getprogarg(char *prog, char **arg)
 		/* Make sure there are no more args */
 		while (*argptr) {
 			if (*argptr == ' ') {
-				fprintf(stderr, "Too many %s args\n", prog);
+				fprintf(stderr, "Too many args [%s]\n", prog);
 				exit(1);
 			}
 			++argptr;
@@ -2092,7 +2092,7 @@ static int show_help(char *path)
 	}
 
 	if (cfg.useeditor)
-		dprintf(fd, "NNN_USE_EDITOR: %s\n", editor);
+		dprintf(fd, "NNN_USE_EDITOR: 1\n");
 	if (idletimeout)
 		dprintf(fd, "NNN_IDLE_TIMEOUT: %d secs\n", idletimeout);
 	if (copier)
@@ -2694,23 +2694,13 @@ nochange:
 					continue;
 
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
-				if (cfg.useeditor) {
-					if (getmime(dents[cur].name)) {
+				if (cfg.useeditor)
+					if (getmime(dents[cur].name) ||
+					    (get_output(g_buf, MAX_CMD_LEN, "file", FILE_OPTS, newpath, 0) &&
+					     strstr(g_buf, "text/") == g_buf)) {
 						spawn(editor, newpath, editor_arg, path, F_NORMAL);
 						continue;
 					}
-
-					/* Recognize and open plain
-					 * text files with vi
-					 */
-					if (get_output(g_buf, MAX_CMD_LEN, "file", FILE_OPTS, newpath, 0) == NULL)
-						continue;
-
-					if (strstr(g_buf, "text/") == g_buf) {
-						spawn(editor, newpath, editor_arg, path, F_NORMAL);
-						continue;
-					}
-				}
 
 				/* Invoke desktop opener as last resort */
 				spawn(utils[OPENER], newpath, NULL, NULL, F_NOWAIT | F_NOTRACE);
@@ -3398,14 +3388,11 @@ nochange:
 
 			/* Repopulate as directory content may have changed */
 			goto begin;
-		case SEL_RUNARG:
-			tmp = NULL;
-			run = xgetenv(env, run);
-			if ((!run || !run[0]) && (strcmp("VISUAL", env) == 0)) {
-				run = editor;
-				tmp = editor_arg;
-			}
-			spawn(run, dents[cur].name, tmp, path, F_NORMAL);
+		case SEL_RUNEDIT:
+			spawn(editor, dents[cur].name, editor_arg, path, F_NORMAL);
+			break;
+		case SEL_RUNPAGE:
+			spawn(pager, dents[cur].name, pager_arg, path, F_NORMAL);
 			break;
 		case SEL_LOCK:
 			spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
@@ -3601,6 +3588,10 @@ int main(int argc, char *argv[])
 	if (getuid() == 0 || getenv("NNN_SHOW_HIDDEN"))
 		cfg.showhidden = 1;
 
+	/* Edit text in EDITOR, if opted */
+	if (getenv("NNN_USE_EDITOR"))
+		cfg.useeditor = 1;
+
 	/* Get VISUAL/EDITOR */
 	editor = xgetenv("VISUAL", xgetenv("EDITOR", "vi"));
 	getprogarg(editor, &editor_arg);
@@ -3608,10 +3599,6 @@ int main(int argc, char *argv[])
 	/* Get PAGER */
 	pager = xgetenv("PAGER", "less");
 	getprogarg(pager, &pager_arg);
-
-	/* Edit text in EDITOR, if opted */
-	if (getenv("NNN_USE_EDITOR"))
-		cfg.useeditor = 1;
 
 #ifdef LINUX_INOTIFY
 	/* Initialize inotify */

@@ -82,7 +82,8 @@ enum action {
 	SEL_HELP,
 	SEL_RUN,
 	SEL_RUNSCRIPT,
-	SEL_RUNARG,
+	SEL_RUNEDIT,
+	SEL_RUNPAGE,
 	SEL_LOCK,
 	SEL_QUITCTX,
 	SEL_QUITCD,
@@ -226,8 +227,8 @@ static struct key bindings[] = {
 	/* Run a custom script */
 	{ 'R',            SEL_RUNSCRIPT, "sh",   "SHELL" },
 	/* Run command with argument */
-	{ 'e',            SEL_RUNARG,    "",     "VISUAL" },
-	{ 'p',            SEL_RUNARG,    "",     "PAGER" },
+	{ 'e',            SEL_RUNEDIT,   "",     "" },
+	{ 'p',            SEL_RUNPAGE,   "",     "" },
 	/* Lock screen */
 	{ 'L',            SEL_LOCK,      "",     "" },
 	/* Quit a context */
