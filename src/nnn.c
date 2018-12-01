@@ -476,6 +476,15 @@ static int get_input(const char *prompt)
 	return r;
 }
 
+static char confirm_force()
+{
+	int r = get_input("use force? ('y/Y' confirms, else interactive)");
+	if (r == 'y' || r == 'Y')
+		return 'f'; /* forceful */
+
+	return 'i'; /* interactive */
+}
+
 /* Increase the limit on open file descriptors, if possible */
 static rlim_t max_openfds()
 {
@@ -3135,36 +3144,38 @@ nochange:
 				goto nochange;
 			}
 
-			/* Fail if copy file path isn't created */
+			/* Fail if copy file path isn't accessible */
 			if (access(g_cppath, R_OK) == -1) {
 				printmsg("empty selection list");
 				goto nochange;
 			}
 
+			char force = confirm_force();
+
 			if (sel == SEL_CP) {
 				snprintf(g_buf, MAX_CMD_LEN,
 #ifdef __linux__
-					 "xargs -0 -a %s -%c src cp -iRp src .",
+					 "xargs -0 -a %s -%c src cp -%cRp src .",
 #else
-					 "cat %s | xargs -0 -o -%c src cp -iRp src .",
+					 "cat %s | xargs -0 -o -%c src cp -%cRp src .",
 #endif
-					 g_cppath, REPLACE_STR);
+					 g_cppath, REPLACE_STR, force);
 			} else if (sel == SEL_MV) {
 				snprintf(g_buf, MAX_CMD_LEN,
 #ifdef __linux__
-					 "xargs -0 -a %s -%c src mv -i src .",
+					 "xargs -0 -a %s -%c src mv -%c src .",
 #else
-					 "cat %s | xargs -0 -o -%c src mv -i src .",
+					 "cat %s | xargs -0 -o -%c src mv -%c src .",
 #endif
-					 g_cppath, REPLACE_STR);
+					 g_cppath, REPLACE_STR, force);
 			} else { /* SEL_RMMUL */
 				snprintf(g_buf, MAX_CMD_LEN,
 #ifdef __linux__
-					 "xargs -0 -a %s rm -ir",
+					 "xargs -0 -a %s rm -%cr",
 #else
-					 "cat %s | xargs -0 -o rm -ir",
+					 "cat %s | xargs -0 -o rm -%cr",
 #endif
-					 g_cppath);
+					 g_cppath, force);
 			}
 
 			spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
@@ -3175,16 +3186,21 @@ nochange:
 			goto begin;
 		}
 		case SEL_RM:
+		{
 			if (!ndents)
 				break;
 
-			mkpath(path, dents[cur].name, newpath, PATH_MAX);
-			spawn("rm", "-ir", newpath, NULL, F_NORMAL | F_SIGINT);
+			char rm_opts[] = "-ir";
+			rm_opts[1] = confirm_force();
 
-			lastname[0] = '\0';
+			mkpath(path, dents[cur].name, newpath, PATH_MAX);
+			spawn("rm", rm_opts, newpath, NULL, F_NORMAL | F_SIGINT);
+
+			copycurname();
 			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
+		}
 		case SEL_OPEN: // fallthrough
 		case SEL_ARCHIVE:
 			if (!ndents)
