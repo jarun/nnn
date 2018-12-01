@@ -2397,11 +2397,14 @@ static void redraw(char *path)
 
 	/* Clear screen */
 	erase();
+
+#ifdef DIR_LIMITED_COPY
 	if (cfg.copymode)
 		if (g_crc != crc8fast((uchar *)dents, ndents * sizeof(struct entry))) {
 			cfg.copymode = 0;
 			DPRINTF_S("selection off");
 		}
+#endif
 
 	/* Fail redraw if < than 11 columns, context info prints 10 chars */
 	if (COLS < 11) {
@@ -2823,7 +2826,9 @@ nochange:
 				if (cfg.curctx == r)
 					continue;
 
+#ifdef DIR_LIMITED_COPY
 				g_crc = 0;
+#endif
 
 				/* Save current context */
 				xstrlcpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
@@ -3072,6 +3077,14 @@ nochange:
 			}
 
 			if (!ncp) { /* Handle range selection */
+#ifndef DIR_LIMITED_COPY
+				if (g_crc != crc8fast((uchar *)dents, ndents * sizeof(struct entry))) {
+					cfg.copymode = 0;
+					printmsg("range error: dir/content changed");
+					DPRINTF_S("range error: dir/content changed");
+					goto nochange;
+				}
+#endif
 				if (cur < copystartid) {
 					copyendid = copystartid;
 					copystartid = cur;

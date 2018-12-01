@@ -103,7 +103,8 @@ It runs on Linux, OS X, Raspberry Pi, Cygwin, Linux subsystem for Windows and Te
   - Media information (needs mediainfo/exiftool)
 - Convenience
   - Create, rename files and directories
-  - Select multiple files; copy, move, delete selection
+  - Select files across directories
+  - Copy, move, delete selection
   - Batch rename/move/delete (needs vidir)
   - Show directories in custom color (default: blue)
   - Spawn a subshell in the current directory
@@ -374,7 +375,7 @@ Use <kbd>^K</kbd> to copy the absolute path of the file under the cursor.
 To copy multiple absolute file paths:
 
 - press <kbd>^Y</kbd> (or <kbd>Y</kbd>) to enter selection mode. In this mode it's possible to
-  - cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry; or,
+  - cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry (works across directories and contexts); or,
   - navigate to another file in the same directory to select a range of files
 - press <kbd>^Y</kbd> (or <kbd>Y</kbd>) _again_ to copy the paths and exit the selection mode
 

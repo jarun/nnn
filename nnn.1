@@ -253,7 +253,7 @@ NNN_COPIER is set (see ENVIRONMENT section below).
 To copy multiple file paths the selection mode should be enabled using \fI^Y\fR.
 In this mode it's possible to
 .Pp
-(1) cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry; or,
+(1) cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry (works across directories and contexts); or,
 .br
 (2) navigate to another file in the same directory to select a range of files.
 .Pp
@@ -263,7 +263,10 @@ be copied, moved or removed using respective keyboard shortcuts.
 To list the file paths copied to memory press \fIy\fR.
 .Sh ENVIRONMENT
 The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take precedence
-when dealing with the !, e and p commands respectively.
+when dealing with the !, e and p commands respectively. A single combination to arguments is supported, e.g.:
+.Bd -literal
+    export EDITOR='vim -xR'
+.Ed
 .Pp
 \fBNNN_BMS:\fR bookmark string as \fIkey_char:location\fR pairs (max 10) separated by
 \fI;\fR:
@@ -277,10 +280,6 @@ when dealing with the !, e and p commands respectively.
 files.
 .Bd -literal
     export NNN_USE_EDITOR=1
-
-    NOTE: Arguments to the editor should be combined together, e.g.,
-
-    export EDITOR='vim -xR'
 .Ed
 .Pp
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal locker.
