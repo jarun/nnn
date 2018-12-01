@@ -2116,15 +2116,15 @@ static int show_help(char *path)
 	if (getenv("PWD"))
 		dprintf(fd, "PWD: %s\n", getenv("PWD"));
 	if (getenv("SHELL"))
-		dprintf(fd, "SHELL: %s\n", shell);
+		dprintf(fd, "SHELL: %s %s\n", shell, shell_arg);
 	if (getenv("SHLVL"))
 		dprintf(fd, "SHLVL: %s\n", getenv("SHLVL"));
 	if (getenv("VISUAL"))
-		dprintf(fd, "VISUAL: %s\n", editor);
+		dprintf(fd, "VISUAL: %s %s\n", editor, editor_arg);
 	else if (getenv("EDITOR"))
-		dprintf(fd, "EDITOR: %s\n", editor);
+		dprintf(fd, "EDITOR: %s %s\n", editor, editor_arg);
 	if (getenv("PAGER"))
-		dprintf(fd, "PAGER: %s\n", pager);
+		dprintf(fd, "PAGER: %s %s\n", pager, pager_arg);
 
 	dprintf(fd, "\nVersion: %s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
