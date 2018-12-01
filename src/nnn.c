@@ -260,12 +260,13 @@ typedef struct {
 	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
 	uint color      : 3;  /* Color code for directories */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 11;
+	uint reserved   : 10;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint picker     : 1;  /* Write selection to user-specified file */
 	uint pickraw    : 1;  /* Write selection to sdtout before exit */
 	uint nonavopen  : 1;  /* Open file on right arrow or `l` */
+	uint useeditor  : 1;  /* Use VISUAL to open text files */
 } settings;
 
 /* Contexts or workspaces */
@@ -281,7 +282,7 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 4, 1, 0, 0, 0, 0, 0};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 4, 1, 0, 0, 0, 0, 0, 0};
 static context g_ctx[MAX_CTX] __attribute__ ((aligned));
 
 static struct entry *dents;
@@ -860,6 +861,30 @@ static char *xgetenv(const char *name, char *fallback)
 	value = getenv(name);
 
 	return value && value[0] ? value : fallback;
+}
+
+/* Parse a string to return program and argument */
+static int getprogarg(char *prog, char **arg)
+{
+	char *argptr;
+
+	while (*prog && *prog != ' ')
+		++prog;
+
+	if (*prog) {
+		*prog = '\0';
+		*arg = ++prog;
+		argptr = *arg;
+
+		/* Make sure there are no more args */
+		while (*argptr) {
+			if (*argptr == ' ')
+				return -1;
+			++argptr;
+		}
+	}
+
+	return 0;
 }
 
 /* Check if a dir exists, IS a dir and is readable */
@@ -2062,7 +2087,7 @@ static int show_help(char *path)
 		dprintf(fd, "\n");
 	}
 
-	if (editor)
+	if (cfg.useeditor)
 		dprintf(fd, "NNN_USE_EDITOR: %s\n", editor);
 	if (idletimeout)
 		dprintf(fd, "NNN_IDLE_TIMEOUT: %d secs\n", idletimeout);
@@ -2665,7 +2690,7 @@ nochange:
 					continue;
 
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
-				if (editor) {
+				if (cfg.useeditor) {
 					if (getmime(dents[cur].name)) {
 						spawn(editor, newpath, editor_arg, path, F_NORMAL);
 						continue;
@@ -3370,10 +3395,13 @@ nochange:
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_RUNARG:
+			tmp = NULL;
 			run = xgetenv(env, run);
-			if ((!run || !run[0]) && (strcmp("VISUAL", env) == 0))
-				run = editor ? editor : xgetenv("EDITOR", "vi");
-			spawn(run, dents[cur].name, NULL, path, F_NORMAL);
+			if ((!run || !run[0]) && (strcmp("VISUAL", env) == 0)) {
+				run = editor;
+				tmp = editor_arg;
+			}
+			spawn(run, dents[cur].name, tmp, path, F_NORMAL);
 			break;
 		case SEL_LOCK:
 			spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
@@ -3569,6 +3597,16 @@ int main(int argc, char *argv[])
 	if (getuid() == 0 || getenv("NNN_SHOW_HIDDEN"))
 		cfg.showhidden = 1;
 
+	editor = xgetenv("VISUAL", xgetenv("EDITOR", "vi"));
+	if (getprogarg(editor, &editor_arg) < 0) {
+		fprintf(stderr, "Too many editor args\n");
+		exit(1);
+	}
+
+	/* Edit text in EDITOR, if opted */
+	if (getenv("NNN_USE_EDITOR"))
+		cfg.useeditor = 1;
+
 #ifdef LINUX_INOTIFY
 	/* Initialize inotify */
 	inotify_fd = inotify_init1(IN_NONBLOCK);
@@ -3583,19 +3621,6 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 #endif
-
-	/* Edit text in EDITOR, if opted */
-	if (getenv("NNN_USE_EDITOR")) {
-		editor = xgetenv("VISUAL", xgetenv("EDITOR", "vi"));
-		/* copier used as a temp var */
-		copier = editor;
-		while (*copier && *copier != ' ')
-			++copier;
-		if (*copier == ' ') {
-			*copier = '\0';
-			editor_arg = ++copier;
-		}
-	}
 
 	/* Get locker wait time, if set; copier used as tmp var */
 	copier = getenv("NNN_IDLE_TIMEOUT");
