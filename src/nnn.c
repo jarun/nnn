@@ -394,7 +394,7 @@ static const char messages[][16] = {
 
 /* Forward declarations */
 static void redraw(char *path);
-static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int pager);
+static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, bool page);
 int (*nftw_fn) (const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 
 /* Functions */
@@ -762,7 +762,7 @@ static bool showcplist()
 	close(fd);
 	exitcurses();
 	if (pos && pos == copybufpos)
-		get_output(NULL, 0, "cat", g_tmpfpath, NULL, 1);
+		get_output(NULL, 0, "cat", g_tmpfpath, NULL, TRUE);
 	unlink(g_tmpfpath);
 	refresh();
 	return TRUE;
@@ -1771,9 +1771,9 @@ static char *get_lsperms(mode_t mode, char *desc)
  * Gets only a single line (that's what we need
  * for now) or shows full command output in pager.
  *
- * If pager is valid, returns NULL
+ * If page is valid, returns NULL
  */
-static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, int pager)
+static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, bool page)
 {
 	pid_t pid;
 	int pipefd[2];
@@ -1810,7 +1810,7 @@ static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *a
 	waitpid(pid, &tmp, 0);
 	close(pipefd[1]);
 
-	if (!pager) {
+	if (!page) {
 		pf = fdopen(pipefd[0], "r");
 		if (pf) {
 			ret = fgets(buf, bytes, pf);
@@ -1826,7 +1826,7 @@ static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *a
 		/* Show in pager in child */
 		dup2(pipefd[0], STDIN_FILENO);
 		close(pipefd[0]);
-		execlp("less", "less", NULL);
+		execlp(pager, pager, NULL);
 		_exit(1);
 	}
 
@@ -1942,7 +1942,7 @@ static int show_stats(char *fpath, char *fname, struct stat *sb)
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
-		p = get_output(g_buf, MAX_CMD_LEN, "file", "-b", fpath, 0);
+		p = get_output(g_buf, MAX_CMD_LEN, "file", "-b", fpath, FALSE);
 		if (p) {
 			dprintf(fd, "\n\n ");
 			while (*p) {
@@ -1964,7 +1964,7 @@ static int show_stats(char *fpath, char *fname, struct stat *sb)
 	close(fd);
 
 	exitcurses();
-	get_output(NULL, 0, "cat", g_tmpfpath, NULL, 1);
+	get_output(NULL, 0, "cat", g_tmpfpath, NULL, TRUE);
 	unlink(g_tmpfpath);
 	refresh();
 	return 0;
@@ -1985,25 +1985,25 @@ static size_t get_fs_info(const char *path, bool type)
 
 static int show_mediainfo(char *fpath, char *arg)
 {
-	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[cfg.metaviewer], NULL, 0))
+	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[cfg.metaviewer], NULL, FALSE))
 		return -1;
 
 	exitcurses();
-	get_output(NULL, 0, utils[cfg.metaviewer], fpath, arg, 1);
+	get_output(NULL, 0, utils[cfg.metaviewer], fpath, arg, TRUE);
 	refresh();
 	return 0;
 }
 
 static int handle_archive(char *fpath, char *arg, char *dir)
 {
-	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[ATOOL], NULL, 0))
+	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[ATOOL], NULL, FALSE))
 		return -1;
 
 	if (arg[1] == 'x')
 		spawn(utils[ATOOL], arg, fpath, dir, F_NORMAL);
 	else {
 		exitcurses();
-		get_output(NULL, 0, utils[ATOOL], arg, fpath, 1);
+		get_output(NULL, 0, utils[ATOOL], arg, fpath, TRUE);
 		refresh();
 	}
 
@@ -2130,7 +2130,7 @@ static int show_help(char *path)
 	close(fd);
 
 	exitcurses();
-	get_output(NULL, 0, "cat", g_tmpfpath, NULL, 1);
+	get_output(NULL, 0, "cat", g_tmpfpath, NULL, TRUE);
 	unlink(g_tmpfpath);
 	refresh();
 	return 0;
@@ -2700,7 +2700,7 @@ nochange:
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
 				if (cfg.useeditor)
 					if (getmime(dents[cur].name) ||
-					    (get_output(g_buf, MAX_CMD_LEN, "file", FILE_OPTS, newpath, 0) &&
+					    (get_output(g_buf, MAX_CMD_LEN, "file", FILE_OPTS, newpath, FALSE) &&
 					     strstr(g_buf, "text/") == g_buf)) {
 						spawn(editor, newpath, editor_arg, path, F_NORMAL);
 						continue;
@@ -3248,7 +3248,7 @@ nochange:
 
 			if (sel == SEL_ARCHIVE) {
 				/* newpath is used as temporary buffer */
-				if (!get_output(newpath, PATH_MAX, "which", utils[APACK], NULL, 0)) {
+				if (!get_output(newpath, PATH_MAX, "which", utils[APACK], NULL, FALSE)) {
 					printmsg("apack missing");
 					continue;
 				}
@@ -3345,7 +3345,7 @@ nochange:
 			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
 		case SEL_RENAMEALL:
-			if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[VIDIR], NULL, 0)) {
+			if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[VIDIR], NULL, FALSE)) {
 				printmsg("vidir missing");
 				goto nochange;
 			}
