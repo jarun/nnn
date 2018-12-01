@@ -3109,7 +3109,7 @@ nochange:
 			if (copybufpos)
 				showcplist();
 			else
-				printmsg("selection off");
+				printmsg("none selected");
 			goto nochange;
 		case SEL_CP:
 		case SEL_MV:
