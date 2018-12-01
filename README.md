@@ -178,6 +178,8 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
 `PREFIX` is supported, in case you want to install to a different location.
 
+Instructions for [Cygwin](https://github.com/jarun/nnn/wiki/Cygwin-instructions).
+
 #### Shell completion
 
 Search keyword and option completion scripts for Bash, Fish and Zsh can be found in respective subdirectories of [`scripts/auto-completion/`](scripts/auto-completion). Please refer to your shell's manual for installation instructions.
