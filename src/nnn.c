@@ -2538,7 +2538,7 @@ static void browse(char *ipath)
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
 	int r, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
-	enum action sel = SEL_RUNARG + 1;
+	enum action sel;
 	bool dir_changed = FALSE;
 
 	/* setup first context */
