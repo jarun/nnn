@@ -155,6 +155,7 @@ static struct key bindings[] = {
 	{ CONTROL('_'),   SEL_LEADER,    "",     "" },
 	{ '`',            SEL_LEADER,    "",     "" },
 	/* Cycle contexts in forward direction */
+	{ '\t',           SEL_CYCLE,     "",     "" },
 	{ CONTROL('T'),   SEL_CYCLE,     "",     "" },
 	/* Mark a path to visit later */
 	{ 'b',            SEL_PIN,       "",     "" },

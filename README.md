@@ -225,8 +225,8 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
     →, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden
               /  Filter          Ins, ^I  Toggle nav-as-you-type
               b  Pin current dir      ^W  Go to pinned dir
-              d  Toggle detail view   ^T  Next active context
-          `, ^/  Leader key      LeaderN  Go to context N
+        Tab, ^T  Next active context   d  Toggle detail view
+          `, ^/  Leader key      LeaderN  Go to/create context N
             Esc  Exit prompt          ^L  Redraw, clear prompt
              ^G  Quit and cd           q  Quit context
           Q, ^Q  Quit                  ?  Help, config
@@ -241,8 +241,8 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
              ^F  Extract archive    m, M  Brief/full media info
               e  Edit in EDITOR        p  Open in PAGER
  ORDER
-             ^J  Toggle du mode        S  Toggle apparent size
-              s  Toggle sort by size   t  Toggle sort by mtime
+             ^J  Disk usage            S  Apparent du
+              s  Size                  t  Modification time
  MISC
               o  Launch GUI app    !, ^]  Spawn SHELL in dir
               R  Run custom script     L  Lock terminal
