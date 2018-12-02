@@ -2832,8 +2832,16 @@ nochange:
 			case '3': // fallthrough
 			case '4':
 				r = fd - '1'; /* Save the next context id */
-				if (cfg.curctx == r)
-					continue;
+				if (cfg.curctx == r) {
+					if (sel == SEL_CYCLE) {
+						(r == MAX_CTX - 1) ? (r = 0) : ++r;
+						snprintf(newpath, PATH_MAX, "Create context %d?  ('Enter' confirms)", r + 1);
+						fd = get_input(newpath);
+						if (fd != '\r')
+							continue;
+					} else
+						continue;
+				}
 
 #ifdef DIR_LIMITED_COPY
 				g_crc = 0;
@@ -3433,7 +3441,7 @@ nochange:
 					break;
 				}
 
-			if (!(r == MAX_CTX || r == 13))
+			if (!(r == MAX_CTX || r == '\r'))
 				break;
 
 			if (sel == SEL_QUITCD) {
