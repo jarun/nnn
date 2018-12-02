@@ -21,7 +21,7 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (click to play video)</i></a></p>
 
-`nnn` is probably the [fastest and most resource-sensitive](#memory-usage) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
+`nnn` is probably the [fastest and most resource-sensitive](#comparison) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
 
 [Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, or use it as a [(neo)vim plugin](https://github.com/jarun/nnn#neovim-plugin); `nnn` supports as many scripts as you need!
 
@@ -38,7 +38,7 @@ It runs on Linux, macOS, Raspberry Pi, Cygwin, Linux subsystem for Windows and T
 #### TABLE OF CONTENTS
 
 - [Features](#features)
-- [Memory usage](#memory-usage)
+- [Comparison](#comparison)
 - [Installation](#installation)
   - [Dependencies](#dependencies)
   - [From a package manager](#from-a-package-manager)
@@ -117,23 +117,17 @@ It runs on Linux, macOS, Raspberry Pi, Cygwin, Linux subsystem for Windows and T
 - Highly optimized, static analysis integrated code
 - Available on many distros
 
-#### MEMORY USAGE
+#### COMPARISON
 
-`nnn` vs. ncdu memory usage in disk usage analyzer mode (400K files on disk):
-
-<pre>
-  PID USER      PR  NI    VIRT    <b>RES</b>    SHR S  %CPU %MEM     TIME+ COMMAND
- 5034 vaio      20   0   71628  <b>59932</b>   2412 S   0.0  0.7   0:01.22 ncdu /
- 4949 vaio      20   0   14812   <b>3616</b>   2560 S   0.0  0.0   0:00.83 nnn -S /
-</pre>
-
-`nnn` vs. midnight commander vs. ranger memory usage while viewing a directory with 13.5K files, sorted by size:
+Stripped binary (or script) size and memory usage of `nnn` and some other similar utilities while viewing a directory with 13.5K files (0 directories), sorted by size/du:
 
 <pre>
-  PID USER      PR  NI    VIRT    <b>RES</b>    SHR S  %CPU %MEM     TIME+ COMMAND
-31885 vaio      20   0  139720  <b>91220</b>   8460 S   0.0  1.1   0:02.96 /usr/bin/python -O /usr/bin/ranger
-30108 vaio      20   0   72152  <b>12468</b>   7336 S   0.0  0.2   0:00.06 mc
-30168 vaio      20   0   16476   <b>5072</b>   2640 S   0.0  0.1   0:00.22 nnn -c 1 -i
+<b>BINSZ</b>    VIRT  <b>  RES</b>    SHR S  %MEM   COMMAND
+<b> 650K</b>  139720  <b>91220</b>   8460 S   1.1   ranger
+<b>   1M</b>   50496  <b>15328</b>   4076 S   0.2   vifm
+<b>   1M</b>   72152  <b>12468</b>   7336 S   0.2   mc
+<b>  70K</b>   16068  <b> 4620</b>   2408 S   0.1   ncdu
+<b>  60K</b>   15748  <b> 4396</b>   2516 S   0.1   nnn -S
 </pre>
 
 Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors).
