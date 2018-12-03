@@ -2049,7 +2049,7 @@ static int show_help(char *path)
    "4→, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden\n"
              "e/  Filter          Ins, ^I  Toggle nav-as-you-type\n"
              "eb  Pin current dir      ^W  Go to pinned dir\n"
-       "8Tab, ^T  Next active context   d  Toggle detail view\n"
+       "8Tab, ^T  Next context          d  Toggle detail view\n"
          "a`, ^/  Leader key      LeaderN  Go to/create context N\n"
            "cEsc  Exit prompt          ^L  Redraw, clear prompt\n"
             "d^G  Quit and cd           q  Quit context\n"

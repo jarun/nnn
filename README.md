@@ -219,7 +219,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
     →, ↵, l, ^M  Open file/enter dir   .  Toggle show hidden
               /  Filter          Ins, ^I  Toggle nav-as-you-type
               b  Pin current dir      ^W  Go to pinned dir
-        Tab, ^T  Next active context   d  Toggle detail view
+        Tab, ^T  Next context          d  Toggle detail view
           `, ^/  Leader key      LeaderN  Go to/create context N
             Esc  Exit prompt          ^L  Redraw, clear prompt
              ^G  Quit and cd           q  Quit context
@@ -250,7 +250,7 @@ The Leader key (<kbd>`</kbd> or <kbd>^/</kbd>) provides a powerful multi-functio
 
 | Key | Function |
 |:---:| --- |
-| <kbd>1-4</kbd> | Go to selected context |
+| <kbd>1-4</kbd> | Go to/create selected context |
 | <kbd>></kbd>, <kbd>.</kbd> | Go to next active context |
 | <kbd><</kbd>, <kbd>,</kbd> | Go to previous active context |
 | key | Go to bookmarked location |
