@@ -180,7 +180,7 @@ disabledbg()
 #define SYMLINK_TO_DIR 0x1
 #define MAX_HOME_LEN 64
 #define MAX_CTX 4
-#define DOT_FILTER_LEN 8
+#define DOT_FILTER_LEN 7
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE     0x00  /* no flag set */
@@ -258,9 +258,8 @@ typedef struct {
 	uint showcolor  : 1;  /* Set to show dirs in blue */
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
-	uint color      : 3;  /* Color code for directories */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 10;
+	uint reserved   : 13;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint picker     : 1;  /* Write selection to user-specified file */
@@ -277,12 +276,13 @@ typedef struct {
 	char c_name[NAME_MAX + 1]; /* Current file name */
 	settings c_cfg; /* Current configuration */
 	char c_fltr[DOT_FILTER_LEN]; /* Hidden filter */
+	char color; /* Color code for directories */
 } context;
 
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 4, 1, 0, 0, 0, 0, 0, 0};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0};
 static context g_ctx[MAX_CTX] __attribute__ ((aligned));
 
 static struct entry *dents;
@@ -798,8 +798,12 @@ static void initcurses(void)
 	curs_set(FALSE); /* Hide cursor */
 	start_color();
 	use_default_colors();
-	if (cfg.showcolor)
-		init_pair(1, cfg.color, -1);
+	if (cfg.showcolor) {
+		init_pair(1, g_ctx[0].color, -1);
+		init_pair(2, g_ctx[1].color, -1);
+		init_pair(3, g_ctx[2].color, -1);
+		init_pair(4, g_ctx[3].color, -1);
+	}
 	settimeout(); /* One second */
 }
 
@@ -1518,7 +1522,7 @@ static char *get_bm_loc(int key, char *buf)
 static void resetdircolor(mode_t mode)
 {
 	if (cfg.dircolor && !S_ISDIR(mode)) {
-		attroff(COLOR_PAIR(1) | A_BOLD);
+		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		cfg.dircolor = 0;
 	}
 }
@@ -2103,6 +2107,8 @@ static int show_help(char *path)
 
 	if (cfg.useeditor)
 		dprintf(fd, "NNN_USE_EDITOR: 1\n");
+	if (getenv("NNN_CONTEXT_COLORS"))
+		dprintf(fd, "NNN_CONTEXT_COLORS: %s\n", getenv("NNN_CONTEXT_COLORS"));
 	if (idletimeout)
 		dprintf(fd, "NNN_IDLE_TIMEOUT: %d secs\n", idletimeout);
 	if (copier)
@@ -2478,7 +2484,7 @@ static void redraw(char *path)
 		ncols -= 5;
 
 	if (cfg.showcolor) {
-		attron(COLOR_PAIR(1) | A_BOLD);
+		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		cfg.dircolor = 1;
 	}
 
@@ -2500,7 +2506,7 @@ static void redraw(char *path)
 
 	/* Must reset e.g. no files in dir */
 	if (cfg.dircolor) {
-		attroff(COLOR_PAIR(1) | A_BOLD);
+		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		cfg.dircolor = 0;
 	}
 
@@ -3511,14 +3517,14 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"usage: nnn [-b key] [-c N] [-e] [-i] [-l]\n"
+		"usage: nnn [-b key] [-C] [-e] [-i] [-l]\n"
 		"           [-p file] [-S] [-v] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
 		"optional args:\n"
 		" -b key  bookmark key to open\n"
-		" -c N    dir color, disables if N>7\n"
+		" -C      disable directory color\n"
 		" -e      use exiftool instead of mediainfo\n"
 		" -i      start in navigate-as-you-type mode\n"
 		" -l      start in light mode\n"
@@ -3541,7 +3547,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	while ((opt = getopt(argc, argv, "Slib:c:ep:vh")) != -1) {
+	while ((opt = getopt(argc, argv, "Slib:Cep:vh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -3558,11 +3564,8 @@ int main(int argc, char *argv[])
 		case 'b':
 			ipath = optarg;
 			break;
-		case 'c':
-			if (atoi(optarg) > 7)
-				cfg.showcolor = 0;
-			else
-				cfg.color = (uchar)atoi(optarg);
+		case 'C':
+			cfg.showcolor = 0;
 			break;
 		case 'e':
 			cfg.metaviewer = EXIFTOOL;
@@ -3590,6 +3593,31 @@ int main(int argc, char *argv[])
 			usage();
 			exit(1);
 		}
+	}
+
+	/* Get the context colors; copier used as tmp var */
+	if (cfg.showcolor) {
+		copier = getenv("NNN_CONTEXT_COLORS");
+		if (copier) {
+			opt = 0;
+			while (*copier && opt < MAX_CTX) {
+				if (*copier < '0' || *copier > '7') {
+					fprintf(stderr, "invalid color code\n");
+					exit(1);
+				} else
+					g_ctx[opt].color = *copier - '0';
+
+				++copier;
+				++opt;
+			}
+
+			while (opt != MAX_CTX) {
+				g_ctx[opt].color = 4;
+				++opt;
+			}
+		} else
+			for (opt = 0; opt < MAX_CTX; ++opt)
+				g_ctx[opt].color = 4; /* Default color is blue */
 	}
 
 	/* Parse bookmarks string */

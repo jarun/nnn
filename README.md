@@ -50,6 +50,7 @@ It runs on Linux, macOS, Raspberry Pi, Cygwin, Linux subsystem for Windows and T
   - [Keyboard shortcuts](#keyboard-shortcuts)
   - [Leader key](#leader-key)
   - [Contexts](#contexts)
+  - [Directory color](#directory-color)
   - [Filters](#filters)
   - [Navigate-as-you-type mode](#navigate-as-you-type-mode)
   - [File indicators](#file-indicators)
@@ -183,7 +184,7 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
 #### Cmdline options
 
 ```
-usage: nnn [-b key] [-c N] [-e] [-i] [-l]
+usage: nnn [-b key] [-C] [-e] [-i] [-l]
            [-p file] [-S] [-v] [-h] [PATH]
 
 The missing terminal file manager for X.
@@ -193,7 +194,7 @@ positional args:
 
 optional args:
  -b key  bookmark key to open
- -c N    dir color, disables if N>7
+ -C      disable directory color
  -e      use exiftool instead of mediainfo
  -i      start in navigate-as-you-type mode
  -l      start in light mode
@@ -272,6 +273,13 @@ To switch to a context press the Leader key followed by the context number (1-4)
 The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
 
 When a context is quit, the next active context is selected. If the last active context is quit, the program quits.
+
+#### Directory color
+
+Each context can have its own color for directories specified:
+
+    export NNN_CONTEXT_COLORS="1234"
+colors: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
 
 #### Filters
 

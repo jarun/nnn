@@ -7,7 +7,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Ar -b key
-.Op Ar -c N
+.Op Ar -C
 .Op Ar -e
 .Op Ar -i
 .Op Ar -l
@@ -166,9 +166,8 @@ supports the following options:
 .Fl "b key"
         specify bookmark key to open
 .Pp
-.Fl "c N"
-        specify dir color (default blue), disables if N>7
-        0-black, 1-red, 2-green, 3-yellow, 4-blue, 5-magenta, 6-cyan, 7-white
+.Fl C
+        disable directory color
 .Pp
 .Fl e
         use exiftool instead of mediainfo
@@ -280,6 +279,13 @@ when dealing with the !, e and p commands respectively. A single combination to 
 files.
 .Bd -literal
     export NNN_USE_EDITOR=1
+.Ed
+.Pp
+\fBNNN_CONTEXT_COLORS:\fR string of color codes for each context, e.g.:
+.Bd -literal
+    export NNN_CONTEXT_COLORS="1234"
+
+    codes: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
 .Ed
 .Pp
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal locker.
