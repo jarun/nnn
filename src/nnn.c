@@ -2404,7 +2404,7 @@ static void redraw(char *path)
 {
 	static char buf[NAME_MAX + 65] __attribute__ ((aligned));
 	static size_t ncols;
-	static int nlines, i;
+	static int nlines, i, attrs;
 	static bool mode_changed;
 
 	mode_changed = FALSE;
@@ -2450,14 +2450,22 @@ static void redraw(char *path)
 	for (i = 0; i < MAX_CTX; ++i) {
 		/* Print current context in reverse */
 		if (cfg.curctx == i) {
-			attron(A_REVERSE);
+			if (cfg.showcolor)
+				attrs = COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE;
+			else
+				attrs = A_REVERSE;
+			attron(attrs);
 			printw("%d", i + 1);
-			attroff(A_REVERSE);
+			attroff(attrs);
 			printw(" ");
 		} else if (g_ctx[i].c_cfg.ctxactive) {
-			attron(A_UNDERLINE);
+			if (cfg.showcolor)
+				attrs = COLOR_PAIR(i + 1) | A_BOLD | A_UNDERLINE;
+			else
+				attrs = A_UNDERLINE;
+			attron(attrs);
 			printw("%d", i + 1);
-			attroff(A_UNDERLINE);
+			attroff(attrs);
 			printw(" ");
 		} else
 			printw("%d ", i + 1);
