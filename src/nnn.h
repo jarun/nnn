@@ -145,7 +145,6 @@ static struct key bindings[] = {
 	{ '`',            SEL_LEADER },
 	/* Cycle contexts in forward direction */
 	{ '\t',           SEL_CYCLE },
-	{ CONTROL('T'),   SEL_CYCLE },
 	/* Mark a path to visit later */
 	{ 'b',            SEL_PIN },
 	/* Visit marked directory */
@@ -154,7 +153,7 @@ static struct key bindings[] = {
 	{ '/',            SEL_FLTR },
 	/* Toggle filter mode */
 	{ KEY_IC,         SEL_MFLTR },
-	{ CONTROL('I'),   SEL_MFLTR },
+	{ CONTROL('T'),   SEL_MFLTR },
 	/* Toggle hide .dot files */
 	{ '.',            SEL_TOGGLEDOT },
 	/* Detailed listing */
