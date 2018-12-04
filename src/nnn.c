@@ -275,8 +275,7 @@ typedef struct {
 	char c_last[PATH_MAX]; /* Last visited dir */
 	char c_name[NAME_MAX + 1]; /* Current file name */
 	settings c_cfg; /* Current configuration */
-	char c_fltr[DOT_FILTER_LEN]; /* Hidden filter */
-	char color; /* Color code for directories */
+	uint color; /* Color code for directories */
 } context;
 
 /* GLOBALS */
@@ -1002,11 +1001,6 @@ static int setfilter(regex_t *regex, char *filter)
 	}
 
 	return r;
-}
-
-static void initfilter(int dot, char *hfltr)
-{
-	dot ? (hfltr[0] = '.', hfltr[1] = '\0') : xstrlcpy(hfltr, "^[^.]", DOT_FILTER_LEN);
 }
 
 static int visible(regex_t *regex, char *file)
@@ -2155,8 +2149,7 @@ static void dentfree(struct entry *dents)
 	free(dents);
 }
 
-static int dentfill(char *path, struct entry **dents,
-	 int (*filter)(regex_t *, char *), regex_t *re)
+static int dentfill(char *path, struct entry **dents)
 {
 	static DIR *dirp;
 	static struct dirent *dp;
@@ -2190,12 +2183,13 @@ static int dentfill(char *path, struct entry **dents,
 	while ((dp = readdir(dirp)) != NULL) {
 		namep = dp->d_name;
 
-		if (filter(re, namep) == 0) {
-			if (!cfg.blkorder)
-				continue;
+		/* Skip self and parent */
+		if ((namep[0] == '.' && (namep[1] == '\0' ||
+		    (namep[1] == '.' && namep[2] == '\0'))))
+			continue;
 
-			/* Skip self and parent */
-			if ((namep[0] == '.' && (namep[1] == '\0' || (namep[1] == '.' && namep[2] == '\0'))))
+		if (!cfg.showhidden && namep[0] == '.') {
+			if (!cfg.blkorder)
 				continue;
 
 			if (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW) == -1)
@@ -2219,11 +2213,6 @@ static int dentfill(char *path, struct entry **dents,
 
 			continue;
 		}
-
-		/* Skip self and parent */
-		if ((namep[0] == '.' && (namep[1] == '\0' ||
-		    (namep[1] == '.' && namep[2] == '\0'))))
-			continue;
 
 		if (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW) == -1) {
 			DPRINTF_S(namep);
@@ -2336,18 +2325,12 @@ static int dentfind(struct entry *dents, const char *fname, int n)
 	return 0;
 }
 
-static int populate(char *path, char *lastname, char *fltr)
+static int populate(char *path, char *lastname)
 {
-	static regex_t re;
-
 	/* Can fail when permissions change while browsing.
 	 * It's assumed that path IS a directory when we are here.
 	 */
 	if (access(path, R_OK) == -1)
-		return -1;
-
-	/* Search filter */
-	if (setfilter(&re, fltr) != 0)
 		return -1;
 
 	if (cfg.blkorder) {
@@ -2361,8 +2344,7 @@ static int populate(char *path, char *lastname, char *fltr)
 	clock_gettime(CLOCK_REALTIME, &ts1); /* Use CLOCK_MONOTONIC on FreeBSD */
 #endif
 
-	ndents = dentfill(path, &dents, visible, &re);
-	regfree(&re);
+	ndents = dentfill(path, &dents);
 	if (!ndents)
 		return 0;
 
@@ -2539,7 +2521,7 @@ static void browse(char *ipath)
 {
 	static char newpath[PATH_MAX] __attribute__ ((aligned));
 	static char mark[PATH_MAX] __attribute__ ((aligned));
-	char *path, *lastdir, *lastname, *hfltr;
+	char *path, *lastdir, *lastname;
 	char *dir, *tmp, *run = NULL, *env = NULL;
 	struct stat sb;
 	int r, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
@@ -2554,8 +2536,6 @@ static void browse(char *ipath)
 	lastdir = g_ctx[0].c_last; /* last visited directory */
 	lastname = g_ctx[0].c_name; /* last visited filename */
 	g_ctx[0].c_cfg = cfg; /* current configuration */
-	initfilter(cfg.showhidden, g_ctx[0].c_fltr); /* Show hidden filter */
-	hfltr = g_ctx[0].c_fltr;
 
 	if (cfg.filtermode)
 		presel = FILTER;
@@ -2590,7 +2570,7 @@ begin:
 	}
 #endif
 
-	if (populate(path, lastname, hfltr) == -1) {
+	if (populate(path, lastname) == -1) {
 		printwarn();
 		goto nochange;
 	}
@@ -2851,7 +2831,6 @@ nochange:
 					g_ctx[r].c_last[0] = '\0';
 					xstrlcpy(g_ctx[r].c_name, dents[cur].name, NAME_MAX + 1);
 					g_ctx[r].c_cfg = cfg;
-					xstrlcpy(g_ctx[r].c_fltr, hfltr, DOT_FILTER_LEN);
 				}
 
 				/* Reset the pointers */
@@ -2859,7 +2838,6 @@ nochange:
 				ipath = g_ctx[r].c_init;
 				lastdir = g_ctx[r].c_last;
 				lastname = g_ctx[r].c_name;
-				hfltr = g_ctx[r].c_fltr;
 
 				cfg.curctx = r;
 				setdirwatch();
@@ -2914,7 +2892,6 @@ nochange:
 			goto begin;
 		case SEL_TOGGLEDOT:
 			cfg.showhidden ^= 1;
-			initfilter(cfg.showhidden, hfltr);
 			/* Save current */
 			if (ndents)
 				copycurname();
@@ -3480,7 +3457,6 @@ nochange:
 						lastdir = g_ctx[r].c_last;
 						lastname = g_ctx[r].c_name;
 						cfg = g_ctx[r].c_cfg;
-						hfltr = g_ctx[r].c_fltr;
 
 						cfg.curctx = r;
 						setdirwatch();
