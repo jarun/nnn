@@ -9,7 +9,7 @@
 setopt localoptions noshwordsplit noksharrays
 local -a args
 args=(
-    '(-c)-c[specify dir color, disables if N>7]:color code'
+    '(-C)-C[disable directory color]'
     '(-e)-e[use exiftool instead of mediainfo]'
     '(-h)-h[show this help and exit]'
     '(-i)-i[start in navigate-as-you-type mode]'

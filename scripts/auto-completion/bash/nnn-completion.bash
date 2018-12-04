@@ -11,7 +11,7 @@ _nnn () {
     local cur=$2 prev=$3
     local -a opts opts_with_args
     opts=(
-        -c
+        -C
         -e
         -h
         -i
@@ -20,7 +20,6 @@ _nnn () {
         -v
     )
     opts_with_arg=(
-        -c
     )
 
     # Do not complete non option names

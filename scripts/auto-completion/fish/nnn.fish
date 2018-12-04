@@ -5,7 +5,7 @@
 #   Arun Prakash Jana <engineerarun@gmail.com>
 #
 
-complete -c nnn -s c -r -d 'specify dir color, disables if N>7'
+complete -c nnn -s C    -d 'disable directory color'
 complete -c nnn -s e    -d 'use exiftool instead of mediainfo'
 complete -c nnn -s h    -d 'show this help and exit'
 complete -c nnn -s i    -d 'start in navigate-as-you-type mode'
