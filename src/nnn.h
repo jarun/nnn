@@ -96,16 +96,6 @@ struct key {
 	enum action act; /* Action */
 };
 
-/* Extension pattern and mime combination */
-struct assoc {
-	char *regex; /* Regex to match on filename */
-	char *mime;  /* File type */
-};
-
-static struct assoc assocs[] = {
-	{ "\\.(c|cpp|h|log|md|py|rb|sh|txt)$", "text" },
-};
-
 static struct key bindings[] = {
 	/* Back */
 	{ KEY_BACKSPACE,  SEL_BACK },
