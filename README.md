@@ -21,13 +21,15 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (click to play video)</i></a></p>
 
+- [x] [Next release highlights](https://github.com/jarun/nnn/issues/137)
+
 `nnn` is probably the [fastest and most resource-sensitive](#comparison) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
 
 [Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, or use it as a [(neo)vim plugin](https://github.com/jarun/nnn#neovim-plugin); `nnn` supports as many scripts as you need!
 
 It runs on Linux, macOS, Raspberry Pi, Cygwin, Linux subsystem for Windows and Termux.
 
-[Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions... Missing a feature? Want to contribute? Head to the rolling [ToDo list](https://github.com/jarun/nnn/issues/137).
+[Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions.
 
 *Love smart and efficient utilities? Explore [my repositories](https://github.com/jarun?tab=repositories). Buy me a cup of coffee if they help you.*
 
@@ -76,6 +78,7 @@ It runs on Linux, macOS, Raspberry Pi, Cygwin, Linux subsystem for Windows and T
   - [Disable file open on navigation](#disable-file-open-on-navigation)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
+- [Contributions](#contributions)
 - [Developers](#developers)
 
 #### FEATURES
@@ -527,7 +530,12 @@ To open files with this setting, press <kbd>Enter</kbd>.
 - [Hacker News](https://news.ycombinator.com/item?id=18520898)
 - [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
 - [LinuxLinks](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)
+- [Suckless Rocks listing](suckless.org/rocks/)
 - [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
+
+#### CONTRIBUTIONS
+
+Missing a feature? Want to contribute? Head to the rolling [ToDo list](https://github.com/jarun/nnn/issues/137).
 
 #### DEVELOPERS
 
