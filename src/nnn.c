@@ -3630,7 +3630,7 @@ int main(int argc, char *argv[])
 
 	/* Parse bookmarks string */
 	 if (parsebmstr() < 0) {
-		fprintf(stderr, "ERROR parsing NNN_BMS: set single-char bookmark keys only\n");
+		fprintf(stderr, "NNN_BMS: single-char keys only\n");
 		exit(1);
 	 }
 
