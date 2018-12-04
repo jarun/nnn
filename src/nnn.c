@@ -30,7 +30,7 @@
 
 #ifdef __linux__
 #if defined(__arm__) || defined(__i386__)
-#define _FILE_OFFSET_BITS 64 /* Support large files on 32-bit Linux */
+#define _FILE_OFFSET_BITS 64 /* Support large files on 32-bit */
 #endif
 #include <sys/inotify.h>
 #define LINUX_INOTIFY
