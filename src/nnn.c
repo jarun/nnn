@@ -1127,8 +1127,6 @@ static int nextsel(char **run, char **env, int *presel)
 
 	for (i = 0; i < len; ++i)
 		if (c == bindings[i].sym) {
-			*run = bindings[i].run;
-			*env = bindings[i].env;
 			return bindings[i].act;
 		}
 
@@ -2974,10 +2972,14 @@ nochange:
 
 			mkpath(path, dents[cur].name, newpath, PATH_MAX);
 
-			if (sel == SEL_MEDIA || sel == SEL_FMEDIA)
-				r = show_mediainfo(newpath, run);
+			if (sel == SEL_MEDIA)
+				r = show_mediainfo(newpath, NULL);
+			else if (sel == SEL_FMEDIA)
+				r = show_mediainfo(newpath, "-f");
+			else if (sel == SEL_LIST)
+				r = handle_archive(newpath, "-l", path);
 			else
-				r = handle_archive(newpath, run, path);
+				r = handle_archive(newpath, "-x", path);
 
 			if (r == -1) {
 				xstrlcpy(newpath, "missing ", PATH_MAX);

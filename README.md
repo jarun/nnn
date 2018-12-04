@@ -131,7 +131,7 @@ Stripped binary (or script) size and memory usage of `nnn` and some other simila
 <b>   1M</b>   50496  <b>15328</b>   4076 S   0.2   vifm
 <b>   1M</b>   72152  <b>12468</b>   7336 S   0.2   mc
 <b>  70K</b>   16068  <b> 4620</b>   2408 S   0.1   ncdu
-<b>  60K</b>   15748  <b> 4396</b>   2516 S   0.1   nnn -S
+<b>  55K</b>   15748  <b> 4396</b>   2516 S   0.1   nnn -S
 </pre>
 
 Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors).

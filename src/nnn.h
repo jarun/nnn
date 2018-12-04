@@ -94,8 +94,6 @@ enum action {
 struct key {
 	int sym;         /* Key pressed */
 	enum action act; /* Action */
-	char *run;       /* Program to run or program option */
-	char *env;       /* Environment variable to run */
 };
 
 /* Extension pattern and mime combination */
@@ -110,133 +108,134 @@ static struct assoc assocs[] = {
 
 static struct key bindings[] = {
 	/* Back */
-	{ KEY_BACKSPACE,  SEL_BACK,      "",     "" },
-	{ '\b' /* BS */,  SEL_BACK,      "",     "" },
-	{ 127 /* DEL */,  SEL_BACK,      "",     "" },
-	{ KEY_LEFT,       SEL_BACK,      "",     "" },
-	{ 'h',            SEL_BACK,      "",     "" },
-	{ CONTROL('H'),   SEL_BACK,      "",     "" },
-	/* Inside */
-	{ KEY_ENTER,      SEL_GOIN,      "",     "" },
-	{ '\r',           SEL_GOIN,      "",     "" },
-	{ KEY_RIGHT,      SEL_NAV_IN,    "",     "" },
-	{ 'l',            SEL_NAV_IN,    "",     "" },
+	{ KEY_BACKSPACE,  SEL_BACK },
+	{ '\b' /* BS */,  SEL_BACK },
+	{ 127 /* DEL */,  SEL_BACK },
+	{ KEY_LEFT,       SEL_BACK },
+	{ 'h',            SEL_BACK },
+	{ CONTROL('H'),   SEL_BACK },
+	/* Inside or select */
+	{ KEY_ENTER,      SEL_GOIN },
+	{ '\r',           SEL_GOIN },
+	/* Pure navigate inside */
+	{ KEY_RIGHT,      SEL_NAV_IN },
+	{ 'l',            SEL_NAV_IN },
 	/* Next */
-	{ 'j',            SEL_NEXT,      "",     "" },
-	{ KEY_DOWN,       SEL_NEXT,      "",     "" },
-	{ CONTROL('N'),   SEL_NEXT,      "",     "" },
+	{ 'j',            SEL_NEXT },
+	{ KEY_DOWN,       SEL_NEXT },
+	{ CONTROL('N'),   SEL_NEXT },
 	/* Previous */
-	{ 'k',            SEL_PREV,      "",     "" },
-	{ KEY_UP,         SEL_PREV,      "",     "" },
-	{ CONTROL('P'),   SEL_PREV,      "",     "" },
+	{ 'k',            SEL_PREV },
+	{ KEY_UP,         SEL_PREV },
+	{ CONTROL('P'),   SEL_PREV },
 	/* Page down */
-	{ KEY_NPAGE,      SEL_PGDN,      "",     "" },
-	{ CONTROL('D'),   SEL_PGDN,      "",     "" },
+	{ KEY_NPAGE,      SEL_PGDN },
+	{ CONTROL('D'),   SEL_PGDN },
 	/* Page up */
-	{ KEY_PPAGE,      SEL_PGUP,      "",     "" },
-	{ CONTROL('U'),   SEL_PGUP,      "",     "" },
+	{ KEY_PPAGE,      SEL_PGUP },
+	{ CONTROL('U'),   SEL_PGUP },
 	/* First entry */
-	{ KEY_HOME,       SEL_HOME,      "",     "" },
-	{ 'g',            SEL_HOME,      "",     "" },
-	{ CONTROL('A'),   SEL_HOME,      "",     "" },
-	{ '^',            SEL_HOME,      "",     "" },
+	{ KEY_HOME,       SEL_HOME },
+	{ 'g',            SEL_HOME },
+	{ CONTROL('A'),   SEL_HOME },
+	{ '^',            SEL_HOME },
 	/* Last entry */
-	{ KEY_END,        SEL_END,       "",     "" },
-	{ 'G',            SEL_END,       "",     "" },
-	{ CONTROL('E'),   SEL_END,       "",     "" },
-	{ '$',            SEL_END,       "",     "" },
+	{ KEY_END,        SEL_END },
+	{ 'G',            SEL_END },
+	{ CONTROL('E'),   SEL_END },
+	{ '$',            SEL_END },
 	/* HOME */
-	{ '~',            SEL_CDHOME,    "",     "" },
+	{ '~',            SEL_CDHOME },
 	/* Initial directory */
-	{ '&',            SEL_CDBEGIN,   "",     "" },
+	{ '&',            SEL_CDBEGIN },
 	/* Last visited dir */
-	{ '-',            SEL_CDLAST,    "",     "" },
+	{ '-',            SEL_CDLAST },
 	/* Leader key */
-	{ CONTROL('_'),   SEL_LEADER,    "",     "" },
-	{ '`',            SEL_LEADER,    "",     "" },
+	{ CONTROL('_'),   SEL_LEADER },
+	{ '`',            SEL_LEADER },
 	/* Cycle contexts in forward direction */
-	{ '\t',           SEL_CYCLE,     "",     "" },
-	{ CONTROL('T'),   SEL_CYCLE,     "",     "" },
+	{ '\t',           SEL_CYCLE },
+	{ CONTROL('T'),   SEL_CYCLE },
 	/* Mark a path to visit later */
-	{ 'b',            SEL_PIN,       "",     "" },
+	{ 'b',            SEL_PIN },
 	/* Visit marked directory */
-	{ CONTROL('W'),   SEL_VISIT,     "",     "" },
+	{ CONTROL('W'),   SEL_VISIT },
 	/* Filter */
-	{ '/',            SEL_FLTR,      "",     "" },
+	{ '/',            SEL_FLTR },
 	/* Toggle filter mode */
-	{ KEY_IC,         SEL_MFLTR,     "",     "" },
-	{ CONTROL('I'),   SEL_MFLTR,     "",     "" },
+	{ KEY_IC,         SEL_MFLTR },
+	{ CONTROL('I'),   SEL_MFLTR },
 	/* Toggle hide .dot files */
-	{ '.',            SEL_TOGGLEDOT, "",     "" },
+	{ '.',            SEL_TOGGLEDOT },
 	/* Detailed listing */
-	{ 'd',            SEL_DETAIL,    "",     "" },
+	{ 'd',            SEL_DETAIL },
 	/* File details */
-	{ 'D',            SEL_STATS,     "",     "" },
+	{ 'D',            SEL_STATS },
 	/* Show media info short, run is hacked */
-	{ 'm',            SEL_MEDIA,     NULL,   "" },
+	{ 'm',            SEL_MEDIA },
 	/* Show media info full, run is hacked */
-	{ 'M',            SEL_FMEDIA,    "-f",   "" },
+	{ 'M',            SEL_FMEDIA },
 	/* Launch a GUI application */
-	{ 'o',            SEL_LAUNCH,    "",     "" },
+	{ 'o',            SEL_LAUNCH },
 	/* Create archive */
-	{ 'f',            SEL_ARCHIVE,   "",     "" },
+	{ 'f',            SEL_ARCHIVE },
 	/* List archive */
-	{ 'F',            SEL_LIST,      "-l",   "" },
+	{ 'F',            SEL_LIST },
 	/* Extract archive */
-	{ CONTROL('F'),   SEL_EXTRACT,   "-x",   "" },
+	{ CONTROL('F'),   SEL_EXTRACT },
 	/* Toggle sort by size */
-	{ 's',            SEL_FSIZE,     "",     "" },
+	{ 's',            SEL_FSIZE },
 	/* Sort by apparent size including dir contents */
-	{ 'S',            SEL_ASIZE,     "",     "" },
+	{ 'S',            SEL_ASIZE },
 	/* Sort by total block count including dir contents */
-	{ CONTROL('J'),   SEL_BSIZE,     "",     "" },
+	{ CONTROL('J'),   SEL_BSIZE },
 	/* Toggle sort by time */
-	{ 't',            SEL_MTIME,     "",     "" },
+	{ 't',            SEL_MTIME },
 	/* Redraw window */
-	{ CONTROL('L'),   SEL_REDRAW,    "",     "" },
-	{ KEY_F(5),       SEL_REDRAW,    "",     "" }, /* Undocumented */
+	{ CONTROL('L'),   SEL_REDRAW },
+	{ KEY_F(5),       SEL_REDRAW }, /* Undocumented */
 	/* Copy currently selected file path */
-	{ CONTROL('K'),   SEL_COPY,      "",     "" },
-	{ ' ',            SEL_COPY,      "",     "" },
+	{ CONTROL('K'),   SEL_COPY },
+	{ ' ',            SEL_COPY },
 	/* Toggle copy multiple file paths */
-	{ CONTROL('Y'),   SEL_COPYMUL,   "",     "" },
-	{ 'Y',            SEL_COPYMUL,   "",     "" },
+	{ CONTROL('Y'),   SEL_COPYMUL },
+	{ 'Y',            SEL_COPYMUL },
 	/* Show list of copied files */
-	{ 'y',            SEL_COPYLIST,  "",     "" },
+	{ 'y',            SEL_COPYLIST },
 	/* Copy from copy buffer */
-	{ 'P',            SEL_CP,        "",     "" },
+	{ 'P',            SEL_CP },
 	/* Move from copy buffer */
-	{ 'V',            SEL_MV,        "",     "" },
+	{ 'V',            SEL_MV },
 	/* Delete from copy buffer */
-	{ 'X',   SEL_RMMUL,     "",     "" },
+	{ 'X',            SEL_RMMUL },
 	/* Delete currently selected */
-	{ CONTROL('X'),   SEL_RM,        "",     "" },
+	{ CONTROL('X'),   SEL_RM },
 	/* Open in a custom application */
-	{ CONTROL('O'),   SEL_OPEN,      "",     "" },
+	{ CONTROL('O'),   SEL_OPEN },
 	/* Create a new file */
-	{ 'n',            SEL_NEW,       "",     "" },
+	{ 'n',            SEL_NEW },
 	/* Show rename prompt */
-	{ CONTROL('R'),   SEL_RENAME,    "",     "" },
-	{ KEY_F(2),       SEL_RENAME,    "",     "" }, /* Undocumented */
+	{ CONTROL('R'),   SEL_RENAME },
+	{ KEY_F(2),       SEL_RENAME }, /* Undocumented */
 	/* Rename contents of current dir */
-	{ 'r',            SEL_RENAMEALL, "",     "" },
+	{ 'r',            SEL_RENAMEALL },
 	/* Show help */
-	{ '?',            SEL_HELP,      "",     "" },
+	{ '?',            SEL_HELP },
 	/* Run command */
-	{ '!',            SEL_RUN,       "",     "" },
-	{ CONTROL(']'),   SEL_RUN,       "",     "" },
+	{ '!',            SEL_RUN },
+	{ CONTROL(']'),   SEL_RUN },
 	/* Run a custom script */
-	{ 'R',            SEL_RUNSCRIPT, "",     "" },
+	{ 'R',            SEL_RUNSCRIPT },
 	/* Run command with argument */
-	{ 'e',            SEL_RUNEDIT,   "",     "" },
-	{ 'p',            SEL_RUNPAGE,   "",     "" },
+	{ 'e',            SEL_RUNEDIT },
+	{ 'p',            SEL_RUNPAGE },
 	/* Lock screen */
-	{ 'L',            SEL_LOCK,      "",     "" },
+	{ 'L',            SEL_LOCK },
 	/* Quit a context */
-	{ 'q',            SEL_QUITCTX,   "",     "" },
+	{ 'q',            SEL_QUITCTX },
 	/* Change dir on quit */
-	{ CONTROL('G'),   SEL_QUITCD,    "",     "" },
+	{ CONTROL('G'),   SEL_QUITCD },
 	/* Quit */
-	{ 'Q',            SEL_QUIT,      "",     "" },
-	{ CONTROL('Q'),   SEL_QUIT,      "",     "" },
+	{ 'Q',            SEL_QUIT },
+	{ CONTROL('Q'),   SEL_QUIT },
 };
