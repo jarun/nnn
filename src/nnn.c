@@ -165,7 +165,7 @@ disabledbg()
 #define ISODD(x) ((x) & 1)
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
-#define MAX_CMD_LEN 5120
+#define CMD_LEN_MAX 5120
 #define CURSR " > "
 #define EMPTY "   "
 #define CURSYM(flag) ((flag) ? CURSR : EMPTY)
@@ -178,8 +178,8 @@ disabledbg()
 #define _ALIGNMENT 0x10 /* 16-byte alignment */
 #define _ALIGNMENT_MASK 0xF
 #define SYMLINK_TO_DIR 0x1
-#define MAX_HOME_LEN 64
-#define MAX_CTX 4
+#define HOME_LEN_MAX 64
+#define CTX_MAX 4
 #define DOT_FILTER_LEN 7
 
 /* Macros to define process spawn behaviour as flags */
@@ -283,7 +283,7 @@ typedef struct {
 
 /* Configuration, contexts */
 static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0};
-static context g_ctx[MAX_CTX] __attribute__ ((aligned));
+static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static struct entry *dents;
 static char *pnamebuf, *pcopybuf;
@@ -307,13 +307,13 @@ static uchar BLK_SHIFT = 9;
 static uchar crc8table[CRC8_TABLE_LEN] __attribute__ ((aligned));
 
 /* For use in functions which are isolated and don't return the buffer */
-static char g_buf[MAX_CMD_LEN] __attribute__ ((aligned));
+static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 
 /* Buffer for file path copy file */
 static char g_cppath[PATH_MAX] __attribute__ ((aligned));
 
 /* Buffer to store tmp file path */
-static char g_tmpfpath[MAX_HOME_LEN] __attribute__ ((aligned));
+static char g_tmpfpath[HOME_LEN_MAX] __attribute__ ((aligned));
 
 #ifdef LINUX_INOTIFY
 static int inotify_fd, inotify_wd = -1;
@@ -756,7 +756,7 @@ static bool showcplist()
 		return FALSE;
 
 	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", MAX_HOME_LEN - g_tmpfplen);
+		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", HOME_LEN_MAX - g_tmpfplen);
 	else {
 		printmsg(messages[STR_NOHOME_ID]);
 		return -1;
@@ -1880,7 +1880,7 @@ static int show_stats(char *fpath, char *fname, struct stat *sb)
 	char *p, *begin = g_buf;
 
 	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", MAX_HOME_LEN - g_tmpfplen);
+		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", HOME_LEN_MAX - g_tmpfplen);
 	else {
 		printmsg(messages[STR_NOHOME_ID]);
 		return -1;
@@ -1895,8 +1895,8 @@ static int show_stats(char *fpath, char *fname, struct stat *sb)
 
 	/* Show file name or 'symlink' -> 'target' */
 	if (perms[0] == 'l') {
-		/* Note that MAX_CMD_LEN > PATH_MAX */
-		ssize_t len = readlink(fpath, g_buf, MAX_CMD_LEN);
+		/* Note that CMD_LEN_MAX > PATH_MAX */
+		ssize_t len = readlink(fpath, g_buf, CMD_LEN_MAX);
 
 		if (len != -1) {
 			struct stat tgtsb;
@@ -1955,7 +1955,7 @@ static int show_stats(char *fpath, char *fname, struct stat *sb)
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
-		p = get_output(g_buf, MAX_CMD_LEN, "file", "-b", fpath, FALSE);
+		p = get_output(g_buf, CMD_LEN_MAX, "file", "-b", fpath, FALSE);
 		if (p) {
 			dprintf(fd, "\n\n ");
 			while (*p) {
@@ -1998,7 +1998,7 @@ static size_t get_fs_info(const char *path, bool type)
 
 static int show_mediainfo(char *fpath, char *arg)
 {
-	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[cfg.metaviewer], NULL, FALSE))
+	if (!get_output(g_buf, CMD_LEN_MAX, "which", utils[cfg.metaviewer], NULL, FALSE))
 		return -1;
 
 	exitcurses();
@@ -2009,7 +2009,7 @@ static int show_mediainfo(char *fpath, char *arg)
 
 static int handle_archive(char *fpath, char *arg, char *dir)
 {
-	if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[ATOOL], NULL, FALSE))
+	if (!get_output(g_buf, CMD_LEN_MAX, "which", utils[ATOOL], NULL, FALSE))
 		return -1;
 
 	if (arg[1] == 'x')
@@ -2034,7 +2034,7 @@ static int handle_archive(char *fpath, char *arg, char *dir)
 static int show_help(char *path)
 {
 	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", MAX_HOME_LEN - g_tmpfplen);
+		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", HOME_LEN_MAX - g_tmpfplen);
 	else {
 		printmsg(messages[STR_NOHOME_ID]);
 		return -1;
@@ -2447,7 +2447,7 @@ static void redraw(char *path)
 		ncols = PATH_MAX;
 
 	printw("[");
-	for (i = 0; i < MAX_CTX; ++i) {
+	for (i = 0; i < CTX_MAX; ++i) {
 		/* Print current context in reverse */
 		if (cfg.curctx == i) {
 			if (cfg.showcolor)
@@ -2723,7 +2723,7 @@ nochange:
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
 				if (cfg.useeditor)
 					if (getmime(dents[cur].name) ||
-					    (get_output(g_buf, MAX_CMD_LEN, "file", FILE_OPTS, newpath, FALSE) &&
+					    (get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE) &&
 					     strstr(g_buf, "text/") == g_buf)) {
 						spawn(editor, newpath, editor_arg, path, F_NORMAL);
 						continue;
@@ -2834,11 +2834,11 @@ nochange:
 				r = cfg.curctx;
 				if (fd == '>' || fd == '.')
 					do
-						(r == MAX_CTX - 1) ? (r = 0) : ++r;
+						(r == CTX_MAX - 1) ? (r = 0) : ++r;
 					while (!g_ctx[r].c_cfg.ctxactive);
 				else
 					do
-						(r == 0) ? (r = MAX_CTX - 1) : --r;
+						(r == 0) ? (r = CTX_MAX - 1) : --r;
 					while (!g_ctx[r].c_cfg.ctxactive); // fallthrough
 				fd = '1' + r; // fallthrough
 			case '1': // fallthrough
@@ -2848,7 +2848,7 @@ nochange:
 				r = fd - '1'; /* Save the next context id */
 				if (cfg.curctx == r) {
 					if (sel == SEL_CYCLE) {
-						(r == MAX_CTX - 1) ? (r = 0) : ++r;
+						(r == CTX_MAX - 1) ? (r = 0) : ++r;
 						snprintf(newpath, PATH_MAX, "Create context %d?  ('Enter' confirms)", r + 1);
 						fd = get_input(newpath);
 						if (fd != '\r')
@@ -3175,7 +3175,7 @@ nochange:
 			char force = confirm_force();
 
 			if (sel == SEL_CP) {
-				snprintf(g_buf, MAX_CMD_LEN,
+				snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
 					 "xargs -0 -a %s -%c src cp -%cRp src .",
 #else
@@ -3183,7 +3183,7 @@ nochange:
 #endif
 					 g_cppath, REPLACE_STR, force);
 			} else if (sel == SEL_MV) {
-				snprintf(g_buf, MAX_CMD_LEN,
+				snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
 					 "xargs -0 -a %s -%c src mv -%c src .",
 #else
@@ -3191,7 +3191,7 @@ nochange:
 #endif
 					 g_cppath, REPLACE_STR, force);
 			} else { /* SEL_RMMUL */
-				snprintf(g_buf, MAX_CMD_LEN,
+				snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
 					 "xargs -0 -a %s rm -%cr",
 #else
@@ -3383,7 +3383,7 @@ nochange:
 			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
 		case SEL_RENAMEALL:
-			if (!get_output(g_buf, MAX_CMD_LEN, "which", utils[VIDIR], NULL, FALSE)) {
+			if (!get_output(g_buf, CMD_LEN_MAX, "which", utils[VIDIR], NULL, FALSE)) {
 				printmsg("vidir missing");
 				goto nochange;
 			}
@@ -3449,13 +3449,13 @@ nochange:
 			break;
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
-			for (r = 0; r < MAX_CTX; ++r)
+			for (r = 0; r < CTX_MAX; ++r)
 				if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
 					r = get_input("Quit all contexts? ('Enter' confirms)");
 					break;
 				}
 
-			if (!(r == MAX_CTX || r == '\r'))
+			if (!(r == CTX_MAX || r == '\r'))
 				break;
 
 			if (sel == SEL_QUITCD) {
@@ -3488,8 +3488,8 @@ nochange:
 			if (sel == SEL_QUITCTX) {
 				uint iter = 1;
 				r = cfg.curctx;
-				while (iter < MAX_CTX) {
-					(r == MAX_CTX - 1) ? (r = 0) : ++r;
+				while (iter < CTX_MAX) {
+					(r == CTX_MAX - 1) ? (r = 0) : ++r;
 					if (g_ctx[r].c_cfg.ctxactive) {
 						g_ctx[cfg.curctx].c_cfg.ctxactive = 0;
 
@@ -3608,7 +3608,7 @@ int main(int argc, char *argv[])
 		copier = getenv("NNN_CONTEXT_COLORS");
 		if (copier) {
 			opt = 0;
-			while (*copier && opt < MAX_CTX) {
+			while (*copier && opt < CTX_MAX) {
 				if (*copier < '0' || *copier > '7') {
 					fprintf(stderr, "invalid color code\n");
 					exit(1);
@@ -3619,12 +3619,12 @@ int main(int argc, char *argv[])
 				++opt;
 			}
 
-			while (opt != MAX_CTX) {
+			while (opt != CTX_MAX) {
 				g_ctx[opt].color = 4;
 				++opt;
 			}
 		} else
-			for (opt = 0; opt < MAX_CTX; ++opt)
+			for (opt = 0; opt < CTX_MAX; ++opt)
 				g_ctx[opt].color = 4; /* Default color is blue */
 	}
 
@@ -3702,15 +3702,15 @@ int main(int argc, char *argv[])
 	copier = getenv("NNN_COPIER");
 
 	if (getenv("HOME"))
-		g_tmpfplen = xstrlcpy(g_tmpfpath, getenv("HOME"), MAX_HOME_LEN);
+		g_tmpfplen = xstrlcpy(g_tmpfpath, getenv("HOME"), HOME_LEN_MAX);
 	else if (getenv("TMPDIR"))
-		g_tmpfplen = xstrlcpy(g_tmpfpath, getenv("TMPDIR"), MAX_HOME_LEN);
+		g_tmpfplen = xstrlcpy(g_tmpfpath, getenv("TMPDIR"), HOME_LEN_MAX);
 	else if (xdiraccess("/tmp"))
-		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", MAX_HOME_LEN);
+		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", HOME_LEN_MAX);
 
 	if (!cfg.picker && g_tmpfplen) {
-		xstrlcpy(g_cppath, g_tmpfpath, MAX_HOME_LEN);
-		xstrlcpy(g_cppath + g_tmpfplen - 1, "/.nnncp", MAX_HOME_LEN - g_tmpfplen);
+		xstrlcpy(g_cppath, g_tmpfpath, HOME_LEN_MAX);
+		xstrlcpy(g_cppath + g_tmpfplen - 1, "/.nnncp", HOME_LEN_MAX - g_tmpfplen);
 	}
 
 	/* Disable auto-select if opted */
