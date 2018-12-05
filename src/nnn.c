@@ -1205,7 +1205,7 @@ static int filterentries(char *path)
 
 		if (r == OK) {
 			/* Handle all control chars in main loop */
-			if (keyname(*ch)[0] == '^') {
+			if (keyname(*ch)[0] == '^' && *ch != '^') {
 				if (len == 1)
 					cur = oldcur;
 				goto end;
