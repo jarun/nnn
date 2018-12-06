@@ -66,6 +66,7 @@ We need contributors. Please visit the ToDo list.
   - [copy file paths](#copy-file-paths)
     - [selection](#selection)
     - [to clipboard](#to-clipboard)
+    - [get selection manually](#get-selection-manually)
   - [cd on quit](#cd-on-quit)
   - [(neo)vim plugin](#neovim-plugin)
   - [run custom scripts](#run-custom-scripts)
@@ -428,6 +429,16 @@ Along with default copy, `nnn` can pipe the absolute path of the current file or
 To inform `nnn` of the executable copier script location:
 
     export NNN_COPIER="/path/to/copier.sh"
+
+##### get selection manually
+
+To get a space-separated list of the file paths in selection, say at the command-prompt:
+
+    cat ~/.nnncp | xargs -0 echo
+
+To get the list in a file:
+
+    cat ~/.nnncp | xargs -0 echo > out.txt
 
 #### cd on quit
 
