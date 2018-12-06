@@ -25,7 +25,7 @@ Noice is Not Noice, a noicer fork...
 
 `nnn` is probably the [fastest and most resource-sensitive](#comparison) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
 
-[Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, or use it as a [(neo)vim plugin](https://github.com/jarun/nnn#neovim-plugin); `nnn` supports as many scripts as you need!
+[Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, transfer selected files using lftp or use it as a [(neo)vim plugin](https://github.com/jarun/nnn#neovim-plugin); `nnn` supports as many scripts as you need!
 
 It runs on Linux, macOS, Raspberry Pi, Cygwin, Linux subsystem for Windows and Termux.
 
@@ -73,6 +73,7 @@ We need contributors. Please visit the ToDo list.
     - [sample scripts](#sample-scripts)
   - [change dir color](#change-dir-color)
   - [integrate patool](#integrate-patool)
+  - [lftp transfers](#lftp-transfers)
   - [work faster at rename prompt](#work-faster-at-rename-prompt)
   - [set idle timeout](#set-idle-timeout)
   - [show hot plugged drives](#show-hot-plugged-drives)
@@ -111,6 +112,7 @@ We need contributors. Please visit the ToDo list.
   - Create, rename files and directories
   - Select files across directories
   - Copy, move, delete selection
+  - Transfer files using lftp
   - Batch rename/move/delete (needs vidir)
   - Show directories in custom color (default: blue)
   - Spawn a subshell in the current directory
@@ -507,6 +509,10 @@ Any other value disables colored directories.
 #### integrate patool
 
 On systems where `atool` is not available but `patool` is, drop two copies of the Python3 script [natool](https://github.com/jarun/nnn/tree/master/scripts/natool) as `atool` and `apack` somewhere in `$PATH`.
+
+#### lftp transfers
+
+lftp can be used from `nnn` for automated remote transfers or copying a selection to a server. Visit the [wiki page](github.com/jarun/nnn/wiki/simplify-remote-transfers-with-lftp) for more details on the integration.
 
 #### work faster at rename prompt
 
