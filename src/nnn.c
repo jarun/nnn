@@ -812,9 +812,16 @@ static void initcurses(void)
  */
 static void spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uchar flag)
 {
-	static char *shlvl;
+	static const char *shlvl;
 	static pid_t pid;
 	static int status;
+
+	/* Swap args if the first arg is NULL and second isn't */
+	if (!arg1 && arg2) {
+		shlvl = arg1;
+		arg1 = arg2;
+		arg2 = shlvl;
+	}
 
 	if (flag & F_NORMAL)
 		exitcurses();
@@ -2682,7 +2689,7 @@ nochange:
 				if (cfg.useeditor &&
 				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE) &&
 				    strstr(g_buf, "text/") == g_buf) {
-					spawn(editor, newpath, editor_arg, path, F_NORMAL);
+					spawn(editor, editor_arg, newpath, path, F_NORMAL);
 					continue;
 				}
 
@@ -3192,6 +3199,9 @@ nochange:
 				break; // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_NEW:
+		{
+			char *ptr = NULL, *ptr1 = NULL, *ptr2 = NULL;
+
 			if (sel == SEL_OPEN)
 				tmp = xreadline(NULL, "open with: ");
 			else if (sel == SEL_LAUNCH)
@@ -3218,17 +3228,18 @@ nochange:
 				else
 					r = F_NOWAIT | F_NOTRACE;
 
+				getprogarg(tmp, &ptr);
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
-				spawn(tmp, newpath, NULL, path, r);
+				spawn(tmp, ptr, newpath, path, r);
 				continue;
 			}
 
 			if (sel == SEL_LAUNCH) {
 				uint args = 0;
-				char *ptr = tmp, *ptr1 = NULL, *ptr2 = NULL;
+				ptr = tmp;
 
 				while (*ptr) {
-					if (*ptr == ' ') {
+					if (isblank(*ptr)) {
 						*ptr = '\0';
 						if (args == 0)
 							ptr1 = ptr + 1;
@@ -3301,6 +3312,7 @@ nochange:
 			close(fd);
 			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
+		}
 		case SEL_RENAME:
 			if (!ndents)
 				break;
@@ -3402,10 +3414,10 @@ nochange:
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_RUNEDIT:
-			spawn(editor, dents[cur].name, editor_arg, path, F_NORMAL);
+			spawn(editor, editor_arg, dents[cur].name, path, F_NORMAL);
 			break;
 		case SEL_RUNPAGE:
-			spawn(pager, dents[cur].name, pager_arg, path, F_NORMAL);
+			spawn(pager, pager_arg, dents[cur].name, path, F_NORMAL);
 			break;
 		case SEL_LOCK:
 			spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);

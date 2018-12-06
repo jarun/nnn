@@ -117,7 +117,7 @@ We need contributors. Please visit the ToDo list.
   - Run custom scripts in the current directory
   - Change directory at exit (*easy* shell integration)
   - Edit file in EDITOR or open in PAGER
-  - GUI app launcher (up to 2 space-separated args)
+  - GUI app launcher
   - Terminal locker integration
 - Unicode support
 - Highly optimized, static analysis integrated code
@@ -347,6 +347,8 @@ To edit all text files in EDITOR (preferably CLI, fallback vi):
 Arguments to the `$EDITOR`, `$PAGER` and `$SHELL` should be combined together, e.g.,
 
     export EDITOR='vim -xR'
+
+The option `open with` takes 1 combined argument and `launcher` takes 2.
 
 #### Help
 
