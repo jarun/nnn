@@ -2923,28 +2923,32 @@ nochange:
 		case SEL_EXTRACT: // fallthrough
 		case SEL_MEDIA: // fallthrough
 		case SEL_FMEDIA:
+		{
 			if (!ndents)
 				break;
 
 			mkpath(path, dents[cur].name, newpath, PATH_MAX);
 
-			if (sel == SEL_MEDIA)
+			switch(sel) {
+			case SEL_MEDIA:
 				r = show_mediainfo(newpath, NULL);
-			else if (sel == SEL_FMEDIA)
+				break;
+			case SEL_FMEDIA:
 				r = show_mediainfo(newpath, "-f");
-			else if (sel == SEL_LIST)
+				break;
+			case SEL_LIST:
 				r = handle_archive(newpath, "-l", path);
-			else
+				break;
+			case SEL_EXTRACT:
 				r = handle_archive(newpath, "-x", path);
+				break;
+			default:
+				r = 0;
+				break;
+			}
 
 			if (r == -1) {
-				xstrlcpy(newpath, "missing ", PATH_MAX);
-				if (sel == SEL_MEDIA || sel == SEL_FMEDIA)
-					xstrlcpy(newpath + 8, utils[cfg.metaviewer], 32);
-				else
-					xstrlcpy(newpath + 8, utils[ATOOL], 32);
-
-				printmsg(newpath);
+				printmsg("utility missing");
 				goto nochange;
 			}
 
@@ -2961,6 +2965,7 @@ nochange:
 				goto begin;
 			}
 			break;
+		}
 		case SEL_FSIZE:
 			cfg.sizeorder ^= 1;
 			cfg.mtimeorder = 0;
