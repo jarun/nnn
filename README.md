@@ -117,7 +117,7 @@ We need contributors. Please visit the ToDo list.
   - Run custom scripts in the current directory
   - Change directory at exit (*easy* shell integration)
   - Edit file in EDITOR or open in PAGER
-  - GUI app launcher
+  - Application launcher
   - Terminal locker integration
 - Unicode support
 - Highly optimized, static analysis integrated code
@@ -244,7 +244,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
              ^J  Disk usage            S  Apparent du
               s  Size                  t  Modification time
  MISC
-              o  Launch GUI app    !, ^]  Spawn SHELL in dir
+          !, ^]  Spawn SHELL in dir    o  Launch app
               R  Run custom script     L  Lock terminal
 ```
 
@@ -438,9 +438,13 @@ To get a space-separated list of the file paths in selection, say at the command
 
     cat ~/.nnncp | xargs -0 echo
 
+Set an easy to remember alias:
+
+    alias ncp="cat ~/.nnncp | xargs -0 echo"
+
 To get the list in a file:
 
-    cat ~/.nnncp | xargs -0 echo > out.txt
+    ncp > out.txt
 
 #### cd on quit
 

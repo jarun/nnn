@@ -2051,7 +2051,7 @@ static int show_help(char *path)
             "d^J  Disk usage            S  Apparent du\n"
              "es  Size                  t  Modification time\n"
 "1MISC\n"
-             "eo  Launch GUI app    !, ^]  Spawn SHELL in dir\n"
+         "a!, ^]  Spawn SHELL in dir    o Launch app\n"
              "eR  Run custom script     L  Lock terminal\n"};
 
 	if (fd == -1)
@@ -3221,13 +3221,13 @@ nochange:
 				goto nochange;
 			}
 
-			if (sel == SEL_OPEN) {
-				r = get_input("press 'c' for cli mode");
-				if (r == 'c')
-					r = F_NORMAL;
-				else
-					r = F_NOWAIT | F_NOTRACE;
+			r = get_input("press 'c' for cli mode");
+			if (r == 'c')
+				r = F_NORMAL;
+			else
+				r = F_NOWAIT | F_NOTRACE;
 
+			if (sel == SEL_OPEN) {
 				getprogarg(tmp, &ptr);
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				spawn(tmp, ptr, newpath, path, r);
@@ -3254,7 +3254,7 @@ nochange:
 					++ptr;
 				}
 
-				spawn(tmp, ptr1, ptr2, path, F_NOWAIT | F_NOTRACE);
+				spawn(tmp, ptr1, ptr2, path, r);
 				break;
 			}
 
