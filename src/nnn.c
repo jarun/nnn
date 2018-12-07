@@ -3221,11 +3221,10 @@ nochange:
 				goto nochange;
 			}
 
-			r = get_input("press 'c' for cli mode");
-			if (r == 'c')
-				r = F_NORMAL;
-			else
-				r = F_NOWAIT | F_NOTRACE;
+			if (sel == SEL_OPEN || sel == SEL_LAUNCH) {
+				r = get_input("press 'c' for cli mode");
+				(r == 'c') ? (r = F_NORMAL) : (r = F_NOWAIT | F_NOTRACE);
+			}
 
 			if (sel == SEL_OPEN) {
 				getprogarg(tmp, &ptr);
