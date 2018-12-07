@@ -3230,10 +3230,7 @@ nochange:
 				getprogarg(tmp, &ptr);
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				spawn(tmp, ptr, newpath, path, r);
-				continue;
-			}
-
-			if (sel == SEL_LAUNCH) {
+			} else if (sel == SEL_LAUNCH) {
 				uint args = 0;
 				ptr = tmp;
 
@@ -3254,10 +3251,7 @@ nochange:
 				}
 
 				spawn(tmp, ptr1, ptr2, path, r);
-				break;
-			}
-
-			if (sel == SEL_ARCHIVE) {
+			} else if (sel == SEL_ARCHIVE) {
 				/* newpath is used as temporary buffer */
 				if (!get_output(newpath, PATH_MAX, "which", utils[APACK], NULL, FALSE)) {
 					printmsg("apack missing");
@@ -3265,7 +3259,9 @@ nochange:
 				}
 
 				spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
+			}
 
+			if (sel != SEL_NEW) {
 				/* Continue in navigate-as-you-type mode, if enabled */
 				if (cfg.filtermode)
 					presel = FILTER;
