@@ -2929,7 +2929,10 @@ nochange:
 		case SEL_LIST: // fallthrough
 		case SEL_EXTRACT: // fallthrough
 		case SEL_MEDIA: // fallthrough
-		case SEL_FMEDIA:
+		case SEL_FMEDIA: // fallthrough
+		case SEL_RUNEDIT: // fallthrough
+		case SEL_RUNPAGE: // fallthrough
+		case SEL_LOCK:
 		{
 			if (!ndents)
 				break;
@@ -2948,6 +2951,18 @@ nochange:
 				break;
 			case SEL_EXTRACT:
 				r = handle_archive(newpath, "-x", path);
+				break;
+			case SEL_RUNEDIT:
+				r = 0;
+				spawn(editor, editor_arg, dents[cur].name, path, F_NORMAL);
+				break;
+			case SEL_RUNPAGE:
+				r = 0;
+				spawn(pager, pager_arg, dents[cur].name, path, F_NORMAL);
+				break;
+			case SEL_LOCK:
+				r = 0;
+				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
 				break;
 			default:
 				r = 0;
@@ -3408,15 +3423,6 @@ nochange:
 
 			/* Repopulate as directory content may have changed */
 			goto begin;
-		case SEL_RUNEDIT:
-			spawn(editor, editor_arg, dents[cur].name, path, F_NORMAL);
-			break;
-		case SEL_RUNPAGE:
-			spawn(pager, pager_arg, dents[cur].name, path, F_NORMAL);
-			break;
-		case SEL_LOCK:
-			spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
-			break;
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
 			for (r = 0; r < CTX_MAX; ++r)
