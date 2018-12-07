@@ -79,7 +79,7 @@ We need contributors. Please visit the ToDo list.
   - [show hot plugged drives](#show-hot-plugged-drives)
   - [tmux configuration](#tmux-configuration)
   - [BSD terminal issue](#bsd-terminal-issue)
-  - [Disable file open on navigation](#disable-file-open-on-navigation)
+  - [disable file open on navigation](#disable-file-open-on-navigation)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
@@ -512,7 +512,7 @@ On systems where `atool` is not available but `patool` is, drop two copies of th
 
 #### lftp transfers
 
-lftp can be used from `nnn` for automated remote transfers or copying a selection to a server. Visit the [wiki page](github.com/jarun/nnn/wiki/simplify-remote-transfers-with-lftp) for more details on the integration.
+lftp can be used from `nnn` for automated remote transfers or copying a selection to a server. Visit the [wiki page](https://github.com/jarun/nnn/wiki/simplify-remote-transfers-with-lftp) for more details on the integration.
 
 #### work faster at rename prompt
 
