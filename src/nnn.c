@@ -3404,9 +3404,14 @@ nochange:
 						tmp = newpath;
 					}
 
-					/* Check if file exists */
-					if (access(tmp, F_OK) == -1) {
+					if (lstat(tmp, &sb) == -1) {
 						printwarn();
+						goto nochange;
+					}
+
+					/* Check if it's a directory */
+					if (S_ISDIR(sb.st_mode)) {
+						printmsg("directory");
 						goto nochange;
 					}
 
