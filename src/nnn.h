@@ -183,7 +183,6 @@ static struct key bindings[] = {
 	{ 't',            SEL_MTIME },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
-	{ KEY_F(5),       SEL_REDRAW }, /* Undocumented */
 	/* Copy currently selected file path */
 	{ CONTROL('K'),   SEL_COPY },
 	{ ' ',            SEL_COPY },
@@ -206,7 +205,6 @@ static struct key bindings[] = {
 	{ 'n',            SEL_NEW },
 	/* Show rename prompt */
 	{ CONTROL('R'),   SEL_RENAME },
-	{ KEY_F(2),       SEL_RENAME }, /* Undocumented */
 	/* Rename contents of current dir */
 	{ 'r',            SEL_RENAMEALL },
 	/* Show help */
