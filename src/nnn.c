@@ -3372,8 +3372,8 @@ nochange:
 			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
 		case SEL_SHELL: // fallthrough
-		case SEL_RUNSCRIPT:
-			if (sel == SEL_RUNSCRIPT) {
+		case SEL_SCRIPT:
+			if (sel == SEL_SCRIPT) {
 				tmp = getenv("NNN_SCRIPT");
 				if (tmp) {
 					if (getenv("NNN_MULTISCRIPT")) {
@@ -3383,6 +3383,12 @@ nochange:
 						if (tmp && tmp[0])
 							xstrlcpy(newpath + _len - 1, tmp, PATH_MAX - _len);
 						tmp = newpath;
+					}
+
+					/* Check if file exists */
+					if (access(tmp, F_OK) == -1) {
+						printwarn();
+						goto nochange;
 					}
 
 					dir = NULL; /* dir used as temp var */
