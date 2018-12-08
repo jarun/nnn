@@ -61,7 +61,7 @@ enum action {
 	SEL_FMEDIA,
 	SEL_LAUNCH,
 	SEL_ARCHIVE,
-	SEL_LIST,
+	SEL_ARCHIVELS,
 	SEL_EXTRACT,
 	SEL_FSIZE,  /* file size */
 	SEL_ASIZE,  /* apparent size */
@@ -170,7 +170,7 @@ static struct key bindings[] = {
 	/* Create archive */
 	{ 'f',            SEL_ARCHIVE },
 	/* List archive */
-	{ 'F',            SEL_LIST },
+	{ 'F',            SEL_ARCHIVELS },
 	/* Extract archive */
 	{ CONTROL('F'),   SEL_EXTRACT },
 	/* Toggle sort by size */

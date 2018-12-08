@@ -2017,13 +2017,13 @@ static bool handle_archive(char *fpath, char *arg, char *dir)
  * the binary size by around a hundred bytes. This would only
  * have increased as we keep adding new options.
  */
-static int show_help(char *path)
+static bool show_help(char *path)
 {
 	if (g_tmpfpath[0])
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", HOME_LEN_MAX - g_tmpfplen);
 	else {
 		printmsg(messages[STR_NOHOME_ID]);
-		return -1;
+		return FALSE;
 	}
 
 	int i = 0, fd = mkstemp(g_tmpfpath);
@@ -2062,7 +2062,7 @@ static int show_help(char *path)
              "eR  Run custom script     L  Lock terminal\n"};
 
 	if (fd == -1)
-		return -1;
+		return FALSE;
 
 	start = end = helpstr;
 	while (*end) {
@@ -2134,7 +2134,7 @@ static int show_help(char *path)
 	get_output(NULL, 0, "cat", g_tmpfpath, NULL, TRUE);
 	unlink(g_tmpfpath);
 	refresh();
-	return 0;
+	return TRUE;
 }
 
 static int sum_bsizes(const char *fpath, const struct stat *sb,
@@ -2933,17 +2933,19 @@ nochange:
 				goto nochange;
 			}
 			break;
-		case SEL_LIST: // fallthrough
-		case SEL_EXTRACT: // fallthrough
 		case SEL_MEDIA: // fallthrough
 		case SEL_FMEDIA: // fallthrough
+		case SEL_ARCHIVELS: // fallthrough
+		case SEL_EXTRACT: // fallthrough
+		case SEL_RENAMEALL: // fallthrough
 		case SEL_RUNEDIT: // fallthrough
-		case SEL_RUNPAGE: // fallthrough
+		case SEL_RUNPAGE:
+			if (!ndents)
+				break; // fallthrough
+		case SEL_REDRAW: // fallthrough
+		case SEL_HELP: // fallthrough
 		case SEL_LOCK:
 		{
-			if (!ndents)
-				break;
-
 			mkpath(path, dents[cur].name, newpath, PATH_MAX);
 
 			switch(sel) {
@@ -2953,11 +2955,22 @@ nochange:
 			case SEL_FMEDIA:
 				r = show_mediainfo(newpath, "-f");
 				break;
-			case SEL_LIST:
+			case SEL_ARCHIVELS:
 				r = handle_archive(newpath, "-l", path);
 				break;
 			case SEL_EXTRACT:
 				r = handle_archive(newpath, "-x", path);
+				break;
+			case SEL_REDRAW:
+				if (ndents)
+					copycurname();
+				goto begin;
+			case SEL_RENAMEALL:
+				if ((r = getutil(utils[VIDIR])))
+					spawn(utils[VIDIR], ".", NULL, path, F_NORMAL);
+				break;
+			case SEL_HELP:
+				r = show_help(path);
 				break;
 			case SEL_RUNEDIT:
 				r = TRUE;
@@ -2971,29 +2984,26 @@ nochange:
 				r = TRUE;
 				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
 				break;
-			default:
-				r = TRUE;
-				break;
-			}
-
-			if (r == FALSE) {
-				printmsg("utility missing");
+			default: /* unreachable */
 				goto nochange;
 			}
 
-			/* In case of successful archive extract, reload contents */
-			if (sel == SEL_EXTRACT) {
-				/* Continue in navigate-as-you-type mode, if enabled */
-				if (cfg.filtermode)
-					presel = FILTER;
-
-				/* Save current */
-				copycurname();
-
-				/* Repopulate as directory content may have changed */
-				goto begin;
+			if (!r) {
+				printmsg("required utility missing");
+				goto nochange;
 			}
-			break;
+
+			/* In case of successful operation, reload contents */
+
+			/* Continue in navigate-as-you-type mode, if enabled */
+			if (cfg.filtermode)
+				presel = FILTER;
+
+			/* Save current */
+			copycurname();
+
+			/* Repopulate as directory content may have changed */
+			goto begin;
 		}
 		case SEL_FSIZE:
 			cfg.sizeorder ^= 1;
@@ -3039,11 +3049,6 @@ nochange:
 			cfg.apparentsz = 0;
 			cfg.blkorder = 0;
 			cfg.copymode = 0;
-			/* Save current */
-			if (ndents)
-				copycurname();
-			goto begin;
-		case SEL_REDRAW:
 			/* Save current */
 			if (ndents)
 				copycurname();
@@ -3374,25 +3379,6 @@ nochange:
 			close(fd);
 			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
-		case SEL_RENAMEALL:
-			if (!getutil(utils[VIDIR])) {
-				printmsg("utility missing");
-				goto nochange;
-			}
-
-			spawn(utils[VIDIR], ".", NULL, path, F_NORMAL);
-
-			/* Save current */
-			if (ndents)
-				copycurname();
-			goto begin;
-		case SEL_HELP:
-			show_help(path);
-
-			/* Continue in navigate-as-you-type mode, if enabled */
-			if (cfg.filtermode)
-				presel = FILTER;
-			break;
 		case SEL_RUN: // fallthrough
 		case SEL_RUNSCRIPT:
 			if (sel == SEL_RUNSCRIPT) {
