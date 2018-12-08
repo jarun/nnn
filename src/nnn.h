@@ -80,7 +80,7 @@ enum action {
 	SEL_RENAME,
 	SEL_RENAMEALL,
 	SEL_HELP,
-	SEL_RUN,
+	SEL_SHELL,
 	SEL_RUNSCRIPT,
 	SEL_RUNEDIT,
 	SEL_RUNPAGE,
@@ -210,8 +210,8 @@ static struct key bindings[] = {
 	/* Show help */
 	{ '?',            SEL_HELP },
 	/* Run command */
-	{ '!',            SEL_RUN },
-	{ CONTROL(']'),   SEL_RUN },
+	{ '!',            SEL_SHELL },
+	{ CONTROL(']'),   SEL_SHELL },
 	/* Run a custom script */
 	{ 'R',            SEL_RUNSCRIPT },
 	/* Run command with argument */

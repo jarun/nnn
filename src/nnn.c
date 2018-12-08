@@ -1058,7 +1058,7 @@ static int entrycmp(const void *va, const void *vb)
  * Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}).
  * The next keyboard input can be simulated by presel.
  */
-static int nextsel(char **run, char **env, int *presel)
+static int nextsel(int *presel)
 {
 	static int c;
 	static uint i;
@@ -2537,7 +2537,7 @@ static void browse(char *ipath)
 	static char newpath[PATH_MAX] __attribute__ ((aligned));
 	static char mark[PATH_MAX] __attribute__ ((aligned));
 	char *path, *lastdir, *lastname;
-	char *dir, *tmp, *run = NULL, *env = NULL;
+	char *dir, *tmp;
 	struct stat sb;
 	int r, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
 	enum action sel;
@@ -2612,7 +2612,7 @@ nochange:
 		if (getppid() == 1)
 			_exit(0);
 
-		sel = nextsel(&run, &env, &presel);
+		sel = nextsel(&presel);
 
 		switch (sel) {
 		case SEL_BACK:
@@ -3377,7 +3377,7 @@ nochange:
 			close(fd);
 			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
-		case SEL_RUN: // fallthrough
+		case SEL_SHELL: // fallthrough
 		case SEL_RUNSCRIPT:
 			if (sel == SEL_RUNSCRIPT) {
 				tmp = getenv("NNN_SCRIPT");
@@ -3388,31 +3388,29 @@ nochange:
 						tmp = xreadline(NULL, "script suffix: ");
 						if (tmp && tmp[0])
 							xstrlcpy(newpath + _len - 1, tmp, PATH_MAX - _len);
-
 						tmp = newpath;
 					}
 
-					char *curfile = NULL;
-
+					dir = NULL; /* dir used as temp var */
 					if (ndents)
-						curfile = dents[cur].name;
-
-					spawn(shell, tmp, curfile, path, F_NORMAL | F_SIGINT);
-				} else
+						dir = dents[cur].name;
+					spawn(shell, tmp, dir, path, F_NORMAL | F_SIGINT);
+				} else {
 					printmsg("set NNN_SCRIPT");
-			} else {
+					goto nochange;
+				}
+			} else
 				spawn(shell, shell_arg, NULL, path, F_NORMAL | F_MARKER);
 
-				/* Continue in navigate-as-you-type mode, if enabled */
-				if (cfg.filtermode)
-					presel = FILTER;
-			}
+			/* Continue in navigate-as-you-type mode, if enabled */
+			if (cfg.filtermode)
+				presel = FILTER;
 
 			/* Save current */
 			if (ndents)
 				copycurname();
 
-			/* Repopulate as directory content may have changed */
+			/* Re-populate as directory content may have changed */
 			goto begin;
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
