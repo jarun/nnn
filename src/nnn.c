@@ -3578,9 +3578,9 @@ int main(int argc, char *argv[])
 				if (*copier < '0' || *copier > '7') {
 					fprintf(stderr, "invalid color code\n");
 					return 1;
-				} else
-					g_ctx[opt].color = *copier - '0';
+				}
 
+				g_ctx[opt].color = *copier - '0';
 				++copier;
 				++opt;
 			}
