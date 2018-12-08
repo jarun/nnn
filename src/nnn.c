@@ -1829,6 +1829,13 @@ static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *a
 	return NULL;
 }
 
+static bool getutil(char *util) {
+	if (!get_output(g_buf, CMD_LEN_MAX, "which", util, NULL, FALSE))
+		return FALSE;
+
+	return TRUE;
+}
+
 static char *xgetpwuid(uid_t uid)
 {
 	struct passwd *pwd = getpwuid(uid);
@@ -1975,21 +1982,21 @@ static size_t get_fs_info(const char *path, bool type)
 	return svb.f_bavail << ffs(svb.f_frsize >> 1);
 }
 
-static int show_mediainfo(char *fpath, char *arg)
+static bool show_mediainfo(char *fpath, char *arg)
 {
-	if (!get_output(g_buf, CMD_LEN_MAX, "which", utils[cfg.metaviewer], NULL, FALSE))
-		return -1;
+	if (!getutil(utils[cfg.metaviewer]))
+		return FALSE;
 
 	exitcurses();
 	get_output(NULL, 0, utils[cfg.metaviewer], fpath, arg, TRUE);
 	refresh();
-	return 0;
+	return TRUE;
 }
 
-static int handle_archive(char *fpath, char *arg, char *dir)
+static bool handle_archive(char *fpath, char *arg, char *dir)
 {
-	if (!get_output(g_buf, CMD_LEN_MAX, "which", utils[ATOOL], NULL, FALSE))
-		return -1;
+	if (!getutil(utils[ATOOL]))
+		return FALSE;
 
 	if (arg[1] == 'x')
 		spawn(utils[ATOOL], arg, fpath, dir, F_NORMAL);
@@ -1999,7 +2006,7 @@ static int handle_archive(char *fpath, char *arg, char *dir)
 		refresh();
 	}
 
-	return 0;
+	return TRUE;
 }
 
 /*
@@ -2953,23 +2960,23 @@ nochange:
 				r = handle_archive(newpath, "-x", path);
 				break;
 			case SEL_RUNEDIT:
-				r = 0;
+				r = TRUE;
 				spawn(editor, editor_arg, dents[cur].name, path, F_NORMAL);
 				break;
 			case SEL_RUNPAGE:
-				r = 0;
+				r = TRUE;
 				spawn(pager, pager_arg, dents[cur].name, path, F_NORMAL);
 				break;
 			case SEL_LOCK:
-				r = 0;
+				r = TRUE;
 				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
 				break;
 			default:
-				r = 0;
+				r = TRUE;
 				break;
 			}
 
-			if (r == -1) {
+			if (r == FALSE) {
 				printmsg("utility missing");
 				goto nochange;
 			}
@@ -3268,8 +3275,8 @@ nochange:
 				spawn(tmp, ptr1, ptr2, path, r);
 			} else if (sel == SEL_ARCHIVE) {
 				/* newpath is used as temporary buffer */
-				if (!get_output(newpath, PATH_MAX, "which", utils[APACK], NULL, FALSE)) {
-					printmsg("apack missing");
+				if (!getutil(utils[APACK])) {
+					printmsg("utility missing");
 					continue;
 				}
 
@@ -3368,8 +3375,8 @@ nochange:
 			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
 		case SEL_RENAMEALL:
-			if (!get_output(g_buf, CMD_LEN_MAX, "which", utils[VIDIR], NULL, FALSE)) {
-				printmsg("vidir missing");
+			if (!getutil(utils[VIDIR])) {
+				printmsg("utility missing");
 				goto nochange;
 			}
 
