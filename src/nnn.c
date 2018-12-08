@@ -3090,9 +3090,6 @@ nochange:
 			printmsg(newpath);
 			goto nochange;
 		case SEL_COPYMUL:
-			if (!ndents)
-				goto nochange;
-
 			cfg.copymode ^= 1;
 			if (cfg.copymode) {
 				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
