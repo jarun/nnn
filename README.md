@@ -117,6 +117,7 @@ We need contributors. Please visit the ToDo list.
   - Show directories in custom color (default: blue)
   - Spawn a subshell in the current directory
   - Run custom scripts in the current directory
+  - Run current file as executable
   - Change directory at exit (*easy* shell integration)
   - Edit file in EDITOR or open in PAGER
   - Application launcher
@@ -247,7 +248,8 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
               s  Size                  t  Modification time
  MISC
           !, ^]  Spawn SHELL in dir    o  Launch app
-              R  Run custom script     L  Lock terminal
+              R  Run custom script    ^S  Execute entry
+              L  Lock terminal
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.

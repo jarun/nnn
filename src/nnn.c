@@ -2060,7 +2060,8 @@ static bool show_help(char *path)
              "es  Size                  t  Modification time\n"
 "1MISC\n"
          "a!, ^]  Spawn SHELL in dir    o  Launch app\n"
-             "eR  Run custom script     L  Lock terminal\n"};
+             "eR  Run custom script    ^S  Execute entry\n"
+             "eL  Lock terminal\n"};
 
 	if (fd == -1)
 		return FALSE;
@@ -3371,9 +3372,27 @@ nochange:
 			close(fd);
 			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
+		case SEL_EXEC:
+			if (!ndents)
+				goto nochange; // fallthrough
 		case SEL_SHELL: // fallthrough
 		case SEL_SCRIPT:
-			if (sel == SEL_SCRIPT) {
+			if (sel == SEL_EXEC) {
+				/* Check if this is a directory */
+				if (S_ISDIR(dents[cur].mode)) {
+					printmsg("directory");
+					goto nochange;
+				}
+
+				/* Check if file is executable */
+				if (!(dents[cur].mode & 0100)) {
+					printmsg("Permission denied");
+					goto nochange;
+				}
+
+				mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				spawn(newpath, NULL, NULL, path, F_NORMAL | F_SIGINT);
+			} else if (sel == SEL_SCRIPT) {
 				tmp = getenv("NNN_SCRIPT");
 				if (tmp) {
 					if (getenv("NNN_MULTISCRIPT")) {
