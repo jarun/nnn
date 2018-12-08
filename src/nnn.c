@@ -2650,18 +2650,11 @@ nochange:
 			mkpath(path, dents[cur].name, newpath, PATH_MAX);
 			DPRINTF_S(newpath);
 
-			/* Get path info */
-			fd = open(newpath, O_RDONLY | O_NONBLOCK);
-			if (fd == -1) {
+			/* Cannot use stale data in entry, file may be missing by now */
+			if (stat(newpath, &sb) == -1) {
 				printwarn();
 				goto nochange;
 			}
-			if (fstat(fd, &sb) == -1) {
-				printwarn();
-				close(fd);
-				goto nochange;
-			}
-			close(fd);
 			DPRINTF_U(sb.st_mode);
 
 			switch (sb.st_mode & S_IFMT) {
