@@ -2059,7 +2059,7 @@ static bool show_help(char *path)
             "d^J  Disk usage            S  Apparent du\n"
              "es  Size                  t  Modification time\n"
 "1MISC\n"
-         "a!, ^]  Spawn SHELL in dir    o Launch app\n"
+         "a!, ^]  Spawn SHELL in dir    o  Launch app\n"
              "eR  Run custom script     L  Lock terminal\n"};
 
 	if (fd == -1)
