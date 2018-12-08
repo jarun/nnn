@@ -2923,13 +2923,7 @@ nochange:
 				break;
 
 			mkpath(path, dents[cur].name, newpath, PATH_MAX);
-
-			if (lstat(newpath, &sb) == -1) {
-				dentfree(dents);
-				errexit();
-			}
-
-			if (!show_stats(newpath, dents[cur].name, &sb)) {
+			if (lstat(newpath, &sb) == -1 || !show_stats(newpath, dents[cur].name, &sb)) {
 				printwarn();
 				goto nochange;
 			}
