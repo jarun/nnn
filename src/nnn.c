@@ -2540,7 +2540,7 @@ static void browse(char *ipath)
 	char *path, *lastdir, *lastname;
 	char *dir, *tmp;
 	struct stat sb;
-	int r, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
+	int r = -1, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
 	enum action sel;
 	bool dir_changed = FALSE;
 
@@ -2937,7 +2937,7 @@ nochange:
 		{
 			mkpath(path, dents[cur].name, newpath, PATH_MAX);
 
-			switch(sel) {
+			switch (sel) {
 			case SEL_MEDIA:
 				r = show_mediainfo(newpath, NULL);
 				break;
@@ -3206,8 +3206,9 @@ nochange:
 				presel = FILTER;
 			goto begin;
 		}
+		case SEL_ARCHIVE: // fallthrough
 		case SEL_OPEN: // fallthrough
-		case SEL_ARCHIVE:
+		case SEL_RENAME:
 			if (!ndents)
 				break; // fallthrough
 		case SEL_LAUNCH: // fallthrough
@@ -3215,14 +3216,23 @@ nochange:
 		{
 			char *ptr = NULL, *ptr1 = NULL, *ptr2 = NULL;
 
-			if (sel == SEL_OPEN)
+			switch (sel) {
+			case SEL_OPEN:
 				tmp = xreadline(NULL, "open with: ");
-			else if (sel == SEL_LAUNCH)
+				break;
+			case SEL_RENAME:
+				tmp = xreadline(dents[cur].name, "");
+				break;
+			case SEL_LAUNCH:
 				tmp = xreadline(NULL, "launch: ");
-			else if (sel == SEL_ARCHIVE)
+				break;
+			case SEL_ARCHIVE:
 				tmp = xreadline(dents[cur].name, "name: ");
-			else
+				break;
+			default:
 				tmp = xreadline(NULL, "name: ");
+				break;
+			}
 
 			if (tmp == NULL || tmp[0] == '\0')
 				break;
@@ -3239,11 +3249,19 @@ nochange:
 				(r == 'c') ? (r = F_NORMAL) : (r = F_NOWAIT | F_NOTRACE);
 			}
 
-			if (sel == SEL_OPEN) {
+			switch (sel) {
+			case SEL_OPEN:
 				getprogarg(tmp, &ptr);
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				spawn(tmp, ptr, newpath, path, r);
-			} else if (sel == SEL_LAUNCH) {
+				break;
+			case SEL_RENAME:
+				/* Skip renaming to same name */
+				if (strcmp(tmp, dents[cur].name) == 0)
+					goto nochange;
+				break;
+			case SEL_LAUNCH:
+			{
 				uint args = 0;
 				ptr = tmp;
 
@@ -3264,7 +3282,9 @@ nochange:
 				}
 
 				spawn(tmp, ptr1, ptr2, path, r);
-			} else if (sel == SEL_ARCHIVE) {
+				break;
+			}
+			case SEL_ARCHIVE:
 				/* newpath is used as temporary buffer */
 				if (!getutil(utils[APACK])) {
 					printmsg("utility missing");
@@ -3272,9 +3292,12 @@ nochange:
 				}
 
 				spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
+				break;
+			default:
+				break;
 			}
 
-			if (sel != SEL_NEW) {
+			if (sel != SEL_NEW && sel != SEL_RENAME) {
 				/* Continue in navigate-as-you-type mode, if enabled */
 				if (cfg.filtermode)
 					presel = FILTER;
@@ -3295,76 +3318,51 @@ nochange:
 
 			/* Check if another file with same name exists */
 			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
-				printmsg("entry exists");
-				goto nochange;
+				if (sel == SEL_RENAME) {
+					/* File with the same name exists */
+					if (get_input("press 'y' to overwrite") != 'y') {
+						close(fd);
+						break;
+					}
+				} else {
+					close(fd);
+					printmsg("entry exists");
+					goto nochange;
+				}
 			}
 
-			/* Check if it's a dir or file */
-			r = get_input("press 'f'(ile) or 'd'(ir)");
-			if (r == 'f') {
-				r = openat(fd, tmp, O_CREAT, 0666);
-				close(r);
-			} else if (r == 'd')
-				r = mkdirat(fd, tmp, 0777);
-			else {
-				close(fd);
-				break;
-			}
+			if (sel == SEL_RENAME) {
+				/* Rename the file */
+				if (renameat(fd, dents[cur].name, fd, tmp) != 0) {
+					close(fd);
+					printwarn();
+					goto nochange;
+				}
+			} else {
+				/* Check if it's a dir or file */
+				r = get_input("press 'f'(ile) or 'd'(ir)");
+				if (r == 'f') {
+					r = openat(fd, tmp, O_CREAT, 0666);
+					close(r);
+				} else if (r == 'd') {
+					r = mkdirat(fd, tmp, 0777);
+				} else {
+					close(fd);
+					break;
+				}
 
-			if (r == -1) {
-				printwarn();
-				close(fd);
-				goto nochange;
+				/* Check if file creation failed */
+				if (r == -1) {
+					close(fd);
+					printwarn();
+					goto nochange;
+				}
 			}
 
 			close(fd);
 			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
 		}
-		case SEL_RENAME:
-			if (!ndents)
-				break;
-
-			tmp = xreadline(dents[cur].name, "");
-			if (tmp == NULL || tmp[0] == '\0')
-				break;
-
-			/* Allow only relative, same dir paths */
-			if (tmp[0] == '/' || strcmp(xbasename(tmp), tmp) != 0) {
-				printmsg(messages[STR_INPUT_ID]);
-				goto nochange;
-			}
-
-			/* Skip renaming to same name */
-			if (strcmp(tmp, dents[cur].name) == 0)
-				break;
-
-			/* Open the descriptor to currently open directory */
-			fd = open(path, O_RDONLY | O_DIRECTORY);
-			if (fd == -1) {
-				printwarn();
-				goto nochange;
-			}
-
-			/* Check if another file with same name exists */
-			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
-				/* File with the same name exists */
-				if (get_input("press 'y' to overwrite") != 'y') {
-					close(fd);
-					break;
-				}
-			}
-
-			/* Rename the file */
-			if (renameat(fd, dents[cur].name, fd, tmp) != 0) {
-				printwarn();
-				close(fd);
-				goto nochange;
-			}
-
-			close(fd);
-			xstrlcpy(lastname, tmp, NAME_MAX + 1);
-			goto begin;
 		case SEL_EXEC:
 			if (!ndents)
 				goto nochange; // fallthrough
