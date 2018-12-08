@@ -777,7 +777,7 @@ static bool showcplist()
 }
 
 /* Initialize curses mode */
-static void initcurses(void)
+static bool initcurses(void)
 {
 	if (initscr() == NULL) {
 		char *term = getenv("TERM");
@@ -786,7 +786,7 @@ static void initcurses(void)
 			fprintf(stderr, "error opening TERM: %s\n", term);
 		else
 			fprintf(stderr, "initscr() failed\n");
-		exit(1);
+		return FALSE;
 	}
 
 	cbreak();
@@ -804,6 +804,7 @@ static void initcurses(void)
 		init_pair(4, g_ctx[3].color, -1);
 	}
 	settimeout(); /* One second */
+	return TRUE;
 }
 
 /*
@@ -1427,12 +1428,12 @@ static size_t mkpath(char *dir, char *name, char *out, size_t n)
 	return (xstrlcpy(out + len, name, n - len) + len);
 }
 
-static int parsebmstr()
+static bool parsebmstr()
 {
 	int i = 0;
 	char *bms = getenv("NNN_BMS");
 	if (!bms)
-		return 0;
+		return TRUE;
 
 	while (*bms && i < BM_MAX) {
 		bookmark[i].key = *bms;
@@ -1443,7 +1444,7 @@ static int parsebmstr()
 		}
 
 		if (*bms != ':')
-			return -1; /* We support single char keys only */
+			return FALSE; /* We support single char keys only */
 
 		bookmark[i].loc = ++bms;
 		if (bookmark[i].loc[0] == '\0' || bookmark[i].loc[0] == ';') {
@@ -1463,7 +1464,7 @@ static int parsebmstr()
 		++i;
 	}
 
-	return 0;
+	return TRUE;
 }
 
 /*
@@ -1859,7 +1860,7 @@ static char *xgetgrgid(gid_t gid)
 /*
  * Follows the stat(1) output closely
  */
-static int show_stats(char *fpath, char *fname, struct stat *sb)
+static bool show_stats(char *fpath, char *fname, struct stat *sb)
 {
 	char desc[DESCRIPTOR_LEN];
 	char *perms = get_lsperms(sb->st_mode, desc);
@@ -1869,13 +1870,13 @@ static int show_stats(char *fpath, char *fname, struct stat *sb)
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", HOME_LEN_MAX - g_tmpfplen);
 	else {
 		printmsg(messages[STR_NOHOME_ID]);
-		return -1;
+		return FALSE;
 	}
 
 	int fd = mkstemp(g_tmpfpath);
 
 	if (fd == -1)
-		return -1;
+		return FALSE;
 
 	dprintf(fd, "    File: '%s'", unescape(fname, 0));
 
@@ -1966,7 +1967,7 @@ static int show_stats(char *fpath, char *fname, struct stat *sb)
 	get_output(NULL, 0, "cat", g_tmpfpath, NULL, TRUE);
 	unlink(g_tmpfpath);
 	refresh();
-	return 0;
+	return TRUE;
 }
 
 static size_t get_fs_info(const char *path, bool type)
@@ -2339,13 +2340,13 @@ static int dentfind(struct entry *dents, const char *fname, int n)
 	return 0;
 }
 
-static int populate(char *path, char *lastname)
+static bool populate(char *path, char *lastname)
 {
 	/* Can fail when permissions change while browsing.
 	 * It's assumed that path IS a directory when we are here.
 	 */
 	if (access(path, R_OK) == -1)
-		return -1;
+		return FALSE;
 
 	if (cfg.blkorder) {
 		printmsg("calculating...");
@@ -2360,7 +2361,7 @@ static int populate(char *path, char *lastname)
 
 	ndents = dentfill(path, &dents);
 	if (!ndents)
-		return 0;
+		return TRUE;
 
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
 
@@ -2371,7 +2372,7 @@ static int populate(char *path, char *lastname)
 
 	/* Find cur from history */
 	cur = dentfind(dents, lastname, ndents);
-	return 0;
+	return TRUE;
 }
 
 static void redraw(char *path)
@@ -2584,7 +2585,7 @@ begin:
 	}
 #endif
 
-	if (populate(path, lastname) == -1) {
+	if (!populate(path, lastname)) {
 		printwarn();
 		goto nochange;
 	}
@@ -2928,7 +2929,7 @@ nochange:
 				errexit();
 			}
 
-			if (show_stats(newpath, dents[cur].name, &sb) < 0) {
+			if (!show_stats(newpath, dents[cur].name, &sb)) {
 				printwarn();
 				goto nochange;
 			}
@@ -3517,7 +3518,7 @@ int main(int argc, char *argv[])
 	/* Confirm we are in a terminal */
 	if (!isatty(0) || !isatty(1)) {
 		fprintf(stderr, "stdin or stdout is not a tty\n");
-		exit(1);
+		return 1;
 	}
 
 	while ((opt = getopt(argc, argv, "Slib:Cep:vh")) != -1) {
@@ -3552,7 +3553,7 @@ int main(int argc, char *argv[])
 				copier = realpath(optarg, g_cppath);
 				if (!g_cppath[0]) {
 					fprintf(stderr, "%s\n", strerror(errno));
-					exit(1);
+					return 1;
 				}
 			}
 			break;
@@ -3564,7 +3565,7 @@ int main(int argc, char *argv[])
 			return 0;
 		default:
 			usage();
-			exit(1);
+			return 1;
 		}
 	}
 
@@ -3576,7 +3577,7 @@ int main(int argc, char *argv[])
 			while (*copier && opt < CTX_MAX) {
 				if (*copier < '0' || *copier > '7') {
 					fprintf(stderr, "invalid color code\n");
-					exit(1);
+					return 1;
 				} else
 					g_ctx[opt].color = *copier - '0';
 
@@ -3594,15 +3595,15 @@ int main(int argc, char *argv[])
 	}
 
 	/* Parse bookmarks string */
-	 if (parsebmstr() < 0) {
+	 if (!parsebmstr()) {
 		fprintf(stderr, "NNN_BMS: single-char keys only\n");
-		exit(1);
+		return 1;
 	 }
 
 	if (ipath) { /* Open a bookmark directly */
 		if (ipath[1] || get_bm_loc(*ipath, cwd) == NULL) {
 			fprintf(stderr, "%s\n", messages[STR_INVBM_KEY]);
-			exit(1);
+			return 1;
 		}
 
 		ipath = cwd;
@@ -3615,7 +3616,7 @@ int main(int argc, char *argv[])
 		ipath = realpath(argv[optind], cwd);
 		if (!ipath) {
 			fprintf(stderr, "%s: no such dir\n", argv[optind]);
-			exit(1);
+			return 1;
 		}
 	}
 
@@ -3646,13 +3647,13 @@ int main(int argc, char *argv[])
 	inotify_fd = inotify_init1(IN_NONBLOCK);
 	if (inotify_fd < 0) {
 		fprintf(stderr, "inotify init! %s\n", strerror(errno));
-		exit(1);
+		return 1;
 	}
 #elif defined(BSD_KQUEUE)
 	kq = kqueue();
 	if (kq < 0) {
 		fprintf(stderr, "kqueue init! %s\n", strerror(errno));
-		exit(1);
+		return 1;
 	}
 #endif
 
@@ -3692,7 +3693,7 @@ int main(int argc, char *argv[])
 	/* Test initial path */
 	if (!xdiraccess(ipath)) {
 		fprintf(stderr, "%s: %s\n", ipath, strerror(errno));
-		exit(1);
+		return 1;
 	}
 
 	/* Set locale */
@@ -3702,7 +3703,9 @@ int main(int argc, char *argv[])
 #ifdef DEBUGMODE
 	enabledbg();
 #endif
-	initcurses();
+	if (!initcurses())
+		return 1;
+
 	browse(ipath);
 	exitcurses();
 
@@ -3732,5 +3735,5 @@ int main(int argc, char *argv[])
 #ifdef DEBUGMODE
 	disabledbg();
 #endif
-	exit(0);
+	return 0;
 }
