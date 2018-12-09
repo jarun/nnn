@@ -83,6 +83,7 @@ enum action {
 	SEL_EXEC,
 	SEL_SHELL,
 	SEL_SCRIPT,
+	SEL_RUNCMD,
 	SEL_RUNEDIT,
 	SEL_RUNPAGE,
 	SEL_LOCK,
@@ -211,13 +212,15 @@ static struct key bindings[] = {
 	/* Show help */
 	{ '?',            SEL_HELP },
 	/* Execute file */
-	{ CONTROL('S'),   SEL_EXEC },
+	{ 'C',            SEL_EXEC },
 	/* Run command */
 	{ '!',            SEL_SHELL },
 	{ CONTROL(']'),   SEL_SHELL },
 	/* Run a custom script */
 	{ 'R',            SEL_SCRIPT },
-	/* Run command with argument */
+	/* Run a command */
+	{ CONTROL('S'),   SEL_RUNCMD },
+	/* Open in EDITOR or PAGER */
 	{ 'e',            SEL_RUNEDIT },
 	{ 'p',            SEL_RUNPAGE },
 	/* Lock screen */

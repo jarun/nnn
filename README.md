@@ -116,6 +116,7 @@ We need contributors. Please visit the ToDo list.
   - Batch rename/move/delete (needs vidir)
   - Show directories in custom color (default: blue)
   - Spawn a subshell in the current directory
+  - Run a command
   - Run custom scripts in the current directory
   - Run current file as executable
   - Change directory at exit (*easy* shell integration)
@@ -248,8 +249,8 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
               t  Modification time   s  Size
  MISC
           !, ^]  Spawn SHELL in dir  o  Launch app
-              R  Run custom script  ^S  Execute entry
-              L  Lock terminal
+             ^S  Run a command       R  Run custom script
+              C  Execute entry       L  Lock terminal
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.

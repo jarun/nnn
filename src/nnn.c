@@ -1288,7 +1288,7 @@ end:
 }
 
 /* Show a prompt with input string and return the changes */
-static char *xreadline(char *fname, char *prompt)
+static char *xreadline(char *prefill, char *prompt)
 {
 	size_t len, pos;
 	int x, y, r;
@@ -1298,9 +1298,9 @@ static char *xreadline(char *fname, char *prompt)
 	cleartimeout();
 	printprompt(prompt);
 
-	if (fname) {
-		DPRINTF_S(fname);
-		len = pos = mbstowcs(buf, fname, NAME_MAX);
+	if (prefill) {
+		DPRINTF_S(prefill);
+		len = pos = mbstowcs(buf, prefill, NAME_MAX);
 	} else
 		len = (size_t)-1;
 
@@ -2060,8 +2060,8 @@ static bool show_help(char *path)
              "et  Modification time   s  Size\n"
 "1MISC\n"
          "a!, ^]  Spawn SHELL in dir  o  Launch app\n"
-             "eR  Run custom script  ^S  Execute entry\n"
-             "eL  Lock terminal\n"};
+            "d^S  Run a command       R  Run custom script\n"
+             "eC  Execute entry       L  Lock terminal\n"};
 
 	if (fd == -1)
 		return FALSE;
@@ -3368,7 +3368,8 @@ nochange:
 			if (!ndents)
 				goto nochange; // fallthrough
 		case SEL_SHELL: // fallthrough
-		case SEL_SCRIPT:
+		case SEL_SCRIPT: // fallthrough
+		case SEL_RUNCMD:
 			if (sel == SEL_EXEC) {
 				/* Check if this is a directory */
 				if (S_ISDIR(dents[cur].mode)) {
@@ -3386,35 +3387,40 @@ nochange:
 				spawn(newpath, NULL, NULL, path, F_NORMAL | F_SIGINT);
 			} else if (sel == SEL_SCRIPT) {
 				tmp = getenv("NNN_SCRIPT");
-				if (tmp) {
-					if (getenv("NNN_MULTISCRIPT")) {
-						size_t _len = xstrlcpy(newpath, tmp, PATH_MAX);
-
-						tmp = xreadline(NULL, "script suffix: ");
-						if (tmp && tmp[0])
-							xstrlcpy(newpath + _len - 1, tmp, PATH_MAX - _len);
-						tmp = newpath;
-					}
-
-					if (lstat(tmp, &sb) == -1) {
-						printwarn();
-						goto nochange;
-					}
-
-					/* Check if it's a directory */
-					if (S_ISDIR(sb.st_mode)) {
-						printmsg("directory");
-						goto nochange;
-					}
-
-					dir = NULL; /* dir used as temp var */
-					if (ndents)
-						dir = dents[cur].name;
-					spawn(shell, tmp, dir, path, F_NORMAL | F_SIGINT);
-				} else {
+				if (!tmp) {
 					printmsg("set NNN_SCRIPT");
 					goto nochange;
 				}
+
+				if (getenv("NNN_MULTISCRIPT")) {
+					size_t _len = xstrlcpy(newpath, tmp, PATH_MAX);
+
+					tmp = xreadline(NULL, "script suffix: ");
+					if (tmp && tmp[0])
+						xstrlcpy(newpath + _len - 1, tmp, PATH_MAX - _len);
+					tmp = newpath;
+				}
+
+				if (lstat(tmp, &sb) == -1) {
+					printwarn();
+					goto nochange;
+				}
+
+				/* Check if it's a directory */
+				if (S_ISDIR(sb.st_mode)) {
+					printmsg("directory");
+					goto nochange;
+				}
+
+				dir = NULL; /* dir used as temp var */
+				if (ndents)
+					dir = dents[cur].name;
+				spawn(shell, tmp, dir, path, F_NORMAL | F_SIGINT);
+			} else if (sel == SEL_RUNCMD) {
+				tmp = xreadline(NULL, "> ");
+				if (!tmp || !tmp[0])
+					goto nochange;
+				spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
 			} else
 				spawn(shell, shell_arg, NULL, path, F_NORMAL | F_MARKER);
 
