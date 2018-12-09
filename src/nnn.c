@@ -3155,24 +3155,22 @@ nochange:
 				goto nochange;
 			}
 
-			char force = confirm_force();
-
 			if (sel == SEL_CP) {
 				snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
-					 "xargs -0 -a %s -%c src cp -%cRp src .",
+					 "xargs -0 -a %s -%c src cp -iRp src .",
 #else
-					 "cat %s | xargs -0 -o -%c src cp -%cRp src .",
+					 "cat %s | xargs -0 -o -%c src cp -iRp src .",
 #endif
-					 g_cppath, REPLACE_STR, force);
+					 g_cppath, REPLACE_STR);
 			} else if (sel == SEL_MV) {
 				snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
-					 "xargs -0 -a %s -%c src mv -%c src .",
+					 "xargs -0 -a %s -%c src mv -i src .",
 #else
-					 "cat %s | xargs -0 -o -%c src mv -%c src .",
+					 "cat %s | xargs -0 -o -%c src mv -i src .",
 #endif
-					 g_cppath, REPLACE_STR, force);
+					 g_cppath, REPLACE_STR);
 			} else { /* SEL_RMMUL */
 				snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
@@ -3180,7 +3178,7 @@ nochange:
 #else
 					 "cat %s | xargs -0 -o rm -%cr",
 #endif
-					 g_cppath, force);
+					 g_cppath, confirm_force());
 			}
 
 			spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
