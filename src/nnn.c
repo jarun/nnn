@@ -3244,6 +3244,7 @@ nochange:
 				goto nochange;
 			}
 
+			/* Confirm if app is CLI or GUI */
 			if (sel == SEL_OPEN || sel == SEL_LAUNCH) {
 				r = get_input("press 'c' for cli mode");
 				(r == 'c') ? (r = F_NORMAL) : (r = F_NOWAIT | F_NOTRACE);
@@ -3297,6 +3298,7 @@ nochange:
 				break;
 			}
 
+			/* Complete OPEN, LAUNCH, ARCHIVE operations */
 			if (sel != SEL_NEW && sel != SEL_RENAME) {
 				/* Continue in navigate-as-you-type mode, if enabled */
 				if (cfg.filtermode)
@@ -3319,12 +3321,13 @@ nochange:
 			/* Check if another file with same name exists */
 			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
 				if (sel == SEL_RENAME) {
-					/* File with the same name exists */
+					/* Overwrite file with same name? */
 					if (get_input("press 'y' to overwrite") != 'y') {
 						close(fd);
 						break;
 					}
 				} else {
+					/* Do nothing in case of NEW */
 					close(fd);
 					printmsg("entry exists");
 					goto nochange;
