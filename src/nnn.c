@@ -3199,7 +3199,11 @@ nochange:
 			mkpath(path, dents[cur].name, newpath, PATH_MAX);
 			spawn("rm", rm_opts, newpath, NULL, F_NORMAL | F_SIGINT);
 
+			if (cur && access(newpath, F_OK) == -1)
+				--cur;
+
 			copycurname();
+
 			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
