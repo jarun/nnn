@@ -416,7 +416,7 @@ To use the copied paths from the cmdline, use command substitution. For example,
     # fish
     ls -ltr (cat /home/user/.nnncp)
 
-An alias may be handy:
+An alias may be handy, e.g. when you want to copy selection at the _run a command_ prompt:
 
     alias ncp='cat /home/user/.nnncp'
 
