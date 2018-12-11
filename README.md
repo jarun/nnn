@@ -557,7 +557,7 @@ To open files with this setting, press <kbd>Enter</kbd>.
 - [Hacker News](https://news.ycombinator.com/item?id=18520898)
 - [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
 - [LinuxLinks](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)
-- [Suckless Rocks listing](suckless.org/rocks/)
+- [Suckless Rocks](suckless.org/rocks/)
 - [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
 
 #### DEVELOPERS
