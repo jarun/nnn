@@ -1,0 +1,27 @@
+name: nnn
+version: git
+summary: The fastest terminal file manager ever written
+description: |
+  nnn is probably the fastest and most resource-sensitive file manager you
+  have ever used. It integrates seamlessly with your DE and favourite GUI
+  utilities, has a unique navigate-as-you-type mode with auto-select, disk
+  usage analyzer mode, bookmarks, contexts, application launcher, familiar
+  navigation shortcuts, subshell spawning and much more.
+
+grade: stable
+confinement: classic
+
+parts:
+  nnn:
+    plugin: make
+    source: .
+    build-packages:
+      - gcc
+      - libncursesw5-dev
+      - pkg-config
+    stage-packages:
+      - libncursesw5
+
+apps:
+  nnn:
+    command: usr/local/bin/nnn
