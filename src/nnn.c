@@ -3423,7 +3423,7 @@ nochange:
 			} else if (sel == SEL_RUNCMD) {
 				tmp = xreadline(NULL, "> ");
 				if (!tmp || !tmp[0])
-					goto nochange;
+					break;
 				spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
 			} else
 				spawn(shell, shell_arg, NULL, path, F_NORMAL | F_MARKER);
