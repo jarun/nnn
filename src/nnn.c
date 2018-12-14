@@ -3422,9 +3422,8 @@ nochange:
 				spawn(shell, tmp, dir, path, F_NORMAL | F_SIGINT);
 			} else if (sel == SEL_RUNCMD) {
 				tmp = xreadline(NULL, "> ");
-				if (!tmp || !tmp[0])
-					break;
-				spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
+				if (tmp && tmp[0])
+					spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
 			} else
 				spawn(shell, shell_arg, NULL, path, F_NORMAL | F_MARKER);
 
