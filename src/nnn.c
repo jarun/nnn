@@ -515,7 +515,7 @@ static rlim_t max_openfds()
  *
  * As per the docs, the *alloc() family is supposed to be memory aligned:
  * Ubuntu: http://manpages.ubuntu.com/manpages/xenial/man3/malloc.3.html
- * OS X: https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/malloc.3.html
+ * macOS: https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/malloc.3.html
  */
 static void *xrealloc(void *pcur, size_t len)
 {
@@ -554,7 +554,8 @@ static size_t xstrlcpy(char *dest, const char *src, size_t n)
 	 * To enable -O3 ensure src and dest are 16-byte aligned
 	 * More info: http://www.felixcloutier.com/x86/MOVDQA.html
 	 */
-	if ((n >= lsize) && (((ulong)src & _ALIGNMENT_MASK) == 0 && ((ulong)dest & _ALIGNMENT_MASK) == 0)) {
+	if ((n >= lsize) && (((ulong)src & _ALIGNMENT_MASK) == 0 &&
+	    ((ulong)dest & _ALIGNMENT_MASK) == 0)) {
 		s = (ulong *)src;
 		d = (ulong *)dest;
 		blocks = n >> _WSHIFT;
@@ -681,9 +682,8 @@ static char *xbasename(char *path)
 /* Writes buflen char(s) from buf to a file */
 static void writecp(const char *buf, const size_t buflen)
 {
-	if (cfg.pickraw) {
+	if (cfg.pickraw)
 		return;
-	}
 
 	if (!g_cppath[0]) {
 		printmsg(messages[STR_COPY_ID]);
