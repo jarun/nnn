@@ -137,7 +137,7 @@ Stripped binary (or script) size and memory usage of `nnn` and some other simila
 <b>   1M</b>   50496  <b>15328</b>   4076 S   0.2   vifm
 <b>   1M</b>   72152  <b>12468</b>   7336 S   0.2   mc
 <b>  70K</b>   16068  <b> 4620</b>   2408 S   0.1   ncdu
-<b>  52K</b>   15720  <b> 4200</b>   2344 S   0.1   nnn -S
+<b>  55K</b>   15720  <b> 4200</b>   2344 S   0.1   nnn -S
 </pre>
 
 Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors).
@@ -467,25 +467,13 @@ As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write 
 
 `nnn` can invoke custom scripts with the currently selected file name as argument 1.
 
-Export the path to the custom executable script:
+Export the absolute path to the directory with your scripts or a single script:
 
-    export NNN_SCRIPT=/usr/local/bin/nscript
+    export NNN_SCRIPT=/home/user/scripts
+    OR
+    export NNN_SCRIPT=/usr/local/bin/nscript.sh
 
-Press <kbd>R</kbd> to run the script in the current directory.
-
-It's possible to run multiple scripts with `nnn` as long as the scripts are in the same location and share the same prefix. To enable multiple scripts,
-
-    export NNN_MULTISCRIPT=1
-
-With the example of `NNN_SCRIPT` above, some more scripts could be:
-
-    /usr/local/bin/nscript1
-    /usr/local/bin/nscript2
-    /usr/local/bin/nscriptcustom1
-    /usr/local/bin/nscriptcustom2
-    and so on...
-
-Type the correct suffix  when prompted on pressing the keybind <kbd>R</kbd>. To use the base script (`NNN_SCRIPT`), just press <kbd>Enter</kbd>.
+Press <kbd>R</kbd> to run the script in the current directory. You can also use this key to cancel choosing a script from the script directory.
 
 ##### sample scripts
 

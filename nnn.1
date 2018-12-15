@@ -150,7 +150,7 @@ Launch an application (takes 2 combined arguments)
 .It Ic ^S
 Run a command
 .It Ic R
-Run a custom script
+Run or choose a custom script
 .It Ic C
 Execute entry
 .It Ic L
@@ -301,14 +301,11 @@ files.
     The path is shown in the help and configuration screen.
 .Ed
 .Pp
-\fBNNN_SCRIPT:\fR path to a custom script to invoke with currently selected file name as argument 1.
+\fBNNN_SCRIPT:\fR absolute path to a directory to select a script from or a single script to invoke with currently selected file name as argument 1.
 .Bd -literal
-    export NNN_SCRIPT=/usr/local/bin/nscript
-.Ed
-.Pp
-\fBNNN_MULTISCRIPT:\fR run multiple custom scripts (default: disabled).
-.Bd -literal
-    export NNN_MULTISCRIPT=1
+    export NNN_SCRIPT=/home/user/scripts
+    OR
+    export NNN_SCRIPT=/usr/local/bin/nscript.sh
 .Ed
 .Pp
 \fBNNN_SHOW_HIDDEN:\fR show hidden files.

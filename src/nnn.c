@@ -259,13 +259,15 @@ typedef struct {
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 13;
+	uint reserved   : 10;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint picker     : 1;  /* Write selection to user-specified file */
 	uint pickraw    : 1;  /* Write selection to sdtout before exit */
 	uint nonavopen  : 1;  /* Open file on right arrow or `l` */
 	uint useeditor  : 1;  /* Use VISUAL to open text files */
+	uint runscript  : 1;  /* Choose script to run mode */
+	uint runctx     : 2;  /* The context in which script is to be run */
 } settings;
 
 /* Contexts or workspaces */
@@ -281,7 +283,7 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0};
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static struct entry *dents;
@@ -2105,8 +2107,6 @@ static bool show_help(char *path)
 		dprintf(fd, "copy file: %s\n", g_cppath);
 	if (getenv("NNN_SCRIPT"))
 		dprintf(fd, "NNN_SCRIPT: %s\n", getenv("NNN_SCRIPT"));
-	if (getenv("NNN_MULTISCRIPT"))
-		dprintf(fd, "NNN_MULTISCRIPT: 1\n");
 	if (getenv("NNN_SHOW_HIDDEN"))
 		dprintf(fd, "NNN_SHOW_HIDDEN: 1\n");
 	if (getenv("NNN_NO_AUTOSELECT"))
@@ -2537,6 +2537,8 @@ static void browse(char *ipath)
 {
 	static char newpath[PATH_MAX] __attribute__ ((aligned));
 	static char mark[PATH_MAX] __attribute__ ((aligned));
+	static char rundir[PATH_MAX] __attribute__ ((aligned));
+	static char runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	char *path, *lastdir, *lastname;
 	char *dir, *tmp;
 	struct stat sb;
@@ -2549,6 +2551,7 @@ static void browse(char *ipath)
 	path = g_ctx[0].c_path;
 	xstrlcpy(g_ctx[0].c_init, ipath, PATH_MAX); /* start directory */
 	g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = newpath[0] = mark[0] = '\0';
+	rundir[0] = runfile[0] = '\0';
 	lastdir = g_ctx[0].c_last; /* last visited directory */
 	lastname = g_ctx[0].c_name; /* last visited filename */
 	g_ctx[0].c_cfg = cfg; /* current configuration */
@@ -2687,6 +2690,28 @@ nochange:
 				if (cfg.nonavopen && sel == SEL_NAV_IN)
 					continue;
 
+				/* Handle script selection mode */
+				if (cfg.runscript) {
+					if (cfg.runctx != cfg.curctx)
+						continue;
+
+					if (!getenv("NNN_SCRIPT") || strcmp(path, getenv("NNN_SCRIPT")) != 0)
+						continue;
+
+					mkpath(path, dents[cur].name, newpath, PATH_MAX);
+					xstrlcpy(path, rundir, PATH_MAX);
+					if (runfile[0]) {
+						xstrlcpy(lastname, runfile, NAME_MAX);
+						spawn(shell, newpath, lastname, path, F_NORMAL | F_SIGINT);
+						runfile[0] = '\0';
+					} else
+						spawn(shell, newpath, NULL, path, F_NORMAL | F_SIGINT);
+					rundir[0] = '\0';
+					cfg.runscript = 0;
+					setdirwatch();
+					goto begin;
+				}
+
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
 				if (cfg.useeditor &&
 				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE) &&
@@ -2749,7 +2774,6 @@ nochange:
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
-
 			xstrlcpy(path, dir, PATH_MAX);
 			lastname[0] = '\0';
 			DPRINTF_S(path);
@@ -2840,6 +2864,7 @@ nochange:
 					g_ctx[r].c_last[0] = '\0';
 					xstrlcpy(g_ctx[r].c_name, dents[cur].name, NAME_MAX + 1);
 					g_ctx[r].c_cfg = cfg;
+					g_ctx[r].c_cfg.runscript = 0;
 				}
 
 				/* Reset the pointers */
@@ -3390,36 +3415,51 @@ nochange:
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				spawn(newpath, NULL, NULL, path, F_NORMAL | F_SIGINT);
 			} else if (sel == SEL_SCRIPT) {
-				tmp = getenv("NNN_SCRIPT");
-				if (!tmp) {
+				dir = getenv("NNN_SCRIPT");
+				if (!dir) {
 					printmsg("set NNN_SCRIPT");
 					goto nochange;
 				}
 
-				if (getenv("NNN_MULTISCRIPT")) {
-					size_t _len = xstrlcpy(newpath, tmp, PATH_MAX);
-
-					tmp = xreadline(NULL, "script suffix: ");
-					if (tmp && tmp[0])
-						xstrlcpy(newpath + _len - 1, tmp, PATH_MAX - _len);
-					tmp = newpath;
-				}
-
-				if (lstat(tmp, &sb) == -1) {
+				if (stat(dir, &sb) == -1) {
 					printwarn();
 					goto nochange;
 				}
 
-				/* Check if it's a directory */
-				if (S_ISDIR(sb.st_mode)) {
-					printmsg("directory");
-					goto nochange;
-				}
+				if (!S_ISDIR(sb.st_mode)) {
+					if (ndents)
+						tmp = dents[cur].name;
+					else
+						tmp = NULL;
+					spawn(shell, dir, tmp, path, F_NORMAL | F_SIGINT);
+				} else {
+					cfg.runscript ^= 1;
+					if (!cfg.runscript && rundir[0]) {
+						/* If reset, switch to original dir */
+						if (strcmp(path, getenv("NNN_SCRIPT")) == 0) {
+							xstrlcpy(path, rundir, PATH_MAX);
+							xstrlcpy(lastname, runfile, NAME_MAX);
+							rundir[0] = '\0';
+							runfile[0] = '\0';
+							setdirwatch();
+							goto begin;
+						}
+						break;
+					}
 
-				dir = NULL; /* dir used as temp var */
-				if (ndents)
-					dir = dents[cur].name;
-				spawn(shell, tmp, dir, path, F_NORMAL | F_SIGINT);
+					/* Check if directory is accessible */
+					if (!xdiraccess(dir))
+						goto nochange;
+
+					xstrlcpy(rundir, path, PATH_MAX);
+					xstrlcpy(path, dir, PATH_MAX);
+					if (ndents)
+						xstrlcpy(runfile, dents[cur].name, NAME_MAX);
+					cfg.runctx = cfg.curctx;
+					lastname[0] = '\0';
+					setdirwatch();
+					goto begin;
+				}
 			} else if (sel == SEL_RUNCMD) {
 				tmp = xreadline(NULL, "> ");
 				if (tmp && tmp[0])
