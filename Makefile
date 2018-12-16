@@ -14,6 +14,9 @@ CFLAGS += $(CFLAGS_OPTIMIZATION)
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
 	CFLAGS += $(shell $(PKG_CONFIG) --cflags ncursesw)
 	LDLIBS += $(shell $(PKG_CONFIG) --libs   ncursesw)
+else ifeq ($(shell $(PKG_CONFIG) ncurses && echo 1),1)
+	CFLAGS += $(shell $(PKG_CONFIG) --cflags ncurses)
+	LDLIBS += $(shell $(PKG_CONFIG) --libs   ncurses)
 else
 	LDLIBS += -lncurses
 endif
