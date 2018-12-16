@@ -33,10 +33,10 @@ all: $(BIN)
 $(SRC): src/nnn.h
 
 $(BIN): $(SRC)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
 debug: $(SRC)
-	$(CC) -DDEBUGMODE -g $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS)
+	$(CC) -DDEBUGMODE -g $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS)
 
 install: all
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
