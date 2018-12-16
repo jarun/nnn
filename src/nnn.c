@@ -2913,29 +2913,63 @@ nochange:
 			if (ndents)
 				copycurname();
 			goto nochange;
-		case SEL_MFLTR:
-			cfg.filtermode ^= 1;
-			if (cfg.filtermode) {
-				presel = FILTER;
-				goto nochange;
+		case SEL_MFLTR: // fallthrough
+		case SEL_TOGGLEDOT: // fallthrough
+		case SEL_DETAIL: // fallthrough
+		case SEL_FSIZE: // fallthrough
+		case SEL_BSIZE: // fallthrough
+		case SEL_MTIME:
+			switch (sel) {
+			case SEL_MFLTR:
+				cfg.filtermode ^= 1;
+				if (cfg.filtermode) {
+					presel = FILTER;
+					goto nochange;
+				}
+
+				/* Start watching the directory */
+				dir_changed = TRUE;
+				break;
+			case SEL_TOGGLEDOT:
+				cfg.showhidden ^= 1;
+				break;
+			case SEL_DETAIL:
+				cfg.showdetail ^= 1;
+				cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
+				break;
+			case SEL_FSIZE:
+				cfg.sizeorder ^= 1;
+				cfg.mtimeorder = 0;
+				cfg.apparentsz = 0;
+				cfg.blkorder = 0;
+				cfg.copymode = 0;
+				break;
+			case SEL_BSIZE:
+				if (sel == SEL_BSIZE) {
+					if (!cfg.apparentsz)
+						cfg.blkorder ^= 1;
+					nftw_fn = &sum_bsizes;
+					cfg.apparentsz = 0;
+					BLK_SHIFT = ffs(S_BLKSIZE) - 1;
+				}
+
+				if (cfg.blkorder) {
+					cfg.showdetail = 1;
+					printptr = &printent_long;
+				}
+				cfg.mtimeorder = 0;
+				cfg.sizeorder = 0;
+				cfg.copymode = 0;
+				break;
+			default: /* SEL_MTIME */
+				cfg.mtimeorder ^= 1;
+				cfg.sizeorder = 0;
+				cfg.apparentsz = 0;
+				cfg.blkorder = 0;
+				cfg.copymode = 0;
+				break;
 			}
 
-			/* Save current */
-			if (ndents)
-				copycurname();
-
-			dir_changed = TRUE;
-			/* Start watching the directory */
-			goto begin;
-		case SEL_TOGGLEDOT:
-			cfg.showhidden ^= 1;
-			/* Save current */
-			if (ndents)
-				copycurname();
-			goto begin;
-		case SEL_DETAIL:
-			cfg.showdetail ^= 1;
-			cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
 			/* Save current */
 			if (ndents)
 				copycurname();
@@ -3020,16 +3054,6 @@ nochange:
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		}
-		case SEL_FSIZE:
-			cfg.sizeorder ^= 1;
-			cfg.mtimeorder = 0;
-			cfg.apparentsz = 0;
-			cfg.blkorder = 0;
-			cfg.copymode = 0;
-			/* Save current */
-			if (ndents)
-				copycurname();
-			goto begin;
 		case SEL_ASIZE:
 			cfg.apparentsz ^= 1;
 			if (cfg.apparentsz) {
@@ -3038,36 +3062,6 @@ nochange:
 				BLK_SHIFT = 0;
 			} else
 				cfg.blkorder = 0; // fallthrough
-		case SEL_BSIZE:
-			if (sel == SEL_BSIZE) {
-				if (!cfg.apparentsz)
-					cfg.blkorder ^= 1;
-				nftw_fn = &sum_bsizes;
-				cfg.apparentsz = 0;
-				BLK_SHIFT = ffs(S_BLKSIZE) - 1;
-			}
-
-			if (cfg.blkorder) {
-				cfg.showdetail = 1;
-				printptr = &printent_long;
-			}
-			cfg.mtimeorder = 0;
-			cfg.sizeorder = 0;
-			cfg.copymode = 0;
-			/* Save current */
-			if (ndents)
-				copycurname();
-			goto begin;
-		case SEL_MTIME:
-			cfg.mtimeorder ^= 1;
-			cfg.sizeorder = 0;
-			cfg.apparentsz = 0;
-			cfg.blkorder = 0;
-			cfg.copymode = 0;
-			/* Save current */
-			if (ndents)
-				copycurname();
-			goto begin;
 		case SEL_COPY:
 			if (!ndents)
 				goto nochange;
