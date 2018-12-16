@@ -2062,9 +2062,9 @@ static bool show_help(char *path)
             "d^J  Disk usage          S  Apparent du\n"
              "et  Modification time   s  Size\n"
 "1MISC\n"
-         "a!, ^]  Spawn SHELL in dir  o  Launch app\n"
-            "d^S  Run a command       R  Run custom script\n"
-             "eC  Execute entry       L  Lock terminal\n"};
+         "a!, ^]  Spawn SHELL in dir  C  Execute entry\n"
+             "eR  Run custom script   L  Lock terminal\n"
+            "d^S  Run a command\n"};
 
 	if (fd == -1)
 		return FALSE;
@@ -3233,15 +3233,9 @@ nochange:
 		case SEL_RENAME:
 			if (!ndents)
 				break; // fallthrough
-		case SEL_LAUNCH: // fallthrough
 		case SEL_NEW:
 		{
-			char *ptr = NULL, *ptr1 = NULL, *ptr2 = NULL;
-
 			switch (sel) {
-			case SEL_LAUNCH:
-				tmp = xreadline(NULL, "launch: ");
-				break;
 			case SEL_ARCHIVE:
 				tmp = xreadline(dents[cur].name, "name: ");
 				break;
@@ -3260,43 +3254,18 @@ nochange:
 				break;
 
 			/* Allow only relative, same dir paths */
-			if ((sel != SEL_LAUNCH) &&
-			    (tmp[0] == '/' || strcmp(xbasename(tmp), tmp) != 0)) {
+			if (tmp[0] == '/' || strcmp(xbasename(tmp), tmp) != 0) {
 				printmsg(messages[STR_INPUT_ID]);
 				goto nochange;
 			}
 
 			/* Confirm if app is CLI or GUI */
-			if (sel == SEL_OPEN || sel == SEL_LAUNCH) {
+			if (sel == SEL_OPEN) {
 				r = get_input("press 'c' for cli mode");
 				(r == 'c') ? (r = F_NORMAL) : (r = F_NOWAIT | F_NOTRACE);
 			}
 
 			switch (sel) {
-			case SEL_LAUNCH:
-			{
-				uint args = 0;
-				ptr = tmp;
-
-				while (*ptr) {
-					if (isblank(*ptr)) {
-						*ptr = '\0';
-						if (args == 0)
-							ptr1 = ptr + 1;
-						else if (args == 1)
-							ptr2 = ptr + 1;
-						else
-							break;
-
-						++args;
-					}
-
-					++ptr;
-				}
-
-				spawn(tmp, ptr1, ptr2, path, r);
-				break;
-			}
 			case SEL_ARCHIVE:
 				/* newpath is used as temporary buffer */
 				if (!getutil(utils[APACK])) {
@@ -3307,9 +3276,9 @@ nochange:
 				spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
 				break;
 			case SEL_OPEN:
-				getprogarg(tmp, &ptr);
+				getprogarg(tmp, &dir); /* dir used as tmp var */
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
-				spawn(tmp, ptr, newpath, path, r);
+				spawn(tmp, dir, newpath, path, r);
 				break;
 			case SEL_RENAME:
 				/* Skip renaming to same name */

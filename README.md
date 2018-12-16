@@ -71,6 +71,7 @@ We need contributors. Please visit the ToDo list.
   - [(neo)vim plugin](#neovim-plugin)
   - [run custom scripts](#run-custom-scripts)
     - [sample scripts](#sample-scripts)
+  - [launch applications](#launch-applications)
   - [change dir color](#change-dir-color)
   - [integrate patool](#integrate-patool)
   - [lftp transfers](#lftp-transfers)
@@ -116,12 +117,11 @@ We need contributors. Please visit the ToDo list.
   - Batch rename/move/delete (needs vidir)
   - Show directories in custom color (default: blue)
   - Spawn a subshell in the current directory
-  - Run a command
+  - Run a command, launch applications
   - Run custom scripts in the current directory
   - Run current file as executable
   - Change directory at exit (*easy* shell integration)
   - Edit file in EDITOR or open in PAGER
-  - Application launcher
   - Terminal locker integration
 - Unicode support
 - Highly optimized, static analysis integrated code
@@ -248,9 +248,9 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
              ^J  Disk usage          S  Apparent du
               t  Modification time   s  Size
  MISC
-          !, ^]  Spawn SHELL in dir  o  Launch app
-             ^S  Run a command       R  Run custom script
-              C  Execute entry       L  Lock terminal
+          !, ^]  Spawn SHELL in dir  C  Execute entry
+              R  Run custom script   L  Lock terminal
+             ^S  Run a command
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
@@ -353,7 +353,7 @@ Arguments to the `$EDITOR`, `$PAGER` and `$SHELL` should be combined together, e
 
     export EDITOR='vim -xR'
 
-The option `open with` takes 1 combined argument and `launcher` takes 2.
+The option `open with` takes 1 combined argument.
 
 #### Help
 
@@ -488,6 +488,10 @@ Press <kbd>R</kbd> to run the script in the current directory. You can also use 
       #!/usr/bin/env sh
 
       xdg-open $(find -type f | fzy) >/dev/null 2>&1
+
+#### launch applications
+
+Applications can be launched from the _run a command_ prompt. Use `&` to launch GUI applications in the background.
 
 #### change dir color
 

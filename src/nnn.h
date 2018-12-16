@@ -59,7 +59,6 @@ enum action {
 	SEL_STATS,
 	SEL_MEDIA,
 	SEL_FMEDIA,
-	SEL_LAUNCH,
 	SEL_ARCHIVE,
 	SEL_ARCHIVELS,
 	SEL_EXTRACT,
@@ -167,8 +166,6 @@ static struct key bindings[] = {
 	{ 'm',            SEL_MEDIA },
 	/* Show media info full, run is hacked */
 	{ 'M',            SEL_FMEDIA },
-	/* Launch a GUI application */
-	{ 'o',            SEL_LAUNCH },
 	/* Create archive */
 	{ 'f',            SEL_ARCHIVE },
 	/* List archive */
