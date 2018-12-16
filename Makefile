@@ -8,18 +8,21 @@ INSTALL ?= install
 
 CFLAGS_OPTIMIZATION ?= -O3
 
+ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
+	CFLAGS_CURSES ?= $(shell $(PKG_CONFIG) --cflags ncursesw)
+	LDLIBS_CURSES ?= $(shell $(PKG_CONFIG) --libs   ncursesw)
+else ifeq ($(shell $(PKG_CONFIG) ncurses && echo 1),1)
+	CFLAGS_CURSES ?= $(shell $(PKG_CONFIG) --cflags ncurses)
+	LDLIBS_CURSES ?= $(shell $(PKG_CONFIG) --libs   ncurses)
+else
+	LDLIBS_CURSES ?= -lncurses
+endif
+
 CFLAGS += -Wall -Wextra -Wno-unused-parameter
 CFLAGS += $(CFLAGS_OPTIMIZATION)
+CFLAGS += $(CFLAGS_CURSES)
 
-ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
-	CFLAGS += $(shell $(PKG_CONFIG) --cflags ncursesw)
-	LDLIBS += $(shell $(PKG_CONFIG) --libs   ncursesw)
-else ifeq ($(shell $(PKG_CONFIG) ncurses && echo 1),1)
-	CFLAGS += $(shell $(PKG_CONFIG) --cflags ncurses)
-	LDLIBS += $(shell $(PKG_CONFIG) --libs   ncurses)
-else
-	LDLIBS += -lncurses
-endif
+LDLIBS += $(LDLIBS_CURSES)
 
 DISTFILES = src nnn.1 Makefile README.md LICENSE
 SRC = src/nnn.c
