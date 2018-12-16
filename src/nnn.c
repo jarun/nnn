@@ -3229,7 +3229,7 @@ nochange:
 			goto begin;
 		}
 		case SEL_ARCHIVE: // fallthrough
-		case SEL_OPEN: // fallthrough
+		case SEL_OPENWITH: // fallthrough
 		case SEL_RENAME:
 			if (!ndents)
 				break; // fallthrough
@@ -3239,7 +3239,7 @@ nochange:
 			case SEL_ARCHIVE:
 				tmp = xreadline(dents[cur].name, "name: ");
 				break;
-			case SEL_OPEN:
+			case SEL_OPENWITH:
 				tmp = xreadline(NULL, "open with: ");
 				break;
 			case SEL_NEW:
@@ -3260,7 +3260,7 @@ nochange:
 			}
 
 			/* Confirm if app is CLI or GUI */
-			if (sel == SEL_OPEN) {
+			if (sel == SEL_OPENWITH) {
 				r = get_input("press 'c' for cli mode");
 				(r == 'c') ? (r = F_NORMAL) : (r = F_NOWAIT | F_NOTRACE);
 			}
@@ -3275,7 +3275,7 @@ nochange:
 
 				spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
 				break;
-			case SEL_OPEN:
+			case SEL_OPENWITH:
 				getprogarg(tmp, &dir); /* dir used as tmp var */
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				spawn(tmp, dir, newpath, path, r);

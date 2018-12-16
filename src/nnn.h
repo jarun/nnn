@@ -74,7 +74,7 @@ enum action {
 	SEL_MV,
 	SEL_RMMUL,
 	SEL_RM,
-	SEL_OPEN,
+	SEL_OPENWITH,
 	SEL_NEW,
 	SEL_RENAME,
 	SEL_RENAMEALL,
@@ -199,7 +199,7 @@ static struct key bindings[] = {
 	/* Delete currently selected */
 	{ CONTROL('X'),   SEL_RM },
 	/* Open in a custom application */
-	{ CONTROL('O'),   SEL_OPEN },
+	{ CONTROL('O'),   SEL_OPENWITH },
 	/* Create a new file */
 	{ 'n',            SEL_NEW },
 	/* Show rename prompt */
