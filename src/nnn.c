@@ -2806,11 +2806,12 @@ nochange:
 			DPRINTF_S(path);
 			setdirwatch();
 			goto begin;
-		case SEL_LEADER:
-			fd = get_input(NULL); // fallthrough
+		case SEL_LEADER: // fallthrough
 		case SEL_CYCLE:
 			if (sel == SEL_CYCLE)
 				fd = '>';
+			else
+				fd = get_input(NULL);
 
 			switch (fd) {
 			case 'q': // fallthrough
@@ -2996,12 +2997,10 @@ nochange:
 				r = TRUE;
 				spawn(pager, pager_arg, dents[cur].name, path, F_NORMAL);
 				break;
-			case SEL_LOCK:
+			default: /* SEL_LOCK */
 				r = TRUE;
 				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
 				break;
-			default: /* unreachable */
-				goto nochange;
 			}
 
 			if (!r) {
@@ -3246,20 +3245,20 @@ nochange:
 			char *ptr = NULL, *ptr1 = NULL, *ptr2 = NULL;
 
 			switch (sel) {
-			case SEL_OPEN:
-				tmp = xreadline(NULL, "open with: ");
-				break;
-			case SEL_RENAME:
-				tmp = xreadline(dents[cur].name, "");
-				break;
 			case SEL_LAUNCH:
 				tmp = xreadline(NULL, "launch: ");
 				break;
 			case SEL_ARCHIVE:
 				tmp = xreadline(dents[cur].name, "name: ");
 				break;
-			default:
+			case SEL_OPEN:
+				tmp = xreadline(NULL, "open with: ");
+				break;
+			case SEL_NEW:
 				tmp = xreadline(NULL, "name: ");
+				break;
+			default: /* SEL_RENAME */
+				tmp = xreadline(dents[cur].name, "");
 				break;
 			}
 
@@ -3280,16 +3279,6 @@ nochange:
 			}
 
 			switch (sel) {
-			case SEL_OPEN:
-				getprogarg(tmp, &ptr);
-				mkpath(path, dents[cur].name, newpath, PATH_MAX);
-				spawn(tmp, ptr, newpath, path, r);
-				break;
-			case SEL_RENAME:
-				/* Skip renaming to same name */
-				if (strcmp(tmp, dents[cur].name) == 0)
-					goto nochange;
-				break;
 			case SEL_LAUNCH:
 			{
 				uint args = 0;
@@ -3322,6 +3311,16 @@ nochange:
 				}
 
 				spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
+				break;
+			case SEL_OPEN:
+				getprogarg(tmp, &ptr);
+				mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				spawn(tmp, ptr, newpath, path, r);
+				break;
+			case SEL_RENAME:
+				/* Skip renaming to same name */
+				if (strcmp(tmp, dents[cur].name) == 0)
+					goto nochange;
 				break;
 			default:
 				break;
@@ -3436,12 +3435,12 @@ nochange:
 				if (S_ISDIR(sb.st_mode)) {
 					cfg.runscript ^= 1;
 					if (!cfg.runscript && rundir[0]) {
-						/* If toggled, switch to original directory */
+						/* If toggled, and still in the script dir,
+						   switch to original directory */
 						if (strcmp(path, runpath) == 0) {
 							xstrlcpy(path, rundir, PATH_MAX);
 							xstrlcpy(lastname, runfile, NAME_MAX);
-							rundir[0] = '\0';
-							runfile[0] = '\0';
+							rundir[0] = runfile[0] = '\0';
 							setdirwatch();
 							goto begin;
 						}
