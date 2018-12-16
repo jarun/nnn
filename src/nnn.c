@@ -2536,10 +2536,10 @@ static void redraw(char *path)
 
 static void browse(char *ipath)
 {
-	static char newpath[PATH_MAX] __attribute__ ((aligned));
-	static char mark[PATH_MAX] __attribute__ ((aligned));
-	static char rundir[PATH_MAX] __attribute__ ((aligned));
-	static char runfile[NAME_MAX + 1] __attribute__ ((aligned));
+	char newpath[PATH_MAX] __attribute__ ((aligned));
+	char mark[PATH_MAX] __attribute__ ((aligned));
+	char rundir[PATH_MAX] __attribute__ ((aligned));
+	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	char *path, *lastdir, *lastname;
 	char *dir, *tmp;
 	struct stat sb;
@@ -2610,7 +2610,7 @@ begin:
 	}
 #endif
 
-	for (;;) {
+	while (1) {
 		redraw(path);
 nochange:
 		/* Exit if parent has exited */
@@ -3368,7 +3368,7 @@ nochange:
 
 				/* Check if this is a directory */
 				if (!S_ISREG(dents[cur].mode)) {
-					printmsg("not a regular file");
+					printmsg("not regular file");
 					goto nochange;
 				}
 
@@ -3430,9 +3430,6 @@ nochange:
 					else
 						tmp = NULL;
 					spawn(shell, runpath, tmp, path, F_NORMAL | F_SIGINT);
-				} else {
-					printmsg("unsupported file");
-					goto nochange;
 				}
 				break;
 			default: /* SEL_RUNCMD */
@@ -3548,7 +3545,7 @@ static void usage(void)
 
 int main(int argc, char *argv[])
 {
-	static char cwd[PATH_MAX] __attribute__ ((aligned));
+	char cwd[PATH_MAX] __attribute__ ((aligned));
 	char *ipath = NULL;
 	int opt;
 
