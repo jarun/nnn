@@ -295,6 +295,7 @@ static char *copier;
 static char *editor, *editor_arg;
 static char *pager, *pager_arg;
 static char *shell, *shell_arg;
+static char *runpath;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -2105,8 +2106,8 @@ static bool show_help(char *path)
 		dprintf(fd, "NNN_COPIER: %s\n", copier);
 	else if (g_cppath[0])
 		dprintf(fd, "copy file: %s\n", g_cppath);
-	if (getenv("NNN_SCRIPT"))
-		dprintf(fd, "NNN_SCRIPT: %s\n", getenv("NNN_SCRIPT"));
+	if (runpath)
+		dprintf(fd, "NNN_SCRIPT: %s\n", runpath);
 	if (getenv("NNN_SHOW_HIDDEN"))
 		dprintf(fd, "NNN_SHOW_HIDDEN: 1\n");
 	if (getenv("NNN_NO_AUTOSELECT"))
@@ -2695,7 +2696,8 @@ nochange:
 					if (cfg.runctx != cfg.curctx)
 						continue;
 
-					if (!getenv("NNN_SCRIPT") || strcmp(path, getenv("NNN_SCRIPT")) != 0)
+					/* Must be in script directory to select script */
+					if (strcmp(path, runpath) != 0)
 						continue;
 
 					mkpath(path, dents[cur].name, newpath, PATH_MAX);
@@ -3393,50 +3395,49 @@ nochange:
 			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
 		}
-		case SEL_EXEC:
-			if (!ndents)
-				goto nochange; // fallthrough
+		case SEL_EXEC: // fallthrough
 		case SEL_SHELL: // fallthrough
 		case SEL_SCRIPT: // fallthrough
 		case SEL_RUNCMD:
-			if (sel == SEL_EXEC) {
+			switch (sel) {
+			case SEL_EXEC:
+				if (!ndents)
+					goto nochange;
+
 				/* Check if this is a directory */
-				if (S_ISDIR(dents[cur].mode)) {
-					printmsg("directory");
+				if (!S_ISREG(dents[cur].mode)) {
+					printmsg("not a regular file");
 					goto nochange;
 				}
 
 				/* Check if file is executable */
 				if (!(dents[cur].mode & 0100)) {
-					printmsg("Permission denied");
+					printmsg("permission denied");
 					goto nochange;
 				}
 
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				spawn(newpath, NULL, NULL, path, F_NORMAL | F_SIGINT);
-			} else if (sel == SEL_SCRIPT) {
-				dir = getenv("NNN_SCRIPT");
-				if (!dir) {
+				break;
+			case SEL_SHELL:
+				spawn(shell, shell_arg, NULL, path, F_NORMAL | F_MARKER);
+				break;
+			case SEL_SCRIPT:
+				if (!runpath) {
 					printmsg("set NNN_SCRIPT");
 					goto nochange;
 				}
 
-				if (stat(dir, &sb) == -1) {
+				if (stat(runpath, &sb) == -1) {
 					printwarn();
 					goto nochange;
 				}
 
-				if (!S_ISDIR(sb.st_mode)) {
-					if (ndents)
-						tmp = dents[cur].name;
-					else
-						tmp = NULL;
-					spawn(shell, dir, tmp, path, F_NORMAL | F_SIGINT);
-				} else {
+				if (S_ISDIR(sb.st_mode)) {
 					cfg.runscript ^= 1;
 					if (!cfg.runscript && rundir[0]) {
-						/* If reset, switch to original dir */
-						if (strcmp(path, getenv("NNN_SCRIPT")) == 0) {
+						/* If toggled, switch to original directory */
+						if (strcmp(path, runpath) == 0) {
 							xstrlcpy(path, rundir, PATH_MAX);
 							xstrlcpy(lastname, runfile, NAME_MAX);
 							rundir[0] = '\0';
@@ -3448,11 +3449,11 @@ nochange:
 					}
 
 					/* Check if directory is accessible */
-					if (!xdiraccess(dir))
+					if (!xdiraccess(runpath))
 						goto nochange;
 
 					xstrlcpy(rundir, path, PATH_MAX);
-					xstrlcpy(path, dir, PATH_MAX);
+					xstrlcpy(path, runpath, PATH_MAX);
 					if (ndents)
 						xstrlcpy(runfile, dents[cur].name, NAME_MAX);
 					cfg.runctx = cfg.curctx;
@@ -3460,12 +3461,23 @@ nochange:
 					setdirwatch();
 					goto begin;
 				}
-			} else if (sel == SEL_RUNCMD) {
+
+				if (S_ISREG(sb.st_mode)) {
+					if (ndents)
+						tmp = dents[cur].name;
+					else
+						tmp = NULL;
+					spawn(shell, runpath, tmp, path, F_NORMAL | F_SIGINT);
+				} else {
+					printmsg("unsupported file");
+					goto nochange;
+				}
+				break;
+			default: /* SEL_RUNCMD */
 				tmp = xreadline(NULL, "> ");
 				if (tmp && tmp[0])
 					spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
-			} else
-				spawn(shell, shell_arg, NULL, path, F_NORMAL | F_MARKER);
+			}
 
 			/* Continue in navigate-as-you-type mode, if enabled */
 			if (cfg.filtermode)
@@ -3704,6 +3716,9 @@ int main(int argc, char *argv[])
 	/* Get SHELL */
 	shell = xgetenv("SHELL", "sh");
 	getprogarg(shell, &shell_arg);
+
+	/* Setup script execution */
+	runpath = getenv("NNN_SCRIPT");
 
 #ifdef LINUX_INOTIFY
 	/* Initialize inotify */
