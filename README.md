@@ -27,7 +27,7 @@ Noice is Not Noice, a noicer fork...
 
 [Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, transfer selected files using lftp or use it as a [(neo)vim plugin](https://github.com/jarun/nnn#neovim-plugin); `nnn` supports as many scripts as you need!
 
-It runs on Linux, macOS, BSD, Cygwin, Linux subsystem for Windows, Termux, and more.
+It runs on Linux, macOS, BSD, Cygwin, Linux subsystem for Windows and Termux.
 
 [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions.
 
@@ -146,7 +146,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 
 #### Dependencies
 
-`nnn` needs curses with wide character support (like ncursesw) and standard libc.
+`nnn` needs a curses library with wide character support (like ncursesw) and standard libc.
 
 #### From a package manager
 
