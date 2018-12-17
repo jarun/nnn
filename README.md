@@ -27,7 +27,7 @@ Noice is Not Noice, a noicer fork...
 
 [Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, transfer selected files using lftp or use it as a [(neo)vim plugin](https://github.com/jarun/nnn#neovim-plugin); `nnn` supports as many scripts as you need!
 
-It runs on Linux, macOS, Raspberry Pi, Cygwin, Linux subsystem for Windows and Termux.
+It runs on Linux, macOS, BSD, Cygwin, Linux subsystem for Windows and Termux.
 
 [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions.
 
@@ -146,7 +146,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 
 #### Dependencies
 
-`nnn` needs libncursesw (on Linux or ncurses on macOS) and standard libc.
+`nnn` needs a curses library with wide character support (like ncursesw) and standard libc.
 
 #### From a package manager
 
@@ -159,6 +159,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 - [NixOS](https://github.com/NixOS/nixpkgs/tree/master/pkgs/applications/misc/nnn) (`nix-env -i nnn`)
 - [OpenBSD](https://cvsweb.openbsd.org/cgi-bin/cvsweb/ports/sysutils/nnn/) (`pkg_add nnn`)
 - [openSUSE](https://software.opensuse.org/package/nnn) (and packages for several other distros) (`zypper in nnn`)
+- [pkgrsc](http://pkgsrc.se/sysutils/nnn) (`pkg_add nnn`)
 - [Raspbian Testing](https://archive.raspbian.org/raspbian/pool/main/n/nnn/) (`apt-get install nnn`)
 - [Slackware](http://slackbuilds.org/repository/14.2/system/nnn/) (`slackpkg install nnn`)
 - [Solus](https://packages.getsol.us/shannon/n/nnn/) (`eopkg install nnn`)
