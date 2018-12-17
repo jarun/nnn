@@ -146,7 +146,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 
 #### Dependencies
 
-`nnn` needs libncursesw (on Linux or ncurses on macOS) and standard libc.
+`nnn` needs curses with wide character support (like ncursesw) and standard libc.
 
 #### From a package manager
 
