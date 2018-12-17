@@ -3548,12 +3548,6 @@ int main(int argc, char *argv[])
 	char *ipath = NULL;
 	int opt;
 
-	/* Confirm we are in a terminal */
-	if (!isatty(0) || !isatty(1)) {
-		fprintf(stderr, "stdin or stdout is not a tty\n");
-		return 1;
-	}
-
 	while ((opt = getopt(argc, argv, "Slib:Cep:vh")) != -1) {
 		switch (opt) {
 		case 'S':
@@ -3600,6 +3594,12 @@ int main(int argc, char *argv[])
 			usage();
 			return 1;
 		}
+	}
+
+	/* Confirm we are in a terminal */
+	if (!isatty(0) || !isatty(1)) {
+		fprintf(stderr, "stdin or stdout is not a tty\n");
+		return 1;
 	}
 
 	/* Get the context colors; copier used as tmp var */
