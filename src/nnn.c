@@ -1405,8 +1405,8 @@ END:
 
 	buf[len] = '\0';
 	DPRINTF_S(buf);
-	wcstombs(g_buf + ((NAME_MAX + 1) << 4), buf, NAME_MAX);
-	return g_buf + ((NAME_MAX + 1) << 4);
+	wcstombs(g_buf + ((NAME_MAX + 1) << 2), buf, NAME_MAX);
+	return g_buf + ((NAME_MAX + 1) << 2);
 }
 
 /*
