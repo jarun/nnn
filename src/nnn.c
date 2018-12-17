@@ -1913,12 +1913,11 @@ static bool show_stats(char *fpath, char *fname, struct stat *sb)
 #endif
 
 	/* Show containing device, inode, hardlink count */
+	snprintf(g_buf, 32, "%lxh/%lud", (ulong)sb->st_dev, (ulong)sb->st_dev);
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
-	snprintf(g_buf, 32, "%xh/%ud", sb->st_dev, sb->st_dev);
 	dprintf(fd, "\n  Device: %-15s Inode: %-11llu Links: %-9hu",
 		g_buf, (unsigned long long)sb->st_ino, sb->st_nlink);
 #else
-	snprintf(g_buf, 32, "%lxh/%lud", (ulong)sb->st_dev, (ulong)sb->st_dev);
 	dprintf(fd, "\n  Device: %-15s Inode: %-11lu Links: %-9lu",
 		g_buf, sb->st_ino, (ulong)sb->st_nlink);
 #endif
