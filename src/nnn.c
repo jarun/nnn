@@ -3602,9 +3602,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	printf("%d\n", CMD_LEN_MAX);
-	return 0;
-
 	/* Get the context colors; copier used as tmp var */
 	if (cfg.showcolor) {
 		copier = getenv("NNN_CONTEXT_COLORS");
