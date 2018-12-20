@@ -165,7 +165,7 @@ disabledbg()
 #define ISODD(x) ((x) & 1)
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
-#define CMD_LEN_MAX 5120
+#define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
 #define CURSR " > "
 #define EMPTY "   "
 #define CURSYM(flag) ((flag) ? CURSR : EMPTY)
@@ -3601,6 +3601,9 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "stdin or stdout is not a tty\n");
 		return 1;
 	}
+
+	printf("%d\n", CMD_LEN_MAX);
+	return 0;
 
 	/* Get the context colors; copier used as tmp var */
 	if (cfg.showcolor) {
