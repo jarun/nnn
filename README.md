@@ -17,9 +17,9 @@ Noice is Not Noice, a noicer fork...
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
-[![nnn screencast](https://i.imgur.com/wNtI24c.jpg)](https://vimeo.com/233223942 "Click to see nnn in action!")
+[![nnn video](https://i.imgur.com/pDyq5oa.jpg)](https://www.youtube.com/watch?v=U2n5aGqou9E "Click to see nnn in action!")
 
-<p align="center"><i>nnn in action! (click to play video)</i></a></p>
+<p align="center"><i>nnn in action! (Courtesy Luke Smith)</i></a></p>
 
 - [x] [Next release highlights & ToDo list](https://github.com/jarun/nnn/issues/137)
 
