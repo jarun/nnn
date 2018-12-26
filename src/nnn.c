@@ -397,7 +397,6 @@ static const char messages[][16] = {
 /* Forward declarations */
 static void redraw(char *path);
 static void spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uchar flag);
-static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, bool page);
 int (*nftw_fn) (const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 
 /* Functions */
