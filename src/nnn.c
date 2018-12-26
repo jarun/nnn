@@ -3269,6 +3269,7 @@ nochange:
 				spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
 				break;
 			case SEL_OPENWITH:
+				dir = NULL;
 				getprogarg(tmp, &dir); /* dir used as tmp var */
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 				spawn(tmp, dir, newpath, path, r);
