@@ -396,6 +396,7 @@ static const char messages[][16] = {
 
 /* Forward declarations */
 static void redraw(char *path);
+static void spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uchar flag);
 static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, bool page);
 int (*nftw_fn) (const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 
@@ -771,11 +772,9 @@ static bool showcplist()
 	pos = selectiontofd(fd);
 
 	close(fd);
-	exitcurses();
 	if (pos && pos == copybufpos)
-		get_output(NULL, 0, "cat", g_tmpfpath, NULL, TRUE);
+		spawn(pager, pager_arg, g_tmpfpath, NULL, F_NORMAL);
 	unlink(g_tmpfpath);
-	refresh();
 	return TRUE;
 }
 
@@ -1965,10 +1964,8 @@ static bool show_stats(char *fpath, char *fname, struct stat *sb)
 
 	close(fd);
 
-	exitcurses();
-	get_output(NULL, 0, "cat", g_tmpfpath, NULL, TRUE);
+	spawn(pager, pager_arg, g_tmpfpath, NULL, F_NORMAL);
 	unlink(g_tmpfpath);
-	refresh();
 	return TRUE;
 }
 
@@ -2132,10 +2129,8 @@ static bool show_help(char *path)
 	dprintf(fd, "\nVersion: %s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
 
-	exitcurses();
-	get_output(NULL, 0, "cat", g_tmpfpath, NULL, TRUE);
+	spawn(pager, pager_arg, g_tmpfpath, NULL, F_NORMAL);
 	unlink(g_tmpfpath);
-	refresh();
 	return TRUE;
 }
 
