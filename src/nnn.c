@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2014-2016, Lazaros Koromilas <lostd@2f30.org>
  * Copyright (c) 2014-2016, Dimitris Papastamos <sin@2f30.org>
- * Copyright (c) 2016-2018, Arun Prakash Jana <engineerarun@gmail.com>
+ * Copyright (c) 2016-2019, Arun Prakash Jana <engineerarun@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -156,7 +156,7 @@ disabledbg()
 #endif /* DEBUGMODE */
 
 /* Macro definitions */
-#define VERSION "2.1"
+#define VERSION "2.2"
 #define GENERAL_INFO "License: BSD 2-Clause\nWebpage: https://github.com/jarun/nnn"
 
 #define LEN(x) (sizeof(x) / sizeof(*(x)))

@@ -1,3 +1,33 @@
+nnn v2.2
+2019-01-01
+
+What's in?
+- (neo)vim plugin [nnn.vim](github.com/mcchrish/nnn.vim)
+- macOS fixes
+  - Fix issues with file copy, move, remove
+  - Handle <kbd>Del</kbd> in rename prompt
+  - Pass correct `file` option to identify mime
+- Support selection across directories and contexts
+- Offer option `force` before file remove
+- Keys <kbd>Tab</kbd>, <kbd>^I</kbd> to go to next active context
+- Per-context directory color specified by `$NNN_CONTEXT_COLORS`
+  - Option `-c` is removed
+- Option `-C` to disable colors
+- Choose script to run from a script directory
+- Run a command (or launch an application)
+- Run file as executable <kbd>C</kbd>
+- Documentation on lftp integration for remote file transfers
+- Support a _combined_ set of arguments to `$EDITOR`, `$PAGER` and `$SHELL`
+- Handle > 2 GB files on 32-bit ARM
+- Env var `$DISABLE_FILE_OPEN_ON_NAV` to disable file open on <kbd>Right</kbd> or <kbd>l</kbd>
+- `NUL`-terminated file paths in selection list instead of `LF`
+- Better support for Termux and Cygwin environments
+- Remapped keys
+  - <kbd>^I</kbd> - go to next active context
+  - <kbd>^T</kbd> - toggle _navigate-as-you-type_
+
+-------------------------------------------------------------------------------
+
 nnn v2.1
 2018-11-23
 

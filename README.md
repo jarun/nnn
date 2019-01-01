@@ -557,4 +557,4 @@ To open files with this setting, press <kbd>Enter</kbd>.
 
 1. Copyright © 2014-2016 Lazaros Koromilas
 2. Copyright © 2014-2016 Dimitris Papastamos
-3. Copyright © 2016-2018 [Arun Prakash Jana](https://github.com/jarun)
+3. Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)

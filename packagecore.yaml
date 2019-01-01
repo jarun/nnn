@@ -88,6 +88,14 @@ packages:
       - ncurses-devel
     deps:
       - ncurses
+  fedora29:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+    deps:
+      - ncurses
 #  opensuse42.3:
 #    builddeps:
 #      - make
