@@ -2,7 +2,7 @@ nnn v2.2
 2019-01-01
 
 What's in?
-- (neo)vim plugin [nnn.vim](github.com/mcchrish/nnn.vim)
+- (neo)vim plugin [nnn.vim](https://github.com/mcchrish/nnn.vim)
 - macOS fixes
   - Fix issues with file copy, move, remove
   - Handle <kbd>Del</kbd> in rename prompt
@@ -15,7 +15,7 @@ What's in?
 - Option `-C` to disable colors
 - Choose script to run from a script directory
 - Run a command (or launch an application)
-- Run file as executable <kbd>C</kbd>
+- Run file as executable (key <kbd>C</kbd>)
 - Documentation on lftp integration for remote file transfers
 - Support a _combined_ set of arguments to `$EDITOR`, `$PAGER` and `$SHELL`
 - Handle > 2 GB files on 32-bit ARM
