@@ -19,9 +19,7 @@ Noice is Not Noice, a noicer fork...
 
 [![nnn video](https://i.imgur.com/pDyq5oa.jpg)](https://www.youtube.com/watch?v=U2n5aGqou9E "Click to see nnn in action!")
 
-<p align="center"><i>nnn in action! (Courtesy Luke Smith)</i></a></p>
-
-- [x] [Next release highlights & ToDo list](https://github.com/jarun/nnn/issues/137)
+<p align="center"><i>nnn in action! (Thanks Luke Smith for the video!)</i></a></p>
 
 `nnn` is probably the [fastest and most resource-sensitive](#comparison) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
 
