@@ -29,7 +29,9 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 
 [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions.
 
-We need contributors. Please visit the ToDo list.
+We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/137).
+
+If you are using custom scripts which you would like to share with others, please raise a PR to add them under [user-scripts](https://github.com/jarun/nnn/tree/master/scripts/user-scripts).
 
 *Love smart and efficient utilities? Explore [my repositories](https://github.com/jarun?tab=repositories). Buy me a cup of coffee if they help you.*
 
@@ -449,6 +451,8 @@ Set an easy to remember alias:
 To get the list in a file:
 
     ncp > out.txt
+
+To use `nnn` as a file picker and redirect the output to other programs, please see [issue #183](https://github.com/jarun/nnn/issues/183).
 
 #### cd on quit
 
