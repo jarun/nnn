@@ -431,7 +431,7 @@ so you can easily handle files together:
 
 ##### to clipboard
 
-Along with default copy, `nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on macOS. Here's a sample [copier script](https://github.com/jarun/nnn/tree/master/scripts/copier).
+Along with default copy, `nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on macOS. Here's a sample [copier script](https://github.com/jarun/nnn/blob/master/scripts/user-scripts/copier.sh).
 
 To inform `nnn` of the executable copier script location:
 
