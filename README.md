@@ -31,8 +31,6 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 
 We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/137).
 
-If you are using custom scripts which you would like to share with others, please raise a PR to add them under [user-scripts](https://github.com/jarun/nnn/tree/master/scripts/user-scripts).
-
 *Love smart and efficient utilities? Explore [my repositories](https://github.com/jarun?tab=repositories). Buy me a cup of coffee if they help you.*
 
 <p align="center">
@@ -69,6 +67,7 @@ If you are using custom scripts which you would like to share with others, pleas
     - [get selection manually](#get-selection-manually)
   - [cd on quit](#cd-on-quit)
   - [(neo)vim plugin](#neovim-plugin)
+  - [file picker](#file-picker)
   - [run custom scripts](#run-custom-scripts)
     - [sample scripts](#sample-scripts)
   - [launch applications](#launch-applications)
@@ -452,8 +451,6 @@ To get the list in a file:
 
     ncp > out.txt
 
-To use `nnn` as a file picker and redirect the output to other programs, please see [issue #183](https://github.com/jarun/nnn/issues/183).
-
 #### cd on quit
 
 To quit `nnn` and switch to the directory last opened follow the instructions below.
@@ -465,6 +462,10 @@ As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write 
 #### (neo)vim plugin
 
 `nnn` can be used as a file picker/chooser within vim or neovim. Find the plugin [here](https://github.com/mcchrish/nnn.vim).
+
+#### file picker
+
+To use `nnn` as a file picker and redirect the output to other programs, use [picker.sh](https://github.com/jarun/nnn/blob/master/scripts/user-scripts/picker.sh).
 
 #### run custom scripts
 
@@ -480,17 +481,7 @@ Press <kbd>R</kbd> to run the script in the current directory. You can also use 
 
 ##### sample scripts
 
-- Open image files in current dir in **sxiv**:
-
-      #!/usr/bin/env sh
-
-      sxiv -q * >/dev/null 2>&1
-
-- Fuzzy find files in **fzy** and open with xdg-open:
-
-      #!/usr/bin/env sh
-
-      xdg-open $(find -type f | fzy) >/dev/null 2>&1
+Sample scripts for use cases like sxiv or fzy integration are under [user-scripts](https://github.com/jarun/nnn/tree/master/scripts/user-scripts). Feel free to contribute yours!
 
 #### launch applications
 

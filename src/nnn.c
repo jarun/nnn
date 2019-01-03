@@ -780,13 +780,18 @@ static bool showcplist()
 /* Initialize curses mode */
 static bool initcurses(void)
 {
-	if (initscr() == NULL) {
+	if (cfg.picker) {
+		if (!newterm(NULL, stderr, stdin)) {
+			fprintf(stderr, "newterm!\n");
+			return FALSE;
+		}
+	} else if (!initscr()) {
 		char *term = getenv("TERM");
 
 		if (term != NULL)
 			fprintf(stderr, "error opening TERM: %s\n", term);
 		else
-			fprintf(stderr, "initscr() failed\n");
+			fprintf(stderr, "initscr!\n");
 		return FALSE;
 	}
 
@@ -3592,8 +3597,8 @@ int main(int argc, char *argv[])
 	}
 
 	/* Confirm we are in a terminal */
-	if (!isatty(0) || !isatty(1)) {
-		fprintf(stderr, "stdin or stdout is not a tty\n");
+	if (!cfg.picker && !(isatty(0) && isatty(1))) {
+		fprintf(stderr, "stdin/stdout !tty\n");
 		return 1;
 	}
 
