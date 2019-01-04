@@ -181,6 +181,7 @@ disabledbg()
 #define HOME_LEN_MAX 64
 #define CTX_MAX 4
 #define DOT_FILTER_LEN 7
+#define ASCII_MAX 128
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE     0x00  /* no flag set */
@@ -1219,7 +1220,7 @@ static int filterentries(char *path)
 
 		if (r == OK) {
 			/* Handle all control chars in main loop */
-			if (keyname(*ch)[0] == '^' && *ch != '^') {
+			if (*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^') {
 				if (len == 1)
 					cur = oldcur;
 				goto end;
@@ -1363,7 +1364,7 @@ static char *xreadline(char *prefill, char *prompt)
 				}
 
 				/* Filter out all other control chars */
-				if (keyname(*ch)[0] == '^')
+				if (*ch < ASCII_MAX && keyname(*ch)[0] == '^')
 					continue;
 
 				if (pos < NAME_MAX - 1) {
