@@ -5,4 +5,4 @@
 # Shell: generic
 # Author: Arun Prakash Jana
 
-sxiv -q * >/dev/null 2>&1
+sxiv -q * >/dev/null 2>&1 &
