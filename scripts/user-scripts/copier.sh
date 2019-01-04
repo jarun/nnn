@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # Linux
 cat ~/.nnncp | xargs -0 | xsel -bi

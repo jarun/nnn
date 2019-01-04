@@ -53,6 +53,7 @@ We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/
   - [Leader key](#leader-key)
   - [Contexts](#contexts)
   - [Directory color](#directory-color)
+  - [Selection](#selection)
   - [Filters](#filters)
   - [Navigate-as-you-type mode](#navigate-as-you-type-mode)
   - [File indicators](#file-indicators)
@@ -62,7 +63,6 @@ We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/
 - [How to](#how-to)
   - [add bookmarks](#add-bookmarks)
   - [copy file paths](#copy-file-paths)
-    - [selection](#selection)
     - [to clipboard](#to-clipboard)
     - [get selection manually](#get-selection-manually)
   - [cd on quit](#cd-on-quit)
@@ -291,6 +291,29 @@ Each context can have its own color for directories specified:
     export NNN_CONTEXT_COLORS="1234"
 colors: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
 
+#### Selection
+
+Use <kbd>^K</kbd> to copy the absolute path of the file under the cursor.
+
+To copy multiple absolute file paths:
+
+- press <kbd>^Y</kbd> (or <kbd>Y</kbd>) to enter selection mode. In this mode it's possible to
+  - cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry (works across directories and contexts); or,
+  - navigate to another file in the same directory to select a range of files
+- press <kbd>^Y</kbd> (or <kbd>Y</kbd>) _again_ to copy the paths and exit the selection mode
+
+The files in the list can now be copied (<kbd>P</kbd>), moved (<kbd>V</kbd>) or removed (<kbd>X</kbd>).
+
+To list the file paths copied to memory press <kbd>y</kbd>.
+
+File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priority) is:
+
+    $HOME or,
+    $TMPDIR or,
+    /tmp
+
+The path is shown in the help and configuration screen.
+
 #### Filters
 
 Filters support regexes to instantly (search-as-you-type) list the matching entries in the current directory.
@@ -384,51 +407,6 @@ NOTE: Bookmark keys should be single-character to use them in combination with t
 
 #### copy file paths
 
-##### selection
-
-Use <kbd>^K</kbd> to copy the absolute path of the file under the cursor.
-
-To copy multiple absolute file paths:
-
-- press <kbd>^Y</kbd> (or <kbd>Y</kbd>) to enter selection mode. In this mode it's possible to
-  - cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry (works across directories and contexts); or,
-  - navigate to another file in the same directory to select a range of files
-- press <kbd>^Y</kbd> (or <kbd>Y</kbd>) _again_ to copy the paths and exit the selection mode
-
-The files in the list can now be copied (<kbd>P</kbd>), moved (<kbd>V</kbd>) or removed (<kbd>X</kbd>).
-
-To list the file paths copied to memory press <kbd>y</kbd>.
-
-File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priority) is:
-
-    $HOME or,
-    $TMPDIR or,
-    /tmp
-
-The path is shown in the help and configuration screen..
-
-To use the copied paths from the cmdline, use command substitution. For example, if `DIR` above is `/home/user`:
-
-    # bash/zsh
-    ls -ltr `cat /home/user/.nnncp`
-    ls -ltr $(cat /home/user/.nnncp)
-
-    # fish
-    ls -ltr (cat /home/user/.nnncp)
-
-An alias may be handy, e.g. when you want to copy selection at the _run a command_ prompt:
-
-    alias ncp='cat /home/user/.nnncp'
-
-so you can easily handle files together:
-
-    # bash/zsh
-    ls -ltr `ncp`
-    ls -ltr $(ncp)
-
-    # fish
-    ls -ltr (ncp)
-
 ##### to clipboard
 
 Along with default copy, `nnn` can pipe the absolute path of the current file or multiple files to a copier script. For example, you can use `xsel` on Linux or `pbcopy` on macOS. Here's a sample [copier script](https://github.com/jarun/nnn/blob/master/scripts/user-scripts/copier.sh).
@@ -439,13 +417,35 @@ To inform `nnn` of the executable copier script location:
 
 ##### get selection manually
 
-To get a space-separated list of the file paths in selection, say at the command-prompt:
+NOTE: In the following examples we assume the copy file is at `~/.nnncp`.
+
+The file paths are `NUL`-terminated, so additional processing is required to make them usable.
+
+To get a space-separated list of the file paths in selection:
 
     cat ~/.nnncp | xargs -0 echo
 
-Set an easy to remember alias:
+To get a newline-separated list of the file paths in selection:
 
-    alias ncp="cat ~/.nnncp | xargs -0 echo"
+    # bash/zsh
+    ls -ltr `cat /home/user/.nnncp | tr '\0' '\n'`
+    ls -ltr $(cat /home/user/.nnncp | tr '\0' '\n')
+
+    # fish
+    ls -ltr (cat /home/user/.nnncp | tr '\0' '\n')
+
+An alias may be handy, e.g. when you want to copy selection at the _run a command_ prompt:
+
+    alias ncp="cat /home/user/.nnncp | tr '\0' '\n'"
+
+so you can easily handle files together:
+
+    # bash/zsh
+    ls -ltr `ncp`
+    ls -ltr $(ncp)
+
+    # fish
+    ls -ltr (ncp)
 
 To get the list in a file:
 
