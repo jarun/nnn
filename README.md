@@ -74,12 +74,12 @@ We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/
   - [change dir color](#change-dir-color)
   - [integrate patool](#integrate-patool)
   - [lftp transfers](#lftp-transfers)
-  - [work faster at rename prompt](#work-faster-at-rename-prompt)
+  - [prompt shortcuts](#prompt-shortcuts)
   - [set idle timeout](#set-idle-timeout)
-  - [show hot plugged drives](#show-hot-plugged-drives)
+  - [show hot-plugged drives](#show-hot-plugged-drives)
   - [tmux configuration](#tmux-configuration)
   - [BSD terminal issue](#bsd-terminal-issue)
-  - [disable file open on navigation](#disable-file-open-on-navigation)
+  - [restrict file open](#restrict-file-open)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
@@ -503,15 +503,15 @@ On systems where `atool` is not available but `patool` is, drop two copies of th
 
 lftp can be used from `nnn` for automated remote transfers or copying a selection to a server. Visit the [wiki page](https://github.com/jarun/nnn/wiki/simplify-remote-transfers-with-lftp) for more details on the integration.
 
-#### work faster at rename prompt
+#### prompt shortcuts
 
-The rename prompt supports some bash-like command-line shortcuts - <kbd>^A</kbd>, <kbd>^E</kbd>, <kbd>^U</kbd>. <kbd>^L</kbd> clears the name.
+The prompts (expect filter prompt) support some bash-like command-line shortcuts - <kbd>^A</kbd>, <kbd>^E</kbd>, <kbd>^U</kbd>. <kbd>^L</kbd> clears the input.
 
 #### set idle timeout
 
 The terminal locker is disabled by default. To set the wait time in seconds, use environment variable `NNN_IDLE_TIMEOUT`.
 
-#### show hot plugged drives
+#### show hot-plugged drives
 
 Enable volume management in your DE file manager and set removable drives or media to be auto-mounted when inserted. Then visit the usual mount point location (`/mnt` or `/media/user`) in `nnn`.
 
@@ -523,13 +523,13 @@ Enable volume management in your DE file manager and set removable drives or med
 
 By default in OpenBSD & FreeBSD, `stty` maps <kbd>^Y</kbd> to `DSUSP`. This means that typing <kbd>^Y</kbd> will suspend `nnn` as if you typed <kbd>^Z</kbd> (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-copy mode. You can check this with `stty -a`. If it includes the text `dsusp = ^Y`, issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the <kbd>^Y</kbd> instead.
 
-#### Disable file open on navigation
+#### Restrict file open
 
 In order to disable opening files on accidental navigation key (<kbd>→</kbd> or <kbd>l</kbd>) press:
 
     export DISABLE_FILE_OPEN_ON_NAV=1
 
-To open files with this setting, press <kbd>Enter</kbd>.
+Use <kbd>Enter</kbd> to open files.
 
 #### WHY FORK?
 
