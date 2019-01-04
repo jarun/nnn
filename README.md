@@ -372,9 +372,7 @@ To edit all text files in EDITOR (preferably CLI, fallback vi):
 
     export NNN_USE_EDITOR=1
 
-Arguments to the `$EDITOR`, `$PAGER` and `$SHELL` should be combined together, e.g.,
-
-    export EDITOR='vim -xR'
+Arguments to the `$PAGER` and `$SHELL` should be combined together.
 
 The option `open with` takes 1 combined argument.
 

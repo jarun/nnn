@@ -293,7 +293,7 @@ static int ndents, cur, total_dents = ENTRY_INCR;
 static uint idle;
 static uint idletimeout, copybufpos, copybuflen;
 static char *copier;
-static char *editor, *editor_arg;
+static char *editor;
 static char *pager, *pager_arg;
 static char *shell, *shell_arg;
 static char *runpath;
@@ -2125,9 +2125,9 @@ static bool show_help(char *path)
 	if (getenv("SHLVL"))
 		dprintf(fd, "SHLVL: %s\n", getenv("SHLVL"));
 	if (getenv("VISUAL"))
-		dprintf(fd, "VISUAL: %s %s\n", editor, editor_arg);
+		dprintf(fd, "VISUAL: %s\n", editor);
 	else if (getenv("EDITOR"))
-		dprintf(fd, "EDITOR: %s %s\n", editor, editor_arg);
+		dprintf(fd, "EDITOR: %s\n", editor);
 	if (getenv("PAGER"))
 		dprintf(fd, "PAGER: %s %s\n", pager, pager_arg);
 
@@ -2717,7 +2717,11 @@ nochange:
 				if (cfg.useeditor &&
 				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE) &&
 				    strstr(g_buf, "text/") == g_buf) {
-					spawn(editor, editor_arg, newpath, path, F_NORMAL);
+					r = xstrlcpy(g_buf, editor, CMD_LEN_MAX);
+					g_buf[r - 1] = ' ';
+					xstrlcpy(g_buf + r, newpath, CMD_LEN_MAX - r);
+					DPRINTF_S(g_buf);
+					spawn("sh", "-c", g_buf, path, F_NORMAL);
 					continue;
 				}
 
@@ -3023,8 +3027,11 @@ nochange:
 				r = show_help(path);
 				break;
 			case SEL_RUNEDIT:
+				r = xstrlcpy(g_buf, editor, CMD_LEN_MAX);
+				g_buf[r - 1] = ' ';
+				xstrlcpy(g_buf + r, dents[cur].name, CMD_LEN_MAX - r);
 				r = TRUE;
-				spawn(editor, editor_arg, dents[cur].name, path, F_NORMAL);
+				spawn("sh", "-c", g_buf, path, F_NORMAL);
 				break;
 			case SEL_RUNPAGE:
 				r = TRUE;
@@ -3666,7 +3673,6 @@ int main(int argc, char *argv[])
 
 	/* Get VISUAL/EDITOR */
 	editor = xgetenv("VISUAL", xgetenv("EDITOR", "vi"));
-	getprogarg(editor, &editor_arg);
 
 	/* Get PAGER */
 	pager = xgetenv("PAGER", "less");
