@@ -318,11 +318,6 @@ The path is shown in the help and configuration screen.
 
 Filters support regexes to instantly (search-as-you-type) list the matching entries in the current directory.
 
-Ways to exit filter prompt:
-- press <kbd>^L</kbd> to clear filter followed by <kbd>Bksp</kbd> (to clear the filter symbol, like vi)
-  - at other prompts <kbd>^L</kbd> followed by <kbd>Enter</kbd> discards all changes and exits prompt
-- run a search with no matches and press <kbd>Enter</kbd>
-
 Common use cases:
 - to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol
 - type `\.mkv` to list all MKV files
@@ -513,7 +508,9 @@ lftp can be used from `nnn` for automated remote transfers or copying a selectio
 
 #### prompt shortcuts
 
-The prompts (expect filter prompt) support some bash-like command-line shortcuts - <kbd>^A</kbd>, <kbd>^E</kbd>, <kbd>^U</kbd>. <kbd>^L</kbd> clears the input.
+The prompts (expect filter prompt) support some bash-like command-line shortcuts - <kbd>^A</kbd>, <kbd>^E</kbd>, <kbd>^U</kbd>.
+
+Key <kbd>^L</kbd> clears and <kbd>Esc</kbd> exits _any_ prompt.
 
 #### set idle timeout
 
