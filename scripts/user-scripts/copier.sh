@@ -1,5 +1,10 @@
 #!/usr/bin/env sh
 
+# Description: Copy selection to clipboard
+#
+# Shell: generic
+# Author: Arun Prakash Jana
+
 # Linux
 cat ~/.nnncp | xargs -0 | xsel -bi
 

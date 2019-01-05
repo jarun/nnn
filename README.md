@@ -465,6 +465,16 @@ As you might notice, `nnn` uses the environment variable `NNN_TMPFILE` to write 
 
 To use `nnn` as a file picker and redirect the output to other programs, use [picker.sh](https://github.com/jarun/nnn/blob/master/scripts/user-scripts/picker.sh).
 
+Ways to pick files:
+
+- use selection and press <kbd>q</kbd> to quit
+- press <kbd>Enter</kbd> to pick any earlier selection and the current entry (to avoid selecting the last file in the selection twice, press <kbd>q</kbd> instead).
+
+Notes:
+
+- pressing <kbd>Enter</kbd> on a directory enters it; when trying to pick a directory, e.g. to pipe to `cd`, use single file selection and press <kbd>q</kbd>
+- to discard selection and quit, press <kbd>^G</kbd>
+
 #### run custom scripts
 
 `nnn` can invoke custom scripts with the currently selected file name as argument 1.

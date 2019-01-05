@@ -2,7 +2,7 @@
 
 # Description: Pick files and pipe the line-separated list to another utility
 #
-# Shell: sh
+# Shell: generic
 # Author: Arun Prakash Jana
 #
 # Usage:
@@ -17,5 +17,8 @@
 # NOTE: This use case is limited to picking files, other functionality may not work as expected.
 
 nnn -p /tmp/picked
-cat /tmp/picked | tr '\0' '\n'
-rm /tmp/picked
+
+if [ -f /tmp/picked ]; then
+    cat /tmp/picked | tr '\0' '\n'
+    rm /tmp/picked
+fi
