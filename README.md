@@ -76,7 +76,7 @@ We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/
   - [lftp transfers](#lftp-transfers)
   - [prompt shortcuts](#prompt-shortcuts)
   - [set idle timeout](#set-idle-timeout)
-  - [show hot-plugged drives](#show-hot-plugged-drives)
+  - [hot-plugged drives](#hot-plugged-drives)
   - [tmux configuration](#tmux-configuration)
   - [BSD terminal issue](#bsd-terminal-issue)
   - [restrict file open](#restrict-file-open)
@@ -519,7 +519,7 @@ The prompts (expect filter prompt) support some bash-like command-line shortcuts
 
 The terminal locker is disabled by default. To set the wait time in seconds, use environment variable `NNN_IDLE_TIMEOUT`.
 
-#### show hot-plugged drives
+#### hot-plugged drives
 
 Enable volume management in your DE file manager and set removable drives or media to be auto-mounted when inserted. Then visit the usual mount point location (`/mnt` or `/media/user`) in `nnn`.
 
