@@ -1259,7 +1259,8 @@ static int filterentries(char *path)
 			printprompt(ln);
 			continue;
 		case 27: /* Exit filter mode on Escape */
-			cur = oldcur;
+			if (len == 1)
+				cur = oldcur;
 			*ch = CONTROL('L');
 			goto end;
 		}
