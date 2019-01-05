@@ -415,13 +415,13 @@ To inform `nnn` of the executable copier script location:
 
 ##### get selection manually
 
-NOTE: In the following examples we assume the copy file is at `~/.nnncp`.
+NOTE: In the following examples we assume the copy file is at `/home/user/.nnncp`.
 
 The file paths are `NUL`-terminated, so additional processing is required to make them usable.
 
 To get a space-separated list of the file paths in selection:
 
-    cat ~/.nnncp | xargs -0 echo
+    cat /home/user/.nnncp | xargs -0 echo
 
 To get a newline-separated list of the file paths in selection:
 
