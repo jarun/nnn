@@ -813,6 +813,7 @@ static bool initcurses(void)
 		init_pair(4, g_ctx[3].color, -1);
 	}
 	settimeout(); /* One second */
+	set_escdelay(25);
 	return TRUE;
 }
 
