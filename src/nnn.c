@@ -385,6 +385,7 @@ static char * const utils[] = {
 #define STR_INVBM_KEY 3
 #define STR_COPY_ID 4
 #define STR_DATE_ID 5
+#define STR_UNSAFE 6
 
 static const char messages[][16] = {
 	"nftw failed",
@@ -393,6 +394,7 @@ static const char messages[][16] = {
 	"invalid key",
 	"copy not set",
 	"%F %T %z",
+	"unsafe cmd",
 };
 
 /* Forward declarations */
@@ -877,6 +879,49 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 		if (flag & F_NORMAL)
 			refresh();
 	}
+}
+
+/*
+ * Quotes argument and spawns a shell command
+ * Uses g_buf
+ */
+static bool quote_run_sh_cmd(const char *cmd, const char *arg, const char *path)
+{
+	const char *ptr;
+	size_t r;
+
+	if (!cmd)
+		return FALSE;
+
+	r = xstrlcpy(g_buf, cmd, CMD_LEN_MAX);
+
+	if (arg) {
+		if (r >= CMD_LEN_MAX - 4) { /* space for at least 4 chars - space'c' */
+			printmsg(messages[6]);
+			return FALSE;
+		}
+
+		for (ptr = arg; *ptr; ++ptr)
+			if (*ptr == '\'') {
+				printmsg(messages[6]);
+				return FALSE;
+			}
+
+		g_buf[r - 1] = ' ';
+		g_buf[r] = '\'';
+		r += xstrlcpy(g_buf + r + 1, arg, CMD_LEN_MAX - 1 - r);
+		if (r >= CMD_LEN_MAX - 1) {
+			printmsg(messages[6]);
+			return FALSE;
+		}
+
+		g_buf[r] = '\'';
+		g_buf[r + 1] = '\0';
+	}
+
+	DPRINTF_S(g_buf);
+	spawn("sh", "-c", g_buf, path, F_NORMAL);
+	return TRUE;
 }
 
 /* Get program name from env var, else return fallback program */
@@ -2717,11 +2762,8 @@ nochange:
 				if (cfg.useeditor &&
 				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE) &&
 				    strstr(g_buf, "text/") == g_buf) {
-					r = xstrlcpy(g_buf, editor, CMD_LEN_MAX);
-					g_buf[r - 1] = ' ';
-					xstrlcpy(g_buf + r, newpath, CMD_LEN_MAX - r);
-					DPRINTF_S(g_buf);
-					spawn("sh", "-c", g_buf, path, F_NORMAL);
+					if (!quote_run_sh_cmd(editor, newpath, path))
+						goto nochange;
 					continue;
 				}
 
@@ -3027,11 +3069,8 @@ nochange:
 				r = show_help(path);
 				break;
 			case SEL_RUNEDIT:
-				r = xstrlcpy(g_buf, editor, CMD_LEN_MAX);
-				g_buf[r - 1] = ' ';
-				xstrlcpy(g_buf + r, dents[cur].name, CMD_LEN_MAX - r);
-				r = TRUE;
-				spawn("sh", "-c", g_buf, path, F_NORMAL);
+				if (!quote_run_sh_cmd(editor, dents[cur].name, path))
+					goto nochange;
 				break;
 			case SEL_RUNPAGE:
 				r = TRUE;
