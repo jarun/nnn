@@ -10,9 +10,11 @@
 # Run commands like:
 #   ls -l `picker`
 #   cd `picker`
+#   vimdiff `picker`
 # or, in fish shell:
 #   ls -l (picker)
 #   cd (picker)
+#   vimdiff (picker)
 #
 # NOTE: This use case is limited to picking files, other functionality may not work as expected.
 
