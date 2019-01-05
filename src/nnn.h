@@ -215,6 +215,7 @@ static struct key bindings[] = {
 	{ CONTROL(']'),   SEL_SHELL },
 	/* Run a custom script */
 	{ 'R',            SEL_SCRIPT },
+	{ CONTROL('V'),   SEL_SCRIPT },
 	/* Run a command */
 	{ CONTROL('S'),   SEL_RUNCMD },
 	/* Open in EDITOR or PAGER */

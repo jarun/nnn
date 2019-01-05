@@ -249,7 +249,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
               t  Modification time   s  Size
  MISC
           !, ^]  Spawn SHELL in dir  C  Execute entry
-              R  Run custom script   L  Lock terminal
+          R, ^V  Run custom script   L  Lock terminal
              ^S  Run a command
 ```
 

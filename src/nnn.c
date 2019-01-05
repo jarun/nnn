@@ -2109,7 +2109,7 @@ static bool show_help(char *path)
              "et  Modification time   s  Size\n"
 "1MISC\n"
          "a!, ^]  Spawn SHELL in dir  C  Execute entry\n"
-             "eR  Run custom script   L  Lock terminal\n"
+         "aR, ^V  Run custom script   L  Lock terminal\n"
             "d^S  Run a command\n"};
 
 	if (fd == -1)
