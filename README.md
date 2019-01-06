@@ -182,7 +182,8 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
 `PREFIX` is supported, in case you want to install to a different location.
 
-Instructions for [Cygwin](https://github.com/jarun/nnn/wiki/Cygwin-instructions).
+- Compilation information for [Raspberry Pi](https://github.com/jarun/nnn/issues/182)
+- Instructions for [Cygwin](https://github.com/jarun/nnn/wiki/Cygwin-instructions)
 
 #### Shell completion
 
