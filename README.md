@@ -73,7 +73,7 @@ We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/
   - [launch applications](#launch-applications)
   - [change dir color](#change-dir-color)
   - [integrate patool](#integrate-patool)
-  - [lftp transfers](#lftp-transfers)
+  - [remote transfers](#remote-transfers)
   - [prompt shortcuts](#prompt-shortcuts)
   - [set idle timeout](#set-idle-timeout)
   - [hot-plugged drives](#hot-plugged-drives)
@@ -503,9 +503,9 @@ Any other value disables colored directories.
 
 On systems where `atool` is not available but `patool` is, drop two copies of the Python3 script [natool](https://github.com/jarun/nnn/tree/master/scripts/natool) as `atool` and `apack` somewhere in `$PATH`.
 
-#### lftp transfers
+#### remote transfers
 
-lftp can be used from `nnn` for automated remote transfers or copying a selection to a server. Visit the [wiki page](https://github.com/jarun/nnn/wiki/simplify-remote-transfers-with-lftp) for more details on the integration.
+lftp can be used with `nnn` for automated remote transfers or copying a selection to a server. Visit the [wiki page](https://github.com/jarun/nnn/wiki/simplify-remote-transfers-with-lftp) for more details on the integration.
 
 #### prompt shortcuts
 
