@@ -2763,7 +2763,8 @@ nochange:
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
 				if (cfg.useeditor &&
 				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE) &&
-				    strstr(g_buf, "text/") == g_buf) {
+				    g_buf[0] == 't' && g_buf[1] == 'e' && g_buf[2] == 'x' &&
+				    g_buf[3] == g_buf[0] && g_buf[4] == '/') {
 					if (!quote_run_sh_cmd(editor, newpath, path))
 						goto nochange;
 					continue;
