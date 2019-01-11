@@ -3045,7 +3045,8 @@ nochange:
 		case SEL_HELP: // fallthrough
 		case SEL_LOCK:
 		{
-			mkpath(path, dents[cur].name, newpath, PATH_MAX);
+			if (ndents)
+				mkpath(path, dents[cur].name, newpath, PATH_MAX);
 
 			switch (sel) {
 			case SEL_MEDIA:
@@ -3097,7 +3098,8 @@ nochange:
 				presel = FILTER;
 
 			/* Save current */
-			copycurname();
+			if (ndents)
+				copycurname();
 
 			/* Repopulate as directory content may have changed */
 			goto begin;
@@ -3251,7 +3253,8 @@ nochange:
 
 			spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
 
-			copycurname();
+			if (ndents)
+				copycurname();
 			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
