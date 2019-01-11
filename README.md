@@ -536,7 +536,7 @@ By default in OpenBSD & FreeBSD, `stty` maps <kbd>^Y</kbd> to `DSUSP`. This mean
 
 In order to disable opening files on accidental navigation key (<kbd>→</kbd> or <kbd>l</kbd>) press:
 
-    export DISABLE_FILE_OPEN_ON_NAV=1
+    export NNN_NO_FILE_OPEN_ON_NAV=1
 
 Use <kbd>Enter</kbd> to open files.
 
