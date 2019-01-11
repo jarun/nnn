@@ -80,6 +80,7 @@ We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/
   - [tmux configuration](#tmux-configuration)
   - [BSD terminal issue](#bsd-terminal-issue)
   - [restrict file open](#restrict-file-open)
+  - [restrict 0-byte files](#restrict-0-byte-files)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
@@ -531,13 +532,19 @@ Enable volume management in your DE file manager and set removable drives or med
 
 By default in OpenBSD & FreeBSD, `stty` maps <kbd>^Y</kbd> to `DSUSP`. This means that typing <kbd>^Y</kbd> will suspend `nnn` as if you typed <kbd>^Z</kbd> (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-copy mode. You can check this with `stty -a`. If it includes the text `dsusp = ^Y`, issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the <kbd>^Y</kbd> instead.
 
-#### Restrict file open
+#### restrict file open
 
 In order to disable opening files on accidental navigation key (<kbd>→</kbd> or <kbd>l</kbd>) press:
 
     export DISABLE_FILE_OPEN_ON_NAV=1
 
 Use <kbd>Enter</kbd> to open files.
+
+#### restrict 0-byte files
+
+Restrict opening 0-byte files due to [unexpected behaviour](https://github.com/jarun/nnn/issues/187); use _edit_ or _open with_ to open the file.
+
+    export NNN_RESTRICT_0B=1
 
 #### WHY FORK?
 

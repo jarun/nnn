@@ -309,6 +309,11 @@ files.
 .Bd -literal
     export DISABLE_FILE_OPEN_ON_NAV=1
 .Ed
+.Pp
+\fBNNN_RESTRICT_0B:\fR restrict opening 0-byte files due to unexpected behaviour; use \fIedit\fR or \fIopen with\fR to open the file.
+.Bd -literal
+    export NNN_RESTRICT_0B=1
+.Ed
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspace key to DEC.
 .Sh AUTHORS

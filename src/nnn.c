@@ -260,7 +260,7 @@ typedef struct {
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 10;
+	uint reserved   : 9;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint picker     : 1;  /* Write selection to user-specified file */
@@ -269,6 +269,7 @@ typedef struct {
 	uint useeditor  : 1;  /* Use VISUAL to open text files */
 	uint runscript  : 1;  /* Choose script to run mode */
 	uint runctx     : 2;  /* The context in which script is to be run */
+	uint restrict0b : 1;  /* Restrict 0-byte file opening */
 } settings;
 
 /* Contexts or workspaces */
@@ -284,7 +285,7 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static struct entry *dents;
@@ -2770,6 +2771,11 @@ nochange:
 					continue;
 				}
 
+				if (!sb.st_size && cfg.restrict0b) {
+					printmsg("empty: use edit or open with");
+					goto nochange;
+				}
+
 				/* Invoke desktop opener as last resort */
 				spawn(utils[OPENER], newpath, NULL, NULL, F_NOWAIT | F_NOTRACE);
 				continue;
@@ -3774,6 +3780,10 @@ int main(int argc, char *argv[])
 	/* Disable opening files on right arrow and `l` */
 	if (getenv("DISABLE_FILE_OPEN_ON_NAV"))
 		cfg.nonavopen = 1;
+
+	/* Restrict opening of 0-byte files */
+	if (getenv("NNN_RESTRICT_0B"))
+		cfg.restrict0b = 1;
 
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
