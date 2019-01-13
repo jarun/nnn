@@ -260,7 +260,7 @@ typedef struct {
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 9;
+	uint reserved   : 8;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint picker     : 1;  /* Write selection to user-specified file */
@@ -270,6 +270,7 @@ typedef struct {
 	uint runscript  : 1;  /* Choose script to run mode */
 	uint runctx     : 2;  /* The context in which script is to be run */
 	uint restrict0b : 1;  /* Restrict 0-byte file opening */
+	uint filter_re  : 1;  /* Use regex filters */
 } settings;
 
 /* Contexts or workspaces */
@@ -285,7 +286,7 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static struct entry *dents;
@@ -1065,10 +1066,17 @@ static int setfilter(regex_t *regex, char *filter)
 	return r;
 }
 
-static int visible(regex_t *regex, char *file)
+static int visible_re(regex_t *regex, char *fname, char *fltr)
 {
-	return regexec(regex, file, 0, NULL, 0) == 0;
+	return regexec(regex, fname, 0, NULL, 0) == 0;
 }
+
+static int visible_str(regex_t *regex, char *fname, char *fltr)
+{
+	return strcasestr(fname, fltr) != NULL;
+}
+
+static int (*filterfn)(regex_t *regex, char *fname, char *fltr) = &visible_re;
 
 static int entrycmp(const void *va, const void *vb)
 {
@@ -1172,16 +1180,16 @@ static int nextsel(int *presel)
 /*
  * Move non-matching entries to the end
  */
-static int fill(struct entry **dents, int (*filter)(regex_t *, char *), regex_t *re)
+static int fill(char* fltr, regex_t *re)
 {
 	static int count;
 	static struct entry _dent, *pdent1, *pdent2;
 
 	for (count = 0; count < ndents; ++count) {
-		if (filter(re, (*dents)[count].name) == 0) {
+		if (filterfn(re, dents[count].name, fltr) == 0) {
 			if (count != --ndents) {
-				pdent1 = &(*dents)[count];
-				pdent2 = &(*dents)[ndents];
+				pdent1 = &dents[count];
+				pdent2 = &dents[ndents];
 
 				*(&_dent) = *pdent1;
 				*pdent1 = *pdent2;
@@ -1201,11 +1209,12 @@ static int matches(char *fltr)
 	static regex_t re;
 
 	/* Search filter */
-	if (setfilter(&re, fltr) != 0)
+	if (cfg.filter_re && setfilter(&re, fltr) != 0)
 		return -1;
 
-	ndents = fill(&dents, visible, &re);
-	regfree(&re);
+	ndents = fill(fltr, &re);
+	if (cfg.filter_re)
+		regfree(&re);
 	if (!ndents)
 		return 0;
 
@@ -2159,10 +2168,14 @@ static bool show_help(char *path)
 		dprintf(fd, "NNN_SCRIPT: %s\n", runpath);
 	if (getenv("NNN_SHOW_HIDDEN"))
 		dprintf(fd, "NNN_SHOW_HIDDEN: 1\n");
-	if (getenv("NNN_NO_AUTOSELECT"))
+	if (cfg.autoselect)
 		dprintf(fd, "NNN_NO_AUTOSELECT: 1\n");
-	if (getenv("NNN_NO_FILE_OPEN_ON_NAV"))
+	if (cfg.nonavopen)
 		dprintf(fd, "NNN_NO_FILE_OPEN_ON_NAV: 1\n");
+	if (cfg.restrict0b)
+		dprintf(fd, "NNN_RESTRICT_0B: 1\n");
+	if (!cfg.filter_re)
+		dprintf(fd, "NNN_PLAIN_FILTER: 1\n");
 
 	dprintf(fd, "\n");
 
@@ -2373,7 +2386,7 @@ static int dentfill(char *path, struct entry **dents)
 }
 
 /* Return the position of the matching entry or 0 otherwise */
-static int dentfind(struct entry *dents, const char *fname, int n)
+static int dentfind(const char *fname, int n)
 {
 	static int i;
 
@@ -2420,7 +2433,7 @@ static bool populate(char *path, char *lastname)
 #endif
 
 	/* Find cur from history */
-	cur = dentfind(dents, lastname, ndents);
+	cur = dentfind(lastname, ndents);
 	return TRUE;
 }
 
@@ -3784,6 +3797,12 @@ int main(int argc, char *argv[])
 	/* Restrict opening of 0-byte files */
 	if (getenv("NNN_RESTRICT_0B"))
 		cfg.restrict0b = 1;
+
+	/* Use string-comparison in filter mode */
+	if (getenv("NNN_PLAIN_FILTER")) {
+		cfg.filter_re = 0;
+		filterfn = &visible_str;
+	}
 
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);

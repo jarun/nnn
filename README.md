@@ -320,12 +320,16 @@ The path is shown in the help and configuration screen.
 
 #### Filters
 
-Filters support regexes to instantly (search-as-you-type) list the matching entries in the current directory.
+Filters support regexes by default to instantly (search-as-you-type) list the matching entries in the current directory.
 
 Common use cases:
 - to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol
 - type `\.mkv` to list all MKV files
 - use `.*` to match any character (_sort of_ fuzzy search)
+
+To filter entries by substring match:
+
+    export NNN_PLAIN_FILTER=1
 
 If `nnn` is invoked as root or the environment variable `NNN_SHOW_HIDDEN` is set the default filter will also match hidden files.
 

@@ -219,7 +219,7 @@ The first time a context is entered, it copies the state of the last visited con
 .Pp
 When a context is quit, the next active context is selected. If the last active context is quit, the program quits.
 .Sh FILTERS
-Filters support regexes to instantly (search-as-you-type) list the matching
+Filters support regexes by default to instantly (search-as-you-type) list the matching
 entries in the current directory.
 .Pp
 Common use cases:
@@ -230,6 +230,8 @@ with a '^' (caret) symbol.
 (2) Type '\\.mkv' to list all MKV files.
 .br
 (3) Use '.*' to match any character (\fIsort of\fR fuzzy search).
+.Pp
+To filter entries by substring match export the environment variable \fBNNN_PLAIN_FILTER\fR.
 .Pp
 If
 .Nm
@@ -313,6 +315,11 @@ files.
 \fBNNN_RESTRICT_0B:\fR restrict opening 0-byte files due to unexpected behaviour; use \fIedit\fR or \fIopen with\fR to open the file.
 .Bd -literal
     export NNN_RESTRICT_0B=1
+.Ed
+.Pp
+\fBNNN_PLAIN_FILTER:\fR use substring match in filter mode.
+.Bd -literal
+    export NNN_PLAIN_FILTER=1
 .Ed
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspace key to DEC.
