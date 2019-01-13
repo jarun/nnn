@@ -8,12 +8,12 @@ env:
 
 matrix:
   include:
-    # Access more recent gcc and clang via a Trusty image
+    # Access more recent gcc and clang via a Xenial image
     - os: linux
-      dist: trusty
+      dist: xenial
       compiler: gcc
     - os: linux
-      dist: trusty
+      dist: xenial
       compiler: clang
     - os: osx
       compiler: gcc
