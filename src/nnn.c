@@ -29,6 +29,9 @@
  */
 
 #ifdef __linux__
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #if defined(__arm__) || defined(__i386__)
 #define _FILE_OFFSET_BITS 64 /* Support large files on 32-bit */
 #endif
