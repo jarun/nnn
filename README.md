@@ -89,7 +89,7 @@ We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/
 
 - Modes
   - Basic, detail (default), disk usage analyzer (du)
-  - Vim (or neovim) file picker (as a plugin)
+  - File picker, vim (or neovim) plugin
 - Navigation
   - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
   - *Navigate-as-you-type* with auto-select directory
@@ -119,6 +119,7 @@ We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/
   - Spawn a subshell in the current directory
   - Run a command, launch applications
   - Run custom scripts in the current directory
+  - Repository of custom scripts
   - Run current file as executable
   - Change directory at exit (*easy* shell integration)
   - Edit file in EDITOR or open in PAGER
