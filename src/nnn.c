@@ -2171,7 +2171,7 @@ static bool show_help(char *path)
 	if (cfg.autoselect)
 		dprintf(fd, "NNN_NO_AUTOSELECT: 1\n");
 	if (cfg.nonavopen)
-		dprintf(fd, "NNN_NO_FILE_OPEN_ON_NAV: 1\n");
+		dprintf(fd, "NNN_RESTRICT_NAV_OPEN: 1\n");
 	if (cfg.restrict0b)
 		dprintf(fd, "NNN_RESTRICT_0B: 1\n");
 	if (!cfg.filter_re)
@@ -3791,7 +3791,7 @@ int main(int argc, char *argv[])
 		cfg.autoselect = 0;
 
 	/* Disable opening files on right arrow and `l` */
-	if (getenv("NNN_NO_FILE_OPEN_ON_NAV"))
+	if (getenv("NNN_RESTRICT_NAV_OPEN"))
 		cfg.nonavopen = 1;
 
 	/* Restrict opening of 0-byte files */
