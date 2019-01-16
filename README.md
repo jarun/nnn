@@ -372,6 +372,10 @@ The following indicators are used in the detail view:
 | $PAGER | page through files (fallback less) |
 | $SHELL | spawn a shell, run script (fallback sh) |
 
+To specify a custom file opener:
+
+    export NNN_OPENER=mimeopen
+
 To edit all text files in EDITOR (preferably CLI, fallback vi):
 
     export NNN_USE_EDITOR=1

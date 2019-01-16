@@ -260,6 +260,11 @@ To list the file paths copied to memory press \fIy\fR.
 The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively. A single combination to arguments is supported for SHELL and PAGER.
 .Pp
+\fBNNN_OPENER:\fR specify a custom file opener.
+.Bd -literal
+    export NNN_OPENER=mimeopen
+.Ed
+.Pp
 \fBNNN_BMS:\fR bookmark string as \fIkey_char:location\fR pairs (max 10) separated by
 \fI;\fR:
 .Bd -literal

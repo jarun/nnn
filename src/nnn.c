@@ -297,6 +297,7 @@ static char *pnamebuf, *pcopybuf;
 static int ndents, cur, total_dents = ENTRY_INCR;
 static uint idle;
 static uint idletimeout, copybufpos, copybuflen;
+static char *opener;
 static char *copier;
 static char *editor;
 static char *pager, *pager_arg;
@@ -2157,6 +2158,8 @@ static bool show_help(char *path)
 		dprintf(fd, "\n");
 	}
 
+	if (getenv("NNN_OPENER"))
+		dprintf(fd, "NNN_OPENER: %s\n", opener);
 	if (cfg.useeditor)
 		dprintf(fd, "NNN_USE_EDITOR: 1\n");
 	if (getenv("NNN_CONTEXT_COLORS"))
@@ -2793,7 +2796,7 @@ nochange:
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(utils[OPENER], newpath, NULL, NULL, F_NOWAIT | F_NOTRACE);
+				spawn(opener, newpath, NULL, NULL, F_NOWAIT | F_NOTRACE);
 				continue;
 			}
 			default:
@@ -3766,6 +3769,11 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 #endif
+
+	/* Get custom opener, if set */
+	opener = getenv("NNN_OPENER");
+	if (!opener)
+		opener = utils[OPENER];
 
 	/* Get locker wait time, if set; copier used as tmp var */
 	copier = getenv("NNN_IDLE_TIMEOUT");
