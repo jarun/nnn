@@ -21,7 +21,7 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (Thanks Luke Smith for the video!)</i></a></p>
 
-`nnn` is probably the [fastest and most resource-sensitive](#comparison) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
+`nnn` is probably the [fastest and most lightweight](#comparison) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
 
 [Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, transfer selected files using lftp or use it as a [(neo)vim plugin](https://github.com/jarun/nnn#neovim-plugin); `nnn` supports as many scripts as you need!
 
@@ -52,7 +52,7 @@ We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/
   - [Keyboard shortcuts](#keyboard-shortcuts)
   - [Leader key](#leader-key)
   - [Contexts](#contexts)
-  - [Directory color](#directory-color)
+    - [Context-specific color](#context-specific-color)
   - [Selection](#selection)
   - [Filters](#filters)
   - [Navigate-as-you-type mode](#navigate-as-you-type-mode)
@@ -116,6 +116,7 @@ We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/
   - Transfer files using lftp
   - Batch rename/move/delete (needs vidir)
   - Show directories in custom color (default: blue)
+  - Per-context directory color
   - Spawn a subshell in the current directory
   - Run a command, launch applications
   - Run custom scripts in the current directory
@@ -289,7 +290,7 @@ The first time a context is entered, it copies the state of the last visited con
 
 When a context is quit, the next active context is selected. If the last active context is quit, the program quits.
 
-#### Directory color
+##### Context-specific color
 
 Each context can have its own color for directories specified:
 
@@ -485,7 +486,7 @@ Notes:
 
 #### run custom scripts
 
-`nnn` can invoke custom scripts with the currently selected file name as argument 1.
+`nnn` can invoke custom scripts in the current directory with the currently selected file name as argument 1.
 
 Export the absolute path to the directory with your scripts or a single script:
 
@@ -493,7 +494,7 @@ Export the absolute path to the directory with your scripts or a single script:
     OR
     export NNN_SCRIPT=/usr/local/bin/nscript.sh
 
-Press <kbd>R</kbd> to run the script in the current directory. You can also use this key to cancel choosing a script from the script directory.
+Press <kbd>R</kbd> to run the script in the current directory. You can also use this key to cancel choosing a script from the script directory and get back to the original directory.
 
 ##### sample scripts
 
