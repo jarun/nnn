@@ -1723,27 +1723,27 @@ static void printent_long(struct entry *ent, int sel, uint namecols)
 
 	if (S_ISDIR(ent->mode)) {
 		if (cfg.blkorder)
-			printw("%s%-16.16s %8.8s/ %s/\n", CURSYM(sel), buf, coolsize(ent->blocks << BLK_SHIFT), pname);
+			printw(" %-16.16s %8.8s/ %s/\n", buf, coolsize(ent->blocks << BLK_SHIFT), pname);
 		else
-			printw("%s%-16.16s        /  %s/\n", CURSYM(sel), buf, pname);
+			printw(" %-16.16s        /  %s/\n", buf, pname);
 	} else if (S_ISLNK(ent->mode)) {
 		if (ent->flags & SYMLINK_TO_DIR)
-			printw("%s%-16.16s       @/  %s@\n", CURSYM(sel), buf, pname);
+			printw(" %-16.16s       @/  %s@\n", buf, pname);
 		else
-			printw("%s%-16.16s        @  %s@\n", CURSYM(sel), buf, pname);
+			printw(" %-16.16s        @  %s@\n", buf, pname);
 	} else if (S_ISSOCK(ent->mode))
-		printw("%s%-16.16s        =  %s=\n", CURSYM(sel), buf, pname);
+		printw(" %-16.16s        =  %s=\n", buf, pname);
 	else if (S_ISFIFO(ent->mode))
-		printw("%s%-16.16s        |  %s|\n", CURSYM(sel), buf, pname);
+		printw(" %-16.16s        |  %s|\n", buf, pname);
 	else if (S_ISBLK(ent->mode))
-		printw("%s%-16.16s        b  %s\n", CURSYM(sel), buf, pname);
+		printw(" %-16.16s        b  %s\n", buf, pname);
 	else if (S_ISCHR(ent->mode))
-		printw("%s%-16.16s        c  %s\n", CURSYM(sel), buf, pname);
+		printw(" %-16.16s        c  %s\n", buf, pname);
 	else if (ent->mode & 0100) {
-		printw("%s%-16.16s %8.8s* %s*\n", CURSYM(sel), buf,
+		printw(" %-16.16s %8.8s* %s*\n", buf,
 		       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 	} else {
-		printw("%s%-16.16s %8.8s  %s\n", CURSYM(sel), buf,
+		printw(" %-16.16s %8.8s  %s\n", buf,
 		       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 	}
 
