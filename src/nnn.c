@@ -1692,8 +1692,6 @@ static char *get_file_sym(mode_t mode)
 		ind[0] = '|';
 	else if (mode & 0100)
 		ind[0] = '*';
-	else
-		ind[0] = '\0';
 
 	return ind;
 }
@@ -1742,15 +1740,11 @@ static void printent_long(struct entry *ent, int sel, uint namecols)
 	else if (S_ISCHR(ent->mode))
 		printw("%s%-16.16s        c  %s\n", CURSYM(sel), buf, pname);
 	else if (ent->mode & 0100) {
-		if (cfg.blkorder)
-			printw("%s%-16.16s %8.8s* %s*\n", CURSYM(sel), buf, coolsize(ent->blocks << BLK_SHIFT), pname);
-		else
-			printw("%s%-16.16s %8.8s* %s*\n", CURSYM(sel), buf, coolsize(ent->size), pname);
+		printw("%s%-16.16s %8.8s* %s*\n", CURSYM(sel), buf,
+		       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 	} else {
-		if (cfg.blkorder)
-			printw("%s%-16.16s %8.8s  %s\n", CURSYM(sel), buf, coolsize(ent->blocks << BLK_SHIFT), pname);
-		else
-			printw("%s%-16.16s %8.8s  %s\n", CURSYM(sel), buf, coolsize(ent->size), pname);
+		printw("%s%-16.16s %8.8s  %s\n", CURSYM(sel), buf,
+		       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 	}
 
 	if (sel)
