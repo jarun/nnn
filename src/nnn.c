@@ -389,18 +389,18 @@ static char * const utils[] = {
 #define STR_NOHOME_ID 1
 #define STR_INPUT_ID 2
 #define STR_INVBM_KEY 3
-#define STR_COPY_ID 4
-#define STR_DATE_ID 5
-#define STR_UNSAFE 6
+#define STR_DATE_ID 4
+#define STR_UNSAFE 5
+#define STR_TMPFILE 6
 
 static const char messages[][16] = {
 	"nftw failed",
 	"HOME not set",
 	"no traversal",
 	"invalid key",
-	"copy not set",
 	"%F %T %z",
 	"unsafe cmd",
+	"/.nnnXXXXXX",
 };
 
 /* Forward declarations */
@@ -694,15 +694,15 @@ static char *xbasename(char *path)
 /* Writes buflen char(s) from buf to a file */
 static void writecp(const char *buf, const size_t buflen)
 {
+	static FILE *fp;
+
 	if (cfg.pickraw)
 		return;
 
-	if (!g_cppath[0]) {
-		printmsg(messages[STR_COPY_ID]);
+	if (!g_cppath[0])
 		return;
-	}
 
-	FILE *fp = fopen(g_cppath, "w");
+	fp = fopen(g_cppath, "w");
 
 	if (fp) {
 		fwrite(buf, 1, buflen, fp);
@@ -767,7 +767,7 @@ static bool showcplist()
 		return FALSE;
 
 	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", HOME_LEN_MAX - g_tmpfplen);
+		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], HOME_LEN_MAX - g_tmpfplen);
 	else {
 		printmsg(messages[STR_NOHOME_ID]);
 		return -1;
@@ -904,13 +904,13 @@ static bool quote_run_sh_cmd(const char *cmd, const char *arg, const char *path)
 
 	if (arg) {
 		if (r >= CMD_LEN_MAX - 4) { /* space for at least 4 chars - space'c' */
-			printmsg(messages[6]);
+			printmsg(messages[STR_UNSAFE]);
 			return FALSE;
 		}
 
 		for (ptr = arg; *ptr; ++ptr)
 			if (*ptr == '\'') {
-				printmsg(messages[6]);
+				printmsg(messages[STR_UNSAFE]);
 				return FALSE;
 			}
 
@@ -918,7 +918,7 @@ static bool quote_run_sh_cmd(const char *cmd, const char *arg, const char *path)
 		g_buf[r] = '\'';
 		r += xstrlcpy(g_buf + r + 1, arg, CMD_LEN_MAX - 1 - r);
 		if (r >= CMD_LEN_MAX - 1) {
-			printmsg(messages[6]);
+			printmsg(messages[STR_UNSAFE]);
 			return FALSE;
 		}
 
@@ -1929,7 +1929,7 @@ static bool show_stats(char *fpath, char *fname, struct stat *sb)
 	char *p, *begin = g_buf;
 
 	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", HOME_LEN_MAX - g_tmpfplen);
+		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], HOME_LEN_MAX - g_tmpfplen);
 	else {
 		printmsg(messages[STR_NOHOME_ID]);
 		return FALSE;
@@ -2080,7 +2080,7 @@ static bool handle_archive(char *fpath, char *arg, char *dir)
 static bool show_help(char *path)
 {
 	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, "/.nnnXXXXXX", HOME_LEN_MAX - g_tmpfplen);
+		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], HOME_LEN_MAX - g_tmpfplen);
 	else {
 		printmsg(messages[STR_NOHOME_ID]);
 		return FALSE;
@@ -3450,6 +3450,7 @@ nochange:
 				}
 
 				mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				DPRINTF_S(newpath);
 				spawn(newpath, NULL, NULL, path, F_NORMAL | F_SIGINT);
 				break;
 			case SEL_SHELL:
