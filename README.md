@@ -208,15 +208,15 @@ positional args:
   PATH   start dir [default: current dir]
 
 optional args:
- -b key  bookmark key to open
+ -b key  open bookmark key
  -C      disable directory color
- -e      use exiftool instead of mediainfo
- -i      start in navigate-as-you-type mode
- -l      start in light mode
- -p file copy selection to file (stdout if '-')
- -S      start in disk usage analyser mode
- -v      show program version
- -h      show this help
+ -e      use exiftool for media info
+ -i      nav-as-you-type mode
+ -l      light mode
+ -p file selection file (stdout if '-')
+ -S      disk usage mode
+ -v      show version
+ -h      show help
 ```
 
 `>` indicates the currently selected entry in `nnn`.

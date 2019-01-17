@@ -3602,15 +3602,15 @@ static void usage(void)
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
 		"optional args:\n"
-		" -b key  bookmark key to open\n"
+		" -b key  open bookmark key\n"
 		" -C      disable directory color\n"
-		" -e      use exiftool instead of mediainfo\n"
-		" -i      start in navigate-as-you-type mode\n"
-		" -l      start in light mode\n"
-		" -p file copy selection to file (stdout if '-')\n"
-		" -S      start in disk usage analyser mode\n"
-		" -v      show program version\n"
-		" -h      show this help\n\n"
+		" -e      use exiftool for media info\n"
+		" -i      nav-as-you-type mode\n"
+		" -l      light mode\n"
+		" -p file selection file (stdout if '-')\n"
+		" -S      disk usage mode\n"
+		" -v      show version\n"
+		" -h      show help\n\n"
 		"Version: %s\n%s\n", VERSION, GENERAL_INFO);
 }
 
