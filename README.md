@@ -23,13 +23,11 @@ Noice is Not Noice, a noicer fork...
 
 `nnn` is probably the [fastest and most lightweight](#comparison) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
 
-[Integrate utilities](https://github.com/jarun/nnn#sample-scripts) like sxiv or fzy easily, transfer selected files using lftp or use it as a [(neo)vim plugin](https://github.com/jarun/nnn#neovim-plugin); `nnn` supports as many scripts as you need!
+Integrate utilities like sxiv (image preview) or fzy (fuzzy subtree search) easily, transfer selected files using lftp or use it as a (neo)vim plugin; `nnn` supports as many scripts as you need! Refer to the [How to](https://github.com/jarun/nnn/wiki/How-to) section on wiki for more details.
 
 It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux.
 
 [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions.
-
-We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/137).
 
 *Love smart and efficient utilities? Explore [my repositories](https://github.com/jarun?tab=repositories). Buy me a cup of coffee if they help you.*
 
@@ -64,6 +62,7 @@ We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
+- [Contributions](#contributions)
 
 #### FEATURES
 
@@ -347,7 +346,7 @@ The following indicators are used in the detail view:
 | file | determine file type |
 | cp, mv, rm, xargs (from findutils on Linux)  | copy, move and remove files |
 | mediainfo, exiftool | multimedia file details |
-| atool, patool ([integration](#integrate-patool)) | create, list and extract archives |
+| atool, patool ([integration](https://github.com/jarun/nnn/wiki/How-to#integrate-patool)) | create, list and extract archives |
 | vidir (from moreutils) | batch rename, move, delete dir entries |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
 | $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
@@ -374,14 +373,14 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 #### QUICKSTART
 
-1. Install the [utilities required](#file-handling) for your regular activities.
-2. Configure [cd on quit](#cd-on-quit).
+1. Install the [utilities required](#utility-dependencies) for your regular activities.
+2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/How-to#cd-on-quit).
 3. Optionally open all text files in EDITOR (fallback vi):
 
        export NNN_USE_EDITOR=1
 4. Run `n`.
 5. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
-6. For additional functionality [setup custom scripts](#run-custom-scripts).
+6. For additional functionality [setup custom scripts](https://github.com/jarun/nnn/wiki/How-to#run-custom-scripts).
 
 #### HOW TO
 
@@ -407,3 +406,7 @@ Please visit the [How to](https://github.com/jarun/nnn/wiki/How-to) wiki page.
 1. Copyright © 2014-2016 Lazaros Koromilas
 2. Copyright © 2014-2016 Dimitris Papastamos
 3. Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)
+
+#### CONTRIBUTIONS
+
+We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/137).
