@@ -2797,45 +2797,61 @@ nochange:
 				printmsg("unsupported file");
 				goto nochange;
 			}
-		case SEL_NEXT:
-			if (cur < ndents - 1)
-				++cur;
-			else if (ndents)
-				/* Roll over, set cursor to first entry */
-				cur = 0;
-			break;
-		case SEL_PREV:
-			if (cur > 0)
-				--cur;
-			else if (ndents)
-				/* Roll over, set cursor to last entry */
-				cur = ndents - 1;
-			break;
-		case SEL_PGDN:
-			if (cur < ndents - 1)
-				cur += MIN((LINES - 4) / 2, ndents - 1 - cur);
-			break;
-		case SEL_PGUP:
-			if (cur > 0)
-				cur -= MIN((LINES - 4) / 2, cur);
-			break;
-		case SEL_HOME:
-			cur = 0;
-			break;
+		case SEL_NEXT: // fallthrough
+		case SEL_PREV: // fallthrough
+		case SEL_PGDN: // fallthrough
+		case SEL_PGUP: // fallthrough
+		case SEL_HOME: // fallthrough
 		case SEL_END:
-			cur = ndents - 1;
+			switch (sel) {
+			case SEL_NEXT:
+				if (cur < ndents - 1)
+					++cur;
+				else if (ndents)
+					/* Roll over, set cursor to first entry */
+					cur = 0;
+				break;
+			case SEL_PREV:
+				if (cur > 0)
+					--cur;
+				else if (ndents)
+					/* Roll over, set cursor to last entry */
+					cur = ndents - 1;
+				break;
+			case SEL_PGDN:
+				if (cur < ndents - 1)
+					cur += MIN((LINES - 4) / 2, ndents - 1 - cur);
+				break;
+			case SEL_PGUP:
+				if (cur > 0)
+					cur -= MIN((LINES - 4) / 2, cur);
+				break;
+			case SEL_HOME:
+				cur = 0;
+				break;
+			default: /* case SEL_END */
+				cur = ndents - 1;
+				break;
+			}
 			break;
-		case SEL_CDHOME:
-			dir = xgetenv("HOME", path); // fallthrough
-		case SEL_CDBEGIN:
-			if (sel == SEL_CDBEGIN)
-				dir = ipath; // fallthrough
-		case SEL_CDLAST:
-			if (sel == SEL_CDLAST)
-				dir = lastdir; // fallthrough
+		case SEL_CDHOME: // fallthrough
+		case SEL_CDBEGIN: // fallthrough
+		case SEL_CDLAST: // fallthrough
 		case SEL_VISIT:
-			if (sel == SEL_VISIT)
+			switch (sel) {
+			case SEL_CDHOME:
+				dir = xgetenv("HOME", path);
+				break;
+			case SEL_CDBEGIN:
+				dir = ipath;
+				break;
+			case SEL_CDLAST:
+				dir = lastdir;
+				break;
+			default: /* case SEL_VISIT */
 				dir = mark;
+				break;
+			}
 
 			if (dir[0] == '\0') {
 				printmsg("not set");
