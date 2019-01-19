@@ -216,7 +216,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
               /  Filter        Ins, ^T  Toggle nav-as-you-type
               b  Pin current dir    ^W  Go to pinned dir
         Tab, ^I  Next context        d  Toggle detail view
-          `, ^/  Leader key    LeaderN  Go to/create context N
+          `, ^/  Leader key   N, LeadN  Go to/create context N
             Esc  Exit prompt        ^L  Redraw/clear prompt
              ^G  Quit and cd         q  Quit context
           Q, ^Q  Quit                ?  Help, config

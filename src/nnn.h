@@ -50,6 +50,10 @@ enum action {
 	SEL_CDLAST,
 	SEL_LEADER,
 	SEL_CYCLE,
+	SEL_CTX1,
+	SEL_CTX2,
+	SEL_CTX3,
+	SEL_CTX4,
 	SEL_PIN,
 	SEL_VISIT,
 	SEL_FLTR,
@@ -145,6 +149,11 @@ static struct key bindings[] = {
 	/* Cycle contexts in forward direction */
 	{ '\t',           SEL_CYCLE },
 	{ CONTROL('I'),   SEL_CYCLE },
+	/* Go to/create context N */
+	{ '1',            SEL_CTX1 },
+	{ '2',            SEL_CTX2 },
+	{ '3',            SEL_CTX3 },
+	{ '4',            SEL_CTX4 },
 	/* Mark a path to visit later */
 	{ 'b',            SEL_PIN },
 	/* Visit marked directory */

@@ -2100,7 +2100,7 @@ static bool show_help(char *path)
              "e/  Filter        Ins, ^T  Toggle nav-as-you-type\n"
              "eb  Pin current dir    ^W  Go to pinned dir\n"
        "8Tab, ^I  Next context        d  Toggle detail view\n"
-         "a`, ^/  Leader key    LeaderN  Go to/create context N\n"
+         "a`, ^/  Leader key   N, LeadN  Go to/create context N\n"
            "cEsc  Exit prompt        ^L  Redraw/clear prompt\n"
             "d^G  Quit and cd         q  Quit context\n"
          "aQ, ^Q  Quit                ?  Help, config\n"
@@ -2874,9 +2874,15 @@ nochange:
 			setdirwatch();
 			goto begin;
 		case SEL_LEADER: // fallthrough
-		case SEL_CYCLE:
+		case SEL_CYCLE: // fallthrough
+		case SEL_CTX1: // fallthrough
+		case SEL_CTX2: // fallthrough
+		case SEL_CTX3: // fallthrough
+		case SEL_CTX4:
 			if (sel == SEL_CYCLE)
 				fd = '>';
+			else if (sel >= SEL_CTX1 && sel <= SEL_CTX4)
+				fd = sel - SEL_CTX1 + '1';
 			else
 				fd = get_input(NULL);
 
@@ -2887,9 +2893,9 @@ nochange:
 			case '&':
 				presel = fd;
 				goto nochange;
-			case '>':
-			case '.':
-			case '<':
+			case '>': // fallthrough
+			case '.': // fallthrough
+			case '<': // fallthrough
 			case ',':
 				r = cfg.curctx;
 				if (fd == '>' || fd == '.')
