@@ -272,7 +272,7 @@ when dealing with the !, e and p commands respectively. A single combination to 
     NOTE: Bookmark keys should be single-character to use them in combination with the Leader key.
 .Ed
 .Pp
-\fBNNN_USE_EDITOR:\fR use EDITOR (preferably CLI, fallback vi) to handle text
+\fBNNN_USE_EDITOR:\fR use EDITOR (VISUAL takes preference, preferably CLI, fallback vi) to handle text
 files.
 .Bd -literal
     export NNN_USE_EDITOR=1
@@ -287,9 +287,9 @@ files.
 .Pp
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal locker (default: disabled).
 .Pp
-\fBNNN_COPIER:\fR set to a clipboard copier script.
+\fBNNN_COPIER:\fR system clipboard copier script.
 .Bd -literal
-    NOTE: By default file paths are copied to the tmp file \fBDIR/.nnncp\fR, where 'DIR' (by priority) is:
+    NOTE: File paths are copied to the tmp file \fBDIR/.nnncp\fR, where 'DIR' (by priority) is:
     \fI$HOME\fR or, \fI$TMPDIR\fR or, \fI/tmp\fR.
     The path is shown in the help and configuration screen.
 .Ed

@@ -56,6 +56,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - [Navigate-as-you-type](#navigate-as-you-type)
   - [File indicators](#file-indicators)
   - [Utility dependencies](#utility-dependencies)
+  - [Configuration](#configuration)
   - [Help](#help)
 - [Quickstart](#quickstart)
 - [How to](#how-to)
@@ -366,6 +367,27 @@ To edit all text files in EDITOR (preferably CLI, fallback vi):
 Arguments to the `$PAGER` and `$SHELL` should be combined together.
 
 The option `open with` takes 1 combined argument.
+
+#### Configuration
+
+`nnn` supports the following environment variables for configuration.
+
+| Example `export` | Description |
+| --- | --- |
+| `NNN_OPENER=mimeopen` | custom file opener |
+| `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | specify bookmarks (max 10) |
+| `NNN_USE_EDITOR=1` | Open text files in `$EDITOR` (`$VISUAL` takes preference), fallback vi |
+| `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
+| `NNN_IDLE_TIMEOUT=300` | idle time to lock terminal [default: disabled] |
+| `NNN_COPIER='copier.sh'` | system clipboard copier script [default: none] |
+| `NNN_SCRIPT=/home/user/scripts[/script.sh]` | path to script dir or a single script |
+| `NNN_NOTE=/home/user/Dropbox/Public/notes` | path to note file [default: none] |
+| `NNN_SHOW_HIDDEN=1` | show hidden (dot) files [default: do not show hidden if not root ] |
+| `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type` mode |
+| `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
+| `NNN_RESTRICT_0B=1` | do not open 0-byte files |
+| `NNN_PLAIN_FILTER` | use substring match in filer mode [default: regex] |
+| `NNN_TMPFILE=/tmp/nnn` | file to write current open dir path to for cd on quit |
 
 #### Help
 
