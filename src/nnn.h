@@ -103,9 +103,6 @@ struct key {
 
 static struct key bindings[] = {
 	/* Back */
-	{ KEY_BACKSPACE,  SEL_BACK },
-	{ '\b' /* BS */,  SEL_BACK },
-	{ 127 /* DEL */,  SEL_BACK },
 	{ KEY_LEFT,       SEL_BACK },
 	{ 'h',            SEL_BACK },
 	{ CONTROL('H'),   SEL_BACK },
