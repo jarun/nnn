@@ -81,6 +81,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Numeric order for numeric names (visit _/proc_)
 - Search
   - Instant filtering with *search-as-you-type*
+  - Regex and substring match
 - Mimes
   - Open with desktop opener or specify a custom app
   - Create, list, extract archives (needs (p)atool)
