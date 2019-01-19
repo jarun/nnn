@@ -3677,32 +3677,28 @@ int main(int argc, char *argv[])
 
 	/* Get the context colors; copier used as tmp var */
 	if (cfg.showcolor) {
-		copier = getenv("NNN_CONTEXT_COLORS");
-		if (copier) {
-			opt = 0;
-			while (*copier && opt < CTX_MAX) {
-				if (*copier < '0' || *copier > '7') {
-					fprintf(stderr, "invalid color code\n");
-					return 1;
-				}
-
-				g_ctx[opt].color = *copier - '0';
-				++copier;
-				++opt;
+		copier = xgetenv("NNN_CONTEXT_COLORS", "4444");
+		opt = 0;
+		while (*copier && opt < CTX_MAX) {
+			if (*copier < '0' || *copier > '7') {
+				fprintf(stderr, "invalid color code\n");
+				return 1;
 			}
 
-			while (opt != CTX_MAX) {
-				g_ctx[opt].color = 4;
-				++opt;
-			}
-		} else
-			for (opt = 0; opt < CTX_MAX; ++opt)
-				g_ctx[opt].color = 4; /* Default color is blue */
+			g_ctx[opt].color = *copier - '0';
+			++copier;
+			++opt;
+		}
+
+		while (opt != CTX_MAX) {
+			g_ctx[opt].color = 4;
+			++opt;
+		}
 	}
 
 	/* Parse bookmarks string */
 	 if (!parsebmstr()) {
-		fprintf(stderr, "NNN_BMS: single-char keys only\n");
+		fprintf(stderr, "NNN_BMS: 1 char per key\n");
 		return 1;
 	 }
 
@@ -3766,9 +3762,7 @@ int main(int argc, char *argv[])
 #endif
 
 	/* Get custom opener, if set */
-	opener = getenv("NNN_OPENER");
-	if (!opener)
-		opener = utils[OPENER];
+	opener = xgetenv("NNN_OPENER", utils[OPENER]);
 
 	/* Get locker wait time, if set; copier used as tmp var */
 	copier = getenv("NNN_IDLE_TIMEOUT");
