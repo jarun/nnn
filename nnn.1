@@ -148,6 +148,8 @@ Execute entry
 Run or choose a custom script
 .It Ic L
 Lock terminal
+.It Ic N
+Take note
 .It Ic ^S
 Run a command
 .El
@@ -278,7 +280,7 @@ files.
 .Pp
 \fBNNN_CONTEXT_COLORS:\fR string of color codes for each context, e.g.:
 .Bd -literal
-    export NNN_CONTEXT_COLORS="1234"
+    export NNN_CONTEXT_COLORS='1234'
 
     codes: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
 .Ed
@@ -292,11 +294,16 @@ files.
     The path is shown in the help and configuration screen.
 .Ed
 .Pp
-\fBNNN_SCRIPT:\fR absolute path to a directory to select a script from or a single script to invoke with currently selected file name as argument 1.
+\fBNNN_SCRIPT:\fR \fIabsolute\fR path to a directory to select a script from or a single script to invoke with currently selected file name as argument 1.
 .Bd -literal
     export NNN_SCRIPT=/home/user/scripts
     OR
     export NNN_SCRIPT=/usr/local/bin/nscript.sh
+.Ed
+.Pp
+\fBNNN_NOTE:\fR \fIabsolute\fR path to a note file.
+.Bd -literal
+    export NNN_NOTE='/home/user/.mynotes'
 .Ed
 .Pp
 \fBNNN_SHOW_HIDDEN:\fR show hidden files.

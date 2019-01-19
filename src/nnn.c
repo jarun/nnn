@@ -2120,7 +2120,7 @@ static bool show_help(char *path)
 "1MISC\n"
          "a!, ^]  Spawn SHELL in dir  C  Execute entry\n"
          "aR, ^V  Run custom script   L  Lock terminal\n"
-            "d^S  Run a command\n"};
+            "d^S  Run a command       N  Take note\n"};
 
 	if (fd == -1)
 		return FALSE;
@@ -3068,6 +3068,7 @@ nochange:
 				break; // fallthrough
 		case SEL_REDRAW: // fallthrough
 		case SEL_HELP: // fallthrough
+		case SEL_NOTE: // fallthrough
 		case SEL_LOCK:
 		{
 			if (ndents)
@@ -3100,10 +3101,22 @@ nochange:
 			case SEL_RUNEDIT:
 				if (!quote_run_sh_cmd(editor, dents[cur].name, path))
 					goto nochange;
+				r = TRUE;
 				break;
 			case SEL_RUNPAGE:
 				r = TRUE;
 				spawn(pager, pager_arg, dents[cur].name, path, F_NORMAL);
+				break;
+			case SEL_NOTE:
+				tmp = getenv("NNN_NOTE");
+				if (!tmp) {
+					printmsg("set NNN_NOTE");
+					goto nochange;
+				}
+
+				if (!quote_run_sh_cmd(editor, tmp, NULL))
+					goto nochange;
+				r = TRUE;
 				break;
 			default: /* SEL_LOCK */
 				r = TRUE;

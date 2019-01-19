@@ -89,6 +89,7 @@ enum action {
 	SEL_RUNCMD,
 	SEL_RUNEDIT,
 	SEL_RUNPAGE,
+	SEL_NOTE,
 	SEL_LOCK,
 	SEL_QUITCTX,
 	SEL_QUITCD,
@@ -225,6 +226,8 @@ static struct key bindings[] = {
 	/* Open in EDITOR or PAGER */
 	{ 'e',            SEL_RUNEDIT },
 	{ 'p',            SEL_RUNPAGE },
+	/* Open notes file */
+	{ 'N',            SEL_NOTE },
 	/* Lock screen */
 	{ 'L',            SEL_LOCK },
 	/* Quit a context */

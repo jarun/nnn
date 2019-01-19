@@ -21,7 +21,7 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (Thanks Luke Smith for the video!)</i></a></p>
 
-`nnn` is probably the [fastest and most lightweight](#comparison) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more.
+`nnn` is probably the [fastest and most lightweight](#comparison) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning, quick notes and much more.
 
 Integrate utilities like sxiv (image preview) or fzy (fuzzy subtree search) easily, transfer selected files using lftp or use it as a (neo)vim plugin; `nnn` supports as many scripts as you need! Refer to the [How to](https://github.com/jarun/nnn/wiki/How-to) section on wiki for more details.
 
@@ -104,6 +104,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Run current file as executable
   - Change directory at exit (*easy* shell integration)
   - Edit file in EDITOR or open in PAGER
+  - Take quick notes
   - Terminal locker integration
 - Unicode support
 - Highly optimized, static analysis integrated code
@@ -237,7 +238,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  MISC
           !, ^]  Spawn SHELL in dir  C  Execute entry
           R, ^V  Run custom script   L  Lock terminal
-             ^S  Run a command
+             ^S  Run a command       N  Take note
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
@@ -275,7 +276,7 @@ When a context is quit, the next active context is selected. If the last active 
 
 Each context can have its own color for directories specified:
 
-    export NNN_CONTEXT_COLORS="1234"
+    export NNN_CONTEXT_COLORS='1234'
 colors: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
 
 #### Selection
