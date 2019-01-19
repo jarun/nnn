@@ -209,10 +209,10 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  NAVIGATION
        ↑, k, ^P  Up           PgUp, ^U  Scroll up
        ↓, j, ^N  Down         PgDn, ^D  Scroll down
- Home, g, ^, ^A  First entry         ~  Go HOME
-  End, G, $, ^E  Last entry          &  Start dir
- ←, Bksp, h, ^H  Parent dir          -  Last visited dir
-    →, ↵, l, ^M  Open file/dir       .  Toggle show hidden
+ ←, Bksp, h, ^H  Parent dir          ~  Go HOME
+    →, ↵, l, ^M  Open file/dir       &  Start dir
+    Home, g, ^A  First entry         -  Last visited dir
+     End, G, ^E  Last entry          .  Toggle show hidden
               /  Filter        Ins, ^T  Toggle nav-as-you-type
               b  Pin current dir    ^W  Go to pinned dir
         Tab, ^I  Next context        d  Toggle detail view
