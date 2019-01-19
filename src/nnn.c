@@ -2826,14 +2826,21 @@ nochange:
 			cur = ndents - 1;
 			break;
 		case SEL_CDHOME:
-			dir = getenv("HOME");
-			if (dir == NULL) {
-				clearprompt();
-				goto nochange;
-			} // fallthrough
+			dir = xgetenv("HOME", path); // fallthrough
 		case SEL_CDBEGIN:
 			if (sel == SEL_CDBEGIN)
-				dir = ipath;
+				dir = ipath; // fallthrough
+		case SEL_CDLAST:
+			if (sel == SEL_CDLAST)
+				dir = lastdir; // fallthrough
+		case SEL_VISIT:
+			if (sel == SEL_VISIT)
+				dir = mark;
+
+			if (dir[0] == '\0') {
+				printmsg("not set");
+				goto nochange;
+			}
 
 			if (!xdiraccess(dir))
 				goto nochange;
@@ -2841,33 +2848,12 @@ nochange:
 			if (strcmp(path, dir) == 0)
 				break;
 
+			/* SEL_CDLAST: dir pointing to lastdir */
+			xstrlcpy(newpath, dir, PATH_MAX);
+
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
-			xstrlcpy(path, dir, PATH_MAX);
-			lastname[0] = '\0';
-			DPRINTF_S(path);
-			setdirwatch();
-			goto begin;
-		case SEL_CDLAST: // fallthrough
-		case SEL_VISIT:
-			if (sel == SEL_VISIT) {
-				if (strcmp(mark, path) == 0)
-					break;
 
-				tmp = mark;
-			} else
-				tmp = lastdir;
-
-			if (tmp[0] == '\0') {
-				printmsg("not set");
-				goto nochange;
-			}
-
-			if (!xdiraccess(tmp))
-				goto nochange;
-
-			xstrlcpy(newpath, tmp, PATH_MAX);
-			xstrlcpy(lastdir, path, PATH_MAX);
 			xstrlcpy(path, newpath, PATH_MAX);
 			lastname[0] = '\0';
 			DPRINTF_S(path);

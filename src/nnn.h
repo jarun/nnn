@@ -48,6 +48,7 @@ enum action {
 	SEL_CDHOME,
 	SEL_CDBEGIN,
 	SEL_CDLAST,
+	SEL_VISIT,
 	SEL_LEADER,
 	SEL_CYCLE,
 	SEL_CTX1,
@@ -55,7 +56,6 @@ enum action {
 	SEL_CTX3,
 	SEL_CTX4,
 	SEL_PIN,
-	SEL_VISIT,
 	SEL_FLTR,
 	SEL_MFLTR,
 	SEL_TOGGLEDOT,
@@ -141,6 +141,8 @@ static struct key bindings[] = {
 	{ '&',            SEL_CDBEGIN },
 	/* Last visited dir */
 	{ '-',            SEL_CDLAST },
+	/* Visit marked directory */
+	{ CONTROL('W'),   SEL_VISIT },
 	/* Leader key */
 	{ CONTROL('_'),   SEL_LEADER },
 	{ '`',            SEL_LEADER },
@@ -154,8 +156,6 @@ static struct key bindings[] = {
 	{ '4',            SEL_CTX4 },
 	/* Mark a path to visit later */
 	{ 'b',            SEL_PIN },
-	/* Visit marked directory */
-	{ CONTROL('W'),   SEL_VISIT },
 	/* Filter */
 	{ '/',            SEL_FLTR },
 	/* Toggle filter mode */
