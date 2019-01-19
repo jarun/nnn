@@ -330,6 +330,11 @@ files.
 .Bd -literal
     export NNN_PLAIN_FILTER=1
 .Ed
+.Pp
+\fBNNN_TMPFILE:\fR when cd on quit is pressed, the absolute path of the current open directory is written to this file. A wrapper script can read this file and cd into it once the program quits.
+.Bd -literal
+    export NNN_TMPFILE=/tmp/nnn
+.Ed
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspace key to DEC.
 .Sh AUTHORS

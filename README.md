@@ -21,7 +21,7 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (Thanks Luke Smith for the video!)</i></a></p>
 
-`nnn` is probably the [fastest and most lightweight](#comparison) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a unique [navigate-as-you-type](#navigate-as-you-type-mode) mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning, quick notes and much more.
+`nnn` is probably the [fastest and most lightweight](#comparison) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a smooth _navigate-as-you-type_ mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning, quick notes and much more.
 
 Integrate utilities like sxiv (image preview) or fzy (fuzzy subtree search) easily, transfer selected files using lftp or use it as a (neo)vim plugin; `nnn` supports as many scripts as you need! Refer to the [How to](https://github.com/jarun/nnn/wiki/How-to) section on wiki for more details.
 
@@ -53,7 +53,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
     - [Context-specific color](#context-specific-color)
   - [Selection](#selection)
   - [Filters](#filters)
-  - [Navigate-as-you-type mode](#navigate-as-you-type-mode)
+  - [Navigate-as-you-type](#navigate-as-you-type)
   - [File indicators](#file-indicators)
   - [Utility dependencies](#utility-dependencies)
   - [Help](#help)
@@ -317,7 +317,7 @@ To filter entries by substring match:
 
 If `nnn` is invoked as root or the environment variable `NNN_SHOW_HIDDEN` is set the default filter will also match hidden files.
 
-#### Navigate-as-you-type mode
+#### Navigate-as-you-type
 
 In this mode directories are opened in filter mode, allowing continuous navigation. Works best with the **arrow keys**.
 
