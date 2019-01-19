@@ -302,7 +302,7 @@ static char *copier;
 static char *editor;
 static char *pager, *pager_arg;
 static char *shell, *shell_arg;
-static char *runpath;
+static char *scriptpath;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -2164,8 +2164,8 @@ static bool show_help(char *path)
 		dprintf(fd, "NNN_COPIER: %s\n", copier);
 	else if (g_cppath[0])
 		dprintf(fd, "copy file: %s\n", g_cppath);
-	if (runpath)
-		dprintf(fd, "NNN_SCRIPT: %s\n", runpath);
+	if (scriptpath)
+		dprintf(fd, "NNN_SCRIPT: %s\n", scriptpath);
 	if (getenv("NNN_SHOW_HIDDEN"))
 		dprintf(fd, "NNN_SHOW_HIDDEN: 1\n");
 	if (cfg.autoselect)
@@ -2757,7 +2757,7 @@ nochange:
 						continue;
 
 					/* Must be in script directory to select script */
-					if (strcmp(path, runpath) != 0)
+					if (strcmp(path, scriptpath) != 0)
 						continue;
 
 					mkpath(path, dents[cur].name, newpath, PATH_MAX);
@@ -3457,12 +3457,12 @@ nochange:
 				spawn(shell, shell_arg, NULL, path, F_NORMAL | F_MARKER);
 				break;
 			case SEL_SCRIPT:
-				if (!runpath) {
+				if (!scriptpath) {
 					printmsg("set NNN_SCRIPT");
 					goto nochange;
 				}
 
-				if (stat(runpath, &sb) == -1) {
+				if (stat(scriptpath, &sb) == -1) {
 					printwarn();
 					goto nochange;
 				}
@@ -3472,7 +3472,7 @@ nochange:
 					if (!cfg.runscript && rundir[0]) {
 						/* If toggled, and still in the script dir,
 						   switch to original directory */
-						if (strcmp(path, runpath) == 0) {
+						if (strcmp(path, scriptpath) == 0) {
 							xstrlcpy(path, rundir, PATH_MAX);
 							xstrlcpy(lastname, runfile, NAME_MAX);
 							rundir[0] = runfile[0] = '\0';
@@ -3483,11 +3483,11 @@ nochange:
 					}
 
 					/* Check if directory is accessible */
-					if (!xdiraccess(runpath))
+					if (!xdiraccess(scriptpath))
 						goto nochange;
 
 					xstrlcpy(rundir, path, PATH_MAX);
-					xstrlcpy(path, runpath, PATH_MAX);
+					xstrlcpy(path, scriptpath, PATH_MAX);
 					if (ndents)
 						xstrlcpy(runfile, dents[cur].name, NAME_MAX);
 					cfg.runctx = cfg.curctx;
@@ -3501,7 +3501,7 @@ nochange:
 						tmp = dents[cur].name;
 					else
 						tmp = NULL;
-					spawn(shell, runpath, tmp, path, F_NORMAL | F_SIGINT);
+					spawn(shell, scriptpath, tmp, path, F_NORMAL | F_SIGINT);
 				}
 				break;
 			default: /* SEL_RUNCMD */
@@ -3744,7 +3744,7 @@ int main(int argc, char *argv[])
 	getprogarg(shell, &shell_arg);
 
 	/* Setup script execution */
-	runpath = getenv("NNN_SCRIPT");
+	scriptpath = getenv("NNN_SCRIPT");
 
 #ifdef LINUX_INOTIFY
 	/* Initialize inotify */
