@@ -1527,8 +1527,7 @@ static int xlink(char *suffix, char *path, char *buf, int type)
 		r = mkpath(path, fname, buf, PATH_MAX);
 		xstrlcpy(buf + r - 1, suffix, PATH_MAX - r - 1);
 
-		r = link_fn(pbuf, buf);
-		if (!r)
+		if (!link_fn(pbuf, buf))
 			++count;
 
 		pos += len + 1;
