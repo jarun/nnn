@@ -1533,22 +1533,22 @@ END:
  * Updates out with "dir/name or "/name"
  * Returns the number of bytes copied including the terminating NULL byte
  */
-static size_t mkpath(char *dir, char *name, char *out, size_t n)
+static size_t mkpath(char *dir, char *name, char *out)
 {
 	static size_t len;
 
 	/* Handle absolute path */
 	if (name[0] == '/')
-		return xstrlcpy(out, name, n);
+		return xstrlcpy(out, name, PATH_MAX);
 
 	/* Handle root case */
 	if (istopdir(dir))
 		len = 1;
 	else
-		len = xstrlcpy(out, dir, n);
+		len = xstrlcpy(out, dir, PATH_MAX);
 
 	out[len - 1] = '/';
-	return (xstrlcpy(out + len, name, n - len) + len);
+	return (xstrlcpy(out + len, name, PATH_MAX - len) + len);
 }
 
 /*
@@ -1576,7 +1576,7 @@ static int xlink(char *suffix, char *path, char *buf, int type)
 	while (pos < copybufpos) {
 		len = strlen(pbuf);
 		fname = xbasename(pbuf);
-		r = mkpath(path, fname, buf, PATH_MAX);
+		r = mkpath(path, fname, buf);
 		xstrlcpy(buf + r - 1, suffix, PATH_MAX - r - 1);
 
 		if (!link_fn(pbuf, buf))
@@ -2366,7 +2366,7 @@ static int dentfill(char *path, struct entry **dents)
 			if (S_ISDIR(sb.st_mode)) {
 				if (sb_path.st_dev == sb.st_dev) {
 					ent_blocks = 0;
-					mkpath(path, namep, g_buf, PATH_MAX);
+					mkpath(path, namep, g_buf);
 
 					if (nftw(g_buf, nftw_fn, open_max,
 						 FTW_MOUNT | FTW_PHYS) == -1) {
@@ -2440,7 +2440,7 @@ static int dentfill(char *path, struct entry **dents)
 			if (S_ISDIR(sb.st_mode)) {
 				ent_blocks = 0;
 				num_saved = num_files + 1;
-				mkpath(path, namep, g_buf, PATH_MAX);
+				mkpath(path, namep, g_buf);
 
 				if (nftw(g_buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
 					printmsg(messages[STR_NFTWFAIL_ID]);
@@ -2813,7 +2813,7 @@ nochange:
 			if (!ndents)
 				goto begin;
 
-			mkpath(path, dents[cur].name, newpath, PATH_MAX);
+			mkpath(path, dents[cur].name, newpath);
 			DPRINTF_S(newpath);
 
 			/* Cannot use stale data in entry, file may be missing by now */
@@ -2841,7 +2841,7 @@ nochange:
 			{
 				/* If opened as vim plugin and Enter/^M pressed, pick */
 				if (cfg.picker && sel == SEL_GOIN) {
-					r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
+					r = mkpath(path, dents[cur].name, newpath);
 					appendfpath(newpath, r);
 					writecp(pcopybuf, copybufpos - 1);
 
@@ -2862,7 +2862,7 @@ nochange:
 					if (strcmp(path, scriptpath) != 0)
 						continue;
 
-					mkpath(path, dents[cur].name, newpath, PATH_MAX);
+					mkpath(path, dents[cur].name, newpath);
 					xstrlcpy(path, rundir, PATH_MAX);
 					if (runfile[0]) {
 						xstrlcpy(lastname, runfile, NAME_MAX);
@@ -3156,7 +3156,7 @@ nochange:
 			if (!ndents)
 				break;
 
-			mkpath(path, dents[cur].name, newpath, PATH_MAX);
+			mkpath(path, dents[cur].name, newpath);
 			if (lstat(newpath, &sb) == -1 || !show_stats(newpath, dents[cur].name, &sb)) {
 				printwarn();
 				goto nochange;
@@ -3177,7 +3177,7 @@ nochange:
 		case SEL_LOCK:
 		{
 			if (ndents)
-				mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				mkpath(path, dents[cur].name, newpath);
 
 			switch (sel) {
 			case SEL_MEDIA:
@@ -3274,13 +3274,13 @@ nochange:
 				if (!ncp)
 					writecp(NULL, 0);
 
-				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				r = mkpath(path, dents[cur].name, newpath);
 				if (!appendfpath(newpath, r))
 					goto nochange;
 
 				++ncp;
 			} else {
-				r = mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				r = mkpath(path, dents[cur].name, newpath);
 				/* Keep the copy buf in sync */
 				copybufpos = 0;
 				appendfpath(newpath, r);
@@ -3322,7 +3322,7 @@ nochange:
 				if (copystartid < copyendid) {
 					for (r = copystartid; r <= copyendid; ++r)
 						if (!appendfpath(newpath, mkpath(path,
-								 dents[r].name, newpath, PATH_MAX)))
+								 dents[r].name, newpath)))
 							goto nochange;
 
 					snprintf(newpath, PATH_MAX, "%d files copied",
@@ -3413,7 +3413,7 @@ nochange:
 			char rm_opts[] = "-ir";
 			rm_opts[1] = confirm_force();
 
-			mkpath(path, dents[cur].name, newpath, PATH_MAX);
+			mkpath(path, dents[cur].name, newpath);
 			spawn("rm", rm_opts, newpath, NULL, F_NORMAL | F_SIGINT);
 
 			if (cur && access(newpath, F_OK) == -1)
@@ -3475,7 +3475,7 @@ nochange:
 			case SEL_OPENWITH:
 				dir = NULL;
 				getprogarg(tmp, &dir); /* dir used as tmp var */
-				mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				mkpath(path, dents[cur].name, newpath);
 				spawn(tmp, dir, newpath, path, r);
 				break;
 			case SEL_RENAME:
@@ -3592,7 +3592,7 @@ nochange:
 					goto nochange;
 				}
 
-				mkpath(path, dents[cur].name, newpath, PATH_MAX);
+				mkpath(path, dents[cur].name, newpath);
 				DPRINTF_S(newpath);
 				spawn(newpath, NULL, NULL, path, F_NORMAL | F_SIGINT);
 				break;
