@@ -214,6 +214,8 @@ disabledbg()
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
 #define setdirwatch() (cfg.filtermode ? (presel = FILTER) : (dir_changed = TRUE))
+/* We don't care about the return value from strcmp() */
+#define xstrcmp(a, b)  (*(a) != *(b) ? -1 : strcmp((a), (b)))
 
 #ifdef LINUX_INOTIFY
 #define EVENT_SIZE (sizeof(struct inotify_event))
@@ -2489,7 +2491,7 @@ static int dentfind(const char *fname, int n)
 	DPRINTF_S(fname);
 
 	for (i = 0; i < n; ++i)
-		if (strcmp(fname, dents[i].name) == 0)
+		if (xstrcmp(fname, dents[i].name) == 0)
 			return i;
 
 	return 0;
@@ -3447,7 +3449,7 @@ nochange:
 				break;
 
 			/* Allow only relative, same dir paths */
-			if (tmp[0] == '/' || strcmp(xbasename(tmp), tmp) != 0) {
+			if (tmp[0] == '/' || xstrcmp(xbasename(tmp), tmp) != 0) {
 				printmsg(messages[STR_INPUT_ID]);
 				goto nochange;
 			}
