@@ -3395,7 +3395,7 @@ nochange:
 				tmp = xreadline(NULL, "open with: ");
 				break;
 			case SEL_NEW:
-				tmp = xreadline(NULL, "name/link suffix: ");
+				tmp = xreadline(NULL, "name/link suffix [@ for no suffix]: ");
 				break;
 			default: /* SEL_RENAME */
 				tmp = xreadline(dents[cur].name, "");
@@ -3494,6 +3494,8 @@ nochange:
 				} else if (r == 'd') {
 					r = mkdirat(fd, tmp, 0777);
 				} else if (r == 's' || r == 'h') {
+					if (tmp[0] == '@' && tmp[1] == '\0')
+						tmp[0] = '\0';
 					r = xlink(tmp, path, newpath, r);
 					close(fd);
 
