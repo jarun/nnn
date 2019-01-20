@@ -393,7 +393,7 @@ static char * const utils[] = {
 #define STR_UNSAFE 5
 #define STR_TMPFILE 6
 
-static const char messages[][16] = {
+static const char * const messages[] = {
 	"nftw failed",
 	"HOME not set",
 	"no traversal",
