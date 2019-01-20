@@ -738,10 +738,8 @@ static ssize_t selectiontofd(int fd)
 	ssize_t pos = 0, len, r, lastpos = copybufpos - 1;
 
 	while (pos < copybufpos) {
-		while(pcopybuf[pos])
-			++pos;
-
 		len = strlen(pbuf);
+		pos += len;
 
 		r = write(fd, pbuf, len);
 		if (r != len)
@@ -750,7 +748,7 @@ static ssize_t selectiontofd(int fd)
 		if (pos != lastpos) {
 			if (write(fd, "\n", 1) != 1)
 				return pos;
-			pbuf = pbuf + len + 1;
+			pbuf += pos + 1;
 		}
 		++pos;
 	}
@@ -1501,7 +1499,10 @@ static size_t mkpath(char *dir, char *name, char *out, size_t n)
 	return (xstrlcpy(out + len, name, n - len) + len);
 }
 
-/* Create symbolic/hard link(s) to file(s) in selection list */
+/*
+ * Create symbolic/hard link(s) to file(s) in selection list
+ * Returns the number of links created
+ */
 static int xlink(char *suffix, char *path, char *buf, int type)
 {
 	int count = 0;
