@@ -2480,13 +2480,13 @@ static int dentfill(char *path, struct entry **dents)
 	return n;
 }
 
-/* Return the position of the matching entry or 0 otherwise */
+/*
+ * Return the position of the matching entry or 0 otherwise
+ * Note there's no NULL check for fname
+ */
 static int dentfind(const char *fname, int n)
 {
 	static int i;
-
-	if (!fname)
-		return 0;
 
 	DPRINTF_S(fname);
 
@@ -2497,14 +2497,8 @@ static int dentfind(const char *fname, int n)
 	return 0;
 }
 
-static bool populate(char *path, char *lastname)
+static void populate(char *path, char *lastname)
 {
-	/* Can fail when permissions change while browsing.
-	 * It's assumed that path IS a directory when we are here.
-	 */
-	if (access(path, R_OK) == -1)
-		return FALSE;
-
 	if (cfg.blkorder) {
 		printmsg("calculating...");
 		refresh();
@@ -2518,7 +2512,7 @@ static bool populate(char *path, char *lastname)
 
 	ndents = dentfill(path, &dents);
 	if (!ndents)
-		return TRUE;
+		return;
 
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
 
@@ -2528,8 +2522,11 @@ static bool populate(char *path, char *lastname)
 #endif
 
 	/* Find cur from history */
-	cur = dentfind(lastname, ndents);
-	return TRUE;
+	/* No NULL check for lastname, always points to an array */
+	if (!*lastname)
+		cur = 0;
+	else
+		dentfind(lastname, ndents);
 }
 
 static void redraw(char *path)
@@ -2749,10 +2746,15 @@ begin:
 	}
 #endif
 
-	if (!populate(path, lastname)) {
+	/* Can fail when permissions change while browsing.
+	 * It's assumed that path IS a directory when we are here.
+	 */
+	if (access(path, R_OK) == -1) {
 		printwarn();
 		goto nochange;
 	}
+
+	populate(path, lastname);
 
 #ifdef LINUX_INOTIFY
 	if (inotify_wd == -1)
@@ -3659,7 +3661,7 @@ nochange:
 			if (ndents)
 				copycurname();
 
-			/* Re-populate as directory content may have changed */
+			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
