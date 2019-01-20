@@ -96,6 +96,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Create, rename files and directories
   - Select files across directories
   - Copy, move, delete selection
+  - Create sym/hard link(s) to selection
   - Transfer files using lftp
   - Batch rename/move/delete (needs vidir)
   - Show directories in custom color (default: blue)
@@ -226,7 +227,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
              ^G  Quit and cd         q  Quit context
           Q, ^Q  Quit                ?  Help, config
  FILES
-             ^O  Open with...        n  Create new
+             ^O  Open with...        n  Create new/link
               D  File details       ^R  Rename entry
           ⎵, ^K  Copy entry path     r  Open dir in vidir
           Y, ^Y  Toggle selection    y  List selection

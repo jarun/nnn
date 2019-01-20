@@ -1469,7 +1469,6 @@ END:
 	clearprompt();
 
 	buf[len] = '\0';
-	DPRINTF_S(buf);
 	wcstombs(g_buf + ((NAME_MAX + 1) << 2), buf, NAME_MAX);
 	return g_buf + ((NAME_MAX + 1) << 2);
 }
@@ -1494,6 +1493,42 @@ static size_t mkpath(char *dir, char *name, char *out, size_t n)
 
 	out[len - 1] = '/';
 	return (xstrlcpy(out + len, name, n - len) + len);
+}
+
+/* Create symbolic/hard link(s) to file(s) in selection list */
+static int xlink(char *suffix, char *path, char *buf, int type)
+{
+	int count = 0;
+	char *pbuf = pcopybuf, *fname;
+	ssize_t pos = 0, len, r;
+	int (*link_fn)(const char *, const char *) = NULL;
+
+	/* Check if selection is empty */
+	if (!copybufpos)
+		return 0;
+
+	if (type == 's') /* symbolic link */
+		link_fn = &symlink;
+	else if (type == 'h') /* hard link */
+		link_fn = &link;
+	else
+		return -1;
+
+	while (pos < copybufpos) {
+		len = strlen(pbuf);
+		fname = xbasename(pbuf);
+		r = mkpath(path, fname, buf, PATH_MAX);
+		xstrlcpy(buf + r - 1, suffix, PATH_MAX - r - 1);
+
+		r = link_fn(pbuf, buf);
+		if (!r)
+			++count;
+
+		pos += len + 1;
+		pbuf += len + 1;
+	}
+
+	return count;
 }
 
 static bool parsebmstr()
@@ -2105,7 +2140,7 @@ static bool show_help(char *path)
             "d^G  Quit and cd         q  Quit context\n"
          "aQ, ^Q  Quit                ?  Help, config\n"
 "1FILES\n"
-            "d^O  Open with...        n  Create new\n"
+            "d^O  Open with...        n  Create new/link\n"
              "eD  File details       ^R  Rename entry\n"
          "a⎵, ^K  Copy entry path     r  Open dir in vidir\n"
          "aY, ^Y  Toggle selection    y  List selection\n"
@@ -3334,7 +3369,7 @@ nochange:
 				tmp = xreadline(NULL, "open with: ");
 				break;
 			case SEL_NEW:
-				tmp = xreadline(NULL, "name: ");
+				tmp = xreadline(NULL, "name/link suffix: ");
 				break;
 			default: /* SEL_RENAME */
 				tmp = xreadline(dents[cur].name, "");
@@ -3426,12 +3461,26 @@ nochange:
 				}
 			} else {
 				/* Check if it's a dir or file */
-				r = get_input("press 'f'(ile) or 'd'(ir)");
+				r = get_input("create 'f'(ile) / 'd'(ir) / 's'(ym) / 'h'(ard)?");
 				if (r == 'f') {
 					r = openat(fd, tmp, O_CREAT, 0666);
 					close(r);
 				} else if (r == 'd') {
 					r = mkdirat(fd, tmp, 0777);
+				} else if (r == 's' || r == 'h') {
+					r = xlink(tmp, path, newpath, r);
+					close(fd);
+
+					if (r <= 0) {
+						printmsg("none created");
+						goto nochange;
+					}
+
+					if (cfg.filtermode)
+						presel = FILTER;
+					if (ndents)
+						copycurname();
+					goto begin;
 				} else {
 					close(fd);
 					break;
