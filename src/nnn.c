@@ -64,7 +64,7 @@
 #define _XOPEN_SOURCE_EXTENDED
 #endif
 #endif
-#ifndef __USE_XOPEN /* Fix failure due to wcswidth(), ncursesw/curses.h includes whcar.h on Ubuntu 14.04 */
+#ifndef __USE_XOPEN /* Fix wcswidth() failure, ncursesw/curses.h includes whcar.h on Ubuntu 14.04 */
 #define __USE_XOPEN
 #endif
 #include <dirent.h>
@@ -176,7 +176,7 @@ disabledbg()
 #define REGEX_MAX 128
 #define BM_MAX 10
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
-#define NAMEBUF_INCR 0x1000 /* 64 dir entries at a time, avg. 64 chars per filename = 64*64B = 4KB */
+#define NAMEBUF_INCR 0x1000 /* 64 dir entries at once, avg. 64 chars per filename = 64*64B = 4KB */
 #define DESCRIPTOR_LEN 32
 #define _ALIGNMENT 0x10 /* 16-byte alignment */
 #define _ALIGNMENT_MASK 0xF
@@ -767,7 +767,8 @@ static bool showcplist()
 		return FALSE;
 
 	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], HOME_LEN_MAX - g_tmpfplen);
+		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
+			 HOME_LEN_MAX - g_tmpfplen);
 	else {
 		printmsg(messages[STR_NOHOME_ID]);
 		return -1;
@@ -1160,14 +1161,17 @@ static int nextsel(int *presel)
 		++idle;
 
 		/*
-		 * Do not check for directory changes in du mode. A redraw forces du calculation.
+		 * Do not check for directory changes in du mode.
+		 * A redraw forces du calculation.
 		 * Check for changes every odd second.
 		 */
 #ifdef LINUX_INOTIFY
-		if (!cfg.blkorder && inotify_wd >= 0 && idle & 1 && read(inotify_fd, inotify_buf, EVENT_BUF_LEN) > 0)
+		if (!cfg.blkorder && inotify_wd >= 0 && idle & 1
+		    && read(inotify_fd, inotify_buf, EVENT_BUF_LEN) > 0)
 #elif defined(BSD_KQUEUE)
 		if (!cfg.blkorder && event_fd >= 0 && idle & 1
-		    && kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, event_data, NUM_EVENT_FDS, &gtimeout) > 0)
+		    && kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
+			      event_data, NUM_EVENT_FDS, &gtimeout) > 0)
 #endif
 				c = CONTROL('L');
 	} else
@@ -1325,7 +1329,8 @@ static int filterentries(char *path)
 					continue;
 
 				/* If the only match is a dir, auto-select and cd into it */
-				if (ndents == 1 && cfg.filtermode && cfg.autoselect && S_ISDIR(dents[0].mode)) {
+				if (ndents == 1 && cfg.filtermode
+				    && cfg.autoselect && S_ISDIR(dents[0].mode)) {
 					*ch = KEY_ENTER;
 					cur = 0;
 					goto end;
@@ -1394,7 +1399,7 @@ static char *xreadline(char *prefill, char *prompt)
 				case '\r':
 					goto END;
 				case 127: /* Handle DEL */ // fallthrough
-				case '\b': /* some old curses (e.g. rhel25) still send '\b' for backspace */
+				case '\b': /* rhel25 sends '\b' for backspace */
 					if (pos > 0) {
 						memmove(buf + pos - 1, buf + pos, (len - pos) << 2);
 						--len, --pos;
@@ -1452,7 +1457,8 @@ static char *xreadline(char *prefill, char *prompt)
 					break;
 				case KEY_DC:
 					if (pos < len) {
-						memmove(buf + pos, buf + pos + 1, (len - pos - 1) << 2);
+						memmove(buf + pos, buf + pos + 1,
+							(len - pos - 1) << 2);
 						--len;
 					}
 					break;
@@ -1758,7 +1764,8 @@ static void printent_long(struct entry *ent, int sel, uint namecols)
 
 	if (S_ISDIR(ent->mode)) {
 		if (cfg.blkorder)
-			printw(" %-16.16s %8.8s/ %s/\n", buf, coolsize(ent->blocks << BLK_SHIFT), pname);
+			printw(" %-16.16s %8.8s/ %s/\n",
+			       buf, coolsize(ent->blocks << BLK_SHIFT), pname);
 		else
 			printw(" %-16.16s        /  %s/\n", buf, pname);
 	} else if (S_ISLNK(ent->mode)) {
@@ -1796,7 +1803,8 @@ static char get_fileind(mode_t mode, char *desc)
 		c = '-';
 		xstrlcpy(desc, "regular file", DESCRIPTOR_LEN);
 		if (mode & 0100)
-			xstrlcpy(desc + 12, ", executable", DESCRIPTOR_LEN - 12); /* Length of string "regular file" is 12 */
+			/* Length of string "regular file" is 12 */
+			xstrlcpy(desc + 12, ", executable", DESCRIPTOR_LEN - 12);
 	} else if (S_ISDIR(mode)) {
 		c = 'd';
 		xstrlcpy(desc, "directory", DESCRIPTOR_LEN);
@@ -1964,7 +1972,8 @@ static bool show_stats(char *fpath, char *fname, struct stat *sb)
 	char *p, *begin = g_buf;
 
 	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], HOME_LEN_MAX - g_tmpfplen);
+		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
+			 HOME_LEN_MAX - g_tmpfplen);
 	else {
 		printmsg(messages[STR_NOHOME_ID]);
 		return FALSE;
@@ -2021,8 +2030,10 @@ static bool show_stats(char *fpath, char *fname, struct stat *sb)
 		dprintf(fd, " Device type: %x,%x", major(sb->st_rdev), minor(sb->st_rdev));
 
 	/* Show permissions, owner, group */
-	dprintf(fd, "\n  Access: 0%d%d%d/%s Uid: (%u/%s)  Gid: (%u/%s)", (sb->st_mode >> 6) & 7, (sb->st_mode >> 3) & 7,
-		sb->st_mode & 7, perms, sb->st_uid, xgetpwuid(sb->st_uid), sb->st_gid, xgetgrgid(sb->st_gid));
+	dprintf(fd, "\n  Access: 0%d%d%d/%s Uid: (%u/%s)  Gid: (%u/%s)",
+		(sb->st_mode >> 6) & 7, (sb->st_mode >> 3) & 7,
+		sb->st_mode & 7, perms, sb->st_uid, xgetpwuid(sb->st_uid),
+		sb->st_gid, xgetgrgid(sb->st_gid));
 
 	/* Show last access time */
 	strftime(g_buf, 40, messages[STR_DATE_ID], localtime(&sb->st_atime));
@@ -2115,7 +2126,8 @@ static bool handle_archive(char *fpath, char *arg, char *dir)
 static bool show_help(char *path)
 {
 	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], HOME_LEN_MAX - g_tmpfplen);
+		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
+			 HOME_LEN_MAX - g_tmpfplen);
 	else {
 		printmsg(messages[STR_NOHOME_ID]);
 		return FALSE;
@@ -2312,9 +2324,12 @@ static int dentfill(char *path, struct entry **dents)
 					ent_blocks = 0;
 					mkpath(path, namep, g_buf, PATH_MAX);
 
-					if (nftw(g_buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
+					if (nftw(g_buf, nftw_fn, open_max,
+						 FTW_MOUNT | FTW_PHYS) == -1) {
 						printmsg(messages[STR_NFTWFAIL_ID]);
-						dir_blocks += (cfg.apparentsz ? sb.st_size : sb.st_blocks);
+						dir_blocks += (cfg.apparentsz
+							       ? sb.st_size
+							       : sb.st_blocks);
 					} else
 						dir_blocks += ent_blocks;
 				}
@@ -2341,7 +2356,7 @@ static int dentfill(char *path, struct entry **dents)
 			DPRINTF_P(*dents);
 		}
 
-		/* If there's not enough bytes left to copy a file name of length NAME_MAX, re-allocate */
+		/* If not enough bytes left to copy a file name of length NAME_MAX, re-allocate */
 		if (namebuflen - off < NAME_MAX + 1) {
 			namebuflen += NAMEBUF_INCR;
 
@@ -2360,7 +2375,8 @@ static int dentfill(char *path, struct entry **dents)
 
 				for (count = 1; count < n; ++dentp, ++count)
 					/* Current filename starts at last filename start + length */
-					(dentp + 1)->name = (char *)((size_t)dentp->name + dentp->nlen);
+					(dentp + 1)->name = (char *)((size_t)dentp->name
+							    + dentp->nlen);
 			}
 		}
 
@@ -2604,7 +2620,8 @@ static void redraw(char *path)
 			/* We need to show filename as it may be truncated in directory listing */
 			if (!cfg.blkorder)
 				snprintf(buf, NAME_MAX + 65, "%d/%d %s[%s%s]",
-					 cur + 1, ndents, sort, unescape(dents[cur].name, NAME_MAX), get_file_sym(dents[cur].mode));
+					 cur + 1, ndents, sort, unescape(dents[cur].name, NAME_MAX),
+					 get_file_sym(dents[cur].mode));
 			else {
 				i = snprintf(buf, 64, "%d/%d ", cur + 1, ndents);
 
@@ -2613,9 +2630,12 @@ static void redraw(char *path)
 				else
 					buf[i++] = 'd';
 
-				i += snprintf(buf + i, 64, "u: %s (%lu files) ", coolsize(dir_blocks << BLK_SHIFT), num_files);
+				i += snprintf(buf + i, 64, "u: %s (%lu files) ",
+					      coolsize(dir_blocks << BLK_SHIFT), num_files);
 				snprintf(buf + i, NAME_MAX, "vol: %s free [%s%s]",
-					 coolsize(get_fs_info(path, FREE)), unescape(dents[cur].name, NAME_MAX), get_file_sym(dents[cur].mode));
+					 coolsize(get_fs_info(path, FREE)),
+					 	  unescape(dents[cur].name, NAME_MAX),
+						  get_file_sym(dents[cur].mode));
 			}
 
 			printmsg(buf);
@@ -2701,7 +2721,8 @@ begin:
 		event_fd = open(path, O_RDONLY);
 #endif
 		if (event_fd >= 0)
-			EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE, EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, path);
+			EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
+			       EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, path);
 	}
 #endif
 
@@ -2799,7 +2820,8 @@ nochange:
 					xstrlcpy(path, rundir, PATH_MAX);
 					if (runfile[0]) {
 						xstrlcpy(lastname, runfile, NAME_MAX);
-						spawn(shell, newpath, lastname, path, F_NORMAL | F_SIGINT);
+						spawn(shell, newpath, lastname, path,
+						      F_NORMAL | F_SIGINT);
 						runfile[0] = '\0';
 					} else
 						spawn(shell, newpath, NULL, path, F_NORMAL | F_SIGINT);
@@ -2811,9 +2833,9 @@ nochange:
 
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
 				if (cfg.useeditor &&
-				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE) &&
-				    g_buf[0] == 't' && g_buf[1] == 'e' && g_buf[2] == 'x' &&
-				    g_buf[3] == g_buf[0] && g_buf[4] == '/') {
+				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE)
+				    && g_buf[0] == 't' && g_buf[1] == 'e' && g_buf[2] == 'x'
+				    && g_buf[3] == g_buf[0] && g_buf[4] == '/') {
 					if (!quote_run_sh_cmd(editor, newpath, path))
 						goto nochange;
 					continue;
@@ -3237,7 +3259,8 @@ nochange:
 
 			if (!ncp) { /* Handle range selection */
 #ifndef DIR_LIMITED_COPY
-				if (g_crc != crc8fast((uchar *)dents, ndents * sizeof(struct entry))) {
+				if (g_crc != crc8fast((uchar *)dents,
+						      ndents * sizeof(struct entry))) {
 					cfg.copymode = 0;
 					printmsg("range error: dir/content changed");
 					DPRINTF_S("range error: dir/content changed");
@@ -3252,10 +3275,12 @@ nochange:
 
 				if (copystartid < copyendid) {
 					for (r = copystartid; r <= copyendid; ++r)
-						if (!appendfpath(newpath, mkpath(path, dents[r].name, newpath, PATH_MAX)))
+						if (!appendfpath(newpath, mkpath(path,
+								 dents[r].name, newpath, PATH_MAX)))
 							goto nochange;
 
-					snprintf(newpath, PATH_MAX, "%d files copied", copyendid - copystartid + 1);
+					snprintf(newpath, PATH_MAX, "%d files copied",
+						 copyendid - copystartid + 1);
 					printmsg(newpath);
 				}
 			}
