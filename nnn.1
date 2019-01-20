@@ -259,11 +259,6 @@ To list the file paths copied to memory press \fIy\fR.
 The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively. A single combination to arguments is supported for SHELL and PAGER.
 .Pp
-\fBNNN_OPENER:\fR specify a custom file opener.
-.Bd -literal
-    export NNN_OPENER=mimeopen
-.Ed
-.Pp
 \fBNNN_BMS:\fR bookmark string as \fIkey_char:location\fR pairs (max 10) separated by
 \fI;\fR:
 .Bd -literal
@@ -272,10 +267,9 @@ when dealing with the !, e and p commands respectively. A single combination to 
     NOTE: Bookmark keys should be single-character to use them in combination with the Leader key.
 .Ed
 .Pp
-\fBNNN_USE_EDITOR:\fR use EDITOR (VISUAL takes preference, preferably CLI, fallback vi) to handle text
-files.
+\fBNNN_OPENER:\fR specify a custom file opener.
 .Bd -literal
-    export NNN_USE_EDITOR=1
+    export NNN_OPENER=mimeopen
 .Ed
 .Pp
 \fBNNN_CONTEXT_COLORS:\fR string of color codes for each context, e.g.:
@@ -306,6 +300,17 @@ files.
     export NNN_NOTE='/home/user/.mynotes'
 .Ed
 .Pp
+\fBNNN_TMPFILE:\fR when cd on quit is pressed, the absolute path of the current open directory is written to this file. A wrapper script can read this file and cd into it once the program quits.
+.Bd -literal
+    export NNN_TMPFILE=/tmp/nnn
+.Ed
+.Pp
+\fBNNN_USE_EDITOR:\fR use EDITOR (VISUAL takes preference, preferably CLI, fallback vi) to handle text
+files.
+.Bd -literal
+    export NNN_USE_EDITOR=1
+.Ed
+.Pp
 \fBNNN_SHOW_HIDDEN:\fR show hidden files.
 .Bd -literal
     export NNN_SHOW_HIDDEN=1
@@ -329,11 +334,6 @@ files.
 \fBNNN_PLAIN_FILTER:\fR use substring match in filter mode.
 .Bd -literal
     export NNN_PLAIN_FILTER=1
-.Ed
-.Pp
-\fBNNN_TMPFILE:\fR when cd on quit is pressed, the absolute path of the current open directory is written to this file. A wrapper script can read this file and cd into it once the program quits.
-.Bd -literal
-    export NNN_TMPFILE=/tmp/nnn
 .Ed
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspace key to DEC.

@@ -160,7 +160,7 @@ disabledbg()
 
 /* Macro definitions */
 #define VERSION "2.2"
-#define GENERAL_INFO "License: BSD 2-Clause\nWebpage: https://github.com/jarun/nnn"
+#define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
 
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
@@ -404,36 +404,53 @@ static const char * const messages[] = {
 };
 
 /* Supported config env vars */
-#define NNN_OPENER 0
-#define NNN_BMS 1
-#define NNN_USE_EDITOR 2
-#define NNN_CONTEXT_COLORS 3
-#define NNN_IDLE_TIMEOUT 4
-#define NNN_COPIER 5
-#define NNN_SCRIPT 6
-#define NNN_NOTE 7
-#define NNN_SHOW_HIDDEN 8
-#define NNN_NO_AUTOSELECT 9
-#define NNN_RESTRICT_NAV_OPEN 10
-#define NNN_RESTRICT_0B 11
-#define NNN_PLAIN_FILTER 12
-#define NNN_TMPFILE 13
+#define NNN_BMS 0
+#define NNN_OPENER 1
+#define NNN_CONTEXT_COLORS 2
+#define NNN_IDLE_TIMEOUT 3
+#define NNN_COPIER 4
+#define NNN_SCRIPT 5
+#define NNN_NOTE 6
+#define NNN_TMPFILE 7
+#define NNN_USE_EDITOR 8
+#define NNN_SHOW_HIDDEN 9
+#define NNN_NO_AUTOSELECT 10
+#define NNN_RESTRICT_NAV_OPEN 11
+#define NNN_RESTRICT_0B 12
+#define NNN_PLAIN_FILTER 13
 
-static const char * const envs[] = {
-	"NNN_OPENER",
+static const char * const env_cfg[] = {
 	"NNN_BMS",
-	"NNN_USE_EDITOR",
+	"NNN_OPENER",
 	"NNN_CONTEXT_COLORS",
 	"NNN_IDLE_TIMEOUT",
 	"NNN_COPIER",
 	"NNN_SCRIPT",
 	"NNN_NOTE",
+	"NNN_TMPFILE",
+	"NNN_USE_EDITOR",
 	"NNN_SHOW_HIDDEN",
 	"NNN_NO_AUTOSELECT",
 	"NNN_RESTRICT_NAV_OPEN",
 	"NNN_RESTRICT_0B",
 	"NNN_PLAIN_FILTER",
-	"NNN_TMPFILE",
+};
+
+/* Required env vars */
+#define PWD 0
+#define SHELL 1
+#define SHLVL 2
+#define VISUAL 3
+#define EDITOR 4
+#define PAGER 5
+
+static const char * const envs[] = {
+	"PWD",
+	"SHELL",
+	"SHLVL",
+	"VISUAL",
+	"EDITOR",
+	"PAGER",
 };
 
 /* Forward declarations */
@@ -880,7 +897,7 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 		if (dir != NULL)
 			status = chdir(dir);
 
-		shlvl = getenv("SHLVL");
+		shlvl = getenv(envs[SHLVL]);
 
 		/* Show a marker (to indicate nnn spawned shell) */
 		if (flag & F_MARKER && shlvl != NULL) {
@@ -1573,7 +1590,7 @@ static int xlink(char *suffix, char *path, char *buf, int type)
 static bool parsebmstr()
 {
 	int i = 0;
-	char *bms = getenv(envs[NNN_BMS]);
+	char *bms = getenv(env_cfg[NNN_BMS]);
 	if (!bms)
 		return TRUE;
 
@@ -2168,39 +2185,40 @@ static bool show_help(char *path)
 
 	int i = 0, fd = mkstemp(g_tmpfpath);
 	char *start, *end;
+
 	static char helpstr[] = {
 "0\n"
 "1NAVIGATION\n"
-      "7↑, k, ^P  Up           PgUp, ^U  Scroll up\n"
-      "7↓, j, ^N  Down         PgDn, ^D  Scroll down\n"
-      "7←, h, ^H  Parent dir          ~  Go HOME\n"
-   "4↵, →, l, ^M  Open file/dir       &  Start dir\n"
-   "4Home, g, ^A  First entry         -  Last visited dir\n"
-    "5End, G, ^E  Last entry          .  Toggle show hidden\n"
-             "e/  Filter        Ins, ^T  Toggle nav-as-you-type\n"
-             "eb  Pin current dir    ^W  Go to pinned dir\n"
-       "8Tab, ^I  Next context        d  Toggle detail view\n"
-         "a`, ^/  Leader key   N, LeadN  Go to/create context N\n"
-           "cEsc  Exit prompt        ^L  Redraw/clear prompt\n"
-            "d^G  Quit and cd         q  Quit context\n"
-         "aQ, ^Q  Quit                ?  Help, config\n"
+      "5↑, k, ^P  Up           PgUp, ^U  Scroll up\n"
+      "5↓, j, ^N  Down         PgDn, ^D  Scroll down\n"
+      "5←, h, ^H  Parent dir          ~  Go HOME\n"
+   "2↵, →, l, ^M  Open file/dir       &  Start dir\n"
+   "2Home, g, ^A  First entry         -  Last visited dir\n"
+    "3End, G, ^E  Last entry          .  Toggle show hidden\n"
+             "c/  Filter        Ins, ^T  Toggle nav-as-you-type\n"
+             "cb  Pin current dir    ^W  Go to pinned dir\n"
+       "6Tab, ^I  Next context        d  Toggle detail view\n"
+         "8`, ^/  Leader key   N, LeadN  Go to/create context N\n"
+           "aEsc  Exit prompt        ^L  Redraw/clear prompt\n"
+            "b^G  Quit and cd         q  Quit context\n"
+         "8Q, ^Q  Quit                ?  Help, config\n"
 "1FILES\n"
-            "d^O  Open with...        n  Create new/link\n"
-             "eD  File details       ^R  Rename entry\n"
-         "a⎵, ^K  Copy entry path     r  Open dir in vidir\n"
-         "aY, ^Y  Toggle selection    y  List selection\n"
-             "eP  Copy selection      X  Delete selection\n"
-             "eV  Move selection     ^X  Delete entry\n"
-             "ef  Archive entry       F  List archive\n"
-            "d^F  Extract archive  m, M  Brief/full media info\n"
-             "ee  Edit in EDITOR      p  Open in PAGER\n"
+            "b^O  Open with...        n  Create new/link\n"
+             "cD  File details       ^R  Rename entry\n"
+         "8⎵, ^K  Copy entry path     r  Open dir in vidir\n"
+         "8Y, ^Y  Toggle selection    y  List selection\n"
+             "cP  Copy selection      X  Delete selection\n"
+             "cV  Move selection     ^X  Delete entry\n"
+             "cf  Archive entry       F  List archive\n"
+            "b^F  Extract archive  m, M  Brief/full media info\n"
+             "ce  Edit in EDITOR      p  Open in PAGER\n"
 "1ORDER TOGGLES\n"
-            "d^J  Disk usage          S  Apparent du\n"
-             "et  Modification time   s  Size\n"
+            "b^J  Disk usage          S  Apparent du\n"
+             "ct  Modification time   s  Size\n"
 "1MISC\n"
-         "a!, ^]  Spawn SHELL in dir  C  Execute entry\n"
-         "aR, ^V  Run custom script   L  Lock terminal\n"
-            "d^S  Run a command       N  Take note\n"};
+         "8!, ^]  Spawn SHELL in dir  C  Execute entry\n"
+         "8R, ^V  Run custom script   L  Lock terminal\n"
+            "b^S  Run a command       N  Take note\n"};
 
 	if (fd == -1)
 		return FALSE;
@@ -2222,7 +2240,7 @@ static bool show_help(char *path)
 	dprintf(fd, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
 	dprintf(fd, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
 
-	if (getenv(envs[NNN_BMS])) {
+	if (getenv(env_cfg[NNN_BMS])) {
 		dprintf(fd, "BOOKMARKS\n");
 		for (; i < BM_MAX; ++i)
 			if (bookmark[i].key)
@@ -2232,55 +2250,38 @@ static bool show_help(char *path)
 		dprintf(fd, "\n");
 	}
 
-	dprintf(fd, "%s: %s\n", envs[NNN_OPENER], opener);
-	if (cfg.useeditor)
-		dprintf(fd, "%s: 1\n", envs[NNN_USE_EDITOR]);
-	start = getenv(envs[NNN_CONTEXT_COLORS]);
-	if (start)
-		dprintf(fd, "%s: %s\n", envs[NNN_CONTEXT_COLORS], start);
-	if (idletimeout)
-		dprintf(fd, "%s: %d secs\n", envs[NNN_IDLE_TIMEOUT], idletimeout);
-	if (copier)
-		dprintf(fd, "%s: %s\n", envs[NNN_COPIER], copier);
+	for (i = NNN_OPENER; i <= NNN_TMPFILE; ++i) {
+		start = getenv(env_cfg[i]);
+		if (start)
+			dprintf(fd, "%s: %s\n", env_cfg[i], start);
+	}
+
 	if (g_cppath[0])
 		dprintf(fd, "COPY FILE: %s\n", g_cppath);
-	if (scriptpath)
-		dprintf(fd, "%s: %s\n", envs[NNN_SCRIPT], scriptpath);
-	start = getenv(envs[NNN_NOTE]);
-	if (start)
-		dprintf(fd, "%s: %s\n", envs[NNN_NOTE], start);
-	if (getenv("NNN_SHOW_HIDDEN"))
-		dprintf(fd, "%s: 1\n", envs[NNN_SHOW_HIDDEN]);
-	if (cfg.autoselect)
-		dprintf(fd, "%s: 1\n", envs[NNN_NO_AUTOSELECT]);
-	if (cfg.nonavopen)
-		dprintf(fd, "%s: 1\n", envs[NNN_RESTRICT_NAV_OPEN]);
-	if (cfg.restrict0b)
-		dprintf(fd, "%s: 1\n", envs[NNN_RESTRICT_0B]);
-	if (!cfg.filter_re)
-		dprintf(fd, "%s: 1\n", envs[NNN_PLAIN_FILTER]);
-	start = getenv(envs[NNN_TMPFILE]);
-	if (start)
-		dprintf(fd, "%s: %s\n", envs[NNN_TMPFILE], start);
+
+	for (i = NNN_USE_EDITOR; i <= NNN_PLAIN_FILTER; ++i) {
+		if (getenv(env_cfg[i]))
+			dprintf(fd, "%s: 1\n", env_cfg[i]);
+	}
 
 	dprintf(fd, "\n");
 
-	start = getenv("PWD");
+	start = getenv(envs[PWD]);
 	if (start)
-		dprintf(fd, "PWD: %s\n", start);
-	if (getenv("SHELL"))
-		dprintf(fd, "SHELL: %s %s\n", shell, shell_arg);
-	start = getenv("SHLVL");
+		dprintf(fd, "%s: %s\n", envs[PWD], start);
+	if (getenv(envs[SHELL]))
+		dprintf(fd, "%s: %s %s\n", envs[SHELL], shell, shell_arg);
+	start = getenv(envs[SHLVL]);
 	if (start)
-		dprintf(fd, "SHLVL: %s\n", start);
-	if (getenv("VISUAL"))
-		dprintf(fd, "VISUAL: %s\n", editor);
-	else if (getenv("EDITOR"))
-		dprintf(fd, "EDITOR: %s\n", editor);
-	if (getenv("PAGER"))
-		dprintf(fd, "PAGER: %s %s\n", pager, pager_arg);
+		dprintf(fd, "%s: %s\n", envs[SHLVL], start);
+	if (getenv(envs[VISUAL]))
+		dprintf(fd, "%s: %s\n", envs[VISUAL], editor);
+	else if (getenv(envs[EDITOR]))
+		dprintf(fd, "%s: %s\n", envs[EDITOR], editor);
+	if (getenv(envs[PAGER]))
+		dprintf(fd, "%s: %s %s\n", envs[PAGER], pager, pager_arg);
 
-	dprintf(fd, "\nVersion: %s\n%s\n", VERSION, GENERAL_INFO);
+	dprintf(fd, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
 
 	spawn(pager, pager_arg, g_tmpfpath, NULL, F_NORMAL);
@@ -3208,7 +3209,7 @@ nochange:
 				spawn(pager, pager_arg, dents[cur].name, path, F_NORMAL);
 				break;
 			case SEL_NOTE:
-				tmp = getenv(envs[NNN_NOTE]);
+				tmp = getenv(env_cfg[NNN_NOTE]);
 				if (!tmp) {
 					printmsg("set NNN_NOTE");
 					goto nochange;
@@ -3682,7 +3683,7 @@ nochange:
 					return;
 				}
 
-				tmp = getenv(envs[NNN_TMPFILE]);
+				tmp = getenv(env_cfg[NNN_TMPFILE]);
 				if (!tmp) {
 					printmsg("set NNN_TMPFILE");
 					goto nochange;
@@ -3750,7 +3751,7 @@ static void usage(void)
 		" -S      disk usage mode\n"
 		" -v      show version\n"
 		" -h      show help\n\n"
-		"Version: %s\n%s\n", VERSION, GENERAL_INFO);
+		"v%s\n%s\n", VERSION, GENERAL_INFO);
 }
 
 int main(int argc, char *argv[])
@@ -3815,7 +3816,7 @@ int main(int argc, char *argv[])
 
 	/* Get the context colors; copier used as tmp var */
 	if (cfg.showcolor) {
-		copier = xgetenv(envs[NNN_CONTEXT_COLORS], "4444");
+		copier = xgetenv(env_cfg[NNN_CONTEXT_COLORS], "4444");
 		opt = 0;
 		while (*copier && opt < CTX_MAX) {
 			if (*copier < '0' || *copier > '7') {
@@ -3836,7 +3837,7 @@ int main(int argc, char *argv[])
 
 	/* Parse bookmarks string */
 	 if (!parsebmstr()) {
-		fprintf(stderr, "%s: 1 char per key\n", envs[NNN_BMS]);
+		fprintf(stderr, "%s: 1 char per key\n", env_cfg[NNN_BMS]);
 		return 1;
 	 }
 
@@ -3863,26 +3864,26 @@ int main(int argc, char *argv[])
 	/* Increase current open file descriptor limit */
 	open_max = max_openfds();
 
-	if (getuid() == 0 || getenv(envs[NNN_SHOW_HIDDEN]))
+	if (getuid() == 0 || getenv(env_cfg[NNN_SHOW_HIDDEN]))
 		cfg.showhidden = 1;
 
 	/* Edit text in EDITOR, if opted */
-	if (getenv(envs[NNN_USE_EDITOR]))
+	if (getenv(env_cfg[NNN_USE_EDITOR]))
 		cfg.useeditor = 1;
 
 	/* Get VISUAL/EDITOR */
-	editor = xgetenv("VISUAL", xgetenv("EDITOR", "vi"));
+	editor = xgetenv(envs[VISUAL], xgetenv(envs[EDITOR], "vi"));
 
 	/* Get PAGER */
-	pager = xgetenv("PAGER", "less");
+	pager = xgetenv(envs[PAGER], "less");
 	getprogarg(pager, &pager_arg);
 
 	/* Get SHELL */
-	shell = xgetenv("SHELL", "sh");
+	shell = xgetenv(envs[SHELL], "sh");
 	getprogarg(shell, &shell_arg);
 
 	/* Setup script execution */
-	scriptpath = getenv(envs[NNN_SCRIPT]);
+	scriptpath = getenv(env_cfg[NNN_SCRIPT]);
 
 #ifdef LINUX_INOTIFY
 	/* Initialize inotify */
@@ -3900,17 +3901,17 @@ int main(int argc, char *argv[])
 #endif
 
 	/* Get custom opener, if set */
-	opener = xgetenv(envs[NNN_OPENER], utils[OPENER]);
+	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
 
 	/* Get locker wait time, if set; copier used as tmp var */
-	copier = getenv(envs[NNN_IDLE_TIMEOUT]);
+	copier = getenv(env_cfg[NNN_IDLE_TIMEOUT]);
 	if (copier) {
 		opt = atoi(copier);
 		idletimeout = opt * ((opt > 0) - (opt < 0));
 	}
 
 	/* Get the clipboard copier, if set */
-	copier = getenv(envs[NNN_COPIER]);
+	copier = getenv(env_cfg[NNN_COPIER]);
 
 	if (getenv("HOME"))
 		g_tmpfplen = xstrlcpy(g_tmpfpath, getenv("HOME"), HOME_LEN_MAX);
@@ -3925,19 +3926,19 @@ int main(int argc, char *argv[])
 	}
 
 	/* Disable auto-select if opted */
-	if (getenv(envs[NNN_NO_AUTOSELECT]))
+	if (getenv(env_cfg[NNN_NO_AUTOSELECT]))
 		cfg.autoselect = 0;
 
 	/* Disable opening files on right arrow and `l` */
-	if (getenv(envs[NNN_RESTRICT_NAV_OPEN]))
+	if (getenv(env_cfg[NNN_RESTRICT_NAV_OPEN]))
 		cfg.nonavopen = 1;
 
 	/* Restrict opening of 0-byte files */
-	if (getenv(envs[NNN_RESTRICT_0B]))
+	if (getenv(env_cfg[NNN_RESTRICT_0B]))
 		cfg.restrict0b = 1;
 
 	/* Use string-comparison in filter mode */
-	if (getenv(envs[NNN_PLAIN_FILTER])) {
+	if (getenv(env_cfg[NNN_PLAIN_FILTER])) {
 		cfg.filter_re = 0;
 		filterfn = &visible_str;
 	}

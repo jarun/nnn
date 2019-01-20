@@ -213,36 +213,36 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
 
 ```
  NAVIGATION
-       ↑, k, ^P  Up           PgUp, ^U  Scroll up
-       ↓, j, ^N  Down         PgDn, ^D  Scroll down
-       ←, h, ^H  Parent dir          ~  Go HOME
-    ↵, →, l, ^M  Open file/dir       &  Start dir
-    Home, g, ^A  First entry         -  Last visited dir
-     End, G, ^E  Last entry          .  Toggle show hidden
-              /  Filter        Ins, ^T  Toggle nav-as-you-type
-              b  Pin current dir    ^W  Go to pinned dir
-        Tab, ^I  Next context        d  Toggle detail view
-          `, ^/  Leader key   N, LeadN  Go to/create context N
-            Esc  Exit prompt        ^L  Redraw/clear prompt
-             ^G  Quit and cd         q  Quit context
-          Q, ^Q  Quit                ?  Help, config
+     ↑, k, ^P  Up           PgUp, ^U  Scroll up
+     ↓, j, ^N  Down         PgDn, ^D  Scroll down
+     ←, h, ^H  Parent dir          ~  Go HOME
+  ↵, →, l, ^M  Open file/dir       &  Start dir
+  Home, g, ^A  First entry         -  Last visited dir
+   End, G, ^E  Last entry          .  Toggle show hidden
+            /  Filter        Ins, ^T  Toggle nav-as-you-type
+            b  Pin current dir    ^W  Go to pinned dir
+      Tab, ^I  Next context        d  Toggle detail view
+        `, ^/  Leader key   N, LeadN  Go to/create context N
+          Esc  Exit prompt        ^L  Redraw/clear prompt
+           ^G  Quit and cd         q  Quit context
+        Q, ^Q  Quit                ?  Help, config
  FILES
-             ^O  Open with...        n  Create new/link
-              D  File details       ^R  Rename entry
-          ⎵, ^K  Copy entry path     r  Open dir in vidir
-          Y, ^Y  Toggle selection    y  List selection
-              P  Copy selection      X  Delete selection
-              V  Move selection     ^X  Delete entry
-              f  Archive entry       F  List archive
-             ^F  Extract archive  m, M  Brief/full media info
-              e  Edit in EDITOR      p  Open in PAGER
+           ^O  Open with...        n  Create new/link
+            D  File details       ^R  Rename entry
+        ⎵, ^K  Copy entry path     r  Open dir in vidir
+        Y, ^Y  Toggle selection    y  List selection
+            P  Copy selection      X  Delete selection
+            V  Move selection     ^X  Delete entry
+            f  Archive entry       F  List archive
+           ^F  Extract archive  m, M  Brief/full media info
+            e  Edit in EDITOR      p  Open in PAGER
  ORDER TOGGLES
-             ^J  Disk usage          S  Apparent du
-              t  Modification time   s  Size
+           ^J  Disk usage          S  Apparent du
+            t  Modification time   s  Size
  MISC
-          !, ^]  Spawn SHELL in dir  C  Execute entry
-          R, ^V  Run custom script   L  Lock terminal
-             ^S  Run a command       N  Take note
+        !, ^]  Spawn SHELL in dir  C  Execute entry
+        R, ^V  Run custom script   L  Lock terminal
+           ^S  Run a command       N  Take note
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
@@ -377,20 +377,20 @@ The option `open with` takes 1 combined argument.
 
 | Example `export` | Description |
 | --- | --- |
-| `NNN_OPENER=mimeopen` | custom file opener |
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | specify bookmarks (max 10) |
-| `NNN_USE_EDITOR=1` | Open text files in `$EDITOR` (overridden by `$VISUAL`, fallback vi) |
+| `NNN_OPENER=mimeopen` | custom file opener |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_IDLE_TIMEOUT=300` | idle time to lock terminal [default: disabled] |
 | `NNN_COPIER='copier.sh'` | system clipboard copier script [default: none] |
 | `NNN_SCRIPT=/home/user/scripts[/script.sh]` | path to script dir or a single script |
 | `NNN_NOTE=/home/user/Dropbox/Public/notes` | path to note file [default: none] |
-| `NNN_SHOW_HIDDEN=1` | show hidden (dot) files [default: do not show hidden if not root ] |
+| `NNN_TMPFILE=/tmp/nnn` | file to write current open dir path to for cd on quit |
+| `NNN_USE_EDITOR=1` | Open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
+| `NNN_SHOW_HIDDEN=1` | show hidden (.) files [default: do not show hidden if not root ] |
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type` mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_RESTRICT_0B=1` | do not open 0-byte files |
 | `NNN_PLAIN_FILTER=1` | use substring match in filer mode [default: regex] |
-| `NNN_TMPFILE=/tmp/nnn` | file to write current open dir path to for cd on quit |
 
 #### Help
 
