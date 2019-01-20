@@ -21,7 +21,9 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (Thanks Luke Smith for the video!)</i></a></p>
 
-`nnn` is probably the [fastest and most lightweight](#comparison) file manager you have ever used. It integrates seamlessly with your DE and favourite GUI utilities, has a smooth _navigate-as-you-type_ mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning, quick notes and much more.
+`nnn` is smooth... like butter. It's also probably the [fastest and most lightweight](#comparison) file manager you have ever used; so you don't keep losing precious time every time a sub-optimal file-manager lags.
+
+`nnn` integrates seamlessly with your DE and favourite GUI utilities, has a unique _navigate-as-you-type_ mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning, quick notes and much more.
 
 Integrate utilities like sxiv (image preview) or fzy (fuzzy subtree search) easily, transfer selected files using lftp or use it as a (neo)vim plugin; `nnn` supports as many scripts as you need! Refer to the [How to](https://github.com/jarun/nnn/wiki/How-to) section on wiki for more details.
 
