@@ -458,7 +458,7 @@ static const char * const envs[] = {
 /* Forward declarations */
 static void redraw(char *path);
 static void spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uchar flag);
-int (*nftw_fn) (const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
+static int (*nftw_fn) (const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 
 /* Functions */
 
@@ -541,7 +541,7 @@ static int get_input(const char *prompt)
 
 static char confirm_force()
 {
-	int r = get_input("use force? ('y/Y' confirms, else interactive)");
+	int r = get_input("use force? (y/Y)");
 	if (r == 'y' || r == 'Y')
 		return 'f'; /* forceful */
 
@@ -786,10 +786,11 @@ static bool appendfpath(const char *path, const size_t len)
 /* Write selected file paths to fd, linefeed separated */
 static ssize_t selectiontofd(int fd)
 {
+	uint lastpos = copybufpos - 1;
 	char *pbuf = pcopybuf;
-	ssize_t pos = 0, len, r, lastpos = copybufpos - 1;
+	ssize_t pos = 0, len, r;
 
-	while (pos < copybufpos) {
+	while (pos <= lastpos) {
 		len = strlen(pbuf);
 		pos += len;
 
@@ -797,7 +798,7 @@ static ssize_t selectiontofd(int fd)
 		if (r != len)
 			return pos;
 
-		if (pos != lastpos) {
+		if (pos <= lastpos) {
 			if (write(fd, "\n", 1) != 1)
 				return pos;
 			pbuf += pos + 1;
@@ -1185,7 +1186,6 @@ static int nextsel(int *presel)
 #elif defined(BSD_KQUEUE)
 	static struct kevent event_data[NUM_EVENT_SLOTS];
 #endif
-
 	c = *presel;
 
 	if (c == 0) {
@@ -1228,9 +1228,8 @@ static int nextsel(int *presel)
 		idle = 0;
 
 	for (i = 0; i < len; ++i)
-		if (c == bindings[i].sym) {
+		if (c == bindings[i].sym)
 			return bindings[i].act;
-		}
 
 	return 0;
 }
@@ -3464,7 +3463,7 @@ nochange:
 				tmp = xreadline(NULL, "open with: ");
 				break;
 			case SEL_NEW:
-				tmp = xreadline(NULL, "name/link suffix [@ for no suffix]: ");
+				tmp = xreadline(NULL, "name/link suffix [@ for none]: ");
 				break;
 			default: /* SEL_RENAME */
 				tmp = xreadline(dents[cur].name, "");
