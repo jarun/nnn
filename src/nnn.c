@@ -1775,16 +1775,30 @@ static char *get_file_sym(mode_t mode)
 {
 	static char ind[2] = "\0\0";
 
-	if (S_ISDIR(mode))
+	switch (mode & S_IFMT) {
+	case S_IFREG:
+		if (mode & 0100)
+			ind[0] = '*';
+		break;
+	case S_IFDIR:
 		ind[0] = '/';
-	else if (S_ISLNK(mode))
+		break;
+	case S_IFLNK:
 		ind[0] = '@';
-	else if (S_ISSOCK(mode))
+		break;
+	case S_IFSOCK:
 		ind[0] = '=';
-	else if (S_ISFIFO(mode))
+		break;
+	case S_IFIFO:
 		ind[0] = '|';
-	else if (mode & 0100)
-		ind[0] = '*';
+		break;
+	case S_IFBLK: // fallthrough
+	case S_IFCHR:
+		break;
+	default:
+		ind[0] = '?';
+		break;
+	}
 
 	return ind;
 }
@@ -1814,31 +1828,44 @@ static void printent_long(struct entry *ent, int sel, uint namecols)
 	if (sel)
 		attron(A_REVERSE);
 
-	if (S_ISDIR(ent->mode)) {
+	switch (ent->mode & S_IFMT) {
+	case S_IFREG:
+		if (ent->mode & 0100)
+			printw(" %-16.16s %8.8s* %s*\n", buf,
+			       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
+		else
+			printw(" %-16.16s %8.8s  %s\n", buf,
+			       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
+		break;
+	case S_IFDIR:
 		if (cfg.blkorder)
 			printw(" %-16.16s %8.8s/ %s/\n",
 			       buf, coolsize(ent->blocks << BLK_SHIFT), pname);
 		else
 			printw(" %-16.16s        /  %s/\n", buf, pname);
-	} else if (S_ISLNK(ent->mode)) {
+		break;
+	case S_IFLNK:
 		if (ent->flags & SYMLINK_TO_DIR)
 			printw(" %-16.16s       @/  %s@\n", buf, pname);
 		else
 			printw(" %-16.16s        @  %s@\n", buf, pname);
-	} else if (S_ISSOCK(ent->mode))
+		break;
+	case S_IFSOCK:
 		printw(" %-16.16s        =  %s=\n", buf, pname);
-	else if (S_ISFIFO(ent->mode))
+		break;
+	case S_IFIFO:
 		printw(" %-16.16s        |  %s|\n", buf, pname);
-	else if (S_ISBLK(ent->mode))
+		break;
+	case S_IFBLK:
 		printw(" %-16.16s        b  %s\n", buf, pname);
-	else if (S_ISCHR(ent->mode))
+		break;
+	case S_IFCHR:
 		printw(" %-16.16s        c  %s\n", buf, pname);
-	else if (ent->mode & 0100) {
-		printw(" %-16.16s %8.8s* %s*\n", buf,
+		break;
+	default:
+		printw(" %-16.16s %8.8s? %s?\n", buf,
 		       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
-	} else {
-		printw(" %-16.16s %8.8s  %s\n", buf,
-		       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
+		break;
 	}
 
 	if (sel)
@@ -1851,46 +1878,43 @@ static char get_fileind(mode_t mode, char *desc)
 {
 	static char c;
 
-	if (S_ISREG(mode)) {
+	switch (mode & S_IFMT) {
+	case S_IFREG:
 		c = '-';
 		xstrlcpy(desc, "regular file", DESCRIPTOR_LEN);
 		if (mode & 0100)
 			/* Length of string "regular file" is 12 */
 			xstrlcpy(desc + 12, ", executable", DESCRIPTOR_LEN - 12);
-	} else if (S_ISDIR(mode)) {
+		break;
+	case S_IFDIR:
 		c = 'd';
 		xstrlcpy(desc, "directory", DESCRIPTOR_LEN);
-	} else if (S_ISBLK(mode)) {
-		c = 'b';
-		xstrlcpy(desc, "block special device", DESCRIPTOR_LEN);
-	} else if (S_ISCHR(mode)) {
-		c = 'c';
-		xstrlcpy(desc, "character special device", DESCRIPTOR_LEN);
-#ifdef S_ISFIFO
-	} else if (S_ISFIFO(mode)) {
-		c = 'p';
-		xstrlcpy(desc, "FIFO", DESCRIPTOR_LEN);
-#endif  /* S_ISFIFO */
-#ifdef S_ISLNK
-	} else if (S_ISLNK(mode)) {
+		break;
+	case S_IFLNK:
 		c = 'l';
 		xstrlcpy(desc, "symbolic link", DESCRIPTOR_LEN);
-#endif  /* S_ISLNK */
-#ifdef S_ISSOCK
-	} else if (S_ISSOCK(mode)) {
+		break;
+	case S_IFSOCK:
 		c = 's';
 		xstrlcpy(desc, "socket", DESCRIPTOR_LEN);
-#endif  /* S_ISSOCK */
-#ifdef S_ISDOOR
-    /* Solaris 2.6, etc. */
-	} else if (S_ISDOOR(mode)) {
-		c = 'D';
-		desc[0] = '\0';
-#endif  /* S_ISDOOR */
-	} else {
+		break;
+	case S_IFIFO:
+		c = 'p';
+		xstrlcpy(desc, "FIFO", DESCRIPTOR_LEN);
+		break;
+	case S_IFBLK:
+		c = 'b';
+		xstrlcpy(desc, "block special device", DESCRIPTOR_LEN);
+		break;
+	case S_IFCHR:
+		c = 'c';
+		xstrlcpy(desc, "character special device", DESCRIPTOR_LEN);
+		break;
+	default:
 		/* Unknown type -- possibly a regular file? */
 		c = '?';
 		desc[0] = '\0';
+		break;
 	}
 
 	return c;

@@ -343,6 +343,7 @@ The following indicators are used in the detail view:
 | `@/` | Symbolic Link to directory |
 | `b` | Block Device |
 | `c` | Character Device |
+| `?` | Unknown |
 
 #### Utility dependencies
 
