@@ -2549,7 +2549,7 @@ static void populate(char *path, char *lastname)
 	if (!*lastname)
 		cur = 0;
 	else
-		dentfind(lastname, ndents);
+		cur = dentfind(lastname, ndents);
 }
 
 static void redraw(char *path)
