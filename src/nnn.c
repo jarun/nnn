@@ -1115,8 +1115,7 @@ static int setfilter(regex_t *regex, char *filter)
 		len = COLS;
 		if (len > NAME_MAX)
 			len = NAME_MAX;
-		regerror(r, regex, g_buf, len);
-		printmsg(g_buf);
+		mvprintw(LINES - 1, 0, "regex error: %d\n", r);
 	}
 
 	return r;
@@ -1636,6 +1635,7 @@ static bool parsebmstr()
 static char *get_bm_loc(int key, char *buf)
 {
 	int r;
+	ssize_t count;
 
 	for (r = 0; bookmark[r].key && r < BM_MAX; ++r) {
 		if (bookmark[r].key == key) {
@@ -1647,7 +1647,8 @@ static char *get_bm_loc(int key, char *buf)
 					return NULL;
 				}
 
-				snprintf(buf, PATH_MAX, "%s%s", home, bookmark[r].loc + 1);
+				count = xstrlcpy(buf, home, PATH_MAX);
+				xstrlcpy(buf + count - 1, bookmark[r].loc + 1, PATH_MAX - count - 1);
 			} else
 				xstrlcpy(buf, bookmark[r].loc, PATH_MAX);
 
@@ -2554,7 +2555,8 @@ static void populate(char *path, char *lastname)
 
 static void redraw(char *path)
 {
-	static char buf[NAME_MAX + 65] __attribute__ ((aligned));
+	static char c;
+	static char buf[12];
 	static size_t ncols;
 	static int nlines, i, attrs;
 	static bool mode_changed;
@@ -2683,26 +2685,23 @@ static void redraw(char *path)
 
 			/* We need to show filename as it may be truncated in directory listing */
 			if (!cfg.blkorder)
-				snprintf(buf, NAME_MAX + 65, "%d/%d %s[%s%s]",
-					 cur + 1, ndents, sort, unescape(dents[cur].name, NAME_MAX),
+				mvprintw(LINES - 1, 0, "%d/%d %s[%s%s]\n", cur + 1, ndents, sort,
+					 unescape(dents[cur].name, NAME_MAX),
 					 get_file_sym(dents[cur].mode));
 			else {
-				i = snprintf(buf, 64, "%d/%d ", cur + 1, ndents);
-
+				xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 				if (cfg.apparentsz)
-					buf[i++] = 'a';
+					c = 'a';
 				else
-					buf[i++] = 'd';
+					c = 'd';
 
-				i += snprintf(buf + i, 64, "u: %s (%lu files) ",
-					      coolsize(dir_blocks << BLK_SHIFT), num_files);
-				snprintf(buf + i, NAME_MAX, "vol: %s free [%s%s]",
+				mvprintw(LINES - 1, 0,
+					 "%d/%d %cu: %s (%lu files) vol: %s free [%s%s]\n",
+					 cur + 1, ndents, c, buf, num_files,
 					 coolsize(get_fs_info(path, FREE)),
-					 	  unescape(dents[cur].name, NAME_MAX),
-						  get_file_sym(dents[cur].mode));
+					 unescape(dents[cur].name, NAME_MAX),
+					 get_file_sym(dents[cur].mode));
 			}
-
-			printmsg(buf);
 		} else
 			printmsg("0 items");
 	}
@@ -3043,7 +3042,8 @@ nochange:
 				if (cfg.curctx == r) {
 					if (sel == SEL_CYCLE) {
 						(r == CTX_MAX - 1) ? (r = 0) : ++r;
-						snprintf(newpath, PATH_MAX, "Create context %d?  ('Enter' confirms)", r + 1);
+						snprintf(newpath, PATH_MAX,
+							 "Create context %d?  (Enter)", r + 1);
 						fd = get_input(newpath);
 						if (fd != '\r')
 							continue;
@@ -3348,9 +3348,8 @@ nochange:
 								 dents[r].name, newpath)))
 							goto nochange;
 
-					snprintf(newpath, PATH_MAX, "%d files copied",
+					mvprintw(LINES - 1, 0, "%d files copied\n",
 						 copyendid - copystartid + 1);
-					printmsg(newpath);
 				}
 			}
 
@@ -3359,10 +3358,8 @@ nochange:
 				if (copier)
 					spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
-				if (ncp) { /* Some files cherry picked */
-					snprintf(newpath, PATH_MAX, "%d files copied", ncp);
-					printmsg(newpath);
-				}
+				if (ncp) /* Some files cherry picked */
+					mvprintw(LINES - 1, 0, "%d files copied\n", ncp);
 			} else
 				printmsg("selection off");
 			goto nochange;
