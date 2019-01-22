@@ -1038,6 +1038,7 @@ static bool xdiraccess(const char *path)
 	return TRUE;
 }
 
+#if 0
 /*
  * We assume none of the strings are NULL.
  *
@@ -1091,6 +1092,7 @@ static int xstricmp(const char * const s1, const char * const s2)
 
 	return strcoll(s1, s2);
 }
+#endif
 
 /* Return the integer value of a char representing HEX */
 static char xchartohex(char c)
@@ -1167,7 +1169,7 @@ static int entrycmp(const void *va, const void *vb)
 			return -1;
 	}
 
-	return xstricmp(pa->name, pb->name);
+	return strverscmp(pa->name, pb->name);
 }
 
 /*
