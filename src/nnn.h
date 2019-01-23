@@ -225,6 +225,7 @@ static struct key bindings[] = {
 	{ 'p',            SEL_RUNPAGE },
 	/* Open notes file */
 	{ 'N',            SEL_NOTE },
+	{ CONTROL('N'),   SEL_NOTE },
 	/* Lock screen */
 	{ 'L',            SEL_LOCK },
 	/* Quit a context */

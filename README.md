@@ -242,7 +242,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  MISC
         !, ^]  Spawn SHELL in dir  C  Execute entry
         R, ^V  Run custom script   L  Lock terminal
-           ^S  Run a command       N  Take note
+           ^S  Run a command   N, ^N  Take note
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
