@@ -1038,6 +1038,14 @@ static bool xdiraccess(const char *path)
 	return TRUE;
 }
 
+static int digit_compare(const char *a, const char *b)
+{
+	while (*a && *b && *a == *b)
+		++a, ++b;
+
+	return *a - *b;
+}
+
 /*
  * We assume none of the strings are NULL.
  *
@@ -1048,7 +1056,15 @@ static bool xdiraccess(const char *path)
  */
 static int xstricmp(const char * const s1, const char * const s2)
 {
-	static const char *c1, *c2;
+	static const char *c1, *c2, *m1, *m2;
+	static int count1, count2, bias;
+
+	static char sign[2];
+
+	count1 = 0;
+	count2 = 0;
+	sign[0] = '+';
+	sign[1] = '+';
 
 	c1 = s1;
 	while (isspace(*c1))
@@ -1058,34 +1074,60 @@ static int xstricmp(const char * const s1, const char * const s2)
 	while (isspace(*c2))
 		++c2;
 
-	if (*c1 == '-' || *c1 == '+')
+	if (*c1 == '-' || *c1 == '+') {
+		if (*c1 == '-')
+			sign[0] = '-';
 		++c1;
+	}
 
-	if (*c2 == '-' || *c2 == '+')
+	if (*c2 == '-' || *c2 == '+') {
+		if (*c2 == '-')
+			sign[1] = '-';
 		++c2;
+	}
 
-	if (isdigit(*c1) && isdigit(*c2)) {
-		while (*c1 >= '0' && *c1 <= '9')
+	if ((*c1 >= '0' && *c1 <= '9') && (*c2 >= '0' && *c2 <= '9')) {
+		while (*c1 == '0')
 			++c1;
+		m1 = c1;
+
+		while (*c2 == '0')
+			++c2;
+		m2 = c2;
+
+		while (*c1 >= '0' && *c1 <= '9') {
+			++count1;
+			++c1;
+		}
 		while (isspace(*c1))
 			++c1;
 
-		while (*c2 >= '0' && *c2 <= '9')
+		while (*c2 >= '0' && *c2 <= '9') {
+			++count2;
 			++c2;
+		}
 		while (isspace(*c2))
 			++c2;
-	}
 
-	if (!*c1 && !*c2) {
-		static long long num1, num2;
+		if (*c1 && !*c2)
+			return 1;
 
-		num1 = strtoll(s1, NULL, 10);
-		num2 = strtoll(s2, NULL, 10);
-		if (num1 != num2) {
-			if (num1 > num2)
+		if (!*c1 && *c2)
+			return -1;
+
+		if (!*c1 && !*c2) {
+			if (sign[0] != sign[1])
+				return ((sign[0] == '+') ? 1 : -1);
+
+			if (count1 > count2)
 				return 1;
 
-			return -1;
+			if (count1 < count2)
+				return -1;
+
+			bias = digit_compare(m1, m2);
+			if (bias)
+				return bias;
 		}
 	}
 
