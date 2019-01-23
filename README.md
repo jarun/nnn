@@ -216,7 +216,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
          ↑, k  Up           PgUp, ^U  Scroll up
          ↓, j  Down         PgDn, ^D  Scroll down
          ←, h  Parent dir          ~  Go HOME
-  ↵, →, l, ^M  Open file/dir       &  Start dir
+      ↵, →, l  Open file/dir       &  Start dir
   Home, g, ^A  First entry         -  Last visited dir
    End, G, ^E  Last entry          .  Toggle show hidden
             /  Filter        Ins, ^T  Toggle nav-as-you-type

@@ -2260,7 +2260,7 @@ static bool show_help(char *path)
           "9↑, k  Up           PgUp, ^U  Scroll up\n"
           "9↓, j  Down         PgDn, ^D  Scroll down\n"
           "9←, h  Parent dir          ~  Go HOME\n"
-   "2↵, →, l, ^M  Open file/dir       &  Start dir\n"
+       "6↵, →, l  Open file/dir       &  Start dir\n"
    "2Home, g, ^A  First entry         -  Last visited dir\n"
     "3End, G, ^E  Last entry          .  Toggle show hidden\n"
              "c/  Filter        Ins, ^T  Toggle nav-as-you-type\n"
