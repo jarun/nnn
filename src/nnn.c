@@ -2257,9 +2257,9 @@ static bool show_help(char *path)
 	static char helpstr[] = {
 "0\n"
 "1NAVIGATION\n"
-      "5↑, k, ^P  Up           PgUp, ^U  Scroll up\n"
-      "5↓, j, ^N  Down         PgDn, ^D  Scroll down\n"
-      "5←, h, ^H  Parent dir          ~  Go HOME\n"
+          "9↑, k  Up           PgUp, ^U  Scroll up\n"
+          "9↓, j  Down         PgDn, ^D  Scroll down\n"
+          "9←, h  Parent dir          ~  Go HOME\n"
    "2↵, →, l, ^M  Open file/dir       &  Start dir\n"
    "2Home, g, ^A  First entry         -  Last visited dir\n"
     "3End, G, ^E  Last entry          .  Toggle show hidden\n"

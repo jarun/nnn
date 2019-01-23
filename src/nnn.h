@@ -106,7 +106,6 @@ static struct key bindings[] = {
 	/* Back */
 	{ KEY_LEFT,       SEL_BACK },
 	{ 'h',            SEL_BACK },
-	{ CONTROL('H'),   SEL_BACK },
 	/* Inside or select */
 	{ KEY_ENTER,      SEL_GOIN },
 	{ '\r',           SEL_GOIN },
@@ -116,11 +115,9 @@ static struct key bindings[] = {
 	/* Next */
 	{ 'j',            SEL_NEXT },
 	{ KEY_DOWN,       SEL_NEXT },
-	{ CONTROL('N'),   SEL_NEXT },
 	/* Previous */
 	{ 'k',            SEL_PREV },
 	{ KEY_UP,         SEL_PREV },
-	{ CONTROL('P'),   SEL_PREV },
 	/* Page down */
 	{ KEY_NPAGE,      SEL_PGDN },
 	{ CONTROL('D'),   SEL_PGDN },

@@ -213,9 +213,9 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
 
 ```
  NAVIGATION
-     ↑, k, ^P  Up           PgUp, ^U  Scroll up
-     ↓, j, ^N  Down         PgDn, ^D  Scroll down
-     ←, h, ^H  Parent dir          ~  Go HOME
+         ↑, k  Up           PgUp, ^U  Scroll up
+         ↓, j  Down         PgDn, ^D  Scroll down
+         ←, h  Parent dir          ~  Go HOME
   ↵, →, l, ^M  Open file/dir       &  Start dir
   Home, g, ^A  First entry         -  Last visited dir
    End, G, ^E  Last entry          .  Toggle show hidden
