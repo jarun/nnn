@@ -442,15 +442,13 @@ static const char * const env_cfg[] = {
 };
 
 /* Required env vars */
-#define PWD 0
-#define SHELL 1
-#define SHLVL 2
-#define VISUAL 3
-#define EDITOR 4
-#define PAGER 5
+#define SHELL 0
+#define SHLVL 1
+#define VISUAL 2
+#define EDITOR 3
+#define PAGER 4
 
 static const char * const envs[] = {
-	"PWD",
 	"SHELL",
 	"SHLVL",
 	"VISUAL",
@@ -2328,23 +2326,6 @@ static bool show_help(char *path)
 			dprintf(fd, "%s: 1\n", env_cfg[i]);
 	}
 
-	dprintf(fd, "\n");
-
-	start = getenv(envs[PWD]);
-	if (start)
-		dprintf(fd, "%s: %s\n", envs[PWD], start);
-	if (getenv(envs[SHELL]))
-		dprintf(fd, "%s: %s %s\n", envs[SHELL], shell, shell_arg);
-	start = getenv(envs[SHLVL]);
-	if (start)
-		dprintf(fd, "%s: %s\n", envs[SHLVL], start);
-	if (getenv(envs[VISUAL]))
-		dprintf(fd, "%s: %s\n", envs[VISUAL], editor);
-	else if (getenv(envs[EDITOR]))
-		dprintf(fd, "%s: %s\n", envs[EDITOR], editor);
-	if (getenv(envs[PAGER]))
-		dprintf(fd, "%s: %s %s\n", envs[PAGER], pager, pager_arg);
-
 	dprintf(fd, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
 
@@ -3943,14 +3924,21 @@ int main(int argc, char *argv[])
 
 	/* Get VISUAL/EDITOR */
 	editor = xgetenv(envs[VISUAL], xgetenv(envs[EDITOR], "vi"));
+	DPRINTF_S(editor);
 
 	/* Get PAGER */
 	pager = xgetenv(envs[PAGER], "less");
 	getprogarg(pager, &pager_arg);
+	DPRINTF_S(pager);
+	DPRINTF_S(pager_arg);
 
 	/* Get SHELL */
 	shell = xgetenv(envs[SHELL], "sh");
 	getprogarg(shell, &shell_arg);
+	DPRINTF_S(shell);
+	DPRINTF_S(shell_arg);
+
+	DPRINTF_S(getenv("PWD"));
 
 	/* Setup script execution */
 	scriptpath = getenv(env_cfg[NNN_SCRIPT]);
