@@ -1499,7 +1499,6 @@ static char *xreadline(char *prefill, char *prompt)
 				case '\t': /* TAB breaks cursor position, ignore it */
 					continue;
 				case CONTROL('L'):
-					clearprompt();
 					printprompt(prompt);
 					len = pos = 0;
 					continue;
@@ -1510,7 +1509,6 @@ static char *xreadline(char *prefill, char *prompt)
 					pos = len;
 					continue;
 				case CONTROL('U'):
-					clearprompt();
 					printprompt(prompt);
 					memmove(buf, buf + pos, (len - pos) << 2);
 					len -= pos;
