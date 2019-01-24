@@ -2293,16 +2293,13 @@ static bool show_help(char *path)
 
 	start = end = helpstr;
 	while (*end) {
-		while (*end != '\n')
-			++end;
-
-		if (start == end) {
-			++end;
-			continue;
+		if (*end == '\n') {
+			dprintf(fd, "%*c%.*s",
+				xchartohex(*start), ' ', (int)(end - start), start + 1);
+			start = end + 1;
 		}
 
-		dprintf(fd, "%*c%.*s", xchartohex(*start), ' ', (int)(end - start), start + 1);
-		start = ++end;
+		++end;
 	}
 
 	dprintf(fd, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
