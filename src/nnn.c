@@ -744,6 +744,22 @@ static char *xbasename(char *path)
 	return base ? base + 1 : path;
 }
 
+static uint xatoi(const char *str)
+{
+	int val = 0;
+
+	if (!str)
+		return 0;
+
+	while (*str >= '0' && *str <= '9')
+	{
+		val = val * 10 + (*str - '0');
+		++str;
+	}
+
+	return val;
+}
+
 /* Writes buflen char(s) from buf to a file */
 static void writecp(const char *buf, const size_t buflen)
 {
@@ -906,7 +922,7 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 		/* Show a marker (to indicate nnn spawned shell) */
 		if (flag & F_MARKER && shlvl != NULL) {
 			fprintf(stdout, "\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
-			fprintf(stdout, "Next shell level: %d\n", atoi(shlvl) + 1);
+			fprintf(stdout, "Next shell level: %d\n", xatoi(shlvl) + 1);
 		}
 
 		/* Suppress stdout and stderr */
@@ -3924,6 +3940,8 @@ int main(int argc, char *argv[])
 
 	/* Get VISUAL/EDITOR */
 	editor = xgetenv(envs[VISUAL], xgetenv(envs[EDITOR], "vi"));
+	DPRINTF_S(getenv(envs[VISUAL]));
+	DPRINTF_S(getenv(envs[EDITOR]));
 	DPRINTF_S(editor);
 
 	/* Get PAGER */
@@ -3961,17 +3979,15 @@ int main(int argc, char *argv[])
 	/* Get custom opener, if set */
 	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
 
-	/* Get locker wait time, if set; copier used as tmp var */
-	copier = getenv(env_cfg[NNN_IDLE_TIMEOUT]);
-	if (copier) {
-		opt = atoi(copier);
-		idletimeout = opt * ((opt > 0) - (opt < 0));
-	}
+	/* Get locker wait time, if set */
+	idletimeout = xatoi(getenv(env_cfg[NNN_IDLE_TIMEOUT]));
+	DPRINTF_U(idletimeout);
 
 	/* Get the clipboard copier, if set */
 	copier = getenv(env_cfg[NNN_COPIER]);
 
 	home = getenv("HOME");
+	DPRINTF_S(home);
 	if (home)
 		g_tmpfplen = xstrlcpy(g_tmpfpath, home, HOME_LEN_MAX);
 	else if (getenv("TMPDIR"))
