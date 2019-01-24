@@ -307,6 +307,7 @@ static char *editor;
 static char *pager, *pager_arg;
 static char *shell, *shell_arg;
 static char *scriptpath;
+static char *home;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -1682,8 +1683,6 @@ static char *get_bm_loc(int key, char *buf)
 	for (r = 0; bookmark[r].key && r < BM_MAX; ++r) {
 		if (bookmark[r].key == key) {
 			if (bookmark[r].loc[0] == '~') {
-				char *home = getenv("HOME");
-
 				if (!home) {
 					DPRINTF_S(messages[STR_NOHOME_ID]);
 					return NULL;
@@ -3004,7 +3003,10 @@ nochange:
 		case SEL_VISIT:
 			switch (sel) {
 			case SEL_CDHOME:
-				dir = xgetenv("HOME", path);
+				if (home)
+					dir = home;
+				else
+					dir = path;
 				break;
 			case SEL_CDBEGIN:
 				dir = ipath;
@@ -3981,8 +3983,9 @@ int main(int argc, char *argv[])
 	/* Get the clipboard copier, if set */
 	copier = getenv(env_cfg[NNN_COPIER]);
 
-	if (getenv("HOME"))
-		g_tmpfplen = xstrlcpy(g_tmpfpath, getenv("HOME"), HOME_LEN_MAX);
+	home = getenv("HOME");
+	if (home)
+		g_tmpfplen = xstrlcpy(g_tmpfpath, home, HOME_LEN_MAX);
 	else if (getenv("TMPDIR"))
 		g_tmpfplen = xstrlcpy(g_tmpfpath, getenv("TMPDIR"), HOME_LEN_MAX);
 	else if (xdiraccess("/tmp"))
