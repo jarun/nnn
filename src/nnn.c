@@ -4031,7 +4031,11 @@ int main(int argc, char *argv[])
 
 	/* Bind TAB to cycling */
 	rl_variable_bind("completion-ignore-case", "on");
+#ifdef __linux__
 	rl_bind_key('\t', rl_menu_complete);
+#else
+	rl_bind_key('\t', rl_complete);
+#endif
 	read_history(NULL);
 
 #ifdef DEBUGMODE
