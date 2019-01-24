@@ -2328,19 +2328,18 @@ static bool show_help(char *path)
 		dprintf(fd, "\n");
 	}
 
-	for (i = NNN_OPENER; i <= NNN_TMPFILE; ++i) {
+	for (i = NNN_OPENER; i <= NNN_PLAIN_FILTER; ++i) {
 		start = getenv(env_cfg[i]);
-		if (start)
-			dprintf(fd, "%s: %s\n", env_cfg[i], start);
+		if (start) {
+			if (i < NNN_USE_EDITOR)
+				dprintf(fd, "%s: %s\n", env_cfg[i], start);
+			else
+				dprintf(fd, "%s: 1\n", env_cfg[i]);
+		}
 	}
 
 	if (g_cppath[0])
 		dprintf(fd, "COPY FILE: %s\n", g_cppath);
-
-	for (i = NNN_USE_EDITOR; i <= NNN_PLAIN_FILTER; ++i) {
-		if (getenv(env_cfg[i]))
-			dprintf(fd, "%s: 1\n", env_cfg[i]);
-	}
 
 	dprintf(fd, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
