@@ -78,6 +78,8 @@
 #endif
 #include <locale.h>
 #include <pwd.h>
+#include <readline/history.h>
+#include <readline/readline.h>
 #include <regex.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -3710,9 +3712,14 @@ nochange:
 				}
 				break;
 			default: /* SEL_RUNCMD */
-				tmp = xreadline(NULL, "> ");
-				if (tmp && tmp[0])
+				exitcurses();
+				tmp = readline("nnn> ");
+				refresh();
+				if (tmp && tmp[0]) {
 					spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
+					add_history(tmp);
+					free(tmp);
+				}
 			}
 
 			/* Continue in navigate-as-you-type mode, if enabled */
@@ -4022,6 +4029,11 @@ int main(int argc, char *argv[])
 	setlocale(LC_ALL, "");
 	crc8init();
 
+	/* Bind TAB to cycling */
+	rl_variable_bind("completion-ignore-case", "on");
+	rl_bind_key('\t', rl_menu_complete);
+	read_history(NULL);
+
 #ifdef DEBUGMODE
 	enabledbg();
 #endif
@@ -4030,6 +4042,8 @@ int main(int argc, char *argv[])
 
 	browse(ipath);
 	exitcurses();
+
+	write_history(NULL);
 
 	if (cfg.pickraw) {
 		if (copybufpos) {

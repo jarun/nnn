@@ -133,7 +133,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 
 #### Dependencies
 
-`nnn` needs a curses library with wide character support (like ncursesw) and standard libc.
+`nnn` needs a curses library with wide character support (like ncursesw), libreadline and standard libc.
 
 #### From a package manager
 
@@ -167,7 +167,7 @@ Packages for Arch Linux, CentOS, Debian, Fedora, Solus, and Ubuntu are available
 
 To cook yourself, download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*). Then install the dependencies and compile (e.g. on Ubuntu 16.04):
 
-    $ sudo apt-get install pkg-config libncursesw5-dev
+    $ sudo apt-get install pkg-config libncursesw5-dev libreadline6-dev
     $ make
     $ sudo make install
 

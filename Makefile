@@ -22,7 +22,7 @@ CFLAGS += -Wall -Wextra -Wno-unused-parameter
 CFLAGS += $(CFLAGS_OPTIMIZATION)
 CFLAGS += $(CFLAGS_CURSES)
 
-LDLIBS += $(LDLIBS_CURSES)
+LDLIBS += -lreadline $(LDLIBS_CURSES)
 
 DISTFILES = src nnn.1 Makefile README.md LICENSE
 SRC = src/nnn.c
