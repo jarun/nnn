@@ -2304,7 +2304,7 @@ static bool show_help(char *path)
 	dprintf(fd, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
 	dprintf(fd, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
 
-	if (getenv(env_cfg[NNN_BMS])) {
+	if (bookmark[0].loc) {
 		dprintf(fd, "BOOKMARKS\n");
 		for (; i < BM_MAX; ++i)
 			if (bookmark[i].key)
