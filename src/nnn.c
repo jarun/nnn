@@ -3152,6 +3152,7 @@ nochange:
 		case SEL_TOGGLEDOT: // fallthrough
 		case SEL_DETAIL: // fallthrough
 		case SEL_FSIZE: // fallthrough
+		case SEL_ASIZE: // fallthrough
 		case SEL_BSIZE: // fallthrough
 		case SEL_MTIME:
 			switch (sel) {
@@ -3178,6 +3179,15 @@ nochange:
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				cfg.copymode = 0;
+				break;
+			case SEL_ASIZE:
+				cfg.apparentsz ^= 1;
+				if (cfg.apparentsz) {
+					nftw_fn = &sum_sizes;
+					cfg.blkorder = 1;
+					BLK_SHIFT = 0;
+				} else
+					cfg.blkorder = 0;
 				break;
 			case SEL_BSIZE:
 				if (sel == SEL_BSIZE) {
@@ -3304,14 +3314,6 @@ nochange:
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		}
-		case SEL_ASIZE:
-			cfg.apparentsz ^= 1;
-			if (cfg.apparentsz) {
-				nftw_fn = &sum_sizes;
-				cfg.blkorder = 1;
-				BLK_SHIFT = 0;
-			} else
-				cfg.blkorder = 0; // fallthrough
 		case SEL_COPY:
 			if (!ndents)
 				goto nochange;
