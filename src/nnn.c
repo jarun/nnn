@@ -1648,36 +1648,33 @@ static bool parsebmstr()
 {
 	int i = 0;
 	char *bms = getenv(env_cfg[NNN_BMS]);
-	if (!bms)
+	char *nextkey = bms;
+	if (!bms | !*bms)
 		return TRUE;
 
 	while (*bms && i < BM_MAX) {
-		bookmark[i].key = *bms;
-
-		if (!*++bms) {
-			bookmark[i].key = '\0';
-			break;
+		if (bms == nextkey) {
+			bookmark[i].key = *bms;
+			if (*++bms != ':')
+				return FALSE;
+			if (*++bms == '\0')
+				return FALSE;
+			bookmark[i].loc = bms;
+			++i;
 		}
 
-		if (*bms != ':')
-			return FALSE; /* We support single char keys only */
-
-		bookmark[i].loc = ++bms;
-		if (bookmark[i].loc[0] == '\0' || bookmark[i].loc[0] == ';') {
-			bookmark[i].key = '\0';
-			break;
-		}
-
-		while (*bms && *bms != ';')
-			++bms;
-
-		if (*bms)
+		if (*bms == ';') {
 			*bms = '\0';
-		else
-			break;
+			nextkey = bms + 1;
+		}
 
 		++bms;
-		++i;
+	}
+
+	if (i < BM_MAX) {
+		if (*bookmark[i - 1].loc == '\0')
+			return FALSE;
+		bookmark[i].key = '\0';
 	}
 
 	return TRUE;
@@ -3903,7 +3900,7 @@ int main(int argc, char *argv[])
 
 	/* Parse bookmarks string */
 	 if (!parsebmstr()) {
-		fprintf(stderr, "%s: 1 char per key\n", env_cfg[NNN_BMS]);
+		fprintf(stderr, "%s: malformed\n", env_cfg[NNN_BMS]);
 		return 1;
 	 }
 
