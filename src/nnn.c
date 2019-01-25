@@ -1649,7 +1649,7 @@ static bool parsebmstr()
 	int i = 0;
 	char *bms = getenv(env_cfg[NNN_BMS]);
 	char *nextkey = bms;
-	if (!bms | !*bms)
+	if (!bms || !*bms)
 		return TRUE;
 
 	while (*bms && i < BM_MAX) {
