@@ -542,7 +542,7 @@ static int get_input(const char *prompt)
 
 static char confirm_force()
 {
-	int r = get_input("use force? (y/Y)");
+	int r = get_input("use force? [y/Y]");
 	if (r == 'y' || r == 'Y')
 		return 'f'; /* forceful */
 
@@ -3077,7 +3077,7 @@ nochange:
 					if (sel == SEL_CYCLE) {
 						(r == CTX_MAX - 1) ? (r = 0) : ++r;
 						snprintf(newpath, PATH_MAX,
-							 "Create context %d?  (Enter)", r + 1);
+							 "Create context %d?  [Enter]", r + 1);
 						fd = get_input(newpath);
 						if (fd != '\r')
 							continue;
@@ -3512,8 +3512,8 @@ nochange:
 
 			/* Confirm if app is CLI or GUI */
 			if (sel == SEL_OPENWITH) {
-				r = get_input("press 'c' for cli mode");
-				(r == 'c') ? (r = F_NORMAL) : (r = F_NOWAIT | F_NOTRACE);
+				r = get_input("cli mode? [y/Y]");
+				(r == 'y' || r == 'Y') ? (r = F_NORMAL) : (r = F_NOWAIT | F_NOTRACE);
 			}
 
 			switch (sel) {
@@ -3565,7 +3565,8 @@ nochange:
 			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
 				if (sel == SEL_RENAME) {
 					/* Overwrite file with same name? */
-					if (get_input("press 'y' to overwrite") != 'y') {
+					r = get_input("overwrite? [y/Y]");
+					if (r != 'y' && r != 'Y') {
 						close(fd);
 						break;
 					}
@@ -3726,7 +3727,7 @@ nochange:
 		case SEL_QUIT:
 			for (r = 0; r < CTX_MAX; ++r)
 				if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
-					r = get_input("Quit all contexts? ('Enter' confirms)");
+					r = get_input("Quit all contexts? [Enter]");
 					break;
 				}
 
