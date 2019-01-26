@@ -139,7 +139,7 @@ static struct key bindings[] = {
 	/* Last visited dir */
 	{ '-',            SEL_CDLAST },
 	/* Visit marked directory */
-	{ CONTROL('W'),   SEL_VISIT },
+	{ CONTROL('B'),   SEL_VISIT },
 	/* Leader key */
 	{ CONTROL('_'),   SEL_LEADER },
 	{ '`',            SEL_LEADER },
