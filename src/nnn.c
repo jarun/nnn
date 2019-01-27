@@ -2253,6 +2253,9 @@ static bool handle_archive(char *fpath, char *arg, char *dir)
  */
 static bool show_help(char *path)
 {
+	int i = 0, fd;
+	char *start, *end;
+
 	if (g_tmpfpath[0])
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
 			 HOME_LEN_MAX - g_tmpfplen);
@@ -2261,8 +2264,7 @@ static bool show_help(char *path)
 		return FALSE;
 	}
 
-	int i = 0, fd = mkstemp(g_tmpfpath);
-	char *start, *end;
+	fd = mkstemp(g_tmpfpath);
 
 	static char helpstr[] = {
 "0\n"
@@ -2633,17 +2635,9 @@ static void redraw(char *path)
 
 	printw("[");
 	for (i = 0; i < CTX_MAX; ++i) {
-		/* Print current context in reverse */
-		if (cfg.curctx == i) {
-			if (cfg.showcolor)
-				attrs = COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE;
-			else
-				attrs = A_REVERSE;
-			attron(attrs);
-			printw("%d", i + 1);
-			attroff(attrs);
-			printw(" ");
-		} else if (g_ctx[i].c_cfg.ctxactive) {
+		if (!g_ctx[i].c_cfg.ctxactive)
+			printw("%d ", i + 1);
+		else if (cfg.curctx != i) {
 			if (cfg.showcolor)
 				attrs = COLOR_PAIR(i + 1) | A_BOLD | A_UNDERLINE;
 			else
@@ -2652,8 +2646,17 @@ static void redraw(char *path)
 			printw("%d", i + 1);
 			attroff(attrs);
 			printw(" ");
-		} else
-			printw("%d ", i + 1);
+		} else {
+			/* Print current context in reverse */
+			if (cfg.showcolor)
+				attrs = COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE;
+			else
+				attrs = A_REVERSE;
+			attron(attrs);
+			printw("%d", i + 1);
+			attroff(attrs);
+			printw(" ");
+		}
 	}
 	printw("\b] "); /* 10 chars printed in total for contexts - "[1 2 3 4] " */
 
