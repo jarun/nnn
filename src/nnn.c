@@ -4034,6 +4034,7 @@ int main(int argc, char *argv[])
 		filterfn = &visible_str;
 	}
 
+	/* Ignore certain signals */
 	signal(SIGINT, SIG_IGN);
 	signal(SIGQUIT, SIG_IGN);
 
