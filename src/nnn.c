@@ -182,7 +182,7 @@ disabledbg()
 #define DESCRIPTOR_LEN 32
 #define _ALIGNMENT 0x10 /* 16-byte alignment */
 #define _ALIGNMENT_MASK 0xF
-#define SYMLINK_TO_DIR 0x1
+#define DIR_OR_LINK_TO_DIR 0x1
 #define HOME_LEN_MAX 64
 #define CTX_MAX 4
 #define DOT_FILTER_LEN 7
@@ -1199,12 +1199,12 @@ static int entrycmp(const void *va, const void *vb)
 	pa = (pEntry)va;
 	pb = (pEntry)vb;
 
-	/* Sort directories first */
-	if (S_ISDIR(pb->mode) && !S_ISDIR(pa->mode))
-		return 1;
+	if ((pb->flags & DIR_OR_LINK_TO_DIR) != (pa->flags & DIR_OR_LINK_TO_DIR)) {
+		if (pb->flags & DIR_OR_LINK_TO_DIR)
+			return 1;
 
-	if (S_ISDIR(pa->mode) && !S_ISDIR(pb->mode))
 		return -1;
+	}
 
 	/* Do the actual sorting */
 	if (cfg.mtimeorder)
@@ -1897,7 +1897,7 @@ static void printent_long(struct entry *ent, int sel, uint namecols)
 			printw(" %-16.16s        /  %s/\n", buf, pname);
 		break;
 	case S_IFLNK:
-		if (ent->flags & SYMLINK_TO_DIR)
+		if (ent->flags & DIR_OR_LINK_TO_DIR)
 			printw(" %-16.16s       @/  %s@\n", buf, pname);
 		else
 			printw(" %-16.16s        @  %s@\n", buf, pname);
@@ -2516,14 +2516,19 @@ static int dentfill(char *path, struct entry **dents)
 			}
 		}
 
-		/* Flag if this is a symlink to a dir */
-		if (S_ISLNK(sb.st_mode))
+		/* Flag if this is a dir or symlink to a dir */
+		if (S_ISDIR(sb.st_mode))
+			dentp->flags |= DIR_OR_LINK_TO_DIR;
+		else if (!S_ISLNK(sb.st_mode))
+			dentp->flags &= ~DIR_OR_LINK_TO_DIR;
+		else {
 			if (!fstatat(fd, namep, &sb, 0)) {
 				if (S_ISDIR(sb.st_mode))
-					dentp->flags |= SYMLINK_TO_DIR;
+					dentp->flags |= DIR_OR_LINK_TO_DIR;
 				else
-					dentp->flags &= ~SYMLINK_TO_DIR;
+					dentp->flags &= ~DIR_OR_LINK_TO_DIR;
 			}
+		}
 
 		++n;
 	}
