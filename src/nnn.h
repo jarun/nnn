@@ -219,7 +219,7 @@ static struct key bindings[] = {
 	{ 'R',            SEL_SCRIPT },
 	{ CONTROL('V'),   SEL_SCRIPT },
 	/* Run a command */
-	{ CONTROL('S'),   SEL_RUNCMD },
+	{ CONTROL('P'),   SEL_RUNCMD },
 	/* Open in EDITOR or PAGER */
 	{ 'e',            SEL_RUNEDIT },
 	{ 'p',            SEL_RUNPAGE },

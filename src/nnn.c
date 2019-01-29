@@ -2298,7 +2298,7 @@ static bool show_help(char *path)
 "1MISC\n"
          "8!, ^]  Spawn SHELL in dir  C  Execute entry\n"
          "8R, ^V  Run custom script   L  Lock terminal\n"
-            "b^S  Run a command   N, ^N  Take note\n"};
+            "b^P  Command prompt  N, ^N  Take note\n"};
 
 	if (fd == -1)
 		return FALSE;
