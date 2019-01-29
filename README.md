@@ -95,7 +95,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Media information (needs mediainfo/exiftool)
 - Convenience
   - Create, rename files and directories
-  - Select files across directories
+  - Select files across directories, range selection
   - Copy, move, delete selection
   - Create sym/hard link(s) to selection
   - Transfer files using lftp
