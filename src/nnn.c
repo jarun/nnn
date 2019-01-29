@@ -818,7 +818,7 @@ static ssize_t selectiontofd(int fd)
 		if (pos <= lastpos) {
 			if (write(fd, "\n", 1) != 1)
 				return pos;
-			pbuf += pos + 1;
+			pbuf += len + 1;
 		}
 		++pos;
 	}
