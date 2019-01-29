@@ -438,4 +438,4 @@ Please visit the [How to](https://github.com/jarun/nnn/wiki/How-to) wiki page.
 
 #### CONTRIBUTIONS
 
-We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/137).
+We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/202).
