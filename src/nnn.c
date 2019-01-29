@@ -2286,7 +2286,8 @@ static bool show_help(char *path)
             "b^O  Open with...        n  Create new/link\n"
              "cD  File details       ^R  Rename entry\n"
          "8⎵, ^K  Copy entry path     r  Open dir in vidir\n"
-         "8Y, ^Y  Toggle selection    y  List selection\n"
+            "b^Y  Toggle selection    y  List selection\n"
+	     "cY  Select all\n"
              "cP  Copy selection      X  Delete selection\n"
              "cV  Move selection     ^X  Delete entry\n"
              "cf  Archive entry       F  List archive\n"
@@ -2743,7 +2744,7 @@ static void redraw(char *path)
 					 get_file_sym(dents[cur].mode));
 			}
 		} else
-			printmsg("0 items");
+			printmsg("0/0");
 	}
 
 	if (mode_changed) {
@@ -3360,11 +3361,23 @@ nochange:
 				printmsg("selection on");
 				DPRINTF_S("selection on");
 				goto nochange;
-			}
+			} // fallthrough
+		case SEL_COPYALL:
+			if (sel == SEL_COPYALL) {
+				if (!ndents) {
+					printmsg("0 entries");
+					goto nochange;
+				}
 
+				cfg.copymode = 0;
+				copybufpos = 0;
+				ncp = 0;
+				copystartid = 0;
+				copyendid = ndents - 1;
+			}
 			if (!ncp) { /* Handle range selection */
 #ifndef DIR_LIMITED_COPY
-				if (g_crc != crc8fast((uchar *)dents,
+				if ((sel != SEL_COPYALL) && g_crc != crc8fast((uchar *)dents,
 						      ndents * sizeof(struct entry))) {
 					cfg.copymode = 0;
 					printmsg("range error: dir/content changed");
@@ -3372,13 +3385,15 @@ nochange:
 					goto nochange;
 				}
 #endif
-				if (cur < copystartid) {
-					copyendid = copystartid;
-					copystartid = cur;
-				} else
-					copyendid = cur;
+				if (sel != SEL_COPYALL) {
+					if (cur < copystartid) {
+						copyendid = copystartid;
+						copystartid = cur;
+					} else
+						copyendid = cur;
+				}
 
-				if (copystartid < copyendid) {
+				if (copystartid < copyendid || sel == SEL_COPYALL) {
 					for (r = copystartid; r <= copyendid; ++r)
 						if (!appendfpath(newpath, mkpath(path,
 								 dents[r].name, newpath)))

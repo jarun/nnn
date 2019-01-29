@@ -73,6 +73,7 @@ enum action {
 	SEL_REDRAW,
 	SEL_COPY,
 	SEL_COPYMUL,
+	SEL_COPYALL,
 	SEL_COPYLIST,
 	SEL_CP,
 	SEL_MV,
@@ -189,7 +190,8 @@ static struct key bindings[] = {
 	{ ' ',            SEL_COPY },
 	/* Toggle copy multiple file paths */
 	{ CONTROL('Y'),   SEL_COPYMUL },
-	{ 'Y',            SEL_COPYMUL },
+	/* Select all files in current dir */
+	{ 'Y',            SEL_COPYALL },
 	/* Show list of copied files */
 	{ 'y',            SEL_COPYLIST },
 	/* Copy from copy buffer */

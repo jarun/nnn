@@ -95,7 +95,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Media information (needs mediainfo/exiftool)
 - Convenience
   - Create, rename files and directories
-  - Select files across directories, range selection
+  - Select files across dirs; all/range selection
   - Copy, move, delete selection
   - Create sym/hard link(s) to selection
   - Transfer files using lftp
@@ -231,7 +231,8 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^O  Open with...        n  Create new/link
             D  File details       ^R  Rename entry
         ⎵, ^K  Copy entry path     r  Open dir in vidir
-        Y, ^Y  Toggle selection    y  List selection
+           ^Y  Toggle selection    y  List selection
+            Y  Select all
             P  Copy selection      X  Delete selection
             V  Move selection     ^X  Delete entry
             f  Archive entry       F  List archive
