@@ -2276,7 +2276,7 @@ static bool show_help(char *path)
    "2Home, g, ^A  First entry         -  Last visited dir\n"
     "3End, G, ^E  Last entry          .  Toggle show hidden\n"
              "c/  Filter        Ins, ^T  Toggle nav-as-you-type\n"
-             "cb  Pin current dir    ^W  Go to pinned dir\n"
+             "cb  Pin current dir    ^B  Go to pinned dir\n"
        "6Tab, ^I  Next context        d  Toggle detail view\n"
          "8`, ^/  Leader key   N, LeadN  Go to/create context N\n"
            "aEsc  Exit prompt        ^L  Redraw/clear prompt\n"

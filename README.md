@@ -221,7 +221,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
   Home, g, ^A  First entry         -  Last visited dir
    End, G, ^E  Last entry          .  Toggle show hidden
             /  Filter        Ins, ^T  Toggle nav-as-you-type
-            b  Pin current dir    ^W  Go to pinned dir
+            b  Pin current dir    ^B  Go to pinned dir
       Tab, ^I  Next context        d  Toggle detail view
         `, ^/  Leader key   N, LeadN  Go to/create context N
           Esc  Exit prompt        ^L  Redraw/clear prompt
