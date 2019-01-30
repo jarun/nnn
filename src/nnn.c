@@ -1249,21 +1249,8 @@ static int nextsel(int *presel)
 	if (c == 0) {
 		c = getch();
 		DPRINTF_D(c);
-	} else {
-		/* Unwatch dir if we are still in a filtered view */
-#ifdef LINUX_INOTIFY
-		if (*presel == FILTER && inotify_wd >= 0) {
-			inotify_rm_watch(inotify_fd, inotify_wd);
-			inotify_wd = -1;
-		}
-#elif defined(BSD_KQUEUE)
-		if (*presel == FILTER && event_fd >= 0) {
-			close(event_fd);
-			event_fd = -1;
-		}
-#endif
+	} else
 		*presel = 0;
-	}
 
 	if (c == -1) {
 		++idle;
@@ -3144,6 +3131,18 @@ nochange:
 			printmsg(mark);
 			goto nochange;
 		case SEL_FLTR:
+			/* Unwatch dir if we are still in a filtered view */
+#ifdef LINUX_INOTIFY
+			if (inotify_wd >= 0) {
+				inotify_rm_watch(inotify_fd, inotify_wd);
+				inotify_wd = -1;
+			}
+#elif defined(BSD_KQUEUE)
+			if (event_fd >= 0) {
+				close(event_fd);
+				event_fd = -1;
+			}
+#endif
 			presel = filterentries(path);
 			/* Save current */
 			if (ndents)
