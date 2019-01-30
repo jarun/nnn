@@ -855,6 +855,29 @@ static bool showcplist()
 	return TRUE;
 }
 
+static bool cpsafe()
+{
+	/* Fail if copy file path not generated */
+	if (!g_cppath[0]) {
+		printmsg("copy file not found");
+		return FALSE;
+	}
+
+	/* Warn if selection not completed */
+	if (cfg.copymode) {
+		printmsg("finish selection first");
+		return FALSE;
+	}
+
+	/* Fail if copy file path isn't accessible */
+	if (access(g_cppath, R_OK) == -1) {
+		printmsg("empty selection list");
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 /* Initialize curses mode */
 static bool initcurses(void)
 {
@@ -3423,23 +3446,8 @@ nochange:
 		case SEL_MV:
 		case SEL_RMMUL:
 		{
-			/* Fail if copy file path not generated */
-			if (!g_cppath[0]) {
-				printmsg("copy file not found");
+			if (!cpsafe())
 				goto nochange;
-			}
-
-			/* Warn if selection not completed */
-			if (cfg.copymode) {
-				printmsg("finish selection first");
-				goto nochange;
-			}
-
-			/* Fail if copy file path isn't accessible */
-			if (access(g_cppath, R_OK) == -1) {
-				printmsg("empty selection list");
-				goto nochange;
-			}
 
 			if (sel == SEL_CP) {
 				snprintf(g_buf, CMD_LEN_MAX,
