@@ -23,16 +23,18 @@
 import sys
 from subprocess import Popen, PIPE, DEVNULL
 
-if len(sys.argv) != 3:
+if len(sys.argv) < 3:
     print('usage: natool [-l] [-x] [archive] [file/dir]')
     sys.exit(0)
 
 if sys.argv[1] == '-x':
-    cmd = ['patool', '--non-interactive', 'extract', sys.argv[2]]
+    cmd = ['patool', '--non-interactive', 'extract']
 elif sys.argv[1] == '-l':
-    cmd = ['patool', '--non-interactive', 'list', sys.argv[2]]
+    cmd = ['patool', '--non-interactive', 'list']
 else:
-    cmd = ['patool', '--non-interactive', 'create', sys.argv[1], sys.argv[2]]
+    cmd = ['patool', '--non-interactive', 'create', sys.argv[1]]
+
+cmd.extend(sys.argv[2:])
 
 pipe = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
 out, err = pipe.communicate()
