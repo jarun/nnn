@@ -111,6 +111,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Edit file in EDITOR or open in PAGER
   - Take quick notes
   - Terminal locker integration
+  - Shortcut reference a keypress away
 - Unicode support
 - Highly optimized, static analysis integrated code
 - Available on many distros
