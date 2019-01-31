@@ -96,7 +96,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - Convenience
   - Create, rename files and directories
   - Select files across dirs; all/range selection
-  - Copy, move, delete selection
+  - Copy, move, delete, archive selection
   - Create sym/hard link(s) to selection
   - Transfer files using lftp
   - Batch rename/move/delete (needs vidir)
