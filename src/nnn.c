@@ -2300,7 +2300,7 @@ static bool show_help(char *path)
              "cY  Select all\n"
              "cP  Copy selection     X  Delete selection\n"
              "cV  Move selection    ^X  Delete entry\n"
-             "cf  Archive entry      F  List archive\n"
+             "cf  Archive files      F  List archive\n"
             "b^F  Extract archive  m M  Brief/full media info\n"
              "ce  Edit in EDITOR     p  Open in PAGER\n"
 "1ORDER TOGGLES\n"
@@ -3512,7 +3512,7 @@ nochange:
 		{
 			switch (sel) {
 			case SEL_ARCHIVE:
-				tmp = xreadline(dents[cur].name, "name: ");
+				tmp = xreadline(NULL, "archive name: ");
 				break;
 			case SEL_OPENWITH:
 				tmp = xreadline(NULL, "open with: ");
@@ -3545,10 +3545,24 @@ nochange:
 				/* newpath is used as temporary buffer */
 				if (!getutil(utils[APACK])) {
 					printmsg("utility missing");
-					continue;
+					goto nochange;
 				}
 
-				spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
+				r = get_input("archive selection (else current)? [s]");
+				if (r == 's') {
+					if (!cpsafe())
+						goto nochange;
+
+					snprintf(g_buf, CMD_LEN_MAX,
+#ifdef __linux__
+						 "xargs -0 -a %s %s %s",
+#else
+						 "cat %s | xargs -0 -o %s %s",
+#endif
+						 g_cppath, utils[APACK], tmp);
+					spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
+				} else
+					spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
 				break;
 			case SEL_OPENWITH:
 				dir = NULL;

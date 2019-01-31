@@ -236,7 +236,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
             Y  Select all
             P  Copy selection     X  Delete selection
             V  Move selection    ^X  Delete entry
-            f  Archive entry      F  List archive
+            f  Archive files      F  List archive
            ^F  Extract archive  m M  Brief/full media info
             e  Edit in EDITOR     p  Open in PAGER
  ORDER TOGGLES
