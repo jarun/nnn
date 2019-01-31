@@ -2305,11 +2305,11 @@ static bool show_help(char *path)
              "ce  Edit in EDITOR     p  Open in PAGER\n"
 "1ORDER TOGGLES\n"
             "b^J  Disk usage         S  Apparent du\n"
-             "ct  Modification time  s  Size\n"
+             "ct  Time modified      s  Size\n"
 "1MISC\n"
           "9! ^]  Spawn SHELL        C  Execute entry\n"
-          "9R ^V  Run/choose script  L  Lock terminal\n"
-            "b^P  Command prompt  N ^N  Take note\n"};
+          "9R ^V  Run/pick script    L  Lock terminal\n"
+            "b^P  Command prompt    ^N  Take note\n"};
 
 	if (fd == -1)
 		return FALSE;

@@ -241,11 +241,11 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
             e  Edit in EDITOR     p  Open in PAGER
  ORDER TOGGLES
            ^J  Disk usage         S  Apparent du
-            t  Modification time  s  Size
+            t  Time modified      s  Size
  MISC
          ! ^]  Spawn SHELL        C  Execute entry
-         R ^V  Run/choose script  L  Lock terminal
-           ^P  Command prompt  N ^N  Take note
+         R ^V  Run/pick script    L  Lock terminal
+           ^P  Command prompt    ^N  Take note
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
