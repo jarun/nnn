@@ -2830,10 +2830,11 @@ begin:
 	populate(path, lastname);
 
 #ifdef LINUX_INOTIFY
-	if (inotify_wd == -1)
+	if (presel != FILTER && inotify_wd == -1) {
 		inotify_wd = inotify_add_watch(inotify_fd, path, INOTIFY_MASK);
+	}
 #elif defined(BSD_KQUEUE)
-	if (event_fd == -1) {
+	if (presel != FILTER && event_fd == -1) {
 #if defined(O_EVTONLY)
 		event_fd = open(path, O_EVTONLY);
 #else
