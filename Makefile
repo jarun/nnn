@@ -63,4 +63,4 @@ clean:
 
 skip: ;
 
-.PHONY: $(BIN) $(SRC) all debug install uninstall strip dist clean
+.PHONY: all debug install uninstall strip dist clean
