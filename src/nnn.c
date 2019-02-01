@@ -1722,9 +1722,9 @@ static char *get_bm_loc(int key, char *buf)
 	return NULL;
 }
 
-static void resetdircolor(mode_t mode)
+static void resetdircolor(int flags)
 {
-	if (cfg.dircolor && !S_ISDIR(mode)) {
+	if (cfg.dircolor && !(flags & DIR_OR_LINK_TO_DIR)) {
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		cfg.dircolor = 0;
 	}
@@ -1872,7 +1872,7 @@ static void printent(struct entry *ent, int sel, uint namecols)
 	pname = unescape(ent->name, namecols);
 
 	/* Directories are always shown on top */
-	resetdircolor(ent->mode);
+	resetdircolor(ent->flags);
 
 	printw("%s%s%s\n", CURSYM(sel), pname, get_file_sym(ent->mode));
 }
@@ -1885,7 +1885,7 @@ static void printent_long(struct entry *ent, int sel, uint namecols)
 	pname = unescape(ent->name, namecols);
 
 	/* Directories are always shown on top */
-	resetdircolor(ent->mode);
+	resetdircolor(ent->flags);
 
 	if (sel)
 		attron(A_REVERSE);
