@@ -3495,7 +3495,8 @@ nochange:
 			mkpath(path, dents[cur].name, newpath);
 			spawn("rm", rm_opts, newpath, NULL, F_NORMAL | F_SIGINT);
 
-			if (cur && access(newpath, F_OK) == -1)
+			/* Don't optimize cur if filtering is on */
+			if (!cfg.filtermode && cur && access(newpath, F_OK) == -1)
 				--cur;
 
 			copycurname();
