@@ -2736,9 +2736,8 @@ static void redraw(char *path)
 
 			/* We need to show filename as it may be truncated in directory listing */
 			if (!cfg.blkorder)
-				mvprintw(LINES - 1, 0, "%d/%d %s[%s%s]\n", cur + 1, ndents, sort,
-					 unescape(dents[cur].name, NAME_MAX),
-					 get_file_sym(dents[cur].mode));
+				mvprintw(LINES - 1, 0, "%d/%d %s[%s]\n", cur + 1, ndents, sort,
+					 unescape(dents[cur].name, NAME_MAX));
 			else {
 				xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 				if (cfg.apparentsz)
@@ -2747,11 +2746,10 @@ static void redraw(char *path)
 					c = 'd';
 
 				mvprintw(LINES - 1, 0,
-					 "%d/%d %cu: %s (%lu files) vol: %s free [%s%s]\n",
+					 "%d/%d %cu: %s (%lu files) vol: %s free [%s]\n",
 					 cur + 1, ndents, c, buf, num_files,
 					 coolsize(get_fs_info(path, FREE)),
-					 unescape(dents[cur].name, NAME_MAX),
-					 get_file_sym(dents[cur].mode));
+					 unescape(dents[cur].name, NAME_MAX));
 			}
 		} else
 			printmsg("0/0");
