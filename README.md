@@ -74,10 +74,10 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Basic, detail (default), disk usage analyzer (du)
   - File picker, vim (or neovim) plugin
 - Navigation
-  - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
-  - *Navigate-as-you-type* with auto-select directory
   - Contexts (_aka_ tabs _aka_ workspaces)
+  - *Navigate-as-you-type* with auto-select directory
   - Bookmarks
+  - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
   - Pin and visit a directory
 - Sorting
   - Directories always listed on top
