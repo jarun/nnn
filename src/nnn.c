@@ -3491,7 +3491,8 @@ nochange:
 				if (copier)
 					spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 			}
-			printmsg(newpath);
+			mvprintw(LINES - 1, 0, "selected %s%s\n",
+				(!cfg.copymode&&copier) ? "and copied " : "" , newpath);
 			goto nochange;
 		case SEL_COPYMUL:
 			cfg.copymode ^= 1;
@@ -3541,7 +3542,7 @@ nochange:
 								 dents[r].name, newpath)))
 							goto nochange;
 
-					mvprintw(LINES - 1, 0, "%d files copied\n",
+					mvprintw(LINES - 1, 0, "%d files selected\n",
 						 copyendid - copystartid + 1);
 				}
 			}
@@ -3552,7 +3553,7 @@ nochange:
 					spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
 				if (ncp) /* Some files cherry picked */
-					mvprintw(LINES - 1, 0, "%d files copied\n", ncp);
+					mvprintw(LINES - 1, 0, "%d files selected\n", ncp);
 			} else
 				printmsg("selection off");
 			goto nochange;
