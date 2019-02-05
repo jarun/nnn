@@ -3491,8 +3491,8 @@ nochange:
 				if (copier)
 					spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 			}
-			mvprintw(LINES - 1, 0, "selected %s%s\n",
-				(!cfg.copymode&&copier) ? "and copied " : "" , newpath);
+
+			printmsg(newpath);
 			goto nochange;
 		case SEL_COPYMUL:
 			cfg.copymode ^= 1;
