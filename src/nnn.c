@@ -433,7 +433,6 @@ static const char * const messages[] = {
 #define NNN_NO_AUTOSELECT 10
 #define NNN_RESTRICT_NAV_OPEN 11
 #define NNN_RESTRICT_0B 12
-#define NNN_PLAIN_FILTER 13
 
 static const char * const env_cfg[] = {
 	"NNN_BMS",
@@ -449,7 +448,6 @@ static const char * const env_cfg[] = {
 	"NNN_NO_AUTOSELECT",
 	"NNN_RESTRICT_NAV_OPEN",
 	"NNN_RESTRICT_0B",
-	"NNN_PLAIN_FILTER",
 };
 
 /* Required env vars */
@@ -2452,7 +2450,7 @@ static bool show_help(char *path)
 		dprintf(fd, "\n");
 	}
 
-	for (i = NNN_OPENER; i <= NNN_PLAIN_FILTER; ++i) {
+	for (i = NNN_OPENER; i <= NNN_RESTRICT_0B; ++i) {
 		start = getenv(env_cfg[i]);
 		if (start) {
 			if (i < NNN_USE_EDITOR)
