@@ -218,6 +218,8 @@ disabledbg()
 #define setdirwatch() (cfg.filtermode ? (presel = FILTER) : (dir_changed = TRUE))
 /* We don't care about the return value from strcmp() */
 #define xstrcmp(a, b)  (*(a) != *(b) ? -1 : strcmp((a), (b)))
+/* A faster version of xisdigit */
+#define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
 
 #ifdef LINUX_INOTIFY
 #define EVENT_SIZE (sizeof(struct inotify_event))
@@ -751,7 +753,7 @@ static uint xatoi(const char *str)
 	if (!str)
 		return 0;
 
-	while (*str >= '0' && *str <= '9')
+	while (xisdigit(*str))
 	{
 		val = val * 10 + (*str - '0');
 		++str;
@@ -1126,7 +1128,7 @@ static int xstricmp(const char * const s1, const char * const s2)
 		++c2;
 	}
 
-	if ((*c1 >= '0' && *c1 <= '9') && (*c2 >= '0' && *c2 <= '9')) {
+	if (xisdigit(*c1) && xisdigit(*c2)) {
 		while (*c1 == '0')
 			++c1;
 		m1 = c1;
@@ -1135,14 +1137,14 @@ static int xstricmp(const char * const s1, const char * const s2)
 			++c2;
 		m2 = c2;
 
-		while (*c1 >= '0' && *c1 <= '9') {
+		while (xisdigit(*c1)) {
 			++count1;
 			++c1;
 		}
 		while (isspace(*c1))
 			++c1;
 
-		while (*c2 >= '0' && *c2 <= '9') {
+		while (xisdigit(*c2)) {
 			++count2;
 			++c2;
 		}
@@ -1177,7 +1179,7 @@ static int xstricmp(const char * const s1, const char * const s2)
 /* Return the integer value of a char representing HEX */
 static char xchartohex(char c)
 {
-	if (c >= '0' && c <= '9')
+	if (xisdigit(c))
 		return c - '0';
 
 	c = TOUPPER(c);
