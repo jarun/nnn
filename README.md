@@ -82,7 +82,8 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - Sorting
   - Directories always listed on top
   - Sort by file name, modification time, size
-  - Numeric order for numeric names (visit _/proc_)
+  - Numeric order for pure numeric names (visit _/proc_)
+  - Version sort
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex and substring match
@@ -187,7 +188,7 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
 #### Cmdline options
 
 ```
-usage: nnn [-b key] [-C] [-e] [-i] [-l]
+usage: nnn [-b key] [-C] [-e] [-i] [-l] [-n]
            [-p file] [-S] [-v] [-h] [PATH]
 
 The missing terminal file manager for X.
@@ -201,6 +202,7 @@ optional args:
  -e      use exiftool for media info
  -i      nav-as-you-type mode
  -l      light mode
+ -n      use version compare to sort
  -p file selection file (stdout if '-')
  -S      disk usage mode
  -v      show version

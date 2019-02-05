@@ -202,6 +202,18 @@ disabledbg()
 #define POLYNOMIAL 0xD8  /* 11011 followed by 0's */
 #define CRC8_TABLE_LEN 256
 
+/* Version compare macros */
+/* states: S_N: normal, S_I: comparing integral part, S_F: comparing
+           fractionnal parts, S_Z: idem but with leading Zeroes only */
+#define  S_N    0x0
+#define  S_I    0x3
+#define  S_F    0x6
+#define  S_Z    0x9
+
+/* result_type: VCMP: return diff; VLEN: compare using len_diff/diff */
+#define  VCMP    2
+#define  VLEN    3
+
 /* Volume info */
 #define FREE 0
 #define CAPACITY 1
@@ -1176,6 +1188,86 @@ static int xstricmp(const char * const s1, const char * const s2)
 	return strcoll(s1, s2);
 }
 
+/*
+ * Version comparison
+ *
+ * The code for version compare is a modified version of the GLIBC
+ * and uClibc implementation of strverscmp(). The source is here:
+ * https://elixir.bootlin.com/uclibc-ng/latest/source/libc/string/strverscmp.c
+ */
+
+/*
+ * Compare S1 and S2 as strings holding indices/version numbers,
+ * returning less than, equal to or greater than zero if S1 is less than,
+ * equal to or greater than S2 (for more info, see the texinfo doc).
+ */
+static int xstrverscmp(const char * const s1, const char * const s2)
+{
+	static const uchar *p1;
+	static const uchar *p2;
+	static uchar c1, c2;
+	static int state, diff;
+
+	p1 = (const uchar *)s1;
+	p2 = (const uchar *)s2;
+
+	/* Symbol(s)    0       [1-9]   others
+	   Transition   (10) 0  (01) d  (00) x   */
+	static const uint8_t next_state[] =
+	{
+		/* state    x    d    0  */
+		/* S_N */  S_N, S_I, S_Z,
+		/* S_I */  S_N, S_I, S_I,
+		/* S_F */  S_N, S_F, S_F,
+		/* S_Z */  S_N, S_F, S_Z
+	};
+
+	static const int8_t result_type[] =
+	{
+		/* state   x/x  x/d  x/0  d/x  d/d  d/0  0/x  0/d  0/0  */
+
+		/* S_N */  VCMP, VCMP, VCMP, VCMP, VLEN, VCMP, VCMP, VCMP, VCMP,
+		/* S_I */  VCMP,   -1,   -1,   +1, VLEN, VLEN,   +1, VLEN, VLEN,
+		/* S_F */  VCMP, VCMP, VCMP, VCMP, VCMP, VCMP, VCMP, VCMP, VCMP,
+		/* S_Z */  VCMP,   +1,   +1,   -1, VCMP, VCMP,   -1, VCMP, VCMP
+	};
+
+	if (p1 == p2)
+		return 0;
+
+	c1 = *p1++;
+	c2 = *p2++;
+
+	/* Hint: '0' is a digit too.  */
+	state = S_N + ((c1 == '0') + (xisdigit(c1) != 0));
+
+	while ((diff = c1 - c2) == 0) {
+		if (c1 == '\0')
+			return diff;
+
+		state = next_state[state];
+		c1 = *p1++;
+		c2 = *p2++;
+		state += (c1 == '0') + (xisdigit(c1) != 0);
+	}
+
+	state = result_type[state * 3 + (((c2 == '0') + (xisdigit(c2) != 0)))];
+
+	switch (state) {
+	case VCMP:
+		return diff;
+	case VLEN:
+		while (xisdigit (*p1++))
+			if (!xisdigit (*p2++))
+				return 1;
+		return xisdigit (*p2) ? -1 : diff;
+	default:
+		return state;
+	}
+}
+
+static int (*cmpfn)(const char * const s1, const char * const s2) = &xstricmp;
+
 /* Return the integer value of a char representing HEX */
 static char xchartohex(char c)
 {
@@ -1251,7 +1343,7 @@ static int entrycmp(const void *va, const void *vb)
 			return -1;
 	}
 
-	return xstricmp(pa->name, pb->name);
+	return cmpfn(pa->name, pb->name);
 }
 
 /*
@@ -3863,7 +3955,7 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"usage: nnn [-b key] [-C] [-e] [-i] [-l]\n"
+		"usage: nnn [-b key] [-C] [-e] [-i] [-l] [-n]\n"
 		"           [-p file] [-S] [-v] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
@@ -3874,6 +3966,7 @@ static void usage(void)
 		" -e      use exiftool for media info\n"
 		" -i      nav-as-you-type mode\n"
 		" -l      light mode\n"
+		" -n      use version compare to sort\n"
 		" -p file selection file (stdout if '-')\n"
 		" -S      disk usage mode\n"
 		" -v      show version\n"
@@ -3887,7 +3980,7 @@ int main(int argc, char *argv[])
 	char *ipath = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "Slib:Cep:vh")) != -1) {
+	while ((opt = getopt(argc, argv, "Slib:Cenp:vh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -3909,6 +4002,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'e':
 			cfg.metaviewer = EXIFTOOL;
+			break;
+		case 'n':
+			cmpfn = &xstrverscmp;
 			break;
 		case 'p':
 			cfg.picker = 1;
