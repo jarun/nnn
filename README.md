@@ -189,7 +189,7 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
 
 ```
 usage: nnn [-b key] [-C] [-e] [-i] [-l] [-n]
-           [-p file] [-S] [-v] [-h] [PATH]
+           [-p file] [-s] [-S] [-v] [-h] [PATH]
 
 The missing terminal file manager for X.
 
@@ -204,6 +204,7 @@ optional args:
  -l      light mode
  -n      use version compare to sort
  -p file selection file (stdout if '-')
+ -s      string filters [default: regex]
  -S      disk usage mode
  -v      show version
  -h      show help
@@ -320,9 +321,7 @@ Common use cases:
 - type `\.mkv` to list all MKV files
 - use `.*` to match any character (_sort of_ fuzzy search)
 
-To filter entries by substring match:
-
-    export NNN_PLAIN_FILTER=1
+There is a program opton to filter entries by substring match.
 
 If `nnn` is invoked as root or the environment variable `NNN_SHOW_HIDDEN` is set the default filter will also match hidden files.
 
@@ -396,7 +395,6 @@ The option `open with` takes 1 combined argument.
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type` mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_RESTRICT_0B=1` | do not open 0-byte files |
-| `NNN_PLAIN_FILTER=1` | use substring match in filer mode [default: regex] |
 
 #### Help
 

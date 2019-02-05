@@ -17,6 +17,7 @@ args=(
     '(-l)-l[start in light mode (fewer details)]'
     '(-n)-n[use version compare to sort files]'
     '(-p)-p[copy selection to file]:file name'
+    '(-s)-s[use substring match for filters]'
     '(-S)-S[start in disk usage analyzer mode]'
     '(-v)-v[show program version and exit]'
     '*:filename:_files'

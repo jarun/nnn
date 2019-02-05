@@ -3956,7 +3956,7 @@ static void usage(void)
 {
 	fprintf(stdout,
 		"usage: nnn [-b key] [-C] [-e] [-i] [-l] [-n]\n"
-		"           [-p file] [-S] [-v] [-h] [PATH]\n\n"
+		"           [-p file] [-s] [-S] [-v] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
@@ -3968,6 +3968,7 @@ static void usage(void)
 		" -l      light mode\n"
 		" -n      use version compare to sort\n"
 		" -p file selection file (stdout if '-')\n"
+		" -s      string filters [default: regex]\n"
 		" -S      disk usage mode\n"
 		" -v      show version\n"
 		" -h      show help\n\n"
@@ -3980,7 +3981,7 @@ int main(int argc, char *argv[])
 	char *ipath = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "Slib:Cenp:vh")) != -1) {
+	while ((opt = getopt(argc, argv, "Slib:Cenp:svh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4018,6 +4019,10 @@ int main(int argc, char *argv[])
 					return 1;
 				}
 			}
+			break;
+		case 's':
+			cfg.filter_re = 0;
+			filterfn = &visible_str;
 			break;
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
@@ -4167,12 +4172,6 @@ int main(int argc, char *argv[])
 	/* Restrict opening of 0-byte files */
 	if (getenv(env_cfg[NNN_RESTRICT_0B]))
 		cfg.restrict0b = 1;
-
-	/* Use string-comparison in filter mode */
-	if (getenv(env_cfg[NNN_PLAIN_FILTER])) {
-		cfg.filter_re = 0;
-		filterfn = &visible_str;
-	}
 
 	/* Ignore certain signals */
 	signal(SIGINT, SIG_IGN);

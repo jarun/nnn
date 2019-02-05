@@ -11,7 +11,9 @@
 .Op Ar -e
 .Op Ar -i
 .Op Ar -l
+.Op Ar -n
 .Op Ar -p file
+.Op Ar -s
 .Op Ar -S
 .Op Ar -v
 .Op Ar -h
@@ -187,6 +189,9 @@ supports the following options:
 .Fl "p file"
         copy (or \fIpick\fR) selection to file, or stdout if file='-'
 .Pp
+.Fl s
+        use substring match for filters instead of regex
+.Pp
 .Fl S
         start in disk usage analyzer mode
 .Pp
@@ -235,7 +240,7 @@ with a '^' (caret) symbol.
 .br
 (3) Use '.*' to match any character (\fIsort of\fR fuzzy search).
 .Pp
-To filter entries by substring match export the environment variable \fBNNN_PLAIN_FILTER\fR.
+There is a program option to filter entries by substring match.
 .Pp
 If
 .Nm
@@ -334,11 +339,6 @@ files.
 \fBNNN_RESTRICT_0B:\fR restrict opening 0-byte files due to unexpected behaviour; use \fIedit\fR or \fIopen with\fR to open the file.
 .Bd -literal
     export NNN_RESTRICT_0B=1
-.Ed
-.Pp
-\fBNNN_PLAIN_FILTER:\fR use substring match in filter mode.
-.Bd -literal
-    export NNN_PLAIN_FILTER=1
 .Ed
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspace key to DEC.
