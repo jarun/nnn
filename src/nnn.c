@@ -3625,15 +3625,22 @@ nochange:
 				presel = FILTER;
 			goto begin;
 		}
-		case SEL_ARCHIVE: // fallthrough
 		case SEL_OPENWITH: // fallthrough
 		case SEL_RENAME:
 			if (!ndents)
 				break; // fallthrough
+		case SEL_ARCHIVE: // fallthrough
 		case SEL_NEW:
 		{
 			switch (sel) {
 			case SEL_ARCHIVE:
+				r = get_input("archive selection (else current)? [s]");
+				if (r == 's' && !cpsafe())
+					goto nochange;
+				else if (!ndents) {
+					printmsg("no files");
+					goto nochange;
+				}
 				tmp = xreadline(NULL, "archive name: ");
 				break;
 			case SEL_OPENWITH:
@@ -3670,11 +3677,7 @@ nochange:
 					goto nochange;
 				}
 
-				r = get_input("archive selection (else current)? [s]");
 				if (r == 's') {
-					if (!cpsafe())
-						goto nochange;
-
 					snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
 						 "xargs -0 -a %s %s %s",
