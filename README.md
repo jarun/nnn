@@ -82,7 +82,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - Sorting
   - Directories always listed on top
   - Sort by file name, modification time, size
-  - Numeric order for pure numeric names (visit _/proc_)
+  - Ordered pure numeric names by default (visit _/proc_)
   - Version sort
 - Search
   - Instant filtering with *search-as-you-type*
