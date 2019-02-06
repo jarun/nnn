@@ -428,11 +428,12 @@ static const char * const messages[] = {
 #define NNN_SCRIPT 5
 #define NNN_NOTE 6
 #define NNN_TMPFILE 7
-#define NNN_USE_EDITOR 8
-#define NNN_SHOW_HIDDEN 9
-#define NNN_NO_AUTOSELECT 10
-#define NNN_RESTRICT_NAV_OPEN 11
-#define NNN_RESTRICT_0B 12
+#define NNNLVL 8 /* strings end here */
+#define NNN_USE_EDITOR 9 /* flags begin here */
+#define NNN_SHOW_HIDDEN 10
+#define NNN_NO_AUTOSELECT 11
+#define NNN_RESTRICT_NAV_OPEN 12
+#define NNN_RESTRICT_0B 13
 
 static const char * const env_cfg[] = {
 	"NNN_BMS",
@@ -443,6 +444,7 @@ static const char * const env_cfg[] = {
 	"NNN_SCRIPT",
 	"NNN_NOTE",
 	"NNN_TMPFILE",
+	"NNNLVL",
 	"NNN_USE_EDITOR",
 	"NNN_SHOW_HIDDEN",
 	"NNN_NO_AUTOSELECT",
@@ -452,14 +454,12 @@ static const char * const env_cfg[] = {
 
 /* Required env vars */
 #define SHELL 0
-#define SHLVL 1
-#define VISUAL 2
-#define EDITOR 3
-#define PAGER 4
+#define VISUAL 1
+#define EDITOR 2
+#define PAGER 3
 
 static const char * const envs[] = {
 	"SHELL",
-	"SHLVL",
 	"VISUAL",
 	"EDITOR",
 	"PAGER",
@@ -783,13 +783,24 @@ static uint xatoi(const char *str)
 	if (!str)
 		return 0;
 
-	while (xisdigit(*str))
-	{
+	while (xisdigit(*str)) {
 		val = val * 10 + (*str - '0');
 		++str;
 	}
 
 	return val;
+}
+
+static char *xitoa(uint val)
+{
+	static const char hexbuf[] = "0123456789";
+	static char ascbuf[32] = {0};
+	static int i;
+
+	for (i = 30; val && i; --i, val /= 10)
+		ascbuf[i] = hexbuf[val % 10];
+
+	return &ascbuf[++i];
 }
 
 /* Writes buflen char(s) from buf to a file */
@@ -953,15 +964,15 @@ static bool initcurses(void)
  */
 static void spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uchar flag)
 {
-	static const char *shlvl;
-	static pid_t pid;
-	static int status;
+	pid_t pid;
+	int status;
+	const char *tmp;
 
 	/* Swap args if the first arg is NULL and second isn't */
 	if (!arg1 && arg2) {
-		shlvl = arg1;
+		tmp = arg1;
 		arg1 = arg2;
-		arg2 = shlvl;
+		arg2 = tmp;
 	}
 
 	if (flag & F_NORMAL)
@@ -972,13 +983,12 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 		if (dir != NULL)
 			status = chdir(dir);
 
-		shlvl = getenv(envs[SHLVL]);
+		tmp = getenv(env_cfg[NNNLVL]);
 
 		/* Show a marker (to indicate nnn spawned shell) */
-		if (flag & F_MARKER && shlvl != NULL) {
-			fprintf(stdout, "\n +-++-++-+\n | n n n |\n +-++-++-+\n\n");
-			fprintf(stdout, "Next shell level: %d\n", xatoi(shlvl) + 1);
-		}
+		if (flag & F_MARKER && tmp)
+			fprintf(stdout, "\n +-++-++-+\n | n n n |\n +-++-++-+\n\n"
+					"Last nnn level: %d\n", xatoi(tmp));
 
 		/* Suppress stdout and stderr */
 		if (flag & F_NOTRACE) {
@@ -4161,6 +4171,10 @@ int main(int argc, char *argv[])
 
 	/* Get custom opener, if set */
 	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
+
+	/* Set nnn neting level (idletimeout used as tmp var) */
+	idletimeout = xatoi(getenv(env_cfg[NNNLVL]));
+	setenv(env_cfg[NNNLVL], xitoa(++idletimeout), 1);
 
 	/* Get locker wait time, if set */
 	idletimeout = xatoi(getenv(env_cfg[NNN_IDLE_TIMEOUT]));
