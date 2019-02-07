@@ -361,7 +361,7 @@ The following indicators are used in the detail view:
 | vidir (from moreutils) | batch rename, move, delete dir entries |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
 | $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
-| $PAGER | page through files (fallback less) |
+| $PAGER (less, most) | page through files (fallback less) |
 | $SHELL | spawn a shell, run script (fallback sh) |
 
 To specify a custom file opener:
