@@ -3645,13 +3645,16 @@ nochange:
 			switch (sel) {
 			case SEL_ARCHIVE:
 				r = get_input("archive selection (else current)? [s]");
-				if (r == 's' && !cpsafe())
-					goto nochange;
-				else if (!ndents) {
+				if (r == 's') {
+					if (!cpsafe())
+						goto nochange;
+					tmp = NULL;
+				} else if (!ndents) {
 					printmsg("no files");
 					goto nochange;
-				}
-				tmp = xreadline(NULL, "archive name: ");
+				} else
+					tmp = dents[cur].name;
+				tmp = xreadline(tmp, "archive name: ");
 				break;
 			case SEL_OPENWITH:
 				tmp = xreadline(NULL, "open with: ");
