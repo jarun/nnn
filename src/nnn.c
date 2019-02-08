@@ -330,6 +330,7 @@ static bm bookmark[BM_MAX];
 static size_t g_tmpfplen; /* path to tmp files for copy without X, keybind help and file stats */
 static uchar g_crc;
 static uchar BLK_SHIFT = 9;
+static bool interrupted = FALSE;
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
@@ -536,6 +537,11 @@ static uchar crc8fast(uchar const message[], size_t n)
 
 	/* The final remainder is the CRC */
 	return remainder;
+}
+
+static void signal_handler(int signum)
+{
+	interrupted = TRUE;
 }
 
 /* Messages show up at the bottom */
@@ -2568,6 +2574,9 @@ static int dentfill(char *path, struct entry **dents)
 							       : sb.st_blocks);
 					} else
 						dir_blocks += ent_blocks;
+
+					if (interrupted)
+						return n;
 				}
 			} else {
 				dir_blocks += (cfg.apparentsz ? sb.st_size : sb.st_blocks);
@@ -2646,6 +2655,9 @@ static int dentfill(char *path, struct entry **dents)
 					dir_blocks += dentp->blocks;
 				else
 					num_files = num_saved;
+
+				if (interrupted)
+					return n;
 			} else {
 				dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				dir_blocks += dentp->blocks;
@@ -2947,6 +2959,13 @@ begin:
 	}
 
 	populate(path, lastname);
+	if (interrupted) {
+		interrupted = FALSE;
+		signal(SIGINT, &signal_handler);
+		cfg.apparentsz = 0;
+		cfg.blkorder = 0;
+		BLK_SHIFT = 9;
+	}
 
 #ifdef LINUX_INOTIFY
 	if (presel != FILTER && inotify_wd == -1) {
@@ -4212,7 +4231,7 @@ int main(int argc, char *argv[])
 		cfg.restrict0b = 1;
 
 	/* Ignore certain signals */
-	signal(SIGINT, SIG_IGN);
+	signal(SIGINT, &signal_handler);
 	signal(SIGQUIT, SIG_IGN);
 
 	/* Test initial path */
