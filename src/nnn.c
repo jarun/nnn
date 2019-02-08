@@ -2564,7 +2564,7 @@ static int dentfill(char *path, struct entry **dents)
 					ent_blocks = 0;
 					mkpath(path, namep, g_buf);
 
-					mvprintw(LINES - 1, 0, "scanning %s\n", xbasename(g_buf));
+					mvprintw(LINES - 1, 0, "scanning %s [^C aborts]\n", xbasename(g_buf));
 					refresh();
 					if (nftw(g_buf, nftw_fn, open_max,
 						 FTW_MOUNT | FTW_PHYS) == -1) {
@@ -2643,7 +2643,7 @@ static int dentfill(char *path, struct entry **dents)
 				num_saved = num_files + 1;
 				mkpath(path, namep, g_buf);
 
-				mvprintw(LINES - 1, 0, "scanning %s\n", xbasename(g_buf));
+				mvprintw(LINES - 1, 0, "scanning %s [^C aborts]\n", xbasename(g_buf));
 				refresh();
 				if (nftw(g_buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
 					printmsg(messages[STR_NFTWFAIL_ID]);
