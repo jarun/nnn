@@ -539,7 +539,7 @@ static uchar crc8fast(uchar const message[], size_t n)
 	return remainder;
 }
 
-static void signal_handler(int signum)
+static void sigint_handler(int sig, siginfo_t *siginfo, void *context)
 {
 	interrupted = TRUE;
 }
@@ -2961,7 +2961,6 @@ begin:
 	populate(path, lastname);
 	if (interrupted) {
 		interrupted = FALSE;
-		signal(SIGINT, &signal_handler);
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
 		BLK_SHIFT = 9;
@@ -4222,8 +4221,14 @@ int main(int argc, char *argv[])
 	if (getenv(env_cfg[NNN_RESTRICT_0B]))
 		cfg.restrict0b = 1;
 
-	/* Ignore certain signals */
-	signal(SIGINT, &signal_handler);
+	/* Ignore/handle certain signals */
+	struct sigaction act = {0};
+	act.sa_sigaction = &sigint_handler;
+	act.sa_flags = SA_SIGINFO;
+	if (sigaction(SIGINT, &act, NULL) < 0) {
+		fprintf(stderr, "sigaction\n");
+		return 1;
+	}
 	signal(SIGQUIT, SIG_IGN);
 
 	/* Test initial path */
