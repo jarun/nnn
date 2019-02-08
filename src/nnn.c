@@ -2965,6 +2965,7 @@ begin:
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
 		BLK_SHIFT = 9;
+		presel = CONTROL('L');
 	}
 
 #ifdef LINUX_INOTIFY
