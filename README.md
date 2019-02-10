@@ -249,7 +249,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  FILES
            ^O  Open with...      n  Create new/link
             D  File details     ^R  Rename entry
-         ⎵ ^K  Copy entry path   r  Open dir in vidir
+         ⎵ ^K  Select entry      r  Open dir in vidir
            ^Y  Toggle selection  y  List selection
             Y  Select all
             P  Copy selection    X  Delete selection
