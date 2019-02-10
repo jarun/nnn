@@ -3227,9 +3227,9 @@ nochange:
 					if (sel == SEL_CYCLE) {
 						(r == CTX_MAX - 1) ? (r = 0) : ++r;
 						snprintf(newpath, PATH_MAX,
-							 "Create context %d?  [Enter]", r + 1);
+							 "Create context %d? [y/Y]", r + 1);
 						fd = get_input(newpath);
-						if (fd != '\r')
+						if (fd != 'y' && fd != 'Y')
 							continue;
 					} else
 						continue;
@@ -3912,7 +3912,8 @@ nochange:
 
 				if (tmp && tmp[0]) {
 					spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
-					if (!cfg.picker) {
+					/* The ideal check is !cfg.picker */
+					if (tmp != g_buf) {
 						/* readline finishing touches */
 						add_history(tmp);
 						free(tmp);
@@ -3934,11 +3935,11 @@ nochange:
 		case SEL_QUIT:
 			for (r = 0; r < CTX_MAX; ++r)
 				if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
-					r = get_input("Quit all contexts? [Enter]");
+					r = get_input("Quit all contexts? [y/Y]");
 					break;
 				}
 
-			if (!(r == CTX_MAX || r == '\r'))
+			if (!(r == CTX_MAX || r == 'y' || r == 'Y'))
 				break;
 
 			if (sel == SEL_QUITCD) {
