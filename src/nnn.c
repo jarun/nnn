@@ -3867,10 +3867,7 @@ nochange:
 				}
 
 				if (S_ISREG(sb.st_mode)) {
-					if (ndents)
-						tmp = dents[cur].name;
-					else
-						tmp = NULL;
+					tmp = ndents ? dents[cur].name : NULL;
 					spawn(shell, scriptpath, tmp, path, F_NORMAL | F_SIGINT);
 				}
 				break;
