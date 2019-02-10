@@ -3888,27 +3888,35 @@ nochange:
 				}
 				break;
 			default: /* SEL_RUNCMD */
-				exitcurses();
+				if (cfg.picker)
+					tmp = xreadline(NULL, "> ");
+				else {
+					/* Use libreadline */
+					exitcurses();
 
-				/* Switch to current path for readline(3) */
-				if (chdir(path) == -1) {
-					printwarn();
-					goto nochange;
+					/* Switch to current path for readline(3) */
+					if (chdir(path) == -1) {
+						printwarn();
+						goto nochange;
+					}
+
+					tmp = readline("nnn> ");
+
+					if (chdir(ipath) == -1) {
+						printwarn();
+						goto nochange;
+					}
+
+					refresh();
 				}
-
-				tmp = readline("nnn> ");
-
-				if (chdir(ipath) == -1) {
-					printwarn();
-					goto nochange;
-				}
-
-				refresh();
 
 				if (tmp && tmp[0]) {
 					spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
-					add_history(tmp);
-					free(tmp);
+					if (!cfg.picker) {
+						/* readline finishing touches */
+						add_history(tmp);
+						free(tmp);
+					}
 				}
 			}
 
