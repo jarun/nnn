@@ -2917,15 +2917,11 @@ static void browse(char *ipath)
 	lastname = g_ctx[0].c_name; /* last visited filename */
 	g_ctx[0].c_cfg = cfg; /* current configuration */
 
-	if (cfg.filtermode)
-		presel = FILTER;
-	else
-		presel = 0;
+	cfg.filtermode ?  (presel = FILTER) : (presel = 0);
 
 	dents = xrealloc(dents, total_dents * sizeof(struct entry));
 	if (dents == NULL)
 		errexit();
-	DPRINTF_P(dents);
 
 	/* Allocate buffer to hold names */
 	pnamebuf = (char *)xrealloc(pnamebuf, NAMEBUF_INCR);
@@ -2933,7 +2929,6 @@ static void browse(char *ipath)
 		free(dents);
 		errexit();
 	}
-	DPRINTF_P(pnamebuf);
 
 begin:
 #ifdef LINUX_INOTIFY
@@ -3067,11 +3062,9 @@ nochange:
 
 				/* Handle script selection mode */
 				if (cfg.runscript) {
-					if (cfg.runctx != cfg.curctx)
-						continue;
-
-					/* Must be in script directory to select script */
-					if (strcmp(path, scriptpath) != 0)
+					if ((cfg.runctx != cfg.curctx)
+					    /* Must be in script directory to select script */
+					    || (strcmp(path, scriptpath) != 0))
 						continue;
 
 					mkpath(path, dents[cur].name, newpath);
@@ -3146,10 +3139,7 @@ nochange:
 		case SEL_VISIT:
 			switch (sel) {
 			case SEL_CDHOME:
-				if (home)
-					dir = home;
-				else
-					dir = path;
+				home ? (dir = home) : (dir = path);
 				break;
 			case SEL_CDBEGIN:
 				dir = ipath;
@@ -3577,10 +3567,7 @@ nochange:
 				printmsg("selection off");
 			goto nochange;
 		case SEL_COPYLIST:
-			if (copybufpos)
-				showcplist();
-			else
-				printmsg("none selected");
+			copybufpos ?  showcplist() : printmsg("none selected");
 			goto nochange;
 		case SEL_CP:
 		case SEL_MV:
@@ -3888,10 +3875,12 @@ nochange:
 				}
 				break;
 			default: /* SEL_RUNCMD */
-				if (cfg.picker)
+				if (cfg.picker) {
+					/* readline prompt breaks the interface, use stock */
 					tmp = xreadline(NULL, "> ");
-				else {
-					/* Use libreadline */
+					if (tmp[0])
+						spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
+				} else {
 					exitcurses();
 
 					/* Switch to current path for readline(3) */
@@ -3908,12 +3897,9 @@ nochange:
 					}
 
 					refresh();
-				}
 
-				if (tmp && tmp[0]) {
-					spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
-					/* The ideal check is !cfg.picker */
-					if (tmp != g_buf) {
+					if (tmp && tmp[0]) {
+						spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
 						/* readline finishing touches */
 						add_history(tmp);
 						free(tmp);
