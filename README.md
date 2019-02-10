@@ -43,7 +43,8 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - [Features](#features)
 - [Comparison](#comparison)
 - [Installation](#installation)
-  - [Dependencies](#dependencies)
+  - [Library dependencies](#library-dependencies)
+  - [Utility dependencies](#utility-dependencies)
   - [From a package manager](#from-a-package-manager)
   - [Release packages](#release-packages)
   - [From source](#from-source)
@@ -58,7 +59,6 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - [Filters](#filters)
   - [Navigate-as-you-type](#navigate-as-you-type)
   - [File indicators](#file-indicators)
-  - [Utility dependencies](#utility-dependencies)
   - [Configuration](#configuration)
   - [Help](#help)
 - [Quickstart](#quickstart)
@@ -134,9 +134,24 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 
 #### INSTALLATION
 
-#### Dependencies
+#### Library dependencies
 
 `nnn` needs a curses library with wide character support (like ncursesw), libreadline and standard libc.
+
+#### Utility dependencies
+
+| External dependency | Operation |
+| --- | --- |
+| xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | desktop opener |
+| file | determine file type |
+| cp, mv, rm, xargs (from findutils on Linux)  | copy, move and remove files |
+| mediainfo, exiftool | multimedia file details |
+| atool, patool ([integration](https://github.com/jarun/nnn/wiki/How-to#integrate-patool)) | create, list and extract archives |
+| vidir (from moreutils) | batch rename, move, delete dir entries |
+| vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
+| $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
+| $PAGER (less, most) | page through files (fallback less) |
+| $SHELL (single coombined argument) | spawn a shell, run script (fallback sh) |
 
 #### From a package manager
 
@@ -253,6 +268,8 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
 
+The option `open with` supports a combined argument.
+
 #### Leader key
 
 The Leader key (<kbd>`</kbd> or <kbd>^/</kbd>) provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and handy location shortcuts.
@@ -348,33 +365,6 @@ The following indicators are used in the detail view:
 | `b` | Block Device |
 | `c` | Character Device |
 | `?` | Unknown |
-
-#### Utility dependencies
-
-| External dependency | Operation |
-| --- | --- |
-| xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | desktop opener |
-| file | determine file type |
-| cp, mv, rm, xargs (from findutils on Linux)  | copy, move and remove files |
-| mediainfo, exiftool | multimedia file details |
-| atool, patool ([integration](https://github.com/jarun/nnn/wiki/How-to#integrate-patool)) | create, list and extract archives |
-| vidir (from moreutils) | batch rename, move, delete dir entries |
-| vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
-| $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
-| $PAGER (less, most) | page through files (fallback less) |
-| $SHELL | spawn a shell, run script (fallback sh) |
-
-To specify a custom file opener:
-
-    export NNN_OPENER=mimeopen
-
-To edit all text files in EDITOR (preferably CLI, fallback vi):
-
-    export NNN_USE_EDITOR=1
-
-Arguments to the `$PAGER` and `$SHELL` should be combined together.
-
-The option `open with` takes 1 combined argument.
 
 #### Configuration
 
