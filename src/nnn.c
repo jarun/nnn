@@ -1419,7 +1419,7 @@ static int nextsel(int *presel)
 		    && kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
 			      event_data, NUM_EVENT_FDS, &gtimeout) > 0)
 #endif
-				c = CONTROL('L');
+			c = CONTROL('L');
 	} else
 		idle = 0;
 
