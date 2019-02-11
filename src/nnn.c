@@ -2738,8 +2738,7 @@ static void populate(char *path, char *lastname)
 
 static void redraw(char *path)
 {
-	static char c;
-	static char buf[12];
+	static char buf[NAME_MAX + 65] __attribute__ ((aligned));
 	static size_t ncols;
 	static int nlines, i, attrs;
 	static bool mode_changed;
@@ -2869,21 +2868,23 @@ static void redraw(char *path)
 
 			/* We need to show filename as it may be truncated in directory listing */
 			if (!cfg.blkorder)
-				mvprintw(LINES - 1, 0, "%d/%d %s[%s]\n", cur + 1, ndents, sort,
-					 unescape(dents[cur].name, NAME_MAX));
+				snprintf(buf, NAME_MAX + 65, "%d/%d %s[%s]",
+					 cur + 1, ndents, sort, unescape(dents[cur].name, NAME_MAX));
 			else {
-				xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
-				if (cfg.apparentsz)
-					c = 'a';
-				else
-					c = 'd';
+				i = snprintf(buf, 64, "%d/%d ", cur + 1, ndents);
 
-				mvprintw(LINES - 1, 0,
-					 "%d/%d %cu: %s (%lu files) vol: %s free [%s]\n",
-					 cur + 1, ndents, c, buf, num_files,
+				if (cfg.apparentsz)
+					buf[i++] = 'a';
+				else
+					buf[i++] = 'd';
+
+				i += snprintf(buf + i, 64, "u: %s (%lu files) ",
+					      coolsize(dir_blocks << BLK_SHIFT), num_files);
+				snprintf(buf + i, NAME_MAX, "vol: %s free [%s]",
 					 coolsize(get_fs_info(path, FREE)),
 					 unescape(dents[cur].name, NAME_MAX));
 			}
+			printmsg(buf);
 		} else
 			printmsg("0/0");
 	}
