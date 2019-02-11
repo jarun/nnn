@@ -3217,9 +3217,9 @@ nochange:
 					if (sel == SEL_CYCLE) {
 						(r == CTX_MAX - 1) ? (r = 0) : ++r;
 						snprintf(newpath, PATH_MAX,
-							 "Create context %d? [y/Y]", r + 1);
+							 "Create context %d? [Enter]", r + 1);
 						fd = get_input(newpath);
-						if (fd != 'y' && fd != 'Y')
+						if (fd != '\r')
 							continue;
 					} else
 						continue;
@@ -3918,11 +3918,11 @@ nochange:
 		case SEL_QUIT:
 			for (r = 0; r < CTX_MAX; ++r)
 				if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
-					r = get_input("Quit all contexts? [y/Y]");
+					r = get_input("Quit all contexts? [Enter]");
 					break;
 				}
 
-			if (!(r == CTX_MAX || r == 'y' || r == 'Y'))
+			if (!(r == CTX_MAX || r == '\r'))
 				break;
 
 			if (sel == SEL_QUITCD) {
