@@ -1874,7 +1874,7 @@ static char *unescape(const char *str, uint maxcols)
 {
 	static wchar_t wbuf[PATH_MAX] __attribute__ ((aligned));
 	static wchar_t *buf;
-	static size_t len;
+	static size_t len, lencount;
 
 	/* Convert multi-byte to wide char */
 	len = mbstowcs(wbuf, str, PATH_MAX);
@@ -1882,11 +1882,12 @@ static char *unescape(const char *str, uint maxcols)
 	g_buf[0] = '\0';
 	buf = wbuf;
 
-	if (maxcols && len > maxcols) {
-		len = wcswidth(wbuf, len);
-
-		if (len > maxcols)
-			wbuf[maxcols] = 0;
+	if (maxcols) {
+		len = lencount = wcswidth(wbuf, len);
+		while (len > maxcols) {
+			wbuf[--lencount] = L'\0';
+			len = wcswidth(wbuf, lencount);
+		}
 	}
 
 	while (*buf) {
@@ -2824,7 +2825,7 @@ static void redraw(char *path)
 
 	/* Calculate the number of cols available to print entry name */
 	if (cfg.showdetail)
-		ncols -= 32;
+		ncols -= 30;
 	else
 		ncols -= 5;
 
