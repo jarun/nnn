@@ -1884,10 +1884,10 @@ static char *unescape(const char *str, uint maxcols)
 
 	if (maxcols) {
 		len = lencount = wcswidth(wbuf, len);
-		while (len > maxcols) {
-			wbuf[--lencount] = L'\0';
-			len = wcswidth(wbuf, lencount);
-		}
+		while (len > maxcols)
+			len = wcswidth(wbuf, --lencount);
+
+		wbuf[lencount] = L'\0';
 	}
 
 	while (*buf) {
