@@ -1884,6 +1884,9 @@ static char *unescape(const char *str, uint maxcols)
 
 	if (maxcols) {
 		len = lencount = wcswidth(wbuf, len);
+		if (len > maxcols)
+			lencount = maxcols + 1;
+
 		while (len > maxcols)
 			len = wcswidth(wbuf, --lencount);
 

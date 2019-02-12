@@ -41,7 +41,7 @@ touch 'korean/IZ_ONE CHU [1회_예고] 아이즈원 데뷔 준비 과정 ★독�
 touch 'korean/IZ_ONE CHU [1회] 도치기현 1호 이모 팬과의 만남! 181025 EP.1-5kYoReT5x44.mp4'
 touch 'korean/IZ_ONE CHU [1회] ′12명 소녀들의 새로운 시작′ 앞으로 아이즈원 잘 부탁해♥ 181025 EP.1-RVNvgbdLQLQ'
 touch 'korean/IZ_ONE CHU [1회] ′앗..그것만은!′ 자비없는 합숙생활 폭로전 181025 EP.1-AmP5KzpoI38.mkv'
-touch 'korean/IZ_ONE CHU [1회] '휴게소 간식 내기' 노래 맞히기 게임 181025 EP.1-LyNDKflpWYE.mp4'
+touch 'korean/IZ_ONE CHU [1회] 휴게소 간식 내기 노래 맞히기 게임 181025 EP.1-LyNDKflpWYE.mp4'
 touch 'korean/IZ_ONE CHU [1회] 2018 아이즈원 걸크러시능력시험 (feat. 치타쌤) 181025 EP.1-9qHWpbo0eB8.mp4'
 touch 'korean/IZ_ONE CHU [1회] ′돼지요′ 아니죠, ′되지요′ 맞습니다! (feat. 꾸라먹방) 181025EP.1-WDLFqMWiKn'
 touch 'korean/IZ_ONE CHU [1회] ′두근두근′ 첫 MT를 앞둔 비글력 만렙의 아이즈원 181025 EP.1'
