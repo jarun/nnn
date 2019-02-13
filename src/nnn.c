@@ -1884,9 +1884,11 @@ static char *unescape(const char *str, uint maxcols)
 
 	if (maxcols) {
 		len = lencount = wcswidth(wbuf, len);
+		/* Reduce nuber of wide chars to max columns */
 		if (len > maxcols)
 			lencount = maxcols + 1;
 
+		/* Reduce wide chars one by one till it fits */
 		while (len > maxcols)
 			len = wcswidth(wbuf, --lencount);
 
