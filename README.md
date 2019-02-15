@@ -417,7 +417,8 @@ Please visit the [How to](https://github.com/jarun/nnn/wiki/How-to) wiki page.
 - [FOSSMint](https://www.fossmint.com/nnn-linux-terminal-file-browser/)
 - [Hacker News](https://news.ycombinator.com/item?id=18520898)
 - [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
-- [LinuxLinks](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)
+- [LinuxLinks1](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)
+- [LinuxLinks2](https://www.linuxlinks.com/bestconsolefilemanagers/)
 - [Suckless Rocks](https://suckless.org/rocks/)
 - [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
 
