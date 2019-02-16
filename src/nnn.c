@@ -3456,7 +3456,7 @@ nochange:
 			}
 
 			if (!r) {
-				printmsg("required utility missing");
+				printmsg("utility missing");
 				goto nochange;
 			}
 
@@ -3539,8 +3539,8 @@ nochange:
 				if ((sel != SEL_COPYALL) && g_crc != crc8fast((uchar *)dents,
 						      ndents * sizeof(struct entry))) {
 					cfg.copymode = 0;
-					printmsg("range error: dir/content changed");
-					DPRINTF_S("range error: dir/content changed");
+					printmsg("dir/content changed");
+					DPRINTF_S("dir/content changed");
 					goto nochange;
 				}
 #endif
@@ -3574,7 +3574,7 @@ nochange:
 				printmsg("selection off");
 			goto nochange;
 		case SEL_COPYLIST:
-			copybufpos ?  showcplist() : printmsg("none selected");
+			copybufpos ? showcplist() : printmsg("none selected");
 			goto nochange;
 		case SEL_CP:
 		case SEL_MV:
