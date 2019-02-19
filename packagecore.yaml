@@ -15,7 +15,7 @@ packages:
     deps:
       - ncurses
       - readline
-    container: "base/archlinux:2018.12.01"
+    container: "archlinux/base"
   centos7.2:
     builddeps:
       - make
