@@ -10,10 +10,10 @@ matrix:
   include:
     # Access more recent gcc and clang via a Xenial image
     - os: linux
-      dist: xenial
+      dist: trusty
       compiler: gcc
     - os: linux
-      dist: xenial
+      dist: trusty
       compiler: clang
     - os: osx
       compiler: gcc
@@ -38,7 +38,7 @@ before_deploy:
   - sudo apt-get update -qy
   - sudo apt-get install -qy python3 python3-pip
   - sudo python3 -m pip install --upgrade pip
-  - sudo python3 -m pip install --upgrade packagecore
+  - sudo python3 -m pip install --upgrade packagecore setuptools
   - packagecore -o dist/ "${TRAVIS_TAG#v}"
   - mv ../$REPO-${TRAVIS_TAG}.tar.gz dist/
 
