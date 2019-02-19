@@ -38,7 +38,7 @@ before_deploy:
   - sudo apt-get update -qy
   - sudo apt-get install -qy python3 python3-pip
   - sudo python3 -m pip install --upgrade pip
-  - sudo python3 -m pip install --upgrade packagecore python3-setuptools
+  - sudo python3 -m pip install --upgrade packagecore
   - packagecore -o dist/ "${TRAVIS_TAG#v}"
   - mv ../$REPO-${TRAVIS_TAG}.tar.gz dist/
 
