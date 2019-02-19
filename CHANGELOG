@@ -1,3 +1,33 @@
+nnn v2.3
+2019-02-19
+
+- file picker mode
+- repo of user-contributed scripts
+- substring search for filters (option `-s`)
+- version sort (option `-n`)
+- disk usage calculation abort with <kbd>^C</kbd>
+- create sym/hard link(s) to files in selection
+- archiving of selection
+- show dir symlinks along with dirs in top
+- fixed CJK character handling at prompts
+- key `N` (1 <= N <= 4) to switch to context N
+- bring back `NNN_OPENER` to specify file opener
+- env var `NNN_NOTE` and keybind <kbd>^N</kbd> for quick notes
+- handle multiple arguments in VISUAL/EDITOR
+- show the current directory being scanned in `du` mode
+- select all files (<kbd>Y</kbd>)
+- show command prompt (<kbd>^P</kbd>)
+- key <kbd>,</kbd> replaces <kbd>`</kbd> as alternative Leader Key
+- keybind for visit pinned directory is now <kbd>^B</kbd>
+- additional key <kbd>^V</kbd> to run or select custom script
+- use libreadline for command prompt
+- reduce delay on <kbd>Esc</kbd> press
+- config option to avoid unexpected behaviour on 0-byte file open (see #187)
+- rename config option `DISABLE_FILE_OPEN_ON_NAV` to `NNN_RESTRICT_NAV_OPEN`
+- keys removed - <kbd>$</kbd>, <kbd>^</kbd>, <kbd>Backspace</kbd>, <kbd>^H</kbd>, <kbd>^P</kbd>, <kbd>^M</kbd>, <kbd>^W</kbd>, <kbd>`</kbd>
+
+-------------------------------------------------------------------------------
+
 nnn v2.2
 2019-01-01
 

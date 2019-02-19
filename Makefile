@@ -1,4 +1,4 @@
-VERSION = 2.2
+VERSION = 2.3
 
 PREFIX ?= /usr/local
 MANPREFIX ?= $(PREFIX)/share/man
