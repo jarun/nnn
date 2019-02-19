@@ -15,7 +15,7 @@ packages:
     deps:
       - ncurses
       - readline
-    container: "base/archlinux"
+    container: "base/archlinux:2018.12.01"
   centos7.2:
     builddeps:
       - make
@@ -64,7 +64,7 @@ packages:
       - libreadline-dev
     deps:
       - libncursesw5
-      - libreadline-common
+      - readline-common
   fedora25:
     builddeps:
       - make
