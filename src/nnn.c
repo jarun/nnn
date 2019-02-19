@@ -4221,7 +4221,8 @@ int main(int argc, char *argv[])
 		cfg.restrict0b = 1;
 
 	/* Ignore/handle certain signals */
-	struct sigaction act = {};
+	struct sigaction act;
+	memset(&act, 0, sizeof(act));
 	act.sa_sigaction = &sigint_handler;
 	act.sa_flags = SA_SIGINFO;
 	if (sigaction(SIGINT, &act, NULL) < 0) {
