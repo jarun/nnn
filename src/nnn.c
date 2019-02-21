@@ -101,7 +101,7 @@
 
 #include "nnn.h"
 
-#ifdef DEBUGMODE
+#ifdef DBGMODE
 static int DEBUG_FD;
 
 static int
@@ -158,7 +158,7 @@ disabledbg()
 #define DPRINTF_U(x)
 #define DPRINTF_S(x)
 #define DPRINTF_P(x)
-#endif /* DEBUGMODE */
+#endif /* DBGMODE */
 
 /* Macro definitions */
 #define VERSION "2.3"
@@ -2717,7 +2717,7 @@ static int dentfind(const char *fname, int n)
 
 static void populate(char *path, char *lastname)
 {
-#ifdef DEBUGMODE
+#ifdef DBGMODE
 	struct timespec ts1, ts2;
 
 	clock_gettime(CLOCK_REALTIME, &ts1); /* Use CLOCK_MONOTONIC on FreeBSD */
@@ -2729,7 +2729,7 @@ static void populate(char *path, char *lastname)
 
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
 
-#ifdef DEBUGMODE
+#ifdef DBGMODE
 	clock_gettime(CLOCK_REALTIME, &ts2);
 	DPRINTF_U(ts2.tv_nsec - ts1.tv_nsec);
 #endif
@@ -4252,7 +4252,7 @@ int main(int argc, char *argv[])
 #endif
 	read_history(NULL);
 
-#ifdef DEBUGMODE
+#ifdef DBGMODE
 	enabledbg();
 #endif
 	if (!initcurses())
@@ -4286,7 +4286,7 @@ int main(int argc, char *argv[])
 	close(kq);
 #endif
 
-#ifdef DEBUGMODE
+#ifdef DBGMODE
 	disabledbg();
 #endif
 	return 0;
