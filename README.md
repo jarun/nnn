@@ -399,7 +399,7 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
        export NNN_USE_EDITOR=1
 4. Run `n`.
-5. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
+5. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 6. For additional functionality [setup custom scripts](https://github.com/jarun/nnn/wiki/How-to#run-custom-scripts).
 
 #### HOW TO
