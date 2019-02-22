@@ -79,8 +79,10 @@
 #include <locale.h>
 #include <pwd.h>
 #include <stdio.h>
+#ifndef NORL
 #include <readline/history.h>
 #include <readline/readline.h>
+#endif
 #include <regex.h>
 #include <signal.h>
 #include <stdarg.h>
@@ -3879,11 +3881,14 @@ nochange:
 				}
 				break;
 			default: /* SEL_RUNCMD */
+#ifndef NORL
 				if (cfg.picker) {
 					/* readline prompt breaks the interface, use stock */
+#endif
 					tmp = xreadline(NULL, "> ");
 					if (tmp[0])
 						spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
+#ifndef NORL
 				} else {
 					exitcurses();
 
@@ -3909,6 +3914,7 @@ nochange:
 						free(tmp);
 					}
 				}
+#endif
 			}
 
 			/* Continue in navigate-as-you-type mode, if enabled */
@@ -4243,6 +4249,7 @@ int main(int argc, char *argv[])
 	crc8init();
 #endif
 
+#ifndef NORL
 	/* Bind TAB to cycling */
 	rl_variable_bind("completion-ignore-case", "on");
 #ifdef __linux__
@@ -4251,6 +4258,7 @@ int main(int argc, char *argv[])
 	rl_bind_key('\t', rl_complete);
 #endif
 	read_history(NULL);
+#endif
 
 #ifdef DBGMODE
 	enabledbg();
@@ -4261,7 +4269,9 @@ int main(int argc, char *argv[])
 	browse(ipath);
 	exitcurses();
 
+#ifndef NORL
 	write_history(NULL);
+#endif
 
 	if (cfg.pickraw) {
 		if (copybufpos) {

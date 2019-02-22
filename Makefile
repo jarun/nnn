@@ -22,7 +22,7 @@ CFLAGS += -Wall -Wextra -Wno-unused-parameter
 CFLAGS += $(CFLAGS_OPTIMIZATION)
 CFLAGS += $(CFLAGS_CURSES)
 
-LDLIBS += -lreadline $(LDLIBS_CURSES)
+LDLIBS += $(LDLIBS_CURSES)
 
 DISTFILES = src nnn.1 Makefile README.md LICENSE
 SRC = src/nnn.c
@@ -33,10 +33,14 @@ all: $(BIN)
 $(SRC): src/nnn.h
 
 $(BIN): $(SRC)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS) -lreadline
 
 debug: $(SRC)
-	$(CC) -DDBGMODE -g $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS)
+	$(CC) -DDBGMODE -g $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS) -lreadline
+
+norl: $(SRC)
+	$(CC) -DNORL $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS)
+	$(STRIP) $(BIN)
 
 install: all
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin

@@ -135,7 +135,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 
 #### Library dependencies
 
-`nnn` needs a curses library with wide character support (like ncursesw), libreadline and standard libc.
+`nnn` needs a curses library with wide character support (like ncursesw), libreadline and standard libc. It's possible to drop libreadline using the Makefile target `norl`.
 
 #### Utility dependencies
 
