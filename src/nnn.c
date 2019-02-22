@@ -205,8 +205,10 @@ disabledbg()
 #define CRC8_TABLE_LEN 256
 
 /* Version compare macros */
-/* states: S_N: normal, S_I: comparing integral part, S_F: comparing
-           fractionnal parts, S_Z: idem but with leading Zeroes only */
+/*
+ * states: S_N: normal, S_I: comparing integral part, S_F: comparing
+ *         fractionnal parts, S_Z: idem but with leading Zeroes only
+ */
 #define  S_N    0x0
 #define  S_I    0x3
 #define  S_F    0x6
@@ -471,7 +473,7 @@ static const char * const envs[] = {
 /* Forward declarations */
 static void redraw(char *path);
 static void spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uchar flag);
-static int (*nftw_fn) (const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
+static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 
 /* Functions */
 
@@ -480,7 +482,7 @@ static int (*nftw_fn) (const char *fpath, const struct stat *sb, int typeflag, s
  *   https://barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code
  */
 #if 0 // using a static table
-static void crc8init()
+static void crc8init(void)
 {
 	uchar remainder, bit;
 	uint dividend;
@@ -511,8 +513,7 @@ static uchar crc8fast(uchar const message[], size_t n)
 	static size_t byte;
 
 	/* CRC data */
-	static const uchar crc8table[CRC8_TABLE_LEN] __attribute__ ((aligned)) =
-	{
+	static const uchar crc8table[CRC8_TABLE_LEN] __attribute__ ((aligned)) = {
 		  0,  94, 188, 226,  97,  63, 221, 131, 194, 156, 126,  32, 163, 253,  31,  65,
 		157, 195,  33, 127, 252, 162,  64,  30,  95,   1, 227, 189,  62,  96, 130, 220,
 		 35, 125, 159, 193,  66,  28, 254, 160, 225, 191,  93,   3, 128, 222,  60,  98,
@@ -572,25 +573,27 @@ static void printprompt(const char *str)
 
 static int get_input(const char *prompt)
 {
+	int r;
+
 	if (prompt)
 		printprompt(prompt);
 	cleartimeout();
-	int r = getch();
+	r = getch();
 	settimeout();
 	return r;
 }
 
-static char confirm_force()
+static char confirm_force(void)
 {
 	int r = get_input("use force? [y/Y]");
+
 	if (r == 'y' || r == 'Y')
 		return 'f'; /* forceful */
-
 	return 'i'; /* interactive */
 }
 
 /* Increase the limit on open file descriptors, if possible */
-static rlim_t max_openfds()
+static rlim_t max_openfds(void)
 {
 	struct rlimit rl;
 	rlim_t limit = getrlimit(RLIMIT_NOFILE, &rl);
@@ -843,8 +846,10 @@ static bool appendfpath(const char *path, const size_t len)
 	}
 
 	/* Enabling the following will miss files with newlines */
-	/* if (copybufpos)
-		pcopybuf[copybufpos - 1] = '\n'; */
+	/*
+	 * if (copybufpos)
+	 *	pcopybuf[copybufpos - 1] = '\n';
+	 */
 
 	copybufpos += xstrlcpy(pcopybuf + copybufpos, path, len);
 
@@ -877,7 +882,7 @@ static ssize_t selectiontofd(int fd)
 	return pos;
 }
 
-static bool showcplist()
+static bool showcplist(void)
 {
 	int fd;
 	ssize_t pos;
@@ -906,7 +911,7 @@ static bool showcplist()
 	return TRUE;
 }
 
-static bool cpsafe()
+static bool cpsafe(void)
 {
 	/* Fail if copy file path not generated */
 	if (!g_cppath[0]) {
@@ -1247,10 +1252,11 @@ static int xstrverscmp(const char * const s1, const char * const s2)
 	p1 = (const uchar *)s1;
 	p2 = (const uchar *)s2;
 
-	/* Symbol(s)    0       [1-9]   others
-	   Transition   (10) 0  (01) d  (00) x   */
-	static const uint8_t next_state[] =
-	{
+	/*
+	 * Symbol(s)    0       [1-9]   others
+	 * Transition   (10) 0  (01) d  (00) x
+	 */
+	static const uint8_t next_state[] = {
 		/* state    x    d    0  */
 		/* S_N */  S_N, S_I, S_Z,
 		/* S_I */  S_N, S_I, S_I,
@@ -1258,14 +1264,13 @@ static int xstrverscmp(const char * const s1, const char * const s2)
 		/* S_Z */  S_N, S_F, S_Z
 	};
 
-	static const int8_t result_type[] __attribute__ ((aligned)) =
-	{
+	static const int8_t result_type[] __attribute__ ((aligned)) = {
 		/* state   x/x  x/d  x/0  d/x  d/d  d/0  0/x  0/d  0/0  */
 
 		/* S_N */  VCMP, VCMP, VCMP, VCMP, VLEN, VCMP, VCMP, VCMP, VCMP,
-		/* S_I */  VCMP,   -1,   -1,   +1, VLEN, VLEN,   +1, VLEN, VLEN,
+		/* S_I */  VCMP,   -1,   -1,    1, VLEN, VLEN,    1, VLEN, VLEN,
 		/* S_F */  VCMP, VCMP, VCMP, VCMP, VCMP, VCMP, VCMP, VCMP, VCMP,
-		/* S_Z */  VCMP,   +1,   +1,   -1, VCMP, VCMP,   -1, VCMP, VCMP
+		/* S_Z */  VCMP,    1,    1,   -1, VCMP, VCMP,   -1, VCMP, VCMP
 	};
 
 	if (p1 == p2)
@@ -1293,10 +1298,10 @@ static int xstrverscmp(const char * const s1, const char * const s2)
 	case VCMP:
 		return diff;
 	case VLEN:
-		while (xisdigit (*p1++))
-			if (!xisdigit (*p2++))
+		while (xisdigit(*p1++))
+			if (!xisdigit(*p2++))
 				return 1;
-		return xisdigit (*p2) ? -1 : diff;
+		return xisdigit(*p2) ? -1 : diff;
 	default:
 		return state;
 	}
@@ -1435,7 +1440,7 @@ static int nextsel(int *presel)
 /*
  * Move non-matching entries to the end
  */
-static int fill(char* fltr, regex_t *re)
+static int fill(char *fltr, regex_t *re)
 {
 	static int count;
 	static struct entry _dent, *pdent1, *pdent2;
@@ -1645,7 +1650,7 @@ static char *xreadline(char *prefill, char *prompt)
 				case '\n': // fallthrough
 				case '\r':
 					goto END;
-				case 127: /* Handle DEL */ // fallthrough
+				case 127: // fallthrough
 				case '\b': /* rhel25 sends '\b' for backspace */
 					if (pos > 0) {
 						memmove(buf + pos - 1, buf + pos, (len - pos) << 2);
@@ -1784,11 +1789,12 @@ static int xlink(char *suffix, char *path, char *buf, int type)
 	return count;
 }
 
-static bool parsebmstr()
+static bool parsebmstr(void)
 {
 	int i = 0;
 	char *bms = getenv(env_cfg[NNN_BMS]);
 	char *nextkey = bms;
+
 	if (!bms || !*bms)
 		return TRUE;
 
@@ -2209,7 +2215,8 @@ static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *a
 	return NULL;
 }
 
-static bool getutil(char *util) {
+static bool getutil(char *util)
+{
 	if (!get_output(g_buf, CMD_LEN_MAX, "which", util, NULL, FALSE))
 		return FALSE;
 
@@ -2267,6 +2274,7 @@ static bool show_stats(char *fpath, char *fname, struct stat *sb)
 
 		if (len != -1) {
 			struct stat tgtsb;
+
 			if (!stat(fpath, &tgtsb) && S_ISDIR(tgtsb.st_mode))
 				g_buf[len++] = '/';
 
@@ -2413,39 +2421,39 @@ static bool show_help(char *path)
 	fd = mkstemp(g_tmpfpath);
 
 	static char helpstr[] = {
-"0\n"
-"1NAVIGATION\n"
-           "a↑ k  Up          PgUp ^U  Scroll up\n"
-           "a↓ j  Down        PgDn ^D  Scroll down\n"
-           "a← h  Parent dir        ~  Go HOME\n"
-         "8↵ → l  Open file/dir     &  Start dir\n"
-     "4Home g ^A  First entry       -  Last visited dir\n"
-      "5End G ^E  Last entry        .  Toggle show hidden\n"
-             "c/  Filter       Ins ^T  Toggle nav-as-you-type\n"
-             "cb  Pin current dir  ^B  Go to pinned dir\n"
-        "7Tab ^I  Next context      d  Toggle detail view\n"
-          "9, ^/  Leader key  N LeadN  Go to/create context N\n"
-           "aEsc  Exit prompt      ^L  Redraw/clear prompt\n"
-            "b^G  Quit and cd       q  Quit context\n"
-          "9Q ^Q  Quit              ?  Help, config\n"
-"1FILES\n"
-            "b^O  Open with...      n  Create new/link\n"
-             "cD  File details     ^R  Rename entry\n"
-          "9⎵ ^K  Select entry      r  Open dir in vidir\n"
-            "b^Y  Toggle selection  y  List selection\n"
-             "cY  Select all\n"
-             "cP  Copy selection    X  Delete selection\n"
-             "cV  Move selection   ^X  Delete entry\n"
-             "cf  Archive files   m M  Brief/full media info\n"
-            "b^F  Extract archive   F  List archive\n"
-             "ce  Edit in EDITOR    p  Open in PAGER\n"
-"1ORDER TOGGLES\n"
-            "b^J  Disk usage        S  Apparent du\n"
-             "ct  Time modified     s  Size\n"
-"1MISC\n"
-          "9! ^]  Spawn SHELL       C  Execute entry\n"
-          "9R ^V  Run/pick script   L  Lock terminal\n"
-            "b^P  Command prompt   ^N  Take note\n"};
+		"0\n"
+		"1NAVIGATION\n"
+		"a↑ k  Up          PgUp ^U  Scroll up\n"
+		"a↓ j  Down        PgDn ^D  Scroll down\n"
+		"a← h  Parent dir        ~  Go HOME\n"
+	      "8↵ → l  Open file/dir     &  Start dir\n"
+	  "4Home g ^A  First entry       -  Last visited dir\n"
+	   "5End G ^E  Last entry        .  Toggle show hidden\n"
+		  "c/  Filter       Ins ^T  Toggle nav-as-you-type\n"
+		  "cb  Pin current dir  ^B  Go to pinned dir\n"
+	     "7Tab ^I  Next context      d  Toggle detail view\n"
+	       "9, ^/  Leader key  N LeadN  Go to/create context N\n"
+		"aEsc  Exit prompt      ^L  Redraw/clear prompt\n"
+		 "b^G  Quit and cd       q  Quit context\n"
+	       "9Q ^Q  Quit              ?  Help, config\n"
+		"1FILES\n"
+		 "b^O  Open with...      n  Create new/link\n"
+		  "cD  File details     ^R  Rename entry\n"
+	       "9⎵ ^K  Select entry      r  Open dir in vidir\n"
+		 "b^Y  Toggle selection  y  List selection\n"
+		  "cY  Select all\n"
+		  "cP  Copy selection    X  Delete selection\n"
+		  "cV  Move selection   ^X  Delete entry\n"
+		  "cf  Archive files   m M  Brief/full media info\n"
+		 "b^F  Extract archive   F  List archive\n"
+		  "ce  Edit in EDITOR    p  Open in PAGER\n"
+		"1ORDER TOGGLES\n"
+		 "b^J  Disk usage        S  Apparent du\n"
+		  "ct  Time modified     s  Size\n"
+		"1MISC\n"
+	       "9! ^]  Spawn SHELL       C  Execute entry\n"
+	       "9R ^V  Run/pick script   L  Lock terminal\n"
+		 "b^P  Command prompt   ^N  Take note\n"};
 
 	if (fd == -1)
 		return FALSE;
@@ -2972,9 +2980,8 @@ begin:
 	}
 
 #ifdef LINUX_INOTIFY
-	if (presel != FILTER && inotify_wd == -1) {
+	if (presel != FILTER && inotify_wd == -1)
 		inotify_wd = inotify_add_watch(inotify_fd, path, INOTIFY_MASK);
-	}
 #elif defined(BSD_KQUEUE)
 	if (presel != FILTER && event_fd == -1) {
 #if defined(O_EVTONLY)
@@ -3223,21 +3230,19 @@ nochange:
 			case '4':
 				r = fd - '1'; /* Save the next context id */
 				if (cfg.curctx == r) {
-					if (sel == SEL_CYCLE) {
-						(r == CTX_MAX - 1) ? (r = 0) : ++r;
-						snprintf(newpath, PATH_MAX,
-							 "Create context %d? [Enter]", r + 1);
-						fd = get_input(newpath);
-						if (fd != '\r')
-							continue;
-					} else
+					if (sel != SEL_CYCLE)
+						continue;
+
+					(r == CTX_MAX - 1) ? (r = 0) : ++r;
+					snprintf(newpath, PATH_MAX,
+						 "Create context %d? [Enter]", r + 1);
+					fd = get_input(newpath);
+					if (fd != '\r')
 						continue;
 				}
-
 #ifdef DIR_LIMITED_COPY
 				g_crc = 0;
 #endif
-
 				/* Save current context */
 				xstrlcpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
 				g_ctx[cfg.curctx].c_cfg = cfg;
@@ -3425,7 +3430,8 @@ nochange:
 					copycurname();
 				goto begin;
 			case SEL_RENAMEALL:
-				if ((r = getutil(utils[VIDIR])))
+				r = getutil(utils[VIDIR]);
+				if (r)
 					spawn(utils[VIDIR], ".", NULL, path, F_NORMAL);
 				break;
 			case SEL_HELP:
@@ -3625,6 +3631,7 @@ nochange:
 				break;
 
 			char rm_opts[] = "-ir";
+
 			rm_opts[1] = confirm_force();
 
 			mkpath(path, dents[cur].name, newpath);
@@ -3849,8 +3856,10 @@ nochange:
 				if (S_ISDIR(sb.st_mode)) {
 					cfg.runscript ^= 1;
 					if (!cfg.runscript && rundir[0]) {
-						/* If toggled, and still in the script dir,
-						   switch to original directory */
+						/*
+						 * If toggled, and still in the script dir,
+						 * switch to original directory
+						 */
 						if (strcmp(path, scriptpath) == 0) {
 							xstrlcpy(path, rundir, PATH_MAX);
 							xstrlcpy(lastname, runfile, NAME_MAX);
@@ -3967,6 +3976,7 @@ nochange:
 		case SEL_QUITCTX:
 			if (sel == SEL_QUITCTX) {
 				uint iter = 1;
+
 				r = cfg.curctx;
 				while (iter < CTX_MAX) {
 					(r == CTX_MAX - 1) ? (r = 0) : ++r;
@@ -4004,7 +4014,7 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"usage: nnn [-b key] [-C] [-e] [-i] [-l] [-n]\n"
+		"%s: nnn [-b key] [-C] [-e] [-i] [-l] [-n]\n"
 		"           [-p file] [-s] [-S] [-v] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
@@ -4018,10 +4028,10 @@ static void usage(void)
 		" -n      use version compare to sort\n"
 		" -p file selection file (stdout if '-')\n"
 		" -s      string filters [default: regex]\n"
-		" -S      disk usage mode\n"
+		" -S      du mode\n"
 		" -v      show version\n"
 		" -h      show help\n\n"
-		"v%s\n%s\n", VERSION, GENERAL_INFO);
+		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
 }
 
 int main(int argc, char *argv[])
@@ -4113,10 +4123,10 @@ int main(int argc, char *argv[])
 	}
 
 	/* Parse bookmarks string */
-	 if (!parsebmstr()) {
+	if (!parsebmstr()) {
 		fprintf(stderr, "%s: malformed\n", env_cfg[NNN_BMS]);
 		return 1;
-	 }
+	}
 
 	if (ipath) { /* Open a bookmark directly */
 		if (ipath[1] || get_bm_loc(*ipath, cwd) == NULL) {
@@ -4228,6 +4238,7 @@ int main(int argc, char *argv[])
 
 	/* Ignore/handle certain signals */
 	struct sigaction act;
+
 	memset(&act, 0, sizeof(act));
 	act.sa_sigaction = &sigint_handler;
 	act.sa_flags = SA_SIGINFO;

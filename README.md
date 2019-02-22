@@ -219,7 +219,7 @@ optional args:
  -n      use version compare to sort
  -p file selection file (stdout if '-')
  -s      string filters [default: regex]
- -S      disk usage mode
+ -S      du mode
  -v      show version
  -h      show help
 ```
