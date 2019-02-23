@@ -1,9 +1,9 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2014-2016, Lazaros Koromilas <lostd@2f30.org>
- * Copyright (c) 2014-2016, Dimitris Papastamos <sin@2f30.org>
- * Copyright (c) 2016-2019, Arun Prakash Jana <engineerarun@gmail.com>
+ * Copyright (C) 2014-2016, Lazaros Koromilas <lostd@2f30.org>
+ * Copyright (C) 2014-2016, Dimitris Papastamos <sin@2f30.org>
+ * Copyright (C) 2016-2019, Arun Prakash Jana <engineerarun@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

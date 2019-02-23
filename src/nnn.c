@@ -1,9 +1,9 @@
 /*
  * BSD 2-Clause License
  *
- * Copyright (c) 2014-2016, Lazaros Koromilas <lostd@2f30.org>
- * Copyright (c) 2014-2016, Dimitris Papastamos <sin@2f30.org>
- * Copyright (c) 2016-2019, Arun Prakash Jana <engineerarun@gmail.com>
+ * Copyright (C) 2014-2016, Lazaros Koromilas <lostd@2f30.org>
+ * Copyright (C) 2014-2016, Dimitris Papastamos <sin@2f30.org>
+ * Copyright (C) 2016-2019, Arun Prakash Jana <engineerarun@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -481,32 +481,6 @@ static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, st
  * CRC8 source:
  *   https://barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code
  */
-#if 0 // using a static table
-static void crc8init(void)
-{
-	uchar remainder, bit;
-	uint dividend;
-
-	/* Compute the remainder of each possible dividend  */
-	for (dividend = 0; dividend < CRC8_TABLE_LEN; ++dividend) {
-		/* Start with the dividend followed by zeros */
-		remainder = dividend << (WIDTH - 8);
-
-		/* Perform modulo-2 division, a bit at a time */
-		for (bit = 8; bit > 0; --bit) {
-			/* Try to divide the current data bit */
-			if (remainder & TOPBIT)
-				remainder = (remainder << 1) ^ POLYNOMIAL;
-			else
-				remainder = (remainder << 1);
-		}
-
-		/* Store the result into the table */
-		crc8table[dividend] = remainder;
-	}
-}
-#endif
-
 static uchar crc8fast(uchar const message[], size_t n)
 {
 	static uchar data, remainder;
@@ -4255,9 +4229,6 @@ int main(int argc, char *argv[])
 
 	/* Set locale */
 	setlocale(LC_ALL, "");
-#if 0
-	crc8init();
-#endif
 
 #ifndef NORL
 	/* Bind TAB to cycling */
