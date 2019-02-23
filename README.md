@@ -255,7 +255,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^O  Open with...      n  Create new/link
             D  File details     ^R  Rename entry
          ⎵ ^K  Select entry      r  Open dir in vidir
-           ^Y  Toggle selection  y  List selection
+         K ^Y  Toggle selection  y  List selection
             Y  Select all
             P  Copy selection    X  Delete selection
             V  Move selection   ^X  Delete entry

@@ -2420,7 +2420,7 @@ static bool show_help(char *path)
 		 "b^O  Open with...      n  Create new/link\n"
 		  "cD  File details     ^R  Rename entry\n"
 	       "9⎵ ^K  Select entry      r  Open dir in vidir\n"
-		 "b^Y  Toggle selection  y  List selection\n"
+	       "9K ^Y  Toggle selection  y  List selection\n"
 		  "cY  Select all\n"
 		  "cP  Copy selection    X  Delete selection\n"
 		  "cV  Move selection   ^X  Delete entry\n"

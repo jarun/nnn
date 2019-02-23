@@ -189,6 +189,7 @@ static struct key bindings[] = {
 	{ CONTROL('K'),   SEL_COPY },
 	{ ' ',            SEL_COPY },
 	/* Toggle copy multiple file paths */
+	{ 'K',            SEL_COPYMUL },
 	{ CONTROL('Y'),   SEL_COPYMUL },
 	/* Select all files in current dir */
 	{ 'Y',            SEL_COPYALL },
