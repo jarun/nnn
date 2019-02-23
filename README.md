@@ -64,10 +64,10 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - [Quickstart](#quickstart)
 - [How to](#how-to)
 - [Troubleshooting](#troubleshooting)
-  - [tmux configuration](#tmux-configuration)
+  - [Tmux configuration](#tmux-configuration)
   - [BSD terminal issue](#bsd-terminal-issue)
-  - [restrict file open](#restrict-file-open)
-  - [restrict 0-byte files](#restrict-0-byte-files)
+  - [Restrict file open](#restrict-file-open)
+  - [Restrict 0-byte files](#restrict-0-byte-files)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
@@ -88,7 +88,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Directories always listed on top
   - Sort by file name, modification time, size
   - Ordered pure numeric names by default (visit _/proc_)
-  - Version sort
+  - Version (_aka_ natural) sort
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex and substring match
@@ -414,7 +414,7 @@ Please visit the [How to](https://github.com/jarun/nnn/wiki/How-to) wiki page.
 
 #### TROUBLESHOOTING
 
-##### tmux configuration
+##### Tmux configuration
 
 `nnn` might not handle keypresses correctly when used with tmux (see issue #104 for more details). Set `TERM=xterm-256color` to address it.
 
@@ -422,7 +422,7 @@ Please visit the [How to](https://github.com/jarun/nnn/wiki/How-to) wiki page.
 
 By default in OpenBSD & FreeBSD, `stty` maps <kbd>^Y</kbd> to `DSUSP`. This means that typing <kbd>^Y</kbd> will suspend `nnn` as if you typed <kbd>^Z</kbd> (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-copy mode. You can check this with `stty -a`. If it includes the text `dsusp = ^Y`, issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the <kbd>^Y</kbd> instead.
 
-##### restrict file open
+##### Restrict file open
 
 In order to disable opening files on accidental navigation key (<kbd>→</kbd> or <kbd>l</kbd>) press:
 
@@ -430,7 +430,7 @@ In order to disable opening files on accidental navigation key (<kbd>→</kbd> o
 
 Use <kbd>Enter</kbd> to open files.
 
-##### restrict 0-byte files
+##### Restrict 0-byte files
 
 Restrict opening 0-byte files due to [unexpected behaviour](https://github.com/jarun/nnn/issues/187); use _edit_ or _open with_ to open the file.
 
