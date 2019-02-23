@@ -460,4 +460,4 @@ Restrict opening 0-byte files due to [unexpected behaviour](https://github.com/j
 
 #### CONTRIBUTIONS
 
-We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/202).
+We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/213).
