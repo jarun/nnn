@@ -119,6 +119,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Terminal locker integration
   - Shortcut reference a keypress away
 - Unicode support
+- Follows Linux kernel coding style
 - Highly optimized, static analysis integrated code
 - Available on many distros
 
