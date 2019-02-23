@@ -3528,6 +3528,22 @@ nochange:
 				printmsg("selection on");
 				DPRINTF_S("selection on");
 				goto nochange;
+			}
+
+			if (!ncp) { /* Handle range selection */
+#ifndef DIR_LIMITED_COPY
+				if (g_crc != crc8fast((uchar *)dents,
+						      ndents * sizeof(struct entry))) {
+					cfg.copymode = 0;
+					printmsg("dir/content changed");
+					goto nochange;
+				}
+#endif
+				if (cur < copystartid) {
+					copyendid = copystartid;
+					copystartid = cur;
+				} else
+					copyendid = cur;
 			} // fallthrough
 		case SEL_COPYALL:
 			if (sel == SEL_COPYALL) {
@@ -3538,37 +3554,19 @@ nochange:
 
 				cfg.copymode = 0;
 				copybufpos = 0;
-				ncp = 0;
+				ncp = 0; /* Override single/multi path selection */
 				copystartid = 0;
 				copyendid = ndents - 1;
 			}
-			if (!ncp) { /* Handle range selection */
-#ifndef DIR_LIMITED_COPY
-				if ((sel != SEL_COPYALL) && g_crc != crc8fast((uchar *)dents,
-						      ndents * sizeof(struct entry))) {
-					cfg.copymode = 0;
-					printmsg("dir/content changed");
-					DPRINTF_S("dir/content changed");
-					goto nochange;
-				}
-#endif
-				if (sel != SEL_COPYALL) {
-					if (cur < copystartid) {
-						copyendid = copystartid;
-						copystartid = cur;
-					} else
-						copyendid = cur;
-				}
 
-				if (copystartid < copyendid || sel == SEL_COPYALL) {
-					for (r = copystartid; r <= copyendid; ++r)
-						if (!appendfpath(newpath, mkpath(path,
-								 dents[r].name, newpath)))
-							goto nochange;
+			if ((!ncp && copystartid < copyendid) || sel == SEL_COPYALL) {
+				for (r = copystartid; r <= copyendid; ++r)
+					if (!appendfpath(newpath, mkpath(path,
+							 dents[r].name, newpath)))
+						goto nochange;
 
-					mvprintw(LINES - 1, 0, "%d files selected\n",
-						 copyendid - copystartid + 1);
-				}
+				mvprintw(LINES - 1, 0, "%d files selected\n",
+					 copyendid - copystartid + 1);
 			}
 
 			if (copybufpos) { /* File path(s) written to the buffer */
