@@ -4105,19 +4105,18 @@ int main(int argc, char *argv[])
 	if (cfg.showcolor) {
 		copier = xgetenv(env_cfg[NNN_CONTEXT_COLORS], "4444");
 		opt = 0;
-		while (*copier && opt < CTX_MAX) {
-			if (*copier < '0' || *copier > '7') {
-				fprintf(stderr, "invalid color code\n");
-				return 1;
-			}
+		while (opt < CTX_MAX) {
+			if (*copier) {
+				if (*copier < '0' || *copier > '7') {
+					fprintf(stderr, "invalid color code\n");
+					return 1;
+				}
 
-			g_ctx[opt].color = *copier - '0';
-			++copier;
-			++opt;
-		}
+				g_ctx[opt].color = *copier - '0';
+				++copier;
+			} else
+				g_ctx[opt].color = 4;
 
-		while (opt != CTX_MAX) {
-			g_ctx[opt].color = 4;
 			++opt;
 		}
 	}
