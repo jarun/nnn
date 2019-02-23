@@ -3851,42 +3851,46 @@ nochange:
 					goto nochange;
 				}
 
-				if (S_ISDIR(sb.st_mode)) {
-					cfg.runscript ^= 1;
-					if (!cfg.runscript && rundir[0]) {
-						/*
-						 * If toggled, and still in the script dir,
-						 * switch to original directory
-						 */
-						if (strcmp(path, scriptpath) == 0) {
-							xstrlcpy(path, rundir, PATH_MAX);
-							xstrlcpy(lastname, runfile, NAME_MAX);
-							rundir[0] = runfile[0] = '\0';
-							setdirwatch();
-							goto begin;
-						}
-						break;
-					}
-
-					/* Check if directory is accessible */
-					if (!xdiraccess(scriptpath))
-						goto nochange;
-
-					xstrlcpy(rundir, path, PATH_MAX);
-					xstrlcpy(path, scriptpath, PATH_MAX);
-					if (ndents)
-						xstrlcpy(runfile, dents[cur].name, NAME_MAX);
-					cfg.runctx = cfg.curctx;
-					lastname[0] = '\0';
-					setdirwatch();
-					goto begin;
-				}
-
+				/* Regular script file */
 				if (S_ISREG(sb.st_mode)) {
 					tmp = ndents ? dents[cur].name : NULL;
 					spawn(shell, scriptpath, tmp, path, F_NORMAL | F_SIGINT);
+					break;
 				}
-				break;
+
+				/* Must be a directory or a regular file */
+				if (!S_ISDIR(sb.st_mode))
+					break;
+
+				/* Script directory */
+				cfg.runscript ^= 1;
+				if (!cfg.runscript && rundir[0]) {
+					/*
+					 * If toggled, and still in the script dir,
+					 * switch to original directory
+					 */
+					if (strcmp(path, scriptpath) == 0) {
+						xstrlcpy(path, rundir, PATH_MAX);
+						xstrlcpy(lastname, runfile, NAME_MAX);
+						rundir[0] = runfile[0] = '\0';
+						setdirwatch();
+						goto begin;
+					}
+					break;
+				}
+
+				/* Check if directory is accessible */
+				if (!xdiraccess(scriptpath))
+					goto nochange;
+
+				xstrlcpy(rundir, path, PATH_MAX);
+				xstrlcpy(path, scriptpath, PATH_MAX);
+				if (ndents)
+					xstrlcpy(runfile, dents[cur].name, NAME_MAX);
+				cfg.runctx = cfg.curctx;
+				lastname[0] = '\0';
+				setdirwatch();
+				goto begin;
 			default: /* SEL_RUNCMD */
 #ifndef NORL
 				if (cfg.picker) {
