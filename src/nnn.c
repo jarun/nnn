@@ -1995,9 +1995,15 @@ static void printent(struct entry *ent, int sel, uint namecols)
 
 static void printent_long(struct entry *ent, int sel, uint namecols)
 {
-	static char buf[18], *pname;
+	static char timebuf[18], permbuf[4], *pname;
 
-	strftime(buf, 18, "%F %R", localtime(&ent->t));
+	/* Timestamp */
+	strftime(timebuf, 18, "%F %R", localtime(&ent->t));
+
+	/* Permissions */
+	snprintf(permbuf, 4, "%d%d%d", (ent->mode >> 6) & 7, (ent->mode >> 3) & 7, ent->mode & 7);
+
+	/* Trim escape chars from name */
 	pname = unescape(ent->name, namecols);
 
 	/* Directories are always shown on top */
@@ -2009,39 +2015,39 @@ static void printent_long(struct entry *ent, int sel, uint namecols)
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
 		if (ent->mode & 0100)
-			printw(" %-16.16s %8.8s* %s*\n", buf,
+			printw(" %-16.16s  0%s %8.8s* %s*\n", timebuf, permbuf,
 			       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 		else
-			printw(" %-16.16s %8.8s  %s\n", buf,
+			printw(" %-16.16s  0%s %8.8s  %s\n", timebuf, permbuf,
 			       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 		break;
 	case S_IFDIR:
 		if (cfg.blkorder)
-			printw(" %-16.16s %8.8s/ %s/\n",
-			       buf, coolsize(ent->blocks << BLK_SHIFT), pname);
+			printw(" %-16.16s  0%s %8.8s/ %s/\n",
+			       timebuf, permbuf, coolsize(ent->blocks << BLK_SHIFT), pname);
 		else
-			printw(" %-16.16s        /  %s/\n", buf, pname);
+			printw(" %-16.16s  0%s        /  %s/\n", timebuf, permbuf, pname);
 		break;
 	case S_IFLNK:
 		if (ent->flags & DIR_OR_LINK_TO_DIR)
-			printw(" %-16.16s       @/  %s@\n", buf, pname);
+			printw(" %-16.16s  0%s       @/  %s@\n", timebuf, permbuf, pname);
 		else
-			printw(" %-16.16s        @  %s@\n", buf, pname);
+			printw(" %-16.16s  0%s        @  %s@\n", timebuf, permbuf, pname);
 		break;
 	case S_IFSOCK:
-		printw(" %-16.16s        =  %s=\n", buf, pname);
+		printw(" %-16.16s  0%s        =  %s=\n", timebuf, permbuf, pname);
 		break;
 	case S_IFIFO:
-		printw(" %-16.16s        |  %s|\n", buf, pname);
+		printw(" %-16.16s  0%s        |  %s|\n", timebuf, permbuf, pname);
 		break;
 	case S_IFBLK:
-		printw(" %-16.16s        b  %s\n", buf, pname);
+		printw(" %-16.16s  0%s        b  %s\n", timebuf, permbuf, pname);
 		break;
 	case S_IFCHR:
-		printw(" %-16.16s        c  %s\n", buf, pname);
+		printw(" %-16.16s  0%s        c  %s\n", timebuf, permbuf, pname);
 		break;
 	default:
-		printw(" %-16.16s %8.8s? %s?\n", buf,
+		printw(" %-16.16s  0%s %8.8s? %s?\n", timebuf, permbuf,
 		       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 		break;
 	}
