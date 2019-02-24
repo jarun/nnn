@@ -324,7 +324,6 @@ static char *copier;
 static char *editor;
 static char *pager, *pager_arg;
 static char *shell, *shell_arg;
-static char *scriptpath;
 static char *home;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
@@ -2899,6 +2898,7 @@ static void browse(char *ipath)
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	char *path, *lastdir, *lastname;
 	char *dir, *tmp;
+	static char *scriptpath;
 	struct stat sb;
 	int r = -1, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
 	enum action sel;
@@ -3058,7 +3058,7 @@ nochange:
 
 				/* Handle script selection mode */
 				if (cfg.runscript) {
-					if ((cfg.runctx != cfg.curctx)
+					if (!scriptpath || (cfg.runctx != cfg.curctx)
 					    /* Must be in script directory to select script */
 					    || (strcmp(path, scriptpath) != 0))
 						continue;
@@ -3427,16 +3427,19 @@ nochange:
 				spawn(pager, pager_arg, dents[cur].name, path, F_NORMAL);
 				break;
 			case SEL_NOTE:
-				tmp = getenv(env_cfg[NNN_NOTE]);
-				if (!tmp) {
+			{
+				static char *notepath;
+				notepath = notepath ? notepath : getenv(env_cfg[NNN_NOTE]);
+				if (!notepath) {
 					printmsg("set NNN_NOTE");
 					goto nochange;
 				}
 
-				if (!quote_run_sh_cmd(editor, tmp, NULL))
+				if (!quote_run_sh_cmd(editor, notepath, NULL))
 					goto nochange;
 				r = TRUE;
 				break;
+			}
 			default: /* SEL_LOCK */
 				r = TRUE;
 				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
@@ -3821,6 +3824,7 @@ nochange:
 				spawn(shell, shell_arg, NULL, path, F_NORMAL | F_MARKER);
 				break;
 			case SEL_SCRIPT:
+				scriptpath = scriptpath ? scriptpath : getenv(env_cfg[NNN_SCRIPT]);
 				if (!scriptpath) {
 					printmsg("set NNN_SCRIPT");
 					goto nochange;
@@ -4157,9 +4161,6 @@ int main(int argc, char *argv[])
 
 	DPRINTF_S(getenv("PWD"));
 
-	/* Setup script execution */
-	scriptpath = getenv(env_cfg[NNN_SCRIPT]);
-
 #ifdef LINUX_INOTIFY
 	/* Initialize inotify */
 	inotify_fd = inotify_init1(IN_NONBLOCK);
@@ -4178,7 +4179,7 @@ int main(int argc, char *argv[])
 	/* Get custom opener, if set */
 	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
 
-	/* Set nnn neting level (idletimeout used as tmp var) */
+	/* Set nnn nesting level, idletimeout used as tmp var */
 	idletimeout = xatoi(getenv(env_cfg[NNNLVL]));
 	setenv(env_cfg[NNNLVL], xitoa(++idletimeout), 1);
 
