@@ -3635,8 +3635,8 @@ nochange:
 		{
 			switch (sel) {
 			case SEL_ARCHIVE:
-				r = get_input("archive selection (else current)? [s]");
-				if (r == 's') {
+				r = get_input("archive selection (else current)? [y/Y]");
+				if (r == 'y' || r == 'Y') {
 					if (!cpsafe())
 						goto nochange;
 					tmp = NULL;
