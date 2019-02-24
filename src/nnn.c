@@ -2809,7 +2809,7 @@ static void redraw(char *path)
 	attroff(A_UNDERLINE);
 
 	/* Fallback to light mode if less than 35 columns */
-	if (ncols < 35 && cfg.showdetail) {
+	if (ncols < 41 && cfg.showdetail) {
 		cfg.showdetail ^= 1;
 		printptr = &printent;
 		mode_changed = TRUE;
@@ -2817,7 +2817,7 @@ static void redraw(char *path)
 
 	/* Calculate the number of cols available to print entry name */
 	if (cfg.showdetail)
-		ncols -= 30;
+		ncols -= 36;
 	else
 		ncols -= 5;
 
