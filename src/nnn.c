@@ -973,8 +973,7 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 
 		/* Show a marker (to indicate nnn spawned shell) */
 		if (flag & F_MARKER && tmp)
-			fprintf(stdout, "\n +-++-++-+\n | n n n |\n +-++-++-+\n\n"
-					"Last nnn level: %d\n", xatoi(tmp));
+			fprintf(stdout, "\n +-++-++-+\n | n n n | %d\n +-++-++-+\n\n", xatoi(tmp));
 
 		/* Suppress stdout and stderr */
 		if (flag & F_NOTRACE) {
