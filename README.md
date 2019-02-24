@@ -247,19 +247,18 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
             /  Filter       Ins ^T  Toggle nav-as-you-type
             b  Pin current dir  ^B  Go to pinned dir
        Tab ^I  Next context      d  Toggle detail view
-         , ^/  Leader key  N LeadN  Go to/create context N
+         , ^/  Leader key  N LeadN  Enter context N
           Esc  Exit prompt      ^L  Redraw/clear prompt
            ^G  Quit and cd       q  Quit context
          Q ^Q  Quit              ?  Help, config
  FILES
            ^O  Open with...      n  Create new/link
             D  File details     ^R  Rename entry
-         ⎵ ^K  Select entry      r  Open dir in vidir
+     ⎵ ^K / Y  Select entry/all  r  Open dir in vidir
          K ^Y  Toggle selection  y  List selection
-            Y  Select all
             P  Copy selection    X  Delete selection
             V  Move selection   ^X  Delete entry
-            f  Archive files   m M  Brief/full media info
+            f  Create archive  m M  Brief/full mediainfo
            ^F  Extract archive   F  List archive
             e  Edit in EDITOR    p  Open in PAGER
  ORDER TOGGLES
