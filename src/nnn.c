@@ -3427,6 +3427,7 @@ nochange:
 			case SEL_NOTE:
 			{
 				static char *notepath;
+
 				notepath = notepath ? notepath : getenv(env_cfg[NNN_NOTE]);
 				if (!notepath) {
 					printmsg("set NNN_NOTE");
