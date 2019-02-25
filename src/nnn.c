@@ -404,6 +404,11 @@ static char * const utils[] = {
 	"UNKNOWN"
 };
 
+#ifdef __linux__
+static char cp[] = "cpg -giRp";
+static char mv[] = "mvg -gi";
+#endif
+
 /* Common strings */
 #define STR_NFTWFAIL_ID 0
 #define STR_NOHOME_ID 1
@@ -438,6 +443,9 @@ static const char * const messages[] = {
 #define NNN_NO_AUTOSELECT 11
 #define NNN_RESTRICT_NAV_OPEN 12
 #define NNN_RESTRICT_0B 13
+#ifdef __linux__
+#define NNN_CP_MV_PROG 14
+#endif
 
 static const char * const env_cfg[] = {
 	"NNN_BMS",
@@ -454,6 +462,9 @@ static const char * const env_cfg[] = {
 	"NNN_NO_AUTOSELECT",
 	"NNN_RESTRICT_NAV_OPEN",
 	"NNN_RESTRICT_0B",
+#ifdef __linux__
+	"NNN_CP_MV_PROG",
+#endif
 };
 
 /* Required env vars */
@@ -3574,19 +3585,21 @@ nochange:
 			if (sel == SEL_CP) {
 				snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
-					 "xargs -0 -a %s -%c src cp -iRp src .",
+					 "xargs -0 -a %s -%c src %s src .",
+					 g_cppath, REPLACE_STR, cp);
 #else
 					 "cat %s | xargs -0 -o -%c src cp -iRp src .",
-#endif
 					 g_cppath, REPLACE_STR);
+#endif
 			} else if (sel == SEL_MV) {
 				snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
-					 "xargs -0 -a %s -%c src mv -i src .",
+					 "xargs -0 -a %s -%c src %s src .",
+					 g_cppath, REPLACE_STR, mv);
 #else
 					 "cat %s | xargs -0 -o -%c src mv -i src .",
-#endif
 					 g_cppath, REPLACE_STR);
+#endif
 			} else { /* SEL_RMMUL */
 				snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
@@ -4214,6 +4227,16 @@ int main(int argc, char *argv[])
 	/* Restrict opening of 0-byte files */
 	if (getenv(env_cfg[NNN_RESTRICT_0B]))
 		cfg.restrict0b = 1;
+
+#ifdef __linux__
+	if (!getenv(env_cfg[NNN_CP_MV_PROG])) {
+		cp[5] = cp[4];
+		cp[2] = cp[4] = ' ';
+
+		mv[5] = mv[4];
+		mv[2] = mv[4] = ' ';
+	}
+#endif
 
 	/* Ignore/handle certain signals */
 	struct sigaction act;

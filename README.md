@@ -103,6 +103,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Create, rename files and directories
   - Select files across dirs; all/range selection
   - Copy, move, delete, archive selection
+  - Show copy, move progress on Linux (needs avdcpmv)
   - Create sym/hard link(s) to selection
   - Transfer files using lftp
   - Batch rename/move/delete (needs vidir)
@@ -154,6 +155,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 | atool, patool ([integration](https://github.com/jarun/nnn/wiki/How-to#integrate-patool)) | create, list and extract archives |
 | vidir (from moreutils) | batch rename, move, delete dir entries |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
+| advcpmv (Linux-only) ([integration](https://github.com/jarun/nnn/wiki/How-to#show-cp-mv-progress)) | copy, move progress |
 | $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
 | $PAGER (less, most) | page through files (fallback less) |
 | $SHELL (single coombined argument) | spawn a shell, run script (fallback sh) |
@@ -389,6 +391,7 @@ The following indicators are used in the detail view:
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type` mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_RESTRICT_0B=1` | do not open 0-byte files |
+| `NNN_CP_MV_PROG=1` | show copy, move progress (Linux-only) |
 
 #### Help
 
