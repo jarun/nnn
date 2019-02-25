@@ -28,7 +28,7 @@ Noice is Not Noice, a noicer fork...
 
 Integrate utilities like sxiv (view images in directory) or fzy (fuzzy search subtree) easily, transfer selected files using lftp or use it as a (neo)vim plugin; `nnn` supports as many scripts as you need! Refer to the [How to](https://github.com/jarun/nnn/wiki/How-to) section on wiki for more details.
 
-It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux.
+It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
 [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions.
 
