@@ -1420,23 +1420,29 @@ static int nextsel(int *presel)
 	return 0;
 }
 
+static inline void swap_ent(int id1, int id2)
+{
+	static struct entry _dent, *pdent1, *pdent2;;
+
+	pdent1 = &dents[id1];
+	pdent2 = &dents[id2];
+
+	*(&_dent) = *pdent1;
+	*pdent1 = *pdent2;
+	*pdent2 = *(&_dent);
+}
+
 /*
  * Move non-matching entries to the end
  */
 static int fill(char *fltr, regex_t *re)
 {
 	static int count;
-	static struct entry _dent, *pdent1, *pdent2;
 
 	for (count = 0; count < ndents; ++count) {
 		if (filterfn(re, dents[count].name, fltr) == 0) {
 			if (count != --ndents) {
-				pdent1 = &dents[count];
-				pdent2 = &dents[ndents];
-
-				*(&_dent) = *pdent1;
-				*pdent1 = *pdent2;
-				*pdent2 = *(&_dent);
+				swap_ent(count, ndents);
 				--count;
 			}
 
