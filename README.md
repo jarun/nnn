@@ -299,7 +299,7 @@ Contexts serve the purpose of exploring multiple directories simultaneously. 4 c
 
 To switch to a context press the Leader key followed by the context number (1-4).
 
-The first time a context is entered, it copies the state of the last visited context. Each context remembers its start directory and last visited directory.
+The first time a context is entered, it copies the state of the last visited context. Each context remembers its last visited directory.
 
 When a context is quit, the next active context is selected. If the last active context is quit, the program quits.
 

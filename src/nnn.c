@@ -302,7 +302,6 @@ typedef struct {
 /* Contexts or workspaces */
 typedef struct {
 	char c_path[PATH_MAX]; /* Current dir */
-	char c_init[PATH_MAX]; /* Initial dir */
 	char c_last[PATH_MAX]; /* Last visited dir */
 	char c_name[NAME_MAX + 1]; /* Current file name */
 	settings c_cfg; /* Current configuration */
@@ -2876,7 +2875,6 @@ static void browse(char *ipath)
 	/* setup first context */
 	xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
 	path = g_ctx[0].c_path;
-	xstrlcpy(g_ctx[0].c_init, ipath, PATH_MAX); /* start directory */
 	g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = newpath[0] = mark[0] = '\0';
 	rundir[0] = runfile[0] = '\0';
 	lastdir = g_ctx[0].c_last; /* last visited directory */
@@ -3201,7 +3199,6 @@ nochange:
 				else { /* Setup a new context from current context */
 					g_ctx[r].c_cfg.ctxactive = 1;
 					xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
-					xstrlcpy(g_ctx[r].c_init, path, PATH_MAX);
 					g_ctx[r].c_last[0] = '\0';
 					xstrlcpy(g_ctx[r].c_name, dents[cur].name, NAME_MAX + 1);
 					g_ctx[r].c_cfg = cfg;
@@ -3210,7 +3207,6 @@ nochange:
 
 				/* Reset the pointers */
 				path = g_ctx[r].c_path;
-				ipath = g_ctx[r].c_init;
 				lastdir = g_ctx[r].c_last;
 				lastname = g_ctx[r].c_name;
 
@@ -3953,7 +3949,6 @@ nochange:
 
 						/* Switch to next active context */
 						path = g_ctx[r].c_path;
-						ipath = g_ctx[r].c_init;
 						lastdir = g_ctx[r].c_last;
 						lastname = g_ctx[r].c_name;
 						cfg = g_ctx[r].c_cfg;
