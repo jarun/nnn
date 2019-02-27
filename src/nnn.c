@@ -2676,19 +2676,15 @@ static int dentfill(char *path, struct entry **dents)
 		}
 
 		/* Flag if this is a dir or symlink to a dir */
+		if (S_ISLNK(sb.st_mode)) {
+			sb.st_mode = 0;
+			fstatat(fd, namep, &sb, 0);
+		}
+
 		if (S_ISDIR(sb.st_mode))
 			dentp->flags |= DIR_OR_LINK_TO_DIR;
-		else if (!S_ISLNK(sb.st_mode)) {
-			if (dentp->flags & DIR_OR_LINK_TO_DIR)
-				dentp->flags &= ~DIR_OR_LINK_TO_DIR;
-		} else {
-			if (!fstatat(fd, namep, &sb, 0)) {
-				if (S_ISDIR(sb.st_mode))
-					dentp->flags |= DIR_OR_LINK_TO_DIR;
-				else
-					dentp->flags &= ~DIR_OR_LINK_TO_DIR;
-			}
-		}
+		else if (dentp->flags & DIR_OR_LINK_TO_DIR)
+			dentp->flags &= ~DIR_OR_LINK_TO_DIR;
 
 		++n;
 	}
