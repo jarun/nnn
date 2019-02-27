@@ -210,7 +210,7 @@ Search keyword and option completion scripts for Bash, Fish and Zsh can be found
 
 ```
 usage: nnn [-b key] [-C] [-e] [-i] [-l] [-n]
-           [-p file] [-s] [-S] [-v] [-h] [PATH]
+           [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]
 
 The missing terminal file manager for X.
 
@@ -228,10 +228,9 @@ optional args:
  -s      string filters [default: regex]
  -S      du mode
  -v      show version
+ -w      wild mode
  -h      show help
 ```
-
-`>` indicates the currently selected entry in `nnn`.
 
 #### Keyboard shortcuts
 
@@ -264,7 +263,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
             e  Edit in EDITOR    p  Open in PAGER
  ORDER TOGGLES
            ^J  Disk usage        S  Apparent du
-            t  Time modified     s  Size
+           ^W  Random  s  Size   t  Time modified
  MISC
          ! ^]  Spawn SHELL       C  Execute entry
          R ^V  Run/pick script   L  Lock terminal
@@ -354,6 +353,8 @@ In this mode directories are opened in filter mode, allowing continuous navigati
 In case of only one match and it's a directory, `nnn` auto selects the directory and enters it in this mode. To disable this behaviour,
 
     export NNN_NO_AUTOSELECT=1
+
+The _wild mode_ program option can be handy for users who use this mode constantly. The entries are unsorted when the directory loads. Applying filters sort the entries (with directories on top). Directory color is disabled in this mode.
 
 #### File indicators
 

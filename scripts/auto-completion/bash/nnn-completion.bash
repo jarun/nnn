@@ -22,6 +22,7 @@ _nnn () {
         -s
         -S
         -v
+        -w
     )
     opts_with_arg=(
         -b
