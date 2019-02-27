@@ -492,13 +492,13 @@ static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, st
  * CRC8 source:
  *   https://barrgroup.com/Embedded-Systems/How-To/CRC-Calculation-C-Code
  */
-static uchar crc8fast(uchar const message[], size_t n)
+static uchar crc8fast(const uchar * const message, size_t n)
 {
-	static uchar data, remainder;
-	static size_t byte;
+	uchar data, remainder;
+	size_t byte;
 
 	/* CRC data */
-	static const uchar crc8table[CRC8_TABLE_LEN] __attribute__ ((aligned)) = {
+	const uchar crc8table[CRC8_TABLE_LEN] __attribute__ ((aligned)) = {
 		  0,  94, 188, 226,  97,  63, 221, 131, 194, 156, 126,  32, 163, 253,  31,  65,
 		157, 195,  33, 127, 252, 162,  64,  30,  95,   1, 227, 189,  62,  96, 130, 220,
 		 35, 125, 159, 193,  66,  28, 254, 160, 225, 191,  93,   3, 128, 222,  60,  98,
@@ -612,9 +612,8 @@ static rlim_t max_openfds(void)
  */
 static void *xrealloc(void *pcur, size_t len)
 {
-	static void *pmem;
+	void *pmem = realloc(pcur, len);
 
-	pmem = realloc(pcur, len);
 	if (!pmem)
 		free(pcur);
 
@@ -628,15 +627,14 @@ static void *xrealloc(void *pcur, size_t len)
  */
 static size_t xstrlcpy(char *dest, const char *src, size_t n)
 {
-	static ulong *s, *d;
-	static size_t len, blocks;
-	static const uint lsize = sizeof(ulong);
-	static const uint _WSHIFT = (sizeof(ulong) == 8) ? 3 : 2;
-
 	if (!src || !dest || !n)
 		return 0;
 
-	len = strlen(src) + 1;
+	static ulong *s, *d;
+	static const uint lsize = sizeof(ulong);
+	static const uint _WSHIFT = (sizeof(ulong) == 8) ? 3 : 2;
+	size_t len = strlen(src) + 1, blocks;
+
 	if (n > len)
 		n = len;
 	else if (len > n)
@@ -687,12 +685,10 @@ static size_t xstrlcpy(char *dest, const char *src, size_t n)
  */
 static void *xmemrchr(uchar *s, uchar ch, size_t n)
 {
-	static uchar *ptr;
-
 	if (!s || !n)
 		return NULL;
 
-	ptr = s + n;
+	uchar *ptr = s + n;
 
 	do {
 		--ptr;
@@ -712,7 +708,7 @@ static void *xmemrchr(uchar *s, uchar ch, size_t n)
  */
 static char *xdirname(const char *path)
 {
-	static char * const buf = g_buf, *last_slash, *runp;
+	char * const buf = g_buf, *last_slash, *runp;
 
 	xstrlcpy(buf, path, PATH_MAX);
 
@@ -766,9 +762,7 @@ static char *xdirname(const char *path)
 
 static char *xbasename(char *path)
 {
-	static char *base;
-
-	base = xmemrchr((uchar *)path, '/', strlen(path));
+	char *base = xmemrchr((uchar *)path, '/', strlen(path));
 	return base ? base + 1 : path;
 }
 
@@ -789,9 +783,9 @@ static uint xatoi(const char *str)
 
 static char *xitoa(uint val)
 {
-	static const char hexbuf[] = "0123456789";
+	const char hexbuf[] = "0123456789";
 	static char ascbuf[32] = {0};
-	static int i;
+	int i;
 
 	for (i = 30; val && i; --i, val /= 10)
 		ascbuf[i] = hexbuf[val % 10];
@@ -802,15 +796,13 @@ static char *xitoa(uint val)
 /* Writes buflen char(s) from buf to a file */
 static void writecp(const char *buf, const size_t buflen)
 {
-	static FILE *fp;
-
 	if (cfg.pickraw)
 		return;
 
 	if (!g_cppath[0])
 		return;
 
-	fp = fopen(g_cppath, "w");
+	FILE *fp = fopen(g_cppath, "w");
 
 	if (fp) {
 		fwrite(buf, 1, buflen, fp);
@@ -1065,12 +1057,10 @@ static bool quote_run_sh_cmd(const char *cmd, const char *arg, const char *path)
 /* Get program name from env var, else return fallback program */
 static char *xgetenv(const char *name, char *fallback)
 {
-	static char *value;
-
 	if (name == NULL)
 		return fallback;
 
-	value = getenv(name);
+	char *value = getenv(name);
 
 	return value && value[0] ? value : fallback;
 }
@@ -1081,7 +1071,7 @@ static char *xgetenv(const char *name, char *fallback)
  */
 static void getprogarg(char *prog, char **arg)
 {
-	char *argptr;
+	const char *argptr;
 
 	while (*prog && !isblank(*prog))
 		++prog;
@@ -1105,9 +1095,8 @@ static void getprogarg(char *prog, char **arg)
 /* Check if a dir exists, IS a dir and is readable */
 static bool xdiraccess(const char *path)
 {
-	static DIR *dirp;
+	DIR *dirp = opendir(path);
 
-	dirp = opendir(path);
 	if (dirp == NULL) {
 		printwarn();
 		return FALSE;
@@ -1135,13 +1124,10 @@ static int digit_compare(const char *a, const char *b)
  */
 static int xstricmp(const char * const s1, const char * const s2)
 {
-	static const char *c1, *c2, *m1, *m2;
-	static int count1, count2, bias;
+	const char *c1, *c2, *m1, *m2;
+	int count1 = 0, count2 = 0, bias;
+	char sign[2];
 
-	static char sign[2];
-
-	count1 = 0;
-	count2 = 0;
 	sign[0] = '+';
 	sign[1] = '+';
 
@@ -1228,13 +1214,10 @@ static int xstricmp(const char * const s1, const char * const s2)
  */
 static int xstrverscmp(const char * const s1, const char * const s2)
 {
-	static const uchar *p1;
-	static const uchar *p2;
-	static uchar c1, c2;
-	static int state, diff;
-
-	p1 = (const uchar *)s1;
-	p2 = (const uchar *)s2;
+	const uchar *p1 = (const uchar *)s1;
+	const uchar *p2 = (const uchar *)s2;
+	uchar c1, c2;
+	int state, diff;
 
 	/*
 	 * Symbol(s)    0       [1-9]   others
@@ -1306,12 +1289,11 @@ static char xchartohex(char c)
 	return c;
 }
 
-static int setfilter(regex_t *regex, char *filter)
+static int setfilter(regex_t *regex, const char *filter)
 {
-	static size_t len;
-	static int r;
+	size_t len;
+	int r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
 
-	r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
 	if (r != 0 && filter && filter[0] != '\0') {
 		len = COLS;
 		if (len > NAME_MAX)
@@ -1322,24 +1304,22 @@ static int setfilter(regex_t *regex, char *filter)
 	return r;
 }
 
-static int visible_re(regex_t *regex, char *fname, char *fltr)
+static int visible_re(regex_t *regex, const char *fname, const char *fltr)
 {
 	return regexec(regex, fname, 0, NULL, 0) == 0;
 }
 
-static int visible_str(regex_t *regex, char *fname, char *fltr)
+static int visible_str(regex_t *regex, const char *fname, const char *fltr)
 {
 	return strcasestr(fname, fltr) != NULL;
 }
 
-static int (*filterfn)(regex_t *regex, char *fname, char *fltr) = &visible_re;
+static int (*filterfn)(regex_t *regex, const char *fname, const char *fltr) = &visible_re;
 
 static int entrycmp(const void *va, const void *vb)
 {
-	static pEntry pa, pb;
-
-	pa = (pEntry)va;
-	pb = (pEntry)vb;
+	const pEntry pa = (pEntry)va;
+	const pEntry pb = (pEntry)vb;
 
 	if ((pb->flags & DIR_OR_LINK_TO_DIR) != (pa->flags & DIR_OR_LINK_TO_DIR)) {
 		if (pb->flags & DIR_OR_LINK_TO_DIR)
@@ -1378,9 +1358,9 @@ static int entrycmp(const void *va, const void *vb)
  */
 static int nextsel(int *presel)
 {
-	static int c;
-	static uint i;
-	static const uint len = LEN(bindings);
+	int c;
+	uint i;
+	const uint len = LEN(bindings);
 #ifdef LINUX_INOTIFY
 	static char inotify_buf[EVENT_BUF_LEN];
 #elif defined(BSD_KQUEUE)
@@ -1423,10 +1403,7 @@ static int nextsel(int *presel)
 
 static inline void swap_ent(int id1, int id2)
 {
-	static struct entry _dent, *pdent1, *pdent2;;
-
-	pdent1 = &dents[id1];
-	pdent2 = &dents[id2];
+	struct entry _dent, *pdent1 = &dents[id1], *pdent2 =  &dents[id2];
 
 	*(&_dent) = *pdent1;
 	*pdent1 = *pdent2;
@@ -1436,11 +1413,9 @@ static inline void swap_ent(int id1, int id2)
 /*
  * Move non-matching entries to the end
  */
-static int fill(char *fltr, regex_t *re)
+static int fill(const char *fltr, regex_t *re)
 {
-	static int count;
-
-	for (count = 0; count < ndents; ++count) {
+	for (int count = 0; count < ndents; ++count) {
 		if (filterfn(re, dents[count].name, fltr) == 0) {
 			if (count != --ndents) {
 				swap_ent(count, ndents);
@@ -1454,9 +1429,9 @@ static int fill(char *fltr, regex_t *re)
 	return ndents;
 }
 
-static int matches(char *fltr)
+static int matches(const char *fltr)
 {
-	static regex_t re;
+	regex_t re;
 
 	/* Search filter */
 	if (cfg.filter_re && setfilter(&re, fltr) != 0)
@@ -1477,7 +1452,7 @@ static int filterentries(char *path)
 {
 	static char ln[REGEX_MAX] __attribute__ ((aligned));
 	static wchar_t wln[REGEX_MAX] __attribute__ ((aligned));
-	static wint_t ch[2] = {0};
+	wint_t ch[2] = {0};
 	int r, total = ndents, oldcur = cur, len = 1;
 	char *pln = ln + 1;
 
@@ -1608,7 +1583,7 @@ static char *xreadline(char *prefill, char *prompt)
 	size_t len, pos;
 	int x, y, r;
 	wint_t ch[2] = {0};
-	static wchar_t * const buf = (wchar_t *)g_buf;
+	wchar_t * const buf = (wchar_t *)g_buf;
 
 	cleartimeout();
 	printprompt(prompt);
@@ -1725,7 +1700,7 @@ END:
  */
 static size_t mkpath(char *dir, char *name, char *out)
 {
-	static size_t len;
+	size_t len;
 
 	/* Handle absolute path */
 	if (name[0] == '/')
@@ -1822,12 +1797,9 @@ static bool parsebmstr(void)
  * NULL is returned in case of no match, path resolution failure etc.
  * buf would be modified, so check return value before access
  */
-static char *get_bm_loc(int key, char *buf)
+static char *get_bm_loc(char *buf, int key)
 {
-	int r;
-	ssize_t count;
-
-	for (r = 0; bookmark[r].key && r < BM_MAX; ++r) {
+	for (int r = 0; bookmark[r].key && r < BM_MAX; ++r) {
 		if (bookmark[r].key == key) {
 			if (bookmark[r].loc[0] == '~') {
 				if (!home) {
@@ -1835,7 +1807,7 @@ static char *get_bm_loc(int key, char *buf)
 					return NULL;
 				}
 
-				count = xstrlcpy(buf, home, PATH_MAX);
+				ssize_t count = xstrlcpy(buf, home, PATH_MAX);
 				xstrlcpy(buf + count - 1, bookmark[r].loc + 1, PATH_MAX - count - 1);
 			} else
 				xstrlcpy(buf, bookmark[r].loc, PATH_MAX);
@@ -1871,14 +1843,13 @@ static void resetdircolor(int flags)
 static char *unescape(const char *str, uint maxcols)
 {
 	static wchar_t wbuf[PATH_MAX] __attribute__ ((aligned));
-	static wchar_t *buf;
+	static wchar_t *buf = wbuf;
 	static size_t len, lencount;
 
 	/* Convert multi-byte to wide char */
 	len = mbstowcs(wbuf, str, PATH_MAX);
 
 	g_buf[0] = '\0';
-	buf = wbuf;
 
 	if (maxcols) {
 		len = lencount = wcswidth(wbuf, len);
@@ -1912,8 +1883,7 @@ static char *coolsize(off_t size)
 	static off_t rem;
 	static int i;
 
-	i = 0;
-	rem = 0;
+	rem = i = 0;
 
 	while (size > 1024) {
 		rem = size & (0x3FF); /* 1024 - 1 = 0x3FF */
@@ -1997,11 +1967,9 @@ static char *get_file_sym(mode_t mode)
 	return ind;
 }
 
-static void printent(struct entry *ent, int sel, uint namecols)
+static void printent(const struct entry *ent, int sel, uint namecols)
 {
-	static char *pname;
-
-	pname = unescape(ent->name, namecols);
+	const char *pname = unescape(ent->name, namecols);
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
@@ -2009,9 +1977,9 @@ static void printent(struct entry *ent, int sel, uint namecols)
 	printw("%s%s%s\n", CURSYM(sel), pname, get_file_sym(ent->mode));
 }
 
-static void printent_long(struct entry *ent, int sel, uint namecols)
+static void printent_long(const struct entry *ent, int sel, uint namecols)
 {
-	static char timebuf[18], permbuf[4], *pname;
+	char timebuf[18], permbuf[4];
 
 	/* Timestamp */
 	strftime(timebuf, 18, "%F %R", localtime(&ent->t));
@@ -2020,7 +1988,7 @@ static void printent_long(struct entry *ent, int sel, uint namecols)
 	snprintf(permbuf, 4, "%d%d%d", (ent->mode >> 6) & 7, (ent->mode >> 3) & 7, ent->mode & 7);
 
 	/* Trim escape chars from name */
-	pname = unescape(ent->name, namecols);
+	const char *pname = unescape(ent->name, namecols);
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
@@ -2072,11 +2040,11 @@ static void printent_long(struct entry *ent, int sel, uint namecols)
 		attroff(A_REVERSE);
 }
 
-static void (*printptr)(struct entry *ent, int sel, uint namecols) = &printent_long;
+static void (*printptr)(const struct entry *ent, int sel, uint namecols) = &printent_long;
 
-static char get_fileind(mode_t mode, char *desc)
+static char get_fileind(char *desc, mode_t mode)
 {
-	static char c;
+	char c;
 
 	switch (mode & S_IFMT) {
 	case S_IFREG:
@@ -2121,12 +2089,12 @@ static char get_fileind(mode_t mode, char *desc)
 }
 
 /* Convert a mode field into "ls -l" type perms field. */
-static char *get_lsperms(mode_t mode, char *desc)
+static char *get_lsperms(char *desc, mode_t mode)
 {
 	static const char * const rwx[] = {"---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx"};
 	static char bits[11] = {'\0'};
 
-	bits[0] = get_fileind(mode, desc);
+	bits[0] = get_fileind(desc, mode);
 	xstrlcpy(&bits[1], rwx[(mode >> 6) & 7], 4);
 	xstrlcpy(&bits[4], rwx[(mode >> 3) & 7], 4);
 	xstrlcpy(&bits[7], rwx[(mode & 7)], 4);
@@ -2147,7 +2115,8 @@ static char *get_lsperms(mode_t mode, char *desc)
  *
  * If page is valid, returns NULL
  */
-static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *arg2, bool page)
+static char *get_output(char *buf, const size_t bytes, const char *file,
+			const char *arg1, const char *arg2, const bool page)
 {
 	pid_t pid;
 	int pipefd[2];
@@ -2211,7 +2180,7 @@ static char *get_output(char *buf, size_t bytes, char *file, char *arg1, char *a
 	return NULL;
 }
 
-static bool getutil(char *util)
+static bool getutil(const char *util)
 {
 	if (!get_output(g_buf, CMD_LEN_MAX, "which", util, NULL, FALSE))
 		return FALSE;
@@ -2221,7 +2190,7 @@ static bool getutil(char *util)
 
 static char *xgetpwuid(uid_t uid)
 {
-	struct passwd *pwd = getpwuid(uid);
+	const struct passwd *pwd = getpwuid(uid);
 
 	if (!pwd)
 		return utils[UNKNOWN];
@@ -2231,7 +2200,7 @@ static char *xgetpwuid(uid_t uid)
 
 static char *xgetgrgid(gid_t gid)
 {
-	struct group *grp = getgrgid(gid);
+	const struct group *grp = getgrgid(gid);
 
 	if (!grp)
 		return utils[UNKNOWN];
@@ -2242,10 +2211,10 @@ static char *xgetgrgid(gid_t gid)
 /*
  * Follows the stat(1) output closely
  */
-static bool show_stats(char *fpath, char *fname, struct stat *sb)
+static bool show_stats(const char *fpath, const char *fname, const struct stat *sb)
 {
 	char desc[DESCRIPTOR_LEN];
-	char *perms = get_lsperms(sb->st_mode, desc);
+	const char *perms = get_lsperms(desc, sb->st_mode);
 	char *p, *begin = g_buf;
 
 	if (g_tmpfpath[0])
@@ -2355,7 +2324,7 @@ static bool show_stats(char *fpath, char *fname, struct stat *sb)
 
 static size_t get_fs_info(const char *path, bool type)
 {
-	static struct statvfs svb;
+	struct statvfs svb;
 
 	if (statvfs(path, &svb) == -1)
 		return 0;
@@ -2366,7 +2335,7 @@ static size_t get_fs_info(const char *path, bool type)
 	return svb.f_bavail << ffs(svb.f_frsize >> 1);
 }
 
-static bool show_mediainfo(char *fpath, char *arg)
+static bool show_mediainfo(const char *fpath, const char *arg)
 {
 	if (!getutil(utils[cfg.metaviewer]))
 		return FALSE;
@@ -2377,7 +2346,7 @@ static bool show_mediainfo(char *fpath, char *arg)
 	return TRUE;
 }
 
-static bool handle_archive(char *fpath, char *arg, char *dir)
+static bool handle_archive(const char *fpath, const char *arg, const char *dir)
 {
 	if (!getutil(utils[ATOOL]))
 		return FALSE;
@@ -2401,22 +2370,11 @@ static bool handle_archive(char *fpath, char *arg, char *dir)
  * the binary size by around a hundred bytes. This would only
  * have increased as we keep adding new options.
  */
-static bool show_help(char *path)
+static bool show_help(const char *path)
 {
 	int i = 0, fd;
-	char *start, *end;
-
-	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
-			 HOME_LEN_MAX - g_tmpfplen);
-	else {
-		printmsg(messages[STR_NOHOME_ID]);
-		return FALSE;
-	}
-
-	fd = mkstemp(g_tmpfpath);
-
-	static char helpstr[] = {
+	const char *start, *end;
+	const char helpstr[] = {
 		"0\n"
 		"1NAVIGATION\n"
 		"a↑ k  Up          PgUp ^U  Scroll up\n"
@@ -2450,6 +2408,15 @@ static bool show_help(char *path)
 	       "9R ^V  Run/pick script   L  Lock terminal\n"
 		 "b^P  Command prompt   ^N  Take note\n"};
 
+	if (g_tmpfpath[0])
+		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
+			 HOME_LEN_MAX - g_tmpfplen);
+	else {
+		printmsg(messages[STR_NOHOME_ID]);
+		return FALSE;
+	}
+
+	fd = mkstemp(g_tmpfpath);
 	if (fd == -1)
 		return FALSE;
 
@@ -2499,7 +2466,7 @@ static bool show_help(char *path)
 }
 
 static int sum_bsizes(const char *fpath, const struct stat *sb,
-	   int typeflag, struct FTW *ftwbuf)
+		      int typeflag, struct FTW *ftwbuf)
 {
 	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D))
 		ent_blocks += sb->st_blocks;
@@ -2509,7 +2476,7 @@ static int sum_bsizes(const char *fpath, const struct stat *sb,
 }
 
 static int sum_sizes(const char *fpath, const struct stat *sb,
-	   int typeflag, struct FTW *ftwbuf)
+		     int typeflag, struct FTW *ftwbuf)
 {
 	if (sb->st_size && (typeflag == FTW_F || typeflag == FTW_D))
 		ent_blocks += sb->st_size;
@@ -2526,18 +2493,15 @@ static void dentfree(struct entry *dents)
 
 static int dentfill(char *path, struct entry **dents)
 {
-	static DIR *dirp;
-	static struct dirent *dp;
-	static char *namep, *pnb;
-	static struct entry *dentp;
-	static size_t off, namebuflen = NAMEBUF_INCR;
-	static ulong num_saved;
-	static int fd, n, count;
-	static struct stat sb_path, sb;
+	int fd, n, count;
+	ulong num_saved;
+	struct dirent *dp;
+	char *namep, *pnb;
+	struct entry *dentp;
+	size_t off = 0, namebuflen = NAMEBUF_INCR;
+	struct stat sb_path, sb;
+	DIR *dirp = opendir(path);
 
-	off = 0;
-
-	dirp = opendir(path);
 	if (dirp == NULL)
 		return 0;
 
@@ -2705,11 +2669,9 @@ static int dentfill(char *path, struct entry **dents)
  */
 static int dentfind(const char *fname, int n)
 {
-	static int i;
-
 	DPRINTF_S(fname);
 
-	for (i = 0; i < n; ++i)
+	for (int i = 0; i < n; ++i)
 		if (xstrcmp(fname, dents[i].name) == 0)
 			return i;
 
@@ -2747,12 +2709,9 @@ static void populate(char *path, char *lastname)
 static void redraw(char *path)
 {
 	static char buf[NAME_MAX + 65] __attribute__ ((aligned));
-	static size_t ncols;
-	static int nlines, i, attrs;
-	static bool mode_changed;
-
-	mode_changed = FALSE;
-	nlines = MIN(LINES - 4, ndents);
+	size_t ncols = COLS;
+	int nlines = MIN(LINES - 4, ndents), i, attrs;
+	bool mode_changed = FALSE;
 
 	/* Clear screen */
 	erase();
@@ -2786,7 +2745,6 @@ static void redraw(char *path)
 		return;
 	}
 
-	ncols = COLS;
 	if (ncols > PATH_MAX)
 		ncols = PATH_MAX;
 
@@ -2815,6 +2773,7 @@ static void redraw(char *path)
 			printw(" ");
 		}
 	}
+
 	printw("\b] "); /* 10 chars printed in total for contexts - "[1 2 3 4] " */
 
 	attron(A_UNDERLINE);
@@ -2849,9 +2808,7 @@ static void redraw(char *path)
 		for (i = ndents - nlines; i < ndents; ++i)
 			printptr(&dents[i], i == cur, ncols);
 	} else {
-		static int odd;
-
-		odd = ISODD(nlines);
+		const int odd = ISODD(nlines);
 		nlines >>= 1;
 		for (i = cur - nlines; i < cur + nlines + odd; ++i)
 			printptr(&dents[i], i == cur, ncols);
@@ -2865,7 +2822,7 @@ static void redraw(char *path)
 
 	if (cfg.showdetail) {
 		if (ndents) {
-			static char sort[9];
+			char sort[9];
 
 			if (cfg.mtimeorder)
 				xstrlcpy(sort, "by time ", 9);
@@ -2909,13 +2866,13 @@ static void browse(char *ipath)
 	char mark[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
-	char *path, *lastdir, *lastname;
-	char *dir, *tmp;
-	static char *scriptpath;
-	struct stat sb;
 	int r = -1, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
 	enum action sel;
 	bool dir_changed = FALSE;
+	struct stat sb;
+	char *path, *lastdir, *lastname;
+	char *dir, *tmp;
+	char *scriptpath = getenv(env_cfg[NNN_SCRIPT]);
 
 	/* setup first context */
 	xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
@@ -3263,7 +3220,7 @@ nochange:
 				goto begin;
 			}
 
-			if (get_bm_loc(fd, newpath) == NULL) {
+			if (get_bm_loc(newpath, fd) == NULL) {
 				printmsg(messages[STR_INVBM_KEY]);
 				goto nochange;
 			}
@@ -3853,7 +3810,6 @@ nochange:
 				spawn(shell, shell_arg, NULL, path, F_NORMAL | F_MARKER);
 				break;
 			case SEL_SCRIPT:
-				scriptpath = scriptpath ? scriptpath : getenv(env_cfg[NNN_SCRIPT]);
 				if (!scriptpath) {
 					printmsg("set NNN_SCRIPT");
 					goto nochange;
@@ -4145,7 +4101,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (ipath) { /* Open a bookmark directly */
-		if (ipath[1] || get_bm_loc(*ipath, cwd) == NULL) {
+		if (ipath[1] || get_bm_loc(cwd, *ipath) == NULL) {
 			fprintf(stderr, "%s\n", messages[STR_INVBM_KEY]);
 			return 1;
 		}
