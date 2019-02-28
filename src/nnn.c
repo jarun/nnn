@@ -180,7 +180,7 @@ disabledbg()
 #define REGEX_MAX 128
 #define BM_MAX 10
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
-#define NAMEBUF_INCR 0x1000 /* 64 dir entries at once, avg. 64 chars per filename = 64*64B = 4KB */
+#define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per filename = 64*32B = 2KB */
 #define DESCRIPTOR_LEN 32
 #define _ALIGNMENT 0x10 /* 16-byte alignment */
 #define _ALIGNMENT_MASK 0xF
@@ -653,7 +653,7 @@ static size_t xstrlcpy(char *dest, const char *src, size_t n)
 		n &= lsize - 1;
 
 		while (blocks) {
-			*d = *s;
+			*d = *s; // NOLINT
 			++d, ++s;
 			--blocks;
 		}
@@ -1291,15 +1291,10 @@ static char xchartohex(char c)
 
 static int setfilter(regex_t *regex, const char *filter)
 {
-	size_t len;
 	int r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
 
-	if (r != 0 && filter && filter[0] != '\0') {
-		len = COLS;
-		if (len > NAME_MAX)
-			len = NAME_MAX;
+	if (r != 0 && filter && filter[0] != '\0')
 		mvprintw(LINES - 1, 0, "regex error: %d\n", r);
-	}
 
 	return r;
 }
@@ -1318,8 +1313,8 @@ static int (*filterfn)(regex_t *regex, const char *fname, const char *fltr) = &v
 
 static int entrycmp(const void *va, const void *vb)
 {
-	const pEntry pa = (pEntry)va;
-	const pEntry pb = (pEntry)vb;
+	const struct entry * pa = (pEntry)va;
+	const struct entry * pb = (pEntry)vb;
 
 	if ((pb->flags & DIR_OR_LINK_TO_DIR) != (pa->flags & DIR_OR_LINK_TO_DIR)) {
 		if (pb->flags & DIR_OR_LINK_TO_DIR)
@@ -1415,7 +1410,9 @@ static inline void swap_ent(int id1, int id2)
  */
 static int fill(const char *fltr, regex_t *re)
 {
-	for (int count = 0; count < ndents; ++count) {
+	int count = 0;
+
+	for (; count < ndents; ++count) {
 		if (filterfn(re, dents[count].name, fltr) == 0) {
 			if (count != --ndents) {
 				swap_ent(count, ndents);
@@ -1799,7 +1796,9 @@ static bool parsebmstr(void)
  */
 static char *get_bm_loc(char *buf, int key)
 {
-	for (int r = 0; bookmark[r].key && r < BM_MAX; ++r) {
+	int r = 0;
+
+	for (; bookmark[r].key && r < BM_MAX; ++r) {
 		if (bookmark[r].key == key) {
 			if (bookmark[r].loc[0] == '~') {
 				if (!home) {
@@ -2626,7 +2625,7 @@ static int dentfill(char *path, struct entry **dents)
 				} else
 					dentp->blocks = ent_blocks;
 
-				if (sb_path.st_dev == sb.st_dev)
+				if (sb_path.st_dev == sb.st_dev) // NOLINT
 					dir_blocks += dentp->blocks;
 				else
 					num_files = num_saved;
@@ -2669,9 +2668,9 @@ static int dentfill(char *path, struct entry **dents)
  */
 static int dentfind(const char *fname, int n)
 {
-	DPRINTF_S(fname);
+	int i = 0;
 
-	for (int i = 0; i < n; ++i)
+	for (; i < n; ++i)
 		if (xstrcmp(fname, dents[i].name) == 0)
 			return i;
 
