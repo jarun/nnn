@@ -281,11 +281,10 @@ typedef struct {
 	uint copymode   : 1;  /* Set when copying files */
 	uint autoselect : 1;  /* Auto-select dir in nav-as-you-type mode */
 	uint showdetail : 1;  /* Clear to show fewer file info */
-	uint showcolor  : 1;  /* Set to show dirs in blue */
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 7;
+	uint reserved   : 8;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint picker     : 1;  /* Write selection to user-specified file */
@@ -311,7 +310,7 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0};
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static struct entry *dents;
@@ -936,12 +935,13 @@ static bool initcurses(void)
 	curs_set(FALSE); /* Hide cursor */
 	start_color();
 	use_default_colors();
-	if (cfg.showcolor) {
-		init_pair(1, g_ctx[0].color, -1);
-		init_pair(2, g_ctx[1].color, -1);
-		init_pair(3, g_ctx[2].color, -1);
-		init_pair(4, g_ctx[3].color, -1);
-	}
+
+	/* Initialize default colors */
+	init_pair(1, g_ctx[0].color, -1);
+	init_pair(2, g_ctx[1].color, -1);
+	init_pair(3, g_ctx[2].color, -1);
+	init_pair(4, g_ctx[3].color, -1);
+
 	settimeout(); /* One second */
 	set_escdelay(25);
 	return TRUE;
@@ -2751,20 +2751,14 @@ static void redraw(char *path)
 		if (!g_ctx[i].c_cfg.ctxactive)
 			printw("%d ", i + 1);
 		else if (cfg.curctx != i) {
-			if (cfg.showcolor)
-				attrs = COLOR_PAIR(i + 1) | A_BOLD | A_UNDERLINE;
-			else
-				attrs = A_UNDERLINE;
+			attrs = COLOR_PAIR(i + 1) | A_BOLD | A_UNDERLINE;
 			attron(attrs);
 			printw("%d", i + 1);
 			attroff(attrs);
 			printw(" ");
 		} else {
 			/* Print current context in reverse */
-			if (cfg.showcolor)
-				attrs = COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE;
-			else
-				attrs = A_REVERSE;
+			attrs = COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE;
 			attron(attrs);
 			printw("%d", i + 1);
 			attroff(attrs);
@@ -2793,7 +2787,7 @@ static void redraw(char *path)
 	else
 		ncols -= 5;
 
-	if (!cfg.wild && cfg.showcolor) {
+	if (!cfg.wild) {
 		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		cfg.dircolor = 1;
 	}
@@ -4004,7 +3998,7 @@ int main(int argc, char *argv[])
 	char *ipath = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "Slib:Cenp:svwh")) != -1) {
+	while ((opt = getopt(argc, argv, "Slib:enp:svwh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4020,9 +4014,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'b':
 			ipath = optarg;
-			break;
-		case 'C':
-			cfg.showcolor = 0;
 			break;
 		case 'e':
 			cfg.metaviewer = EXIFTOOL;
@@ -4069,23 +4060,21 @@ int main(int argc, char *argv[])
 	}
 
 	/* Get the context colors; copier used as tmp var */
-	if (cfg.showcolor) {
-		copier = xgetenv(env_cfg[NNN_CONTEXT_COLORS], "4444");
-		opt = 0;
-		while (opt < CTX_MAX) {
-			if (*copier) {
-				if (*copier < '0' || *copier > '7') {
-					fprintf(stderr, "invalid color code\n");
-					return 1;
-				}
+	copier = xgetenv(env_cfg[NNN_CONTEXT_COLORS], "4444");
+	opt = 0;
+	while (opt < CTX_MAX) {
+		if (*copier) {
+			if (*copier < '0' || *copier > '7') {
+				fprintf(stderr, "invalid color code\n");
+				return 1;
+			}
 
-				g_ctx[opt].color = *copier - '0';
-				++copier;
-			} else
-				g_ctx[opt].color = 4;
+			g_ctx[opt].color = *copier - '0';
+			++copier;
+		} else
+			g_ctx[opt].color = 4;
 
-			++opt;
-		}
+		++opt;
 	}
 
 	/* Parse bookmarks string */

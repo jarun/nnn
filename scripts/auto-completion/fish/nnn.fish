@@ -6,7 +6,6 @@
 #
 
 complete -c nnn -s b -r -d 'bookmark key to open'
-complete -c nnn -s C    -d 'disable directory color'
 complete -c nnn -s e    -d 'use exiftool instead of mediainfo'
 complete -c nnn -s h    -d 'show this help and exit'
 complete -c nnn -s i    -d 'start in navigate-as-you-type mode'

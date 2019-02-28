@@ -219,7 +219,6 @@ positional args:
 
 optional args:
  -b key  open bookmark key
- -C      disable directory color
  -e      use exiftool for media info
  -i      nav-as-you-type mode
  -l      light mode

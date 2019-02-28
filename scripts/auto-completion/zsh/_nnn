@@ -10,7 +10,6 @@ setopt localoptions noshwordsplit noksharrays
 local -a args
 args=(
     '(-b)-b[bookmark key to open]:key char'
-    '(-C)-C[disable directory color]'
     '(-e)-e[use exiftool instead of mediainfo]'
     '(-h)-h[show this help and exit]'
     '(-i)-i[start in navigate-as-you-type mode]'
