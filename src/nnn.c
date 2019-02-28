@@ -3997,6 +3997,7 @@ int main(int argc, char *argv[])
 	char cwd[PATH_MAX] __attribute__ ((aligned));
 	char *ipath = NULL;
 	int opt;
+	struct sigaction act;
 
 	while ((opt = getopt(argc, argv, "Slib:enp:svwh")) != -1) {
 		switch (opt) {
@@ -4199,8 +4200,6 @@ int main(int argc, char *argv[])
 #endif
 
 	/* Ignore/handle certain signals */
-	struct sigaction act;
-
 	memset(&act, 0, sizeof(act));
 	act.sa_sigaction = &sigint_handler;
 	act.sa_flags = SA_SIGINFO;
