@@ -3380,6 +3380,7 @@ nochange:
 		{
 			if (ndents)
 				mkpath(path, dents[cur].name, newpath);
+			r = TRUE;
 
 			switch (sel) {
 			case SEL_MEDIA:
@@ -3409,10 +3410,8 @@ nochange:
 			case SEL_RUNEDIT:
 				if (!quote_run_sh_cmd(editor, dents[cur].name, path))
 					goto nochange;
-				r = TRUE;
 				break;
 			case SEL_RUNPAGE:
-				r = TRUE;
 				spawn(pager, pager_arg, dents[cur].name, path, F_NORMAL);
 				break;
 			case SEL_NOTE:
@@ -3427,11 +3426,9 @@ nochange:
 
 				if (!quote_run_sh_cmd(editor, notepath, NULL))
 					goto nochange;
-				r = TRUE;
 				break;
 			}
 			default: /* SEL_LOCK */
-				r = TRUE;
 				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
 				break;
 			}
@@ -3510,7 +3507,6 @@ nochange:
 				copystartid = cur;
 				ncp = 0;
 				printmsg("selection on");
-				DPRINTF_S("selection on");
 				goto nochange;
 			}
 
@@ -3531,10 +3527,8 @@ nochange:
 			} // fallthrough
 		case SEL_COPYALL:
 			if (sel == SEL_COPYALL) {
-				if (!ndents) {
-					printmsg("0 entries");
+				if (!ndents)
 					goto nochange;
-				}
 
 				cfg.copymode = 0;
 				copybufpos = 0;
@@ -3576,7 +3570,8 @@ nochange:
 			if (!cpsafe())
 				goto nochange;
 
-			if (sel == SEL_CP) {
+			switch (sel) {
+			case SEL_CP:
 				snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
 					 "xargs -0 -a %s -%c src %s src .",
@@ -3585,7 +3580,8 @@ nochange:
 					 "cat %s | xargs -0 -o -%c src cp -iRp src .",
 					 g_cppath, REPLACE_STR);
 #endif
-			} else if (sel == SEL_MV) {
+				break;
+			case SEL_MV:
 				snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
 					 "xargs -0 -a %s -%c src %s src .",
@@ -3594,7 +3590,8 @@ nochange:
 					 "cat %s | xargs -0 -o -%c src mv -i src .",
 					 g_cppath, REPLACE_STR);
 #endif
-			} else { /* SEL_RMMUL */
+				break;
+			default: /* SEL_RMMUL */
 				snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
 					 "xargs -0 -a %s rm -%cr",
@@ -3602,6 +3599,7 @@ nochange:
 					 "cat %s | xargs -0 -o rm -%cr",
 #endif
 					 g_cppath, confirm_force());
+				break;
 			}
 
 			spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
@@ -3964,10 +3962,8 @@ nochange:
 			} // fallthrough
 		case SEL_QUITCTX:
 			if (sel == SEL_QUITCTX) {
-				uint iter = 1;
-
 				r = cfg.curctx;
-				while (iter < CTX_MAX) {
+				for (fd = 1; fd < CTX_MAX; ++fd) {
 					(r == CTX_MAX - 1) ? (r = 0) : ++r;
 					if (g_ctx[r].c_cfg.ctxactive) {
 						g_ctx[cfg.curctx].c_cfg.ctxactive = 0;
@@ -3982,8 +3978,6 @@ nochange:
 						setdirwatch();
 						goto begin;
 					}
-
-					++iter;
 				}
 			}
 
