@@ -315,7 +315,7 @@ Use <kbd>^K</kbd> to copy the absolute path of the file under the cursor.
 
 To copy multiple absolute file paths:
 
-- press <kbd>^Y</kbd> (or <kbd>Y</kbd>) to enter selection mode. In this mode it's possible to
+- press <kbd>^Y</kbd> to enter selection mode. In this mode it's possible to
   - cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry (works across directories and contexts); or,
   - navigate to another file in the same directory to select a range of files
 - press <kbd>^Y</kbd> again to save the selection and exit selection mode.
