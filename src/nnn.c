@@ -1832,7 +1832,7 @@ static char *get_bm_loc(char *buf, int key)
 	return NULL;
 }
 
-static void resetdircolor(int flags)
+static inline void resetdircolor(int flags)
 {
 	if (cfg.dircolor && !(flags & DIR_OR_LINK_TO_DIR)) {
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
@@ -1861,11 +1861,11 @@ static char *unescape(const char *str, uint maxcols)
 	/* Convert multi-byte to wide char */
 	len = mbstowcs(wbuf, str, PATH_MAX);
 
-	g_buf[0] = '\0';
+	//g_buf[0] = '\0';
 
 	if (maxcols) {
 		len = lencount = wcswidth(wbuf, len);
-		/* Reduce nuber of wide chars to max columns */
+		/* Reduce number of wide chars to max columns */
 		if (len > maxcols)
 			lencount = maxcols + 1;
 
@@ -1991,13 +1991,19 @@ static void printent(const struct entry *ent, int sel, uint namecols)
 
 static void printent_long(const struct entry *ent, int sel, uint namecols)
 {
-	char timebuf[18], permbuf[4], cp = ' ';
+	char timebuf[18], permbuf[4], ind1 = '\0', ind2[] = "\0\0", cp = ' ';
 
 	/* Timestamp */
 	strftime(timebuf, 18, "%F %R", localtime(&ent->t));
 
 	/* Permissions */
-	snprintf(permbuf, 4, "%d%d%d", (ent->mode >> 6) & 7, (ent->mode >> 3) & 7, ent->mode & 7);
+	permbuf[0] = *xitoa((ent->mode >> 6) & 7);
+	permbuf[0] = permbuf[0] ? permbuf[0] : '0';
+	permbuf[1] = *xitoa((ent->mode >> 3) & 7);
+	permbuf[1] = permbuf[1] ? permbuf[1] : '0';
+	permbuf[2] = *xitoa(ent->mode & 7);
+	permbuf[2] = permbuf[2] ? permbuf[2] : '0';
+	permbuf[3] = '\0';
 
 	/* Add copy indicator */
 	if (ent->flags & FILE_COPIED)
@@ -2035,20 +2041,20 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 			printw("%c%-16.16s  0%s        @  %s@\n", cp, timebuf, permbuf, pname);
 		break;
 	case S_IFSOCK:
-		printw("%c%-16.16s  0%s        =  %s=\n", cp, timebuf, permbuf, pname);
-		break;
+		ind1 = ind2[0] = '='; // fallthrough
 	case S_IFIFO:
-		printw("%c%-16.16s  0%s        |  %s|\n", cp, timebuf, permbuf, pname);
-		break;
+		if (!ind1)
+			ind1 = ind2[0] = '|'; // fallthrough
 	case S_IFBLK:
-		printw("%c%-16.16s  0%s        b  %s\n", cp, timebuf, permbuf, pname);
-		break;
+		if (!ind1)
+			ind1 = 'b'; // fallthrough
 	case S_IFCHR:
-		printw("%c%-16.16s  0%s        c  %s\n", cp, timebuf, permbuf, pname);
-		break;
+		if (!ind1)
+			ind1 = 'c'; // fallthrough
 	default:
-		printw("%c%-16.16s  0%s %8.8s? %s?\n", cp, timebuf, permbuf,
-		       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
+		if (!ind1)
+			ind1 = ind2[0] = '?';
+		printw("%c%-16.16s  0%s        %c  %s%s\n", cp, timebuf, permbuf, ind1, pname, ind2);
 		break;
 	}
 
