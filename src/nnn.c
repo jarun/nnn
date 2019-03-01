@@ -70,14 +70,12 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <grp.h>
 #include <libgen.h>
 #include <limits.h>
 #ifdef __gnu_hurd__
 #define PATH_MAX 4096
 #endif
 #include <locale.h>
-#include <pwd.h>
 #include <stdio.h>
 #ifndef NORL
 #include <readline/history.h>
@@ -2064,73 +2062,6 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 
 static void (*printptr)(const struct entry *ent, int sel, uint namecols) = &printent_long;
 
-static char get_fileind(char *desc, mode_t mode)
-{
-	char c;
-
-	switch (mode & S_IFMT) {
-	case S_IFREG:
-		c = '-';
-		xstrlcpy(desc, "regular file", DESCRIPTOR_LEN);
-		if (mode & 0100)
-			/* Length of string "regular file" is 12 */
-			xstrlcpy(desc + 12, ", executable", DESCRIPTOR_LEN - 12);
-		break;
-	case S_IFDIR:
-		c = 'd';
-		xstrlcpy(desc, "directory", DESCRIPTOR_LEN);
-		break;
-	case S_IFLNK:
-		c = 'l';
-		xstrlcpy(desc, "symbolic link", DESCRIPTOR_LEN);
-		break;
-	case S_IFSOCK:
-		c = 's';
-		xstrlcpy(desc, "socket", DESCRIPTOR_LEN);
-		break;
-	case S_IFIFO:
-		c = 'p';
-		xstrlcpy(desc, "FIFO", DESCRIPTOR_LEN);
-		break;
-	case S_IFBLK:
-		c = 'b';
-		xstrlcpy(desc, "block special device", DESCRIPTOR_LEN);
-		break;
-	case S_IFCHR:
-		c = 'c';
-		xstrlcpy(desc, "character special device", DESCRIPTOR_LEN);
-		break;
-	default:
-		/* Unknown type -- possibly a regular file? */
-		c = '?';
-		desc[0] = '\0';
-		break;
-	}
-
-	return c;
-}
-
-/* Convert a mode field into "ls -l" type perms field. */
-static char *get_lsperms(char *desc, mode_t mode)
-{
-	static const char * const rwx[] = {"---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx"};
-	static char bits[11] = {'\0'};
-
-	bits[0] = get_fileind(desc, mode);
-	xstrlcpy(&bits[1], rwx[(mode >> 6) & 7], 4);
-	xstrlcpy(&bits[4], rwx[(mode >> 3) & 7], 4);
-	xstrlcpy(&bits[7], rwx[(mode & 7)], 4);
-
-	if (mode & S_ISUID)
-		bits[3] = (mode & 0100) ? 's' : 'S';  /* user executable */
-	if (mode & S_ISGID)
-		bits[6] = (mode & 0010) ? 's' : 'l';  /* group executable */
-	if (mode & S_ISVTX)
-		bits[9] = (mode & 0001) ? 't' : 'T';  /* others executable */
-
-	return bits;
-}
-
 /*
  * Gets only a single line (that's what we need
  * for now) or shows full command output in pager.
@@ -2210,34 +2141,14 @@ static bool getutil(const char *util)
 	return TRUE;
 }
 
-static char *xgetpwuid(uid_t uid)
-{
-	const struct passwd *pwd = getpwuid(uid);
-
-	if (!pwd)
-		return utils[UNKNOWN];
-
-	return pwd->pw_name;
-}
-
-static char *xgetgrgid(gid_t gid)
-{
-	const struct group *grp = getgrgid(gid);
-
-	if (!grp)
-		return utils[UNKNOWN];
-
-	return grp->gr_name;
-}
-
 /*
  * Follows the stat(1) output closely
  */
 static bool show_stats(const char *fpath, const char *fname, const struct stat *sb)
 {
-	char desc[DESCRIPTOR_LEN];
-	const char *perms = get_lsperms(desc, sb->st_mode);
+	int fd;
 	char *p, *begin = g_buf;
+	FILE *fp;
 
 	if (g_tmpfpath[0])
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
@@ -2247,74 +2158,19 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 		return FALSE;
 	}
 
-	int fd = mkstemp(g_tmpfpath);
-
+	fd = mkstemp(g_tmpfpath);
 	if (fd == -1)
 		return FALSE;
 
-	dprintf(fd, "    File: '%s'", unescape(fname, 0));
+	xstrlcpy(g_buf, "stat ", 6);
+	xstrlcpy(g_buf + 5, fpath, PATH_MAX);
 
-	/* Show file name or 'symlink' -> 'target' */
-	if (perms[0] == 'l') {
-		/* Note that CMD_LEN_MAX > PATH_MAX */
-		ssize_t len = readlink(fpath, g_buf, CMD_LEN_MAX);
-
-		if (len != -1) {
-			struct stat tgtsb;
-
-			if (!stat(fpath, &tgtsb) && S_ISDIR(tgtsb.st_mode))
-				g_buf[len++] = '/';
-
-			g_buf[len] = '\0';
-
-			/*
-			 * We pass g_buf but unescape() operates on g_buf too!
-			 * Read the API notes for information on how this works.
-			 */
-			dprintf(fd, " -> '%s'", unescape(g_buf, 0));
-		}
+	fp = popen(g_buf, "r");
+	if (fp != NULL) {
+		while (fgets(g_buf, CMD_LEN_MAX - 1, fp) != NULL)
+			dprintf(fd, "%s", g_buf);
+		pclose(fp);
 	}
-
-	/* Show size, blocks, file type */
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
-	dprintf(fd, "\n    Size: %-15lld Blocks: %-10lld IO Block: %-6d %s",
-	       (long long)sb->st_size, (long long)sb->st_blocks, sb->st_blksize, desc);
-#else
-	dprintf(fd, "\n    Size: %-15ld Blocks: %-10ld IO Block: %-6ld %s",
-	       sb->st_size, sb->st_blocks, (long)sb->st_blksize, desc);
-#endif
-
-	/* Show containing device, inode, hardlink count */
-	snprintf(g_buf, 32, "%lxh/%lud", (ulong)sb->st_dev, (ulong)sb->st_dev);
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
-	dprintf(fd, "\n  Device: %-15s Inode: %-11llu Links: %-9hu",
-		g_buf, (unsigned long long)sb->st_ino, sb->st_nlink);
-#else
-	dprintf(fd, "\n  Device: %-15s Inode: %-11lu Links: %-9lu",
-		g_buf, sb->st_ino, (ulong)sb->st_nlink);
-#endif
-
-	/* Show major, minor number for block or char device */
-	if (perms[0] == 'b' || perms[0] == 'c')
-		dprintf(fd, " Device type: %x,%x", major(sb->st_rdev), minor(sb->st_rdev));
-
-	/* Show permissions, owner, group */
-	dprintf(fd, "\n  Access: 0%d%d%d/%s Uid: (%u/%s)  Gid: (%u/%s)",
-		(sb->st_mode >> 6) & 7, (sb->st_mode >> 3) & 7,
-		sb->st_mode & 7, perms, sb->st_uid, xgetpwuid(sb->st_uid),
-		sb->st_gid, xgetgrgid(sb->st_gid));
-
-	/* Show last access time */
-	strftime(g_buf, 40, messages[STR_DATE_ID], localtime(&sb->st_atime));
-	dprintf(fd, "\n\n  Access: %s", g_buf);
-
-	/* Show last modification time */
-	strftime(g_buf, 40, messages[STR_DATE_ID], localtime(&sb->st_mtime));
-	dprintf(fd, "\n  Modify: %s", g_buf);
-
-	/* Show last status change time */
-	strftime(g_buf, 40, messages[STR_DATE_ID], localtime(&sb->st_ctime));
-	dprintf(fd, "\n  Change: %s", g_buf);
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
@@ -2332,11 +2188,9 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 			}
 			dprintf(fd, " %s", begin);
 		}
+	}
 
-		dprintf(fd, "\n\n");
-	} else
-		dprintf(fd, "\n\n\n");
-
+	dprintf(fd, "\n\n");
 	close(fd);
 
 	spawn(pager, pager_arg, g_tmpfpath, NULL, F_NORMAL);
