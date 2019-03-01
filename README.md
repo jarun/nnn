@@ -318,7 +318,9 @@ To copy multiple absolute file paths:
 - press <kbd>^Y</kbd> (or <kbd>Y</kbd>) to enter selection mode. In this mode it's possible to
   - cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry (works across directories and contexts); or,
   - navigate to another file in the same directory to select a range of files
-- press <kbd>^Y</kbd> (or <kbd>Y</kbd>) _again_ to copy the paths and exit the selection mode
+- press <kbd>^Y</kbd> again to save the selection and exit selection mode.
+
+Selected files are visually indicated by a `+`.
 
 The files in the list can now be copied (<kbd>P</kbd>), moved (<kbd>V</kbd>) or removed (<kbd>X</kbd>).
 

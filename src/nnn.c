@@ -184,11 +184,14 @@ disabledbg()
 #define DESCRIPTOR_LEN 32
 #define _ALIGNMENT 0x10 /* 16-byte alignment */
 #define _ALIGNMENT_MASK 0xF
-#define DIR_OR_LINK_TO_DIR 0x1
 #define HOME_LEN_MAX 64
 #define CTX_MAX 4
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
+
+/* Entry flags */
+#define DIR_OR_LINK_TO_DIR 0x1
+#define FILE_COPIED 0x10
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE     0x00  /* no flag set */
@@ -907,6 +910,17 @@ static bool cpsafe(void)
 	}
 
 	return TRUE;
+}
+
+/* Reset copy indicators */
+static void resetcpind()
+{
+	int r = 0;
+
+	/* Reset copy indicators */
+	for (; r < ndents; ++r)
+		if (dents[r].flags & FILE_COPIED)
+			dents[r].flags &= ~FILE_COPIED;
 }
 
 /* Initialize curses mode */
@@ -1977,13 +1991,17 @@ static void printent(const struct entry *ent, int sel, uint namecols)
 
 static void printent_long(const struct entry *ent, int sel, uint namecols)
 {
-	char timebuf[18], permbuf[4];
+	char timebuf[18], permbuf[4], cp = ' ';
 
 	/* Timestamp */
 	strftime(timebuf, 18, "%F %R", localtime(&ent->t));
 
 	/* Permissions */
 	snprintf(permbuf, 4, "%d%d%d", (ent->mode >> 6) & 7, (ent->mode >> 3) & 7, ent->mode & 7);
+
+	/* Add copy indicator */
+	if (ent->flags & FILE_COPIED)
+		cp = '+';
 
 	/* Trim escape chars from name */
 	const char *pname = unescape(ent->name, namecols);
@@ -1997,39 +2015,39 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
 		if (ent->mode & 0100)
-			printw(" %-16.16s  0%s %8.8s* %s*\n", timebuf, permbuf,
+			printw("%c%-16.16s  0%s %8.8s* %s*\n", cp, timebuf, permbuf,
 			       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 		else
-			printw(" %-16.16s  0%s %8.8s  %s\n", timebuf, permbuf,
+			printw("%c%-16.16s  0%s %8.8s  %s\n", cp, timebuf, permbuf,
 			       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 		break;
 	case S_IFDIR:
 		if (cfg.blkorder)
-			printw(" %-16.16s  0%s %8.8s/ %s/\n",
-			       timebuf, permbuf, coolsize(ent->blocks << BLK_SHIFT), pname);
+			printw("%c%-16.16s  0%s %8.8s/ %s/\n",
+			       cp, timebuf, permbuf, coolsize(ent->blocks << BLK_SHIFT), pname);
 		else
-			printw(" %-16.16s  0%s        /  %s/\n", timebuf, permbuf, pname);
+			printw("%c%-16.16s  0%s        /  %s/\n", cp, timebuf, permbuf, pname);
 		break;
 	case S_IFLNK:
 		if (ent->flags & DIR_OR_LINK_TO_DIR)
-			printw(" %-16.16s  0%s       @/  %s@\n", timebuf, permbuf, pname);
+			printw("%c%-16.16s  0%s       @/  %s@\n", cp, timebuf, permbuf, pname);
 		else
-			printw(" %-16.16s  0%s        @  %s@\n", timebuf, permbuf, pname);
+			printw("%c%-16.16s  0%s        @  %s@\n", cp, timebuf, permbuf, pname);
 		break;
 	case S_IFSOCK:
-		printw(" %-16.16s  0%s        =  %s=\n", timebuf, permbuf, pname);
+		printw("%c%-16.16s  0%s        =  %s=\n", cp, timebuf, permbuf, pname);
 		break;
 	case S_IFIFO:
-		printw(" %-16.16s  0%s        |  %s|\n", timebuf, permbuf, pname);
+		printw("%c%-16.16s  0%s        |  %s|\n", cp, timebuf, permbuf, pname);
 		break;
 	case S_IFBLK:
-		printw(" %-16.16s  0%s        b  %s\n", timebuf, permbuf, pname);
+		printw("%c%-16.16s  0%s        b  %s\n", cp, timebuf, permbuf, pname);
 		break;
 	case S_IFCHR:
-		printw(" %-16.16s  0%s        c  %s\n", timebuf, permbuf, pname);
+		printw("%c%-16.16s  0%s        c  %s\n", cp, timebuf, permbuf, pname);
 		break;
 	default:
-		printw(" %-16.16s  0%s %8.8s? %s?\n", timebuf, permbuf,
+		printw("%c%-16.16s  0%s %8.8s? %s?\n", cp, timebuf, permbuf,
 		       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 		break;
 	}
@@ -2609,6 +2627,7 @@ static int dentfill(char *path, struct entry **dents)
 		dentp->mode = sb.st_mode;
 		dentp->t = sb.st_mtime;
 		dentp->size = sb.st_size;
+		dentp->flags = 0;
 
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
@@ -2646,8 +2665,6 @@ static int dentfill(char *path, struct entry **dents)
 
 		if (S_ISDIR(sb.st_mode))
 			dentp->flags |= DIR_OR_LINK_TO_DIR;
-		else if (dentp->flags & DIR_OR_LINK_TO_DIR)
-			dentp->flags &= ~DIR_OR_LINK_TO_DIR;
 
 		++n;
 	}
@@ -3463,8 +3480,13 @@ nochange:
 				++ncp;
 			} else {
 				r = mkpath(path, dents[cur].name, newpath);
-				/* Keep the copy buf in sync */
-				copybufpos = 0;
+
+				if (copybufpos) {
+					resetcpind();
+
+					/* Keep the copy buf in sync */
+					copybufpos = 0;
+				}
 				appendfpath(newpath, r);
 
 				writecp(newpath, r - 1); /* Truncate NULL from end */
@@ -3472,14 +3494,20 @@ nochange:
 					spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 			}
 
+			dents[cur].flags |= FILE_COPIED;
+
 			printmsg(newpath);
 			goto nochange;
 		case SEL_COPYMUL:
 			cfg.copymode ^= 1;
 			if (cfg.copymode) {
+				if (copybufpos) {
+					resetcpind();
+					writecp(NULL, 0);
+					copybufpos = 0;
+				}
 				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
 				copystartid = cur;
-				copybufpos = 0;
 				ncp = 0;
 				printmsg("selection on");
 				DPRINTF_S("selection on");
@@ -3516,10 +3544,13 @@ nochange:
 			}
 
 			if ((!ncp && copystartid < copyendid) || sel == SEL_COPYALL) {
-				for (r = copystartid; r <= copyendid; ++r)
+				for (r = copystartid; r <= copyendid; ++r) {
 					if (!appendfpath(newpath, mkpath(path,
 							 dents[r].name, newpath)))
 						goto nochange;
+
+					dents[r].flags |= FILE_COPIED;
+				}
 
 				mvprintw(LINES - 1, 0, "%d files selected\n",
 					 copyendid - copystartid + 1);
