@@ -2021,24 +2021,24 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
 		if (ent->mode & 0100)
-			printw("%c%-16.16s  0%s %8.8s* %s*\n", cp, timebuf, permbuf,
+			printw("%c%-16.16s  %s %8.8s* %s*\n", cp, timebuf, permbuf,
 			       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 		else
-			printw("%c%-16.16s  0%s %8.8s  %s\n", cp, timebuf, permbuf,
+			printw("%c%-16.16s  %s %8.8s  %s\n", cp, timebuf, permbuf,
 			       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 		break;
 	case S_IFDIR:
 		if (cfg.blkorder)
-			printw("%c%-16.16s  0%s %8.8s/ %s/\n",
+			printw("%c%-16.16s  %s %8.8s/ %s/\n",
 			       cp, timebuf, permbuf, coolsize(ent->blocks << BLK_SHIFT), pname);
 		else
-			printw("%c%-16.16s  0%s        /  %s/\n", cp, timebuf, permbuf, pname);
+			printw("%c%-16.16s  %s        /  %s/\n", cp, timebuf, permbuf, pname);
 		break;
 	case S_IFLNK:
 		if (ent->flags & DIR_OR_LINK_TO_DIR)
-			printw("%c%-16.16s  0%s       @/  %s@\n", cp, timebuf, permbuf, pname);
+			printw("%c%-16.16s  %s       @/  %s@\n", cp, timebuf, permbuf, pname);
 		else
-			printw("%c%-16.16s  0%s        @  %s@\n", cp, timebuf, permbuf, pname);
+			printw("%c%-16.16s  %s        @  %s@\n", cp, timebuf, permbuf, pname);
 		break;
 	case S_IFSOCK:
 		ind1 = ind2[0] = '='; // fallthrough
@@ -2054,7 +2054,7 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 	default:
 		if (!ind1)
 			ind1 = ind2[0] = '?';
-		printw("%c%-16.16s  0%s        %c  %s%s\n", cp, timebuf, permbuf, ind1, pname, ind2);
+		printw("%c%-16.16s  %s        %c  %s%s\n", cp, timebuf, permbuf, ind1, pname, ind2);
 		break;
 	}
 
