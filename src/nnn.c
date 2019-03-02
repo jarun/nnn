@@ -976,11 +976,11 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 		arg2 = tmp;
 	}
 
-	if (flag & F_NORMAL)
-		exitcurses();
-
 	pid = fork();
 	if (pid == 0) {
+		if (flag & F_NORMAL)
+			exitcurses();
+
 		if (dir != NULL)
 			status = chdir(dir);
 
@@ -1017,8 +1017,11 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 				DPRINTF_D(status);
 
 		DPRINTF_D(pid);
-		if (flag & F_NORMAL)
+		if (flag & F_NORMAL) {
+			exitcurses();
+			initcurses();
 			refresh();
+		}
 	}
 }
 
