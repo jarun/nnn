@@ -267,7 +267,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  MISC
          ! ^]  Spawn SHELL       C  Execute entry
          R ^V  Run/pick script   L  Lock terminal
-           ^P  Command prompt   ^N  Take note
+           ^P  Prompt  ^N  Note  T  Empty trash
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.

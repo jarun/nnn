@@ -312,7 +312,7 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static struct entry *dents;
@@ -1167,7 +1167,7 @@ static void mvstr(char *buf, const char *dst)
 
 static bool rmmulstr(char *buf, const char *curpath)
 {
-	if (cfg.trash && strcmp(curpath, g_trash) != 0) {
+	if (cfg.trash) {
 		if (!xdiraccess(g_trash))
 			return FALSE;
 
@@ -1202,6 +1202,40 @@ static bool xrm(char *path)
 	char rm_opts[] = {'-', confirm_force(), 'r'};
 
 	spawn("rm", rm_opts, path, NULL, F_NORMAL | F_SIGINT);
+	return TRUE;
+}
+
+/*
+ * Returns:
+ * FALSE - a message is shown
+ * TRUE - no message shown
+ */
+static bool empty_trash(const char *path)
+{
+	size_t r;
+
+	if (!cfg.trash) {
+		printmsg("set NNN_TRASH");
+		return FALSE;
+	}
+
+	if (!xdiraccess(g_trash))
+		return FALSE;
+
+	r = xstrlcpy(g_buf, "rm -rf ", CMD_LEN_MAX);
+	r += xstrlcpy(g_buf + r - 1, g_trash, CMD_LEN_MAX - r);
+	g_buf[r - 2] = '/';
+	g_buf[r - 1] = '*';
+	g_buf[r] = '\0';
+
+	spawn("sh", "-c", g_buf, NULL, F_NORMAL | F_SIGINT);
+
+	/* Show msg only if not in trash, else refresh trash */
+	if (strcmp(path, g_trash) != 0) {
+		printmsg("trash emptied");
+		return FALSE;
+	}
+
 	return TRUE;
 }
 
@@ -2370,7 +2404,7 @@ static bool show_help(const char *path)
 		"1MISC\n"
 	       "9! ^]  Spawn SHELL       C  Execute entry\n"
 	       "9R ^V  Run/pick script   L  Lock terminal\n"
-		 "b^P  Command prompt   ^N  Take note\n"};
+		 "b^P  Prompt  ^N  Note  T  Empty trash\n"};
 
 	if (g_tmpfpath[0])
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
@@ -3539,18 +3573,29 @@ nochange:
 				presel = FILTER;
 			goto begin;
 		}
-		case SEL_RM:
+		case SEL_RM: // fallthrough
+		case SEL_RMTRASH:
 		{
-			if (!ndents)
-				break;
+			if (sel == SEL_RM) {
+				if (!ndents)
+					break;
 
-			mkpath(path, dents[cur].name, newpath);
-			if (!xrm(newpath))
-				goto nochange;
+				mkpath(path, dents[cur].name, newpath);
 
-			/* Don't optimize cur if filtering is on */
-			if (!cfg.filtermode && cur && access(newpath, F_OK) == -1)
-				--cur;
+				if (!xrm(newpath))
+					goto nochange;
+
+				/* Don't optimize cur if filtering is on */
+				if (!cfg.filtermode && cur && access(newpath, F_OK) == -1)
+					--cur;
+			} else {
+				r = get_input("Empty trash? [y/Y]");
+				if (!(r == 'y' || r == 'Y'))
+					break;
+
+				if (!empty_trash(path))
+					goto nochange;
+			}
 
 			copycurname();
 
