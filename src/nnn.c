@@ -1217,6 +1217,25 @@ static void archive_selection(const char *archive, const char *curpath)
 	spawn("sh", "-c", g_buf, curpath, F_NORMAL | F_SIGINT);
 }
 
+static bool write_lastdir(const char *curpath)
+{
+	char *tmp = getenv(env_cfg[NNN_TMPFILE]);
+
+	if (!tmp) {
+		printmsg("set NNN_TMPFILE");
+		return FALSE;
+	}
+
+	FILE *fp = fopen(tmp, "w");
+
+	if (fp) {
+		fprintf(fp, "cd \"%s\"", curpath);
+		fclose(fp);
+	}
+
+	return TRUE;
+}
+
 /*
  * Returns:
  * FALSE - a message is shown
@@ -3917,23 +3936,8 @@ nochange:
 					/* Picker mode: reset buffer or clear file */
 					if (copybufpos)
 						cfg.pickraw ? copybufpos = 0 : writecp(NULL, 0);
-
-					dentfree(dents);
-					return;
-				}
-
-				tmp = getenv(env_cfg[NNN_TMPFILE]);
-				if (!tmp) {
-					printmsg("set NNN_TMPFILE");
+				} else if (!write_lastdir(path))
 					goto nochange;
-				}
-
-				FILE *fp = fopen(tmp, "w");
-
-				if (fp) {
-					fprintf(fp, "cd \"%s\"", path);
-					fclose(fp);
-				}
 			} // fallthrough
 		case SEL_QUITCTX:
 			if (sel == SEL_QUITCTX) {
