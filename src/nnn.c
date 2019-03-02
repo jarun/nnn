@@ -1205,6 +1205,18 @@ static bool xrm(char *path)
 	return TRUE;
 }
 
+static void archive_selection(const char *archive, const char *curpath)
+{
+	snprintf(g_buf, CMD_LEN_MAX,
+#ifdef __linux__
+		 "xargs -0 -a %s %s %s",
+#else
+		 "cat %s | xargs -0 -o %s %s",
+#endif
+		 g_cppath, utils[APACK], archive);
+	spawn("sh", "-c", g_buf, curpath, F_NORMAL | F_SIGINT);
+}
+
 /*
  * Returns:
  * FALSE - a message is shown
@@ -3658,17 +3670,8 @@ nochange:
 					goto nochange;
 				}
 
-				if (r == 's') {
-					snprintf(g_buf, CMD_LEN_MAX,
-#ifdef __linux__
-						 "xargs -0 -a %s %s %s",
-#else
-						 "cat %s | xargs -0 -o %s %s",
-#endif
-						 g_cppath, utils[APACK], tmp);
-					spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
-				} else
-					spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
+				r == 's' ? archive_selection(tmp, path)
+					 : spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
 				break;
 			case SEL_OPENWITH:
 				dir = NULL;
