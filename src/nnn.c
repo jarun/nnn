@@ -285,7 +285,7 @@ typedef struct {
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 8;
+	uint reserved   : 7;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint picker     : 1;  /* Write selection to user-specified file */
@@ -297,6 +297,7 @@ typedef struct {
 	uint restrict0b : 1;  /* Restrict 0-byte file opening */
 	uint filter_re  : 1;  /* Use regex filters */
 	uint wild       : 1;  /* Do not sort entries on dir load */
+	uint trash      : 1;  /* Move removed files to trash */
 } settings;
 
 /* Contexts or workspaces */
@@ -311,7 +312,7 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0};
+static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1};
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static struct entry *dents;
@@ -446,8 +447,9 @@ static const char * const messages[] = {
 #define NNN_NO_AUTOSELECT 11
 #define NNN_RESTRICT_NAV_OPEN 12
 #define NNN_RESTRICT_0B 13
+#define NNN_TRASH 14
 #ifdef __linux__
-#define NNN_CP_MV_PROG 14
+#define NNN_CP_MV_PROG 15
 #endif
 
 static const char * const env_cfg[] = {
@@ -465,6 +467,7 @@ static const char * const env_cfg[] = {
 	"NNN_NO_AUTOSELECT",
 	"NNN_RESTRICT_NAV_OPEN",
 	"NNN_RESTRICT_0B",
+	"NNN_TRASH",
 #ifdef __linux__
 	"NNN_CP_MV_PROG",
 #endif
@@ -1152,18 +1155,26 @@ static void cpstr(char *buf)
 #endif
 }
 
-static void mvstr(char *buf)
+static void mvstr(char *buf, const char *dst)
 {
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-		 "xargs -0 -a %s -%c src %s src .", g_cppath, REPLACE_STR, mv);
+		 "xargs -0 -a %s -%c src %s src %s", g_cppath, REPLACE_STR, mv, dst);
 #else
-		 "cat %s | xargs -0 -o -%c src mv -i src .", g_cppath, REPLACE_STR);
+		 "cat %s | xargs -0 -o -%c src mv -i src %s", g_cppath, REPLACE_STR, dst);
 #endif
 }
 
-static void rmmulstr(char *buf)
+static bool rmmulstr(char *buf, const char *curpath)
 {
+	if (cfg.trash && strcmp(curpath, g_trash) != 0) {
+		if (!xdiraccess(g_trash))
+			return FALSE;
+
+		mvstr(buf, g_trash);
+		return TRUE;
+	}
+
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
 		 "xargs -0 -a %s rm -%cr",
@@ -1171,13 +1182,27 @@ static void rmmulstr(char *buf)
 		 "cat %s | xargs -0 -o rm -%cr",
 #endif
 		 g_cppath, confirm_force());
+	return TRUE;
 }
 
-static void xrm(char *path)
+static bool xrm(char *path)
 {
+	DPRINTF_S(path);
+	DPRINTF_S(xbasename(path));
+	DPRINTF_S(g_trash);
+	if (cfg.trash && strcmp(xdirname(path), g_trash) != 0) {
+		if (!xdiraccess(g_trash))
+			return FALSE;
+
+		spawn("mv", path, g_trash, NULL, F_NORMAL | F_SIGINT);
+		DPRINTF_S(g_buf);
+		return TRUE;
+	}
+
 	char rm_opts[] = {'-', confirm_force(), 'r'};
 
 	spawn("rm", rm_opts, path, NULL, F_NORMAL | F_SIGINT);
+	return TRUE;
 }
 
 static int digit_compare(const char *a, const char *b)
@@ -2332,7 +2357,7 @@ static bool show_help(const char *path)
 		"1FILES\n"
 		 "b^O  Open with...      n  Create new/link\n"
 		  "cD  File details     ^R  Rename entry\n"
-	   "5⎵ ^K / Y  Select entry/all  r  Open dir in vidir\n"
+	   "5⎵ ^K / Y  Select entry/all  r  Batch rename\n"
 	       "9K ^Y  Toggle selection  y  List selection\n"
 		  "cP  Copy selection    X  Delete selection\n"
 		  "cV  Move selection   ^X  Delete entry\n"
@@ -2383,7 +2408,7 @@ static bool show_help(const char *path)
 		dprintf(fd, "\n");
 	}
 
-	for (i = NNN_OPENER; i <= NNN_RESTRICT_0B; ++i) {
+	for (i = NNN_OPENER; i <= NNN_TRASH; ++i) {
 		start = getenv(env_cfg[i]);
 		if (start) {
 			if (i < NNN_USE_EDITOR)
@@ -3498,10 +3523,11 @@ nochange:
 				cpstr(g_buf);
 				break;
 			case SEL_MV:
-				mvstr(g_buf);
+				mvstr(g_buf, ".");
 				break;
 			default: /* SEL_RMMUL */
-				rmmulstr(g_buf);
+				if (!rmmulstr(g_buf, path))
+					goto nochange;
 				break;
 			}
 
@@ -3519,7 +3545,8 @@ nochange:
 				break;
 
 			mkpath(path, dents[cur].name, newpath);
-			xrm(newpath);
+			if (!xrm(newpath))
+				goto nochange;
 
 			/* Don't optimize cur if filtering is on */
 			if (!cfg.filtermode && cur && access(newpath, F_OK) == -1)
@@ -4090,9 +4117,9 @@ int main(int argc, char *argv[])
 	home = getenv("HOME");
 	DPRINTF_S(home);
 
-	if (getenv("NNN_TRASH")) {
+	if (getenv(env_cfg[NNN_TRASH])) {
 		if (!home) {
-			fprintf(stderr, "trash! no HOME!\n");
+			fprintf(stderr, "trash: HOME!\n");
 			return 1;
 		}
 
@@ -4108,6 +4135,8 @@ int main(int argc, char *argv[])
 		DPRINTF_S(g_trash);
 		if (!createdir(g_trash, 0777))
 			return 1;
+
+		cfg.trash = 1;
 	}
 
 	if (home) {

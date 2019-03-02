@@ -97,7 +97,7 @@ Show entry details
 .It Ic ^R
 Rename selected entry
 .It Ic r
-Open directory in vidir
+Batch rename
 .It Ic K, ^Y
 Toggle selection mode
 .It Ic Y
@@ -346,6 +346,11 @@ files.
 \fBNNN_RESTRICT_0B:\fR restrict opening 0-byte files due to unexpected behaviour; use \fIedit\fR or \fIopen with\fR to open the file.
 .Bd -literal
     export NNN_RESTRICT_0B=1
+.Ed
+.Pp
+\fBNNN_TRASH:\fR move files to \fB~/.local/share/nnn/trash\fR on delete.
+.Bd -literal
+    export NNN_TRASH=1
 .Ed
 .Pp
 \fBNNN_CP_MV_PROG:\fR show progress of copy, move operations (Linux-only, needs advcpmv).

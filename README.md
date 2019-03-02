@@ -102,11 +102,11 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - Convenience
   - Create, rename files and directories
   - Select files across dirs; all/range selection
-  - Copy, move, delete, archive selection
+  - Copy, move, trash, delete, archive selection
   - Show copy, move progress on Linux (needs avdcpmv)
   - Create sym/hard link(s) to selection
   - Transfer files using lftp
-  - Batch rename/move/delete (needs vidir)
+  - Batch rename (needs vidir)
   - Show directories in custom color (default: blue)
   - Per-context directory color
   - Spawn a subshell in the current directory
@@ -153,7 +153,7 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 | cp, mv, rm, xargs (from findutils on Linux)  | copy, move and remove files |
 | mediainfo, exiftool | multimedia file details |
 | atool, patool ([integration](https://github.com/jarun/nnn/wiki/How-to#integrate-patool)) | create, list and extract archives |
-| vidir (from moreutils) | batch rename, move, delete dir entries |
+| vidir (from moreutils) | batch rename dir entries |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/How-to#show-cp-mv-progress)) | copy, move progress |
 | $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
@@ -254,7 +254,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  FILES
            ^O  Open with...      n  Create new/link
             D  File details     ^R  Rename entry
-     ⎵ ^K / Y  Select entry/all  r  Open dir in vidir
+     ⎵ ^K / Y  Select entry/all  r  Batch rename
          K ^Y  Toggle selection  y  List selection
             P  Copy selection    X  Delete selection
             V  Move selection   ^X  Delete entry
@@ -393,6 +393,7 @@ The following indicators are used in the detail view:
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type` mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_RESTRICT_0B=1` | do not open 0-byte files |
+| `NNN_TRASH=1` | move files to `~/.local/share/nnn/trash` on delete |
 | `NNN_CP_MV_PROG=1` | show copy, move progress on Linux |
 
 #### Help
