@@ -4125,13 +4125,7 @@ int main(int argc, char *argv[])
 
 		/* Create trash dir if missing */
 		g_tmpfplen = xstrlcpy(g_trash, home, PATH_MAX);
-		g_tmpfplen += xstrlcpy(g_trash + g_tmpfplen - 1,
-				      "/.local/share/nnn", PATH_MAX - g_tmpfplen);
-		DPRINTF_S(g_trash);
-		if (!createdir(g_trash, 0777))
-			return 1;
-
-		xstrlcpy(g_trash + g_tmpfplen - 2, "/trash", PATH_MAX - g_tmpfplen);
+		xstrlcpy(g_trash + g_tmpfplen - 1, "/.local/trash", PATH_MAX - g_tmpfplen);
 		DPRINTF_S(g_trash);
 		if (!createdir(g_trash, 0777))
 			return 1;

@@ -393,7 +393,7 @@ The following indicators are used in the detail view:
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type` mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_RESTRICT_0B=1` | do not open 0-byte files |
-| `NNN_TRASH=1` | move files to `~/.local/share/nnn/trash` on delete |
+| `NNN_TRASH=1` | move files to `~/.local/trash` on delete |
 | `NNN_CP_MV_PROG=1` | show copy, move progress on Linux |
 
 #### Help
