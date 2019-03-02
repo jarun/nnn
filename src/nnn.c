@@ -3670,8 +3670,9 @@ nochange:
 					goto nochange;
 				}
 
-				r == 's' ? archive_selection(tmp, path)
-					 : spawn(utils[APACK], tmp, dents[cur].name, path, F_NORMAL);
+				(r == 'y' || r == 'Y') ? archive_selection(tmp, path)
+					 	       : spawn(utils[APACK], tmp, dents[cur].name,
+							       path, F_NORMAL);
 				break;
 			case SEL_OPENWITH:
 				dir = NULL;
