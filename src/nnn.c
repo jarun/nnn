@@ -341,6 +341,9 @@ static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 /* Buffer for file path copy file */
 static char g_cppath[PATH_MAX] __attribute__ ((aligned));
 
+/* Buffer for trash dir */
+static char g_trash[PATH_MAX] __attribute__ ((aligned));
+
 /* Buffer to store tmp file path */
 static char g_tmpfpath[HOME_LEN_MAX] __attribute__ ((aligned));
 
@@ -1118,6 +1121,25 @@ static bool xdiraccess(const char *path)
 
 	closedir(dirp);
 	return TRUE;
+}
+
+/*
+ * Creates a dir if not present
+ */
+static bool createdir(const char *path, mode_t mode)
+{
+	DIR *dirp = opendir(path);
+
+	if (dirp) {
+		closedir(dirp);
+		return TRUE;
+	}
+
+	if (errno == ENOENT && !mkdir(path, mode))
+		return TRUE;
+
+	fprintf(stderr, "create %s %s\n", path, strerror(errno));
+	return FALSE;
 }
 
 static int digit_compare(const char *a, const char *b)
@@ -4053,16 +4075,38 @@ int main(int argc, char *argv[])
 
 	home = getenv("HOME");
 	DPRINTF_S(home);
-	if (home)
+
+	if (getenv("NNN_TRASH")) {
+		if (!home) {
+			fprintf(stderr, "trash! no HOME!\n");
+			return 1;
+		}
+
+		/* Create trash dir if missing */
+		g_tmpfplen = xstrlcpy(g_trash, home, PATH_MAX);
+		g_tmpfplen += xstrlcpy(g_trash + g_tmpfplen - 1,
+				      "/.local/share/nnn", PATH_MAX - g_tmpfplen);
+		DPRINTF_S(g_trash);
+		if (!createdir(g_trash, 0777))
+			return 1;
+
+		xstrlcpy(g_trash + g_tmpfplen - 2, "/trash", PATH_MAX - g_tmpfplen);
+		DPRINTF_S(g_trash);
+		if (!createdir(g_trash, 0777))
+			return 1;
+	}
+
+	if (home) {
+		/* Prefix for other temporary ops */
 		g_tmpfplen = xstrlcpy(g_tmpfpath, home, HOME_LEN_MAX);
-	else if (getenv("TMPDIR"))
+	} else if (getenv("TMPDIR"))
 		g_tmpfplen = xstrlcpy(g_tmpfpath, getenv("TMPDIR"), HOME_LEN_MAX);
 	else if (xdiraccess("/tmp"))
 		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", HOME_LEN_MAX);
 
 	if (!cfg.picker && g_tmpfplen) {
-		xstrlcpy(g_cppath, g_tmpfpath, HOME_LEN_MAX);
-		xstrlcpy(g_cppath + g_tmpfplen - 1, "/.nnncp", HOME_LEN_MAX - g_tmpfplen);
+		xstrlcpy(g_cppath, g_tmpfpath, PATH_MAX);
+		xstrlcpy(g_cppath + g_tmpfplen - 1, "/.nnncp", PATH_MAX - g_tmpfplen);
 	}
 
 	/* Disable auto-select if opted */
