@@ -1142,6 +1142,44 @@ static bool createdir(const char *path, mode_t mode)
 	return FALSE;
 }
 
+static void cpstr(char *buf)
+{
+	snprintf(buf, CMD_LEN_MAX,
+#ifdef __linux__
+		 "xargs -0 -a %s -%c src %s src .", g_cppath, REPLACE_STR, cp);
+#else
+		 "cat %s | xargs -0 -o -%c src cp -iRp src .", g_cppath, REPLACE_STR);
+#endif
+}
+
+static void mvstr(char *buf)
+{
+	snprintf(buf, CMD_LEN_MAX,
+#ifdef __linux__
+		 "xargs -0 -a %s -%c src %s src .", g_cppath, REPLACE_STR, mv);
+#else
+		 "cat %s | xargs -0 -o -%c src mv -i src .", g_cppath, REPLACE_STR);
+#endif
+}
+
+static void rmmulstr(char *buf)
+{
+	snprintf(buf, CMD_LEN_MAX,
+#ifdef __linux__
+		 "xargs -0 -a %s rm -%cr",
+#else
+		 "cat %s | xargs -0 -o rm -%cr",
+#endif
+		 g_cppath, confirm_force());
+}
+
+static void xrm(char *path)
+{
+	char rm_opts[] = {'-', confirm_force(), 'r'};
+
+	spawn("rm", rm_opts, path, NULL, F_NORMAL | F_SIGINT);
+}
+
 static int digit_compare(const char *a, const char *b)
 {
 	while (*a && *b && *a == *b)
@@ -3457,33 +3495,13 @@ nochange:
 
 			switch (sel) {
 			case SEL_CP:
-				snprintf(g_buf, CMD_LEN_MAX,
-#ifdef __linux__
-					 "xargs -0 -a %s -%c src %s src .",
-					 g_cppath, REPLACE_STR, cp);
-#else
-					 "cat %s | xargs -0 -o -%c src cp -iRp src .",
-					 g_cppath, REPLACE_STR);
-#endif
+				cpstr(g_buf);
 				break;
 			case SEL_MV:
-				snprintf(g_buf, CMD_LEN_MAX,
-#ifdef __linux__
-					 "xargs -0 -a %s -%c src %s src .",
-					 g_cppath, REPLACE_STR, mv);
-#else
-					 "cat %s | xargs -0 -o -%c src mv -i src .",
-					 g_cppath, REPLACE_STR);
-#endif
+				mvstr(g_buf);
 				break;
 			default: /* SEL_RMMUL */
-				snprintf(g_buf, CMD_LEN_MAX,
-#ifdef __linux__
-					 "xargs -0 -a %s rm -%cr",
-#else
-					 "cat %s | xargs -0 -o rm -%cr",
-#endif
-					 g_cppath, confirm_force());
+				rmmulstr(g_buf);
 				break;
 			}
 
@@ -3500,12 +3518,8 @@ nochange:
 			if (!ndents)
 				break;
 
-			char rm_opts[] = "-ir";
-
-			rm_opts[1] = confirm_force();
-
 			mkpath(path, dents[cur].name, newpath);
-			spawn("rm", rm_opts, newpath, NULL, F_NORMAL | F_SIGINT);
+			xrm(newpath);
 
 			/* Don't optimize cur if filtering is on */
 			if (!cfg.filtermode && cur && access(newpath, F_OK) == -1)
