@@ -22,7 +22,7 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (Thanks Luke Smith for the video!)</i></a></p>
 
-`nnn` is smooth... like butter. It's also probably the [fastest and most lightweight](#comparison) file manager you have ever used.
+`nnn` is smooth... like butter. It's also probably one of the fastest and most lightweight file managers you have ever used.
 
 `nnn` integrates seamlessly with your DE and favourite GUI utilities, has a unique _navigate-as-you-type_ mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning, quick notes and much more.
 
@@ -41,7 +41,6 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 #### TABLE OF CONTENTS
 
 - [Features](#features)
-- [Comparison](#comparison)
 - [Installation](#installation)
   - [Library dependencies](#library-dependencies)
   - [Utility dependencies](#utility-dependencies)
@@ -123,18 +122,6 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - Follows Linux kernel coding style
 - Highly optimized, static analysis integrated code
 - Available on many distros
-
-#### COMPARISON
-
-Stripped binary (or script) size and memory usage of `nnn` and some other similar utilities while viewing a directory with 13.5K files (0 directories), sorted by size/du:
-
-<pre>
-<b>BINSZ</b>    VIRT  <b>  RES</b>    SHR S  %MEM   COMMAND
-<b> 650K</b>  139720  <b>91220</b>   8460 S   1.1   ranger
-<b>   1M</b>   50496  <b>15328</b>   4076 S   0.2   vifm
-<b>   1M</b>   72152  <b>12468</b>   7336 S   0.2   mc
-<b>  55K</b>   15740  <b> 4348</b>   2460 S   0.1   nnn -S
-</pre>
 
 Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors).
 
