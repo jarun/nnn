@@ -22,7 +22,7 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (Thanks Luke Smith for the video!)</i></a></p>
 
-`nnn` is smooth... like butter. It's also probably one of the fastest and most lightweight file managers you have ever used.
+`nnn` is smooth... like butter. It's also one of the fastest and most lightweight file managers you have ever used. It comes in a `~55KB` binary using `~3.5MB` resident memory at runtime.
 
 `nnn` integrates seamlessly with your DE and favourite GUI utilities, has a unique _navigate-as-you-type_ mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning, quick notes and much more.
 
@@ -61,7 +61,6 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - [Configuration](#configuration)
   - [Help](#help)
 - [Quickstart](#quickstart)
-- [How to](#how-to)
 - [Troubleshooting](#troubleshooting)
   - [Tmux configuration](#tmux-configuration)
   - [BSD terminal issue](#bsd-terminal-issue)
@@ -123,8 +122,6 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - Highly optimized, static analysis integrated code
 - Available on many distros
 
-Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors).
-
 #### INSTALLATION
 
 #### Library dependencies
@@ -137,8 +134,8 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 | --- | --- |
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | desktop opener |
 | file | determine file type |
-| cp, mv, rm, xargs (from findutils on Linux)  | copy, move and remove files |
-| mediainfo, exiftool | multimedia file details |
+| coreutils (cp, mv, rm), findutils (xargs) | copy, move and remove files |
+| mediainfo or exiftool | multimedia file details |
 | atool, patool ([integration](https://github.com/jarun/nnn/wiki/How-to#integrate-patool)) | create, list and extract archives |
 | vidir (from moreutils) | batch rename dir entries |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
@@ -170,10 +167,9 @@ Intrigued? Find out [HOW](https://github.com/jarun/nnn/wiki/performance-factors)
 - [Ubuntu](https://packages.ubuntu.com/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
 - [Void Linux](https://github.com/void-linux/void-packages/tree/master/srcpkgs/nnn) (`xbps-install -S nnn`)
 
-
 #### Release packages
 
-Packages for Arch Linux, CentOS, Debian, Fedora, Solus, and Ubuntu are available with the [latest stable release](https://github.com/jarun/nnn/releases/latest).
+Packages for Arch Linux, CentOS, Debian, Fedora and Ubuntu are available with the [latest stable release](https://github.com/jarun/nnn/releases/latest).
 
 #### From source
 
@@ -190,7 +186,7 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
 #### Shell completion
 
-Search keyword and option completion scripts for Bash, Fish and Zsh can be found in respective subdirectories of [`scripts/auto-completion/`](scripts/auto-completion). Please refer to your shell's manual for installation instructions.
+Option completion scripts for Bash, Fish and Zsh can be found in respective subdirectories of [`scripts/auto-completion/`](scripts/auto-completion). Please refer to your shell's manual for installation instructions.
 
 #### USAGE
 
@@ -257,7 +253,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^P  Prompt  ^N  Note  T  Empty trash
 ```
 
-Help & settings, file details, media info and archive listing are shown in the PAGER. Please use the PAGER-specific keys in these screens.
+Help & settings, file details, media info and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.
 
 The option `open with` supports a combined argument.
 
@@ -331,7 +327,7 @@ Common use cases:
 - type `\.mkv` to list all MKV files
 - use `.*` to match any character (_sort of_ fuzzy search)
 
-There is a program opton to filter entries by substring match.
+There is a program option to filter entries by substring match instead of regex.
 
 If `nnn` is invoked as root or the environment variable `NNN_SHOW_HIDDEN` is set the default filter will also match hidden files.
 
@@ -398,11 +394,10 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
        export NNN_USE_EDITOR=1
 4. Run `n`.
 5. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
-6. For additional functionality [setup custom scripts](https://github.com/jarun/nnn/wiki/How-to#run-custom-scripts).
+6. The prompt can be used as a launcher and to run commands.
 
-#### HOW TO
-
-Please visit the [How to](https://github.com/jarun/nnn/wiki/How-to) wiki page.
+- For additional functionality [setup custom scripts](https://github.com/jarun/nnn/wiki/How-to#run-custom-scripts).
+- Visit the [How to](https://github.com/jarun/nnn/wiki/How-to) for many more specific usecases.
 
 #### TROUBLESHOOTING
 
@@ -411,6 +406,8 @@ Please visit the [How to](https://github.com/jarun/nnn/wiki/How-to) wiki page.
 `nnn` might not handle keypresses correctly when used with tmux (see issue #104 for more details). Set `TERM=xterm-256color` to address it.
 
 ##### BSD terminal issue
+
+TLDR: Use the keybind <kbd>K</kbd> to toggle selection if you are having issues with <kbd>^Y</kbd>.
 
 By default in OpenBSD & FreeBSD (and probably on macOS as well), `stty` maps <kbd>^Y</kbd> to `DSUSP`. This means that typing <kbd>^Y</kbd> will suspend `nnn` as if you typed <kbd>^Z</kbd> (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-copy mode. You can check this with `stty -a`. If it includes the text `dsusp = ^Y`, issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the <kbd>^Y</kbd> instead.
 
