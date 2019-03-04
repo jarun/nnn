@@ -1497,9 +1497,7 @@ static int entrycmp(const void *va, const void *vb)
 
 		if (pb->size < pa->size)
 			return -1;
-	}
-
-	if (cfg.blkorder) {
+	} else if (cfg.blkorder) {
 		if (pb->blocks > pa->blocks)
 			return 1;
 
