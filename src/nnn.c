@@ -768,6 +768,7 @@ static char *xdirname(const char *path)
 static char *xbasename(char *path)
 {
 	char *base = xmemrchr((uchar *)path, '/', strlen(path));
+
 	return base ? base + 1 : path;
 }
 
@@ -788,7 +789,7 @@ static uint xatoi(const char *str)
 
 static char *xitoa(uint val)
 {
-	const char hexbuf[] = "0123456789";
+	static const char hexbuf[] = "0123456789";
 	static char ascbuf[32] = {0};
 	int i;
 
@@ -917,7 +918,7 @@ static bool cpsafe(void)
 }
 
 /* Reset copy indicators */
-static void resetcpind()
+static void resetcpind(void)
 {
 	int r = 0;
 
@@ -1477,8 +1478,8 @@ static int (*filterfn)(regex_t *regex, const char *fname, const char *fltr) = &v
 
 static int entrycmp(const void *va, const void *vb)
 {
-	const struct entry * pa = (pEntry)va;
-	const struct entry * pb = (pEntry)vb;
+	const struct entry *pa = (pEntry)va;
+	const struct entry *pb = (pEntry)vb;
 
 	if ((pb->flags & DIR_OR_LINK_TO_DIR) != (pa->flags & DIR_OR_LINK_TO_DIR)) {
 		if (pb->flags & DIR_OR_LINK_TO_DIR)
@@ -1969,6 +1970,7 @@ static char *get_bm_loc(char *buf, int key)
 				}
 
 				ssize_t count = xstrlcpy(buf, home, PATH_MAX);
+
 				xstrlcpy(buf + count - 1, bookmark[r].loc + 1, PATH_MAX - count - 1);
 			} else
 				xstrlcpy(buf, bookmark[r].loc, PATH_MAX);
@@ -2830,6 +2832,7 @@ static void redraw(char *path)
 			printptr(&dents[i], i == cur, ncols);
 	} else {
 		const int odd = ISODD(nlines);
+
 		nlines >>= 1;
 		for (i = cur - nlines; i < cur + nlines + odd; ++i)
 			printptr(&dents[i], i == cur, ncols);
@@ -3689,7 +3692,7 @@ nochange:
 				}
 
 				(r == 'y' || r == 'Y') ? archive_selection(tmp, path)
-					 	       : spawn(utils[APACK], tmp, dents[cur].name,
+						       : spawn(utils[APACK], tmp, dents[cur].name,
 							       path, F_NORMAL);
 				break;
 			case SEL_OPENWITH:
