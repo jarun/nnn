@@ -983,19 +983,13 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 		arg2 = tmp;
 	}
 
+	if (flag & F_NORMAL)
+		exitcurses();
+
 	pid = fork();
 	if (pid == 0) {
-		if (flag & F_NORMAL)
-			exitcurses();
-
 		if (dir != NULL)
 			status = chdir(dir);
-
-		tmp = getenv(env_cfg[NNNLVL]);
-
-		/* Show a marker (to indicate nnn spawned shell) */
-		if (flag & F_MARKER && tmp)
-			fprintf(stdout, "\n +-++-++-+\n | n n n | %d\n +-++-++-+\n\n", xatoi(tmp));
 
 		/* Suppress stdout and stderr */
 		if (flag & F_NOTRACE) {
@@ -1025,9 +1019,10 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 
 		DPRINTF_D(pid);
 		if (flag & F_NORMAL) {
-			exitcurses();
-			initcurses();
 			refresh();
+			exitcurses();
+			fflush(stdout);
+			initcurses();
 		}
 	}
 }
