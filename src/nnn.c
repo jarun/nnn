@@ -2098,7 +2098,10 @@ static char *coolsize(off_t size)
 
 static char *get_file_sym(mode_t mode)
 {
-	static char ind[2] = "\0\0";
+	static char ind[2];
+
+	ind[0] = '\0';
+	ind[1] = '\0';
 
 	switch (mode & S_IFMT) {
 	case S_IFREG:
