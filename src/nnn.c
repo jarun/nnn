@@ -171,8 +171,8 @@ disabledbg()
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
-#define CURSR " > "
-#define EMPTY "   "
+#define CURSR " >"
+#define EMPTY "  "
 #define CURSYM(flag) ((flag) ? CURSR : EMPTY)
 #define FILTER '/'
 #define REGEX_MAX 128
@@ -2134,16 +2134,18 @@ static char *get_file_sym(mode_t mode)
 static void printent(const struct entry *ent, int sel, uint namecols)
 {
 	const char *pname = unescape(ent->name, namecols);
+	const char cp = (ent->flags & FILE_COPIED) ? '+' : ' ';
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
 
-	printw("%s%s%s\n", CURSYM(sel), pname, get_file_sym(ent->mode));
+	printw("%s%c%s%s\n", CURSYM(sel), cp, pname, get_file_sym(ent->mode));
 }
 
 static void printent_long(const struct entry *ent, int sel, uint namecols)
 {
-	char timebuf[18], permbuf[4], ind1 = '\0', ind2[] = "\0\0", cp = ' ';
+	char timebuf[18], permbuf[4], ind1 = '\0', ind2[] = "\0\0";
+	const char cp = (ent->flags & FILE_COPIED) ? '+' : ' ';
 
 	/* Timestamp */
 	strftime(timebuf, 18, "%F %R", localtime(&ent->t));
@@ -2156,10 +2158,6 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 	permbuf[2] = *xitoa(ent->mode & 7);
 	permbuf[2] = permbuf[2] ? permbuf[2] : '0';
 	permbuf[3] = '\0';
-
-	/* Add copy indicator */
-	if (ent->flags & FILE_COPIED)
-		cp = '+';
 
 	/* Trim escape chars from name */
 	const char *pname = unescape(ent->name, namecols);
