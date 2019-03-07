@@ -673,7 +673,7 @@ static size_t xstrlcpy(char *dest, const char *src, size_t n)
 		dest = (char *)d;
 	}
 
-	while (--n && (*dest = *src))
+	while (--n && (*dest = *src)) // NOLINT
 		++dest, ++src;
 
 	if (!n)
