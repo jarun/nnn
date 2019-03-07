@@ -2741,9 +2741,9 @@ static void populate(char *path, char *lastname)
 
 static void redraw(char *path)
 {
-	static char buf[NAME_MAX + 65] __attribute__ ((aligned));
+	char buf[NAME_MAX + 65];
 	char c;
-	size_t ncols = COLS;
+	size_t ncols = (COLS <= PATH_MAX) ? COLS : PATH_MAX;
 	int nlines = MIN(LINES - 4, ndents), i, attrs;
 
 	/* Clear screen */
@@ -2758,16 +2758,13 @@ static void redraw(char *path)
 #endif
 
 	/* Fail redraw if < than 11 columns, context info prints 10 chars */
-	if (COLS < 11) {
+	if (ncols < 11) {
 		printmsg("too few columns!");
 		return;
 	}
 
 	DPRINTF_D(cur);
 	DPRINTF_S(path);
-
-	if (ncols > PATH_MAX)
-		ncols = PATH_MAX;
 
 	printw("[");
 	for (i = 0; i < CTX_MAX; ++i) {
@@ -2799,16 +2796,16 @@ static void redraw(char *path)
 	attroff(A_UNDERLINE);
 	path[ncols - 11] = c;
 
-	/* Fallback to light mode if less than 35 columns */
-	if (ncols < 35 && cfg.showdetail) {
-		cfg.showdetail ^= 1;
-		printptr = &printent;
-	}
-
 	/* Calculate the number of cols available to print entry name */
-	if (cfg.showdetail)
-		ncols -= 35;
-	else
+	if (cfg.showdetail) {
+		/* Fallback to light mode if less than 35 columns */
+		if (ncols < 36) {
+			cfg.showdetail ^= 1;
+			printptr = &printent;
+			ncols -= 5;
+		} else
+			ncols -= 35;
+	} else
 		ncols -= 5;
 
 	if (!cfg.wild) {
