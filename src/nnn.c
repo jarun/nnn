@@ -269,7 +269,7 @@ typedef struct entry {
 typedef struct {
 	int key;
 	char *loc;
-} bm;
+} __attribute__ ((packed)) bm;
 
 /* Settings */
 typedef struct {
@@ -307,7 +307,7 @@ typedef struct {
 	char c_name[NAME_MAX + 1]; /* Current file name */
 	settings c_cfg; /* Current configuration */
 	uint color; /* Color code for directories */
-} context;
+} __attribute__ ((packed)) context;
 
 /* GLOBALS */
 
