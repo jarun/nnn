@@ -4166,9 +4166,6 @@ int main(int argc, char *argv[])
 	idletimeout = xatoi(getenv(env_cfg[NNN_IDLE_TIMEOUT]));
 	DPRINTF_U(idletimeout);
 
-	/* Get the clipboard copier, if set */
-	copier = getenv(env_cfg[NNN_COPIER]);
-
 	home = getenv("HOME");
 	DPRINTF_S(home);
 
@@ -4188,18 +4185,21 @@ int main(int argc, char *argv[])
 		cfg.trash = 1;
 	}
 
-	if (home) {
-		/* Prefix for other temporary ops */
+	/* Prefix for other temporary ops */
+	if (home)
 		g_tmpfplen = xstrlcpy(g_tmpfpath, home, HOME_LEN_MAX);
-	} else if (getenv("TMPDIR"))
-		g_tmpfplen = xstrlcpy(g_tmpfpath, getenv("TMPDIR"), HOME_LEN_MAX);
 	else if (xdiraccess("/tmp"))
 		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", HOME_LEN_MAX);
+	else if ((copier = getenv("TMPDIR")) != NULL)
+		g_tmpfplen = xstrlcpy(g_tmpfpath, copier, HOME_LEN_MAX);
 
 	if (!cfg.picker && g_tmpfplen) {
 		xstrlcpy(g_cppath, g_tmpfpath, PATH_MAX);
 		xstrlcpy(g_cppath + g_tmpfplen - 1, "/.nnncp", PATH_MAX - g_tmpfplen);
 	}
+
+	/* Get the clipboard copier, if set */
+	copier = getenv(env_cfg[NNN_COPIER]);
 
 	/* Disable auto-select if opted */
 	if (getenv(env_cfg[NNN_NO_AUTOSELECT]))
