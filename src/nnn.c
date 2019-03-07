@@ -1935,6 +1935,10 @@ static bool parsebmstr(void)
 		}
 
 		if (*bms == ';') {
+			/* Remove trailing space */
+			if (i > 0 && *(bms - 1) == '/')
+				*(bms - 1) = '\0';
+
 			*bms = '\0';
 			nextkey = bms + 1;
 		}
@@ -2738,6 +2742,7 @@ static void populate(char *path, char *lastname)
 static void redraw(char *path)
 {
 	static char buf[NAME_MAX + 65] __attribute__ ((aligned));
+	char c;
 	size_t ncols = COLS;
 	int nlines = MIN(LINES - 4, ndents), i, attrs;
 
@@ -2758,20 +2763,8 @@ static void redraw(char *path)
 		return;
 	}
 
-	/* Strip trailing slashes */
-	for (i = strlen(path) - 1; i > 0; --i)
-		if (path[i] == '/')
-			path[i] = '\0';
-		else
-			break;
-
 	DPRINTF_D(cur);
 	DPRINTF_S(path);
-
-	if (!realpath(path, g_buf)) {
-		printwarn();
-		return;
-	}
 
 	if (ncols > PATH_MAX)
 		ncols = PATH_MAX;
@@ -2800,9 +2793,11 @@ static void redraw(char *path)
 
 	attron(A_UNDERLINE);
 	/* No text wrapping in cwd line */
-	g_buf[ncols - 11] = '\0';
-	printw("%s\n\n", g_buf);
+	c = path[ncols - 11];
+	path[ncols - 11] = '\0';
+	printw("%s\n\n", path);
 	attroff(A_UNDERLINE);
+	path[ncols - 11] = c;
 
 	/* Fallback to light mode if less than 35 columns */
 	if (ncols < 35 && cfg.showdetail) {
@@ -2812,7 +2807,7 @@ static void redraw(char *path)
 
 	/* Calculate the number of cols available to print entry name */
 	if (cfg.showdetail)
-		ncols -= 36;
+		ncols -= 35;
 	else
 		ncols -= 5;
 
