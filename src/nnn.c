@@ -237,6 +237,7 @@ disabledbg()
 #define xstrcmp(a, b)  (*(a) != *(b) ? -1 : strcmp((a), (b)))
 /* A faster version of xisdigit */
 #define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
+#define xerror() perror(xitoa(__LINE__))
 
 #ifdef LINUX_INOTIFY
 #define EVENT_SIZE (sizeof(struct inotify_event))
@@ -529,9 +530,36 @@ static uchar crc8fast(const uchar * const message, size_t n)
 	return remainder;
 }
 
-static void sigint_handler(int sig, siginfo_t *siginfo, void *context)
+static void sigint_handler(int sig)
 {
 	interrupted = TRUE;
+}
+
+static uint xatoi(const char *str)
+{
+	int val = 0;
+
+	if (!str)
+		return 0;
+
+	while (xisdigit(*str)) {
+		val = val * 10 + (*str - '0');
+		++str;
+	}
+
+	return val;
+}
+
+static char *xitoa(uint val)
+{
+	static const char hexbuf[] = "0123456789";
+	static char ascbuf[32] = {0};
+	int i;
+
+	for (i = 30; val && i; --i, val /= 10)
+		ascbuf[i] = hexbuf[val % 10];
+
+	return &ascbuf[++i];
 }
 
 /* Messages show up at the bottom */
@@ -544,7 +572,7 @@ static void printmsg(const char *msg)
 static void printerr(int linenum)
 {
 	exitcurses();
-	fprintf(stderr, "line %d: (%d) %s\n", linenum, errno, strerror(errno));
+	perror(xitoa(linenum));
 	if (!cfg.picker && g_cppath[0])
 		unlink(g_cppath);
 	free(pcopybuf);
@@ -767,33 +795,6 @@ static char *xbasename(char *path)
 	char *base = xmemrchr((uchar *)path, '/', strlen(path));
 
 	return base ? base + 1 : path;
-}
-
-static uint xatoi(const char *str)
-{
-	int val = 0;
-
-	if (!str)
-		return 0;
-
-	while (xisdigit(*str)) {
-		val = val * 10 + (*str - '0');
-		++str;
-	}
-
-	return val;
-}
-
-static char *xitoa(uint val)
-{
-	static const char hexbuf[] = "0123456789";
-	static char ascbuf[32] = {0};
-	int i;
-
-	for (i = 30; val && i; --i, val /= 10)
-		ascbuf[i] = hexbuf[val % 10];
-
-	return &ascbuf[++i];
 }
 
 /* Writes buflen char(s) from buf to a file */
@@ -3904,7 +3905,6 @@ int main(int argc, char *argv[])
 	char cwd[PATH_MAX] __attribute__ ((aligned));
 	char *ipath = NULL;
 	int opt;
-	struct sigaction act;
 
 	while ((opt = getopt(argc, argv, "Slib:enp:svwh")) != -1) {
 		switch (opt) {
@@ -3936,8 +3936,8 @@ int main(int argc, char *argv[])
 			else {
 				/* copier used as tmp var */
 				copier = realpath(optarg, g_cppath);
-				if (!g_cppath[0]) {
-					fprintf(stderr, "%s\n", strerror(errno));
+				if (!copier) {
+					xerror();
 					return 1;
 				}
 			}
@@ -3963,7 +3963,7 @@ int main(int argc, char *argv[])
 
 	/* Confirm we are in a terminal */
 	if (!cfg.picker && !(isatty(0) && isatty(1))) {
-		fprintf(stderr, "stdin/stdout !tty\n");
+		xerror();
 		return 1;
 	}
 
@@ -3973,7 +3973,7 @@ int main(int argc, char *argv[])
 	while (opt < CTX_MAX) {
 		if (*copier) {
 			if (*copier < '0' || *copier > '7') {
-				fprintf(stderr, "invalid color code\n");
+				fprintf(stderr, "0 <= code <= 7\n");
 				return 1;
 			}
 
@@ -3987,7 +3987,7 @@ int main(int argc, char *argv[])
 
 	/* Parse bookmarks string */
 	if (!parsebmstr()) {
-		fprintf(stderr, "%s: malformed\n", env_cfg[NNN_BMS]);
+		fprintf(stderr, "%s\n", env_cfg[NNN_BMS]);
 		return 1;
 	}
 
@@ -4006,7 +4006,7 @@ int main(int argc, char *argv[])
 	} else {
 		ipath = realpath(argv[optind], cwd);
 		if (!ipath) {
-			fprintf(stderr, "%s: no such dir\n", argv[optind]);
+			xerror();
 			return 1;
 		}
 	}
@@ -4045,13 +4045,13 @@ int main(int argc, char *argv[])
 	/* Initialize inotify */
 	inotify_fd = inotify_init1(IN_NONBLOCK);
 	if (inotify_fd < 0) {
-		fprintf(stderr, "inotify init! %s\n", strerror(errno));
+		xerror();
 		return 1;
 	}
 #elif defined(BSD_KQUEUE)
 	kq = kqueue();
 	if (kq < 0) {
-		fprintf(stderr, "kqueue init! %s\n", strerror(errno));
+		xerror();
 		return 1;
 	}
 #endif
@@ -4112,18 +4112,16 @@ int main(int argc, char *argv[])
 #endif
 
 	/* Ignore/handle certain signals */
-	memset(&act, 0, sizeof(act));
-	act.sa_sigaction = &sigint_handler;
-	act.sa_flags = SA_SIGINFO;
+	struct sigaction act = {.sa_handler = sigint_handler};
 	if (sigaction(SIGINT, &act, NULL) < 0) {
-		fprintf(stderr, "sigaction\n");
+		xerror();
 		return 1;
 	}
 	signal(SIGQUIT, SIG_IGN);
 
 	/* Test initial path */
 	if (!xdiraccess(ipath)) {
-		fprintf(stderr, "%s: %s\n", ipath, strerror(errno));
+		xerror();
 		return 1;
 	}
 
@@ -4158,7 +4156,7 @@ int main(int argc, char *argv[])
 		if (copybufpos) {
 			opt = selectiontofd(1);
 			if (opt != (int)(copybufpos))
-				fprintf(stderr, "%s\n", strerror(errno));
+				xerror();
 		}
 	} else if (!cfg.picker && g_cppath[0])
 		unlink(g_cppath);

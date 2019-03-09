@@ -22,7 +22,7 @@ Noice is Not Noice, a noicer fork...
 
 <p align="center"><i>nnn in action! (Thanks Luke Smith for the video!)</i></a></p>
 
-`nnn` is smooth... like butter. It's also one of the fastest and most lightweight file managers you have ever used. It comes in a `~55KB` binary using `~3.5MB` resident memory at runtime.
+`nnn` is smooth... like butter. It's also one of the fastest and most lightweight file managers you have ever used. It comes in a `~50KB` binary using `~3.5MB` resident memory at runtime.
 
 `nnn` integrates seamlessly with your DE and favourite GUI utilities, has a unique _navigate-as-you-type_ mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning, quick notes and much more.
 
