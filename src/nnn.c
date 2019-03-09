@@ -175,7 +175,7 @@ disabledbg()
 #define EMPTY "  "
 #define CURSYM(flag) ((flag) ? CURSR : EMPTY)
 #define FILTER '/'
-#define REGEX_MAX 128
+#define REGEX_MAX 48
 #define BM_MAX 10
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per filename = 64*32B = 2KB */
@@ -419,6 +419,7 @@ static char mv[] = "mvg -gi";
 #define STR_DATE_ID 4
 #define STR_UNSAFE 5
 #define STR_TMPFILE 6
+#define STR_ARGLIMIT 7
 
 static const char * const messages[] = {
 	"nftw failed",
@@ -428,6 +429,7 @@ static const char * const messages[] = {
 	"%F %T %z",
 	"unsafe cmd",
 	"/.nnnXXXXXX",
+	"one arg max",
 };
 
 /* Supported config env vars */
@@ -1083,7 +1085,7 @@ static char *xgetenv(const char *name, char *fallback)
  * Parse a string to get program and argument
  * NOTE: original string may be modified
  */
-static void getprogarg(char *prog, char **arg)
+static bool getprogarg(char *prog, char **arg)
 {
 	const char *argptr;
 
@@ -1097,13 +1099,14 @@ static void getprogarg(char *prog, char **arg)
 
 		/* Make sure there are no more args */
 		while (*argptr) {
-			if (isblank(*argptr)) {
-				fprintf(stderr, "Too many args [%s]\n", prog);
-				exit(1);
-			}
+			if (isblank(*argptr))
+				return FALSE;
+
 			++argptr;
 		}
 	}
+
+	return TRUE;
 }
 
 /* Check if a dir exists, IS a dir and is readable */
@@ -1928,6 +1931,7 @@ static inline void resetdircolor(int flags)
 /*
  * Replace escape characters in a string with '?'
  * Adjust string length to maxcols if > 0;
+ * Max supported str length: NAME_MAX;
  *
  * Interestingly, note that unescape() uses g_buf. What happens if
  * str also points to g_buf? In this case we assume that the caller
@@ -1939,12 +1943,12 @@ static inline void resetdircolor(int flags)
  */
 static char *unescape(const char *str, uint maxcols)
 {
-	static wchar_t wbuf[PATH_MAX] __attribute__ ((aligned));
+	static wchar_t wbuf[NAME_MAX + 1] __attribute__ ((aligned));
 	static wchar_t *buf = wbuf;
 	static size_t len, lencount;
 
 	/* Convert multi-byte to wide char */
-	len = mbstowcs(wbuf, str, PATH_MAX);
+	len = mbstowcs(wbuf, str, NAME_MAX);
 
 	//g_buf[0] = '\0';
 
@@ -1969,7 +1973,7 @@ static char *unescape(const char *str, uint maxcols)
 	}
 
 	/* Convert wide char to multi-byte */
-	wcstombs(g_buf, wbuf, PATH_MAX);
+	wcstombs(g_buf, wbuf, NAME_MAX);
 	return g_buf;
 }
 
@@ -3599,7 +3603,10 @@ nochange:
 				break;
 			case SEL_OPENWITH:
 				dir = NULL;
-				getprogarg(tmp, &dir); /* dir used as tmp var */
+				if (!getprogarg(tmp, &dir)) { /* dir used as tmp var */
+					printmsg(messages[STR_ARGLIMIT]);
+					goto nochange;
+				}
 				mkpath(path, dents[cur].name, newpath);
 				spawn(tmp, dir, newpath, path, r);
 				break;
@@ -4029,14 +4036,17 @@ int main(int argc, char *argv[])
 
 	/* Get PAGER */
 	pager = xgetenv(envs[PAGER], "less");
-	getprogarg(pager, &pager_arg);
 	DPRINTF_S(pager);
-	DPRINTF_S(pager_arg);
 
 	/* Get SHELL */
 	shell = xgetenv(envs[SHELL], "sh");
-	getprogarg(shell, &shell_arg);
 	DPRINTF_S(shell);
+
+	if (!getprogarg(pager, &pager_arg) || !getprogarg(shell, &shell_arg)) {
+		fprintf(stderr, "%s\n", messages[STR_ARGLIMIT]);
+		return 1;
+	}
+	DPRINTF_S(pager_arg);
 	DPRINTF_S(shell_arg);
 
 	DPRINTF_S(getenv("PWD"));
