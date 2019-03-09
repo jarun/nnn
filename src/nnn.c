@@ -1944,32 +1944,31 @@ static inline void resetdircolor(int flags)
 static char *unescape(const char *str, uint maxcols)
 {
 	static wchar_t wbuf[NAME_MAX + 1] __attribute__ ((aligned));
-	static wchar_t *buf = wbuf;
-	static size_t len, lencount;
+	wchar_t *buf = wbuf;
+	size_t len, lencount = 0;
 
 	/* Convert multi-byte to wide char */
 	len = mbstowcs(wbuf, str, NAME_MAX);
 
-	//g_buf[0] = '\0';
+	while (*buf && lencount <= maxcols) {
+		if (*buf <= '\x1f' || *buf == '\x7f')
+			*buf = '\?';
 
-	if (maxcols) {
-		len = lencount = wcswidth(wbuf, len);
-		/* Reduce number of wide chars to max columns */
-		if (len > maxcols)
-			lencount = maxcols + 1;
+		++buf;
+		++lencount;
+	}
+
+	len = lencount = wcswidth(wbuf, len);
+
+	/* Reduce number of wide chars to max columns */
+	if (len > maxcols) {
+		lencount = maxcols + 1;
 
 		/* Reduce wide chars one by one till it fits */
 		while (len > maxcols)
 			len = wcswidth(wbuf, --lencount);
 
 		wbuf[lencount] = L'\0';
-	}
-
-	while (*buf) {
-		if (*buf <= '\x1f' || *buf == '\x7f')
-			*buf = '\?';
-
-		++buf;
 	}
 
 	/* Convert wide char to multi-byte */
