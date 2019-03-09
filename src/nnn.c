@@ -171,7 +171,7 @@ disabledbg()
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
-#define CURSR " >"
+#define CURSR ">>"
 #define EMPTY "  "
 #define CURSYM(flag) ((flag) ? CURSR : EMPTY)
 #define FILTER '/'
