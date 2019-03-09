@@ -2675,10 +2675,13 @@ static void populate(char *path, char *lastname)
 
 static void redraw(char *path)
 {
-	char buf[NAME_MAX + 65];
-	char c;
 	size_t ncols = (COLS <= PATH_MAX) ? COLS : PATH_MAX;
-	int nlines = MIN(LINES - 4, ndents), i, attrs;
+	int lastln = LINES;
+	int nlines = MIN(lastln - 4, ndents), i, attrs;
+	char buf[12];
+	char c;
+
+	--lastln;
 
 	/* Clear screen */
 	erase();
@@ -2723,12 +2726,12 @@ static void redraw(char *path)
 	printw("\b] "); /* 10 chars printed in total for contexts - "[1 2 3 4] " */
 
 	attron(A_UNDERLINE);
-	/* No text wrapping in cwd line */
+	/* No text wrapping in cwd line, store the truncating char in c */
 	c = path[ncols - 11];
 	path[ncols - 11] = '\0';
 	printw("%s\n\n", path);
 	attroff(A_UNDERLINE);
-	path[ncols - 11] = c;
+	path[ncols - 11] = c; /* Restore c */
 
 	/* Calculate the number of cols available to print entry name */
 	if (cfg.showdetail) {
@@ -2770,34 +2773,34 @@ static void redraw(char *path)
 
 	if (cfg.showdetail) {
 		if (ndents) {
-			char sort[9];
+			char sort[] = "\0y time ";
 
 			if (cfg.mtimeorder)
-				xstrlcpy(sort, "by time ", 9);
-			else if (cfg.sizeorder)
-				xstrlcpy(sort, "by size ", 9);
-			else
-				sort[0] = '\0';
+				sort[0] = 'b';
+			else if (cfg.sizeorder) {
+				sort[0] = 'b';
+				sort[3] = 's';
+				sort[5] = 'z';
+			}
 
 			/* We need to show filename as it may be truncated in directory listing */
 			if (!cfg.blkorder)
-				snprintf(buf, NAME_MAX + 65, "%d/%d %s[%s]",
-					 cur + 1, ndents, sort, unescape(dents[cur].name, NAME_MAX));
+				mvprintw(lastln, 0, "%d/%d %s[%s]\n", cur + 1, ndents, sort,
+					 unescape(dents[cur].name, NAME_MAX));
 			else {
-				i = snprintf(buf, 64, "%d/%d ", cur + 1, ndents);
+				xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 
 				if (cfg.apparentsz)
-					buf[i++] = 'a';
+					c = 'a';
 				else
-					buf[i++] = 'd';
+					c = 'd';
 
-				i += snprintf(buf + i, 64, "u: %s (%lu files) ",
-					      coolsize(dir_blocks << BLK_SHIFT), num_files);
-				snprintf(buf + i, NAME_MAX, "vol: %s free [%s]",
+				mvprintw(lastln, 0,
+					 "%d/%d %cu: %s (%lu files) free: %s [%s]\n",
+					 cur + 1, ndents, c, buf, num_files,
 					 coolsize(get_fs_info(path, FREE)),
 					 unescape(dents[cur].name, NAME_MAX));
 			}
-			printmsg(buf);
 		} else
 			printmsg("0/0");
 	}
