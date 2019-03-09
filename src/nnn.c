@@ -4113,6 +4113,7 @@ int main(int argc, char *argv[])
 
 	/* Ignore/handle certain signals */
 	struct sigaction act = {.sa_handler = sigint_handler};
+
 	if (sigaction(SIGINT, &act, NULL) < 0) {
 		xerror();
 		return 1;
