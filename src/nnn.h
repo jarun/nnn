@@ -80,7 +80,6 @@ enum action {
 	SEL_MV,
 	SEL_RMMUL,
 	SEL_RM,
-	SEL_RMTRASH,
 	SEL_OPENWITH,
 	SEL_NEW,
 	SEL_RENAME,
@@ -207,8 +206,6 @@ static struct key bindings[] = {
 	{ 'X',            SEL_RMMUL },
 	/* Delete currently selected */
 	{ CONTROL('X'),   SEL_RM },
-	/* Clear trash */
-	{ 'T',            SEL_RMTRASH },
 	/* Open in a custom application */
 	{ CONTROL('O'),   SEL_OPENWITH },
 	/* Create a new file */

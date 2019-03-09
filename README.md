@@ -100,7 +100,8 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - Convenience
   - Create, rename files and directories
   - Select files across dirs; all/range selection
-  - Copy, move, trash, delete, archive selection
+  - Copy, move, delete, archive selection
+  - Freedeskp compliant trash (needs trash-cli)
   - Show copy, move progress on Linux (needs avdcpmv)
   - Create sym/hard link(s) to selection
   - Transfer files using lftp
@@ -135,6 +136,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | desktop opener |
 | file | determine file type |
 | coreutils (cp, mv, rm), findutils (xargs) | copy, move and remove files |
+| trash-cli | trash files instead of delete |
 | mediainfo or exiftool | multimedia file details |
 | atool, patool ([integration](https://github.com/jarun/nnn/wiki/How-to#integrate-patool)) | create, list and extract archives |
 | vidir (from moreutils) | batch rename dir entries |
@@ -250,7 +252,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  MISC
          ! ^]  Spawn SHELL       C  Execute entry
          R ^V  Run/pick script   L  Lock terminal
-           ^P  Prompt  ^N  Note  T  Empty trash
+           ^P  Prompt           ^N  Note
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.
@@ -376,7 +378,7 @@ The following indicators are used in the detail view:
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type` mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_RESTRICT_0B=1` | do not open 0-byte files |
-| `NNN_TRASH=1` | move files to `~/.local/trash` on delete |
+| `NNN_TRASH=1` | trash (instead of _delete_) files to desktop Trash |
 | `NNN_CP_MV_PROG=1` | show copy, move progress on Linux |
 
 #### Help

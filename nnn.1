@@ -158,8 +158,6 @@ Lock terminal
 Show command prompt
 .It Ic ^N
 Take note
-.It Ic T
-Empty trash
 .El
 .Pp
 Backing up one directory level will set the cursor position at the
@@ -350,7 +348,7 @@ files.
     export NNN_RESTRICT_0B=1
 .Ed
 .Pp
-\fBNNN_TRASH:\fR move files to \fB~/.local/trash\fR on delete.
+\fBNNN_TRASH:\fR trash (instead of \fIdelete\fR) files to desktop Trash.
 .Bd -literal
     export NNN_TRASH=1
 .Ed

@@ -342,9 +342,6 @@ static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 /* Buffer for file path copy file */
 static char g_cppath[PATH_MAX] __attribute__ ((aligned));
 
-/* Buffer for trash dir */
-static char g_trash[PATH_MAX] __attribute__ ((aligned));
-
 /* Buffer to store tmp file path */
 static char g_tmpfpath[HOME_LEN_MAX] __attribute__ ((aligned));
 
@@ -1122,25 +1119,6 @@ static bool xdiraccess(const char *path)
 	return TRUE;
 }
 
-/*
- * Creates a dir if not present
- */
-static bool createdir(const char *path, mode_t mode)
-{
-	DIR *dirp = opendir(path);
-
-	if (dirp) {
-		closedir(dirp);
-		return TRUE;
-	}
-
-	if (errno == ENOENT && !mkdir(path, mode))
-		return TRUE;
-
-	fprintf(stderr, "create %s %s\n", path, strerror(errno));
-	return FALSE;
-}
-
 static void cpstr(char *buf)
 {
 	snprintf(buf, CMD_LEN_MAX,
@@ -1151,26 +1129,18 @@ static void cpstr(char *buf)
 #endif
 }
 
-static void mvstr(char *buf, const char *dst)
+static void mvstr(char *buf)
 {
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-		 "xargs -0 -a %s -%c src %s src %s", g_cppath, REPLACE_STR, mv, dst);
+		 "xargs -0 -a %s -%c src %s src .", g_cppath, REPLACE_STR, mv);
 #else
-		 "cat %s | xargs -0 -o -%c src mv -i src %s", g_cppath, REPLACE_STR, dst);
+		 "cat %s | xargs -0 -o -%c src mv -i src .", g_cppath, REPLACE_STR);
 #endif
 }
 
-static bool rmmulstr(char *buf, const char *curpath)
+static void rmmulstr(char *buf)
 {
-	if (cfg.trash) {
-		if (!xdiraccess(g_trash))
-			return FALSE;
-
-		mvstr(buf, g_trash);
-		return TRUE;
-	}
-
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
 		 "xargs -0 -a %s rm -%cr",
@@ -1178,27 +1148,13 @@ static bool rmmulstr(char *buf, const char *curpath)
 		 "cat %s | xargs -0 -o rm -%cr",
 #endif
 		 g_cppath, confirm_force());
-	return TRUE;
 }
 
-static bool xrm(char *path)
+static void xrm(char *path)
 {
-	DPRINTF_S(path);
-	DPRINTF_S(xbasename(path));
-	DPRINTF_S(g_trash);
-	if (cfg.trash && strcmp(xdirname(path), g_trash) != 0) {
-		if (!xdiraccess(g_trash))
-			return FALSE;
-
-		spawn("mv", path, g_trash, NULL, F_NORMAL | F_SIGINT);
-		DPRINTF_S(g_buf);
-		return TRUE;
-	}
-
 	char rm_opts[] = {'-', confirm_force(), 'r'};
 
 	spawn("rm", rm_opts, path, NULL, F_NORMAL | F_SIGINT);
-	return TRUE;
 }
 
 static void archive_selection(const char *archive, const char *curpath)
@@ -1227,40 +1183,6 @@ static bool write_lastdir(const char *curpath)
 	if (fp) {
 		fprintf(fp, "cd \"%s\"", curpath);
 		fclose(fp);
-	}
-
-	return TRUE;
-}
-
-/*
- * Returns:
- * FALSE - a message is shown
- * TRUE - no message shown
- */
-static bool empty_trash(const char *path)
-{
-	size_t r;
-
-	if (!cfg.trash) {
-		printmsg("set NNN_TRASH");
-		return FALSE;
-	}
-
-	if (!xdiraccess(g_trash))
-		return FALSE;
-
-	r = xstrlcpy(g_buf, "rm -rf ", CMD_LEN_MAX);
-	r += xstrlcpy(g_buf + r - 1, g_trash, CMD_LEN_MAX - r);
-	g_buf[r - 2] = '/';
-	g_buf[r - 1] = '*';
-	g_buf[r] = '\0';
-
-	spawn("sh", "-c", g_buf, NULL, F_NORMAL | F_SIGINT);
-
-	/* Show msg only if not in trash, else refresh trash */
-	if (strcmp(path, g_trash) != 0) {
-		printmsg("trash emptied");
-		return FALSE;
 	}
 
 	return TRUE;
@@ -2435,7 +2357,7 @@ static bool show_help(const char *path)
 		"1MISC\n"
 	       "9! ^]  Spawn SHELL       C  Execute entry\n"
 	       "9R ^V  Run/pick script   L  Lock terminal\n"
-		 "b^P  Prompt  ^N  Note  T  Empty trash\n"};
+		 "b^P  Prompt           ^N  Note\n"};
 
 	if (g_tmpfpath[0])
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
@@ -3570,11 +3492,10 @@ nochange:
 				cpstr(g_buf);
 				break;
 			case SEL_MV:
-				mvstr(g_buf, ".");
+				mvstr(g_buf);
 				break;
 			default: /* SEL_RMMUL */
-				if (!rmmulstr(g_buf, path))
-					goto nochange;
+				rmmulstr(g_buf);
 				break;
 			}
 
@@ -3586,29 +3507,17 @@ nochange:
 				presel = FILTER;
 			goto begin;
 		}
-		case SEL_RM: // fallthrough
-		case SEL_RMTRASH:
+		case SEL_RM:
 		{
-			if (sel == SEL_RM) {
-				if (!ndents)
-					break;
+			if (!ndents)
+				break;
 
-				mkpath(path, dents[cur].name, newpath);
+			mkpath(path, dents[cur].name, newpath);
+			xrm(newpath);
 
-				if (!xrm(newpath))
-					goto nochange;
-
-				/* Don't optimize cur if filtering is on */
-				if (!cfg.filtermode && cur && access(newpath, F_OK) == -1)
-					--cur;
-			} else {
-				r = get_input("Empty trash? [y/Y]");
-				if (!(r == 'y' || r == 'Y'))
-					break;
-
-				if (!empty_trash(path))
-					goto nochange;
-			}
+			/* Don't optimize cur if filtering is on */
+			if (!cfg.filtermode && cur && access(newpath, F_OK) == -1)
+				--cur;
 
 			copycurname();
 
@@ -4149,21 +4058,8 @@ int main(int argc, char *argv[])
 	home = getenv("HOME");
 	DPRINTF_S(home);
 
-	if (getenv(env_cfg[NNN_TRASH])) {
-		if (!home) {
-			fprintf(stderr, "trash: HOME!\n");
-			return 1;
-		}
-
-		/* Create trash dir if missing */
-		g_tmpfplen = xstrlcpy(g_trash, home, PATH_MAX);
-		xstrlcpy(g_trash + g_tmpfplen - 1, "/.local/trash", PATH_MAX - g_tmpfplen);
-		DPRINTF_S(g_trash);
-		if (!createdir(g_trash, 0777))
-			return 1;
-
+	if (getenv(env_cfg[NNN_TRASH]))
 		cfg.trash = 1;
-	}
 
 	/* Prefix for other temporary ops */
 	if (home)
