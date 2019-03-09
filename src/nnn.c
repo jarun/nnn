@@ -348,11 +348,13 @@ static char g_tmpfpath[HOME_LEN_MAX] __attribute__ ((aligned));
 
 #ifdef LINUX_INOTIFY
 static int inotify_fd, inotify_wd = -1;
-static uint INOTIFY_MASK = IN_ATTRIB | IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MODIFY | IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
+static uint INOTIFY_MASK = IN_ATTRIB | IN_CREATE | IN_DELETE | IN_DELETE_SELF
+			   | IN_MODIFY | IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
 #elif defined(BSD_KQUEUE)
 static int kq, event_fd = -1;
 static struct kevent events_to_monitor[NUM_EVENT_FDS];
-static uint KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
+static uint KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
+			    | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
 static struct timespec gtimeout;
 #endif
 
@@ -2490,8 +2492,7 @@ static int dentfill(char *path, struct entry **dents)
 		namep = dp->d_name;
 
 		/* Skip self and parent */
-		if ((namep[0] == '.' && (namep[1] == '\0' ||
-		    (namep[1] == '.' && namep[2] == '\0'))))
+		if ((namep[0] == '.' && (namep[1] == '\0' || (namep[1] == '.' && namep[2] == '\0'))))
 			continue;
 
 		if (!cfg.showhidden && namep[0] == '.') {
@@ -2506,7 +2507,8 @@ static int dentfill(char *path, struct entry **dents)
 					ent_blocks = 0;
 					mkpath(path, namep, g_buf);
 
-					mvprintw(LINES - 1, 0, "scanning %s [^C aborts]\n", xbasename(g_buf));
+					mvprintw(LINES - 1, 0, "scanning %s [^C aborts]\n",
+						 xbasename(g_buf));
 					refresh();
 					if (nftw(g_buf, nftw_fn, open_max,
 						 FTW_MOUNT | FTW_PHYS) == -1) {
@@ -2985,7 +2987,8 @@ nochange:
 						      F_NORMAL | F_SIGINT);
 						runfile[0] = '\0';
 					} else
-						spawn(shell, newpath, NULL, path, F_NORMAL | F_SIGINT);
+						spawn(shell, newpath, NULL, path,
+						      F_NORMAL | F_SIGINT);
 					rundir[0] = '\0';
 					cfg.runscript = 0;
 					setdirwatch();
