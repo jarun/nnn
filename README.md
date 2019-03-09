@@ -379,7 +379,7 @@ The following indicators are used in the detail view:
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_RESTRICT_0B=1` | do not open 0-byte files |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
-| `NNN_CP_MV_PROG=1` | show copy, move progress on Linux |
+| `NNN_OPS_PROG=1` | show copy, move progress on Linux |
 
 #### Help
 
