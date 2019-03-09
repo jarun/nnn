@@ -1141,20 +1141,32 @@ static void mvstr(char *buf)
 
 static void rmmulstr(char *buf)
 {
-	snprintf(buf, CMD_LEN_MAX,
+	if (cfg.trash) {
+		snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-		 "xargs -0 -a %s rm -%cr",
+			 "xargs -0 -a %s trash-put", g_cppath);
 #else
-		 "cat %s | xargs -0 -o rm -%cr",
+			 "cat %s | xargs -0 trash-put", g_cppath);
 #endif
-		 g_cppath, confirm_force());
+	} else {
+		snprintf(buf, CMD_LEN_MAX,
+#ifdef __linux__
+			 "xargs -0 -a %s rm -%cr", g_cppath, confirm_force());
+#else
+			 "cat %s | xargs -0 -o rm -%cr", g_cppath, confirm_force());
+#endif
+	}
 }
 
 static void xrm(char *path)
 {
-	char rm_opts[] = {'-', confirm_force(), 'r'};
+	if (cfg.trash)
+		spawn("trash-put", path, NULL, NULL, F_NORMAL | F_SIGINT);
+	else {
+		char rm_opts[] = {'-', confirm_force(), 'r'};
 
-	spawn("rm", rm_opts, path, NULL, F_NORMAL | F_SIGINT);
+		spawn("rm", rm_opts, path, NULL, F_NORMAL | F_SIGINT);
+	}
 }
 
 static void archive_selection(const char *archive, const char *curpath)
