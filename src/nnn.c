@@ -343,6 +343,10 @@ static uchar g_crc;
 static uchar BLK_SHIFT = 9;
 static bool interrupted = FALSE;
 
+/* Signal handler related */
+static sighandler_t oldsighup; /* old value of hangup signal */
+static sighandler_t oldsigtstp; /* old value of SIGTSTP */
+
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 
@@ -999,6 +1003,43 @@ static int parseargs(char *line, char **argv)
 	return count;
 }
 
+static pid_t xfork(uchar flag)
+{
+	pid_t p = fork();
+
+	if (p > 0) {
+		/* the parent ignores the interrupt, quit and hangup signals */
+		oldsighup = signal(SIGHUP, SIG_IGN);
+		oldsigtstp = signal(SIGTSTP, SIG_DFL);
+	} else if (p == 0) {
+		/* so they can be used to stop the child */
+		signal(SIGHUP, SIG_DFL);
+		signal(SIGINT, SIG_DFL);
+		signal(SIGQUIT, SIG_DFL);
+		signal(SIGTSTP, SIG_DFL);
+
+		if (flag & F_NOWAIT)
+			setsid();
+	}
+
+	if (p == -1)
+		perror("fork");
+	return p;
+}
+
+static void join(pid_t p, uchar flag)
+{
+	int status;
+
+	if (!(flag & F_NOWAIT))
+		/* wait for the child to exit */
+		while (waitpid(p, &status, 0) == -1);
+
+	/* restore parent's signal handling */
+	signal(SIGHUP, oldsighup);
+	signal(SIGTSTP, oldsigtstp);
+}
+
 /*
  * Spawns a child process. Behaviour can be controlled using flag.
  * Limited to 2 arguments to a program, flag works on bit set.
@@ -1043,13 +1084,14 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 		argv[2] = arg2;
 	}
 
-
-	if (flag & F_NORMAL)
+	if (flag & F_NORMAL) {
 		exitcurses();
+		fflush(stdout);
+	}
 
-	pid = fork();
+	pid = xfork(flag);
 	if (pid == 0) {
-		if (dir != NULL)
+		if (dir)
 			status = chdir(dir);
 
 		/* Suppress stdout and stderr */
@@ -1061,31 +1103,15 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 			close(fd);
 		}
 
-		if (flag & F_NOWAIT) {
-			signal(SIGHUP, SIG_IGN);
-			signal(SIGPIPE, SIG_IGN);
-			setsid();
-		}
-
-		if (flag & F_SIGINT)
-			signal(SIGINT, SIG_DFL);
-
 		execvp(*argv, argv);
 		_exit(1);
 	} else {
-		if (!(flag & F_NOWAIT))
-			/* Ignore interruptions */
-			while (waitpid(pid, &status, 0) == -1)
-				DPRINTF_D(status);
+		join(pid, flag);
 
 		DPRINTF_D(pid);
 		if (flag & F_NORMAL) {
-			refresh();
-			if (flag & F_EDIT) {
-				exitcurses();
-				fflush(stdout);
-				initcurses();
-			}
+			nonl();
+			noecho();
 		}
 
 		free(cmd);
@@ -3520,7 +3546,14 @@ nochange:
 				printmsg("selection off");
 			goto nochange;
 		case SEL_COPYLIST:
-			copybufpos ? showcplist() : printmsg("none selected");
+			if (copybufpos) {
+				showcplist();
+				if (cfg.filtermode)
+					presel = FILTER;
+				break;
+			}
+
+			printmsg("none selected");
 			goto nochange;
 		case SEL_CP:
 		case SEL_MV:
