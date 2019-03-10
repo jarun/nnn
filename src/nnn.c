@@ -197,6 +197,7 @@ disabledbg()
 #define F_NOWAIT   0x02  /* don't wait for child process (e.g. file manager) */
 #define F_NOTRACE  0x04  /* suppress stdout and strerr (no traces) */
 #define F_SIGINT   0x08  /* restore default SIGINT handler */
+#define F_EDITOR   0x10  /* spawn the editor */
 #define F_NORMAL   0x80  /* spawn child process in non-curses regular CLI mode */
 
 /* CRC8 macros */
@@ -1022,9 +1023,11 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 		DPRINTF_D(pid);
 		if (flag & F_NORMAL) {
 			refresh();
-			exitcurses();
-			fflush(stdout);
-			initcurses();
+			if (flag & F_EDITOR) {
+				exitcurses();
+				fflush(stdout);
+				initcurses();
+			}
 		}
 	}
 }
@@ -1068,7 +1071,7 @@ static bool quote_run_sh_cmd(const char *cmd, const char *arg, const char *path)
 	}
 
 	DPRINTF_S(g_buf);
-	spawn("sh", "-c", g_buf, path, F_NORMAL);
+	spawn("sh", "-c", g_buf, path, F_NORMAL | F_EDITOR);
 	return TRUE;
 }
 
