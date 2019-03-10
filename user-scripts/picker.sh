@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Description: Pick files and pipe the line-separated list to another utility
+# Description: Pick files and pipe the newline-separated list to another utility
 #
 # Shell: generic
 # Author: Arun Prakash Jana

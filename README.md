@@ -61,6 +61,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - [Configuration](#configuration)
   - [Help](#help)
 - [Quickstart](#quickstart)
+- [User scripts](#user-scripts)
 - [Troubleshooting](#troubleshooting)
   - [Tmux configuration](#tmux-configuration)
   - [BSD terminal issue](#bsd-terminal-issue)
@@ -400,6 +401,20 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 - For additional functionality [setup custom scripts](https://github.com/jarun/nnn/wiki/How-to#run-custom-scripts).
 - Visit the [How to](https://github.com/jarun/nnn/wiki/How-to) for many more specific usecases.
+
+#### USER SCRIPTS
+
+The following [user-scripts](https://github.com/jarun/nnn/tree/master/user-scripts) are available.
+
+| Script | Description |
+| --- | --- |
+| copier.sh | Copy selection to clipboard |
+| edit.sh | Fuzzy find a file in directory subtree with fzy and edit in vim |
+| fzy.sh | Fuzzy find a file in directory subtree with fzy and open using xdg-open |
+| imgur.sh | Upload an image file to imgur |
+| picker.sh | Pick files and pipe the newline-separated list to another utility |
+| sxiv.sh | Open images in current directory in sxiv |
+| upgrade.sh | Check and update to latest version of nnn manually on Debian 9 Stretch |
 
 #### TROUBLESHOOTING
 

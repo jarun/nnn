@@ -3,6 +3,9 @@
 # https://imgur.com/tools
 #
 # Slightly modified for `nnn` integration
+#
+# Shell: bash
+# Description: Upload an image file to imgur
 
 if [ "${1}" = "--debug" ]; then
   echo "########################################"
