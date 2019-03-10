@@ -325,6 +325,7 @@ static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 static struct entry *dents;
 static char *pnamebuf, *pcopybuf;
 static int ndents, cur, total_dents = ENTRY_INCR;
+static int xlines, xcols;
 static uint idle;
 static uint idletimeout, copybufpos, copybuflen;
 static char *opener;
@@ -584,7 +585,7 @@ static char *xitoa(uint val)
 /* Messages show up at the bottom */
 static void printmsg(const char *msg)
 {
-	mvprintw(LINES - 1, 0, "%s\n", msg);
+	mvprintw(xlines - 1, 0, "%s\n", msg);
 }
 
 /* Kill curses and display error before exiting */
@@ -1445,7 +1446,7 @@ static int setfilter(regex_t *regex, const char *filter)
 	int r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
 
 	if (r != 0 && filter && filter[0] != '\0')
-		mvprintw(LINES - 1, 0, "regex error: %d\n", r);
+		mvprintw(xlines - 1, 0, "regex error: %d\n", r);
 
 	return r;
 }
@@ -2557,7 +2558,7 @@ static int dentfill(char *path, struct entry **dents)
 					ent_blocks = 0;
 					mkpath(path, namep, g_buf);
 
-					mvprintw(LINES - 1, 0, "scanning %s [^C aborts]\n",
+					mvprintw(xlines - 1, 0, "scanning %s [^C aborts]\n",
 						 xbasename(g_buf));
 					refresh();
 					if (nftw(g_buf, nftw_fn, open_max,
@@ -2642,7 +2643,8 @@ static int dentfill(char *path, struct entry **dents)
 				num_saved = num_files + 1;
 				mkpath(path, namep, g_buf);
 
-				mvprintw(LINES - 1, 0, "scanning %s [^C aborts]\n", xbasename(g_buf));
+				mvprintw(xlines - 1, 0, "scanning %s [^C aborts]\n",
+					 xbasename(g_buf));
 				refresh();
 				if (nftw(g_buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
 					printmsg(messages[STR_NFTWFAIL_ID]);
@@ -2732,8 +2734,11 @@ static void populate(char *path, char *lastname)
 
 static void redraw(char *path)
 {
-	size_t ncols = (COLS <= PATH_MAX) ? COLS : PATH_MAX;
-	int lastln = LINES;
+	xlines = LINES;
+	xcols = COLS;
+
+	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
+	int lastln = xlines;
 	int nlines = MIN(lastln - 4, ndents), i, attrs;
 	char buf[12];
 	char c;
@@ -3089,11 +3094,11 @@ nochange:
 			break;
 		case SEL_PGDN:
 			if (cur < ndents - 1)
-				cur += MIN((LINES - 4) / 2, ndents - 1 - cur);
+				cur += MIN((xlines - 4) / 2, ndents - 1 - cur);
 			break;
 		case SEL_PGUP:
 			if (cur > 0)
-				cur -= MIN((LINES - 4) / 2, cur);
+				cur -= MIN((xlines - 4) / 2, cur);
 			break;
 		case SEL_HOME:
 			cur = 0;
@@ -3536,7 +3541,7 @@ nochange:
 					dents[r].flags |= FILE_COPIED;
 				}
 
-				mvprintw(LINES - 1, 0, "%d files selected\n",
+				mvprintw(xlines - 1, 0, "%d files selected\n",
 					 copyendid - copystartid + 1);
 			}
 
@@ -3546,7 +3551,7 @@ nochange:
 					spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
 				if (ncp) /* Some files cherry picked */
-					mvprintw(LINES - 1, 0, "%d files selected\n", ncp);
+					mvprintw(xlines - 1, 0, "%d files selected\n", ncp);
 			} else
 				printmsg("selection off");
 			goto nochange;
@@ -3935,13 +3940,19 @@ nochange:
 
 			dentfree(dents);
 			return;
-		} /* switch (sel) */
+		default:
+			if (xlines != LINES || xcols != COLS)
+				goto begin;
 
-		/* Locker */
-		if (idletimeout != 0 && idle == idletimeout) {
-			idle = 0;
-			spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
-		}
+			/* Locker */
+			if (idletimeout != 0 && idle == idletimeout) {
+				idle = 0;
+				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
+				goto begin;
+			}
+
+			goto nochange;
+		} /* switch (sel) */
 	}
 }
 
