@@ -175,6 +175,7 @@ disabledbg()
 #define EMPTY "  "
 #define CURSYM(flag) ((flag) ? CURSR : EMPTY)
 #define FILTER '/'
+#define MSGWAIT '$'
 #define REGEX_MAX 48
 #define BM_MAX 10
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
@@ -588,6 +589,12 @@ static void printmsg(const char *msg)
 	mvprintw(xlines - 1, 0, "%s\n", msg);
 }
 
+static void printwait(const char *msg, int *presel)
+{
+	printmsg(msg);
+	*presel = MSGWAIT;
+}
+
 /* Kill curses and display error before exiting */
 static void printerr(int linenum)
 {
@@ -835,15 +842,13 @@ static void writecp(const char *buf, const size_t buflen)
 		printwarn();
 }
 
-static bool appendfpath(const char *path, const size_t len)
+static void appendfpath(const char *path, const size_t len)
 {
 	if ((copybufpos >= copybuflen) || ((len + 3) > (copybuflen - copybufpos))) {
 		copybuflen += PATH_MAX;
 		pcopybuf = xrealloc(pcopybuf, copybuflen);
-		if (!pcopybuf) {
-			printmsg("no memory!");
-			return FALSE;
-		}
+		if (!pcopybuf)
+			errexit();
 	}
 
 	/* Enabling the following will miss files with newlines */
@@ -853,8 +858,6 @@ static bool appendfpath(const char *path, const size_t len)
 	 */
 
 	copybufpos += xstrlcpy(pcopybuf + copybufpos, path, len);
-
-	return TRUE;
 }
 
 /* Write selected file paths to fd, linefeed separated */
@@ -883,25 +886,27 @@ static ssize_t selectiontofd(int fd)
 	return pos;
 }
 
-static bool showcplist(void)
+static void showcplist(void)
 {
 	int fd;
 	ssize_t pos;
 
 	if (!copybufpos)
-		return FALSE;
+		return;
 
 	if (g_tmpfpath[0])
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
 			 HOME_LEN_MAX - g_tmpfplen);
 	else {
-		printmsg(messages[STR_NOHOME_ID]);
-		return -1;
+		DPRINTF_S(messages[STR_NOHOME_ID]);
+		return;
 	}
 
 	fd = mkstemp(g_tmpfpath);
-	if (fd == -1)
-		return FALSE;
+	if (fd == -1) {
+		DPRINTF_S("mkstemp failed!");
+		return;
+	}
 
 	pos = selectiontofd(fd);
 
@@ -909,7 +914,6 @@ static bool showcplist(void)
 	if (pos && pos == copybufpos)
 		spawn(pager, g_tmpfpath, NULL, NULL, F_PAGER);
 	unlink(g_tmpfpath);
-	return TRUE;
 }
 
 static bool cpsafe(void)
@@ -928,7 +932,7 @@ static bool cpsafe(void)
 
 	/* Fail if copy file path isn't accessible */
 	if (access(g_cppath, R_OK) == -1) {
-		printmsg("empty selection list");
+		printmsg("check copyfile permission");
 		return FALSE;
 	}
 
@@ -1501,7 +1505,7 @@ static int entrycmp(const void *va, const void *vb)
  * Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}).
  * The next keyboard input can be simulated by presel.
  */
-static int nextsel(int *presel)
+static int nextsel(int presel)
 {
 	int c;
 	uint i;
@@ -1511,13 +1515,15 @@ static int nextsel(int *presel)
 #elif defined(BSD_KQUEUE)
 	static struct kevent event_data[NUM_EVENT_SLOTS];
 #endif
-	c = *presel;
+	c = presel;
 
-	if (c == 0) {
+	if (c == 0 || c == '$') {
 		c = getch();
 		DPRINTF_D(c);
-	} else
-		*presel = 0;
+
+		if (presel == '$')
+			c = CONTROL('L');
+	}
 
 	if (c == -1) {
 		++idle;
@@ -2298,10 +2304,8 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 	if (g_tmpfpath[0])
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
 			 HOME_LEN_MAX - g_tmpfplen);
-	else {
-		printmsg(messages[STR_NOHOME_ID]);
+	else
 		return FALSE;
-	}
 
 	fd = mkstemp(g_tmpfpath);
 	if (fd == -1)
@@ -2563,7 +2567,7 @@ static int dentfill(char *path, struct entry **dents)
 					refresh();
 					if (nftw(g_buf, nftw_fn, open_max,
 						 FTW_MOUNT | FTW_PHYS) == -1) {
-						printmsg(messages[STR_NFTWFAIL_ID]);
+						DPRINTF_S(messages[STR_NFTWFAIL_ID]);
 						dir_blocks += (cfg.apparentsz
 							       ? sb.st_size
 							       : sb.st_blocks);
@@ -2647,7 +2651,7 @@ static int dentfill(char *path, struct entry **dents)
 					 xbasename(g_buf));
 				refresh();
 				if (nftw(g_buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
-					printmsg(messages[STR_NFTWFAIL_ID]);
+					DPRINTF_S(messages[STR_NFTWFAIL_ID]);
 					dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				} else
 					dentp->blocks = ent_blocks;
@@ -2959,7 +2963,9 @@ nochange:
 		if (getppid() == 1)
 			_exit(0);
 
-		sel = nextsel(&presel);
+		sel = nextsel(presel);
+		if (presel)
+			presel = 0;
 
 		switch (sel) {
 		case SEL_BACK:
@@ -3066,7 +3072,7 @@ nochange:
 				}
 
 				if (!sb.st_size && cfg.restrict0b) {
-					printmsg("empty: use edit or open with");
+					printwait("empty: use edit or open with", &presel);
 					goto nochange;
 				}
 
@@ -3075,7 +3081,7 @@ nochange:
 				continue;
 			}
 			default:
-				printmsg("unsupported file");
+				printwait("unsupported file", &presel);
 				goto nochange;
 			}
 		case SEL_NEXT:
@@ -3126,7 +3132,7 @@ nochange:
 			}
 
 			if (dir[0] == '\0') {
-				printmsg("not set");
+				printwait("not set", &presel);
 				goto nochange;
 			}
 
@@ -3226,7 +3232,7 @@ nochange:
 			}
 
 			if (get_bm_loc(newpath, fd) == NULL) {
-				printmsg(messages[STR_INVBM_KEY]);
+				printwait(messages[STR_INVBM_KEY], &presel);
 				goto nochange;
 			}
 
@@ -3249,7 +3255,7 @@ nochange:
 			goto begin;
 		case SEL_PIN:
 			xstrlcpy(mark, path, PATH_MAX);
-			printmsg(mark);
+			printwait(mark, &presel);
 			goto nochange;
 		case SEL_FLTR:
 			/* Unwatch dir if we are still in a filtered view */
@@ -3360,6 +3366,7 @@ nochange:
 			mkpath(path, dents[cur].name, newpath);
 			if (lstat(newpath, &sb) == -1 || !show_stats(newpath, dents[cur].name, &sb)) {
 				printwarn();
+				presel = MSGWAIT;
 				goto nochange;
 			}
 			break;
@@ -3418,7 +3425,7 @@ nochange:
 
 				notepath = notepath ? notepath : getenv(env_cfg[NNN_NOTE]);
 				if (!notepath) {
-					printmsg("set NNN_NOTE");
+					printwait("set NNN_NOTE", &presel);
 					goto nochange;
 				}
 
@@ -3431,7 +3438,7 @@ nochange:
 			}
 
 			if (!r) {
-				printmsg("utility missing");
+				printwait("utility missing", &presel);
 				goto nochange;
 			}
 
@@ -3468,8 +3475,7 @@ nochange:
 					writecp(NULL, 0);
 
 				r = mkpath(path, dents[cur].name, newpath);
-				if (!appendfpath(newpath, r))
-					goto nochange;
+				appendfpath(newpath, r);
 
 				++ncp;
 			} else {
@@ -3501,7 +3507,7 @@ nochange:
 				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
 				copystartid = cur;
 				ncp = 0;
-				printmsg("selection on");
+				printwait("selection on", &presel);
 				goto nochange;
 			}
 
@@ -3510,7 +3516,7 @@ nochange:
 				if (g_crc != crc8fast((uchar *)dents,
 						      ndents * sizeof(struct entry))) {
 					cfg.copymode = 0;
-					printmsg("dir/content changed");
+					printwait("dir/content changed", &presel);
 					goto nochange;
 				}
 #endif
@@ -3534,15 +3540,14 @@ nochange:
 
 			if ((!ncp && copystartid < copyendid) || sel == SEL_COPYALL) {
 				for (r = copystartid; r <= copyendid; ++r) {
-					if (!appendfpath(newpath, mkpath(path,
-							 dents[r].name, newpath)))
-						goto nochange;
-
+					appendfpath(newpath, mkpath(path, dents[r].name, newpath));
 					dents[r].flags |= FILE_COPIED;
 				}
 
 				mvprintw(xlines - 1, 0, "%d files selected\n",
 					 copyendid - copystartid + 1);
+				getch();
+				continue; /* delayed message shown, now redraw */
 			}
 
 			if (copybufpos) { /* File path(s) written to the buffer */
@@ -3550,10 +3555,13 @@ nochange:
 				if (copier)
 					spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
-				if (ncp) /* Some files cherry picked */
+				if (ncp) { /* Some files cherry picked */
 					mvprintw(xlines - 1, 0, "%d files selected\n", ncp);
+					getch();
+					continue; /* delayed message shown, now redraw */
+				}
 			} else
-				printmsg("selection off");
+				printwait("selection off", &presel);
 			goto nochange;
 		case SEL_COPYLIST:
 			if (copybufpos) {
@@ -3563,14 +3571,16 @@ nochange:
 				break;
 			}
 
-			printmsg("none selected");
+			printwait("none selected", &presel);
 			goto nochange;
 		case SEL_CP:
 		case SEL_MV:
 		case SEL_RMMUL:
 		{
-			if (!cpsafe())
+			if (!cpsafe()) {
+				presel = MSGWAIT;
 				goto nochange;
+			}
 
 			switch (sel) {
 			case SEL_CP:
@@ -3621,11 +3631,13 @@ nochange:
 			case SEL_ARCHIVE:
 				r = get_input("archive selection (else current)? [y/Y]");
 				if (r == 'y' || r == 'Y') {
-					if (!cpsafe())
+					if (!cpsafe()) {
+						presel = MSGWAIT;
 						goto nochange;
+					}
 					tmp = NULL;
 				} else if (!ndents) {
-					printmsg("no files");
+					printwait("no files", &presel);
 					goto nochange;
 				} else
 					tmp = dents[cur].name;
@@ -3647,7 +3659,7 @@ nochange:
 
 			/* Allow only relative, same dir paths */
 			if (tmp[0] == '/' || xstrcmp(xbasename(tmp), tmp) != 0) {
-				printmsg(messages[STR_INPUT_ID]);
+				printwait(messages[STR_INPUT_ID], &presel);
 				goto nochange;
 			}
 
@@ -3661,7 +3673,7 @@ nochange:
 			case SEL_ARCHIVE:
 				/* newpath is used as temporary buffer */
 				if (!getutil(utils[APACK])) {
-					printmsg("utility missing");
+					printwait("utility missing", &presel);
 					goto nochange;
 				}
 
@@ -3672,7 +3684,7 @@ nochange:
 			case SEL_OPENWITH:
 				dir = NULL;
 				if (!getprogarg(tmp, &dir)) { /* dir used as tmp var */
-					printmsg(messages[STR_ARGLIMIT]);
+					printwait(messages[STR_ARGLIMIT], &presel);
 					goto nochange;
 				}
 				mkpath(path, dents[cur].name, newpath);
@@ -3719,7 +3731,7 @@ nochange:
 				} else {
 					/* Do nothing in case of NEW */
 					close(fd);
-					printmsg("entry exists");
+					printwait("entry exists", &presel);
 					goto nochange;
 				}
 			}
@@ -3746,7 +3758,7 @@ nochange:
 					close(fd);
 
 					if (r <= 0) {
-						printmsg("none created");
+						printwait("none created", &presel);
 						goto nochange;
 					}
 
@@ -3783,13 +3795,13 @@ nochange:
 
 				/* Check if this is a directory */
 				if (!S_ISREG(dents[cur].mode)) {
-					printmsg("not regular file");
+					printwait("not regular file", &presel);
 					goto nochange;
 				}
 
 				/* Check if file is executable */
 				if (!(dents[cur].mode & 0100)) {
-					printmsg("permission denied");
+					printwait("permission denied", &presel);
 					goto nochange;
 				}
 
@@ -3802,7 +3814,7 @@ nochange:
 				break;
 			case SEL_SCRIPT:
 				if (!scriptpath) {
-					printmsg("set NNN_SCRIPT");
+					printwait("set NNN_SCRIPT", &presel);
 					goto nochange;
 				}
 
@@ -3914,8 +3926,10 @@ nochange:
 					/* Picker mode: reset buffer or clear file */
 					if (copybufpos)
 						cfg.pickraw ? copybufpos = 0 : writecp(NULL, 0);
-				} else if (!write_lastdir(path))
+				} else if (!write_lastdir(path)) {
+					presel = MSGWAIT;
 					goto nochange;
+				}
 			} // fallthrough
 		case SEL_QUITCTX:
 			if (sel == SEL_QUITCTX) {
@@ -3941,8 +3955,11 @@ nochange:
 			dentfree(dents);
 			return;
 		default:
-			if (xlines != LINES || xcols != COLS)
+			if (xlines != LINES || xcols != COLS) {
+				idle = 0;
+				setdirwatch();
 				goto begin;
+			}
 
 			/* Locker */
 			if (idletimeout != 0 && idle == idletimeout) {
