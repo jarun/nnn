@@ -4005,7 +4005,7 @@ int main(int argc, char *argv[])
 			else {
 				/* copier used as tmp var */
 				copier = realpath(optarg, g_cppath);
-				if (!copier) {
+				if (!g_cppath[0]) {
 					xerror();
 					return 1;
 				}
