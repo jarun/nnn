@@ -3036,13 +3036,15 @@ nochange:
 						continue;
 
 					mkpath(path, dents[cur].name, newpath);
+					/* Copy to path so we can return back to earlier dir */
 					xstrlcpy(path, rundir, PATH_MAX);
 					if (runfile[0]) {
 						xstrlcpy(lastname, runfile, NAME_MAX);
-						spawn(shell, newpath, lastname, path, F_SHELL);
+						spawn(newpath, lastname, NULL, path,
+						      F_NORMAL | F_SIGINT);
 						runfile[0] = '\0';
 					} else
-						spawn(shell, newpath, NULL, path, F_SHELL);
+						spawn(newpath, NULL, NULL, path, F_NORMAL | F_SIGINT);
 					rundir[0] = '\0';
 					cfg.runscript = 0;
 					setdirwatch();
@@ -3807,7 +3809,7 @@ nochange:
 				/* Regular script file */
 				if (S_ISREG(sb.st_mode)) {
 					tmp = ndents ? dents[cur].name : NULL;
-					spawn(shell, scriptpath, tmp, path, F_SHELL);
+					spawn(scriptpath, tmp, NULL, path, F_NORMAL | F_SIGINT);
 					break;
 				}
 
