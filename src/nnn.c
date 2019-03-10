@@ -2465,7 +2465,7 @@ static void dentfree(struct entry *dents)
 
 static int dentfill(char *path, struct entry **dents)
 {
-	int fd, n, count;
+	int n = 0, count;
 	ulong num_saved;
 	struct dirent *dp;
 	char *namep, *pnb;
@@ -2477,15 +2477,14 @@ static int dentfill(char *path, struct entry **dents)
 	if (dirp == NULL)
 		return 0;
 
-	fd = dirfd(dirp);
-
-	n = 0;
+	int fd = dirfd(dirp);
 
 	if (cfg.blkorder) {
 		num_files = 0;
 		dir_blocks = 0;
 
 		if (fstatat(fd, ".", &sb_path, 0) == -1) {
+			closedir(dirp);
 			printwarn();
 			return 0;
 		}
@@ -2522,8 +2521,10 @@ static int dentfill(char *path, struct entry **dents)
 					} else
 						dir_blocks += ent_blocks;
 
-					if (interrupted)
+					if (interrupted) {
+						closedir(dirp);
 						return n;
+					}
 				}
 			} else {
 				dir_blocks += (cfg.apparentsz ? sb.st_size : sb.st_blocks);
@@ -2543,6 +2544,7 @@ static int dentfill(char *path, struct entry **dents)
 			*dents = xrealloc(*dents, total_dents * sizeof(**dents));
 			if (*dents == NULL) {
 				free(pnamebuf);
+				closedir(dirp);
 				errexit();
 			}
 			DPRINTF_P(*dents);
@@ -2556,6 +2558,7 @@ static int dentfill(char *path, struct entry **dents)
 			pnamebuf = (char *)xrealloc(pnamebuf, namebuflen);
 			if (pnamebuf == NULL) {
 				free(*dents);
+				closedir(dirp);
 				errexit();
 			}
 			DPRINTF_P(pnamebuf);
@@ -2604,8 +2607,10 @@ static int dentfill(char *path, struct entry **dents)
 				else
 					num_files = num_saved;
 
-				if (interrupted)
+				if (interrupted) {
+					closedir(dirp);
 					return n;
+				}
 			} else {
 				dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				dir_blocks += dentp->blocks;
