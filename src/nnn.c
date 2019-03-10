@@ -974,19 +974,18 @@ static bool initcurses(void)
 	return TRUE;
 }
 
-/* NOTE: There's no NULL check here */
-
+/* No NULL check here as spawn() guards against it */
 static int parseargs(char *line, char **argv)
 {
 	int count = 0;
 
 	argv[count++] = line;
 
-	while (*line) {
+	while (*line) { // NOLINT
 		if (isblank(*line)) {
 			*line++ = '\0';
 
-			if (!*line)
+			if (!*line) // NOLINT
 				return count;
 
 			argv[count++] = line;
