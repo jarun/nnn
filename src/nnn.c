@@ -3482,9 +3482,7 @@ nochange:
 			}
 
 			dents[cur].flags |= FILE_COPIED;
-
-			printmsg(newpath);
-			goto nochange;
+			break;
 		case SEL_COPYMUL:
 			cfg.copymode ^= 1;
 			if (cfg.copymode) {
