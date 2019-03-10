@@ -343,9 +343,14 @@ static uchar g_crc;
 static uchar BLK_SHIFT = 9;
 static bool interrupted = FALSE;
 
-/* Signal handler related */
+/* Retain old signal handlers */
+#ifdef __linux__
 static sighandler_t oldsighup; /* old value of hangup signal */
 static sighandler_t oldsigtstp; /* old value of SIGTSTP */
+#else
+static sig_t oldsighup;
+static sig_t oldsigtstp;
+#endif
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
@@ -1091,8 +1096,8 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 
 	pid = xfork(flag);
 	if (pid == 0) {
-		if (dir)
-			status = chdir(dir);
+		if (dir && chdir(dir) == -1)
+			_exit(1);
 
 		/* Suppress stdout and stderr */
 		if (flag & F_NOTRACE) {
