@@ -186,6 +186,7 @@ disabledbg()
 #define CTX_MAX 4
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
+#define EXEC_ARGS_MAX 8
 
 /* Entry flags */
 #define DIR_OR_LINK_TO_DIR 0x1
@@ -198,6 +199,7 @@ disabledbg()
 #define F_NOTRACE  0x04  /* suppress stdout and strerr (no traces) */
 #define F_SIGINT   0x08  /* restore default SIGINT handler */
 #define F_EDITOR   0x10  /* spawn the editor */
+#define F_MULTI    0x20  /* first arg can be combination of args */
 #define F_NORMAL   0x80  /* spawn child process in non-curses regular CLI mode */
 
 /* CRC8 macros */
@@ -491,7 +493,7 @@ static const char * const envs[] = {
 
 /* Forward declarations */
 static void redraw(char *path);
-static void spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uchar flag);
+static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag);
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 
 /* Functions */
@@ -969,22 +971,76 @@ static bool initcurses(void)
 	return TRUE;
 }
 
+/* NOTE: There's no NULL check here */
+
+static int parseargs(char *line, char **argv)
+{
+	int count = 0;
+
+	argv[count++] = line;
+
+	while (*line) {
+		if (isblank(*line)) {
+			*line++ = '\0';
+
+			if (!*line)
+				return count;
+
+			argv[count++] = line;
+			if (count == EXEC_ARGS_MAX)
+				return -1;
+		}
+
+		++line;
+	 }
+
+	return count;
+}
+
 /*
  * Spawns a child process. Behaviour can be controlled using flag.
  * Limited to 2 arguments to a program, flag works on bit set.
  */
-static void spawn(const char *file, const char *arg1, const char *arg2, const char *dir, uchar flag)
+static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag)
 {
 	pid_t pid;
 	int status;
-	const char *tmp;
+	char *argv[EXEC_ARGS_MAX] = {0};
+	char *cmd = NULL;
+
+	if (!file || !file[0])
+		return;
 
 	/* Swap args if the first arg is NULL and second isn't */
 	if (!arg1 && arg2) {
-		tmp = arg1;
 		arg1 = arg2;
-		arg2 = tmp;
+		arg2 = NULL;
 	}
+
+	if (flag & F_MULTI) {
+		size_t len = strlen(file) + 1;
+		cmd = (char *)malloc(len);
+		if (!cmd) {
+			DPRINTF_S("spawn: malloc()!");
+			return;
+		}
+
+		xstrlcpy(cmd, file, len);
+		argv[0] = file;
+		status = parseargs(cmd, argv);
+		if (status == -1 || status > (EXEC_ARGS_MAX - 2)) { /* arg1 and last NULL */
+			free(cmd);
+			DPRINTF_S("spawn: NULL or too many args");
+			return;
+		}
+
+		argv[status] = arg1;
+	} else {
+		argv[0] = file;
+		argv[1] = arg1;
+		argv[2] = arg2;
+	}
+
 
 	if (flag & F_NORMAL)
 		exitcurses();
@@ -1012,7 +1068,7 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 		if (flag & F_SIGINT)
 			signal(SIGINT, SIG_DFL);
 
-		execlp(file, file, arg1, arg2, NULL);
+		execvp(*argv, argv);
 		_exit(1);
 	} else {
 		if (!(flag & F_NOWAIT))
@@ -1029,50 +1085,9 @@ static void spawn(const char *file, const char *arg1, const char *arg2, const ch
 				initcurses();
 			}
 		}
+
+		free(cmd);
 	}
-}
-
-/*
- * Quotes argument and spawns a shell command
- * Uses g_buf
- */
-static bool quote_run_sh_cmd(const char *cmd, const char *arg, const char *path)
-{
-	const char *ptr;
-	size_t r;
-
-	if (!cmd)
-		return FALSE;
-
-	r = xstrlcpy(g_buf, cmd, CMD_LEN_MAX);
-
-	if (arg) {
-		if (r >= CMD_LEN_MAX - 4) { /* space for at least 4 chars - space'c' */
-			printmsg(messages[STR_UNSAFE]);
-			return FALSE;
-		}
-
-		for (ptr = arg; *ptr; ++ptr)
-			if (*ptr == '\'') {
-				printmsg(messages[STR_UNSAFE]);
-				return FALSE;
-			}
-
-		g_buf[r - 1] = ' ';
-		g_buf[r] = '\'';
-		r += xstrlcpy(g_buf + r + 1, arg, CMD_LEN_MAX - 1 - r);
-		if (r >= CMD_LEN_MAX - 1) {
-			printmsg(messages[STR_UNSAFE]);
-			return FALSE;
-		}
-
-		g_buf[r] = '\'';
-		g_buf[r + 1] = '\0';
-	}
-
-	DPRINTF_S(g_buf);
-	spawn("sh", "-c", g_buf, path, F_NORMAL | F_EDITOR);
-	return TRUE;
 }
 
 /* Get program name from env var, else return fallback program */
@@ -2318,7 +2333,7 @@ static bool show_mediainfo(const char *fpath, const char *arg)
 	return TRUE;
 }
 
-static bool handle_archive(const char *fpath, const char *arg, const char *dir)
+static bool handle_archive(char *fpath, char *arg, const char *dir)
 {
 	if (!getutil(utils[ATOOL]))
 		return FALSE;
@@ -3008,8 +3023,8 @@ nochange:
 				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE)
 				    && g_buf[0] == 't' && g_buf[1] == 'e' && g_buf[2] == 'x'
 				    && g_buf[3] == g_buf[0] && g_buf[4] == '/') {
-					if (!quote_run_sh_cmd(editor, newpath, path))
-						goto nochange;
+					spawn(editor, newpath, NULL, path,
+					      F_NORMAL | F_EDITOR | F_MULTI);
 					continue;
 				}
 
@@ -3355,8 +3370,8 @@ nochange:
 				r = show_help(path);
 				break;
 			case SEL_RUNEDIT:
-				if (!quote_run_sh_cmd(editor, dents[cur].name, path))
-					goto nochange;
+				spawn(editor, dents[cur].name, NULL, path,
+				      F_NORMAL | F_EDITOR |F_MULTI);
 				break;
 			case SEL_RUNPAGE:
 				spawn(pager, pager_arg, dents[cur].name, path, F_NORMAL);
@@ -3371,8 +3386,7 @@ nochange:
 					goto nochange;
 				}
 
-				if (!quote_run_sh_cmd(editor, notepath, NULL))
-					goto nochange;
+				spawn(editor, notepath, NULL, path, F_NORMAL | F_EDITOR |F_MULTI);
 				break;
 			}
 			default: /* SEL_LOCK */
