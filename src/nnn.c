@@ -194,13 +194,16 @@ disabledbg()
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE     0x00  /* no flag set */
-#define F_MARKER   0x01  /* draw marker to indicate nnn spawned (e.g. shell) */
+#define F_MULTI    0x01  /* first arg can be combination of args; to be used with F_NORMAL */
 #define F_NOWAIT   0x02  /* don't wait for child process (e.g. file manager) */
 #define F_NOTRACE  0x04  /* suppress stdout and strerr (no traces) */
 #define F_SIGINT   0x08  /* restore default SIGINT handler */
-#define F_EDITOR   0x10  /* spawn the editor */
-#define F_MULTI    0x20  /* first arg can be combination of args */
-#define F_NORMAL   0x80  /* spawn child process in non-curses regular CLI mode */
+#define F_EDIT     0x10  /* spawn the editor */
+#define F_NORMAL   0x20  /* spawn child process in non-curses regular CLI mode */
+
+#define F_PAGER    (F_NORMAL | F_MULTI)
+#define F_SHELL    (F_NORMAL | F_MULTI | F_SIGINT)
+#define F_EDITOR   (F_NORMAL | F_MULTI | F_EDIT)
 
 /* CRC8 macros */
 #define WIDTH  (sizeof(unsigned char) << 3)
@@ -327,8 +330,8 @@ static uint idletimeout, copybufpos, copybuflen;
 static char *opener;
 static char *copier;
 static char *editor;
-static char *pager, *pager_arg;
-static char *shell, *shell_arg;
+static char *pager;
+static char *shell;
 static char *home;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
@@ -894,7 +897,7 @@ static bool showcplist(void)
 
 	close(fd);
 	if (pos && pos == copybufpos)
-		spawn(pager, pager_arg, g_tmpfpath, NULL, F_NORMAL);
+		spawn(pager, g_tmpfpath, NULL, NULL, F_PAGER);
 	unlink(g_tmpfpath);
 	return TRUE;
 }
@@ -1026,15 +1029,15 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 		}
 
 		xstrlcpy(cmd, file, len);
-		argv[0] = file;
 		status = parseargs(cmd, argv);
-		if (status == -1 || status > (EXEC_ARGS_MAX - 2)) { /* arg1 and last NULL */
+		if (status == -1 || status > (EXEC_ARGS_MAX - 3)) { /* arg1, arg2 and last NULL */
 			free(cmd);
 			DPRINTF_S("spawn: NULL or too many args");
 			return;
 		}
 
-		argv[status] = arg1;
+		argv[status++] = arg1;
+		argv[status] = arg2;
 	} else {
 		argv[0] = file;
 		argv[1] = arg1;
@@ -1079,7 +1082,7 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 		DPRINTF_D(pid);
 		if (flag & F_NORMAL) {
 			refresh();
-			if (flag & F_EDITOR) {
+			if (flag & F_EDIT) {
 				exitcurses();
 				fflush(stdout);
 				initcurses();
@@ -2233,7 +2236,7 @@ static char *get_output(char *buf, const size_t bytes, const char *file,
 		/* Show in pager in child */
 		dup2(pipefd[0], STDIN_FILENO);
 		close(pipefd[0]);
-		execlp(pager, pager, NULL);
+		spawn(pager, NULL, NULL, NULL, F_PAGER);
 		_exit(1);
 	}
 
@@ -2304,7 +2307,7 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 	dprintf(fd, "\n\n");
 	close(fd);
 
-	spawn(pager, pager_arg, g_tmpfpath, NULL, F_NORMAL);
+	spawn(pager, g_tmpfpath, NULL, NULL, F_PAGER);
 	unlink(g_tmpfpath);
 	return TRUE;
 }
@@ -2447,7 +2450,7 @@ static bool show_help(const char *path)
 	dprintf(fd, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
 
-	spawn(pager, pager_arg, g_tmpfpath, NULL, F_NORMAL);
+	spawn(pager, g_tmpfpath, NULL, NULL, F_PAGER);
 	unlink(g_tmpfpath);
 	return TRUE;
 }
@@ -3006,12 +3009,10 @@ nochange:
 					xstrlcpy(path, rundir, PATH_MAX);
 					if (runfile[0]) {
 						xstrlcpy(lastname, runfile, NAME_MAX);
-						spawn(shell, newpath, lastname, path,
-						      F_NORMAL | F_SIGINT);
+						spawn(shell, newpath, lastname, path, F_SHELL);
 						runfile[0] = '\0';
 					} else
-						spawn(shell, newpath, NULL, path,
-						      F_NORMAL | F_SIGINT);
+						spawn(shell, newpath, NULL, path, F_SHELL);
 					rundir[0] = '\0';
 					cfg.runscript = 0;
 					setdirwatch();
@@ -3023,8 +3024,7 @@ nochange:
 				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE)
 				    && g_buf[0] == 't' && g_buf[1] == 'e' && g_buf[2] == 'x'
 				    && g_buf[3] == g_buf[0] && g_buf[4] == '/') {
-					spawn(editor, newpath, NULL, path,
-					      F_NORMAL | F_EDITOR | F_MULTI);
+					spawn(editor, newpath, NULL, path, F_EDITOR);
 					continue;
 				}
 
@@ -3370,11 +3370,10 @@ nochange:
 				r = show_help(path);
 				break;
 			case SEL_RUNEDIT:
-				spawn(editor, dents[cur].name, NULL, path,
-				      F_NORMAL | F_EDITOR |F_MULTI);
+				spawn(editor, dents[cur].name, NULL, path, F_EDITOR);
 				break;
 			case SEL_RUNPAGE:
-				spawn(pager, pager_arg, dents[cur].name, path, F_NORMAL);
+				spawn(pager, dents[cur].name, NULL, path, F_PAGER);
 				break;
 			case SEL_NOTE:
 			{
@@ -3386,7 +3385,7 @@ nochange:
 					goto nochange;
 				}
 
-				spawn(editor, notepath, NULL, path, F_NORMAL | F_EDITOR |F_MULTI);
+				spawn(editor, notepath, NULL, path, F_EDITOR);
 				break;
 			}
 			default: /* SEL_LOCK */
@@ -3757,7 +3756,7 @@ nochange:
 				spawn(newpath, NULL, NULL, path, F_NORMAL | F_SIGINT);
 				break;
 			case SEL_SHELL:
-				spawn(shell, shell_arg, NULL, path, F_NORMAL | F_MARKER);
+				spawn(shell, NULL, NULL, path, F_SHELL);
 				break;
 			case SEL_SCRIPT:
 				if (!scriptpath) {
@@ -3773,7 +3772,7 @@ nochange:
 				/* Regular script file */
 				if (S_ISREG(sb.st_mode)) {
 					tmp = ndents ? dents[cur].name : NULL;
-					spawn(shell, scriptpath, tmp, path, F_NORMAL | F_SIGINT);
+					spawn(shell, scriptpath, tmp, path, F_SHELL);
 					break;
 				}
 
@@ -3813,11 +3812,10 @@ nochange:
 			default: /* SEL_RUNCMD */
 #ifndef NORL
 				if (cfg.picker) {
-					/* readline prompt breaks the interface, use stock */
 #endif
 					tmp = xreadline(NULL, "> ");
 					if (tmp[0])
-						spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
+						spawn(shell, "-c", tmp, path, F_SHELL);
 #ifndef NORL
 				} else {
 					exitcurses();
@@ -3838,7 +3836,7 @@ nochange:
 					refresh();
 
 					if (tmp && tmp[0]) {
-						spawn(shell, "-c", tmp, path, F_NORMAL | F_SIGINT);
+						spawn(shell, "-c", tmp, path, F_SHELL);
 						/* readline finishing touches */
 						add_history(tmp);
 						free(tmp);
@@ -4068,13 +4066,6 @@ int main(int argc, char *argv[])
 	/* Get SHELL */
 	shell = xgetenv(envs[SHELL], "sh");
 	DPRINTF_S(shell);
-
-	if (!getprogarg(pager, &pager_arg) || !getprogarg(shell, &shell_arg)) {
-		fprintf(stderr, "%s\n", messages[STR_ARGLIMIT]);
-		return 1;
-	}
-	DPRINTF_S(pager_arg);
-	DPRINTF_S(shell_arg);
 
 	DPRINTF_S(getenv("PWD"));
 
