@@ -102,7 +102,7 @@ enum action {
 struct key {
 	int sym;         /* Key pressed */
 	enum action act; /* Action */
-} __attribute__ ((packed));
+};
 
 static struct key bindings[] = {
 	/* Back */

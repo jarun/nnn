@@ -267,13 +267,13 @@ typedef struct entry {
 	mode_t mode;
 	ushort nlen; /* Length of file name; can be uchar (< NAME_MAX + 1) */
 	uchar flags; /* Flags specific to the file */
-} __attribute__ ((packed, aligned(_ALIGNMENT))) *pEntry;
+} __attribute__ ((aligned(_ALIGNMENT))) *pEntry;
 
 /* Bookmark */
 typedef struct {
 	int key;
 	char *loc;
-} __attribute__ ((packed)) bm;
+} bm;
 
 /* Settings */
 typedef struct {
@@ -311,7 +311,7 @@ typedef struct {
 	char c_name[NAME_MAX + 1]; /* Current file name */
 	settings c_cfg; /* Current configuration */
 	uint color; /* Color code for directories */
-} __attribute__ ((packed)) context;
+} context;
 
 /* GLOBALS */
 
