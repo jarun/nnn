@@ -334,7 +334,6 @@ static char *home;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
-static uint open_max;
 static bm bookmark[BM_MAX];
 static size_t g_tmpfplen; /* path to tmp files for copy without X, keybind help and file stats */
 static uchar g_crc;
@@ -2516,6 +2515,7 @@ static int dentfill(char *path, struct entry **dents)
 	size_t off = 0, namebuflen = NAMEBUF_INCR;
 	struct stat sb_path, sb;
 	DIR *dirp = opendir(path);
+	static uint open_max;
 
 	if (dirp == NULL)
 		return 0;
@@ -2531,6 +2531,10 @@ static int dentfill(char *path, struct entry **dents)
 			printwarn();
 			return 0;
 		}
+
+		/* Increase current open file descriptor limit */
+		if (!open_max)
+			open_max = max_openfds();
 	}
 
 	while ((dp = readdir(dirp)) != NULL) {
@@ -4100,9 +4104,6 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
-
-	/* Increase current open file descriptor limit */
-	open_max = max_openfds();
 
 	/* Edit text in EDITOR, if opted */
 	if (getenv(env_cfg[NNN_USE_EDITOR]))
