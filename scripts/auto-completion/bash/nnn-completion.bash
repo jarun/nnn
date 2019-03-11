@@ -12,6 +12,7 @@ _nnn () {
     local -a opts opts_with_args
     opts=(
         -b
+        -d
         -e
         -h
         -i
