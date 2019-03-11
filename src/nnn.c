@@ -54,7 +54,6 @@
 #endif
 #include <sys/wait.h>
 
-#include <ctype.h>
 #ifdef __linux__ /* Fix failure due to mvaddnwstr() */
 #ifndef NCURSES_WIDECHAR
 #define NCURSES_WIDECHAR 1
@@ -168,6 +167,7 @@ disabledbg()
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define ISODD(x) ((x) & 1)
+#define ISBLANK(x) ((x) == ' ' || (x) == '\t')
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
@@ -431,7 +431,6 @@ static char mv[] = "mvg -gi";
 #define STR_INVBM_KEY 2
 #define STR_DATE_ID 3
 #define STR_TMPFILE 4
-#define STR_ARGLIMIT 5
 
 static const char * const messages[] = {
 	"HOME not set",
@@ -439,7 +438,6 @@ static const char * const messages[] = {
 	"invalid key",
 	"%F %T %z",
 	"/.nnnXXXXXX",
-	"one arg max",
 };
 
 /* Supported config env vars */
@@ -942,6 +940,8 @@ static void resetcpind(void)
 /* Initialize curses mode */
 static bool initcurses(void)
 {
+	int i;
+
 	if (cfg.picker) {
 		if (!newterm(NULL, stderr, stdin)) {
 			fprintf(stderr, "newterm!\n");
@@ -960,17 +960,15 @@ static bool initcurses(void)
 	cbreak();
 	noecho();
 	nonl();
-	intrflush(stdscr, FALSE);
+	//intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
 	curs_set(FALSE); /* Hide cursor */
 	start_color();
 	use_default_colors();
 
 	/* Initialize default colors */
-	init_pair(1, g_ctx[0].color, -1);
-	init_pair(2, g_ctx[1].color, -1);
-	init_pair(3, g_ctx[2].color, -1);
-	init_pair(4, g_ctx[3].color, -1);
+	for (i = 0; i <  CTX_MAX; ++i)
+		init_pair(i + 1, g_ctx[i].color, -1);
 
 	settimeout(); /* One second */
 	set_escdelay(25);
@@ -985,7 +983,7 @@ static int parseargs(char *line, char **argv)
 	argv[count++] = line;
 
 	while (*line) { // NOLINT
-		if (isblank(*line)) {
+		if (ISBLANK(*line)) {
 			*line++ = '\0';
 
 			if (!*line) // NOLINT
@@ -1083,10 +1081,8 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 		argv[2] = arg2;
 	}
 
-	if (flag & F_NORMAL) {
+	if (flag & F_NORMAL)
 		exitcurses();
-		fflush(stdout);
-	}
 
 	pid = xfork(flag);
 	if (pid == 0) {
@@ -1120,40 +1116,9 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 /* Get program name from env var, else return fallback program */
 static char *xgetenv(const char *name, char *fallback)
 {
-	if (name == NULL)
-		return fallback;
-
 	char *value = getenv(name);
 
 	return value && value[0] ? value : fallback;
-}
-
-/*
- * Parse a string to get program and argument
- * NOTE: original string may be modified
- */
-static bool getprogarg(char *prog, char **arg)
-{
-	const char *argptr;
-
-	while (*prog && !isblank(*prog))
-		++prog;
-
-	if (*prog) {
-		*prog = '\0';
-		*arg = ++prog;
-		argptr = *arg;
-
-		/* Make sure there are no more args */
-		while (*argptr) {
-			if (isblank(*argptr))
-				return FALSE;
-
-			++argptr;
-		}
-	}
-
-	return TRUE;
 }
 
 /* Check if a dir exists, IS a dir and is readable */
@@ -1277,11 +1242,11 @@ static int xstricmp(const char * const s1, const char * const s2)
 	sign[1] = '+';
 
 	c1 = s1;
-	while (isspace(*c1))
+	while (ISBLANK(*c1))
 		++c1;
 
 	c2 = s2;
-	while (isspace(*c2))
+	while (ISBLANK(*c2))
 		++c2;
 
 	if (*c1 == '-' || *c1 == '+') {
@@ -1309,14 +1274,14 @@ static int xstricmp(const char * const s1, const char * const s2)
 			++count1;
 			++c1;
 		}
-		while (isspace(*c1))
+		while (ISBLANK(*c1))
 			++c1;
 
 		while (xisdigit(*c2)) {
 			++count2;
 			++c2;
 		}
-		while (isspace(*c2))
+		while (ISBLANK(*c2))
 			++c2;
 
 		if (*c1 && !*c2)
@@ -3659,7 +3624,8 @@ nochange:
 			/* Confirm if app is CLI or GUI */
 			if (sel == SEL_OPENWITH) {
 				r = get_input("cli mode? [y/Y]");
-				(r == 'y' || r == 'Y') ? (r = F_NORMAL) : (r = F_NOWAIT | F_NOTRACE);
+				(r == 'y' || r == 'Y') ? (r = F_CLI)
+						       : (r = F_NOWAIT | F_NOTRACE | F_MULTI);
 			}
 
 			switch (sel) {
@@ -3675,13 +3641,8 @@ nochange:
 							       path, F_NORMAL);
 				break;
 			case SEL_OPENWITH:
-				dir = NULL;
-				if (!getprogarg(tmp, &dir)) { /* dir used as tmp var */
-					printwait(messages[STR_ARGLIMIT], &presel);
-					goto nochange;
-				}
 				mkpath(path, dents[cur].name, newpath);
-				spawn(tmp, dir, newpath, path, r);
+				spawn(tmp, newpath, NULL, path, r);
 				break;
 			case SEL_RENAME:
 				/* Skip renaming to same name */

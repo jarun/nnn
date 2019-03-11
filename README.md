@@ -145,7 +145,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/How-to#show-cp-mv-progress)) | copy, move progress |
 | $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
 | $PAGER (less, most) | page through files (fallback less) |
-| $SHELL (single coombined argument) | spawn a shell, run script (fallback sh) |
+| $SHELL | spawn a shell, run script (fallback sh) |
 
 #### From a package manager
 
@@ -258,8 +258,6 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.
-
-The option `open with` supports a combined argument.
 
 #### Leader key
 
