@@ -574,7 +574,7 @@ static char *xitoa(uint val)
 }
 
 /* Messages show up at the bottom */
-static void printmsg(const char *msg)
+static inline void printmsg(const char *msg)
 {
 	mvprintw(xlines - 1, 0, "%s\n", msg);
 }
