@@ -198,13 +198,9 @@ disabledbg()
 #define F_MULTI    0x01  /* first arg can be combination of args; to be used with F_NORMAL */
 #define F_NOWAIT   0x02  /* don't wait for child process (e.g. file manager) */
 #define F_NOTRACE  0x04  /* suppress stdout and strerr (no traces) */
-#define F_SIGINT   0x08  /* restore default SIGINT handler */
-#define F_EDIT     0x10  /* spawn the editor */
-#define F_NORMAL   0x20  /* spawn child process in non-curses regular CLI mode */
+#define F_NORMAL   0x08  /* spawn child process in non-curses regular CLI mode */
 
-#define F_PAGER    (F_NORMAL | F_MULTI)
-#define F_SHELL    (F_NORMAL | F_MULTI | F_SIGINT)
-#define F_EDITOR   (F_NORMAL | F_MULTI | F_EDIT)
+#define F_CLI      (F_NORMAL | F_MULTI)
 
 /* CRC8 macros */
 #define WIDTH  (sizeof(unsigned char) << 3)
@@ -431,22 +427,18 @@ static char mv[] = "mvg -gi";
 #endif
 
 /* Common strings */
-#define STR_NFTWFAIL_ID 0
-#define STR_NOHOME_ID 1
-#define STR_INPUT_ID 2
-#define STR_INVBM_KEY 3
-#define STR_DATE_ID 4
-#define STR_UNSAFE 5
-#define STR_TMPFILE 6
-#define STR_ARGLIMIT 7
+#define STR_NOHOME_ID 0
+#define STR_INPUT_ID 1
+#define STR_INVBM_KEY 2
+#define STR_DATE_ID 3
+#define STR_TMPFILE 4
+#define STR_ARGLIMIT 5
 
 static const char * const messages[] = {
-	"nftw failed",
 	"HOME not set",
 	"no traversal",
 	"invalid key",
 	"%F %T %z",
-	"unsafe cmd",
 	"/.nnnXXXXXX",
 	"one arg max",
 };
@@ -912,7 +904,7 @@ static void showcplist(void)
 
 	close(fd);
 	if (pos && pos == copybufpos)
-		spawn(pager, g_tmpfpath, NULL, NULL, F_PAGER);
+		spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
 	unlink(g_tmpfpath);
 }
 
@@ -1223,11 +1215,11 @@ static void rmmulstr(char *buf)
 static void xrm(char *path)
 {
 	if (cfg.trash)
-		spawn("trash-put", path, NULL, NULL, F_NORMAL | F_SIGINT);
+		spawn("trash-put", path, NULL, NULL, F_NORMAL);
 	else {
 		char rm_opts[] = {'-', confirm_force(), 'r'};
 
-		spawn("rm", rm_opts, path, NULL, F_NORMAL | F_SIGINT);
+		spawn("rm", rm_opts, path, NULL, F_NORMAL);
 	}
 }
 
@@ -1240,7 +1232,7 @@ static void archive_selection(const char *archive, const char *curpath)
 		 "cat %s | xargs -0 -o %s %s",
 #endif
 		 g_cppath, utils[APACK], archive);
-	spawn("sh", "-c", g_buf, curpath, F_NORMAL | F_SIGINT);
+	spawn("sh", "-c", g_buf, curpath, F_NORMAL);
 }
 
 static bool write_lastdir(const char *curpath)
@@ -2273,7 +2265,7 @@ static char *get_output(char *buf, const size_t bytes, const char *file,
 		/* Show in pager in child */
 		dup2(pipefd[0], STDIN_FILENO);
 		close(pipefd[0]);
-		spawn(pager, NULL, NULL, NULL, F_PAGER);
+		spawn(pager, NULL, NULL, NULL, F_CLI);
 		_exit(1);
 	}
 
@@ -2342,7 +2334,7 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 	dprintf(fd, "\n\n");
 	close(fd);
 
-	spawn(pager, g_tmpfpath, NULL, NULL, F_PAGER);
+	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
 	unlink(g_tmpfpath);
 	return TRUE;
 }
@@ -2485,7 +2477,7 @@ static bool show_help(const char *path)
 	dprintf(fd, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
 
-	spawn(pager, g_tmpfpath, NULL, NULL, F_PAGER);
+	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
 	unlink(g_tmpfpath);
 	return TRUE;
 }
@@ -2567,7 +2559,7 @@ static int dentfill(char *path, struct entry **dents)
 					refresh();
 					if (nftw(g_buf, nftw_fn, open_max,
 						 FTW_MOUNT | FTW_PHYS) == -1) {
-						DPRINTF_S(messages[STR_NFTWFAIL_ID]);
+						DPRINTF_S("nftw failed");
 						dir_blocks += (cfg.apparentsz
 							       ? sb.st_size
 							       : sb.st_blocks);
@@ -2651,7 +2643,7 @@ static int dentfill(char *path, struct entry **dents)
 					 xbasename(g_buf));
 				refresh();
 				if (nftw(g_buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
-					DPRINTF_S(messages[STR_NFTWFAIL_ID]);
+					DPRINTF_S("nftw failed");
 					dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				} else
 					dentp->blocks = ent_blocks;
@@ -3051,11 +3043,10 @@ nochange:
 					xstrlcpy(path, rundir, PATH_MAX);
 					if (runfile[0]) {
 						xstrlcpy(lastname, runfile, NAME_MAX);
-						spawn(newpath, lastname, NULL, path,
-						      F_NORMAL | F_SIGINT);
+						spawn(newpath, lastname, NULL, path, F_NORMAL);
 						runfile[0] = '\0';
 					} else
-						spawn(newpath, NULL, NULL, path, F_NORMAL | F_SIGINT);
+						spawn(newpath, NULL, NULL, path, F_NORMAL);
 					rundir[0] = '\0';
 					cfg.runscript = 0;
 					setdirwatch();
@@ -3067,7 +3058,7 @@ nochange:
 				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE)
 				    && g_buf[0] == 't' && g_buf[1] == 'e' && g_buf[2] == 'x'
 				    && g_buf[3] == g_buf[0] && g_buf[4] == '/') {
-					spawn(editor, newpath, NULL, path, F_EDITOR);
+					spawn(editor, newpath, NULL, path, F_CLI);
 					continue;
 				}
 
@@ -3414,10 +3405,10 @@ nochange:
 				r = show_help(path);
 				break;
 			case SEL_RUNEDIT:
-				spawn(editor, dents[cur].name, NULL, path, F_EDITOR);
+				spawn(editor, dents[cur].name, NULL, path, F_CLI);
 				break;
 			case SEL_RUNPAGE:
-				spawn(pager, dents[cur].name, NULL, path, F_PAGER);
+				spawn(pager, dents[cur].name, NULL, path, F_CLI);
 				break;
 			case SEL_NOTE:
 			{
@@ -3429,11 +3420,11 @@ nochange:
 					goto nochange;
 				}
 
-				spawn(editor, notepath, NULL, path, F_EDITOR);
+				spawn(editor, notepath, NULL, path, F_CLI);
 				break;
 			}
 			default: /* SEL_LOCK */
-				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
+				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL);
 				break;
 			}
 
@@ -3594,7 +3585,7 @@ nochange:
 				break;
 			}
 
-			spawn("sh", "-c", g_buf, path, F_NORMAL | F_SIGINT);
+			spawn("sh", "-c", g_buf, path, F_NORMAL);
 
 			if (ndents)
 				copycurname();
@@ -3807,10 +3798,10 @@ nochange:
 
 				mkpath(path, dents[cur].name, newpath);
 				DPRINTF_S(newpath);
-				spawn(newpath, NULL, NULL, path, F_NORMAL | F_SIGINT);
+				spawn(newpath, NULL, NULL, path, F_NORMAL);
 				break;
 			case SEL_SHELL:
-				spawn(shell, NULL, NULL, path, F_SHELL);
+				spawn(shell, NULL, NULL, path, F_CLI);
 				break;
 			case SEL_SCRIPT:
 				if (!scriptpath) {
@@ -3826,7 +3817,7 @@ nochange:
 				/* Regular script file */
 				if (S_ISREG(sb.st_mode)) {
 					tmp = ndents ? dents[cur].name : NULL;
-					spawn(scriptpath, tmp, NULL, path, F_NORMAL | F_SIGINT);
+					spawn(scriptpath, tmp, NULL, path, F_NORMAL);
 					break;
 				}
 
@@ -3869,7 +3860,7 @@ nochange:
 #endif
 					tmp = xreadline(NULL, "> ");
 					if (tmp[0])
-						spawn(shell, "-c", tmp, path, F_SHELL);
+						spawn(shell, "-c", tmp, path, F_CLI);
 #ifndef NORL
 				} else {
 					exitcurses();
@@ -3890,7 +3881,7 @@ nochange:
 					refresh();
 
 					if (tmp && tmp[0]) {
-						spawn(shell, "-c", tmp, path, F_SHELL);
+						spawn(shell, "-c", tmp, path, F_CLI);
 						/* readline finishing touches */
 						add_history(tmp);
 						free(tmp);
@@ -3964,7 +3955,7 @@ nochange:
 			/* Locker */
 			if (idletimeout != 0 && idle == idletimeout) {
 				idle = 0;
-				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL | F_SIGINT);
+				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL);
 				goto begin;
 			}
 
