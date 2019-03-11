@@ -454,13 +454,12 @@ static const char * const messages[] = {
 #define NNN_TMPFILE 7
 #define NNNLVL 8 /* strings end here */
 #define NNN_USE_EDITOR 9 /* flags begin here */
-#define NNN_SHOW_HIDDEN 10
-#define NNN_NO_AUTOSELECT 11
-#define NNN_RESTRICT_NAV_OPEN 12
-#define NNN_RESTRICT_0B 13
-#define NNN_TRASH 14
+#define NNN_NO_AUTOSELECT 10
+#define NNN_RESTRICT_NAV_OPEN 11
+#define NNN_RESTRICT_0B 12
+#define NNN_TRASH 13
 #ifdef __linux__
-#define NNN_OPS_PROG 15
+#define NNN_OPS_PROG 14
 #endif
 
 static const char * const env_cfg[] = {
@@ -474,7 +473,6 @@ static const char * const env_cfg[] = {
 	"NNN_TMPFILE",
 	"NNNLVL",
 	"NNN_USE_EDITOR",
-	"NNN_SHOW_HIDDEN",
 	"NNN_NO_AUTOSELECT",
 	"NNN_RESTRICT_NAV_OPEN",
 	"NNN_RESTRICT_0B",
@@ -3967,13 +3965,14 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"%s: nnn [-b key] [-C] [-e] [-i] [-l] [-n]\n"
+		"%s: nnn [-b key] [-C] [-d] [-e] [-i] [-l] [-n]\n"
 		"           [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
 		"optional args:\n"
 		" -b key  open bookmark key\n"
+		" -d      show hidden files\n"
 		" -C      disable directory color\n"
 		" -e      use exiftool for media info\n"
 		" -i      nav-as-you-type mode\n"
@@ -3994,7 +3993,7 @@ int main(int argc, char *argv[])
 	char *ipath = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "Slib:enp:svwh")) != -1) {
+	while ((opt = getopt(argc, argv, "Slib:denp:svwh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4010,6 +4009,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'b':
 			ipath = optarg;
+			break;
+		case 'd':
+			cfg.showhidden = 1;
 			break;
 		case 'e':
 			cfg.metaviewer = EXIFTOOL;
@@ -4101,9 +4103,6 @@ int main(int argc, char *argv[])
 
 	/* Increase current open file descriptor limit */
 	open_max = max_openfds();
-
-	if (getuid() == 0 || getenv(env_cfg[NNN_SHOW_HIDDEN]))
-		cfg.showhidden = 1;
 
 	/* Edit text in EDITOR, if opted */
 	if (getenv(env_cfg[NNN_USE_EDITOR]))

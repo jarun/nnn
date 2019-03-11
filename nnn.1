@@ -7,6 +7,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Ar -b key
+.Op Ar -d
 .Op Ar -e
 .Op Ar -i
 .Op Ar -l
@@ -173,6 +174,9 @@ supports the following options:
 .Fl "b key"
         specify bookmark key to open
 .Pp
+.Fl d
+        show hidden files
+.Pp
 .Fl e
         use exiftool instead of mediainfo
 .Pp
@@ -243,10 +247,6 @@ with a '^' (caret) symbol.
 (3) Use '.*' to match any character (\fIsort of\fR fuzzy search).
 .Pp
 There is a program option to filter entries by substring match instead of regex.
-.Pp
-If
-.Nm
-is invoked as root or the environment variable \fBNNN_SHOW_HIDDEN\fR is set the default filter will also match hidden files.
 .Pp
 In the \fInavigate-as-you-type\fR mode directories are opened in filter mode,
 allowing continuous navigation. Works best with the \fBarrow keys\fR.
@@ -326,11 +326,6 @@ when dealing with the !, e and p commands respectively. A single combination to 
 files.
 .Bd -literal
     export NNN_USE_EDITOR=1
-.Ed
-.Pp
-\fBNNN_SHOW_HIDDEN:\fR show hidden files.
-.Bd -literal
-    export NNN_SHOW_HIDDEN=1
 .Ed
 .Pp
 \fBNNN_NO_AUTOSELECT:\fR disable directory auto-selection in \fInavigate-as-you-type\fR mode.

@@ -206,6 +206,7 @@ positional args:
 
 optional args:
  -b key  open bookmark key
+ -d      show hidden files
  -e      use exiftool for media info
  -i      nav-as-you-type mode
  -l      light mode
@@ -332,8 +333,6 @@ Common use cases:
 
 There is a program option to filter entries by substring match instead of regex.
 
-If `nnn` is invoked as root or the environment variable `NNN_SHOW_HIDDEN` is set the default filter will also match hidden files.
-
 #### Navigate-as-you-type
 
 In this mode directories are opened in filter mode, allowing continuous navigation. Works best with the **arrow keys**.
@@ -375,7 +374,6 @@ The following indicators are used in the detail view:
 | `NNN_NOTE=/home/user/Dropbox/Public/notes` | path to note file [default: none] |
 | `NNN_TMPFILE=/tmp/nnn` | file to write current open dir path to for cd on quit |
 | `NNN_USE_EDITOR=1` | Open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
-| `NNN_SHOW_HIDDEN=1` | show hidden (.) files [default: do not show hidden if not root ] |
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type` mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_RESTRICT_0B=1` | do not open 0-byte files |
