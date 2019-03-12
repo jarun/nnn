@@ -581,7 +581,8 @@ static inline void printmsg(const char *msg)
 static void printwait(const char *msg, int *presel)
 {
 	printmsg(msg);
-	*presel = MSGWAIT;
+	if (presel)
+		*presel = MSGWAIT;
 }
 
 /* Kill curses and display error before exiting */
@@ -1473,12 +1474,16 @@ static int nextsel(int presel)
 #endif
 	c = presel;
 
-	if (c == 0 || c == '$') {
+	if (c == 0 || c == MSGWAIT) {
 		c = getch();
 		DPRINTF_D(c);
 
-		if (presel == '$')
-			c = CONTROL('L');
+		if (presel == MSGWAIT) {
+			if (cfg.filtermode)
+				c = FILTER;
+			else
+				c = CONTROL('L');
+		}
 	}
 
 	if (c == -1) {
@@ -3261,7 +3266,7 @@ nochange:
 			case SEL_DETAIL:
 				cfg.showdetail ^= 1;
 				cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
-				break;
+				continue;
 			case SEL_FSIZE:
 				cfg.sizeorder ^= 1;
 				cfg.mtimeorder = 0;
@@ -3467,8 +3472,9 @@ nochange:
 				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
 				copystartid = cur;
 				ncp = 0;
-				printwait("selection on", &presel);
-				goto nochange;
+				mvprintw(xlines - 1, 0, "selection on");
+				getch();
+				continue;
 			}
 
 			if (!ncp) { /* Handle range selection */
@@ -3504,10 +3510,9 @@ nochange:
 					dents[r].flags |= FILE_COPIED;
 				}
 
-				mvprintw(xlines - 1, 0, "%d files selected\n",
-					 copyendid - copystartid + 1);
+				ncp = copyendid - copystartid + 1;
+				mvprintw(xlines - 1, 0, "%d files selected\n", ncp);
 				getch();
-				continue; /* delayed message shown, now redraw */
 			}
 
 			if (copybufpos) { /* File path(s) written to the buffer */
@@ -3518,11 +3523,12 @@ nochange:
 				if (ncp) { /* Some files cherry picked */
 					mvprintw(xlines - 1, 0, "%d files selected\n", ncp);
 					getch();
-					continue; /* delayed message shown, now redraw */
 				}
-			} else
+			} else {
 				printwait("selection off", &presel);
-			goto nochange;
+				goto nochange;
+			}
+			continue;
 		case SEL_COPYLIST:
 			if (copybufpos) {
 				showcplist();
