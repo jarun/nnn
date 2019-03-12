@@ -2361,7 +2361,7 @@ static bool show_help(const char *path)
 		"a↑ k  Up          PgUp ^U  Scroll up\n"
 		"a↓ j  Down        PgDn ^D  Scroll down\n"
 		"a← h  Parent dir        ~  Go HOME\n"
-	      "8↵ → l  Open file/dir     &  Start dir\n"
+	      "8↵ → l  Open file/dir     @  Start dir\n"
 	  "4Home g ^A  First entry       -  Last visited dir\n"
 	   "5End G ^E  Last entry        .  Toggle show hidden\n"
 		  "c/  Filter       Ins ^T  Toggle nav-as-you-type\n"
@@ -3130,7 +3130,7 @@ nochange:
 			case 'q': // fallthrough
 			case '~': // fallthrough
 			case '-': // fallthrough
-			case '&':
+			case '@':
 				presel = fd;
 				goto nochange;
 			case '>': // fallthrough

@@ -138,7 +138,7 @@ static struct key bindings[] = {
 	/* HOME */
 	{ '~',            SEL_CDHOME },
 	/* Initial directory */
-	{ '&',            SEL_CDBEGIN },
+	{ '@',            SEL_CDBEGIN },
 	/* Last visited dir */
 	{ '-',            SEL_CDLAST },
 	/* Visit marked directory */

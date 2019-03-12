@@ -81,7 +81,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Contexts (_aka_ tabs _aka_ workspaces)
   - *Navigate-as-you-type* with auto-select directory
   - Bookmarks
-  - Familiar, easy shortcuts (arrows, `~`, `-`, `&`)
+  - Familiar, easy shortcuts (arrows, `~`, `-`, `@`)
   - Pin and visit a directory
 - Sorting
   - Directories always listed on top
@@ -196,7 +196,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 #### Cmdline options
 
 ```
-usage: nnn [-b key] [-C] [-e] [-i] [-l] [-n]
+usage: nnn [-b key] [-d] [-e] [-i] [-l] [-n]
            [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]
 
 The missing terminal file manager for X.
@@ -228,7 +228,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
           ↑ k  Up          PgUp ^U  Scroll up
           ↓ j  Down        PgDn ^D  Scroll down
           ← h  Parent dir        ~  Go HOME
-        ↵ → l  Open file/dir     &  Start dir
+        ↵ → l  Open file/dir     @  Start dir
     Home g ^A  First entry       -  Last visited dir
      End G ^E  Last entry        .  Toggle show hidden
             /  Filter       Ins ^T  Toggle nav-as-you-type
@@ -271,7 +271,7 @@ The Leader key (<kbd>`</kbd> or <kbd>^/</kbd>) provides a powerful multi-functio
 | key | Go to bookmarked location |
 | <kbd>~</kbd> | Go to HOME directory |
 | <kbd>-</kbd> | Go to last visited directory |
-| <kbd>&</kbd> | Go to start directory |
+| <kbd>@</kbd> | Go to start directory |
 | <kbd>q</kbd> | Quit context |
 
 #### Contexts
