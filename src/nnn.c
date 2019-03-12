@@ -394,7 +394,8 @@ static struct timespec gtimeout;
 #define APACK 4
 #define VIDIR 5
 #define LOCKER 6
-#define UNKNOWN 7
+#define NLAUNCH 7
+#define UNKNOWN 8
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -417,6 +418,7 @@ static char * const utils[] = {
 #else
 	"vlock",
 #endif
+	"nlaunch",
 	"UNKNOWN"
 };
 
@@ -2385,7 +2387,7 @@ static bool show_help(const char *path)
 		"1MISC\n"
 	       "9! ^]  Spawn SHELL       C  Execute entry\n"
 	       "9R ^V  Run/pick script   L  Lock terminal\n"
-		 "b^P  Prompt           ^N  Note\n"};
+		 "b^P  Prompt  ^N  Note  =  Launcher\n"};
 
 	if (g_tmpfpath[0])
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
@@ -3741,6 +3743,7 @@ nochange:
 		case SEL_EXEC: // fallthrough
 		case SEL_SHELL: // fallthrough
 		case SEL_SCRIPT: // fallthrough
+		case SEL_LAUNCH: // fallthrough
 		case SEL_RUNCMD:
 			switch (sel) {
 			case SEL_EXEC:
@@ -3817,6 +3820,11 @@ nochange:
 				lastname[0] = '\0';
 				setdirwatch();
 				goto begin;
+			case SEL_LAUNCH:
+				if (getutil(utils[NLAUNCH])) {
+					spawn(utils[NLAUNCH], NULL, NULL, path, F_NORMAL);
+					break;
+				} // fallthrough
 			default: /* SEL_RUNCMD */
 #ifndef NORL
 				if (cfg.picker) {

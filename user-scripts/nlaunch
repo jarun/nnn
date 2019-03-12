@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+# Description: Fuzzy find executables in $PATH and launch an application
+#              stdin, stdout, stderr are suppressed so CLI utilities exit silently
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+IFS=':'
+
+get_selection() {
+    ls -H $PATH | sort | fzy
+}
+
+if selection=$( get_selection ); then
+    "$selection" 2>&1 >/dev/null &
+fi

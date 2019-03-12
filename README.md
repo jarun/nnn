@@ -254,7 +254,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  MISC
          ! ^]  Spawn SHELL       C  Execute entry
          R ^V  Run/pick script   L  Lock terminal
-           ^P  Prompt           ^N  Note
+           ^P  Prompt  ^N  Note  =  Launcher
 ```
 
 Help & settings, file details, media info and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.
@@ -393,7 +393,6 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
        export NNN_USE_EDITOR=1
 4. Run `n`.
 5. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
-6. The prompt can be used as a launcher and to run commands.
 
 - For additional functionality [setup custom scripts](https://github.com/jarun/nnn/wiki/How-to#run-custom-scripts).
 - Visit the [How to](https://github.com/jarun/nnn/wiki/How-to) for many more specific usecases.
@@ -408,6 +407,7 @@ The following [user-scripts](https://github.com/jarun/nnn/tree/master/user-scrip
 | edit.sh | Fuzzy find a file in directory subtree with fzy and edit in vim |
 | fzy.sh | Fuzzy find a file in directory subtree with fzy and open using xdg-open |
 | imgur.sh | Upload an image file to imgur |
+| nlaunch | drop-down app launcher (needs fzy), drop in `$PATH`; fallback regular prompt |
 | picker.sh | Pick files and pipe the newline-separated list to another utility |
 | sxiv.sh | Open images in current directory in sxiv |
 | upgrade.sh | Check and update to latest version of nnn manually on Debian 9 Stretch |
