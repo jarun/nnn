@@ -13,5 +13,5 @@ get_selection() {
 }
 
 if selection=$( get_selection ); then
-    "$selection" 2>&1 >/dev/null &
+    "$selection" 2>/dev/null 1>/dev/null &
 fi
