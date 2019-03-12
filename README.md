@@ -81,7 +81,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Contexts (_aka_ tabs _aka_ workspaces)
   - *Navigate-as-you-type* with auto-select directory
   - Bookmarks
-  - Familiar, easy shortcuts (arrows, `~`, `-`, `@`)
+  - Familiar, easy shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>)
   - Pin and visit a directory
 - Sorting
   - Directories always listed on top
@@ -140,6 +140,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 | trash-cli | trash files (instead of delete) |
 | mediainfo or exiftool | multimedia file details |
 | atool, patool ([integration](https://github.com/jarun/nnn/wiki/How-to#integrate-patool)) | create, list and extract archives |
+| fzy | app launcher with drop-down menu |
 | vidir (from moreutils) | batch rename dir entries |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/How-to#show-cp-mv-progress)) | copy, move progress |
@@ -335,11 +336,13 @@ There is a program option to filter entries by substring match instead of regex.
 
 In this mode directories are opened in filter mode, allowing continuous navigation. Works best with the **arrow keys**.
 
-In case of only one match and it's a directory, `nnn` auto selects the directory and enters it in this mode. To disable this behaviour,
+When there's a unique match and it's a directory, `nnn` auto selects the directory and enters it in this mode. To disable this behaviour,
 
     export NNN_NO_AUTOSELECT=1
 
-The _wild mode_ program option can be handy for users who use this mode constantly. The entries are unsorted when the directory loads. Applying filters sort the entries (with directories on top). Directory color is disabled in this mode.
+This mode takes navigation to the next level when short, unique keypress sequences are possible. For example, to reach `nnn` development directory (located at `~/GitHub/nnn`) from my `$HOME` (which is the default directory the terminal starts in), I use the sequence <kbd>g</kbd><kbd>n</kbd>.
+
+The **_wild mode_** program option can be extremely handy for users who use this mode constantly. The entries are unsorted when the directory loads. Applying filters sorts the entries (with directories on top). Directory color is disabled in this mode.
 
 #### File indicators
 
@@ -372,7 +375,7 @@ The following indicators are used in the detail view:
 | `NNN_NOTE=/home/user/Dropbox/Public/notes` | path to note file [default: none] |
 | `NNN_TMPFILE=/tmp/nnn` | file to write current open dir path to for cd on quit |
 | `NNN_USE_EDITOR=1` | Open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
-| `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type` mode |
+| `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_RESTRICT_0B=1` | do not open 0-byte files |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
@@ -392,25 +395,19 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
        export NNN_USE_EDITOR=1
 4. Run `n`.
-5. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
+5. To use `nnn` as a GUI app launcher with fuzzy selection menu, drop [`nlaunch`](https://github.com/jarun/nnn/blob/master/user-scripts/nlaunch) somewhere in your `$PATH`.
+6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 
 - For additional functionality [setup custom scripts](https://github.com/jarun/nnn/wiki/How-to#run-custom-scripts).
 - Visit the [How to](https://github.com/jarun/nnn/wiki/How-to) for many more specific usecases.
 
 #### USER SCRIPTS
 
-The following [user-scripts](https://github.com/jarun/nnn/tree/master/user-scripts) are available.
+Copy the scripts in the [user-scripts](https://github.com/jarun/nnn/tree/master/user-scripts) directory and let `nnn` know the location:
 
-| Script | Description |
-| --- | --- |
-| copier.sh | Copy selection to clipboard |
-| edit.sh | Fuzzy find a file in directory subtree with fzy and edit in vim |
-| fzy.sh | Fuzzy find a file in directory subtree with fzy and open using xdg-open |
-| imgur.sh | Upload an image file to imgur |
-| nlaunch | drop-down app launcher (needs fzy), drop in `$PATH`; fallback regular prompt |
-| picker.sh | Pick files and pipe the newline-separated list to another utility |
-| sxiv.sh | Open images in current directory in sxiv |
-| upgrade.sh | Check and update to latest version of nnn manually on Debian 9 Stretch |
+    export NNN_SCRIPT=/absolute/path/to/scripts_dir
+
+If you have an interesting script feel free to raise a PR.
 
 #### TROUBLESHOOTING
 
