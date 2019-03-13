@@ -3176,11 +3176,11 @@ nochange:
 				r = cfg.curctx;
 				if (fd == '>' || fd == '.')
 					do
-						(r == CTX_MAX - 1) ? (r = 0) : ++r;
+			     			r = (r + 1) & ~CTX_MAX;
 					while (!g_ctx[r].c_cfg.ctxactive);
 				else
 					do
-						(r == 0) ? (r = CTX_MAX - 1) : --r;
+			     			r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
 					while (!g_ctx[r].c_cfg.ctxactive); // fallthrough
 				fd = '1' + r; // fallthrough
 			case '1': // fallthrough
@@ -3919,26 +3919,28 @@ nochange:
 					presel = MSGWAIT;
 					goto nochange;
 				}
-			} // fallthrough
+			}
+
+			dentfree(dents);
+			return;
 		case SEL_QUITCTX:
-			if (sel == SEL_QUITCTX) {
-				r = cfg.curctx;
-				for (fd = 1; fd < CTX_MAX; ++fd) {
-					(r == CTX_MAX - 1) ? (r = 0) : ++r;
-					if (g_ctx[r].c_cfg.ctxactive) {
-						g_ctx[cfg.curctx].c_cfg.ctxactive = 0;
+			fd = cfg.curctx;
+			for (r = (fd + 1) & ~CTX_MAX;
+			     (r != fd) && !g_ctx[r].c_cfg.ctxactive;
+			     r = ((r + 1) & ~CTX_MAX));
 
-						/* Switch to next active context */
-						path = g_ctx[r].c_path;
-						lastdir = g_ctx[r].c_last;
-						lastname = g_ctx[r].c_name;
-						cfg = g_ctx[r].c_cfg;
+			if (r != fd) {
+				g_ctx[fd].c_cfg.ctxactive = 0;
 
-						cfg.curctx = r;
-						setdirwatch();
-						goto begin;
-					}
-				}
+				/* Switch to next active context */
+				path = g_ctx[r].c_path;
+				lastdir = g_ctx[r].c_last;
+				lastname = g_ctx[r].c_name;
+				cfg = g_ctx[r].c_cfg;
+
+				cfg.curctx = r;
+				setdirwatch();
+				goto begin;
 			}
 
 			dentfree(dents);
