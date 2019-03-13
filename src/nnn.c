@@ -232,7 +232,7 @@ disabledbg()
 #define printwarn() printmsg(strerror(errno))
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
 #define copycurname() xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1)
-#define settimeout() timeout(500)
+#define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
 #define setdirwatch() (cfg.filtermode ? (presel = FILTER) : (dir_changed = TRUE))
@@ -581,8 +581,7 @@ static inline void printmsg(const char *msg)
 static void printwait(const char *msg, int *presel)
 {
 	printmsg(msg);
-	if (presel)
-		*presel = MSGWAIT;
+	*presel = MSGWAIT;
 }
 
 /* Kill curses and display error before exiting */
@@ -613,6 +612,12 @@ static int get_input(const char *prompt)
 	r = getch();
 	settimeout();
 	return r;
+}
+
+static void xdelay(void)
+{
+	refresh();
+	usleep(350000); /* 350 ms delay */
 }
 
 static char confirm_force(void)
@@ -3478,7 +3483,7 @@ nochange:
 				copystartid = cur;
 				ncp = 0;
 				mvprintw(xlines - 1, 0, "selection on");
-				getch();
+				xdelay();
 				continue;
 			}
 
@@ -3516,8 +3521,8 @@ nochange:
 				}
 
 				ncp = copyendid - copystartid + 1;
-				mvprintw(xlines - 1, 0, "%d files selected\n", ncp);
-				getch();
+				mvprintw(xlines - 1, 0, "%d selected\n", ncp);
+				xdelay();
 			}
 
 			if (copybufpos) { /* File path(s) written to the buffer */
@@ -3526,8 +3531,8 @@ nochange:
 					spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
 				if (ncp) { /* Some files cherry picked */
-					mvprintw(xlines - 1, 0, "%d files selected\n", ncp);
-					getch();
+					mvprintw(xlines - 1, 0, "%d selected\n", ncp);
+					xdelay();
 				}
 			} else {
 				printwait("selection off", &presel);
@@ -3935,7 +3940,7 @@ nochange:
 			}
 
 			/* Locker */
-			if (idletimeout != 0 && idle == idletimeout) {
+			if (idletimeout && idle == idletimeout) {
 				idle = 0;
 				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL);
 				goto begin;
