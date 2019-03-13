@@ -1187,8 +1187,9 @@ static void xrm(char *path)
 	if (cfg.trash)
 		spawn("trash-put", path, NULL, NULL, F_NORMAL);
 	else {
-		char rm_opts[] = {'-', confirm_force(), 'r'};
+		char rm_opts[] = "-ir";
 
+		rm_opts[1] = confirm_force();
 		spawn("rm", rm_opts, path, NULL, F_NORMAL);
 	}
 }
