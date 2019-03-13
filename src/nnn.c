@@ -1610,7 +1610,6 @@ static int filterentries(char *path)
 		case 27: /* Exit filter mode on Escape */
 			if (len == 1)
 				cur = oldcur;
-			*ch = CONTROL('L');
 			goto end;
 		}
 
@@ -3240,6 +3239,12 @@ nochange:
 			/* Save current */
 			if (ndents)
 				copycurname();
+
+			if (presel == 27) {
+				presel = 0;
+				break;
+			}
+
 			goto nochange;
 		case SEL_MFLTR: // fallthrough
 		case SEL_TOGGLEDOT: // fallthrough
