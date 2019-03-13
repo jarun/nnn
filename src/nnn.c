@@ -2502,7 +2502,7 @@ static int sum_sizes(const char *fpath, const struct stat *sb,
 	return 0;
 }
 
-static void dentfree(struct entry *dents)
+static void dentfree(void)
 {
 	free(pnamebuf);
 	free(dents);
@@ -2683,7 +2683,7 @@ static int dentfill(char *path, struct entry **dents)
 
 	/* Should never be null */
 	if (closedir(dirp) == -1) {
-		dentfree(*dents);
+		dentfree();
 		errexit();
 	}
 
@@ -2883,6 +2883,8 @@ static void browse(char *ipath)
 	char *dir, *tmp;
 	char *scriptpath = getenv(env_cfg[NNN_SCRIPT]);
 
+	atexit(dentfree);
+
 	/* setup first context */
 	xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
 	path = g_ctx[0].c_path;
@@ -2895,15 +2897,13 @@ static void browse(char *ipath)
 	cfg.filtermode ?  (presel = FILTER) : (presel = 0);
 
 	dents = xrealloc(dents, total_dents * sizeof(struct entry));
-	if (dents == NULL)
+	if (!dents)
 		errexit();
 
 	/* Allocate buffer to hold names */
 	pnamebuf = (char *)xrealloc(pnamebuf, NAMEBUF_INCR);
-	if (pnamebuf == NULL) {
-		free(dents);
+	if (!pnamebuf)
 		errexit();
-	}
 
 begin:
 #ifdef LINUX_INOTIFY
@@ -3027,8 +3027,6 @@ nochange:
 					r = mkpath(path, dents[cur].name, newpath);
 					appendfpath(newpath, r);
 					writecp(pcopybuf, copybufpos - 1);
-
-					dentfree(dents);
 					return;
 				}
 
@@ -3920,8 +3918,6 @@ nochange:
 					goto nochange;
 				}
 			}
-
-			dentfree(dents);
 			return;
 		case SEL_QUITCTX:
 			fd = cfg.curctx;
@@ -3942,8 +3938,6 @@ nochange:
 				setdirwatch();
 				goto begin;
 			}
-
-			dentfree(dents);
 			return;
 		default:
 			if (xlines != LINES || xcols != COLS) {
