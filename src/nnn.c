@@ -1872,6 +1872,33 @@ static int xlink(char *suffix, char *path, char *buf, int type)
 	return count;
 }
 
+static void savecurctx(settings *curcfg, char *path, char *curname, int r /* next context num */)
+{
+	settings cfg = *curcfg;
+
+#ifdef DIR_LIMITED_COPY
+	g_crc = 0;
+#endif
+	/* Save current context */
+	xstrlcpy(g_ctx[cfg.curctx].c_name, curname, NAME_MAX + 1);
+	g_ctx[cfg.curctx].c_cfg = cfg;
+
+	if (g_ctx[r].c_cfg.ctxactive) /* Switch to saved context */
+		cfg = g_ctx[r].c_cfg;
+	else { /* Setup a new context from current context */
+		g_ctx[r].c_cfg.ctxactive = 1;
+		xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
+		g_ctx[r].c_last[0] = '\0';
+		xstrlcpy(g_ctx[r].c_name, curname, NAME_MAX + 1);
+		g_ctx[r].c_cfg = cfg;
+		g_ctx[r].c_cfg.runscript = 0;
+	}
+
+	cfg.curctx = r;
+
+	*curcfg = cfg;
+}
+
 static bool parsebmstr(void)
 {
 	int i = 0;
@@ -3172,30 +3199,14 @@ nochange:
 					if (fd != '\r')
 						continue;
 				}
-#ifdef DIR_LIMITED_COPY
-				g_crc = 0;
-#endif
-				/* Save current context */
-				xstrlcpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
-				g_ctx[cfg.curctx].c_cfg = cfg;
 
-				if (g_ctx[r].c_cfg.ctxactive) /* Switch to saved context */
-					cfg = g_ctx[r].c_cfg;
-				else { /* Setup a new context from current context */
-					g_ctx[r].c_cfg.ctxactive = 1;
-					xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
-					g_ctx[r].c_last[0] = '\0';
-					xstrlcpy(g_ctx[r].c_name, dents[cur].name, NAME_MAX + 1);
-					g_ctx[r].c_cfg = cfg;
-					g_ctx[r].c_cfg.runscript = 0;
-				}
+				savecurctx(&cfg, path, dents[cur].name, r);
 
 				/* Reset the pointers */
 				path = g_ctx[r].c_path;
 				lastdir = g_ctx[r].c_last;
 				lastname = g_ctx[r].c_name;
 
-				cfg.curctx = r;
 				setdirwatch();
 				goto begin;
 			}
