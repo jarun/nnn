@@ -3282,6 +3282,7 @@ nochange:
 				break;
 			case SEL_TOGGLEDOT:
 				cfg.showhidden ^= 1;
+				setdirwatch();
 				break;
 			case SEL_DETAIL:
 				cfg.showdetail ^= 1;
