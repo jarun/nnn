@@ -3475,8 +3475,7 @@ nochange:
 				appendfpath(newpath, r);
 
 				writecp(newpath, r - 1); /* Truncate NULL from end */
-				if (copier)
-					spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 			}
 
 			dents[cur].flags |= FILE_COPIED;
@@ -3537,8 +3536,7 @@ nochange:
 
 			if (copybufpos) { /* File path(s) written to the buffer */
 				writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
-				if (copier)
-					spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
 				if (ncp) { /* Some files cherry picked */
 					mvprintw(xlines - 1, 0, "%d selected\n", ncp);
