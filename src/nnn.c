@@ -3351,7 +3351,6 @@ nochange:
 			mkpath(path, dents[cur].name, newpath);
 			if (lstat(newpath, &sb) == -1 || !show_stats(newpath, dents[cur].name, &sb)) {
 				printwarn();
-				presel = MSGWAIT;
 				goto nochange;
 			}
 			break;
