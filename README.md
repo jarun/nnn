@@ -75,36 +75,33 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 #### FEATURES
 
 - Modes
-  - Basic, detail (default), disk usage analyzer (du)
+  - Detail (default), light, disk usage analyzer (du)
   - File picker, vim (or neovim) plugin
 - Navigation
-  - Contexts (_aka_ tabs _aka_ workspaces)
   - *Navigate-as-you-type* with auto-select directory
-  - Bookmarks
+  - 4 contexts (_aka_ tabs _aka_ workspaces)
+  - Bookmarks; pin and visit a directory
   - Familiar, easy shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>)
-  - Pin and visit a directory
 - Sorting
-  - Directories always listed on top
-  - Sort by file name, modification time, size
   - Ordered pure numeric names by default (visit _/proc_)
+  - Sort by file name, modification time, size
   - Version (_aka_ natural) sort
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex and substring match
 - Mimes
   - Open with desktop opener or specify a custom app
-  - Create, list, extract archives (needs (p)atool)
+  - Create, list, extract archive (needs (p)atool)
   - Open all text files in EDITOR (optional)
 - Information
-  - Detailed stat-like file information
+  - Detailed file information (stat and file)
   - Media information (needs mediainfo/exiftool)
 - Convenience
   - Create, rename files and directories
   - Select files across dirs; all/range selection
-  - Copy, move, delete, archive selection
+  - Copy, move, delete, archive, link selection
   - FreeDesktop compliant trash (needs trash-cli)
   - Show copy, move progress on Linux (needs avdcpmv)
-  - Create sym/hard link(s) to selection
   - Transfer files using lftp
   - Batch rename (needs vidir)
   - Show directories in custom color (default: blue)
@@ -398,14 +395,22 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 5. To use `nnn` as a GUI app launcher with fuzzy selection menu, drop [`nlaunch`](https://github.com/jarun/nnn/blob/master/user-scripts/nlaunch) somewhere in your `$PATH`.
 6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 
-- For additional functionality [setup custom scripts](https://github.com/jarun/nnn/wiki/How-to#run-custom-scripts).
+- For additional functionality [setup custom scripts](#user-scripts).
 - Visit the [How to](https://github.com/jarun/nnn/wiki/How-to) for many more specific usecases.
 
 #### USER SCRIPTS
 
-Copy the scripts in the [user-scripts](https://github.com/jarun/nnn/tree/master/user-scripts) directory and let `nnn` know the location:
+`nnn` can invoke custom scripts in the current directory (`$PWD` for the script) with the currently selected file name as the argument.
+
+Copy the scripts of your interest in the [user-scripts](https://github.com/jarun/nnn/tree/master/user-scripts) directory and let `nnn` know the location:
 
     export NNN_SCRIPT=/absolute/path/to/scripts_dir
+
+Use the run/pick script shortcut to jump to the script directory and pick a script. Repeating the same shortcut cancels the operation and puts you back in the original directory.
+
+In case you need only one script:
+
+    export NNN_SCRIPT=/absolute/path/to/script
 
 If you have an interesting script feel free to raise a PR.
 
