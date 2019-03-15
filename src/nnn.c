@@ -121,21 +121,22 @@ xprintf(int fd, const char *fmt, ...)
 static int
 enabledbg()
 {
-	FILE *fp = fopen("/tmp/nnn_debug", "w");
+	FILE *fp = fopen("/tmp/nnndbg", "w");
 
 	if (!fp) {
-		fprintf(stderr, "debug: open failed! (1)\n");
+		perror("dbg(1)");
 
-		fp = fopen("./nnn_debug", "w");
+		fp = fopen("./nnndbg", "w");
 		if (!fp) {
-			fprintf(stderr, "debug: open failed! (2)\n");
+			perror("dbg(2)");
 			return -1;
 		}
 	}
 
-	DEBUG_FD = fileno(fp);
+	DEBUG_FD = dup(fileno(fp));
+	fclose(fp);
 	if (DEBUG_FD == -1) {
-		fprintf(stderr, "debug: open fd failed!\n");
+		perror("dbg(3)");
 		return -1;
 	}
 
