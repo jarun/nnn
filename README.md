@@ -24,11 +24,11 @@ Noice is Not Noice, a noicer fork...
 
 `nnn` is smooth... like butter. It's also one of the fastest and most lightweight file managers you have ever used. It comes in a `~50KB` binary using `~3.5MB` resident memory at runtime.
 
-`nnn` integrates seamlessly with your DE and favourite GUI utilities, has a unique _navigate-as-you-type_ mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning, quick notes and much more.
+Runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
-Integrate utilities like sxiv (view images in directory) or fzy (fuzzy search subtree) easily, transfer selected files using lftp or use it as a (neo)vim plugin; `nnn` supports as many scripts as you need! Refer to the [How to](https://github.com/jarun/nnn/wiki/How-to) section on wiki for more details.
+`nnn` works with your DE and favourite GUI utilities, has a unique _navigate-as-you-type_ mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, shell spawning, quick notes and much more.
 
-It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
+It supports as many scripts as you need! Integrate utilities like sxiv (view images in directory) or fzy (fuzzy search subtree) with available scripts (or your own), transfer selected files using lftp or use it as a (neo)vim plugin. Refer to the wiki [How to](https://github.com/jarun/nnn/wiki/How-to) for more such use cases.
 
 [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions.
 
@@ -104,10 +104,9 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Show copy, move progress on Linux (needs avdcpmv)
   - Transfer files using lftp
   - Batch rename (needs vidir)
-  - Show directories in custom color (default: blue)
-  - Per-context directory color
-  - Spawn a subshell in the current directory
-  - Run a command, launch applications
+  - Per-context directory color (default: blue)
+  - Spawn a shell in the current directory
+  - Launch applications, run a command
   - Run custom scripts in the current directory
   - Repository of custom scripts
   - Run current file as executable
@@ -119,6 +118,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - Unicode support
 - Follows Linux kernel coding style
 - Highly optimized, static analysis integrated code
+- Minimal library dependencies
 - Available on many distros
 
 #### INSTALLATION
