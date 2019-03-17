@@ -94,75 +94,16 @@
 #include <ftw.h>
 #include <wchar.h>
 
-#ifndef S_BLKSIZE
-#define S_BLKSIZE 512 /* S_BLKSIZE is missing on Android NDK (Termux) */
-#endif
-
 #include "nnn.h"
-
-#ifdef DBGMODE
-static int DEBUG_FD;
-
-static int
-xprintf(int fd, const char *fmt, ...)
-{
-	char buf[BUFSIZ];
-	int r;
-	va_list ap;
-
-	va_start(ap, fmt);
-	r = vsnprintf(buf, sizeof(buf), fmt, ap);
-	if (r > 0)
-		r = write(fd, buf, r);
-	va_end(ap);
-	return r;
-}
-
-static int
-enabledbg()
-{
-	FILE *fp = fopen("/tmp/nnndbg", "w");
-
-	if (!fp) {
-		perror("dbg(1)");
-
-		fp = fopen("./nnndbg", "w");
-		if (!fp) {
-			perror("dbg(2)");
-			return -1;
-		}
-	}
-
-	DEBUG_FD = dup(fileno(fp));
-	fclose(fp);
-	if (DEBUG_FD == -1) {
-		perror("dbg(3)");
-		return -1;
-	}
-
-	return 0;
-}
-
-static void
-disabledbg()
-{
-	close(DEBUG_FD);
-}
-
-#define DPRINTF_D(x) xprintf(DEBUG_FD, #x "=%d\n", x)
-#define DPRINTF_U(x) xprintf(DEBUG_FD, #x "=%u\n", x)
-#define DPRINTF_S(x) xprintf(DEBUG_FD, #x "=%s\n", x)
-#define DPRINTF_P(x) xprintf(DEBUG_FD, #x "=%p\n", x)
-#else
-#define DPRINTF_D(x)
-#define DPRINTF_U(x)
-#define DPRINTF_S(x)
-#define DPRINTF_P(x)
-#endif /* DBGMODE */
+#include "dbg.h"
 
 /* Macro definitions */
 #define VERSION "2.3"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
+
+#ifndef S_BLKSIZE
+#define S_BLKSIZE 512 /* S_BLKSIZE is missing on Android NDK (Termux) */
+#endif
 
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
@@ -226,30 +167,6 @@ disabledbg()
 /* Volume info */
 #define FREE 0
 #define CAPACITY 1
-
-/* Function macros */
-#define exitcurses() endwin()
-#define clearprompt() printmsg("")
-#define printwarn() printmsg(strerror(errno))
-#define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
-#define copycurname() xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1)
-#define settimeout() timeout(1000)
-#define cleartimeout() timeout(-1)
-#define errexit() printerr(__LINE__)
-#define setdirwatch() (cfg.filtermode ? (presel = FILTER) : (dir_changed = TRUE))
-/* We don't care about the return value from strcmp() */
-#define xstrcmp(a, b)  (*(a) != *(b) ? -1 : strcmp((a), (b)))
-/* A faster version of xisdigit */
-#define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
-#define xerror() perror(xitoa(__LINE__))
-
-#ifdef LINUX_INOTIFY
-#define EVENT_SIZE (sizeof(struct inotify_event))
-#define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
-#elif defined(BSD_KQUEUE)
-#define NUM_EVENT_SLOTS 1
-#define NUM_EVENT_FDS 1
-#endif
 
 /* TYPE DEFINITIONS */
 typedef unsigned long ulong;
@@ -358,18 +275,6 @@ static char g_cppath[PATH_MAX] __attribute__ ((aligned));
 
 /* Buffer to store tmp file path */
 static char g_tmpfpath[HOME_LEN_MAX] __attribute__ ((aligned));
-
-#ifdef LINUX_INOTIFY
-static int inotify_fd, inotify_wd = -1;
-static uint INOTIFY_MASK = IN_ATTRIB | IN_CREATE | IN_DELETE | IN_DELETE_SELF
-			   | IN_MODIFY | IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
-#elif defined(BSD_KQUEUE)
-static int kq, event_fd = -1;
-static struct kevent events_to_monitor[NUM_EVENT_FDS];
-static uint KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
-			    | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
-static struct timespec gtimeout;
-#endif
 
 /* Replace-str for xargs on different platforms */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
@@ -494,6 +399,39 @@ static const char * const envs[] = {
 	"EDITOR",
 	"PAGER",
 };
+
+/* Event handling */
+#ifdef LINUX_INOTIFY
+#define EVENT_SIZE (sizeof(struct inotify_event))
+#define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
+static int inotify_fd, inotify_wd = -1;
+static uint INOTIFY_MASK = IN_ATTRIB | IN_CREATE | IN_DELETE | IN_DELETE_SELF
+			   | IN_MODIFY | IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
+#elif defined(BSD_KQUEUE)
+#define NUM_EVENT_SLOTS 1
+#define NUM_EVENT_FDS 1
+static int kq, event_fd = -1;
+static struct kevent events_to_monitor[NUM_EVENT_FDS];
+static uint KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
+			    | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
+static struct timespec gtimeout;
+#endif
+
+/* Function macros */
+#define exitcurses() endwin()
+#define clearprompt() printmsg("")
+#define printwarn() printmsg(strerror(errno))
+#define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
+#define copycurname() xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1)
+#define settimeout() timeout(1000)
+#define cleartimeout() timeout(-1)
+#define errexit() printerr(__LINE__)
+#define setdirwatch() (cfg.filtermode ? (presel = FILTER) : (dir_changed = TRUE))
+/* We don't care about the return value from strcmp() */
+#define xstrcmp(a, b)  (*(a) != *(b) ? -1 : strcmp((a), (b)))
+/* A faster version of xisdigit */
+#define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
+#define xerror() perror(xitoa(__LINE__))
 
 /* Forward declarations */
 static void redraw(char *path);
