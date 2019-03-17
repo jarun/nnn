@@ -28,7 +28,7 @@ Runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and
 
 `nnn` works with your DE and favourite GUI utilities, has a unique _navigate-as-you-type_ mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, shell spawning, quick notes and much more.
 
-It supports as many scripts as you need! Integrate utilities like sxiv (view images in directory) or fzy (fuzzy search subtree) with available scripts (or your own), transfer selected files using lftp or use it as a (neo)vim plugin. Refer to the wiki [How to](https://github.com/jarun/nnn/wiki/How-to) for more such use cases.
+It supports as many scripts as you need! Integrate utilities like sxiv (view images in directory) or fzy (fuzzy search subtree) with available scripts (or your own), transfer selected files using lftp or use it as a (neo)vim plugin. Refer to the wiki page [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn) for more such use cases.
 
 [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions.
 
@@ -136,11 +136,11 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
 | coreutils (cp, mv, rm), findutils (xargs) | copy, move and remove files |
 | trash-cli | trash files (instead of delete) |
 | mediainfo or exiftool | multimedia file details |
-| atool, patool ([integration](https://github.com/jarun/nnn/wiki/How-to#integrate-patool)) | create, list and extract archives |
+| atool, patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
 | fzy | app launcher with drop-down menu |
 | vidir (from moreutils) | batch rename dir entries |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
-| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/How-to#show-cp-mv-progress)) | copy, move progress |
+| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | copy, move progress |
 | $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
 | $PAGER (less, most) | page through files (fallback less) |
 | $SHELL | spawn a shell, run script (fallback sh) |
@@ -387,7 +387,7 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 #### QUICKSTART
 
 1. Install the [utilities required](#utility-dependencies) for your regular activities.
-2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/How-to#cd-on-quit).
+2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/hacking-nnn#cd-on-quit).
 3. Optionally open all text files in EDITOR (fallback vi):
 
        export NNN_USE_EDITOR=1
@@ -396,7 +396,7 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 
 - For additional functionality [setup custom scripts](#user-scripts).
-- Visit the [How to](https://github.com/jarun/nnn/wiki/How-to) for many more specific usecases.
+- Visit the wiki page [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn) for many more specific usecases.
 
 #### USER SCRIPTS
 

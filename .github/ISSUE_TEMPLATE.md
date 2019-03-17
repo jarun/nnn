@@ -6,8 +6,8 @@ Before opening an issue, please try to reproduce the issue on latest master. The
 
 Useful links:
 
-- [compile `nnn` from source](https://github.com/jarun/nnn#from-source)
-- [debugging `nnn`](https://github.com/jarun/nnn/wiki/debugging-nnn)
+- compile `nnn` from source - https://github.com/jarun/nnn#from-source
+- debugging `nnn` - https://github.com/jarun/nnn/wiki/debugging-nnn
 
 If the issue can be reproduced on master, please make sure you provide the following:
 
