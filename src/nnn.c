@@ -1004,7 +1004,7 @@ static int parseargs(char *line, char **argv)
 		}
 
 		++line;
-	 }
+	}
 
 	return count;
 }
@@ -1039,7 +1039,8 @@ static void join(pid_t p, uchar flag)
 
 	if (!(flag & F_NOWAIT))
 		/* wait for the child to exit */
-		while (waitpid(p, &status, 0) == -1);
+		do {
+		} while (waitpid(p, &status, 0) == -1);
 
 	/* restore parent's signal handling */
 	signal(SIGHUP, oldsighup);
@@ -1068,9 +1069,10 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 
 	if (flag & F_MULTI) {
 		size_t len = strlen(file) + 1;
+
 		cmd = (char *)malloc(len);
 		if (!cmd) {
-			DPRINTF_S("spawn: malloc()!");
+			DPRINTF_S("malloc()!");
 			return;
 		}
 
@@ -1078,7 +1080,7 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 		status = parseargs(cmd, argv);
 		if (status == -1 || status > (EXEC_ARGS_MAX - 3)) { /* arg1, arg2 and last NULL */
 			free(cmd);
-			DPRINTF_S("spawn: NULL or too many args");
+			DPRINTF_S("NULL or too many args");
 			return;
 		}
 
@@ -3176,11 +3178,11 @@ nochange:
 				r = cfg.curctx;
 				if (fd == '>' || fd == '.')
 					do
-			     			r = (r + 1) & ~CTX_MAX;
+						r = (r + 1) & ~CTX_MAX;
 					while (!g_ctx[r].c_cfg.ctxactive);
 				else
 					do
-			     			r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
+						r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
 					while (!g_ctx[r].c_cfg.ctxactive); // fallthrough
 				fd = '1' + r; // fallthrough
 			case '1': // fallthrough
@@ -3923,7 +3925,8 @@ nochange:
 			fd = cfg.curctx;
 			for (r = (fd + 1) & ~CTX_MAX;
 			     (r != fd) && !g_ctx[r].c_cfg.ctxactive;
-			     r = ((r + 1) & ~CTX_MAX));
+			     r = ((r + 1) & ~CTX_MAX)) {
+			};
 
 			if (r != fd) {
 				g_ctx[fd].c_cfg.ctxactive = 0;
@@ -4154,8 +4157,11 @@ int main(int argc, char *argv[])
 		g_tmpfplen = xstrlcpy(g_tmpfpath, home, HOME_LEN_MAX);
 	else if (xdiraccess("/tmp"))
 		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", HOME_LEN_MAX);
-	else if ((copier = getenv("TMPDIR")) != NULL)
-		g_tmpfplen = xstrlcpy(g_tmpfpath, copier, HOME_LEN_MAX);
+	else {
+		copier = getenv("TMPDIR");
+		if (copier != NULL)
+			g_tmpfplen = xstrlcpy(g_tmpfpath, copier, HOME_LEN_MAX);
+	}
 
 	if (!cfg.picker && g_tmpfplen) {
 		xstrlcpy(g_cppath, g_tmpfpath, PATH_MAX);
