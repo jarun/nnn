@@ -4,6 +4,11 @@ If it looks like a local environment issue, please try to debug yourself. Debugg
 
 Before opening an issue, please try to reproduce the issue on latest master. The bug you noticed might have already been fixed.
 
+Useful links:
+
+- [compile `nnn` from source](https://github.com/jarun/nnn#from-source)
+- [debugging `nnn`](https://github.com/jarun/nnn/wiki/debugging-nnn)
+
 If the issue can be reproduced on master, please make sure you provide the following:
 
 - exact steps to reproduce the issue

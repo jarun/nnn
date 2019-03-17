@@ -313,8 +313,8 @@ To list the file paths copied to memory press <kbd>y</kbd>.
 File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priority) is:
 
     $HOME or,
-    $TMPDIR or,
     /tmp
+    $TMPDIR or,
 
 The path is shown in the help and configuration screen.
 
