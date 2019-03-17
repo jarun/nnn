@@ -6,6 +6,7 @@
 | edit | Fuzzy find a file in directory subtree with fzy and edit in vim |
 | fzy | Fuzzy find a file in directory subtree with fzy and open using xdg-open |
 | imgur | Upload an image file to imgur |
+| kdeconnect | Send selected files to Android device using kdeconnect-cli |
 | nlaunch | drop-down app launcher (needs fzy), drop in `$PATH`; fallback regular prompt |
 | picker | Pick files and pipe the newline-separated list to another utility |
 | sxiv | Open images in current directory in sxiv |
