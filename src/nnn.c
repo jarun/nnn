@@ -3432,7 +3432,7 @@ nochange:
 				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
 				copystartid = cur;
 				ncp = 0;
-				mvprintw(xlines - 1, 0, "selection on");
+				mvprintw(xlines - 1, 0, "selection on\n");
 				xdelay();
 				continue;
 			}
