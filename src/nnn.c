@@ -3315,12 +3315,12 @@ nochange:
 			r = TRUE;
 
 			switch (sel) {
-			case SEL_MEDIA:
-				r = show_mediainfo(newpath, NULL);
-				break;
+			case SEL_MEDIA: // fallthrough
 			case SEL_FMEDIA:
-				r = show_mediainfo(newpath, "-f");
-				break;
+				tmp = (sel == SEL_FMEDIA) ? "-f" : NULL;
+				show_mediainfo(newpath, tmp);
+				setdirwatch();
+				goto nochange;
 			case SEL_ARCHIVELS:
 				r = handle_archive(newpath, "-l", path);
 				break;
