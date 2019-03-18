@@ -3013,7 +3013,7 @@ nochange:
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(opener, newpath, NULL, NULL, F_NOWAIT | F_NOTRACE);
+				spawn(opener, newpath, NULL, NULL, F_NOTRACE);
 				continue;
 			}
 			default:
