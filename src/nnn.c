@@ -402,8 +402,9 @@ static const char * const envs[] = {
 
 /* Event handling */
 #ifdef LINUX_INOTIFY
+#define NUM_EVENT_SLOTS 16 /* Make room for 16 events */
 #define EVENT_SIZE (sizeof(struct inotify_event))
-#define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
+#define EVENT_BUF_LEN (EVENT_SIZE * NUM_EVENT_SLOTS)
 static int inotify_fd, inotify_wd = -1;
 static uint INOTIFY_MASK = IN_ATTRIB | IN_CREATE | IN_DELETE | IN_DELETE_SELF
 			   | IN_MODIFY | IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
@@ -1415,7 +1416,9 @@ static int nextsel(int presel)
 	uint i;
 	const uint len = LEN(bindings);
 #ifdef LINUX_INOTIFY
-	static char inotify_buf[EVENT_BUF_LEN];
+	struct inotify_event *event;
+	static char inotify_buf[EVENT_BUF_LEN]
+		    __attribute__ ((aligned(__alignof__(struct inotify_event))));
 #elif defined(BSD_KQUEUE)
 	static struct kevent event_data[NUM_EVENT_SLOTS];
 #endif
@@ -1442,14 +1445,27 @@ static int nextsel(int presel)
 		 * Check for changes every odd second.
 		 */
 #ifdef LINUX_INOTIFY
-		if (!cfg.blkorder && inotify_wd >= 0 && idle & 1
-		    && read(inotify_fd, inotify_buf, EVENT_BUF_LEN) > 0)
+		if (!cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
+			ssize_t bytes = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
+			if (bytes > 0) {
+				for (char *ptr = inotify_buf; ptr < inotify_buf + bytes;
+				     ptr += sizeof(struct inotify_event) + event->len) {
+					event = (struct inotify_event *) ptr;
+					DPRINTF_D(event->wd);
+					DPRINTF_D(event->mask);
+					if (event->mask & INOTIFY_MASK) {
+						c = CONTROL('L');
+						break;
+					}
+				}
+			}
+		}
 #elif defined(BSD_KQUEUE)
 		if (!cfg.blkorder && event_fd >= 0 && idle & 1
 		    && kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
 			      event_data, NUM_EVENT_FDS, &gtimeout) > 0)
-#endif
 			c = CONTROL('L');
+#endif
 	} else
 		idle = 0;
 
