@@ -1416,6 +1416,7 @@ static int nextsel(int presel)
 	uint i;
 	const uint len = LEN(bindings);
 #ifdef LINUX_INOTIFY
+	char *ptr;
 	struct inotify_event *event;
 	static char inotify_buf[EVENT_BUF_LEN]
 		    __attribute__ ((aligned(__alignof__(struct inotify_event))));
@@ -1446,9 +1447,9 @@ static int nextsel(int presel)
 		 */
 #ifdef LINUX_INOTIFY
 		if (!cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
-			ssize_t bytes = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
-			if (bytes > 0) {
-				for (char *ptr = inotify_buf; ptr < inotify_buf + bytes;
+			i = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
+			if (i > 0) {
+				for (ptr = inotify_buf; ptr < inotify_buf + i;
 				     ptr += sizeof(struct inotify_event) + event->len) {
 					event = (struct inotify_event *) ptr;
 					DPRINTF_D(event->wd);
