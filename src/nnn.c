@@ -3919,7 +3919,7 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"%s: nnn [-b key] [-C] [-d] [-e] [-i] [-l] [-n]\n"
+		"%s: nnn [-b key] [-d] [-e] [-i] [-l] [-n]\n"
 		"           [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
@@ -3927,7 +3927,6 @@ static void usage(void)
 		"optional args:\n"
 		" -b key  open bookmark key\n"
 		" -d      show hidden files\n"
-		" -C      disable directory color\n"
 		" -e      use exiftool for media info\n"
 		" -i      nav-as-you-type mode\n"
 		" -l      light mode\n"
