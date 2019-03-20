@@ -4033,6 +4033,9 @@ int main(int argc, char *argv[])
 		++opt;
 	}
 
+	home = getenv("HOME");
+	DPRINTF_S(home);
+
 	/* Parse bookmarks string */
 	if (!parsebmstr()) {
 		fprintf(stderr, "%s\n", env_cfg[NNN_BMS]);
@@ -4104,9 +4107,6 @@ int main(int argc, char *argv[])
 	/* Get locker wait time, if set */
 	idletimeout = xatoi(getenv(env_cfg[NNN_IDLE_TIMEOUT]));
 	DPRINTF_U(idletimeout);
-
-	home = getenv("HOME");
-	DPRINTF_S(home);
 
 	if (getenv(env_cfg[NNN_TRASH]))
 		cfg.trash = 1;
