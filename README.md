@@ -79,6 +79,7 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
   - File picker, vim (or neovim) plugin
 - Navigation
   - *Navigate-as-you-type* with auto-select directory
+  - *Wild load* for *navigate-as-you-type*
   - 4 contexts (_aka_ tabs _aka_ workspaces)
   - Bookmarks; pin and visit a directory
   - Familiar, easy shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>)
@@ -213,7 +214,7 @@ optional args:
  -s      string filters [default: regex]
  -S      du mode
  -v      show version
- -w      wild mode
+ -w      wild load
  -h      show help
 ```
 
@@ -339,7 +340,7 @@ When there's a unique match and it's a directory, `nnn` auto selects the directo
 
 This mode takes navigation to the next level when short, unique keypress sequences are possible. For example, to reach `nnn` development directory (located at `~/GitHub/nnn`) from my `$HOME` (which is the default directory the terminal starts in), I use the sequence <kbd>g</kbd><kbd>n</kbd>.
 
-The **_wild mode_** program option can be extremely handy for users who use this mode constantly. The entries are unsorted when the directory loads. Applying filters sorts the entries (with directories on top). Directory color is disabled in this mode.
+The **_wild load_** option can be extremely handy for users who use this mode constantly. The entries are unsorted when the directory loads. Applying filters sorts the entries (with directories on top). Directory color is disabled in this mode.
 
 #### File indicators
 

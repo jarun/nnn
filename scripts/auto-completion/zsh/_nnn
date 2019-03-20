@@ -20,7 +20,7 @@ args=(
     '(-s)-s[use substring match for filters]'
     '(-S)-S[start in disk usage analyzer mode]'
     '(-v)-v[show program version and exit]'
-    '(-w)-w[wild mode]'
+    '(-w)-w[wild load]'
     '*:filename:_files'
 )
 _arguments -S -s $args

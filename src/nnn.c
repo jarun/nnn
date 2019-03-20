@@ -3940,7 +3940,7 @@ static void usage(void)
 		" -s      string filters [default: regex]\n"
 		" -S      du mode\n"
 		" -v      show version\n"
-		" -w      wild mode\n"
+		" -w      wild load\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
 }
