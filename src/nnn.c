@@ -1454,11 +1454,16 @@ static int nextsel(int presel)
 					event = (struct inotify_event *) ptr;
 					DPRINTF_D(event->wd);
 					DPRINTF_D(event->mask);
+					if (!event->wd)
+						break;
+
 					if (event->mask & INOTIFY_MASK) {
 						c = CONTROL('L');
+						DPRINTF_S("issue refresh");
 						break;
 					}
 				}
+				DPRINTF_S("inotify read done");
 			}
 		}
 #elif defined(BSD_KQUEUE)
