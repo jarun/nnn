@@ -367,7 +367,7 @@ The following indicators are used in the detail view:
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | specify bookmarks (max 10) |
 | `NNN_OPENER=mimeopen` | custom file opener |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
-| `NNN_IDLE_TIMEOUT=300` | idle time to lock terminal [default: disabled] |
+| `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
 | `NNN_COPIER='copier.sh'` | system clipboard copier script [default: none] |
 | `NNN_SCRIPT=/home/user/scripts[/script.sh]` | path to script dir or a single script |
 | `NNN_NOTE=/home/user/Dropbox/Public/notes` | path to note file [default: none] |
