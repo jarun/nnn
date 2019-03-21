@@ -888,7 +888,7 @@ static void resetcpind(void)
 /* Initialize curses mode */
 static bool initcurses(void)
 {
-	int i;
+	short i;
 
 	if (cfg.picker) {
 		if (!newterm(NULL, stderr, stdin)) {
@@ -1385,8 +1385,12 @@ static int entrycmp(const void *va, const void *vb)
 	}
 
 	/* Do the actual sorting */
-	if (cfg.mtimeorder)
-		return pb->t - pa->t;
+	if (cfg.mtimeorder) {
+		if (pb->t >= pa->t)
+			return (int)(pb->t - pa->t);
+
+		return -1;
+	}
 
 	if (cfg.sizeorder) {
 		if (pb->size > pa->size)
@@ -2311,9 +2315,9 @@ static size_t get_fs_info(const char *path, bool type)
 		return 0;
 
 	if (type == CAPACITY)
-		return svb.f_blocks << ffs(svb.f_bsize >> 1);
+		return svb.f_blocks << ffs((int)(svb.f_bsize >> 1));
 
-	return svb.f_bavail << ffs(svb.f_frsize >> 1);
+	return svb.f_bavail << ffs((int)(svb.f_frsize >> 1));
 }
 
 static bool show_mediainfo(const char *fpath, const char *arg)
