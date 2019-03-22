@@ -150,6 +150,7 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
 
 - [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=nnn) (`apk add nnn`)
 - [Arch Linux](https://www.archlinux.org/packages/community/x86_64/nnn/) (`pacman -S nnn`)
+- [CRUX](https://github.com/TimB87/crux-ports/tree/master/nnn) (`prt-get depinst nnn`)
 - [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
 - [Fedora](https://apps.fedoraproject.org/packages/nnn) (`dnf install nnn`)
 - [FreeBSD](https://www.freshports.org/misc/nnn) (`pkg install nnn`)
@@ -168,7 +169,6 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
 - [Termux](https://github.com/termux/termux-packages/tree/master/packages/nnn) (`pkg in nnn`)
 - [Ubuntu](https://packages.ubuntu.com/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
 - [Void Linux](https://github.com/void-linux/void-packages/tree/master/srcpkgs/nnn) (`xbps-install -S nnn`)
-- [CRUX](https://github.com/TimB87/crux-ports/tree/master/nnn) (prt-get depinst nnn)
 
 #### Release packages
 
