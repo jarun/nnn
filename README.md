@@ -28,7 +28,7 @@ Runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and
 
 `nnn` works with your DE and favourite GUI utilities, has a unique _navigate-as-you-type_ mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, shell spawning, quick notes and much more.
 
-It supports as many scripts as you need! Integrate utilities like sxiv (view images in directory) or fzy (fuzzy search subtree) with available scripts (or your own), transfer selected files using lftp or use it as a (neo)vim plugin. Refer to the wiki page [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn) for more such use cases.
+Have as many scripts as you want! View file and directory diffs in vimdiff, integrate utilities like sxiv (to cycle through images in directory) or fzy (to fuzzy search in subtree) with [available scripts](https://github.com/jarun/nnn/tree/master/user-scripts) (or your own), transfer selected files using lftp or use it as a (neo)vim plugin. Refer to the wiki page [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn) for more such use cases.
 
 [Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions.
 
@@ -48,6 +48,7 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
   - [Release packages](#release-packages)
   - [From source](#from-source)
   - [Shell completion](#shell-completion)
+- [Quickstart](#quickstart)
 - [Usage](#usage)
   - [Cmdline options](#cmdline-options)
   - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -60,7 +61,6 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
   - [File indicators](#file-indicators)
   - [Configuration](#configuration)
   - [Help](#help)
-- [Quickstart](#quickstart)
 - [User scripts](#user-scripts)
 - [Troubleshooting](#troubleshooting)
   - [Tmux configuration](#tmux-configuration)
@@ -75,7 +75,8 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
 #### FEATURES
 
 - Modes
-  - Detail (default), light, disk usage analyzer (du)
+  - Detail (default), light
+  - Disk usage analyzer (block/apparent)
   - File picker, vim (or neovim) plugin
 - Navigation
   - *Navigate-as-you-type* with auto-select directory
@@ -150,7 +151,7 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
 
 - [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=nnn) (`apk add nnn`)
 - [Arch Linux](https://www.archlinux.org/packages/community/x86_64/nnn/) (`pacman -S nnn`)
-- [CRUX](https://github.com/TimB87/crux-ports/tree/master/nnn) (`prt-get depinst nnn`)
+- [CRUX portdb](https://crux.nu/portdb/?a=search&q=nnn) (`prt-get depinst nnn`)
 - [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
 - [Fedora](https://apps.fedoraproject.org/packages/nnn) (`dnf install nnn`)
 - [FreeBSD](https://www.freshports.org/misc/nnn) (`pkg install nnn`)
@@ -190,6 +191,20 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 #### Shell completion
 
 Option completion scripts for Bash, Fish and Zsh can be found in respective subdirectories of [`scripts/auto-completion/`](scripts/auto-completion). Please refer to your shell's manual for installation instructions.
+
+#### QUICKSTART
+
+1. Install the [utilities required](#utility-dependencies) for your regular activities.
+2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/hacking-nnn#cd-on-quit).
+3. Optionally open all text files in EDITOR (fallback vi):
+
+       export NNN_USE_EDITOR=1
+4. Run `n`.
+5. To use `nnn` as a GUI app launcher with fuzzy selection menu, drop [`nlaunch`](https://github.com/jarun/nnn/blob/master/user-scripts/nlaunch) somewhere in your `$PATH`.
+6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
+
+- For additional functionality [setup custom scripts](#user-scripts).
+- Visit the wiki page [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn) for many more specific usecases.
 
 #### USAGE
 
@@ -388,20 +403,6 @@ The following indicators are used in the detail view:
     $ nnn -h
     $ man nnn
 To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
-
-#### QUICKSTART
-
-1. Install the [utilities required](#utility-dependencies) for your regular activities.
-2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/hacking-nnn#cd-on-quit).
-3. Optionally open all text files in EDITOR (fallback vi):
-
-       export NNN_USE_EDITOR=1
-4. Run `n`.
-5. To use `nnn` as a GUI app launcher with fuzzy selection menu, drop [`nlaunch`](https://github.com/jarun/nnn/blob/master/user-scripts/nlaunch) somewhere in your `$PATH`.
-6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
-
-- For additional functionality [setup custom scripts](#user-scripts).
-- Visit the wiki page [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn) for many more specific usecases.
 
 #### USER SCRIPTS
 
