@@ -27,6 +27,7 @@ Please consider contributing the feature back to `nnn` yourself. Feel free to di
 [ ] Desktop Environment:
 [ ] Terminal Emulator:
 [ ] Shell:
+[ ] Custom desktop opener (if applicable):
 [ ] Issue exists on `nnn` master
 
 #### Exact steps to reproduce the issue

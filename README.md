@@ -319,6 +319,8 @@ File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priori
 
 The path is shown in the help and configuration screen.
 
+_**NOTE:**_ If you are on BSD/macOS, please check the [BSD terminal issue](https://github.com/jarun/nnn#bsd-terminal-issue) with <kbd>^Y</kbd> for workaround.
+
 #### Filters
 
 Filters support regexes by default to instantly (search-as-you-type) list the matching entries in the current directory.
