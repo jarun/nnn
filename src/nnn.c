@@ -256,6 +256,7 @@ static bm bookmark[BM_MAX];
 static size_t g_tmpfplen; /* path to tmp files for copy without X, keybind help and file stats */
 static uchar g_crc;
 static uchar BLK_SHIFT = 9;
+static uchar opener_flag = F_NOTRACE;
 static bool interrupted = FALSE;
 
 /* Retain old signal handlers */
@@ -362,9 +363,10 @@ static const char * const messages[] = {
 #define NNN_NO_AUTOSELECT 10
 #define NNN_RESTRICT_NAV_OPEN 11
 #define NNN_RESTRICT_0B 12
-#define NNN_TRASH 13
+#define NNN_OPENER_DETACH 13
+#define NNN_TRASH 14
 #ifdef __linux__
-#define NNN_OPS_PROG 14
+#define NNN_OPS_PROG 15
 #endif
 
 static const char * const env_cfg[] = {
@@ -381,6 +383,7 @@ static const char * const env_cfg[] = {
 	"NNN_NO_AUTOSELECT",
 	"NNN_RESTRICT_NAV_OPEN",
 	"NNN_RESTRICT_0B",
+	"NNN_OPENER_DETACH",
 	"NNN_TRASH",
 #ifdef __linux__
 	"NNN_OPS_PROG",
@@ -3039,7 +3042,7 @@ nochange:
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(opener, newpath, NULL, NULL, F_NOTRACE);
+				spawn(opener, newpath, NULL, NULL, opener_flag);
 				continue;
 			}
 			default:
@@ -4103,6 +4106,8 @@ int main(int argc, char *argv[])
 
 	/* Get custom opener, if set */
 	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
+	if (getenv(env_cfg[NNN_OPENER_DETACH]))
+		opener_flag |= F_NOWAIT;
 
 	/* Set nnn nesting level, idletimeout used as tmp var */
 	idletimeout = xatoi(getenv(env_cfg[NNNLVL]));
