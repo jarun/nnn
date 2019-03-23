@@ -1,6 +1,4 @@
-## nnn
-
-Noice is Not Noice, a noicer fork...
+## nnn (_type less, do more_)
 
 <p align="center">
 <a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600" alt="Latest release" /></a>
@@ -446,6 +444,8 @@ Restrict opening 0-byte files due to [unexpected behaviour](https://github.com/j
 `nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today. I chose to fork because:
 - one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. `noice` was rudimentary. In my opinion evolution is the taste of time.
 - I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind. Check out [nnn design considerations](https://github.com/jarun/nnn/wiki/nnn-design-considerations) for more details.
+
+Trivia: The name `nnn` stands for _Noice is Not Noice, a noicer fork..._.
 
 #### MENTIONS
 
