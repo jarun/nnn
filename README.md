@@ -18,17 +18,15 @@
 
 [![nnn video](https://i.imgur.com/ZB5UdQ8.jpg)](https://www.youtube.com/watch?v=U2n5aGqou9E "Click to see nnn in action!")
 
-<p align="center"><i>nnn in action! (Thanks Luke Smith for the video!)</i></a></p>
+<p align="center"><i>video of nnn in action (an earlier release)</i></a></p>
 
-`nnn` is smooth... like butter. It's also one of the fastest and most lightweight file managers you have ever used. It comes in a `~50KB` binary using `~3.5MB` resident memory at runtime.
+`nnn` is one of the fastest and most lightweight file managers you have ever used (binary size `~50KB`, resident memory usage `~3.5MB`). And yet, it doesn't lack in features!
 
-Runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
+`nnn` works seamlessly with your DE and favourite GUI utilities. It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
-`nnn` works with your DE and favourite GUI utilities, has a unique _navigate-as-you-type_ mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, shell spawning, quick notes and much more.
+Have as many scripts as you want to extend the power of `nnn`! Pick from the [scripts repository](https://github.com/jarun/nnn/tree/master/user-scripts) or add your own.
 
-Have as many scripts as you want! View file and directory diffs in vimdiff, integrate utilities like sxiv (to cycle through images in directory) or fzy (to fuzzy search in subtree) with [available scripts](https://github.com/jarun/nnn/tree/master/user-scripts) (or your own), transfer selected files using lftp or use it as a (neo)vim plugin. Refer to the wiki page [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn) for more such use cases.
-
-[Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions.
+[Quickstart](#quickstart) and see how `nnn` simplifies long desktop sessions. When you are ready for more, start [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn).
 
 *Love smart and efficient utilities? Explore [my repositories](https://github.com/jarun?tab=repositories). Buy me a cup of coffee if they help you.*
 
@@ -101,6 +99,7 @@ Have as many scripts as you want! View file and directory diffs in vimdiff, inte
   - Copy, move, delete, archive, link selection
   - FreeDesktop compliant trash (needs trash-cli)
   - Show copy, move progress on Linux (needs avdcpmv)
+  - Script to view directory and file diff for selection
   - Transfer files using lftp
   - Batch rename (needs vidir)
   - Per-context directory color (default: blue)
@@ -112,7 +111,7 @@ Have as many scripts as you want! View file and directory diffs in vimdiff, inte
   - Change directory at exit (*easy* shell integration)
   - Edit file in EDITOR or open in PAGER
   - Take quick notes
-  - Terminal locker integration
+  - Lock the terminal (needs a locker)
   - Shortcut reference a keypress away
 - Unicode support
 - Follows Linux kernel coding style
