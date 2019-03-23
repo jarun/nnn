@@ -409,7 +409,7 @@ static const char * const envs[] = {
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define EVENT_BUF_LEN (EVENT_SIZE * NUM_EVENT_SLOTS)
 static int inotify_fd, inotify_wd = -1;
-static uint INOTIFY_MASK = IN_ATTRIB | IN_CREATE | IN_DELETE | IN_DELETE_SELF
+static uint INOTIFY_MASK = /* IN_ATTRIB | */ IN_CREATE | IN_DELETE | IN_DELETE_SELF
 			   | IN_MODIFY | IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
 #elif defined(BSD_KQUEUE)
 #define NUM_EVENT_SLOTS 1
