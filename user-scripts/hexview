@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+# Description: View a file in hex
+# Requires: xxd and $PAGER
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+if ! [ -z "$1" ]; then
+    xxd "$1" | "$PAGER"
+fi

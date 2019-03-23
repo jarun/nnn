@@ -5,6 +5,7 @@
 | copier | Copy selection to clipboard |
 | edit | Fuzzy find a file in directory subtree with fzy and edit in vim |
 | fzy | Fuzzy find a file in directory subtree with fzy and open using xdg-open |
+| hexview | view a file in hex; needs xxd and $PAGER |
 | imgur | Upload an image file to imgur |
 | kdeconnect | Send selected files to Android device using kdeconnect-cli |
 | ndiff | File and directory diff for selection using vimdiff |
