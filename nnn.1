@@ -76,31 +76,31 @@ supports the following options:
 .Nm
 uses \fIxdg-open\fR (on Linux) and \fIopen(1)\fR (on macOS) as the desktop opener.
 .Pp
-There is no configuration file. Settings work on environment variables. Please
-refer to the ENVIRONMENT section below.
+There is no configuration file. Settings work on environment variables. See ENVIRONMENT section below.
 .Pp
 Configuring
 .Nm
 to change to the last visited directory on quit requires shell integration in a
-few easy steps. Please visit the project page (linked below) for the
-instructions.
+few easy steps. Look up NNN_TMPFILE in the ENVIRONMENT section below.
 .Sh CONTEXTS
 Contexts serve the purpose of exploring multiple directories simultaneously. 4 contexts
 are available. The status of the contexts are shown in the top left corner:
 .Pp
 - the current context is in reverse
 .br
-- other used contexts are underlined
+- other active contexts are underlined
 .br
-- rest are unused
+- rest are inactive
 .Pp
 To switch to a context press the Leader key followed by the context number (1-4).
 .Pp
 The first time a context is entered, it copies the state of the last visited context. Each context remembers its last visited directory.
 .Pp
 When a context is quit, the next active context is selected. If the last active context is quit, the program quits.
+.Pp
+Each context can have its own directory color specified. See ENVIRONMENT section below.
 .Sh FILTERS
-Filters support regexes by default to instantly (search-as-you-type) list the matching
+Filters support regexes (default) to instantly (search-as-you-type) list the matching
 entries in the current directory.
 .Pp
 Common use cases:
@@ -135,9 +135,7 @@ Press \fI^Y\fR again to save the selection and exit selection mode.
 .Pp
 Selected files are visually indicated by a \fB+\fR.
 .br
-The files in the list can now be copied, moved or removed using respective keyboard shortcuts.
-.Pp
-To list the selected files press \fIy\fR.
+The files in the list can now be listed, copied, moved, removed, archived or linked.
 .Sh ENVIRONMENT
 The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively. A single combination to arguments is supported for SHELL and PAGER.

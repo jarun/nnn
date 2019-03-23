@@ -70,7 +70,6 @@ Have as many scripts as you want! View file and directory diffs in vimdiff, inte
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
-- [Contributions](#contributions)
 
 #### FEATURES
 
@@ -136,7 +135,7 @@ Have as many scripts as you want! View file and directory diffs in vimdiff, inte
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | desktop opener |
 | file | determine file type |
 | coreutils (cp, mv, rm), findutils (xargs) | copy, move and remove files |
-| trash-cli | trash files (instead of delete) |
+| trash-cli | trash files (default: delete) |
 | mediainfo or exiftool | multimedia file details |
 | atool, patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
 | fzy | app launcher with drop-down menu |
@@ -185,7 +184,7 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
 `PREFIX` is supported, in case you want to install to a different location.
 
-- Compilation information for [Raspberry Pi](https://github.com/jarun/nnn/issues/182)
+- Compilation for [Raspberry Pi](https://github.com/jarun/nnn/issues/182)
 - Instructions for [Cygwin](https://github.com/jarun/nnn/wiki/Cygwin-instructions)
 
 #### Shell completion
@@ -274,7 +273,7 @@ Help & settings, file details, media info and archive listing are shown in the P
 
 #### Leader key
 
-The Leader key (<kbd>`</kbd> or <kbd>^/</kbd>) provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and handy location shortcuts.
+The Leader key provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and location shortcuts.
 
 | Key | Function |
 |:---:| --- |
@@ -292,8 +291,8 @@ The Leader key (<kbd>`</kbd> or <kbd>^/</kbd>) provides a powerful multi-functio
 Contexts serve the purpose of exploring multiple directories simultaneously. 4 contexts are available. The status of the contexts are shown in the top left corner:
 
 - the current context is in reverse
-- other used contexts are underlined
-- rest are unused
+- other active contexts are underlined
+- rest are inactive
 
 To switch to a context press the Leader key followed by the context number (1-4).
 
@@ -303,7 +302,7 @@ When a context is quit, the next active context is selected. If the last active 
 
 ##### Context-specific color
 
-Each context can have its own color for directories specified:
+Each context can have its own directory color specified:
 
     export NNN_CONTEXT_COLORS='1234'
 colors: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
@@ -319,11 +318,11 @@ To copy multiple absolute file paths:
   - navigate to another file in the same directory to select a range of files
 - press <kbd>^Y</kbd> again to save the selection and exit selection mode.
 
+_NOTE:_ If you are on BSD/macOS, please check the [BSD terminal issue](https://github.com/jarun/nnn#bsd-terminal-issue) with <kbd>^Y</kbd> for workaround.
+
 Selected files are visually indicated by a `+`.
 
-The files in the list can now be copied (<kbd>P</kbd>), moved (<kbd>V</kbd>) or removed (<kbd>X</kbd>).
-
-To list the file paths copied to memory press <kbd>y</kbd>.
+The selection can now be listed, copied, moved, removed, archived or linked.
 
 File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priority) is:
 
@@ -333,11 +332,9 @@ File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priori
 
 The path is shown in the help and configuration screen.
 
-_**NOTE:**_ If you are on BSD/macOS, please check the [BSD terminal issue](https://github.com/jarun/nnn#bsd-terminal-issue) with <kbd>^Y</kbd> for workaround.
-
 #### Filters
 
-Filters support regexes by default to instantly (search-as-you-type) list the matching entries in the current directory.
+Filters support regexes (default) to instantly (search-as-you-type) list the matching entries in the current directory.
 
 Common use cases:
 - to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol
@@ -466,6 +463,4 @@ Restrict opening 0-byte files due to [unexpected behaviour](https://github.com/j
 2. Copyright © 2014-2016 Dimitris Papastamos
 3. Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)
 
-#### CONTRIBUTIONS
-
-We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/213).
+Contributions are welcome. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/213).
