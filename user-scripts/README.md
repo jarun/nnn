@@ -13,4 +13,5 @@
 | nlaunch | Drop-down independent app launcher (needs fzy), drop in `$PATH`; fallback regular prompt |
 | picker | Pick files and pipe the newline-separated list to another utility |
 | sxiv | Open images in current directory in sxiv |
+| transfer | Upload current file to transfer.sh |
 | upgrade | Check and update to latest version of nnn manually on Debian 9 Stretch |
