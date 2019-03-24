@@ -1,6 +1,4 @@
-#### Alphabetical list of scripts
-
-| Script | Description |
+| Script (a-z) | Description |
 | --- | --- |
 | copier | Copy selection to clipboard |
 | edit | Fuzzy find a file in directory subtree with fzy and edit in vim |
