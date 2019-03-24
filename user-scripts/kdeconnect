@@ -2,7 +2,7 @@
 
 # Description: Send the selected files to your Android device using kdeconnect-cli. You must have installed and configured kdeconnect both on the Android device and on the PC.
 #
-# Shell: Bash
+# Shell: bash
 # Author: juacq97
 
 id=$(kdeconnect-cli -a --id-only | awk '{print $1}')

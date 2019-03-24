@@ -2,7 +2,7 @@
 
 # Description: Pick files and pipe the newline-separated list to another utility
 #
-# Shell: generic
+# Shell: POSIX compliant
 # Author: Arun Prakash Jana
 #
 # Usage:

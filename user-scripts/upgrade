@@ -18,7 +18,7 @@ fi
 wget "https://github.com/jarun/nnn/releases/download/v$new/nnn_$new-1_debian9.amd64.deb"
 
 # install it
-dpkg -i nnn_$new-1_debian9.amd64.deb
+sudo dpkg -i nnn_$new-1_debian9.amd64.deb
 
 # remove the file
 rm -rf nnn_$new-1_debian9.amd64.deb
