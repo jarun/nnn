@@ -6,6 +6,7 @@
 | edit | Fuzzy find a file in directory subtree with fzy and edit in vim |
 | fzy | Fuzzy find a file in directory subtree with fzy and open using xdg-open |
 | hexview | view a file in hex; needs xxd and $PAGER |
+| imgresize | Resize images in directory to screen resolution (needs [imgp](https://github.com/jarun/imgp)) |
 | imgur | Upload an image file to imgur |
 | kdeconnect | Send selected files to Android device using kdeconnect-cli |
 | ndiff | File and directory diff for selection using vimdiff |
