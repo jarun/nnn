@@ -11,6 +11,7 @@
 | kdeconnect | Send selected files to Android device using kdeconnect-cli |
 | ndiff | File and directory diff for selection using vimdiff |
 | nlaunch | Drop-down independent app launcher (needs fzy), drop in `$PATH`; fallback regular prompt |
+| paste | Paste contents of current (text) file to paste.ubuntu.com (needs [pastebinit](https://launchpad.net/pastebinit)) |
 | picker | Pick files and pipe the newline-separated list to another utility |
 | sxiv | Open images in current directory in sxiv |
 | transfer | Upload current file to transfer.sh |
