@@ -1,4 +1,4 @@
-.Dd Feb 19, 2019
+.Dd Mar 19, 2019
 .Dt NNN 1
 .Os
 .Sh NAME
@@ -29,145 +29,9 @@ opens the current working directory by default if
 is not specified.
 .Sh KEYBINDS
 .Pp
-NAVIGATION
-.Pp
-.Bl -tag -width "l, [Right], [Return] or C-mXXXX" -offset indent -compact
-.It Ic [Up], k
-Move to previous entry
-.It Ic [Down], j
-Move to next entry
-.It Ic [Left], h
-Go to parent directory
-.It Ic [Right], [Enter], l
-Open file or enter directory
-.It Ic [PgUp], ^U
-Scroll up half a page
-.It Ic [PgDn], ^D
-Scroll down half a page
-.It Ic [Home], g, ^A
-Move to the first entry
-.It Ic [End], G, ^E
-Move to the last entry
-.It Ic ~
-Change to the HOME directory
-.It Ic &
-Change to initial directory
-.It Ic \-
-Change to the last visited directory
-.It Ic \&.
-Toggle show hidden . (dot) files
-.It Ic /
-Change filter (more information below)
-.It Ic [Insert], ^T
-Toggle navigate-as-you-type mode
-.It Ic b
-Pin current directory
-.It Ic ^B
-Visit pinned directory
-.It Ic d
-Toggle detail view
-.It Ic Tab, ^I
-Next context, ask to create if none
-.It Ic ,, ^/
-Leader key
-.It Ic N, LeaderN
-Switch to context N
-.It Ic Esc
-Exit prompt
-.It Ic ^L
-Force a redraw, clear prompt
-.It Ic q
-Quit the current context
-.It Ic ^G
-Quit and change directory
-.It Ic Q, ^Q
-Quit
-.It Ic \&?
-Help and configuration screen
-.El
-.Pp
-FILES
-.Pp
-.Bl -tag -width "l, [Right], [Return] or C-mXXXX" -offset indent -compact
-.It Ic ^O
-Open with an application
-.It Ic n
-Create a new file, directory or link(s) to selection
-.It Ic D
-Show entry details
-.It Ic ^R
-Rename selected entry
-.It Ic r
-Batch rename
-.It Ic K, ^Y
-Toggle selection mode
-.It Ic Y
-Select all entries in dir
-.It Ic Space, ^K
-Select entry and copy absolute path
-.It Ic y
-Show selection list
-.It Ic P
-Copy files from selection
-.It Ic V
-Move files from selection
-.It Ic X
-Delete files from selection
-.It Ic ^X
-Delete entry
-.It Ic f
-Archive files
-.It Ic F
-List files in archive
-.It Ic ^F
-Extract archive in current directory
-.It Ic m, M
-Show brief/full media info
-.It Ic e
-Open entry in EDITOR (fallback vi)
-.It Ic p
-Open entry in PAGER (fallback less)
-.El
-.Pp
-ORDER TOGGLES
-.Pp
-.Bl -tag -width "l, [Right], [Return] or C-mXXXX" -offset indent -compact
-.It Ic ^J
-Toggle disk usage analyzer mode
-.It Ic S
-Toggle sort by apparent size
-.It Ic ^W
-Wild mode
-.It Ic t
-Toggle sort by time modified
-.It Ic s
-Toggle sort by file size
-.El
-.Pp
-MISC
-.Pp
-.Bl -tag -width "l, [Right], [Return] or C-mXXXX" -offset indent -compact
-.It Ic \&!, ^]
-Spawn SHELL in current directory (fallback sh)
-.It Ic C
-Execute entry
-.It Ic R, ^V
-Run or pick a script to run
-.It Ic L
-Lock terminal
-.It Ic ^P
-Show command prompt
-.It Ic ^N
-Take note
-.It Ic =
-Launcher
-.El
-.Pp
-Backing up one directory level will set the cursor position at the
-directory you came out of.
-.Pp
-Help & settings, file details, media info and archive listing are shown in the
-PAGER. Use the PAGER-specific keys in these screens.
+Press \fB?\fR in
+.Nm
+to see the list of keybinds.
 .Sh OPTIONS
 .Pp
 .Nm
@@ -204,7 +68,7 @@ supports the following options:
         show version and exit
 .Pp
 .Fl w
-        wild mode - entries unsorted on directory load
+        wild load - entries unsorted on directory load
 .Pp
 .Fl h
         show program help and exit
@@ -212,31 +76,31 @@ supports the following options:
 .Nm
 uses \fIxdg-open\fR (on Linux) and \fIopen(1)\fR (on macOS) as the desktop opener.
 .Pp
-There is no configuration file. Settings work on environment variables. Please
-refer to the ENVIRONMENT section below.
+There is no configuration file. Settings work on environment variables. See ENVIRONMENT section below.
 .Pp
 Configuring
 .Nm
 to change to the last visited directory on quit requires shell integration in a
-few easy steps. Please visit the project page (linked below) for the
-instructions.
+few easy steps. Look up NNN_TMPFILE in the ENVIRONMENT section below.
 .Sh CONTEXTS
 Contexts serve the purpose of exploring multiple directories simultaneously. 4 contexts
 are available. The status of the contexts are shown in the top left corner:
 .Pp
 - the current context is in reverse
 .br
-- other used contexts are underlined
+- other active contexts are underlined
 .br
-- rest are unused
+- rest are inactive
 .Pp
 To switch to a context press the Leader key followed by the context number (1-4).
 .Pp
 The first time a context is entered, it copies the state of the last visited context. Each context remembers its last visited directory.
 .Pp
 When a context is quit, the next active context is selected. If the last active context is quit, the program quits.
+.Pp
+Each context can have its own directory color specified. See ENVIRONMENT section below.
 .Sh FILTERS
-Filters support regexes by default to instantly (search-as-you-type) list the matching
+Filters support regexes (default) to instantly (search-as-you-type) list the matching
 entries in the current directory.
 .Pp
 Common use cases:
@@ -255,7 +119,7 @@ allowing continuous navigation. Works best with the \fBarrow keys\fR.
 .br
 When there's a unique match and it's a directory, `nnn` auto selects the directory and enters it in this mode.
 .br
-The \fIwild mode\fR can be extremely handy for users who use the \fInavigate-as-you-type\fR mode constantly. The entries are unsorted when the directory loads. Applying filters sorts the entries (with directories on top). Directory color is disabled in this mode.
+The \fIwild load\fR option can be extremely handy for users who use the \fInavigate-as-you-type\fR mode constantly. The entries are unsorted when the directory loads. Applying filters sorts the entries (with directories on top). Directory color is disabled in this mode.
 .Sh SELECTION MODE
 The absolute path of a single file can be copied to clipboard by pressing \fI^K\fR if
 NNN_COPIER is set (see ENVIRONMENT section below).
@@ -271,9 +135,7 @@ Press \fI^Y\fR again to save the selection and exit selection mode.
 .Pp
 Selected files are visually indicated by a \fB+\fR.
 .br
-The files in the list can now be copied, moved or removed using respective keyboard shortcuts.
-.Pp
-To list the selected files press \fIy\fR.
+The files in the list can now be listed, copied, moved, removed, archived or linked.
 .Sh ENVIRONMENT
 The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively. A single combination to arguments is supported for SHELL and PAGER.
@@ -289,6 +151,11 @@ when dealing with the !, e and p commands respectively. A single combination to 
 \fBNNN_OPENER:\fR specify a custom file opener.
 .Bd -literal
     export NNN_OPENER=mimeopen
+.Ed
+.Pp
+\fBNNN_OPENER_DETACH:\fR do not block when invoking file opener.
+.Bd -literal
+    export NNN_OPENER_DETACH=1
 .Ed
 .Pp
 \fBNNN_CONTEXT_COLORS:\fR string of color codes for each context, e.g.:

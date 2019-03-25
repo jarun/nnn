@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+# Description: Paste contents of a text a file to paste.ubuntu.com using pastebinit
+#
+# pastebinit: https://launchpad.net/pastebinit
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+if ! [ -z "$1" ]; then
+    pastebinit "$1"
+    read input
+fi

@@ -1,6 +1,4 @@
-## nnn
-
-Noice is Not Noice, a noicer fork...
+## nnn (_type less, do more_)
 
 <p align="center">
 <a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600" alt="Latest release" /></a>
@@ -20,17 +18,15 @@ Noice is Not Noice, a noicer fork...
 
 [![nnn video](https://i.imgur.com/ZB5UdQ8.jpg)](https://www.youtube.com/watch?v=U2n5aGqou9E "Click to see nnn in action!")
 
-<p align="center"><i>nnn in action! (Thanks Luke Smith for the video!)</i></a></p>
+<p align="center"><i>video of nnn in action (an earlier release)</i></a></p>
 
-`nnn` is smooth... like butter. It's also one of the fastest and most lightweight file managers you have ever used. It comes in a `~50KB` binary using `~3.5MB` resident memory at runtime.
+`nnn` is one of the fastest and most lightweight file managers you have ever used (`~50KB` binary, `~3.5MB` resident memory usage, [highly optimized](https://github.com/jarun/nnn/wiki/performance-factors) code). And yet, it doesn't lack in features!
 
-Runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
+`nnn` works seamlessly with your DE and favourite GUI utilities. It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
-`nnn` works with your DE and favourite GUI utilities, has a unique _navigate-as-you-type_ mode with auto-select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, shell spawning, quick notes and much more.
+Have as many scripts as you want to extend the power of `nnn`! Pick from the [scripts repository](https://github.com/jarun/nnn/tree/master/user-scripts) or add your own.
 
-It supports as many scripts as you need! Integrate utilities like sxiv (view images in directory) or fzy (fuzzy search subtree) with available scripts (or your own), transfer selected files using lftp or use it as a (neo)vim plugin. Refer to the wiki [How to](https://github.com/jarun/nnn/wiki/How-to) for more such use cases.
-
-[Quickstart](#quickstart) and see how `nnn` simplifies those long desktop sessions.
+[Quickstart](#quickstart) and see how `nnn` simplifies long desktop sessions. When you are ready for more, start [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn).
 
 *Love smart and efficient utilities? Explore [my repositories](https://github.com/jarun?tab=repositories). Buy me a cup of coffee if they help you.*
 
@@ -48,6 +44,7 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
   - [Release packages](#release-packages)
   - [From source](#from-source)
   - [Shell completion](#shell-completion)
+- [Quickstart](#quickstart)
 - [Usage](#usage)
   - [Cmdline options](#cmdline-options)
   - [Keyboard shortcuts](#keyboard-shortcuts)
@@ -60,7 +57,6 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
   - [File indicators](#file-indicators)
   - [Configuration](#configuration)
   - [Help](#help)
-- [Quickstart](#quickstart)
 - [User scripts](#user-scripts)
 - [Troubleshooting](#troubleshooting)
   - [Tmux configuration](#tmux-configuration)
@@ -70,15 +66,16 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
-- [Contributions](#contributions)
 
 #### FEATURES
 
 - Modes
-  - Detail (default), light, disk usage analyzer (du)
-  - File picker, vim (or neovim) plugin
+  - Detail (default), light
+  - Disk usage analyzer (block/apparent)
+  - File picker, (neo)vim plugin
 - Navigation
   - *Navigate-as-you-type* with auto-select directory
+  - *Wild load* for *navigate-as-you-type*
   - 4 contexts (_aka_ tabs _aka_ workspaces)
   - Bookmarks; pin and visit a directory
   - Familiar, easy shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>)
@@ -102,6 +99,7 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
   - Copy, move, delete, archive, link selection
   - FreeDesktop compliant trash (needs trash-cli)
   - Show copy, move progress on Linux (needs avdcpmv)
+  - Script to view directory and file diff for selection
   - Transfer files using lftp
   - Batch rename (needs vidir)
   - Per-context directory color (default: blue)
@@ -113,7 +111,7 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
   - Change directory at exit (*easy* shell integration)
   - Edit file in EDITOR or open in PAGER
   - Take quick notes
-  - Terminal locker integration
+  - Lock the terminal (needs a locker)
   - Shortcut reference a keypress away
 - Unicode support
 - Follows Linux kernel coding style
@@ -134,13 +132,13 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | desktop opener |
 | file | determine file type |
 | coreutils (cp, mv, rm), findutils (xargs) | copy, move and remove files |
-| trash-cli | trash files (instead of delete) |
+| trash-cli | trash files (default: delete) |
 | mediainfo or exiftool | multimedia file details |
-| atool, patool ([integration](https://github.com/jarun/nnn/wiki/How-to#integrate-patool)) | create, list and extract archives |
+| atool, patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
 | fzy | app launcher with drop-down menu |
 | vidir (from moreutils) | batch rename dir entries |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
-| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/How-to#show-cp-mv-progress)) | copy, move progress |
+| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | copy, move progress |
 | $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
 | $PAGER (less, most) | page through files (fallback less) |
 | $SHELL | spawn a shell, run script (fallback sh) |
@@ -149,6 +147,7 @@ It supports as many scripts as you need! Integrate utilities like sxiv (view ima
 
 - [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=nnn) (`apk add nnn`)
 - [Arch Linux](https://www.archlinux.org/packages/community/x86_64/nnn/) (`pacman -S nnn`)
+- [CRUX portdb](https://crux.nu/portdb/?a=search&q=nnn) (`prt-get depinst nnn`)
 - [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
 - [Fedora](https://apps.fedoraproject.org/packages/nnn) (`dnf install nnn`)
 - [FreeBSD](https://www.freshports.org/misc/nnn) (`pkg install nnn`)
@@ -182,12 +181,24 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
 `PREFIX` is supported, in case you want to install to a different location.
 
-- Compilation information for [Raspberry Pi](https://github.com/jarun/nnn/issues/182)
+- Compilation for [Raspberry Pi](https://github.com/jarun/nnn/issues/182)
 - Instructions for [Cygwin](https://github.com/jarun/nnn/wiki/Cygwin-instructions)
 
 #### Shell completion
 
 Option completion scripts for Bash, Fish and Zsh can be found in respective subdirectories of [`scripts/auto-completion/`](scripts/auto-completion). Please refer to your shell's manual for installation instructions.
+
+#### QUICKSTART
+
+1. Install the [utilities required](#utility-dependencies) for your regular activities.
+2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/hacking-nnn#cd-on-quit).
+3. Optionally open all text files in EDITOR (fallback vi): `export NNN_USE_EDITOR=1`
+4. Run `n`.
+5. To use `nnn` as a GUI app launcher with fuzzy selection menu, drop [`nlaunch`](https://github.com/jarun/nnn/blob/master/user-scripts/nlaunch) somewhere in your `$PATH`.
+6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
+
+- For additional functionality [setup custom scripts](#user-scripts).
+- Visit the wiki page [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn) for many more specific usecases.
 
 #### USAGE
 
@@ -213,7 +224,7 @@ optional args:
  -s      string filters [default: regex]
  -S      du mode
  -v      show version
- -w      wild mode
+ -w      wild load
  -h      show help
 ```
 
@@ -259,7 +270,7 @@ Help & settings, file details, media info and archive listing are shown in the P
 
 #### Leader key
 
-The Leader key (<kbd>`</kbd> or <kbd>^/</kbd>) provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and handy location shortcuts.
+The Leader key provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and location shortcuts.
 
 | Key | Function |
 |:---:| --- |
@@ -277,8 +288,8 @@ The Leader key (<kbd>`</kbd> or <kbd>^/</kbd>) provides a powerful multi-functio
 Contexts serve the purpose of exploring multiple directories simultaneously. 4 contexts are available. The status of the contexts are shown in the top left corner:
 
 - the current context is in reverse
-- other used contexts are underlined
-- rest are unused
+- other active contexts are underlined
+- rest are inactive
 
 To switch to a context press the Leader key followed by the context number (1-4).
 
@@ -288,7 +299,7 @@ When a context is quit, the next active context is selected. If the last active 
 
 ##### Context-specific color
 
-Each context can have its own color for directories specified:
+Each context can have its own directory color specified:
 
     export NNN_CONTEXT_COLORS='1234'
 colors: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
@@ -304,23 +315,23 @@ To copy multiple absolute file paths:
   - navigate to another file in the same directory to select a range of files
 - press <kbd>^Y</kbd> again to save the selection and exit selection mode.
 
+_NOTE:_ If you are on BSD/macOS, please check the [BSD terminal issue](https://github.com/jarun/nnn#bsd-terminal-issue) with <kbd>^Y</kbd> for workaround.
+
 Selected files are visually indicated by a `+`.
 
-The files in the list can now be copied (<kbd>P</kbd>), moved (<kbd>V</kbd>) or removed (<kbd>X</kbd>).
-
-To list the file paths copied to memory press <kbd>y</kbd>.
+The selection can now be listed, copied, moved, removed, archived or linked.
 
 File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priority) is:
 
     $HOME or,
-    $TMPDIR or,
     /tmp
+    $TMPDIR or,
 
 The path is shown in the help and configuration screen.
 
 #### Filters
 
-Filters support regexes by default to instantly (search-as-you-type) list the matching entries in the current directory.
+Filters support regexes (default) to instantly (search-as-you-type) list the matching entries in the current directory.
 
 Common use cases:
 - to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol
@@ -339,7 +350,7 @@ When there's a unique match and it's a directory, `nnn` auto selects the directo
 
 This mode takes navigation to the next level when short, unique keypress sequences are possible. For example, to reach `nnn` development directory (located at `~/GitHub/nnn`) from my `$HOME` (which is the default directory the terminal starts in), I use the sequence <kbd>g</kbd><kbd>n</kbd>.
 
-The **_wild mode_** program option can be extremely handy for users who use this mode constantly. The entries are unsorted when the directory loads. Applying filters sorts the entries (with directories on top). Directory color is disabled in this mode.
+The **_wild load_** option can be extremely handy for users who use this mode constantly. The entries are unsorted when the directory loads. Applying filters sorts the entries (with directories on top). Directory color is disabled in this mode.
 
 #### File indicators
 
@@ -365,8 +376,9 @@ The following indicators are used in the detail view:
 | --- | --- |
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | specify bookmarks (max 10) |
 | `NNN_OPENER=mimeopen` | custom file opener |
+| `NNN_OPENER_DETACH=1` | do not block when invoking file opener |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
-| `NNN_IDLE_TIMEOUT=300` | idle time to lock terminal [default: disabled] |
+| `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
 | `NNN_COPIER='copier.sh'` | system clipboard copier script [default: none] |
 | `NNN_SCRIPT=/home/user/scripts[/script.sh]` | path to script dir or a single script |
 | `NNN_NOTE=/home/user/Dropbox/Public/notes` | path to note file [default: none] |
@@ -383,20 +395,6 @@ The following indicators are used in the detail view:
     $ nnn -h
     $ man nnn
 To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
-
-#### QUICKSTART
-
-1. Install the [utilities required](#utility-dependencies) for your regular activities.
-2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/How-to#cd-on-quit).
-3. Optionally open all text files in EDITOR (fallback vi):
-
-       export NNN_USE_EDITOR=1
-4. Run `n`.
-5. To use `nnn` as a GUI app launcher with fuzzy selection menu, drop [`nlaunch`](https://github.com/jarun/nnn/blob/master/user-scripts/nlaunch) somewhere in your `$PATH`.
-6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
-
-- For additional functionality [setup custom scripts](#user-scripts).
-- Visit the [How to](https://github.com/jarun/nnn/wiki/How-to) for many more specific usecases.
 
 #### USER SCRIPTS
 
@@ -446,6 +444,8 @@ Restrict opening 0-byte files due to [unexpected behaviour](https://github.com/j
 - one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. `noice` was rudimentary. In my opinion evolution is the taste of time.
 - I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind. Check out [nnn design considerations](https://github.com/jarun/nnn/wiki/nnn-design-considerations) for more details.
 
+Trivia: The name `nnn` stands for _Noice is Not Noice, a noicer fork..._.
+
 #### MENTIONS
 
 - [FOSSMint](https://www.fossmint.com/nnn-linux-terminal-file-browser/)
@@ -462,6 +462,4 @@ Restrict opening 0-byte files due to [unexpected behaviour](https://github.com/j
 2. Copyright © 2014-2016 Dimitris Papastamos
 3. Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)
 
-#### CONTRIBUTIONS
-
-We need contributors. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/213).
+Contributions are welcome. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/213).

@@ -185,7 +185,7 @@ static struct key bindings[] = {
 	{ CONTROL('J'),   SEL_BSIZE },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME },
-	/* Wild mode */
+	/* Wild load */
 	{ CONTROL('W'),   SEL_WILD },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },

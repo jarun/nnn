@@ -1,3 +1,26 @@
+nnn v2.4
+2019-03-19
+
+- FreeDesktop.org compliant trashing
+- mark selected entries with `+`
+- _wild_ mode (option `-w`, key <kbd>^W</kbd>) for _nav-as-you-type_
+- POSIX-compliant GUI app launcher with drop-down menu (key <kbd>=</kbd>)
+- new scripts:
+  - upload image to imgur
+  - send selection to Android using kdeconnect-cli
+- show permissions in detail mode
+- cp, mv progress bar for Linux (needs advcpmv) [BSD, macOS shows on <kbd>^T</kbd>]
+- make libreadline an optional dep (reduces memory usage)
+- minimize the number of redraws
+- handle screen resize gracefully
+- option `-d` to show hidden files (`NNN_SHOW_HIDDEN` is removed)
+- additional key <kbd>K</kbd> to toggle selection
+- change visit start dir key to <kbd>@</kbd>
+- option `-C` to disable colors removed
+- per-context initial directory replaced by program start dir
+- marker msg when spawning new shell removed
+- rename debug file to `nnndbg`
+
 nnn v2.3
 2019-02-19
 

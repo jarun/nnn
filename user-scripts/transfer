@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+
+# Description: Upload a file to transfer.sh
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+if ! [ -z "$1" ]; then
+    # Upload the file, show the download link and wait till user presses any key
+    curl -s --upload-file "$1" https://transfer.sh/`basename "$1"`
+    echo
+    read input
+
+    # To write download link to "$1".loc and exit
+    # curl -s --upload-file "$1" https://transfer.sh/`basename "$1"` -o `basename "$1"`.loc
+fi

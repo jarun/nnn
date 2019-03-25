@@ -94,75 +94,16 @@
 #include <ftw.h>
 #include <wchar.h>
 
+#include "nnn.h"
+#include "dbg.h"
+
+/* Macro definitions */
+#define VERSION "2.4"
+#define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
+
 #ifndef S_BLKSIZE
 #define S_BLKSIZE 512 /* S_BLKSIZE is missing on Android NDK (Termux) */
 #endif
-
-#include "nnn.h"
-
-#ifdef DBGMODE
-static int DEBUG_FD;
-
-static int
-xprintf(int fd, const char *fmt, ...)
-{
-	char buf[BUFSIZ];
-	int r;
-	va_list ap;
-
-	va_start(ap, fmt);
-	r = vsnprintf(buf, sizeof(buf), fmt, ap);
-	if (r > 0)
-		r = write(fd, buf, r);
-	va_end(ap);
-	return r;
-}
-
-static int
-enabledbg()
-{
-	FILE *fp = fopen("/tmp/nnndbg", "w");
-
-	if (!fp) {
-		perror("dbg(1)");
-
-		fp = fopen("./nnndbg", "w");
-		if (!fp) {
-			perror("dbg(2)");
-			return -1;
-		}
-	}
-
-	DEBUG_FD = dup(fileno(fp));
-	fclose(fp);
-	if (DEBUG_FD == -1) {
-		perror("dbg(3)");
-		return -1;
-	}
-
-	return 0;
-}
-
-static void
-disabledbg()
-{
-	close(DEBUG_FD);
-}
-
-#define DPRINTF_D(x) xprintf(DEBUG_FD, #x "=%d\n", x)
-#define DPRINTF_U(x) xprintf(DEBUG_FD, #x "=%u\n", x)
-#define DPRINTF_S(x) xprintf(DEBUG_FD, #x "=%s\n", x)
-#define DPRINTF_P(x) xprintf(DEBUG_FD, #x "=%p\n", x)
-#else
-#define DPRINTF_D(x)
-#define DPRINTF_U(x)
-#define DPRINTF_S(x)
-#define DPRINTF_P(x)
-#endif /* DBGMODE */
-
-/* Macro definitions */
-#define VERSION "2.3"
-#define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
 
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
@@ -226,30 +167,6 @@ disabledbg()
 /* Volume info */
 #define FREE 0
 #define CAPACITY 1
-
-/* Function macros */
-#define exitcurses() endwin()
-#define clearprompt() printmsg("")
-#define printwarn() printmsg(strerror(errno))
-#define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
-#define copycurname() xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1)
-#define settimeout() timeout(1000)
-#define cleartimeout() timeout(-1)
-#define errexit() printerr(__LINE__)
-#define setdirwatch() (cfg.filtermode ? (presel = FILTER) : (dir_changed = TRUE))
-/* We don't care about the return value from strcmp() */
-#define xstrcmp(a, b)  (*(a) != *(b) ? -1 : strcmp((a), (b)))
-/* A faster version of xisdigit */
-#define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
-#define xerror() perror(xitoa(__LINE__))
-
-#ifdef LINUX_INOTIFY
-#define EVENT_SIZE (sizeof(struct inotify_event))
-#define EVENT_BUF_LEN (1024 * (EVENT_SIZE + 16))
-#elif defined(BSD_KQUEUE)
-#define NUM_EVENT_SLOTS 1
-#define NUM_EVENT_FDS 1
-#endif
 
 /* TYPE DEFINITIONS */
 typedef unsigned long ulong;
@@ -339,6 +256,7 @@ static bm bookmark[BM_MAX];
 static size_t g_tmpfplen; /* path to tmp files for copy without X, keybind help and file stats */
 static uchar g_crc;
 static uchar BLK_SHIFT = 9;
+static uchar opener_flag = F_NOTRACE;
 static bool interrupted = FALSE;
 
 /* Retain old signal handlers */
@@ -358,18 +276,6 @@ static char g_cppath[PATH_MAX] __attribute__ ((aligned));
 
 /* Buffer to store tmp file path */
 static char g_tmpfpath[HOME_LEN_MAX] __attribute__ ((aligned));
-
-#ifdef LINUX_INOTIFY
-static int inotify_fd, inotify_wd = -1;
-static uint INOTIFY_MASK = IN_ATTRIB | IN_CREATE | IN_DELETE | IN_DELETE_SELF
-			   | IN_MODIFY | IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
-#elif defined(BSD_KQUEUE)
-static int kq, event_fd = -1;
-static struct kevent events_to_monitor[NUM_EVENT_FDS];
-static uint KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
-			    | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
-static struct timespec gtimeout;
-#endif
 
 /* Replace-str for xargs on different platforms */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
@@ -457,9 +363,10 @@ static const char * const messages[] = {
 #define NNN_NO_AUTOSELECT 10
 #define NNN_RESTRICT_NAV_OPEN 11
 #define NNN_RESTRICT_0B 12
-#define NNN_TRASH 13
+#define NNN_OPENER_DETACH 13
+#define NNN_TRASH 14
 #ifdef __linux__
-#define NNN_OPS_PROG 14
+#define NNN_OPS_PROG 15
 #endif
 
 static const char * const env_cfg[] = {
@@ -476,6 +383,7 @@ static const char * const env_cfg[] = {
 	"NNN_NO_AUTOSELECT",
 	"NNN_RESTRICT_NAV_OPEN",
 	"NNN_RESTRICT_0B",
+	"NNN_OPENER_DETACH",
 	"NNN_TRASH",
 #ifdef __linux__
 	"NNN_OPS_PROG",
@@ -494,6 +402,40 @@ static const char * const envs[] = {
 	"EDITOR",
 	"PAGER",
 };
+
+/* Event handling */
+#ifdef LINUX_INOTIFY
+#define NUM_EVENT_SLOTS 16 /* Make room for 16 events */
+#define EVENT_SIZE (sizeof(struct inotify_event))
+#define EVENT_BUF_LEN (EVENT_SIZE * NUM_EVENT_SLOTS)
+static int inotify_fd, inotify_wd = -1;
+static uint INOTIFY_MASK = /* IN_ATTRIB | */ IN_CREATE | IN_DELETE | IN_DELETE_SELF
+			   | IN_MODIFY | IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO;
+#elif defined(BSD_KQUEUE)
+#define NUM_EVENT_SLOTS 1
+#define NUM_EVENT_FDS 1
+static int kq, event_fd = -1;
+static struct kevent events_to_monitor[NUM_EVENT_FDS];
+static uint KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
+			    | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
+static struct timespec gtimeout;
+#endif
+
+/* Function macros */
+#define exitcurses() endwin()
+#define clearprompt() printmsg("")
+#define printwarn() printmsg(strerror(errno))
+#define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
+#define copycurname() xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1)
+#define settimeout() timeout(1000)
+#define cleartimeout() timeout(-1)
+#define errexit() printerr(__LINE__)
+#define setdirwatch() (cfg.filtermode ? (presel = FILTER) : (dir_changed = TRUE))
+/* We don't care about the return value from strcmp() */
+#define xstrcmp(a, b)  (*(a) != *(b) ? -1 : strcmp((a), (b)))
+/* A faster version of xisdigit */
+#define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
+#define xerror() perror(xitoa(__LINE__))
 
 /* Forward declarations */
 static void redraw(char *path);
@@ -949,7 +891,7 @@ static void resetcpind(void)
 /* Initialize curses mode */
 static bool initcurses(void)
 {
-	int i;
+	short i;
 
 	if (cfg.picker) {
 		if (!newterm(NULL, stderr, stdin)) {
@@ -1004,7 +946,7 @@ static int parseargs(char *line, char **argv)
 		}
 
 		++line;
-	 }
+	}
 
 	return count;
 }
@@ -1039,7 +981,8 @@ static void join(pid_t p, uchar flag)
 
 	if (!(flag & F_NOWAIT))
 		/* wait for the child to exit */
-		while (waitpid(p, &status, 0) == -1);
+		do {
+		} while (waitpid(p, &status, 0) == -1);
 
 	/* restore parent's signal handling */
 	signal(SIGHUP, oldsighup);
@@ -1068,9 +1011,10 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 
 	if (flag & F_MULTI) {
 		size_t len = strlen(file) + 1;
+
 		cmd = (char *)malloc(len);
 		if (!cmd) {
-			DPRINTF_S("spawn: malloc()!");
+			DPRINTF_S("malloc()!");
 			return;
 		}
 
@@ -1078,7 +1022,7 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 		status = parseargs(cmd, argv);
 		if (status == -1 || status > (EXEC_ARGS_MAX - 3)) { /* arg1, arg2 and last NULL */
 			free(cmd);
-			DPRINTF_S("spawn: NULL or too many args");
+			DPRINTF_S("NULL or too many args");
 			return;
 		}
 
@@ -1444,8 +1388,12 @@ static int entrycmp(const void *va, const void *vb)
 	}
 
 	/* Do the actual sorting */
-	if (cfg.mtimeorder)
-		return pb->t - pa->t;
+	if (cfg.mtimeorder) {
+		if (pb->t >= pa->t)
+			return (int)(pb->t - pa->t);
+
+		return -1;
+	}
 
 	if (cfg.sizeorder) {
 		if (pb->size > pa->size)
@@ -1475,7 +1423,10 @@ static int nextsel(int presel)
 	uint i;
 	const uint len = LEN(bindings);
 #ifdef LINUX_INOTIFY
-	static char inotify_buf[EVENT_BUF_LEN];
+	char *ptr;
+	struct inotify_event *event;
+	static char inotify_buf[EVENT_BUF_LEN]
+		    __attribute__ ((aligned(__alignof__(struct inotify_event))));
 #elif defined(BSD_KQUEUE)
 	static struct kevent event_data[NUM_EVENT_SLOTS];
 #endif
@@ -1502,14 +1453,32 @@ static int nextsel(int presel)
 		 * Check for changes every odd second.
 		 */
 #ifdef LINUX_INOTIFY
-		if (!cfg.blkorder && inotify_wd >= 0 && idle & 1
-		    && read(inotify_fd, inotify_buf, EVENT_BUF_LEN) > 0)
+		if (!cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
+			i = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
+			if (i > 0) {
+				for (ptr = inotify_buf; ptr < inotify_buf + i;
+				     ptr += sizeof(struct inotify_event) + event->len) {
+					event = (struct inotify_event *) ptr;
+					DPRINTF_D(event->wd);
+					DPRINTF_D(event->mask);
+					if (!event->wd)
+						break;
+
+					if (event->mask & INOTIFY_MASK) {
+						c = CONTROL('L');
+						DPRINTF_S("issue refresh");
+						break;
+					}
+				}
+				DPRINTF_S("inotify read done");
+			}
+		}
 #elif defined(BSD_KQUEUE)
 		if (!cfg.blkorder && event_fd >= 0 && idle & 1
 		    && kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
 			      event_data, NUM_EVENT_FDS, &gtimeout) > 0)
-#endif
 			c = CONTROL('L');
+#endif
 	} else
 		idle = 0;
 
@@ -2349,9 +2318,9 @@ static size_t get_fs_info(const char *path, bool type)
 		return 0;
 
 	if (type == CAPACITY)
-		return svb.f_blocks << ffs(svb.f_bsize >> 1);
+		return svb.f_blocks << ffs((int)(svb.f_bsize >> 1));
 
-	return svb.f_bavail << ffs(svb.f_frsize >> 1);
+	return svb.f_bavail << ffs((int)(svb.f_frsize >> 1));
 }
 
 static bool show_mediainfo(const char *fpath, const char *arg)
@@ -3073,7 +3042,7 @@ nochange:
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(opener, newpath, NULL, NULL, F_NOWAIT | F_NOTRACE);
+				spawn(opener, newpath, NULL, NULL, opener_flag);
 				continue;
 			}
 			default:
@@ -3176,11 +3145,11 @@ nochange:
 				r = cfg.curctx;
 				if (fd == '>' || fd == '.')
 					do
-			     			r = (r + 1) & ~CTX_MAX;
+						r = (r + 1) & ~CTX_MAX;
 					while (!g_ctx[r].c_cfg.ctxactive);
 				else
 					do
-			     			r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
+						r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
 					while (!g_ctx[r].c_cfg.ctxactive); // fallthrough
 				fd = '1' + r; // fallthrough
 			case '1': // fallthrough
@@ -3375,12 +3344,12 @@ nochange:
 			r = TRUE;
 
 			switch (sel) {
-			case SEL_MEDIA:
-				r = show_mediainfo(newpath, NULL);
-				break;
+			case SEL_MEDIA: // fallthrough
 			case SEL_FMEDIA:
-				r = show_mediainfo(newpath, "-f");
-				break;
+				tmp = (sel == SEL_FMEDIA) ? "-f" : NULL;
+				show_mediainfo(newpath, tmp);
+				setdirwatch();
+				goto nochange;
 			case SEL_ARCHIVELS:
 				r = handle_archive(newpath, "-l", path);
 				break;
@@ -3492,7 +3461,7 @@ nochange:
 				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
 				copystartid = cur;
 				ncp = 0;
-				mvprintw(xlines - 1, 0, "selection on");
+				mvprintw(xlines - 1, 0, "selection on\n");
 				xdelay();
 				continue;
 			}
@@ -3923,7 +3892,8 @@ nochange:
 			fd = cfg.curctx;
 			for (r = (fd + 1) & ~CTX_MAX;
 			     (r != fd) && !g_ctx[r].c_cfg.ctxactive;
-			     r = ((r + 1) & ~CTX_MAX));
+			     r = ((r + 1) & ~CTX_MAX)) {
+			};
 
 			if (r != fd) {
 				g_ctx[fd].c_cfg.ctxactive = 0;
@@ -3961,7 +3931,7 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"%s: nnn [-b key] [-C] [-d] [-e] [-i] [-l] [-n]\n"
+		"%s: nnn [-b key] [-d] [-e] [-i] [-l] [-n]\n"
 		"           [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
@@ -3969,7 +3939,6 @@ static void usage(void)
 		"optional args:\n"
 		" -b key  open bookmark key\n"
 		" -d      show hidden files\n"
-		" -C      disable directory color\n"
 		" -e      use exiftool for media info\n"
 		" -i      nav-as-you-type mode\n"
 		" -l      light mode\n"
@@ -3978,7 +3947,7 @@ static void usage(void)
 		" -s      string filters [default: regex]\n"
 		" -S      du mode\n"
 		" -v      show version\n"
-		" -w      wild mode\n"
+		" -w      wild load\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
 }
@@ -4071,6 +4040,9 @@ int main(int argc, char *argv[])
 		++opt;
 	}
 
+	home = getenv("HOME");
+	DPRINTF_S(home);
+
 	/* Parse bookmarks string */
 	if (!parsebmstr()) {
 		fprintf(stderr, "%s\n", env_cfg[NNN_BMS]);
@@ -4134,6 +4106,8 @@ int main(int argc, char *argv[])
 
 	/* Get custom opener, if set */
 	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
+	if (getenv(env_cfg[NNN_OPENER_DETACH]))
+		opener_flag |= F_NOWAIT;
 
 	/* Set nnn nesting level, idletimeout used as tmp var */
 	idletimeout = xatoi(getenv(env_cfg[NNNLVL]));
@@ -4143,9 +4117,6 @@ int main(int argc, char *argv[])
 	idletimeout = xatoi(getenv(env_cfg[NNN_IDLE_TIMEOUT]));
 	DPRINTF_U(idletimeout);
 
-	home = getenv("HOME");
-	DPRINTF_S(home);
-
 	if (getenv(env_cfg[NNN_TRASH]))
 		cfg.trash = 1;
 
@@ -4154,8 +4125,11 @@ int main(int argc, char *argv[])
 		g_tmpfplen = xstrlcpy(g_tmpfpath, home, HOME_LEN_MAX);
 	else if (xdiraccess("/tmp"))
 		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", HOME_LEN_MAX);
-	else if ((copier = getenv("TMPDIR")) != NULL)
-		g_tmpfplen = xstrlcpy(g_tmpfpath, copier, HOME_LEN_MAX);
+	else {
+		copier = getenv("TMPDIR");
+		if (copier != NULL)
+			g_tmpfplen = xstrlcpy(g_tmpfpath, copier, HOME_LEN_MAX);
+	}
 
 	if (!cfg.picker && g_tmpfplen) {
 		xstrlcpy(g_cppath, g_tmpfpath, PATH_MAX);

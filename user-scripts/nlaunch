@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
 
-# Description: Fuzzy find executables in $PATH and launch an application
-#              stdin, stdout, stderr are suppressed so CLI utilities exit silently
+# Description: Fuzzy find executables in $PATH and launch an application.
+#              stdin, stdout, stderr are suppressed so CLI utilities exit silently.
+#              Works as an independent app launcher.
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

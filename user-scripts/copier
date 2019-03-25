@@ -2,7 +2,7 @@
 
 # Description: Copy selection to clipboard
 #
-# Shell: generic
+# Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
 # Linux
