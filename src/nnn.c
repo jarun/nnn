@@ -1766,6 +1766,12 @@ static char *xreadline(char *prefill, char *prompt)
 						--len;
 					}
 					break;
+				case KEY_END:
+					pos = len;
+					break;
+				case KEY_HOME:
+					pos = 0;
+					break;
 				default:
 					break;
 				}
