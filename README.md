@@ -86,6 +86,7 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the [sc
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex and substring match
+  - Subtree search (needs fzy)
 - Mimes
   - Open with desktop opener or specify a custom app
   - Create, list, extract archive (needs (p)atool)
