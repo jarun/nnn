@@ -5,4 +5,4 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-vim `find -type f | fzy`
+vim "$(find -type f | fzy)"

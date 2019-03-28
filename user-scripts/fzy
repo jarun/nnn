@@ -5,4 +5,4 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-xdg-open `find -type f | fzy` >/dev/null 2>&1
+xdg-open "$(find -type f | fzy)" >/dev/null 2>&1
