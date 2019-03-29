@@ -20,7 +20,7 @@
 
 <p align="center"><i>video of nnn in action (an earlier release)</i></a></p>
 
-`nnn` is one of the fastest and most lightweight file managers you have ever used (`~50KB` binary, `~3.5MB` resident memory usage, [highly optimized](https://github.com/jarun/nnn/wiki/performance-factors) code). And yet, it doesn't lack in features!
+`nnn` is one of the fastest and most lightweight file managers (`~50KB` binary, `~3.5MB` resident memory usage, [highly optimized](https://github.com/jarun/nnn/wiki/performance-factors) code). And yet, it doesn't lack in features!
 
 `nnn` works seamlessly with your DE and favourite GUI utilities. It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
@@ -74,8 +74,7 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the [sc
   - Disk usage analyzer (block/apparent)
   - File picker, (neo)vim plugin
 - Navigation
-  - *Navigate-as-you-type* with auto-select directory
-  - *Wild load* for *navigate-as-you-type*
+  - *Navigate-as-you-type* with auto-select dir, *wild load*
   - 4 contexts (_aka_ tabs _aka_ workspaces)
   - Bookmarks; pin and visit a directory
   - Familiar, easy shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>)
