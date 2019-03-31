@@ -227,6 +227,8 @@ typedef struct {
 	char c_path[PATH_MAX]; /* Current dir */
 	char c_last[PATH_MAX]; /* Last visited dir */
 	char c_name[NAME_MAX + 1]; /* Current file name */
+	char c_fltr[REGEX_MAX]; /* Current filter */
+	char *p_fltr; /* pointer to the current filter */
 	settings c_cfg; /* Current configuration */
 	uint color; /* Color code for directories */
 } context;
@@ -441,6 +443,7 @@ static struct timespec gtimeout;
 static void redraw(char *path);
 static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag);
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
+static int dentfind(const char *fname, int n);
 
 /* Functions */
 
@@ -1540,15 +1543,24 @@ static int matches(const char *fltr)
 
 static int filterentries(char *path)
 {
-	static char ln[REGEX_MAX] __attribute__ ((aligned));
 	static wchar_t wln[REGEX_MAX] __attribute__ ((aligned));
+	char *ln = g_ctx[cfg.curctx].c_fltr;
 	wint_t ch[2] = {0};
-	int r, total = ndents, oldcur = cur, len = 1;
-	char *pln = ln + 1;
+	int r, total = ndents, oldcur = cur, len;
+	char *pln = g_ctx[cfg.curctx].p_fltr;
 
-	ln[0] = wln[0] = FILTER;
-	ln[1] = wln[1] = '\0';
 	cur = 0;
+
+	if (ndents && ln[0] == FILTER && *pln) {
+		if (matches(pln) != -1)
+			redraw(path);
+
+		len = mbstowcs(wln, ln, REGEX_MAX);
+	} else {
+		ln[0] = wln[0] = FILTER;
+		ln[1] = wln[1] = '\0';
+		len = 1;
+	}
 
 	cleartimeout();
 	curs_set(TRUE);
@@ -1659,6 +1671,10 @@ static int filterentries(char *path)
 		}
 	}
 end:
+	if (*ch != '\t') {
+		g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
+		g_ctx[cfg.curctx].p_fltr = g_ctx[cfg.curctx].c_fltr + 1;
+	}
 	curs_set(FALSE);
 	settimeout();
 
@@ -1867,6 +1883,8 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 		xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
 		g_ctx[r].c_last[0] = '\0';
 		xstrlcpy(g_ctx[r].c_name, curname, NAME_MAX + 1);
+		g_ctx[r].c_fltr[0] = g_ctx[r].c_fltr[1] = '\0';
+		g_ctx[r].p_fltr = g_ctx[r].c_fltr + 1;
 		g_ctx[r].c_cfg = cfg;
 		g_ctx[r].c_cfg.runscript = 0;
 	}
@@ -2869,6 +2887,8 @@ static void browse(char *ipath)
 	rundir[0] = runfile[0] = '\0';
 	lastdir = g_ctx[0].c_last; /* last visited directory */
 	lastname = g_ctx[0].c_name; /* last visited filename */
+	g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
+	g_ctx[cfg.curctx].p_fltr = g_ctx[cfg.curctx].c_fltr + 1;
 	g_ctx[0].c_cfg = cfg; /* current configuration */
 
 	cfg.filtermode ?  (presel = FILTER) : (presel = 0);
