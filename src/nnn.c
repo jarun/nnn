@@ -153,7 +153,7 @@
 /* Version compare macros */
 /*
  * states: S_N: normal, S_I: comparing integral part, S_F: comparing
- *         fractionnal parts, S_Z: idem but with leading Zeroes only
+ *         fractional parts, S_Z: idem but with leading Zeroes only
  */
 #define  S_N    0x0
 #define  S_I    0x3
@@ -349,7 +349,7 @@ static const char * const messages[] = {
 	"/.nnnXXXXXX",
 };
 
-/* Supported config env vars */
+/* Supported configuration environment variables */
 #define NNN_BMS 0
 #define NNN_OPENER 1
 #define NNN_CONTEXT_COLORS 2
@@ -390,7 +390,7 @@ static const char * const env_cfg[] = {
 #endif
 };
 
-/* Required env vars */
+/* Required environment variables */
 #define SHELL 0
 #define VISUAL 1
 #define EDITOR 2
@@ -869,7 +869,7 @@ static bool cpsafe(void)
 	}
 
 	/* Fail if copy file path isn't accessible */
-	if (access(g_cppath, R_OK) == -1) {
+	if (access(g_cppath, R_OK | W_OK) == -1) {
 		printmsg("check copyfile permission");
 		return FALSE;
 	}
