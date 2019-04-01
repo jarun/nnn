@@ -2286,6 +2286,7 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 {
 	int fd;
 	char *p, *begin = g_buf;
+	size_t r;
 	FILE *fp;
 
 	if (g_tmpfpath[0])
@@ -2298,8 +2299,11 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 	if (fd == -1)
 		return FALSE;
 
-	xstrlcpy(g_buf, "stat ", 6);
-	xstrlcpy(g_buf + 5, fpath, PATH_MAX);
+	r = xstrlcpy(g_buf, "stat \'", PATH_MAX);
+	r += xstrlcpy(g_buf + r - 1, fpath, PATH_MAX);
+	g_buf[r - 2] = '\'';
+	g_buf[r - 1] = '\0';
+	DPRINTF_S(g_buf);
 
 	fp = popen(g_buf, "r");
 	if (fp != NULL) {
