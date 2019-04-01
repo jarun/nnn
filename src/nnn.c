@@ -3939,6 +3939,8 @@ nochange:
 			if (xlines != LINES || xcols != COLS) {
 				idle = 0;
 				setdirwatch();
+				if (ndents)
+					copycurname();
 				goto begin;
 			}
 
@@ -3946,6 +3948,8 @@ nochange:
 			if (idletimeout && idle == idletimeout) {
 				idle = 0;
 				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL);
+				if (ndents)
+					copycurname();
 				goto begin;
 			}
 
