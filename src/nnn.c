@@ -1310,8 +1310,10 @@ static int xstrverscmp(const char * const s1, const char * const s2)
 	if (p1 == p2)
 		return 0;
 
-	c1 = *p1++;
-	c2 = *p2++;
+	c1 = TOUPPER(*p1);
+	++p1;
+	c2 = TOUPPER(*p2);
+	++p2;
 
 	/* Hint: '0' is a digit too.  */
 	state = S_N + ((c1 == '0') + (xisdigit(c1) != 0));
@@ -1321,8 +1323,10 @@ static int xstrverscmp(const char * const s1, const char * const s2)
 			return diff;
 
 		state = next_state[state];
-		c1 = *p1++;
-		c2 = *p2++;
+		c1 = TOUPPER(*p1);
+		++p1;
+		c2 = TOUPPER(*p2);
+		++p2;
 		state += (c1 == '0') + (xisdigit(c1) != 0);
 	}
 
