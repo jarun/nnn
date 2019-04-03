@@ -400,7 +400,7 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 `nnn` can invoke custom scripts in the current directory (`$PWD` for the script) with the currently selected file name as the argument.
 
-Copy the scripts of your interest in the [user-scripts](https://github.com/jarun/nnn/tree/master/user-scripts) directory and let `nnn` know the location:
+Copy the scripts of your interest from the [user-scripts](https://github.com/jarun/nnn/tree/master/user-scripts) directory and let `nnn` know the location:
 
     export NNN_SCRIPT=/absolute/path/to/scripts_dir
 
@@ -430,7 +430,7 @@ In order to disable opening files on accidental navigation key (<kbd>→</kbd> o
 
     export NNN_RESTRICT_NAV_OPEN=1
 
-Use <kbd>Enter</kbd> to open files.
+Use <kbd>Enter</kbd> to open these files.
 
 ##### Restrict 0-byte files
 
