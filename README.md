@@ -16,9 +16,11 @@
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
-[![nnn video](https://i.imgur.com/ZB5UdQ8.jpg)](https://www.youtube.com/watch?v=U2n5aGqou9E "Click to see nnn in action!")
+<p align="center">
+<a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/onpq3vP.png" alt="Click to watch video"/></a>
+</p>
 
-<p align="center"><i>video of nnn in action (an earlier release)</i></a></p>
+<p align="center"><i>3 instances of nnn (light with filter, detail, du) with memory usage. Click for a demo video.</i></a></p>
 
 `nnn` is one of the fastest and most lightweight file managers (`~50KB` binary, `~3.5MB` resident memory usage, [highly optimized](https://github.com/jarun/nnn/wiki/performance-factors) code). And yet, it doesn't lack in features!
 
