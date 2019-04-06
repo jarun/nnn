@@ -357,7 +357,7 @@ static const char * const messages[] = {
 #define NNN_CONTEXT_COLORS 2
 #define NNN_IDLE_TIMEOUT 3
 #define NNN_COPIER 4
-#define NNN_SCRIPT 5
+#define NNN_SCRIPT_DIR 5
 #define NNN_NOTE 6
 #define NNN_TMPFILE 7
 #define NNNLVL 8 /* strings end here */
@@ -377,7 +377,7 @@ static const char * const env_cfg[] = {
 	"NNN_CONTEXT_COLORS",
 	"NNN_IDLE_TIMEOUT",
 	"NNN_COPIER",
-	"NNN_SCRIPT",
+	"NNN_SCRIPT_DIR",
 	"NNN_NOTE",
 	"NNN_TMPFILE",
 	"NNNLVL",
@@ -2425,7 +2425,7 @@ static bool show_help(const char *path)
 		 "b^W  Random  s  Size   t  Time modified\n"
 		"1MISC\n"
 	       "9! ^]  Spawn SHELL       C  Execute entry\n"
-	       "9R ^V  Run/pick script   L  Lock terminal\n"
+	       "9R ^V  Run script        L  Lock terminal\n"
 		 "b^P  Prompt  ^N  Note  =  Launcher\n"};
 
 	if (g_tmpfpath[0])
@@ -2884,7 +2884,7 @@ static void browse(char *ipath)
 	struct stat sb;
 	char *path, *lastdir, *lastname;
 	char *dir, *tmp;
-	char *scriptpath = getenv(env_cfg[NNN_SCRIPT]);
+	char *scriptpath = getenv(env_cfg[NNN_SCRIPT_DIR]);
 
 	atexit(dentfree);
 
@@ -3799,7 +3799,7 @@ nochange:
 				break;
 			case SEL_SCRIPT:
 				if (!scriptpath) {
-					printwait("set NNN_SCRIPT", &presel);
+					printwait("set NNN_SCRIPT_DIR", &presel);
 					goto nochange;
 				}
 
@@ -3808,18 +3808,10 @@ nochange:
 					goto nochange;
 				}
 
-				/* Regular script file */
-				if (S_ISREG(sb.st_mode)) {
-					tmp = ndents ? dents[cur].name : NULL;
-					spawn(scriptpath, tmp, NULL, path, F_NORMAL);
-					break;
-				}
-
-				/* Must be a directory or a regular file */
+				/* Must be a directory */
 				if (!S_ISDIR(sb.st_mode))
 					break;
 
-				/* Script directory */
 				cfg.runscript ^= 1;
 				if (!cfg.runscript && rundir[0]) {
 					/*

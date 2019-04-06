@@ -107,7 +107,6 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the [sc
   - Per-context directory color (default: blue)
   - Spawn a shell in the current directory
   - Launch applications, run a command
-  - Run custom scripts in the current directory
   - Repository of custom scripts
   - Run current file as executable
   - Change directory at exit (*easy* shell integration)
@@ -264,7 +263,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^W  Random  s  Size   t  Time modified
  MISC
          ! ^]  Spawn SHELL       C  Execute entry
-         R ^V  Run/pick script   L  Lock terminal
+         R ^V  Run script        L  Lock terminal
            ^P  Prompt  ^N  Note  =  Launcher
 ```
 
@@ -382,7 +381,7 @@ The following indicators are used in the detail view:
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
 | `NNN_COPIER='copier.sh'` | system clipboard copier script [default: none] |
-| `NNN_SCRIPT=/home/user/scripts[/script.sh]` | path to script dir or a single script |
+| `NNN_SCRIPT_DIR=/home/user/scripts` | absolute path to script dir |
 | `NNN_NOTE=/home/user/Dropbox/Public/notes` | path to note file [default: none] |
 | `NNN_TMPFILE=/tmp/nnn` | file to write current open dir path to for cd on quit |
 | `NNN_USE_EDITOR=1` | Open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
@@ -404,13 +403,9 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 Copy the scripts of your interest from the [user-scripts](https://github.com/jarun/nnn/tree/master/user-scripts) directory and let `nnn` know the location:
 
-    export NNN_SCRIPT=/absolute/path/to/scripts_dir
+    export NNN_SCRIPT_DIR=/absolute/path/to/scripts_dir
 
-Use the run/pick script shortcut to jump to the script directory and pick a script. Repeating the same shortcut cancels the operation and puts you back in the original directory.
-
-In case you need only one script:
-
-    export NNN_SCRIPT=/absolute/path/to/script
+Use the run script shortcut to jump to the script directory and pick a script. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
 If you have an interesting script feel free to raise a PR.
 
