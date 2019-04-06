@@ -20,7 +20,7 @@
 <a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/onpq3vP.png" alt="Click to watch video"/></a>
 </p>
 
-<p align="center"><i>3 instances of nnn (light with filter, detail, du) with memory usage. Click for a demo video.</i></a></p>
+<p align="center"><i>3 modes of nnn (light with filter, detail, du analyzer) with memory usage. Click for a demo video.</i></a></p>
 
 `nnn` is one of the fastest and most lightweight file managers (`~50KB` binary, `~3.5MB` resident memory usage, [highly optimized](https://github.com/jarun/nnn/wiki/performance-factors) code). And yet, it doesn't lack in features!
 
