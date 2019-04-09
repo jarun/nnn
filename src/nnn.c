@@ -193,7 +193,10 @@ typedef struct {
 	char *loc;
 } bm;
 
-/* Settings */
+/*
+ * Settings
+ * NOTE: update default values if changing order
+ */
 typedef struct {
 	uint filtermode : 1;  /* Set to enter filter mode */
 	uint mtimeorder : 1;  /* Set to sort by time modified */
@@ -202,17 +205,17 @@ typedef struct {
 	uint blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
 	uint showhidden : 1;  /* Set to show hidden files */
 	uint copymode   : 1;  /* Set when copying files */
-	uint autoselect : 1;  /* Auto-select dir in nav-as-you-type mode */
 	uint showdetail : 1;  /* Clear to show fewer file info */
-	uint dircolor   : 1;  /* Current status of dir color */
-	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
 	uint ctxactive  : 1;  /* Context active or not */
 	uint reserved   : 7;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
+	uint dircolor   : 1;  /* Current status of dir color */
 	uint picker     : 1;  /* Write selection to user-specified file */
 	uint pickraw    : 1;  /* Write selection to sdtout before exit */
 	uint nonavopen  : 1;  /* Open file on right arrow or `l` */
+	uint autoselect : 1;  /* Auto-select dir in nav-as-you-type mode */
+	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
 	uint useeditor  : 1;  /* Use VISUAL to open text files */
 	uint runscript  : 1;  /* Choose script to run mode */
 	uint runctx     : 2;  /* The context in which script is to be run */
@@ -236,7 +239,32 @@ typedef struct {
 /* GLOBALS */
 
 /* Configuration, contexts */
-static settings cfg = {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0};
+static settings cfg = {
+	0, /* filtermode */
+	0, /* mtimeorder */
+	0, /* sizeorder */
+	0, /* apparentsz */
+	0, /* blkorder */
+	0, /* showhidden */
+	0, /* copymode */
+	1, /* showdetail */
+	1, /* ctxactive */
+	0, /* reserved */
+	0, /* curctx */
+	0, /* dircolor */
+	0, /* picker */
+	0, /* pickraw */
+	0, /* nonavopen */
+	1, /* autoselect */
+	0, /* metaviewer */
+	0, /* useeditor */
+	0, /* runscript */
+	0, /* runctx */
+	0, /* restrict0b */
+	1, /* filter_re */
+	0, /* wild */
+	0, /* trash */
+	};
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static struct entry *dents;
