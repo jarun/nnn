@@ -3602,6 +3602,7 @@ nochange:
 			if (!cfg.filtermode && cur && access(newpath, F_OK) == -1)
 				--cur;
 
+			/* We reduce cur only if it is > 0, so it's at least 0 */
 			copycurname();
 
 			if (cfg.filtermode)
