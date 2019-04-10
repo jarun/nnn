@@ -4178,6 +4178,7 @@ int main(int argc, char *argv[])
 	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
 	if (getenv(env_cfg[NNN_OPENER_DETACH]))
 		opener_flag |= F_NOWAIT;
+	DPRINTF_S(opener);
 
 	/* Set nnn nesting level, idletimeout used as tmp var */
 	idletimeout = xatoi(getenv(env_cfg[NNNLVL]));
