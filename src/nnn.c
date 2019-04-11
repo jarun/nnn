@@ -736,10 +736,7 @@ static char *xbasename(char *path)
 /* Writes buflen char(s) from buf to a file */
 static void writecp(const char *buf, const size_t buflen)
 {
-	if (cfg.pickraw)
-		return;
-
-	if (!g_cppath[0])
+	if (cfg.pickraw || !*g_cppath)
 		return;
 
 	FILE *fp = fopen(g_cppath, "w");
@@ -759,12 +756,6 @@ static void appendfpath(const char *path, const size_t len)
 		if (!pcopybuf)
 			errexit();
 	}
-
-	/* Enabling the following will miss files with newlines */
-	/*
-	 * if (copybufpos)
-	 *	pcopybuf[copybufpos - 1] = '\n';
-	 */
 
 	copybufpos += xstrlcpy(pcopybuf + copybufpos, path, len);
 }
@@ -971,7 +962,7 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 	char *argv[EXEC_ARGS_MAX] = {0};
 	char *cmd = NULL;
 
-	if (!file || !file[0])
+	if (!file || !*file)
 		return;
 
 	/* Swap args if the first arg is NULL and second isn't */
