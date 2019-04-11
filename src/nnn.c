@@ -726,66 +726,6 @@ static void *xmemrchr(uchar *s, uchar ch, size_t n)
 	return NULL;
 }
 
-/*
- * The following dirname(3) implementation does not
- * modify the input. We use a copy of the original.
- *
- * Modified from the glibc (GNU LGPL) version.
- */
-static char *xdirname(const char *path)
-{
-	char * const buf = g_buf, *last_slash, *runp;
-
-	xstrlcpy(buf, path, PATH_MAX);
-
-	/* Find last '/'. */
-	last_slash = xmemrchr((uchar *)buf, '/', strlen(buf));
-
-	if (last_slash && last_slash != buf && last_slash[1] == '\0') {
-		/* Determine whether all remaining characters are slashes. */
-		for (runp = last_slash; runp != buf; --runp)
-			if (runp[-1] != '/')
-				break;
-
-		/* The '/' is the last character, we have to look further. */
-		if (runp != buf)
-			last_slash = xmemrchr((uchar *)buf, '/', runp - buf);
-	}
-
-	if (last_slash) {
-		/* Determine whether all remaining characters are slashes. */
-		for (runp = last_slash; runp != buf; --runp)
-			if (runp[-1] != '/')
-				break;
-
-		/* Terminate the buffer. */
-		if (runp == buf) {
-			/* The last slash is the first character in the string.
-			 * We have to return "/". As a special case we have to
-			 * return "//" if there are exactly two slashes at the
-			 * beginning of the string. See XBD 4.10 Path Name
-			 * Resolution for more information.
-			 */
-			if (last_slash == buf + 1)
-				++last_slash;
-			else
-				last_slash = buf + 1;
-		} else
-			last_slash = runp;
-
-		last_slash[0] = '\0';
-	} else {
-		/* This assignment is ill-designed but the XPG specs require to
-		 * return a string containing "." in any case no directory part
-		 * is found and so a static and constant string is required.
-		 */
-		buf[0] = '.';
-		buf[1] = '\0';
-	}
-
-	return buf;
-}
-
 static char *xbasename(char *path)
 {
 	char *base = xmemrchr((uchar *)path, '/', strlen(path));
@@ -3012,17 +2952,20 @@ nochange:
 				goto nochange;
 			}
 
-			dir = xdirname(path);
+			/* Use a copy as dirname() may change the string passed */
+			xstrlcpy(newpath, path, PATH_MAX);
+
+			dir = dirname(newpath);
 			if (access(dir, R_OK) == -1) {
 				printwarn();
 				goto nochange;
 			}
 
-			/* Save history */
-			xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
-
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
+
+			/* Save history */
+			xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
 
 			xstrlcpy(path, dir, PATH_MAX);
 
