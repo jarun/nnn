@@ -741,7 +741,7 @@ static char *xdirname(const char *path)
 	/* Find last '/'. */
 	last_slash = xmemrchr((uchar *)buf, '/', strlen(buf));
 
-	if (last_slash != NULL && last_slash != buf && last_slash[1] == '\0') {
+	if (last_slash && last_slash != buf && last_slash[1] == '\0') {
 		/* Determine whether all remaining characters are slashes. */
 		for (runp = last_slash; runp != buf; --runp)
 			if (runp[-1] != '/')
@@ -752,7 +752,7 @@ static char *xdirname(const char *path)
 			last_slash = xmemrchr((uchar *)buf, '/', runp - buf);
 	}
 
-	if (last_slash != NULL) {
+	if (last_slash) {
 		/* Determine whether all remaining characters are slashes. */
 		for (runp = last_slash; runp != buf; --runp)
 			if (runp[-1] != '/')
@@ -932,7 +932,7 @@ static bool initcurses(void)
 	} else if (!initscr()) {
 		char *term = getenv("TERM");
 
-		if (term != NULL)
+		if (term)
 			fprintf(stderr, "error opening TERM: %s\n", term);
 		else
 			fprintf(stderr, "initscr!\n");
@@ -1110,7 +1110,7 @@ static bool xdiraccess(const char *path)
 {
 	DIR *dirp = opendir(path);
 
-	if (dirp == NULL) {
+	if (!dirp) {
 		printwarn();
 		return FALSE;
 	}
@@ -2343,8 +2343,8 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 	DPRINTF_S(g_buf);
 
 	fp = popen(g_buf, "r");
-	if (fp != NULL) {
-		while (fgets(g_buf, CMD_LEN_MAX - 1, fp) != NULL)
+	if (fp) {
+		while (fgets(g_buf, CMD_LEN_MAX - 1, fp))
 			dprintf(fd, "%s", g_buf);
 		pclose(fp);
 	}
@@ -2556,7 +2556,7 @@ static int dentfill(char *path, struct entry **dents)
 	DIR *dirp = opendir(path);
 	static uint open_max;
 
-	if (dirp == NULL)
+	if (!dirp)
 		return 0;
 
 	int fd = dirfd(dirp);
@@ -2576,7 +2576,7 @@ static int dentfill(char *path, struct entry **dents)
 			open_max = max_openfds();
 	}
 
-	while ((dp = readdir(dirp)) != NULL) {
+	while ((dp = readdir(dirp))) {
 		namep = dp->d_name;
 
 		/* Skip self and parent */
@@ -2628,7 +2628,7 @@ static int dentfill(char *path, struct entry **dents)
 		if (n == total_dents) {
 			total_dents += ENTRY_INCR;
 			*dents = xrealloc(*dents, total_dents * sizeof(**dents));
-			if (*dents == NULL) {
+			if (!*dents) {
 				free(pnamebuf);
 				closedir(dirp);
 				errexit();
@@ -2642,7 +2642,7 @@ static int dentfill(char *path, struct entry **dents)
 
 			pnb = pnamebuf;
 			pnamebuf = (char *)xrealloc(pnamebuf, namebuflen);
-			if (pnamebuf == NULL) {
+			if (!pnamebuf) {
 				free(*dents);
 				closedir(dirp);
 				errexit();
@@ -3247,7 +3247,7 @@ nochange:
 				goto begin;
 			}
 
-			if (get_bm_loc(newpath, fd) == NULL) {
+			if (!get_bm_loc(newpath, fd)) {
 				printwait(messages[STR_INVBM_KEY], &presel);
 				goto nochange;
 			}
@@ -3676,7 +3676,7 @@ nochange:
 				break;
 			}
 
-			if (tmp == NULL || tmp[0] == '\0')
+			if (!tmp || !*tmp)
 				break;
 
 			/* Allow only relative, same dir paths */
@@ -4120,7 +4120,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (ipath) { /* Open a bookmark directly */
-		if (ipath[1] || get_bm_loc(cwd, *ipath) == NULL) {
+		if (ipath[1] || !get_bm_loc(cwd, *ipath)) {
 			fprintf(stderr, "%s\n", messages[STR_INVBM_KEY]);
 			return 1;
 		}
@@ -4129,7 +4129,7 @@ int main(int argc, char *argv[])
 	} else if (argc == optind) {
 		/* Start in the current directory */
 		ipath = getcwd(cwd, PATH_MAX);
-		if (ipath == NULL)
+		if (!ipath)
 			ipath = "/";
 	} else {
 		ipath = realpath(argv[optind], cwd);
@@ -4198,7 +4198,7 @@ int main(int argc, char *argv[])
 		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", HOME_LEN_MAX);
 	else {
 		copier = getenv("TMPDIR");
-		if (copier != NULL)
+		if (copier)
 			g_tmpfplen = xstrlcpy(g_tmpfpath, copier, HOME_LEN_MAX);
 	}
 
