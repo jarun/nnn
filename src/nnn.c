@@ -2367,7 +2367,7 @@ static bool show_help(const char *path)
 		  "c/  Filter       Ins ^T  Toggle nav-as-you-type\n"
 		  "cb  Pin current dir  ^B  Go to pinned dir\n"
 	     "7Tab ^I  Next context      d  Toggle detail view\n"
-	       "9, ^/  Leader key  N LeadN  Enter context N\n"
+	       "9, ^/  Leader key  N LeadN  Context N\n"
 		"aEsc  Exit prompt      ^L  Redraw/clear prompt\n"
 		 "b^G  Quit and cd       q  Quit context\n"
 	       "9Q ^Q  Quit              ?  Help, config\n"

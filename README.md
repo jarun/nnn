@@ -244,7 +244,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
             /  Filter       Ins ^T  Toggle nav-as-you-type
             b  Pin current dir  ^B  Go to pinned dir
        Tab ^I  Next context      d  Toggle detail view
-         , ^/  Leader key  N LeadN  Enter context N
+         , ^/  Leader key  N LeadN  Context N
           Esc  Exit prompt      ^L  Redraw/clear prompt
            ^G  Quit and cd       q  Quit context
          Q ^Q  Quit              ?  Help, config
