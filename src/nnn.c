@@ -3830,6 +3830,8 @@ nochange:
 
 					if (chdir(ipath) == -1) {
 						printwarn();
+						if (tmp)
+							free(tmp);
 						goto nochange;
 					}
 
@@ -3839,8 +3841,10 @@ nochange:
 						spawn(shell, "-c", tmp, path, F_CLI);
 						/* readline finishing touches */
 						add_history(tmp);
-						free(tmp);
 					}
+
+					if (tmp)
+						free(tmp);
 				}
 #endif
 			}
