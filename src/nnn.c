@@ -231,7 +231,6 @@ typedef struct {
 	char c_last[PATH_MAX]; /* Last visited dir */
 	char c_name[NAME_MAX + 1]; /* Current file name */
 	char c_fltr[REGEX_MAX]; /* Current filter */
-	char *p_fltr; /* pointer to the current filter */
 	settings c_cfg; /* Current configuration */
 	uint color; /* Color code for directories */
 } context;
@@ -1510,7 +1509,7 @@ static int filterentries(char *path)
 	char *ln = g_ctx[cfg.curctx].c_fltr;
 	wint_t ch[2] = {0};
 	int r, total = ndents, oldcur = cur, len;
-	char *pln = g_ctx[cfg.curctx].p_fltr;
+	char *pln = g_ctx[cfg.curctx].c_fltr + 1;
 
 	cur = 0;
 
@@ -1634,10 +1633,9 @@ static int filterentries(char *path)
 		}
 	}
 end:
-	if (*ch != '\t') {
+	if (*ch != '\t')
 		g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
-		g_ctx[cfg.curctx].p_fltr = g_ctx[cfg.curctx].c_fltr + 1;
-	}
+
 	curs_set(FALSE);
 	settimeout();
 
@@ -2158,7 +2156,6 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 		g_ctx[r].c_last[0] = '\0';
 		xstrlcpy(g_ctx[r].c_name, curname, NAME_MAX + 1);
 		g_ctx[r].c_fltr[0] = g_ctx[r].c_fltr[1] = '\0';
-		g_ctx[r].p_fltr = g_ctx[r].c_fltr + 1;
 		g_ctx[r].c_cfg = cfg;
 		g_ctx[r].c_cfg.runscript = 0;
 	}
@@ -2860,7 +2857,6 @@ static void browse(char *ipath)
 	lastdir = g_ctx[0].c_last; /* last visited directory */
 	lastname = g_ctx[0].c_name; /* last visited filename */
 	g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
-	g_ctx[cfg.curctx].p_fltr = g_ctx[cfg.curctx].c_fltr + 1;
 	g_ctx[0].c_cfg = cfg; /* current configuration */
 
 	cfg.filtermode ?  (presel = FILTER) : (presel = 0);
