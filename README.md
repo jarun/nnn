@@ -237,7 +237,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  NAVIGATION
           ↑ k  Up          PgUp ^U  Scroll up
           ↓ j  Down        PgDn ^D  Scroll down
-          ← h  Parent dir        ~  Go HOME
+          ← h  Parent dir      ~ `  HOME, /
         ↵ → l  Open file/dir     @  Start dir
     Home g ^A  First entry       -  Last visited dir
      End G ^E  Last entry        .  Toggle show hidden
@@ -280,6 +280,7 @@ The Leader key provides a powerful multi-functional navigation mechanism. It is 
 | <kbd><</kbd>, <kbd>,</kbd> | Go to previous active context |
 | key | Go to bookmarked location |
 | <kbd>~</kbd> | Go to HOME directory |
+| <kbd>`</kbd> | Go to `/` |
 | <kbd>-</kbd> | Go to last visited directory |
 | <kbd>@</kbd> | Go to start directory |
 | <kbd>q</kbd> | Quit context |

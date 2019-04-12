@@ -2360,7 +2360,7 @@ static bool show_help(const char *path)
 		"1NAVIGATION\n"
 		"a↑ k  Up          PgUp ^U  Scroll up\n"
 		"a↓ j  Down        PgDn ^D  Scroll down\n"
-		"a← h  Parent dir        ~  Go HOME\n"
+		"a← h  Parent dir      ~ `  HOME, /\n"
 	      "8↵ → l  Open file/dir     @  Start dir\n"
 	  "4Home g ^A  First entry       -  Last visited dir\n"
 	   "5End G ^E  Last entry        .  Toggle show hidden\n"
@@ -3077,6 +3077,7 @@ nochange:
 		case SEL_CDHOME: // fallthrough
 		case SEL_CDBEGIN: // fallthrough
 		case SEL_CDLAST: // fallthrough
+		case SEL_CDROOT: // fallthrough
 		case SEL_VISIT:
 			switch (sel) {
 			case SEL_CDHOME:
@@ -3087,6 +3088,9 @@ nochange:
 				break;
 			case SEL_CDLAST:
 				dir = lastdir;
+				break;
+			case SEL_CDROOT:
+				dir = "/";
 				break;
 			default: /* case SEL_VISIT */
 				dir = mark;
@@ -3131,6 +3135,7 @@ nochange:
 			switch (fd) {
 			case 'q': // fallthrough
 			case '~': // fallthrough
+			case '`': // fallthrough
 			case '-': // fallthrough
 			case '@':
 				presel = fd;
