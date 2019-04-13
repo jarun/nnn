@@ -3822,24 +3822,23 @@ nochange:
 						spawn(shell, "-c", tmp, path, F_CLI);
 #ifndef NORL
 				} else {
-					exitcurses();
-
 					/* Switch to current path for readline(3) */
 					if (chdir(path) == -1) {
 						printwarn();
 						goto nochange;
 					}
 
+					exitcurses();
+
 					tmp = readline("nnn> ");
+
+					refresh();
 
 					if (chdir(ipath) == -1) {
 						printwarn();
-						if (tmp)
-							free(tmp);
+						free(tmp);
 						goto nochange;
 					}
-
-					refresh();
 
 					if (tmp && tmp[0]) {
 						spawn(shell, "-c", tmp, path, F_CLI);
@@ -3847,8 +3846,7 @@ nochange:
 						add_history(tmp);
 					}
 
-					if (tmp)
-						free(tmp);
+					free(tmp);
 				}
 #endif
 			}
