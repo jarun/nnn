@@ -22,6 +22,27 @@ jobs:
             ls -l nnn
             make clean
 
+  gcc-8:
+    docker:
+      - image: ubuntu:18.04
+        working_directory: ~/nnn
+        environment:
+          CC: gcc-8
+          CI_FORCE_TEST: 1
+    steps:
+      - run:
+          command: |
+            apt update -qq
+            apt install -y --no-install-recommends git gcc-8 make pkg-config libncursesw5-dev libreadline-dev
+      - checkout
+      - run:
+          command: |
+            export CFLAGS=-Werror
+            make clean
+            make strip
+            ls -l nnn
+            make clean
+
   package-and-publish:
     machine: true
     working_directory: ~/nnn
@@ -45,6 +66,7 @@ workflows:
   test:
     jobs: &all-tests
       - gcc
+      - gcc-8
 
   nightly:
     triggers:
