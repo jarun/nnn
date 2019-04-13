@@ -9,12 +9,12 @@ env:
 matrix:
   include:
     # Access more recent gcc and clang via a Xenial image
-    - os: linux
-      dist: trusty
-      compiler: gcc
-    - os: linux
-      dist: trusty
-      compiler: clang
+    #- os: linux
+    #  dist: trusty
+    #  compiler: gcc
+    #- os: linux
+    #  dist: trusty
+    #  compiler: clang
     - os: osx
       compiler: gcc
     - os: osx
