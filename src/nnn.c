@@ -3106,7 +3106,7 @@ nochange:
 				goto nochange;
 
 			if (strcmp(path, dir) == 0)
-				break;
+				goto nochange;
 
 			/* SEL_CDLAST: dir pointing to lastdir */
 			xstrlcpy(newpath, dir, PATH_MAX);
