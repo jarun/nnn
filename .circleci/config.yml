@@ -1,7 +1,7 @@
 version: 2
 
 jobs:
-  gcc:
+  compile:
     docker:
       - image: ubuntu:18.04
         working_directory: ~/nnn
@@ -73,12 +73,12 @@ workflows:
 
   test:
     jobs: &all-tests
-      - gcc
+      - compile
 
   nightly:
     triggers:
       - schedule:
-          cron: "0 0 * * *"
+          cron: "0 0 * * 0"
           filters:
             branches:
               only:
