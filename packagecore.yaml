@@ -16,33 +16,33 @@ packages:
       - ncurses
       - readline
     container: "archlinux/base"
-  centos7.2:
-    builddeps:
-      - make
-      - gcc
-      - pkgconfig
-      - ncurses-devel
-      - readline-devel
-    deps:
-      - ncurses
-      - readline
-    commands:
-      pre:
-        - yum install epel-release
-  centos7.3:
-    builddeps:
-      - make
-      - gcc
-      - pkgconfig
-      - ncurses-devel
-      - readline-devel
-    deps:
-      - ncurses
-      - readline
-    commands:
-      pre:
-        - yum install epel-release
   centos7.4:
+    builddeps:
+      - make
+      - gcc
+      - pkgconfig
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+    commands:
+      pre:
+        - yum install epel-release
+  centos7.5:
+    builddeps:
+      - make
+      - gcc
+      - pkgconfig
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+    commands:
+      pre:
+        - yum install epel-release
+  centos7.6:
     builddeps:
       - make
       - gcc
