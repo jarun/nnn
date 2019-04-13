@@ -1,0 +1,66 @@
+version: 2
+
+jobs:
+  gcc:
+    docker:
+      - image: ubuntu:18.04
+        working_directory: ~/nnn
+        environment:
+          CC: gcc
+          CI_FORCE_TEST: 1
+    steps:
+      - run:
+          command: |
+            apt update -qq
+            apt install -y --no-install-recommends git gcc make pkg-config libncursesw5-dev libreadline-dev
+      - checkout
+      - run:
+          command: |
+            export CFLAGS=-Werror
+            make clean
+            make strip
+            ls -l nnn
+            make clean
+
+  package-and-publish:
+    machine: true
+    working_directory: ~/nnn
+    steps:
+      - run:
+          name: "package with packagecore"
+          command: |
+            # Use latest installed python3 from pyenv
+            export PYENV_VERSION="$(pyenv versions | grep -Po '\b3\.\d+\.\d+' | tail -1)"
+            pip install packagecore
+            packagecore -o ./dist/ ${CIRCLE_TAG#v}
+      - run:
+          name: "publish to GitHub"
+          command: |
+            go get github.com/tcnksm/ghr
+            ghr -t ${GITHUB_API_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -replace ${CIRCLE_TAG} ./dist/
+
+workflows:
+  version: 2
+
+  test:
+    jobs: &all-tests
+      - gcc
+
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - master
+    jobs: *all-tests
+
+  publish-github-release:
+    jobs:
+      - package-and-publish:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
