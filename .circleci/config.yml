@@ -11,24 +11,45 @@ jobs:
       - run:
           command: |
             apt update -qq
-            apt install -y --no-install-recommends software-properties-common
+            apt install -y --no-install-recommends software-properties-common wget gpg-agent
             apt-add-repository -y ppa:jonathonf/gcc-9.0
+            wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|apt-key add -
+            apt-add-repository -y "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-8 main"
             apt update -qq
-            apt install -y --no-install-recommends git gcc gcc-8 gcc-9 make pkg-config libncursesw5-dev libreadline-dev
+            apt install -y --no-install-recommends git gcc gcc-8 gcc-9 clang clang-8 clang-tidy-8 make pkg-config libncursesw5-dev libreadline-dev
       - checkout
       - run:
           command: |
             export CFLAGS=-Werror
             make clean
+            echo
+            echo "########## gcc ##########"
             CC=gcc make strip
             ls -l nnn
             make clean
+            echo
+            echo "########## gcc-8 ##########"
             CC=gcc-8 make strip
             ls -l nnn
             make clean
+            echo
+            echo "########## gcc-9 ##########"
             CC=gcc-9 make strip
             ls -l nnn
             make clean
+            echo
+            echo "########## clang ##########"
+            CC=clang make strip
+            ls -l nnn
+            make clean
+            echo
+            echo "########## clang-8 ##########"
+            CC=clang-8 make strip
+            ls -l nnn
+            make clean
+            echo
+            echo "########## clang-tidy-8 ##########"
+            clang-tidy-8 src/* -- -I/usr/include -I/usr/include/ncursesw
 
   package-and-publish:
     machine: true
