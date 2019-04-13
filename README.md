@@ -237,10 +237,9 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  NAVIGATION
           ↑ k  Up          PgUp ^U  Scroll up
           ↓ j  Down        PgDn ^D  Scroll down
-          ← h  Parent dir      ~ `  HOME, /
-        ↵ → l  Open file/dir     @  Start dir
-    Home g ^A  First entry       -  Last visited dir
-     End G ^E  Last entry        .  Toggle show hidden
+          ← h  Parent dir  ~ ` @ -  HOME, /, start, last
+        ↵ → l  Open file/dir     .  Toggle show hidden
+    Home g ^A  First entry    G ^E  Last entry
             /  Filter       Ins ^T  Toggle nav-as-you-type
             b  Pin current dir  ^B  Go to pinned dir
        Tab ^I  Next context      d  Toggle detail view
@@ -279,10 +278,7 @@ The Leader key provides a powerful multi-functional navigation mechanism. It is 
 | <kbd>></kbd>, <kbd>.</kbd> | Go to next active context |
 | <kbd><</kbd>, <kbd>,</kbd> | Go to previous active context |
 | key | Go to bookmarked location |
-| <kbd>~</kbd> | Go to HOME directory |
-| <kbd>`</kbd> | Go to `/` |
-| <kbd>-</kbd> | Go to last visited directory |
-| <kbd>@</kbd> | Go to start directory |
+| <kbd>~</kbd> <kbd>`</kbd> <kbd>@</kbd> <kbd>-</kbd> | Go to HOME, `/`, start, last visited dir |
 | <kbd>q</kbd> | Quit context |
 
 #### Contexts
