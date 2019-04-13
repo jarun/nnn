@@ -55,6 +55,7 @@ jobs:
     machine: true
     working_directory: ~/nnn
     steps:
+      - checkout
       - run:
           name: "package with packagecore"
           command: |
