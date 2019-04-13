@@ -263,7 +263,8 @@ static settings cfg = {
 	1, /* filter_re */
 	0, /* wild */
 	0, /* trash */
-	};
+};
+
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static struct entry *dents;
