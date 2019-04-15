@@ -4024,10 +4024,8 @@ int main(int argc, char *argv[])
 	}
 
 	/* Confirm we are in a terminal */
-	if (!cfg.picker && !(isatty(0) && isatty(1))) {
-		xerror();
-		return 1;
-	}
+	if (!cfg.picker && !(isatty(0) && isatty(1)))
+		exit(1);
 
 	/* Get the context colors; copier used as tmp var */
 	copier = xgetenv(env_cfg[NNN_CONTEXT_COLORS], "4444");
@@ -4069,7 +4067,11 @@ int main(int argc, char *argv[])
 		if (!ipath)
 			ipath = "/";
 	} else {
-		ipath = realpath(argv[optind], cwd);
+		ipath = argv[optind];
+		if (strlen(ipath) > 7 && ipath[0] == 'f' && ipath[1] == 'i' && ipath[2] == 'l'
+		    && ipath[3] == 'e' && ipath[4] == ':' && ipath[5] == '/' && ipath[6] == '/')
+			ipath = ipath + 7;
+		ipath = realpath(ipath, cwd);
 		if (!ipath) {
 			xerror();
 			return 1;
