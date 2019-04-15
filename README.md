@@ -200,7 +200,8 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 
 - For additional functionality [setup custom scripts](#user-scripts).
-- Visit the wiki page [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn) for many more specific usecases.
+- Visit the wiki page [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn) for many more specific use cases.
+- To set `nnn` as the default file manager, follow these [instructions](https://github.com/jarun/nnn/wiki/nnn-as-default-file-manager).
 
 #### USAGE
 
