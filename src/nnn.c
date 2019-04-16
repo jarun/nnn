@@ -4045,8 +4045,19 @@ int main(int argc, char *argv[])
 		++opt;
 	}
 
+#ifdef DBGMODE
+	enabledbg();
+	atexit(disabledbg);
+#endif
+
 	home = getenv("HOME");
 	DPRINTF_S(home);
+
+	/* Get custom opener, if set */
+	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
+	if (getenv(env_cfg[NNN_OPENER_DETACH]))
+		opener_flag |= F_NOWAIT;
+	DPRINTF_S(opener);
 
 	/* Parse bookmarks string */
 	if (!parsebmstr()) {
@@ -4072,9 +4083,27 @@ int main(int argc, char *argv[])
 		    && ipath[3] == 'e' && ipath[4] == ':' && ipath[5] == '/' && ipath[6] == '/')
 			ipath = ipath + 7;
 		ipath = realpath(ipath, cwd);
+		DPRINTF_S(ipath);
 		if (!ipath) {
 			xerror();
 			return 1;
+		}
+
+		/*
+		 * If nnn is set as the file manager, applications may try to open
+		 * files by invoking nnn. In that case pass the file path to the
+		 * desktop opener and exit.
+		 */
+		struct stat sb;
+
+		if (stat(ipath, &sb) == -1) {
+			printwarn();
+			return 1;
+		}
+
+		if (S_ISREG(sb.st_mode)) {
+			spawn(opener, ipath, NULL, NULL, opener_flag);
+			return 0;
 		}
 	}
 
@@ -4112,12 +4141,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 #endif
-
-	/* Get custom opener, if set */
-	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
-	if (getenv(env_cfg[NNN_OPENER_DETACH]))
-		opener_flag |= F_NOWAIT;
-	DPRINTF_S(opener);
 
 	/* Set nnn nesting level, idletimeout used as tmp var */
 	idletimeout = xatoi(getenv(env_cfg[NNNLVL]));
@@ -4200,9 +4223,6 @@ int main(int argc, char *argv[])
 	read_history(NULL);
 #endif
 
-#ifdef DBGMODE
-	enabledbg();
-#endif
 	if (!initcurses())
 		return 1;
 
@@ -4236,8 +4256,5 @@ int main(int argc, char *argv[])
 	close(kq);
 #endif
 
-#ifdef DBGMODE
-	disabledbg();
-#endif
 	return 0;
 }

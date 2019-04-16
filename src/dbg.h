@@ -47,7 +47,7 @@ static int xprintf(int fd, const char *fmt, ...)
 	return r;
 }
 
-static int enabledbg()
+static int enabledbg(void)
 {
 	FILE *fp = fopen("/tmp/nnndbg", "w");
 
@@ -71,7 +71,7 @@ static int enabledbg()
 	return 0;
 }
 
-static void disabledbg()
+static void disabledbg(void)
 {
 	close(DEBUG_FD);
 }
