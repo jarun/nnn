@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+# Description: Set the selected image as wallpaper using pywal and change the terminal color schemes. Just put the cursor on a image and run the script. 
+#
+# Shell: POSIX Compliant
+# Author: juacq97
+
+if ! [ -z "$1" ]; then
+    if [ $(mimetype --output-format %m $1 | awk -F '/' '{print $1}') == "image" ]; then
+	wal -i $1
+	notify-send -a "nnn" "Wallpaper changed!"
+    else
+	notify-send -a "nnn" "You need to select a image"
+    fi
+fi
