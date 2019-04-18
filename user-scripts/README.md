@@ -8,7 +8,6 @@
 | imgur | bash | [imgur](https://github.com/jomo/imgur-screenshot) | Upload an image to imgur |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
 | ndiff | sh | vimdiff | File and directory diff for selection |
-| nlaunch | sh | fzy | Drop-down app launcher. Copy in `$PATH`; fallback regular prompt |
 | nwal | sh | nitrogen | Set the selected image as wallpaper using nitrogen |
 | paste | sh | [pastebinit](https://launchpad.net/pastebinit) | Paste contents of current (text) file to paste.ubuntu.com |
 | picker | sh | nnn | Pick files and pipe the newline-separated list to another utility |

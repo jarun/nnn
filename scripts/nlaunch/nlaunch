@@ -4,6 +4,8 @@
 #              stdin, stdout, stderr are suppressed so CLI utilities exit silently.
 #              Works as an independent app launcher.
 #
+#              Requires fzy.
+#
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 

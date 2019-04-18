@@ -196,7 +196,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/hacking-nnn#cd-on-quit).
 3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`
 4. Run `n`.
-5. To use `nnn` as a GUI app launcher with fuzzy selection menu, drop [`nlaunch`](https://github.com/jarun/nnn/blob/master/user-scripts/nlaunch) somewhere in your `$PATH`.
+5. To use `nnn` as a GUI app launcher with fuzzy selection menu, drop [`nlaunch`](https://github.com/jarun/nnn/blob/master/scripts/nlaunch/nlaunch) somewhere in your `$PATH`. Note that the launcher requires fzy.
 6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 
 - For additional functionality [setup custom scripts](#user-scripts).
