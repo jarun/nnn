@@ -27,7 +27,7 @@
 
 `nnn` works seamlessly with your DE and favourite GUI utilities. It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
-Have as many scripts as you want to extend the power of `nnn`! Pick from the [scripts repository](https://github.com/jarun/nnn/tree/master/user-scripts) or add your own.
+Have as many scripts as you want to extend the power of `nnn`! Pick from the available [plugins](https://github.com/jarun/nnn/tree/master/plugins) or add your own.
 
 [Quickstart](#quickstart) and see how `nnn` simplifies long desktop sessions. When you are ready for more, start [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn).
 
@@ -60,7 +60,7 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the [sc
   - [File indicators](#file-indicators)
   - [Configuration](#configuration)
   - [Help](#help)
-- [User scripts](#user-scripts)
+- [Plugins](#plugins)
 - [Troubleshooting](#troubleshooting)
   - [Tmux configuration](#tmux-configuration)
   - [BSD terminal issue](#bsd-terminal-issue)
@@ -102,13 +102,12 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the [sc
   - Copy, move, delete, archive, link selection
   - FreeDesktop compliant trash (needs trash-cli)
   - Show copy, move progress on Linux (needs avdcpmv)
-  - Script to view directory and file diff for selection
+  - Plugin repository
   - Transfer files using lftp
   - Batch rename (needs vidir)
   - Per-context directory color (default: blue)
   - Spawn a shell in the current directory
   - Launch applications, run a command
-  - Repository of custom scripts
   - Run current file as executable
   - Change directory at exit (*easy* shell integration)
   - Edit file in EDITOR or open in PAGER
@@ -143,7 +142,7 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the [sc
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | copy, move progress |
 | $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
 | $PAGER (less, most) | page through files (fallback less) |
-| $SHELL | spawn a shell, run script (fallback sh) |
+| $SHELL | spawn a shell, run some commands (fallback sh) |
 
 #### From a package manager
 
@@ -199,7 +198,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 5. To use `nnn` as a GUI app launcher with fuzzy selection menu, drop [`nlaunch`](https://github.com/jarun/nnn/blob/master/scripts/nlaunch/nlaunch) somewhere in your `$PATH`. Note that the launcher requires fzy.
 6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 
-- For additional functionality [setup custom scripts](#user-scripts).
+- For additional functionality [setup plugins](#plugins).
 - Visit the wiki page [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn) for many more specific use cases.
 - To set `nnn` as the default file manager, follow these [instructions](https://github.com/jarun/nnn/wiki/nnn-as-default-file-manager).
 
@@ -264,7 +263,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^W  Random  s  Size   t  Time modified
  MISC
          ! ^]  Spawn SHELL       C  Execute entry
-         R ^V  Run script        L  Lock terminal
+         R ^V  Pick plugin       L  Lock terminal
            ^P  Prompt  ^N  Note  =  Launcher
 ```
 
@@ -379,8 +378,8 @@ The following indicators are used in the detail view:
 | `NNN_OPENER_DETACH=1` | do not block when invoking file opener |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
-| `NNN_COPIER='copier.sh'` | system clipboard copier script [default: none] |
-| `NNN_SCRIPT_DIR=/home/user/scripts` | absolute path to script dir |
+| `NNN_COPIER='/path/to/copier.sh'` | system clipboard copier script [default: none] |
+| `NNN_PLUGIN_DIR=/home/user/nnn-plugins` | absolute path to plugins dir |
 | `NNN_NOTE=/home/user/Dropbox/Public/notes` | path to note file [default: none] |
 | `NNN_TMPFILE=/tmp/nnn` | file to write current open dir path to for cd on quit |
 | `NNN_USE_EDITOR=1` | Open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
@@ -396,17 +395,17 @@ The following indicators are used in the detail view:
     $ man nnn
 To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
-#### USER SCRIPTS
+#### PLUGINS
 
-`nnn` can invoke custom scripts in the current directory (`$PWD` for the script) with the currently selected file name as the argument.
+`nnn` can invoke plugins in the current directory (`$PWD` for the plugin) with the currently selected file name as the argument.
 
-Copy the scripts of your interest from the [user-scripts](https://github.com/jarun/nnn/tree/master/user-scripts) directory and let `nnn` know the location:
+Copy the plugins of your interest from the [plugins](https://github.com/jarun/nnn/tree/master/plugins) directory and let `nnn` know the location:
 
-    export NNN_SCRIPT_DIR=/absolute/path/to/scripts_dir
+    export NNN_PLUGIN_DIR=/absolute/path/to/plugins_dir
 
-Use the run script shortcut to jump to the script directory and pick a script. Repeating the same shortcut cancels the operation and puts you back in the original directory.
+Use the pick plugin shortcut to visit the plugin directory and pick a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
-If you have an interesting script feel free to raise a PR.
+If you have an interesting plugin feel free to raise a PR.
 
 #### TROUBLESHOOTING
 

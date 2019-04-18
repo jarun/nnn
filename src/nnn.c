@@ -217,8 +217,8 @@ typedef struct {
 	uint autoselect : 1;  /* Auto-select dir in nav-as-you-type mode */
 	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
 	uint useeditor  : 1;  /* Use VISUAL to open text files */
-	uint runscript  : 1;  /* Choose script to run mode */
-	uint runctx     : 2;  /* The context in which script is to be run */
+	uint runplugin  : 1;  /* Choose plugin mode */
+	uint runctx     : 2;  /* The context in which plugin is to be run */
 	uint restrict0b : 1;  /* Restrict 0-byte file opening */
 	uint filter_re  : 1;  /* Use regex filters */
 	uint wild       : 1;  /* Do not sort entries on dir load */
@@ -257,7 +257,7 @@ static settings cfg = {
 	1, /* autoselect */
 	0, /* metaviewer */
 	0, /* useeditor */
-	0, /* runscript */
+	0, /* runplugin */
 	0, /* runctx */
 	0, /* restrict0b */
 	1, /* filter_re */
@@ -385,7 +385,7 @@ static const char * const messages[] = {
 #define NNN_CONTEXT_COLORS 2
 #define NNN_IDLE_TIMEOUT 3
 #define NNN_COPIER 4
-#define NNN_SCRIPT_DIR 5
+#define NNN_PLUGIN_DIR 5
 #define NNN_NOTE 6
 #define NNN_TMPFILE 7
 #define NNNLVL 8 /* strings end here */
@@ -405,7 +405,7 @@ static const char * const env_cfg[] = {
 	"NNN_CONTEXT_COLORS",
 	"NNN_IDLE_TIMEOUT",
 	"NNN_COPIER",
-	"NNN_SCRIPT_DIR",
+	"NNN_PLUGIN_DIR",
 	"NNN_NOTE",
 	"NNN_TMPFILE",
 	"NNNLVL",
@@ -2158,7 +2158,7 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 		xstrlcpy(g_ctx[r].c_name, curname, NAME_MAX + 1);
 		g_ctx[r].c_fltr[0] = g_ctx[r].c_fltr[1] = '\0';
 		g_ctx[r].c_cfg = cfg;
-		g_ctx[r].c_cfg.runscript = 0;
+		g_ctx[r].c_cfg.runplugin = 0;
 	}
 
 	cfg.curctx = r;
@@ -2386,7 +2386,7 @@ static bool show_help(const char *path)
 		 "b^W  Random  s  Size   t  Time modified\n"
 		"1MISC\n"
 	       "9! ^]  Spawn SHELL       C  Execute entry\n"
-	       "9R ^V  Run script        L  Lock terminal\n"
+	       "9R ^V  Pick plugin       L  Lock terminal\n"
 		 "b^P  Prompt  ^N  Note  =  Launcher\n"};
 
 	if (g_tmpfpath[0])
@@ -2845,7 +2845,7 @@ static void browse(char *ipath)
 	struct stat sb;
 	char *path, *lastdir, *lastname;
 	char *dir, *tmp;
-	char *scriptpath = getenv(env_cfg[NNN_SCRIPT_DIR]);
+	char *pluginpath = getenv(env_cfg[NNN_PLUGIN_DIR]);
 
 	atexit(dentfree);
 
@@ -3002,11 +3002,11 @@ nochange:
 				if (cfg.nonavopen && sel == SEL_NAV_IN)
 					continue;
 
-				/* Handle script selection mode */
-				if (cfg.runscript) {
-					if (!scriptpath || (cfg.runctx != cfg.curctx)
-					    /* Must be in script directory to select script */
-					    || (strcmp(path, scriptpath) != 0))
+				/* Handle plugin selection mode */
+				if (cfg.runplugin) {
+					if (!pluginpath || (cfg.runctx != cfg.curctx)
+					    /* Must be in plugin directory to select plugin */
+					    || (strcmp(path, pluginpath) != 0))
 						continue;
 
 					mkpath(path, dents[cur].name, newpath);
@@ -3019,7 +3019,7 @@ nochange:
 					} else
 						spawn(newpath, NULL, NULL, path, F_NORMAL);
 					rundir[0] = '\0';
-					cfg.runscript = 0;
+					cfg.runplugin = 0;
 					setdirwatch();
 					goto begin;
 				}
@@ -3739,7 +3739,7 @@ nochange:
 		}
 		case SEL_EXEC: // fallthrough
 		case SEL_SHELL: // fallthrough
-		case SEL_SCRIPT: // fallthrough
+		case SEL_PLUGIN: // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_RUNCMD:
 			switch (sel) {
@@ -3766,13 +3766,13 @@ nochange:
 			case SEL_SHELL:
 				spawn(shell, NULL, NULL, path, F_CLI);
 				break;
-			case SEL_SCRIPT:
-				if (!scriptpath) {
-					printwait("set NNN_SCRIPT_DIR", &presel);
+			case SEL_PLUGIN:
+				if (!pluginpath) {
+					printwait("set NNN_PLUGIN_DIR", &presel);
 					goto nochange;
 				}
 
-				if (stat(scriptpath, &sb) == -1) {
+				if (stat(pluginpath, &sb) == -1) {
 					printwarn();
 					goto nochange;
 				}
@@ -3781,13 +3781,13 @@ nochange:
 				if (!S_ISDIR(sb.st_mode))
 					break;
 
-				cfg.runscript ^= 1;
-				if (!cfg.runscript && rundir[0]) {
+				cfg.runplugin ^= 1;
+				if (!cfg.runplugin && rundir[0]) {
 					/*
-					 * If toggled, and still in the script dir,
+					 * If toggled, and still in the plugin dir,
 					 * switch to original directory
 					 */
-					if (strcmp(path, scriptpath) == 0) {
+					if (strcmp(path, pluginpath) == 0) {
 						xstrlcpy(path, rundir, PATH_MAX);
 						xstrlcpy(lastname, runfile, NAME_MAX);
 						rundir[0] = runfile[0] = '\0';
@@ -3798,11 +3798,11 @@ nochange:
 				}
 
 				/* Check if directory is accessible */
-				if (!xdiraccess(scriptpath))
+				if (!xdiraccess(pluginpath))
 					goto nochange;
 
 				xstrlcpy(rundir, path, PATH_MAX);
-				xstrlcpy(path, scriptpath, PATH_MAX);
+				xstrlcpy(path, pluginpath, PATH_MAX);
 				if (ndents)
 					xstrlcpy(runfile, dents[cur].name, NAME_MAX);
 				cfg.runctx = cfg.curctx;
