@@ -2,7 +2,7 @@
 
 # Description: Open images in current directory in sxiv
 #
-# Shell: generic
+# Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
 sxiv -q * >/dev/null 2>&1 &

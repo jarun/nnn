@@ -1,8 +1,8 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # Description: Check and update to latest version of nnn manually on Debian 9 Stretch
 #
-# Shell: bash
+# Shell: POSIX-compliant
 # Author: Arun Prakash Jana
 # NOTE: This script installs a package, should be issued with admin privilege
 
