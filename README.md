@@ -378,7 +378,7 @@ The following indicators are used in the detail view:
 | `NNN_OPENER_DETACH=1` | do not block when invoking file opener |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
-| `NNN_COPIER='/path/to/copier.sh'` | system clipboard copier script [default: none] |
+| `NNN_COPIER='/absolute/path/to/copier'` | system clipboard copier script [default: none] |
 | `NNN_PLUGIN_DIR=/home/user/nnn-plugins` | absolute path to plugins dir |
 | `NNN_NOTE=/home/user/Dropbox/Public/notes` | path to note file [default: none] |
 | `NNN_TMPFILE=/tmp/nnn` | file to write current open dir path to for cd on quit |
