@@ -1,15 +1,16 @@
 | Plugin (a-z) | Lang | Deps | Description |
 | --- | --- | --- | --- |
-| edit | sh | fzy | Fuzzy find a file in directory subtree and edit in vim |
-| fzy | sh | fzy | Fuzzy find a file in directory subtree and open using xdg-open |
-| hexview | sh | xxd, `$PAGER` | view a file in hex |
+| fzy-edit | sh | fzy | Fuzzy find a file in directory subtree and edit in vim |
+| fzy-open | sh | fzy | Fuzzy find a file in directory subtree and open using xdg-open |
+| getplugs | sh | wget | Update plugins |
+| hexview | sh | xxd, `$PAGER` | View a file in hex |
 | imgresize | sh | [imgp](https://github.com/jarun/imgp) | Resize images in directory to screen resolution |
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
 | ndiff | sh | vimdiff | File and directory diff for selection |
 | nmount | sh | pmount | Toggle mount status of a device as normal user |
 | nwal | sh | nitrogen | Set the selected image as wallpaper using nitrogen |
-| paste | sh | [pastebinit](https://launchpad.net/pastebinit) | Paste contents of current (text) file to paste.ubuntu.com |
+| pastebin | sh | [pastebinit](https://launchpad.net/pastebinit) | Paste contents of current (text) file to paste.ubuntu.com |
 | picker | sh | nnn | Pick files and pipe the newline-separated list to another utility |
 | pywal | sh | pywal | Set selected image as wallpaper, change terminal color scheme |
 | sxiv | sh | sxiv | Browse images in a dir in sxiv, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts))|

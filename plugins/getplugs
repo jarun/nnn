@@ -1,0 +1,11 @@
+#!/usr/bin/env sh
+
+# Description: Update nnn plugins
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+wget -nv --show-progress https://github.com/jarun/nnn/archive/master.tar.gz
+tar -xf master.tar.gz
+cp -vf nnn-master/plugins/* .
+rm -rf nnn-master/ master.tar.gz README.md
