@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+# Description: Shows the IP address and whois information.
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+IP=`curl -s ifconfig.me`
+
+whois "$IP"
+echo your IP address is "$IP"
+
+read dummy
