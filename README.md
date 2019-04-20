@@ -418,8 +418,7 @@ Notes:
 
 1. `nnn` places you inside the mount point after both mount and unmount. This is done so you can ensure the operation completed successfully. To jump back to the last directory, press the usual <kbd>-</kbd>.
 2. `nnn` doesn't delete the mount point on unmount. This is to prevent accidental data loss.
-
-More information on [SSHFS](https://wiki.archlinux.org/index.php/SSHFS)
+3. More information on [SSHFS](https://wiki.archlinux.org/index.php/SSHFS).
 
 #### Help
 
