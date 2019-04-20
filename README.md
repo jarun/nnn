@@ -59,6 +59,7 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the ava
   - [Navigate-as-you-type](#navigate-as-you-type)
   - [File indicators](#file-indicators)
   - [Configuration](#configuration)
+  - [SSHFS mounts](#sshfs-mounts)
   - [Help](#help)
 - [Plugins](#plugins)
 - [Troubleshooting](#troubleshooting)
@@ -103,7 +104,7 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the ava
   - FreeDesktop compliant trash (needs trash-cli)
   - Show copy, move progress on Linux (needs avdcpmv)
   - Plugin repository
-  - Transfer files using lftp
+  - SSHFS mounts (needs sshfs)
   - Batch rename (needs vidir)
   - Per-context directory color (default: blue)
   - Spawn a shell in the current directory
@@ -140,6 +141,8 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the ava
 | vidir (from moreutils) | batch rename dir entries |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | copy, move progress |
+| sshfs | mount remote over SSHFS |
+| fusermount(3) | SSHFS unmount |
 | $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
 | $PAGER (less, most) | page through files (fallback less) |
 | $SHELL | spawn a shell, run some commands (fallback sh) |
@@ -264,6 +267,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  MISC
          ! ^]  Spawn SHELL       C  Execute entry
          R ^V  Pick plugin       L  Lock terminal
+            c  SSHFS mount       u  Unmount
            ^P  Prompt  ^N  Note  =  Launcher
 ```
 
@@ -380,14 +384,42 @@ The following indicators are used in the detail view:
 | `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
 | `NNN_COPIER='/absolute/path/to/copier'` | system clipboard copier script [default: none] |
 | `NNN_PLUGIN_DIR=/home/user/nnn-plugins` | absolute path to plugins dir |
-| `NNN_NOTE=/home/user/Dropbox/Public/notes` | path to note file [default: none] |
+| `NNN_NOTE=/home/user/Dropbox/notes` | path to note file [default: none] |
 | `NNN_TMPFILE=/tmp/nnn` | file to write current open dir path to for cd on quit |
+| `NNN_SSHFS_MNT_ROOT=/home/user/.netmnt` | absolute path to SSHFS mount point root |
 | `NNN_USE_EDITOR=1` | Open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_RESTRICT_0B=1` | do not open 0-byte files |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
 | `NNN_OPS_PROG=1` | show copy, move progress on Linux |
+
+#### SSHFS mounts
+
+To connect to and mount remote shares using SSHFS, `nnn` requires the following:
+
+1. ssh configuration file `~/.ssh/config` should have the host entries. sshfs reads this file.
+2. `NNN_SSHFS_MNT_ROOT` should be set to the **absolute path** to the directory under which `nnn` creates the mount point for a host. The mount point is the same as the host name.
+
+Example host entry for a Termux environment on Android device:
+
+```
+Host phone
+    HostName 192.168.0.102
+    User u0_a117
+    Port 8022
+```
+
+If `NNN_SSHFS_MNT_ROOT` is set to `/home/user/remotes`, the above host `phone` will be mounted at `/home/user/remotes/phone`. `nnn` creates the directory `phone` if it doesn't exist.
+
+To unmount a mount point highlight it in `nnn` (so that it's the current entry) and press the relevant keybind to unmount. It might be a good idea to bookmark `NNN_SSHFS_MNT_ROOT`.
+
+Notes:
+
+1. `nnn` places you inside the mount point after both mount and unmount. This is done so you can ensure the operation completed successfully. To jump back to the last directory, press the usual <kbd>-</kbd>.
+2. `nnn` doesn't delete the mount point on unmount. This is to prevent accidental data loss.
+
+More information on [SSHFS](https://wiki.archlinux.org/index.php/SSHFS)
 
 #### Help
 

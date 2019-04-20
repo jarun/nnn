@@ -279,6 +279,7 @@ static char *editor;
 static char *pager;
 static char *shell;
 static char *home;
+static char *sshfsmnt;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -388,15 +389,16 @@ static const char * const messages[] = {
 #define NNN_PLUGIN_DIR 5
 #define NNN_NOTE 6
 #define NNN_TMPFILE 7
-#define NNNLVL 8 /* strings end here */
-#define NNN_USE_EDITOR 9 /* flags begin here */
-#define NNN_NO_AUTOSELECT 10
-#define NNN_RESTRICT_NAV_OPEN 11
-#define NNN_RESTRICT_0B 12
-#define NNN_OPENER_DETACH 13
-#define NNN_TRASH 14
+#define NNN_SSHFS_MNT_ROOT 8
+#define NNNLVL 9 /* strings end here */
+#define NNN_USE_EDITOR 10 /* flags begin here */
+#define NNN_NO_AUTOSELECT 11
+#define NNN_RESTRICT_NAV_OPEN 12
+#define NNN_RESTRICT_0B 13
+#define NNN_OPENER_DETACH 14
+#define NNN_TRASH 15
 #ifdef __linux__
-#define NNN_OPS_PROG 15
+#define NNN_OPS_PROG 16
 #endif
 
 static const char * const env_cfg[] = {
@@ -408,6 +410,7 @@ static const char * const env_cfg[] = {
 	"NNN_PLUGIN_DIR",
 	"NNN_NOTE",
 	"NNN_TMPFILE",
+	"NNN_SSHFS_MNT_ROOT",
 	"NNNLVL",
 	"NNN_USE_EDITOR",
 	"NNN_NO_AUTOSELECT",
@@ -2387,6 +2390,7 @@ static bool show_help(const char *path)
 		"1MISC\n"
 	       "9! ^]  Spawn SHELL       C  Execute entry\n"
 	       "9R ^V  Pick plugin       L  Lock terminal\n"
+	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt  ^N  Note  =  Launcher\n"};
 
 	if (g_tmpfpath[0])
@@ -2888,10 +2892,8 @@ begin:
 	/* Can fail when permissions change while browsing.
 	 * It's assumed that path IS a directory when we are here.
 	 */
-	if (access(path, R_OK) == -1) {
+	if (access(path, R_OK) == -1)
 		printwarn();
-		goto nochange;
-	}
 
 	populate(path, lastname);
 	if (interrupted) {
@@ -3862,6 +3864,73 @@ nochange:
 
 			/* Repopulate as directory content may have changed */
 			goto begin;
+		case SEL_SSHFS:
+			if (!sshfsmnt) {
+				printwait("set NNN_SSHFS_MNT_ROOT", &presel);
+				goto nochange;
+			}
+
+			tmp = xreadline(NULL, "Host: ");
+			if (!tmp[0])
+				goto nochange;
+
+			/* Create the mount point */
+			mkpath(sshfsmnt, tmp, newpath);
+			r = mkdir(newpath, 0777);
+			if (r == -1 && errno != EEXIST) {
+				printwait(strerror(errno), &presel);
+				goto nochange;
+			}
+
+			/* Check if directory can be accessed */
+			if (!xdiraccess(newpath)) {
+				presel = MSGWAIT;
+				goto nochange;
+			}
+
+			if (!getutil("sshfs")) {
+				printwait("sshfs missing", &presel);
+				goto nochange;
+			}
+
+			/* Convert "Host" to "Host:" */
+			r = strlen(tmp);
+			tmp[r] = ':';
+			tmp[r + 1] = '\0';
+
+			/* Connect to remote */
+			spawn("sshfs", tmp, newpath, NULL, F_NORMAL); // fallthrough
+		case SEL_UMOUNT:
+			if (sel == SEL_UMOUNT) {
+				static char cmd[] = "fusermount3"; /* Arch Linux utility */
+				static bool found = FALSE;
+
+				/* On Ubuntu it's fusermount */
+				if (!found && !getutil(cmd))
+					cmd[10] = '\0';
+
+				if (!ndents)
+					goto nochange;
+
+				mkpath(path, dents[cur].name, newpath);
+				if (!xdiraccess(newpath)) {
+					presel = MSGWAIT;
+					goto nochange;
+				}
+
+				spawn(cmd, "-u", newpath, NULL, F_NORMAL);
+			}
+
+			lastname[0] = '\0';
+
+			/* Save last working directory */
+			xstrlcpy(lastdir, path, PATH_MAX);
+
+			/* Switch to mount point */
+			xstrlcpy(path, newpath, PATH_MAX);
+
+			setdirwatch();
+			goto begin;
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
 			for (r = 0; r < CTX_MAX; ++r)
@@ -4168,6 +4237,9 @@ int main(int argc, char *argv[])
 		xstrlcpy(g_cppath, g_tmpfpath, PATH_MAX);
 		xstrlcpy(g_cppath + g_tmpfplen - 1, "/.nnncp", PATH_MAX - g_tmpfplen);
 	}
+
+	/* Get SSHFS mountpoint */
+	sshfsmnt = getenv("NNN_SSHFS_MNT_ROOT");
 
 	/* Get the clipboard copier, if set */
 	copier = getenv(env_cfg[NNN_COPIER]);

@@ -189,6 +189,11 @@ when dealing with the !, e and p commands respectively. A single combination to 
     export NNN_TMPFILE=/tmp/nnn
 .Ed
 .Pp
+\fBNNN_SSHFS_MNT_ROOT:\fR absolute path to SSHFS mount point root. Mount points are created at this location.
+.Bd -literal
+    export NNN_SSHFS_MNT_ROOT=/home/user/.netmnt`
+.Ed
+.Pp
 \fBNNN_USE_EDITOR:\fR use EDITOR (VISUAL takes preference, preferably CLI, fallback vi) to handle text
 files.
 .Bd -literal
