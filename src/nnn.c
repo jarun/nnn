@@ -3062,9 +3062,17 @@ nochange:
 			break;
 		case SEL_PGDN:
 			if (cur < ndents - 1)
-				cur += MIN((xlines - 4) / 2, ndents - 1 - cur);
+				cur += MIN((xlines - 4), ndents - 1 - cur);
 			break;
 		case SEL_PGUP:
+			if (cur > 0)
+				cur -= MIN((xlines - 4), cur);
+			break;
+		case SEL_CTRL_D:
+			if (cur < ndents - 1)
+				cur += MIN((xlines - 4) / 2, ndents - 1 - cur);
+			break;
+		case SEL_CTRL_U:
 			if (cur > 0)
 				cur -= MIN((xlines - 4) / 2, cur);
 			break;
