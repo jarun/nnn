@@ -43,6 +43,8 @@ enum action {
 	SEL_PREV,
 	SEL_PGDN,
 	SEL_PGUP,
+	SEL_CTRL_D,
+	SEL_CTRL_U,
 	SEL_HOME,
 	SEL_END,
 	SEL_CDHOME,
@@ -126,10 +128,12 @@ static struct key bindings[] = {
 	{ KEY_UP,         SEL_PREV },
 	/* Page down */
 	{ KEY_NPAGE,      SEL_PGDN },
-	{ CONTROL('D'),   SEL_PGDN },
 	/* Page up */
 	{ KEY_PPAGE,      SEL_PGUP },
-	{ CONTROL('U'),   SEL_PGUP },
+	/* Ctrl+D */
+	{ CONTROL('D'),   SEL_CTRL_D },
+	/* Ctrl+U */
+	{ CONTROL('U'),   SEL_CTRL_U },
 	/* First entry */
 	{ KEY_HOME,       SEL_HOME },
 	{ 'g',            SEL_HOME },
