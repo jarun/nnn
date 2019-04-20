@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Description: Shows the IP address and whois information.
+# Description: Shows the IP address and whois information. Useful over VPNs.
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

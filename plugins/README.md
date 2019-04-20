@@ -1,5 +1,6 @@
 | Plugin (a-z) | Lang | Deps | Description |
 | --- | --- | --- | --- |
+| boom | sh | SMPlayer | Play random music from current dir (modify `PLAYER`) |
 | fzy-edit | sh | fzy | Fuzzy find a file in directory subtree and edit in vim |
 | fzy-open | sh | fzy | Fuzzy find a file in directory subtree and open using xdg-open |
 | getplugs | sh | wget | Update plugins |
