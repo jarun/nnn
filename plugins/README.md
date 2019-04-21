@@ -24,7 +24,7 @@
 Plugins can access:
 - all files in the directory (`nnn` switches to the dir where the plugin is to be run so the dir is `$PWD` for the plugin)
 - the currently highlighted file (the file name is passed as the argument to a plugin)
-- the current selection (by reading the file .nnncp, see the plugin `ndiff`)
+- the current selection (by reading the file `~/.config/nnn/.selection`, see the plugin `ndiff`)
 
 Each script has a _Description_ section which provides more details on what the script does, if applicable.
 

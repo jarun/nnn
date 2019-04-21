@@ -1,4 +1,5 @@
 /*
+
  * BSD 2-Clause License
  *
  * Copyright (C) 2014-2016, Lazaros Koromilas <lostd@2f30.org>
@@ -125,7 +126,7 @@
 #define DESCRIPTOR_LEN 32
 #define _ALIGNMENT 0x10 /* 16-byte alignment */
 #define _ALIGNMENT_MASK 0xF
-#define HOME_LEN_MAX 64
+#define TMP_LEN_MAX 64
 #define CTX_MAX 4
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
@@ -279,6 +280,9 @@ static char *editor;
 static char *pager;
 static char *shell;
 static char *home;
+static char *cfgdir;
+static char *g_cppath;
+static char *plugindir;
 static char *sshfsmnt;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
@@ -302,11 +306,8 @@ static sig_t oldsigtstp;
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 
-/* Buffer for file path copy file */
-static char g_cppath[PATH_MAX] __attribute__ ((aligned));
-
-/* Buffer to store tmp file path */
-static char g_tmpfpath[HOME_LEN_MAX] __attribute__ ((aligned));
+/* Buffer to store tmp file path to show selection, file stats and help */
+static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 
 /* Replace-str for xargs on different platforms */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
@@ -386,19 +387,18 @@ static const char * const messages[] = {
 #define NNN_CONTEXT_COLORS 2
 #define NNN_IDLE_TIMEOUT 3
 #define NNN_COPIER 4
-#define NNN_PLUGIN_DIR 5
-#define NNN_NOTE 6
-#define NNN_TMPFILE 7
-#define NNN_SSHFS_MNT_ROOT 8
-#define NNNLVL 9 /* strings end here */
-#define NNN_USE_EDITOR 10 /* flags begin here */
-#define NNN_NO_AUTOSELECT 11
-#define NNN_RESTRICT_NAV_OPEN 12
-#define NNN_RESTRICT_0B 13
-#define NNN_OPENER_DETACH 14
-#define NNN_TRASH 15
+#define NNN_NOTE 5
+#define NNN_TMPFILE 6
+#define NNN_SSHFS_MNT_ROOT 7
+#define NNNLVL 8 /* strings end here */
+#define NNN_USE_EDITOR 9 /* flags begin here */
+#define NNN_NO_AUTOSELECT 10
+#define NNN_RESTRICT_NAV_OPEN 11
+#define NNN_RESTRICT_0B 12
+#define NNN_OPENER_DETACH 13
+#define NNN_TRASH 14
 #ifdef __linux__
-#define NNN_OPS_PROG 16
+#define NNN_OPS_PROG 15
 #endif
 
 static const char * const env_cfg[] = {
@@ -407,7 +407,6 @@ static const char * const env_cfg[] = {
 	"NNN_CONTEXT_COLORS",
 	"NNN_IDLE_TIMEOUT",
 	"NNN_COPIER",
-	"NNN_PLUGIN_DIR",
 	"NNN_NOTE",
 	"NNN_TMPFILE",
 	"NNN_SSHFS_MNT_ROOT",
@@ -566,7 +565,7 @@ static void printerr(int linenum)
 {
 	exitcurses();
 	perror(xitoa(linenum));
-	if (!cfg.picker && g_cppath[0])
+	if (!cfg.picker && g_cppath)
 		unlink(g_cppath);
 	free(pcopybuf);
 	exit(1);
@@ -739,7 +738,7 @@ static char *xbasename(char *path)
 /* Writes buflen char(s) from buf to a file */
 static void writecp(const char *buf, const size_t buflen)
 {
-	if (cfg.pickraw || !*g_cppath)
+	if (cfg.pickraw || !g_cppath)
 		return;
 
 	FILE *fp = fopen(g_cppath, "w");
@@ -799,7 +798,7 @@ static void showcplist(void)
 
 	if (g_tmpfpath[0])
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
-			 HOME_LEN_MAX - g_tmpfplen);
+			 TMP_LEN_MAX - g_tmpfplen);
 	else {
 		DPRINTF_S(messages[STR_NOHOME_ID]);
 		return;
@@ -821,9 +820,9 @@ static void showcplist(void)
 
 static bool cpsafe(void)
 {
-	/* Fail if copy file path not generated */
-	if (!g_cppath[0]) {
-		printmsg("copy file not found");
+	/* Fail if selection file path not generated */
+	if (!g_cppath) {
+		printmsg("selection file not found");
 		return FALSE;
 	}
 
@@ -833,9 +832,9 @@ static bool cpsafe(void)
 		return FALSE;
 	}
 
-	/* Fail if copy file path isn't accessible */
+	/* Fail if selection file path isn't accessible */
 	if (access(g_cppath, R_OK | W_OK) == -1) {
-		printmsg("check copyfile permission");
+		printmsg("check selection file permission");
 		return FALSE;
 	}
 
@@ -2263,7 +2262,7 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 
 	if (g_tmpfpath[0])
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
-			 HOME_LEN_MAX - g_tmpfplen);
+			 TMP_LEN_MAX - g_tmpfplen);
 	else
 		return FALSE;
 
@@ -2513,7 +2512,7 @@ static bool show_help(const char *path)
 
 	if (g_tmpfpath[0])
 		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
-			 HOME_LEN_MAX - g_tmpfplen);
+			 TMP_LEN_MAX - g_tmpfplen);
 	else {
 		printmsg(messages[STR_NOHOME_ID]);
 		return FALSE;
@@ -2557,8 +2556,8 @@ static bool show_help(const char *path)
 		}
 	}
 
-	if (g_cppath[0])
-		dprintf(fd, "COPY FILE: %s\n", g_cppath);
+	if (g_cppath)
+		dprintf(fd, "SELECTION FILE: %s\n", g_cppath);
 
 	dprintf(fd, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
@@ -2713,7 +2712,7 @@ static int dentfill(char *path, struct entry **dents)
 
 		dentp = *dents + n;
 
-		/* Copy file name */
+		/* Selection file name */
 		dentp->name = (char *)((size_t)pnamebuf + off);
 		dentp->nlen = xstrlcpy(dentp->name, namep, NAME_MAX + 1);
 		off += dentp->nlen;
@@ -2965,7 +2964,7 @@ static void browse(char *ipath)
 	enum action sel;
 	bool dir_changed = FALSE;
 	struct stat sb;
-	char *path, *lastdir, *lastname, *dir, *tmp, *pluginpath = getenv(env_cfg[NNN_PLUGIN_DIR]);
+	char *path, *lastdir, *lastname, *dir, *tmp;
 
 	atexit(dentfree);
 
@@ -3110,9 +3109,9 @@ nochange:
 
 				/* Handle plugin selection mode */
 				if (cfg.runplugin) {
-					if (!pluginpath || (cfg.runctx != cfg.curctx)
+					if (!plugindir || (cfg.runctx != cfg.curctx)
 					    /* Must be in plugin directory to select plugin */
-					    || (strcmp(path, pluginpath) != 0))
+					    || (strcmp(path, plugindir) != 0))
 						continue;
 
 					mkpath(path, dents[cur].name, newpath);
@@ -3534,7 +3533,7 @@ nochange:
 
 			if (cfg.copymode) {
 				/*
-				 * Clear the tmp copy path file on first copy.
+				 * Clear the selection file on first copy.
 				 *
 				 * This ensures that when the first file path is
 				 * copied into memory (but not written to tmp file
@@ -3843,8 +3842,9 @@ nochange:
 
 				/* Check if file creation failed */
 				if (r == -1) {
-					close(fd);
 					printwarn();
+					presel = MSGWAIT;
+					close(fd);
 					goto nochange;
 				}
 			}
@@ -3867,12 +3867,12 @@ nochange:
 				spawn(shell, NULL, NULL, path, F_CLI);
 				break;
 			case SEL_PLUGIN:
-				if (!pluginpath) {
-					printwait("set NNN_PLUGIN_DIR", &presel);
+				if (!plugindir) {
+					printwait("plugins dir missing", &presel);
 					goto nochange;
 				}
 
-				if (stat(pluginpath, &sb) == -1) {
+				if (stat(plugindir, &sb) == -1) {
 					printwarn();
 					presel = MSGWAIT;
 					goto nochange;
@@ -3888,7 +3888,7 @@ nochange:
 					 * If toggled, and still in the plugin dir,
 					 * switch to original directory
 					 */
-					if (strcmp(path, pluginpath) == 0) {
+					if (strcmp(path, plugindir) == 0) {
 						xstrlcpy(path, rundir, PATH_MAX);
 						xstrlcpy(lastname, runfile, NAME_MAX);
 						rundir[0] = runfile[0] = '\0';
@@ -3899,11 +3899,11 @@ nochange:
 				}
 
 				/* Check if directory is accessible */
-				if (!xdiraccess(pluginpath))
+				if (!xdiraccess(plugindir))
 					goto nochange;
 
 				xstrlcpy(rundir, path, PATH_MAX);
-				xstrlcpy(path, pluginpath, PATH_MAX);
+				xstrlcpy(path, plugindir, PATH_MAX);
 				if (ndents)
 					xstrlcpy(runfile, dents[cur].name, NAME_MAX);
 				cfg.runctx = cfg.curctx;
@@ -4082,6 +4082,103 @@ static void usage(void)
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
 }
 
+static bool create_dir(const char *path)
+{
+	if (!xdiraccess(path)) {
+		if (errno != ENOENT)
+			return FALSE;
+
+		if (mkdir(path, 0777) == -1)
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+static bool setup_config(void)
+{
+	size_t r, len;
+
+	/* Set up configuration file paths */
+	len = strlen(home) + 1 + 20; /* add length of "/.config/nnn/plugins" */
+	cfgdir = (char *)malloc(len);
+	plugindir = (char *)malloc(len);
+	if (!cfgdir || !plugindir) {
+		xerror();
+		return FALSE;
+	}
+	r = xstrlcpy(cfgdir, home, len);
+	xstrlcpy(cfgdir + r - 1, "/.config/nnn", len - r);
+	DPRINTF_S(cfgdir);
+
+	/* TODO: remove in next release */
+	if (access(cfgdir, F_OK) == -1)
+		fprintf(stdout, "WARNING: selection file is ~/.config/nnn/.selection (see CHANGELOG)\n");
+
+	/* Create ~/.config/nnn */
+	if (!create_dir(cfgdir)) {
+		xerror();
+		return FALSE;
+	}
+
+	xstrlcpy(cfgdir + r + 12 - 1, "/plugins", 9);
+	DPRINTF_S(cfgdir);
+
+	xstrlcpy(plugindir, cfgdir, len);
+	DPRINTF_S(plugindir);
+
+	/* Create ~/.config/nnn/plugins */
+	if (!create_dir(cfgdir)) {
+		xerror();
+		return FALSE;
+	}
+
+	/* Reset to config path */
+	cfgdir[r + 11] = '\0';
+	DPRINTF_S(cfgdir);
+
+	/* Set selection file path */
+	if (!cfg.picker) {
+		/* Length of "/.config/nnn/.selection" */
+		g_cppath = (char *)malloc(len + 3);
+		r = xstrlcpy(g_cppath, cfgdir, len + 3);
+		xstrlcpy(g_cppath + r - 1, "/.selection", 12);
+		DPRINTF_S(g_cppath);
+	}
+
+	return TRUE;
+}
+
+static bool set_tmp_path()
+{
+	char *path;
+
+	if (xdiraccess("/tmp"))
+		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", TMP_LEN_MAX);
+	else {
+		path = getenv("TMPDIR");
+		if (path)
+			g_tmpfplen = xstrlcpy(g_tmpfpath, path, TMP_LEN_MAX);
+		else {
+			fprintf(stderr, "set TMPDIR\n");
+			return FALSE;
+		}
+	}
+
+	return TRUE;
+}
+
+static void cleanup(void)
+{
+	free(g_cppath);
+	free(plugindir);
+	free(cfgdir);
+
+#ifdef DBGMODE
+	disabledbg();
+#endif
+}
+
 int main(int argc, char *argv[])
 {
 	char cwd[PATH_MAX] __attribute__ ((aligned));
@@ -4121,7 +4218,7 @@ int main(int argc, char *argv[])
 			else {
 				/* copier used as tmp var */
 				copier = realpath(optarg, g_cppath);
-				if (!g_cppath[0]) {
+				if (!g_cppath) {
 					xerror();
 					return 1;
 				}
@@ -4170,11 +4267,19 @@ int main(int argc, char *argv[])
 
 #ifdef DBGMODE
 	enabledbg();
-	atexit(disabledbg);
 #endif
 
+	atexit(cleanup);
+
 	home = getenv("HOME");
+	if (!home) {
+		fprintf(stderr, "set HOME\n");
+		return 1;
+	}
 	DPRINTF_S(home);
+
+	if (!setup_config())
+		return 1;
 
 	/* Get custom opener, if set */
 	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
@@ -4276,21 +4381,9 @@ int main(int argc, char *argv[])
 	if (getenv(env_cfg[NNN_TRASH]))
 		cfg.trash = 1;
 
-	/* Prefix for other temporary ops */
-	if (home)
-		g_tmpfplen = xstrlcpy(g_tmpfpath, home, HOME_LEN_MAX);
-	else if (xdiraccess("/tmp"))
-		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", HOME_LEN_MAX);
-	else {
-		copier = getenv("TMPDIR");
-		if (copier)
-			g_tmpfplen = xstrlcpy(g_tmpfpath, copier, HOME_LEN_MAX);
-	}
-
-	if (!cfg.picker && g_tmpfplen) {
-		xstrlcpy(g_cppath, g_tmpfpath, PATH_MAX);
-		xstrlcpy(g_cppath + g_tmpfplen - 1, "/.nnncp", PATH_MAX - g_tmpfplen);
-	}
+	/* Prefix for temporary files */
+	if (!set_tmp_path())
+		return 1;
 
 	/* Get SSHFS mountpoint */
 	sshfsmnt = getenv("NNN_SSHFS_MNT_ROOT");
@@ -4365,7 +4458,7 @@ int main(int argc, char *argv[])
 			if (opt != (int)(copybufpos))
 				xerror();
 		}
-	} else if (!cfg.picker && g_cppath[0])
+	} else if (!cfg.picker && g_cppath)
 		unlink(g_cppath);
 
 	/* Free the copy buffer */

@@ -169,14 +169,8 @@ when dealing with the !, e and p commands respectively. A single combination to 
 .Pp
 \fBNNN_COPIER:\fR system clipboard copier script.
 .Bd -literal
-    NOTE: File paths are copied to the tmp file \fBDIR/.nnncp\fR, where 'DIR' (by priority) is:
-    \fI$HOME\fR or, \fI$TMPDIR\fR or, \fI/tmp\fR.
+    NOTE: File paths are copied to the tmp file \fB~/.config/nnn/.selection\fR.
     The path is shown in the help and configuration screen.
-.Ed
-.Pp
-\fBNNN_PLUGIN_DIR:\fR \fIabsolute\fR path to plugin directory. Selected plugin is invoked with currently selected file name as argument 1.
-.Bd -literal
-    export NNN_PLUGIN_DIR=/absolute/path/to/plugins_dir
 .Ed
 .Pp
 \fBNNN_NOTE:\fR \fIabsolute\fR path to a note file.

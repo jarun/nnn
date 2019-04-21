@@ -5,4 +5,4 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-vimdiff $(cat ~/.nnncp | tr '\0' '\n')
+vimdiff $(cat ~/.config/nnn/.selection | tr '\0' '\n')

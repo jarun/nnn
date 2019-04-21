@@ -320,11 +320,7 @@ Selected files are visually indicated by a `+`.
 
 The selection can now be listed, copied, moved, removed, archived or linked.
 
-File paths are copied to the temporary file `DIR/.nnncp`, where `DIR` (by priority) is:
-
-    $HOME or,
-    /tmp
-    $TMPDIR or,
+File paths are copied to the temporary file `~/.config/nnn/.selection`.
 
 The path is shown in the help and configuration screen.
 
@@ -379,7 +375,6 @@ The following indicators are used in the detail view:
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
 | `NNN_COPIER='/absolute/path/to/copier'` | system clipboard copier script [default: none] |
-| `NNN_PLUGIN_DIR=/home/user/nnn-plugins` | absolute path to plugins dir |
 | `NNN_NOTE=/home/user/Dropbox/notes` | path to note file [default: none] |
 | `NNN_TMPFILE=/tmp/nnn` | file to write current open dir path to for cd on quit |
 | `NNN_SSHFS_MNT_ROOT=/home/user/.netmnt` | absolute path to SSHFS mount point root |
@@ -426,11 +421,9 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 `nnn` can invoke plugins in the current directory (`$PWD` for the plugin) with the currently selected file name as the argument.
 
-Copy the plugins of your interest from the [plugins](https://github.com/jarun/nnn/tree/master/plugins) directory and let `nnn` know the location:
+Copy the [plugins](https://github.com/jarun/nnn/tree/master/plugins) of your interest to `~/.config/nnn/plugins`.
 
-    export NNN_PLUGIN_DIR=/absolute/path/to/plugins_dir
-
-Use the pick plugin shortcut to visit the plugin directory and pick a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
+Use the pick plugin shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
 If you have an interesting plugin feel free to raise a PR.
 

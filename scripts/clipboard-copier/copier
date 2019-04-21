@@ -5,14 +5,16 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
+SELECTION=~/.config/nnn/.selection
+
 # Linux
-cat ~/.nnncp | xargs -0 | xsel -bi
+cat "$SELECTION" | xargs -0 | xsel -bi
 
 # macOS
-# cat ~/.nnncp | xargs -0 | pbcopy
+# cat "$SELECTION" | xargs -0 | pbcopy
 
 # Termux
-# cat /data/data/com.termux/files/home/.nnncp | xargs -0 | termux-clipboard-set
+# cat "$SELECTION" | xargs -0 | termux-clipboard-set
 
 # Cygwin
-# cat ~/.nnncp | xargs -0 | clip
+# cat "$SELECTION" | xargs -0 | clip
