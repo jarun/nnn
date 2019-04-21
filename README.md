@@ -375,7 +375,6 @@ The following indicators are used in the detail view:
 | `NNN_COPIER='/absolute/path/to/copier'` | system clipboard copier script [default: none] |
 | `NNN_NOTE=/home/user/Dropbox/notes` | path to note file [default: none] |
 | `NNN_TMPFILE=/tmp/nnn` | file to write current open dir path to for cd on quit |
-| `NNN_SSHFS_MNT_ROOT=/home/user/.netmnt` | absolute path to SSHFS mount point root |
 | `NNN_USE_EDITOR=1` | Open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
@@ -385,10 +384,7 @@ The following indicators are used in the detail view:
 
 #### SSHFS mounts
 
-To connect to and mount remote shares using SSHFS, `nnn` requires the following:
-
-1. ssh configuration file `~/.ssh/config` should have the host entries. sshfs reads this file.
-2. `$NNN_SSHFS_MNT_ROOT` should be set to the **absolute path** to the directory under which `nnn` creates the mount point for a host. The mount point is the same as the host name.
+To connect to and mount remote shares using SSHFS, `nnn` requires the ssh configuration file `~/.ssh/config` to have the host entries. sshfs reads this file.
 
 Example host entry for a Termux environment on Android device:
 
@@ -399,14 +395,12 @@ Host phone
     Port 8022
 ```
 
-If `$NNN_SSHFS_MNT_ROOT` is set to `/home/user/remotes`, the above host `phone` will be mounted at `/home/user/remotes/phone`. `nnn` creates the directory `phone` if it doesn't exist.
-
-To unmount a mount point highlight it in `nnn` (so that it's the current entry) and press the relevant keybind to unmount. It might be a good idea to bookmark `$NNN_SSHFS_MNT_ROOT`.
+The above host `phone` will be mounted at `~/.config/nnn/phone`. `nnn` creates the directory `phone` if it doesn't exist.
 
 Notes:
 
-1. `nnn` places you inside the mount point after a successful (un)mount so you can ensure the operation completed successfully indeed. To jump back to the last directory, press the usual <kbd>-</kbd>.
-2. `nnn` doesn't delete the mount point on unmount to prevent accidental data loss.
+1. `nnn` takes you to the mount point after successful mounts. To jump back to the last directory, press the usual <kbd>-</kbd>.
+2. `nnn` doesn't delete the mount point on unmount to prevent accidental data loss. **Please ensure the mount point is not mounted if you are deleting it manually.**
 3. More information on [SSHFS](https://wiki.archlinux.org/index.php/SSHFS).
 
 #### Help

@@ -283,7 +283,6 @@ static char *home;
 static char *cfgdir;
 static char *g_cppath;
 static char *plugindir;
-static char *sshfsmnt;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -389,16 +388,15 @@ static const char * const messages[] = {
 #define NNN_COPIER 4
 #define NNN_NOTE 5
 #define NNN_TMPFILE 6
-#define NNN_SSHFS_MNT_ROOT 7
-#define NNNLVL 8 /* strings end here */
-#define NNN_USE_EDITOR 9 /* flags begin here */
-#define NNN_NO_AUTOSELECT 10
-#define NNN_RESTRICT_NAV_OPEN 11
-#define NNN_RESTRICT_0B 12
-#define NNN_OPENER_DETACH 13
-#define NNN_TRASH 14
+#define NNNLVL 7 /* strings end here */
+#define NNN_USE_EDITOR 8 /* flags begin here */
+#define NNN_NO_AUTOSELECT 9
+#define NNN_RESTRICT_NAV_OPEN 10
+#define NNN_RESTRICT_0B 11
+#define NNN_OPENER_DETACH 12
+#define NNN_TRASH 13
 #ifdef __linux__
-#define NNN_OPS_PROG 15
+#define NNN_OPS_PROG 14
 #endif
 
 static const char * const env_cfg[] = {
@@ -409,7 +407,6 @@ static const char * const env_cfg[] = {
 	"NNN_COPIER",
 	"NNN_NOTE",
 	"NNN_TMPFILE",
-	"NNN_SSHFS_MNT_ROOT",
 	"NNNLVL",
 	"NNN_USE_EDITOR",
 	"NNN_NO_AUTOSELECT",
@@ -2407,31 +2404,32 @@ static bool execute_file(int cur, char *path, char *newpath, int *presel)
 	return TRUE;
 }
 
+static bool create_dir(const char *path)
+{
+	if (!xdiraccess(path)) {
+		if (errno != ENOENT)
+			return FALSE;
+
+		if (mkdir(path, 0777) == -1)
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 static bool sshfs_mount(char *path, char *newpath, int *presel)
 {
 	int r;
 	char *tmp;
 
-	if (!sshfsmnt) {
-		printwait("set NNN_SSHFS_MNT_ROOT", presel);
-		return FALSE;
-	}
-
-	tmp = xreadline(NULL, "Host: ");
+	tmp = xreadline(NULL, "host: ");
 	if (!tmp[0])
 		return FALSE;
 
 	/* Create the mount point */
-	mkpath(sshfsmnt, tmp, newpath);
-	r = mkdir(newpath, 0777);
-	if (r == -1 && errno != EEXIST) {
+	mkpath(cfgdir, tmp, newpath);
+	if (!create_dir(newpath)) {
 		printwait(strerror(errno), presel);
-		return FALSE;
-	}
-
-	/* Check if directory can be accessed */
-	if (!xdiraccess(newpath)) {
-		*presel = MSGWAIT;
 		return FALSE;
 	}
 
@@ -2454,19 +2452,22 @@ static bool sshfs_mount(char *path, char *newpath, int *presel)
 	return TRUE;
 }
 
-static bool sshfs_unmount(char *path, char *fname, char *newpath, int *presel)
+static bool sshfs_unmount(char *path, char *newpath, int *presel)
 {
 	static char cmd[] = "fusermount3"; /* Arch Linux utility */
 	static bool found = FALSE;
+	char *tmp;
 
 	/* On Ubuntu it's fusermount */
 	if (!found && !getutil(cmd))
 		cmd[10] = '\0';
 
-	if (!ndents)
+	tmp = xreadline(NULL, "host: ");
+	if (!tmp[0])
 		return FALSE;
 
-	mkpath(path, dents[cur].name, newpath);
+	/* Create the mount point */
+	mkpath(cfgdir, tmp, newpath);
 	if (!xdiraccess(newpath)) {
 		*presel = MSGWAIT;
 		return FALSE;
@@ -3981,10 +3982,6 @@ nochange:
 			goto begin;
 		case SEL_SSHFS:
 			if (!sshfs_mount(path, newpath, &presel))
-				goto nochange; // fallthrough
-		case SEL_UMOUNT:
-			if (sel == SEL_UMOUNT
-			    && !sshfs_unmount(path, dents[cur].name, newpath, &presel))
 				goto nochange;
 
 			lastname[0] = '\0';
@@ -3997,6 +3994,9 @@ nochange:
 
 			setdirwatch();
 			goto begin;
+		case SEL_UMOUNT:
+			sshfs_unmount(path, newpath, &presel);
+			goto nochange;
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
 			for (r = 0; r < CTX_MAX; ++r)
@@ -4096,19 +4096,6 @@ static void usage(void)
 		" -w      wild load\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
-}
-
-static bool create_dir(const char *path)
-{
-	if (!xdiraccess(path)) {
-		if (errno != ENOENT)
-			return FALSE;
-
-		if (mkdir(path, 0777) == -1)
-			return FALSE;
-	}
-
-	return TRUE;
 }
 
 static bool setup_config(void)
@@ -4400,9 +4387,6 @@ int main(int argc, char *argv[])
 	/* Prefix for temporary files */
 	if (!set_tmp_path())
 		return 1;
-
-	/* Get SSHFS mountpoint */
-	sshfsmnt = getenv("NNN_SSHFS_MNT_ROOT");
 
 	/* Get the clipboard copier, if set */
 	copier = getenv(env_cfg[NNN_COPIER]);
