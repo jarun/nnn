@@ -459,7 +459,7 @@ static struct timespec gtimeout;
 #define clearprompt() printmsg("")
 #define printwarn() printmsg(strerror(errno))
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
-#define copycurname() xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1)
+#define copycurname() if (ndents) xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1)
 #define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
@@ -3301,8 +3301,7 @@ nochange:
 			presel = filterentries(path);
 
 			/* Save current */
-			if (ndents)
-				copycurname();
+			copycurname();
 
 			if (presel == 27) {
 				presel = 0;
@@ -3391,8 +3390,7 @@ nochange:
 			}
 
 			/* Save current */
-			if (ndents)
-				copycurname();
+			copycurname();
 			goto begin;
 		case SEL_STATS:
 			if (!ndents)
@@ -3436,8 +3434,7 @@ nochange:
 				r = handle_archive(newpath, "-x", path);
 				break;
 			case SEL_REDRAW:
-				if (ndents)
-					copycurname();
+				copycurname();
 				goto begin;
 			case SEL_RENAMEALL:
 				r = getutil(utils[VIDIR]);
@@ -3483,8 +3480,7 @@ nochange:
 				presel = FILTER;
 
 			/* Save current */
-			if (ndents)
-				copycurname();
+			copycurname();
 
 			/* Repopulate as directory content may have changed */
 			goto begin;
@@ -3629,8 +3625,7 @@ nochange:
 
 			spawn("sh", "-c", g_buf, path, F_NORMAL);
 
-			if (ndents)
-				copycurname();
+			copycurname();
 			if (cfg.filtermode)
 				presel = FILTER;
 			goto begin;
@@ -3794,8 +3789,7 @@ nochange:
 
 					if (cfg.filtermode)
 						presel = FILTER;
-					if (ndents)
-						copycurname();
+					copycurname();
 					goto begin;
 				} else {
 					close(fd);
@@ -3934,8 +3928,7 @@ nochange:
 				presel = FILTER;
 
 			/* Save current */
-			if (ndents)
-				copycurname();
+			copycurname();
 
 			/* Repopulate as directory content may have changed */
 			goto begin;
@@ -4011,8 +4004,7 @@ nochange:
 			if (xlines != LINES || xcols != COLS) {
 				idle = 0;
 				setdirwatch();
-				if (ndents)
-					copycurname();
+				copycurname();
 				goto begin;
 			}
 
@@ -4020,8 +4012,7 @@ nochange:
 			if (idletimeout && idle == idletimeout) {
 				idle = 0;
 				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL);
-				if (ndents)
-					copycurname();
+				copycurname();
 				goto begin;
 			}
 
