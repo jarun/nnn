@@ -2347,6 +2347,54 @@ static bool handle_archive(char *fpath, char *arg, const char *dir)
 	return TRUE;
 }
 
+static char *visit_parent(char *path, char *newpath, int *presel)
+{
+	char *dir;
+
+	/* There is no going back */
+	if (istopdir(path)) {
+		/* Continue in navigate-as-you-type mode, if enabled */
+		if (cfg.filtermode)
+			*presel = FILTER;
+		return NULL;
+	}
+
+	/* Use a copy as dirname() may change the string passed */
+	xstrlcpy(newpath, path, PATH_MAX);
+
+	dir = dirname(newpath);
+	if (access(dir, R_OK) == -1) {
+		printwarn();
+		*presel = MSGWAIT;
+		return NULL;
+	}
+
+	return dir;
+}
+
+static bool execute_file(int cur, char *path, char *newpath, int *presel)
+{
+	if (!ndents)
+		return FALSE;
+
+	/* Check if this is a directory */
+	if (!S_ISREG(dents[cur].mode)) {
+		printwait("not regular file", presel);
+		return FALSE;
+	}
+
+	/* Check if file is executable */
+	if (!(dents[cur].mode & 0100)) {
+		printwait("permission denied", presel);
+		return FALSE;
+	}
+
+	mkpath(path, dents[cur].name, newpath);
+	spawn(newpath, NULL, NULL, path, F_NORMAL);
+
+	return TRUE;
+}
+
 static bool sshfs_mount(char *path, char *newpath, int *presel)
 {
 	int r;
@@ -2998,22 +3046,9 @@ nochange:
 
 		switch (sel) {
 		case SEL_BACK:
-			/* There is no going back */
-			if (istopdir(path)) {
-				/* Continue in navigate-as-you-type mode, if enabled */
-				if (cfg.filtermode)
-					presel = FILTER;
+			dir = visit_parent(path, newpath, &presel);
+			if (!dir)
 				goto nochange;
-			}
-
-			/* Use a copy as dirname() may change the string passed */
-			xstrlcpy(newpath, path, PATH_MAX);
-
-			dir = dirname(newpath);
-			if (access(dir, R_OK) == -1) {
-				printwarn();
-				goto nochange;
-			}
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
@@ -3045,6 +3080,7 @@ nochange:
 			case S_IFDIR:
 				if (access(newpath, R_OK) == -1) {
 					printwarn();
+					presel = MSGWAIT;
 					goto nochange;
 				}
 
@@ -3177,8 +3213,10 @@ nochange:
 				goto nochange;
 			}
 
-			if (!xdiraccess(dir))
+			if (!xdiraccess(dir)) {
+				presel = MSGWAIT;
 				goto nochange;
+			}
 
 			if (strcmp(path, dir) == 0)
 				goto nochange;
@@ -3819,24 +3857,8 @@ nochange:
 		case SEL_RUNCMD:
 			switch (sel) {
 			case SEL_EXEC:
-				if (!ndents)
+				if (!execute_file(cur, path, newpath, &presel))
 					goto nochange;
-
-				/* Check if this is a directory */
-				if (!S_ISREG(dents[cur].mode)) {
-					printwait("not regular file", &presel);
-					goto nochange;
-				}
-
-				/* Check if file is executable */
-				if (!(dents[cur].mode & 0100)) {
-					printwait("permission denied", &presel);
-					goto nochange;
-				}
-
-				mkpath(path, dents[cur].name, newpath);
-				DPRINTF_S(newpath);
-				spawn(newpath, NULL, NULL, path, F_NORMAL);
 				break;
 			case SEL_SHELL:
 				spawn(shell, NULL, NULL, path, F_CLI);
@@ -3849,6 +3871,7 @@ nochange:
 
 				if (stat(pluginpath, &sb) == -1) {
 					printwarn();
+					presel = MSGWAIT;
 					goto nochange;
 				}
 
