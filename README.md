@@ -23,7 +23,7 @@
 
 <p align="center"><i>3 modes of nnn (light with filter, detail, du analyzer) with memory usage. Click for a demo video.</i></a></p>
 
-`nnn` is one of the fastest and most lightweight file managers (`~50KB` binary, `~3.5MB` resident memory usage, [highly optimized](https://github.com/jarun/nnn/wiki/performance-factors) code). And yet, it doesn't lack in features!
+`nnn` is one of the fastest and most lightweight file managers (`~55KB` binary, `~3.5MB` resident memory usage, [highly optimized](https://github.com/jarun/nnn/wiki/performance-factors) code). And yet, it doesn't lack in features!
 
 `nnn` works seamlessly with your DE and favourite GUI utilities. It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
@@ -129,23 +129,19 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the ava
 
 #### Utility dependencies
 
-| External dependency | Operation |
+| Dependency | Operation |
 | --- | --- |
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | desktop opener |
-| file | determine file type |
-| coreutils (cp, mv, rm), findutils (xargs) | copy, move and remove files |
+| file, coreutils (cp, mv, rm), findutils (xargs) | detect type, copy, move and remove files |
 | trash-cli | trash files (default: delete) |
-| mediainfo or exiftool | multimedia file details |
-| atool, patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
+| mediainfo / exiftool | multimedia file details |
+| atool / patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
 | fzy | app launcher with drop-down menu |
 | vidir (from moreutils) | batch rename dir entries |
+| sshfs, fusermount(3) | mount, unmount remote over SSHFS |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | copy, move progress |
-| sshfs | mount remote over SSHFS |
-| fusermount(3) | SSHFS unmount |
-| $EDITOR (overridden by $VISUAL, if defined) | edit files (fallback vi) |
-| $PAGER (less, most) | page through files (fallback less) |
-| $SHELL | spawn a shell, run some commands (fallback sh) |
+| `$VISUAL` (else `$EDITOR`), `$PAGER` (less, most), `$SHELL` | fallback vi, less, sh |
 
 #### From a package manager
 
@@ -271,7 +267,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^P  Prompt  ^N  Note  =  Launcher
 ```
 
-Help & settings, file details, media info and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.
+Note: Help & settings, file details, media info and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.
 
 #### Leader key
 
@@ -399,7 +395,7 @@ The following indicators are used in the detail view:
 To connect to and mount remote shares using SSHFS, `nnn` requires the following:
 
 1. ssh configuration file `~/.ssh/config` should have the host entries. sshfs reads this file.
-2. `NNN_SSHFS_MNT_ROOT` should be set to the **absolute path** to the directory under which `nnn` creates the mount point for a host. The mount point is the same as the host name.
+2. `$NNN_SSHFS_MNT_ROOT` should be set to the **absolute path** to the directory under which `nnn` creates the mount point for a host. The mount point is the same as the host name.
 
 Example host entry for a Termux environment on Android device:
 
@@ -410,9 +406,9 @@ Host phone
     Port 8022
 ```
 
-If `NNN_SSHFS_MNT_ROOT` is set to `/home/user/remotes`, the above host `phone` will be mounted at `/home/user/remotes/phone`. `nnn` creates the directory `phone` if it doesn't exist.
+If `$NNN_SSHFS_MNT_ROOT` is set to `/home/user/remotes`, the above host `phone` will be mounted at `/home/user/remotes/phone`. `nnn` creates the directory `phone` if it doesn't exist.
 
-To unmount a mount point highlight it in `nnn` (so that it's the current entry) and press the relevant keybind to unmount. It might be a good idea to bookmark `NNN_SSHFS_MNT_ROOT`.
+To unmount a mount point highlight it in `nnn` (so that it's the current entry) and press the relevant keybind to unmount. It might be a good idea to bookmark `$NNN_SSHFS_MNT_ROOT`.
 
 Notes:
 
