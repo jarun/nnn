@@ -10,6 +10,11 @@ lsblk
 echo
 echo -n "device (e.g. sdc2): "
 read dev
+
+if [ -z "$dev" ]; then
+    exit 1
+fi
+
 echo
 
 if grep -qs "$dev " /proc/mounts; then
