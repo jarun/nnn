@@ -2914,9 +2914,7 @@ static void browse(char *ipath)
 	enum action sel;
 	bool dir_changed = FALSE;
 	struct stat sb;
-	char *path, *lastdir, *lastname;
-	char *dir, *tmp;
-	char *pluginpath = getenv(env_cfg[NNN_PLUGIN_DIR]);
+	char *path, *lastdir, *lastname, *dir, *tmp, *pluginpath = getenv(env_cfg[NNN_PLUGIN_DIR]);
 
 	atexit(dentfree);
 
