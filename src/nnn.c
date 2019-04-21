@@ -2347,6 +2347,73 @@ static bool handle_archive(char *fpath, char *arg, const char *dir)
 	return TRUE;
 }
 
+static bool sshfs_mount(char *path, char *newpath, int *presel)
+{
+	int r;
+	char *tmp;
+
+	if (!sshfsmnt) {
+		printwait("set NNN_SSHFS_MNT_ROOT", presel);
+		return FALSE;
+	}
+
+	tmp = xreadline(NULL, "Host: ");
+	if (!tmp[0])
+		return FALSE;
+
+	/* Create the mount point */
+	mkpath(sshfsmnt, tmp, newpath);
+	r = mkdir(newpath, 0777);
+	if (r == -1 && errno != EEXIST) {
+		printwait(strerror(errno), presel);
+		return FALSE;
+	}
+
+	/* Check if directory can be accessed */
+	if (!xdiraccess(newpath)) {
+		*presel = MSGWAIT;
+		return FALSE;
+	}
+
+	if (!getutil("sshfs")) {
+		printwait("sshfs missing", presel);
+		return FALSE;
+	}
+
+	/* Convert "Host" to "Host:" */
+	r = strlen(tmp);
+	tmp[r] = ':';
+	tmp[r + 1] = '\0';
+
+	/* Connect to remote */
+	spawn("sshfs", tmp, newpath, NULL, F_NORMAL);
+
+	return TRUE;
+}
+
+static bool sshfs_unmount(char *path, char *fname, char *newpath, int *presel)
+{
+	static char cmd[] = "fusermount3"; /* Arch Linux utility */
+	static bool found = FALSE;
+
+	/* On Ubuntu it's fusermount */
+	if (!found && !getutil(cmd))
+		cmd[10] = '\0';
+
+	if (!ndents)
+		return FALSE;
+
+	mkpath(path, dents[cur].name, newpath);
+	if (!xdiraccess(newpath)) {
+		*presel = MSGWAIT;
+		return FALSE;
+	}
+
+	spawn(cmd, "-u", newpath, NULL, F_NORMAL);
+
+	return TRUE;
+}
+
 /*
  * The help string tokens (each line) start with a HEX value
  * which indicates the number of spaces to print before the
@@ -3873,61 +3940,12 @@ nochange:
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_SSHFS:
-			if (!sshfsmnt) {
-				printwait("set NNN_SSHFS_MNT_ROOT", &presel);
-				goto nochange;
-			}
-
-			tmp = xreadline(NULL, "Host: ");
-			if (!tmp[0])
-				goto nochange;
-
-			/* Create the mount point */
-			mkpath(sshfsmnt, tmp, newpath);
-			r = mkdir(newpath, 0777);
-			if (r == -1 && errno != EEXIST) {
-				printwait(strerror(errno), &presel);
-				goto nochange;
-			}
-
-			/* Check if directory can be accessed */
-			if (!xdiraccess(newpath)) {
-				presel = MSGWAIT;
-				goto nochange;
-			}
-
-			if (!getutil("sshfs")) {
-				printwait("sshfs missing", &presel);
-				goto nochange;
-			}
-
-			/* Convert "Host" to "Host:" */
-			r = strlen(tmp);
-			tmp[r] = ':';
-			tmp[r + 1] = '\0';
-
-			/* Connect to remote */
-			spawn("sshfs", tmp, newpath, NULL, F_NORMAL); // fallthrough
+			if (!sshfs_mount(path, newpath, &presel))
+				goto nochange; // fallthrough
 		case SEL_UMOUNT:
-			if (sel == SEL_UMOUNT) {
-				static char cmd[] = "fusermount3"; /* Arch Linux utility */
-				static bool found = FALSE;
-
-				/* On Ubuntu it's fusermount */
-				if (!found && !getutil(cmd))
-					cmd[10] = '\0';
-
-				if (!ndents)
-					goto nochange;
-
-				mkpath(path, dents[cur].name, newpath);
-				if (!xdiraccess(newpath)) {
-					presel = MSGWAIT;
-					goto nochange;
-				}
-
-				spawn(cmd, "-u", newpath, NULL, F_NORMAL);
-			}
+			if (sel == SEL_UMOUNT
+			    && !sshfs_unmount(path, dents[cur].name, newpath, &presel))
+				goto nochange;
 
 			lastname[0] = '\0';
 
