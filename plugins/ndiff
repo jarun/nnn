@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Description: File and directory diff using vimdiff
+# Description: Show diff using vimdiff
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

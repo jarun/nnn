@@ -9,7 +9,7 @@
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
 | ipinfo | sh | curl, whois | Fetch IP address and whois information |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
-| ndiff | sh | vimdiff | File and directory diff for selection |
+| ndiff | sh | vimdiff | Show diff for selection |
 | nmount | sh | pmount | Toggle mount status of a device as normal user |
 | nwal | sh | nitrogen | Set the selected image as wallpaper using nitrogen |
 | pastebin | sh | [pastebinit](https://launchpad.net/pastebinit) | Paste contents of current (text) file to paste.ubuntu.com |
