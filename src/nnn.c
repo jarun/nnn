@@ -2139,6 +2139,7 @@ static void (*printptr)(const struct entry *ent, int sel, uint namecols) = &prin
 static void savecurctx(settings *curcfg, char *path, char *curname, int r /* next context num */)
 {
 	settings cfg = *curcfg;
+	bool copymode = cfg.copymode ? TRUE : FALSE;
 
 #ifdef DIR_LIMITED_COPY
 	g_crc = 0;
@@ -2164,6 +2165,8 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 		g_ctx[r].c_cfg.runplugin = 0;
 	}
 
+	/* Continue copy mode */
+	cfg.copymode = copymode;
 	cfg.curctx = r;
 
 	*curcfg = cfg;
@@ -4002,13 +4005,15 @@ nochange:
 			}
 			return;
 		case SEL_QUITCTX:
-			fd = cfg.curctx;
+			fd = cfg.curctx; /* fd used as tmp var */
 			for (r = (fd + 1) & ~CTX_MAX;
 			     (r != fd) && !g_ctx[r].c_cfg.ctxactive;
 			     r = ((r + 1) & ~CTX_MAX)) {
 			};
 
 			if (r != fd) {
+				bool copymode = cfg.copymode ? TRUE : FALSE;
+
 				g_ctx[fd].c_cfg.ctxactive = 0;
 
 				/* Switch to next active context */
@@ -4023,6 +4028,8 @@ nochange:
 
 				cfg = g_ctx[r].c_cfg;
 
+				/* Continue copy mode */
+				cfg.copymode = copymode;
 				cfg.curctx = r;
 				setdirwatch();
 				goto begin;
