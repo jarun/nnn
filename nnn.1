@@ -120,9 +120,8 @@ allowing continuous navigation. Works best with the \fBarrow keys\fR.
 When there's a unique match and it's a directory, `nnn` auto selects the directory and enters it in this mode.
 .br
 The \fIwild load\fR option can be extremely handy for users who use the \fInavigate-as-you-type\fR mode constantly. The entries are unsorted when the directory loads. Applying filters sorts the entries (with directories on top). Directory color is disabled in this mode.
-.Sh SELECTION MODE
-The absolute path of a single file can be copied to clipboard by pressing \fI^K\fR if
-NNN_COPIER is set (see ENVIRONMENT section below).
+.Sh SELECTION
+Use \fI^K\fR to select the file under the cursor.
 .Pp
 To select multiple files the selection mode should be enabled using \fI^Y\fR.
 In this mode it's possible to
@@ -133,9 +132,11 @@ In this mode it's possible to
 .Pp
 Press \fI^Y\fR again to save the selection and exit selection mode.
 .Pp
-Selected files are visually indicated by a \fB+\fR.
+Selected files are visually indicated by a \fB+\fR before the entries.
 .br
 The files in the list can now be listed, copied, moved, removed, archived or linked.
+.br
+Absolute paths of the selected files are copied to the temporary file \fB~/.config/nnn/.selection\fR. The path is shown in the help and configuration screen. If \fB$NNN_COPIER\fR is set (see ENVIRONMENT section below) the file paths are also copied to the system clipboard.
 .Sh ENVIRONMENT
 The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively. A single combination to arguments is supported for SHELL and PAGER.

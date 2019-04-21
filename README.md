@@ -305,9 +305,9 @@ colors: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 
 
 #### Selection
 
-Use <kbd>^K</kbd> to copy the absolute path of the file under the cursor.
+Use <kbd>^K</kbd> to select the file under the cursor.
 
-To copy multiple absolute file paths:
+To select multiple files:
 
 - press <kbd>^Y</kbd> to enter selection mode. In this mode it's possible to
   - cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry (works across directories and contexts); or,
@@ -316,13 +316,11 @@ To copy multiple absolute file paths:
 
 _NOTE:_ If you are on BSD/macOS, please check the [BSD terminal issue](https://github.com/jarun/nnn#bsd-terminal-issue) with <kbd>^Y</kbd> for workaround.
 
-Selected files are visually indicated by a `+`.
+Selected files are visually indicated by a `+` before the entries.
 
 The selection can now be listed, copied, moved, removed, archived or linked.
 
-File paths are copied to the temporary file `~/.config/nnn/.selection`.
-
-The path is shown in the help and configuration screen.
+Absolute paths of the selected files are copied to the temporary file `~/.config/nnn/.selection`. The path is shown in the help and configuration screen. If `$NNN_COPIER` is set the file paths are also copied to the system clipboard.
 
 #### Filters
 
@@ -419,7 +417,7 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 #### PLUGINS
 
-`nnn` can invoke plugins in the current directory (`$PWD` for the plugin) with the currently selected file name as the argument.
+To extend the capabilities of `nnn`, plugins are introduced. Plugins are scripts which `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins.
 
 Copy the [plugins](https://github.com/jarun/nnn/tree/master/plugins) of your interest to `~/.config/nnn/plugins`.
 
@@ -437,7 +435,7 @@ If you have an interesting plugin feel free to raise a PR.
 
 TLDR: Use the keybind <kbd>K</kbd> to toggle selection if you are having issues with <kbd>^Y</kbd>.
 
-By default in OpenBSD & FreeBSD (and probably on macOS as well), `stty` maps <kbd>^Y</kbd> to `DSUSP`. This means that typing <kbd>^Y</kbd> will suspend `nnn` as if you typed <kbd>^Z</kbd> (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-copy mode. You can check this with `stty -a`. If it includes the text `dsusp = ^Y`, issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the <kbd>^Y</kbd> instead.
+By default in OpenBSD & FreeBSD (and probably on macOS as well), `stty` maps <kbd>^Y</kbd> to `DSUSP`. This means that typing <kbd>^Y</kbd> will suspend `nnn` as if you typed <kbd>^Z</kbd> (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-selection mode. You can check this with `stty -a`. If it includes the text `dsusp = ^Y`, issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the <kbd>^Y</kbd> instead.
 
 ##### Restrict file open
 
