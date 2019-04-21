@@ -471,7 +471,7 @@ static struct timespec gtimeout;
 
 /* Forward declarations */
 static void redraw(char *path);
-static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag);
+static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag);
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 static int dentfind(const char *fname, int n);
 
@@ -939,33 +939,41 @@ static pid_t xfork(uchar flag)
 	return p;
 }
 
-static void join(pid_t p, uchar flag)
+static int join(pid_t p, uchar flag)
 {
-	int status;
+	int status = 0xFFFF;
 
-	if (!(flag & F_NOWAIT))
+	if (!(flag & F_NOWAIT)) {
 		/* wait for the child to exit */
 		do {
 		} while (waitpid(p, &status, 0) == -1);
 
+		if (WIFEXITED(status)) {
+			status = WEXITSTATUS(status);
+			DPRINTF_D(status);
+		}
+	}
+
 	/* restore parent's signal handling */
 	signal(SIGHUP, oldsighup);
 	signal(SIGTSTP, oldsigtstp);
+
+	return status;
 }
 
 /*
  * Spawns a child process. Behaviour can be controlled using flag.
  * Limited to 2 arguments to a program, flag works on bit set.
  */
-static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag)
+static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag)
 {
 	pid_t pid;
-	int status;
+	int status, retstatus = 0xFFFF;
 	char *argv[EXEC_ARGS_MAX] = {0};
 	char *cmd = NULL;
 
 	if (!file || !*file)
-		return;
+		return retstatus;
 
 	/* Swap args if the first arg is NULL and second isn't */
 	if (!arg1 && arg2) {
@@ -979,7 +987,7 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 		cmd = (char *)malloc(len);
 		if (!cmd) {
 			DPRINTF_S("malloc()!");
-			return;
+			return retstatus;
 		}
 
 		xstrlcpy(cmd, file, len);
@@ -987,7 +995,7 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 		if (status == -1 || status > (EXEC_ARGS_MAX - 3)) { /* arg1, arg2 and last NULL */
 			free(cmd);
 			DPRINTF_S("NULL or too many args");
-			return;
+			return retstatus;
 		}
 
 		argv[status++] = arg1;
@@ -1018,7 +1026,7 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 		execvp(*argv, argv);
 		_exit(1);
 	} else {
-		join(pid, flag);
+		retstatus = join(pid, flag);
 
 		DPRINTF_D(pid);
 		if (flag & F_NORMAL) {
@@ -1028,6 +1036,8 @@ static void spawn(char *file, char *arg1, char *arg2, const char *dir, uchar fla
 
 		free(cmd);
 	}
+
+	return retstatus;
 }
 
 /* Get program name from env var, else return fallback program */
@@ -2436,7 +2446,10 @@ static bool sshfs_mount(char *path, char *newpath, int *presel)
 	tmp[r + 1] = '\0';
 
 	/* Connect to remote */
-	spawn("sshfs", tmp, newpath, NULL, F_NORMAL);
+	if (spawn("sshfs", tmp, newpath, NULL, F_NORMAL)) {
+		printwait("mount failed", presel);
+		return FALSE;
+	}
 
 	return TRUE;
 }
@@ -2459,7 +2472,10 @@ static bool sshfs_unmount(char *path, char *fname, char *newpath, int *presel)
 		return FALSE;
 	}
 
-	spawn(cmd, "-u", newpath, NULL, F_NORMAL);
+	if (spawn(cmd, "-u", newpath, NULL, F_NORMAL)) {
+		printwait("unmount failed", presel);
+		return FALSE;
+	}
 
 	return TRUE;
 }
