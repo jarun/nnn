@@ -4196,12 +4196,16 @@ int main(int argc, char *argv[])
 			if (optarg[0] == '-' && optarg[1] == '\0')
 				cfg.pickraw = 1;
 			else {
-				/* copier used as tmp var */
-				copier = realpath(optarg, g_cppath);
-				if (!g_cppath) {
+				int fd = open(optarg, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+
+				if (fd == -1) {
 					xerror();
 					return 1;
 				}
+
+				close(fd);
+				g_cppath = realpath(optarg, NULL);
+				unlink(g_cppath);
 			}
 			break;
 		case 's':
