@@ -366,14 +366,12 @@ static char mv[] = "mvg -gi";
 #endif
 
 /* Common strings */
-#define STR_NOHOME_ID 0
-#define STR_INPUT_ID 1
-#define STR_INVBM_KEY 2
-#define STR_DATE_ID 3
-#define STR_TMPFILE 4
+#define STR_INPUT_ID 0
+#define STR_INVBM_KEY 1
+#define STR_DATE_ID 2
+#define STR_TMPFILE 3
 
 static const char * const messages[] = {
-	"HOME not set",
 	"no traversal",
 	"invalid key",
 	"%F %T %z",
@@ -1884,11 +1882,6 @@ static char *get_bm_loc(char *buf, int key)
 	for (; bookmark[r].key && r < BM_MAX; ++r) {
 		if (bookmark[r].key == key) {
 			if (bookmark[r].loc[0] == '~') {
-				if (!home) {
-					DPRINTF_S(messages[STR_NOHOME_ID]);
-					return NULL;
-				}
-
 				ssize_t count = xstrlcpy(buf, home, PATH_MAX);
 
 				xstrlcpy(buf + count - 1, bookmark[r].loc + 1, PATH_MAX - count - 1);
@@ -3195,7 +3188,7 @@ nochange:
 		case SEL_VISIT:
 			switch (sel) {
 			case SEL_CDHOME:
-				home ? (dir = home) : (dir = path);
+				dir = home;
 				break;
 			case SEL_CDBEGIN:
 				dir = ipath;
