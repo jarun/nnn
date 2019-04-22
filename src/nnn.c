@@ -287,7 +287,7 @@ static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
 static bm bookmark[BM_MAX];
-static size_t g_tmpfplen; /* path to tmp files for copy without X, keybind help and file stats */
+static size_t g_tmpfplen;
 static uchar g_crc;
 static uchar BLK_SHIFT = 9;
 static uchar opener_flag = F_NOTRACE;
@@ -793,13 +793,7 @@ static void showcplist(void)
 	if (!copybufpos)
 		return;
 
-	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
-			 TMP_LEN_MAX - g_tmpfplen);
-	else {
-		DPRINTF_S(messages[STR_NOHOME_ID]);
-		return;
-	}
+	xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - g_tmpfplen);
 
 	fd = mkstemp(g_tmpfpath);
 	if (fd == -1) {
@@ -2267,11 +2261,7 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 	size_t r;
 	FILE *fp;
 
-	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
-			 TMP_LEN_MAX - g_tmpfplen);
-	else
-		return FALSE;
+	xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - g_tmpfplen);
 
 	fd = mkstemp(g_tmpfpath);
 	if (fd == -1)
@@ -2527,13 +2517,7 @@ static bool show_help(const char *path)
 	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt  ^N  Note  =  Launcher\n"};
 
-	if (g_tmpfpath[0])
-		xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE],
-			 TMP_LEN_MAX - g_tmpfplen);
-	else {
-		printmsg(messages[STR_NOHOME_ID]);
-		return FALSE;
-	}
+	xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - g_tmpfplen);
 
 	fd = mkstemp(g_tmpfpath);
 	if (fd == -1)
