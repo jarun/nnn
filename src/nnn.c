@@ -1892,8 +1892,9 @@ static char *get_bm_loc(char *buf, int key)
 				xstrlcpy(buf, home, len + 1);
 				xstrlcpy(buf + len, bookmark[r].loc + 1, loclen);
 				return buf;
-			} else
-				return realpath(bookmark[r].loc, buf);
+			}
+
+			return realpath(bookmark[r].loc, buf);
 		}
 	}
 
