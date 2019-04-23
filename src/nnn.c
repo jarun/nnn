@@ -280,6 +280,7 @@ static char *editor;
 static char *pager;
 static char *shell;
 static char *home;
+static char *initpath;
 static char *cfgdir;
 static char *g_cppath;
 static char *plugindir;
@@ -1882,13 +1883,17 @@ static char *get_bm_loc(char *buf, int key)
 	for (; bookmark[r].key && r < BM_MAX; ++r) {
 		if (bookmark[r].key == key) {
 			if (bookmark[r].loc[0] == '~') {
-				ssize_t count = xstrlcpy(buf, home, PATH_MAX);
+				ssize_t len = strlen(home);
+				ssize_t loclen = strlen(bookmark[r].loc);
 
-				xstrlcpy(buf + count - 1, bookmark[r].loc + 1, PATH_MAX - count - 1);
+				if (!buf)
+					buf = (char *)malloc(len + loclen);
+
+				xstrlcpy(buf, home, len + 1);
+				xstrlcpy(buf + len, bookmark[r].loc + 1, loclen);
+				return buf;
 			} else
-				xstrlcpy(buf, bookmark[r].loc, PATH_MAX);
-
-			return buf;
+				return realpath(bookmark[r].loc, buf);
 		}
 	}
 
@@ -4153,6 +4158,7 @@ static void cleanup(void)
 	free(g_cppath);
 	free(plugindir);
 	free(cfgdir);
+	free(initpath);
 
 #ifdef DBGMODE
 	disabledbg();
@@ -4161,8 +4167,7 @@ static void cleanup(void)
 
 int main(int argc, char *argv[])
 {
-	char cwd[PATH_MAX] __attribute__ ((aligned));
-	char *ipath = NULL;
+	char *arg = NULL;
 	int opt;
 
 	while ((opt = getopt(argc, argv, "Slib:denp:svwh")) != -1) {
@@ -4180,7 +4185,7 @@ int main(int argc, char *argv[])
 			cfg.filtermode = 1;
 			break;
 		case 'b':
-			ipath = optarg;
+			arg = optarg;
 			break;
 		case 'd':
 			cfg.showhidden = 1;
@@ -4277,26 +4282,24 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	if (ipath) { /* Open a bookmark directly */
-		if (ipath[1] || !get_bm_loc(cwd, *ipath)) {
+	if (arg) { /* Open a bookmark directly */
+		if (arg[1] || (initpath = get_bm_loc(NULL, *arg)) == NULL) {
 			fprintf(stderr, "%s\n", messages[STR_INVBM_KEY]);
 			return 1;
 		}
-
-		ipath = cwd;
 	} else if (argc == optind) {
 		/* Start in the current directory */
-		ipath = getcwd(cwd, PATH_MAX);
-		if (!ipath)
-			ipath = "/";
+		initpath = getcwd(NULL, PATH_MAX);
+		if (!initpath)
+			initpath = "/";
 	} else {
-		ipath = argv[optind];
-		if (strlen(ipath) > 7 && ipath[0] == 'f' && ipath[1] == 'i' && ipath[2] == 'l'
-		    && ipath[3] == 'e' && ipath[4] == ':' && ipath[5] == '/' && ipath[6] == '/')
-			ipath = ipath + 7;
-		ipath = realpath(ipath, cwd);
-		DPRINTF_S(ipath);
-		if (!ipath) {
+		arg = argv[optind];
+		if (strlen(arg) > 7 && arg[0] == 'f' && arg[1] == 'i' && arg[2] == 'l'
+		    && arg[3] == 'e' && arg[4] == ':' && arg[5] == '/' && arg[6] == '/')
+			arg = arg + 7;
+		initpath = realpath(arg, NULL);
+		DPRINTF_S(initpath);
+		if (!initpath) {
 			xerror();
 			return 1;
 		}
@@ -4308,13 +4311,13 @@ int main(int argc, char *argv[])
 		 */
 		struct stat sb;
 
-		if (stat(ipath, &sb) == -1) {
+		if (stat(initpath, &sb) == -1) {
 			printwarn();
 			return 1;
 		}
 
 		if (S_ISREG(sb.st_mode)) {
-			spawn(opener, ipath, NULL, NULL, opener_flag);
+			spawn(opener, initpath, NULL, NULL, opener_flag);
 			return 0;
 		}
 	}
@@ -4404,7 +4407,7 @@ int main(int argc, char *argv[])
 	signal(SIGQUIT, SIG_IGN);
 
 	/* Test initial path */
-	if (!xdiraccess(ipath)) {
+	if (!xdiraccess(initpath)) {
 		xerror();
 		return 1;
 	}
@@ -4426,7 +4429,7 @@ int main(int argc, char *argv[])
 	if (!initcurses())
 		return 1;
 
-	browse(ipath);
+	browse(initpath);
 	exitcurses();
 
 #ifndef NORL
