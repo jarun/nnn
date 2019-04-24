@@ -1049,6 +1049,17 @@ static char *xgetenv(const char *name, char *fallback)
 	return value && value[0] ? value : fallback;
 }
 
+/* Checks if an env variable is set to 1 */
+static bool xgetenv_set(const char *name)
+{
+	char *value = getenv(name);
+
+	if (value && value[0] == 1 && !value[1])
+		return TRUE;
+
+	return FALSE;
+}
+
 /* Check if a dir exists, IS a dir and is readable */
 static bool xdiraccess(const char *path)
 {
@@ -2559,12 +2570,8 @@ static bool show_help(const char *path)
 
 	for (i = NNN_OPENER; i <= NNN_TRASH; ++i) {
 		start = getenv(env_cfg[i]);
-		if (start) {
-			if (i < NNN_USE_EDITOR)
+		if (start)
 				dprintf(fd, "%s: %s\n", env_cfg[i], start);
-			else
-				dprintf(fd, "%s: 1\n", env_cfg[i]);
-		}
 	}
 
 	if (g_cppath)
@@ -4108,10 +4115,6 @@ static bool setup_config(void)
 	xstrlcpy(cfgdir + r - 1, "/.config/nnn", len - r);
 	DPRINTF_S(cfgdir);
 
-	/* TODO: remove in next release */
-	if (access(cfgdir, F_OK) == -1)
-		fprintf(stdout, "WARNING: selection file is ~/.config/nnn/.selection (see CHANGELOG)\n");
-
 	/* Create ~/.config/nnn */
 	if (!create_dir(cfgdir)) {
 		xerror();
@@ -4284,7 +4287,7 @@ int main(int argc, char *argv[])
 
 	/* Get custom opener, if set */
 	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
-	if (getenv(env_cfg[NNN_OPENER_DETACH]))
+	if (xgetenv_set(env_cfg[NNN_OPENER_DETACH]))
 		opener_flag |= F_NOWAIT;
 	DPRINTF_S(opener);
 
@@ -4335,7 +4338,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Edit text in EDITOR, if opted */
-	if (getenv(env_cfg[NNN_USE_EDITOR]))
+	if (xgetenv_set(env_cfg[NNN_USE_EDITOR]))
 		cfg.useeditor = 1;
 
 	/* Get VISUAL/EDITOR */
@@ -4377,7 +4380,7 @@ int main(int argc, char *argv[])
 	idletimeout = xatoi(getenv(env_cfg[NNN_IDLE_TIMEOUT]));
 	DPRINTF_U(idletimeout);
 
-	if (getenv(env_cfg[NNN_TRASH]))
+	if (xgetenv_set(env_cfg[NNN_TRASH]))
 		cfg.trash = 1;
 
 	/* Prefix for temporary files */
@@ -4388,19 +4391,19 @@ int main(int argc, char *argv[])
 	copier = getenv(env_cfg[NNN_COPIER]);
 
 	/* Disable auto-select if opted */
-	if (getenv(env_cfg[NNN_NO_AUTOSELECT]))
+	if (xgetenv_set(env_cfg[NNN_NO_AUTOSELECT]))
 		cfg.autoselect = 0;
 
 	/* Disable opening files on right arrow and `l` */
-	if (getenv(env_cfg[NNN_RESTRICT_NAV_OPEN]))
+	if (xgetenv_set(env_cfg[NNN_RESTRICT_NAV_OPEN]))
 		cfg.nonavopen = 1;
 
 	/* Restrict opening of 0-byte files */
-	if (getenv(env_cfg[NNN_RESTRICT_0B]))
+	if (xgetenv_set(env_cfg[NNN_RESTRICT_0B]))
 		cfg.restrict0b = 1;
 
 #ifdef __linux__
-	if (!getenv(env_cfg[NNN_OPS_PROG])) {
+	if (!xgetenv_set(env_cfg[NNN_OPS_PROG])) {
 		cp[5] = cp[4];
 		cp[2] = cp[4] = ' ';
 

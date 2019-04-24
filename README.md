@@ -375,7 +375,7 @@ The following indicators are used in the detail view:
 | `NNN_COPIER='/absolute/path/to/copier'` | system clipboard copier script [default: none] |
 | `NNN_NOTE=/home/user/Dropbox/notes` | path to note file [default: none] |
 | `NNN_TMPFILE=/tmp/nnn` | file to write current open dir path to for cd on quit |
-| `NNN_USE_EDITOR=1` | Open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
+| `NNN_USE_EDITOR=1` | open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_RESTRICT_0B=1` | do not open 0-byte files |
