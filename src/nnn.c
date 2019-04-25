@@ -936,15 +936,7 @@ static int join(pid_t p, uchar flag)
 	if (!(flag & F_NOWAIT)) {
 		/* wait for the child to exit */
 		do {
-			/* Exit if parent has exited */
-			if (getppid() == 1) {
-				/* Kill child */
-				kill(p, SIGKILL);
-
-				/* Exit */
-				_exit(0);
-			}
-		} while (waitpid(p, &status, WNOHANG) <= 0);
+		} while (waitpid(p, &status, 0) == -1);
 
 		if (WIFEXITED(status)) {
 			status = WEXITSTATUS(status);
@@ -1008,8 +1000,6 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 		exitcurses();
 
 	pid = xfork(flag);
-
-	/* Child */
 	if (pid == 0) {
 		if (dir && chdir(dir) == -1)
 			_exit(1);
@@ -1025,18 +1015,17 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 
 		execvp(*argv, argv);
 		_exit(1);
+	} else {
+		retstatus = join(pid, flag);
+
+		DPRINTF_D(pid);
+		if (flag & F_NORMAL) {
+			nonl();
+			noecho();
+		}
+
+		free(cmd);
 	}
-
-	/* Parent */
-	retstatus = join(pid, flag);
-
-	DPRINTF_D(pid);
-	if (flag & F_NORMAL) {
-		nonl();
-		noecho();
-	}
-
-	free(cmd);
 
 	return retstatus;
 }
