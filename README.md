@@ -418,6 +418,10 @@ Restrict opening 0-byte files due to [unexpected behaviour](https://github.com/j
 
     export NNN_RESTRICT_0B=1
 
+##### 100% CPU usage
+
+There is a known issue where if you close the terminal directly with `nnn` waiting for a spawned process to exit, a deadlock occurs and `nnn` uses 100% CPU. Please see issue [#225](https://github.com/jarun/nnn/issues/225) for more details. Make sure you quit the spawned process before closing the terminal. It's not a problem if there is no spawned process.
+
 #### WHY FORK?
 
 `nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today. I chose to fork because:
