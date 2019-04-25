@@ -59,6 +59,7 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the ava
   - [Navigate-as-you-type](#navigate-as-you-type)
   - [File indicators](#file-indicators)
   - [Configuration](#configuration)
+  - [Hot-plugged drives](#hot-plugged-drives)
   - [SSHFS mounts](#sshfs-mounts)
   - [Help](#help)
 - [Plugins](#plugins)
@@ -233,40 +234,6 @@ optional args:
 
 Press <kbd>?</kbd> in `nnn` to see the list anytime.
 
-```
- NAVIGATION
-          ↑ k  Up          PgUp ^U  Scroll up
-          ↓ j  Down        PgDn ^D  Scroll down
-          ← h  Parent dir  ~ ` @ -  HOME, /, start, last
-        ↵ → l  Open file/dir     .  Toggle show hidden
-    Home g ^A  First entry    G ^E  Last entry
-            /  Filter       Ins ^T  Toggle nav-as-you-type
-            b  Pin current dir  ^B  Go to pinned dir
-       Tab ^I  Next context      d  Toggle detail view
-         , ^/  Leader key  N LeadN  Context N
-          Esc  Exit prompt      ^L  Redraw/clear prompt
-           ^G  Quit and cd       q  Quit context
-         Q ^Q  Quit              ?  Help, config
- FILES
-           ^O  Open with...      n  Create new/link
-            D  File details     ^R  Rename entry
-     ⎵ ^K / Y  Select entry/all  r  Batch rename
-         K ^Y  Toggle selection  y  List selection
-            P  Copy selection    X  Delete selection
-            V  Move selection   ^X  Delete entry
-            f  Create archive  m M  Brief/full mediainfo
-           ^F  Extract archive   F  List archive
-            e  Edit in EDITOR    p  Open in PAGER
- ORDER TOGGLES
-           ^J  Disk usage        S  Apparent du
-           ^W  Random  s  Size   t  Time modified
- MISC
-         ! ^]  Spawn SHELL       C  Execute entry
-         R ^V  Pick plugin       L  Lock terminal
-            c  SSHFS mount       u  Unmount
-           ^P  Prompt  ^N  Note  =  Launcher
-```
-
 Note: Help & settings, file details, media info and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.
 
 #### Leader key
@@ -381,6 +348,12 @@ The following indicators are used in the detail view:
 | `NNN_RESTRICT_0B=1` | do not open 0-byte files |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
 | `NNN_OPS_PROG=1` | show copy, move progress on Linux |
+
+#### Hot-plugged drives
+
+External storage devices can be (un)mounted using the plugin [nmount](https://github.com/jarun/nnn/blob/master/plugins/nmount).
+
+For auto-mounting external storage drives use udev rules or udisks wrappers.
 
 #### SSHFS mounts
 
