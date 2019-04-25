@@ -66,8 +66,7 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the ava
 - [Troubleshooting](#troubleshooting)
   - [Tmux configuration](#tmux-configuration)
   - [BSD terminal issue](#bsd-terminal-issue)
-  - [Restrict file open](#restrict-file-open)
-  - [Restrict 0-byte files](#restrict-0-byte-files)
+  - [100% CPU usage](#100-cpu-usage)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
@@ -345,7 +344,7 @@ The following indicators are used in the detail view:
 | `NNN_USE_EDITOR=1` | open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
-| `NNN_RESTRICT_0B=1` | do not open 0-byte files |
+| `NNN_RESTRICT_0B=1` | disable 0-byte file open; see [#187](https://github.com/jarun/nnn/issues/187), use _edit_ or _open with_ |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
 | `NNN_OPS_PROG=1` | show copy, move progress on Linux |
 
@@ -404,23 +403,9 @@ TLDR: Use the keybind <kbd>K</kbd> to toggle selection if you are having issues 
 
 By default in OpenBSD & FreeBSD (and probably on macOS as well), `stty` maps <kbd>^Y</kbd> to `DSUSP`. This means that typing <kbd>^Y</kbd> will suspend `nnn` as if you typed <kbd>^Z</kbd> (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-selection mode. You can check this with `stty -a`. If it includes the text `dsusp = ^Y`, issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the <kbd>^Y</kbd> instead.
 
-##### Restrict file open
-
-In order to disable opening files on accidental navigation key (<kbd>→</kbd> or <kbd>l</kbd>) press:
-
-    export NNN_RESTRICT_NAV_OPEN=1
-
-Use <kbd>Enter</kbd> to open these files.
-
-##### Restrict 0-byte files
-
-Restrict opening 0-byte files due to [unexpected behaviour](https://github.com/jarun/nnn/issues/187); use _edit_ or _open with_ to open the file.
-
-    export NNN_RESTRICT_0B=1
-
 ##### 100% CPU usage
 
-There is a known issue where if you close the terminal directly with `nnn` waiting for a spawned process to exit, a deadlock occurs and `nnn` uses 100% CPU. Please see issue [#225](https://github.com/jarun/nnn/issues/225) for more details. Make sure you quit the spawned process before closing the terminal. It's not a problem if there is no spawned process.
+There is a known issue where if you close the terminal directly with `nnn` waiting for a spawned process to exit, a deadlock occurs and `nnn` uses 100% CPU. Please see issue [#225](https://github.com/jarun/nnn/issues/225) for more details. Make sure you quit the spawned process before closing the terminal. It's not a problem if there is no spawned process (`nnn` isn't blocked) as `nnn` checks if the parent process has exited.
 
 #### WHY FORK?
 
