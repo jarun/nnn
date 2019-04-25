@@ -1054,7 +1054,7 @@ static bool xgetenv_set(const char *name)
 {
 	char *value = getenv(name);
 
-	if (value && value[0] == 1 && !value[1])
+	if (value && value[0] == '1' && !value[1])
 		return TRUE;
 
 	return FALSE;
