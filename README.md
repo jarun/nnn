@@ -27,9 +27,9 @@
 
 `nnn` works seamlessly with your DE and favourite GUI utilities. It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
-Have as many scripts as you want to extend the power of `nnn`! Pick from the available [plugins](https://github.com/jarun/nnn/tree/master/plugins) or add your own.
+Have as many scripts as you want to extend the power of `nnn`! Pick from the available plugins or add your own.
 
-[Quickstart](#quickstart) and see how `nnn` simplifies long desktop sessions. When you are ready for more, start [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn).
+**[Quickstart](#quickstart)** and see how `nnn` simplifies long desktop sessions.
 
 *Love smart and efficient utilities? Explore [my repositories](https://github.com/jarun?tab=repositories). Buy me a cup of coffee if they help you.*
 
@@ -198,7 +198,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 
 - For additional functionality [setup plugins](#plugins).
-- Visit the wiki page [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn) for many more specific use cases.
+- When you are ready for more, start [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn).
 - To set `nnn` as the default file manager, follow these [instructions](https://github.com/jarun/nnn/wiki/nnn-as-default-file-manager).
 
 #### USAGE
