@@ -1778,6 +1778,44 @@ END:
 	return g_buf + ((NAME_MAX + 1) << 2);
 }
 
+#ifndef NORL
+/*
+ * Caller should check the value of presel to confirm if it needs to wait to show warning
+ */
+static char *getreadline(char *prompt, char *path, char *curpath, int *presel)
+{
+	char *input;
+
+	/* Switch to current path for readline(3) */
+	if (chdir(path) == -1) {
+		printwarn(presel);
+		return NULL;
+	}
+
+	exitcurses();
+
+	input = readline(prompt);
+
+	refresh();
+
+	if (chdir(curpath) == -1) {
+		printwarn(presel);
+		free(input);
+		return NULL;
+	}
+
+	if (input && input[0]) {
+		add_history(input);
+		xstrlcpy(g_buf, input, CMD_LEN_MAX);
+		free(input);
+		return g_buf;
+	}
+
+	free(input);
+	return NULL;
+}
+#endif
+
 /*
  * Updates out with "dir/name or "/name"
  * Returns the number of bytes copied including the terminating NULL byte
@@ -3921,37 +3959,16 @@ nochange:
 				if (cfg.picker) {
 #endif
 					tmp = xreadline(NULL, "> ");
-					if (tmp[0])
-						spawn(shell, "-c", tmp, path, F_CLI);
 #ifndef NORL
 				} else {
-					/* Switch to current path for readline(3) */
-					if (chdir(path) == -1) {
-						printwarn(&presel);
+					presel = 0;
+					tmp = getreadline("> ", path, ipath, &presel);
+					if (presel == MSGWAIT)
 						goto nochange;
-					}
-
-					exitcurses();
-
-					tmp = readline("nnn> ");
-
-					refresh();
-
-					if (chdir(ipath) == -1) {
-						printwarn(&presel);
-						free(tmp);
-						goto nochange;
-					}
-
-					if (tmp && tmp[0]) {
-						spawn(shell, "-c", tmp, path, F_CLI);
-						/* readline finishing touches */
-						add_history(tmp);
-					}
-
-					free(tmp);
 				}
 #endif
+				if (tmp[0])
+					spawn(shell, "-c", tmp, path, F_CLI);
 			}
 
 			/* Continue in navigate-as-you-type mode, if enabled */
