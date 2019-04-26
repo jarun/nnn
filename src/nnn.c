@@ -449,7 +449,7 @@ static struct timespec gtimeout;
 /* Function macros */
 #define exitcurses() endwin()
 #define clearprompt() printmsg("")
-#define printwarn() printmsg(strerror(errno))
+#define printwarn(presel) printwait(strerror(errno), presel)
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
 #define copycurname() xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1)
 #define settimeout() timeout(1000)
@@ -550,7 +550,8 @@ static inline void printmsg(const char *msg)
 static void printwait(const char *msg, int *presel)
 {
 	printmsg(msg);
-	*presel = MSGWAIT;
+	if (presel)
+		*presel = MSGWAIT;
 }
 
 /* Kill curses and display error before exiting */
@@ -740,7 +741,7 @@ static void writecp(const char *buf, const size_t buflen)
 		fwrite(buf, 1, buflen, fp);
 		fclose(fp);
 	} else
-		printwarn();
+		printwarn(NULL);
 }
 
 static void appendfpath(const char *path, const size_t len)
@@ -1052,7 +1053,7 @@ static bool xdiraccess(const char *path)
 	DIR *dirp = opendir(path);
 
 	if (!dirp) {
-		printwarn();
+		printwarn(NULL);
 		return FALSE;
 	}
 
@@ -2370,8 +2371,7 @@ static char *visit_parent(char *path, char *newpath, int *presel)
 
 	dir = dirname(newpath);
 	if (access(dir, R_OK) == -1) {
-		printwarn();
-		*presel = MSGWAIT;
+		printwarn(presel);
 		return NULL;
 	}
 
@@ -2620,7 +2620,7 @@ static int dentfill(char *path, struct entry **dents)
 
 		if (fstatat(fd, ".", &sb_path, 0) == -1) {
 			closedir(dirp);
-			printwarn();
+			printwarn(NULL);
 			return 0;
 		}
 
@@ -3012,7 +3012,7 @@ begin:
 	 * It's assumed that path IS a directory when we are here.
 	 */
 	if (access(path, R_OK) == -1)
-		printwarn();
+		printwarn(&presel);
 
 	populate(path, lastname);
 	if (interrupted) {
@@ -3077,7 +3077,7 @@ nochange:
 
 			/* Cannot use stale data in entry, file may be missing by now */
 			if (stat(newpath, &sb) == -1) {
-				printwarn();
+				printwarn(&presel);
 				goto nochange;
 			}
 			DPRINTF_U(sb.st_mode);
@@ -3085,8 +3085,7 @@ nochange:
 			switch (sb.st_mode & S_IFMT) {
 			case S_IFDIR:
 				if (access(newpath, R_OK) == -1) {
-					printwarn();
-					presel = MSGWAIT;
+					printwarn(&presel);
 					goto nochange;
 				}
 
@@ -3442,7 +3441,7 @@ nochange:
 
 			mkpath(path, dents[cur].name, newpath);
 			if (lstat(newpath, &sb) == -1 || !show_stats(newpath, dents[cur].name, &sb)) {
-				printwarn();
+				printwarn(&presel);
 				goto nochange;
 			}
 			break;
@@ -3787,7 +3786,7 @@ nochange:
 			/* Open the descriptor to currently open directory */
 			fd = open(path, O_RDONLY | O_DIRECTORY);
 			if (fd == -1) {
-				printwarn();
+				printwarn(&presel);
 				goto nochange;
 			}
 
@@ -3812,7 +3811,7 @@ nochange:
 				/* Rename the file */
 				if (renameat(fd, dents[cur].name, fd, tmp) != 0) {
 					close(fd);
-					printwarn();
+					printwarn(&presel);
 					goto nochange;
 				}
 			} else {
@@ -3846,8 +3845,7 @@ nochange:
 
 				/* Check if file creation failed */
 				if (r == -1) {
-					printwarn();
-					presel = MSGWAIT;
+					printwarn(&presel);
 					close(fd);
 					goto nochange;
 				}
@@ -3877,8 +3875,7 @@ nochange:
 				}
 
 				if (stat(plugindir, &sb) == -1) {
-					printwarn();
-					presel = MSGWAIT;
+					printwarn(&presel);
 					goto nochange;
 				}
 
@@ -3930,7 +3927,7 @@ nochange:
 				} else {
 					/* Switch to current path for readline(3) */
 					if (chdir(path) == -1) {
-						printwarn();
+						printwarn(&presel);
 						goto nochange;
 					}
 
@@ -3941,7 +3938,7 @@ nochange:
 					refresh();
 
 					if (chdir(ipath) == -1) {
-						printwarn();
+						printwarn(&presel);
 						free(tmp);
 						goto nochange;
 					}
@@ -4311,7 +4308,7 @@ int main(int argc, char *argv[])
 		struct stat sb;
 
 		if (stat(initpath, &sb) == -1) {
-			printwarn();
+			xerror();
 			return 1;
 		}
 
