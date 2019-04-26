@@ -335,7 +335,6 @@ The following indicators are used in the detail view:
 | --- | --- |
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | specify bookmarks (max 10) |
 | `NNN_OPENER=mimeopen` | custom file opener |
-| `NNN_OPENER_DETACH=1` | do not block when invoking file opener |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
 | `NNN_COPIER='/absolute/path/to/copier'` | system clipboard copier script [default: none] |

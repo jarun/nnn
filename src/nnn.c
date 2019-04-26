@@ -291,7 +291,6 @@ static bm bookmark[BM_MAX];
 static size_t g_tmpfplen;
 static uchar g_crc;
 static uchar BLK_SHIFT = 9;
-static uchar opener_flag = F_NOTRACE;
 static bool interrupted = FALSE;
 
 /* Retain old signal handlers */
@@ -392,10 +391,9 @@ static const char * const messages[] = {
 #define NNN_NO_AUTOSELECT 9
 #define NNN_RESTRICT_NAV_OPEN 10
 #define NNN_RESTRICT_0B 11
-#define NNN_OPENER_DETACH 12
-#define NNN_TRASH 13
+#define NNN_TRASH 12
 #ifdef __linux__
-#define NNN_OPS_PROG 14
+#define NNN_OPS_PROG 13
 #endif
 
 static const char * const env_cfg[] = {
@@ -411,7 +409,6 @@ static const char * const env_cfg[] = {
 	"NNN_NO_AUTOSELECT",
 	"NNN_RESTRICT_NAV_OPEN",
 	"NNN_RESTRICT_0B",
-	"NNN_OPENER_DETACH",
 	"NNN_TRASH",
 #ifdef __linux__
 	"NNN_OPS_PROG",
@@ -3151,7 +3148,7 @@ nochange:
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(opener, newpath, NULL, NULL, opener_flag);
+				spawn(opener, newpath, NULL, NULL, F_NOTRACE | F_NOWAIT);
 				continue;
 			}
 			default:
@@ -4276,8 +4273,6 @@ int main(int argc, char *argv[])
 
 	/* Get custom opener, if set */
 	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
-	if (xgetenv_set(env_cfg[NNN_OPENER_DETACH]))
-		opener_flag |= F_NOWAIT;
 	DPRINTF_S(opener);
 
 	/* Parse bookmarks string */
@@ -4321,7 +4316,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (S_ISREG(sb.st_mode)) {
-			spawn(opener, initpath, NULL, NULL, opener_flag);
+			spawn(opener, initpath, NULL, NULL, F_NOTRACE | F_NOWAIT);
 			return 0;
 		}
 	}
