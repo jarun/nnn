@@ -405,7 +405,7 @@ By default in OpenBSD & FreeBSD (and probably on macOS as well), `stty` maps <kb
 
 ##### 100% CPU usage
 
-There is a known issue where if you close the terminal directly with `nnn` waiting for a spawned process to exit, a deadlock occurs and `nnn` uses 100% CPU. Please see issue [#225](https://github.com/jarun/nnn/issues/225) for more details. Make sure you quit the spawned process before closing the terminal. It's not a problem if there is no spawned process (`nnn` isn't blocked) as `nnn` checks if the parent process has exited.
+There is a known issue where if you close the terminal directly with `nnn` **_waiting for a spawned process_**, a deadlock occurs and `nnn` uses 100% CPU. Please see issue [#225](https://github.com/jarun/nnn/issues/225) for more details. Make sure you quit the spawned process before closing the terminal. It's not a problem if there is no spawned process (`nnn` isn't blocked) as `nnn` checks if the parent process has exited.
 
 #### WHY FORK?
 
