@@ -3757,7 +3757,14 @@ nochange:
 				tmp = xreadline(tmp, "archive name: ");
 				break;
 			case SEL_OPENWITH:
+#ifdef NORL
 				tmp = xreadline(NULL, "open with: ");
+#else
+				presel = 0;
+				tmp = getreadline("open with: ", path, ipath, &presel);
+				if (presel == MSGWAIT)
+					goto nochange;
+#endif
 				break;
 			case SEL_NEW:
 				tmp = xreadline(NULL, "name/link suffix [@ for none]: ");
