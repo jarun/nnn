@@ -2637,7 +2637,7 @@ static void dentfree(void)
 
 static int dentfill(char *path, struct entry **dents)
 {
-	int n = 0, count;
+	int n = 0, count, flags = 0;
 	ulong num_saved;
 	struct dirent *dp;
 	char *namep, *pnb;
@@ -2667,7 +2667,22 @@ static int dentfill(char *path, struct entry **dents)
 			open_max = max_openfds();
 	}
 
-	while ((dp = readdir(dirp))) {
+	dp = readdir(dirp);
+	// if (!dp) /* We have opened the dir, at least . would be returned */
+	//	goto exit;
+
+	if (cfg.blkorder || dp->d_type == DT_UNKNOWN) {
+		/*
+		 * Optimization added for filesystems which support dirent.d_type
+		 * see readdir(3)
+		 * Known drawbacks:
+		 * - the symlink size is set to 0
+		 * - the modification time of the symlink is set to that of the target file
+		 */
+		flags = AT_SYMLINK_NOFOLLOW;
+	}
+
+	do {
 		namep = dp->d_name;
 
 		/* Skip self and parent */
@@ -2711,7 +2726,7 @@ static int dentfill(char *path, struct entry **dents)
 			continue;
 		}
 
-		if (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW) == -1) {
+		if (fstatat(fd, namep, &sb, flags) == -1) {
 			DPRINTF_S(namep);
 			continue;
 		}
@@ -2760,9 +2775,14 @@ static int dentfill(char *path, struct entry **dents)
 		off += dentp->nlen;
 
 		/* Copy other fields */
-		dentp->mode = sb.st_mode;
 		dentp->t = sb.st_mtime;
-		dentp->size = sb.st_size;
+		if (dp->d_type == DT_LNK && !flags) { /* Do not add sizes for links */
+			dentp->mode = (sb.st_mode & ~S_IFMT) | S_IFLNK;
+			dentp->size = 0;
+		} else {
+			dentp->mode = sb.st_mode;
+			dentp->size = sb.st_size;
+		}
 		dentp->flags = 0;
 
 		if (cfg.blkorder) {
@@ -2796,18 +2816,22 @@ static int dentfill(char *path, struct entry **dents)
 			}
 		}
 
-		/* Flag if this is a dir or symlink to a dir */
-		if (S_ISLNK(sb.st_mode)) {
-			sb.st_mode = 0;
-			fstatat(fd, namep, &sb, 0);
-		}
+		if (flags) {
+			/* Flag if this is a dir or symlink to a dir */
+			if (S_ISLNK(sb.st_mode)) {
+				sb.st_mode = 0;
+				fstatat(fd, namep, &sb, 0);
+			}
 
-		if (S_ISDIR(sb.st_mode))
+			if (S_ISDIR(sb.st_mode))
+				dentp->flags |= DIR_OR_LINK_TO_DIR;
+		} else if (dp->d_type == DT_DIR || (dp->d_type == DT_LNK && S_ISDIR(sb.st_mode)))
 			dentp->flags |= DIR_OR_LINK_TO_DIR;
 
 		++n;
-	}
+	} while ((dp = readdir(dirp)));
 
+//exit:
 	/* Should never be null */
 	if (closedir(dirp) == -1) {
 		dentfree();
