@@ -370,12 +370,14 @@ static char mv[] = "mvg -gi";
 #define STR_INVBM_KEY 1
 #define STR_DATE_ID 2
 #define STR_TMPFILE 3
+#define NONE_SELECTED 4
 
 static const char * const messages[] = {
 	"no traversal",
 	"invalid key",
 	"%F %T %z",
 	"/.nnnXXXXXX",
+	"empty selection",
 };
 
 /* Supported configuration environment variables */
@@ -1842,7 +1844,7 @@ static size_t mkpath(char *dir, char *name, char *out)
  * Create symbolic/hard link(s) to file(s) in selection list
  * Returns the number of links created
  */
-static int xlink(char *suffix, char *path, char *buf, int type)
+static int xlink(char *suffix, char *path, char *buf, int *presel, int type)
 {
 	int count = 0;
 	char *pbuf = pcopybuf, *fname;
@@ -1850,15 +1852,15 @@ static int xlink(char *suffix, char *path, char *buf, int type)
 	int (*link_fn)(const char *, const char *) = NULL;
 
 	/* Check if selection is empty */
-	if (!copybufpos)
-		return 0;
+	if (!copybufpos) {
+		printwait(messages[NONE_SELECTED], presel);
+		return -1;
+	}
 
 	if (type == 's') /* symbolic link */
 		link_fn = &symlink;
-	else if (type == 'h') /* hard link */
+	else /* hard link */
 		link_fn = &link;
-	else
-		return -1;
 
 	while (pos < copybufpos) {
 		len = strlen(pbuf);
@@ -1872,6 +1874,9 @@ static int xlink(char *suffix, char *path, char *buf, int type)
 		pos += len + 1;
 		pbuf += len + 1;
 	}
+
+	if (!count)
+		printwait("none created", presel);
 
 	return count;
 }
@@ -3707,7 +3712,7 @@ nochange:
 				break;
 			}
 
-			printwait("none selected", &presel);
+			printwait(messages[NONE_SELECTED], &presel);
 			goto nochange;
 		case SEL_CP:
 		case SEL_MV:
@@ -3894,13 +3899,11 @@ nochange:
 				} else if (r == 's' || r == 'h') {
 					if (tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
-					r = xlink(tmp, path, newpath, r);
+					r = xlink(tmp, path, newpath, &presel, r);
 					close(fd);
 
-					if (r <= 0) {
-						printwait("none created", &presel);
+					if (r <= 0)
 						goto nochange;
-					}
 
 					if (cfg.filtermode)
 						presel = FILTER;
