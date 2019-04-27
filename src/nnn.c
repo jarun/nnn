@@ -731,6 +731,12 @@ static char *xbasename(char *path)
 	return base ? base + 1 : path;
 }
 
+static int create_tmp_file()
+{
+	xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - g_tmpfplen);
+	return mkstemp(g_tmpfpath);
+}
+
 /* Writes buflen char(s) from buf to a file */
 static void writecp(const char *buf, const size_t buflen)
 {
@@ -792,9 +798,7 @@ static void showcplist(void)
 	if (!copybufpos)
 		return;
 
-	xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - g_tmpfplen);
-
-	fd = mkstemp(g_tmpfpath);
+	fd = create_tmp_file();
 	if (fd == -1) {
 		DPRINTF_S("mkstemp failed!");
 		return;
@@ -2312,9 +2316,7 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 	size_t r;
 	FILE *fp;
 
-	xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - g_tmpfplen);
-
-	fd = mkstemp(g_tmpfpath);
+	fd = create_tmp_file();
 	if (fd == -1)
 		return FALSE;
 
@@ -2567,9 +2569,7 @@ static bool show_help(const char *path)
 	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt  ^N  Note  =  Launcher\n"};
 
-	xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - g_tmpfplen);
-
-	fd = mkstemp(g_tmpfpath);
+	fd = create_tmp_file();
 	if (fd == -1)
 		return FALSE;
 
