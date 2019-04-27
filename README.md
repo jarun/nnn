@@ -23,11 +23,11 @@
 
 <p align="center"><i>3 modes of nnn (light with filter, detail, du analyzer) with memory usage. Click for a demo video.</i></a></p>
 
-`nnn` is one of the fastest and most lightweight file managers (`~55KB` binary, `~3.5MB` resident memory usage, [highly optimized](https://github.com/jarun/nnn/wiki/performance-factors) code). And yet, it doesn't lack in features!
+`nnn` is smooth... like butter. It's one of the fastest and most lightweight file managers, thanks to a [highly optimized](https://github.com/jarun/nnn/wiki/performance-factors) code. And yet, it doesn't lack in features!
 
-`nnn` works seamlessly with your DE and favourite GUI utilities. It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
+It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
-Have as many scripts as you want to extend the power of `nnn`! Pick from the available plugins or add your own.
+`nnn` works seamlessly with DEs and GUI utilities. Several plugins are available to extend its power. New plugins can be added easily.
 
 **[Quickstart](#quickstart)** and see how `nnn` simplifies long desktop sessions.
 
