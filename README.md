@@ -89,7 +89,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex and substring match
-  - Subtree search (needs fzy)
+  - Subtree search to open or edit files (using plugin)
 - Mimes
   - Open with desktop opener or specify a custom app
   - Create, list, extract archive (needs (p)atool)
@@ -136,7 +136,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 | trash-cli | trash files (default: delete) |
 | mediainfo / exiftool | multimedia file details |
 | atool / patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
-| fzy | app launcher with drop-down menu |
+| fzy | app launcher, subtree search |
 | vidir (from moreutils) | batch rename dir entries |
 | sshfs, fusermount(3) | mount, unmount remote over SSHFS |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
@@ -194,7 +194,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/hacking-nnn#cd-on-quit).
 3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`
 4. Run `n`.
-5. To use `nnn` as a GUI app launcher with fuzzy selection menu, drop [`nlaunch`](https://github.com/jarun/nnn/blob/master/scripts/nlaunch/nlaunch) somewhere in your `$PATH`. Note that the launcher requires fzy.
+5. To enable the GUI app launcher with a fuzzy drop-down selection menu [`nlaunch`](https://github.com/jarun/nnn/tree/master/scripts/nlaunch), drop it somewhere in your `$PATH`.
 6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 
 - For additional functionality [setup plugins](#plugins).
