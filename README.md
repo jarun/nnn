@@ -23,11 +23,11 @@
 
 <p align="center"><i>3 modes of nnn (light with filter, detail, du analyzer) with memory usage. Click for a demo video.</i></a></p>
 
-`nnn` is one of the fastest and most lightweight file managers (`~55KB` binary, `~3.5MB` resident memory usage, [highly optimized](https://github.com/jarun/nnn/wiki/performance-factors) code). And yet, it doesn't lack in features!
+`nnn` is smooth... like butter. It's one of the fastest and most lightweight file managers, thanks to a [highly optimized](https://github.com/jarun/nnn/wiki/performance-factors) code. And yet, it doesn't lack in features!
 
-`nnn` works seamlessly with your DE and favourite GUI utilities. It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
+It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
-Have as many scripts as you want to extend the power of `nnn`! Pick from the available plugins or add your own.
+`nnn` works seamlessly with DEs and GUI utilities. Several plugins are available to extend its power. New plugins can be added easily.
 
 **[Quickstart](#quickstart)** and see how `nnn` simplifies long desktop sessions.
 
@@ -89,7 +89,7 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the ava
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex and substring match
-  - Subtree search (needs fzy)
+  - Subtree search to open or edit files (using plugin)
 - Mimes
   - Open with desktop opener or specify a custom app
   - Create, list, extract archive (needs (p)atool)
@@ -136,7 +136,7 @@ Have as many scripts as you want to extend the power of `nnn`! Pick from the ava
 | trash-cli | trash files (default: delete) |
 | mediainfo / exiftool | multimedia file details |
 | atool / patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
-| fzy | app launcher with drop-down menu |
+| fzy | app launcher, subtree search |
 | vidir (from moreutils) | batch rename dir entries |
 | sshfs, fusermount(3) | mount, unmount remote over SSHFS |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
@@ -194,7 +194,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/hacking-nnn#cd-on-quit).
 3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`
 4. Run `n`.
-5. To use `nnn` as a GUI app launcher with fuzzy selection menu, drop [`nlaunch`](https://github.com/jarun/nnn/blob/master/scripts/nlaunch/nlaunch) somewhere in your `$PATH`. Note that the launcher requires fzy.
+5. To enable the GUI app launcher with a fuzzy drop-down selection menu [`nlaunch`](https://github.com/jarun/nnn/tree/master/scripts/nlaunch), drop it somewhere in your `$PATH`.
 6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 
 - For additional functionality [setup plugins](#plugins).
@@ -444,7 +444,7 @@ There is a known issue where if you close the terminal directly with `nnn` **_wa
 
 `nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today. I chose to fork because:
 - one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. `noice` was rudimentary. In my opinion evolution is the taste of time.
-- I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind. Check out [nnn design considerations](https://github.com/jarun/nnn/wiki/nnn-design-considerations) for more details.
+- I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind. Check out the [design considerations](https://github.com/jarun/nnn/wiki/design-considerations) for more details.
 
 Trivia: The name `nnn` stands for _Noice is Not Noice, a noicer fork..._.
 
