@@ -6,6 +6,9 @@
 #
 #              Requires fzy.
 #
+#              Usage: nlaunch [delay]
+#                     delay is in seconds, if omitted nlaunch waits for 1 sec
+#
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
@@ -17,4 +20,10 @@ get_selection() {
 
 if selection=$( get_selection ); then
     setsid "$selection" 2>/dev/null 1>/dev/null &
+
+    if ! [ -z "$1" ]; then
+        sleep "$1"
+    else
+        sleep 1
+    fi
 fi

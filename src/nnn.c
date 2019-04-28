@@ -3985,7 +3985,7 @@ nochange:
 				goto begin;
 			case SEL_LAUNCH:
 				if (getutil(utils[NLAUNCH])) {
-					spawn(utils[NLAUNCH], NULL, NULL, path, F_NORMAL);
+					spawn(utils[NLAUNCH], "0", NULL, path, F_NORMAL);
 					break;
 				} // fallthrough
 			default: /* SEL_RUNCMD */
