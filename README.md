@@ -23,7 +23,7 @@
 
 <p align="center"><i>3 modes of nnn (light with filter, detail, du analyzer) with memory usage. Click for a demo video.</i></a></p>
 
-`nnn` is smooth... like butter. It's one of the fastest and most lightweight file managers, thanks to a [highly optimized](https://github.com/jarun/nnn/wiki/performance-factors) code. And yet, it doesn't lack in features!
+`nnn` is smooth... like butter. It's one of the fastest and most lightweight file managers, thanks to a **[highly optimized](https://github.com/jarun/nnn/wiki/performance-factors)** code. And yet, it doesn't lack in features!
 
 It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
@@ -129,6 +129,8 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 
 #### Utility dependencies
 
+The following table is a complete list. Some of the utilities may be installed by default (e.g. desktop opener, file, coreutils, findutils) and some may not be required by all users (e.g. sshfs, vlock, advcpmv).
+
 | Dependency | Operation |
 | --- | --- |
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | desktop opener |
@@ -136,7 +138,6 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 | trash-cli | trash files (default: delete) |
 | mediainfo / exiftool | multimedia file details |
 | atool / patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
-| fzy | app launcher, subtree search |
 | vidir (from moreutils) | batch rename dir entries |
 | sshfs, fusermount(3) | mount, unmount remote over SSHFS |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
