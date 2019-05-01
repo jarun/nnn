@@ -5,7 +5,10 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
+mkdir -p ~/.config/nnn/plugins
+cd ~/.config/nnn/plugins
 wget -nv --show-progress https://github.com/jarun/nnn/archive/master.tar.gz
 tar -xf master.tar.gz
 cp -vf nnn-master/plugins/* .
+cp -vf nnn-master/scripts/nlaunch/nlaunch .
 rm -rf nnn-master/ master.tar.gz README.md

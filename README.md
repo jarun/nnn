@@ -27,7 +27,7 @@
 
 It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
-`nnn` works seamlessly with DEs and GUI utilities. Several plugins are available to extend its power. New plugins can be added easily.
+`nnn` works seamlessly with DEs and GUI utilities. Several **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. New plugins can be added easily.
 
 **[Quickstart](#quickstart)** and see how `nnn` simplifies long desktop sessions.
 
@@ -78,8 +78,8 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Disk usage analyzer (block/apparent)
   - File picker, (neo)vim plugin
 - Navigation
-  - *Navigate-as-you-type* with auto-select dir, *wild load*
-  - 4 contexts (_aka_ tabs _aka_ workspaces)
+  - *Navigate-as-you-type* with dir auto-select, *wild load*
+  - 4 contexts (_aka_ tabs/workspaces)
   - Bookmarks; pin and visit a directory
   - Familiar, easy shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>)
 - Sorting
@@ -93,19 +93,19 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - Mimes
   - Open with desktop opener or specify a custom app
   - Create, list, extract archive (needs (p)atool)
-  - Open all text files in EDITOR (optional)
+  - Option to open all text files in EDITOR
 - Information
-  - Detailed file information (stat and file)
+  - Detailed file information
   - Media information (needs mediainfo/exiftool)
 - Convenience
   - Create, rename files and directories
   - Select files across dirs; all/range selection
   - Copy, move, delete, archive, link selection
   - FreeDesktop compliant trash (needs trash-cli)
-  - Show copy, move progress on Linux (needs avdcpmv)
   - Plugin repository
   - SSHFS mounts (needs sshfs)
   - Batch rename (needs vidir)
+  - Show copy, move progress on Linux (needs avdcpmv)
   - Per-context directory color (default: blue)
   - Spawn a shell in the current directory
   - Launch applications, run a command
@@ -195,10 +195,9 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/hacking-nnn#cd-on-quit).
 3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`
 4. Run `n`.
-5. To enable the GUI app launcher with a fuzzy drop-down selection menu [`nlaunch`](https://github.com/jarun/nnn/tree/master/scripts/nlaunch), drop it somewhere in your `$PATH`.
-6. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
+5. For additional functionality [setup plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins) and the GUI app launcher [`nlaunch`](https://github.com/jarun/nnn/tree/master/scripts/nlaunch).
 
-- For additional functionality [setup plugins](#plugins).
+- Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 - When you are ready for more, start [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn).
 - To set `nnn` as the default file manager, follow these [instructions](https://github.com/jarun/nnn/wiki/nnn-as-default-file-manager).
 

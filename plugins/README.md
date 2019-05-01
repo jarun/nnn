@@ -19,6 +19,12 @@
 | transfer | sh | curl | Upload current file to transfer.sh |
 | upgrade | sh | wget | Upgrade to latest nnn version manually on Debian 9 Stretch |
 
+#### Installing plugins
+
+Download the `getplugs` plugin and execute it to get all the plugins. You can run it again later to update the plugins.
+
+Note that `getplugs` also downloads the launcher `nlaunch` which you have to drop somewhere in your `$PATH` manually.
+
 #### File access from plugins
 
 Plugins can access:
