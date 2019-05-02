@@ -28,7 +28,7 @@ DISTFILES = src nnn.1 Makefile README.md LICENSE
 SRC = src/nnn.c
 BIN = nnn
 
-all:
+all: $(BIN)
 
 $(SRC): src/nnn.h
 
