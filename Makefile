@@ -36,7 +36,7 @@ $(BIN): $(SRC)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS) -lreadline
 
 debug: $(SRC)
-	$(CC) -DDBGMODE -g $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS) -lreadline
+	$(CC) -DDBGMODE -g $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS) -lreadline -lrt
 
 norl: $(SRC)
 	$(CC) -DNORL $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS)
