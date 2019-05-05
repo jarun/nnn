@@ -12,22 +12,24 @@ echo
 echo -n "device (e.g. sdc2): "
 read dev
 
-if [ -z "$dev" ]; then
-    exit 1
-fi
-
-echo
-
-if grep -qs "$dev " /proc/mounts; then
-    sync
-    pumount "$dev"
-    if [ "$?" -eq "0" ]; then
-        udisksctl power-off -b /dev/"$dev"
-        echo $dev ejected.
+while ! [ -z "$dev" ]
+do
+    if grep -qs "$dev " /proc/mounts; then
+        sync
+        pumount "$dev"
+        if [ "$?" -eq "0" ]; then
+            echo "$dev" unmounted.
+            udisksctl power-off -b /dev/"$dev"
+            if [ "$?" -eq "0" ]; then
+                echo "$dev" ejected.
+            fi
+        fi
+    else
+        pmount "$dev"
+        echo "$dev" mounted to "$(lsblk -n /dev/"$dev" | rev | cut -d' ' -f1 | rev)".
     fi
-else
-    pmount "$dev"
-    echo "$dev" mounted to "$(lsblk -n /dev/"$dev" | rev | cut -d' ' -f1 | rev)".
-fi
 
-read dummy
+    echo
+    echo -n "next device: "
+    read dev
+done
