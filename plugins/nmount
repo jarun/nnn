@@ -19,6 +19,7 @@ fi
 echo
 
 if grep -qs "$dev " /proc/mounts; then
+    sync
     pumount "$dev"
     if [ "$?" -eq "0" ]; then
         udisksctl power-off -b /dev/"$dev"
