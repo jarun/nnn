@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+# Description: View a PDF file in pager
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+if ! [ -z "$1" ]; then
+    if [ $(head -c 4 "$1") = "%PDF" ]; then
+        pdftotext -nopgbrk -layout "$1" - | sed 's/\xe2\x80\x8b//g' | $PAGER
+    fi
+fi
