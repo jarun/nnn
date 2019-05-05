@@ -10,5 +10,5 @@ cd ~/.config/nnn/plugins
 wget -nv --show-progress https://github.com/jarun/nnn/archive/master.tar.gz
 tar -xf master.tar.gz
 cp -vf nnn-master/plugins/* .
-cp -vf nnn-master/scripts/nlaunch/nlaunch .
+sudo mv -vf nnn-master/scripts/nlaunch/nlaunch /usr/local/bin/
 rm -rf nnn-master/ master.tar.gz README.md

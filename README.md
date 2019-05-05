@@ -195,7 +195,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/hacking-nnn#cd-on-quit).
 3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`
 4. Run `n`.
-5. For additional functionality [setup plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins) and the GUI app launcher [`nlaunch`](https://github.com/jarun/nnn/tree/master/scripts/nlaunch).
+5. For additional functionality [install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins) and the GUI app launcher [`nlaunch`](https://github.com/jarun/nnn/tree/master/scripts/nlaunch).
 
 - Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 - When you are ready for more, start [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn).
@@ -416,9 +416,7 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 #### PLUGINS
 
-To extend the capabilities of `nnn`, plugins are introduced. Plugins are scripts which `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins.
-
-Copy the [plugins](https://github.com/jarun/nnn/tree/master/plugins) of your interest to `~/.config/nnn/plugins`.
+To extend the capabilities of `nnn`, [plugins](https://github.com/jarun/nnn/tree/master/plugins) are introduced. Plugins are scripts which `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins.
 
 Use the pick plugin shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 

@@ -21,9 +21,9 @@
 
 #### Installing plugins
 
-Download the `getplugs` plugin and execute it to get all the plugins. You can run it again later to update the plugins.
+Download the `getplugs` plugin and execute it anywhere to get all the plugins installed to `~/.config/nnn/plugins`. You can run it again later to update the plugins.
 
-Note that `getplugs` also downloads the launcher `nlaunch` which you have to drop somewhere in your `$PATH` manually.
+**NOTE:** `getplugs` also downloads the launcher `nlaunch` and tries to place it at `/usr/local/bin/` using `sudo`. If it fails you have to place `nlauch` manually somewhere in your `$PATH`.
 
 #### File access from plugins
 
