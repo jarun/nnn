@@ -13,6 +13,7 @@
 | nmount | sh | pmount | Toggle mount status of a device as normal user |
 | nwal | sh | nitrogen | Set the selected image as wallpaper using nitrogen |
 | pastebin | sh | [pastebinit](https://launchpad.net/pastebinit) | Paste contents of current (text) file to paste.ubuntu.com |
+| pdfview | sh | pdftotext, `$PAGER` | View current PDF file |
 | picker | sh | nnn | Pick files and pipe the newline-separated list to another utility |
 | pywal | sh | pywal | Set selected image as wallpaper, change terminal color scheme |
 | sxiv | sh | sxiv | Browse images in a dir in sxiv, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts))|
