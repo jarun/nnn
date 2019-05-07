@@ -1023,10 +1023,8 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 		retstatus = join(pid, flag);
 
 		DPRINTF_D(pid);
-		if (flag & F_NORMAL) {
-			nonl();
-			noecho();
-		}
+		if (flag & F_NORMAL)
+			refresh();
 
 		free(cmd);
 	}
