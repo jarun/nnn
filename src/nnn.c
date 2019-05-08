@@ -3138,10 +3138,20 @@ nochange:
 				break;
 			// Handle clicking on a context at the top:
 			if (event.y == 0) {
-				int ctx = (event.x - 1)/2;
-				if (event.x == 1 + 2*ctx && 0 <= ctx && ctx < CTX_MAX) {
-					r = ctx;
-					goto switch_context;
+				// Get context from: "[1 2 3 4]..."
+				r = event.x/2;
+				if (event.x != 1 + 2*r)
+					break; // The character after the context number
+				if (0 <= r && r < CTX_MAX && r != cfg.curctx) {
+					savecurctx(&cfg, path, dents[cur].name, r);
+
+					/* Reset the pointers */
+					path = g_ctx[r].c_path;
+					lastdir = g_ctx[r].c_last;
+					lastname = g_ctx[r].c_name;
+
+					setdirwatch();
+					goto begin;
 				}
 				break;
 			}
@@ -3373,7 +3383,6 @@ nochange:
 			case '3': // fallthrough
 			case '4':
 				r = fd - '1'; /* Save the next context id */
-switch_context:
 				if (cfg.curctx == r) {
 					if (sel != SEL_CYCLE)
 						continue;
