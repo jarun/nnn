@@ -4359,10 +4359,6 @@ int main(int argc, char *argv[])
 	if (!setup_config())
 		return 1;
 
-	/* Get custom opener, if set */
-	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
-	DPRINTF_S(opener);
-
 	/* Parse bookmarks string */
 	if (!parsebmstr()) {
 		fprintf(stderr, "%s\n", env_cfg[NNN_BMS]);
@@ -4389,23 +4385,6 @@ int main(int argc, char *argv[])
 		if (!initpath) {
 			xerror();
 			return 1;
-		}
-
-		/*
-		 * If nnn is set as the file manager, applications may try to open
-		 * files by invoking nnn. In that case pass the file path to the
-		 * desktop opener and exit.
-		 */
-		struct stat sb;
-
-		if (stat(initpath, &sb) == -1) {
-			xerror();
-			return 1;
-		}
-
-		if (S_ISREG(sb.st_mode)) {
-			spawn(opener, initpath, NULL, NULL, F_NOTRACE | F_NOWAIT);
-			return 0;
 		}
 	}
 
@@ -4443,6 +4422,10 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 #endif
+
+	/* Get custom opener, if set */
+	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
+	DPRINTF_S(opener);
 
 	/* Set nnn nesting level, idletimeout used as tmp var */
 	idletimeout = xatoi(getenv(env_cfg[NNNLVL]));
