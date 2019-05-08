@@ -3135,14 +3135,16 @@ nochange:
 			goto begin;
 		case SEL_CLICK:
 			if (getmouse(&event) != OK)
-				break;
+				goto nochange;
 
 			// Handle clicking on a context at the top:
 			if (event.y == 0) {
 				// Get context from: "[1 2 3 4]..."
 				r = event.x/2;
-				if (event.x != 1 + 2*r)
-					break; // The character after the context number
+
+				if (event.x != 1 + (r << 1))
+					goto nochange; // The character after the context number
+
 				if (0 <= r && r < CTX_MAX && r != cfg.curctx) {
 					savecurctx(&cfg, path, dents[cur].name, r);
 
@@ -3154,25 +3156,26 @@ nochange:
 					setdirwatch();
 					goto begin;
 				}
-				break;
+				goto nochange;
 			}
 
 			// Handle clicking on a file:
-			if (2 <= event.y && event.y < LINES - 2) {
-				r = 0;
-				if (cur-(LINES-4)/2 > 0)
-					r = cur-(LINES-4)/2;
-				if (ndents >= LINES-4 && ndents - (LINES-4) < r)
-					r = ndents - (LINES-4);
-				r += event.y - 2;
+			if (2 <= event.y && event.y < xlines - 2) {
+				r = event.y - 2;
+
 				if (r >= ndents)
-					break;
-				cur = r;
+					goto nochange;
+
+				if (ndents > (xlines - 4) && cur >= ((xlines - 4) >> 1))
+					cur -= ((xlines - 4) >> 1) - r;
+				else
+					cur = r;
+
 				// Single click just selects, double click also opens
 				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
-					break; // fallthrough
+					break;
 			} else
-				break;
+				goto nochange; // fallthrough
 		case SEL_NAV_IN: // fallthrough
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
