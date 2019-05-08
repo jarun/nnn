@@ -98,6 +98,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Detailed file information
   - Media information (needs mediainfo/exiftool)
 - Convenience
+  - Mouse support
   - Create, rename files and directories
   - Select files across dirs; all/range selection
   - Copy, move, delete, archive, link selection
