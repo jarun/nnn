@@ -3136,6 +3136,7 @@ nochange:
 		case SEL_CLICK:
 			if (getmouse(&event) != OK)
 				break;
+
 			// Handle clicking on a context at the top:
 			if (event.y == 0) {
 				// Get context from: "[1 2 3 4]..."
@@ -3155,6 +3156,7 @@ nochange:
 				}
 				break;
 			}
+
 			// Handle clicking on a file:
 			if (2 <= event.y && event.y < LINES - 2) {
 				r = 0;
@@ -3168,10 +3170,9 @@ nochange:
 				cur = r;
 				// Single click just selects, double click also opens
 				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
-					break;
-			} else {
+					break; // fallthrough
+			} else
 				break;
-			}
 		case SEL_NAV_IN: // fallthrough
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
