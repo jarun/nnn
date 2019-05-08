@@ -3812,7 +3812,7 @@ nochange:
 
 			/* Confirm if app is CLI or GUI */
 			if (sel == SEL_OPENWITH) {
-				r = get_input("cli mode? [y/Y]");
+				r = get_input("cli mode? [y/N]");
 				(r == 'y' || r == 'Y') ? (r = F_CLI)
 						       : (r = F_NOWAIT | F_NOTRACE | F_MULTI);
 			}
