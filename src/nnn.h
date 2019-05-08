@@ -102,6 +102,7 @@ enum action {
 	SEL_QUITCTX,
 	SEL_QUITCD,
 	SEL_QUIT,
+	SEL_CLICK,
 };
 
 /* Associate a pressed key to an action */
@@ -256,4 +257,5 @@ static struct key bindings[] = {
 	/* Quit */
 	{ 'Q',            SEL_QUIT },
 	{ CONTROL('Q'),   SEL_QUIT },
+	{ KEY_MOUSE,      SEL_CLICK },
 };
