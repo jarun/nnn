@@ -2895,8 +2895,8 @@ static void redraw(char *path)
 	xcols = COLS;
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
-	int lastln = xlines;
-	int scrolloff = MIN(SCROLLOFF, (xlines-4)>>1);
+	int lastln = xlines, onscreen = xlines - 4;
+	int scrolloff = MIN(SCROLLOFF, onscreen >> 1);
 	int i, attrs;
 	char buf[12];
 	char c;
@@ -2906,12 +2906,12 @@ static void redraw(char *path)
 	/* Clear screen */
 	erase();
 
-	if (ndents <= xlines - 4)
+	if (ndents <= onscreen)
 		curscroll = 0;
 	else if (cur < curscroll + scrolloff)
 		curscroll = MAX(0, cur - scrolloff);
-	else if (cur > curscroll + (xlines - 4) - scrolloff - 1)
-		curscroll = MIN(ndents - (xlines - 4), cur - (xlines - 4) + scrolloff + 1);
+	else if (cur > curscroll + onscreen - scrolloff - 1)
+		curscroll = MIN(ndents - onscreen, cur - onscreen + scrolloff + 1);
 
 #ifdef DIR_LIMITED_COPY
 	if (cfg.copymode)
@@ -2978,7 +2978,7 @@ static void redraw(char *path)
 	}
 
 	/* Print listing */
-	for (i = curscroll; i < ndents && i < curscroll + (xlines - 4); ++i) {
+	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i) {
 		printptr(&dents[i], i == cur, ncols);
 	}
 
@@ -3170,7 +3170,6 @@ nochange:
 				// Single click just selects, double click also opens
 				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
 					break;
-				// fallthrough to select the file
 			} else
 				goto nochange; // fallthrough
 		case SEL_NAV_IN: // fallthrough
