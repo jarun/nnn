@@ -3161,7 +3161,6 @@ nochange:
 				r = MAX(0, MIN(cur-((xlines-4)>>1), ndents-(xlines-4)));
 				// Add the mouse click position to get the clicked file:
 				r += event.y - 2;
-                printf("CLICKED: %d", r);
 
 				if (r >= ndents)
 					goto nochange;
