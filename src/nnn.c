@@ -3107,7 +3107,6 @@ begin:
 
 	while (1) {
 		redraw(path);
-        onscreen = xlines - 4;
 nochange:
 		/* Exit if parent has exited */
 		if (getppid() == 1)
@@ -3277,6 +3276,7 @@ nochange:
 			break;
 		case SEL_PGDN: // fallthrough
 		case SEL_CTRL_D:
+			onscreen = xlines - 4;
 			r = sel == SEL_PGDN ? onscreen - 1 : onscreen >> 1;
 			curscroll = MIN(ndents - onscreen, curscroll + r);
 			cur = (curscroll == ndents - onscreen) ? cur + r :
@@ -3285,6 +3285,7 @@ nochange:
 			break;
 		case SEL_PGUP: // fallthrough
 		case SEL_CTRL_U:
+			onscreen = xlines - 4;
 			r = sel == SEL_PGUP ? onscreen - 1 : onscreen >> 1;
 			curscroll = MAX(0, curscroll - r);
 			cur = (curscroll == 0) ? cur - r :
