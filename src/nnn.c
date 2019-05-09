@@ -133,6 +133,7 @@
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
 #define EXEC_ARGS_MAX 8
+#define SCROLLOFF 5
 
 /* Entry flags */
 #define DIR_OR_LINK_TO_DIR 0x1
@@ -272,7 +273,7 @@ static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static struct entry *dents;
 static char *pnamebuf, *pcopybuf;
-static int ndents, cur, total_dents = ENTRY_INCR;
+static int ndents, cur, curscroll, total_dents = ENTRY_INCR;
 static int xlines, xcols;
 static uint idle;
 static uint idletimeout, copybufpos, copybuflen;
@@ -1655,6 +1656,8 @@ end:
 	if (*ch != '\t')
 		g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
 
+	curscroll = MAX(0, cur - SCROLLOFF);
+
 	curs_set(FALSE);
 	settimeout();
 
@@ -2882,6 +2885,8 @@ static void populate(char *path, char *lastname)
 		cur = 0;
 	else
 		cur = dentfind(lastname, ndents);
+
+	curscroll = MAX(0, cur - SCROLLOFF);
 }
 
 static void redraw(char *path)
@@ -2891,7 +2896,8 @@ static void redraw(char *path)
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int lastln = xlines;
-	int nlines = MIN(lastln - 4, ndents), i, attrs;
+	int scrolloff = MIN(SCROLLOFF, (xlines-4)>>1);
+	int i, attrs;
 	char buf[12];
 	char c;
 
@@ -2899,6 +2905,13 @@ static void redraw(char *path)
 
 	/* Clear screen */
 	erase();
+
+	if (ndents <= xlines - 4)
+		curscroll = 0;
+	else if (cur < curscroll + scrolloff)
+		curscroll = MAX(0, cur - scrolloff);
+	else if (cur > curscroll + (xlines - 4) - scrolloff - 1)
+		curscroll = MIN(ndents - (xlines - 4), cur - (xlines - 4) + scrolloff + 1);
 
 #ifdef DIR_LIMITED_COPY
 	if (cfg.copymode)
@@ -2965,18 +2978,8 @@ static void redraw(char *path)
 	}
 
 	/* Print listing */
-	if (cur < (nlines >> 1)) {
-		for (i = 0; i < nlines; ++i)
-			printptr(&dents[i], i == cur, ncols);
-	} else if (cur >= ndents - (nlines >> 1)) {
-		for (i = ndents - nlines; i < ndents; ++i)
-			printptr(&dents[i], i == cur, ncols);
-	} else {
-		const int odd = ISODD(nlines);
-
-		nlines >>= 1;
-		for (i = cur - nlines; i < cur + nlines + odd; ++i)
-			printptr(&dents[i], i == cur, ncols);
+	for (i = curscroll; i < ndents && i < curscroll + (xlines - 4); ++i) {
+		printptr(&dents[i], i == cur, ncols);
 	}
 
 	/* Must reset e.g. no files in dir */
@@ -3157,10 +3160,7 @@ nochange:
 
 			// Handle clicking on a file:
 			if (2 <= event.y && event.y < xlines - 2) {
-				// Get index of the first file listed on-screen:
-				r = MAX(0, MIN(cur-((xlines-4)>>1), ndents-(xlines-4)));
-				// Add the mouse click position to get the clicked file:
-				r += event.y - 2;
+				r = curscroll + (event.y - 2);
 
 				if (r >= ndents)
 					goto nochange;
