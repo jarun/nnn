@@ -2017,8 +2017,8 @@ static char *coolsize(off_t size)
 {
 	static const char * const U = "BKMGTPEZY";
 	static char size_buf[12]; /* Buffer to hold human readable size */
-	static off_t rem;
-	static int i;
+	off_t rem;
+	int i;
 
 	rem = i = 0;
 
@@ -2065,19 +2065,21 @@ static char *coolsize(off_t size)
 	}
 
 	if (i > 0 && i < 6)
-		snprintf(size_buf, 12, "%lu.%0*lu%c", (ulong)size, i, (ulong)rem, U[i]);
+		snprintf(size_buf, 12, "%lu.%0*lu%c", size, i, rem, U[i]);
 	else
-		snprintf(size_buf, 12, "%lu%c", (ulong)size, U[i]);
+		snprintf(size_buf, 12, "%lu%c", size, U[i]);
 
 	return size_buf;
 }
 
-static char *get_file_sym(mode_t mode)
+static void printent(const struct entry *ent, int sel, uint namecols)
 {
-	static char ind[2];
+	const char *pname = unescape(ent->name, namecols);
+	const char cp = (ent->flags & FILE_COPIED) ? '+' : ' ';
+	char ind[2];
+	mode_t mode = ent->mode;
 
-	ind[0] = '\0';
-	ind[1] = '\0';
+	ind[0] = ind[1] = '\0';
 
 	switch (mode & S_IFMT) {
 	case S_IFREG:
@@ -2104,18 +2106,10 @@ static char *get_file_sym(mode_t mode)
 		break;
 	}
 
-	return ind;
-}
-
-static void printent(const struct entry *ent, int sel, uint namecols)
-{
-	const char *pname = unescape(ent->name, namecols);
-	const char cp = (ent->flags & FILE_COPIED) ? '+' : ' ';
-
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
 
-	printw("%s%c%s%s\n", CURSYM(sel), cp, pname, get_file_sym(ent->mode));
+	printw("%s%c%s%s\n", CURSYM(sel), cp, pname, ind);
 }
 
 static void printent_long(const struct entry *ent, int sel, uint namecols)
