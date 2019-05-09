@@ -2019,7 +2019,7 @@ static char *coolsize(off_t size)
 {
 	static const char * const U = "BKMGTPEZY";
 	static char size_buf[12]; /* Buffer to hold human readable size */
-	static off_t rem;
+	off_t rem;
 	int i;
 
 	rem = i = 0;
@@ -2067,9 +2067,9 @@ static char *coolsize(off_t size)
 	}
 
 	if (i > 0 && i < 6)
-		snprintf(size_buf, 12, "%lu.%0*lu%c", (ulong)size, i, (ulong)rem, U[i]);
+		snprintf(size_buf, 12, "%lu.%0*lu%c", size, i, rem, U[i]);
 	else
-		snprintf(size_buf, 12, "%lu%c", (ulong)size, U[i]);
+		snprintf(size_buf, 12, "%lu%c", size, U[i]);
 
 	return size_buf;
 }
@@ -3158,7 +3158,7 @@ nochange:
 			// Handle clicking on a file:
 			if (2 <= event.y && event.y < xlines - 2) {
 				// Get index of the first file listed on-screen:
-				r = MAX(0, MIN(cur-((xlines-4)>>1), ndents-(xlines-4)));
+				r = MAX(0, MIN(cur - ((xlines - 4) >> 1), ndents - (xlines - 4)));
 				// Add the mouse click position to get the clicked file:
 				r += event.y - 2;
 
@@ -3170,7 +3170,6 @@ nochange:
 				// Single click just selects, double click also opens
 				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
 					break;
-				// fallthrough to select the file
 			} else
 				goto nochange; // fallthrough
 		case SEL_NAV_IN: // fallthrough
