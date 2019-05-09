@@ -3158,9 +3158,10 @@ nochange:
 			// Handle clicking on a file:
 			if (2 <= event.y && event.y < xlines - 2) {
 				// Get index of the first file listed on-screen:
-				r = MIN(MAX(0, cur-((xlines-4)>>1)), ndents-(xlines-4));
+				r = MAX(0, MIN(cur-((xlines-4)>>1), ndents-(xlines-4)));
 				// Add the mouse click position to get the clicked file:
 				r += event.y - 2;
+                printf("CLICKED: %d", r);
 
 				if (r >= ndents)
 					goto nochange;
