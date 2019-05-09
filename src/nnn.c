@@ -2019,7 +2019,7 @@ static char *coolsize(off_t size)
 {
 	static const char * const U = "BKMGTPEZY";
 	static char size_buf[12]; /* Buffer to hold human readable size */
-	off_t rem;
+	static off_t rem;
 	int i;
 
 	rem = i = 0;
@@ -2067,9 +2067,9 @@ static char *coolsize(off_t size)
 	}
 
 	if (i > 0 && i < 6)
-		snprintf(size_buf, 12, "%lu.%0*lu%c", size, i, rem, U[i]);
+		snprintf(size_buf, 12, "%lu.%0*lu%c", (ulong)size, i, (ulong)rem, U[i]);
 	else
-		snprintf(size_buf, 12, "%lu%c", size, U[i]);
+		snprintf(size_buf, 12, "%lu%c", (ulong)size, U[i]);
 
 	return size_buf;
 }
