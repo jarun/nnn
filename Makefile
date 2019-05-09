@@ -18,7 +18,7 @@ else
 	LDLIBS_CURSES ?= -lncurses
 endif
 
-CFLAGS += -Wall -Wextra -Wno-unused-parameter
+CFLAGS += -Wall -Wextra -Wno-unused-parameter -Wno-format-truncation
 CFLAGS += $(CFLAGS_OPTIMIZATION)
 CFLAGS += $(CFLAGS_CURSES)
 
