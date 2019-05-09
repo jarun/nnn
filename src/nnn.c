@@ -3170,7 +3170,7 @@ nochange:
 				// Single click just selects, double click also opens
 				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
 					break;
-                // fallthrough
+				// fallthrough
 			} else
 				goto nochange;
 		case SEL_NAV_IN: // fallthrough
