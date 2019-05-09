@@ -2022,7 +2022,7 @@ static char *coolsize(off_t size)
 {
 	static const char * const U = "BKMGTPEZY";
 	static char size_buf[12]; /* Buffer to hold human readable size */
-	off_t rem;
+	static off_t rem;
 	int i;
 
 	rem = i = 0;
