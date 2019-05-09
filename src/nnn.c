@@ -2070,9 +2070,9 @@ static char *coolsize(off_t size)
 	}
 
 	if (i > 0 && i < 6)
-		snprintf(size_buf, 12, "%lu.%0*lu%c", size, i, rem, U[i]);
+		snprintf(size_buf, 12, "%lu.%0*lu%c", (long)size, i, (long)rem, U[i]);
 	else
-		snprintf(size_buf, 12, "%lu%c", size, U[i]);
+		snprintf(size_buf, 12, "%lu%c", (long)size, U[i]);
 
 	return size_buf;
 }
