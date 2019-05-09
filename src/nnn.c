@@ -3170,9 +3170,9 @@ nochange:
 				// Single click just selects, double click also opens
 				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
 					break;
-				// fallthrough
+				// fallthrough to select the file
 			} else
-				goto nochange;
+				goto nochange; // fallthrough
 		case SEL_NAV_IN: // fallthrough
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
