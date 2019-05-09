@@ -109,6 +109,8 @@
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
+#undef MAX
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define ISODD(x) ((x) & 1)
 #define ISBLANK(x) ((x) == ' ' || (x) == '\t')
 #define TOUPPER(ch) \
@@ -3155,15 +3157,15 @@ nochange:
 
 			// Handle clicking on a file:
 			if (2 <= event.y && event.y < xlines - 2) {
-				r = event.y - 2;
+				// Get index of the first file listed on-screen:
+				r = MIN(MAX(0, cur-((xlines-4)>>1)), ndents-(xlines-4));
+				// Add the mouse click position to get the clicked file:
+				r += event.y - 2;
 
 				if (r >= ndents)
 					goto nochange;
 
-				if (ndents > (xlines - 4) && cur >= ((xlines - 4) >> 1))
-					cur -= ((xlines - 4) >> 1) - r;
-				else
-					cur = r;
+				cur = r;
 
 				// Single click just selects, double click also opens
 				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
