@@ -133,6 +133,7 @@
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
 #define EXEC_ARGS_MAX 8
+#define SCROLLOFF 5
 
 /* Entry flags */
 #define DIR_OR_LINK_TO_DIR 0x1
@@ -272,7 +273,7 @@ static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static struct entry *dents;
 static char *pnamebuf, *pcopybuf;
-static int ndents, cur, total_dents = ENTRY_INCR;
+static int ndents, cur, curscroll, total_dents = ENTRY_INCR;
 static int xlines, xcols;
 static uint idle;
 static uint idletimeout, copybufpos, copybuflen;
@@ -1655,6 +1656,8 @@ end:
 	if (*ch != '\t')
 		g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
 
+	curscroll = MAX(0, cur - SCROLLOFF);
+
 	curs_set(FALSE);
 	settimeout();
 
@@ -2067,9 +2070,9 @@ static char *coolsize(off_t size)
 	}
 
 	if (i > 0 && i < 6)
-		snprintf(size_buf, 12, "%lu.%0*lu%c", size, i, rem, U[i]);
+		snprintf(size_buf, 12, "%lu.%0*lu%c", (ulong)size, i, (ulong)rem, U[i]);
 	else
-		snprintf(size_buf, 12, "%lu%c", size, U[i]);
+		snprintf(size_buf, 12, "%lu%c", (ulong)size, U[i]);
 
 	return size_buf;
 }
@@ -2882,6 +2885,8 @@ static void populate(char *path, char *lastname)
 		cur = 0;
 	else
 		cur = dentfind(lastname, ndents);
+
+	curscroll = MAX(0, cur - SCROLLOFF);
 }
 
 static void redraw(char *path)
@@ -2890,8 +2895,9 @@ static void redraw(char *path)
 	xcols = COLS;
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
-	int lastln = xlines;
-	int nlines = MIN(lastln - 4, ndents), i, attrs;
+	int lastln = xlines, onscreen = xlines - 4;
+	int scrolloff = MIN(SCROLLOFF, onscreen >> 1);
+	int i, attrs;
 	char buf[12];
 	char c;
 
@@ -2899,6 +2905,13 @@ static void redraw(char *path)
 
 	/* Clear screen */
 	erase();
+
+	if (ndents <= onscreen)
+		curscroll = 0;
+	else if (cur < curscroll + scrolloff)
+		curscroll = MAX(0, cur - scrolloff);
+	else if (cur > curscroll + onscreen - scrolloff - 1)
+		curscroll = MIN(ndents - onscreen, cur - onscreen + scrolloff + 1);
 
 #ifdef DIR_LIMITED_COPY
 	if (cfg.copymode)
@@ -2965,18 +2978,8 @@ static void redraw(char *path)
 	}
 
 	/* Print listing */
-	if (cur < (nlines >> 1)) {
-		for (i = 0; i < nlines; ++i)
-			printptr(&dents[i], i == cur, ncols);
-	} else if (cur >= ndents - (nlines >> 1)) {
-		for (i = ndents - nlines; i < ndents; ++i)
-			printptr(&dents[i], i == cur, ncols);
-	} else {
-		const int odd = ISODD(nlines);
-
-		nlines >>= 1;
-		for (i = cur - nlines; i < cur + nlines + odd; ++i)
-			printptr(&dents[i], i == cur, ncols);
+	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i) {
+		printptr(&dents[i], i == cur, ncols);
 	}
 
 	/* Must reset e.g. no files in dir */
@@ -3026,7 +3029,7 @@ static void browse(char *ipath)
 	char mark[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
-	int r = -1, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
+	int r = -1, fd, presel, ncp = 0, copystartid = 0, copyendid = 0, onscreen;
 	enum action sel;
 	bool dir_changed = FALSE;
 	struct stat sb;
@@ -3136,7 +3139,7 @@ nochange:
 			// Handle clicking on a context at the top:
 			if (event.y == 0) {
 				// Get context from: "[1 2 3 4]..."
-				r = event.x/2;
+				r = event.x >> 1;
 
 				if (event.x != 1 + (r << 1))
 					goto nochange; // The character after the context number
@@ -3157,10 +3160,7 @@ nochange:
 
 			// Handle clicking on a file:
 			if (2 <= event.y && event.y < xlines - 2) {
-				// Get index of the first file listed on-screen:
-				r = MAX(0, MIN(cur - ((xlines - 4) >> 1), ndents - (xlines - 4)));
-				// Add the mouse click position to get the clicked file:
-				r += event.y - 2;
+				r = curscroll + (event.y - 2);
 
 				if (r >= ndents)
 					goto nochange;
@@ -3274,21 +3274,23 @@ nochange:
 				/* Roll over, set cursor to last entry */
 				cur = ndents - 1;
 			break;
-		case SEL_PGDN:
-			if (cur < ndents - 1)
-				cur += MIN((xlines - 4), ndents - 1 - cur);
-			break;
-		case SEL_PGUP:
-			if (cur > 0)
-				cur -= MIN((xlines - 4), cur);
-			break;
+		case SEL_PGDN: // fallthrough
 		case SEL_CTRL_D:
-			if (cur < ndents - 1)
-				cur += MIN((xlines - 4) / 2, ndents - 1 - cur);
+			onscreen = xlines - 4;
+			r = sel == SEL_PGDN ? onscreen - 1 : onscreen >> 1;
+			curscroll = MIN(ndents - onscreen, curscroll + r);
+			cur = (curscroll == ndents - onscreen) ? cur + r :
+				curscroll + MIN(SCROLLOFF, onscreen >> 1);
+			cur = MIN(ndents - 1, cur);
 			break;
+		case SEL_PGUP: // fallthrough
 		case SEL_CTRL_U:
-			if (cur > 0)
-				cur -= MIN((xlines - 4) / 2, cur);
+			onscreen = xlines - 4;
+			r = sel == SEL_PGUP ? onscreen - 1 : onscreen >> 1;
+			curscroll = MAX(0, curscroll - r);
+			cur = (curscroll == 0) ? cur - r :
+				curscroll + onscreen - MIN(SCROLLOFF, onscreen >> 1) - 1;
+			cur = MAX(0, cur);
 			break;
 		case SEL_HOME:
 			cur = 0;
