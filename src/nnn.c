@@ -3029,7 +3029,7 @@ static void browse(char *ipath)
 	char mark[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
-	int r = -1, fd, presel, ncp = 0, copystartid = 0, copyendid = 0;
+	int r = -1, fd, presel, ncp = 0, copystartid = 0, copyendid = 0, onscreen;
 	enum action sel;
 	bool dir_changed = FALSE;
 	struct stat sb;
@@ -3107,6 +3107,7 @@ begin:
 
 	while (1) {
 		redraw(path);
+        onscreen = xlines - 4;
 nochange:
 		/* Exit if parent has exited */
 		if (getppid() == 1)
@@ -3139,7 +3140,7 @@ nochange:
 			// Handle clicking on a context at the top:
 			if (event.y == 0) {
 				// Get context from: "[1 2 3 4]..."
-				r = event.x/2;
+				r = event.x >> 1;
 
 				if (event.x != 1 + (r << 1))
 					goto nochange; // The character after the context number
@@ -3276,18 +3277,18 @@ nochange:
 			break;
 		case SEL_PGDN: // fallthrough
 		case SEL_CTRL_D:
-			r = sel == SEL_PGDN ? (xlines - 4) - 1 : (xlines - 4) / 2;
-			curscroll = MIN(ndents - (xlines - 4), curscroll + r);
-			cur = (curscroll == ndents - (xlines - 4)) ? cur + r :
-				curscroll + MIN(SCROLLOFF, (xlines - 4) >> 1);
+			r = sel == SEL_PGDN ? onscreen - 1 : onscreen >> 1;
+			curscroll = MIN(ndents - onscreen, curscroll + r);
+			cur = (curscroll == ndents - onscreen) ? cur + r :
+				curscroll + MIN(SCROLLOFF, onscreen >> 1);
 			cur = MIN(ndents - 1, cur);
 			break;
 		case SEL_PGUP: // fallthrough
 		case SEL_CTRL_U:
-			r = sel == SEL_PGUP ? (xlines - 4) - 1 : (xlines - 4) / 2;
+			r = sel == SEL_PGUP ? onscreen - 1 : onscreen >> 1;
 			curscroll = MAX(0, curscroll - r);
 			cur = (curscroll == 0) ? cur - r :
-				curscroll + (xlines - 4) - MIN(SCROLLOFF, (xlines - 4) >> 1) - 1;
+				curscroll + onscreen - MIN(SCROLLOFF, onscreen >> 1) - 1;
 			cur = MAX(0, cur);
 			break;
 		case SEL_HOME:
