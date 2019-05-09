@@ -3275,21 +3275,21 @@ nochange:
 				/* Roll over, set cursor to last entry */
 				cur = ndents - 1;
 			break;
-		case SEL_PGDN:
-			if (cur < ndents - 1)
-				cur += MIN((xlines - 4), ndents - 1 - cur);
-			break;
-		case SEL_PGUP:
-			if (cur > 0)
-				cur -= MIN((xlines - 4), cur);
-			break;
+		case SEL_PGDN: // fallthrough
 		case SEL_CTRL_D:
-			if (cur < ndents - 1)
-				cur += MIN((xlines - 4) / 2, ndents - 1 - cur);
+			r = sel == SEL_PGDN ? (xlines - 4) - 1 : (xlines - 4) / 2;
+			curscroll = MIN(ndents - (xlines - 4), curscroll + r);
+			cur = (curscroll == ndents - (xlines - 4)) ? cur + r :
+				curscroll + MIN(SCROLLOFF, (xlines - 4) >> 1);
+			cur = MIN(ndents - 1, cur);
 			break;
+		case SEL_PGUP: // fallthrough
 		case SEL_CTRL_U:
-			if (cur > 0)
-				cur -= MIN((xlines - 4) / 2, cur);
+			r = sel == SEL_PGUP ? (xlines - 4) - 1 : (xlines - 4) / 2;
+			curscroll = MAX(0, curscroll - r);
+			cur = (curscroll == 0) ? cur - r :
+				curscroll + (xlines - 4) - MIN(SCROLLOFF, (xlines - 4) >> 1) - 1;
+			cur = MAX(0, cur);
 			break;
 		case SEL_HOME:
 			cur = 0;
