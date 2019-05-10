@@ -472,6 +472,7 @@ static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag);
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 static int dentfind(const char *fname, int n);
+static void move_cursor(int target, int ignore_scrolloff);
 
 /* Functions */
 
@@ -1656,7 +1657,7 @@ end:
 	if (*ch != '\t')
 		g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
 
-	curscroll = MAX(0, cur - SCROLLOFF);
+	move_cursor(cur, 0);
 
 	curs_set(FALSE);
 	settimeout();
@@ -2882,11 +2883,33 @@ static void populate(char *path, char *lastname)
 	/* Find cur from history */
 	/* No NULL check for lastname, always points to an array */
 	if (!*lastname)
-		cur = 0;
+		move_cursor(0, 0);
 	else
-		cur = dentfind(lastname, ndents);
+		move_cursor(dentfind(lastname, ndents), 0);
+}
 
-	curscroll = MAX(0, cur - SCROLLOFF);
+static void move_cursor(int target, int ignore_scrolloff)
+{
+	int delta, scrolloff, onscreen = xlines - 4;
+	target = MAX(0, MIN(ndents - 1, target));
+	delta = target - cur;
+	cur = target;
+	if (!ignore_scrolloff) {
+		scrolloff = MIN(SCROLLOFF, onscreen >> 1);
+		/* 
+		 * When ignore_scrolloff is 1, the cursor can jump into the scrolloff
+		 * margin area, but when ignore_scrolloff is 0, act like a boa
+		 * constrictor and squeeze the cursor towards the middle region of the
+		 * screen by allowing it to move inward and disallowing it to move
+		 * outward (deeper into the scrolloff margin area).
+		 */
+		if (cur < curscroll + scrolloff && delta < 0)
+			curscroll += delta;
+		else if (cur > curscroll + onscreen - scrolloff - 1 && delta > 0)
+			curscroll += delta;
+	}
+	curscroll = MIN(curscroll, MIN(cur, ndents - onscreen));
+	curscroll = MAX(curscroll, MAX(cur - (onscreen - 1), 0));
 }
 
 static void redraw(char *path)
@@ -2896,7 +2919,6 @@ static void redraw(char *path)
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int lastln = xlines, onscreen = xlines - 4;
-	int scrolloff = MIN(SCROLLOFF, onscreen >> 1);
 	int i, attrs;
 	char buf[12];
 	char c;
@@ -2906,12 +2928,8 @@ static void redraw(char *path)
 	/* Clear screen */
 	erase();
 
-	if (ndents <= onscreen)
-		curscroll = 0;
-	else if (cur < curscroll + scrolloff)
-		curscroll = MAX(0, cur - scrolloff);
-	else if (cur > curscroll + onscreen - scrolloff - 1)
-		curscroll = MIN(ndents - onscreen, cur - onscreen + scrolloff + 1);
+	/* Enforce scroll/cursor invariants */
+	move_cursor(cur, 1);
 
 #ifdef DIR_LIMITED_COPY
 	if (cfg.copymode)
@@ -3165,7 +3183,7 @@ nochange:
 				if (r >= ndents)
 					goto nochange;
 
-				cur = r;
+				move_cursor(r, 1);
 
 				// Single click just selects, double click also opens
 				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
@@ -3261,42 +3279,38 @@ nochange:
 				goto nochange;
 			}
 		case SEL_NEXT:
-			if (cur < ndents - 1)
-				++cur;
-			else if (ndents)
-				/* Roll over, set cursor to first entry */
-				cur = 0;
+			if (ndents)
+				move_cursor((cur + 1) % ndents, 0);
 			break;
 		case SEL_PREV:
-			if (cur > 0)
-				--cur;
-			else if (ndents)
-				/* Roll over, set cursor to last entry */
-				cur = ndents - 1;
+			if (ndents)
+				move_cursor((cur + ndents - 1) % ndents, 0);
 			break;
 		case SEL_PGDN: // fallthrough
+			onscreen = xlines - 4;
+			move_cursor(curscroll + (onscreen - 1), 1);
+			curscroll += onscreen - 1;
+			break;
 		case SEL_CTRL_D:
 			onscreen = xlines - 4;
-			r = sel == SEL_PGDN ? onscreen - 1 : onscreen >> 1;
-			curscroll = MIN(ndents - onscreen, curscroll + r);
-			cur = (curscroll == ndents - onscreen) ? cur + r :
-				curscroll + MIN(SCROLLOFF, onscreen >> 1);
-			cur = MIN(ndents - 1, cur);
+			move_cursor(curscroll + (onscreen - 1), 1);
+			curscroll += onscreen >> 1;
 			break;
 		case SEL_PGUP: // fallthrough
+			onscreen = xlines - 4;
+			move_cursor(curscroll, 1);
+			curscroll -= onscreen - 1;
+			break;
 		case SEL_CTRL_U:
 			onscreen = xlines - 4;
-			r = sel == SEL_PGUP ? onscreen - 1 : onscreen >> 1;
-			curscroll = MAX(0, curscroll - r);
-			cur = (curscroll == 0) ? cur - r :
-				curscroll + onscreen - MIN(SCROLLOFF, onscreen >> 1) - 1;
-			cur = MAX(0, cur);
+			move_cursor(curscroll, 1);
+			curscroll -= onscreen >> 1;
 			break;
 		case SEL_HOME:
-			cur = 0;
+			move_cursor(0, 1);
 			break;
 		case SEL_END:
-			cur = ndents - 1;
+			move_cursor(ndents - 1, 1);
 			break;
 		case SEL_CDHOME: // fallthrough
 		case SEL_CDBEGIN: // fallthrough
@@ -3794,7 +3808,7 @@ nochange:
 
 			/* Don't optimize cur if filtering is on */
 			if (!cfg.filtermode && cur && access(newpath, F_OK) == -1)
-				--cur;
+				move_cursor(cur - 1, 0);
 
 			/* We reduce cur only if it is > 0, so it's at least 0 */
 			copycurname();
