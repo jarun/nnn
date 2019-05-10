@@ -450,7 +450,8 @@ Trivia: The name `nnn` stands for _Noice is Not Noice, a noicer fork..._.
 #### MENTIONS
 
 - [FOSSMint](https://www.fossmint.com/nnn-linux-terminal-file-browser/)
-- [Hacker News](https://news.ycombinator.com/item?id=18520898)
+- [Hacker News 1](https://news.ycombinator.com/item?id=18520898)
+- [Hacker News 2](https://news.ycombinator.com/item?id=19850656)
 - [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
 - [LinuxLinks1](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)
 - [LinuxLinks2](https://www.linuxlinks.com/bestconsolefilemanagers/)
