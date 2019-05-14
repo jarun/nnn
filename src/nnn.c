@@ -2659,7 +2659,7 @@ static int dentfill(char *path, struct entry **dents)
 		num_files = 0;
 		dir_blocks = 0;
 
-		if (fstatat(fd, ".", &sb_path, 0) == -1) {
+		if (fstatat(fd, path, &sb_path, 0) == -1) {
 			closedir(dirp);
 			printwarn(NULL);
 			return 0;
