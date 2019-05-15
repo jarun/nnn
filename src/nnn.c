@@ -134,6 +134,7 @@
 #define ASCII_MAX 128
 #define EXEC_ARGS_MAX 8
 #define SCROLLOFF 5
+#define LONG_SIZE sizeof(ulong)
 
 /* Entry flags */
 #define DIR_OR_LINK_TO_DIR 0x1
@@ -536,7 +537,7 @@ static uint xatoi(const char *str)
 
 static char *xitoa(uint val)
 {
-	static const char hexbuf[] = "0123456789";
+	const char hexbuf[] = "0123456789";
 	static char ascbuf[32] = {0};
 	int i;
 
@@ -657,10 +658,10 @@ static size_t xstrlcpy(char *dest, const char *src, size_t n)
 	if (!src || !dest || !n)
 		return 0;
 
-	static ulong *s, *d;
-	static const uint lsize = sizeof(ulong);
-	static const uint _WSHIFT = (sizeof(ulong) == 8) ? 3 : 2;
+	ulong *s, *d;
 	size_t len = strlen(src) + 1, blocks;
+	const uint _WSHIFT = (LONG_SIZE == 8) ? 3 : 2;
+
 
 	if (n > len)
 		n = len;
@@ -672,12 +673,12 @@ static size_t xstrlcpy(char *dest, const char *src, size_t n)
 	 * To enable -O3 ensure src and dest are 16-byte aligned
 	 * More info: http://www.felixcloutier.com/x86/MOVDQA.html
 	 */
-	if ((n >= lsize) && (((ulong)src & _ALIGNMENT_MASK) == 0 &&
+	if ((n >= LONG_SIZE) && (((ulong)src & _ALIGNMENT_MASK) == 0 &&
 	    ((ulong)dest & _ALIGNMENT_MASK) == 0)) {
 		s = (ulong *)src;
 		d = (ulong *)dest;
 		blocks = n >> _WSHIFT;
-		n &= lsize - 1;
+		n &= LONG_SIZE - 1;
 
 		while (blocks) {
 			*d = *s; // NOLINT
@@ -729,7 +730,7 @@ static void *xmemrchr(uchar *s, uchar ch, size_t n)
 
 static char *xbasename(char *path)
 {
-	char *base = xmemrchr((uchar *)path, '/', strlen(path));
+	char *base = xmemrchr((uchar *)path, '/', strlen(path)); // NOLINT
 
 	return base ? base + 1 : path;
 }
@@ -1525,7 +1526,7 @@ static int matches(const char *fltr)
 
 static int filterentries(char *path)
 {
-	static wchar_t wln[REGEX_MAX] __attribute__ ((aligned));
+	wchar_t *wln = (wchar_t *)alloca(sizeof(wchar_t) * REGEX_MAX);
 	char *ln = g_ctx[cfg.curctx].c_fltr;
 	wint_t ch[2] = {0};
 	int r, total = ndents, oldcur = cur, len;
@@ -1844,7 +1845,7 @@ static size_t mkpath(char *dir, char *name, char *out)
 	else
 		len = xstrlcpy(out, dir, PATH_MAX);
 
-	out[len - 1] = '/';
+	out[len - 1] = '/'; // NOLINT
 	return (xstrlcpy(out + len, name, PATH_MAX - len) + len);
 }
 
@@ -2020,7 +2021,7 @@ static char *unescape(const char *str, uint maxcols)
 
 static char *coolsize(off_t size)
 {
-	static const char * const U = "BKMGTPEZY";
+	const char * const U = "BKMGTPEZY";
 	static char size_buf[12]; /* Buffer to hold human readable size */
 	off_t rem;
 	int i;
@@ -2499,8 +2500,10 @@ static bool sshfs_unmount(char *path, char *newpath, int *presel)
 	char *tmp;
 
 	/* On Ubuntu it's fusermount */
-	if (!found && !getutil(cmd))
+	if (!found && !getutil(cmd)) {
 		cmd[10] = '\0';
+		found = TRUE;
+	}
 
 	tmp = xreadline(NULL, "host: ");
 	if (!tmp[0])
@@ -2640,15 +2643,15 @@ static void dentfree(void)
 
 static int dentfill(char *path, struct entry **dents)
 {
+	static uint open_max;
 	int n = 0, count, flags = 0;
 	ulong num_saved;
 	struct dirent *dp;
-	char *namep, *pnb;
+	char *namep, *pnb, *buf = NULL;
 	struct entry *dentp;
 	size_t off = 0, namebuflen = NAMEBUF_INCR;
 	struct stat sb_path, sb;
 	DIR *dirp = opendir(path);
-	static uint open_max;
 
 	if (!dirp)
 		return 0;
@@ -2658,6 +2661,7 @@ static int dentfill(char *path, struct entry **dents)
 	if (cfg.blkorder) {
 		num_files = 0;
 		dir_blocks = 0;
+		buf = (char *)alloca(strlen(path) + NAME_MAX + 2);
 
 		if (fstatat(fd, path, &sb_path, 0) == -1) {
 			closedir(dirp);
@@ -2702,12 +2706,12 @@ static int dentfill(char *path, struct entry **dents)
 			if (S_ISDIR(sb.st_mode)) {
 				if (sb_path.st_dev == sb.st_dev) {
 					ent_blocks = 0;
-					mkpath(path, namep, g_buf);
+					mkpath(path, namep, buf);
 
 					mvprintw(xlines - 1, 0, "scanning %s [^C aborts]\n",
-						 xbasename(g_buf));
+						 xbasename(buf));
 					refresh();
-					if (nftw(g_buf, nftw_fn, open_max,
+					if (nftw(buf, nftw_fn, open_max,
 						 FTW_MOUNT | FTW_PHYS) == -1) {
 						DPRINTF_S("nftw failed");
 						dir_blocks += (cfg.apparentsz
@@ -2792,12 +2796,11 @@ static int dentfill(char *path, struct entry **dents)
 			if (S_ISDIR(sb.st_mode)) {
 				ent_blocks = 0;
 				num_saved = num_files + 1;
-				mkpath(path, namep, g_buf);
+				mkpath(path, namep, buf);
 
-				mvprintw(xlines - 1, 0, "scanning %s [^C aborts]\n",
-					 xbasename(g_buf));
+				mvprintw(xlines - 1, 0, "scanning %s [^C aborts]\n", xbasename(buf));
 				refresh();
-				if (nftw(g_buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
+				if (nftw(buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
 					DPRINTF_S("nftw failed");
 					dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				} else
