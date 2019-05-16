@@ -537,12 +537,11 @@ static uint xatoi(const char *str)
 
 static char *xitoa(uint val)
 {
-	const char hexbuf[] = "0123456789";
 	static char ascbuf[32] = {0};
 	int i;
 
 	for (i = 30; val && i; --i, val /= 10)
-		ascbuf[i] = hexbuf[val % 10];
+		ascbuf[i] = '0' + (val % 10);
 
 	return &ascbuf[++i];
 }
