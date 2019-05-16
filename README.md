@@ -105,7 +105,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - FreeDesktop compliant trash (needs trash-cli)
   - Plugin repository
   - SSHFS mounts (needs sshfs)
-  - Batch rename (needs vidir)
+  - Batch rename
   - Show copy, move progress on Linux (needs avdcpmv)
   - Per-context directory color (default: blue)
   - Spawn a shell in the current directory
@@ -139,7 +139,6 @@ The following table is a complete list. Some of the utilities may be installed b
 | trash-cli | trash files (default: delete) |
 | mediainfo / exiftool | multimedia file details |
 | atool / patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
-| vidir (from moreutils) | batch rename dir entries |
 | sshfs, fusermount(3) | mount, unmount remote over SSHFS |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | copy, move progress |
