@@ -832,7 +832,7 @@ static bool cpsafe(void)
 
 	/* Fail if selection file path isn't accessible */
 	if (access(g_cppath, R_OK | W_OK) == -1) {
-		printmsg("check selection file permission");
+		errno == ENOENT ? printmsg(messages[NONE_SELECTED]) : printwarn(NULL);
 		return FALSE;
 	}
 
