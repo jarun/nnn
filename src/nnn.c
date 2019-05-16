@@ -2126,12 +2126,9 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 	strftime(timebuf, 18, "%F %R", localtime(&ent->t));
 
 	/* Permissions */
-	permbuf[0] = *xitoa((ent->mode >> 6) & 7);
-	permbuf[0] = permbuf[0] ? permbuf[0] : '0';
-	permbuf[1] = *xitoa((ent->mode >> 3) & 7);
-	permbuf[1] = permbuf[1] ? permbuf[1] : '0';
-	permbuf[2] = *xitoa(ent->mode & 7);
-	permbuf[2] = permbuf[2] ? permbuf[2] : '0';
+	permbuf[0] = '0' + ((ent->mode >> 6) & 7);
+	permbuf[1] = '0' + ((ent->mode >> 3) & 7);
+	permbuf[2] = '0' + (ent->mode & 7);
 	permbuf[3] = '\0';
 
 	/* Trim escape chars from name */
