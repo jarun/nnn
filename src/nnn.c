@@ -2027,7 +2027,7 @@ static char *coolsize(off_t size)
 
 	rem = i = 0;
 
-	while (size > 1024) {
+	while (size >= 1024) {
 		rem = size & (0x3FF); /* 1024 - 1 = 0x3FF */
 		size >>= 10;
 		++i;
@@ -2070,9 +2070,9 @@ static char *coolsize(off_t size)
 	}
 
 	if (i > 0 && i < 6)
-		snprintf(size_buf, 12, "%lu.%0*lu%c", (ulong)size, i, (ulong)rem, U[i]);
+		snprintf(size_buf, 12, "%u.%0*u%c", (uint)size, i & 0b11, (uint)rem, U[i]);
 	else
-		snprintf(size_buf, 12, "%lu%c", (ulong)size, U[i]);
+		snprintf(size_buf, 12, "%u%c", (uint)size, U[i]);
 
 	return size_buf;
 }
