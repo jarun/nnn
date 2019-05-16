@@ -1124,7 +1124,7 @@ static void rename_selection(const char *path)
 	char fselected[PATH_MAX] = {0};
 	char frenamed[PATH_MAX] = {0};
 	int fd1 = -1, fd2 = -1, i;
-	size_t len, len2;
+	ssize_t len, len2;
 	char *name;
 
 	strncpy(fselected, g_tmpfpath, g_tmpfplen);
@@ -1142,19 +1142,21 @@ static void rename_selection(const char *path)
 	if (copybufpos > 0) {
 		// Rename selected files with absolute paths:
 		selectiontofd(fd1);
-		write(fd1, "\n", 1);
+		if (write(fd1, "\n", 1) < 1)
+			goto finished_renaming;
 		selectiontofd(fd2);
-		write(fd2, "\n", 1);
+		if (write(fd2, "\n", 1) < 1)
+			goto finished_renaming;
 	} else {
 		// If nothing is selected, use the directory contents with relative paths:
 		for (i = 0; i < ndents; ++i) {
 			name = strrchr(dents[i].name, '/');
 			name = name ? name + 1 : dents[i].name;
 			len = strlen(name);
-			write(fd1, name, len);
-			write(fd1, "\n", 1);
-			write(fd2, name, len);
-			write(fd2, "\n", 1);
+			if (write(fd1, name, len) != len || write(fd1, "\n", 1) != 1)
+				goto finished_renaming;
+			if (write(fd2, name, len) != len || write(fd2, "\n", 1) != 1)
+				goto finished_renaming;
 		}
 	}
 
