@@ -1169,7 +1169,7 @@ static void rename_selection(const char *path)
 	while ((i = read(fd1, buf, sizeof(buf))) > 0) {
 		while (i) len += buf[--i] == '\n';
 	}
-    if (i < 0) goto finished_renaming;
+	if (i < 0) goto finished_renaming;
 
 	// Reopen file descriptor to get updated contents:
 	if ((fd2 = open(frenamed, O_RDONLY)) == -1)
@@ -1177,7 +1177,7 @@ static void rename_selection(const char *path)
 	while ((i = read(fd2, buf, sizeof(buf))) > 0) {
 		while (i) len2 += buf[--i] == '\n';
 	}
-    if (i < 0) goto finished_renaming;
+	if (i < 0) goto finished_renaming;
 
 	if (len2 != len) {
 		get_input("Error: wrong number of filenames. Press any key to continue...");
