@@ -1120,7 +1120,8 @@ static void xrm(char *path)
 
 static void rename_selection(const char *path)
 {
-	char buf[1024];
+	static const char renamecmd[] = "paste -d'\n' %s %s | xargs -d'\n' -n2 mv 2>/dev/null";
+	static char buf[sizeof(renamecmd) + 2 * PATH_MAX];
 	char fselected[PATH_MAX] = {0};
 	char frenamed[PATH_MAX] = {0};
 	int fd1 = -1, fd2 = -1, i;
@@ -1128,8 +1129,8 @@ static void rename_selection(const char *path)
 	char *name;
 
 	strncpy(fselected, g_tmpfpath, g_tmpfplen);
-	strcat(fselected, messages[STR_TMPFILE]);
-	strcpy(frenamed, fselected);
+	strncat(fselected, messages[STR_TMPFILE], PATH_MAX);
+	strncpy(frenamed, fselected, PATH_MAX);
 
 	if ((fd1 = mkstemp(fselected)) == -1)
 		return;
@@ -1186,10 +1187,8 @@ static void rename_selection(const char *path)
 		goto finished_renaming;
 	}
 
-	snprintf(g_buf, CMD_LEN_MAX,
-		 "paste -d'\n' %s %s | xargs -d'\n' -n2 mv 2>/dev/null",
-		 fselected, frenamed);
-	spawn("sh", "-c", g_buf, path, F_NORMAL);
+	snprintf(buf, sizeof(buf), renamecmd, fselected, frenamed);
+	spawn("sh", "-c", buf, path, F_NORMAL);
 
 finished_renaming:
 	if (fd2 >= 0) close(fd1);
