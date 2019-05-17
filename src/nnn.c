@@ -1129,7 +1129,7 @@ static void rename_selection(const char *path)
 	char *name;
 
 	strncpy(fselected, g_tmpfpath, g_tmpfplen);
-	strlcat(fselected, messages[STR_TMPFILE], strlen(messages[STR_TMPFILE]));
+	strncat(fselected, messages[STR_TMPFILE], strlen(messages[STR_TMPFILE]));
 	strncpy(frenamed, fselected, PATH_MAX);
 
 	if ((fd1 = mkstemp(fselected)) == -1)
