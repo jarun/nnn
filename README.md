@@ -50,8 +50,8 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - [Quickstart](#quickstart)
 - [Usage](#usage)
   - [Cmdline options](#cmdline-options)
-  - [Keyboard shortcuts](#keyboard-shortcuts)
-  - [Leader key](#leader-key)
+  - [Keyboard and mouse](#keyboard-and-mouse)
+    - [Leader key](#leader-key)
   - [Contexts](#contexts)
     - [Context-specific color](#context-specific-color)
   - [Selection](#selection)
@@ -230,7 +230,7 @@ optional args:
  -h      show help
 ```
 
-#### Keyboard shortcuts
+#### Keyboard and mouse
 
 Press <kbd>?</kbd> in `nnn` to see the list anytime.
 
@@ -270,7 +270,13 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
 
 Note: Help & settings, file details, media info and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.
 
-#### Leader key
+| Mouse click | Function |
+|:---:| --- |
+| Left single | Select context or entry |
+| Left double | Select context or open file/directory |
+| Middle single | Visit parent directory |
+
+##### Leader key
 
 The Leader key provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and location shortcuts.
 

@@ -874,7 +874,7 @@ static bool initcurses(void)
 	nonl();
 	//intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
-	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED, NULL);
+	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED | BUTTON2_CLICKED, NULL);
 	curs_set(FALSE); /* Hide cursor */
 	start_color();
 	use_default_colors();
@@ -3116,24 +3116,28 @@ nochange:
 			presel = 0;
 
 		switch (sel) {
-		case SEL_BACK:
-			dir = visit_parent(path, newpath, &presel);
-			if (!dir)
-				goto nochange;
-
-			/* Save last working directory */
-			xstrlcpy(lastdir, path, PATH_MAX);
-
-			/* Save history */
-			xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
-
-			xstrlcpy(path, dir, PATH_MAX);
-
-			setdirwatch();
-			goto begin;
 		case SEL_CLICK:
 			if (getmouse(&event) != OK)
-				goto nochange;
+				goto nochange; // fallthrough
+		case SEL_BACK:
+			// Handle right click to go to parent
+			if ((sel == SEL_BACK)
+			    || (sel == SEL_CLICK && event.bstate == BUTTON2_CLICKED)) {
+				dir = visit_parent(path, newpath, &presel);
+				if (!dir)
+					goto nochange;
+
+				/* Save last working directory */
+				xstrlcpy(lastdir, path, PATH_MAX);
+
+				/* Save history */
+				xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
+
+				xstrlcpy(path, dir, PATH_MAX);
+
+				setdirwatch();
+				goto begin;
+			}
 
 			// Handle clicking on a context at the top:
 			if (event.y == 0) {
