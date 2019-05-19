@@ -92,7 +92,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Subtree search to open or edit files (using plugin)
 - Mimes
   - Open with desktop opener or specify a custom app
-  - Create, list, extract archive (needs (p)atool)
+  - Create, list, extract archive (needs (p)atool/bsdtar)
   - Option to open all text files in EDITOR
 - Information
   - Detailed file information
@@ -138,7 +138,7 @@ The following table is a complete list. Some of the utilities may be installed b
 | file, coreutils (cp, mv, rm), findutils (xargs) | detect type, copy, move and remove files |
 | trash-cli | trash files (default: delete) |
 | mediainfo / exiftool | multimedia file details |
-| atool / patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
+| atool / bsdtar / patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
 | vidir (from moreutils) | batch rename dir entries |
 | sshfs, fusermount(3) | mount, unmount remote over SSHFS |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |

@@ -333,7 +333,7 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define EXIFTOOL 1
 #define OPENER 2
 #define ATOOL 3
-#define APACK 4
+#define BSDTAR 4
 #define VIDIR 5
 #define LOCKER 6
 #define NLAUNCH 7
@@ -351,7 +351,7 @@ static char * const utils[] = {
 	"xdg-open",
 #endif
 	"atool",
-	"apack",
+	"bsdtar",
 	"vidir",
 #ifdef __APPLE__
 	"bashlock",
@@ -375,6 +375,7 @@ static char mv[] = "mvg -gi";
 #define STR_DATE_ID 2
 #define STR_TMPFILE 3
 #define NONE_SELECTED 4
+#define UTIL_MISSING 5
 
 static const char * const messages[] = {
 	"no traversal",
@@ -382,6 +383,7 @@ static const char * const messages[] = {
 	"%F %T %z",
 	"/.nnnXXXXXX",
 	"empty selection",
+	"utility missing",
 };
 
 /* Supported configuration environment variables */
@@ -1121,7 +1123,7 @@ static void xrm(char *path)
 	}
 }
 
-static void archive_selection(const char *archive, const char *curpath)
+static void archive_selection(const char *cmd, const char *archive, const char *curpath)
 {
 	snprintf(g_buf, CMD_LEN_MAX,
 #ifdef __linux__
@@ -1129,7 +1131,7 @@ static void archive_selection(const char *archive, const char *curpath)
 #else
 		 "cat %s | xargs -0 -o %s %s",
 #endif
-		 g_cppath, utils[APACK], archive);
+		 g_cppath, cmd, archive);
 	spawn("sh", "-c", g_buf, curpath, F_NORMAL);
 }
 
@@ -2379,16 +2381,27 @@ static bool show_mediainfo(const char *fpath, const char *arg)
 	return TRUE;
 }
 
-static bool handle_archive(char *fpath, char *arg, const char *dir)
+/* Extracts or lists archive */
+static bool handle_archive(char *fpath, const char *dir, char op)
 {
-	if (!getutil(utils[ATOOL]))
+	char larg[] = "-tf";
+	char xarg[] = "-xf";
+	char *util;
+
+	if (getutil(utils[ATOOL])) {
+		util = utils[ATOOL];
+		larg[1] = op;
+		larg[2] = xarg[2] = '\0';
+	} else if (getutil(utils[BSDTAR]))
+		util = utils[BSDTAR];
+	else
 		return FALSE;
 
-	if (arg[1] == 'x')
-		spawn(utils[ATOOL], arg, fpath, dir, F_NORMAL);
-	else {
+	if (op == 'x') { // extract
+		spawn(util, xarg, fpath, dir, F_NORMAL);
+	} else { // list
 		exitcurses();
-		get_output(NULL, 0, utils[ATOOL], arg, fpath, TRUE);
+		get_output(NULL, 0, util, larg, fpath, TRUE);
 		refresh();
 	}
 
@@ -2895,7 +2908,7 @@ static void move_cursor(int target, int ignore_scrolloff)
 	cur = target;
 	if (!ignore_scrolloff) {
 		scrolloff = MIN(SCROLLOFF, onscreen >> 1);
-		/* 
+		/*
 		 * When ignore_scrolloff is 1, the cursor can jump into the scrolloff
 		 * margin area, but when ignore_scrolloff is 0, act like a boa
 		 * constrictor and squeeze the cursor towards the middle region of the
@@ -3596,10 +3609,10 @@ nochange:
 				setdirwatch();
 				goto nochange;
 			case SEL_ARCHIVELS:
-				r = handle_archive(newpath, "-l", path);
+				r = handle_archive(newpath, path, 'l');
 				break;
 			case SEL_EXTRACT:
-				r = handle_archive(newpath, "-x", path);
+				r = handle_archive(newpath, path, 'x');
 				break;
 			case SEL_REDRAW:
 				if (ndents)
@@ -3638,7 +3651,7 @@ nochange:
 			}
 
 			if (!r) {
-				printwait("utility missing", &presel);
+				printwait(messages[UTIL_MISSING], &presel);
 				goto nochange;
 			}
 
@@ -3879,16 +3892,21 @@ nochange:
 
 			switch (sel) {
 			case SEL_ARCHIVE:
-				/* newpath is used as temporary buffer */
-				if (!getutil(utils[APACK])) {
-					printwait("utility missing", &presel);
+			{
+				char cmd[] = "bsdtar -cf";
+
+				if (getutil(utils[ATOOL]))
+					xstrlcpy(cmd, "atool -qa", 10);
+				else if (!getutil(utils[BSDTAR])) {
+					printwait(messages[UTIL_MISSING], &presel);
 					goto nochange;
 				}
 
-				(r == 'y' || r == 'Y') ? archive_selection(tmp, path)
-						       : spawn(utils[APACK], tmp, dents[cur].name,
-							       path, F_NORMAL);
+				(r == 'y' || r == 'Y') ? archive_selection(cmd, tmp, path)
+						       : spawn(cmd, tmp, dents[cur].name,
+							       path, F_NORMAL | F_MULTI);
 				break;
+			}
 			case SEL_OPENWITH:
 				mkpath(path, dents[cur].name, newpath);
 				spawn(tmp, newpath, NULL, path, r);
