@@ -3896,7 +3896,7 @@ nochange:
 				char cmd[] = "bsdtar -cf";
 
 				if (getutil(utils[ATOOL]))
-					xstrlcpy(cmd, "atool -qa", 10);
+					xstrlcpy(cmd, "atool -a", 10);
 				else if (!getutil(utils[BSDTAR])) {
 					printwait(messages[UTIL_MISSING], &presel);
 					goto nochange;
