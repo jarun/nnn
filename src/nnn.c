@@ -1120,22 +1120,19 @@ static void xrm(char *path)
 
 static void rename_selection(const char *path)
 {
-	static const char renamecmd[] = "paste -d'\n' %s %s | xargs -d'\n' -n2 mv 2>/dev/null";
-	static char buf[sizeof(renamecmd) + 2 * PATH_MAX];
-	char fselected[PATH_MAX] = {0};
-	char frenamed[PATH_MAX] = {0};
+	const char renamecmd[] = "paste -d'\n' %s %s | xargs -d'\n' -n2 mv 2>/dev/null";
+	char buf[sizeof(renamecmd) + 2 * PATH_MAX];
+	char foriginal[TMP_LEN_MAX] = {0};
 	int fd1 = -1, fd2 = -1, i;
 	ssize_t len, len2;
-	char *name;
 
-	strncpy(fselected, g_tmpfpath, g_tmpfplen);
-	strncat(fselected, messages[STR_TMPFILE], strlen(messages[STR_TMPFILE]));
-	strncpy(frenamed, fselected, PATH_MAX);
-
-	if ((fd1 = mkstemp(fselected)) == -1)
+	if ((fd1 = create_tmp_file()) == -1)
 		return;
-	if ((fd2 = mkstemp(frenamed)) == -1) {
-		unlink(fselected);
+
+	xstrlcpy(foriginal, g_tmpfpath, strlen(g_tmpfpath)+1);
+
+	if ((fd2 = create_tmp_file()) == -1) {
+		unlink(foriginal);
 		close(fd1);
 		return;
 	}
@@ -1151,12 +1148,10 @@ static void rename_selection(const char *path)
 	} else {
 		// If nothing is selected, use the directory contents with relative paths:
 		for (i = 0; i < ndents; ++i) {
-			name = strrchr(dents[i].name, '/');
-			name = name ? name + 1 : dents[i].name;
-			len = strlen(name);
-			if (write(fd1, name, len) != len || write(fd1, "\n", 1) != 1)
+			len = strlen(dents[i].name);
+			if (write(fd1, dents[i].name, len) != len || write(fd1, "\n", 1) != 1)
 				goto finished_renaming;
-			if (write(fd2, name, len) != len || write(fd2, "\n", 1) != 1)
+			if (write(fd2, dents[i].name, len) != len || write(fd2, "\n", 1) != 1)
 				goto finished_renaming;
 		}
 	}
@@ -1164,7 +1159,7 @@ static void rename_selection(const char *path)
 	close(fd2);
 	fd2 = -1;
 
-	spawn(editor, frenamed, NULL, path, F_CLI);
+	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
 
 	// Check that the number of filenames is unchanged:
 	len = 0, len2 = 0;
@@ -1175,7 +1170,7 @@ static void rename_selection(const char *path)
 	if (i < 0) goto finished_renaming;
 
 	// Reopen file descriptor to get updated contents:
-	if ((fd2 = open(frenamed, O_RDONLY)) == -1)
+	if ((fd2 = open(g_tmpfpath, O_RDONLY)) == -1)
 		goto finished_renaming;
 	while ((i = read(fd2, buf, sizeof(buf))) > 0) {
 		while (i) len2 += buf[--i] == '\n';
@@ -1187,14 +1182,14 @@ static void rename_selection(const char *path)
 		goto finished_renaming;
 	}
 
-	snprintf(buf, sizeof(buf), renamecmd, fselected, frenamed);
+	snprintf(buf, sizeof(buf), renamecmd, foriginal, g_tmpfpath);
 	spawn("sh", "-c", buf, path, F_NORMAL);
 
 finished_renaming:
 	if (fd2 >= 0) close(fd1);
-	unlink(fselected);
+	unlink(foriginal);
 	if (fd2 >= 0) close(fd2);
-	unlink(frenamed);
+	unlink(g_tmpfpath);
 }
 
 static void archive_selection(const char *archive, const char *curpath)
