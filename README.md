@@ -15,27 +15,24 @@
 <a href="https://travis-ci.org/jarun/nnn"><img src="https://img.shields.io/travis/jarun/nnn/master.svg?label=travis" alt="Travis Status" /></a>
 <a href="https://circleci.com/gh/jarun/workflows/nnn"><img src="https://img.shields.io/circleci/project/github/jarun/nnn.svg?label=circleci" alt="CircleCI Status" /></a>
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow.svg?maxAge=2592000" alt="License" /></a>
+<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
+
+`nnn` is a full-featured file manager for low-power, low-frequency, resource-limited devices and the regular desktop. It aims to be **[one of the fastest and most lightweight](https://github.com/jarun/nnn/wiki/performance)** file managers.
+
+`nnn` is also a disk usage analyzer, a fuzzy app launcher and a batch file renamer.
+
+It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
+
+Several **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. New plugins can be added easily.
+
+`nnn` works seamlessly with DEs and GUI utilities. **[Quickstart](#quickstart)** and see how `nnn` simplifies long desktop sessions.
 
 <p align="center">
 <a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/onpq3vP.png" alt="Click to watch video"/></a>
 </p>
 
 <p align="center"><i>3 modes of nnn (light with filter, detail, du analyzer) with memory usage. Click for a demo video.</i></a></p>
-
-`nnn` is a full-featured file manager for low-power, low-frequency, resource-limited devices and the regular desktop. It aims to be **[one of the fastest and most lightweight](https://github.com/jarun/nnn/wiki/performance)** file managers.
-
-It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
-
-`nnn` works seamlessly with DEs and GUI utilities. Several **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. New plugins can be added easily.
-
-**[Quickstart](#quickstart)** and see how `nnn` simplifies long desktop sessions.
-
-*Love smart and efficient utilities? Explore [my repositories](https://github.com/jarun?tab=repositories). Buy me a cup of coffee if they help you.*
-
-<p align="center">
-<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
-</p>
 
 #### TABLE OF CONTENTS
 
@@ -136,9 +133,9 @@ The following table is a complete list. Some of the utilities may be installed b
 | --- | --- |
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | desktop opener |
 | file, coreutils (cp, mv, rm), findutils (xargs) | detect type, copy, move and remove files |
-| trash-cli | trash files (default: delete) |
-| mediainfo / exiftool | multimedia file details |
 | atool / bsdtar / patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
+| mediainfo / exiftool | multimedia file details |
+| trash-cli | trash files (default action: delete) |
 | sshfs, fusermount(3) | mount, unmount remote over SSHFS |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | copy, move progress |
@@ -191,11 +188,10 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 
 #### QUICKSTART
 
-1. Install the [utilities required](#utility-dependencies) for your regular activities.
+1. Install the [utilities you may need](#utility-dependencies) based on your regular workflows.
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/hacking-nnn#cd-on-quit).
 3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`
-4. Run `n`.
-5. For additional functionality [install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins) and the GUI app launcher [`nlaunch`](https://github.com/jarun/nnn/tree/master/scripts/nlaunch).
+4. For additional functionality [install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins) and the GUI app launcher [`nlaunch`](https://github.com/jarun/nnn/tree/master/scripts/nlaunch).
 
 - Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
 - When you are ready for more, start [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn).
