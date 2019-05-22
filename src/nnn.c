@@ -769,11 +769,19 @@ static void appendfpath(const char *path, const size_t len)
 }
 
 /* Write selected file paths to fd, linefeed separated */
-static ssize_t selectiontofd(int fd)
+static ssize_t selectiontofd(int fd, uint *pcount)
 {
-	uint lastpos = copybufpos - 1;
+	uint lastpos, count = 0;
 	char *pbuf = pcopybuf;
 	ssize_t pos = 0, len, r;
+
+	if (pcount)
+		*pcount = 0;
+
+	if (!copybufpos)
+		return 0;
+
+	lastpos = copybufpos - 1;
 
 	while (pos <= lastpos) {
 		len = strlen(pbuf);
@@ -789,7 +797,11 @@ static ssize_t selectiontofd(int fd)
 			pbuf += len + 1;
 		}
 		++pos;
+		++count;
 	}
+
+	if (pcount)
+		*pcount = count;
 
 	return pos;
 }
@@ -808,7 +820,7 @@ static void showcplist(void)
 		return;
 	}
 
-	pos = selectiontofd(fd);
+	pos = selectiontofd(fd, NULL);
 
 	close(fd);
 	if (pos && pos == copybufpos)
@@ -1121,78 +1133,79 @@ static void xrm(char *path)
 	}
 }
 
-static void rename_selection(const char *path)
+static bool batch_rename(const char *path)
 {
-	const char renamecmd[] = "paste -d'\n' %s %s | xargs -d'\n' -n2 mv 2>/dev/null";
-	char buf[sizeof(renamecmd) + 2 * PATH_MAX];
-	char foriginal[TMP_LEN_MAX] = {0};
 	int fd1 = -1, fd2 = -1, i;
-	ssize_t len, len2;
+	uint count = 0, lines = 0;
+	bool dir = FALSE, ret = FALSE;
+	const char renamecmd[] = "paste -d'\n' %s %s | xargs -d'\n' -n2 mv 2>/dev/null";
+	char foriginal[TMP_LEN_MAX] = {0};
+	char buf[sizeof(renamecmd) + (PATH_MAX << 1)];
 
 	if ((fd1 = create_tmp_file()) == -1)
-		return;
+		return ret;
 
 	xstrlcpy(foriginal, g_tmpfpath, strlen(g_tmpfpath)+1);
 
 	if ((fd2 = create_tmp_file()) == -1) {
 		unlink(foriginal);
 		close(fd1);
-		return;
+		return ret;
 	}
 
-	if (copybufpos > 0) {
-		// Rename selected files with absolute paths:
-		selectiontofd(fd1);
-		if (write(fd1, "\n", 1) < 1)
-			goto finished_renaming;
-		selectiontofd(fd2);
-		if (write(fd2, "\n", 1) < 1)
-			goto finished_renaming;
-	} else {
-		// If nothing is selected, use the directory contents with relative paths:
-		for (i = 0; i < ndents; ++i) {
-			len = strlen(dents[i].name);
-			if (write(fd1, dents[i].name, len) != len || write(fd1, "\n", 1) != 1)
-				goto finished_renaming;
-			if (write(fd2, dents[i].name, len) != len || write(fd2, "\n", 1) != 1)
-				goto finished_renaming;
-		}
+	if (!copybufpos) {
+		if (!ndents)
+			return TRUE;
+
+		for (i = 0; i < ndents; ++i)
+			appendfpath(dents[i].name, NAME_MAX);
+
+		dir = TRUE;
 	}
 
+	selectiontofd(fd1, &count);
+	selectiontofd(fd2, NULL);
 	close(fd2);
-	fd2 = -1;
+
+	if (dir)
+		copybufpos = 0;
 
 	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
 
-	// Check that the number of filenames is unchanged:
-	len = 0, len2 = 0;
-	lseek(fd1, 0, SEEK_SET);
-	while ((i = read(fd1, buf, sizeof(buf))) > 0) {
-		while (i) len += buf[--i] == '\n';
-	}
-	if (i < 0) goto finished_renaming;
-
 	// Reopen file descriptor to get updated contents:
 	if ((fd2 = open(g_tmpfpath, O_RDONLY)) == -1)
-		goto finished_renaming;
-	while ((i = read(fd2, buf, sizeof(buf))) > 0) {
-		while (i) len2 += buf[--i] == '\n';
-	}
-	if (i < 0) goto finished_renaming;
+		goto finish;
 
-	if (len2 != len) {
-		get_input("Error: wrong number of filenames. Press any key to continue...");
-		goto finished_renaming;
+	while ((i = read(fd2, buf, sizeof(buf))) > 0) {
+		while (i)
+			lines += (buf[--i] == '\n');
+	}
+
+	if (i < 0)
+		goto finish;
+
+	DPRINTF_U(count);
+	DPRINTF_U(lines);
+
+	if (count != lines) {
+		DPRINTF_S("cannot delete files");
+		goto finish;
 	}
 
 	snprintf(buf, sizeof(buf), renamecmd, foriginal, g_tmpfpath);
 	spawn("sh", "-c", buf, path, F_NORMAL);
+	ret = TRUE;
 
-finished_renaming:
-	if (fd2 >= 0) close(fd1);
+finish:
+	if (fd1 >= 0)
+		close(fd1);
 	unlink(foriginal);
-	if (fd2 >= 0) close(fd2);
+
+	if (fd2 >= 0)
+		close(fd2);
 	unlink(g_tmpfpath);
+
+	return ret;
 }
 
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
@@ -3659,12 +3672,12 @@ nochange:
 		case SEL_FMEDIA: // fallthrough
 		case SEL_ARCHIVELS: // fallthrough
 		case SEL_EXTRACT: // fallthrough
-		case SEL_RENAMEALL: // fallthrough
 		case SEL_RUNEDIT: // fallthrough
 		case SEL_RUNPAGE:
 			if (!ndents)
 				break; // fallthrough
 		case SEL_REDRAW: // fallthrough
+		case SEL_RENAMEALL: // fallthrough
 		case SEL_HELP: // fallthrough
 		case SEL_NOTE: // fallthrough
 		case SEL_LOCK:
@@ -3691,7 +3704,10 @@ nochange:
 					copycurname();
 				goto begin;
 			case SEL_RENAMEALL:
-				rename_selection(path);
+				if (!batch_rename(path)) {
+					printwait("batch rename failed", &presel);
+					goto nochange;
+				}
 				break;
 			case SEL_HELP:
 				r = show_help(path);
@@ -4635,7 +4651,7 @@ int main(int argc, char *argv[])
 
 	if (cfg.pickraw) {
 		if (copybufpos) {
-			opt = selectiontofd(1);
+			opt = selectiontofd(1, NULL);
 			if (opt != (int)(copybufpos))
 				xerror();
 		}

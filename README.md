@@ -105,7 +105,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - FreeDesktop compliant trash (needs trash-cli)
   - Plugin repository
   - SSHFS mounts (needs sshfs)
-  - Batch rename
+  - Batch rename selection or dir entries
   - Show copy, move progress on Linux (needs avdcpmv)
   - Per-context directory color (default: blue)
   - Spawn a shell in the current directory
