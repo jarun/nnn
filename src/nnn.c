@@ -334,10 +334,9 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define OPENER 2
 #define ATOOL 3
 #define BSDTAR 4
-#define VIDIR 5
-#define LOCKER 6
-#define NLAUNCH 7
-#define UNKNOWN 8
+#define LOCKER 5
+#define NLAUNCH 6
+#define UNKNOWN 7
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -352,7 +351,6 @@ static char * const utils[] = {
 #endif
 	"atool",
 	"bsdtar",
-	"vidir",
 #ifdef __APPLE__
 	"bashlock",
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
@@ -1121,6 +1119,80 @@ static void xrm(char *path)
 		rm_opts[1] = confirm_force();
 		spawn("rm", rm_opts, path, NULL, F_NORMAL);
 	}
+}
+
+static void rename_selection(const char *path)
+{
+	const char renamecmd[] = "paste -d'\n' %s %s | xargs -d'\n' -n2 mv 2>/dev/null";
+	char buf[sizeof(renamecmd) + 2 * PATH_MAX];
+	char foriginal[TMP_LEN_MAX] = {0};
+	int fd1 = -1, fd2 = -1, i;
+	ssize_t len, len2;
+
+	if ((fd1 = create_tmp_file()) == -1)
+		return;
+
+	xstrlcpy(foriginal, g_tmpfpath, strlen(g_tmpfpath)+1);
+
+	if ((fd2 = create_tmp_file()) == -1) {
+		unlink(foriginal);
+		close(fd1);
+		return;
+	}
+
+	if (copybufpos > 0) {
+		// Rename selected files with absolute paths:
+		selectiontofd(fd1);
+		if (write(fd1, "\n", 1) < 1)
+			goto finished_renaming;
+		selectiontofd(fd2);
+		if (write(fd2, "\n", 1) < 1)
+			goto finished_renaming;
+	} else {
+		// If nothing is selected, use the directory contents with relative paths:
+		for (i = 0; i < ndents; ++i) {
+			len = strlen(dents[i].name);
+			if (write(fd1, dents[i].name, len) != len || write(fd1, "\n", 1) != 1)
+				goto finished_renaming;
+			if (write(fd2, dents[i].name, len) != len || write(fd2, "\n", 1) != 1)
+				goto finished_renaming;
+		}
+	}
+
+	close(fd2);
+	fd2 = -1;
+
+	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
+
+	// Check that the number of filenames is unchanged:
+	len = 0, len2 = 0;
+	lseek(fd1, 0, SEEK_SET);
+	while ((i = read(fd1, buf, sizeof(buf))) > 0) {
+		while (i) len += buf[--i] == '\n';
+	}
+	if (i < 0) goto finished_renaming;
+
+	// Reopen file descriptor to get updated contents:
+	if ((fd2 = open(g_tmpfpath, O_RDONLY)) == -1)
+		goto finished_renaming;
+	while ((i = read(fd2, buf, sizeof(buf))) > 0) {
+		while (i) len2 += buf[--i] == '\n';
+	}
+	if (i < 0) goto finished_renaming;
+
+	if (len2 != len) {
+		get_input("Error: wrong number of filenames. Press any key to continue...");
+		goto finished_renaming;
+	}
+
+	snprintf(buf, sizeof(buf), renamecmd, foriginal, g_tmpfpath);
+	spawn("sh", "-c", buf, path, F_NORMAL);
+
+finished_renaming:
+	if (fd2 >= 0) close(fd1);
+	unlink(foriginal);
+	if (fd2 >= 0) close(fd2);
+	unlink(g_tmpfpath);
 }
 
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
@@ -3619,9 +3691,7 @@ nochange:
 					copycurname();
 				goto begin;
 			case SEL_RENAMEALL:
-				r = getutil(utils[VIDIR]);
-				if (r)
-					spawn(utils[VIDIR], ".", NULL, path, F_NORMAL);
+				rename_selection(path);
 				break;
 			case SEL_HELP:
 				r = show_help(path);
