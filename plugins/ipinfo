@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Description: Shows the IP address and whois information. Useful over VPNs.
+# Description: Shows the external IP address and whois information. Useful over VPNs.
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
@@ -8,6 +8,6 @@
 IP=`curl -s ifconfig.me`
 
 whois "$IP"
-echo your IP address is "$IP"
+echo your external IP address is "$IP"
 
 read dummy

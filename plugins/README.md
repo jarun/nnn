@@ -7,7 +7,7 @@
 | hexview | sh | xxd, `$PAGER` | View a file in hex |
 | imgresize | sh | [imgp](https://github.com/jarun/imgp) | Resize images in directory to screen resolution |
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
-| ipinfo | sh | curl, whois | Fetch IP address and whois information |
+| ipinfo | sh | curl, whois | Fetch external IP address and whois information |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
 | ndiff | sh | vimdiff | Show diff for selection |
 | nmount | sh | pmount | Toggle mount status of a device as normal user |
