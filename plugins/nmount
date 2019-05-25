@@ -9,6 +9,7 @@
 
 lsblk
 echo
+echo "Make sure you aren't still in the mounted device."
 echo -n "device (e.g. sdc2): "
 read dev
 
