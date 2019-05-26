@@ -18,15 +18,13 @@
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
 
-`nnn` is a full-featured file manager for low-power, low-frequency, resource-limited devices and the regular desktop. It aims to be **[one of the fastest and most lightweight](https://github.com/jarun/nnn/wiki/performance)** file managers.
+`nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely **[light and fast](https://github.com/jarun/nnn/wiki/performance)**.
 
-`nnn` is also a disk usage analyzer, a fuzzy app launcher and a batch file renamer.
+`nnn` is also a disk usage analyzer, a fuzzy app launcher and a batch file renamer. Several **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. New ones can be added easily.
 
 It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
-Several **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. New plugins can be added easily.
-
-`nnn` works seamlessly with DEs and GUI utilities. **[Quickstart](#quickstart)** and see how `nnn` simplifies long desktop sessions.
+`nnn` works seamlessly with DEs and GUI utilities. **[Quickstart](#quickstart)** and see how `nnn` simplifies workflows.
 
 <p align="center">
 <a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/onpq3vP.png" alt="Click to watch video"/></a>
