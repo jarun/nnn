@@ -323,9 +323,9 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 
 /* Options to identify file mime */
 #ifdef __APPLE__
-#define FILE_OPTS "-bI"
+#define FILE_OPTS "-bIL"
 #else
-#define FILE_OPTS "-bi"
+#define FILE_OPTS "-biL"
 #endif
 
 /* Macros for utilities */
