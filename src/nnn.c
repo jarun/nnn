@@ -2538,7 +2538,7 @@ static bool create_dir(const char *path)
 		if (errno != ENOENT)
 			return FALSE;
 
-		if (mkdir(path, 0777) == -1)
+		if (mkdir(path, 0755) == -1)
 			return FALSE;
 	}
 
