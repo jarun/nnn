@@ -4300,10 +4300,18 @@ static bool setup_config(void)
 		return FALSE;
 	}
 	r = xstrlcpy(cfgdir, home, len);
-	xstrlcpy(cfgdir + r - 1, "/.config/nnn", len - r);
+
+	/* Create ~/.config */
+	xstrlcpy(cfgdir + r - 1, "/.config", len - r);
 	DPRINTF_S(cfgdir);
+	if (!create_dir(cfgdir)) {
+		xerror();
+		return FALSE;
+	}
 
 	/* Create ~/.config/nnn */
+	xstrlcpy(cfgdir + r - 1, "/.config/nnn", len - r);
+	DPRINTF_S(cfgdir);
 	if (!create_dir(cfgdir)) {
 		xerror();
 		return FALSE;
