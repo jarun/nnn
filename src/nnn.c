@@ -483,8 +483,8 @@ static void move_cursor(int target, int ignore_scrolloff);
  */
 static uchar crc8fast(const uchar * const message, size_t n)
 {
-	uchar data, remainder;
-	size_t byte;
+	uchar data, remainder = 0;
+	size_t byte = 0;
 
 	/* CRC data */
 	static const uchar crc8table[CRC8_TABLE_LEN] __attribute__ ((aligned)) = {
@@ -507,9 +507,10 @@ static uchar crc8fast(const uchar * const message, size_t n)
 	};
 
 	/* Divide the message by the polynomial, a byte at a time */
-	for (remainder = byte = 0; byte < n; ++byte) {
+	while (byte < n) {
 		data = message[byte] ^ (remainder >> (WIDTH - 8));
 		remainder = crc8table[data] ^ (remainder << 8);
+		++byte;
 	}
 
 	/* The final remainder is the CRC */
@@ -1257,18 +1258,13 @@ static int digit_compare(const char *a, const char *b)
  */
 static int xstricmp(const char * const s1, const char * const s2)
 {
-	const char *c1, *c2, *m1, *m2;
+	const char *c1 = s1, *c2 = s2, *m1, *m2;
 	int count1 = 0, count2 = 0, bias;
-	char sign[2];
+	char sign[2] = {'+', '+'};
 
-	sign[0] = '+';
-	sign[1] = '+';
-
-	c1 = s1;
 	while (ISBLANK(*c1))
 		++c1;
 
-	c2 = s2;
 	while (ISBLANK(*c2))
 		++c2;
 
@@ -1492,18 +1488,16 @@ static int entrycmp(const void *va, const void *vb)
  */
 static int nextsel(int presel)
 {
-	int c;
+	int c = presel;
 	uint i;
 	const uint len = LEN(bindings);
 #ifdef LINUX_INOTIFY
-	char *ptr;
 	struct inotify_event *event;
 	static char inotify_buf[EVENT_BUF_LEN]
 		    __attribute__ ((aligned(__alignof__(struct inotify_event))));
 #elif defined(BSD_KQUEUE)
 	static struct kevent event_data[NUM_EVENT_SLOTS];
 #endif
-	c = presel;
 
 	if (c == 0 || c == MSGWAIT) {
 		c = getch();
@@ -1529,6 +1523,8 @@ static int nextsel(int presel)
 		if (!cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
 			i = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
 			if (i > 0) {
+				char *ptr;
+
 				for (ptr = inotify_buf; ptr < inotify_buf + i;
 				     ptr += sizeof(struct inotify_event) + event->len) {
 					event = (struct inotify_event *) ptr;
@@ -2075,10 +2071,10 @@ static char *unescape(const char *str, uint maxcols)
 {
 	static wchar_t wbuf[NAME_MAX + 1] __attribute__ ((aligned));
 	wchar_t *buf = wbuf;
-	size_t len, lencount = 0;
+	size_t lencount = 0;
 
 	/* Convert multi-byte to wide char */
-	len = mbstowcs(wbuf, str, NAME_MAX);
+	size_t len = mbstowcs(wbuf, str, NAME_MAX);
 
 	while (*buf && lencount <= maxcols) {
 		if (*buf <= '\x1f' || *buf == '\x7f')
@@ -2110,10 +2106,8 @@ static char *coolsize(off_t size)
 {
 	const char * const U = "BKMGTPEZY";
 	static char size_buf[12]; /* Buffer to hold human readable size */
-	off_t rem;
-	int i;
-
-	rem = i = 0;
+	off_t rem = 0;
+	int i = 0;
 
 	while (size >= 1024) {
 		rem = size & (0x3FF); /* 1024 - 1 = 0x3FF */
@@ -2169,10 +2163,8 @@ static void printent(const struct entry *ent, int sel, uint namecols)
 {
 	const char *pname = unescape(ent->name, namecols);
 	const char cp = (ent->flags & FILE_COPIED) ? '+' : ' ';
-	char ind[2];
+	char ind[2] = {'\0', '\0'};
 	mode_t mode = ent->mode;
-
-	ind[0] = ind[1] = '\0';
 
 	switch (mode & S_IFMT) {
 	case S_IFREG:
