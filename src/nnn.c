@@ -99,7 +99,7 @@
 #include "dbg.h"
 
 /* Macro definitions */
-#define VERSION "2.4"
+#define VERSION "2.5"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
 
 #ifndef S_BLKSIZE

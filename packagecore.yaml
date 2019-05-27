@@ -115,6 +115,16 @@ packages:
     deps:
       - ncurses
       - readline
+  fedora30:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
 #  opensuse42.3:
 #    builddeps:
 #      - make

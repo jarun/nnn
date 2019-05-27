@@ -1,3 +1,38 @@
+nnn v2.5
+2019-05-27
+
+- mouse support
+- new location for config files - `~/.config/nnn`
+  - plugin dir location: `~/.config/nnn/plugins`
+  - selection file `.nnncp` is now `~/.config/nnn/.selection`
+- plugins:
+  - pdfview: view a PDF in pager
+  - nmount: (un)mount a storage device
+  - ndiff: file and directory diff for selection
+  - hexview: view a file in hex
+  - imgresize: batch resize images to desktop resolution
+  - ipinfo: check your IP address and whois information
+  - transfer: upload a file to transfer.in
+  - pastebin: paste the contents of a text file to paste.ubuntu.com
+  - boom: play random music from a directory
+  - nwal: set an image as wallpaper using nitrogen
+  - pywal: set selected image as wallpaper, change terminal color scheme
+  - getplugs: update plugins
+- SSHFS support
+- support `bsdtar`, simplify `patool` integration
+- native batch rename support (`vidir` dependency dropped)
+- changes to support [configuration](https://github.com/jarun/nnn/wiki/nnn-as-default-file-manager) as the default file manager
+- per-context detail/light mode
+- case-insensitive version compare
+- shortcut to visit `/` - <kbd>`</kbd> (backtick)
+- vim-like scrolloff support
+- <kbd>^D</kbd> & <kbd>^U</kbd>: scroll half page, <kbd>PgDn</kbd> & <kbd>PdUp</kbd>: scroll full page
+- fix selection across contexts
+- recognize <kbd>Home</kbd> and <kbd>End</kbd> keys at prompt for editing
+- fix broken program option `-b`
+- POSIX-compliant user-scripts (wherever possible)
+- `NNN_SCRIPT` is retired (replaced by plugins)
+
 nnn v2.4
 2019-03-19
 
