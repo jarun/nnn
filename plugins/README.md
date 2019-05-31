@@ -19,6 +19,7 @@
 | sxiv | sh | sxiv | Browse images in a dir in sxiv, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts))|
 | transfer | sh | curl | Upload current file to transfer.sh |
 | upgrade | sh | wget | Upgrade to latest nnn version manually on Debian 9 Stretch |
+| viuimg | sh | [viu](https://github.com/atanunq/viu), less | View an image or images in a directory |
 
 #### Installing plugins
 
