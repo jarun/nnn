@@ -2,11 +2,23 @@
 
 # Description: View a PDF file in pager
 #
+# Notes:
+# - $PAGER must be 'less -R' or 'most'
+# - To use mutool, uncomment the relevant lines and comment the pdftotext line
+#
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
 if ! [ -z "$1" ]; then
     if [ $(head -c 4 "$1") = "%PDF" ]; then
+        # Convert using pdftotext
         pdftotext -nopgbrk -layout "$1" - | sed 's/\xe2\x80\x8b//g' | $PAGER
+
+        # Convert using mutool
+        # file=`basename "$1"`
+        # txt=/tmp/"$file".txt
+        # mutool convert -o "$txt" "$1"
+        # eval $PAGER $txt
+        # rm "$txt"
     fi
 fi
