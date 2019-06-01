@@ -1878,8 +1878,6 @@ END:
  */
 static char *getreadline(char *prompt, char *path, char *curpath, int *presel)
 {
-	char *input;
-
 	/* Switch to current path for readline(3) */
 	if (chdir(path) == -1) {
 		printwarn(presel);
@@ -1888,7 +1886,7 @@ static char *getreadline(char *prompt, char *path, char *curpath, int *presel)
 
 	exitcurses();
 
-	input = readline(prompt);
+	char *input = readline(prompt);
 
 	refresh();
 
@@ -4155,7 +4153,7 @@ nochange:
 						goto nochange;
 				}
 #endif
-				if (tmp[0])
+				if (tmp && tmp[0]) // NOLINT
 					spawn(shell, "-c", tmp, path, F_CLI);
 			}
 
