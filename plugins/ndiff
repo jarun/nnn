@@ -5,10 +5,22 @@
 # Shell: Bash
 # Author: Arun Prakash Jana
 
-arr=($(cat ~/.config/nnn/.selection | tr '\0' '\n'))
+selection=~/.config/nnn/.selection
 
-if [ -d "${arr[0]}" ] && [ -d "${arr[1]}" ]; then
-    vimdiff <(cd ${arr[0]} && find | sort) <(cd ${arr[1]} && find | sort)
-else
-    vimdiff "${arr[@]}"
+if [ -s $selection ]; then
+    arr=$(cat $selection | tr '\0' '\n')
+    { read -r f1; read -r f2; } <<< "$arr"
+
+    if [ -z "$f2" ]; then
+        exit
+    fi
+
+    if [ -d "$f1" ] && [ -d "$f2" ]; then
+        vimdiff <(cd "$f1" && find | sort) <(cd "$f2" && find | sort)
+    else
+        cat $selection | xargs -0 -o vimdiff
+
+        # For GNU xargs (note: ignoreme takes up $0)
+        # cat $selection | xargs -0 bash -c '</dev/tty vimdiff "$@"' ignoreme
+    fi
 fi
