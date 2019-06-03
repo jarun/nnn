@@ -418,10 +418,6 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 To extend the capabilities of `nnn`, [plugins](https://github.com/jarun/nnn/tree/master/plugins) are introduced. Plugins are scripts which `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins.
 
-Use the pick plugin shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
-
-If you have an interesting plugin feel free to raise a PR.
-
 #### TROUBLESHOOTING
 
 ##### Tmux configuration
