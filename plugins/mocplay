@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+
+# Description: Appends and optionally plays music in MOC
+#
+# Notes:
+# - if selection is available, plays it, else plays the current file or directory
+# - appends tracks and exits is MOC is running, else clears playlist and adds tracks
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+selection=~/.config/nnn/.selection
+cmd=$(pgrep -x mocp 2>/dev/null)
+ret=$cmd
+
+if [ -s "$selection" ]; then
+    # try selection first
+    if [ -z "$ret" ]; then
+        # mocp not running
+        mocp -S
+
+        # clear selection and play
+        cat "$selection" | xargs -0 mocp -acp
+    else
+        # mocp running, just append
+        cat "$selection" | xargs -0 mocp -a
+    fi
+else
+    # ensure a file/dir is passed
+    if ! [ -z "$1" ]; then
+        if [ -z "$ret" ]; then
+            # mocp not running
+            mocp -S
+
+            # clear selection and play
+            mocp -acp "$1"
+        else
+            # mocp running, just append
+            mocp -a "$1"
+        fi
+    fi
+fi
