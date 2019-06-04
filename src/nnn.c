@@ -212,7 +212,7 @@ typedef struct {
 	uint copymode   : 1;  /* Set when copying files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 7;
+	uint reserved   : 8;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
@@ -224,7 +224,6 @@ typedef struct {
 	uint useeditor  : 1;  /* Use VISUAL to open text files */
 	uint runplugin  : 1;  /* Choose plugin mode */
 	uint runctx     : 2;  /* The context in which plugin is to be run */
-	uint restrict0b : 1;  /* Restrict 0-byte file opening */
 	uint filter_re  : 1;  /* Use regex filters */
 	uint wild       : 1;  /* Do not sort entries on dir load */
 	uint trash      : 1;  /* Move removed files to trash */
@@ -264,7 +263,6 @@ static settings cfg = {
 	0, /* useeditor */
 	0, /* runplugin */
 	0, /* runctx */
-	0, /* restrict0b */
 	1, /* filter_re */
 	0, /* wild */
 	0, /* trash */
@@ -396,10 +394,9 @@ static const char * const messages[] = {
 #define NNN_USE_EDITOR 8 /* flags begin here */
 #define NNN_NO_AUTOSELECT 9
 #define NNN_RESTRICT_NAV_OPEN 10
-#define NNN_RESTRICT_0B 11
-#define NNN_TRASH 12
+#define NNN_TRASH 11
 #ifdef __linux__
-#define NNN_OPS_PROG 13
+#define NNN_OPS_PROG 12
 #endif
 
 static const char * const env_cfg[] = {
@@ -414,7 +411,6 @@ static const char * const env_cfg[] = {
 	"NNN_USE_EDITOR",
 	"NNN_NO_AUTOSELECT",
 	"NNN_RESTRICT_NAV_OPEN",
-	"NNN_RESTRICT_0B",
 	"NNN_TRASH",
 #ifdef __linux__
 	"NNN_OPS_PROG",
@@ -3356,7 +3352,7 @@ nochange:
 					continue;
 				}
 
-				if (!sb.st_size && cfg.restrict0b) {
+				if (!sb.st_size) {
 					printwait("empty: use edit or open with", &presel);
 					goto nochange;
 				}
@@ -4593,10 +4589,6 @@ int main(int argc, char *argv[])
 	/* Disable opening files on right arrow and `l` */
 	if (xgetenv_set(env_cfg[NNN_RESTRICT_NAV_OPEN]))
 		cfg.nonavopen = 1;
-
-	/* Restrict opening of 0-byte files */
-	if (xgetenv_set(env_cfg[NNN_RESTRICT_0B]))
-		cfg.restrict0b = 1;
 
 #ifdef __linux__
 	if (!xgetenv_set(env_cfg[NNN_OPS_PROG])) {

@@ -377,7 +377,6 @@ The following indicators are used in the detail view:
 | `NNN_USE_EDITOR=1` | open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
-| `NNN_RESTRICT_0B=1` | disable 0-byte file open; see [#187](https://github.com/jarun/nnn/issues/187), use _edit_ or _open with_ |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
 | `NNN_OPS_PROG=1` | show copy, move progress on Linux |
 
