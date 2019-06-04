@@ -3215,6 +3215,10 @@ nochange:
 		if (getppid() == 1)
 			_exit(0);
 
+		/* Check if CWD is deleted to  avoid hang, bad idea */
+		//if (access(path, F_OK))
+		//	return;
+
 		sel = nextsel(presel);
 		if (presel)
 			presel = 0;
