@@ -1489,10 +1489,11 @@ static int nextsel(int presel)
 	const uint len = LEN(bindings);
 #ifdef LINUX_INOTIFY
 	struct inotify_event *event;
-	static char inotify_buf[EVENT_BUF_LEN]
-		    __attribute__ ((aligned(__alignof__(struct inotify_event))));
+	char *inotify_buf = alloca(EVENT_BUF_LEN);
+	memset((void *)inotify_buf, 0x0, EVENT_BUF_LEN);
 #elif defined(BSD_KQUEUE)
-	static struct kevent event_data[NUM_EVENT_SLOTS];
+	struct kevent *event_data = alloca(sizeof(struct kevent) * NUM_EVENT_SLOTS);
+	memset((void *)event_data, 0x0, sizeof(struct kevent) * NUM_EVENT_SLOTS);
 #endif
 
 	if (c == 0 || c == MSGWAIT) {
@@ -1521,7 +1522,8 @@ static int nextsel(int presel)
 			if (i > 0) {
 				char *ptr;
 
-				for (ptr = inotify_buf; ptr < inotify_buf + i;
+				for (ptr = inotify_buf;
+				     ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
 				     ptr += sizeof(struct inotify_event) + event->len) {
 					event = (struct inotify_event *) ptr;
 					DPRINTF_D(event->wd);
