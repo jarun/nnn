@@ -4252,7 +4252,11 @@ nochange:
 			/* Locker */
 			if (idletimeout && idle == idletimeout) {
 				idle = 0;
-				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL);
+				tmp = utils[LOCKER];
+				if (!getutil(tmp))
+					tmp = "pipes.sh";
+
+				spawn(tmp, NULL, NULL, NULL, F_NORMAL);
 				if (ndents)
 					copycurname();
 				goto begin;

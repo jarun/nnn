@@ -135,7 +135,7 @@ The following table is a complete list. Some of the utilities may be installed b
 | mediainfo / exiftool | multimedia file details |
 | trash-cli | trash files (default action: delete) |
 | sshfs, fusermount(3) | mount, unmount remote over SSHFS |
-| vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker |
+| vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker (fallback: [pipes.sh](https://github.com/pipeseroni/pipes.sh)) |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | copy, move progress |
 | `$VISUAL` (else `$EDITOR`), `$PAGER` (less, most), `$SHELL` | fallback vi, less, sh |
 
