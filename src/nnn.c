@@ -333,8 +333,9 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define ATOOL 3
 #define BSDTAR 4
 #define LOCKER 5
-#define NLAUNCH 6
-#define UNKNOWN 7
+#define PIPES 6
+#define NLAUNCH 7
+#define UNKNOWN 8
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -356,6 +357,7 @@ static char * const utils[] = {
 #else
 	"vlock",
 #endif
+	"pipes.sh",
 	"nlaunch",
 	"UNKNOWN"
 };
@@ -2607,6 +2609,15 @@ static bool sshfs_unmount(char *path, char *newpath, int *presel)
 	return TRUE;
 }
 
+static void lock_terminal(void)
+{
+	char *tmp = utils[LOCKER];
+	if (!getutil(tmp))
+		tmp = utils[PIPES];;
+
+	spawn(tmp, NULL, NULL, NULL, F_NORMAL);
+}
+
 /*
  * The help string tokens (each line) start with a HEX value
  * which indicates the number of spaces to print before the
@@ -3724,7 +3735,7 @@ nochange:
 				break;
 			}
 			default: /* SEL_LOCK */
-				spawn(utils[LOCKER], NULL, NULL, NULL, F_NORMAL);
+				lock_terminal();
 				break;
 			}
 
@@ -4252,11 +4263,7 @@ nochange:
 			/* Locker */
 			if (idletimeout && idle == idletimeout) {
 				idle = 0;
-				tmp = utils[LOCKER];
-				if (!getutil(tmp))
-					tmp = "pipes.sh";
-
-				spawn(tmp, NULL, NULL, NULL, F_NORMAL);
+				lock_terminal();
 				if (ndents)
 					copycurname();
 				goto begin;
