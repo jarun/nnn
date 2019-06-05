@@ -93,14 +93,14 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Detailed file information
   - Media information (needs mediainfo/exiftool)
 - Convenience
-  - Mouse support
-  - Create, rename files and directories
+  - Plugin repository
   - Select files across dirs; all/range selection
   - Copy, move, delete, archive, link selection
-  - FreeDesktop compliant trash (needs trash-cli)
-  - Plugin repository
-  - SSHFS mounts (needs sshfs)
   - Batch rename selection or dir entries
+  - FreeDesktop compliant trash (needs trash-cli)
+  - SSHFS mounts (needs sshfs)
+  - Mouse support
+  - Create, rename files and directories
   - Show copy, move progress on Linux (needs avdcpmv)
   - Per-context directory color (default: blue)
   - Spawn a shell in the current directory
