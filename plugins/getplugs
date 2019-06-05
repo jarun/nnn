@@ -5,6 +5,11 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
+# backup any earlier plugins
+if [ -d ~/.config/nnn/plugins ]; then
+    tar -C ~/.config/nnn/ -cf ~/.config/nnn/"plugins-$(date '+%Y%m%d%H%M').tar.bz2" plugins/
+fi
+
 mkdir -p ~/.config/nnn/plugins
 cd ~/.config/nnn/plugins
 wget -nv --show-progress https://github.com/jarun/nnn/archive/master.tar.gz
