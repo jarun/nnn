@@ -1491,10 +1491,10 @@ static int nextsel(int presel)
 	const uint len = LEN(bindings);
 #ifdef LINUX_INOTIFY
 	struct inotify_event *event;
-	char *inotify_buf = alloca(EVENT_BUF_LEN);
+	char inotify_buf[EVENT_BUF_LEN];
 	memset((void *)inotify_buf, 0x0, EVENT_BUF_LEN);
 #elif defined(BSD_KQUEUE)
-	struct kevent *event_data = alloca(sizeof(struct kevent) * NUM_EVENT_SLOTS);
+	struct kevent event_data[NUM_EVENT_SLOTS];
 	memset((void *)event_data, 0x0, sizeof(struct kevent) * NUM_EVENT_SLOTS);
 #endif
 
