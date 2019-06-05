@@ -4,6 +4,8 @@
 #              If the device is not mounted, it will be mounted.
 #              If the device is mounted, it will be unmounted and powered down.
 #
+#              Runs `lsblk` if 'l' is entered, exits on 'Return`.
+#
 # Note:
 # - The script uses Linux-specific lsblk to list block devices. Alternatives:
 #       macOS: "diskutil list"
@@ -14,31 +16,37 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
+prompt="device name ['l' lists]: "
+
 lsblk
 
 echo
 echo "Make sure you aren't still in the mounted device."
-echo -n "device (e.g. sdc2): "
+echo -n "$prompt"
 read dev
 
 while ! [ -z "$dev" ]
 do
-    if grep -qs "$dev " /proc/mounts; then
-        sync
-        pumount "$dev"
-        if [ "$?" -eq "0" ]; then
-            echo "$dev" unmounted.
-            udisksctl power-off -b /dev/"$dev"
-            if [ "$?" -eq "0" ]; then
-                echo "$dev" ejected.
-            fi
-        fi
+    if [ "$dev" = "l" ]; then
+        lsblk
     else
-        pmount "$dev"
-        echo "$dev" mounted to "$(lsblk -n /dev/"$dev" | rev | cut -d' ' -f1 | rev)".
+        if grep -qs "$dev " /proc/mounts; then
+            sync
+            pumount "$dev"
+            if [ "$?" -eq "0" ]; then
+                echo "$dev" unmounted.
+                udisksctl power-off -b /dev/"$dev"
+                if [ "$?" -eq "0" ]; then
+                    echo "$dev" ejected.
+                fi
+            fi
+        else
+            pmount "$dev"
+            echo "$dev" mounted to "$(lsblk -n /dev/"$dev" | rev | cut -d' ' -f1 | rev)".
+        fi
     fi
 
     echo
-    echo -n "next device: "
+    echo -n "$prompt"
     read dev
 done
