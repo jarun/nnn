@@ -17,6 +17,7 @@
 | pdfview | sh | pdftotext/mupdf-tools | View current PDF file in `$PAGER` |
 | picker | sh | nnn | Pick files and pipe the newline-separated list to another utility |
 | pywal | sh | pywal | Set selected image as wallpaper, change terminal color scheme |
+| splitjoin | bash | split, cat | Split current file or join selection |
 | sxiv | sh | sxiv | Browse images in a dir in sxiv, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts))|
 | transfer | sh | curl | Upload current file to transfer.sh |
 | upgrade | sh | wget | Upgrade to latest nnn version manually on Debian 9 Stretch |

@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Description: Splits the file passed as argument or joins selection
+#
+# Note: Adds numeric suffix to split files
+#       Adds '.join' suffix to the first file to be joined and saves as output file for join
+#
+# Shell: Bash
+# Author: Arun Prakash Jana
+
+selection=~/.config/nnn/.selection
+
+echo -n "press 's' (split current file) or 'j' (join selection): "
+read resp
+
+if [ "$resp" = "j" ]; then
+    if [ -s "$selection" ]; then
+        arr=$(cat $selection | tr '\0' '\n')
+        { read -r file; } <<< "$arr"
+
+        file=$(basename "$file").out
+
+        cat "$selection" | sort -z | xargs -0 -i cat {} > "$file"
+    fi
+elif [ "$resp" = "s" ]; then
+    if ! [ -z "$1" ] && [ -f "$1" ] ; then
+        # a single file is passed
+        echo -n "split size in MB: "
+        read size
+
+        if ! [ -z "$size" ]; then
+            split -d -b "$size"M "$1" "$1"
+        fi
+    fi
+fi
