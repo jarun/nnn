@@ -125,7 +125,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 
 #### Utility dependencies
 
-The following table is a complete list. Some of the utilities may be installed by default (e.g. desktop opener, file, coreutils, findutils) and some may not be required by all users (e.g. sshfs, vlock, advcpmv).
+The following table is a complete list. Some of the utilities may be installed by default (e.g. desktop opener, file, coreutils, findutils) and some may not be required by all users (e.g. sshfs, terminal locker, advcpmv).
 
 | Dependency | Operation |
 | --- | --- |
