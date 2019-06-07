@@ -40,3 +40,6 @@ else
         fi
     fi
 fi
+
+# uncomment the line below to show mocp interface after appending
+# mocp
