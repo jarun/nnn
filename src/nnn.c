@@ -391,14 +391,13 @@ static const char * const messages[] = {
 #define NNN_IDLE_TIMEOUT 3
 #define NNN_COPIER 4
 #define NNN_NOTE 5
-#define NNN_TMPFILE 6
-#define NNNLVL 7 /* strings end here */
-#define NNN_USE_EDITOR 8 /* flags begin here */
-#define NNN_NO_AUTOSELECT 9
-#define NNN_RESTRICT_NAV_OPEN 10
-#define NNN_TRASH 11
+#define NNNLVL 6 /* strings end here */
+#define NNN_USE_EDITOR 7 /* flags begin here */
+#define NNN_NO_AUTOSELECT 8
+#define NNN_RESTRICT_NAV_OPEN 9
+#define NNN_TRASH 10
 #ifdef __linux__
-#define NNN_OPS_PROG 12
+#define NNN_OPS_PROG 11
 #endif
 
 static const char * const env_cfg[] = {
@@ -408,7 +407,6 @@ static const char * const env_cfg[] = {
 	"NNN_IDLE_TIMEOUT",
 	"NNN_COPIER",
 	"NNN_NOTE",
-	"NNN_TMPFILE",
 	"NNNLVL",
 	"NNN_USE_EDITOR",
 	"NNN_NO_AUTOSELECT",
@@ -1221,21 +1219,23 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 
 static bool write_lastdir(const char *curpath)
 {
-	char *tmp = getenv(env_cfg[NNN_TMPFILE]);
+	bool ret = TRUE;
+	size_t len = strlen(cfgdir);
 
-	if (!tmp) {
-		printmsg("set NNN_TMPFILE");
-		return FALSE;
-	}
+	xstrlcpy(cfgdir + len, "/.lastd", 8);
+	DPRINTF_S(cfgdir);
 
-	FILE *fp = fopen(tmp, "w");
+	FILE *fp = fopen(cfgdir, "w");
 
 	if (fp) {
-		fprintf(fp, "cd \"%s\"", curpath);
-		fclose(fp);
-	}
+		if (fprintf(fp, "cd \"%s\"", curpath) < 0)
+			ret = FALSE;
 
-	return TRUE;
+		fclose(fp);
+	} else
+		ret = FALSE;
+
+	return ret;
 }
 
 static int digit_compare(const char *a, const char *b)
