@@ -4301,47 +4301,77 @@ static void usage(void)
 static bool setup_config(void)
 {
 	size_t r, len;
+	char *xdgcfg = getenv("XDG_CONFIG_HOME");
+	bool xdg = FALSE;
 
 	/* Set up configuration file paths */
-	len = strlen(home) + 1 + 20; /* add length of "/.config/nnn/plugins" */
+	if (xdgcfg && xdgcfg[0]) {
+		DPRINTF_S(xdgcfg);
+		if (xdgcfg[0] == '~') {
+			r = xstrlcpy(g_buf, home, PATH_MAX);
+			xstrlcpy(g_buf + r - 1, xdgcfg + 1, PATH_MAX);
+			xdgcfg = g_buf;
+			DPRINTF_S(xdgcfg);
+		}
+
+		if (!xdiraccess(xdgcfg)) {
+			xerror();
+			return FALSE;
+		}
+
+		len = strlen(xdgcfg) + 1 + 12; /* add length of "/nnn/plugins" */
+		xdg = TRUE;
+	}
+
+	if (!xdg)
+		len = strlen(home) + 1 + 20; /* add length of "/.config/nnn/plugins" */
+
 	cfgdir = (char *)malloc(len);
 	plugindir = (char *)malloc(len);
 	if (!cfgdir || !plugindir) {
 		xerror();
 		return FALSE;
 	}
-	r = xstrlcpy(cfgdir, home, len);
 
-	/* Create ~/.config */
-	xstrlcpy(cfgdir + r - 1, "/.config", len - r);
-	DPRINTF_S(cfgdir);
-	if (!create_dir(cfgdir)) {
-		xerror();
-		return FALSE;
+	if (xdg) {
+		xstrlcpy(cfgdir, xdgcfg, len);
+		r = len - 12;
+	} else {
+		r = xstrlcpy(cfgdir, home, len);
+
+		/* Create ~/.config */
+		xstrlcpy(cfgdir + r - 1, "/.config", len - r);
+		DPRINTF_S(cfgdir);
+		if (!create_dir(cfgdir)) {
+			xerror();
+			return FALSE;
+		}
+
+		r += 8; /* length of "/.config" */
 	}
 
 	/* Create ~/.config/nnn */
-	xstrlcpy(cfgdir + r - 1, "/.config/nnn", len - r);
+	xstrlcpy(cfgdir + r - 1, "/nnn", len - r);
 	DPRINTF_S(cfgdir);
 	if (!create_dir(cfgdir)) {
 		xerror();
 		return FALSE;
 	}
 
-	xstrlcpy(cfgdir + r + 12 - 1, "/plugins", 9);
+	/* Create ~/.config/nnn/plugins */
+	xstrlcpy(cfgdir + r + 4 - 1, "/plugins", 9);
 	DPRINTF_S(cfgdir);
 
 	xstrlcpy(plugindir, cfgdir, len);
 	DPRINTF_S(plugindir);
 
-	/* Create ~/.config/nnn/plugins */
 	if (!create_dir(cfgdir)) {
 		xerror();
 		return FALSE;
 	}
 
 	/* Reset to config path */
-	cfgdir[r + 11] = '\0';
+	cfgdir[r + 3] = '\0';
 	DPRINTF_S(cfgdir);
 
 	/* Set selection file path */

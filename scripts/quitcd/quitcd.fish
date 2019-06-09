@@ -5,6 +5,7 @@
 function n --description 'support nnn quit and change directory'
     nnn $argv
 
+    # NOTE: set NNN_TMPFILE correctly if you use 'XDG_CONFIG_HOME'
     set NNN_TMPFILE ~/.config/nnn/.lastd
 
     if test -e $NNN_TMPFILE
