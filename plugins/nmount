@@ -29,6 +29,8 @@ while ! [ -z "$dev" ]
 do
     if [ "$dev" = "l" ]; then
         lsblk
+    elif [ "$dev" = "q" ]; then
+        exit
     else
         if grep -qs "$dev " /proc/mounts; then
             sync
