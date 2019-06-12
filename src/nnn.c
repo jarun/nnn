@@ -745,9 +745,9 @@ static void writecp(const char *buf, const size_t buflen)
 		return;
 
 	FILE *fp = fopen(g_cppath, "w");
-
 	if (fp) {
-		fwrite(buf, 1, buflen, fp);
+		if (fwrite(buf, 1, buflen, fp) != buflen)
+			printwarn(NULL);
 		fclose(fp);
 	} else
 		printwarn(NULL);
