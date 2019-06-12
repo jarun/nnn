@@ -20,7 +20,7 @@
 
 `nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely **[light and fast](https://github.com/jarun/nnn/wiki/performance)**.
 
-`nnn` is also a disk usage analyzer, a fuzzy app launcher and a batch file renamer. Several **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. New ones can be added easily.
+`nnn` is also a disk usage analyzer, a fuzzy app launcher and a batch file renamer. 20+ **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. Custom plugins are easy to add.
 
 It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
