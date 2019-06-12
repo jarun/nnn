@@ -143,7 +143,7 @@ The following table is a complete list. Some of the utilities may be installed b
 
 - [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=nnn) (`apk add nnn`)
 - [Arch Linux](https://www.archlinux.org/packages/community/x86_64/nnn/) (`pacman -S nnn`)
-- [CRUX portdb](https://crux.nu/portdb/?a=search&q=nnn) (`prt-get depinst nnn`)
+- [CRUX](https://crux.nu/portdb/?a=search&q=nnn) (`prt-get depinst nnn`)
 - [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
 - [Fedora](https://apps.fedoraproject.org/packages/nnn) (`dnf install nnn`)
 - [FreeBSD](https://www.freshports.org/misc/nnn) (`pkg install nnn`)
