@@ -306,6 +306,7 @@ static sig_t oldsigtstp;
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
+static wchar_t g_wbuf[CMD_LEN_MAX] __attribute__ ((aligned));
 
 /* Buffer to store tmp file path to show selection, file stats and help */
 static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
@@ -1755,7 +1756,7 @@ static char *xreadline(char *prefill, char *prompt)
 	size_t len, pos;
 	int x, y, r;
 	wint_t ch[2] = {0};
-	wchar_t * const buf = (wchar_t *)g_buf;
+	wchar_t * const buf = g_wbuf;
 
 	cleartimeout();
 	printprompt(prompt);
