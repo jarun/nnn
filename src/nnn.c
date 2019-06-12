@@ -766,11 +766,12 @@ static void appendfpath(const char *path, const size_t len)
 }
 
 /* Write selected file paths to fd, linefeed separated */
-static ssize_t selectiontofd(int fd, uint *pcount)
+static size_t selectiontofd(int fd, uint *pcount)
 {
 	uint lastpos, count = 0;
 	char *pbuf = pcopybuf;
-	ssize_t pos = 0, len, r;
+	size_t pos = 0, len;
+	ssize_t r;
 
 	if (pcount)
 		*pcount = 0;
@@ -785,7 +786,7 @@ static ssize_t selectiontofd(int fd, uint *pcount)
 		pos += len;
 
 		r = write(fd, pbuf, len);
-		if (r != len)
+		if (r != (ssize_t)len)
 			return pos;
 
 		if (pos <= lastpos) {
@@ -806,7 +807,7 @@ static ssize_t selectiontofd(int fd, uint *pcount)
 static void showcplist(void)
 {
 	int fd;
-	ssize_t pos;
+	size_t pos;
 
 	if (!copybufpos)
 		return;
@@ -1938,7 +1939,7 @@ static int xlink(char *suffix, char *path, char *buf, int *presel, int type)
 {
 	int count = 0;
 	char *pbuf = pcopybuf, *fname;
-	ssize_t pos = 0, len, r;
+	size_t pos = 0, len, r;
 	int (*link_fn)(const char *, const char *) = NULL;
 
 	/* Check if selection is empty */
