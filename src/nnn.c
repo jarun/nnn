@@ -1756,14 +1756,17 @@ static char *xreadline(char *prefill, char *prompt)
 	size_t len, pos;
 	int x, y, r;
 	wint_t ch[2] = {0};
-	wchar_t * const buf = (wchar_t *)g_buf;
+	wchar_t * const buf = malloc(sizeof(wchar_t) * CMD_LEN_MAX);
+
+	if (!buf)
+		errexit();
 
 	cleartimeout();
 	printprompt(prompt);
 
 	if (prefill) {
 		DPRINTF_S(prefill);
-		len = pos = mbstowcs(buf, prefill, NAME_MAX);
+		len = pos = mbstowcs(buf, prefill, CMD_LEN_MAX);
 	} else
 		len = (size_t)-1;
 
@@ -1821,7 +1824,7 @@ static char *xreadline(char *prefill, char *prompt)
 				if (*ch < ASCII_MAX && keyname(*ch)[0] == '^')
 					continue;
 
-				if (pos < NAME_MAX - 1) {
+				if (pos < CMD_LEN_MAX - 1) {
 					memmove(buf + pos + 1, buf + pos, (len - pos) << 2);
 					buf[pos] = *ch;
 					++len, ++pos;
@@ -1869,8 +1872,9 @@ END:
 	clearprompt();
 
 	buf[len] = '\0';
-	wcstombs(g_buf + ((NAME_MAX + 1) << 2), buf, NAME_MAX);
-	return g_buf + ((NAME_MAX + 1) << 2);
+	wcstombs(g_buf, buf, ++len);
+	free(buf);
+	return g_buf;
 }
 
 #ifndef NORL
