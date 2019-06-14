@@ -24,7 +24,7 @@
 
 It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
-`nnn` works seamlessly with DEs and GUI utilities. **[Quickstart](#quickstart)** and see how `nnn` simplifies workflows.
+`nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes. **[Quickstart](#quickstart)** and see how `nnn` simplifies workflows.
 
 <p align="center">
 <a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/onpq3vP.png" alt="Click to watch video"/></a>
@@ -125,19 +125,17 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 
 #### Utility dependencies
 
-The following table is a complete list. Some of the utilities may be installed by default (e.g. desktop opener, file, coreutils, findutils) and some may not be required by all users (e.g. sshfs, terminal locker, advcpmv).
-
-| Dependency | Operation |
-| --- | --- |
-| xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | desktop opener |
-| file, coreutils (cp, mv, rm), findutils (xargs) | detect type, copy, move and remove files |
-| atool / bsdtar / patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | create, list and extract archives |
-| mediainfo / exiftool | multimedia file details |
-| trash-cli | trash files (default action: delete) |
-| sshfs, fusermount(3) | mount, unmount remote over SSHFS |
-| vlock (Linux), bashlock (macOS), lock(1) (BSD) | terminal locker (fallback: [pipes.sh](https://github.com/pipeseroni/pipes.sh)) |
-| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | copy, move progress |
-| `$VISUAL` (else `$EDITOR`), `$PAGER` (less, most), `$SHELL` | fallback vi, less, sh |
+| Dependency | Installation | Operation |
+| --- | --- | --- |
+| xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | base | desktop opener |
+| file, coreutils (cp, mv, rm), findutils (xargs) | base | file type, copy, move and remove |
+| atool / bsdtar / patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | needed | create, list and extract archives |
+| mediainfo / exiftool | if needed | multimedia file details |
+| trash-cli | optional | trash files (default action: delete) |
+| sshfs, fusermount(3) | if needed | mount, unmount over SSHFS |
+| vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [pipes.sh](https://github.com/pipeseroni/pipes.sh)) |
+| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | optional | copy, move progress |
+| `$VISUAL` (else `$EDITOR`), `$PAGER`, `$SHELL` | optional | fallback vi, less, sh |
 
 #### From a package manager
 
@@ -363,17 +361,17 @@ The following indicators are used in the detail view:
 
 #### Configuration
 
-`nnn` supports the following environment variables for configuration.
+`nnn` supports the following environment variables for configuration. All of them are optional (set if you need).
 
 | Example `export` | Description |
 | --- | --- |
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | specify bookmarks (max 10) |
-| `NNN_OPENER=mimeopen` | custom file opener |
+| `NNN_USE_EDITOR=1` | open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
+| `NNN_NOTE=/home/user/Dropbox/notes` | path to note file [default: none] |
+| `NNN_OPENER=mimeopen` | custom file opener |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
 | `NNN_COPIER='/absolute/path/to/copier'` | system clipboard copier script [default: none] |
-| `NNN_NOTE=/home/user/Dropbox/notes` | path to note file [default: none] |
-| `NNN_USE_EDITOR=1` | open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
