@@ -93,7 +93,8 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Detailed file information
   - Media information (needs mediainfo/exiftool)
 - Convenience
-  - Plugin repository
+  - Needs minimal configuration
+  - Rich set of plugins
   - Select files across dirs; all/range selection
   - Copy, move, delete, archive, link selection
   - Batch rename selection or dir entries

@@ -146,6 +146,7 @@
 #define F_NOWAIT   0x02  /* don't wait for child process (e.g. file manager) */
 #define F_NOTRACE  0x04  /* suppress stdout and strerr (no traces) */
 #define F_NORMAL   0x08  /* spawn child process in non-curses regular CLI mode */
+#define F_CMD      0x10  /* run command - show results before exit (must have F_NORMAL) */
 
 #define F_CLI      (F_NORMAL | F_MULTI)
 
@@ -1038,8 +1039,14 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 		retstatus = join(pid, flag);
 
 		DPRINTF_D(pid);
-		if (flag & F_NORMAL)
+		if (flag & F_NORMAL) {
+			if (flag & F_CMD) {
+				printf("\nPress Enter to continue");
+				getchar();
+			}
+
 			refresh();
+		}
 
 		free(cmd);
 	}
@@ -4172,7 +4179,7 @@ nochange:
 				}
 #endif
 				if (tmp && tmp[0]) // NOLINT
-					spawn(shell, "-c", tmp, path, F_CLI);
+					spawn(shell, "-c", tmp, path, F_CLI | F_CMD);
 			}
 
 			/* Continue in navigate-as-you-type mode, if enabled */
