@@ -15,7 +15,6 @@ args=(
     '(-h)-h[show this help and exit]'
     '(-i)-i[start in navigate-as-you-type mode]'
     '(-l)-l[start in light mode (fewer details)]'
-    '(-n)-n[use version compare to sort files]'
     '(-p)-p[copy selection to file]:file name'
     '(-s)-s[use substring match for filters]'
     '(-S)-S[start in disk usage analyzer mode]'

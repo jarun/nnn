@@ -78,9 +78,8 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - Bookmarks; pin and visit a directory
   - Familiar, easy shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>)
 - Sorting
-  - Ordered pure numeric names by default (visit _/proc_)
+  - Case-insensitive version (_aka_ natural) sort
   - Sort by file name, modification time, size
-  - Version (_aka_ natural) sort
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex and substring match
@@ -199,8 +198,8 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 #### Cmdline options
 
 ```
-usage: nnn [-b key] [-d] [-e] [-i] [-l] [-n]
-           [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]
+usage: nnn [-b key] [-d] [-e] [-i] [-l] [-p file]
+           [-s] [-S] [-v] [-w] [-h] [PATH]
 
 The missing terminal file manager for X.
 
@@ -213,7 +212,6 @@ optional args:
  -e      use exiftool for media info
  -i      nav-as-you-type mode
  -l      light mode
- -n      use version compare to sort
  -p file selection file (stdout if '-')
  -s      string filters [default: regex]
  -S      du mode

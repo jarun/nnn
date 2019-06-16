@@ -1246,6 +1246,7 @@ static bool write_lastdir(const char *curpath)
 	return ret;
 }
 
+#if 0
 static int digit_compare(const char *a, const char *b)
 {
 	while (*a && *b && *a == *b)
@@ -1333,6 +1334,7 @@ static int xstricmp(const char * const s1, const char * const s2)
 
 	return strcoll(s1, s2);
 }
+#endif
 
 /*
  * Version comparison
@@ -1346,8 +1348,10 @@ static int xstricmp(const char * const s1, const char * const s2)
  * Compare S1 and S2 as strings holding indices/version numbers,
  * returning less than, equal to or greater than zero if S1 is less than,
  * equal to or greater than S2 (for more info, see the texinfo doc).
+ *
+ * Ignores case.
  */
-static int xstrverscmp(const char * const s1, const char * const s2)
+static int xstrverscasecmp(const char * const s1, const char * const s2)
 {
 	const uchar *p1 = (const uchar *)s1;
 	const uchar *p2 = (const uchar *)s2;
@@ -1412,8 +1416,6 @@ static int xstrverscmp(const char * const s1, const char * const s2)
 		return state;
 	}
 }
-
-static int (*cmpfn)(const char * const s1, const char * const s2) = &xstricmp;
 
 /* Return the integer value of a char representing HEX */
 static char xchartohex(char c)
@@ -1484,7 +1486,7 @@ static int entrycmp(const void *va, const void *vb)
 			return -1;
 	}
 
-	return cmpfn(pa->name, pb->name);
+	return xstrverscasecmp(pa->name, pb->name);
 }
 
 /*
@@ -4289,8 +4291,8 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"%s: nnn [-b key] [-d] [-e] [-i] [-l] [-n]\n"
-		"           [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]\n\n"
+		"%s: nnn [-b key] [-d] [-e] [-i] [-l] [-p file]\n"
+		"           [-s] [-S] [-v] [-w] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
@@ -4300,7 +4302,6 @@ static void usage(void)
 		" -e      use exiftool for media info\n"
 		" -i      nav-as-you-type mode\n"
 		" -l      light mode\n"
-		" -n      use version compare to sort\n"
 		" -p file selection file (stdout if '-')\n"
 		" -s      string filters [default: regex]\n"
 		" -S      du mode\n"
@@ -4434,7 +4435,7 @@ int main(int argc, char *argv[])
 	char *arg = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "Slib:denp:svwh")) != -1) {
+	while ((opt = getopt(argc, argv, "Slib:dep:svwh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4456,9 +4457,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'e':
 			cfg.metaviewer = EXIFTOOL;
-			break;
-		case 'n':
-			cmpfn = &xstrverscmp;
 			break;
 		case 'p':
 			cfg.picker = 1;
