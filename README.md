@@ -129,10 +129,10 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 | --- | --- | --- |
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | base | desktop opener |
 | file, coreutils (cp, mv, rm), findutils (xargs) | base | file type, copy, move and remove |
-| atool / bsdtar / patool ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#integrate-patool)) | needed | create, list and extract archives |
+| atool / bsdtar | needed | create, list and extract archives |
 | mediainfo / exiftool | if needed | multimedia file details |
-| trash-cli | optional | trash files (default action: delete) |
 | sshfs, fusermount(3) | if needed | mount, unmount over SSHFS |
+| trash-cli | optional | trash files (default action: delete) |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | optional | copy, move progress |
 | `$VISUAL` (else `$EDITOR`), `$PAGER`, `$SHELL` | optional | fallback vi, less, sh |
