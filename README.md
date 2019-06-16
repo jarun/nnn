@@ -319,6 +319,8 @@ Selected files are visually indicated by a `+` before the entries.
 
 The selection can now be listed, copied, moved, removed, archived or linked.
 
+Navigate to a target directory then use <kbd>V</kbd> (move) or <kbd>P</kbd> (copy) to have the selected files moved or copied.
+
 Absolute paths of the selected files are copied to the temporary file `~/.config/nnn/.selection`. The path is shown in the help and configuration screen. If `$NNN_COPIER` is set the file paths are also copied to the system clipboard.
 
 #### Filters
