@@ -334,7 +334,7 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define ATOOL 3
 #define BSDTAR 4
 #define LOCKER 5
-#define PIPES 6
+#define CMATRIX 6
 #define NLAUNCH 7
 #define UNKNOWN 8
 
@@ -358,7 +358,7 @@ static char * const utils[] = {
 #else
 	"vlock",
 #endif
-	"pipes.sh",
+	"cmatrix",
 	"nlaunch",
 	"UNKNOWN"
 };
@@ -2627,7 +2627,7 @@ static void lock_terminal(void)
 {
 	char *tmp = utils[LOCKER];
 	if (!getutil(tmp))
-		tmp = utils[PIPES];;
+		tmp = utils[CMATRIX];;
 
 	spawn(tmp, NULL, NULL, NULL, F_NORMAL);
 }

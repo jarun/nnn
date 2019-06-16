@@ -133,7 +133,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 | mediainfo / exiftool | if needed | multimedia file details |
 | trash-cli | optional | trash files (default action: delete) |
 | sshfs, fusermount(3) | if needed | mount, unmount over SSHFS |
-| vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [pipes.sh](https://github.com/pipeseroni/pipes.sh)) |
+| vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | optional | copy, move progress |
 | `$VISUAL` (else `$EDITOR`), `$PAGER`, `$SHELL` | optional | fallback vi, less, sh |
 
