@@ -12,7 +12,7 @@ jobs:
           command: |
             apt update -qq
             apt install -y --no-install-recommends software-properties-common wget gpg-agent
-            apt-add-repository -y ppa:jonathonf/gcc-9.0
+            apt-add-repository -y ppa:jonathonf/gcc-9.1
             wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|apt-key add -
             apt-add-repository -y "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-8 main"
             apt update -qq
