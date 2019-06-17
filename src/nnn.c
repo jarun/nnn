@@ -213,7 +213,7 @@ typedef struct {
 	uint copymode   : 1;  /* Set when copying files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 8;
+	uint reserved   : 7;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
@@ -228,6 +228,7 @@ typedef struct {
 	uint filter_re  : 1;  /* Use regex filters */
 	uint wild       : 1;  /* Do not sort entries on dir load */
 	uint trash      : 1;  /* Move removed files to trash */
+	uint badexit    : 1;  /* Program quit due to dir removed or moved */
 } settings;
 
 /* Contexts or workspaces */
@@ -267,6 +268,7 @@ static settings cfg = {
 	1, /* filter_re */
 	0, /* wild */
 	0, /* trash */
+	0, /* badexit */
 };
 
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
@@ -3241,8 +3243,11 @@ nochange:
 			_exit(0);
 
 		/* Check if CWD is deleted to  avoid hang, bad idea */
-		//if (access(path, F_OK))
-		//	return;
+		if (access(path, F_OK)) {
+			DPRINTF_S("dir deleted or moved");
+			cfg.badexit = 1;
+			return;
+		}
 
 		sel = nextsel(presel);
 		if (presel)
@@ -4691,6 +4696,9 @@ int main(int argc, char *argv[])
 
 	browse(initpath);
 	exitcurses();
+
+	if (cfg.badexit)
+		xerror();
 
 #ifndef NORL
 	write_history(NULL);
