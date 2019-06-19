@@ -171,7 +171,7 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
     $ sudo apt-get install pkg-config libncursesw5-dev libreadline6-dev
     $ make
-    $ sudo make install
+    $ sudo make strip install
 
 `PREFIX` is supported, in case you want to install to a different location.
 
