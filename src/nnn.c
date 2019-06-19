@@ -598,7 +598,7 @@ static void xdelay(void)
 
 static char confirm_force(void)
 {
-	int r = get_input("use force? [y/Y]");
+	int r = get_input("use force? [y/Y confirms]");
 
 	if (r == 'y' || r == 'Y')
 		return 'f'; /* forceful */
@@ -3950,7 +3950,7 @@ nochange:
 		{
 			switch (sel) {
 			case SEL_ARCHIVE:
-				r = get_input("archive selection (else current)? [y/Y]");
+				r = get_input("archive selection (else current)? [y/Y confirms]");
 				if (r == 'y' || r == 'Y') {
 					if (!cpsafe()) {
 						presel = MSGWAIT;
@@ -3993,7 +3993,7 @@ nochange:
 
 			/* Confirm if app is CLI or GUI */
 			if (sel == SEL_OPENWITH) {
-				r = get_input("cli mode? [y/Y]");
+				r = get_input("cli mode? [y/Y confirms]");
 				(r == 'y' || r == 'Y') ? (r = F_CLI)
 						       : (r = F_NOWAIT | F_NOTRACE | F_MULTI);
 			}
@@ -4052,7 +4052,7 @@ nochange:
 			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
 				if (sel == SEL_RENAME) {
 					/* Overwrite file with same name? */
-					r = get_input("overwrite? [y/Y]");
+					r = get_input("overwrite? [y/Y confirms]");
 					if (r != 'y' && r != 'Y') {
 						close(fd);
 						break;
