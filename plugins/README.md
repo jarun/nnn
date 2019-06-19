@@ -9,6 +9,7 @@
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
 | ipinfo | sh | curl, whois | Fetch external IP address and whois information |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
+| md5sum | sh | md5sum | Create and verify md5 checksums |
 | mocplay | sh | [moc](http://moc.daper.net/) | Appends (and plays, see script) selection/dir/file in moc|
 | ndiff | bash | vimdiff | Diff for selection (limited to 2 for directories) |
 | nmount | sh | pmount, udisks2 | Toggle mount status of a device as normal user |
