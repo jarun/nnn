@@ -19,9 +19,7 @@ if [ -s "$selection" ]; then
 fi
 
 if [ "$resp" = "s" ]; then
-    arr=$(cat $selection | tr '\0' '\n')
-    { read -r file; } <<< "$arr"
-    file=$(basename "$file").md5
+    file=$(basename "$(cat $selection | tr '\0' '\n' | head -n 1)").md5
     cat "$selection" | sed 's|'"$PWD/"'||g' | xargs -0 -i md5sum {} > "$file"
 else
     if ! [ -z "$1" ] && [ -f "$1" ]; then
