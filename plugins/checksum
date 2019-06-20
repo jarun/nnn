@@ -12,7 +12,7 @@
 # Shell: POSIX compliant
 # Author: ath3
 
-selection=~/.config/nnn/.selection
+selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 resp=f
 chsum=md5
 ischksum=0

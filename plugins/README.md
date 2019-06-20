@@ -26,7 +26,7 @@
 
 #### Installing plugins
 
-Download the `getplugs` plugin and execute it anywhere to get all the plugins installed to `~/.config/nnn/plugins`. You can run it again later to update the plugins. It backs up earlier plugins.
+Download the `getplugs` plugin and execute it anywhere to get all the plugins installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You can run it again later to update the plugins. It backs up earlier plugins.
 
 **NOTE:** `getplugs` also downloads the launcher `nlaunch` and tries to place it at `/usr/local/bin/` using `sudo`. If it fails you have to place `nlauch` manually somewhere in your `$PATH`.
 
@@ -35,7 +35,7 @@ Download the `getplugs` plugin and execute it anywhere to get all the plugins in
 Plugins can access:
 - all files in the directory (`nnn` switches to the dir where the plugin is to be run so the dir is `$PWD` for the plugin)
 - the current file under the cursor (the file name is passed as the argument to a plugin)
-- the current selection (by reading the file `~/.config/nnn/.selection`, see the plugin `ndiff`)
+- the current selection (by reading the file `.selection` in config dir, see the plugin `ndiff`)
 
 Each script has a _Description_ section which provides more details on what the script does, if applicable.
 

@@ -5,13 +5,16 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
+CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/
+PLUGIN_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins
+
 # backup any earlier plugins
-if [ -d ~/.config/nnn/plugins ]; then
-    tar -C ~/.config/nnn/ -cf ~/.config/nnn/"plugins-$(date '+%Y%m%d%H%M').tar.bz2" plugins/
+if [ -d $PLUGIN_DIR ]; then
+    tar -C $CONFIG_DIR -cf $CONFIG_DIR"plugins-$(date '+%Y%m%d%H%M').tar.bz2" plugins/
 fi
 
-mkdir -p ~/.config/nnn/plugins
-cd ~/.config/nnn/plugins
+mkdir -p $PLUGIN_DIR
+cd $PLUGIN_DIR
 wget -nv --show-progress https://github.com/jarun/nnn/archive/master.tar.gz
 tar -xf master.tar.gz
 cp -vf nnn-master/plugins/* .

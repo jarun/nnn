@@ -5,7 +5,7 @@
 # Shell: POSIX compliant
 # Author: juacq97
 
-SELECTION=~/.config/nnn/.selection
+SELECTION=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 
 id=$(kdeconnect-cli -a --id-only | awk '{print $1}')
 if [ "$(find "$SELECTION")" ]; then

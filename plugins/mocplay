@@ -9,7 +9,7 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-selection=~/.config/nnn/.selection
+selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 cmd=$(pgrep -x mocp 2>/dev/null)
 ret=$cmd
 

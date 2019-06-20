@@ -72,7 +72,7 @@ supports the following options:
 .Nm
 uses \fIxdg-open\fR (on Linux) and \fIopen(1)\fR (on macOS) as the desktop opener.
 .Pp
-There is no configuration file. Settings work on environment variables. See ENVIRONMENT section below.
+There is no configuration file. Associated files are stored in \fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/\fR. Settings work on environment variables. See ENVIRONMENT section below.
 .Pp
 Configuring
 .Nm
@@ -132,7 +132,7 @@ Selected files are visually indicated by a \fB+\fR before the entries.
 .br
 The files in the list can now be listed, copied, moved, removed, archived or linked.
 .br
-Absolute paths of the selected files are copied to the temporary file \fB~/.config/nnn/.selection\fR. The path is shown in the help and configuration screen. If \fB$NNN_COPIER\fR is set (see ENVIRONMENT section below) the file paths are also copied to the system clipboard.
+Absolute paths of the selected files are copied to the temporary file \fB.selection\fR in config directory. The path is shown in the help and configuration screen. If \fB$NNN_COPIER\fR is set (see ENVIRONMENT section below) the file paths are also copied to the system clipboard.
 .Sh ENVIRONMENT
 The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively. A single combination to arguments is supported for SHELL and PAGER.
@@ -159,11 +159,7 @@ when dealing with the !, e and p commands respectively. A single combination to 
 .Pp
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal locker (default: disabled).
 .Pp
-\fBNNN_COPIER:\fR system clipboard copier script.
-.Bd -literal
-    NOTE: File paths are copied to the tmp file \fB~/.config/nnn/.selection\fR.
-    The path is shown in the help and configuration screen.
-.Ed
+\fBNNN_COPIER:\fR system clipboard copier script. The project page has some sample copier scripts.
 .Pp
 \fBNNN_NOTE:\fR \fIabsolute\fR path to a note file.
 .Bd -literal
