@@ -1,0 +1,64 @@
+#!/usr/bin/env sh
+
+# Description: Create and verify checksums
+#
+# If selection is used: it will generate one file containing the checksums with file names
+#                       [and with paths if they are in another directory]
+#                       The filename will be checksum_timestamp.checksum_type
+# If file is used: if the file is a checksum, it does the verification
+#                  if the file is not a checksum, it will be created from it
+#                  The filename will be filename.checksum_type
+#
+# Shell: POSIX compliant
+# Author: ath3
+
+selection=~/.config/nnn/.selection
+resp=f
+chsum=md5
+ischksum=0
+
+checksum_type()
+{
+    echo "possible checksums: md5, sha1, sha224, sha256, sha384, sha512"
+    echo -n "create md5 (m), sha256 (s), sha512 (S) (or type one of the above checksums) [default=m]: "
+    read chsum_resp
+    for chks in md5 sha1 sha224 sha256 sha384 sha512
+    do
+        if [ "$chsum_resp" = "$chks" ]; then
+            chsum=$chsum_resp
+            return
+        fi
+    done
+    if [ "$chsum_resp" = "s" ]; then
+        chsum=sha256
+    elif [ "$chsum_resp" = "S" ]; then
+        chsum=sha512
+    fi
+}
+
+if [ -s "$selection" ]; then
+    echo -n "work with selection (s) or current file (f) [default=f]: "
+    read resp
+fi
+
+if [ "$resp" = "s" ]; then
+    checksum_type
+    sed 's|'"$PWD/"'||g' < "$selection" | xargs -0 -i ${chsum}sum {} > "checksum_$(date '+%Y%m%d%H%M').$chsum"
+else
+    if [ -n "$1" ] && [ -f "$1" ]; then
+        for chks in md5 sha1 sha224 sha256 sha384 sha512
+        do
+            if [ "$(echo "$1" | grep \.${chks}$)" ]; then
+                ischksum=1
+                ${chks}sum -c < "$1"
+                read
+                exit
+            fi
+        done
+        if [ $ischksum -eq 0 ]; then
+            checksum_type
+            file=$(basename "$1").$chsum
+            ${chsum}sum "$1" > "$file"
+        fi
+    fi
+fi

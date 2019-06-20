@@ -1,34 +1,46 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # Description: Splits the file passed as argument or joins selection
 #
 # Note: Adds numeric suffix to split files
-#       Adds '.join' suffix to the first file to be joined and saves as output file for join
+#       Adds '.out suffix to the first file to be joined and saves as output file for join
 #
-# Shell: Bash
+# Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
 selection=~/.config/nnn/.selection
+resp=s
 
-echo -n "press 's' (split current file) or 'j' (join selection): "
-read resp
+if [ -s "$selection" ]; then
+    echo -n "press 's' (split current file) or 'j' (join selection): "
+    read resp
+fi
 
 if [ "$resp" = "j" ]; then
     if [ -s "$selection" ]; then
-        arr=$(cat $selection | tr '\0' '\n')
-        { read -r file; } <<< "$arr"
+        arr=$(tr '\0' '\n' < "$selection")
+        if [ "$(echo "$arr" | wc -l)" -lt 2 ]; then
+            echo "joining needs at least 2 files"
+            exit
+        fi
+        for entry in $arr
+        do
+            if [ -d "$entry" ]; then
+                echo "cant join directories"
+                exit
+            fi
+        done
 
-        file=$(basename "$file").out
-
-        cat "$selection" | sort -z | xargs -0 -i cat {} > "$file"
+        file="$(basename "$(echo "$arr" | sed -n '1p' | sed -e 's/[0-9][0-9]$//')")"
+        sort -z < "$selection" | xargs -0 -I{} cat {} > "${file}.out"
     fi
 elif [ "$resp" = "s" ]; then
-    if ! [ -z "$1" ] && [ -f "$1" ] ; then
+    if [ -n "$1" ] && [ -f "$1" ]; then
         # a single file is passed
         echo -n "split size in MB: "
         read size
 
-        if ! [ -z "$size" ]; then
+        if [ -n "$size" ]; then
             split -d -b "$size"M "$1" "$1"
         fi
     fi

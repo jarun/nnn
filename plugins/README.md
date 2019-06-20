@@ -9,15 +9,16 @@
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
 | ipinfo | sh | curl, whois | Fetch external IP address and whois information |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
+| checksum | sh | md5sum, sha256sum | Create and verify checksums |
 | mocplay | sh | [moc](http://moc.daper.net/) | Appends (and plays, see script) selection/dir/file in moc|
-| ndiff | bash | vimdiff | Diff for selection (limited to 2 for directories) |
+| ndiff | sh | vimdiff | Diff for selection (limited to 2 for directories) |
 | nmount | sh | pmount, udisks2 | Toggle mount status of a device as normal user |
 | nwal | sh | nitrogen | Set the selected image as wallpaper using nitrogen |
 | pastebin | sh | [pastebinit](https://launchpad.net/pastebinit) | Paste contents of (text) file to paste.ubuntu.com |
 | pdfview | sh | pdftotext/mupdf-tools | View PDF file in `$PAGER` |
 | picker | sh | nnn | Pick files and pipe the newline-separated list to another utility |
 | pywal | sh | pywal | Set selected image as wallpaper, change terminal color scheme |
-| splitjoin | bash | split, cat | Split file or join selection |
+| splitjoin | sh | split, cat | Split file or join selection |
 | sxiv | sh | sxiv | Browse images in a dir in sxiv, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts))|
 | transfer | sh | curl | Upload file to transfer.sh |
 | upgrade | sh | wget | Upgrade to latest nnn version manually on Debian 9 Stretch |
