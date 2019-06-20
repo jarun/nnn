@@ -2,6 +2,9 @@
 
 # Description: Show diff of 2 directories or multiple files in vimdiff
 #
+# Note: vim may show the warning: 'Vim: Warning: Input is not from a terminal'
+#       press 'Enter' to ignore and proceed.
+#
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
