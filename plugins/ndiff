@@ -1,26 +1,28 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # Description: Show diff of 2 directories or multiple files in vimdiff
 #
-# Shell: Bash
+# Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
 selection=~/.config/nnn/.selection
 
 if [ -s $selection ]; then
-    arr=$(cat $selection | tr '\0' '\n')
-    { read -r f1; read -r f2; } <<< "$arr"
-
-    if [ -z "$f2" ]; then
-        exit
-    fi
-
-    if [ -d "$f1" ] && [ -d "$f2" ]; then
-        vimdiff <(cd "$f1" && find | sort) <(cd "$f2" && find | sort)
+    arr=$(tr '\0' '\n' < "$selection")
+    if [ "$(echo "$arr" | wc -l)" -gt 1 ]; then
+         f1="$(echo "$arr" | sed -n '1p')"
+         f2="$(echo "$arr" | sed -n '2p')"
+         if [ -d "$f1" ] && [ -d "$f2" ]; then
+            dir1=$(mktemp "${TMPDIR:-/tmp}"/nnn-$(basename "$f1").XXXXXXXX)
+            dir2=$(mktemp "${TMPDIR:-/tmp}"/nnn-$(basename "$f2").XXXXXXXX)
+            ls -A1 "$f1" > "$dir1"
+            ls -A1 "$f2" > "$dir2"
+            vimdiff "$dir1" "$dir2"
+            rm "$dir1" "$dir2"
+        else
+            cat $selection | xargs -0 vimdiff
+        fi
     else
-        cat $selection | xargs -0 -o vimdiff
-
-        # For GNU xargs (note: ignoreme takes up $0)
-        # cat $selection | xargs -0 bash -c '</dev/tty vimdiff "$@"' ignoreme
+        echo "needs at least 2 files or directories selected for comparison"
     fi
 fi
