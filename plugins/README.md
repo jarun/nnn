@@ -1,6 +1,7 @@
 | Plugin (a-z) | Lang | Deps | Description |
 | --- | --- | --- | --- |
 | boom | sh | SMPlayer | Play random music from dir (modify `PLAYER`) |
+| checksum | sh | md5sum, sha256sum | Create and verify checksums |
 | fzy-edit | sh | fzy | Fuzzy find a file in directory subtree and edit in vim |
 | fzy-open | sh | fzy | Fuzzy find a file in directory subtree and open using xdg-open |
 | getplugs | sh | wget | Update plugins |
@@ -9,7 +10,6 @@
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
 | ipinfo | sh | curl, whois | Fetch external IP address and whois information |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
-| checksum | sh | md5sum, sha256sum | Create and verify checksums |
 | mocplay | sh | [moc](http://moc.daper.net/) | Appends (and plays, see script) selection/dir/file in moc|
 | ndiff | sh | vimdiff | Diff for selection (limited to 2 for directories) |
 | nmount | sh | pmount, udisks2 | Toggle mount status of a device as normal user |
