@@ -6,7 +6,7 @@
 #       press 'Enter' to ignore and proceed.
 #
 # Shell: POSIX compliant
-# Author: Arun Prakash Jana
+# Authors: Arun Prakash Jana, ath3
 
 selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 

@@ -6,7 +6,7 @@
 #       Adds '.out suffix to the first file to be joined and saves as output file for join
 #
 # Shell: POSIX compliant
-# Author: Arun Prakash Jana
+# Authors: Arun Prakash Jana, ath3
 
 selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 resp=s
