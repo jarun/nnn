@@ -44,6 +44,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - [Shell completion](#shell-completion)
 - [Quickstart](#quickstart)
 - [Usage](#usage)
+  - [Configuration](#configuration)
   - [Cmdline options](#cmdline-options)
   - [Keyboard and mouse](#keyboard-and-mouse)
     - [Leader key](#leader-key)
@@ -53,7 +54,6 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - [Filters](#filters)
   - [Navigate-as-you-type](#navigate-as-you-type)
   - [File indicators](#file-indicators)
-  - [Configuration](#configuration)
   - [Hot-plugged drives](#hot-plugged-drives)
   - [SSHFS mounts](#sshfs-mounts)
   - [Help](#help)
@@ -194,6 +194,24 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 - To set `nnn` as the default file manager, follow these [instructions](https://github.com/jarun/nnn/wiki/nnn-as-default-file-manager).
 
 #### USAGE
+
+#### Configuration
+
+`nnn` supports the following environment variables for configuration. All of them are optional (set if you need). There is no config file. Any associated files are stored under `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/`.
+
+| Example `export` | Description |
+| --- | --- |
+| `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | specify bookmarks (max 10) |
+| `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
+| `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
+| `NNN_NOTE=/home/user/Dropbox/notes` | path to note file [default: none] |
+| `NNN_OPENER=mimeopen` | custom file opener |
+| `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
+| `NNN_COPIER='/absolute/path/to/copier'` | system clipboard copier script [default: none] |
+| `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
+| `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
+| `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
+| `NNN_OPS_PROG=1` | show copy, move progress on Linux |
 
 #### Cmdline options
 
@@ -359,24 +377,6 @@ The following indicators are used in the detail view:
 | `b` | Block Device |
 | `c` | Character Device |
 | `?` | Unknown |
-
-#### Configuration
-
-`nnn` supports the following environment variables for configuration. All of them are optional (set if you need). Any associated files are stored under `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/`.
-
-| Example `export` | Description |
-| --- | --- |
-| `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | specify bookmarks (max 10) |
-| `NNN_USE_EDITOR=1` | open text files in `$EDITOR` (`$VISUAL`, if defined; fallback vi) |
-| `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
-| `NNN_NOTE=/home/user/Dropbox/notes` | path to note file [default: none] |
-| `NNN_OPENER=mimeopen` | custom file opener |
-| `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
-| `NNN_COPIER='/absolute/path/to/copier'` | system clipboard copier script [default: none] |
-| `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
-| `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
-| `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
-| `NNN_OPS_PROG=1` | show copy, move progress on Linux |
 
 #### Hot-plugged drives
 
