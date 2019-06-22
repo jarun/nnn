@@ -151,8 +151,8 @@
 #define F_CLI      (F_NORMAL | F_MULTI)
 
 /* CRC8 macros */
-#define WIDTH  (sizeof(unsigned char) << 3)
-#define TOPBIT (1 << (WIDTH - 1))
+#define UCHAR_BIT_WIDTH  (sizeof(unsigned char) << 3)
+#define TOPBIT (1 << (UCHAR_BIT_WIDTH - 1))
 #define POLYNOMIAL 0xD8  /* 11011 followed by 0's */
 #define CRC8_TABLE_LEN 256
 
@@ -507,7 +507,7 @@ static uchar crc8fast(const uchar * const message, size_t n)
 
 	/* Divide the message by the polynomial, a byte at a time */
 	while (byte < n) {
-		data = message[byte] ^ (remainder >> (WIDTH - 8));
+		data = message[byte] ^ (remainder >> (UCHAR_BIT_WIDTH - 8));
 		remainder = crc8table[data] ^ (remainder << 8);
 		++byte;
 	}
@@ -1766,6 +1766,7 @@ static char *xreadline(char *prefill, char *prompt)
 {
 	size_t len, pos;
 	int x, y, r;
+	const int WCHAR_T_WIDTH = sizeof(wchar_t);
 	wint_t ch[2] = {0};
 	wchar_t * const buf = malloc(sizeof(wchar_t) * CMD_LEN_MAX);
 
@@ -1805,7 +1806,8 @@ static char *xreadline(char *prefill, char *prompt)
 				case 127: // fallthrough
 				case '\b': /* rhel25 sends '\b' for backspace */
 					if (pos > 0) {
-						memmove(buf + pos - 1, buf + pos, (len - pos) << 2);
+						memmove(buf + pos - 1, buf + pos,
+							(len - pos) * WCHAR_T_WIDTH);
 						--len, --pos;
 					} // fallthrough
 				case '\t': /* TAB breaks cursor position, ignore it */
@@ -1822,7 +1824,7 @@ static char *xreadline(char *prefill, char *prompt)
 					continue;
 				case CONTROL('U'):
 					printprompt(prompt);
-					memmove(buf, buf + pos, (len - pos) << 2);
+					memmove(buf, buf + pos, (len - pos) * WCHAR_T_WIDTH);
 					len -= pos;
 					pos = 0;
 					continue;
@@ -1836,7 +1838,8 @@ static char *xreadline(char *prefill, char *prompt)
 					continue;
 
 				if (pos < CMD_LEN_MAX - 1) {
-					memmove(buf + pos + 1, buf + pos, (len - pos) << 2);
+					memmove(buf + pos + 1, buf + pos,
+						(len - pos) * WCHAR_T_WIDTH);
 					buf[pos] = *ch;
 					++len, ++pos;
 					continue;
@@ -1853,14 +1856,15 @@ static char *xreadline(char *prefill, char *prompt)
 					break;
 				case KEY_BACKSPACE:
 					if (pos > 0) {
-						memmove(buf + pos - 1, buf + pos, (len - pos) << 2);
+						memmove(buf + pos - 1, buf + pos,
+							(len - pos) * WCHAR_T_WIDTH);
 						--len, --pos;
 					}
 					break;
 				case KEY_DC:
 					if (pos < len) {
 						memmove(buf + pos, buf + pos + 1,
-							(len - pos - 1) << 2);
+							(len - pos - 1) * WCHAR_T_WIDTH);
 						--len;
 					}
 					break;
@@ -1883,7 +1887,7 @@ END:
 	clearprompt();
 
 	buf[len] = '\0';
-	wcstombs(g_buf, buf, ++len);
+	wcstombs(g_buf, buf, CMD_LEN_MAX);
 	free(buf);
 	return g_buf;
 }
