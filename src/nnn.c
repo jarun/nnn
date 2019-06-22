@@ -1887,7 +1887,11 @@ END:
 	clearprompt();
 
 	buf[len] = '\0';
-	wcstombs(g_buf, buf, CMD_LEN_MAX);
+
+	pos = wcstombs(g_buf, buf, CMD_LEN_MAX - 1);
+	if (pos >= CMD_LEN_MAX - 1)
+		g_buf[CMD_LEN_MAX - 1] = '\0';
+
 	free(buf);
 	return g_buf;
 }
