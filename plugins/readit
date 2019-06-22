@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+
+# Description: Read a text or PDF file in British English
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+if ! [ -z "$1" ]; then
+    tmpf=`basename "$1"`
+    tmpf="${TMPDIR:-/tmp}"/"${tmpf%.*}"
+
+    if [ $(head -c 4 "$1") = "%PDF" ]; then
+        # Convert using pdftotext
+        pdftotext -nopgbrk -layout "$1" - | sed 's/\xe2\x80\x8b//g' > "$tmpf".txt
+
+        pico2wave -w "$tmpf".wav -l en-GB "$(cat "$tmpf".txt | tr '\n' ' ')"
+
+        rm "$tmpf".txt
+    else
+        pico2wave -w "$tmpf".wav -l en-GB "$(cat "$1" | tr '\n' ' ')"
+    fi
+
+    # to jump around and note the time
+    mpv "$tmpf".wav
+
+    # flat read but better quality
+    # play -qV0 "$tmpf".wav treble 2 gain -l 2
+
+    rm "$tmpf".wav
+fi
