@@ -1,7 +1,7 @@
 | Plugin (a-z) | Lang | Deps | Description |
 | --- | --- | --- | --- |
 | boom | sh | SMPlayer | Play random music from dir (modify `PLAYER`) |
-| checksum | sh | md5sum, sha256sum | Create and verify checksums |
+| checksum | sh | md5sum,<br>sha256sum | Create and verify checksums |
 | fzy-edit | sh | fzy | Fuzzy find a file in directory subtree and edit in vim |
 | fzy-open | sh | fzy | Fuzzy find a file in directory subtree and open using xdg-open |
 | getplugs | sh | wget | Update plugins |
@@ -15,10 +15,10 @@
 | nmount | sh | pmount, udisks2 | Toggle mount status of a device as normal user |
 | nwal | sh | nitrogen | Set the selected image as wallpaper using nitrogen |
 | pastebin | sh | [pastebinit](https://launchpad.net/pastebinit) | Paste contents of (text) file to paste.ubuntu.com |
-| pdfview | sh | pdftotext/mupdf-tools | View PDF file in `$PAGER` |
+| pdfview | sh | pdftotext/<br>mupdf-tools | View PDF file in `$PAGER` |
 | picker | sh | nnn | Pick files and pipe the newline-separated list to another utility |
 | pywal | sh | pywal | Set selected image as wallpaper, change terminal color scheme |
-| readit | sh | pdftotext,<br>pico2wave, mpv | Read a PDF or text file aloud |
+| readit | sh | pdftotext, mpv,<br>pico2wave | Read a PDF or text file aloud |
 | ringtone | sh | date, ffmpeg | Create a variable bitrate mp3 ringtone from file |
 | splitjoin | sh | split, cat | Split file or join selection |
 | sxiv | sh | sxiv | Browse images in a dir in sxiv, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts))|
