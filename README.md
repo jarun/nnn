@@ -204,6 +204,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | specify bookmarks (max 10) |
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
+| `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
 | `NNN_NOTE=/home/user/Dropbox/notes` | path to note file [default: none] |
 | `NNN_OPENER=mimeopen` | custom file opener |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
@@ -398,6 +399,12 @@ Host phone
 ```
 
 The above host `phone` will be mounted at `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/phone`. `nnn` creates the directory `phone` if it doesn't exist.
+
+If you need to pass options to the `sshfs` command, you can do so:
+
+    export NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user,cache_timeout=3600'
+
+The options must be preceded by `sshfs` and comma-separated without any space between them.
 
 Notes:
 

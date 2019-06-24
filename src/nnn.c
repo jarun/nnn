@@ -2569,8 +2569,14 @@ static bool create_dir(const char *path)
 
 static bool sshfs_mount(char *path, char *newpath, int *presel)
 {
+	uchar flag = F_NORMAL;
 	int r;
-	char *tmp;
+	char *tmp, *env, *cmd = "sshfs";
+
+	if (!getutil(cmd)) {
+		printwait("sshfs missing", presel);
+		return FALSE;
+	}
 
 	tmp = xreadline(NULL, "host: ");
 	if (!tmp[0])
@@ -2583,18 +2589,19 @@ static bool sshfs_mount(char *path, char *newpath, int *presel)
 		return FALSE;
 	}
 
-	if (!getutil("sshfs")) {
-		printwait("sshfs missing", presel);
-		return FALSE;
-	}
-
 	/* Convert "Host" to "Host:" */
 	r = strlen(tmp);
 	tmp[r] = ':';
 	tmp[r + 1] = '\0';
 
+	env = getenv("NNN_SSHFS_OPTS");
+	if (env)
+		flag |= F_MULTI;
+	else
+		env = cmd;
+
 	/* Connect to remote */
-	if (spawn("sshfs", tmp, newpath, NULL, F_NORMAL)) {
+	if (spawn(env, tmp, newpath, NULL, flag)) {
 		printwait("mount failed", presel);
 		return FALSE;
 	}

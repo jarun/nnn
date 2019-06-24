@@ -157,6 +157,13 @@ when dealing with the !, e and p commands respectively. A single combination to 
     codes: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
 .Ed
 .Pp
+\fBNNN_SSHFS_OPTS:\fR Pass additional options to sshfs command:
+.Bd -literal
+    export NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user,cache_timeout=3600'
+
+    NOTE: The options must be preceded by `sshfs` and comma-separated without any space between them.
+.Ed
+.Pp
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal locker (default: disabled).
 .Pp
 \fBNNN_COPIER:\fR system clipboard copier script. The project page has some sample copier scripts.
