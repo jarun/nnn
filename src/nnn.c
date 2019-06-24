@@ -2574,7 +2574,7 @@ static bool sshfs_mount(char *path, char *newpath, int *presel)
 	char *tmp, *env, *cmd = "sshfs";
 
 	if (!getutil(cmd)) {
-		printwait("sshfs missing", presel);
+		printwait(messages[UTIL_MISSING], presel);
 		return FALSE;
 	}
 
