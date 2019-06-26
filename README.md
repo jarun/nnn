@@ -444,7 +444,7 @@ There is a known issue where if you close the terminal directly with `nnn` **_wa
 - one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. `noice` was rudimentary. In my opinion evolution is the taste of time.
 - I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind. Check out the [design considerations](https://github.com/jarun/nnn/wiki/design-considerations) for more details.
 
-Trivia: The name `nnn` stands for _Noice is Not Noice, a noicer fork..._.
+Trivia: The name `nnn` is a recursive acronym for the initial words from _Noice is Not Noice, a noicer fork..._, suggested by a longtime friend.
 
 #### MENTIONS
 
