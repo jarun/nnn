@@ -4637,10 +4637,6 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	/* Get custom opener, if set */
-	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
-	DPRINTF_S(opener);
-
 	/* Set nnn nesting level, idletimeout used as tmp var */
 	idletimeout = xatoi(getenv(env_cfg[NNNLVL]));
 	setenv(env_cfg[NNNLVL], xitoa(++idletimeout), 1);
