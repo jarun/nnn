@@ -5,6 +5,7 @@ MANPREFIX ?= $(PREFIX)/share/man
 STRIP ?= strip
 PKG_CONFIG ?= pkg-config
 INSTALL ?= install
+CP ?= cp
 
 CFLAGS_OPTIMIZATION ?= -O3
 
