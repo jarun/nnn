@@ -20,7 +20,7 @@
 
 `nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely **[light and fast](https://github.com/jarun/nnn/wiki/performance)**.
 
-`nnn` is also a disk usage analyzer, a fuzzy app launcher and a batch file renamer. 20+ **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. Custom plugins are easy to add.
+`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a [(neo)vim picker](https://github.com/mcchrish/nnn.vim). 20+ **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. Custom plugins are easy to add.
 
 It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
@@ -57,7 +57,6 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
   - [Hot-plugged drives](#hot-plugged-drives)
   - [SSHFS mounts](#sshfs-mounts)
   - [Help](#help)
-- [Plugins](#plugins)
 - [Troubleshooting](#troubleshooting)
   - [Tmux configuration](#tmux-configuration)
   - [BSD terminal issue](#bsd-terminal-issue)
@@ -144,7 +143,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 - [CRUX](https://crux.nu/portdb/?a=search&q=nnn) (`prt-get depinst nnn`)
 - [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
 - [Fedora](https://apps.fedoraproject.org/packages/nnn) (`dnf install nnn`)
-- [FreeBSD](https://www.freshports.org/misc/nnn) (`pkg install nnn`)
+- [FreeBSD](https://svnweb.freebsd.org/ports/head/misc/nnn/) (`pkg install nnn`)
 - [Gentoo](https://packages.gentoo.org/packages/app-misc/nnn) (`emerge nnn`)
 - [macOS/Homebrew](http://formulae.brew.sh/formula/nnn) (`brew install nnn`)
 - [MacPorts](https://www.macports.org/ports.php?by=name&substr=nnn) (`port install nnn`)
@@ -417,10 +416,6 @@ Notes:
     $ nnn -h
     $ man nnn
 To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
-
-#### PLUGINS
-
-To extend the capabilities of `nnn`, [plugins](https://github.com/jarun/nnn/tree/master/plugins) are introduced. Plugins are scripts which `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins.
 
 #### TROUBLESHOOTING
 
