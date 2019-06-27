@@ -15,7 +15,6 @@
 selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 resp=f
 chsum=md5
-ischksum=0
 
 checksum_type()
 {
@@ -49,16 +48,13 @@ else
         for chks in md5 sha1 sha224 sha256 sha384 sha512
         do
             if [ "$(echo "$1" | grep \.${chks}$)" ]; then
-                ischksum=1
                 ${chks}sum -c < "$1"
                 read
                 exit
             fi
         done
-        if [ $ischksum -eq 0 ]; then
-            checksum_type
-            file=$(basename "$1").$chsum
-            ${chsum}sum "$1" > "$file"
-        fi
+        checksum_type
+        file=$(basename "$1").$chsum
+        ${chsum}sum "$1" > "$file"
     fi
 fi
