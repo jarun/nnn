@@ -5,40 +5,68 @@
 # Notes:
 # - if selection is available, plays it, else plays the current file or directory
 # - appends tracks and exits is MOC is running, else clears playlist and adds tracks
+# - to randomize the order of files appended to the playlist, set SHUFFLE=1
+#   if you add a directory with many files when SHUFFLE=1 is set, it might take a very long time to finish!
 #
 # Shell: POSIX compliant
-# Author: Arun Prakash Jana
+# Author: Arun Prakash Jana, ath3
 
+IFS="$(printf '\n\r')"
 selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 cmd=$(pgrep -x mocp 2>/dev/null)
 ret=$cmd
 
-if [ -s "$selection" ]; then
-    # try selection first
-    if [ -z "$ret" ]; then
-        # mocp not running
-        mocp -S
+SHUFFLE=0
 
-        # clear selection and play
-        cat "$selection" | xargs -0 mocp -acp
+mocp_add() {
+    if [ $SHUFFLE = 1 ]; then
+        if [ -s "$selection" ]; then
+            arr=$(tr '\0' '\n' < "$selection")
+        elif [ -n "$1" ]; then
+            arr="$1"
+        fi
+
+        for entry in $arr
+        do
+            if [ -d "$entry" ]; then
+                arr2=$arr2$(find "$entry" -type f)
+            else
+                arr2=$(printf "%s\n%s" "$entry" "$arr2")
+            fi
+        done
+
+        arr2=$(echo "$arr2" | awk 'BEGIN{srand();}{print rand()"\t"$0}' | sort -k1 -n | cut -f2-)
+        for entry in $arr2
+        do
+            if [ -f "$entry" ] && [ "$(echo "$entry" | grep -v '\.m3u$\|\.pls$')" ]; then
+                mocp -a "$entry"
+            fi
+        done
+
     else
-        # mocp running, just append
-        cat "$selection" | xargs -0 mocp -a
-    fi
-else
-    # ensure a file/dir is passed
-    if ! [ -z "$1" ]; then
-        if [ -z "$ret" ]; then
-            # mocp not running
-            mocp -S
-
-            # clear selection and play
-            mocp -acp "$1"
+        if [ -s "$selection" ]; then
+            xargs < "$selection" -0 mocp -a
         else
-            # mocp running, just append
             mocp -a "$1"
         fi
     fi
+}
+
+if [ ! -s "$selection" ] && [ -z "$1" ]; then
+   exit
+fi
+
+if [ -z "$ret" ]; then
+    # mocp not running
+    mocp -S
+
+    # clear selection and play
+    mocp -c
+    mocp_add "$1"
+    mocp -p
+else
+    # mocp running, just append
+    mocp_add "$1"
 fi
 
 # uncomment the line below to show mocp interface after appending
