@@ -8,14 +8,14 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-if ! [ -z "$1" ]; then
+if [ -n "$1" ]; then
     echo -n "start (hh:mm:ss): "
     read start
-    st=`date -d "$start" +%s`
+    st=$(date -d "$start" +%s) || exit 1
 
     echo -n "end (hh:mm:ss): "
     read end
-    et=`date -d "$end" +%s`
+    et=$(date -d "$end" +%s) || exit 1
 
     if [ $st -ge $et ]; then
         echo "error: start >= end"
@@ -24,7 +24,7 @@ if ! [ -z "$1" ]; then
 
     interval=$(( $et - $st ))
 
-    outfile=`basename "$1"`
+    outfile=$(basename "$1")
     outfile="${outfile%.*}"_ringtone.mp3
 
     ffmpeg -i "$1" -ss "$start" -t "$interval" -vn -sn -acodec libmp3lame -q:a 2 "$outfile"
