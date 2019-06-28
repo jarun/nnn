@@ -136,6 +136,10 @@
 #define SCROLLOFF 5
 #define LONG_SIZE sizeof(ulong)
 
+/* Program return codes */
+#define _SUCCESS 0
+#define _FAILURE !_SUCCESS
+
 /* Entry flags */
 #define DIR_OR_LINK_TO_DIR 0x1
 #define FILE_COPIED 0x10
@@ -4487,7 +4491,7 @@ int main(int argc, char *argv[])
 
 				if (fd == -1) {
 					xerror();
-					return 1;
+					return _FAILURE;
 				}
 
 				close(fd);
@@ -4501,16 +4505,16 @@ int main(int argc, char *argv[])
 			break;
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
-			return 0;
+			return _SUCCESS;
 		case 'w':
 			cfg.wild = 1;
 			break;
 		case 'h':
 			usage();
-			return 0;
+			return _SUCCESS;
 		default:
 			usage();
-			return 1;
+			return _FAILURE;
 		}
 	}
 
@@ -4525,7 +4529,7 @@ int main(int argc, char *argv[])
 		if (*copier) {
 			if (*copier < '0' || *copier > '7') {
 				fprintf(stderr, "0 <= code <= 7\n");
-				return 1;
+				return _FAILURE;
 			}
 
 			g_ctx[opt].color = *copier - '0';
@@ -4545,12 +4549,12 @@ int main(int argc, char *argv[])
 	home = getenv("HOME");
 	if (!home) {
 		fprintf(stderr, "set HOME\n");
-		return 1;
+		return _FAILURE;
 	}
 	DPRINTF_S(home);
 
 	if (!setup_config())
-		return 1;
+		return _FAILURE;
 
 	/* Get custom opener, if set */
 	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
@@ -4559,13 +4563,13 @@ int main(int argc, char *argv[])
 	/* Parse bookmarks string */
 	if (!parsebmstr()) {
 		fprintf(stderr, "%s\n", env_cfg[NNN_BMS]);
-		return 1;
+		return _FAILURE;
 	}
 
 	if (arg) { /* Open a bookmark directly */
 		if (arg[1] || (initpath = get_bm_loc(NULL, *arg)) == NULL) {
 			fprintf(stderr, "%s\n", messages[STR_INVBM_KEY]);
-			return 1;
+			return _FAILURE;
 		}
 	} else if (argc == optind) {
 		/* Start in the current directory */
@@ -4581,7 +4585,7 @@ int main(int argc, char *argv[])
 		DPRINTF_S(initpath);
 		if (!initpath) {
 			xerror();
-			return 1;
+			return _FAILURE;
 		}
 
 		/*
@@ -4593,12 +4597,12 @@ int main(int argc, char *argv[])
 
 		if (stat(initpath, &sb) == -1) {
 			xerror();
-			return 1;
+			return _FAILURE;
 		}
 
 		if (S_ISREG(sb.st_mode)) {
 			execlp(opener, opener, arg, NULL);
-			return 0;
+			return _SUCCESS;
 		}
 	}
 
@@ -4627,13 +4631,13 @@ int main(int argc, char *argv[])
 	inotify_fd = inotify_init1(IN_NONBLOCK);
 	if (inotify_fd < 0) {
 		xerror();
-		return 1;
+		return _FAILURE;
 	}
 #elif defined(BSD_KQUEUE)
 	kq = kqueue();
 	if (kq < 0) {
 		xerror();
-		return 1;
+		return _FAILURE;
 	}
 #endif
 
@@ -4650,7 +4654,7 @@ int main(int argc, char *argv[])
 
 	/* Prefix for temporary files */
 	if (!set_tmp_path())
-		return 1;
+		return _FAILURE;
 
 	/* Get the clipboard copier, if set */
 	copier = getenv(env_cfg[NNN_COPIER]);
@@ -4678,14 +4682,14 @@ int main(int argc, char *argv[])
 
 	if (sigaction(SIGINT, &act, NULL) < 0) {
 		xerror();
-		return 1;
+		return _FAILURE;
 	}
 	signal(SIGQUIT, SIG_IGN);
 
 	/* Test initial path */
 	if (!xdiraccess(initpath)) {
 		xerror();
-		return 1;
+		return _FAILURE;
 	}
 
 	/* Set locale */
@@ -4703,7 +4707,7 @@ int main(int argc, char *argv[])
 #endif
 
 	if (!initcurses())
-		return 1;
+		return _FAILURE;
 
 	browse(initpath);
 	exitcurses();
@@ -4738,5 +4742,5 @@ int main(int argc, char *argv[])
 	close(kq);
 #endif
 
-	return 0;
+	return _SUCCESS;
 }
