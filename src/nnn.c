@@ -2440,9 +2440,9 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 	if (fd == -1)
 		return FALSE;
 
-	r = xstrlcpy(g_buf, "stat \'", PATH_MAX);
+	r = xstrlcpy(g_buf, "stat \"", PATH_MAX);
 	r += xstrlcpy(g_buf + r - 1, fpath, PATH_MAX);
-	g_buf[r - 2] = '\'';
+	g_buf[r - 2] = '\"';
 	g_buf[r - 1] = '\0';
 	DPRINTF_S(g_buf);
 
