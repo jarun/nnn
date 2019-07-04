@@ -2133,6 +2133,7 @@ static char *coolsize(off_t size)
 	const char * const U = "BKMGTPEZY";
 	static char size_buf[12]; /* Buffer to hold human readable size */
 	off_t rem = 0;
+	size_t ret;
 	int i = 0;
 
 	while (size >= 1024) {
@@ -2177,10 +2178,28 @@ static char *coolsize(off_t size)
 			rem /= 10;
 	}
 
-	if (i > 0 && i < 6)
-		snprintf(size_buf, 12, "%u.%0*u%c", (uint)size, i & 0b11, (uint)rem, U[i]);
-	else
-		snprintf(size_buf, 12, "%u%c", (uint)size, U[i]);
+	if (i > 0 && i < 6) {
+		ret = xstrlcpy(size_buf, xitoa(size), 11);
+		size_buf[ret - 1] = '.';
+
+		char *frac = xitoa(rem);
+		size_t toprint = i > 3 ? 3 : i;
+		size_t len = strlen(frac);
+
+		if (len < toprint) {
+			size_buf[ret] = size_buf[ret + 1] = size_buf[ret + 2] = '0';
+			xstrlcpy(size_buf + ret + (toprint - len), frac, (toprint - len) + 1);
+		} else
+			xstrlcpy(size_buf + ret, frac, toprint + 1);
+
+		ret += toprint;
+	} else {
+		ret = xstrlcpy(size_buf, size ? xitoa(size) : "0", 10);
+		--ret;
+	}
+
+	size_buf[ret] = U[i];
+	size_buf[ret + 1] = '\0';
 
 	return size_buf;
 }
