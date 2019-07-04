@@ -2178,7 +2178,7 @@ static char *coolsize(off_t size)
 			rem /= 10;
 	}
 
-	if (i > 0 && i < 6) {
+	if (i > 0 && i < 6 && rem) {
 		ret = xstrlcpy(size_buf, xitoa(size), 11);
 		size_buf[ret - 1] = '.';
 
