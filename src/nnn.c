@@ -4029,6 +4029,9 @@ nochange:
 				goto nochange;
 			}
 
+			xstrlcpy(runfile, tmp, NAME_MAX);
+			tmp = runfile;
+
 			/* Confirm if app is CLI or GUI */
 			if (sel == SEL_OPENWITH) {
 				r = get_input("cli mode? [y/Y confirms]");
