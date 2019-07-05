@@ -145,14 +145,13 @@
 #define FILE_COPIED 0x10
 
 /* Macros to define process spawn behaviour as flags */
-#define F_NONE     0x00  /* no flag set */
-#define F_MULTI    0x01  /* first arg can be combination of args; to be used with F_NORMAL */
-#define F_NOWAIT   0x02  /* don't wait for child process (e.g. file manager) */
-#define F_NOTRACE  0x04  /* suppress stdout and strerr (no traces) */
-#define F_NORMAL   0x08  /* spawn child process in non-curses regular CLI mode */
-#define F_CMD      0x10  /* run command - show results before exit (must have F_NORMAL) */
-
-#define F_CLI      (F_NORMAL | F_MULTI)
+#define F_NONE    0x00  /* no flag set */
+#define F_MULTI   0x01  /* first arg can be combination of args; to be used with F_NORMAL */
+#define F_NOWAIT  0x02  /* don't wait for child process (e.g. file manager) */
+#define F_NOTRACE 0x04  /* suppress stdout and strerr (no traces) */
+#define F_NORMAL  0x08  /* spawn child process in non-curses regular CLI mode */
+#define F_CMD     0x10  /* run command - show results before exit (must have F_NORMAL) */
+#define F_CLI     (F_NORMAL | F_MULTI)
 
 /* CRC8 macros */
 #define UCHAR_BIT_WIDTH  (sizeof(unsigned char) << 3)
@@ -165,14 +164,14 @@
  * states: S_N: normal, S_I: comparing integral part, S_F: comparing
  *         fractional parts, S_Z: idem but with leading Zeroes only
  */
-#define  S_N    0x0
-#define  S_I    0x3
-#define  S_F    0x6
-#define  S_Z    0x9
+#define S_N 0x0
+#define S_I 0x3
+#define S_F 0x6
+#define S_Z 0x9
 
 /* result_type: VCMP: return diff; VLEN: compare using len_diff/diff */
-#define  VCMP    2
-#define  VLEN    3
+#define VCMP 2
+#define VLEN 3
 
 /* Volume info */
 #define FREE 0
@@ -665,7 +664,6 @@ static size_t xstrlcpy(char *dest, const char *src, size_t n)
 	ulong *s, *d;
 	size_t len = strlen(src) + 1, blocks;
 	const uint _WSHIFT = (LONG_SIZE == 8) ? 3 : 2;
-
 
 	if (n > len)
 		n = len;
