@@ -2420,7 +2420,9 @@ static char *get_output(char *buf, const size_t bytes, const char *file,
 
 static bool getutil(const char *util)
 {
-	if (!get_output(g_buf, CMD_LEN_MAX, "which", util, NULL, FALSE))
+	char buf[8];
+
+	if (!get_output(buf, 8, "which", util, NULL, FALSE))
 		return FALSE;
 
 	return TRUE;
