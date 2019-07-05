@@ -133,7 +133,7 @@
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
 #define EXEC_ARGS_MAX 8
-#define SCROLLOFF 5
+#define SCROLLOFF 3
 #define LONG_SIZE sizeof(ulong)
 
 /* Program return codes */
