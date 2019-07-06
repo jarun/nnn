@@ -2177,12 +2177,12 @@ static char *coolsize(off_t size)
 	}
 
 	if (i > 0 && i < 6 && rem) {
+		ret = xstrlcpy(size_buf, xitoa(size), 11);
+		size_buf[ret - 1] = '.';
+
 		char *frac = xitoa(rem);
 		size_t toprint = i > 3 ? 3 : i;
 		size_t len = strlen(frac);
-
-		ret = xstrlcpy(size_buf, xitoa(size), 11);
-		size_buf[ret - 1] = '.';
 
 		if (len < toprint) {
 			size_buf[ret] = size_buf[ret + 1] = size_buf[ret + 2] = '0';
