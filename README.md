@@ -26,11 +26,16 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 
 `nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes. **[Quickstart](#quickstart)** and see how `nnn` simplifies workflows.
 
+Demo videos:
+
+- [`nnn` on Termux (Android)](https://vimeo.com/346719001)
+- [features overview](https://www.youtube.com/watch?v=U2n5aGqou9E)
+
 <p align="center">
-<a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/onpq3vP.png" alt="Click to watch video"/></a>
+<a><img src="https://i.imgur.com/onpq3vP.png" /></a>
 </p>
 
-<p align="center"><i>3 modes of nnn (light with filter, detail, du analyzer) with memory usage. Click for a demo video.</i></a></p>
+<p align="center"><i>3 modes of nnn (light with filter, detail, du analyzer) with memory usage</i></a></p>
 
 #### TABLE OF CONTENTS
 
