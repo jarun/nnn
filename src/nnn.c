@@ -891,6 +891,7 @@ static bool initcurses(void)
 	//intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
 	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED | BUTTON2_CLICKED, NULL);
+	mouseinterval(400);
 	curs_set(FALSE); /* Hide cursor */
 	start_color();
 	use_default_colors();
