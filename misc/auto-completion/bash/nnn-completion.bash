@@ -9,7 +9,7 @@ _nnn () {
     COMPREPLY=()
     local IFS=$' \n'
     local cur=$2 prev=$3
-    local -a opts opts_with_args
+    local -a opts
     opts=(
         -b
         -d
@@ -23,22 +23,16 @@ _nnn () {
         -v
         -w
     )
-    opts_with_arg=(
-        -b
-        -p
-    )
-
-    # Do not complete non option names
-    [[ $cur == -* ]] || return 1
-
-    # Do not complete when the previous arg is an option expecting an argument
-    for opt in "${opts_with_arg[@]}"; do
-        [[ $opt == $prev ]] && return 1
-    done
-
-    # Complete option names
-    COMPREPLY=( $(compgen -W "${opts[*]}" -- "$cur") )
-    return 0
+    if [[ $prev == -b ]]; then
+        local bookmarks=$(echo $NNN_BMS | awk -F: -v RS=\; '{print $1}')
+        COMPREPLY=( $(compgen -W "$bookmarks" -- "$cur") )
+    elif [[ $prev == -p ]]; then
+        COMPREPLY=( $(compgen -f -d -- "$cur") )
+    elif [[ $cur == -* ]]; then
+        COMPREPLY=( $(compgen -W "${opts[*]}" -- "$cur") )
+    else
+        COMPREPLY=( $(compgen -f -d -- "$cur") )
+    fi
 }
 
-complete -F _nnn nnn
+complete -o filenames -F _nnn nnn
