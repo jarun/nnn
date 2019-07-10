@@ -154,6 +154,7 @@ Demo videos:
 - [MacPorts](https://www.macports.org/ports.php?by=name&substr=nnn) (`port install nnn`)
 - [Milis Linux](https://notabug.org/milislinux/milis/src/master/talimatname/genel/n/nnn/talimat) (`mps kur nnn`)
 - [NixOS](https://github.com/NixOS/nixpkgs/tree/master/pkgs/applications/misc/nnn) (`nix-env -i nnn`)
+- [NuTyX](https://www.nutyx.org/en/?type=pkg&branch=rolling&arch=x86_64&searchpkg=nnn) (`cards install nnn`)
 - [OpenBSD](https://cvsweb.openbsd.org/cgi-bin/cvsweb/ports/sysutils/nnn/) (`pkg_add nnn`)
 - [openSUSE](https://software.opensuse.org/package/nnn) (and packages for several other distros) (`zypper in nnn`)
 - [pkgrsc](http://pkgsrc.se/sysutils/nnn) (`pkg_add nnn`)
