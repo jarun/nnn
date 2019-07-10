@@ -809,18 +809,19 @@ static size_t selectiontofd(int fd, uint *pcount)
 	return pos;
 }
 
-static void showcplist(void)
+/* List selection from selection buffer */
+static bool showcplist(void)
 {
 	int fd;
 	size_t pos;
 
 	if (!copybufpos)
-		return;
+		return FALSE;
 
 	fd = create_tmp_file();
 	if (fd == -1) {
 		DPRINTF_S("mkstemp failed!");
-		return;
+		return FALSE;
 	}
 
 	pos = selectiontofd(fd, NULL);
@@ -829,6 +830,26 @@ static void showcplist(void)
 	if (pos && pos == copybufpos)
 		spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
 	unlink(g_tmpfpath);
+
+	return TRUE;
+}
+
+/* List selection from selection file (another instance) */
+static bool showcpfile(void)
+{
+	struct stat sb;
+
+	if (stat(g_cppath, &sb) == -1)
+		return FALSE;
+
+	/* Nothing selected if file size is 0 */
+	if (!sb.st_size)
+		return FALSE;
+
+	snprintf(g_buf, CMD_LEN_MAX, "cat %s | tr \'\\0\' \'\\n\'", g_cppath);
+	spawn("sh", "-c", g_buf, NULL, F_NORMAL | F_CMD);
+
+	return TRUE;
 }
 
 static bool cpsafe(void)
@@ -3923,8 +3944,7 @@ nochange:
 			}
 			continue;
 		case SEL_COPYLIST:
-			if (copybufpos) {
-				showcplist();
+			if (showcplist() || showcpfile()) {
 				if (cfg.filtermode)
 					presel = FILTER;
 				break;
