@@ -28,7 +28,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 
 Demo videos:
 
-- [`nnn` on Termux (Android)](https://vimeo.com/346719001)
+- [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=AbaauM7gUJw)
 - [features overview](https://www.youtube.com/watch?v=U2n5aGqou9E)
 
 <p align="center">
