@@ -18,7 +18,7 @@
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
 
-`nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely **[light and fast](https://github.com/jarun/nnn/wiki/performance)**.
+`nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/performance)**).
 
 `nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a [(neo)vim picker](https://github.com/mcchrish/nnn.vim). 20+ **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. Custom plugins are easy to add.
 
