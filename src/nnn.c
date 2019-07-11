@@ -1486,28 +1486,23 @@ static int entrycmp(const void *va, const void *vb)
 	if ((pb->flags & DIR_OR_LINK_TO_DIR) != (pa->flags & DIR_OR_LINK_TO_DIR)) {
 		if (pb->flags & DIR_OR_LINK_TO_DIR)
 			return 1;
-
 		return -1;
 	}
 
-	/* Do the actual sorting */
+	/* Sort based on specified order */
 	if (cfg.mtimeorder) {
-		if (pb->t >= pa->t)
-			return (int)(pb->t - pa->t);
-
-		return -1;
-	}
-
-	if (cfg.sizeorder) {
+		if (pb->t > pa->t)
+			return 1;
+		if (pb->t < pa->t)
+			return -1;
+	} else if (cfg.sizeorder) {
 		if (pb->size > pa->size)
 			return 1;
-
 		if (pb->size < pa->size)
 			return -1;
 	} else if (cfg.blkorder) {
 		if (pb->blocks > pa->blocks)
 			return 1;
-
 		if (pb->blocks < pa->blocks)
 			return -1;
 	}
