@@ -26,6 +26,7 @@ The currently available plugins are listed below.
 | ringtone | sh | date, ffmpeg | Create a variable bitrate mp3 ringtone from file |
 | splitjoin | sh | split, cat | Split file or join selection |
 | sxiv | sh | sxiv | Browse images in a dir in sxiv, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts))|
+| thumb | sh | [lsix](https://github.com/hackerb9/lsix) | View thumbnail of an image or dir of images |
 | transfer | sh | curl | Upload file to transfer.sh |
 | upgrade | sh | wget | Upgrade to latest nnn version manually on Debian 9 Stretch |
 | viuimg | sh | [viu](https://github.com/atanunq/viu), less | View an image or images in a directory |

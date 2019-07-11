@@ -143,7 +143,7 @@ Demo videos:
 
 #### From a package manager
 
-Find a list of known packagers [here](https://github.com/jarun/nnn/wiki/packagers).
+There's a good chance `nnn` is already available in the default repos of your distro. Find a list of known packagers [here](https://github.com/jarun/nnn/wiki/packagers).
 
 #### Release packages
 
