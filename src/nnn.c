@@ -911,7 +911,12 @@ static bool initcurses(void)
 	nonl();
 	//intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
+#if NCURSES_MOUSE_VERSION <= 1
 	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED | BUTTON2_CLICKED, NULL);
+#else
+	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED | BUTTON2_CLICKED
+		  | BUTTON4_PRESSED | BUTTON5_PRESSED, NULL);
+#endif
 	mouseinterval(400);
 	curs_set(FALSE); /* Hide cursor */
 	start_color();
@@ -3354,6 +3359,23 @@ nochange:
 				setdirwatch();
 				goto begin;
 			}
+
+#if NCURSES_MOUSE_VERSION > 1
+			if (event.bstate == BUTTON4_PRESSED || event.bstate == BUTTON5_PRESSED)
+			{
+				/* Scroll up */
+				if (event.bstate == BUTTON4_PRESSED && ndents) {
+					move_cursor((cur + ndents - 1) % ndents, 0);
+					break;
+				}
+
+				/* Scroll down */
+				if (event.bstate == BUTTON5_PRESSED && ndents) {
+					move_cursor((cur + 1) % ndents, 0);
+					break;
+				}
+			}
+#endif
 
 			// Handle clicking on a context at the top:
 			if (event.y == 0) {
