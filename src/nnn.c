@@ -3297,9 +3297,9 @@ nochange:
 		if (getppid() == 1)
 			_exit(0);
 
-		/* Check if CWD is deleted and find an existing parent */
+		/* If CWD is deleted or moved or perms changed, find an accessible parent */
 		if (access(path, F_OK)) {
-			DPRINTF_S("dir deleted or moved");
+			DPRINTF_S("directory inaccessible");
 
 			/* Save history */
 			xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
