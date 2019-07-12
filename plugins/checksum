@@ -4,10 +4,10 @@
 #
 # If selection is used: it will generate one file containing the checksums with file names
 #                       [and with paths if they are in another directory]
-#                       The filename will be checksum_timestamp.checksum_type
-# If file is used: if the file is a checksum, it does the verification
-#                  if the file is not a checksum, it will be created from it
-#                  The filename will be filename.checksum_type
+#                       The output checksum filename will be checksum_timestamp.checksum_type
+# If file is used: if the file is a checksum, the plugin does the verification
+#                  if the file is not a checksum, checksum will be generated for it
+#                  The output checksum filename will be filename.checksum_type
 #
 # Shell: POSIX compliant
 # Author: ath3
