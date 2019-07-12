@@ -264,10 +264,11 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
 Note: Help & settings, file details, media info and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.
 
 | Mouse click | Function |
-|:---:| --- |
+|---| --- |
+| Left single on context number | Visit context |
+| Left single on top row after context numbers | Visit parent |
 | Left single | Select context or entry |
 | Left double | Select context or open file/directory |
-| Middle single | Visit parent directory |
 
 ##### Leader key
 

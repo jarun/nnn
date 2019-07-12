@@ -912,10 +912,9 @@ static bool initcurses(void)
 	//intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
 #if NCURSES_MOUSE_VERSION <= 1
-	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED | BUTTON2_CLICKED, NULL);
+	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED, NULL);
 #else
-	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED | BUTTON2_CLICKED
-		  | BUTTON4_PRESSED | BUTTON5_PRESSED, NULL);
+	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED | BUTTON4_PRESSED | BUTTON5_PRESSED, NULL);
 #endif
 	mouseinterval(400);
 	curs_set(FALSE); /* Hide cursor */
@@ -3341,9 +3340,28 @@ nochange:
 			if (getmouse(&event) != OK)
 				goto nochange; // fallthrough
 		case SEL_BACK:
-			// Handle right click to go to parent
-			if ((sel == SEL_BACK)
-			    || (sel == SEL_CLICK && event.bstate == BUTTON2_CLICKED)) {
+			/* Handle clicking on a context at the top */
+			if (sel == SEL_CLICK && event.bstate == BUTTON1_CLICKED && event.y == 0) {
+				/* Get context from: "[1 2 3 4]..." */
+				r = event.x >> 1;
+
+				/* If clicked after contexts, go to parent */
+				if (r >= CTX_MAX)
+					sel = SEL_BACK;
+				else if (0 <= r && r < CTX_MAX && r != cfg.curctx) {
+					savecurctx(&cfg, path, dents[cur].name, r);
+
+					/* Reset the pointers */
+					path = g_ctx[r].c_path;
+					lastdir = g_ctx[r].c_last;
+					lastname = g_ctx[r].c_name;
+
+					setdirwatch();
+					goto begin;
+				}
+			}
+
+			if (sel == SEL_BACK) {
 				dir = visit_parent(path, newpath, &presel);
 				if (!dir)
 					goto nochange;
@@ -3361,45 +3379,20 @@ nochange:
 			}
 
 #if NCURSES_MOUSE_VERSION > 1
-			if (event.bstate == BUTTON4_PRESSED || event.bstate == BUTTON5_PRESSED)
-			{
-				/* Scroll up */
-				if (event.bstate == BUTTON4_PRESSED && ndents) {
-					move_cursor((cur + ndents - 1) % ndents, 0);
-					break;
-				}
+			/* Scroll up */
+			if (event.bstate == BUTTON4_PRESSED && ndents) {
+				move_cursor((cur + ndents - 1) % ndents, 0);
+				break;
+			}
 
-				/* Scroll down */
-				if (event.bstate == BUTTON5_PRESSED && ndents) {
-					move_cursor((cur + 1) % ndents, 0);
-					break;
-				}
+			/* Scroll down */
+			if (event.bstate == BUTTON5_PRESSED && ndents) {
+				move_cursor((cur + 1) % ndents, 0);
+				break;
 			}
 #endif
 
-			// Handle clicking on a context at the top:
-			if (event.y == 0) {
-				// Get context from: "[1 2 3 4]..."
-				r = event.x >> 1;
-
-				if (event.x != 1 + (r << 1))
-					goto nochange; // The character after the context number
-
-				if (0 <= r && r < CTX_MAX && r != cfg.curctx) {
-					savecurctx(&cfg, path, dents[cur].name, r);
-
-					/* Reset the pointers */
-					path = g_ctx[r].c_path;
-					lastdir = g_ctx[r].c_last;
-					lastname = g_ctx[r].c_name;
-
-					setdirwatch();
-					goto begin;
-				}
-				goto nochange;
-			}
-
-			// Handle clicking on a file:
+			/* Handle clicking on a file */
 			if (2 <= event.y && event.y < xlines - 2) {
 				r = curscroll + (event.y - 2);
 
@@ -3408,7 +3401,7 @@ nochange:
 
 				move_cursor(r, 1);
 
-				// Single click just selects, double click also opens
+				/*Single click just selects, double click also opens */
 				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
 					break;
 			} else
