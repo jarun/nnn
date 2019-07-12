@@ -1696,6 +1696,7 @@ static int filterentries(char *path)
 
 			printprompt(ln);
 			continue;
+		case KEY_MOUSE: // fallthrough
 		case 27: /* Exit filter mode on Escape */
 			if (len == 1)
 				cur = oldcur;
@@ -3392,13 +3393,27 @@ nochange:
 			}
 #endif
 
-			/* Handle clicking on a file */
-			if (2 <= event.y && event.y < xlines - 2) {
+			if (2 <= event.y && event.y < xlines - 2)
 				r = curscroll + (event.y - 2);
 
-				if (r >= ndents)
+			/* Toggle filter mode on left click on last line */
+			if (event.y >= xlines - 2 || r >= ndents) {
+				cfg.filtermode ^= 1;
+				if (cfg.filtermode) {
+					presel = FILTER;
 					goto nochange;
+				}
 
+				/* Start watching the directory */
+				dir_changed = TRUE;
+
+				if (ndents)
+					copycurname();
+				goto begin;
+			}
+
+			/* Handle clicking on a file */
+			if (2 <= event.y && event.y < xlines - 2) {
 				move_cursor(r, 1);
 
 				/*Single click just selects, double click also opens */
