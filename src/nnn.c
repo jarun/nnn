@@ -1207,7 +1207,7 @@ static bool batch_rename(const char *path)
 
 	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
 
-	// Reopen file descriptor to get updated contents:
+	/* Reopen file descriptor to get updated contents */
 	if ((fd2 = open(g_tmpfpath, O_RDONLY)) == -1)
 		goto finish;
 
@@ -1711,7 +1711,7 @@ static int filterentries(char *path)
 			}
 
 			switch (*ch) {
-			case '\r':  // with nonl(), this is ENTER key value
+			case '\r':  /* with nonl(), this is ENTER key value */
 				if (len == 1) {
 					cur = oldcur;
 					goto end;
@@ -1722,7 +1722,7 @@ static int filterentries(char *path)
 
 				redraw(path);
 				goto end;
-			case '?':  // '?' is an invalid regex, show help instead
+			case '?':  /* '?' is an invalid regex, show help instead */
 				if (len == 1) {
 					cur = oldcur;
 					goto end;
@@ -2540,9 +2540,9 @@ static bool handle_archive(char *fpath, const char *dir, char op)
 	else
 		return FALSE;
 
-	if (op == 'x') { // extract
+	if (op == 'x') { /* extract */
 		spawn(util, xarg, fpath, dir, F_NORMAL);
-	} else { // list
+	} else { /* list */
 		exitcurses();
 		get_output(NULL, 0, util, larg, fpath, TRUE);
 		refresh();
