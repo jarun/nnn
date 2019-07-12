@@ -3301,6 +3301,9 @@ nochange:
 		if (access(path, F_OK)) {
 			DPRINTF_S("dir deleted or moved");
 
+			/* Save history */
+			xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
+
 			xstrlcpy(newpath, path, PATH_MAX);
 			while (true) {
 				dir = visit_parent(path, newpath, &presel);
