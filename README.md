@@ -26,10 +26,7 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 
 `nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes. **[Quickstart](#quickstart)** and see how `nnn` simplifies workflows.
 
-Demo videos:
-
-- [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=AbaauM7gUJw)
-- [features overview](https://www.youtube.com/watch?v=U2n5aGqou9E)
+Demo videos: i. [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=AbaauM7gUJw), ii. [features overview](https://www.youtube.com/watch?v=U2n5aGqou9E)
 
 <p align="center">
 <a><img src="https://i.imgur.com/onpq3vP.png" /></a>
@@ -445,4 +442,4 @@ Trivia: The name `nnn` is a recursive acronym for the initial words from _Noice 
 2. Copyright © 2014-2016 Dimitris Papastamos
 3. Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)
 
-Contributions are welcome. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/213).
+Contributions are welcome. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/306).
