@@ -3297,11 +3297,34 @@ nochange:
 		if (getppid() == 1)
 			_exit(0);
 
-		/* Check if CWD is deleted to  avoid hang, bad idea */
+		/* Check if CWD is deleted and find an existing parent */
 		if (access(path, F_OK)) {
 			DPRINTF_S("dir deleted or moved");
-			cfg.badexit = 1;
-			return;
+
+			/* Save history */
+			xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
+
+			xstrlcpy(newpath, path, PATH_MAX);
+			while (true) {
+				dir = visit_parent(path, newpath, &presel);
+				if (istopdir(path) || istopdir(newpath)) {
+					if (!dir)
+						dir = dirname(newpath);
+					break;
+				}
+				if (!dir) {
+					xstrlcpy(path, newpath, PATH_MAX);
+					continue;
+				}
+				break;
+			}
+
+			xstrlcpy(path, dir, PATH_MAX);
+
+			setdirwatch();
+			mvprintw(xlines - 1, 0, "cannot access directory\n");
+			xdelay();
+			goto begin;
 		}
 
 		sel = nextsel(presel);
