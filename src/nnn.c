@@ -3178,15 +3178,12 @@ static void redraw(char *path)
 
 	if (cfg.showdetail) {
 		if (ndents) {
-			char sort[] = "\0y time ";
+			char sort[] = "\0 ";
 
 			if (cfg.mtimeorder)
-				sort[0] = 'b';
-			else if (cfg.sizeorder) {
-				sort[0] = 'b';
-				sort[3] = 's';
-				sort[5] = 'z';
-			}
+				sort[0] = 'T';
+			else if (cfg.sizeorder)
+				sort[0] = 'S';
 
 			/* We need to show filename as it may be truncated in directory listing */
 			if (!cfg.blkorder)
