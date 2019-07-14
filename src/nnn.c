@@ -1168,7 +1168,7 @@ static void xrm(char *path)
 
 static bool batch_rename(const char *path)
 {
-	int fd1 = -1, fd2 = -1, i;
+	int fd1, fd2, i;
 	uint count = 0, lines = 0;
 	bool dir = FALSE, ret = FALSE;
 	const char renamecmd[] = "paste -d'\n' %s %s | xargs -d'\n' -n2 mv 2>/dev/null";
