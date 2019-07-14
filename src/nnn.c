@@ -1274,7 +1274,6 @@ static bool write_lastdir(const char *curpath)
 	return ret;
 }
 
-#if 0
 static int digit_compare(const char *a, const char *b)
 {
 	while (*a && *b && *a == *b)
@@ -1362,7 +1361,6 @@ static int xstricmp(const char * const s1, const char * const s2)
 
 	return strcoll(s1, s2);
 }
-#endif
 
 /*
  * Version comparison
@@ -1445,6 +1443,8 @@ static int xstrverscasecmp(const char * const s1, const char * const s2)
 	}
 }
 
+static int (*cmpfn)(const char * const s1, const char * const s2) = &xstricmp;
+
 /* Return the integer value of a char representing HEX */
 static char xchartohex(char c)
 {
@@ -1509,7 +1509,7 @@ static int entrycmp(const void *va, const void *vb)
 			return -1;
 	}
 
-	return xstrverscasecmp(pa->name, pb->name);
+	return cmpfn(pa->name, pb->name);
 }
 
 /*
@@ -4401,8 +4401,8 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"%s: nnn [-b key] [-d] [-e] [-i] [-l] [-p file]\n"
-		"           [-s] [-S] [-v] [-w] [-h] [PATH]\n\n"
+		"%s: nnn [-b key] [-d] [-e] [-i] [-l] [-n]\n"
+		"           [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
@@ -4412,6 +4412,7 @@ static void usage(void)
 		" -e      use exiftool for media info\n"
 		" -i      nav-as-you-type mode\n"
 		" -l      light mode\n"
+		" -n      version sort\n"
 		" -p file selection file (stdout if '-')\n"
 		" -s      string filters [default: regex]\n"
 		" -S      du mode\n"
@@ -4545,7 +4546,7 @@ int main(int argc, char *argv[])
 	char *arg = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "Slib:dep:svwh")) != -1) {
+	while ((opt = getopt(argc, argv, "Slib:denp:svwh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4567,6 +4568,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'e':
 			cfg.metaviewer = EXIFTOOL;
+			break;
+		case 'n':
+			cmpfn = &xstrverscasecmp;
 			break;
 		case 'p':
 			cfg.picker = 1;
