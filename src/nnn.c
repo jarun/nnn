@@ -2845,8 +2845,8 @@ static int dentfill(char *path, struct entry **dents)
 	}
 
 	dp = readdir(dirp);
-	// if (!dp) /* We have opened the dir, at least . would be returned */
-	//	goto exit;
+	if (!dp)
+		goto exit;
 
 	if (cfg.blkorder || dp->d_type == DT_UNKNOWN) {
 		/*
@@ -3007,7 +3007,7 @@ static int dentfill(char *path, struct entry **dents)
 		++n;
 	} while ((dp = readdir(dirp)));
 
-//exit:
+exit:
 	/* Should never be null */
 	if (closedir(dirp) == -1) {
 		dentfree();
