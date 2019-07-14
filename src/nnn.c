@@ -2199,7 +2199,7 @@ static char *coolsize(off_t size)
 	}
 
 	if (i > 0 && i < 6 && rem) {
-		ret = xstrlcpy(size_buf, xitoa(size), 11);
+		ret = xstrlcpy(size_buf, xitoa(size), 12);
 		size_buf[ret - 1] = '.';
 
 		char *frac = xitoa(rem);
@@ -2208,13 +2208,13 @@ static char *coolsize(off_t size)
 
 		if (len < toprint) {
 			size_buf[ret] = size_buf[ret + 1] = size_buf[ret + 2] = '0';
-			xstrlcpy(size_buf + ret + (toprint - len), frac, (toprint - len) + 1);
+			xstrlcpy(size_buf + ret + (toprint - len), frac, len + 1);
 		} else
 			xstrlcpy(size_buf + ret, frac, toprint + 1);
 
 		ret += toprint;
 	} else {
-		ret = xstrlcpy(size_buf, size ? xitoa(size) : "0", 10);
+		ret = xstrlcpy(size_buf, size ? xitoa(size) : "0", 12);
 		--ret;
 	}
 
