@@ -1171,7 +1171,7 @@ static bool batch_rename(const char *path)
 	int fd1, fd2, i;
 	uint count = 0, lines = 0;
 	bool dir = FALSE, ret = FALSE;
-	const char renamecmd[] = "paste -d'\n' %s %s | xargs -d'\n' -n2 mv 2>/dev/null";
+	const char renamecmd[] = "paste -d'\n' %s %s | xargs -n2 -n2 mv 2>/dev/null";
 	char foriginal[TMP_LEN_MAX] = {0};
 	char buf[sizeof(renamecmd) + (PATH_MAX << 1)];
 
