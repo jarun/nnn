@@ -223,6 +223,7 @@ static struct key bindings[] = {
 	{ 'n',            SEL_NEW },
 	/* Show rename prompt */
 	{ CONTROL('R'),   SEL_RENAME },
+	{ KEY_F(2),       SEL_RENAME }, // undocumented
 	/* Rename contents of current dir */
 	{ 'r',            SEL_RENAMEALL },
 	/* Connect to server over SSHFS */
