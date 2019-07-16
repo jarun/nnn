@@ -4784,6 +4784,7 @@ int main(int argc, char *argv[])
 
 #ifndef NORL
 #if RL_READLINE_VERSION >= 0x0603
+	/* readline would overwrite the WINCH signal hook */
 	rl_change_environment = 0;
 #endif
 	/* Bind TAB to cycling */
