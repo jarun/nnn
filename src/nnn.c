@@ -4783,7 +4783,9 @@ int main(int argc, char *argv[])
 	setlocale(LC_ALL, "");
 
 #ifndef NORL
+#if RL_READLINE_VERSION >= 0x0603
 	rl_change_environment = 0;
+#endif
 	/* Bind TAB to cycling */
 	rl_variable_bind("completion-ignore-case", "on");
 #ifdef __linux__
