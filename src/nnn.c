@@ -548,6 +548,15 @@ static char *xitoa(uint val)
 	return &ascbuf[++i];
 }
 
+#ifdef KEY_RESIZE
+/* Clear the old prompt */
+static inline void clearoldprompt()
+{
+	move(xlines - 1, 0);
+	clrtoeol();
+}
+#endif
+
 /* Messages show up at the bottom */
 static inline void printmsg(const char *msg)
 {
@@ -586,7 +595,20 @@ static int get_input(const char *prompt)
 	if (prompt)
 		printprompt(prompt);
 	cleartimeout();
+#ifdef KEY_RESIZE
+	do {
+		r = getch();
+		if ( r == KEY_RESIZE) {
+			if (prompt) {
+				clearoldprompt();
+				xlines = LINES;
+				printprompt(prompt);
+			}
+		}
+	} while ( r == KEY_RESIZE);
+#else
 	r = getch();
+#endif
 	settimeout();
 	return r;
 }
@@ -1667,6 +1689,13 @@ static int filterentries(char *path)
 
 	while ((r = get_wch(ch)) != ERR) {
 		switch (*ch) {
+#ifdef KEY_RESIZE
+		case KEY_RESIZE:
+			clearoldprompt();
+			redraw(path);
+			printprompt(ln);
+			continue;
+#endif
 		case KEY_DC: // fallthrough
 		case  KEY_BACKSPACE: // fallthrough
 		case '\b': // fallthrough
@@ -1787,7 +1816,7 @@ end:
 static char *xreadline(char *prefill, char *prompt)
 {
 	size_t len, pos;
-	int x, y, r;
+	int x, r;
 	const int WCHAR_T_WIDTH = sizeof(wchar_t);
 	wint_t ch[2] = {0};
 	wchar_t * const buf = malloc(sizeof(wchar_t) * CMD_LEN_MAX);
@@ -1809,13 +1838,13 @@ static char *xreadline(char *prefill, char *prompt)
 		len = pos = 0;
 	}
 
-	getyx(stdscr, y, x);
+	x = getcurx(stdscr);
 	curs_set(TRUE);
 
 	while (1) {
 		buf[len] = ' ';
-		mvaddnwstr(y, x, buf, len + 1);
-		move(y, x + wcswidth(buf, pos));
+		mvaddnwstr(xlines - 1, x, buf, len + 1);
+		move(xlines - 1, x + wcswidth(buf, pos));
 
 		r = get_wch(ch);
 		if (r != ERR) {
@@ -1868,6 +1897,13 @@ static char *xreadline(char *prefill, char *prompt)
 				}
 			} else {
 				switch (*ch) {
+#ifdef KEY_RESIZE
+				case KEY_RESIZE:
+					clearoldprompt();
+					xlines = LINES;
+					printprompt(prompt);
+					break;
+#endif
 				case KEY_LEFT:
 					if (pos > 0)
 						--pos;
