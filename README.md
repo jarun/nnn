@@ -93,9 +93,23 @@ Demo videos: i. [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Abaa
 - Information
   - Detailed file information
   - Media information (needs mediainfo/exiftool)
+- Plugins
+  - (Un)mount external drives
+  - File and directory diff
+  - Play selection in MOC
+  - View PDF as text
+  - View images/thumbnails in terminal
+  - Upload image to Imgur
+  - Paste text to Ubuntu pastebin
+  - Upload file to transfer.sh
+  - Split and join files
+  - Create MP3 ringtones
+  - Calculate and verify checksums
+  - Read a text file
+  - Hex viewer
+  - and more...
 - Convenience
   - Needs minimal configuration
-  - Rich set of plugins
   - Select files across dirs; all/range selection
   - Copy, move, delete, archive, link selection
   - Batch rename selection or dir entries
