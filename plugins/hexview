@@ -7,5 +7,5 @@
 # Author: Arun Prakash Jana
 
 if ! [ -z "$1" ]; then
-    xxd "$1" | "$PAGER"
+    xxd "$1" | $PAGER
 fi
