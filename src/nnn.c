@@ -1265,14 +1265,16 @@ finish:
 
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
 {
-	snprintf(g_buf, CMD_LEN_MAX,
+	char *buf = (char *)malloc(CMD_LEN_MAX * sizeof(char));
+	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
 		 "xargs -0 -a %s %s %s",
 #else
 		 "cat %s | xargs -0 -o %s %s",
 #endif
 		 g_cppath, cmd, archive);
-	spawn("sh", "-c", g_buf, curpath, F_NORMAL);
+	spawn("sh", "-c", buf, curpath, F_NORMAL);
+	free(buf);
 }
 
 static bool write_lastdir(const char *curpath)
