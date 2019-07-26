@@ -52,6 +52,7 @@ Demo videos: i. [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Abaa
     - [Leader key](#leader-key)
   - [Contexts](#contexts)
     - [Context-specific color](#context-specific-color)
+  - [Dual pane](#dual-pane)
   - [Selection](#selection)
   - [Filters](#filters)
   - [Navigate-as-you-type](#navigate-as-you-type)
@@ -317,6 +318,14 @@ Each context can have its own directory color specified:
 
     export NNN_CONTEXT_COLORS='1234'
 colors: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
+
+#### Dual pane
+
+Any number of `nnn` instances can be opened simultaneously using the lightweight terminal multiplexter [`dvtm`](http://www.brain-dump.org/projects/dvtm/). For example, to open 2 instances or a dual pane mode, have the following alias:
+
+    alias n2="dvtm -m '^c' nnn nnn"
+
+Note that the `dvtm` MOD key is redefined to <kbd>^C</kbd> as the default one (<kbd>^G</kbd>) is also an `nnn` shortcut.
 
 #### Selection
 

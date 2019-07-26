@@ -274,8 +274,6 @@ static settings cfg = {
 
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
-static struct entry *dents;
-static char *pnamebuf, *pcopybuf;
 static int ndents, cur, curscroll, total_dents = ENTRY_INCR;
 static int xlines, xcols;
 static uint idle;
@@ -290,6 +288,8 @@ static char *initpath;
 static char *cfgdir;
 static char *g_cppath;
 static char *plugindir;
+static char *pnamebuf, *pcopybuf;
+static struct entry *dents;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
