@@ -135,6 +135,7 @@
 #define EXEC_ARGS_MAX 8
 #define SCROLLOFF 3
 #define LONG_SIZE sizeof(ulong)
+#define ARCHIVE_CMD_LEN 12
 
 /* Program return codes */
 #define _SUCCESS 0
@@ -474,6 +475,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 static int dentfind(const char *fname, int n);
 static void move_cursor(int target, int ignore_scrolloff);
+static bool getutil(const char *util);
 
 /* Functions */
 
@@ -725,6 +727,20 @@ static size_t xstrlcpy(char *dest, const char *src, size_t n)
 		*dest = '\0';
 
 	return len;
+}
+
+static bool is_suffix(const char *str, const char *suffix)
+{
+	if (!str || !suffix)
+		return FALSE;
+
+	size_t lenstr = strlen(str);
+	size_t lensuffix = strlen(suffix);
+
+	if (lensuffix > lenstr)
+		return FALSE;
+
+	return (xstrcmp(str + (lenstr - lensuffix), suffix) == 0);
 }
 
 /*
@@ -1261,6 +1277,18 @@ finish:
 	unlink(g_tmpfpath);
 
 	return ret;
+}
+
+static void get_archive_cmd(char *cmd, char *archive)
+{
+	if (getutil(utils[ATOOL]))
+		xstrlcpy(cmd, "atool -a", ARCHIVE_CMD_LEN);
+	else if (getutil(utils[BSDTAR]))
+		xstrlcpy(cmd, "bsdtar -cvf", ARCHIVE_CMD_LEN);
+	else if (is_suffix(archive, ".zip"))
+		xstrlcpy(cmd, "zip -r", ARCHIVE_CMD_LEN);
+	else
+		xstrlcpy(cmd, "tar -cvf", ARCHIVE_CMD_LEN);
 }
 
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
@@ -4141,14 +4169,9 @@ nochange:
 			switch (sel) {
 			case SEL_ARCHIVE:
 			{
-				char cmd[] = "bsdtar -cf";
+				char cmd[ARCHIVE_CMD_LEN];
 
-				if (getutil(utils[ATOOL]))
-					xstrlcpy(cmd, "atool -a", 10);
-				else if (!getutil(utils[BSDTAR])) {
-					printwait(messages[UTIL_MISSING], &presel);
-					goto nochange;
-				}
+				get_archive_cmd(cmd, tmp);
 
 				(r == 'y' || r == 'Y') ? archive_selection(cmd, tmp, path)
 						       : spawn(cmd, tmp, dents[cur].name,
