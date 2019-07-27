@@ -337,10 +337,12 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define OPENER 2
 #define ATOOL 3
 #define BSDTAR 4
-#define LOCKER 5
-#define CMATRIX 6
-#define NLAUNCH 7
-#define UNKNOWN 8
+#define UNZIP 5
+#define TAR 6
+#define LOCKER 7
+#define CMATRIX 8
+#define NLAUNCH 9
+#define UNKNOWN 10
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -355,6 +357,8 @@ static char * const utils[] = {
 #endif
 	"atool",
 	"bsdtar",
+	"unzip",
+	"tar",
 #ifdef __APPLE__
 	"bashlock",
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
@@ -2589,31 +2593,37 @@ static bool show_mediainfo(const char *fpath, const char *arg)
 	return TRUE;
 }
 
-/* Extracts or lists archive */
-static bool handle_archive(char *fpath, const char *dir, char op)
+/* List or extract archive */
+static void handle_archive(char *fpath, const char *dir, char op)
 {
-	char larg[] = "-tf";
-	char xarg[] = "-xf";
+	char arg[] = "-tvf"; /* options for tar/bsdtar to list files */
 	char *util;
 
 	if (getutil(utils[ATOOL])) {
 		util = utils[ATOOL];
-		larg[1] = op;
-		larg[2] = xarg[2] = '\0';
-	} else if (getutil(utils[BSDTAR]))
+		arg[1] = op;
+		arg[2] = '\0';
+	} else if (getutil(utils[BSDTAR])) {
 		util = utils[BSDTAR];
-	else
-		return FALSE;
-
-	if (op == 'x') { /* extract */
-		spawn(util, xarg, fpath, dir, F_NORMAL);
-	} else { /* list */
-		exitcurses();
-		get_output(NULL, 0, util, larg, fpath, TRUE);
-		refresh();
+		if (op == 'x')
+			arg[1] = op;
+	} else if (is_suffix(fpath, ".zip")) {
+		util = utils[UNZIP];
+		arg[1] = (op == 'l') ? 'v' /* verbose listing */ : '\0';
+		arg[2] = '\0';
+	} else {
+		util = utils[TAR];
+		if (op == 'x')
+			arg[1] = op;
 	}
 
-	return TRUE;
+	if (op == 'x') { /* extract */
+		spawn(util, arg, fpath, dir, F_NORMAL);
+	} else { /* list */
+		exitcurses();
+		get_output(NULL, 0, util, arg, fpath, TRUE);
+		refresh();
+	}
 }
 
 static char *visit_parent(char *path, char *newpath, int *presel)
@@ -3885,10 +3895,10 @@ nochange:
 				setdirwatch();
 				goto nochange;
 			case SEL_ARCHIVELS:
-				r = handle_archive(newpath, path, 'l');
+				handle_archive(newpath, path, 'l');
 				break;
 			case SEL_EXTRACT:
-				r = handle_archive(newpath, path, 'x');
+				handle_archive(newpath, path, 'x');
 				break;
 			case SEL_REDRAW:
 				if (ndents)
