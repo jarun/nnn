@@ -20,7 +20,7 @@
 
 `nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/performance)**).
 
-`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. 26 **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. Custom plugins are easy to add. There's an independent [(neo)vim picker plugin](https://github.com/mcchrish/nnn.vim) project.
+`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. Many **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. Custom plugins are easy to add. There's an independent [(neo)vim picker plugin](https://github.com/mcchrish/nnn.vim) project.
 
 It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
 
@@ -89,7 +89,7 @@ Demo videos: i. [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Abaa
   - Subtree search to open or edit files (using plugin)
 - Mimes
   - Open with desktop opener or specify a custom app
-  - Create, list, extract archive (needs (p)atool/bsdtar)
+  - Create, list, extract archives
   - Option to open all text files in EDITOR
 - Information
   - Detailed file information
@@ -146,7 +146,7 @@ Demo videos: i. [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Abaa
 | --- | --- | --- |
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | base | desktop opener |
 | file, coreutils (cp, mv, rm), findutils (xargs) | base | file type, copy, move and remove |
-| atool / bsdtar | needed | create, list and extract archives |
+| tar, (un)zip [atool/bsdtar for more formats] | base | create, list, extract tar, gzip, bzip2, zip |
 | mediainfo / exiftool | if needed | multimedia file details |
 | sshfs, fusermount(3) | if needed | mount, unmount over SSHFS |
 | trash-cli | optional | trash files (default action: delete) |
@@ -323,9 +323,9 @@ colors: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 
 
 Any number of `nnn` instances can be opened simultaneously using the lightweight terminal multiplexter [`dvtm`](http://www.brain-dump.org/projects/dvtm/). For example, to open 2 instances or a dual pane mode, have the following alias:
 
-    alias n2="dvtm -m '^c' nnn nnn"
+    alias n2="dvtm -m '^h' nnn nnn"
 
-Note that the `dvtm` MOD key is redefined to <kbd>^C</kbd> as the default one (<kbd>^G</kbd>) is also an `nnn` shortcut.
+Note that the `dvtm` MOD key is redefined to <kbd>^H</kbd> as the default one (<kbd>^G</kbd>) is also an `nnn` shortcut.
 
 #### Selection
 
