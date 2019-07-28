@@ -281,7 +281,7 @@ Note: Help & settings, file details, media info and archive listing are shown in
 |---| --- |
 | Left single on context number | Visit context |
 | Left single on top row after context numbers | Visit parent |
-| Left single/double after last entry | Toggle nav-as-you-type |
+| Left single/double on last 2 rows | Toggle nav-as-you-type |
 | Left single | Select context or entry |
 | Left double | Select context or open entry |
 

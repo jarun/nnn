@@ -3468,11 +3468,8 @@ nochange:
 			}
 #endif
 
-			if (2 <= event.y && event.y < xlines - 2)
-				r = curscroll + (event.y - 2);
-
-			/* Toggle filter mode on left click on last line */
-			if (event.y >= xlines - 2 || r >= ndents) {
+			/* Toggle filter mode on left click on last 2 lines */
+			if (event.y >= xlines - 2) {
 				cfg.filtermode ^= 1;
 				if (cfg.filtermode) {
 					presel = FILTER;
@@ -3488,14 +3485,18 @@ nochange:
 			}
 
 			/* Handle clicking on a file */
-			if (2 <= event.y && event.y < xlines - 2) {
+			r = curscroll + (event.y - 2);
+			if (2 <= event.y && event.y < xlines - 2 && r < ndents) {
 				move_cursor(r, 1);
 
 				/*Single click just selects, double click also opens */
 				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
 					break;
-			} else
+			} else {
+				if (cfg.filtermode)
+					presel = FILTER;
 				goto nochange; // fallthrough
+			}
 		case SEL_NAV_IN: // fallthrough
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
