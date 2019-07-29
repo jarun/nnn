@@ -26,6 +26,8 @@ It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows 
 
 `nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes. **[Quickstart](#quickstart)** and see how `nnn` simplifies workflows.
 
+Visit the **[wiki](https://github.com/jarun/nnn/wiki)** for more.
+
 Demo videos: i. [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=AbaauM7gUJw), ii. [features overview](https://www.youtube.com/watch?v=U2n5aGqou9E)
 
 <p align="center">
