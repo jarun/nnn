@@ -3491,7 +3491,7 @@ nochange:
 
 				/*Single click just selects, double click also opens */
 				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
-					break;
+					goto nochange;
 			} else {
 				if (cfg.filtermode)
 					presel = FILTER;
