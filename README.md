@@ -18,26 +18,15 @@
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
 
-`nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/performance)**).
-
-`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. Many **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. Custom plugins are easy to add. There's an independent [(neo)vim picker plugin](https://github.com/mcchrish/nnn.vim) project.
-
-It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
-
-`nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes. **[Quickstart](#quickstart)** and see how `nnn` simplifies workflows.
-
-Visit the **[wiki](https://github.com/jarun/nnn/wiki)** for more.
-
-Demo videos: i. [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=AbaauM7gUJw), ii. [features overview](https://www.youtube.com/watch?v=U2n5aGqou9E)
-
 <p align="center">
-<a><img src="https://i.imgur.com/onpq3vP.png" /></a>
+<a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/onpq3vP.png" /></a>
 </p>
 
-<p align="center"><i>3 modes of nnn (light with filter, detail, du analyzer) with memory usage</i></a></p>
+<p align="center"><i>Modes of nnn (light with filter, detail, du analyzer) with memory usage (click for a demo video)</i></a></p>
 
 #### TABLE OF CONTENTS
 
+- [Introduction](#introduction)
 - [Features](#features)
 - [Installation](#installation)
   - [Library dependencies](#library-dependencies)
@@ -69,6 +58,20 @@ Demo videos: i. [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Abaa
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
+
+#### INTRODUCTION
+
+`nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/performance)**).
+
+`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. Many **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. Custom plugins are easy to add. There's an independent [(neo)vim picker plugin](https://github.com/mcchrish/nnn.vim) project.
+
+It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
+
+`nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes. **[Quickstart](#quickstart)** and see how `nnn` simplifies workflows.
+
+Visit the **[wiki](https://github.com/jarun/nnn/wiki)** for more.
+
+Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=AbaauM7gUJw).
 
 #### FEATURES
 
