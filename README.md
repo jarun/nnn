@@ -161,7 +161,30 @@ Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Ab
 
 #### From a package manager
 
-There's a good chance `nnn` is already available in the default repos of your distro. Find a list of known packagers [here](https://github.com/jarun/nnn/wiki/packagers).
+There's a good chance `nnn` is already available in the default repos of your distro. Find a list of known packagers below.
+
+- [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=nnn) (`apk add nnn`)
+- [Arch Linux](https://www.archlinux.org/packages/community/x86_64/nnn/) (`pacman -S nnn`)
+- [CRUX](https://crux.nu/portdb/?a=search&q=nnn) (`prt-get depinst nnn`)
+- [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
+- [Fedora](https://apps.fedoraproject.org/packages/nnn) (`dnf install nnn`)
+- [FreeBSD](https://svnweb.freebsd.org/ports/head/misc/nnn/) (`pkg install nnn`)
+- [Gentoo](https://packages.gentoo.org/packages/app-misc/nnn) (`emerge nnn`)
+- [macOS/Homebrew](http://formulae.brew.sh/formula/nnn) (`brew install nnn`)
+- [MacPorts](https://www.macports.org/ports.php?by=name&substr=nnn) (`port install nnn`)
+- [Milis Linux](https://notabug.org/milislinux/milis/src/master/talimatname/genel/n/nnn/talimat) (`mps kur nnn`)
+- [NixOS](https://github.com/NixOS/nixpkgs/tree/master/pkgs/applications/misc/nnn) (`nix-env -i nnn`)
+- [NuTyX](https://www.nutyx.org/en/?type=pkg&branch=rolling&arch=x86_64&searchpkg=nnn) (`cards install nnn`)
+- [OpenBSD](https://cvsweb.openbsd.org/cgi-bin/cvsweb/ports/sysutils/nnn/) (`pkg_add nnn`)
+- [openSUSE](https://software.opensuse.org/package/nnn) (and packages for several other distros) (`zypper in nnn`)
+- [pkgrsc](http://pkgsrc.se/sysutils/nnn) (`pkg_add nnn`)
+- [Raspbian Testing](https://archive.raspbian.org/raspbian/pool/main/n/nnn/) (`apt-get install nnn`)
+- [Slackware](http://slackbuilds.org/repository/14.2/system/nnn/) (`slackpkg install nnn`)
+- [Solus](https://packages.getsol.us/shannon/n/nnn/) (`eopkg install nnn`)
+- [Source Mage](http://codex.sourcemage.org/test/shell-term-fm/nnn/) (`cast nnn`)
+- [Termux](https://github.com/termux/termux-packages/tree/master/packages/nnn) (`pkg in nnn`)
+- [Ubuntu](https://packages.ubuntu.com/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
+- [Void Linux](https://github.com/void-linux/void-packages/tree/master/srcpkgs/nnn) (`xbps-install -S nnn`)
 
 #### Release packages
 
