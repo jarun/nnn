@@ -87,7 +87,7 @@ Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Ab
 - Sorting
   - Ordered pure numeric names by default (visit _/proc_)
   - Case-insensitive version (_aka_ natural) sort
-  - Sort by file name, modification time, size
+  - Sort by file name, modification time, size, file extension
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex and substring match
@@ -294,7 +294,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^F  Extract archive   F  List archive
             e  Edit in EDITOR    p  Open in PAGER
  ORDER TOGGLES
-           ^J  Disk usage        S  Apparent du
+           ^J  du      E  Extn   S  Apparent du
            ^W  Random  s  Size   t  Time modified
  MISC
          ! ^]  Spawn SHELL       C  Execute entry

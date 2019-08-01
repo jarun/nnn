@@ -72,6 +72,7 @@ enum action {
 	SEL_FSIZE,  /* file size */
 	SEL_ASIZE,  /* apparent size */
 	SEL_BSIZE,  /* block size */
+	SEL_EXTN,   /* order by extension */
 	SEL_MTIME,
 	SEL_WILD,
 	SEL_REDRAW,
@@ -193,6 +194,8 @@ static struct key bindings[] = {
 	{ 'S',            SEL_ASIZE },
 	/* Sort by total block count including dir contents */
 	{ CONTROL('J'),   SEL_BSIZE },
+	/* Sort by file extension */
+	{ 'E',            SEL_EXTN },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME },
 	/* Wild load */

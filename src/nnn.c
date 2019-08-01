@@ -213,11 +213,12 @@ typedef struct {
 	uint sizeorder  : 1;  /* Set to sort by file size */
 	uint apparentsz : 1;  /* Set to sort by apparent size (disk usage) */
 	uint blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
+	uint extnorder  : 1;  /* Order by extension */
 	uint showhidden : 1;  /* Set to show hidden files */
 	uint copymode   : 1;  /* Set when copying files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 8;
+	uint reserved   : 7;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
@@ -253,6 +254,7 @@ static settings cfg = {
 	0, /* sizeorder */
 	0, /* apparentsz */
 	0, /* blkorder */
+	0, /* extnorder */
 	0, /* showhidden */
 	0, /* copymode */
 	1, /* showdetail */
@@ -1567,6 +1569,22 @@ static int entrycmp(const void *va, const void *vb)
 			return 1;
 		if (pb->blocks < pa->blocks)
 			return -1;
+	} else if (cfg.extnorder && !(pb->flags & DIR_OR_LINK_TO_DIR)) {
+		char *extna = xmemrchr((uchar *)pa->name, '.', strlen(pa->name));
+		char *extnb = xmemrchr((uchar *)pb->name, '.', strlen(pb->name));
+
+		if (extna || extnb) {
+			if (!extna)
+				return 1;
+
+			if (!extnb)
+				return -1;
+
+			int ret = strcasecmp(extna, extnb);
+
+			if (ret)
+				return ret;
+		}
 	}
 
 	return cmpfn(pa->name, pb->name);
@@ -2810,7 +2828,7 @@ static bool show_help(const char *path)
 		 "b^F  Extract archive   F  List archive\n"
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
 		"1ORDER TOGGLES\n"
-		 "b^J  Disk usage        S  Apparent du\n"
+		 "b^J  du      E  Extn   S  Apparent du\n"
 		 "b^W  Random  s  Size   t  Time modified\n"
 		"1MISC\n"
 	       "9! ^]  Spawn SHELL       C  Execute entry\n"
@@ -3264,6 +3282,8 @@ static void redraw(char *path)
 				sort[0] = 'T';
 			else if (cfg.sizeorder)
 				sort[0] = 'S';
+			else if (cfg.extnorder)
+				sort[0] = 'E';
 
 			/* We need to show filename as it may be truncated in directory listing */
 			if (!cfg.blkorder)
@@ -3786,6 +3806,7 @@ nochange:
 		case SEL_FSIZE: // fallthrough
 		case SEL_ASIZE: // fallthrough
 		case SEL_BSIZE: // fallthrough
+		case SEL_EXTN: // fallthrough
 		case SEL_MTIME: // fallthrough
 		case SEL_WILD:
 			switch (sel) {
@@ -3812,6 +3833,7 @@ nochange:
 				cfg.mtimeorder = 0;
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
+				cfg.extnorder = 0;
 				cfg.copymode = 0;
 				cfg.wild = 0;
 				break;
@@ -3838,6 +3860,16 @@ nochange:
 				}
 				cfg.mtimeorder = 0;
 				cfg.sizeorder = 0;
+				cfg.extnorder = 0;
+				cfg.copymode = 0;
+				cfg.wild = 0;
+				break;
+			case SEL_EXTN:
+				cfg.extnorder ^= 1;
+				cfg.sizeorder = 0;
+				cfg.mtimeorder = 0;
+				cfg.apparentsz = 0;
+				cfg.blkorder = 0;
 				cfg.copymode = 0;
 				cfg.wild = 0;
 				break;
@@ -3846,6 +3878,7 @@ nochange:
 				cfg.sizeorder = 0;
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
+				cfg.extnorder = 0;
 				cfg.copymode = 0;
 				cfg.wild = 0;
 				break;
@@ -3855,6 +3888,7 @@ nochange:
 				cfg.sizeorder = 0;
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
+				cfg.extnorder = 0;
 				cfg.copymode = 0;
 				setdirwatch();
 				goto nochange;
