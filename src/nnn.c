@@ -1302,7 +1302,7 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 	char *buf = (char *)malloc(CMD_LEN_MAX * sizeof(char));
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-		 "xargs -0 -a %s %s %s", g_cppath, cmd, archive);
+		"sed -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, g_cppath, cmd, archive);
 #else
 		 "cat %s | xargs -0 -o %s %s", g_cppath, cmd, archive);
 #endif
