@@ -932,7 +932,6 @@ static void resetcpind(void)
 static bool initcurses(void)
 {
 	short i;
-	uchar mask = 8; /* Use bright colors */
 
 	if (cfg.picker) {
 		if (!newterm(NULL, stderr, stdin)) {
@@ -964,13 +963,9 @@ static bool initcurses(void)
 	start_color();
 	use_default_colors();
 
-	/* Handle 8-bit color terms */
-	if (COLOR_PAIRS != 256)
-		mask = 0;
-
 	/* Initialize default colors */
 	for (i = 0; i <  CTX_MAX; ++i)
-		init_pair(i + 1, g_ctx[i].color | mask, -1);
+		init_pair(i + 1, g_ctx[i].color, -1);
 
 	settimeout(); /* One second */
 	set_escdelay(25);
@@ -2185,7 +2180,7 @@ static char *get_bm_loc(char *buf, int key)
 static inline void resetdircolor(int flags)
 {
 	if (cfg.dircolor && !(flags & DIR_OR_LINK_TO_DIR)) {
-		attroff(COLOR_PAIR(cfg.curctx + 1));
+		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		cfg.dircolor = 0;
 	}
 }
@@ -3221,14 +3216,14 @@ static void redraw(char *path)
 		if (!g_ctx[i].c_cfg.ctxactive)
 			printw("%d ", i + 1);
 		else if (cfg.curctx != i) {
-			attrs = COLOR_PAIR(i + 1) | A_UNDERLINE;
+			attrs = COLOR_PAIR(i + 1) | A_BOLD | A_UNDERLINE;
 			attron(attrs);
 			printw("%d", i + 1);
 			attroff(attrs);
 			printw(" ");
 		} else {
 			/* Print current context in reverse */
-			attrs = COLOR_PAIR(i + 1) | A_REVERSE;
+			attrs = COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE;
 			attron(attrs);
 			printw("%d", i + 1);
 			attroff(attrs);
@@ -3259,7 +3254,7 @@ static void redraw(char *path)
 		ncols -= 5;
 
 	if (!cfg.wild) {
-		attron(COLOR_PAIR(cfg.curctx + 1));
+		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		cfg.dircolor = 1;
 	}
 
@@ -3270,7 +3265,7 @@ static void redraw(char *path)
 
 	/* Must reset e.g. no files in dir */
 	if (cfg.dircolor) {
-		attroff(COLOR_PAIR(cfg.curctx + 1));
+		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		cfg.dircolor = 0;
 	}
 
@@ -4722,7 +4717,6 @@ int main(int argc, char *argv[])
 	/* Get the context colors; copier used as tmp var */
 	copier = xgetenv(env_cfg[NNN_CONTEXT_COLORS], "4444");
 	opt = 0;
-
 	while (opt < CTX_MAX) {
 		if (*copier) {
 			if (*copier < '0' || *copier > '7') {
@@ -4730,7 +4724,7 @@ int main(int argc, char *argv[])
 				return _FAILURE;
 			}
 
-			g_ctx[opt].color = (*copier - '0');
+			g_ctx[opt].color = *copier - '0';
 			++copier;
 		} else
 			g_ctx[opt].color = 4;
