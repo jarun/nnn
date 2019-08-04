@@ -2814,7 +2814,7 @@ static bool show_help(const char *path)
 	       "9Q ^Q  Quit              ?  Help, config\n"
 		"1FILES\n"
 		 "b^O  Open with...      n  Create new/link\n"
-		  "cD  File details     ^R  Rename entry\n"
+		  "cD  File details     ^R  Rename/duplicate\n"
 	   "5⎵ ^K / Y  Select entry/all  r  Batch rename\n"
 	       "9K ^Y  Toggle selection  y  List selection\n"
 		  "cP  Copy selection    X  Delete selection\n"
@@ -4160,6 +4160,8 @@ nochange:
 		case SEL_ARCHIVE: // fallthrough
 		case SEL_NEW:
 		{
+			int dup = 'n';
+
 			switch (sel) {
 			case SEL_ARCHIVE:
 				r = get_input("archive selection (else current)? [y/Y confirms]");
@@ -4190,6 +4192,7 @@ nochange:
 				tmp = xreadline(NULL, "name/link suffix [@ for none]: ");
 				break;
 			default: /* SEL_RENAME */
+				dup = get_input("duplicate? [y/Y confirms]");
 				tmp = xreadline(dents[cur].name, "");
 				break;
 			}
@@ -4274,7 +4277,9 @@ nochange:
 
 			if (sel == SEL_RENAME) {
 				/* Rename the file */
-				if (renameat(fd, dents[cur].name, fd, tmp) != 0) {
+				if (dup == 'y' || dup == 'Y') {
+					spawn("cp -r", dents[cur].name, tmp, path, F_CLI | F_NOTRACE);
+				} else if (renameat(fd, dents[cur].name, fd, tmp) != 0) {
 					close(fd);
 					printwarn(&presel);
 					goto nochange;

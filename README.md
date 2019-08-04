@@ -122,7 +122,7 @@ Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Ab
   - FreeDesktop compliant trash (needs trash-cli)
   - SSHFS mounts (needs sshfs)
   - Mouse support
-  - Create, rename files and directories
+  - Create, rename, duplicate files and directories
   - Show copy, move progress on Linux (needs avdcpmv)
   - Per-context directory color (default: blue)
   - Spawn a shell in the current directory
@@ -285,7 +285,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
          Q ^Q  Quit              ?  Help, config
  FILES
            ^O  Open with...      n  Create new/link
-            D  File details     ^R  Rename entry
+            D  File details     ^R  Rename/duplicate
      ⎵ ^K / Y  Select entry/all  r  Batch rename
          K ^Y  Toggle selection  y  List selection
             P  Copy selection    X  Delete selection
