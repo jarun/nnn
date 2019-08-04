@@ -41,7 +41,6 @@ debug: $(SRC)
 
 norl: $(SRC)
 	$(CC) -DNORL $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS)
-	$(STRIP) $(BIN)
 
 install: all
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
