@@ -116,9 +116,6 @@
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
-#define CURSR ">>"
-#define EMPTY "  "
-#define CURSYM(flag) ((flag) ? CURSR : EMPTY)
 #define FILTER '/'
 #define MSGWAIT '$'
 #define REGEX_MAX 48
@@ -2344,7 +2341,13 @@ static void printent(const struct entry *ent, int sel, uint namecols)
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
 
-	printw("%s%c%s%s\n", CURSYM(sel), cp, pname, ind);
+	if (sel)
+		attron(A_REVERSE);
+
+	printw("%c%s%s\n", cp, pname, ind);
+
+	if (sel)
+		attroff(A_REVERSE);
 }
 
 static void printent_long(const struct entry *ent, int sel, uint namecols)
@@ -3269,38 +3272,31 @@ static void redraw(char *path)
 		cfg.dircolor = 0;
 	}
 
-	if (cfg.showdetail) {
-		if (ndents) {
-			char sort[] = "\0 ";
+	if (ndents) {
+		char sort[] = "\0 ";
 
-			if (cfg.mtimeorder)
-				sort[0] = 'T';
-			else if (cfg.sizeorder)
-				sort[0] = 'S';
-			else if (cfg.extnorder)
-				sort[0] = 'E';
+		if (cfg.mtimeorder)
+			sort[0] = 'T';
+		else if (cfg.sizeorder)
+			sort[0] = 'S';
+		else if (cfg.extnorder)
+			sort[0] = 'E';
 
-			/* We need to show filename as it may be truncated in directory listing */
-			if (!cfg.blkorder)
-				mvprintw(lastln, 0, "%d/%d %s[%s]\n", cur + 1, ndents, sort,
-					 unescape(dents[cur].name, NAME_MAX));
-			else {
-				xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
+		/* We need to show filename as it may be truncated in directory listing */
+		if (!cfg.showdetail || !cfg.blkorder)
+			mvprintw(lastln, 0, "%d/%d %s[%s]\n", cur + 1, ndents, sort,
+				 unescape(dents[cur].name, NAME_MAX));
+		else {
+			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
+			c = cfg.apparentsz ? 'a' : 'd';
 
-				if (cfg.apparentsz)
-					c = 'a';
-				else
-					c = 'd';
-
-				mvprintw(lastln, 0,
-					 "%d/%d %cu: %s (%lu files) free: %s [%s]\n",
-					 cur + 1, ndents, c, buf, num_files,
-					 coolsize(get_fs_info(path, FREE)),
-					 unescape(dents[cur].name, NAME_MAX));
-			}
-		} else
-			printmsg("0/0");
-	}
+			mvprintw(lastln, 0, "%d/%d %cu: %s (%lu files) free: %s [%s]\n",
+				 cur + 1, ndents, c, buf, num_files,
+				 coolsize(get_fs_info(path, FREE)),
+				 unescape(dents[cur].name, NAME_MAX));
+		}
+	} else
+		printmsg("0/0");
 }
 
 static void browse(char *ipath)
