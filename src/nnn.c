@@ -4193,9 +4193,13 @@ nochange:
 				tmp = xreadline(NULL, "name/link suffix [@ for none]: ");
 				break;
 			default: /* SEL_RENAME */
-				dup = get_input("Press 'd' to duplicate");
-				tmp = xreadline(dents[cur].name, "");
-				break;
+				dup = get_input("Press 'r'(ename) / 'd'(uplicate)");
+				if (dup == 'r' || dup == 'd') {
+					tmp = xreadline(dents[cur].name, "");
+					break;
+				}
+
+				tmp = NULL;
 			}
 
 			if (!tmp || !*tmp)
