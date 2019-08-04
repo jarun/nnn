@@ -4188,7 +4188,7 @@ nochange:
 				tmp = xreadline(NULL, "name/link suffix [@ for none]: ");
 				break;
 			default: /* SEL_RENAME */
-				dup = get_input("duplicate? [y/Y confirms]");
+				dup = get_input("Press 'd' to duplicate");
 				tmp = xreadline(dents[cur].name, "");
 				break;
 			}
@@ -4273,9 +4273,9 @@ nochange:
 
 			if (sel == SEL_RENAME) {
 				/* Rename the file */
-				if (dup == 'y' || dup == 'Y') {
+				if (dup == 'd')
 					spawn("cp -r", dents[cur].name, tmp, path, F_CLI | F_NOTRACE);
-				} else if (renameat(fd, dents[cur].name, fd, tmp) != 0) {
+				else if (renameat(fd, dents[cur].name, fd, tmp) != 0) {
 					close(fd);
 					printwarn(&presel);
 					goto nochange;
