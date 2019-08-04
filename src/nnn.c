@@ -254,7 +254,7 @@ static settings cfg = {
 	0, /* extnorder */
 	0, /* showhidden */
 	0, /* copymode */
-	1, /* showdetail */
+	0, /* showdetail */
 	1, /* ctxactive */
 	0, /* reserved */
 	0, /* curctx */
@@ -2417,7 +2417,7 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 		attroff(A_REVERSE);
 }
 
-static void (*printptr)(const struct entry *ent, int sel, uint namecols) = &printent_long;
+static void (*printptr)(const struct entry *ent, int sel, uint namecols) = &printent;
 
 static void savecurctx(settings *curcfg, char *path, char *curname, int r /* next context num */)
 {
@@ -4504,17 +4504,17 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"%s: nnn [-b key] [-d] [-e] [-i] [-l] [-n]\n"
+		"%s: nnn [-b key] [-d] [-e] [-H] [-i] [-n]\n"
 		"           [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
 		"optional args:\n"
 		" -b key  open bookmark key\n"
-		" -d      show hidden files\n"
+		" -d      detail mode\n"
 		" -e      use exiftool for media info\n"
+		" -H      show hidden files\n"
 		" -i      nav-as-you-type mode\n"
-		" -l      light mode\n"
 		" -n      version sort\n"
 		" -p file selection file (stdout if '-')\n"
 		" -s      string filters [default: regex]\n"
@@ -4649,16 +4649,16 @@ int main(int argc, char *argv[])
 	char *arg = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "Slib:denp:svwh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSib:denp:svwh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
 			nftw_fn = sum_bsizes;
 			BLK_SHIFT = ffs(S_BLKSIZE) - 1;
 			break;
-		case 'l':
-			cfg.showdetail = 0;
-			printptr = &printent;
+		case 'd':
+			cfg.showdetail = 1;
+			printptr = &printent_long;
 			break;
 		case 'i':
 			cfg.filtermode = 1;
@@ -4666,11 +4666,11 @@ int main(int argc, char *argv[])
 		case 'b':
 			arg = optarg;
 			break;
-		case 'd':
-			cfg.showhidden = 1;
-			break;
 		case 'e':
 			cfg.metaviewer = EXIFTOOL;
+			break;
+		case 'H':
+			cfg.showhidden = 1;
 			break;
 		case 'n':
 			cmpfn = &xstrverscasecmp;

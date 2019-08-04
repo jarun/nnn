@@ -242,7 +242,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 #### Cmdline options
 
 ```
-usage: nnn [-b key] [-d] [-e] [-i] [-l] [-n]
+usage: nnn [-b key] [-d] [-e] [-H] [-i] [-n]
            [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]
 
 The missing terminal file manager for X.
@@ -252,10 +252,10 @@ positional args:
 
 optional args:
  -b key  open bookmark key
- -d      show hidden files
+ -d      detail mode
  -e      use exiftool for media info
+ -H      show hidden files
  -i      nav-as-you-type mode
- -l      light mode
  -n      version sort
  -p file selection file (stdout if '-')
  -s      string filters [default: regex]
