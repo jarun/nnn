@@ -276,10 +276,10 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
           ← h  Parent dir  ~ ` @ -  HOME, /, start, last
         ↵ → l  Open file/dir     .  Toggle show hidden
     Home g ^A  First entry    G ^E  Last entry
-            /  Filter       Ins ^T  Toggle nav-as-you-type
             b  Pin current dir  ^B  Go to pinned dir
        Tab ^I  Next context      d  Toggle detail view
          , ^/  Leader key  N LeadN  Context N
+            /  Filter/Lead  Ins ^T  Toggle nav-as-you-type
           Esc  Exit prompt      ^L  Redraw/clear prompt
            ^G  Quit and cd       q  Quit context
          Q ^Q  Quit              ?  Help, config
@@ -325,6 +325,8 @@ The Leader key provides a powerful multi-functional navigation mechanism. It is 
 | key | Go to bookmarked location |
 | <kbd>~</kbd> <kbd>`</kbd> <kbd>@</kbd> <kbd>-</kbd> | Go to HOME, `/`, start, last visited dir |
 | <kbd>q</kbd> | Quit context |
+
+When the filter is on, <kbd>/</kbd> works as an additional Leader key.
 
 #### Contexts
 

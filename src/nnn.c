@@ -1798,6 +1798,11 @@ static int filterentries(char *path)
 
 				redraw(path);
 				goto end;
+			case '/': /* works as Leader key in filter mode */
+				*ch = CONTROL('_'); // fallthrough
+				if (len == 1)
+					cur = oldcur;
+				goto end;
 			case '?':  /* '?' is an invalid regex, show help instead */
 				if (len == 1) {
 					cur = oldcur;
@@ -2808,10 +2813,10 @@ static bool show_help(const char *path)
 		"a← h  Parent dir  ~ ` @ -  HOME, /, start, last\n"
 	      "8↵ → l  Open file/dir     .  Toggle show hidden\n"
 	  "4Home g ^A  First entry    G ^E  Last entry\n"
-		  "c/  Filter       Ins ^T  Toggle nav-as-you-type\n"
 		  "cb  Pin current dir  ^B  Go to pinned dir\n"
 	     "7Tab ^I  Next context      d  Toggle detail view\n"
 	       "9, ^/  Leader key  N LeadN  Context N\n"
+		  "c/  Filter/Lead  Ins ^T  Toggle nav-as-you-type\n"
 		"aEsc  Exit prompt      ^L  Redraw/clear prompt\n"
 		 "b^G  Quit and cd       q  Quit context\n"
 	       "9Q ^Q  Quit              ?  Help, config\n"
