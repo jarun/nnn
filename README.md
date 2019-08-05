@@ -315,7 +315,7 @@ Note: Help & settings, file details, media info and archive listing are shown in
 
 ##### Leader key
 
-The Leader key provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and location shortcuts.
+The Leader/Lead key provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and location shortcuts.
 
 | Key | Function |
 |:---:| --- |
