@@ -65,16 +65,6 @@ packages:
     deps:
       - libncursesw5
       - readline-common
-  debian10:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - libncursesw5-dev
-      - libreadline-dev
-    deps:
-      - libncursesw5
-      - readline-common
   fedora25:
     builddeps:
       - make

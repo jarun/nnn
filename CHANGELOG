@@ -1,3 +1,39 @@
+nnn v2.6
+2019-08-06
+
+- new plugins
+   - view image or browse a directory of images in terminal
+   - show image thumbnails
+   - PDF and text file reader
+   - calculate and verify checksum of selection or file
+   - append (and play) selection/dir/file music in MOC
+   - variable bitrate mp3 ringtone generator
+   - split current file or join selection
+- better experience on Termux (and touch based devices)
+   - mouse scrolling support (with ncursesw6.0 and above)
+   - tap/left click to visit parent, toggle nav-as-you-type mode
+- light mode set as default
+- show status bar and use reverse video in light mode
+- changed program options
+  - `-d`: detail mode
+  - `-H`: show hidden files
+  - `-l` is retired
+- support `XDG_CONFIG_HOME`
+- support <kbd>/</kbd> as an additional Leader key when filter is on
+- sort by file extension
+- use zip/unzip/tar if atool/bsdtar not found
+- support duplicate file (key <kbd>^R</kbd>, same as rename file)
+- new config option `NNN_SSHFS_OPTS` to specify `sshfs` options
+- restrict opening 0 byte files (`NNN_RESTRICT_0B` is obsolete)
+- critical defects fixed
+   - fix #276 - crash with variable length inotify event handling
+   - fix #285 - hang after deleting/moving current directory
+   - fix #274 - a broken prompt on empty input with libreadline
+   - fix #304 - list selection from another instance
+- `cmatrix` as locker fallback
+- wait for user input after running a command from prompt
+- scrolloff set to 3 from 5
+
 nnn v2.5
 2019-05-27
 
