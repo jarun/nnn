@@ -132,7 +132,7 @@
 #define EXEC_ARGS_MAX 8
 #define SCROLLOFF 3
 #define LONG_SIZE sizeof(ulong)
-#define ARCHIVE_CMD_LEN 12
+#define ARCHIVE_CMD_LEN 16
 
 /* Program return codes */
 #define _SUCCESS 0
@@ -1265,11 +1265,11 @@ static void get_archive_cmd(char *cmd, char *archive)
 	if (getutil(utils[ATOOL]))
 		xstrlcpy(cmd, "atool -a", ARCHIVE_CMD_LEN);
 	else if (getutil(utils[BSDTAR]))
-		xstrlcpy(cmd, "bsdtar -cvf", ARCHIVE_CMD_LEN);
+		xstrlcpy(cmd, "bsdtar -acvf", ARCHIVE_CMD_LEN);
 	else if (is_suffix(archive, ".zip"))
 		xstrlcpy(cmd, "zip -r", ARCHIVE_CMD_LEN);
 	else
-		xstrlcpy(cmd, "tar -cvf", ARCHIVE_CMD_LEN);
+		xstrlcpy(cmd, "tar -acvf", ARCHIVE_CMD_LEN);
 }
 
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
