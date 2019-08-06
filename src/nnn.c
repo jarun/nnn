@@ -3977,6 +3977,11 @@ nochange:
 				appendfpath(newpath, r);
 
 				++ncp;
+				dents[cur].flags |= FILE_COPIED;
+
+				/* move cursor to the next entry if this is not the last entry */
+				if (cur != ndents - 1)
+					move_cursor((cur + 1) % ndents, 0);
 			} else {
 				r = mkpath(path, dents[cur].name, newpath);
 
@@ -3990,9 +3995,9 @@ nochange:
 
 				writecp(newpath, r - 1); /* Truncate NULL from end */
 				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
-			}
 
-			dents[cur].flags |= FILE_COPIED;
+				dents[cur].flags |= FILE_COPIED;
+			}
 			break;
 		case SEL_COPYMUL:
 			cfg.copymode ^= 1;
