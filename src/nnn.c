@@ -3973,11 +3973,14 @@ nochange:
 				if (!ncp)
 					writecp(NULL, 0);
 
-				r = mkpath(path, dents[cur].name, newpath);
-				appendfpath(newpath, r);
+				/* Do not select if already selected */
+				if (!(dents[cur].flags & FILE_COPIED)) {
+					r = mkpath(path, dents[cur].name, newpath);
+					appendfpath(newpath, r);
 
-				++ncp;
-				dents[cur].flags |= FILE_COPIED;
+					++ncp;
+					dents[cur].flags |= FILE_COPIED;
+				}
 
 				/* move cursor to the next entry if this is not the last entry */
 				if (cur != ndents - 1)
