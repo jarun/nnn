@@ -3954,7 +3954,7 @@ nochange:
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		}
-		case SEL_COPY:
+		case SEL_SEL:
 			if (!ndents)
 				goto nochange;
 
@@ -4002,7 +4002,7 @@ nochange:
 				dents[cur].flags |= FILE_COPIED;
 			}
 			break;
-		case SEL_COPYMUL:
+		case SEL_SELMUL:
 			cfg.copymode ^= 1;
 			if (cfg.copymode) {
 				if (copybufpos) {
@@ -4033,8 +4033,8 @@ nochange:
 				} else
 					copyendid = cur;
 			} // fallthrough
-		case SEL_COPYALL:
-			if (sel == SEL_COPYALL) {
+		case SEL_SELALL:
+			if (sel == SEL_SELALL) {
 				if (!ndents)
 					goto nochange;
 
@@ -4045,7 +4045,7 @@ nochange:
 				copyendid = ndents - 1;
 			}
 
-			if ((!ncp && copystartid < copyendid) || sel == SEL_COPYALL) {
+			if ((!ncp && copystartid < copyendid) || sel == SEL_SELALL) {
 				for (r = copystartid; r <= copyendid; ++r) {
 					appendfpath(newpath, mkpath(path, dents[r].name, newpath));
 					dents[r].flags |= FILE_COPIED;
@@ -4069,7 +4069,7 @@ nochange:
 				goto nochange;
 			}
 			continue;
-		case SEL_COPYLIST:
+		case SEL_SELLST:
 			if (showcplist() || showcpfile()) {
 				if (cfg.filtermode)
 					presel = FILTER;

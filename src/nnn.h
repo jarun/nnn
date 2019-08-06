@@ -76,10 +76,10 @@ enum action {
 	SEL_MTIME,
 	SEL_WILD,
 	SEL_REDRAW,
-	SEL_COPY,
-	SEL_COPYMUL,
-	SEL_COPYALL,
-	SEL_COPYLIST,
+	SEL_SEL,
+	SEL_SELMUL,
+	SEL_SELALL,
+	SEL_SELLST,
 	SEL_CP,
 	SEL_MV,
 	SEL_RMMUL,
@@ -203,15 +203,15 @@ static struct key bindings[] = {
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
 	/* Copy currently selected file path */
-	{ CONTROL('K'),   SEL_COPY },
-	{ ' ',            SEL_COPY },
+	{ CONTROL('K'),   SEL_SEL },
+	{ ' ',            SEL_SEL },
 	/* Toggle copy multiple file paths */
-	{ 'K',            SEL_COPYMUL },
-	{ CONTROL('Y'),   SEL_COPYMUL },
+	{ 'K',            SEL_SELMUL },
+	{ CONTROL('Y'),   SEL_SELMUL },
 	/* Select all files in current dir */
-	{ 'Y',            SEL_COPYALL },
+	{ 'Y',            SEL_SELALL },
 	/* Show list of copied files */
-	{ 'y',            SEL_COPYLIST },
+	{ 'y',            SEL_SELLST },
 	/* Copy from copy buffer */
 	{ 'P',            SEL_CP },
 	/* Move from copy buffer */
