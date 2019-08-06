@@ -3465,13 +3465,13 @@ nochange:
 			}
 
 			/* Handle clicking on a file */
-			r = curscroll + (event.y - 2);
-			if (2 <= event.y && event.y < xlines - 2 && r < ndents) {
+			if (2 <= event.y && event.y <= ndents + 1) {
+				r = curscroll + (event.y - 2);
 				move_cursor(r, 1);
 
 				/*Single click just selects, double click also opens */
 				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
-					goto nochange;
+					break;
 			} else {
 				if (cfg.filtermode)
 					presel = FILTER;
