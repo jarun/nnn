@@ -230,10 +230,10 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
-| `NNN_NOTE=/home/user/Dropbox/notes` | path to note file [default: none] |
+| `NNN_NOTE='/home/user/Dropbox/notes'` | absolute path to note file [default: none] |
 | `NNN_OPENER=mimeopen` | custom file opener |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
-| `NNN_COPIER='/absolute/path/to/copier'` | system clipboard copier script [default: none] |
+| `NNN_COPIER=copier` | clipboard copier script [default: none] |
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
