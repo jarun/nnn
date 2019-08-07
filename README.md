@@ -323,6 +323,7 @@ The Leader/Lead key provides a powerful multi-functional navigation mechanism. I
 | <kbd>></kbd>, <kbd>.</kbd> | Go to next active context |
 | <kbd><</kbd>, <kbd>,</kbd> | Go to previous active context |
 | key | Go to bookmarked location |
+| <kbd>'</kbd> | Go to first file in directory |
 | <kbd>~</kbd> <kbd>`</kbd> <kbd>@</kbd> <kbd>-</kbd> | Go to HOME, `/`, start, last visited dir |
 | <kbd>q</kbd> | Quit context |
 

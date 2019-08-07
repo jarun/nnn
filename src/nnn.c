@@ -3669,6 +3669,16 @@ nochange:
 			case '@':
 				presel = fd;
 				goto nochange;
+			case '\'':
+				for (r = 0; r < ndents; ++r) {
+					if (!(dents[r].flags & DIR_OR_LINK_TO_DIR)) {
+						move_cursor((r) % ndents, 0);
+						break;
+					}
+				}
+				if (r != ndents)
+					continue;;
+				goto nochange;
 			case '>': // fallthrough
 			case '.': // fallthrough
 			case '<': // fallthrough
