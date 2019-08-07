@@ -2074,12 +2074,15 @@ static int xlink(char *suffix, char *path, char *buf, int *presel, int type)
 static bool parsebmstr(void)
 {
 	int i = 0;
-	bmstr = strdup(getenv(env_cfg[NNN_BMS]));
-	char *bms = bmstr;
-	char *nextkey = bms;
+	char *nextkey;
+	char *bms = getenv(env_cfg[NNN_BMS]);
 
 	if (!bms || !*bms)
 		return TRUE;
+
+	bmstr = strdup(bms);
+	bms = bmstr;
+	nextkey = bms;
 
 	while (*bms && i < BM_MAX) {
 		if (bms == nextkey) {
