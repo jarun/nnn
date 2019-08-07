@@ -278,6 +278,7 @@ static int ndents, cur, curscroll, total_dents = ENTRY_INCR;
 static int xlines, xcols;
 static uint idle;
 static uint idletimeout, copybufpos, copybuflen;
+static char *bmstr;
 static char *opener;
 static char *copier;
 static char *editor;
@@ -2073,7 +2074,8 @@ static int xlink(char *suffix, char *path, char *buf, int *presel, int type)
 static bool parsebmstr(void)
 {
 	int i = 0;
-	char *bms = getenv(env_cfg[NNN_BMS]);
+	bmstr = strdup(getenv(env_cfg[NNN_BMS]));
+	char *bms = bmstr;
 	char *nextkey = bms;
 
 	if (!bms || !*bms)
@@ -4619,6 +4621,7 @@ static void cleanup(void)
 	free(plugindir);
 	free(cfgdir);
 	free(initpath);
+	free(bmstr);
 
 #ifdef DBGMODE
 	disabledbg();
