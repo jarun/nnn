@@ -275,14 +275,14 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
           ↓ j  Down        PgDn ^D  Scroll down
           ← h  Parent dir  ~ ` @ -  HOME, /, start, last
         ↵ → l  Open file/dir     .  Toggle show hidden
-    Home g ^A  First entry    G ^E  Last entry
+         g ^A  First entry    G ^E  Last entry
             b  Pin current dir  ^B  Go to pinned dir
        Tab ^I  Next context      d  Toggle detail view
-         , ^/  Leader key  N LeadN  Context N
+         , ^/  Lead key    N LeadN  Context N
             /  Filter/Lead  Ins ^T  Toggle nav-as-you-type
           Esc  Exit prompt      ^L  Redraw/clear prompt
-           ^G  Quit and cd       q  Quit context
-         Q ^Q  Quit              ?  Help, config
+            q  Quit context  Lead'  First file
+         Q ^Q  Quit  ^G  QuitCD  ?  Help, config
  FILES
            ^O  Open with...      n  Create new/link
             D  File details     ^R  Rename/duplicate
