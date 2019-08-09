@@ -24,7 +24,7 @@
 
 <p align="center"><i>Modes of nnn (light with filter, detail, du analyzer) with memory usage (click for a demo video)</i></a></p>
 
-#### TABLE OF CONTENTS
+## ToC
 
 - [Introduction](#introduction)
 - [Features](#features)
@@ -35,21 +35,20 @@
   - [Release packages](#release-packages)
   - [From source](#from-source)
   - [Shell completion](#shell-completion)
-- [Quickstart](#quickstart)
 - [Usage](#usage)
   - [Configuration](#configuration)
   - [Cmdline options](#cmdline-options)
   - [Keyboard and mouse](#keyboard-and-mouse)
     - [Leader key](#leader-key)
+- [Concepts](#concepts)
   - [Contexts](#contexts)
     - [Context-specific color](#context-specific-color)
-  - [Dual pane](#dual-pane)
+    - [Dual pane](#dual-pane)
   - [Selection](#selection)
   - [Filters](#filters)
   - [Navigate-as-you-type](#navigate-as-you-type)
   - [File indicators](#file-indicators)
   - [Hot-plugged drives](#hot-plugged-drives)
-  - [SSHFS mounts](#sshfs-mounts)
   - [Help](#help)
 - [Troubleshooting](#troubleshooting)
   - [Tmux configuration](#tmux-configuration)
@@ -59,21 +58,19 @@
 - [Mentions](#mentions)
 - [Developers](#developers)
 
-#### INTRODUCTION
+## Introduction
 
 `nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/performance)**).
 
 `nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. Many **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. Custom plugins are easy to add. There's an independent [(neo)vim picker plugin](https://github.com/mcchrish/nnn.vim) project.
 
-It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android.
+It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android. `nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes.
 
-`nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes. **[Quickstart](#quickstart)** and see how `nnn` simplifies workflows.
-
-Visit the **[wiki](https://github.com/jarun/nnn/wiki)** for more.
+Visit the **[wiki](https://github.com/jarun/nnn/wiki)** for more information on configuration, operational notes and tips.
 
 Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=AbaauM7gUJw).
 
-#### FEATURES
+## Features
 
 - Modes
   - Detail (default), light
@@ -139,7 +136,7 @@ Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Ab
 - Minimal library dependencies
 - Available on many distros
 
-#### INSTALLATION
+## Installation
 
 #### Library dependencies
 
@@ -156,7 +153,7 @@ Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Ab
 | sshfs, fusermount(3) | if needed | mount, unmount over SSHFS |
 | trash-cli | optional | trash files (default action: delete) |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
-| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/hacking-nnn#show-cp-mv-progress)) | optional | copy, move progress |
+| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki#show-cp-mv-progress)) | optional | copy, move progress |
 | `$VISUAL` (else `$EDITOR`), `$PAGER`, `$SHELL` | optional | fallback vi, less, sh |
 
 #### From a package manager
@@ -207,18 +204,7 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
 Option completion scripts for Bash, Fish and Zsh can be found in respective subdirectories of [`misc/auto-completion/`](misc/auto-completion). Please refer to your shell's manual for installation instructions.
 
-#### QUICKSTART
-
-1. Install the [utilities you may need](#utility-dependencies) based on your regular workflows.
-2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/hacking-nnn#cd-on-quit).
-3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`
-4. For additional functionality [install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins) and the GUI app launcher [`nlaunch`](https://github.com/jarun/nnn/tree/master/misc/nlaunch).
-
-- Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
-- When you are ready for more, start [hacking `nnn`](https://github.com/jarun/nnn/wiki/hacking-nnn).
-- To set `nnn` as the default file manager, follow these [instructions](https://github.com/jarun/nnn/wiki/nnn-as-default-file-manager).
-
-#### USAGE
+## Usage
 
 #### Configuration
 
@@ -329,6 +315,8 @@ The Leader/Lead key provides a powerful multi-functional navigation mechanism. I
 
 When the filter is on, <kbd>/</kbd> works as an additional Leader key.
 
+## Concepts
+
 #### Contexts
 
 Contexts serve the purpose of exploring multiple directories simultaneously. 4 contexts are available. The status of the contexts are shown in the top left corner:
@@ -350,7 +338,7 @@ Each context can have its own directory color specified:
     export NNN_CONTEXT_COLORS='1234'
 colors: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
 
-#### Dual pane
+##### Dual pane
 
 Any number of `nnn` instances can be opened simultaneously using the lightweight terminal multiplexter [`dvtm`](http://www.brain-dump.org/projects/dvtm/). For example, to open 2 instances or a dual pane mode, have the following alias:
 
@@ -424,40 +412,13 @@ External storage devices can be (un)mounted using the plugin [nmount](https://gi
 
 For auto-mounting external storage drives use udev rules or udisks wrappers.
 
-#### SSHFS mounts
-
-To connect to and mount remote shares using SSHFS, `nnn` requires the ssh configuration file `~/.ssh/config` to have the host entries. sshfs reads this file.
-
-Example host entry for a Termux environment on Android device:
-
-```
-Host phone
-    HostName 192.168.0.102
-    User u0_a117
-    Port 8022
-```
-
-The above host `phone` will be mounted at `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/phone`. `nnn` creates the directory `phone` if it doesn't exist.
-
-If you need to pass options to the `sshfs` command, you can do so:
-
-    export NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user,cache_timeout=3600'
-
-The options must be preceded by `sshfs` and comma-separated without any space between them.
-
-Notes:
-
-1. `nnn` takes you to the mount point after successful mounts. To jump back to the last directory, press the usual <kbd>-</kbd>.
-2. `nnn` doesn't delete the mount point on unmount to prevent accidental data loss. **Please ensure the mount point is not mounted if you are deleting it manually.**
-3. More information on [SSHFS](https://wiki.archlinux.org/index.php/SSHFS).
-
 #### Help
 
     $ nnn -h
     $ man nnn
 To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
-#### TROUBLESHOOTING
+## Troubleshooting
 
 ##### Tmux configuration
 
@@ -473,7 +434,7 @@ By default in OpenBSD & FreeBSD (and probably on macOS as well), `stty` maps <kb
 
 There is a known issue where if you close the terminal directly with `nnn` **_waiting for a spawned process_**, a deadlock occurs and `nnn` uses 100% CPU. Please see issue [#225](https://github.com/jarun/nnn/issues/225) for more details. Make sure you quit the spawned process before closing the terminal. It's not a problem if there is no spawned process (`nnn` isn't blocked) as `nnn` checks if the parent process has exited.
 
-#### WHY FORK?
+## Why fork?
 
 `nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today. I chose to fork because:
 - one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. `noice` was rudimentary. In my opinion evolution is the taste of time.
@@ -481,7 +442,7 @@ There is a known issue where if you close the terminal directly with `nnn` **_wa
 
 Trivia: The name `nnn` is a recursive acronym for the initial words from _Noice is Not Noice, a noicer fork..._, suggested by a longtime friend.
 
-#### MENTIONS
+## Mentions
 
 - [FOSSMint](https://www.fossmint.com/nnn-linux-terminal-file-browser/)
 - [Hacker News 1](https://news.ycombinator.com/item?id=18520898)
@@ -492,7 +453,7 @@ Trivia: The name `nnn` is a recursive acronym for the initial words from _Noice 
 - [Suckless Rocks](https://suckless.org/rocks/)
 - [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
 
-#### DEVELOPERS
+## Developers
 
 1. Copyright © 2014-2016 Lazaros Koromilas
 2. Copyright © 2014-2016 Dimitris Papastamos
