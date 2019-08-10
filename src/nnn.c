@@ -1301,11 +1301,9 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
 		"sed -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, g_cppath, cmd, archive);
-#elif defined __APPLE__
+#else
 		"cat '%s' | tr '\\0' '\n' | sed -e 's|^%s/||' | tr '\n' '\\0' | xargs -0 %s %s",
 		g_cppath, curpath, cmd, archive);
-#else
-		 "cat %s | xargs -0 -o %s %s", g_cppath, cmd, archive);
 #endif
 	spawn("sh", "-c", buf, curpath, F_NORMAL);
 	free(buf);
