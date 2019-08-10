@@ -40,6 +40,7 @@
   - [Cmdline options](#cmdline-options)
   - [Keyboard and mouse](#keyboard-and-mouse)
     - [Leader key](#leader-key)
+  - [Help](#help)
 - [Concepts](#concepts)
   - [Contexts](#contexts)
     - [Context-specific color](#context-specific-color)
@@ -49,7 +50,6 @@
   - [Navigate-as-you-type](#navigate-as-you-type)
   - [File indicators](#file-indicators)
   - [Hot-plugged drives](#hot-plugged-drives)
-  - [Help](#help)
 - [Troubleshooting](#troubleshooting)
   - [Tmux configuration](#tmux-configuration)
   - [BSD terminal issue](#bsd-terminal-issue)
@@ -316,6 +316,12 @@ The Leader/Lead key provides a powerful multi-functional navigation mechanism. I
 
 When the filter is on, <kbd>/</kbd> works as an additional Leader key.
 
+#### Help
+
+    $ nnn -h
+    $ man nnn
+To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
+
 ## Concepts
 
 #### Contexts
@@ -413,12 +419,6 @@ External storage devices can be (un)mounted using the plugin [nmount](https://gi
 
 For auto-mounting external storage drives use udev rules or udisks wrappers.
 
-#### Help
-
-    $ nnn -h
-    $ man nnn
-To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
-
 ## Troubleshooting
 
 ##### Tmux configuration
@@ -429,7 +429,7 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 TLDR: Use the keybind <kbd>K</kbd> to toggle selection if you are having issues with <kbd>^Y</kbd>.
 
-By default in OpenBSD & FreeBSD (and probably on macOS as well), `stty` maps <kbd>^Y</kbd> to `DSUSP`. This means that typing <kbd>^Y</kbd> will suspend `nnn` as if you typed <kbd>^Z</kbd> (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-selection mode. You can check this with `stty -a`. If it includes the text `dsusp = ^Y`, issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the <kbd>^Y</kbd> instead.
+On OpenBSD & FreeBSD (and probably on macOS as well) `stty` maps <kbd>^Y</kbd> to `DSUSP` by default. This means that typing <kbd>^Y</kbd> will suspend `nnn` as if you typed <kbd>^Z</kbd> (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-selection mode. You can check this with `stty -a`. If it includes the text `dsusp = ^Y`, issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the <kbd>^Y</kbd> instead.
 
 ##### 100% CPU usage
 
