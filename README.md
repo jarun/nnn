@@ -179,6 +179,7 @@ There's a good chance `nnn` is already available in the default repos of your di
 - [pkgrsc](http://pkgsrc.se/sysutils/nnn) (`pkg_add nnn`)
 - [Raspbian Testing](https://archive.raspbian.org/raspbian/pool/main/n/nnn/) (`apt-get install nnn`)
 - [Slackware](http://slackbuilds.org/repository/14.2/system/nnn/) (`slackpkg install nnn`)
+- [SliTaz Cooking](http://cook.slitaz.org/index.cgi?pkg=nnn) (`cooker pkg nnn`)
 - [Solus](https://packages.getsol.us/shannon/n/nnn/) (`eopkg install nnn`)
 - [Source Mage](http://codex.sourcemage.org/test/shell-term-fm/nnn/) (`cast nnn`)
 - [Termux](https://github.com/termux/termux-packages/tree/master/packages/nnn) (`pkg in nnn`)
