@@ -479,7 +479,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 static int dentfind(const char *fname, int n);
 static void move_cursor(int target, int ignore_scrolloff);
-static bool getutil(const char *util);
+static bool getutil(char *util);
 
 /* Functions */
 
@@ -2542,14 +2542,9 @@ static char *get_output(char *buf, const size_t bytes, const char *file,
 	return NULL;
 }
 
-static bool getutil(const char *util)
+static inline bool getutil(char *util)
 {
-	char buf[8];
-
-	if (!get_output(buf, 8, "which", util, NULL, FALSE))
-		return FALSE;
-
-	return TRUE;
+	return spawn("which", util, NULL, NULL, F_NORMAL | F_NOTRACE) == 0;
 }
 
 /*
