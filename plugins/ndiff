@@ -23,6 +23,10 @@ if [ -s $selection ]; then
             vimdiff "$dir1" "$dir2"
             rm "$dir1" "$dir2"
         else
+            # If xargs supports the -o option, use it to get rid of:
+            #     Vim: Warning: Input is not from a terminal
+            # cat $selection | xargs -0 -o vimdiff
+
             cat $selection | xargs -0 vimdiff
         fi
     else
