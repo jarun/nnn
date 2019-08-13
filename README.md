@@ -113,6 +113,7 @@ Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Ab
   - and more...
 - Convenience
   - Needs minimal configuration
+  - Plugin keybinds
   - Select files across dirs; all/range selection
   - Copy, move, delete, archive, link selection
   - Batch rename selection or dir entries
@@ -216,6 +217,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 | Example `export` | Description |
 | --- | --- |
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | specify bookmarks (max 10) |
+| `NNN_PLUG='fzy-open;mocplay;nmount;thumb'` | plugins to run with <kbd>xN</kbd> |
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
@@ -286,8 +288,8 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^J  du      E  Extn   S  Apparent du
            ^W  Random  s  Size   t  Time modified
  MISC
-         ! ^]  Spawn SHELL       C  Execute entry
-         R ^V  Pick plugin       L  Lock terminal
+         ! ^]  Shell   L  Lock   C  Execute entry
+         R ^V  Pick plugin      xN  Run plugin N
             c  SSHFS mount       u  Unmount
            ^P  Prompt  ^N  Note  =  Launcher
 ```

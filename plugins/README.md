@@ -50,6 +50,12 @@ Each script has a _Description_ section which provides more details on what the 
 
 Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
+To run (up to 8) plugins directly with <kbd>xN</kbd>:
+
+    export NNN_PLUG='fzy-open;mocplay;ndiff;nmount;viuimg;pdfview'
+
+With this, plugin `fzy-open` can be run with the keybind <kbd>x1</kbd>, `mocplay` can be run with <kbd>x2</kbd> and so on...
+
 #### Contributing plugins
 
 Plugins are scripts and all scripting languages should work. However, POSIX-compliant shell scripts runnable in `sh` are preferred. If that's too rudimentary for your use case, use Python, Perl or Ruby. Please keep non-portable commands (like `notify-send`) commented so users from any other OS/DE aren't surprised.

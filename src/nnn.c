@@ -120,6 +120,7 @@
 #define MSGWAIT '$'
 #define REGEX_MAX 48
 #define BM_MAX 10
+#define PLUGIN_MAX 8
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per filename = 64*32B = 2KB */
 #define DESCRIPTOR_LEN 32
@@ -200,6 +201,9 @@ typedef struct {
 	char *loc;
 } bm;
 
+/* Plugins */
+static char *plug[PLUGIN_MAX] = {NULL};
+
 /*
  * Settings
  * NOTE: update default values if changing order
@@ -279,6 +283,7 @@ static int xlines, xcols;
 static uint idle;
 static uint idletimeout, copybufpos, copybuflen;
 static char *bmstr;
+static char *pluginstr;
 static char *opener;
 static char *copier;
 static char *editor;
@@ -2185,6 +2190,32 @@ static char *get_bm_loc(char *buf, int key)
 	return NULL;
 }
 
+static void parseplugins(void)
+{
+	int i = 0;
+	char *nextplug;
+	char *plugins = getenv("NNN_PLUG");
+
+	if (!plugins || !*plugins)
+		return;
+
+	pluginstr = strdup(plugins);
+	plugins = pluginstr;
+	nextplug = plugins;
+
+	while (*plugins && i < PLUGIN_MAX) {
+		if (plugins == nextplug) {
+			plug[i] = nextplug;
+			++i;
+		} else if (*plugins == ';') {
+			*plugins = '\0';
+			nextplug = plugins + 1;
+		}
+
+		++plugins;
+	}
+}
+
 static inline void resetdircolor(int flags)
 {
 	if (cfg.dircolor && !(flags & DIR_OR_LINK_TO_DIR)) {
@@ -2804,7 +2835,7 @@ static void lock_terminal(void)
  */
 static bool show_help(const char *path)
 {
-	int i = 0, fd;
+	int i, fd;
 	const char *start, *end;
 	const char helpstr[] = {
 		"0\n"
@@ -2835,8 +2866,8 @@ static bool show_help(const char *path)
 		 "b^J  du      E  Extn   S  Apparent du\n"
 		 "b^W  Random  s  Size   t  Time modified\n"
 		"1MISC\n"
-	       "9! ^]  Spawn SHELL       C  Execute entry\n"
-	       "9R ^V  Pick plugin       L  Lock terminal\n"
+	       "9! ^]  Shell   L  Lock   C  Execute entry\n"
+	       "9R ^V  Pick plugin      xN  Run plugin N\n"
 	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt  ^N  Note  =  Launcher\n"};
 
@@ -2860,11 +2891,15 @@ static bool show_help(const char *path)
 
 	if (bookmark[0].loc) {
 		dprintf(fd, "BOOKMARKS\n");
-		for (; i < BM_MAX; ++i)
-			if (bookmark[i].key)
-				dprintf(fd, " %c: %s\n", (char)bookmark[i].key, bookmark[i].loc);
-			else
-				break;
+		for (i = 0; i < BM_MAX && bookmark[i].key; ++i)
+			dprintf(fd, " %c: %s\n", (char)bookmark[i].key, bookmark[i].loc);
+		dprintf(fd, "\n");
+	}
+
+	if (plug[0]) {
+		dprintf(fd, "PLUGIN KEYS\n");
+		for (i = 0; i < PLUGIN_MAX && plug[i]; ++i)
+			dprintf(fd, " %d: %s\n", i + 1, plug[i]);
 		dprintf(fd, "\n");
 	}
 
@@ -4359,6 +4394,7 @@ nochange:
 		}
 		case SEL_EXEC: // fallthrough
 		case SEL_SHELL: // fallthrough
+		case SEL_PLUGKEY: // fallthrough
 		case SEL_PLUGIN: // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_RUNCMD:
@@ -4370,6 +4406,7 @@ nochange:
 			case SEL_SHELL:
 				spawn(shell, NULL, NULL, path, F_CLI);
 				break;
+			case SEL_PLUGKEY: // fallthrough
 			case SEL_PLUGIN:
 				if (!plugindir) {
 					printwait("plugins dir missing", &presel);
@@ -4384,6 +4421,20 @@ nochange:
 				/* Must be a directory */
 				if (!S_ISDIR(sb.st_mode))
 					break;
+
+				if (sel == SEL_PLUGKEY)
+				{
+					r = get_input("") - '0';
+					if ((r < 1 || r > PLUGIN_MAX) || !plug[r - 1])
+						goto nochange;
+
+					mkpath(plugindir, plug[r - 1], newpath);
+					if (ndents)
+						spawn(newpath, dents[cur].name, NULL, path, F_NORMAL);
+					else
+						spawn(newpath, NULL, NULL, path, F_NORMAL);
+					break;
+				}
 
 				cfg.runplugin ^= 1;
 				if (!cfg.runplugin && rundir[0]) {
@@ -4677,6 +4728,7 @@ static void cleanup(void)
 	free(cfgdir);
 	free(initpath);
 	free(bmstr);
+	free(pluginstr);
 
 #ifdef DBGMODE
 	disabledbg();
@@ -4797,6 +4849,8 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "%s\n", env_cfg[NNN_BMS]);
 		return _FAILURE;
 	}
+
+	parseplugins();
 
 	if (arg) { /* Open a bookmark directly */
 		if (arg[1] || (initpath = get_bm_loc(NULL, *arg)) == NULL) {
