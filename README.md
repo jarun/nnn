@@ -228,7 +228,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
 | `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
-| `NNN_OPS_PROG=1` | show copy, move progress on Linux |
+| `NNN_CP_MV_PROG=1` | show copy, move progress on Linux |
 
 #### Cmdline options
 
