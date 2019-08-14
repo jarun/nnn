@@ -466,4 +466,4 @@ Trivia: The name `nnn` is a recursive acronym for the initial words from _Noice 
 2. Copyright © 2014-2016 Dimitris Papastamos
 3. Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)
 
-Contributions are welcome. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/306).
+Contributions are welcome. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/324).
