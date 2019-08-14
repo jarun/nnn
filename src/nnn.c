@@ -1302,7 +1302,12 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 {
 	char *buf = (char *)malloc(CMD_LEN_MAX * sizeof(char));
 	snprintf(buf, CMD_LEN_MAX,
-		"awk 'BEGIN{RS=\"\\0\"} {gsub(\"%s/\", \"\", $0); printf \"%%s\\0\", $0}' %s | xargs -0 %s %s", curpath, g_cppath, cmd, archive);
+#ifdef __linux__
+		"sed -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, g_cppath, cmd, archive);
+#else
+		"cat '%s' | tr '\\0' '\n' | sed -e 's|^%s/||' | tr '\n' '\\0' | xargs -0 %s %s",
+		g_cppath, curpath, cmd, archive);
+#endif
 	spawn("sh", "-c", buf, curpath, F_NORMAL);
 	free(buf);
 }
