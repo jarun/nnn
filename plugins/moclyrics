@@ -1,0 +1,39 @@
+#!/usr/bin/env sh
+
+# Description: Fetches the lyrics of the currently playing track in MOC
+#              Requires ddgr (https://github.com/jarun/ddgr)
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+# Check if MOC server is running
+cmd=$(pgrep -x mocp 2>/dev/null)
+ret=$cmd
+if [ -z "$ret" ]; then
+    exit
+fi
+
+# Grab the output
+out="$(mocp -i)"
+
+# Check if anything is playing
+state=$(echo "$out" | grep "State:" | cut -d' ' -f2)
+if ! [ $state = 'PLAY' ]; then
+    exit
+fi
+
+# Try by Artist and Song Title first
+ARTIST="$(echo "$out" | grep 'Artist:' | cut -d':' -f2 | sed 's/^[[:blank:]]*//;s/[[:blank:]]*$//')"
+TITLE="$(echo "$out" | grep 'SongTitle:' | cut -d':' -f2 | sed 's/^[[:blank:]]*//;s/[[:blank:]]*$//')"
+
+if ! [ -z "$ARTIST" ] && ! [ -z "$TITLE" ]; then
+    ddgr -w azlyrics.com --ducky "$ARTIST" "$TITLE"
+else
+    # Try by file name
+    FILENAME="$(basename "$(echo "$out" | grep 'File:' | cut -d':' -f2)")"
+    FILENAME="$(echo "${FILENAME%%.*}" | tr -d -)"
+
+    if ! [ -z "$FILENAME" ]; then
+        ddgr -w azlyrics.com --ducky "$FILENAME"
+    fi
+fi
