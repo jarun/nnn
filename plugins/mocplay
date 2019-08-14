@@ -59,15 +59,25 @@ fi
 if [ -z "$ret" ]; then
     # mocp not running
     mocp -S
-
-    # clear selection and play
-    mocp -c
-    mocp_add "$1"
-    mocp -p
 else
-    # mocp running, just append
-    mocp_add "$1"
+    # mocp running, check if it's playing
+    state=$(mocp -i | grep "State:" | cut -d' ' -f2)
+
+    if [ $state = 'PLAY' ]; then
+        # add to playlist and exit
+        mocp_add "$1"
+
+        # uncomment the line below to show mocp interface after appending
+        # mocp
+
+        exit
+    fi
 fi
+
+# clear selection and play
+mocp -c
+mocp_add "$1"
+mocp -p
 
 # uncomment the line below to show mocp interface after appending
 # mocp
