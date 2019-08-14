@@ -120,7 +120,7 @@
 #define MSGWAIT '$'
 #define REGEX_MAX 48
 #define BM_MAX 10
-#define PLUGIN_MAX 8
+#define PLUGIN_MAX 10
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per filename = 64*32B = 2KB */
 #define DESCRIPTOR_LEN 32
@@ -195,14 +195,11 @@ typedef struct entry {
 	uchar flags; /* Flags specific to the file */
 } __attribute__ ((aligned(_ALIGNMENT))) *pEntry;
 
-/* Bookmark */
+/* Key-value pairs from env */
 typedef struct {
 	int key;
-	char *loc;
-} bm;
-
-/* Plugins */
-static char *plug[PLUGIN_MAX] = {NULL};
+	char *val;
+} kv;
 
 /*
  * Settings
@@ -299,7 +296,8 @@ static struct entry *dents;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
-static bm bookmark[BM_MAX];
+static kv bookmark[BM_MAX];
+static kv plug[PLUGIN_MAX];
 static size_t g_tmpfplen;
 static uchar g_crc;
 static uchar BLK_SHIFT = 9;
@@ -2113,107 +2111,84 @@ static int xlink(char *suffix, char *path, char *buf, int *presel, int type)
 	return count;
 }
 
-static bool parsebmstr(void)
+static bool parsekvpair(kv *kvarr, char **envcpy, const char *cfgstr, uchar maxitems)
 {
 	int i = 0;
 	char *nextkey;
-	char *bms = getenv(env_cfg[NNN_BMS]);
+	char *ptr = getenv(cfgstr);
 
-	if (!bms || !*bms)
+	if (!ptr || !*ptr)
 		return TRUE;
 
-	bmstr = strdup(bms);
-	bms = bmstr;
-	nextkey = bms;
+	*envcpy = strdup(ptr);
+	ptr = *envcpy;
+	nextkey = ptr;
 
-	while (*bms && i < BM_MAX) {
-		if (bms == nextkey) {
-			bookmark[i].key = *bms;
-			if (*++bms != ':')
+	while (*ptr && i < maxitems) {
+		if (ptr == nextkey) {
+			kvarr[i].key = *ptr;
+			if (*++ptr != ':')
 				return FALSE;
-			if (*++bms == '\0')
+			if (*++ptr == '\0')
 				return FALSE;
-			bookmark[i].loc = bms;
+			kvarr[i].val = ptr;
 			++i;
 		}
 
-		if (*bms == ';') {
+		if (*ptr == ';') {
 			/* Remove trailing space */
-			if (i > 0 && *(bms - 1) == '/')
-				*(bms - 1) = '\0';
+			if (i > 0 && *(ptr - 1) == '/')
+				*(ptr - 1) = '\0';
 
-			*bms = '\0';
-			nextkey = bms + 1;
+			*ptr = '\0';
+			nextkey = ptr + 1;
 		}
 
-		++bms;
+		++ptr;
 	}
 
-	if (i < BM_MAX) {
-		if (*bookmark[i - 1].loc == '\0')
+	if (i < maxitems) {
+		if (*kvarr[i - 1].val == '\0')
 			return FALSE;
-		bookmark[i].key = '\0';
+		kvarr[i].key = '\0';
 	}
 
 	return TRUE;
 }
 
 /*
- * Get the real path to a bookmark
+ * Get the value corresponding to a key
  *
  * NULL is returned in case of no match, path resolution failure etc.
  * buf would be modified, so check return value before access
  */
-static char *get_bm_loc(char *buf, int key)
+static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool path)
 {
 	int r = 0;
 
-	for (; bookmark[r].key && r < BM_MAX; ++r) {
-		if (bookmark[r].key == key) {
-			if (bookmark[r].loc[0] == '~') {
+	for (; kvarr[r].key && r < max; ++r) {
+		if (kvarr[r].key == key) {
+			if (!path)
+				return kvarr[r].val;
+
+			if (kvarr[r].val[0] == '~') {
 				ssize_t len = strlen(home);
-				ssize_t loclen = strlen(bookmark[r].loc);
+				ssize_t loclen = strlen(kvarr[r].val);
 
 				if (!buf)
 					buf = (char *)malloc(len + loclen);
 
 				xstrlcpy(buf, home, len + 1);
-				xstrlcpy(buf + len, bookmark[r].loc + 1, loclen);
+				xstrlcpy(buf + len, kvarr[r].val + 1, loclen);
 				return buf;
 			}
 
-			return realpath(bookmark[r].loc, buf);
+			return realpath(kvarr[r].val, buf);
 		}
 	}
 
 	DPRINTF_S("Invalid key");
 	return NULL;
-}
-
-static void parseplugins(void)
-{
-	int i = 0;
-	char *nextplug;
-	char *plugins = getenv("NNN_PLUG");
-
-	if (!plugins || !*plugins)
-		return;
-
-	pluginstr = strdup(plugins);
-	plugins = pluginstr;
-	nextplug = plugins;
-
-	while (*plugins && i < PLUGIN_MAX) {
-		if (plugins == nextplug) {
-			plug[i] = nextplug;
-			++i;
-		} else if (*plugins == ';') {
-			*plugins = '\0';
-			nextplug = plugins + 1;
-		}
-
-		++plugins;
-	}
 }
 
 static inline void resetdircolor(int flags)
@@ -2825,6 +2800,14 @@ static void lock_terminal(void)
 	spawn(tmp, NULL, NULL, NULL, F_NORMAL);
 }
 
+static void printkv(kv *kvarr, int fd, uchar max)
+{
+	uchar i = 0;
+
+	for (; i < max && kvarr[i].key; ++i)
+		dprintf(fd, " %c: %s\n", (char)kvarr[i].key, kvarr[i].val);
+}
+
 /*
  * The help string tokens (each line) start with a HEX value
  * which indicates the number of spaces to print before the
@@ -2867,7 +2850,7 @@ static bool show_help(const char *path)
 		 "b^W  Random  s  Size   t  Time modified\n"
 		"1MISC\n"
 	       "9! ^]  Shell   L  Lock   C  Execute entry\n"
-	       "9R ^V  Pick plugin      xN  Run plugin N\n"
+	       "9R ^V  Pick plugin      xK  Run plugin key K\n"
 	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt  ^N  Note  =  Launcher\n"};
 
@@ -2889,24 +2872,22 @@ static bool show_help(const char *path)
 	dprintf(fd, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
 	dprintf(fd, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
 
-	if (bookmark[0].loc) {
+	if (bookmark[0].val) {
 		dprintf(fd, "BOOKMARKS\n");
-		for (i = 0; i < BM_MAX && bookmark[i].key; ++i)
-			dprintf(fd, " %c: %s\n", (char)bookmark[i].key, bookmark[i].loc);
+		printkv(bookmark, fd, BM_MAX);
 		dprintf(fd, "\n");
 	}
 
-	if (plug[0]) {
+	if (plug[0].val) {
 		dprintf(fd, "PLUGIN KEYS\n");
-		for (i = 0; i < PLUGIN_MAX && plug[i]; ++i)
-			dprintf(fd, " %d: %s\n", i + 1, plug[i]);
+		printkv(plug, fd, PLUGIN_MAX);
 		dprintf(fd, "\n");
 	}
 
 	for (i = NNN_OPENER; i <= NNN_TRASH; ++i) {
 		start = getenv(env_cfg[i]);
 		if (start)
-				dprintf(fd, "%s: %s\n", env_cfg[i], start);
+			dprintf(fd, "%s: %s\n", env_cfg[i], start);
 	}
 
 	if (g_cppath)
@@ -3801,7 +3782,7 @@ nochange:
 				goto begin;
 			}
 
-			if (!get_bm_loc(newpath, fd)) {
+			if (!get_kv_val(bookmark, newpath, fd, BM_MAX, TRUE)) {
 				printwait(messages[STR_INVBM_KEY], &presel);
 				goto nochange;
 			}
@@ -4424,11 +4405,12 @@ nochange:
 
 				if (sel == SEL_PLUGKEY)
 				{
-					r = get_input("") - '0';
-					if ((r < 1 || r > PLUGIN_MAX) || !plug[r - 1])
+					r = get_input("");
+					tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
+					if (!tmp)
 						goto nochange;
 
-					mkpath(plugindir, plug[r - 1], newpath);
+					mkpath(plugindir, tmp, newpath);
 					if (ndents)
 						spawn(newpath, dents[cur].name, NULL, path, F_NORMAL);
 					else
@@ -4845,15 +4827,19 @@ int main(int argc, char *argv[])
 	DPRINTF_S(opener);
 
 	/* Parse bookmarks string */
-	if (!parsebmstr()) {
+	if (!parsekvpair(bookmark, &bmstr, env_cfg[NNN_BMS], BM_MAX)) {
 		fprintf(stderr, "%s\n", env_cfg[NNN_BMS]);
 		return _FAILURE;
 	}
 
-	parseplugins();
+	/* Parse plugins string */
+	if (!parsekvpair(plug, &pluginstr, "NNN_PLUG", PLUGIN_MAX)) {
+		fprintf(stderr, "%s\n", "NNN_PLUG");
+		return _FAILURE;
+	}
 
 	if (arg) { /* Open a bookmark directly */
-		if (arg[1] || (initpath = get_bm_loc(NULL, *arg)) == NULL) {
+		if (arg[1] || (initpath = get_kv_val(bookmark, NULL, *arg, BM_MAX, TRUE)) == NULL) {
 			fprintf(stderr, "%s\n", messages[STR_INVBM_KEY]);
 			return _FAILURE;
 		}

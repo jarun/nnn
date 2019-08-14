@@ -146,7 +146,15 @@ when dealing with the !, e and p commands respectively. A single combination to 
 .Bd -literal
     export NNN_BMS='d:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
 
-    NOTE: Bookmark keys should be single-character to use them in combination with the Leader key.
+    NOTE: To go to a bookmark, press the leader key followed by the bookmark key.
+.Ed
+.Pp
+\fBNNN_PLUG:\fR directly executable plugins as \fIkey_char:location\fR pairs (max 10) separated by
+\fI;\fR:
+.Bd -literal
+    export NNN_PLUG='o:fzy-open;p:mocplay;d:ndiff;m:nmount;t:thumb'
+
+    NOTE: To run a plugin directly, press 'x' followed by the plugin key.
 .Ed
 .Pp
 \fBNNN_USE_EDITOR:\fR use VISUAL (else EDITOR, preferably CLI, fallback vi) to handle text
@@ -201,6 +209,8 @@ files.
 \fBNNN_CP_MV_PROG:\fR show progress of copy, move operations (Linux-only, needs advcpmv).
 .Bd -literal
     export NNN_CP_MV_PROG=1
+
+    NOTE: BSD and macOS users can press '^T' to check the progress.
 .Ed
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspace key to DEC.

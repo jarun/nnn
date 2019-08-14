@@ -48,13 +48,15 @@ Each script has a _Description_ section which provides more details on what the 
 
 #### Usage
 
-Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
+There are 2 ways to run plugins:
 
-To run (up to 8) plugins directly with <kbd>xN</kbd>:
+1. Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
-    export NNN_PLUG='fzy-open;mocplay;ndiff;nmount;viuimg;pdfview'
+2. To run (up to 10) plugins directly with <kbd>x-key</kbd>:
 
-With this, plugin `fzy-open` can be run with the keybind <kbd>x1</kbd>, `mocplay` can be run with <kbd>x2</kbd> and so on...
+       export NNN_PLUG='o:fzy-open;p:mocplay;d:ndiff;m:nmount;t:thumb'
+
+   With this, plugin `fzy-open` can be run with the keybind <kbd>xo</kbd>, `mocplay` can be run with <kbd>xp</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
 
 #### Contributing plugins
 

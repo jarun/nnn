@@ -62,7 +62,9 @@
 
 `nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/performance)**).
 
-`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. Many **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. Custom plugins are easy to add. There's an independent [(neo)vim picker plugin](https://github.com/mcchrish/nnn.vim) project.
+`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker.
+
+Many **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. Plugins can be run directly with custom keybinds. There's an independent [(neo)vim picker plugin](https://github.com/mcchrish/nnn.vim) project. Custom plugins are easy to add.
 
 It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android. `nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes.
 
@@ -216,8 +218,8 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 
 | Example `export` | Description |
 | --- | --- |
-| `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | specify bookmarks (max 10) |
-| `NNN_PLUG='fzy-open;mocplay;nmount;thumb'` | plugins to run with <kbd>xN</kbd> |
+| `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | key-bookmark pairs [max 10] |
+| `NNN_PLUG='o:fzy-open;p:mocplay;m:nmount;t:thumb'` | key-plugin pairs (<kbd>x-key</kbd> to run) [max 10] |
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
@@ -289,7 +291,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^W  Random  s  Size   t  Time modified
  MISC
          ! ^]  Shell   L  Lock   C  Execute entry
-         R ^V  Pick plugin      xN  Run plugin N
+         R ^V  Pick plugin      xK  Run plugin key K
             c  SSHFS mount       u  Unmount
            ^P  Prompt  ^N  Note  =  Launcher
 ```
