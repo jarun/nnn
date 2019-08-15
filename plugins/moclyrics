@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Description: Fetches the lyrics of the currently playing track in MOC
+# Description: Fetches the lyrics of the track currently playing in MOC
 #              Requires ddgr (https://github.com/jarun/ddgr)
 #
 # Shell: POSIX compliant

@@ -14,7 +14,7 @@ The currently available plugins are listed below.
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
 | ipinfo | sh | curl, whois | Fetch external IP address and whois information |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
-| moclyrics | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) | Show lyrics of current track in moc |
+| moclyrics | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) | Show lyrics of the track playing in moc |
 | mocplay | sh | [moc](http://moc.daper.net/) | Appends (and plays, see script) selection/dir/file in moc|
 | ndiff | sh | vimdiff | Diff for selection (limited to 2 for directories) |
 | nmount | sh | pmount, udisks2 | Toggle mount status of a device as normal user |
@@ -52,13 +52,13 @@ Each script has a _Description_ section which provides more details on what the 
 
 There are 2 ways to run plugins:
 
-1. Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
-
-2. To run (up to 10) plugins directly with <kbd>x-key</kbd>:
+1. Directly with <kbd>x-key</kbd>:
 
        export NNN_PLUG='o:fzy-open;p:mocplay;d:ndiff;m:nmount;t:thumb'
 
-   With this, plugin `fzy-open` can be run with the keybind <kbd>xo</kbd>, `mocplay` can be run with <kbd>xp</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
+   With this, plugin `fzy-open` can be run with the keybind <kbd>xo</kbd>, `mocplay` can be run with <kbd>xp</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen. Up to 10 plugins can have such keybinds.
+
+2. Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
 #### Contributing plugins
 
