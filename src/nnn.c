@@ -1,5 +1,4 @@
 /*
-
  * BSD 2-Clause License
  *
  * Copyright (C) 2014-2016, Lazaros Koromilas <lostd@2f30.org>

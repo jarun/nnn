@@ -50,17 +50,13 @@
   - [Navigate-as-you-type](#navigate-as-you-type)
   - [File indicators](#file-indicators)
   - [Hot-plugged drives](#hot-plugged-drives)
-- [Troubleshooting](#troubleshooting)
-  - [Tmux configuration](#tmux-configuration)
-  - [BSD terminal issue](#bsd-terminal-issue)
-  - [100% CPU usage](#100-cpu-usage)
 - [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
 
 ## Introduction
 
-`nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/performance)**).
+`nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/info:-performance)**).
 
 `nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker.
 
@@ -104,8 +100,9 @@ Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Ab
   - Play selection in MOC
   - View PDF as text
   - View images/thumbnails in terminal
+  - View video thumbnails in terminal
   - Upload image to Imgur
-  - Paste text to Ubuntu pastebin
+  - Paste to Ubuntu pastebin
   - Upload file to transfer.sh
   - Split and join files
   - Create MP3 ringtones
@@ -204,7 +201,7 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 `PREFIX` is supported, in case you want to install to a different location.
 
 - Compilation notes for [Raspberry Pi](https://github.com/jarun/nnn/issues/182)
-- Instructions for [Cygwin](https://github.com/jarun/nnn/wiki/Cygwin-instructions)
+- Instructions for [Cygwin](https://github.com/jarun/nnn/wiki/dev:-compile-on-Cygwin)
 
 #### Shell completion
 
@@ -425,27 +422,11 @@ External storage devices can be (un)mounted using the plugin [nmount](https://gi
 
 For auto-mounting external storage drives use udev rules or udisks wrappers.
 
-## Troubleshooting
-
-##### Tmux configuration
-
-`nnn` might not handle keypresses correctly when used with tmux (see issue #104 for more details). Set `TERM=xterm-256color` to address it.
-
-##### BSD terminal issue
-
-TLDR: Use the keybind <kbd>K</kbd> to toggle selection if you are having issues with <kbd>^Y</kbd>.
-
-On OpenBSD & FreeBSD (and probably on macOS as well) `stty` maps <kbd>^Y</kbd> to `DSUSP` by default. This means that typing <kbd>^Y</kbd> will suspend `nnn` as if you typed <kbd>^Z</kbd> (you can bring `nnn` back to the foreground by issuing `fg`) instead of entering multi-selection mode. You can check this with `stty -a`. If it includes the text `dsusp = ^Y`, issuing `stty dsusp undef` will disable this `DSUSP` and let `nnn` receive the <kbd>^Y</kbd> instead.
-
-##### 100% CPU usage
-
-There is a known issue where if you close the terminal directly with `nnn` **_waiting for a spawned process_**, a deadlock occurs and `nnn` uses 100% CPU. Please see issue [#225](https://github.com/jarun/nnn/issues/225) for more details. Make sure you quit the spawned process before closing the terminal. It's not a problem if there is no spawned process (`nnn` isn't blocked) as `nnn` checks if the parent process has exited.
-
 ## Why fork?
 
-`nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/nnn-vs.-noice) today. I chose to fork because:
+`nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/info:-nnn-vs.-noice) today. I chose to fork because:
 - one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. `noice` was rudimentary. In my opinion evolution is the taste of time.
-- I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind. Check out the [design considerations](https://github.com/jarun/nnn/wiki/design-considerations) for more details.
+- I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind. Check out the [design considerations](https://github.com/jarun/nnn/wiki/info:-design-considerations) for more details.
 
 Trivia: The name `nnn` is a recursive acronym for the initial words from _Noice is Not Noice, a noicer fork..._, suggested by a longtime friend.
 
