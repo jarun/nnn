@@ -14,7 +14,7 @@ The currently available plugins are listed below.
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
 | ipinfo | sh | curl, whois | Fetch external IP address and whois information |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
-| moclyrics | sh | [ddgr](https://github.com/jarun/ddgr), moc | Show lyrics of current track in moc |
+| moclyrics | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) | Show lyrics of current track in moc |
 | mocplay | sh | [moc](http://moc.daper.net/) | Appends (and plays, see script) selection/dir/file in moc|
 | ndiff | sh | vimdiff | Diff for selection (limited to 2 for directories) |
 | nmount | sh | pmount, udisks2 | Toggle mount status of a device as normal user |
@@ -30,6 +30,7 @@ The currently available plugins are listed below.
 | thumb | sh | [lsix](https://github.com/hackerb9/lsix) | View thumbnail of an image or dir of images |
 | transfer | sh | curl | Upload file to transfer.sh |
 | upgrade | sh | wget | Upgrade to latest nnn version manually on Debian 9 Stretch |
+| vidthumb | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) | Show video thumbnails in terminal |
 | viuimg | sh | [viu](https://github.com/atanunq/viu), less | View an image or images in a directory |
 
 #### Installing plugins
