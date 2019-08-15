@@ -1216,7 +1216,7 @@ static bool batch_rename(const char *path)
 	int fd1, fd2, i;
 	uint count = 0, lines = 0;
 	bool dir = FALSE, ret = FALSE;
-	const char renamecmd[] = "awk 'FNR==NR{a[NR]=$0} a[FNR]!=$0{printf \"%%s\\0%%s\\0\",a[FNR],$0}' %s %s | xargs -0 -n2 mv 2>/dev/null";
+	const char renamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
 	char foriginal[TMP_LEN_MAX] = {0};
 	char buf[sizeof(renamecmd) + (PATH_MAX << 1)];
 
