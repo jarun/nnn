@@ -224,7 +224,6 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 | `NNN_OPENER=mimeopen` | custom file opener |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
 | `NNN_COPIER=copier` | clipboard copier script [default: none] |
-| `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
 | `NNN_OPS_PROG=1` | show copy, move progress on Linux |
 
@@ -232,7 +231,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 
 ```
 usage: nnn [-b key] [-d] [-e] [-H] [-i] [-n] [-o]
-           [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]
+           [-p file] [-s] [-S] [-t] [-v] [-w] [-h] [PATH]
 
 The missing terminal file manager for X.
 
@@ -250,6 +249,7 @@ optional args:
  -p file selection file (stdout if '-')
  -s      string filters [default: regex]
  -S      du mode
+ -t      disable dir auto-select
  -v      show version
  -w      wild load
  -h      show help
@@ -392,9 +392,7 @@ There is a program option to filter entries by substring match instead of regex.
 
 In this mode directories are opened in filter mode, allowing continuous navigation. Works best with the **arrow keys**.
 
-When there's a unique match and it's a directory, `nnn` auto selects the directory and enters it in this mode. To disable this behaviour,
-
-    export NNN_NO_AUTOSELECT=1
+When there's a unique match and it's a directory, `nnn` auto selects the directory and enters it in this mode. Use the relevant program option to disable this behaviour.
 
 This mode takes navigation to the next level when short, unique keypress sequences are possible. For example, to reach `nnn` development directory (located at `~/GitHub/nnn`) from my `$HOME` (which is the default directory the terminal starts in), I use the sequence <kbd>g</kbd><kbd>n</kbd>.
 

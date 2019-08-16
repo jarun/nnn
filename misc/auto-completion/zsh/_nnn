@@ -19,6 +19,7 @@ args=(
     '(-p)-p[copy selection to file]:file name'
     '(-s)-s[use substring match for filters]'
     '(-S)-S[start in disk usage analyzer mode]'
+    '(-t)-t[disable dir auto-select]'
     '(-v)-v[show program version and exit]'
     '(-w)-w[wild load]'
     '(-h)-h[show program help]'

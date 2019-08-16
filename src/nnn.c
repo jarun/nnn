@@ -404,10 +404,9 @@ static const char * const messages[] = {
 #define NNN_NOTE 5
 #define NNNLVL 6 /* strings end here */
 #define NNN_USE_EDITOR 7 /* flags begin here */
-#define NNN_NO_AUTOSELECT 8
-#define NNN_TRASH 9
+#define NNN_TRASH 8
 #ifdef __linux__
-#define NNN_OPS_PROG 10
+#define NNN_OPS_PROG 9
 #endif
 
 static const char * const env_cfg[] = {
@@ -419,7 +418,6 @@ static const char * const env_cfg[] = {
 	"NNN_NOTE",
 	"NNNLVL",
 	"NNN_USE_EDITOR",
-	"NNN_NO_AUTOSELECT",
 	"NNN_TRASH",
 #ifdef __linux__
 	"NNN_OPS_PROG",
@@ -4575,7 +4573,7 @@ static void usage(void)
 {
 	fprintf(stdout,
 		"%s: nnn [-b key] [-d] [-e] [-H] [-i] [-n] [-o]\n"
-		"           [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]\n\n"
+		"           [-p file] [-s] [-S] [-t] [-v] [-w] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
@@ -4590,6 +4588,7 @@ static void usage(void)
 		" -p file selection file (stdout if '-')\n"
 		" -s      string filters [default: regex]\n"
 		" -S      du mode\n"
+		" -t      disable dir auto-select\n"
 		" -v      show version\n"
 		" -w      wild load\n"
 		" -h      show help\n\n"
@@ -4722,7 +4721,7 @@ int main(int argc, char *argv[])
 	char *arg = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "HSib:denop:svwh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSib:denop:stvwh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4771,6 +4770,9 @@ int main(int argc, char *argv[])
 		case 's':
 			cfg.filter_re = 0;
 			filterfn = &visible_str;
+			break;
+		case 't':
+			cfg.autoselect = 0;
 			break;
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
@@ -4933,10 +4935,6 @@ int main(int argc, char *argv[])
 
 	/* Get the clipboard copier, if set */
 	copier = getenv(env_cfg[NNN_COPIER]);
-
-	/* Disable auto-select if opted */
-	if (xgetenv_set(env_cfg[NNN_NO_AUTOSELECT]))
-		cfg.autoselect = 0;
 
 #ifdef __linux__
 	if (!xgetenv_set(env_cfg[NNN_OPS_PROG])) {

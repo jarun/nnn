@@ -67,6 +67,9 @@ supports the following options:
 .Fl S
         start in disk usage analyzer mode
 .Pp
+.Fl t
+        disable directory auto-select in navigate-as-you-type mode
+.Pp
 .Fl v
         show version and exit
 .Pp
@@ -193,11 +196,6 @@ files.
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal locker (default: disabled).
 .Pp
 \fBNNN_COPIER:\fR system clipboard copier script. The project page has some sample copier scripts.
-.Pp
-\fBNNN_NO_AUTOSELECT:\fR disable directory auto-selection in \fInavigate-as-you-type\fR mode.
-.Bd -literal
-    export NNN_NO_AUTOSELECT=1
-.Ed
 .Pp
 \fBNNN_TRASH:\fR trash (instead of \fIdelete\fR) files to desktop Trash.
 .Bd -literal
