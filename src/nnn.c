@@ -408,7 +408,7 @@ static const char * const messages[] = {
 #define NNN_RESTRICT_NAV_OPEN 9
 #define NNN_TRASH 10
 #ifdef __linux__
-#define NNN_CP_MV_PROG 11
+#define NNN_OPS_PROG 11
 #endif
 
 static const char * const env_cfg[] = {
@@ -424,7 +424,7 @@ static const char * const env_cfg[] = {
 	"NNN_RESTRICT_NAV_OPEN",
 	"NNN_TRASH",
 #ifdef __linux__
-	"NNN_CP_MV_PROG",
+	"NNN_OPS_PROG",
 #endif
 };
 
@@ -4941,7 +4941,7 @@ int main(int argc, char *argv[])
 		cfg.nonavopen = 1;
 
 #ifdef __linux__
-	if (!xgetenv_set(env_cfg[NNN_CP_MV_PROG])) {
+	if (!xgetenv_set(env_cfg[NNN_OPS_PROG])) {
 		cp[5] = cp[4];
 		cp[2] = cp[4] = ' ';
 
