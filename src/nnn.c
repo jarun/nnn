@@ -2411,10 +2411,7 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 			printw("%c%-16.16s  %s        /  %s/\n", cp, timebuf, permbuf, pname);
 		break;
 	case S_IFLNK:
-		if (ent->flags & DIR_OR_LINK_TO_DIR)
-			printw("%c%-16.16s  %s       @/  %s@\n", cp, timebuf, permbuf, pname);
-		else
-			printw("%c%-16.16s  %s        @  %s@\n", cp, timebuf, permbuf, pname);
+		printw("%c%-16.16s  %s        @  %s@\n", cp, timebuf, permbuf, pname);
 		break;
 	case S_IFSOCK:
 		ind1 = ind2[0] = '='; // fallthrough
