@@ -55,6 +55,9 @@ supports the following options:
 .Fl n
         use case-insensitive version compare to sort files
 .Pp
+.Fl o
+        open files only on Enter key
+.Pp
 .Fl "p file"
         copy (or \fIpick\fR) selection to file, or stdout if file='-'
 .Pp
@@ -194,11 +197,6 @@ files.
 \fBNNN_NO_AUTOSELECT:\fR disable directory auto-selection in \fInavigate-as-you-type\fR mode.
 .Bd -literal
     export NNN_NO_AUTOSELECT=1
-.Ed
-.Pp
-\fBNNN_RESTRICT_NAV_OPEN:\fR disable file open on \fBRight\fR or \fBl\fR keys (\fBEnter\fR opens files).
-.Bd -literal
-    export NNN_RESTRICT_NAV_OPEN=1
 .Ed
 .Pp
 \fBNNN_TRASH:\fR trash (instead of \fIdelete\fR) files to desktop Trash.

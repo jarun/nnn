@@ -15,6 +15,7 @@ args=(
     '(-H)-H[show hidden files]'
     '(-i)-i[start in navigate-as-you-type mode]'
     '(-n)-n[use version compare to sort files]'
+    '(-o)-o[open files only on Enter]'
     '(-p)-p[copy selection to file]:file name'
     '(-s)-s[use substring match for filters]'
     '(-S)-S[start in disk usage analyzer mode]'

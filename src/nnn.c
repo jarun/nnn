@@ -405,10 +405,9 @@ static const char * const messages[] = {
 #define NNNLVL 6 /* strings end here */
 #define NNN_USE_EDITOR 7 /* flags begin here */
 #define NNN_NO_AUTOSELECT 8
-#define NNN_RESTRICT_NAV_OPEN 9
-#define NNN_TRASH 10
+#define NNN_TRASH 9
 #ifdef __linux__
-#define NNN_OPS_PROG 11
+#define NNN_OPS_PROG 10
 #endif
 
 static const char * const env_cfg[] = {
@@ -421,7 +420,6 @@ static const char * const env_cfg[] = {
 	"NNNLVL",
 	"NNN_USE_EDITOR",
 	"NNN_NO_AUTOSELECT",
-	"NNN_RESTRICT_NAV_OPEN",
 	"NNN_TRASH",
 #ifdef __linux__
 	"NNN_OPS_PROG",
@@ -4576,7 +4574,7 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"%s: nnn [-b key] [-d] [-e] [-H] [-i] [-n]\n"
+		"%s: nnn [-b key] [-d] [-e] [-H] [-i] [-n] [-o]\n"
 		"           [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
@@ -4588,6 +4586,7 @@ static void usage(void)
 		" -H      show hidden files\n"
 		" -i      nav-as-you-type mode\n"
 		" -n      version sort\n"
+		" -o      press Enter to open files\n"
 		" -p file selection file (stdout if '-')\n"
 		" -s      string filters [default: regex]\n"
 		" -S      du mode\n"
@@ -4723,7 +4722,7 @@ int main(int argc, char *argv[])
 	char *arg = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "HSib:denp:svwh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSib:denop:svwh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4748,6 +4747,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'n':
 			cmpfn = &xstrverscasecmp;
+			break;
+		case 'o':
+			cfg.nonavopen = 1;
 			break;
 		case 'p':
 			cfg.picker = 1;
@@ -4935,10 +4937,6 @@ int main(int argc, char *argv[])
 	/* Disable auto-select if opted */
 	if (xgetenv_set(env_cfg[NNN_NO_AUTOSELECT]))
 		cfg.autoselect = 0;
-
-	/* Disable opening files on right arrow and `l` */
-	if (xgetenv_set(env_cfg[NNN_RESTRICT_NAV_OPEN]))
-		cfg.nonavopen = 1;
 
 #ifdef __linux__
 	if (!xgetenv_set(env_cfg[NNN_OPS_PROG])) {

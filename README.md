@@ -225,14 +225,13 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 | `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
 | `NNN_COPIER=copier` | clipboard copier script [default: none] |
 | `NNN_NO_AUTOSELECT=1` | do not auto-select matching dir in _nav-as-you-type_ mode |
-| `NNN_RESTRICT_NAV_OPEN=1` | open files on <kbd> ↵</kbd>, not <kbd>→</kbd> or <kbd>l</kbd> |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
 | `NNN_OPS_PROG=1` | show copy, move progress on Linux |
 
 #### Cmdline options
 
 ```
-usage: nnn [-b key] [-d] [-e] [-H] [-i] [-n]
+usage: nnn [-b key] [-d] [-e] [-H] [-i] [-n] [-o]
            [-p file] [-s] [-S] [-v] [-w] [-h] [PATH]
 
 The missing terminal file manager for X.
@@ -247,6 +246,7 @@ optional args:
  -H      show hidden files
  -i      nav-as-you-type mode
  -n      version sort
+ -o      press Enter to open files
  -p file selection file (stdout if '-')
  -s      string filters [default: regex]
  -S      du mode
