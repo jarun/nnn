@@ -14,15 +14,15 @@ _nnn () {
         -b
         -d
         -e
-        -h
+        -H
         -i
-        -l
         -n
         -p
         -s
         -S
         -v
         -w
+        -h
     )
     if [[ $prev == -b ]]; then
         local bookmarks=$(echo $NNN_BMS | awk -F: -v RS=\; '{print $1}')
