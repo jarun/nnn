@@ -33,13 +33,13 @@ The currently available plugins are listed below.
 | vidthumb | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) | Show video thumbnails in terminal |
 | viuimg | sh | [viu](https://github.com/atanunq/viu), less | View an image or images in a directory |
 
-#### Installing plugins
+## Installing plugins
 
 Download the `getplugs` plugin and execute it anywhere to get all the plugins installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You can run it again later to update the plugins. It backs up earlier plugins.
 
 **NOTE:** `getplugs` also downloads the launcher `nlaunch` and tries to place it at `/usr/local/bin/` using `sudo`. If it fails you have to place `nlauch` manually somewhere in your `$PATH`.
 
-#### File access from plugins
+## File access from plugins
 
 Plugins can access:
 - all files in the directory (`nnn` switches to the dir where the plugin is to be run so the dir is `$PWD` for the plugin)
@@ -48,7 +48,7 @@ Plugins can access:
 
 Each script has a _Description_ section which provides more details on what the script does, if applicable.
 
-#### Usage
+## Usage
 
 There are 2 ways to run plugins:
 
@@ -60,8 +60,21 @@ There are 2 ways to run plugins:
 
 2. Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
-#### Contributing plugins
+## Create your own plugins
 
-Plugins are scripts and all scripting languages should work. However, POSIX-compliant shell scripts runnable in `sh` are preferred. If that's too rudimentary for your use case, use Python, Perl or Ruby. Please keep non-portable commands (like `notify-send`) commented so users from any other OS/DE aren't surprised.
+Plugins are scripts and all scripting languages should work. However, POSIX-compliant shell scripts runnable in `sh` are preferred. If that's too rudimentary for your use case, use Python, Perl or Ruby.
+
+You can create your own plugins by putting them in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
+
+For example, you could create a executable shell script `git-changes`:
+
+    #!/usr/bin/env sh
+    git log -p -- "$@"
+
+And then trigger it by hitting the pick plugin key and selecting `git-changes` which will conveniently show the git log of changes to the particular file along with the code for a quick and easy review.
+
+## Contributing plugins
+
+Please keep non-portable commands (like `notify-send`) commented so users from any other OS/DE aren't surprised.
 
 The plugins should be executable. Please add an entry in the table above.

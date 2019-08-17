@@ -15,7 +15,6 @@
 <a href="https://travis-ci.org/jarun/nnn"><img src="https://img.shields.io/travis/jarun/nnn/master.svg?label=travis" alt="Travis Status" /></a>
 <a href="https://circleci.com/gh/jarun/workflows/nnn"><img src="https://img.shields.io/circleci/project/github/jarun/nnn.svg?label=circleci" alt="CircleCI Status" /></a>
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow.svg?maxAge=2592000" alt="License" /></a>
-<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
 
 <p align="center">
@@ -24,7 +23,7 @@
 
 <p align="center"><i>Modes of nnn (light with filter, detail, du analyzer) with memory usage (click for a demo video)</i></a></p>
 
-## ToC
+## Index
 
 - [Introduction](#introduction)
 - [Features](#features)
@@ -49,24 +48,20 @@
   - [Filters](#filters)
   - [Navigate-as-you-type](#navigate-as-you-type)
   - [File indicators](#file-indicators)
-  - [Hot-plugged drives](#hot-plugged-drives)
-- [Why fork?](#why-fork)
 - [Mentions](#mentions)
 - [Developers](#developers)
 
 ## Introduction
 
-`nnn` is a full-featured file manager for low-end devices and the regular desktop. It's extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/info:-performance)**).
+`nnn` is a full-featured terminal file manager. It's extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/Performance)**).
 
 `nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker.
 
-Many **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** are available to extend its power. Plugins can be run directly with custom keybinds. There's an independent [(neo)vim picker plugin](https://github.com/mcchrish/nnn.vim) project. Custom plugins are easy to add.
+It runs smoothly on the Raspberry Pi, Termux on Android ([demo video](https://www.youtube.com/watch?v=AbaauM7gUJw)), Linux, macOS, BSD, Cygwin and Linux subsystem for Windows. `nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes.
 
-It runs on Linux, macOS, Raspberry Pi, BSD, Cygwin, Linux subsystem for Windows and Termux on Android. `nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes.
+**[Plugins](https://github.com/jarun/nnn/tree/master/plugins)** can be run with custom keybinds. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim). Custom plugins are easy to add.
 
-Visit the **[wiki](https://github.com/jarun/nnn/wiki)** for more information on configuration, operational notes and tips.
-
-Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=AbaauM7gUJw).
+Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for how tos, use cases, chronology and insights.
 
 ## Features
 
@@ -94,24 +89,8 @@ Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Ab
 - Information
   - Detailed file information
   - Media information (needs mediainfo/exiftool)
-- Plugins
-  - (Un)mount external drives
-  - File and directory diff
-  - Play selection in MOC
-  - View PDF as text
-  - View images/thumbnails in terminal
-  - View video thumbnails in terminal
-  - Upload image to Imgur
-  - Paste to Ubuntu pastebin
-  - Upload file to transfer.sh
-  - Split and join files
-  - Create MP3 ringtones
-  - Calculate and verify checksums
-  - Read a text file
-  - Hex viewer
-  - and more...
 - Convenience
-  - Needs minimal configuration
+  - Minimal configuration
   - Plugin keybinds
   - Select files across dirs; all/range selection
   - Copy, move, delete, archive, link selection
@@ -130,6 +109,7 @@ Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Ab
   - Take quick notes
   - Lock the terminal (needs a locker)
   - Shortcut reference a keypress away
+- Plugins
 - Unicode support
 - Follows Linux kernel coding style
 - Highly optimized, static analysis integrated code
@@ -158,7 +138,7 @@ Here's a video of [`nnn` on Termux (Android)](https://www.youtube.com/watch?v=Ab
 
 #### From a package manager
 
-There's a good chance `nnn` is already available in the default repos of your distro. Find a list of known packagers below.
+`nnn` may be available in the default repos of your distro already. Find a list of known packagers below.
 
 - [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=nnn) (`apk add nnn`)
 - [Arch Linux](https://www.archlinux.org/packages/community/x86_64/nnn/) (`pacman -S nnn`)
@@ -200,8 +180,8 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
 `PREFIX` is supported, in case you want to install to a different location.
 
-- Compilation notes for [Raspberry Pi](https://github.com/jarun/nnn/issues/182)
-- Instructions for [Cygwin](https://github.com/jarun/nnn/wiki/dev:-compile-on-Cygwin)
+- Compilation notes on [Raspberry Pi](https://github.com/jarun/nnn/wiki/Compile-for-Pi)
+- Instructions for [Cygwin](https://github.com/jarun/nnn/wiki/Compile-on-Cygwin)
 
 #### Shell completion
 
@@ -412,20 +392,6 @@ The following indicators are used in the detail view:
 | `b` | Block Device |
 | `c` | Character Device |
 | `?` | Unknown |
-
-#### Hot-plugged drives
-
-External storage devices can be (un)mounted using the plugin [nmount](https://github.com/jarun/nnn/blob/master/plugins/nmount).
-
-For auto-mounting external storage drives use udev rules or udisks wrappers.
-
-## Why fork?
-
-`nnn` was initially forked from [noice](http://git.2f30.org/noice/) but is significantly [different](https://github.com/jarun/nnn/wiki/info:-nnn-vs.-noice) today. I chose to fork because:
-- one can argue my approach deviates from the goal of the original project -  keep the utility `suckless`. `noice` was rudimentary. In my opinion evolution is the taste of time.
-- I would like to have a bit of control on what features are added in the name of desktop integration. A feature-bloat is the last thing in my mind. Check out the [design considerations](https://github.com/jarun/nnn/wiki/info:-design-considerations) for more details.
-
-Trivia: The name `nnn` is a recursive acronym for the initial words from _Noice is Not Noice, a noicer fork..._, suggested by a longtime friend.
 
 ## Mentions
 
