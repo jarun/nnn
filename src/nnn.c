@@ -4235,13 +4235,8 @@ nochange:
 				tmp = xreadline(NULL, "name/link suffix [@ for none]: ");
 				break;
 			default: /* SEL_RENAME */
-				dup = get_input("Press 'r'(ename) / 'd'(uplicate)");
-				if (dup == 'r' || dup == 'd') {
-					tmp = xreadline(dents[cur].name, "");
-					break;
-				}
-
-				tmp = NULL;
+				tmp = xreadline(dents[cur].name, "");
+				break;
 			}
 
 			if (!tmp || !*tmp)
@@ -4278,8 +4273,13 @@ nochange:
 				break;
 			case SEL_RENAME:
 				/* Skip renaming to same name */
-				if (strcmp(tmp, dents[cur].name) == 0)
-					goto nochange;
+				if (strcmp(tmp, dents[cur].name) == 0) {
+					tmp = xreadline(dents[cur].name, "copy name: ");
+					if (strcmp(tmp, dents[cur].name) == 0)
+						goto nochange;
+
+					dup = 'd';
+				}
 				break;
 			default:
 				break;
