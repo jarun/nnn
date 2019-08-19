@@ -74,6 +74,7 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for how tos, use cases, 
   - 4 contexts (_aka_ tabs/workspaces)
   - Bookmarks; pin and visit a directory
   - Familiar, easy shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>)
+  - Change directory at exit (*easy* shell integration)
 - Sorting
   - Ordered pure numeric names by default (visit _/proc_)
   - Case-insensitive version (_aka_ natural) sort
@@ -97,24 +98,16 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for how tos, use cases, 
   - Batch rename selection or dir entries
   - FreeDesktop compliant trash (needs trash-cli)
   - SSHFS mounts (needs sshfs)
-  - Mouse support
   - Create, rename, duplicate files and directories
-  - Show copy, move progress on Linux (needs avdcpmv)
   - Per-context directory color (default: blue)
-  - Spawn a shell in the current directory
-  - Launch applications, run a command
-  - Run current file as executable
-  - Change directory at exit (*easy* shell integration)
-  - Edit file in EDITOR or open in PAGER
-  - Take quick notes
-  - Lock the terminal (needs a locker)
+  - Spawn a shell, run apps, run commands, execute file
+  - Take quick notes, lock terminal (needs a locker)
   - Shortcut reference a keypress away
-- Plugins
 - Unicode support
 - Follows Linux kernel coding style
 - Highly optimized, static analysis integrated code
 - Minimal library dependencies
-- Available on many distros
+- Widely available
 
 ## Installation
 
@@ -205,7 +198,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 | `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
 | `NNN_COPIER=copier` | clipboard copier script [default: none] |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
-| `NNN_OPS_PROG=1` | show copy, move progress on Linux |
+| `NNN_OPS_PROG=1` | show cp, mv progress on Linux (needs advcpmv) |
 
 #### Cmdline options
 
