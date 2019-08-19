@@ -3448,7 +3448,7 @@ nochange:
 		}
 
 		/* If STDIN is no longer a tty (closed) we should exit */
-		if(!cfg.picker && !isatty(STDIN_FILENO))
+		if (!isatty(STDIN_FILENO) && !cfg.picker)
 			return;
 
 		sel = nextsel(presel);
