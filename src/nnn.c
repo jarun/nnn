@@ -3447,6 +3447,10 @@ nochange:
 			goto begin;
 		}
 
+		/* If STDIN is no longer a tty (closed) we should exit */
+		if(!cfg.picker && !isatty(STDIN_FILENO))
+			return;
+
 		sel = nextsel(presel);
 		if (presel)
 			presel = 0;
@@ -4790,7 +4794,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Confirm we are in a terminal */
-	if (!cfg.picker && !(isatty(0) && isatty(1)))
+	if (!cfg.picker && !(isatty(STDIN_FILENO) && isatty(STDOUT_FILENO)))
 		exit(1);
 
 	/* Get the context colors; copier used as tmp var */
