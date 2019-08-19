@@ -19,6 +19,7 @@ The currently available plugins are listed below.
 | ndiff | sh | vimdiff | Diff for selection (limited to 2 for directories) |
 | nmount | sh | pmount, udisks2 | Toggle mount status of a device as normal user |
 | nwal | sh | nitrogen | Set the selected image as wallpaper using nitrogen |
+| organize | sh | file | Auto-organize files in directories by file type |
 | pastebin | sh | [pastebinit](https://launchpad.net/pastebinit) | Paste contents of (text) file to paste.ubuntu.com |
 | pdfview | sh | pdftotext/<br>mupdf-tools | View PDF file in `$PAGER` |
 | picker | sh | nnn | Pick files and pipe the newline-separated list to another utility |

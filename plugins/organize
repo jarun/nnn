@@ -1,0 +1,53 @@
+#!/usr/bin/env sh
+
+# Description: Organize files in directories by category
+#
+# Shell: POSIX compliant
+# Author: th3lusive
+
+organize() {
+    case "$(file -biL "$1")" in
+        *video*)
+            [ ! -d "Videos" ] && mkdir "Videos"
+            mv "$1" "Videos/$1"
+            printf "Moved %s to Videos\n" "$1" ;;
+
+        *audio*) [ ! -d "Audio" ] && mkdir "Audio"
+            mv "$1" "Audio/$1"
+            printf "Moved %s to Audio\n" "$1" ;;
+
+        *image*)
+            [ ! -d "Images" ] && mkdir "Images"
+            mv "$1" "Images/$1"
+            printf "Moved %s to Images\n" "$1" ;;
+
+        *pdf*|*document*|*epub*|*djvu*|*cb*)
+            [ ! -d "Documents" ] && mkdir "Documents"
+            mv "$1" "Documents/$1"
+            printf "Moved %s to Documents\n" "$1" ;;
+
+        *text*)
+            [ ! -d "Plaintext" ] && mkdir "Plaintext"
+            mv "$1" "Plaintext/$1"
+            printf "Moved %s to Plaintext\n" "$1" ;;
+
+        *tar*|*xz*|*compress*|*7z*|*rar*|*zip*)
+            [ ! -d "Archives" ] && mkdir "Archives"
+            mv "$1" "Archives/$1"
+            printf "Moved %s to Archives\n" "$1" ;;
+
+        *binary*)
+            [ ! -d "Binaries" ] && mkdir "Binaries"
+            mv "$1" "Binaries/$1"
+            printf "Moved %s to Binaries\n" "$1" ;;
+    esac
+}
+
+main() {
+    for file in *
+    do
+       [ -f "$file" ] && organize "$file"
+    done
+}
+
+main "$@"
