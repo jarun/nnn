@@ -74,7 +74,6 @@ enum action {
 	SEL_BSIZE,  /* block size */
 	SEL_EXTN,   /* order by extension */
 	SEL_MTIME,
-	SEL_WILD,
 	SEL_REDRAW,
 	SEL_SEL,
 	SEL_SELMUL,
@@ -199,8 +198,6 @@ static struct key bindings[] = {
 	{ 'E',            SEL_EXTN },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME },
-	/* Wild load */
-	{ CONTROL('W'),   SEL_WILD },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
 	/* Copy currently selected file path */

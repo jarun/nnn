@@ -23,7 +23,6 @@ _nnn () {
         -S
         -t
         -v
-        -w
         -h
     )
     if [[ $prev == -b ]]; then

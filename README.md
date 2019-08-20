@@ -70,7 +70,7 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for how tos, use cases, 
   - Disk usage analyzer (block/apparent)
   - File picker, (neo)vim plugin
 - Navigation
-  - *Navigate-as-you-type* with dir auto-select, *wild load*
+  - *Navigate-as-you-type* with dir auto-select
   - 4 contexts (_aka_ tabs/workspaces)
   - Bookmarks; pin and visit a directory
   - Familiar, easy shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>)
@@ -209,7 +209,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 
 ```
 usage: nnn [-b key] [-d] [-e] [-H] [-i] [-n] [-o]
-           [-p file] [-s] [-S] [-t] [-v] [-w] [-h] [PATH]
+           [-p file] [-s] [-S] [-t] [-v] [-h] [PATH]
 
 The missing terminal file manager for X.
 
@@ -229,7 +229,6 @@ optional args:
  -S      du mode
  -t      disable dir auto-select
  -v      show version
- -w      wild load
  -h      show help
 ```
 
@@ -262,8 +261,8 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^F  Extract archive   F  List archive
             e  Edit in EDITOR    p  Open in PAGER
  ORDER TOGGLES
-           ^J  du      E  Extn   S  Apparent du
-           ^W  Random  s  Size   t  Time modified
+           ^J  du                S  Apparent du
+            s  Size    E  Extn   t  Time modified
  MISC
          ! ^]  Shell   L  Lock   C  Execute entry
          R ^V  Pick plugin      xK  Run plugin key K
@@ -373,8 +372,6 @@ In this mode directories are opened in filter mode, allowing continuous navigati
 When there's a unique match and it's a directory, `nnn` auto selects the directory and enters it in this mode. Use the relevant program option to disable this behaviour.
 
 This mode takes navigation to the next level when short, unique keypress sequences are possible. For example, to reach `nnn` development directory (located at `~/GitHub/nnn`) from my `$HOME` (which is the default directory the terminal starts in), I use the sequence <kbd>g</kbd><kbd>n</kbd>.
-
-The **_wild load_** option can be extremely handy for users who use this mode constantly. The entries are unsorted when the directory loads. Applying filters sorts the entries (with directories on top). Directory color is disabled in this mode.
 
 #### File indicators
 

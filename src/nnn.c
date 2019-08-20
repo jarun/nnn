@@ -215,7 +215,7 @@ typedef struct {
 	uint copymode   : 1;  /* Set when copying files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 7;
+	uint reserved   : 8;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
@@ -228,7 +228,6 @@ typedef struct {
 	uint runplugin  : 1;  /* Choose plugin mode */
 	uint runctx     : 2;  /* The context in which plugin is to be run */
 	uint filter_re  : 1;  /* Use regex filters */
-	uint wild       : 1;  /* Do not sort entries on dir load */
 	uint trash      : 1;  /* Move removed files to trash */
 } settings;
 
@@ -268,7 +267,6 @@ static settings cfg = {
 	0, /* runplugin */
 	0, /* runctx */
 	1, /* filter_re */
-	0, /* wild */
 	0, /* trash */
 };
 
@@ -2843,8 +2841,8 @@ static bool show_help(const char *path)
 		 "b^F  Extract archive   F  List archive\n"
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
 		"1ORDER TOGGLES\n"
-		 "b^J  du      E  Extn   S  Apparent du\n"
-		 "b^W  Random  s  Size   t  Time modified\n"
+		 "b^J  du                S  Apparent du\n"
+		  "cs  Size    E  Extn   t  Time modified\n"
 		"1MISC\n"
 	       "9! ^]  Shell   L  Lock   C  Execute entry\n"
 	       "9R ^V  Pick plugin      xK  Run plugin key K\n"
@@ -3167,8 +3165,7 @@ static void populate(char *path, char *lastname)
 	if (!ndents)
 		return;
 
-	if (!cfg.wild)
-		qsort(dents, ndents, sizeof(*dents), entrycmp);
+	qsort(dents, ndents, sizeof(*dents), entrycmp);
 
 #ifdef DBGMODE
 	clock_gettime(CLOCK_REALTIME, &ts2);
@@ -3285,10 +3282,8 @@ static void redraw(char *path)
 	} else
 		ncols -= 5;
 
-	if (!cfg.wild) {
-		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
-		cfg.dircolor = 1;
-	}
+	attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+	cfg.dircolor = 1;
 
 	/* Print listing */
 	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i) {
@@ -3841,8 +3836,7 @@ nochange:
 		case SEL_ASIZE: // fallthrough
 		case SEL_BSIZE: // fallthrough
 		case SEL_EXTN: // fallthrough
-		case SEL_MTIME: // fallthrough
-		case SEL_WILD:
+		case SEL_MTIME:
 			switch (sel) {
 			case SEL_MFLTR:
 				cfg.filtermode ^= 1;
@@ -3869,7 +3863,6 @@ nochange:
 				cfg.blkorder = 0;
 				cfg.extnorder = 0;
 				cfg.copymode = 0;
-				cfg.wild = 0;
 				break;
 			case SEL_ASIZE:
 				cfg.apparentsz ^= 1;
@@ -3896,7 +3889,6 @@ nochange:
 				cfg.sizeorder = 0;
 				cfg.extnorder = 0;
 				cfg.copymode = 0;
-				cfg.wild = 0;
 				break;
 			case SEL_EXTN:
 				cfg.extnorder ^= 1;
@@ -3905,27 +3897,15 @@ nochange:
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				cfg.copymode = 0;
-				cfg.wild = 0;
 				break;
-			case SEL_MTIME:
+			default: /* SEL_MTIME */
 				cfg.mtimeorder ^= 1;
 				cfg.sizeorder = 0;
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				cfg.extnorder = 0;
 				cfg.copymode = 0;
-				cfg.wild = 0;
 				break;
-			default: /* SEL_WILD */
-				cfg.wild ^= 1;
-				cfg.mtimeorder = 0;
-				cfg.sizeorder = 0;
-				cfg.apparentsz = 0;
-				cfg.blkorder = 0;
-				cfg.extnorder = 0;
-				cfg.copymode = 0;
-				setdirwatch();
-				goto nochange;
 			}
 
 			/* Save current */
@@ -4577,7 +4557,7 @@ static void usage(void)
 {
 	fprintf(stdout,
 		"%s: nnn [-b key] [-d] [-e] [-H] [-i] [-n] [-o]\n"
-		"           [-p file] [-s] [-S] [-t] [-v] [-w] [-h] [PATH]\n\n"
+		"           [-p file] [-s] [-S] [-t] [-v] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
@@ -4594,7 +4574,6 @@ static void usage(void)
 		" -S      du mode\n"
 		" -t      disable dir auto-select\n"
 		" -v      show version\n"
-		" -w      wild load\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
 }
@@ -4725,7 +4704,7 @@ int main(int argc, char *argv[])
 	char *arg = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "HSib:denop:stvwh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSib:denop:stvh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4781,9 +4760,6 @@ int main(int argc, char *argv[])
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
 			return _SUCCESS;
-		case 'w':
-			cfg.wild = 1;
-			break;
 		case 'h':
 			usage();
 			return _SUCCESS;
