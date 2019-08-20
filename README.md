@@ -133,31 +133,36 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for how tos, use cases, 
 
 `nnn` may be available in the default repos of your distro already. Find a list of known packagers below.
 
-- [Alpine Linux](https://pkgs.alpinelinux.org/packages?name=nnn) (`apk add nnn`)
-- [Arch Linux](https://www.archlinux.org/packages/community/x86_64/nnn/) (`pacman -S nnn`)
-- CentOS (`yum --enablerepo=epel install nnn`)
-- [CRUX](https://crux.nu/portdb/?a=search&q=nnn) (`prt-get depinst nnn`)
-- [Debian](https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
-- [DPorts](https://github.com/DragonFlyBSD/DPorts/tree/master/misc/nnn) (`pkg install nnn`)
-- [Fedora](https://apps.fedoraproject.org/packages/nnn) (`dnf install nnn`)
-- [FreeBSD](https://svnweb.freebsd.org/ports/head/misc/nnn/) (`pkg install nnn`)
-- [Gentoo](https://packages.gentoo.org/packages/app-misc/nnn) (`emerge nnn`)
-- [macOS/Homebrew](http://formulae.brew.sh/formula/nnn) (`brew install nnn`)
-- [MacPorts](https://www.macports.org/ports.php?by=name&substr=nnn) (`port install nnn`)
-- [Milis Linux](https://notabug.org/milislinux/milis/src/master/talimatname/genel/n/nnn/talimat) (`mps kur nnn`)
-- [nixpkgs](https://github.com/NixOS/nixpkgs/tree/master/pkgs/applications/misc/nnn) (`nix-env -i nnn`)
-- [NuTyX](https://www.nutyx.org/en/?type=pkg&branch=rolling&arch=x86_64&searchpkg=nnn) (`cards install nnn`)
-- [OpenBSD](https://cvsweb.openbsd.org/cgi-bin/cvsweb/ports/sysutils/nnn/) (`pkg_add nnn`)
-- [openSUSE](https://software.opensuse.org/package/nnn) (and packages for several other distros) (`zypper in nnn`)
-- [pkgrsc](http://pkgsrc.se/sysutils/nnn) (`pkg_add nnn`)
-- [Raspbian Testing](https://archive.raspbian.org/raspbian/pool/main/n/nnn/) (`apt-get install nnn`)
-- [Slackware](http://slackbuilds.org/repository/14.2/system/nnn/) (`slackpkg install nnn`)
-- [SliTaz Cooking](http://cook.slitaz.org/index.cgi?pkg=nnn) (`cooker pkg nnn`)
-- [Solus](https://packages.getsol.us/shannon/n/nnn/) (`eopkg install nnn`)
-- [Source Mage](http://codex.sourcemage.org/test/shell-term-fm/nnn/) (`cast nnn`)
-- [Termux](https://github.com/termux/termux-packages/tree/master/packages/nnn) (`pkg in nnn`)
-- [Ubuntu](https://packages.ubuntu.com/search?keywords=nnn&searchon=names&exact=1) (`apt-get install nnn`)
-- [Void Linux](https://github.com/void-linux/void-packages/tree/master/srcpkgs/nnn) (`xbps-install -S nnn`)
+<details><summary>Expand</summary>
+<p>
+<br>
+● <a href="https://pkgs.alpinelinux.org/packages?name=nnn">Alpine Linux</a> (<code>apk add nnn</code>)<br>
+● <a href="https://www.archlinux.org/packages/community/x86_64/nnn/">Arch Linux</a> (<code>pacman -S nnn</code>)<br>
+● CentOS (<code>yum --enablerepo=epel install nnn</code>)<br>
+● <a href="https://crux.nu/portdb/?a=search&q=nnn">CRUX</a> (<code>prt-get depinst nnn</code>)<br>
+● <a href="https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1">Debian</a> (<code>apt-get install nnn</code>)<br>
+● <a href="https://github.com/DragonFlyBSD/DPorts/tree/master/misc/nnn">DPorts</a> (<code>pkg install nnn</code>)<br>
+● <a href="https://apps.fedoraproject.org/packages/nnn">Fedora</a> (<code>dnf install nnn</code>)<br>
+● <a href="https://svnweb.freebsd.org/ports/head/misc/nnn/">FreeBDS</a> (<code>pkg install nnn</code>)<br>
+● <a href="https://packages.gentoo.org/packages/app-misc/nnn">Gentoo</a> (<code>emerge nnn</code>)<br>
+● <a href="http://formulae.brew.sh/formula/nnn">macOS/Homebrew</a> (<code>brew install nnn</code>)<br>
+● <a href="https://www.macports.org/ports.php?by=name&substr=nnn">MacPorts</a> (<code>port install nnn</code>)<br>
+● <a href="https://notabug.org/milislinux/milis/src/master/talimatname/genel/n/nnn/talimat">Milis Linux</a> (<code>mps kur nnn</code>)<br>
+● <a href="https://github.com/NixOS/nixpkgs/tree/master/pkgs/applications/misc/nnn">nixpkgs</a> (<code>nix-env -i nnn</code>)<br>
+● <a href="https://www.nutyx.org/en/?type=pkg&branch=rolling&arch=x86_64&searchpkg=nnn">NuTyX</a> (<code>cards install nnn</code>)<br>
+● <a href="https://cvsweb.openbsd.org/cgi-bin/cvsweb/ports/sysutils/nnn/">OpenBSD</a> (<code>pkg_add nnn</code>)<br>
+● <a href="https://software.opensuse.org/package/nnn">openSUSE (and packages for several other distros)</a> (<code>zypper in nnn</code>)<br>
+● <a href="http://pkgsrc.se/sysutils/nnn">pkgsrc</a> (<code>pkg_add nnn</code>)<br>
+● <a href="https://archive.raspbian.org/raspbian/pool/main/n/nnn/">Raspbian Testing</a> (<code>apt-get install nnn</code>)<br>
+● <a href="http://slackbuilds.org/repository/14.2/system/nnn/">Slackware</a> (<code>slackpkg install nnn</code>)<br>
+● <a href="http://cook.slitaz.org/index.cgi?pkg=nnn">SliTaz Cooking</a> (<code>cooker pkg nnn</code>)<br>
+● <a href="https://packages.getsol.us/shannon/n/nnn/">Solus</a> (<code>eopkg install nnn</code>)<br>
+● <a href="http://codex.sourcemage.org/test/shell-term-fm/nnn/">Source Mage</a> (<code>cast nnn</code>)<br>
+● <a href="https://github.com/termux/termux-packages/tree/master/packages/nnn">Termux</a> (<code>pkg in nnn</code>)<br>
+● <a href="https://packages.ubuntu.com/search?keywords=nnn&searchon=names&exact=1">Ubuntu</a> (<code>apt-get install nnn</code>)<br>
+● <a href="https://github.com/void-linux/void-packages/tree/master/srcpkgs/nnn">Void Linux</a> (<code>xbps-install -S nnn</code>)<br>
+</p>
+</details>
 
 #### Release packages
 
