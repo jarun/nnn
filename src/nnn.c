@@ -2210,7 +2210,7 @@ static inline void resetdircolor(int flags)
  * it doesn't touch str anymore). Only after that it starts modifying
  * g_buf. This is a phased operation.
  */
-static char *unescape(const char *str, uint maxcols)
+static char *unescape(const char *str, uint maxcols, wchar_t **wstr)
 {
 	static wchar_t wbuf[NAME_MAX + 1] __attribute__ ((aligned));
 	wchar_t *buf = wbuf;
@@ -2238,6 +2238,11 @@ static char *unescape(const char *str, uint maxcols)
 			len = wcswidth(wbuf, --lencount);
 
 		wbuf[lencount] = L'\0';
+	}
+
+	if (wstr) {
+		*wstr = wbuf;
+		return NULL;
 	}
 
 	/* Convert wide char to multi-byte */
@@ -2323,7 +2328,8 @@ static char *coolsize(off_t size)
 
 static void printent(const struct entry *ent, int sel, uint namecols)
 {
-	const char *pname = unescape(ent->name, namecols);
+	wchar_t *wstr;
+	unescape(ent->name, namecols, &wstr);
 	const char cp = (ent->flags & FILE_COPIED) ? '+' : ' ';
 	char ind[2] = {'\0', '\0'};
 	mode_t mode = ent->mode;
@@ -2359,7 +2365,9 @@ static void printent(const struct entry *ent, int sel, uint namecols)
 	if (sel)
 		attron(A_REVERSE);
 
-	printw("%c%s%s\n", cp, pname, ind);
+	printw("%c", cp);
+	addwstr(wstr);
+	printw("%s\n", ind);
 
 	if (sel)
 		attroff(A_REVERSE);
@@ -2380,7 +2388,7 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 	permbuf[3] = '\0';
 
 	/* Trim escape chars from name */
-	const char *pname = unescape(ent->name, namecols);
+	const char *pname = unescape(ent->name, namecols, NULL);
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
@@ -3280,7 +3288,7 @@ static void redraw(char *path)
 		} else
 			ncols -= 35;
 	} else
-		ncols -= 5;
+		ncols -= 3;
 
 	attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 	cfg.dircolor = 1;
@@ -3309,7 +3317,7 @@ static void redraw(char *path)
 		/* We need to show filename as it may be truncated in directory listing */
 		if (!cfg.showdetail || !cfg.blkorder)
 			mvprintw(lastln, 0, "%d/%d %s[%s]\n", cur + 1, ndents, sort,
-				 unescape(dents[cur].name, NAME_MAX));
+				 unescape(dents[cur].name, NAME_MAX, NULL));
 		else {
 			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
@@ -3317,7 +3325,7 @@ static void redraw(char *path)
 			mvprintw(lastln, 0, "%d/%d %cu: %s (%lu files) free: %s [%s]\n",
 				 cur + 1, ndents, c, buf, num_files,
 				 coolsize(get_fs_info(path, FREE)),
-				 unescape(dents[cur].name, NAME_MAX));
+				 unescape(dents[cur].name, NAME_MAX, NULL));
 		}
 	} else
 		printmsg("0/0");
