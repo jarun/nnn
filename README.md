@@ -178,8 +178,8 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
 `PREFIX` is supported, in case you want to install to a different location.
 
-- Compilation notes on [Raspberry Pi](https://github.com/jarun/nnn/wiki/Compile-for-Pi)
-- Instructions for [Cygwin](https://github.com/jarun/nnn/wiki/Compile-on-Cygwin)
+- Compilation notes on [Raspberry Pi](https://github.com/jarun/nnn/wiki/Developer-guides#compile-for-pi)
+- Instructions for [Cygwin](https://github.com/jarun/nnn/wiki/Developer-guides#compile-on-cygwin)
 
 #### Shell completion
 
@@ -308,26 +308,21 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 Contexts serve the purpose of exploring multiple directories simultaneously. 4 contexts are available. The status of the contexts are shown in the top left corner:
 
-- the current context is in reverse
+- the current context is in reverse video
 - other active contexts are underlined
 - rest are inactive
 
-To switch to a context press the Leader key followed by the context number (1-4).
-
-The first time a context is entered, it copies the state of the last visited context. Each context remembers its last visited directory.
-
-When a context is quit, the next active context is selected. If the last active context is quit, the program quits.
+On context creation, the state of the previous context is copied. Each context remembers its last visited directory.
 
 ##### Context-specific color
 
-Each context can have its own directory color specified:
+Each context can have its own directory color specified in `NNN_CONTEXT_COLORS`.
 
-    export NNN_CONTEXT_COLORS='1234'
 colors: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
 
 ##### Dual pane
 
-Any number of `nnn` instances can be opened simultaneously using the lightweight terminal multiplexter [`dvtm`](http://www.brain-dump.org/projects/dvtm/). For example, to open 2 instances or a dual pane mode, have the following alias:
+Any number of `nnn` instances can be opened simultaneously using a terminal multiplexter. For example, to open 2 instances or a dual pane mode in `dvtm`, have the following alias:
 
     alias n2="dvtm -m '^h' nnn nnn"
 
@@ -344,7 +339,7 @@ To select multiple files:
   - navigate to another file in the same directory to select a range of files
 - press <kbd>^Y</kbd> again to save the selection and exit selection mode.
 
-_NOTE:_ If you are on BSD/macOS, please check the [BSD terminal issue](https://github.com/jarun/nnn#bsd-terminal-issue) with <kbd>^Y</kbd> for workaround.
+_NOTE:_ If you are on BSD/macOS, please check the [BSD terminal issue](https://github.com/jarun/nnn/wiki/Troubleshooting#bsd-terminal-issue) with <kbd>^Y</kbd> for workaround.
 
 Selected files are visually indicated by a `+` before the entries.
 

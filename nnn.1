@@ -88,17 +88,13 @@ few easy steps. Look up NNN_TMPFILE in the ENVIRONMENT section below.
 Contexts serve the purpose of exploring multiple directories simultaneously. 4 contexts
 are available. The status of the contexts are shown in the top left corner:
 .Pp
-- the current context is in reverse
+- the current context is in reverse video
 .br
 - other active contexts are underlined
 .br
 - rest are inactive
 .Pp
-To switch to a context press the Leader key followed by the context number (1-4).
-.Pp
-The first time a context is entered, it copies the state of the last visited context. Each context remembers its last visited directory.
-.Pp
-When a context is quit, the next active context is selected. If the last active context is quit, the program quits.
+On context creation, the state of the previous context is copied. Each context remembers its last visited directory.
 .Pp
 Each context can have its own directory color specified. See ENVIRONMENT section below.
 .Sh FILTERS
