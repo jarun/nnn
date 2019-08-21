@@ -2330,32 +2330,30 @@ static void printent(const struct entry *ent, int sel, uint namecols)
 {
 	wchar_t *wstr;
 	unescape(ent->name, namecols, &wstr);
-	const char cp = (ent->flags & FILE_COPIED) ? '+' : ' ';
-	char ind[2] = {'\0', '\0'};
-	mode_t mode = ent->mode;
+	char ind = '\0';
 
-	switch (mode & S_IFMT) {
+	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
-		if (mode & 0100)
-			ind[0] = '*';
+		if (ent->mode & 0100)
+			ind = '*';
 		break;
 	case S_IFDIR:
-		ind[0] = '/';
+		ind = '/';
 		break;
 	case S_IFLNK:
-		ind[0] = '@';
+		ind = '@';
 		break;
 	case S_IFSOCK:
-		ind[0] = '=';
+		ind = '=';
 		break;
 	case S_IFIFO:
-		ind[0] = '|';
+		ind = '|';
 		break;
 	case S_IFBLK: // fallthrough
 	case S_IFCHR:
 		break;
 	default:
-		ind[0] = '?';
+		ind = '?';
 		break;
 	}
 
@@ -2365,9 +2363,11 @@ static void printent(const struct entry *ent, int sel, uint namecols)
 	if (sel)
 		attron(A_REVERSE);
 
-	printw("%c", cp);
+	addch((ent->flags & FILE_COPIED) ? '+' : ' ');
 	addwstr(wstr);
-	printw("%s\n", ind);
+	if (ind)
+		addch(ind);
+	addch('\n');
 
 	if (sel)
 		attroff(A_REVERSE);
