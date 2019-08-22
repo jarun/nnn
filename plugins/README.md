@@ -6,8 +6,7 @@ The currently available plugins are listed below.
 | --- | --- | --- | --- |
 | boom | sh | SMPlayer | Play random music from dir (modify `PLAYER`) |
 | checksum | sh | md5sum,<br>sha256sum | Create and verify checksums |
-| fzy-edit | sh | fzy | Fuzzy find a file in directory subtree and edit in vim |
-| fzy-open | sh | fzy | Fuzzy find a file in directory subtree and open using xdg-open |
+| fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | wget | Update plugins |
 | hexview | sh | xxd | View a file in hex in `$PAGER` |
 | imgresize | sh | [imgp](https://github.com/jarun/imgp) | Resize images in directory to screen resolution |

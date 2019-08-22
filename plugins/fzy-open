@@ -1,8 +1,17 @@
 #!/usr/bin/env sh
 
-# Description: Fuzzy find a file in directory subtree with fzy and open using xdg-open
+# Description: Fuzzy find a file in directory subtree with fzy
+#              Opens in $VISUAL or $EDITOR if text
+#              Opens other type of files with xdg-open
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-xdg-open "$(find -type f | fzy)" >/dev/null 2>&1
+entry="$(find -type f | fzy)"
+
+case "$(file -biL "$entry")" in
+    *text*)
+        "${VISUAL:-$EDITOR}" "$entry" ;;
+    *)
+        xdg-open "$entry" >/dev/null 2>&1 ;;
+esac

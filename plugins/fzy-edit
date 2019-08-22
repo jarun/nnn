@@ -1,8 +1,0 @@
-#!/usr/bin/env sh
-
-# Description: Fuzzy find a file in directory subtree with fzy and edit in vim
-#
-# Shell: POSIX compliant
-# Author: Arun Prakash Jana
-
-vim "$(find -type f | fzy)"
