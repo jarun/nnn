@@ -4964,7 +4964,8 @@ int main(int argc, char *argv[])
 #else
 	rl_bind_key('\t', rl_complete);
 #endif
-	read_history(NULL);
+	mkpath(cfgdir, ".history", g_buf);
+	read_history(g_buf);
 #endif
 
 	if (!initcurses())
@@ -4974,7 +4975,8 @@ int main(int argc, char *argv[])
 	exitcurses();
 
 #ifndef NORL
-	write_history(NULL);
+	mkpath(cfgdir, ".history", g_buf);
+	write_history(g_buf);
 #endif
 
 	if (cfg.pickraw) {
