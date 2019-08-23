@@ -42,14 +42,14 @@ fi
 
 if [ "$resp" = "s" ]; then
     checksum_type
-    sed 's|'"$PWD/"'||g' < "$selection" | xargs -0 -i ${chsum}sum {} > "checksum_$(date '+%Y%m%d%H%M').$chsum"
+    sed 's|'"$PWD/"'||g' < "$selection" | xargs -0 -I{} ${chsum}sum {} > "checksum_$(date '+%Y%m%d%H%M').$chsum"
 else
     if [ -n "$1" ] && [ -f "$1" ]; then
         for chks in md5 sha1 sha224 sha256 sha384 sha512
         do
             if [ "$(echo "$1" | grep \.${chks}$)" ]; then
                 ${chks}sum -c < "$1"
-                read
+                read dummy
                 exit
             fi
         done
