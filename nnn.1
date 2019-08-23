@@ -13,6 +13,7 @@
 .Op Ar -i
 .Op Ar -n
 .Op Ar -p file
+.Op Ar -r
 .Op Ar -s
 .Op Ar -S
 .Op Ar -v
@@ -59,6 +60,9 @@ supports the following options:
 .Pp
 .Fl "p file"
         copy (or \fIpick\fR) selection to file, or stdout if file='-'
+.Pp
+.Fl r
+        show cp, mv progress (Linux-only, needs advcpmv; '^T' shows the progress on BSD/macOS)
 .Pp
 .Fl s
         use substring match for filters instead of regex
@@ -190,13 +194,6 @@ files.
 \fBNNN_TRASH:\fR trash (instead of \fIdelete\fR) files to desktop Trash.
 .Bd -literal
     export NNN_TRASH=1
-.Ed
-.Pp
-\fBNNN_OPS_PROG:\fR show progress of copy, move operations (Linux-only, needs advcpmv).
-.Bd -literal
-    export NNN_OPS_PROG=1
-
-    NOTE: BSD and macOS users can press '^T' to check the progress.
 .Ed
 .Sh KNOWN ISSUES
 If you are using urxvt you might have to set backspace key to DEC.

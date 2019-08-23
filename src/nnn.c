@@ -403,9 +403,6 @@ static const char * const messages[] = {
 #define NNNLVL 6 /* strings end here */
 #define NNN_USE_EDITOR 7 /* flags begin here */
 #define NNN_TRASH 8
-#ifdef __linux__
-#define NNN_OPS_PROG 9
-#endif
 
 static const char * const env_cfg[] = {
 	"NNN_BMS",
@@ -417,9 +414,6 @@ static const char * const env_cfg[] = {
 	"NNNLVL",
 	"NNN_USE_EDITOR",
 	"NNN_TRASH",
-#ifdef __linux__
-	"NNN_OPS_PROG",
-#endif
 };
 
 /* Required environment variables */
@@ -4565,7 +4559,7 @@ static void usage(void)
 {
 	fprintf(stdout,
 		"%s: nnn [-b key] [-d] [-e] [-H] [-i] [-n] [-o]\n"
-		"           [-p file] [-s] [-S] [-t] [-v] [-h] [PATH]\n\n"
+		"           [-p file] [-r] [-s] [-S] [-t] [-v] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
@@ -4578,6 +4572,7 @@ static void usage(void)
 		" -n      version sort\n"
 		" -o      press Enter to open files\n"
 		" -p file selection file (stdout if '-')\n"
+		" -r      show cp, mv progress on Linux\n"
 		" -s      string filters [default: regex]\n"
 		" -S      du mode\n"
 		" -t      disable dir auto-select\n"
@@ -4711,8 +4706,11 @@ int main(int argc, char *argv[])
 {
 	char *arg = NULL;
 	int opt;
+#ifdef __linux__
+	bool progress = FALSE;
+#endif
 
-	while ((opt = getopt(argc, argv, "HSib:denop:stvh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSib:denop:rstvh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4757,6 +4755,11 @@ int main(int argc, char *argv[])
 				g_cppath = realpath(optarg, NULL);
 				unlink(g_cppath);
 			}
+			break;
+		case 'r':
+#ifdef __linux__
+			progress = TRUE;
+#endif
 			break;
 		case 's':
 			cfg.filter_re = 0;
@@ -4925,7 +4928,7 @@ int main(int argc, char *argv[])
 	copier = getenv(env_cfg[NNN_COPIER]);
 
 #ifdef __linux__
-	if (!xgetenv_set(env_cfg[NNN_OPS_PROG])) {
+	if (!progress) {
 		cp[5] = cp[4];
 		cp[2] = cp[4] = ' ';
 

@@ -17,6 +17,7 @@ args=(
     '(-n)-n[use version compare to sort files]'
     '(-o)-o[open files only on Enter]'
     '(-p)-p[copy selection to file]:file name'
+    '(-r)-r[show cp, mv progress (Linux-only)]'
     '(-s)-s[use substring match for filters]'
     '(-S)-S[start in disk usage analyzer mode]'
     '(-t)-t[disable dir auto-select]'
