@@ -1151,9 +1151,9 @@ static void cpstr(char *buf)
 {
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-		 "xargs -0 -a %s -%c src %s src .", g_cppath, REPLACE_STR, cp);
+		 "xargs -0 -a %s -%c {} %s {} .", g_cppath, REPLACE_STR, cp);
 #else
-		 "cat %s | xargs -0 -o -%c src cp -iRp src .", g_cppath, REPLACE_STR);
+		 "cat %s | xargs -0 -o -%c {} cp -iRp {} .", g_cppath, REPLACE_STR);
 #endif
 }
 
@@ -1161,9 +1161,9 @@ static void mvstr(char *buf)
 {
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-		 "xargs -0 -a %s -%c src %s src .", g_cppath, REPLACE_STR, mv);
+		 "xargs -0 -a %s -%c {} %s {} .", g_cppath, REPLACE_STR, mv);
 #else
-		 "cat %s | xargs -0 -o -%c src mv -i src .", g_cppath, REPLACE_STR);
+		 "cat %s | xargs -0 -o -%c {} mv -i {} .", g_cppath, REPLACE_STR);
 #endif
 }
 
