@@ -5,6 +5,7 @@ The currently available plugins are listed below.
 | Plugin (a-z) | Lang | Deps | Description |
 | --- | --- | --- | --- |
 | boom | sh | SMPlayer | Play random music from dir (modify `PLAYER`) |
+| dups | sh | find, md5sum,<br>sort uniq xargs | List non-empty duplicate files in current directory |
 | checksum | sh | md5sum,<br>sha256sum | Create and verify checksums |
 | fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | wget | Update plugins |
@@ -17,12 +18,12 @@ The currently available plugins are listed below.
 | mocplay | sh | [moc](http://moc.daper.net/) | Appends (and plays, see script) selection/dir/file in moc|
 | ndiff | sh | vimdiff | Diff for selection (limited to 2 for directories) |
 | nmount | sh | pmount, udisks2 | Toggle mount status of a device as normal user |
-| nwal | sh | nitrogen | Set the selected image as wallpaper using nitrogen |
+| nwal | sh | nitrogen | Set image as wallpaper using nitrogen |
 | organize | sh | file | Auto-organize files in directories by file type |
 | pastebin | sh | [pastebinit](https://launchpad.net/pastebinit) | Paste contents of (text) file to paste.ubuntu.com |
 | pdfview | sh | pdftotext/<br>mupdf-tools | View PDF file in `$PAGER` |
 | picker | sh | nnn | Pick files and pipe the newline-separated list to another utility |
-| pywal | sh | pywal | Set selected image as wallpaper, change terminal color scheme |
+| pywal | sh | pywal | Set image as wallpaper, change terminal colorscheme |
 | readit | sh | pdftotext, mpv,<br>pico2wave | Read a PDF or text file aloud |
 | ringtone | sh | date, ffmpeg | Create a variable bitrate mp3 ringtone from file |
 | splitjoin | sh | split, cat | Split file or join selection |
