@@ -200,6 +200,7 @@ static struct key bindings[] = {
 	{ 't',            SEL_MTIME },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
+	{ KEY_F(5),       SEL_REDRAW },
 	/* Copy currently selected file path */
 	{ CONTROL('K'),   SEL_SEL },
 	{ ' ',            SEL_SEL },
@@ -224,7 +225,7 @@ static struct key bindings[] = {
 	{ 'n',            SEL_NEW },
 	/* Show rename prompt */
 	{ CONTROL('R'),   SEL_RENAME },
-	{ KEY_F(2),       SEL_RENAME }, // undocumented
+	{ KEY_F(2),       SEL_RENAME },
 	/* Rename contents of current dir */
 	{ 'r',            SEL_RENAMEALL },
 	/* Connect to server over SSHFS */

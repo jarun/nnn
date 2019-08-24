@@ -243,12 +243,12 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
        Tab ^I  Next context      d  Toggle detail view
          , ^/  Lead key    N LeadN  Context N
             /  Filter/Lead  Ins ^T  Toggle nav-as-you-type
-          Esc  Exit prompt      ^L  Redraw/clear prompt
+          Esc  Exit prompt   ^L F5  Redraw/clear prompt
             q  Quit context  Lead'  First file
          Q ^Q  Quit  ^G  QuitCD  ?  Help, config
  FILES
            ^O  Open with...      n  Create new/link
-            D  File details     ^R  Rename/duplicate
+            D  File detail   ^R F2  Rename/duplicate
      ⎵ ^K / Y  Select entry/all  r  Batch rename
          K ^Y  Toggle selection  y  List selection
             P  Copy selection    X  Delete selection
