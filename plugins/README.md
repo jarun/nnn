@@ -4,13 +4,13 @@ The currently available plugins are listed below.
 
 | Plugin (a-z) | Lang | Deps | Description |
 | --- | --- | --- | --- |
-| boom | sh | SMPlayer | Play random music from dir (modify `PLAYER`) |
-| dups | sh | find, md5sum,<br>sort uniq xargs | List non-empty duplicate files in current directory |
+| boom | sh | [moc](http://moc.daper.net/) | Play random music from dir |
+| dups | sh | find, md5sum,<br>sort uniq xargs | List non-empty duplicate files in current dir |
 | checksum | sh | md5sum,<br>sha256sum | Create and verify checksums |
 | fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | wget | Update plugins |
 | hexview | sh | xxd | View a file in hex in `$PAGER` |
-| imgresize | sh | [imgp](https://github.com/jarun/imgp) | Resize images in directory to screen resolution |
+| imgresize | sh | [imgp](https://github.com/jarun/imgp) | Resize images in dir to screen resolution |
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
 | ipinfo | sh | curl, whois | Fetch external IP address and whois information |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
@@ -22,17 +22,17 @@ The currently available plugins are listed below.
 | organize | sh | file | Auto-organize files in directories by file type |
 | pastebin | sh | [pastebinit](https://launchpad.net/pastebinit) | Paste contents of (text) file to paste.ubuntu.com |
 | pdfview | sh | pdftotext/<br>mupdf-tools | View PDF file in `$PAGER` |
-| picker | sh | nnn | Pick files and pipe the newline-separated list to another utility |
+| picker | sh | nnn | Pick files and list one per line (to pipe) |
 | pywal | sh | pywal | Set image as wallpaper, change terminal colorscheme |
 | readit | sh | pdftotext, mpv,<br>pico2wave | Read a PDF or text file aloud |
 | ringtone | sh | date, ffmpeg | Create a variable bitrate mp3 ringtone from file |
 | splitjoin | sh | split, cat | Split file or join selection |
-| sxiv | sh | sxiv | Browse images in a dir in sxiv, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts))|
+| sxiv | sh | sxiv | View images in dir, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts))|
 | thumb | sh | [lsix](https://github.com/hackerb9/lsix) | View thumbnail of an image or dir of images |
 | transfer | sh | curl | Upload file to transfer.sh |
-| upgrade | sh | wget | Upgrade to latest nnn version manually on Debian 9 Stretch |
+| upgrade | sh | wget | Upgrade nnn manually on Debian 9 Stretch |
 | vidthumb | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) | Show video thumbnails in terminal |
-| viuimg | sh | [viu](https://github.com/atanunq/viu), less | View an image or images in a directory |
+| viuimg | sh | [viu](https://github.com/atanunq/viu), less | View an image or images in dir |
 
 ## Installing plugins
 

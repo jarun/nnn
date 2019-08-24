@@ -1,12 +1,32 @@
 #!/usr/bin/env sh
 
 # Description: Play random music from current directory. Identifies MP3, FLAC, WEBM, WMA.
-#              You may want to change the PLAYER.
+#              You may want to set GUIPLAYER.
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-PLAYER=smplayer
+#GUIPLAYER=smplayer
 
-find . -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.webm" -o -iname "*.wma" \) | sort -R | head -n 100 | xargs -d "\n" "$PLAYER" > /dev/null 2>&1 &
-disown
+if [ ! -z "$GUIPLAYER" ]; then
+    PLAYER="$GUIPLAYER"
+    find . -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.webm" -o -iname "*.wma" \) | sort -R | head -n 100 | xargs -d "\n" "$PLAYER" > /dev/null 2>&1 &
+
+    # detach the player
+    disown
+else
+    # exit MOC server
+    mocp -x
+
+    # start MOC server
+    mocp -S
+
+    # clear MOC playlist
+    mocp -c
+
+    # add up to 100 random audio files
+    find . -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.webm" -o -iname "*.wma" \) | sort -R | head -n 100 | xargs -d "\n" mocp -a
+
+    # start playing
+    mocp -p
+fi
