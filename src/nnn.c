@@ -917,7 +917,7 @@ static void resetcpind(void)
 }
 
 /* Initialize curses mode */
-static bool initcurses(void)
+static bool initcurses(mmask_t *oldmask)
 {
 	short i;
 
@@ -942,9 +942,9 @@ static bool initcurses(void)
 	//intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
 #if NCURSES_MOUSE_VERSION <= 1
-	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED, NULL);
+	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED, oldmask);
 #else
-	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED | BUTTON4_PRESSED | BUTTON5_PRESSED, NULL);
+	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED | BUTTON4_PRESSED | BUTTON5_PRESSED, oldmask);
 #endif
 	mouseinterval(400);
 	curs_set(FALSE); /* Hide cursor */
@@ -4704,6 +4704,7 @@ static void cleanup(void)
 
 int main(int argc, char *argv[])
 {
+	mmask_t mask;
 	char *arg = NULL;
 	int opt;
 #ifdef __linux__
@@ -4971,10 +4972,11 @@ int main(int argc, char *argv[])
 	read_history(g_buf);
 #endif
 
-	if (!initcurses())
+	if (!initcurses(&mask))
 		return _FAILURE;
 
 	browse(initpath);
+	mousemask(mask, NULL);
 	exitcurses();
 
 #ifndef NORL
