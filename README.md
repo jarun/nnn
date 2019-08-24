@@ -40,14 +40,6 @@
   - [Keyboard and mouse](#keyboard-and-mouse)
     - [Leader key](#leader-key)
   - [Help](#help)
-- [Concepts](#concepts)
-  - [Contexts](#contexts)
-    - [Context-specific color](#context-specific-color)
-    - [Dual pane](#dual-pane)
-  - [Selection](#selection)
-  - [Filters](#filters)
-  - [Navigate-as-you-type](#navigate-as-you-type)
-  - [File indicators](#file-indicators)
 - [Mentions](#mentions)
 - [Developers](#developers)
 
@@ -61,7 +53,7 @@ It runs smoothly on the Raspberry Pi, Termux on Android ([demo video](https://ww
 
 **[Plugins](https://github.com/jarun/nnn/tree/master/plugins)** can be run with custom keybinds. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim). Custom plugins are easy to add.
 
-Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for how tos, use cases, chronology and insights.
+Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts, how tos, use cases, chronology and insights.
 
 ## Features
 
@@ -126,7 +118,7 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for how tos, use cases, 
 | sshfs, fusermount(3) | if needed | mount, unmount over SSHFS |
 | trash-cli | optional | trash files (default action: delete) |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
-| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki#show-cp-mv-progress)) | optional | copy, move progress |
+| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/Advanced-use-cases#show-cp-mv-progress)) | optional | copy, move progress |
 | `$VISUAL` (else `$EDITOR`), `$PAGER`, `$SHELL` | optional | fallback vi, less, sh |
 
 #### From a package manager
@@ -189,7 +181,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 
 #### Configuration
 
-`nnn` supports the following environment variables for configuration. All of them are optional (set if you need). There is no config file. Any associated files are stored under `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/`.
+`nnn` supports the following environment variables for configuration. All of them are optional (set if you need). There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/`.
 
 | Example `export` | Description |
 | --- | --- |
@@ -200,7 +192,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
 | `NNN_NOTE='/home/user/Dropbox/notes'` | absolute path to note file [default: none] |
 | `NNN_OPENER=mimeopen` | custom file opener |
-| `NNN_IDLE_TIMEOUT=300` | idle seconds before locking terminal [default: disabled] |
+| `NNN_IDLE_TIMEOUT=300` | idle seconds to lock terminal [default: disabled] |
 | `NNN_COPIER=copier` | clipboard copier script [default: none] |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
 
@@ -301,87 +293,6 @@ When the filter is on, <kbd>/</kbd> works as an additional Leader key.
     $ nnn -h
     $ man nnn
 To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
-
-## Concepts
-
-#### Contexts
-
-Contexts serve the purpose of exploring multiple directories simultaneously. 4 contexts are available. The status of the contexts are shown in the top left corner:
-
-- the current context is in reverse video
-- other active contexts are underlined
-- rest are inactive
-
-On context creation, the state of the previous context is copied. Each context remembers its last visited directory.
-
-##### Context-specific color
-
-Each context can have its own directory color specified in `NNN_CONTEXT_COLORS`.
-
-colors: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
-
-##### Dual pane
-
-Any number of `nnn` instances can be opened simultaneously using a terminal multiplexter. For example, to open 2 instances or a dual pane mode in `dvtm`, have the following alias:
-
-    alias n2="dvtm -m '^h' nnn nnn"
-
-Note that the `dvtm` MOD key is redefined to <kbd>^H</kbd> as the default one (<kbd>^G</kbd>) is also an `nnn` shortcut.
-
-#### Selection
-
-Use <kbd>^K</kbd> to select the file under the cursor.
-
-To select multiple files:
-
-- press <kbd>^Y</kbd> to enter selection mode. In this mode it's possible to
-  - cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry (works across directories and contexts); or,
-  - navigate to another file in the same directory to select a range of files
-- press <kbd>^Y</kbd> again to save the selection and exit selection mode.
-
-_NOTE:_ If you are on BSD/macOS, please check the [BSD terminal issue](https://github.com/jarun/nnn/wiki/Troubleshooting#bsd-terminal-issue) with <kbd>^Y</kbd> for workaround.
-
-Selected files are visually indicated by a `+` before the entries.
-
-The selection can now be listed, copied, moved, removed, archived or linked.
-
-Navigate to a target directory then use <kbd>P</kbd> (cp) or <kbd>V</kbd> (mv) to copy or move the selected files.
-
-Absolute paths of the selected files are copied to the temporary file `.selection` in the config directory. The path is shown in the help and configuration screen. If `$NNN_COPIER` is set the file paths are also copied to the system clipboard.
-
-#### Filters
-
-Filters support regexes (default) to instantly (search-as-you-type) list the matching entries in the current directory.
-
-Common use cases:
-- to list all matches starting with the filter expression, start the expression with a `^` (caret) symbol
-- type `\.mkv` to list all MKV files
-- use `.*` to match any character (_sort of_ fuzzy search)
-
-There is a program option to filter entries by substring match instead of regex.
-
-#### Navigate-as-you-type
-
-In this mode directories are opened in filter mode, allowing continuous navigation. Works best with the **arrow keys**.
-
-When there's a unique match and it's a directory, `nnn` auto selects the directory and enters it in this mode. Use the relevant program option to disable this behaviour.
-
-This mode takes navigation to the next level when short, unique keypress sequences are possible. For example, to reach `nnn` development directory (located at `~/GitHub/nnn`) from my `$HOME` (which is the default directory the terminal starts in), I use the sequence <kbd>g</kbd><kbd>n</kbd>.
-
-#### File indicators
-
-The following indicators are used in the detail view:
-
-| Indicator | File Type |
-|:---:| --- |
-| `/` | Directory |
-| `*` | Executable |
-| <code>&#124;</code> | Fifo |
-| `=` | Socket |
-| `@` | Symbolic Link |
-| `b` | Block Device |
-| `c` | Character Device |
-| `?` | Unknown |
 
 ## Mentions
 
