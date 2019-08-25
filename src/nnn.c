@@ -4717,8 +4717,7 @@ int main(int argc, char *argv[])
 		case 'S':
 			cfg.blkorder = 1;
 			nftw_fn = sum_bsizes;
-			BLK_SHIFT = ffs(S_BLKSIZE) - 1;
-			break;
+			BLK_SHIFT = ffs(S_BLKSIZE) - 1; // fallthrough
 		case 'd':
 			cfg.showdetail = 1;
 			printptr = &printent_long;
