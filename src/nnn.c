@@ -927,12 +927,8 @@ static bool initcurses(mmask_t *oldmask)
 			return FALSE;
 		}
 	} else if (!initscr()) {
-		char *term = getenv("TERM");
-
-		if (term)
-			fprintf(stderr, "error opening TERM: %s\n", term);
-		else
-			fprintf(stderr, "initscr!\n");
+		fprintf(stderr, "initscr!\n");
+		DPRINTF_S(getenv("TERM"));
 		return FALSE;
 	}
 
@@ -2847,7 +2843,7 @@ static bool show_help(const char *path)
 		  "cs  Size    E  Extn   t  Time modified\n"
 		"1MISC\n"
 	       "9! ^]  Shell   L  Lock   C  Execute entry\n"
-	       "9R ^V  Pick plugin      xK  Run plugin key K\n"
+	       "9R ^V  Pick plugin  F12 xK  Run plugin key K\n"
 	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt  ^N  Note  =  Launcher\n"};
 

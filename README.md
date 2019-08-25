@@ -261,7 +261,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
             s  Size    E  Extn   t  Time modified
  MISC
          ! ^]  Shell   L  Lock   C  Execute entry
-         R ^V  Pick plugin      xK  Run plugin key K
+         R ^V  Pick plugin  F12 xK  Run plugin key K
             c  SSHFS mount       u  Unmount
            ^P  Prompt  ^N  Note  =  Launcher
 ```
