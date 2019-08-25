@@ -3728,7 +3728,7 @@ nochange:
 			case '@':
 				presel = fd;
 				goto nochange;
-			case '\'':
+			case '\'': /* jump to first file in the directory */
 				for (r = 0; r < ndents; ++r) {
 					if (!(dents[r].flags & DIR_OR_LINK_TO_DIR)) {
 						move_cursor((r) % ndents, 0);
@@ -3738,12 +3738,17 @@ nochange:
 				if (r != ndents)
 					continue;;
 				goto nochange;
-			case '>': // fallthrough
-			case '.': // fallthrough
-			case '<': // fallthrough
-			case ',':
+			case '.':
+				cfg.showhidden ^= 1;
+				setdirwatch();
+				if (ndents)
+					copycurname();
+				goto begin;
+			case ']': // fallthrough
+			case '[': // fallthrough
+				/* visit next and previous contexts */
 				r = cfg.curctx;
-				if (fd == '>' || fd == '.')
+				if (fd == ']')
 					do
 						r = (r + 1) & ~CTX_MAX;
 					while (!g_ctx[r].c_cfg.ctxactive);
