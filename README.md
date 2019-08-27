@@ -85,7 +85,7 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts
   - Option to open all text files in EDITOR
 - Information
   - Detailed file information
-  - Media information (needs mediainfo/exiftool)
+  - Media information (using plugin)
 - Convenience
   - Minimal configuration
   - Plugin keybinds
@@ -118,7 +118,6 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | base | desktop opener |
 | file, coreutils (cp, mv, rm), findutils (xargs) | base | file type, copy, move and remove |
 | tar, (un)zip [atool/bsdtar for more formats] | base | create, list, extract tar, gzip, bzip2, zip |
-| mediainfo / exiftool | if needed | multimedia file details |
 | sshfs, fusermount(3) | if needed | mount, unmount over SSHFS |
 | trash-cli | optional | trash files (default action: delete) |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
@@ -203,8 +202,8 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 #### Cmdline options
 
 ```
-usage: nnn [-b key] [-d] [-e] [-H] [-i] [-n] [-o]
-           [-p file] [-r] [-s] [-S] [-t] [-v] [-h] [PATH]
+usage: nnn [-b key] [-d] [-H] [-i] [-n] [-o] [-p file]
+           [-r] [-s] [-S] [-t] [-v] [-h] [PATH]
 
 The missing terminal file manager for X.
 
@@ -214,7 +213,6 @@ positional args:
 optional args:
  -b key  open bookmark key
  -d      detail mode
- -e      use exiftool for media info
  -H      show hidden files
  -i      nav-as-you-type mode
  -n      version sort
@@ -253,20 +251,20 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
          K ^Y  Toggle selection  y  List selection
             P  Copy selection    X  Delete selection
             V  Move selection   ^X  Delete entry
-            f  Create archive  m M  Brief/full mediainfo
+            f  Create archive    C  Execute entry
            ^F  Extract archive   F  List archive
             e  Edit in EDITOR    p  Open in PAGER
  ORDER TOGGLES
            ^J  du                S  Apparent du
             s  Size    E  Extn   t  Time modified
  MISC
-         ! ^]  Shell   L  Lock   C  Execute entry
+         ! ^]  Shell   ^N  Note  L  Lock
          R ^V  Pick plugin  F12 xK  Run plugin key K
             c  SSHFS mount       u  Unmount
-           ^P  Prompt  ^N  Note  =  Launcher
+           ^P  Prompt            =  Launcher
 ```
 
-Note: Help & settings, file details, media info and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.
+Note: Help & settings, file details and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.
 
 | Mouse click | Function |
 |---| --- |

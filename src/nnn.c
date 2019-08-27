@@ -332,22 +332,18 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 #endif
 
 /* Macros for utilities */
-#define MEDIAINFO 0
-#define EXIFTOOL 1
-#define OPENER 2
-#define ATOOL 3
-#define BSDTAR 4
-#define UNZIP 5
-#define TAR 6
-#define LOCKER 7
-#define CMATRIX 8
-#define NLAUNCH 9
-#define UNKNOWN 10
+#define OPENER 0
+#define ATOOL 1
+#define BSDTAR 2
+#define UNZIP 3
+#define TAR 4
+#define LOCKER 5
+#define CMATRIX 6
+#define NLAUNCH 7
+#define UNKNOWN 8
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
-	"mediainfo",
-	"exiftool",
 #ifdef __APPLE__
 	"/usr/bin/open",
 #elif defined __CYGWIN__
@@ -2607,17 +2603,6 @@ static size_t get_fs_info(const char *path, bool type)
 	return svb.f_bavail << ffs((int)(svb.f_frsize >> 1));
 }
 
-static bool show_mediainfo(const char *fpath, const char *arg)
-{
-	if (!getutil(utils[cfg.metaviewer]))
-		return FALSE;
-
-	exitcurses();
-	get_output(NULL, 0, utils[cfg.metaviewer], fpath, arg, TRUE);
-	refresh();
-	return TRUE;
-}
-
 /* List or extract archive */
 static void handle_archive(char *fpath, const char *dir, char op)
 {
@@ -2835,17 +2820,17 @@ static bool show_help(const char *path)
 	       "9K ^Y  Toggle selection  y  List selection\n"
 		  "cP  Copy selection    X  Delete selection\n"
 		  "cV  Move selection   ^X  Delete entry\n"
-		  "cf  Create archive  m M  Brief/full mediainfo\n"
+		  "cf  Create archive    C  Execute entry\n"
 		 "b^F  Extract archive   F  List archive\n"
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
 		"1ORDER TOGGLES\n"
 		 "b^J  du                S  Apparent du\n"
 		  "cs  Size    E  Extn   t  Time modified\n"
 		"1MISC\n"
-	       "9! ^]  Shell   L  Lock   C  Execute entry\n"
+	       "9! ^]  Shell   ^N  Note  L  Lock   \n"
 	       "9R ^V  Pick plugin  F12 xK  Run plugin key K\n"
 	          "cc  SSHFS mount       u  Unmount\n"
-		 "b^P  Prompt  ^N  Note  =  Launcher\n"};
+		 "b^P  Prompt            =  Launcher\n"};
 
 	fd = create_tmp_file();
 	if (fd == -1)
@@ -3925,8 +3910,6 @@ nochange:
 				goto nochange;
 			}
 			break;
-		case SEL_MEDIA: // fallthrough
-		case SEL_FMEDIA: // fallthrough
 		case SEL_ARCHIVELS: // fallthrough
 		case SEL_EXTRACT: // fallthrough
 		case SEL_RUNEDIT: // fallthrough
@@ -3944,12 +3927,6 @@ nochange:
 			r = TRUE;
 
 			switch (sel) {
-			case SEL_MEDIA: // fallthrough
-			case SEL_FMEDIA:
-				tmp = (sel == SEL_FMEDIA) ? "-f" : NULL;
-				show_mediainfo(newpath, tmp);
-				setdirwatch();
-				goto nochange;
 			case SEL_ARCHIVELS:
 				handle_archive(newpath, path, 'l');
 				break;
@@ -4559,15 +4536,14 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"%s: nnn [-b key] [-d] [-e] [-H] [-i] [-n] [-o]\n"
-		"           [-p file] [-r] [-s] [-S] [-t] [-v] [-h] [PATH]\n\n"
+		"%s: nnn [-b key] [-d] [-H] [-i] [-n] [-o] [-p file]\n"
+		"           [-r] [-s] [-S] [-t] [-v] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
 		"optional args:\n"
 		" -b key  open bookmark key\n"
 		" -d      detail mode\n"
-		" -e      use exiftool for media info\n"
 		" -H      show hidden files\n"
 		" -i      nav-as-you-type mode\n"
 		" -n      version sort\n"
@@ -4712,7 +4688,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSib:denop:rstvh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSib:dnop:rstvh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4727,9 +4703,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'b':
 			arg = optarg;
-			break;
-		case 'e':
-			cfg.metaviewer = EXIFTOOL;
 			break;
 		case 'H':
 			cfg.showhidden = 1;

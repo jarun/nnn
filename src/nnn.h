@@ -64,8 +64,6 @@ enum action {
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
 	SEL_STATS,
-	SEL_MEDIA,
-	SEL_FMEDIA,
 	SEL_ARCHIVE,
 	SEL_ARCHIVELS,
 	SEL_EXTRACT,
@@ -178,10 +176,6 @@ static struct key bindings[] = {
 	{ 'd',            SEL_DETAIL },
 	/* File details */
 	{ 'D',            SEL_STATS },
-	/* Show media info short, run is hacked */
-	{ 'm',            SEL_MEDIA },
-	/* Show media info full, run is hacked */
-	{ 'M',            SEL_FMEDIA },
 	/* Create archive */
 	{ 'f',            SEL_ARCHIVE },
 	/* List archive */

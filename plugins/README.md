@@ -14,6 +14,7 @@ The currently available plugins are listed below.
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
 | ipinfo | sh | curl, whois | Fetch external IP address and whois information |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
+| mediainf | sh | mediainfo | Show media information |
 | moclyrics | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) | Show lyrics of the track playing in moc |
 | mocplay | sh | [moc](http://moc.daper.net/) | Appends (and plays, see script) selection/dir/file in moc|
 | ndiff | sh | vimdiff | Diff for selection (limited to 2 for directories) |

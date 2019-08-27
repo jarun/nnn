@@ -7,7 +7,6 @@
 
 complete -c nnn -s b -r -d 'bookmark key to open'
 complete -c nnn -s d    -d 'start in detail mode'
-complete -c nnn -s e    -d 'use exiftool instead of mediainfo'
 complete -c nnn -s H    -d 'show hidden files'
 complete -c nnn -s i    -d 'start in navigate-as-you-type mode'
 complete -c nnn -s n    -d 'use version compare to sort files'
