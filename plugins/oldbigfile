@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+
+# Description: List files bigger than input size by ascending access date.
+#
+# Requires: find sort
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+echo -n "Min file size (MB): "
+read size
+
+find -size +"$size"M -type f -printf '%A+ %s %p\n' | sort
+
+echo "Press any key to exit"
+read dummy

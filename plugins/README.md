@@ -20,6 +20,7 @@ The currently available plugins are listed below.
 | ndiff | sh | vimdiff | Diff for selection (limited to 2 for directories) |
 | nmount | sh | pmount, udisks2 | Toggle mount status of a device as normal user |
 | nwal | sh | nitrogen | Set image as wallpaper using nitrogen |
+| oldbigfile | sh | find, sort | List large files by access time |
 | organize | sh | file | Auto-organize files in directories by file type |
 | pastebin | sh | [pastebinit](https://launchpad.net/pastebinit) | Paste contents of (text) file to paste.ubuntu.com |
 | pdfview | sh | pdftotext/<br>mupdf-tools | View PDF file in `$PAGER` |
