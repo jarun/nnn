@@ -6,6 +6,7 @@
 .Nd the missing terminal file manager for X
 .Sh SYNOPSIS
 .Nm
+.Op Ar -a
 .Op Ar -b key
 .Op Ar -d
 .Op Ar -H
@@ -35,6 +36,9 @@ to see the list of keybinds.
 .Pp
 .Nm
 supports the following options:
+.Pp
+.Fl a
+        use access time for all operations (default: modification time)
 .Pp
 .Fl "b key"
         specify bookmark key to open

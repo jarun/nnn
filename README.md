@@ -74,7 +74,7 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts
 - Sorting
   - Ordered pure numeric names by default (visit _/proc_)
   - Case-insensitive version (_aka_ natural) sort
-  - Sort by file name, modification time, size, file extension
+  - By file name, modification/access time, size, extension
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex and substring match
@@ -202,8 +202,8 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 #### Cmdline options
 
 ```
-usage: nnn [-b key] [-d] [-H] [-i] [-n] [-o] [-p file]
-           [-r] [-s] [-S] [-t] [-v] [-h] [PATH]
+usage: nnn [-a] [-b key] [-d] [-H] [-i] [-n] [-o]
+           [-p file] [-r] [-s] [-S] [-t] [-v] [-h] [PATH]
 
 The missing terminal file manager for X.
 
@@ -211,6 +211,7 @@ positional args:
   PATH   start dir [default: current dir]
 
 optional args:
+ -a      use access time
  -b key  open bookmark key
  -d      detail mode
  -H      show hidden files

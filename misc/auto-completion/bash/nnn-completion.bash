@@ -11,6 +11,7 @@ _nnn () {
     local cur=$2 prev=$3
     local -a opts
     opts=(
+        -a
         -b
         -d
         -H

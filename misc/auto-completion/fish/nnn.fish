@@ -5,6 +5,7 @@
 #   Arun Prakash Jana <engineerarun@gmail.com>
 #
 
+complete -c nnn -s a    -d 'use access time'
 complete -c nnn -s b -r -d 'bookmark key to open'
 complete -c nnn -s d    -d 'start in detail mode'
 complete -c nnn -s H    -d 'show hidden files'

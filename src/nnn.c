@@ -215,7 +215,7 @@ typedef struct {
 	uint copymode   : 1;  /* Set when copying files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 8;
+	uint reserved   : 7;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
@@ -229,6 +229,7 @@ typedef struct {
 	uint runctx     : 2;  /* The context in which plugin is to be run */
 	uint filter_re  : 1;  /* Use regex filters */
 	uint trash      : 1;  /* Move removed files to trash */
+	uint mtime      : 1;  /* Use modification time (else access time) */
 } settings;
 
 /* Contexts or workspaces */
@@ -268,6 +269,7 @@ static settings cfg = {
 	0, /* runctx */
 	1, /* filter_re */
 	0, /* trash */
+	1, /* mtime */
 };
 
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
@@ -3056,7 +3058,7 @@ static int dentfill(char *path, struct entry **dents)
 		off += dentp->nlen;
 
 		/* Copy other fields */
-		dentp->t = sb.st_mtime;
+		dentp->t = cfg.mtime ? sb.st_mtime : sb.st_atime;
 		if (dp->d_type == DT_LNK && !flags) { /* Do not add sizes for links */
 			dentp->mode = (sb.st_mode & ~S_IFMT) | S_IFLNK;
 			dentp->size = 0;
@@ -3283,7 +3285,7 @@ static void redraw(char *path)
 		char sort[] = "\0 ";
 
 		if (cfg.mtimeorder)
-			sort[0] = 'T';
+			sort[0] = cfg.mtime ? 'T' : 'A';
 		else if (cfg.sizeorder)
 			sort[0] = 'S';
 		else if (cfg.extnorder)
@@ -4536,12 +4538,13 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"%s: nnn [-b key] [-d] [-H] [-i] [-n] [-o] [-p file]\n"
-		"           [-r] [-s] [-S] [-t] [-v] [-h] [PATH]\n\n"
+		"%s: nnn [-a] [-b key] [-d] [-H] [-i] [-n] [-o]\n"
+		"           [-p file] [-r] [-s] [-S] [-t] [-v] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
 		"  PATH   start dir [default: current dir]\n\n"
 		"optional args:\n"
+		" -a      use access time\n"
 		" -b key  open bookmark key\n"
 		" -d      detail mode\n"
 		" -H      show hidden files\n"
@@ -4688,7 +4691,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSib:dnop:rstvh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSiab:dnop:rstvh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4700,6 +4703,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'i':
 			cfg.filtermode = 1;
+			break;
+		case 'a':
+			cfg.mtime = 0;
 			break;
 		case 'b':
 			arg = optarg;

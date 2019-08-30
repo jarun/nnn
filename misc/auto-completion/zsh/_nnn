@@ -9,6 +9,7 @@
 setopt localoptions noshwordsplit noksharrays
 local -a args
 args=(
+    '(-a)-a[use access time]'
     '(-b)-b[bookmark key to open]:key char'
     '(-d)-d[start in detail mode]'
     '(-H)-H[show hidden files]'
