@@ -180,6 +180,7 @@ typedef unsigned long ulong;
 typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
+typedef long long int ll;
 
 /* STRUCTURES */
 
@@ -1314,14 +1315,6 @@ static bool write_lastdir(const char *curpath)
 	return ret;
 }
 
-static int digit_compare(const char *a, const char *b)
-{
-	while (*a && *b && *a == *b)
-		++a, ++b;
-
-	return *a - *b;
-}
-
 /*
  * We assume none of the strings are NULL.
  *
@@ -1332,73 +1325,32 @@ static int digit_compare(const char *a, const char *b)
  */
 static int xstricmp(const char * const s1, const char * const s2)
 {
-	const char *c1 = s1, *c2 = s2, *m1, *m2;
-	int count1 = 0, count2 = 0, bias;
-	char sign[2] = {'+', '+'};
+	char *p1, *p2;
 
-	while (ISBLANK(*c1))
-		++c1;
+	ll v1 = strtoll(s1, &p1, 10);
+	ll v2 = strtoll(s2, &p2, 10);
 
-	while (ISBLANK(*c2))
-		++c2;
-
-	if (*c1 == '-' || *c1 == '+') {
-		if (*c1 == '-')
-			sign[0] = '-';
-		++c1;
-	}
-
-	if (*c2 == '-' || *c2 == '+') {
-		if (*c2 == '-')
-			sign[1] = '-';
-		++c2;
-	}
-
-	if (xisdigit(*c1) && xisdigit(*c2)) {
-		while (*c1 == '0')
-			++c1;
-		m1 = c1;
-
-		while (*c2 == '0')
-			++c2;
-		m2 = c2;
-
-		while (xisdigit(*c1)) {
-			++count1;
-			++c1;
-		}
-		while (ISBLANK(*c1))
-			++c1;
-
-		while (xisdigit(*c2)) {
-			++count2;
-			++c2;
-		}
-		while (ISBLANK(*c2))
-			++c2;
-
-		if (*c1 && !*c2)
-			return 1;
-
-		if (!*c1 && *c2)
-			return -1;
-
-		if (!*c1 && !*c2) {
-			if (sign[0] != sign[1])
-				return ((sign[0] == '+') ? 1 : -1);
-
-			if (count1 > count2)
-				return 1;
-
-			if (count1 < count2)
+	/* Check if at least 1 string is numeric */
+	if (s1 != p1 || s2 != p2) {
+		/* Handle both pure numeric */
+		if (s1 != p1 && s2 != p2) {
+			if (v2 > v1)
 				return -1;
 
-			bias = digit_compare(m1, m2);
-			if (bias)
-				return bias;
+			if (v1 > v2)
+				return 1;
 		}
+
+		/* Only first string non-numeric */
+		if (s1 == p1)
+			return 1;
+
+		/* Only second string non-numeric */
+		if (s2 == p2)
+			return -1;
 	}
 
+	/* Handle 1. all non-numeric and 2. both same numeric value cases */
 	return strcoll(s1, s2);
 }
 
