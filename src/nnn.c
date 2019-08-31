@@ -3697,7 +3697,7 @@ nochange:
 		case SEL_CTX3: // fallthrough
 		case SEL_CTX4:
 			if (sel == SEL_CYCLE)
-				fd = '>';
+				fd = ']';
 			else if (sel >= SEL_CTX1 && sel <= SEL_CTX4)
 				fd = sel - SEL_CTX1 + '1';
 			else
