@@ -315,4 +315,4 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 2. Copyright © 2014-2016 Dimitris Papastamos
 3. Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)
 
-Contributions are welcome. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/324).
+Contributions are welcome. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/329).
