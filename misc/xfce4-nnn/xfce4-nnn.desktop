@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=xfce4-nnn
+Comment=Run NNN manager in xfce4-terminal
+Exec=xfce4-terminal -e 'bash -ilc nnn'
+Icon=utilities-terminal
+Terminal=false
+Type=Application
+Categories=GTK;System;TerminalEmulator;
+StartupNotify=true
