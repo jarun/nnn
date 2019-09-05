@@ -2779,7 +2779,7 @@ static bool show_help(const char *path)
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
 		"1ORDER TOGGLES\n"
 		 "b^J  du                S  Apparent du\n"
-		  "cs  Size    E  Extn   t  Time modified\n"
+		  "cs  Size     E  Extn  t  Time modified\n"
 		"1MISC\n"
 	       "9! ^]  Shell   ^N  Note  L  Lock   \n"
 	       "9R ^V  Pick plugin  F12 xK  Run plugin key K\n"
