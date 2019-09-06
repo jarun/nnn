@@ -42,15 +42,6 @@ Download the `getplugs` plugin and execute it anywhere to get all the plugins in
 
 **NOTE:** `getplugs` also downloads the launcher `nlaunch` and tries to place it at `/usr/local/bin/` using `sudo`. If it fails you have to place `nlauch` manually somewhere in your `$PATH`.
 
-## File access from plugins
-
-Plugins can access:
-- all files in the directory (`nnn` switches to the dir where the plugin is to be run so the dir is `$PWD` for the plugin)
-- the current file under the cursor (the file name is passed as the argument to a plugin)
-- the current selection (by reading the file `.selection` in config dir, see the plugin `ndiff`)
-
-Each script has a _Description_ section which provides more details on what the script does, if applicable.
-
 ## Usage
 
 There are 2 ways to run plugins:
@@ -62,6 +53,15 @@ There are 2 ways to run plugins:
    With this, plugin `fzy-open` can be run with the keybind <kbd>xo</kbd>, `mocplay` can be run with <kbd>xp</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen. Up to 10 plugins can have such keybinds.
 
 2. Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
+
+## File access from plugins
+
+Plugins can access:
+- all files in the directory (`nnn` switches to the dir where the plugin is to be run so the dir is `$PWD` for the plugin)
+- the current file under the cursor (the file name is passed as the argument to a plugin)
+- the current selection (by reading the file `.selection` in config dir, see the plugin `ndiff`)
+
+Each script has a _Description_ section which provides more details on what the script does, if applicable.
 
 ## Create your own plugins
 
