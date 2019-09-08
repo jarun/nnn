@@ -195,21 +195,21 @@ static struct key bindings[] = {
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
 	{ KEY_F(5),       SEL_REDRAW },
-	/* Copy currently selected file path */
+	/* Select current file path */
 	{ CONTROL('K'),   SEL_SEL },
 	{ ' ',            SEL_SEL },
-	/* Toggle copy multiple file paths */
+	/* Toggle select multiple files */
 	{ 'K',            SEL_SELMUL },
 	{ CONTROL('Y'),   SEL_SELMUL },
 	/* Select all files in current dir */
 	{ 'Y',            SEL_SELALL },
 	/* Show list of copied files */
 	{ 'y',            SEL_SELLST },
-	/* Copy from copy buffer */
+	/* Copy from selection buffer */
 	{ 'P',            SEL_CP },
-	/* Move from copy buffer */
+	/* Move from selection buffer */
 	{ 'V',            SEL_MV },
-	/* Delete from copy buffer */
+	/* Delete from selection buffer */
 	{ 'X',            SEL_RMMUL },
 	/* Delete currently selected */
 	{ CONTROL('X'),   SEL_RM },

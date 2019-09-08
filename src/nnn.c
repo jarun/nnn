@@ -140,7 +140,7 @@
 
 /* Entry flags */
 #define DIR_OR_LINK_TO_DIR 0x1
-#define FILE_COPIED 0x10
+#define FILE_SELECTED 0x10
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE    0x00  /* no flag set */
@@ -213,7 +213,7 @@ typedef struct {
 	uint blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
 	uint extnorder  : 1;  /* Order by extension */
 	uint showhidden : 1;  /* Set to show hidden files */
-	uint copymode   : 1;  /* Set when copying files */
+	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
 	uint reserved   : 7;
@@ -254,7 +254,7 @@ static settings cfg = {
 	0, /* blkorder */
 	0, /* extnorder */
 	0, /* showhidden */
-	0, /* copymode */
+	0, /* selmode */
 	0, /* showdetail */
 	1, /* ctxactive */
 	0, /* reserved */
@@ -279,7 +279,7 @@ static int ndents, cur, curscroll, total_dents = ENTRY_INCR;
 static int xlines, xcols;
 static int nselected;
 static uint idle;
-static uint idletimeout, copybufpos, copybuflen;
+static uint idletimeout, selbufpos, selbuflen;
 static char *bmstr;
 static char *pluginstr;
 static char *opener;
@@ -292,7 +292,7 @@ static char *initpath;
 static char *cfgdir;
 static char *g_cppath;
 static char *plugindir;
-static char *pnamebuf, *pcopybuf;
+static char *pnamebuf, *pselbuf;
 static struct entry *dents;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
@@ -576,7 +576,7 @@ static void printerr(int linenum)
 	perror(xitoa(linenum));
 	if (!cfg.picker && g_cppath)
 		unlink(g_cppath);
-	free(pcopybuf);
+	free(pselbuf);
 	exit(1);
 }
 
@@ -793,31 +793,31 @@ static void writecp(const char *buf, const size_t buflen)
 
 static void appendfpath(const char *path, const size_t len)
 {
-	if ((copybufpos >= copybuflen) || ((len + 3) > (copybuflen - copybufpos))) {
-		copybuflen += PATH_MAX;
-		pcopybuf = xrealloc(pcopybuf, copybuflen);
-		if (!pcopybuf)
+	if ((selbufpos >= selbuflen) || ((len + 3) > (selbuflen - selbufpos))) {
+		selbuflen += PATH_MAX;
+		pselbuf = xrealloc(pselbuf, selbuflen);
+		if (!pselbuf)
 			errexit();
 	}
 
-	copybufpos += xstrlcpy(pcopybuf + copybufpos, path, len);
+	selbufpos += xstrlcpy(pselbuf + selbufpos, path, len);
 }
 
 /* Write selected file paths to fd, linefeed separated */
 static size_t selectiontofd(int fd, uint *pcount)
 {
 	uint lastpos, count = 0;
-	char *pbuf = pcopybuf;
+	char *pbuf = pselbuf;
 	size_t pos = 0, len;
 	ssize_t r;
 
 	if (pcount)
 		*pcount = 0;
 
-	if (!copybufpos)
+	if (!selbufpos)
 		return 0;
 
-	lastpos = copybufpos - 1;
+	lastpos = selbufpos - 1;
 
 	while (pos <= lastpos) {
 		len = strlen(pbuf);
@@ -848,7 +848,7 @@ static bool showcplist(void)
 	int fd;
 	size_t pos;
 
-	if (!copybufpos)
+	if (!selbufpos)
 		return FALSE;
 
 	fd = create_tmp_file();
@@ -860,7 +860,7 @@ static bool showcplist(void)
 	pos = selectiontofd(fd, NULL);
 
 	close(fd);
-	if (pos && pos == copybufpos)
+	if (pos && pos == selbufpos)
 		spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
 	unlink(g_tmpfpath);
 
@@ -894,7 +894,7 @@ static bool cpsafe(void)
 	}
 
 	/* Warn if selection not completed */
-	if (cfg.copymode) {
+	if (cfg.selmode) {
 		printmsg("finish selection first");
 		return FALSE;
 	}
@@ -908,15 +908,14 @@ static bool cpsafe(void)
 	return TRUE;
 }
 
-/* Reset copy indicators */
+/* Reset selection indicators */
 static void resetcpind(void)
 {
 	int r = 0;
 
-	/* Reset copy indicators */
 	for (; r < ndents; ++r)
-		if (dents[r].flags & FILE_COPIED)
-			dents[r].flags &= ~FILE_COPIED;
+		if (dents[r].flags & FILE_SELECTED)
+			dents[r].flags &= ~FILE_SELECTED;
 }
 
 /* Initialize curses mode */
@@ -1217,7 +1216,7 @@ static bool batch_rename(const char *path)
 		return ret;
 	}
 
-	if (!copybufpos) {
+	if (!selbufpos) {
 		if (!ndents)
 			return TRUE;
 
@@ -1232,7 +1231,7 @@ static bool batch_rename(const char *path)
 	close(fd2);
 
 	if (dir)
-		copybufpos = 0;
+		selbufpos = 0;
 
 	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
 
@@ -2019,12 +2018,12 @@ static size_t mkpath(char *dir, char *name, char *out)
 static int xlink(char *suffix, char *path, char *buf, int *presel, int type)
 {
 	int count = 0;
-	char *pbuf = pcopybuf, *fname;
+	char *pbuf = pselbuf, *fname;
 	size_t pos = 0, len, r;
 	int (*link_fn)(const char *, const char *) = NULL;
 
 	/* Check if selection is empty */
-	if (!copybufpos) {
+	if (!selbufpos) {
 		printwait(messages[NONE_SELECTED], presel);
 		return -1;
 	}
@@ -2034,7 +2033,7 @@ static int xlink(char *suffix, char *path, char *buf, int *presel, int type)
 	else /* hard link */
 		link_fn = &link;
 
-	while (pos < copybufpos) {
+	while (pos < selbufpos) {
 		len = strlen(pbuf);
 		fname = xbasename(pbuf);
 		r = mkpath(path, fname, buf);
@@ -2307,7 +2306,7 @@ static void printent(const struct entry *ent, int sel, uint namecols)
 	if (sel)
 		attron(A_REVERSE);
 
-	addch((ent->flags & FILE_COPIED) ? '+' : ' ');
+	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 	addwstr(wstr);
 	if (ind)
 		addch(ind);
@@ -2320,7 +2319,7 @@ static void printent(const struct entry *ent, int sel, uint namecols)
 static void printent_long(const struct entry *ent, int sel, uint namecols)
 {
 	char timebuf[18], permbuf[4], ind1 = '\0', ind2[] = "\0\0";
-	const char cp = (ent->flags & FILE_COPIED) ? '+' : ' ';
+	const char cp = (ent->flags & FILE_SELECTED) ? '+' : ' ';
 
 	/* Timestamp */
 	strftime(timebuf, 18, "%F %R", localtime(&ent->t));
@@ -2386,9 +2385,9 @@ static void (*printptr)(const struct entry *ent, int sel, uint namecols) = &prin
 static void savecurctx(settings *curcfg, char *path, char *curname, int r /* next context num */)
 {
 	settings cfg = *curcfg;
-	bool copymode = cfg.copymode ? TRUE : FALSE;
+	bool selmode = cfg.selmode ? TRUE : FALSE;
 
-#ifdef DIR_LIMITED_COPY
+#ifdef DIR_LIMITED_SELECTION
 	g_crc = 0;
 #endif
 	/* Save current context */
@@ -2412,8 +2411,8 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 		g_ctx[r].c_cfg.runplugin = 0;
 	}
 
-	/* Continue copy mode */
-	cfg.copymode = copymode;
+	/* Continue selection mode */
+	cfg.selmode = selmode;
 	cfg.curctx = r;
 
 	*curcfg = cfg;
@@ -3164,10 +3163,10 @@ static void redraw(char *path)
 	/* Enforce scroll/cursor invariants */
 	move_cursor(cur, 1);
 
-#ifdef DIR_LIMITED_COPY
-	if (cfg.copymode)
+#ifdef DIR_LIMITED_SELECTION
+	if (cfg.selmode)
 		if (g_crc != crc8fast((uchar *)dents, ndents * sizeof(struct entry))) {
-			cfg.copymode = 0;
+			cfg.selmode = 0;
 			DPRINTF_S("selection off");
 		}
 #endif
@@ -3239,7 +3238,7 @@ static void redraw(char *path)
 
 	if (ndents) {
 		char sort[] = "\0 ";
-		char copymode[] = "\0 ";
+		char selmode[] = "\0 ";
 
 		if (cfg.mtimeorder)
 			sort[0] = cfg.mtime ? 'T' : 'A';
@@ -3248,19 +3247,19 @@ static void redraw(char *path)
 		else if (cfg.extnorder)
 			sort[0] = 'E';
 
-		if (cfg.copymode)
-			copymode[0] = 'Y';
+		if (cfg.selmode)
+			selmode[0] = 'Y';
 
 		/* We need to show filename as it may be truncated in directory listing */
 		if (!cfg.showdetail || !cfg.blkorder)
 			mvprintw(lastln, 0, "%d/%d (%d) %s%s[%s]\n", cur + 1, ndents, nselected,
-				 copymode, sort, unescape(dents[cur].name, NAME_MAX, NULL));
+				 selmode, sort, unescape(dents[cur].name, NAME_MAX, NULL));
 		else {
 			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
 			mvprintw(lastln, 0, "%d/%d (%d) %s%cu: %s (%lu files) free: %s [%s]\n",
-				 cur + 1, ndents, nselected, copymode, c, buf, num_files,
+				 cur + 1, ndents, nselected, selmode, c, buf, num_files,
 				 coolsize(get_fs_info(path, FREE)),
 				 unescape(dents[cur].name, NAME_MAX, NULL));
 		}
@@ -3274,7 +3273,7 @@ static void browse(char *ipath)
 	char mark[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
-	int r = -1, fd, presel, copystartid = 0, copyendid = 0, onscreen;
+	int r = -1, fd, presel, selstartid = 0, selendid = 0, onscreen;
 	enum action sel;
 	bool dir_changed = FALSE;
 	struct stat sb;
@@ -3517,7 +3516,7 @@ nochange:
 				if (cfg.picker && sel == SEL_GOIN) {
 					r = mkpath(path, dents[cur].name, newpath);
 					appendfpath(newpath, r);
-					writecp(pcopybuf, copybufpos - 1);
+					writecp(pselbuf, selbufpos - 1);
 					return;
 				}
 
@@ -3812,7 +3811,7 @@ nochange:
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				cfg.extnorder = 0;
-				cfg.copymode = 0;
+				cfg.selmode = 0;
 				break;
 			case SEL_ASIZE:
 				cfg.apparentsz ^= 1;
@@ -3838,7 +3837,7 @@ nochange:
 				cfg.mtimeorder = 0;
 				cfg.sizeorder = 0;
 				cfg.extnorder = 0;
-				cfg.copymode = 0;
+				cfg.selmode = 0;
 				break;
 			case SEL_EXTN:
 				cfg.extnorder ^= 1;
@@ -3846,7 +3845,7 @@ nochange:
 				cfg.mtimeorder = 0;
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
-				cfg.copymode = 0;
+				cfg.selmode = 0;
 				break;
 			default: /* SEL_MTIME */
 				cfg.mtimeorder ^= 1;
@@ -3854,7 +3853,7 @@ nochange:
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				cfg.extnorder = 0;
-				cfg.copymode = 0;
+				cfg.selmode = 0;
 				break;
 			}
 
@@ -3954,28 +3953,29 @@ nochange:
 			if (!ndents)
 				goto nochange;
 
-			if (cfg.copymode) {
+			if (cfg.selmode) {
 				/*
-				 * Clear the selection file on first copy.
+				 * Clear the selection file on first select.
 				 *
 				 * This ensures that when the first file path is
 				 * copied into memory (but not written to tmp file
 				 * yet to save on writes), the tmp file is cleared.
 				 * The user may be in the middle of selection mode op
 				 * and issue a cp, mv of multi-rm assuming the files
-				 * in the copy list would be affected. However, these
-				 * ops read the source file paths from the tmp file.
+				 * in the selection list would be affected. However,
+				 * these operations read the source file paths from
+				 * the temporary selection file.
 				 */
 				if (!nselected)
 					writecp(NULL, 0);
 
 				/* Do not select if already selected */
-				if (!(dents[cur].flags & FILE_COPIED)) {
+				if (!(dents[cur].flags & FILE_SELECTED)) {
 					r = mkpath(path, dents[cur].name, newpath);
 					appendfpath(newpath, r);
 
 					++nselected;
-					dents[cur].flags |= FILE_COPIED;
+					dents[cur].flags |= FILE_SELECTED;
 				}
 
 				/* move cursor to the next entry if this is not the last entry */
@@ -3984,30 +3984,30 @@ nochange:
 			} else {
 				r = mkpath(path, dents[cur].name, newpath);
 
-				if (copybufpos) {
+				if (selbufpos) {
 					resetcpind();
 
-					/* Keep the copy buf in sync */
-					copybufpos = 0;
+					/* Keep the selection buffer in sync */
+					selbufpos = 0;
 				}
 				appendfpath(newpath, r);
 
 				writecp(newpath, r - 1); /* Truncate NULL from end */
 				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
-				dents[cur].flags |= FILE_COPIED;
+				dents[cur].flags |= FILE_SELECTED;
 			}
 			break;
 		case SEL_SELMUL:
-			cfg.copymode ^= 1;
-			if (cfg.copymode) {
-				if (copybufpos) {
+			cfg.selmode ^= 1;
+			if (cfg.selmode) {
+				if (selbufpos) {
 					resetcpind();
 					writecp(NULL, 0);
-					copybufpos = 0;
+					selbufpos = 0;
 				}
 				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
-				copystartid = cur;
+				selstartid = cur;
 				nselected = 0;
 				mvprintw(xlines - 1, 0, "selection on\n");
 				xdelay();
@@ -4015,45 +4015,45 @@ nochange:
 			}
 
 			if (!nselected) { /* Handle range selection */
-#ifndef DIR_LIMITED_COPY
+#ifndef DIR_LIMITED_SELECTION
 				if (g_crc != crc8fast((uchar *)dents,
 						      ndents * sizeof(struct entry))) {
-					cfg.copymode = 0;
+					cfg.selmode = 0;
 					printwait("dir/content changed", &presel);
 					goto nochange;
 				}
 #endif
-				if (cur < copystartid) {
-					copyendid = copystartid;
-					copystartid = cur;
+				if (cur < selstartid) {
+					selendid = selstartid;
+					selstartid = cur;
 				} else
-					copyendid = cur;
+					selendid = cur;
 			} // fallthrough
 		case SEL_SELALL:
 			if (sel == SEL_SELALL) {
 				if (!ndents)
 					goto nochange;
 
-				cfg.copymode = 0;
-				copybufpos = 0;
+				cfg.selmode = 0;
+				selbufpos = 0;
 				nselected = 0; /* Override single/multi path selection */
-				copystartid = 0;
-				copyendid = ndents - 1;
+				selstartid = 0;
+				selendid = ndents - 1;
 			}
 
-			if ((!nselected && copystartid < copyendid) || sel == SEL_SELALL) {
-				for (r = copystartid; r <= copyendid; ++r) {
+			if ((!nselected && selstartid < selendid) || sel == SEL_SELALL) {
+				for (r = selstartid; r <= selendid; ++r) {
 					appendfpath(newpath, mkpath(path, dents[r].name, newpath));
-					dents[r].flags |= FILE_COPIED;
+					dents[r].flags |= FILE_SELECTED;
 				}
 
-				nselected = copyendid - copystartid + 1;
+				nselected = selendid - selstartid + 1;
 				mvprintw(xlines - 1, 0, "%d selected\n", nselected);
 				xdelay();
 			}
 
-			if (copybufpos) { /* File path(s) written to the buffer */
-				writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
+			if (selbufpos) { /* File path(s) written to the buffer */
+				writecp(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
 				if (nselected) { /* Some files cherry picked */
@@ -4433,8 +4433,8 @@ nochange:
 				/* In vim picker mode, clear selection and exit */
 				if (cfg.picker) {
 					/* Picker mode: reset buffer or clear file */
-					if (copybufpos)
-						cfg.pickraw ? copybufpos = 0 : writecp(NULL, 0);
+					if (selbufpos)
+						cfg.pickraw ? selbufpos = 0 : writecp(NULL, 0);
 				} else if (!write_lastdir(path)) {
 					presel = MSGWAIT;
 					goto nochange;
@@ -4449,7 +4449,7 @@ nochange:
 			};
 
 			if (r != fd) {
-				bool copymode = cfg.copymode ? TRUE : FALSE;
+				bool selmode = cfg.selmode ? TRUE : FALSE;
 
 				g_ctx[fd].c_cfg.ctxactive = 0;
 
@@ -4465,8 +4465,8 @@ nochange:
 
 				cfg = g_ctx[r].c_cfg;
 
-				/* Continue copy mode */
-				cfg.copymode = copymode;
+				/* Continue selection mode */
+				cfg.selmode = selmode;
 				cfg.curctx = r;
 				setdirwatch();
 				goto begin;
@@ -4924,16 +4924,16 @@ int main(int argc, char *argv[])
 #endif
 
 	if (cfg.pickraw) {
-		if (copybufpos) {
+		if (selbufpos) {
 			opt = selectiontofd(1, NULL);
-			if (opt != (int)(copybufpos))
+			if (opt != (int)(selbufpos))
 				xerror();
 		}
 	} else if (!cfg.picker && g_cppath)
 		unlink(g_cppath);
 
-	/* Free the copy buffer */
-	free(pcopybuf);
+	/* Free the selection buffer */
+	free(pselbuf);
 
 #ifdef LINUX_INOTIFY
 	/* Shutdown inotify */
