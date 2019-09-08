@@ -536,9 +536,12 @@ static uint xatoi(const char *str)
 static char *xitoa(uint val)
 {
 	static char ascbuf[32] = {0};
-	int i;
+	int i = 30;
 
-	for (i = 30; val && i; --i, val /= 10)
+	if (!val)
+		return "0";
+
+	for (; val && i; --i, val /= 10)
 		ascbuf[i] = '0' + (val % 10);
 
 	return &ascbuf[++i];
