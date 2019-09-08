@@ -277,6 +277,7 @@ static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static int ndents, cur, curscroll, total_dents = ENTRY_INCR;
 static int xlines, xcols;
+static int nselected;
 static uint idle;
 static uint idletimeout, copybufpos, copybuflen;
 static char *bmstr;
@@ -3235,6 +3236,7 @@ static void redraw(char *path)
 
 	if (ndents) {
 		char sort[] = "\0 ";
+		char copymode[] = "\0 ";
 
 		if (cfg.mtimeorder)
 			sort[0] = cfg.mtime ? 'T' : 'A';
@@ -3243,16 +3245,19 @@ static void redraw(char *path)
 		else if (cfg.extnorder)
 			sort[0] = 'E';
 
+		if (cfg.copymode)
+			copymode[0] = 'Y';
+
 		/* We need to show filename as it may be truncated in directory listing */
 		if (!cfg.showdetail || !cfg.blkorder)
-			mvprintw(lastln, 0, "%d/%d %s[%s]\n", cur + 1, ndents, sort,
-				 unescape(dents[cur].name, NAME_MAX, NULL));
+			mvprintw(lastln, 0, "%d/%d (%d) %s%s[%s]\n", cur + 1, ndents, nselected,
+				 copymode, sort, unescape(dents[cur].name, NAME_MAX, NULL));
 		else {
 			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
-			mvprintw(lastln, 0, "%d/%d %cu: %s (%lu files) free: %s [%s]\n",
-				 cur + 1, ndents, c, buf, num_files,
+			mvprintw(lastln, 0, "%d/%d (%d) %s%cu: %s (%lu files) free: %s [%s]\n",
+				 cur + 1, ndents, nselected, copymode, c, buf, num_files,
 				 coolsize(get_fs_info(path, FREE)),
 				 unescape(dents[cur].name, NAME_MAX, NULL));
 		}
@@ -3266,7 +3271,7 @@ static void browse(char *ipath)
 	char mark[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
-	int r = -1, fd, presel, ncp = 0, copystartid = 0, copyendid = 0, onscreen;
+	int r = -1, fd, presel, copystartid = 0, copyendid = 0, onscreen;
 	enum action sel;
 	bool dir_changed = FALSE;
 	struct stat sb;
@@ -3958,7 +3963,7 @@ nochange:
 				 * in the copy list would be affected. However, these
 				 * ops read the source file paths from the tmp file.
 				 */
-				if (!ncp)
+				if (!nselected)
 					writecp(NULL, 0);
 
 				/* Do not select if already selected */
@@ -3966,7 +3971,7 @@ nochange:
 					r = mkpath(path, dents[cur].name, newpath);
 					appendfpath(newpath, r);
 
-					++ncp;
+					++nselected;
 					dents[cur].flags |= FILE_COPIED;
 				}
 
@@ -4000,13 +4005,13 @@ nochange:
 				}
 				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
 				copystartid = cur;
-				ncp = 0;
+				nselected = 0;
 				mvprintw(xlines - 1, 0, "selection on\n");
 				xdelay();
 				continue;
 			}
 
-			if (!ncp) { /* Handle range selection */
+			if (!nselected) { /* Handle range selection */
 #ifndef DIR_LIMITED_COPY
 				if (g_crc != crc8fast((uchar *)dents,
 						      ndents * sizeof(struct entry))) {
@@ -4028,19 +4033,19 @@ nochange:
 
 				cfg.copymode = 0;
 				copybufpos = 0;
-				ncp = 0; /* Override single/multi path selection */
+				nselected = 0; /* Override single/multi path selection */
 				copystartid = 0;
 				copyendid = ndents - 1;
 			}
 
-			if ((!ncp && copystartid < copyendid) || sel == SEL_SELALL) {
+			if ((!nselected && copystartid < copyendid) || sel == SEL_SELALL) {
 				for (r = copystartid; r <= copyendid; ++r) {
 					appendfpath(newpath, mkpath(path, dents[r].name, newpath));
 					dents[r].flags |= FILE_COPIED;
 				}
 
-				ncp = copyendid - copystartid + 1;
-				mvprintw(xlines - 1, 0, "%d selected\n", ncp);
+				nselected = copyendid - copystartid + 1;
+				mvprintw(xlines - 1, 0, "%d selected\n", nselected);
 				xdelay();
 			}
 
@@ -4048,8 +4053,8 @@ nochange:
 				writecp(pcopybuf, copybufpos - 1); /* Truncate NULL from end */
 				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
-				if (ncp) { /* Some files cherry picked */
-					mvprintw(xlines - 1, 0, "%d selected\n", ncp);
+				if (nselected) { /* Some files cherry picked */
+					mvprintw(xlines - 1, 0, "%d selected\n", nselected);
 					xdelay();
 				}
 			} else {
