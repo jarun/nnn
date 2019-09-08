@@ -3154,6 +3154,7 @@ static void redraw(char *path)
 	int i, attrs;
 	char buf[12];
 	char c;
+	char *ptr = path, *base = xbasename(path);
 
 	--lastln;
 
@@ -3206,7 +3207,23 @@ static void redraw(char *path)
 	/* No text wrapping in cwd line, store the truncating char in c */
 	c = path[ncols - 11];
 	path[ncols - 11] = '\0';
-	printw("%s\n\n", path);
+
+	/* Print path */
+	if (base - ptr <= 1)
+		printw("%s\n\n", path);
+	else {
+		base = base - 1;
+		while (ptr < base) {
+			if (*ptr == '/') {
+				addch(*ptr);
+				addch(*(++ptr));
+			}
+			++ptr;
+		}
+
+		printw("/%s\n\n", base + 1);
+	}
+
 	attroff(A_UNDERLINE);
 	path[ncols - 11] = c; /* Restore c */
 
