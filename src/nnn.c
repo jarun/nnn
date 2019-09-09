@@ -549,7 +549,7 @@ static char *xitoa(uint val)
 
 #ifdef KEY_RESIZE
 /* Clear the old prompt */
-static inline void clearoldprompt()
+static inline void clearoldprompt(void)
 {
 	move(xlines - 1, 0);
 	clrtoeol();
@@ -3152,9 +3152,10 @@ static void redraw(char *path)
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int lastln = xlines, onscreen = xlines - 4;
 	int i, attrs;
+	size_t len = strlen(path);
 	char buf[12];
 	char c;
-	char *ptr = path, *base = xbasename(path);
+	char *ptr = path, *base;
 
 	--lastln;
 
@@ -3204,28 +3205,34 @@ static void redraw(char *path)
 	printw("\b] "); /* 10 chars printed in total for contexts - "[1 2 3 4] " */
 
 	attron(A_UNDERLINE);
-	/* No text wrapping in cwd line, store the truncating char in c */
-	c = path[ncols - 11];
-	path[ncols - 11] = '\0';
 
 	/* Print path */
-	if (base - ptr <= 1)
-		printw("%s\n\n", path);
+	if ((len + 11) <= (size_t)ncols)
+		addnstr(path, ncols - 11);
 	else {
-		base = base - 1;
-		while (ptr < base) {
-			if (*ptr == '/') {
-				addch(*ptr);
-				addch(*(++ptr));
+		base = xbasename(path);
+		if ((base - ptr) <= 1)
+			addnstr(path, ncols - 11);
+		else {
+			len = 0;
+			--base;
+			while (ptr < base) {
+				if (*ptr == '/') {
+					addch(*ptr);
+					addch(*(++ptr));
+					len += 2; /* 2 characters added */
+				}
+				++ptr;
 			}
-			++ptr;
-		}
 
-		printw("/%s\n\n", base + 1);
+			addnstr(base, ncols - (11 + len + 1));
+		}
 	}
 
+	/* Go to first entry */
+	move(2, 0);
+
 	attroff(A_UNDERLINE);
-	path[ncols - 11] = c; /* Restore c */
 
 	/* Calculate the number of cols available to print entry name */
 	if (cfg.showdetail) {
