@@ -585,7 +585,7 @@ static void printerr(int linenum)
 static void printprompt(const char *str)
 {
 	clearprompt();
-	printw(str);
+	addstr(str);
 }
 
 static int get_input(const char *prompt)
@@ -3182,27 +3182,27 @@ static void redraw(char *path)
 	DPRINTF_D(cur);
 	DPRINTF_S(path);
 
-	printw("[");
+	addch('[');
 	for (i = 0; i < CTX_MAX; ++i) {
-		if (!g_ctx[i].c_cfg.ctxactive)
-			printw("%d ", i + 1);
-		else if (cfg.curctx != i) {
-			attrs = COLOR_PAIR(i + 1) | A_BOLD | A_UNDERLINE;
-			attron(attrs);
-			printw("%d", i + 1);
-			attroff(attrs);
-			printw(" ");
+		if (!g_ctx[i].c_cfg.ctxactive) {
+			addch(i + '1');
+			addch(' ');
 		} else {
-			/* Print current context in reverse */
-			attrs = COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE;
+			if (cfg.curctx != i)
+				/* Underline active contexts */
+				attrs = COLOR_PAIR(i + 1) | A_BOLD | A_UNDERLINE;
+			else
+				/* Print current context in reverse */
+				attrs = COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE;
+
 			attron(attrs);
-			printw("%d", i + 1);
+			addch(i + '1');
 			attroff(attrs);
-			printw(" ");
+			addch(' ');
 		}
 	}
 
-	printw("\b] "); /* 10 chars printed in total for contexts - "[1 2 3 4] " */
+	addstr("\b] "); /* 10 chars printed for contexts - "[1 2 3 4] " */
 
 	attron(A_UNDERLINE);
 
