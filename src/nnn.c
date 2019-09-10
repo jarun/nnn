@@ -3152,7 +3152,6 @@ static void redraw(char *path)
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int lastln = xlines, onscreen = xlines - 4;
 	int i, attrs;
-	size_t len = strlen(path);
 	char buf[12];
 	char c;
 	char *ptr = path, *base;
@@ -3207,25 +3206,26 @@ static void redraw(char *path)
 	attron(A_UNDERLINE);
 
 	/* Print path */
-	if ((len + 11) <= (size_t)ncols)
+	i = (int)strlen(path);
+	if ((i + 11) <= ncols)
 		addnstr(path, ncols - 11);
 	else {
 		base = xbasename(path);
 		if ((base - ptr) <= 1)
 			addnstr(path, ncols - 11);
 		else {
-			len = 0;
+			i = 0;
 			--base;
 			while (ptr < base) {
 				if (*ptr == '/') {
 					addch(*ptr);
 					addch(*(++ptr));
-					len += 2; /* 2 characters added */
+					i += 2; /* 2 characters added */
 				}
 				++ptr;
 			}
 
-			addnstr(base, ncols - (11 + len + 1));
+			addnstr(base, ncols - (11 + i));
 		}
 	}
 
