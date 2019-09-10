@@ -131,6 +131,7 @@
 #define ASCII_MAX 128
 #define EXEC_ARGS_MAX 8
 #define SCROLLOFF 3
+#define MIN_DISPLAY_COLS 10
 #define LONG_SIZE sizeof(ulong)
 #define ARCHIVE_CMD_LEN 16
 
@@ -3172,8 +3173,8 @@ static void redraw(char *path)
 		}
 #endif
 
-	/* Fail redraw if < than 11 columns, context info prints 10 chars */
-	if (ncols < 11) {
+	/* Fail redraw if < than 10 columns, context info prints 10 chars */
+	if (ncols < MIN_DISPLAY_COLS) {
 		printmsg("too few columns!");
 		return;
 	}
@@ -3207,25 +3208,30 @@ static void redraw(char *path)
 
 	/* Print path */
 	i = (int)strlen(path);
-	if ((i + 11) <= ncols)
-		addnstr(path, ncols - 11);
+	if ((i + MIN_DISPLAY_COLS) <= ncols)
+		addnstr(path, ncols - MIN_DISPLAY_COLS);
 	else {
 		base = xbasename(path);
 		if ((base - ptr) <= 1)
-			addnstr(path, ncols - 11);
+			addnstr(path, ncols - MIN_DISPLAY_COLS);
 		else {
 			i = 0;
 			--base;
 			while (ptr < base) {
 				if (*ptr == '/') {
+					i += 2; /* 2 characters added */
+					if (ncols < i + MIN_DISPLAY_COLS) {
+						base = NULL; /* Can't print more characters */
+						break;
+					}
+
 					addch(*ptr);
 					addch(*(++ptr));
-					i += 2; /* 2 characters added */
 				}
 				++ptr;
 			}
 
-			addnstr(base, ncols - (11 + i));
+			addnstr(base, ncols - (MIN_DISPLAY_COLS + i));
 		}
 	}
 
@@ -3240,11 +3246,11 @@ static void redraw(char *path)
 		if (ncols < 36) {
 			cfg.showdetail ^= 1;
 			printptr = &printent;
-			ncols -= 5;
+			ncols -= 3; /* Preceding space, indicator, newline */
 		} else
 			ncols -= 35;
 	} else
-		ncols -= 3;
+		ncols -= 3; /* Preceding space, indicator, newline */
 
 	attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 	cfg.dircolor = 1;
