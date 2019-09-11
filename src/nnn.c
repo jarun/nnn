@@ -1220,21 +1220,27 @@ static bool batch_rename(const char *path)
 		return ret;
 	}
 
-	if (!selbufpos) {
-		if (!ndents)
-			return TRUE;
+	if (selbufpos) {
+		i = get_input("rename selection? [y/Y confirms]");
+		if (i != 'y' && i != 'Y') {
+			if (!ndents)
+				return TRUE;
 
+			selbufpos = 0; /* Clear the selection */
+			dir = TRUE;
+		}
+	} else
+		dir = TRUE; /* Rename entries in dir */
+
+	if (dir)
 		for (i = 0; i < ndents; ++i)
 			appendfpath(dents[i].name, NAME_MAX);
-
-		dir = TRUE;
-	}
 
 	selectiontofd(fd1, &count);
 	selectiontofd(fd2, NULL);
 	close(fd2);
 
-	if (dir)
+	if (dir) /* Don't retain dir entries in selection */
 		selbufpos = 0;
 
 	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
@@ -1243,10 +1249,9 @@ static bool batch_rename(const char *path)
 	if ((fd2 = open(g_tmpfpath, O_RDONLY)) == -1)
 		goto finish;
 
-	while ((i = read(fd2, buf, sizeof(buf))) > 0) {
+	while ((i = read(fd2, buf, sizeof(buf))) > 0)
 		while (i)
 			lines += (buf[--i] == '\n');
-	}
 
 	if (i < 0)
 		goto finish;
