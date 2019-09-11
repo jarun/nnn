@@ -151,6 +151,7 @@
 #define F_NORMAL  0x08  /* spawn child process in non-curses regular CLI mode */
 #define F_CMD     0x10  /* run command - show results before exit (must have F_NORMAL) */
 #define F_CLI     (F_NORMAL | F_MULTI)
+#define F_SILENT  (F_CLI | F_NOTRACE)
 
 /* CRC8 macros */
 #define UCHAR_BIT_WIDTH  (sizeof(unsigned char) << 3)
@@ -4279,7 +4280,7 @@ nochange:
 			if (sel == SEL_RENAME) {
 				/* Rename the file */
 				if (dup == 'd')
-					spawn("cp -r", dents[cur].name, tmp, path, F_CLI | F_NOTRACE);
+					spawn("cp -rp", dents[cur].name, tmp, path, F_SILENT);
 				else if (renameat(fd, dents[cur].name, fd, tmp) != 0) {
 					close(fd);
 					printwarn(&presel);
@@ -4535,7 +4536,7 @@ static void usage(void)
 		" -a      use access time\n"
 		" -b key  open bookmark key\n"
 		" -d      detail mode\n"
-		" -f      run filter as cmd on ^P\n"
+		" -f      run filter as cmd on prompt key\n"
 		" -H      show hidden files\n"
 		" -i      nav-as-you-type mode\n"
 		" -n      version sort\n"
