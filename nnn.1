@@ -9,6 +9,7 @@
 .Op Ar -a
 .Op Ar -b key
 .Op Ar -d
+.Op Ar -f
 .Op Ar -H
 .Op Ar -i
 .Op Ar -n
@@ -45,6 +46,9 @@ supports the following options:
 .Pp
 .Fl d
         detail mode
+.Pp
+.Fl f
+        run filter as command when ^P is pressed
 .Pp
 .Fl H
         show hidden files
@@ -116,6 +120,8 @@ with a '^' (caret) symbol.
 .Pp
 There is a program option to filter entries by substring match instead of regex.
 .Pp
+There is a program option to execute the current filter as a command when \fI^P\fR is pressed.
+.Pp
 In the \fInavigate-as-you-type\fR mode directories are opened in filter mode,
 allowing continuous navigation. Works best with the \fBarrow keys\fR.
 .br
@@ -157,8 +163,7 @@ when dealing with the !, e and p commands respectively. A single combination to 
     NOTE: To run a plugin directly, press 'x' followed by the plugin key.
 .Ed
 .Pp
-\fBNNN_USE_EDITOR:\fR use VISUAL (else EDITOR, preferably CLI, fallback vi) to handle text
-files.
+\fBNNN_USE_EDITOR:\fR use VISUAL (else EDITOR, preferably CLI, fallback vi) to handle text files.
 .Bd -literal
     export NNN_USE_EDITOR=1
 .Ed

@@ -217,7 +217,7 @@ typedef struct {
 	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 7;
+	uint reserved   : 6;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
@@ -230,6 +230,7 @@ typedef struct {
 	uint runplugin  : 1;  /* Choose plugin mode */
 	uint runctx     : 2;  /* The context in which plugin is to be run */
 	uint filter_re  : 1;  /* Use regex filters */
+	uint filtercmd  : 1;  /* Run filter as command on no match */
 	uint trash      : 1;  /* Move removed files to trash */
 	uint mtime      : 1;  /* Use modification time (else access time) */
 } settings;
@@ -270,6 +271,7 @@ static settings cfg = {
 	0, /* runplugin */
 	0, /* runctx */
 	1, /* filter_re */
+	0, /* filtercmd */
 	0, /* trash */
 	1, /* mtime */
 };
@@ -1644,12 +1646,10 @@ static int matches(const char *fltr)
 	ndents = fill(fltr, &re);
 	if (cfg.filter_re)
 		regfree(&re);
-	if (!ndents)
-		return 0;
 
 	qsort(dents, ndents, sizeof(*dents), entrycmp);
 
-	return 0;
+	return ndents;
 }
 
 static int filterentries(char *path)
@@ -1728,23 +1728,21 @@ static int filterentries(char *path)
 		if (r == OK) {
 			/* Handle all control chars in main loop */
 			if (*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^') {
+				DPRINTF_D(*ch);
+				DPRINTF_S(keyname(*ch));
+
+				/* If there's a filter, try a command on ^P */
+				if (cfg.filtercmd && *ch == CONTROL('P') && len > 1) {
+					spawn(shell, "-c", pln, path, F_CLI | F_CMD);
+					*ch = CONTROL('L');
+				}
+
 				if (len == 1)
 					cur = oldcur;
 				goto end;
 			}
 
 			switch (*ch) {
-			case '\r':  /* with nonl(), this is ENTER key value */
-				if (len == 1) {
-					cur = oldcur;
-					goto end;
-				}
-
-				if (matches(pln) == -1)
-					goto end;
-
-				redraw(path);
-				goto end;
 			case '/': /* works as Leader key in filter mode */
 				*ch = CONTROL('_'); // fallthrough
 				if (len == 1)
@@ -4528,7 +4526,7 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"%s: nnn [-a] [-b key] [-d] [-H] [-i] [-n] [-o]\n"
+		"%s: nnn [-a] [-b key] [-d] [-f] [-H] [-i] [-n] [-o]\n"
 		"           [-p file] [-r] [-s] [-S] [-t] [-v] [-h] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
@@ -4537,6 +4535,7 @@ static void usage(void)
 		" -a      use access time\n"
 		" -b key  open bookmark key\n"
 		" -d      detail mode\n"
+		" -f      run filter as cmd on ^P\n"
 		" -H      show hidden files\n"
 		" -i      nav-as-you-type mode\n"
 		" -n      version sort\n"
@@ -4681,7 +4680,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSiab:dnop:rstvh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSiab:dfnop:rstvh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4699,6 +4698,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'b':
 			arg = optarg;
+			break;
+		case 'f':
+			cfg.filtercmd = 1;
 			break;
 		case 'H':
 			cfg.showhidden = 1;

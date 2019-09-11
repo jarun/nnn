@@ -202,7 +202,7 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 #### Cmdline options
 
 ```
-usage: nnn [-a] [-b key] [-d] [-H] [-i] [-n] [-o]
+usage: nnn [-a] [-b key] [-d] [-f] [-H] [-i] [-n] [-o]
            [-p file] [-r] [-s] [-S] [-t] [-v] [-h] [PATH]
 
 The missing terminal file manager for X.
@@ -214,6 +214,7 @@ optional args:
  -a      use access time
  -b key  open bookmark key
  -d      detail mode
+ -f      run filter as cmd on ^P
  -H      show hidden files
  -i      nav-as-you-type mode
  -n      version sort
