@@ -185,9 +185,9 @@ static struct key bindings[] = {
 	/* Toggle sort by size */
 	{ 's',            SEL_FSIZE },
 	/* Sort by apparent size including dir contents */
-	{ 'S',            SEL_ASIZE },
+	{ 'A',            SEL_ASIZE },
 	/* Sort by total block count including dir contents */
-	{ CONTROL('J'),   SEL_BSIZE },
+	{ 'S',            SEL_BSIZE },
 	/* Sort by file extension */
 	{ 'E',            SEL_EXTN },
 	/* Toggle sort by time */

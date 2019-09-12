@@ -2786,7 +2786,7 @@ static bool show_help(const char *path)
 		 "b^F  Extract archive   F  List archive\n"
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
 		"1ORDER TOGGLES\n"
-		 "b^J  du                S  Apparent du\n"
+		  "cS  du                A  Apparent du\n"
 		  "cs  Size     E  Extn  t  Time modified\n"
 		"1MISC\n"
 	       "9! ^]  Shell   ^N  Note  L  Lock   \n"

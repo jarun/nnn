@@ -257,7 +257,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^F  Extract archive   F  List archive
             e  Edit in EDITOR    p  Open in PAGER
  ORDER TOGGLES
-           ^J  du                S  Apparent du
+            S  du                A  Apparent du
             s  Size    E  Extn   t  Time modified
  MISC
          ! ^]  Shell   ^N  Note  L  Lock
