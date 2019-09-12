@@ -3284,18 +3284,31 @@ static void redraw(char *path)
 		if (cfg.selmode)
 			selmode[0] = 'Y';
 
+		/* Get the file extension for regular files */
+		if (S_ISREG(dents[cur].mode)) {
+			i = (int)strlen(dents[cur].name);
+			ptr = xmemrchr((uchar *)dents[cur].name, '.', i);
+			if (ptr)
+				attrs = ptr - dents[cur].name; /* attrs used as tmp var */
+			if (!ptr || (i - attrs) > 5 || (i - attrs) < 2)
+				ptr = "\b";
+		} else
+			ptr = "\b";
+
+		/* Get the unescaped file name */
+		base = unescape(dents[cur].name, NAME_MAX, NULL);
+
 		/* We need to show filename as it may be truncated in directory listing */
 		if (!cfg.showdetail || !cfg.blkorder)
-			mvprintw(lastln, 0, "%d/%d (%d) %s%s[%s]\n", cur + 1, ndents, nselected,
-				 selmode, sort, unescape(dents[cur].name, NAME_MAX, NULL));
+			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s [%s]\n",
+				 cur + 1, ndents, nselected, selmode, sort, ptr, base);
 		else {
 			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
-			mvprintw(lastln, 0, "%d/%d (%d) %s%cu: %s (%lu files) free: %s [%s]\n",
+			mvprintw(lastln, 0, "%d/%d (%d) %s%cu: %s (%lu files) free: %s %s [%s]\n",
 				 cur + 1, ndents, nselected, selmode, c, buf, num_files,
-				 coolsize(get_fs_info(path, FREE)),
-				 unescape(dents[cur].name, NAME_MAX, NULL));
+				 coolsize(get_fs_info(path, FREE)), ptr, base);
 		}
 	} else
 		printmsg("0/0");
