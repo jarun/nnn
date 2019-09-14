@@ -3328,6 +3328,7 @@ static void redraw(char *path)
 	if (ndents) {
 		char sort[] = "\0 ";
 		char selmode[] = "\0 ";
+		pEntry pent = &dents[cur];
 
 		if (cfg.selmode)
 			selmode[0] = 'Y';
@@ -3340,11 +3341,11 @@ static void redraw(char *path)
 			sort[0] = 'E';
 
 		/* Get the file extension for regular files */
-		if (S_ISREG(dents[cur].mode)) {
-			i = (int)strlen(dents[cur].name);
-			ptr = xmemrchr((uchar *)dents[cur].name, '.', i);
+		if (S_ISREG(pent->mode)) {
+			i = (int)strlen(pent->name);
+			ptr = xmemrchr((uchar *)pent->name, '.', i);
 			if (ptr)
-				attrs = ptr - dents[cur].name; /* attrs used as tmp var */
+				attrs = ptr - pent->name; /* attrs used as tmp var */
 			if (!ptr || (i - attrs) > 5 || (i - attrs) < 2)
 				ptr = "\b";
 		} else
@@ -3353,20 +3354,20 @@ static void redraw(char *path)
 		/* We need to show filename as it may be truncated in directory listing */
 		if (!cfg.showdetail && !cfg.blkorder) { /* light mode */
 			/* Timestamp */
-			strftime(buf, 18, "%F %R", localtime(&dents[cur].t));
+			strftime(buf, 18, "%F %R", localtime(&pent->t));
 
 			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s %s %s\n",
 				 cur + 1, ndents, nselected, selmode, sort, buf,
-				 get_lsperms(dents[cur].mode), ptr);
+				 get_lsperms(pent->mode), ptr);
 		} else if (!cfg.blkorder) { /* detail mode */
 			/* Get the unescaped file name */
-			base = unescape(dents[cur].name, NAME_MAX, NULL);
+			base = unescape(pent->name, NAME_MAX, NULL);
 
 			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s [%s]\n",
 				 cur + 1, ndents, nselected, selmode, sort, ptr, base);
 		} else { /* du mode */
 			/* Get the unescaped file name */
-			base = unescape(dents[cur].name, NAME_MAX, NULL);
+			base = unescape(pent->name, NAME_MAX, NULL);
 
 			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
