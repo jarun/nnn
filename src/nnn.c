@@ -3917,6 +3917,7 @@ nochange:
 			case SEL_DETAIL:
 				cfg.showdetail ^= 1;
 				cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
+				cfg.blkorder = 0;
 				continue;
 			case SEL_FSIZE:
 				cfg.sizeorder ^= 1;
