@@ -1740,7 +1740,7 @@ static int filterentries(char *path)
 				/* If there's a filter, try a command on ^P */
 				if (cfg.filtercmd && *ch == CONTROL('P') && len > 1) {
 					spawn(shell, "-c", pln, path, F_CLI | F_CMD);
-					*ch = CONTROL('L');
+					continue;
 				}
 
 				if (len == 1)

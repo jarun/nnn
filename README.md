@@ -51,11 +51,9 @@
 
 `nnn` is a full-featured terminal file manager. It's extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/Performance)**).
 
-`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker.
+`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. 30+ **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** extend the capabilities further. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim). Custom plugins are easy to add.
 
 It runs smoothly on the Raspberry Pi, Termux on Android ([demo video](https://www.youtube.com/watch?v=AbaauM7gUJw)), Linux, macOS, BSD, Cygwin and Linux subsystem for Windows. `nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes.
-
-**[Plugins](https://github.com/jarun/nnn/tree/master/plugins)** can be run with custom keybinds. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim). Custom plugins are easy to add.
 
 Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts, how tos, use cases, chronology and insights.
 
