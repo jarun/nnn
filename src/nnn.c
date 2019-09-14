@@ -2274,6 +2274,61 @@ static char *coolsize(off_t size)
 	return size_buf;
 }
 
+static char get_fileind(mode_t mode)
+{
+	char c = '\0';
+
+	switch (mode & S_IFMT) {
+	case S_IFREG:
+		c = '-';
+		break;
+	case S_IFDIR:
+		c = 'd';
+		break;
+	case S_IFLNK:
+		c = 'l';
+		break;
+	case S_IFSOCK:
+		c = 's';
+		break;
+	case S_IFIFO:
+		c = 'p';
+		break;
+	case S_IFBLK:
+		c = 'b';
+		break;
+	case S_IFCHR:
+		c = 'c';
+		break;
+	default:
+		c = '?';
+		break;
+	}
+
+	return c;
+}
+
+/* Convert a mode field into "ls -l" type perms field. */
+static char *get_lsperms(mode_t mode)
+{
+	static const char * const rwx[] = {"---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx"};
+	static char bits[11] = {'\0'};
+
+	bits[0] = get_fileind(mode);
+	xstrlcpy(&bits[1], rwx[(mode >> 6) & 7], 4);
+	xstrlcpy(&bits[4], rwx[(mode >> 3) & 7], 4);
+	xstrlcpy(&bits[7], rwx[(mode & 7)], 4);
+
+	if (mode & S_ISUID)
+	        bits[3] = (mode & 0100) ? 's' : 'S';  /* user executable */
+	if (mode & S_ISGID)
+	        bits[6] = (mode & 0010) ? 's' : 'l';  /* group executable */
+	if (mode & S_ISVTX)
+	        bits[9] = (mode & 0001) ? 't' : 'T';  /* others executable */
+
+	return bits;
+}
+
 static void printent(const struct entry *ent, int sel, uint namecols)
 {
 	wchar_t *wstr;
@@ -3157,7 +3212,7 @@ static void redraw(char *path)
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int lastln = xlines, onscreen = xlines - 4;
 	int i, attrs;
-	char buf[12];
+	char buf[18];
 	char c;
 	char *ptr = path, *base;
 
@@ -3274,15 +3329,15 @@ static void redraw(char *path)
 		char sort[] = "\0 ";
 		char selmode[] = "\0 ";
 
+		if (cfg.selmode)
+			selmode[0] = 'Y';
+
 		if (cfg.mtimeorder)
 			sort[0] = cfg.mtime ? 'T' : 'A';
 		else if (cfg.sizeorder)
 			sort[0] = 'S';
 		else if (cfg.extnorder)
 			sort[0] = 'E';
-
-		if (cfg.selmode)
-			selmode[0] = 'Y';
 
 		/* Get the file extension for regular files */
 		if (S_ISREG(dents[cur].mode)) {
@@ -3295,14 +3350,24 @@ static void redraw(char *path)
 		} else
 			ptr = "\b";
 
-		/* Get the unescaped file name */
-		base = unescape(dents[cur].name, NAME_MAX, NULL);
-
 		/* We need to show filename as it may be truncated in directory listing */
-		if (!cfg.showdetail || !cfg.blkorder)
+		if (!cfg.showdetail && !cfg.blkorder) { /* light mode */
+			/* Timestamp */
+			strftime(buf, 18, "%F %R", localtime(&dents[cur].t));
+
+			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s %s %s\n",
+				 cur + 1, ndents, nselected, selmode, sort, buf,
+				 get_lsperms(dents[cur].mode), ptr);
+		} else if (!cfg.blkorder) { /* detail mode */
+			/* Get the unescaped file name */
+			base = unescape(dents[cur].name, NAME_MAX, NULL);
+
 			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s [%s]\n",
 				 cur + 1, ndents, nselected, selmode, sort, ptr, base);
-		else {
+		} else { /* du mode */
+			/* Get the unescaped file name */
+			base = unescape(dents[cur].name, NAME_MAX, NULL);
+
 			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
