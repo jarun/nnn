@@ -126,7 +126,7 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts
 
 #### From a package manager
 
-`nnn` may be available in the default repos of your distro already. Find a list of known packagers below.
+`nnn` may be available in the default repos of your distro already. Find a list of known packagers below. If the version available in the default repos of your distro is dated please try an alternative installation method.
 
 <details><summary>Expand</summary>
 <p>
