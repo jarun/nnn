@@ -2332,7 +2332,6 @@ static char *get_lsperms(mode_t mode)
 static void printent(const struct entry *ent, int sel, uint namecols)
 {
 	wchar_t *wstr;
-	unescape(ent->name, namecols, &wstr);
 	char ind = '\0';
 
 	switch (ent->mode & S_IFMT) {
@@ -2359,6 +2358,11 @@ static void printent(const struct entry *ent, int sel, uint namecols)
 		ind = '?';
 		break;
 	}
+
+	if (!ind)
+		++namecols;
+
+	unescape(ent->name, namecols, &wstr);
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
@@ -2389,6 +2393,10 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 	permbuf[1] = '0' + ((ent->mode >> 3) & 7);
 	permbuf[2] = '0' + (ent->mode & 7);
 	permbuf[3] = '\0';
+
+	/* Add a column if no indicator is needed */
+	if (S_ISREG(ent->mode) && !(ent->mode & 0100))
+		++namecols;
 
 	/* Trim escape chars from name */
 	const char *pname = unescape(ent->name, namecols, NULL);
