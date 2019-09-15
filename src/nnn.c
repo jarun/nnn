@@ -1751,6 +1751,7 @@ static int filterentries(char *path)
 			switch (*ch) {
 			case '/': /* works as Leader key in filter mode */
 				*ch = CONTROL('_'); // fallthrough
+			case '>':
 				if (len == 1)
 					cur = oldcur;
 				goto end;
