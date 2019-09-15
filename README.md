@@ -261,7 +261,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
          ! ^]  Shell   ^N  Note  L  Lock
          R ^V  Pick plugin   :K xK  Run plugin key K
             c  SSHFS mount       u  Unmount
-           ^P  Prompt            =  Launcher
+           ^P  Prompt/run expr   =  Launcher
 ```
 
 Note: Help & settings, file details and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.

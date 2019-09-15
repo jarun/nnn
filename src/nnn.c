@@ -2857,7 +2857,7 @@ static bool show_help(const char *path)
 	       "9! ^]  Shell   ^N  Note  L  Lock   \n"
 	       "9R ^V  Pick plugin   :K xK  Run plugin key K\n"
 	          "cc  SSHFS mount       u  Unmount\n"
-		 "b^P  Prompt            =  Launcher\n"};
+		 "b^P  Prompt/run expr   =  Launcher\n"};
 
 	fd = create_tmp_file();
 	if (fd == -1)
