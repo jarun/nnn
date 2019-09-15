@@ -3364,7 +3364,7 @@ static void redraw(char *path)
 			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
-			mvprintw(lastln, 0, "%d/%d (%d) %s%cu: %s (%lu files) free: %s %s\n",
+			mvprintw(lastln, 0, "%d/%d (%d) %s%cu:%s (%lu files) free:%s %s\n",
 				 cur + 1, ndents, nselected, selmode, c, buf, num_files,
 				 coolsize(get_fs_info(path, FREE)), ptr);
 		} else { /* light or detail mode */
