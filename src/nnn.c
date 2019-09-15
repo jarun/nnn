@@ -3352,29 +3352,23 @@ static void redraw(char *path)
 			ptr = "\b";
 
 		/* We need to show filename as it may be truncated in directory listing */
-		if (!cfg.showdetail && !cfg.blkorder) { /* light mode */
-			/* Timestamp */
-			strftime(buf, 18, "%F %R", localtime(&pent->t));
+		/* Get the unescaped file name */
+		base = unescape(pent->name, NAME_MAX, NULL);
 
-			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s %s %s\n",
-				 cur + 1, ndents, nselected, selmode, sort, buf,
-				 get_lsperms(pent->mode), ptr);
-		} else if (!cfg.blkorder) { /* detail mode */
-			/* Get the unescaped file name */
-			base = unescape(pent->name, NAME_MAX, NULL);
-
-			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s [%s]\n",
-				 cur + 1, ndents, nselected, selmode, sort, ptr, base);
-		} else { /* du mode */
-			/* Get the unescaped file name */
-			base = unescape(pent->name, NAME_MAX, NULL);
-
+		if (cfg.blkorder) { /* du mode */
 			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
 			mvprintw(lastln, 0, "%d/%d (%d) %s%cu: %s (%lu files) free: %s %s [%s]\n",
 				 cur + 1, ndents, nselected, selmode, c, buf, num_files,
 				 coolsize(get_fs_info(path, FREE)), ptr, base);
+		} else { /* light or detail mode */
+			/* Timestamp */
+			strftime(buf, 18, "%d/%b/%Y %R", localtime(&pent->t));
+
+			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s %s %s [%s]\n",
+				 cur + 1, ndents, nselected, selmode, sort, buf,
+				 get_lsperms(pent->mode), ptr, base);
 		}
 	} else
 		printmsg("0/0");
