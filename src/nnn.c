@@ -1755,7 +1755,7 @@ static int filterentries(char *path)
 			switch (*ch) {
 			case '/': /* works as Leader key in filter mode */
 				*ch = CONTROL('_'); // fallthrough
-			case '>':
+			case ':':
 				if (len == 1)
 					cur = oldcur;
 				goto end;
@@ -2855,7 +2855,7 @@ static bool show_help(const char *path)
 		  "cs  Size     E  Extn  t  Time modified\n"
 		"1MISC\n"
 	       "9! ^]  Shell   ^N  Note  L  Lock   \n"
-	       "9R ^V  Pick plugin  F12 xK  Run plugin key K\n"
+	       "9R ^V  Pick plugin   :K xK  Run plugin key K\n"
 	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt            =  Launcher\n"};
 

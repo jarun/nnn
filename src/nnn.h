@@ -235,7 +235,7 @@ static struct key bindings[] = {
 	{ CONTROL(']'),   SEL_SHELL },
 	/* Plugin key */
 	{ 'x',            SEL_PLUGKEY },
-	{ '>',            SEL_PLUGKEY },
+	{ ':',            SEL_PLUGKEY },
 	/* Run a plugin */
 	{ 'R',            SEL_PLUGIN },
 	{ CONTROL('V'),   SEL_PLUGIN },
