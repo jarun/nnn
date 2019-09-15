@@ -18,10 +18,10 @@
 </p>
 
 <p align="center">
-<a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/onpq3vP.png" /></a>
+<a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/2B8KQCJ.png" /></a>
 </p>
 
-<p align="center"><i>Modes of nnn (light with filter, detail, du analyzer) with memory usage (click for a demo video)</i></a></p>
+<p align="center"><i>Nav-as-you-type and du analyzer modes (click for a demo video)</i></a></p>
 
 <p align="center">
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
@@ -60,7 +60,7 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts
 ## Features
 
 - Modes
-  - Detail (default), light
+  - Light (default), detail
   - Disk usage analyzer (block/apparent)
   - File picker, (neo)vim plugin
 - Navigation
