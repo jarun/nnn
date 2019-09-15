@@ -946,7 +946,8 @@ static bool initcurses(mmask_t *oldmask)
 #if NCURSES_MOUSE_VERSION <= 1
 	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED, oldmask);
 #else
-	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED | BUTTON4_PRESSED | BUTTON5_PRESSED, oldmask);
+	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED | BUTTON4_PRESSED | BUTTON5_PRESSED,
+		  oldmask);
 #endif
 	mouseinterval(400);
 	curs_set(FALSE); /* Hide cursor */
@@ -1295,6 +1296,7 @@ static void get_archive_cmd(char *cmd, char *archive)
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
 {
 	char *buf = (char *)malloc(CMD_LEN_MAX * sizeof(char));
+
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
 		"sed -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, g_cppath, cmd, archive);
@@ -1385,8 +1387,8 @@ static int xstrverscasecmp(const char * const s1, const char * const s2)
 {
 	const uchar *p1 = (const uchar *)s1;
 	const uchar *p2 = (const uchar *)s2;
-	uchar c1, c2;
 	int state, diff;
+	uchar c1, c2;
 
 	/*
 	 * Symbol(s)    0       [1-9]   others
@@ -1545,9 +1547,11 @@ static int nextsel(int presel)
 #ifdef LINUX_INOTIFY
 	struct inotify_event *event;
 	char inotify_buf[EVENT_BUF_LEN];
+
 	memset((void *)inotify_buf, 0x0, EVENT_BUF_LEN);
 #elif defined(BSD_KQUEUE)
 	struct kevent event_data[NUM_EVENT_SLOTS];
+
 	memset((void *)event_data, 0x0, sizeof(struct kevent) * NUM_EVENT_SLOTS);
 #endif
 
@@ -2164,7 +2168,6 @@ static char *unescape(const char *str, uint maxcols, wchar_t **wstr)
 	static wchar_t wbuf[NAME_MAX + 1] __attribute__ ((aligned));
 	wchar_t *buf = wbuf;
 	size_t lencount = 0;
-
 	/* Convert multi-byte to wide char */
 	size_t len = mbstowcs(wbuf, str, NAME_MAX);
 
@@ -2795,6 +2798,7 @@ static bool sshfs_unmount(char *path, char *newpath, int *presel)
 static void lock_terminal(void)
 {
 	char *tmp = utils[LOCKER];
+
 	if (!getutil(tmp))
 		tmp = utils[CMATRIX];;
 
@@ -2902,8 +2906,7 @@ static bool show_help(const char *path)
 	return TRUE;
 }
 
-static int sum_bsizes(const char *fpath, const struct stat *sb,
-		      int typeflag, struct FTW *ftwbuf)
+static int sum_bsizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
 	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D))
 		ent_blocks += sb->st_blocks;
@@ -2912,8 +2915,7 @@ static int sum_bsizes(const char *fpath, const struct stat *sb,
 	return 0;
 }
 
-static int sum_sizes(const char *fpath, const struct stat *sb,
-		     int typeflag, struct FTW *ftwbuf)
+static int sum_sizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
 	if (sb->st_size && (typeflag == FTW_F || typeflag == FTW_D))
 		ent_blocks += sb->st_size;
@@ -3189,6 +3191,7 @@ static void populate(char *path, char *lastname)
 static void move_cursor(int target, int ignore_scrolloff)
 {
 	int delta, scrolloff, onscreen = xlines - 4;
+
 	target = MAX(0, MIN(ndents - 1, target));
 	delta = target - cur;
 	cur = target;
@@ -3357,18 +3360,18 @@ static void redraw(char *path)
 		} else
 			ptr = "\b";
 
-		/* We need to show filename as it may be truncated in directory listing */
-		/* Get the unescaped file name */
-		base = unescape(pent->name, NAME_MAX, NULL);
-
 		if (cfg.blkorder) { /* du mode */
 			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
-			mvprintw(lastln, 0, "%d/%d (%d) %s%cu: %s (%lu files) free: %s %s [%s]\n",
+			mvprintw(lastln, 0, "%d/%d (%d) %s%cu: %s (%lu files) free: %s %s\n",
 				 cur + 1, ndents, nselected, selmode, c, buf, num_files,
-				 coolsize(get_fs_info(path, FREE)), ptr, base);
+				 coolsize(get_fs_info(path, FREE)), ptr);
 		} else { /* light or detail mode */
+			/* Show filename as it may be truncated in directory listing */
+			/* Get the unescaped file name */
+			base = unescape(pent->name, NAME_MAX, NULL);
+
 			/* Timestamp */
 			strftime(buf, 18, "%d/%b/%Y %R", localtime(&pent->t));
 
