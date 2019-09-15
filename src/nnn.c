@@ -3373,11 +3373,11 @@ static void redraw(char *path)
 			base = unescape(pent->name, NAME_MAX, NULL);
 
 			/* Timestamp */
-			strftime(buf, 18, "%d/%b/%Y %R", localtime(&pent->t));
+			strftime(buf, 18, "%Y/%b/%d %R", localtime(&pent->t));
 
-			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s %s %s [%s]\n",
+			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s %s %s %s [%s]\n",
 				 cur + 1, ndents, nselected, selmode, sort, buf,
-				 get_lsperms(pent->mode), ptr, base);
+				 get_lsperms(pent->mode), coolsize(pent->size), ptr, base);
 		}
 	} else
 		printmsg("0/0");
