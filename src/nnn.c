@@ -2417,11 +2417,8 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 			       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 		break;
 	case S_IFDIR:
-		if (cfg.blkorder)
-			printw("%c%-16.16s  %s %8.8s/ %s/\n",
-			       cp, timebuf, permbuf, coolsize(ent->blocks << BLK_SHIFT), pname);
-		else
-			printw("%c%-16.16s  %s        /  %s/\n", cp, timebuf, permbuf, pname);
+		printw("%c%-16.16s  %s %8.8s  %s/\n", cp, timebuf, permbuf,
+		       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
 		break;
 	case S_IFLNK:
 		printw("%c%-16.16s  %s        @  %s@\n", cp, timebuf, permbuf, pname);
