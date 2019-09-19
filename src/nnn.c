@@ -348,7 +348,6 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define LOCKER 5
 #define CMATRIX 6
 #define NLAUNCH 7
-#define UNKNOWN 8
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -372,7 +371,6 @@ static char * const utils[] = {
 #endif
 	"cmatrix",
 	"nlaunch",
-	"UNKNOWN"
 };
 
 #ifdef __linux__
@@ -3364,7 +3362,7 @@ static void redraw(char *path)
 			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
-			mvprintw(lastln, 0, "%d/%d (%d) %s%cu:%s (%lu files) free:%s %s\n",
+			mvprintw(lastln, 0, "%d/%d (%d) %s%cu:%s (%lu files) free:%s %s",
 				 cur + 1, ndents, nselected, selmode, c, buf, num_files,
 				 coolsize(get_fs_info(path, FREE)), ptr);
 		} else { /* light or detail mode */
@@ -3375,7 +3373,7 @@ static void redraw(char *path)
 			/* Timestamp */
 			strftime(buf, 18, "%Y/%b/%d %R", localtime(&pent->t));
 
-			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s %s %s %s [%s]\n",
+			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s %s %s %s [%s]",
 				 cur + 1, ndents, nselected, selmode, sort, buf,
 				 get_lsperms(pent->mode), coolsize(pent->size), ptr, base);
 		}
