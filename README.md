@@ -18,7 +18,7 @@
 </p>
 
 <p align="center">
-<a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/2B8KQCJ.png" /></a>
+<a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a>
 </p>
 
 <p align="center"><i>navigate-as-you-type & du analyzer mode (click for a demo video)</i></a></p>

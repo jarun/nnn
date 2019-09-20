@@ -3362,9 +3362,9 @@ static void redraw(char *path)
 			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
-			mvprintw(lastln, 0, "%d/%d (%d) %s%cu:%s (%lu files) free:%s %s",
-				 cur + 1, ndents, nselected, selmode, c, buf, num_files,
-				 coolsize(get_fs_info(path, FREE)), ptr);
+			mvprintw(lastln, 0, "%d/%d (%d) %s%cu:%s free:%s files:%lu %s",
+				 cur + 1, ndents, nselected, selmode, c, buf,
+				 coolsize(get_fs_info(path, FREE)), num_files, ptr);
 		} else { /* light or detail mode */
 			/* Show filename as it may be truncated in directory listing */
 			/* Get the unescaped file name */
