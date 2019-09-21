@@ -4110,6 +4110,7 @@ nochange:
 				writecp(newpath, r - 1); /* Truncate NULL from end */
 				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
+				nselected = 1;
 				dents[cur].flags |= FILE_SELECTED;
 			}
 			break;
