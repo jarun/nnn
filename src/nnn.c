@@ -4437,7 +4437,10 @@ nochange:
 						spawn(newpath, dents[cur].name, NULL, path, F_NORMAL);
 					else
 						spawn(newpath, NULL, NULL, path, F_NORMAL);
-					break;
+
+					if (cfg.filtermode)
+						presel = FILTER;
+					goto nochange;
 				}
 
 				cfg.runplugin ^= 1;
