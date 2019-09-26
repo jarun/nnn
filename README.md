@@ -87,7 +87,7 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts
   - Create, rename, duplicate files and directories
   - Per-context directory color (default: blue)
   - Spawn a shell, run apps, run commands, execute file
-  - Take quick notes, lock terminal (needs a locker)
+  - Lock terminal (needs a locker)
   - Shortcut reference a keypress away
 - Unicode support
 - Follows Linux kernel coding style
@@ -179,7 +179,6 @@ Option completion scripts for Bash, Fish and Zsh can be found in respective subd
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
-| `NNN_NOTE='/home/user/Dropbox/notes'` | absolute path to note file [default: none] |
 | `NNN_OPENER=mimeopen` | custom file opener |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds to lock terminal [default: disabled] |
 | `NNN_COPIER=copier` | clipboard copier script [default: none] |
@@ -246,10 +245,10 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
             S  du                A  Apparent du
             s  Size    E  Extn   t  Time modified
  MISC
-         ! ^]  Shell   ^N  Note  L  Lock
+         ! ^]  Shell             =  Launcher
          R ^V  Pick plugin   :K xK  Run plugin key K
             c  SSHFS mount       u  Unmount
-           ^P  Prompt/run expr   =  Launcher
+           ^P  Prompt/run expr   L  Lock
 ```
 
 Note: Help & settings, file details and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.

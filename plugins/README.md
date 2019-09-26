@@ -19,6 +19,7 @@ The currently available plugins are listed below.
 | mocplay | sh | [moc](http://moc.daper.net/) | Appends (and plays, see script) selection/dir/file in moc|
 | ndiff | sh | vimdiff | Diff for selection (limited to 2 for directories) |
 | nmount | sh | pmount, udisks2 | Toggle mount status of a device as normal user |
+| notes | sh | - | Open a quick notes file/dir in `$EDITOR` |
 | nwal | sh | nitrogen | Set image as wallpaper using nitrogen |
 | oldbigfile | sh | find, sort | List large files by access time |
 | organize | sh | file | Auto-organize files in directories by file type |

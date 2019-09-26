@@ -401,10 +401,9 @@ static const char * const messages[] = {
 #define NNN_CONTEXT_COLORS 2
 #define NNN_IDLE_TIMEOUT 3
 #define NNN_COPIER 4
-#define NNN_NOTE 5
-#define NNNLVL 6 /* strings end here */
-#define NNN_USE_EDITOR 7 /* flags begin here */
-#define NNN_TRASH 8
+#define NNNLVL 5 /* strings end here */
+#define NNN_USE_EDITOR 6 /* flags begin here */
+#define NNN_TRASH 7
 
 static const char * const env_cfg[] = {
 	"NNN_BMS",
@@ -412,7 +411,6 @@ static const char * const env_cfg[] = {
 	"NNN_CONTEXT_COLORS",
 	"NNN_IDLE_TIMEOUT",
 	"NNN_COPIER",
-	"NNN_NOTE",
 	"NNNLVL",
 	"NNN_USE_EDITOR",
 	"NNN_TRASH",
@@ -2852,10 +2850,10 @@ static bool show_help(const char *path)
 		  "cS  du                A  Apparent du\n"
 		  "cs  Size     E  Extn  t  Time modified\n"
 		"1MISC\n"
-	       "9! ^]  Shell   ^N  Note  L  Lock   \n"
+	       "9! ^]  Shell             =  Launcher\n"
 	       "9R ^V  Pick plugin   :K xK  Run plugin key K\n"
 	          "cc  SSHFS mount       u  Unmount\n"
-		 "b^P  Prompt/run expr   =  Launcher\n"};
+		 "b^P  Prompt/run expr   L  Lock\n"};
 
 	fd = create_tmp_file();
 	if (fd == -1)
@@ -3994,7 +3992,6 @@ nochange:
 		case SEL_REDRAW: // fallthrough
 		case SEL_RENAMEALL: // fallthrough
 		case SEL_HELP: // fallthrough
-		case SEL_NOTE: // fallthrough
 		case SEL_LOCK:
 		{
 			if (ndents)
@@ -4027,19 +4024,6 @@ nochange:
 			case SEL_RUNPAGE:
 				spawn(pager, dents[cur].name, NULL, path, F_CLI);
 				break;
-			case SEL_NOTE:
-			{
-				static char *notepath;
-
-				notepath = notepath ? notepath : getenv(env_cfg[NNN_NOTE]);
-				if (!notepath) {
-					printwait("set NNN_NOTE", &presel);
-					goto nochange;
-				}
-
-				spawn(editor, notepath, NULL, path, F_CLI);
-				break;
-			}
 			default: /* SEL_LOCK */
 				lock_terminal();
 				break;
