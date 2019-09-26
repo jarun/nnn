@@ -2,10 +2,10 @@
 
 <p align="center">
 <a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600" alt="Latest release" /></a>
-<a href="http://formulae.brew.sh/formula/nnn"><img src="https://img.shields.io/homebrew/v/nnn.svg?maxAge=600" alt="Homebrew" /></a>
 <a href="https://www.archlinux.org/packages/community/x86_64/nnn/"><img src="https://img.shields.io/badge/archlinux-rolling-blue.svg?maxAge=600" alt="Arch Linux" /></a>
 <a href="https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1"><img src="https://img.shields.io/badge/debian-10+-blue.svg?maxAge=2592000" alt="Debian Buster+" /></a>
 <a href="https://apps.fedoraproject.org/packages/nnn"><img src="https://img.shields.io/badge/fedora-27+-blue.svg?maxAge=2592000" alt="Fedora 27+" /></a>
+<a href="http://formulae.brew.sh/formula/nnn"><img src="https://img.shields.io/homebrew/v/nnn.svg?maxAge=600" alt="Homebrew" /></a>
 <a href="https://software.opensuse.org/package/nnn"><img src="https://img.shields.io/badge/opensuse%20leap-15.0+-blue.svg?maxAge=2592000" alt="openSUSE Leap 15.0+" /></a>
 <a href="https://packages.ubuntu.com/search?keywords=nnn&searchon=names&exact=1"><img src="https://img.shields.io/badge/ubuntu-17.10+-blue.svg?maxAge=2592000" alt="Ubuntu Artful+" /></a>
 </p>
@@ -31,6 +31,7 @@
 
 - [Introduction](#introduction)
 - [Features](#features)
+- [Quickstart](#quickstart)
 - [Installation](#installation)
   - [Library dependencies](#library-dependencies)
   - [Utility dependencies](#utility-dependencies)
@@ -49,7 +50,7 @@
 
 ## Introduction
 
-`nnn` is a full-featured terminal file manager. It's extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/Performance)**).
+`nnn` is a full-featured terminal file manager. It's tiny, extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/Performance)**).
 
 `nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. 30+ **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** extend the capabilities further. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim). Custom plugins are easy to add.
 
@@ -102,6 +103,18 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts
 - Highly optimized, static analysis integrated code
 - Minimal library dependencies
 - Widely available
+
+## Quickstart
+
+While we strongly advise reading this page and the wiki, if you can't wait to start using `nnn`:
+
+1. Install the [utilities you may need](https://github.com/jarun/nnn#utility-dependencies) based on your regular workflows.
+2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
+3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`
+4. For additional functionality [install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins) and the GUI app launcher [`nlaunch`](https://github.com/jarun/nnn/tree/master/misc/nlaunch).
+
+- Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
+- To set `nnn` as the default file manager, follow these [instructions](https://github.com/jarun/nnn/wiki/Advanced-use-cases#configure-as-default-fm).
 
 ## Installation
 
