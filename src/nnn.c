@@ -3202,9 +3202,8 @@ static void move_cursor(int target, int ignore_scrolloff)
 		 * screen by allowing it to move inward and disallowing it to move
 		 * outward (deeper into the scrolloff margin area).
 		 */
-		if (cur < curscroll + scrolloff && delta < 0)
-			curscroll += delta;
-		else if (cur > curscroll + onscreen - scrolloff - 1 && delta > 0)
+		if (((cur < (curscroll + scrolloff)) && delta < 0)
+		    || ((cur > (curscroll + onscreen - scrolloff - 1)) && delta > 0))
 			curscroll += delta;
 	}
 	curscroll = MIN(curscroll, MIN(cur, ndents - onscreen));
