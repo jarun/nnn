@@ -2,15 +2,6 @@
 
 <p align="center">
 <a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600" alt="Latest release" /></a>
-<a href="https://www.archlinux.org/packages/community/x86_64/nnn/"><img src="https://img.shields.io/badge/archlinux-rolling-blue.svg?maxAge=600" alt="Arch Linux" /></a>
-<a href="https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1"><img src="https://img.shields.io/badge/debian-10+-blue.svg?maxAge=2592000" alt="Debian Buster+" /></a>
-<a href="https://apps.fedoraproject.org/packages/nnn"><img src="https://img.shields.io/badge/fedora-27+-blue.svg?maxAge=2592000" alt="Fedora 27+" /></a>
-<a href="http://formulae.brew.sh/formula/nnn"><img src="https://img.shields.io/homebrew/v/nnn.svg?maxAge=600" alt="Homebrew" /></a>
-<a href="https://software.opensuse.org/package/nnn"><img src="https://img.shields.io/badge/opensuse%20leap-15.0+-blue.svg?maxAge=2592000" alt="openSUSE Leap 15.0+" /></a>
-<a href="https://packages.ubuntu.com/search?keywords=nnn&searchon=names&exact=1"><img src="https://img.shields.io/badge/ubuntu-17.10+-blue.svg?maxAge=2592000" alt="Ubuntu Artful+" /></a>
-</p>
-
-<p align="center">
 <a href="https://repology.org/metapackage/nnn"><img src="https://repology.org/badge/tiny-repos/nnn.svg" alt="Availability"></a>
 <a href="https://travis-ci.org/jarun/nnn"><img src="https://img.shields.io/travis/jarun/nnn/master.svg?label=travis" alt="Travis Status" /></a>
 <a href="https://circleci.com/gh/jarun/workflows/nnn"><img src="https://img.shields.io/circleci/project/github/jarun/nnn.svg?label=circleci" alt="CircleCI Status" /></a>
@@ -137,36 +128,20 @@ While we strongly advise reading this page and the wiki, if you can't wait to st
 
 #### From a package manager
 
-`nnn` may be available in the default repos of your distro already. Find a list of known packagers below. If the version available in the default repos of your distro is dated please try an alternative installation method.
+You can install `nnn` from the package manager of your OS. If the version available is dated please try an alternative installation method.
 
-<details><summary>Expand</summary>
+<details><summary>Packaging status from Repology</summary>
 <p>
 <br>
-● <a href="https://pkgs.alpinelinux.org/packages?name=nnn">Alpine Linux</a> (<code>apk add nnn</code>)<br>
-● <a href="https://www.archlinux.org/packages/community/x86_64/nnn/">Arch Linux</a> (<code>pacman -S nnn</code>)<br>
+<a href="https://repology.org/metapackage/nnn/versions"><img src="https://repology.org/badge/vertical-allrepos/nnn.svg" alt="Packaging status"></a>
+</p>
+Unlisted distros:
+<p>
+<br>
 ● CentOS (<code>yum --enablerepo=epel install nnn</code>)<br>
-● <a href="https://crux.nu/portdb/?a=search&q=nnn">CRUX</a> (<code>prt-get depinst nnn</code>)<br>
-● <a href="https://packages.debian.org/search?keywords=nnn&searchon=names&exact=1">Debian</a> (<code>apt-get install nnn</code>)<br>
-● <a href="https://github.com/DragonFlyBSD/DPorts/tree/master/misc/nnn">DPorts</a> (<code>pkg install nnn</code>)<br>
-● <a href="https://apps.fedoraproject.org/packages/nnn">Fedora</a> (<code>dnf install nnn</code>)<br>
-● <a href="https://svnweb.freebsd.org/ports/head/misc/nnn/">FreeBDS</a> (<code>pkg install nnn</code>)<br>
-● <a href="https://packages.gentoo.org/packages/app-misc/nnn">Gentoo</a> (<code>emerge nnn</code>)<br>
-● <a href="http://formulae.brew.sh/formula/nnn">macOS/Homebrew</a> (<code>brew install nnn</code>)<br>
-● <a href="https://www.macports.org/ports.php?by=name&substr=nnn">MacPorts</a> (<code>port install nnn</code>)<br>
 ● <a href="https://notabug.org/milislinux/milis/src/master/talimatname/genel/n/nnn/talimat">Milis Linux</a> (<code>mps kur nnn</code>)<br>
-● <a href="https://github.com/NixOS/nixpkgs/tree/master/pkgs/applications/misc/nnn">nixpkgs</a> (<code>nix-env -i nnn</code>)<br>
 ● <a href="https://www.nutyx.org/en/?type=pkg&branch=rolling&arch=x86_64&searchpkg=nnn">NuTyX</a> (<code>cards install nnn</code>)<br>
-● <a href="https://cvsweb.openbsd.org/cgi-bin/cvsweb/ports/sysutils/nnn/">OpenBSD</a> (<code>pkg_add nnn</code>)<br>
-● <a href="https://software.opensuse.org/package/nnn">openSUSE (and packages for several other distros)</a> (<code>zypper in nnn</code>)<br>
-● <a href="http://pkgsrc.se/sysutils/nnn">pkgsrc</a> (<code>pkg_add nnn</code>)<br>
-● <a href="https://archive.raspbian.org/raspbian/pool/main/n/nnn/">Raspbian Testing</a> (<code>apt-get install nnn</code>)<br>
-● <a href="http://slackbuilds.org/repository/14.2/system/nnn/">Slackware</a> (<code>slackpkg install nnn</code>)<br>
-● <a href="http://cook.slitaz.org/index.cgi?pkg=nnn">SliTaz Cooking</a> (<code>cooker pkg nnn</code>)<br>
-● <a href="https://packages.getsol.us/shannon/n/nnn/">Solus</a> (<code>eopkg install nnn</code>)<br>
 ● <a href="http://codex.sourcemage.org/test/shell-term-fm/nnn/">Source Mage</a> (<code>cast nnn</code>)<br>
-● <a href="https://github.com/termux/termux-packages/tree/master/packages/nnn">Termux</a> (<code>pkg in nnn</code>)<br>
-● <a href="https://packages.ubuntu.com/search?keywords=nnn&searchon=names&exact=1">Ubuntu</a> (<code>apt-get install nnn</code>)<br>
-● <a href="https://github.com/void-linux/void-packages/tree/master/srcpkgs/nnn">Void Linux</a> (<code>xbps-install -S nnn</code>)<br>
 </p>
 </details>
 
