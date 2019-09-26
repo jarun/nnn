@@ -60,7 +60,7 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts
   - 4 contexts (_aka_ tabs/workspaces)
   - Bookmarks; pin and visit a directory
   - Familiar, easy shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>)
-  - Change directory at exit (*easy* shell integration)
+  - CD on quit (*easy* shell integration)
 - Sorting
   - Ordered pure numeric names by default (visit _/proc_)
   - Case-insensitive version (_aka_ natural) sort
