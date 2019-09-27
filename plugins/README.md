@@ -1,4 +1,4 @@
-To extend the capabilities of `nnn`, plugins are introduced. Plugins are scripts which `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins.
+Plugins extend the capabilities of `nnn`. They are scripts which `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins.
 
 The currently available plugins are listed below.
 
@@ -8,7 +8,7 @@ The currently available plugins are listed below.
 | dups | sh | find, md5sum,<br>sort uniq xargs | List non-empty duplicate files in current dir |
 | checksum | sh | md5sum,<br>sha256sum | Create and verify checksums |
 | fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
-| getplugs | sh | wget | Update plugins |
+| getplugs | sh | curl | Update plugins |
 | hexview | sh | xxd | View a file in hex in `$PAGER` |
 | imgresize | sh | [imgp](https://github.com/jarun/imgp) | Resize images in dir to screen resolution |
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
@@ -33,13 +33,17 @@ The currently available plugins are listed below.
 | sxiv | sh | sxiv | View images in dir, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts))|
 | thumb | sh | [lsix](https://github.com/hackerb9/lsix) | View thumbnail of an image or dir of images |
 | transfer | sh | curl | Upload file to transfer.sh |
-| upgrade | sh | wget | Upgrade nnn manually on Debian 9 Stretch |
+| upgrade | sh | curl | Upgrade nnn manually on Debian 9 Stretch |
 | vidthumb | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) | Show video thumbnails in terminal |
 | viuimg | sh | [viu](https://github.com/atanunq/viu), less | View an image or images in dir |
 
 ## Installing plugins
 
-Download the `getplugs` plugin and execute it anywhere to get all the plugins installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You can run it again later to update the plugins. It backs up earlier plugins.
+The following command installs all plugins:
+
+    curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs | sh
+
+Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You can run the `getplugs` plugin later to update the plugins. It backs up earlier plugins.
 
 **NOTE:** `getplugs` also downloads the launcher `nlaunch` and tries to place it at `/usr/local/bin/` using `sudo`. If it fails you have to place `nlauch` manually somewhere in your `$PATH`.
 

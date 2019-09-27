@@ -53,7 +53,7 @@ It runs smoothly on the Raspberry Pi, Termux on Android, Linux, macOS, BSD, Cygw
 
 - [Wiki](https://github.com/jarun/nnn/wiki): operational concepts, how tos, use cases, chronology and insights
 - [Performance numbers](https://github.com/jarun/nnn/wiki/Performance)
-- [Plugin repository](https://github.com/jarun/nnn/tree/master/plugins)
+- [Plugin repository and docs](https://github.com/jarun/nnn/tree/master/plugins)
 - [(neo)vim plugin](https://github.com/mcchrish/nnn.vim)
 - [`nnn` on Android](https://www.youtube.com/watch?v=AbaauM7gUJw)
 

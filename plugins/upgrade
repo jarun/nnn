@@ -15,7 +15,7 @@ if [ $cur_ver == $new_ver ]; then
 fi
 
 # get the package
-wget "https://github.com/jarun/nnn/releases/download/v$new/nnn_$new-1_debian9.amd64.deb"
+curl -Ls -O "https://github.com/jarun/nnn/releases/download/v$new/nnn_$new-1_debian9.amd64.deb"
 
 # install it
 sudo dpkg -i nnn_$new-1_debian9.amd64.deb
