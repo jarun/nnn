@@ -47,17 +47,15 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You ca
 
 **NOTE:** `getplugs` also downloads the launcher `nlaunch` and tries to place it at `/usr/local/bin/` using `sudo`. If it fails you have to place `nlauch` manually somewhere in your `$PATH`.
 
-## Usage
+## Executing plugins
 
-There are 2 ways to run plugins:
+**Method 1:** Directly with <kbd>:key</kbd>:
 
-1. Directly with <kbd>x-key</kbd>:
+    export NNN_PLUG='o:fzy-open;p:mocplay;d:ndiff;m:nmount;n:notes;t:thumb'
 
-       export NNN_PLUG='o:fzy-open;p:mocplay;d:ndiff;m:nmount;t:thumb'
+With this, plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be run with <kbd>:p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen. Up to 10 plugins can have such keybinds.
 
-   With this, plugin `fzy-open` can be run with the keybind <kbd>xo</kbd>, `mocplay` can be run with <kbd>xp</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen. Up to 10 plugins can have such keybinds.
-
-2. Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
+**Method 2:** Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
 ## File access from plugins
 
