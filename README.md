@@ -12,7 +12,7 @@
 <a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a>
 </p>
 
-<p align="center"><i>navigate-as-you-type & du analyzer mode (click for a demo video)</i></a></p>
+<p align="center"><i>navigate-as-you-type & du analyzer mode (click on the image for a demo video)</i></a></p>
 
 <p align="center">
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
@@ -34,22 +34,28 @@
   - [Configuration](#configuration)
   - [Cmdline options](#cmdline-options)
   - [Keyboard and mouse](#keyboard-and-mouse)
-    - [Leader key](#leader-key)
+  - [Leader key](#leader-key)
   - [Help](#help)
 - [Mentions](#mentions)
 - [Developers](#developers)
 
 ## Introduction
 
-`nnn` is a full-featured terminal file manager. It's tiny, extremely light and fast (**[performance](https://github.com/jarun/nnn/wiki/Performance)**).
+`nnn` is a full-featured terminal file manager. It's tiny, extremely light and fast.
 
-`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. 30+ **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** extend the capabilities further. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim). Custom plugins are easy to add.
+`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. 30+ plugins extend the capabilities further. Custom plugins are easy to add.
 
 If you prefer a lightweight system or productivity-boosting utilities, `nnn` is a delight to have. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes.
 
-It runs smoothly on the Raspberry Pi, Termux on Android ([demo video](https://www.youtube.com/watch?v=AbaauM7gUJw)), Linux, macOS, BSD, Cygwin and Linux subsystem for Windows. `nnn` works seamlessly with DEs and GUI utilities.
+It runs smoothly on the Raspberry Pi, Termux on Android, Linux, macOS, BSD, Cygwin and Linux subsystem for Windows. `nnn` works seamlessly with DEs and GUI utilities.
 
-Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts, how tos, use cases, chronology and insights.
+#### Important links
+
+- [Wiki](https://github.com/jarun/nnn/wiki): operational concepts, how tos, use cases, chronology and insights
+- [Performance numbers](https://github.com/jarun/nnn/wiki/Performance)
+- [Plugin repository](https://github.com/jarun/nnn/tree/master/plugins)
+- [(neo)vim plugin](https://github.com/mcchrish/nnn.vim)
+- [`nnn` on Android](https://www.youtube.com/watch?v=AbaauM7gUJw)
 
 ## Features
 
@@ -127,9 +133,9 @@ A curses library with wide character support (like ncursesw), libreadline and st
 
 #### From a package manager
 
-You can install `nnn` from the package manager of your OS. If the version available is dated please try an alternative installation method.
+Install `nnn` from your package manager. If the version available is dated try an alternative installation method.
 
-<details><summary>Packaging status from Repology</summary>
+<details><summary>Packaging status from Repology (expand)</summary>
 <p>
 <br>
 <a href="https://repology.org/metapackage/nnn/versions"><img src="https://repology.org/badge/vertical-allrepos/nnn.svg" alt="Packaging status"></a>
@@ -146,11 +152,11 @@ Unlisted distros:
 
 #### Release packages
 
-Packages for Arch Linux, CentOS, Debian, Fedora and Ubuntu are available with the [latest stable release](https://github.com/jarun/nnn/releases/latest).
+Packages for Arch Linux, CentOS, Debian, Fedora and Ubuntu are auto-generated with the [latest stable release](https://github.com/jarun/nnn/releases/latest).
 
 #### From source
 
-To cook yourself, download the latest stable release or clone this repository (*risky*). Then install the dependencies and compile (e.g. on Ubuntu 16.04):
+Download the latest stable release or clone this repository (*risky*), install deps and compile. On Ubuntu 16.04:
 
     $ sudo apt-get install pkg-config libncursesw5-dev libreadline6-dev
     $ make
@@ -162,7 +168,7 @@ Visit the [developer guides](https://github.com/jarun/nnn/wiki/Developer-guides)
 
 #### Shell completion
 
-Option completion scripts for Bash, Fish and Zsh can be found in respective subdirectories of [`misc/auto-completion/`](misc/auto-completion). Please refer to your shell's manual for installation instructions.
+Completion scripts for Bash, Fish and Zsh are [available](misc/auto-completion). Refer to your shell's manual for installation instructions.
 
 ## Usage
 
@@ -249,7 +255,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^P  Prompt/run expr   L  Lock
 ```
 
-Note: Help & settings, file details and archive listing are shown in the PAGER. Use the PAGER-specific keys in these screens.
+Note: Help & settings, file details and archive listing are shown in the PAGER.
 
 | Mouse click | Function |
 |---| --- |
@@ -259,7 +265,7 @@ Note: Help & settings, file details and archive listing are shown in the PAGER. 
 | Left single | Select context or entry |
 | Left double | Select context or open entry |
 
-##### Leader key
+#### Leader key
 
 The Leader/Lead key provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and location shortcuts.
 
@@ -299,4 +305,4 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 2. Copyright © 2014-2016 Dimitris Papastamos
 3. Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)
 
-Contributions are welcome. Please visit the [ToDo list](https://github.com/jarun/nnn/issues/329).
+Contributions are welcome. Head to the [ToDo list](https://github.com/jarun/nnn/issues/329).
