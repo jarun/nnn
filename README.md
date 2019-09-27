@@ -45,7 +45,9 @@
 
 `nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. 30+ **[plugins](https://github.com/jarun/nnn/tree/master/plugins)** extend the capabilities further. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim). Custom plugins are easy to add.
 
-It runs smoothly on the Raspberry Pi, Termux on Android ([demo video](https://www.youtube.com/watch?v=AbaauM7gUJw)), Linux, macOS, BSD, Cygwin and Linux subsystem for Windows. `nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes.
+If you prefer a lightweight system or productivity-boosting utilities, `nnn` is a delight to have. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes.
+
+It runs smoothly on the Raspberry Pi, Termux on Android ([demo video](https://www.youtube.com/watch?v=AbaauM7gUJw)), Linux, macOS, BSD, Cygwin and Linux subsystem for Windows. `nnn` works seamlessly with DEs and GUI utilities.
 
 Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts, how tos, use cases, chronology and insights.
 
@@ -57,9 +59,9 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts
   - File picker, (neo)vim plugin
 - Navigation
   - *Navigate-as-you-type* with dir auto-select
-  - 4 contexts (_aka_ tabs/workspaces)
+  - Contexts (_aka_ tabs/workspaces) with configurable colors
   - Bookmarks; pin and visit a directory
-  - Familiar, easy shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>)
+  - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>) with quick reference
   - CD on quit (*easy* shell integration)
 - Sorting
   - Ordered pure numeric names by default (visit _/proc_)
@@ -77,23 +79,20 @@ Visit the **[Wiki](https://github.com/jarun/nnn/wiki)** for operational concepts
   - Detailed file information
   - Media information (using plugin)
 - Convenience
-  - Minimal configuration
-  - Plugin keybinds
-  - Select files across dirs; all/range selection
-  - Copy, move, delete, archive, link selection
-  - Batch rename selection or dir entries
+  - Lots of plugins with configurable keybinds
   - FreeDesktop compliant trash (needs trash-cli)
   - SSHFS mounts (needs sshfs)
+  - Cross-directory file selection, all/range selection
+  - Batch rename selection or dir entries
+  - Copy, move, delete, archive, link selection
   - Create, rename, duplicate files and directories
-  - Per-context directory color (default: blue)
   - Spawn a shell, run apps, run commands, execute file
   - Lock terminal (needs a locker)
-  - Shortcut reference a keypress away
+- Minimal deps, minimal config
+- Available on many package managers
 - Unicode support
 - Follows Linux kernel coding style
 - Highly optimized, static analysis integrated code
-- Minimal library dependencies
-- Widely available
 
 ## Quickstart
 
@@ -111,7 +110,7 @@ While we strongly advise reading this page and the wiki, if you can't wait to st
 
 #### Library dependencies
 
-`nnn` needs a curses library with wide character support (like ncursesw), libreadline and standard libc. It's possible to drop libreadline using the Makefile target `norl`.
+A curses library with wide character support (like ncursesw), libreadline and standard libc. It's possible to drop libreadline using the Makefile target `norl`.
 
 #### Utility dependencies
 
@@ -151,7 +150,7 @@ Packages for Arch Linux, CentOS, Debian, Fedora and Ubuntu are available with th
 
 #### From source
 
-To cook yourself, download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*). Then install the dependencies and compile (e.g. on Ubuntu 16.04):
+To cook yourself, download the latest stable release or clone this repository (*risky*). Then install the dependencies and compile (e.g. on Ubuntu 16.04):
 
     $ sudo apt-get install pkg-config libncursesw5-dev libreadline6-dev
     $ make
@@ -159,8 +158,7 @@ To cook yourself, download the [latest stable release](https://github.com/jarun/
 
 `PREFIX` is supported, in case you want to install to a different location.
 
-- Compilation notes on [Raspberry Pi](https://github.com/jarun/nnn/wiki/Developer-guides#compile-for-pi)
-- Instructions for [Cygwin](https://github.com/jarun/nnn/wiki/Developer-guides#compile-on-cygwin)
+Visit the [developer guides](https://github.com/jarun/nnn/wiki/Developer-guides) for compilation notes on the Pi, Cygwin and other compilation modes.
 
 #### Shell completion
 
