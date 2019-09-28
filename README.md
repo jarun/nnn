@@ -51,11 +51,11 @@ It runs smoothly on the Raspberry Pi, Termux on Android, Linux, macOS, BSD, Cygw
 
 #### Important links
 
-- [Wiki](https://github.com/jarun/nnn/wiki): operational concepts, how tos, use cases, chronology and insights
-- [Performance numbers](https://github.com/jarun/nnn/wiki/Performance)
-- [Plugin repository and docs](https://github.com/jarun/nnn/tree/master/plugins)
-- [(neo)vim plugin](https://github.com/mcchrish/nnn.vim)
-- [`nnn` on Android](https://www.youtube.com/watch?v=AbaauM7gUJw)
+1. [Wiki](https://github.com/jarun/nnn/wiki): operational concepts, how tos, use cases, chronology and insights
+2. [Performance numbers](https://github.com/jarun/nnn/wiki/Performance)
+3. [Plugin repository and docs](https://github.com/jarun/nnn/tree/master/plugins)
+4. [(neo)vim plugin](https://github.com/mcchrish/nnn.vim)
+5. [nnn on Android](https://www.youtube.com/watch?v=AbaauM7gUJw)
 
 ## Features
 
@@ -102,15 +102,17 @@ It runs smoothly on the Raspberry Pi, Termux on Android, Linux, macOS, BSD, Cygw
 
 ## Quickstart
 
-While we strongly advise reading this page and the wiki, if you can't wait to start using `nnn`:
+While we strongly advise reading this page and the wiki, if you can't wait to start:
 
 1. Install the [utilities you may need](https://github.com/jarun/nnn#utility-dependencies) based on your regular workflows.
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`
 4. For additional functionality [install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins) and the GUI app launcher [`nlaunch`](https://github.com/jarun/nnn/tree/master/misc/nlaunch).
 
-- Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
-- To set `nnn` as the default file manager, follow these [instructions](https://github.com/jarun/nnn/wiki/Advanced-use-cases#configure-as-default-fm).
+Notes:
+
+1. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
+2. To set `nnn` as the default file manager, follow these [instructions](https://github.com/jarun/nnn/wiki/Advanced-use-cases#configure-as-default-fm).
 
 ## Installation
 
@@ -301,8 +303,8 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 ## Developers
 
-1. Copyright © 2014-2016 Lazaros Koromilas
-2. Copyright © 2014-2016 Dimitris Papastamos
-3. Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)
+- Copyright © 2014-2016 Lazaros Koromilas
+- Copyright © 2014-2016 Dimitris Papastamos
+- Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)
 
-Contributions are welcome. Head to the [ToDo list](https://github.com/jarun/nnn/issues/329).
+Contributions are welcome. Head to the [ToDo list](https://github.com/jarun/nnn/issues/332).
