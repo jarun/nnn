@@ -6,17 +6,11 @@
 <a href="https://travis-ci.org/jarun/nnn"><img src="https://img.shields.io/travis/jarun/nnn/master.svg?label=travis" alt="Travis Status" /></a>
 <a href="https://circleci.com/gh/jarun/workflows/nnn"><img src="https://img.shields.io/circleci/project/github/jarun/nnn.svg?label=circleci" alt="CircleCI Status" /></a>
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow.svg?maxAge=2592000" alt="License" /></a>
-</p>
-
-<p align="center">
-<a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a>
-</p>
-
-<p align="center"><i>navigate-as-you-type & du analyzer mode (click on the image for a demo video)</i></a></p>
-
-<p align="center">
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
+
+<p align="center"><img src="https://i.imgur.com/MPWpmos.png" /></p>
+<p align="center"><i>navigate-as-you-type & du analyzer mode</i></p>
 
 ## Index
 
@@ -56,7 +50,8 @@ It runs smoothly on the Raspberry Pi, Termux on Android, Linux, macOS, BSD, Cygw
 2. [Performance numbers](https://github.com/jarun/nnn/wiki/Performance)
 3. [Plugin repository and docs](https://github.com/jarun/nnn/tree/master/plugins)
 4. [(neo)vim plugin](https://github.com/mcchrish/nnn.vim)
-5. [nnn on Android](https://www.youtube.com/watch?v=AbaauM7gUJw)
+5. [Demo video](https://www.youtube.com/watch?v=U2n5aGqou9E) (v2.1)
+6. [nnn on Android](https://www.youtube.com/watch?v=AbaauM7gUJw)
 
 ## Features
 
@@ -119,7 +114,7 @@ Notes:
 
 #### Library dependencies
 
-A curses library with wide character support (like ncursesw), libreadline and standard libc. It's possible to drop libreadline using the Makefile target `norl`.
+A curses library with wide char support (e.g. ncursesw), libreadline and standard libc. Makefile target `norl` drops libreadline.
 
 #### Utility dependencies
 
@@ -177,7 +172,9 @@ Completion scripts for Bash, Fish and Zsh are [available](misc/auto-completion).
 
 #### Configuration
 
-`nnn` supports the following environment variables for configuration. All of them are optional (set if you need). There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/`.
+There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/`.
+
+`nnn` supports the following optional (set if you need) environment variables.
 
 | Example `export` | Description |
 | --- | --- |
@@ -257,7 +254,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^P  Prompt/run expr   L  Lock
 ```
 
-Note: Help & settings, file details and archive listing are shown in the PAGER.
+Note: Help & settings, file details and archive listing are shown in the `$PAGER`.
 
 | Mouse click | Function |
 |---| --- |
@@ -303,8 +300,8 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 ## Developers
 
+- Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)
 - Copyright © 2014-2016 Lazaros Koromilas
 - Copyright © 2014-2016 Dimitris Papastamos
-- Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)
 
 Contributions are welcome. Head to the [ToDo list](https://github.com/jarun/nnn/issues/332).
