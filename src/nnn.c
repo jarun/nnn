@@ -2842,8 +2842,8 @@ static bool show_help(const char *path)
 	       "9, ^/  Lead key    N LeadN  Context N\n"
 		  "c/  Filter/Lead  Ins ^T  Toggle nav-as-you-type\n"
 		"aEsc  Exit prompt   ^L F5  Redraw/clear prompt\n"
-		  "cq  Quit context  Lead'  First file\n"
-	       "9Q ^Q  Quit  ^G  QuitCD  ?  Help, config\n"
+		  "c?  Help, config  Lead'  First file\n"
+	       "9Q ^Q  Quit  ^G  QuitCD  q  Quit context\n"
 		"1FILES\n"
 		 "b^O  Open with...      n  Create new/link\n"
 		  "cD  File detail   ^R F2  Rename/duplicate\n"
@@ -2855,13 +2855,13 @@ static bool show_help(const char *path)
 		 "b^F  Extract archive   F  List archive\n"
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
 		"1ORDER TOGGLES\n"
-		  "cS  du                A  Apparent du\n"
-		  "cs  Size     E  Extn  t  Time modified\n"
+		  "cA  Apparent du       S  du\n"
+		  "cs  Size     E  Extn  t  Time\n"
 		"1MISC\n"
 	       "9! ^]  Shell             =  Launcher\n"
 	       "9R ^V  Pick plugin   :K xK  Run plugin key K\n"
 	          "cc  SSHFS mount       u  Unmount\n"
-		 "b^P  Prompt/run expr   L  Lock\n"};
+		 "b^P  Prompt/run cmd    L  Lock\n"};
 
 	fd = create_tmp_file();
 	if (fd == -1)

@@ -232,8 +232,8 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
          , ^/  Lead key    N LeadN  Context N
             /  Filter/Lead  Ins ^T  Toggle nav-as-you-type
           Esc  Exit prompt   ^L F5  Redraw/clear prompt
-            q  Quit context  Lead'  First file
-         Q ^Q  Quit  ^G  QuitCD  ?  Help, config
+            ?  Help, config  Lead'  First file
+         Q ^Q  Quit  ^G  QuitCD  q  Quit context
  FILES
            ^O  Open with...      n  Create new/link
             D  File detail   ^R F2  Rename/duplicate
@@ -245,13 +245,13 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
            ^F  Extract archive   F  List archive
             e  Edit in EDITOR    p  Open in PAGER
  ORDER TOGGLES
-            S  du                A  Apparent du
-            s  Size    E  Extn   t  Time modified
+            A  Apparent du       S  du
+            s  Size    E  Extn   t  Time
  MISC
          ! ^]  Shell             =  Launcher
          R ^V  Pick plugin   :K xK  Run plugin key K
             c  SSHFS mount       u  Unmount
-           ^P  Prompt/run expr   L  Lock
+           ^P  Prompt/run cmd    L  Lock
 ```
 
 Note: Help & settings, file details and archive listing are shown in the `$PAGER`.
@@ -275,7 +275,7 @@ The Leader/Lead key provides a powerful multi-functional navigation mechanism. I
 | <kbd>[</kbd> | Go to previous active context |
 | key | Go to bookmarked location |
 | <kbd>'</kbd> | Go to first file in directory |
-| <kbd>~</kbd> <kbd>`</kbd> <kbd>@</kbd> <kbd>-</kbd> | Go to HOME, `/`, start, last visited dir |
+| <kbd>~</kbd> <kbd>`</kbd> <kbd>@</kbd> <kbd>-</kbd> | Visit HOME, `/`, start, last visited dir |
 | <kbd>.</kbd> | Toggle show hidden files |
 | <kbd>q</kbd> | Quit context |
 
