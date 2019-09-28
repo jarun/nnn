@@ -4609,11 +4609,10 @@ nochange:
 static void usage(void)
 {
 	fprintf(stdout,
-		"%s: nnn [-a] [-b key] [-d] [-f] [-H] [-i] [-n] [-o]\n"
-		"           [-p file] [-r] [-s] [-S] [-t] [-v] [-h] [PATH]\n\n"
+		"%s: nnn [OPTIONS] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
-		"  PATH   start dir [default: current dir]\n\n"
+		"  PATH   start dir [default: .]\n\n"
 		"optional args:\n"
 		" -a      use access time\n"
 		" -b key  open bookmark key\n"

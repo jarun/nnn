@@ -194,13 +194,12 @@ Completion scripts for Bash, Fish and Zsh are [available](misc/auto-completion).
 #### Cmdline options
 
 ```
-usage: nnn [-a] [-b key] [-d] [-f] [-H] [-i] [-n] [-o]
-           [-p file] [-r] [-s] [-S] [-t] [-v] [-h] [PATH]
+usage: nnn [OPTIONS] [PATH]
 
 The missing terminal file manager for X.
 
 positional args:
-  PATH   start dir [default: current dir]
+  PATH   start dir [default: .]
 
 optional args:
  -a      use access time
