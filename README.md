@@ -21,6 +21,7 @@
 ## Index
 
 - [Introduction](#introduction)
+- [Wiki, resources](#wiki-resources)
 - [Features](#features)
 - [Quickstart](#quickstart)
 - [Installation](#installation)
@@ -49,9 +50,9 @@ If you prefer a lightweight system or productivity-boosting utilities, `nnn` is 
 
 It runs smoothly on the Raspberry Pi, Termux on Android, Linux, macOS, BSD, Cygwin and Linux subsystem for Windows. `nnn` works seamlessly with DEs and GUI utilities.
 
-#### Important links
+## Wiki, resources
 
-1. [Wiki](https://github.com/jarun/nnn/wiki): operational concepts, how tos, use cases, chronology and insights
+1. [Wiki](https://github.com/jarun/nnn/wiki) (concepts, how-tos, use cases, chronology and insights)
 2. [Performance numbers](https://github.com/jarun/nnn/wiki/Performance)
 3. [Plugin repository and docs](https://github.com/jarun/nnn/tree/master/plugins)
 4. [(neo)vim plugin](https://github.com/mcchrish/nnn.vim)

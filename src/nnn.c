@@ -421,12 +421,14 @@ static const char * const env_cfg[] = {
 #define VISUAL 1
 #define EDITOR 2
 #define PAGER 3
+#define NCUR 4
 
 static const char * const envs[] = {
 	"SHELL",
 	"VISUAL",
 	"EDITOR",
 	"PAGER",
+	"NN",
 };
 
 /* Event handling */
@@ -1113,6 +1115,12 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 	return retstatus;
 }
 
+static void prompt_run(char *cmd, const char *cur, const char *path)
+{
+	setenv(envs[NCUR], cur, 1);
+	spawn(shell, "-c", cmd, path, F_CLI | F_CMD);
+}
+
 /* Get program name from env var, else return fallback program */
 static char *xgetenv(const char *name, char *fallback)
 {
@@ -1739,7 +1747,7 @@ static int filterentries(char *path)
 
 				/* If there's a filter, try a command on ^P */
 				if (cfg.filtercmd && *ch == CONTROL('P') && len > 1) {
-					spawn(shell, "-c", pln, path, F_CLI | F_CMD);
+					prompt_run(pln, (ndents ? dents[cur].name : ""), path);
 					continue;
 				}
 
@@ -4407,6 +4415,7 @@ nochange:
 					goto nochange;
 				break;
 			case SEL_SHELL:
+				setenv(envs[NCUR], (ndents ? dents[cur].name : ""), 1);
 				spawn(shell, NULL, NULL, path, F_CLI);
 				break;
 			case SEL_PLUGKEY: // fallthrough
@@ -4490,7 +4499,7 @@ nochange:
 				}
 #endif
 				if (tmp && tmp[0]) // NOLINT
-					spawn(shell, "-c", tmp, path, F_CLI | F_CMD);
+					prompt_run(tmp, (ndents ? dents[cur].name : ""), path);
 			}
 
 			/* Continue in navigate-as-you-type mode, if enabled */
