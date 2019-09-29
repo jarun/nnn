@@ -294,7 +294,7 @@ static char *shell;
 static char *home;
 static char *initpath;
 static char *cfgdir;
-static char *g_cppath;
+static char *g_selpath;
 static char *plugindir;
 static char *pnamebuf, *pselbuf;
 static struct entry *dents;
@@ -576,8 +576,8 @@ static void printerr(int linenum)
 {
 	exitcurses();
 	perror(xitoa(linenum));
-	if (!cfg.picker && g_cppath)
-		unlink(g_cppath);
+	if (!cfg.picker && g_selpath)
+		unlink(g_selpath);
 	free(pselbuf);
 	exit(1);
 }
@@ -779,12 +779,12 @@ static int create_tmp_file()
 }
 
 /* Writes buflen char(s) from buf to a file */
-static void writecp(const char *buf, const size_t buflen)
+static void writesel(const char *buf, const size_t buflen)
 {
-	if (cfg.pickraw || !g_cppath)
+	if (cfg.pickraw || !g_selpath)
 		return;
 
-	FILE *fp = fopen(g_cppath, "w");
+	FILE *fp = fopen(g_selpath, "w");
 	if (fp) {
 		if (fwrite(buf, 1, buflen, fp) != buflen)
 			printwarn(NULL);
@@ -806,7 +806,7 @@ static void appendfpath(const char *path, const size_t len)
 }
 
 /* Write selected file paths to fd, linefeed separated */
-static size_t selectiontofd(int fd, uint *pcount)
+static size_t seltofile(int fd, uint *pcount)
 {
 	uint lastpos, count = 0;
 	char *pbuf = pselbuf;
@@ -845,7 +845,7 @@ static size_t selectiontofd(int fd, uint *pcount)
 }
 
 /* List selection from selection buffer */
-static bool showcplist(void)
+static bool listselbuf(void)
 {
 	int fd;
 	size_t pos;
@@ -859,7 +859,7 @@ static bool showcplist(void)
 		return FALSE;
 	}
 
-	pos = selectiontofd(fd, NULL);
+	pos = seltofile(fd, NULL);
 
 	close(fd);
 	if (pos && pos == selbufpos)
@@ -870,27 +870,27 @@ static bool showcplist(void)
 }
 
 /* List selection from selection file (another instance) */
-static bool showcpfile(void)
+static bool listselfile(void)
 {
 	struct stat sb;
 
-	if (stat(g_cppath, &sb) == -1)
+	if (stat(g_selpath, &sb) == -1)
 		return FALSE;
 
 	/* Nothing selected if file size is 0 */
 	if (!sb.st_size)
 		return FALSE;
 
-	snprintf(g_buf, CMD_LEN_MAX, "cat %s | tr \'\\0\' \'\\n\'", g_cppath);
+	snprintf(g_buf, CMD_LEN_MAX, "cat %s | tr \'\\0\' \'\\n\'", g_selpath);
 	spawn("sh", "-c", g_buf, NULL, F_NORMAL | F_CMD);
 
 	return TRUE;
 }
 
-static bool cpsafe(void)
+static bool selsafe(void)
 {
 	/* Fail if selection file path not generated */
-	if (!g_cppath) {
+	if (!g_selpath) {
 		printmsg("selection file not found");
 		return FALSE;
 	}
@@ -902,7 +902,7 @@ static bool cpsafe(void)
 	}
 
 	/* Fail if selection file path isn't accessible */
-	if (access(g_cppath, R_OK | W_OK) == -1) {
+	if (access(g_selpath, R_OK | W_OK) == -1) {
 		errno == ENOENT ? printmsg(messages[NONE_SELECTED]) : printwarn(NULL);
 		return FALSE;
 	}
@@ -911,7 +911,7 @@ static bool cpsafe(void)
 }
 
 /* Reset selection indicators */
-static void resetcpind(void)
+static void resetselind(void)
 {
 	int r = 0;
 
@@ -1158,9 +1158,9 @@ static void cpstr(char *buf)
 {
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-		 "xargs -0 -a %s -%c {} %s {} .", g_cppath, REPLACE_STR, cp);
+		 "xargs -0 -a %s -%c {} %s {} .", g_selpath, REPLACE_STR, cp);
 #else
-		 "cat %s | xargs -0 -o -%c {} cp -iRp {} .", g_cppath, REPLACE_STR);
+		 "cat %s | xargs -0 -o -%c {} cp -iRp {} .", g_selpath, REPLACE_STR);
 #endif
 }
 
@@ -1168,9 +1168,9 @@ static void mvstr(char *buf)
 {
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-		 "xargs -0 -a %s -%c {} %s {} .", g_cppath, REPLACE_STR, mv);
+		 "xargs -0 -a %s -%c {} %s {} .", g_selpath, REPLACE_STR, mv);
 #else
-		 "cat %s | xargs -0 -o -%c {} mv -i {} .", g_cppath, REPLACE_STR);
+		 "cat %s | xargs -0 -o -%c {} mv -i {} .", g_selpath, REPLACE_STR);
 #endif
 }
 
@@ -1179,16 +1179,16 @@ static void rmmulstr(char *buf)
 	if (cfg.trash) {
 		snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-			 "xargs -0 -a %s trash-put", g_cppath);
+			 "xargs -0 -a %s trash-put", g_selpath);
 #else
-			 "cat %s | xargs -0 trash-put", g_cppath);
+			 "cat %s | xargs -0 trash-put", g_selpath);
 #endif
 	} else {
 		snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-			 "xargs -0 -a %s rm -%cr", g_cppath, confirm_force());
+			 "xargs -0 -a %s rm -%cr", g_selpath, confirm_force());
 #else
-			 "cat %s | xargs -0 -o rm -%cr", g_cppath, confirm_force());
+			 "cat %s | xargs -0 -o rm -%cr", g_selpath, confirm_force());
 #endif
 	}
 }
@@ -1241,8 +1241,8 @@ static bool batch_rename(const char *path)
 		for (i = 0; i < ndents; ++i)
 			appendfpath(dents[i].name, NAME_MAX);
 
-	selectiontofd(fd1, &count);
-	selectiontofd(fd2, NULL);
+	seltofile(fd1, &count);
+	seltofile(fd2, NULL);
 	close(fd2);
 
 	if (dir) /* Don't retain dir entries in selection */
@@ -1303,10 +1303,10 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-		"sed -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, g_cppath, cmd, archive);
+		"sed -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, g_selpath, cmd, archive);
 #else
 		"cat '%s' | tr '\\0' '\n' | sed -e 's|^%s/||' | tr '\n' '\\0' | xargs -0 %s %s",
-		g_cppath, curpath, cmd, archive);
+		g_selpath, curpath, cmd, archive);
 #endif
 	spawn("sh", "-c", buf, curpath, F_NORMAL);
 	free(buf);
@@ -2899,8 +2899,8 @@ static bool show_help(const char *path)
 			dprintf(fd, "%s: %s\n", env_cfg[i], start);
 	}
 
-	if (g_cppath)
-		dprintf(fd, "SELECTION FILE: %s\n", g_cppath);
+	if (g_selpath)
+		dprintf(fd, "SELECTION FILE: %s\n", g_selpath);
 
 	dprintf(fd, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
@@ -3635,7 +3635,7 @@ nochange:
 				if (cfg.picker && sel == SEL_GOIN) {
 					r = mkpath(path, dents[cur].name, newpath);
 					appendfpath(newpath, r);
-					writecp(pselbuf, selbufpos - 1);
+					writesel(pselbuf, selbufpos - 1);
 					return;
 				}
 
@@ -4073,7 +4073,7 @@ nochange:
 				 * the temporary selection file.
 				 */
 				if (!nselected)
-					writecp(NULL, 0);
+					writesel(NULL, 0);
 
 				/* Do not select if already selected */
 				if (!(dents[cur].flags & FILE_SELECTED)) {
@@ -4091,14 +4091,14 @@ nochange:
 				r = mkpath(path, dents[cur].name, newpath);
 
 				if (selbufpos) {
-					resetcpind();
+					resetselind();
 
 					/* Keep the selection buffer in sync */
 					selbufpos = 0;
 				}
 				appendfpath(newpath, r);
 
-				writecp(newpath, r - 1); /* Truncate NULL from end */
+				writesel(newpath, r - 1); /* Truncate NULL from end */
 				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
 				nselected = 1;
@@ -4109,8 +4109,8 @@ nochange:
 			cfg.selmode ^= 1;
 			if (cfg.selmode) {
 				if (selbufpos) {
-					resetcpind();
-					writecp(NULL, 0);
+					resetselind();
+					writesel(NULL, 0);
 					selbufpos = 0;
 				}
 				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
@@ -4160,7 +4160,7 @@ nochange:
 			}
 
 			if (selbufpos) { /* File path(s) written to the buffer */
-				writecp(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
 				if (nselected) { /* Some files cherry picked */
@@ -4173,7 +4173,7 @@ nochange:
 			}
 			continue;
 		case SEL_SELLST:
-			if (showcplist() || showcpfile()) {
+			if (listselbuf() || listselfile()) {
 				if (cfg.filtermode)
 					presel = FILTER;
 				break;
@@ -4185,7 +4185,7 @@ nochange:
 		case SEL_MV:
 		case SEL_RMMUL:
 		{
-			if (!cpsafe()) {
+			if (!selsafe()) {
 				presel = MSGWAIT;
 				goto nochange;
 			}
@@ -4242,7 +4242,7 @@ nochange:
 			case SEL_ARCHIVE:
 				r = get_input("archive selection (else current)? [y/Y confirms]");
 				if (r == 'y' || r == 'Y') {
-					if (!cpsafe()) {
+					if (!selsafe()) {
 						presel = MSGWAIT;
 						goto nochange;
 					}
@@ -4545,7 +4545,7 @@ nochange:
 				if (cfg.picker) {
 					/* Picker mode: reset buffer or clear file */
 					if (selbufpos)
-						cfg.pickraw ? selbufpos = 0 : writecp(NULL, 0);
+						cfg.pickraw ? selbufpos = 0 : writesel(NULL, 0);
 				} else if (!write_lastdir(path)) {
 					presel = MSGWAIT;
 					goto nochange;
@@ -4711,10 +4711,10 @@ static bool setup_config(void)
 	/* Set selection file path */
 	if (!cfg.picker) {
 		/* Length of "/.config/nnn/.selection" */
-		g_cppath = (char *)malloc(len + 3);
-		r = xstrlcpy(g_cppath, cfgdir, len + 3);
-		xstrlcpy(g_cppath + r - 1, "/.selection", 12);
-		DPRINTF_S(g_cppath);
+		g_selpath = (char *)malloc(len + 3);
+		r = xstrlcpy(g_selpath, cfgdir, len + 3);
+		xstrlcpy(g_selpath + r - 1, "/.selection", 12);
+		DPRINTF_S(g_selpath);
 	}
 
 	return TRUE;
@@ -4741,7 +4741,7 @@ static bool set_tmp_path()
 
 static void cleanup(void)
 {
-	free(g_cppath);
+	free(g_selpath);
 	free(plugindir);
 	free(cfgdir);
 	free(initpath);
@@ -4806,8 +4806,8 @@ int main(int argc, char *argv[])
 				}
 
 				close(fd);
-				g_cppath = realpath(optarg, NULL);
-				unlink(g_cppath);
+				g_selpath = realpath(optarg, NULL);
+				unlink(g_selpath);
 			}
 			break;
 		case 'r':
@@ -5039,12 +5039,12 @@ int main(int argc, char *argv[])
 
 	if (cfg.pickraw) {
 		if (selbufpos) {
-			opt = selectiontofd(1, NULL);
+			opt = seltofile(1, NULL);
 			if (opt != (int)(selbufpos))
 				xerror();
 		}
-	} else if (!cfg.picker && g_cppath)
-		unlink(g_cppath);
+	} else if (!cfg.picker && g_selpath)
+		unlink(g_selpath);
 
 	/* Free the selection buffer */
 	free(pselbuf);
