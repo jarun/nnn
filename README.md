@@ -114,7 +114,7 @@ Notes:
 
 #### Library dependencies
 
-A curses library with wide char support (e.g. ncursesw), libreadline and standard libc. Makefile target `norl` drops libreadline.
+A curses library with wide char support (e.g. ncursesw), libreadline (`make norl` to drop) and standard libc.
 
 #### Utility dependencies
 
@@ -133,7 +133,7 @@ A curses library with wide char support (e.g. ncursesw), libreadline and standar
 
 Install `nnn` from your package manager. If the version available is dated try an alternative installation method.
 
-<details><summary>Packaging status from Repology (expand)</summary>
+<details><summary>Packaging status (expand)</summary>
 <p>
 <br>
 <a href="https://repology.org/metapackage/nnn/versions"><img src="https://repology.org/badge/vertical-allrepos/nnn.svg" alt="Packaging status"></a>
@@ -179,7 +179,7 @@ There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$
 | Example `export` | Description |
 | --- | --- |
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | key-bookmark pairs [max 10] |
-| `NNN_PLUG='o:fzy-open;p:mocplay;m:nmount;t:thumb'` | key-plugin pairs (<kbd>x-key</kbd> to run) [max 10] |
+| `NNN_PLUG='o:fzy-open;p:mocplay;m:nmount;t:thumb'` | key-plugin pairs (<kbd>:key</kbd> to run) [max 10] |
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
@@ -290,11 +290,9 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 ## Mentions
 
 - [FOSSMint](https://www.fossmint.com/nnn-linux-terminal-file-browser/)
-- [Hacker News 1](https://news.ycombinator.com/item?id=18520898)
-- [Hacker News 2](https://news.ycombinator.com/item?id=19850656)
+- Hacker News [[1](https://news.ycombinator.com/item?id=18520898)] [[2](https://news.ycombinator.com/item?id=19850656)]
 - [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
-- [LinuxLinks1](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)
-- [LinuxLinks2](https://www.linuxlinks.com/bestconsolefilemanagers/)
+- LinuxLinks [[1](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)] [[2](https://www.linuxlinks.com/bestconsolefilemanagers/)]
 - [Suckless Rocks](https://suckless.org/rocks/)
 - [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
 
