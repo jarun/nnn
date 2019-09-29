@@ -69,7 +69,7 @@ jobs:
             # Use latest installed python3 from pyenv
             export PYENV_VERSION="$(pyenv versions | grep -Po '\b3\.\d+\.\d+' | tail -1)"
             pip install packagecore
-            packagecore -o ./dist/ ${CIRCLE_TAG#v}
+            packagecore -c misc/packagecore/packagecore.yaml -o ./dist/ ${CIRCLE_TAG#v}
             # Move source pack to dist
             mv ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz dist/
 

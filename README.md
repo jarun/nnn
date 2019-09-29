@@ -91,7 +91,7 @@ It runs smoothly on the Raspberry Pi, Termux on Android, Linux, macOS, BSD, Cygw
   - Spawn a shell, run apps, run commands, execute file
   - Lock terminal (needs a locker)
 - Minimal deps, minimal config
-- Available on many package managers
+- Widely available
 - Unicode support
 - Follows Linux kernel coding style
 - Highly optimized, static analysis integrated code
