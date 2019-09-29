@@ -887,17 +887,26 @@ static bool listselfile(void)
 	return TRUE;
 }
 
+/* Finish selection procedure before an operation */
+static void endselection(void)
+{
+	if (!cfg.selmode)
+		return;
+
+	cfg.selmode = 0;
+
+	if (selbufpos) { /* File path(s) written to the buffer */
+		writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+		spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+		selbufpos = 0;
+	}
+}
+
 static bool selsafe(void)
 {
 	/* Fail if selection file path not generated */
 	if (!g_selpath) {
 		printmsg("selection file not found");
-		return FALSE;
-	}
-
-	/* Warn if selection not completed */
-	if (cfg.selmode) {
-		printmsg("finish selection first");
 		return FALSE;
 	}
 
@@ -3998,7 +4007,7 @@ nochange:
 			if (!ndents)
 				break; // fallthrough
 		case SEL_REDRAW: // fallthrough
-		case SEL_RENAMEALL: // fallthrough
+		case SEL_RENAMEMUL: // fallthrough
 		case SEL_HELP: // fallthrough
 		case SEL_LOCK:
 		{
@@ -4017,7 +4026,9 @@ nochange:
 				if (ndents)
 					copycurname();
 				goto begin;
-			case SEL_RENAMEALL:
+			case SEL_RENAMEMUL:
+				endselection();
+
 				if (!batch_rename(path)) {
 					printwait("batch rename failed", &presel);
 					goto nochange;
@@ -4185,6 +4196,8 @@ nochange:
 		case SEL_MV:
 		case SEL_RMMUL:
 		{
+			endselection();
+
 			if (!selsafe()) {
 				presel = MSGWAIT;
 				goto nochange;
@@ -4242,10 +4255,13 @@ nochange:
 			case SEL_ARCHIVE:
 				r = get_input("archive selection (else current)? [y/Y confirms]");
 				if (r == 'y' || r == 'Y') {
+					endselection();
+
 					if (!selsafe()) {
 						presel = MSGWAIT;
 						goto nochange;
 					}
+
 					tmp = NULL;
 				} else if (!ndents) {
 					printwait("no files", &presel);
@@ -4409,6 +4425,8 @@ nochange:
 		case SEL_PLUGIN: // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_RUNCMD:
+			endselection();
+
 			switch (sel) {
 			case SEL_EXEC:
 				if (!execute_file(cur, path, newpath, &presel))
