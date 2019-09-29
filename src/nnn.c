@@ -3348,7 +3348,7 @@ static void redraw(char *path)
 		if (cfg.mtimeorder)
 			sort[0] = cfg.mtime ? 'T' : 'A';
 		else if (cfg.sizeorder)
-			sort[0] = 'S';
+			sort[0] = 'Z';
 		else if (cfg.extnorder)
 			sort[0] = 'E';
 
