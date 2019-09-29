@@ -198,10 +198,10 @@ static struct key bindings[] = {
 	{ CONTROL('K'),   SEL_SEL },
 	{ ' ',            SEL_SEL },
 	/* Toggle select multiple files */
-	{ 'K',            SEL_SELMUL },
+	{ '\'',           SEL_SELMUL },
 	{ CONTROL('Y'),   SEL_SELMUL },
 	/* Select all files in current dir */
-	{ 'Y',            SEL_SELALL },
+	{ 'a',            SEL_SELALL },
 	/* Show list of copied files */
 	{ 'y',            SEL_SELLST },
 	/* Copy from selection buffer */

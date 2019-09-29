@@ -131,16 +131,18 @@ auto selects the directory and enters it in this mode.
 .Sh SELECTION
 Use \fI^K\fR to select the file under the cursor.
 .Pp
-To select multiple files the selection mode should be enabled using \fI^Y\fR.
+To select multiple files press \fI^Y\fR and enter selection mode.
 In this mode it's possible to
 .Pp
-(1) cherry-pick individual files one by one by pressing <kbd>^K</kbd> on each entry (works across directories and contexts); or,
+(1) cherry-pick individual files one by one by pressing \fI^K\fR on each entry (works across directories and contexts); or,
 .br
 (2) navigate to another file in the same directory to select a range of files.
 .Pp
-Press \fI^Y\fR again to save the selection and exit selection mode.
+Running any operation that uses the selection OR pressing \fI^Y\fR again will save the selection and exit the selection mode.
 .Pp
-Selected files are visually indicated by a \fB+\fR before the entries.
+Press \fI^Y\fR twice to clear selection.
+.Pp
+Selected files are visually indicated by a \fI+\fR before the entries.
 .br
 The files in the list can now be listed, copied, moved, removed, archived or linked.
 .br
@@ -162,7 +164,7 @@ when dealing with the !, e and p commands respectively. A single combination to 
 .Bd -literal
     export NNN_PLUG='o:fzy-open;p:mocplay;d:ndiff;m:nmount;t:thumb;i:mediainf'
 
-    NOTE: To run a plugin directly, press 'x' followed by the plugin key.
+    NOTE: To run a plugin directly, press \fI:\fR followed by the plugin key.
 .Ed
 .Pp
 \fBNNN_USE_EDITOR:\fR use VISUAL (else EDITOR, preferably CLI, fallback vi) to handle text files.
@@ -201,7 +203,7 @@ when dealing with the !, e and p commands respectively. A single combination to 
 .Nm
 may not handle keypresses correctly when used with tmux (see issue #104 for more details). Set \fBTERM=xterm-256color\fR to address it.
 .Pp
-Use the keybind \fBK\fR to toggle selection if you are having issues with \fB^Y\fR on *BSD or macOS. To use \fB^Y\fR, run:
+Use the keybind \fI'\fR to toggle selection if you are having issues with \fI^Y\fR on *BSD or macOS. To use \fI^Y\fR, run:
 .Bd -literal
     stty dsusp undef
 .Ed
