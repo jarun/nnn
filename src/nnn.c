@@ -898,7 +898,6 @@ static void endselection(void)
 	if (selbufpos) { /* File path(s) written to the buffer */
 		writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 		spawn(copier, NULL, NULL, NULL, F_NOTRACE);
-		selbufpos = 0;
 	}
 }
 
