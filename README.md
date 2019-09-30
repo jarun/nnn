@@ -218,7 +218,7 @@ optional args:
 
 #### Keyboard and mouse
 
-Press <kbd>?</kbd> in `nnn` to see the list anytime.
+Press <kbd>?</kbd> in `nnn` to see the list anytime (the listing below is from dev branch).
 
 ```
  NAVIGATION
@@ -237,8 +237,8 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime.
  FILES
            ^O  Open with...      n  Create new/link
             D  File detail   ^R F2  Rename/duplicate
-     ⎵ ^K / Y  Select entry/all  r  Batch rename
-         K ^Y  Toggle selection  y  List selection
+     ⎵ ^J / a  Select entry/all  r  Batch rename
+         m ^S  Toggle multi sel  y  List selection
             P  Copy selection    X  Delete selection
             V  Move selection   ^X  Delete entry
             f  Create archive    C  Execute entry
