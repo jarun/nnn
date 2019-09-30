@@ -9,49 +9,18 @@
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
 
-<p align="center"><img src="https://i.imgur.com/MPWpmos.png" /></p>
-<p align="center"><i>navigate-as-you-type & du</i></p>
-
-## Index
-
-- [Introduction](#introduction)
-- [Wiki, resources](#wiki-resources)
-- [Features](#features)
-- [Quickstart](#quickstart)
-- [Installation](#installation)
-  - [Library dependencies](#library-dependencies)
-  - [Utility dependencies](#utility-dependencies)
-  - [From a package manager](#from-a-package-manager)
-  - [Release packages](#release-packages)
-  - [From source](#from-source)
-  - [Shell completion](#shell-completion)
-- [Usage](#usage)
-  - [Configuration](#configuration)
-  - [Cmdline options](#cmdline-options)
-  - [Keyboard and mouse](#keyboard-and-mouse)
-  - [Leader key](#leader-key)
-  - [Help](#help)
-- [Mentions](#mentions)
-- [Developers](#developers)
+<p align="center"><a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a></p>
+<p align="center"><i>navigate-as-you-type & du (click to see demo video)</i></p>
 
 ## Introduction
 
-`nnn` is a full-featured terminal file manager. It's tiny, extremely light and fast.
+`nnn` is a full-featured terminal file manager. It's tiny, [extremely light and fast](https://github.com/jarun/nnn/wiki/Performance).
 
-`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. 30+ plugins extend the capabilities further. Custom plugins are easy to add.
+`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has 30+ plugins to extend the capabilities further. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
 
-If you prefer a lightweight system or productivity-boosting utilities, `nnn` is a delight to have. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes.
+It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.com/watch?v=AbaauM7gUJw), Linux, macOS, BSD, Cygwin and Linux subsystem for Windows. `nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes.
 
-It runs smoothly on the Raspberry Pi, Termux on Android, Linux, macOS, BSD, Cygwin and Linux subsystem for Windows. `nnn` works seamlessly with DEs and GUI utilities.
-
-## Wiki, resources
-
-1. [Wiki](https://github.com/jarun/nnn/wiki) (concepts, how-tos, use cases, troubleshooting and more...)
-2. [Performance numbers](https://github.com/jarun/nnn/wiki/Performance)
-3. [Plugin repository and docs](https://github.com/jarun/nnn/tree/master/plugins)
-4. [(neo)vim plugin](https://github.com/mcchrish/nnn.vim)
-5. [Demo video](https://www.youtube.com/watch?v=U2n5aGqou9E) (v2.1)
-6. [nnn on Android](https://www.youtube.com/watch?v=AbaauM7gUJw)
+Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
 
 ## Features
 
@@ -216,7 +185,7 @@ optional args:
 
 #### Keyboard and mouse
 
-Press <kbd>?</kbd> in `nnn` to see the list anytime (the listing below is from **dev branch**).
+The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see the keybinds in your installed version.
 
 ```
  NAVIGATION
@@ -252,7 +221,10 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime (the listing below is from *
            ^P  Prompt/run cmd    L  Lock
 ```
 
-Note: Help & settings, file details and archive listing are shown in the `$PAGER`.
+Notes:
+
+1. Help & settings, file details and archive listing are shown in the `$PAGER`.
+2. To change shortcuts modify key bindings in `nnn.h` and compile.
 
 | Mouse click | Function |
 |---| --- |
