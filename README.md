@@ -46,7 +46,7 @@ It runs smoothly on the Raspberry Pi, Termux on Android, Linux, macOS, BSD, Cygw
 
 ## Wiki, resources
 
-1. [Wiki](https://github.com/jarun/nnn/wiki) (concepts, how-tos, use cases, chronology and insights)
+1. [Wiki](https://github.com/jarun/nnn/wiki) (concepts, how-tos, use cases, troubleshooting and more...)
 2. [Performance numbers](https://github.com/jarun/nnn/wiki/Performance)
 3. [Plugin repository and docs](https://github.com/jarun/nnn/tree/master/plugins)
 4. [(neo)vim plugin](https://github.com/mcchrish/nnn.vim)
@@ -238,7 +238,7 @@ Press <kbd>?</kbd> in `nnn` to see the list anytime (the listing below is from d
            ^O  Open with...      n  Create new/link
             D  File detail   ^R F2  Rename/duplicate
      ⎵ ^J / a  Select entry/all  r  Batch rename
-         m ^S  Toggle multi sel  y  List selection
+         m ^S  Toggle multi sel  M  List selection
             P  Copy selection    X  Delete selection
             V  Move selection   ^X  Delete entry
             f  Create archive    C  Execute entry
