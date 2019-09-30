@@ -195,11 +195,11 @@ static struct key bindings[] = {
 	{ CONTROL('L'),   SEL_REDRAW },
 	{ KEY_F(5),       SEL_REDRAW },
 	/* Select current file path */
-	{ CONTROL('K'),   SEL_SEL },
+	{ CONTROL('J'),   SEL_SEL },
 	{ ' ',            SEL_SEL },
 	/* Toggle select multiple files */
-	{ '\'',           SEL_SELMUL },
-	{ CONTROL('Y'),   SEL_SELMUL },
+	{ 'm',            SEL_SELMUL },
+	{ CONTROL('S'),   SEL_SELMUL },
 	/* Select all files in current dir */
 	{ 'a',            SEL_SELALL },
 	/* Show list of copied files */
