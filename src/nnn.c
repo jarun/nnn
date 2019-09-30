@@ -4095,9 +4095,8 @@ nochange:
 			startselection();
 			rangesel ^= 1;
 
-			g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
-
 			if (rangesel) { /* Range selection started */
+				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
 				selstartid = cur;
 				mvprintw(xlines - 1, 0, "range selection on\n");
 				xdelay();
