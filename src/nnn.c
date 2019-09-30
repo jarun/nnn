@@ -3355,11 +3355,7 @@ static void redraw(char *path)
 
 	if (ndents) {
 		char sort[] = "\0 ";
-		char selmode[] = "\0 ";
 		pEntry pent = &dents[cur];
-
-		if (cfg.selmode)
-			selmode[0] = 'Y';
 
 		if (cfg.mtimeorder)
 			sort[0] = cfg.mtime ? 'T' : 'A';
@@ -3383,8 +3379,8 @@ static void redraw(char *path)
 			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
-			mvprintw(lastln, 0, "%d/%d (%d) %s%cu:%s free:%s files:%lu %s",
-				 cur + 1, ndents, nselected, selmode, c, buf,
+			mvprintw(lastln, 0, "%d/%d (%d) %cu:%s free:%s files:%lu %s",
+				 cur + 1, ndents, nselected, c, buf,
 				 coolsize(get_fs_info(path, FREE)), num_files, ptr);
 		} else { /* light or detail mode */
 			/* Show filename as it may be truncated in directory listing */
@@ -3394,8 +3390,8 @@ static void redraw(char *path)
 			/* Timestamp */
 			strftime(buf, 18, "%Y-%b-%d %R", localtime(&pent->t));
 
-			mvprintw(lastln, 0, "%d/%d (%d) %s%s%s %s %s %s [%s]",
-				 cur + 1, ndents, nselected, selmode, sort, buf,
+			mvprintw(lastln, 0, "%d/%d (%d) %s%s %s %s %s [%s]",
+				 cur + 1, ndents, nselected, sort, buf,
 				 get_lsperms(pent->mode), coolsize(pent->size), ptr, base);
 		}
 	} else
