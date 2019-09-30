@@ -4123,6 +4123,7 @@ nochange:
 				nselected = 0;
 				selbufpos = 0;
 				cfg.selmode = 0;
+				writesel(NULL, 0);
 				break;
 			} // fallthrough
 		case SEL_SELALL:
