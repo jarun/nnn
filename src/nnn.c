@@ -2050,6 +2050,8 @@ static int xlink(char *suffix, char *path, char *buf, int *presel, int type)
 		return -1;
 	}
 
+	endselection();
+
 	if (type == 's') /* symbolic link */
 		link_fn = &symlink;
 	else /* hard link */
