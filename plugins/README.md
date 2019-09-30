@@ -1,3 +1,8 @@
+<h1 align="center">nnn plugins</h1>
+
+<p align="center"><img src="https://i.imgur.com/14iPDIq.png" /></p>
+<p align="center"><i>image preview with plugin thumb</i></p>
+
 Plugins extend the capabilities of `nnn`. They are scripts which `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins.
 
 The currently available plugins are listed below.

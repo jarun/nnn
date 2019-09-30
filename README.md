@@ -10,7 +10,7 @@
 </p>
 
 <p align="center"><img src="https://i.imgur.com/MPWpmos.png" /></p>
-<p align="center"><i>navigate-as-you-type & du analyzer mode</i></p>
+<p align="center"><i>navigate-as-you-type & du</i></p>
 
 ## Index
 
