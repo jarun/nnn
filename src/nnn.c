@@ -3790,7 +3790,6 @@ nochange:
 				fd = get_input(NULL);
 
 			switch (fd) {
-			case 'q': // fallthrough
 			case '~': // fallthrough
 			case '`': // fallthrough
 			case '-': // fallthrough

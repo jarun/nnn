@@ -277,7 +277,6 @@ The Leader/Lead key provides a powerful multi-functional navigation mechanism. I
 | <kbd>'</kbd> | Go to first file in directory |
 | <kbd>~</kbd> <kbd>`</kbd> <kbd>@</kbd> <kbd>-</kbd> | Visit HOME, `/`, start, last visited dir |
 | <kbd>.</kbd> | Toggle show hidden files |
-| <kbd>q</kbd> | Quit context |
 
 When the filter is on, <kbd>/</kbd> works as an additional Leader key.
 
