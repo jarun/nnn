@@ -257,7 +257,7 @@ static settings cfg = {
 	0, /* blkorder */
 	0, /* extnorder */
 	0, /* showhidden */
-	0, /* selmode */
+	1, /* selmode */
 	0, /* showdetail */
 	1, /* ctxactive */
 	0, /* reserved */
@@ -887,17 +887,41 @@ static bool listselfile(void)
 	return TRUE;
 }
 
+/* Reset selection indicators */
+static void resetselind(void)
+{
+	int r = 0;
+
+	for (; r < ndents; ++r)
+		if (dents[r].flags & FILE_SELECTED)
+			dents[r].flags &= ~FILE_SELECTED;
+}
+
+static void startselection()
+{
+	if (!cfg.selmode) {
+		cfg.selmode = 1;
+		nselected = 0;
+
+		if (selbufpos) {
+			resetselind();
+			writesel(NULL, 0);
+			selbufpos = 0;
+		}
+	}
+}
+
+
 /* Finish selection procedure before an operation */
 static void endselection(void)
 {
-	if (!cfg.selmode)
-		return;
+	if (cfg.selmode) {
+		cfg.selmode = 0;
 
-	cfg.selmode = 0;
-
-	if (selbufpos) { /* File path(s) written to the buffer */
-		writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-		spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+		if (selbufpos) { /* File path(s) written to the buffer */
+			writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+			spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+		}
 	}
 }
 
@@ -916,16 +940,6 @@ static bool selsafe(void)
 	}
 
 	return TRUE;
-}
-
-/* Reset selection indicators */
-static void resetselind(void)
-{
-	int r = 0;
-
-	for (; r < ndents; ++r)
-		if (dents[r].flags & FILE_SELECTED)
-			dents[r].flags &= ~FILE_SELECTED;
 }
 
 /* Initialize curses mode */
@@ -2857,8 +2871,8 @@ static bool show_help(const char *path)
 		"1FILES\n"
 		 "b^O  Open with...      n  Create new/link\n"
 		  "cD  File detail   ^R F2  Rename/duplicate\n"
-	   "5⎵ ^J / a  Select entry/all  r  Batch rename\n"
-	       "9m ^S  Toggle multi sel  M  List selection\n"
+	   "5⎵ ^J / a  Sel entry/all     r  Batch rename\n"
+	       "9m ^S  Sel range, clear  M  List selection\n"
 		  "cP  Copy selection    X  Delete selection\n"
 		  "cV  Move selection   ^X  Delete entry\n"
 		  "cf  Create archive    C  Execute entry\n"
@@ -3246,14 +3260,6 @@ static void redraw(char *path)
 	/* Enforce scroll/cursor invariants */
 	move_cursor(cur, 1);
 
-#ifdef DIR_LIMITED_SELECTION
-	if (cfg.selmode)
-		if (g_crc != crc8fast((uchar *)dents, ndents * sizeof(struct entry))) {
-			cfg.selmode = 0;
-			DPRINTF_S("selection off");
-		}
-#endif
-
 	/* Fail redraw if < than 10 columns, context info prints 10 chars */
 	if (ncols < MIN_DISPLAY_COLS) {
 		printmsg("too few columns!");
@@ -3404,7 +3410,7 @@ static void browse(char *ipath)
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	int r = -1, fd, presel, selstartid = 0, selendid = 0, onscreen;
 	enum action sel;
-	bool dir_changed = FALSE;
+	bool dir_changed = FALSE, rangesel = FALSE;
 	struct stat sb;
 	char *path, *lastdir, *lastname, *dir, *tmp;
 	MEVENT event;
@@ -4070,118 +4076,87 @@ nochange:
 			if (!ndents)
 				goto nochange;
 
-			if (cfg.selmode) {
-				/*
-				 * Clear the selection file on first select.
-				 *
-				 * This ensures that when the first file path is
-				 * copied into memory (but not written to tmp file
-				 * yet to save on writes), the tmp file is cleared.
-				 * The user may be in the middle of selection mode op
-				 * and issue a cp, mv of multi-rm assuming the files
-				 * in the selection list would be affected. However,
-				 * these operations read the source file paths from
-				 * the temporary selection file.
-				 */
-				if (!nselected)
-					writesel(NULL, 0);
+			startselection();
+			if (rangesel)
+				rangesel = FALSE;
 
-				/* Do not select if already selected */
-				if (!(dents[cur].flags & FILE_SELECTED)) {
-					r = mkpath(path, dents[cur].name, newpath);
-					appendfpath(newpath, r);
+			/* Do not select if already selected */
+			if (!(dents[cur].flags & FILE_SELECTED)) {
+				appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 
-					++nselected;
-					dents[cur].flags |= FILE_SELECTED;
-				}
-
-				/* move cursor to the next entry if this is not the last entry */
-				if (cur != ndents - 1)
-					move_cursor((cur + 1) % ndents, 0);
-			} else {
-				r = mkpath(path, dents[cur].name, newpath);
-
-				if (selbufpos) {
-					resetselind();
-
-					/* Keep the selection buffer in sync */
-					selbufpos = 0;
-				}
-				appendfpath(newpath, r);
-
-				writesel(newpath, r - 1); /* Truncate NULL from end */
-				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
-
-				nselected = 1;
+				++nselected;
 				dents[cur].flags |= FILE_SELECTED;
 			}
+
+			/* move cursor to the next entry if this is not the last entry */
+			if (cur != ndents - 1)
+				move_cursor((cur + 1) % ndents, 0);
 			break;
 		case SEL_SELMUL:
-			cfg.selmode ^= 1;
-			if (cfg.selmode) {
-				if (selbufpos) {
-					resetselind();
-					writesel(NULL, 0);
-					selbufpos = 0;
-				}
-				g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
+			if (!ndents)
+				goto nochange;
+
+			startselection();
+			rangesel ^= 1;
+
+			g_crc = crc8fast((uchar *)dents, ndents * sizeof(struct entry));
+
+			if (rangesel) { /* Range selection started */
 				selstartid = cur;
-				nselected = 0;
-				mvprintw(xlines - 1, 0, "selection on\n");
+				mvprintw(xlines - 1, 0, "range selection on\n");
 				xdelay();
 				continue;
 			}
 
-			if (!nselected) { /* Handle range selection */
 #ifndef DIR_LIMITED_SELECTION
-				if (g_crc != crc8fast((uchar *)dents,
-						      ndents * sizeof(struct entry))) {
-					cfg.selmode = 0;
-					printwait("dir/content changed", &presel);
-					goto nochange;
-				}
+			if (g_crc != crc8fast((uchar *)dents, ndents * sizeof(struct entry))) {
+				rangesel = 0;
+				printwait("dir/content changed, range selection off", &presel);
+				goto nochange;
+			}
 #endif
-				if (cur < selstartid) {
-					selendid = selstartid;
-					selstartid = cur;
-				} else
-					selendid = cur;
+			if (cur < selstartid) {
+				selendid = selstartid;
+				selstartid = cur;
+			} else
+				selendid = cur;
+
+			/* Clear selection on repeat on same file */
+			if (selstartid == selendid) {
+				resetselind();
+				nselected = 0;
+				selbufpos = 0;
+				cfg.selmode = 0;
+				break;
 			} // fallthrough
 		case SEL_SELALL:
 			if (sel == SEL_SELALL) {
 				if (!ndents)
 					goto nochange;
 
-				cfg.selmode = 0;
-				selbufpos = 0;
-				nselected = 0; /* Override single/multi path selection */
+				startselection();
+				if (rangesel)
+					rangesel = FALSE;
+
 				selstartid = 0;
 				selendid = ndents - 1;
 			}
 
-			if ((!nselected && selstartid < selendid) || sel == SEL_SELALL) {
-				for (r = selstartid; r <= selendid; ++r) {
+			for (r = selstartid; r <= selendid; ++r) {
+				if (!(dents[r].flags & FILE_SELECTED)) {
 					appendfpath(newpath, mkpath(path, dents[r].name, newpath));
 					dents[r].flags |= FILE_SELECTED;
+					++nselected;
 				}
-
-				nselected = selendid - selstartid + 1;
-				mvprintw(xlines - 1, 0, "%d selected\n", nselected);
-				xdelay();
 			}
 
-			if (selbufpos) { /* File path(s) written to the buffer */
-				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+			/* Show the range count */
+			//r = selendid - selstartid + 1;
+			//mvprintw(xlines - 1, 0, "+%d\n", r);
+			//xdelay();
 
-				if (nselected) { /* Some files cherry picked */
-					mvprintw(xlines - 1, 0, "%d selected\n", nselected);
-					xdelay();
-				}
-			} else {
-				printwait("selection off", &presel);
-				goto nochange;
-			}
+			writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+			spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 			continue;
 		case SEL_SELLST:
 			if (listselbuf() || listselfile()) {
@@ -4216,6 +4191,13 @@ nochange:
 			}
 
 			spawn("sh", "-c", g_buf, path, F_NORMAL);
+
+			/* Clear selection on move or delete */
+			if (sel == SEL_MV || sel == SEL_RMMUL) {
+				nselected = 0;
+				selbufpos = 0;
+				writesel(NULL, 0);
+			}
 
 			if (ndents)
 				copycurname();
