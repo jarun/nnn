@@ -98,8 +98,6 @@ It runs smoothly on the Raspberry Pi, Termux on Android, Linux, macOS, BSD, Cygw
 
 ## Quickstart
 
-While we strongly advise reading this page and the wiki, if you can't wait to start:
-
 1. Install the [utilities you may need](https://github.com/jarun/nnn#utility-dependencies) based on your regular workflows.
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`
@@ -123,7 +121,7 @@ A curses library with wide char support (e.g. ncursesw), libreadline (`make norl
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | base | desktop opener |
 | file, coreutils (cp, mv, rm), findutils (xargs) | base | file type, copy, move and remove |
 | tar, (un)zip [atool/bsdtar for more formats] | base | create, list, extract tar, gzip, bzip2, zip |
-| sshfs, fusermount(3) | if needed | mount, unmount over SSHFS |
+| sshfs, fusermount(3) | optional | mount, unmount over SSHFS |
 | trash-cli | optional | trash files (default action: delete) |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/Advanced-use-cases#show-cp-mv-progress)) | optional | copy, move progress |
