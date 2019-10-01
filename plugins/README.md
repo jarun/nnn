@@ -40,7 +40,7 @@ The currently available plugins are listed below.
 | transfer | sh | curl | Upload file to transfer.sh |
 | upgrade | sh | curl | Upgrade nnn manually on Debian 9 Stretch |
 | vidthumb | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) | Show video thumbnails in terminal |
-| viuimg | sh | [viu](https://github.com/atanunq/viu), less | View an image or images in dir |
+| viuimg | sh | [viu](https://github.com/atanunq/viu), less | View an image or images in dir in `$PAGER` |
 
 ## Installing plugins
 
@@ -56,7 +56,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You ca
 
 **Method 1:** Directly with <kbd>:key</kbd>:
 
-    export NNN_PLUG='o:fzy-open;p:mocplay;d:ndiff;m:nmount;n:notes;t:thumb'
+    export NNN_PLUG='o:fzy-open;p:mocplay;d:ndiff;m:nmount;n:notes;v:viuimg;t:thumb'
 
 With this, plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be run with <kbd>:p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen. Up to 10 plugins can have such keybinds.
 

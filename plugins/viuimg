@@ -1,27 +1,10 @@
 #!/usr/bin/env sh
 
-# Description: View an image or images in a directory in pager
-#
-# Note: While it's very easy to fix this in Bash (sample commented),  with the
-#       current POSIX shell script implementation the unmatched patterns are spewed.
-#       A patch to fix this is highly appreciated.
+# Description: View an image or images in a directory in $PAGER
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
 if ! [ -z "$1" ]; then
-    if [ -d "$1" ]; then
-        cd "$1"
-
-        # Bash implementation
-        # shopt -s nullglob
-        # viu -n *.bmp *.BMP *.gif *.GIF *.jpg *.JPG *.jpeg *.JPEG *.png *.PNG *.svg *.SVG 2>/dev/null | less -R
-
-        for file in *.bmp *.BMP *.gif *.GIF *.jpg *.JPG *.jpeg *.JPEG *.png *.PNG *.svg *.SVG
-        do
-            viu -n "$file" 2>/dev/null
-        done | less -R
-    else
-        viu -n "$1" | less -R
-    fi
+    viu -n "$1" | less -R
 fi
