@@ -199,7 +199,7 @@ static struct key bindings[] = {
 	{ ' ',            SEL_SEL },
 	/* Toggle select multiple files */
 	{ 'm',            SEL_SELMUL },
-	{ CONTROL('S'),   SEL_SELMUL },
+	{ CONTROL('K'),   SEL_SELMUL },
 	/* Select all files in current dir */
 	{ 'a',            SEL_SELALL },
 	/* Show list of copied files */

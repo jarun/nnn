@@ -2872,7 +2872,7 @@ static bool show_help(const char *path)
 		 "b^O  Open with...      n  Create new/link\n"
 		  "cD  File detail   ^R F2  Rename/duplicate\n"
 	   "5⎵ ^J / a  Sel entry/all     r  Batch rename\n"
-	       "9m ^S  Sel range, clear  M  List selection\n"
+	       "9m ^K  Sel range, clear  M  List selection\n"
 		  "cP  Copy selection    X  Delete selection\n"
 		  "cV  Move selection   ^X  Delete entry\n"
 		  "cf  Create archive    C  Execute entry\n"
