@@ -38,6 +38,7 @@ The currently available plugins are listed below.
 | sxiv | sh | sxiv | View images in dir, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts))|
 | thumb | sh | [lsix](https://github.com/hackerb9/lsix) | View thumbnail of an image or dir of images |
 | transfer | sh | curl | Upload file to transfer.sh |
+| uidgid | sh | ls, less | List user and group of all files in dir |
 | upgrade | sh | curl | Upgrade nnn manually on Debian 9 Stretch |
 | vidthumb | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) | Show video thumbnails in terminal |
 | viuimg | sh | [viu](https://github.com/atanunq/viu), less | View an image or images in dir in `$PAGER` |

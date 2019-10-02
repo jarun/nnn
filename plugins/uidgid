@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+# Description: list uid and gid of files
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana, superDuperCyberTechno
+
+ls -laht | less
