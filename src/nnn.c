@@ -218,7 +218,7 @@ typedef struct {
 	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 6;
+	uint reserved   : 5;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
@@ -234,6 +234,7 @@ typedef struct {
 	uint filtercmd  : 1;  /* Run filter as command on no match */
 	uint trash      : 1;  /* Move removed files to trash */
 	uint mtime      : 1;  /* Use modification time (else access time) */
+	uint cliopener  : 1;  /* All-CLI app opener */
 } settings;
 
 /* Contexts or workspaces */
@@ -275,6 +276,7 @@ static settings cfg = {
 	0, /* filtercmd */
 	0, /* trash */
 	1, /* mtime */
+	0, /* cliopener */
 };
 
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
@@ -3406,6 +3408,7 @@ static void browse(char *ipath)
 	char mark[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
+	uchar opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
 	int r = -1, fd, presel, selstartid = 0, selendid = 0, onscreen;
 	enum action sel;
 	bool dir_changed = FALSE, rangesel = FALSE;
@@ -3694,7 +3697,7 @@ nochange:
 				}
 
 				/* Invoke desktop opener as last resort */
-				spawn(opener, newpath, NULL, NULL, F_NOTRACE | F_NOWAIT);
+				spawn(opener, newpath, NULL, NULL, opener_flags);
 				continue;
 			}
 			default:
@@ -4608,6 +4611,7 @@ static void usage(void)
 		"optional args:\n"
 		" -a      use access time\n"
 		" -b key  open bookmark key\n"
+		" -c      cli-only opener\n"
 		" -d      detail mode\n"
 		" -f      run filter as cmd on prompt key\n"
 		" -H      show hidden files\n"
@@ -4754,7 +4758,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSiab:dfnop:rstvh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSiab:cdfnop:rstvh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4772,6 +4776,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'b':
 			arg = optarg;
+			break;
+		case 'c':
+			cfg.cliopener = 1;
 			break;
 		case 'f':
 			cfg.filtercmd = 1;
@@ -4920,8 +4927,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* Edit text in EDITOR, if opted */
-	if (xgetenv_set(env_cfg[NNN_USE_EDITOR]))
+	/* Edit text in EDITOR if opted (and opener is not all-CLI) */
+	if (!cfg.cliopener && xgetenv_set(env_cfg[NNN_USE_EDITOR]))
 		cfg.useeditor = 1;
 
 	/* Get VISUAL/EDITOR */
