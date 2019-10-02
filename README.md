@@ -173,9 +173,9 @@ optional args:
  -H      show hidden files
  -i      nav-as-you-type mode
  -n      version sort
- -o      press Enter to open files
- -p file selection file (stdout if '-')
- -r      show cp, mv progress on Linux
+ -o      open files on Enter
+ -p file selection file [stdout if '-']
+ -r      use advcpmv patched cp, mv
  -s      string filters [default: regex]
  -S      du mode
  -t      disable dir auto-select

@@ -391,8 +391,8 @@ static const char * const messages[] = {
 	"invalid key",
 	"%F %T %z",
 	"/.nnnXXXXXX",
-	"empty selection",
-	"utility missing",
+	"0 selected",
+	"missing dep",
 };
 
 /* Supported configuration environment variables */
@@ -775,7 +775,12 @@ static char *xbasename(char *path)
 static int create_tmp_file()
 {
 	xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - g_tmpfplen);
-	return mkstemp(g_tmpfpath);
+
+	int fd = mkstemp(g_tmpfpath);
+	if (fd == -1) {
+		DPRINTF_S(strerror(errno));
+	}
+	return fd;
 }
 
 /* Writes buflen char(s) from buf to a file */
@@ -854,10 +859,8 @@ static bool listselbuf(void)
 		return FALSE;
 
 	fd = create_tmp_file();
-	if (fd == -1) {
-		DPRINTF_S("mkstemp failed!");
+	if (fd == -1)
 		return FALSE;
-	}
 
 	pos = seltofile(fd, NULL);
 
@@ -2849,7 +2852,7 @@ static void printkv(kv *kvarr, int fd, uchar max)
  * the binary size by around a hundred bytes. This would only
  * have increased as we keep adding new options.
  */
-static bool show_help(const char *path)
+static void show_help(const char *path)
 {
 	int i, fd;
 	const char *start, *end;
@@ -2889,7 +2892,7 @@ static bool show_help(const char *path)
 
 	fd = create_tmp_file();
 	if (fd == -1)
-		return FALSE;
+		return;
 
 	start = end = helpstr;
 	while (*end) {
@@ -2931,7 +2934,6 @@ static bool show_help(const char *path)
 
 	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
 	unlink(g_tmpfpath);
-	return TRUE;
 }
 
 static int sum_bsizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
@@ -4015,7 +4017,6 @@ nochange:
 		{
 			if (ndents)
 				mkpath(path, dents[cur].name, newpath);
-			r = TRUE;
 
 			switch (sel) {
 			case SEL_ARCHIVELS:
@@ -4037,7 +4038,7 @@ nochange:
 				}
 				break;
 			case SEL_HELP:
-				r = show_help(path);
+				show_help(path);
 				break;
 			case SEL_RUNEDIT:
 				spawn(editor, dents[cur].name, NULL, path, F_CLI);
@@ -4048,11 +4049,6 @@ nochange:
 			default: /* SEL_LOCK */
 				lock_terminal();
 				break;
-			}
-
-			if (!r) {
-				printwait(messages[UTIL_MISSING], &presel);
-				goto nochange;
 			}
 
 			/* In case of successful operation, reload contents */
@@ -4617,9 +4613,9 @@ static void usage(void)
 		" -H      show hidden files\n"
 		" -i      nav-as-you-type mode\n"
 		" -n      version sort\n"
-		" -o      press Enter to open files\n"
-		" -p file selection file (stdout if '-')\n"
-		" -r      show cp, mv progress on Linux\n"
+		" -o      open files on Enter\n"
+		" -p file selection file [stdout if '-']\n"
+		" -r      use advcpmv patched cp, mv\n"
 		" -s      string filters [default: regex]\n"
 		" -S      du mode\n"
 		" -t      disable dir auto-select\n"
