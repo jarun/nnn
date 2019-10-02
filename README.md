@@ -168,7 +168,6 @@ positional args:
 optional args:
  -a      use access time
  -b key  open bookmark key
- -c      cli-only opener
  -d      detail mode
  -f      run filter as cmd on prompt key
  -H      show hidden files
