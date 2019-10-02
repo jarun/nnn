@@ -5,4 +5,4 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana, superDuperCyberTechno
 
-ls -laht | less
+ls -lah --group-directories-first | less
