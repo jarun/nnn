@@ -3390,11 +3390,6 @@ static void browse(char *ipath)
 	if (!pnamebuf)
 		errexit();
 
-#ifdef __linux__
-	if (!getenv("DISPLAY"))
-		opener_flags = F_CLI;
-#endif
-
 begin:
 #ifdef LINUX_INOTIFY
 	if ((presel == FILTER || dir_changed) && inotify_wd >= 0) {
