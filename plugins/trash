@@ -1,0 +1,29 @@
+#!/usr/bin/env sh
+
+# Description: Send a file or a selection of files to the trash can rather than outright delete it/them (rm)
+# Dependencies: trash-cli
+#
+# Shell: POSIX compliant
+# Author: superDuperCyberTechno
+
+#fetch the selection
+selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+
+#if the selection file is not empty
+if [ -s $selection ]; then
+    #convert to array
+    arr=$(tr '\0' '\n' < "$selection")
+
+    #trash all elements (files) in array
+    for entry in $arr
+    do
+        trash "$entry"
+    done
+
+    #delete the selection file
+    rm ${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+
+#if there is no selection just trash the currently selected file
+elif ! [ -z "$1" ]; then
+    trash `pwd`/`basename "$1"`
+fi
