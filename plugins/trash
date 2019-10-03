@@ -17,7 +17,7 @@ if [ -s $selection ]; then
     #trash all elements (files) in array
     for entry in $arr
     do
-        trash "$entry"
+        command trash "$entry"
     done
 
     #delete the selection file
@@ -25,5 +25,5 @@ if [ -s $selection ]; then
 
 #if there is no selection just trash the currently selected file
 elif ! [ -z "$1" ]; then
-    trash `pwd`/`basename "$1"`
+    command trash `pwd`/`basename "$1"`
 fi
