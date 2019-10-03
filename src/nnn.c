@@ -428,7 +428,7 @@ static const char * const envs[] = {
 
 /* Event handling */
 #ifdef LINUX_INOTIFY
-#define NUM_EVENT_SLOTS 16 /* Make room for 16 events */
+#define NUM_EVENT_SLOTS 8 /* Make room for 8 events */
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define EVENT_BUF_LEN (EVENT_SIZE * NUM_EVENT_SLOTS)
 static int inotify_fd, inotify_wd = -1;
