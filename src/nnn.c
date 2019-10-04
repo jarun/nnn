@@ -74,7 +74,9 @@
 #ifdef __gnu_hurd__
 #define PATH_MAX 4096
 #endif
+#ifndef NOLOCALE
 #include <locale.h>
+#endif
 #include <stdio.h>
 #ifndef NORL
 #include <readline/history.h>
@@ -1349,7 +1351,11 @@ static int xstricmp(const char * const s1, const char * const s2)
 	}
 
 	/* Handle 1. all non-numeric and 2. both same numeric value cases */
+#ifndef NOLOCALE
 	return strcoll(s1, s2);
+#else
+	return strcasecmp(s1, s2);
+#endif
 }
 
 /*
@@ -4960,8 +4966,10 @@ int main(int argc, char *argv[])
 		return _FAILURE;
 	}
 
+#ifndef NOLOCALE
 	/* Set locale */
 	setlocale(LC_ALL, "");
+#endif
 
 #ifndef NORL
 #if RL_READLINE_VERSION >= 0x0603

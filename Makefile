@@ -42,6 +42,9 @@ debug: $(SRC)
 norl: $(SRC)
 	$(CC) -DNORL $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS)
 
+nolocale: $(SRC)
+	$(CC) -DNORL -DNOLOCALE $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS)
+
 install: all
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin
