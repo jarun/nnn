@@ -1,13 +1,11 @@
 #!/usr/bin/env sh
 
-# Description: Paste contents of a text a file to paste.ubuntu.com using pastebinit
-#
-# pastebinit: https://launchpad.net/pastebinit
+# Description: Paste contents of a text a file http://ix.io
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
 if ! [ -z "$1" ]; then
-    pastebinit "$1"
+    curl -F "f:1=@"$1"" ix.io
     read input
 fi

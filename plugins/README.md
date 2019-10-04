@@ -28,7 +28,7 @@ The currently available plugins are listed below.
 | nwal | sh | nitrogen | Set image as wallpaper using nitrogen |
 | oldbigfile | sh | find, sort | List large files by access time |
 | organize | sh | file | Auto-organize files in directories by file type |
-| pastebin | sh | [pastebinit](https://launchpad.net/pastebinit) | Paste contents of (text) file to paste.ubuntu.com |
+| pastebin | sh | - | Paste contents of a text a file ix.io |
 | pdfview | sh | pdftotext/<br>mupdf-tools | View PDF file in `$PAGER` |
 | picker | sh | nnn | Pick files and list one per line (to pipe) |
 | pywal | sh | pywal | Set image as wallpaper, change terminal colorscheme |
