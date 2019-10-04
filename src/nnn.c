@@ -301,7 +301,7 @@ static blkcnt_t dir_blocks;
 static ulong num_files;
 static kv bookmark[BM_MAX];
 static kv plug[PLUGIN_MAX];
-static size_t g_tmpfplen;
+static uchar g_tmpfplen;
 static uchar BLK_SHIFT = 9;
 static bool interrupted = FALSE;
 
@@ -4682,11 +4682,11 @@ static bool set_tmp_path()
 	char *path;
 
 	if (xdiraccess("/tmp"))
-		g_tmpfplen = xstrlcpy(g_tmpfpath, "/tmp", TMP_LEN_MAX);
+		g_tmpfplen = (uchar)xstrlcpy(g_tmpfpath, "/tmp", TMP_LEN_MAX);
 	else {
 		path = getenv("TMPDIR");
 		if (path)
-			g_tmpfplen = xstrlcpy(g_tmpfpath, path, TMP_LEN_MAX);
+			g_tmpfplen = (uchar)xstrlcpy(g_tmpfpath, path, TMP_LEN_MAX);
 		else {
 			fprintf(stderr, "set TMPDIR\n");
 			return FALSE;
