@@ -191,7 +191,7 @@ typedef struct entry {
 	mode_t mode;
 	ushort nlen; /* Length of file name; can be uchar (< NAME_MAX + 1) */
 	uchar flags; /* Flags specific to the file */
-} __attribute__ ((aligned(_ALIGNMENT))) *pEntry;
+} *pEntry;
 
 /* Key-value pairs from env */
 typedef struct {
