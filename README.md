@@ -196,11 +196,11 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
         ↵ → l  Open file/dir     .  Toggle show hidden
          g ^A  First entry    G ^E  Last entry
             b  Pin current dir  ^B  Go to pinned dir
-       Tab ^I  Next context      d  Toggle detail view
+      (Sh)Tab  Cycle context     d  Toggle detail view
          , ^/  Lead key    N LeadN  Context N
             /  Filter/Lead  Ins ^T  Toggle nav-as-you-type
           Esc  Exit prompt   ^L F5  Redraw/clear prompt
-            ?  Help, config  Lead'  First file
+            ?  Help, conf  ' Lead'  First file
          Q ^Q  Quit  ^G  QuitCD  q  Quit context
  FILES
            ^O  Open with...      n  Create new/link
@@ -242,8 +242,6 @@ The Leader/Lead key provides a powerful multi-functional navigation mechanism. I
 | Key | Function |
 |:---:| --- |
 | <kbd>1-4</kbd> | Go to/create selected context |
-| <kbd>]</kbd> | Go to next active context |
-| <kbd>[</kbd> | Go to previous active context |
 | key | Go to bookmarked location |
 | <kbd>'</kbd> | Go to first file in directory |
 | <kbd>~</kbd> <kbd>`</kbd> <kbd>@</kbd> <kbd>-</kbd> | Visit HOME, `/`, start, last visited dir |

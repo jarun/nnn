@@ -2823,11 +2823,11 @@ static void show_help(const char *path)
 	      "8↵ → l  Open file/dir     .  Toggle show hidden\n"
 	       "9g ^A  First entry    G ^E  Last entry\n"
 		  "cb  Pin current dir  ^B  Go to pinned dir\n"
-	     "7Tab ^I  Next context      d  Toggle detail view\n"
+	    "6(Sh)Tab  Next context      d  Toggle detail view\n"
 	       "9, ^/  Lead key    N LeadN  Context N\n"
 		  "c/  Filter/Lead  Ins ^T  Toggle nav-as-you-type\n"
 		"aEsc  Exit prompt   ^L F5  Redraw/clear prompt\n"
-		  "c?  Help, config  Lead'  First file\n"
+		  "c?  Help, conf  ' Lead'  First file\n"
 	       "9Q ^Q  Quit  ^G  QuitCD  q  Quit context\n"
 		"1FILES\n"
 		 "b^O  Open with...      n  Create new/link\n"
@@ -3744,16 +3744,31 @@ nochange:
 			goto begin;
 		case SEL_LEADER: // fallthrough
 		case SEL_CYCLE: // fallthrough
+		case SEL_CYCLER: // fallthrough
+		case SEL_FIRST: // fallthrough
 		case SEL_CTX1: // fallthrough
 		case SEL_CTX2: // fallthrough
 		case SEL_CTX3: // fallthrough
 		case SEL_CTX4:
-			if (sel == SEL_CYCLE)
-				fd = ']';
-			else if (sel >= SEL_CTX1 && sel <= SEL_CTX4)
+			switch (sel) {
+			case SEL_CYCLE:
+				fd = '\t';
+				break;
+			case SEL_CYCLER:
+				fd = KEY_BTAB;
+				break;
+			case SEL_FIRST:
+				fd = '\'';
+				break;
+			case SEL_CTX1: // fallthrough
+			case SEL_CTX2: // fallthrough
+			case SEL_CTX3: // fallthrough
+			case SEL_CTX4:
 				fd = sel - SEL_CTX1 + '1';
-			else
+				break;
+			default:
 				fd = get_input(NULL);
+			}
 
 			switch (fd) {
 			case '~': // fallthrough
@@ -3778,18 +3793,18 @@ nochange:
 				if (ndents)
 					copycurname();
 				goto begin;
-			case ']': // fallthrough
-			case '[': // fallthrough
+			case '\t': // fallthrough
+			case KEY_BTAB:
 				/* visit next and previous contexts */
 				r = cfg.curctx;
-				if (fd == ']')
+				if (fd == '\t')
 					do
 						r = (r + 1) & ~CTX_MAX;
 					while (!g_ctx[r].c_cfg.ctxactive);
 				else
 					do
 						r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
-					while (!g_ctx[r].c_cfg.ctxactive); // fallthrough
+					while (!g_ctx[r].c_cfg.ctxactive);
 				fd = '1' + r; // fallthrough
 			case '1': // fallthrough
 			case '2': // fallthrough

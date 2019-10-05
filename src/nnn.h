@@ -47,6 +47,7 @@ enum action {
 	SEL_CTRL_U,
 	SEL_HOME,
 	SEL_END,
+	SEL_FIRST,
 	SEL_CDHOME,
 	SEL_CDBEGIN,
 	SEL_CDLAST,
@@ -54,6 +55,7 @@ enum action {
 	SEL_VISIT,
 	SEL_LEADER,
 	SEL_CYCLE,
+	SEL_CYCLER,
 	SEL_CTX1,
 	SEL_CTX2,
 	SEL_CTX3,
@@ -141,6 +143,8 @@ static struct key bindings[] = {
 	{ KEY_END,        SEL_END },
 	{ 'G',            SEL_END },
 	{ CONTROL('E'),   SEL_END },
+	/* Go to first file */
+	{ '\'',           SEL_FIRST },
 	/* HOME */
 	{ '~',            SEL_CDHOME },
 	/* Initial directory */
@@ -155,8 +159,9 @@ static struct key bindings[] = {
 	{ CONTROL('_'),   SEL_LEADER },
 	{ ',',            SEL_LEADER },
 	/* Cycle contexts in forward direction */
-	{ '\t',           SEL_CYCLE },
-	{ CONTROL('I'),   SEL_CYCLE },
+	{ '\t',        SEL_CYCLE },
+	/* Cycle contexts in reverse direction */
+	{ KEY_BTAB,       SEL_CYCLER },
 	/* Go to/create context N */
 	{ '1',            SEL_CTX1 },
 	{ '2',            SEL_CTX2 },
