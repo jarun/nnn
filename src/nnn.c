@@ -346,6 +346,7 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define LOCKER 5
 #define CMATRIX 6
 #define NLAUNCH 7
+#define UNRARFREE 8
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -369,6 +370,7 @@ static char * const utils[] = {
 #endif
 	"cmatrix",
 	"nlaunch",
+	"unrar-free",
 };
 
 #ifdef __linux__
@@ -2636,6 +2638,10 @@ static void handle_archive(char *fpath, const char *dir, char op)
 	} else if (is_suffix(fpath, ".zip")) {
 		util = utils[UNZIP];
 		arg[1] = (op == 'l') ? 'v' /* verbose listing */ : '\0';
+		arg[2] = '\0';
+	} else if (is_suffix(fpath, ".rar")) {
+		util = utils[UNRARFREE];
+		arg[1] = (op == 'l') ? 't' : 'x';
 		arg[2] = '\0';
 	} else {
 		util = utils[TAR];
