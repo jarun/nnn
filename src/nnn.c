@@ -2845,7 +2845,7 @@ static void show_help(const char *path)
 		  "cs  Size    E  Extn   t  Time\n"
 		"1MISC\n"
 	       "9! ^]  Shell             =  Launcher\n"
-	       "9R ^V  Pick plugin   :K xK  Run plugin key K\n"
+	       "9R ^V  Pick plugin   :K xK  Execute plugin K\n"
 	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt/run cmd    L  Lock\n"};
 

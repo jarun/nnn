@@ -217,7 +217,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
             s  Size    E  Extn   t  Time
  MISC
          ! ^]  Shell             =  Launcher
-         R ^V  Pick plugin   :K xK  Run plugin key K
+         R ^V  Pick plugin   :K xK  Execute plugin K
             c  SSHFS mount       u  Unmount
            ^P  Prompt/run cmd    L  Lock
 ```
