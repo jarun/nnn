@@ -117,6 +117,7 @@
 #define TOUPPER(ch) \
 	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
+#define READLINE_MAX 128
 #define FILTER '/'
 #define MSGWAIT '$'
 #define REGEX_MAX 48
@@ -1818,7 +1819,7 @@ static char *xreadline(char *prefill, char *prompt)
 	int x, r;
 	const int WCHAR_T_WIDTH = sizeof(wchar_t);
 	wint_t ch[2] = {0};
-	wchar_t * const buf = malloc(sizeof(wchar_t) * CMD_LEN_MAX);
+	wchar_t * const buf = malloc(sizeof(wchar_t) * READLINE_MAX);
 
 	if (!buf)
 		errexit();
@@ -1828,7 +1829,7 @@ static char *xreadline(char *prefill, char *prompt)
 
 	if (prefill) {
 		DPRINTF_S(prefill);
-		len = pos = mbstowcs(buf, prefill, CMD_LEN_MAX);
+		len = pos = mbstowcs(buf, prefill, READLINE_MAX);
 	} else
 		len = (size_t)-1;
 
@@ -1887,7 +1888,7 @@ static char *xreadline(char *prefill, char *prompt)
 				if (*ch < ASCII_MAX && keyname(*ch)[0] == '^')
 					continue;
 
-				if (pos < CMD_LEN_MAX - 1) {
+				if (pos < READLINE_MAX - 1) {
 					memmove(buf + pos + 1, buf + pos,
 						(len - pos) * WCHAR_T_WIDTH);
 					buf[pos] = *ch;
@@ -1945,9 +1946,9 @@ END:
 
 	buf[len] = '\0';
 
-	pos = wcstombs(g_buf, buf, CMD_LEN_MAX - 1);
-	if (pos >= CMD_LEN_MAX - 1)
-		g_buf[CMD_LEN_MAX - 1] = '\0';
+	pos = wcstombs(g_buf, buf, READLINE_MAX - 1);
+	if (pos >= READLINE_MAX - 1)
+		g_buf[READLINE_MAX - 1] = '\0';
 
 	free(buf);
 	return g_buf;
