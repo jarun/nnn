@@ -2825,7 +2825,7 @@ static void show_help(const char *path)
 		  "cb  Pin current dir  ^B  Go to pinned dir\n"
 	    "6(Sh)Tab  Next context      d  Toggle detail view\n"
 	       "9, ^/  Lead key    N LeadN  Context N\n"
-		  "c/  Filter/Lead  Ins ^T  Toggle nav-as-you-type\n"
+		  "c/  Filter/Lead  Ins ^N  Toggle nav-as-you-type\n"
 		"aEsc  Exit prompt   ^L F5  Redraw/clear prompt\n"
 		  "c?  Help, conf  ' Lead'  First file\n"
 	       "9Q ^Q  Quit  ^G  QuitCD  q  Quit context\n"

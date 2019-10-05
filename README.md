@@ -198,7 +198,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
             b  Pin current dir  ^B  Go to pinned dir
       (Sh)Tab  Cycle context     d  Toggle detail view
          , ^/  Lead key    N LeadN  Context N
-            /  Filter/Lead  Ins ^T  Toggle nav-as-you-type
+            /  Filter/Lead  Ins ^N  Toggle nav-as-you-type
           Esc  Exit prompt   ^L F5  Redraw/clear prompt
             ?  Help, conf  ' Lead'  First file
          Q ^Q  Quit  ^G  QuitCD  q  Quit context

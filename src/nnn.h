@@ -173,7 +173,7 @@ static struct key bindings[] = {
 	{ '/',            SEL_FLTR },
 	/* Toggle filter mode */
 	{ KEY_IC,         SEL_MFLTR },
-	{ CONTROL('T'),   SEL_MFLTR },
+	{ CONTROL('N'),   SEL_MFLTR },
 	/* Toggle hide .dot files */
 	{ '.',            SEL_TOGGLEDOT },
 	/* Detailed listing */
