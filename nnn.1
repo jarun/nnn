@@ -133,24 +133,19 @@ When there's a unique match and it's a directory,
 .Nm
 auto selects the directory and enters it in this mode.
 .Sh SELECTION
-Use \fI^J\fR to select the file under the cursor.
+There are 3 groups of shortcuts to add files to selection:
 .Pp
-To select multiple files press \fI^S\fR and enter selection mode.
-In this mode it's possible to
-.Pp
-(1) cherry-pick individual files one by one by pressing \fI^J\fR on each entry (works across directories and contexts); or,
+(1) add an individual file to selection
 .br
-(2) navigate to another file in the same directory to select a range of files.
-.Pp
-Running any operation that uses the selection OR pressing \fI^S\fR again will save the selection and exit the selection mode.
-.Pp
-Press \fI^S\fR twice to clear selection.
-.Pp
-Selected files are visually indicated by a \fI+\fR before the entries.
+(2) add a range of files to selection
 .br
-The files in the list can now be listed, copied, moved, removed, archived or linked.
+(3) add all files in the current directory to selection
+.Pp
+Repeat range selection on the same entry to clear selection. Selected files are visually indicated by a \fI+\fR before the entries.
 .br
-Absolute paths of the selected files are copied to the temporary file \fB.selection\fR in config directory. The path is shown in the help and configuration screen. If \fB$NNN_COPIER\fR is set (see ENVIRONMENT section below) the file paths are also copied to the system clipboard.
+The selection can now be listed, copied, moved, removed, archived or linked.
+.br
+Absolute paths of the selected files are copied to the temporary file \fB.selection\fR in the config directory. The path is shown in the help and configuration screen. If \fB$NNN_COPIER\fR is set (see ENVIRONMENT section below) the file paths are also copied to the system clipboard.
 .Sh ENVIRONMENT
 The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively. A single combination to arguments is supported for SHELL and PAGER.
@@ -203,6 +198,8 @@ when dealing with the !, e and p commands respectively. A single combination to 
 .Bd -literal
     export NNN_TRASH=1
 .Ed
+.Pp
+\fBNN:\fR this is a special variable set to the current entry before executing a command from the command prompt or spawning a shell.
 .Sh KNOWN ISSUES
 .Nm
 may not handle keypresses correctly when used with tmux (see issue #104 for more details). Set \fBTERM=xterm-256color\fR to address it.

@@ -255,8 +255,10 @@ When the filter is on, <kbd>/</kbd> works as an additional Leader key.
     $ man nnn
 To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
-## Mentions
+## Elsewhere
 
+- [Wikipedia](https://en.wikipedia.org/wiki/Nnn_(file_manager))
+- [ArchWiki](https://wiki.archlinux.org/index.php/Nnn)
 - [FOSSMint](https://www.fossmint.com/nnn-linux-terminal-file-browser/)
 - Hacker News [[1](https://news.ycombinator.com/item?id=18520898)] [[2](https://news.ycombinator.com/item?id=19850656)]
 - [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
