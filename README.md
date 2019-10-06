@@ -270,4 +270,4 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 - Copyright © 2014-2016 Lazaros Koromilas
 - Copyright © 2014-2016 Dimitris Papastamos
 
-Contributions are welcome. Head to the [ToDo list](https://github.com/jarun/nnn/issues/332).
+Visit the to the [ToDo list](https://github.com/jarun/nnn/issues/337) to contribute.
