@@ -100,7 +100,7 @@
 #include "dbg.h"
 
 /* Macro definitions */
-#define VERSION "2.6"
+#define VERSION "2.7"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
 
 #ifndef S_BLKSIZE
@@ -2824,7 +2824,7 @@ static void show_help(const char *path)
 	      "8↵ → l  Open file/dir     .  Toggle show hidden\n"
 	       "9g ^A  First entry    G ^E  Last entry\n"
 		  "cb  Pin current dir  ^B  Go to pinned dir\n"
-	    "6(Sh)Tab  Next context      d  Toggle detail view\n"
+	    "6(Sh)Tab  Cycle context     d  Toggle detail view\n"
 	       "9, ^/  Lead key    N LeadN  Context N\n"
 		  "c/  Filter/Lead  Ins ^N  Toggle nav-as-you-type\n"
 		"aEsc  Exit prompt   ^L F5  Redraw/clear prompt\n"

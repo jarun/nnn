@@ -1,3 +1,68 @@
+nnn v2.7
+2019-10-06
+
+- plugins for image preview, image and video thumbnails
+- redesigned selection workflow
+- drop path prefix for files in current dir for selection based archives
+- custom direct keybinds for plugins
+- libreadline `.history` file moved to `nnn` config directory
+- export current entry as `$NN` at command prompt
+- more informative status bar in light/detail modes
+- auto-proceed to next file on single file select
+- path clipping for long paths
+- completely revamped wiki
+- new program options:
+  - `-a` to use file access time throughout the program
+  - `-c` to indicate cli-only opener
+  - `-f` to run filter as command on <kbd>^P</kbd>
+  - `-o` replaces config `NNN_RESTRICT_NAV_OPEN`
+  - `-t` replaces config `NNN_NO_AUTOSELECT`
+  - `-r` replaces config `NNN_OPS_PROG`
+- plugin changes:
+  - `vidthumb` - show video thumbnails in terminal
+  - `mediainf` - show media info (decoupled as a plugin)
+  - `notes` - open a quick notes file/dir in `$EDITOR` (decoupled as a plugin)
+  - `dups` - list duplicate files in the current directory
+  - `oldbigfile` - list large files by access time
+  - `moclyrics` - show lyrics of the track currently playing in MOC
+  - `uidgid` list uid and gid of files in directory
+  - `mocplay` - now detects if a track is playing or not
+  - `organize` - categorize files and move to respective directories
+  - `pastebin` - now uses ix.io paste service
+  - `fzy-edit` - merged into `fzy-open`
+  - `viuimg` - fix directory view
+  - `checksum` - fixed POSIX compliance issues
+  - `boom` - play music in MOC
+- keybind changes:
+  - select entry: <kbd>Space</kbd> and <kbd>^J</kbd>
+  - select range (or clear selection): <kbd>m</kbd> and <kbd>^K</kbd>
+  - select all in dir: <kbd>a</kbd>
+  - list selection: <kbd>M</kbd>
+  - <kbd>^N</kbd> replaces <kbd>^T</kbd> to toggle _nav-as-you-type_
+  - <kbd>Shift TAB</kbd> to reverse context cycle
+  - <kbd>'</kbd> to jump to first file in dir
+  - <kbd>S</kbd> for du, <kbd>A</kbd> for apparent du
+  - additional key <kbd>:</kbd> to run plugin
+  - additional key <kbd>F2</kbd> to rename file
+  - additional key <kbd>F5</kbd> to redraw
+  - quit context key <kbd>Leadq</kbd> is removed
+- Leader key combinations:
+  - <kbd>Lead'</kbd> to jump to first file in dir
+  - <kbd>Lead]</kbd> go to next active context
+  - <kbd>Lead[</kbd> go to prev active context
+  - <kbd>Lead.</kbd> toggle show hidden files
+- improved duplicate file workflow
+- improved batch rename workflow when a selection exists
+- removed the wild load option (`-w`)
+- removed quick notes (added plugin `notes`)
+- fix #225 (thanks @KlzXS)
+- fix `tar`/`bsdtar` always creating tar archives (and not by suffix)
+- fix single mouse click to select file not working
+- fix symlink to dir removed on batch rename
+- fix detail mode not set with program option `-S`
+
+-------------------------------------------------------------------------------
+
 nnn v2.6
 2019-08-06
 
@@ -34,6 +99,8 @@ nnn v2.6
 - wait for user input after running a command from prompt
 - scrolloff set to 3 from 5
 
+-------------------------------------------------------------------------------
+
 nnn v2.5
 2019-05-27
 
@@ -69,6 +136,8 @@ nnn v2.5
 - POSIX-compliant user-scripts (wherever possible)
 - `NNN_SCRIPT` is retired (replaced by plugins)
 
+-------------------------------------------------------------------------------
+
 nnn v2.4
 2019-03-19
 
@@ -91,6 +160,8 @@ nnn v2.4
 - per-context initial directory replaced by program start dir
 - marker msg when spawning new shell removed
 - rename debug file to `nnndbg`
+
+-------------------------------------------------------------------------------
 
 nnn v2.3
 2019-02-19
