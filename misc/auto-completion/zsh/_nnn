@@ -11,7 +11,9 @@ local -a args
 args=(
     '(-a)-a[use access time]'
     '(-b)-b[bookmark key to open]:key char'
+    '(-c)-d[cli-only opener]'
     '(-d)-d[start in detail mode]'
+    '(-f)-d[run filter as cmd on prompt key]'
     '(-H)-H[show hidden files]'
     '(-i)-i[start in navigate-as-you-type mode]'
     '(-n)-n[use version compare to sort files]'

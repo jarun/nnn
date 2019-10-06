@@ -13,7 +13,9 @@ _nnn () {
     opts=(
         -a
         -b
+        -c
         -d
+        -f
         -H
         -i
         -n
