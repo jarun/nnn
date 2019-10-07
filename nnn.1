@@ -203,11 +203,6 @@ when dealing with the !, e and p commands respectively. A single combination to 
 .Sh KNOWN ISSUES
 .Nm
 may not handle keypresses correctly when used with tmux (see issue #104 for more details). Set \fBTERM=xterm-256color\fR to address it.
-.Pp
-Use the keybind \fI'\fR to toggle selection if you are having issues with \fI^Y\fR on *BSD or macOS. To use \fI^Y\fR, run:
-.Bd -literal
-    stty dsusp undef
-.Ed
 .Sh AUTHORS
 .An Arun Prakash Jana Aq Mt engineerarun@gmail.com ,
 .An Lazaros Koromilas Aq Mt lostd@2f30.org ,
