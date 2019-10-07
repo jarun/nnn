@@ -426,7 +426,7 @@ static const char * const envs[] = {
 	"VISUAL",
 	"EDITOR",
 	"PAGER",
-	"NN",
+	"NNN",
 };
 
 /* Event handling */
