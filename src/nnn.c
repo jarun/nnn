@@ -886,6 +886,58 @@ static void endselection(void)
 	}
 }
 
+static bool seledit(void)
+{
+	int fd, i;
+
+	if (!selbufpos)
+		return FALSE;
+
+	fd = create_tmp_file();
+	if (fd == -1)
+		return FALSE;
+
+	seltofile(fd, NULL);
+	close(fd);
+
+	spawn(editor, g_tmpfpath, NULL, NULL, F_CLI);
+
+	if ((fd = open(g_tmpfpath, O_RDONLY)) == -1){
+		unlink(g_tmpfpath);
+		return FALSE;
+	}
+
+	struct stat sb;
+	fstat(fd, &sb);
+
+	if (sb.st_size > selbuflen){
+		pselbuf = xrealloc(pselbuf, sb.st_size);
+		if(!pselbuf)
+			errexit();
+	}
+
+	i = read(fd, pselbuf, selbuflen);
+	close(fd);
+	unlink(g_tmpfpath);
+
+	resetselind();
+	nselected = 0;
+	selbufpos = i;
+	while(i){
+		if (pselbuf[--i] == '\n'){
+			++nselected;
+			pselbuf[i] = '\0';
+		}
+	}
+
+	if (selbufpos)
+		writesel(pselbuf, selbufpos - 1);
+	else
+		writesel(NULL, 0);
+
+	return TRUE;
+}
+
 static bool selsafe(void)
 {
 	/* Fail if selection file path not generated */
@@ -4139,6 +4191,12 @@ nochange:
 
 			printwait(messages[NONE_SELECTED], &presel);
 			goto nochange;
+		case SEL_SELEDIT:
+			if (!seledit()){
+				printwait(messages[NONE_SELECTED], &presel);
+				goto nochange;
+			}
+			break;
 		case SEL_CP:
 		case SEL_MV:
 		case SEL_RMMUL:
