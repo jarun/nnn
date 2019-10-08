@@ -9,6 +9,38 @@ CP ?= cp
 
 CFLAGS_OPTIMIZATION ?= -O3
 
+O_DEBUG := 0
+O_NORL := 0  # no readline support
+O_NOLOC := 0  # no locale support
+
+# convert targets to flags for backwards compatibility
+ifeq ($(MAKECMDGOALS),debug)
+	O_DEBUG := 1
+endif
+ifeq ($(MAKECMDGOALS),norl)
+	O_NORL := 1
+endif
+ifeq ($(MAKECMDGOALS),noloc)
+	O_NORL := 1
+	O_NOLOC := 1
+endif
+
+ifeq ($(O_DEBUG),1)
+	CPPFLAGS += -DDBGMODE
+	CFLAGS += -g
+	LDLIBS += -lrt
+endif
+
+ifeq ($(O_NORL),1)
+	CPPFLAGS += -DNORL
+else
+	LDLIBS += -lreadline
+endif
+
+ifeq ($(O_NOLOC),1)
+	CPPFLAGS += -DNOLOCALE
+endif
+
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
 	CFLAGS_CURSES ?= $(shell $(PKG_CONFIG) --cflags ncursesw)
 	LDLIBS_CURSES ?= $(shell $(PKG_CONFIG) --libs   ncursesw)
@@ -34,16 +66,12 @@ all: $(BIN)
 $(SRC): src/nnn.h
 
 $(BIN): $(SRC)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS) -lreadline
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
 
-debug: $(SRC)
-	$(CC) -DDBGMODE -g $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS) -lreadline -lrt
-
-norl: $(SRC)
-	$(CC) -DNORL $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS)
-
-noloc: $(SRC)
-	$(CC) -DNORL -DNOLOCALE $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $(BIN) $^ $(LDLIBS)
+# targets for backwards compatibility
+debug: $(BIN)
+norl: $(BIN)
+noloc: $(BIN)
 
 install: all
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin

@@ -81,7 +81,7 @@ Notes:
 
 #### Library dependencies
 
-A curses library with wide char support (e.g. ncursesw), libreadline (`make norl` to drop) and standard libc.
+A curses library with wide char support (e.g. ncursesw), libreadline (`make O_NORL=1` to drop) and standard libc.
 
 #### Utility dependencies
 
