@@ -4578,6 +4578,22 @@ nochange:
 	}
 }
 
+static void check_keybinding_collision(void)
+{
+	unsigned long i;
+	bool bitmap[KEY_MAX] = {FALSE};
+
+	for (i = 0; i < sizeof(bindings) / sizeof(struct key); ++i) {
+		int curr_sym = bindings[i].sym;
+
+		if (bitmap[curr_sym])
+			fprintf(stdout,
+				"Collision of key %s detected\n", keyname(curr_sym));
+		else
+			bitmap[curr_sym] = TRUE;
+	}
+}
+
 static void usage(void)
 {
 	fprintf(stdout,
@@ -4592,6 +4608,7 @@ static void usage(void)
 		" -d      detail mode\n"
 		" -f      run filter as cmd on prompt key\n"
 		" -H      show hidden files\n"
+		" -K      test for keybinding collision\n"
 		" -i      nav-as-you-type mode\n"
 		" -n      version sort\n"
 		" -o      open files on Enter\n"
@@ -4735,7 +4752,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSiab:cdfnop:rstvh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKiab:cdfnop:rstvh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -4798,6 +4815,9 @@ int main(int argc, char *argv[])
 		case 't':
 			cfg.autoselect = 0;
 			break;
+		case 'K':
+			check_keybinding_collision();
+			return _SUCCESS;
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
 			return _SUCCESS;
