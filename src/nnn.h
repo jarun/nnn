@@ -211,7 +211,7 @@ static struct key bindings[] = {
 	/* Show list of copied files */
 	{ 'M',            SEL_SELLST },
 	/* Edit selection buffer */
-	{ CONTROL('G'),   SEL_SELEDIT },
+	{ 'K',            SEL_SELEDIT },
 	/* Copy from selection buffer */
 	{ 'P',            SEL_CP },
 	/* Move from selection buffer */
