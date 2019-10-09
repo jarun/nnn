@@ -889,7 +889,8 @@ static void endselection(void)
 static bool seledit(void)
 {
 	bool ret = FALSE;
-	int fd, i;
+	int fd, lines = 0;
+	ssize_t count;
 
 	if (!selbufpos) {
 		DPRINTF_S("empty selection");
@@ -921,31 +922,35 @@ static bool seledit(void)
 		goto emptyedit;
 	}
 
-	i = read(fd, pselbuf, selbuflen);
+	count = read(fd, pselbuf, selbuflen);
 	close(fd);
 	unlink(g_tmpfpath);
 
-	if (!i) {
+	if (!count) {
 		ret = TRUE;
 		goto emptyedit;
 	}
 
-	if (i < 0) {
+	if (count < 0) {
 		DPRINTF_S("error reading tmp file");
 		goto emptyedit;
 	}
 
 	resetselind();
-	nselected = 0;
-	selbufpos = i;
+	selbufpos = count;
 	/* The last character should be '\n' */
-	pselbuf[--i] = '\0';
-	for (--i; i > 0; --i) {
+	pselbuf[--count] = '\0';
+	for (--count; count > 0; --count) {
 		/* Replace every '\n' that separates two paths */
-		if (pselbuf[i] == '\n' && pselbuf[i+1] == '/') {
-			++nselected;
-			pselbuf[i] = '\0';
+		if (pselbuf[count] == '\n' && pselbuf[count + 1] == '/') {
+			++lines;
+			pselbuf[count] = '\0';
 		}
+	}
+
+	if (lines > nselected) {
+		DPRINTF_S("files added to selection");
+		goto emptyedit;
 	}
 
 	writesel(pselbuf, selbufpos - 1);
