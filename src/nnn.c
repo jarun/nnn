@@ -953,6 +953,7 @@ static bool seledit(void)
 		goto emptyedit;
 	}
 
+	nselected = lines;
 	writesel(pselbuf, selbufpos - 1);
 
 	return TRUE;
