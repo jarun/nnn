@@ -14,13 +14,13 @@ O_NORL := 0  # no readline support
 O_NOLOC := 0  # no locale support
 
 # convert targets to flags for backwards compatibility
-ifeq ($(MAKECMDGOALS),debug)
+ifneq ($(filter debug,$(MAKECMDGOALS)),)
 	O_DEBUG := 1
 endif
-ifeq ($(MAKECMDGOALS),norl)
+ifneq ($(filter norl,$(MAKECMDGOALS)),)
 	O_NORL := 1
 endif
-ifeq ($(MAKECMDGOALS),noloc)
+ifneq ($(filter noloc,$(MAKECMDGOALS)),)
 	O_NORL := 1
 	O_NOLOC := 1
 endif
