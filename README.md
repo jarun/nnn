@@ -235,11 +235,11 @@ Notes:
 | Left single | Select context or entry |
 | Left double | Select context or open entry |
 
-#### Leader key
+#### Lead key
 
-The Leader/Lead key provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and location shortcuts.
+The Lead/Leader key provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and location shortcuts.
 
-| Key | Function |
+| Follower key | Function |
 |:---:| --- |
 | <kbd>1-4</kbd> | Go to/create selected context |
 | key | Go to bookmarked location |
@@ -247,7 +247,7 @@ The Leader/Lead key provides a powerful multi-functional navigation mechanism. I
 | <kbd>~</kbd> <kbd>`</kbd> <kbd>@</kbd> <kbd>-</kbd> | Visit HOME, `/`, start, last visited dir |
 | <kbd>.</kbd> | Toggle show hidden files |
 
-When the filter is on, <kbd>/</kbd> works as an additional Leader key.
+When the filter is on, <kbd>/</kbd> works as an additional Lead key.
 
 #### Help
 
