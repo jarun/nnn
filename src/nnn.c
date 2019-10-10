@@ -886,6 +886,87 @@ static void endselection(void)
 	}
 }
 
+static bool seledit(void)
+{
+	bool ret = FALSE;
+	int fd, lines = 0;
+	ssize_t count;
+
+	if (!selbufpos) {
+		DPRINTF_S("empty selection");
+		return FALSE;
+	}
+
+	fd = create_tmp_file();
+	if (fd == -1) {
+		DPRINTF_S("couldn't create tmp file");
+		return FALSE;
+	}
+
+	seltofile(fd, NULL);
+	close(fd);
+
+	spawn(editor, g_tmpfpath, NULL, NULL, F_CLI);
+
+	if ((fd = open(g_tmpfpath, O_RDONLY)) == -1) {
+		DPRINTF_S("couldn't read tmp file");
+		unlink(g_tmpfpath);
+		return FALSE;
+	}
+
+	struct stat sb;
+	fstat(fd, &sb);
+
+	if (sb.st_size > selbufpos) {
+		DPRINTF_S("edited buffer larger than pervious");
+		goto emptyedit;
+	}
+
+	count = read(fd, pselbuf, selbuflen);
+	close(fd);
+	unlink(g_tmpfpath);
+
+	if (!count) {
+		ret = TRUE;
+		goto emptyedit;
+	}
+
+	if (count < 0) {
+		DPRINTF_S("error reading tmp file");
+		goto emptyedit;
+	}
+
+	resetselind();
+	selbufpos = count;
+	/* The last character should be '\n' */
+	pselbuf[--count] = '\0';
+	for (--count; count > 0; --count) {
+		/* Replace every '\n' that separates two paths */
+		if (pselbuf[count] == '\n' && pselbuf[count + 1] == '/') {
+			++lines;
+			pselbuf[count] = '\0';
+		}
+	}
+
+	if (lines > nselected) {
+		DPRINTF_S("files added to selection");
+		goto emptyedit;
+	}
+
+	nselected = lines;
+	writesel(pselbuf, selbufpos - 1);
+
+	return TRUE;
+
+emptyedit:
+	resetselind();
+	nselected = 0;
+	selbufpos = 0;
+	cfg.selmode = 0;
+	writesel(NULL, 0);
+	return ret;
+}
+
 static bool selsafe(void)
 {
 	/* Fail if selection file path not generated */
@@ -4139,6 +4220,12 @@ nochange:
 
 			printwait(messages[NONE_SELECTED], &presel);
 			goto nochange;
+		case SEL_SELEDIT:
+			if (!seledit()){
+				printwait("edit failed!", &presel);
+				goto nochange;
+			}
+			break;
 		case SEL_CP:
 		case SEL_MV:
 		case SEL_RMMUL:
