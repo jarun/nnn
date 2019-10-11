@@ -2793,7 +2793,7 @@ static bool create_dir(const char *path)
 	return TRUE;
 }
 
-static bool sshfs_mount(char *path, char *newpath, int *presel)
+static bool sshfs_mount(char *newpath, int *presel)
 {
 	uchar flag = F_NORMAL;
 	int r;
@@ -2835,7 +2835,7 @@ static bool sshfs_mount(char *path, char *newpath, int *presel)
 	return TRUE;
 }
 
-static bool sshfs_unmount(char *path, char *newpath, int *presel)
+static bool sshfs_unmount(char *newpath, int *presel)
 {
 	static char cmd[] = "fusermount3"; /* Arch Linux utility */
 	static bool found = FALSE;
@@ -4578,7 +4578,7 @@ nochange:
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_SSHFS:
-			if (!sshfs_mount(path, newpath, &presel))
+			if (!sshfs_mount(newpath, &presel))
 				goto nochange;
 
 			lastname[0] = '\0';
@@ -4592,7 +4592,7 @@ nochange:
 			setdirwatch();
 			goto begin;
 		case SEL_UMOUNT:
-			sshfs_unmount(path, newpath, &presel);
+			sshfs_unmount(newpath, &presel);
 			goto nochange;
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
