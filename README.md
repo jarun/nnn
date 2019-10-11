@@ -173,6 +173,7 @@ optional args:
  -f      run filter as cmd on prompt key
  -H      show hidden files
  -i      nav-as-you-type mode
+ -K      detect key collision
  -n      version sort
  -o      open files on Enter
  -p file selection file [stdout if '-']

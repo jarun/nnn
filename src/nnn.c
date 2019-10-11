@@ -4671,19 +4671,19 @@ nochange:
 	}
 }
 
-static void check_keybinding_collision(void)
+static void check_key_collision(void)
 {
-	unsigned long i;
+	int key;
+	uint i = 0;
 	bool bitmap[KEY_MAX] = {FALSE};
 
-	for (i = 0; i < sizeof(bindings) / sizeof(struct key); ++i) {
-		int curr_sym = bindings[i].sym;
+	for (; i < sizeof(bindings) / sizeof(struct key); ++i) {
+		key = bindings[i].sym;
 
-		if (bitmap[curr_sym])
-			fprintf(stdout,
-				"Collision of key %s detected\n", keyname(curr_sym));
+		if (bitmap[key])
+			fprintf(stdout, "collision detected: key [%s]\n", keyname(key));
 		else
-			bitmap[curr_sym] = TRUE;
+			bitmap[key] = TRUE;
 	}
 }
 
@@ -4701,8 +4701,8 @@ static void usage(void)
 		" -d      detail mode\n"
 		" -f      run filter as cmd on prompt key\n"
 		" -H      show hidden files\n"
-		" -K      test for keybinding collision\n"
 		" -i      nav-as-you-type mode\n"
+		" -K      detect key collision\n"
 		" -n      version sort\n"
 		" -o      open files on Enter\n"
 		" -p file selection file [stdout if '-']\n"
@@ -4909,7 +4909,7 @@ int main(int argc, char *argv[])
 			cfg.autoselect = 0;
 			break;
 		case 'K':
-			check_keybinding_collision();
+			check_key_collision();
 			return _SUCCESS;
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);

@@ -16,6 +16,7 @@ args=(
     '(-f)-d[run filter as cmd on prompt key]'
     '(-H)-H[show hidden files]'
     '(-i)-i[start in navigate-as-you-type mode]'
+    '(-K)-K[detect key collision]'
     '(-n)-n[use version compare to sort files]'
     '(-o)-o[open files only on Enter]'
     '(-p)-p[copy selection to file]:file name'
