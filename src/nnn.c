@@ -4323,7 +4323,13 @@ nochange:
 #endif
 				break;
 			case SEL_NEW:
-				tmp = xreadline(NULL, "name/link suffix [@ for none]: ");
+				r = get_input("create 'f'(ile) / 'd'(ir) / 's'(ym) / 'h'(ard)?");
+				if (r == 'f' || r == 'd') {
+					tmp = xreadline(NULL, "name: ");
+				} else if (r == 's' || r == 'h') {
+					tmp = xreadline(NULL, "link suffix [@ for none]: ");
+				} else
+					tmp = NULL;
 				break;
 			default: /* SEL_RENAME */
 				tmp = xreadline(dents[cur].name, "");
@@ -4424,7 +4430,6 @@ nochange:
 				}
 			} else {
 				/* Check if it's a dir or file */
-				r = get_input("create 'f'(ile) / 'd'(ir) / 's'(ym) / 'h'(ard)?");
 				if (r == 'f') {
 					r = openat(fd, tmp, O_CREAT, 0666);
 					close(r);
