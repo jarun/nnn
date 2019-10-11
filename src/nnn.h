@@ -88,6 +88,7 @@ enum action {
 	SEL_NEW,
 	SEL_RENAME,
 	SEL_RENAMEMUL,
+	SEL_ARCHIVEMNT,
 	SEL_SSHFS,
 	SEL_UMOUNT,
 	SEL_HELP,
@@ -229,6 +230,8 @@ static struct key bindings[] = {
 	{ KEY_F(2),       SEL_RENAME },
 	/* Rename contents of current dir */
 	{ 'r',            SEL_RENAMEMUL },
+	/* Mount an archive */
+	{ 'T',            SEL_ARCHIVEMNT },
 	/* Connect to server over SSHFS */
 	{ 'c',            SEL_SSHFS },
 	/* Disconnect a SSHFS mount point */

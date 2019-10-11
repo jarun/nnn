@@ -383,6 +383,7 @@ static char mv[] = "mvg -gi";
 #define STR_TMPFILE 3
 #define NONE_SELECTED 4
 #define UTIL_MISSING 5
+#define MOUNT_FAILED 6
 
 static const char * const messages[] = {
 	"no traversal",
@@ -391,6 +392,7 @@ static const char * const messages[] = {
 	"/.nnnXXXXXX",
 	"0 selected",
 	"missing dep",
+	"mount failed",
 };
 
 /* Supported configuration environment variables */
@@ -2793,6 +2795,50 @@ static bool create_dir(const char *path)
 	return TRUE;
 }
 
+static bool archive_mount(char *name, char *path, char *newpath, int *presel)
+{
+	char *dir, *cmd = "archivemount";
+	size_t len;
+
+	if (!getutil(cmd)) {
+		printwait(messages[UTIL_MISSING], presel);
+		return FALSE;
+	}
+
+	dir = strdup(name);
+	if (!dir)
+		return FALSE;
+
+	len = strlen(dir);
+
+	while (len > 1)
+		if (dir[--len] == '.') {
+			dir[len] = '\0';
+			break;
+		}
+
+	DPRINTF_S(dir);
+
+	/* Create the mount point */
+	mkpath(cfgdir, dir, newpath);
+	free(dir);
+
+	if (!create_dir(newpath)) {
+		printwait(strerror(errno), presel);
+		return FALSE;
+	}
+
+	/* Mount archive */
+	DPRINTF_S(name);
+	DPRINTF_S(newpath);
+	if (spawn(cmd, name, newpath, path, F_NORMAL)) {
+		printwait(messages[MOUNT_FAILED], presel);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static bool sshfs_mount(char *newpath, int *presel)
 {
 	uchar flag = F_NORMAL;
@@ -2828,18 +2874,23 @@ static bool sshfs_mount(char *newpath, int *presel)
 
 	/* Connect to remote */
 	if (spawn(env, tmp, newpath, NULL, flag)) {
-		printwait("mount failed", presel);
+		printwait(messages[MOUNT_FAILED], presel);
 		return FALSE;
 	}
 
 	return TRUE;
 }
 
-static bool sshfs_unmount(char *newpath, int *presel)
+/*
+ * Unmounts if the directory represented by name is a mount point.
+ * Otherwise, asks for hostname
+ */
+static bool unmount(char *name, char *newpath, int *presel)
 {
 	static char cmd[] = "fusermount3"; /* Arch Linux utility */
 	static bool found = FALSE;
-	char *tmp;
+	char *tmp = name;
+	struct stat sb, psb;
 
 	/* On Ubuntu it's fusermount */
 	if (!found && !getutil(cmd)) {
@@ -2847,9 +2898,19 @@ static bool sshfs_unmount(char *newpath, int *presel)
 		found = TRUE;
 	}
 
-	tmp = xreadline(NULL, "host: ");
-	if (!tmp[0])
-		return FALSE;
+	if (tmp) {
+		mkpath(cfgdir, tmp, newpath);
+		if ((lstat(newpath, &sb) == -1) || (lstat(dirname(newpath), &psb) == -1)) {
+			*presel = MSGWAIT;
+			return FALSE;
+		}
+	}
+
+	if (!tmp || (sb.st_dev == psb.st_dev)) {
+		tmp = xreadline(NULL, "host: ");
+		if (!tmp[0])
+			return FALSE;
+	}
 
 	/* Create the mount point */
 	mkpath(cfgdir, tmp, newpath);
@@ -2919,14 +2980,14 @@ static void show_help(const char *path)
 	          "ca  Select all        K  Edit selection\n"
 		  "cP  Copy selection    X  Delete selection\n"
 		  "cV  Move selection   ^X  Delete entry\n"
-		  "cf  Create archive    C  Execute entry\n"
+		  "cf  Create archive    T  Mount archive\n"
 		 "b^F  Extract archive   F  List archive\n"
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
 		"1ORDER TOGGLES\n"
 		  "cA  Apparent du       S  du\n"
-		  "cs  Size    E  Extn   t  Time\n"
+		  "cs  Size   E  Extn    t  Time\n"
 		"1MISC\n"
-	       "9! ^]  Shell             =  Launcher\n"
+	       "9! ^]  Shell  =  Launch  C  Execute entry\n"
 	       "9R ^V  Pick plugin   :K xK  Execute plugin K\n"
 	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt/run cmd    L  Lock\n"};
@@ -4577,8 +4638,11 @@ nochange:
 
 			/* Repopulate as directory content may have changed */
 			goto begin;
+		case SEL_ARCHIVEMNT:
+			if (!ndents || !archive_mount(dents[cur].name, path, newpath, &presel))
+				goto nochange; // fallthrough
 		case SEL_SSHFS:
-			if (!sshfs_mount(newpath, &presel))
+			if (sel == SEL_SSHFS && !sshfs_mount(newpath, &presel))
 				goto nochange;
 
 			lastname[0] = '\0';
@@ -4592,7 +4656,8 @@ nochange:
 			setdirwatch();
 			goto begin;
 		case SEL_UMOUNT:
-			sshfs_unmount(newpath, &presel);
+			tmp = ndents ? dents[cur].name : NULL;
+			unmount(tmp, newpath, &presel);
 			goto nochange;
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:

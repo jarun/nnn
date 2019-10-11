@@ -44,7 +44,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - Subtree search to open or edit files (using plugin)
 - Mimes
   - Open with desktop opener or specify a custom app
-  - Create, list, extract archives
+  - Create, list, extract, mount (FUSE based) archives
   - Option to open all text files in EDITOR
 - Information
   - Detailed file information
@@ -90,6 +90,7 @@ A curses library with wide char support (e.g. ncursesw), libreadline (`make O_NO
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | base | desktop opener |
 | file, coreutils (cp, mv, rm), findutils (xargs) | base | file type, copy, move and remove |
 | tar, (un)zip [atool/bsdtar for more formats] | base | create, list, extract tar, gzip, bzip2, zip |
+| archivemount | optional | mount archives over FUSE |
 | sshfs, fusermount(3) | optional | mount, unmount over SSHFS |
 | trash-cli | optional | trash files (default action: delete) |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
@@ -211,14 +212,14 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
             a  Select all        K  Edit selection
             P  Copy selection    X  Delete selection
             V  Move selection   ^X  Delete entry
-            f  Create archive    C  Execute entry
+            f  Create archive    T  Mount archive
            ^F  Extract archive   F  List archive
             e  Edit in EDITOR    p  Open in PAGER
  ORDER TOGGLES
             A  Apparent du       S  du
-            s  Size    E  Extn   t  Time
+            s  Size   E  Extn    t  Time
  MISC
-         ! ^]  Shell             =  Launcher
+         ! ^]  Shell  =  Launch  C  Execute entry
          R ^V  Pick plugin   :K xK  Execute plugin K
             c  SSHFS mount       u  Unmount
            ^P  Prompt/run cmd    L  Lock
