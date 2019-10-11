@@ -4674,7 +4674,7 @@ nochange:
 static void check_key_collision(void)
 {
 	int key;
-	uint i = 0;
+	ulong i = 0;
 	bool bitmap[KEY_MAX] = {FALSE};
 
 	for (; i < sizeof(bindings) / sizeof(struct key); ++i) {
