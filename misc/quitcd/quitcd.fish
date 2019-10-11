@@ -3,6 +3,8 @@
 # or, add the lines to the 'config.fish' file.
 
 function n --description 'support nnn quit and change directory'
+    # The default behaviour is to cd on quit (nnn checks if NNN_TMPFILE is set)
+    # To cd on quit only on ^G, export NNN_TMPFILE after the call to nnn
     if test -n "$XDG_CONFIG_HOME"
         set -x NNN_TMPFILE "$XDG_CONFIG_HOME/nnn/.lastd"
     else

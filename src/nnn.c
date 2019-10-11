@@ -4603,9 +4603,42 @@ nochange:
 				}
 
 			if (!(r == CTX_MAX || r == '\r'))
-				break;
+				break; // fallthrough
+		case SEL_QUITCTX:
+			if (sel == SEL_QUITCTX) {
+				fd = cfg.curctx; /* fd used as tmp var */
+				for (r = (fd + 1) & ~CTX_MAX;
+				     (r != fd) && !g_ctx[r].c_cfg.ctxactive;
+				     r = ((r + 1) & ~CTX_MAX)) {
+				};
 
-			if (sel == SEL_QUITCD) {
+				if (r != fd) {
+					bool selmode = cfg.selmode ? TRUE : FALSE;
+
+					g_ctx[fd].c_cfg.ctxactive = 0;
+
+					/* Switch to next active context */
+					path = g_ctx[r].c_path;
+					lastdir = g_ctx[r].c_last;
+					lastname = g_ctx[r].c_name;
+
+					/* Switch light/detail mode */
+					if (cfg.showdetail != g_ctx[r].c_cfg.showdetail)
+						/* Set the reverse */
+						printptr = cfg.showdetail ?
+								&printent : &printent_long;
+
+					cfg = g_ctx[r].c_cfg;
+
+					/* Continue selection mode */
+					cfg.selmode = selmode;
+					cfg.curctx = r;
+					setdirwatch();
+					goto begin;
+				}
+			}
+
+			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE")) {
 				/* In vim picker mode, clear selection and exit */
 				if (cfg.picker) {
 					/* Picker mode: reset buffer or clear file */
@@ -4615,37 +4648,6 @@ nochange:
 					presel = MSGWAIT;
 					goto nochange;
 				}
-			}
-			return;
-		case SEL_QUITCTX:
-			fd = cfg.curctx; /* fd used as tmp var */
-			for (r = (fd + 1) & ~CTX_MAX;
-			     (r != fd) && !g_ctx[r].c_cfg.ctxactive;
-			     r = ((r + 1) & ~CTX_MAX)) {
-			};
-
-			if (r != fd) {
-				bool selmode = cfg.selmode ? TRUE : FALSE;
-
-				g_ctx[fd].c_cfg.ctxactive = 0;
-
-				/* Switch to next active context */
-				path = g_ctx[r].c_path;
-				lastdir = g_ctx[r].c_last;
-				lastname = g_ctx[r].c_name;
-
-				/* Switch light/detail mode */
-				if (cfg.showdetail != g_ctx[r].c_cfg.showdetail)
-					/* Set the reverse */
-					printptr = cfg.showdetail ? &printent : &printent_long;
-
-				cfg = g_ctx[r].c_cfg;
-
-				/* Continue selection mode */
-				cfg.selmode = selmode;
-				cfg.curctx = r;
-				setdirwatch();
-				goto begin;
 			}
 			return;
 		default:
