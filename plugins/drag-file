@@ -2,6 +2,7 @@
 
 # Description: Open a Drag and drop window, to drop files onto other programs
 #
+# Dependency: https://github.com/mwh/dragon
 # Shell: POSIX compliant
 # Author: 0xACE
 

@@ -3,11 +3,12 @@
 # Description: Provides drag and drop window for files.
 #
 # Files that are dropped will be added to nnn's selection
-# Some webbased files will be downloaded to current directory with curl
+# Some web based files will be downloaded to current directory with curl
 # and it may overwrite some existing files
 #
-# The user has to mm to clear nnn's selection first
+# The user has to press mm to clear nnn's selection first
 #
+# Dependency: https://github.com/mwh/dragon
 # Shell: POSIX compliant
 # Author: 0xACE
 
