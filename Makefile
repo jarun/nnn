@@ -59,14 +59,13 @@ LDLIBS += $(LDLIBS_CURSES)
 
 DISTFILES = src nnn.1 Makefile README.md LICENSE
 SRC = src/nnn.c
+HEADERS = src/nnn.h
 BIN = nnn
 
 all: $(BIN)
 
-$(SRC): src/nnn.h
-
-$(BIN): $(SRC)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+$(BIN): $(SRC) $(HEADERS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LDLIBS)
 
 # targets for backwards compatibility
 debug: $(BIN)
