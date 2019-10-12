@@ -2636,6 +2636,17 @@ static inline bool getutil(char *util)
 	return spawn("which", util, NULL, NULL, F_NORMAL | F_NOTRACE) == 0;
 }
 
+static void pipetofd(char *cmd, int fd)
+{
+	FILE *fp = popen(cmd, "r");
+
+	if (fp) {
+		while (fgets(g_buf, CMD_LEN_MAX - 1, fp))
+			dprintf(fd, "%s", g_buf);
+		pclose(fp);
+	}
+}
+
 /*
  * Follows the stat(1) output closely
  */
@@ -2644,7 +2655,6 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 	int fd;
 	char *p, *begin = g_buf;
 	size_t r;
-	FILE *fp;
 
 	fd = create_tmp_file();
 	if (fd == -1)
@@ -2656,12 +2666,7 @@ static bool show_stats(const char *fpath, const char *fname, const struct stat *
 	g_buf[r - 1] = '\0';
 	DPRINTF_S(g_buf);
 
-	fp = popen(g_buf, "r");
-	if (fp) {
-		while (fgets(g_buf, CMD_LEN_MAX - 1, fp))
-			dprintf(fd, "%s", g_buf);
-		pclose(fp);
-	}
+	pipetofd(g_buf, fd);
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
@@ -2995,6 +3000,9 @@ static void show_help(const char *path)
 	fd = create_tmp_file();
 	if (fd == -1)
 		return;
+
+	if (getutil("fortune"))
+		pipetofd("fortune -s", fd);
 
 	start = end = helpstr;
 	while (*end) {
@@ -4385,11 +4393,11 @@ nochange:
 				break;
 			case SEL_NEW:
 				r = get_input("create 'f'(ile) / 'd'(ir) / 's'(ym) / 'h'(ard)?");
-				if (r == 'f' || r == 'd') {
+				if (r == 'f' || r == 'd')
 					tmp = xreadline(NULL, "name: ");
-				} else if (r == 's' || r == 'h') {
+				else if (r == 's' || r == 'h')
 					tmp = xreadline(NULL, "link suffix [@ for none]: ");
-				} else
+				else
 					tmp = NULL;
 				break;
 			default: /* SEL_RENAME */
@@ -4494,9 +4502,9 @@ nochange:
 				if (r == 'f') {
 					r = openat(fd, tmp, O_CREAT, 0666);
 					close(r);
-				} else if (r == 'd') {
+				} else if (r == 'd')
 					r = mkdirat(fd, tmp, 0777);
-				} else if (r == 's' || r == 'h') {
+				else if (r == 's' || r == 'h') {
 					if (tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
 					r = xlink(tmp, path, newpath, &presel, r);
