@@ -32,7 +32,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - *Navigate-as-you-type* with dir auto-select
   - Contexts (_aka_ tabs/workspaces) with configurable colors
   - Bookmarks; pin and visit a directory
-  - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>) with quick reference
+  - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick reference
   - CD on quit (*easy* shell integration)
 - Sorting
   - Ordered pure numeric names by default (visit _/proc_)
@@ -90,8 +90,8 @@ A curses library with wide char support (e.g. ncursesw), libreadline (`make O_NO
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | base | desktop opener |
 | file, coreutils (cp, mv, rm), findutils (xargs) | base | file type, copy, move and remove |
 | tar, (un)zip [atool/bsdtar for more formats] | base | create, list, extract tar, gzip, bzip2, zip |
-| archivemount | optional | mount archives over FUSE |
-| sshfs, fusermount(3) | optional | mount, unmount over SSHFS |
+| archivemount, fusermount(3) | optional | mount, unmount archives |
+| sshfs, fusermount(3) | optional | mount, unmount remotes |
 | trash-cli | optional | trash files (default action: delete) |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/Advanced-use-cases#show-cp-mv-progress)) | optional | copy, move progress |
