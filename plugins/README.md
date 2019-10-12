@@ -16,6 +16,7 @@ The currently available plugins are listed below.
 | drop-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files into nnn |
 | fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | curl | Update plugins |
+| gutenread | sh | curl, unzip, w3m | Browse, download, read from Project Gutenberg |
 | hexview | sh | xxd | View a file in hex in `$PAGER` |
 | imgresize | sh | [imgp](https://github.com/jarun/imgp) | Resize images in dir to screen resolution |
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |

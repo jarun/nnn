@@ -1,0 +1,35 @@
+#!/usr/bin/env sh
+
+# Description: Browse Project Gutenberg catalogue by popularity, then download
+#              and read a book of your choice.
+#
+# Details: Set the variable EBOOK_ID to download in html format and read in w3m.
+#          Clear EBOOK_ID to browse available ebooks by popularity and set it to
+#          the ID once you find an interesting one.
+#
+#          For example:
+#          Wuthering Heights by Emily Brontë is at https://www.gutenberg.org/ebooks/768
+#          So EBOOK_ID would be 768
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+EBOOK_ID=
+DIR=${XDG_CACHE_HOME:-$HOME/.cache}/nnn/gutenbooks/"$EBOOK_ID"
+BROWSE_LINK="http://www.gutenberg.org/ebooks/search/?sort_order=downloads"
+BROWSER=w3m
+
+if [ ! -z "$EBOOK_ID" ]; then
+    if [ ! -e $DIR ]; then
+        mkdir -p $DIR
+        cd $DIR
+        curl -L -O "https://www.gutenberg.org/files/"$EBOOK_ID"/"$EBOOK_ID"-h.zip"
+        unzip "$EBOOK_ID"-h.zip
+    fi
+
+    if [ -d $DIR ]; then
+        "$BROWSER" $DIR/"$EBOOK_ID"-h/"$EBOOK_ID"-h.htm
+    fi
+else
+    "$BROWSER" $BROWSE_LINK
+fi
