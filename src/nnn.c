@@ -107,6 +107,7 @@
 #define S_BLKSIZE 512 /* S_BLKSIZE is missing on Android NDK (Termux) */
 #endif
 
+#define _ABSSUB(N, M) (((N) <= (M)) ? ((M) - (N)) : ((N) - (M)))
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -1015,12 +1016,12 @@ static bool initcurses(mmask_t *oldmask)
 	//intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
 #if NCURSES_MOUSE_VERSION <= 1
-	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED, oldmask);
+	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED, oldmask);
 #else
-	mousemask(BUTTON1_CLICKED | BUTTON1_DOUBLE_CLICKED | BUTTON4_PRESSED | BUTTON5_PRESSED,
+	mousemask(BUTTON1_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED,
 		  oldmask);
 #endif
-	mouseinterval(400);
+	mouseinterval(0);
 	curs_set(FALSE); /* Hide cursor */
 	start_color();
 	use_default_colors();
@@ -3542,6 +3543,8 @@ static void browse(char *ipath)
 	struct stat sb;
 	char *path, *lastdir, *lastname, *dir, *tmp;
 	MEVENT event;
+	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0}};
+	bool currentmouse = 1;
 
 	atexit(dentfree);
 
@@ -3663,7 +3666,7 @@ nochange:
 				goto nochange; // fallthrough
 		case SEL_BACK:
 			/* Handle clicking on a context at the top */
-			if (sel == SEL_CLICK && event.bstate == BUTTON1_CLICKED && event.y == 0) {
+			if (sel == SEL_CLICK && event.bstate == BUTTON1_PRESSED && event.y == 0) {
 				/* Get context from: "[1 2 3 4]..." */
 				r = event.x >> 1;
 
@@ -3715,7 +3718,7 @@ nochange:
 #endif
 
 			/* Toggle filter mode on left click on last 2 lines */
-			if (event.y >= xlines - 2) {
+			if (event.y >= xlines - 2 && event.bstate == BUTTON1_PRESSED) {
 				cfg.filtermode ^= 1;
 				if (cfg.filtermode) {
 					presel = FILTER;
@@ -3731,13 +3734,18 @@ nochange:
 			}
 
 			/* Handle clicking on a file */
-			if (2 <= event.y && event.y <= ndents + 1) {
+			if (2 <= event.y && event.y <= ndents + 1 && event.bstate == BUTTON1_PRESSED) {
 				r = curscroll + (event.y - 2);
 				move_cursor(r, 1);
+				currentmouse ^= 1;
+				clock_gettime(CLOCK_MONOTONIC_RAW, &mousetimings[currentmouse]);
 
 				/*Single click just selects, double click also opens */
-				if (event.bstate != BUTTON1_DOUBLE_CLICKED)
+				if (((_ABSSUB(mousetimings[0].tv_sec, mousetimings[1].tv_sec) << 30)
+				  + (mousetimings[0].tv_nsec - mousetimings[1].tv_nsec))
+					> 400000000)
 					break;
+				mousetimings[currentmouse].tv_sec = 0;
 			} else {
 				if (cfg.filtermode)
 					presel = FILTER;
