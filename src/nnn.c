@@ -2898,12 +2898,14 @@ static bool sshfs_mount(char *newpath, int *presel)
  * Unmounts if the directory represented by name is a mount point.
  * Otherwise, asks for hostname
  */
-static bool unmount(char *name, char *newpath, int *presel)
+static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 {
 	static char cmd[] = "fusermount3"; /* Arch Linux utility */
 	static bool found = FALSE;
 	char *tmp = name;
 	struct stat sb, psb;
+	bool child = false;
+	bool parent = false;
 
 	/* On Ubuntu it's fusermount */
 	if (!found && !getutil(cmd)) {
@@ -2911,15 +2913,17 @@ static bool unmount(char *name, char *newpath, int *presel)
 		found = TRUE;
 	}
 
-	if (tmp) {
+	if (tmp && strcmp(cfgdir, currentpath) == 0) {
 		mkpath(cfgdir, tmp, newpath);
-		if ((lstat(newpath, &sb) == -1) || (lstat(dirname(newpath), &psb) == -1)) {
+		child = lstat(newpath, &sb) != -1;
+		parent = lstat(dirname(newpath), &psb) != -1;
+		if (!child && !parent) {
 			*presel = MSGWAIT;
 			return FALSE;
 		}
 	}
 
-	if (!tmp || (sb.st_dev == psb.st_dev)) {
+	if (!tmp || !child || !S_ISDIR(sb.st_mode) || (child && parent && sb.st_dev == psb.st_dev)) {
 		tmp = xreadline(NULL, "host: ");
 		if (!tmp[0])
 			return FALSE;
@@ -4679,7 +4683,7 @@ nochange:
 			goto begin;
 		case SEL_UMOUNT:
 			tmp = ndents ? dents[cur].name : NULL;
-			unmount(tmp, newpath, &presel);
+			unmount(tmp, newpath, &presel, path);
 			goto nochange;
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
