@@ -16,7 +16,7 @@ The currently available plugins are listed below.
 | drop-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files into nnn |
 | fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | curl | Update plugins |
-| gutenread | sh | curl, unzip, w3m | Browse, download, read from Project Gutenberg |
+| gutenread | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional)| Browse, download, read from Project Gutenberg |
 | hexview | sh | xxd | View a file in hex in `$PAGER` |
 | imgresize | sh | [imgp](https://github.com/jarun/imgp) | Resize images in dir to screen resolution |
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
@@ -24,7 +24,7 @@ The currently available plugins are listed below.
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
 | mediainf | sh | mediainfo | Show media information |
 | moclyrics | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) | Show lyrics of the track playing in moc |
-| mocplay | sh | [moc](http://moc.daper.net/) | Appends (and plays, see script) selection/dir/file in moc|
+| mocplay | sh | [moc](http://moc.daper.net/) | Append (and/or play) selection/dir/file in moc|
 | ndiff | sh | vimdiff | Diff for selection (limited to 2 for directories) |
 | nmount | sh | pmount, udisks2 | Toggle mount status of a device as normal user |
 | notes | sh | - | Open a quick notes file/dir in `$EDITOR` |
