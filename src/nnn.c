@@ -383,7 +383,7 @@ static char mv[] = "mvg -gi";
 #define STR_TMPFILE 3
 #define NONE_SELECTED 4
 #define UTIL_MISSING 5
-#define MOUNT_FAILED 6
+#define OPERATION_FAILED 6
 
 static const char * const messages[] = {
 	"no traversal",
@@ -392,7 +392,7 @@ static const char * const messages[] = {
 	"/.nnnXXXXXX",
 	"0 selected",
 	"missing dep",
-	"mount failed",
+	"failed!",
 };
 
 /* Supported configuration environment variables */
@@ -1271,7 +1271,7 @@ static void xrm(char *path)
 	}
 }
 
-static bool mvcp_rename(const char *path, const char *cmd)
+static bool cpmv_rename(const char *path, const char *cmd)
 {
 	int fd, i;
 	uint count = 0, lines = 0;
@@ -1308,7 +1308,6 @@ static bool mvcp_rename(const char *path, const char *cmd)
 	DPRINTF_U(count);
 	DPRINTF_U(lines);
 
-	/* What happens to this and batch_rename() if given filenames with '\n' in them? */
 	if (2 * count != lines) {
 		DPRINTF_S("cannot delete files");
 		goto finish;
@@ -2886,7 +2885,7 @@ static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 	DPRINTF_S(name);
 	DPRINTF_S(newpath);
 	if (spawn(cmd, name, newpath, path, F_NORMAL)) {
-		printwait(messages[MOUNT_FAILED], presel);
+		printwait(messages[OPERATION_FAILED], presel);
 		return FALSE;
 	}
 
@@ -2928,7 +2927,7 @@ static bool sshfs_mount(char *newpath, int *presel)
 
 	/* Connect to remote */
 	if (spawn(env, tmp, newpath, NULL, flag)) {
-		printwait(messages[MOUNT_FAILED], presel);
+		printwait(messages[OPERATION_FAILED], presel);
 		return FALSE;
 	}
 
@@ -2974,7 +2973,7 @@ static bool unmount(char *name, char *newpath, int *presel)
 	}
 
 	if (spawn(cmd, "-u", newpath, NULL, F_NORMAL)) {
-		printwait("unmount failed", presel);
+		printwait(messages[OPERATION_FAILED], presel);
 		return FALSE;
 	}
 
@@ -3032,8 +3031,9 @@ static void show_help(const char *path)
 	       "9⎵ ^J  Select entry      r  Batch rename\n"
 	       "9m ^K  Sel range, clear  M  List selection\n"
 	          "ca  Select all        K  Edit selection\n"
-		  "cP  Copy selection    X  Delete selection\n"
-		  "cV  Move selection   ^X  Delete entry\n"
+		  "cP Copy selection     w  Copy selection as\n"
+		  "cV Move selection     W  Move selection as\n"
+		  "cX Delete selection  ^X  Delete entry\n"
 		  "cf  Create archive    T  Mount archive\n"
 		 "b^F  Extract archive   F  List archive\n"
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
@@ -4206,7 +4206,7 @@ nochange:
 				endselection();
 
 				if (!batch_rename(path)) {
-					printwait("batch rename failed", &presel);
+					printwait(messages[OPERATION_FAILED], &presel);
 					goto nochange;
 				}
 				break;
@@ -4338,7 +4338,7 @@ nochange:
 			goto nochange;
 		case SEL_SELEDIT:
 			if (!seledit()){
-				printwait("edit failed!", &presel);
+				printwait(messages[OPERATION_FAILED], &presel);
 				goto nochange;
 			}
 			break;
@@ -4363,14 +4363,14 @@ nochange:
 				mvstr(g_buf);
 				break;
 			case SEL_CPAS:
-				if (!mvcp_rename(path, cp)) {
-					printwait("copy and rename failed!", &presel);
+				if (!cpmv_rename(path, cp)) {
+					printwait(messages[OPERATION_FAILED], &presel);
 					goto nochange;
 				}
 				break;
 			case SEL_MVAS:
-				if (!mvcp_rename(path, mv)) {
-					printwait("move and rename failed!", &presel);
+				if (!cpmv_rename(path, mv)) {
+					printwait(messages[OPERATION_FAILED], &presel);
 					goto nochange;
 				}
 				break;
