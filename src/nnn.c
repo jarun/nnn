@@ -2904,6 +2904,8 @@ static bool unmount(char *name, char *newpath, int *presel)
 	static bool found = FALSE;
 	char *tmp = name;
 	struct stat sb, psb;
+	bool child = false;
+	bool parent = false;
 
 	/* On Ubuntu it's fusermount */
 	if (!found && !getutil(cmd)) {
@@ -2913,13 +2915,15 @@ static bool unmount(char *name, char *newpath, int *presel)
 
 	if (tmp) {
 		mkpath(cfgdir, tmp, newpath);
-		if ((lstat(newpath, &sb) == -1) || (lstat(dirname(newpath), &psb) == -1)) {
+		child = lstat(newpath, &sb) != -1;
+		parent = lstat(dirname(newpath), &psb) != -1;
+		if (!child && !parent) {
 			*presel = MSGWAIT;
 			return FALSE;
 		}
 	}
 
-	if (!tmp || (sb.st_dev == psb.st_dev)) {
+	if (!tmp || !child || !S_ISDIR(sb.st_mode) || (child && parent && sb.st_dev == psb.st_dev)) {
 		tmp = xreadline(NULL, "host: ");
 		if (!tmp[0])
 			return FALSE;
