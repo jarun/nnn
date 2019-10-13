@@ -1271,6 +1271,60 @@ static void xrm(char *path)
 	}
 }
 
+static bool mvcp_rename(const char *path, const char *cmd)
+{
+	int fd, i;
+	uint count = 0, lines = 0;
+	bool ret = FALSE;
+	const char formatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
+	const char renamecmd[] =
+		"sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -o -n2 %s";
+	char buf[sizeof(renamecmd) + sizeof(cmd) + (PATH_MAX << 1)];
+
+	if ((fd = create_tmp_file()) == -1)
+		return ret;
+
+	if (!selbufpos)
+		goto finish;
+
+	seltofile(fd, &count);
+	close(fd);
+
+	snprintf(buf, sizeof(buf), formatcmd, g_tmpfpath);
+	spawn("sh", "-c", buf, path, F_NORMAL);
+
+	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
+
+	if ((fd = open(g_tmpfpath, O_RDONLY)) == -1)
+		goto finish;
+
+	while ((i = read(fd, buf, sizeof(buf))) > 0)
+		while (i)
+			lines += (buf[--i] == '\n');
+
+	if (i < 0)
+		goto finish;
+
+	DPRINTF_U(count);
+	DPRINTF_U(lines);
+
+	/* What happens to this and batch_rename() if given filenames with '\n' in them? */
+	if (2 * count != lines) {
+		DPRINTF_S("cannot delete files");
+		goto finish;
+	}
+
+	snprintf(buf, sizeof(buf), renamecmd, path, g_tmpfpath, cmd);
+	spawn("sh", "-c", buf, path, F_NORMAL);
+	ret = TRUE;
+
+finish:
+	if (fd >= 0)
+		close(fd);
+
+	return ret;
+}
+
 static bool batch_rename(const char *path)
 {
 	int fd1, fd2, i;
@@ -4290,6 +4344,8 @@ nochange:
 			break;
 		case SEL_CP:
 		case SEL_MV:
+		case SEL_CPAS:
+		case SEL_MVAS:
 		case SEL_RMMUL:
 		{
 			endselection();
@@ -4306,15 +4362,28 @@ nochange:
 			case SEL_MV:
 				mvstr(g_buf);
 				break;
+			case SEL_CPAS:
+				if (!mvcp_rename(path, cp)) {
+					printwait("copy and rename failed!", &presel);
+					goto nochange;
+				}
+				break;
+			case SEL_MVAS:
+				if (!mvcp_rename(path, mv)) {
+					printwait("move and rename failed!", &presel);
+					goto nochange;
+				}
+				break;
 			default: /* SEL_RMMUL */
 				rmmulstr(g_buf);
 				break;
 			}
 
-			spawn("sh", "-c", g_buf, path, F_NORMAL);
+			if (sel != SEL_CPAS && sel != SEL_MVAS)
+				spawn("sh", "-c", g_buf, path, F_NORMAL);
 
 			/* Clear selection on move or delete */
-			if (sel == SEL_MV || sel == SEL_RMMUL) {
+			if (sel == SEL_MV || sel == SEL_MVAS || sel == SEL_RMMUL) {
 				nselected = 0;
 				selbufpos = 0;
 				writesel(NULL, 0);
