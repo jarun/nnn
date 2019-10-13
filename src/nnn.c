@@ -200,6 +200,11 @@ typedef struct {
 	char *val;
 } kv;
 
+typedef struct {
+	const regex_t *regex;
+	const char *str;
+} fltrexp_t;
+
 /*
  * Settings
  * NOTE: update default values if changing order
@@ -477,6 +482,8 @@ static bool getutil(char *util);
 
 static void sigint_handler(int sig)
 {
+	(void) sig;
+
 	interrupted = TRUE;
 }
 
@@ -1548,17 +1555,17 @@ static int setfilter(regex_t *regex, const char *filter)
 	return r;
 }
 
-static int visible_re(regex_t *regex, const char *fname, const char *fltr)
+static int visible_re(const fltrexp_t *fltrexp, const char *fname)
 {
-	return regexec(regex, fname, 0, NULL, 0) == 0;
+	return regexec(fltrexp->regex, fname, 0, NULL, 0) == 0;
 }
 
-static int visible_str(regex_t *regex, const char *fname, const char *fltr)
+static int visible_str(const fltrexp_t *fltrexp, const char *fname)
 {
-	return strcasestr(fname, fltr) != NULL;
+	return strcasestr(fname, fltrexp->str) != NULL;
 }
 
-static int (*filterfn)(regex_t *regex, const char *fname, const char *fltr) = &visible_re;
+static int (*filterfn)(const fltrexp_t *fltr, const char *fname) = &visible_re;
 
 static int entrycmp(const void *va, const void *vb)
 {
@@ -1704,9 +1711,10 @@ static inline void swap_ent(int id1, int id2)
 static int fill(const char *fltr, regex_t *re)
 {
 	int count = 0;
+	fltrexp_t fltrexp = { .regex = re, .str = fltr };
 
 	for (; count < ndents; ++count) {
-		if (filterfn(re, dents[count].name, fltr) == 0) {
+		if (filterfn(&fltrexp, dents[count].name) == 0) {
 			if (count != --ndents) {
 				swap_ent(count, ndents);
 				--count;
@@ -2650,7 +2658,7 @@ static void pipetofd(char *cmd, int fd)
 /*
  * Follows the stat(1) output closely
  */
-static bool show_stats(const char *fpath, const char *fname, const struct stat *sb)
+static bool show_stats(const char *fpath, const struct stat *sb)
 {
 	int fd;
 	char *p, *begin = g_buf;
@@ -3048,6 +3056,9 @@ static void show_help(const char *path)
 
 static int sum_bsizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
+	(void) fpath;
+	(void) ftwbuf;
+
 	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D))
 		ent_blocks += sb->st_blocks;
 
@@ -3057,6 +3068,9 @@ static int sum_bsizes(const char *fpath, const struct stat *sb, int typeflag, st
 
 static int sum_sizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
+	(void) fpath;
+	(void) ftwbuf;
+
 	if (sb->st_size && (typeflag == FTW_F || typeflag == FTW_D))
 		ent_blocks += sb->st_size;
 
@@ -4126,7 +4140,7 @@ nochange:
 				break;
 
 			mkpath(path, dents[cur].name, newpath);
-			if (lstat(newpath, &sb) == -1 || !show_stats(newpath, dents[cur].name, &sb)) {
+			if (lstat(newpath, &sb) == -1 || !show_stats(newpath, &sb)) {
 				printwarn(&presel);
 				goto nochange;
 			}
