@@ -70,7 +70,8 @@ With this, plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay
 
 Plugins can access:
 - all files in the directory (`nnn` switches to the dir where the plugin is to be run so the dir is `$PWD` for the plugin)
-- the current file under the cursor (the file name is passed as the argument to a plugin)
+- the current file under the cursor (the file name is passed as the first argument to a plugin)
+- the traversed path where plugin is invoked (this is the second argument to the plugin; for all practical purposes this is the same as `$PWD` except paths with symlinks)
 - the current selection (by reading the file `.selection` in config dir, see the plugin `ndiff`)
 
 Each script has a _Description_ section which provides more details on what the script does, if applicable.

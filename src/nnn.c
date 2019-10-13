@@ -3781,10 +3781,10 @@ nochange:
 					xstrlcpy(path, rundir, PATH_MAX);
 					if (runfile[0]) {
 						xstrlcpy(lastname, runfile, NAME_MAX);
-						spawn(newpath, lastname, NULL, path, F_NORMAL);
+						spawn(newpath, lastname, path, path, F_NORMAL);
 						runfile[0] = '\0';
 					} else
-						spawn(newpath, NULL, NULL, path, F_NORMAL);
+						spawn(newpath, NULL, path, path, F_NORMAL);
 					rundir[0] = '\0';
 					cfg.runplugin = 0;
 					setdirwatch();
@@ -4577,9 +4577,9 @@ nochange:
 
 					mkpath(plugindir, tmp, newpath);
 					if (ndents)
-						spawn(newpath, dents[cur].name, NULL, path, F_NORMAL);
+						spawn(newpath, dents[cur].name, path, path, F_NORMAL);
 					else
-						spawn(newpath, NULL, NULL, path, F_NORMAL);
+						spawn(newpath, NULL, path, path, F_NORMAL);
 
 					if (cfg.filtermode)
 						presel = FILTER;
