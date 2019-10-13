@@ -1284,10 +1284,21 @@ static bool cpmv_rename(const char *path, const char *cmd)
 	if ((fd = create_tmp_file()) == -1)
 		return ret;
 
-	if (!selbufpos)
-		goto finish;
+	/* selsafe() returned TRUE for this to be called */
+	if (!selbufpos) {
+		snprintf(buf, sizeof(buf), "cat %s | tr '\\0' '\\n' > %s", g_selpath, g_tmpfpath);
+		spawn("sh", "-c", buf, NULL, F_NORMAL | F_CMD);
 
-	seltofile(fd, &count);
+		while ((i = read(fd, buf, sizeof(buf))) > 0)
+			while(i)
+				count += (buf[--i] == '\n');
+
+		if (!count)
+			goto finish;
+	} else {
+		seltofile(fd, &count);
+	}
+
 	close(fd);
 
 	snprintf(buf, sizeof(buf), formatcmd, g_tmpfpath);
