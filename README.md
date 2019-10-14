@@ -55,7 +55,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - SSHFS mounts (needs sshfs)
   - Cross-directory file selection, all/range selection
   - Batch rename selection or dir entries
-  - Copy, move, delete, archive, link selection
+  - Copy (as), move (as), delete, archive, link selection
   - Create, rename, duplicate files and directories
   - Spawn a shell, run apps, run commands, execute file
   - Lock terminal (needs a locker)
@@ -195,8 +195,8 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
  NAVIGATION
           ↑ k  Up          PgUp ^U  Scroll up
           ↓ j  Down        PgDn ^D  Scroll down
-          ← h  Parent dir  ~ ` @ -  HOME, /, start, last
-        ↵ → l  Open file/dir     .  Toggle show hidden
+          ← h  Parent      ~ ` @ -  HOME, /, start, last
+        ↵ → l  Open              .  Toggle show hidden
          g ^A  First entry    G ^E  Last entry
             b  Pin current dir  ^B  Go to pinned dir
       (Sh)Tab  Cycle context     d  Toggle detail view
@@ -213,7 +213,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
             a  Select all        K  Edit selection
             P  Copy selection    w  Copy selection as
             V  Move selection    W  Move selection as
-            X  Delete selection ^X  Delete entry
+            X  Del selection    ^X  Del entry
             f  Create archive    T  Mount archive
            ^F  Extract archive   F  List archive
             e  Edit in EDITOR    p  Open in PAGER

@@ -908,7 +908,7 @@ static void clearselection(void)
 	writesel(NULL, 0);
 }
 
-static bool seledit(void)
+static bool editselection(void)
 {
 	bool ret = FALSE;
 	int fd, lines = 0;
@@ -1338,11 +1338,8 @@ static bool cpmv_rename(const char *path, const char *cmd)
 	lines = lines_in_file(fd, buf, sizeof(buf));
 	DPRINTF_U(count);
 	DPRINTF_U(lines);
-	if (!lines)
-		goto finish;
-
-	if (2 * count != lines) {
-		DPRINTF_S("cannot delete files");
+	if (!lines || (2 * count != lines)) {
+		DPRINTF_S("num mismatch");
 		goto finish;
 	}
 
@@ -1409,10 +1406,7 @@ static bool batch_rename(const char *path)
 	lines = lines_in_file(fd2, buf, sizeof(buf));
 	DPRINTF_U(count);
 	DPRINTF_U(lines);
-	if (!lines)
-		goto finish;
-
-	if (count != lines) {
+	if (!lines || (count != lines)) {
 		DPRINTF_S("cannot delete files");
 		goto finish;
 	}
@@ -3054,8 +3048,8 @@ static void show_help(const char *path)
 		"1NAVIGATION\n"
 		"a↑ k  Up          PgUp ^U  Scroll up\n"
 		"a↓ j  Down        PgDn ^D  Scroll down\n"
-		"a← h  Parent dir  ~ ` @ -  HOME, /, start, last\n"
-	      "8↵ → l  Open file/dir     .  Toggle show hidden\n"
+		"a← h  Parent      ~ ` @ -  HOME, /, start, last\n"
+	      "8↵ → l  Open              .  Toggle show hidden\n"
 	       "9g ^A  First entry    G ^E  Last entry\n"
 		  "cb  Pin current dir  ^B  Go to pinned dir\n"
 	    "6(Sh)Tab  Cycle context     d  Toggle detail view\n"
@@ -3070,9 +3064,9 @@ static void show_help(const char *path)
 	       "9⎵ ^J  Select entry      r  Batch rename\n"
 	       "9m ^K  Sel range, clear  M  List selection\n"
 	          "ca  Select all        K  Edit selection\n"
-		  "cP Copy selection     w  Copy selection as\n"
-		  "cV Move selection     W  Move selection as\n"
-		  "cX Delete selection  ^X  Delete entry\n"
+		  "cP  Copy selection    w  Copy selection as\n"
+		  "cV  Move selection    W  Move selection as\n"
+		  "cX  Del selection    ^X  Del entry\n"
 		  "cf  Create archive    T  Mount archive\n"
 		 "b^F  Extract archive   F  List archive\n"
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
@@ -4389,7 +4383,7 @@ nochange:
 			printwait(messages[NONE_SELECTED], &presel);
 			goto nochange;
 		case SEL_SELEDIT:
-			if (!seledit()){
+			if (!editselection()){
 				printwait(messages[OPERATION_FAILED], &presel);
 				goto nochange;
 			}
