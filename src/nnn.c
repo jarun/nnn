@@ -108,6 +108,7 @@
 #endif
 
 #define _ABSSUB(N, M) (((N) <= (M)) ? ((M) - (N)) : ((N) - (M)))
+#define DOUBLECLICK_INTERVAL_NS 400000000
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -3743,7 +3744,7 @@ nochange:
 				/*Single click just selects, double click also opens */
 				if (((_ABSSUB(mousetimings[0].tv_sec, mousetimings[1].tv_sec) << 30)
 				  + (mousetimings[0].tv_nsec - mousetimings[1].tv_nsec))
-					> 400000000)
+					> DOUBLECLICK_INTERVAL_NS)
 					break;
 				mousetimings[currentmouse].tv_sec = 0;
 			} else {
