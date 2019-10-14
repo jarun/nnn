@@ -381,6 +381,9 @@ static char * const utils[] = {
 #ifdef __linux__
 static char cp[] = "cpg -giRp";
 static char mv[] = "mvg -gi";
+#else
+static char cp[] = "cp -iRp";
+static char mv[] = "mv -i";
 #endif
 
 /* Common strings */
@@ -1235,7 +1238,7 @@ static void cpstr(char *buf)
 #ifdef __linux__
 		 "xargs -0 -a %s -%c {} %s {} .", g_selpath, REPLACE_STR, cp);
 #else
-		 "cat %s | xargs -0 -o -%c {} cp -iRp {} .", g_selpath, REPLACE_STR);
+		 "cat %s | xargs -0 -o -%c {} %s {} .", g_selpath, REPLACE_STR, cp);
 #endif
 }
 
@@ -1245,7 +1248,7 @@ static void mvstr(char *buf)
 #ifdef __linux__
 		 "xargs -0 -a %s -%c {} %s {} .", g_selpath, REPLACE_STR, mv);
 #else
-		 "cat %s | xargs -0 -o -%c {} mv -i {} .", g_selpath, REPLACE_STR);
+		 "cat %s | xargs -0 -o -%c {} %s {} .", g_selpath, REPLACE_STR, mv);
 #endif
 }
 
