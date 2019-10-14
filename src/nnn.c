@@ -3889,8 +3889,7 @@ nochange:
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
 				if (cfg.useeditor &&
 				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE)
-				    && g_buf[0] == 't' && g_buf[1] == 'e' && g_buf[2] == 'x'
-				    && g_buf[3] == g_buf[0] && g_buf[4] == '/') {
+				    && !strncmp(g_buf, "text/", 5)) {
 					spawn(editor, newpath, NULL, path, F_CLI);
 					continue;
 				}
@@ -5168,8 +5167,7 @@ int main(int argc, char *argv[])
 			initpath = "/";
 	} else {
 		arg = argv[optind];
-		if (strlen(arg) > 7 && arg[0] == 'f' && arg[1] == 'i' && arg[2] == 'l'
-		    && arg[3] == 'e' && arg[4] == ':' && arg[5] == '/' && arg[6] == '/')
+		if (strlen(arg) > 7 && !strncmp(arg, "file://", 7))
 			arg = arg + 7;
 		initpath = realpath(arg, NULL);
 		DPRINTF_S(initpath);
