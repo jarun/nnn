@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+
+# Description: Edit file as superuser
+#
+# Shell: POSIX compliant
+# Author: Anna Arad
+
+EDITOR="${EDITOR:-vim}"
+
+is_cmd_exists () {
+    which "$1" > /dev/null 2>&1
+    echo $?
+}
+
+if [ "$(is_cmd_exists sudoedit)" -eq "0" ]; then
+    sudoedit "$1"
+elif [ "$(is_cmd_exists sudo)" -eq "0" ]; then
+    sudo "$EDITOR" "$1"
+elif [ "$(is_cmd_exists doas)" -eq "0" ]; then
+    doas "$EDITOR" "$1"
+fi
