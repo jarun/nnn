@@ -900,6 +900,14 @@ static void endselection(void)
 	}
 }
 
+static void clearselection(void)
+{
+	nselected = 0;
+	selbufpos = 0;
+	cfg.selmode = 0;
+	writesel(NULL, 0);
+}
+
 static bool seledit(void)
 {
 	bool ret = FALSE;
@@ -974,10 +982,7 @@ static bool seledit(void)
 
 emptyedit:
 	resetselind();
-	nselected = 0;
-	selbufpos = 0;
-	cfg.selmode = 0;
-	writesel(NULL, 0);
+	clearselection();
 	return ret;
 }
 
@@ -1283,9 +1288,22 @@ static void xrm(char *path)
 	}
 }
 
+static uint lines_in_file(int fd, char *buf, size_t buflen)
+{
+	ssize_t len;
+	uint count = 0;
+
+	while ((len = read(fd, buf, buflen)) > 0)
+		while (len)
+			count += (buf[--len] == '\n');
+
+	/* For all use cases 0 linecount is considered as error */
+	return ((len < 0) ? 0 : count);
+}
+
 static bool cpmv_rename(const char *path, const char *cmd)
 {
-	int fd, i;
+	int fd;
 	uint count = 0, lines = 0;
 	bool ret = FALSE;
 	const char formatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
@@ -1301,15 +1319,11 @@ static bool cpmv_rename(const char *path, const char *cmd)
 		snprintf(buf, sizeof(buf), "cat %s | tr '\\0' '\\n' > %s", g_selpath, g_tmpfpath);
 		spawn("sh", "-c", buf, NULL, F_NORMAL | F_CMD);
 
-		while ((i = read(fd, buf, sizeof(buf))) > 0)
-			while(i)
-				count += (buf[--i] == '\n');
-
+		count = lines_in_file(fd, buf, sizeof(buf));
 		if (!count)
 			goto finish;
-	} else {
+	} else
 		seltofile(fd, &count);
-	}
 
 	close(fd);
 
@@ -1321,15 +1335,11 @@ static bool cpmv_rename(const char *path, const char *cmd)
 	if ((fd = open(g_tmpfpath, O_RDONLY)) == -1)
 		goto finish;
 
-	while ((i = read(fd, buf, sizeof(buf))) > 0)
-		while (i)
-			lines += (buf[--i] == '\n');
-
-	if (i < 0)
-		goto finish;
-
+	lines = lines_in_file(fd, buf, sizeof(buf));
 	DPRINTF_U(count);
 	DPRINTF_U(lines);
+	if (!lines)
+		goto finish;
 
 	if (2 * count != lines) {
 		DPRINTF_S("cannot delete files");
@@ -1396,15 +1406,11 @@ static bool batch_rename(const char *path)
 	if ((fd2 = open(g_tmpfpath, O_RDONLY)) == -1)
 		goto finish;
 
-	while ((i = read(fd2, buf, sizeof(buf))) > 0)
-		while (i)
-			lines += (buf[--i] == '\n');
-
-	if (i < 0)
-		goto finish;
-
+	lines = lines_in_file(fd2, buf, sizeof(buf));
 	DPRINTF_U(count);
 	DPRINTF_U(lines);
+	if (!lines)
+		goto finish;
 
 	if (count != lines) {
 		DPRINTF_S("cannot delete files");
@@ -4341,10 +4347,7 @@ nochange:
 			/* Clear selection on repeat on same file */
 			if (selstartid == selendid) {
 				resetselind();
-				nselected = 0;
-				selbufpos = 0;
-				cfg.selmode = 0;
-				writesel(NULL, 0);
+				clearselection();
 				break;
 			} // fallthrough
 		case SEL_SELALL:
@@ -4432,11 +4435,8 @@ nochange:
 				spawn("sh", "-c", g_buf, path, F_NORMAL);
 
 			/* Clear selection on move or delete */
-			if (sel == SEL_MV || sel == SEL_MVAS || sel == SEL_RMMUL) {
-				nselected = 0;
-				selbufpos = 0;
-				writesel(NULL, 0);
-			}
+			if (sel == SEL_MV || sel == SEL_MVAS || sel == SEL_RMMUL)
+				clearselection();
 
 			if (ndents)
 				copycurname();
