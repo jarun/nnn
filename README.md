@@ -211,8 +211,9 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
          ⎵ ^J  Select entry      r  Batch rename
          m ^K  Sel range, clear  M  List selection
             a  Select all        K  Edit selection
-            P  Copy selection    X  Delete selection
-            V  Move selection   ^X  Delete entry
+            P  Copy selection    w  Copy selection as
+            V  Move selection    W  Move selection as
+            X  Delete selection ^X  Delete entry
             f  Create archive    T  Mount archive
            ^F  Extract archive   F  List archive
             e  Edit in EDITOR    p  Open in PAGER

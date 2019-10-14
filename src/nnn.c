@@ -390,7 +390,7 @@ static char mv[] = "mvg -gi";
 #define STR_TMPFILE 3
 #define NONE_SELECTED 4
 #define UTIL_MISSING 5
-#define MOUNT_FAILED 6
+#define OPERATION_FAILED 6
 
 static const char * const messages[] = {
 	"no traversal",
@@ -399,7 +399,7 @@ static const char * const messages[] = {
 	"/.nnnXXXXXX",
 	"0 selected",
 	"missing dep",
-	"mount failed",
+	"failed!",
 };
 
 /* Supported configuration environment variables */
@@ -1278,6 +1278,70 @@ static void xrm(char *path)
 		rm_opts[1] = confirm_force();
 		spawn("rm", rm_opts, path, NULL, F_NORMAL);
 	}
+}
+
+static bool cpmv_rename(const char *path, const char *cmd)
+{
+	int fd, i;
+	uint count = 0, lines = 0;
+	bool ret = FALSE;
+	const char formatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
+	const char renamecmd[] =
+		"sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -o -n2 %s";
+	char buf[sizeof(renamecmd) + sizeof(cmd) + (PATH_MAX << 1)];
+
+	if ((fd = create_tmp_file()) == -1)
+		return ret;
+
+	/* selsafe() returned TRUE for this to be called */
+	if (!selbufpos) {
+		snprintf(buf, sizeof(buf), "cat %s | tr '\\0' '\\n' > %s", g_selpath, g_tmpfpath);
+		spawn("sh", "-c", buf, NULL, F_NORMAL | F_CMD);
+
+		while ((i = read(fd, buf, sizeof(buf))) > 0)
+			while(i)
+				count += (buf[--i] == '\n');
+
+		if (!count)
+			goto finish;
+	} else {
+		seltofile(fd, &count);
+	}
+
+	close(fd);
+
+	snprintf(buf, sizeof(buf), formatcmd, g_tmpfpath);
+	spawn("sh", "-c", buf, path, F_NORMAL);
+
+	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
+
+	if ((fd = open(g_tmpfpath, O_RDONLY)) == -1)
+		goto finish;
+
+	while ((i = read(fd, buf, sizeof(buf))) > 0)
+		while (i)
+			lines += (buf[--i] == '\n');
+
+	if (i < 0)
+		goto finish;
+
+	DPRINTF_U(count);
+	DPRINTF_U(lines);
+
+	if (2 * count != lines) {
+		DPRINTF_S("cannot delete files");
+		goto finish;
+	}
+
+	snprintf(buf, sizeof(buf), renamecmd, path, g_tmpfpath, cmd);
+	spawn("sh", "-c", buf, path, F_NORMAL);
+	ret = TRUE;
+
+finish:
+	if (fd >= 0)
+		close(fd);
+
+	return ret;
 }
 
 static bool batch_rename(const char *path)
@@ -2847,7 +2911,7 @@ static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 	DPRINTF_S(name);
 	DPRINTF_S(newpath);
 	if (spawn(cmd, name, newpath, path, F_NORMAL)) {
-		printwait(messages[MOUNT_FAILED], presel);
+		printwait(messages[OPERATION_FAILED], presel);
 		return FALSE;
 	}
 
@@ -2889,7 +2953,7 @@ static bool sshfs_mount(char *newpath, int *presel)
 
 	/* Connect to remote */
 	if (spawn(env, tmp, newpath, NULL, flag)) {
-		printwait(messages[MOUNT_FAILED], presel);
+		printwait(messages[OPERATION_FAILED], presel);
 		return FALSE;
 	}
 
@@ -2939,7 +3003,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	}
 
 	if (spawn(cmd, "-u", newpath, NULL, F_NORMAL)) {
-		printwait("unmount failed", presel);
+		printwait(messages[OPERATION_FAILED], presel);
 		return FALSE;
 	}
 
@@ -2997,8 +3061,9 @@ static void show_help(const char *path)
 	       "9⎵ ^J  Select entry      r  Batch rename\n"
 	       "9m ^K  Sel range, clear  M  List selection\n"
 	          "ca  Select all        K  Edit selection\n"
-		  "cP  Copy selection    X  Delete selection\n"
-		  "cV  Move selection   ^X  Delete entry\n"
+		  "cP Copy selection     w  Copy selection as\n"
+		  "cV Move selection     W  Move selection as\n"
+		  "cX Delete selection  ^X  Delete entry\n"
 		  "cf  Create archive    T  Mount archive\n"
 		 "b^F  Extract archive   F  List archive\n"
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
@@ -4187,7 +4252,7 @@ nochange:
 				endselection();
 
 				if (!batch_rename(path)) {
-					printwait("batch rename failed", &presel);
+					printwait(messages[OPERATION_FAILED], &presel);
 					goto nochange;
 				}
 				break;
@@ -4319,12 +4384,14 @@ nochange:
 			goto nochange;
 		case SEL_SELEDIT:
 			if (!seledit()){
-				printwait("edit failed!", &presel);
+				printwait(messages[OPERATION_FAILED], &presel);
 				goto nochange;
 			}
 			break;
 		case SEL_CP:
 		case SEL_MV:
+		case SEL_CPAS:
+		case SEL_MVAS:
 		case SEL_RMMUL:
 		{
 			endselection();
@@ -4341,15 +4408,28 @@ nochange:
 			case SEL_MV:
 				mvstr(g_buf);
 				break;
+			case SEL_CPAS:
+				if (!cpmv_rename(path, cp)) {
+					printwait(messages[OPERATION_FAILED], &presel);
+					goto nochange;
+				}
+				break;
+			case SEL_MVAS:
+				if (!cpmv_rename(path, mv)) {
+					printwait(messages[OPERATION_FAILED], &presel);
+					goto nochange;
+				}
+				break;
 			default: /* SEL_RMMUL */
 				rmmulstr(g_buf);
 				break;
 			}
 
-			spawn("sh", "-c", g_buf, path, F_NORMAL);
+			if (sel != SEL_CPAS && sel != SEL_MVAS)
+				spawn("sh", "-c", g_buf, path, F_NORMAL);
 
 			/* Clear selection on move or delete */
-			if (sel == SEL_MV || sel == SEL_RMMUL) {
+			if (sel == SEL_MV || sel == SEL_MVAS || sel == SEL_RMMUL) {
 				nselected = 0;
 				selbufpos = 0;
 				writesel(NULL, 0);
