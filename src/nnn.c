@@ -2150,7 +2150,7 @@ static char *getreadline(char *prompt, char *path, char *curpath, int *presel)
  * Updates out with "dir/name or "/name"
  * Returns the number of bytes copied including the terminating NULL byte
  */
-static size_t mkpath(char *dir, char *name, char *out)
+static size_t mkpath(const char *dir, const char *name, char *out)
 {
 	size_t len;
 
@@ -2634,27 +2634,46 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 	*curcfg = cfg;
 }
 
-static void session_manager(int op)
+static void save_session()
 {
-    char *session_name = xreadline("", "Session name: ");
-    char session_path[PATH_MAX + 1];
-    mkpath(sessiondir, session_name, session_path);
+	char *session_name = xreadline("", "session name: ");
+	char session_path[PATH_MAX + 1];
+	mkpath(sessiondir, session_name, session_path);
 
-    FILE *fsession = fopen(session_path, (op == SEL_SAVE_SESSION) ? "wb" : "rb");
-    if (!fsession) {
-        printmsg("Failed to save session");
-        return;
-    }
+	FILE *fsession = fopen(session_path, "wb");
+	if (!fsession) {
+		printmsg("failed to open session file");
+		return;
+	}
 
-    if (op == SEL_SAVE_SESSION) {
-        fwrite(&cfg, sizeof(cfg), 1, fsession);
-        fwrite(g_ctx, sizeof(context), CTX_MAX, fsession);
-    } else { // SEL_LOAD_SESSION
-        fread(&cfg, sizeof(cfg), 1, fsession);
-        fread(g_ctx, sizeof(context), CTX_MAX, fsession);
-    }
+	if (fwrite(&cfg, sizeof(cfg), 1, fsession) != 1
+		|| fwrite(g_ctx, sizeof(context), CTX_MAX, fsession) != CTX_MAX) {
+		printmsg("failed to write session data");
+	}
 
-    fclose(fsession);
+	fclose(fsession);
+}
+
+static int load_session(const char *session_name) {
+	char session_path[PATH_MAX + 1];
+	mkpath(sessiondir, session_name, session_path);
+	int status = _SUCCESS;
+
+	FILE *fsession = fopen(session_path, "rb");
+	if (!fsession) {
+		printmsg("failed to open session file");
+		return _FAILURE;
+	}
+
+	if (fread(&cfg, sizeof(cfg), 1, fsession) != 1
+		|| fread(g_ctx, sizeof(context), CTX_MAX, fsession) != CTX_MAX) {
+		printmsg("failed to read session data");
+		status = _FAILURE;
+	}
+
+	fclose(fsession);
+
+	return status;
 }
 
 /*
@@ -3644,7 +3663,7 @@ static void redraw(char *path)
 		printmsg("0/0");
 }
 
-static void browse(char *ipath)
+static void browse(char *ipath, const char *session)
 {
 	char newpath[PATH_MAX] __attribute__ ((aligned));
 	char mark[PATH_MAX] __attribute__ ((aligned));
@@ -3664,14 +3683,16 @@ static void browse(char *ipath)
 	atexit(dentfree);
 
 	/* setup first context */
-	xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
-	path = g_ctx[0].c_path;
-	g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = newpath[0] = mark[0] = '\0';
-	rundir[0] = runfile[0] = '\0';
-	lastdir = g_ctx[0].c_last; /* last visited directory */
-	lastname = g_ctx[0].c_name; /* last visited filename */
-	g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
-	g_ctx[0].c_cfg = cfg; /* current configuration */
+	if (!session || load_session(session) == _FAILURE) {
+		xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
+		path = g_ctx[0].c_path;
+		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = newpath[0] = mark[0] = '\0';
+		rundir[0] = runfile[0] = '\0';
+		lastdir = g_ctx[0].c_last; /* last visited directory */
+		lastname = g_ctx[0].c_name; /* last visited filename */
+		g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
+		g_ctx[0].c_cfg = cfg; /* current configuration */
+	}
 
 	cfg.filtermode ?  (presel = FILTER) : (presel = 0);
 
@@ -4903,8 +4924,7 @@ nochange:
 			}
 			return;
         case SEL_SAVE_SESSION:
-        case SEL_LOAD_SESSION:
-            session_manager(sel);
+            save_session();
             break;
 		default:
 			if (xlines != LINES || xcols != COLS) {
@@ -5112,12 +5132,13 @@ int main(int argc, char *argv[])
 {
 	mmask_t mask;
 	char *arg = NULL;
+    char *session = NULL;
 	int opt;
 #ifdef __linux__
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKiab:cdfnop:rstvh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKiab:cde:fnop:rstvh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5138,6 +5159,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'c':
 			cfg.cliopener = 1;
+			break;
+		case 'e':
+            session = optarg;
 			break;
 		case 'f':
 			cfg.filtercmd = 1;
@@ -5390,7 +5414,7 @@ int main(int argc, char *argv[])
 	if (!initcurses(&mask))
 		return _FAILURE;
 
-	browse(initpath);
+	browse(initpath, session);
 	mousemask(mask, NULL);
 	exitcurses();
 
