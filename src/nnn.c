@@ -3827,7 +3827,15 @@ nochange:
 				r = curscroll + (event.y - 2);
 				move_cursor(r, 1);
 				currentmouse ^= 1;
-				clock_gettime(CLOCK_MONOTONIC_RAW, &mousetimings[currentmouse]);
+				clock_gettime(
+#if defined(CLOCK_MONOTONIC_RAW)
+				    CLOCK_MONOTONIC_RAW
+#elif defined(CLOCK_MONOTONIC)
+				    CLOCK_MONOTONIC,
+#else
+				    CLOCK_REALTIME,
+#endif
+				    &mousetimings[currentmouse]);
 
 				/*Single click just selects, double click also opens */
 				if (((_ABSSUB(mousetimings[0].tv_sec, mousetimings[1].tv_sec) << 30)
