@@ -2708,14 +2708,14 @@ static inline bool getutil(char *util)
 	return spawn("which", util, NULL, NULL, F_NORMAL | F_NOTRACE) == 0;
 }
 
-static void pipetofd(char *cmd, int fd)
+static void pipetof(char *cmd, FILE *fout)
 {
-	FILE *fp = popen(cmd, "r");
+	FILE *fin = popen(cmd, "r");
 
-	if (fp) {
-		while (fgets(g_buf, CMD_LEN_MAX - 1, fp))
-			dprintf(fd, "%s", g_buf);
-		pclose(fp);
+	if (fin) {
+		while (fgets(g_buf, CMD_LEN_MAX - 1, fin))
+			fprintf(fout, "%s", g_buf);
+		pclose(fin);
 	}
 }
 
@@ -2725,6 +2725,7 @@ static void pipetofd(char *cmd, int fd)
 static bool show_stats(const char *fpath, const struct stat *sb)
 {
 	int fd;
+	FILE *fp;
 	char *p, *begin = g_buf;
 	size_t r;
 
@@ -2738,27 +2739,33 @@ static bool show_stats(const char *fpath, const struct stat *sb)
 	g_buf[r - 1] = '\0';
 	DPRINTF_S(g_buf);
 
-	pipetofd(g_buf, fd);
+	if (!(fp = fdopen(fd, "w"))) {
+		close(fd);
+		return FALSE;
+	}
+
+	pipetof(g_buf, fp);
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
 		p = get_output(g_buf, CMD_LEN_MAX, "file", "-b", fpath, FALSE);
 		if (p) {
-			dprintf(fd, "\n\n ");
+			fprintf(fp, "\n\n ");
 			while (*p) {
 				if (*p == ',') {
 					*p = '\0';
-					dprintf(fd, " %s\n", begin);
+					fprintf(fp, " %s\n", begin);
 					begin = p + 1;
 				}
 
 				++p;
 			}
-			dprintf(fd, " %s", begin);
+			fprintf(fp, " %s", begin);
 		}
 	}
 
-	dprintf(fd, "\n\n");
+	fprintf(fp, "\n\n");
+	fclose(fp);
 	close(fd);
 
 	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
@@ -3018,12 +3025,12 @@ static void lock_terminal(void)
 	spawn(tmp, NULL, NULL, NULL, F_NORMAL);
 }
 
-static void printkv(kv *kvarr, int fd, uchar max)
+static void printkv(kv *kvarr, FILE *fp, uchar max)
 {
 	uchar i = 0;
 
 	for (; i < max && kvarr[i].key; ++i)
-		dprintf(fd, " %c: %s\n", (char)kvarr[i].key, kvarr[i].val);
+		fprintf(fp, " %c: %s\n", (char)kvarr[i].key, kvarr[i].val);
 }
 
 /*
@@ -3037,6 +3044,7 @@ static void printkv(kv *kvarr, int fd, uchar max)
 static void show_help(const char *path)
 {
 	int i, fd;
+	FILE *fp;
 	const char *start, *end;
 	const char helpstr[] = {
 		"0\n"
@@ -3077,14 +3085,18 @@ static void show_help(const char *path)
 	fd = create_tmp_file();
 	if (fd == -1)
 		return;
+	if (!(fp = fdopen(fd, "w"))) {
+		close(fd);
+		return;
+	}
 
 	if (getutil("fortune"))
-		pipetofd("fortune -s", fd);
+		pipetof("fortune -s", fp);
 
 	start = end = helpstr;
 	while (*end) {
 		if (*end == '\n') {
-			dprintf(fd, "%*c%.*s",
+			fprintf(fp, "%*c%.*s",
 				xchartohex(*start), ' ', (int)(end - start), start + 1);
 			start = end + 1;
 		}
@@ -3092,31 +3104,32 @@ static void show_help(const char *path)
 		++end;
 	}
 
-	dprintf(fd, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
-	dprintf(fd, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
+	fprintf(fp, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
+	fprintf(fp, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
 
 	if (bookmark[0].val) {
-		dprintf(fd, "BOOKMARKS\n");
-		printkv(bookmark, fd, BM_MAX);
-		dprintf(fd, "\n");
+		fprintf(fp, "BOOKMARKS\n");
+		printkv(bookmark, fp, BM_MAX);
+		fprintf(fp, "\n");
 	}
 
 	if (plug[0].val) {
-		dprintf(fd, "PLUGIN KEYS\n");
-		printkv(plug, fd, PLUGIN_MAX);
-		dprintf(fd, "\n");
+		fprintf(fp, "PLUGIN KEYS\n");
+		printkv(plug, fp, PLUGIN_MAX);
+		fprintf(fp, "\n");
 	}
 
 	for (i = NNN_OPENER; i <= NNN_TRASH; ++i) {
 		start = getenv(env_cfg[i]);
 		if (start)
-			dprintf(fd, "%s: %s\n", env_cfg[i], start);
+			fprintf(fp, "%s: %s\n", env_cfg[i], start);
 	}
 
 	if (g_selpath)
-		dprintf(fd, "SELECTION FILE: %s\n", g_selpath);
+		fprintf(fp, "SELECTION FILE: %s\n", g_selpath);
 
-	dprintf(fd, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
+	fprintf(fp, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
+	fclose(fp);
 	close(fd);
 
 	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
