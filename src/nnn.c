@@ -86,6 +86,9 @@
 #include <signal.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#ifdef __sun
+#include <alloca.h>
+#endif
 #include <string.h>
 #include <strings.h>
 #include <time.h>
