@@ -3829,7 +3829,7 @@ nochange:
 				currentmouse ^= 1;
 				clock_gettime(
 #if defined(CLOCK_MONOTONIC_RAW)
-				    CLOCK_MONOTONIC_RAW
+				    CLOCK_MONOTONIC_RAW,
 #elif defined(CLOCK_MONOTONIC)
 				    CLOCK_MONOTONIC,
 #else
