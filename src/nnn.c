@@ -3203,7 +3203,11 @@ static int dentfill(char *path, struct entry **dents)
 	if (!dp)
 		goto exit;
 
+#ifdef __sun
+	if (cfg.blkorder) { /* no d_type */
+#else
 	if (cfg.blkorder || dp->d_type == DT_UNKNOWN) {
+#endif
 		/*
 		 * Optimization added for filesystems which support dirent.d_type
 		 * see readdir(3)
@@ -3318,7 +3322,12 @@ static int dentfill(char *path, struct entry **dents)
 
 		/* Copy other fields */
 		dentp->t = cfg.mtime ? sb.st_mtime : sb.st_atime;
-		if (dp->d_type == DT_LNK && !flags) { /* Do not add sizes for links */
+#ifdef __sun
+		if (0) { /* no d_type */
+#else
+		if (!flags && dp->d_type == DT_LNK) { /* Do not add sizes for links */
+#endif
+			 /* Do not add sizes for links */
 			dentp->mode = (sb.st_mode & ~S_IFMT) | S_IFLNK;
 			dentp->size = 0;
 		} else {
@@ -3366,8 +3375,11 @@ static int dentfill(char *path, struct entry **dents)
 
 			if (S_ISDIR(sb.st_mode))
 				dentp->flags |= DIR_OR_LINK_TO_DIR;
-		} else if (dp->d_type == DT_DIR || (dp->d_type == DT_LNK && S_ISDIR(sb.st_mode)))
+#ifndef __sun /* no d_type */
+		} else if (dp->d_type == DT_DIR || (dp->d_type == DT_LNK && S_ISDIR(sb.st_mode))) {
 			dentp->flags |= DIR_OR_LINK_TO_DIR;
+#endif
+		}
 
 		++n;
 	} while ((dp = readdir(dirp)));
