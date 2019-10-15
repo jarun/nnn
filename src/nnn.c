@@ -1239,23 +1239,12 @@ static bool xdiraccess(const char *path)
 	return TRUE;
 }
 
-static void cpstr(char *buf)
+static void opstr(char *buf, char *op)
 {
-	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-		 "xargs -0 -a %s -%c {} %s {} .", g_selpath, REPLACE_STR, cp);
+	snprintf(buf, CMD_LEN_MAX, "xargs -0 -a %s -%c {} %s {} .", g_selpath, REPLACE_STR, op);
 #else
-		 "cat %s | xargs -0 -o -%c {} %s {} .", g_selpath, REPLACE_STR, cp);
-#endif
-}
-
-static void mvstr(char *buf)
-{
-	snprintf(buf, CMD_LEN_MAX,
-#ifdef __linux__
-		 "xargs -0 -a %s -%c {} %s {} .", g_selpath, REPLACE_STR, mv);
-#else
-		 "cat %s | xargs -0 -o -%c {} %s {} .", g_selpath, REPLACE_STR, mv);
+	snprintf(buf, CMD_LEN_MAX, "cat %s | xargs -0 -o -%c {} %s {} .", g_selpath, REPLACE_STR, op);
 #endif
 }
 
@@ -4404,10 +4393,10 @@ nochange:
 
 			switch (sel) {
 			case SEL_CP:
-				cpstr(g_buf);
+				opstr(g_buf, cp);
 				break;
 			case SEL_MV:
-				mvstr(g_buf);
+				opstr(g_buf, mv);
 				break;
 			case SEL_CPAS:
 				if (!cpmv_rename(path, cp)) {
