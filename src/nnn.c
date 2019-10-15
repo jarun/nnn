@@ -321,8 +321,9 @@ static bool interrupted = FALSE;
 static sighandler_t oldsighup; /* old value of hangup signal */
 static sighandler_t oldsigtstp; /* old value of SIGTSTP */
 #else
-static sig_t oldsighup;
-static sig_t oldsigtstp;
+/* note: no sig_t on Solaris-derivs */
+static void (*oldsighup)(int);
+static void (*oldsigtstp)(int);
 #endif
 
 /* For use in functions which are isolated and don't return the buffer */
