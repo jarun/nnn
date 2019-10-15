@@ -4596,7 +4596,11 @@ nochange:
 			}
 
 			/* Open the descriptor to currently open directory */
+#ifdef O_DIRECTORY
 			fd = open(path, O_RDONLY | O_DIRECTORY);
+#else
+			fd = open(path, O_RDONLY);
+#endif
 			if (fd == -1) {
 				printwarn(&presel);
 				goto nochange;
