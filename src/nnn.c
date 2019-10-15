@@ -305,6 +305,7 @@ static char *initpath;
 static char *cfgdir;
 static char *g_selpath;
 static char *plugindir;
+static char *sessiondir;
 static char *pnamebuf, *pselbuf;
 static struct entry *dents;
 static blkcnt_t ent_blocks;
@@ -2633,6 +2634,42 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 	*curcfg = cfg;
 }
 
+static void save_session(void)
+{
+    char *session_name = xreadline("", "Session name: ");
+    char session_path[PATH_MAX + 1];
+    mkpath(sessiondir, session_name, session_path);
+
+    FILE *fsession = fopen(session_path, "wb");
+    if (!fsession) {
+        printmsg("Failed to save session");
+        return;
+    }
+
+    fwrite(&cfg, sizeof(cfg), 1, fsession);
+    fwrite(g_ctx, sizeof(context), CTX_MAX, fsession);
+
+    fclose(fsession);
+}
+
+static void load_session(void)
+{
+    char *session_name = xreadline("", "Session name: ");
+    char session_path[PATH_MAX + 1];
+    mkpath(sessiondir, session_name, session_path);
+
+    FILE *fsession = fopen(session_path, "rb");
+    if (!fsession) {
+        printmsg("Failed to load session");
+        return;
+    }
+
+    fread(&cfg, sizeof(cfg), 1, fsession);
+    fread(g_ctx, sizeof(context), CTX_MAX, fsession);
+
+    fclose(fsession);
+}
+
 /*
  * Gets only a single line (that's what we need
  * for now) or shows full command output in pager.
@@ -4878,6 +4915,12 @@ nochange:
 				}
 			}
 			return;
+        case SEL_SAVE_SESSION:
+            save_session();
+            break;
+        case SEL_LOAD_SESSION:
+            load_session();
+            break;
 		default:
 			if (xlines != LINES || xcols != COLS) {
 				idle = 0;
@@ -4966,16 +5009,17 @@ static bool setup_config(void)
 			return FALSE;
 		}
 
-		len = strlen(xdgcfg) + 1 + 12; /* add length of "/nnn/plugins" */
+		len = strlen(xdgcfg) + 1 + 13; /* add length of "/nnn/sessions" */
 		xdg = TRUE;
 	}
 
 	if (!xdg)
-		len = strlen(home) + 1 + 20; /* add length of "/.config/nnn/plugins" */
+		len = strlen(home) + 1 + 21; /* add length of "/.config/nnn/sessions" */
 
 	cfgdir = (char *)malloc(len);
 	plugindir = (char *)malloc(len);
-	if (!cfgdir || !plugindir) {
+	sessiondir = (char *)malloc(len);
+	if (!cfgdir || !plugindir || !sessiondir) {
 		xerror();
 		return FALSE;
 	}
@@ -5011,6 +5055,18 @@ static bool setup_config(void)
 
 	xstrlcpy(plugindir, cfgdir, len);
 	DPRINTF_S(plugindir);
+
+	if (!create_dir(cfgdir)) {
+		xerror();
+		return FALSE;
+	}
+
+	/* Create ~/.config/nnn/sessions */
+	xstrlcpy(cfgdir + r + 4 - 1, "/sessions", 10);
+	DPRINTF_S(cfgdir);
+
+	xstrlcpy(sessiondir, cfgdir, len);
+	DPRINTF_S(sessiondir);
 
 	if (!create_dir(cfgdir)) {
 		xerror();
@@ -5056,6 +5112,7 @@ static void cleanup(void)
 {
 	free(g_selpath);
 	free(plugindir);
+    free(sessiondir);
 	free(cfgdir);
 	free(initpath);
 	free(bmstr);
