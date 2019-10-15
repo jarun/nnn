@@ -3686,13 +3686,18 @@ static void browse(char *ipath, const char *session)
 	if (!session || load_session(session) == _FAILURE) {
 		xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
 		path = g_ctx[0].c_path;
-		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = newpath[0] = mark[0] = '\0';
-		rundir[0] = runfile[0] = '\0';
+		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = '\0';
 		lastdir = g_ctx[0].c_last; /* last visited directory */
 		lastname = g_ctx[0].c_name; /* last visited filename */
 		g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
 		g_ctx[0].c_cfg = cfg; /* current configuration */
+	} else {
+		path = g_ctx[cfg.curctx].c_path;
+		lastdir = g_ctx[cfg.curctx].c_last;
+		lastname = g_ctx[cfg.curctx].c_name;
 	}
+
+	newpath[0] = mark[0] = rundir[0] = runfile[0] = '\0';
 
 	cfg.filtermode ?  (presel = FILTER) : (presel = 0);
 
