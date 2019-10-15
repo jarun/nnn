@@ -342,10 +342,10 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 #endif
 
 /* Options to identify file mime */
-#ifdef __APPLE__
-#define FILE_OPTS "-bIL"
-#else
-#define FILE_OPTS "-biL"
+#if defined(__APPLE__)
+#define FILE_MIME_OPTS "-bIL"
+#elif !defined(__sun) /* no mime option for 'file' */
+#define FILE_MIME_OPTS "-biL"
 #endif
 
 /* Macros for utilities */
@@ -3916,8 +3916,14 @@ nochange:
 
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
 				if (cfg.useeditor &&
-				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE)
+#ifdef FILE_MIME_OPTS
+				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
 				    && !strncmp(g_buf, "text/", 5)) {
+#else
+				    /* no mime option; guess from description instead */
+				    get_output(g_buf, CMD_LEN_MAX, "file", "-b", newpath, FALSE)
+				    && strstr(g_buf, "text")) {
+#endif
 					spawn(editor, newpath, NULL, path, F_CLI);
 					continue;
 				}
