@@ -2634,38 +2634,25 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 	*curcfg = cfg;
 }
 
-static void save_session(void)
+static void session_manager(int op)
 {
     char *session_name = xreadline("", "Session name: ");
     char session_path[PATH_MAX + 1];
     mkpath(sessiondir, session_name, session_path);
 
-    FILE *fsession = fopen(session_path, "wb");
+    FILE *fsession = fopen(session_path, (op == SEL_SAVE_SESSION) ? "wb" : "rb");
     if (!fsession) {
         printmsg("Failed to save session");
         return;
     }
 
-    fwrite(&cfg, sizeof(cfg), 1, fsession);
-    fwrite(g_ctx, sizeof(context), CTX_MAX, fsession);
-
-    fclose(fsession);
-}
-
-static void load_session(void)
-{
-    char *session_name = xreadline("", "Session name: ");
-    char session_path[PATH_MAX + 1];
-    mkpath(sessiondir, session_name, session_path);
-
-    FILE *fsession = fopen(session_path, "rb");
-    if (!fsession) {
-        printmsg("Failed to load session");
-        return;
+    if (op == SEL_SAVE_SESSION) {
+        fwrite(&cfg, sizeof(cfg), 1, fsession);
+        fwrite(g_ctx, sizeof(context), CTX_MAX, fsession);
+    } else { // SEL_LOAD_SESSION
+        fread(&cfg, sizeof(cfg), 1, fsession);
+        fread(g_ctx, sizeof(context), CTX_MAX, fsession);
     }
-
-    fread(&cfg, sizeof(cfg), 1, fsession);
-    fread(g_ctx, sizeof(context), CTX_MAX, fsession);
 
     fclose(fsession);
 }
@@ -4916,10 +4903,8 @@ nochange:
 			}
 			return;
         case SEL_SAVE_SESSION:
-            save_session();
-            break;
         case SEL_LOAD_SESSION:
-            load_session();
+            session_manager(sel);
             break;
 		default:
 			if (xlines != LINES || xcols != COLS) {
