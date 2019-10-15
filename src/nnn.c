@@ -154,7 +154,7 @@
 #define F_NOWAIT  0x02  /* don't wait for child process (e.g. file manager) */
 #define F_NOTRACE 0x04  /* suppress stdout and strerr (no traces) */
 #define F_NORMAL  0x08  /* spawn child process in non-curses regular CLI mode */
-#define F_CMD     0x10  /* run command - show results before exit (must have F_NORMAL) */
+#define F_CONFIRM 0x10  /* run command - show results before exit (must have F_NORMAL) */
 #define F_CLI     (F_NORMAL | F_MULTI)
 #define F_SILENT  (F_CLI | F_NOTRACE)
 
@@ -353,6 +353,7 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define LOCKER 5
 #define CMATRIX 6
 #define NLAUNCH 7
+#define SH_EXEC 8
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -376,6 +377,7 @@ static char * const utils[] = {
 #endif
 	"cmatrix",
 	"nlaunch",
+	"sh -c",
 };
 
 #ifdef __linux__
@@ -857,7 +859,7 @@ static bool listselfile(void)
 		return FALSE;
 
 	snprintf(g_buf, CMD_LEN_MAX, "cat %s | tr \'\\0\' \'\\n\'", g_selpath);
-	spawn("sh", "-c", g_buf, NULL, F_NORMAL | F_CMD);
+	spawn(utils[SH_EXEC], g_buf, NULL, NULL, F_CLI | F_CONFIRM);
 
 	return TRUE;
 }
@@ -1184,7 +1186,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 
 		DPRINTF_D(pid);
 		if (flag & F_NORMAL) {
-			if (flag & F_CMD) {
+			if (flag & F_CONFIRM) {
 				printf("\nPress Enter to continue");
 				getchar();
 			}
@@ -1201,7 +1203,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 static void prompt_run(char *cmd, const char *cur, const char *path)
 {
 	setenv(envs[NCUR], cur, 1);
-	spawn(shell, "-c", cmd, path, F_CLI | F_CMD);
+	spawn(shell, "-c", cmd, path, F_CLI | F_CONFIRM);
 }
 
 /* Get program name from env var, else return fallback program */
@@ -1317,7 +1319,7 @@ static bool cpmv_rename(const char *path, const char *cmd)
 	/* selsafe() returned TRUE for this to be called */
 	if (!selbufpos) {
 		snprintf(buf, sizeof(buf), "cat %s | tr '\\0' '\\n' > %s", g_selpath, g_tmpfpath);
-		spawn("sh", "-c", buf, NULL, F_NORMAL | F_CMD);
+		spawn(utils[SH_EXEC], buf, NULL, NULL, F_CLI);
 
 		count = lines_in_file(fd, buf, sizeof(buf));
 		if (!count)
@@ -1328,7 +1330,7 @@ static bool cpmv_rename(const char *path, const char *cmd)
 	close(fd);
 
 	snprintf(buf, sizeof(buf), formatcmd, g_tmpfpath);
-	spawn("sh", "-c", buf, path, F_NORMAL);
+	spawn(utils[SH_EXEC], buf, NULL, path, F_CLI);
 
 	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
 
@@ -1344,7 +1346,7 @@ static bool cpmv_rename(const char *path, const char *cmd)
 	}
 
 	snprintf(buf, sizeof(buf), renamecmd, path, g_tmpfpath, cmd);
-	spawn("sh", "-c", buf, path, F_NORMAL);
+	spawn(utils[SH_EXEC], buf, NULL, path, F_CLI);
 	ret = TRUE;
 
 finish:
@@ -1412,7 +1414,7 @@ static bool batch_rename(const char *path)
 	}
 
 	snprintf(buf, sizeof(buf), renamecmd, foriginal, g_tmpfpath);
-	spawn("sh", "-c", buf, path, F_NORMAL);
+	spawn(utils[SH_EXEC], buf, NULL, path, F_CLI);
 	ret = TRUE;
 
 finish:
@@ -1450,7 +1452,7 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 		"cat '%s' | tr '\\0' '\n' | sed -e 's|^%s/||' | tr '\n' '\\0' | xargs -0 %s %s",
 		g_selpath, curpath, cmd, archive);
 #endif
-	spawn("sh", "-c", buf, curpath, F_NORMAL);
+	spawn(utils[SH_EXEC], buf, NULL, curpath, F_CLI);
 	free(buf);
 }
 
@@ -4425,7 +4427,7 @@ nochange:
 			}
 
 			if (sel != SEL_CPAS && sel != SEL_MVAS)
-				spawn("sh", "-c", g_buf, path, F_NORMAL);
+				spawn(utils[SH_EXEC], g_buf, NULL, path, F_CLI);
 
 			/* Clear selection on move or delete */
 			if (sel == SEL_MV || sel == SEL_MVAS || sel == SEL_RMMUL)
