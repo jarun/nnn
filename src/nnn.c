@@ -2634,42 +2634,118 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 	*curcfg = cfg;
 }
 
-static void save_session()
+static void save_session(const char *mark, int *presel)
 {
 	char *session_name = xreadline("", "session name: ");
 	char session_path[PATH_MAX + 1];
+	int status = _FAILURE;
+	int i = 0;
+	size_t len;
+
 	mkpath(sessiondir, session_name, session_path);
 
 	FILE *fsession = fopen(session_path, "wb");
 	if (!fsession) {
-		printmsg("failed to open session file");
+		printwait("failed to open session file", presel);
 		return;
 	}
 
-	if (fwrite(&cfg, sizeof(cfg), 1, fsession) != 1
-		|| fwrite(g_ctx, sizeof(context), CTX_MAX, fsession) != CTX_MAX) {
-		printmsg("failed to write session data");
+	if (fwrite(&cfg, sizeof(cfg), 1, fsession) != 1) goto END;
+
+	for (; i < CTX_MAX; ++i) {
+		len = strnlen(g_ctx[i].c_path, PATH_MAX);
+		if (fwrite(&len, sizeof(size_t), 1, fsession) != 1) goto END;
+		if (len > 0)
+			if (fwrite(g_ctx[i].c_path, len, 1, fsession) != 1) goto END;
+
+		len = strnlen(g_ctx[i].c_name, NAME_MAX);
+		if (fwrite(&len, sizeof(size_t), 1, fsession) != 1) goto END;
+		if (len > 0)
+			if (fwrite(g_ctx[i].c_name, len, 1, fsession) != 1) goto END;
+
+		len = strnlen(g_ctx[i].c_last, PATH_MAX);
+		if (fwrite(&len, sizeof(size_t), 1, fsession) != 1) goto END;
+		if (len > 0)
+			if (fwrite(g_ctx[i].c_last, len, 1, fsession) != 1) goto END;
+
+		len = strnlen(g_ctx[i].c_fltr, REGEX_MAX);
+		if (fwrite(&len, sizeof(size_t), 1, fsession) != 1) goto END;
+		if (len > 0)
+			if (fwrite(g_ctx[i].c_fltr, len, 1, fsession) != 1) goto END;
+
+		if (fwrite(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1) goto END;
+		if (fwrite(&g_ctx[i].color, sizeof(uint), 1, fsession) != 1) goto END;
 	}
+
+	len = strnlen(mark, PATH_MAX);
+	if (fwrite(&len, sizeof(size_t), 1, fsession) != 1) goto END;
+	if (len > 0)
+		if (fwrite(mark, len, 1, fsession) != 1) goto END;
+
+	status = _SUCCESS;
+
+END:
+	if (status == _FAILURE)
+		printwait("failed to write session data", presel);
 
 	fclose(fsession);
 }
 
-static int load_session(const char *session_name) {
+static int load_session(const char *session_name, char *mark, int *presel) {
 	char session_path[PATH_MAX + 1];
 	mkpath(sessiondir, session_name, session_path);
-	int status = _SUCCESS;
+	int status = _FAILURE;
+	int i = 0;
+	size_t len;
 
 	FILE *fsession = fopen(session_path, "rb");
 	if (!fsession) {
-		printmsg("failed to open session file");
+		printwait("failed to open session file", presel);
 		return _FAILURE;
 	}
 
-	if (fread(&cfg, sizeof(cfg), 1, fsession) != 1
-		|| fread(g_ctx, sizeof(context), CTX_MAX, fsession) != CTX_MAX) {
-		printmsg("failed to read session data");
-		status = _FAILURE;
+	if (fread(&cfg, sizeof(cfg), 1, fsession) != 1) goto END;
+
+	for (; i < CTX_MAX; ++i) {
+		if (fread(&len, sizeof(size_t), 1, fsession) != 1) goto END;
+		if (len > 0) {
+			if (fread(g_ctx[i].c_path, len, 1, fsession) != 1) goto END;
+			g_ctx[i].c_path[len] = '\0';
+		}
+
+		if (fread(&len, sizeof(size_t), 1, fsession) != 1) goto END;
+		if (len > 0) {
+			if (fread(g_ctx[i].c_name, len, 1, fsession) != 1) goto END;
+			g_ctx[i].c_name[len] = '\0';
+		}
+
+		if (fread(&len, sizeof(size_t), 1, fsession) != 1) goto END;
+		if (len > 0) {
+			if (fread(g_ctx[i].c_last, len, 1, fsession) != 1) goto END;
+			g_ctx[i].c_last[len] = '\0';
+		}
+
+		if (fread(&len, sizeof(size_t), 1, fsession) != 1) goto END;
+		if (len > 0) {
+			if (fread(g_ctx[i].c_fltr, len, 1, fsession) != 1) goto END;
+			g_ctx[i].c_fltr[len] = '\0';
+		}
+
+		if (fread(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1) goto END;
+		if (fread(&g_ctx[i].color, sizeof(uint), 1, fsession) != 1) goto END;
 	}
+
+	if (fread(&len, sizeof(size_t), 1, fsession) != 1) goto END;
+	if (len > 0) {
+		if (len > 0 && fread(mark, len, 1, fsession) != 1) goto END;
+		mark[len] = '\0';
+	}
+
+	status = _SUCCESS;
+
+END:
+	if (status == _FAILURE)
+		printwait("failed to read session data", presel);
 
 	fclose(fsession);
 
@@ -3670,7 +3746,7 @@ static void browse(char *ipath, const char *session)
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	uchar opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
-	int r = -1, fd, presel, selstartid = 0, selendid = 0, onscreen;
+	int r = -1, fd, presel = 0, selstartid = 0, selendid = 0, onscreen;
 	ino_t inode = 0;
 	enum action sel;
 	bool dir_changed = FALSE, rangesel = FALSE;
@@ -3683,10 +3759,10 @@ static void browse(char *ipath, const char *session)
 	atexit(dentfree);
 
 	/* setup first context */
-	if (!session || load_session(session) == _FAILURE) {
+	if (!session || load_session(session, mark, &presel) == _FAILURE) {
 		xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
 		path = g_ctx[0].c_path;
-		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = '\0';
+		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = mark[0] = '\0';
 		lastdir = g_ctx[0].c_last; /* last visited directory */
 		lastname = g_ctx[0].c_name; /* last visited filename */
 		g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
@@ -3697,9 +3773,10 @@ static void browse(char *ipath, const char *session)
 		lastname = g_ctx[cfg.curctx].c_name;
 	}
 
-	newpath[0] = mark[0] = rundir[0] = runfile[0] = '\0';
+	newpath[0] = rundir[0] = runfile[0] = '\0';
 
-	cfg.filtermode ?  (presel = FILTER) : (presel = 0);
+	if (cfg.filtermode && presel == 0)
+		presel = FILTER;
 
 	dents = xrealloc(dents, total_dents * sizeof(struct entry));
 	if (!dents)
@@ -4929,7 +5006,7 @@ nochange:
 			}
 			return;
         case SEL_SAVE_SESSION:
-            save_session();
+            save_session(mark, &presel);
             break;
 		default:
 			if (xlines != LINES || xcols != COLS) {
