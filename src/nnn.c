@@ -2644,9 +2644,8 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 	*curcfg = cfg;
 }
 
-static void save_session(const char *mark, int *presel)
+static void save_session(const char *mark, int *presel, bool last_session)
 {
-	char *session_name = xreadline("", "session name: ");
 	char session_path[PATH_MAX + 1];
 	int status = _FAILURE;
 	int i;
@@ -2656,13 +2655,18 @@ static void save_session(const char *mark, int *presel)
 	header.mark_length = strnlen(mark, PATH_MAX);
 
 	for (i = 0; i < CTX_MAX; ++i) {
-		header.path_length[i] = strnlen(g_ctx[i].c_path, PATH_MAX);
-		header.name_length[i] = strnlen(g_ctx[i].c_name, NAME_MAX);
-		header.last_length[i] = strnlen(g_ctx[i].c_last, PATH_MAX);
-		header.fltr_length[i] = strnlen(g_ctx[i].c_fltr, REGEX_MAX);
+		if (!g_ctx[i].c_cfg.ctxactive) {
+			header.path_length[i] = header.name_length[i]
+				= header.last_length[i] = header.fltr_length[i] = 0;
+		} else {
+			header.path_length[i] = strnlen(g_ctx[i].c_path, PATH_MAX) + 1;
+			header.name_length[i] = strnlen(g_ctx[i].c_name, NAME_MAX) + 1;
+			header.last_length[i] = strnlen(g_ctx[i].c_last, PATH_MAX) + 1;
+			header.fltr_length[i] = strnlen(g_ctx[i].c_fltr, REGEX_MAX) + 1;
+		}
 	}
 
-	mkpath(sessiondir, session_name, session_path);
+	mkpath(sessiondir, !last_session ? xreadline("", "session name: ") : "@", session_path);
 
 	FILE *fsession = fopen(session_path, "wb");
 	if (!fsession) {
@@ -2693,12 +2697,22 @@ END:
 		printwait("failed to write session data", presel);
 }
 
-static int load_session(const char *session_name, char *mark) {
+static int load_session(const char *session_name, char *mark
+		, char **path, char **lastdir, char **lastname, bool restore_session) {
 	char session_path[PATH_MAX + 1];
-	mkpath(sessiondir, session_name, session_path);
 	int status = _FAILURE;
 	int i = 0;
 	session_header_t header;
+
+	// Session loaded dynamically
+	if (!(session_name || restore_session)) {
+		save_session(mark, NULL, TRUE);
+	}
+
+	if (!restore_session)
+		mkpath(sessiondir, session_name ? session_name : xreadline("", "session name: "), session_path);
+	else
+		mkpath(sessiondir, "@", session_path);
 
 	mark[0] = '\0';
 
@@ -2727,6 +2741,9 @@ static int load_session(const char *session_name, char *mark) {
 			|| (header.path_length[i] > 0 && fread(g_ctx[i].c_path, header.path_length[i], 1, fsession) != 1))
 			goto END;
 
+	*path = g_ctx[cfg.curctx].c_path;
+	*lastdir = g_ctx[cfg.curctx].c_last;
+	*lastname = g_ctx[cfg.curctx].c_name;
 	status = _SUCCESS;
 
 END:
@@ -3734,7 +3751,7 @@ static void browse(char *ipath, const char *session)
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	uchar opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
-	int r = -1, fd, presel = 0, selstartid = 0, selendid = 0, onscreen;
+	int r = -1, fd, presel, selstartid = 0, selendid = 0, onscreen;
 	ino_t inode = 0;
 	enum action sel;
 	bool dir_changed = FALSE, rangesel = FALSE;
@@ -3750,7 +3767,7 @@ static void browse(char *ipath, const char *session)
 	xcols = COLS;
 
 	/* setup first context */
-	if (!session || load_session(session, mark) == _FAILURE) {
+	if (!session || load_session(session, mark, &path, &lastdir, &lastname, FALSE) == _FAILURE) {
 		xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
 		path = g_ctx[0].c_path;
 		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = mark[0] = '\0';
@@ -3758,16 +3775,11 @@ static void browse(char *ipath, const char *session)
 		lastname = g_ctx[0].c_name; /* last visited filename */
 		g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
 		g_ctx[0].c_cfg = cfg; /* current configuration */
-	} else {
-		path = g_ctx[cfg.curctx].c_path;
-		lastdir = g_ctx[cfg.curctx].c_last;
-		lastname = g_ctx[cfg.curctx].c_name;
 	}
 
 	newpath[0] = rundir[0] = runfile[0] = '\0';
 
-	if (cfg.filtermode && presel == 0)
-		presel = FILTER;
+	presel = cfg.filtermode ? FILTER : 0;
 
 	dents = xrealloc(dents, total_dents * sizeof(struct entry));
 	if (!dents)
@@ -4997,8 +5009,16 @@ nochange:
 			}
 			return;
         case SEL_SAVE_SESSION:
-            save_session(mark, &presel);
+            save_session(mark, &presel, FALSE);
             goto nochange;
+		case SEL_LOAD_SESSION:
+		case SEL_RESTORE_SESSION:
+			if (load_session(NULL, mark, &path, &lastdir, &lastname, sel == SEL_RESTORE_SESSION) == _SUCCESS) {
+				setdirwatch();
+				goto begin;
+			} else {
+				goto nochange;
+			}
 		default:
 			if (xlines != LINES || xcols != COLS) {
 				idle = 0;

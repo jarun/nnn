@@ -108,6 +108,8 @@ enum action {
 	SEL_QUIT,
 	SEL_CLICK,
     SEL_SAVE_SESSION,
+    SEL_LOAD_SESSION,
+	SEL_RESTORE_SESSION,
 };
 
 /* Associate a pressed key to an action */
@@ -274,4 +276,6 @@ static struct key bindings[] = {
 	{ CONTROL('Q'),   SEL_QUIT },
 	{ KEY_MOUSE,      SEL_CLICK },
 	{ CONTROL('W'),   SEL_SAVE_SESSION },
+	{ CONTROL('T'),   SEL_LOAD_SESSION },
+	{ CONTROL('Y'),   SEL_RESTORE_SESSION },
 };
