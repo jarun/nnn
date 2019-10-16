@@ -257,7 +257,6 @@ typedef struct {
 
 typedef struct {
 	size_t version;
-
 	size_t path_length[CTX_MAX];
 	size_t last_length[CTX_MAX];
 	size_t name_length[CTX_MAX];
@@ -2701,6 +2700,8 @@ static int load_session(const char *session_name, char *mark) {
 	int i = 0;
 	session_header_t header;
 
+	mark[0] = '\0';
+
 	FILE *fsession = fopen(session_path, "rb");
 	if (!fsession) {
 		printmsg("failed to open session file");
@@ -2713,6 +2714,9 @@ static int load_session(const char *session_name, char *mark) {
 		|| (fread(&cfg, sizeof(cfg), 1, fsession) != 1)
 		|| (header.mark_length > 0 && fread(mark, header.mark_length, 1, fsession) != 1))
 		goto END;
+
+	g_ctx[cfg.curctx].c_name[0] = g_ctx[cfg.curctx].c_last[0]
+		= g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
 
 	for (; i < CTX_MAX; ++i)
 		if ((fread(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1)
