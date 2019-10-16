@@ -2530,11 +2530,12 @@ static void printent(const struct entry *ent, int sel, uint namecols)
 
 static void printent_long(const struct entry *ent, int sel, uint namecols)
 {
-	char timebuf[18], permbuf[4], ind1 = '\0', ind2[] = "\0\0";
+	char timebuf[24], permbuf[4], ind1 = '\0', ind2[] = "\0\0";
 	const char cp = (ent->flags & FILE_SELECTED) ? '+' : ' ';
 
 	/* Timestamp */
-	strftime(timebuf, 18, "%F %R", localtime(&ent->t));
+	strftime(timebuf, sizeof(timebuf), "%F %R", localtime(&ent->t));
+	timebuf[sizeof(timebuf)-1] = '\0';
 
 	/* Permissions */
 	permbuf[0] = '0' + ((ent->mode >> 6) & 7);
@@ -3439,7 +3440,7 @@ static void redraw(char *path)
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int lastln = xlines, onscreen = xlines - 4;
 	int i, attrs;
-	char buf[18];
+	char buf[24];
 	char c;
 	char *ptr = path, *base;
 
@@ -3579,7 +3580,8 @@ static void redraw(char *path)
 			base = unescape(pent->name, NAME_MAX, NULL);
 
 			/* Timestamp */
-			strftime(buf, 18, "%Y-%b-%d %R", localtime(&pent->t));
+			strftime(buf, sizeof(buf), "%Y-%b-%d %R", localtime(&pent->t));
+			buf[sizeof(buf)-1] = '\0';
 
 			mvprintw(lastln, 0, "%d/%d (%d) %s%s %s %s %s [%s]",
 				 cur + 1, ndents, nselected, sort, buf,
