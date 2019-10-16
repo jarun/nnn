@@ -58,7 +58,7 @@
 #ifndef NCURSES_WIDECHAR
 #define NCURSES_WIDECHAR 1
 #endif
-#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__) || defined(__sun)
 #ifndef _XOPEN_SOURCE_EXTENDED
 #define _XOPEN_SOURCE_EXTENDED
 #endif
@@ -86,6 +86,9 @@
 #include <signal.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#ifdef __sun
+#include <alloca.h>
+#endif
 #include <string.h>
 #include <strings.h>
 #include <time.h>
@@ -318,8 +321,9 @@ static bool interrupted = FALSE;
 static sighandler_t oldsighup; /* old value of hangup signal */
 static sighandler_t oldsigtstp; /* old value of SIGTSTP */
 #else
-static sig_t oldsighup;
-static sig_t oldsigtstp;
+/* note: no sig_t on Solaris-derivs */
+static void (*oldsighup)(int);
+static void (*oldsigtstp)(int);
 #endif
 
 /* For use in functions which are isolated and don't return the buffer */
@@ -338,10 +342,10 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 #endif
 
 /* Options to identify file mime */
-#ifdef __APPLE__
-#define FILE_OPTS "-bIL"
-#else
-#define FILE_OPTS "-biL"
+#if defined(__APPLE__)
+#define FILE_MIME_OPTS "-bIL"
+#elif !defined(__sun) /* no mime option for 'file' */
+#define FILE_MIME_OPTS "-biL"
 #endif
 
 /* Macros for utilities */
@@ -2705,14 +2709,14 @@ static inline bool getutil(char *util)
 	return spawn("which", util, NULL, NULL, F_NORMAL | F_NOTRACE) == 0;
 }
 
-static void pipetofd(char *cmd, int fd)
+static void pipetof(char *cmd, FILE *fout)
 {
-	FILE *fp = popen(cmd, "r");
+	FILE *fin = popen(cmd, "r");
 
-	if (fp) {
-		while (fgets(g_buf, CMD_LEN_MAX - 1, fp))
-			dprintf(fd, "%s", g_buf);
-		pclose(fp);
+	if (fin) {
+		while (fgets(g_buf, CMD_LEN_MAX - 1, fin))
+			fprintf(fout, "%s", g_buf);
+		pclose(fin);
 	}
 }
 
@@ -2722,6 +2726,7 @@ static void pipetofd(char *cmd, int fd)
 static bool show_stats(const char *fpath, const struct stat *sb)
 {
 	int fd;
+	FILE *fp;
 	char *p, *begin = g_buf;
 	size_t r;
 
@@ -2735,27 +2740,33 @@ static bool show_stats(const char *fpath, const struct stat *sb)
 	g_buf[r - 1] = '\0';
 	DPRINTF_S(g_buf);
 
-	pipetofd(g_buf, fd);
+	if (!(fp = fdopen(fd, "w"))) {
+		close(fd);
+		return FALSE;
+	}
+
+	pipetof(g_buf, fp);
 
 	if (S_ISREG(sb->st_mode)) {
 		/* Show file(1) output */
 		p = get_output(g_buf, CMD_LEN_MAX, "file", "-b", fpath, FALSE);
 		if (p) {
-			dprintf(fd, "\n\n ");
+			fprintf(fp, "\n\n ");
 			while (*p) {
 				if (*p == ',') {
 					*p = '\0';
-					dprintf(fd, " %s\n", begin);
+					fprintf(fp, " %s\n", begin);
 					begin = p + 1;
 				}
 
 				++p;
 			}
-			dprintf(fd, " %s", begin);
+			fprintf(fp, " %s", begin);
 		}
 	}
 
-	dprintf(fd, "\n\n");
+	fprintf(fp, "\n\n");
+	fclose(fp);
 	close(fd);
 
 	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
@@ -3015,12 +3026,12 @@ static void lock_terminal(void)
 	spawn(tmp, NULL, NULL, NULL, F_NORMAL);
 }
 
-static void printkv(kv *kvarr, int fd, uchar max)
+static void printkv(kv *kvarr, FILE *fp, uchar max)
 {
 	uchar i = 0;
 
 	for (; i < max && kvarr[i].key; ++i)
-		dprintf(fd, " %c: %s\n", (char)kvarr[i].key, kvarr[i].val);
+		fprintf(fp, " %c: %s\n", (char)kvarr[i].key, kvarr[i].val);
 }
 
 /*
@@ -3034,6 +3045,7 @@ static void printkv(kv *kvarr, int fd, uchar max)
 static void show_help(const char *path)
 {
 	int i, fd;
+	FILE *fp;
 	const char *start, *end;
 	const char helpstr[] = {
 		"0\n"
@@ -3074,14 +3086,18 @@ static void show_help(const char *path)
 	fd = create_tmp_file();
 	if (fd == -1)
 		return;
+	if (!(fp = fdopen(fd, "w"))) {
+		close(fd);
+		return;
+	}
 
 	if (getutil("fortune"))
-		pipetofd("fortune -s", fd);
+		pipetof("fortune -s", fp);
 
 	start = end = helpstr;
 	while (*end) {
 		if (*end == '\n') {
-			dprintf(fd, "%*c%.*s",
+			fprintf(fp, "%*c%.*s",
 				xchartohex(*start), ' ', (int)(end - start), start + 1);
 			start = end + 1;
 		}
@@ -3089,31 +3105,32 @@ static void show_help(const char *path)
 		++end;
 	}
 
-	dprintf(fd, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
-	dprintf(fd, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
+	fprintf(fp, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
+	fprintf(fp, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
 
 	if (bookmark[0].val) {
-		dprintf(fd, "BOOKMARKS\n");
-		printkv(bookmark, fd, BM_MAX);
-		dprintf(fd, "\n");
+		fprintf(fp, "BOOKMARKS\n");
+		printkv(bookmark, fp, BM_MAX);
+		fprintf(fp, "\n");
 	}
 
 	if (plug[0].val) {
-		dprintf(fd, "PLUGIN KEYS\n");
-		printkv(plug, fd, PLUGIN_MAX);
-		dprintf(fd, "\n");
+		fprintf(fp, "PLUGIN KEYS\n");
+		printkv(plug, fp, PLUGIN_MAX);
+		fprintf(fp, "\n");
 	}
 
 	for (i = NNN_OPENER; i <= NNN_TRASH; ++i) {
 		start = getenv(env_cfg[i]);
 		if (start)
-			dprintf(fd, "%s: %s\n", env_cfg[i], start);
+			fprintf(fp, "%s: %s\n", env_cfg[i], start);
 	}
 
 	if (g_selpath)
-		dprintf(fd, "SELECTION FILE: %s\n", g_selpath);
+		fprintf(fp, "SELECTION FILE: %s\n", g_selpath);
 
-	dprintf(fd, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
+	fprintf(fp, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
+	fclose(fp);
 	close(fd);
 
 	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
@@ -3187,7 +3204,11 @@ static int dentfill(char *path, struct entry **dents)
 	if (!dp)
 		goto exit;
 
+#ifdef __sun
+	if (cfg.blkorder) { /* no d_type */
+#else
 	if (cfg.blkorder || dp->d_type == DT_UNKNOWN) {
+#endif
 		/*
 		 * Optimization added for filesystems which support dirent.d_type
 		 * see readdir(3)
@@ -3302,7 +3323,12 @@ static int dentfill(char *path, struct entry **dents)
 
 		/* Copy other fields */
 		dentp->t = cfg.mtime ? sb.st_mtime : sb.st_atime;
-		if (dp->d_type == DT_LNK && !flags) { /* Do not add sizes for links */
+#ifdef __sun
+		if (0) { /* no d_type */
+#else
+		if (!flags && dp->d_type == DT_LNK) { /* Do not add sizes for links */
+#endif
+			 /* Do not add sizes for links */
 			dentp->mode = (sb.st_mode & ~S_IFMT) | S_IFLNK;
 			dentp->size = 0;
 		} else {
@@ -3350,8 +3376,11 @@ static int dentfill(char *path, struct entry **dents)
 
 			if (S_ISDIR(sb.st_mode))
 				dentp->flags |= DIR_OR_LINK_TO_DIR;
-		} else if (dp->d_type == DT_DIR || (dp->d_type == DT_LNK && S_ISDIR(sb.st_mode)))
+#ifndef __sun /* no d_type */
+		} else if (dp->d_type == DT_DIR || (dp->d_type == DT_LNK && S_ISDIR(sb.st_mode))) {
 			dentp->flags |= DIR_OR_LINK_TO_DIR;
+#endif
+		}
 
 		++n;
 	} while ((dp = readdir(dirp)));
@@ -3800,7 +3829,15 @@ nochange:
 				r = curscroll + (event.y - 2);
 				move_cursor(r, 1);
 				currentmouse ^= 1;
-				clock_gettime(CLOCK_MONOTONIC_RAW, &mousetimings[currentmouse]);
+				clock_gettime(
+#if defined(CLOCK_MONOTONIC_RAW)
+				    CLOCK_MONOTONIC_RAW,
+#elif defined(CLOCK_MONOTONIC)
+				    CLOCK_MONOTONIC,
+#else
+				    CLOCK_REALTIME,
+#endif
+				    &mousetimings[currentmouse]);
 
 				/*Single click just selects, double click also opens */
 				if (((_ABSSUB(mousetimings[0].tv_sec, mousetimings[1].tv_sec) << 30)
@@ -3881,8 +3918,14 @@ nochange:
 
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
 				if (cfg.useeditor &&
-				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_OPTS, newpath, FALSE)
+#ifdef FILE_MIME_OPTS
+				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
 				    && !strncmp(g_buf, "text/", 5)) {
+#else
+				    /* no mime option; guess from description instead */
+				    get_output(g_buf, CMD_LEN_MAX, "file", "-b", newpath, FALSE)
+				    && strstr(g_buf, "text")) {
+#endif
 					spawn(editor, newpath, NULL, path, F_CLI);
 					continue;
 				}
@@ -4561,7 +4604,11 @@ nochange:
 			}
 
 			/* Open the descriptor to currently open directory */
+#ifdef O_DIRECTORY
 			fd = open(path, O_RDONLY | O_DIRECTORY);
+#else
+			fd = open(path, O_RDONLY);
+#endif
 			if (fd == -1) {
 				printwarn(&presel);
 				goto nochange;
