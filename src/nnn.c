@@ -105,6 +105,7 @@
 /* Macro definitions */
 #define VERSION "2.7"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
+#define SESSIONS_VERSION 0
 
 #ifndef S_BLKSIZE
 #define S_BLKSIZE 512 /* S_BLKSIZE is missing on Android NDK (Termux) */
@@ -253,6 +254,16 @@ typedef struct {
 	settings c_cfg; /* Current configuration */
 	uint color; /* Color code for directories */
 } context;
+
+typedef struct {
+	size_t version;
+
+	size_t path_length[CTX_MAX];
+	size_t last_length[CTX_MAX];
+	size_t name_length[CTX_MAX];
+	size_t fltr_length[CTX_MAX];
+	size_t mark_length;
+} session_header_t;
 
 /* GLOBALS */
 
@@ -2639,8 +2650,18 @@ static void save_session(const char *mark, int *presel)
 	char *session_name = xreadline("", "session name: ");
 	char session_path[PATH_MAX + 1];
 	int status = _FAILURE;
-	int i = 0;
-	size_t len;
+	int i;
+	session_header_t header;
+
+	header.version = SESSIONS_VERSION;
+	header.mark_length = strnlen(mark, PATH_MAX);
+
+	for (i = 0; i < CTX_MAX; ++i) {
+		header.path_length[i] = strnlen(g_ctx[i].c_path, PATH_MAX);
+		header.name_length[i] = strnlen(g_ctx[i].c_name, NAME_MAX);
+		header.last_length[i] = strnlen(g_ctx[i].c_last, PATH_MAX);
+		header.fltr_length[i] = strnlen(g_ctx[i].c_fltr, REGEX_MAX);
+	}
 
 	mkpath(sessiondir, session_name, session_path);
 
@@ -2650,37 +2671,19 @@ static void save_session(const char *mark, int *presel)
 		return;
 	}
 
-	if (fwrite(&cfg, sizeof(cfg), 1, fsession) != 1) goto END;
+	if ((fwrite(&header, sizeof(header), 1, fsession) != 1)
+		|| (fwrite(&cfg, sizeof(cfg), 1, fsession) != 1)
+		|| (header.mark_length > 0 && fwrite(mark, header.mark_length, 1, fsession) != 1))
+		goto END;
 
-	for (; i < CTX_MAX; ++i) {
-		len = strnlen(g_ctx[i].c_path, PATH_MAX);
-		if (fwrite(&len, sizeof(size_t), 1, fsession) != 1) goto END;
-		if (len > 0)
-			if (fwrite(g_ctx[i].c_path, len, 1, fsession) != 1) goto END;
-
-		len = strnlen(g_ctx[i].c_name, NAME_MAX);
-		if (fwrite(&len, sizeof(size_t), 1, fsession) != 1) goto END;
-		if (len > 0)
-			if (fwrite(g_ctx[i].c_name, len, 1, fsession) != 1) goto END;
-
-		len = strnlen(g_ctx[i].c_last, PATH_MAX);
-		if (fwrite(&len, sizeof(size_t), 1, fsession) != 1) goto END;
-		if (len > 0)
-			if (fwrite(g_ctx[i].c_last, len, 1, fsession) != 1) goto END;
-
-		len = strnlen(g_ctx[i].c_fltr, REGEX_MAX);
-		if (fwrite(&len, sizeof(size_t), 1, fsession) != 1) goto END;
-		if (len > 0)
-			if (fwrite(g_ctx[i].c_fltr, len, 1, fsession) != 1) goto END;
-
-		if (fwrite(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1) goto END;
-		if (fwrite(&g_ctx[i].color, sizeof(uint), 1, fsession) != 1) goto END;
-	}
-
-	len = strnlen(mark, PATH_MAX);
-	if (fwrite(&len, sizeof(size_t), 1, fsession) != 1) goto END;
-	if (len > 0)
-		if (fwrite(mark, len, 1, fsession) != 1) goto END;
+	for (i = 0; i < CTX_MAX; ++i)
+		if ((fwrite(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1)
+			|| (fwrite(&g_ctx[i].color, sizeof(uint), 1, fsession) != 1)
+			|| (header.name_length[i] > 0 && fwrite(g_ctx[i].c_name, header.name_length[i], 1, fsession) != 1)
+			|| (header.last_length[i] > 0 && fwrite(g_ctx[i].c_last, header.last_length[i], 1, fsession) != 1)
+			|| (header.fltr_length[i] > 0 && fwrite(g_ctx[i].c_fltr, header.fltr_length[i], 1, fsession) != 1)
+			|| (header.path_length[i] > 0 && fwrite(g_ctx[i].c_path, header.path_length[i], 1, fsession) != 1))
+			goto END;
 
 	status = _SUCCESS;
 
@@ -2696,7 +2699,7 @@ static int load_session(const char *session_name, char *mark) {
 	mkpath(sessiondir, session_name, session_path);
 	int status = _FAILURE;
 	int i = 0;
-	size_t len;
+	session_header_t header;
 
 	FILE *fsession = fopen(session_path, "rb");
 	if (!fsession) {
@@ -2705,42 +2708,20 @@ static int load_session(const char *session_name, char *mark) {
 		return _FAILURE;
 	}
 
-	if (fread(&cfg, sizeof(cfg), 1, fsession) != 1) goto END;
+	if ((fread(&header, sizeof(header), 1, fsession) != 1)
+		|| (header.version != SESSIONS_VERSION)
+		|| (fread(&cfg, sizeof(cfg), 1, fsession) != 1)
+		|| (header.mark_length > 0 && fread(mark, header.mark_length, 1, fsession) != 1))
+		goto END;
 
-	for (; i < CTX_MAX; ++i) {
-		if (fread(&len, sizeof(size_t), 1, fsession) != 1) goto END;
-		if (len > 0) {
-			if (fread(g_ctx[i].c_path, len, 1, fsession) != 1) goto END;
-			g_ctx[i].c_path[len] = '\0';
-		}
-
-		if (fread(&len, sizeof(size_t), 1, fsession) != 1) goto END;
-		if (len > 0) {
-			if (fread(g_ctx[i].c_name, len, 1, fsession) != 1) goto END;
-			g_ctx[i].c_name[len] = '\0';
-		}
-
-		if (fread(&len, sizeof(size_t), 1, fsession) != 1) goto END;
-		if (len > 0) {
-			if (fread(g_ctx[i].c_last, len, 1, fsession) != 1) goto END;
-			g_ctx[i].c_last[len] = '\0';
-		}
-
-		if (fread(&len, sizeof(size_t), 1, fsession) != 1) goto END;
-		if (len > 0) {
-			if (fread(g_ctx[i].c_fltr, len, 1, fsession) != 1) goto END;
-			g_ctx[i].c_fltr[len] = '\0';
-		}
-
-		if (fread(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1) goto END;
-		if (fread(&g_ctx[i].color, sizeof(uint), 1, fsession) != 1) goto END;
-	}
-
-	if (fread(&len, sizeof(size_t), 1, fsession) != 1) goto END;
-	if (len > 0) {
-		if (len > 0 && fread(mark, len, 1, fsession) != 1) goto END;
-		mark[len] = '\0';
-	}
+	for (; i < CTX_MAX; ++i)
+		if ((fread(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1)
+			|| (fread(&g_ctx[i].color, sizeof(uint), 1, fsession) != 1)
+			|| (header.name_length[i] > 0 && fread(g_ctx[i].c_name, header.name_length[i], 1, fsession) != 1)
+			|| (header.last_length[i] > 0 && fread(g_ctx[i].c_last, header.last_length[i], 1, fsession) != 1)
+			|| (header.fltr_length[i] > 0 && fread(g_ctx[i].c_fltr, header.fltr_length[i], 1, fsession) != 1)
+			|| (header.path_length[i] > 0 && fread(g_ctx[i].c_path, header.path_length[i], 1, fsession) != 1))
+			goto END;
 
 	status = _SUCCESS;
 
