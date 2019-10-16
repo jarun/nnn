@@ -10,6 +10,7 @@
 .Op Ar -b key
 .Op Ar -c
 .Op Ar -d
+.Op Ar -e session
 .Op Ar -f
 .Op Ar -H
 .Op Ar -i
@@ -51,6 +52,9 @@ supports the following options:
 .Pp
 .Fl d
         detail mode
+.Pp
+.Fl "e session"
+        Load a session by name
 .Pp
 .Fl f
         run filter as command when the prompt key is pressed
@@ -108,6 +112,20 @@ are available. The status of the contexts are shown in the top left corner:
 On context creation, the state of the previous context is copied. Each context remembers its last visited directory.
 .Pp
 Each context can have its own directory color specified. See ENVIRONMENT section below.
+.Sh SESSIONS
+Sessions are a way to save and restore states of work. A session stores the settings, contexts and pinned directory.
+.Pp
+Sessions can be loaded dynamically from within a running
+.Nm
+instance, or with a flag to
+.Nm .
+.Pp
+When a session is loaded dynamically, the last working session is saved automatically to a dedicated 
+-- "last session" -- session file.
+.Pp
+All the session files are located in \fBnnn\fR's
+configuration directory under the "sessions" directory and named after the session.
+"@" is the "last session" file.
 .Sh FILTERS
 Filters support regexes (default) to instantly (search-as-you-type) list the matching
 entries in the current directory.
