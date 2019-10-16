@@ -5210,7 +5210,7 @@ static void cleanup(void)
 {
 	free(g_selpath);
 	free(plugindir);
-    free(sessiondir);
+	free(sessiondir);
 	free(cfgdir);
 	free(initpath);
 	free(bmstr);
@@ -5225,7 +5225,7 @@ int main(int argc, char *argv[])
 {
 	mmask_t mask;
 	char *arg = NULL;
-    char *session = NULL;
+	char *session = NULL;
 	int opt;
 #ifdef __linux__
 	bool progress = FALSE;
@@ -5254,7 +5254,7 @@ int main(int argc, char *argv[])
 			cfg.cliopener = 1;
 			break;
 		case 'e':
-            session = optarg;
+			session = optarg;
 			break;
 		case 'f':
 			cfg.filtercmd = 1;
