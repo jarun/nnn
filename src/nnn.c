@@ -2685,13 +2685,13 @@ static void save_session(const char *mark, int *presel)
 	status = _SUCCESS;
 
 END:
+	fclose(fsession);
+
 	if (status == _FAILURE)
 		printwait("failed to write session data", presel);
-
-	fclose(fsession);
 }
 
-static int load_session(const char *session_name, char *mark, int *presel) {
+static int load_session(const char *session_name, char *mark) {
 	char session_path[PATH_MAX + 1];
 	mkpath(sessiondir, session_name, session_path);
 	int status = _FAILURE;
@@ -2700,7 +2700,8 @@ static int load_session(const char *session_name, char *mark, int *presel) {
 
 	FILE *fsession = fopen(session_path, "rb");
 	if (!fsession) {
-		printwait("failed to open session file", presel);
+		printmsg("failed to open session file");
+		xdelay();
 		return _FAILURE;
 	}
 
@@ -2744,10 +2745,12 @@ static int load_session(const char *session_name, char *mark, int *presel) {
 	status = _SUCCESS;
 
 END:
-	if (status == _FAILURE)
-		printwait("failed to read session data", presel);
-
 	fclose(fsession);
+
+	if (status == _FAILURE) {
+		printmsg("failed to read session data");
+		xdelay();
+	}
 
 	return status;
 }
@@ -3758,8 +3761,11 @@ static void browse(char *ipath, const char *session)
 
 	atexit(dentfree);
 
+	xlines = LINES;
+	xcols = COLS;
+
 	/* setup first context */
-	if (!session || load_session(session, mark, &presel) == _FAILURE) {
+	if (!session || load_session(session, mark) == _FAILURE) {
 		xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
 		path = g_ctx[0].c_path;
 		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = mark[0] = '\0';
@@ -5007,7 +5013,7 @@ nochange:
 			return;
         case SEL_SAVE_SESSION:
             save_session(mark, &presel);
-            break;
+            goto nochange;
 		default:
 			if (xlines != LINES || xcols != COLS) {
 				idle = 0;
