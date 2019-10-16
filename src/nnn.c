@@ -3943,39 +3943,50 @@ nochange:
 				printwait("unsupported file", &presel);
 				goto nochange;
 			}
-		case SEL_NEXT:
-			if (ndents)
-				move_cursor((cur + 1) % ndents, 0);
-			break;
-		case SEL_PREV:
-			if (ndents)
-				move_cursor((cur + ndents - 1) % ndents, 0);
-			break;
-		case SEL_PGDN: // fallthrough
-			onscreen = xlines - 4;
-			move_cursor(curscroll + (onscreen - 1), 1);
-			curscroll += onscreen - 1;
-			break;
-		case SEL_CTRL_D:
-			onscreen = xlines - 4;
-			move_cursor(curscroll + (onscreen - 1), 1);
-			curscroll += onscreen >> 1;
-			break;
-		case SEL_PGUP: // fallthrough
-			onscreen = xlines - 4;
-			move_cursor(curscroll, 1);
-			curscroll -= onscreen - 1;
-			break;
-		case SEL_CTRL_U:
-			onscreen = xlines - 4;
-			move_cursor(curscroll, 1);
-			curscroll -= onscreen >> 1;
-			break;
-		case SEL_HOME:
-			move_cursor(0, 1);
-			break;
+		case SEL_NEXT: // fallthorugh
+		case SEL_PREV: // fallthorugh
+		case SEL_PGDN: // fallthorugh
+		case SEL_CTRL_D: // fallthorugh
+		case SEL_PGUP: // fallthorugh
+		case SEL_CTRL_U: // fallthorugh
+		case SEL_HOME: // fallthorugh
 		case SEL_END:
-			move_cursor(ndents - 1, 1);
+			switch (sel) {
+			case SEL_NEXT:
+				if (ndents)
+					move_cursor((cur + 1) % ndents, 0);
+				break;
+			case SEL_PREV:
+				if (ndents)
+					move_cursor((cur + ndents - 1) % ndents, 0);
+				break;
+			case SEL_PGDN:
+				onscreen = xlines - 4;
+				move_cursor(curscroll + (onscreen - 1), 1);
+				curscroll += onscreen - 1;
+				break;
+			case SEL_CTRL_D:
+				onscreen = xlines - 4;
+				move_cursor(curscroll + (onscreen - 1), 1);
+				curscroll += onscreen >> 1;
+				break;
+			case SEL_PGUP: // fallthrough
+				onscreen = xlines - 4;
+				move_cursor(curscroll, 1);
+				curscroll -= onscreen - 1;
+				break;
+			case SEL_CTRL_U:
+				onscreen = xlines - 4;
+				move_cursor(curscroll, 1);
+				curscroll -= onscreen >> 1;
+				break;
+			case SEL_HOME:
+				move_cursor(0, 1);
+				break;
+			default: /* case SEL_END: */
+				move_cursor(ndents - 1, 1);
+				break;
+			}
 			break;
 		case SEL_CDHOME: // fallthrough
 		case SEL_CDBEGIN: // fallthrough
@@ -4811,15 +4822,7 @@ nochange:
 			unmount(tmp, newpath, &presel, path);
 			goto nochange;
 		case SEL_QUITCD: // fallthrough
-		case SEL_QUIT:
-			for (r = 0; r < CTX_MAX; ++r)
-				if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
-					r = get_input("Quit all contexts? [Enter]");
-					break;
-				}
-
-			if (!(r == CTX_MAX || r == '\r'))
-				break; // fallthrough
+		case SEL_QUIT: // fallthrough
 		case SEL_QUITCTX:
 			if (sel == SEL_QUITCTX) {
 				fd = cfg.curctx; /* fd used as tmp var */
@@ -4852,6 +4855,15 @@ nochange:
 					setdirwatch();
 					goto begin;
 				}
+			} else {
+				for (r = 0; r < CTX_MAX; ++r)
+					if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
+						r = get_input("Quit all contexts? [Enter]");
+						break;
+					}
+
+				if (!(r == CTX_MAX || r == '\r'))
+					break; // fallthrough
 			}
 
 			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE")) {
