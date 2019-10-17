@@ -82,8 +82,7 @@ enum action {
 	SEL_SELEDIT,
 	SEL_CP,
 	SEL_MV,
-	SEL_CPAS,
-	SEL_MVAS,
+	SEL_CPMVAS,
 	SEL_RMMUL,
 	SEL_RM,
 	SEL_OPENWITH,
@@ -219,10 +218,8 @@ static struct key bindings[] = {
 	{ 'P',            SEL_CP },
 	/* Move from selection buffer */
 	{ 'V',            SEL_MV },
-	/* Copyfrom selection buffer and rename */
-	{ 'w',            SEL_CPAS },
-	/* Movefrom selection buffer and rename */
-	{ 'W',            SEL_MVAS },
+	/* Copy/move from selection buffer and rename */
+	{ 'w',            SEL_CPMVAS },
 	/* Delete from selection buffer */
 	{ 'X',            SEL_RMMUL },
 	/* Delete currently selected */

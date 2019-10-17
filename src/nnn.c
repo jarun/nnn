@@ -1296,11 +1296,12 @@ static uint lines_in_file(int fd, char *buf, size_t buflen)
 	return ((len < 0) ? 0 : count);
 }
 
-static bool cpmv_rename(const char *path, const char *cmd)
+static bool cpmv_rename(int choice, const char *path)
 {
 	int fd;
 	uint count = 0, lines = 0;
 	bool ret = FALSE;
+	char *cmd = (choice == 'c' ? cp : mv);
 	const char formatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
 	const char renamecmd[] =
 		"sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -o -n2 %s";
@@ -3065,11 +3066,10 @@ static void show_help(const char *path)
 		"1FILES\n"
 		 "b^O  Open with...      n  Create new/link\n"
 		  "cD  File detail   ^R F2  Rename/duplicate\n"
-	       "9⎵ ^J  Select entry      r  Batch rename\n"
+	     "7⎵ ^J/a  Select entry/all  r  Batch rename\n"
 	       "9m ^K  Sel range, clear  M  List selection\n"
-	          "ca  Select all        K  Edit selection\n"
-		  "cP  Copy selection    w  Copy selection as\n"
-		  "cV  Move selection    W  Move selection as\n"
+		  "cP  Copy selection    K  Edit selection\n"
+		  "cV  Move selection    w  Copy/move sel as\n"
 		  "cX  Del selection    ^X  Del entry\n"
 		  "cf  Create archive    T  Mount archive\n"
 		 "b^F  Extract archive   F  List archive\n"
@@ -4434,10 +4434,9 @@ nochange:
 				goto nochange;
 			}
 			break;
-		case SEL_CP:
-		case SEL_MV:
-		case SEL_CPAS:
-		case SEL_MVAS:
+		case SEL_CP: // fallthrough
+		case SEL_MV: // fallthrough
+		case SEL_CPMVAS: // fallthrough
 		case SEL_RMMUL:
 		{
 			endselection();
@@ -4454,14 +4453,15 @@ nochange:
 			case SEL_MV:
 				opstr(g_buf, mv);
 				break;
-			case SEL_CPAS:
-				if (!cpmv_rename(path, cp)) {
-					printwait(messages[OPERATION_FAILED], &presel);
+			case SEL_CPMVAS:
+				r = get_input("'c'p / 'm'v as?");
+				if (r != 'c' && r != 'm') {
+					if (cfg.filtermode)
+						presel = FILTER;
 					goto nochange;
 				}
-				break;
-			case SEL_MVAS:
-				if (!cpmv_rename(path, mv)) {
+
+				if (!cpmv_rename(r, path)) {
 					printwait(messages[OPERATION_FAILED], &presel);
 					goto nochange;
 				}
@@ -4471,11 +4471,11 @@ nochange:
 				break;
 			}
 
-			if (sel != SEL_CPAS && sel != SEL_MVAS)
+			if (sel != SEL_CPMVAS)
 				spawn(utils[SH_EXEC], g_buf, NULL, path, F_CLI);
 
 			/* Clear selection on move or delete */
-			if (sel == SEL_MV || sel == SEL_MVAS || sel == SEL_RMMUL)
+			if (sel != SEL_CP)
 				clearselection();
 
 			if (ndents)
