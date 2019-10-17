@@ -2650,6 +2650,7 @@ static void save_session(const char *mark, int *presel, bool last_session)
 	int status = _FAILURE;
 	int i;
 	session_header_t header;
+	char *session_name;
 
 	header.version = SESSIONS_VERSION;
 	header.mark_length = strnlen(mark, PATH_MAX);
@@ -2666,7 +2667,11 @@ static void save_session(const char *mark, int *presel, bool last_session)
 		}
 	}
 
-	mkpath(sessiondir, !last_session ? xreadline("", "session name: ") : "@", session_path);
+	session_name = !last_session ? xreadline("", "session name: ") : "@";
+	if (session_name[0] != '\0')
+		mkpath(sessiondir, session_name, session_path);
+	else
+		return;
 
 	FILE *fsession = fopen(session_path, "wb");
 	if (!fsession) {
@@ -2703,16 +2708,19 @@ static int load_session(const char *session_name, char *mark
 	int status = _FAILURE;
 	int i = 0;
 	session_header_t header;
+	bool has_loaded_dynamically = !(session_name || restore_session);
 
-	// Session loaded dynamically
-	if (!(session_name || restore_session)) {
-		save_session(mark, NULL, TRUE);
-	}
-
-	if (!restore_session)
-		mkpath(sessiondir, session_name ? session_name : xreadline("", "session name: "), session_path);
-	else
+	if (!restore_session) {
+		session_name = session_name ? session_name : xreadline("", "session name: ");
+		if (session_name[0] != '\0')
+			mkpath(sessiondir, session_name ? session_name : xreadline("", "session name: "), session_path);
+		else
+			return _FAILURE;
+	} else
 		mkpath(sessiondir, "@", session_path);
+
+	if (has_loaded_dynamically)
+		save_session(mark, NULL, TRUE);
 
 	mark[0] = '\0';
 
