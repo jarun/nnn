@@ -3204,6 +3204,7 @@ static void show_help(const char *path)
 		"1MISC\n"
 	       "9! ^]  Shell  =  Launch  C  Execute entry\n"
 	       "9R ^V  Pick plugin   :K xK  Execute plugin K\n"
+		   "cU  Manage session\n"
 	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt/run cmd    L  Lock\n"};
 
@@ -5008,17 +5009,20 @@ nochange:
 				}
 			}
 			return;
-        case SEL_SAVE_SESSION:
-            save_session(mark, &presel, FALSE);
-            goto nochange;
-		case SEL_LOAD_SESSION:
-		case SEL_RESTORE_SESSION:
-			if (load_session(NULL, mark, &path, &lastdir, &lastname, sel == SEL_RESTORE_SESSION) == _SUCCESS) {
-				setdirwatch();
-				goto begin;
-			} else {
+        case SEL_SESSIONS:
+			r = get_input("'s'(ave) / 'l'(oad) / 'r'(estore) session?");
+
+			if (r == 's') {
+				save_session(mark, &presel, FALSE);
+				goto nochange;
+			} else if (r == 'l' || r == 'r') {
+				if (load_session(NULL, mark, &path, &lastdir, &lastname, r == 'r') == _SUCCESS) {
+					setdirwatch();
+					goto begin;
+				}
 				goto nochange;
 			}
+			break;
 		default:
 			if (xlines != LINES || xcols != COLS) {
 				idle = 0;
@@ -5070,6 +5074,7 @@ static void usage(void)
 		" -b key  open bookmark key\n"
 		" -c      cli-only opener\n"
 		" -d      detail mode\n"
+		" -e      load session by name\n"
 		" -f      run filter as cmd on prompt key\n"
 		" -H      show hidden files\n"
 		" -i      nav-as-you-type mode\n"
