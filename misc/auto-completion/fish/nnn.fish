@@ -6,16 +6,16 @@
 #
 
 if test -n "$XDG_CONFIG_HOME"
-    set nnn_config $XDG_CONFIG_HOME/.config/nnn
+    set sessions_dir $XDG_CONFIG_HOME/.config/nnn/sessions
 else
-    set nnn_config $HOME/.config/nnn
+    set sessions_dir $HOME/.config/nnn/sessions
 end
 
 complete -c nnn -s a    -d 'use access time'
 complete -c nnn -s b -r -d 'bookmark key to open' -x -a '(echo $NNN_BMS | awk -F: -v RS=\; \'{print $1"\t"$2}\')'
 complete -c nnn -s c    -d 'cli-only opener'
 complete -c nnn -s d    -d 'start in detail mode'
-complete -c nnn -s e -r -d 'load session by name' -x -a '@\t"last session" (ls $nnn_config/sessions)'
+complete -c nnn -s e -r -d 'load session by name' -x -a '@\t"last session" (ls $nnn_config)'
 complete -c nnn -s f    -d 'run filter as cmd on prompt key'
 complete -c nnn -s H    -d 'show hidden files'
 complete -c nnn -s i    -d 'start in navigate-as-you-type mode'
