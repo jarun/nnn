@@ -105,6 +105,7 @@
 /* Macro definitions */
 #define VERSION "2.7"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
+#define SESSIONS_VERSION 0
 
 #ifndef S_BLKSIZE
 #define S_BLKSIZE 512 /* S_BLKSIZE is missing on Android NDK (Termux) */
@@ -254,6 +255,14 @@ typedef struct {
 	uint color; /* Color code for directories */
 } context;
 
+typedef struct {
+	size_t ver;
+	size_t pathln[CTX_MAX];
+	size_t lastln[CTX_MAX];
+	size_t nameln[CTX_MAX];
+	size_t fltrln[CTX_MAX];
+} session_header_t;
+
 /* GLOBALS */
 
 /* Configuration, contexts */
@@ -305,6 +314,7 @@ static char *initpath;
 static char *cfgdir;
 static char *g_selpath;
 static char *plugindir;
+static char *sessiondir;
 static char *pnamebuf, *pselbuf;
 static struct entry *dents;
 static blkcnt_t ent_blocks;
@@ -2150,7 +2160,7 @@ static char *getreadline(char *prompt, char *path, char *curpath, int *presel)
  * Updates out with "dir/name or "/name"
  * Returns the number of bytes copied including the terminating NULL byte
  */
-static size_t mkpath(char *dir, char *name, char *out)
+static size_t mkpath(const char *dir, const char *name, char *out)
 {
 	size_t len;
 
@@ -2634,6 +2644,122 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 	*curcfg = cfg;
 }
 
+static void save_session(bool last_session, int *presel)
+{
+	char session_path[PATH_MAX + 1];
+	int status = _FAILURE;
+	int i;
+	session_header_t header;
+	char *session_name;
+
+	header.ver = SESSIONS_VERSION;
+
+	for (i = 0; i < CTX_MAX; ++i) {
+		if (!g_ctx[i].c_cfg.ctxactive) {
+			header.pathln[i] = header.nameln[i]
+				= header.lastln[i] = header.fltrln[i] = 0;
+		} else {
+			header.pathln[i] = strnlen(g_ctx[i].c_path, PATH_MAX) + 1;
+			header.nameln[i] = strnlen(g_ctx[i].c_name, NAME_MAX) + 1;
+			header.lastln[i] = strnlen(g_ctx[i].c_last, PATH_MAX) + 1;
+			header.fltrln[i] = strnlen(g_ctx[i].c_fltr, REGEX_MAX) + 1;
+		}
+	}
+
+	session_name = !last_session ? xreadline("", "session name: ") : "@";
+	if (session_name[0] != '\0')
+		mkpath(sessiondir, session_name, session_path);
+	else
+		return;
+
+	FILE *fsession = fopen(session_path, "wb");
+	if (!fsession) {
+		printwait("failed to open session file", presel);
+		return;
+	}
+
+	if ((fwrite(&header, sizeof(header), 1, fsession) != 1)
+		|| (fwrite(&cfg, sizeof(cfg), 1, fsession) != 1))
+		goto END;
+
+	for (i = 0; i < CTX_MAX; ++i)
+		if ((fwrite(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1)
+			|| (fwrite(&g_ctx[i].color, sizeof(uint), 1, fsession) != 1)
+			|| (header.nameln[i] > 0 && fwrite(g_ctx[i].c_name, header.nameln[i], 1, fsession) != 1)
+			|| (header.lastln[i] > 0 && fwrite(g_ctx[i].c_last, header.lastln[i], 1, fsession) != 1)
+			|| (header.fltrln[i] > 0 && fwrite(g_ctx[i].c_fltr, header.fltrln[i], 1, fsession) != 1)
+			|| (header.pathln[i] > 0 && fwrite(g_ctx[i].c_path, header.pathln[i], 1, fsession) != 1))
+			goto END;
+
+	status = _SUCCESS;
+
+END:
+	fclose(fsession);
+
+	if (status == _FAILURE)
+		printwait("failed to write session data", presel);
+}
+
+static bool load_session(const char *session_name, char **path, char **lastdir
+		, char **lastname, bool restore_session) {
+	char session_path[PATH_MAX + 1];
+	int status = _FAILURE;
+	int i = 0;
+	session_header_t header;
+	bool has_loaded_dynamically = !(session_name || restore_session);
+
+	if (!restore_session) {
+		session_name = session_name ? session_name : xreadline("", "session name: ");
+		if (session_name[0] != '\0')
+			mkpath(sessiondir, session_name ? session_name : xreadline("", "session name: "), session_path);
+		else
+			return _FAILURE;
+	} else
+		mkpath(sessiondir, "@", session_path);
+
+	if (has_loaded_dynamically)
+		save_session(TRUE, NULL);
+
+	FILE *fsession = fopen(session_path, "rb");
+	if (!fsession) {
+		printmsg("failed to open session file");
+		xdelay();
+		return _FAILURE;
+	}
+
+	if ((fread(&header, sizeof(header), 1, fsession) != 1)
+		|| (header.ver != SESSIONS_VERSION)
+		|| (fread(&cfg, sizeof(cfg), 1, fsession) != 1))
+		goto END;
+
+	g_ctx[cfg.curctx].c_name[0] = g_ctx[cfg.curctx].c_last[0]
+		= g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
+
+	for (; i < CTX_MAX; ++i)
+		if ((fread(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1)
+			|| (fread(&g_ctx[i].color, sizeof(uint), 1, fsession) != 1)
+			|| (header.nameln[i] > 0 && fread(g_ctx[i].c_name, header.nameln[i], 1, fsession) != 1)
+			|| (header.lastln[i] > 0 && fread(g_ctx[i].c_last, header.lastln[i], 1, fsession) != 1)
+			|| (header.fltrln[i] > 0 && fread(g_ctx[i].c_fltr, header.fltrln[i], 1, fsession) != 1)
+			|| (header.pathln[i] > 0 && fread(g_ctx[i].c_path, header.pathln[i], 1, fsession) != 1))
+			goto END;
+
+	*path = g_ctx[cfg.curctx].c_path;
+	*lastdir = g_ctx[cfg.curctx].c_last;
+	*lastname = g_ctx[cfg.curctx].c_name;
+	status = _SUCCESS;
+
+END:
+	fclose(fsession);
+
+	if (status == _FAILURE) {
+		printmsg("failed to read session data");
+		xdelay();
+	}
+
+	return status;
+}
+
 /*
  * Gets only a single line (that's what we need
  * for now) or shows full command output in pager.
@@ -3078,8 +3204,9 @@ static void show_help(const char *path)
 		  "cA  Apparent du       S  du\n"
 		  "cs  Size   E  Extn    t  Time\n"
 		"1MISC\n"
-	       "9! ^]  Shell  =  Launch  C  Execute entry\n"
+	       "9! ^]  Shell             C  Execute entry\n"
 	       "9R ^V  Pick plugin   :K xK  Execute plugin K\n"
+		   "cU  Manage session    =  Launch\n"
 	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt/run cmd    L  Lock\n"};
 
@@ -3620,7 +3747,7 @@ static void redraw(char *path)
 		printmsg("0/0");
 }
 
-static void browse(char *ipath)
+static void browse(char *ipath, const char *session)
 {
 	char newpath[PATH_MAX] __attribute__ ((aligned));
 	char mark[PATH_MAX] __attribute__ ((aligned));
@@ -3639,17 +3766,23 @@ static void browse(char *ipath)
 
 	atexit(dentfree);
 
-	/* setup first context */
-	xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
-	path = g_ctx[0].c_path;
-	g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = newpath[0] = mark[0] = '\0';
-	rundir[0] = runfile[0] = '\0';
-	lastdir = g_ctx[0].c_last; /* last visited directory */
-	lastname = g_ctx[0].c_name; /* last visited filename */
-	g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
-	g_ctx[0].c_cfg = cfg; /* current configuration */
+	xlines = LINES;
+	xcols = COLS;
 
-	cfg.filtermode ?  (presel = FILTER) : (presel = 0);
+	/* setup first context */
+	if (!session || load_session(session, &path, &lastdir, &lastname, FALSE) == _FAILURE) {
+		xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
+		path = g_ctx[0].c_path;
+		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = '\0';
+		lastdir = g_ctx[0].c_last; /* last visited directory */
+		lastname = g_ctx[0].c_name; /* last visited filename */
+		g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
+		g_ctx[0].c_cfg = cfg; /* current configuration */
+	}
+
+	newpath[0] = rundir[0] = runfile[0] = mark[0] = '\0';
+
+	presel = cfg.filtermode ? FILTER : 0;
 
 	dents = xrealloc(dents, total_dents * sizeof(struct entry));
 	if (!dents)
@@ -4878,6 +5011,22 @@ nochange:
 				}
 			}
 			return;
+        case SEL_SESSIONS:
+			r = get_input("'s'(ave) / 'l'(oad) / 'r'(estore) session?");
+
+			if (r == 's') {
+				save_session(FALSE, &presel);
+				goto nochange;
+			} else if (r == 'l' || r == 'r') {
+				if (load_session(NULL, &path, &lastdir, &lastname, r == 'r') == _SUCCESS) {
+					setdirwatch();
+					goto begin;
+				}
+
+				presel = MSGWAIT;
+				goto nochange;
+			}
+			break;
 		default:
 			if (xlines != LINES || xcols != COLS) {
 				idle = 0;
@@ -4929,6 +5078,7 @@ static void usage(void)
 		" -b key  open bookmark key\n"
 		" -c      cli-only opener\n"
 		" -d      detail mode\n"
+		" -e name load session by name\n"
 		" -f      run filter as cmd on prompt key\n"
 		" -H      show hidden files\n"
 		" -i      nav-as-you-type mode\n"
@@ -4966,16 +5116,17 @@ static bool setup_config(void)
 			return FALSE;
 		}
 
-		len = strlen(xdgcfg) + 1 + 12; /* add length of "/nnn/plugins" */
+		len = strlen(xdgcfg) + 1 + 13; /* add length of "/nnn/sessions" */
 		xdg = TRUE;
 	}
 
 	if (!xdg)
-		len = strlen(home) + 1 + 20; /* add length of "/.config/nnn/plugins" */
+		len = strlen(home) + 1 + 21; /* add length of "/.config/nnn/sessions" */
 
 	cfgdir = (char *)malloc(len);
 	plugindir = (char *)malloc(len);
-	if (!cfgdir || !plugindir) {
+	sessiondir = (char *)malloc(len);
+	if (!cfgdir || !plugindir || !sessiondir) {
 		xerror();
 		return FALSE;
 	}
@@ -5011,6 +5162,18 @@ static bool setup_config(void)
 
 	xstrlcpy(plugindir, cfgdir, len);
 	DPRINTF_S(plugindir);
+
+	if (!create_dir(cfgdir)) {
+		xerror();
+		return FALSE;
+	}
+
+	/* Create ~/.config/nnn/sessions */
+	xstrlcpy(cfgdir + r + 4 - 1, "/sessions", 10);
+	DPRINTF_S(cfgdir);
+
+	xstrlcpy(sessiondir, cfgdir, len);
+	DPRINTF_S(sessiondir);
 
 	if (!create_dir(cfgdir)) {
 		xerror();
@@ -5056,6 +5219,7 @@ static void cleanup(void)
 {
 	free(g_selpath);
 	free(plugindir);
+	free(sessiondir);
 	free(cfgdir);
 	free(initpath);
 	free(bmstr);
@@ -5070,12 +5234,13 @@ int main(int argc, char *argv[])
 {
 	mmask_t mask;
 	char *arg = NULL;
+	char *session = NULL;
 	int opt;
 #ifdef __linux__
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKiab:cdfnop:rstvh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKiab:cde:fnop:rstvh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5096,6 +5261,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'c':
 			cfg.cliopener = 1;
+			break;
+		case 'e':
+			session = optarg;
 			break;
 		case 'f':
 			cfg.filtercmd = 1;
@@ -5348,7 +5516,7 @@ int main(int argc, char *argv[])
 	if (!initcurses(&mask))
 		return _FAILURE;
 
-	browse(initpath);
+	browse(initpath, session);
 	mousemask(mask, NULL);
 	exitcurses();
 
