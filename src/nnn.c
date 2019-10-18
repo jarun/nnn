@@ -256,12 +256,11 @@ typedef struct {
 } context;
 
 typedef struct {
-	size_t version;
-	size_t path_length[CTX_MAX];
-	size_t last_length[CTX_MAX];
-	size_t name_length[CTX_MAX];
-	size_t fltr_length[CTX_MAX];
-	size_t mark_length;
+	size_t ver;
+	size_t pathln[CTX_MAX];
+	size_t lastln[CTX_MAX];
+	size_t nameln[CTX_MAX];
+	size_t fltrln[CTX_MAX];
 } session_header_t;
 
 /* GLOBALS */
@@ -2644,7 +2643,7 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 	*curcfg = cfg;
 }
 
-static void save_session(const char *mark, int *presel, bool last_session)
+static void save_session(bool last_session, int *presel)
 {
 	char session_path[PATH_MAX + 1];
 	int status = _FAILURE;
@@ -2652,18 +2651,17 @@ static void save_session(const char *mark, int *presel, bool last_session)
 	session_header_t header;
 	char *session_name;
 
-	header.version = SESSIONS_VERSION;
-	header.mark_length = strnlen(mark, PATH_MAX);
+	header.ver = SESSIONS_VERSION;
 
 	for (i = 0; i < CTX_MAX; ++i) {
 		if (!g_ctx[i].c_cfg.ctxactive) {
-			header.path_length[i] = header.name_length[i]
-				= header.last_length[i] = header.fltr_length[i] = 0;
+			header.pathln[i] = header.nameln[i]
+				= header.lastln[i] = header.fltrln[i] = 0;
 		} else {
-			header.path_length[i] = strnlen(g_ctx[i].c_path, PATH_MAX) + 1;
-			header.name_length[i] = strnlen(g_ctx[i].c_name, NAME_MAX) + 1;
-			header.last_length[i] = strnlen(g_ctx[i].c_last, PATH_MAX) + 1;
-			header.fltr_length[i] = strnlen(g_ctx[i].c_fltr, REGEX_MAX) + 1;
+			header.pathln[i] = strnlen(g_ctx[i].c_path, PATH_MAX) + 1;
+			header.nameln[i] = strnlen(g_ctx[i].c_name, NAME_MAX) + 1;
+			header.lastln[i] = strnlen(g_ctx[i].c_last, PATH_MAX) + 1;
+			header.fltrln[i] = strnlen(g_ctx[i].c_fltr, REGEX_MAX) + 1;
 		}
 	}
 
@@ -2680,17 +2678,16 @@ static void save_session(const char *mark, int *presel, bool last_session)
 	}
 
 	if ((fwrite(&header, sizeof(header), 1, fsession) != 1)
-		|| (fwrite(&cfg, sizeof(cfg), 1, fsession) != 1)
-		|| (header.mark_length > 0 && fwrite(mark, header.mark_length, 1, fsession) != 1))
+		|| (fwrite(&cfg, sizeof(cfg), 1, fsession) != 1))
 		goto END;
 
 	for (i = 0; i < CTX_MAX; ++i)
 		if ((fwrite(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1)
 			|| (fwrite(&g_ctx[i].color, sizeof(uint), 1, fsession) != 1)
-			|| (header.name_length[i] > 0 && fwrite(g_ctx[i].c_name, header.name_length[i], 1, fsession) != 1)
-			|| (header.last_length[i] > 0 && fwrite(g_ctx[i].c_last, header.last_length[i], 1, fsession) != 1)
-			|| (header.fltr_length[i] > 0 && fwrite(g_ctx[i].c_fltr, header.fltr_length[i], 1, fsession) != 1)
-			|| (header.path_length[i] > 0 && fwrite(g_ctx[i].c_path, header.path_length[i], 1, fsession) != 1))
+			|| (header.nameln[i] > 0 && fwrite(g_ctx[i].c_name, header.nameln[i], 1, fsession) != 1)
+			|| (header.lastln[i] > 0 && fwrite(g_ctx[i].c_last, header.lastln[i], 1, fsession) != 1)
+			|| (header.fltrln[i] > 0 && fwrite(g_ctx[i].c_fltr, header.fltrln[i], 1, fsession) != 1)
+			|| (header.pathln[i] > 0 && fwrite(g_ctx[i].c_path, header.pathln[i], 1, fsession) != 1))
 			goto END;
 
 	status = _SUCCESS;
@@ -2702,8 +2699,8 @@ END:
 		printwait("failed to write session data", presel);
 }
 
-static int load_session(const char *session_name, char *mark
-		, char **path, char **lastdir, char **lastname, bool restore_session) {
+static bool load_session(const char *session_name, char **path, char **lastdir
+		, char **lastname, bool restore_session) {
 	char session_path[PATH_MAX + 1];
 	int status = _FAILURE;
 	int i = 0;
@@ -2720,9 +2717,7 @@ static int load_session(const char *session_name, char *mark
 		mkpath(sessiondir, "@", session_path);
 
 	if (has_loaded_dynamically)
-		save_session(mark, NULL, TRUE);
-
-	mark[0] = '\0';
+		save_session(TRUE, NULL);
 
 	FILE *fsession = fopen(session_path, "rb");
 	if (!fsession) {
@@ -2732,9 +2727,8 @@ static int load_session(const char *session_name, char *mark
 	}
 
 	if ((fread(&header, sizeof(header), 1, fsession) != 1)
-		|| (header.version != SESSIONS_VERSION)
-		|| (fread(&cfg, sizeof(cfg), 1, fsession) != 1)
-		|| (header.mark_length > 0 && fread(mark, header.mark_length, 1, fsession) != 1))
+		|| (header.ver != SESSIONS_VERSION)
+		|| (fread(&cfg, sizeof(cfg), 1, fsession) != 1))
 		goto END;
 
 	g_ctx[cfg.curctx].c_name[0] = g_ctx[cfg.curctx].c_last[0]
@@ -2743,10 +2737,10 @@ static int load_session(const char *session_name, char *mark
 	for (; i < CTX_MAX; ++i)
 		if ((fread(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1)
 			|| (fread(&g_ctx[i].color, sizeof(uint), 1, fsession) != 1)
-			|| (header.name_length[i] > 0 && fread(g_ctx[i].c_name, header.name_length[i], 1, fsession) != 1)
-			|| (header.last_length[i] > 0 && fread(g_ctx[i].c_last, header.last_length[i], 1, fsession) != 1)
-			|| (header.fltr_length[i] > 0 && fread(g_ctx[i].c_fltr, header.fltr_length[i], 1, fsession) != 1)
-			|| (header.path_length[i] > 0 && fread(g_ctx[i].c_path, header.path_length[i], 1, fsession) != 1))
+			|| (header.nameln[i] > 0 && fread(g_ctx[i].c_name, header.nameln[i], 1, fsession) != 1)
+			|| (header.lastln[i] > 0 && fread(g_ctx[i].c_last, header.lastln[i], 1, fsession) != 1)
+			|| (header.fltrln[i] > 0 && fread(g_ctx[i].c_fltr, header.fltrln[i], 1, fsession) != 1)
+			|| (header.pathln[i] > 0 && fread(g_ctx[i].c_path, header.pathln[i], 1, fsession) != 1))
 			goto END;
 
 	*path = g_ctx[cfg.curctx].c_path;
@@ -3210,9 +3204,9 @@ static void show_help(const char *path)
 		  "cA  Apparent du       S  du\n"
 		  "cs  Size   E  Extn    t  Time\n"
 		"1MISC\n"
-	       "9! ^]  Shell  =  Launch  C  Execute entry\n"
+	       "9! ^]  Shell             C  Execute entry\n"
 	       "9R ^V  Pick plugin   :K xK  Execute plugin K\n"
-		   "cU  Manage session\n"
+		   "cU  Manage session    =  Launch\n"
 	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt/run cmd    L  Lock\n"};
 
@@ -3776,17 +3770,17 @@ static void browse(char *ipath, const char *session)
 	xcols = COLS;
 
 	/* setup first context */
-	if (!session || load_session(session, mark, &path, &lastdir, &lastname, FALSE) == _FAILURE) {
+	if (!session || load_session(session, &path, &lastdir, &lastname, FALSE) == _FAILURE) {
 		xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
 		path = g_ctx[0].c_path;
-		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = mark[0] = '\0';
+		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = '\0';
 		lastdir = g_ctx[0].c_last; /* last visited directory */
 		lastname = g_ctx[0].c_name; /* last visited filename */
 		g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
 		g_ctx[0].c_cfg = cfg; /* current configuration */
 	}
 
-	newpath[0] = rundir[0] = runfile[0] = '\0';
+	newpath[0] = rundir[0] = runfile[0] = mark[0] = '\0';
 
 	presel = cfg.filtermode ? FILTER : 0;
 
@@ -5021,13 +5015,15 @@ nochange:
 			r = get_input("'s'(ave) / 'l'(oad) / 'r'(estore) session?");
 
 			if (r == 's') {
-				save_session(mark, &presel, FALSE);
+				save_session(FALSE, &presel);
 				goto nochange;
 			} else if (r == 'l' || r == 'r') {
-				if (load_session(NULL, mark, &path, &lastdir, &lastname, r == 'r') == _SUCCESS) {
+				if (load_session(NULL, &path, &lastdir, &lastname, r == 'r') == _SUCCESS) {
 					setdirwatch();
 					goto begin;
 				}
+
+				presel = MSGWAIT;
 				goto nochange;
 			}
 			break;
@@ -5082,7 +5078,7 @@ static void usage(void)
 		" -b key  open bookmark key\n"
 		" -c      cli-only opener\n"
 		" -d      detail mode\n"
-		" -e      load session by name\n"
+		" -e name load session by name\n"
 		" -f      run filter as cmd on prompt key\n"
 		" -H      show hidden files\n"
 		" -i      nav-as-you-type mode\n"

@@ -10,7 +10,7 @@
 .Op Ar -b key
 .Op Ar -c
 .Op Ar -d
-.Op Ar -e session
+.Op Ar -e name
 .Op Ar -f
 .Op Ar -H
 .Op Ar -i
@@ -53,7 +53,7 @@ supports the following options:
 .Fl d
         detail mode
 .Pp
-.Fl "e session"
+.Fl "e name"
         Load a session by name
 .Pp
 .Fl f
@@ -113,7 +113,7 @@ On context creation, the state of the previous context is copied. Each context r
 .Pp
 Each context can have its own directory color specified. See ENVIRONMENT section below.
 .Sh SESSIONS
-Sessions are a way to save and restore states of work. A session stores the settings, contexts and pinned directory.
+Sessions are a way to save and restore states of work. A session stores the settings and contexts.
 .Pp
 Sessions can be loaded dynamically from within a running
 .Nm
