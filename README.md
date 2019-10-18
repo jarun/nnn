@@ -275,8 +275,11 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 ## Developers
 
-- Copyright © 2016-2019 [Arun Prakash Jana](https://github.com/jarun)
-- Copyright © 2014-2016 Lazaros Koromilas
-- Copyright © 2014-2016 Dimitris Papastamos
+- [Arun Prakash Jana](https://github.com/jarun) (Copyright © 2016-2019)
+- [0xACE](https://github.com/0xACE)
+- [Anna Arad](https://github.com/annagrram)
+- [KlzXS](https://github.com/KlzXS)
+- [Sijmen J. Mulder](https://github.com/sjmulder)
+- and other contributors
 
 Visit the to the [ToDo list](https://github.com/jarun/nnn/issues/337) to contribute.
