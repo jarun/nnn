@@ -117,14 +117,12 @@ Sessions are a way to save and restore states of work. A session stores the sett
 .Pp
 Sessions can be loaded dynamically from within a running
 .Nm
-instance, or with a flag to
-.Nm .
+instance, or with a program option.
 .Pp
-When a session is loaded dynamically, the last working session is saved automatically to a dedicated 
+When a session is loaded dynamically, the last working session is saved automatically to a dedicated
 -- "last session" -- session file.
 .Pp
-All the session files are located in \fBnnn\fR's
-configuration directory under the "sessions" directory and named after the session.
+All the session files are located in the \fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions\fR directory by the session name.
 "@" is the "last session" file.
 .Sh FILTERS
 Filters support regexes (default) to instantly (search-as-you-type) list the matching

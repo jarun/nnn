@@ -3206,7 +3206,7 @@ static void show_help(const char *path)
 		"1MISC\n"
 	       "9! ^]  Shell             C  Execute entry\n"
 	       "9R ^V  Pick plugin   :K xK  Execute plugin K\n"
-		   "cU  Manage session    =  Launch\n"
+		  "cU  Manage session    =  Launch\n"
 	          "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt/run cmd    L  Lock\n"};
 

@@ -31,7 +31,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
 - Navigation
   - *Navigate-as-you-type* with dir auto-select
   - Contexts (_aka_ tabs/workspaces) with configurable colors
-  - Bookmarks; pin and visit a directory
+  - Sessions, bookmarks; pin and visit a dir
   - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick reference
   - CD on quit (*easy* shell integration)
 - Sorting
@@ -53,10 +53,10 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - Lots of plugins with configurable keybinds
   - FreeDesktop compliant trash (needs trash-cli)
   - SSHFS mounts (needs sshfs)
-  - Cross-directory file selection, all/range selection
+  - Cross-dir file selection, all/range selection
   - Batch rename selection or dir entries
   - Copy (as), move (as), delete, archive, link selection
-  - Create, rename, duplicate files and directories
+  - Create, rename, duplicate files and dirs
   - Spawn a shell, run apps, run commands, execute file
   - Lock terminal (needs a locker)
 - Minimal deps, minimal config
@@ -172,6 +172,7 @@ optional args:
  -b key  open bookmark key
  -c      cli-only opener
  -d      detail mode
+ -e name load session by name
  -f      run filter as cmd on prompt key
  -H      show hidden files
  -i      nav-as-you-type mode
@@ -221,8 +222,9 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
             A  Apparent du       S  du
             s  Size   E  Extn    t  Time
  MISC
-         ! ^]  Shell  =  Launch  C  Execute entry
+         ! ^]  Shell             C  Execute entry
          R ^V  Pick plugin   :K xK  Execute plugin K
+            U  Manage session    =  Launch
             c  SSHFS mount       u  Unmount
            ^P  Prompt/run cmd    L  Lock
 ```
