@@ -3264,6 +3264,27 @@ static void show_help(const char *path)
 	unlink(g_tmpfpath);
 }
 
+static bool run_selected_plugin(char *path, const char *file, char *newpath, char *rundir, char *runfile, char *lastname)
+{
+	if ((cfg.runctx != cfg.curctx)
+	    /* Must be in plugin directory to select plugin */
+	    || (strcmp(path, plugindir) != 0))
+		return FALSE;
+
+	mkpath(path, file, newpath);
+	/* Copy to path so we can return back to earlier dir */
+	xstrlcpy(path, rundir, PATH_MAX);
+	if (runfile[0]) {
+		xstrlcpy(lastname, runfile, NAME_MAX);
+		spawn(newpath, lastname, path, path, F_NORMAL);
+		runfile[0] = '\0';
+	} else
+		spawn(newpath, NULL, path, path, F_NORMAL);
+	rundir[0] = '\0';
+	cfg.runplugin = 0;
+	return TRUE;
+}
+
 static int sum_bsizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
 	(void) fpath;
@@ -4029,22 +4050,8 @@ nochange:
 
 				/* Handle plugin selection mode */
 				if (cfg.runplugin) {
-					if (!plugindir || (cfg.runctx != cfg.curctx)
-					    /* Must be in plugin directory to select plugin */
-					    || (strcmp(path, plugindir) != 0))
+					if (!run_selected_plugin(path, dents[cur].name, newpath, rundir, runfile, lastname))
 						continue;
-
-					mkpath(path, dents[cur].name, newpath);
-					/* Copy to path so we can return back to earlier dir */
-					xstrlcpy(path, rundir, PATH_MAX);
-					if (runfile[0]) {
-						xstrlcpy(lastname, runfile, NAME_MAX);
-						spawn(newpath, lastname, path, path, F_NORMAL);
-						runfile[0] = '\0';
-					} else
-						spawn(newpath, NULL, path, path, F_NORMAL);
-					rundir[0] = '\0';
-					cfg.runplugin = 0;
 					setdirwatch();
 					goto begin;
 				}
@@ -4841,19 +4848,11 @@ nochange:
 				break;
 			case SEL_PLUGKEY: // fallthrough
 			case SEL_PLUGIN:
-				if (!plugindir) {
-					printwait("plugins dir missing", &presel);
-					goto nochange;
-				}
-
-				if (stat(plugindir, &sb) == -1) {
+				/* Check if directory is accessible */
+				if (!xdiraccess(plugindir)) {
 					printwarn(&presel);
 					goto nochange;
 				}
-
-				/* Must be a directory */
-				if (!S_ISDIR(sb.st_mode))
-					break;
 
 				if (sel == SEL_PLUGKEY)
 				{
@@ -4888,10 +4887,6 @@ nochange:
 					}
 					break;
 				}
-
-				/* Check if directory is accessible */
-				if (!xdiraccess(plugindir))
-					goto nochange;
 
 				xstrlcpy(rundir, path, PATH_MAX);
 				xstrlcpy(path, plugindir, PATH_MAX);
