@@ -1360,6 +1360,55 @@ finish:
 	return ret;
 }
 
+static bool cpmvrm_selection(enum action sel, char *path, int *presel)
+{
+	int r;
+
+	endselection();
+
+	if (!selsafe()) {
+		*presel = MSGWAIT;
+		return FALSE;
+	}
+
+	switch (sel) {
+	case SEL_CP:
+		opstr(g_buf, cp);
+		break;
+	case SEL_MV:
+		opstr(g_buf, mv);
+		break;
+	case SEL_CPMVAS:
+		r = get_input("'c'p / 'm'v as?");
+		if (r != 'c' && r != 'm') {
+			if (cfg.filtermode)
+				*presel = FILTER;
+			return FALSE;
+		}
+
+		if (!cpmv_rename(r, path)) {
+			printwait(messages[OPERATION_FAILED], presel);
+			return FALSE;
+		}
+		break;
+	default: /* SEL_RMMUL */
+		rmmulstr(g_buf);
+		break;
+	}
+
+	if (sel != SEL_CPMVAS)
+		spawn(utils[SH_EXEC], g_buf, NULL, path, F_CLI);
+
+	/* Clear selection on move or delete */
+	if (sel != SEL_CP)
+		clearselection();
+
+	if (cfg.filtermode)
+		*presel = FILTER;
+
+	return TRUE;
+}
+
 static bool batch_rename(const char *path)
 {
 	int fd1, fd2, i;
@@ -4592,49 +4641,11 @@ nochange:
 		case SEL_CPMVAS: // fallthrough
 		case SEL_RMMUL:
 		{
-			endselection();
-
-			if (!selsafe()) {
-				presel = MSGWAIT;
+			if (!cpmvrm_selection(sel, path, &presel))
 				goto nochange;
-			}
-
-			switch (sel) {
-			case SEL_CP:
-				opstr(g_buf, cp);
-				break;
-			case SEL_MV:
-				opstr(g_buf, mv);
-				break;
-			case SEL_CPMVAS:
-				r = get_input("'c'p / 'm'v as?");
-				if (r != 'c' && r != 'm') {
-					if (cfg.filtermode)
-						presel = FILTER;
-					goto nochange;
-				}
-
-				if (!cpmv_rename(r, path)) {
-					printwait(messages[OPERATION_FAILED], &presel);
-					goto nochange;
-				}
-				break;
-			default: /* SEL_RMMUL */
-				rmmulstr(g_buf);
-				break;
-			}
-
-			if (sel != SEL_CPMVAS)
-				spawn(utils[SH_EXEC], g_buf, NULL, path, F_CLI);
-
-			/* Clear selection on move or delete */
-			if (sel != SEL_CP)
-				clearselection();
 
 			if (ndents)
 				copycurname();
-			if (cfg.filtermode)
-				presel = FILTER;
 			goto begin;
 		}
 		case SEL_RM:
@@ -5019,7 +5030,7 @@ nochange:
 				}
 			}
 			return;
-        case SEL_SESSIONS:
+		case SEL_SESSIONS:
 			r = get_input("'s'(ave) / 'l'(oad) / 'r'(estore) session?");
 
 			if (r == 's') {
