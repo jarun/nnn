@@ -5,6 +5,6 @@
 # Shell: POSIX compliant
 # Author: Anna Arad
 
-source $(dirname $0)/.nnn-plugin-helper
+. $(dirname $0)/.nnn-plugin-helper
 
 nnn_cd "$(dirname $(readlink -fn $1))"

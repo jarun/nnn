@@ -504,7 +504,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 static int dentfind(const char *fname, int n);
 static void move_cursor(int target, int ignore_scrolloff);
-static bool getutil(char *util);
+static inline bool getutil(char *util);
 
 /* Functions */
 
