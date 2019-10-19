@@ -10,13 +10,13 @@ PLUGIN_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins
 
 # backup any earlier plugins
 if [ -d $PLUGIN_DIR ]; then
-    tar -C $CONFIG_DIR -cf $CONFIG_DIR"plugins-$(date '+%Y%m%d%H%M').tar.bz2" plugins/
+    tar -C $CONFIG_DIR -cjf $CONFIG_DIR"plugins-$(date '+%Y%m%d%H%M').tar.bz2" plugins/
 fi
 
 mkdir -p $PLUGIN_DIR
 cd $PLUGIN_DIR
 curl -Ls -O https://github.com/jarun/nnn/archive/master.tar.gz
 tar -xf master.tar.gz
-cp -vf nnn-master/plugins/* .
+cp -vf nnn-master/plugins/{,.}[^.]* .
 sudo mv -vf nnn-master/misc/nlaunch/nlaunch /usr/local/bin/
 rm -rf nnn-master/ master.tar.gz README.md
