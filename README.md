@@ -209,11 +209,10 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
  FILES
            ^O  Open with...      n  Create new/link
             D  File detail   ^R F2  Rename/duplicate
-         ⎵ ^J  Select entry      r  Batch rename
+       ⎵ ^J/a  Select entry/all  r  Batch rename
          m ^K  Sel range, clear  M  List selection
-            a  Select all        K  Edit selection
-            P  Copy selection    w  Copy selection as
-            V  Move selection    W  Move selection as
+            P  Copy selection    K  Edit selection
+            V  Move selection    w  Copy/move sel as
             X  Del selection    ^X  Del entry
             f  Create archive    T  Mount archive
            ^F  Extract archive   F  List archive

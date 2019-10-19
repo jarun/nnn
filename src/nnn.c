@@ -3637,6 +3637,48 @@ static void move_cursor(int target, int ignore_scrolloff)
 	curscroll = MAX(curscroll, MAX(cur - (onscreen - 1), 0));
 }
 
+static void handle_screen_move(enum action sel)
+{
+	int onscreen;
+
+	switch (sel) {
+	case SEL_NEXT:
+		if (ndents)
+			move_cursor((cur + 1) % ndents, 0);
+		break;
+	case SEL_PREV:
+		if (ndents)
+			move_cursor((cur + ndents - 1) % ndents, 0);
+		break;
+	case SEL_PGDN:
+		onscreen = xlines - 4;
+		move_cursor(curscroll + (onscreen - 1), 1);
+		curscroll += onscreen - 1;
+		break;
+	case SEL_CTRL_D:
+		onscreen = xlines - 4;
+		move_cursor(curscroll + (onscreen - 1), 1);
+		curscroll += onscreen >> 1;
+		break;
+	case SEL_PGUP: // fallthrough
+		onscreen = xlines - 4;
+		move_cursor(curscroll, 1);
+		curscroll -= onscreen - 1;
+		break;
+	case SEL_CTRL_U:
+		onscreen = xlines - 4;
+		move_cursor(curscroll, 1);
+		curscroll -= onscreen >> 1;
+		break;
+	case SEL_HOME:
+		move_cursor(0, 1);
+		break;
+	default: /* case SEL_END: */
+		move_cursor(ndents - 1, 1);
+		break;
+	}
+}
+
 static void redraw(char *path)
 {
 	xlines = LINES;
@@ -3803,7 +3845,7 @@ static void browse(char *ipath, const char *session)
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	uchar opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
-	int r = -1, fd, presel, selstartid = 0, selendid = 0, onscreen;
+	int r = -1, fd, presel, selstartid = 0, selendid = 0;
 	ino_t inode = 0;
 	enum action sel;
 	bool dir_changed = FALSE, rangesel = FALSE;
@@ -4089,50 +4131,15 @@ nochange:
 				printwait("unsupported file", &presel);
 				goto nochange;
 			}
-		case SEL_NEXT: // fallthorugh
-		case SEL_PREV: // fallthorugh
-		case SEL_PGDN: // fallthorugh
-		case SEL_CTRL_D: // fallthorugh
-		case SEL_PGUP: // fallthorugh
-		case SEL_CTRL_U: // fallthorugh
-		case SEL_HOME: // fallthorugh
+		case SEL_NEXT: // fallthrough
+		case SEL_PREV: // fallthrough
+		case SEL_PGDN: // fallthrough
+		case SEL_CTRL_D: // fallthrough
+		case SEL_PGUP: // fallthrough
+		case SEL_CTRL_U: // fallthrough
+		case SEL_HOME: // fallthrough
 		case SEL_END:
-			switch (sel) {
-			case SEL_NEXT:
-				if (ndents)
-					move_cursor((cur + 1) % ndents, 0);
-				break;
-			case SEL_PREV:
-				if (ndents)
-					move_cursor((cur + ndents - 1) % ndents, 0);
-				break;
-			case SEL_PGDN:
-				onscreen = xlines - 4;
-				move_cursor(curscroll + (onscreen - 1), 1);
-				curscroll += onscreen - 1;
-				break;
-			case SEL_CTRL_D:
-				onscreen = xlines - 4;
-				move_cursor(curscroll + (onscreen - 1), 1);
-				curscroll += onscreen >> 1;
-				break;
-			case SEL_PGUP: // fallthrough
-				onscreen = xlines - 4;
-				move_cursor(curscroll, 1);
-				curscroll -= onscreen - 1;
-				break;
-			case SEL_CTRL_U:
-				onscreen = xlines - 4;
-				move_cursor(curscroll, 1);
-				curscroll -= onscreen >> 1;
-				break;
-			case SEL_HOME:
-				move_cursor(0, 1);
-				break;
-			default: /* case SEL_END: */
-				move_cursor(ndents - 1, 1);
-				break;
-			}
+			handle_screen_move(sel);
 			break;
 		case SEL_CDHOME: // fallthrough
 		case SEL_CDBEGIN: // fallthrough
