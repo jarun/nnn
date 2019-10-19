@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+# Description: Run fzf and go to the directory of the file selected
+#
+# Shell: POSIX compliant
+# Author: Anna Arad
+
+source $(dirname $0)/.nnn-plugin-helper
+
+nnn_cd "$PWD/$(dirname $(fzf --print0))"

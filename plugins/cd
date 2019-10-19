@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+# Description: Go to requested directory
+#
+# Shell: POSIX compliant
+# Author: Anna Arad
+
+source $(dirname $0)/.nnn-plugin-helper
+
+echo -n "cd to: "
+read dir
+
+nnn_cd "$dir"

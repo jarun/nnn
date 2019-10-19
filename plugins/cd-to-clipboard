@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+# Description: Go to a directory from clipboard
+#
+# Shell: POSIX compliant
+# Author: Anna Arad
+
+source $(dirname $0)/.nnn-plugin-helper
+
+nnn_cd "$(xsel -ob)"

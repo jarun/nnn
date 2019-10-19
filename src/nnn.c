@@ -342,6 +342,9 @@ static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 /* Buffer to store tmp file path to show selection, file stats and help */
 static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 
+/* Buffer to store plugins control pipe location */
+static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
+
 /* Replace-str for xargs on different platforms */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
 #define REPLACE_STR 'J'
@@ -427,9 +430,10 @@ static const char * const messages[] = {
 #define NNN_CONTEXT_COLORS 2
 #define NNN_IDLE_TIMEOUT 3
 #define NNN_COPIER 4
-#define NNNLVL 5 /* strings end here */
-#define NNN_USE_EDITOR 6 /* flags begin here */
-#define NNN_TRASH 7
+#define NNNLVL 5
+#define NNN_PIPE 6 /* strings end here */
+#define NNN_USE_EDITOR 7 /* flags begin here */
+#define NNN_TRASH 8
 
 static const char * const env_cfg[] = {
 	"NNN_BMS",
@@ -438,6 +442,7 @@ static const char * const env_cfg[] = {
 	"NNN_IDLE_TIMEOUT",
 	"NNN_COPIER",
 	"NNNLVL",
+	"NNN_PIPE",
 	"NNN_USE_EDITOR",
 	"NNN_TRASH",
 };
@@ -3299,6 +3304,10 @@ static bool run_selected_plugin(char *path, const char *file, char *newpath, cha
 	    || (strcmp(path, plugindir) != 0))
 		return FALSE;
 
+	int fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
+	if (fd == -1)
+		return FALSE;
+
 	mkpath(path, file, newpath);
 	/* Copy to path so we can return back to earlier dir */
 	xstrlcpy(path, rundir, PATH_MAX);
@@ -3310,6 +3319,12 @@ static bool run_selected_plugin(char *path, const char *file, char *newpath, cha
 		spawn(newpath, NULL, path, path, F_NORMAL);
 	rundir[0] = '\0';
 	cfg.runplugin = 0;
+
+	size_t len = read(fd, g_buf, PATH_MAX);
+	g_buf[len] = '\0';
+
+	close(fd);
+
 	return TRUE;
 }
 
@@ -4100,6 +4115,23 @@ nochange:
 				if (cfg.runplugin) {
 					if (!run_selected_plugin(path, dents[cur].name, newpath, rundir, runfile, lastname))
 						continue;
+
+					if (g_buf[0] != '\0' && g_buf[1] != '\0') {
+						int ctx = g_buf[0] - '0';
+
+						if (ctx == 0) {
+							xstrlcpy(lastdir, path, PATH_MAX);
+							xstrlcpy(path, g_buf + 1, PATH_MAX);
+						} else if (ctx >= 1 && ctx <= CTX_MAX) {
+							r = ctx - 1;
+							g_ctx[r].c_cfg.ctxactive = 0;
+							savecurctx(&cfg, g_buf + 1, dents[cur].name, r);
+							path = g_ctx[r].c_path;
+							lastdir = g_ctx[r].c_last;
+							lastname = g_ctx[r].c_name;
+						}
+					}
+
 					setdirwatch();
 					goto begin;
 				}
@@ -5233,6 +5265,8 @@ static void cleanup(void)
 	free(bmstr);
 	free(pluginstr);
 
+	unlink(g_pipepath);
+
 #ifdef DBGMODE
 	disabledbg();
 #endif
@@ -5474,6 +5508,15 @@ int main(int argc, char *argv[])
 
 	/* Get the clipboard copier, if set */
 	copier = getenv(env_cfg[NNN_COPIER]);
+
+	/* Create pipe for plugin control */
+	snprintf(g_buf, CMD_LEN_MAX, "nnn-pipe.%d", getpid());
+	mkpath(g_tmpfpath, g_buf, g_pipepath);
+	unlink(g_pipepath);
+	if (mkfifo(g_pipepath, 0600) != 0)
+		return _FAILURE;
+
+	setenv(env_cfg[NNN_PIPE], g_pipepath, TRUE);
 
 #ifdef __linux__
 	if (!progress) {
