@@ -2971,6 +2971,34 @@ static char *visit_parent(char *path, char *newpath, int *presel)
 	return dir;
 }
 
+static void find_accessible_parent(char *path, char *newpath, char *lastname, int *presel)
+{
+	char *dir;
+
+	/* Save history */
+	xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
+
+	xstrlcpy(newpath, path, PATH_MAX);
+	while (true) {
+		dir = visit_parent(path, newpath, presel);
+		if (istopdir(path) || istopdir(newpath)) {
+			if (!dir)
+				dir = dirname(newpath);
+			break;
+		}
+		if (!dir) {
+			xstrlcpy(path, newpath, PATH_MAX);
+			continue;
+		}
+		break;
+	}
+
+	xstrlcpy(path, dir, PATH_MAX);
+
+	mvprintw(xlines - 1, 0, "cannot access dir\n");
+	xdelay();
+}
+
 static bool execute_file(int cur, char *path, char *newpath, int *presel)
 {
 	if (!ndents)
@@ -3870,30 +3898,8 @@ nochange:
 		/* If CWD is deleted or moved or perms changed, find an accessible parent */
 		if (access(path, F_OK)) {
 			DPRINTF_S("directory inaccessible");
-
-			/* Save history */
-			xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
-
-			xstrlcpy(newpath, path, PATH_MAX);
-			while (true) {
-				dir = visit_parent(path, newpath, &presel);
-				if (istopdir(path) || istopdir(newpath)) {
-					if (!dir)
-						dir = dirname(newpath);
-					break;
-				}
-				if (!dir) {
-					xstrlcpy(path, newpath, PATH_MAX);
-					continue;
-				}
-				break;
-			}
-
-			xstrlcpy(path, dir, PATH_MAX);
-
+			find_accessible_parent(path, newpath, lastname, &presel);
 			setdirwatch();
-			mvprintw(xlines - 1, 0, "cannot access directory\n");
-			xdelay();
 			goto begin;
 		}
 
