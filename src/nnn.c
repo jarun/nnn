@@ -345,7 +345,7 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 /* Buffer to store plugins control pipe location */
 static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 
-static bool g_is_plugin_control_initialized = FALSE;
+static bool g_plinit = FALSE;
 
 /* Replace-str for xargs on different platforms */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
@@ -3299,7 +3299,7 @@ static void show_help(const char *path)
 	unlink(g_tmpfpath);
 }
 
-static bool initialize_plugin_control() {
+static bool plctrl_init() {
 	snprintf(g_buf, CMD_LEN_MAX, "nnn-pipe.%d", getpid());
 	mkpath(g_tmpfpath, g_buf, g_pipepath);
 	unlink(g_pipepath);
@@ -3313,9 +3313,9 @@ static bool initialize_plugin_control() {
 
 static bool run_selected_plugin(char **path, const char *file, char *newpath, char *rundir, char *runfile, char **lastname, char **lastdir)
 {
-	if (!g_is_plugin_control_initialized) {
-		initialize_plugin_control();
-		g_is_plugin_control_initialized = TRUE;
+	if (!g_plinit) {
+		plctrl_init();
+		g_plinit = TRUE;
 	}
 
 	if ((cfg.runctx != cfg.curctx)
