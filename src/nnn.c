@@ -410,6 +410,7 @@ static char mv[] = "mv -i";
 #define NONE_SELECTED 4
 #define UTIL_MISSING 5
 #define OPERATION_FAILED 6
+#define SESSION_NAME 7
 
 static const char * const messages[] = {
 	"no traversal",
@@ -419,6 +420,7 @@ static const char * const messages[] = {
 	"0 selected",
 	"missing dep",
 	"failed!",
+	"session name: ",
 };
 
 /* Supported configuration environment variables */
@@ -2028,7 +2030,7 @@ end:
 }
 
 /* Show a prompt with input string and return the changes */
-static char *xreadline(char *prefill, char *prompt)
+static char *xreadline(const char *prefill, const char *prompt)
 {
 	size_t len, pos;
 	int x, r;
@@ -2695,11 +2697,11 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 
 static void save_session(bool last_session, int *presel)
 {
-	char session_path[PATH_MAX + 1];
-	int status = _FAILURE;
+	char spath[PATH_MAX];
 	int i;
 	session_header_t header;
-	char *session_name;
+	char *sname;
+	bool status = FALSE;
 
 	header.ver = SESSIONS_VERSION;
 
@@ -2715,13 +2717,11 @@ static void save_session(bool last_session, int *presel)
 		}
 	}
 
-	session_name = !last_session ? xreadline("", "session name: ") : "@";
-	if (session_name[0] != '\0')
-		mkpath(sessiondir, session_name, session_path);
-	else
+	sname = !last_session ? xreadline(NULL, messages[SESSION_NAME]) : "@";
+	if (!sname[0])
 		return;
 
-	FILE *fsession = fopen(session_path, "wb");
+	FILE *fsession = fopen(spath, "wb");
 	if (!fsession) {
 		printwait("failed to open session file", presel);
 		return;
@@ -2740,40 +2740,39 @@ static void save_session(bool last_session, int *presel)
 			|| (header.pathln[i] > 0 && fwrite(g_ctx[i].c_path, header.pathln[i], 1, fsession) != 1))
 			goto END;
 
-	status = _SUCCESS;
+	status = TRUE;
 
 END:
 	fclose(fsession);
 
-	if (status == _FAILURE)
+	if (!status)
 		printwait("failed to write session data", presel);
 }
 
-static bool load_session(const char *session_name, char **path, char **lastdir
-		, char **lastname, bool restore_session) {
-	char session_path[PATH_MAX + 1];
-	int status = _FAILURE;
+static bool load_session(const char *sname, char **path, char **lastdir, char **lastname, bool restore) {
+	char spath[PATH_MAX];
 	int i = 0;
 	session_header_t header;
-	bool has_loaded_dynamically = !(session_name || restore_session);
+	bool has_loaded_dynamically = !(sname || restore);
+	bool status = FALSE;
 
-	if (!restore_session) {
-		session_name = session_name ? session_name : xreadline("", "session name: ");
-		if (session_name[0] != '\0')
-			mkpath(sessiondir, session_name ? session_name : xreadline("", "session name: "), session_path);
-		else
-			return _FAILURE;
+	if (!restore) {
+		sname = sname ? sname : xreadline(NULL, messages[SESSION_NAME]);
+		if (!sname[0])
+			return FALSE;
+
+		mkpath(sessiondir, sname ? sname : xreadline(NULL, messages[SESSION_NAME]), spath);
 	} else
-		mkpath(sessiondir, "@", session_path);
+		mkpath(sessiondir, "@", spath);
 
 	if (has_loaded_dynamically)
 		save_session(TRUE, NULL);
 
-	FILE *fsession = fopen(session_path, "rb");
+	FILE *fsession = fopen(spath, "rb");
 	if (!fsession) {
 		printmsg("failed to open session file");
 		xdelay();
-		return _FAILURE;
+		return FALSE;
 	}
 
 	if ((fread(&header, sizeof(header), 1, fsession) != 1)
@@ -2796,12 +2795,12 @@ static bool load_session(const char *session_name, char **path, char **lastdir
 	*path = g_ctx[cfg.curctx].c_path;
 	*lastdir = g_ctx[cfg.curctx].c_last;
 	*lastname = g_ctx[cfg.curctx].c_name;
-	status = _SUCCESS;
+	status = TRUE;
 
 END:
 	fclose(fsession);
 
-	if (status == _FAILURE) {
+	if (!status) {
 		printmsg("failed to read session data");
 		xdelay();
 	}
@@ -3910,7 +3909,7 @@ static void browse(char *ipath, const char *session)
 	xcols = COLS;
 
 	/* setup first context */
-	if (!session || load_session(session, &path, &lastdir, &lastname, FALSE) == _FAILURE) {
+	if (!session || !load_session(session, &path, &lastdir, &lastname, FALSE)) {
 		xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
 		path = g_ctx[0].c_path;
 		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = '\0';
@@ -4465,28 +4464,28 @@ nochange:
 				copycurname();
 			goto begin;
 		case SEL_STATS:
-			if (!ndents)
-				break;
-
-			mkpath(path, dents[cur].name, newpath);
-			if (lstat(newpath, &sb) == -1 || !show_stats(newpath, &sb)) {
-				printwarn(&presel);
-				goto nochange;
+			if (ndents) {
+				mkpath(path, dents[cur].name, newpath);
+				if (lstat(newpath, &sb) == -1 || !show_stats(newpath, &sb)) {
+					printwarn(&presel);
+					goto nochange;
+				}
 			}
 			break;
 		case SEL_ARCHIVELS: // fallthrough
 		case SEL_EXTRACT: // fallthrough
-		case SEL_RUNEDIT: // fallthrough
-		case SEL_RUNPAGE:
-			if (!ndents)
-				break; // fallthrough
 		case SEL_REDRAW: // fallthrough
 		case SEL_RENAMEMUL: // fallthrough
 		case SEL_HELP: // fallthrough
+		case SEL_RUNEDIT: // fallthrough
+		case SEL_RUNPAGE: // fallthrough
 		case SEL_LOCK:
 		{
 			if (ndents)
 				mkpath(path, dents[cur].name, newpath);
+			else if (sel == SEL_ARCHIVELS || sel == SEL_EXTRACT
+				 || sel == SEL_RUNEDIT || sel == SEL_RUNPAGE)
+				break;
 
 			switch (sel) {
 			case SEL_ARCHIVELS:
@@ -4496,9 +4495,7 @@ nochange:
 				handle_archive(newpath, path, 'x');
 				break;
 			case SEL_REDRAW:
-				if (ndents)
-					copycurname();
-				goto begin;
+				break;
 			case SEL_RENAMEMUL:
 				endselection();
 
@@ -4524,7 +4521,7 @@ nochange:
 			/* In case of successful operation, reload contents */
 
 			/* Continue in navigate-as-you-type mode, if enabled */
-			if (cfg.filtermode)
+			if (cfg.filtermode && sel != SEL_REDRAW)
 				presel = FILTER;
 
 			/* Save current */
@@ -4667,14 +4664,15 @@ nochange:
 				presel = FILTER;
 			goto begin;
 		}
-		case SEL_OPENWITH: // fallthrough
-		case SEL_RENAME:
-			if (!ndents)
-				break; // fallthrough
 		case SEL_ARCHIVE: // fallthrough
-		case SEL_NEW:
+		case SEL_OPENWITH: // fallthrough
+		case SEL_NEW: // fallthrough
+		case SEL_RENAME:
 		{
 			int dup = 'n';
+
+			if (!ndents && (sel == SEL_OPENWITH || sel == SEL_RENAME))
+				break;
 
 			switch (sel) {
 			case SEL_ARCHIVE:
@@ -4973,9 +4971,27 @@ nochange:
 			tmp = ndents ? dents[cur].name : NULL;
 			unmount(tmp, newpath, &presel, path);
 			goto nochange;
+		case SEL_SESSIONS:
+			r = get_input("'s'(ave) / 'l'(oad) / 'r'(estore) session?");
+
+			if (r == 's') {
+				save_session(FALSE, &presel);
+				goto nochange;
+			}
+
+			if (r == 'l' || r == 'r') {
+				if (load_session(NULL, &path, &lastdir, &lastname, r == 'r')) {
+					setdirwatch();
+					goto begin;
+				}
+
+				presel = MSGWAIT;
+				goto nochange;
+			}
+			break;
+		case SEL_QUITCTX: // fallthrough
 		case SEL_QUITCD: // fallthrough
-		case SEL_QUIT: // fallthrough
-		case SEL_QUITCTX:
+		case SEL_QUIT:
 			if (sel == SEL_QUITCTX) {
 				fd = cfg.curctx; /* fd used as tmp var */
 				for (r = (fd + 1) & ~CTX_MAX;
@@ -5030,22 +5046,6 @@ nochange:
 				}
 			}
 			return;
-		case SEL_SESSIONS:
-			r = get_input("'s'(ave) / 'l'(oad) / 'r'(estore) session?");
-
-			if (r == 's') {
-				save_session(FALSE, &presel);
-				goto nochange;
-			} else if (r == 'l' || r == 'r') {
-				if (load_session(NULL, &path, &lastdir, &lastname, r == 'r') == _SUCCESS) {
-					setdirwatch();
-					goto begin;
-				}
-
-				presel = MSGWAIT;
-				goto nochange;
-			}
-			break;
 		default:
 			if (xlines != LINES || xcols != COLS) {
 				idle = 0;

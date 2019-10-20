@@ -102,11 +102,11 @@ enum action {
 	SEL_RUNEDIT,
 	SEL_RUNPAGE,
 	SEL_LOCK,
+	SEL_SESSIONS,
 	SEL_QUITCTX,
 	SEL_QUITCD,
 	SEL_QUIT,
 	SEL_CLICK,
-	SEL_SESSIONS,
 };
 
 /* Associate a pressed key to an action */
