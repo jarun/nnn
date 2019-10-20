@@ -11,9 +11,12 @@ The currently available plugins are listed below.
 | --- | --- | --- | --- |
 | boom | sh | [moc](http://moc.daper.net/) | Play random music from dir |
 | dups | sh | find, md5sum,<br>sort uniq xargs | List non-empty duplicate files in current dir |
+| cd | sh | - | Change to arbitrary directory |
+| cd-to-clipboard | sh | xsel | Change to directory in clipboard |
 | checksum | sh | md5sum,<br>sha256sum | Create and verify checksums |
 | drag-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files from nnn |
 | drop-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files into nnn |
+| fzf | sh | fzf | Change to the directory of a file selected by fzf |
 | fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | curl | Update plugins |
 | gutenread | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional)| Browse, download, read from Project Gutenberg |
@@ -36,6 +39,7 @@ The currently available plugins are listed below.
 | picker | sh | nnn | Pick files and list one per line (to pipe) |
 | pywal | sh | pywal | Set image as wallpaper, change terminal colorscheme |
 | readit | sh | pdftotext, mpv,<br>pico2wave | Read a PDF or text file aloud |
+| resolve-link-dir | sh | - | Change to the resolve directory of a link |
 | ringtone | sh | date, ffmpeg | Create a variable bitrate mp3 ringtone from file |
 | splitjoin | sh | split, cat | Split file or join selection |
 | suedit | sh | sudoedit/sudo/doas | Edit file using superuser permissions |
@@ -67,28 +71,59 @@ With this, plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay
 
 **Method 2:** Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
-## File access from plugins
+## Create your own plugins
 
-Plugins can access:
-- all files in the directory (`nnn` switches to the dir where the plugin is to be run so the dir is `$PWD` for the plugin)
-- the current file under the cursor (the file name is passed as the first argument to a plugin)
-- the traversed path where plugin is invoked (this is the second argument to the plugin; for all practical purposes this is the same as `$PWD` except paths with symlinks)
-- the current selection (by reading the file `.selection` in config dir, see the plugin `ndiff`)
+Plugins are a powerful yet easy way to extend the capabilities of `nnn`.
+
+Plugins are scripts that can be written in any scripting language. However, POSIX-compliant shell scripts runnable in `sh` are preferred.
 
 Each script has a _Description_ section which provides more details on what the script does, if applicable.
 
-## Create your own plugins
+The plugins reside in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 
-Plugins are scripts and all scripting languages should work. However, POSIX-compliant shell scripts runnable in `sh` are preferred. If that's too rudimentary for your use case, use Python, Perl or Ruby.
+When `nnn` executes a plugin, it does the following:
+- Change to the directory where the plugin is to be run (`$PWD` pointing to the active directory)
+- Passes two arguments to the script:
+    1. The hovered file's name
+    2. The working directory (might differ from `$PWD` in case of symlinked paths; non-canonical)
+- Sets the environment variable `NNN_PIPE` used to control `nnn` active directory.
 
-You can create your own plugins by putting them in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
+Plugins can also access the current selections by reading the `.selections` file in the config directory (See the `ndiff` plugin for example).
 
-For example, you could create a executable shell script `git-changes`:
+#### Controlling `nnn`'s active directory
+`nnn` provides a mechanism for plugins to control its active directory.
+The way to do so is by writing to the pipe pointed by the environment variable `NNN_PIPE`.
+The plugin should write a single string in the format `<number><path>` without a newline at the end. For example, `1/etc`.
+The number indicates the context to change the active directory of (0 is used to indicate the current context).
 
+For convenience, we provided a helper script named `.nnn-plugin-helper` and a function named `nnn_cd` to ease this process. `nnn_cd` receives the path to change to as the first argument, and the context as an optional second argument.
+If a context is not provided, it is asked for explicitly.
+Usage examples can be found in the Examples section below.
+
+#### Examples
+There are many plugins provided by `nnn` which can be used as examples. Here are a few simple selected examples.
+
+- Show the git log of changes to the particular file along with the code for a quick and easy review.
+   ```sh
     #!/usr/bin/env sh
-    git log -p -- "$@"
-
-And then trigger it by hitting the pick plugin key and selecting `git-changes` which will conveniently show the git log of changes to the particular file along with the code for a quick and easy review.
+    git log -p -- "$1"
+    ```
+    
+- Change to directory in clipboard using helper script
+    ```sh
+    #!/usr/bin/env sh
+    . $(dirname $0/.nnn-plugin-helper)
+    nnn_cd "$(xsel -ob)"
+    ```
+    
+- Change to arbitrary directory without helper script
+    ```sh
+    #!/usr/bin/env sh
+    echo -n "cd to: "
+    read dir
+    
+    echo -n "0$dir" > $NNN_PIPE
+    ```
 
 ## Contributing plugins
 
