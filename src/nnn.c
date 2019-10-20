@@ -3256,10 +3256,10 @@ static void show_help(const char *path)
 	const char helpstr[] = {
 		"0\n"
 		"1NAVIGATION\n"
-		"a↑ k  Up          PgUp ^U  Scroll up\n"
-		"a↓ j  Down        PgDn ^D  Scroll down\n"
-		"a← h  Parent      ~ ` @ -  HOME, /, start, last\n"
-	      "8↵ → l  Open              .  Toggle show hidden\n"
+	       "9Up k  Up          PgUp ^U  Scroll up\n"
+	     "7Down j  Down        PgDn ^D  Scroll down\n"
+	     "7Left h  Parent      ~ ` @ -  HOME, /, start, last\n"
+        "2Ret Right l  Open              .  Toggle show hidden\n"
 	       "9g ^A  First entry    G ^E  Last entry\n"
 		  "cb  Pin current dir  ^B  Go to pinned dir\n"
 	    "6(Sh)Tab  Cycle context     d  Toggle detail view\n"
@@ -3296,9 +3296,6 @@ static void show_help(const char *path)
 		close(fd);
 		return;
 	}
-
-	if (getutil("fortune"))
-		pipetof("fortune -s", fp);
 
 	start = end = helpstr;
 	while (*end) {
