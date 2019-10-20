@@ -29,6 +29,6 @@ fi
 cd $CONFIG_DIR
 curl -Ls -O https://github.com/jarun/nnn/archive/master.tar.gz
 tar -zxf master.tar.gz
-cp -vrf nnn-master/plugins .
+cp -vRf nnn-master/plugins .
 $sucmd mv -vf nnn-master/misc/nlaunch/nlaunch /usr/local/bin/
 rm -rf nnn-master/ master.tar.gz README.md
