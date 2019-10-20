@@ -3299,7 +3299,8 @@ static void show_help(const char *path)
 	unlink(g_tmpfpath);
 }
 
-static bool plctrl_init() {
+static bool plctrl_init()
+{
 	snprintf(g_buf, CMD_LEN_MAX, "nnn-pipe.%d", getpid());
 	mkpath(g_tmpfpath, g_buf, g_pipepath);
 	unlink(g_pipepath);
