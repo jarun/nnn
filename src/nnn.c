@@ -2700,6 +2700,7 @@ static void save_session(bool last_session, int *presel)
 	char spath[PATH_MAX];
 	int i;
 	session_header_t header;
+	FILE *fsession;
 	char *sname;
 	bool status = FALSE;
 
@@ -2720,8 +2721,9 @@ static void save_session(bool last_session, int *presel)
 	sname = !last_session ? xreadline(NULL, messages[SESSION_NAME]) : "@";
 	if (!sname[0])
 		return;
+	mkpath(sessiondir, sname, spath);
 
-	FILE *fsession = fopen(spath, "wb");
+	fsession = fopen(spath, "wb");
 	if (!fsession) {
 		printwait("failed to open session file", presel);
 		return;
@@ -2753,6 +2755,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	char spath[PATH_MAX];
 	int i = 0;
 	session_header_t header;
+	FILE *fsession;
 	bool has_loaded_dynamically = !(sname || restore);
 	bool status = FALSE;
 
@@ -2761,14 +2764,14 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 		if (!sname[0])
 			return FALSE;
 
-		mkpath(sessiondir, sname ? sname : xreadline(NULL, messages[SESSION_NAME]), spath);
+		mkpath(sessiondir, sname, spath);
 	} else
 		mkpath(sessiondir, "@", spath);
 
 	if (has_loaded_dynamically)
 		save_session(TRUE, NULL);
 
-	FILE *fsession = fopen(spath, "rb");
+	fsession = fopen(spath, "rb");
 	if (!fsession) {
 		printmsg("failed to open session file");
 		xdelay();
