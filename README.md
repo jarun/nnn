@@ -95,7 +95,6 @@ A curses library with wide char support (e.g. ncursesw), libreadline (`make O_NO
 | trash-cli | optional | trash files (default action: delete) |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/Advanced-use-cases#show-cp-mv-progress)) | optional | copy, move progress |
-| fortune | optional | random quotes in help screen |
 | `$VISUAL` (else `$EDITOR`), `$PAGER`, `$SHELL` | optional | fallback vi, less, sh |
 
 #### From a package manager
