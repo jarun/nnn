@@ -3259,7 +3259,7 @@ static void show_help(const char *path)
 	       "9Up k  Up          PgUp ^U  Scroll up\n"
 	     "7Down j  Down        PgDn ^D  Scroll down\n"
 	     "7Left h  Parent      ~ ` @ -  HOME, /, start, last\n"
-        "2Ret Right l  Open              .  Toggle show hidden\n"
+	"2Ret Right l  Open              .  Toggle show hidden\n"
 	       "9g ^A  First entry    G ^E  Last entry\n"
 		  "cb  Pin current dir  ^B  Go to pinned dir\n"
 	    "6(Sh)Tab  Cycle context     d  Toggle detail view\n"
