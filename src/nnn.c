@@ -3271,7 +3271,7 @@ static void show_help(const char *path)
 		"1FILES\n"
 		 "b^O  Open with...      n  Create new/link\n"
 		  "cD  File detail   ^R F2  Rename/duplicate\n"
-	     "7⎵ ^J/a  Select entry/all  r  Batch rename\n"
+	 "3Space ^J/a  Select entry/all  r  Batch rename\n"
 	       "9m ^K  Sel range, clear  M  List selection\n"
 		  "cP  Copy selection    K  Edit selection\n"
 		  "cV  Move selection    w  Copy/move sel as\n"

@@ -193,10 +193,10 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
 
 ```
  NAVIGATION
-          ↑ k  Up          PgUp ^U  Scroll up
-          ↓ j  Down        PgDn ^D  Scroll down
-          ← h  Parent      ~ ` @ -  HOME, /, start, last
-        ↵ → l  Open              .  Toggle show hidden
+         Up k  Up          PgUp ^U  Scroll up
+       Down j  Down        PgDn ^D  Scroll down
+       Left h  Parent      ~ ` @ -  HOME, /, start, last
+  Ret Right l  Open              .  Toggle show hidden
          g ^A  First entry    G ^E  Last entry
             b  Pin current dir  ^B  Go to pinned dir
       (Sh)Tab  Cycle context     d  Toggle detail view
@@ -208,7 +208,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
  FILES
            ^O  Open with...      n  Create new/link
             D  File detail   ^R F2  Rename/duplicate
-       ⎵ ^J/a  Select entry/all  r  Batch rename
+   Space ^J/a  Select entry/all  r  Batch rename
          m ^K  Sel range, clear  M  List selection
             P  Copy selection    K  Edit selection
             V  Move selection    w  Copy/move sel as
