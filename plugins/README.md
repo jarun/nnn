@@ -16,7 +16,7 @@ The currently available plugins are listed below.
 | checksum | sh | md5sum,<br>sha256sum | Create and verify checksums |
 | drag-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files from nnn |
 | drop-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files into nnn |
-| fzcd | sh | fzy/fzf (optional fd) | Change to the directory of a file/directory selected by fzy/fzf |
+| fzcd | sh | fzy/fzf<br>(optional fd) | Change to the directory of a file/directory selected by fzy/fzf |
 | fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | curl | Update plugins |
 | gutenread | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional)| Browse, download, read from Project Gutenberg |
@@ -25,6 +25,7 @@ The currently available plugins are listed below.
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
 | ipinfo | sh | curl, whois | Fetch external IP address and whois information |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
+| lncd | sh | - | Change to the resolve directory of a link |
 | mediainf | sh | mediainfo | Show media information |
 | moclyrics | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) | Show lyrics of the track playing in moc |
 | mocplay | sh | [moc](http://moc.daper.net/) | Append (and/or play) selection/dir/file in moc|
@@ -39,7 +40,6 @@ The currently available plugins are listed below.
 | picker | sh | nnn | Pick files and list one per line (to pipe) |
 | pywal | sh | pywal | Set image as wallpaper, change terminal colorscheme |
 | readit | sh | pdftotext, mpv,<br>pico2wave | Read a PDF or text file aloud |
-| lnkcd | sh | - | Change to the resolve directory of a link |
 | ringtone | sh | date, ffmpeg | Create a variable bitrate mp3 ringtone from file |
 | splitjoin | sh | split, cat | Split file or join selection |
 | suedit | sh | sudoedit/sudo/doas | Edit file using superuser permissions |
