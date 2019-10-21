@@ -16,7 +16,7 @@ The currently available plugins are listed below.
 | checksum | sh | md5sum,<br>sha256sum | Create and verify checksums |
 | drag-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files from nnn |
 | drop-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files into nnn |
-| fzf | sh | fzf | Change to the directory of a file selected by fzf |
+| fzcd | sh | fzy/fzf (optional fd) | Change to the directory of a file/directory selected by fzy/fzf |
 | fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | curl | Update plugins |
 | gutenread | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional)| Browse, download, read from Project Gutenberg |

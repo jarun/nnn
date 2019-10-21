@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+
+# Description: Run fzf and go to the directory of the file selected
+#
+# Shell: POSIX compliant
+# Author: Anna Arad
+
+. $(dirname $0)/.nnn-plugin-helper
+
+if [ "$(cmd_exists fzy)" -eq "0" ]; then
+	if [ "$(cmd_exists fd)" -eq "0" ]; then
+		fd=fd
+	elif [ "$(cmd_exists fdfind)" -eq "0" ]; then
+		fd=fdfind
+	else
+		fd=find
+	fi
+
+	sel=$($fd | fzy)
+elif [ "$(cmd_exists fzf)" -eq "0" ]; then
+	sel=$(fzf --print0)
+else
+	exit 1
+fi
+
+if [ "$?" -eq "0" ]; then
+	case "$(file -bi "$sel")" in
+		*directory*) ;;
+		*) sel=$(dirname $sel) ;;
+	esac
+	nnn_cd "$PWD/$sel"
+fi

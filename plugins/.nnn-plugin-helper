@@ -26,3 +26,8 @@ nnn_cd () {
 
     echo -n ${context:-0}$dir > $NNN_PIPE
 }
+
+cmd_exists () {
+	which "$1" > /dev/null 2>&1
+	echo $?
+}
