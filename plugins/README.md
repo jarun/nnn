@@ -39,7 +39,7 @@ The currently available plugins are listed below.
 | picker | sh | nnn | Pick files and list one per line (to pipe) |
 | pywal | sh | pywal | Set image as wallpaper, change terminal colorscheme |
 | readit | sh | pdftotext, mpv,<br>pico2wave | Read a PDF or text file aloud |
-| resolve-link-dir | sh | - | Change to the resolve directory of a link |
+| lnkcd | sh | - | Change to the resolve directory of a link |
 | ringtone | sh | date, ffmpeg | Create a variable bitrate mp3 ringtone from file |
 | splitjoin | sh | split, cat | Split file or join selection |
 | suedit | sh | sudoedit/sudo/doas | Edit file using superuser permissions |
