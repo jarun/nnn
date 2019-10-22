@@ -11,8 +11,6 @@ The currently available plugins are listed below.
 | --- | --- | --- | --- |
 | boom | sh | [moc](http://moc.daper.net/) | Play random music from dir |
 | dups | sh | find, md5sum,<br>sort uniq xargs | List non-empty duplicate files in current dir |
-| cd | sh | - | Change to arbitrary directory |
-| cd-to-clipboard | sh | xsel | Change to directory in clipboard |
 | checksum | sh | md5sum,<br>sha256sum | Create and verify checksums |
 | drag-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files from nnn |
 | drop-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files into nnn |
@@ -25,7 +23,6 @@ The currently available plugins are listed below.
 | imgur | bash | - | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) |
 | ipinfo | sh | curl, whois | Fetch external IP address and whois information |
 | kdeconnect | sh | kdeconnect-cli | Send selected files to an Android device |
-| lncd | sh | - | Change to the resolve directory of a link |
 | mediainf | sh | mediainfo | Show media information |
 | moclyrics | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) | Show lyrics of the track playing in moc |
 | mocplay | sh | [moc](http://moc.daper.net/) | Append (and/or play) selection/dir/file in moc|
@@ -113,7 +110,16 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
     ```sh
     #!/usr/bin/env sh
     . $(dirname $0/.nnn-plugin-helper)
+
     nnn_cd "$(xsel -ob)"
+    ```
+
+- Change direcory to the location of a link using helper script with specific context (current)
+    ```sh
+    #!/usr/bin/env sh
+    . $(dirname $0/.nnn-plugin-helper)
+
+    nnn_cd "$(dirname $(readlink -fn $1))" 0
     ```
     
 - Change to arbitrary directory without helper script
