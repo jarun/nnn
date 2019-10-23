@@ -109,7 +109,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 - Change to directory in clipboard using helper script
     ```sh
     #!/usr/bin/env sh
-    . $(dirname $0/.nnn-plugin-helper)
+    . $(dirname $0)/.nnn-plugin-helper
 
     nnn_cd "$(xsel -ob)"
     ```
@@ -117,7 +117,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 - Change direcory to the location of a link using helper script with specific context (current)
     ```sh
     #!/usr/bin/env sh
-    . $(dirname $0/.nnn-plugin-helper)
+    . $(dirname $0)/.nnn-plugin-helper
 
     nnn_cd "$(dirname $(readlink -fn $1))" 0
     ```
