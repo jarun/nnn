@@ -342,6 +342,11 @@ static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 /* Buffer to store tmp file path to show selection, file stats and help */
 static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 
+/* Buffer to store plugins control pipe location */
+static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
+
+static bool g_plinit = FALSE;
+
 /* Replace-str for xargs on different platforms */
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
 #define REPLACE_STR 'J'
@@ -429,9 +434,10 @@ static const char * const messages[] = {
 #define NNN_CONTEXT_COLORS 2
 #define NNN_IDLE_TIMEOUT 3
 #define NNN_COPIER 4
-#define NNNLVL 5 /* strings end here */
-#define NNN_USE_EDITOR 6 /* flags begin here */
-#define NNN_TRASH 7
+#define NNNLVL 5
+#define NNN_PIPE 6 /* strings end here */
+#define NNN_USE_EDITOR 7 /* flags begin here */
+#define NNN_TRASH 8
 
 static const char * const env_cfg[] = {
 	"NNN_BMS",
@@ -440,6 +446,7 @@ static const char * const env_cfg[] = {
 	"NNN_IDLE_TIMEOUT",
 	"NNN_COPIER",
 	"NNNLVL",
+	"NNN_PIPE",
 	"NNN_USE_EDITOR",
 	"NNN_TRASH",
 };
@@ -499,7 +506,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 static int dentfind(const char *fname, int n);
 static void move_cursor(int target, int ignore_scrolloff);
-static bool getutil(char *util);
+static inline bool getutil(char *util);
 
 /* Functions */
 
@@ -3340,24 +3347,68 @@ static void show_help(const char *path)
 	unlink(g_tmpfpath);
 }
 
-static bool run_selected_plugin(char *path, const char *file, char *newpath, char *rundir, char *runfile, char *lastname)
+static bool plctrl_init()
 {
+	snprintf(g_buf, CMD_LEN_MAX, "nnn-pipe.%d", getpid());
+	mkpath(g_tmpfpath, g_buf, g_pipepath);
+	unlink(g_pipepath);
+	if (mkfifo(g_pipepath, 0600) != 0)
+		return _FAILURE;
+
+	setenv(env_cfg[NNN_PIPE], g_pipepath, TRUE);
+
+	return _SUCCESS;
+}
+
+static bool run_selected_plugin(char **path, const char *file, char *newpath, char *rundir, char *runfile, char **lastname, char **lastdir)
+{
+	if (!g_plinit) {
+		plctrl_init();
+		g_plinit = TRUE;
+	}
+
 	if ((cfg.runctx != cfg.curctx)
 	    /* Must be in plugin directory to select plugin */
-	    || (strcmp(path, plugindir) != 0))
+	    || (strcmp(*path, plugindir) != 0))
 		return FALSE;
 
-	mkpath(path, file, newpath);
+	int fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
+	if (fd == -1)
+		return FALSE;
+
+	mkpath(*path, file, newpath);
 	/* Copy to path so we can return back to earlier dir */
-	xstrlcpy(path, rundir, PATH_MAX);
+	xstrlcpy(*path, rundir, PATH_MAX);
 	if (runfile[0]) {
-		xstrlcpy(lastname, runfile, NAME_MAX);
-		spawn(newpath, lastname, path, path, F_NORMAL);
+		xstrlcpy(*lastname, runfile, NAME_MAX);
+		spawn(newpath, *lastname, *path, *path, F_NORMAL);
 		runfile[0] = '\0';
 	} else
-		spawn(newpath, NULL, path, path, F_NORMAL);
+		spawn(newpath, NULL, *path, *path, F_NORMAL);
 	rundir[0] = '\0';
 	cfg.runplugin = 0;
+
+	size_t len = read(fd, g_buf, PATH_MAX);
+	g_buf[len] = '\0';
+
+	close(fd);
+
+	if (len > 1) {
+		int ctx = g_buf[0] - '0';
+
+		if (ctx == 0) {
+			xstrlcpy(*lastdir, *path, PATH_MAX);
+			xstrlcpy(*path, g_buf + 1, PATH_MAX);
+		} else if (ctx >= 1 && ctx <= CTX_MAX) {
+			int r = ctx - 1;
+			g_ctx[r].c_cfg.ctxactive = 0;
+			savecurctx(&cfg, g_buf + 1, dents[cur].name, r);
+			*path = g_ctx[r].c_path;
+			*lastdir = g_ctx[r].c_last;
+			*lastname = g_ctx[r].c_name;
+		}
+	}
+
 	return TRUE;
 }
 
@@ -4146,8 +4197,9 @@ nochange:
 
 				/* Handle plugin selection mode */
 				if (cfg.runplugin) {
-					if (!run_selected_plugin(path, dents[cur].name, newpath, rundir, runfile, lastname))
+					if (!run_selected_plugin(&path, dents[cur].name, newpath, rundir, runfile, &lastname, &lastdir))
 						continue;
+
 					setdirwatch();
 					goto begin;
 				}
@@ -5243,6 +5295,8 @@ static void cleanup(void)
 	free(initpath);
 	free(bmstr);
 	free(pluginstr);
+
+	unlink(g_pipepath);
 
 #ifdef DBGMODE
 	disabledbg();

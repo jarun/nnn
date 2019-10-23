@@ -8,15 +8,27 @@
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/
 PLUGIN_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins
 
-# backup any earlier plugins
-if [ -d $PLUGIN_DIR ]; then
-    tar -C $CONFIG_DIR -cf $CONFIG_DIR"plugins-$(date '+%Y%m%d%H%M').tar.bz2" plugins/
+is_cmd_exists () {
+    which "$1" > /dev/null 2>&1
+    echo $?
+}
+
+if [ "$(is_cmd_exists sudo)" == "0" ]; then
+    sucmd=sudo
+elif [ "$(is_cmd_exists doas)" == "0" ]; then
+    sucmd=doas
+else
+    sucmd=: # noop
 fi
 
-mkdir -p $PLUGIN_DIR
-cd $PLUGIN_DIR
+# backup any earlier plugins
+if [ -d $PLUGIN_DIR ]; then
+    tar -C $CONFIG_DIR -czf $CONFIG_DIR"plugins-$(date '+%Y%m%d%H%M').tar.gz" plugins/
+fi
+
+cd $CONFIG_DIR
 curl -Ls -O https://github.com/jarun/nnn/archive/master.tar.gz
-tar -xf master.tar.gz
-cp -vf nnn-master/plugins/* .
-sudo mv -vf nnn-master/misc/nlaunch/nlaunch /usr/local/bin/
+tar -zxf master.tar.gz
+cp -vRf nnn-master/plugins .
+$sucmd mv -vf nnn-master/misc/nlaunch/nlaunch /usr/local/bin/
 rm -rf nnn-master/ master.tar.gz README.md

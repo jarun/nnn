@@ -1,0 +1,33 @@
+#!/usr/bin/env sh
+
+# Description: Helper script for plugins
+#
+# Shell: POSIX compliant
+# Author: Anna Arad
+
+selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+
+## Ask nnn to switch to directory $1 in context $2.
+## If $2 is not provided, the function asks explicitly.
+nnn_cd () {
+    dir=$1
+
+    if [ -z "$NNN_PIPE" ]; then
+        echo "No pipe file found" 1>&2
+        return
+    fi
+
+    if [ -n "$2" ]; then
+        context=$2
+    else
+        echo -n "Choose context 1-4 (blank for current): "
+        read context
+    fi
+
+    echo -n ${context:-0}$dir > $NNN_PIPE
+}
+
+cmd_exists () {
+	which "$1" > /dev/null 2>&1
+	echo $?
+}
