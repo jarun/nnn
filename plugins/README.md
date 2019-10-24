@@ -14,7 +14,7 @@ The currently available plugins are listed below.
 | checksum | sh | md5sum,<br>sha256sum | Create and verify checksums |
 | drag-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files from nnn |
 | drop-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files into nnn |
-| fzcd | sh | fzy/fzf<br>(optional fd) | Change to the directory of a file/directory selected by fzy/fzf |
+| fzcd | sh | fzy/fzf<br>(optional fd) | Change to the directory of a fuzzy-selected file/dir |
 | fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | curl | Update plugins |
 | gutenread | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional)| Browse, download, read from Project Gutenberg |
@@ -66,7 +66,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You ca
 
 With this, plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be run with <kbd>:p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen. Up to 10 plugins can have such keybinds.
 
-To assign keys to arbitrary commands (non-shell interpreted) and invoke like plugins, add `_` (underscore) before the command. For example:
+To assign keys to arbitrary commands (non-shell-interpreted) and invoke like plugins, add `_` (underscore) before the command. For example:
 
     export NNN_PLUG='x:_chmod +x;o:fzy-open'
 

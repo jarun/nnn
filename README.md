@@ -30,7 +30,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - File picker, (neo)vim plugin
 - Navigation
   - *Navigate-as-you-type* with dir auto-select
-  - Contexts (_aka_ tabs/workspaces) with configurable colors
+  - Contexts (_aka_ tabs/workspaces) with custom colors
   - Sessions, bookmarks; pin and visit a dir
   - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick reference
   - CD on quit (*easy* shell integration)
@@ -50,7 +50,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - Detailed file information
   - Media information (using plugin)
 - Convenience
-  - Run plugins (or commands) with configurable keybinds
+  - Run plugins and commands with custom keybinds
   - FreeDesktop compliant trash (needs trash-cli)
   - SSHFS mounts (needs sshfs)
   - Cross-dir file/all/range selection
@@ -147,7 +147,7 @@ There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$
 | Example `export` | Description |
 | --- | --- |
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | key-bookmark pairs [max 10] |
-| `NNN_PLUG='o:fzy-open;p:mocplay;m:nmount;t:thumb'` | key-plugin pairs (<kbd>:key</kbd> to run) [max 15] |
+| `NNN_PLUG='p:mocplay;m:nmount;t:thumb;x:_chmod +x'` | key-plugin (or cmd) pairs (<kbd>:key</kbd> to run) [max 15] |
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
