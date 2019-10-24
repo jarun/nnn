@@ -66,6 +66,10 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You ca
 
 With this, plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be run with <kbd>:p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen. Up to 10 plugins can have such keybinds.
 
+To assign keys to arbitrary commands (non-shell interpreted) and invoke like plugins, add `_` (underscore) before the command. For example:
+
+    export NNN_PLUG='x:_chmod +x;o:fzy-open'
+
 **Method 2:** Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
 ## Create your own plugins
@@ -105,7 +109,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
     #!/usr/bin/env sh
     git log -p -- "$1"
     ```
-    
+
 - Change to directory in clipboard using helper script
     ```sh
     #!/usr/bin/env sh
@@ -121,13 +125,13 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 
     nnn_cd "$(dirname $(readlink -fn $1))" 0
     ```
-    
+
 - Change to arbitrary directory without helper script
     ```sh
     #!/usr/bin/env sh
     echo -n "cd to: "
     read dir
-    
+
     echo -n "0$dir" > $NNN_PIPE
     ```
 

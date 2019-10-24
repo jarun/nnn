@@ -128,7 +128,7 @@
 #define MSGWAIT '$'
 #define REGEX_MAX 48
 #define BM_MAX 10
-#define PLUGIN_MAX 10
+#define PLUGIN_MAX 15
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per filename = 64*32B = 2KB */
 #define DESCRIPTOR_LEN 32
@@ -4941,13 +4941,21 @@ nochange:
 				}
 
 				if (sel == SEL_PLUGKEY) {
+					uchar flag = F_NORMAL;
+
 					r = get_input("");
 					tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
 					if (!tmp)
 						goto nochange;
 
-					mkpath(plugindir, tmp, newpath);
-					spawn(newpath, (ndents ? dents[cur].name : NULL), path, path, F_NORMAL);
+					if (tmp[0] == '_' && tmp[1]) {
+						xstrlcpy(newpath, ++tmp, PATH_MAX);
+						flag = F_CLI | F_CONFIRM;
+					} else
+						mkpath(plugindir, tmp, newpath);
+
+					spawn(newpath, (ndents ? dents[cur].name : NULL),
+					      path, path, flag);
 
 					if (cfg.filtermode)
 						presel = FILTER;
