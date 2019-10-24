@@ -4667,13 +4667,12 @@ nochange:
 				selendid = ndents - 1;
 			}
 
-			for (r = selstartid; r <= selendid; ++r) {
+			for (r = selstartid; r <= selendid; ++r)
 				if (!(dents[r].flags & FILE_SELECTED)) {
 					appendfpath(newpath, mkpath(path, dents[r].name, newpath));
 					dents[r].flags |= FILE_SELECTED;
 					++nselected;
 				}
-			}
 
 			/* Show the range count */
 			//r = selendid - selstartid + 1;
@@ -4948,10 +4947,7 @@ nochange:
 						goto nochange;
 
 					mkpath(plugindir, tmp, newpath);
-					if (ndents)
-						spawn(newpath, dents[cur].name, path, path, F_NORMAL);
-					else
-						spawn(newpath, NULL, path, path, F_NORMAL);
+					spawn(newpath, (ndents ? dents[cur].name : NULL), path, path, F_NORMAL);
 
 					if (cfg.filtermode)
 						presel = FILTER;
