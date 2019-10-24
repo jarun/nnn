@@ -50,10 +50,10 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - Detailed file information
   - Media information (using plugin)
 - Convenience
-  - Lots of plugins with configurable keybinds
+  - Plugins with configurable keybinds
   - FreeDesktop compliant trash (needs trash-cli)
   - SSHFS mounts (needs sshfs)
-  - Cross-dir file selection, all/range selection
+  - Cross-dir file/all/range selection
   - Batch rename selection or dir entries
   - Copy (as), move (as), delete, archive, link selection
   - Create, rename, duplicate files and dirs
