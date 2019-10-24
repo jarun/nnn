@@ -185,7 +185,7 @@ typedef unsigned long ulong;
 typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
-typedef long long int ll;
+typedef long long ll;
 
 /* STRUCTURES */
 
@@ -596,14 +596,14 @@ static int get_input(const char *prompt)
 #ifdef KEY_RESIZE
 	do {
 		r = getch();
-		if ( r == KEY_RESIZE) {
+		if (r == KEY_RESIZE) {
 			if (prompt) {
 				clearoldprompt();
 				xlines = LINES;
 				printprompt(prompt);
 			}
 		}
-	} while ( r == KEY_RESIZE);
+	} while (r == KEY_RESIZE);
 #else
 	r = getch();
 #endif
@@ -769,14 +769,16 @@ static char *xbasename(char *path)
 	return base ? base + 1 : path;
 }
 
-static int create_tmp_file()
+static int create_tmp_file(void)
 {
 	xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - g_tmpfplen);
 
 	int fd = mkstemp(g_tmpfpath);
+
 	if (fd == -1) {
 		DPRINTF_S(strerror(errno));
 	}
+
 	return fd;
 }
 
@@ -787,6 +789,7 @@ static void writesel(const char *buf, const size_t buflen)
 		return;
 
 	FILE *fp = fopen(g_selpath, "w");
+
 	if (fp) {
 		if (fwrite(buf, 1, buflen, fp) != buflen)
 			printwarn(NULL);
@@ -897,7 +900,7 @@ static void resetselind(void)
 			dents[r].flags &= ~FILE_SELECTED;
 }
 
-static void startselection()
+static void startselection(void)
 {
 	if (!cfg.selmode) {
 		cfg.selmode = 1;
@@ -938,6 +941,7 @@ static bool editselection(void)
 	bool ret = FALSE;
 	int fd, lines = 0;
 	ssize_t count;
+	struct stat sb;
 
 	if (!selbufpos) {
 		DPRINTF_S("empty selection");
@@ -955,13 +959,13 @@ static bool editselection(void)
 
 	spawn(editor, g_tmpfpath, NULL, NULL, F_CLI);
 
-	if ((fd = open(g_tmpfpath, O_RDONLY)) == -1) {
+	fd = open(g_tmpfpath, O_RDONLY);
+	if (fd == -1) {
 		DPRINTF_S("couldn't read tmp file");
 		unlink(g_tmpfpath);
 		return FALSE;
 	}
 
-	struct stat sb;
 	fstat(fd, &sb);
 
 	if (sb.st_size > selbufpos) {
@@ -1321,12 +1325,12 @@ static bool cpmv_rename(int choice, const char *path)
 	uint count = 0, lines = 0;
 	bool ret = FALSE;
 	char *cmd = (choice == 'c' ? cp : mv);
-	const char formatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
-	const char renamecmd[] =
-		"sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -o -n2 %s";
+	static const char formatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
+	static const char renamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -o -n2 %s";
 	char buf[sizeof(renamecmd) + sizeof(cmd) + (PATH_MAX << 1)];
 
-	if ((fd = create_tmp_file()) == -1)
+	fd = create_tmp_file();
+	if (fd == -1)
 		return ret;
 
 	/* selsafe() returned TRUE for this to be called */
@@ -1347,7 +1351,8 @@ static bool cpmv_rename(int choice, const char *path)
 
 	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
 
-	if ((fd = open(g_tmpfpath, O_RDONLY)) == -1)
+	fd = open(g_tmpfpath, O_RDONLY);
+	if (fd == -1)
 		goto finish;
 
 	lines = lines_in_file(fd, buf, sizeof(buf));
@@ -1423,16 +1428,18 @@ static bool batch_rename(const char *path)
 	int fd1, fd2, i;
 	uint count = 0, lines = 0;
 	bool dir = FALSE, ret = FALSE;
-	const char renamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
+	static const char renamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
 	char foriginal[TMP_LEN_MAX] = {0};
 	char buf[sizeof(renamecmd) + (PATH_MAX << 1)];
 
-	if ((fd1 = create_tmp_file()) == -1)
+	fd1 = create_tmp_file();
+	if (fd1 == -1)
 		return ret;
 
 	xstrlcpy(foriginal, g_tmpfpath, strlen(g_tmpfpath)+1);
 
-	if ((fd2 = create_tmp_file()) == -1) {
+	fd2 = create_tmp_file();
+	if (fd2 == -1) {
 		unlink(foriginal);
 		close(fd1);
 		return ret;
@@ -1464,7 +1471,8 @@ static bool batch_rename(const char *path)
 	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
 
 	/* Reopen file descriptor to get updated contents */
-	if ((fd2 = open(g_tmpfpath, O_RDONLY)) == -1)
+	fd2 = open(g_tmpfpath, O_RDONLY);
+	if (fd2 == -1)
 		goto finish;
 
 	lines = lines_in_file(fd2, buf, sizeof(buf));
@@ -2541,11 +2549,11 @@ static char *get_lsperms(mode_t mode)
 	xstrlcpy(&bits[7], rwx[(mode & 7)], 4);
 
 	if (mode & S_ISUID)
-	        bits[3] = (mode & 0100) ? 's' : 'S';  /* user executable */
+		bits[3] = (mode & 0100) ? 's' : 'S';  /* user executable */
 	if (mode & S_ISGID)
-	        bits[6] = (mode & 0010) ? 's' : 'l';  /* group executable */
+		bits[6] = (mode & 0010) ? 's' : 'l';  /* group executable */
 	if (mode & S_ISVTX)
-	        bits[9] = (mode & 0001) ? 't' : 'T';  /* others executable */
+		bits[9] = (mode & 0001) ? 't' : 'T';  /* others executable */
 
 	return bits;
 }
@@ -2758,7 +2766,8 @@ END:
 		printwait("failed to write session data", presel);
 }
 
-static bool load_session(const char *sname, char **path, char **lastdir, char **lastname, bool restore) {
+static bool load_session(const char *sname, char **path, char **lastdir, char **lastname, bool restore)
+{
 	char spath[PATH_MAX];
 	int i = 0;
 	session_header_t header;
@@ -2925,7 +2934,8 @@ static bool show_stats(const char *fpath, const struct stat *sb)
 	g_buf[r - 1] = '\0';
 	DPRINTF_S(g_buf);
 
-	if (!(fp = fdopen(fd, "w"))) {
+	fp = fdopen(fd, "w");
+	if (!fp) {
 		close(fd);
 		return FALSE;
 	}
@@ -3185,7 +3195,7 @@ static bool sshfs_mount(char *newpath, int *presel)
  */
 static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 {
-	static char cmd[] = "fusermount3"; /* Arch Linux utility */
+	char cmd[] = "fusermount3"; /* Arch Linux utility */
 	static bool found = FALSE;
 	char *tmp = name;
 	struct stat sb, psb;
@@ -3234,7 +3244,7 @@ static void lock_terminal(void)
 	char *tmp = utils[LOCKER];
 
 	if (!getutil(tmp))
-		tmp = utils[CMATRIX];;
+		tmp = utils[CMATRIX];
 
 	spawn(tmp, NULL, NULL, NULL, F_NORMAL);
 }
@@ -3293,13 +3303,15 @@ static void show_help(const char *path)
 	       "9! ^]  Shell             C  Execute entry\n"
 	       "9R ^V  Pick plugin   :K xK  Execute plugin K\n"
 		  "cU  Manage session    =  Launch\n"
-	          "cc  SSHFS mount       u  Unmount\n"
+		  "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt/run cmd    L  Lock\n"};
 
 	fd = create_tmp_file();
 	if (fd == -1)
 		return;
-	if (!(fp = fdopen(fd, "w"))) {
+
+	fp = fdopen(fd, "w");
+	if (!fp) {
 		close(fd);
 		return;
 	}
@@ -3347,7 +3359,7 @@ static void show_help(const char *path)
 	unlink(g_tmpfpath);
 }
 
-static bool plctrl_init()
+static bool plctrl_init(void)
 {
 	snprintf(g_buf, CMD_LEN_MAX, "nnn-pipe.%d", getpid());
 	mkpath(g_tmpfpath, g_buf, g_pipepath);
@@ -3362,6 +3374,9 @@ static bool plctrl_init()
 
 static bool run_selected_plugin(char **path, const char *file, char *newpath, char *rundir, char *runfile, char **lastname, char **lastdir)
 {
+	int fd;
+	size_t len;
+
 	if (!g_plinit) {
 		plctrl_init();
 		g_plinit = TRUE;
@@ -3372,7 +3387,7 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 	    || (strcmp(*path, plugindir) != 0))
 		return FALSE;
 
-	int fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
+	fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
 	if (fd == -1)
 		return FALSE;
 
@@ -3388,7 +3403,7 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 	rundir[0] = '\0';
 	cfg.runplugin = 0;
 
-	size_t len = read(fd, g_buf, PATH_MAX);
+	len = read(fd, g_buf, PATH_MAX);
 	g_buf[len] = '\0';
 
 	close(fd);
@@ -3401,6 +3416,7 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 			xstrlcpy(*path, g_buf + 1, PATH_MAX);
 		} else if (ctx >= 1 && ctx <= CTX_MAX) {
 			int r = ctx - 1;
+
 			g_ctx[r].c_cfg.ctxactive = 0;
 			savecurctx(&cfg, g_buf + 1, dents[cur].name, r);
 			*path = g_ctx[r].c_path;
@@ -3584,8 +3600,7 @@ static int dentfill(char *path, struct entry **dents)
 
 				for (count = 1; count < n; ++dentp, ++count)
 					/* Current filename starts at last filename start + length */
-					(dentp + 1)->name = (char *)((size_t)dentp->name
-							    + dentp->nlen);
+					(dentp + 1)->name = (char *)((size_t)dentp->name + dentp->nlen);
 			}
 		}
 
@@ -3598,11 +3613,8 @@ static int dentfill(char *path, struct entry **dents)
 
 		/* Copy other fields */
 		dentp->t = cfg.mtime ? sb.st_mtime : sb.st_atime;
-#ifdef __sun
-		if (0) { /* no d_type */
-#else
-		if (!flags && dp->d_type == DT_LNK) { /* Do not add sizes for links */
-#endif
+#ifndef __sun
+		if (!flags && dp->d_type == DT_LNK) {
 			 /* Do not add sizes for links */
 			dentp->mode = (sb.st_mode & ~S_IFMT) | S_IFLNK;
 			dentp->size = 0;
@@ -3610,6 +3622,10 @@ static int dentfill(char *path, struct entry **dents)
 			dentp->mode = sb.st_mode;
 			dentp->size = sb.st_size;
 		}
+#else
+		dentp->mode = sb.st_mode;
+		dentp->size = sb.st_size;
+#endif
 		dentp->flags = 0;
 
 		if (cfg.blkorder) {
@@ -3881,9 +3897,8 @@ static void redraw(char *path)
 	cfg.dircolor = 1;
 
 	/* Print listing */
-	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i) {
+	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
 		printptr(&dents[i], i == cur, ncols);
-	}
 
 	/* Must reset e.g. no files in dir */
 	if (cfg.dircolor) {
@@ -3951,7 +3966,7 @@ static void browse(char *ipath, const char *session)
 	struct stat sb;
 	char *path, *lastdir, *lastname, *dir, *tmp;
 	MEVENT event;
-	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0}};
+	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0} };
 	bool currentmouse = 1;
 
 	atexit(dentfree);
@@ -4065,7 +4080,7 @@ nochange:
 				/* If clicked after contexts, go to parent */
 				if (r >= CTX_MAX)
 					sel = SEL_BACK;
-				else if (0 <= r && r < CTX_MAX && r != cfg.curctx) {
+				else if (r >= 0 && r < CTX_MAX && r != cfg.curctx) {
 					savecurctx(&cfg, path, dents[cur].name, r);
 
 					/* Reset the pointers */
@@ -4126,7 +4141,7 @@ nochange:
 			}
 
 			/* Handle clicking on a file */
-			if (2 <= event.y && event.y <= ndents + 1 && event.bstate == BUTTON1_PRESSED) {
+			if (event.y >= 2 && event.y <= ndents + 1 && event.bstate == BUTTON1_PRESSED) {
 				r = curscroll + (event.y - 2);
 				move_cursor(r, 1);
 				currentmouse ^= 1;
@@ -4331,7 +4346,7 @@ nochange:
 					}
 				}
 				if (r != ndents)
-					continue;;
+					continue;
 				goto nochange;
 			case '.':
 				cfg.showhidden ^= 1;
@@ -4680,7 +4695,7 @@ nochange:
 			printwait(messages[NONE_SELECTED], &presel);
 			goto nochange;
 		case SEL_SELEDIT:
-			if (!editselection()){
+			if (!editselection()) {
 				printwait(messages[OPERATION_FAILED], &presel);
 				goto nochange;
 			}
@@ -4928,8 +4943,7 @@ nochange:
 					goto nochange;
 				}
 
-				if (sel == SEL_PLUGKEY)
-				{
+				if (sel == SEL_PLUGKEY) {
 					r = get_input("");
 					tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
 					if (!tmp)
@@ -5267,7 +5281,7 @@ static bool setup_config(void)
 	return TRUE;
 }
 
-static bool set_tmp_path()
+static bool set_tmp_path(void)
 {
 	char *path;
 
@@ -5355,7 +5369,7 @@ int main(int argc, char *argv[])
 			if (optarg[0] == '-' && optarg[1] == '\0')
 				cfg.pickraw = 1;
 			else {
-				int fd = open(optarg, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+				int fd = open(optarg, O_WRONLY | O_CREAT, 0600);
 
 				if (fd == -1) {
 					xerror();
@@ -5449,7 +5463,10 @@ int main(int argc, char *argv[])
 	}
 
 	if (arg) { /* Open a bookmark directly */
-		if (arg[1] || (initpath = get_kv_val(bookmark, NULL, *arg, BM_MAX, TRUE)) == NULL) {
+		if (!arg[1]) /* Bookmarks keys are single char */
+			initpath = get_kv_val(bookmark, NULL, *arg, BM_MAX, TRUE);
+
+		if (!initpath) {
 			fprintf(stderr, "%s\n", messages[STR_INVBM_KEY]);
 			return _FAILURE;
 		}
