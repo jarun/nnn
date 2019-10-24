@@ -588,22 +588,20 @@ static void printprompt(const char *str)
 
 static int get_input(const char *prompt)
 {
-	int r;
+	int r = KEY_RESIZE;
 
 	if (prompt)
 		printprompt(prompt);
 	cleartimeout();
 #ifdef KEY_RESIZE
-	do {
+	while (r == KEY_RESIZE) {
 		r = getch();
-		if (r == KEY_RESIZE) {
-			if (prompt) {
-				clearoldprompt();
-				xlines = LINES;
-				printprompt(prompt);
-			}
+		if (r == KEY_RESIZE && prompt) {
+			clearoldprompt();
+			xlines = LINES;
+			printprompt(prompt);
 		}
-	} while (r == KEY_RESIZE);
+	};
 #else
 	r = getch();
 #endif
