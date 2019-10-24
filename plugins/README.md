@@ -66,11 +66,22 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You ca
 
 With this, plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be run with <kbd>:p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen. Up to 10 plugins can have such keybinds.
 
-To assign keys to arbitrary commands (non-shell-interpreted) and invoke like plugins, add `_` (underscore) before the command. For example:
+To assign keys to arbitrary cli commands (non-shell-interpreted) and invoke like plugins, add `_` (underscore) before the command. For example:
 
     export NNN_PLUG='x:_chmod +x;o:fzy-open'
 
 **Method 2:** Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
+
+## Access level of plugins
+
+When `nnn` executes a plugin, it does the following:
+- Change to the directory where the plugin is to be run (`$PWD` pointing to the active directory)
+- Passes two arguments to the script:
+    1. The hovered file's name.
+    2. The working directory (might differ from `$PWD` in case of symlinked paths; non-canonical). Note that the second argument is not passed in case of commands starting with `_`.
+- Sets the environment variable `NNN_PIPE` used to control `nnn` active directory.
+
+Plugins can also access the current selections by reading the `.selections` file in the config directory (See the `ndiff` plugin for example).
 
 ## Create your own plugins
 
@@ -81,15 +92,6 @@ Plugins are scripts that can be written in any scripting language. However, POSI
 Each script has a _Description_ section which provides more details on what the script does, if applicable.
 
 The plugins reside in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
-
-When `nnn` executes a plugin, it does the following:
-- Change to the directory where the plugin is to be run (`$PWD` pointing to the active directory)
-- Passes two arguments to the script:
-    1. The hovered file's name
-    2. The working directory (might differ from `$PWD` in case of symlinked paths; non-canonical)
-- Sets the environment variable `NNN_PIPE` used to control `nnn` active directory.
-
-Plugins can also access the current selections by reading the `.selections` file in the config directory (See the `ndiff` plugin for example).
 
 #### Controlling `nnn`'s active directory
 `nnn` provides a mechanism for plugins to control its active directory.

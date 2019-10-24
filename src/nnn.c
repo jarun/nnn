@@ -120,8 +120,7 @@
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define ISODD(x) ((x) & 1)
 #define ISBLANK(x) ((x) == ' ' || (x) == '\t')
-#define TOUPPER(ch) \
-	(((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
+#define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
 #define READLINE_MAX 128
 #define FILTER '/'
@@ -345,6 +344,7 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 /* Buffer to store plugins control pipe location */
 static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 
+/* Plugin control initialization status */
 static bool g_plinit = FALSE;
 
 /* Replace-str for xargs on different platforms */
@@ -3798,13 +3798,11 @@ static void redraw(char *path)
 	xcols = COLS;
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
-	int lastln = xlines, onscreen = xlines - 4;
+	int lastln = xlines - 1, onscreen = xlines - 4;
 	int i, attrs;
 	char buf[24];
 	char c;
 	char *ptr = path, *base;
-
-	--lastln;
 
 	/* Clear screen */
 	erase();
@@ -3840,7 +3838,6 @@ static void redraw(char *path)
 			addch(' ');
 		}
 	}
-
 	addstr("\b] "); /* 10 chars printed for contexts - "[1 2 3 4] " */
 
 	attron(A_UNDERLINE);
@@ -4951,11 +4948,14 @@ nochange:
 					if (tmp[0] == '_' && tmp[1]) {
 						xstrlcpy(newpath, ++tmp, PATH_MAX);
 						flag = F_CLI | F_CONFIRM;
-					} else
+						tmp = NULL;
+					} else {
 						mkpath(plugindir, tmp, newpath);
+						tmp = path;
+					}
 
 					spawn(newpath, (ndents ? dents[cur].name : NULL),
-					      path, path, flag);
+					      tmp, path, flag);
 
 					if (cfg.filtermode)
 						presel = FILTER;
