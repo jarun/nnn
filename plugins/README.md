@@ -66,7 +66,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You ca
 
 With this, plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be run with <kbd>:p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen. Up to 10 plugins can have such keybinds.
 
-To assign keys to arbitrary cli commands (non-shell-interpreted) and invoke like plugins, add `_` (underscore) before the command. For example:
+To assign keys to arbitrary non-background cli commands (non-shell-interpreted) and invoke like plugins, add `_` (underscore) before the command. For example:
 
     export NNN_PLUG='x:_chmod +x;o:fzy-open'
 

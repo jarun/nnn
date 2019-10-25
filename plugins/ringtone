@@ -3,6 +3,10 @@
 # Description: Create an mp3 ringtone out of an audio file in any format
 #              Needs user to provide start and end where to cut the file
 #              Input file audio.ext results in audio_ringtone.mp3
+#
+#              Tip: To convert a complete media file, set start as 0 and
+#              the runtime of the file as end.
+#
 # Requires: date, ffmpeg
 #
 # Shell: POSIX compliant
