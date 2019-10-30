@@ -5501,7 +5501,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (S_ISREG(sb.st_mode)) {
-			execlp(opener, opener, arg, NULL);
+			spawn(opener, arg, NULL, NULL, F_NOWAIT);
 			return _SUCCESS;
 		}
 	}
