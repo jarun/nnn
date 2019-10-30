@@ -142,6 +142,7 @@
 #define MIN_DISPLAY_COLS 10
 #define LONG_SIZE sizeof(ulong)
 #define ARCHIVE_CMD_LEN 16
+#define BLK_SHIFT_512 9
 
 /* Program return codes */
 #define _SUCCESS 0
@@ -322,7 +323,7 @@ static ulong num_files;
 static kv bookmark[BM_MAX];
 static kv plug[PLUGIN_MAX];
 static uchar g_tmpfplen;
-static uchar BLK_SHIFT = 9;
+static uchar blk_shift = BLK_SHIFT_512;
 static bool interrupted = FALSE;
 
 /* Retain old signal handlers */
@@ -2639,14 +2640,14 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 	case S_IFREG:
 		if (ent->mode & 0100)
 			printw("%c%-16.16s  %s %8.8s* %s*\n", cp, timebuf, permbuf,
-			       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
+			       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size), pname);
 		else
 			printw("%c%-16.16s  %s %8.8s  %s\n", cp, timebuf, permbuf,
-			       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
+			       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size), pname);
 		break;
 	case S_IFDIR:
 		printw("%c%-16.16s  %s %8.8s  %s/\n", cp, timebuf, permbuf,
-		       coolsize(cfg.blkorder ? ent->blocks << BLK_SHIFT : ent->size), pname);
+		       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size), pname);
 		break;
 	case S_IFLNK:
 		printw("%c%-16.16s  %s        @  %s@\n", cp, timebuf, permbuf, pname);
@@ -3924,7 +3925,7 @@ static void redraw(char *path)
 			ptr = "\b";
 
 		if (cfg.blkorder) { /* du mode */
-			xstrlcpy(buf, coolsize(dir_blocks << BLK_SHIFT), 12);
+			xstrlcpy(buf, coolsize(dir_blocks << blk_shift), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
 			mvprintw(lastln, 0, "%d/%d (%d) %cu:%s free:%s files:%lu %s",
@@ -4019,7 +4020,7 @@ begin:
 		interrupted = FALSE;
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
-		BLK_SHIFT = 9;
+		blk_shift = BLK_SHIFT_512;
 		presel = CONTROL('L');
 	}
 
@@ -4482,7 +4483,7 @@ nochange:
 				if (cfg.apparentsz) {
 					nftw_fn = &sum_sizes;
 					cfg.blkorder = 1;
-					BLK_SHIFT = 0;
+					blk_shift = 0;
 				} else
 					cfg.blkorder = 0; // fallthrough
 			case SEL_BSIZE:
@@ -4491,7 +4492,7 @@ nochange:
 						cfg.blkorder ^= 1;
 					nftw_fn = &sum_bsizes;
 					cfg.apparentsz = 0;
-					BLK_SHIFT = ffs(S_BLKSIZE) - 1;
+					blk_shift = ffs(S_BLKSIZE) - 1;
 				}
 
 				if (cfg.blkorder) {
@@ -5334,7 +5335,7 @@ int main(int argc, char *argv[])
 		case 'S':
 			cfg.blkorder = 1;
 			nftw_fn = sum_bsizes;
-			BLK_SHIFT = ffs(S_BLKSIZE) - 1; // fallthrough
+			blk_shift = ffs(S_BLKSIZE) - 1; // fallthrough
 		case 'd':
 			cfg.showdetail = 1;
 			printptr = &printent_long;
