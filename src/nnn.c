@@ -5435,6 +5435,7 @@ int main(int argc, char *argv[])
 
 #ifdef DBGMODE
 	enabledbg();
+	DPRINTF_S(VERSION);
 #endif
 
 	atexit(cleanup);
