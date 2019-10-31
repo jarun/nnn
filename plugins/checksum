@@ -2,15 +2,17 @@
 
 # Description: Create and verify checksums
 #
-# If selection is used: it will generate one file containing the checksums with file names
-#                       [and with paths if they are in another directory]
-#                       The output checksum filename will be checksum_timestamp.checksum_type
-# If file is used: if the file is a checksum, the plugin does the verification
-#                  if the file is not a checksum, checksum will be generated for it
-#                  The output checksum filename will be filename.checksum_type
+# For selection: it will generate one file containing the checksums with file names
+#                [and with paths if they are in another directory]
+#                the output checksum filename will be checksum_timestamp.checksum_type
+# For file: if the file is a checksum, the plugin does the verification
+#           if the file is not a checksum, checksum will be generated for it
+#           the output checksum filename will be filename.checksum_type
+# For directory: recursively calculates checksum for all the files in the directory
+#                the output checksum filename will be directory.checksum_type
 #
 # Shell: POSIX compliant
-# Author: ath3
+# Author: ath3, Arun Prakash Jana
 
 selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 resp=f
@@ -43,8 +45,8 @@ fi
 if [ "$resp" = "s" ]; then
     checksum_type
     sed 's|'"$PWD/"'||g' < "$selection" | xargs -0 -I{} ${chsum}sum {} > "checksum_$(date '+%Y%m%d%H%M').$chsum"
-else
-    if [ -n "$1" ] && [ -f "$1" ]; then
+elif [ -n "$1" ]; then
+    if [ -f "$1" ]; then
         for chks in md5 sha1 sha224 sha256 sha384 sha512
         do
             if [ "$(echo "$1" | grep \.${chks}$)" ]; then
@@ -56,5 +58,9 @@ else
         checksum_type
         file=$(basename "$1").$chsum
         ${chsum}sum "$1" > "$file"
+    elif [ -d "$1" ]; then
+        checksum_type
+        file=$(basename "$1").$chsum
+        find "$1" -type f -exec ${chsum}sum "{}" + > "$file"
     fi
 fi
