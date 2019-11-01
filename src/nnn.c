@@ -182,6 +182,7 @@
 
 /* TYPE DEFINITIONS */
 typedef unsigned long ulong;
+typedef unsigned long long ull;
 typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
@@ -3928,9 +3929,10 @@ static void redraw(char *path)
 			xstrlcpy(buf, coolsize(dir_blocks << blk_shift), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
-			mvprintw(lastln, 0, "%d/%d (%d) %cu:%s free:%s files:%lu %s",
+			mvprintw(lastln, 0, "%d/%d (%d) %cu:%s free:%s files:%lu %lluB %s",
 				 cur + 1, ndents, nselected, c, buf,
-				 coolsize(get_fs_info(path, FREE)), num_files, ptr);
+				 coolsize(get_fs_info(path, FREE)), num_files,
+				 (ull)(pent->blocks << blk_shift), ptr);
 		} else { /* light or detail mode */
 			/* Show filename as it may be truncated in directory listing */
 			/* Get the unescaped file name */
