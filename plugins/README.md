@@ -35,6 +35,7 @@ The currently available plugins are listed below.
 | pastebin | sh | - | Paste contents of a text a file ix.io |
 | pdfview | sh | pdftotext/<br>mupdf-tools | View PDF file in `$PAGER` |
 | picker | sh | nnn | Pick files and list one per line (to pipe) |
+| pskill | sh | fzy, sudo/doas | Fuzzy list by name and kill process or zombie |
 | pywal | sh | pywal | Set image as wallpaper, change terminal colorscheme |
 | readit | sh | pdftotext, mpv,<br>pico2wave | Read a PDF or text file aloud |
 | ringtone | sh | date, ffmpeg | Create a variable bitrate mp3 ringtone from file |

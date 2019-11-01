@@ -1,0 +1,29 @@
+#!/usr/bin/env sh
+
+# Description: Fuzzy list and kill a (zombie) process by name
+#
+# Note: To kill a zombie process enter "zombie"
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+is_cmd_exists () {
+    which "$1" > /dev/null 2>&1
+    echo $?
+}
+
+if [ "$(is_cmd_exists sudo)" -eq "0" ]; then
+    sucmd=sudo
+elif [ "$(is_cmd_exists doas)" -eq "0" ]; then
+    sucmd=doas
+else
+    sucmd=: # noop
+fi
+
+echo -n "Enter process name ['defunct' for zombies]: "
+read psname
+
+if ! [ -z "$psname" ]; then
+    cmd="$(ps -ax | grep -iw "$psname" | fzy | sed -e 's/^[ \t]*//' | cut -d' ' -f1)"
+    $sucmd kill -9 "$cmd"
+fi
