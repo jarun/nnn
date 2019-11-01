@@ -13,9 +13,9 @@ is_cmd_exists () {
     echo $?
 }
 
-if [ "$(is_cmd_exists sudo)" == "0" ]; then
+if [ "$(is_cmd_exists sudo)" -eq "0" ]; then
     sucmd=sudo
-elif [ "$(is_cmd_exists doas)" == "0" ]; then
+elif [ "$(is_cmd_exists doas)" -eq "0" ]; then
     sucmd=doas
 else
     sucmd=: # noop
