@@ -486,6 +486,7 @@ static struct timespec gtimeout;
 #endif
 
 /* Function macros */
+#define tolastln() move(xlines - 1, 0)
 #define exitcurses() endwin()
 #define clearprompt() printmsg("")
 #define printwarn(presel) printwait(strerror(errno), presel)
@@ -551,7 +552,7 @@ static char *xitoa(uint val)
 /* Clear the old prompt */
 static inline void clearoldprompt(void)
 {
-	move(xlines - 1, 0);
+	tolastln();
 	clrtoeol();
 }
 #endif
@@ -559,7 +560,9 @@ static inline void clearoldprompt(void)
 /* Messages show up at the bottom */
 static inline void printmsg(const char *msg)
 {
-	mvprintw(xlines - 1, 0, "%s\n", msg);
+	tolastln();
+	addstr(msg);
+	addch('\n');
 }
 
 static void printwait(const char *msg, int *presel)
@@ -3062,7 +3065,7 @@ static void find_accessible_parent(char *path, char *newpath, char *lastname, in
 
 	xstrlcpy(path, dir, PATH_MAX);
 
-	mvprintw(xlines - 1, 0, "cannot access dir\n");
+	printmsg("cannot access dir");
 	xdelay();
 }
 
@@ -3528,11 +3531,11 @@ static int dentfill(char *path, struct entry **dents)
 					ent_blocks = 0;
 					mkpath(path, namep, buf);
 
-					mvprintw(xlines - 1, 0, "scanning %s [^C aborts]\n",
-						 xbasename(buf));
+					tolastln();
+					addstr(xbasename(buf));
+					addstr(" [^C aborts]\n");
 					refresh();
-					if (nftw(buf, nftw_fn, open_max,
-						 FTW_MOUNT | FTW_PHYS) == -1) {
+					if (nftw(buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) < 0) {
 						DPRINTF_S("nftw failed");
 						dir_blocks += (cfg.apparentsz
 							       ? sb.st_size
@@ -3633,9 +3636,11 @@ static int dentfill(char *path, struct entry **dents)
 				num_saved = num_files + 1;
 				mkpath(path, namep, buf);
 
-				mvprintw(xlines - 1, 0, "scanning %s [^C aborts]\n", xbasename(buf));
+				tolastln();
+				addstr(xbasename(buf));
+				addstr(" [^C aborts]\n");
 				refresh();
-				if (nftw(buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) == -1) {
+				if (nftw(buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) < 0) {
 					DPRINTF_S("nftw failed");
 					dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				} else
@@ -4630,7 +4635,7 @@ nochange:
 			if (rangesel) { /* Range selection started */
 				inode = sb.st_ino;
 				selstartid = cur;
-				mvprintw(xlines - 1, 0, "range selection on\n");
+				printmsg("range selection on");
 				xdelay();
 				continue;
 			}
