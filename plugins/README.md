@@ -12,8 +12,7 @@ The currently available plugins are listed below.
 | boom | sh | [moc](http://moc.daper.net/) | Play random music from dir |
 | dups | sh | find, md5sum,<br>sort uniq xargs | List non-empty duplicate files in current dir |
 | checksum | sh | md5sum,<br>sha256sum | Create and verify checksums |
-| drag-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files from nnn |
-| drop-file | sh | [dragon](https://github.com/mwh/dragon) | Drag and drop files into nnn |
+| dragdrop | sh | [dragon](https://github.com/mwh/dragon) | Drag/drop files from/into nnn |
 | fzcd | sh | fzy/fzf<br>(optional fd) | Change to the directory of a fuzzy-selected file/dir |
 | fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | curl | Update plugins |
