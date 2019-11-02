@@ -5227,7 +5227,7 @@ static bool setup_config(void)
 
 	if (xdg) {
 		xstrlcpy(cfgdir, xdgcfg, len);
-		r = len - 12;
+		r = len - 13; /* subtract length of "/nnn/sessions" */
 	} else {
 		r = xstrlcpy(cfgdir, home, len);
 
@@ -5251,7 +5251,7 @@ static bool setup_config(void)
 	}
 
 	/* Create ~/.config/nnn/plugins */
-	xstrlcpy(cfgdir + r + 4 - 1, "/plugins", 9);
+	xstrlcpy(cfgdir + r + 4 - 1, "/plugins", 9); /* subtract length of "/nnn" (4) */
 	DPRINTF_S(cfgdir);
 
 	xstrlcpy(plugindir, cfgdir, len);
@@ -5263,7 +5263,7 @@ static bool setup_config(void)
 	}
 
 	/* Create ~/.config/nnn/sessions */
-	xstrlcpy(cfgdir + r + 4 - 1, "/sessions", 10);
+	xstrlcpy(cfgdir + r + 4 - 1, "/sessions", 10); /* subtract length of "/nnn" (4) */
 	DPRINTF_S(cfgdir);
 
 	xstrlcpy(sessiondir, cfgdir, len);
