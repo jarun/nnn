@@ -19,10 +19,10 @@ all=
 
 dnd()
 {
-    if which dragon-drag-and-drop; then
-	dragon-drag-and-drop "$@"
+    if which dragon-drag-and-drop 2>&1 >/dev/null; then
+	dragon-drag-and-drop "$@" 2>/dev/null
     else
-	dragon "$@"
+	dragon "$@" 2>/dev/null
     fi
 }
 
