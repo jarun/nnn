@@ -18,3 +18,6 @@ cat "$SELECTION" | xargs -0 | xsel -bi
 
 # Cygwin
 # cat "$SELECTION" | xargs -0 | clip
+
+# Wayland
+# cat "$SELECTION" | xargs -0 | wl-copy
