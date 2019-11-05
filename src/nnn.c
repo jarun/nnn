@@ -2398,6 +2398,11 @@ static char *unescape(const char *str, uint maxcols, wchar_t **wstr)
 	static wchar_t wbuf[NAME_MAX + 1] __attribute__ ((aligned));
 	wchar_t *buf = wbuf;
 	size_t lencount = 0;
+
+#ifdef NOLOCALE
+	memset(wbuf, 0, sizeof(wbuf));
+#endif
+
 	/* Convert multi-byte to wide char */
 	size_t len = mbstowcs(wbuf, str, NAME_MAX);
 
