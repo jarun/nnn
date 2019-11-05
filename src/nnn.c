@@ -621,7 +621,11 @@ static void xdelay(void)
 
 static char confirm_force(void)
 {
-	int r = get_input("use force? [y/Y confirms]");
+	char str[64] = {0};
+	int r;
+
+	snprintf(str, 64, "forcibly remove %d files (UNRECOVERABLE)? [y/Y confirms]", nselected);
+	r = get_input(str);
 
 	if (r == 'y' || r == 'Y')
 		return 'f'; /* forceful */
@@ -1303,7 +1307,6 @@ static void xrm(char *path)
 	else {
 		char rm_opts[] = "-ir";
 
-		rm_opts[1] = confirm_force();
 		spawn("rm", rm_opts, path, NULL, F_NORMAL);
 	}
 }
