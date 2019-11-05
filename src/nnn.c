@@ -619,12 +619,14 @@ static void xdelay(void)
 	usleep(350000); /* 350 ms delay */
 }
 
-static char confirm_force(void)
+static char confirm_force(bool selection)
 {
-	char str[64] = {0};
+	char str[64] = "forcibly remove current file (UNRECOVERABLE)? [y/Y confirms]";
 	int r;
 
-	snprintf(str, 64, "forcibly remove %d files (UNRECOVERABLE)? [y/Y confirms]", nselected);
+	if (selection)
+		snprintf(str, 64, "forcibly remove %d file(s) (UNRECOVERABLE)? [y/Y confirms]", nselected);
+
 	r = get_input(str);
 
 	if (r == 'y' || r == 'Y')
@@ -1293,9 +1295,9 @@ static void rmmulstr(char *buf)
 	} else {
 		snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-			 "xargs -0 -a %s rm -%cr", g_selpath, confirm_force());
+			 "xargs -0 -a %s rm -%cr", g_selpath, confirm_force(TRUE));
 #else
-			 "cat %s | xargs -0 -o rm -%cr", g_selpath, confirm_force());
+			 "cat %s | xargs -0 -o rm -%cr", g_selpath, confirm_force(TRUE));
 #endif
 	}
 }
@@ -1307,6 +1309,7 @@ static void xrm(char *path)
 	else {
 		char rm_opts[] = "-ir";
 
+		rm_opts[1] = confirm_force(FALSE);
 		spawn("rm", rm_opts, path, NULL, F_NORMAL);
 	}
 }
