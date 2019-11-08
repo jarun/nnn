@@ -4971,6 +4971,7 @@ nochange:
 					} else {
 						xstrlcpy(rundir, path, PATH_MAX);
 						xstrlcpy(path, plugindir, PATH_MAX);
+						cfg.runctx = cfg.curctx;
 						if (!run_selected_plugin(&path, tmp, newpath, rundir,
 								(ndents ? dents[cur].name : NULL),
 								&lastname, &lastdir))
