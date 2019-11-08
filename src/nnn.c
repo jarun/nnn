@@ -3424,7 +3424,7 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 	if (len > 1) {
 		int ctx = g_buf[0] - '0';
 
-		if (ctx == 0) {
+		if (ctx == 0 || ctx == cfg.curctx + 1) {
 			xstrlcpy(*lastdir, *path, PATH_MAX);
 			xstrlcpy(*path, g_buf + 1, PATH_MAX);
 		} else if (ctx >= 1 && ctx <= CTX_MAX) {
@@ -4966,18 +4966,20 @@ nochange:
 					if (tmp[0] == '_' && tmp[1]) {
 						xstrlcpy(newpath, ++tmp, PATH_MAX);
 						flag = F_CLI | F_CONFIRM;
-						tmp = NULL;
+						spawn(newpath, (ndents ? dents[cur].name : NULL),
+						      NULL, path, flag);
 					} else {
-						mkpath(plugindir, tmp, newpath);
-						tmp = path;
+						xstrlcpy(rundir, path, PATH_MAX);
+						xstrlcpy(path, plugindir, PATH_MAX);
+						if (!run_selected_plugin(&path, tmp, newpath, rundir,
+								(ndents ? dents[cur].name : NULL),
+								&lastname, &lastdir))
+							goto nochange;
+
 					}
 
-					spawn(newpath, (ndents ? dents[cur].name : NULL),
-					      tmp, path, flag);
-
-					if (cfg.filtermode)
-						presel = FILTER;
-					goto nochange;
+					setdirwatch();
+					goto begin;
 				}
 
 				cfg.runplugin ^= 1;
