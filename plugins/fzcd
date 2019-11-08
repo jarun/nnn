@@ -26,7 +26,7 @@ fi
 if [ "$?" -eq "0" ]; then
 	case "$(file -bi "$sel")" in
 		*directory*) ;;
-		*) sel=$(dirname $sel) ;;
+		*) sel=$(dirname "$sel") ;;
 	esac
 	nnn_cd "$PWD/$sel"
 fi
