@@ -3407,7 +3407,7 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 	mkpath(*path, file, newpath);
 	/* Copy to path so we can return back to earlier dir */
 	xstrlcpy(*path, rundir, PATH_MAX);
-	if (runfile[0]) {
+	if (runfile && runfile[0]) {
 		xstrlcpy(*lastname, runfile, NAME_MAX);
 		spawn(newpath, *lastname, *path, *path, F_NORMAL);
 		runfile[0] = '\0';
