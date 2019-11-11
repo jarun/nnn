@@ -265,6 +265,7 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 - [Wikipedia](https://en.wikipedia.org/wiki/Nnn_(file_manager))
 - [ArchWiki](https://wiki.archlinux.org/index.php/Nnn)
 - [FOSSMint](https://www.fossmint.com/nnn-linux-terminal-file-browser/)
+- [gHacks Tech News](https://www.ghacks.net/2019/11/01/nnn-is-an-excellent-command-line-based-file-manager-for-linux-macos-and-bsds/)
 - Hacker News [[1](https://news.ycombinator.com/item?id=18520898)] [[2](https://news.ycombinator.com/item?id=19850656)]
 - [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
 - LinuxLinks [[1](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)] [[2](https://www.linuxlinks.com/bestconsolefilemanagers/)]
