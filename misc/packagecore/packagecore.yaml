@@ -42,6 +42,19 @@ packages:
     commands:
       pre:
         - yum install epel-release
+  centos8.0:
+    builddeps:
+      - make
+      - gcc
+      - pkgconfig
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+    commands:
+      pre:
+        - yum install epel-release
   debian9:
     builddeps:
       - make
@@ -73,6 +86,16 @@ packages:
       - ncurses
       - readline
   fedora30:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+  fedora31:
     builddeps:
       - make
       - gcc
