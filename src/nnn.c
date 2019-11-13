@@ -4956,8 +4956,6 @@ nochange:
 				}
 
 				if (sel == SEL_PLUGKEY) {
-					uchar flag = F_NORMAL;
-
 					r = get_input("");
 					tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
 					if (!tmp)
@@ -4965,9 +4963,8 @@ nochange:
 
 					if (tmp[0] == '_' && tmp[1]) {
 						xstrlcpy(newpath, ++tmp, PATH_MAX);
-						flag = F_CLI | F_CONFIRM;
 						spawn(newpath, (ndents ? dents[cur].name : NULL),
-						      NULL, path, flag);
+						      NULL, path, F_CLI | F_CONFIRM);
 					} else {
 						xstrlcpy(rundir, path, PATH_MAX);
 						xstrlcpy(path, plugindir, PATH_MAX);
@@ -4978,33 +4975,30 @@ nochange:
 							goto nochange;
 
 					}
-
-					setdirwatch();
-					goto begin;
-				}
-
-				cfg.runplugin ^= 1;
-				if (!cfg.runplugin && rundir[0]) {
-					/*
-					 * If toggled, and still in the plugin dir,
-					 * switch to original directory
-					 */
-					if (strcmp(path, plugindir) == 0) {
-						xstrlcpy(path, rundir, PATH_MAX);
-						xstrlcpy(lastname, runfile, NAME_MAX);
-						rundir[0] = runfile[0] = '\0';
-						setdirwatch();
-						goto begin;
+				} else {
+					cfg.runplugin ^= 1;
+					if (!cfg.runplugin && rundir[0]) {
+						/*
+						 * If toggled, and still in the plugin dir,
+						 * switch to original directory
+						 */
+						if (strcmp(path, plugindir) == 0) {
+							xstrlcpy(path, rundir, PATH_MAX);
+							xstrlcpy(lastname, runfile, NAME_MAX);
+							rundir[0] = runfile[0] = '\0';
+							setdirwatch();
+							goto begin;
+						}
+						break;
 					}
-					break;
-				}
 
-				xstrlcpy(rundir, path, PATH_MAX);
-				xstrlcpy(path, plugindir, PATH_MAX);
-				if (ndents)
-					xstrlcpy(runfile, dents[cur].name, NAME_MAX);
-				cfg.runctx = cfg.curctx;
-				lastname[0] = '\0';
+					xstrlcpy(rundir, path, PATH_MAX);
+					xstrlcpy(path, plugindir, PATH_MAX);
+					if (ndents)
+						xstrlcpy(runfile, dents[cur].name, NAME_MAX);
+					cfg.runctx = cfg.curctx;
+					lastname[0] = '\0';
+				}
 				setdirwatch();
 				goto begin;
 			case SEL_LAUNCH:
