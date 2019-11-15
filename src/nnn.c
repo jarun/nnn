@@ -3375,6 +3375,8 @@ static void show_help(const char *path)
 static bool plctrl_init(void)
 {
 	snprintf(g_buf, CMD_LEN_MAX, "nnn-pipe.%d", getpid());
+	/* g_tmpfpath is used to generate tmp file names */
+	g_tmpfpath[g_tmpfplen - 1] = '\0';
 	mkpath(g_tmpfpath, g_buf, g_pipepath);
 	unlink(g_pipepath);
 	if (mkfifo(g_pipepath, 0600) != 0)
@@ -3395,9 +3397,8 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 		g_plinit = TRUE;
 	}
 
-	if ((cfg.runctx != cfg.curctx)
-	    /* Must be in plugin directory to select plugin */
-	    || (!direct && strcmp(*path, plugindir) != 0))
+	/* Must be in plugin directory to select plugin */
+	if (!direct && ((cfg.runctx != cfg.curctx) || (strcmp(*path, plugindir) != 0)))
 		return FALSE;
 
 	fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
@@ -4972,12 +4973,13 @@ nochange:
 						spawn(newpath, (ndents ? dents[cur].name : NULL),
 						      NULL, path, F_CLI | F_CONFIRM);
 					} else {
-						cfg.runctx = cfg.curctx;
 						if (!run_selected_plugin(&path, tmp, newpath, NULL,
 								(ndents ? dents[cur].name : NULL),
-								&lastname, &lastdir, TRUE))
+								&lastname, &lastdir, TRUE)) {
+							if (cfg.filtermode)
+								presel = FILTER;
 							goto nochange;
-
+						}
 					}
 				} else {
 					cfg.runplugin ^= 1;
