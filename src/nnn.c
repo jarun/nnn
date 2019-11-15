@@ -3385,7 +3385,7 @@ static bool plctrl_init(void)
 	return _SUCCESS;
 }
 
-static bool run_selected_plugin(char **path, const char *file, char *newpath, char *rundir, char *runfile, char **lastname, char **lastdir)
+static bool run_selected_plugin(char **path, const char *file, char *newpath, char *rundir, char *runfile, char **lastname, char **lastdir, bool direct)
 {
 	int fd;
 	size_t len;
@@ -3397,24 +3397,30 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 
 	if ((cfg.runctx != cfg.curctx)
 	    /* Must be in plugin directory to select plugin */
-	    || (strcmp(*path, plugindir) != 0))
+	    || (!direct && strcmp(*path, plugindir) != 0))
 		return FALSE;
 
 	fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
 	if (fd == -1)
 		return FALSE;
 
-	mkpath(*path, file, newpath);
+	/* Generate absolute path to plugin */
+	mkpath(plugindir, file, newpath);
+
 	/* Copy to path so we can return back to earlier dir */
-	xstrlcpy(*path, rundir, PATH_MAX);
+	if (!direct) {
+		xstrlcpy(*path, rundir, PATH_MAX);
+		rundir[0] = '\0';
+		cfg.runplugin = 0;
+	}
+
 	if (runfile && runfile[0]) {
 		xstrlcpy(*lastname, runfile, NAME_MAX);
 		spawn(newpath, *lastname, *path, *path, F_NORMAL);
-		runfile[0] = '\0';
+		if (!direct)
+			runfile[0] = '\0';
 	} else
 		spawn(newpath, NULL, *path, *path, F_NORMAL);
-	rundir[0] = '\0';
-	cfg.runplugin = 0;
 
 	len = read(fd, g_buf, PATH_MAX);
 	g_buf[len] = '\0';
@@ -4225,7 +4231,7 @@ nochange:
 
 				/* Handle plugin selection mode */
 				if (cfg.runplugin) {
-					if (!run_selected_plugin(&path, dents[cur].name, newpath, rundir, runfile, &lastname, &lastdir))
+					if (!run_selected_plugin(&path, dents[cur].name, newpath, rundir, runfile, &lastname, &lastdir, FALSE))
 						continue;
 
 					setdirwatch();
@@ -4966,12 +4972,10 @@ nochange:
 						spawn(newpath, (ndents ? dents[cur].name : NULL),
 						      NULL, path, F_CLI | F_CONFIRM);
 					} else {
-						xstrlcpy(rundir, path, PATH_MAX);
-						xstrlcpy(path, plugindir, PATH_MAX);
 						cfg.runctx = cfg.curctx;
-						if (!run_selected_plugin(&path, tmp, newpath, rundir,
+						if (!run_selected_plugin(&path, tmp, newpath, NULL,
 								(ndents ? dents[cur].name : NULL),
-								&lastname, &lastdir))
+								&lastname, &lastdir, TRUE))
 							goto nochange;
 
 					}
