@@ -3312,7 +3312,7 @@ static void show_help(const char *path)
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
 		"1ORDER TOGGLES\n"
 		  "cA  Apparent du       S  du\n"
-		  "cs  Size   E  Extn    t  Time\n"
+		  "cz  Size   E  Extn    t  Time\n"
 		"1MISC\n"
 	       "9! ^]  Shell             C  Execute entry\n"
 	       "9R ^V  Pick plugin   :K xK  Execute plugin K\n"

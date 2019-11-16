@@ -191,7 +191,7 @@ static struct key bindings[] = {
 	/* Extract archive */
 	{ CONTROL('F'),   SEL_EXTRACT },
 	/* Toggle sort by size */
-	{ 's',            SEL_FSIZE },
+	{ 'z',            SEL_FSIZE },
 	/* Sort by apparent size including dir contents */
 	{ 'A',            SEL_ASIZE },
 	/* Sort by total block count including dir contents */

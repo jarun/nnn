@@ -218,7 +218,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
             e  Edit in EDITOR    p  Open in PAGER
  ORDER TOGGLES
             A  Apparent du       S  du
-            s  Size   E  Extn    t  Time
+            z  Size   E  Extn    t  Time
  MISC
          ! ^]  Shell             C  Execute entry
          R ^V  Pick plugin   :K xK  Execute plugin K
