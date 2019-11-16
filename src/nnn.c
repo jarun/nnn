@@ -1806,7 +1806,7 @@ static int nextsel(int presel)
 		 * Check for changes every odd second.
 		 */
 #ifdef LINUX_INOTIFY
-		if (!cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
+		if (!cfg.selmode && !cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
 			i = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
 			if (i > 0) {
 				char *ptr;
@@ -1830,7 +1830,7 @@ static int nextsel(int presel)
 			}
 		}
 #elif defined(BSD_KQUEUE)
-		if (!cfg.blkorder && event_fd >= 0 && idle & 1
+		if (!cfg.selmode && !cfg.blkorder && event_fd >= 0 && idle & 1
 		    && kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
 			      event_data, NUM_EVENT_FDS, &gtimeout) > 0)
 			c = CONTROL('L');
