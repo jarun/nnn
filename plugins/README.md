@@ -68,7 +68,11 @@ With this, plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay
 
 To assign keys to arbitrary non-background cli commands (non-shell-interpreted) and invoke like plugins, add `_` (underscore) before the command. For example:
 
-    export NNN_PLUG='x:_chmod +x;o:fzy-open'
+    export NNN_PLUG='x:_chmod +x $NNN;g:_git log;s:_smplayer $NNN;o:fzy-open'
+    Notes:
+      1. use single quotes for $NNN_PLUG so $NNN is not interpreted
+      2. $NNN should be the last argument (IF you want to pass the hovered file name)
+      3. (_again_) add `_` before the command
 
 **Method 2:** Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 

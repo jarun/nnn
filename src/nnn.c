@@ -4970,8 +4970,14 @@ nochange:
 
 					if (tmp[0] == '_' && tmp[1]) {
 						xstrlcpy(newpath, ++tmp, PATH_MAX);
-						spawn(newpath, (ndents ? dents[cur].name : NULL),
-						      NULL, path, F_CLI | F_CONFIRM);
+						if (is_suffix(newpath, " $NNN")) {
+							tmp = (ndents ? dents[cur].name : NULL);
+							/* Set `\0` to clear ' $NNN' suffix */
+							newpath[strlen(newpath) - 5] = '\0';
+						} else
+							tmp = NULL;
+
+						spawn(newpath, tmp, NULL, path, F_CLI | F_CONFIRM);
 					} else {
 						if (!run_selected_plugin(&path, tmp, newpath, NULL,
 								(ndents ? dents[cur].name : NULL),
@@ -4981,6 +4987,9 @@ nochange:
 							goto nochange;
 						}
 					}
+
+					if (ndents)
+						copycurname();
 				} else {
 					cfg.runplugin ^= 1;
 					if (!cfg.runplugin && rundir[0]) {
