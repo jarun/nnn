@@ -4606,6 +4606,11 @@ nochange:
 				break;
 			}
 
+			/* Do not reload in some cases if in selection mode */
+			if (cfg.selmode && (sel == SEL_HELP
+			    || sel == SEL_RUNEDIT || sel == SEL_RUNPAGE))
+				goto nochange;
+
 			/* In case of successful operation, reload contents */
 
 			/* Continue in navigate-as-you-type mode, if enabled */
