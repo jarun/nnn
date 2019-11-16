@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+# Description: Show tree output in $EDITOR
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+tree -ps | $EDITOR -
