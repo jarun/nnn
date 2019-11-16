@@ -1014,6 +1014,7 @@ static bool editselection(void)
 
 	nselected = lines;
 	writesel(pselbuf, selbufpos - 1);
+	spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
 	return TRUE;
 
@@ -3303,7 +3304,7 @@ static void show_help(const char *path)
 		  "cD  File detail   ^R F2  Rename/duplicate\n"
 	 "3Space ^J/a  Select entry/all  r  Batch rename\n"
 	       "9m ^K  Sel range, clear  M  List selection\n"
-		  "cP  Copy selection    K  Edit selection\n"
+		  "cP  Copy selection    K  Edit, flush sel\n"
 		  "cV  Move selection    w  Copy/move sel as\n"
 		  "cX  Del selection    ^X  Del entry\n"
 		  "cf  Create archive    T  Mount archive\n"
@@ -4701,8 +4702,8 @@ nochange:
 			//mvprintw(xlines - 1, 0, "+%d\n", r);
 			//xdelay();
 
-			writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-			spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+			//writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+			//spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 			continue;
 		case SEL_SELLST:
 			if (listselbuf() || listselfile()) {

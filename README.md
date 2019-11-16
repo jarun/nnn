@@ -210,7 +210,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
             D  File detail   ^R F2  Rename/duplicate
    Space ^J/a  Select entry/all  r  Batch rename
          m ^K  Sel range, clear  M  List selection
-            P  Copy selection    K  Edit selection
+            P  Copy selection    K  Edit, flush sel
             V  Move selection    w  Copy/move sel as
             X  Del selection    ^X  Del entry
             f  Create archive    T  Mount archive
