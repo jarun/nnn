@@ -66,17 +66,23 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You ca
 
     export NNN_PLUG='o:fzy-open;p:mocplay;d:ndiff;m:nmount;n:notes;v:viuimg;t:thumb'
 
-With this, plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be run with <kbd>:p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen. Up to 10 plugins can have such keybinds.
+Now plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be run with <kbd>:p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
+
+**Method 2:** Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
+
+## Running commands as plugin
 
 To assign keys to arbitrary non-background cli commands (non-shell-interpreted) and invoke like plugins, add `_` (underscore) before the command. For example:
 
     export NNN_PLUG='x:_chmod +x $NNN;g:_git log;s:_smplayer $NNN;o:fzy-open'
-    Notes:
-      1. use single quotes for $NNN_PLUG so $NNN is not interpreted
-      2. $NNN should be the last argument (IF you want to pass the hovered file name)
-      3. (_again_) add `_` before the command
 
-**Method 2:** Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
+Now <kbd>:x</kbd> can be used to make a file executable, <kbd>:g</kbd> can be used to the git log of a git project directory, <kbd>:s</kbd> can be used to preview a partially downloaded media file.
+
+Notes:
+
+1. Use single quotes for `$NNN_PLUG` so `$NNN` is not interpreted
+2. `$NNN` should be the last argument (IF you want to pass the hovered file name)
+3. (_Again_) add `_` before the command
 
 ## Access level of plugins
 
