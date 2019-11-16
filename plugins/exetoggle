@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+
+# Description: Toggle executable status of hovered file
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+if ! [ -z "$1" ]; then
+    if [ -x "$1" ]; then
+        chmod -x "$1"
+    else
+        chmod +x "$1"
+    fi
+fi

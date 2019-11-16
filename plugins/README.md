@@ -13,6 +13,7 @@ The currently available plugins are listed below.
 | dups | sh | find, md5sum,<br>sort uniq xargs | List non-empty duplicate files in current dir |
 | checksum | sh | md5sum,<br>sha256sum | Create and verify checksums |
 | dragdrop | sh | [dragon](https://github.com/mwh/dragon) | Drag/drop files from/into nnn |
+| exetoggle | sh | chmod | Toggle executable status of hovered file |
 | fzcd | sh | fzy/fzf<br>(optional fd) | Change to the directory of a fuzzy-selected file/dir |
 | fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | curl | Update plugins |
