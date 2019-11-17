@@ -15,7 +15,7 @@ The currently available plugins are listed below.
 | dragdrop | sh | [dragon](https://github.com/mwh/dragon) | Drag/drop files from/into nnn |
 | exetoggle | sh | chmod | Toggle executable status of hovered file |
 | fzcd | sh | fzy/fzf<br>(optional fd) | Change to the directory of a fuzzy-selected file/dir |
-| fzy-open | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
+| fzopen | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | curl | Update plugins |
 | gutenread | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional)| Browse, download, read from Project Gutenberg |
 | hexview | sh | xxd | View a file in hex in `$PAGER` |
@@ -67,9 +67,9 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You ca
 
 **Method 1:** Directly with <kbd>:key</kbd>:
 
-    export NNN_PLUG='o:fzy-open;p:mocplay;d:ndiff;m:nmount;n:notes;v:viuimg;t:thumb'
+    export NNN_PLUG='o:fzopen;p:mocplay;d:ndiff;m:nmount;n:notes;v:viuimg;t:thumb'
 
-Now plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be run with <kbd>:p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
+Now plugin `fzopen` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be run with <kbd>:p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
 
 **Method 2:** Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
@@ -77,7 +77,7 @@ Now plugin `fzy-open` can be run with the keybind <kbd>:o</kbd>, `mocplay` can b
 
 To assign keys to arbitrary non-background cli commands (non-shell-interpreted) and invoke like plugins, add `_` (underscore) before the command. For example:
 
-    export NNN_PLUG='x:_chmod +x $NNN;g:_git log;s:_smplayer $NNN;o:fzy-open'
+    export NNN_PLUG='x:_chmod +x $NNN;g:_git log;s:_smplayer $NNN;o:fzopen'
 
 Now <kbd>:x</kbd> can be used to make a file executable, <kbd>:g</kbd> can be used to the git log of a git project directory, <kbd>:s</kbd> can be used to preview a partially downloaded media file.
 

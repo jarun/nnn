@@ -147,7 +147,7 @@ There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$
 | Example `export` | Description |
 | --- | --- |
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | key-bookmark pairs [max 10] |
-| `NNN_PLUG='p:mocplay;m:nmount;t:thumb;x:_chmod +x'` | key-plugin (or cmd) pairs (<kbd>:key</kbd> to run) [max 15] |
+| `NNN_PLUG='m:nmount;t:thumb;x:_chmod +x $NNN'` | key-plugin (or cmd) pairs (<kbd>:key</kbd> to run) [max 15] |
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
