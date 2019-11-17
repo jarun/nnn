@@ -1,11 +1,16 @@
 <h1 align="center">nnn plugins</h1>
 
+<p align="center"><img src="https://i.imgur.com/SpT0L2W.png" /></p>
+<p align="center"><i>read ebooks with plugin gutenread (Android)</i></p>
+
 <p align="center"><img src="https://i.imgur.com/14iPDIq.png" /></p>
 <p align="center"><i>image preview with plugin thumb</i></p>
 
+## Introduction
+
 Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or binaries) which `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins.
 
-The currently available plugins are listed below.
+## List of plugins
 
 | Plugin (a-z) | Lang | Deps | Description |
 | --- | --- | --- | --- |
@@ -50,9 +55,6 @@ The currently available plugins are listed below.
 | upgrade | sh | curl | Upgrade nnn manually on Debian 9 Stretch |
 | vidthumb | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) | Show video thumbnails in terminal |
 | viuimg | sh | [viu](https://github.com/atanunq/viu), less | View an image or images in dir in `$PAGER` |
-
-<p align="center"><img src="https://i.imgur.com/SpT0L2W.png" /></p>
-<p align="center"><i>read ebooks with plugin gutenread (Android)</i></p>
 
 ## Installing plugins
 
