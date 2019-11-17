@@ -3398,7 +3398,7 @@ static bool plctrl_init(void)
 	return _SUCCESS;
 }
 
-static bool run_selected_plugin(char **path, const char *file, char *newpath, char *rundir, char *runfile, char **lastname, char **lastdir, bool direct)
+static bool run_selected_plugin(char **path, const char *file, char *newpath, char *runfile, char **lastname, char **lastdir)
 {
 	int fd;
 	size_t len;
@@ -3408,10 +3408,6 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 		g_plinit = TRUE;
 	}
 
-	/* Must be in plugin directory to select plugin */
-	if (!direct && ((cfg.runctx != cfg.curctx) || (strcmp(*path, plugindir) != 0)))
-		return FALSE;
-
 	fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
 	if (fd == -1)
 		return FALSE;
@@ -3419,18 +3415,9 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 	/* Generate absolute path to plugin */
 	mkpath(plugindir, file, newpath);
 
-	/* Copy to path so we can return back to earlier dir */
-	if (!direct) {
-		xstrlcpy(*path, rundir, PATH_MAX);
-		rundir[0] = '\0';
-		cfg.runplugin = 0;
-	}
-
 	if (runfile && runfile[0]) {
 		xstrlcpy(*lastname, runfile, NAME_MAX);
 		spawn(newpath, *lastname, *path, *path, F_NORMAL);
-		if (!direct)
-			runfile[0] = '\0';
 	} else
 		spawn(newpath, NULL, *path, *path, F_NORMAL);
 
@@ -4243,11 +4230,28 @@ nochange:
 
 				/* Handle plugin selection mode */
 				if (cfg.runplugin) {
-					if (!run_selected_plugin(&path, dents[cur].name, newpath, rundir, runfile, &lastname, &lastdir, FALSE))
-						continue;
+					cfg.runplugin = 0;
+					/* Must be in plugin dir and same context to select plugin */
+					if ((cfg.runctx != cfg.curctx)
+					    || (strcmp(path, plugindir) != 0))
+						; /* We are somewhere else, continue as usual */
+					else {
+						/* Copy path so we can return back to earlier dir */
+						xstrlcpy(path, rundir, PATH_MAX);
+						rundir[0] = '\0';
 
-					setdirwatch();
-					goto begin;
+						if (!run_selected_plugin(&path, dents[cur].name,
+									 newpath, runfile, &lastname,
+									 &lastdir)) {
+							DPRINTF_S("plugin failed!");
+						}
+
+						if (runfile[0])
+							runfile[0] = '\0';
+
+						setdirwatch();
+						goto begin;
+					}
 				}
 
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
@@ -4993,11 +4997,11 @@ nochange:
 
 						spawn(newpath, tmp, NULL, path, F_CLI | F_CONFIRM);
 					} else {
-						if (!run_selected_plugin(&path, tmp, newpath, NULL,
+						if (!run_selected_plugin(&path, tmp, newpath,
 								(ndents ? dents[cur].name : NULL),
-								&lastname, &lastdir, TRUE)) {
-							if (cfg.filtermode)
-								presel = FILTER;
+								&lastname, &lastdir)) {
+							printwait(messages[OPERATION_FAILED],
+								  &presel);
 							goto nochange;
 						}
 					}
