@@ -15,6 +15,7 @@ The currently available plugins are listed below.
 | dragdrop | sh | [dragon](https://github.com/mwh/dragon) | Drag/drop files from/into nnn |
 | exetoggle | sh | chmod | Toggle executable status of hovered file |
 | fzcd | sh | fzy/fzf<br>(optional fd) | Change to the directory of a fuzzy-selected file/dir |
+| fzhist | sh | fzy | Fuzzy-select a cmd from history, edit in $EDITOR and run |
 | fzopen | sh | fzy, xdg-open | Fuzzy find a file in dir subtree and edit or xdg-open |
 | getplugs | sh | curl | Update plugins |
 | gutenread | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional)| Browse, download, read from Project Gutenberg |
