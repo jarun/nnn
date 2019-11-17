@@ -15,7 +15,6 @@ is_cmd_exists () {
 
 merge () {
 	vimdiff $1 $2
-	cp -vRf $1 $2
 }
 
 prompt () {
@@ -63,4 +62,4 @@ done
 cd ../..
 
 $sucmd mv -vf nnn-master/misc/nlaunch/nlaunch /usr/local/bin/
-rm -rf nnn-master/ master.tar.gz README.md
+rm -rf nnn-master/ master.tar.gz $PLUGIN_DIR/README.md
