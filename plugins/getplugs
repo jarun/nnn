@@ -13,6 +13,25 @@ is_cmd_exists () {
     echo $?
 }
 
+merge () {
+	vimdiff $1 $2
+	cp -vRf $1 $2
+}
+
+prompt () {
+	echo "Plugin $1 already exists and is different."
+	echo -n "Keep (k), merge (m), overwrite (o) [default: k]? "
+	read operation
+
+	if [ "$operation" = "m" ]; then
+		op="merge"
+	elif [ "$operation" = "o" ]; then
+		op="cp -vRf"
+	else
+		op="true"
+	fi
+}
+
 if [ "$(is_cmd_exists sudo)" -eq "0" ]; then
     sucmd=sudo
 elif [ "$(is_cmd_exists doas)" -eq "0" ]; then
@@ -29,6 +48,19 @@ fi
 cd $CONFIG_DIR
 curl -Ls -O https://github.com/jarun/nnn/archive/master.tar.gz
 tar -zxf master.tar.gz
-cp -vRf nnn-master/plugins .
+
+cd nnn-master/plugins
+for f in *; do
+	if [ -f ../../plugins/$f ]; then
+		if [ "$(diff --brief $f ../../plugins/$f)" ]; then
+			prompt $f
+			$op $f ../../plugins/
+		fi
+	else
+		cp -vRf $f ../../plugins/
+	fi
+done
+cd ../..
+
 $sucmd mv -vf nnn-master/misc/nlaunch/nlaunch /usr/local/bin/
 rm -rf nnn-master/ master.tar.gz README.md
