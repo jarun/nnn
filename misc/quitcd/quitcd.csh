@@ -4,4 +4,4 @@
 # To cd on quit only on ^G, export NNN_TMPFILE after the call to nnn
 set NNN_TMPFILE=~/.config/nnn/.lastd
 
-alias n 'nnn; source "$NNN_TMPFILE"; rm "$NNN_TMPFILE"'
+alias n 'nnn; source "$NNN_TMPFILE"; rm -f "$NNN_TMPFILE"'
