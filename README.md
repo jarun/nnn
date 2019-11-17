@@ -281,4 +281,4 @@ To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 - [Sijmen J. Mulder](https://github.com/sjmulder)
 - and other contributors
 
-Visit the to the [ToDo list](https://github.com/jarun/nnn/issues/337) to contribute.
+Visit the to the [ToDo list](https://github.com/jarun/nnn/issues/386) to contribute or see the current development status.
