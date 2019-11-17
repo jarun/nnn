@@ -1278,7 +1278,7 @@ static bool xdiraccess(const char *path)
 static void opstr(char *buf, char *op)
 {
 #ifdef __linux__
-	snprintf(buf, CMD_LEN_MAX, "xargs -0 -a %s -%c {} %s {} .", g_selpath, REPLACE_STR, op);
+	snprintf(buf, CMD_LEN_MAX, "cat %s | xargs -0 -%c {} %s {} .", g_selpath, REPLACE_STR, op);
 #else
 	snprintf(buf, CMD_LEN_MAX, "cat %s | xargs -0 -o -%c {} %s {} .", g_selpath, REPLACE_STR, op);
 #endif
@@ -1286,17 +1286,12 @@ static void opstr(char *buf, char *op)
 
 static void rmmulstr(char *buf)
 {
-	if (cfg.trash) {
+	if (cfg.trash)
+		snprintf(buf, CMD_LEN_MAX, "cat %s | xargs -0 trash-put", g_selpath);
+	else {
 		snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-			 "xargs -0 -a %s trash-put", g_selpath);
-#else
-			 "cat %s | xargs -0 trash-put", g_selpath);
-#endif
-	} else {
-		snprintf(buf, CMD_LEN_MAX,
-#ifdef __linux__
-			 "xargs -0 -a %s rm -%cr", g_selpath, confirm_force(TRUE));
+			 "cat %s | xargs -0 rm -%cr", g_selpath, confirm_force(TRUE));
 #else
 			 "cat %s | xargs -0 -o rm -%cr", g_selpath, confirm_force(TRUE));
 #endif
@@ -1335,7 +1330,7 @@ static bool cpmv_rename(int choice, const char *path)
 	bool ret = FALSE;
 	char *cmd = (choice == 'c' ? cp : mv);
 	static const char formatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
-	static const char renamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -o -n2 %s";
+	static const char renamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -n2 %s";
 	char buf[sizeof(renamecmd) + sizeof(cmd) + (PATH_MAX << 1)];
 
 	fd = create_tmp_file();
