@@ -1976,6 +1976,16 @@ static int filterentries(char *path)
 				/* If there's a filter, try a command on ^P */
 				if (cfg.filtercmd && *ch == CONTROL('P') && len > 1) {
 					prompt_run(pln, (ndents ? dents[cur].name : ""), path);
+
+					/* Clear the prompt */
+					while (len > 1)
+						wln[--len] = '\0';
+					wcstombs(ln, wln, REGEX_MAX);
+					ndents = total;
+					if (matches(pln) != -1)
+						redraw(path);
+
+					printprompt(ln);
 					continue;
 				}
 
