@@ -2001,6 +2001,7 @@ static int filterentries(char *path)
 			case '/': /* works as Leader key in filter mode */
 				*ch = CONTROL('_'); // fallthrough
 			case ':':
+			case ';':
 				if (len == 1)
 					cur = oldcur;
 				goto end;
@@ -3327,8 +3328,8 @@ static void show_help(const char *path)
 		  "cA  Apparent du       S  du\n"
 		  "cz  Size   E  Extn    t  Time\n"
 		"1MISC\n"
-	       "9! ^]  Shell             C  Execute entry\n"
-	       "9R ^V  Pick plugin   :K xK  Execute plugin K\n"
+	       "9! ^]  Shell      ;K :K xK  Execute plugin K\n"
+		  "cC  Execute entry  R ^V  Pick plugin\n"
 		  "cU  Manage session    =  Launch\n"
 		  "cc  SSHFS mount       u  Unmount\n"
 		 "b^P  Prompt/run cmd    L  Lock\n"};

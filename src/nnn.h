@@ -250,6 +250,7 @@ static struct key bindings[] = {
 	/* Plugin key */
 	{ 'x',            SEL_PLUGKEY },
 	{ ':',            SEL_PLUGKEY },
+	{ ';',            SEL_PLUGKEY },
 	/* Run a plugin */
 	{ 'R',            SEL_PLUGIN },
 	{ CONTROL('V'),   SEL_PLUGIN },

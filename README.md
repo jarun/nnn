@@ -220,8 +220,8 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
             A  Apparent du       S  du
             z  Size   E  Extn    t  Time
  MISC
-         ! ^]  Shell             C  Execute entry
-         R ^V  Pick plugin   :K xK  Execute plugin K
+         ! ^]  Shell      ;K :K xK  Execute plugin K
+            C  Execute entry  R ^V  Pick plugin
             U  Manage session    =  Launch
             c  SSHFS mount       u  Unmount
            ^P  Prompt/run cmd    L  Lock
