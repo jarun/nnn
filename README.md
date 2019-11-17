@@ -207,7 +207,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
          Q ^Q  Quit  ^G  QuitCD  q  Quit context
  FILES
            ^O  Open with...      n  Create new/link
-            D  File detail   ^R F2  Rename/duplicate
+            D  File details  ^R F2  Rename/duplicate
    Space ^J/a  Select entry/all  r  Batch rename
          m ^K  Sel range, clear  M  List selection
             P  Copy selection    K  Edit, flush sel
