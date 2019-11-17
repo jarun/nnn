@@ -1007,6 +1007,9 @@ static bool editselection(void)
 		}
 	}
 
+	/* Add a line for the last file */
+	++lines;
+
 	if (lines > nselected) {
 		DPRINTF_S("files added to selection");
 		goto emptyedit;
