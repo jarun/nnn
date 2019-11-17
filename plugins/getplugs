@@ -18,7 +18,7 @@ merge () {
 	cp -vRf $1 $2
 }
 
-prompt() {
+prompt () {
 	echo "Plugin $1 already exists and is different."
 	echo -n "Keep (k), merge (m), overwrite (o) [default: k]? "
 	read operation
