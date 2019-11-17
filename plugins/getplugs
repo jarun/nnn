@@ -3,7 +3,7 @@
 # Description: Update nnn plugins
 #
 # Shell: POSIX compliant
-# Author: Arun Prakash Jana
+# Author: Arun Prakash Jana, KlzXS
 
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/
 PLUGIN_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins

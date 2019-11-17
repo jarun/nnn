@@ -28,4 +28,7 @@ if ! [ -z "$entry" ]; then
     fi
 
     rm $tmpfile
+
+    echo -n "Press any key to exit"
+    read input
 fi
