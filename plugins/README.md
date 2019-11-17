@@ -50,6 +50,9 @@ The currently available plugins are listed below.
 | vidthumb | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) | Show video thumbnails in terminal |
 | viuimg | sh | [viu](https://github.com/atanunq/viu), less | View an image or images in dir in `$PAGER` |
 
+<p align="center"><img src="https://i.imgur.com/SpT0L2W.png" /></p>
+<p align="center"><i>read ebooks with plugin gutenread (Android)</i></p>
+
 ## Installing plugins
 
 The following command installs all plugins:
