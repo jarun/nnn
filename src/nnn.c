@@ -3513,7 +3513,9 @@ static int dentfill(char *path, struct entry **dents)
 			open_max = max_openfds();
 	}
 
+#if _POSIX_C_SOURCE >= 200112L
 	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
+#endif
 
 	dp = readdir(dirp);
 	if (!dp)
