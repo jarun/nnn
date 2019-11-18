@@ -274,7 +274,7 @@ static settings cfg = {
 	0, /* blkorder */
 	0, /* extnorder */
 	0, /* showhidden */
-	1, /* selmode */
+	0, /* selmode */
 	0, /* showdetail */
 	1, /* ctxactive */
 	0, /* reserved */
@@ -3955,9 +3955,9 @@ static void redraw(char *path)
 			xstrlcpy(buf, coolsize(dir_blocks << blk_shift), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
-			mvprintw(lastln, 0, "%d/%d [%s] %cu:%s free:%s files:%lu %lldB %s",
-				 cur + 1, ndents, (nselected ?  xitoa(nselected) : ""), c, buf,
-				 coolsize(get_fs_info(path, FREE)), num_files,
+			mvprintw(lastln, 0, "%d/%d [%d:%s] %cu:%s free:%s files:%lu %lldB %s",
+				 cur + 1, ndents, cfg.selmode, (nselected ?  xitoa(nselected) : ""),
+				 c, buf, coolsize(get_fs_info(path, FREE)), num_files,
 				 (ll)pent->blocks << blk_shift, ptr);
 		} else { /* light or detail mode */
 			/* Show filename as it may be truncated in directory listing */
@@ -3968,9 +3968,9 @@ static void redraw(char *path)
 			strftime(buf, sizeof(buf), "%Y-%b-%d %R", localtime(&pent->t));
 			buf[sizeof(buf)-1] = '\0';
 
-			mvprintw(lastln, 0, "%d/%d [%s] %s%s %s %s %s [%s]",
-				 cur + 1, ndents, (nselected ?  xitoa(nselected) : ""), sort, buf,
-				 get_lsperms(pent->mode), coolsize(pent->size), ptr, base);
+			mvprintw(lastln, 0, "%d/%d [%d:%s] %s%s %s %s %s [%s]",
+				 cur + 1, ndents, cfg.selmode, (nselected ?  xitoa(nselected) : ""),
+				 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr, base);
 		}
 	} else
 		printmsg("0/0");
@@ -4614,28 +4614,23 @@ nochange:
 				break;
 			case SEL_HELP:
 				show_help(path);
-				break;
+				continue;
 			case SEL_RUNEDIT:
 				spawn(editor, dents[cur].name, NULL, path, F_CLI);
-				break;
+				continue;
 			case SEL_RUNPAGE:
 				spawn(pager, dents[cur].name, NULL, path, F_CLI);
-				break;
+				continue;
 			default: /* SEL_LOCK */
 				lock_terminal();
 				break;
 			}
 
-			/* Do not reload in some cases if in selection mode */
-			if (cfg.selmode && (sel == SEL_HELP
-			    || sel == SEL_RUNEDIT || sel == SEL_RUNPAGE))
-				goto nochange;
-
 			/* In case of successful operation, reload contents */
 
 			/* Continue in navigate-as-you-type mode, if enabled */
 			if (cfg.filtermode && sel != SEL_REDRAW)
-				presel = FILTER;
+				break;
 
 			/* Save current */
 			if (ndents)
