@@ -27,7 +27,7 @@ if [ -s $selection ]; then
             #     Vim: Warning: Input is not from a terminal
             # cat $selection | xargs -0 -o vimdiff
 
-            cat $selection | xargs -0 -o vimdiff +0
+            cat $selection | xargs -0 vimdiff +0
         fi
     else
         echo "needs at least 2 files or directories selected for comparison"
