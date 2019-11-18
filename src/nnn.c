@@ -3512,6 +3512,8 @@ static int dentfill(char *path, struct entry **dents)
 			open_max = max_openfds();
 	}
 
+	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
+
 	dp = readdir(dirp);
 	if (!dp)
 		goto exit;
