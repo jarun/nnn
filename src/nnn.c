@@ -3952,8 +3952,8 @@ static void redraw(char *path)
 			xstrlcpy(buf, coolsize(dir_blocks << blk_shift), 12);
 			c = cfg.apparentsz ? 'a' : 'd';
 
-			mvprintw(lastln, 0, "%d/%d (%d) %cu:%s free:%s files:%lu %lldB %s",
-				 cur + 1, ndents, nselected, c, buf,
+			mvprintw(lastln, 0, "%d/%d [%s] %cu:%s free:%s files:%lu %lldB %s",
+				 cur + 1, ndents, (nselected ?  xitoa(nselected) : ""), c, buf,
 				 coolsize(get_fs_info(path, FREE)), num_files,
 				 (ll)pent->blocks << blk_shift, ptr);
 		} else { /* light or detail mode */
@@ -3965,8 +3965,8 @@ static void redraw(char *path)
 			strftime(buf, sizeof(buf), "%Y-%b-%d %R", localtime(&pent->t));
 			buf[sizeof(buf)-1] = '\0';
 
-			mvprintw(lastln, 0, "%d/%d (%d) %s%s %s %s %s [%s]",
-				 cur + 1, ndents, nselected, sort, buf,
+			mvprintw(lastln, 0, "%d/%d [%s] %s%s %s %s %s [%s]",
+				 cur + 1, ndents, (nselected ?  xitoa(nselected) : ""), sort, buf,
 				 get_lsperms(pent->mode), coolsize(pent->size), ptr, base);
 		}
 	} else
