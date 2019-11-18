@@ -1936,7 +1936,7 @@ static int filterentries(char *path)
 			continue;
 #endif
 		case KEY_DC: // fallthrough
-		case  KEY_BACKSPACE: // fallthrough
+		case KEY_BACKSPACE: // fallthrough
 		case '\b': // fallthrough
 		case CONTROL('L'): // fallthrough
 		case 127: /* handle DEL */
@@ -1971,7 +1971,8 @@ static int filterentries(char *path)
 
 		if (r == OK) {
 			/* Handle all control chars in main loop */
-			if (*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^') {
+			if ((*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^')
+			    || (*ch == ']' && len == 1)) {
 				DPRINTF_D(*ch);
 				DPRINTF_S(keyname(*ch));
 
@@ -3331,7 +3332,7 @@ static void show_help(const char *path)
 		  "cC  Execute entry  R ^V  Pick plugin\n"
 		  "cU  Manage session    =  Launch\n"
 		  "cc  SSHFS mount       u  Unmount\n"
-		 "b^P  Prompt/run cmd    L  Lock\n"};
+	       "9] ^P  Prompt/run cmd    L  Lock\n"};
 
 	fd = create_tmp_file();
 	if (fd == -1)

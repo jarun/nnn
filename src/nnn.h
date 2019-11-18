@@ -257,6 +257,7 @@ static struct key bindings[] = {
 	/* Launcher */
 	{ '=',            SEL_LAUNCH },
 	/* Run a command */
+	{ ']',            SEL_RUNCMD },
 	{ CONTROL('P'),   SEL_RUNCMD },
 	/* Open in EDITOR or PAGER */
 	{ 'e',            SEL_RUNEDIT },

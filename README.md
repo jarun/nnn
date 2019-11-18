@@ -224,7 +224,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
             C  Execute entry  R ^V  Pick plugin
             U  Manage session    =  Launch
             c  SSHFS mount       u  Unmount
-           ^P  Prompt/run cmd    L  Lock
+         ] ^P  Prompt/run cmd    L  Lock
 ```
 
 Notes:
