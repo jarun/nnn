@@ -621,12 +621,11 @@ static void xdelay(void)
 
 static char confirm_force(bool selection)
 {
-	char str[64] = "forcibly remove current file (unrecoverable)? [y/Y confirms]";
+	char str[64];
 	int r;
 
-	if (selection)
-		snprintf(str, 64, "forcibly remove %d file(s) (unrecoverable)? [y/Y confirms]", nselected);
-
+	snprintf(str, 64, "forcibly remove %s file%s (unrecoverable)? [y/Y confirms]",
+		 (selection ? xitoa(nselected) : "current"), (selection ? "(s)" : ""));
 	r = get_input(str);
 
 	if (r == 'y' || r == 'Y')

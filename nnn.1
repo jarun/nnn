@@ -189,6 +189,16 @@ when dealing with the !, e and p commands respectively. A single combination to 
     NOTE: To run a plugin directly, press \fI:\fR followed by the plugin key.
 .Ed
 .Pp
+    To assign keys to arbitrary non-background cli commands (non-shell-interpreted) and invoke like plugins, add \fI_\fR (underscore) before the command.
+.Bd -literal
+    export NNN_PLUG='x:_chmod +x $NNN;g:_git log;s:_smplayer $NNN;o:fzopen'
+
+    NOTES:
+    1. Use single quotes for $NNN_PLUG so $NNN is not interpreted
+    2. $NNN should be the last argument (IF you want to pass the hovered file name)
+    3. (Again) add \fI_\fR before the command
+.Ed
+.Pp
 \fBNNN_USE_EDITOR:\fR use VISUAL (else EDITOR, preferably CLI, fallback vi) to handle text files.
 .Bd -literal
     export NNN_USE_EDITOR=1
