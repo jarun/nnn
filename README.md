@@ -56,7 +56,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - Cross-dir file/all/range selection
   - Batch rename selection or dir entries
   - Copy (as), move (as), delete, archive, link selection
-  - Create, rename, duplicate files and dirs
+  - Create (with parents), rename, duplicate (anywhere) files and dirs
   - Spawn a shell, run apps, run commands, execute file
   - Lock terminal (needs a locker)
 - Minimal deps, minimal config

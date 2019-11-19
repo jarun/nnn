@@ -1317,6 +1317,59 @@ static void xrm(char *path)
 	}
 }
 
+/* Create non-existent parents and a file or dir */
+static bool xmkentryp(char* path, bool dir)
+{
+	char* p = path;
+	char *slash = path;
+
+	if (!p || !*p)
+		return FALSE;
+
+	/* Skip the first '/' */
+	++p;
+
+	while (*p != '\0') {
+		if (*p == '/') {
+			slash = p;
+			*p = '\0';
+		} else {
+			++p;
+			continue;
+		}
+
+		/* Create folder from path to '\0' inserted at p */
+		if (mkdir(path, 0777) == -1 && errno != EEXIST) {
+			DPRINTF_S("mkdir1 fail");
+			DPRINTF_S(strerror(errno));
+			*slash = '/';
+			return FALSE;
+		}
+
+		/* Restore path */
+		*slash = '/';
+		++p;
+	}
+
+	if (dir) {
+		if(mkdir(path, 0777) == -1 && errno != EEXIST) {
+			DPRINTF_S("mkdir2 fail");
+			DPRINTF_S(strerror(errno));
+			return FALSE;
+		}
+	} else {
+		int fd = open(path, O_CREAT, 0666);
+		if (fd == -1 && errno != EEXIST) {
+			DPRINTF_S("open fail");
+			DPRINTF_S(strerror(errno));
+			return FALSE;
+		} else
+			close(fd);
+	}
+
+	return TRUE;
+}
+
 static uint lines_in_file(int fd, char *buf, size_t buflen)
 {
 	ssize_t len;
@@ -4834,7 +4887,8 @@ nochange:
 				break;
 
 			/* Allow only relative, same dir paths */
-			if (tmp[0] == '/' || xstrcmp(xbasename(tmp), tmp) != 0) {
+			if (tmp[0] == '/'
+			    || ((r != 'f' && r != 'd') && (xstrcmp(xbasename(tmp), tmp) != 0))) {
 				printwait(messages[STR_INPUT_ID], &presel);
 				goto nochange;
 			}
@@ -4929,11 +4983,12 @@ nochange:
 			} else {
 				/* Check if it's a dir or file */
 				if (r == 'f') {
-					r = openat(fd, tmp, O_CREAT, 0666);
-					close(r);
-				} else if (r == 'd')
-					r = mkdirat(fd, tmp, 0777);
-				else if (r == 's' || r == 'h') {
+					mkpath(path, tmp, newpath);
+					r = xmkentryp(newpath, FALSE);
+				} else if (r == 'd') {
+					mkpath(path, tmp, newpath);
+					r = xmkentryp(newpath, TRUE);
+				} else if (r == 's' || r == 'h') {
 					if (tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
 					r = xlink(tmp, path, newpath, &presel, r);
