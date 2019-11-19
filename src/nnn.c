@@ -4591,6 +4591,8 @@ nochange:
 		case SEL_RUNPAGE: // fallthrough
 		case SEL_LOCK:
 		{
+			bool refresh = FALSE;
+
 			if (ndents)
 				mkpath(path, dents[cur].name, newpath);
 			else if (sel == SEL_ARCHIVELS || sel == SEL_EXTRACT
@@ -4600,11 +4602,14 @@ nochange:
 			switch (sel) {
 			case SEL_ARCHIVELS:
 				handle_archive(newpath, path, 'l');
+				refresh = TRUE;
 				break;
 			case SEL_EXTRACT:
 				handle_archive(newpath, path, 'x');
+				refresh = TRUE;
 				break;
 			case SEL_REDRAW:
+				refresh = TRUE;
 				break;
 			case SEL_RENAMEMUL:
 				endselection();
@@ -4613,6 +4618,7 @@ nochange:
 					printwait(messages[OPERATION_FAILED], &presel);
 					goto nochange;
 				}
+				refresh = TRUE;
 				break;
 			case SEL_HELP:
 				show_help(path);
@@ -4631,7 +4637,7 @@ nochange:
 			/* In case of successful operation, reload contents */
 
 			/* Continue in navigate-as-you-type mode, if enabled */
-			if (cfg.filtermode && sel != SEL_REDRAW)
+			if (cfg.filtermode && !refresh)
 				break;
 
 			/* Save current */
