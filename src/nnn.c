@@ -1363,8 +1363,9 @@ static bool xmkentryp(char* path, bool dir)
 			DPRINTF_S("open fail");
 			DPRINTF_S(strerror(errno));
 			return FALSE;
-		} else
-			close(fd);
+		}
+
+		close(fd);
 	}
 
 	return TRUE;
