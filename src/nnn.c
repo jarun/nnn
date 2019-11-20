@@ -4873,7 +4873,7 @@ nochange:
 			case SEL_NEW:
 				r = get_input("create 'f'(ile) / 'd'(ir) / 's'(ym) / 'h'(ard)?");
 				if (r == 'f' || r == 'd')
-					tmp = xreadline(NULL, "name: ");
+					tmp = xreadline(NULL, "relative path: ");
 				else if (r == 's' || r == 'h')
 					tmp = xreadline(NULL, "link suffix [@ for none]: ");
 				else
