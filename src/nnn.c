@@ -4705,7 +4705,7 @@ nochange:
 			}
 
 			/* move cursor to the next entry if this is not the last entry */
-			if (cur != ndents - 1)
+			if (!cfg.picker && cur != ndents - 1)
 				move_cursor((cur + 1) % ndents, 0);
 			break;
 		case SEL_SELMUL:
@@ -5206,8 +5206,7 @@ nochange:
 				/* In vim picker mode, clear selection and exit */
 				if (cfg.picker) {
 					/* Picker mode: reset buffer or clear file */
-					if (selbufpos)
-						cfg.pickraw ? selbufpos = 0 : writesel(NULL, 0);
+					selbufpos = 0;
 				} else if (!write_lastdir(path)) {
 					presel = MSGWAIT;
 					goto nochange;
@@ -5715,6 +5714,9 @@ int main(int argc, char *argv[])
 			if (opt != (int)(selbufpos))
 				xerror();
 		}
+	} else if (cfg.picker) {
+		if (selbufpos)
+			writesel(pselbuf, selbufpos - 1);
 	} else if (!cfg.picker && g_selpath)
 		unlink(g_selpath);
 
