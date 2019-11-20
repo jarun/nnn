@@ -1317,60 +1317,6 @@ static void xrm(char *path)
 	}
 }
 
-/* Create non-existent parents and a file or dir */
-static bool xmkentryp(char* path, bool dir)
-{
-	char* p = path;
-	char *slash = path;
-
-	if (!p || !*p)
-		return FALSE;
-
-	/* Skip the first '/' */
-	++p;
-
-	while (*p != '\0') {
-		if (*p == '/') {
-			slash = p;
-			*p = '\0';
-		} else {
-			++p;
-			continue;
-		}
-
-		/* Create folder from path to '\0' inserted at p */
-		if (mkdir(path, 0777) == -1 && errno != EEXIST) {
-			DPRINTF_S("mkdir1 fail");
-			DPRINTF_S(strerror(errno));
-			*slash = '/';
-			return FALSE;
-		}
-
-		/* Restore path */
-		*slash = '/';
-		++p;
-	}
-
-	if (dir) {
-		if(mkdir(path, 0777) == -1 && errno != EEXIST) {
-			DPRINTF_S("mkdir2 fail");
-			DPRINTF_S(strerror(errno));
-			return FALSE;
-		}
-	} else {
-		int fd = open(path, O_CREAT, 0666);
-		if (fd == -1 && errno != EEXIST) {
-			DPRINTF_S("open fail");
-			DPRINTF_S(strerror(errno));
-			return FALSE;
-		}
-
-		close(fd);
-	}
-
-	return TRUE;
-}
-
 static uint lines_in_file(int fd, char *buf, size_t buflen)
 {
 	ssize_t len;
@@ -3172,14 +3118,55 @@ static bool execute_file(int cur, char *path, char *newpath, int *presel)
 	return TRUE;
 }
 
-static bool create_dir(const char *path)
+/* Create non-existent parents and a file or dir */
+static bool xmktree(char* path, bool dir)
 {
-	if (!xdiraccess(path)) {
-		if (errno != ENOENT)
-			return FALSE;
+	char* p = path;
+	char *slash = path;
 
-		if (mkdir(path, 0755) == -1)
+	if (!p || !*p)
+		return FALSE;
+
+	/* Skip the first '/' */
+	++p;
+
+	while (*p != '\0') {
+		if (*p == '/') {
+			slash = p;
+			*p = '\0';
+		} else {
+			++p;
+			continue;
+		}
+
+		/* Create folder from path to '\0' inserted at p */
+		if (mkdir(path, 0777) == -1 && errno != EEXIST) {
+			DPRINTF_S("mkdir1!");
+			DPRINTF_S(strerror(errno));
+			*slash = '/';
 			return FALSE;
+		}
+
+		/* Restore path */
+		*slash = '/';
+		++p;
+	}
+
+	if (dir) {
+		if(mkdir(path, 0777) == -1 && errno != EEXIST) {
+			DPRINTF_S("mkdir2!");
+			DPRINTF_S(strerror(errno));
+			return FALSE;
+		}
+	} else {
+		int fd = open(path, O_CREAT, 0666);
+		if (fd == -1 && errno != EEXIST) {
+			DPRINTF_S("open!");
+			DPRINTF_S(strerror(errno));
+			return FALSE;
+		}
+
+		close(fd);
 	}
 
 	return TRUE;
@@ -3213,7 +3200,7 @@ static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 	mkpath(cfgdir, dir, newpath);
 	free(dir);
 
-	if (!create_dir(newpath)) {
+	if (!xmktree(newpath, TRUE)) {
 		printwait(strerror(errno), presel);
 		return FALSE;
 	}
@@ -3246,7 +3233,7 @@ static bool sshfs_mount(char *newpath, int *presel)
 
 	/* Create the mount point */
 	mkpath(cfgdir, tmp, newpath);
-	if (!create_dir(newpath)) {
+	if (!xmktree(newpath, TRUE)) {
 		printwait(strerror(errno), presel);
 		return FALSE;
 	}
@@ -4985,10 +4972,10 @@ nochange:
 				/* Check if it's a dir or file */
 				if (r == 'f') {
 					mkpath(path, tmp, newpath);
-					r = xmkentryp(newpath, FALSE);
+					r = xmktree(newpath, FALSE);
 				} else if (r == 'd') {
 					mkpath(path, tmp, newpath);
-					r = xmkentryp(newpath, TRUE);
+					r = xmktree(newpath, TRUE);
 				} else if (r == 's' || r == 'h') {
 					if (tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
@@ -5340,21 +5327,12 @@ static bool setup_config(void)
 		/* Create ~/.config */
 		xstrlcpy(cfgdir + r - 1, "/.config", len - r);
 		DPRINTF_S(cfgdir);
-		if (!create_dir(cfgdir)) {
-			xerror();
-			return FALSE;
-		}
-
 		r += 8; /* length of "/.config" */
 	}
 
 	/* Create ~/.config/nnn */
 	xstrlcpy(cfgdir + r - 1, "/nnn", len - r);
 	DPRINTF_S(cfgdir);
-	if (!create_dir(cfgdir)) {
-		xerror();
-		return FALSE;
-	}
 
 	/* Create ~/.config/nnn/plugins */
 	xstrlcpy(cfgdir + r + 4 - 1, "/plugins", 9); /* subtract length of "/nnn" (4) */
@@ -5363,7 +5341,7 @@ static bool setup_config(void)
 	xstrlcpy(plugindir, cfgdir, len);
 	DPRINTF_S(plugindir);
 
-	if (!create_dir(cfgdir)) {
+	if (!xmktree(cfgdir, TRUE)) {
 		xerror();
 		return FALSE;
 	}
@@ -5375,7 +5353,7 @@ static bool setup_config(void)
 	xstrlcpy(sessiondir, cfgdir, len);
 	DPRINTF_S(sessiondir);
 
-	if (!create_dir(cfgdir)) {
+	if (!xmktree(cfgdir, TRUE)) {
 		xerror();
 		return FALSE;
 	}
