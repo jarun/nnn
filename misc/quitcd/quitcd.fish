@@ -17,6 +17,11 @@ function n --description 'support nnn quit and change directory'
         set -x NNN_TMPFILE "$HOME/.config/nnn/.lastd"
     end
 
+    # Unmask ^Q (, ^V etc.) (if required, see `stty -a`) to Quit nnn
+    # stty start undef
+    # stty stop undef
+    # stty lwrap undef
+
     nnn $argv
 
     if test -e $NNN_TMPFILE

@@ -10,6 +10,11 @@ n()
     # To cd on quit only on ^G, export NNN_TMPFILE after the call to nnn
     export NNN_TMPFILE=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.lastd
 
+    # Unmask ^Q (, ^V etc.) (if required, see `stty -a`) to Quit nnn
+    # stty start undef
+    # stty stop undef
+    # stty lwrap undef
+
     nnn "$@"
 
     if [ -f $NNN_TMPFILE ]; then

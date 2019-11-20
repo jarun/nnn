@@ -4,4 +4,9 @@
 # To cd on quit only on ^G, export NNN_TMPFILE after the call to nnn
 set NNN_TMPFILE=~/.config/nnn/.lastd
 
+# Unmask ^Q (, ^V etc.) (if required, see `stty -a`) to Quit nnn
+# stty start undef
+# stty stop undef
+# stty lwrap undef
+
 alias n 'nnn -fis; source "$NNN_TMPFILE"; rm -f "$NNN_TMPFILE"'
