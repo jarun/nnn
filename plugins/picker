@@ -21,6 +21,6 @@
 nnn -p /tmp/picked
 
 if [ -f /tmp/picked ]; then
-    cat /tmp/picked | tr '\0' '\n'
+    tr '\0' '\n' < /tmp/picked
     rm /tmp/picked
 fi

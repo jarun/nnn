@@ -25,9 +25,9 @@ if [ -s $selection ]; then
         else
             # If xargs supports the -o option, use it to get rid of:
             #     Vim: Warning: Input is not from a terminal
-            # cat $selection | xargs -0 -o vimdiff
+            # xargs -0 -o vimdiff < $selection
 
-            cat $selection | xargs -0 vimdiff +0
+            xargs -0 vimdiff +0 < $selection
         fi
     else
         echo "needs at least 2 files or directories selected for comparison"

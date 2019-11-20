@@ -13,11 +13,11 @@ if ! [ -z "$1" ]; then
         # Convert using pdftotext
         pdftotext -nopgbrk -layout "$1" - | sed 's/\xe2\x80\x8b//g' > "$tmpf".txt
 
-        pico2wave -w "$tmpf".wav -l en-GB "$(cat "$tmpf".txt | tr '\n' ' ')"
+        pico2wave -w "$tmpf".wav -l en-GB "$(tr '\n' ' ' < "$tmpf".txt)"
 
         rm "$tmpf".txt
     else
-        pico2wave -w "$tmpf".wav -l en-GB "$(cat "$1" | tr '\n' ' ')"
+        pico2wave -w "$tmpf".wav -l en-GB "$(tr '\n' ' ' < "$1")"
     fi
 
     # to jump around and note the time

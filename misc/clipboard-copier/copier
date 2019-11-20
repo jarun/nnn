@@ -8,16 +8,16 @@
 SELECTION=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 
 # Linux
-cat "$SELECTION" | xargs -0 | xsel -bi
+xargs -0 < "$SELECTION" | xsel -bi
 
 # macOS
-# cat "$SELECTION" | xargs -0 | pbcopy
+# xargs -0 < "$SELECTION" | pbcopy
 
 # Termux
-# cat "$SELECTION" | xargs -0 | termux-clipboard-set
+# xargs -0 < "$SELECTION" | termux-clipboard-set
 
 # Cygwin
-# cat "$SELECTION" | xargs -0 | clip
+# xargs -0 < "$SELECTION" | clip
 
 # Wayland
-# cat "$SELECTION" | xargs -0 | wl-copy
+# xargs -0 < "$SELECTION" | wl-copy

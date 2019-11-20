@@ -891,7 +891,7 @@ static bool listselfile(void)
 	if (!sb.st_size)
 		return FALSE;
 
-	snprintf(g_buf, CMD_LEN_MAX, "cat %s | tr \'\\0\' \'\\n\'", g_selpath);
+	snprintf(g_buf, CMD_LEN_MAX, "tr \'\\0\' \'\\n\' < %s", g_selpath);
 	spawn(utils[SH_EXEC], g_buf, NULL, NULL, F_CLI | F_CONFIRM);
 
 	return TRUE;
@@ -1346,7 +1346,7 @@ static bool cpmv_rename(int choice, const char *path)
 
 	/* selsafe() returned TRUE for this to be called */
 	if (!selbufpos) {
-		snprintf(buf, sizeof(buf), "cat %s | tr '\\0' '\\n' > %s", g_selpath, g_tmpfpath);
+		snprintf(buf, sizeof(buf), "tr '\\0' '\\n' < %s > %s", g_selpath, g_tmpfpath);
 		spawn(utils[SH_EXEC], buf, NULL, NULL, F_CLI);
 
 		count = lines_in_file(fd, buf, sizeof(buf));

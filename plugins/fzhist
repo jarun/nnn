@@ -10,10 +10,10 @@ shellname="$(basename "$SHELL")"
 
 if [ "$shellname" = "bash" ]; then
     hist_file="$HOME/.bash_history"
-    entry="$(cat "$hist_file" | fzy)"
+    entry="$(fzy < "$hist_file")"
 elif [ "$shellname" = "fish" ]; then
     hist_file="$HOME/.config/fish/fish_history"
-    entry="$(cat "$hist_file" | grep "\- cmd: " | cut -c 8- | fzy)"
+    entry="$(grep "\- cmd: " "$hist_file" | cut -c 8- | fzy)"
 fi
 
 if ! [ -z "$entry" ]; then
@@ -21,10 +21,8 @@ if ! [ -z "$entry" ]; then
     echo "$entry" >> $tmpfile
     $EDITOR $tmpfile
 
-    cmd="$(cat $tmpfile)"
-
-    if ! [ -z "$cmd" ]; then
-        $SHELL -c "$cmd"
+    if [ -s $tmpfile ]; then
+        $SHELL -c "$(cat $tmpfile)"
     fi
 
     rm $tmpfile
