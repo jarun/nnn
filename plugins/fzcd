@@ -28,5 +28,8 @@ if [ "$?" -eq "0" ]; then
 		*directory*) ;;
 		*) sel=$(dirname "$sel") ;;
 	esac
+
+    # Remove "./" prefix
+    sel="$(echo "$sel" | cut -c 3-)"
 	nnn_cd "$PWD/$sel"
 fi

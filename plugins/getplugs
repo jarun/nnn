@@ -44,6 +44,7 @@ if [ -d $PLUGIN_DIR ]; then
     tar -C $CONFIG_DIR -czf $CONFIG_DIR"plugins-$(date '+%Y%m%d%H%M').tar.gz" plugins/
 fi
 
+mkdir -p $PLUGIN_DIR
 cd $CONFIG_DIR
 curl -Ls -O https://github.com/jarun/nnn/archive/master.tar.gz
 tar -zxf master.tar.gz
