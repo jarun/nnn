@@ -12,6 +12,6 @@ if ! [ -z "$1" ]; then
         lsix "$1"
     fi
 
-    echo -n "Press any key to exit..."
-    read dummy
+    printf "Press any key to exit..."
+    read -r _
 fi

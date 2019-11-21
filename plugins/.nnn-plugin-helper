@@ -6,6 +6,7 @@
 # Author: Anna Arad
 
 selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+export selection
 
 ## Ask nnn to switch to directory $1 in context $2.
 ## If $2 is not provided, the function asks explicitly.
@@ -20,11 +21,11 @@ nnn_cd () {
     if [ -n "$2" ]; then
         context=$2
     else
-        echo -n "Choose context 1-4 (blank for current): "
-        read context
+        printf "Choose context 1-4 (blank for current): "
+        read -r context
     fi
 
-    echo -n ${context:-0}$dir > $NNN_PIPE
+    printf "%s" "${context:-0}$dir" > "$NNN_PIPE"
 }
 
 cmd_exists () {

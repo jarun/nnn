@@ -18,7 +18,8 @@ ret=$cmd
 
 SHUFFLE=0
 
-mocp_add() {
+mocp_add ()
+{
     if [ $SHUFFLE = 1 ]; then
         if [ "$resp" = "y" ]; then
             arr=$(tr '\0' '\n' < "$selection")
@@ -38,7 +39,7 @@ mocp_add() {
         arr2=$(echo "$arr2" | awk 'BEGIN{srand();}{print rand()"\t"$0}' | sort -k1 -n | cut -f2-)
         for entry in $arr2
         do
-            if [ -f "$entry" ] && [ "$(echo "$entry" | grep -v '\.m3u$\|\.pls$')" ]; then
+            if [ -f "$entry" ] &&  echo "$entry" | grep -qv '\.m3u$\|\.pls$' ; then
                 mocp -a "$entry"
             fi
         done
@@ -57,8 +58,8 @@ if [ ! -s "$selection" ] && [ -z "$1" ]; then
 fi
 
 if [ -s "$selection" ]; then
-    echo -n "Work with selection? Enter 'y' to confirm: "
-    read resp
+    printf "Work with selection? Enter 'y' to confirm: "
+    read -r resp
 fi
 
 if [ -z "$ret" ]; then
@@ -68,7 +69,7 @@ else
     # mocp running, check if it's playing
     state=$(mocp -i | grep "State:" | cut -d' ' -f2)
 
-    if [ $state = 'PLAY' ]; then
+    if [ "$state" = 'PLAY' ]; then
         # add to playlist and exit
         mocp_add "$1"
 

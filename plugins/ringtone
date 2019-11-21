@@ -13,20 +13,21 @@
 # Author: Arun Prakash Jana
 
 if [ -n "$1" ]; then
-    echo -n "start (hh:mm:ss): "
-    read start
+    printf "start (hh:mm:ss): "
+    read -r start
     st=$(date -d "$start" +%s) || exit 1
 
-    echo -n "end (hh:mm:ss): "
-    read end
+    printf "end (hh:mm:ss): "
+    read -r end
     et=$(date -d "$end" +%s) || exit 1
 
-    if [ $st -ge $et ]; then
-        echo "error: start >= end"
+    if [ "$st" -ge "$et" ]; then
+        printf "error: start >= end "
+        read -r _
         exit 1
     fi
 
-    interval=$(( $et - $st ))
+    interval=$(( et - st ))
 
     outfile=$(basename "$1")
     outfile="${outfile%.*}"_ringtone.mp3

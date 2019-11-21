@@ -5,4 +5,5 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana, superDuperCyberTechno
 
+# shellcheck disable=SC2012
 ls -lah --group-directories-first | less

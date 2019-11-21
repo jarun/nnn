@@ -18,15 +18,15 @@ fi
 
 if ! [ -z "$entry" ]; then
     tmpfile=$(mktemp)
-    echo "$entry" >> $tmpfile
-    $EDITOR $tmpfile
+    echo "$entry" >> "$tmpfile"
+    $EDITOR "$tmpfile"
 
-    if [ -s $tmpfile ]; then
-        $SHELL -c "$(cat $tmpfile)"
+    if [ -s "$tmpfile" ]; then
+        $SHELL -c "$(cat "$tmpfile")"
     fi
 
-    rm $tmpfile
+    rm "$tmpfile"
 
-    echo -n "Press any key to exit"
-    read input
+    printf "Press any key to exit"
+    read -r _
 fi

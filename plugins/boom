@@ -15,7 +15,7 @@ if [ ! -z "$GUIPLAYER" ]; then
     find . -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.webm" -o -iname "*.wma" \) | sort -R | head -n $NUMTRACKS | xargs -d "\n" "$PLAYER" > /dev/null 2>&1 &
 
     # detach the player
-    disown
+    sleep 1
 else
     # start MOC server
     mocp -S

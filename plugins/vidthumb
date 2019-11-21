@@ -23,5 +23,5 @@ lsix .nthumbs/*
 # remove the thumbnails
 rm -rf .nthumbs
 
-echo -n "Press any key to exit..."
-read dummy
+printf "Press any key to exit..."
+read -r _

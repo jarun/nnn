@@ -5,9 +5,9 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-IP=`curl -s ifconfig.me`
+IP=$(curl -s ifconfig.me)
 
 whois "$IP"
 echo your external IP address is "$IP"
 
-read dummy
+read -r _

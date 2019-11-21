@@ -6,6 +6,6 @@
 # Author: Arun Prakash Jana
 
 if ! [ -z "$1" ]; then
-    curl -F "f:1=@"$1"" ix.io
-    read input
+    curl -F "f:1=@$1" ix.io
+    read -r _
 fi

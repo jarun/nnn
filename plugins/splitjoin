@@ -12,8 +12,8 @@ selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 resp=s
 
 if [ -s "$selection" ]; then
-    echo -n "press 's' (split current file) or 'j' (join selection): "
-    read resp
+    printf "press 's' (split current file) or 'j' (join selection): "
+    read -r resp
 fi
 
 if [ "$resp" = "j" ]; then
@@ -37,8 +37,8 @@ if [ "$resp" = "j" ]; then
 elif [ "$resp" = "s" ]; then
     if [ -n "$1" ] && [ -f "$1" ]; then
         # a single file is passed
-        echo -n "split size in MB: "
-        read size
+        printf "split size in MB: "
+        read -r size
 
         if [ -n "$size" ]; then
             split -d -b "$size"M "$1" "$1"

@@ -7,7 +7,7 @@ test -e outdir && {
     exit 1
 }
 
-mkdir -p outdir && cd outdir
+mkdir -p outdir && cd outdir || exit 1
 
 echo 'It works!' > normal.txt
 echo 'Με δουλέβει;' > 'κοινό.txt'

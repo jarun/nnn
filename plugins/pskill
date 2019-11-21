@@ -20,10 +20,11 @@ else
     sucmd=: # noop
 fi
 
-echo -n "Enter process name ['defunct' for zombies]: "
-read psname
+printf "Enter process name ['defunct' for zombies]: "
+read -r psname
 
 if ! [ -z "$psname" ]; then
+    # shellcheck disable=SC2009
     cmd="$(ps -ax | grep -iw "$psname" | fzy | sed -e 's/^[ \t]*//' | cut -d' ' -f1)"
     $sucmd kill -9 "$cmd"
 fi

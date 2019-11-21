@@ -6,10 +6,10 @@
 # Author: Arun Prakash Jana
 # NOTE: This script installs a package, should be issued with admin privilege
 
-cur=`nnn -v`
-new=`curl -s "https://github.com/jarun/nnn/releases/latest" | grep -Eo "[0-9]+\.[0-9]+"`
+cur="$(nnn -v)"
+new="$(curl -s "https://github.com/jarun/nnn/releases/latest" | grep -Eo "[0-9]+\.[0-9]+")"
 
-if [ $cur_ver == $new_ver ]; then
+if [ "$cur" = "$new" ]; then
     echo 'Already at latest version'
     exit 0
 fi
@@ -18,7 +18,7 @@ fi
 curl -Ls -O "https://github.com/jarun/nnn/releases/download/v$new/nnn_$new-1_debian9.amd64.deb"
 
 # install it
-sudo dpkg -i nnn_$new-1_debian9.amd64.deb
+sudo dpkg -i nnn_"$new"-1_debian9.amd64.deb
 
 # remove the file
-rm -rf nnn_$new-1_debian9.amd64.deb
+rm -rf nnn_"$new"-1_debian9.amd64.deb

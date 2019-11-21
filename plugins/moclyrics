@@ -18,7 +18,7 @@ out="$(mocp -i)"
 
 # Check if anything is playing
 state=$(echo "$out" | grep "State:" | cut -d' ' -f2)
-if ! [ $state = 'PLAY' ]; then
+if ! [ "$state" = 'PLAY' ]; then
     exit
 fi
 

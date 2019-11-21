@@ -7,7 +7,7 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-entry="$(find -type f 2>/dev/null | fzy)"
+entry="$(find . -type f 2>/dev/null | fzy)"
 
 case "$(file -biL "$entry")" in
     *text*)

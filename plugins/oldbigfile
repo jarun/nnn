@@ -7,10 +7,10 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-echo -n "Min file size (MB): "
-read size
+printf "Min file size (MB): "
+read -r size
 
-find -size +"$size"M -type f -printf '%A+ %s %p\n' | sort
+find . -size +"$size"M -type f -printf '%A+ %s %p\n' | sort
 
 echo "Press any key to exit"
-read dummy
+read -r _

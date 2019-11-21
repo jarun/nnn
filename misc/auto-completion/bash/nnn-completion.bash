@@ -5,7 +5,8 @@
 #   Arun Prakash Jana <engineerarun@gmail.com>
 #
 
-_nnn () {
+_nnn ()
+{
     COMPREPLY=()
     local IFS=$' \n'
     local cur=$2 prev=$3
@@ -36,7 +37,7 @@ _nnn () {
         COMPREPLY=( $(compgen -f -d -- "$cur") )
     elif [[ $prev == -e ]]; then
         local sessions_dir=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions
-        COMPREPLY=( $(compgen -W "$(ls $sessions_dir)" -- "$cur") )
+        COMPREPLY=( $(compgen -W "$(ls "$sessions_dir")" -- "$cur") )
     elif [[ $cur == -* ]]; then
         COMPREPLY=( $(compgen -W "${opts[*]}" -- "$cur") )
     else

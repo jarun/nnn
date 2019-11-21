@@ -16,5 +16,5 @@ if command -v sxiv >/dev/null 2>&1; then
     fi
 else
     echo "sxiv missing"
-    read dummy
+    read -r _
 fi

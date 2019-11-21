@@ -16,21 +16,22 @@
 selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 resp=f
 all=
-if which dragon-drag-and-drop 2>&1 >/dev/null; then
+if which dragon-drag-and-drop >/dev/null 2>&1; then
     dnd="dragon-drag-and-drop"
 else
     dnd="dragon"
 fi
 
-function add_file() {
-	echo -n "$@" >> "$selection"
-	echo -ne "\0" >> "$selection"
+add_file ()
+{
+	printf "%s" "$@" >> "$selection"
+	printf "\0" >> "$selection"
 }
 
-function use_all()
+use_all ()
 {
-    echo -n "mark --all (a) [default=none]: "
-    read resp
+    printf "mark --all (a) [default=none]: "
+    read -r resp
     if [ "$resp" = "a" ]; then
         all="--all"
     else
@@ -39,11 +40,11 @@ function use_all()
 }
 
 if [ -s "$selection" ]; then
-    echo -n "Drop file (r). Drag selection (s), Drag current directory (d) or drag current file (f) [default=f]: "
-    read resp
+    printf "Drop file (r). Drag selection (s), Drag current directory (d) or drag current file (f) [default=f]: "
+    read -r resp
 else
-    echo -n "Drop file (r). Drag current directory (d) or drag current file (f) [default=f]: "
-    read resp
+    printf "Drop file (r). Drag current directory (d) or drag current file (f) [default=f]: "
+    read -r resp
     if [ "$resp" = "s" ]; then
         resp=f
     fi
@@ -56,10 +57,10 @@ elif [ "$resp" = "d" ]; then
     use_all
     "$dnd" "$all" "$PWD/"* &
 elif [ "$resp" = "r" ]; then
-    echo -n > "$selection"
-    "$dnd" --print-path --target | while read f
+    printf > "$selection"
+    "$dnd" --print-path --target | while read -r f
     do
-            if echo -n "$f" | grep '^\(https\?\|ftps\?\|s\?ftp\):\/\/' ; then
+            if printf "%s" "$f" | grep '^\(https\?\|ftps\?\|s\?ftp\):\/\/' ; then
                     curl -LJO "$f"
                     add_file "$PWD/$(basename "$f")"
             elif [ -e "$f" ]; then

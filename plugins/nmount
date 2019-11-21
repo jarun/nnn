@@ -20,10 +20,9 @@ prompt="device name ['l' lists]: "
 
 lsblk
 
-echo
-echo "Make sure you aren't still in the mounted device."
-echo -n "$prompt"
-read dev
+printf "\nMake sure you aren't still in the mounted device."
+printf "%s" "$prompt"
+read -r dev
 
 while ! [ -z "$dev" ]
 do
@@ -34,11 +33,11 @@ do
     else
         if grep -qs "$dev " /proc/mounts; then
             sync
-            pumount "$dev"
-            if [ "$?" -eq "0" ]; then
+            if pumount "$dev"
+            then
                 echo "$dev" unmounted.
-                udisksctl power-off -b /dev/"$dev"
-                if [ "$?" -eq "0" ]; then
+                if udisksctl power-off -b /dev/"$dev"
+                then
                     echo "$dev" ejected.
                 fi
             fi
@@ -49,6 +48,6 @@ do
     fi
 
     echo
-    echo -n "$prompt"
-    read dev
+    printf "%s" "$prompt"
+    read -r dev
 done

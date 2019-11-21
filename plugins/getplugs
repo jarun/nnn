@@ -14,13 +14,13 @@ is_cmd_exists () {
 }
 
 merge () {
-	vimdiff $1 $2
+	vimdiff "$1" "$2"
 }
 
 prompt () {
-	echo "Plugin $1 already exists and is different."
-	echo -n "Keep (k), merge (m), overwrite (o) [default: k]? "
-	read operation
+	printf "%s" "Plugin $1 already exists and is different.\n"
+	printf "Keep (k), merge (m), overwrite (o) [default: k]? "
+	read -r operation
 
 	if [ "$operation" = "m" ]; then
 		op="merge"
@@ -40,27 +40,27 @@ else
 fi
 
 # backup any earlier plugins
-if [ -d $PLUGIN_DIR ]; then
-    tar -C $CONFIG_DIR -czf $CONFIG_DIR"plugins-$(date '+%Y%m%d%H%M').tar.gz" plugins/
+if [ -d "$PLUGIN_DIR" ]; then
+    tar -C "$CONFIG_DIR" -czf "$CONFIG_DIR""plugins-$(date '+%Y%m%d%H%M').tar.gz" plugins/
 fi
 
-mkdir -p $PLUGIN_DIR
-cd $CONFIG_DIR
+mkdir -p "$PLUGIN_DIR"
+cd "$CONFIG_DIR" || exit 1
 curl -Ls -O https://github.com/jarun/nnn/archive/master.tar.gz
 tar -zxf master.tar.gz
 
-cd nnn-master/plugins
+cd nnn-master/plugins || exit 1
 for f in *; do
-	if [ -f ../../plugins/$f ]; then
-		if [ "$(diff --brief $f ../../plugins/$f)" ]; then
-			prompt $f
-			$op $f ../../plugins/
+	if [ -f ../../plugins/"$f" ]; then
+		if [ "$(diff --brief "$f" ../../plugins/"$f")" ]; then
+			prompt "$f"
+			$op "$f" ../../plugins/
 		fi
 	else
-		cp -vRf $f ../../plugins/
+		cp -vRf "$f" ../../plugins/
 	fi
 done
-cd ../..
+cd ../.. || exit 1
 
 $sucmd mv -vf nnn-master/misc/nlaunch/nlaunch /usr/local/bin/
-rm -rf nnn-master/ master.tar.gz $PLUGIN_DIR/README.md
+rm -rf nnn-master/ master.tar.gz "$PLUGIN_DIR"/README.md

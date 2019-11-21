@@ -1,7 +1,7 @@
-n()
+n ()
 {
     # Block nesting of nnn in subshells
-    if [ $(expr $NNNLVL + 0) -ge 1 ]; then
+    if [ "$((NNNLVL + 0))" -ge 1 ]; then
         echo "nnn is already running"
         return
     fi
@@ -17,8 +17,8 @@ n()
 
     nnn "$@"
 
-    if [ -f $NNN_TMPFILE ]; then
-            . $NNN_TMPFILE
-            rm $NNN_TMPFILE
+    if [ -f "$NNN_TMPFILE" ]; then
+            . "$NNN_TMPFILE"
+            rm -f "$NNN_TMPFILE" > /dev/null
     fi
 }

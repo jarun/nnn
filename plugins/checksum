@@ -21,8 +21,8 @@ chsum=md5
 checksum_type()
 {
     echo "possible checksums: md5, sha1, sha224, sha256, sha384, sha512"
-    echo -n "create md5 (m), sha256 (s), sha512 (S) (or type one of the above checksums) [default=m]: "
-    read chsum_resp
+    printf "create md5 (m), sha256 (s), sha512 (S) (or type one of the above checksums) [default=m]: "
+    read -r chsum_resp
     for chks in md5 sha1 sha224 sha256 sha384 sha512
     do
         if [ "$chsum_resp" = "$chks" ]; then
@@ -38,8 +38,8 @@ checksum_type()
 }
 
 if [ -s "$selection" ]; then
-    echo -n "work with selection (s) or current file (f) [default=f]: "
-    read resp
+    printf "work with selection (s) or current file (f) [default=f]: "
+    read -r resp
 fi
 
 if [ "$resp" = "s" ]; then
@@ -49,10 +49,10 @@ elif [ -n "$1" ]; then
     if [ -f "$1" ]; then
         for chks in md5 sha1 sha224 sha256 sha384 sha512
         do
-            if [ "$(echo "$1" | grep \.${chks}$)" ]; then
+            if echo "$1" | grep -q \.${chks}$; then
                 ${chks}sum -c < "$1"
-                read dummy
-                exit
+                read -r _
+                return
             fi
         done
         checksum_type
