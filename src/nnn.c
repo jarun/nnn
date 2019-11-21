@@ -615,7 +615,7 @@ static char confirm_force(bool selection)
 	char str[64];
 	int r;
 
-	snprintf(str, 64, "forcibly remove %s file%s (unrecoverable)? [y/Y confirms]",
+	snprintf(str, 64, "forcibly remove %s file%s (unrecoverable)?",
 		 (selection ? xitoa(nselected) : "current"), (selection ? "(s)" : ""));
 	r = get_input(str);
 
@@ -1275,11 +1275,11 @@ static void opstr(char *buf, char *op)
 
 static void rmmulstr(char *buf)
 {
-	if (cfg.trash) {
+	if (cfg.trash)
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 trash-put < %s", g_selpath);
-	} else {
-		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr $0 $@ < /dev/tty' < %s", confirm_force(TRUE), g_selpath);
-	}
+	else
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr $0 $@ < /dev/tty' < %s",
+			 confirm_force(TRUE), g_selpath);
 }
 
 static void xrm(char *path)
@@ -1434,7 +1434,7 @@ static bool batch_rename(const char *path)
 	}
 
 	if (selbufpos) {
-		i = get_input("rename selection? [y/Y confirms]");
+		i = get_input("rename selection?");
 		if (i != 'y' && i != 'Y') {
 			if (!ndents)
 				return TRUE;
@@ -4439,9 +4439,9 @@ nochange:
 
 					(r == CTX_MAX - 1) ? (r = 0) : ++r;
 					snprintf(newpath, PATH_MAX,
-						 "Create context %d? [Enter]", r + 1);
+						 "Create context %d?", r + 1);
 					fd = get_input(newpath);
-					if (fd != '\r')
+					if (fd != 'y' && fd != 'Y')
 						continue;
 				}
 
@@ -4807,7 +4807,7 @@ nochange:
 
 			switch (sel) {
 			case SEL_ARCHIVE:
-				r = get_input("archive selection (else current)? [y/Y confirms]");
+				r = get_input("archive selection (else current)?");
 				if (r == 'y' || r == 'Y') {
 					endselection();
 
@@ -4860,7 +4860,7 @@ nochange:
 
 			/* Confirm if app is CLI or GUI */
 			if (sel == SEL_OPENWITH) {
-				r = get_input("cli mode? [y/Y confirms]");
+				r = get_input("cli mode?");
 				(r == 'y' || r == 'Y') ? (r = F_CLI)
 						       : (r = F_NOWAIT | F_NOTRACE | F_MULTI);
 			}
@@ -4923,7 +4923,7 @@ nochange:
 			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
 				if (sel == SEL_RENAME) {
 					/* Overwrite file with same name? */
-					r = get_input("overwrite? [y/Y confirms]");
+					r = get_input("overwrite?");
 					if (r != 'y' && r != 'Y') {
 						close(fd);
 						break;
@@ -5171,11 +5171,11 @@ nochange:
 			} else {
 				for (r = 0; r < CTX_MAX; ++r)
 					if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
-						r = get_input("Quit all contexts? [Enter]");
+						r = get_input("Quit all contexts?");
 						break;
 					}
 
-				if (!(r == CTX_MAX || r == '\r'))
+				if (!(r == CTX_MAX || r == 'y' || r == 'Y'))
 					break; // fallthrough
 			}
 
