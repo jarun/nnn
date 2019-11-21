@@ -348,15 +348,6 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 /* Plugin control initialization status */
 static bool g_plinit = FALSE;
 
-/* Replace-str for xargs on different platforms */
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
-#define REPLACE_STR 'J'
-#elif defined(__linux__) || defined(__CYGWIN__)
-#define REPLACE_STR 'I'
-#else
-#define REPLACE_STR 'I'
-#endif
-
 /* Options to identify file mime */
 #if defined(__APPLE__)
 #define FILE_MIME_OPTS "-bIL"
@@ -1279,29 +1270,15 @@ static bool xdiraccess(const char *path)
 
 static void opstr(char *buf, char *op)
 {
-#ifdef __linux__
-	snprintf(buf, CMD_LEN_MAX, "xargs -0 -a %s -%c {} %s {} .", g_selpath, REPLACE_STR, op);
-#else
-	snprintf(buf, CMD_LEN_MAX, "cat %s | xargs -0 -o -%c {} %s {} .", g_selpath, REPLACE_STR, op);
-#endif
+	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s $0 $@ . < /dev/tty' < %s", op, g_selpath);
 }
 
 static void rmmulstr(char *buf)
 {
 	if (cfg.trash) {
-		snprintf(buf, CMD_LEN_MAX,
-#ifdef __linux__
-			 "xargs -0 -a %s trash-put", g_selpath);
-#else
-			 "cat %s | xargs -0 trash-put", g_selpath);
-#endif
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 trash-put < %s", g_selpath);
 	} else {
-		snprintf(buf, CMD_LEN_MAX,
-#ifdef __linux__
-			 "xargs -0 -a %s rm -%cr", g_selpath, confirm_force(TRUE));
-#else
-			 "cat %s | xargs -0 -o rm -%cr", g_selpath, confirm_force(TRUE));
-#endif
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr $0 $@ < /dev/tty' < %s", confirm_force(TRUE), g_selpath);
 	}
 }
 
@@ -1337,7 +1314,7 @@ static bool cpmv_rename(int choice, const char *path)
 	bool ret = FALSE;
 	char *cmd = (choice == 'c' ? cp : mv);
 	static const char formatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
-	static const char renamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -o -n2 %s";
+	static const char renamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s $0 $@ < /dev/tty'";
 	char buf[sizeof(renamecmd) + sizeof(cmd) + (PATH_MAX << 1)];
 
 	fd = create_tmp_file();
@@ -1530,7 +1507,7 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 #ifdef __linux__
 		"sed -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, g_selpath, cmd, archive);
 #else
-		"cat '%s' | tr '\\0' '\n' | sed -e 's|^%s/||' | tr '\n' '\\0' | xargs -0 %s %s",
+		"tr '\\0' '\n' < '%s' | sed -e 's|^%s/||' | tr '\n' '\\0' | xargs -0 %s %s",
 		g_selpath, curpath, cmd, archive);
 #endif
 	spawn(utils[SH_EXEC], buf, NULL, curpath, F_CLI);
