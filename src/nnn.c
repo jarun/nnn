@@ -525,7 +525,7 @@ static char mv[] = "mv -i";
 #endif
 
 static const char cpmvformatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
-static const char cpmvrenamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s $0 $@ < /dev/tty'";
+static const char cpmvrenamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'";
 static const char batchrenamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
 
 /* Event handling */
@@ -1340,7 +1340,7 @@ static bool xdiraccess(const char *path)
 
 static void opstr(char *buf, char *op)
 {
-	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s $0 $@ . < /dev/tty' < %s", op, g_selpath);
+	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s \"$0\" \"$@\" . < /dev/tty' < %s", op, g_selpath);
 }
 
 static void rmmulstr(char *buf)
@@ -1348,7 +1348,7 @@ static void rmmulstr(char *buf)
 	if (cfg.trash)
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 trash-put < %s", g_selpath);
 	else
-		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr $0 $@ < /dev/tty' < %s",
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr \"$0\" \"$@\" < /dev/tty' < %s",
 			 confirm_force(TRUE), g_selpath);
 }
 
