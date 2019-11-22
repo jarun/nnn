@@ -35,14 +35,12 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | ndiff | Diff for selection (limited to 2 for directories) | sh | vimdiff |
 | nmount | Toggle mount status of a device as normal user | sh | pmount, udisks2 |
 | notes | Open a quick notes file/dir in `$EDITOR` | sh | - |
-| nwal | Set image as wallpaper using nitrogen | sh | nitrogen |
 | oldbigfile | List large files by access time | sh | find, sort |
 | organize | Auto-organize files in directories by file type | sh | file |
 | pastebin | Paste contents of a text a file ix.io | sh | - |
 | pdfview | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
 | picker | Pick files and list one per line (to pipe) | sh | nnn |
 | pskill | Fuzzy list by name and kill process or zombie | sh | fzy, sudo/doas |
-| pywal | Set image as wallpaper, change terminal colorscheme | sh | pywal |
 | readit | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
 | ringtone | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
 | splitjoin | Split file or join selection | sh | split, cat |
@@ -55,6 +53,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | upgrade | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
 | vidthumb | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
 | viuimg | View an image or images in dir in `$PAGER` | sh | [viu](https://github.com/atanunq/viu), less |
+| wall | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 
 ## Installing plugins
 
@@ -149,10 +148,10 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 - Change to arbitrary directory without helper script
     ```sh
     #!/usr/bin/env sh
-    echo -n "cd to: "
-    read dir
+    printf "cd to: "
+    read -r dir
 
-    echo -n "0$dir" > $NNN_PIPE
+    printf "%s" "0$dir" > "$NNN_PIPE"
     ```
 
 ## Contributing plugins

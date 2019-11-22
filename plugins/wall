@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+
+# Description: Set the selected image as wallpaper using nitrogen or pywal.
+# Usage: Hover on an image and run the script to set it as wallpaper.
+#
+# Shell: POSIX Compliant
+# Author: juacq97
+
+cmd_exists () {
+	which "$1" > /dev/null 2>&1
+	echo $?
+}
+
+if ! [ -z "$1" ]; then
+    if [ "$(mimetype --output-format %m "$1" | awk -F '/' '{print $1}')" = "image" ]; then
+        if [ "$(cmd_exists nitrogen)" -eq "0" ]; then
+	        nitrogen --set-zoom-fill --save "$1"
+        elif [ "$(cmd_exists wal)" -eq "0" ]; then
+	        wal -i "$1"
+        else
+            printf "nitrogen ir pywal missing"
+            read -r _
+        fi
+
+    # If you want a system notification, uncomment the next 3 lines.
+    # notify-send -a "nnn" "Wallpaper changed!"
+    #   else
+    # notify-send -a "nnn" "No image selected"
+    fi
+fi

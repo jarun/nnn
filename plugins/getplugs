@@ -14,7 +14,7 @@ is_cmd_exists () {
 }
 
 merge () {
-	vimdiff "$1" "$2"
+	vimdiff +0 "$1" "$2"
 }
 
 prompt () {
