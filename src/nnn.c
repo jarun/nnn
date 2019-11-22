@@ -365,6 +365,8 @@ static bool g_plinit = FALSE;
 #define CMATRIX 6
 #define NLAUNCH 7
 #define SH_EXEC 8
+#define ARCHIVEMOUNT 9
+#define SSHFS 10
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -389,25 +391,50 @@ static char * const utils[] = {
 	"cmatrix",
 	"nlaunch",
 	"sh -c",
+	"archivemount",
+	"sshfs",
 };
 
-#ifdef __linux__
-static char cp[] = "cpg -giRp";
-static char mv[] = "mvg -gi";
-#else
-static char cp[] = "cp -iRp";
-static char mv[] = "mv -i";
-#endif
-
 /* Common strings */
-#define STR_INPUT_ID 0
-#define STR_INVBM_KEY 1
+#define MSG_NO_TRAVERSAL 0
+#define MSG_INVBM_KEY 1
 #define STR_DATE_ID 2
 #define STR_TMPFILE 3
-#define NONE_SELECTED 4
-#define UTIL_MISSING 5
-#define OPERATION_FAILED 6
-#define SESSION_NAME 7
+#define MSG_0_SELECTED 4
+#define MSG_UTIL_MISSING 5
+#define MSG_FAILED 6
+#define MSG_SSN_NAME 7
+#define MSG_CP_MV_AS 8
+#define MSG_RENAME_SEL 9
+#define MSG_FORCE_RM 10
+#define MSG_CREATE_CTX 11
+#define MSG_ARCHIVE_SEL 12
+#define MSG_NEW_OPTS 13
+#define MSG_CLI_MODE 14
+#define MSG_OVERWRITE 15
+#define MSG_SSN_OPTS 16
+#define MSG_QUIT_ALL 17
+#define MSG_HOSTNAME 18
+#define MSG_ARCHIVE_NAME 19
+#define MSG_OPEN_WITH 20
+#define MSG_REL_PATH 21
+#define MSG_LINK_SUFFIX 22
+#define MSG_COPY_NAME 23
+#define MSG_CONTINUE 24
+#define MSG_SEL_MISSING 25
+#define MSG_SSN_MISSING 26
+#define MSG_DIR_ACCESS 27
+#define MSG_0_CREATED 28
+#define MSG_NOT_REG_FILE 29
+#define MSG_PERM_DENIED 30
+#define MSG_EMPTY_FILE 31
+#define MSG_UNSUPPORTED 32
+#define MSG_NOT_SET 33
+#define MSG_RANGE_SEL_ON 34
+#define MSG_DIR_CHANGED 35
+#define MSG_0_FILES 36
+#define MSG_EXISTS 37
+#define MSG_FEW_COLOUMNS 38
 
 static const char * const messages[] = {
 	"no traversal",
@@ -415,9 +442,40 @@ static const char * const messages[] = {
 	"%F %T %z",
 	"/.nnnXXXXXX",
 	"0 selected",
-	"missing dep",
+	"missing util",
 	"failed!",
 	"session name: ",
+	"'c'p / 'm'v as?",
+	"rename sel?",
+	"forcibly remove %s file%s (unrecoverable)?",
+	"Create context %d?",
+	"archive sel?",
+	"'f'(ile) / 'd'(ir) / 's'(ym) / 'h'(ard)?",
+	"cli mode?",
+	"overwrite?",
+	"'s'(ave) / 'l'(oad) / 'r'(estore)?",
+	"Quit all contexts?",
+	"host: ",
+	"archive name: ",
+	"open with: ",
+	"relative path: ",
+	"link suffix [@ for none]: ",
+	"copy name: ",
+	"\nPress Enter to continue",
+	"sel file missing",
+	"session file missing",
+	"dir inaccessible",
+	"0 created",
+	"not regular file",
+	"permission denied",
+	"empty: edit or open with",
+	"unsupported file",
+	"not set",
+	"range sel on",
+	"dir changed, range sel off",
+	"0 files",
+	"entry exists",
+	"too few columns!",
 };
 
 /* Supported configuration environment variables */
@@ -444,11 +502,11 @@ static const char * const env_cfg[] = {
 };
 
 /* Required environment variables */
-#define SHELL 0
-#define VISUAL 1
-#define EDITOR 2
-#define PAGER 3
-#define NCUR 4
+#define ENV_SHELL 0
+#define ENV_VISUAL 1
+#define ENV_EDITOR 2
+#define ENV_PAGER 3
+#define ENV_NCUR 4
 
 static const char * const envs[] = {
 	"SHELL",
@@ -457,6 +515,18 @@ static const char * const envs[] = {
 	"PAGER",
 	"NNN",
 };
+
+#ifdef __linux__
+static char cp[] = "cpg -giRp";
+static char mv[] = "mvg -gi";
+#else
+static char cp[] = "cp -iRp";
+static char mv[] = "mv -i";
+#endif
+
+static const char cpmvformatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
+static const char cpmvrenamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s $0 $@ < /dev/tty'";
+static const char batchrenamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
 
 /* Event handling */
 #ifdef LINUX_INOTIFY
@@ -615,7 +685,7 @@ static char confirm_force(bool selection)
 	char str[64];
 	int r;
 
-	snprintf(str, 64, "forcibly remove %s file%s (unrecoverable)?",
+	snprintf(str, 64, messages[MSG_FORCE_RM],
 		 (selection ? xitoa(nselected) : "current"), (selection ? "(s)" : ""));
 	r = get_input(str);
 
@@ -1021,13 +1091,13 @@ static bool selsafe(void)
 {
 	/* Fail if selection file path not generated */
 	if (!g_selpath) {
-		printmsg("selection file not found");
+		printmsg(messages[MSG_SEL_MISSING]);
 		return FALSE;
 	}
 
 	/* Fail if selection file path isn't accessible */
 	if (access(g_selpath, R_OK | W_OK) == -1) {
-		errno == ENOENT ? printmsg(messages[NONE_SELECTED]) : printwarn(NULL);
+		errno == ENOENT ? printmsg(messages[MSG_0_SELECTED]) : printwarn(NULL);
 		return FALSE;
 	}
 
@@ -1216,7 +1286,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 		DPRINTF_D(pid);
 		if (flag & F_NORMAL) {
 			if (flag & F_CONFIRM) {
-				printf("\nPress Enter to continue");
+				printf("%s", messages[MSG_CONTINUE]);
 				getchar();
 			}
 
@@ -1231,7 +1301,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 
 static void prompt_run(char *cmd, const char *cur, const char *path)
 {
-	setenv(envs[NCUR], cur, 1);
+	setenv(envs[ENV_NCUR], cur, 1);
 	spawn(shell, "-c", cmd, path, F_CLI | F_CONFIRM);
 }
 
@@ -1313,9 +1383,7 @@ static bool cpmv_rename(int choice, const char *path)
 	uint count = 0, lines = 0;
 	bool ret = FALSE;
 	char *cmd = (choice == 'c' ? cp : mv);
-	static const char formatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
-	static const char renamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s $0 $@ < /dev/tty'";
-	char buf[sizeof(renamecmd) + sizeof(cmd) + (PATH_MAX << 1)];
+	char buf[sizeof(cpmvrenamecmd) + sizeof(cmd) + (PATH_MAX << 1)];
 
 	fd = create_tmp_file();
 	if (fd == -1)
@@ -1334,7 +1402,7 @@ static bool cpmv_rename(int choice, const char *path)
 
 	close(fd);
 
-	snprintf(buf, sizeof(buf), formatcmd, g_tmpfpath);
+	snprintf(buf, sizeof(buf), cpmvformatcmd, g_tmpfpath);
 	spawn(utils[SH_EXEC], buf, NULL, path, F_CLI);
 
 	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
@@ -1351,7 +1419,7 @@ static bool cpmv_rename(int choice, const char *path)
 		goto finish;
 	}
 
-	snprintf(buf, sizeof(buf), renamecmd, path, g_tmpfpath, cmd);
+	snprintf(buf, sizeof(buf), cpmvrenamecmd, path, g_tmpfpath, cmd);
 	spawn(utils[SH_EXEC], buf, NULL, path, F_CLI);
 	ret = TRUE;
 
@@ -1381,7 +1449,7 @@ static bool cpmvrm_selection(enum action sel, char *path, int *presel)
 		opstr(g_buf, mv);
 		break;
 	case SEL_CPMVAS:
-		r = get_input("'c'p / 'm'v as?");
+		r = get_input(messages[MSG_CP_MV_AS]);
 		if (r != 'c' && r != 'm') {
 			if (cfg.filtermode)
 				*presel = FILTER;
@@ -1389,7 +1457,7 @@ static bool cpmvrm_selection(enum action sel, char *path, int *presel)
 		}
 
 		if (!cpmv_rename(r, path)) {
-			printwait(messages[OPERATION_FAILED], presel);
+			printwait(messages[MSG_FAILED], presel);
 			return FALSE;
 		}
 		break;
@@ -1416,9 +1484,8 @@ static bool batch_rename(const char *path)
 	int fd1, fd2, i;
 	uint count = 0, lines = 0;
 	bool dir = FALSE, ret = FALSE;
-	static const char renamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
 	char foriginal[TMP_LEN_MAX] = {0};
-	char buf[sizeof(renamecmd) + (PATH_MAX << 1)];
+	char buf[sizeof(batchrenamecmd) + (PATH_MAX << 1)];
 
 	fd1 = create_tmp_file();
 	if (fd1 == -1)
@@ -1434,7 +1501,7 @@ static bool batch_rename(const char *path)
 	}
 
 	if (selbufpos) {
-		i = get_input("rename selection?");
+		i = get_input(messages[MSG_RENAME_SEL]);
 		if (i != 'y' && i != 'Y') {
 			if (!ndents)
 				return TRUE;
@@ -1471,7 +1538,7 @@ static bool batch_rename(const char *path)
 		goto finish;
 	}
 
-	snprintf(buf, sizeof(buf), renamecmd, foriginal, g_tmpfpath);
+	snprintf(buf, sizeof(buf), batchrenamecmd, foriginal, g_tmpfpath);
 	spawn(utils[SH_EXEC], buf, NULL, path, F_CLI);
 	ret = TRUE;
 
@@ -1499,7 +1566,7 @@ static void get_archive_cmd(char *cmd, char *archive)
 		xstrlcpy(cmd, "tar -acvf", ARCHIVE_CMD_LEN);
 }
 
-static void archive_selection(const char *cmd, const char *archive, const char *curpath)
+static void MSG_ARCHIVE_SELection(const char *cmd, const char *archive, const char *curpath)
 {
 	char *buf = (char *)malloc(CMD_LEN_MAX * sizeof(char));
 
@@ -2190,7 +2257,7 @@ END:
 /*
  * Caller should check the value of presel to confirm if it needs to wait to show warning
  */
-static char *getreadline(char *prompt, char *path, char *curpath, int *presel)
+static char *getreadline(const char *prompt, char *path, char *curpath, int *presel)
 {
 	/* Switch to current path for readline(3) */
 	if (chdir(path) == -1) {
@@ -2257,7 +2324,7 @@ static int xlink(char *suffix, char *path, char *buf, int *presel, int type)
 
 	/* Check if selection is empty */
 	if (!selbufpos) {
-		printwait(messages[NONE_SELECTED], presel);
+		printwait(messages[MSG_0_SELECTED], presel);
 		return -1;
 	}
 
@@ -2282,7 +2349,7 @@ static int xlink(char *suffix, char *path, char *buf, int *presel, int type)
 	}
 
 	if (!count)
-		printwait("none created", presel);
+		printwait(messages[MSG_0_CREATED], presel);
 
 	return count;
 }
@@ -2738,14 +2805,14 @@ static void save_session(bool last_session, int *presel)
 		}
 	}
 
-	sname = !last_session ? xreadline(NULL, messages[SESSION_NAME]) : "@";
+	sname = !last_session ? xreadline(NULL, messages[MSG_SSN_NAME]) : "@";
 	if (!sname[0])
 		return;
 	mkpath(sessiondir, sname, spath);
 
 	fsession = fopen(spath, "wb");
 	if (!fsession) {
-		printwait("failed to open session file", presel);
+		printwait(messages[MSG_SSN_MISSING], presel);
 		return;
 	}
 
@@ -2768,7 +2835,7 @@ END:
 	fclose(fsession);
 
 	if (!status)
-		printwait("failed to write session data", presel);
+		printwait(messages[MSG_FAILED], presel);
 }
 
 static bool load_session(const char *sname, char **path, char **lastdir, char **lastname, bool restore)
@@ -2781,7 +2848,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	bool status = FALSE;
 
 	if (!restore) {
-		sname = sname ? sname : xreadline(NULL, messages[SESSION_NAME]);
+		sname = sname ? sname : xreadline(NULL, messages[MSG_SSN_NAME]);
 		if (!sname[0])
 			return FALSE;
 
@@ -2794,7 +2861,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 
 	fsession = fopen(spath, "rb");
 	if (!fsession) {
-		printmsg("failed to open session file");
+		printmsg(messages[MSG_SSN_MISSING]);
 		xdelay();
 		return FALSE;
 	}
@@ -2825,7 +2892,7 @@ END:
 	fclose(fsession);
 
 	if (!status) {
-		printmsg("failed to read session data");
+		printmsg(messages[MSG_FAILED]);
 		xdelay();
 	}
 
@@ -3068,7 +3135,7 @@ static void find_accessible_parent(char *path, char *newpath, char *lastname, in
 
 	xstrlcpy(path, dir, PATH_MAX);
 
-	printmsg("cannot access dir");
+	printmsg(messages[MSG_DIR_ACCESS]);
 	xdelay();
 }
 
@@ -3079,13 +3146,13 @@ static bool execute_file(int cur, char *path, char *newpath, int *presel)
 
 	/* Check if this is a directory */
 	if (!S_ISREG(dents[cur].mode)) {
-		printwait("not regular file", presel);
+		printwait(messages[MSG_NOT_REG_FILE], presel);
 		return FALSE;
 	}
 
 	/* Check if file is executable */
 	if (!(dents[cur].mode & 0100)) {
-		printwait("permission denied", presel);
+		printwait(messages[MSG_PERM_DENIED], presel);
 		return FALSE;
 	}
 
@@ -3151,11 +3218,11 @@ static bool xmktree(char* path, bool dir)
 
 static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 {
-	char *dir, *cmd = "archivemount";
+	char *dir, *cmd = utils[ARCHIVEMOUNT];
 	size_t len;
 
 	if (!getutil(cmd)) {
-		printwait(messages[UTIL_MISSING], presel);
+		printwait(messages[MSG_UTIL_MISSING], presel);
 		return FALSE;
 	}
 
@@ -3186,7 +3253,7 @@ static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 	DPRINTF_S(name);
 	DPRINTF_S(newpath);
 	if (spawn(cmd, name, newpath, path, F_NORMAL)) {
-		printwait(messages[OPERATION_FAILED], presel);
+		printwait(messages[MSG_FAILED], presel);
 		return FALSE;
 	}
 
@@ -3197,14 +3264,14 @@ static bool sshfs_mount(char *newpath, int *presel)
 {
 	uchar flag = F_NORMAL;
 	int r;
-	char *tmp, *env, *cmd = "sshfs";
+	char *tmp, *env, *cmd = utils[SSHFS];
 
 	if (!getutil(cmd)) {
-		printwait(messages[UTIL_MISSING], presel);
+		printwait(messages[MSG_UTIL_MISSING], presel);
 		return FALSE;
 	}
 
-	tmp = xreadline(NULL, "host: ");
+	tmp = xreadline(NULL, messages[MSG_HOSTNAME]);
 	if (!tmp[0])
 		return FALSE;
 
@@ -3228,7 +3295,7 @@ static bool sshfs_mount(char *newpath, int *presel)
 
 	/* Connect to remote */
 	if (spawn(env, tmp, newpath, NULL, flag)) {
-		printwait(messages[OPERATION_FAILED], presel);
+		printwait(messages[MSG_FAILED], presel);
 		return FALSE;
 	}
 
@@ -3265,7 +3332,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	}
 
 	if (!tmp || !child || !S_ISDIR(sb.st_mode) || (child && parent && sb.st_dev == psb.st_dev)) {
-		tmp = xreadline(NULL, "host: ");
+		tmp = xreadline(NULL, messages[MSG_HOSTNAME]);
 		if (!tmp[0])
 			return FALSE;
 	}
@@ -3278,7 +3345,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	}
 
 	if (spawn(cmd, "-u", newpath, NULL, F_NORMAL)) {
-		printwait(messages[OPERATION_FAILED], presel);
+		printwait(messages[MSG_FAILED], presel);
 		return FALSE;
 	}
 
@@ -3860,7 +3927,7 @@ static void redraw(char *path)
 
 	/* Fail redraw if < than 10 columns, context info prints 10 chars */
 	if (ncols < MIN_DISPLAY_COLS) {
-		printmsg("too few columns!");
+		printmsg(messages[MSG_FEW_COLOUMNS]);
 		return;
 	}
 
@@ -4295,7 +4362,7 @@ nochange:
 				}
 
 				if (!sb.st_size) {
-					printwait("empty: use edit or open with", &presel);
+					printwait(messages[MSG_EMPTY_FILE], &presel);
 					goto nochange;
 				}
 
@@ -4304,7 +4371,7 @@ nochange:
 				continue;
 			}
 			default:
-				printwait("unsupported file", &presel);
+				printwait(messages[MSG_UNSUPPORTED], &presel);
 				goto nochange;
 			}
 		case SEL_NEXT: // fallthrough
@@ -4341,7 +4408,7 @@ nochange:
 			}
 
 			if (dir[0] == '\0') {
-				printwait("not set", &presel);
+				printwait(messages[MSG_NOT_SET], &presel);
 				goto nochange;
 			}
 
@@ -4438,8 +4505,7 @@ nochange:
 						continue;
 
 					(r == CTX_MAX - 1) ? (r = 0) : ++r;
-					snprintf(newpath, PATH_MAX,
-						 "Create context %d?", r + 1);
+					snprintf(newpath, PATH_MAX, messages[MSG_CREATE_CTX], r + 1);
 					fd = get_input(newpath);
 					if (fd != 'y' && fd != 'Y')
 						continue;
@@ -4457,7 +4523,7 @@ nochange:
 			}
 
 			if (!get_kv_val(bookmark, newpath, fd, BM_MAX, TRUE)) {
-				printwait(messages[STR_INVBM_KEY], &presel);
+				printwait(messages[MSG_INVBM_KEY], &presel);
 				goto nochange;
 			}
 
@@ -4633,7 +4699,7 @@ nochange:
 				endselection();
 
 				if (!batch_rename(path)) {
-					printwait(messages[OPERATION_FAILED], &presel);
+					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;
 				}
 				refresh = TRUE;
@@ -4700,14 +4766,14 @@ nochange:
 			if (rangesel) { /* Range selection started */
 				inode = sb.st_ino;
 				selstartid = cur;
-				printmsg("range selection on");
+				printmsg(messages[MSG_RANGE_SEL_ON]);
 				xdelay();
 				continue;
 			}
 
 #ifndef DIR_LIMITED_SELECTION
 			if (inode != sb.st_ino) {
-				printwait("dir changed, range selection off", &presel);
+				printwait(messages[MSG_DIR_CHANGED], &presel);
 				goto nochange;
 			}
 #endif
@@ -4758,11 +4824,11 @@ nochange:
 				break;
 			}
 
-			printwait(messages[NONE_SELECTED], &presel);
+			printwait(messages[MSG_0_SELECTED], &presel);
 			goto nochange;
 		case SEL_SELEDIT:
 			if (!editselection()) {
-				printwait(messages[OPERATION_FAILED], &presel);
+				printwait(messages[MSG_FAILED], &presel);
 				goto nochange;
 			}
 			break;
@@ -4807,7 +4873,7 @@ nochange:
 
 			switch (sel) {
 			case SEL_ARCHIVE:
-				r = get_input("archive selection (else current)?");
+				r = get_input(messages[MSG_ARCHIVE_SEL]);
 				if (r == 'y' || r == 'Y') {
 					endselection();
 
@@ -4818,28 +4884,28 @@ nochange:
 
 					tmp = NULL;
 				} else if (!ndents) {
-					printwait("no files", &presel);
+					printwait(messages[MSG_0_FILES], &presel);
 					goto nochange;
 				} else
 					tmp = dents[cur].name;
-				tmp = xreadline(tmp, "archive name: ");
+				tmp = xreadline(tmp, messages[MSG_ARCHIVE_NAME]);
 				break;
 			case SEL_OPENWITH:
 #ifdef NORL
-				tmp = xreadline(NULL, "open with: ");
+				tmp = xreadline(NULL, messages[MSG_OPEN_WITH]);
 #else
 				presel = 0;
-				tmp = getreadline("open with: ", path, ipath, &presel);
+				tmp = getreadline(messages[MSG_OPEN_WITH], path, ipath, &presel);
 				if (presel == MSGWAIT)
 					goto nochange;
 #endif
 				break;
 			case SEL_NEW:
-				r = get_input("create 'f'(ile) / 'd'(ir) / 's'(ym) / 'h'(ard)?");
+				r = get_input(messages[MSG_NEW_OPTS]);
 				if (r == 'f' || r == 'd')
-					tmp = xreadline(NULL, "relative path: ");
+					tmp = xreadline(NULL, messages[MSG_REL_PATH]);
 				else if (r == 's' || r == 'h')
-					tmp = xreadline(NULL, "link suffix [@ for none]: ");
+					tmp = xreadline(NULL, messages[MSG_LINK_SUFFIX]);
 				else
 					tmp = NULL;
 				break;
@@ -4854,13 +4920,13 @@ nochange:
 			/* Allow only relative, same dir paths */
 			if (tmp[0] == '/'
 			    || ((r != 'f' && r != 'd') && (xstrcmp(xbasename(tmp), tmp) != 0))) {
-				printwait(messages[STR_INPUT_ID], &presel);
+				printwait(messages[MSG_NO_TRAVERSAL], &presel);
 				goto nochange;
 			}
 
 			/* Confirm if app is CLI or GUI */
 			if (sel == SEL_OPENWITH) {
-				r = get_input("cli mode?");
+				r = get_input(messages[MSG_CLI_MODE]);
 				(r == 'y' || r == 'Y') ? (r = F_CLI)
 						       : (r = F_NOWAIT | F_NOTRACE | F_MULTI);
 			}
@@ -4872,7 +4938,7 @@ nochange:
 
 				get_archive_cmd(cmd, tmp);
 
-				(r == 'y' || r == 'Y') ? archive_selection(cmd, tmp, path)
+				(r == 'y' || r == 'Y') ? MSG_ARCHIVE_SELection(cmd, tmp, path)
 						       : spawn(cmd, tmp, dents[cur].name,
 							       path, F_NORMAL | F_MULTI);
 				break;
@@ -4884,7 +4950,7 @@ nochange:
 			case SEL_RENAME:
 				/* Skip renaming to same name */
 				if (strcmp(tmp, dents[cur].name) == 0) {
-					tmp = xreadline(dents[cur].name, "copy name: ");
+					tmp = xreadline(dents[cur].name, messages[MSG_COPY_NAME]);
 					if (strcmp(tmp, dents[cur].name) == 0)
 						goto nochange;
 
@@ -4923,7 +4989,7 @@ nochange:
 			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
 				if (sel == SEL_RENAME) {
 					/* Overwrite file with same name? */
-					r = get_input("overwrite?");
+					r = get_input(messages[MSG_OVERWRITE]);
 					if (r != 'y' && r != 'Y') {
 						close(fd);
 						break;
@@ -4931,7 +4997,7 @@ nochange:
 				} else {
 					/* Do nothing in case of NEW */
 					close(fd);
-					printwait("entry exists", &presel);
+					printwait(messages[MSG_EXISTS], &presel);
 					goto nochange;
 				}
 			}
@@ -4998,7 +5064,7 @@ nochange:
 					goto nochange;
 				break;
 			case SEL_SHELL:
-				setenv(envs[NCUR], (ndents ? dents[cur].name : ""), 1);
+				setenv(envs[ENV_NCUR], (ndents ? dents[cur].name : ""), 1);
 				spawn(shell, NULL, NULL, path, F_CLI);
 				break;
 			case SEL_PLUGKEY: // fallthrough
@@ -5010,7 +5076,7 @@ nochange:
 				}
 
 				if (sel == SEL_PLUGKEY) {
-					r = get_input("");
+					r = get_input(NULL);
 					tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
 					if (!tmp)
 						goto nochange;
@@ -5029,7 +5095,7 @@ nochange:
 						if (!run_selected_plugin(&path, tmp, newpath,
 								(ndents ? dents[cur].name : NULL),
 								&lastname, &lastdir)) {
-							printwait(messages[OPERATION_FAILED],
+							printwait(messages[MSG_FAILED],
 								  &presel);
 							goto nochange;
 						}
@@ -5117,7 +5183,7 @@ nochange:
 			unmount(tmp, newpath, &presel, path);
 			goto nochange;
 		case SEL_SESSIONS:
-			r = get_input("'s'(ave) / 'l'(oad) / 'r'(estore) session?");
+			r = get_input(messages[MSG_SSN_OPTS]);
 
 			if (r == 's') {
 				save_session(FALSE, &presel);
@@ -5171,7 +5237,7 @@ nochange:
 			} else {
 				for (r = 0; r < CTX_MAX; ++r)
 					if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
-						r = get_input("Quit all contexts?");
+						r = get_input(messages[MSG_QUIT_ALL]);
 						break;
 					}
 
@@ -5223,7 +5289,7 @@ static void check_key_collision(void)
 		key = bindings[i].sym;
 
 		if (bitmap[key])
-			fprintf(stdout, "collision detected: key [%s]\n", keyname(key));
+			fprintf(stdout, "key collision! [%s]\n", keyname(key));
 		else
 			bitmap[key] = TRUE;
 	}
@@ -5537,7 +5603,7 @@ int main(int argc, char *argv[])
 			initpath = get_kv_val(bookmark, NULL, *arg, BM_MAX, TRUE);
 
 		if (!initpath) {
-			fprintf(stderr, "%s\n", messages[STR_INVBM_KEY]);
+			fprintf(stderr, "%s\n", messages[MSG_INVBM_KEY]);
 			return _FAILURE;
 		}
 	} else if (argc == optind) {
@@ -5579,17 +5645,17 @@ int main(int argc, char *argv[])
 		cfg.useeditor = 1;
 
 	/* Get VISUAL/EDITOR */
-	editor = xgetenv(envs[VISUAL], xgetenv(envs[EDITOR], "vi"));
-	DPRINTF_S(getenv(envs[VISUAL]));
-	DPRINTF_S(getenv(envs[EDITOR]));
+	editor = xgetenv(envs[ENV_VISUAL], xgetenv(envs[ENV_EDITOR], "vi"));
+	DPRINTF_S(getenv(envs[ENV_VISUAL]));
+	DPRINTF_S(getenv(envs[ENV_EDITOR]));
 	DPRINTF_S(editor);
 
 	/* Get PAGER */
-	pager = xgetenv(envs[PAGER], "less");
+	pager = xgetenv(envs[ENV_PAGER], "less");
 	DPRINTF_S(pager);
 
 	/* Get SHELL */
-	shell = xgetenv(envs[SHELL], "sh");
+	shell = xgetenv(envs[ENV_SHELL], "sh");
 	DPRINTF_S(shell);
 
 	DPRINTF_S(getenv("PWD"));
