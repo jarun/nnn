@@ -4,7 +4,7 @@
 <p align="center"><i>read ebooks with plugin gutenread (Android)</i></p>
 
 <p align="center"><img src="https://i.imgur.com/14iPDIq.png" /></p>
-<p align="center"><i>image preview with plugin thumb</i></p>
+<p align="center"><i>image preview with plugin imgthumb</i></p>
 
 ## Introduction
 
@@ -16,7 +16,8 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | --- | --- | --- | --- |
 | boom | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | dups | List non-empty duplicate files in current dir | sh | find, md5sum,<br>sort uniq xargs |
-| checksum | Create and verify checksums | sh | md5sum,<br>sha256sum |
+| chksum | Create and verify checksums | sh | md5sum,<br>sha256sum |
+| diffs | Diff for selection (limited to 2 for directories) | sh | vimdiff |
 | dragdrop | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
 | exetoggle | Toggle executable status of hovered file | sh | chmod |
 | fzcd | Change to the directory of a fuzzy-selected file/dir | sh | fzy/fzf<br>(optional fd) |
@@ -26,33 +27,32 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | gutenread | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
 | hexview | View a file in hex in `$PAGER` | sh | xxd |
 | imgresize | Resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |
+| imgsxiv | Browse images, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)), [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images)| sh | sxiv |
+| imgthumb | View thumbnail of an image or dir of images | sh | [lsix](https://github.com/hackerb9/lsix) |
 | imgur | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) | bash | - |
+| imgviu | View an image or images in dir in `$PAGER` | sh | [viu](https://github.com/atanunq/viu), less |
 | ipinfo | Fetch external IP address and whois information | sh | curl, whois |
 | kdeconnect | Send selected files to an Android device | sh | kdeconnect-cli |
 | mediainf | Show media information | sh | mediainfo |
 | moclyrics | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
 | mocplay | Append (and/or play) selection/dir/file in moc | sh | [moc](http://moc.daper.net/) |
-| ndiff | Diff for selection (limited to 2 for directories) | sh | vimdiff |
 | nmount | Toggle mount status of a device as normal user | sh | pmount, udisks2 |
 | notes | Open a quick notes file/dir in `$EDITOR` | sh | - |
 | oldbigfile | List large files by access time | sh | find, sort |
 | organize | Auto-organize files in directories by file type | sh | file |
 | pastebin | Paste contents of a text a file ix.io | sh | - |
+| pdfread | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
 | pdfview | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
 | picker | Pick files and list one per line (to pipe) | sh | nnn |
 | pskill | Fuzzy list by name and kill process or zombie | sh | fzy, sudo/doas |
-| readit | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
 | ringtone | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
 | splitjoin | Split file or join selection | sh | split, cat |
 | suedit | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
-| sxiv | Browse images, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)), [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images)| sh | sxiv |
-| thumb | View thumbnail of an image or dir of images | sh | [lsix](https://github.com/hackerb9/lsix) |
 | transfer | Upload file to transfer.sh | sh | curl |
 | treeview | Informative tree output in `$EDITOR` | sh | tree |
 | uidgid | List user and group of all files in dir | sh | ls, less |
 | upgrade | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
 | vidthumb | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
-| viuimg | View an image or images in dir in `$PAGER` | sh | [viu](https://github.com/atanunq/viu), less |
 | wall | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 
 ## Installing plugins
@@ -69,7 +69,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You ca
 
 **Method 1:** Directly with <kbd>:key</kbd>:
 
-    export NNN_PLUG='o:fzopen;p:mocplay;d:ndiff;m:nmount;n:notes;v:viuimg;t:thumb'
+    export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;n:notes;v:imgviu;t:imgthumb'
 
 Now plugin `fzopen` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be run with <kbd>:p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
 
@@ -98,7 +98,7 @@ When `nnn` executes a plugin, it does the following:
     2. The working directory (might differ from `$PWD` in case of symlinked paths; non-canonical). Note that the second argument is not passed in case of commands starting with `_`.
 - Sets the environment variable `NNN_PIPE` used to control `nnn` active directory.
 
-Plugins can also access the current selections by reading the `.selections` file in the config directory (See the `ndiff` plugin for example).
+Plugins can also access the current selections by reading the `.selections` file in the config directory (See the `diffs` plugin for example).
 
 ## Create your own plugins
 
