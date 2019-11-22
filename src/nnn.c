@@ -356,17 +356,17 @@ static bool g_plinit = FALSE;
 #endif
 
 /* Macros for utilities */
-#define OPENER 0
-#define ATOOL 1
-#define BSDTAR 2
-#define UNZIP 3
-#define TAR 4
-#define LOCKER 5
-#define CMATRIX 6
-#define NLAUNCH 7
-#define SH_EXEC 8
-#define ARCHIVEMOUNT 9
-#define SSHFS 10
+#define UTIL_OPENER 0
+#define UTIL_ATOOL 1
+#define UTIL_BSDTAR 2
+#define UTIL_UNZIP 3
+#define UTIL_TAR 4
+#define UTIL_LOCKER 5
+#define UTIL_CMATRIX 6
+#define UTIL_NLAUNCH 7
+#define UTIL_SH_EXEC 8
+#define UTIL_ARCHIVEMOUNT 9
+#define UTIL_SSHFS 10
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -953,7 +953,7 @@ static bool listselfile(void)
 		return FALSE;
 
 	snprintf(g_buf, CMD_LEN_MAX, "tr \'\\0\' \'\\n\' < %s", g_selpath);
-	spawn(utils[SH_EXEC], g_buf, NULL, NULL, F_CLI | F_CONFIRM);
+	spawn(utils[UTIL_SH_EXEC], g_buf, NULL, NULL, F_CLI | F_CONFIRM);
 
 	return TRUE;
 }
@@ -1392,7 +1392,7 @@ static bool cpmv_rename(int choice, const char *path)
 	/* selsafe() returned TRUE for this to be called */
 	if (!selbufpos) {
 		snprintf(buf, sizeof(buf), "tr '\\0' '\\n' < %s > %s", g_selpath, g_tmpfpath);
-		spawn(utils[SH_EXEC], buf, NULL, NULL, F_CLI);
+		spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
 
 		count = lines_in_file(fd, buf, sizeof(buf));
 		if (!count)
@@ -1403,7 +1403,7 @@ static bool cpmv_rename(int choice, const char *path)
 	close(fd);
 
 	snprintf(buf, sizeof(buf), cpmvformatcmd, g_tmpfpath);
-	spawn(utils[SH_EXEC], buf, NULL, path, F_CLI);
+	spawn(utils[UTIL_SH_EXEC], buf, NULL, path, F_CLI);
 
 	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
 
@@ -1420,7 +1420,7 @@ static bool cpmv_rename(int choice, const char *path)
 	}
 
 	snprintf(buf, sizeof(buf), cpmvrenamecmd, path, g_tmpfpath, cmd);
-	spawn(utils[SH_EXEC], buf, NULL, path, F_CLI);
+	spawn(utils[UTIL_SH_EXEC], buf, NULL, path, F_CLI);
 	ret = TRUE;
 
 finish:
@@ -1467,7 +1467,7 @@ static bool cpmvrm_selection(enum action sel, char *path, int *presel)
 	}
 
 	if (sel != SEL_CPMVAS)
-		spawn(utils[SH_EXEC], g_buf, NULL, path, F_CLI);
+		spawn(utils[UTIL_SH_EXEC], g_buf, NULL, path, F_CLI);
 
 	/* Clear selection on move or delete */
 	if (sel != SEL_CP)
@@ -1539,7 +1539,7 @@ static bool batch_rename(const char *path)
 	}
 
 	snprintf(buf, sizeof(buf), batchrenamecmd, foriginal, g_tmpfpath);
-	spawn(utils[SH_EXEC], buf, NULL, path, F_CLI);
+	spawn(utils[UTIL_SH_EXEC], buf, NULL, path, F_CLI);
 	ret = TRUE;
 
 finish:
@@ -1556,9 +1556,9 @@ finish:
 
 static void get_archive_cmd(char *cmd, char *archive)
 {
-	if (getutil(utils[ATOOL]))
+	if (getutil(utils[UTIL_ATOOL]))
 		xstrlcpy(cmd, "atool -a", ARCHIVE_CMD_LEN);
-	else if (getutil(utils[BSDTAR]))
+	else if (getutil(utils[UTIL_BSDTAR]))
 		xstrlcpy(cmd, "bsdtar -acvf", ARCHIVE_CMD_LEN);
 	else if (is_suffix(archive, ".zip"))
 		xstrlcpy(cmd, "zip -r", ARCHIVE_CMD_LEN);
@@ -1577,7 +1577,7 @@ static void MSG_ARCHIVE_SELection(const char *cmd, const char *archive, const ch
 		"tr '\\0' '\n' < '%s' | sed -e 's|^%s/||' | tr '\n' '\\0' | xargs -0 %s %s",
 		g_selpath, curpath, cmd, archive);
 #endif
-	spawn(utils[SH_EXEC], buf, NULL, curpath, F_CLI);
+	spawn(utils[UTIL_SH_EXEC], buf, NULL, curpath, F_CLI);
 	free(buf);
 }
 
@@ -3060,20 +3060,20 @@ static void handle_archive(char *fpath, const char *dir, char op)
 	char arg[] = "-tvf"; /* options for tar/bsdtar to list files */
 	char *util;
 
-	if (getutil(utils[ATOOL])) {
-		util = utils[ATOOL];
+	if (getutil(utils[UTIL_ATOOL])) {
+		util = utils[UTIL_ATOOL];
 		arg[1] = op;
 		arg[2] = '\0';
-	} else if (getutil(utils[BSDTAR])) {
-		util = utils[BSDTAR];
+	} else if (getutil(utils[UTIL_BSDTAR])) {
+		util = utils[UTIL_BSDTAR];
 		if (op == 'x')
 			arg[1] = op;
 	} else if (is_suffix(fpath, ".zip")) {
-		util = utils[UNZIP];
+		util = utils[UTIL_UNZIP];
 		arg[1] = (op == 'l') ? 'v' /* verbose listing */ : '\0';
 		arg[2] = '\0';
 	} else {
-		util = utils[TAR];
+		util = utils[UTIL_TAR];
 		if (op == 'x')
 			arg[1] = op;
 	}
@@ -3218,7 +3218,7 @@ static bool xmktree(char* path, bool dir)
 
 static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 {
-	char *dir, *cmd = utils[ARCHIVEMOUNT];
+	char *dir, *cmd = utils[UTIL_ARCHIVEMOUNT];
 	size_t len;
 
 	if (!getutil(cmd)) {
@@ -3264,7 +3264,7 @@ static bool sshfs_mount(char *newpath, int *presel)
 {
 	uchar flag = F_NORMAL;
 	int r;
-	char *tmp, *env, *cmd = utils[SSHFS];
+	char *tmp, *env, *cmd = utils[UTIL_SSHFS];
 
 	if (!getutil(cmd)) {
 		printwait(messages[MSG_UTIL_MISSING], presel);
@@ -3354,10 +3354,10 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 
 static void lock_terminal(void)
 {
-	char *tmp = utils[LOCKER];
+	char *tmp = utils[UTIL_LOCKER];
 
 	if (!getutil(tmp))
-		tmp = utils[CMATRIX];
+		tmp = utils[UTIL_CMATRIX];
 
 	spawn(tmp, NULL, NULL, NULL, F_NORMAL);
 }
@@ -5130,8 +5130,8 @@ nochange:
 				setdirwatch();
 				goto begin;
 			case SEL_LAUNCH:
-				if (getutil(utils[NLAUNCH])) {
-					spawn(utils[NLAUNCH], "0", NULL, path, F_NORMAL);
+				if (getutil(utils[UTIL_NLAUNCH])) {
+					spawn(utils[UTIL_NLAUNCH], "0", NULL, path, F_NORMAL);
 					break;
 				} // fallthrough
 			default: /* SEL_RUNCMD */
@@ -5583,7 +5583,7 @@ int main(int argc, char *argv[])
 		return _FAILURE;
 
 	/* Get custom opener, if set */
-	opener = xgetenv(env_cfg[NNN_OPENER], utils[OPENER]);
+	opener = xgetenv(env_cfg[NNN_OPENER], utils[UTIL_OPENER]);
 	DPRINTF_S(opener);
 
 	/* Parse bookmarks string */
