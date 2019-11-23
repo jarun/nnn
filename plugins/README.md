@@ -79,14 +79,14 @@ Now plugin `fzopen` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be 
 
 To assign keys to arbitrary non-background cli commands (non-shell-interpreted) and invoke like plugins, add `_` (underscore) before the command. For example:
 
-    export NNN_PLUG='x:_chmod +x $NNN;g:_git log;s:_smplayer $NNN;o:fzopen'
+    export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn;o:fzopen'
 
 Now <kbd>:x</kbd> can be used to make a file executable, <kbd>:g</kbd> can be used to the git log of a git project directory, <kbd>:s</kbd> can be used to preview a partially downloaded media file.
 
 Notes:
 
-1. Use single quotes for `$NNN_PLUG` so `$NNN` is not interpreted
-2. `$NNN` should be the last argument (IF you want to pass the hovered file name)
+1. Use single quotes for `$NNN_PLUG` so `$nnn` is not interpreted
+2. `$nnn` should be the last argument (IF you want to pass the hovered file name)
 3. (_Again_) add `_` before the command
 
 ## Access level of plugins

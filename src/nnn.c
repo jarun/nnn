@@ -516,7 +516,7 @@ static const char * const envs[] = {
 	"VISUAL",
 	"EDITOR",
 	"PAGER",
-	"NNN",
+	"nnn",
 };
 
 #ifdef __linux__
@@ -5086,9 +5086,9 @@ nochange:
 
 					if (tmp[0] == '_' && tmp[1]) {
 						xstrlcpy(newpath, ++tmp, PATH_MAX);
-						if (is_suffix(newpath, " $NNN")) {
+						if (is_suffix(newpath, " $nnn")) {
 							tmp = (ndents ? dents[cur].name : NULL);
-							/* Set `\0` to clear ' $NNN' suffix */
+							/* Set `\0` to clear ' $nnn' suffix */
 							newpath[strlen(newpath) - 5] = '\0';
 						} else
 							tmp = NULL;

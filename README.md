@@ -58,6 +58,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - Copy (as), move (as), delete, archive, link selection
   - Create (with parents), rename, duplicate (anywhere) files and dirs
   - Spawn a shell, run apps, run commands, execute file
+  - Hovered file set as `$nnn` at prompt and spawned shell
   - Lock terminal (needs a locker)
 - Minimal deps, minimal config
 - Widely available
@@ -147,7 +148,7 @@ There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$
 | Example `export` | Description |
 | --- | --- |
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | key-bookmark pairs [max 10] |
-| `NNN_PLUG='m:nmount;t:imgthumb;x:_chmod +x $NNN'` | key-plugin (or cmd) pairs (<kbd>:key</kbd> to run) [max 15] |
+| `NNN_PLUG='m:nmount;t:imgthumb;x:_chmod +x $nnn'` | key-plugin (or cmd) pairs (<kbd>:key</kbd> to run) [max 15] |
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
