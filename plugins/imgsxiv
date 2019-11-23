@@ -9,7 +9,7 @@
 if command -v sxiv >/dev/null 2>&1; then
     if ! [ -z "$1" ]; then
         if [ -f "$1" ]; then
-            sxiv -q "$PWD"
+            sxiv -q "$1" "$PWD"
         elif [ -d "$1" ] || [ -h "$1" ]; then
             sxiv -qt "$1"
         fi
