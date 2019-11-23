@@ -186,7 +186,6 @@ typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef long long ll;
-typedef unsigned long long ull;
 
 /* STRUCTURES */
 
@@ -196,7 +195,6 @@ typedef struct entry {
 	time_t t;
 	off_t size;
 	blkcnt_t blocks; /* number of 512B blocks allocated */
-	ino_t inode;
 	mode_t mode;
 	ushort nlen; /* Length of file name; can be uchar (< NAME_MAX + 1) */
 	uchar flags; /* Flags specific to the file */
@@ -346,11 +344,6 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 
 /* Buffer to store plugins control pipe location */
 static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
-
-#define HASH_BITS    (0xFFFFFF)
-#define HASH_OCTETS    (HASH_BITS >> 6)
-/* Buffer to hold inode hash bit for selection */
-static ull *ihashbmp;
 
 /* Plugin control initialization status */
 static bool g_plinit = FALSE;
@@ -579,43 +572,6 @@ static void move_cursor(int target, int ignore_scrolloff);
 static inline bool getutil(char *util);
 
 /* Functions */
-
-/*
- * Source: https://elixir.bootlin.com/linux/latest/source/arch/alpha/include/asm/bitops.h#L314
- */
-static bool test_set_bit(ull nr)
-{
-	ull *m = ((ull *)ihashbmp) + (nr >> 6);
-
-	if (*m & (1 << (nr & 63)))
-		return FALSE;
-
-	*m |= 1 << (nr & 63);
-
-	return TRUE;
-}
-#if 0
-static bool test_clear_bit(ull nr)
-{
-	ull *m = ((ull *) ihashbmp) + (nr >> 6);
-
-	if (!(*m & (1 << (nr & 63))))
-		return FALSE;
-
-	*m &= ~(1 << (nr & 63));
-	return TRUE;
-}
-#endif
-
-static void clear_hash()
-{
-	ulong i = 0;
-	ull *addr = ihashbmp;
-
-	for (; i < HASH_OCTETS; ++i, ++addr)
-		if (*addr)
-			*addr = 0;
-}
 
 static void sigint_handler(int sig)
 {
@@ -1033,8 +989,6 @@ static void endselection(void)
 	if (cfg.selmode) {
 		cfg.selmode = 0;
 
-		clear_hash();
-
 		if (selbufpos) { /* File path(s) written to the buffer */
 			writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			spawn(copier, NULL, NULL, NULL, F_NOTRACE);
@@ -1122,7 +1076,8 @@ static bool editselection(void)
 	}
 
 	nselected = lines;
-	endselection();
+	writesel(pselbuf, selbufpos - 1);
+	spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
 	return TRUE;
 
@@ -3662,7 +3617,6 @@ static int dentfill(char *path, struct entry **dents)
 		 * Known drawbacks:
 		 * - the symlink size is set to 0
 		 * - the modification time of the symlink is set to that of the target file
-		 * - the inode number is that of the target file
 		 */
 		flags = AT_SYMLINK_NOFOLLOW;
 	}
@@ -3770,7 +3724,6 @@ static int dentfill(char *path, struct entry **dents)
 
 		/* Copy other fields */
 		dentp->t = cfg.mtime ? sb.st_mtime : sb.st_atime;
-		dentp->inode = sb.st_ino;
 #ifndef __sun
 		if (!flags && dp->d_type == DT_LNK) {
 			 /* Do not add sizes for links */
@@ -4787,7 +4740,7 @@ nochange:
 				rangesel = FALSE;
 
 			/* Do not select if already selected */
-			if (test_set_bit((ull)dents[cur].inode)) {
+			if (!(dents[cur].flags & FILE_SELECTED)) {
 				appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 
 				++nselected;
@@ -4849,16 +4802,12 @@ nochange:
 				selendid = ndents - 1;
 			}
 
-			for (r = selstartid; r <= selendid; ++r) {
-				if (test_set_bit((ull)dents[r].inode)) {
+			for (r = selstartid; r <= selendid; ++r)
+				if (!(dents[r].flags & FILE_SELECTED)) {
 					appendfpath(newpath, mkpath(path, dents[r].name, newpath));
 					dents[r].flags |= FILE_SELECTED;
 					++nselected;
-				} else {
-					DPRINTF_S(dents[r].name);
-					DPRINTF_U(dents[r].inode);
 				}
-			}
 
 			/* Show the range count */
 			//r = selendid - selstartid + 1;
@@ -5495,7 +5444,6 @@ static void cleanup(void)
 	free(initpath);
 	free(bmstr);
 	free(pluginstr);
-	free(ihashbmp);
 
 	unlink(g_pipepath);
 
@@ -5793,9 +5741,6 @@ int main(int argc, char *argv[])
 
 	if (!initcurses(&mask))
 		return _FAILURE;
-
-	ihashbmp = malloc(HASH_OCTETS << 3);
-	memset(ihashbmp, 0, HASH_OCTETS << 3);
 
 	browse(initpath, session);
 	mousemask(mask, NULL);
