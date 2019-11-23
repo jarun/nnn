@@ -226,7 +226,7 @@ typedef struct {
 	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 5;
+	uint reserved   : 4;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
@@ -243,6 +243,7 @@ typedef struct {
 	uint trash      : 1;  /* Move removed files to trash */
 	uint mtime      : 1;  /* Use modification time (else access time) */
 	uint cliopener  : 1;  /* All-CLI app opener */
+	uint waitedit   : 1;  /* For ops that can't be detached, used EDITOR */
 } settings;
 
 /* Contexts or workspaces */
@@ -293,6 +294,7 @@ static settings cfg = {
 	0, /* trash */
 	1, /* mtime */
 	0, /* cliopener */
+	0, /* waitedit */
 };
 
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
@@ -307,6 +309,7 @@ static char *pluginstr;
 static char *opener;
 static char *copier;
 static char *editor;
+static char *enveditor;
 static char *pager;
 static char *shell;
 static char *home;
@@ -1025,7 +1028,7 @@ static bool editselection(void)
 	seltofile(fd, NULL);
 	close(fd);
 
-	spawn(editor, g_tmpfpath, NULL, NULL, F_CLI);
+	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, NULL, F_CLI);
 
 	fd = open(g_tmpfpath, O_RDONLY);
 	if (fd == -1) {
@@ -1405,7 +1408,7 @@ static bool cpmv_rename(int choice, const char *path)
 	snprintf(buf, sizeof(buf), cpmvformatcmd, g_tmpfpath);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, path, F_CLI);
 
-	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
+	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, path, F_CLI);
 
 	fd = open(g_tmpfpath, O_RDONLY);
 	if (fd == -1)
@@ -1523,7 +1526,7 @@ static bool batch_rename(const char *path)
 	if (dir) /* Don't retain dir entries in selection */
 		selbufpos = 0;
 
-	spawn(editor, g_tmpfpath, NULL, path, F_CLI);
+	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, path, F_CLI);
 
 	/* Reopen file descriptor to get updated contents */
 	fd2 = open(g_tmpfpath, O_RDONLY);
@@ -5308,6 +5311,7 @@ static void usage(void)
 		" -c      cli-only opener\n"
 		" -d      detail mode\n"
 		" -e name load session by name\n"
+		" -E      EDITOR for undetached edits\n"
 		" -f      run filter as cmd on prompt key\n"
 		" -H      show hidden files\n"
 		" -i      nav-as-you-type mode\n"
@@ -5462,7 +5466,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKiab:cde:fnop:rstvh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKiab:cde:Efnop:rstvh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5486,6 +5490,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'e':
 			session = optarg;
+			break;
+		case 'E':
+			cfg.waitedit = 1;
 			break;
 		case 'f':
 			cfg.filtercmd = 1;
@@ -5645,7 +5652,8 @@ int main(int argc, char *argv[])
 		cfg.useeditor = 1;
 
 	/* Get VISUAL/EDITOR */
-	editor = xgetenv(envs[ENV_VISUAL], xgetenv(envs[ENV_EDITOR], "vi"));
+	enveditor = xgetenv(envs[ENV_EDITOR], "vi");
+	editor = xgetenv(envs[ENV_VISUAL], enveditor);
 	DPRINTF_S(getenv(envs[ENV_VISUAL]));
 	DPRINTF_S(getenv(envs[ENV_EDITOR]));
 	DPRINTF_S(editor);

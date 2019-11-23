@@ -172,6 +172,7 @@ optional args:
  -c      cli-only opener
  -d      detail mode
  -e name load session by name
+ -E      EDITOR for undetached edits
  -f      run filter as cmd on prompt key
  -H      show hidden files
  -i      nav-as-you-type mode

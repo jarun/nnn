@@ -20,7 +20,7 @@ prompt="device name ['l' lists]: "
 
 lsblk
 
-printf "\nMake sure you aren't still in the mounted device."
+printf "\nEnsure you aren't still in the mounted device.\n"
 printf "%s" "$prompt"
 read -r dev
 
