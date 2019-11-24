@@ -147,12 +147,12 @@ There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$
 
 | Example `export` | Description |
 | --- | --- |
+| `NNN_OPENER=mimeopen` | custom file opener |
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | key-bookmark pairs [max 10] |
 | `NNN_PLUG='m:nmount;t:imgthumb;x:_chmod +x $nnn'` | key-plugin (or cmd) pairs (<kbd>:key</kbd> to run) [max 15] |
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
-| `NNN_OPENER=mimeopen` | custom file opener |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds to lock terminal [default: disabled] |
 | `NNN_COPIER=copier` | clipboard copier script [default: none] |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |

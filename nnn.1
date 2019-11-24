@@ -11,6 +11,7 @@
 .Op Ar -c
 .Op Ar -d
 .Op Ar -e name
+.Op Ar -E
 .Op Ar -f
 .Op Ar -H
 .Op Ar -i
@@ -54,7 +55,10 @@ supports the following options:
         detail mode
 .Pp
 .Fl "e name"
-        Load a session by name
+        load a session by name
+.Pp
+.Fl E
+        use $EDITOR for internal undetached edits
 .Pp
 .Fl f
         run filter as command when the prompt key is pressed
