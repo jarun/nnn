@@ -90,7 +90,7 @@ enum action {
 	SEL_RENAME,
 	SEL_RENAMEMUL,
 	SEL_ARCHIVEMNT,
-	SEL_SSHFS,
+	SEL_REMOTE,
 	SEL_UMOUNT,
 	SEL_HELP,
 	SEL_EXEC,
@@ -237,7 +237,7 @@ static struct key bindings[] = {
 	/* Mount an archive */
 	{ 'T',            SEL_ARCHIVEMNT },
 	/* Connect to server over SSHFS */
-	{ 'c',            SEL_SSHFS },
+	{ 'c',            SEL_REMOTE },
 	/* Disconnect a SSHFS mount point */
 	{ 'u',            SEL_UMOUNT },
 	/* Show help */

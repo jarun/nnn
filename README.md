@@ -52,7 +52,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
 - Convenience
   - Run plugins and commands with custom keybinds
   - FreeDesktop compliant trash (needs trash-cli)
-  - SSHFS mounts (needs sshfs)
+  - Remote mounts (needs sshfs, rclone)
   - Cross-dir file/all/range selection
   - Batch rename selection or dir entries
   - Copy (as), move (as), delete, archive, link selection
@@ -92,7 +92,7 @@ A curses library with wide char support (e.g. ncursesw), libreadline (`make O_NO
 | file, coreutils (cp, mv, rm), xargs | base | file type, copy, move and remove |
 | tar, (un)zip [atool/bsdtar for more formats] | base | create, list, extract tar, gzip, bzip2, zip |
 | archivemount, fusermount(3) | optional | mount, unmount archives |
-| sshfs, fusermount(3) | optional | mount, unmount remotes |
+| sshfs, [rclone](https://rclone.org/), fusermount(3) | optional | mount, unmount remotes |
 | trash-cli | optional | trash files (default action: rm) |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/Advanced-use-cases#show-cp-mv-progress)) | optional | copy, move progress |
@@ -153,6 +153,7 @@ There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
+| `NNN_RCLONE_OPTS='rclone mount --read-only'` | specify rclone options |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds to lock terminal [default: disabled] |
 | `NNN_COPIER=copier` | clipboard copier script [default: none] |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
@@ -225,7 +226,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
          ! ^]  Shell      ;K :K xK  Execute plugin K
             C  Execute entry  R ^V  Pick plugin
             U  Manage session    =  Launch
-            c  SSHFS mount       u  Unmount
+            c  Remote mount      u  Unmount
          ] ^P  Prompt/run cmd    L  Lock
 ```
 

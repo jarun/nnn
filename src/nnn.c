@@ -112,7 +112,8 @@
 #endif
 
 #define _ABSSUB(N, M) (((N) <= (M)) ? ((M) - (N)) : ((N) - (M)))
-#define DOUBLECLICK_INTERVAL_NS 400000000
+#define DOUBLECLICK_INTERVAL_NS (400000000)
+#define XDELAY_INTERVAL_US (350000) /* 350 ms delay */
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -370,6 +371,7 @@ static bool g_plinit = FALSE;
 #define UTIL_SH_EXEC 8
 #define UTIL_ARCHIVEMOUNT 9
 #define UTIL_SSHFS 10
+#define UTIL_RCLONE 11
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -396,6 +398,7 @@ static char * const utils[] = {
 	"sh -c",
 	"archivemount",
 	"sshfs",
+	"rclone",
 };
 
 /* Common strings */
@@ -438,6 +441,8 @@ static char * const utils[] = {
 #define MSG_0_FILES 36
 #define MSG_EXISTS 37
 #define MSG_FEW_COLOUMNS 38
+#define MSG_REMOTE_OPTS 39
+#define MSG_RCLONE_DELAY 40
 
 static const char * const messages[] = {
 	"no traversal",
@@ -453,12 +458,12 @@ static const char * const messages[] = {
 	"forcibly remove %s file%s (unrecoverable)?",
 	"Create context %d?",
 	"archive sel?",
-	"'f'(ile) / 'd'(ir) / 's'(ym) / 'h'(ard)?",
+	"'f'ile / 'd'ir / 's'ym / 'h'ard?",
 	"cli mode?",
 	"overwrite?",
-	"'s'(ave) / 'l'(oad) / 'r'(estore)?",
+	"'s'ave / 'l'oad / 'r'estore?",
 	"Quit all contexts?",
-	"host: ",
+	"remote name: ",
 	"archive name: ",
 	"open with: ",
 	"relative path: ",
@@ -479,6 +484,8 @@ static const char * const messages[] = {
 	"0 files",
 	"entry exists",
 	"too few columns!",
+	"'s'shfs / 'r'clone?",
+	"rclone mount may take a while"
 };
 
 /* Supported configuration environment variables */
@@ -677,10 +684,10 @@ static int get_input(const char *prompt)
 	return r;
 }
 
-static void xdelay(void)
+static void xdelay(useconds_t delay)
 {
 	refresh();
-	usleep(350000); /* 350 ms delay */
+	usleep(delay);
 }
 
 static char confirm_force(bool selection)
@@ -2865,7 +2872,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	fsession = fopen(spath, "rb");
 	if (!fsession) {
 		printmsg(messages[MSG_SSN_MISSING]);
-		xdelay();
+		xdelay(XDELAY_INTERVAL_US);
 		return FALSE;
 	}
 
@@ -2896,7 +2903,7 @@ END:
 
 	if (!status) {
 		printmsg(messages[MSG_FAILED]);
-		xdelay();
+		xdelay(XDELAY_INTERVAL_US);
 	}
 
 	return status;
@@ -3139,7 +3146,7 @@ static void find_accessible_parent(char *path, char *newpath, char *lastname, in
 	xstrlcpy(path, dir, PATH_MAX);
 
 	printmsg(messages[MSG_DIR_ACCESS]);
-	xdelay();
+	xdelay(XDELAY_INTERVAL_US);
 }
 
 static bool execute_file(int cur, char *path, char *newpath, int *presel)
@@ -3263,11 +3270,23 @@ static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 	return TRUE;
 }
 
-static bool sshfs_mount(char *newpath, int *presel)
+static bool remote_mount(char *newpath, int *presel)
 {
-	uchar flag = F_NORMAL;
-	int r;
-	char *tmp, *env, *cmd = utils[UTIL_SSHFS];
+	uchar flag = F_CLI;
+	int r, opt = get_input(messages[MSG_REMOTE_OPTS]);
+	char *tmp, *env, *cmd;
+
+	if (opt == 's') {
+		cmd = utils[UTIL_SSHFS];
+		env = xgetenv("NNN_SSHFS_OPTS", cmd);
+	} else if (opt == 'r') {
+		flag |= F_NOWAIT;
+		cmd = utils[UTIL_RCLONE];
+		env = xgetenv("NNN_RCLONE_OPTS", "rclone mount");
+	} else {
+		printwait(messages[MSG_FAILED], presel);
+		return FALSE;
+	}
 
 	if (!getutil(cmd)) {
 		printwait(messages[MSG_UTIL_MISSING], presel);
@@ -3287,19 +3306,21 @@ static bool sshfs_mount(char *newpath, int *presel)
 
 	/* Convert "Host" to "Host:" */
 	r = strlen(tmp);
-	tmp[r] = ':';
-	tmp[r + 1] = '\0';
-
-	env = getenv("NNN_SSHFS_OPTS");
-	if (env)
-		flag |= F_MULTI;
-	else
-		env = cmd;
+	if (tmp[r - 1] != ':') { /* Append ':' if missing */
+		tmp[r] = ':';
+		tmp[r + 1] = '\0';
+	}
 
 	/* Connect to remote */
-	if (spawn(env, tmp, newpath, NULL, flag)) {
-		printwait(messages[MSG_FAILED], presel);
-		return FALSE;
+	if (opt == 's') {
+		if (spawn(env, tmp, newpath, NULL, flag)) {
+			printwait(messages[MSG_FAILED], presel);
+			return FALSE;
+		}
+	} else {
+		spawn(env, tmp, newpath, NULL, flag);
+		printmsg(messages[MSG_RCLONE_DELAY]);
+		xdelay(XDELAY_INTERVAL_US * 10);
 	}
 
 	return TRUE;
@@ -3311,12 +3332,12 @@ static bool sshfs_mount(char *newpath, int *presel)
  */
 static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 {
-	char cmd[] = "fusermount3"; /* Arch Linux utility */
+	static char cmd[] = "fusermount3"; /* Arch Linux utility */
 	static bool found = FALSE;
 	char *tmp = name;
 	struct stat sb, psb;
-	bool child = false;
-	bool parent = false;
+	bool child = FALSE;
+	bool parent = FALSE;
 
 	/* On Ubuntu it's fusermount */
 	if (!found && !getutil(cmd)) {
@@ -4770,7 +4791,7 @@ nochange:
 				inode = sb.st_ino;
 				selstartid = cur;
 				printmsg(messages[MSG_RANGE_SEL_ON]);
-				xdelay();
+				xdelay(XDELAY_INTERVAL_US);
 				continue;
 			}
 
@@ -4815,7 +4836,7 @@ nochange:
 			/* Show the range count */
 			//r = selendid - selstartid + 1;
 			//mvprintw(xlines - 1, 0, "+%d\n", r);
-			//xdelay();
+			//xdelay(XDELAY_INTERVAL_US);
 
 			//writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			//spawn(copier, NULL, NULL, NULL, F_NOTRACE);
@@ -5167,8 +5188,8 @@ nochange:
 		case SEL_ARCHIVEMNT:
 			if (!ndents || !archive_mount(dents[cur].name, path, newpath, &presel))
 				goto nochange; // fallthrough
-		case SEL_SSHFS:
-			if (sel == SEL_SSHFS && !sshfs_mount(newpath, &presel))
+		case SEL_REMOTE:
+			if (sel == SEL_REMOTE && !remote_mount(newpath, &presel))
 				goto nochange;
 
 			lastname[0] = '\0';

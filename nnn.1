@@ -223,6 +223,13 @@ when dealing with the !, e and p commands respectively. A single combination to 
     NOTE: The options must be preceded by `sshfs` and comma-separated without any space between them.
 .Ed
 .Pp
+\fBNNN_RCLONE_OPTS:\fR pass additional options to rclone command:
+.Bd -literal
+    export NNN_RCLONE_OPTS='rclone mount --read-only --no-checksum'
+
+    NOTE: The options must be preceded by `rclone` and max 5 flags are supported.
+.Ed
+.Pp
 \fBNNN_OPENER:\fR specify a custom file opener.
 .Bd -literal
     export NNN_OPENER=mimeopen
