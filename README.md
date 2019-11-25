@@ -1,4 +1,4 @@
-<h1 align="center">nnn - <i>type less, do more, way faster</i></h1>
+<h1 align="center">nnn - <i>type less, do more, wayyy faster</i></h1>
 
 <p align="center">
 <a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600" alt="Latest release" /></a>
@@ -14,7 +14,7 @@
 
 ## Introduction
 
-`nnn` is a full-featured terminal file manager. It's tiny, [extremely light and fast](https://github.com/jarun/nnn/wiki/Performance).
+`nnn` is a full-featured terminal file manager. It's tiny in size with an [incredible performance](https://github.com/jarun/nnn/wiki/Performance).
 
 `nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch file renamer and a file picker. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further. You can _plug_ new functionality to `nnn` instantly. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
 
