@@ -485,7 +485,7 @@ static const char * const messages[] = {
 	"entry exists",
 	"too few columns!",
 	"'s'shfs / 'r'clone?",
-	"rclone mount may take a while"
+	"may take a while, try refresh"
 };
 
 /* Supported configuration environment variables */
@@ -3320,7 +3320,7 @@ static bool remote_mount(char *newpath, int *presel)
 	} else {
 		spawn(env, tmp, newpath, NULL, flag);
 		printmsg(messages[MSG_RCLONE_DELAY]);
-		xdelay(XDELAY_INTERVAL_MS * 10);
+		xdelay(XDELAY_INTERVAL_MS << 2); /* Set 4 times the usual delay */
 	}
 
 	return TRUE;
