@@ -113,7 +113,7 @@
 
 #define _ABSSUB(N, M) (((N) <= (M)) ? ((M) - (N)) : ((N) - (M)))
 #define DOUBLECLICK_INTERVAL_NS (400000000)
-#define XDELAY_INTERVAL_US (350000) /* 350 ms delay */
+#define XDELAY_INTERVAL_MS (350000) /* 350 ms delay */
 #define LEN(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -2872,7 +2872,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	fsession = fopen(spath, "rb");
 	if (!fsession) {
 		printmsg(messages[MSG_SSN_MISSING]);
-		xdelay(XDELAY_INTERVAL_US);
+		xdelay(XDELAY_INTERVAL_MS);
 		return FALSE;
 	}
 
@@ -2903,7 +2903,7 @@ END:
 
 	if (!status) {
 		printmsg(messages[MSG_FAILED]);
-		xdelay(XDELAY_INTERVAL_US);
+		xdelay(XDELAY_INTERVAL_MS);
 	}
 
 	return status;
@@ -3146,7 +3146,7 @@ static void find_accessible_parent(char *path, char *newpath, char *lastname, in
 	xstrlcpy(path, dir, PATH_MAX);
 
 	printmsg(messages[MSG_DIR_ACCESS]);
-	xdelay(XDELAY_INTERVAL_US);
+	xdelay(XDELAY_INTERVAL_MS);
 }
 
 static bool execute_file(int cur, char *path, char *newpath, int *presel)
@@ -3320,7 +3320,7 @@ static bool remote_mount(char *newpath, int *presel)
 	} else {
 		spawn(env, tmp, newpath, NULL, flag);
 		printmsg(messages[MSG_RCLONE_DELAY]);
-		xdelay(XDELAY_INTERVAL_US * 10);
+		xdelay(XDELAY_INTERVAL_MS * 10);
 	}
 
 	return TRUE;
@@ -4791,7 +4791,7 @@ nochange:
 				inode = sb.st_ino;
 				selstartid = cur;
 				printmsg(messages[MSG_RANGE_SEL_ON]);
-				xdelay(XDELAY_INTERVAL_US);
+				xdelay(XDELAY_INTERVAL_MS);
 				continue;
 			}
 
@@ -4836,7 +4836,7 @@ nochange:
 			/* Show the range count */
 			//r = selendid - selstartid + 1;
 			//mvprintw(xlines - 1, 0, "+%d\n", r);
-			//xdelay(XDELAY_INTERVAL_US);
+			//xdelay(XDELAY_INTERVAL_MS);
 
 			//writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			//spawn(copier, NULL, NULL, NULL, F_NOTRACE);

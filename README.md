@@ -32,6 +32,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - *Navigate-as-you-type* with dir auto-select
   - Contexts (_aka_ tabs/workspaces) with custom colors
   - Sessions, bookmarks; pin and visit a dir
+  - Remote mounts (needs sshfs, rclone)
   - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick reference
   - CD on quit (*easy* shell integration)
 - Sorting
@@ -52,7 +53,6 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
 - Convenience
   - Run plugins and commands with custom keybinds
   - FreeDesktop compliant trash (needs trash-cli)
-  - Remote mounts (needs sshfs, rclone)
   - Cross-dir file/all/range selection
   - Batch rename selection or dir entries
   - Copy (as), move (as), delete, archive, link selection
