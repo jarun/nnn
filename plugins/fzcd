@@ -18,18 +18,17 @@ if [ "$(cmd_exists fzy)" -eq "0" ]; then
 
 	sel=$($fd | fzy)
 elif [ "$(cmd_exists fzf)" -eq "0" ]; then
-	sel=$(fzf --print0)
+	sel=$(fzf)
 else
 	exit 1
 fi
 
-if ! [ -z "$sel" ]; then
-	case "$(file -bi "$sel")" in
-		*directory*) ;;
-		*) sel=$(dirname "$sel") ;;
-	esac
+if [ -n "$sel" ]; then
+	if ! [ -d "$sel" ]; then
+		sel=$(dirname "$sel")
+	fi
 
-    # Remove "./" prefix
-    sel="$(echo "$sel" | cut -c 3-)"
+    # Remove "./" prefix if it exists
+    sel="${sel#./}"
 	nnn_cd "$PWD/$sel"
 fi

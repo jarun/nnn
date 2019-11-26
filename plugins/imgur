@@ -77,23 +77,16 @@ upload_connect_timeout="5"
 upload_timeout="120"
 upload_retries="1"
 
+# shellcheck disable=SC2034
 if is_mac; then
-  # shellcheck disable=SC2034
   screenshot_select_command="screencapture -i %img"
-  # shellcheck disable=SC2034
   screenshot_window_command="screencapture -iWa %img"
-  # shellcheck disable=SC2034
   screenshot_full_command="screencapture %img"
-  # shellcheck disable=SC2034
   open_command="open %url"
 else
-  # shellcheck disable=SC2034
   screenshot_select_command="scrot -s %img"
-  # shellcheck disable=SC2034
   screenshot_window_command="scrot %img"
-  # shellcheck disable=SC2034
   screenshot_full_command="scrot %img"
-  # shellcheck disable=SC2034
   open_command="xdg-open %url"
 fi
 open="true"
@@ -169,8 +162,7 @@ function take_screenshot() {
   cmd="screenshot_${mode}_command"
   cmd=${!cmd//\%img/${1}}
 
-  shot_err="$(${cmd} &>/dev/null)" #takes a screenshot with selection
-  if ! [ -z "$shot_err" ]; then
+  if ! shot_err="$(${cmd} &>/dev/null)"; then  #takes a screenshot with selection
     echo "Failed to take screenshot '${1}': '${shot_err}'. For more information visit https://github.com/jomo/imgur-screenshot/wiki/Troubleshooting" | tee -a "${log_file}"
     notify error "Something went wrong :(" "Information has been logged"
     exit 1
@@ -256,8 +248,13 @@ function refresh_access_token() {
   check_oauth2_client_secrets
   token_url="https://api.imgur.com/oauth2/token"
   # exchange the refresh token for access_token and refresh_token
-  response="$(curl --compressed -fsSL --stderr - -F "client_id=${imgur_acct_key}" -F "client_secret=${imgur_secret}" -F "grant_type=refresh_token" -F "refresh_token=${refresh_token}" "${token_url}")"
-  if ! [ -z "$response" ]; then
+  if ! response="$(curl --compressed -fsSL --stderr - \
+                    -F "client_id=${imgur_acct_key}" \
+                    -F "client_secret=${imgur_secret}" \
+                    -F "grant_type=refresh_token" \
+                    -F "refresh_token=${refresh_token}" \
+                    "${token_url}"
+                    )"; then
     # curl failed
     handle_upload_error "${response}" "${token_url}"
     exit 1
