@@ -24,8 +24,7 @@ fi
 
 add_file ()
 {
-	printf "%s" "$@" >> "$selection"
-	printf "\0" >> "$selection"
+    printf '%s\0' "$@" >> "$selection"
 }
 
 use_all ()
@@ -57,7 +56,7 @@ elif [ "$resp" = "d" ]; then
     use_all
     "$dnd" "$all" "$PWD/"* &
 elif [ "$resp" = "r" ]; then
-    printf > "$selection"
+    true > "$selection"
     "$dnd" --print-path --target | while read -r f
     do
             if printf "%s" "$f" | grep '^\(https\?\|ftps\?\|s\?ftp\):\/\/' ; then
