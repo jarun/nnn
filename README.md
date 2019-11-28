@@ -174,7 +174,7 @@ optional args:
  -c      cli-only opener
  -d      detail mode
  -e name load session by name
- -E      EDITOR for undetached edits
+ -E      use EDITOR for undetached edits
  -f      run filter as cmd on prompt key
  -H      show hidden files
  -i      nav-as-you-type mode
@@ -212,7 +212,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
            ^O  Open with...      n  Create new/link
             D  File details  ^R F2  Rename/duplicate
    Space ^J/a  Select entry/all  r  Batch rename
-         m ^K  Sel range, clear  M  List selection
+         m ^K  Sel range, clear  M  Show sel buf
             P  Copy selection    K  Edit, flush sel
             V  Move selection    w  Copy/move sel as
             X  Del selection    ^X  Del entry
