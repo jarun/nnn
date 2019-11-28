@@ -78,7 +78,7 @@ enum action {
 	SEL_SEL,
 	SEL_SELMUL,
 	SEL_SELALL,
-	SEL_SELLST,
+	SEL_SELLIST,
 	SEL_SELEDIT,
 	SEL_CP,
 	SEL_MV,
@@ -212,7 +212,7 @@ static struct key bindings[] = {
 	/* Select all files in current dir */
 	{ 'a',            SEL_SELALL },
 	/* Show list of copied files */
-	{ 'M',            SEL_SELLST },
+	{ 'M',            SEL_SELLIST },
 	/* Edit selection buffer */
 	{ 'K',            SEL_SELEDIT },
 	/* Copy from selection buffer */

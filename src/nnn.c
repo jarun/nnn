@@ -580,6 +580,7 @@ static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, st
 static int dentfind(const char *fname, int n);
 static void move_cursor(int target, int ignore_scrolloff);
 static inline bool getutil(char *util);
+static size_t mkpath(const char *dir, const char *name, char *out);
 
 /* Functions */
 
@@ -992,12 +993,25 @@ static void startselection(void)
 	}
 }
 
+static void updateselbuf(const char *path, char *newpath)
+{
+	int i = 0;
+	size_t r;
+
+	for (; i < ndents; ++i)
+		if (dents[i].flags & FILE_SELECTED) {
+			r = mkpath(path, dents[i].name, newpath);
+			appendfpath(newpath, r);
+		}
+}
 
 /* Finish selection procedure before an operation */
-static void endselection(void)
+static void endselection(const char *path, char *newpath)
 {
 	if (cfg.selmode) {
 		cfg.selmode = 0;
+
+		updateselbuf(path, newpath);
 
 		if (selbufpos) { /* File path(s) written to the buffer */
 			writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
@@ -1444,8 +1458,6 @@ static bool cpmvrm_selection(enum action sel, char *path, int *presel)
 {
 	int r;
 
-	endselection();
-
 	if (!selsafe()) {
 		*presel = MSGWAIT;
 		return FALSE;
@@ -1576,7 +1588,7 @@ static void get_archive_cmd(char *cmd, char *archive)
 		xstrlcpy(cmd, "tar -acvf", ARCHIVE_CMD_LEN);
 }
 
-static void MSG_ARCHIVE_SELection(const char *cmd, const char *archive, const char *curpath)
+static void archive_selection(const char *cmd, const char *archive, const char *curpath)
 {
 	char *buf = (char *)malloc(CMD_LEN_MAX * sizeof(char));
 
@@ -2337,8 +2349,6 @@ static int xlink(char *suffix, char *path, char *buf, int *presel, int type)
 		printwait(messages[MSG_0_SELECTED], presel);
 		return -1;
 	}
-
-	endselection();
 
 	if (type == 's') /* symbolic link */
 		link_fn = &symlink;
@@ -4134,6 +4144,9 @@ static void browse(char *ipath, const char *session)
 		errexit();
 
 begin:
+	if (cfg.selmode && nselected)
+		updateselbuf(lastdir, newpath);
+
 #ifdef LINUX_INOTIFY
 	if ((presel == FILTER || dir_changed) && inotify_wd >= 0) {
 		inotify_rm_watch(inotify_fd, inotify_wd);
@@ -4720,7 +4733,7 @@ nochange:
 				refresh = TRUE;
 				break;
 			case SEL_RENAMEMUL:
-				endselection();
+				endselection(path, newpath);
 
 				if (!batch_rename(path)) {
 					printwait(messages[MSG_FAILED], &presel);
@@ -4763,13 +4776,8 @@ nochange:
 			if (rangesel)
 				rangesel = FALSE;
 
-			/* Do not select if already selected */
-			if (!(dents[cur].flags & FILE_SELECTED)) {
-				appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
-
-				++nselected;
-				dents[cur].flags |= FILE_SELECTED;
-			}
+			dents[cur].flags ^= FILE_SELECTED;
+			dents[cur].flags ? ++nselected : --nselected;
 
 			/* move cursor to the next entry if this is not the last entry */
 			if (!cfg.picker && cur != ndents - 1)
@@ -4828,29 +4836,22 @@ nochange:
 
 			for (r = selstartid; r <= selendid; ++r)
 				if (!(dents[r].flags & FILE_SELECTED)) {
-					appendfpath(newpath, mkpath(path, dents[r].name, newpath));
 					dents[r].flags |= FILE_SELECTED;
 					++nselected;
 				}
-
-			/* Show the range count */
-			//r = selendid - selstartid + 1;
-			//mvprintw(xlines - 1, 0, "+%d\n", r);
-			//xdelay(XDELAY_INTERVAL_MS);
-
-			//writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-			//spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 			continue;
-		case SEL_SELLST:
+		case SEL_SELLIST:
 			if (listselbuf() || listselfile()) {
 				if (cfg.filtermode)
 					presel = FILTER;
 				break;
 			}
 
-			printwait(messages[MSG_0_SELECTED], &presel);
 			goto nochange;
 		case SEL_SELEDIT:
+			if (nselected)
+				updateselbuf(path, newpath);
+
 			if (!editselection()) {
 				printwait(messages[MSG_FAILED], &presel);
 				goto nochange;
@@ -4861,6 +4862,8 @@ nochange:
 		case SEL_CPMVAS: // fallthrough
 		case SEL_RMMUL:
 		{
+			endselection(path, newpath);
+
 			if (!cpmvrm_selection(sel, path, &presel))
 				goto nochange;
 
@@ -4899,7 +4902,7 @@ nochange:
 			case SEL_ARCHIVE:
 				r = get_input(messages[MSG_ARCHIVE_SEL]);
 				if (r == 'y' || r == 'Y') {
-					endselection();
+					endselection(path, newpath);
 
 					if (!selsafe()) {
 						presel = MSGWAIT;
@@ -4962,7 +4965,7 @@ nochange:
 
 				get_archive_cmd(cmd, tmp);
 
-				(r == 'y' || r == 'Y') ? MSG_ARCHIVE_SELection(cmd, tmp, path)
+				(r == 'y' || r == 'Y') ? archive_selection(cmd, tmp, path)
 						       : spawn(cmd, tmp, dents[cur].name,
 							       path, F_NORMAL | F_MULTI);
 				break;
@@ -5044,6 +5047,8 @@ nochange:
 					mkpath(path, tmp, newpath);
 					r = xmktree(newpath, TRUE);
 				} else if (r == 's' || r == 'h') {
+					endselection(path, newpath);
+
 					if (tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
 					r = xlink(tmp, path, newpath, &presel, r);
@@ -5080,7 +5085,7 @@ nochange:
 		case SEL_PLUGIN: // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_RUNCMD:
-			endselection();
+			endselection(path, newpath);
 
 			switch (sel) {
 			case SEL_EXEC:
