@@ -581,6 +581,7 @@ static int dentfind(const char *fname, int n);
 static void move_cursor(int target, int ignore_scrolloff);
 static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
+static void updateselbuf(const char *path, char *newpath);
 
 /* Functions */
 
@@ -929,17 +930,22 @@ static size_t seltofile(int fd, uint *pcount)
 }
 
 /* List selection from selection buffer */
-static bool listselbuf(void)
+static bool listselbuf(const char *path, char *newpath)
 {
 	int fd;
 	size_t pos;
+	uint oldpos = selbufpos;
+
+	updateselbuf(path, newpath);
 
 	if (!selbufpos)
 		return FALSE;
 
 	fd = create_tmp_file();
-	if (fd == -1)
+	if (fd == -1) {
+		selbufpos = oldpos;
 		return FALSE;
+	}
 
 	pos = seltofile(fd, NULL);
 
@@ -948,6 +954,7 @@ static bool listselbuf(void)
 		spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
 	unlink(g_tmpfpath);
 
+	selbufpos = oldpos;
 	return TRUE;
 }
 
@@ -3435,8 +3442,8 @@ static void show_help(const char *path)
 		"1FILES\n"
 		 "b^O  Open with...      n  Create new/link\n"
 		  "cD  File details  ^R F2  Rename/duplicate\n"
-	 "3Space ^J/a  Select entry/all  r  Batch rename\n"
-	       "9m ^K  Sel range, clear  M  Show sel buf\n"
+	 "3Space ^J/a  Sel toggle/all    r  Batch rename\n"
+	       "9m ^K  Sel range, clear  M  List selection\n"
 		  "cP  Copy selection    K  Edit, flush sel\n"
 		  "cV  Move selection    w  Copy/move sel as\n"
 		  "cX  Del selection    ^X  Del entry\n"
@@ -4841,7 +4848,7 @@ nochange:
 				}
 			continue;
 		case SEL_SELLIST:
-			if (listselbuf() || listselfile()) {
+			if (listselbuf(path, newpath) || listselfile()) {
 				if (cfg.filtermode)
 					presel = FILTER;
 				break;
