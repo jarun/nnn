@@ -936,7 +936,8 @@ static bool listselbuf(const char *path, char *newpath)
 	size_t pos;
 	uint oldpos = selbufpos;
 
-	updateselbuf(path, newpath);
+	if (cfg.selmode)
+		updateselbuf(path, newpath);
 
 	if (!selbufpos)
 		return FALSE;
@@ -4141,7 +4142,7 @@ static void browse(char *ipath, const char *session)
 	char *path, *lastdir, *lastname, *dir, *tmp;
 	MEVENT event;
 	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0} };
-	bool currentmouse = 1;
+	bool currentmouse = 1, ctx_changed = FALSE;
 
 	atexit(dentfree);
 
@@ -4173,8 +4174,10 @@ static void browse(char *ipath, const char *session)
 		errexit();
 
 begin:
-	if (cfg.selmode && nselected && lastdir[0])
+	if (cfg.selmode && lastdir[0] && !ctx_changed)
 		updateselbuf(lastdir, newpath);
+	else if (ctx_changed)
+		ctx_changed = FALSE;
 
 #ifdef LINUX_INOTIFY
 	if ((presel == FILTER || dir_changed) && inotify_wd >= 0) {
@@ -4575,6 +4578,11 @@ nochange:
 					fd = get_input(newpath);
 					if (fd != 'y' && fd != 'Y')
 						continue;
+				}
+
+				if (cfg.selmode) {
+					updateselbuf(path, newpath);
+					ctx_changed = TRUE;
 				}
 
 				savecurctx(&cfg, path, dents[cur].name, r);
