@@ -154,23 +154,19 @@ auto selects the directory and enters it in this mode.
 .Sh SELECTION
 There are 3 groups of shortcuts to add files to selection:
 .Pp
-(1) add an individual file to selection
+(1) hovered file selection toggle (indicated by '+' symbol on/off)
 .br
 (2) add a range of files to selection
 .br
 (3) add all files in the current directory to selection
 .Pp
-Selected files are visually indicated by a \fI+\fR before the entries.
-.br
 The selection can now be listed, copied, moved, removed, archived or linked.
-.br
+.Pp
 Absolute paths of the selected files are copied to the temporary file \fB.selection\fR in the config directory. The path is shown in the help and configuration screen. If \fB$NNN_COPIER\fR is set (see ENVIRONMENT section below) the file paths are also copied to the system clipboard.
 .Pp
-Repeat range selection on the same entry to clear selection. It's also possible to edit the current selection.
+To flush the selection without running any operation use the _edit, flush selection_ key. The list is flushed even if unchanged. Use this key to remove a file from selection after you navigate away from its directory.
 .Pp
-Deselecting a single file is not implemented because substantial string processing would be required if thousands of files are selected. It would have been trivial if the selection was limited to a single directory (use a flag for each file and select the files with the flag set). However,
-.Nm
-allows selection across directories making it non-trivial to do that. Also, the buffer used to select is a compact one (no byte wasted) so \fBmemmove\fR() would be required to deselect each intermediate file. Considering these, the alternatives were chosen.
+Repeat range selection on the same entry twice to clear selection completely.
 .Sh FILE SIZE
 The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y (powers of 1024), same as the default units in \fIls\fR.
 .Sh ENVIRONMENT

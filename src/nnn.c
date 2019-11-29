@@ -411,10 +411,10 @@ static char * const utils[] = {
 #define MSG_FAILED 6
 #define MSG_SSN_NAME 7
 #define MSG_CP_MV_AS 8
-#define MSG_RENAME_SEL 9
+#define MSG_RENAME_OPTS 9
 #define MSG_FORCE_RM 10
 #define MSG_CREATE_CTX 11
-#define MSG_ARCHIVE_SEL 12
+#define MSG_CUR_SEL_OPTS 12
 #define MSG_NEW_OPTS 13
 #define MSG_CLI_MODE 14
 #define MSG_OVERWRITE 15
@@ -454,10 +454,10 @@ static const char * const messages[] = {
 	"failed!",
 	"session name: ",
 	"'c'p / 'm'v as?",
-	"rename sel?",
+	"'c'urrent dir / 's'election?",
 	"forcibly remove %s file%s (unrecoverable)?",
-	"Create context %d?",
-	"archive sel?",
+	"create context %d?",
+	"'c'urrent / 's'election?",
 	"'f'ile / 'd'ir / 's'ym / 'h'ard?",
 	"cli mode?",
 	"overwrite?",
@@ -1516,6 +1516,20 @@ static bool batch_rename(const char *path)
 	char foriginal[TMP_LEN_MAX] = {0};
 	char buf[sizeof(batchrenamecmd) + (PATH_MAX << 1)];
 
+	if (selbufpos) {
+		if (ndents) {
+			i = get_input(messages[MSG_RENAME_OPTS]);
+			if (i == 'c') {
+				selbufpos = 0; /* Clear the selection */
+				dir = TRUE;
+			} else if (i != 's')
+				return ret;
+		}
+	} else if (ndents)
+		dir = TRUE; /* Rename entries in dir */
+	else
+		return ret;
+
 	fd1 = create_tmp_file();
 	if (fd1 == -1)
 		return ret;
@@ -1528,18 +1542,6 @@ static bool batch_rename(const char *path)
 		close(fd1);
 		return ret;
 	}
-
-	if (selbufpos) {
-		i = get_input(messages[MSG_RENAME_SEL]);
-		if (i != 'y' && i != 'Y') {
-			if (!ndents)
-				return TRUE;
-
-			selbufpos = 0; /* Clear the selection */
-			dir = TRUE;
-		}
-	} else
-		dir = TRUE; /* Rename entries in dir */
 
 	if (dir)
 		for (i = 0; i < ndents; ++i)
@@ -2344,23 +2346,42 @@ static size_t mkpath(const char *dir, const char *name, char *out)
  * Create symbolic/hard link(s) to file(s) in selection list
  * Returns the number of links created
  */
-static int xlink(char *suffix, char *path, char *buf, int *presel, int type)
+static int xlink(char *suffix, char *path, char *curfname, char *buf, int *presel, int type)
 {
-	int count = 0;
+	int count = 0, choice = 's';
 	char *pbuf = pselbuf, *fname;
 	size_t pos = 0, len, r;
 	int (*link_fn)(const char *, const char *) = NULL;
 
-	/* Check if selection is empty */
-	if (!selbufpos) {
-		printwait(messages[MSG_0_SELECTED], presel);
+	if (selbufpos) {
+		if (ndents) {
+			choice = get_input(messages[MSG_CUR_SEL_OPTS]);
+			if (choice != 'c' && choice != 's')
+				return -1;
+		}
+	} else if (ndents)
+		choice = 'c';
+	else
 		return -1;
-	}
 
 	if (type == 's') /* symbolic link */
 		link_fn = &symlink;
 	else /* hard link */
 		link_fn = &link;
+
+	if (choice == 'c') {
+		char lnpath[PATH_MAX];
+
+		mkpath(path, curfname, buf);
+		r = mkpath(path, curfname, lnpath);
+		xstrlcpy(lnpath + r - 1, suffix, PATH_MAX - r - 1);
+
+		if (!link_fn(buf, lnpath))
+			return 1;
+
+		printwarn(presel);
+		return 0; /* One link created */
+	}
 
 	while (pos < selbufpos) {
 		len = strlen(pbuf);
@@ -4907,20 +4928,19 @@ nochange:
 
 			switch (sel) {
 			case SEL_ARCHIVE:
-				r = get_input(messages[MSG_ARCHIVE_SEL]);
-				if (r == 'y' || r == 'Y') {
-					endselection(path, newpath);
+				endselection(path, newpath);
 
+				r = get_input(messages[MSG_CUR_SEL_OPTS]);
+				if (r == 's') {
 					if (!selsafe()) {
 						presel = MSGWAIT;
 						goto nochange;
 					}
 
 					tmp = NULL;
-				} else if (!ndents) {
-					printwait(messages[MSG_0_FILES], &presel);
+				} else if (!ndents)
 					goto nochange;
-				} else
+				else
 					tmp = dents[cur].name;
 				tmp = xreadline(tmp, messages[MSG_ARCHIVE_NAME]);
 				break;
@@ -5058,7 +5078,8 @@ nochange:
 
 					if (tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
-					r = xlink(tmp, path, newpath, &presel, r);
+					r = xlink(tmp, path, (ndents ? dents[cur].name : NULL),
+						  newpath, &presel, r);
 					close(fd);
 
 					if (r <= 0)
