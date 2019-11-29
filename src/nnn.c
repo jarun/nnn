@@ -4132,6 +4132,7 @@ static void browse(char *ipath, const char *session)
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	uchar opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
+	uint utmp;
 	int r = -1, fd, presel, selstartid = 0, selendid = 0;
 	ino_t inode = 0;
 	enum action sel;
@@ -4172,7 +4173,7 @@ static void browse(char *ipath, const char *session)
 		errexit();
 
 begin:
-	if (cfg.selmode && nselected)
+	if (cfg.selmode && nselected && lastdir[0])
 		updateselbuf(lastdir, newpath);
 
 #ifdef LINUX_INOTIFY
@@ -4804,6 +4805,16 @@ nochange:
 			if (rangesel)
 				rangesel = FALSE;
 
+			/* Write the path to selection file to avoid flush */
+			if (!(dents[cur].flags & FILE_SELECTED)) {
+				utmp = selbufpos;
+				appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
+				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+				selbufpos = utmp;
+			}
+
+			/* Toggle selection status */
 			dents[cur].flags ^= FILE_SELECTED;
 			dents[cur].flags ? ++nselected : --nselected;
 
@@ -4862,11 +4873,24 @@ nochange:
 				selendid = ndents - 1;
 			}
 
+			/* Remember current selection buffer position */
+			utmp = selbufpos;
+
 			for (r = selstartid; r <= selendid; ++r)
 				if (!(dents[r].flags & FILE_SELECTED)) {
+					/* Write the path to selection file to avoid flush */
+					appendfpath(newpath, mkpath(path, dents[r].name, newpath));
+
 					dents[r].flags |= FILE_SELECTED;
 					++nselected;
 				}
+
+			if (selbufpos != utmp) {
+				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+				/* Restore current selection buffer position */
+				selbufpos = utmp;
+			}
 			continue;
 		case SEL_SELLIST:
 			if (listselbuf(path, newpath) || listselfile()) {
