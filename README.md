@@ -5,7 +5,7 @@
 <a href="https://repology.org/metapackage/nnn"><img src="https://repology.org/badge/tiny-repos/nnn.svg" alt="Availability"></a>
 <a href="https://travis-ci.org/jarun/nnn"><img src="https://img.shields.io/travis/jarun/nnn/master.svg?label=travis" alt="Travis Status" /></a>
 <a href="https://circleci.com/gh/jarun/workflows/nnn"><img src="https://img.shields.io/circleci/project/github/jarun/nnn.svg?label=circleci" alt="CircleCI Status" /></a>
-<a href="https://en.wikipedia.org/wiki/Privacy-invasive_software"><img src="https://img.shields.io/badge/privacy-aware-brown" alt="Privacy Awareness" /></a>
+<a href="https://en.wikipedia.org/wiki/Privacy-invasive_software"><img src="https://img.shields.io/badge/privacy-aware-crimson" alt="Privacy Awareness" /></a>
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
@@ -14,11 +14,11 @@
 
 ## Introduction
 
-`nnn` is a full-featured terminal file manager. It's tiny in size with an [incredible performance](https://github.com/jarun/nnn/wiki/Performance).
+`nnn` is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible performance](https://github.com/jarun/nnn/wiki/Performance).
 
-`nnn` is also a disk usage analyzer, a fuzzy app launcher, a batch renamer and a file picker. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further. You can _plug_ new functionality _and play_ with a custom keybind instantly. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
+`nnn` is also a du analyzer, a fuzzy app launcher, a batch renamer and a file picker. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further. You can _plug_ new functionality _and play_ with a custom keybind instantly. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
 
-It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.com/watch?v=AbaauM7gUJw), Linux, macOS, BSD, Cygwin and Linux subsystem for Windows. `nnn` works seamlessly with DEs and GUI utilities. It's nearly zero-config (with sensible defaults) and can be setup in less than 5 minutes.
+It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.com/watch?v=AbaauM7gUJw), Linux, macOS, BSD, Cygwin, WSL and works seamlessly with DEs and GUI utilities.
 
 Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
 
@@ -66,7 +66,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - Hovered file set as `$nnn` at prompt and spawned shell
   - Lock terminal (needs a locker)
 - Privacy-aware (no unconfirmed user data collection)
-- Minimal deps, minimal config
+- Minimal deps, minimal config (with sensible defaults)
 - Widely available
 - Unicode support
 - Follows Linux kernel coding style
