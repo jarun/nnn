@@ -582,6 +582,7 @@ static void move_cursor(int target, int ignore_scrolloff);
 static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
 static void updateselbuf(const char *path, char *newpath);
+static char *xgetenv(const char *name, char *fallback);
 
 /* Functions */
 
@@ -1140,6 +1141,7 @@ static bool selsafe(void)
 static bool initcurses(mmask_t *oldmask)
 {
 	short i;
+	char *colors = xgetenv(env_cfg[NNN_CONTEXT_COLORS], "4444");
 
 	if (cfg.picker) {
 		if (!newterm(NULL, stderr, stdin)) {
@@ -1168,9 +1170,16 @@ static bool initcurses(mmask_t *oldmask)
 	start_color();
 	use_default_colors();
 
-	/* Initialize default colors */
-	for (i = 0; i <  CTX_MAX; ++i)
+	/* Get and set the context colors */
+	for (i = 0; i <  CTX_MAX; ++i) {
+		if (*colors) {
+			g_ctx[i].color = (*colors < '0' || *colors > '7') ? 4 : *colors - '0';
+			++colors;
+		} else
+			g_ctx[i].color = 4;
+
 		init_pair(i + 1, g_ctx[i].color, -1);
+	}
 
 	settimeout(); /* One second */
 	set_escdelay(25);
@@ -5639,24 +5648,6 @@ int main(int argc, char *argv[])
 	/* Confirm we are in a terminal */
 	if (!cfg.picker && !(isatty(STDIN_FILENO) && isatty(STDOUT_FILENO)))
 		exit(1);
-
-	/* Get the context colors; copier used as tmp var */
-	copier = xgetenv(env_cfg[NNN_CONTEXT_COLORS], "4444");
-	opt = 0;
-	while (opt < CTX_MAX) {
-		if (*copier) {
-			if (*copier < '0' || *copier > '7') {
-				fprintf(stderr, "0 <= code <= 7\n");
-				return _FAILURE;
-			}
-
-			g_ctx[opt].color = *copier - '0';
-			++copier;
-		} else
-			g_ctx[opt].color = 4;
-
-		++opt;
-	}
 
 #ifdef DBGMODE
 	enabledbg();
