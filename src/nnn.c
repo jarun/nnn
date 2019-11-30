@@ -4958,10 +4958,11 @@ nochange:
 			if (!ndents && (sel == SEL_OPENWITH || sel == SEL_RENAME))
 				break;
 
-			switch (sel) {
-			case SEL_ARCHIVE:
+			if (sel != SEL_OPENWITH)
 				endselection(path, newpath);
 
+			switch (sel) {
+			case SEL_ARCHIVE:
 				r = get_input(messages[MSG_CUR_SEL_OPTS]);
 				if (r == 's') {
 					if (!selsafe()) {
@@ -5106,7 +5107,6 @@ nochange:
 					mkpath(path, tmp, newpath);
 					r = xmktree(newpath, TRUE);
 				} else if (r == 's' || r == 'h') {
-					endselection(path, newpath);
 
 					if (tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
