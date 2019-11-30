@@ -11,9 +11,11 @@ local -a args
 args=(
     '(-a)-a[use access time]'
     '(-b)-b[bookmark key to open]:key char'
-    '(-c)-d[cli-only opener]'
+    '(-c)-c[cli-only opener]'
     '(-d)-d[start in detail mode]'
-    '(-f)-d[run filter as cmd on prompt key]'
+    '(-e)-e[load session]:session name'
+    '(-E)-E[use EDITOR for undetached edits]'
+    '(-f)-f[run filter as cmd on prompt key]'
     '(-H)-H[show hidden files]'
     '(-i)-i[start in navigate-as-you-type mode]'
     '(-K)-K[detect key collision]'

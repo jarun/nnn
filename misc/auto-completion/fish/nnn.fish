@@ -16,6 +16,7 @@ complete -c nnn -s b -r -d 'bookmark key to open' -x -a '(echo $NNN_BMS | awk -F
 complete -c nnn -s c    -d 'cli-only opener'
 complete -c nnn -s d    -d 'start in detail mode'
 complete -c nnn -s e -r -d 'load session by name' -x -a '@\t"last session" (ls $sessions_dir)'
+complete -c nnn -s E    -d 'use EDITOR for undetached edits'
 complete -c nnn -s f    -d 'run filter as cmd on prompt key'
 complete -c nnn -s H    -d 'show hidden files'
 complete -c nnn -s i    -d 'start in navigate-as-you-type mode'
