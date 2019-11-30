@@ -4389,8 +4389,8 @@ nochange:
 			{
 				/* If opened as vim plugin and Enter/^M pressed, pick */
 				if (cfg.picker && sel == SEL_GOIN) {
-					r = mkpath(path, dents[cur].name, newpath);
-					appendfpath(newpath, r);
+					dents[cur].flags |= FILE_SELECTED;
+					updateselbuf(path, newpath);
 					writesel(pselbuf, selbufpos - 1);
 					return;
 				}
