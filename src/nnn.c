@@ -2085,12 +2085,12 @@ static int filterentries(char *path)
 			switch (*ch) {
 			case '/': /* works as Leader key in filter mode */
 				*ch = CONTROL('_'); // fallthrough
-			case ':':
-			case ';':
 				if (len == 1)
 					cur = oldcur;
 				goto end;
-			case '?':  /* '?' is an invalid regex, show help instead */
+			case ':': // fallthrough /* Run plugin keys */
+			case ';': // fallthrough
+			case '?': /* Help and config key, '?' is an invalid regex */
 				if (len == 1) {
 					cur = oldcur;
 					goto end;
