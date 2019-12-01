@@ -189,6 +189,7 @@ optional args:
  -o      open files on Enter
  -p file selection file [stdout if '-']
  -r      use advcpmv patched cp, mv
+ -R      disable rollover at edges
  -s      string filters [default: regex]
  -S      du mode
  -t      disable dir auto-select

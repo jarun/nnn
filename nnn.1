@@ -19,6 +19,7 @@
 .Op Ar -n
 .Op Ar -p file
 .Op Ar -r
+.Op Ar -R
 .Op Ar -s
 .Op Ar -S
 .Op Ar -v
@@ -83,6 +84,9 @@ supports the following options:
 .Pp
 .Fl r
         show cp, mv progress (Linux-only, needs advcpmv; '^T' shows the progress on BSD/macOS)
+.Pp
+.Fl R
+        disable rollover at edges
 .Pp
 .Fl s
         use substring match for filters instead of regex

@@ -23,6 +23,7 @@ args=(
     '(-o)-o[open files only on Enter]'
     '(-p)-p[copy selection to file]:file name'
     '(-r)-r[show cp, mv progress (Linux-only)]'
+    '(-R)-R[disable rollover at edges]'
     '(-s)-s[use substring match for filters]'
     '(-S)-S[start in disk usage analyzer mode]'
     '(-t)-t[disable dir auto-select]'

@@ -227,7 +227,7 @@ typedef struct {
 	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 4;
+	uint reserved   : 3;
 	/* The following settings are global */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
@@ -245,6 +245,7 @@ typedef struct {
 	uint mtime      : 1;  /* Use modification time (else access time) */
 	uint cliopener  : 1;  /* All-CLI app opener */
 	uint waitedit   : 1;  /* For ops that can't be detached, used EDITOR */
+	uint rollover   : 1;  /* Roll over at edges */
 } settings;
 
 /* Contexts or workspaces */
@@ -296,6 +297,7 @@ static settings cfg = {
 	1, /* mtime */
 	0, /* cliopener */
 	0, /* waitedit */
+	1, /* rollover */
 };
 
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
@@ -3937,17 +3939,17 @@ static void move_cursor(int target, int ignore_scrolloff)
 	curscroll = MAX(curscroll, MAX(cur - (onscreen - 1), 0));
 }
 
-static void handle_screen_move(enum action sel)
+static inline void handle_screen_move(enum action sel)
 {
 	int onscreen;
 
 	switch (sel) {
 	case SEL_NEXT:
-		if (ndents)
+		if (ndents && (cfg.rollover || (cur != ndents - 1)))
 			move_cursor((cur + 1) % ndents, 0);
 		break;
 	case SEL_PREV:
-		if (ndents)
+		if (ndents && (cfg.rollover || cur))
 			move_cursor((cur + ndents - 1) % ndents, 0);
 		break;
 	case SEL_PGDN:
@@ -5415,6 +5417,7 @@ static void usage(void)
 		" -o      open files on Enter\n"
 		" -p file selection file [stdout if '-']\n"
 		" -r      use advcpmv patched cp, mv\n"
+		" -R      disable rollover at edges\n"
 		" -s      string filters [default: regex]\n"
 		" -S      du mode\n"
 		" -t      disable dir auto-select\n"
@@ -5561,7 +5564,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKiab:cde:Efnop:rstvh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKiab:cde:Efnop:rRstvh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5622,6 +5625,9 @@ int main(int argc, char *argv[])
 #ifdef __linux__
 			progress = TRUE;
 #endif
+			break;
+		case 'R':
+			cfg.rollover = 0;
 			break;
 		case 's':
 			cfg.filter_re = 0;
