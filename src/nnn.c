@@ -4303,13 +4303,14 @@ nochange:
 
 #if NCURSES_MOUSE_VERSION > 1
 			/* Scroll up */
-			if (event.bstate == BUTTON4_PRESSED && ndents) {
+			if (event.bstate == BUTTON4_PRESSED && ndents && (cfg.rollover || cur)) {
 				move_cursor((cur + ndents - 1) % ndents, 0);
 				break;
 			}
 
 			/* Scroll down */
-			if (event.bstate == BUTTON5_PRESSED && ndents) {
+			if (event.bstate == BUTTON5_PRESSED && ndents
+			    && (cfg.rollover || (cur != ndents - 1))) {
 				move_cursor((cur + 1) % ndents, 0);
 				break;
 			}
