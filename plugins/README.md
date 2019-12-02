@@ -21,8 +21,8 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | dragdrop | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
 | exetoggle | Toggle executable status of hovered file | sh | chmod |
 | fzcd | Change to the directory of a fuzzy-selected file/dir | sh | fzy/fzf<br>(optional fd) |
-| fzhist | Fuzzy-select a cmd from history, edit in $EDITOR and run | sh | fzy |
-| fzopen | Fuzzy find a file in dir subtree and edit or xdg-open | sh | fzy, xdg-open |
+| fzhist | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzy |
+| fzopen | Fuzzy find a file in dir subtree and edit or open | sh | fzy, xdg-open |
 | getplugs | Update plugins | sh | curl |
 | gutenread | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
 | hexview | View a file in hex in `$PAGER` | sh | xxd |

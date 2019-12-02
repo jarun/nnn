@@ -5767,9 +5767,8 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	/* Set nnn nesting level, idletimeout used as tmp var */
-	idletimeout = xatoi(getenv(env_cfg[NNNLVL]));
-	setenv(env_cfg[NNNLVL], xitoa(++idletimeout), 1);
+	/* Set nnn nesting level */
+	setenv(env_cfg[NNNLVL], xitoa(xatoi(getenv(env_cfg[NNNLVL])) + 1), 1);
 
 	/* Get locker wait time, if set */
 	idletimeout = xatoi(getenv(env_cfg[NNN_IDLE_TIMEOUT]));
