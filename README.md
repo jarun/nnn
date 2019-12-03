@@ -59,7 +59,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - Run plugins and commands with custom keybinds
   - FreeDesktop compliant trash (needs trash-cli)
   - Cross-dir file/all/range selection
-  - Batch rename selection or dir entries
+  - Batch renamer (feature-limited) for selection or dir
   - Copy (as), move (as), delete, archive, link selection
   - Create (with parents), rename, duplicate (anywhere) files and dirs
   - Spawn a shell, run apps, run commands, execute file

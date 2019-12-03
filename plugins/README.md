@@ -102,13 +102,9 @@ Plugins can also access the current selections by reading the `.selections` file
 
 ## Create your own plugins
 
-Plugins are a powerful yet easy way to extend the capabilities of `nnn`.
-
 Plugins are scripts that can be written in any scripting language. However, POSIX-compliant shell scripts runnable in `sh` are preferred.
 
-Each script has a _Description_ section which provides more details on what the script does, if applicable.
-
-The plugins reside in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
+Once it's ready, drop the plugin in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins` and make it executable. Optionally add a custom keybind in `$NNN_PLUG` if you intend to use the plugin frequently.
 
 #### Controlling `nnn`'s active directory
 `nnn` provides a mechanism for plugins to control its active directory.
@@ -156,6 +152,6 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 
 ## Contributing plugins
 
-Please keep non-portable commands (like `notify-send`) commented so users from any other OS/DE aren't surprised.
+Add informative sections like _Description_, _Notes_, _Dependencies_, _Shell_, _Author_ etc. in the plugin as applicable. Add an entry in the table above. Please keep non-portable commands (like `notify-send`) commented so users from any other OS/DE aren't surprised.
 
-The plugins should be executable. Please add an entry in the table above.
+The plugins should be executable.
