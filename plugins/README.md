@@ -14,7 +14,6 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 
 | Plugin (a-z) | Description | Lang | Deps |
 | --- | --- | --- | --- |
-| renamer | Batch rename files with qmv or vidir | sh | [renameutils](https://www.nongnu.org/renameutils/) or [moreutils](https://joeyh.name/code/moreutils/) |
 | boom | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | dups | List non-empty duplicate files in current dir | sh | find, md5sum,<br>sort uniq xargs |
 | chksum | Create and verify checksums | sh | md5sum,<br>sha256sum |
@@ -46,6 +45,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | pdfview | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
 | picker | Pick files and list one per line (to pipe) | sh | nnn |
 | pskill | Fuzzy list by name and kill process or zombie | sh | fzy, sudo/doas |
+| renamer | Batch rename files | sh | [qmv](https://www.nongnu.org/renameutils/)/[vidir](https://joeyh.name/code/moreutils/) |
 | ringtone | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
 | splitjoin | Split file or join selection | sh | split, cat |
 | suedit | Edit file using superuser permissions | sh | sudoedit/sudo/doas |

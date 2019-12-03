@@ -31,7 +31,7 @@ if [ -s "$selection" ]; then
 fi
 
 if [ "$resp" = "y" ]; then
-    # -o flag is necessary for interative editors
+    # -o flag is necessary for interactive editors
     xargs -o -0 $batchrenamesel < "$selection"
 elif [ ! "$(LC_ALL=C ls -a)" = ".
 .." ]; then
