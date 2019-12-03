@@ -374,6 +374,9 @@ static bool g_plinit = FALSE;
 #define UTIL_ARCHIVEMOUNT 9
 #define UTIL_SSHFS 10
 #define UTIL_RCLONE 11
+#define UTIL_VI 12
+#define UTIL_LESS 13
+#define UTIL_SH 14
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -401,6 +404,9 @@ static char * const utils[] = {
 	"archivemount",
 	"sshfs",
 	"rclone",
+	"vi",
+	"less",
+	"sh",
 };
 
 /* Common strings */
@@ -5736,18 +5742,18 @@ int main(int argc, char *argv[])
 		cfg.useeditor = 1;
 
 	/* Get VISUAL/EDITOR */
-	enveditor = xgetenv(envs[ENV_EDITOR], "vi");
+	enveditor = xgetenv(envs[ENV_EDITOR], utils[UTIL_VI]);
 	editor = xgetenv(envs[ENV_VISUAL], enveditor);
 	DPRINTF_S(getenv(envs[ENV_VISUAL]));
 	DPRINTF_S(getenv(envs[ENV_EDITOR]));
 	DPRINTF_S(editor);
 
 	/* Get PAGER */
-	pager = xgetenv(envs[ENV_PAGER], "less");
+	pager = xgetenv(envs[ENV_PAGER], utils[UTIL_LESS]);
 	DPRINTF_S(pager);
 
 	/* Get SHELL */
-	shell = xgetenv(envs[ENV_SHELL], "sh");
+	shell = xgetenv(envs[ENV_SHELL], utils[UTIL_SH]);
 	DPRINTF_S(shell);
 
 	DPRINTF_S(getenv("PWD"));

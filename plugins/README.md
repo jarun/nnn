@@ -45,7 +45,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | pdfview | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
 | picker | Pick files and list one per line (to pipe) | sh | nnn |
 | pskill | Fuzzy list by name and kill process or zombie | sh | fzy, sudo/doas |
-| renamer | Batch rename files | sh | [qmv](https://www.nongnu.org/renameutils/)/[vidir](https://joeyh.name/code/moreutils/) |
+| renamer | Batch rename selection or files in dir | sh | [qmv](https://www.nongnu.org/renameutils/)/[vidir](https://joeyh.name/code/moreutils/) |
 | ringtone | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
 | splitjoin | Split file or join selection | sh | split, cat |
 | suedit | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
