@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+
+# Description: Batch rename selection or current directory with qmv
+#
+# Notes:
+# - Try to mimic current batch rename functionality but with correct
+#   handling of edge cases by qmv or vidir.
+#	Qmv opens with hidden files if no selection is used. Selected
+#	directories are shown.
+#   Vidir don't show directories nor hidden files.
+#
+# Shell: POSIX compliant
+# Author: José Neder
+
+selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+
+if command -v qmv >/dev/null 2>&1; then
+	batchrenamesel="qmv -fdo -da"
+	batchrename="qmv -fdo -a"
+elif command -v vidir >/dev/null 2>&1; then
+	batchrenamesel="vidir"
+	batchrename="vidir"
+else
+    printf "there is not batchrename program installed."
+    exit
+fi
+
+if [ -s "$selection" ]; then
+    printf "rename selection? "
+    read -r resp
+fi
+
+if [ "$resp" = "y" ]; then
+    # -o flag is necessary for interative editors
+    xargs -o -0 $batchrenamesel < "$selection"
+elif [ ! "$(LC_ALL=C ls -a)" = ".
+.." ]; then
+	# On older systems that don't have ls -A
+    $batchrename
+fi
+
