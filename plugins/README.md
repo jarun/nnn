@@ -14,6 +14,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 
 | Plugin (a-z) | Description | Lang | Deps |
 | --- | --- | --- | --- |
+| renamer | Batch rename files with qmv or vidir | sh | [renameutils](https://www.nongnu.org/renameutils/) or [moreutils](https://joeyh.name/code/moreutils/) |
 | boom | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | dups | List non-empty duplicate files in current dir | sh | find, md5sum,<br>sort uniq xargs |
 | chksum | Create and verify checksums | sh | md5sum,<br>sha256sum |
