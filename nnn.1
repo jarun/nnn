@@ -158,7 +158,7 @@ auto selects the directory and enters it in this mode.
 .Sh SELECTION
 There are 3 groups of shortcuts to add files to selection:
 .Pp
-(1) hovered file selection toggle (indicated by '+' symbol on/off)
+(1) hovered file selection toggle (deselects if '+' is visible before the entry, else adds to selection)
 .br
 (2) add a range of files to selection
 .br
@@ -168,7 +168,7 @@ The selection can now be listed, copied, moved, removed, archived or linked.
 .Pp
 Absolute paths of the selected files are copied to the temporary file \fB.selection\fR in the config directory. The path is shown in the help and configuration screen. If \fB$NNN_COPIER\fR is set (see ENVIRONMENT section below) the file paths are also copied to the system clipboard.
 .Pp
-To flush the selection without running any operation use the _edit, flush selection_ key. The list is flushed even if unchanged. Use this key to remove a file from selection after you navigate away from its directory.
+To flush the selection without running any operation use the _edit, flush selection_ key. The list is flushed even if unchanged. Use this key to remove a file from selection after you navigate away from its directory. Flushing doesn't end the selection mode. You can add more files to the selection and edit/flush the list again. Flushing doesn't end the selection mode. You can add more files to the selection and edit/flush the list again.
 .Pp
 Repeat range selection on the same entry twice to clear selection completely.
 .Sh FILE SIZE
