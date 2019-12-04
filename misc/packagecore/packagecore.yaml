@@ -85,16 +85,16 @@ packages:
     deps:
       - ncurses
       - readline
-#  fedora30:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkg-config
-#      - ncurses-devel
-#      - readline-devel
-#    deps:
-#      - ncurses
-#      - readline
+  fedora30:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
   fedora31:
     builddeps:
       - make
