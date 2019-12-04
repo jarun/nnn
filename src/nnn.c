@@ -5043,9 +5043,9 @@ nochange:
 
 				get_archive_cmd(cmd, tmp);
 
-				(r == 'y' || r == 'Y') ? archive_selection(cmd, tmp, path)
-						       : spawn(cmd, tmp, dents[cur].name,
-							       path, F_NORMAL | F_MULTI);
+				(r == 's') ? archive_selection(cmd, tmp, path)
+					   : spawn(cmd, tmp, dents[cur].name,
+						    path, F_NORMAL | F_MULTI);
 				break;
 			}
 			case SEL_OPENWITH:
