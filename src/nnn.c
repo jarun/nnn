@@ -4132,7 +4132,7 @@ static void redraw(char *path)
 			base = unescape(pent->name, NAME_MAX, NULL);
 
 			/* Timestamp */
-			strftime(buf, sizeof(buf), "%Y-%b-%d %R", localtime(&pent->t));
+			strftime(buf, sizeof(buf), "%F %R", localtime(&pent->t));
 			buf[sizeof(buf)-1] = '\0';
 
 			mvprintw(lastln, 0, "%d/%d [%d:%s] %s%s %s %s %s [%s]",
