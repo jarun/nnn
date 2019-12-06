@@ -51,6 +51,8 @@ tar -zxf master.tar.gz
 
 cd nnn-master/plugins || exit 1
 
+# shellcheck disable=SC2044
+# We do not use obnoxious names for plugins
 for f in $(find . -maxdepth 1 \( ! -iname "." ! -iname "*.md" \)); do
 	if [ -f ../../plugins/"$f" ]; then
 		if [ "$(diff --brief "$f" ../../plugins/"$f")" ]; then
