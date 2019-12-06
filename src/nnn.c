@@ -467,7 +467,7 @@ static const char * const messages[] = {
 	"create context %d?",
 	"'c'urrent / 's'election?",
 	"'f'ile / 'd'ir / 's'ym / 'h'ard?",
-	"cli mode?",
+	"'c'li / 'g'ui?",
 	"overwrite?",
 	"'s'ave / 'l'oad / 'r'estore?",
 	"Quit all contexts?",
@@ -5032,8 +5032,12 @@ nochange:
 			/* Confirm if app is CLI or GUI */
 			if (sel == SEL_OPENWITH) {
 				r = get_input(messages[MSG_CLI_MODE]);
-				(r == 'y' || r == 'Y') ? (r = F_CLI)
-						       : (r = F_NOWAIT | F_NOTRACE | F_MULTI);
+				r = (r == 'c' ? F_CLI :
+				     (r == 'g' ? F_NOWAIT | F_NOTRACE | F_MULTI : 0));
+				if (!r) {
+					cfg.filtermode ? presel = FILTER : clearprompt();
+					goto nochange;
+				}
 			}
 
 			switch (sel) {
