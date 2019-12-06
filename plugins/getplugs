@@ -50,7 +50,8 @@ curl -Ls -O https://github.com/jarun/nnn/archive/master.tar.gz
 tar -zxf master.tar.gz
 
 cd nnn-master/plugins || exit 1
-for f in *; do
+
+for f in $(find . -maxdepth 1 \( ! -iname "." ! -iname "*.md" \)); do
 	if [ -f ../../plugins/"$f" ]; then
 		if [ "$(diff --brief "$f" ../../plugins/"$f")" ]; then
 			prompt "$f"
@@ -63,4 +64,4 @@ done
 cd ../.. || exit 1
 
 $sucmd mv -vf nnn-master/misc/nlaunch/nlaunch /usr/local/bin/
-rm -rf nnn-master/ master.tar.gz "$PLUGIN_DIR"/README.md
+rm -rf nnn-master/ master.tar.gz
