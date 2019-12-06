@@ -306,7 +306,7 @@ static int ndents, cur, curscroll, total_dents = ENTRY_INCR;
 static int xlines, xcols;
 static int nselected;
 static uint idle;
-static uint idletimeout, selbufpos, selbuflen;
+static uint idletimeout, selbufpos, lastappendpos, selbuflen;
 static char *bmstr;
 static char *pluginstr;
 static char *opener;
@@ -1007,6 +1007,8 @@ static void startselection(void)
 			writesel(NULL, 0);
 			selbufpos = 0;
 		}
+
+		lastappendpos = 0;
 	}
 }
 
@@ -4834,9 +4836,11 @@ nochange:
 			/* Write the path to selection file to avoid flush */
 			if (!(dents[cur].flags & FILE_SELECTED)) {
 				utmp = selbufpos;
+				selbufpos = lastappendpos;
 				appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+				lastappendpos = selbufpos;
 				selbufpos = utmp;
 			}
 
@@ -4901,6 +4905,7 @@ nochange:
 
 			/* Remember current selection buffer position */
 			utmp = selbufpos;
+			selbufpos = lastappendpos;
 
 			for (r = selstartid; r <= selendid; ++r)
 				if (!(dents[r].flags & FILE_SELECTED)) {
@@ -4915,6 +4920,7 @@ nochange:
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 				/* Restore current selection buffer position */
+				lastappendpos = selbufpos;
 				selbufpos = utmp;
 			}
 			continue;
