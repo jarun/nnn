@@ -31,13 +31,13 @@ prompt () {
 	fi
 }
 
-if [ "$(is_cmd_exists sudo)" -eq "0" ]; then
-    sucmd=sudo
-elif [ "$(is_cmd_exists doas)" -eq "0" ]; then
-    sucmd=doas
-else
-    sucmd=: # noop
-fi
+# if [ "$(is_cmd_exists sudo)" -eq "0" ]; then
+#     sucmd=sudo
+# elif [ "$(is_cmd_exists doas)" -eq "0" ]; then
+#     sucmd=doas
+# else
+#     sucmd=: # noop
+# fi
 
 # backup any earlier plugins
 if [ -d "$PLUGIN_DIR" ]; then
@@ -65,5 +65,4 @@ for f in $(find . -maxdepth 1 \( ! -iname "." ! -iname "*.md" \)); do
 done
 cd ../.. || exit 1
 
-$sucmd mv -vf nnn-master/misc/nlaunch/nlaunch /usr/local/bin/
 rm -rf nnn-master/ master.tar.gz

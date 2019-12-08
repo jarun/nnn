@@ -1,11 +1,12 @@
 #!/usr/bin/env sh
 
 # #############################################################################
-# nuke: a sample script to play files in different apps by file type and mime
-# shell: POSIX compliant
-# usage: nuke filepath
+# Description: Sample script to play files in apps by file type or mime
 #
-# nnn integration:
+# Shell: POSIX compliant
+# Usage: nuke filepath
+#
+# Integration with nnn:
 #   1. Export the required config:
 #         export NNN_OPENER=/absolute/path/to/nuke
 #         # Otherwise, if nuke is in $PATH
@@ -14,7 +15,7 @@
 #         nnn -c
 #   3. nuke can use nnn plugins (e.g. mocplay is used for audio), $PATH is updated.
 #
-# details:
+# Details:
 #   Inspired by ranger's scope.sh, modified for usage with nnn.
 #
 #   Tries to play 'file' (1st argument) in the following order:
@@ -22,7 +23,7 @@
 #   ii. by mime (image, video, audio, pdf)
 #   iii. by mime (other file types)
 #
-# modification tips:
+# Modification tips:
 #   1. Invokes CLI utilities by default. Set GUI to 1 to enable GUI apps.
 #   2. PAGER is "less -R".
 #   3. Start GUI apps in bg to unblock. Redirect stdout and strerr if required.
@@ -32,7 +33,7 @@
 #
 #   Feel free to change the utilities to your favourites and add more mimes.
 #
-# defaults:
+# Defaults:
 #   By extension (only the enbaled ones):
 #      most archives: list with atool, bsdtar
 #      rar: list with unrar

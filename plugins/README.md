@@ -20,7 +20,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | diffs | Diff for selection (limited to 2 for directories) | sh | vimdiff |
 | dragdrop | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
 | exetoggle | Toggle executable status of hovered file | sh | chmod |
-| fzcd | Change to the directory of a fuzzy-selected file/dir | sh | fzy/fzf<br>(optional fd) |
+| fzcd | Change to the directory of a fuzzy-selected file/dir | sh | fzf/fzy<br>(optional fd) |
 | fzhist | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzy |
 | fzopen | Fuzzy find a file in dir subtree and edit or open | sh | fzy, xdg-open |
 | getplugs | Update plugins | sh | curl |
@@ -33,6 +33,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | imgviu | View an image or images in dir in `$PAGER` | sh | [viu](https://github.com/atanunq/viu), less |
 | ipinfo | Fetch external IP address and whois information | sh | curl, whois |
 | kdeconnect | Send selected files to an Android device | sh | kdeconnect-cli |
+| launch | GUI application launcher | sh | fzf/fzy |
 | mediainf | Show media information | sh | mediainfo |
 | moclyrics | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
 | mocplay | Append (and/or play) selection/dir/file in moc | sh | [moc](http://moc.daper.net/) |
@@ -64,8 +65,6 @@ The following command installs all plugins:
     curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs | sh
 
 Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You can run the `getplugs` plugin later to update the plugins. It backs up earlier plugins.
-
-**NOTE:** `getplugs` also downloads the launcher `nlaunch` and tries to place it at `/usr/local/bin/` using `sudo`. If it fails you have to place `nlauch` manually somewhere in your `$PATH`.
 
 ## Executing plugins
 

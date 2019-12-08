@@ -369,7 +369,7 @@ static bool g_plinit = FALSE;
 #define UTIL_TAR 4
 #define UTIL_LOCKER 5
 #define UTIL_CMATRIX 6
-#define UTIL_NLAUNCH 7
+#define UTIL_LAUNCH 7
 #define UTIL_SH_EXEC 8
 #define UTIL_ARCHIVEMOUNT 9
 #define UTIL_SSHFS 10
@@ -377,6 +377,8 @@ static bool g_plinit = FALSE;
 #define UTIL_VI 12
 #define UTIL_LESS 13
 #define UTIL_SH 14
+#define UTIL_FZF 15
+#define UTIL_FZY 16
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -399,7 +401,7 @@ static char * const utils[] = {
 	"vlock",
 #endif
 	"cmatrix",
-	"nlaunch",
+	"launch",
 	"sh -c",
 	"archivemount",
 	"sshfs",
@@ -407,6 +409,8 @@ static char * const utils[] = {
 	"vi",
 	"less",
 	"sh",
+	"fzf",
+	"fzy",
 };
 
 /* Common strings */
@@ -451,6 +455,7 @@ static char * const utils[] = {
 #define MSG_FEW_COLOUMNS 38
 #define MSG_REMOTE_OPTS 39
 #define MSG_RCLONE_DELAY 40
+#define MSG_APP_NAME 41
 
 static const char * const messages[] = {
 	"no traversal",
@@ -493,7 +498,8 @@ static const char * const messages[] = {
 	"entry exists",
 	"too few columns!",
 	"'s'shfs / 'r'clone?",
-	"may take a while, try refresh"
+	"may take a while, try refresh",
+	"app name: ",
 };
 
 /* Supported configuration environment variables */
@@ -2098,6 +2104,7 @@ static int filterentries(char *path)
 				if (len == 1)
 					cur = oldcur;
 				goto end;
+			case '=': // fallthrough /* Launch app */
 			case ':': // fallthrough /* Run plugin keys */
 			case ';': // fallthrough
 			case '?': /* Help and config key, '?' is an invalid regex */
@@ -3497,7 +3504,7 @@ static void show_help(const char *path)
 		"1MISC\n"
 	       "9! ^]  Shell      ;K :K xK  Execute plugin K\n"
 		  "cC  Execute entry  R ^V  Pick plugin\n"
-		  "cU  Manage session    =  Launch\n"
+		  "cU  Manage session    =  Launch app\n"
 		  "cc  SSHFS mount       u  Unmount\n"
 	       "9] ^P  Prompt/run cmd    L  Lock\n"};
 
@@ -5247,10 +5254,22 @@ nochange:
 				setdirwatch();
 				goto begin;
 			case SEL_LAUNCH:
-				if (getutil(utils[UTIL_NLAUNCH])) {
-					spawn(utils[UTIL_NLAUNCH], "0", NULL, path, F_NORMAL);
-					break;
-				} // fallthrough
+				mkpath(plugindir, utils[UTIL_LAUNCH], newpath);
+				if ((getutil(utils[UTIL_FZF]) || getutil(utils[UTIL_FZY]))
+				    && access(newpath, X_OK) == 0) {
+					tmp = newpath;
+					r = F_NORMAL;
+				} else {
+					tmp = xreadline(NULL, messages[MSG_APP_NAME]);
+					r = F_NOWAIT | F_NOTRACE | F_MULTI;
+				}
+
+				if (tmp && *tmp) // NOLINT
+					spawn(tmp, "0", NULL, path, r);
+
+				if (cfg.filtermode)
+					presel = FILTER;
+				goto nochange;
 			default: /* SEL_RUNCMD */
 #ifndef NORL
 				if (cfg.picker) {
@@ -5264,7 +5283,7 @@ nochange:
 						goto nochange;
 				}
 #endif
-				if (tmp && tmp[0]) // NOLINT
+				if (tmp && *tmp) // NOLINT
 					prompt_run(tmp, (ndents ? dents[cur].name : ""), path);
 			}
 

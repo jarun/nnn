@@ -77,7 +77,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
 1. Install the [utilities you may need](https://github.com/jarun/nnn#utility-dependencies) based on your regular workflows.
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`.
-4. For additional functionality [install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins) and the GUI app launcher [`nlaunch`](https://github.com/jarun/nnn/tree/master/misc/nlaunch).
+4. For additional functionality [install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins).
 
 Notes:
 
@@ -232,7 +232,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
  MISC
          ! ^]  Shell      ;K :K xK  Execute plugin K
             C  Execute entry  R ^V  Pick plugin
-            U  Manage session    =  Launch
+            U  Manage session    =  Launch app
             c  Remote mount      u  Unmount
          ] ^P  Prompt/run cmd    L  Lock
 ```
