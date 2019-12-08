@@ -19,16 +19,15 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-# shellcheck disable=SC2012
 # shellcheck disable=SC2086
 
 IFS=':'
 
 get_selection() {
     if which fzf >/dev/null 2>&1; then
-        ls -H $PATH | sort | fzf
+        { IFS=:; ls -H $PATH; } | sort | fzy
     elif which fzy >/dev/null 2>&1; then
-        ls -H $PATH | sort | fzy
+        { IFS=:; ls -H $PATH; } | sort | fzy
     else
         exit 1
     fi
