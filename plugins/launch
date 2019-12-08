@@ -19,6 +19,9 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
+# shellcheck disable=SC2012
+# shellcheck disable=SC2086
+
 IFS=':'
 
 get_selection() {

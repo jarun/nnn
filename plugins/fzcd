@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Description: Run fzf and go to the directory of the file selected
+# Description: Run fzf/fzy/fd/fdfind/find and go to the directory of the file selected
 #
 # Shell: POSIX compliant
 # Author: Anna Arad
