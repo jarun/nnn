@@ -1,18 +1,18 @@
 #!/usr/bin/env sh
 
 # #############################################################################
-# nplay: a sample script to play files in different apps by file type and mime
+# nuke: a sample script to play files in different apps by file type and mime
 # shell: POSIX compliant
-# usage: nplay filepath
+# usage: nuke filepath
 #
 # nnn integration:
 #   1. Export the required config:
-#         export NNN_OPENER=/absolute/path/to/nplay
-#         # Otherwise, if nplay is in $PATH
-#         # export NNN_OPENER=nplay
+#         export NNN_OPENER=/absolute/path/to/nuke
+#         # Otherwise, if nuke is in $PATH
+#         # export NNN_OPENER=nuke
 #   2. Run nnn with the program option to indicate a CLI opener
 #         nnn -c
-#   3. nplay can use nnn plugins (e.g. mocplay is used for audio), $PATH is updated.
+#   3. nuke can use nnn plugins (e.g. mocplay is used for audio), $PATH is updated.
 #
 # details:
 #   Inspired by ranger's scope.sh, modified for usage with nnn.

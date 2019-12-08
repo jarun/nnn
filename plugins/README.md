@@ -38,7 +38,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | mocplay | Append (and/or play) selection/dir/file in moc | sh | [moc](http://moc.daper.net/) |
 | nmount | Toggle mount status of a device as normal user | sh | pmount, udisks2 |
 | notes | Open a quick notes file/dir in `$EDITOR` | sh | - |
-| nplay | Sample file opener (CLI-only by default) | sh | various |
+| nuke | Sample file opener (CLI-only by default) | sh | various |
 | oldbigfile | List large files by access time | sh | find, sort |
 | organize | Auto-organize files in directories by file type | sh | file |
 | pastebin | Paste contents of a text a file ix.io | sh | - |
