@@ -7,9 +7,9 @@
 #
 # nnn integration:
 #   1. Export the required config:
-#         export NNN_OPENER=/path/to/nplay
+#         export NNN_OPENER=/absolute/path/to/nplay
 #         # Otherwise, if nplay is in $PATH
-#         export NNN_OPENER=nplay
+#         # export NNN_OPENER=nplay
 #   2. Run nnn with the program option to indicate a CLI opener
 #         nnn -c
 #   3. nplay can use nnn plugins (e.g. mocplay is used for audio), $PATH is updated.

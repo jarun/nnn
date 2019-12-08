@@ -153,7 +153,7 @@ There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$
 
 | Example `export` | Description |
 | --- | --- |
-| `NNN_OPENER=nplay` | custom file opener ([nplay](https://github.com/jarun/nnn/blob/master/misc/nplay/nplay)) |
+| `NNN_OPENER=nplay` | custom file opener ([nplay](https://github.com/jarun/nnn/blob/master/plugins/nplay)) |
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | key-bookmark pairs [max 10] |
 | `NNN_PLUG='o:fzopen;m:nmount;x:_chmod +x $nnn'` | key-plugin (or cmd) pairs (<kbd>:key</kbd> to run) [max 15] |
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
