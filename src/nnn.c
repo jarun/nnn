@@ -3516,8 +3516,8 @@ static void show_help(const char *path)
 		"1MISC\n"
 	       "9! ^]  Shell      ;K :K xK  Execute plugin K\n"
 		  "cC  Execute entry  R ^V  Pick plugin\n"
-		  "cU  Manage session    =  Launch app\n"
-		  "cc  SSHFS mount       u  Unmount\n"
+		  "cs  Manage session    =  Launch app\n"
+		  "cc  Connect remote    u  Unmount\n"
 	      "9\\ ^P  Prompt/run cmd    L  Lock\n"};
 
 	fd = create_tmp_file();
