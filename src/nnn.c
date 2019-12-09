@@ -2134,7 +2134,7 @@ static int filterentries(char *path)
 
 				/* If the only match is a dir, auto-select and cd into it */
 				if (ndents == 1 && cfg.filtermode
-				    && cfg.autoselect && S_ISDIR(dents[0].mode)) {
+				    && cfg.autoselect && (dents[0].flags & DIR_OR_LINK_TO_DIR)) {
 					*ch = KEY_ENTER;
 					cur = 0;
 					goto end;
