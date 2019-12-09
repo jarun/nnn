@@ -4,10 +4,20 @@
 #              Opens in $VISUAL or $EDITOR if text
 #              Opens other type of files with xdg-open
 #
+# Requires: fzf/fzy, xdg-open
+#
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-entry="$(find . -type f 2>/dev/null | fzy)"
+if which fzf >/dev/null 2>&1; then
+    fuzzy=fzf
+elif which fzy >/dev/null 2>&1; then
+    fuzzy=fzy
+else
+    exit 1
+fi
+
+entry="$(find . -type f 2>/dev/null | "$fuzzy")"
 
 case "$(file -biL "$entry")" in
     *text*)

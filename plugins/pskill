@@ -2,29 +2,34 @@
 
 # Description: Fuzzy list and kill a (zombie) process by name
 #
+# Requires: fzf or fzy, ps
+#
 # Note: To kill a zombie process enter "zombie"
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-is_cmd_exists () {
-    which "$1" > /dev/null 2>&1
-    echo $?
-}
-
-if [ "$(is_cmd_exists sudo)" -eq "0" ]; then
-    sucmd=sudo
-elif [ "$(is_cmd_exists doas)" -eq "0" ]; then
-    sucmd=doas
-else
-    sucmd=: # noop
-fi
-
 printf "Enter process name ['defunct' for zombies]: "
 read -r psname
 
+# shellcheck disable=SC2009
 if ! [ -z "$psname" ]; then
-    # shellcheck disable=SC2009
-    cmd="$(ps -ax | grep -iw "$psname" | fzy | sed -e 's/^[ \t]*//' | cut -d' ' -f1)"
+    if which sudo >/dev/null 2>&1; then
+        sucmd=sudo
+    elif which doas >/dev/null 2>&1; then
+        sucmd=doas
+    else
+        sucmd=: # noop
+    fi
+
+    if which fzf >/dev/null 2>&1; then
+        fuzzy=fzf
+    elif which fzy >/dev/null 2>&1; then
+        fuzzy=fzy
+    else
+        exit 1
+    fi
+
+    cmd="$(ps -ax | grep -iw "$psname" | "$fuzzy" | sed -e 's/^[ \t]*//' | cut -d' ' -f1)"
     $sucmd kill -9 "$cmd"
 fi

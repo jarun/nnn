@@ -6,14 +6,22 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
+if which fzf >/dev/null 2>&1; then
+    fuzzy=fzf
+elif which fzy >/dev/null 2>&1; then
+    fuzzy=fzy
+else
+    exit 1
+fi
+
 shellname="$(basename "$SHELL")"
 
 if [ "$shellname" = "bash" ]; then
     hist_file="$HOME/.bash_history"
-    entry="$(fzy < "$hist_file")"
+    entry="$("$fuzzy" < "$hist_file")"
 elif [ "$shellname" = "fish" ]; then
     hist_file="$HOME/.config/fish/fish_history"
-    entry="$(grep "\- cmd: " "$hist_file" | cut -c 8- | fzy)"
+    entry="$(grep "\- cmd: " "$hist_file" | cut -c 8- | "$fuzzy")"
 fi
 
 if ! [ -z "$entry" ]; then

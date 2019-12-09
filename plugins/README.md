@@ -20,9 +20,9 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | diffs | Diff for selection (limited to 2 for directories) | sh | vimdiff |
 | dragdrop | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
 | exetoggle | Toggle executable status of hovered file | sh | chmod |
-| fzcd | Change to the directory of a fuzzy-selected file/dir | sh | fzf/fzy<br>(optional fd) |
-| fzhist | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzy |
-| fzopen | Fuzzy find a file in dir subtree and edit or open | sh | fzy, xdg-open |
+| fzcd | Change to the directory of a fuzzy-selected file/dir | sh | fzf/fzy<br>fd/fdfind/find |
+| fzhist | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf/fzy |
+| fzopen | Fuzzy find a file in dir subtree and edit or open | sh | fzf/fzy, xdg-open |
 | getplugs | Update plugins | sh | curl |
 | gutenread | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
 | hexview | View a file in hex in `$PAGER` | sh | xxd |
@@ -46,7 +46,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | pdfread | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
 | pdfview | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
 | picker | Pick files and list one per line (to pipe) | sh | nnn |
-| pskill | Fuzzy list by name and kill process or zombie | sh | fzy, sudo/doas |
+| pskill | Fuzzy list by name and kill process or zombie | sh | fzf/fzy, ps,<br>sudo/doas |
 | renamer | Batch rename selection or files in dir | sh | [qmv](https://www.nongnu.org/renameutils/)/[vidir](https://joeyh.name/code/moreutils/) |
 | ringtone | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
 | splitjoin | Split file or join selection | sh | split, cat |
