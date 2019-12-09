@@ -272,5 +272,5 @@ static struct key bindings[] = {
 	{ 'Q',            SEL_QUIT },
 	{ CONTROL('Q'),   SEL_QUIT },
 	{ KEY_MOUSE,      SEL_CLICK },
-	{ 'U',            SEL_SESSIONS },
+	{ 's',            SEL_SESSIONS },
 };

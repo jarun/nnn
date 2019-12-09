@@ -232,8 +232,8 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
  MISC
          ! ^]  Shell      ;K :K xK  Execute plugin K
             C  Execute entry  R ^V  Pick plugin
-            U  Manage session    =  Launch app
-            c  Remote mount      u  Unmount
+            s  Manage session    =  Launch app
+            c  Connect remote    u  Unmount
          ] ^P  Prompt/run cmd    L  Lock
 ```
 

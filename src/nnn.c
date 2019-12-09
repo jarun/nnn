@@ -1397,7 +1397,8 @@ static bool xdiraccess(const char *path)
 
 static void opstr(char *buf, char *op)
 {
-	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s \"$0\" \"$@\" . < /dev/tty' < %s", op, g_selpath);
+	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s \"$0\" \"$@\" . < /dev/tty' < %s",
+		 op, g_selpath);
 }
 
 static void rmmulstr(char *buf)
@@ -2086,6 +2087,7 @@ static int filterentries(char *path)
 						wln[--len] = '\0';
 					wcstombs(ln, wln, REGEX_MAX);
 					ndents = total;
+					cur = oldcur = 0; /* Ran a command, refresh */
 					if (matches(pln) != -1)
 						redraw(path);
 
@@ -2898,10 +2900,14 @@ static void save_session(bool last_session, int *presel)
 	for (i = 0; i < CTX_MAX; ++i)
 		if ((fwrite(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1)
 			|| (fwrite(&g_ctx[i].color, sizeof(uint), 1, fsession) != 1)
-			|| (header.nameln[i] > 0 && fwrite(g_ctx[i].c_name, header.nameln[i], 1, fsession) != 1)
-			|| (header.lastln[i] > 0 && fwrite(g_ctx[i].c_last, header.lastln[i], 1, fsession) != 1)
-			|| (header.fltrln[i] > 0 && fwrite(g_ctx[i].c_fltr, header.fltrln[i], 1, fsession) != 1)
-			|| (header.pathln[i] > 0 && fwrite(g_ctx[i].c_path, header.pathln[i], 1, fsession) != 1))
+			|| (header.nameln[i] > 0
+			    && fwrite(g_ctx[i].c_name, header.nameln[i], 1, fsession) != 1)
+			|| (header.lastln[i] > 0
+			    && fwrite(g_ctx[i].c_last, header.lastln[i], 1, fsession) != 1)
+			|| (header.fltrln[i] > 0
+			    && fwrite(g_ctx[i].c_fltr, header.fltrln[i], 1, fsession) != 1)
+			|| (header.pathln[i] > 0
+			    && fwrite(g_ctx[i].c_path, header.pathln[i], 1, fsession) != 1))
 			goto END;
 
 	status = TRUE;
@@ -2952,15 +2958,20 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	for (; i < CTX_MAX; ++i)
 		if ((fread(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1)
 			|| (fread(&g_ctx[i].color, sizeof(uint), 1, fsession) != 1)
-			|| (header.nameln[i] > 0 && fread(g_ctx[i].c_name, header.nameln[i], 1, fsession) != 1)
-			|| (header.lastln[i] > 0 && fread(g_ctx[i].c_last, header.lastln[i], 1, fsession) != 1)
-			|| (header.fltrln[i] > 0 && fread(g_ctx[i].c_fltr, header.fltrln[i], 1, fsession) != 1)
-			|| (header.pathln[i] > 0 && fread(g_ctx[i].c_path, header.pathln[i], 1, fsession) != 1))
+			|| (header.nameln[i] > 0
+			    && fread(g_ctx[i].c_name, header.nameln[i], 1, fsession) != 1)
+			|| (header.lastln[i] > 0
+			    && fread(g_ctx[i].c_last, header.lastln[i], 1, fsession) != 1)
+			|| (header.fltrln[i] > 0
+			    && fread(g_ctx[i].c_fltr, header.fltrln[i], 1, fsession) != 1)
+			|| (header.pathln[i] > 0
+			    && fread(g_ctx[i].c_path, header.pathln[i], 1, fsession) != 1))
 			goto END;
 
 	*path = g_ctx[cfg.curctx].c_path;
 	*lastdir = g_ctx[cfg.curctx].c_last;
 	*lastname = g_ctx[cfg.curctx].c_name;
+	printptr = cfg.showdetail ? &printent_long : &printent;
 	status = TRUE;
 
 END:
@@ -3504,8 +3515,8 @@ static void show_help(const char *path)
 		"1MISC\n"
 	       "9! ^]  Shell      ;K :K xK  Execute plugin K\n"
 		  "cC  Execute entry  R ^V  Pick plugin\n"
-		  "cU  Manage session    =  Launch app\n"
-		  "cc  SSHFS mount       u  Unmount\n"
+		  "cs  Manage session    =  Launch app\n"
+		  "cc  Connect remote    u  Unmount\n"
 	       "9] ^P  Prompt/run cmd    L  Lock\n"};
 
 	fd = create_tmp_file();
