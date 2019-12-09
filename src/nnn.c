@@ -3756,15 +3756,12 @@ static int dentfill(char *path, struct entry **dents)
 
 		if (fstatat(fd, namep, &sb, flags) == -1) {
 			/* List a symlink with target missing */
-			if (!flags && errno == ENOENT) {
-				if (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW) == -1) {
+			if (flags || (!flags && fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW) == -1)) {
+				DPRINTF_U(flags);
+				if (!flags) {
 					DPRINTF_S(namep);
 					DPRINTF_S(strerror(errno));
-					continue;
 				}
-			} else {
-				DPRINTF_S(namep);
-				DPRINTF_S(strerror(errno));
 				continue;
 			}
 		}
