@@ -2074,13 +2074,12 @@ static int filterentries(char *path)
 		if (r == OK) {
 			/* Handle all control chars in main loop */
 			if ((*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^')
-			    || (*ch == '\\')) {
+			    || (*ch == '\\' && len == 1)) {
 				DPRINTF_D(*ch);
 				DPRINTF_S(keyname(*ch));
 
 				/* If there's a filter, try a command on ^P */
-				if (cfg.filtercmd && (*ch == CONTROL('P') || *ch == '\\')
-				    && len > 1) {
+				if (cfg.filtercmd && *ch == CONTROL('P') && len > 1) {
 					prompt_run(pln, (ndents ? dents[cur].name : ""), path);
 
 					/* Clear the prompt */
