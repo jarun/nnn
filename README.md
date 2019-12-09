@@ -223,8 +223,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
             P  Copy selection    K  Edit, flush sel
             V  Move selection    w  Copy/move sel as
             X  Del selection    ^X  Del entry
-            f  Create archive    T  Mount archive
-           ^F  Extract archive   F  List archive
+            f  Archive        o ^F  Archive ops
             e  Edit in EDITOR    p  Open in PAGER
  ORDER TOGGLES
             A  Apparent du       S  du

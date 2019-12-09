@@ -67,8 +67,6 @@ enum action {
 	SEL_DETAIL,
 	SEL_STATS,
 	SEL_ARCHIVE,
-	SEL_ARCHIVELS,
-	SEL_EXTRACT,
 	SEL_FSIZE,  /* file size */
 	SEL_ASIZE,  /* apparent size */
 	SEL_BSIZE,  /* block size */
@@ -89,7 +87,7 @@ enum action {
 	SEL_NEW,
 	SEL_RENAME,
 	SEL_RENAMEMUL,
-	SEL_ARCHIVEMNT,
+	SEL_ARCHIVEOPS,
 	SEL_REMOTE,
 	SEL_UMOUNT,
 	SEL_HELP,
@@ -186,10 +184,6 @@ static struct key bindings[] = {
 	{ 'D',            SEL_STATS },
 	/* Create archive */
 	{ 'f',            SEL_ARCHIVE },
-	/* List archive */
-	{ 'F',            SEL_ARCHIVELS },
-	/* Extract archive */
-	{ CONTROL('F'),   SEL_EXTRACT },
 	/* Toggle sort by size */
 	{ 'z',            SEL_FSIZE },
 	/* Sort by apparent size including dir contents */
@@ -235,7 +229,8 @@ static struct key bindings[] = {
 	/* Rename contents of current dir */
 	{ 'r',            SEL_RENAMEMUL },
 	/* Mount an archive */
-	{ 'T',            SEL_ARCHIVEMNT },
+	{ 'o',            SEL_ARCHIVEOPS },
+	{ CONTROL('F'),   SEL_ARCHIVEOPS },
 	/* Connect to server over SSHFS */
 	{ 'c',            SEL_REMOTE },
 	/* Disconnect a SSHFS mount point */

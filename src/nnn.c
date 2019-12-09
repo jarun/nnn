@@ -456,6 +456,7 @@ static char * const utils[] = {
 #define MSG_REMOTE_OPTS 39
 #define MSG_RCLONE_DELAY 40
 #define MSG_APP_NAME 41
+#define MSG_ARCHIVE_OPTS 42
 
 static const char * const messages[] = {
 	"no traversal",
@@ -500,6 +501,7 @@ static const char * const messages[] = {
 	"'s'shfs / 'r'clone?",
 	"may take a while, try refresh",
 	"app name: ",
+	"e'x'tract / 'l'ist / 'm'ount?",
 };
 
 /* Supported configuration environment variables */
@@ -3506,8 +3508,7 @@ static void show_help(const char *path)
 		  "cP  Copy selection    K  Edit, flush sel\n"
 		  "cV  Move selection    w  Copy/move sel as\n"
 		  "cX  Del selection    ^X  Del entry\n"
-		  "cf  Create archive    T  Mount archive\n"
-		 "b^F  Extract archive   F  List archive\n"
+		  "cf  Archive        o ^F  Archive ops\n"
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
 		"1ORDER TOGGLES\n"
 		  "cA  Apparent du       S  du\n"
@@ -4775,8 +4776,6 @@ nochange:
 				}
 			}
 			break;
-		case SEL_ARCHIVELS: // fallthrough
-		case SEL_EXTRACT: // fallthrough
 		case SEL_REDRAW: // fallthrough
 		case SEL_RENAMEMUL: // fallthrough
 		case SEL_HELP: // fallthrough
@@ -4788,19 +4787,10 @@ nochange:
 
 			if (ndents)
 				mkpath(path, dents[cur].name, newpath);
-			else if (sel == SEL_ARCHIVELS || sel == SEL_EXTRACT
-				 || sel == SEL_RUNEDIT || sel == SEL_RUNPAGE)
+			else if (sel == SEL_RUNEDIT || sel == SEL_RUNPAGE)
 				break;
 
 			switch (sel) {
-			case SEL_ARCHIVELS:
-				handle_archive(newpath, path, 'l');
-				refresh = TRUE;
-				break;
-			case SEL_EXTRACT:
-				handle_archive(newpath, path, 'x');
-				refresh = TRUE;
-				break;
 			case SEL_REDRAW:
 				refresh = TRUE;
 				break;
@@ -5010,9 +5000,10 @@ nochange:
 					}
 
 					tmp = NULL;
-				} else if (!ndents)
+				} else if (r != 'c' || !ndents) {
+					clearprompt();
 					goto nochange;
-				else
+				} else
 					tmp = dents[cur].name;
 				tmp = xreadline(tmp, messages[MSG_ARCHIVE_NAME]);
 				break;
@@ -5305,8 +5296,19 @@ nochange:
 
 			/* Repopulate as directory content may have changed */
 			goto begin;
-		case SEL_ARCHIVEMNT:
-			if (!ndents || !archive_mount(dents[cur].name, path, newpath, &presel))
+		case SEL_ARCHIVEOPS:
+			if (!ndents)
+				goto nochange;
+
+			r = get_input(messages[MSG_ARCHIVE_OPTS]);
+			if (r == 'l' || r == 'x') {
+				mkpath(path, dents[cur].name, newpath);
+				handle_archive(newpath, path, r);
+				copycurname();
+				goto begin;
+			}
+
+			if (r != 'm' || !archive_mount(dents[cur].name, path, newpath, &presel))
 				goto nochange; // fallthrough
 		case SEL_REMOTE:
 			if (sel == SEL_REMOTE && !remote_mount(newpath, &presel))
