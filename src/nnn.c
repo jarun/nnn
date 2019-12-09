@@ -2961,6 +2961,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	*path = g_ctx[cfg.curctx].c_path;
 	*lastdir = g_ctx[cfg.curctx].c_last;
 	*lastname = g_ctx[cfg.curctx].c_name;
+	printptr = cfg.showdetail ? &printent_long : &printent;
 	status = TRUE;
 
 END:
