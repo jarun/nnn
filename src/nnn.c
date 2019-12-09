@@ -1891,7 +1891,7 @@ static int nextsel(int presel)
 
 	if (c == 0 || c == MSGWAIT) {
 		c = getch();
-		DPRINTF_D(c);
+		//DPRINTF_D(c);
 
 		if (presel == MSGWAIT) {
 			if (cfg.filtermode)
@@ -4017,7 +4017,7 @@ static void redraw(char *path)
 		return;
 	}
 
-	DPRINTF_D(cur);
+	//DPRINTF_D(cur);
 	DPRINTF_S(path);
 
 	addch('[');
