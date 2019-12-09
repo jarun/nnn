@@ -2074,7 +2074,7 @@ static int filterentries(char *path)
 		if (r == OK) {
 			/* Handle all control chars in main loop */
 			if ((*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^')
-			    || (*ch == '\\' && len == 1)) {
+			    || (*ch == ']' && len == 1)) {
 				DPRINTF_D(*ch);
 				DPRINTF_S(keyname(*ch));
 
@@ -3517,7 +3517,7 @@ static void show_help(const char *path)
 		  "cC  Execute entry  R ^V  Pick plugin\n"
 		  "cs  Manage session    =  Launch app\n"
 		  "cc  Connect remote    u  Unmount\n"
-	      "9\\ ^P  Prompt/run cmd    L  Lock\n"};
+	       "9] ^P  Prompt/run cmd    L  Lock\n"};
 
 	fd = create_tmp_file();
 	if (fd == -1)
