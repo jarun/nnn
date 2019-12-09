@@ -16,7 +16,7 @@
 
 `nnn` is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible performance](https://github.com/jarun/nnn/wiki/Performance).
 
-`nnn` is also a du analyzer, a fuzzy app launcher, a batch renamer and a file picker. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further. You can _plug_ new functionality _and play_ with a custom keybind instantly. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
+`nnn` is also a du analyzer, an app launcher, a batch renamer and a file picker. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further. You can _plug_ new functionality _and play_ with a custom keybind instantly. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
 
 It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.com/watch?v=AbaauM7gUJw), Linux, macOS, BSD, Cygwin, WSL and works seamlessly with DEs and GUI utilities.
 
@@ -62,7 +62,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - Batch renamer (feature-limited) for selection or dir
   - Copy (as), move (as), delete, archive, link selection
   - Create (with parents), rename, duplicate (anywhere) files and dirs
-  - Spawn a shell, run apps, run commands, execute file
+  - Launch GUI apps, run commands, execute file, spawn a shell
   - Hovered file set as `$nnn` at prompt and spawned shell
   - Lock terminal (needs a locker)
 - Privacy-aware (no unconfirmed user data collection)
@@ -155,7 +155,7 @@ There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$
 | --- | --- |
 | `NNN_OPENER=nuke` | custom file opener (see plugin `nuke`) |
 | `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | key-bookmark pairs [max 10] |
-| `NNN_PLUG='o:fzopen;m:nmount;x:_chmod +x $nnn'` | key-plugin (or cmd) pairs (<kbd>:key</kbd> to run) [max 15] |
+| `NNN_PLUG='o:fzopen;m:nmount;x:_chmod +x $nnn'` | key-plugin (or cmd) pairs [max 15] |
 | `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
 | `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |

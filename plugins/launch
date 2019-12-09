@@ -25,9 +25,9 @@ IFS=':'
 
 get_selection() {
     if which fzf >/dev/null 2>&1; then
-        { IFS=:; ls -H $PATH; } | sort | fzy
+        { IFS=':'; ls -H $PATH; } | sort | fzy
     elif which fzy >/dev/null 2>&1; then
-        { IFS=:; ls -H $PATH; } | sort | fzy
+        { IFS=':'; ls -H $PATH; } | sort | fzy
     else
         exit 1
     fi
