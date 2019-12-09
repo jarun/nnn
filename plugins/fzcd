@@ -26,6 +26,8 @@ fi
 if [ -n "$sel" ]; then
 	if ! [ -d "$sel" ]; then
 		sel=$(dirname "$sel")
+    elif [ "$sel" = "." ]; then
+        exit 0
 	fi
 
     # Remove "./" prefix if it exists
