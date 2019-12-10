@@ -4863,7 +4863,7 @@ nochange:
 
 			/* Toggle selection status */
 			dents[cur].flags ^= FILE_SELECTED;
-			dents[cur].flags ? ++nselected : --nselected;
+			(dents[cur].flags & FILE_SELECTED) ? ++nselected : --nselected;
 
 			if (!nselected) {
 				writesel(NULL, 0);
