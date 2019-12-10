@@ -46,7 +46,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - By file name, modification/access time, size, extension
 - Search
   - Instant filtering with *search-as-you-type*
-  - Regex and substring match
+  - Regex (default) and substring match
   - Subtree search to open or edit files (using plugin)
 - Mimes
   - Open with desktop opener or specify a custom app

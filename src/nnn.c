@@ -1801,12 +1801,7 @@ static char xchartohex(char c)
 
 static int setfilter(regex_t *regex, const char *filter)
 {
-	int r = regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
-
-	if (r != 0 && filter && filter[0] != '\0')
-		mvprintw(xlines - 1, 0, "regex error: %d\n", r);
-
-	return r;
+	return regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
 }
 
 static int visible_re(const fltrexp_t *fltrexp, const char *fname)
@@ -2131,8 +2126,10 @@ static int filterentries(char *path)
 				 */
 				/* ndents = total; */
 
-				if (matches(pln) == -1)
+				if (matches(pln) == -1) {
+					printprompt(ln);
 					continue;
+				}
 
 				/* If the only match is a dir, auto-select and cd into it */
 				if (ndents == 1 && cfg.filtermode
