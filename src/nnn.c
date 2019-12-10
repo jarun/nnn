@@ -1053,22 +1053,23 @@ static void clearselection(void)
 	writesel(NULL, 0);
 }
 
-static bool editselection(void)
+/* Returns: 1 - success, 0 - none selected, -1 - other failure */
+static int editselection(void)
 {
-	bool ret = FALSE;
+	int ret = -1;
 	int fd, lines = 0;
 	ssize_t count;
 	struct stat sb;
 
 	if (!selbufpos) {
 		DPRINTF_S("empty selection");
-		return FALSE;
+		return 0;
 	}
 
 	fd = create_tmp_file();
 	if (fd == -1) {
 		DPRINTF_S("couldn't create tmp file");
-		return FALSE;
+		return -1;
 	}
 
 	seltofile(fd, NULL);
@@ -1080,7 +1081,7 @@ static bool editselection(void)
 	if (fd == -1) {
 		DPRINTF_S("couldn't read tmp file");
 		unlink(g_tmpfpath);
-		return FALSE;
+		return -1;
 	}
 
 	fstat(fd, &sb);
@@ -1095,7 +1096,7 @@ static bool editselection(void)
 	unlink(g_tmpfpath);
 
 	if (!count) {
-		ret = TRUE;
+		ret = 1;
 		goto emptyedit;
 	}
 
@@ -1128,7 +1129,7 @@ static bool editselection(void)
 	writesel(pselbuf, selbufpos - 1);
 	spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
-	return TRUE;
+	return 1;
 
 emptyedit:
 	resetselind();
@@ -4864,6 +4865,11 @@ nochange:
 			dents[cur].flags ^= FILE_SELECTED;
 			dents[cur].flags ? ++nselected : --nselected;
 
+			if (!nselected) {
+				writesel(NULL, 0);
+				unlink(g_selpath);
+			}
+
 			/* move cursor to the next entry if this is not the last entry */
 			if (!cfg.picker && cur != ndents - 1)
 				move_cursor((cur + 1) % ndents, 0);
@@ -4952,8 +4958,11 @@ nochange:
 			if (nselected)
 				updateselbuf(path, newpath);
 
-			if (!editselection()) {
-				printwait(messages[MSG_FAILED], &presel);
+			r = editselection();
+			if (r <= 0) {
+				const char * msg
+					= (!r ? messages[MSG_0_SELECTED] : messages[MSG_FAILED]);
+				printwait(msg, &presel);
 				goto nochange;
 			}
 			break;
