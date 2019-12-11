@@ -206,14 +206,14 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
          Up k  Up          PgUp ^U  Scroll up
        Down j  Down        PgDn ^D  Scroll down
        Left h  Parent      ~ ` @ -  HOME, /, start, last
-  Ret Right l  Open              .  Show hidden toggle
-         g ^A  Top            G ^E  Bottom
+         g ^A  Top     Ret Right l  Open
+         G ^E  Bottom            '  First file
             b  Pin CWD          ^B  Go to pinned dir
-      (Sh)Tab  Cycle context     d  Detail view toggle
          , ^/  Lead key    N LeadN  Context N
+      (Sh)Tab  Cycle context     d  Detail view toggle
             /  Filter/Lead  Ins ^N  Nav-as-you-type toggle
           Esc  Exit prompt   ^L F5  Redraw/clear prompt
-            ?  Help, conf        '  First file
+            .  Show/hide dots    ?  Help, conf
          Q ^Q  Quit  ^G  QuitCD  q  Quit context
  FILES
            ^O  Open with...      n  Create new/link
@@ -229,7 +229,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
             A  Apparent du       S  du
             z  Size   E  Extn    t  Time
  MISC
-         ! ^]  Shell         ;K xK  Execute plugin K
+         ! ^]  Shell           ; x  Plugin key
             C  Execute file   R ^V  Pick plugin
             s  Manage session    =  Launch app
             c  Connect remote    u  Unmount
