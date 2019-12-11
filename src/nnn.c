@@ -138,7 +138,7 @@
 #define CTX_MAX 4
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
-#define EXEC_ARGS_MAX 10
+#define EXEC_ARGS_MAX 8
 #define SCROLLOFF 3
 #define MIN_DISPLAY_COLS 10
 #define LONG_SIZE sizeof(ulong)
@@ -379,6 +379,7 @@ static bool g_plinit = FALSE;
 #define UTIL_SH 14
 #define UTIL_FZF 15
 #define UTIL_FZY 16
+#define UTIL_NOTIFY 17
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -411,6 +412,7 @@ static char * const utils[] = {
 	"sh",
 	"fzf",
 	"fzy",
+	".notify",
 };
 
 /* Common strings */
@@ -4445,7 +4447,7 @@ nochange:
 
 				/* If open file is disabled on right arrow or `l`, return */
 				if (cfg.nonavopen && sel == SEL_NAV_IN)
-					continue;
+					goto nochange;
 
 				/* Handle plugin selection mode */
 				if (cfg.runplugin) {
@@ -4972,8 +4974,9 @@ nochange:
 			if (!cpmvrm_selection(sel, path, &presel))
 				goto nochange;
 
-			spawn("ntfy -l CRITICAL -t nnn send Done!",
-			      NULL, NULL, NULL, F_NOWAIT | F_NOTRACE | F_MULTI);
+			/* Show notification on operation complete */
+			mkpath(plugindir, utils[UTIL_NOTIFY], newpath);
+			spawn(newpath, NULL, NULL, NULL, F_NOWAIT | F_NOTRACE);
 
 			if (ndents)
 				copycurname();

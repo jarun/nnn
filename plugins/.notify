@@ -1,0 +1,20 @@
+#!/usr/bin/env sh
+
+# Description: Show a notification
+#
+# Details: nnn invokes this plugin to show notification when a cp/mv/rm operation is complete.
+#
+# Requires: notify-send (Ubuntu)/ntfy (https://github.com/dschep/ntfy)/osascript (macOS)
+#
+# Shell: POSIX compliant
+# Author: Anna Arad
+
+OS="$(uname)"
+
+if which notify-send >/dev/null 2>&1; then
+    notify-send nnn "Done!"
+elif [ "$OS" = "Darwin" ]; then
+    osascript -e 'display notification "Done!" with title "nnn"'
+elif which ntfy >/dev/null 2>&1; then
+    ntfy -t nnn send "Done!"
+fi
