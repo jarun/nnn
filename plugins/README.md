@@ -69,11 +69,11 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You ca
 
 ## Executing plugins
 
-**Method 1:** Directly with <kbd>:key</kbd>:
+**Method 1:** Directly with <kbd>;key</kbd> or <kbd>xkey</kbd>:
 
     export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;n:notes;v:imgviu;t:imgthumb'
 
-Now plugin `fzopen` can be run with the keybind <kbd>:o</kbd>, `mocplay` can be run with <kbd>:p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
+Now plugin `fzopen` can be run with the keybind <kbd>;o</kbd>, `mocplay` can be run with <kbd>;p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
 
 **Method 2:** Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
@@ -83,7 +83,7 @@ To assign keys to arbitrary non-background cli commands (non-shell-interpreted) 
 
     export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn;o:fzopen'
 
-Now <kbd>:x</kbd> can be used to make a file executable, <kbd>:g</kbd> can be used to the git log of a git project directory, <kbd>:s</kbd> can be used to preview a partially downloaded media file.
+Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be used to the git log of a git project directory, <kbd>;s</kbd> can be used to preview a partially downloaded media file.
 
 Notes:
 

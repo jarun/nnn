@@ -206,12 +206,12 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
          Up k  Up          PgUp ^U  Scroll up
        Down j  Down        PgDn ^D  Scroll down
        Left h  Parent      ~ ` @ -  HOME, /, start, last
-  Ret Right l  Open              .  Toggle show hidden
-         g ^A  First entry    G ^E  Last entry
-            b  Pin current dir  ^B  Go to pinned dir
-      (Sh)Tab  Cycle context     d  Toggle detail view
+  Ret Right l  Open              .  Show hidden toggle
+         g ^A  Top            G ^E  Bottom
+            b  Pin CWD          ^B  Go to pinned dir
+      (Sh)Tab  Cycle context     d  Detail view toggle
          , ^/  Lead key    N LeadN  Context N
-            /  Filter/Lead  Ins ^N  Toggle nav-as-you-type
+            /  Filter/Lead  Ins ^N  Nav-as-you-type toggle
           Esc  Exit prompt   ^L F5  Redraw/clear prompt
             ?  Help, conf  ' Lead'  First file
          Q ^Q  Quit  ^G  QuitCD  q  Quit context
@@ -219,18 +219,18 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
            ^O  Open with...      n  Create new/link
             D  File details  ^R F2  Rename/duplicate
    Space ^J/a  Sel toggle/all    r  Batch rename
-         m ^K  Sel range, clear  M  List selection
-            P  Copy selection    K  Edit, flush sel
-            V  Move selection    w  Copy/move sel as
-            X  Del selection    ^X  Del entry
+         m ^K  Sel range, clear  M  List sel
+            P  Copy sel here     K  Edit, flush sel
+            V  Move sel here     w  Copy/move sel as
+            X  Del sel          ^X  Del entry
             f  Archive        o ^F  Archive ops
             e  Edit in EDITOR    p  Open in PAGER
  ORDER TOGGLES
             A  Apparent du       S  du
             z  Size   E  Extn    t  Time
  MISC
-         ! ^]  Shell      ;K :K xK  Execute plugin K
-            C  Execute entry  R ^V  Pick plugin
+         ! ^]  Shell         ;K xK  Execute plugin K
+            C  Execute file   R ^V  Pick plugin
             s  Manage session    =  Launch app
             c  Connect remote    u  Unmount
          ] ^P  Prompt/run cmd    L  Lock

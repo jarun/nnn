@@ -423,39 +423,38 @@ static char * const utils[] = {
 #define MSG_FAILED 6
 #define MSG_SSN_NAME 7
 #define MSG_CP_MV_AS 8
-#define MSG_RENAME_OPTS 9
+#define MSG_CUR_SEL_OPTS 9
 #define MSG_FORCE_RM 10
 #define MSG_CREATE_CTX 11
-#define MSG_CUR_SEL_OPTS 12
-#define MSG_NEW_OPTS 13
-#define MSG_CLI_MODE 14
-#define MSG_OVERWRITE 15
-#define MSG_SSN_OPTS 16
-#define MSG_QUIT_ALL 17
-#define MSG_HOSTNAME 18
-#define MSG_ARCHIVE_NAME 19
-#define MSG_OPEN_WITH 20
-#define MSG_REL_PATH 21
-#define MSG_LINK_SUFFIX 22
-#define MSG_COPY_NAME 23
-#define MSG_CONTINUE 24
-#define MSG_SEL_MISSING 25
-#define MSG_ACCESS 26
-#define MSG_0_CREATED 27
-#define MSG_NOT_REG_FILE 28
-#define MSG_PERM_DENIED 29
-#define MSG_EMPTY_FILE 30
-#define MSG_UNSUPPORTED 31
-#define MSG_NOT_SET 32
-#define MSG_RANGE_SEL_ON 33
-#define MSG_DIR_CHANGED 34
-#define MSG_0_FILES 35
-#define MSG_EXISTS 36
-#define MSG_FEW_COLOUMNS 37
-#define MSG_REMOTE_OPTS 38
-#define MSG_RCLONE_DELAY 39
-#define MSG_APP_NAME 40
-#define MSG_ARCHIVE_OPTS 41
+#define MSG_NEW_OPTS 12
+#define MSG_CLI_MODE 13
+#define MSG_OVERWRITE 14
+#define MSG_SSN_OPTS 15
+#define MSG_QUIT_ALL 16
+#define MSG_HOSTNAME 17
+#define MSG_ARCHIVE_NAME 18
+#define MSG_OPEN_WITH 19
+#define MSG_REL_PATH 20
+#define MSG_LINK_SUFFIX 21
+#define MSG_COPY_NAME 22
+#define MSG_CONTINUE 23
+#define MSG_SEL_MISSING 24
+#define MSG_ACCESS 25
+#define MSG_0_CREATED 26
+#define MSG_NOT_REG_FILE 27
+#define MSG_PERM_DENIED 28
+#define MSG_EMPTY_FILE 29
+#define MSG_UNSUPPORTED 30
+#define MSG_NOT_SET 31
+#define MSG_RANGE_SEL_ON 32
+#define MSG_DIR_CHANGED 33
+#define MSG_0_FILES 34
+#define MSG_EXISTS 35
+#define MSG_FEW_COLOUMNS 36
+#define MSG_REMOTE_OPTS 37
+#define MSG_RCLONE_DELAY 38
+#define MSG_APP_NAME 39
+#define MSG_ARCHIVE_OPTS 40
 
 static const char * const messages[] = {
 	"no traversal",
@@ -467,10 +466,9 @@ static const char * const messages[] = {
 	"failed!",
 	"session name: ",
 	"'c'p / 'm'v as?",
-	"'c'urrent dir / 's'election?",
+	"'c'urrent / 's'el?",
 	"forcibly remove %s file%s (unrecoverable)?",
 	"create context %d?",
-	"'c'urrent / 's'election?",
 	"'f'ile / 'd'ir / 's'ym / 'h'ard?",
 	"'c'li / 'g'ui?",
 	"overwrite?",
@@ -1546,7 +1544,7 @@ static bool batch_rename(const char *path)
 
 	if (selbufpos) {
 		if (ndents) {
-			i = get_input(messages[MSG_RENAME_OPTS]);
+			i = get_input(messages[MSG_CUR_SEL_OPTS]);
 			if (i == 'c') {
 				selbufpos = 0; /* Clear the selection */
 				dir = TRUE;
@@ -2103,8 +2101,7 @@ static int filterentries(char *path)
 					cur = oldcur;
 				goto end;
 			case '=': // fallthrough /* Launch app */
-			case ':': // fallthrough /* Run plugin keys */
-			case ';': // fallthrough
+			case ';': // fallthrough /* Run plugin key */
 			case '?': /* Help and config key, '?' is an invalid regex */
 				if (len == 1) {
 					cur = oldcur;
@@ -3487,12 +3484,12 @@ static void show_help(const char *path)
 	       "9Up k  Up          PgUp ^U  Scroll up\n"
 	     "7Down j  Down        PgDn ^D  Scroll down\n"
 	     "7Left h  Parent      ~ ` @ -  HOME, /, start, last\n"
-	"2Ret Right l  Open              .  Toggle show hidden\n"
-	       "9g ^A  First entry    G ^E  Last entry\n"
-		  "cb  Pin current dir  ^B  Go to pinned dir\n"
-	    "6(Sh)Tab  Cycle context     d  Toggle detail view\n"
+	"2Ret Right l  Open              .  Show hidden toggle\n"
+	       "9g ^A  Top            G ^E  Bottom\n"
+		  "cb  Pin CWD          ^B  Go to pinned dir\n"
+	    "6(Sh)Tab  Cycle context     d  Detail view toggle\n"
 	       "9, ^/  Lead key    N LeadN  Context N\n"
-		  "c/  Filter/Lead  Ins ^N  Toggle nav-as-you-type\n"
+		  "c/  Filter/Lead  Ins ^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt   ^L F5  Redraw/clear prompt\n"
 		  "c?  Help, conf  ' Lead'  First file\n"
 	       "9Q ^Q  Quit  ^G  QuitCD  q  Quit context\n"
@@ -3500,18 +3497,18 @@ static void show_help(const char *path)
 		 "b^O  Open with...      n  Create new/link\n"
 		  "cD  File details  ^R F2  Rename/duplicate\n"
 	 "3Space ^J/a  Sel toggle/all    r  Batch rename\n"
-	       "9m ^K  Sel range, clear  M  List selection\n"
-		  "cP  Copy selection    K  Edit, flush sel\n"
-		  "cV  Move selection    w  Copy/move sel as\n"
-		  "cX  Del selection    ^X  Del entry\n"
+	       "9m ^K  Sel range, clear  M  List sel\n"
+		  "cP  Copy sel here     K  Edit, flush sel\n"
+		  "cV  Move sel here     w  Copy/move sel as\n"
+		  "cX  Del sel          ^X  Del entry\n"
 		  "cf  Archive        o ^F  Archive ops\n"
 		  "ce  Edit in EDITOR    p  Open in PAGER\n"
 		"1ORDER TOGGLES\n"
 		  "cA  Apparent du       S  du\n"
 		  "cz  Size   E  Extn    t  Time\n"
 		"1MISC\n"
-	       "9! ^]  Shell      ;K :K xK  Execute plugin K\n"
-		  "cC  Execute entry  R ^V  Pick plugin\n"
+	       "9! ^]  Shell         ;K xK  Execute plugin K\n"
+		  "cC  Execute file   R ^V  Pick plugin\n"
 		  "cs  Manage session    =  Launch app\n"
 		  "cc  Connect remote    u  Unmount\n"
 	       "9] ^P  Prompt/run cmd    L  Lock\n"};
