@@ -138,7 +138,7 @@
 #define CTX_MAX 4
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
-#define EXEC_ARGS_MAX 8
+#define EXEC_ARGS_MAX 10
 #define SCROLLOFF 3
 #define MIN_DISPLAY_COLS 10
 #define LONG_SIZE sizeof(ulong)
@@ -4971,6 +4971,9 @@ nochange:
 
 			if (!cpmvrm_selection(sel, path, &presel))
 				goto nochange;
+
+			spawn("ntfy -l CRITICAL -t nnn send Done!",
+			      NULL, NULL, NULL, F_NOWAIT | F_NOTRACE | F_MULTI);
 
 			if (ndents)
 				copycurname();

@@ -56,6 +56,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - Detailed file information
   - Media information (using plugin)
 - Convenience
+  - Notification on cp, mv, rm completion (needs ntfy)
   - Run plugins and commands with custom keybinds
   - FreeDesktop compliant trash (needs trash-cli)
   - Cross-dir file/all/range selection
@@ -100,6 +101,7 @@ A curses library with wide char support (e.g. ncursesw), libreadline (`make O_NO
 | archivemount, fusermount(3) | optional | mount, unmount archives |
 | sshfs, [rclone](https://rclone.org/), fusermount(3) | optional | mount, unmount remotes |
 | trash-cli | optional | trash files (default action: rm) |
+| [ntfy](https://github.com/dschep/ntfy) | optional | operation completion notification |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/Advanced-use-cases#show-cp-mv-progress)) | optional | copy, move progress |
 | `$VISUAL` (else `$EDITOR`), `$PAGER`, `$SHELL` | optional | fallback vi, less, sh |
