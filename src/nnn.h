@@ -161,7 +161,7 @@ static struct key bindings[] = {
 	{ CONTROL('_'),   SEL_LEADER },
 	{ ',',            SEL_LEADER },
 	/* Cycle contexts in forward direction */
-	{ '\t',        SEL_CYCLE },
+	{ '\t',           SEL_CYCLE },
 	/* Cycle contexts in reverse direction */
 	{ KEY_BTAB,       SEL_CYCLER },
 	/* Go to/create context N */

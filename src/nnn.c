@@ -3491,7 +3491,7 @@ static void show_help(const char *path)
 	       "9, ^/  Lead key    N LeadN  Context N\n"
 		  "c/  Filter/Lead  Ins ^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt   ^L F5  Redraw/clear prompt\n"
-		  "c?  Help, conf  ' Lead'  First file\n"
+		  "c?  Help, conf        '  First file\n"
 	       "9Q ^Q  Quit  ^G  QuitCD  q  Quit context\n"
 		"1FILES\n"
 		 "b^O  Open with...      n  Create new/link\n"
@@ -4008,9 +4008,21 @@ static inline void handle_screen_move(enum action sel)
 	case SEL_HOME:
 		move_cursor(0, 1);
 		break;
-	default: /* case SEL_END: */
+	case SEL_END:
 		move_cursor(ndents - 1, 1);
 		break;
+	default: /* case SEL_FIRST */
+	{
+		int r = 0;
+
+		for (; r < ndents; ++r) {
+			if (!(dents[r].flags & DIR_OR_LINK_TO_DIR)) {
+				move_cursor((r) % ndents, 0);
+				break;
+			}
+		}
+		break;
+	}
 	}
 }
 
@@ -4495,7 +4507,8 @@ nochange:
 		case SEL_PGUP: // fallthrough
 		case SEL_CTRL_U: // fallthrough
 		case SEL_HOME: // fallthrough
-		case SEL_END:
+		case SEL_END: // fallthrough
+		case SEL_FIRST:
 			handle_screen_move(sel);
 			break;
 		case SEL_CDHOME: // fallthrough
@@ -4548,7 +4561,6 @@ nochange:
 		case SEL_LEADER: // fallthrough
 		case SEL_CYCLE: // fallthrough
 		case SEL_CYCLER: // fallthrough
-		case SEL_FIRST: // fallthrough
 		case SEL_CTX1: // fallthrough
 		case SEL_CTX2: // fallthrough
 		case SEL_CTX3: // fallthrough
@@ -4559,9 +4571,6 @@ nochange:
 				break;
 			case SEL_CYCLER:
 				fd = KEY_BTAB;
-				break;
-			case SEL_FIRST:
-				fd = '\'';
 				break;
 			case SEL_CTX1: // fallthrough
 			case SEL_CTX2: // fallthrough
@@ -4579,16 +4588,6 @@ nochange:
 			case '-': // fallthrough
 			case '@':
 				presel = fd;
-				goto nochange;
-			case '\'': /* jump to first file in the directory */
-				for (r = 0; r < ndents; ++r) {
-					if (!(dents[r].flags & DIR_OR_LINK_TO_DIR)) {
-						move_cursor((r) % ndents, 0);
-						break;
-					}
-				}
-				if (r != ndents)
-					continue;
 				goto nochange;
 			case '.':
 				cfg.showhidden ^= 1;

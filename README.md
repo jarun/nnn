@@ -213,7 +213,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
          , ^/  Lead key    N LeadN  Context N
             /  Filter/Lead  Ins ^N  Nav-as-you-type toggle
           Esc  Exit prompt   ^L F5  Redraw/clear prompt
-            ?  Help, conf  ' Lead'  First file
+            ?  Help, conf        '  First file
          Q ^Q  Quit  ^G  QuitCD  q  Quit context
  FILES
            ^O  Open with...      n  Create new/link
@@ -257,7 +257,6 @@ The Lead/Leader key provides a powerful multi-functional navigation mechanism. I
 |:---:| --- |
 | <kbd>1-4</kbd> | Go to/create selected context |
 | key | Go to bookmarked location |
-| <kbd>'</kbd> | Go to first file in directory |
 | <kbd>~</kbd> <kbd>`</kbd> <kbd>@</kbd> <kbd>-</kbd> | Visit HOME, `/`, start, last visited dir |
 | <kbd>.</kbd> | Toggle show hidden files |
 
