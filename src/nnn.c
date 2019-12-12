@@ -4741,7 +4741,6 @@ nochange:
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				cfg.extnorder = 0;
-				cfg.selmode = 0;
 				break;
 			case SEL_ASIZE:
 				cfg.apparentsz ^= 1;
@@ -4767,7 +4766,6 @@ nochange:
 				cfg.mtimeorder = 0;
 				cfg.sizeorder = 0;
 				cfg.extnorder = 0;
-				cfg.selmode = 0;
 				break;
 			case SEL_EXTN:
 				cfg.extnorder ^= 1;
@@ -4775,7 +4773,6 @@ nochange:
 				cfg.mtimeorder = 0;
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
-				cfg.selmode = 0;
 				break;
 			default: /* SEL_MTIME */
 				cfg.mtimeorder ^= 1;
@@ -4783,8 +4780,13 @@ nochange:
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				cfg.extnorder = 0;
-				cfg.selmode = 0;
 				break;
+			}
+
+			if (cfg.selmode) {
+				if (nselected)
+					updateselbuf(path, newpath);
+				cfg.selmode = 0;
 			}
 
 			/* Save current */
