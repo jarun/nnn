@@ -596,7 +596,6 @@ static int dentfind(const char *fname, int n);
 static void move_cursor(int target, int ignore_scrolloff);
 static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
-static void updateselbuf(const char *path, char *newpath);
 static char *xgetenv(const char *name, char *fallback);
 static void plugscript(const char *plugin, char *newpath, uchar flags);
 
@@ -947,14 +946,11 @@ static size_t seltofile(int fd, uint *pcount)
 }
 
 /* List selection from selection buffer */
-static bool listselbuf(const char *path, char *newpath)
+static bool listselbuf()
 {
 	int fd;
 	size_t pos;
 	uint oldpos = selbufpos;
-
-	if (cfg.selmode)
-		updateselbuf(path, newpath);
 
 	if (!selbufpos)
 		return FALSE;
@@ -1033,19 +1029,10 @@ static void updateselbuf(const char *path, char *newpath)
 }
 
 /* Finish selection procedure before an operation */
-static void endselection(const char *path, char *newpath)
+static inline void endselection()
 {
-	if (cfg.selmode) {
+	if (cfg.selmode)
 		cfg.selmode = 0;
-
-		updateselbuf(path, newpath);
-
-		if (selbufpos) { /* File path(s) written to the buffer */
-			writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-			if (cfg.x11)
-				plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
-		}
-	}
 }
 
 static void clearselection(void)
@@ -4200,7 +4187,6 @@ static void browse(char *ipath, const char *session)
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	uchar opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
-	uint utmp;
 	int r = -1, fd, presel, selstartid = 0, selendid = 0;
 	ino_t inode = 0;
 	enum action sel;
@@ -4209,7 +4195,7 @@ static void browse(char *ipath, const char *session)
 	char *path, *lastdir, *lastname, *dir, *tmp;
 	MEVENT event;
 	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0} };
-	bool currentmouse = 1, ctx_changed = FALSE;
+	bool currentmouse = 1;
 
 	atexit(dentfree);
 
@@ -4241,10 +4227,8 @@ static void browse(char *ipath, const char *session)
 		errexit();
 
 begin:
-	if (cfg.selmode && lastdir[0] && !ctx_changed)
-		updateselbuf(lastdir, newpath);
-	else if (ctx_changed)
-		ctx_changed = FALSE;
+	if (cfg.selmode && lastdir[0])
+		lastappendpos = selbufpos;
 
 #ifdef LINUX_INOTIFY
 	if ((presel == FILTER || dir_changed) && inotify_wd >= 0) {
@@ -4328,10 +4312,8 @@ nochange:
 				if (r >= CTX_MAX)
 					sel = SEL_BACK;
 				else if (r >= 0 && r < CTX_MAX && r != cfg.curctx) {
-					if (cfg.selmode) {
-						updateselbuf(path, newpath);
-						ctx_changed = TRUE;
-					}
+					if (cfg.selmode)
+						lastappendpos = selbufpos;
 
 					savecurctx(&cfg, path, dents[cur].name, r);
 
@@ -4453,8 +4435,7 @@ nochange:
 			{
 				/* If opened as vim plugin and Enter/^M pressed, pick */
 				if (cfg.picker && sel == SEL_GOIN) {
-					dents[cur].flags |= FILE_SELECTED;
-					updateselbuf(path, newpath);
+					appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 					writesel(pselbuf, selbufpos - 1);
 					return;
 				}
@@ -4640,10 +4621,8 @@ nochange:
 						continue;
 				}
 
-				if (cfg.selmode) {
-					updateselbuf(path, newpath);
-					ctx_changed = TRUE;
-				}
+				if (cfg.selmode)
+					lastappendpos = selbufpos;
 
 				savecurctx(&cfg, path, dents[cur].name, r);
 
@@ -4783,11 +4762,7 @@ nochange:
 				break;
 			}
 
-			if (cfg.selmode) {
-				if (nselected)
-					updateselbuf(path, newpath);
-				cfg.selmode = 0;
-			}
+			endselection();
 
 			/* Save current */
 			if (ndents)
@@ -4821,7 +4796,7 @@ nochange:
 				refresh = TRUE;
 				break;
 			case SEL_RENAMEMUL:
-				endselection(path, newpath);
+				endselection();
 
 				if (!batch_rename(path)) {
 					printwait(messages[MSG_FAILED], &presel);
@@ -4849,6 +4824,8 @@ nochange:
 			if (cfg.filtermode && !refresh)
 				break;
 
+			endselection();
+
 			/* Save current */
 			if (ndents)
 				copycurname();
@@ -4869,20 +4846,15 @@ nochange:
 
 			if (dents[cur].flags & FILE_SELECTED) {
 				++nselected;
-				utmp = selbufpos;
-				selbufpos = lastappendpos;
 				appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-				lastappendpos = selbufpos;
-				selbufpos = utmp;
 			} else {
 				--nselected;
+				selbufpos = lastappendpos;
+
 				if (nselected) {
-					utmp = selbufpos;
 					updateselbuf(path, newpath);
 					writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-					lastappendpos = selbufpos;
-					selbufpos = utmp;
 				} else
 					writesel(NULL, 0);
 			}
@@ -4949,9 +4921,6 @@ nochange:
 			}
 
 			/* Remember current selection buffer position */
-			utmp = selbufpos;
-			selbufpos = lastappendpos;
-
 			for (r = selstartid; r <= selendid; ++r)
 				if (!(dents[r].flags & FILE_SELECTED)) {
 					/* Write the path to selection file to avoid flush */
@@ -4961,17 +4930,12 @@ nochange:
 					++nselected;
 				}
 
-			if (selbufpos != utmp) {
-				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-				if (cfg.x11)
-					plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
-				/* Restore current selection buffer position */
-				lastappendpos = selbufpos;
-				selbufpos = utmp;
-			}
+			writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+			if (cfg.x11)
+				plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 			continue;
 		case SEL_SELLIST:
-			if (listselbuf(path, newpath) || listselfile()) {
+			if (listselbuf() || listselfile()) {
 				if (cfg.filtermode)
 					presel = FILTER;
 				break;
@@ -4979,9 +4943,6 @@ nochange:
 
 			goto nochange;
 		case SEL_SELEDIT:
-			if (nselected)
-				updateselbuf(path, newpath);
-
 			r = editselection();
 			if (r <= 0) {
 				const char * msg
@@ -4996,7 +4957,7 @@ nochange:
 		case SEL_CPMVAS: // fallthrough
 		case SEL_RMMUL:
 		{
-			endselection(path, newpath);
+			endselection();
 
 			if (!cpmvrm_selection(sel, path, &presel))
 				goto nochange;
@@ -5037,7 +4998,7 @@ nochange:
 				break;
 
 			if (sel != SEL_OPENWITH)
-				endselection(path, newpath);
+				endselection();
 
 			switch (sel) {
 			case SEL_ARCHIVE:
@@ -5228,7 +5189,7 @@ nochange:
 		case SEL_PLUGIN: // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_RUNCMD:
-			endselection(path, newpath);
+			endselection();
 
 			switch (sel) {
 			case SEL_EXEC:
