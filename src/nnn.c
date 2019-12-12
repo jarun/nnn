@@ -598,7 +598,7 @@ static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
 static void updateselbuf(const char *path, char *newpath);
 static char *xgetenv(const char *name, char *fallback);
-static void run_plugin(const char *plugin, char *newpath, const uchar flags);
+static void plugscript(const char *plugin, char *newpath, uchar flags);
 
 /* Functions */
 
@@ -1043,7 +1043,7 @@ static void endselection(const char *path, char *newpath)
 		if (selbufpos) { /* File path(s) written to the buffer */
 			writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			if (cfg.x11)
-				run_plugin(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
+				plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 		}
 	}
 }
@@ -3633,7 +3633,7 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 	return TRUE;
 }
 
-static void run_plugin(const char *plugin, char *newpath, const uchar flags)
+static void plugscript(const char *plugin, char *newpath, uchar flags)
 {
 	mkpath(plugindir, plugin, newpath);
 	if (!access(newpath, X_OK))
@@ -4864,7 +4864,7 @@ nochange:
 				appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 				if (cfg.x11)
-					run_plugin(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
+					plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 				lastappendpos = selbufpos;
 				selbufpos = utmp;
 			}
@@ -4949,7 +4949,7 @@ nochange:
 			if (selbufpos != utmp) {
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 				if (cfg.x11)
-					run_plugin(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
+					plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 				/* Restore current selection buffer position */
 				lastappendpos = selbufpos;
 				selbufpos = utmp;
@@ -4974,7 +4974,7 @@ nochange:
 				printwait(msg, &presel);
 				goto nochange;
 			} else if (cfg.x11)
-				run_plugin(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
+				plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 			break;
 		case SEL_CP: // fallthrough
 		case SEL_MV: // fallthrough
@@ -4988,7 +4988,7 @@ nochange:
 
 			/* Show notification on operation complete */
 			if (cfg.x11)
-				run_plugin(utils[UTIL_NTFY], newpath, F_NOWAIT | F_NOTRACE);
+				plugscript(utils[UTIL_NTFY], newpath, F_NOWAIT | F_NOTRACE);
 
 			if (ndents)
 				copycurname();
