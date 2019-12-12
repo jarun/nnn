@@ -4864,26 +4864,34 @@ nochange:
 			if (rangesel)
 				rangesel = FALSE;
 
-			/* Write the path to selection file to avoid flush */
-			if (!(dents[cur].flags & FILE_SELECTED)) {
+			/* Toggle selection status */
+			dents[cur].flags ^= FILE_SELECTED;
+
+			if (dents[cur].flags & FILE_SELECTED) {
+				++nselected;
 				utmp = selbufpos;
 				selbufpos = lastappendpos;
 				appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-				if (cfg.x11)
-					plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 				lastappendpos = selbufpos;
 				selbufpos = utmp;
+			} else {
+				--nselected;
+				if (nselected) {
+					utmp = selbufpos;
+					updateselbuf(path, newpath);
+					writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+					lastappendpos = selbufpos;
+					selbufpos = utmp;
+				} else
+					writesel(NULL, 0);
 			}
 
-			/* Toggle selection status */
-			dents[cur].flags ^= FILE_SELECTED;
-			(dents[cur].flags & FILE_SELECTED) ? ++nselected : --nselected;
+			if (cfg.x11)
+				plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 
-			if (!nselected) {
-				writesel(NULL, 0);
+			if (!nselected)
 				unlink(g_selpath);
-			}
 
 			/* move cursor to the next entry if this is not the last entry */
 			if (!cfg.picker && cur != ndents - 1)
