@@ -62,6 +62,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - Batch renamer (feature-limited) for selection or dir
   - Copy (as), move (as), delete, archive, link selection
   - Notification on cp, mv, rm completion
+  - Copy file paths to system clipboard on select
   - Create (with parents), rename, duplicate (anywhere) files and dirs
   - Launch GUI apps, run commands, execute file, spawn a shell
   - Hovered file set as `$nnn` at prompt and spawned shell
@@ -162,7 +163,6 @@ There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$
 | `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
 | `NNN_RCLONE_OPTS='rclone mount --read-only'` | specify rclone options |
 | `NNN_IDLE_TIMEOUT=300` | idle seconds to lock terminal [default: disabled] |
-| `NNN_COPIER=copier` | clipboard copier script [default: none] |
 | `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
 
 #### Cmdline options
@@ -195,6 +195,7 @@ optional args:
  -S      du mode
  -t      disable dir auto-select
  -v      show version
+ -x      notis, sel to system clipboard
  -h      show help
 ```
 

@@ -31,6 +31,7 @@ _nnn ()
         -S
         -t
         -v
+        -x
         -h
     )
     if [[ $prev == -b ]]; then

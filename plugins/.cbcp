@@ -1,0 +1,45 @@
+#!/usr/bin/env sh
+
+# Description: Copy selection to system clipboard as newline-separated entries
+# Requires: tr and
+#           xclip/xsel (Linux)
+#           pbcopy (macOS)
+#           termux-clipboard-set (Termux)
+#           clip.exe (WSL)
+#           clip (Cygwin)
+#           wl-copy (Wayland)
+#
+# LIMITATION: breaks if a filename has newline in it
+#
+# Note: For a space-separated list:
+#       xargs -0 < "$SELECTION"
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}" # protect trailing \n
+
+SELECTION=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+
+if which xsel >/dev/null 2>&1; then
+    # Linux
+    tr '\0' '\n' < "$SELECTION" | xsel -bi
+elif which xclip >/dev/null 2>&1; then
+    # Linux
+    tr '\0' '\n' < "$SELECTION" | xclip -sel clip
+elif which pbcopy >/dev/null 2>&1; then
+    # macOS
+    tr '\0' '\n' < "$SELECTION" | pbcopy
+elif which termux-clipboard-set >/dev/null 2>&1; then
+    # Termux
+    tr '\0' '\n' < "$SELECTION" | termux-clipboard-set
+elif which clip.exe >/dev/null 2>&1; then
+    # WSL
+    tr '\0' '\n' < "$SELECTION" | clip.exe
+elif which clip >/dev/null 2>&1; then
+    # Cygwin
+    tr '\0' '\n' < "$SELECTION" | clip
+elif which wl-copy >/dev/null 2>&1; then
+    # Wayland
+    tr '\0' '\n' < "$SELECTION" | wl-copy
+fi

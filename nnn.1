@@ -23,6 +23,7 @@
 .Op Ar -s
 .Op Ar -S
 .Op Ar -v
+.Op Ar -x
 .Op Ar -h
 .Op Ar PATH
 .Sh DESCRIPTION
@@ -100,6 +101,9 @@ supports the following options:
 .Fl v
         show version and exit
 .Pp
+.Fl x
+        show notis on selection cp, mv, rm completion; copy path to system clipboard on select
+.Pp
 .Fl h
         show program help and exit
 .Sh CONFIGURATION
@@ -166,7 +170,7 @@ There are 3 groups of shortcuts to add files to selection:
 .Pp
 The selection can now be listed, copied, moved, removed, archived or linked.
 .Pp
-Absolute paths of the selected files are copied to the temporary file \fB.selection\fR in the config directory. The path is shown in the help and configuration screen. If \fB$NNN_COPIER\fR is set (see ENVIRONMENT section below) the file paths are also copied to the system clipboard.
+Absolute paths of the selected files are copied to the temporary file \fB.selection\fR in the config directory. The path is shown in the help and configuration screen.
 .Pp
 To flush the selection without running any operation use the _edit, flush selection_ key. The list is flushed even if unchanged. Use this key to remove a file from selection after you navigate away from its directory. Flushing doesn't end the selection mode. You can add more files to the selection and edit/flush the list again. Flushing doesn't end the selection mode. You can add more files to the selection and edit/flush the list again.
 .Pp
@@ -238,8 +242,6 @@ when dealing with the !, e and p commands respectively. A single combination to 
 .Ed
 .Pp
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal locker (default: disabled).
-.Pp
-\fBNNN_COPIER:\fR system clipboard copier script. The project page has some sample copier scripts.
 .Pp
 \fBNNN_TRASH:\fR trash (instead of \fIdelete\fR) files to desktop Trash.
 .Bd -literal

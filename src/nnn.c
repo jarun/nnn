@@ -227,8 +227,9 @@ typedef struct {
 	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 3;
+	uint reserved   : 2;
 	/* The following settings are global */
+	uint x11        : 1;  /* Copy to system clipboard and show notis */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint picker     : 1;  /* Write selection to user-specified file */
@@ -281,6 +282,7 @@ static settings cfg = {
 	0, /* showdetail */
 	1, /* ctxactive */
 	0, /* reserved */
+	0, /* x11 */
 	0, /* curctx */
 	0, /* dircolor */
 	0, /* picker */
@@ -310,7 +312,6 @@ static uint idletimeout, selbufpos, lastappendpos, selbuflen;
 static char *bmstr;
 static char *pluginstr;
 static char *opener;
-static char *copier;
 static char *editor;
 static char *enveditor;
 static char *pager;
@@ -379,7 +380,8 @@ static bool g_plinit = FALSE;
 #define UTIL_SH 14
 #define UTIL_FZF 15
 #define UTIL_FZY 16
-#define UTIL_NOTIFY 17
+#define UTIL_NTFY 17
+#define UTIL_CBCP 18
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -412,7 +414,8 @@ static char * const utils[] = {
 	"sh",
 	"fzf",
 	"fzy",
-	".notify",
+	".ntfy",
+	".cbcp",
 };
 
 /* Common strings */
@@ -507,18 +510,16 @@ static const char * const messages[] = {
 #define NNN_OPENER 1
 #define NNN_CONTEXT_COLORS 2
 #define NNN_IDLE_TIMEOUT 3
-#define NNN_COPIER 4
-#define NNNLVL 5
-#define NNN_PIPE 6 /* strings end here */
-#define NNN_USE_EDITOR 7 /* flags begin here */
-#define NNN_TRASH 8
+#define NNNLVL 4
+#define NNN_PIPE 5 /* strings end here */
+#define NNN_USE_EDITOR 6 /* flags begin here */
+#define NNN_TRASH 7
 
 static const char * const env_cfg[] = {
 	"NNN_BMS",
 	"NNN_OPENER",
 	"NNN_CONTEXT_COLORS",
 	"NNN_IDLE_TIMEOUT",
-	"NNN_COPIER",
 	"NNNLVL",
 	"NNN_PIPE",
 	"NNN_USE_EDITOR",
@@ -597,6 +598,7 @@ static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
 static void updateselbuf(const char *path, char *newpath);
 static char *xgetenv(const char *name, char *fallback);
+static void run_plugin(const char *plugin, char *newpath, const uchar flags);
 
 /* Functions */
 
@@ -1040,7 +1042,8 @@ static void endselection(const char *path, char *newpath)
 
 		if (selbufpos) { /* File path(s) written to the buffer */
 			writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-			spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+			if (cfg.x11)
+				run_plugin(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 		}
 	}
 }
@@ -1127,7 +1130,6 @@ static int editselection(void)
 
 	nselected = lines;
 	writesel(pselbuf, selbufpos - 1);
-	spawn(copier, NULL, NULL, NULL, F_NOTRACE);
 
 	return 1;
 
@@ -3631,6 +3633,13 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 	return TRUE;
 }
 
+static void run_plugin(const char *plugin, char *newpath, const uchar flags)
+{
+	mkpath(plugindir, plugin, newpath);
+	if (!access(newpath, X_OK))
+		spawn(newpath, NULL, NULL, NULL, flags);
+}
+
 static void launch_app(const char *path, char *newpath)
 {
 	int r = F_NORMAL;
@@ -4854,7 +4863,8 @@ nochange:
 				selbufpos = lastappendpos;
 				appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+				if (cfg.x11)
+					run_plugin(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 				lastappendpos = selbufpos;
 				selbufpos = utmp;
 			}
@@ -4938,7 +4948,8 @@ nochange:
 
 			if (selbufpos != utmp) {
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-				spawn(copier, NULL, NULL, NULL, F_NOTRACE);
+				if (cfg.x11)
+					run_plugin(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 				/* Restore current selection buffer position */
 				lastappendpos = selbufpos;
 				selbufpos = utmp;
@@ -4962,7 +4973,8 @@ nochange:
 					= (!r ? messages[MSG_0_SELECTED] : messages[MSG_FAILED]);
 				printwait(msg, &presel);
 				goto nochange;
-			}
+			} else if (cfg.x11)
+				run_plugin(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 			break;
 		case SEL_CP: // fallthrough
 		case SEL_MV: // fallthrough
@@ -4975,8 +4987,8 @@ nochange:
 				goto nochange;
 
 			/* Show notification on operation complete */
-			mkpath(plugindir, utils[UTIL_NOTIFY], newpath);
-			spawn(newpath, NULL, NULL, NULL, F_NOWAIT | F_NOTRACE);
+			if (cfg.x11)
+				run_plugin(utils[UTIL_NTFY], newpath, F_NOWAIT | F_NOTRACE);
 
 			if (ndents)
 				copycurname();
@@ -5479,6 +5491,7 @@ static void usage(void)
 		" -S      du mode\n"
 		" -t      disable dir auto-select\n"
 		" -v      show version\n"
+		" -x      notis, sel to system clipboard\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
 }
@@ -5621,7 +5634,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKiab:cde:Efnop:rRstvh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKiab:cde:Efnop:rRstvxh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5699,6 +5712,9 @@ int main(int argc, char *argv[])
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
 			return _SUCCESS;
+		case 'x':
+			cfg.x11 = 1;
+			break;
 		case 'h':
 			usage();
 			return _SUCCESS;
@@ -5836,9 +5852,6 @@ int main(int argc, char *argv[])
 	/* Prefix for temporary files */
 	if (!set_tmp_path())
 		return _FAILURE;
-
-	/* Get the clipboard copier, if set */
-	copier = getenv(env_cfg[NNN_COPIER]);
 
 #ifdef __linux__
 	if (!progress) {
