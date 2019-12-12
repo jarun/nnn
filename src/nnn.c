@@ -4684,7 +4684,6 @@ nochange:
 				presel = 0;
 				break;
 			}
-
 			goto nochange;
 		case SEL_MFLTR: // fallthrough
 		case SEL_TOGGLEDOT: // fallthrough
@@ -4829,7 +4828,6 @@ nochange:
 			/* Save current */
 			if (ndents)
 				copycurname();
-
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		}
@@ -4849,10 +4847,8 @@ nochange:
 				appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			} else {
-				--nselected;
 				selbufpos = lastappendpos;
-
-				if (nselected) {
+				if (--nselected) {
 					updateselbuf(path, newpath);
 					writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 				} else
@@ -4940,7 +4936,6 @@ nochange:
 					presel = FILTER;
 				break;
 			}
-
 			goto nochange;
 		case SEL_SELEDIT:
 			r = editselection();
@@ -5292,7 +5287,6 @@ nochange:
 			/* Save current */
 			if (ndents)
 				copycurname();
-
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_ARCHIVEOPS:
