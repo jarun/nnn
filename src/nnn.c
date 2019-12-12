@@ -4328,6 +4328,11 @@ nochange:
 				if (r >= CTX_MAX)
 					sel = SEL_BACK;
 				else if (r >= 0 && r < CTX_MAX && r != cfg.curctx) {
+					if (cfg.selmode) {
+						updateselbuf(path, newpath);
+						ctx_changed = TRUE;
+					}
+
 					savecurctx(&cfg, path, dents[cur].name, r);
 
 					/* Reset the pointers */
