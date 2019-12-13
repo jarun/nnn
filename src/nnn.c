@@ -3489,7 +3489,7 @@ static void show_help(const char *path)
 		  "cD  File details  ^R F2  Rename/duplicate\n"
 	 "3Space ^J/a  Sel toggle/all    r  Batch rename\n"
 	       "9m ^K  Sel range, clear  M  List sel\n"
-		  "cP  Copy sel here     K  Edit, flush sel\n"
+		  "cP  Copy sel here     K  Edit sel\n"
 		  "cV  Move sel here     w  Copy/move sel as\n"
 		  "cX  Del sel          ^X  Del entry\n"
 		  "cf  Archive        o ^F  Archive ops\n"
@@ -4940,7 +4940,7 @@ nochange:
 		case SEL_SELEDIT:
 			r = editselection();
 			if (r <= 0) {
-				const char * msg
+				const char *msg
 					= (!r ? messages[MSG_0_SELECTED] : messages[MSG_FAILED]);
 				printwait(msg, &presel);
 				goto nochange;

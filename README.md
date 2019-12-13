@@ -228,7 +228,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
             D  File details  ^R F2  Rename/duplicate
    Space ^J/a  Sel toggle/all    r  Batch rename
          m ^K  Sel range, clear  M  List sel
-            P  Copy sel here     K  Edit, flush sel
+            P  Copy sel here     K  Edit sel
             V  Move sel here     w  Copy/move sel as
             X  Del sel          ^X  Del entry
             f  Archive        o ^F  Archive ops
