@@ -80,6 +80,8 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`.
 4. For additional functionality [install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins).
+5. To copy selected file paths to system clipboard and show notis on cp, mv, rm completion use option `-x`.
+6. For a strictly CLI-only experience, see plugin `nuke`. It's a sample opener you can customize.
 
 Notes:
 
@@ -90,7 +92,7 @@ Notes:
 
 #### Library dependencies
 
-A curses library with wide char support (e.g. ncursesw), libreadline (`make O_NORL=1` to drop) and standard libc.
+A curses library with wide char support (e.g. ncursesw), libreadline (optional) and standard libc.
 
 #### Utility dependencies
 
@@ -134,8 +136,12 @@ Packages for Arch Linux, CentOS, Debian, Fedora and Ubuntu are auto-generated wi
 Download the latest stable release or clone this repository (*risky*), install deps and compile. On Ubuntu 18.04:
 
     $ sudo apt-get install pkg-config libncursesw5-dev libreadline-dev
-    $ make
     $ sudo make strip install
+
+To compile _without_ libreadline:
+
+    $ sudo apt-get install pkg-config libncursesw5-dev
+    $ sudo make O_NORL=1 strip install
 
 `PREFIX` is supported, in case you want to install to a different location.
 
@@ -241,7 +247,7 @@ The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see th
 Notes:
 
 1. Help & settings, file details and archive listing are shown in the `$PAGER`.
-2. To change shortcuts modify key bindings in `nnn.h` and compile.
+2. To change shortcuts modify key bindings in `nnn.h` and compile. Option `-K` detects collisions.
 
 | Mouse click | Function |
 |---| --- |
