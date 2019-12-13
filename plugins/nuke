@@ -204,7 +204,7 @@ handle_multimedia() {
         ## Image
         image/*)
             if [ $GUI -ne 0 ] && which sxiv >/dev/null 2>&1; then
-                sxiv -q "$1" "$(dirname "${FPATH}")" &
+                sxiv -q "${FPATH}" &
                 exit 0
             elif which viu >/dev/null 2>&1; then
                 viu -n "${FPATH}" | less -R
