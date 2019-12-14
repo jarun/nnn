@@ -20,7 +20,7 @@
 
 It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.com/watch?v=AbaauM7gUJw), Linux, macOS, BSD, Cygwin, WSL and works seamlessly with DEs and GUI utilities.
 
-Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
+Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage, how-tos and troubleshooting.
 
 *Love smart and efficient utilities? Explore [my repositories](https://github.com/jarun?tab=repositories). Buy me a cup of coffee if they help you.*
 
@@ -83,10 +83,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
 5. To copy selected file paths to system clipboard and show notis on cp, mv, rm completion use option `-x`.
 6. For a strictly CLI-only experience, see plugin `nuke`. It's a sample opener you can customize.
 
-Notes:
-
-1. Don't memorize keys. Arrows, <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> for help on keyboard shortcuts anytime.
-2. To set `nnn` as the default file manager, follow these [instructions](https://github.com/jarun/nnn/wiki/Advanced-use-cases#configure-as-default-fm).
+Note: Don't memorize keys. Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> to list shortcuts anytime.
 
 ## Installation
 
@@ -145,136 +142,11 @@ To compile _without_ libreadline:
 
 `PREFIX` is supported, in case you want to install to a different location.
 
-Visit the [developer guides](https://github.com/jarun/nnn/wiki/Developer-guides) for compilation notes on the Pi, Cygwin and other compilation modes.
+See the [developer guides](https://github.com/jarun/nnn/wiki/Developer-guides) for compilation notes on the Pi, Cygwin and other compilation modes.
 
 #### Shell completion
 
 Completion scripts for Bash, Fish and Zsh are [available](misc/auto-completion). Refer to your shell's manual for installation instructions.
-
-## Usage
-
-#### Configuration
-
-There is no config file. Associated files are stored under `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/`.
-
-`nnn` supports the following optional (set if you need) environment variables.
-
-| Example `export` | Description |
-| --- | --- |
-| `NNN_OPENER=nuke` | custom file opener (see plugin `nuke`) |
-| `NNN_BMS='d:~/Documents;D:~/Docs archive/'` | key-bookmark pairs [max 10] |
-| `NNN_PLUG='o:fzopen;m:nmount;x:_chmod +x $nnn'` | key-plugin (or cmd) pairs [max 15] |
-| `NNN_USE_EDITOR=1` | open text files in `$VISUAL` (else `$EDITOR`, fallback vi) |
-| `NNN_CONTEXT_COLORS='1234'` | specify per context color [default: '4444' (all blue)] |
-| `NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user'` | specify SSHFS options |
-| `NNN_RCLONE_OPTS='rclone mount --read-only'` | specify rclone options |
-| `NNN_IDLE_TIMEOUT=300` | idle seconds to lock terminal [default: disabled] |
-| `NNN_TRASH=1` | trash files to the desktop Trash [default: delete] |
-
-#### Cmdline options
-
-```
-usage: nnn [OPTIONS] [PATH]
-
-The missing terminal file manager for X.
-
-positional args:
-  PATH   start dir [default: .]
-
-optional args:
- -a      use access time
- -b key  open bookmark key
- -c      cli-only opener
- -d      detail mode
- -e name load session by name
- -E      use EDITOR for undetached edits
- -f      run filter as cmd on prompt key
- -g      regex filters [default: string]
- -H      show hidden files
- -i      nav-as-you-type mode
- -K      detect key collision
- -n      version sort
- -o      open files on Enter
- -p file selection file [stdout if '-']
- -r      use advcpmv patched cp, mv
- -R      disable rollover at edges
- -S      du mode
- -t      disable dir auto-select
- -v      show version
- -x      notis, sel to system clipboard
- -h      show help
-```
-
-#### Keyboard and mouse
-
-The list below is from the **dev branch**. Press <kbd>?</kbd> in `nnn` to see the keybinds in your installed version.
-
-```
- NAVIGATION
-         Up k  Up          PgUp ^U  Scroll up
-       Down j  Down        PgDn ^D  Scroll down
-       Left h  Parent      ~ ` @ -  HOME, /, start, last
-         g ^A  Top     Ret Right l  Open
-         G ^E  Bottom            '  First file
-            b  Pin CWD          ^B  Go to pinned dir
-         , ^/  Lead key    N LeadN  Context N
-      (Sh)Tab  Cycle context     d  Detail view toggle
-            /  Filter/Lead  Ins ^N  Nav-as-you-type toggle
-          Esc  Exit prompt   ^L F5  Redraw/clear prompt
-            .  Show/hide dots    ?  Help, conf
-         Q ^Q  Quit  ^G  QuitCD  q  Quit context
- FILES
-           ^O  Open with...      n  Create new/link
-            D  File details  ^R F2  Rename/duplicate
-   Space ^J/a  Sel toggle/all    r  Batch rename
-         m ^K  Sel range, clear  M  List sel
-            P  Copy sel here     K  Edit sel
-            V  Move sel here     w  Copy/move sel as
-            X  Del sel          ^X  Del entry
-            f  Archive        o ^F  Archive ops
-            e  Edit in EDITOR    p  Open in PAGER
- ORDER TOGGLES
-            A  Apparent du       S  du
-            z  Size   E  Extn    t  Time
- MISC
-         ! ^]  Shell           ; x  Plugin key
-            C  Execute file   R ^V  Pick plugin
-            s  Manage session    =  Launch app
-            c  Connect remote    u  Unmount
-         ] ^P  Prompt/run cmd    L  Lock
-```
-
-Notes:
-
-1. Help & settings, file details and archive listing are shown in the `$PAGER`.
-2. To change shortcuts modify key bindings in `nnn.h` and compile. Option `-K` detects collisions.
-
-| Mouse click | Function |
-|---| --- |
-| Left single on context number | Visit context |
-| Left single on top row after context numbers | Visit parent |
-| Left single/double on last 2 rows | Toggle nav-as-you-type |
-| Left single | Select context or entry |
-| Left double | Select context or open entry |
-
-#### Lead key
-
-The Lead/Leader key provides a powerful multi-functional navigation mechanism. It is case-sensitive and understands contexts, bookmarks and location shortcuts.
-
-| Follower key | Function |
-|:---:| --- |
-| <kbd>1-4</kbd> | Go to/create selected context |
-| key | Go to bookmarked location |
-| <kbd>~</kbd> <kbd>`</kbd> <kbd>@</kbd> <kbd>-</kbd> | Visit HOME, `/`, start, last visited dir |
-| <kbd>.</kbd> | Toggle show hidden files |
-
-When the filter is on, <kbd>/</kbd> works as an additional Lead key.
-
-#### Help
-
-    $ nnn -h
-    $ man nnn
-To lookup keyboard shortcuts at runtime, press <kbd>?</kbd>.
 
 ## Elsewhere
 
