@@ -2086,11 +2086,6 @@ static int filterentries(char *path)
 			}
 
 			switch (*ch) {
-			case '/': /* works as Leader key in filter mode */
-				*ch = CONTROL('_'); // fallthrough
-				if (len == 1)
-					cur = oldcur;
-				goto end;
 			case '=': // fallthrough /* Launch app */
 			case ';': // fallthrough /* Run plugin key */
 			case '?': /* Help and config key, '?' is an invalid regex */
@@ -3480,7 +3475,7 @@ static void show_help(const char *path)
 		  "cb  Pin CWD          ^B  Go to pinned dir\n"
 	       "9, ^/  Lead key    N LeadN  Context N\n"
 	    "6(Sh)Tab  Cycle context     d  Detail view toggle\n"
-		  "c/  Filter/Lead  Ins ^N  Nav-as-you-type toggle\n"
+		  "c/  Filter       Ins ^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt   ^L F5  Redraw/clear prompt\n"
 	          "c.  Show/hide dots    ?  Help, conf\n"
 	       "9Q ^Q  Quit  ^G  QuitCD  q  Quit context\n"
@@ -3499,7 +3494,7 @@ static void show_help(const char *path)
 		  "cz  Size   E  Extn    t  Time\n"
 		"1MISC\n"
 	       "9! ^]  Shell           ; x  Plugin key\n"
-		  "cC  Execute file   R ^V  Pick plugin\n"
+		  "cC  Execute file   i ^V  Pick plugin\n"
 		  "cs  Manage session    =  Launch app\n"
 		  "cc  Connect remote    u  Unmount\n"
 	       "9] ^P  Prompt/run cmd    L  Lock\n"};
