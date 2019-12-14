@@ -83,7 +83,7 @@ Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage,
 5. To copy selected file paths to system clipboard and show notis on cp, mv, rm completion use option `-x`.
 6. For a strictly CLI-only experience, see plugin `nuke`. It's a sample opener you can customize.
 
-Note: Don't memorize keys. Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> to list shortcuts anytime.
+Don't memorize keys. Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> to list shortcuts anytime.
 
 ## Installation
 
@@ -164,9 +164,7 @@ Completion scripts for Bash, Fish and Zsh are [available](misc/auto-completion).
 
 - [Arun Prakash Jana](https://github.com/jarun) (Copyright © 2016-2019)
 - [0xACE](https://github.com/0xACE)
-- [Anna Arad](https://github.com/annagrram)
 - [KlzXS](https://github.com/KlzXS)
-- [Sijmen J. Mulder](https://github.com/sjmulder)
 - and other contributors
 
 `nnn` is actively developed. Visit the to the [ToDo list](https://github.com/jarun/nnn/issues/386) to contribute or see the features in progress.
