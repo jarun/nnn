@@ -293,7 +293,7 @@ static settings cfg = {
 	0, /* useeditor */
 	0, /* runplugin */
 	0, /* runctx */
-	1, /* filter_re */
+	0, /* filter_re */
 	0, /* filtercmd */
 	0, /* trash */
 	1, /* mtime */
@@ -1804,7 +1804,7 @@ static int visible_str(const fltrexp_t *fltrexp, const char *fname)
 	return strcasestr(fname, fltrexp->str) != NULL;
 }
 
-static int (*filterfn)(const fltrexp_t *fltr, const char *fname) = &visible_re;
+static int (*filterfn)(const fltrexp_t *fltr, const char *fname) = &visible_str;
 
 static int entrycmp(const void *va, const void *vb)
 {
@@ -5449,6 +5449,7 @@ static void usage(void)
 		" -e name load session by name\n"
 		" -E      use EDITOR for undetached edits\n"
 		" -f      run filter as cmd on prompt key\n"
+		" -g      regex filters [default: string]\n"
 		" -H      show hidden files\n"
 		" -i      nav-as-you-type mode\n"
 		" -K      detect key collision\n"
@@ -5457,7 +5458,6 @@ static void usage(void)
 		" -p file selection file [stdout if '-']\n"
 		" -r      use advcpmv patched cp, mv\n"
 		" -R      disable rollover at edges\n"
-		" -s      string filters [default: regex]\n"
 		" -S      du mode\n"
 		" -t      disable dir auto-select\n"
 		" -v      show version\n"
@@ -5604,7 +5604,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKiab:cde:Efnop:rRstvxh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKiab:cde:Efgnop:rRtvxh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5634,6 +5634,10 @@ int main(int argc, char *argv[])
 			break;
 		case 'f':
 			cfg.filtercmd = 1;
+			break;
+		case 'g':
+			cfg.filter_re = 1;
+			filterfn = &visible_re;
 			break;
 		case 'H':
 			cfg.showhidden = 1;
@@ -5668,10 +5672,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'R':
 			cfg.rollover = 0;
-			break;
-		case 's':
-			cfg.filter_re = 0;
-			filterfn = &visible_str;
 			break;
 		case 't':
 			cfg.autoselect = 0;

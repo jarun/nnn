@@ -46,7 +46,7 @@ Add to that an awesome [Wiki](https://github.com/jarun/nnn/wiki)!
   - By file name, modification/access time, size, extension
 - Search
   - Instant filtering with *search-as-you-type*
-  - Regex (default) and substring match
+  - Regex and substring (default) matches
   - Subtree search to open or edit files (using plugin)
 - Mimes
   - Open with desktop opener or specify a custom app
@@ -189,6 +189,7 @@ optional args:
  -e name load session by name
  -E      use EDITOR for undetached edits
  -f      run filter as cmd on prompt key
+ -g      regex filters [default: string]
  -H      show hidden files
  -i      nav-as-you-type mode
  -K      detect key collision
@@ -197,7 +198,6 @@ optional args:
  -p file selection file [stdout if '-']
  -r      use advcpmv patched cp, mv
  -R      disable rollover at edges
- -s      string filters [default: regex]
  -S      du mode
  -t      disable dir auto-select
  -v      show version

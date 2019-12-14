@@ -13,6 +13,7 @@
 .Op Ar -e name
 .Op Ar -E
 .Op Ar -f
+.Op Ar -g
 .Op Ar -H
 .Op Ar -i
 .Op Ar -K
@@ -20,7 +21,6 @@
 .Op Ar -p file
 .Op Ar -r
 .Op Ar -R
-.Op Ar -s
 .Op Ar -S
 .Op Ar -v
 .Op Ar -x
@@ -65,6 +65,9 @@ supports the following options:
 .Fl f
         run filter as command when the prompt key is pressed
 .Pp
+.Fl g
+        use regex filters instead of substring match
+.Pp
 .Fl H
         show hidden files
 .Pp
@@ -88,9 +91,6 @@ supports the following options:
 .Pp
 .Fl R
         disable rollover at edges
-.Pp
-.Fl s
-        use substring match for filters instead of regex
 .Pp
 .Fl S
         start in disk usage analyzer mode
@@ -137,10 +137,9 @@ When a session is loaded dynamically, the last working session is saved automati
 All the session files are located in the \fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions\fR directory by the session name.
 "@" is the "last session" file.
 .Sh FILTERS
-Filters support regexes (default) to instantly (search-as-you-type) list the matching
-entries in the current directory.
+Filters are substrings to find matching entries in the current directory instantly (search-as-you-type). There is a program option to use regex filters.
 .Pp
-Common use cases:
+Common regex use cases:
 .Pp
 (1) To list all matches starting with the filter expression, start the expression
 with a '^' (caret) symbol.
@@ -148,8 +147,6 @@ with a '^' (caret) symbol.
 (2) Type '\\.mkv' to list all MKV files.
 .br
 (3) Use '.*' to match any character (\fIsort of\fR fuzzy search).
-.Pp
-There is a program option to filter entries by substring match instead of regex.
 .Pp
 There is a program option to execute the current filter as a command when the prompt key is pressed.
 .Pp
