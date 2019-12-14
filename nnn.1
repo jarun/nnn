@@ -18,6 +18,7 @@
 .Op Ar -K
 .Op Ar -n
 .Op Ar -p file
+.Op Ar -Q
 .Op Ar -r
 .Op Ar -R
 .Op Ar -S
@@ -81,6 +82,9 @@ supports the following options:
 .Pp
 .Fl "p file"
         copy (or \fIpick\fR) selection to file, or stdout if file='-'
+.Pp
+.Fl Q
+        disable confirmation when quitting program with multiple active contexts
 .Pp
 .Fl r
         show cp, mv progress (Linux-only, needs advcpmv; '^T' shows the progress on BSD/macOS)

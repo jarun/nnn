@@ -227,8 +227,9 @@ typedef struct {
 	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 3;
+	uint reserved   : 2;
 	/* The following settings are global */
+	uint forcequit  : 1;  /* Do not confirm when quitting program */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint picker     : 1;  /* Write selection to user-specified file */
@@ -281,6 +282,7 @@ static settings cfg = {
 	0, /* showdetail */
 	1, /* ctxactive */
 	0, /* reserved */
+	0, /* forcequit */
 	0, /* curctx */
 	0, /* dircolor */
 	0, /* picker */
@@ -5348,7 +5350,7 @@ nochange:
 					setdirwatch();
 					goto begin;
 				}
-			} else {
+			} else if (!cfg.forcequit) {
 				for (r = 0; r < CTX_MAX; ++r)
 					if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
 						r = get_input(messages[MSG_QUIT_ALL]);
@@ -5430,10 +5432,11 @@ static void usage(void)
 		" -n      version sort\n"
 		" -o      open files on Enter\n"
 		" -p file selection file [stdout if '-']\n"
+		" -Q      no quit confirmation\n"
 		" -r      use advcpmv patched cp, mv\n"
-		" -R      disable rollover at edges\n"
+		" -R      no rollover at edges\n"
 		" -S      du mode\n"
-		" -t      disable dir auto-select\n"
+		" -t      no dir auto-select\n"
 		" -v      show version\n"
 		" -x      notis, sel to system clipboard\n"
 		" -h      show help\n\n"
@@ -5578,7 +5581,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKiab:cde:Egnop:rRtvxh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKiab:cde:Egnop:QrRtvxh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5635,6 +5638,9 @@ int main(int argc, char *argv[])
 				g_selpath = realpath(optarg, NULL);
 				unlink(g_selpath);
 			}
+			break;
+		case 'Q':
+			cfg.forcequit = 1;
 			break;
 		case 'r':
 #ifdef __linux__

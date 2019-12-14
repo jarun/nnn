@@ -22,6 +22,7 @@ args=(
     '(-n)-n[use version compare to sort files]'
     '(-o)-o[open files only on Enter]'
     '(-p)-p[copy selection to file]:file name'
+    '(-Q)-Q[disable quit confirmation]'
     '(-r)-r[show cp, mv progress (Linux-only)]'
     '(-R)-R[disable rollover at edges]'
     '(-S)-S[start in disk usage analyzer mode]'
