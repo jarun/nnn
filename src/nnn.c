@@ -227,9 +227,8 @@ typedef struct {
 	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 2;
+	uint reserved   : 3;
 	/* The following settings are global */
-	uint x11        : 1;  /* Copy to system clipboard and show notis */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint picker     : 1;  /* Write selection to user-specified file */
@@ -241,7 +240,7 @@ typedef struct {
 	uint runplugin  : 1;  /* Choose plugin mode */
 	uint runctx     : 2;  /* The context in which plugin is to be run */
 	uint filter_re  : 1;  /* Use regex filters */
-	uint filtercmd  : 1;  /* Run filter as command on no match */
+	uint x11        : 1;  /* Copy to system clipboard and show notis */
 	uint trash      : 1;  /* Move removed files to trash */
 	uint mtime      : 1;  /* Use modification time (else access time) */
 	uint cliopener  : 1;  /* All-CLI app opener */
@@ -282,7 +281,6 @@ static settings cfg = {
 	0, /* showdetail */
 	1, /* ctxactive */
 	0, /* reserved */
-	0, /* x11 */
 	0, /* curctx */
 	0, /* dircolor */
 	0, /* picker */
@@ -294,7 +292,7 @@ static settings cfg = {
 	0, /* runplugin */
 	0, /* runctx */
 	0, /* filter_re */
-	0, /* filtercmd */
+	0, /* x11 */
 	0, /* trash */
 	1, /* mtime */
 	0, /* cliopener */
@@ -2058,27 +2056,9 @@ static int filterentries(char *path)
 
 		if (r == OK) {
 			/* Handle all control chars in main loop */
-			if ((*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^')
-			    || (*ch == ']' && len == 1)) {
+			if (*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^') {
 				DPRINTF_D(*ch);
 				DPRINTF_S(keyname(*ch));
-
-				/* If there's a filter, try a command on ^P */
-				if (cfg.filtercmd && *ch == CONTROL('P') && len > 1) {
-					prompt_run(pln, (ndents ? dents[cur].name : ""), path);
-
-					/* Clear the prompt */
-					while (len > 1)
-						wln[--len] = '\0';
-					wcstombs(ln, wln, REGEX_MAX);
-					ndents = total;
-					cur = oldcur = 0; /* Ran a command, refresh */
-					if (matches(pln) != -1)
-						redraw(path);
-
-					printprompt(ln);
-					continue;
-				}
 
 				if (len == 1)
 					cur = oldcur;
@@ -3497,7 +3477,7 @@ static void show_help(const char *path)
 		  "cC  Execute file   i ^V  Pick plugin\n"
 		  "cs  Manage session    =  Launch app\n"
 		  "cc  Connect remote    u  Unmount\n"
-	       "9] ^P  Prompt/run cmd    L  Lock\n"};
+	       "9] ^P  Prompt            L  Lock\n"};
 
 	fd = create_tmp_file();
 	if (fd == -1)
@@ -5443,7 +5423,6 @@ static void usage(void)
 		" -d      detail mode\n"
 		" -e name load session by name\n"
 		" -E      use EDITOR for undetached edits\n"
-		" -f      run filter as cmd on prompt key\n"
 		" -g      regex filters [default: string]\n"
 		" -H      show hidden files\n"
 		" -i      nav-as-you-type mode\n"
@@ -5599,7 +5578,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKiab:cde:Efgnop:rRtvxh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKiab:cde:Egnop:rRtvxh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5626,9 +5605,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'E':
 			cfg.waitedit = 1;
-			break;
-		case 'f':
-			cfg.filtercmd = 1;
 			break;
 		case 'g':
 			cfg.filter_re = 1;

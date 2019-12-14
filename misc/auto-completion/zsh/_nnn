@@ -15,7 +15,6 @@ args=(
     '(-d)-d[start in detail mode]'
     '(-e)-e[load session]:session name'
     '(-E)-E[use EDITOR for undetached edits]'
-    '(-f)-f[run filter as cmd on prompt key]'
     '(-g)-g[regex filters]'
     '(-H)-H[show hidden files]'
     '(-i)-i[start in navigate-as-you-type mode]'
