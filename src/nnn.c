@@ -422,49 +422,46 @@ static char * const utils[] = {
 /* Common strings */
 #define MSG_NO_TRAVERSAL 0
 #define MSG_INVBM_KEY 1
-#define STR_DATE_ID 2
-#define STR_TMPFILE 3
-#define MSG_0_SELECTED 4
-#define MSG_UTIL_MISSING 5
-#define MSG_FAILED 6
-#define MSG_SSN_NAME 7
-#define MSG_CP_MV_AS 8
-#define MSG_CUR_SEL_OPTS 9
-#define MSG_FORCE_RM 10
-#define MSG_CREATE_CTX 11
-#define MSG_NEW_OPTS 12
-#define MSG_CLI_MODE 13
-#define MSG_OVERWRITE 14
-#define MSG_SSN_OPTS 15
-#define MSG_QUIT_ALL 16
-#define MSG_HOSTNAME 17
-#define MSG_ARCHIVE_NAME 18
-#define MSG_OPEN_WITH 19
-#define MSG_REL_PATH 20
-#define MSG_LINK_SUFFIX 21
-#define MSG_COPY_NAME 22
-#define MSG_CONTINUE 23
-#define MSG_SEL_MISSING 24
-#define MSG_ACCESS 25
-#define MSG_0_CREATED 26
-#define MSG_NOT_REG_FILE 27
-#define MSG_PERM_DENIED 28
-#define MSG_EMPTY_FILE 29
-#define MSG_UNSUPPORTED 30
-#define MSG_NOT_SET 31
-#define MSG_DIR_CHANGED 32
-#define MSG_0_FILES 33
-#define MSG_EXISTS 34
-#define MSG_FEW_COLOUMNS 35
-#define MSG_REMOTE_OPTS 36
-#define MSG_RCLONE_DELAY 37
-#define MSG_APP_NAME 38
-#define MSG_ARCHIVE_OPTS 39
+#define STR_TMPFILE 2
+#define MSG_0_SELECTED 3
+#define MSG_UTIL_MISSING 4
+#define MSG_FAILED 5
+#define MSG_SSN_NAME 6
+#define MSG_CP_MV_AS 7
+#define MSG_CUR_SEL_OPTS 8
+#define MSG_FORCE_RM 9
+#define MSG_CREATE_CTX 10
+#define MSG_NEW_OPTS 11
+#define MSG_CLI_MODE 12
+#define MSG_OVERWRITE 13
+#define MSG_SSN_OPTS 14
+#define MSG_QUIT_ALL 15
+#define MSG_HOSTNAME 16
+#define MSG_ARCHIVE_NAME 17
+#define MSG_OPEN_WITH 18
+#define MSG_REL_PATH 19
+#define MSG_LINK_SUFFIX 20
+#define MSG_COPY_NAME 21
+#define MSG_CONTINUE 22
+#define MSG_SEL_MISSING 23
+#define MSG_ACCESS 24
+#define MSG_0_CREATED 25
+#define MSG_NOT_REG_FILE 26
+#define MSG_PERM_DENIED 27
+#define MSG_EMPTY_FILE 28
+#define MSG_UNSUPPORTED 29
+#define MSG_NOT_SET 30
+#define MSG_DIR_CHANGED 31
+#define MSG_EXISTS 32
+#define MSG_FEW_COLUMNS 33
+#define MSG_REMOTE_OPTS 34
+#define MSG_RCLONE_DELAY 35
+#define MSG_APP_NAME 36
+#define MSG_ARCHIVE_OPTS 37
 
 static const char * const messages[] = {
 	"no traversal",
 	"invalid key",
-	"%F %T %z",
 	"/.nnnXXXXXX",
 	"0 selected",
 	"missing util",
@@ -495,7 +492,6 @@ static const char * const messages[] = {
 	"unsupported file",
 	"not set",
 	"dir changed, range sel off",
-	"0 files",
 	"entry exists",
 	"too few columns!",
 	"'s'shfs / 'r'clone?",
@@ -4018,7 +4014,7 @@ static void redraw(char *path)
 
 	/* Fail redraw if < than 10 columns, context info prints 10 chars */
 	if (ncols < MIN_DISPLAY_COLS) {
-		printmsg(messages[MSG_FEW_COLOUMNS]);
+		printmsg(messages[MSG_FEW_COLUMNS]);
 		return;
 	}
 
