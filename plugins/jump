@@ -4,6 +4,8 @@
 #
 # Requires: autojump - https://github.com/wting/autojump
 #
+# Note: autojump STORES NAVIGATION PATTERNS
+#
 # Shell: POSIX compliant
 # Author: Marty Buchaus
 

@@ -14,7 +14,6 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 
 | Plugin (a-z) | Description | Lang | Deps |
 | --- | --- | --- | --- |
-| autojump | Navigate to dir/path | sh | autojump |
 | boom | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | dups | List non-empty duplicate files in current dir | sh | find, md5sum,<br>sort uniq xargs |
 | chksum | Create and verify checksums | sh | md5sum,<br>sha256sum |
@@ -33,6 +32,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | imgur | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) | bash | - |
 | imgviu | View an image or images in dir in `$PAGER` | sh | [viu](https://github.com/atanunq/viu), less |
 | ipinfo | Fetch external IP address and whois information | sh | curl, whois |
+| jump | Navigate to dir/path (**autojump stores navigation patterns**) | sh | autojump |
 | kdeconnect | Send selected files to an Android device | sh | kdeconnect-cli |
 | launch | GUI application launcher | sh | fzf/fzy |
 | mediainf | Show media information | sh | mediainfo |
