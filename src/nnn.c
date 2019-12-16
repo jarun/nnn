@@ -3420,9 +3420,14 @@ static void printkv(kv *kvarr, FILE *fp, uchar max)
 static void sprintkeys(kv *kvarr, char *buf, uchar max)
 {
 	uchar i = 0;
+	uchar j = 0;
 
-	for (; i < max && kvarr[i].key; ++i)
-		buf += snprintf(buf, CMD_LEN_MAX, " %c", (char)kvarr[i].key);
+	for (; i < max && kvarr[i].key; ++i, j+=2) {
+		buf[j] = ' ';
+		buf[j+1] = kvarr[i].key;
+	}
+
+	buf[j] = '\0';
 }
 
 /*
