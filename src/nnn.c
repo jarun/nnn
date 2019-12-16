@@ -3432,6 +3432,14 @@ static void printkv(kv *kvarr, FILE *fp, uchar max)
 		fprintf(fp, " %c: %s\n", (char)kvarr[i].key, kvarr[i].val);
 }
 
+static void sprintkv(kv *kvarr, char *buf, uchar max)
+{
+	uchar i = 0;
+
+	for (; i < max && kvarr[i].key; ++i)
+		buf += snprintf(buf, CMD_LEN_MAX, " %c=%s", (char)kvarr[i].key, kvarr[i].val);
+}
+
 /*
  * The help string tokens (each line) start with a HEX value
  * which indicates the number of spaces to print before the
@@ -5180,10 +5188,15 @@ nochange:
 				}
 
 				if (sel == SEL_PLUGKEY) {
+					xstrlcpy(g_buf, "pick plugin:", CMD_LEN_MAX);
+					sprintkv(plug, g_buf + strlen(g_buf), PLUGIN_MAX);
+					printprompt(g_buf);
 					r = get_input(NULL);
 					tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
-					if (!tmp)
+					if (!tmp) {
+						clearprompt();
 						goto nochange;
+					}
 
 					if (tmp[0] == '_' && tmp[1]) {
 						xstrlcpy(newpath, ++tmp, PATH_MAX);
