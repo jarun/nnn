@@ -307,7 +307,6 @@ static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 static int ndents, cur, curscroll, total_dents = ENTRY_INCR;
 static int xlines, xcols;
 static int nselected;
-static bool rangesel;
 static uint idle;
 static uint idletimeout, selbufpos, lastappendpos, selbuflen;
 static char *bmstr;
@@ -333,6 +332,7 @@ static kv plug[PLUGIN_MAX];
 static uchar g_tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
 static bool interrupted = FALSE;
+static bool rangesel = FALSE;
 
 /* Retain old signal handlers */
 #ifdef __linux__
@@ -4136,7 +4136,8 @@ static void redraw(char *path)
 			c = cfg.apparentsz ? 'a' : 'd';
 
 			mvprintw(lastln, 0, "%d/%d [%d:%s] %cu:%s free:%s files:%lu %lldB %s",
-				 cur + 1, ndents, cfg.selmode, (rangesel ? "*" : nselected ? xitoa(nselected) : ""),
+				 cur + 1, ndents, cfg.selmode,
+				 (rangesel ? "*" : (nselected ? xitoa(nselected) : "")),
 				 c, buf, coolsize(get_fs_info(path, FREE)), num_files,
 				 (ll)pent->blocks << blk_shift, ptr);
 		} else { /* light or detail mode */
@@ -4149,7 +4150,8 @@ static void redraw(char *path)
 			buf[sizeof(buf)-1] = '\0';
 
 			mvprintw(lastln, 0, "%d/%d [%d:%s] %s%s %s %s %s [%s]",
-				 cur + 1, ndents, cfg.selmode, (rangesel ? "*" : nselected ? xitoa(nselected) : ""),
+				 cur + 1, ndents, cfg.selmode,
+				 (rangesel ? "*" : (nselected ? xitoa(nselected) : "")),
 				 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr, base);
 		}
 	} else
