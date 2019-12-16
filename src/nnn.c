@@ -458,6 +458,7 @@ static char * const utils[] = {
 #define MSG_RCLONE_DELAY 35
 #define MSG_APP_NAME 36
 #define MSG_ARCHIVE_OPTS 37
+#define MSG_PLUGIN_KEYS 38
 
 static const char * const messages[] = {
 	"no traversal",
@@ -498,6 +499,7 @@ static const char * const messages[] = {
 	"may take a while, try refresh",
 	"app name: ",
 	"e'x'tract / 'l'ist / 'm'ount?",
+	"plugin keys:",
 };
 
 /* Supported configuration environment variables */
@@ -3415,12 +3417,12 @@ static void printkv(kv *kvarr, FILE *fp, uchar max)
 		fprintf(fp, " %c: %s\n", (char)kvarr[i].key, kvarr[i].val);
 }
 
-static void sprintkv(kv *kvarr, char *buf, uchar max)
+static void sprintkeys(kv *kvarr, char *buf, uchar max)
 {
 	uchar i = 0;
 
 	for (; i < max && kvarr[i].key; ++i)
-		buf += snprintf(buf, CMD_LEN_MAX, " %c=%s", (char)kvarr[i].key, kvarr[i].val);
+		buf += snprintf(buf, CMD_LEN_MAX, " %c", (char)kvarr[i].key);
 }
 
 /*
@@ -5174,8 +5176,8 @@ nochange:
 				}
 
 				if (sel == SEL_PLUGKEY) {
-					xstrlcpy(g_buf, "pick plugin:", CMD_LEN_MAX);
-					sprintkv(plug, g_buf + strlen(g_buf), PLUGIN_MAX);
+					xstrlcpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
+					sprintkeys(plug, g_buf + strlen(g_buf), PLUGIN_MAX);
 					printprompt(g_buf);
 					r = get_input(NULL);
 					tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
