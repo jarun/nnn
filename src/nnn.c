@@ -1775,19 +1775,6 @@ static int xstrverscasecmp(const char * const s1, const char * const s2)
 
 static int (*cmpfn)(const char * const s1, const char * const s2) = &xstricmp;
 
-/* Return the integer value of a char representing HEX */
-static char xchartohex(char c)
-{
-	if (xisdigit(c))
-		return c - '0';
-
-	c = TOUPPER(c);
-	if (c >= 'A' && c <= 'F')
-		return c - 'A' + 10;
-
-	return c;
-}
-
 static int setfilter(regex_t *regex, const char *filter)
 {
 	return regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
@@ -3454,39 +3441,42 @@ static void show_help(const char *path)
 	FILE *fp;
 	const char *start, *end;
 	const char helpstr[] = {
-		"0\n"
-		"1NAVIGATION\n"
-	       "9Up k  Up          PgUp ^U  Scroll up\n"
-	     "7Down j  Down        PgDn ^D  Scroll down\n"
-	     "7Left h  Parent      ~ ` @ -  HOME, /, start, last\n"
-	       "9g ^A  Top     Ret Right l  Open\n"
-	       "9G ^E  Bottom            '  First file\n"
-		  "cb  Pin CWD          ^B  Go to pinned dir\n"
-	       "9, ^/  Lead key    N LeadN  Context N\n"
-	    "6(Sh)Tab  Cycle context     d  Detail view toggle\n"
-		  "c/  Filter       Ins ^N  Nav-as-you-type toggle\n"
-		"aEsc  Exit prompt   ^L F5  Redraw/clear prompt\n"
-	          "c.  Show/hide dots    ?  Help, conf\n"
-	       "9Q ^Q  Quit  ^G  QuitCD  q  Quit context\n"
-		"1FILES\n"
-		 "b^O  Open with...      n  Create new/link\n"
-		  "cD  File details  ^R F2  Rename/duplicate\n"
-	 "3Space ^J/a  Sel toggle/all    r  Batch rename\n"
-	       "9m ^K  Sel range, clear  M  List sel\n"
-		  "cP  Copy sel here     K  Edit sel\n"
-		  "cV  Move sel here     w  Copy/move sel as\n"
-		  "cX  Del sel          ^X  Del entry\n"
-		  "cf  Archive        o ^F  Archive ops\n"
-		  "ce  Edit in EDITOR    p  Open in PAGER\n"
-		"1ORDER TOGGLES\n"
-		  "cA  Apparent du       S  du\n"
-		  "cz  Size   E  Extn    t  Time\n"
-		"1MISC\n"
-	       "9! ^]  Shell           ; x  Plugin key\n"
-		  "cC  Execute file   i ^V  Pick plugin\n"
-		  "cs  Manage session    =  Launch app\n"
-		  "cc  Connect remote    u  Unmount\n"
-	       "9] ^P  Prompt            L  Lock\n"};
+		"\n"
+		" NAVIGATION\n"
+	       "%-9cUp k  Up%-20cPgUp ^U  Scroll up\n"
+	     "%-7cDown j  Down%-18cPgDn ^D  Scroll down\n"
+	     "%-7cLeft h  Parent%-16c~ ` @ -  HOME, /, start, last\n"
+	       "%-9cg ^A  Top%-15cRet Right l  Open\n"
+	       "%-9cG ^E  Bottom%-22c'  First file\n"
+		  "%-12cb  Pin CWD%-20c^B  Go to pinned dir\n"
+	       "%-9c, ^/  Lead key%-14cN LeadN  Context N\n"
+	    "%-6c(Sh)Tab  Cycle context%-15cd  Detail view toggle\n"
+		  "%-12c/  Filter%-17cIns ^N  Nav-as-you-type toggle\n"
+		"%-10cEsc  Exit prompt%-13c^L F5  Redraw/clear prompt\n"
+	          "%-12c.  Show/hide dots%-14c?  Help, conf\n"
+	       "%-9cQ ^Q  Quit%-24cq  Quit context\n"
+	       "%-11c^G  QuitCD%-1c\n"
+		" FILES\n"
+		 "%-11c^O  Open with...%-16cn  Create new/link\n"
+		  "%-12cD  File details%-12c^R F2  Rename/duplicate\n"
+	 "%-3cSpace ^J/a  Sel toggle/all%-14cr  Batch rename\n"
+	       "%-9cm ^K  Sel range, clear%-12cM  List sel\n"
+		  "%-12cP  Copy sel here%-15cK  Edit sel\n"
+		  "%-12cV  Move sel here%-15cw  Copy/move sel as\n"
+		  "%-12cX  Delete sel%-17c^X  Delete entry\n"
+		  "%-12cf  Archive%-18co ^F  Archive ops\n"
+		  "%-12ce  Edit in EDITOR%-14cp  Open in PAGER\n"
+		" ORDER TOGGLES\n"
+		  "%-12cA  Apparent du%-17cS  du\n"
+		  "%-12cz  Size%-24ct  Time\n"
+		  "%-12cE  Extension%-1c\n"
+		" MISC\n"
+	       "%-9c! ^]  Shell%-21c; x  Plugin key\n"
+		  "%-12cC  Execute file%-13ci ^V  Pick plugin\n"
+		  "%-12cs  Manage session%-14c=  Launch app\n"
+		  "%-12cc  Connect remote%-14cu  Unmount\n"
+	       "%-9c] ^P  Prompt%-22cL  Lock\n"
+	       };
 
 	fd = create_tmp_file();
 	if (fd == -1)
@@ -3501,8 +3491,8 @@ static void show_help(const char *path)
 	start = end = helpstr;
 	while (*end) {
 		if (*end == '\n') {
-			fprintf(fp, "%*c%.*s",
-				xchartohex(*start), ' ', (int)(end - start), start + 1);
+			xstrlcpy(g_buf, start, end - start + 2);
+			fprintf(fp, g_buf, ' ', ' ');
 			start = end + 1;
 		}
 
