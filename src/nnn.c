@@ -307,6 +307,7 @@ static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 static int ndents, cur, curscroll, total_dents = ENTRY_INCR;
 static int xlines, xcols;
 static int nselected;
+static bool rangesel;
 static uint idle;
 static uint idletimeout, selbufpos, lastappendpos, selbuflen;
 static char *bmstr;
@@ -451,15 +452,14 @@ static char * const utils[] = {
 #define MSG_EMPTY_FILE 29
 #define MSG_UNSUPPORTED 30
 #define MSG_NOT_SET 31
-#define MSG_RANGE_SEL_ON 32
-#define MSG_DIR_CHANGED 33
-#define MSG_0_FILES 34
-#define MSG_EXISTS 35
-#define MSG_FEW_COLOUMNS 36
-#define MSG_REMOTE_OPTS 37
-#define MSG_RCLONE_DELAY 38
-#define MSG_APP_NAME 39
-#define MSG_ARCHIVE_OPTS 40
+#define MSG_DIR_CHANGED 32
+#define MSG_0_FILES 33
+#define MSG_EXISTS 34
+#define MSG_FEW_COLOUMNS 35
+#define MSG_REMOTE_OPTS 36
+#define MSG_RCLONE_DELAY 37
+#define MSG_APP_NAME 38
+#define MSG_ARCHIVE_OPTS 39
 
 static const char * const messages[] = {
 	"no traversal",
@@ -494,7 +494,6 @@ static const char * const messages[] = {
 	"empty: edit or open with",
 	"unsupported file",
 	"not set",
-	"range sel on",
 	"dir changed, range sel off",
 	"0 files",
 	"entry exists",
@@ -4137,7 +4136,7 @@ static void redraw(char *path)
 			c = cfg.apparentsz ? 'a' : 'd';
 
 			mvprintw(lastln, 0, "%d/%d [%d:%s] %cu:%s free:%s files:%lu %lldB %s",
-				 cur + 1, ndents, cfg.selmode, (nselected ?  xitoa(nselected) : ""),
+				 cur + 1, ndents, cfg.selmode, (rangesel ? "*" : nselected ? xitoa(nselected) : ""),
 				 c, buf, coolsize(get_fs_info(path, FREE)), num_files,
 				 (ll)pent->blocks << blk_shift, ptr);
 		} else { /* light or detail mode */
@@ -4150,7 +4149,7 @@ static void redraw(char *path)
 			buf[sizeof(buf)-1] = '\0';
 
 			mvprintw(lastln, 0, "%d/%d [%d:%s] %s%s %s %s %s [%s]",
-				 cur + 1, ndents, cfg.selmode, (nselected ?  xitoa(nselected) : ""),
+				 cur + 1, ndents, cfg.selmode, (rangesel ? "*" : nselected ? xitoa(nselected) : ""),
 				 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr, base);
 		}
 	} else
@@ -4167,7 +4166,7 @@ static void browse(char *ipath, const char *session)
 	int r = -1, fd, presel, selstartid = 0, selendid = 0;
 	ino_t inode = 0;
 	enum action sel;
-	bool dir_changed = FALSE, rangesel = FALSE;
+	bool dir_changed = FALSE;
 	struct stat sb;
 	char *path, *lastdir, *lastname, *dir, *tmp;
 	MEVENT event;
@@ -4857,8 +4856,6 @@ nochange:
 			if (rangesel) { /* Range selection started */
 				inode = sb.st_ino;
 				selstartid = cur;
-				printmsg(messages[MSG_RANGE_SEL_ON]);
-				xdelay(XDELAY_INTERVAL_MS);
 				continue;
 			}
 
