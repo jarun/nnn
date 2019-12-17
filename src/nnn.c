@@ -3552,6 +3552,37 @@ static void show_help(const char *path)
 	unlink(g_tmpfpath);
 }
 
+static bool run_cmd_as_plugin(const char *path, char *file, char *newpath, char *runfile)
+{
+	uchar flags = F_CLI | F_CONFIRM;
+	size_t len;
+
+	DPRINTF_S(file);
+
+	/* Get rid of preceding _ */
+	++file;
+
+	if (!*file)
+		return FALSE;
+
+	len = strlen(file);
+	if (len > 1 && file[len - 1] == '*') {
+		flags &= ~F_CONFIRM; /* GUI case */
+		file[len - 1] = '\0'; /* Get rid of trailing nowait symbol */
+		--len;
+	}
+
+	xstrlcpy(newpath, file, PATH_MAX);
+	if (is_suffix(file, " $nnn")) {
+		/* Set `\0` to clear ' $nnn' suffix */
+		newpath[len - 5] = '\0';
+	} else
+		runfile = NULL;
+
+	spawn(newpath, runfile, NULL, path, flags);
+	return TRUE;
+}
+
 static bool plctrl_init(void)
 {
 	snprintf(g_buf, CMD_LEN_MAX, "nnn-pipe.%d", getpid());
@@ -3567,10 +3598,13 @@ static bool plctrl_init(void)
 	return _SUCCESS;
 }
 
-static bool run_selected_plugin(char **path, const char *file, char *newpath, char *runfile, char **lastname, char **lastdir)
+static bool run_selected_plugin(char **path, char *file, char *newpath, char *runfile, char **lastname, char **lastdir)
 {
 	int fd;
 	size_t len;
+
+	if (*file == '_')
+		return run_cmd_as_plugin(*path, file, newpath, runfile);
 
 	if (!g_plinit) {
 		plctrl_init();
@@ -5214,24 +5248,11 @@ nochange:
 						goto nochange;
 					}
 
-					if (tmp[0] == '_' && tmp[1]) {
-						xstrlcpy(newpath, ++tmp, PATH_MAX);
-						if (is_suffix(newpath, " $nnn")) {
-							tmp = (ndents ? dents[cur].name : NULL);
-							/* Set `\0` to clear ' $nnn' suffix */
-							newpath[strlen(newpath) - 5] = '\0';
-						} else
-							tmp = NULL;
-
-						spawn(newpath, tmp, NULL, path, F_CLI | F_CONFIRM);
-					} else {
-						if (!run_selected_plugin(&path, tmp, newpath,
-								(ndents ? dents[cur].name : NULL),
-								&lastname, &lastdir)) {
-							printwait(messages[MSG_FAILED],
-								  &presel);
-							goto nochange;
-						}
+					if (!run_selected_plugin(&path, tmp, newpath,
+								 (ndents ? dents[cur].name : NULL),
+								 &lastname, &lastdir)) {
+						printwait(messages[MSG_FAILED], &presel);
+						goto nochange;
 					}
 
 					if (ndents)
