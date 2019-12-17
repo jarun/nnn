@@ -3469,7 +3469,7 @@ static void show_help(const char *path)
 	       "9g ^A  Top%-15cRet Right l  Open\n"
 	       "9G ^E  Bottom%-22c'  First file\n"
 		  "cb  Pin CWD%-20c^B  Go to pinned dir\n"
-	      "9c, ^/  Lead key%-14cN LeadN  Context N\n"
+	      "8c, ^/  Lead key%-14cN LeadN  Context N\n"
 	    "6(Sh)Tab  Cycle context%-15cd  Detail view toggle\n"
 		  "c/  Filter%-17cIns ^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt%-13c^L F5  Redraw/clear prompt\n"
