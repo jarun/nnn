@@ -421,7 +421,7 @@ static char * const utils[] = {
 
 /* Common strings */
 #define MSG_NO_TRAVERSAL 0
-#define MSG_INVBM_KEY 1
+#define MSG_INVALID_KEY 1
 #define STR_TMPFILE 2
 #define MSG_0_SELECTED 3
 #define MSG_UTIL_MISSING 4
@@ -3434,7 +3434,7 @@ static void printkv(kv *kvarr, FILE *fp, uchar max)
 		fprintf(fp, " %c: %s\n", (char)kvarr[i].key, kvarr[i].val);
 }
 
-static void sprintkeys(kv *kvarr, char *buf, uchar max)
+static void printkeys(kv *kvarr, char *buf, uchar max)
 {
 	uchar i = 0;
 	uchar j = 0;
@@ -4574,7 +4574,7 @@ nochange:
 				break;
 			default:
 				xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
-				sprintkeys(bookmark, g_buf + strlen(g_buf), BM_MAX);
+				printkeys(bookmark, g_buf + strlen(g_buf), BM_MAX);
 				printprompt(g_buf);
 				fd = get_input(NULL);
 			}
@@ -4636,7 +4636,7 @@ nochange:
 			}
 
 			if (!get_kv_val(bookmark, newpath, fd, BM_MAX, TRUE)) {
-				clearprompt();
+				printwait(messages[MSG_INVALID_KEY], &presel);;
 				goto nochange;
 			}
 
@@ -5205,12 +5205,12 @@ nochange:
 
 				if (sel == SEL_PLUGKEY) {
 					xstrlcpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
-					sprintkeys(plug, g_buf + strlen(g_buf), PLUGIN_MAX);
+					printkeys(plug, g_buf + strlen(g_buf), PLUGIN_MAX);
 					printprompt(g_buf);
 					r = get_input(NULL);
 					tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
 					if (!tmp) {
-						clearprompt();
+						printwait(messages[MSG_INVALID_KEY], &presel);
 						goto nochange;
 					}
 
@@ -5741,7 +5741,7 @@ int main(int argc, char *argv[])
 			initpath = get_kv_val(bookmark, NULL, *arg, BM_MAX, TRUE);
 
 		if (!initpath) {
-			fprintf(stderr, "%s\n", messages[MSG_INVBM_KEY]);
+			fprintf(stderr, "%s\n", messages[MSG_INVALID_KEY]);
 			return _FAILURE;
 		}
 	} else if (argc == optind) {
