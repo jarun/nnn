@@ -4620,7 +4620,7 @@ nochange:
 			}
 
 			if (!get_kv_val(bookmark, newpath, fd, BM_MAX, TRUE)) {
-				printwait(messages[MSG_INVBM_KEY], &presel);
+				clearprompt();
 				goto nochange;
 			}
 
