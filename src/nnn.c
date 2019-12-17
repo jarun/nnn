@@ -4580,6 +4580,9 @@ nochange:
 			}
 
 			switch (fd) {
+			case 27:
+				clearprompt();
+				goto nochange;
 			case '~': // fallthrough
 			case '`': // fallthrough
 			case '-': // fallthrough
@@ -5208,6 +5211,10 @@ nochange:
 					printkeys(plug, g_buf + strlen(g_buf), PLUGIN_MAX);
 					printprompt(g_buf);
 					r = get_input(NULL);
+					if (r == 27) {
+						clearprompt();
+						goto nochange;
+					}
 					tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
 					if (!tmp) {
 						printwait(messages[MSG_INVALID_KEY], &presel);
