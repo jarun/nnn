@@ -3513,7 +3513,7 @@ static void show_help(const char *path)
 		if (*end == '\n') {
 			snprintf(g_buf, CMD_LEN_MAX, "%*c%.*s",
 				 xchartohex(*start), ' ', (int)(end - start), start + 1);
-			fprintf(fp, g_buf, ' ', ' ');
+			fprintf(fp, g_buf, ' ');
 			start = end + 1;
 		}
 
