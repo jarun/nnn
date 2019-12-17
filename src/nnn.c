@@ -2764,7 +2764,7 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 		       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size), pname);
 		break;
 	case S_IFLNK:
-		printw("%c%-16.16s  %s        @  %s@\n", cp, timebuf, permbuf, pname);
+		printw("%c%-16.16s  %s%-8c@  %s@\n", cp, timebuf, permbuf, ' ', pname);
 		break;
 	case S_IFSOCK:
 		ind1 = ind2[0] = '='; // fallthrough
@@ -2780,7 +2780,7 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 	default:
 		if (!ind1)
 			ind1 = ind2[0] = '?';
-		printw("%c%-16.16s  %s        %c  %s%s\n", cp, timebuf, permbuf, ind1, pname, ind2);
+		printw("%c%-16.16s  %s%-8c%c  %s%s\n", cp, timebuf, permbuf, ' ', ind1, pname, ind2);
 		break;
 	}
 
@@ -5447,28 +5447,31 @@ static void usage(void)
 		"positional args:\n"
 		"  PATH   start dir [default: .]\n\n"
 		"optional args:\n"
-		" -a      use access time\n"
+		" -a%-6cuse access time\n"
 		" -b key  open bookmark key\n"
-		" -c      cli-only opener\n"
-		" -d      detail mode\n"
+		" -c%-6ccli-only opener\n"
+		" -d%-6cdetail mode\n"
 		" -e name load session by name\n"
-		" -E      use EDITOR for undetached edits\n"
-		" -g      regex filters [default: string]\n"
-		" -H      show hidden files\n"
-		" -i      nav-as-you-type mode\n"
-		" -K      detect key collision\n"
-		" -n      version sort\n"
-		" -o      open files on Enter\n"
+		" -E%-6cuse EDITOR for undetached edits\n"
+		" -g%-6cregex filters [default: string]\n"
+		" -H%-6cshow hidden files\n"
+		" -i%-6cnav-as-you-type mode\n"
+		" -K%-6cdetect key collision\n"
+		" -n%-6cversion sort\n"
+		" -o%-6copen files on Enter\n"
 		" -p file selection file [stdout if '-']\n"
-		" -Q      no quit confirmation\n"
-		" -r      use advcpmv patched cp, mv\n"
-		" -R      no rollover at edges\n"
-		" -S      du mode\n"
-		" -t      no dir auto-select\n"
-		" -v      show version\n"
-		" -x      notis, sel to system clipboard\n"
-		" -h      show help\n\n"
-		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
+		" -Q%-6cno quit confirmation\n"
+		" -r%-6cuse advcpmv patched cp, mv\n"
+		" -R%-6cno rollover at edges\n"
+		" -S%-6cdu mode\n"
+		" -t%-6cno dir auto-select\n"
+		" -v%-6cshow version\n"
+		" -x%-6cnotis, sel to system clipboard\n"
+		" -h%-6cshow help\n\n"
+		"v%s\n%s\n", __func__,
+		' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+		' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
+		VERSION, GENERAL_INFO);
 }
 
 static bool setup_config(void)
