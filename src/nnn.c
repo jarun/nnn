@@ -459,6 +459,7 @@ static char * const utils[] = {
 #define MSG_APP_NAME 36
 #define MSG_ARCHIVE_OPTS 37
 #define MSG_PLUGIN_KEYS 38
+#define MSG_BOOKMARK_KEYS 39
 
 static const char * const messages[] = {
 	"no traversal",
@@ -500,6 +501,7 @@ static const char * const messages[] = {
 	"app name: ",
 	"e'x'tract / 'l'ist / 'm'ount?",
 	"plugin keys:",
+	"bookmark keys:",
 };
 
 /* Supported configuration environment variables */
@@ -4555,6 +4557,9 @@ nochange:
 				fd = sel - SEL_CTX1 + '1';
 				break;
 			default:
+				xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
+				sprintkeys(bookmark, g_buf + strlen(g_buf), BM_MAX);
+				printprompt(g_buf);
 				fd = get_input(NULL);
 			}
 
@@ -4619,8 +4624,10 @@ nochange:
 				goto nochange;
 			}
 
-			if (!xdiraccess(newpath))
+			if (!xdiraccess(newpath)) {
+				printwait(messages[MSG_ACCESS], &presel);
 				goto nochange;
+			}
 
 			if (strcmp(path, newpath) == 0)
 				break;
