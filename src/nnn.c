@@ -3553,12 +3553,10 @@ static void show_help(const char *path)
 	unlink(g_tmpfpath);
 }
 
-static bool run_cmd_as_plugin(const char *path, char *file, char *newpath, char *runfile)
+static bool run_cmd_as_plugin(const char *path, const char *file, char *newpath, char *runfile)
 {
 	uchar flags = F_CLI | F_CONFIRM;
 	size_t len;
-
-	DPRINTF_S(file);
 
 	/* Get rid of preceding _ */
 	++file;
@@ -3566,15 +3564,16 @@ static bool run_cmd_as_plugin(const char *path, char *file, char *newpath, char 
 	if (!*file)
 		return FALSE;
 
-	len = strlen(file);
-	if (len > 1 && file[len - 1] == '*') {
+	xstrlcpy(newpath, file, PATH_MAX);
+
+	len = strlen(newpath);
+	if (len > 1 && newpath[len - 1] == '*') {
 		flags &= ~F_CONFIRM; /* GUI case */
-		file[len - 1] = '\0'; /* Get rid of trailing nowait symbol */
+		newpath[len - 1] = '\0'; /* Get rid of trailing nowait symbol */
 		--len;
 	}
 
-	xstrlcpy(newpath, file, PATH_MAX);
-	if (is_suffix(file, " $nnn")) {
+	if (is_suffix(newpath, " $nnn")) {
 		/* Set `\0` to clear ' $nnn' suffix */
 		newpath[len - 5] = '\0';
 	} else
@@ -3599,7 +3598,7 @@ static bool plctrl_init(void)
 	return _SUCCESS;
 }
 
-static bool run_selected_plugin(char **path, char *file, char *newpath, char *runfile, char **lastname, char **lastdir)
+static bool run_selected_plugin(char **path, const char *file, char *newpath, char *runfile, char **lastname, char **lastdir)
 {
 	int fd;
 	size_t len;
