@@ -3702,9 +3702,30 @@ static void dentfree(void)
 	free(dents);
 }
 
-static int dentfill(char *path, struct entry **dents)
+static blkcnt_t dirwalk(char *path, struct stat *psb)
 {
 	static uint open_max;
+
+	/* Increase current open file descriptor limit */
+	if (!open_max)
+		open_max = max_openfds();
+
+	ent_blocks = 0;
+	tolastln();
+	addstr(xbasename(path));
+	addstr(" [^C aborts]\n");
+	refresh();
+
+	if (nftw(path, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) < 0) {
+		DPRINTF_S("nftw failed");
+		return (cfg.apparentsz ? psb->st_size : psb->st_blocks);
+	}
+
+	return ent_blocks;
+}
+
+static int dentfill(char *path, struct entry **dents)
+{
 	int n = 0, count, flags = 0;
 	ulong num_saved;
 	struct dirent *dp;
@@ -3729,10 +3750,6 @@ static int dentfill(char *path, struct entry **dents)
 			printwarn(NULL);
 			return 0;
 		}
-
-		/* Increase current open file descriptor limit */
-		if (!open_max)
-			open_max = max_openfds();
 	}
 
 #if _POSIX_C_SOURCE >= 200112L
@@ -3774,20 +3791,9 @@ static int dentfill(char *path, struct entry **dents)
 
 			if (S_ISDIR(sb.st_mode)) {
 				if (sb_path.st_dev == sb.st_dev) {
-					ent_blocks = 0;
 					mkpath(path, namep, buf);
 
-					tolastln();
-					addstr(xbasename(buf));
-					addstr(" [^C aborts]\n");
-					refresh();
-					if (nftw(buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) < 0) {
-						DPRINTF_S("nftw failed");
-						dir_blocks += (cfg.apparentsz
-							       ? sb.st_size
-							       : sb.st_blocks);
-					} else
-						dir_blocks += ent_blocks;
+					dir_blocks += dirwalk(buf, &sb);
 
 					if (interrupted) {
 						closedir(dirp);
@@ -3875,19 +3881,11 @@ static int dentfill(char *path, struct entry **dents)
 
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
-				ent_blocks = 0;
 				num_saved = num_files + 1;
 				mkpath(path, namep, buf);
 
-				tolastln();
-				addstr(xbasename(buf));
-				addstr(" [^C aborts]\n");
-				refresh();
-				if (nftw(buf, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) < 0) {
-					DPRINTF_S("nftw failed");
-					dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
-				} else
-					dentp->blocks = ent_blocks;
+				/* Need to show the disk usage of this dir */
+				dentp->blocks = dirwalk(buf, &sb);
 
 				if (sb_path.st_dev == sb.st_dev) // NOLINT
 					dir_blocks += dentp->blocks;
@@ -4217,16 +4215,15 @@ static void browse(char *ipath, const char *session)
 	char mark[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
-	uchar opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
-	int r = -1, fd, presel, selstartid = 0, selendid = 0;
+	char *path, *lastdir, *lastname, *dir, *tmp;
 	ino_t inode = 0;
 	enum action sel;
-	bool dir_changed = FALSE;
 	struct stat sb;
-	char *path, *lastdir, *lastname, *dir, *tmp;
 	MEVENT event;
 	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0} };
-	bool currentmouse = 1;
+	int r = -1, fd, presel, selstartid = 0, selendid = 0;
+	const uchar opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
+	bool currentmouse = 1, dir_changed = FALSE;
 
 	atexit(dentfree);
 
