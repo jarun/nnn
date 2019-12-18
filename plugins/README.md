@@ -87,7 +87,7 @@ For example:
 
 Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be used to the git log of a git project directory, <kbd>;s</kbd> can be used to preview a partially downloaded media file.
 
-`nnn` waits for user confirmation when it executes a command as plugin (unline plugins which can add a `read` to wait). If you do not need to wait for user confirmation after the command has executed, add a `*` after the command. For example:
+`nnn` waits for user confirmation (the prompt `Press Enter to continue`) when it executes a command as plugin (unline plugins which can add a `read` to wait). If you do not need to wait for user confirmation after the command has executed, add a `*` after the command. For example:
 
     export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn*;o:fzopen'
 
