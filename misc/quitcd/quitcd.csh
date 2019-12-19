@@ -9,5 +9,6 @@ set NNN_TMPFILE=~/.config/nnn/.lastd
 # stty start undef
 # stty stop undef
 # stty lwrap undef
+# stty lnext undef
 
 alias n 'nnn -fis; source "$NNN_TMPFILE"; rm -f "$NNN_TMPFILE"'
