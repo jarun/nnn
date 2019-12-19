@@ -5814,8 +5814,8 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* Edit text in "editor" if opted (gets preference over option `-c`) */
-	if (xgetenv_set(env_cfg[NNN_USE_EDITOR]))
+	/* Edit text in EDITOR if opted (and opener is not all-CLI) */
+	if (!cfg.cliopener && xgetenv_set(env_cfg[NNN_USE_EDITOR]))
 		cfg.useeditor = 1;
 
 	/* Get VISUAL/EDITOR */
