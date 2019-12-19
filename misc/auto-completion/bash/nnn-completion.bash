@@ -16,7 +16,6 @@ _nnn ()
         -b
         -c
         -d
-        -e
         -E
         -g
         -H
@@ -28,6 +27,7 @@ _nnn ()
         -Q
         -r
         -R
+        -s
         -S
         -t
         -v
@@ -39,7 +39,7 @@ _nnn ()
         COMPREPLY=( $(compgen -W "$bookmarks" -- "$cur") )
     elif [[ $prev == -p ]]; then
         COMPREPLY=( $(compgen -f -d -- "$cur") )
-    elif [[ $prev == -e ]]; then
+    elif [[ $prev == -s ]]; then
         local sessions_dir=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions
         COMPREPLY=( $(cd "$sessions_dir" && compgen -f -d -- "$cur") )
     elif [[ $cur == -* ]]; then

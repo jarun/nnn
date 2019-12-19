@@ -321,7 +321,6 @@ static char *initpath;
 static char *cfgdir;
 static char *g_selpath;
 static char *plugindir;
-static char *sessiondir;
 static char *pnamebuf, *pselbuf;
 static struct entry *dents;
 static blkcnt_t ent_blocks;
@@ -331,8 +330,6 @@ static kv bookmark[BM_MAX];
 static kv plug[PLUGIN_MAX];
 static uchar g_tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
-static bool interrupted = FALSE;
-static bool rangesel = FALSE;
 
 /* Retain old signal handlers */
 #ifdef __linux__
@@ -353,8 +350,14 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 /* Buffer to store plugins control pipe location */
 static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 
+/* MISC NON-PERSISTENT INTERNAL BINARY STATES */
+
 /* Plugin control initialization status */
-static bool g_plinit = FALSE;
+#define STATE_PLUGIN_INIT 0x1
+#define STATE_INTERRUPTED 0x2
+#define STATE_RANGESEL 0x4
+
+static uchar g_states;
 
 /* Options to identify file mime */
 #if defined(__APPLE__)
@@ -531,6 +534,7 @@ static const char * const env_cfg[] = {
 #define ENV_EDITOR 2
 #define ENV_PAGER 3
 #define ENV_NCUR 4
+#define DIR_SESSIONS 5
 
 static const char * const envs[] = {
 	"SHELL",
@@ -538,6 +542,7 @@ static const char * const envs[] = {
 	"EDITOR",
 	"PAGER",
 	"nnn",
+	"/sessions",
 };
 
 #ifdef __linux__
@@ -604,7 +609,7 @@ static void sigint_handler(int sig)
 {
 	(void) sig;
 
-	interrupted = TRUE;
+	g_states |= STATE_INTERRUPTED;
 }
 
 static uint xatoi(const char *str)
@@ -2824,9 +2829,17 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 	*curcfg = cfg;
 }
 
-static void save_session(bool last_session, int *presel)
+static void makesessionpath(char *spath, const char *sname)
 {
-	char spath[PATH_MAX];
+	size_t r = mkpath(cfgdir, envs[DIR_SESSIONS] + 1 /* begins with '/' */, spath);
+
+	spath[r - 1] = '/';
+	xstrlcpy(spath + r, sname, PATH_MAX - r);
+
+}
+
+static void save_session(bool last_session, int *presel, char *spath)
+{
 	int i;
 	session_header_t header;
 	FILE *fsession;
@@ -2850,7 +2863,8 @@ static void save_session(bool last_session, int *presel)
 	sname = !last_session ? xreadline(NULL, messages[MSG_SSN_NAME]) : "@";
 	if (!sname[0])
 		return;
-	mkpath(sessiondir, sname, spath);
+
+	makesessionpath(spath, sname);
 
 	fsession = fopen(spath, "wb");
 	if (!fsession) {
@@ -2884,9 +2898,8 @@ END:
 		printwait(messages[MSG_FAILED], presel);
 }
 
-static bool load_session(const char *sname, char **path, char **lastdir, char **lastname, bool restore)
+static bool load_session(const char *sname, char **path, char **lastdir, char **lastname, char *spath, bool restore)
 {
-	char spath[PATH_MAX];
 	int i = 0;
 	session_header_t header;
 	FILE *fsession;
@@ -2897,13 +2910,13 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 		sname = sname ? sname : xreadline(NULL, messages[MSG_SSN_NAME]);
 		if (!sname[0])
 			return FALSE;
+	}
 
-		mkpath(sessiondir, sname, spath);
-	} else
-		mkpath(sessiondir, "@", spath);
-
+	/* Save current session */
 	if (has_loaded_dynamically)
-		save_session(TRUE, NULL);
+		save_session(TRUE, NULL, spath);
+
+	makesessionpath(spath, (!restore ? sname : "@"));
 
 	fsession = fopen(spath, "rb");
 	if (!fsession) {
@@ -2945,7 +2958,8 @@ END:
 	if (!status) {
 		printmsg(messages[MSG_FAILED]);
 		xdelay(XDELAY_INTERVAL_MS);
-	}
+	} else if (restore)
+		unlink(spath);
 
 	return status;
 }
@@ -3474,7 +3488,7 @@ static void show_help(const char *path)
 	    "6(Sh)Tab  Cycle context%-11cd  Detail view toggle\n"
 		  "c/  Filter%-13cIns ^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt%-9c^L F5  Redraw/clear prompt\n"
-		  "c.  Hidden toggle%-11c?  Help, conf\n"
+		  "c.  Toggle hidden%-11c?  Help, conf\n"
 	       "9Q ^Q  Quit%-20cq  Quit context\n"
 		 "b^G  QuitCD%-1c\n"
 		"1FILES\n"
@@ -3606,9 +3620,9 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 	if (*file == '_')
 		return run_cmd_as_plugin(*path, file, newpath, runfile);
 
-	if (!g_plinit) {
+	if (!(g_states & STATE_PLUGIN_INIT)) {
 		plctrl_init();
-		g_plinit = TRUE;
+		g_states |= STATE_PLUGIN_INIT;
 	}
 
 	fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
@@ -3795,7 +3809,7 @@ static int dentfill(char *path, struct entry **dents)
 
 					dir_blocks += dirwalk(buf, &sb);
 
-					if (interrupted) {
+					if (g_states & STATE_INTERRUPTED) {
 						closedir(dirp);
 						return n;
 					}
@@ -3892,7 +3906,7 @@ static int dentfill(char *path, struct entry **dents)
 				else
 					num_files = num_saved;
 
-				if (interrupted) {
+				if (g_states & STATE_INTERRUPTED) {
 					closedir(dirp);
 					return n;
 				}
@@ -4188,7 +4202,7 @@ static void redraw(char *path)
 
 			mvprintw(lastln, 0, "%d/%d [%d:%s] %cu:%s free:%s files:%lu %lldB %s",
 				 cur + 1, ndents, cfg.selmode,
-				 (rangesel ? "*" : (nselected ? xitoa(nselected) : "")),
+				 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
 				 c, buf, coolsize(get_fs_info(path, FREE)), num_files,
 				 (ll)pent->blocks << blk_shift, ptr);
 		} else { /* light or detail mode */
@@ -4202,7 +4216,7 @@ static void redraw(char *path)
 
 			mvprintw(lastln, 0, "%d/%d [%d:%s] %s%s %s %s %s [%s]",
 				 cur + 1, ndents, cfg.selmode,
-				 (rangesel ? "*" : (nselected ? xitoa(nselected) : "")),
+				 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
 				 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr, base);
 		}
 	} else
@@ -4231,7 +4245,7 @@ static void browse(char *ipath, const char *session)
 	xcols = COLS;
 
 	/* setup first context */
-	if (!session || !load_session(session, &path, &lastdir, &lastname, FALSE)) {
+	if (!session || !load_session(session, &path, &lastdir, &lastname, newpath, FALSE)) {
 		xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
 		path = g_ctx[0].c_path;
 		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = '\0';
@@ -4279,8 +4293,8 @@ begin:
 		printwarn(&presel);
 
 	populate(path, lastname);
-	if (interrupted) {
-		interrupted = FALSE;
+	if (g_states & STATE_INTERRUPTED) {
+		g_states &= ~STATE_INTERRUPTED;
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
 		blk_shift = BLK_SHIFT_512;
@@ -4869,8 +4883,8 @@ nochange:
 				goto nochange;
 
 			startselection();
-			if (rangesel)
-				rangesel = FALSE;
+			if (g_states & STATE_RANGESEL)
+				g_states &= ~STATE_RANGESEL;
 
 			/* Toggle selection status */
 			dents[cur].flags ^= FILE_SELECTED;
@@ -4903,14 +4917,14 @@ nochange:
 				goto nochange;
 
 			startselection();
-			rangesel ^= TRUE;
+			g_states ^= STATE_RANGESEL;
 
 			if (stat(path, &sb) == -1) {
 				printwarn(&presel);
 				goto nochange;
 			}
 
-			if (rangesel) { /* Range selection started */
+			if (g_states & STATE_RANGESEL) { /* Range selection started */
 				inode = sb.st_ino;
 				selstartid = cur;
 				continue;
@@ -4940,8 +4954,8 @@ nochange:
 					goto nochange;
 
 				startselection();
-				if (rangesel)
-					rangesel = FALSE;
+				if (g_states & STATE_RANGESEL)
+					g_states &= ~STATE_RANGESEL;
 
 				selstartid = 0;
 				selendid = ndents - 1;
@@ -5348,12 +5362,13 @@ nochange:
 			r = get_input(messages[MSG_SSN_OPTS]);
 
 			if (r == 's') {
-				save_session(FALSE, &presel);
+				save_session(FALSE, &presel, newpath);
 				goto nochange;
 			}
 
 			if (r == 'l' || r == 'r') {
-				if (load_session(NULL, &path, &lastdir, &lastname, r == 'r')) {
+				if (load_session(NULL, &path, &lastdir,
+						 &lastname, newpath, r == 'r')) {
 					setdirwatch();
 					goto begin;
 				}
@@ -5469,7 +5484,6 @@ static void usage(void)
 		" -b key  open bookmark key\n"
 		" -c      cli-only opener\n"
 		" -d      detail mode\n"
-		" -e name load session by name\n"
 		" -E      use EDITOR for undetached edits\n"
 		" -g      regex filters [default: string]\n"
 		" -H      show hidden files\n"
@@ -5481,6 +5495,7 @@ static void usage(void)
 		" -Q      no quit confirmation\n"
 		" -r      use advcpmv patched cp, mv\n"
 		" -R      no rollover at edges\n"
+		" -s name load session by name\n"
 		" -S      du mode\n"
 		" -t      no dir auto-select\n"
 		" -v      show version\n"
@@ -5519,8 +5534,7 @@ static bool setup_config(void)
 
 	cfgdir = (char *)malloc(len);
 	plugindir = (char *)malloc(len);
-	sessiondir = (char *)malloc(len);
-	if (!cfgdir || !plugindir || !sessiondir) {
+	if (!cfgdir || !plugindir) {
 		xerror();
 		return FALSE;
 	}
@@ -5554,11 +5568,8 @@ static bool setup_config(void)
 	}
 
 	/* Create ~/.config/nnn/sessions */
-	xstrlcpy(cfgdir + r + 4 - 1, "/sessions", 10); /* subtract length of "/nnn" (4) */
+	xstrlcpy(cfgdir + r + 4 - 1, envs[DIR_SESSIONS], 10); /* subtract length of "/nnn" (4) */
 	DPRINTF_S(cfgdir);
-
-	xstrlcpy(sessiondir, cfgdir, len);
-	DPRINTF_S(sessiondir);
 
 	if (!xmktree(cfgdir, TRUE)) {
 		xerror();
@@ -5604,7 +5615,6 @@ static void cleanup(void)
 {
 	free(g_selpath);
 	free(plugindir);
-	free(sessiondir);
 	free(cfgdir);
 	free(initpath);
 	free(bmstr);
@@ -5627,7 +5637,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKiab:cde:Egnop:QrRtvxh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKiab:cdEgnop:QrRs:tvxh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5648,9 +5658,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'c':
 			cfg.cliopener = 1;
-			break;
-		case 'e':
-			session = optarg;
 			break;
 		case 'E':
 			cfg.waitedit = 1;
@@ -5695,6 +5702,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'R':
 			cfg.rollover = 0;
+			break;
+		case 's':
+			session = optarg;
 			break;
 		case 't':
 			cfg.autoselect = 0;
