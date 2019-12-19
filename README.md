@@ -74,7 +74,7 @@ Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage,
 
 1. Install the [utilities you may need](https://github.com/jarun/nnn#utility-dependencies) based on your regular workflows.
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
-3. Optionally open all text files in `$EDITOR` (fallback vi): `export NNN_USE_EDITOR=1`.
+3. Optionally open all text files in `$VISUAL` (else `$EDITOR`, fallback vi): `export NNN_USE_EDITOR=1`.
 4. For additional functionality [install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins).
 5. To copy selected file paths to system clipboard and show notis on cp, mv, rm completion use option `-x`.
 6. For a strictly CLI-only experience, see plugin `nuke`. It's a sample opener you can customize.
@@ -160,7 +160,9 @@ Completion scripts for Bash, Fish and Zsh are [available](misc/auto-completion).
 
 - [Arun Prakash Jana](https://github.com/jarun) (Copyright © 2016-2019)
 - [0xACE](https://github.com/0xACE)
+- [Anna Arad](https://github.com/annagrram)
 - [KlzXS](https://github.com/KlzXS)
+- [Maxim Baz](https://github.com/maximbaz)
 - and other contributors
 
 `nnn` is actively developed. Visit the to the [ToDo list](https://github.com/jarun/nnn/issues/386) to contribute or see the features in progress.
