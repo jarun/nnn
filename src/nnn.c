@@ -3339,7 +3339,7 @@ static bool remote_mount(char *newpath, int *presel)
 		cmd = utils[UTIL_RCLONE];
 		env = xgetenv("NNN_RCLONE_OPTS", "rclone mount");
 	} else {
-		printwait(messages[MSG_FAILED], presel);
+		printwait(messages[MSG_INVALID_KEY], presel);
 		return FALSE;
 	}
 
@@ -5338,8 +5338,16 @@ nochange:
 				goto begin;
 			}
 
-			if (r != 'm' || !archive_mount(dents[cur].name, path, newpath, &presel))
-				goto nochange; // fallthrough
+			if (r != 'm') {
+				printwait(messages[MSG_INVALID_KEY], &presel);
+				goto nochange;
+			}
+
+			if (!archive_mount(dents[cur].name, path, newpath, &presel)) {
+				printwait(messages[MSG_FAILED], &presel);
+				goto nochange;
+			}
+			// fallthrough
 		case SEL_REMOTE:
 			if (sel == SEL_REMOTE && !remote_mount(newpath, &presel))
 				goto nochange;
