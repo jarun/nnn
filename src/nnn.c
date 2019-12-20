@@ -5259,10 +5259,21 @@ nochange:
 						goto nochange;
 					}
 
+					if (tmp[0] == '-' && tmp[1]) {
+						++tmp;
+						r = FALSE; /* Do not refresh dir after completion */
+					} else
+						r = TRUE;
+
 					if (!run_selected_plugin(&path, tmp, newpath,
 								 (ndents ? dents[cur].name : NULL),
 								 &lastname, &lastdir)) {
 						printwait(messages[MSG_FAILED], &presel);
+						goto nochange;
+					}
+
+					if (!r) {
+						clearprompt();
 						goto nochange;
 					}
 

@@ -77,6 +77,14 @@ Now plugin `fzopen` can be run with the keybind <kbd>;o</kbd>, `mocplay` can be 
 
 **Method 2:** Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
 
+#### Skip directory refresh after running a plugin
+
+`nnn` refreshes a directory after running a plugin by key (Method 1 above) to reflect any chanegs in the directory by the plugin. However, there are scenarios where this isn't desired, say while running the `mediainfo` plugin on some filtered files. To achive this, add a `-` before the plugin name, e.g.:
+
+    export NNN_PLUG='o:fzopen;m:-mediainfo;p:mocplay;
+
+Now `nnn` will not refresh the directory after running the `mediainfo` plugin.
+
 ## Running commands as plugin
 
 To assign keys to arbitrary non-background cli commands (non-shell-interpreted) and invoke like plugins, add `_` (underscore) before the command.
@@ -98,6 +106,7 @@ Notes:
 1. Use single quotes for `$NNN_PLUG` so `$nnn` is not interpreted
 2. `$nnn` should be the last argument (IF you want to pass the hovered file name)
 3. (_Again_) add `_` before the command
+4. To disable directory refresh after running a command as plugin prefix the command with `-_`
 
 ## Access level of plugins
 
