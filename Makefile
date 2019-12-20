@@ -92,9 +92,19 @@ dist:
 	gzip nnn-$(VERSION).tar
 	$(RM) -r nnn-$(VERSION)
 
+sign:
+	git archive -o nnn-$(VERSION).tar.gz --format tar.gz --prefix=nnn-$(VERSION)/ v$(VERSION)
+	gpg --detach-sign --yes nnn-$(VERSION).tar.gz
+	rm -f nnn-$(VERSION).tar.gz
+
+	$(eval ID=$(shell curl -s 'https://api.github.com/repos/jarun/nnn/releases/tags/v$(VERSION)' | jq .id))
+	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION).tar.gz.sig' \
+	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/pgp-signature' \
+	    --upload-file nnn-$(VERSION).tar.gz.sig
+
 clean:
-	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz
+	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig
 
 skip: ;
 
-.PHONY: all debug install uninstall strip dist clean
+.PHONY: all debug install uninstall strip dist sign clean
