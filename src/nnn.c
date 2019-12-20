@@ -331,8 +331,6 @@ static kv bookmark[BM_MAX];
 static kv plug[PLUGIN_MAX];
 static uchar g_tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
-static bool interrupted = FALSE;
-static bool rangesel = FALSE;
 
 /* Retain old signal handlers */
 #ifdef __linux__
@@ -353,8 +351,14 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 /* Buffer to store plugins control pipe location */
 static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 
+/* MISC NON-PERSISTENT INTERNAL BINARY STATES */
+
 /* Plugin control initialization status */
-static bool g_plinit = FALSE;
+#define STATE_PLUGIN_INIT 0x1
+#define STATE_INTERRUPTED 0x2
+#define STATE_RANGESEL 0x4
+
+static uchar g_states;
 
 /* Options to identify file mime */
 #if defined(__APPLE__)
@@ -604,7 +608,7 @@ static void sigint_handler(int sig)
 {
 	(void) sig;
 
-	interrupted = TRUE;
+	g_states |= STATE_INTERRUPTED;
 }
 
 static uint xatoi(const char *str)
@@ -3607,9 +3611,9 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 	if (*file == '_')
 		return run_cmd_as_plugin(*path, file, newpath, runfile);
 
-	if (!g_plinit) {
+	if (!(g_states & STATE_PLUGIN_INIT)) {
 		plctrl_init();
-		g_plinit = TRUE;
+		g_states |= STATE_PLUGIN_INIT;
 	}
 
 	fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
@@ -3796,7 +3800,7 @@ static int dentfill(char *path, struct entry **dents)
 
 					dir_blocks += dirwalk(buf, &sb);
 
-					if (interrupted) {
+					if (g_states & STATE_INTERRUPTED) {
 						closedir(dirp);
 						return n;
 					}
@@ -3893,7 +3897,7 @@ static int dentfill(char *path, struct entry **dents)
 				else
 					num_files = num_saved;
 
-				if (interrupted) {
+				if (g_states & STATE_INTERRUPTED) {
 					closedir(dirp);
 					return n;
 				}
@@ -4189,7 +4193,7 @@ static void redraw(char *path)
 
 			mvprintw(lastln, 0, "%d/%d [%d:%s] %cu:%s free:%s files:%lu %lldB %s",
 				 cur + 1, ndents, cfg.selmode,
-				 (rangesel ? "*" : (nselected ? xitoa(nselected) : "")),
+				 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
 				 c, buf, coolsize(get_fs_info(path, FREE)), num_files,
 				 (ll)pent->blocks << blk_shift, ptr);
 		} else { /* light or detail mode */
@@ -4203,7 +4207,7 @@ static void redraw(char *path)
 
 			mvprintw(lastln, 0, "%d/%d [%d:%s] %s%s %s %s %s [%s]",
 				 cur + 1, ndents, cfg.selmode,
-				 (rangesel ? "*" : (nselected ? xitoa(nselected) : "")),
+				 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
 				 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr, base);
 		}
 	} else
@@ -4280,8 +4284,8 @@ begin:
 		printwarn(&presel);
 
 	populate(path, lastname);
-	if (interrupted) {
-		interrupted = FALSE;
+	if (g_states & STATE_INTERRUPTED) {
+		g_states &= ~STATE_INTERRUPTED;
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
 		blk_shift = BLK_SHIFT_512;
@@ -4870,8 +4874,8 @@ nochange:
 				goto nochange;
 
 			startselection();
-			if (rangesel)
-				rangesel = FALSE;
+			if (g_states & STATE_RANGESEL)
+				g_states &= ~STATE_RANGESEL;
 
 			/* Toggle selection status */
 			dents[cur].flags ^= FILE_SELECTED;
@@ -4904,14 +4908,14 @@ nochange:
 				goto nochange;
 
 			startselection();
-			rangesel ^= TRUE;
+			g_states ^= STATE_RANGESEL;
 
 			if (stat(path, &sb) == -1) {
 				printwarn(&presel);
 				goto nochange;
 			}
 
-			if (rangesel) { /* Range selection started */
+			if (g_states & STATE_RANGESEL) { /* Range selection started */
 				inode = sb.st_ino;
 				selstartid = cur;
 				continue;
@@ -4941,8 +4945,8 @@ nochange:
 					goto nochange;
 
 				startselection();
-				if (rangesel)
-					rangesel = FALSE;
+				if (g_states & STATE_RANGESEL)
+					g_states &= ~STATE_RANGESEL;
 
 				selstartid = 0;
 				selendid = ndents - 1;
