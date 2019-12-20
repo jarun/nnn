@@ -98,7 +98,7 @@ sign:
 	rm -f nnn-$(VERSION).tar.gz
 
 clean:
-	$(RM) -f $(BIN) *.sig
+	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig
 
 skip: ;
 
