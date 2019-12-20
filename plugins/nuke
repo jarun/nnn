@@ -18,6 +18,8 @@
 # Details:
 #   Inspired by ranger's scope.sh, modified for usage with nnn.
 #
+#   Guards against accidentally opening mime types like executables, shared libs etc.
+#
 #   Tries to play 'file' (1st argument) in the following order:
 #   i. by extension
 #   ii. by mime (image, video, audio, pdf)
@@ -415,7 +417,24 @@ handle_fallback() {
     exit 1
 }
 
+handle_blocked() {
+    case "${MIMETYPE}" in
+        application/x-sharedlib)
+            exit 0;;
+
+        application/x-shared-library-la)
+            exit 0;;
+
+        application/x-executable)
+            exit 0;;
+
+        application/x-shellscript)
+            exit 0;;
+    esac
+}
+
 MIMETYPE="$( file --dereference --brief --mime-type -- "${FPATH}" )"
+handle_blocked "${MIMETYPE}"
 handle_extension
 handle_multimedia "${MIMETYPE}"
 handle_mime "${MIMETYPE}"
