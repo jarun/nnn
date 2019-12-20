@@ -10,6 +10,7 @@
 .Op Ar -b key
 .Op Ar -c
 .Op Ar -d
+.Op Ar -e name
 .Op Ar -E
 .Op Ar -g
 .Op Ar -H
@@ -20,7 +21,6 @@
 .Op Ar -Q
 .Op Ar -r
 .Op Ar -R
-.Op Ar -s name
 .Op Ar -S
 .Op Ar -v
 .Op Ar -x
@@ -56,6 +56,9 @@ supports the following options:
 .Fl d
         detail mode
 .Pp
+.Fl "e name"
+        load a session by name
+.Pp
 .Fl E
         use $EDITOR for internal undetached edits
 .Pp
@@ -88,9 +91,6 @@ supports the following options:
 .Pp
 .Fl R
         disable rollover at edges
-.Pp
-.Fl "s name"
-        load a session by name
 .Pp
 .Fl S
         start in disk usage analyzer mode
