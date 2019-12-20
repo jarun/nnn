@@ -2945,7 +2945,8 @@ END:
 	if (!status) {
 		printmsg(messages[MSG_FAILED]);
 		xdelay(XDELAY_INTERVAL_MS);
-	}
+	} else if (restore)
+		unlink(spath);
 
 	return status;
 }
@@ -3474,7 +3475,7 @@ static void show_help(const char *path)
 	    "6(Sh)Tab  Cycle context%-11cd  Detail view toggle\n"
 		  "c/  Filter%-13cIns ^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt%-9c^L F5  Redraw/clear prompt\n"
-		  "c.  Hidden toggle%-11c?  Help, conf\n"
+		  "c.  Toggle hidden%-11c?  Help, conf\n"
 	       "9Q ^Q  Quit%-20cq  Quit context\n"
 		 "b^G  QuitCD%-1c\n"
 		"1FILES\n"
@@ -5488,7 +5489,6 @@ static void usage(void)
 		" -b key  open bookmark key\n"
 		" -c      cli-only opener\n"
 		" -d      detail mode\n"
-		" -e name load session by name\n"
 		" -E      use EDITOR for undetached edits\n"
 		" -g      regex filters [default: string]\n"
 		" -H      show hidden files\n"
@@ -5500,6 +5500,7 @@ static void usage(void)
 		" -Q      no quit confirmation\n"
 		" -r      use advcpmv patched cp, mv\n"
 		" -R      no rollover at edges\n"
+		" -s name load session by name\n"
 		" -S      du mode\n"
 		" -t      no dir auto-select\n"
 		" -v      show version\n"
@@ -5646,7 +5647,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKiab:cde:Egnop:QrRtvxh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKiab:cdEgnop:QrRs:tvxh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5667,9 +5668,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'c':
 			cfg.cliopener = 1;
-			break;
-		case 'e':
-			session = optarg;
 			break;
 		case 'E':
 			cfg.waitedit = 1;
@@ -5714,6 +5712,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'R':
 			cfg.rollover = 0;
+			break;
+		case 's':
+			session = optarg;
 			break;
 		case 't':
 			cfg.autoselect = 0;
