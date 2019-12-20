@@ -64,16 +64,10 @@ jobs:
             # Clean up
             rm -rf ./.git
             rm -rf ./dist/*
-            # Pack source
-            cd ..
-            tar -czf ${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz ${CIRCLE_PROJECT_REPONAME}
-            cd ${CIRCLE_PROJECT_REPONAME}
             # Use latest installed python3 from pyenv
             export PYENV_VERSION="$(pyenv versions | grep -Po '\b3\.\d+\.\d+' | tail -1)"
             pip install packagecore
             packagecore -c misc/packagecore/packagecore.yaml -o ./dist/ ${CIRCLE_TAG#v}
-            # Move source pack to dist
-            mv ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz dist/
 
       - run:
           name: "publish to GitHub"

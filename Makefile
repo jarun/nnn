@@ -57,7 +57,6 @@ CFLAGS += $(CFLAGS_CURSES)
 
 LDLIBS += $(LDLIBS_CURSES)
 
-DISTFILES = src nnn.1 Makefile README.md LICENSE
 SRC = src/nnn.c
 HEADERS = src/nnn.h
 BIN = nnn
@@ -85,16 +84,14 @@ uninstall:
 strip: $(BIN)
 	$(STRIP) $^
 
-dist:
-	mkdir -p nnn-$(VERSION)
-	$(CP) -r $(DISTFILES) nnn-$(VERSION)
-	tar -cf nnn-$(VERSION).tar nnn-$(VERSION)
-	gzip nnn-$(VERSION).tar
-	$(RM) -r nnn-$(VERSION)
+sign:
+	git archive -o nnn-$(VERSION).tar.gz --format tar.gz --prefix=nnn-$(VERSION)/ v$(VERSION)
+	gpg --detach-sign nnn-$(VERSION).tar.gz
+	rm -f nnn-$(VERSION).tar.gz
 
 clean:
-	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz
+	$(RM) -f $(BIN) *.sig
 
 skip: ;
 
-.PHONY: all debug install uninstall strip dist clean
+.PHONY: all debug install uninstall strip sign clean
