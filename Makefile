@@ -94,8 +94,13 @@ dist:
 
 sign:
 	git archive -o nnn-$(VERSION).tar.gz --format tar.gz --prefix=nnn-$(VERSION)/ v$(VERSION)
-	gpg --detach-sign nnn-$(VERSION).tar.gz
+	gpg --detach-sign --yes nnn-$(VERSION).tar.gz
 	rm -f nnn-$(VERSION).tar.gz
+
+	$(eval TOKEN=$(shell cat /tmp/access_token))
+	$(eval ID=$(shell curl -s 'https://api.github.com/repos/jarun/nnn/releases/tags/v$(VERSION)' | jq .id))
+	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION).tar.gz.sig' \
+	    -H 'Authorization: token $(TOKEN)' -H 'Content-Type: application/pgp-signature' --upload-file nnn-$(VERSION).tar.gz.sig
 
 clean:
 	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig
