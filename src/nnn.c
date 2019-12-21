@@ -1500,8 +1500,7 @@ static bool cpmvrm_selection(enum action sel, char *path, int *presel)
 	case SEL_CPMVAS:
 		r = get_input(messages[MSG_CP_MV_AS]);
 		if (r != 'c' && r != 'm') {
-			if (cfg.filtermode)
-				*presel = FILTER;
+			printwait(messages[MSG_INVALID_KEY], presel);
 			return FALSE;
 		}
 
