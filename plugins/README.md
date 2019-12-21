@@ -75,11 +75,11 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You ca
 
 Now plugin `fzopen` can be run with the keybind <kbd>;o</kbd>, `mocplay` can be run with <kbd>;p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
 
-**Method 2:** Use the _pick plugin_ shortcut to visit the plugin directory and execute a plugin. Repeating the same shortcut cancels the operation and puts you back in the original directory.
+**Method 2:** Use the _pick plugin_ keybind to visit the plugin directory and execute a plugin. Repeat the keybind to cancel and return to the original directory.
 
 #### Skip directory refresh after running a plugin
 
-`nnn` refreshes a directory after running a plugin by key (Method 1 above) to reflect any chanegs in the directory by the plugin. However, there are scenarios where this isn't desired, say while running the `mediainfo` plugin on some filtered files. To achive this, add a `-` before the plugin name, e.g.:
+`nnn` refreshes a directory after running a plugin by key (Method 1 above) to reflect any changes by the plugin. To disable this (say while running the `mediainfo` plugin on some filtered files), add a `-` before the plugin name:
 
     export NNN_PLUG='o:fzopen;m:-mediainfo;p:mocplay;
 
@@ -87,7 +87,7 @@ Now `nnn` will not refresh the directory after running the `mediainfo` plugin.
 
 ## Running commands as plugin
 
-To assign keys to arbitrary non-background cli commands (non-shell-interpreted) and invoke like plugins, add `_` (underscore) before the command.
+To assign keys to arbitrary non-background, non-shell-interpreted cli commands and invoke like plugins, add `_` (underscore) before the command.
 
 For example:
 
@@ -95,7 +95,9 @@ For example:
 
 Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be used to the git log of a git project directory, <kbd>;s</kbd> can be used to preview a partially downloaded media file.
 
-`nnn` waits for user confirmation (the prompt `Press Enter to continue`) when it executes a command as plugin (unline plugins which can add a `read` to wait). If you do not need to wait for user confirmation after the command has executed, add a `*` after the command. For example:
+#### Skip user confirmation after command execution
+
+`nnn` waits for user confirmation (the prompt `Press Enter to continue`) after it executes a command as plugin (unlike plugins which can add a `read` to wait). To skip this, add a `*` after the command. For example:
 
     export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn*;o:fzopen'
 
@@ -111,19 +113,19 @@ Notes:
 ## Access level of plugins
 
 When `nnn` executes a plugin, it does the following:
-- Change to the directory where the plugin is to be run (`$PWD` pointing to the active directory)
+- Changes to the directory where the plugin is to be run (`$PWD` pointing to the active directory)
 - Passes two arguments to the script:
     1. The hovered file's name.
-    2. The working directory (might differ from `$PWD` in case of symlinked paths; non-canonical). Note that the second argument is not passed in case of commands starting with `_`.
+    2. The working directory (might differ from `$PWD` in case of symlinked paths; non-canonical).
 - Sets the environment variable `NNN_PIPE` used to control `nnn` active directory.
 
-Plugins can also access the current selections by reading the `.selections` file in the config directory (See the `diffs` plugin for example).
+Plugins can also read the `.selection` file in the config directory.
 
 ## Create your own plugins
 
-Plugins are scripts that can be written in any scripting language. However, POSIX-compliant shell scripts runnable in `sh` are preferred.
+Plugins can be written in any scripting language. However, POSIX-compliant shell scripts runnable in `sh` are preferred.
 
-Once it's ready, drop the plugin in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins` and make it executable. Optionally add a custom keybind in `$NNN_PLUG` if you intend to use the plugin frequently.
+Drop the plugin in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins` and make it executable. Optionally add a custom keybind in `$NNN_PLUG` for frequent usage.
 
 #### Controlling `nnn`'s active directory
 `nnn` provides a mechanism for plugins to control its active directory.
@@ -152,7 +154,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
     nnn_cd "$(xsel -ob)"
     ```
 
-- Change direcory to the location of a link using helper script with specific context (current)
+- Change directory to the location of a link using helper script with specific context (current)
     ```sh
     #!/usr/bin/env sh
     . $(dirname $0)/.nnn-plugin-helper
@@ -171,6 +173,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 
 ## Contributing plugins
 
-Add informative sections like _Description_, _Notes_, _Dependencies_, _Shell_, _Author_ etc. in the plugin as applicable. Add an entry in the table above. Please keep non-portable commands (like `notify-send`) commented so users from any other OS/DE aren't surprised.
-
-The plugins should be executable.
+1. Add informative sections like _Description_, _Notes_, _Dependencies_, _Shell_, _Author_ etc. in the plugin.
+2. Add an entry in the table above.
+3. Keep non-portable commands (like `notify-send`) commented so users from any other OS/DE aren't surprised.
+4. The plugin file should be executable.
