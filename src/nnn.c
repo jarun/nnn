@@ -5792,6 +5792,7 @@ int main(int argc, char *argv[])
 			initpath = "/";
 	} else {
 		arg = argv[optind];
+		DPRINTF_S(arg);
 		if (strlen(arg) > 7 && !strncmp(arg, "file://", 7))
 			arg = arg + 7;
 		initpath = realpath(arg, NULL);
@@ -5814,7 +5815,7 @@ int main(int argc, char *argv[])
 		}
 
 		if (S_ISREG(sb.st_mode)) {
-			spawn(opener, arg, NULL, NULL, F_NOWAIT);
+			spawn(opener, arg, NULL, NULL, cfg.cliopener ? F_CLI : F_NOTRACE | F_NOWAIT);
 			return _SUCCESS;
 		}
 	}
