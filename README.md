@@ -126,7 +126,19 @@ Packages for Arch Linux, CentOS, Debian, Fedora and Ubuntu are auto-generated wi
 
 #### From source
 
-Download the latest stable release or clone this repository (*risky*), install deps and compile. On Ubuntu 18.04:
+Download the latest stable release or clone this repository (*risky*).
+
+Sources tarball is signed with PGP key, which you can verify as following:
+
+```
+$ gpg --verify nnn-<VERSION>.tar.gz.sig nnn-<VERSION>.tar.gz
+gpg: Signature made ...
+gpg:                using RSA key BBAD0B2F3093A7C3377A8F6BA75979F35C080412
+gpg: Good signature from "Arun Prakash Jana <...>"
+Primary key fingerprint: BBAD 0B2F 3093 A7C3 377A  8F6B A759 79F3 5C08 0412
+```
+
+Then install deps and compile. On Ubuntu 18.04:
 
     $ sudo apt-get install pkg-config libncursesw5-dev libreadline-dev
     $ sudo make strip install
