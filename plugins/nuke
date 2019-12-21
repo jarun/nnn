@@ -122,8 +122,8 @@ handle_extension() {
             fi
             exit 1;;
 
-        ## M4A audio
-        m4a)
+        ## Audio
+        aac|flac|m4a|mid|midi|mpa|mp2|mp3|ogg|wav|wma)
             if which mocp >/dev/null 2>&1; then
                 mocplay "${FPATH}" >/dev/null 2>&1
                 exit 0
