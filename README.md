@@ -138,7 +138,7 @@ To compile _without_ libreadline:
 
 `PREFIX` is supported, in case you want to install to a different location.
 
-See the [developer guides](https://github.com/jarun/nnn/wiki/Developer-guides) for compilation notes on the Pi, Cygwin and other compilation modes.
+See the [developer guides](https://github.com/jarun/nnn/wiki/Developer-guides) for source verification, compilation notes on the Pi, Cygwin and other tips.
 
 #### Shell completion
 

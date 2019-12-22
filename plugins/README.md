@@ -67,19 +67,19 @@ The following command installs all plugins:
 
 Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You can run the `getplugs` plugin later to update the plugins. It backs up earlier plugins.
 
-## Executing plugins
+## Ways to execute a plugin
 
-**Method 1:** Directly with <kbd>;key</kbd> or <kbd>xkey</kbd>:
+1. Directly with <kbd>;key</kbd> or <kbd>xkey</kbd>:
 
-    export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;n:notes;v:imgviu;t:imgthumb'
+       export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;n:notes;v:imgviu;t:imgthumb'
 
-Now plugin `fzopen` can be run with the keybind <kbd>;o</kbd>, `mocplay` can be run with <kbd>;p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
+    Now plugin `fzopen` can be run with the keybind <kbd>;o</kbd>, `mocplay` can be run with <kbd>;p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
 
-**Method 2:** Use the _pick plugin_ keybind to visit the plugin directory and execute a plugin. Repeat the keybind to cancel and return to the original directory.
+2. Use the _pick plugin_ keybind to visit the plugin directory and execute a plugin. Repeat the keybind to cancel and return to the original directory.
 
 #### Skip directory refresh after running a plugin
 
-`nnn` refreshes a directory after running a plugin by key (Method 1 above) to reflect any changes by the plugin. To disable this (say while running the `mediainfo` plugin on some filtered files), add a `-` before the plugin name:
+`nnn` refreshes a directory after running a plugin by key (method 1 above) to reflect any changes by the plugin. To disable this (say while running the `mediainfo` plugin on some filtered files), add a `-` before the plugin name:
 
     export NNN_PLUG='o:fzopen;m:-mediainfo;p:mocplay;
 
