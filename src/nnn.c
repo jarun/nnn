@@ -3765,10 +3765,9 @@ static int dentfill(char *path, struct entry **dents)
 		goto exit;
 
 #ifdef __sun
-	if (cfg.blkorder) { /* no d_type */
+	flags = AT_SYMLINK_NOFOLLOW; /* no d_type */
 #else
 	if (cfg.blkorder || dp->d_type == DT_UNKNOWN) {
-#endif
 		/*
 		 * Optimization added for filesystems which support dirent.d_type
 		 * see readdir(3)
@@ -3778,6 +3777,7 @@ static int dentfill(char *path, struct entry **dents)
 		 */
 		flags = AT_SYMLINK_NOFOLLOW;
 	}
+#endif
 
 	do {
 		namep = dp->d_name;
