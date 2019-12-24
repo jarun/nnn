@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+
+# Description: Upload a file to file.io
+# Requires: curl, jq, tr
+# Note: File set to expire after a week
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+if [ -s "$1" ]; then
+    # Upload the file, show the download link and wait till user presses any key
+    curl -s -F "file=@$1" https://file.io/?expires=1w | jq '.link' | tr -d '"'
+
+    # To write download link to "$1".loc and exit
+    # curl -s -F "file=@$1" https://file.io/?expires=1w -o `basename "$1"`.loc
+else
+    echo "empty file!"
+fi
+    read -r _

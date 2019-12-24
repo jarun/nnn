@@ -52,10 +52,10 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | ringtone | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
 | splitjoin | Split file or join selection | sh | split, cat |
 | suedit | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
-| transfer | Upload file to transfer.sh | sh | curl |
 | treeview | Informative tree output in `$EDITOR` | sh | tree |
 | uidgid | List user and group of all files in dir | sh | ls, less |
 | upgrade | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
+| upload | Upload file to file.io | sh | curl, jq, tr |
 | vidthumb | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
 | wall | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 
