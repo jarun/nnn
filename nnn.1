@@ -13,6 +13,7 @@
 .Op Ar -E
 .Op Ar -g
 .Op Ar -H
+.Op Ar -i
 .Op Ar -K
 .Op Ar -n
 .Op Ar -p file
@@ -22,7 +23,6 @@
 .Op Ar -s name
 .Op Ar -S
 .Op Ar -v
-.Op Ar -V
 .Op Ar -x
 .Op Ar -h
 .Op Ar PATH
@@ -65,11 +65,14 @@ supports the following options:
 .Fl H
         show hidden files
 .Pp
+.Fl i
+        start in navigate-as-you-type mode
+.Pp
 .Fl K
         test for keybind collision
 .Pp
 .Fl n
-        start in navigate-as-you-type mode
+        use case-insensitive version compare to sort files
 .Pp
 .Fl o
         open files only on Enter key
@@ -97,9 +100,6 @@ supports the following options:
 .Pp
 .Fl v
         show version and exit
-.Pp
-.Fl V
-        use case-insensitive version compare to sort files
 .Pp
 .Fl x
         show notis on selection cp, mv, rm completion; copy path to system clipboard on select
