@@ -3472,7 +3472,7 @@ static void show_help(const char *path)
 	     "7Down j  Down%-14cPgDn ^D  Scroll down\n"
 	     "7Left h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
 	       "9g ^A  Top%-11cRet Right l  Open\n"
-	       "9G ^E  End%-21c'  First file\n"
+	       "9G ^E  Bottom%-18c'  First file\n"
 		  "cb  Pin CWD%-16c^B  Go to pinned dir\n"
 	       "9, ^/  Go to bookmark%-10cd  Detail view toggle\n"
 	    "6(Sh)Tab  Cycle context%-11cN  Context N\n"
