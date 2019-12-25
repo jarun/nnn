@@ -2127,7 +2127,7 @@ static int filterentries(char *path)
 		}
 	}
 end:
-	if (*ch != '\t' && *ch != CONTROL('_'))
+	if (*ch != '\t' && *ch != 27)
 		g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
 
 	move_cursor(cur, 0);
@@ -3474,8 +3474,8 @@ static void show_help(const char *path)
 	       "9g ^A  Top%-11cRet Right l  Open\n"
 	       "9G ^E  Bottom%-18c'  First file\n"
 		  "cb  Pin CWD%-16c^B  Go to pinned dir\n"
-	       "9, ^/  Lead key%-10cN LeadN  Context N\n"
-	    "6(Sh)Tab  Cycle context%-11cd  Detail view toggle\n"
+	       "9, ^/  Go to bookmark%-10cd  Detail view toggle\n"
+	    "6(Sh)Tab  Cycle context%-11cN  Context N\n"
 		  "c/  Filter%-13cIns ^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt%-9c^L F5  Redraw/clear prompt\n"
 		  "c.  Toggle hidden%-11c?  Help, conf\n"
@@ -3496,7 +3496,7 @@ static void show_help(const char *path)
 		  "cz  Size%-20ct  Time\n"
 		  "cE  Extension%-1c\n"
 		"1MISC\n"
-	       "9! ^]  Shell%-17c; x  Plugin key\n"
+	       "9! ^]  Shell%-17c; x  Run plugin\n"
 		  "cC  Execute file%-9ci ^V  Pick plugin\n"
 		  "cs  Manage session%-10c=  Launch app\n"
 		  "cc  Connect remote%-10cu  Unmount\n"
@@ -4587,7 +4587,6 @@ nochange:
 			DPRINTF_S(path);
 			setdirwatch();
 			goto begin;
-		case SEL_LEADER: // fallthrough
 		case SEL_CYCLE: // fallthrough
 		case SEL_CYCLER: // fallthrough
 		case SEL_CTX1: // fallthrough
@@ -4595,43 +4594,11 @@ nochange:
 		case SEL_CTX3: // fallthrough
 		case SEL_CTX4:
 			switch (sel) {
-			case SEL_CYCLE:
-				fd = '\t';
-				break;
+			case SEL_CYCLE: // fallthrough
 			case SEL_CYCLER:
-				fd = KEY_BTAB;
-				break;
-			case SEL_CTX1: // fallthrough
-			case SEL_CTX2: // fallthrough
-			case SEL_CTX3: // fallthrough
-			case SEL_CTX4:
-				fd = sel - SEL_CTX1 + '1';
-				break;
-			default:
-				xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
-				printkeys(bookmark, g_buf + strlen(g_buf), BM_MAX);
-				printprompt(g_buf);
-				fd = get_input(NULL);
-			}
-
-			switch (fd) {
-			case '~': // fallthrough
-			case '`': // fallthrough
-			case '-': // fallthrough
-			case '@':
-				presel = fd;
-				goto nochange;
-			case '.':
-				cfg.showhidden ^= 1;
-				setdirwatch();
-				if (ndents)
-					copycurname();
-				goto begin;
-			case '\t': // fallthrough
-			case KEY_BTAB:
 				/* visit next and previous contexts */
 				r = cfg.curctx;
-				if (fd == '\t')
+				if (sel == SEL_CYCLE)
 					do
 						r = (r + 1) & ~CTX_MAX;
 					while (!g_ctx[r].c_cfg.ctxactive);
@@ -4639,12 +4606,11 @@ nochange:
 					do
 						r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
 					while (!g_ctx[r].c_cfg.ctxactive);
-				fd = '1' + r; // fallthrough
-			case '1': // fallthrough
-			case '2': // fallthrough
-			case '3': // fallthrough
-			case '4':
-				r = fd - '1'; /* Save the next context id */
+				// fallthrough
+			default: /* SEL_CTXN */
+				if (sel >= SEL_CTX1) /* CYCLE keys are lesser in value */
+					r = sel - SEL_CTX1; /* Save the next context id */
+
 				if (cfg.curctx == r) {
 					if (sel != SEL_CYCLE)
 						continue;
@@ -4669,6 +4635,11 @@ nochange:
 				setdirwatch();
 				goto begin;
 			}
+		case SEL_BOOKMARK:
+			xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
+			printkeys(bookmark, g_buf + strlen(g_buf), BM_MAX);
+			printprompt(g_buf);
+			fd = get_input(NULL);
 
 			if (!get_kv_val(bookmark, newpath, fd, BM_MAX, TRUE)) {
 				printwait(messages[MSG_INVALID_KEY], &presel);;
