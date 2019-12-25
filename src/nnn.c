@@ -327,7 +327,7 @@ static struct entry *dents;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
-static kv bookmark[BM_MAX + 1];
+static kv bookmark[BM_MAX];
 static kv plug[PLUGIN_MAX];
 static uchar g_tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
@@ -4215,6 +4215,7 @@ static void redraw(char *path)
 static void browse(char *ipath, const char *session)
 {
 	char newpath[PATH_MAX] __attribute__ ((aligned));
+	char mark[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	char *path, *lastdir, *lastname, *dir, *tmp;
@@ -4243,7 +4244,7 @@ static void browse(char *ipath, const char *session)
 		g_ctx[0].c_cfg = cfg; /* current configuration */
 	}
 
-	newpath[0] = rundir[0] = runfile[0] = '\0';
+	newpath[0] = rundir[0] = runfile[0] = mark[0] = '\0';
 
 	presel = cfg.filtermode ? FILTER : 0;
 
@@ -4636,13 +4637,15 @@ nochange:
 			r = get_input(NULL);
 
 			if (!get_kv_val(bookmark, newpath, r, BM_MAX, TRUE)) {
-				if (r == ',' && bookmark[BM_MAX].val)
-					xstrlcpy(newpath, bookmark[BM_MAX].val, PATH_MAX);
+				if (r == ',' && mark[0])
+					xstrlcpy(newpath, mark, PATH_MAX);
 				else {
 					printwait(messages[MSG_INVALID_KEY], &presel);;
 					goto nochange;
 				}
 			}
+
+
 
 			if (!xdiraccess(newpath)) {
 				printwait(messages[MSG_ACCESS], &presel);
@@ -4664,9 +4667,8 @@ nochange:
 			setdirwatch();
 			goto begin;
 		case SEL_PIN:
-			bookmark[BM_MAX].val = xrealloc(bookmark[BM_MAX].val, strlen(path));
-			xstrlcpy(bookmark[BM_MAX].val, path, PATH_MAX);
-			printwait(bookmark[BM_MAX].val, &presel);
+			xstrlcpy(mark, path, PATH_MAX);
+			printwait(mark, &presel);
 			goto nochange;
 		case SEL_FLTR:
 			/* Unwatch dir if we are still in a filtered view */
@@ -5601,7 +5603,6 @@ static void cleanup(void)
 	free(cfgdir);
 	free(initpath);
 	free(bmstr);
-	free(bookmark[BM_MAX].val);
 	free(pluginstr);
 
 	unlink(g_pipepath);
@@ -5741,7 +5742,6 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "%s\n", env_cfg[NNN_BMS]);
 		return _FAILURE;
 	}
-	bookmark[BM_MAX].key = ','; /* Set key for pinned dir */
 
 	/* Parse plugins string */
 	if (!parsekvpair(plug, &pluginstr, "NNN_PLUG", PLUGIN_MAX)) {
