@@ -3473,14 +3473,13 @@ static void show_help(const char *path)
 	     "7Left h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
 	       "9g ^A  Top%-11cRet Right l  Open\n"
 	       "9G ^E  End%-21c'  First file\n"
-		  "cb  Pin CWD%-16c^B  Go to pinned dir\n"
-	       "9, ^/  Go to bookmark%-10cd  Detail view toggle\n"
+		  "c,  Pin CWD%-17c.  Toggle hidden\n"
+	       "9b ^B  Go to bookmark%-10cd  Detail view toggle\n"
 	    "6(Sh)Tab  Cycle context%-11cN  Context N\n"
-		  "c/  Filter%-13cIns ^N  Nav-as-you-type toggle\n"
+		  "c/  Filter%-14c^/ ^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt%-9c^L F5  Redraw/clear prompt\n"
-		  "c.  Toggle hidden%-11c?  Help, conf\n"
+		 "b^G  QuitCD%-18c?  Help, conf\n"
 	       "9Q ^Q  Quit%-20cq  Quit context\n"
-		 "b^G  QuitCD%-1c\n"
 		"1FILES\n"
 		 "b^O  Open with...%-12cn  Create new/link\n"
 		  "cD  File details%-8c^R F2  Rename/duplicate\n"
@@ -4543,8 +4542,7 @@ nochange:
 		case SEL_CDHOME: // fallthrough
 		case SEL_CDBEGIN: // fallthrough
 		case SEL_CDLAST: // fallthrough
-		case SEL_CDROOT: // fallthrough
-		case SEL_VISIT:
+		case SEL_CDROOT:
 			switch (sel) {
 			case SEL_CDHOME:
 				dir = home;
@@ -4555,11 +4553,8 @@ nochange:
 			case SEL_CDLAST:
 				dir = lastdir;
 				break;
-			case SEL_CDROOT:
+			default: /* SEL_CDROOT */
 				dir = "/";
-				break;
-			default: /* case SEL_VISIT */
-				dir = mark;
 				break;
 			}
 
@@ -4639,12 +4634,18 @@ nochange:
 			xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
 			printkeys(bookmark, g_buf + strlen(g_buf), BM_MAX);
 			printprompt(g_buf);
-			fd = get_input(NULL);
+			r = get_input(NULL);
 
-			if (!get_kv_val(bookmark, newpath, fd, BM_MAX, TRUE)) {
-				printwait(messages[MSG_INVALID_KEY], &presel);;
-				goto nochange;
+			if (!get_kv_val(bookmark, newpath, r, BM_MAX, TRUE)) {
+				if (r == ',' && mark[0])
+					xstrlcpy(newpath, mark, PATH_MAX);
+				else {
+					printwait(messages[MSG_INVALID_KEY], &presel);;
+					goto nochange;
+				}
 			}
+
+
 
 			if (!xdiraccess(newpath)) {
 				printwait(messages[MSG_ACCESS], &presel);
@@ -5466,9 +5467,8 @@ static void usage(void)
 		" -E      use EDITOR for undetached edits\n"
 		" -g      regex filters [default: string]\n"
 		" -H      show hidden files\n"
-		" -i      nav-as-you-type mode\n"
 		" -K      detect key collision\n"
-		" -n      version sort\n"
+		" -n      nav-as-you-type mode\n"
 		" -o      open files on Enter\n"
 		" -p file selection file [stdout if '-']\n"
 		" -Q      no quit confirmation\n"
@@ -5478,6 +5478,7 @@ static void usage(void)
 		" -S      du mode\n"
 		" -t      no dir auto-select\n"
 		" -v      show version\n"
+		" -V      version sort\n"
 		" -x      notis, sel to system clipboard\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
@@ -5621,7 +5622,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKiab:cdEgnop:QrRs:tvxh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKab:cdEgnop:QrRs:tvVxh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5630,9 +5631,6 @@ int main(int argc, char *argv[])
 		case 'd':
 			cfg.showdetail = 1;
 			printptr = &printent_long;
-			break;
-		case 'i':
-			cfg.filtermode = 1;
 			break;
 		case 'a':
 			cfg.mtime = 0;
@@ -5654,7 +5652,7 @@ int main(int argc, char *argv[])
 			cfg.showhidden = 1;
 			break;
 		case 'n':
-			cmpfn = &xstrverscasecmp;
+			cfg.filtermode = 1;
 			break;
 		case 'o':
 			cfg.nonavopen = 1;
@@ -5699,6 +5697,9 @@ int main(int argc, char *argv[])
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
 			return _SUCCESS;
+		case 'V':
+			cmpfn = &xstrverscasecmp;
+			break;
 		case 'x':
 			cfg.x11 = 1;
 			break;
