@@ -5495,9 +5495,8 @@ static void usage(void)
 		" -E      use EDITOR for undetached edits\n"
 		" -g      regex filters [default: string]\n"
 		" -H      show hidden files\n"
-		" -i      nav-as-you-type mode\n"
 		" -K      detect key collision\n"
-		" -n      version sort\n"
+		" -n      nav-as-you-type mode\n"
 		" -o      open files on Enter\n"
 		" -p file selection file [stdout if '-']\n"
 		" -Q      no quit confirmation\n"
@@ -5507,6 +5506,7 @@ static void usage(void)
 		" -S      du mode\n"
 		" -t      no dir auto-select\n"
 		" -v      show version\n"
+		" -V      version sort\n"
 		" -x      notis, sel to system clipboard\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
@@ -5650,7 +5650,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKiab:cdEgnop:QrRs:tvxh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKab:cdEgnop:QrRs:tvVxh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5659,9 +5659,6 @@ int main(int argc, char *argv[])
 		case 'd':
 			cfg.showdetail = 1;
 			printptr = &printent_long;
-			break;
-		case 'i':
-			cfg.filtermode = 1;
 			break;
 		case 'a':
 			cfg.mtime = 0;
@@ -5683,7 +5680,7 @@ int main(int argc, char *argv[])
 			cfg.showhidden = 1;
 			break;
 		case 'n':
-			cmpfn = &xstrverscasecmp;
+			cfg.filtermode = 1;
 			break;
 		case 'o':
 			cfg.nonavopen = 1;
@@ -5728,6 +5725,9 @@ int main(int argc, char *argv[])
 		case 'v':
 			fprintf(stdout, "%s\n", VERSION);
 			return _SUCCESS;
+		case 'V':
+			cmpfn = &xstrverscasecmp;
+			break;
 		case 'x':
 			cfg.x11 = 1;
 			break;
