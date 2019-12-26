@@ -2127,7 +2127,7 @@ static int filterentries(char *path)
 		}
 	}
 end:
-	if (*ch != '\t')
+	if (*ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN)
 		g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
 
 	move_cursor(cur, 0);
