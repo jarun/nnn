@@ -1987,7 +1987,7 @@ static int matches(const char *fltr)
 	return ndents;
 }
 
-static int filterentries(char *path)
+static int filterentries(char *path, char *lastname)
 {
 	wchar_t *wln = (wchar_t *)alloca(sizeof(wchar_t) * REGEX_MAX);
 	char *ln = g_ctx[cfg.curctx].c_fltr;
@@ -1995,17 +1995,18 @@ static int filterentries(char *path)
 	int r, total = ndents, oldcur = cur, len;
 	char *pln = g_ctx[cfg.curctx].c_fltr + 1;
 
-	cur = 0;
-
 	if (ndents && ln[0] == FILTER && *pln) {
-		if (matches(pln) != -1)
+		if (matches(pln) != -1) {
+			move_cursor(dentfind(lastname, ndents), 0);
 			redraw(path);
+		}
 
 		len = mbstowcs(wln, ln, REGEX_MAX);
 	} else {
 		ln[0] = wln[0] = FILTER;
 		ln[1] = wln[1] = '\0';
 		len = 1;
+		cur = 0;
 	}
 
 	cleartimeout();
@@ -2127,10 +2128,11 @@ static int filterentries(char *path)
 		}
 	}
 end:
-	if (*ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN)
+	if (*ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN) {
 		g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
-
-	move_cursor(cur, 0);
+		move_cursor(cur, 0);
+	} else if (ndents)
+		xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1);
 
 	curs_set(FALSE);
 	settimeout();
@@ -3472,7 +3474,7 @@ static void show_help(const char *path)
 	     "7Down j  Down%-14cPgDn ^D  Scroll down\n"
 	     "7Left h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
 	       "9g ^A  Top%-11cRet Right l  Open\n"
-	       "9G ^E  Bottom%-18c'  First file\n"
+	       "9G ^E  End%-21c'  First file\n"
 		  "cb  Pin CWD%-16c^B  Go to pinned dir\n"
 	       "9, ^/  Lead key%-10cN LeadN  Context N\n"
 	    "6(Sh)Tab  Cycle context%-11cd  Detail view toggle\n"
@@ -4369,6 +4371,7 @@ nochange:
 
 				/* Save history */
 				xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
+				g_ctx[cfg.curctx].c_fltr[1] = '\0';
 
 				xstrlcpy(path, dir, PATH_MAX);
 
@@ -4393,6 +4396,7 @@ nochange:
 
 			/* Toggle filter mode on left click on last 2 lines */
 			if (event.y >= xlines - 2 && event.bstate == BUTTON1_PRESSED) {
+				g_ctx[cfg.curctx].c_fltr[1] = '\0';
 				cfg.filtermode ^= 1;
 				if (cfg.filtermode) {
 					presel = FILTER;
@@ -4460,7 +4464,7 @@ nochange:
 				xstrlcpy(lastdir, path, PATH_MAX);
 
 				xstrlcpy(path, newpath, PATH_MAX);
-				lastname[0] = '\0';
+				lastname[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
 				setdirwatch();
 				goto begin;
 			case S_IFREG:
@@ -4496,6 +4500,7 @@ nochange:
 
 						if (runfile[0])
 							runfile[0] = '\0';
+						g_ctx[cfg.curctx].c_fltr[1] = '\0';
 
 						setdirwatch();
 						goto begin;
@@ -4583,7 +4588,7 @@ nochange:
 			xstrlcpy(lastdir, path, PATH_MAX);
 
 			xstrlcpy(path, newpath, PATH_MAX);
-			lastname[0] = '\0';
+			lastname[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
 			DPRINTF_S(path);
 			setdirwatch();
 			goto begin;
@@ -4683,7 +4688,7 @@ nochange:
 			if (strcmp(path, newpath) == 0)
 				break;
 
-			lastname[0] = '\0';
+			lastname[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
@@ -4711,7 +4716,7 @@ nochange:
 				event_fd = -1;
 			}
 #endif
-			presel = filterentries(path);
+			presel = filterentries(path, lastname);
 
 			/* Save current */
 			if (ndents)
@@ -5294,6 +5299,7 @@ nochange:
 					lastname[0] = '\0';
 				}
 				setdirwatch();
+				g_ctx[cfg.curctx].c_fltr[1] = 0;
 				goto begin;
 			case SEL_LAUNCH:
 				launch_app(path, newpath);
