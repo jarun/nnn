@@ -4067,6 +4067,46 @@ static inline void handle_screen_move(enum action sel)
 	}
 }
 
+static int handle_context_switch(enum action sel, char *newpath)
+{
+	int r = -1, input;
+
+	switch (sel) {
+	case SEL_CYCLE: // fallthrough
+	case SEL_CYCLER:
+		/* visit next and previous contexts */
+		r = cfg.curctx;
+		if (sel == SEL_CYCLE)
+			do
+				r = (r + 1) & ~CTX_MAX;
+			while (!g_ctx[r].c_cfg.ctxactive);
+		else
+			do
+				r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
+			while (!g_ctx[r].c_cfg.ctxactive);
+		// fallthrough
+	default: /* SEL_CTXN */
+		if (sel >= SEL_CTX1) /* CYCLE keys are lesser in value */
+			r = sel - SEL_CTX1; /* Save the next context id */
+
+		if (cfg.curctx == r) {
+			if (sel != SEL_CYCLE)
+				return -1;
+
+			(r == CTX_MAX - 1) ? (r = 0) : ++r;
+			snprintf(newpath, PATH_MAX, messages[MSG_CREATE_CTX], r + 1);
+			input = get_input(newpath);
+			if (input != 'y' && input != 'Y')
+				return -1;
+		}
+
+		if (cfg.selmode)
+			lastappendpos = selbufpos;
+	}
+
+	return r;
+}
+
 static void redraw(char *path)
 {
 	xlines = LINES;
@@ -4495,10 +4535,7 @@ nochange:
 				if (cfg.runplugin) {
 					cfg.runplugin = 0;
 					/* Must be in plugin dir and same context to select plugin */
-					if ((cfg.runctx != cfg.curctx)
-					    || (strcmp(path, plugindir) != 0))
-						; /* We are somewhere else, continue as usual */
-					else {
+					if ((cfg.runctx == cfg.curctx) && !strcmp(path, plugindir)) {
 						/* Copy path so we can return back to earlier dir */
 						xstrlcpy(path, rundir, PATH_MAX);
 						rundir[0] = '\0';
@@ -4611,24 +4648,29 @@ nochange:
 		case SEL_CTX2: // fallthrough
 		case SEL_CTX3: // fallthrough
 		case SEL_CTX4:
-			switch (sel) {
-			case SEL_CYCLE:
-				fd = '\t';
-				break;
-			case SEL_CYCLER:
-				fd = KEY_BTAB;
-				break;
-			case SEL_CTX1: // fallthrough
-			case SEL_CTX2: // fallthrough
-			case SEL_CTX3: // fallthrough
-			case SEL_CTX4:
-				fd = sel - SEL_CTX1 + '1';
-				break;
-			default:
+			if (sel == SEL_LEADER) {
 				xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
 				printkeys(bookmark, g_buf + strlen(g_buf), BM_MAX);
 				printprompt(g_buf);
 				fd = get_input(NULL);
+
+				if (fd >= '1' && fd <= '4')
+					sel = SEL_CTX1 + (fd - '1');
+			}
+
+			if (sel != SEL_LEADER) {
+				r = handle_context_switch(sel, newpath);
+				if (r < 0)
+					continue;
+				savecurctx(&cfg, path, dents[cur].name, r);
+
+				/* Reset the pointers */
+				path = g_ctx[r].c_path;
+				lastdir = g_ctx[r].c_last;
+				lastname = g_ctx[r].c_name;
+
+				setdirwatch();
+				goto begin;
 			}
 
 			switch (fd) {
@@ -4643,47 +4685,6 @@ nochange:
 				setdirwatch();
 				if (ndents)
 					copycurname();
-				goto begin;
-			case '\t': // fallthrough
-			case KEY_BTAB:
-				/* visit next and previous contexts */
-				r = cfg.curctx;
-				if (fd == '\t')
-					do
-						r = (r + 1) & ~CTX_MAX;
-					while (!g_ctx[r].c_cfg.ctxactive);
-				else
-					do
-						r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
-					while (!g_ctx[r].c_cfg.ctxactive);
-				fd = '1' + r; // fallthrough
-			case '1': // fallthrough
-			case '2': // fallthrough
-			case '3': // fallthrough
-			case '4':
-				r = fd - '1'; /* Save the next context id */
-				if (cfg.curctx == r) {
-					if (sel != SEL_CYCLE)
-						continue;
-
-					(r == CTX_MAX - 1) ? (r = 0) : ++r;
-					snprintf(newpath, PATH_MAX, messages[MSG_CREATE_CTX], r + 1);
-					fd = get_input(newpath);
-					if (fd != 'y' && fd != 'Y')
-						continue;
-				}
-
-				if (cfg.selmode)
-					lastappendpos = selbufpos;
-
-				savecurctx(&cfg, path, dents[cur].name, r);
-
-				/* Reset the pointers */
-				path = g_ctx[r].c_path;
-				lastdir = g_ctx[r].c_last;
-				lastname = g_ctx[r].c_name;
-
-				setdirwatch();
 				goto begin;
 			}
 
