@@ -705,6 +705,22 @@ static int get_input(const char *prompt)
 	return r;
 }
 
+static int get_cur_or_sel()
+{
+	if (selbufpos && ndents) {
+		int choice = get_input(messages[MSG_CUR_SEL_OPTS]);
+		return ((choice == 'c' || choice == 's') ? choice : 0);
+	}
+
+	if (selbufpos)
+		return 's';
+
+	if (ndents)
+		return 'c';
+
+	return 0;
+}
+
 static void xdelay(useconds_t delay)
 {
 	refresh();
@@ -1535,19 +1551,14 @@ static bool batch_rename(const char *path)
 	char foriginal[TMP_LEN_MAX] = {0};
 	char buf[sizeof(batchrenamecmd) + (PATH_MAX << 1)];
 
-	if (selbufpos) {
-		if (ndents) {
-			i = get_input(messages[MSG_CUR_SEL_OPTS]);
-			if (i == 'c') {
-				selbufpos = 0; /* Clear the selection */
-				dir = TRUE;
-			} else if (i != 's')
-				return ret;
-		}
-	} else if (ndents)
-		dir = TRUE; /* Rename entries in dir */
-	else
+	i = get_cur_or_sel();
+	if (!i)
 		return ret;
+
+	if (i == 'c') { /* Rename entries in current dir */
+		selbufpos = 0;
+		dir = TRUE;
+	}
 
 	fd1 = create_tmp_file();
 	if (fd1 == -1)
@@ -2357,20 +2368,13 @@ static size_t mkpath(const char *dir, const char *name, char *out)
  */
 static int xlink(char *suffix, char *path, char *curfname, char *buf, int *presel, int type)
 {
-	int count = 0, choice = 's';
+	int count = 0, choice;
 	char *pbuf = pselbuf, *fname;
 	size_t pos = 0, len, r;
 	int (*link_fn)(const char *, const char *) = NULL;
 
-	if (selbufpos) {
-		if (ndents) {
-			choice = get_input(messages[MSG_CUR_SEL_OPTS]);
-			if (choice != 'c' && choice != 's')
-				return -1;
-		}
-	} else if (ndents)
-		choice = 'c';
-	else
+	choice = get_cur_or_sel();
+	if (!choice)
 		return -1;
 
 	if (type == 's') /* symbolic link */
@@ -4763,7 +4767,8 @@ nochange:
 				break;
 			case SEL_TOGGLEDOT:
 				cfg.showhidden ^= 1;
-				setdirwatch();
+				if (cfg.filtermode)
+					presel = FILTER;
 				break;
 			case SEL_DETAIL:
 				cfg.showdetail ^= 1;
@@ -4818,6 +4823,7 @@ nochange:
 				break;
 			}
 
+			clearfilter();
 			endselection();
 
 			/* Save current */
@@ -5052,7 +5058,12 @@ nochange:
 
 			switch (sel) {
 			case SEL_ARCHIVE:
-				r = get_input(messages[MSG_CUR_SEL_OPTS]);
+				r = get_cur_or_sel();
+				if (!r) {
+					clearprompt();
+					goto nochange;
+				}
+
 				if (r == 's') {
 					if (!selsafe()) {
 						presel = MSGWAIT;
@@ -5060,11 +5071,9 @@ nochange:
 					}
 
 					tmp = NULL;
-				} else if (r != 'c' || !ndents) {
-					clearprompt();
-					goto nochange;
 				} else
 					tmp = dents[cur].name;
+
 				tmp = xreadline(tmp, messages[MSG_ARCHIVE_NAME]);
 				break;
 			case SEL_OPENWITH:
