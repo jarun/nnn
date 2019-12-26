@@ -1810,6 +1810,12 @@ static int visible_str(const fltrexp_t *fltrexp, const char *fname)
 
 static int (*filterfn)(const fltrexp_t *fltr, const char *fname) = &visible_str;
 
+static void clearfilter()
+{
+	if (g_ctx[cfg.curctx].c_fltr[1])
+		g_ctx[cfg.curctx].c_fltr[1] = 0;
+}
+
 static int entrycmp(const void *va, const void *vb)
 {
 	const struct entry *pa = (pEntry)va;
@@ -1882,6 +1888,10 @@ static int nextsel(int presel)
 	if (c == 0 || c == MSGWAIT) {
 		c = getch();
 		//DPRINTF_D(c);
+
+		/* Clear previous filter when manually starting */
+		if (c == FILTER)
+			clearfilter();
 
 		if (presel == MSGWAIT) {
 			if (cfg.filtermode)
@@ -4371,7 +4381,7 @@ nochange:
 
 				/* Save history */
 				xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
-				g_ctx[cfg.curctx].c_fltr[1] = '\0';
+				clearfilter();
 
 				xstrlcpy(path, dir, PATH_MAX);
 
@@ -4396,7 +4406,7 @@ nochange:
 
 			/* Toggle filter mode on left click on last 2 lines */
 			if (event.y >= xlines - 2 && event.bstate == BUTTON1_PRESSED) {
-				g_ctx[cfg.curctx].c_fltr[1] = '\0';
+				clearfilter();
 				cfg.filtermode ^= 1;
 				if (cfg.filtermode) {
 					presel = FILTER;
@@ -4464,7 +4474,8 @@ nochange:
 				xstrlcpy(lastdir, path, PATH_MAX);
 
 				xstrlcpy(path, newpath, PATH_MAX);
-				lastname[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
+				lastname[0] = '\0';
+				clearfilter();
 				setdirwatch();
 				goto begin;
 			case S_IFREG:
@@ -4500,7 +4511,7 @@ nochange:
 
 						if (runfile[0])
 							runfile[0] = '\0';
-						g_ctx[cfg.curctx].c_fltr[1] = '\0';
+						clearfilter();
 
 						setdirwatch();
 						goto begin;
@@ -4588,7 +4599,8 @@ nochange:
 			xstrlcpy(lastdir, path, PATH_MAX);
 
 			xstrlcpy(path, newpath, PATH_MAX);
-			lastname[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
+			lastname[0] = '\0';
+			clearfilter();
 			DPRINTF_S(path);
 			setdirwatch();
 			goto begin;
@@ -4688,7 +4700,8 @@ nochange:
 			if (strcmp(path, newpath) == 0)
 				break;
 
-			lastname[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
+			lastname[0] =  '\0';
+			clearfilter();
 
 			/* Save last working directory */
 			xstrlcpy(lastdir, path, PATH_MAX);
@@ -4740,6 +4753,7 @@ nochange:
 				cfg.filtermode ^= 1;
 				if (cfg.filtermode) {
 					presel = FILTER;
+					clearfilter();
 					goto nochange;
 				}
 
@@ -5299,7 +5313,7 @@ nochange:
 					lastname[0] = '\0';
 				}
 				setdirwatch();
-				g_ctx[cfg.curctx].c_fltr[1] = 0;
+				clearfilter();
 				goto begin;
 			case SEL_LAUNCH:
 				launch_app(path, newpath);
