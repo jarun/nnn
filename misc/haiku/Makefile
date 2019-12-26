@@ -63,7 +63,7 @@ CFLAGS += $(CFLAGS_CURSES)
 
 LDLIBS += $(LDLIBS_CURSES) $(LDLIBS_HAIKU)
 
-DISTFILES = src nnn.1 Makefile README.md LICENSE
+DISTFILES = src nnn.1 Makefile README.md LICENSE VERSION.mk
 SRC = src/nnn.c
 HEADERS = src/nnn.h
 BIN = nnn
@@ -103,6 +103,8 @@ strip: $(BIN)
 dist:
 	mkdir -p nnn-$(VERSION)
 	$(CP) -r $(DISTFILES) nnn-$(VERSION)
+	mkdir -p nnn-$(VERSION)/misc
+	$(CP) -r misc/haiku nnn-$(VERSION)/misc
 	tar -cf nnn-$(VERSION).tar nnn-$(VERSION)
 	gzip nnn-$(VERSION).tar
 	$(RM) -r nnn-$(VERSION)
