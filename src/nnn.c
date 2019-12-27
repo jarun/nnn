@@ -2859,9 +2859,12 @@ static void save_session(bool last_session, int *presel)
 			header.pathln[i] = header.nameln[i]
 				= header.lastln[i] = header.fltrln[i] = 0;
 		} else {
+			if (cfg.curctx == i && ndents)
+				/* Update current file name, arrows don't update it */
+				xstrlcpy(g_ctx[i].c_name, dents[cur].name, NAME_MAX + 1);
 			header.pathln[i] = strnlen(g_ctx[i].c_path, PATH_MAX) + 1;
-			header.nameln[i] = strnlen(g_ctx[i].c_name, NAME_MAX) + 1;
 			header.lastln[i] = strnlen(g_ctx[i].c_last, PATH_MAX) + 1;
+			header.nameln[i] = strnlen(g_ctx[i].c_name, NAME_MAX) + 1;
 			header.fltrln[i] = strnlen(g_ctx[i].c_fltr, REGEX_MAX) + 1;
 		}
 	}
