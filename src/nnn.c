@@ -5400,21 +5400,17 @@ nochange:
 		case SEL_SESSIONS:
 			r = get_input(messages[MSG_SSN_OPTS]);
 
-			if (r == 's') {
+			if (r == 's')
 				save_session(FALSE, &presel);
-				goto nochange;
-			}
-
-			if (r == 'l' || r == 'r') {
+			else if (r == 'l' || r == 'r') {
 				if (load_session(NULL, &path, &lastdir, &lastname, r == 'r')) {
 					setdirwatch();
 					goto begin;
 				}
-
-				presel = MSGWAIT;
-				goto nochange;
 			}
-			break;
+
+			clearprompt();
+			goto nochange;
 		case SEL_QUITCTX: // fallthrough
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
