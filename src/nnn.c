@@ -49,6 +49,9 @@
 #include <sys/event.h>
 #include <sys/time.h>
 #define BSD_KQUEUE
+#elif defined(__HAIKU__)
+#include "../misc/haiku/haiku_interop.h"
+#define HAIKU_NM
 #else
 #include <sys/sysmacros.h>
 #endif
@@ -570,6 +573,9 @@ static struct kevent events_to_monitor[NUM_EVENT_FDS];
 static uint KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
 			    | NOTE_RENAME | NOTE_REVOKE | NOTE_WRITE;
 static struct timespec gtimeout;
+#elif defined(HAIKU_NM)
+static bool haiku_nm_active = FALSE;
+static haiku_nm_h haiku_hnd = NULL;
 #endif
 
 /* Function macros */
@@ -1892,6 +1898,8 @@ static int nextsel(int presel)
 	struct kevent event_data[NUM_EVENT_SLOTS];
 
 	memset((void *)event_data, 0x0, sizeof(struct kevent) * NUM_EVENT_SLOTS);
+#elif defined(HAIKU_NM)
+// TODO: Do some Haiku declarations
 #endif
 
 	if (c == 0 || c == MSGWAIT) {
@@ -1946,6 +1954,9 @@ static int nextsel(int presel)
 		if (!cfg.selmode && !cfg.blkorder && event_fd >= 0 && idle & 1
 		    && kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
 			      event_data, NUM_EVENT_FDS, &gtimeout) > 0)
+			c = CONTROL('L');
+#elif defined(HAIKU_NM)
+		if (!cfg.selmode && !cfg.blkorder && haiku_nm_active && idle & 1 && haiku_is_update_needed(haiku_hnd))
 			c = CONTROL('L');
 #endif
 	} else
@@ -3250,12 +3261,25 @@ static bool xmktree(char* path, bool dir)
 
 		/* Create folder from path to '\0' inserted at p */
 		if (mkdir(path, 0777) == -1 && errno != EEXIST) {
+#ifdef __HAIKU__
+			// XDG_CONFIG_HOME contains a directory
+			// that is read-only, but the full path
+			// is writeable.
+			// Try to continue and see what happens.
+			// TODO: Find a more robust solution.
+			if (errno == B_READ_ONLY_DEVICE) {
+				goto next;
+			}
+#endif
 			DPRINTF_S("mkdir1!");
 			DPRINTF_S(strerror(errno));
 			*slash = '/';
 			return FALSE;
 		}
 
+#ifdef __HAIKU__
+next:
+#endif
 		/* Restore path */
 		*slash = '/';
 		++p;
@@ -3774,7 +3798,7 @@ static int dentfill(char *path, struct entry **dents)
 	if (!dp)
 		goto exit;
 
-#ifdef __sun
+#if defined(__sun) || defined(__HAIKU__)
 	flags = AT_SYMLINK_NOFOLLOW; /* no d_type */
 #else
 	if (cfg.blkorder || dp->d_type == DT_UNKNOWN) {
@@ -3878,7 +3902,7 @@ static int dentfill(char *path, struct entry **dents)
 
 		/* Copy other fields */
 		dentp->t = cfg.mtime ? sb.st_mtime : sb.st_atime;
-#ifndef __sun
+#if !(defined(__sun) || defined(__HAIKU__))
 		if (!flags && dp->d_type == DT_LNK) {
 			 /* Do not add sizes for links */
 			dentp->mode = (sb.st_mode & ~S_IFMT) | S_IFLNK;
@@ -3926,7 +3950,7 @@ static int dentfill(char *path, struct entry **dents)
 
 			if (S_ISDIR(sb.st_mode))
 				dentp->flags |= DIR_OR_LINK_TO_DIR;
-#ifndef __sun /* no d_type */
+#if !(defined(__sun) || defined(__HAIKU__)) /* no d_type */
 		} else if (dp->d_type == DT_DIR || (dp->d_type == DT_LNK && S_ISDIR(sb.st_mode))) {
 			dentp->flags |= DIR_OR_LINK_TO_DIR;
 #endif
@@ -4321,6 +4345,12 @@ begin:
 		event_fd = -1;
 		dir_changed = FALSE;
 	}
+#elif defined(HAIKU_NM)
+	if ((presel == FILTER || dir_changed) && haiku_hnd != NULL) {
+		haiku_stop_watch(haiku_hnd);
+		haiku_nm_active = FALSE;
+		dir_changed = FALSE;
+	}
 #endif
 
 	/* Can fail when permissions change while browsing.
@@ -4352,6 +4382,8 @@ begin:
 			EV_SET(&events_to_monitor[0], event_fd, EVFILT_VNODE,
 			       EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, path);
 	}
+#elif defined(HAIKU_NM)
+	haiku_nm_active = haiku_watch_dir(haiku_hnd, path) == _SUCCESS;
 #endif
 
 	while (1) {
@@ -4725,6 +4757,11 @@ nochange:
 			if (event_fd >= 0) {
 				close(event_fd);
 				event_fd = -1;
+			}
+#elif defined(HAIKU_NM)
+			if (haiku_nm_active) {
+				haiku_stop_watch(haiku_hnd);
+				haiku_nm_active = FALSE;
 			}
 #endif
 			presel = filterentries(path, lastname);
@@ -5852,6 +5889,12 @@ int main(int argc, char *argv[])
 		xerror();
 		return _FAILURE;
 	}
+#elif defined(HAIKU_NM)
+	haiku_hnd = haiku_init_nm();
+	if (!haiku_hnd) {
+		xerror();
+		return _FAILURE;
+	}
 #endif
 
 	/* Set nnn nesting level */
@@ -5950,6 +5993,8 @@ int main(int argc, char *argv[])
 	if (event_fd >= 0)
 		close(event_fd);
 	close(kq);
+#elif defined(HAIKU_NM)
+	haiku_close_nm(haiku_hnd);
 #endif
 
 	return _SUCCESS;
