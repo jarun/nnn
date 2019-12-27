@@ -3482,13 +3482,13 @@ static void show_help(const char *path)
 	     "7Down j  Down%-14cPgDn ^D  Scroll down\n"
 	     "7Left h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
 	       "9g ^A  Top%-11cRet Right l  Open\n"
-	       "9G ^E  End%-21c'  First file\n"
+	       "9G ^E  End%-21c.  Toggle hidden\n"
 		  "cb  Pin CWD%-16c^B  Go to pinned dir\n"
-	       "9, ^/  Lead key%-10cN LeadN  Context N\n"
-	    "6(Sh)Tab  Cycle context%-11cd  Detail view toggle\n"
+	       "9, ^/  Lead key%-16cd  Detail view toggle\n"
+	    "6N LeadN  Context N%-9c(Sh)Tab  Cycle context\n"
 		  "c/  Filter%-13cIns ^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt%-9c^L F5  Redraw/clear prompt\n"
-		  "c.  Toggle hidden%-11c?  Help, conf\n"
+		  "c?  Help, conf%-14c'  First file\n"
 	       "9Q ^Q  Quit%-20cq  Quit context\n"
 		 "b^G  QuitCD%-1c\n"
 		"1FILES\n"
@@ -4679,6 +4679,7 @@ nochange:
 			case '-': // fallthrough
 			case '@':
 			case '.':
+			case '\'':
 				presel = fd;
 				goto nochange;
 			}
