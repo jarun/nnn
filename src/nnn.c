@@ -449,21 +449,20 @@ static char * const utils[] = {
 #define MSG_CONTINUE 22
 #define MSG_SEL_MISSING 23
 #define MSG_ACCESS 24
-#define MSG_0_CREATED 25
-#define MSG_NOT_REG_FILE 26
-#define MSG_PERM_DENIED 27
-#define MSG_EMPTY_FILE 28
-#define MSG_UNSUPPORTED 29
-#define MSG_NOT_SET 30
-#define MSG_DIR_CHANGED 31
-#define MSG_EXISTS 32
-#define MSG_FEW_COLUMNS 33
-#define MSG_REMOTE_OPTS 34
-#define MSG_RCLONE_DELAY 35
-#define MSG_APP_NAME 36
-#define MSG_ARCHIVE_OPTS 37
-#define MSG_PLUGIN_KEYS 38
-#define MSG_BOOKMARK_KEYS 39
+#define MSG_NOT_REG_FILE 25
+#define MSG_PERM_DENIED 26
+#define MSG_EMPTY_FILE 27
+#define MSG_UNSUPPORTED 28
+#define MSG_NOT_SET 29
+#define MSG_DIR_CHANGED 30
+#define MSG_EXISTS 31
+#define MSG_FEW_COLUMNS 32
+#define MSG_REMOTE_OPTS 33
+#define MSG_RCLONE_DELAY 34
+#define MSG_APP_NAME 35
+#define MSG_ARCHIVE_OPTS 36
+#define MSG_PLUGIN_KEYS 37
+#define MSG_BOOKMARK_KEYS 38
 
 static const char * const messages[] = {
 	"no traversal",
@@ -491,7 +490,6 @@ static const char * const messages[] = {
 	"\nPress Enter to continue",
 	"open failed",
 	"dir inaccessible",
-	"0 created",
 	"not regular file",
 	"permission denied",
 	"empty: edit or open with",
@@ -2322,13 +2320,9 @@ static char *getreadline(const char *prompt, char *path, char *curpath, int *pre
 
 	refresh();
 
-	if (chdir(curpath) == -1) {
+	if (chdir(curpath) == -1)
 		printwarn(presel);
-		free(input);
-		return NULL;
-	}
-
-	if (input && input[0]) {
+	else if (input && input[0]) {
 		add_history(input);
 		xstrlcpy(g_buf, input, CMD_LEN_MAX);
 		free(input);
@@ -2364,7 +2358,7 @@ static size_t mkpath(const char *dir, const char *name, char *out)
 
 /*
  * Create symbolic/hard link(s) to file(s) in selection list
- * Returns the number of links created
+ * Returns the number of links created, -1 on error
  */
 static int xlink(char *suffix, char *path, char *curfname, char *buf, int *presel, int type)
 {
@@ -2390,10 +2384,10 @@ static int xlink(char *suffix, char *path, char *curfname, char *buf, int *prese
 		xstrlcpy(lnpath + r - 1, suffix, PATH_MAX - r - 1);
 
 		if (!link_fn(buf, lnpath))
-			return 1;
+			return 1; /* One link created */
 
 		printwarn(presel);
-		return 0; /* One link created */
+		return -1;
 	}
 
 	while (pos < selbufpos) {
@@ -2408,9 +2402,6 @@ static int xlink(char *suffix, char *path, char *curfname, char *buf, int *prese
 		pos += len + 1;
 		pbuf += len + 1;
 	}
-
-	if (!count)
-		printwait(messages[MSG_0_CREATED], presel);
 
 	return count;
 }
@@ -5113,33 +5104,39 @@ nochange:
 				goto nochange;
 			}
 
-			/* Confirm if app is CLI or GUI */
-			if (sel == SEL_OPENWITH) {
-				r = get_input(messages[MSG_CLI_MODE]);
-				r = (r == 'c' ? F_CLI :
-				     (r == 'g' ? F_NOWAIT | F_NOTRACE | F_MULTI : 0));
-				if (!r) {
-					cfg.filtermode ? presel = FILTER : clearprompt();
-					goto nochange;
-				}
-			}
-
 			switch (sel) {
 			case SEL_ARCHIVE:
-			{
-				char cmd[ARCHIVE_CMD_LEN];
-
-				get_archive_cmd(cmd, tmp);
-
-				(r == 's') ? archive_selection(cmd, tmp, path)
-					   : spawn(cmd, tmp, dents[cur].name,
+				mkpath(path, tmp, newpath);
+				if (access(newpath, F_OK) == 0) {
+					fd = get_input(messages[MSG_OVERWRITE]);
+					if (r != 'y' && r != 'Y') {
+						clearprompt();
+						goto nochange;
+					}
+				}
+				get_archive_cmd(newpath, tmp);
+				(r == 's') ? archive_selection(newpath, tmp, path)
+					   : spawn(newpath, tmp, dents[cur].name,
 						    path, F_NORMAL | F_MULTI);
-				break;
-			}
+				// fallthrough
 			case SEL_OPENWITH:
-				mkpath(path, dents[cur].name, newpath);
-				spawn(tmp, newpath, NULL, path, r);
-				break;
+				if (sel == SEL_OPENWITH) {
+					/* Confirm if app is CLI or GUI */
+					r = get_input(messages[MSG_CLI_MODE]);
+					r = (r == 'c' ? F_CLI :
+					     (r == 'g' ? F_NOWAIT | F_NOTRACE | F_MULTI : 0));
+					if (!r) {
+						cfg.filtermode ? presel = FILTER : clearprompt();
+						goto nochange;
+					}
+					mkpath(path, dents[cur].name, newpath);
+					spawn(tmp, newpath, NULL, path, r);
+				}
+
+				if (cfg.filtermode)
+					presel = FILTER;
+				copycurname();
+				goto begin;
 			case SEL_RENAME:
 				/* Skip renaming to same name */
 				if (strcmp(tmp, dents[cur].name) == 0) {
@@ -5150,21 +5147,8 @@ nochange:
 					dup = 'd';
 				}
 				break;
-			default:
+			default: /* SEL_NEW */
 				break;
-			}
-
-			/* Complete OPEN, LAUNCH, ARCHIVE operations */
-			if (sel != SEL_NEW && sel != SEL_RENAME) {
-				/* Continue in navigate-as-you-type mode, if enabled */
-				if (cfg.filtermode)
-					presel = FILTER;
-
-				/* Save current */
-				copycurname();
-
-				/* Repopulate as directory content may have changed */
-				goto begin;
 			}
 
 			/* Open the descriptor to currently open directory */
@@ -5204,45 +5188,42 @@ nochange:
 					printwarn(&presel);
 					goto nochange;
 				}
+				close(fd);
+				xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			} else {
+				close(fd); /* Use fd as tmp var */
+				presel = 0;
+
 				/* Check if it's a dir or file */
 				if (r == 'f') {
 					mkpath(path, tmp, newpath);
-					r = xmktree(newpath, FALSE);
+					fd = xmktree(newpath, FALSE);
 				} else if (r == 'd') {
 					mkpath(path, tmp, newpath);
-					r = xmktree(newpath, TRUE);
+					fd = xmktree(newpath, TRUE);
 				} else if (r == 's' || r == 'h') {
 
 					if (tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
-					r = xlink(tmp, path, (ndents ? dents[cur].name : NULL),
+					fd = xlink(tmp, path, (ndents ? dents[cur].name : NULL),
 						  newpath, &presel, r);
-					close(fd);
-
-					if (r <= 0)
-						goto nochange;
-
-					if (cfg.filtermode)
-						presel = FILTER;
-					if (ndents)
-						copycurname();
-					goto begin;
-				} else {
-					close(fd);
-					break;
 				}
 
-				/* Check if file creation failed */
-				if (r == -1) {
-					printwarn(&presel);
-					close(fd);
+				if (!fd)
+					printwait(messages[MSG_FAILED], &presel);
+
+				if (fd <= 0)
 					goto nochange;
+
+				if (r == 'f' || r == 'd')
+					xstrlcpy(lastname, tmp, NAME_MAX + 1);
+				else if (ndents) {
+					if (cfg.filtermode)
+						presel = FILTER;
+					copycurname();
 				}
 			}
 
-			close(fd);
-			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
 		}
 		case SEL_PLUGKEY: // fallthrough
