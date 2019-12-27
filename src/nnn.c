@@ -640,7 +640,7 @@ static char *xitoa(uint val)
 
 #ifdef KEY_RESIZE
 /* Clear the old prompt */
-static inline void clearoldprompt(void)
+static void clearoldprompt(void)
 {
 	tolastln();
 	clrtoeol();
@@ -648,7 +648,7 @@ static inline void clearoldprompt(void)
 #endif
 
 /* Messages show up at the bottom */
-static inline void printmsg(const char *msg)
+static void printmsg(const char *msg)
 {
 	tolastln();
 	addstr(msg);
@@ -1046,7 +1046,7 @@ static void updateselbuf(const char *path, char *newpath)
 }
 
 /* Finish selection procedure before an operation */
-static inline void endselection()
+static void endselection()
 {
 	if (cfg.selmode)
 		cfg.selmode = 0;
@@ -2486,7 +2486,7 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool path)
 	return NULL;
 }
 
-static inline void resetdircolor(int flags)
+static void resetdircolor(int flags)
 {
 	if (cfg.dircolor && !(flags & DIR_OR_LINK_TO_DIR)) {
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
@@ -3937,10 +3937,8 @@ static int dentfill(char *path, struct entry **dents)
 
 exit:
 	/* Should never be null */
-	if (closedir(dirp) == -1) {
-		dentfree();
+	if (closedir(dirp) == -1)
 		errexit();
-	}
 
 	return n;
 }
@@ -4011,7 +4009,7 @@ static void move_cursor(int target, int ignore_scrolloff)
 	curscroll = MAX(curscroll, MAX(cur - (onscreen - 1), 0));
 }
 
-static inline void handle_screen_move(enum action sel)
+static void handle_screen_move(enum action sel)
 {
 	int onscreen;
 
@@ -4266,10 +4264,9 @@ static void redraw(char *path)
 static void browse(char *ipath, const char *session)
 {
 	char newpath[PATH_MAX] __attribute__ ((aligned));
-	char mark[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
-	char *path, *lastdir, *lastname, *dir, *tmp;
+	char *path, *lastdir, *lastname, *dir, *tmp, *mark = NULL;
 	ino_t inode = 0;
 	enum action sel;
 	struct stat sb;
@@ -4295,7 +4292,7 @@ static void browse(char *ipath, const char *session)
 		g_ctx[0].c_cfg = cfg; /* current configuration */
 	}
 
-	newpath[0] = rundir[0] = runfile[0] = mark[0] = '\0';
+	newpath[0] = rundir[0] = runfile[0] = '\0';
 
 	presel = cfg.filtermode ? FILTER : 0;
 
@@ -4361,8 +4358,10 @@ begin:
 		redraw(path);
 nochange:
 		/* Exit if parent has exited */
-		if (getppid() == 1)
+		if (getppid() == 1) {
+			free(mark);
 			_exit(0);
+		}
 
 		/* If CWD is deleted or moved or perms changed, find an accessible parent */
 		if (access(path, F_OK)) {
@@ -4373,8 +4372,10 @@ nochange:
 		}
 
 		/* If STDIN is no longer a tty (closed) we should exit */
-		if (!isatty(STDIN_FILENO) && !cfg.picker)
+		if (!isatty(STDIN_FILENO) && !cfg.picker) {
+			free(mark);
 			return;
+		}
 
 		sel = nextsel(presel);
 		if (presel)
@@ -4522,6 +4523,7 @@ nochange:
 				if (cfg.picker && sel == SEL_GOIN) {
 					appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 					writesel(pselbuf, selbufpos - 1);
+					free(mark);
 					return;
 				}
 
@@ -4609,12 +4611,12 @@ nochange:
 			case SEL_CDROOT:
 				dir = "/";
 				break;
-			default: /* case SEL_VISIT */
+			default: /* SEL_VISIT */
 				dir = mark;
 				break;
 			}
 
-			if (dir[0] == '\0') {
+			if (!dir || !*dir) {
 				printwait(messages[MSG_NOT_SET], &presel);
 				goto nochange;
 			}
@@ -4676,14 +4678,9 @@ nochange:
 			case '`': // fallthrough
 			case '-': // fallthrough
 			case '@':
+			case '.':
 				presel = fd;
 				goto nochange;
-			case '.':
-				cfg.showhidden ^= 1;
-				setdirwatch();
-				if (ndents)
-					copycurname();
-				goto begin;
 			}
 
 			if (!get_kv_val(bookmark, newpath, fd, BM_MAX, TRUE)) {
@@ -4712,7 +4709,8 @@ nochange:
 			setdirwatch();
 			goto begin;
 		case SEL_PIN:
-			xstrlcpy(mark, path, PATH_MAX);
+			free(mark);
+			mark = strdup(path);
 			printwait(mark, &presel);
 			goto nochange;
 		case SEL_FLTR:
@@ -5445,6 +5443,7 @@ nochange:
 			/* Picker mode: reset buffer or clear file */
 			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE"))
 				cfg.picker ? selbufpos = 0 : write_lastdir(path);
+			free(mark);
 			return;
 		default:
 			if (xlines != LINES || xcols != COLS)
