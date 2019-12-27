@@ -5245,10 +5245,76 @@ nochange:
 			xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			goto begin;
 		}
+		case SEL_PLUGKEY: // fallthrough
+		case SEL_PLUGIN:
+			/* Check if directory is accessible */
+			if (!xdiraccess(plugindir)) {
+				printwarn(&presel);
+				goto nochange;
+			}
+
+			if (sel == SEL_PLUGKEY) {
+				xstrlcpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
+				printkeys(plug, g_buf + strlen(g_buf), PLUGIN_MAX);
+				printprompt(g_buf);
+				r = get_input(NULL);
+				tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
+				if (!tmp) {
+					printwait(messages[MSG_INVALID_KEY], &presel);
+					goto nochange;
+				}
+
+				if (tmp[0] == '-' && tmp[1]) {
+					++tmp;
+					r = FALSE; /* Do not refresh dir after completion */
+				} else
+					r = TRUE;
+
+				if (!run_selected_plugin(&path, tmp, newpath,
+							 (ndents ? dents[cur].name : NULL),
+							 &lastname, &lastdir)) {
+					printwait(messages[MSG_FAILED], &presel);
+					goto nochange;
+				}
+
+				if (!r) {
+					clearprompt();
+					goto nochange;
+				}
+
+				if (ndents)
+					copycurname();
+			} else {
+				cfg.runplugin ^= 1;
+				if (!cfg.runplugin && rundir[0]) {
+					/*
+					 * If toggled, and still in the plugin dir,
+					 * switch to original directory
+					 */
+					if (strcmp(path, plugindir) == 0) {
+						xstrlcpy(path, rundir, PATH_MAX);
+						xstrlcpy(lastname, runfile, NAME_MAX);
+						rundir[0] = runfile[0] = '\0';
+						setdirwatch();
+						goto begin;
+					}
+
+					/* Otherwise, initiate choosing plugin again */
+					cfg.runplugin = 1;
+				}
+
+				xstrlcpy(rundir, path, PATH_MAX);
+				xstrlcpy(path, plugindir, PATH_MAX);
+				if (ndents)
+					xstrlcpy(runfile, dents[cur].name, NAME_MAX);
+				cfg.runctx = cfg.curctx;
+				lastname[0] = '\0';
+			}
+			setdirwatch();
+			clearfilter();
+			goto begin;
 		case SEL_EXEC: // fallthrough
 		case SEL_SHELL: // fallthrough
-		case SEL_PLUGKEY: // fallthrough
-		case SEL_PLUGIN: // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_RUNCMD:
 			endselection();
@@ -5262,72 +5328,6 @@ nochange:
 				setenv(envs[ENV_NCUR], (ndents ? dents[cur].name : ""), 1);
 				spawn(shell, NULL, NULL, path, F_CLI);
 				break;
-			case SEL_PLUGKEY: // fallthrough
-			case SEL_PLUGIN:
-				/* Check if directory is accessible */
-				if (!xdiraccess(plugindir)) {
-					printwarn(&presel);
-					goto nochange;
-				}
-
-				if (sel == SEL_PLUGKEY) {
-					xstrlcpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
-					printkeys(plug, g_buf + strlen(g_buf), PLUGIN_MAX);
-					printprompt(g_buf);
-					r = get_input(NULL);
-					tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
-					if (!tmp) {
-						printwait(messages[MSG_INVALID_KEY], &presel);
-						goto nochange;
-					}
-
-					if (tmp[0] == '-' && tmp[1]) {
-						++tmp;
-						r = FALSE; /* Do not refresh dir after completion */
-					} else
-						r = TRUE;
-
-					if (!run_selected_plugin(&path, tmp, newpath,
-								 (ndents ? dents[cur].name : NULL),
-								 &lastname, &lastdir)) {
-						printwait(messages[MSG_FAILED], &presel);
-						goto nochange;
-					}
-
-					if (!r) {
-						clearprompt();
-						goto nochange;
-					}
-
-					if (ndents)
-						copycurname();
-				} else {
-					cfg.runplugin ^= 1;
-					if (!cfg.runplugin && rundir[0]) {
-						/*
-						 * If toggled, and still in the plugin dir,
-						 * switch to original directory
-						 */
-						if (strcmp(path, plugindir) == 0) {
-							xstrlcpy(path, rundir, PATH_MAX);
-							xstrlcpy(lastname, runfile, NAME_MAX);
-							rundir[0] = runfile[0] = '\0';
-							setdirwatch();
-							goto begin;
-						}
-						break;
-					}
-
-					xstrlcpy(rundir, path, PATH_MAX);
-					xstrlcpy(path, plugindir, PATH_MAX);
-					if (ndents)
-						xstrlcpy(runfile, dents[cur].name, NAME_MAX);
-					cfg.runctx = cfg.curctx;
-					lastname[0] = '\0';
-				}
-				setdirwatch();
-				clearfilter();
-				goto begin;
 			case SEL_LAUNCH:
 				launch_app(path, newpath);
 
