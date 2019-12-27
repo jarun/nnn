@@ -5460,36 +5460,24 @@ nochange:
 					break; // fallthrough
 			}
 
-			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE")) {
-				/* In vim picker mode, clear selection and exit */
-				if (cfg.picker) {
-					/* Picker mode: reset buffer or clear file */
-					selbufpos = 0;
-				} else if (!write_lastdir(path)) {
-					presel = MSGWAIT;
-					goto nochange;
-				}
-			}
+			/* CD on Quit */
+			/* In vim picker mode, clear selection and exit */
+			/* Picker mode: reset buffer or clear file */
+			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE"))
+				cfg.picker ? selbufpos = 0 : write_lastdir(path);
 			return;
 		default:
-			if (xlines != LINES || xcols != COLS) {
-				idle = 0;
-				setdirwatch();
-				if (ndents)
-					copycurname();
-				goto begin;
-			}
+			if (xlines != LINES || xcols != COLS)
+				setdirwatch(); /* Terminal resized */
+			else if (idletimeout && idle == idletimeout)
+				lock_terminal(); /* Locker */
+			else
+				goto nochange;
 
-			/* Locker */
-			if (idletimeout && idle == idletimeout) {
-				idle = 0;
-				lock_terminal();
-				if (ndents)
-					copycurname();
-				goto begin;
-			}
-
-			goto nochange;
+			idle = 0;
+			if (ndents)
+				copycurname();
+			goto begin;
 		} /* switch (sel) */
 	}
 }
