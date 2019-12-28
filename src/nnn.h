@@ -53,7 +53,7 @@ enum action {
 	SEL_CDLAST,
 	SEL_CDROOT,
 	SEL_VISIT,
-	SEL_LEADER,
+	SEL_BOOKMARK,
 	SEL_CYCLE,
 	SEL_CYCLER,
 	SEL_CTX1,
@@ -157,10 +157,10 @@ static struct key bindings[] = {
 	/* Go to / */
 	{ '`',            SEL_CDROOT },
 	/* Visit marked directory */
-	{ CONTROL('B'),   SEL_VISIT },
+	{ ',',            SEL_VISIT },
 	/* Leader key */
-	{ CONTROL('_'),   SEL_LEADER },
-	{ ',',            SEL_LEADER },
+	{ 'b',            SEL_BOOKMARK },
+	{ CONTROL('B'),   SEL_BOOKMARK },
 	/* Cycle contexts in forward direction */
 	{ '\t',           SEL_CYCLE },
 	/* Cycle contexts in reverse direction */
@@ -171,12 +171,12 @@ static struct key bindings[] = {
 	{ '3',            SEL_CTX3 },
 	{ '4',            SEL_CTX4 },
 	/* Mark a path to visit later */
-	{ 'b',            SEL_PIN },
+	{ '+',            SEL_PIN },
 	/* Filter */
 	{ '/',            SEL_FLTR },
 	/* Toggle filter mode */
 	{ KEY_IC,         SEL_MFLTR },
-	{ CONTROL('N'),   SEL_MFLTR },
+	{ CONTROL('_'),   SEL_MFLTR },
 	/* Toggle hide .dot files */
 	{ '.',            SEL_TOGGLEDOT },
 	/* Detailed listing */

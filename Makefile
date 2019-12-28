@@ -107,4 +107,4 @@ clean:
 
 skip: ;
 
-.PHONY: all debug install uninstall strip dist sign clean
+.PHONY: all install uninstall strip dist sign clean

@@ -1905,6 +1905,7 @@ static int nextsel(int presel)
 	if (c == 0 || c == MSGWAIT) {
 		c = getch();
 		//DPRINTF_D(c);
+		//DPRINTF_S(keyname(c));
 
 		/* Clear previous filter when manually starting */
 		if (c == FILTER)
@@ -2022,7 +2023,7 @@ static int filterentries(char *path, char *lastname)
 	wchar_t *wln = (wchar_t *)alloca(sizeof(wchar_t) * REGEX_MAX);
 	char *ln = g_ctx[cfg.curctx].c_fltr;
 	wint_t ch[2] = {0};
-	int r, total = ndents, oldcur = cur, len;
+	int r, total = ndents, len;
 	char *pln = g_ctx[cfg.curctx].c_fltr + 1;
 
 	if (ndents && ln[0] == FILTER && *pln) {
@@ -2036,7 +2037,6 @@ static int filterentries(char *path, char *lastname)
 		ln[0] = wln[0] = FILTER;
 		ln[1] = wln[1] = '\0';
 		len = 1;
-		cur = 0;
 	}
 
 	cleartimeout();
@@ -2044,16 +2044,14 @@ static int filterentries(char *path, char *lastname)
 	printprompt(ln);
 
 	while ((r = get_wch(ch)) != ERR) {
+		//DPRINTF_D(*ch);
+		//DPRINTF_S(keyname(*ch));
+
 		switch (*ch) {
 #ifdef KEY_RESIZE
 		case KEY_RESIZE:
 			clearoldprompt();
-			if (len == 1) {
-				cur = oldcur;
-				redraw(path);
-				cur = 0;
-			} else
-				redraw(path);
+			redraw(path);
 			printprompt(ln);
 			continue;
 #endif
@@ -2063,7 +2061,6 @@ static int filterentries(char *path, char *lastname)
 		case CONTROL('L'): // fallthrough
 		case 127: /* handle DEL */
 			if (len == 1 && *ch != CONTROL('L')) {
-				cur = oldcur;
 				*ch = CONTROL('L');
 				goto end;
 			}
@@ -2074,8 +2071,7 @@ static int filterentries(char *path, char *lastname)
 			else
 				wln[--len] = '\0';
 
-			if (len == 1)
-				cur = oldcur;
+			cur = 0;
 
 			wcstombs(ln, wln, REGEX_MAX);
 			ndents = total;
@@ -2086,31 +2082,22 @@ static int filterentries(char *path, char *lastname)
 			continue;
 		case KEY_MOUSE: // fallthrough
 		case 27: /* Exit filter mode on Escape */
-			if (len == 1)
-				cur = oldcur;
 			goto end;
 		}
 
 		if (r == OK) {
 			/* Handle all control chars in main loop */
-			if (*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^') {
-				DPRINTF_D(*ch);
-				DPRINTF_S(keyname(*ch));
-
-				if (len == 1)
-					cur = oldcur;
+			if (*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^')
 				goto end;
-			}
 
 			switch (*ch) {
 			case '=': // fallthrough /* Launch app */
 			case ']': // fallthorugh /*Prompt key */
 			case ';': // fallthrough /* Run plugin key */
 			case '?': /* Help and config key, '?' is an invalid regex */
-				if (len == 1) {
-					cur = oldcur;
+				if (len == 1)
 					goto end;
-				} // fallthrough
+				// fallthrough
 			default:
 				/* Reset cur in case it's a repeat search */
 				if (len == 1)
@@ -2151,11 +2138,8 @@ static int filterentries(char *path, char *lastname)
 				redraw(path);
 				printprompt(ln);
 			}
-		} else {
-			if (len == 1)
-				cur = oldcur;
+		} else
 			goto end;
-		}
 	}
 end:
 	if (*ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN) {
@@ -2832,7 +2816,7 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 		g_ctx[r].c_cfg.ctxactive = 1;
 		xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
 		g_ctx[r].c_last[0] = '\0';
-		xstrlcpy(g_ctx[r].c_name, curname, NAME_MAX + 1);
+		g_ctx[r].c_name[0] = '\0';
 		g_ctx[r].c_fltr[0] = g_ctx[r].c_fltr[1] = '\0';
 		g_ctx[r].c_cfg = cfg;
 		g_ctx[r].c_cfg.runplugin = 0;
@@ -3504,20 +3488,20 @@ static void show_help(const char *path)
 		"1NAVIGATION\n"
 	       "9Up k  Up%-16cPgUp ^U  Scroll up\n"
 	       "9Dn j  Down%-14cPgDn ^D  Scroll down\n"
-	       "9<- h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
-	   "5Ret -> l  Open%-20c'  First file\n"
+	       "9Lt h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
+	   "5Ret Rt l  Open%-20c'  First file\n"
 	       "9g ^A  Top%-21c.  Toggle hidden\n"
-	       "9G ^E  End%-21cb  Pin CWD\n"
-	       "9, ^/  Lead key%-15c^B  Visit pinned\n"
-	    "6N LeadN  Context N%-9c(Sh)Tab  Cycle context\n"
-		  "c/  Filter%-13cIns ^N  Nav-as-you-type toggle\n"
-		"aEsc  Exit prompt%-9c^L F5  Redraw/clear prompt\n"
+	       "9G ^E  End%-21c+  Pin CWD\n"
+	       "9b ^B  Bookmark key%-12c,  Visit pinned\n"
+	          "cN  Context N%-9c(Sh)Tab  Cycle context\n"
+		  "c/  Filter%-13cIns ^/  Filter mode toggle\n"
+		"aEsc  Exit prompt%-9cF5 ^L  Redraw/clear prompt\n"
 		  "c?  Help, conf%-13c^G  QuitCD\n"
 	       "9Q ^Q  Quit%-20cq  Quit context\n"
 		"1FILES\n"
 		 "b^O  Open with...%-12cn  Create new/link\n"
 		  "cD  File details%-12cd  Detail view toggle\n"
-	          "cr  Batch rename%-8c^R F2  Rename/duplicate\n"
+	          "cr  Batch rename%-8cF2 ^R  Rename/duplicate\n"
 	   "5Space ^J  Sel toggle%-14ca  Sel all\n"
 	       "9m ^K  Sel range, clear%-8cM  List sel\n"
 		  "cP  Copy sel here%-11cK  Edit sel\n"
@@ -4676,48 +4660,11 @@ nochange:
 			DPRINTF_S(path);
 			setdirwatch();
 			goto begin;
-		case SEL_LEADER: // fallthrough
-		case SEL_CYCLE: // fallthrough
-		case SEL_CYCLER: // fallthrough
-		case SEL_CTX1: // fallthrough
-		case SEL_CTX2: // fallthrough
-		case SEL_CTX3: // fallthrough
-		case SEL_CTX4:
-			if (sel == SEL_LEADER) {
-				xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
-				printkeys(bookmark, g_buf + strlen(g_buf), BM_MAX);
-				printprompt(g_buf);
-				fd = get_input(NULL);
-
-				if (fd >= '1' && fd <= '4')
-					sel = SEL_CTX1 + (fd - '1');
-			}
-
-			if (sel != SEL_LEADER) {
-				r = handle_context_switch(sel, newpath);
-				if (r < 0)
-					continue;
-				savecurctx(&cfg, path, dents[cur].name, r);
-
-				/* Reset the pointers */
-				path = g_ctx[r].c_path;
-				lastdir = g_ctx[r].c_last;
-				lastname = g_ctx[r].c_name;
-
-				setdirwatch();
-				goto begin;
-			}
-
-			switch (fd) {
-			case '~': // fallthrough
-			case '`': // fallthrough
-			case '-': // fallthrough
-			case '@':
-			case '.':
-			case '\'':
-				presel = fd;
-				goto nochange;
-			}
+		case SEL_BOOKMARK:
+			xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
+			printkeys(bookmark, g_buf + strlen(g_buf), BM_MAX);
+			printprompt(g_buf);
+			fd = get_input(NULL);
 
 			if (!get_kv_val(bookmark, newpath, fd, BM_MAX, TRUE)) {
 				printwait(messages[MSG_INVALID_KEY], &presel);;
@@ -4741,6 +4688,24 @@ nochange:
 			/* Save the newly opted dir in path */
 			xstrlcpy(path, newpath, PATH_MAX);
 			DPRINTF_S(path);
+
+			setdirwatch();
+			goto begin;
+		case SEL_CYCLE: // fallthrough
+		case SEL_CYCLER: // fallthrough
+		case SEL_CTX1: // fallthrough
+		case SEL_CTX2: // fallthrough
+		case SEL_CTX3: // fallthrough
+		case SEL_CTX4:
+			r = handle_context_switch(sel, newpath);
+			if (r < 0)
+				continue;
+			savecurctx(&cfg, path, dents[cur].name, r);
+
+			/* Reset the pointers */
+			path = g_ctx[r].c_path;
+			lastdir = g_ctx[r].c_last;
+			lastname = g_ctx[r].c_name;
 
 			setdirwatch();
 			goto begin;
@@ -4905,6 +4870,8 @@ nochange:
 				break;
 			case SEL_HELP:
 				show_help(path);
+				if (cfg.filtermode)
+					presel = FILTER;
 				continue;
 			case SEL_RUNEDIT:
 				spawn(editor, dents[cur].name, NULL, path, F_CLI);
