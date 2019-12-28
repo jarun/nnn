@@ -72,6 +72,7 @@ enum action {
 	SEL_BSIZE,  /* block size */
 	SEL_EXTN,   /* order by extension */
 	SEL_MTIME,
+	SEL_VERSION,
 	SEL_REDRAW,
 	SEL_SEL,
 	SEL_SELMUL,
@@ -194,6 +195,8 @@ static struct key bindings[] = {
 	{ 'E',            SEL_EXTN },
 	/* Toggle sort by time */
 	{ 't',            SEL_MTIME },
+	/* Toggle version sort */
+	{ 'v',            SEL_VERSION },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
 	{ KEY_F(5),       SEL_REDRAW },

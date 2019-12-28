@@ -3517,8 +3517,8 @@ static void show_help(const char *path)
 		"1FILES\n"
 		 "b^O  Open with...%-12cn  Create new/link\n"
 		  "cD  File details%-12cd  Detail view toggle\n"
-	          "ca  Sel all%-13c^R F2  Rename/duplicate\n"
-	   "5Space ^J  Sel toggle%-14cr  Batch rename\n"
+	          "cr  Batch rename%-8c^R F2  Rename/duplicate\n"
+	   "5Space ^J  Sel toggle%-14ca  Sel all\n"
 	       "9m ^K  Sel range, clear%-8cM  List sel\n"
 		  "cP  Copy sel here%-11cK  Edit sel\n"
 		  "cV  Move sel here%-11cw  Copy/move sel as\n"
@@ -3526,9 +3526,9 @@ static void show_help(const char *path)
 		  "cf  Archive%-14co ^F  Archive ops\n"
 		  "ce  Edit in EDITOR%-10cp  Open in PAGER\n"
 		"1ORDER TOGGLES\n"
-		  "cA  Apparent du%-13cS  du\n"
+		  "cS  Disk usage%-14cA  Apparent du\n"
 		  "cz  Size%-20ct  Time\n"
-		  "cE  Extension%-1c\n"
+		  "cv  version%-17cE  Extension\n"
 		"1MISC\n"
 	       "9! ^]  Shell%-17c; x  Plugin key\n"
 		  "cC  Execute file%-9ci ^V  Pick plugin\n"
@@ -4237,7 +4237,7 @@ static void redraw(char *path)
 	}
 
 	if (ndents) {
-		char sort[] = "\0 ";
+		char sort[] = "\0 \0";
 		pEntry pent = &dents[cur];
 
 		if (cfg.mtimeorder)
@@ -4246,6 +4246,9 @@ static void redraw(char *path)
 			sort[0] = 'Z';
 		else if (cfg.extnorder)
 			sort[0] = 'E';
+
+		if (cmpfn == &xstrverscasecmp)
+			sort[0] ? (sort[1] = 'V', sort[2] = ' ') : (sort[0] = 'V');
 
 		/* Get the file extension for regular files */
 		if (S_ISREG(pent->mode)) {
@@ -4782,7 +4785,8 @@ nochange:
 		case SEL_ASIZE: // fallthrough
 		case SEL_BSIZE: // fallthrough
 		case SEL_EXTN: // fallthrough
-		case SEL_MTIME:
+		case SEL_MTIME: // fallthrough
+		case SEL_VERSION:
 			switch (sel) {
 			case SEL_MFLTR:
 				cfg.filtermode ^= 1;
@@ -4844,12 +4848,15 @@ nochange:
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				break;
-			default: /* SEL_MTIME */
+			case SEL_MTIME:
 				cfg.mtimeorder ^= 1;
 				cfg.sizeorder = 0;
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				cfg.extnorder = 0;
+				break;
+			default: /* SEL_VERSION */
+				cmpfn = (cmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
 				break;
 			}
 
@@ -5540,8 +5547,8 @@ static void usage(void)
 		" -s name load session by name\n"
 		" -S      du mode\n"
 		" -t      no dir auto-select\n"
-		" -v      show version\n"
-		" -V      version sort\n"
+		" -v      version sort\n"
+		" -V      show version\n"
 		" -x      notis, sel to system clipboard\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
@@ -5758,11 +5765,11 @@ int main(int argc, char *argv[])
 			check_key_collision();
 			return _SUCCESS;
 		case 'v':
-			fprintf(stdout, "%s\n", VERSION);
-			return _SUCCESS;
-		case 'V':
 			cmpfn = &xstrverscasecmp;
 			break;
+		case 'V':
+			fprintf(stdout, "%s\n", VERSION);
+			return _SUCCESS;
 		case 'x':
 			cfg.x11 = 1;
 			break;
