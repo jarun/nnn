@@ -81,7 +81,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You ca
 
 `nnn` refreshes a directory after running a plugin by key (method 1 above) to reflect any changes by the plugin. To disable this (say while running the `mediainfo` plugin on some filtered files), add a `-` before the plugin name:
 
-    export NNN_PLUG='o:fzopen;m:-mediainfo;p:mocplay;
+    export NNN_PLUG='m:-mediainfo'
 
 Now `nnn` will not refresh the directory after running the `mediainfo` plugin.
 
@@ -99,7 +99,7 @@ Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be us
 
 `nnn` waits for user confirmation (the prompt `Press Enter to continue`) after it executes a command as plugin (unlike plugins which can add a `read` to wait). To skip this, add a `*` after the command. For example:
 
-    export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn*;o:fzopen'
+    export NNN_PLUG='s:_smplayer $nnn*'
 
 Now there will be no prompt after <kbd>;s</kbd>.
 
@@ -108,7 +108,7 @@ Notes:
 1. Use single quotes for `$NNN_PLUG` so `$nnn` is not interpreted
 2. `$nnn` should be the last argument (IF you want to pass the hovered file name)
 3. (_Again_) add `_` before the command
-4. To disable directory refresh after running a command as plugin prefix the command with `-_`
+4. To disable directory refresh after running a _command as plugin_, prefix the command with `-_`
 
 ## Access level of plugins
 

@@ -87,7 +87,6 @@ enum action {
 	SEL_NEW,
 	SEL_RENAME,
 	SEL_RENAMEMUL,
-	SEL_ARCHIVEOPS,
 	SEL_REMOTE,
 	SEL_UMOUNT,
 	SEL_HELP,
@@ -179,7 +178,7 @@ static struct key bindings[] = {
 	/* File details */
 	{ 'D',            SEL_STATS },
 	/* Create archive */
-	{ 'f',            SEL_ARCHIVE },
+	{ 'i',            SEL_ARCHIVE },
 	/* Toggle sort by size */
 	{ 'z',            SEL_FSIZE },
 	/* Sort by apparent size including dir contents */
@@ -226,8 +225,6 @@ static struct key bindings[] = {
 	{ KEY_F(2),       SEL_RENAME },
 	/* Rename contents of current dir */
 	{ 'r',            SEL_RENAMEMUL },
-	/* Mount an archive */
-	{ CONTROL('F'),   SEL_ARCHIVEOPS },
 	/* Connect to server over SSHFS */
 	{ 'c',            SEL_REMOTE },
 	/* Disconnect a SSHFS mount point */

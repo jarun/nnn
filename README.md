@@ -93,7 +93,7 @@ A curses library with wide char support (e.g. ncursesw), libreadline (optional) 
 | --- | --- | --- |
 | xdg-open (Linux), open(1) (macOS), cygstart (Cygwin) | base | desktop opener |
 | file, coreutils (cp, mv, rm), xargs | base | file type, copy, move and remove |
-| tar, (un)zip [atool/bsdtar for more formats] | base | create, list, extract tar, gzip, bzip2, zip |
+| tar, (un)zip [atool/bsdtar for more formats] | base | create, list, extract bzip2, (g)zip, tar |
 | archivemount, fusermount(3) | optional | mount, unmount archives |
 | sshfs, [rclone](https://rclone.org/), fusermount(3) | optional | mount, unmount remotes |
 | trash-cli | optional | trash files (default action: rm) |

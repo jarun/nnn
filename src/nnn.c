@@ -334,6 +334,7 @@ static kv bookmark[BM_MAX];
 static kv plug[PLUGIN_MAX];
 static uchar g_tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
+static regex_t archive_re;
 
 /* Retain old signal handlers */
 #ifdef __linux__
@@ -464,6 +465,7 @@ static char * const utils[] = {
 #define MSG_ARCHIVE_OPTS 34
 #define MSG_PLUGIN_KEYS 35
 #define MSG_BOOKMARK_KEYS 36
+#define MSG_INVALID_REG 37
 
 static const char * const messages[] = {
 	"no traversal",
@@ -500,9 +502,10 @@ static const char * const messages[] = {
 	"'s'shfs / 'r'clone?",
 	"may take a while, try refresh",
 	"app name: ",
-	"e'x'tract / 'l'ist / 'm'ount?",
+	"'d'efault, e'x'tract / 'l'ist / 'm'ount?",
 	"plugin keys:",
 	"bookmark keys:",
+	"invalid regex",
 };
 
 /* Supported configuration environment variables */
@@ -511,9 +514,10 @@ static const char * const messages[] = {
 #define NNN_CONTEXT_COLORS 2
 #define NNN_IDLE_TIMEOUT 3
 #define NNNLVL 4
-#define NNN_PIPE 5 /* strings end here */
-#define NNN_USE_EDITOR 6 /* flags begin here */
-#define NNN_TRASH 7
+#define NNN_PIPE 5
+#define NNN_ARCHIVE 6 /* strings end here */
+#define NNN_USE_EDITOR 7 /* flags begin here */
+#define NNN_TRASH 8
 
 static const char * const env_cfg[] = {
 	"NNN_BMS",
@@ -522,6 +526,7 @@ static const char * const env_cfg[] = {
 	"NNN_IDLE_TIMEOUT",
 	"NNNLVL",
 	"NNN_PIPE",
+	"NNN_ARCHIVE",
 	"NNN_USE_EDITOR",
 	"NNN_TRASH",
 };
@@ -552,6 +557,7 @@ static char mv[] = "mv -i";
 static const char cpmvformatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
 static const char cpmvrenamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'";
 static const char batchrenamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
+static const char archive_regex[] ="\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$";
 
 /* Event handling */
 #ifdef LINUX_INOTIFY
@@ -599,7 +605,7 @@ static int dentfind(const char *fname, int n);
 static void move_cursor(int target, int ignore_scrolloff);
 static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
-static char *xgetenv(const char *name, char *fallback);
+static char *xgetenv(const char * const name, char *fallback);
 static void plugscript(const char *plugin, char *newpath, uchar flags);
 
 /* Functions */
@@ -1372,7 +1378,7 @@ static void prompt_run(char *cmd, const char *cur, const char *path)
 }
 
 /* Get program name from env var, else return fallback program */
-static char *xgetenv(const char *name, char *fallback)
+static char *xgetenv(const char * const name, char *fallback)
 {
 	char *value = getenv(name);
 
@@ -2090,7 +2096,7 @@ static int filterentries(char *path, char *lastname)
 			case '=': // fallthrough /* Launch app */
 			case ']': // fallthorugh /*Prompt key */
 			case ';': // fallthrough /* Run plugin key */
-			case ',': // falltrough /* Pin CWD */
+			case ',': // fallthrough /* Pin CWD */
 			case '?': /* Help and config key, '?' is an invalid regex */
 				if (len == 1)
 					goto end;
@@ -3480,8 +3486,8 @@ static void show_help(const char *path)
 		  "cP  Copy sel here%-10c^Y  Edit sel\n"
 		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
 		  "cX  Delete sel%-13c^X  Delete entry\n"
-		  "cf  Archive%-16c^F  Archive ops\n"
 		  "ce  Edit in EDITOR%-10cp  Open in PAGER\n"
+		  "ci  Archive entry%-0c\n"
 		"1ORDER TOGGLES\n"
 		  "cS  Disk usage%-14cA  Apparent du\n"
 		  "cz  Size%-20ct  Time\n"
@@ -4560,6 +4566,28 @@ nochange:
 					continue;
 				}
 
+				if (!regexec(&archive_re, dents[cur].name, 0, NULL, 0)) {
+					r = get_input(messages[MSG_ARCHIVE_OPTS]);
+					if (r == 'l' || r == 'x') {
+						mkpath(path, dents[cur].name, newpath);
+						handle_archive(newpath, path, r);
+						copycurname();
+						goto begin;
+					}
+
+					fd = FALSE;
+					if (r == 'm') {
+						if (!archive_mount(dents[cur].name, path, newpath, &presel))
+							fd = MSG_FAILED;
+					} else if (r != 'd')
+						fd = MSG_INVALID_KEY;
+
+					if (r != 'd') {
+						fd ? printwait(messages[fd], &presel) : clearprompt();
+						goto nochange;
+					}
+				}
+
 				if (!sb.st_size) {
 					printwait(messages[MSG_EMPTY_FILE], &presel);
 					goto nochange;
@@ -5324,28 +5352,6 @@ nochange:
 				copycurname();
 			/* Repopulate as directory content may have changed */
 			goto begin;
-		case SEL_ARCHIVEOPS:
-			if (!ndents)
-				goto nochange;
-
-			r = get_input(messages[MSG_ARCHIVE_OPTS]);
-			if (r == 'l' || r == 'x') {
-				mkpath(path, dents[cur].name, newpath);
-				handle_archive(newpath, path, r);
-				copycurname();
-				goto begin;
-			}
-
-			if (r != 'm') {
-				printwait(messages[MSG_INVALID_KEY], &presel);
-				goto nochange;
-			}
-
-			if (!archive_mount(dents[cur].name, path, newpath, &presel)) {
-				printwait(messages[MSG_FAILED], &presel);
-				goto nochange;
-			}
-			// fallthrough
 		case SEL_REMOTE:
 			if (sel == SEL_REMOTE && !remote_mount(newpath, &presel))
 				goto nochange;
@@ -5802,6 +5808,13 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	/* Set archive handling (enveditor used as tmp var) */
+	enveditor = getenv(env_cfg[NNN_ARCHIVE]);
+	if (setfilter(&archive_re, (enveditor ? enveditor : archive_regex))) {
+		fprintf(stderr, "%s\n", messages[MSG_INVALID_REG]);
+		return _FAILURE;
+	}
+
 	/* Edit text in EDITOR if opted (and opener is not all-CLI) */
 	if (!cfg.cliopener && xgetenv_set(env_cfg[NNN_USE_EDITOR]))
 		cfg.useeditor = 1;
@@ -5927,6 +5940,9 @@ int main(int argc, char *argv[])
 			writesel(pselbuf, selbufpos - 1);
 	} else if (!cfg.picker && g_selpath)
 		unlink(g_selpath);
+
+	/* Free the regex */
+	regfree(&archive_re);
 
 	/* Free the selection buffer */
 	free(pselbuf);

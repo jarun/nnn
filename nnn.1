@@ -174,6 +174,13 @@ The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y (pow
 The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take precedence
 when dealing with the !, e and p commands respectively. A single combination to arguments is supported for SHELL and PAGER.
 .Pp
+\fBNNN_OPENER:\fR specify a custom file opener.
+.Bd -literal
+    export NNN_OPENER=nuke
+
+    NOTE: `nuke` is a file opener available in plugin repository
+.Ed
+.Pp
 \fBNNN_BMS:\fR bookmark string as \fIkey_char:location\fR pairs (max 10) separated by
 \fI;\fR:
 .Bd -literal
@@ -187,7 +194,11 @@ when dealing with the !, e and p commands respectively. A single combination to 
 .Bd -literal
     export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;t:imgthumb;i:mediainf'
 
-    NOTE: To run a plugin directly, press \fI:\fR followed by the plugin key.
+    NOTES:
+    1. To run a plugin directly, press \fI;\fR followed by the plugin key
+    2. To skip directory refresh after running a plugin,prefix with \fB-\fR
+
+    export NNN_PLUG='m:-mediainfo'
 .Ed
 .Pp
     To assign keys to arbitrary non-background non-shell-interpreted cli
@@ -198,7 +209,11 @@ when dealing with the !, e and p commands respectively. A single combination to 
     NOTES:
     1. Use single quotes for $NNN_PLUG so $nnn is not interpreted
     2. $nnn should be the last argument (IF you want to pass the hovered file name)
-    3. (Again) add \fI_\fR before the command
+    3. (Again) add \fB_\fR before the command
+    4. To disable directory refresh after running a \fIcommand as plugin\fR, prefix the command with \fB-_\fR
+    5. To skip user confirmation after command execution, suffix with \fB*\fR
+
+    export NNN_PLUG='y:-_sync*'
 .Ed
 .Pp
 \fBNNN_USE_EDITOR:\fR use VISUAL (else EDITOR, preferably CLI, fallback vi) to handle text files.
@@ -227,13 +242,6 @@ when dealing with the !, e and p commands respectively. A single combination to 
     NOTE: The options must be preceded by `rclone` and max 5 flags are supported.
 .Ed
 .Pp
-\fBNNN_OPENER:\fR specify a custom file opener.
-.Bd -literal
-    export NNN_OPENER=nuke
-
-    NOTE: `nuke` is a file opener available in plugin repository
-.Ed
-.Pp
 \fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal locker (default: disabled).
 .Pp
 \fBNNN_TRASH:\fR trash (instead of \fIdelete\fR) files to desktop Trash.
@@ -241,7 +249,7 @@ when dealing with the !, e and p commands respectively. A single combination to 
     export NNN_TRASH=1
 .Ed
 .Pp
-\fBNNN:\fR this is a special variable set to the current entry before executing a command from the command prompt or spawning a shell.
+\fBNNN:\fR this is a special variable set to the hovered entry before executing a command from the command prompt or spawning a shell.
 .Sh KNOWN ISSUES
 .Nm
 may not handle keypresses correctly when used with tmux (see issue #104 for more details). Set \fBTERM=xterm-256color\fR to address it.
