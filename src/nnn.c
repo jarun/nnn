@@ -5007,6 +5007,7 @@ nochange:
 					presel = FILTER;
 				break;
 			}
+			printwait(messages[MSG_0_SELECTED], &presel);
 			goto nochange;
 		case SEL_SELEDIT:
 			r = editselection();
