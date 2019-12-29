@@ -605,7 +605,7 @@ static int dentfind(const char *fname, int n);
 static void move_cursor(int target, int ignore_scrolloff);
 static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
-static char *xgetenv(const char * const name, char *fallback);
+static char *xgetenv(const char *name, char *fallback);
 static void plugscript(const char *plugin, char *newpath, uchar flags);
 
 /* Functions */
