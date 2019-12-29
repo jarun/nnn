@@ -88,8 +88,7 @@ strip: $(BIN)
 dist:
 	mkdir -p nnn-$(VERSION)
 	$(CP) -r $(DISTFILES) nnn-$(VERSION)
-	tar -cf nnn-$(VERSION).tar nnn-$(VERSION)
-	gzip nnn-$(VERSION).tar
+	tar -cf - nnn-$(VERSION) | gzip > nnn-$(VERSION).tar.gz
 	$(RM) -r nnn-$(VERSION)
 
 sign:

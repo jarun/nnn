@@ -105,8 +105,7 @@ dist:
 	$(CP) -r $(DISTFILES) nnn-$(VERSION)
 	mkdir -p nnn-$(VERSION)/misc
 	$(CP) -r misc/haiku nnn-$(VERSION)/misc
-	tar -cf nnn-$(VERSION).tar nnn-$(VERSION)
-	gzip nnn-$(VERSION).tar
+	tar -cf - nnn-$(VERSION) | gzip > nnn-$(VERSION).tar.gz
 	$(RM) -r nnn-$(VERSION)
 
 clean:
