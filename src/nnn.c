@@ -3494,7 +3494,7 @@ static void show_help(const char *path)
 		  "cv  version%-17cE  Extension\n"
 		"1MISC\n"
 	       "9! ^]  Shell%-17c; x  Execute plugin\n"
-	       "9] ^T  Cmd prompt%-13c^P  Pick plugin\n"
+	          "c]  Cmd prompt%-13c^P  Pick plugin\n"
 		  "cs  Manage session%-10c=  Launch app\n"
 		  "cc  Connect remote%-10cu  Unmount\n"
 	       };
@@ -5341,6 +5341,8 @@ nochange:
 #endif
 				if (tmp && *tmp) // NOLINT
 					prompt_run(tmp, (ndents ? dents[cur].name : ""), path);
+				else
+					goto nochange;
 			}
 
 			/* Continue in navigate-as-you-type mode, if enabled */
