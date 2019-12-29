@@ -452,20 +452,18 @@ static char * const utils[] = {
 #define MSG_CONTINUE 22
 #define MSG_SEL_MISSING 23
 #define MSG_ACCESS 24
-#define MSG_NOT_REG_FILE 25
-#define MSG_PERM_DENIED 26
-#define MSG_EMPTY_FILE 27
-#define MSG_UNSUPPORTED 28
-#define MSG_NOT_SET 29
-#define MSG_DIR_CHANGED 30
-#define MSG_EXISTS 31
-#define MSG_FEW_COLUMNS 32
-#define MSG_REMOTE_OPTS 33
-#define MSG_RCLONE_DELAY 34
-#define MSG_APP_NAME 35
-#define MSG_ARCHIVE_OPTS 36
-#define MSG_PLUGIN_KEYS 37
-#define MSG_BOOKMARK_KEYS 38
+#define MSG_EMPTY_FILE 25
+#define MSG_UNSUPPORTED 26
+#define MSG_NOT_SET 27
+#define MSG_DIR_CHANGED 28
+#define MSG_EXISTS 29
+#define MSG_FEW_COLUMNS 30
+#define MSG_REMOTE_OPTS 31
+#define MSG_RCLONE_DELAY 32
+#define MSG_APP_NAME 33
+#define MSG_ARCHIVE_OPTS 34
+#define MSG_PLUGIN_KEYS 35
+#define MSG_BOOKMARK_KEYS 36
 
 static const char * const messages[] = {
 	"no traversal",
@@ -493,8 +491,6 @@ static const char * const messages[] = {
 	"\nPress Enter to continue",
 	"open failed",
 	"dir inaccessible",
-	"not regular file",
-	"permission denied",
 	"empty: edit or open with",
 	"unsupported file",
 	"not set",
@@ -3199,29 +3195,6 @@ static void find_accessible_parent(char *path, char *newpath, char *lastname, in
 	xdelay(XDELAY_INTERVAL_MS);
 }
 
-static bool execute_file(int cur, char *path, char *newpath, int *presel)
-{
-	if (!ndents)
-		return FALSE;
-
-	/* Check if this is a directory */
-	if (!S_ISREG(dents[cur].mode)) {
-		printwait(messages[MSG_NOT_REG_FILE], presel);
-		return FALSE;
-	}
-
-	/* Check if file is executable */
-	if (!(dents[cur].mode & 0100)) {
-		printwait(messages[MSG_PERM_DENIED], presel);
-		return FALSE;
-	}
-
-	mkpath(path, dents[cur].name, newpath);
-	spawn(newpath, NULL, NULL, path, F_NORMAL);
-
-	return TRUE;
-}
-
 /* Create non-existent parents and a file or dir */
 static bool xmktree(char* path, bool dir)
 {
@@ -3515,10 +3488,10 @@ static void show_help(const char *path)
 		  "cv  version%-17cE  Extension\n"
 		"1MISC\n"
 	       "9! ^]  Shell%-17c; x  Plugin key\n"
-		  "cC  Execute file%-9ci ^V  Pick plugin\n"
+	       "9] ^P  Prompt%-15ci ^V  Pick plugin\n"
 		  "cs  Manage session%-10c=  Launch app\n"
 		  "cc  Connect remote%-10cu  Unmount\n"
-	       "9] ^P  Prompt%-18cL  Lock\n"
+	          "cL  Lock%-0c\n"
 	       };
 
 	fd = create_tmp_file();
@@ -5119,7 +5092,7 @@ nochange:
 				mkpath(path, tmp, newpath);
 				if (access(newpath, F_OK) == 0) {
 					fd = get_input(messages[MSG_OVERWRITE]);
-					if (r != 'y' && r != 'Y') {
+					if (fd != 'y' && fd != 'Y') {
 						clearprompt();
 						goto nochange;
 					}
@@ -5304,17 +5277,12 @@ nochange:
 			setdirwatch();
 			clearfilter();
 			goto begin;
-		case SEL_EXEC: // fallthrough
 		case SEL_SHELL: // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_RUNCMD:
 			endselection();
 
 			switch (sel) {
-			case SEL_EXEC:
-				if (!execute_file(cur, path, newpath, &presel))
-					goto nochange;
-				break;
 			case SEL_SHELL:
 				setenv(envs[ENV_NCUR], (ndents ? dents[cur].name : ""), 1);
 				spawn(shell, NULL, NULL, path, F_CLI);
