@@ -3472,7 +3472,7 @@ static void show_help(const char *path)
 	       "9g ^A  Top%-21c.  Toggle hidden\n"
 	       "9G ^E  End%-21cL  Lock terminal\n"
 	       "9b ^/  Bookmark key%-12c,  Pin CWD\n"
-	          "cN  Context N%-9c(Sh)Tab  Cycle context\n"
+	        "a1-4  Context 1-4%-7c(Sh)Tab  Cycle context\n"
 		  "c/  Filter%-17c^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt%-9cF5 ^L  Redraw/clear prompt\n"
 		  "c?  Help, conf%-13c^G  QuitCD\n"
