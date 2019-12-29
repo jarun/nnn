@@ -1,4 +1,4 @@
-include VERSION.mk
+VERSION = $(shell grep -m1 VERSION $(SRC) | cut -f 2 -d'"')
 
 PREFIX ?= /boot/system/non-packaged
 MANPREFIX ?= /boot/system/non-packaged/documentation/man
@@ -63,7 +63,7 @@ CFLAGS += $(CFLAGS_CURSES)
 
 LDLIBS += $(LDLIBS_CURSES) $(LDLIBS_HAIKU)
 
-DISTFILES = src nnn.1 Makefile README.md LICENSE VERSION.mk
+DISTFILES = src nnn.1 Makefile README.md LICENSE
 SRC = src/nnn.c
 HEADERS = src/nnn.h
 BIN = nnn

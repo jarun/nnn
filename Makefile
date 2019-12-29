@@ -1,4 +1,4 @@
-include VERSION.mk
+VERSION = $(shell grep -m1 VERSION $(SRC) | cut -f 2 -d'"')
 
 PREFIX ?= /usr/local
 MANPREFIX ?= $(PREFIX)/share/man
@@ -57,7 +57,7 @@ CFLAGS += $(CFLAGS_CURSES)
 
 LDLIBS += $(LDLIBS_CURSES)
 
-DISTFILES = src nnn.1 Makefile README.md LICENSE VERSION.mk
+DISTFILES = src nnn.1 Makefile README.md LICENSE
 SRC = src/nnn.c
 HEADERS = src/nnn.h
 BIN = nnn
