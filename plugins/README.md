@@ -67,15 +67,15 @@ The following command installs all plugins:
 
 Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You can run the `getplugs` plugin later to update the plugins. It backs up earlier plugins.
 
-## Ways to execute a plugin
+## Ways to invoke a plugin
 
-1. Directly with <kbd>;key</kbd> or <kbd>xkey</kbd>:
+1. Execute directly with <kbd>;key</kbd> or <kbd>xkey</kbd>:
 
        export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;n:notes;v:imgviu;t:imgthumb'
 
     Now plugin `fzopen` can be run with the keybind <kbd>;o</kbd>, `mocplay` can be run with <kbd>;p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
 
-2. Use the _pick plugin_ keybind to visit the plugin directory and execute a plugin. Repeat the keybind to cancel and return to the original directory.
+2. Use the _pick plugin_ keybind to visit the plugin directory, select and run a plugin. Repeat the keybind to cancel and return to the original directory.
 
 #### Skip directory refresh after running a plugin
 

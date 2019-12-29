@@ -52,7 +52,6 @@ enum action {
 	SEL_CDBEGIN,
 	SEL_CDLAST,
 	SEL_CDROOT,
-	SEL_VISIT,
 	SEL_BOOKMARK,
 	SEL_CYCLE,
 	SEL_CYCLER,
@@ -155,11 +154,9 @@ static struct key bindings[] = {
 	{ '-',            SEL_CDLAST },
 	/* Go to / */
 	{ '`',            SEL_CDROOT },
-	/* Visit marked directory */
-	{ ',',            SEL_VISIT },
 	/* Leader key */
 	{ 'b',            SEL_BOOKMARK },
-	{ CONTROL('B'),   SEL_BOOKMARK },
+	{ CONTROL('_'),   SEL_BOOKMARK },
 	/* Cycle contexts in forward direction */
 	{ '\t',           SEL_CYCLE },
 	/* Cycle contexts in reverse direction */
@@ -170,12 +167,11 @@ static struct key bindings[] = {
 	{ '3',            SEL_CTX3 },
 	{ '4',            SEL_CTX4 },
 	/* Mark a path to visit later */
-	{ '+',            SEL_PIN },
+	{ ',',            SEL_PIN },
 	/* Filter */
 	{ '/',            SEL_FLTR },
 	/* Toggle filter mode */
-	{ KEY_IC,         SEL_MFLTR },
-	{ CONTROL('_'),   SEL_MFLTR },
+	{ CONTROL('N'),   SEL_MFLTR },
 	/* Toggle hide .dot files */
 	{ '.',            SEL_TOGGLEDOT },
 	/* Detailed listing */
@@ -208,15 +204,15 @@ static struct key bindings[] = {
 	/* Select all files in current dir */
 	{ 'a',            SEL_SELALL },
 	/* Show list of copied files */
-	{ 'M',            SEL_SELLIST },
+	{ 'y',            SEL_SELLIST },
 	/* Edit selection buffer */
-	{ 'K',            SEL_SELEDIT },
+	{ CONTROL('Y'),   SEL_SELEDIT },
 	/* Copy from selection buffer */
 	{ 'P',            SEL_CP },
 	/* Move from selection buffer */
 	{ 'V',            SEL_MV },
 	/* Copy/move from selection buffer and rename */
-	{ 'w',            SEL_CPMVAS },
+	{ CONTROL('V'),   SEL_CPMVAS },
 	/* Delete from selection buffer */
 	{ 'X',            SEL_RMMUL },
 	/* Delete currently selected */
@@ -231,7 +227,6 @@ static struct key bindings[] = {
 	/* Rename contents of current dir */
 	{ 'r',            SEL_RENAMEMUL },
 	/* Mount an archive */
-	{ 'o',            SEL_ARCHIVEOPS },
 	{ CONTROL('F'),   SEL_ARCHIVEOPS },
 	/* Connect to server over SSHFS */
 	{ 'c',            SEL_REMOTE },
@@ -243,8 +238,7 @@ static struct key bindings[] = {
 	{ 'x',            SEL_PLUGKEY },
 	{ ';',            SEL_PLUGKEY },
 	/* Run a plugin */
-	{ 'i',            SEL_PLUGIN },
-	{ CONTROL('V'),   SEL_PLUGIN },
+	{ CONTROL('P'),   SEL_PLUGIN },
 	/* Run command */
 	{ '!',            SEL_SHELL },
 	{ CONTROL(']'),   SEL_SHELL },
@@ -252,7 +246,7 @@ static struct key bindings[] = {
 	{ '=',            SEL_LAUNCH },
 	/* Run a command */
 	{ ']',            SEL_RUNCMD },
-	{ CONTROL('P'),   SEL_RUNCMD },
+	{ CONTROL('T'),   SEL_RUNCMD },
 	/* Open in EDITOR or PAGER */
 	{ 'e',            SEL_RUNEDIT },
 	{ 'p',            SEL_RUNPAGE },

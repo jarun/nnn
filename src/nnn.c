@@ -2090,6 +2090,7 @@ static int filterentries(char *path, char *lastname)
 			case '=': // fallthrough /* Launch app */
 			case ']': // fallthorugh /*Prompt key */
 			case ';': // fallthrough /* Run plugin key */
+			case ',': // falltrough /* Pin CWD */
 			case '?': /* Help and config key, '?' is an invalid regex */
 				if (len == 1)
 					goto end;
@@ -3433,14 +3434,13 @@ static void printkv(kv *kvarr, FILE *fp, uchar max)
 static void printkeys(kv *kvarr, char *buf, uchar max)
 {
 	uchar i = 0;
-	uchar j = 0;
 
-	for (; i < max && kvarr[i].key; ++i, j+=2) {
-		buf[j] = ' ';
-		buf[j+1] = kvarr[i].key;
+	for (; i < max && kvarr[i].key; ++i) {
+		buf[i << 1] = ' ';
+		buf[(i << 1) + 1] = kvarr[i].key;
 	}
 
-	buf[j] = '\0';
+	buf[i << 1] = '\0';
 }
 
 /*
@@ -3464,10 +3464,10 @@ static void show_help(const char *path)
 	       "9Lt h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
 	   "5Ret Rt l  Open%-20c'  First file\n"
 	       "9g ^A  Top%-21c.  Toggle hidden\n"
-	       "9G ^E  End%-21c+  Pin CWD\n"
-	       "9b ^B  Bookmark key%-12c,  Visit pinned\n"
+	       "9G ^E  End%-21cL  Lock terminal\n"
+	       "9b ^/  Bookmark key%-12c,  Pin CWD\n"
 	          "cN  Context N%-9c(Sh)Tab  Cycle context\n"
-		  "c/  Filter%-13cIns ^/  Filter mode toggle\n"
+		  "c/  Filter%-17c^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt%-9cF5 ^L  Redraw/clear prompt\n"
 		  "c?  Help, conf%-13c^G  QuitCD\n"
 	       "9Q ^Q  Quit%-20cq  Quit context\n"
@@ -3475,23 +3475,22 @@ static void show_help(const char *path)
 		 "b^O  Open with...%-12cn  Create new/link\n"
 		  "cD  File details%-12cd  Detail view toggle\n"
 	          "cr  Batch rename%-8cF2 ^R  Rename/duplicate\n"
-	   "5Space ^J  Sel toggle%-14ca  Sel all\n"
-	       "9m ^K  Sel range, clear%-8cM  List sel\n"
-		  "cP  Copy sel here%-11cK  Edit sel\n"
-		  "cV  Move sel here%-11cw  Copy/move sel as\n"
+	   "5Space ^J  (Un)select%-11cm ^K  Select range, clear\n"
+	          "ca  Select all%-14cy  List sel\n"
+		  "cP  Copy sel here%-10c^Y  Edit sel\n"
+		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
 		  "cX  Delete sel%-13c^X  Delete entry\n"
-		  "cf  Archive%-14co ^F  Archive ops\n"
+		  "cf  Archive%-16c^F  Archive ops\n"
 		  "ce  Edit in EDITOR%-10cp  Open in PAGER\n"
 		"1ORDER TOGGLES\n"
 		  "cS  Disk usage%-14cA  Apparent du\n"
 		  "cz  Size%-20ct  Time\n"
 		  "cv  version%-17cE  Extension\n"
 		"1MISC\n"
-	       "9! ^]  Shell%-17c; x  Plugin key\n"
-	       "9] ^P  Prompt%-15ci ^V  Pick plugin\n"
+	       "9! ^]  Shell%-17c; x  Execute plugin\n"
+	       "9] ^T  Cmd prompt%-13c^P  Pick plugin\n"
 		  "cs  Manage session%-10c=  Launch app\n"
 		  "cc  Connect remote%-10cu  Unmount\n"
-	          "cL  Lock%-0c\n"
 	       };
 
 	fd = create_tmp_file();
@@ -4588,8 +4587,7 @@ nochange:
 		case SEL_CDHOME: // fallthrough
 		case SEL_CDBEGIN: // fallthrough
 		case SEL_CDLAST: // fallthrough
-		case SEL_CDROOT: // fallthrough
-		case SEL_VISIT:
+		case SEL_CDROOT:
 			switch (sel) {
 			case SEL_CDHOME:
 				dir = home;
@@ -4600,11 +4598,8 @@ nochange:
 			case SEL_CDLAST:
 				dir = lastdir;
 				break;
-			case SEL_CDROOT:
+			default: /* SEL_CDROOT */
 				dir = "/";
-				break;
-			default: /* SEL_VISIT */
-				dir = mark;
 				break;
 			}
 
@@ -4634,18 +4629,28 @@ nochange:
 			setdirwatch();
 			goto begin;
 		case SEL_BOOKMARK:
-			xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
-			printkeys(bookmark, g_buf + strlen(g_buf), BM_MAX);
+			r = xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
+			if (mark) { /* There is a pinned directory */
+				g_buf[--r] = ' ';
+				g_buf[++r] = ',';
+				g_buf[++r] = '\0';
+				++r;
+			}
+			printkeys(bookmark, g_buf + r - 1, BM_MAX);
 			printprompt(g_buf);
 			fd = get_input(NULL);
 
-			if (!get_kv_val(bookmark, newpath, fd, BM_MAX, TRUE)) {
-				printwait(messages[MSG_INVALID_KEY], &presel);;
-				goto nochange;
-			}
+			r = FALSE;
+			if (fd == ',') /* Visit pinned directory */
+				mark ? xstrlcpy(newpath, mark, PATH_MAX) : (r = MSG_NOT_SET);
+			else if (!get_kv_val(bookmark, newpath, fd, BM_MAX, TRUE))
+				r = MSG_INVALID_KEY;
 
-			if (!xdiraccess(newpath)) {
-				printwait(messages[MSG_ACCESS], &presel);
+			if (!r && !xdiraccess(newpath))
+				r = MSG_ACCESS;
+
+			if (r) {
+				printwait(messages[r], &presel);
 				goto nochange;
 			}
 
@@ -5218,8 +5223,8 @@ nochange:
 			}
 
 			if (sel == SEL_PLUGKEY) {
-				xstrlcpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
-				printkeys(plug, g_buf + strlen(g_buf), PLUGIN_MAX);
+				r = xstrlcpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
+				printkeys(plug, g_buf + r - 1, PLUGIN_MAX);
 				printprompt(g_buf);
 				r = get_input(NULL);
 				tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
