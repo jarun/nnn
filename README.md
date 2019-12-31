@@ -158,7 +158,7 @@ Completion scripts for Bash, Fish and Zsh are [available](misc/auto-completion).
 
 ## Developers
 
-- [Arun Prakash Jana](https://github.com/jarun) (Copyright © 2016-2019)
+- [Arun Prakash Jana](https://github.com/jarun) (Copyright © 2016-2020)
 - [0xACE](https://github.com/0xACE)
 - [Anna Arad](https://github.com/annagrram)
 - [KlzXS](https://github.com/KlzXS)
