@@ -4566,6 +4566,11 @@ nochange:
 					continue;
 				}
 
+				if (!sb.st_size) {
+					printwait(messages[MSG_EMPTY_FILE], &presel);
+					goto nochange;
+				}
+
 				if (!regexec(&archive_re, dents[cur].name, 0, NULL, 0)) {
 					r = get_input(messages[MSG_ARCHIVE_OPTS]);
 					if (r == 'l' || r == 'x') {
@@ -4575,22 +4580,29 @@ nochange:
 						goto begin;
 					}
 
-					fd = FALSE;
 					if (r == 'm') {
-						if (!archive_mount(dents[cur].name, path, newpath, &presel))
-							fd = MSG_FAILED;
-					} else if (r != 'd')
-						fd = MSG_INVALID_KEY;
+						if (archive_mount(dents[cur].name,
+								  path, newpath, &presel)) {
+							lastname[0] = '\0';
+
+							/* Save last working directory */
+							xstrlcpy(lastdir, path, PATH_MAX);
+
+							/* Switch to mount point */
+							xstrlcpy(path, newpath, PATH_MAX);
+
+							setdirwatch();
+							goto begin;
+						} else {
+							printwait(messages[MSG_FAILED], &presel);
+							goto nochange;
+						}
+					}
 
 					if (r != 'd') {
-						fd ? printwait(messages[fd], &presel) : clearprompt();
+						printwait(messages[MSG_INVALID_KEY], &presel);
 						goto nochange;
 					}
-				}
-
-				if (!sb.st_size) {
-					printwait(messages[MSG_EMPTY_FILE], &presel);
-					goto nochange;
 				}
 
 				/* Invoke desktop opener as last resort */
@@ -5123,6 +5135,9 @@ nochange:
 
 			switch (sel) {
 			case SEL_ARCHIVE:
+				if (r == 'c' && strcmp(tmp, dents[cur].name) == 0)
+					goto nochange;
+
 				mkpath(path, tmp, newpath);
 				if (access(newpath, F_OK) == 0) {
 					fd = get_input(messages[MSG_OVERWRITE]);
