@@ -52,7 +52,7 @@ Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage,
   - Detailed file information
   - Media information (using plugin)
 - Convenience
-  - Run plugins and commands with custom keybinds
+  - Run plugins and custom commands with custom keybinds
   - FreeDesktop compliant trash (needs trash-cli)
   - Cross-dir file/all/range selection
   - Batch renamer (feature-limited) for selection or dir
@@ -60,7 +60,7 @@ Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage,
   - Notification on cp, mv, rm completion
   - Copy file paths to system clipboard on select
   - Create (with parents), rename, duplicate (anywhere) files and dirs
-  - Launch GUI apps, run commands, execute file, spawn a shell
+  - Launch GUI apps, run commands, spawn a shell
   - Hovered file set as `$nnn` at prompt and spawned shell
   - Lock terminal (needs a locker)
 - Privacy-aware (no unconfirmed user data collection)
