@@ -2682,7 +2682,7 @@ static char *get_lsperms(mode_t mode)
 	return bits;
 }
 
-static void printent(const struct entry *ent, int sel, uint namecols)
+static void printent(const struct entry *ent, uint namecols, bool sel)
 {
 	wchar_t *wstr;
 	char ind = '\0';
@@ -2733,7 +2733,7 @@ static void printent(const struct entry *ent, int sel, uint namecols)
 		attroff(A_REVERSE);
 }
 
-static void printent_long(const struct entry *ent, int sel, uint namecols)
+static void printent_long(const struct entry *ent, uint namecols, bool sel)
 {
 	char timebuf[24], permbuf[4], ind1 = '\0', ind2[] = "\0\0";
 	const char cp = (ent->flags & FILE_SELECTED) ? '+' : ' ';
@@ -2799,7 +2799,7 @@ static void printent_long(const struct entry *ent, int sel, uint namecols)
 		attroff(A_REVERSE);
 }
 
-static void (*printptr)(const struct entry *ent, int sel, uint namecols) = &printent;
+static void (*printptr)(const struct entry *ent, uint namecols, bool sel) = &printent;
 
 static void savecurctx(settings *curcfg, char *path, char *curname, int r /* next context num */)
 {
@@ -4122,20 +4122,15 @@ static void redraw(char *path)
 	for (i = 0; i < CTX_MAX; ++i) {
 		if (!g_ctx[i].c_cfg.ctxactive) {
 			addch(i + '1');
-			addch(' ');
 		} else {
-			if (cfg.curctx != i)
-				/* Underline active contexts */
-				attrs = COLOR_PAIR(i + 1) | A_BOLD | A_UNDERLINE;
-			else
-				/* Print current context in reverse */
-				attrs = COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE;
-
+			attrs = (cfg.curctx != i)
+				 ? (COLOR_PAIR(i + 1) | A_BOLD | A_UNDERLINE) /* Underline active */
+				 : (COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE); /* Current in reverse */
 			attron(attrs);
 			addch(i + '1');
 			attroff(attrs);
-			addch(' ');
 		}
+		addch(' ');
 	}
 	addstr("\b] "); /* 10 chars printed for contexts - "[1 2 3 4] " */
 
@@ -4192,7 +4187,7 @@ static void redraw(char *path)
 
 	/* Print listing */
 	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
-		printptr(&dents[i], i == cur, ncols);
+		printptr(&dents[i], ncols, i == cur);
 
 	/* Must reset e.g. no files in dir */
 	if (cfg.dircolor) {
