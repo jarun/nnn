@@ -411,6 +411,8 @@ static char * const utils[] = {
 	"bashlock",
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 	"lock",
+#elif defined __HAIKU__
+	"peaclock",
 #else
 	"vlock",
 #endif
