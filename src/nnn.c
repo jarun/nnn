@@ -4551,6 +4551,11 @@ nochange:
 					}
 				}
 
+				if (!sb.st_size) {
+					printwait(messages[MSG_EMPTY_FILE], &presel);
+					goto nochange;
+				}
+
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
 				if (cfg.useeditor &&
 #ifdef FILE_MIME_OPTS
@@ -4563,11 +4568,6 @@ nochange:
 #endif
 					spawn(editor, newpath, NULL, path, F_CLI);
 					continue;
-				}
-
-				if (!sb.st_size) {
-					printwait(messages[MSG_EMPTY_FILE], &presel);
-					goto nochange;
 				}
 
 				if (!regexec(&archive_re, dents[cur].name, 0, NULL, 0)) {
