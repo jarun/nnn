@@ -398,6 +398,8 @@ static char * const utils[] = {
 	"/usr/bin/open",
 #elif defined __CYGWIN__
 	"cygstart",
+#elif defined __HAIKU__
+	"open",
 #else
 	"xdg-open",
 #endif
