@@ -18,9 +18,9 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | boom | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | dups | List non-empty duplicate files in current dir | sh | find, md5sum,<br>sort uniq xargs |
 | chksum | Create and verify checksums | sh | md5sum,<br>sha256sum |
+| chmodx | Toggle executable status of hovered file | sh | chmod |
 | diffs | Diff for selection (limited to 2 for directories) | sh | vimdiff |
 | dragdrop | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
-| exetoggle | Toggle executable status of hovered file | sh | chmod |
 | fzcd | Change to the directory of a fuzzy-selected file/dir | sh | fzf/fzy<br>fd/fdfind/find |
 | fzhist | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf/fzy |
 | fzopen | Fuzzy find a file in dir subtree and edit or open | sh | fzf/fzy, xdg-open |
