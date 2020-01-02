@@ -3108,6 +3108,13 @@ static bool show_stats(const char *fpath, const struct stat *sb)
 	return TRUE;
 }
 
+static bool xchmod(const char *fpath, mode_t mode)
+{
+	(S_IXUSR & mode) ? (mode &= ~(S_IXUSR | S_IXGRP | S_IXOTH)) : (mode |= (S_IXUSR | S_IXGRP | S_IXOTH));
+
+	return (chmod(fpath, mode) == 0);
+}
+
 static size_t get_fs_info(const char *path, bool type)
 {
 	struct statvfs svb;
@@ -3491,7 +3498,7 @@ static void show_help(const char *path)
 		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
 		  "cX  Delete sel%-13c^X  Delete entry\n"
 		  "ce  Edit in EDITOR%-10cp  Open in PAGER\n"
-		  "ci  Archive entry%-0c\n"
+		  "ci  Archive entry%-11c*  Toggle exe\n"
 		"1ORDER TOGGLES\n"
 		  "cS  Disk usage%-14cA  Apparent du\n"
 		  "cz  Size%-20ct  Time\n"
@@ -4849,13 +4856,19 @@ nochange:
 			if (ndents)
 				copycurname();
 			goto begin;
-		case SEL_STATS:
+		case SEL_STATS: // fallthrough
+		case SEL_CHMODX:
 			if (ndents) {
 				mkpath(path, dents[cur].name, newpath);
-				if (lstat(newpath, &sb) == -1 || !show_stats(newpath, &sb)) {
+				if (lstat(newpath, &sb) == -1
+				    || (sel == SEL_STATS && !show_stats(newpath, &sb))
+				    || (sel == SEL_CHMODX && !xchmod(newpath, sb.st_mode))) {
 					printwarn(&presel);
 					goto nochange;
 				}
+
+				if (sel == SEL_CHMODX)
+					dents[cur].mode ^= S_IXUSR;
 			}
 			break;
 		case SEL_REDRAW: // fallthrough

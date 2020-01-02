@@ -65,6 +65,7 @@ enum action {
 	SEL_TOGGLEDOT,
 	SEL_DETAIL,
 	SEL_STATS,
+	SEL_CHMODX,
 	SEL_ARCHIVE,
 	SEL_FSIZE,  /* file size */
 	SEL_ASIZE,  /* apparent size */
@@ -177,6 +178,8 @@ static struct key bindings[] = {
 	{ 'd',            SEL_DETAIL },
 	/* File details */
 	{ 'D',            SEL_STATS },
+	/* Toggle executable status */
+	{ '*',            SEL_CHMODX },
 	/* Create archive */
 	{ 'i',            SEL_ARCHIVE },
 	/* Toggle sort by size */

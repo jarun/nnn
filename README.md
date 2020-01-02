@@ -60,7 +60,7 @@ Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage,
   - Notification on cp, mv, rm completion
   - Copy file paths to system clipboard on select
   - Create (with parents), rename, duplicate (anywhere) files and dirs
-  - Launch GUI apps, run commands, spawn a shell
+  - Launch GUI apps, run commands, spawn a shell, toggle executable
   - Hovered file set as `$nnn` at prompt and spawned shell
   - Lock terminal (needs a locker)
 - Privacy-aware (no unconfirmed user data collection)

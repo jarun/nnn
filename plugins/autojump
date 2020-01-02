@@ -15,5 +15,6 @@ if which autojump >/dev/null 2>&1; then
     odir="$(autojump "$dir")"
     printf "%s" "0$odir" > "$NNN_PIPE"
 else
-    exit 1
+    printf "autojump missing"
+    read -r _
 fi
