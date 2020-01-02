@@ -38,7 +38,6 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | moclyrics | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
 | mocplay | Append (and/or play) selection/dir/file in moc | sh | [moc](http://moc.daper.net/) |
 | nmount | Toggle mount status of a device as normal user | sh | pmount, udisks2 |
-| notes | Open a quick notes file/dir in `$EDITOR` | sh | - |
 | nuke | Sample file opener (CLI-only by default) | sh | various |
 | oldbigfile | List large files by access time | sh | find, sort |
 | organize | Auto-organize files in directories by file type | sh | file |
@@ -98,9 +97,9 @@ Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be us
 
 `nnn` waits for user confirmation (the prompt `Press Enter to continue`) after it executes a command as plugin (unlike plugins which can add a `read` to wait). To skip this, add a `*` after the command. For example:
 
-    export NNN_PLUG='s:_smplayer $nnn*'
+    export NNN_PLUG='s:_smplayer $nnn*;n:-_vim /home/vaio/Dropbox/Public/synced_note*'
 
-Now there will be no prompt after <kbd>;s</kbd>.
+Now there will be no prompt after <kbd>;s</kbd> and <kbd>;n</kbd>.
 
 Notes:
 
