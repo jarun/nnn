@@ -27,10 +27,9 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | gutenread | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
 | hexview | View a file in hex in `$PAGER` | sh | xxd |
 | imgresize | Resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |
-| imgsxiv | Browse images, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)), [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images)| sh | sxiv |
 | imgthumb | View thumbnail of an image or dir of images | sh | [lsix](https://github.com/hackerb9/lsix) |
 | imgur | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) | bash | - |
-| imgviu | View an image or images in dir in `$PAGER` | sh | [viu](https://github.com/atanunq/viu), less |
+| imgview | Browse images, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)), [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images)| sh | sxiv/[viu](https://github.com/atanunq/viu), less|
 | ipinfo | Fetch external IP address and whois information | sh | curl, whois |
 | kdeconnect | Send selected files to an Android device | sh | kdeconnect-cli |
 | launch | GUI application launcher | sh | fzf/fzy |

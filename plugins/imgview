@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+
+# Description: Open images in hovered  directory and thumbnails
+#              open hovered image in sxiv or viu and browse other images in the directory
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+if [ -z "$1" ] || ! [ -s "$1" ]; then
+    printf "empty file"
+    read -r _
+    exit 1
+fi
+
+if command -v sxiv >/dev/null 2>&1; then
+    if [ -f "$1" ]; then
+        sxiv -q "$1" "$PWD"
+    elif [ -d "$1" ] || [ -h "$1" ]; then
+        sxiv -qt "$1"
+    fi
+elif command -v viu >/dev/null 2>&1; then
+    viu -n "$1" | less -R
+else
+    printf "install sxiv or viu"
+    read -r _
+    exit 2
+fi
