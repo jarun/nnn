@@ -1,7 +1,7 @@
 VERSION = $(shell grep -m1 VERSION $(SRC) | cut -f 2 -d'"')
 
 PREFIX ?= /boot/system/non-packaged
-MANPREFIX ?= /boot/system/non-packaged/documentation/man
+MANPREFIX ?= $(PREFIX)/documentation/man
 STRIP ?= strip
 PKG_CONFIG ?= pkg-config
 INSTALL ?= install
