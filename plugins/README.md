@@ -40,7 +40,6 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | nuke | Sample file opener (CLI-only by default) | sh | various |
 | oldbigfile | List large files by access time | sh | find, sort |
 | organize | Auto-organize files in directories by file type | sh | file |
-| pastebin | Paste contents of a text a file ix.io | sh | - |
 | pdfread | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
 | pdfview | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
 | picker | Pick files and list one per line (to pipe) | sh | nnn |
@@ -52,7 +51,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | treeview | Informative tree output in `$EDITOR` | sh | tree |
 | uidgid | List user and group of all files in dir | sh | ls, less |
 | upgrade | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
-| upload | Upload file to file.io | sh | curl, jq, tr |
+| upload | Paste text to ix.io, upload binary to file.io | sh | curl, jq, tr |
 | vidthumb | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
 | wall | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 
