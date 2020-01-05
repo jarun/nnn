@@ -5053,6 +5053,8 @@ nochange:
 			if (!cpmvrm_selection(sel, path, &presel))
 				goto nochange;
 
+			clearfilter();
+
 			/* Show notification on operation complete */
 			if (cfg.x11)
 				plugscript(utils[UTIL_NTFY], newpath, F_NOWAIT | F_NOTRACE);
