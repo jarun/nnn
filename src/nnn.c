@@ -5078,6 +5078,8 @@ nochange:
 			/* We reduce cur only if it is > 0, so it's at least 0 */
 			copycurname();
 
+			clearfilter();
+
 			goto begin;
 		}
 		case SEL_ARCHIVE: // fallthrough
