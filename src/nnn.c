@@ -3492,13 +3492,13 @@ static void show_help(const char *path)
 		 "b^O  Open with...%-12cn  Create new/link\n"
 		  "cD  File details%-12cd  Detail view toggle\n"
 	          "cr  Batch rename%-8cF2 ^R  Rename/duplicate\n"
-	   "5Space ^J  (Un)select%-11cm ^K  Select range, clear\n"
-	          "ca  Select all%-14cy  List sel\n"
-		  "cP  Copy sel here%-10c^Y  Edit sel\n"
-		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
-		  "cX  Delete sel%-13c^X  Delete entry\n"
 		  "ce  Edit in EDITOR%-10cp  Open in PAGER\n"
 		  "ci  Archive entry%-11c*  Toggle exe\n"
+	   "5Space ^J  (Un)select%-11cm ^K  Select range, clear\n"
+	          "cP  Copy sel here%-11ca  Select all\n"
+		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
+		  "cX  Delete sel%-13c^X  Delete entry\n"
+		  "cy  List sel%-15c^Y  Edit sel\n"
 		"1ORDER TOGGLES\n"
 		  "cS  Disk usage%-14cA  Apparent du\n"
 		  "cz  Size%-20ct  Time\n"
@@ -3508,7 +3508,7 @@ static void show_help(const char *path)
 	          "c]  Cmd prompt%-13c^P  Pick plugin\n"
 		  "cs  Manage session%-10c=  Launch app\n"
 		  "cc  Connect remote%-10cu  Unmount\n"
-	       };
+	};
 
 	fd = create_tmp_file();
 	if (fd == -1)
