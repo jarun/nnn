@@ -121,7 +121,7 @@ Plugins can also read the `.selection` file in the config directory.
 
 Plugins can be written in any scripting language. However, POSIX-compliant shell scripts runnable in `sh` are preferred.
 
-Drop the plugin in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins` and make it executable. Optionally add a custom keybind in `$NNN_PLUG` for frequent usage.
+Drop the plugin in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins` and make it executable. Optionally add a hotkey in `$NNN_PLUG` for frequent usage.
 
 #### Controlling `nnn`'s active directory
 `nnn` provides a mechanism for plugins to control its active directory.

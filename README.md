@@ -17,7 +17,7 @@
 
 `nnn` is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible performance](https://github.com/jarun/nnn/wiki/Performance).
 
-`nnn` is also a du analyzer, an app launcher, a batch renamer and a file picker. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further. You can _plug_ new functionality _and play_ with a custom keybind instantly. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
+`nnn` is also a du analyzer, an app launcher, a batch renamer and a file picker. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further. You can _plug_ new functionality _and play_ with a hotkey. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
 
 It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.com/watch?v=AbaauM7gUJw), Linux, macOS, BSD, Cygwin, WSL and works seamlessly with DEs and GUI utilities.
 
@@ -32,7 +32,7 @@ Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage,
 - Navigation
   - *Navigate-as-you-type* with dir auto-select
   - Contexts (_aka_ tabs/workspaces) with custom colors
-  - Sessions, bookmarks; pin and visit a dir
+  - Sessions, bookmarks with hotkeys; pin and visit a dir
   - Remote mounts (needs sshfs, rclone)
   - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick reference
   - CD on quit (*easy* shell integration)
@@ -52,7 +52,7 @@ Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage,
   - Detailed file information
   - Media information (using plugin)
 - Convenience
-  - Run plugins and custom commands with custom keybinds
+  - Run plugins and custom commands with hotkeys
   - FreeDesktop compliant trash (needs trash-cli)
   - Cross-dir file/all/range selection
   - Batch renamer (feature-limited) for selection or dir
