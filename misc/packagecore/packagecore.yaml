@@ -105,14 +105,16 @@ packages:
     deps:
       - ncurses
       - readline
-#  opensuse42.3:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkg-config
-#      - ncurses-devel
-#    deps:
-#      - ncurses
+  opensuse15.1:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - readline-devel
+      - ncurses-devel
+    deps:
+      - libncurses6
+      - libreadline7
   ubuntu16.04:
     builddeps:
       - make
