@@ -5071,14 +5071,14 @@ nochange:
 			mkpath(path, dents[cur].name, newpath);
 			xrm(newpath);
 
-			/* Don't optimize cur if filtering is on */
 			if (cur && access(newpath, F_OK) == -1)
 				move_cursor(cur - 1, 0);
 
 			/* We reduce cur only if it is > 0, so it's at least 0 */
 			copycurname();
 
-			clearfilter();
+			if (cfg.filtermode)
+				presel = FILTER;
 
 			goto begin;
 		}
