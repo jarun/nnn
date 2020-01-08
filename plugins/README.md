@@ -106,6 +106,17 @@ Notes:
 3. (_Again_) add `_` before the command
 4. To disable directory refresh after running a _command as plugin_, prefix the command with `-_`
 
+#### Some useful key-command examples
+
+| Key:Command | Description |
+|---|---|
+| `k:-_fuser -kiv $nnn*` | Interactively kill process(es) using hovered file |
+| `l:_git log` | Show git log |
+| `n:-_vi /home/user/Dropbox/dir/note*` | Take quick notes in a synced file/dir of notes |
+| `s:_smplayer -minigui $nnn*` | Play hovered media file, even unfinished download |
+| `x:_chmod +x $nnn` | Make the hovered file executable |
+| `y:-_sync*` | Flush cached writes |
+
 ## Access level of plugins
 
 When `nnn` executes a plugin, it does the following:

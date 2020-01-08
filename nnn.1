@@ -214,6 +214,18 @@ when dealing with the !, e and p commands respectively. A single combination to 
     5. To skip user confirmation after command execution, suffix with \fB*\fR
 
     export NNN_PLUG='y:-_sync*'
+
+    EXAMPLES:
+    ----------------------------------- + -------------------------------------------------
+                Key:Command             |                   Description
+    ----------------------------------- + -------------------------------------------------
+    k:-_fuser -kiv $nnn*                | Interactively kill process(es) using hovered file
+    l:_git log                          | Show git log
+    n:-_vi /home/user/Dropbox/dir/note* | Take quick notes in a synced file/dir of notes
+    s:_smplayer -minigui $nnn*          | Play hovered media file, even unfinished download
+    x:_chmod +x $nnn                    | Make the hovered file executable
+    y:-_sync*                           | Flush cached writes
+    ----------------------------------- + -------------------------------------------------
 .Ed
 .Pp
 \fBNNN_USE_EDITOR:\fR use VISUAL (else EDITOR, preferably CLI, fallback vi) to handle text files.
