@@ -7,6 +7,7 @@
 .Sh SYNOPSIS
 .Nm
 .Op Ar -a
+.Op Ar -A
 .Op Ar -b key
 .Op Ar -c
 .Op Ar -d
@@ -46,6 +47,9 @@ supports the following options:
 .Pp
 .Fl a
         use access time for all operations (default: modification time)
+.Pp
+.Fl A
+        disable directory auto-select in navigate-as-you-type mode
 .Pp
 .Fl "b key"
         specify bookmark key to open
@@ -91,9 +95,6 @@ supports the following options:
 .Pp
 .Fl S
         start in disk usage analyzer mode
-.Pp
-.Fl t
-        disable directory auto-select in navigate-as-you-type mode
 .Pp
 .Fl v
         use case-insensitive version compare to sort files

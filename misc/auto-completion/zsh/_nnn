@@ -10,6 +10,7 @@ setopt localoptions noshwordsplit noksharrays
 local -a args
 args=(
     '(-a)-a[use access time]'
+    '(-A)-A[disable dir auto-select]'
     '(-b)-b[bookmark key to open]:key char'
     '(-c)-c[cli-only opener]'
     '(-d)-d[start in detail mode]'
@@ -25,7 +26,6 @@ args=(
     '(-R)-R[disable rollover at edges]'
     '(-s)-s[load session]:session name'
     '(-S)-S[start in disk usage analyzer mode]'
-    '(-t)-t[disable dir auto-select]'
     '(-v)-v[use version compare to sort files]'
     '(-V)-V[show program version and exit]'
     '(-x)-x[notis, sel to system clipboard]'

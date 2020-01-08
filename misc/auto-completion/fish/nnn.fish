@@ -12,6 +12,7 @@ else
 end
 
 complete -c nnn -s a    -d 'use access time'
+complete -c nnn -s A    -d 'disable dir auto-select'
 complete -c nnn -s b -r -d 'bookmark key to open' -x -a '(echo $NNN_BMS | awk -F: -v RS=\; \'{print $1"\t"$2}\')'
 complete -c nnn -s c    -d 'cli-only opener'
 complete -c nnn -s d    -d 'start in detail mode'
@@ -27,7 +28,6 @@ complete -c nnn -s r    -d 'show cp, mv progress (Linux-only)'
 complete -c nnn -s R    -d 'disable rollover at edges'
 complete -c nnn -s s -r -d 'load session by name' -x -a '@\t"last session" (ls $sessions_dir)'
 complete -c nnn -s S    -d 'start in disk usage analyzer mode'
-complete -c nnn -s t    -d 'disable dir auto-select'
 complete -c nnn -s v    -d 'use version compare to sort files'
 complete -c nnn -s V    -d 'show program version and exit'
 complete -c nnn -s x    -d 'notis, sel to system clipboard'

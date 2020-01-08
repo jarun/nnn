@@ -13,6 +13,7 @@ _nnn ()
     local -a opts
     opts=(
         -a
+        -A
         -b
         -c
         -d
@@ -28,7 +29,6 @@ _nnn ()
         -R
         -s
         -S
-        -t
         -v
         -V
         -x

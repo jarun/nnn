@@ -5506,6 +5506,7 @@ static void usage(void)
 		"  PATH   start dir [default: .]\n\n"
 		"optional args:\n"
 		" -a      use access time\n"
+		" -A      no dir auto-select\n"
 		" -b key  open bookmark key\n"
 		" -c      cli-only opener\n"
 		" -d      detail mode\n"
@@ -5521,7 +5522,6 @@ static void usage(void)
 		" -R      no rollover at edges\n"
 		" -s name load session by name\n"
 		" -S      du mode\n"
-		" -t      no dir auto-select\n"
 		" -v      version sort\n"
 		" -V      show version\n"
 		" -x      notis, sel to system clipboard\n"
@@ -5667,7 +5667,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKab:cdEgnop:QrRs:tvVxh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKaAb:cdEgnop:QrRs:vVxh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5679,6 +5679,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'a':
 			cfg.mtime = 0;
+			break;
+		case 'A':
+			cfg.autoselect = 0;
 			break;
 		case 'b':
 			arg = optarg;
@@ -5732,9 +5735,6 @@ int main(int argc, char *argv[])
 			break;
 		case 's':
 			session = optarg;
-			break;
-		case 't':
-			cfg.autoselect = 0;
 			break;
 		case 'K':
 			check_key_collision();
