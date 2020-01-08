@@ -117,7 +117,7 @@
 #define _ABSSUB(N, M) (((N) <= (M)) ? ((M) - (N)) : ((N) - (M)))
 #define DOUBLECLICK_INTERVAL_NS (400000000)
 #define XDELAY_INTERVAL_MS (350000) /* 350 ms delay */
-#define LEN(x) (sizeof(x) / sizeof(*(x)))
+#define ELEMENTS(x) (sizeof(x) / sizeof(*(x)))
 #undef MIN
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #undef MAX
@@ -1894,7 +1894,6 @@ static int nextsel(int presel)
 {
 	int c = presel;
 	uint i;
-	const uint len = LEN(bindings);
 #ifdef LINUX_INOTIFY
 	struct inotify_event *event;
 	char inotify_buf[EVENT_BUF_LEN];
@@ -1917,12 +1916,8 @@ static int nextsel(int presel)
 		if (c == FILTER)
 			clearfilter();
 
-		if (presel == MSGWAIT) {
-			if (cfg.filtermode)
-				c = FILTER;
-			else
-				c = CONTROL('L');
-		}
+		if (presel == MSGWAIT)
+			c = (cfg.filtermode) ? FILTER : CONTROL('L');
 	}
 
 	if (c == -1) {
@@ -1969,7 +1964,7 @@ static int nextsel(int presel)
 	} else
 		idle = 0;
 
-	for (i = 0; i < len; ++i)
+	for (i = 0; i < ELEMENTS(bindings); ++i)
 		if (c == bindings[i].sym)
 			return bindings[i].act;
 
