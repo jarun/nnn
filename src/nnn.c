@@ -1964,7 +1964,7 @@ static int nextsel(int presel)
 	} else
 		idle = 0;
 
-	for (i = 0; i < ELEMENTS(bindings); ++i)
+	for (i = 0; i < (int)ELEMENTS(bindings); ++i)
 		if (c == bindings[i].sym)
 			return bindings[i].act;
 
