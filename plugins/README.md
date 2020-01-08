@@ -10,6 +10,14 @@
 
 Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or binaries) which `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins.
 
+## Installing plugins
+
+The following command installs or updates (after backup) all plugins:
+
+    curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs | sh
+
+Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
+
 ## List of plugins
 
 | Plugin (a-z) | Description | Lang | Deps |
@@ -54,14 +62,6 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | upload | Paste text to ix.io, upload binary to file.io | sh | curl, jq, tr |
 | vidthumb | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
 | wall | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
-
-## Installing plugins
-
-The following command installs all plugins:
-
-    curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs | sh
-
-Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`. You can run the `getplugs` plugin later to update the plugins. It backs up earlier plugins.
 
 ## Ways to invoke a plugin
 
