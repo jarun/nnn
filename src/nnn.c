@@ -3090,11 +3090,15 @@ static bool show_stats(const char *fpath, const struct stat *sb)
 
 				++p;
 			}
-			fprintf(fp, " %s", begin);
+			fprintf(fp, " %s\n  ", begin);
+
+			/* Show the file mime type */
+			p = get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, fpath, FALSE);
+			fprintf(fp, "%s", g_buf);
 		}
 	}
 
-	fprintf(fp, "\n\n");
+	fprintf(fp, "\n");
 	fclose(fp);
 	close(fd);
 
