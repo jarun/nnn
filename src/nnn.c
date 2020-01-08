@@ -1870,10 +1870,10 @@ static int entrycmp(const void *va, const void *vb)
 
 		if (extna || extnb) {
 			if (!extna)
-				return 1;
+				return -1;
 
 			if (!extnb)
-				return -1;
+				return 1;
 
 			int ret = strcasecmp(extna, extnb);
 
