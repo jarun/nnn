@@ -1865,8 +1865,8 @@ static int entrycmp(const void *va, const void *vb)
 		if (pb->blocks < pa->blocks)
 			return -1;
 	} else if (cfg.extnorder && !(pb->flags & DIR_OR_LINK_TO_DIR)) {
-		char *extna = xmemrchr((uchar *)pa->name, '.', strlen(pa->name));
-		char *extnb = xmemrchr((uchar *)pb->name, '.', strlen(pb->name));
+		char *extna = xmemrchr((uchar *)pa->name, '.', pa->nlen - 1);
+		char *extnb = xmemrchr((uchar *)pb->name, '.', pb->nlen - 1);
 
 		if (extna || extnb) {
 			if (!extna)
@@ -4215,7 +4215,7 @@ static void redraw(char *path)
 
 		/* Get the file extension for regular files */
 		if (S_ISREG(pent->mode)) {
-			i = (int)strlen(pent->name);
+			i = (int)(pent->nlen - 1);
 			ptr = xmemrchr((uchar *)pent->name, '.', i);
 			if (ptr)
 				attrs = ptr - pent->name; /* attrs used as tmp var */
