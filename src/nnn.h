@@ -73,6 +73,7 @@ enum action {
 	SEL_EXTN,   /* order by extension */
 	SEL_MTIME,
 	SEL_VERSION,
+	SEL_REVERSE,
 	SEL_REDRAW,
 	SEL_SEL,
 	SEL_SELMUL,
@@ -194,6 +195,8 @@ static struct key bindings[] = {
 	{ 't',            SEL_MTIME },
 	/* Toggle version sort */
 	{ 'v',            SEL_VERSION },
+	/* Toggle reverse sort */
+	{ 'R',            SEL_REVERSE },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
 	{ KEY_F(5),       SEL_REDRAW },

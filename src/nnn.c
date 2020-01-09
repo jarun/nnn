@@ -1797,7 +1797,7 @@ static int xstrverscasecmp(const char * const s1, const char * const s2)
 	}
 }
 
-static int (*cmpfn)(const char * const s1, const char * const s2) = &xstricmp;
+static int (*namecmpfn)(const char * const s1, const char * const s2) = &xstricmp;
 
 /* Return the integer value of a char representing HEX */
 static char xchartohex(char c)
@@ -1882,8 +1882,22 @@ static int entrycmp(const void *va, const void *vb)
 		}
 	}
 
-	return cmpfn(pa->name, pb->name);
+	return namecmpfn(pa->name, pb->name);
 }
+
+static int reventrycmp(const void *va, const void *vb)
+{
+	if ((((pEntry)vb)->flags & DIR_OR_LINK_TO_DIR)
+	    != (((pEntry)va)->flags & DIR_OR_LINK_TO_DIR)) {
+		if (((pEntry)vb)->flags & DIR_OR_LINK_TO_DIR)
+			return 1;
+		return -1;
+	}
+
+	return -entrycmp(va, vb);
+}
+
+static int (*entrycmpfn)(const void *va, const void *vb) = &entrycmp;
 
 /*
  * Returns SEL_* if key is bound and 0 otherwise.
@@ -2014,7 +2028,7 @@ static int matches(const char *fltr)
 	if (cfg.filter_re)
 		regfree(&re);
 
-	qsort(dents, ndents, sizeof(*dents), entrycmp);
+	qsort(dents, ndents, sizeof(*dents), entrycmpfn);
 
 	return ndents;
 }
@@ -3501,7 +3515,8 @@ static void show_help(const char *path)
 		"1ORDER TOGGLES\n"
 		  "cS  Disk usage%-14cA  Apparent du\n"
 		  "cz  Size%-20ct  Time\n"
-		  "cv  version%-17cE  Extension\n"
+		  "cv  Version%-17cE  Extension\n"
+		  "cR  Reverse%-0c\n"
 		"1MISC\n"
 	       "9! ^]  Shell%-17c; x  Execute plugin\n"
 	          "c]  Cmd prompt%-13c^P  Pick plugin\n"
@@ -3966,7 +3981,7 @@ static void populate(char *path, char *lastname)
 	if (!ndents)
 		return;
 
-	qsort(dents, ndents, sizeof(*dents), entrycmp);
+	qsort(dents, ndents, sizeof(*dents), entrycmpfn);
 
 #ifdef DBGMODE
 	clock_gettime(CLOCK_REALTIME, &ts2);
@@ -4204,7 +4219,7 @@ static void redraw(char *path)
 	}
 
 	if (ndents) {
-		char sort[] = "\0 \0";
+		char sort[] = "\0 \0\0";
 		pEntry pent = &dents[cur];
 
 		if (cfg.mtimeorder)
@@ -4214,8 +4229,17 @@ static void redraw(char *path)
 		else if (cfg.extnorder)
 			sort[0] = 'E';
 
-		if (cmpfn == &xstrverscasecmp)
-			sort[0] ? (sort[1] = 'V', sort[2] = ' ') : (sort[0] = 'V');
+		if (entrycmpfn == &reventrycmp)
+			sort[0] ? (sort[1] = 'R', sort[2] = ' ') : (sort[0] = 'R');
+
+		if (namecmpfn == &xstrverscasecmp) {
+			if (!sort[0])
+				sort[0] = 'V';
+			else if (sort[1] == ' ')
+				sort[1] = 'V', sort[2] = ' ';
+			else
+				sort[2] = 'V', sort[3] = ' ';
+		}
 
 		/* Get the file extension for regular files */
 		if (S_ISREG(pent->mode)) {
@@ -4774,7 +4798,8 @@ nochange:
 		case SEL_BSIZE: // fallthrough
 		case SEL_EXTN: // fallthrough
 		case SEL_MTIME: // fallthrough
-		case SEL_VERSION:
+		case SEL_VERSION: // fallthrough
+		case SEL_REVERSE:
 			switch (sel) {
 			case SEL_MFLTR:
 				cfg.filtermode ^= 1;
@@ -4803,6 +4828,8 @@ nochange:
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				cfg.extnorder = 0;
+				if (!cfg.sizeorder)
+					entrycmpfn = &entrycmp;
 				break;
 			case SEL_ASIZE:
 				cfg.apparentsz ^= 1;
@@ -4811,7 +4838,8 @@ nochange:
 					cfg.blkorder = 1;
 					blk_shift = 0;
 				} else
-					cfg.blkorder = 0; // fallthrough
+					cfg.blkorder = 0;
+				// fallthrough
 			case SEL_BSIZE:
 				if (sel == SEL_BSIZE) {
 					if (!cfg.apparentsz)
@@ -4824,7 +4852,8 @@ nochange:
 				if (cfg.blkorder) {
 					cfg.showdetail = 1;
 					printptr = &printent_long;
-				}
+				} else
+					entrycmpfn = &entrycmp;
 				cfg.mtimeorder = 0;
 				cfg.sizeorder = 0;
 				cfg.extnorder = 0;
@@ -4835,6 +4864,8 @@ nochange:
 				cfg.mtimeorder = 0;
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
+				if (!cfg.extnorder)
+					entrycmpfn = &entrycmp;
 				break;
 			case SEL_MTIME:
 				cfg.mtimeorder ^= 1;
@@ -4842,9 +4873,18 @@ nochange:
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				cfg.extnorder = 0;
+				if (!cfg.mtimeorder)
+					entrycmpfn = &entrycmp;
 				break;
-			default: /* SEL_VERSION */
-				cmpfn = (cmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
+			case SEL_VERSION:
+				if (namecmpfn == &xstrverscasecmp) {
+					namecmpfn = &xstricmp;
+					entrycmpfn = &entrycmp;
+				} else
+					namecmpfn = &xstrverscasecmp;
+				break;
+			default: /* SEL_REVERSE */
+				entrycmpfn = (entrycmpfn == &entrycmp) ? &reventrycmp : &entrycmp;
 				break;
 			}
 
@@ -5744,7 +5784,7 @@ int main(int argc, char *argv[])
 			check_key_collision();
 			return _SUCCESS;
 		case 'v':
-			cmpfn = &xstrverscasecmp;
+			namecmpfn = &xstrverscasecmp;
 			break;
 		case 'V':
 			fprintf(stdout, "%s\n", VERSION);

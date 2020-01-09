@@ -40,6 +40,7 @@ Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage,
   - Ordered pure numeric names by default (visit _/proc_)
   - Case-insensitive version (_aka_ natural) sort
   - By file name, modification/access time, size, extension
+  - Reverse sort
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex and substring (default) matches
