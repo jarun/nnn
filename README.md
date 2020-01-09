@@ -25,6 +25,12 @@ Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage,
 
 ## Features
 
+- Resource sensitive
+  - Typically needs < 3.5MB resident memory
+  - Works with 8-bit colors
+  - Disk-IO sensitive (few disk reads and writes)
+  - No config file to read on each start
+  - No FPU usage (all integer calculations, even for file size)
 - Modes
   - Light (default), detail
   - Disk usage analyzer (block/apparent)
