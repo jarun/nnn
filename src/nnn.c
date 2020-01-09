@@ -2158,7 +2158,7 @@ static int filterentries(char *path, char *lastname)
 			goto end;
 	}
 end:
-	if (*ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN) {
+	if (*ch != 27 && *ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN && *ch != CONTROL('T')) {
 		g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
 		move_cursor(cur, 0);
 	} else if (ndents)
@@ -3516,7 +3516,7 @@ static void show_help(const char *path)
 		  "cS  Disk usage%-14cA  Apparent du\n"
 		  "cz  Size%-20ct  Time\n"
 		  "cv  Version%-17cE  Extension\n"
-		  "cR  Reverse%-0c\n"
+	       "9R ^T  Reverse%-0c\n"
 		"1MISC\n"
 	       "9! ^]  Shell%-17c; x  Execute plugin\n"
 	          "c]  Cmd prompt%-13c^P  Pick plugin\n"
@@ -4800,6 +4800,9 @@ nochange:
 		case SEL_MTIME: // fallthrough
 		case SEL_VERSION: // fallthrough
 		case SEL_REVERSE:
+			if (sel >= SEL_FSIZE && sel < SEL_REVERSE && entrycmpfn == &reventrycmp)
+				entrycmpfn = &entrycmp;
+
 			switch (sel) {
 			case SEL_MFLTR:
 				cfg.filtermode ^= 1;
@@ -4828,8 +4831,6 @@ nochange:
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				cfg.extnorder = 0;
-				if (!cfg.sizeorder)
-					entrycmpfn = &entrycmp;
 				break;
 			case SEL_ASIZE:
 				cfg.apparentsz ^= 1;
@@ -4852,11 +4853,12 @@ nochange:
 				if (cfg.blkorder) {
 					cfg.showdetail = 1;
 					printptr = &printent_long;
-				} else
-					entrycmpfn = &entrycmp;
+				}
 				cfg.mtimeorder = 0;
 				cfg.sizeorder = 0;
 				cfg.extnorder = 0;
+				clearfilter(); /* Reload directory */
+				endselection(); /* We are going to reload dir */
 				break;
 			case SEL_EXTN:
 				cfg.extnorder ^= 1;
@@ -4864,8 +4866,6 @@ nochange:
 				cfg.mtimeorder = 0;
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
-				if (!cfg.extnorder)
-					entrycmpfn = &entrycmp;
 				break;
 			case SEL_MTIME:
 				cfg.mtimeorder ^= 1;
@@ -4873,28 +4873,26 @@ nochange:
 				cfg.apparentsz = 0;
 				cfg.blkorder = 0;
 				cfg.extnorder = 0;
-				if (!cfg.mtimeorder)
-					entrycmpfn = &entrycmp;
 				break;
 			case SEL_VERSION:
-				if (namecmpfn == &xstrverscasecmp) {
-					namecmpfn = &xstricmp;
-					entrycmpfn = &entrycmp;
-				} else
-					namecmpfn = &xstrverscasecmp;
+				namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
 				break;
 			default: /* SEL_REVERSE */
 				entrycmpfn = (entrycmpfn == &entrycmp) ? &reventrycmp : &entrycmp;
 				break;
 			}
 
-			clearfilter();
-			endselection();
+			if (cfg.filtermode)
+				presel = FILTER;
 
 			/* Save current */
 			if (ndents)
 				copycurname();
-			goto begin;
+
+			/* If there's no filter, reload the directory */
+			if (!g_ctx[cfg.curctx].c_fltr[1])
+				goto begin;
+			break;
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
 			if (ndents) {

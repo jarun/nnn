@@ -197,6 +197,7 @@ static struct key bindings[] = {
 	{ 'v',            SEL_VERSION },
 	/* Toggle reverse sort */
 	{ 'R',            SEL_REVERSE },
+	{ CONTROL('T'),   SEL_REVERSE },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
 	{ KEY_F(5),       SEL_REDRAW },
