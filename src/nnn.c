@@ -4219,8 +4219,10 @@ static void redraw(char *path)
 	}
 
 	if (ndents) {
-		char sort[] = "\0 \0\0";
+		char sort[] = "\0\0\0\0";
 		pEntry pent = &dents[cur];
+
+		i = 0;
 
 		if (cfg.mtimeorder)
 			sort[0] = cfg.mtime ? 'T' : 'A';
@@ -4229,17 +4231,21 @@ static void redraw(char *path)
 		else if (cfg.extnorder)
 			sort[0] = 'E';
 
-		if (entrycmpfn == &reventrycmp)
-			sort[0] ? (sort[1] = 'R', sort[2] = ' ') : (sort[0] = 'R');
+		if (sort[i])
+			++i;
+
+		if (entrycmpfn == &reventrycmp) {
+			sort[i] = 'R';
+			++i;
+		}
 
 		if (namecmpfn == &xstrverscasecmp) {
-			if (!sort[0])
-				sort[0] = 'V';
-			else if (sort[1] == ' ')
-				sort[1] = 'V', sort[2] = ' ';
-			else
-				sort[2] = 'V', sort[3] = ' ';
+			sort[i] = 'V';
+			++i;
 		}
+
+		if (i)
+			sort[i] = ' ';
 
 		/* Get the file extension for regular files */
 		if (S_ISREG(pent->mode)) {
