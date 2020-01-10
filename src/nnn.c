@@ -4806,8 +4806,8 @@ nochange:
 		case SEL_BSIZE: // fallthrough
 		case SEL_EXTN: // fallthrough
 		case SEL_MTIME: // fallthrough
-		case SEL_VERSION: // fallthrough
-		case SEL_REVERSE:
+		case SEL_REVERSE: // fallthrough
+		case SEL_VERSION:
 			if (sel >= SEL_FSIZE && sel < SEL_REVERSE && entrycmpfn == &reventrycmp)
 				entrycmpfn = &entrycmp;
 
@@ -4882,25 +4882,24 @@ nochange:
 				cfg.blkorder = 0;
 				cfg.extnorder = 0;
 				break;
-			case SEL_VERSION:
-				namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
-				break;
-			default: /* SEL_REVERSE */
+			case SEL_REVERSE:
 				entrycmpfn = (entrycmpfn == &entrycmp) ? &reventrycmp : &entrycmp;
+				break;
+			default: /* SEL_VERSION */
+				namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
 				break;
 			}
 
-			if (cfg.filtermode)
-				presel = FILTER;
 
 			/* Save current */
 			if (ndents)
 				copycurname();
 
-			/* If there's no filter, reload the directory */
-			if (!g_ctx[cfg.curctx].c_fltr[1])
-				goto begin;
-			break;
+			if (cfg.filtermode || g_ctx[cfg.curctx].c_fltr[1]) {
+				presel = FILTER;
+				break;
+			}
+			goto begin;
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
 			if (ndents) {
