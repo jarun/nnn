@@ -29,8 +29,16 @@ Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage,
   - Typically needs < 3.5MB resident memory
   - Works with 8-bit colors
   - Disk-IO sensitive (few disk reads and writes)
-  - No config file to read on each start
   - No FPU usage (all integer calculations, even for file size)
+- Portable
+  - Minimal library deps, easily compilable, tiny binary
+  - No config file, minimal config with sensible defaults
+  - Widely available on many packagers
+  - Unicode support
+- Quality
+  - Privacy-aware (no unconfirmed user data collection)
+  - POSIX-compliant, follows Linux kernel coding style
+  - Highly optimized, static analysis integrated code
 - Modes
   - Light (default), detail
   - Disk usage analyzer (block/apparent)
@@ -70,12 +78,6 @@ Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage,
   - Launch GUI apps, run commands, spawn a shell, toggle executable
   - Hovered file set as `$nnn` at prompt and spawned shell
   - Lock terminal (needs a locker)
-- Privacy-aware (no unconfirmed user data collection)
-- Minimal deps, minimal config (with sensible defaults)
-- Widely available
-- Unicode support
-- Follows Linux kernel coding style
-- Highly optimized, static analysis integrated code
 
 ## Quickstart
 

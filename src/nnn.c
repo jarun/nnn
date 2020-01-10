@@ -3516,7 +3516,7 @@ static void show_help(const char *path)
 		  "cS  Disk usage%-14cA  Apparent du\n"
 		  "cz  Size%-20ct  Time\n"
 		  "cv  Version%-17cE  Extension\n"
-	       "9R ^T  Reverse%-0c\n"
+	       "9R ^T  Reverse (tac)%-0c\n"
 		"1MISC\n"
 	       "9! ^]  Shell%-17c; x  Execute plugin\n"
 	          "c]  Cmd prompt%-13c^P  Pick plugin\n"
