@@ -1214,6 +1214,8 @@ static bool initcurses(mmask_t *oldmask)
 			g_ctx[i].color = 4;
 
 		init_pair(i + 1, g_ctx[i].color, -1);
+
+		g_ctx[i].c_fltr[REGEX_MAX - 1] = '\0';
 	}
 
 	settimeout(); /* One second */
@@ -1833,8 +1835,12 @@ static int (*filterfn)(const fltrexp_t *fltr, const char *fname) = &visible_str;
 
 static void clearfilter()
 {
-	if (g_ctx[cfg.curctx].c_fltr[1])
-		g_ctx[cfg.curctx].c_fltr[1] = 0;
+	char *fltr = g_ctx[cfg.curctx].c_fltr;
+
+	if (fltr[1]) {
+		fltr[REGEX_MAX - 1] = fltr[1];
+		fltr[1] = '\0';
+	}
 }
 
 static int entrycmp(const void *va, const void *vb)
@@ -2080,10 +2086,11 @@ static int filterentries(char *path, char *lastname)
 				goto end;
 			}
 
-			if (*ch == CONTROL('L'))
-				while (len > 1)
-					wln[--len] = '\0';
-			else
+			if (*ch == CONTROL('L') && wln[1]) {
+				ln[REGEX_MAX - 1] = ln[1];
+				wln[1] = '\0';
+				len = 1;
+			} else
 				wln[--len] = '\0';
 
 			cur = 0;
@@ -2098,6 +2105,18 @@ static int filterentries(char *path, char *lastname)
 		case KEY_MOUSE: // fallthrough
 		case 27: /* Exit filter mode on Escape */
 			goto end;
+		case KEY_UP: /* On the first Up, show previous filter */
+			if (len == 1 && ln[REGEX_MAX - 1]) {
+				ln[1] = ln[REGEX_MAX - 1];
+				ln[REGEX_MAX - 1] = '\0';
+				len = mbstowcs(wln, ln, REGEX_MAX);
+
+				if (matches(pln) != -1)
+					redraw(path);
+
+				printprompt(ln);
+				continue;
+			}
 		}
 
 		if (r == OK) {
@@ -2105,61 +2124,65 @@ static int filterentries(char *path, char *lastname)
 			if (*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^')
 				goto end;
 
-			switch (*ch) {
-			case '=': // fallthrough /* Launch app */
-			case ']': // fallthorugh /*Prompt key */
-			case ';': // fallthrough /* Run plugin key */
-			case ',': // fallthrough /* Pin CWD */
-			case '?': /* Help and config key, '?' is an invalid regex */
-				if (len == 1)
-					goto end;
-				// fallthrough
-			default:
-				/* Reset cur in case it's a repeat search */
-				if (len == 1)
-					cur = 0;
-
-				if (len == REGEX_MAX - 1)
-					break;
-
-				wln[len] = (wchar_t)*ch;
-				wln[++len] = '\0';
-				wcstombs(ln, wln, REGEX_MAX);
-
-				/* Forward-filtering optimization:
-				 * - new matches can only be a subset of current matches.
-				 */
-				/* ndents = total; */
-
-				if (matches(pln) == -1) {
-					printprompt(ln);
-					continue;
-				}
-
-				/* If the only match is a dir, auto-select and cd into it */
-				if (ndents == 1 && cfg.filtermode
-				    && cfg.autoselect && (dents[0].flags & DIR_OR_LINK_TO_DIR)) {
-					*ch = KEY_ENTER;
-					cur = 0;
+			if (len == 1) {
+				switch (*ch) {
+				case '=': // fallthrough /* Launch app */
+				case ']': // fallthorugh /*Prompt key */
+				case ';': // fallthrough /* Run plugin key */
+				case ',': // fallthrough /* Pin CWD */
+				case '?': /* Help and config key, '?' is an invalid regex */
 					goto end;
 				}
-
-				/*
-				 * redraw() should be above the auto-select optimization, for
-				 * the case where there's an issue with dir auto-select, say,
-				 * due to a permission problem. The transition is _jumpy_ in
-				 * case of such an error. However, we optimize for successful
-				 * cases where the dir has permissions. This skips a redraw().
-				 */
-				redraw(path);
-				printprompt(ln);
 			}
+
+			/* Reset cur in case it's a repeat search */
+			if (len == 1)
+				cur = 0;
+
+			if (len == REGEX_MAX - 1)
+				break;
+
+			wln[len] = (wchar_t)*ch;
+			wln[++len] = '\0';
+			wcstombs(ln, wln, REGEX_MAX);
+
+			/* Forward-filtering optimization:
+			 * - new matches can only be a subset of current matches.
+			 */
+			/* ndents = total; */
+
+			if (matches(pln) == -1) {
+				printprompt(ln);
+				continue;
+			}
+
+			/* If the only match is a dir, auto-select and cd into it */
+			if (ndents == 1 && cfg.filtermode
+			    && cfg.autoselect && (dents[0].flags & DIR_OR_LINK_TO_DIR)) {
+				*ch = KEY_ENTER;
+				cur = 0;
+				goto end;
+			}
+
+			/*
+			 * redraw() should be above the auto-select optimization, for
+			 * the case where there's an issue with dir auto-select, say,
+			 * due to a permission problem. The transition is _jumpy_ in
+			 * case of such an error. However, we optimize for successful
+			 * cases where the dir has permissions. This skips a redraw().
+			 */
+			redraw(path);
+			printprompt(ln);
 		} else
-			goto end;
+			break;
 	}
 end:
+	/* Save last working filter in-filter */
+	if (ln[1])
+		ln[REGEX_MAX - 1] = ln[1];
+
 	if (*ch != 27 && *ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN && *ch != CONTROL('T')) {
-		g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
+		ln[0] = ln[1] = '\0';
 		move_cursor(cur, 0);
 	} else if (ndents)
 		xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1);
