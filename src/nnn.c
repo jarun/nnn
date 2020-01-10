@@ -452,7 +452,7 @@ static char * const utils[] = {
 #define MSG_ARCHIVE_NAME 17
 #define MSG_OPEN_WITH 18
 #define MSG_REL_PATH 19
-#define MSG_LINK_SUFFIX 20
+#define MSG_LINK_PREFIX 20
 #define MSG_COPY_NAME 21
 #define MSG_CONTINUE 22
 #define MSG_SEL_MISSING 23
@@ -492,7 +492,7 @@ static const char * const messages[] = {
 	"archive name: ",
 	"open with: ",
 	"relative path: ",
-	"link suffix [@ for none]: ",
+	"link prefix [@ for none]: ",
 	"copy name: ",
 	"\nPress Enter to continue",
 	"open failed",
@@ -2371,12 +2371,13 @@ static size_t mkpath(const char *dir, const char *name, char *out)
  * Create symbolic/hard link(s) to file(s) in selection list
  * Returns the number of links created, -1 on error
  */
-static int xlink(char *suffix, char *path, char *curfname, char *buf, int *presel, int type)
+static int xlink(char *prefix, char *path, char *curfname, char *buf, int *presel, int type)
 {
 	int count = 0, choice;
-	char *pbuf = pselbuf, *fname;
+	char *psel = pselbuf, *fname;
 	size_t pos = 0, len, r;
 	int (*link_fn)(const char *, const char *) = NULL;
+	char lnpath[PATH_MAX];
 
 	choice = get_cur_or_sel();
 	if (!choice)
@@ -2388,11 +2389,10 @@ static int xlink(char *suffix, char *path, char *curfname, char *buf, int *prese
 		link_fn = &link;
 
 	if (choice == 'c') {
-		char lnpath[PATH_MAX];
-
-		mkpath(path, curfname, buf);
-		r = mkpath(path, curfname, lnpath);
-		xstrlcpy(lnpath + r - 1, suffix, PATH_MAX - r - 1);
+		r = xstrlcpy(buf, prefix, NAME_MAX + 1); /* Copy prefix */
+		xstrlcpy(buf + r - 1, curfname, NAME_MAX - r); /* Suffix target file name */
+		mkpath(path, buf, lnpath); /* Generate link path */
+		mkpath(path, curfname, buf); /* Generate target file path */
 
 		if (!link_fn(buf, lnpath))
 			return 1; /* One link created */
@@ -2402,16 +2402,18 @@ static int xlink(char *suffix, char *path, char *curfname, char *buf, int *prese
 	}
 
 	while (pos < selbufpos) {
-		len = strlen(pbuf);
-		fname = xbasename(pbuf);
-		r = mkpath(path, fname, buf);
-		xstrlcpy(buf + r - 1, suffix, PATH_MAX - r - 1);
+		len = strlen(psel);
+		fname = xbasename(psel);
 
-		if (!link_fn(pbuf, buf))
+		r = xstrlcpy(buf, prefix, NAME_MAX + 1); /* Copy prefix */
+		xstrlcpy(buf + r - 1, fname, NAME_MAX - r); /* Suffix target file name */
+		mkpath(path, buf, lnpath); /* Generate link path */
+
+		if (!link_fn(psel, lnpath))
 			++count;
 
 		pos += len + 1;
-		pbuf += len + 1;
+		psel += len + 1;
 	}
 
 	return count;
@@ -5173,7 +5175,7 @@ nochange:
 				if (r == 'f' || r == 'd')
 					tmp = xreadline(NULL, messages[MSG_REL_PATH]);
 				else if (r == 's' || r == 'h')
-					tmp = xreadline(NULL, messages[MSG_LINK_SUFFIX]);
+					tmp = xreadline(NULL, messages[MSG_LINK_PREFIX]);
 				else
 					tmp = NULL;
 				break;
@@ -5281,7 +5283,7 @@ nochange:
 				}
 				close(fd);
 				xstrlcpy(lastname, tmp, NAME_MAX + 1);
-			} else {
+			} else { /* SEL_NEW */
 				close(fd); /* Use fd as tmp var */
 				presel = 0;
 
