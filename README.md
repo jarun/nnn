@@ -21,7 +21,7 @@
 
 It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.com/watch?v=AbaauM7gUJw), Linux, macOS, BSD, Haiku, Cygwin, WSL and works seamlessly with DEs and GUI utilities.
 
-Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage, how-tos and troubleshooting.
+[Wiki](https://github.com/jarun/nnn/wiki).
 
 ## Features
 
@@ -50,22 +50,22 @@ Visit the [Wiki](https://github.com/jarun/nnn/wiki) for concepts, program usage,
   - Remote mounts (needs sshfs, rclone)
   - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick reference
   - CD on quit (*easy* shell integration)
-- Sorting
+- Search
+  - Instant filtering with *search-as-you-type*
+  - Regex and substring (default) matches
+  - Subtree search plugin to open or edit files
+- Sort
   - Ordered pure numeric names by default (visit _/proc_)
   - Case-insensitive version (_aka_ natural) sort
   - By file name, modification/access time, size, extension
   - Reverse sort
-- Search
-  - Instant filtering with *search-as-you-type*
-  - Regex and substring (default) matches
-  - Subtree search to open or edit files (using plugin)
 - Mimes
   - Open with desktop opener or specify a custom app
   - Create, list, extract, mount (FUSE based) archives
   - Option to open all text files in EDITOR
 - Information
   - Detailed file information
-  - Media information (using plugin)
+  - Media information plugin
 - Convenience
   - Run plugins and custom commands with hotkeys
   - FreeDesktop compliant trash (needs trash-cli)

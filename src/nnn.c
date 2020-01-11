@@ -1379,7 +1379,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 		if (flag & F_NORMAL) {
 			if (flag & F_CONFIRM) {
 				printf("%s", messages[MSG_CONTINUE]);
-				getchar();
+				while (getchar() != '\n');
 			}
 
 			refresh();
