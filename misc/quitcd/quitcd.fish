@@ -4,9 +4,11 @@
 
 function n --description 'support nnn quit and change directory'
     # Block nesting of nnn in subshells
-    if [ (expr $NNNLVL + 0) -ge 1 ]
-        echo "nnn is already running"
-        return
+    if test -n NNNLVL
+        if [ (expr $NNNLVL + 0) -ge 1 ]
+            echo "nnn is already running"
+            return
+        end
     end
 
     # The default behaviour is to cd on quit (nnn checks if NNN_TMPFILE is set)
