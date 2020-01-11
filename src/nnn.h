@@ -239,8 +239,8 @@ static struct key bindings[] = {
 	/* Show help */
 	{ '?',            SEL_HELP },
 	/* Plugin key */
-	{ 'x',            SEL_PLUGKEY },
 	{ ';',            SEL_PLUGKEY },
+	{ CONTROL('F'),   SEL_PLUGKEY },
 	/* Run a plugin */
 	{ CONTROL('P'),   SEL_PLUGIN },
 	/* Run command */
