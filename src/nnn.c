@@ -2242,7 +2242,8 @@ end:
 	if (ln[1])
 		ln[REGEX_MAX - 1] = ln[1];
 
-	if (*ch != 27 && *ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN && *ch != CONTROL('T')) {
+	if (*ch != 27 && *ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN
+	    && *ch != CONTROL('T') && *ch != CONTROL('F')) {
 		ln[0] = ln[1] = '\0';
 		move_cursor(cur, 0);
 	} else if (ndents)
@@ -5439,7 +5440,7 @@ nochange:
 				}
 
 				if (!r) {
-					clearprompt();
+					cfg.filtermode ? presel = FILTER : clearprompt();
 					goto nochange;
 				}
 
