@@ -49,7 +49,11 @@ static int xprintf(int fd, const char *fmt, ...)
 
 static int enabledbg(void)
 {
-	FILE *fp = fopen("/tmp/nnndbg", "w");
+        /* overwrite or append to previous log via environment */
+        int keep_log = getenv("NNN_DEBUG_KEEP_LOG") ? 1 : 0;
+        char *log_file_mode = keep_log ? "a" : "w"; 
+
+	FILE *fp = fopen("/tmp/nnndbg", log_file_mode);
 
 	if (!fp) {
 		perror("dbg(1)");
@@ -68,7 +72,14 @@ static int enabledbg(void)
 		return -1;
 	}
 
-	return 0;
+        if(keep_log) {
+           /* seperate the runs with a blank line if the file is not empty */
+           if(lseek(DEBUG_FD, 0, SEEK_CUR)) {  
+             write(DEBUG_FD, "\n", 1);
+           }
+        }
+
+        return 0;
 }
 
 static void disabledbg(void)
