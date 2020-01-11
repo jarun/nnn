@@ -65,7 +65,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 
 ## Ways to invoke a plugin
 
-1. Execute directly with <kbd>;key</kbd> or <kbd>xkey</kbd>:
+1. Fire directly with <kbd>;key</kbd> or <kbd>^Fkey</kbd>:
 
        export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;n:notes;v:imgviu;t:imgthumb'
 
