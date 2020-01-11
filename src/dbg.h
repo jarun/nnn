@@ -58,7 +58,7 @@ static int enabledbg(void)
 	if (!fp) {
 		perror("dbg(1)");
 
-		fp = fopen("./nnndbg", "w");
+		fp = fopen("./nnndbg", log_file_mode);
 		if (!fp) {
 			perror("dbg(2)");
 			return -1;
