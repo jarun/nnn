@@ -13,6 +13,7 @@
 #         # export NNN_OPENER=nuke
 #   2. Run nnn with the program option to indicate a CLI opener
 #         nnn -c
+#         # The -c program option overrides config `NNN_USE_EDITOR`
 #   3. nuke can use nnn plugins (e.g. mocplay is used for audio), $PATH is updated.
 #
 # Details:

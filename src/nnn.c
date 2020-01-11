@@ -129,6 +129,7 @@
 #define READLINE_MAX 128
 #define FILTER '/'
 #define RFILTER '\\'
+#define CASE ':'
 #define MSGWAIT '$'
 #define REGEX_MAX 48
 #define BM_MAX 10
@@ -2011,7 +2012,7 @@ static void showfilterinfo(void)
 {
 	char info[REGEX_MAX];
 
-	snprintf(info, REGEX_MAX - 1, "    %s [/\\], %s [|]",
+	snprintf(info, REGEX_MAX - 1, "    %s [/\\], %s [:]",
 		 (cfg.regex ? "regex" : "str"),
 		 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
 	printinfoln(info);
@@ -2167,7 +2168,7 @@ static int filterentries(char *path, char *lastname)
 				}
 
 				/* Toggle case-sensitivity */
-				if (*ch == '|') {
+				if (*ch == CASE) {
 					fnstrstr = (fnstrstr == &strcasestr) ? &strstr : &strcasestr;
 					regflags ^= REG_ICASE;
 					showfilter(ln);
