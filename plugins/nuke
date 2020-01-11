@@ -41,8 +41,8 @@
 #      rar: list with unrar
 #      7-zip: list with 7z
 #      pdf: zathura (GUI), pdftotext, mutool, exiftool
-#      m4a: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
-#      torrent: transmission-show
+#      audio: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
+#      torrent: rtorrent, transmission-show
 #      odt|ods|odp|sxw: odt2txt
 #      htm|html|xhtml: w3m, lynx, elinks
 #      json: jq, python (json.tool module)
@@ -52,6 +52,7 @@
 #      audio/*: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
 #      application/pdf: zathura (GUI), pdftotext, mutool, exiftool
 #   Other mimes:
+#      text/troff: man -l
 #      text/* | */xml: vi
 #      image/vnd.djvu): djvutxt, exiftool
 #
@@ -75,6 +76,23 @@ ext="${FNAME##*.}"
 if ! [ -z "$ext" ]; then
     ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
 fi
+
+handle_pdf() {
+    if [ $GUI -ne 0 ] && which zathura >/dev/null 2>&1; then
+        zathura "${FPATH}" >/dev/null 2>&1 &
+        exit 0
+    elif which pdftotext >/dev/null 2>&1; then
+        ## Preview as text conversion
+        pdftotext -l 10 -nopgbrk -q -- "${FPATH}" - | less -R
+        exit 0
+    elif which mutool >/dev/null 2>&1; then
+        mutool draw -F txt -i -- "${FPATH}" 1-10
+        exit 0
+    elif which exiftool >/dev/null 2>&1; then
+        exiftool "${FPATH}" | less -R
+        exit 0
+    fi
+}
 
 # handle this extension and exit
 handle_extension() {
@@ -106,20 +124,7 @@ handle_extension() {
 
         ## PDF
         pdf)
-            if [ $GUI -ne 0 ] && which zathura >/dev/null 2>&1; then
-                zathura "${FPATH}" >/dev/null 2>&1 &
-                exit 0
-            elif which pdftotext >/dev/null 2>&1; then
-                ## Preview as text conversion
-                pdftotext -l 10 -nopgbrk -q -- "${FPATH}" - | less -R
-                exit 0
-            elif which mutool >/dev/null 2>&1; then
-                mutool draw -F txt -i -- "${FPATH}" 1-10
-                exit 0
-            elif which exiftool >/dev/null 2>&1; then
-                exiftool "${FPATH}" | less -R
-                exit 0
-            fi
+            handle_pdf
             exit 1;;
 
         ## Audio
@@ -141,7 +146,10 @@ handle_extension() {
 
         ## BitTorrent
         torrent)
-            if which transmission-show >/dev/null 2>&1; then
+            if which rtorrent >/dev/null 2>&1; then
+                rtorrent "${FPATH}"
+                exit 0
+            elif which transmission-show >/dev/null 2>&1; then
                 transmission-show -- "${FPATH}"
                 exit 0
             fi
@@ -273,20 +281,7 @@ handle_multimedia() {
 
         ## PDF
         application/pdf)
-            if [ $GUI -ne 0 ] && which zathura >/dev/null 2>&1; then
-                zathura "${FPATH}" >/dev/null 2>&1 &
-                exit 0
-            elif which pdftotext >/dev/null 2>&1; then
-                ## Preview as text conversion
-                pdftotext -l 10 -nopgbrk -q -- "${FPATH}" - | less -R
-                exit 0
-            elif which mutool >/dev/null 2>&1; then
-                mutool draw -F txt -i -- "${FPATH}" 1-10 | less -R
-                exit 0
-            elif which exiftool >/dev/null 2>&1; then
-                exiftool "${FPATH}" | less -R
-                exit 0
-            fi
+            handle_pdf
             exit 1;;
 
         #     pdftoppm -f 1 -l 1 \
