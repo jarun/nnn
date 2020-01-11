@@ -138,13 +138,15 @@ When a session is loaded dynamically, the last working session is saved automati
 All the session files are located in the \fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions\fR directory by the session name.
 "@" is the "last session" file.
 .Sh FILTERS
-Filters are substrings to find matching entries in the current directory instantly (\fIsearch-as-you-type\fR). There is a program option to switch to regex filters.
+Filters are strings to find matching entries in the current directory instantly (\fIsearch-as-you-type\fR). There is a program option to switch to regex filters. Matches are case-insensitive by default.
 .Pp
-To switch the filter type at runtime:
+To modify match criteria at runtime:
 .br
 - string to regex: press '\\' at empty filter prompt
 .br
 - regex to string: press '/' at empty filter prompt
+.br
+- toggle case sensitivity: press '|' at empty filter prompt
 .Pp
 Common regex use cases:
 .Pp

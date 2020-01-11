@@ -693,6 +693,18 @@ static void printprompt(const char *str)
 	addstr(str);
 }
 
+static void clearinfoln(void)
+{
+	move(xlines - 2, 0);
+	addstr("");
+}
+
+static void printinfoln(const char *str)
+{
+	clearinfoln();
+	mvaddstr(xlines - 2, xcols - strlen(str), str);
+}
+
 static int get_input(const char *prompt)
 {
 	int r = KEY_RESIZE;
@@ -1817,9 +1829,12 @@ static char xchartohex(char c)
 	return c;
 }
 
+static char * (*fnstrstr)(const char *haystack, const char *needle) = &strcasestr;
+static int regflags = REG_NOSUB | REG_EXTENDED | REG_ICASE;
+
 static int setfilter(regex_t *regex, const char *filter)
 {
-	return regcomp(regex, filter, REG_NOSUB | REG_EXTENDED | REG_ICASE);
+	return regcomp(regex, filter, regflags);
 }
 
 static int visible_re(const fltrexp_t *fltrexp, const char *fname)
@@ -1829,7 +1844,7 @@ static int visible_re(const fltrexp_t *fltrexp, const char *fname)
 
 static int visible_str(const fltrexp_t *fltrexp, const char *fname)
 {
-	return strcasestr(fname, fltrexp->str) != NULL;
+	return fnstrstr(fname, fltrexp->str) != NULL;
 }
 
 static int (*filterfn)(const fltrexp_t *fltr, const char *fname) = &visible_str;
@@ -1992,6 +2007,22 @@ static int nextsel(int presel)
 	return 0;
 }
 
+static void showfilterinfo(void)
+{
+	char info[REGEX_MAX];
+
+	snprintf(info, REGEX_MAX - 1, "    %s [/\\], %s [|]",
+		 (cfg.regex ? "regex" : "str"),
+		 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
+	printinfoln(info);
+}
+
+static void showfilter(char *str)
+{
+	showfilterinfo();
+	printprompt(str);
+}
+
 static inline void swap_ent(int id1, int id2)
 {
 	struct entry _dent, *pdent1 = &dents[id1], *pdent2 =  &dents[id2];
@@ -2063,7 +2094,7 @@ static int filterentries(char *path, char *lastname)
 
 	cleartimeout();
 	curs_set(TRUE);
-	printprompt(ln);
+	showfilter(ln);
 
 	while ((r = get_wch(ch)) != ERR) {
 		//DPRINTF_D(*ch);
@@ -2074,7 +2105,7 @@ static int filterentries(char *path, char *lastname)
 		case KEY_RESIZE:
 			clearoldprompt();
 			redraw(path);
-			printprompt(ln);
+			showfilter(ln);
 			continue;
 #endif
 		case KEY_DC: // fallthrough
@@ -2101,12 +2132,12 @@ static int filterentries(char *path, char *lastname)
 			if (matches(pln) != -1)
 				redraw(path);
 
-			printprompt(ln);
+			showfilter(ln);
 			continue;
 		case KEY_MOUSE: // fallthrough
 		case 27: /* Exit filter mode on Escape */
 			goto end;
-		case KEY_UP: /* On the first Up, show previous filter */
+		case KEY_UP: /* On the first Up, apply previous filter */
 			if (len == 1 && ln[REGEX_MAX - 1]) {
 				ln[1] = ln[REGEX_MAX - 1];
 				ln[REGEX_MAX - 1] = '\0';
@@ -2115,7 +2146,7 @@ static int filterentries(char *path, char *lastname)
 				if (matches(pln) != -1)
 					redraw(path);
 
-				printprompt(ln);
+				showfilter(ln);
 				continue;
 			}
 		}
@@ -2135,23 +2166,29 @@ static int filterentries(char *path, char *lastname)
 					goto end;
 				}
 
-				DPRINTF_S(ln);
-
-				if (*ch == RFILTER && ln[0] == FILTER) {
-					DPRINTF_S("set back");
-					wln[0] = ln[0] = RFILTER;
-					cfg.regex = TRUE;
-					filterfn = &visible_re;
-					printprompt(ln);
+				/* Toggle case-sensitivity */
+				if (*ch == '|') {
+					fnstrstr = (fnstrstr == &strcasestr) ? &strstr : &strcasestr;
+					regflags ^= REG_ICASE;
+					showfilter(ln);
 					continue;
 				}
 
+				/* string to regex */
+				if (*ch == RFILTER && ln[0] == FILTER) {
+					wln[0] = ln[0] = RFILTER;
+					cfg.regex = TRUE;
+					filterfn = &visible_re;
+					showfilter(ln);
+					continue;
+				}
+
+				/* regex to string */
 				if (*ch == FILTER && ln[0] == RFILTER) {
-					DPRINTF_S("set forward");
 					wln[0] = ln[0] = FILTER;
 					cfg.regex = FALSE;
 					filterfn = &visible_str;
-					printprompt(ln);
+					showfilter(ln);
 					continue;
 				}
 			}
@@ -2173,7 +2210,7 @@ static int filterentries(char *path, char *lastname)
 			/* ndents = total; */
 
 			if (matches(pln) == -1) {
-				printprompt(ln);
+				showfilter(ln);
 				continue;
 			}
 
@@ -2193,11 +2230,13 @@ static int filterentries(char *path, char *lastname)
 			 * cases where the dir has permissions. This skips a redraw().
 			 */
 			redraw(path);
-			printprompt(ln);
+			showfilter(ln);
 		} else
 			break;
 	}
 end:
+	clearinfoln();
+
 	/* Save last working filter in-filter */
 	if (ln[1])
 		ln[REGEX_MAX - 1] = ln[1];
@@ -5608,7 +5647,7 @@ static void usage(void)
 		" -H      show hidden files\n"
 		" -K      detect key collision\n"
 		" -n      nav-as-you-type mode\n"
-		" -o      open files on Enter\n"
+		" -o      open files only on Enter\n"
 		" -p file selection file [stdout if '-']\n"
 		" -Q      no quit confirmation\n"
 		" -r      use advcpmv patched cp, mv\n"
