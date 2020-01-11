@@ -128,6 +128,7 @@
 #define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
 #define READLINE_MAX 128
 #define FILTER '/'
+#define RFILTER '\\'
 #define MSGWAIT '$'
 #define REGEX_MAX 48
 #define BM_MAX 10
@@ -243,7 +244,7 @@ typedef struct {
 	uint useeditor  : 1;  /* Use VISUAL to open text files */
 	uint runplugin  : 1;  /* Choose plugin mode */
 	uint runctx     : 2;  /* The context in which plugin is to be run */
-	uint filter_re  : 1;  /* Use regex filters */
+	uint regex      : 1;  /* Use regex filters */
 	uint x11        : 1;  /* Copy to system clipboard and show notis */
 	uint trash      : 1;  /* Move removed files to trash */
 	uint mtime      : 1;  /* Use modification time (else access time) */
@@ -296,7 +297,7 @@ static settings cfg = {
 	0, /* useeditor */
 	0, /* runplugin */
 	0, /* runctx */
-	0, /* filter_re */
+	0, /* regex */
 	0, /* x11 */
 	0, /* trash */
 	1, /* mtime */
@@ -2027,11 +2028,11 @@ static int matches(const char *fltr)
 	regex_t re;
 
 	/* Search filter */
-	if (cfg.filter_re && setfilter(&re, fltr) != 0)
+	if (cfg.regex && setfilter(&re, fltr) != 0)
 		return -1;
 
 	ndents = fill(fltr, &re);
-	if (cfg.filter_re)
+	if (cfg.regex)
 		regfree(&re);
 
 	qsort(dents, ndents, sizeof(*dents), entrycmpfn);
@@ -2047,7 +2048,7 @@ static int filterentries(char *path, char *lastname)
 	int r, total = ndents, len;
 	char *pln = g_ctx[cfg.curctx].c_fltr + 1;
 
-	if (ndents && ln[0] == FILTER && *pln) {
+	if (ndents && (ln[0] == FILTER || ln[0] == RFILTER) && *pln) {
 		if (matches(pln) != -1) {
 			move_cursor(dentfind(lastname, ndents), 0);
 			redraw(path);
@@ -2055,7 +2056,7 @@ static int filterentries(char *path, char *lastname)
 
 		len = mbstowcs(wln, ln, REGEX_MAX);
 	} else {
-		ln[0] = wln[0] = FILTER;
+		ln[0] = wln[0] = cfg.regex ? RFILTER : FILTER;
 		ln[1] = wln[1] = '\0';
 		len = 1;
 	}
@@ -2132,6 +2133,26 @@ static int filterentries(char *path, char *lastname)
 				case ',': // fallthrough /* Pin CWD */
 				case '?': /* Help and config key, '?' is an invalid regex */
 					goto end;
+				}
+
+				DPRINTF_S(ln);
+
+				if (*ch == RFILTER && ln[0] == FILTER) {
+					DPRINTF_S("set back");
+					wln[0] = ln[0] = RFILTER;
+					cfg.regex = TRUE;
+					filterfn = &visible_re;
+					printprompt(ln);
+					continue;
+				}
+
+				if (*ch == FILTER && ln[0] == RFILTER) {
+					DPRINTF_S("set forward");
+					wln[0] = ln[0] = FILTER;
+					cfg.regex = FALSE;
+					filterfn = &visible_str;
+					printprompt(ln);
+					continue;
 				}
 			}
 
@@ -5765,7 +5786,7 @@ int main(int argc, char *argv[])
 			cfg.waitedit = 1;
 			break;
 		case 'g':
-			cfg.filter_re = 1;
+			cfg.regex = 1;
 			filterfn = &visible_re;
 			break;
 		case 'H':
