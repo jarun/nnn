@@ -77,7 +77,7 @@ It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.co
   - Create (with parents), rename, duplicate (anywhere) files and dirs
   - Launch GUI apps, run commands, spawn a shell, toggle executable
   - Hovered file set as `$nnn` at prompt and spawned shell
-  - Lock terminal (needs a locker)
+  - Lock terminal after configurable idle timeout
 
 ## Quickstart
 
@@ -88,7 +88,7 @@ It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.co
 5. To copy selected file paths to system clipboard and show notis on cp, mv, rm completion use option `-x`.
 6. For a strictly CLI-only experience, see plugin `nuke`. It's a sample opener you can customize.
 
-Don't memorize keys. Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd> and <kbd>q</kbd> suffice. Press <kbd>?</kbd> to list shortcuts anytime.
+Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd> and <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates, cycles contexts. Hit <kbd>?</kbd> to lookup shortcuts.
 
 ## Installation
 
