@@ -5239,7 +5239,7 @@ nochange:
 			case SEL_ARCHIVE:
 				r = get_cur_or_sel();
 				if (!r) {
-					clearprompt();
+					statusbar(path);
 					goto nochange;
 				}
 
@@ -5298,7 +5298,7 @@ nochange:
 				if (access(newpath, F_OK) == 0) {
 					fd = get_input(messages[MSG_OVERWRITE]);
 					if (fd != 'y' && fd != 'Y') {
-						clearprompt();
+						statusbar(path);
 						goto nochange;
 					}
 				}
@@ -5314,7 +5314,7 @@ nochange:
 					r = (r == 'c' ? F_CLI :
 					     (r == 'g' ? F_NOWAIT | F_NOTRACE | F_MULTI : 0));
 					if (!r) {
-						cfg.filtermode ? presel = FILTER : clearprompt();
+						cfg.filtermode ? presel = FILTER : statusbar(path);
 						goto nochange;
 					}
 					mkpath(path, dents[cur].name, newpath);
@@ -5448,7 +5448,7 @@ nochange:
 				}
 
 				if (!r) {
-					cfg.filtermode ? presel = FILTER : clearprompt();
+					cfg.filtermode ? presel = FILTER : statusbar(path);
 					goto nochange;
 				}
 
@@ -5557,7 +5557,7 @@ nochange:
 				}
 			}
 
-			clearprompt();
+			statusbar(path);
 			goto nochange;
 		case SEL_QUITCTX: // fallthrough
 		case SEL_QUITCD: // fallthrough

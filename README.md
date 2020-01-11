@@ -21,7 +21,7 @@
 
 It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.com/watch?v=AbaauM7gUJw), Linux, macOS, BSD, Haiku, Cygwin, WSL and works seamlessly with DEs and GUI utilities.
 
-[Wiki](https://github.com/jarun/nnn/wiki).
+[**Wiki**](https://github.com/jarun/nnn/wiki).
 
 ## Features
 
