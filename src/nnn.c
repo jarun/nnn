@@ -4201,17 +4201,88 @@ static int handle_context_switch(enum action sel, char *newpath)
 	return r;
 }
 
+static void statusbar(char *path)
+{
+	int i = 0, extnlen = 0;
+	char *ptr;
+	char sort[] = "\0\0\0\0";
+	char buf[24];
+	pEntry pent = &dents[cur];
+
+	if (!ndents) {
+		printmsg("0/0");
+		return;
+	}
+
+	if (cfg.mtimeorder)
+		sort[0] = cfg.mtime ? 'T' : 'A';
+	else if (cfg.sizeorder)
+		sort[0] = 'Z';
+	else if (cfg.extnorder)
+		sort[0] = 'E';
+
+	if (sort[i])
+		++i;
+
+	if (entrycmpfn == &reventrycmp) {
+		sort[i] = 'R';
+		++i;
+	}
+
+	if (namecmpfn == &xstrverscasecmp) {
+		sort[i] = 'V';
+		++i;
+	}
+
+	if (i)
+		sort[i] = ' ';
+
+	/* Get the file extension for regular files */
+	if (S_ISREG(pent->mode)) {
+		i = (int)(pent->nlen - 1);
+		ptr = xmemrchr((uchar *)pent->name, '.', i);
+		if (ptr) {
+			extnlen = ptr - pent->name;
+			extnlen = i - extnlen;
+		}
+		if (!ptr || extnlen > 5 || extnlen < 2)
+			ptr = "\b";
+	} else
+		ptr = "\b";
+
+	if (cfg.blkorder) { /* du mode */
+		xstrlcpy(buf, coolsize(dir_blocks << blk_shift), 12);
+
+		mvprintw(xlines - 1, 0, "%d/%d [%d:%s] %cu:%s free:%s files:%lu %lldB %s",
+			 cur + 1, ndents, cfg.selmode,
+			 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
+			 (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
+			 num_files, (ll)pent->blocks << blk_shift, ptr);
+	} else { /* light or detail mode */
+		/* Show filename as it may be truncated in directory listing */
+		/* Get the unescaped file name */
+		char *fname = unescape(pent->name, NAME_MAX, NULL);
+
+		/* Timestamp */
+		strftime(buf, sizeof(buf), "%F %R", localtime(&pent->t));
+		buf[sizeof(buf)-1] = '\0';
+
+		mvprintw(xlines - 1, 0, "%d/%d [%d:%s] %s%s %s %s %s [%s]",
+			 cur + 1, ndents, cfg.selmode,
+			 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
+			 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr, fname);
+	}
+}
+
 static void redraw(char *path)
 {
 	xlines = LINES;
 	xcols = COLS;
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
-	int lastln = xlines - 1, onscreen = xlines - 4;
-	int i, attrs;
-	char buf[24];
-	char c;
-	char *ptr = path, *base;
+	int onscreen = xlines - 4;
+	int i;
+	char *ptr = path;
 
 	/* Clear screen */
 	erase();
@@ -4233,9 +4304,9 @@ static void redraw(char *path)
 		if (!g_ctx[i].c_cfg.ctxactive) {
 			addch(i + '1');
 		} else {
-			attrs = (cfg.curctx != i)
-				 ? (COLOR_PAIR(i + 1) | A_BOLD | A_UNDERLINE) /* Underline active */
-				 : (COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE); /* Current in reverse */
+			int attrs = (cfg.curctx != i)
+				     ? (COLOR_PAIR(i + 1) | A_BOLD | A_UNDERLINE) /* Active */
+				     : (COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE); /* Current */
 			attron(attrs);
 			addch(i + '1');
 			attroff(attrs);
@@ -4251,7 +4322,8 @@ static void redraw(char *path)
 	if ((i + MIN_DISPLAY_COLS) <= ncols)
 		addnstr(path, ncols - MIN_DISPLAY_COLS);
 	else {
-		base = xbasename(path);
+		char *base = xbasename(path);
+
 		if ((base - ptr) <= 1)
 			addnstr(path, ncols - MIN_DISPLAY_COLS);
 		else {
@@ -4305,71 +4377,7 @@ static void redraw(char *path)
 		cfg.dircolor = 0;
 	}
 
-	if (ndents) {
-		char sort[] = "\0\0\0\0";
-		pEntry pent = &dents[cur];
-
-		i = 0;
-
-		if (cfg.mtimeorder)
-			sort[0] = cfg.mtime ? 'T' : 'A';
-		else if (cfg.sizeorder)
-			sort[0] = 'Z';
-		else if (cfg.extnorder)
-			sort[0] = 'E';
-
-		if (sort[i])
-			++i;
-
-		if (entrycmpfn == &reventrycmp) {
-			sort[i] = 'R';
-			++i;
-		}
-
-		if (namecmpfn == &xstrverscasecmp) {
-			sort[i] = 'V';
-			++i;
-		}
-
-		if (i)
-			sort[i] = ' ';
-
-		/* Get the file extension for regular files */
-		if (S_ISREG(pent->mode)) {
-			i = (int)(pent->nlen - 1);
-			ptr = xmemrchr((uchar *)pent->name, '.', i);
-			if (ptr)
-				attrs = ptr - pent->name; /* attrs used as tmp var */
-			if (!ptr || (i - attrs) > 5 || (i - attrs) < 2)
-				ptr = "\b";
-		} else
-			ptr = "\b";
-
-		if (cfg.blkorder) { /* du mode */
-			xstrlcpy(buf, coolsize(dir_blocks << blk_shift), 12);
-			c = cfg.apparentsz ? 'a' : 'd';
-
-			mvprintw(lastln, 0, "%d/%d [%d:%s] %cu:%s free:%s files:%lu %lldB %s",
-				 cur + 1, ndents, cfg.selmode,
-				 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
-				 c, buf, coolsize(get_fs_info(path, FREE)), num_files,
-				 (ll)pent->blocks << blk_shift, ptr);
-		} else { /* light or detail mode */
-			/* Show filename as it may be truncated in directory listing */
-			/* Get the unescaped file name */
-			base = unescape(pent->name, NAME_MAX, NULL);
-
-			/* Timestamp */
-			strftime(buf, sizeof(buf), "%F %R", localtime(&pent->t));
-			buf[sizeof(buf)-1] = '\0';
-
-			mvprintw(lastln, 0, "%d/%d [%d:%s] %s%s %s %s %s [%s]",
-				 cur + 1, ndents, cfg.selmode,
-				 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
-				 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr, base);
-		}
-	} else
-		printmsg("0/0");
+	statusbar(path);
 }
 
 static void browse(char *ipath, const char *session)
