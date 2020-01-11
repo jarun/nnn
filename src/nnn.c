@@ -2012,7 +2012,7 @@ static void showfilterinfo(void)
 {
 	char info[REGEX_MAX];
 
-	snprintf(info, REGEX_MAX - 1, "    %s [/\\], %s [:]",
+	snprintf(info, REGEX_MAX - 1, "    %s [keys /\\], %s [key :]",
 		 (cfg.regex ? "regex" : "str"),
 		 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
 	printinfoln(info);
