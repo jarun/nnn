@@ -4653,6 +4653,7 @@ nochange:
 					cfg.runplugin = 0;
 					/* Must be in plugin dir and same context to select plugin */
 					if ((cfg.runctx == cfg.curctx) && !strcmp(path, plugindir)) {
+						endselection();
 						/* Copy path so we can return back to earlier dir */
 						xstrlcpy(path, rundir, PATH_MAX);
 						rundir[0] = '\0';
@@ -4908,9 +4909,12 @@ nochange:
 				break;
 			case SEL_TOGGLEDOT:
 				cfg.showhidden ^= 1;
+				if (ndents)
+					copycurname();
 				if (cfg.filtermode)
 					presel = FILTER;
-				break;
+				clearfilter();
+				goto begin;
 			case SEL_DETAIL:
 				cfg.showdetail ^= 1;
 				cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
@@ -4972,7 +4976,6 @@ nochange:
 				namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
 				break;
 			}
-
 
 			/* Save current */
 			if (ndents)
@@ -5410,6 +5413,7 @@ nochange:
 			}
 
 			if (sel == SEL_PLUGKEY) {
+				endselection();
 				r = xstrlcpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
 				printkeys(plug, g_buf + r - 1, PLUGIN_MAX);
 				printprompt(g_buf);

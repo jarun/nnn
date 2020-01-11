@@ -371,6 +371,11 @@ handle_multimedia() {
 handle_mime() {
     mimetype="${1}"
     case "${mimetype}" in
+        ## Manpages
+        text/troff)
+            man -l "${FPATH}"
+            exit 0;;
+
         ## Text
         text/* | */xml)
             vi "${FPATH}"
