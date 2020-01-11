@@ -3,10 +3,15 @@
 # or, add the lines to the 'config.fish' file.
 
 function n --description 'support nnn quit and change directory'
-    # Block nesting of nnn in subshells
-    if [ (expr $NNNLVL + 0) -ge 1 ]
-        echo "nnn is already running"
-        return
+    # BSD expr doesn't accept empty values
+    if test -n $NNNLVL
+
+    else
+	# Block nesting of nnn in subshells
+	if [ (expr $NNNLVL + 0) -ge 1 ]
+	    echo "nnn is already running"
+	    return
+	end
     end
 
     # The default behaviour is to cd on quit (nnn checks if NNN_TMPFILE is set)
