@@ -2119,10 +2119,25 @@ static int filterentries(char *path, char *lastname)
 				goto end;
 			}
 
-			if (*ch == CONTROL('L') && wln[1]) {
-				ln[REGEX_MAX - 1] = ln[1];
-				wln[1] = '\0';
-				len = 1;
+			if (*ch == CONTROL('L')) {
+				if (wln[1]) {
+					ln[REGEX_MAX - 1] = ln[1];
+					wln[1] = '\0';
+					len = 1;
+				} else if (ln[REGEX_MAX - 1]) { /* Show the previous filter */
+					ln[1] = ln[REGEX_MAX - 1];
+					ln[REGEX_MAX - 1] = '\0';
+					len = mbstowcs(wln, ln, REGEX_MAX);
+					/* Go to the top, we don't know if the
+					   hovered file will match the filter */
+					cur = 0;
+
+					if (matches(pln) != -1)
+						redraw(path);
+
+					showfilter(ln);
+					continue;
+				}
 			} else
 				wln[--len] = '\0';
 
@@ -2138,21 +2153,6 @@ static int filterentries(char *path, char *lastname)
 		case KEY_MOUSE: // fallthrough
 		case 27: /* Exit filter mode on Escape */
 			goto end;
-		case KEY_UP: /* On the first Up, apply previous filter */
-			if (len == 1 && ln[REGEX_MAX - 1]) {
-				ln[1] = ln[REGEX_MAX - 1];
-				ln[REGEX_MAX - 1] = '\0';
-				len = mbstowcs(wln, ln, REGEX_MAX);
-				/* Go to the top, we don't know if the
-				   hovered file will match the filter */
-				cur = 0;
-
-				if (matches(pln) != -1)
-					redraw(path);
-
-				showfilter(ln);
-				continue;
-			}
 		}
 
 		if (r == OK) {
