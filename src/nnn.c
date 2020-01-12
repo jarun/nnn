@@ -309,7 +309,7 @@ static settings cfg = {
 
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
-static int ndents, cur, curscroll, total_dents = ENTRY_INCR;
+static int ndents, cur, last, curscroll, last_curscroll, total_dents = ENTRY_INCR;
 static int xlines, xcols;
 static int nselected;
 static uint idle;
@@ -337,6 +337,7 @@ static kv plug[PLUGIN_MAX];
 static uchar g_tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
 static regex_t archive_re;
+static bool is_move_op = FALSE;
 
 /* Retain old signal handlers */
 #ifdef __linux__
@@ -4089,14 +4090,19 @@ static void populate(char *path, char *lastname)
 		move_cursor(0, 0);
 	else
 		move_cursor(dentfind(lastname, ndents), 0);
+
+	// Force full redraw
+	last_curscroll = -1;
 }
 
 static void move_cursor(int target, int ignore_scrolloff)
 {
 	int delta, scrolloff, onscreen = xlines - 4;
+	last_curscroll = curscroll;
 
 	target = MAX(0, MIN(ndents - 1, target));
 	delta = target - cur;
+	last = cur;
 	cur = target;
 	if (!ignore_scrolloff) {
 		scrolloff = MIN(SCROLLOFF, onscreen >> 1);
@@ -4280,6 +4286,8 @@ static void statusbar(char *path)
 			 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
 			 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr, fname);
 	}
+
+	clrtoeol();
 }
 
 static void redraw(char *path)
@@ -4291,6 +4299,39 @@ static void redraw(char *path)
 	int onscreen = xlines - 4;
 	int i;
 	char *ptr = path;
+
+	// Fast redraw
+	if (is_move_op && last_curscroll == curscroll) {
+		is_move_op = FALSE;
+		/* Calculate the number of cols available to print entry name */
+		if (cfg.showdetail) {
+			/* Fallback to light mode if less than 35 columns */
+			if (ncols < 36) {
+				cfg.showdetail ^= 1;
+				printptr = &printent;
+				ncols -= 3; /* Preceding space, indicator, newline */
+			} else
+				ncols -= 35;
+		} else
+			ncols -= 3; /* Preceding space, indicator, newline */
+
+		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+		cfg.dircolor = 1;
+
+		move(2 + last - curscroll, 0);
+		printptr(&dents[last], ncols, false);
+		move(2 + cur - curscroll, 0);
+		printptr(&dents[cur], ncols, true);
+
+		/* Must reset e.g. no files in dir */
+		if (cfg.dircolor) {
+			attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+			cfg.dircolor = 0;
+		}
+
+		statusbar(path);
+		return;
+	}
 
 	/* Clear screen */
 	erase();
@@ -4761,6 +4802,7 @@ nochange:
 		case SEL_HOME: // fallthrough
 		case SEL_END: // fallthrough
 		case SEL_FIRST:
+			is_move_op = TRUE;
 			handle_screen_move(sel);
 			break;
 		case SEL_CDHOME: // fallthrough
