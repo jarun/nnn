@@ -652,10 +652,17 @@ static char *xitoa(uint val)
 	return &ascbuf[++i];
 }
 
+static void clearinfoln(void)
+{
+	move(xlines - 2, 0);
+	clrtoeol();
+}
+
 #ifdef KEY_RESIZE
 /* Clear the old prompt */
 static void clearoldprompt(void)
 {
+	clearinfoln();
 	tolastln();
 	clrtoeol();
 }
@@ -692,12 +699,6 @@ static void printprompt(const char *str)
 {
 	clearprompt();
 	addstr(str);
-}
-
-static void clearinfoln(void)
-{
-	move(xlines - 2, 0);
-	addstr("");
 }
 
 static void printinfoln(const char *str)
