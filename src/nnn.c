@@ -337,7 +337,6 @@ static kv plug[PLUGIN_MAX];
 static uchar g_tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
 static regex_t archive_re;
-static bool is_move_op = FALSE;
 
 /* Retain old signal handlers */
 #ifdef __linux__
@@ -364,6 +363,7 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define STATE_PLUGIN_INIT 0x1
 #define STATE_INTERRUPTED 0x2
 #define STATE_RANGESEL 0x4
+#define STATE_MOVE_OP 0x8
 
 static uchar g_states;
 
@@ -656,7 +656,7 @@ static char *xitoa(uint val)
 static void clearinfoln(void)
 {
 	move(xlines - 2, 0);
-	clrtoeol();
+	addch('\n');
 }
 
 #ifdef KEY_RESIZE
@@ -665,7 +665,7 @@ static void clearoldprompt(void)
 {
 	clearinfoln();
 	tolastln();
-	clrtoeol();
+	addch('\n');
 }
 #endif
 
@@ -4287,7 +4287,46 @@ static void statusbar(char *path)
 			 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr, fname);
 	}
 
-	clrtoeol();
+	addch('\n');
+}
+
+static int adjust_cols(int ncols)
+{
+	/* Calculate the number of cols available to print entry name */
+	if (cfg.showdetail) {
+		/* Fallback to light mode if less than 35 columns */
+		if (ncols < 36) {
+			cfg.showdetail ^= 1;
+			printptr = &printent;
+			ncols -= 3; /* Preceding space, indicator, newline */
+		} else
+			ncols -= 35;
+	} else
+		ncols -= 3; /* Preceding space, indicator, newline */
+
+	attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+	cfg.dircolor = 1;
+
+	return ncols;
+}
+
+static void draw_line(char *path, int ncols)
+{
+	ncols = adjust_cols(ncols);
+
+	move(2 + last - curscroll, 0);
+	printptr(&dents[last], ncols, false);
+	move(2 + cur - curscroll, 0);
+	printptr(&dents[cur], ncols, true);
+
+	/* Must reset e.g. no files in dir */
+	if (cfg.dircolor) {
+		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+		cfg.dircolor = 0;
+	}
+
+	statusbar(path);
+	return;
 }
 
 static void redraw(char *path)
@@ -4301,36 +4340,11 @@ static void redraw(char *path)
 	char *ptr = path;
 
 	// Fast redraw
-	if (is_move_op && last_curscroll == curscroll) {
-		is_move_op = FALSE;
-		/* Calculate the number of cols available to print entry name */
-		if (cfg.showdetail) {
-			/* Fallback to light mode if less than 35 columns */
-			if (ncols < 36) {
-				cfg.showdetail ^= 1;
-				printptr = &printent;
-				ncols -= 3; /* Preceding space, indicator, newline */
-			} else
-				ncols -= 35;
-		} else
-			ncols -= 3; /* Preceding space, indicator, newline */
+	if (g_states & STATE_MOVE_OP) {
+		g_states &= ~STATE_MOVE_OP;
 
-		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
-		cfg.dircolor = 1;
-
-		move(2 + last - curscroll, 0);
-		printptr(&dents[last], ncols, false);
-		move(2 + cur - curscroll, 0);
-		printptr(&dents[cur], ncols, true);
-
-		/* Must reset e.g. no files in dir */
-		if (cfg.dircolor) {
-			attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
-			cfg.dircolor = 0;
-		}
-
-		statusbar(path);
-		return;
+		if (last_curscroll == curscroll)
+			return draw_line(path, ncols);
 	}
 
 	/* Clear screen */
@@ -4401,20 +4415,7 @@ static void redraw(char *path)
 
 	attroff(A_UNDERLINE);
 
-	/* Calculate the number of cols available to print entry name */
-	if (cfg.showdetail) {
-		/* Fallback to light mode if less than 35 columns */
-		if (ncols < 36) {
-			cfg.showdetail ^= 1;
-			printptr = &printent;
-			ncols -= 3; /* Preceding space, indicator, newline */
-		} else
-			ncols -= 35;
-	} else
-		ncols -= 3; /* Preceding space, indicator, newline */
-
-	attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
-	cfg.dircolor = 1;
+	ncols = adjust_cols(ncols);
 
 	/* Print listing */
 	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
@@ -4802,7 +4803,7 @@ nochange:
 		case SEL_HOME: // fallthrough
 		case SEL_END: // fallthrough
 		case SEL_FIRST:
-			is_move_op = TRUE;
+			g_states |= STATE_MOVE_OP;
 			handle_screen_move(sel);
 			break;
 		case SEL_CDHOME: // fallthrough
