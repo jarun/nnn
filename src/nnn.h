@@ -67,6 +67,7 @@ enum action {
 	SEL_STATS,
 	SEL_CHMODX,
 	SEL_ARCHIVE,
+	SEL_ORDER,
 	SEL_FSIZE,  /* file size */
 	SEL_ASIZE,  /* apparent size */
 	SEL_BSIZE,  /* block size */
@@ -183,21 +184,9 @@ static struct key bindings[] = {
 	{ '*',            SEL_CHMODX },
 	/* Create archive */
 	{ 'i',            SEL_ARCHIVE },
-	/* Toggle sort by size */
-	{ 'z',            SEL_FSIZE },
-	/* Sort by apparent size including dir contents */
-	{ 'A',            SEL_ASIZE },
-	/* Sort by total block count including dir contents */
-	{ 'S',            SEL_BSIZE },
-	/* Sort by file extension */
-	{ 'E',            SEL_EXTN },
-	/* Toggle sort by time */
-	{ 't',            SEL_MTIME },
-	/* Toggle reverse sort */
-	{ 'R',            SEL_REVERSE },
-	{ CONTROL('T'),   SEL_REVERSE },
-	/* Toggle version sort */
-	{ 'v',            SEL_VERSION },
+	/* Order toggle */
+	{ 'o',            SEL_ORDER },
+	{ CONTROL('T'),   SEL_ORDER },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
 	{ KEY_F(5),       SEL_REDRAW },

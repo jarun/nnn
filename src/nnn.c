@@ -473,6 +473,7 @@ static char * const utils[] = {
 #define MSG_PLUGIN_KEYS 35
 #define MSG_BOOKMARK_KEYS 36
 #define MSG_INVALID_REG 37
+#define MSG_ORDER 38
 
 static const char * const messages[] = {
 	"no traversal",
@@ -513,6 +514,7 @@ static const char * const messages[] = {
 	"plugin keys:",
 	"bookmark keys:",
 	"invalid regex",
+	"toggle 'a'u / 'd'u / 'e'xtn / 'r'everse / 's'ize / 't'ime / 'v'ersion?",
 };
 
 /* Supported configuration environment variables */
@@ -3608,11 +3610,7 @@ static void show_help(const char *path)
 		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
 		  "cX  Delete sel%-13c^X  Delete entry\n"
 		  "cy  List sel%-15c^Y  Edit sel\n"
-		"1ORDER TOGGLES\n"
-		  "cS  Disk usage%-14cA  Apparent du\n"
-		  "cz  Size%-20ct  Time\n"
-		  "cv  Version%-17cE  Extension\n"
-	       "9R ^T  Reverse (tac)%-0c\n"
+	       "9o ^T  Order toggele%-0c\n"
 		"1MISC\n"
 	       "9! ^]  Shell%-16c; ^F  Fire plugin\n"
 	          "c]  Cmd prompt%-13c^P  Pick plugin\n"
@@ -4231,7 +4229,7 @@ static void statusbar(char *path)
 	if (cfg.mtimeorder)
 		sort[0] = cfg.mtime ? 'T' : 'A';
 	else if (cfg.sizeorder)
-		sort[0] = 'Z';
+		sort[0] = 'S';
 	else if (cfg.extnorder)
 		sort[0] = 'E';
 
@@ -4945,16 +4943,7 @@ nochange:
 		case SEL_MFLTR: // fallthrough
 		case SEL_TOGGLEDOT: // fallthrough
 		case SEL_DETAIL: // fallthrough
-		case SEL_FSIZE: // fallthrough
-		case SEL_ASIZE: // fallthrough
-		case SEL_BSIZE: // fallthrough
-		case SEL_EXTN: // fallthrough
-		case SEL_MTIME: // fallthrough
-		case SEL_REVERSE: // fallthrough
-		case SEL_VERSION:
-			if (sel >= SEL_FSIZE && sel < SEL_REVERSE && entrycmpfn == &reventrycmp)
-				entrycmpfn = &entrycmp;
-
+		case SEL_ORDER:
 			switch (sel) {
 			case SEL_MFLTR:
 				cfg.filtermode ^= 1;
@@ -4980,60 +4969,75 @@ nochange:
 				cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
 				cfg.blkorder = 0;
 				continue;
-			case SEL_FSIZE:
-				cfg.sizeorder ^= 1;
-				cfg.mtimeorder = 0;
-				cfg.apparentsz = 0;
-				cfg.blkorder = 0;
-				cfg.extnorder = 0;
-				break;
-			case SEL_ASIZE:
-				cfg.apparentsz ^= 1;
-				if (cfg.apparentsz) {
-					nftw_fn = &sum_sizes;
-					cfg.blkorder = 1;
-					blk_shift = 0;
-				} else
-					cfg.blkorder = 0;
-				// fallthrough
-			case SEL_BSIZE:
-				if (sel == SEL_BSIZE) {
-					if (!cfg.apparentsz)
-						cfg.blkorder ^= 1;
-					nftw_fn = &sum_bsizes;
-					cfg.apparentsz = 0;
-					blk_shift = ffs(S_BLKSIZE) - 1;
-				}
+			case SEL_ORDER:
+				r = get_input(messages[MSG_ORDER]);
 
-				if (cfg.blkorder) {
-					cfg.showdetail = 1;
-					printptr = &printent_long;
+				if ((r == 'a' || r == 'd' || r == 'e'
+				    || r == 'r' || r == 's' || r == 't')
+				    && (entrycmpfn == &reventrycmp))
+					entrycmpfn = &entrycmp;
+
+				switch (r) {
+				case 'a': /* Apparent du */
+					cfg.apparentsz ^= 1;
+					if (cfg.apparentsz) {
+						nftw_fn = &sum_sizes;
+						cfg.blkorder = 1;
+						blk_shift = 0;
+					} else
+						cfg.blkorder = 0;
+					// fallthrough
+				case 'd': /* Disk usage */
+					if (sel == SEL_BSIZE) {
+						if (!cfg.apparentsz)
+							cfg.blkorder ^= 1;
+						nftw_fn = &sum_bsizes;
+						cfg.apparentsz = 0;
+						blk_shift = ffs(S_BLKSIZE) - 1;
+					}
+
+					if (cfg.blkorder) {
+						cfg.showdetail = 1;
+						printptr = &printent_long;
+					}
+					cfg.mtimeorder = 0;
+					cfg.sizeorder = 0;
+					cfg.extnorder = 0;
+					clearfilter(); /* Reload directory */
+					endselection(); /* We are going to reload dir */
+					break;
+				case 'e': /* File extension */
+					cfg.extnorder ^= 1;
+					cfg.sizeorder = 0;
+					cfg.mtimeorder = 0;
+					cfg.apparentsz = 0;
+					cfg.blkorder = 0;
+					break;
+				case 'r': /* Reverse sort */
+					entrycmpfn = (entrycmpfn == &entrycmp) ? &reventrycmp : &entrycmp;
+					break;
+				case 's': /* File size */
+					cfg.sizeorder ^= 1;
+					cfg.mtimeorder = 0;
+					cfg.apparentsz = 0;
+					cfg.blkorder = 0;
+					cfg.extnorder = 0;
+					break;
+				case 't': /* Modification or access time */
+					cfg.mtimeorder ^= 1;
+					cfg.sizeorder = 0;
+					cfg.apparentsz = 0;
+					cfg.blkorder = 0;
+					cfg.extnorder = 0;
+					break;
+				case 'v': /* Version */
+					namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
+					break;
+				default:
+					cfg.filtermode ? presel = FILTER : statusbar(path);
+					goto nochange;
 				}
-				cfg.mtimeorder = 0;
-				cfg.sizeorder = 0;
-				cfg.extnorder = 0;
-				clearfilter(); /* Reload directory */
-				endselection(); /* We are going to reload dir */
-				break;
-			case SEL_EXTN:
-				cfg.extnorder ^= 1;
-				cfg.sizeorder = 0;
-				cfg.mtimeorder = 0;
-				cfg.apparentsz = 0;
-				cfg.blkorder = 0;
-				break;
-			case SEL_MTIME:
-				cfg.mtimeorder ^= 1;
-				cfg.sizeorder = 0;
-				cfg.apparentsz = 0;
-				cfg.blkorder = 0;
-				cfg.extnorder = 0;
-				break;
-			case SEL_REVERSE:
-				entrycmpfn = (entrycmpfn == &entrycmp) ? &reventrycmp : &entrycmp;
-				break;
-			default: /* SEL_VERSION */
-				namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
+			default:
 				break;
 			}
 
