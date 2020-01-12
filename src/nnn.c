@@ -3588,7 +3588,7 @@ static void show_help(const char *path)
 	       "9Up k  Up%-16cPgUp ^U  Scroll up\n"
 	       "9Dn j  Down%-14cPgDn ^D  Scroll down\n"
 	       "9Lt h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
-	   "5Ret Rt l  Open%-20c'  First file\n"
+	   "5Ret Rt l  Open%-20cf  First file\n"
 	       "9g ^A  Top%-21c.  Toggle hidden\n"
 	       "9G ^E  End%-21cL  Lock terminal\n"
 	       "9b ^/  Bookmark key%-12c,  Pin CWD\n"
