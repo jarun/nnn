@@ -29,7 +29,7 @@ It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.co
   - Typically needs < 3.5MB resident memory
   - Works with 8-bit colors
   - Disk-IO sensitive (few disk reads and writes)
-  - No FPU usage (all integer calculations, even for file size)
+  - No FPU usage (all integer maths, even for file size)
   - Minimizes screen refresh with fast line redraws
 - Portable
   - Minimal library deps, easily compilable, tiny binary

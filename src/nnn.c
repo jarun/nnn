@@ -4326,7 +4326,6 @@ static void draw_line(char *path, int ncols)
 	}
 
 	statusbar(path);
-	return;
 }
 
 static void redraw(char *path)
