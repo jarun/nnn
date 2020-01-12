@@ -5037,15 +5037,19 @@ nochange:
 				break;
 			}
 
+			if (cfg.filtermode)
+				presel = FILTER;
+
 			/* Save current */
 			if (ndents)
 				copycurname();
 
-			if (cfg.filtermode || g_ctx[cfg.curctx].c_fltr[1]) {
-				presel = FILTER;
-				break;
-			}
-			goto begin;
+			/* If there's no filter, reload the directory */
+			if (!g_ctx[cfg.curctx].c_fltr[1])
+				goto begin;
+
+			presel = FILTER; /* If there's a filter, apply it */
+			break;
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
 			if (ndents) {
