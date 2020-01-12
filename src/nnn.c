@@ -4973,7 +4973,7 @@ nochange:
 				r = get_input(messages[MSG_ORDER]);
 
 				if ((r == 'a' || r == 'd' || r == 'e'
-				    || r == 'r' || r == 's' || r == 't')
+				    || r == 's' || r == 't')
 				    && (entrycmpfn == &reventrycmp))
 					entrycmpfn = &entrycmp;
 
