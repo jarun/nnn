@@ -88,7 +88,7 @@ It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.co
 5. To copy selected file paths to system clipboard and show notis on cp, mv, rm completion use option `-x`.
 6. For a strictly CLI-only experience, see plugin `nuke`. It's a sample opener you can customize.
 
-Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd> and <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates, cycles contexts. Hit <kbd>?</kbd> to lookup shortcuts.
+Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates, cycles contexts. <kbd>?</kbd> lists shortcuts.
 
 ## Installation
 
