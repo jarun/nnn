@@ -2507,7 +2507,7 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int *prese
 	return count;
 }
 
-static bool parsekvpair(kv *kvarr, char **envcpy, const char *cfgstr, uchar maxitems)
+static bool parsekvpair(kv *kvarr, char **envcpy, const char *cfgstr, uchar maxitems, size_t maxlen)
 {
 	int i = 0;
 	char *nextkey;
@@ -2548,6 +2548,10 @@ static bool parsekvpair(kv *kvarr, char **envcpy, const char *cfgstr, uchar maxi
 			return FALSE;
 		kvarr[i].key = '\0';
 	}
+
+	for (i = 0; i < maxitems && kvarr[i].key; ++i)
+		if (strlen(kvarr[i].val) >= maxlen)
+			return FALSE;
 
 	return TRUE;
 }
@@ -5932,13 +5936,13 @@ int main(int argc, char *argv[])
 	DPRINTF_S(opener);
 
 	/* Parse bookmarks string */
-	if (!parsekvpair(bookmark, &bmstr, env_cfg[NNN_BMS], BM_MAX)) {
+	if (!parsekvpair(bookmark, &bmstr, env_cfg[NNN_BMS], BM_MAX, PATH_MAX)) {
 		fprintf(stderr, "%s\n", env_cfg[NNN_BMS]);
 		return _FAILURE;
 	}
 
 	/* Parse plugins string */
-	if (!parsekvpair(plug, &pluginstr, "NNN_PLUG", PLUGIN_MAX)) {
+	if (!parsekvpair(plug, &pluginstr, "NNN_PLUG", PLUGIN_MAX, PATH_MAX)) {
 		fprintf(stderr, "%s\n", "NNN_PLUG");
 		return _FAILURE;
 	}
