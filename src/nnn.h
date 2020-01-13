@@ -223,7 +223,7 @@ static struct key bindings[] = {
 	/* Run a command */
 	{ ']',            SEL_RUNCMD },
 	/* Lock screen */
-	{ 'L',            SEL_LOCK },
+	{ '0',            SEL_LOCK },
 	/* Quit a context */
 	{ 'q',            SEL_QUITCTX },
 	/* Change dir on quit */

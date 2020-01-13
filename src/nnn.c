@@ -3608,7 +3608,7 @@ static void show_help(const char *path)
 	       "9Lt h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
 	   "5Ret Rt l  Open%-20cf  First file\n"
 	       "9g ^A  Top%-21c.  Toggle hidden\n"
-	       "9G ^E  End%-21cL  Lock terminal\n"
+	       "9G ^E  End%-21c0  Lock terminal\n"
 	       "9b ^/  Bookmark key%-12c,  Pin CWD\n"
 	        "a1-4  Context 1-4%-7c(Sh)Tab  Cycle context\n"
 		  "c/  Filter%-17c^N  Nav-as-you-type toggle\n"
