@@ -19,7 +19,7 @@
 
 `nnn` is also a du analyzer, an app launcher, a batch renamer and a file picker. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further. You can _plug_ new functionality _and play_ with a hotkey. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
 
-It runs smoothly on the Raspberry Pi, Termux [on Android](https://www.youtube.com/watch?v=AbaauM7gUJw), Linux, macOS, BSD, Haiku, Cygwin, WSL and works seamlessly with DEs and GUI utilities.
+It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
 
 [**Wiki**](https://github.com/jarun/nnn/wiki).
 
