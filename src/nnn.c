@@ -474,6 +474,7 @@ static char * const utils[] = {
 #define MSG_BOOKMARK_KEYS 36
 #define MSG_INVALID_REG 37
 #define MSG_ORDER 38
+#define MSG_EDIT_SEL 39
 
 static const char * const messages[] = {
 	"no traversal",
@@ -515,6 +516,7 @@ static const char * const messages[] = {
 	"bookmark keys:",
 	"invalid regex",
 	"toggle 'a'u / 'd'u / 'e'xtn / 'r'everse / 's'ize / 't'ime / 'v'ersion?",
+	"edit sel?",
 };
 
 /* Supported configuration environment variables */
@@ -3609,8 +3611,7 @@ static void show_help(const char *path)
 	          "cP  Copy sel here%-11ca  Select all\n"
 		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
 		  "cX  Delete sel%-13c^X  Delete entry\n"
-		  "cy  List sel%-15c^Y  Edit sel\n"
-	       "9o ^T  Order toggle%-0c\n"
+	       "9o ^T  Order toggle%-11c^Y  List, edit sel\n"
 		"1MISC\n"
 	       "9! ^]  Shell%-16c; ^F  Fire plugin\n"
 	          "c]  Cmd prompt%-13c^P  Pick plugin\n"
@@ -5223,23 +5224,28 @@ nochange:
 				plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 			continue;
 		case SEL_SELLIST:
-			if (listselbuf() || listselfile()) {
-				if (cfg.filtermode)
-					presel = FILTER;
-				break;
-			}
-			printwait(messages[MSG_0_SELECTED], &presel);
-			goto nochange;
-		case SEL_SELEDIT:
-			r = editselection();
-			if (r <= 0) {
-				const char *msg
-					= (!r ? messages[MSG_0_SELECTED] : messages[MSG_FAILED]);
-				printwait(msg, &presel);
+			if (!listselbuf() && !listselfile()) {
+				printwait(messages[MSG_0_SELECTED], &presel);
 				goto nochange;
-			} else if (cfg.x11)
+			}
+
+			r = get_input(messages[MSG_EDIT_SEL]);
+			if (r != 'y' && r != 'Y') {
+				cfg.filtermode ?  presel = FILTER : statusbar(path);
+				goto nochange;
+			}
+
+			r = editselection();
+			if (r <= 0) { /* Cannot be equal to 0 though as listing guards */
+				printwait(messages[MSG_FAILED], &presel);
+				goto nochange;
+			}
+
+			if (cfg.x11)
 				plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
-			break;
+
+			cfg.filtermode ?  presel = FILTER : statusbar(path);
+			goto nochange;
 		case SEL_CP: // fallthrough
 		case SEL_MV: // fallthrough
 		case SEL_CPMVAS: // fallthrough
