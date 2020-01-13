@@ -175,7 +175,7 @@ static struct key bindings[] = {
 	{ 'z',            SEL_ARCHIVE },
 	/* Order toggle */
 	{ 'o',            SEL_ORDER },
-	{ CONTROL('T'),   SEL_ORDER },
+	{ CONTROL('O'),   SEL_ORDER },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
 	/* Select current file path */
@@ -183,23 +183,27 @@ static struct key bindings[] = {
 	{ ' ',            SEL_SEL },
 	/* Toggle select multiple files */
 	{ 'm',            SEL_SELMUL },
-	{ CONTROL('K'),   SEL_SELMUL },
+	{ CONTROL('M'),   SEL_SELMUL },
 	/* Select all files in current dir */
 	{ 'a',            SEL_SELALL },
 	/* List, edit selection */
 	{ 'e',            SEL_SELEDIT },
 	/* Copy from selection buffer */
 	{ 'p',            SEL_CP },
+	{ CONTROL('P'),   SEL_CP },
 	/* Move from selection buffer */
 	{ 'v',            SEL_MV },
+	{ CONTROL('V'),   SEL_MV },
 	/* Copy/move from selection buffer and rename */
-	{ CONTROL('V'),   SEL_CPMVAS },
+	{ 'w',            SEL_CPMVAS },
+	{ CONTROL('W'),   SEL_CPMVAS },
 	/* Delete from selection buffer */
 	{ 'x',            SEL_RMMUL },
+	{ CONTROL('X'),   SEL_RMMUL },
 	/* Delete currently selected */
-	{ CONTROL('X'),   SEL_RM },
+	{ CONTROL('K'),   SEL_RM },
 	/* Open in a custom application */
-	{ CONTROL('O'),   SEL_OPENWITH },
+	{ CONTROL('T'),   SEL_OPENWITH },
 	/* Create a new file */
 	{ 'n',            SEL_NEW },
 	/* Show rename prompt */
@@ -214,7 +218,7 @@ static struct key bindings[] = {
 	{ '?',            SEL_HELP },
 	/* Run a plugin */
 	{ ';',            SEL_PLUGIN },
-	{ CONTROL('P'),   SEL_PLUGIN },
+	{ CONTROL(';'),   SEL_PLUGIN },
 	/* Run command */
 	{ '!',            SEL_SHELL },
 	{ CONTROL(']'),   SEL_SHELL },
