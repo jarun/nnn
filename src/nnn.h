@@ -168,7 +168,7 @@ static struct key bindings[] = {
 	/* Detailed listing */
 	{ 'd',            SEL_DETAIL },
 	/* File details */
-	{ 'D',            SEL_STATS },
+	{ CONTROL('F'),   SEL_STATS },
 	/* Toggle executable status */
 	{ '*',            SEL_CHMODX },
 	/* Create archive */

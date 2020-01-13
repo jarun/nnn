@@ -3617,7 +3617,7 @@ static void show_help(const char *path)
 	       "9Q ^Q  Quit%-20cq  Quit context\n"
 		"1FILES\n"
 		 "b^O  Open with...%-12cn  Create new/link\n"
-		  "cD  File details%-12cd  Detail view toggle\n"
+		 "b^F  File details%-12cd  Detail view toggle\n"
 	         "b^R  Rename/dup%-14cr  Batch rename\n"
 		  "cz  Archive entry%-11c*  Toggle exe\n"
 	   "5Space ^J  (Un)select%-11cm ^K  Mark range/clear\n"

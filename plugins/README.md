@@ -65,7 +65,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 
 ## Invoking a plugin
 
-Use the plugin shortcut (<kbd>;key</kbd> or <kbd>;key</kbd>) to list the defined plugin keys and press the required key. E.g., with the below config:
+Use the plugin shortcut (<kbd>;key</kbd> or <kbd>^Pkey</kbd>) to list the defined plugin keys and press the required key. E.g., with the below config:
 
     export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;n:notes;v:imgviu;t:imgthumb'
 
