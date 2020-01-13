@@ -474,6 +474,7 @@ static char * const utils[] = {
 #define MSG_BOOKMARK_KEYS 36
 #define MSG_INVALID_REG 37
 #define MSG_ORDER 38
+#define MSG_LIST_SEL 39
 
 static const char * const messages[] = {
 	"no traversal",
@@ -515,6 +516,7 @@ static const char * const messages[] = {
 	"bookmark keys:",
 	"invalid regex",
 	"toggle 'a'u / 'd'u / 'e'xtn / 'r'everse / 's'ize / 't'ime / 'v'ersion?",
+	"0 selected, list selection file?"
 };
 
 /* Supported configuration environment variables */
@@ -1019,6 +1021,7 @@ static bool listselbuf()
 	selbufpos = oldpos;
 	return TRUE;
 }
+#endif
 
 /* List selection from selection file (another instance) */
 static bool listselfile(void)
@@ -1037,7 +1040,6 @@ static bool listselfile(void)
 
 	return TRUE;
 }
-#endif
 
 /* Reset selection indicators */
 static void resetselind(void)
@@ -1099,11 +1101,14 @@ static int editselection(void)
 	int fd, lines = 0;
 	ssize_t count;
 	struct stat sb;
-	struct timespec mtime;
+	time_t mtime;
 
 	if (!selbufpos) {
-		DPRINTF_S("empty selection");
-		return 0;
+		fd = get_input(messages[MSG_LIST_SEL]);
+		if ((fd == 'y' || fd == 'Y') && !listselfile())
+			return 0;
+
+		return 1;
 	}
 
 	fd = create_tmp_file();
@@ -1121,7 +1126,7 @@ static int editselection(void)
 		unlink(g_tmpfpath);
 		return -1;
 	}
-	mtime = sb.st_mtim;
+	mtime = sb.st_mtime;
 
 	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, NULL, F_CLI);
 
@@ -1134,7 +1139,7 @@ static int editselection(void)
 
 	fstat(fd, &sb);
 
-	if (mtime.tv_sec == sb.st_mtim.tv_sec) {
+	if (mtime == sb.st_mtime) {
 		DPRINTF_S("selection is not modified");
 		unlink(g_tmpfpath);
 		return 1;
@@ -3627,7 +3632,7 @@ static void show_help(const char *path)
 	          "cP  Copy sel here%-11ca  Select all\n"
 		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
 		  "cX  Delete sel%-13c^X  Delete entry\n"
-	       "9o ^T  Order toggle%-11c^Y  Edit sel\n"
+	       "9o ^T  Order toggle%-11c^W  Edit sel\n"
 		"1MISC\n"
 	       "9; ^P  Plugin%-18c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"

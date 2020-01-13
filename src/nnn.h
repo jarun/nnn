@@ -189,7 +189,7 @@ static struct key bindings[] = {
 	/* Select all files in current dir */
 	{ 'a',            SEL_SELALL },
 	/* List, edit selection */
-	{ CONTROL('Y'),   SEL_SELEDIT },
+	{ CONTROL('W'),   SEL_SELEDIT },
 	/* Copy from selection buffer */
 	{ 'P',            SEL_CP },
 	/* Move from selection buffer */
