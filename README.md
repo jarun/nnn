@@ -87,7 +87,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 3. Optionally open all text files in `$VISUAL` (else `$EDITOR`, fallback vi): `export NNN_USE_EDITOR=1`.
 4. For additional functionality [install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins).
 5. To copy selected file paths to system clipboard and show notis on cp, mv, rm completion use option `-x`.
-6. For a strictly CLI-only experience, see plugin `nuke`. It's a sample opener you can customize.
+6. For a strictly CLI environment, see plugin `nuke`. It's a sample opener you can customize.
 
 Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates, cycles contexts. <kbd>?</kbd> lists shortcuts.
 
