@@ -187,15 +187,15 @@ static struct key bindings[] = {
 	/* Select all files in current dir */
 	{ 'a',            SEL_SELALL },
 	/* List, edit selection */
-	{ CONTROL('W'),   SEL_SELEDIT },
+	{ 'e',            SEL_SELEDIT },
 	/* Copy from selection buffer */
-	{ 'P',            SEL_CP },
+	{ 'p',            SEL_CP },
 	/* Move from selection buffer */
-	{ 'V',            SEL_MV },
+	{ 'v',            SEL_MV },
 	/* Copy/move from selection buffer and rename */
 	{ CONTROL('V'),   SEL_CPMVAS },
 	/* Delete from selection buffer */
-	{ 'X',            SEL_RMMUL },
+	{ 'x',            SEL_RMMUL },
 	/* Delete currently selected */
 	{ CONTROL('X'),   SEL_RM },
 	/* Open in a custom application */
