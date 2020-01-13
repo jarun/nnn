@@ -180,17 +180,16 @@ static struct key bindings[] = {
 	{ CONTROL('T'),   SEL_ORDER },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
-	{ KEY_F(5),       SEL_REDRAW },
 	/* Select current file path */
 	{ CONTROL('J'),   SEL_SEL },
 	{ ' ',            SEL_SEL },
 	/* Toggle select multiple files */
-	{ '\'',           SEL_SELMUL },
+	{ 'm',            SEL_SELMUL },
 	{ CONTROL('K'),   SEL_SELMUL },
 	/* Select all files in current dir */
 	{ 'a',            SEL_SELALL },
 	/* List, edit selection */
-	{ 'y',            SEL_SELLIST },
+	{ CONTROL('Y'),   SEL_SELLIST },
 	/* Copy from selection buffer */
 	{ 'P',            SEL_CP },
 	/* Move from selection buffer */
@@ -207,7 +206,6 @@ static struct key bindings[] = {
 	{ 'n',            SEL_NEW },
 	/* Show rename prompt */
 	{ CONTROL('R'),   SEL_RENAME },
-	{ KEY_F(2),       SEL_RENAME },
 	/* Rename contents of current dir */
 	{ 'r',            SEL_RENAMEMUL },
 	/* Connect to server over SSHFS */

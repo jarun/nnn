@@ -3607,7 +3607,7 @@ static void show_help(const char *path)
 	         "b^R  Rename/dup%-14cr  Batch rename\n"
 		  "cz  Archive entry%-11c*  Toggle exe\n"
 		  "ce  Edit in EDITOR%-10cp  Open in PAGER\n"
-	   "5Space ^J  (Un)select%-11c' ^K  Select range, clear\n"
+	   "5Space ^J  (Un)select%-11cm ^K  Mark range/clear\n"
 	          "cP  Copy sel here%-11ca  Select all\n"
 		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
 		  "cX  Delete sel%-13c^X  Delete entry\n"
