@@ -3610,7 +3610,7 @@ static void show_help(const char *path)
 		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
 		  "cX  Delete sel%-13c^X  Delete entry\n"
 		  "cy  List sel%-15c^Y  Edit sel\n"
-	       "9o ^T  Order toggele%-0c\n"
+	       "9o ^T  Order toggle%-0c\n"
 		"1MISC\n"
 	       "9! ^]  Shell%-16c; ^F  Fire plugin\n"
 	          "c]  Cmd prompt%-13c^P  Pick plugin\n"
@@ -4969,11 +4969,10 @@ nochange:
 				cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
 				cfg.blkorder = 0;
 				continue;
-			case SEL_ORDER:
+			default: /* SEL_ORDER */
 				r = get_input(messages[MSG_ORDER]);
 
-				if ((r == 'a' || r == 'd' || r == 'e'
-				    || r == 's' || r == 't')
+				if ((r == 'a' || r == 'd' || r == 'e' || r == 's' || r == 't')
 				    && (entrycmpfn == &reventrycmp))
 					entrycmpfn = &entrycmp;
 
@@ -5037,8 +5036,6 @@ nochange:
 					cfg.filtermode ? presel = FILTER : statusbar(path);
 					goto nochange;
 				}
-			default:
-				break;
 			}
 
 			if (cfg.filtermode)
