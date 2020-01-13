@@ -85,7 +85,6 @@ enum action {
 	SEL_REMOTE,
 	SEL_UMOUNT,
 	SEL_HELP,
-	SEL_PLUGKEY,
 	SEL_PLUGIN,
 	SEL_SHELL,
 	SEL_LAUNCH,
@@ -217,10 +216,8 @@ static struct key bindings[] = {
 	{ 'u',            SEL_UMOUNT },
 	/* Show help */
 	{ '?',            SEL_HELP },
-	/* Plugin key */
-	{ ';',            SEL_PLUGKEY },
-	{ CONTROL('F'),   SEL_PLUGKEY },
 	/* Run a plugin */
+	{ ';',            SEL_PLUGIN },
 	{ CONTROL('P'),   SEL_PLUGIN },
 	/* Run command */
 	{ '!',            SEL_SHELL },

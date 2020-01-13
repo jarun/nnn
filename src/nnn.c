@@ -3613,10 +3613,10 @@ static void show_help(const char *path)
 		  "cX  Delete sel%-13c^X  Delete entry\n"
 	       "9o ^T  Order toggle%-11c^Y  List, edit sel\n"
 		"1MISC\n"
-	       "9! ^]  Shell%-16c; ^F  Fire plugin\n"
-	          "c]  Cmd prompt%-13c^P  Pick plugin\n"
-		  "cs  Manage session%-10c=  Launch app\n"
-		  "cc  Connect remote%-10cu  Unmount\n"
+	       "9; ^P  Plugin%-18c=  Launch app\n"
+	       "9! ^]  Shell%-19c]  Cmd prompt\n"
+		  "cs  Manage session%-10cu  Unmount\n"
+		  "cc  Connect remote%-0c\n"
 	};
 
 	fd = create_tmp_file();
@@ -5477,7 +5477,6 @@ nochange:
 
 			goto begin;
 		}
-		case SEL_PLUGKEY: // fallthrough
 		case SEL_PLUGIN:
 			/* Check if directory is accessible */
 			if (!xdiraccess(plugindir)) {
@@ -5485,12 +5484,12 @@ nochange:
 				goto nochange;
 			}
 
-			if (sel == SEL_PLUGKEY) {
+			r = xstrlcpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
+			printkeys(plug, g_buf + r - 1, PLUGIN_MAX);
+			printprompt(g_buf);
+			r = get_input(NULL);
+			if (r != '\r') {
 				endselection();
-				r = xstrlcpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
-				printkeys(plug, g_buf + r - 1, PLUGIN_MAX);
-				printprompt(g_buf);
-				r = get_input(NULL);
 				tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
 				if (!tmp) {
 					printwait(messages[MSG_INVALID_KEY], &presel);
@@ -5517,7 +5516,7 @@ nochange:
 
 				if (ndents)
 					copycurname();
-			} else {
+			} else { /* 'Return/Enter' enters the plugin directory */
 				cfg.runplugin ^= 1;
 				if (!cfg.runplugin && rundir[0]) {
 					/*
