@@ -220,7 +220,7 @@ static struct key bindings[] = {
 	{ ';',            SEL_PLUGIN },
 	{ CONTROL(';'),   SEL_PLUGIN },
 	/* Run command */
-	{ '!',            SEL_SHELL },
+	{ 't',            SEL_SHELL },
 	{ CONTROL(']'),   SEL_SHELL },
 	/* Launcher */
 	{ '=',            SEL_LAUNCH },

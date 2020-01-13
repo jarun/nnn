@@ -3627,7 +3627,7 @@ static void show_help(const char *path)
 	       "9o ^O  Sort toggles%-12ce  Edit sel\n"
 		"1MISC\n"
 	       "9; ^;  Plugin%-18c=  Launch app\n"
-	       "9! ^]  Shell%-19c]  Cmd prompt\n"
+	       "9t ^]  Shell%-19c]  Cmd prompt\n"
 		  "cs  Manage session%-10cu  Unmount\n"
 		  "cc  Connect remote%-0c\n"
 	};
