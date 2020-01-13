@@ -89,8 +89,6 @@ enum action {
 	SEL_SHELL,
 	SEL_LAUNCH,
 	SEL_RUNCMD,
-	SEL_RUNEDIT,
-	SEL_RUNPAGE,
 	SEL_LOCK,
 	SEL_SESSIONS,
 	SEL_QUITCTX,
@@ -224,9 +222,6 @@ static struct key bindings[] = {
 	{ '=',            SEL_LAUNCH },
 	/* Run a command */
 	{ ']',            SEL_RUNCMD },
-	/* Open in EDITOR or PAGER */
-	{ 'e',            SEL_RUNEDIT },
-	{ 'p',            SEL_RUNPAGE },
 	/* Lock screen */
 	{ 'L',            SEL_LOCK },
 	/* Quit a context */

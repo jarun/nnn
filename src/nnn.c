@@ -501,7 +501,7 @@ static const char * const messages[] = {
 	"\nPress Enter to continue",
 	"open failed",
 	"dir inaccessible",
-	"empty: edit or open with",
+	"empty: use open with",
 	"unsupported file",
 	"not set",
 	"dir changed, range sel off",
@@ -3620,7 +3620,6 @@ static void show_help(const char *path)
 		  "cD  File details%-12cd  Detail view toggle\n"
 	         "b^R  Rename/dup%-14cr  Batch rename\n"
 		  "cz  Archive entry%-11c*  Toggle exe\n"
-		  "ce  Edit in EDITOR%-10cp  Open in PAGER\n"
 	   "5Space ^J  (Un)select%-11cm ^K  Mark range/clear\n"
 	          "cP  Copy sel here%-11ca  Select all\n"
 		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
@@ -4745,23 +4744,23 @@ nochange:
 					}
 				}
 
-				if (!sb.st_size) {
-					printwait(messages[MSG_EMPTY_FILE], &presel);
-					goto nochange;
-				}
-
 				/* If NNN_USE_EDITOR is set, open text in EDITOR */
-				if (cfg.useeditor &&
+				if (cfg.useeditor && (!sb.st_size ||
 #ifdef FILE_MIME_OPTS
-				    get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
-				    && !strncmp(g_buf, "text/", 5)) {
+				    (get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
+				    && !strncmp(g_buf, "text/", 5)))) {
 #else
 				    /* no mime option; guess from description instead */
-				    get_output(g_buf, CMD_LEN_MAX, "file", "-b", newpath, FALSE)
-				    && strstr(g_buf, "text")) {
+				    (get_output(g_buf, CMD_LEN_MAX, "file", "-b", newpath, FALSE)
+				    && strstr(g_buf, "text")))) {
 #endif
 					spawn(editor, newpath, NULL, path, F_CLI);
 					continue;
+				}
+
+				if (!sb.st_size) {
+					printwait(messages[MSG_EMPTY_FILE], &presel);
+					goto nochange;
 				}
 
 				if (!regexec(&archive_re, dents[cur].name, 0, NULL, 0)) {
@@ -5086,16 +5085,12 @@ nochange:
 		case SEL_REDRAW: // fallthrough
 		case SEL_RENAMEMUL: // fallthrough
 		case SEL_HELP: // fallthrough
-		case SEL_RUNEDIT: // fallthrough
-		case SEL_RUNPAGE: // fallthrough
 		case SEL_LOCK:
 		{
 			bool refresh = FALSE;
 
 			if (ndents)
 				mkpath(path, dents[cur].name, newpath);
-			else if (sel == SEL_RUNEDIT || sel == SEL_RUNPAGE)
-				break;
 
 			switch (sel) {
 			case SEL_REDRAW:
@@ -5114,12 +5109,6 @@ nochange:
 				show_help(path);
 				if (cfg.filtermode)
 					presel = FILTER;
-				continue;
-			case SEL_RUNEDIT:
-				spawn(editor, dents[cur].name, NULL, path, F_CLI);
-				continue;
-			case SEL_RUNPAGE:
-				spawn(pager, dents[cur].name, NULL, path, F_CLI);
 				continue;
 			default: /* SEL_LOCK */
 				lock_terminal();
