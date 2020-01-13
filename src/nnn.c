@@ -510,7 +510,7 @@ static const char * const messages[] = {
 	"'s'shfs / 'r'clone?",
 	"may take a while, try refresh",
 	"app name: ",
-	"'d'efault, e'x'tract / 'l'ist / 'm'ount?",
+	"'d'efault / e'x'tract / 'l'ist / 'm'ount?",
 	"plugin keys:",
 	"bookmark keys:",
 	"invalid regex",
