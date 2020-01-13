@@ -474,7 +474,6 @@ static char * const utils[] = {
 #define MSG_BOOKMARK_KEYS 36
 #define MSG_INVALID_REG 37
 #define MSG_ORDER 38
-#define MSG_EDIT_SEL 39
 
 static const char * const messages[] = {
 	"no traversal",
@@ -516,7 +515,6 @@ static const char * const messages[] = {
 	"bookmark keys:",
 	"invalid regex",
 	"toggle 'a'u / 'd'u / 'e'xtn / 'r'everse / 's'ize / 't'ime / 'v'ersion?",
-	"edit sel?",
 };
 
 /* Supported configuration environment variables */
@@ -994,6 +992,7 @@ static size_t seltofile(int fd, uint *pcount)
 	return pos;
 }
 
+#if 0
 /* List selection from selection buffer */
 static bool listselbuf()
 {
@@ -1038,6 +1037,7 @@ static bool listselfile(void)
 
 	return TRUE;
 }
+#endif
 
 /* Reset selection indicators */
 static void resetselind(void)
@@ -1099,6 +1099,7 @@ static int editselection(void)
 	int fd, lines = 0;
 	ssize_t count;
 	struct stat sb;
+	struct timespec mtime;
 
 	if (!selbufpos) {
 		DPRINTF_S("empty selection");
@@ -1114,19 +1115,34 @@ static int editselection(void)
 	seltofile(fd, NULL);
 	close(fd);
 
+	/* Save the last modification time */
+	if (stat(g_tmpfpath, &sb)) {
+		DPRINTF_S(strerror(errno));
+		unlink(g_tmpfpath);
+		return -1;
+	}
+	mtime = sb.st_mtim;
+
 	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, NULL, F_CLI);
 
 	fd = open(g_tmpfpath, O_RDONLY);
 	if (fd == -1) {
-		DPRINTF_S("couldn't read tmp file");
+		DPRINTF_S(strerror(errno));
 		unlink(g_tmpfpath);
 		return -1;
 	}
 
 	fstat(fd, &sb);
 
+	if (mtime.tv_sec == sb.st_mtim.tv_sec) {
+		DPRINTF_S("selection is not modified");
+		unlink(g_tmpfpath);
+		return 1;
+	}
+
 	if (sb.st_size > selbufpos) {
-		DPRINTF_S("edited buffer larger than pervious");
+		DPRINTF_S("edited buffer larger than previous");
+		unlink(g_tmpfpath);
 		goto emptyedit;
 	}
 
@@ -3611,7 +3627,7 @@ static void show_help(const char *path)
 	          "cP  Copy sel here%-11ca  Select all\n"
 		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
 		  "cX  Delete sel%-13c^X  Delete entry\n"
-	       "9o ^T  Order toggle%-11c^Y  List, edit sel\n"
+	       "9o ^T  Order toggle%-11c^Y  Edit sel\n"
 		"1MISC\n"
 	       "9; ^P  Plugin%-18c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
@@ -5223,28 +5239,16 @@ nochange:
 			if (cfg.x11)
 				plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 			continue;
-		case SEL_SELLIST:
-			if (!listselbuf() && !listselfile()) {
-				printwait(messages[MSG_0_SELECTED], &presel);
-				goto nochange;
-			}
-
-			r = get_input(messages[MSG_EDIT_SEL]);
-			if (r != 'y' && r != 'Y') {
-				cfg.filtermode ?  presel = FILTER : statusbar(path);
-				goto nochange;
-			}
-
+		case SEL_SELEDIT:
 			r = editselection();
-			if (r <= 0) { /* Cannot be equal to 0 though as listing guards */
-				printwait(messages[MSG_FAILED], &presel);
-				goto nochange;
+			if (r <= 0) {
+				r = !r ? MSG_0_SELECTED : MSG_FAILED;
+				printwait(messages[r], &presel);
+			} else {
+				if (cfg.x11)
+					plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
+				cfg.filtermode ?  presel = FILTER : statusbar(path);
 			}
-
-			if (cfg.x11)
-				plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
-
-			cfg.filtermode ?  presel = FILTER : statusbar(path);
 			goto nochange;
 		case SEL_CP: // fallthrough
 		case SEL_MV: // fallthrough

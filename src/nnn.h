@@ -72,7 +72,7 @@ enum action {
 	SEL_SEL,
 	SEL_SELMUL,
 	SEL_SELALL,
-	SEL_SELLIST,
+	SEL_SELEDIT,
 	SEL_CP,
 	SEL_MV,
 	SEL_CPMVAS,
@@ -189,7 +189,7 @@ static struct key bindings[] = {
 	/* Select all files in current dir */
 	{ 'a',            SEL_SELALL },
 	/* List, edit selection */
-	{ CONTROL('Y'),   SEL_SELLIST },
+	{ CONTROL('Y'),   SEL_SELEDIT },
 	/* Copy from selection buffer */
 	{ 'P',            SEL_CP },
 	/* Move from selection buffer */
