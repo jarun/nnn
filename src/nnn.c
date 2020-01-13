@@ -5033,7 +5033,9 @@ nochange:
 					namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
 					break;
 				default:
-					cfg.filtermode ? presel = FILTER : statusbar(path);
+					if (cfg.filtermode)
+						presel = FILTER;
+					printwait(messages[MSG_INVALID_KEY], &presel);
 					goto nochange;
 				}
 			}
