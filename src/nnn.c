@@ -474,7 +474,6 @@ static char * const utils[] = {
 #define MSG_BOOKMARK_KEYS 36
 #define MSG_INVALID_REG 37
 #define MSG_ORDER 38
-#define MSG_LIST_SEL 39
 
 static const char * const messages[] = {
 	"no traversal",
@@ -516,7 +515,6 @@ static const char * const messages[] = {
 	"bookmark keys:",
 	"invalid regex",
 	"toggle 'a'u / 'd'u / 'e'xtn / 'r'everse / 's'ize / 't'ime / 'v'ersion?",
-	"0 selected, list selection file?"
 };
 
 /* Supported configuration environment variables */
@@ -1103,13 +1101,8 @@ static int editselection(void)
 	struct stat sb;
 	time_t mtime;
 
-	if (!selbufpos) {
-		fd = get_input(messages[MSG_LIST_SEL]);
-		if ((fd == 'y' || fd == 'Y') && !listselfile())
-			return 0;
-
-		return 1;
-	}
+	if (!selbufpos)
+		return listselfile();
 
 	fd = create_tmp_file();
 	if (fd == -1) {
