@@ -3604,7 +3604,7 @@ static void show_help(const char *path)
 		  "cD  File details%-12cd  Detail view toggle\n"
 	          "cr  Batch rename%-8cF2 ^R  Rename/duplicate\n"
 		  "ce  Edit in EDITOR%-10cp  Open in PAGER\n"
-		  "ci  Archive entry%-11c*  Toggle exe\n"
+		  "cz  Archive entry%-11c*  Toggle exe\n"
 	   "5Space ^J  (Un)select%-11cm ^K  Select range, clear\n"
 	          "cP  Copy sel here%-11ca  Select all\n"
 		  "cV  Move sel here%-10c^V  Copy/move sel as\n"
@@ -4987,7 +4987,7 @@ nochange:
 						cfg.blkorder = 0;
 					// fallthrough
 				case 'd': /* Disk usage */
-					if (sel == SEL_BSIZE) {
+					if (r == 'd') {
 						if (!cfg.apparentsz)
 							cfg.blkorder ^= 1;
 						nftw_fn = &sum_bsizes;

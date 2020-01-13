@@ -68,13 +68,6 @@ enum action {
 	SEL_CHMODX,
 	SEL_ARCHIVE,
 	SEL_ORDER,
-	SEL_FSIZE,  /* file size */
-	SEL_ASIZE,  /* apparent size */
-	SEL_BSIZE,  /* block size */
-	SEL_EXTN,   /* order by extension */
-	SEL_MTIME,
-	SEL_REVERSE,
-	SEL_VERSION,
 	SEL_REDRAW,
 	SEL_SEL,
 	SEL_SELMUL,
@@ -183,7 +176,7 @@ static struct key bindings[] = {
 	/* Toggle executable status */
 	{ '*',            SEL_CHMODX },
 	/* Create archive */
-	{ 'i',            SEL_ARCHIVE },
+	{ 'z',            SEL_ARCHIVE },
 	/* Order toggle */
 	{ 'o',            SEL_ORDER },
 	{ CONTROL('T'),   SEL_ORDER },
