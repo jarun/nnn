@@ -5034,6 +5034,7 @@ nochange:
 					break;
 				default:
 					cfg.filtermode ? presel = FILTER : statusbar(path);
+					printwait(messages[MSG_INVALID_KEY], &presel);
 					goto nochange;
 				}
 			}
