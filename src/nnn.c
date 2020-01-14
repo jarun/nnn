@@ -3469,7 +3469,7 @@ static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 	free(dir);
 
 	if (!xmktree(newpath, TRUE)) {
-		printwait(strerror(errno), presel);
+		printwarn(presel);
 		return FALSE;
 	}
 
@@ -3514,7 +3514,7 @@ static bool remote_mount(char *newpath, int *presel)
 	/* Create the mount point */
 	mkpath(cfgdir, tmp, newpath);
 	if (!xmktree(newpath, TRUE)) {
-		printwait(strerror(errno), presel);
+		printwarn(presel);
 		return FALSE;
 	}
 
