@@ -1675,10 +1675,12 @@ static void get_archive_cmd(char *cmd, char *archive)
 
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
 {
-	char *buf = (char *)malloc(CMD_LEN_MAX * sizeof(char));
+	/* The 70 comes from the string below */
+	char *buf = (char *)malloc((70 + strlen(cmd) + strlen(archive)
+								   + strlen(curpath) + strlen(g_selpath)) * sizeof(char));
 	if (!buf) {
-		DPRINTF_S("malloc failed!");
-		printmsg(messages[MSG_FAILED]);
+		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
 		return;
 	}
 
@@ -2636,7 +2638,7 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool path)
 				if (!buf) {
 					buf = (char *)malloc(len + loclen);
 					if (!buf) {
-						DPRINTF_S("malloc failed!");
+						DPRINTF_S(strerror(errno));
 						return NULL;
 					}
 				}
