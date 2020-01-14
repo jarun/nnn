@@ -1571,7 +1571,7 @@ static bool cpmvrm_selection(enum action sel, char *path, int *presel)
 			return FALSE;
 		}
 		break;
-	default: /* SEL_RMMUL */
+	default: /* SEL_RM */
 		rmmulstr(g_buf);
 		break;
 	}
@@ -3606,7 +3606,7 @@ static void show_help(const char *path)
 	       "9Up k  Up%-16cPgUp ^U  Scroll up\n"
 	       "9Dn j  Down%-14cPgDn ^D  Scroll down\n"
 	       "9Lt h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
-	   "5Ret Rt l  Open%-20cf  First file\n"
+	   "5Ret Rt l  Open%-20c'  First file\n"
 	       "9g ^A  Top%-21c.  Toggle hidden\n"
 	       "9G ^E  End%-21c0  Lock terminal\n"
 	       "9b ^/  Bookmark key%-12c,  Pin CWD\n"
@@ -3616,20 +3616,19 @@ static void show_help(const char *path)
 		  "c?  Help, conf%-13c^G  QuitCD\n"
 	       "9Q ^Q  Quit%-20cq  Quit context\n"
 		"1FILES\n"
-		 "b^O  Open with...%-12cn  Create new/link\n"
-		 "b^F  File details%-12cd  Detail view toggle\n"
+	       "9o ^O  Open with...%-12cn  Create new/link\n"
+	       "9f ^F  File details%-12cd  Detail view toggle\n"
 	         "b^R  Rename/dup%-14cr  Batch rename\n"
-		  "cz  Archive entry%-11c*  Toggle exe\n"
+		  "cz  Archive%-17c*  Toggle exe\n"
 	   "5Space ^J  (Un)select%-11cm ^K  Mark range/clear\n"
-	          "cp  Copy sel here%-11ca  Select all\n"
-		  "cv  Move sel here%-10c^V  Copy/move sel as\n"
-		  "cx  Delete sel%-13c^X  Delete entry\n"
-	       "9o ^T  Sort toggles%-12ce  Edit sel\n"
+	          "9p ^P  Copy sel here%-11ca  Select all\n"
+		  "9v ^V  Move sel here%-8cw ^W  Copy/move sel as\n"
+		  "9x ^X  Delete%-18ce  Edit sel\n"
 		"1MISC\n"
-	       "9; ^P  Plugin%-18c=  Launch app\n"
+	       "9; ^S  Select plugin%-11c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
-		  "cs  Manage session%-10cu  Unmount\n"
-		  "cc  Connect remote%-0c\n"
+		  "cc  Connect remote%-10cu  Unmount\n"
+	       "9t ^T  Sort toggles%-12cs  Manage session\n"
 	};
 
 	fd = create_tmp_file();
@@ -5240,8 +5239,30 @@ nochange:
 		case SEL_CP: // fallthrough
 		case SEL_MV: // fallthrough
 		case SEL_CPMVAS: // fallthrough
-		case SEL_RMMUL:
+		case SEL_RM:
 		{
+			if (sel == SEL_RM) {
+				r = get_cur_or_sel();
+				if (!r) {
+					statusbar(path);
+					goto nochange;
+				}
+
+				if (r == 'c') {
+					mkpath(path, dents[cur].name, newpath);
+					xrm(newpath);
+
+					if (cur && access(newpath, F_OK) == -1) {
+						move_cursor(cur - 1, 0);
+						copycurname();
+					}
+
+					if (cfg.filtermode)
+						presel = FILTER;
+					goto begin;
+				}
+			}
+
 			endselection();
 
 			if (!cpmvrm_selection(sel, path, &presel))
@@ -5255,25 +5276,6 @@ nochange:
 
 			if (ndents)
 				copycurname();
-			goto begin;
-		}
-		case SEL_RM:
-		{
-			if (!ndents)
-				break;
-
-			mkpath(path, dents[cur].name, newpath);
-			xrm(newpath);
-
-			if (cur && access(newpath, F_OK) == -1)
-				move_cursor(cur - 1, 0);
-
-			/* We reduce cur only if it is > 0, so it's at least 0 */
-			copycurname();
-
-			if (cfg.filtermode)
-				presel = FILTER;
-
 			goto begin;
 		}
 		case SEL_ARCHIVE: // fallthrough

@@ -76,7 +76,6 @@ enum action {
 	SEL_CP,
 	SEL_MV,
 	SEL_CPMVAS,
-	SEL_RMMUL,
 	SEL_RM,
 	SEL_OPENWITH,
 	SEL_NEW,
@@ -136,7 +135,7 @@ static struct key bindings[] = {
 	{ 'G',            SEL_END },
 	{ CONTROL('E'),   SEL_END },
 	/* Go to first file */
-	{ 'f',            SEL_FIRST },
+	{ '\'',           SEL_FIRST },
 	/* HOME */
 	{ '~',            SEL_CDHOME },
 	/* Initial directory */
@@ -168,13 +167,14 @@ static struct key bindings[] = {
 	/* Detailed listing */
 	{ 'd',            SEL_DETAIL },
 	/* File details */
+	{ 'f',            SEL_STATS },
 	{ CONTROL('F'),   SEL_STATS },
 	/* Toggle executable status */
 	{ '*',            SEL_CHMODX },
 	/* Create archive */
 	{ 'z',            SEL_ARCHIVE },
-	/* Order toggle */
-	{ 'o',            SEL_ORDER },
+	/* Sort toggles */
+	{ 't',            SEL_ORDER },
 	{ CONTROL('T'),   SEL_ORDER },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
@@ -190,15 +190,18 @@ static struct key bindings[] = {
 	{ 'e',            SEL_SELEDIT },
 	/* Copy from selection buffer */
 	{ 'p',            SEL_CP },
+	{ CONTROL('P'),   SEL_CP },
 	/* Move from selection buffer */
 	{ 'v',            SEL_MV },
+	{ CONTROL('V'),   SEL_MV },
 	/* Copy/move from selection buffer and rename */
-	{ CONTROL('V'),   SEL_CPMVAS },
+	{ 'w',            SEL_CPMVAS },
+	{ CONTROL('W'),   SEL_CPMVAS },
 	/* Delete from selection buffer */
-	{ 'x',            SEL_RMMUL },
-	/* Delete currently selected */
+	{ 'x',            SEL_RM },
 	{ CONTROL('X'),   SEL_RM },
 	/* Open in a custom application */
+	{ 'o',            SEL_OPENWITH },
 	{ CONTROL('O'),   SEL_OPENWITH },
 	/* Create a new file */
 	{ 'n',            SEL_NEW },
@@ -214,7 +217,7 @@ static struct key bindings[] = {
 	{ '?',            SEL_HELP },
 	/* Run a plugin */
 	{ ';',            SEL_PLUGIN },
-	{ CONTROL('P'),   SEL_PLUGIN },
+	{ CONTROL('S'),   SEL_PLUGIN },
 	/* Run command */
 	{ '!',            SEL_SHELL },
 	{ CONTROL(']'),   SEL_SHELL },
