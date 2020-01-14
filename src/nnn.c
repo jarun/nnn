@@ -1677,7 +1677,7 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 {
 	/* The 70 comes from the string below */
 	char *buf = (char *)malloc((70 + strlen(cmd) + strlen(archive)
-								   + strlen(curpath) + strlen(g_selpath)) * sizeof(char));
+				       + strlen(curpath) + strlen(g_selpath)) * sizeof(char));
 	if (!buf) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
