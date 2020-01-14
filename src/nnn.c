@@ -4327,26 +4327,38 @@ static int adjust_cols(int ncols)
 	} else
 		ncols -= 3; /* Preceding space, indicator, newline */
 
-	attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
-	cfg.dircolor = 1;
-
 	return ncols;
 }
 
 static void draw_line(char *path, int ncols)
 {
+	bool dir = FALSE;
+
 	ncols = adjust_cols(ncols);
 
+	if (dents[last].flags & DIR_OR_LINK_TO_DIR) {
+		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+		dir = TRUE;
+	}
 	move(2 + last - curscroll, 0);
 	printptr(&dents[last], ncols, false);
+
+	if (dents[cur].flags & DIR_OR_LINK_TO_DIR) {
+		if (!dir)  {/* First file is not a directory */
+			attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+			dir = TRUE;
+		}
+	} else if (dir) { /* Second file is not a directory */
+		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+		dir = FALSE;
+	}
+
 	move(2 + cur - curscroll, 0);
 	printptr(&dents[cur], ncols, true);
 
 	/* Must reset e.g. no files in dir */
-	if (cfg.dircolor) {
+	if (dir)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
-		cfg.dircolor = 0;
-	}
 
 	statusbar(path);
 }
@@ -4438,6 +4450,9 @@ static void redraw(char *path)
 	attroff(A_UNDERLINE);
 
 	ncols = adjust_cols(ncols);
+
+	attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+	cfg.dircolor = 1;
 
 	/* Print listing */
 	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
