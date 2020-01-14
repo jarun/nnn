@@ -26,11 +26,12 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 ## Features
 
 - Resource sensitive
-  - Typically needs < 3.5MB resident memory
+  - Typically needs less than 3.5MB resident memory
   - Works with 8-bit colors
   - Disk-IO sensitive (few disk reads and writes)
   - No FPU usage (all integer maths, even for file size)
   - Minimizes screen refresh with fast line redraws
+  - Tiny binary (typically less than 100KB)
 - Portable
   - Minimal library deps, easily compilable, tiny binary
   - No config file, minimal config with sensible defaults

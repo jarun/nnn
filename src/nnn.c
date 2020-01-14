@@ -2028,11 +2028,44 @@ static int nextsel(int presel)
 	return 0;
 }
 
+static int getorderstr(char *sort)
+{
+	int i = 0;
+
+	if (cfg.mtimeorder)
+		sort[0] = cfg.mtime ? 'T' : 'A';
+	else if (cfg.sizeorder)
+		sort[0] = 'S';
+	else if (cfg.extnorder)
+		sort[0] = 'E';
+
+	if (sort[i])
+		++i;
+
+	if (entrycmpfn == &reventrycmp) {
+		sort[i] = 'R';
+		++i;
+	}
+
+	if (namecmpfn == &xstrverscasecmp) {
+		sort[i] = 'V';
+		++i;
+	}
+
+	if (i)
+		sort[i] = ' ';
+
+	return i;
+}
+
 static void showfilterinfo(void)
 {
-	char info[REGEX_MAX];
+	int i = 0;
+	char info[REGEX_MAX] = "\0\0\0\0";
 
-	snprintf(info, REGEX_MAX - 1, "    %s [keys /\\], %s [key :]",
+	i = getorderstr(info);
+
+	snprintf(info + i, REGEX_MAX - i - 1, "  %s [keys /\\], %s [key :]",
 		 (cfg.regex ? "regex" : "str"),
 		 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
 	printinfoln(info);
@@ -4230,7 +4263,6 @@ static void statusbar(char *path)
 {
 	int i = 0, extnlen = 0;
 	char *ptr;
-	char sort[] = "\0\0\0\0";
 	char buf[24];
 	pEntry pent = &dents[cur];
 
@@ -4238,29 +4270,6 @@ static void statusbar(char *path)
 		printmsg("0/0");
 		return;
 	}
-
-	if (cfg.mtimeorder)
-		sort[0] = cfg.mtime ? 'T' : 'A';
-	else if (cfg.sizeorder)
-		sort[0] = 'S';
-	else if (cfg.extnorder)
-		sort[0] = 'E';
-
-	if (sort[i])
-		++i;
-
-	if (entrycmpfn == &reventrycmp) {
-		sort[i] = 'R';
-		++i;
-	}
-
-	if (namecmpfn == &xstrverscasecmp) {
-		sort[i] = 'V';
-		++i;
-	}
-
-	if (i)
-		sort[i] = ' ';
 
 	/* Get the file extension for regular files */
 	if (S_ISREG(pent->mode)) {
@@ -4287,6 +4296,9 @@ static void statusbar(char *path)
 		/* Show filename as it may be truncated in directory listing */
 		/* Get the unescaped file name */
 		char *fname = unescape(pent->name, NAME_MAX, NULL);
+		char sort[] = "\0\0\0\0";
+
+		getorderstr(sort);
 
 		/* Timestamp */
 		strftime(buf, sizeof(buf), "%F %R", localtime(&pent->t));
