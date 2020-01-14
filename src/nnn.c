@@ -1675,7 +1675,14 @@ static void get_archive_cmd(char *cmd, char *archive)
 
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
 {
-	char *buf = (char *)malloc(CMD_LEN_MAX * sizeof(char));
+	/* The 70 comes from the string below */
+	char *buf = (char *)malloc((70 + strlen(cmd) + strlen(archive)
+				       + strlen(curpath) + strlen(g_selpath)) * sizeof(char));
+	if (!buf) {
+		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
+		return;
+	}
 
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
@@ -2628,8 +2635,13 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool path)
 				ssize_t len = strlen(home);
 				ssize_t loclen = strlen(kvarr[r].val);
 
-				if (!buf)
+				if (!buf) {
 					buf = (char *)malloc(len + loclen);
+					if (!buf) {
+						DPRINTF_S(strerror(errno));
+						return NULL;
+					}
+				}
 
 				xstrlcpy(buf, home, len + 1);
 				xstrlcpy(buf + len, kvarr[r].val + 1, loclen);
@@ -5841,6 +5853,11 @@ static bool setup_config(void)
 	if (!cfg.picker) {
 		/* Length of "/.config/nnn/.selection" */
 		g_selpath = (char *)malloc(len + 3);
+		if (!g_selpath) {
+			xerror();
+			return FALSE;
+		}
+
 		r = xstrlcpy(g_selpath, cfgdir, len + 3);
 		xstrlcpy(g_selpath + r - 1, "/.selection", 12);
 		DPRINTF_S(g_selpath);
