@@ -1,4 +1,4 @@
-<h1 align="center">nnn - <i>type less, do more, wayyy faster</i></h1>
+<h1 align="center">nnn - <i>supercharge your productivity!</i></h1>
 
 <p align="center">
 <a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600" alt="Latest release" /></a>
