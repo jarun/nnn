@@ -67,7 +67,7 @@ enum action {
 	SEL_STATS,
 	SEL_CHMODX,
 	SEL_ARCHIVE,
-	SEL_ORDER,
+	SEL_SORT,
 	SEL_REDRAW,
 	SEL_SEL,
 	SEL_SELMUL,
@@ -174,8 +174,8 @@ static struct key bindings[] = {
 	/* Create archive */
 	{ 'z',            SEL_ARCHIVE },
 	/* Sort toggles */
-	{ 't',            SEL_ORDER },
-	{ CONTROL('T'),   SEL_ORDER },
+	{ 't',            SEL_SORT },
+	{ CONTROL('T'),   SEL_SORT },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
 	/* Select current file path */

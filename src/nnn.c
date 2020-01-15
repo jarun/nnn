@@ -2072,7 +2072,7 @@ static void showfilterinfo(void)
 
 	i = getorderstr(info);
 
-	snprintf(info + i, REGEX_MAX - i - 1, "  %s [keys /\\], %s [key :]",
+	snprintf(info + i, REGEX_MAX - i - 1, "  %s [/], %s [:]",
 		 (cfg.regex ? "regex" : "str"),
 		 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
 	printinfoln(info);
@@ -2238,20 +2238,11 @@ static int filterentries(char *path, char *lastname)
 					continue;
 				}
 
-				/* string to regex */
-				if (*ch == RFILTER && ln[0] == FILTER) {
-					wln[0] = ln[0] = RFILTER;
-					cfg.regex = TRUE;
-					filterfn = &visible_re;
-					showfilter(ln);
-					continue;
-				}
-
-				/* regex to string */
-				if (*ch == FILTER && ln[0] == RFILTER) {
-					wln[0] = ln[0] = FILTER;
-					cfg.regex = FALSE;
-					filterfn = &visible_str;
+				/* toggle string or regex filter */
+				if (*ch == FILTER) {
+					wln[0] = ln[0] = (ln[0] == FILTER) ? RFILTER : FILTER;
+					cfg.regex ^= 1;
+					filterfn = (filterfn == &visible_str) ? &visible_re : &visible_str;
 					showfilter(ln);
 					continue;
 				}
@@ -4994,7 +4985,7 @@ nochange:
 		case SEL_MFLTR: // fallthrough
 		case SEL_TOGGLEDOT: // fallthrough
 		case SEL_DETAIL: // fallthrough
-		case SEL_ORDER:
+		case SEL_SORT:
 			switch (sel) {
 			case SEL_MFLTR:
 				cfg.filtermode ^= 1;
@@ -5020,7 +5011,7 @@ nochange:
 				cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
 				cfg.blkorder = 0;
 				continue;
-			default: /* SEL_ORDER */
+			default: /* SEL_SORT */
 				r = get_input(messages[MSG_ORDER]);
 
 				if ((r == 'a' || r == 'd' || r == 'e' || r == 's' || r == 't')
