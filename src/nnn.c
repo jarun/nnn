@@ -940,11 +940,101 @@ static void *xmemrchr(uchar *s, uchar ch, size_t n)
 	return NULL;
 }
 
+static char *common_prefix(const char *s, char *prefix)
+{
+	if (!s || !prefix)
+		return NULL;
+
+	ulong x, y;
+	size_t i, j;
+	size_t len_s = strlen(s), len_prefix = strlen(prefix);
+	size_t len = MIN(len_s, len_prefix);
+	char *tmp;
+
+	for (i = 0; i < len; i += sizeof(ulong)) {
+		if (len - i >= sizeof(ulong)) {
+			x = *((ulong *)(s + i));
+			y = *((ulong *)(prefix + i));
+			if (!(x ^ y))
+				continue;
+		}
+
+		for (j = 0; j < MIN(sizeof(ulong), len - i); ++j) {
+			if (s[i + j] != prefix[i + j]){
+				tmp = xmemrchr((uchar *)prefix, '/', i + j);
+				if (!tmp)
+					return NULL;
+
+				*(tmp != prefix ? tmp : tmp + 1) = '\0';
+
+				return prefix;
+			}
+		}
+	}
+
+	if (len_s < len_prefix || (len_s > len_prefix && s[len_prefix] != '/')) {
+		tmp = xmemrchr((uchar*)prefix, '/', len);
+		if (!tmp)
+			return NULL;
+
+		*(tmp != prefix ? tmp : tmp + 1) = '\0';
+	}
+
+	return prefix;
+}
+
 static char *xbasename(char *path)
 {
 	char *base = xmemrchr((uchar *)path, '/', strlen(path)); // NOLINT
 
 	return base ? base + 1 : path;
+}
+
+static char *xrealpath(const char *path, char *resolved_path, const char *cwd)
+{
+	if (!path || !resolved_path || !cwd)
+		return NULL;
+
+	size_t dst_size = 0, src_size = strlen(path);
+	const char *src, *next;
+	char *dst;
+
+
+	/* Turn relative paths into absolute */
+	if (path[0] != '/')
+		dst_size = xstrlcpy(resolved_path, cwd, strlen(cwd) + 1) - 1;
+	else
+		resolved_path[0] = '\0';
+
+
+	src = path;
+	dst = resolved_path + dst_size;
+	for (next = NULL; next != path + src_size;) {
+		next = strchr(src, '/');
+		if (!next)
+			next = path+src_size;
+
+		if (next - src == 2 && src[0] == '.' && src[1] == '.') {
+			if (dst - resolved_path) {
+				dst = xmemrchr((uchar*)resolved_path, '/', dst-resolved_path);
+				*dst = '\0';
+			}
+		} else if (next - src == 1 && src[0] == '.'); // NOP
+		else if (next - src){
+			*(dst++) = '/';
+			xstrlcpy(dst, src, next - src + 1);
+			dst += next - src;
+		}
+
+		src = next + 1;
+	}
+
+	if (*resolved_path == '\0') {
+		resolved_path[0] = '/';
+		resolved_path[1] = '\0';
+	}
+
+	return resolved_path;
 }
 
 static int create_tmp_file(void)
@@ -5861,6 +5951,146 @@ nochange:
 	}
 }
 
+static char *make_tmp_tree(char **paths, size_t entries, const char *prefix)
+{
+	char *slash;
+	size_t i, len = strlen(prefix);
+	char *tmpdir = malloc(sizeof(char) * (PATH_MAX + 15));
+
+	if (!tmpdir) {
+		DPRINTF_S(strerror(errno));
+		return NULL;
+	}
+
+	xstrlcpy(tmpdir, "/tmp/nnnXXXXXX", 15);
+
+	if (!mkdtemp(tmpdir)) {
+		free(tmpdir);
+
+		DPRINTF_S(strerror(errno));
+		return NULL;
+	}
+
+	for(i = 0; i < entries; ++i){
+		xstrlcpy(tmpdir + 14, paths[i] + len, strlen(paths[i]) + 1);
+
+		slash = xmemrchr((uchar *)tmpdir, '/', strlen(paths[i]) + 15);
+		*slash = '\0';
+
+		xmktree(tmpdir, TRUE);
+
+		*slash = '/';
+		if (symlink(paths[i], tmpdir))
+			DPRINTF_S(strerror(errno));
+	}
+
+	tmpdir[14] = '\0';
+	return tmpdir;
+}
+
+static char *load_input()
+{
+	/* 512 KiB chunk size */
+	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
+	char *input = malloc(sizeof(char) * chunk), *tmpdir;
+	char prefix[PATH_MAX], cwd[PATH_MAX], *next, *prev, **paths;
+	ssize_t input_read, total_read = 0;
+
+	if (!input) {
+		DPRINTF_S(strerror(errno));
+		return NULL;
+	}
+
+	total_read = input_read = read(STDIN_FILENO, input, chunk);
+	while (input_read == chunk && chunk_count < 512) {
+		if (!xrealloc(input, (++chunk_count) * chunk))
+			goto malloc_1;
+
+		input_read = read(STDIN_FILENO, input + (chunk_count - 1) * chunk, chunk);
+		if (input_read < 0) {
+			DPRINTF_S(strerror(errno));
+			goto malloc_1;
+		}
+
+		total_read += input_read;
+	}
+
+	input[total_read] = '\0';
+
+	/* 256MiB already read, enough for 2^16 paths */
+	if (input_read == chunk && chunk_count == 512)
+		goto malloc_1;
+
+	prev = input;
+	while (prev < input + total_read + 1) {
+		next = memchr(prev, '\0', total_read - (prev - input) + 1) + 1;
+
+		if (next - prev == 1) {
+			prev = next;
+			continue;
+		}
+
+		prev = next;
+
+		/* No NULL terminator at the end or limit exceeded */
+		if (++entries > (1 << 16) || !next)
+			goto malloc_1;
+	}
+
+	// allocate the space for all the strings 
+	paths = malloc(sizeof(char *) * entries);
+	if (!paths) {
+		DPRINTF_S(strerror(errno));
+		goto malloc_1;
+	}
+
+	getcwd(cwd, PATH_MAX);
+
+	for (i = 0; i < entries; ++i) {
+		paths[i] = malloc(sizeof(char) * PATH_MAX);
+		if (!paths[i]) {
+			DPRINTF_S(strerror(errno));
+
+			for(--i; i >= 0; --i)
+				free(paths[i]);
+
+			goto malloc_2;
+		}
+	}
+
+	for (i = 0, prev = input; i < entries; ++i) {
+		if (!xrealpath(prev, paths[i], cwd))
+			goto malloc_3;
+
+		next = memchr(prev, '\0', total_read - (prev - input) + 1) + 1;
+		if (next - prev == 1) {
+			prev = next;
+			continue;
+		}
+
+		prev = next;
+	}
+
+	xstrlcpy(prefix, paths[0], strlen(paths[0]) + 1);
+	for (i = 1; i < entries; ++i) {
+		if (!common_prefix(paths[i], prefix))
+			goto malloc_3;
+	}
+
+	tmpdir = make_tmp_tree(paths, entries, prefix);
+	if (tmpdir)
+		return tmpdir;
+
+malloc_3:
+	for(i = 0; i < entries; --i)
+		free(paths[i]);
+malloc_2:
+	free(paths);
+malloc_1:
+	free(input);
+	return NULL;
+}
+
 static void check_key_collision(void)
 {
 	int key;
@@ -6149,8 +6379,19 @@ int main(int argc, char *argv[])
 	}
 
 	/* Confirm we are in a terminal */
-	if (!cfg.picker && !(isatty(STDIN_FILENO) && isatty(STDOUT_FILENO)))
+	if (!cfg.picker && !isatty(STDOUT_FILENO)) {
 		exit(1);
+	}
+
+	/* Now we are in path list mode */
+	if (!cfg.picker && !isatty(STDIN_FILENO)) {
+		initpath = load_input();
+		if (!initpath)
+			return _FAILURE;
+
+		/* We return to tty */
+		dup2(STDOUT_FILENO, STDIN_FILENO);
+	}
 
 #ifdef DBGMODE
 	enabledbg();
@@ -6185,7 +6426,8 @@ int main(int argc, char *argv[])
 		return _FAILURE;
 	}
 
-	if (arg) { /* Open a bookmark directly */
+	if (initpath); // NOP
+	else if (arg) { /* Open a bookmark directly */
 		if (!arg[1]) /* Bookmarks keys are single char */
 			initpath = get_kv_val(bookmark, NULL, *arg, BM_MAX, TRUE);
 
