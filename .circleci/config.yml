@@ -62,7 +62,6 @@ jobs:
           name: "package with packagecore"
           command: |
             # Clean up
-            rm -rf ./.git
             rm -rf ./dist/*
             # Pack source
             git archive -o ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz --format tar.gz --prefix=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG#v}/ ${CIRCLE_TAG}
