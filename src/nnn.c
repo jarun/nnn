@@ -106,7 +106,7 @@
 #include "dbg.h"
 
 /* Macro definitions */
-#define VERSION "2.8.1"
+#define VERSION "2.9"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
 #define SESSIONS_VERSION 1
 
@@ -2305,8 +2305,7 @@ end:
 	if (ln[1])
 		ln[REGEX_MAX - 1] = ln[1];
 
-	if (*ch != 27 && *ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN
-	    && *ch != CONTROL('T') && *ch != CONTROL('F')) {
+	if (*ch != 27 && *ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN && *ch != CONTROL('T')) {
 		ln[0] = ln[1] = '\0';
 		move_cursor(cur, 0);
 	} else if (ndents)

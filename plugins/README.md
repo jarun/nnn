@@ -110,9 +110,11 @@ Notes:
 
 | Key:Command | Description |
 |---|---|
+| `e:-_vi $nnn*` | Edit hovered file in vi |
 | `k:-_fuser -kiv $nnn*` | Interactively kill process(es) using hovered file |
 | `l:_git log` | Show git log |
 | `n:-_vi /home/user/Dropbox/dir/note*` | Take quick notes in a synced file/dir of notes |
+| `p:-_less -iR $nnn*` | Page through hovered file in less |
 | `s:_smplayer -minigui $nnn*` | Play hovered media file, even unfinished download |
 | `x:_chmod +x $nnn` | Make the hovered file executable |
 | `y:-_sync*` | Flush cached writes |

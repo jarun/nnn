@@ -1,3 +1,61 @@
+nnn v2.9
+2020-01-15
+
+- all keybinds and options reviewed by the team and frozen (see #422)
+  - reduced number of keybinds
+- greatly improved help screen readability
+- `nuke`: sample opener (CLI-only by default) and plugin
+- fast line redraws instead of full screen refresh (thanks @annagrram)
+- auto archive handling by extension (see config `NNN_ARCHIVE`)
+- Lead key simplified to bookmark key (<kbd>b</kbd> or <kbd>^/</kbd>)
+- single key to toggle order (<kbd>t</kbd> or <kbd>^T</kbd>)
+- plugins
+  - `.cbcp`: copy selection to system clipboard (internal, program option `-x`)
+  - `.ntfy`: show noti on cp, mv, rm completion (internal, program option `-x`)
+  - `autojump`: navigate using autojump
+  - `upload`: paste text files to http://ix.io, upload rest to https://file.io
+  - all fuzzy plugins modified to support both `fzf` and `fzy`
+- more control on plugins
+  - prefix `-` to skip directory refresh after running (cmd as) plugin
+  - suffix `*` to skip confirmation after running cmd as plugin
+- indicate range selection mode with `*`
+- list keys at bookmark and plugin key prompts
+- visit to pinned dir like bookmarks (Bookmark key followed by <kbd>,</kbd>)
+- toggle executable (key <kbd>*</kbd>)
+- show mime along with file details
+- special keys at empty filter prompt:
+  - apply the last filter (key <kbd>^L</kbd>)
+  - set to string (key <kbd>/</kbd>) or regex (key <kbd>\\</kbd>)
+  - toggle case-sensitivity (<kbd>:</kbd>)
+- retain filter on <kbd>Esc</kbd>, <kbd>Up</kbd>, <kbd>Down</kbd>
+- show filter details when filter is on
+- remove option to run filter as cmd on prompt key (can be disruptive)
+- program options
+  - option `-x`: enable notis and copy selection to system clipboard
+  - option `-g`: regex filters (string filter is default now)
+  - option `-Q`: quit program without confirmation
+  - option `-s`: load session
+  - option `-n`: start in nav-as-you-type mode
+  - option `-v`: version sort
+  - option `-V`: show program version
+  - option `-A`: disable dir auto-select
+- ISO 8601 compliant date in status bar
+- ported to Haiku OS (thanks @annagrram)
+- sort only filtered entries (to avoid directory refresh)
+- fix `getplugs` to install hidden files
+- fix several selection issues (see #400)
+- fix detail mode not restored on loading session
+- fix symlink to directory not auto-selected
+- fix regex error on partial regex patterns
+- fix symlink not shown if `stat(2)` on target fails
+- fix flags when spawning a CLI opener as default FM
+- fix issue with stat flag on Sun (no support for `dirent.d_type`)
+- fix current file in current context not saved correctly in session
+- signed source distribution on release
+- simplified debugging with line numbers in logs
+
+-------------------------------------------------------------------------------
+
 nnn v2.8.1
 2019-12-05
 
