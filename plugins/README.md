@@ -102,9 +102,9 @@ Now there will be no prompt after <kbd>;s</kbd> and <kbd>;n</kbd>.
 Notes:
 
 1. Use single quotes for `$NNN_PLUG` so `$nnn` is not interpreted
-2. `$nnn` should be the last argument (IF you want to pass the hovered file name)
+2. `$nnn` should be the last argument (IF used)
 3. (_Again_) add `_` before the command
-4. To disable directory refresh after running a _command as plugin_, prefix the command with `-_`
+4. To disable directory refresh after running a _command as plugin_, prefix with `-_`
 
 #### Some useful key-command examples
 

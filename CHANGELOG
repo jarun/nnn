@@ -23,9 +23,9 @@ nnn v2.9
 - visit to pinned dir like bookmarks (Bookmark key followed by <kbd>,</kbd>)
 - toggle executable (key <kbd>*</kbd>)
 - show mime along with file details
-- special keys at empty filter prompt:
-  - apply the last filter (key <kbd>^L</kbd>)
-  - set to string (key <kbd>/</kbd>) or regex (key <kbd>\\</kbd>)
+- more special keys at empty filter prompt:
+  - apply the last filter (<kbd>^L</kbd>)
+  - toggle between string and regex (<kbd>/</kbd>)
   - toggle case-sensitivity (<kbd>:</kbd>)
 - retain filter on <kbd>Esc</kbd>, <kbd>Up</kbd>, <kbd>Down</kbd>
 - show filter details when filter is on

@@ -29,7 +29,12 @@
 .Op Ar PATH
 .Sh DESCRIPTION
 .Nm
-(Nnn's Not Noice) is a performance-optimized, feature-packed fork of noice (http://git.2f30.org/noice/) with seamless desktop integration, simplified navigation, \fInavigate-as-you-type\fR mode with auto select, disk usage analyzer mode, bookmarks, contexts, application launcher, familiar navigation shortcuts, subshell spawning and much more. It remains a simple and efficient file manager that stays out of your way.
+(Nnn's Not Noice) is a performance-optimized, feature-packed fork of
+noice (http://git.2f30.org/noice/) with seamless desktop integration,
+simplified navigation, \fInavigate-as-you-type\fR mode with auto select,
+disk usage analyzer mode, bookmarks, contexts, application launcher,
+familiar navigation shortcuts, subshell spawning and much more.It
+remains a simple and efficient file manager that stays out of your way.
 .Pp
 .Nm
 opens the current working directory by default if
@@ -82,10 +87,11 @@ supports the following options:
         copy (or \fIpick\fR) selection to file, or stdout if file='-'
 .Pp
 .Fl Q
-        disable confirmation when quitting program with multiple active contexts
+        disable confirmation on quit with multiple contexts active
 .Pp
 .Fl r
-        show cp, mv progress (Linux-only, needs advcpmv; '^T' shows the progress on BSD/macOS)
+        show cp, mv progress
+        (Linux-only, needs advcpmv; '^T' shows the progress on BSD/macOS)
 .Pp
 .Fl R
         disable rollover at edges
@@ -103,18 +109,27 @@ supports the following options:
         show version and exit
 .Pp
 .Fl x
-        show notis on selection cp, mv, rm completion; copy path to system clipboard on select
+        show notis on selection cp, mv, rm completion
+        copy path to system clipboard on select
 .Pp
 .Fl h
         show program help and exit
 .Sh CONFIGURATION
-.Nm
-uses \fIxdg-open\fR (on Linux) and \fIopen(1)\fR (on macOS) as the desktop opener.
+There is no configuration file. Associated files are at
 .Pp
-There is no configuration file. Associated files are stored in \fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/\fR. Settings work on environment variables. See ENVIRONMENT section below.
+\fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/\fR
+.Pp
+Configuration is done using a few optional (set if you need) environment
+variables. See ENVIRONMENT section.
+.Pp
+.Nm
+uses \fIxdg-open\fR (on Linux), \fIopen(1)\fR (on macOS), \fIcygstart\fR on
+(Cygwin) and \fIopen\fR on (Haiku) as the desktop opener. It's also possible
+to specify a custom opener. See ENVIRONMENT section.
 .Sh CONTEXTS
-Contexts serve the purpose of exploring multiple directories simultaneously. 4 contexts
-are available. The status of the contexts are shown in the top left corner:
+Contexts serve the purpose of exploring multiple directories simultaneously. 4
+contexts are available. The status of the contexts are shown in the top left
+corner:
 .Pp
 - the current context is in reverse video
 .br
@@ -122,38 +137,61 @@ are available. The status of the contexts are shown in the top left corner:
 .br
 - rest are inactive
 .Pp
-On context creation, the state of the previous context is copied. Each context remembers its last visited directory.
+On context creation, the state of the previous context is copied. Each context
+remembers its last visited directory.
 .Pp
-Each context can have its own directory color specified. See ENVIRONMENT section below.
+Each context can have its own directory color specified. See ENVIRONMENT
+section.
 .Sh SESSIONS
-Sessions are a way to save and restore states of work. A session stores the settings and contexts.
+Sessions are a way to save and restore states of work. A session stores the
+settings and contexts.
 .Pp
 Sessions can be loaded dynamically from within a running
 .Nm
 instance, or with a program option.
 .Pp
-When a session is loaded dynamically, the last working session is saved automatically to a dedicated
--- "last session" -- session file.
+When a session is loaded dynamically, the last working session is saved
+automatically to a dedicated -- "last session" -- session file.
 .Pp
-All the session files are located in the \fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions\fR directory by the session name.
+All the session files are located by session name in the directory
+.Pp
+\fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions\fR
+.Pp
 "@" is the "last session" file.
 .Sh FILTERS
-Filters are strings to find matching entries in the current directory instantly (\fIsearch-as-you-type\fR). There is a program option to switch to regex filters. Matches are case-insensitive by default.
+Filters are strings to find matching entries in the current directory
+instantly (\fIsearch-as-you-type\fR). There is a program option to switch to
+regex filters. Matches are case-insensitive by default. In each context the
+last filter is persisted at runtime or in saved sessions.
 .Pp
-To modify match criteria at runtime:
-.br
-- toggle between string and regex: press '/' at empty filter prompt
-.br
-- toggle case sensitivity: press ':' at empty filter prompt
+Special keys at empty filter prompt:
 .Pp
-In each context the last filter is persisted at runtime or in saved
-sessions, and can be accessed with '^L' at the empty filter prompt. It's
-possible to change the match criteria and re-apply the last filter.
+- toggle between string and regex: '/'
+.br
+- toggle case sensitivity: ':'
+.br
+- apply the last filter (or clear filter if non-empty): '^L'
+.br
+- show help and config screen: '?'
+.br
+- show command prompt: ']'
+.br
+- launch an application: '='
+.br
+- run a plugin by its key: ';'
+.br
+- pin current directory: ','
+.Pp
+Other noteworthy keys:
+.Pp
+- '^char': usual keybind functionality
+.br
+- 'Esc': exit filter prompt but skip dir refresh
 .Pp
 Common regex use cases:
 .Pp
-(1) To list all matches starting with the filter expression, start the expression
-with a '^' (caret) symbol.
+(1) To list all matches starting with the filter expression,
+    start the expression with a '^' (caret) symbol.
 .br
 (2) Type '\\.mkv' to list all MKV files.
 .br
@@ -164,26 +202,36 @@ allowing continuous navigation. Works best with the \fBarrow keys\fR.
 .br
 When there's a unique match and it's a directory,
 .Nm
-auto selects the directory and enters it in this mode. Use the relevant program option to disable this behaviour.
+auto selects the directory and enters it in this mode. Use the relevant
+program option to disable this behaviour.
 .Sh SELECTION
 There are 3 groups of keybinds to add files to selection:
 .Pp
-(1) hovered file selection toggle (deselects if '+' is visible before the entry, else adds to selection)
+(1) hovered file selection toggle (deselects if '+' is visible before the
+    entry, else adds to selection)
 .br
-(2) add a range of files to selection (repeat the range key on the same entry twice to clear selection completely)
+(2) add a range of files to selection (repeat the range key on the same entry
+    twice to clear selection completely)
 .br
 (3) add all files in the current directory to selection
 .Pp
 A selection can be edited, copied, moved, removed, archived or linked.
 .Pp
-Absolute paths of the selected files are copied to \fB.selection\fR file in the config directory.
+Absolute paths of the selected files are copied to \fB.selection\fR file in
+the config directory.
 .Pp
-To edit the selection use the _edit selection_ key. Use this key to remove a file from selection after you navigate away from its directory. Editing doesn't end the selection mode. You can add more files to the selection and edit the list again. If no file is selected in the current session, this option attempts to list the selection file.
-.Sh FILE SIZE
-The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y (powers of 1024), same as the default units in \fIls\fR.
+To edit the selection use the _edit selection_ key. Use this key to remove a
+file from selection after you navigate away from its directory. Editing doesn't
+end the selection mode. You can add more files to the selection and edit the
+list again. If no file is selected in the current session, this option attempts
+to list the selection file.
+.Sh UNITS
+The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y
+(powers of 1024), same as the default units in \fIls\fR.
 .Sh ENVIRONMENT
-The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take precedence
-when dealing with the !, e and p commands respectively. A single combination to arguments is supported for SHELL and PAGER.
+The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take
+precedence when dealing with the !, e and p commands respectively. A single
+combination to arguments is supported for SHELL and PAGER.
 .Pp
 \fBNNN_OPENER:\fR specify a custom file opener.
 .Bd -literal
@@ -192,18 +240,18 @@ when dealing with the !, e and p commands respectively. A single combination to 
     NOTE: `nuke` is a file opener available in plugin repository
 .Ed
 .Pp
-\fBNNN_BMS:\fR bookmark string as \fIkey_char:location\fR pairs (max 10) separated by
-\fI;\fR:
+\fBNNN_BMS:\fR bookmark string as \fIkey_char:location\fR pairs
+(max 10) separated by \fI;\fR:
 .Bd -literal
     export NNN_BMS='d:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
 
     NOTE: To go to a bookmark, press the Lead key followed by the bookmark key.
 .Ed
 .Pp
-\fBNNN_PLUG:\fR directly executable plugins as \fIkey_char:location\fR pairs (max 10) separated by
-\fI;\fR:
+\fBNNN_PLUG:\fR directly executable plugins as \fIkey_char:location\fR pairs
+(max 15) separated by \fI;\fR:
 .Bd -literal
-    export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;t:imgthumb;i:mediainf'
+    export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;t:imgthumb'
 
     NOTES:
     1. To run a plugin directly, press \fI;\fR followed by the plugin key
@@ -213,15 +261,17 @@ when dealing with the !, e and p commands respectively. A single combination to 
 .Ed
 .Pp
     To assign keys to arbitrary non-background non-shell-interpreted cli
-    commands and invoke like plugins, add \fI_\fR (underscore) before the command.
+    commands and invoke like plugins, add \fI_\fR (underscore) before the
+    command.
 .Bd -literal
-    export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn;o:fzopen;m:nmount'
+    export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn;o:fzopen'
 
     NOTES:
     1. Use single quotes for $NNN_PLUG so $nnn is not interpreted
-    2. $nnn should be the last argument (IF you want to pass the hovered file name)
+    2. $nnn should be the last argument (IF used)
     3. (Again) add \fB_\fR before the command
-    4. To disable directory refresh after running a \fIcommand as plugin\fR, prefix the command with \fB-_\fR
+    4. To disable directory refresh after running a \fIcommand as plugin\fR,
+       prefix with \fB-_\fR
     5. To skip user confirmation after command execution, suffix with \fB*\fR
 
     export NNN_PLUG='y:-_sync*'
@@ -241,7 +291,8 @@ when dealing with the !, e and p commands respectively. A single combination to 
     ----------------------------------- + -------------------------------------------------
 .Ed
 .Pp
-\fBNNN_USE_EDITOR:\fR use VISUAL (else EDITOR, preferably CLI, fallback vi) to handle text files.
+\fBNNN_USE_EDITOR:\fR use VISUAL (else EDITOR, preferably CLI, fallback vi)
+to handle text files.
 .Bd -literal
     export NNN_USE_EDITOR=1
 .Ed
@@ -267,17 +318,20 @@ when dealing with the !, e and p commands respectively. A single combination to 
     NOTE: The options must be preceded by `rclone` and max 5 flags are supported.
 .Ed
 .Pp
-\fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal locker (default: disabled).
+\fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal locker
+(default: disabled).
 .Pp
 \fBNNN_TRASH:\fR trash (instead of \fIdelete\fR) files to desktop Trash.
 .Bd -literal
     export NNN_TRASH=1
 .Ed
 .Pp
-\fBNNN:\fR this is a special variable set to the hovered entry before executing a command from the command prompt or spawning a shell.
+\fBnnn:\fR this is a special variable set to the hovered entry before executing
+a command from the command prompt or spawning a shell.
 .Sh KNOWN ISSUES
 .Nm
-may not handle keypresses correctly when used with tmux (see issue #104 for more details). Set \fBTERM=xterm-256color\fR to address it.
+may not handle keypresses correctly when used with tmux (see issue #104 for
+more details). Set \fBTERM=xterm-256color\fR to address it.
 .Sh AUTHORS
 .An Arun Prakash Jana Aq Mt engineerarun@gmail.com ,
 .An Lazaros Koromilas Aq Mt lostd@2f30.org ,
