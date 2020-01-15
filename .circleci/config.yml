@@ -65,9 +65,7 @@ jobs:
             rm -rf ./.git
             rm -rf ./dist/*
             # Pack source
-            cd ..
-            tar -czf ${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz ${CIRCLE_PROJECT_REPONAME}
-            cd ${CIRCLE_PROJECT_REPONAME}
+            git archive -o ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz --format tar.gz --prefix=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG#v}/ ${CIRCLE_TAG}
             # Use latest installed python3 from pyenv
             export PYENV_VERSION="$(pyenv versions | grep -Po '\b3\.\d+\.\d+' | tail -1)"
             pip install packagecore
