@@ -12,10 +12,10 @@ is_cmd_exists () {
     echo $?
 }
 
-if [ "$(is_cmd_exists sudoedit)" -eq "0" ]; then
-    sudoedit "$1"
-elif [ "$(is_cmd_exists sudo)" -eq "0" ]; then
+if [ "$(is_cmd_exists sudo)" -eq "0" ]; then
     sudo "$EDITOR" "$1"
+elif [ "$(is_cmd_exists sudoedit)" -eq "0" ]; then
+    sudoedit "$1"
 elif [ "$(is_cmd_exists doas)" -eq "0" ]; then
     doas "$EDITOR" "$1"
 fi
