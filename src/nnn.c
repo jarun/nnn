@@ -712,20 +712,20 @@ static void printinfoln(const char *str)
 
 static int get_input(const char *prompt)
 {
-	int r = KEY_RESIZE;
+	int r;
 
 	if (prompt)
 		printprompt(prompt);
 	cleartimeout();
 #ifdef KEY_RESIZE
-	while (r == KEY_RESIZE) {
+	do {
 		r = getch();
 		if (r == KEY_RESIZE && prompt) {
 			clearoldprompt();
 			xlines = LINES;
 			printprompt(prompt);
 		}
-	};
+	} while (r == KEY_RESIZE);
 #else
 	r = getch();
 #endif
