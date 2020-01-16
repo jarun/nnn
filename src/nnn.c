@@ -3285,7 +3285,7 @@ static size_t get_fs_info(const char *path, bool type)
 		return 0;
 
 	if (type == CAPACITY)
-		return svb.f_blocks << ffs((int)(svb.f_bsize >> 1));
+		return svb.f_blocks << ffs((int)(svb.f_frsize >> 1));
 
 	return svb.f_bavail << ffs((int)(svb.f_frsize >> 1));
 }
