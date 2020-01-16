@@ -5588,11 +5588,11 @@ nochange:
 #ifndef NORL
 				if (cfg.picker) {
 #endif
-					tmp = xreadline(NULL, "> ");
+					tmp = xreadline(NULL, ">>> ");
 #ifndef NORL
 				} else {
 					presel = 0;
-					tmp = getreadline("> ", path, ipath, &presel);
+					tmp = getreadline(">>> ", path, ipath, &presel);
 					if (presel == MSGWAIT)
 						goto nochange;
 				}
