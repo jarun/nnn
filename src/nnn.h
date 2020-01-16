@@ -233,10 +233,9 @@ static struct key bindings[] = {
 	/* Change dir on quit */
 	{ CONTROL('G'),   SEL_QUITCD },
 	/* Quit */
-	{ 'Q',            SEL_QUIT },
 	{ CONTROL('Q'),   SEL_QUIT },
 	/* Quit with an error code */
-	{ CONTROL('H'),   SEL_QUITFAIL },
+	{ 'Q',            SEL_QUITFAIL },
 	{ KEY_MOUSE,      SEL_CLICK },
 	{ 's',            SEL_SESSIONS },
 };
