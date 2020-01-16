@@ -4380,7 +4380,7 @@ static void redraw(char *path)
 	if (g_states & STATE_MOVE_OP) {
 		g_states &= ~STATE_MOVE_OP;
 
-		if (last_curscroll == curscroll)
+		if (ndents && (last_curscroll == curscroll))
 			return draw_line(path, ncols);
 	}
 
