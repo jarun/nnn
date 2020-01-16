@@ -10,6 +10,8 @@
 
 Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or binaries) which `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins.
 
+`nnn` is language-agnostic when it comes to plugins. You can write a plugin in any (scripting) language you are comfortable in!
+
 ## Installing plugins
 
 The following command installs or updates (after backup) all plugins:

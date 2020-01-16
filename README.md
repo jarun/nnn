@@ -33,6 +33,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Minimizes screen refresh with fast line redraws
   - Tiny binary (typically less than 100KB)
 - Portable
+  - Language-agnostic plugins
   - Minimal library deps, easily compilable, tiny binary
   - No config file, minimal config with sensible defaults
   - Widely available on many packagers
