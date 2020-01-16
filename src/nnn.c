@@ -256,6 +256,7 @@ typedef struct {
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint picker     : 1;  /* Write selection to user-specified file */
 	uint pickraw    : 1;  /* Write selection to sdtout before exit */
+	uint listfiles  : 1;  /* Show list of files from input */
 	uint nonavopen  : 1;  /* Open file on right arrow or `l` */
 	uint autoselect : 1;  /* Auto-select dir in nav-as-you-type mode */
 	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
@@ -309,6 +310,7 @@ static settings cfg = {
 	0, /* dircolor */
 	0, /* picker */
 	0, /* pickraw */
+	0, /* listfiles */
 	0, /* nonavopen */
 	1, /* autoselect */
 	0, /* metaviewer */
@@ -5953,16 +5955,20 @@ nochange:
 
 static char *make_tmp_tree(char **paths, size_t entries, const char *prefix)
 {
-	char *slash;
+	/* tmpdir holds the full path */
+	/* tmp holds the path without the tmp dir prefix */
+	char *slash, *tmp;
 	size_t i, len = strlen(prefix);
-	char *tmpdir = malloc(sizeof(char) * (PATH_MAX + 15));
+	char *tmpdir = malloc(sizeof(char) * (PATH_MAX + TMP_LEN_MAX));
 
 	if (!tmpdir) {
 		DPRINTF_S(strerror(errno));
 		return NULL;
 	}
 
-	xstrlcpy(tmpdir, "/tmp/nnnXXXXXX", 15);
+	tmp = tmpdir + g_tmpfplen - 1;
+	xstrlcpy(tmpdir, g_tmpfpath, g_tmpfplen);
+	xstrlcpy(tmp, "/nnnXXXXXX", 11);
 
 	if (!mkdtemp(tmpdir)) {
 		free(tmpdir);
@@ -5972,9 +5978,9 @@ static char *make_tmp_tree(char **paths, size_t entries, const char *prefix)
 	}
 
 	for(i = 0; i < entries; ++i){
-		xstrlcpy(tmpdir + 14, paths[i] + len, strlen(paths[i]) + 1);
+		xstrlcpy(tmp + 10, paths[i] + len, strlen(paths[i]) + 1);
 
-		slash = xmemrchr((uchar *)tmpdir, '/', strlen(paths[i]) + 15);
+		slash = xmemrchr((uchar *)tmp, '/', strlen(paths[i]) + 11);
 		*slash = '\0';
 
 		xmktree(tmpdir, TRUE);
@@ -5984,7 +5990,7 @@ static char *make_tmp_tree(char **paths, size_t entries, const char *prefix)
 			DPRINTF_S(strerror(errno));
 	}
 
-	tmpdir[14] = '\0';
+	tmp[10] = '\0';
 	return tmpdir;
 }
 
@@ -6385,6 +6391,13 @@ int main(int argc, char *argv[])
 
 	/* Now we are in path list mode */
 	if (!cfg.picker && !isatty(STDIN_FILENO)) {
+		cfg.listfiles = 1;
+
+		/* Prefix for temporary files */
+		if (!set_tmp_path())
+			return _FAILURE;
+
+
 		initpath = load_input();
 		if (!initpath)
 			return _FAILURE;
@@ -6571,6 +6584,10 @@ int main(int argc, char *argv[])
 
 	opt = browse(initpath, session);
 	mousemask(mask, NULL);
+
+	if (cfg.listfiles)
+		spawn("rm -rf", initpath, NULL, NULL, F_SILENT);
+
 	exitcurses();
 
 #ifndef NORL
