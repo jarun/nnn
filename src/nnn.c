@@ -4515,6 +4515,15 @@ static bool browse(char *ipath, const char *session)
 		errexit();
 
 begin:
+	/* Can fail when permissions change while browsing.
+	 * It's assumed that path IS a directory when we are here.
+	 */
+	if (access(path, R_OK) == -1) {
+		DPRINTF_S("directory inaccessible");
+		find_accessible_parent(path, newpath, lastname, &presel);
+		setdirwatch();
+	}
+
 	if (cfg.selmode && lastdir[0])
 		lastappendpos = selbufpos;
 
@@ -4537,12 +4546,6 @@ begin:
 		dir_changed = FALSE;
 	}
 #endif
-
-	/* Can fail when permissions change while browsing.
-	 * It's assumed that path IS a directory when we are here.
-	 */
-	if (access(path, R_OK) == -1)
-		printwarn(&presel);
 
 	populate(path, lastname);
 	if (g_states & STATE_INTERRUPTED) {
@@ -4581,12 +4584,8 @@ nochange:
 		}
 
 		/* If CWD is deleted or moved or perms changed, find an accessible parent */
-		if (access(path, F_OK)) {
-			DPRINTF_S("directory inaccessible");
-			find_accessible_parent(path, newpath, lastname, &presel);
-			setdirwatch();
+		if (access(path, F_OK))
 			goto begin;
-		}
 
 		/* If STDIN is no longer a tty (closed) we should exit */
 		if (!isatty(STDIN_FILENO) && !cfg.picker) {
@@ -6155,12 +6154,6 @@ int main(int argc, char *argv[])
 		return _FAILURE;
 	}
 	signal(SIGQUIT, SIG_IGN);
-
-	/* Test initial path */
-	if (!xdiraccess(initpath)) {
-		xerror();
-		return _FAILURE;
-	}
 
 #ifndef NOLOCALE
 	/* Set locale */
