@@ -6186,7 +6186,7 @@ int main(int argc, char *argv[])
 	if (!initcurses(&mask))
 		return _FAILURE;
 
-	bool success = browse(initpath, session);
+	opt = browse(initpath, session);
 	mousemask(mask, NULL);
 	exitcurses();
 
@@ -6195,16 +6195,11 @@ int main(int argc, char *argv[])
 	write_history(g_buf);
 #endif
 
-	if (cfg.pickraw) {
-		if (selbufpos) {
-			opt = seltofile(1, NULL);
-			if (opt != (int)(selbufpos))
-				xerror();
-		}
-	} else if (cfg.picker) {
-		if (selbufpos)
-			writesel(pselbuf, selbufpos - 1);
-	} else if (!cfg.picker && g_selpath)
+	if (cfg.pickraw && selbufpos && seltofile(1, NULL) != (size_t)(selbufpos))
+		xerror();
+	else if (cfg.picker && selbufpos)
+		writesel(pselbuf, selbufpos - 1);
+	else if (!cfg.picker && g_selpath)
 		unlink(g_selpath);
 
 	/* Free the regex */
@@ -6226,5 +6221,5 @@ int main(int argc, char *argv[])
 	haiku_close_nm(haiku_hnd);
 #endif
 
-	return success;
+	return opt;
 }
