@@ -93,6 +93,7 @@ enum action {
 	SEL_QUITCTX,
 	SEL_QUITCD,
 	SEL_QUIT,
+	SEL_QUITFAIL,
 	SEL_CLICK,
 };
 
@@ -232,8 +233,9 @@ static struct key bindings[] = {
 	/* Change dir on quit */
 	{ CONTROL('G'),   SEL_QUITCD },
 	/* Quit */
-	{ 'Q',            SEL_QUIT },
 	{ CONTROL('Q'),   SEL_QUIT },
+	/* Quit with an error code */
+	{ 'Q',            SEL_QUITFAIL },
 	{ KEY_MOUSE,      SEL_CLICK },
 	{ 's',            SEL_SESSIONS },
 };

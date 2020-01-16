@@ -3645,20 +3645,21 @@ static void show_help(const char *path)
 	       "9g ^A  Top%-21c.  Toggle hidden\n"
 	       "9G ^E  End%-21c0  Lock terminal\n"
 	       "9b ^/  Bookmark key%-12c,  Pin CWD\n"
-	        "a1-4  Context 1-4%-8c(B)Tab  Cycle context\n"
+		"a1-4  Context 1-4%-8c(B)Tab  Cycle context\n"
 		  "c/  Filter%-17c^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt%-12c^L  Redraw/clear prompt\n"
 		  "c?  Help, conf%-13c^G  QuitCD\n"
-	       "9Q ^Q  Quit%-20cq  Quit context\n"
+		  "cq  Quit context%-12cQ  Quit with err\n"
+		 "b^Q  Quit\n"
 		"1FILES\n"
 	       "9o ^O  Open with...%-12cn  Create new/link\n"
 	       "9f ^F  File details%-12cd  Detail view toggle\n"
-	         "b^R  Rename/dup%-14cr  Batch rename\n"
+		 "b^R  Rename/dup%-14cr  Batch rename\n"
 		  "cz  Archive%-17c*  Toggle exe\n"
 	   "5Space ^J  (Un)select%-11cm ^K  Mark range/clear\n"
-	          "9p ^P  Copy sel here%-11ca  Select all\n"
-		  "9v ^V  Move sel here%-8cw ^W  Copy/move sel as\n"
-		  "9x ^X  Delete%-18ce  Edit sel\n"
+	       "9p ^P  Copy sel here%-11ca  Select all\n"
+	       "9v ^V  Move sel here%-8cw ^W  Copy/move sel as\n"
+	       "9x ^X  Delete%-18ce  Edit sel\n"
 		"1MISC\n"
 	       "9; ^S  Select plugin%-11c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
@@ -4469,7 +4470,7 @@ static void redraw(char *path)
 	statusbar(path);
 }
 
-static void browse(char *ipath, const char *session)
+static bool browse(char *ipath, const char *session)
 {
 	char newpath[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
@@ -4590,7 +4591,7 @@ nochange:
 		/* If STDIN is no longer a tty (closed) we should exit */
 		if (!isatty(STDIN_FILENO) && !cfg.picker) {
 			free(mark);
-			return;
+			return _FAILURE;
 		}
 
 		sel = nextsel(presel);
@@ -4740,7 +4741,7 @@ nochange:
 					appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 					writesel(pselbuf, selbufpos - 1);
 					free(mark);
-					return;
+					return _SUCCESS;
 				}
 
 				/* If open file is disabled on right arrow or `l`, return */
@@ -5646,6 +5647,7 @@ nochange:
 		case SEL_QUITCTX: // fallthrough
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
+		case SEL_QUITFAIL:
 			if (sel == SEL_QUITCTX) {
 				fd = cfg.curctx; /* fd used as tmp var */
 				for (r = (fd + 1) & ~CTX_MAX;
@@ -5694,7 +5696,7 @@ nochange:
 			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE"))
 				cfg.picker ? selbufpos = 0 : write_lastdir(path);
 			free(mark);
-			return;
+			return sel == SEL_QUITFAIL ? _FAILURE : _SUCCESS;
 		default:
 			if (xlines != LINES || xcols != COLS)
 				setdirwatch(); /* Terminal resized */
@@ -6184,7 +6186,7 @@ int main(int argc, char *argv[])
 	if (!initcurses(&mask))
 		return _FAILURE;
 
-	browse(initpath, session);
+	opt = browse(initpath, session);
 	mousemask(mask, NULL);
 	exitcurses();
 
@@ -6194,11 +6196,8 @@ int main(int argc, char *argv[])
 #endif
 
 	if (cfg.pickraw) {
-		if (selbufpos) {
-			opt = seltofile(1, NULL);
-			if (opt != (int)(selbufpos))
-				xerror();
-		}
+		if (selbufpos && (seltofile(1, NULL) != (size_t)(selbufpos)))
+			xerror();
 	} else if (cfg.picker) {
 		if (selbufpos)
 			writesel(pselbuf, selbufpos - 1);
@@ -6224,5 +6223,5 @@ int main(int argc, char *argv[])
 	haiku_close_nm(haiku_hnd);
 #endif
 
-	return _SUCCESS;
+	return opt;
 }
