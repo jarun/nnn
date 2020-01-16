@@ -6195,10 +6195,14 @@ int main(int argc, char *argv[])
 	write_history(g_buf);
 #endif
 
-	if (cfg.pickraw && selbufpos && seltofile(1, NULL) != (size_t)(selbufpos))
-		xerror();
-	else if (cfg.picker && selbufpos)
-		writesel(pselbuf, selbufpos - 1);
+	if (cfg.pickraw) {
+		if (selbufpos && seltofile(1, NULL) != (size_t)(selbufpos))
+			xerror();
+	}
+	else if (cfg.picker) {
+		if (selbufpos)
+			writesel(pselbuf, selbufpos - 1);
+	}
 	else if (!cfg.picker && g_selpath)
 		unlink(g_selpath);
 
