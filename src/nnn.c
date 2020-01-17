@@ -871,7 +871,7 @@ static size_t xstrlcpy(char *dest, const char *src, size_t n)
 
 	/*
 	 * To enable -O3 ensure src and dest are 16-byte aligned
-	 * More info: http://www.felixcloutier.com/x86/MOVDQA.html
+	 * More info: https://www.felixcloutier.com/x86/MOVDQA:VMOVDQA32:VMOVDQA64
 	 */
 	if ((n >= LONG_SIZE) && (((ulong)src & _ALIGNMENT_MASK) == 0 &&
 	    ((ulong)dest & _ALIGNMENT_MASK) == 0)) {
@@ -947,33 +947,66 @@ static char *common_prefix(const char *s, char *prefix)
 	if (!s || !prefix)
 		return NULL;
 
-	ulong x, y;
-	size_t i, j;
+	/* Only accept non-empty strings */
+	if (*s == '\0' || *prefix == '\0')
+		return NULL;
+
+	ulong *x, *y;
+	size_t i, j, blocks = 0;
 	size_t len_s = strlen(s), len_prefix = strlen(prefix);
 	size_t len = MIN(len_s, len_prefix);
+	const uint _WSHIFT = (LONG_SIZE == 8) ? 3 : 2;
 	char *tmp;
 
-	for (i = 0; i < len; i += sizeof(ulong)) {
-		if (len - i >= sizeof(ulong)) {
-			x = *((ulong *)(s + i));
-			y = *((ulong *)(prefix + i));
-			if (!(x ^ y))
-				continue;
+	/*
+	 * To enable -O3 ensure s and prefix are 16-byte aligned
+	 * More info: https://www.felixcloutier.com/x86/MOVDQA:VMOVDQA32:VMOVDQA64
+	 */
+	if ((len >= LONG_SIZE) && (((ulong)s & _ALIGNMENT_MASK) == 0
+			       && ((ulong)prefix & _ALIGNMENT_MASK) == 0)) {
+		x = (ulong *)s;
+		y = (ulong *)prefix;
+		blocks = len >> _WSHIFT;
+		len &= LONG_SIZE - 1;
+
+		i = 0;
+		while (i < blocks && !(*x ^ *y))
+			++x, ++y, ++i;
+
+		if (i < blocks) {
+			i *= LONG_SIZE;
+			for (j = 0; j < LONG_SIZE; ++j)
+				if (s[i + j] != prefix[i + j]){
+					tmp = xmemrchr((uchar *)prefix, '/', i + j);
+					if (!tmp)
+						return NULL;
+
+					*(tmp != prefix ? tmp : tmp + 1) = '\0';
+
+					return prefix;
+				}
 		}
 
-		for (j = 0; j < MIN(sizeof(ulong), len - i); ++j) {
-			if (s[i + j] != prefix[i + j]){
-				tmp = xmemrchr((uchar *)prefix, '/', i + j);
-				if (!tmp)
-					return NULL;
-
-				*(tmp != prefix ? tmp : tmp + 1) = '\0';
-
-				return prefix;
-			}
-		}
+		if (!len)
+			return prefix;
 	}
 
+	j = 0;
+	i = blocks * LONG_SIZE;
+	while (j < len && s[i + j] == prefix[i + j])
+		++j;
+
+	if (j < len) {
+		tmp = xmemrchr((uchar *)prefix, '/', i + j);
+		if (!tmp)
+			return NULL;
+
+		*(tmp != prefix ? tmp : tmp + 1) = '\0';
+
+		return prefix;
+	}
+
+	/* complete match but lenghts might differ */
 	if (len_s < len_prefix || (len_s > len_prefix && s[len_prefix] != '/')) {
 		tmp = xmemrchr((uchar*)prefix, '/', len);
 		if (!tmp)
@@ -1001,6 +1034,8 @@ static char *xrealpath(const char *path, char *resolved_path, const char *cwd)
 	const char *src, *next;
 	char *dst;
 
+	if (src_size > PATH_MAX)
+		return NULL;
 
 	/* Turn relative paths into absolute */
 	if (path[0] != '/')
@@ -5986,8 +6021,7 @@ static char *make_tmp_tree(char **paths, size_t entries, const char *prefix)
 		xmktree(tmpdir, TRUE);
 
 		*slash = '/';
-		if (symlink(paths[i], tmpdir))
-			DPRINTF_S(strerror(errno));
+		if (symlink(paths[i], tmpdir)){}
 	}
 
 	tmp[10] = '\0';
@@ -6009,7 +6043,7 @@ static char *load_input()
 
 	total_read = input_read = read(STDIN_FILENO, input, chunk);
 	while (input_read == chunk && chunk_count < 512) {
-		if (!xrealloc(input, (++chunk_count) * chunk))
+		if (!(input = xrealloc(input, (++chunk_count) * chunk)))
 			goto malloc_1;
 
 		input_read = read(STDIN_FILENO, input + (chunk_count - 1) * chunk, chunk);
@@ -6022,7 +6056,6 @@ static char *load_input()
 	}
 
 	input[total_read] = '\0';
-
 	/* 256MiB already read, enough for 2^16 paths */
 	if (input_read == chunk && chunk_count == 512)
 		goto malloc_1;
@@ -6043,6 +6076,9 @@ static char *load_input()
 			goto malloc_1;
 	}
 
+	if (!entries)
+		goto malloc_1;
+
 	// allocate the space for all the strings 
 	paths = malloc(sizeof(char *) * entries);
 	if (!paths) {
@@ -6050,7 +6086,11 @@ static char *load_input()
 		goto malloc_1;
 	}
 
-	getcwd(cwd, PATH_MAX);
+	/* prev used as tmp variable */
+	prev = getcwd(cwd, PATH_MAX);
+	if (!prev) {
+		goto malloc_2;
+	}
 
 	for (i = 0; i < entries; ++i) {
 		paths[i] = malloc(sizeof(char) * PATH_MAX);
@@ -6065,14 +6105,15 @@ static char *load_input()
 	}
 
 	for (i = 0, prev = input; i < entries; ++i) {
-		if (!xrealpath(prev, paths[i], cwd))
-			goto malloc_3;
-
 		next = memchr(prev, '\0', total_read - (prev - input) + 1) + 1;
 		if (next - prev == 1) {
+			--i;
 			prev = next;
 			continue;
 		}
+
+		if (!xrealpath(prev, paths[i], cwd))
+			goto malloc_3;
 
 		prev = next;
 	}
@@ -6084,11 +6125,17 @@ static char *load_input()
 	}
 
 	tmpdir = make_tmp_tree(paths, entries, prefix);
-	if (tmpdir)
+	if (tmpdir) {
+		for(i = 0; i < entries; ++i)
+			free(paths[i]);
+		free(paths);
+		free(input);
+
 		return tmpdir;
+	}
 
 malloc_3:
-	for(i = 0; i < entries; --i)
+	for(i = 0; i < entries; ++i)
 		free(paths[i]);
 malloc_2:
 	free(paths);
@@ -6384,6 +6431,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
+#ifdef DBGMODE
+	enabledbg();
+	DPRINTF_S(VERSION);
+#endif
+
 	/* Confirm we are in a terminal */
 	if (!cfg.picker && !isatty(STDOUT_FILENO)) {
 		exit(1);
@@ -6405,11 +6457,6 @@ int main(int argc, char *argv[])
 		/* We return to tty */
 		dup2(STDOUT_FILENO, STDIN_FILENO);
 	}
-
-#ifdef DBGMODE
-	enabledbg();
-	DPRINTF_S(VERSION);
-#endif
 
 	atexit(cleanup);
 
