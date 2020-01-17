@@ -11,6 +11,7 @@
 .Op Ar -b key
 .Op Ar -c
 .Op Ar -d
+.Op Ar -e
 .Op Ar -E
 .Op Ar -g
 .Op Ar -H
@@ -22,6 +23,7 @@
 .Op Ar -R
 .Op Ar -s name
 .Op Ar -S
+.Op Ar -t secs
 .Op Ar -v
 .Op Ar -V
 .Op Ar -x
@@ -60,10 +62,13 @@ supports the following options:
         specify bookmark key to open
 .Pp
 .Fl c
-        opener opens files in cli utilities only
+        opener opens files in cli utilities only (overrides -e)
 .Pp
 .Fl d
         detail mode
+.Pp
+.Fl e
+        open text files in $VISUAL (else $EDITOR, fallback vi) [preferably CLI]
 .Pp
 .Fl E
         use $EDITOR for internal undetached edits
@@ -101,6 +106,9 @@ supports the following options:
 .Pp
 .Fl S
         start in disk usage analyzer mode
+.Pp
+.Fl "t secs"
+        idle timeout in seconds to lock terminal
 .Pp
 .Fl v
         use case-insensitive version compare to sort files
@@ -229,9 +237,8 @@ to list the selection file.
 The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y
 (powers of 1024), same as the default units in \fIls\fR.
 .Sh ENVIRONMENT
-The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables take
-precedence when dealing with the !, e and p commands respectively. A single
-combination to arguments is supported for SHELL and PAGER.
+The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables are
+used. A single combination of arguments is supported for SHELL and PAGER.
 .Pp
 \fBNNN_OPENER:\fR specify a custom file opener.
 .Bd -literal
@@ -291,12 +298,6 @@ combination to arguments is supported for SHELL and PAGER.
     ----------------------------------- + -------------------------------------------------
 .Ed
 .Pp
-\fBNNN_USE_EDITOR:\fR use VISUAL (else EDITOR, preferably CLI, fallback vi)
-to handle text files.
-.Bd -literal
-    export NNN_USE_EDITOR=1
-.Ed
-.Pp
 \fBNNN_CONTEXT_COLORS:\fR string of color codes for each context, e.g.:
 .Bd -literal
     export NNN_CONTEXT_COLORS='1234'
@@ -317,9 +318,6 @@ to handle text files.
 
     NOTE: The options must be preceded by `rclone` and max 5 flags are supported.
 .Ed
-.Pp
-\fBNNN_IDLE_TIMEOUT:\fR set idle timeout (in seconds) to invoke terminal locker
-(default: disabled).
 .Pp
 \fBNNN_TRASH:\fR trash (instead of \fIdelete\fR) files to desktop Trash.
 .Bd -literal

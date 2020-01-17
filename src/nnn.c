@@ -521,22 +521,18 @@ static const char * const messages[] = {
 #define NNN_BMS 0
 #define NNN_OPENER 1
 #define NNN_CONTEXT_COLORS 2
-#define NNN_IDLE_TIMEOUT 3
-#define NNNLVL 4
-#define NNN_PIPE 5
-#define NNN_ARCHIVE 6 /* strings end here */
-#define NNN_USE_EDITOR 7 /* flags begin here */
-#define NNN_TRASH 8
+#define NNNLVL 3
+#define NNN_PIPE 4
+#define NNN_ARCHIVE 5 /* strings end here */
+#define NNN_TRASH 6 /* flags begin here */
 
 static const char * const env_cfg[] = {
 	"NNN_BMS",
 	"NNN_OPENER",
 	"NNN_CONTEXT_COLORS",
-	"NNN_IDLE_TIMEOUT",
 	"NNNLVL",
 	"NNN_PIPE",
 	"NNN_ARCHIVE",
-	"NNN_USE_EDITOR",
 	"NNN_TRASH",
 };
 
@@ -4772,7 +4768,6 @@ nochange:
 					}
 				}
 
-				/* If NNN_USE_EDITOR is set, open text in EDITOR */
 				if (cfg.useeditor && (!sb.st_size ||
 #ifdef FILE_MIME_OPTS
 				    (get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
@@ -5739,8 +5734,9 @@ static void usage(void)
 		" -a      use access time\n"
 		" -A      no dir auto-select\n"
 		" -b key  open bookmark key\n"
-		" -c      cli-only opener\n"
+		" -c      cli-only opener (overrides -e)\n"
 		" -d      detail mode\n"
+		" -e      text in $VISUAL ($EDITOR/vi)\n"
 		" -E      use EDITOR for undetached edits\n"
 		" -g      regex filters [default: string]\n"
 		" -H      show hidden files\n"
@@ -5753,6 +5749,7 @@ static void usage(void)
 		" -R      no rollover at edges\n"
 		" -s name load session by name\n"
 		" -S      du mode\n"
+		" -t secs timeout to lock\n"
 		" -v      version sort\n"
 		" -V      show version\n"
 		" -x      notis, sel to system clipboard\n"
@@ -5903,7 +5900,7 @@ int main(int argc, char *argv[])
 	bool progress = FALSE;
 #endif
 
-	while ((opt = getopt(argc, argv, "HSKaAb:cdEgnop:QrRs:vVxh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKaAb:cdeEgnop:QrRs:t:vVxh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5924,6 +5921,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'c':
 			cfg.cliopener = 1;
+			break;
+		case 'e':
+			cfg.useeditor = 1;
 			break;
 		case 'E':
 			cfg.waitedit = 1;
@@ -5971,6 +5971,9 @@ int main(int argc, char *argv[])
 			break;
 		case 's':
 			session = optarg;
+			break;
+		case 't':
+			idletimeout = xatoi(optarg);
 			break;
 		case 'K':
 			check_key_collision();
@@ -6080,9 +6083,9 @@ int main(int argc, char *argv[])
 		return _FAILURE;
 	}
 
-	/* Edit text in EDITOR if opted (and opener is not all-CLI) */
-	if (!cfg.cliopener && xgetenv_set(env_cfg[NNN_USE_EDITOR]))
-		cfg.useeditor = 1;
+	/* An all-CLI opener overrides option -e) */
+	if (cfg.cliopener)
+		cfg.useeditor = 0;
 
 	/* Get VISUAL/EDITOR */
 	enveditor = xgetenv(envs[ENV_EDITOR], utils[UTIL_VI]);
@@ -6124,10 +6127,6 @@ int main(int argc, char *argv[])
 
 	/* Set nnn nesting level */
 	setenv(env_cfg[NNNLVL], xitoa(xatoi(getenv(env_cfg[NNNLVL])) + 1), 1);
-
-	/* Get locker wait time, if set */
-	idletimeout = xatoi(getenv(env_cfg[NNN_IDLE_TIMEOUT]));
-	DPRINTF_U(idletimeout);
 
 	if (xgetenv_set(env_cfg[NNN_TRASH]))
 		cfg.trash = 1;

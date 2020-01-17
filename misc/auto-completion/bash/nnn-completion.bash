@@ -17,6 +17,7 @@ _nnn ()
         -b
         -c
         -d
+        -e
         -E
         -g
         -H
@@ -29,6 +30,7 @@ _nnn ()
         -R
         -s
         -S
+        -t
         -v
         -V
         -x
@@ -42,6 +44,8 @@ _nnn ()
     elif [[ $prev == -s ]]; then
         local sessions_dir=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions
         COMPREPLY=( $(cd "$sessions_dir" && compgen -f -d -- "$cur") )
+    elif [[ $prev == -t ]]; then
+        return 1
     elif [[ $cur == -* ]]; then
         COMPREPLY=( $(compgen -W "${opts[*]}" -- "$cur") )
     else
