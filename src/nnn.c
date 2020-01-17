@@ -5279,7 +5279,8 @@ nochange:
 					if (cur && access(newpath, F_OK) == -1) {
 						move_cursor(cur - 1, 0);
 						copycurname();
-					}
+					} else
+						lastname[0] = '\0';
 
 					if (cfg.filtermode)
 						presel = FILTER;
