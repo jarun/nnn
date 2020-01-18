@@ -521,7 +521,7 @@ static const char * const messages[] = {
 #define NNN_BMS 0
 #define NNN_PLUG 1
 #define NNN_OPENER 2
-#define NNN_CONTEXT_COLORS 3
+#define NNN_COLORS 3
 #define NNNLVL 4
 #define NNN_PIPE 5
 #define NNN_ARCHIVE 6 /* strings end here */
@@ -531,7 +531,7 @@ static const char * const env_cfg[] = {
 	"NNN_BMS",
 	"NNN_PLUG",
 	"NNN_OPENER",
-	"NNN_CONTEXT_COLORS",
+	"NNN_COLORS",
 	"NNNLVL",
 	"NNN_PIPE",
 	"NNN_ARCHIVE",
@@ -1213,7 +1213,7 @@ static bool selsafe(void)
 static bool initcurses(mmask_t *oldmask)
 {
 	short i;
-	char *colors = xgetenv(env_cfg[NNN_CONTEXT_COLORS], "4444");
+	char *colors = xgetenv(env_cfg[NNN_COLORS], "4444");
 
 	if (cfg.picker) {
 		if (!newterm(NULL, stderr, stdin)) {
@@ -3489,11 +3489,11 @@ static bool remote_mount(char *newpath, int *presel)
 
 	if (opt == 's') {
 		cmd = utils[UTIL_SSHFS];
-		env = xgetenv("NNN_SSHFS_OPTS", cmd);
+		env = xgetenv("NNN_SSHFS", cmd);
 	} else if (opt == 'r') {
 		flag |= F_NOWAIT;
 		cmd = utils[UTIL_RCLONE];
-		env = xgetenv("NNN_RCLONE_OPTS", "rclone mount");
+		env = xgetenv("NNN_RCLONE", "rclone mount");
 	} else {
 		printwait(messages[MSG_INVALID_KEY], presel);
 		return FALSE;

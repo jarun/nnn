@@ -298,23 +298,23 @@ used. A single combination of arguments is supported for SHELL and PAGER.
     ----------------------------------- + -------------------------------------------------
 .Ed
 .Pp
-\fBNNN_CONTEXT_COLORS:\fR string of color codes for each context, e.g.:
+\fBNNN_COLORS:\fR string of color codes for each context, e.g.:
 .Bd -literal
-    export NNN_CONTEXT_COLORS='1234'
+    export NNN_COLORS='1234'
 
     codes: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
 .Ed
 .Pp
-\fBNNN_SSHFS_OPTS:\fR pass additional options to sshfs command:
+\fBNNN_SSHFS:\fR pass additional options to sshfs command:
 .Bd -literal
-    export NNN_SSHFS_OPTS='sshfs -o reconnect,idmap=user,cache_timeout=3600'
+    export NNN_SSHFS='sshfs -o reconnect,idmap=user,cache_timeout=3600'
 
     NOTE: The options must be preceded by `sshfs` and comma-separated without any space between them.
 .Ed
 .Pp
-\fBNNN_RCLONE_OPTS:\fR pass additional options to rclone command:
+\fBNNN_RCLONE:\fR pass additional options to rclone command:
 .Bd -literal
-    export NNN_RCLONE_OPTS='rclone mount --read-only --no-checksum'
+    export NNN_RCLONE='rclone mount --read-only --no-checksum'
 
     NOTE: The options must be preceded by `rclone` and max 5 flags are supported.
 .Ed
