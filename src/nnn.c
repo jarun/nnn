@@ -2783,47 +2783,39 @@ static char *coolsize(off_t size)
 	return size_buf;
 }
 
-static char get_fileind(mode_t mode)
-{
-	char c = '\0';
-
-	switch (mode & S_IFMT) {
-	case S_IFREG:
-		c = '-';
-		break;
-	case S_IFDIR:
-		c = 'd';
-		break;
-	case S_IFLNK:
-		c = 'l';
-		break;
-	case S_IFSOCK:
-		c = 's';
-		break;
-	case S_IFIFO:
-		c = 'p';
-		break;
-	case S_IFBLK:
-		c = 'b';
-		break;
-	case S_IFCHR:
-		c = 'c';
-		break;
-	default:
-		c = '?';
-		break;
-	}
-
-	return c;
-}
-
 /* Convert a mode field into "ls -l" type perms field. */
 static char *get_lsperms(mode_t mode)
 {
 	static const char * const rwx[] = {"---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx"};
 	static char bits[11] = {'\0'};
 
-	bits[0] = get_fileind(mode);
+	switch (mode & S_IFMT) {
+	case S_IFREG:
+		bits[0] = '-';
+		break;
+	case S_IFDIR:
+		bits[0] = 'd';
+		break;
+	case S_IFLNK:
+		bits[0] = 'l';
+		break;
+	case S_IFSOCK:
+		bits[0] = 's';
+		break;
+	case S_IFIFO:
+		bits[0] = 'p';
+		break;
+	case S_IFBLK:
+		bits[0] = 'b';
+		break;
+	case S_IFCHR:
+		bits[0] = 'c';
+		break;
+	default:
+		bits[0] = '?';
+		break;
+	}
+
 	xstrlcpy(&bits[1], rwx[(mode >> 6) & 7], 4);
 	xstrlcpy(&bits[4], rwx[(mode >> 3) & 7], 4);
 	xstrlcpy(&bits[7], rwx[(mode & 7)], 4);
