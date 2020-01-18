@@ -552,8 +552,8 @@ static const char * const envs[] = {
 };
 
 #ifdef __linux__
-static char cp[] = "cpg -giRp";
-static char mv[] = "mvg -gi";
+static char cp[] = "cp   -iRp";
+static char mv[] = "mv   -i";
 #else
 static char cp[] = "cp -iRp";
 static char mv[] = "mv -i";
@@ -5897,9 +5897,6 @@ int main(int argc, char *argv[])
 	char *arg = NULL;
 	char *session = NULL;
 	int opt;
-#ifdef __linux__
-	bool progress = FALSE;
-#endif
 
 	while ((opt = getopt(argc, argv, "HSKaAb:cdeEgnop:QrRs:t:vVxh")) != -1) {
 		switch (opt) {
@@ -5964,7 +5961,8 @@ int main(int argc, char *argv[])
 			break;
 		case 'r':
 #ifdef __linux__
-			progress = TRUE;
+			cp[2] = cp[5] = mv[2] = mv[5] = 'g'; /* cp -iRp -> cpg -giRp */
+			cp[4] = mv[4] = '-';
 #endif
 			break;
 		case 'R':
@@ -6135,16 +6133,6 @@ int main(int argc, char *argv[])
 	/* Prefix for temporary files */
 	if (!set_tmp_path())
 		return _FAILURE;
-
-#ifdef __linux__
-	if (!progress) {
-		cp[5] = cp[4];
-		cp[2] = cp[4] = ' ';
-
-		mv[5] = mv[4];
-		mv[2] = mv[4] = ' ';
-	}
-#endif
 
 	/* Ignore/handle certain signals */
 	struct sigaction act = {.sa_handler = sigint_handler};
