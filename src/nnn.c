@@ -3630,7 +3630,7 @@ static void show_help(const char *path)
 	       "9Dn j  Down%-14cPgDn ^D  Scroll down\n"
 	       "9Lt h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
 	   "5Ret Rt l  Open%-20c'  First file\n"
-	       "9g ^A  Top%-21c.  Toggle hidden\n"
+	       "9g ^A  Top%-18c. F5  Toggle hidden\n"
 	       "9G ^E  End%-21c0  Lock terminal\n"
 	       "9b ^/  Bookmark key%-12c,  Pin CWD\n"
 		"a1-4  Context 1-4%-8c(B)Tab  Cycle context\n"
@@ -4970,7 +4970,7 @@ nochange:
 			}
 			goto nochange;
 		case SEL_MFLTR: // fallthrough
-		case SEL_TOGGLEDOT: // fallthrough
+		case SEL_HIDDEN: // fallthrough
 		case SEL_DETAIL: // fallthrough
 		case SEL_SORT:
 			switch (sel) {
@@ -4985,7 +4985,7 @@ nochange:
 				/* Start watching the directory */
 				dir_changed = TRUE;
 				break;
-			case SEL_TOGGLEDOT:
+			case SEL_HIDDEN:
 				cfg.showhidden ^= 1;
 				if (ndents)
 					copycurname();

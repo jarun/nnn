@@ -62,7 +62,7 @@ enum action {
 	SEL_PIN,
 	SEL_FLTR,
 	SEL_MFLTR,
-	SEL_TOGGLEDOT,
+	SEL_HIDDEN,
 	SEL_DETAIL,
 	SEL_STATS,
 	SEL_CHMODX,
@@ -164,7 +164,8 @@ static struct key bindings[] = {
 	/* Toggle filter mode */
 	{ CONTROL('N'),   SEL_MFLTR },
 	/* Toggle hide .dot files */
-	{ '.',            SEL_TOGGLEDOT },
+	{ '.',            SEL_HIDDEN },
+	{ KEY_F(5),       SEL_HIDDEN },
 	/* Detailed listing */
 	{ 'd',            SEL_DETAIL },
 	/* File details */
