@@ -519,15 +519,17 @@ static const char * const messages[] = {
 
 /* Supported configuration environment variables */
 #define NNN_BMS 0
-#define NNN_OPENER 1
-#define NNN_CONTEXT_COLORS 2
-#define NNNLVL 3
-#define NNN_PIPE 4
-#define NNN_ARCHIVE 5 /* strings end here */
-#define NNN_TRASH 6 /* flags begin here */
+#define NNN_PLUG 1
+#define NNN_OPENER 2
+#define NNN_CONTEXT_COLORS 3
+#define NNNLVL 4
+#define NNN_PIPE 5
+#define NNN_ARCHIVE 6 /* strings end here */
+#define NNN_TRASH 7 /* flags begin here */
 
 static const char * const env_cfg[] = {
 	"NNN_BMS",
+	"NNN_PLUG",
 	"NNN_OPENER",
 	"NNN_CONTEXT_COLORS",
 	"NNNLVL",
@@ -6024,8 +6026,8 @@ int main(int argc, char *argv[])
 	}
 
 	/* Parse plugins string */
-	if (!parsekvpair(plug, &pluginstr, "NNN_PLUG", PLUGIN_MAX, PATH_MAX)) {
-		fprintf(stderr, "%s\n", "NNN_PLUG");
+	if (!parsekvpair(plug, &pluginstr, env_cfg[NNN_PLUG], PLUGIN_MAX, PATH_MAX)) {
+		fprintf(stderr, "%s\n", env_cfg[NNN_PLUG]);
 		return _FAILURE;
 	}
 
