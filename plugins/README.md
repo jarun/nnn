@@ -71,7 +71,7 @@ Use the plugin shortcut (<kbd>;key</kbd> or <kbd>^Skey</kbd>) to list the define
 
     export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;n:notes;v:imgviu;t:imgthumb'
 
-    Plugin `fzopen` can be run with the keybind <kbd>;o</kbd>, `mocplay` can be run with <kbd>;p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
+Plugin `fzopen` can be run with the keybind <kbd>;o</kbd>, `mocplay` can be run with <kbd>;p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
 
 A maximum of 15 keys can be defined. To select and invoke a plugin from the plugin directory, press <kbd>Enter</kbd> (to _enter_ the plugin dir) after the plugin shortcut.
 
