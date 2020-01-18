@@ -4235,6 +4235,76 @@ static int handle_context_switch(enum action sel, char *newpath)
 	return r;
 }
 
+static bool set_sort_flags(void)
+{
+	int r = get_input(messages[MSG_ORDER]);
+
+	if ((r == 'a' || r == 'd' || r == 'e' || r == 's' || r == 't') && (entrycmpfn == &reventrycmp))
+		entrycmpfn = &entrycmp;
+
+	switch (r) {
+	case 'a': /* Apparent du */
+		cfg.apparentsz ^= 1;
+		if (cfg.apparentsz) {
+			nftw_fn = &sum_asize;
+			cfg.blkorder = 1;
+			blk_shift = 0;
+		} else
+			cfg.blkorder = 0;
+		// fallthrough
+	case 'd': /* Disk usage */
+		if (r == 'd') {
+			if (!cfg.apparentsz)
+				cfg.blkorder ^= 1;
+			nftw_fn = &sum_bsize;
+			cfg.apparentsz = 0;
+			blk_shift = ffs(S_BLKSIZE) - 1;
+		}
+
+		if (cfg.blkorder) {
+			cfg.showdetail = 1;
+			printptr = &printent_long;
+		}
+		cfg.mtimeorder = 0;
+		cfg.sizeorder = 0;
+		cfg.extnorder = 0;
+		clearfilter(); /* Reload directory */
+		endselection(); /* We are going to reload dir */
+		break;
+	case 'e': /* File extension */
+		cfg.extnorder ^= 1;
+		cfg.sizeorder = 0;
+		cfg.mtimeorder = 0;
+		cfg.apparentsz = 0;
+		cfg.blkorder = 0;
+		break;
+	case 'r': /* Reverse sort */
+		entrycmpfn = (entrycmpfn == &entrycmp) ? &reventrycmp : &entrycmp;
+		break;
+	case 's': /* File size */
+		cfg.sizeorder ^= 1;
+		cfg.mtimeorder = 0;
+		cfg.apparentsz = 0;
+		cfg.blkorder = 0;
+		cfg.extnorder = 0;
+		break;
+	case 't': /* Modification or access time */
+		cfg.mtimeorder ^= 1;
+		cfg.sizeorder = 0;
+		cfg.apparentsz = 0;
+		cfg.blkorder = 0;
+		cfg.extnorder = 0;
+		break;
+	case 'v': /* Version */
+		namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
+		break;
+	default:
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static void statusbar(char *path)
 {
 	int i = 0, extnlen = 0;
@@ -4984,69 +5054,7 @@ nochange:
 				cfg.blkorder = 0;
 				continue;
 			default: /* SEL_SORT */
-				r = get_input(messages[MSG_ORDER]);
-
-				if ((r == 'a' || r == 'd' || r == 'e' || r == 's' || r == 't')
-				    && (entrycmpfn == &reventrycmp))
-					entrycmpfn = &entrycmp;
-
-				switch (r) {
-				case 'a': /* Apparent du */
-					cfg.apparentsz ^= 1;
-					if (cfg.apparentsz) {
-						nftw_fn = &sum_asize;
-						cfg.blkorder = 1;
-						blk_shift = 0;
-					} else
-						cfg.blkorder = 0;
-					// fallthrough
-				case 'd': /* Disk usage */
-					if (r == 'd') {
-						if (!cfg.apparentsz)
-							cfg.blkorder ^= 1;
-						nftw_fn = &sum_bsize;
-						cfg.apparentsz = 0;
-						blk_shift = ffs(S_BLKSIZE) - 1;
-					}
-
-					if (cfg.blkorder) {
-						cfg.showdetail = 1;
-						printptr = &printent_long;
-					}
-					cfg.mtimeorder = 0;
-					cfg.sizeorder = 0;
-					cfg.extnorder = 0;
-					clearfilter(); /* Reload directory */
-					endselection(); /* We are going to reload dir */
-					break;
-				case 'e': /* File extension */
-					cfg.extnorder ^= 1;
-					cfg.sizeorder = 0;
-					cfg.mtimeorder = 0;
-					cfg.apparentsz = 0;
-					cfg.blkorder = 0;
-					break;
-				case 'r': /* Reverse sort */
-					entrycmpfn = (entrycmpfn == &entrycmp) ? &reventrycmp : &entrycmp;
-					break;
-				case 's': /* File size */
-					cfg.sizeorder ^= 1;
-					cfg.mtimeorder = 0;
-					cfg.apparentsz = 0;
-					cfg.blkorder = 0;
-					cfg.extnorder = 0;
-					break;
-				case 't': /* Modification or access time */
-					cfg.mtimeorder ^= 1;
-					cfg.sizeorder = 0;
-					cfg.apparentsz = 0;
-					cfg.blkorder = 0;
-					cfg.extnorder = 0;
-					break;
-				case 'v': /* Version */
-					namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
-					break;
-				default:
+				if (!set_sort_flags()) {
 					if (cfg.filtermode)
 						presel = FILTER;
 					printwait(messages[MSG_INVALID_KEY], &presel);
