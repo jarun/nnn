@@ -641,12 +641,17 @@ static char *xitoa(uint val)
 {
 	static char ascbuf[32] = {0};
 	int i = 30;
+	uint rem;
 
 	if (!val)
 		return "0";
 
-	for (; val && i; --i, val /= 10)
-		ascbuf[i] = '0' + (val % 10);
+	while (val && i) {
+		rem = val / 10;
+		ascbuf[i] = '0' + (val - (rem * 10));
+		val = rem;
+		--i;
+	}
 
 	return &ascbuf[++i];
 }
