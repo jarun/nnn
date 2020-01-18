@@ -562,9 +562,12 @@ static char mv[] = "mv -i";
 #endif
 
 static const char cpmvformatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
-static const char cpmvrenamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' %s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'";
-static const char batchrenamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
-static const char archive_regex[] ="\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$";
+static const char cpmvrenamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
+				    "%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" "
+				    "< /dev/tty'";
+static const char batchrenamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
+				     "tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
+static const char archive_regex[] = "\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$";
 
 /* Event handling */
 #ifdef LINUX_INOTIFY
@@ -584,7 +587,7 @@ static uint KQUEUE_FFLAGS = NOTE_DELETE | NOTE_EXTEND | NOTE_LINK
 static struct timespec gtimeout;
 #elif defined(HAIKU_NM)
 static bool haiku_nm_active = FALSE;
-static haiku_nm_h haiku_hnd = NULL;
+static haiku_nm_h haiku_hnd;
 #endif
 
 /* Function macros */
@@ -736,10 +739,11 @@ static int get_input(const char *prompt)
 	return r;
 }
 
-static int get_cur_or_sel()
+static int get_cur_or_sel(void)
 {
 	if (selbufpos && ndents) {
 		int choice = get_input(messages[MSG_CUR_SEL_OPTS]);
+
 		return ((choice == 'c' || choice == 's') ? choice : 0);
 	}
 
@@ -995,35 +999,6 @@ static size_t seltofile(int fd, uint *pcount)
 	return pos;
 }
 
-#if 0
-/* List selection from selection buffer */
-static bool listselbuf()
-{
-	int fd;
-	size_t pos;
-	uint oldpos = selbufpos;
-
-	if (!selbufpos)
-		return FALSE;
-
-	fd = create_tmp_file();
-	if (fd == -1) {
-		selbufpos = oldpos;
-		return FALSE;
-	}
-
-	pos = seltofile(fd, NULL);
-
-	close(fd);
-	if (pos && pos == selbufpos)
-		spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
-	unlink(g_tmpfpath);
-
-	selbufpos = oldpos;
-	return TRUE;
-}
-#endif
-
 /* List selection from selection file (another instance) */
 static bool listselfile(void)
 {
@@ -1081,7 +1056,7 @@ static void updateselbuf(const char *path, char *newpath)
 }
 
 /* Finish selection procedure before an operation */
-static void endselection()
+static void endselection(void)
 {
 	if (cfg.selmode)
 		cfg.selmode = 0;
@@ -1880,7 +1855,7 @@ static int visible_str(const fltrexp_t *fltrexp, const char *fname)
 
 static int (*filterfn)(const fltrexp_t *fltr, const char *fname) = &visible_str;
 
-static void clearfilter()
+static void clearfilter(void)
 {
 	char *fltr = g_ctx[cfg.curctx].c_fltr;
 
@@ -2191,8 +2166,10 @@ static int filterentries(char *path, char *lastname)
 					ln[1] = ln[REGEX_MAX - 1];
 					ln[REGEX_MAX - 1] = '\0';
 					len = mbstowcs(wln, ln, REGEX_MAX);
-					/* Go to the top, we don't know if the
-					   hovered file will match the filter */
+					/*
+					 * Go to the top, we don't know if the
+					 * hovered file will match the filter
+					 */
 					cur = 0;
 
 					if (matches(pln) != -1)
@@ -3267,7 +3244,8 @@ static bool show_stats(const char *fpath, const struct stat *sb)
 
 static bool xchmod(const char *fpath, mode_t mode)
 {
-	(S_IXUSR & mode) ? (mode &= ~(S_IXUSR | S_IXGRP | S_IXOTH)) : (mode |= (S_IXUSR | S_IXGRP | S_IXOTH));
+	/* (Un)set (S_IXUSR | S_IXGRP | S_IXOTH) */
+	(0100 & mode) ? (mode &= ~0111) : (mode |= 0111);
 
 	return (chmod(fpath, mode) == 0);
 }
@@ -3371,9 +3349,9 @@ static void find_accessible_parent(char *path, char *newpath, char *lastname, in
 }
 
 /* Create non-existent parents and a file or dir */
-static bool xmktree(char* path, bool dir)
+static bool xmktree(char *path, bool dir)
 {
-	char* p = path;
+	char *p = path;
 	char *slash = path;
 
 	if (!p || !*p)
@@ -3399,9 +3377,8 @@ static bool xmktree(char* path, bool dir)
 			// is writeable.
 			// Try to continue and see what happens.
 			// TODO: Find a more robust solution.
-			if (errno == B_READ_ONLY_DEVICE) {
+			if (errno == B_READ_ONLY_DEVICE)
 				goto next;
-			}
 #endif
 			DPRINTF_S("mkdir1!");
 			DPRINTF_S(strerror(errno));
@@ -3418,13 +3395,14 @@ next:
 	}
 
 	if (dir) {
-		if(mkdir(path, 0777) == -1 && errno != EEXIST) {
+		if (mkdir(path, 0777) == -1 && errno != EEXIST) {
 			DPRINTF_S("mkdir2!");
 			DPRINTF_S(strerror(errno));
 			return FALSE;
 		}
 	} else {
 		int fd = open(path, O_CREAT, 0666);
+
 		if (fd == -1 && errno != EEXIST) {
 			DPRINTF_S("open!");
 			DPRINTF_S(strerror(errno));
@@ -3835,7 +3813,7 @@ static void launch_app(const char *path, char *newpath)
 		spawn(tmp, "0", NULL, path, r);
 }
 
-static int sum_bsizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+static int sum_bsize(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
 	(void) fpath;
 	(void) ftwbuf;
@@ -3847,7 +3825,7 @@ static int sum_bsizes(const char *fpath, const struct stat *sb, int typeflag, st
 	return 0;
 }
 
-static int sum_sizes(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+static int sum_asize(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
 	(void) fpath;
 	(void) ftwbuf;
@@ -3881,7 +3859,7 @@ static blkcnt_t dirwalk(char *path, struct stat *psb)
 
 	if (nftw(path, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) < 0) {
 		DPRINTF_S("nftw failed");
-		return (cfg.apparentsz ? psb->st_size : psb->st_blocks);
+		return cfg.apparentsz ? psb->st_size : psb->st_blocks;
 	}
 
 	return ent_blocks;
@@ -4140,8 +4118,8 @@ static void populate(char *path, char *lastname)
 static void move_cursor(int target, int ignore_scrolloff)
 {
 	int delta, scrolloff, onscreen = xlines - 4;
-	last_curscroll = curscroll;
 
+	last_curscroll = curscroll;
 	target = MAX(0, MIN(ndents - 1, target));
 	delta = target - cur;
 	last = cur;
@@ -5016,7 +4994,7 @@ nochange:
 				case 'a': /* Apparent du */
 					cfg.apparentsz ^= 1;
 					if (cfg.apparentsz) {
-						nftw_fn = &sum_sizes;
+						nftw_fn = &sum_asize;
 						cfg.blkorder = 1;
 						blk_shift = 0;
 					} else
@@ -5026,7 +5004,7 @@ nochange:
 					if (r == 'd') {
 						if (!cfg.apparentsz)
 							cfg.blkorder ^= 1;
-						nftw_fn = &sum_bsizes;
+						nftw_fn = &sum_bsize;
 						cfg.apparentsz = 0;
 						blk_shift = ffs(S_BLKSIZE) - 1;
 					}
@@ -5101,7 +5079,7 @@ nochange:
 				}
 
 				if (sel == SEL_CHMODX)
-					dents[cur].mode ^= S_IXUSR;
+					dents[cur].mode ^= 0111;
 			}
 			break;
 		case SEL_REDRAW: // fallthrough
@@ -5901,7 +5879,7 @@ int main(int argc, char *argv[])
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
-			nftw_fn = sum_bsizes;
+			nftw_fn = sum_bsize;
 			blk_shift = ffs(S_BLKSIZE) - 1; // fallthrough
 		case 'd':
 			cfg.showdetail = 1;
