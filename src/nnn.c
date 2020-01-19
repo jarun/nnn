@@ -256,7 +256,6 @@ typedef struct {
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint picker     : 1;  /* Write selection to user-specified file */
 	uint pickraw    : 1;  /* Write selection to sdtout before exit */
-	uint listfiles  : 1;  /* Show list of files from input */
 	uint nonavopen  : 1;  /* Open file on right arrow or `l` */
 	uint autoselect : 1;  /* Auto-select dir in nav-as-you-type mode */
 	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
@@ -310,7 +309,6 @@ static settings cfg = {
 	0, /* dircolor */
 	0, /* picker */
 	0, /* pickraw */
-	0, /* listfiles */
 	0, /* nonavopen */
 	1, /* autoselect */
 	0, /* metaviewer */
@@ -376,6 +374,12 @@ static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 
 /* Buffer to store tmp file path to show selection, file stats and help */
 static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
+
+/* Buffer to store path to tmp directory for listing files from input */
+static char g_listpath[TMP_LEN_MAX] __attribute__ ((aligned));
+
+/* Buffer to store common prefix for listing files from input */
+static char g_prefixpath[PATH_MAX] __attribute__ ((aligned));
 
 /* Buffer to store plugins control pipe location */
 static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
@@ -598,6 +602,7 @@ static const char cpmvrenamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\
 static const char batchrenamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
 				     "tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
 static const char archive_regex[] = "\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$";
+static const char replaceprefixcmd[] = "sed -i 's|^%s\\(.*\\)$|%s\\1|' %s";
 
 /* Event handling */
 #ifdef LINUX_INOTIFY
@@ -1213,8 +1218,51 @@ static void updateselbuf(const char *path, char *newpath)
 /* Finish selection procedure before an operation */
 static void endselection(void)
 {
+	int fd;
+	ssize_t count;
+	char buf[sizeof(replaceprefixcmd) + PATH_MAX + (TMP_LEN_MAX << 1)];
+
 	if (cfg.selmode)
 		cfg.selmode = 0;
+
+	if (!*g_listpath)
+		return;
+
+	fd = create_tmp_file();
+	if (fd == -1) {
+		DPRINTF_S("couldn't create tmp file");
+		return;
+	}
+
+	seltofile(fd, NULL);
+	close(fd);
+
+	snprintf(buf, sizeof(buf), replaceprefixcmd, g_listpath, g_prefixpath, g_tmpfpath);
+	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
+
+	fd = open(g_tmpfpath, O_RDONLY);
+	if (fd == -1) {
+		DPRINTF_S(strerror(errno));
+		unlink(g_tmpfpath);
+		return;
+	}
+
+	count = read(fd, pselbuf, selbuflen);
+	close(fd);
+	unlink(g_tmpfpath);
+
+	if (count < 0){
+		DPRINTF_S(strerror(errno));
+		return;
+	}
+
+	selbufpos = count;
+	pselbuf[--count] = '\0';
+	for (--count; count > 0; --count) {
+		if (pselbuf[count] == '\n' && pselbuf[count+1] == '/') {
+			pselbuf[count] = '\0';
+		}
+	}
 }
 
 static void clearselection(void)
@@ -1287,7 +1335,7 @@ static int editselection(void)
 	}
 
 	if (count < 0) {
-		DPRINTF_S("error reading tmp file");
+		DPRINTF_S(strerror(errno));
 		goto emptyedit;
 	}
 
@@ -5368,7 +5416,7 @@ nochange:
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
 			if (ndents) {
-				mkpath(path, dents[cur].name, newpath);
+				mkpath((xstrcmp(path, g_listpath) ? path : g_prefixpath), dents[cur].name, newpath);
 				if (lstat(newpath, &sb) == -1
 				    || (sel == SEL_STATS && !show_stats(newpath, &sb))
 				    || (sel == SEL_CHMODX && !xchmod(newpath, sb.st_mode))) {
@@ -5550,7 +5598,7 @@ nochange:
 				}
 
 				if (r == 'c') {
-					mkpath(path, dents[cur].name, newpath);
+					mkpath((xstrcmp(path, g_listpath) ? path : g_prefixpath), dents[cur].name, newpath);
 					xrm(newpath);
 
 					if (cur && access(newpath, F_OK) == -1) {
@@ -6012,6 +6060,8 @@ static char *make_tmp_tree(char **paths, size_t entries, const char *prefix)
 		return NULL;
 	}
 
+	xstrlcpy(g_listpath, tmpdir, g_tmpfplen + 10);
+
 	for(i = 0; i < entries; ++i){
 		xstrlcpy(tmp + 10, paths[i] + len, strlen(paths[i]) + 1);
 
@@ -6033,7 +6083,7 @@ static char *load_input()
 	/* 512 KiB chunk size */
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
 	char *input = malloc(sizeof(char) * chunk), *tmpdir;
-	char prefix[PATH_MAX], cwd[PATH_MAX], *next, *prev, **paths;
+	char cwd[PATH_MAX], *next, *prev, **paths;
 	ssize_t input_read, total_read = 0;
 
 	if (!input) {
@@ -6118,13 +6168,13 @@ static char *load_input()
 		prev = next;
 	}
 
-	xstrlcpy(prefix, paths[0], strlen(paths[0]) + 1);
+	xstrlcpy(g_prefixpath, paths[0], strlen(paths[0]) + 1);
 	for (i = 1; i < entries; ++i) {
-		if (!common_prefix(paths[i], prefix))
+		if (!common_prefix(paths[i], g_prefixpath))
 			goto malloc_3;
 	}
 
-	tmpdir = make_tmp_tree(paths, entries, prefix);
+	tmpdir = make_tmp_tree(paths, entries, g_prefixpath);
 	if (tmpdir) {
 		for(i = 0; i < entries; ++i)
 			free(paths[i]);
@@ -6443,8 +6493,6 @@ int main(int argc, char *argv[])
 
 	/* Now we are in path list mode */
 	if (!cfg.picker && !isatty(STDIN_FILENO)) {
-		cfg.listfiles = 1;
-
 		/* Prefix for temporary files */
 		if (!set_tmp_path())
 			return _FAILURE;
@@ -6632,7 +6680,7 @@ int main(int argc, char *argv[])
 	opt = browse(initpath, session);
 	mousemask(mask, NULL);
 
-	if (cfg.listfiles)
+	if (*g_listpath)
 		spawn("rm -rf", initpath, NULL, NULL, F_SILENT);
 
 	exitcurses();
