@@ -2279,8 +2279,11 @@ end:
 	if (*ch != 27 && *ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN && *ch != CONTROL('T')) {
 		ln[0] = ln[1] = '\0';
 		move_cursor(cur, 0);
-	} else if (ndents)
-		xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1);
+	}
+
+	/* Save current */
+	if (ndents)
+		copycurname();
 
 	curs_set(FALSE);
 	settimeout();
@@ -5014,10 +5017,6 @@ nochange:
 			}
 #endif
 			presel = filterentries(path, lastname);
-
-			/* Save current */
-			if (ndents)
-				copycurname();
 
 			if (presel == 27) {
 				presel = 0;
