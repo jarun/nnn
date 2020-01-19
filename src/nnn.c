@@ -2327,94 +2327,95 @@ static char *xreadline(const char *prefill, const char *prompt)
 		move(xlines - 1, x + wcswidth(buf, pos));
 
 		r = get_wch(ch);
-		if (r != ERR) {
-			if (r == OK) {
-				switch (*ch) {
-				case KEY_ENTER: // fallthrough
-				case '\n': // fallthrough
-				case '\r':
-					goto END;
-				case 127: // fallthrough
-				case '\b': /* rhel25 sends '\b' for backspace */
-					if (pos > 0) {
-						memmove(buf + pos - 1, buf + pos,
-							(len - pos) * WCHAR_T_WIDTH);
-						--len, --pos;
-					} // fallthrough
-				case '\t': /* TAB breaks cursor position, ignore it */
-					continue;
-				case CONTROL('L'):
-					printprompt(prompt);
-					len = pos = 0;
-					continue;
-				case CONTROL('A'):
-					pos = 0;
-					continue;
-				case CONTROL('E'):
-					pos = len;
-					continue;
-				case CONTROL('U'):
-					printprompt(prompt);
-					memmove(buf, buf + pos, (len - pos) * WCHAR_T_WIDTH);
-					len -= pos;
-					pos = 0;
-					continue;
-				case 27: /* Exit prompt on Escape */
-					len = 0;
-					goto END;
-				}
+		if (r == ERR)
+			continue;
 
-				/* Filter out all other control chars */
-				if (*ch < ASCII_MAX && keyname(*ch)[0] == '^')
-					continue;
-
-				if (pos < READLINE_MAX - 1) {
-					memmove(buf + pos + 1, buf + pos,
+		if (r == OK) {
+			switch (*ch) {
+			case KEY_ENTER: // fallthrough
+			case '\n': // fallthrough
+			case '\r':
+				goto END;
+			case 127: // fallthrough
+			case '\b': /* rhel25 sends '\b' for backspace */
+				if (pos > 0) {
+					memmove(buf + pos - 1, buf + pos,
 						(len - pos) * WCHAR_T_WIDTH);
-					buf[pos] = *ch;
-					++len, ++pos;
-					continue;
-				}
-			} else {
-				switch (*ch) {
-#ifdef KEY_RESIZE
-				case KEY_RESIZE:
-					clearoldprompt();
-					xlines = LINES;
-					printprompt(prompt);
-					break;
+					--len, --pos;
+				} // fallthrough
+			case '\t': /* TAB breaks cursor position, ignore it */
+				continue;
+			case CONTROL('L'):
+				printprompt(prompt);
+				len = pos = 0;
+				continue;
+			case CONTROL('A'):
+				pos = 0;
+				continue;
+			case CONTROL('E'):
+				pos = len;
+				continue;
+			case CONTROL('U'):
+				printprompt(prompt);
+				memmove(buf, buf + pos, (len - pos) * WCHAR_T_WIDTH);
+				len -= pos;
+				pos = 0;
+				continue;
+			case 27: /* Exit prompt on Escape */
+				len = 0;
+				goto END;
+			}
+
+			/* Filter out all other control chars */
+			if (*ch < ASCII_MAX && keyname(*ch)[0] == '^')
+				continue;
+
+			if (pos < READLINE_MAX - 1) {
+				memmove(buf + pos + 1, buf + pos,
+					(len - pos) * WCHAR_T_WIDTH);
+				buf[pos] = *ch;
+				++len, ++pos;
+				continue;
+			}
+		} else {
+			switch (*ch) {
+#ifdef KE
+			case KEY_RESIZE:
+				clearoldprompt();
+				xlines = LINES;
+				printprompt(prompt);
+				break;
 #endif
-				case KEY_LEFT:
-					if (pos > 0)
-						--pos;
-					break;
-				case KEY_RIGHT:
-					if (pos < len)
-						++pos;
-					break;
-				case KEY_BACKSPACE:
-					if (pos > 0) {
-						memmove(buf + pos - 1, buf + pos,
-							(len - pos) * WCHAR_T_WIDTH);
-						--len, --pos;
-					}
-					break;
-				case KEY_DC:
-					if (pos < len) {
-						memmove(buf + pos, buf + pos + 1,
-							(len - pos - 1) * WCHAR_T_WIDTH);
-						--len;
-					}
-					break;
-				case KEY_END:
-					pos = len;
-					break;
-				case KEY_HOME:
-					pos = 0;
-					break;
-				default:
-					break;
+			case KEY_LEFT:
+				if (pos > 0)
+					--pos;
+				break;
+			case KEY_RIGHT:
+				if (pos < len)
+					++pos;
+				break;
+			case KEY_BACKSPACE:
+				if (pos > 0) {
+					memmove(buf + pos - 1, buf + pos,
+						(len - pos) * WCHAR_T_WIDTH);
+					--len, --pos;
 				}
+				break;
+			case KEY_DC:
+				if (pos < len) {
+					memmove(buf + pos, buf + pos + 1,
+						(len - pos - 1) * WCHAR_T_WIDTH);
+					--len;
+				}
+				break;
+			case KEY_END:
+				pos = len;
+				break;
+			case KEY_HOME:
+				pos = 0;
+				break;
+			default:
+				break;
 			}
 		}
 	}
