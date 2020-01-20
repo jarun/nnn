@@ -2150,41 +2150,31 @@ static int filterentries(char *path, char *lastname)
 		case KEY_DC: // fallthrough
 		case KEY_BACKSPACE: // fallthrough
 		case '\b': // fallthrough
-		case CONTROL('L'): // fallthrough
 		case 127: /* handle DEL */
-			if (len == 1 && *ch != CONTROL('L')) {
+			if (len != 1) {
+				wln[--len] = '\0';
+				wcstombs(ln, wln, REGEX_MAX);
+				ndents = total;
+			} else
 				*ch = CONTROL('L');
-				goto end;
-			}
-
+			// fallthrough
+		case CONTROL('L'):
 			if (*ch == CONTROL('L')) {
 				if (wln[1]) {
 					ln[REGEX_MAX - 1] = ln[1];
-					wln[1] = '\0';
+					ln[1] = wln[1] = '\0';
 					len = 1;
+					ndents = total;
 				} else if (ln[REGEX_MAX - 1]) { /* Show the previous filter */
 					ln[1] = ln[REGEX_MAX - 1];
 					ln[REGEX_MAX - 1] = '\0';
 					len = mbstowcs(wln, ln, REGEX_MAX);
-					/*
-					 * Go to the top, we don't know if the
-					 * hovered file will match the filter
-					 */
-					cur = 0;
-
-					if (matches(pln) != -1)
-						redraw(path);
-
-					showfilter(ln);
-					continue;
 				}
-			} else
-				wln[--len] = '\0';
+			}
 
+			/* Go to the top, we don't know if the hovered file will match the filter */
 			cur = 0;
 
-			wcstombs(ln, wln, REGEX_MAX);
-			ndents = total;
 			if (matches(pln) != -1)
 				redraw(path);
 
@@ -2195,79 +2185,79 @@ static int filterentries(char *path, char *lastname)
 			goto end;
 		}
 
-		if (r == OK) {
-			/* Handle all control chars in main loop */
-			if (*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^')
+		if (r != OK) /* Handle Fn keys in main loop */
+			break;
+
+		/* Handle all control chars in main loop */
+		if (*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^')
+			goto end;
+
+		if (len == 1) {
+			switch (*ch) {
+			case '=': // fallthrough /* Launch app */
+			case ']': // fallthorugh /*Prompt key */
+			case ';': // fallthrough /* Run plugin key */
+			case ',': // fallthrough /* Pin CWD */
+			case '?': /* Help and config key, '?' is an invalid regex */
 				goto end;
-
-			if (len == 1) {
-				switch (*ch) {
-				case '=': // fallthrough /* Launch app */
-				case ']': // fallthorugh /*Prompt key */
-				case ';': // fallthrough /* Run plugin key */
-				case ',': // fallthrough /* Pin CWD */
-				case '?': /* Help and config key, '?' is an invalid regex */
-					goto end;
-				}
-
-				/* Toggle case-sensitivity */
-				if (*ch == CASE) {
-					fnstrstr = (fnstrstr == &strcasestr) ? &strstr : &strcasestr;
-					regflags ^= REG_ICASE;
-					showfilter(ln);
-					continue;
-				}
-
-				/* toggle string or regex filter */
-				if (*ch == FILTER) {
-					wln[0] = ln[0] = (ln[0] == FILTER) ? RFILTER : FILTER;
-					cfg.regex ^= 1;
-					filterfn = (filterfn == &visible_str) ? &visible_re : &visible_str;
-					showfilter(ln);
-					continue;
-				}
 			}
 
-			/* Reset cur in case it's a repeat search */
-			if (len == 1)
-				cur = 0;
-
-			if (len == REGEX_MAX - 1)
-				break;
-
-			wln[len] = (wchar_t)*ch;
-			wln[++len] = '\0';
-			wcstombs(ln, wln, REGEX_MAX);
-
-			/* Forward-filtering optimization:
-			 * - new matches can only be a subset of current matches.
-			 */
-			/* ndents = total; */
-
-			if (matches(pln) == -1) {
+			/* Toggle case-sensitivity */
+			if (*ch == CASE) {
+				fnstrstr = (fnstrstr == &strcasestr) ? &strstr : &strcasestr;
+				regflags ^= REG_ICASE;
 				showfilter(ln);
 				continue;
 			}
 
-			/* If the only match is a dir, auto-select and cd into it */
-			if (ndents == 1 && cfg.filtermode
-			    && cfg.autoselect && (dents[0].flags & DIR_OR_LINK_TO_DIR)) {
-				*ch = KEY_ENTER;
-				cur = 0;
-				goto end;
+			/* toggle string or regex filter */
+			if (*ch == FILTER) {
+				wln[0] = ln[0] = (ln[0] == FILTER) ? RFILTER : FILTER;
+				cfg.regex ^= 1;
+				filterfn = (filterfn == &visible_str) ? &visible_re : &visible_str;
+				showfilter(ln);
+				continue;
 			}
+		}
 
-			/*
-			 * redraw() should be above the auto-select optimization, for
-			 * the case where there's an issue with dir auto-select, say,
-			 * due to a permission problem. The transition is _jumpy_ in
-			 * case of such an error. However, we optimize for successful
-			 * cases where the dir has permissions. This skips a redraw().
-			 */
-			redraw(path);
-			showfilter(ln);
-		} else
+		/* Reset cur in case it's a repeat search */
+		if (len == 1)
+			cur = 0;
+
+		if (len == REGEX_MAX - 1)
 			break;
+
+		wln[len] = (wchar_t)*ch;
+		wln[++len] = '\0';
+		wcstombs(ln, wln, REGEX_MAX);
+
+		/* Forward-filtering optimization:
+		 * - new matches can only be a subset of current matches.
+		 */
+		/* ndents = total; */
+
+		if (matches(pln) == -1) {
+			showfilter(ln);
+			continue;
+		}
+
+		/* If the only match is a dir, auto-select and cd into it */
+		if (ndents == 1 && cfg.filtermode
+		    && cfg.autoselect && (dents[0].flags & DIR_OR_LINK_TO_DIR)) {
+			*ch = KEY_ENTER;
+			cur = 0;
+			goto end;
+		}
+
+		/*
+		 * redraw() should be above the auto-select optimization, for
+		 * the case where there's an issue with dir auto-select, say,
+		 * due to a permission problem. The transition is _jumpy_ in
+		 * case of such an error. However, we optimize for successful
+		 * cases where the dir has permissions. This skips a redraw().
+		 */
+		redraw(path);
+		showfilter(ln);
 	}
 end:
 	clearinfoln();
