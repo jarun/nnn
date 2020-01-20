@@ -1209,8 +1209,7 @@ static bool initcurses(mmask_t *oldmask)
 #if NCURSES_MOUSE_VERSION <= 1
 	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED, oldmask);
 #else
-	mousemask(BUTTON1_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED,
-		  oldmask);
+	mousemask(BUTTON1_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED, oldmask);
 #endif
 	mouseinterval(0);
 	curs_set(FALSE); /* Hide cursor */
@@ -5868,7 +5867,7 @@ static void cleanup(void)
 
 int main(int argc, char *argv[])
 {
-	mmask_t mask;
+	mmask_t mask = 0;
 	char *arg = NULL;
 	char *session = NULL;
 	int opt;
