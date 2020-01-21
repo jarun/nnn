@@ -6156,7 +6156,7 @@ int main(int argc, char *argv[])
 	} else if (cfg.picker) {
 		if (selbufpos)
 			writesel(pselbuf, selbufpos - 1);
-	} else if (!cfg.picker && g_selpath)
+	} else if (g_selpath)
 		unlink(g_selpath);
 
 	/* Free the regex */
