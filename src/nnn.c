@@ -5796,7 +5796,7 @@ static bool setup_config(void)
 	xstrlcpy(plugindir, cfgdir, len);
 	DPRINTF_S(plugindir);
 
-	if (!xmktree(cfgdir, TRUE)) {
+	if (!xmktree(plugindir, TRUE)) {
 		xerror();
 		return FALSE;
 	}
@@ -5808,7 +5808,7 @@ static bool setup_config(void)
 	xstrlcpy(sessiondir, cfgdir, len);
 	DPRINTF_S(sessiondir);
 
-	if (!xmktree(cfgdir, TRUE)) {
+	if (!xmktree(sessiondir, TRUE)) {
 		xerror();
 		return FALSE;
 	}
