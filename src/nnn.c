@@ -463,17 +463,19 @@ static char * const utils[] = {
 #define MSG_EMPTY_FILE 25
 #define MSG_UNSUPPORTED 26
 #define MSG_NOT_SET 27
-#define MSG_DIR_CHANGED 28
-#define MSG_EXISTS 29
-#define MSG_FEW_COLUMNS 30
-#define MSG_REMOTE_OPTS 31
-#define MSG_RCLONE_DELAY 32
-#define MSG_APP_NAME 33
-#define MSG_ARCHIVE_OPTS 34
-#define MSG_PLUGIN_KEYS 35
-#define MSG_BOOKMARK_KEYS 36
-#define MSG_INVALID_REG 37
-#define MSG_ORDER 38
+#define MSG_EXISTS 28
+#define MSG_FEW_COLUMNS 29
+#define MSG_REMOTE_OPTS 30
+#define MSG_RCLONE_DELAY 31
+#define MSG_APP_NAME 32
+#define MSG_ARCHIVE_OPTS 33
+#define MSG_PLUGIN_KEYS 34
+#define MSG_BOOKMARK_KEYS 35
+#define MSG_INVALID_REG 36
+#define MSG_ORDER 37
+#ifndef DIR_LIMITED_SELECTION
+#define MSG_DIR_CHANGED 38 /* Must be the last entry */
+#endif
 
 static const char * const messages[] = {
 	"no traversal",
@@ -504,7 +506,6 @@ static const char * const messages[] = {
 	"empty: use open with",
 	"unsupported file",
 	"not set",
-	"dir changed, range sel off",
 	"entry exists",
 	"too few columns!",
 	"'s'shfs / 'r'clone?",
@@ -515,6 +516,9 @@ static const char * const messages[] = {
 	"bookmark keys:",
 	"invalid regex",
 	"toggle 'a'u / 'd'u / 'e'xtn / 'r'everse / 's'ize / 't'ime / 'v'ersion?",
+#ifndef DIR_LIMITED_SELECTION
+	"dir changed, range sel off", /* Must be the last entry */
+#endif
 };
 
 /* Supported configuration environment variables */
@@ -4512,7 +4516,6 @@ static bool browse(char *ipath, const char *session)
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	char *path, *lastdir, *lastname, *dir, *tmp, *mark = NULL;
-	ino_t inode = 0;
 	enum action sel;
 	struct stat sb;
 	MEVENT event;
@@ -4520,11 +4523,11 @@ static bool browse(char *ipath, const char *session)
 	int r = -1, fd, presel, selstartid = 0, selendid = 0;
 	const uchar opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
 	bool currentmouse = 1, dir_changed = FALSE;
+#ifndef DIR_LIMITED_SELECTION
+	ino_t inode = 0;
+#endif
 
 	atexit(dentfree);
-
-	xlines = LINES;
-	xcols = COLS;
 
 	/* setup first context */
 	if (!session || !load_session(session, &path, &lastdir, &lastname, FALSE)) {
@@ -5173,7 +5176,9 @@ nochange:
 			}
 
 			if (g_states & STATE_RANGESEL) { /* Range selection started */
+#ifndef DIR_LIMITED_SELECTION
 				inode = sb.st_ino;
+#endif
 				selstartid = cur;
 				continue;
 			}
@@ -5867,7 +5872,7 @@ static void cleanup(void)
 
 int main(int argc, char *argv[])
 {
-	mmask_t mask = 0;
+	mmask_t mask;
 	char *arg = NULL;
 	char *session = NULL;
 	int opt;
