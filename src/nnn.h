@@ -64,6 +64,7 @@ enum action {
 	SEL_MFLTR,
 	SEL_HIDDEN,
 	SEL_DETAIL,
+	SEL_FULLPATH,
 	SEL_STATS,
 	SEL_CHMODX,
 	SEL_ARCHIVE,
@@ -168,6 +169,8 @@ static struct key bindings[] = {
 	{ KEY_F(5),       SEL_HIDDEN },
 	/* Detailed listing */
 	{ 'd',            SEL_DETAIL },
+	/* Show full home path */
+	{ 'F',            SEL_FULLPATH },
 	/* File details */
 	{ 'f',            SEL_STATS },
 	{ CONTROL('F'),   SEL_STATS },

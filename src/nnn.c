@@ -231,6 +231,7 @@ typedef struct {
 	uint showhidden : 1;  /* Set to show hidden files */
 	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
+	uint fullpath   : 1;  /* Don't shorten home address to "~" */
 	uint ctxactive  : 1;  /* Context active or not */
 	uint reserved   : 2;
 	/* The following settings are global */
@@ -285,6 +286,7 @@ static settings cfg = {
 	0, /* showhidden */
 	0, /* selmode */
 	0, /* showdetail */
+	0, /* fullpath */
 	1, /* ctxactive */
 	0, /* reserved */
 	0, /* forcequit */
@@ -4406,6 +4408,45 @@ static void draw_line(char *path, int ncols)
 	statusbar(path);
 }
 
+char *str_replace(char *orig, char *rep, char *with)
+{
+	char *result;
+	char *ins;
+	char *tmp;
+	int len_rep;
+	int len_with;
+	int len_front;
+	int count;
+
+	if (!orig || !rep)
+		return NULL;
+	len_rep = strlen(rep);
+	if (len_rep == 0)
+		return NULL;
+	if (!with)
+		with = "";
+	len_with = strlen(with);
+
+	ins = orig;
+	for (count = 0; (tmp = strstr(ins, rep)); ++count)
+		ins = tmp + len_rep;
+
+	tmp = result = malloc(strlen(orig) + (len_with - len_rep) * count + 1);
+
+	if (!result)
+		return NULL;
+
+	while (count--) {
+		ins = strstr(orig, rep);
+		len_front = ins - orig;
+		tmp = strncpy(tmp, orig, len_front) + len_front;
+		tmp = strcpy(tmp, with) + len_with;
+		orig += len_front + len_rep;
+	}
+	strcpy(tmp, orig);
+	return result;
+}
+
 static void redraw(char *path)
 {
 	xlines = LINES;
@@ -4414,14 +4455,15 @@ static void redraw(char *path)
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int onscreen = xlines - 4;
 	int i;
-	char *ptr = path;
+	char *header_str = (cfg.fullpath) ? path : str_replace(path, home, "~");
+	char *ptr = (cfg.fullpath) ? path : header_str;
 
 	// Fast redraw
 	if (g_states & STATE_MOVE_OP) {
 		g_states &= ~STATE_MOVE_OP;
 
 		if (ndents && (last_curscroll == curscroll))
-			return draw_line(path, ncols);
+			return draw_line(header_str, ncols);
 	}
 
 	/* Clear screen */
@@ -4458,17 +4500,24 @@ static void redraw(char *path)
 	attron(A_UNDERLINE);
 
 	/* Print path */
-	i = (int)strlen(path);
+	i = (int)strlen(header_str);
 	if ((i + MIN_DISPLAY_COLS) <= ncols)
-		addnstr(path, ncols - MIN_DISPLAY_COLS);
+		addnstr(header_str, ncols - MIN_DISPLAY_COLS);
 	else {
-		char *base = xbasename(path);
+		char *base = xbasename(header_str);
 
 		if ((base - ptr) <= 1)
-			addnstr(path, ncols - MIN_DISPLAY_COLS);
+			addnstr(header_str, ncols - MIN_DISPLAY_COLS);
 		else {
 			i = 0;
 			--base;
+
+			/* Ugly */
+			if (!cfg.fullpath) {
+				addch('~');
+				++i;
+			}
+
 			while (ptr < base) {
 				if (*ptr == '/') {
 					i += 2; /* 2 characters added */
@@ -4486,6 +4535,7 @@ static void redraw(char *path)
 			addnstr(base, ncols - (MIN_DISPLAY_COLS + i));
 		}
 	}
+	free(header_str);
 
 	/* Go to first entry */
 	move(2, 0);
@@ -5019,6 +5069,7 @@ nochange:
 		case SEL_MFLTR: // fallthrough
 		case SEL_HIDDEN: // fallthrough
 		case SEL_DETAIL: // fallthrough
+		case SEL_FULLPATH: // fallthrough
 		case SEL_SORT:
 			switch (sel) {
 			case SEL_MFLTR:
@@ -5044,6 +5095,9 @@ nochange:
 				cfg.showdetail ^= 1;
 				cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
 				cfg.blkorder = 0;
+				continue;
+			case SEL_FULLPATH:
+				cfg.fullpath ^= 1;
 				continue;
 			default: /* SEL_SORT */
 				if (!set_sort_flags()) {
@@ -5716,6 +5770,7 @@ static void usage(void)
 		" -b key  open bookmark key\n"
 		" -c      cli-only opener (overrides -e)\n"
 		" -d      detail mode\n"
+		" -F      use full path for home instead of \"~\"\n"
 		" -e      text in $VISUAL ($EDITOR/vi)\n"
 		" -E      use EDITOR for undetached edits\n"
 		" -g      regex filters [default: string]\n"
@@ -5877,7 +5932,7 @@ int main(int argc, char *argv[])
 	char *session = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "HSKaAb:cdeEgnop:QrRs:t:vVxh")) != -1) {
+	while ((opt = getopt(argc, argv, "HSKaAb:cdFeEgnop:QrRs:t:vVxh")) != -1) {
 		switch (opt) {
 		case 'S':
 			cfg.blkorder = 1;
@@ -5886,6 +5941,9 @@ int main(int argc, char *argv[])
 		case 'd':
 			cfg.showdetail = 1;
 			printptr = &printent_long;
+			break;
+		case 'F':
+			cfg.fullpath = 1;
 			break;
 		case 'a':
 			cfg.mtime = 0;
