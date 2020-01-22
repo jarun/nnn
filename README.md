@@ -78,7 +78,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Cross-dir file/all/range selection
   - Batch renamer (feature-limited) for selection or dir
   - Copy (as), move (as), delete, archive, link selection
-  - Notification on cp, mv, rm completion
+  - Dir updates, notification on cp, mv, rm completion
   - Copy file paths to system clipboard on select
   - Create (with parents), rename, duplicate (anywhere) files and dirs
   - Launch GUI apps, run commands, spawn a shell, toggle executable

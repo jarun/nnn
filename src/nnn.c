@@ -473,8 +473,9 @@ static char * const utils[] = {
 #define MSG_BOOKMARK_KEYS 35
 #define MSG_INVALID_REG 36
 #define MSG_ORDER 37
+#define MSG_LAZY 38
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 38 /* Must be the last entry */
+#define MSG_DIR_CHANGED 39 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -516,6 +517,7 @@ static const char * const messages[] = {
 	"bookmark keys:",
 	"invalid regex",
 	"toggle 'a'u / 'd'u / 'e'xtn / 'r'everse / 's'ize / 't'ime / 'v'ersion?",
+	"unmount failed! try lazy?",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -3518,18 +3520,24 @@ static bool remote_mount(char *newpath, int *presel)
  */
 static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 {
+#ifdef __APPLE__
+	static char cmd[] = "umount";
+#else
 	static char cmd[] = "fusermount3"; /* Arch Linux utility */
 	static bool found = FALSE;
+#endif
 	char *tmp = name;
 	struct stat sb, psb;
 	bool child = FALSE;
 	bool parent = FALSE;
 
+#ifndef __APPLE__
 	/* On Ubuntu it's fusermount */
 	if (!found && !getutil(cmd)) {
 		cmd[10] = '\0';
 		found = TRUE;
 	}
+#endif
 
 	if (tmp && strcmp(cfgdir, currentpath) == 0) {
 		mkpath(cfgdir, tmp, newpath);
@@ -3554,9 +3562,24 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 		return FALSE;
 	}
 
+#ifdef __APPLE__
+	if (spawn(cmd, newpath, NULL, NULL, F_NORMAL)) {
+#else
 	if (spawn(cmd, "-u", newpath, NULL, F_NORMAL)) {
-		printwait(messages[MSG_FAILED], presel);
-		return FALSE;
+#endif
+		int r = get_input(messages[MSG_LAZY]);
+
+		if (r != 'y' && r != 'Y')
+			return FALSE;
+
+#ifdef __APPLE__
+		if (spawn(cmd, "-l", newpath, NULL, F_NORMAL)) {
+#else
+		if (spawn(cmd, "-uz", newpath, NULL, F_NORMAL)) {
+#endif
+			printwait(messages[MSG_FAILED], presel);
+			return FALSE;
+		}
 	}
 
 	return TRUE;
@@ -5877,16 +5900,8 @@ int main(int argc, char *argv[])
 	char *session = NULL;
 	int opt;
 
-	while ((opt = getopt(argc, argv, "HSKaAb:cdeEgnop:QrRs:t:vVxh")) != -1) {
+	while ((opt = getopt(argc, argv, "aAb:cdeEgHKnop:QrRs:St:vVxh")) != -1) {
 		switch (opt) {
-		case 'S':
-			cfg.blkorder = 1;
-			nftw_fn = sum_bsize;
-			blk_shift = ffs(S_BLKSIZE) - 1; // fallthrough
-		case 'd':
-			cfg.showdetail = 1;
-			printptr = &printent_long;
-			break;
 		case 'a':
 			cfg.mtime = 0;
 			break;
@@ -5898,6 +5913,14 @@ int main(int argc, char *argv[])
 			break;
 		case 'c':
 			cfg.cliopener = 1;
+			break;
+		case 'S':
+			cfg.blkorder = 1;
+			nftw_fn = sum_bsize;
+			blk_shift = ffs(S_BLKSIZE) - 1; // fallthrough
+		case 'd':
+			cfg.showdetail = 1;
+			printptr = &printent_long;
 			break;
 		case 'e':
 			cfg.useeditor = 1;
@@ -5912,6 +5935,9 @@ int main(int argc, char *argv[])
 		case 'H':
 			cfg.showhidden = 1;
 			break;
+		case 'K':
+			check_key_collision();
+			return _SUCCESS;
 		case 'n':
 			cfg.filtermode = 1;
 			break;
@@ -5953,9 +5979,6 @@ int main(int argc, char *argv[])
 		case 't':
 			idletimeout = xatoi(optarg);
 			break;
-		case 'K':
-			check_key_collision();
-			return _SUCCESS;
 		case 'v':
 			namecmpfn = &xstrverscasecmp;
 			break;
