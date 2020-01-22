@@ -45,6 +45,7 @@
 #      audio: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
 #      torrent: rtorrent, transmission-show
 #      odt|ods|odp|sxw: odt2txt
+#      md: glow (https://github.com/charmbracelet/glow)
 #      htm|html|xhtml: w3m, lynx, elinks
 #      json: jq, python (json.tool module)
 #   Multimedia by mime:
@@ -164,6 +165,14 @@ handle_extension() {
                 exit 0
             fi
             exit 1;;
+
+        ## Markdown
+        md)
+            if which glow >/dev/null 2>&1; then
+                glow -sdark "${FPATH}" | less -R
+                exit 0
+            fi
+            ;;
 
         ## HTML
         htm|html|xhtml)
@@ -375,7 +384,7 @@ handle_mime() {
         ## Text
         text/* | */xml)
             vi "${FPATH}"
-            exit 1;;
+            exit 0;;
             ## Syntax highlight
             # if [[ "$( stat --printf='%s' -- "${FPATH}" )" -gt "${HIGHLIGHT_SIZE_MAX}" ]]; then
             #     exit 2
