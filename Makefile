@@ -57,6 +57,12 @@ CFLAGS += $(CFLAGS_CURSES)
 
 LDLIBS += $(LDLIBS_CURSES)
 
+# static compilation needs libgpm development package
+ifeq ($(O_STATIC),1)
+	LDFLAGS += -static
+	LDLIBS += -lgpm
+endif
+
 DISTFILES = src nnn.1 Makefile README.md LICENSE
 SRC = src/nnn.c
 HEADERS = src/nnn.h
