@@ -1279,6 +1279,7 @@ static int parseargs(char *line, char **argv)
 
 static pid_t xfork(uchar flag)
 {
+	int status;
 	pid_t p = fork();
 
 	if (p > 0) {
@@ -1286,15 +1287,36 @@ static pid_t xfork(uchar flag)
 		oldsighup = signal(SIGHUP, SIG_IGN);
 		oldsigtstp = signal(SIGTSTP, SIG_DFL);
 	} else if (p == 0) {
+		/* We create a grandchild to detach */
+		if (flag & F_NOWAIT) {
+			p = fork();
+
+			if (p > 0)
+				exit(0);
+			else if (p == 0) {
+				signal(SIGHUP, SIG_DFL);
+				signal(SIGINT, SIG_DFL);
+				signal(SIGQUIT, SIG_DFL);
+				signal(SIGTSTP, SIG_DFL);
+
+				setsid();
+				return p;
+			}
+
+			perror("fork");
+			exit(0);
+		}
+
 		/* so they can be used to stop the child */
 		signal(SIGHUP, SIG_DFL);
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
 		signal(SIGTSTP, SIG_DFL);
-
-		if (flag & F_NOWAIT)
-			setsid();
 	}
+
+	/* This is the parent waiting for the child to create grandchild*/
+	if (flag & F_NOWAIT)
+		waitpid(p, &status, 0);
 
 	if (p == -1)
 		perror("fork");
