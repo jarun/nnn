@@ -342,6 +342,8 @@ static char *home;
 static char *initpath;
 static char *cfgdir;
 static char *g_selpath;
+static char *g_listpath;
+static char *g_prefixpath;
 static char *plugindir;
 static char *sessiondir;
 static char *pnamebuf, *pselbuf;
@@ -374,12 +376,6 @@ static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 
 /* Buffer to store tmp file path to show selection, file stats and help */
 static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
-
-/* Buffer to store path to tmp directory for listing files from input */
-static char g_listpath[TMP_LEN_MAX] __attribute__ ((aligned));
-
-/* Buffer to store common prefix for listing files from input */
-static char g_prefixpath[PATH_MAX] __attribute__ ((aligned));
 
 /* Buffer to store plugins control pipe location */
 static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
@@ -1225,7 +1221,7 @@ static void endselection(void)
 	if (cfg.selmode)
 		cfg.selmode = 0;
 
-	if (!*g_listpath)
+	if (!g_listpath || !selbufpos)
 		return;
 
 	fd = create_tmp_file();
@@ -6040,6 +6036,8 @@ static char *make_tmp_tree(char **paths, size_t entries, const char *prefix)
 {
 	/* tmpdir holds the full path */
 	/* tmp holds the path without the tmp dir prefix */
+	int err;
+	struct stat sb;
 	char *slash, *tmp;
 	size_t i, len = strlen(prefix);
 	char *tmpdir = malloc(sizeof(char) * (PATH_MAX + TMP_LEN_MAX));
@@ -6060,9 +6058,13 @@ static char *make_tmp_tree(char **paths, size_t entries, const char *prefix)
 		return NULL;
 	}
 
-	xstrlcpy(g_listpath, tmpdir, g_tmpfplen + 10);
+	g_listpath = tmpdir;
 
 	for(i = 0; i < entries; ++i){
+		err = stat(paths[i], &sb);
+		if (err == ENOENT)
+			continue;
+
 		xstrlcpy(tmp + 10, paths[i] + len, strlen(paths[i]) + 1);
 
 		slash = xmemrchr((uchar *)tmp, '/', strlen(paths[i]) + 11);
@@ -6078,12 +6080,12 @@ static char *make_tmp_tree(char **paths, size_t entries, const char *prefix)
 	return tmpdir;
 }
 
-static char *load_input()
+static char *load_input(void)
 {
 	/* 512 KiB chunk size */
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
 	char *input = malloc(sizeof(char) * chunk), *tmpdir;
-	char cwd[PATH_MAX], *next, *prev, **paths;
+	char cwd[PATH_MAX], *next, *prev, **paths, *tmp;
 	ssize_t input_read, total_read = 0;
 
 	if (!input) {
@@ -6111,7 +6113,7 @@ static char *load_input()
 		goto malloc_1;
 
 	prev = input;
-	while (prev < input + total_read + 1) {
+	while (prev < input + total_read) {
 		next = memchr(prev, '\0', total_read - (prev - input) + 1) + 1;
 
 		if (next - prev == 1) {
@@ -6121,8 +6123,8 @@ static char *load_input()
 
 		prev = next;
 
-		/* No NULL terminator at the end or limit exceeded */
-		if (++entries > (1 << 16) || !next)
+		/* path limit exceeded */
+		if (++entries > (1 << 16))
 			goto malloc_1;
 	}
 
@@ -6168,10 +6170,22 @@ static char *load_input()
 		prev = next;
 	}
 
+	g_prefixpath = malloc(sizeof(char) * PATH_MAX);
+	if (!g_prefixpath)
+		goto malloc_3;
+
 	xstrlcpy(g_prefixpath, paths[0], strlen(paths[0]) + 1);
 	for (i = 1; i < entries; ++i) {
 		if (!common_prefix(paths[i], g_prefixpath))
 			goto malloc_3;
+	}
+
+	if (entries == 1) {
+		tmp = xmemrchr((uchar*)g_prefixpath, '/', strlen(g_prefixpath));
+		if (!tmp)
+			return NULL;
+
+		*(tmp != g_prefixpath ? tmp : tmp + 1) = '\0';
 	}
 
 	tmpdir = make_tmp_tree(paths, entries, g_prefixpath);
@@ -6369,6 +6383,7 @@ static void cleanup(void)
 	free(initpath);
 	free(bmstr);
 	free(pluginstr);
+	free(g_prefixpath);
 
 	unlink(g_pipepath);
 
@@ -6486,27 +6501,30 @@ int main(int argc, char *argv[])
 	DPRINTF_S(VERSION);
 #endif
 
-	/* Confirm we are in a terminal */
-	if (!cfg.picker && !isatty(STDOUT_FILENO)) {
-		exit(1);
-	}
-
-	/* Now we are in path list mode */
-	if (!cfg.picker && !isatty(STDIN_FILENO)) {
-		/* Prefix for temporary files */
-		if (!set_tmp_path())
-			return _FAILURE;
-
-
-		initpath = load_input();
-		if (!initpath)
-			return _FAILURE;
-
-		/* We return to tty */
-		dup2(STDOUT_FILENO, STDIN_FILENO);
-	}
-
 	atexit(cleanup);
+
+	if (!cfg.picker) {
+		/* Confirm we are in a terminal */
+		if (!isatty(STDOUT_FILENO))
+			exit(1);
+
+		/* Now we are in path list mode */
+		if (!isatty(STDIN_FILENO)) {
+			/* Prefix for temporary files */
+			if (!set_tmp_path())
+				exit(1);
+
+			/* This is the same as g_listpath */
+			initpath = load_input();
+			if (!initpath)
+				exit(1);
+
+			/* We return to tty */
+			dup2(STDOUT_FILENO, STDIN_FILENO);
+		}
+
+	}
+
 
 	home = getenv("HOME");
 	if (!home) {
@@ -6680,7 +6698,7 @@ int main(int argc, char *argv[])
 	opt = browse(initpath, session);
 	mousemask(mask, NULL);
 
-	if (*g_listpath)
+	if (g_listpath)
 		spawn("rm -rf", initpath, NULL, NULL, F_SILENT);
 
 	exitcurses();
