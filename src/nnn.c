@@ -85,7 +85,11 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 #endif
+#ifdef PCRE
+#include <pcre.h>
+#else
 #include <regex.h>
+#endif
 #include <signal.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -213,7 +217,11 @@ typedef struct {
 } kv;
 
 typedef struct {
+#ifdef PCRE
+	const pcre *pcrex;
+#else
 	const regex_t *regex;
+#endif
 	const char *str;
 } fltrexp_t;
 
@@ -336,7 +344,11 @@ static kv bookmark[BM_MAX];
 static kv plug[PLUGIN_MAX];
 static uchar g_tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
+#ifdef PCRE
+static pcre *archive_pcre;
+#else
 static regex_t archive_re;
+#endif
 
 /* Retain old signal handlers */
 #ifdef __linux__
@@ -1841,16 +1853,37 @@ static char xchartohex(char c)
 }
 
 static char * (*fnstrstr)(const char *haystack, const char *needle) = &strcasestr;
+#ifdef PCRE
+static const unsigned char *tables;
+static int pcreflags = PCRE_NO_AUTO_CAPTURE | PCRE_EXTENDED | PCRE_CASELESS;
+#else
 static int regflags = REG_NOSUB | REG_EXTENDED | REG_ICASE;
+#endif
 
+#ifdef PCRE
+static int setfilter(pcre **pcrex, const char *filter)
+{
+	const char *errstr = NULL;
+	int erroffset = 0;
+
+	*pcrex = pcre_compile(filter, pcreflags, &errstr, &erroffset, tables);
+
+	return errstr ? -1 : 0;
+}
+#else
 static int setfilter(regex_t *regex, const char *filter)
 {
 	return regcomp(regex, filter, regflags);
 }
+#endif
 
 static int visible_re(const fltrexp_t *fltrexp, const char *fname)
 {
+#ifdef PCRE
+	return pcre_exec(fltrexp->pcrex, NULL, fname, strlen(fname), 0, 0, NULL, 0);
+#else
 	return regexec(fltrexp->regex, fname, 0, NULL, 0) == 0;
+#endif
 }
 
 static int visible_str(const fltrexp_t *fltrexp, const char *fname)
@@ -2076,13 +2109,18 @@ static inline void swap_ent(int id1, int id2)
 	*pdent2 = *(&_dent);
 }
 
-/*
- * Move non-matching entries to the end
- */
+#ifdef PCRE
+static int fill(const char *fltr, pcre *pcrex)
+#else
 static int fill(const char *fltr, regex_t *re)
+#endif
 {
 	int count = 0;
+#ifdef PCRE
+	fltrexp_t fltrexp = { .pcrex = pcrex, .str = fltr };
+#else
 	fltrexp_t fltrexp = { .regex = re, .str = fltr };
+#endif
 
 	for (; count < ndents; ++count) {
 		if (filterfn(&fltrexp, dents[count].name) == 0) {
@@ -2100,15 +2138,29 @@ static int fill(const char *fltr, regex_t *re)
 
 static int matches(const char *fltr)
 {
+#ifdef PCRE
+	pcre *pcrex = NULL;
+
+	/* Search filter */
+	if (cfg.regex && setfilter(&pcrex, fltr))
+		return -1;
+
+	ndents = fill(fltr, pcrex);
+
+	if (cfg.regex)
+		pcre_free(pcrex);
+#else
 	regex_t re;
 
 	/* Search filter */
-	if (cfg.regex && setfilter(&re, fltr) != 0)
+	if (cfg.regex && setfilter(&re, fltr))
 		return -1;
 
 	ndents = fill(fltr, &re);
+
 	if (cfg.regex)
 		regfree(&re);
+#endif
 
 	qsort(dents, ndents, sizeof(*dents), entrycmpfn);
 
@@ -2210,7 +2262,11 @@ static int filterentries(char *path, char *lastname)
 			/* Toggle case-sensitivity */
 			if (*ch == CASE) {
 				fnstrstr = (fnstrstr == &strcasestr) ? &strstr : &strcasestr;
+#ifdef PCRE
+				pcreflags ^= PCRE_CASELESS;
+#else
 				regflags ^= REG_ICASE;
+#endif
 				showfilter(ln);
 				continue;
 			}
@@ -4849,7 +4905,12 @@ nochange:
 					goto nochange;
 				}
 
+#ifdef PCRE
+				if (!pcre_exec(archive_pcre, NULL, dents[cur].name,
+					       strlen(dents[cur].name), 0, 0, NULL, 0)) {
+#else
 				if (!regexec(&archive_re, dents[cur].name, 0, NULL, 0)) {
+#endif
 					r = get_input(messages[MSG_ARCHIVE_OPTS]);
 					if (r == 'l' || r == 'x') {
 						mkpath(path, dents[cur].name, newpath);
@@ -6076,7 +6137,11 @@ int main(int argc, char *argv[])
 
 	/* Set archive handling (enveditor used as tmp var) */
 	enveditor = getenv(env_cfg[NNN_ARCHIVE]);
+#ifdef PCRE
+	if (setfilter(&archive_pcre, (enveditor ? enveditor : archive_regex))) {
+#else
 	if (setfilter(&archive_re, (enveditor ? enveditor : archive_regex))) {
+#endif
 		fprintf(stderr, "%s\n", messages[MSG_INVALID_REG]);
 		return _FAILURE;
 	}
@@ -6145,6 +6210,9 @@ int main(int argc, char *argv[])
 #ifndef NOLOCALE
 	/* Set locale */
 	setlocale(LC_ALL, "");
+#ifdef PCRE
+	tables = pcre_maketables();
+#endif
 #endif
 
 #ifndef NORL
@@ -6185,7 +6253,11 @@ int main(int argc, char *argv[])
 		unlink(g_selpath);
 
 	/* Free the regex */
+#ifdef PCRE
+	pcre_free(archive_pcre);
+#else
 	regfree(&archive_re);
+#endif
 
 	/* Free the selection buffer */
 	free(pselbuf);
