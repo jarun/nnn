@@ -5412,7 +5412,11 @@ nochange:
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
 			if (ndents) {
-				mkpath((xstrcmp(path, g_listpath) ? path : g_prefixpath), dents[cur].name, newpath);
+				if (g_listpath && xstrcmp(path, g_listpath) == 0)
+					mkpath(g_prefixpath, dents[cur].name, newpath);
+				else
+					mkpath(path, dents[cur].name, newpath);
+
 				if (lstat(newpath, &sb) == -1
 				    || (sel == SEL_STATS && !show_stats(newpath, &sb))
 				    || (sel == SEL_CHMODX && !xchmod(newpath, sb.st_mode))) {
@@ -5594,7 +5598,11 @@ nochange:
 				}
 
 				if (r == 'c') {
-					mkpath((xstrcmp(path, g_listpath) ? path : g_prefixpath), dents[cur].name, newpath);
+					if(g_listpath && xstrcmp(path, g_listpath) == 0)
+						mkpath(g_prefixpath, dents[cur].name, newpath);
+					else
+						mkpath(path, dents[cur].name, newpath);
+
 					xrm(newpath);
 
 					if (cur && access(newpath, F_OK) == -1) {
