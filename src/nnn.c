@@ -4359,9 +4359,6 @@ static void statusbar(char *path)
 			 (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
 			 num_files, (ll)pent->blocks << blk_shift, ptr);
 	} else { /* light or detail mode */
-		/* Show filename as it may be truncated in directory listing */
-		/* Get the unescaped file name */
-		char *fname = unescape(pent->name, NAME_MAX, NULL);
 		char sort[] = "\0\0\0\0";
 
 		getorderstr(sort);
@@ -4370,10 +4367,10 @@ static void statusbar(char *path)
 		strftime(buf, sizeof(buf), "%F %R", localtime(&pent->t));
 		buf[sizeof(buf)-1] = '\0';
 
-		mvprintw(xlines - 1, 0, "%d/%d [%d:%s] %s%s %s %s %s [%s]",
+		mvprintw(xlines - 1, 0, "%d/%d [%d:%s] %s%s %s %s %s",
 			 cur + 1, ndents, cfg.selmode,
 			 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
-			 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr, fname);
+			 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr);
 	}
 
 	addch('\n');
