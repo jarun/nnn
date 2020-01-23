@@ -1854,7 +1854,6 @@ static char xchartohex(char c)
 
 static char * (*fnstrstr)(const char *haystack, const char *needle) = &strcasestr;
 #ifdef PCRE
-static const unsigned char *tables;
 static int pcreflags = PCRE_NO_AUTO_CAPTURE | PCRE_EXTENDED | PCRE_CASELESS;
 #else
 static int regflags = REG_NOSUB | REG_EXTENDED | REG_ICASE;
@@ -1863,12 +1862,8 @@ static int regflags = REG_NOSUB | REG_EXTENDED | REG_ICASE;
 #ifdef PCRE
 static int setfilter(pcre **pcrex, const char *filter)
 {
-	const char *errstr = NULL;
-	int erroffset = 0;
-
-	*pcrex = pcre_compile(filter, pcreflags, &errstr, &erroffset, tables);
-
-	return errstr ? -1 : 0;
+	*pcrex = pcre_compile(filter, pcreflags, NULL, NULL, NULL);
+	return *pcrex ? 0 : -1;
 }
 #else
 static int setfilter(regex_t *regex, const char *filter)
