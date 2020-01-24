@@ -1884,8 +1884,12 @@ static int regflags = REG_NOSUB | REG_EXTENDED | REG_ICASE;
 #ifdef PCRE
 static int setfilter(pcre **pcrex, const char *filter)
 {
-	*pcrex = pcre_compile(filter, pcreflags, NULL, NULL, NULL);
-	return *pcrex ? 0 : -1;
+	const char *errstr = NULL;
+	int erroffset = 0;
+
+	*pcrex = pcre_compile(filter, pcreflags, &errstr, &erroffset, tables);
+
+	return errstr ? -1 : 0;
 }
 #else
 static int setfilter(regex_t *regex, const char *filter)
