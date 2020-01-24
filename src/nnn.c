@@ -1279,6 +1279,7 @@ static int parseargs(char *line, char **argv)
 
 static pid_t xfork(uchar flag)
 {
+	int status;
 	pid_t p = fork();
 
 	if (p > 0) {
@@ -1286,15 +1287,36 @@ static pid_t xfork(uchar flag)
 		oldsighup = signal(SIGHUP, SIG_IGN);
 		oldsigtstp = signal(SIGTSTP, SIG_DFL);
 	} else if (p == 0) {
+		/* We create a grandchild to detach */
+		if (flag & F_NOWAIT) {
+			p = fork();
+
+			if (p > 0)
+				exit(0);
+			else if (p == 0) {
+				signal(SIGHUP, SIG_DFL);
+				signal(SIGINT, SIG_DFL);
+				signal(SIGQUIT, SIG_DFL);
+				signal(SIGTSTP, SIG_DFL);
+
+				setsid();
+				return p;
+			}
+
+			perror("fork");
+			exit(0);
+		}
+
 		/* so they can be used to stop the child */
 		signal(SIGHUP, SIG_DFL);
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
 		signal(SIGTSTP, SIG_DFL);
-
-		if (flag & F_NOWAIT)
-			setsid();
 	}
+
+	/* This is the parent waiting for the child to create grandchild*/
+	if (flag & F_NOWAIT)
+		waitpid(p, &status, 0);
 
 	if (p == -1)
 		perror("fork");
@@ -1854,7 +1876,6 @@ static char xchartohex(char c)
 
 static char * (*fnstrstr)(const char *haystack, const char *needle) = &strcasestr;
 #ifdef PCRE
-static const unsigned char *tables;
 static int pcreflags = PCRE_NO_AUTO_CAPTURE | PCRE_EXTENDED | PCRE_CASELESS;
 #else
 static int regflags = REG_NOSUB | REG_EXTENDED | REG_ICASE;
@@ -1863,12 +1884,8 @@ static int regflags = REG_NOSUB | REG_EXTENDED | REG_ICASE;
 #ifdef PCRE
 static int setfilter(pcre **pcrex, const char *filter)
 {
-	const char *errstr = NULL;
-	int erroffset = 0;
-
-	*pcrex = pcre_compile(filter, pcreflags, &errstr, &erroffset, tables);
-
-	return errstr ? -1 : 0;
+	*pcrex = pcre_compile(filter, pcreflags, NULL, NULL, NULL);
+	return *pcrex ? 0 : -1;
 }
 #else
 static int setfilter(regex_t *regex, const char *filter)
