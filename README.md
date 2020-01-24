@@ -146,11 +146,6 @@ Download the latest stable release or clone this repository (*risky*), install d
     $ sudo apt-get install pkg-config libncursesw5-dev libreadline-dev
     $ sudo make strip install
 
-To compile _without_ libreadline:
-
-    $ sudo apt-get install pkg-config libncursesw5-dev
-    $ sudo make O_NORL=1 strip install
-
 `PREFIX` is supported, in case you want to install to a different location.
 
 See the [developer guides](https://github.com/jarun/nnn/wiki/Developer-guides) for source verification, compilation notes on the Pi, Cygwin and other tips.
