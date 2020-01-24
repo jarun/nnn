@@ -1902,7 +1902,7 @@ static int setfilter(regex_t *regex, const char *filter)
 static int visible_re(const fltrexp_t *fltrexp, const char *fname)
 {
 #ifdef PCRE
-	return pcre_exec(fltrexp->pcrex, NULL, fname, strlen(fname), 0, 0, NULL, 0);
+	return pcre_exec(fltrexp->pcrex, NULL, fname, strlen(fname), 0, 0, NULL, 0) == 0;
 #else
 	return regexec(fltrexp->regex, fname, 0, NULL, 0) == 0;
 #endif
