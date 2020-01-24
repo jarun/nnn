@@ -37,6 +37,11 @@ else
 	LDLIBS += -lreadline
 endif
 
+ifeq ($(O_PCRE),1)
+	CPPFLAGS += -DPCRE
+	LDLIBS += -lpcre
+endif
+
 ifeq ($(O_NOLOC),1)
 	CPPFLAGS += -DNOLOCALE
 endif

@@ -58,7 +58,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - CD on quit (*easy* shell integration)
 - Search
   - Instant filtering with *search-as-you-type*
-  - Regex and substring (default) matches
+  - Regex (POSIX/PCRE) and string (default) filters
   - Subtree search plugin to open or edit files
 - Sort
   - Ordered pure numeric names by default (visit _/proc_)
