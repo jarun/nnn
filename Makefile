@@ -33,6 +33,8 @@ endif
 
 ifeq ($(O_NORL),1)
 	CPPFLAGS += -DNORL
+else ifeq ($(O_STATIC),1)
+	CPPFLAGS += -DNORL
 else
 	LDLIBS += -lreadline
 endif
