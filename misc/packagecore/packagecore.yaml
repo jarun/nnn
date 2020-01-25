@@ -16,122 +16,122 @@ packages:
       - ncurses
       - readline
     container: "archlinux/base"
-#  centos7.5:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkgconfig
-#      - ncurses-devel
-#      - readline-devel
-#    deps:
-#      - ncurses
-#      - readline
-#    commands:
-#      pre:
-#        - yum install epel-release
-#  centos7.6:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkgconfig
-#      - ncurses-devel
-#      - readline-devel
-#    deps:
-#      - ncurses
-#      - readline
-#    commands:
-#      pre:
-#        - yum install epel-release
-#  centos8.0:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkgconfig
-#      - ncurses-devel
-#      - readline-devel
-#    deps:
-#      - ncurses
-#      - readline
-#    commands:
-#      pre:
-#        - yum install epel-release
-#  debian9:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkg-config
-#      - libncursesw5-dev
-#      - libreadline-dev
-#    deps:
-#      - libncursesw5
-#      - readline-common
-#  debian10:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkg-config
-#      - libncursesw5-dev
-#      - libreadline-dev
-#    deps:
-#      - libncursesw5
-#      - readline-common
-#  fedora29:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkg-config
-#      - ncurses-devel
-#      - readline-devel
-#    deps:
-#      - ncurses
-#      - readline
-#  fedora30:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkg-config
-#      - ncurses-devel
-#      - readline-devel
-#    deps:
-#      - ncurses
-#      - readline
-#  fedora31:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkg-config
-#      - ncurses-devel
-#      - readline-devel
-#    deps:
-#      - ncurses
-#      - readline
-#  opensuse15.1:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkg-config
-#      - readline-devel
-#      - ncurses-devel
-#    deps:
-#      - libncurses6
-#      - libreadline7
-#  ubuntu16.04:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkg-config
-#      - libncursesw5-dev
-#      - libreadline6-dev
-#    deps:
-#      - libncursesw5
-#      - libreadline6
-#  ubuntu18.04:
-#    builddeps:
-#      - make
-#      - gcc
-#      - pkg-config
-#      - libncursesw5-dev
-#      - libreadline-dev
-#    deps:
-#      - libncursesw5
-#      - libreadline7
+  centos7.5:
+    builddeps:
+      - make
+      - gcc
+      - pkgconfig
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+    commands:
+      pre:
+        - yum install epel-release
+  centos7.6:
+    builddeps:
+      - make
+      - gcc
+      - pkgconfig
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+    commands:
+      pre:
+        - yum install epel-release
+  centos8.0:
+    builddeps:
+      - make
+      - gcc
+      - pkgconfig
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+    commands:
+      pre:
+        - yum install epel-release
+  debian9:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - libncursesw5-dev
+      - libreadline-dev
+    deps:
+      - libncursesw5
+      - readline-common
+  debian10:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - libncursesw5-dev
+      - libreadline-dev
+    deps:
+      - libncursesw5
+      - readline-common
+  fedora29:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+  fedora30:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+  fedora31:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+  opensuse15.1:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - readline-devel
+      - ncurses-devel
+    deps:
+      - libncurses6
+      - libreadline7
+  ubuntu16.04:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - libncursesw5-dev
+      - libreadline6-dev
+    deps:
+      - libncursesw5
+      - libreadline6
+  ubuntu18.04:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - libncursesw5-dev
+      - libreadline-dev
+    deps:
+      - libncursesw5
+      - libreadline7
