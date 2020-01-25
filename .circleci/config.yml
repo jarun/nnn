@@ -73,6 +73,18 @@ jobs:
             mv ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz dist/
 
       - run:
+          name: "generate static package"
+          command: |
+            # Compile statically
+            make O_STATIC=1 O_NORL=1 strip
+            # Archive
+            tar -cvf ${CIRCLE_PROJECT_REPONAME}-static-${CIRCLE_TAG}.amd64.tar.gz ${CIRCLE_PROJECT_REPONAME}
+            # Move static package to dist
+            mv tar -cvf ${CIRCLE_PROJECT_REPONAME}-static-${CIRCLE_TAG}.amd64.tar.gz dist/
+            # Remove static binary
+            rm ${CIRCLE_PROJECT_REPONAME}
+
+      - run:
           name: "publish to GitHub"
           command: |
             go get github.com/tcnksm/ghr
