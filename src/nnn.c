@@ -498,8 +498,9 @@ static char * const utils[] = {
 #define MSG_INVALID_REG 36
 #define MSG_ORDER 37
 #define MSG_LAZY 38
+#define MSG_IGNORED 39
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 39 /* Must be the last entry */
+#define MSG_DIR_CHANGED 40 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -542,6 +543,7 @@ static const char * const messages[] = {
 	"invalid regex",
 	"toggle 'a'u / 'd'u / 'e'xtn / 'r'everse / 's'ize / 't'ime / 'v'ersion?",
 	"unmount failed! try lazy?",
+	"some paths were invalid. ignoring",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -977,7 +979,7 @@ static char *common_prefix(const char *s, char *prefix)
 		if (i < blocks) {
 			i *= LONG_SIZE;
 			for (j = 0; j < LONG_SIZE; ++j)
-				if (s[i + j] != prefix[i + j]){
+				if (s[i + j] != prefix[i + j]) {
 					tmp = xmemrchr((uchar *)prefix, '/', i + j);
 					if (!tmp)
 						return NULL;
@@ -1009,7 +1011,7 @@ static char *common_prefix(const char *s, char *prefix)
 
 	/* complete match but lenghts might differ */
 	if (len_s < len_prefix || (len_s > len_prefix && s[len_prefix] != '/')) {
-		tmp = xmemrchr((uchar*)prefix, '/', len);
+		tmp = xmemrchr((uchar *)prefix, '/', len);
 		if (!tmp)
 			return NULL;
 
@@ -1054,11 +1056,12 @@ static char *xrealpath(const char *path, char *resolved_path, const char *cwd)
 
 		if (next - src == 2 && src[0] == '.' && src[1] == '.') {
 			if (dst - resolved_path) {
-				dst = xmemrchr((uchar*)resolved_path, '/', dst-resolved_path);
+				dst = xmemrchr((uchar *)resolved_path, '/', dst-resolved_path);
 				*dst = '\0';
 			}
-		} else if (next - src == 1 && src[0] == '.'); // NOP
-		else if (next - src){
+		} else if (next - src == 1 && src[0] == '.') {
+			/* NOP */
+		} else if (next - src) {
 			*(dst++) = '/';
 			xstrlcpy(dst, src, next - src + 1);
 			dst += next - src;
@@ -1247,7 +1250,7 @@ static void endselection(void)
 	close(fd);
 	unlink(g_tmpfpath);
 
-	if (count < 0){
+	if (count < 0) {
 		DPRINTF_S(strerror(errno));
 		return;
 	}
@@ -1259,6 +1262,8 @@ static void endselection(void)
 			pselbuf[count] = '\0';
 		}
 	}
+
+	writesel(pselbuf, selbufpos - 1);
 }
 
 static void clearselection(void)
@@ -4842,7 +4847,7 @@ static void redraw(char *path)
 	statusbar(path);
 }
 
-static bool browse(char *ipath, const char *session)
+static bool browse(char *ipath, const char *session, const char *startmsg)
 {
 	char newpath[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
@@ -4962,6 +4967,13 @@ nochange:
 		if (!isatty(STDIN_FILENO) && !cfg.picker) {
 			free(mark);
 			return _FAILURE;
+		}
+
+		/* Display a one-time message */
+		if (startmsg) {
+			printwait(startmsg, &presel);
+			startmsg = NULL;
+			goto nochange;
 		}
 
 		sel = nextsel(presel);
@@ -5598,7 +5610,7 @@ nochange:
 				}
 
 				if (r == 'c') {
-					if(g_listpath && xstrcmp(path, g_listpath) == 0)
+					if (g_listpath && xstrcmp(path, g_listpath) == 0)
 						mkpath(g_prefixpath, dents[cur].name, newpath);
 					else
 						mkpath(path, dents[cur].name, newpath);
@@ -6040,14 +6052,14 @@ nochange:
 	}
 }
 
-static char *make_tmp_tree(char **paths, size_t entries, const char *prefix)
+static char *make_tmp_tree(char **paths, ssize_t *entries, const char *prefix)
 {
 	/* tmpdir holds the full path */
 	/* tmp holds the path without the tmp dir prefix */
-	int err;
+	int err, ignore = 0;
 	struct stat sb;
 	char *slash, *tmp;
-	size_t i, len = strlen(prefix);
+	ssize_t i, len = strlen(prefix);
 	char *tmpdir = malloc(sizeof(char) * (PATH_MAX + TMP_LEN_MAX));
 
 	if (!tmpdir) {
@@ -6068,10 +6080,12 @@ static char *make_tmp_tree(char **paths, size_t entries, const char *prefix)
 
 	g_listpath = tmpdir;
 
-	for(i = 0; i < entries; ++i){
+	for (i = 0; i < *entries; ++i) {
 		err = stat(paths[i], &sb);
-		if (err == ENOENT)
+		if (err && errno == ENOENT) {
+			ignore = 1;
 			continue;
+		}
 
 		xstrlcpy(tmp + 10, paths[i] + len, strlen(paths[i]) + 1);
 
@@ -6081,14 +6095,20 @@ static char *make_tmp_tree(char **paths, size_t entries, const char *prefix)
 		xmktree(tmpdir, TRUE);
 
 		*slash = '/';
-		if (symlink(paths[i], tmpdir)){}
+		if (symlink(paths[i], tmpdir)) {
+			DPRINTF_S(paths[i]);
+			DPRINTF_S(strerror(errno));
+		}
 	}
+
+	if (ignore)
+		*entries = -1;
 
 	tmp[10] = '\0';
 	return tmpdir;
 }
 
-static char *load_input(void)
+static char *load_input(const char **startmsg)
 {
 	/* 512 KiB chunk size */
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
@@ -6139,7 +6159,7 @@ static char *load_input(void)
 	if (!entries)
 		goto malloc_1;
 
-	// allocate the space for all the strings 
+	/* allocate the space for all the strings */
 	paths = malloc(sizeof(char *) * entries);
 	if (!paths) {
 		DPRINTF_S(strerror(errno));
@@ -6157,7 +6177,7 @@ static char *load_input(void)
 		if (!paths[i]) {
 			DPRINTF_S(strerror(errno));
 
-			for(--i; i >= 0; --i)
+			for (--i; i >= 0; --i)
 				free(paths[i]);
 
 			goto malloc_2;
@@ -6189,16 +6209,19 @@ static char *load_input(void)
 	}
 
 	if (entries == 1) {
-		tmp = xmemrchr((uchar*)g_prefixpath, '/', strlen(g_prefixpath));
+		tmp = xmemrchr((uchar *)g_prefixpath, '/', strlen(g_prefixpath));
 		if (!tmp)
 			return NULL;
 
 		*(tmp != g_prefixpath ? tmp : tmp + 1) = '\0';
 	}
 
-	tmpdir = make_tmp_tree(paths, entries, g_prefixpath);
+	tmpdir = make_tmp_tree(paths, &entries, g_prefixpath);
+	if (entries == -1)
+		*startmsg = messages[MSG_IGNORED];
+
 	if (tmpdir) {
-		for(i = 0; i < entries; ++i)
+		for (i = 0; i < entries; ++i)
 			free(paths[i]);
 		free(paths);
 		free(input);
@@ -6207,7 +6230,7 @@ static char *load_input(void)
 	}
 
 malloc_3:
-	for(i = 0; i < entries; ++i)
+	for (i = 0; i < entries; ++i)
 		free(paths[i]);
 malloc_2:
 	free(paths);
@@ -6405,6 +6428,7 @@ int main(int argc, char *argv[])
 	mmask_t mask;
 	char *arg = NULL;
 	char *session = NULL;
+	const char *startmsg = NULL;
 	int opt;
 
 	while ((opt = getopt(argc, argv, "aAb:cdeEgHKnop:QrRs:St:vVxh")) != -1) {
@@ -6523,7 +6547,7 @@ int main(int argc, char *argv[])
 				exit(1);
 
 			/* This is the same as g_listpath */
-			initpath = load_input();
+			initpath = load_input(&startmsg);
 			if (!initpath)
 				exit(1);
 
@@ -6532,7 +6556,6 @@ int main(int argc, char *argv[])
 		}
 
 	}
-
 
 	home = getenv("HOME");
 	if (!home) {
@@ -6560,8 +6583,9 @@ int main(int argc, char *argv[])
 		return _FAILURE;
 	}
 
-	if (initpath); // NOP
-	else if (arg) { /* Open a bookmark directly */
+	if (initpath) {
+		/* NOP */
+	} else if (arg) { /* Open a bookmark directly */
 		if (!arg[1]) /* Bookmarks keys are single char */
 			initpath = get_kv_val(bookmark, NULL, *arg, BM_MAX, TRUE);
 
@@ -6703,7 +6727,7 @@ int main(int argc, char *argv[])
 	if (!initcurses(&mask))
 		return _FAILURE;
 
-	opt = browse(initpath, session);
+	opt = browse(initpath, session, startmsg);
 	mousemask(mask, NULL);
 
 	if (g_listpath)
