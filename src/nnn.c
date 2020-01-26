@@ -543,7 +543,7 @@ static const char * const messages[] = {
 	"invalid regex",
 	"toggle 'a'u / 'd'u / 'e'xtn / 'r'everse / 's'ize / 't'ime / 'v'ersion?",
 	"unmount failed! try lazy?",
-	"some paths were invalid. ignoring",
+	"ignoring invalid paths...",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
