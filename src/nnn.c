@@ -2412,8 +2412,12 @@ static char *xreadline(const char *prefill, const char *prompt)
 			case CONTROL('D'):
 				if (pos < len)
 					++pos;
-				else
-					continue; // fallthrough
+				else if (!(pos || len)) { /* Exit on ^D at empty prompt */
+					len = 0;
+					goto END;
+				} else
+					continue;
+				// fallthrough
 			case 127: // fallthrough
 			case '\b': /* rhel25 sends '\b' for backspace */
 				if (pos > 0) {
