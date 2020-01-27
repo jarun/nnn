@@ -2483,7 +2483,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 			}
 		} else {
 			switch (*ch) {
-#ifdef KE
+#ifdef KEY_RESIZE
 			case KEY_RESIZE:
 				clearoldprompt();
 				xlines = LINES;
