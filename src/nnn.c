@@ -2409,6 +2409,11 @@ static char *xreadline(const char *prefill, const char *prompt)
 			case '\n': // fallthrough
 			case '\r':
 				goto END;
+			case CONTROL('D'):
+				if (pos < len)
+					++pos;
+				else
+					continue; // fallthrough
 			case 127: // fallthrough
 			case '\b': /* rhel25 sends '\b' for backspace */
 				if (pos > 0) {
@@ -2417,6 +2422,28 @@ static char *xreadline(const char *prefill, const char *prompt)
 					--len, --pos;
 				} // fallthrough
 			case '\t': /* TAB breaks cursor position, ignore it */
+				continue;
+			case CONTROL('F'):
+				if (pos < len)
+					++pos;
+				continue;
+			case CONTROL('B'):
+				if (pos > 0)
+					--pos;
+				continue;
+			case CONTROL('W'):
+				printprompt(prompt);
+				do {
+					if (pos == 0)
+						break;
+					memmove(buf + pos - 1, buf + pos,
+						(len - pos) * WCHAR_T_WIDTH);
+					--pos, --len;
+				} while (buf[pos-1] != ' ' && buf[pos-1] != '/');
+				continue;
+			case CONTROL('K'):
+				printprompt(prompt);
+				len = pos;
 				continue;
 			case CONTROL('L'):
 				printprompt(prompt);
