@@ -28,7 +28,6 @@ endif
 ifeq ($(O_DEBUG),1)
 	CPPFLAGS += -DDBGMODE
 	CFLAGS += -g
-	LDLIBS += -lrt
 endif
 
 ifeq ($(O_NORL),1)
