@@ -355,6 +355,7 @@ static kv bookmark[BM_MAX];
 static kv plug[PLUGIN_MAX];
 static uchar g_tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
+static const uint _WSHIFT = (LONG_SIZE == 8) ? 3 : 2;
 #ifdef PCRE
 static pcre *archive_pcre;
 #else
@@ -388,6 +389,7 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define STATE_RANGESEL 0x4
 #define STATE_MOVE_OP 0x8
 #define STATE_AUTONEXT 0x10
+#define STATE_MSG 0x20
 
 static uchar g_states;
 
@@ -864,7 +866,6 @@ static size_t xstrlcpy(char *dest, const char *src, size_t n)
 
 	ulong *s, *d;
 	size_t len = strlen(src) + 1, blocks;
-	const uint _WSHIFT = (LONG_SIZE == 8) ? 3 : 2;
 
 	if (n > len)
 		n = len;
@@ -955,10 +956,9 @@ static char *common_prefix(const char *s, char *prefix)
 		return NULL;
 
 	ulong *x, *y;
-	size_t i, j, blocks = 0;
+	size_t i = 0, j = 0, blocks = 0;
 	size_t len_s = strlen(s), len_prefix = strlen(prefix);
 	size_t len = MIN(len_s, len_prefix);
-	const uint _WSHIFT = (LONG_SIZE == 8) ? 3 : 2;
 	char *tmp;
 
 	/*
@@ -972,13 +972,13 @@ static char *common_prefix(const char *s, char *prefix)
 		blocks = len >> _WSHIFT;
 		len &= LONG_SIZE - 1;
 
-		i = 0;
 		while (i < blocks && !(*x ^ *y))
 			++x, ++y, ++i;
 
+		/* This should always return */
 		if (i < blocks) {
 			i *= LONG_SIZE;
-			for (j = 0; j < LONG_SIZE; ++j)
+			for (; j < LONG_SIZE; ++j)
 				if (s[i + j] != prefix[i + j]) {
 					tmp = xmemrchr((uchar *)prefix, '/', i + j);
 					if (!tmp)
@@ -994,7 +994,6 @@ static char *common_prefix(const char *s, char *prefix)
 			return prefix;
 	}
 
-	j = 0;
 	i = blocks * LONG_SIZE;
 	while (j < len && s[i + j] == prefix[i + j])
 		++j;
@@ -1052,7 +1051,7 @@ static char *xrealpath(const char *path, char *resolved_path, const char *cwd)
 	for (next = NULL; next != path + src_size;) {
 		next = strchr(src, '/');
 		if (!next)
-			next = path+src_size;
+			next = path + src_size;
 
 		if (next - src == 2 && src[0] == '.' && src[1] == '.') {
 			if (dst - resolved_path) {
@@ -1257,11 +1256,9 @@ static void endselection(void)
 
 	selbufpos = count;
 	pselbuf[--count] = '\0';
-	for (--count; count > 0; --count) {
-		if (pselbuf[count] == '\n' && pselbuf[count+1] == '/') {
+	for (--count; count > 0; --count)
+		if (pselbuf[count] == '\n' && pselbuf[count+1] == '/')
 			pselbuf[count] = '\0';
-		}
-	}
 
 	writesel(pselbuf, selbufpos - 1);
 }
@@ -4847,7 +4844,7 @@ static void redraw(char *path)
 	statusbar(path);
 }
 
-static bool browse(char *ipath, const char *session, const char *startmsg)
+static bool browse(char *ipath, const char *session)
 {
 	char newpath[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
@@ -4970,9 +4967,9 @@ nochange:
 		}
 
 		/* Display a one-time message */
-		if (startmsg) {
-			printwait(startmsg, &presel);
-			startmsg = NULL;
+		if (g_states & STATE_MSG) {
+			g_states &= ~STATE_MSG;
+			printwait(messages[MSG_IGNORED], &presel);
 			goto nochange;
 		}
 
@@ -5424,10 +5421,8 @@ nochange:
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
 			if (ndents) {
-				if (g_listpath && xstrcmp(path, g_listpath) == 0)
-					mkpath(g_prefixpath, dents[cur].name, newpath);
-				else
-					mkpath(path, dents[cur].name, newpath);
+				tmp = (g_listpath && xstrcmp(path, g_listpath) == 0) ? g_prefixpath : path;
+				mkpath(tmp, dents[cur].name, newpath);
 
 				if (lstat(newpath, &sb) == -1
 				    || (sel == SEL_STATS && !show_stats(newpath, &sb))
@@ -5610,11 +5605,8 @@ nochange:
 				}
 
 				if (r == 'c') {
-					if (g_listpath && xstrcmp(path, g_listpath) == 0)
-						mkpath(g_prefixpath, dents[cur].name, newpath);
-					else
-						mkpath(path, dents[cur].name, newpath);
-
+					tmp = (g_listpath && xstrcmp(path, g_listpath) == 0) ? g_prefixpath : path;
+					mkpath(tmp, dents[cur].name, newpath);
 					xrm(newpath);
 
 					if (cur && access(newpath, F_OK) == -1) {
@@ -6052,7 +6044,7 @@ nochange:
 	}
 }
 
-static char *make_tmp_tree(char **paths, ssize_t *entries, const char *prefix)
+static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 {
 	/* tmpdir holds the full path */
 	/* tmp holds the path without the tmp dir prefix */
@@ -6080,7 +6072,7 @@ static char *make_tmp_tree(char **paths, ssize_t *entries, const char *prefix)
 
 	g_listpath = tmpdir;
 
-	for (i = 0; i < *entries; ++i) {
+	for (i = 0; i < entries; ++i) {
 		err = stat(paths[i], &sb);
 		if (err && errno == ENOENT) {
 			ignore = 1;
@@ -6102,13 +6094,13 @@ static char *make_tmp_tree(char **paths, ssize_t *entries, const char *prefix)
 	}
 
 	if (ignore)
-		*entries = -1;
+		g_states |= STATE_MSG;
 
 	tmp[10] = '\0';
 	return tmpdir;
 }
 
-static char *load_input(const char **startmsg)
+static char *load_input()
 {
 	/* 512 KiB chunk size */
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
@@ -6216,9 +6208,7 @@ static char *load_input(const char **startmsg)
 		*(tmp != g_prefixpath ? tmp : tmp + 1) = '\0';
 	}
 
-	tmpdir = make_tmp_tree(paths, &entries, g_prefixpath);
-	if (entries == -1)
-		*startmsg = messages[MSG_IGNORED];
+	tmpdir = make_tmp_tree(paths, entries, g_prefixpath);
 
 	if (tmpdir) {
 		for (i = 0; i < entries; ++i)
@@ -6428,7 +6418,6 @@ int main(int argc, char *argv[])
 	mmask_t mask;
 	char *arg = NULL;
 	char *session = NULL;
-	const char *startmsg = NULL;
 	int opt;
 
 	while ((opt = getopt(argc, argv, "aAb:cdeEgHKnop:QrRs:St:vVxh")) != -1) {
@@ -6533,6 +6522,10 @@ int main(int argc, char *argv[])
 	DPRINTF_S(VERSION);
 #endif
 
+	/* Prefix for temporary files */
+	if (!set_tmp_path())
+		return _FAILURE;
+
 	atexit(cleanup);
 
 	if (!cfg.picker) {
@@ -6542,12 +6535,9 @@ int main(int argc, char *argv[])
 
 		/* Now we are in path list mode */
 		if (!isatty(STDIN_FILENO)) {
-			/* Prefix for temporary files */
-			if (!set_tmp_path())
-				exit(1);
 
 			/* This is the same as g_listpath */
-			initpath = load_input(&startmsg);
+			initpath = load_input();
 			if (!initpath)
 				exit(1);
 
@@ -6687,10 +6677,6 @@ int main(int argc, char *argv[])
 	if (xgetenv_set(env_cfg[NNN_TRASH]))
 		cfg.trash = 1;
 
-	/* Prefix for temporary files */
-	if (!set_tmp_path())
-		return _FAILURE;
-
 	/* Ignore/handle certain signals */
 	struct sigaction act = {.sa_handler = sigint_handler};
 
@@ -6727,7 +6713,7 @@ int main(int argc, char *argv[])
 	if (!initcurses(&mask))
 		return _FAILURE;
 
-	opt = browse(initpath, session, startmsg);
+	opt = browse(initpath, session);
 	mousemask(mask, NULL);
 
 	if (g_listpath)
