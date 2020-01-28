@@ -130,7 +130,7 @@
 #define ISBLANK(x) ((x) == ' ' || (x) == '\t')
 #define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
-#define READLINE_MAX 128
+#define READLINE_MAX 256
 #define FILTER '/'
 #define RFILTER '\\'
 #define CASE ':'
