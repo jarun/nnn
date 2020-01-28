@@ -28,7 +28,6 @@ endif
 ifeq ($(O_DEBUG),1)
 	CPPFLAGS += -DDBGMODE
 	CFLAGS += -g
-	LDLIBS += -lrt
 endif
 
 ifeq ($(O_NORL),1)
@@ -63,6 +62,8 @@ CFLAGS += $(CFLAGS_OPTIMIZATION)
 CFLAGS += $(CFLAGS_CURSES)
 
 LDLIBS += $(LDLIBS_CURSES)
+# clock_gettime() on old glibc, e.g. RHEL 6
+LDLIBS += -lrt
 
 # static compilation needs libgpm development package
 ifeq ($(O_STATIC),1)
