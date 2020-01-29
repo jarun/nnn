@@ -123,11 +123,11 @@
  * flexible array on Illumos. Use somewhat accomodating fallback values.
  */
 #ifndef NAME_MAX
-#define NAME_MAX 512
+#define NAME_MAX 255
 #endif
 
 #ifndef PATH_MAX
-#define PATH_MAX 8191
+#define PATH_MAX 4096
 #endif
 
 #define _ABSSUB(N, M) (((N) <= (M)) ? ((M) - (N)) : ((N) - (M)))
