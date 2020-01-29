@@ -1233,7 +1233,10 @@ static void endselection(void)
 	}
 
 	seltofile(fd, NULL);
-	close(fd);
+	if (close(fd)) {
+		DPRINTF_S(strerror(errno));
+		return;
+	}
 
 	snprintf(buf, sizeof(buf), replaceprefixcmd, g_listpath, g_prefixpath, g_tmpfpath);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
@@ -1241,15 +1244,20 @@ static void endselection(void)
 	fd = open(g_tmpfpath, O_RDONLY);
 	if (fd == -1) {
 		DPRINTF_S(strerror(errno));
-		unlink(g_tmpfpath);
+		if (unlink(g_tmpfpath))
+			DPRINTF_S(strerror(errno));
 		return;
 	}
 
 	count = read(fd, pselbuf, selbuflen);
-	close(fd);
-	unlink(g_tmpfpath);
-
 	if (count < 0) {
+		DPRINTF_S(strerror(errno));
+		if (close(fd) || unlink(g_tmpfpath))
+			DPRINTF_S(strerror(errno));
+		return;
+	}
+
+	if (close(fd) || unlink(g_tmpfpath)) {
 		DPRINTF_S(strerror(errno));
 		return;
 	}
@@ -1290,7 +1298,10 @@ static int editselection(void)
 	}
 
 	seltofile(fd, NULL);
-	close(fd);
+	if (close(fd)) {
+		DPRINTF_S(strerror(errno));
+		return -1;
+	}
 
 	/* Save the last modification time */
 	if (stat(g_tmpfpath, &sb)) {
@@ -1324,16 +1335,20 @@ static int editselection(void)
 	}
 
 	count = read(fd, pselbuf, selbuflen);
-	close(fd);
-	unlink(g_tmpfpath);
-
-	if (!count) {
-		ret = 1;
+	if (count < 0) {
+		DPRINTF_S(strerror(errno));
+		if (close(fd) || unlink(g_tmpfpath))
+			DPRINTF_S(strerror(errno));
 		goto emptyedit;
 	}
 
-	if (count < 0) {
+	if (close(fd) || unlink(g_tmpfpath)) {
 		DPRINTF_S(strerror(errno));
+		goto emptyedit;
+	}
+
+	if (!count) {
+		ret = 1;
 		goto emptyedit;
 	}
 
