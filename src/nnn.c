@@ -1244,16 +1244,18 @@ static void endselection(void)
 	fd = open(g_tmpfpath, O_RDONLY);
 	if (fd == -1) {
 		DPRINTF_S(strerror(errno));
-		if (unlink(g_tmpfpath))
+		if (unlink(g_tmpfpath)) {
 			DPRINTF_S(strerror(errno));
+		}
 		return;
 	}
 
 	count = read(fd, pselbuf, selbuflen);
 	if (count < 0) {
 		DPRINTF_S(strerror(errno));
-		if (close(fd) || unlink(g_tmpfpath))
+		if (close(fd) || unlink(g_tmpfpath)) {
 			DPRINTF_S(strerror(errno));
+		}
 		return;
 	}
 
@@ -1337,8 +1339,9 @@ static int editselection(void)
 	count = read(fd, pselbuf, selbuflen);
 	if (count < 0) {
 		DPRINTF_S(strerror(errno));
-		if (close(fd) || unlink(g_tmpfpath))
+		if (close(fd) || unlink(g_tmpfpath)) {
 			DPRINTF_S(strerror(errno));
+		}
 		goto emptyedit;
 	}
 
