@@ -74,9 +74,6 @@
 #include <fcntl.h>
 #include <libgen.h>
 #include <limits.h>
-#ifdef __gnu_hurd__
-#define PATH_MAX 4096
-#endif
 #ifndef NOLOCALE
 #include <locale.h>
 #endif
@@ -116,6 +113,18 @@
 
 #ifndef S_BLKSIZE
 #define S_BLKSIZE 512 /* S_BLKSIZE is missing on Android NDK (Termux) */
+#endif
+
+/*
+ * NAME_MAX and PATH_MAX may not exist, e.g. with dirent.c_name being a
+ * flexible array on Illumos. Use somewhat accomodating fallback values.
+ */
+#ifndef NAME_MAX
+#define NAME_MAX 255
+#endif
+
+#ifndef PATH_MAX
+#define PATH_MAX 4096
 #endif
 
 #define _ABSSUB(N, M) (((N) <= (M)) ? ((M) - (N)) : ((N) - (M)))
