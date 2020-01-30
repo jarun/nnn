@@ -385,6 +385,7 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define STATE_INTERRUPTED 0x2
 #define STATE_RANGESEL 0x4
 #define STATE_MOVE_OP 0x8
+#define STATE_AUTONEXT 0x10
 
 static uchar g_states;
 
@@ -3759,9 +3760,9 @@ static void show_help(const char *path)
 		"a1-4  Context 1-4%-8c(B)Tab  Cycle context\n"
 		  "c/  Filter%-17c^N  Nav-as-you-type toggle\n"
 		"aEsc  Exit prompt%-12c^L  Redraw/clear prompt\n"
-		  "c?  Help, conf%-13c^G  QuitCD\n"
-		  "cq  Quit context%-12cQ  Quit with err\n"
-		 "b^Q  Quit\n"
+		  "c?  Help, conf%-14c+  Toggle proceed on open\n"
+		  "cq  Quit context%-11c^G  QuitCD\n"
+		 "b^Q  Quit%-20cQ  Quit with err\n"
 		"1FILES\n"
 	       "9o ^O  Open with...%-12cn  Create new/link\n"
 	       "9f ^F  File details%-12cd  Detail view toggle\n"
@@ -5017,6 +5018,11 @@ nochange:
 
 				/* Invoke desktop opener as last resort */
 				spawn(opener, newpath, NULL, NULL, opener_flags);
+
+				/* Move cursor to the next entry if not the last entry */
+				if ((g_states & STATE_AUTONEXT) && cur != ndents - 1)
+					move_cursor((cur + 1) % ndents, 0);
+
 				continue;
 			}
 			default:
@@ -5769,6 +5775,9 @@ nochange:
 			}
 
 			statusbar(path);
+			goto nochange;
+		case SEL_AUTONEXT:
+			g_states ^= STATE_AUTONEXT;
 			goto nochange;
 		case SEL_QUITCTX: // fallthrough
 		case SEL_QUITCD: // fallthrough

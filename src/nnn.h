@@ -90,6 +90,7 @@ enum action {
 	SEL_RUNCMD,
 	SEL_LOCK,
 	SEL_SESSIONS,
+	SEL_AUTONEXT,
 	SEL_QUITCTX,
 	SEL_QUITCD,
 	SEL_QUIT,
@@ -229,6 +230,10 @@ static struct key bindings[] = {
 	{ ']',            SEL_RUNCMD },
 	/* Lock screen */
 	{ '0',            SEL_LOCK },
+	/* Manage sessions */
+	{ 's',            SEL_SESSIONS },
+	/* Quit a context */
+	{ '+',            SEL_AUTONEXT },
 	/* Quit a context */
 	{ 'q',            SEL_QUITCTX },
 	/* Change dir on quit */
@@ -238,5 +243,4 @@ static struct key bindings[] = {
 	/* Quit with an error code */
 	{ 'Q',            SEL_QUITFAIL },
 	{ KEY_MOUSE,      SEL_CLICK },
-	{ 's',            SEL_SESSIONS },
 };
