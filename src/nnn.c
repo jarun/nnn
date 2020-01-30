@@ -3843,12 +3843,21 @@ static bool run_cmd_as_plugin(const char *path, const char *file, char *newpath,
 	if (!*file)
 		return FALSE;
 
+	/* Check if GUI flags are to be used */
+	if (*file == '|') {
+		flags = F_NOTRACE | F_NOWAIT;
+		++file;
+
+		if (!*file)
+			return FALSE;
+	}
+
 	xstrlcpy(newpath, file, PATH_MAX);
 
 	len = strlen(newpath);
 	if (len > 1 && newpath[len - 1] == '*') {
-		flags &= ~F_CONFIRM; /* GUI case */
-		newpath[len - 1] = '\0'; /* Get rid of trailing nowait symbol */
+		flags &= ~F_CONFIRM; /* Skip user confirmation */
+		newpath[len - 1] = '\0'; /* Get rid of trailing no confirmation symbol */
 		--len;
 	}
 

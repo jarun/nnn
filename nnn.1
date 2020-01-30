@@ -262,7 +262,7 @@ used. A single combination of arguments is supported for SHELL and PAGER.
 
     NOTES:
     1. To run a plugin directly, press \fI;\fR followed by the plugin key
-    2. To skip directory refresh after running a plugin,prefix with \fB-\fR
+    2. To skip directory refresh after running a plugin, prefix with \fB-\fR
 
     export NNN_PLUG='m:-mediainfo'
 .Ed
@@ -283,6 +283,10 @@ used. A single combination of arguments is supported for SHELL and PAGER.
 
     export NNN_PLUG='y:-_sync*'
 
+    6. To run a \fIGUI app as plugin\fR, add a \fB|\fR after \fB_\fR
+
+    export NNN_PLUG='m:-_|mousepad $nnn'
+
     EXAMPLES:
     ----------------------------------- + -------------------------------------------------
                 Key:Command             |                   Description
@@ -292,7 +296,7 @@ used. A single combination of arguments is supported for SHELL and PAGER.
     l:_git log                          | Show git log
     n:-_vi /home/user/Dropbox/dir/note* | Take quick notes in a synced file/dir of notes
     p:-_less -iR $nnn*                  | Page through hovered file in less
-    s:_smplayer -minigui $nnn*          | Play hovered media file, even unfinished download
+    s:-_|smplayer -minigui $nnn         | Play hovered media file, even unfinished download
     x:_chmod +x $nnn                    | Make the hovered file executable
     y:-_sync*                           | Flush cached writes
     ----------------------------------- + -------------------------------------------------

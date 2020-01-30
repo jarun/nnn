@@ -101,6 +101,12 @@ Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be us
 
 Now there will be no prompt after <kbd>;s</kbd> and <kbd>;n</kbd>.
 
+#### Run GUI app as plugin
+
+To run a GUI app as plugin, add a `|` after `_`. For example:
+
+    export NNN_PLUG='m:-_|mousepad $nnn'
+
 Notes:
 
 1. Use single quotes for `$NNN_PLUG` so `$nnn` is not interpreted
@@ -117,7 +123,7 @@ Notes:
 | `l:_git log` | Show git log |
 | `n:-_vi /home/user/Dropbox/dir/note*` | Take quick notes in a synced file/dir of notes |
 | `p:-_less -iR $nnn*` | Page through hovered file in less |
-| `s:_smplayer -minigui $nnn*` | Play hovered media file, even unfinished download |
+| `s:-_\|smplayer -minigui $nnn` | Play hovered media file, even unfinished download |
 | `x:_chmod +x $nnn` | Make the hovered file executable |
 | `y:-_sync*` | Flush cached writes |
 
