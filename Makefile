@@ -97,6 +97,10 @@ uninstall:
 strip: $(BIN)
 	$(STRIP) $^
 
+static:
+	make O_STATIC=1 strip
+	mv $(BIN) $(BIN)-static
+
 dist:
 	mkdir -p nnn-$(VERSION)
 	$(CP) -r $(DISTFILES) nnn-$(VERSION)
@@ -108,14 +112,18 @@ sign:
 	gpg --detach-sign --yes nnn-$(VERSION).tar.gz
 	rm -f nnn-$(VERSION).tar.gz
 
+upload-local: sign static
 	$(eval ID=$(shell curl -s 'https://api.github.com/repos/jarun/nnn/releases/tags/v$(VERSION)' | jq .id))
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION).tar.gz.sig' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/pgp-signature' \
 	    --upload-file nnn-$(VERSION).tar.gz.sig
+	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION)-static' \
+	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
+	    --upload-file $(BIN)-static
 
 clean:
-	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig
+	$(RM) -f $(BIN) $(BIN)-static nnn-$(VERSION).tar.gz *.sig
 
 skip: ;
 
-.PHONY: all install uninstall strip dist sign clean
+.PHONY: all install uninstall strip static dist sign upload-local clean
