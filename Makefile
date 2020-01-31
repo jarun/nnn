@@ -117,12 +117,14 @@ upload-local: sign static
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION).tar.gz.sig' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/pgp-signature' \
 	    --upload-file nnn-$(VERSION).tar.gz.sig
+	tar -cf $(BIN)-static-$(VERSION).x86-64.tar.gz $(BIN)-static
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION)-static' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
-	    --upload-file $(BIN)-static
+	    --upload-file $(BIN)-static-$(VERSION).x86-64.tar.gz
 
 clean:
-	$(RM) -f $(BIN) $(BIN)-static nnn-$(VERSION).tar.gz *.sig
+	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig \
+	    $(BIN)-static $(BIN)-static-$(VERSION).x86-64.tar.gz
 
 skip: ;
 
