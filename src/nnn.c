@@ -4972,6 +4972,13 @@ begin:
 
 	while (1) {
 		redraw(path);
+
+		/* Display a one-time message */
+		if (g_listpath && (g_states & STATE_MSG)) {
+			g_states &= ~STATE_MSG;
+			printwait(messages[MSG_IGNORED], &presel);
+		}
+
 nochange:
 		/* Exit if parent has exited */
 		if (getppid() == 1) {
@@ -4987,13 +4994,6 @@ nochange:
 		if (!isatty(STDIN_FILENO) && !cfg.picker) {
 			free(mark);
 			return _FAILURE;
-		}
-
-		/* Display a one-time message */
-		if (g_states & STATE_MSG) {
-			g_states &= ~STATE_MSG;
-			printwait(messages[MSG_IGNORED], &presel);
-			goto nochange;
 		}
 
 		sel = nextsel(presel);
