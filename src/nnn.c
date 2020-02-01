@@ -3580,14 +3580,26 @@ static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 static bool remote_mount(char *newpath, int *presel)
 {
 	uchar flag = F_CLI;
-	int r, opt = get_input(messages[MSG_REMOTE_OPTS]);
+	int opt;
 	char *tmp, *env, *cmd;
+	bool r, s;
+
+	r = getutil(utils[UTIL_RCLONE]);
+	s = getutil(utils[UTIL_SSHFS]);
+
+	if (!(r || s))
+		return FALSE;
+
+	if (r && s)
+		opt = get_input(messages[MSG_REMOTE_OPTS]);
+	else
+		opt = (!s) ? 'r' : 's';
 
 	if (opt == 's') {
 		cmd = utils[UTIL_SSHFS];
 		env = xgetenv("NNN_SSHFS", cmd);
 	} else if (opt == 'r') {
-		flag |= F_NOWAIT;
+		flag |= F_NOWAIT | F_NOTRACE;
 		cmd = utils[UTIL_RCLONE];
 		env = xgetenv("NNN_RCLONE", "rclone mount");
 	} else {
@@ -3612,10 +3624,11 @@ static bool remote_mount(char *newpath, int *presel)
 	}
 
 	/* Convert "Host" to "Host:" */
-	r = strlen(tmp);
-	if (tmp[r - 1] != ':') { /* Append ':' if missing */
-		tmp[r] = ':';
-		tmp[r + 1] = '\0';
+	size_t len = strlen(tmp);
+
+	if (tmp[len - 1] != ':') { /* Append ':' if missing */
+		tmp[len] = ':';
+		tmp[len + 1] = '\0';
 	}
 
 	/* Connect to remote */
