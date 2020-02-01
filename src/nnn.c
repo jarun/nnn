@@ -531,7 +531,7 @@ static const char * const messages[] = {
 	"\nPress Enter to continue",
 	"open failed",
 	"dir inaccessible",
-	"empty: use open with",
+	"empty: edit or open with",
 	"unsupported file",
 	"not set",
 	"entry exists",
@@ -3976,11 +3976,12 @@ static void show_help(const char *path)
 	       "9o ^O  Open with...%-12cn  Create new/link\n"
 	       "9f ^F  File details%-12cd  Detail view toggle\n"
 		 "b^R  Rename/dup%-14cr  Batch rename\n"
-		  "cz  Archive%-17c*  Toggle exe\n"
+		  "cz  Archive%-17ce  Edit in EDITOR\n"
 	   "5Space ^J  (Un)select%-11cm ^K  Mark range/clear\n"
 	       "9p ^P  Copy sel here%-11ca  Select all\n"
 	       "9v ^V  Move sel here%-8cw ^W  Copy/move sel as\n"
-	       "9x ^X  Delete%-18ce  Edit sel\n"
+	       "9x ^X  Delete%-18cE  Edit sel\n"
+	          "c*  Toggle exe%-0c\n"
 		"1MISC\n"
 	       "9; ^S  Select plugin%-11c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
@@ -5461,6 +5462,7 @@ nochange:
 		case SEL_REDRAW: // fallthrough
 		case SEL_RENAMEMUL: // fallthrough
 		case SEL_HELP: // fallthrough
+		case SEL_EDIT: // fallthrough
 		case SEL_LOCK:
 		{
 			bool refresh = FALSE;
@@ -5485,6 +5487,9 @@ nochange:
 				show_help(path);
 				if (cfg.filtermode)
 					presel = FILTER;
+				continue;
+			case SEL_EDIT:
+				spawn(editor, dents[cur].name, NULL, path, F_CLI);
 				continue;
 			default: /* SEL_LOCK */
 				lock_terminal();
