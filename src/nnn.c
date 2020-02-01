@@ -1036,6 +1036,8 @@ static char *xrealpath(const char *path, const char *cwd)
 	const char *src, *next;
 	char *dst;
 	char *resolved_path = malloc(src_size + (*path == '/' ? 0 : cwd_size) + 1);
+	if (!resolved_path)
+		return NULL;
 
 	/* Turn relative paths into absolute */
 	if (path[0] != '/')
@@ -6202,12 +6204,12 @@ static char *load_input()
 
 	g_prefixpath = malloc(sizeof(char) * PATH_MAX);
 	if (!g_prefixpath)
-		goto malloc_1;
+		goto malloc_2;
 
 	xstrlcpy(g_prefixpath, paths[0], strlen(paths[0]) + 1);
 	for (i = 1; i < entries; ++i) {
 		if (!common_prefix(paths[i], g_prefixpath))
-			goto malloc_1;
+			goto malloc_2;
 	}
 
 	if (entries == 1) {
@@ -6221,11 +6223,16 @@ static char *load_input()
 	tmpdir = make_tmp_tree(paths, entries, g_prefixpath);
 
 	if (tmpdir) {
+		for (i = entries - 1; i >= 0; --i)
+			free(paths[i]);
 		free(input);
 
 		return tmpdir;
 	}
 
+malloc_2:
+	for (i = entries - 1; i >= 0; --i)
+		free(paths[i]);
 malloc_1:
 	free(input);
 	return NULL;
