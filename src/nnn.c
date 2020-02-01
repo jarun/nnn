@@ -1302,7 +1302,7 @@ static pid_t xfork(uchar flag)
 			p = fork();
 
 			if (p > 0)
-				exit(0);
+				_exit(0);
 			else if (p == 0) {
 				signal(SIGHUP, SIG_DFL);
 				signal(SIGINT, SIG_DFL);
@@ -1314,7 +1314,7 @@ static pid_t xfork(uchar flag)
 			}
 
 			perror("fork");
-			exit(0);
+			_exit(0);
 		}
 
 		/* so they can be used to stop the child */
