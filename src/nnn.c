@@ -2024,12 +2024,10 @@ static int nextsel(int presel)
 		//DPRINTF_D(c);
 		//DPRINTF_S(keyname(c));
 
-		/* Clear previous filter when manually starting */
-		if (c == FILTER)
-			clearfilter();
-
-		if (presel == MSGWAIT)
+		if (c == ERR && presel == MSGWAIT)
 			c = (cfg.filtermode) ? FILTER : CONTROL('L');
+		else if (c == FILTER) /* Clear previous filter when manually starting */
+			clearfilter();
 	}
 
 	if (c == -1) {
