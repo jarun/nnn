@@ -2453,7 +2453,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 					memmove(buf + pos - 1, buf + pos,
 						(len - pos) * WCHAR_T_WIDTH);
 					--pos, --len;
-				} while (buf[pos-1] != ' ' && buf[pos-1] != '/');
+				} while (buf[pos - 1] != ' ' && buf[pos - 1] != '/'); // NOLINT
 				continue;
 			case CONTROL('K'):
 				printprompt(prompt);
