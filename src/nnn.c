@@ -3579,7 +3579,7 @@ static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 
 static bool remote_mount(char *newpath, int *presel)
 {
-	uchar flag = F_CLI;
+	uchar flag = F_MULTI;
 	int r, opt = get_input(messages[MSG_REMOTE_OPTS]);
 	char *tmp, *env, *cmd;
 
