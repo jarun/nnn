@@ -342,6 +342,8 @@ static char *home;
 static char *initpath;
 static char *cfgdir;
 static char *g_selpath;
+static char *g_listpath;
+static char *g_prefixpath;
 static char *plugindir;
 static char *sessiondir;
 static char *pnamebuf, *pselbuf;
@@ -353,6 +355,7 @@ static kv bookmark[BM_MAX];
 static kv plug[PLUGIN_MAX];
 static uchar g_tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
+static const uint _WSHIFT = (LONG_SIZE == 8) ? 3 : 2;
 #ifdef PCRE
 static pcre *archive_pcre;
 #else
@@ -386,6 +389,7 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define STATE_RANGESEL 0x4
 #define STATE_MOVE_OP 0x8
 #define STATE_AUTONEXT 0x10
+#define STATE_MSG 0x20
 
 static uchar g_states;
 
@@ -496,8 +500,9 @@ static char * const utils[] = {
 #define MSG_INVALID_REG 36
 #define MSG_ORDER 37
 #define MSG_LAZY 38
+#define MSG_IGNORED 39
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 39 /* Must be the last entry */
+#define MSG_DIR_CHANGED 40 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -540,6 +545,7 @@ static const char * const messages[] = {
 	"invalid regex",
 	"toggle 'a'u / 'd'u / 'e'xtn / 'r'everse / 's'ize / 't'ime / 'v'ersion?",
 	"unmount failed! try lazy?",
+	"ignoring invalid paths...",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -596,6 +602,7 @@ static const char cpmvrenamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\
 static const char batchrenamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
 				     "tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
 static const char archive_regex[] = "\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$";
+static const char replaceprefixcmd[] = "sed -i 's|^%s\\(.*\\)$|%s\\1|' %s";
 
 /* Event handling */
 #ifdef LINUX_INOTIFY
@@ -859,7 +866,6 @@ static size_t xstrlcpy(char *dest, const char *src, size_t n)
 
 	ulong *s, *d;
 	size_t len = strlen(src) + 1, blocks;
-	const uint _WSHIFT = (LONG_SIZE == 8) ? 3 : 2;
 
 	if (n > len)
 		n = len;
@@ -869,7 +875,7 @@ static size_t xstrlcpy(char *dest, const char *src, size_t n)
 
 	/*
 	 * To enable -O3 ensure src and dest are 16-byte aligned
-	 * More info: http://www.felixcloutier.com/x86/MOVDQA.html
+	 * More info: https://www.felixcloutier.com/x86/MOVDQA:VMOVDQA32:VMOVDQA64
 	 */
 	if ((n >= LONG_SIZE) && (((ulong)src & _ALIGNMENT_MASK) == 0 &&
 	    ((ulong)dest & _ALIGNMENT_MASK) == 0)) {
@@ -940,11 +946,134 @@ static void *xmemrchr(uchar *s, uchar ch, size_t n)
 	return NULL;
 }
 
+static char *common_prefix(const char *s, char *prefix)
+{
+	if (!s || !prefix)
+		return NULL;
+
+	/* Only accept non-empty strings */
+	if (*s == '\0' || *prefix == '\0')
+		return NULL;
+
+	ulong *x, *y;
+	size_t i = 0, j = 0, blocks = 0;
+	size_t len_s = strlen(s), len_prefix = strlen(prefix);
+	size_t len = MIN(len_s, len_prefix);
+	char *tmp;
+
+	/*
+	 * To enable -O3 ensure s and prefix are 16-byte aligned
+	 * More info: https://www.felixcloutier.com/x86/MOVDQA:VMOVDQA32:VMOVDQA64
+	 */
+	if ((len >= LONG_SIZE) && (((ulong)s & _ALIGNMENT_MASK) == 0
+			       && ((ulong)prefix & _ALIGNMENT_MASK) == 0)) {
+		x = (ulong *)s;
+		y = (ulong *)prefix;
+		blocks = len >> _WSHIFT;
+		len &= LONG_SIZE - 1;
+
+		while (i < blocks && !(*x ^ *y))
+			++x, ++y, ++i;
+
+		/* This should always return */
+		if (i < blocks) {
+			i *= LONG_SIZE;
+			for (; j < LONG_SIZE; ++j)
+				if (s[i + j] != prefix[i + j]) {
+					tmp = xmemrchr((uchar *)prefix, '/', i + j);
+					if (!tmp)
+						return NULL;
+
+					*(tmp != prefix ? tmp : tmp + 1) = '\0';
+
+					return prefix;
+				}
+		}
+
+		if (!len)
+			return prefix;
+	}
+
+	i = blocks * LONG_SIZE;
+	while (j < len && s[i + j] == prefix[i + j])
+		++j;
+
+	if (j < len) {
+		tmp = xmemrchr((uchar *)prefix, '/', i + j);
+		if (!tmp)
+			return NULL;
+
+		*(tmp != prefix ? tmp : tmp + 1) = '\0';
+
+		return prefix;
+	}
+
+	/* complete match but lenghts might differ */
+	if (len_s < len_prefix || (len_s > len_prefix && s[len_prefix] != '/')) {
+		tmp = xmemrchr((uchar *)prefix, '/', len);
+		if (!tmp)
+			return NULL;
+
+		*(tmp != prefix ? tmp : tmp + 1) = '\0';
+	}
+
+	return prefix;
+}
+
 static char *xbasename(char *path)
 {
 	char *base = xmemrchr((uchar *)path, '/', strlen(path)); // NOLINT
 
 	return base ? base + 1 : path;
+}
+
+static char *xrealpath(const char *path, const char *cwd)
+{
+	if (!path || !cwd)
+		return NULL;
+
+	size_t dst_size = 0, src_size = strlen(path), cwd_size = strlen(cwd);
+	const char *src, *next;
+	char *dst;
+	char *resolved_path = malloc(src_size + (*path == '/' ? 0 : cwd_size) + 1);
+	if (!resolved_path)
+		return NULL;
+
+	/* Turn relative paths into absolute */
+	if (path[0] != '/')
+		dst_size = xstrlcpy(resolved_path, cwd, cwd_size + 1) - 1;
+	else
+		resolved_path[0] = '\0';
+
+	src = path;
+	dst = resolved_path + dst_size;
+	for (next = NULL; next != path + src_size;) {
+		next = strchr(src, '/');
+		if (!next)
+			next = path + src_size;
+
+		if (next - src == 2 && src[0] == '.' && src[1] == '.') {
+			if (dst - resolved_path) {
+				dst = xmemrchr((uchar *)resolved_path, '/', dst-resolved_path);
+				*dst = '\0';
+			}
+		} else if (next - src == 1 && src[0] == '.') {
+			/* NOP */
+		} else if (next - src) {
+			*(dst++) = '/';
+			xstrlcpy(dst, src, next - src + 1);
+			dst += next - src;
+		}
+
+		src = next + 1;
+	}
+
+	if (*resolved_path == '\0') {
+		resolved_path[0] = '/';
+		resolved_path[1] = '\0';
+	}
+
+	return resolved_path;
 }
 
 static int create_tmp_file(void)
@@ -1086,8 +1215,66 @@ static void updateselbuf(const char *path, char *newpath)
 /* Finish selection procedure before an operation */
 static void endselection(void)
 {
+	int fd;
+	ssize_t count;
+	char buf[sizeof(replaceprefixcmd) + PATH_MAX + (TMP_LEN_MAX << 1)];
+
 	if (cfg.selmode)
 		cfg.selmode = 0;
+
+	if (!g_listpath || !selbufpos)
+		return;
+
+	fd = create_tmp_file();
+	if (fd == -1) {
+		DPRINTF_S("couldn't create tmp file");
+		return;
+	}
+
+	seltofile(fd, NULL);
+	if (close(fd)) {
+		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
+		return;
+	}
+
+	snprintf(buf, sizeof(buf), replaceprefixcmd, g_listpath, g_prefixpath, g_tmpfpath);
+	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
+
+	fd = open(g_tmpfpath, O_RDONLY);
+	if (fd == -1) {
+		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
+		if (unlink(g_tmpfpath)) {
+			DPRINTF_S(strerror(errno));
+			printwarn(NULL);
+		}
+		return;
+	}
+
+	count = read(fd, pselbuf, selbuflen);
+	if (count < 0) {
+		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
+		if (close(fd) || unlink(g_tmpfpath)) {
+			DPRINTF_S(strerror(errno));
+		}
+		return;
+	}
+
+	if (close(fd) || unlink(g_tmpfpath)) {
+		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
+		return;
+	}
+
+	selbufpos = count;
+	pselbuf[--count] = '\0';
+	for (--count; count > 0; --count)
+		if (pselbuf[count] == '\n' && pselbuf[count+1] == '/')
+			pselbuf[count] = '\0';
+
+	writesel(pselbuf, selbufpos - 1);
 }
 
 static void clearselection(void)
@@ -1117,7 +1304,10 @@ static int editselection(void)
 	}
 
 	seltofile(fd, NULL);
-	close(fd);
+	if (close(fd)) {
+		DPRINTF_S(strerror(errno));
+		return -1;
+	}
 
 	/* Save the last modification time */
 	if (stat(g_tmpfpath, &sb)) {
@@ -1151,16 +1341,24 @@ static int editselection(void)
 	}
 
 	count = read(fd, pselbuf, selbuflen);
-	close(fd);
-	unlink(g_tmpfpath);
-
-	if (!count) {
-		ret = 1;
+	if (count < 0) {
+		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
+		if (close(fd) || unlink(g_tmpfpath)) {
+			DPRINTF_S(strerror(errno));
+			printwarn(NULL);
+		}
 		goto emptyedit;
 	}
 
-	if (count < 0) {
-		DPRINTF_S("error reading tmp file");
+	if (close(fd) || unlink(g_tmpfpath)) {
+		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
+		goto emptyedit;
+	}
+
+	if (!count) {
+		ret = 1;
 		goto emptyedit;
 	}
 
@@ -4791,6 +4989,13 @@ nochange:
 			return _FAILURE;
 		}
 
+		/* Display a one-time message */
+		if (g_states & STATE_MSG) {
+			g_states &= ~STATE_MSG;
+			printwait(messages[MSG_IGNORED], &presel);
+			goto nochange;
+		}
+
 		sel = nextsel(presel);
 		if (presel)
 			presel = 0;
@@ -5239,7 +5444,9 @@ nochange:
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
 			if (ndents) {
-				mkpath(path, dents[cur].name, newpath);
+				tmp = (g_listpath && xstrcmp(path, g_listpath) == 0) ? g_prefixpath : path;
+				mkpath(tmp, dents[cur].name, newpath);
+
 				if (lstat(newpath, &sb) == -1
 				    || (sel == SEL_STATS && !show_stats(newpath, &sb))
 				    || (sel == SEL_CHMODX && !xchmod(newpath, sb.st_mode))) {
@@ -5421,7 +5628,8 @@ nochange:
 				}
 
 				if (r == 'c') {
-					mkpath(path, dents[cur].name, newpath);
+					tmp = (g_listpath && xstrcmp(path, g_listpath) == 0) ? g_prefixpath : path;
+					mkpath(tmp, dents[cur].name, newpath);
 					xrm(newpath);
 
 					if (cur && access(newpath, F_OK) == -1) {
@@ -5859,6 +6067,175 @@ nochange:
 	}
 }
 
+static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
+{
+	/* tmpdir holds the full path */
+	/* tmp holds the path without the tmp dir prefix */
+	int err, ignore = 0;
+	struct stat sb;
+	char *slash, *tmp;
+	ssize_t i, len = strlen(prefix);
+	char *tmpdir = malloc(sizeof(char) * (PATH_MAX + TMP_LEN_MAX));
+
+	if (!tmpdir) {
+		DPRINTF_S(strerror(errno));
+		return NULL;
+	}
+
+	tmp = tmpdir + g_tmpfplen - 1;
+	xstrlcpy(tmpdir, g_tmpfpath, g_tmpfplen);
+	xstrlcpy(tmp, "/nnnXXXXXX", 11);
+
+	if (!mkdtemp(tmpdir)) {
+		free(tmpdir);
+
+		DPRINTF_S(strerror(errno));
+		return NULL;
+	}
+
+	g_listpath = tmpdir;
+
+	for (i = 0; i < entries; ++i) {
+		err = stat(paths[i], &sb);
+		if (err && errno == ENOENT) {
+			ignore = 1;
+			continue;
+		}
+
+		xstrlcpy(tmp + 10, paths[i] + len, strlen(paths[i]) + 1);
+
+		slash = xmemrchr((uchar *)tmp, '/', strlen(paths[i]) + 11);
+		*slash = '\0';
+
+		xmktree(tmpdir, TRUE);
+
+		*slash = '/';
+		if (symlink(paths[i], tmpdir)) {
+			DPRINTF_S(paths[i]);
+			DPRINTF_S(strerror(errno));
+		}
+	}
+
+	if (ignore)
+		g_states |= STATE_MSG;
+
+	tmp[10] = '\0';
+	return tmpdir;
+}
+
+static char *load_input()
+{
+	/* 512 KiB chunk size */
+	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
+	char *input = malloc(sizeof(char) * chunk), *tmpdir;
+	char cwd[PATH_MAX], *next, *prev, *tmp;
+	size_t offsets[1 << 16];
+	char *paths[1 << 16];
+	ssize_t input_read, total_read = 0, off = 0;
+
+	if (!input) {
+		DPRINTF_S(strerror(errno));
+		return NULL;
+	}
+
+	while (chunk_count < 512) {
+		input_read = read(STDIN_FILENO, input, chunk);
+		if (input_read < 0) {
+			DPRINTF_S(strerror(errno));
+			goto malloc_1;
+		}
+
+		total_read += input_read;
+		++chunk_count;
+
+		while (off < total_read) {
+			next = memchr(input + off, '\0', total_read - off) + 1;
+			if (next == (void *)1)
+				break;
+
+			if (next - input == off + 1) {
+				off = next - input;
+				continue;
+			}
+
+			if (entries == (1 << 16))
+				goto malloc_1;
+
+			offsets[entries++] = off;
+			off = next - input;
+		}
+
+		if (input_read < chunk)
+			break;
+
+		if (chunk_count == 512 || !(input = xrealloc(input, (chunk_count + 1) * chunk)))
+			goto malloc_1;
+	}
+
+	if (off != total_read) {
+		if (entries == (1 << 16))
+			goto malloc_1;
+
+		offsets[entries++] = off;
+	}
+
+	if (!entries)
+		goto malloc_1;
+
+	input[total_read] = '\0';
+
+	for (i = 0; i < entries; ++i)
+		paths[i] = input + offsets[i];
+
+	/* prev used as tmp variable */
+	prev = getcwd(cwd, PATH_MAX);
+	if (!prev)
+		goto malloc_1;
+
+	for (i = 0; i < entries; ++i) {
+		if (!(paths[i] = xrealpath(paths[i], cwd))) {
+			for (--i; i >= 0; --i)
+				free(paths[i]);
+			goto malloc_1;
+		}
+	}
+
+	g_prefixpath = malloc(sizeof(char) * PATH_MAX);
+	if (!g_prefixpath)
+		goto malloc_2;
+
+	xstrlcpy(g_prefixpath, paths[0], strlen(paths[0]) + 1);
+	for (i = 1; i < entries; ++i) {
+		if (!common_prefix(paths[i], g_prefixpath))
+			goto malloc_2;
+	}
+
+	if (entries == 1) {
+		tmp = xmemrchr((uchar *)g_prefixpath, '/', strlen(g_prefixpath));
+		if (!tmp)
+			return NULL;
+
+		*(tmp != g_prefixpath ? tmp : tmp + 1) = '\0';
+	}
+
+	tmpdir = make_tmp_tree(paths, entries, g_prefixpath);
+
+	if (tmpdir) {
+		for (i = entries - 1; i >= 0; --i)
+			free(paths[i]);
+		free(input);
+
+		return tmpdir;
+	}
+
+malloc_2:
+	for (i = entries - 1; i >= 0; --i)
+		free(paths[i]);
+malloc_1:
+	free(input);
+	return NULL;
+}
+
 static void check_key_collision(void)
 {
 	int key;
@@ -6034,6 +6411,7 @@ static void cleanup(void)
 	free(initpath);
 	free(bmstr);
 	free(pluginstr);
+	free(g_prefixpath);
 
 	unlink(g_pipepath);
 
@@ -6146,16 +6524,35 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	/* Confirm we are in a terminal */
-	if (!cfg.picker && !(isatty(STDIN_FILENO) && isatty(STDOUT_FILENO)))
-		exit(1);
-
 #ifdef DBGMODE
 	enabledbg();
 	DPRINTF_S(VERSION);
 #endif
 
+	/* Prefix for temporary files */
+	if (!set_tmp_path())
+		return _FAILURE;
+
 	atexit(cleanup);
+
+	if (!cfg.picker) {
+		/* Confirm we are in a terminal */
+		if (!isatty(STDOUT_FILENO))
+			exit(1);
+
+		/* Now we are in path list mode */
+		if (!isatty(STDIN_FILENO)) {
+
+			/* This is the same as g_listpath */
+			initpath = load_input();
+			if (!initpath)
+				exit(1);
+
+			/* We return to tty */
+			dup2(STDOUT_FILENO, STDIN_FILENO);
+		}
+
+	}
 
 	home = getenv("HOME");
 	if (!home) {
@@ -6183,7 +6580,9 @@ int main(int argc, char *argv[])
 		return _FAILURE;
 	}
 
-	if (arg) { /* Open a bookmark directly */
+	if (initpath) {
+		/* NOP */
+	} else if (arg) { /* Open a bookmark directly */
 		if (!arg[1]) /* Bookmarks keys are single char */
 			initpath = get_kv_val(bookmark, NULL, *arg, BM_MAX, TRUE);
 
@@ -6285,10 +6684,6 @@ int main(int argc, char *argv[])
 	if (xgetenv_set(env_cfg[NNN_TRASH]))
 		cfg.trash = 1;
 
-	/* Prefix for temporary files */
-	if (!set_tmp_path())
-		return _FAILURE;
-
 	/* Ignore/handle certain signals */
 	struct sigaction act = {.sa_handler = sigint_handler};
 
@@ -6327,6 +6722,10 @@ int main(int argc, char *argv[])
 
 	opt = browse(initpath, session);
 	mousemask(mask, NULL);
+
+	if (g_listpath)
+		spawn("rm -rf", initpath, NULL, NULL, F_SILENT);
+
 	exitcurses();
 
 #ifndef NORL
