@@ -1027,24 +1027,21 @@ static char *xbasename(char *path)
 	return base ? base + 1 : path;
 }
 
-static char *xrealpath(const char *path, char *resolved_path, const char *cwd)
+static char *xrealpath(const char *path, const char *cwd)
 {
-	if (!path || !resolved_path || !cwd)
+	if (!path || !cwd)
 		return NULL;
 
-	size_t dst_size = 0, src_size = strlen(path);
+	size_t dst_size = 0, src_size = strlen(path), cwd_size = strlen(cwd);
 	const char *src, *next;
 	char *dst;
-
-	if (src_size > PATH_MAX)
-		return NULL;
+	char *resolved_path = malloc(src_size + (*path == '/' ? 0 : cwd_size) + 1);
 
 	/* Turn relative paths into absolute */
 	if (path[0] != '/')
-		dst_size = xstrlcpy(resolved_path, cwd, strlen(cwd) + 1) - 1;
+		dst_size = xstrlcpy(resolved_path, cwd, cwd_size + 1) - 1;
 	else
 		resolved_path[0] = '\0';
-
 
 	src = path;
 	dst = resolved_path + dst_size;
@@ -1235,6 +1232,7 @@ static void endselection(void)
 	seltofile(fd, NULL);
 	if (close(fd)) {
 		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
 		return;
 	}
 
@@ -1244,8 +1242,10 @@ static void endselection(void)
 	fd = open(g_tmpfpath, O_RDONLY);
 	if (fd == -1) {
 		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
 		if (unlink(g_tmpfpath)) {
 			DPRINTF_S(strerror(errno));
+			printwarn(NULL);
 		}
 		return;
 	}
@@ -1253,6 +1253,7 @@ static void endselection(void)
 	count = read(fd, pselbuf, selbuflen);
 	if (count < 0) {
 		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
 		if (close(fd) || unlink(g_tmpfpath)) {
 			DPRINTF_S(strerror(errno));
 		}
@@ -1261,6 +1262,7 @@ static void endselection(void)
 
 	if (close(fd) || unlink(g_tmpfpath)) {
 		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
 		return;
 	}
 
@@ -1339,14 +1341,17 @@ static int editselection(void)
 	count = read(fd, pselbuf, selbuflen);
 	if (count < 0) {
 		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
 		if (close(fd) || unlink(g_tmpfpath)) {
 			DPRINTF_S(strerror(errno));
+			printwarn(NULL);
 		}
 		goto emptyedit;
 	}
 
 	if (close(fd) || unlink(g_tmpfpath)) {
 		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
 		goto emptyedit;
 	}
 
@@ -6123,99 +6128,86 @@ static char *load_input()
 	/* 512 KiB chunk size */
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
 	char *input = malloc(sizeof(char) * chunk), *tmpdir;
-	char cwd[PATH_MAX], *next, *prev, **paths, *tmp;
-	ssize_t input_read, total_read = 0;
+	char cwd[PATH_MAX], *next, *prev, *tmp;
+	size_t offsets[1 << 16];
+	char *paths[1 << 16];
+	ssize_t input_read, total_read = 0, off = 0;
 
 	if (!input) {
 		DPRINTF_S(strerror(errno));
 		return NULL;
 	}
 
-	total_read = input_read = read(STDIN_FILENO, input, chunk);
-	while (input_read == chunk && chunk_count < 512) {
-		if (!(input = xrealloc(input, (++chunk_count) * chunk)))
-			goto malloc_1;
-
-		input_read = read(STDIN_FILENO, input + (chunk_count - 1) * chunk, chunk);
+	while (chunk_count < 512) {
+		input_read = read(STDIN_FILENO, input, chunk);
 		if (input_read < 0) {
 			DPRINTF_S(strerror(errno));
 			goto malloc_1;
 		}
 
 		total_read += input_read;
-	}
+		++chunk_count;
 
-	input[total_read] = '\0';
-	/* 256MiB already read, enough for 2^16 paths */
-	if (input_read == chunk && chunk_count == 512)
-		goto malloc_1;
+		while (off < total_read) {
+			next = memchr(input + off, '\0', total_read - off) + 1;
+			if (next == (void *)1)
+				break;
 
-	prev = input;
-	while (prev < input + total_read) {
-		next = memchr(prev, '\0', total_read - (prev - input) + 1) + 1;
+			if (next - input == off + 1) {
+				off = next - input;
+				continue;
+			}
 
-		if (next - prev == 1) {
-			prev = next;
-			continue;
+			if (entries == (1 << 16))
+				goto malloc_1;
+
+			offsets[entries++] = off;
+			off = next - input;
 		}
 
-		prev = next;
+		if (input_read < chunk)
+			break;
 
-		/* path limit exceeded */
-		if (++entries > (1 << 16))
+		if (chunk_count == 512 || !(input = xrealloc(input, (chunk_count + 1) * chunk)))
 			goto malloc_1;
+	}
+
+	if (off != total_read) {
+		if (entries == (1 << 16))
+			goto malloc_1;
+
+		offsets[entries++] = off;
 	}
 
 	if (!entries)
 		goto malloc_1;
 
-	/* allocate the space for all the strings */
-	paths = malloc(sizeof(char *) * entries);
-	if (!paths) {
-		DPRINTF_S(strerror(errno));
-		goto malloc_1;
-	}
+	input[total_read] = '\0';
+
+	for (i = 0; i < entries; ++i)
+		paths[i] = input + offsets[i];
 
 	/* prev used as tmp variable */
 	prev = getcwd(cwd, PATH_MAX);
-	if (!prev) {
-		goto malloc_2;
-	}
+	if (!prev)
+		goto malloc_1;
 
 	for (i = 0; i < entries; ++i) {
-		paths[i] = malloc(sizeof(char) * PATH_MAX);
-		if (!paths[i]) {
-			DPRINTF_S(strerror(errno));
-
+		if (!(paths[i] = xrealpath(paths[i], cwd))) {
 			for (--i; i >= 0; --i)
 				free(paths[i]);
-
-			goto malloc_2;
+			goto malloc_1;
 		}
-	}
-
-	for (i = 0, prev = input; i < entries; ++i) {
-		next = memchr(prev, '\0', total_read - (prev - input) + 1) + 1;
-		if (next - prev == 1) {
-			--i;
-			prev = next;
-			continue;
-		}
-
-		if (!xrealpath(prev, paths[i], cwd))
-			goto malloc_3;
-
-		prev = next;
 	}
 
 	g_prefixpath = malloc(sizeof(char) * PATH_MAX);
 	if (!g_prefixpath)
-		goto malloc_3;
+		goto malloc_1;
 
 	xstrlcpy(g_prefixpath, paths[0], strlen(paths[0]) + 1);
 	for (i = 1; i < entries; ++i) {
 		if (!common_prefix(paths[i], g_prefixpath))
-			goto malloc_3;
+			goto malloc_1;
 	}
 
 	if (entries == 1) {
@@ -6229,19 +6221,11 @@ static char *load_input()
 	tmpdir = make_tmp_tree(paths, entries, g_prefixpath);
 
 	if (tmpdir) {
-		for (i = 0; i < entries; ++i)
-			free(paths[i]);
-		free(paths);
 		free(input);
 
 		return tmpdir;
 	}
 
-malloc_3:
-	for (i = 0; i < entries; ++i)
-		free(paths[i]);
-malloc_2:
-	free(paths);
 malloc_1:
 	free(input);
 	return NULL;
