@@ -118,7 +118,6 @@ Notes:
 
 | Key:Command | Description |
 |---|---|
-| `e:-_vi $nnn*` | Edit hovered file in vi |
 | `k:-_fuser -kiv $nnn*` | Interactively kill process(es) using hovered file |
 | `l:_git log` | Show git log |
 | `n:-_vi /home/user/Dropbox/dir/note*` | Take quick notes in a synced file/dir of notes |
