@@ -6178,12 +6178,12 @@ static char *load_input()
 			break;
 
 		if (chunk_count == 512 || !(input = xrealloc(input, (chunk_count + 1) * chunk)))
-			goto malloc_2;
+			goto malloc_1;
 	}
 
 	if (off != total_read) {
 		if (entries == (1 << 16))
-			goto malloc_2;
+			goto malloc_1;
 
 		paths[entries++] = input + off;
 	}
@@ -6195,16 +6195,25 @@ static char *load_input()
 
 	g_prefixpath = malloc(sizeof(char) * PATH_MAX);
 	if (!g_prefixpath)
-		goto malloc_2;
+		goto malloc_1;
 
 	if (!(paths[0] = xrealpath(paths[0], cwd)))
-		goto malloc_2; // free all entries
+		goto malloc_1; // free all entries
 
 	xstrlcpy(g_prefixpath, paths[0], strlen(paths[0]) + 1);
 
-	for (i = 1; i < entries; ++i)
-		if (!(paths[i] = xrealpath(paths[i], cwd)) || !common_prefix(paths[i], g_prefixpath))
-			goto malloc_2; // free all entries
+	for (i = 1; i < entries; ++i) {
+		if (!(paths[i] = xrealpath(paths[i], cwd))) {
+			entries = i; // free from the previous entry
+			goto malloc_2;
+
+		}
+
+		if (!common_prefix(paths[i], g_prefixpath)) {
+			entries = i + 1; // free from the current entry
+			goto malloc_2;
+		}
+	}
 
 	if (entries == 1) {
 		tmp = xmemrchr((uchar *)g_prefixpath, '/', strlen(g_prefixpath));
