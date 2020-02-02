@@ -6134,6 +6134,7 @@ static char *load_input()
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
 	char *input = malloc(sizeof(char) * chunk), *tmpdir = NULL;
 	char cwd[PATH_MAX], *next, *tmp;
+	size_t offsets[1 << 16];
 	char *paths[1 << 16];
 	ssize_t input_read, total_read = 0, off = 0;
 
@@ -6170,28 +6171,34 @@ static char *load_input()
 			if (entries == (1 << 16))
 				goto malloc_1;
 
-			paths[entries++] = input + off;
+			offsets[entries++] = off;
 			off = next - input;
 		}
 
 		if (input_read < chunk)
 			break;
 
-		if (chunk_count == 512 || !(input = xrealloc(input, (chunk_count + 1) * chunk)))
+		if (chunk_count == 512)
 			goto malloc_1;
+
+		if (!(input = xrealloc(input, (chunk_count + 1) * chunk)))
+			return NULL;
 	}
 
 	if (off != total_read) {
 		if (entries == (1 << 16))
 			goto malloc_1;
 
-		paths[entries++] = input + off;
+		offsets[entries++] = off;
 	}
 
 	if (!entries)
 		goto malloc_1;
 
 	input[total_read] = '\0';
+
+	for (i = 0; i < entries; ++i)
+		paths[i] = input + offsets[i];
 
 	g_prefixpath = malloc(sizeof(char) * PATH_MAX);
 	if (!g_prefixpath)
