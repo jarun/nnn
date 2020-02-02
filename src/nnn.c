@@ -157,6 +157,7 @@
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
 #define EXEC_ARGS_MAX 8
+#define LIST_FILES_MAX (1 << 16)
 #define SCROLLOFF 3
 #define MIN_DISPLAY_COLS 10
 #define LONG_SIZE sizeof(ulong)
@@ -6134,8 +6135,8 @@ static char *load_input()
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
 	char *input = malloc(sizeof(char) * chunk), *tmpdir = NULL;
 	char cwd[PATH_MAX], *next, *tmp;
-	size_t offsets[1 << 16];
-	char *paths[1 << 16];
+	size_t offsets[LIST_FILES_MAX];
+	char **paths = NULL;
 	ssize_t input_read, total_read = 0, off = 0;
 
 	if (!input) {
@@ -6168,7 +6169,7 @@ static char *load_input()
 				continue;
 			}
 
-			if (entries == (1 << 16))
+			if (entries == LIST_FILES_MAX)
 				goto malloc_1;
 
 			offsets[entries++] = off;
@@ -6186,7 +6187,7 @@ static char *load_input()
 	}
 
 	if (off != total_read) {
-		if (entries == (1 << 16))
+		if (entries == LIST_FILES_MAX)
 			goto malloc_1;
 
 		offsets[entries++] = off;
@@ -6196,6 +6197,10 @@ static char *load_input()
 		goto malloc_1;
 
 	input[total_read] = '\0';
+
+	paths = malloc(entries * sizeof(char *));
+	if (!paths)
+		goto malloc_1;
 
 	for (i = 0; i < entries; ++i)
 		paths[i] = input + offsets[i];
@@ -6225,7 +6230,7 @@ static char *load_input()
 	if (entries == 1) {
 		tmp = xmemrchr((uchar *)g_prefixpath, '/', strlen(g_prefixpath));
 		if (!tmp)
-			return NULL;
+			goto malloc_2;
 
 		*(tmp != g_prefixpath ? tmp : tmp + 1) = '\0';
 	}
@@ -6237,6 +6242,7 @@ malloc_2:
 		free(paths[i]);
 malloc_1:
 	free(input);
+	free(paths);
 	return tmpdir;
 }
 
