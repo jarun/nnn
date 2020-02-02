@@ -6132,14 +6132,18 @@ static char *load_input()
 {
 	/* 512 KiB chunk size */
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
-	char *input = malloc(sizeof(char) * chunk), *tmpdir;
-	char cwd[PATH_MAX], *next, *prev, *tmp;
-	size_t offsets[1 << 16];
+	char *input = malloc(sizeof(char) * chunk), *tmpdir = NULL;
+	char cwd[PATH_MAX], *next, *tmp;
 	char *paths[1 << 16];
 	ssize_t input_read, total_read = 0, off = 0;
 
 	if (!input) {
 		DPRINTF_S(strerror(errno));
+		return NULL;
+	}
+
+	if (!getcwd(cwd, PATH_MAX)) {
+		free(input);
 		return NULL;
 	}
 
@@ -6166,7 +6170,7 @@ static char *load_input()
 			if (entries == (1 << 16))
 				goto malloc_1;
 
-			offsets[entries++] = off;
+			paths[entries++] = input + off;
 			off = next - input;
 		}
 
@@ -6174,14 +6178,14 @@ static char *load_input()
 			break;
 
 		if (chunk_count == 512 || !(input = xrealloc(input, (chunk_count + 1) * chunk)))
-			goto malloc_1;
+			goto malloc_2;
 	}
 
 	if (off != total_read) {
 		if (entries == (1 << 16))
-			goto malloc_1;
+			goto malloc_2;
 
-		offsets[entries++] = off;
+		paths[entries++] = input + off;
 	}
 
 	if (!entries)
@@ -6189,31 +6193,18 @@ static char *load_input()
 
 	input[total_read] = '\0';
 
-	for (i = 0; i < entries; ++i)
-		paths[i] = input + offsets[i];
-
-	/* prev used as tmp variable */
-	prev = getcwd(cwd, PATH_MAX);
-	if (!prev)
-		goto malloc_1;
-
-	for (i = 0; i < entries; ++i) {
-		if (!(paths[i] = xrealpath(paths[i], cwd))) {
-			for (--i; i >= 0; --i)
-				free(paths[i]);
-			goto malloc_1;
-		}
-	}
-
 	g_prefixpath = malloc(sizeof(char) * PATH_MAX);
 	if (!g_prefixpath)
 		goto malloc_2;
 
+	if (!(paths[0] = xrealpath(paths[0], cwd)))
+		goto malloc_2; // free all entries
+
 	xstrlcpy(g_prefixpath, paths[0], strlen(paths[0]) + 1);
-	for (i = 1; i < entries; ++i) {
-		if (!common_prefix(paths[i], g_prefixpath))
-			goto malloc_2;
-	}
+
+	for (i = 1; i < entries; ++i)
+		if (!(paths[i] = xrealpath(paths[i], cwd)) || !common_prefix(paths[i], g_prefixpath))
+			goto malloc_2; // free all entries
 
 	if (entries == 1) {
 		tmp = xmemrchr((uchar *)g_prefixpath, '/', strlen(g_prefixpath));
@@ -6225,20 +6216,12 @@ static char *load_input()
 
 	tmpdir = make_tmp_tree(paths, entries, g_prefixpath);
 
-	if (tmpdir) {
-		for (i = entries - 1; i >= 0; --i)
-			free(paths[i]);
-		free(input);
-
-		return tmpdir;
-	}
-
 malloc_2:
 	for (i = entries - 1; i >= 0; --i)
 		free(paths[i]);
 malloc_1:
 	free(input);
-	return NULL;
+	return tmpdir;
 }
 
 static void check_key_collision(void)
