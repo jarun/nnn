@@ -6395,21 +6395,16 @@ static bool setup_config(void)
 
 static bool set_tmp_path(void)
 {
-	char *path;
+        char *tmp = "/tmp";
+        char *path = xdiraccess(tmp) ? tmp : getenv("TMPDIR");
 
-	if (xdiraccess("/tmp"))
-		g_tmpfplen = (uchar)xstrlcpy(g_tmpfpath, "/tmp", TMP_LEN_MAX);
-	else {
-		path = getenv("TMPDIR");
-		if (path)
-			g_tmpfplen = (uchar)xstrlcpy(g_tmpfpath, path, TMP_LEN_MAX);
-		else {
-			fprintf(stderr, "set TMPDIR\n");
-			return FALSE;
-		}
-	}
+        if (!path) {
+                fprintf(stderr, "set TMPDIR\n");
+                return FALSE;
+        }
 
-	return TRUE;
+        g_tmpfplen = (uchar)xstrlcpy(g_tmpfpath, path, TMP_LEN_MAX);
+        return TRUE;
 }
 
 static void cleanup(void)
