@@ -4998,13 +4998,6 @@ nochange:
 			return _FAILURE;
 		}
 
-		/* Display a one-time message */
-		if (g_states & STATE_MSG) {
-			g_states &= ~STATE_MSG;
-			printwait(messages[MSG_IGNORED], &presel);
-			goto nochange;
-		}
-
 		sel = nextsel(presel);
 		if (presel)
 			presel = 0;
