@@ -6117,7 +6117,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 
 		xstrlcpy(tmp + 10, paths[i] + len, strlen(paths[i]) + 1);
 
-		slash = xmemrchr((uchar *)tmp, '/', strlen(paths[i]) + 11);
+		slash = xmemrchr((uchar *)tmp, '/', strlen(paths[i]) - len + 1);
 		*slash = '\0';
 
 		xmktree(tmpdir, TRUE);
@@ -6157,11 +6157,14 @@ static char *load_input()
 	}
 
 	while (chunk_count < 512) {
-		input_read = read(STDIN_FILENO, input, chunk);
+		input_read = read(STDIN_FILENO, input + total_read, chunk);
 		if (input_read < 0) {
 			DPRINTF_S(strerror(errno));
 			goto malloc_1;
 		}
+
+		if (input_read == 0)
+			break;
 
 		total_read += input_read;
 		++chunk_count;
@@ -6183,11 +6186,17 @@ static char *load_input()
 			off = next - input;
 		}
 
-		if (input_read < chunk)
-			break;
-
 		if (chunk_count == 512)
 			goto malloc_1;
+
+		/* We don't need to allocate another chunk */
+		if (chunk_count == (total_read - input_read) / chunk)
+			continue;
+
+		chunk_count = total_read / chunk;
+		if (total_read % chunk)
+			++chunk_count;
+
 
 		if (!(input = xrealloc(input, (chunk_count + 1) * chunk)))
 			return NULL;
