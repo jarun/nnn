@@ -56,6 +56,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Remote mounts (needs sshfs, rclone)
   - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick reference
   - CD on quit (*easy* shell integration)
+  - Auto-proceed on opening files
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex (POSIX/PCRE) and string (default) filters

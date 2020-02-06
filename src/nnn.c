@@ -157,6 +157,7 @@
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
 #define EXEC_ARGS_MAX 8
+#define LIST_FILES_MAX (1 << 16)
 #define SCROLLOFF 3
 #define MIN_DISPLAY_COLS 10
 #define LONG_SIZE sizeof(ulong)
@@ -531,7 +532,7 @@ static const char * const messages[] = {
 	"\nPress Enter to continue",
 	"open failed",
 	"dir inaccessible",
-	"empty: use open with",
+	"empty: edit or open with",
 	"unsupported file",
 	"not set",
 	"entry exists",
@@ -1500,7 +1501,7 @@ static pid_t xfork(uchar flag)
 			p = fork();
 
 			if (p > 0)
-				exit(0);
+				_exit(0);
 			else if (p == 0) {
 				signal(SIGHUP, SIG_DFL);
 				signal(SIGINT, SIG_DFL);
@@ -1512,7 +1513,7 @@ static pid_t xfork(uchar flag)
 			}
 
 			perror("fork");
-			exit(0);
+			_exit(0);
 		}
 
 		/* so they can be used to stop the child */
@@ -2222,12 +2223,10 @@ static int nextsel(int presel)
 		//DPRINTF_D(c);
 		//DPRINTF_S(keyname(c));
 
-		/* Clear previous filter when manually starting */
-		if (c == FILTER)
-			clearfilter();
-
-		if (presel == MSGWAIT)
+		if (c == ERR && presel == MSGWAIT)
 			c = (cfg.filtermode) ? FILTER : CONTROL('L');
+		else if (c == FILTER) /* Clear previous filter when manually starting */
+			clearfilter();
 	}
 
 	if (c == -1) {
@@ -3978,11 +3977,12 @@ static void show_help(const char *path)
 	       "9o ^O  Open with...%-12cn  Create new/link\n"
 	       "9f ^F  File details%-12cd  Detail view toggle\n"
 		 "b^R  Rename/dup%-14cr  Batch rename\n"
-		  "cz  Archive%-17c*  Toggle exe\n"
+		  "cz  Archive%-17ce  Edit in EDITOR\n"
 	   "5Space ^J  (Un)select%-11cm ^K  Mark range/clear\n"
 	       "9p ^P  Copy sel here%-11ca  Select all\n"
 	       "9v ^V  Move sel here%-8cw ^W  Copy/move sel as\n"
-	       "9x ^X  Delete%-18ce  Edit sel\n"
+	       "9x ^X  Delete%-18cE  Edit sel\n"
+	          "c*  Toggle exe%-0c\n"
 		"1MISC\n"
 	       "9; ^S  Select plugin%-11c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
@@ -4974,6 +4974,13 @@ begin:
 
 	while (1) {
 		redraw(path);
+
+		/* Display a one-time message */
+		if (g_listpath && (g_states & STATE_MSG)) {
+			g_states &= ~STATE_MSG;
+			printwait(messages[MSG_IGNORED], &presel);
+		}
+
 nochange:
 		/* Exit if parent has exited */
 		if (getppid() == 1) {
@@ -5463,6 +5470,7 @@ nochange:
 		case SEL_REDRAW: // fallthrough
 		case SEL_RENAMEMUL: // fallthrough
 		case SEL_HELP: // fallthrough
+		case SEL_EDIT: // fallthrough
 		case SEL_LOCK:
 		{
 			bool refresh = FALSE;
@@ -5487,6 +5495,9 @@ nochange:
 				show_help(path);
 				if (cfg.filtermode)
 					presel = FILTER;
+				continue;
+			case SEL_EDIT:
+				spawn(editor, dents[cur].name, NULL, path, F_CLI);
 				continue;
 			default: /* SEL_LOCK */
 				lock_terminal();
@@ -6129,14 +6140,19 @@ static char *load_input()
 {
 	/* 512 KiB chunk size */
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
-	char *input = malloc(sizeof(char) * chunk), *tmpdir;
-	char cwd[PATH_MAX], *next, *prev, *tmp;
-	size_t offsets[1 << 16];
-	char *paths[1 << 16];
+	char *input = malloc(sizeof(char) * chunk), *tmpdir = NULL;
+	char cwd[PATH_MAX], *next, *tmp;
+	size_t offsets[LIST_FILES_MAX];
+	char **paths = NULL;
 	ssize_t input_read, total_read = 0, off = 0;
 
 	if (!input) {
 		DPRINTF_S(strerror(errno));
+		return NULL;
+	}
+
+	if (!getcwd(cwd, PATH_MAX)) {
+		free(input);
 		return NULL;
 	}
 
@@ -6160,7 +6176,7 @@ static char *load_input()
 				continue;
 			}
 
-			if (entries == (1 << 16))
+			if (entries == LIST_FILES_MAX)
 				goto malloc_1;
 
 			offsets[entries++] = off;
@@ -6170,12 +6186,15 @@ static char *load_input()
 		if (input_read < chunk)
 			break;
 
-		if (chunk_count == 512 || !(input = xrealloc(input, (chunk_count + 1) * chunk)))
+		if (chunk_count == 512)
 			goto malloc_1;
+
+		if (!(input = xrealloc(input, (chunk_count + 1) * chunk)))
+			return NULL;
 	}
 
 	if (off != total_read) {
-		if (entries == (1 << 16))
+		if (entries == LIST_FILES_MAX)
 			goto malloc_1;
 
 		offsets[entries++] = off;
@@ -6186,56 +6205,52 @@ static char *load_input()
 
 	input[total_read] = '\0';
 
+	paths = malloc(entries * sizeof(char *));
+	if (!paths)
+		goto malloc_1;
+
 	for (i = 0; i < entries; ++i)
 		paths[i] = input + offsets[i];
 
-	/* prev used as tmp variable */
-	prev = getcwd(cwd, PATH_MAX);
-	if (!prev)
-		goto malloc_1;
-
-	for (i = 0; i < entries; ++i) {
-		if (!(paths[i] = xrealpath(paths[i], cwd))) {
-			for (--i; i >= 0; --i)
-				free(paths[i]);
-			goto malloc_1;
-		}
-	}
-
 	g_prefixpath = malloc(sizeof(char) * PATH_MAX);
 	if (!g_prefixpath)
-		goto malloc_2;
+		goto malloc_1;
+
+	if (!(paths[0] = xrealpath(paths[0], cwd)))
+		goto malloc_1; // free all entries
 
 	xstrlcpy(g_prefixpath, paths[0], strlen(paths[0]) + 1);
+
 	for (i = 1; i < entries; ++i) {
-		if (!common_prefix(paths[i], g_prefixpath))
+		if (!(paths[i] = xrealpath(paths[i], cwd))) {
+			entries = i; // free from the previous entry
 			goto malloc_2;
+
+		}
+
+		if (!common_prefix(paths[i], g_prefixpath)) {
+			entries = i + 1; // free from the current entry
+			goto malloc_2;
+		}
 	}
 
 	if (entries == 1) {
 		tmp = xmemrchr((uchar *)g_prefixpath, '/', strlen(g_prefixpath));
 		if (!tmp)
-			return NULL;
+			goto malloc_2;
 
 		*(tmp != g_prefixpath ? tmp : tmp + 1) = '\0';
 	}
 
 	tmpdir = make_tmp_tree(paths, entries, g_prefixpath);
 
-	if (tmpdir) {
-		for (i = entries - 1; i >= 0; --i)
-			free(paths[i]);
-		free(input);
-
-		return tmpdir;
-	}
-
 malloc_2:
 	for (i = entries - 1; i >= 0; --i)
 		free(paths[i]);
 malloc_1:
 	free(input);
-	return NULL;
+	free(paths);
+	return tmpdir;
 }
 
 static void check_key_collision(void)
@@ -6387,21 +6402,16 @@ static bool setup_config(void)
 
 static bool set_tmp_path(void)
 {
-	char *path;
+        char *tmp = "/tmp";
+        char *path = xdiraccess(tmp) ? tmp : getenv("TMPDIR");
 
-	if (xdiraccess("/tmp"))
-		g_tmpfplen = (uchar)xstrlcpy(g_tmpfpath, "/tmp", TMP_LEN_MAX);
-	else {
-		path = getenv("TMPDIR");
-		if (path)
-			g_tmpfplen = (uchar)xstrlcpy(g_tmpfpath, path, TMP_LEN_MAX);
-		else {
-			fprintf(stderr, "set TMPDIR\n");
-			return FALSE;
-		}
-	}
+        if (!path) {
+                fprintf(stderr, "set TMPDIR\n");
+                return FALSE;
+        }
 
-	return TRUE;
+        g_tmpfplen = (uchar)xstrlcpy(g_tmpfpath, path, TMP_LEN_MAX);
+        return TRUE;
 }
 
 static void cleanup(void)

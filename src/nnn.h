@@ -84,6 +84,7 @@ enum action {
 	SEL_REMOTE,
 	SEL_UMOUNT,
 	SEL_HELP,
+	SEL_EDIT,
 	SEL_PLUGIN,
 	SEL_SHELL,
 	SEL_LAUNCH,
@@ -190,7 +191,7 @@ static struct key bindings[] = {
 	/* Select all files in current dir */
 	{ 'a',            SEL_SELALL },
 	/* List, edit selection */
-	{ 'e',            SEL_SELEDIT },
+	{ 'E',            SEL_SELEDIT },
 	/* Copy from selection buffer */
 	{ 'p',            SEL_CP },
 	{ CONTROL('P'),   SEL_CP },
@@ -218,6 +219,8 @@ static struct key bindings[] = {
 	{ 'u',            SEL_UMOUNT },
 	/* Show help */
 	{ '?',            SEL_HELP },
+	/* Edit in EDITOR */
+	{ 'e',            SEL_EDIT },
 	/* Run a plugin */
 	{ ';',            SEL_PLUGIN },
 	{ CONTROL('S'),   SEL_PLUGIN },
