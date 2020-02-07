@@ -2225,7 +2225,8 @@ static int nextsel(int presel)
 
 		if (c == ERR && presel == MSGWAIT)
 			c = (cfg.filtermode) ? FILTER : CONTROL('L');
-		else if (c == FILTER) /* Clear previous filter when manually starting */
+		else if (c == FILTER || c == CONTROL('L'))
+			/* Clear previous filter when manually starting */
 			clearfilter();
 	}
 
