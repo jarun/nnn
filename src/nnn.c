@@ -6092,6 +6092,9 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 	xstrlcpy(tmpdir, g_tmpfpath, g_tmpfplen);
 	xstrlcpy(tmp, "/nnnXXXXXX", 11);
 
+	/* Points right after the base tmp dir */
+	tmp += 10;
+
 	if (!mkdtemp(tmpdir)) {
 		free(tmpdir);
 
@@ -6108,9 +6111,11 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 			continue;
 		}
 
-		xstrlcpy(tmp + 10, paths[i] + len, strlen(paths[i]) + 1);
+		/* Don't copy the common prefix */
+		xstrlcpy(tmp, paths[i] + len, strlen(paths[i]) - len + 1);
 
-		slash = xmemrchr((uchar *)tmp, '/', strlen(paths[i]) - len + 1);
+		/* Get the dir containing the path */
+		slash = xmemrchr((uchar *)tmp, '/', strlen(paths[i]) - len);
 		*slash = '\0';
 
 		xmktree(tmpdir, TRUE);
@@ -6125,7 +6130,8 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 	if (ignore)
 		g_states |= STATE_MSG;
 
-	tmp[10] = '\0';
+	/* Get the dir in which to start */
+	*tmp = '\0';
 	return tmpdir;
 }
 
