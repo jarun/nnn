@@ -6116,6 +6116,9 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 
 		/* Get the dir containing the path */
 		slash = xmemrchr((uchar *)tmp, '/', strlen(paths[i]) - len);
+		if (!slash)
+			slash = tmp;
+
 		*slash = '\0';
 
 		xmktree(tmpdir, TRUE);
