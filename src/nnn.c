@@ -973,7 +973,7 @@ static char *common_prefix(const char *s, char *prefix)
 		blocks = len >> _WSHIFT;
 		len &= LONG_SIZE - 1;
 
-		while (i < blocks && !(*x ^ *y))
+		while (i < blocks && (*x == *y))
 			++x, ++y, ++i;
 
 		/* This should always return */
@@ -6093,6 +6093,9 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 	xstrlcpy(tmpdir, g_tmpfpath, g_tmpfplen);
 	xstrlcpy(tmp, "/nnnXXXXXX", 11);
 
+	/* Points right after the base tmp dir */
+	tmp += 10;
+
 	if (!mkdtemp(tmpdir)) {
 		free(tmpdir);
 
@@ -6109,14 +6112,19 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 			continue;
 		}
 
-		xstrlcpy(tmp + 10, paths[i] + len, strlen(paths[i]) + 1);
+		/* Don't copy the common prefix */
+		xstrlcpy(tmp, paths[i] + len, strlen(paths[i]) - len + 1);
 
-		slash = xmemrchr((uchar *)tmp, '/', strlen(paths[i]) + 11);
-		*slash = '\0';
+		/* Get the dir containing the path */
+		slash = xmemrchr((uchar *)tmp, '/', strlen(paths[i]) - len);
+		if (slash)
+			*slash = '\0';
 
 		xmktree(tmpdir, TRUE);
 
-		*slash = '/';
+		if (slash)
+			*slash = '/';
+
 		if (symlink(paths[i], tmpdir)) {
 			DPRINTF_S(paths[i]);
 			DPRINTF_S(strerror(errno));
@@ -6126,7 +6134,8 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 	if (ignore)
 		g_states |= STATE_MSG;
 
-	tmp[10] = '\0';
+	/* Get the dir in which to start */
+	*tmp = '\0';
 	return tmpdir;
 }
 
@@ -6139,6 +6148,7 @@ static char *load_input()
 	size_t offsets[LIST_FILES_MAX];
 	char **paths = NULL;
 	ssize_t input_read, total_read = 0, off = 0;
+	bool dotfirst = FALSE;
 
 	if (!input) {
 		DPRINTF_S(strerror(errno));
@@ -6151,11 +6161,14 @@ static char *load_input()
 	}
 
 	while (chunk_count < 512) {
-		input_read = read(STDIN_FILENO, input, chunk);
+		input_read = read(STDIN_FILENO, input + total_read, chunk);
 		if (input_read < 0) {
 			DPRINTF_S(strerror(errno));
 			goto malloc_1;
 		}
+
+		if (input_read == 0)
+			break;
 
 		total_read += input_read;
 		++chunk_count;
@@ -6177,11 +6190,17 @@ static char *load_input()
 			off = next - input;
 		}
 
-		if (input_read < chunk)
-			break;
-
 		if (chunk_count == 512)
 			goto malloc_1;
+
+		/* We don't need to allocate another chunk */
+		if (chunk_count == (total_read - input_read) / chunk)
+			continue;
+
+		chunk_count = total_read / chunk;
+		if (total_read % chunk)
+			++chunk_count;
+
 
 		if (!(input = xrealloc(input, (chunk_count + 1) * chunk)))
 			return NULL;
@@ -6193,6 +6212,10 @@ static char *load_input()
 
 		offsets[entries++] = off;
 	}
+
+	DPRINTF_D(entries);
+	DPRINTF_D(total_read);
+	DPRINTF_D(chunk_count);
 
 	if (!entries)
 		goto malloc_1;
@@ -6210,10 +6233,20 @@ static char *load_input()
 	if (!g_prefixpath)
 		goto malloc_1;
 
+	if (paths[0][0] == '.' && paths[0][1] == '\0')
+		dotfirst = TRUE;
+
 	if (!(paths[0] = xrealpath(paths[0], cwd)))
 		goto malloc_1; // free all entries
 
-	xstrlcpy(g_prefixpath, paths[0], strlen(paths[0]) + 1);
+	DPRINTF_S(paths[0]);
+
+	if (dotfirst)
+		xstrlcpy(g_prefixpath, paths[0], strlen(paths[0]) + 1);
+	else
+		xstrlcpy(g_prefixpath, dirname(paths[0]), strlen(dirname(paths[0])) + 1);
+
+	DPRINTF_S(g_prefixpath);
 
 	for (i = 1; i < entries; ++i) {
 		if (!(paths[i] = xrealpath(paths[i], cwd))) {
@@ -6222,11 +6255,17 @@ static char *load_input()
 
 		}
 
+		DPRINTF_S(paths[i]);
+
 		if (!common_prefix(paths[i], g_prefixpath)) {
 			entries = i + 1; // free from the current entry
 			goto malloc_2;
 		}
+
+		DPRINTF_S(g_prefixpath);
 	}
+
+	DPRINTF_S(g_prefixpath);
 
 	if (entries == 1) {
 		tmp = xmemrchr((uchar *)g_prefixpath, '/', strlen(g_prefixpath));
