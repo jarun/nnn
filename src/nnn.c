@@ -4369,7 +4369,7 @@ static int dentfill(char *path, struct entry **dents)
 		if (!flags && dp->d_type == DT_LNK) {
 			 /* Do not add sizes for links */
 			dentp->mode = (sb.st_mode & ~S_IFMT) | S_IFLNK;
-			dentp->size = 0;
+			dentp->size = g_listpath ? sb.st_size : 0;
 		} else {
 			dentp->mode = sb.st_mode;
 			dentp->size = sb.st_size;
