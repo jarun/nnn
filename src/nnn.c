@@ -1028,55 +1028,6 @@ static char *xbasename(char *path)
 	return base ? base + 1 : path;
 }
 
-static char *xrealpath(const char *path, const char *cwd)
-{
-	if (!path || !cwd)
-		return NULL;
-
-	size_t dst_size = 0, src_size = strlen(path), cwd_size = strlen(cwd);
-	const char *src, *next;
-	char *dst;
-	char *resolved_path = malloc(src_size + (*path == '/' ? 0 : cwd_size) + 1);
-	if (!resolved_path)
-		return NULL;
-
-	/* Turn relative paths into absolute */
-	if (path[0] != '/')
-		dst_size = xstrlcpy(resolved_path, cwd, cwd_size + 1) - 1;
-	else
-		resolved_path[0] = '\0';
-
-	src = path;
-	dst = resolved_path + dst_size;
-	for (next = NULL; next != path + src_size;) {
-		next = strchr(src, '/');
-		if (!next)
-			next = path + src_size;
-
-		if (next - src == 2 && src[0] == '.' && src[1] == '.') {
-			if (dst - resolved_path) {
-				dst = xmemrchr((uchar *)resolved_path, '/', dst-resolved_path);
-				*dst = '\0';
-			}
-		} else if (next - src == 1 && src[0] == '.') {
-			/* NOP */
-		} else if (next - src) {
-			*(dst++) = '/';
-			xstrlcpy(dst, src, next - src + 1);
-			dst += next - src;
-		}
-
-		src = next + 1;
-	}
-
-	if (*resolved_path == '\0') {
-		resolved_path[0] = '/';
-		resolved_path[1] = '\0';
-	}
-
-	return resolved_path;
-}
-
 static int create_tmp_file(void)
 {
 	xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - g_tmpfplen);
@@ -6145,7 +6096,7 @@ static char *load_input()
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
 	char *input = malloc(sizeof(char) * chunk), *tmpdir = NULL;
 	char cwd[PATH_MAX], *next, *tmp;
-	size_t offsets[LIST_FILES_MAX];
+	size_t offsets[LIST_FILES_MAX], len;
 	char **paths = NULL;
 	ssize_t input_read, total_read = 0, off = 0;
 	bool dotfirst = FALSE;
@@ -6236,20 +6187,28 @@ static char *load_input()
 	if (paths[0][0] == '.' && paths[0][1] == '\0')
 		dotfirst = TRUE;
 
-	if (!(paths[0] = xrealpath(paths[0], cwd)))
+	if (!(paths[0] = realpath(paths[0], NULL)))
 		goto malloc_1; // free all entries
 
 	DPRINTF_S(paths[0]);
 
-	if (dotfirst)
+	if (dotfirst) {
 		xstrlcpy(g_prefixpath, paths[0], strlen(paths[0]) + 1);
-	else
-		xstrlcpy(g_prefixpath, dirname(paths[0]), strlen(dirname(paths[0])) + 1);
+		i = 1; /* start enumerating from first file */
+	} else {
+		xstrlcpy(g_buf, paths[0], PATH_MAX);
+		len = strlen(dirname(g_buf));
+
+		/* dirname() may modify the original path */
+		xstrlcpy(g_buf, paths[0], PATH_MAX);
+		xstrlcpy(g_prefixpath, dirname(g_buf), len + 1);
+		i = 0;
+	}
 
 	DPRINTF_S(g_prefixpath);
 
-	for (i = 1; i < entries; ++i) {
-		if (!(paths[i] = xrealpath(paths[i], cwd))) {
+	for (; i < entries; ++i) {
+		if (!(paths[i] = realpath(paths[i], NULL))) {
 			entries = i; // free from the previous entry
 			goto malloc_2;
 
@@ -6257,7 +6216,8 @@ static char *load_input()
 
 		DPRINTF_S(paths[i]);
 
-		if (!common_prefix(paths[i], g_prefixpath)) {
+		xstrlcpy(g_buf, paths[i], PATH_MAX);
+		if (!common_prefix(dirname(g_buf), g_prefixpath)) {
 			entries = i + 1; // free from the current entry
 			goto malloc_2;
 		}
