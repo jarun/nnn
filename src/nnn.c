@@ -1027,6 +1027,59 @@ static char *common_prefix(const char *s, char *prefix)
 	return prefix;
 }
 
+/*
+ * The library function realpath() resolves symlinks.
+ * If there's a symlink in file list we want to show the symlink not what it's points to.
+ */
+static char *xrealpath(const char *path, const char *cwd)
+{
+	if (!path || !cwd)
+		return NULL;
+
+	size_t dst_size = 0, src_size = strlen(path), cwd_size = strlen(cwd);
+	const char *src, *next;
+	char *dst;
+	char *resolved_path = malloc(src_size + (*path == '/' ? 0 : cwd_size) + 1);
+	if (!resolved_path)
+		return NULL;
+
+	/* Turn relative paths into absolute */
+	if (path[0] != '/')
+		dst_size = xstrlcpy(resolved_path, cwd, cwd_size + 1) - 1;
+	else
+		resolved_path[0] = '\0';
+
+	src = path;
+	dst = resolved_path + dst_size;
+	for (next = NULL; next != path + src_size;) {
+		next = strchr(src, '/');
+		if (!next)
+			next = path + src_size;
+
+		if (next - src == 2 && src[0] == '.' && src[1] == '.') {
+			if (dst - resolved_path) {
+				dst = xmemrchr((uchar *)resolved_path, '/', dst-resolved_path);
+				*dst = '\0';
+			}
+		} else if (next - src == 1 && src[0] == '.') {
+			/* NOP */
+		} else if (next - src) {
+			*(dst++) = '/';
+			xstrlcpy(dst, src, next - src + 1);
+			dst += next - src;
+		}
+
+		src = next + 1;
+	}
+
+	if (*resolved_path == '\0') {
+		resolved_path[0] = '/';
+		resolved_path[1] = '\0';
+	}
+
+	return resolved_path;
+}
+
 static char *xbasename(char *path)
 {
 	char *base = xmemrchr((uchar *)path, '/', strlen(path)); // NOLINT
@@ -6201,10 +6254,12 @@ static char *load_input()
 	DPRINTF_S(paths[0]);
 
 	for (i = 0; i < entries; ++i) {
-		if (selforparent(paths[i]))
+		if (selforparent(paths[i])) {
+			paths[i] = NULL;
 			continue;
+		}
 
-		if (!(paths[i] = realpath(paths[i], NULL))) {
+		if (!(paths[i] = xrealpath(paths[i], cwd))) {
 			entries = i; // free from the previous entry
 			goto malloc_2;
 
