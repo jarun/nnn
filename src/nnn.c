@@ -947,10 +947,16 @@ static void *xmemrchr(uchar *s, uchar ch, size_t n)
 	return NULL;
 }
 
+/* Assumes both the paths passed are directories */
 static char *common_prefix(const char *s, char *prefix)
 {
-	if (!s || !prefix)
+	if (!s || !*s ||  !prefix)
 		return NULL;
+
+	if (!*prefix) {
+		xstrlcpy(prefix, s, PATH_MAX);
+		return prefix;
+	}
 
 	/* Only accept non-empty strings */
 	if (*s == '\0' || *prefix == '\0')
@@ -4176,6 +4182,12 @@ static blkcnt_t dirwalk(char *path, struct stat *psb)
 	return ent_blocks;
 }
 
+/* Skip self and parent */
+static bool selforparent(char *path)
+{
+	return path[0] == '.' && (path[1] == '\0' || (path[1] == '.' && path[2] == '\0'));
+}
+
 static int dentfill(char *path, struct entry **dents)
 {
 	int n = 0, count, flags = 0;
@@ -4230,8 +4242,7 @@ static int dentfill(char *path, struct entry **dents)
 	do {
 		namep = dp->d_name;
 
-		/* Skip self and parent */
-		if ((namep[0] == '.' && (namep[1] == '\0' || (namep[1] == '.' && namep[2] == '\0'))))
+		if (selforparent(namep))
 			continue;
 
 		if (!cfg.showhidden && namep[0] == '.') {
@@ -6057,6 +6068,9 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 	g_listpath = tmpdir;
 
 	for (i = 0; i < entries; ++i) {
+		if (!paths[i])
+			continue;
+
 		err = stat(paths[i], &sb);
 		if (err && errno == ENOENT) {
 			ignore = 1;
@@ -6096,10 +6110,9 @@ static char *load_input()
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
 	char *input = malloc(sizeof(char) * chunk), *tmpdir = NULL;
 	char cwd[PATH_MAX], *next, *tmp;
-	size_t offsets[LIST_FILES_MAX], len;
+	size_t offsets[LIST_FILES_MAX];
 	char **paths = NULL;
 	ssize_t input_read, total_read = 0, off = 0;
-	bool dotfirst = FALSE;
 
 	if (!input) {
 		DPRINTF_S(strerror(errno));
@@ -6183,31 +6196,14 @@ static char *load_input()
 	g_prefixpath = malloc(sizeof(char) * PATH_MAX);
 	if (!g_prefixpath)
 		goto malloc_1;
-
-	if (paths[0][0] == '.' && paths[0][1] == '\0')
-		dotfirst = TRUE;
-
-	if (!(paths[0] = realpath(paths[0], NULL)))
-		goto malloc_1; // free all entries
+	g_prefixpath[0] = '\0';
 
 	DPRINTF_S(paths[0]);
 
-	if (dotfirst) {
-		xstrlcpy(g_prefixpath, paths[0], strlen(paths[0]) + 1);
-		i = 1; /* start enumerating from first file */
-	} else {
-		xstrlcpy(g_buf, paths[0], PATH_MAX);
-		len = strlen(dirname(g_buf));
+	for (i = 0; i < entries; ++i) {
+		if (selforparent(paths[i]))
+			continue;
 
-		/* dirname() may modify the original path */
-		xstrlcpy(g_buf, paths[0], PATH_MAX);
-		xstrlcpy(g_prefixpath, dirname(g_buf), len + 1);
-		i = 0;
-	}
-
-	DPRINTF_S(g_prefixpath);
-
-	for (; i < entries; ++i) {
 		if (!(paths[i] = realpath(paths[i], NULL))) {
 			entries = i; // free from the previous entry
 			goto malloc_2;
