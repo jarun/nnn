@@ -4236,7 +4236,7 @@ static blkcnt_t dirwalk(char *path, struct stat *psb)
 }
 
 /* Skip self and parent */
-static bool selforparent(char *path)
+static bool selforparent(const char *path)
 {
 	return path[0] == '.' && (path[1] == '\0' || (path[1] == '.' && path[2] == '\0'));
 }
