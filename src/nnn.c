@@ -948,81 +948,46 @@ static void *xmemrchr(uchar *s, uchar ch, size_t n)
 }
 
 /* Assumes both the paths passed are directories */
-static char *common_prefix(const char *s, char *prefix)
+static char *common_prefix(const char *path, char *prefix)
 {
-	if (!s || !*s ||  !prefix)
+	const char *x = path, *y = prefix;
+	char *sep;
+
+	if (!path || !*path || !prefix)
 		return NULL;
 
 	if (!*prefix) {
-		xstrlcpy(prefix, s, PATH_MAX);
+		xstrlcpy(prefix, path, PATH_MAX);
 		return prefix;
 	}
 
-	/* Only accept non-empty strings */
-	if (*s == '\0' || *prefix == '\0')
-		return NULL;
+	while (*x && *y && (*x == *y))
+		++x, ++y;
 
-	ulong *x, *y;
-	size_t i = 0, j = 0, blocks = 0;
-	size_t len_s = strlen(s), len_prefix = strlen(prefix);
-	size_t len = MIN(len_s, len_prefix);
-	char *tmp;
+	/* Strings are same OR prefix is smaller */
+	if ((!*x && !*y) || !*y)
+		return prefix;
 
-	/*
-	 * To enable -O3 ensure s and prefix are 16-byte aligned
-	 * More info: https://www.felixcloutier.com/x86/MOVDQA:VMOVDQA32:VMOVDQA64
-	 */
-	if ((len >= LONG_SIZE) && (((ulong)s & _ALIGNMENT_MASK) == 0
-			       && ((ulong)prefix & _ALIGNMENT_MASK) == 0)) {
-		x = (ulong *)s;
-		y = (ulong *)prefix;
-		blocks = len >> _WSHIFT;
-		len &= LONG_SIZE - 1;
-
-		while (i < blocks && (*x == *y))
-			++x, ++y, ++i;
-
-		/* This should always return */
-		if (i < blocks) {
-			i *= LONG_SIZE;
-			for (; j < LONG_SIZE; ++j)
-				if (s[i + j] != prefix[i + j]) {
-					tmp = xmemrchr((uchar *)prefix, '/', i + j);
-					if (!tmp)
-						return NULL;
-
-					*(tmp != prefix ? tmp : tmp + 1) = '\0';
-
-					return prefix;
-				}
-		}
-
-		if (!len)
-			return prefix;
-	}
-
-	i = blocks * LONG_SIZE;
-	while (j < len && s[i + j] == prefix[i + j])
-		++j;
-
-	if (j < len) {
-		tmp = xmemrchr((uchar *)prefix, '/', i + j);
-		if (!tmp)
-			return NULL;
-
-		*(tmp != prefix ? tmp : tmp + 1) = '\0';
-
+	/* Path is smaller */
+	if (!*x) {
+		xstrlcpy(prefix, path, path - x + 1);
 		return prefix;
 	}
 
-	/* complete match but lenghts might differ */
-	if (len_s < len_prefix || (len_s > len_prefix && s[len_prefix] != '/')) {
-		tmp = xmemrchr((uchar *)prefix, '/', len);
-		if (!tmp)
-			return NULL;
-
-		*(tmp != prefix ? tmp : tmp + 1) = '\0';
+	/* Paths deviate and prefix ends with '/' */
+	if (y != prefix && *y == '/') {
+		prefix[y - prefix] = '\0';
+		return prefix;
 	}
+
+	/* Shorten prefix */
+	prefix[y - prefix] = '\0';
+
+	sep = xmemrchr((uchar *)prefix, '/', y - prefix);
+	if (sep != prefix)
+		*sep = '\0';
+	else /* Just '/' */
+		prefix[1] = '\0';
 
 	return prefix;
 }
@@ -1031,7 +996,7 @@ static char *common_prefix(const char *s, char *prefix)
  * The library function realpath() resolves symlinks.
  * If there's a symlink in file list we want to show the symlink not what it's points to.
  */
-static char *xrealpath(const char *path, const char *cwd)
+static char *abspath(const char *path, const char *cwd)
 {
 	if (!path || !cwd)
 		return NULL;
@@ -1058,7 +1023,7 @@ static char *xrealpath(const char *path, const char *cwd)
 
 		if (next - src == 2 && src[0] == '.' && src[1] == '.') {
 			if (dst - resolved_path) {
-				dst = xmemrchr((uchar *)resolved_path, '/', dst-resolved_path);
+				dst = xmemrchr((uchar *)resolved_path, '/', dst - resolved_path);
 				*dst = '\0';
 			}
 		} else if (next - src == 1 && src[0] == '.') {
@@ -6259,7 +6224,7 @@ static char *load_input()
 			continue;
 		}
 
-		if (!(paths[i] = xrealpath(paths[i], cwd))) {
+		if (!(paths[i] = abspath(paths[i], cwd))) {
 			entries = i; // free from the previous entry
 			goto malloc_2;
 
@@ -6278,15 +6243,17 @@ static char *load_input()
 
 	DPRINTF_S(g_prefixpath);
 
-	if (entries == 1) {
-		tmp = xmemrchr((uchar *)g_prefixpath, '/', strlen(g_prefixpath));
-		if (!tmp)
-			goto malloc_2;
+	if (g_prefixpath[0]) {
+		if (entries == 1) {
+			tmp = xmemrchr((uchar *)g_prefixpath, '/', strlen(g_prefixpath));
+			if (!tmp)
+				goto malloc_2;
 
-		*(tmp != g_prefixpath ? tmp : tmp + 1) = '\0';
+			*(tmp != g_prefixpath ? tmp : tmp + 1) = '\0';
+		}
+
+		tmpdir = make_tmp_tree(paths, entries, g_prefixpath);
 	}
-
-	tmpdir = make_tmp_tree(paths, entries, g_prefixpath);
 
 malloc_2:
 	for (i = entries - 1; i >= 0; --i)
