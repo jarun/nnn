@@ -964,21 +964,19 @@ static char *common_prefix(const char *path, char *prefix)
 	while (*x && *y && (*x == *y))
 		++x, ++y;
 
-	/* Strings are same OR prefix is shorter */
-	if ((!*x && !*y) || !*y)
+	/* Strings are same */
+	if (!*x && !*y)
 		return prefix;
 
 	/* Path is shorter */
-	if (!*x) {
-		xstrlcpy(prefix, path, path - x + 1);
+	if (!*x && *y == '/') {
+		xstrlcpy(prefix, path, y - path);
 		return prefix;
 	}
 
-	/* Paths deviate and prefix ends with '/' */
-	if (y != prefix && *y == '/') {
-		prefix[y - prefix] = '\0';
+	/* Prefix is shorter */
+	if (!*y && *x == '/')
 		return prefix;
-	}
 
 	/* Shorten prefix */
 	prefix[y - prefix] = '\0';
