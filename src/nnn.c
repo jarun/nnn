@@ -964,11 +964,11 @@ static char *common_prefix(const char *path, char *prefix)
 	while (*x && *y && (*x == *y))
 		++x, ++y;
 
-	/* Strings are same OR prefix is smaller */
+	/* Strings are same OR prefix is shorter */
 	if ((!*x && !*y) || !*y)
 		return prefix;
 
-	/* Path is smaller */
+	/* Path is shorter */
 	if (!*x) {
 		xstrlcpy(prefix, path, path - x + 1);
 		return prefix;
@@ -6219,7 +6219,7 @@ static char *load_input()
 	DPRINTF_S(paths[0]);
 
 	for (i = 0; i < entries; ++i) {
-		if (selforparent(paths[i])) {
+		if (paths[i][0] == '\n' || selforparent(paths[i])) {
 			paths[i] = NULL;
 			continue;
 		}
