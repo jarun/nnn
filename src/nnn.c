@@ -5482,8 +5482,6 @@ nochange:
 			if (cfg.filtermode && !refresh)
 				break;
 
-			endselection();
-
 			/* Save current */
 			if (ndents)
 				copycurname();
