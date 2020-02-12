@@ -2059,7 +2059,7 @@ static char xchartohex(char c)
 static char * (*fnstrstr)(const char *haystack, const char *needle) = &strcasestr;
 #ifdef PCRE
 static const unsigned char *tables;
-static int pcreflags = PCRE_NO_AUTO_CAPTURE | PCRE_EXTENDED | PCRE_CASELESS;
+static int pcreflags = PCRE_NO_AUTO_CAPTURE | PCRE_EXTENDED | PCRE_CASELESS | PCRE_UTF8;
 #else
 static int regflags = REG_NOSUB | REG_EXTENDED | REG_ICASE;
 #endif
