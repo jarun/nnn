@@ -4671,8 +4671,8 @@ static void statusbar(char *path)
 	if (cfg.blkorder) { /* du mode */
 		xstrlcpy(buf, coolsize(dir_blocks << blk_shift), 12);
 
-		mvprintw(xlines - 1, 0, "%d/%d [%d:%s] %cu:%s free:%s files:%lu %lldB %s",
-			 cur + 1, ndents, cfg.selmode,
+		mvprintw(xlines - 1, 0, "%d/%d [%s:%s] %cu:%s free:%s files:%lu %lldB %s",
+			 cur + 1, ndents, (cfg.selmode ? "s" : ""),
 			 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
 			 (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
 			 num_files, (ll)pent->blocks << blk_shift, ptr);
@@ -4685,8 +4685,8 @@ static void statusbar(char *path)
 		strftime(buf, sizeof(buf), "%F %R", localtime(&pent->t));
 		buf[sizeof(buf)-1] = '\0';
 
-		mvprintw(xlines - 1, 0, "%d/%d [%d:%s] %s%s %s %s %s",
-			 cur + 1, ndents, cfg.selmode,
+		mvprintw(xlines - 1, 0, "%d/%d [%s:%s] %s%s %s %s %s",
+			 cur + 1, ndents, (cfg.selmode ? "s" : ""),
 			 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
 			 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr);
 	}
