@@ -43,6 +43,7 @@
 #      7-zip: list with 7z
 #      pdf: zathura (GUI), pdftotext, mutool, exiftool
 #      audio: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
+#      avi|dat|mkv|mp4: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
 #      torrent: rtorrent, transmission-show
 #      odt|ods|odp|sxw: odt2txt
 #      md: glow (https://github.com/charmbracelet/glow)
@@ -96,6 +97,44 @@ handle_pdf() {
     fi
 }
 
+handle_audio() {
+    if which mocp >/dev/null 2>&1; then
+        mocplay "${FPATH}" >/dev/null 2>&1
+        exit 0
+    elif which mpv >/dev/null 2>&1; then
+        mpv "${FPATH}" >/dev/null 2>&1 &
+        exit 0
+    elif which mediainfo >/dev/null 2>&1; then
+        mediainfo "${FPATH}" | less -R
+        exit 0
+    elif which exiftool >/dev/null 2>&1; then
+        exiftool "${FPATH}"| less -R
+        exit 0
+    fi
+}
+
+handle_video() {
+    if [ $GUI -ne 0 ] && which smplayer >/dev/null 2>&1; then
+        smplayer "${FPATH}" >/dev/null 2>&1 &
+        exit 0
+    elif [ $GUI -ne 0 ] && which mpv >/dev/null 2>&1; then
+        mpv "${FPATH}" >/dev/null 2>&1 &
+        exit 0
+    elif which ffmpegthumbnailer >/dev/null 2>&1; then
+        # Thumbnail
+        [ -d "${IMAGE_CACHE_PATH}" ] || mkdir "${IMAGE_CACHE_PATH}"
+        ffmpegthumbnailer -i "${FPATH}" -o "${IMAGE_CACHE_PATH}/${FNAME}.jpg" -s 0
+        viu -n "${IMAGE_CACHE_PATH}/${FNAME}.jpg" | less -R
+        exit 0
+    elif which mediainfo >/dev/null 2>&1; then
+        mediainfo "${FPATH}" | less -R
+        exit 0
+    elif which exiftool >/dev/null 2>&1; then
+        exiftool "${FPATH}"| less -R
+        exit 0
+    fi
+}
+
 # handle this extension and exit
 handle_extension() {
     case "${ext}" in
@@ -131,19 +170,12 @@ handle_extension() {
 
         ## Audio
         aac|flac|m4a|mid|midi|mpa|mp2|mp3|ogg|wav|wma)
-            if which mocp >/dev/null 2>&1; then
-                mocplay "${FPATH}" >/dev/null 2>&1
-                exit 0
-            elif which mpv >/dev/null 2>&1; then
-                mpv "${FPATH}" >/dev/null 2>&1 &
-                exit 0
-            elif which mediainfo >/dev/null 2>&1; then
-                mediainfo "${FPATH}" | less -R
-                exit 0
-            elif which exiftool >/dev/null 2>&1; then
-                exiftool "${FPATH}"| less -R
-                exit 0
-            fi
+            handle_audio
+            exit 1;;
+
+        ## Video
+        avi|dat|mkv|mp4)
+            handle_video
             exit 1;;
 
         ## BitTorrent
@@ -249,49 +281,19 @@ handle_multimedia() {
             ## as above), but might fail for unsupported types.
             exit 7;;
 
-        ## Video
-        video/*)
-            if [ $GUI -ne 0 ] && which smplayer >/dev/null 2>&1; then
-                smplayer "${FPATH}" >/dev/null 2>&1 &
-                exit 0
-            elif [ $GUI -ne 0 ] && which mpv >/dev/null 2>&1; then
-                mpv "${FPATH}" >/dev/null 2>&1 &
-                exit 0
-            elif which ffmpegthumbnailer >/dev/null 2>&1; then
-                # Thumbnail
-                [ -d "${IMAGE_CACHE_PATH}" ] || mkdir "${IMAGE_CACHE_PATH}"
-                ffmpegthumbnailer -i "${FPATH}" -o "${IMAGE_CACHE_PATH}/${FNAME}.jpg" -s 0
-                viu -n "${IMAGE_CACHE_PATH}/${FNAME}.jpg" | less -R
-                exit 0
-            elif which mediainfo >/dev/null 2>&1; then
-                mediainfo "${FPATH}" | less -R
-                exit 0
-            elif which exiftool >/dev/null 2>&1; then
-                exiftool "${FPATH}"| less -R
-                exit 0
-            fi
+        ## PDF
+        application/pdf)
+            handle_pdf
             exit 1;;
 
         ## Audio
         audio/*)
-            if which mocp >/dev/null 2>&1; then
-                mocplay "${FPATH}" >/dev/null 2>&1
-                exit 0
-            elif which mpv >/dev/null 2>&1; then
-                mpv "${FPATH}" >/dev/null 2>&1 &
-                exit 0
-            elif which mediainfo >/dev/null 2>&1; then
-                mediainfo "${FPATH}" | less -R
-                exit 0
-            elif which exiftool >/dev/null 2>&1; then
-                exiftool "${FPATH}"| less -R
-                exit 0
-            fi
+            handle_audio
             exit 1;;
 
-        ## PDF
-        application/pdf)
-            handle_pdf
+        ## Video
+        video/*)
+            handle_video
             exit 1;;
 
         #     pdftoppm -f 1 -l 1 \
