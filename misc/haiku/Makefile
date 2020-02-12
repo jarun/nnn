@@ -33,8 +33,15 @@ endif
 
 ifeq ($(O_NORL),1)
 	CPPFLAGS += -DNORL
+else ifeq ($(O_STATIC),1)
+	CPPFLAGS += -DNORL
 else
 	LDLIBS += -lreadline
+endif
+
+ifeq ($(O_PCRE),1)
+	CPPFLAGS += -DPCRE
+	LDLIBS += -lpcre
 endif
 
 ifeq ($(O_NOLOC),1)
@@ -62,6 +69,12 @@ CFLAGS += $(CFLAGS_OPTIMIZATION)
 CFLAGS += $(CFLAGS_CURSES)
 
 LDLIBS += $(LDLIBS_CURSES) $(LDLIBS_HAIKU)
+
+# static compilation needs libgpm development package
+ifeq ($(O_STATIC),1)
+	LDFLAGS += -static
+	LDLIBS += -lgpm
+endif
 
 DISTFILES = src nnn.1 Makefile README.md LICENSE
 SRC = src/nnn.c
@@ -122,12 +135,14 @@ upload-local: sign static
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION).tar.gz.sig' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/pgp-signature' \
 	    --upload-file nnn-$(VERSION).tar.gz.sig
-	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION)-static' \
+	tar -cf $(BIN)-static-$(VERSION).x86-64.tar.gz $(BIN)-static
+	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION)-static-$(VERSION).x86-64.tar.gz' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
-	    --upload-file $(BIN)-static
+	    --upload-file $(BIN)-static-$(VERSION).x86-64.tar.gz
 
 clean:
-	$(RM) -f $(BIN) $(BIN)-static $(OBJS) nnn-$(VERSION).tar.gz *.sig
+	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig \
+	    $(BIN)-static $(BIN)-static-$(VERSION).x86-64.tar.gz
 
 skip: ;
 
