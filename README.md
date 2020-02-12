@@ -177,4 +177,4 @@ Completion scripts for Bash, Fish and Zsh are [available](misc/auto-completion).
 - [Maxim Baz](https://github.com/maximbaz)
 - and other contributors
 
-`nnn` is actively developed. Visit the to the [ToDo list](https://github.com/jarun/nnn/issues/448) to contribute or see the features in progress.
+`nnn` is actively developed. Visit the to the [ToDo list](https://github.com/jarun/nnn/issues/472) to contribute or see the features in progress.

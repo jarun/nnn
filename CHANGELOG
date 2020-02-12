@@ -1,3 +1,32 @@
+nnn v3.0
+2020-02-12
+
+- take list of files as input and show
+- option `-e` replaces `NNN_USE_EDITOR`
+- option `-t` replaces `NNN_IDLE_TIMEOUT`
+- PCRE support
+- more readline bindings for native prompts
+- run GUI app as plugin
+- attempt lazy unmount when regular unmount fails
+- fix unmount on macOS: use `umount`
+- detect `sshfs` and `rclone` to prompt intelligently
+- auto-proceed on file open (toggle key <kbd>+</kbd>)
+- quit with error code on <kbd>Q</kbd>
+- additional key <kbd>F5</kbd> to toggle hidden
+- key <kbd>e</kbd> to edit in EDITOR (back on multiple user requests)
+- option to edit list of files in selection is changed to <kbd>E</kbd>
+- do not end selection on redraw
+- `nuke`: [`glow`](https://github.com/charmbracelet/glow) as Markdown viewer
+- `nuke`: refactor, handle some common video types by extension
+- file name removed from status bar
+- static Makefile target
+- generate, upload static package on release
+- fix crash on entering empty dir, then Down
+- fix keypresses lost when showing message
+- fix #227: `nnn` creates xdg-open zombies
+
+-------------------------------------------------------------------------------
+
 nnn v2.9
 2020-01-15
 
