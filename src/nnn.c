@@ -937,12 +937,10 @@ static void *xmemrchr(uchar *s, uchar ch, size_t n)
 
 	uchar *ptr = s + n;
 
-	do {
-		--ptr;
-
-		if (*ptr == ch)
+	do
+		if (*--ptr == ch)
 			return ptr;
-	} while (s != ptr);
+	while (s != ptr);
 
 	return NULL;
 }
@@ -3264,13 +3262,12 @@ static void save_session(bool last_session, int *presel)
 	char *sname;
 	bool status = FALSE;
 
+	memset(&header, 0, sizeof(session_header_t));
+
 	header.ver = SESSIONS_VERSION;
 
 	for (i = 0; i < CTX_MAX; ++i) {
-		if (!g_ctx[i].c_cfg.ctxactive) {
-			header.pathln[i] = header.nameln[i]
-				= header.lastln[i] = header.fltrln[i] = 0;
-		} else {
+		if (g_ctx[i].c_cfg.ctxactive) {
 			if (cfg.curctx == i && ndents)
 				/* Update current file name, arrows don't update it */
 				xstrlcpy(g_ctx[i].c_name, dents[cur].name, NAME_MAX + 1);
