@@ -643,6 +643,12 @@ static haiku_nm_h haiku_hnd;
 #define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
 #define xerror() perror(xitoa(__LINE__))
 
+#ifdef __GNUC__
+#define UNUSED(x) UNUSED_##x __attribute__((__unused__))
+#else
+#define UNUSED(x) UNUSED_##x
+#endif /* __GNUC__ */
+
 /* Forward declarations */
 static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag);
@@ -656,26 +662,9 @@ static void plugscript(const char *plugin, char *newpath, uchar flags);
 
 /* Functions */
 
-static void sigint_handler(int sig)
+static void sigint_handler(int UNUSED(sig))
 {
-	(void) sig;
-
 	g_states |= STATE_INTERRUPTED;
-}
-
-static uint xatoi(const char *str)
-{
-	int val = 0;
-
-	if (!str)
-		return 0;
-
-	while (xisdigit(*str)) {
-		val = val * 10 + (*str - '0');
-		++str;
-	}
-
-	return val;
 }
 
 static char *xitoa(uint val)
@@ -4143,11 +4132,8 @@ static void launch_app(const char *path, char *newpath)
 		spawn(tmp, "0", NULL, path, r);
 }
 
-static int sum_bsize(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
-	(void) fpath;
-	(void) ftwbuf;
-
 	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D))
 		ent_blocks += sb->st_blocks;
 
@@ -4155,11 +4141,8 @@ static int sum_bsize(const char *fpath, const struct stat *sb, int typeflag, str
 	return 0;
 }
 
-static int sum_asize(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+static int sum_asize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
-	(void) fpath;
-	(void) ftwbuf;
-
 	if (sb->st_size && (typeflag == FTW_F || typeflag == FTW_D))
 		ent_blocks += sb->st_size;
 
@@ -6520,7 +6503,7 @@ int main(int argc, char *argv[])
 			session = optarg;
 			break;
 		case 't':
-			idletimeout = xatoi(optarg);
+			idletimeout = atoi(optarg);
 			break;
 		case 'v':
 			namecmpfn = &xstrverscasecmp;
@@ -6695,7 +6678,8 @@ int main(int argc, char *argv[])
 #endif
 
 	/* Set nnn nesting level */
-	setenv(env_cfg[NNNLVL], xitoa(xatoi(getenv(env_cfg[NNNLVL])) + 1), 1);
+	arg = getenv(env_cfg[NNNLVL]);
+	setenv(env_cfg[NNNLVL], xitoa((arg ? atoi(arg) : 0) + 1), 1);
 
 	if (xgetenv_set(env_cfg[NNN_TRASH]))
 		cfg.trash = 1;
