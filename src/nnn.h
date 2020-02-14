@@ -96,7 +96,9 @@ enum action {
 	SEL_QUITCD,
 	SEL_QUIT,
 	SEL_QUITFAIL,
+#ifndef NOMOUSE
 	SEL_CLICK,
+#endif
 };
 
 /* Associate a pressed key to an action */
@@ -245,5 +247,7 @@ static struct key bindings[] = {
 	{ CONTROL('Q'),   SEL_QUIT },
 	/* Quit with an error code */
 	{ 'Q',            SEL_QUITFAIL },
+#ifndef NOMOUSE
 	{ KEY_MOUSE,      SEL_CLICK },
+#endif
 };

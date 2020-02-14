@@ -1377,6 +1377,10 @@ static bool initcurses(mmask_t *oldmask)
 	short i;
 	char *colors = xgetenv(env_cfg[NNN_COLORS], "4444");
 
+#ifdef NOMOUSE
+	(void) oldmask;
+#endif
+
 	if (cfg.picker) {
 		if (!newterm(NULL, stderr, stdin)) {
 			fprintf(stderr, "newterm!\n");
@@ -1393,12 +1397,14 @@ static bool initcurses(mmask_t *oldmask)
 	nonl();
 	//intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
+#ifndef NOMOUSE
 #if NCURSES_MOUSE_VERSION <= 1
 	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED, oldmask);
 #else
 	mousemask(BUTTON1_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED, oldmask);
 #endif
 	mouseinterval(0);
+#endif
 	curs_set(FALSE); /* Hide cursor */
 	start_color();
 	use_default_colors();
@@ -2427,7 +2433,9 @@ static int filterentries(char *path, char *lastname)
 
 			showfilter(ln);
 			continue;
+#ifndef NOMOUSE
 		case KEY_MOUSE: // fallthrough
+#endif
 		case 27: /* Exit filter mode on Escape */
 			goto end;
 		}
@@ -4836,11 +4844,16 @@ static bool browse(char *ipath, const char *session)
 	char *path, *lastdir, *lastname, *dir, *tmp, *mark = NULL;
 	enum action sel;
 	struct stat sb;
-	MEVENT event;
-	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0} };
 	int r = -1, fd, presel, selstartid = 0, selendid = 0;
 	const uchar opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
-	bool currentmouse = 1, dir_changed = FALSE;
+	bool dir_changed = FALSE;
+
+#ifndef NOMOUSE
+	MEVENT event;
+	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0} };
+	bool currentmouse = 1;
+#endif
+
 #ifndef DIR_LIMITED_SELECTION
 	ino_t inode = 0;
 #endif
@@ -4962,6 +4975,7 @@ nochange:
 			presel = 0;
 
 		switch (sel) {
+#ifndef NOMOUSE
 		case SEL_CLICK:
 			if (getmouse(&event) != OK)
 				goto nochange;
@@ -4988,9 +5002,13 @@ nochange:
 					setdirwatch();
 					goto begin;
 				}
-			} // fallthrough
+			}
+#endif
+			// fallthrough
 		case SEL_BACK:
+#ifndef NOMOUSE
 			if (sel == SEL_BACK) {
+#endif
 				dir = visit_parent(path, newpath, &presel);
 				if (!dir)
 					goto nochange;
@@ -5006,8 +5024,11 @@ nochange:
 
 				setdirwatch();
 				goto begin;
+#ifndef NOMOUSE
 			}
+#endif
 
+#ifndef NOMOUSE
 #if NCURSES_MOUSE_VERSION > 1
 			/* Scroll up */
 			if (event.bstate == BUTTON4_PRESSED && ndents && (cfg.rollover || cur)) {
@@ -5066,6 +5087,7 @@ nochange:
 					presel = FILTER;
 				goto nochange; // fallthrough
 			}
+#endif
 		case SEL_NAV_IN: // fallthrough
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
@@ -6721,7 +6743,10 @@ int main(int argc, char *argv[])
 		return _FAILURE;
 
 	opt = browse(initpath, session);
+
+#ifndef NOMOUSE
 	mousemask(mask, NULL);
+#endif
 
 	if (g_listpath)
 		spawn("rm -rf", initpath, NULL, NULL, F_SILENT);

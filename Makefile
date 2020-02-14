@@ -47,6 +47,10 @@ ifeq ($(O_NOLOC),1)
 	CPPFLAGS += -DNOLOCALE
 endif
 
+ifeq ($(O_NOMOUSE),1)
+	CPPFLAGS += -DNOMOUSE
+endif
+
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
 	CFLAGS_CURSES ?= $(shell $(PKG_CONFIG) --cflags ncursesw)
 	LDLIBS_CURSES ?= $(shell $(PKG_CONFIG) --libs   ncursesw)
