@@ -43,7 +43,7 @@
 #      7-zip: list with 7z
 #      pdf: zathura (GUI), pdftotext, mutool, exiftool
 #      audio: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
-#      avi|dat|mkv|mp4: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
+#      avi|mkv|mp4: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
 #      torrent: rtorrent, transmission-show
 #      odt|ods|odp|sxw: odt2txt
 #      md: glow (https://github.com/charmbracelet/glow)
@@ -174,7 +174,7 @@ handle_extension() {
             exit 1;;
 
         ## Video
-        avi|dat|mkv|mp4)
+        avi|mkv|mp4)
             handle_video
             exit 1;;
 
