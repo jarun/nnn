@@ -4964,17 +4964,17 @@ nochange:
 		switch (sel) {
 		case SEL_CLICK:
 			if (getmouse(&event) != OK)
-				goto nochange; // fallthrough
-		case SEL_BACK:
+				goto nochange;
+
 			/* Handle clicking on a context at the top */
-			if (sel == SEL_CLICK && event.bstate == BUTTON1_PRESSED && event.y == 0) {
+			if (event.bstate == BUTTON1_PRESSED && event.y == 0) {
 				/* Get context from: "[1 2 3 4]..." */
 				r = event.x >> 1;
 
 				/* If clicked after contexts, go to parent */
 				if (r >= CTX_MAX)
 					sel = SEL_BACK;
-				else if (r >= 0 && r < CTX_MAX && r != cfg.curctx) {
+				else if (r >= 0 && r != cfg.curctx) {
 					if (cfg.selmode)
 						lastappendpos = selbufpos;
 
@@ -4988,8 +4988,8 @@ nochange:
 					setdirwatch();
 					goto begin;
 				}
-			}
-
+			} // fallthrough
+		case SEL_BACK:
 			if (sel == SEL_BACK) {
 				dir = visit_parent(path, newpath, &presel);
 				if (!dir)
