@@ -1372,7 +1372,7 @@ static bool selsafe(void)
 }
 
 /* Initialize curses mode */
-static bool initcurses(mmask_t *oldmask)
+static bool initcurses(void *oldmask)
 {
 	short i;
 	char *colors = xgetenv(env_cfg[NNN_COLORS], "4444");
@@ -1399,9 +1399,9 @@ static bool initcurses(mmask_t *oldmask)
 	keypad(stdscr, TRUE);
 #ifndef NOMOUSE
 #if NCURSES_MOUSE_VERSION <= 1
-	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED, oldmask);
+	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED, (mmask_t *)oldmask);
 #else
-	mousemask(BUTTON1_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED, oldmask);
+	mousemask(BUTTON1_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED, (mmask_t *)oldmask);
 #endif
 	mouseinterval(0);
 #endif
@@ -6443,10 +6443,12 @@ static void cleanup(void)
 
 int main(int argc, char *argv[])
 {
-	mmask_t mask;
 	char *arg = NULL;
 	char *session = NULL;
 	int opt;
+#ifndef NOMOUSE
+	mmask_t mask;
+#endif
 
 	while ((opt = getopt(argc, argv, "aAb:cdeEgHKnop:QrRs:St:vVxh")) != -1) {
 		switch (opt) {
@@ -6739,7 +6741,11 @@ int main(int argc, char *argv[])
 	read_history(g_buf);
 #endif
 
+#ifndef NOMOUSE
 	if (!initcurses(&mask))
+#else
+	if (!initcurses(NULL))
+#endif
 		return _FAILURE;
 
 	opt = browse(initpath, session);
