@@ -5870,13 +5870,13 @@ nochange:
 					goto nochange;
 				}
 
+				if (ndents)
+					copycurname();
+
 				if (!r) {
 					cfg.filtermode ? presel = FILTER : statusbar(path);
 					goto nochange;
 				}
-
-				if (ndents)
-					copycurname();
 			} else { /* 'Return/Enter' enters the plugin directory */
 				cfg.runplugin ^= 1;
 				if (!cfg.runplugin && rundir[0]) {
