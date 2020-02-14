@@ -553,16 +553,18 @@ static const char * const messages[] = {
 };
 
 /* Supported configuration environment variables */
-#define NNN_BMS 0
-#define NNN_PLUG 1
-#define NNN_OPENER 2
-#define NNN_COLORS 3
-#define NNNLVL 4
-#define NNN_PIPE 5
-#define NNN_ARCHIVE 6 /* strings end here */
-#define NNN_TRASH 7 /* flags begin here */
+#define NNN_OPTS 0
+#define NNN_BMS 1
+#define NNN_PLUG 2
+#define NNN_OPENER 3
+#define NNN_COLORS 4
+#define NNNLVL 5
+#define NNN_PIPE 6
+#define NNN_ARCHIVE 7 /* strings end here */
+#define NNN_TRASH 8 /* flags begin here */
 
 static const char * const env_cfg[] = {
+	"NNN_OPTS",
 	"NNN_BMS",
 	"NNN_PLUG",
 	"NNN_OPENER",
@@ -6450,7 +6452,12 @@ int main(int argc, char *argv[])
 	mmask_t mask;
 #endif
 
-	while ((opt = getopt(argc, argv, "aAb:cdeEgHKnop:QrRs:St:vVxh")) != -1) {
+  const char* const env_opts = xgetenv(env_cfg[NNN_OPTS], NULL);
+  int env_opts_idx = (env_opts ? (int)strlen(env_opts) : -1);
+  while ((opt = (--env_opts_idx >= 0 ? env_opts[env_opts_idx] : getopt(argc, argv, "aAb:cdeEgHKnop:QrRs:St:vVxh"))) != -1) {
+		if (env_opts_idx >= 0) {
+			optarg = NULL;
+		}
 		switch (opt) {
 		case 'a':
 			cfg.mtime = 0;
@@ -6495,6 +6502,9 @@ int main(int argc, char *argv[])
 			cfg.nonavopen = 1;
 			break;
 		case 'p':
+			if (!optarg) {
+				break;
+			}
 			cfg.picker = 1;
 			if (optarg[0] == '-' && optarg[1] == '\0')
 				cfg.pickraw = 1;
@@ -6524,24 +6534,39 @@ int main(int argc, char *argv[])
 			cfg.rollover = 0;
 			break;
 		case 's':
+			if (!optarg) {
+				break;
+			}
 			session = optarg;
 			break;
 		case 't':
+			if (!optarg) {
+				break;
+			}
 			idletimeout = atoi(optarg);
 			break;
 		case 'v':
 			namecmpfn = &xstrverscasecmp;
 			break;
 		case 'V':
+			if (env_opts_idx >= 0) {
+				break;
+			}
 			fprintf(stdout, "%s\n", VERSION);
 			return _SUCCESS;
 		case 'x':
 			cfg.x11 = 1;
 			break;
 		case 'h':
+			if (env_opts_idx >= 0) {
+				break;
+			}
 			usage();
 			return _SUCCESS;
 		default:
+			if (env_opts_idx >= 0) {
+				fprintf(stderr, "Error: Illegal option '%c' in env var '%s'\n\n", opt, env_cfg[NNN_OPTS]);
+			}
 			usage();
 			return _FAILURE;
 		}
