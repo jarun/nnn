@@ -37,7 +37,8 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Tiny binary (typically less than 100KB)
 - Portable
   - Language-agnostic plugins
-  - Minimal library deps, easily compilable, tiny binary
+  - Minimal library deps, easy to compile
+  - Compile in/out features with make variables
   - No config file, minimal config with sensible defaults
   - Widely available on many packagers
   - Unicode support
