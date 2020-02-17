@@ -6576,7 +6576,6 @@ int main(int argc, char *argv[])
 
 		/* Now we are in path list mode */
 		if (!isatty(STDIN_FILENO)) {
-
 			/* This is the same as g_listpath */
 			initpath = load_input();
 			if (!initpath)
@@ -6585,7 +6584,6 @@ int main(int argc, char *argv[])
 			/* We return to tty */
 			dup2(STDOUT_FILENO, STDIN_FILENO);
 		}
-
 	}
 
 	home = getenv("HOME");
@@ -6614,48 +6612,48 @@ int main(int argc, char *argv[])
 		return _FAILURE;
 	}
 
-	if (initpath) {
-		/* NOP */
-	} else if (arg) { /* Open a bookmark directly */
-		if (!arg[1]) /* Bookmarks keys are single char */
-			initpath = get_kv_val(bookmark, NULL, *arg, BM_MAX, TRUE);
+	if (!initpath) {
+		if (arg) { /* Open a bookmark directly */
+			if (!arg[1]) /* Bookmarks keys are single char */
+				initpath = get_kv_val(bookmark, NULL, *arg, BM_MAX, TRUE);
 
-		if (!initpath) {
-			fprintf(stderr, "%s\n", messages[MSG_INVALID_KEY]);
-			return _FAILURE;
-		}
-	} else if (argc == optind) {
-		/* Start in the current directory */
-		initpath = getcwd(NULL, PATH_MAX);
-		if (!initpath)
-			initpath = "/";
-	} else {
-		arg = argv[optind];
-		DPRINTF_S(arg);
-		if (strlen(arg) > 7 && !strncmp(arg, "file://", 7))
-			arg = arg + 7;
-		initpath = realpath(arg, NULL);
-		DPRINTF_S(initpath);
-		if (!initpath) {
-			xerror();
-			return _FAILURE;
-		}
+			if (!initpath) {
+				fprintf(stderr, "%s\n", messages[MSG_INVALID_KEY]);
+				return _FAILURE;
+			}
+		} else if (argc == optind) {
+			/* Start in the current directory */
+			initpath = getcwd(NULL, PATH_MAX);
+			if (!initpath)
+				initpath = "/";
+		} else {
+			arg = argv[optind];
+			DPRINTF_S(arg);
+			if (strlen(arg) > 7 && !strncmp(arg, "file://", 7))
+				arg = arg + 7;
+			initpath = realpath(arg, NULL);
+			DPRINTF_S(initpath);
+			if (!initpath) {
+				xerror();
+				return _FAILURE;
+			}
 
-		/*
-		 * If nnn is set as the file manager, applications may try to open
-		 * files by invoking nnn. In that case pass the file path to the
-		 * desktop opener and exit.
-		 */
-		struct stat sb;
+			/*
+			 * If nnn is set as the file manager, applications may try to open
+			 * files by invoking nnn. In that case pass the file path to the
+			 * desktop opener and exit.
+			 */
+			struct stat sb;
 
-		if (stat(initpath, &sb) == -1) {
-			xerror();
-			return _FAILURE;
-		}
+			if (stat(initpath, &sb) == -1) {
+				xerror();
+				return _FAILURE;
+			}
 
-		if (S_ISREG(sb.st_mode)) {
-			spawn(opener, arg, NULL, NULL, cfg.cliopener ? F_CLI : F_NOTRACE | F_NOWAIT);
-			return _SUCCESS;
+			if (S_ISREG(sb.st_mode)) {
+				spawn(opener, arg, NULL, NULL, cfg.cliopener ? F_CLI : F_NOTRACE | F_NOWAIT);
+				return _SUCCESS;
+			}
 		}
 	}
 
