@@ -5453,6 +5453,8 @@ nochange:
 
 			if (ndents)
 				mkpath(path, dents[cur].name, newpath);
+			else if (sel == SEL_EDIT) /* Avoid trying to edit a non-existing file */
+				goto nochange;
 
 			switch (sel) {
 			case SEL_REDRAW:
