@@ -5913,6 +5913,10 @@ nochange:
 
 			switch (sel) {
 			case SEL_SHELL:
+				/* Set nnn nesting level */
+				tmp = getenv(env_cfg[NNNLVL]);
+				setenv(env_cfg[NNNLVL], xitoa((tmp ? atoi(tmp) : 0) + 1), 1);
+
 				setenv(envs[ENV_NCUR], (ndents ? dents[cur].name : ""), 1);
 				spawn(shell, NULL, NULL, path, F_CLI);
 				break;
@@ -6710,10 +6714,7 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	/* Set nnn nesting level */
-	arg = getenv(env_cfg[NNNLVL]);
-	setenv(env_cfg[NNNLVL], xitoa((arg ? atoi(arg) : 0) + 1), 1);
-
+	/* Configure trash preference */
 	if (xgetenv_set(env_cfg[NNN_TRASH]))
 		cfg.trash = 1;
 
