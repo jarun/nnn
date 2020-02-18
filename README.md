@@ -36,6 +36,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Minimizes screen refresh with fast line redraws
   - Tiny binary (typically less than 100KB)
 - Portable
+  - Statically-linked binary available
   - Language-agnostic plugins
   - Minimal library deps, easy to compile
   - Compile in/out features with make variables
@@ -100,6 +101,8 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates, cycles contexts. <kbd>?</kbd> lists shortcuts.
 
 ## Installation
+
+No permission to install packages? Get the statically linked binary from the latest release.
 
 #### Library dependencies
 
