@@ -149,8 +149,10 @@ Packages for Arch Linux, CentOS, Debian, Fedora and Ubuntu are auto-generated wi
 
 Download the latest stable release or clone this repository (*risky*), install deps and compile. On Ubuntu 18.04:
 
-    $ sudo apt-get install pkg-config libncursesw5-dev libreadline-dev
-    $ sudo make strip install
+```sh
+sudo apt-get install pkg-config libncursesw5-dev libreadline-dev
+sudo make strip install
+```
 
 `PREFIX` is supported, in case you want to install to a different location.
 

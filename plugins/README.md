@@ -16,7 +16,9 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 
 The following command installs or updates (after backup) all plugins:
 
-    curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs | sh
+```sh
+curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs | sh
+```
 
 Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 
@@ -69,7 +71,9 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 
 Use the plugin shortcut (<kbd>;key</kbd> or <kbd>^Skey</kbd>) to list the defined plugin keys and press the required key. E.g., with the below config:
 
-    export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;n:notes;v:imgviu;t:imgthumb'
+```sh
+export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;n:notes;v:imgviu;t:imgthumb'
+```
 
 Plugin `fzopen` can be run with the keybind <kbd>;o</kbd>, `mocplay` can be run with <kbd>;p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
 
@@ -79,7 +83,9 @@ A maximum of 15 keys can be defined. To select and invoke a plugin from the plug
 
 `nnn` refreshes the directory after running a plugin to reflect any changes by the plugin. To disable this (say while running the `mediainfo` plugin on some filtered files), add a `-` before the plugin name:
 
-    export NNN_PLUG='m:-mediainfo'
+```sh
+export NNN_PLUG='m:-mediainfo'
+```
 
 Now `nnn` will not refresh the directory after running the `mediainfo` plugin.
 
@@ -89,7 +95,9 @@ To assign keys to arbitrary non-background, non-shell-interpreted cli commands a
 
 For example:
 
-    export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn;o:fzopen'
+```sh
+export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn;o:fzopen'
+```
 
 Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be used to the git log of a git project directory, <kbd>;s</kbd> can be used to preview a partially downloaded media file.
 
@@ -97,7 +105,9 @@ Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be us
 
 `nnn` waits for user confirmation (the prompt `Press Enter to continue`) after it executes a command as plugin (unlike plugins which can add a `read` to wait). To skip this, add a `*` after the command. For example:
 
-    export NNN_PLUG='s:_smplayer $nnn*;n:-_vim /home/vaio/Dropbox/Public/synced_note*'
+```sh
+export NNN_PLUG='s:_smplayer $nnn*;n:-_vim /home/vaio/Dropbox/Public/synced_note*'
+```
 
 Now there will be no prompt after <kbd>;s</kbd> and <kbd>;n</kbd>.
 
@@ -105,7 +115,9 @@ Now there will be no prompt after <kbd>;s</kbd> and <kbd>;n</kbd>.
 
 To run a GUI app as plugin, add a `|` after `_`. For example:
 
-    export NNN_PLUG='m:-_|mousepad $nnn'
+```sh
+export NNN_PLUG='m:-_|mousepad $nnn'
+```
 
 Notes:
 
