@@ -4862,6 +4862,9 @@ static bool browse(char *ipath, const char *session)
 
 	atexit(dentfree);
 
+	xlines = LINES;
+	xcols = COLS;
+
 	/* setup first context */
 	if (!session || !load_session(session, &path, &lastdir, &lastname, FALSE)) {
 		xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
