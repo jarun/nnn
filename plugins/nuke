@@ -44,6 +44,7 @@
 #      pdf: zathura (GUI), pdftotext, mutool, exiftool
 #      audio: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
 #      avi|mkv|mp4: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
+#      log: vi
 #      torrent: rtorrent, transmission-show
 #      odt|ods|odp|sxw: odt2txt
 #      md: glow (https://github.com/charmbracelet/glow)
@@ -178,6 +179,11 @@ handle_extension() {
             handle_video
             exit 1;;
 
+        ## Log files
+        log)
+            vi "${FPATH}"
+            exit 0;;
+
         ## BitTorrent
         torrent)
             if which rtorrent >/dev/null 2>&1; then
@@ -220,6 +226,7 @@ handle_extension() {
                 exit 0
             fi
             ;;
+
         ## JSON
         json)
             if which jq >/dev/null 2>&1; then
