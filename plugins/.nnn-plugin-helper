@@ -8,6 +8,10 @@
 selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 export selection
 
+## Set CUR_CTX to 1 to open directory in current context
+CUR_CTX=0
+export CUR_CTX
+
 ## Ask nnn to switch to directory $1 in context $2.
 ## If $2 is not provided, the function asks explicitly.
 nnn_cd () {
@@ -20,7 +24,7 @@ nnn_cd () {
 
     if [ -n "$2" ]; then
         context=$2
-    else
+    elif [ $CUR_CTX -ne 1 ]; then
         printf "Choose context 1-4 (blank for current): "
         read -r context
     fi

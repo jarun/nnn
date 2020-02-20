@@ -162,7 +162,7 @@ The plugin should write a single string in the format `<number><path>` without a
 The number indicates the context to change the active directory of (0 is used to indicate the current context).
 
 For convenience, we provided a helper script named `.nnn-plugin-helper` and a function named `nnn_cd` to ease this process. `nnn_cd` receives the path to change to as the first argument, and the context as an optional second argument.
-If a context is not provided, it is asked for explicitly.
+If a context is not provided, it is asked for explicitly. To skip this and choose the current context, set the `CUR_CTX` variable in `.nnn-plugin-helper` to `1`.
 Usage examples can be found in the Examples section below.
 
 #### Examples
