@@ -645,6 +645,7 @@ static haiku_nm_h haiku_hnd;
 /* A faster version of xisdigit */
 #define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
 #define xerror() perror(xitoa(__LINE__))
+#define xconfirm(c) (c == 'y' || c == 'Y')
 
 #ifdef __GNUC__
 #define UNUSED(x) UNUSED_##x __attribute__((__unused__))
@@ -799,7 +800,7 @@ static char confirm_force(bool selection)
 		 (selection ? xitoa(nselected) : "current"), (selection ? "(s)" : ""));
 	r = get_input(str);
 
-	if (r == 'y' || r == 'Y')
+	if (xconfirm(r))
 		return 'f'; /* forceful */
 	return 'i'; /* interactive */
 }
@@ -3869,7 +3870,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 #endif
 		int r = get_input(messages[MSG_LAZY]);
 
-		if (r != 'y' && r != 'Y')
+		if (!xconfirm(r))
 			return FALSE;
 
 #ifdef __APPLE__
@@ -4553,7 +4554,7 @@ static int handle_context_switch(enum action sel, char *newpath)
 			(r == CTX_MAX - 1) ? (r = 0) : ++r;
 			snprintf(newpath, PATH_MAX, messages[MSG_CREATE_CTX], r + 1);
 			input = get_input(newpath);
-			if (input != 'y' && input != 'Y')
+			if (!xconfirm(input))
 				return -1;
 		}
 
@@ -5727,7 +5728,7 @@ nochange:
 				mkpath(path, tmp, newpath);
 				if (access(newpath, F_OK) == 0) {
 					fd = get_input(messages[MSG_OVERWRITE]);
-					if (fd != 'y' && fd != 'Y') {
+					if (!xconfirm(fd)) {
 						statusbar(path);
 						goto nochange;
 					}
@@ -5785,7 +5786,7 @@ nochange:
 				if (sel == SEL_RENAME) {
 					/* Overwrite file with same name? */
 					r = get_input(messages[MSG_OVERWRITE]);
-					if (r != 'y' && r != 'Y') {
+					if (!xconfirm(r)) {
 						close(fd);
 						break;
 					}
@@ -6037,7 +6038,7 @@ nochange:
 						break;
 					}
 
-				if (!(r == CTX_MAX || r == 'y' || r == 'Y'))
+				if (!(r == CTX_MAX || xconfirm(r)))
 					break; // fallthrough
 			}
 
