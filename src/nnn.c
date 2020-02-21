@@ -250,7 +250,7 @@ typedef struct {
 	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved   : 2;
+	uint reserved1  : 2;
 	/* The following settings are global */
 	uint forcequit  : 1;  /* Do not confirm when quitting program */
 	uint curctx     : 2;  /* Current context number */
@@ -265,7 +265,7 @@ typedef struct {
 	uint runctx     : 2;  /* The context in which plugin is to be run */
 	uint regex      : 1;  /* Use regex filters */
 	uint x11        : 1;  /* Copy to system clipboard and show notis */
-	uint trash      : 1;  /* Move removed files to trash */
+	uint reserved2  : 1;
 	uint mtime      : 1;  /* Use modification time (else access time) */
 	uint cliopener  : 1;  /* All-CLI app opener */
 	uint waitedit   : 1;  /* For ops that can't be detached, used EDITOR */
@@ -304,7 +304,7 @@ static settings cfg = {
 	0, /* selmode */
 	0, /* showdetail */
 	1, /* ctxactive */
-	0, /* reserved */
+	0, /* reserved1 */
 	0, /* forcequit */
 	0, /* curctx */
 	0, /* dircolor */
@@ -318,7 +318,7 @@ static settings cfg = {
 	0, /* runctx */
 	0, /* regex */
 	0, /* x11 */
-	0, /* trash */
+	0, /* reserved2 */
 	1, /* mtime */
 	0, /* cliopener */
 	0, /* waitedit */
@@ -391,6 +391,7 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define STATE_MOVE_OP 0x8
 #define STATE_AUTONEXT 0x10
 #define STATE_MSG 0x20
+#define STATE_TRASH 0x40
 
 static uchar g_states;
 
@@ -1652,7 +1653,7 @@ static void opstr(char *buf, char *op)
 
 static void rmmulstr(char *buf)
 {
-	if (cfg.trash)
+	if (g_states & STATE_TRASH)
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 trash-put < %s", g_selpath);
 	else
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr \"$0\" \"$@\" < /dev/tty' < %s",
@@ -1661,7 +1662,7 @@ static void rmmulstr(char *buf)
 
 static void xrm(char *path)
 {
-	if (cfg.trash)
+	if (g_states & STATE_TRASH)
 		spawn("trash-put", path, NULL, NULL, F_NORMAL);
 	else {
 		char rm_opts[] = "-ir";
@@ -6721,7 +6722,7 @@ int main(int argc, char *argv[])
 
 	/* Configure trash preference */
 	if (xgetenv_set(env_cfg[NNN_TRASH]))
-		cfg.trash = 1;
+		g_states |= STATE_TRASH;
 
 	/* Ignore/handle certain signals */
 	struct sigaction act = {.sa_handler = sigint_handler};
