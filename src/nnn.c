@@ -645,7 +645,7 @@ static haiku_nm_h haiku_hnd;
 /* A faster version of xisdigit */
 #define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
 #define xerror() perror(xitoa(__LINE__))
-#define xconfirm(c) (c == 'y' || c == 'Y')
+#define xconfirm(c) ((c) == 'y' || (c) == 'Y')
 
 #ifdef __GNUC__
 #define UNUSED(x) UNUSED_##x __attribute__((__unused__))
