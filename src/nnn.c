@@ -3100,38 +3100,39 @@ static char *coolsize(off_t size)
 	return size_buf;
 }
 
+static char get_ind(mode_t mode, bool perms)
+{
+	switch (mode & S_IFMT) {
+	case S_IFREG:
+		if (perms)
+			return '-';
+		if (mode & 0100)
+			return '*';
+		return '\0';
+	case S_IFDIR:
+		return perms ? 'd' : '/';
+	case S_IFLNK:
+		return perms ? 'l' : '@';
+	case S_IFSOCK:
+		return perms ? 's' : '=';
+	case S_IFIFO:
+		return perms ? 'p' : '|';
+	case S_IFBLK:
+		return perms ? 'b' : '\0';
+	case S_IFCHR:
+		return perms ? 'c' : '\0';
+	default:
+		return '?';
+	}
+}
+
 /* Convert a mode field into "ls -l" type perms field. */
 static char *get_lsperms(mode_t mode)
 {
 	static const char * const rwx[] = {"---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx"};
 	static char bits[11] = {'\0'};
 
-	switch (mode & S_IFMT) {
-	case S_IFREG:
-		bits[0] = '-';
-		break;
-	case S_IFDIR:
-		bits[0] = 'd';
-		break;
-	case S_IFLNK:
-		bits[0] = 'l';
-		break;
-	case S_IFSOCK:
-		bits[0] = 's';
-		break;
-	case S_IFIFO:
-		bits[0] = 'p';
-		break;
-	case S_IFBLK:
-		bits[0] = 'b';
-		break;
-	case S_IFCHR:
-		bits[0] = 'c';
-		break;
-	default:
-		bits[0] = '?';
-		break;
-	}
+	bits[0] = get_ind(mode, TRUE);
 
 	xstrlcpy(&bits[1], rwx[(mode >> 6) & 7], 4);
 	xstrlcpy(&bits[4], rwx[(mode >> 3) & 7], 4);
@@ -3150,36 +3151,12 @@ static char *get_lsperms(mode_t mode)
 static void printent(const struct entry *ent, uint namecols, bool sel)
 {
 	wchar_t *wstr;
-	char ind = '\0';
 	char hln = '\0';
+	char ind = get_ind(ent->mode, FALSE);
 
-	switch (ent->mode & S_IFMT) {
-	case S_IFREG:
-		if (ent->flags & HARD_LINK) {
-			hln = '>';
-			--namecols;
-		}
-		if (ent->mode & 0100)
-			ind = '*';
-		break;
-	case S_IFDIR:
-		ind = '/';
-		break;
-	case S_IFLNK:
-		ind = '@';
-		break;
-	case S_IFSOCK:
-		ind = '=';
-		break;
-	case S_IFIFO:
-		ind = '|';
-		break;
-	case S_IFBLK: // fallthrough
-	case S_IFCHR:
-		break;
-	default:
-		ind = '?';
-		break;
+	if (S_ISREG(ent->mode) && (ent->flags & HARD_LINK)) {
+		hln = '>';
+		--namecols;
 	}
 
 	if (!ind)
