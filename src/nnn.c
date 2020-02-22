@@ -173,7 +173,8 @@
 #define _FAILURE !_SUCCESS
 
 /* Entry flags */
-#define DIR_OR_LINK_TO_DIR 0x1
+#define DIR_OR_LINK_TO_DIR 0x01
+#define HARD_LINK 0x02
 #define FILE_SELECTED 0x10
 
 /* Macros to define process spawn behaviour as flags */
@@ -3150,9 +3151,14 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 {
 	wchar_t *wstr;
 	char ind = '\0';
+	char hln = '\0';
 
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
+		if (ent->flags & HARD_LINK) {
+			hln = '>';
+			--namecols;
+		}
 		if (ent->mode & 0100)
 			ind = '*';
 		break;
@@ -3191,6 +3197,8 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 	addwstr(wstr);
 	if (ind)
 		addch(ind);
+	if (hln)
+		addch(hln);
 	addch('\n');
 
 	if (sel)
@@ -3227,12 +3235,10 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
-		if (ent->mode & 0100)
-			printw("%c%-16.16s  %s %8.8s* %s*\n", cp, timebuf, permbuf,
-			       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size), pname);
-		else
-			printw("%c%-16.16s  %s %8.8s  %s\n", cp, timebuf, permbuf,
-			       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size), pname);
+		printw("%c%-16.16s  %s %8.8s%s %s%s\n", cp, timebuf, permbuf,
+		       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size),
+		       ((ent->flags & HARD_LINK) ? ">" : " "), pname,
+		       ((ent->mode & 0100) ? "*" : ""));
 		break;
 	case S_IFDIR:
 		printw("%c%-16.16s  %s %8.8s  %s/\n", cp, timebuf, permbuf,
@@ -4401,7 +4407,7 @@ static int dentfill(char *path, struct entry **dents)
 		dentp->mode = sb.st_mode;
 		dentp->size = sb.st_size;
 #endif
-		dentp->flags = 0;
+		dentp->flags = (sb.st_nlink > 1) ? HARD_LINK : 0;
 
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
