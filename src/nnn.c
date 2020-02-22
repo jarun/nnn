@@ -2499,9 +2499,10 @@ static int filterentries(char *path, char *lastname)
 		if (len == 1) {
 			switch (*ch) {
 			case '=': // fallthrough /* Launch app */
-			case ']': // fallthorugh /*Prompt key */
+			case ']': // fallthorugh /* Prompt key */
 			case ';': // fallthrough /* Run plugin key */
 			case ',': // fallthrough /* Pin CWD */
+			case '~': // fallthrough /* Go HOME */
 			case '?': /* Help and config key, '?' is an invalid regex */
 				goto end;
 			}
