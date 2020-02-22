@@ -164,6 +164,10 @@
 #define ARCHIVE_CMD_LEN 16
 #define BLK_SHIFT_512 9
 
+/* Detect hardlinks in du */
+#define HASH_BITS (0xFFFFFF)
+#define HASH_OCTETS (HASH_BITS >> 6) /* 2^6 = 64 */
+
 /* Program return codes */
 #define _SUCCESS 0
 #define _FAILURE !_SUCCESS
@@ -206,6 +210,7 @@ typedef unsigned int uint;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef long long ll;
+typedef unsigned long long ull;
 
 /* STRUCTURES */
 
@@ -348,6 +353,7 @@ static char *g_prefixpath;
 static char *plugindir;
 static char *sessiondir;
 static char *pnamebuf, *pselbuf;
+static ull *ihashbmp;
 static struct entry *dents;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
@@ -688,6 +694,44 @@ static char *xitoa(uint val)
 	}
 
 	return &ascbuf[++i];
+}
+
+/*
+ * Source: https://elixir.bootlin.com/linux/latest/source/arch/alpha/include/asm/bitops.h
+ */
+static bool test_set_bit(ull nr)
+{
+	ull *m = ((ull *)ihashbmp) + (nr >> 6);
+
+	if (*m & (1 << (nr & 63)))
+		return FALSE;
+
+	*m |= 1 << (nr & 63);
+
+	return TRUE;
+}
+
+#if 0
+static bool test_clear_bit(ull nr)
+{
+	ull *m = ((ull *) ihashbmp) + (nr >> 6);
+
+	if (!(*m & (1 << (nr & 63))))
+		return FALSE;
+
+	*m &= ~(1 << (nr & 63));
+	return TRUE;
+}
+#endif
+
+static void clear_hash()
+{
+	ulong i = 0;
+	ull *addr = ihashbmp;
+
+	for (; i < HASH_OCTETS; ++i, ++addr)
+		if (*addr)
+			*addr = 0;
 }
 
 static void clearinfoln(void)
@@ -4146,7 +4190,8 @@ static void launch_app(const char *path, char *newpath)
 
 static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
-	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D))
+	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D)
+	    && (sb->st_nlink <= 1 || test_set_bit((ull)sb->st_ino)))
 		ent_blocks += sb->st_blocks;
 
 	++num_files;
@@ -4155,7 +4200,8 @@ static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typef
 
 static int sum_asize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
-	if (sb->st_size && (typeflag == FTW_F || typeflag == FTW_D))
+	if (sb->st_size && (typeflag == FTW_F || typeflag == FTW_D)
+	    && (sb->st_nlink <= 1 || test_set_bit((ull)sb->st_ino)))
 		ent_blocks += sb->st_size;
 
 	++num_files;
@@ -4222,6 +4268,13 @@ static int dentfill(char *path, struct entry **dents)
 			printwarn(NULL);
 			return 0;
 		}
+
+		if (!ihashbmp) {
+			ihashbmp = calloc(1, HASH_OCTETS << 3);
+			if (!ihashbmp)
+				return 0;
+		} else
+			clear_hash();
 	}
 
 #if _POSIX_C_SOURCE >= 200112L
@@ -4266,13 +4319,13 @@ static int dentfill(char *path, struct entry **dents)
 
 					dir_blocks += dirwalk(buf, &sb);
 
-					if (g_states & STATE_INTERRUPTED) {
-						closedir(dirp);
-						return n;
-					}
+					if (g_states & STATE_INTERRUPTED)
+						goto exit;
 				}
 			} else {
-				dir_blocks += (cfg.apparentsz ? sb.st_size : sb.st_blocks);
+				/* Do not recount hard links */
+				if (sb.st_nlink <= 1 || test_set_bit((ull)sb.st_ino))
+					dir_blocks += (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				++num_files;
 			}
 
@@ -4363,13 +4416,13 @@ static int dentfill(char *path, struct entry **dents)
 				else
 					num_files = num_saved;
 
-				if (g_states & STATE_INTERRUPTED) {
-					closedir(dirp);
-					return n;
-				}
+				if (g_states & STATE_INTERRUPTED)
+					goto exit;
 			} else {
 				dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
-				dir_blocks += dentp->blocks;
+				/* Do not recount hard links */
+				if (sb.st_nlink <= 1 || test_set_bit((ull)sb.st_ino))
+					dir_blocks += dentp->blocks;
 				++num_files;
 			}
 		}
@@ -6446,6 +6499,7 @@ static void cleanup(void)
 	free(bmstr);
 	free(pluginstr);
 	free(g_prefixpath);
+	free(ihashbmp);
 
 	unlink(g_pipepath);
 
