@@ -3207,7 +3207,7 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 
 static void printent_long(const struct entry *ent, uint namecols, bool sel)
 {
-	char timebuf[24], permbuf[4], ind1 = '\0', ind2[] = "\0\0";
+	char timebuf[24], permbuf[4], ind1 = '\0', ind2 = '\0';
 	const char cp = (ent->flags & FILE_SELECTED) ? '+' : ' ';
 
 	/* Timestamp */
@@ -3235,23 +3235,27 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
-		printw("%c%-16.16s  %s %8.8s%s %s%s\n", cp, timebuf, permbuf,
-		       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size),
-		       ((ent->flags & HARD_LINK) ? ">" : " "), pname,
-		       ((ent->mode & 0100) ? "*" : ""));
-		break;
+		ind1 = (ent->flags & HARD_LINK) ? '>' : ' ';
+		if (ent->mode & 0100)
+			ind2 = '*'; // fallthrough
 	case S_IFDIR:
-		printw("%c%-16.16s  %s %8.8s  %s/\n", cp, timebuf, permbuf,
-		       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size), pname);
+		if (!ind1) {
+			ind1 = ' ';
+			ind2 = '/';
+		}
+
+		printw("%c%-16.16s  %s %8.8s%c %s%c", cp, timebuf, permbuf,
+		       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size),
+		       ind1, pname, ind2);
 		break;
 	case S_IFLNK:
-		printw("%c%-16.16s  %s        @  %s@\n", cp, timebuf, permbuf, pname);
-		break;
+		ind1 = ind2 = '@'; // fallthrough
 	case S_IFSOCK:
-		ind1 = ind2[0] = '='; // fallthrough
+		if (!ind1)
+			ind1 = ind2 = '='; // fallthrough
 	case S_IFIFO:
 		if (!ind1)
-			ind1 = ind2[0] = '|'; // fallthrough
+			ind1 = ind2 = '|'; // fallthrough
 	case S_IFBLK:
 		if (!ind1)
 			ind1 = 'b'; // fallthrough
@@ -3260,10 +3264,12 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 			ind1 = 'c'; // fallthrough
 	default:
 		if (!ind1)
-			ind1 = ind2[0] = '?';
-		printw("%c%-16.16s  %s        %c  %s%s\n", cp, timebuf, permbuf, ind1, pname, ind2);
+			ind1 = ind2 = '?';
+		printw("%c%-16.16s  %s        %c  %s%c", cp, timebuf, permbuf, ind1, pname, ind2);
 		break;
 	}
+
+	addch('\n');
 
 	if (sel)
 		attroff(A_REVERSE);
