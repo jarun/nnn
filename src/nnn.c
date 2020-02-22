@@ -4252,16 +4252,13 @@ static int dentfill(char *path, struct entry **dents)
 		dir_blocks = 0;
 		buf = (char *)alloca(strlen(path) + NAME_MAX + 2);
 
-		if (fstatat(fd, path, &sb_path, 0) == -1) {
-			closedir(dirp);
-			printwarn(NULL);
-			return 0;
-		}
+		if (fstatat(fd, path, &sb_path, 0) == -1)
+			goto exit;
 
 		if (!ihashbmp) {
 			ihashbmp = calloc(1, HASH_OCTETS << 3);
 			if (!ihashbmp)
-				return 0;
+				goto exit;
 		} else
 			clear_hash();
 	}
