@@ -15,7 +15,7 @@ handle_multimedia() {
 
     case "${mime}" in
         audio/* | video/*)
-            ffmpeg -i "${file}" -vn -codec:a libmp3lame -q:a 2 "${outdir}"/"${file%.*}.mp3"
+            ffmpeg -i "${file}" -vn -codec:a libmp3lame -q:a 2 "${outdir}/${file%.*}.mp3"
             ;;
         *)
             ;;

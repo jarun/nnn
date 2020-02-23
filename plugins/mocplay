@@ -57,7 +57,9 @@ if [ ! -s "$selection" ] && [ -z "$1" ]; then
    exit
 fi
 
-if [ -s "$selection" ]; then
+if [ "$2" = "opener" ]; then
+    :
+elif [ -s "$selection" ]; then
     printf "Work with selection? Enter 'y' to confirm: "
     read -r resp
 fi
