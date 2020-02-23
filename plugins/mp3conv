@@ -1,0 +1,34 @@
+#!/usr/bin/env sh
+
+# Description: Extract audio from multimedia files and convert to mp3
+#
+# Dependency: ffmpeg compiled with libmp3lame audio codec support
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+outdir=_mp3files
+
+if ! [ -e "${outdir}" ]; then
+    mkdir "${outdir}"
+fi
+
+handle_multimedia() {
+    mime="${1}"
+    file="${2}"
+
+    case "${mime}" in
+        audio/* | video/*)
+            ffmpeg -i "${file}" -vn -codec:a libmp3lame -q:a 2 "${outdir}"/"${file%.*}.mp3"
+            ;;
+        *)
+            ;;
+    esac
+}
+
+for f in *; do
+    if [ -f "${f}" ]; then
+        mimestr="$( file --dereference --brief --mime-type -- "${f}" )"
+        handle_multimedia "${mimestr}" "${f}"
+    fi
+done

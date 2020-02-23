@@ -48,6 +48,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | mediainf | Show media information | sh | mediainfo |
 | moclyrics | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
 | mocplay | Append (and/or play) selection/dir/file in moc | sh | [moc](http://moc.daper.net/) |
+| mp3conv | Extract audio from multimedia as mp3 | sh | ffmpeg |
 | nmount | Toggle mount status of a device as normal user | sh | pmount, udisks2 |
 | nuke | Sample file opener (CLI-only by default) | sh | various |
 | oldbigfile | List large files by access time | sh | find, sort |
