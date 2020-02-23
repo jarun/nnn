@@ -37,7 +37,7 @@
 #   Feel free to change the utilities to your favourites and add more mimes.
 #
 # Defaults:
-#   By extension (only the enbaled ones):
+#   By extension (only the enabled ones):
 #      most archives: list with atool, bsdtar
 #      rar: list with unrar
 #      7-zip: list with 7z
@@ -51,7 +51,7 @@
 #      htm|html|xhtml: w3m, lynx, elinks
 #      json: jq, python (json.tool module)
 #   Multimedia by mime:
-#      image/*: sxiv (GUI), viu, img2txt, exiftool
+#      image/*: sxiv (GUI), viu (https://github.com/atanunq/viu), img2txt, exiftool
 #      video/*: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
 #      audio/*: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
 #      application/pdf: zathura (GUI), pdftotext, mutool, exiftool
@@ -62,7 +62,7 @@
 #
 # ToDo:
 #   1. Adapt, test and enable all mimes
-#   2. Clean-up unnecessary the exit codes
+#   2. Clean-up the unnecessary exit codes
 # #############################################################################
 
 # set to 1 to enable GUI apps
