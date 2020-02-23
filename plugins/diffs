@@ -2,32 +2,47 @@
 
 # Description: Show diff of 2 directories or multiple files in vimdiff
 #
-# Note: vim may show the warning: 'Vim: Warning: Input is not from a terminal'
-#       press 'Enter' to ignore and proceed.
+# Note: 1. vim may show the warning: 'Vim: Warning: Input is not from a terminal'
+#          press 'Enter' to ignore and proceed.
+#       2. if only one file is in selection, the hovered file is considered as the
+#          second file to diff with
 #
 # Shell: POSIX compliant
 # Authors: Arun Prakash Jana, ath3
 
 selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 
+dirdiff() {
+    dir1=$(mktemp "${TMPDIR:-/tmp}"/nnn-"$(basename "$1")".XXXXXXXX)
+    dir2=$(mktemp "${TMPDIR:-/tmp}"/nnn-"$(basename "$2")".XXXXXXXX)
+    ls -A1 "$1" > "$dir1"
+    ls -A1 "$2" > "$dir2"
+    vimdiff "$dir1" "$dir2"
+    rm "$dir1" "$dir2"
+}
+
 if [ -s "$selection" ]; then
     arr=$(tr '\0' '\n' < "$selection")
     if [ "$(echo "$arr" | wc -l)" -gt 1 ]; then
-         f1="$(echo "$arr" | sed -n '1p')"
-         f2="$(echo "$arr" | sed -n '2p')"
-         if [ -d "$f1" ] && [ -d "$f2" ]; then
-            dir1=$(mktemp "${TMPDIR:-/tmp}"/nnn-"$(basename "$f1")".XXXXXXXX)
-            dir2=$(mktemp "${TMPDIR:-/tmp}"/nnn-"$(basename "$f2")".XXXXXXXX)
-            ls -A1 "$f1" > "$dir1"
-            ls -A1 "$f2" > "$dir2"
-            vimdiff "$dir1" "$dir2"
-            rm "$dir1" "$dir2"
+        f1="$(echo "$arr" | sed -n '1p')"
+        f2="$(echo "$arr" | sed -n '2p')"
+        if [ -d "$f1" ] && [ -d "$f2" ]; then
+            dirdiff "$f1" "$f2"
         else
             # If xargs supports the -o option, use it to get rid of:
             #     Vim: Warning: Input is not from a terminal
             # xargs -0 -o vimdiff < $selection
 
             xargs -0 vimdiff +0 < "$selection"
+        fi
+    elif ! [ -z "$1" ]; then
+        f1="$(echo "$arr" | sed -n '1p')"
+        if [ -d "$f1" ] && [ -d "$1" ]; then
+            dirdiff "$f1" "$1"
+        elif [ -f "$f1" ] && [ -f "$1" ]; then
+            vimdiff +0 "$f1" "$1"
+        else
+            echo "cannot compare file with directory"
         fi
     else
         echo "needs at least 2 files or directories selected for comparison"
