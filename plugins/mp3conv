@@ -9,10 +9,6 @@
 
 outdir=_mp3files
 
-if ! [ -e "${outdir}" ]; then
-    mkdir "${outdir}"
-fi
-
 handle_multimedia() {
     mime="${1}"
     file="${2}"
@@ -26,9 +22,20 @@ handle_multimedia() {
     esac
 }
 
-for f in *; do
-    if [ -f "${f}" ]; then
-        mimestr="$( file --dereference --brief --mime-type -- "${f}" )"
-        handle_multimedia "${mimestr}" "${f}"
+printf "Process 'a'll in directory or 'c'urrent? "
+read -r resp
+
+if [ "$resp" = "a" ]; then
+    if ! [ -e "${outdir}" ]; then
+        mkdir "${outdir}"
     fi
-done
+
+    for f in *; do
+        if [ -f "${f}" ]; then
+            mimestr="$( file --dereference --brief --mime-type -- "${f}" )"
+            handle_multimedia "${mimestr}" "${f}"
+        fi
+    done
+elif [ "$resp" = "c" ] && [ -f "$1" ]; then
+    ffmpeg -i "${1}" -vn -codec:a libmp3lame -q:a 2 "${1%.*}.mp3"
+fi
