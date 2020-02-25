@@ -2972,16 +2972,8 @@ static void resetdircolor(int flags)
  * Replace escape characters in a string with '?'
  * Adjust string length to maxcols if > 0;
  * Max supported str length: NAME_MAX;
- *
- * Interestingly, note that unescape() uses g_buf. What happens if
- * str also points to g_buf? In this case we assume that the caller
- * acknowledges that it's OK to lose the data in g_buf after this
- * call to unescape().
- * The API, on its part, first converts str to multibyte (after which
- * it doesn't touch str anymore). Only after that it starts modifying
- * g_buf. This is a phased operation.
  */
-static char *unescape(const char *str, uint maxcols, wchar_t **wstr)
+static wchar_t *unescape(const char *str, uint maxcols)
 {
 	static wchar_t wbuf[NAME_MAX + 1] __attribute__ ((aligned));
 	wchar_t *buf = wbuf;
@@ -2994,35 +2986,34 @@ static char *unescape(const char *str, uint maxcols, wchar_t **wstr)
 	/* Convert multi-byte to wide char */
 	size_t len = mbstowcs(wbuf, str, NAME_MAX);
 
-	while (*buf && lencount <= maxcols) {
-		if (*buf <= '\x1f' || *buf == '\x7f')
-			*buf = '\?';
-
-		++buf;
-		++lencount;
-	}
-
-	len = lencount = wcswidth(wbuf, len);
+	len = wcswidth(wbuf, len);
 
 	/* Reduce number of wide chars to max columns */
 	if (len > maxcols) {
+		while (*buf && lencount <= maxcols) {
+			if (*buf <= '\x1f' || *buf == '\x7f')
+				*buf = '\?';
+
+			++buf;
+			++lencount;
+		}
+
 		lencount = maxcols + 1;
 
 		/* Reduce wide chars one by one till it fits */
-		while (len > maxcols)
+		do
 			len = wcswidth(wbuf, --lencount);
+		while (len > maxcols);
 
 		wbuf[lencount] = L'\0';
+	} else {
+		do /* We do not expect a NULL string */
+			if (*buf <= '\x1f' || *buf == '\x7f')
+				*buf = '\?';
+		while (*++buf);
 	}
 
-	if (wstr) {
-		*wstr = wbuf;
-		return NULL;
-	}
-
-	/* Convert wide char to multi-byte */
-	wcstombs(g_buf, wbuf, NAME_MAX);
-	return g_buf;
+	return wbuf;
 }
 
 static char *coolsize(off_t size)
@@ -3151,7 +3142,6 @@ static char *get_lsperms(mode_t mode)
 
 static void printent(const struct entry *ent, uint namecols, bool sel)
 {
-	wchar_t *wstr;
 	char hln = '\0';
 	char ind = get_ind(ent->mode, FALSE);
 
@@ -3163,30 +3153,26 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 	if (!ind)
 		++namecols;
 
-	unescape(ent->name, namecols, &wstr);
-
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
 
+	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
+
 	if (sel)
 		attron(A_REVERSE);
-
-	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
-	addwstr(wstr);
+	addwstr(unescape(ent->name, namecols));
+	if (sel)
+		attroff(A_REVERSE);
 	if (ind)
 		addch(ind);
 	if (hln)
 		addch(hln);
 	addch('\n');
-
-	if (sel)
-		attroff(A_REVERSE);
 }
 
 static void printent_long(const struct entry *ent, uint namecols, bool sel)
 {
 	char timebuf[24], permbuf[4], ind1 = '\0', ind2 = '\0';
-	const char cp = (ent->flags & FILE_SELECTED) ? '+' : ' ';
 
 	/* Timestamp */
 	strftime(timebuf, sizeof(timebuf), "%F %R", localtime(&ent->t));
@@ -3202,11 +3188,10 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	if (S_ISREG(ent->mode) && !(ent->mode & 0100))
 		++namecols;
 
-	/* Trim escape chars from name */
-	const char *pname = unescape(ent->name, namecols, NULL);
-
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
+
+	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
 	if (sel)
 		attron(A_REVERSE);
@@ -3222,9 +3207,8 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 			ind2 = '/';
 		}
 
-		printw("%c%-16.16s  %s %8.8s%c %s%c", cp, timebuf, permbuf,
-		       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size),
-		       ind1, pname, ind2);
+		printw("%-16.16s  %s %8.8s%c ", timebuf, permbuf,
+		       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size), ind1);
 		break;
 	case S_IFLNK:
 		ind1 = ind2 = '@'; // fallthrough
@@ -3243,14 +3227,16 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	default:
 		if (!ind1)
 			ind1 = ind2 = '?';
-		printw("%c%-16.16s  %s        %c  %s%c", cp, timebuf, permbuf, ind1, pname, ind2);
+		printw("%-16.16s  %s        %c  ", timebuf, permbuf, ind1);
 		break;
 	}
 
-	addch('\n');
-
+	addwstr(unescape(ent->name, namecols));
 	if (sel)
 		attroff(A_REVERSE);
+	if (ind2)
+		addch(ind2);
+	addch('\n');
 }
 
 static void (*printptr)(const struct entry *ent, uint namecols, bool sel) = &printent;
