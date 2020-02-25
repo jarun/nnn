@@ -99,7 +99,7 @@ handle_pdf() {
 }
 
 handle_audio() {
-    if which mocplay >/dev/null 2>&1; then
+    if which mocp >/dev/null 2>&1 && which mocplay >/dev/null 2>&1; then
         mocplay "${FPATH}" "opener" >/dev/null 2>&1
         exit 0
     elif which mpv >/dev/null 2>&1; then
