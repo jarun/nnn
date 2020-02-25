@@ -2975,12 +2975,12 @@ static void resetdircolor(int flags)
  */
 static wchar_t *unescape(const char *str, uint maxcols)
 {
-	static wchar_t wbuf[NAME_MAX + 1] __attribute__ ((aligned));
+	wchar_t * const wbuf = (wchar_t *)g_buf;
 	wchar_t *buf = wbuf;
 	size_t lencount = 0;
 
 #ifdef NOLOCALE
-	memset(wbuf, 0, sizeof(wbuf));
+	memset(wbuf, 0, sizeof(NAME_MAX + 1));
 #endif
 
 	/* Convert multi-byte to wide char */
@@ -3172,17 +3172,16 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 
 static void printent_long(const struct entry *ent, uint namecols, bool sel)
 {
-	char timebuf[24], permbuf[4], ind1 = '\0', ind2 = '\0';
+	char timebuf[18], permbuf[8] = "      ", ind1 = '\0', ind2 = '\0', special = '\0';
 
 	/* Timestamp */
 	strftime(timebuf, sizeof(timebuf), "%F %R", localtime(&ent->t));
-	timebuf[sizeof(timebuf)-1] = '\0';
+	//timebuf[sizeof(timebuf)-1] = '\0';
 
 	/* Permissions */
-	permbuf[0] = '0' + ((ent->mode >> 6) & 7);
-	permbuf[1] = '0' + ((ent->mode >> 3) & 7);
-	permbuf[2] = '0' + (ent->mode & 7);
-	permbuf[3] = '\0';
+	permbuf[2] = '0' + ((ent->mode >> 6) & 7);
+	permbuf[3] = '0' + ((ent->mode >> 3) & 7);
+	permbuf[4] = '0' + (ent->mode & 7);
 
 	/* Add a column if no indicator is needed */
 	if (S_ISREG(ent->mode) && !(ent->mode & 0100))
@@ -3196,6 +3195,9 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	if (sel)
 		attron(A_REVERSE);
 
+	addstr(timebuf);
+	addstr(permbuf);
+
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
 		ind1 = (ent->flags & HARD_LINK) ? '>' : ' ';
@@ -3207,8 +3209,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 			ind2 = '/';
 		}
 
-		printw("%-16.16s  %s %8.8s%c ", timebuf, permbuf,
-		       coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size), ind1);
+		printw("%8.8s", coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size));
 		break;
 	case S_IFLNK:
 		ind1 = ind2 = '@'; // fallthrough
@@ -3227,10 +3228,15 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	default:
 		if (!ind1)
 			ind1 = ind2 = '?';
-		printw("%-16.16s  %s        %c  ", timebuf, permbuf, ind1);
+		addstr("       ");
+		special = ' ';
 		break;
 	}
 
+	addch(ind1);
+	addch(' ');
+	if (special)
+		addch(special);
 	addwstr(unescape(ent->name, namecols));
 	if (sel)
 		attroff(A_REVERSE);
