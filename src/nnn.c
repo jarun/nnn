@@ -5381,8 +5381,13 @@ nochange:
 			path = g_ctx[r].c_path;
 			lastdir = g_ctx[r].c_last;
 			lastname = g_ctx[r].c_name;
+			tmp = g_ctx[r].c_fltr;
 
-			setdirwatch();
+			if (cfg.filtermode || ((tmp[0] == FILTER || tmp[0] == RFILTER) && tmp[1]))
+				presel = FILTER;
+			else
+				dir_changed = TRUE;
+
 			goto begin;
 		case SEL_PIN:
 			free(mark);
