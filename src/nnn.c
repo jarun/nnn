@@ -3142,13 +3142,11 @@ static char *get_lsperms(mode_t mode)
 
 static void printent(const struct entry *ent, uint namecols, bool sel)
 {
-	char hln = '\0';
 	char ind = get_ind(ent->mode, FALSE);
+	int attrs = sel ? A_REVERSE : 0;
 
-	if (S_ISREG(ent->mode) && (ent->flags & HARD_LINK)) {
-		hln = '>';
-		--namecols;
-	}
+	if ((S_ISREG(ent->mode) && (ent->flags & HARD_LINK)) || ind == '@')
+		attrs |= A_DIM;
 
 	if (!ind)
 		++namecols;
@@ -3158,21 +3156,22 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 
 	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
-	if (sel)
-		attron(A_REVERSE);
+	if (attrs)
+		attron(attrs);
 	addwstr(unescape(ent->name, namecols));
-	if (sel)
-		attroff(A_REVERSE);
+	if (attrs)
+		attroff(attrs);
+
 	if (ind)
 		addch(ind);
-	if (hln)
-		addch(hln);
 	addch('\n');
 }
 
 static void printent_long(const struct entry *ent, uint namecols, bool sel)
 {
-	char timebuf[18], permbuf[8], ind1 = '\0', ind2 = '\0', special = '\0';
+	bool ln = FALSE;
+	char timebuf[18], permbuf[8], ind1 = '\0', ind2 = '\0';
+	int attrs = sel ? A_REVERSE : 0;
 	size_t len;
 	char *size;
 
@@ -3192,25 +3191,23 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 
 	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
-	if (sel)
-		attron(A_REVERSE);
+	if (attrs)
+		attron(attrs);
 
 	addstr(timebuf);
 	addstr(permbuf);
 
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
-		ind1 = (ent->flags & HARD_LINK) ? '>' : ' ';
+		if (ent->flags & HARD_LINK)
+			ln = TRUE;
+
 		if (ent->mode & 0100)
 			ind2 = '*';
-		else /* Add a column if no indicator is needed */
-			++namecols;
 		// fallthrough
 	case S_IFDIR:
-		if (!ind1) {
-			ind1 = ' ';
+		if (!ind2) /* Add a column if end indicator is not needed */
 			++namecols;
-		}
 
 		size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
 		len = 9 - strlen(size);
@@ -3219,6 +3216,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		addstr(size);
 		break;
 	case S_IFLNK:
+		ln = TRUE;
 		ind1 = ind2 = '@'; // fallthrough
 	case S_IFSOCK:
 		if (!ind1)
@@ -3236,17 +3234,18 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		if (!ind1)
 			ind1 = ind2 = '?';
 		addstr("       ");
-		special = ' ';
+		addch(ind1);
 		break;
 	}
 
-	addch(ind1);
-	addch(' ');
-	if (special)
-		addch(special);
+	addstr("  ");
+	if (ln) {
+		attron(A_DIM);
+		attrs |=  A_DIM;
+	}
 	addwstr(unescape(ent->name, namecols));
-	if (sel)
-		attroff(A_REVERSE);
+	if (attrs)
+		attroff(attrs);
 	if (ind2)
 		addch(ind2);
 	addch('\n');
