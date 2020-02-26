@@ -3173,6 +3173,8 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 static void printent_long(const struct entry *ent, uint namecols, bool sel)
 {
 	char timebuf[18], permbuf[8], ind1 = '\0', ind2 = '\0', special = '\0';
+	size_t len;
+	char *size;
 
 	/* Timestamp */
 	strftime(timebuf, sizeof(timebuf), "%F %R", localtime(&ent->t));
@@ -3211,7 +3213,11 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 			ind2 = '/';
 		}
 
-		printw("%8.8s", coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size));
+		size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
+		len = 9 - strlen(size);
+		while (--len)
+			addch(' ');
+		addstr(size);
 		break;
 	case S_IFLNK:
 		ind1 = ind2 = '@'; // fallthrough
