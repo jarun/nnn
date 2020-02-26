@@ -165,7 +165,7 @@
 #define BLK_SHIFT_512 9
 
 /* Detect hardlinks in du */
-#define HASH_BITS (0xFFFFFF)
+#define HASH_BITS (0xFFFF)
 #define HASH_OCTETS (HASH_BITS >> 6) /* 2^6 = 64 */
 
 /* Program return codes */
@@ -702,6 +702,7 @@ static char *xitoa(uint val)
  */
 static bool test_set_bit(ull nr)
 {
+	nr &= HASH_BITS;
 	ull *m = ((ull *)ihashbmp) + (nr >> 6);
 
 	if (*m & (1 << (nr & 63)))
@@ -4179,7 +4180,7 @@ static void launch_app(const char *path, char *newpath)
 static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
 	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D)
-	    && (sb->st_nlink <= 1 || test_set_bit((ull)sb->st_ino)))
+	    && (sb->st_nlink <= 1 || test_set_bit((ull)sb->st_ino + (ull)sb->st_size)))
 		ent_blocks += sb->st_blocks;
 
 	++num_files;
@@ -4189,7 +4190,7 @@ static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typef
 static int sum_asize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
 	if (sb->st_size && (typeflag == FTW_F || typeflag == FTW_D)
-	    && (sb->st_nlink <= 1 || test_set_bit((ull)sb->st_ino)))
+	    && (sb->st_nlink <= 1 || test_set_bit((ull)sb->st_ino + (ull)sb->st_size)))
 		ent_blocks += sb->st_size;
 
 	++num_files;
@@ -4309,7 +4310,8 @@ static int dentfill(char *path, struct entry **dents)
 				}
 			} else {
 				/* Do not recount hard links */
-				if (sb.st_nlink <= 1 || test_set_bit((ull)sb.st_ino))
+				if (sb.st_nlink <= 1
+				    || test_set_bit((ull)sb.st_ino + (ull)sb.st_size))
 					dir_blocks += (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				++num_files;
 			}
@@ -4406,7 +4408,8 @@ static int dentfill(char *path, struct entry **dents)
 			} else {
 				dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				/* Do not recount hard links */
-				if (sb.st_nlink <= 1 || test_set_bit((ull)sb.st_ino))
+				if (sb.st_nlink <= 1
+				    || test_set_bit((ull)sb.st_ino + (ull)sb.st_size))
 					dir_blocks += dentp->blocks;
 				++num_files;
 			}
