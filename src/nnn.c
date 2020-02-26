@@ -3102,7 +3102,7 @@ static char get_ind(mode_t mode, bool perms)
 			return '*';
 		return '\0';
 	case S_IFDIR:
-		return perms ? 'd' : '/';
+		return perms ? 'd' : '\0';
 	case S_IFLNK:
 		return perms ? 'l' : '@';
 	case S_IFSOCK:
@@ -3187,10 +3187,6 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	permbuf[3] = '0' + ((ent->mode >> 3) & 7);
 	permbuf[4] = '0' + (ent->mode & 7);
 
-	/* Add a column if no indicator is needed */
-	if (S_ISREG(ent->mode) && !(ent->mode & 0100))
-		++namecols;
-
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
 
@@ -3206,11 +3202,14 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	case S_IFREG:
 		ind1 = (ent->flags & HARD_LINK) ? '>' : ' ';
 		if (ent->mode & 0100)
-			ind2 = '*'; // fallthrough
+			ind2 = '*';
+		else /* Add a column if no indicator is needed */
+			++namecols;
+		// fallthrough
 	case S_IFDIR:
 		if (!ind1) {
 			ind1 = ' ';
-			ind2 = '/';
+			++namecols;
 		}
 
 		size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
