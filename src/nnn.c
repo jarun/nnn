@@ -3172,13 +3172,15 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 
 static void printent_long(const struct entry *ent, uint namecols, bool sel)
 {
-	char timebuf[18], permbuf[8] = "      ", ind1 = '\0', ind2 = '\0', special = '\0';
+	char timebuf[18], permbuf[8], ind1 = '\0', ind2 = '\0', special = '\0';
 
 	/* Timestamp */
 	strftime(timebuf, sizeof(timebuf), "%F %R", localtime(&ent->t));
 	//timebuf[sizeof(timebuf)-1] = '\0';
 
 	/* Permissions */
+	permbuf[0] = permbuf[1] = permbuf[5] = ' ';
+	permbuf[6] = '\0';
 	permbuf[2] = '0' + ((ent->mode >> 6) & 7);
 	permbuf[3] = '0' + ((ent->mode >> 3) & 7);
 	permbuf[4] = '0' + (ent->mode & 7);
