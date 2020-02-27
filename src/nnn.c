@@ -3228,7 +3228,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 			++namecols;
 
 		size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
-		len = 9 - (uint)strlen(size);
+		len = 10 - (uint)strlen(size);
 		while (--len)
 			addch(' ');
 		addstr(size);
