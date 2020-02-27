@@ -3175,7 +3175,7 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 	char ind = get_ind(ent->mode, FALSE);
 	int attrs = sel ? A_REVERSE : 0;
 
-	if ((S_ISREG(ent->mode) && (ent->flags & HARD_LINK)) || ind == '@')
+	if (ind == '@' || (ent->flags & HARD_LINK))
 		attrs |= A_DIM;
 
 	if (!ind)
@@ -4204,8 +4204,8 @@ static void launch_app(const char *path, char *newpath)
 
 static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
-	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D)
-	    && (sb->st_nlink <= 1 || test_set_bit((uint)sb->st_ino)))
+	if (sb->st_blocks && (typeflag == FTW_D
+	    || (typeflag == FTW_F && (sb->st_nlink <= 1 || test_set_bit((uint)sb->st_ino)))))
 		ent_blocks += sb->st_blocks;
 
 	++num_files;
@@ -4214,8 +4214,8 @@ static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typef
 
 static int sum_asize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
-	if (sb->st_size && (typeflag == FTW_F || typeflag == FTW_D)
-	    && (sb->st_nlink <= 1 || test_set_bit((uint)sb->st_ino)))
+	if (sb->st_size && (typeflag == FTW_D
+	    || (typeflag == FTW_D && (sb->st_nlink <= 1 || test_set_bit((uint)sb->st_ino)))))
 		ent_blocks += sb->st_size;
 
 	++num_files;
@@ -4412,7 +4412,8 @@ static int dentfill(char *path, struct entry **dents)
 		dentp->mode = sb.st_mode;
 		dentp->size = sb.st_size;
 #endif
-		dentp->flags = (sb.st_nlink > 1) ? HARD_LINK : 0;
+		dentp->flags = S_ISDIR(sb.st_mode) ? 0 : ((sb.st_nlink > 1) ? HARD_LINK : 0);
+		DPRINTF_D(dentp->flags);
 
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
