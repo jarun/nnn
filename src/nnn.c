@@ -700,9 +700,8 @@ static char *xitoa(uint val)
 /*
  * Source: https://elixir.bootlin.com/linux/latest/source/arch/alpha/include/asm/bitops.h
  */
-static bool test_set_bit(ull nr)
+static bool test_set_bit(ulong nr)
 {
-	nr &= HASH_BITS;
 	ull *m = ((ull *)ihashbmp) + (nr >> 6);
 
 	if (*m & (1 << (nr & 63)))
@@ -714,7 +713,7 @@ static bool test_set_bit(ull nr)
 }
 
 #if 0
-static bool test_clear_bit(ull nr)
+static bool test_clear_bit(ulong nr)
 {
 	ull *m = ((ull *) ihashbmp) + (nr >> 6);
 
@@ -3173,7 +3172,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	bool ln = FALSE;
 	char timebuf[18], permbuf[8], ind1 = '\0', ind2 = '\0';
 	int attrs = sel ? A_REVERSE : 0;
-	size_t len;
+	uint len;
 	char *size;
 
 	/* Timestamp */
@@ -3211,7 +3210,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 			++namecols;
 
 		size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
-		len = 9 - strlen(size);
+		len = 9 - (uint)strlen(size);
 		while (--len)
 			addch(' ');
 		addstr(size);
@@ -4180,7 +4179,7 @@ static void launch_app(const char *path, char *newpath)
 static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
 	if (sb->st_blocks && (typeflag == FTW_F || typeflag == FTW_D)
-	    && (sb->st_nlink <= 1 || test_set_bit((ull)sb->st_ino + (ull)sb->st_size)))
+	    && (sb->st_nlink <= 1 || test_set_bit((ulong)sb->st_ino + (ulong)sb->st_size)))
 		ent_blocks += sb->st_blocks;
 
 	++num_files;
@@ -4190,7 +4189,7 @@ static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typef
 static int sum_asize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
 	if (sb->st_size && (typeflag == FTW_F || typeflag == FTW_D)
-	    && (sb->st_nlink <= 1 || test_set_bit((ull)sb->st_ino + (ull)sb->st_size)))
+	    && (sb->st_nlink <= 1 || test_set_bit((ulong)sb->st_ino + (ulong)sb->st_size)))
 		ent_blocks += sb->st_size;
 
 	++num_files;
@@ -4311,7 +4310,7 @@ static int dentfill(char *path, struct entry **dents)
 			} else {
 				/* Do not recount hard links */
 				if (sb.st_nlink <= 1
-				    || test_set_bit((ull)sb.st_ino + (ull)sb.st_size))
+				    || test_set_bit((ulong)sb.st_ino + (ulong)sb.st_size))
 					dir_blocks += (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				++num_files;
 			}
@@ -4409,7 +4408,7 @@ static int dentfill(char *path, struct entry **dents)
 				dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				/* Do not recount hard links */
 				if (sb.st_nlink <= 1
-				    || test_set_bit((ull)sb.st_ino + (ull)sb.st_size))
+				    || test_set_bit((ulong)sb.st_ino + (ulong)sb.st_size))
 					dir_blocks += dentp->blocks;
 				++num_files;
 			}
