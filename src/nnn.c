@@ -3154,6 +3154,14 @@ static char *get_lsperms(mode_t mode)
 	return bits;
 }
 
+static void print_time(const time_t *timep)
+{
+	struct tm *t = localtime(timep);
+
+	printw("%d-%02d-%02d %02d:%02d",
+	       t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
+}
+
 static void printent(const struct entry *ent, uint namecols, bool sel)
 {
 	char ind = get_ind(ent->mode, FALSE);
@@ -3184,21 +3192,10 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 static void printent_long(const struct entry *ent, uint namecols, bool sel)
 {
 	bool ln = FALSE;
-	char timebuf[18], permbuf[8], ind1 = '\0', ind2 = '\0';
+	char ind1 = '\0', ind2 = '\0';
 	int attrs = sel ? A_REVERSE : 0;
 	uint len;
 	char *size;
-
-	/* Timestamp */
-	strftime(timebuf, sizeof(timebuf), "%F %R", localtime(&ent->t));
-	//timebuf[sizeof(timebuf)-1] = '\0';
-
-	/* Permissions */
-	permbuf[0] = permbuf[1] = permbuf[5] = ' ';
-	permbuf[6] = '\0';
-	permbuf[2] = '0' + ((ent->mode >> 6) & 7);
-	permbuf[3] = '0' + ((ent->mode >> 3) & 7);
-	permbuf[4] = '0' + (ent->mode & 7);
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
@@ -3208,8 +3205,15 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	if (attrs)
 		attron(attrs);
 
-	addstr(timebuf);
-	addstr(permbuf);
+	/* Timestamp */
+	print_time(&ent->t);
+
+	addstr("  ");
+
+	/* Permissions */
+	addch('0' + ((ent->mode >> 6) & 7));
+	addch('0' + ((ent->mode >> 3) & 7));
+	addch('0' + (ent->mode & 7));
 
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
@@ -4691,7 +4695,6 @@ static void statusbar(char *path)
 {
 	int i = 0, extnlen = 0;
 	char *ptr;
-	char buf[24];
 	pEntry pent = &dents[cur];
 
 	if (!ndents) {
@@ -4712,27 +4715,36 @@ static void statusbar(char *path)
 	} else
 		ptr = "\b";
 
+	tolastln();
+
 	if (cfg.blkorder) { /* du mode */
+		char buf[24];
+
 		xstrlcpy(buf, coolsize(dir_blocks << blk_shift), 12);
 
-		mvprintw(xlines - 1, 0, "%d/%d [%s:%s] %cu:%s free:%s files:%lu %lldB %s",
-			 cur + 1, ndents, (cfg.selmode ? "s" : ""),
-			 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
-			 (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
-			 num_files, (ll)pent->blocks << blk_shift, ptr);
+		printw("%d/%d [%s:%s] %cu:%s free:%s files:%lu %lldB %s",
+		       cur + 1, ndents, (cfg.selmode ? "s" : ""),
+		       ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
+		       (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
+		       num_files, (ll)pent->blocks << blk_shift, ptr);
 	} else { /* light or detail mode */
 		char sort[] = "\0\0\0\0";
 
 		getorderstr(sort);
 
-		/* Timestamp */
-		strftime(buf, sizeof(buf), "%F %R", localtime(&pent->t));
-		buf[sizeof(buf)-1] = '\0';
-
-		mvprintw(xlines - 1, 0, "%d/%d [%s:%s] %s%s %s %s %s",
-			 cur + 1, ndents, (cfg.selmode ? "s" : ""),
+		printw("%d/%d [%s:%s] %s", cur + 1, ndents, (cfg.selmode ? "s" : ""),
 			 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
-			 sort, buf, get_lsperms(pent->mode), coolsize(pent->size), ptr);
+			 sort);
+
+		/* Timestamp */
+		print_time(&pent->t);
+
+		addch(' ');
+		addstr(get_lsperms(pent->mode));
+		addch(' ');
+		addstr(coolsize(pent->size));
+		addch(' ');
+		addstr(ptr);
 	}
 
 	addch('\n');
