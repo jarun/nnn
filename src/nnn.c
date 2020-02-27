@@ -2497,14 +2497,24 @@ static int filterentries(char *path, char *lastname)
 			goto end;
 
 		if (len == 1) {
-			switch (*ch) {
-			case '=': // fallthrough /* Launch app */
-			case ']': // fallthorugh /* Prompt key */
-			case ';': // fallthrough /* Run plugin key */
-			case ',': // fallthrough /* Pin CWD */
-			case '~': // fallthrough /* Go HOME */
-			case '?': /* Help and config key, '?' is an invalid regex */
+			if (*ch == '?') /* Help and config key, '?' is an invalid regex */
 				goto end;
+
+			if (cfg.filtermode) {
+				switch (*ch) {
+				case '\'': // fallthrough /* Go to first non-dir file */
+				case '+': // fallthrough /* Toggle proceed on open */
+				case ',': // fallthrough /* Pin CWD */
+				case '-': // fallthrough /* Visit last visited dir */
+				case '.': // fallthrough /* Show hidden files */
+				case ';': // fallthrough /* Run plugin key */
+				case '=': // fallthrough /* Launch app */
+				case '@': // fallthrough /* Visit start dir */
+				case ']': // fallthorugh /* Prompt key */
+				case '`': // fallthrough /* Visit / */
+				case '~': /* Go HOME */
+					goto end;
+				}
 			}
 
 			/* Toggle case-sensitivity */
