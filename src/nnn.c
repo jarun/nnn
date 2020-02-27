@@ -606,14 +606,22 @@ static char cp[] = "cp -iRp";
 static char mv[] = "mv -i";
 #endif
 
-static const char cpmvformatcmd[] = "sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s";
-static const char cpmvrenamecmd[] = "sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
-				    "%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" "
-				    "< /dev/tty'";
-static const char batchrenamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
-				     "tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
-static const char archive_regex[] = "\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$";
-static const char replaceprefixcmd[] = "sed -i 's|^%s\\(.*\\)$|%s\\1|' %s";
+/* Patterns */
+#define P_CPMVFMT 0
+#define P_CPMVRNM 1
+#define P_BATCHRNM 2
+#define P_ARCHIVE 3
+#define P_REPLACE 4
+
+static const char * const patterns[] = {
+	"sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s",
+	"sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
+		"%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
+	"paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
+		"tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null",
+	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$",
+	"sed -i 's|^%s\\(.*\\)$|%s\\1|' %s",
+};
 
 /* Event handling */
 #ifdef LINUX_INOTIFY
@@ -1231,7 +1239,7 @@ static void endselection(void)
 {
 	int fd;
 	ssize_t count;
-	char buf[sizeof(replaceprefixcmd) + PATH_MAX + (TMP_LEN_MAX << 1)];
+	char buf[sizeof(patterns[P_REPLACE]) + PATH_MAX + (TMP_LEN_MAX << 1)];
 
 	if (cfg.selmode)
 		cfg.selmode = 0;
@@ -1252,7 +1260,7 @@ static void endselection(void)
 		return;
 	}
 
-	snprintf(buf, sizeof(buf), replaceprefixcmd, g_listpath, g_prefixpath, g_tmpfpath);
+	snprintf(buf, sizeof(buf), patterns[P_REPLACE], g_listpath, g_prefixpath, g_tmpfpath);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
 
 	fd = open(g_tmpfpath, O_RDONLY);
@@ -1741,7 +1749,7 @@ static bool cpmv_rename(int choice, const char *path)
 	uint count = 0, lines = 0;
 	bool ret = FALSE;
 	char *cmd = (choice == 'c' ? cp : mv);
-	char buf[sizeof(cpmvrenamecmd) + sizeof(cmd) + (PATH_MAX << 1)];
+	char buf[sizeof(patterns[P_CPMVRNM]) + sizeof(cmd) + (PATH_MAX << 1)];
 
 	fd = create_tmp_file();
 	if (fd == -1)
@@ -1760,7 +1768,7 @@ static bool cpmv_rename(int choice, const char *path)
 
 	close(fd);
 
-	snprintf(buf, sizeof(buf), cpmvformatcmd, g_tmpfpath);
+	snprintf(buf, sizeof(buf), patterns[P_CPMVFMT], g_tmpfpath);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, path, F_CLI);
 
 	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, path, F_CLI);
@@ -1777,7 +1785,7 @@ static bool cpmv_rename(int choice, const char *path)
 		goto finish;
 	}
 
-	snprintf(buf, sizeof(buf), cpmvrenamecmd, path, g_tmpfpath, cmd);
+	snprintf(buf, sizeof(buf), patterns[P_CPMVRNM], path, g_tmpfpath, cmd);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, path, F_CLI);
 	ret = TRUE;
 
@@ -1840,7 +1848,7 @@ static bool batch_rename(const char *path)
 	uint count = 0, lines = 0;
 	bool dir = FALSE, ret = FALSE;
 	char foriginal[TMP_LEN_MAX] = {0};
-	char buf[sizeof(batchrenamecmd) + (PATH_MAX << 1)];
+	char buf[sizeof(patterns[P_BATCHRNM]) + (PATH_MAX << 1)];
 
 	i = get_cur_or_sel();
 	if (!i)
@@ -1890,7 +1898,7 @@ static bool batch_rename(const char *path)
 		goto finish;
 	}
 
-	snprintf(buf, sizeof(buf), batchrenamecmd, foriginal, g_tmpfpath);
+	snprintf(buf, sizeof(buf), patterns[P_BATCHRNM], foriginal, g_tmpfpath);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, path, F_CLI);
 	ret = TRUE;
 
@@ -6741,9 +6749,9 @@ int main(int argc, char *argv[])
 	/* Set archive handling (enveditor used as tmp var) */
 	enveditor = getenv(env_cfg[NNN_ARCHIVE]);
 #ifdef PCRE
-	if (setfilter(&archive_pcre, (enveditor ? enveditor : archive_regex))) {
+	if (setfilter(&archive_pcre, (enveditor ? enveditor : patterns[P_ARCHIVE]))) {
 #else
-	if (setfilter(&archive_re, (enveditor ? enveditor : archive_regex))) {
+	if (setfilter(&archive_re, (enveditor ? enveditor : patterns[P_ARCHIVE]))) {
 #endif
 		fprintf(stderr, "%s\n", messages[MSG_INVALID_REG]);
 		return _FAILURE;
