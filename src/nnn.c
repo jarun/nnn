@@ -2921,6 +2921,10 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 	kvarr = *arr;
 
 	*envcpy = strdup(ptr);
+	if (!*envcpy) {
+		xerror();
+		return FALSE;
+	}
 	ptr = *envcpy;
 	nextkey = ptr;
 
@@ -2948,7 +2952,7 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 	}
 
 	if (i < maxitems) {
-		if (*kvarr[i - 1].val == '\0')
+		if (kvarr[i - 1].val && *kvarr[i - 1].val == '\0')
 			return FALSE;
 		kvarr[i].key = '\0';
 	}
