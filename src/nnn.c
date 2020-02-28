@@ -145,8 +145,6 @@
 #define CASE ':'
 #define MSGWAIT '$'
 #define REGEX_MAX 48
-#define BM_MAX 10
-#define PLUGIN_MAX 15
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per filename = 64*32B = 2KB */
 #define DESCRIPTOR_LEN 32
@@ -334,10 +332,11 @@ static settings cfg = {
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static int ndents, cur, last, curscroll, last_curscroll, total_dents = ENTRY_INCR;
-static int xlines, xcols;
+static ushort xlines, xcols;
 static int nselected;
-static uint idle;
 static uint idletimeout, selbufpos, lastappendpos, selbuflen;
+static ushort idle;
+static ushort maxbm, maxplug;
 static char *bmstr;
 static char *pluginstr;
 static char *opener;
@@ -359,8 +358,8 @@ static struct entry *dents;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
-static kv bookmark[BM_MAX];
-static kv plug[PLUGIN_MAX];
+static kv *bookmark;
+static kv *plug;
 static uchar g_tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
 static const uint _WSHIFT = (LONG_SIZE == 8) ? 3 : 2;
@@ -2893,14 +2892,33 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int *prese
 	return count;
 }
 
-static bool parsekvpair(kv *kvarr, char **envcpy, const char *cfgstr, uchar maxitems, size_t maxlen)
+static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 {
-	int i = 0;
+	uint maxitems = 0, i = 0;
 	char *nextkey;
-	char *ptr = getenv(cfgstr);
+	char *ptr = getenv(env_cfg[id]);
+	kv *kvarr;
 
 	if (!ptr || !*ptr)
 		return TRUE;
+
+	nextkey = ptr;
+	while (*nextkey) {
+		if (*nextkey == ':')
+			++maxitems;
+		++nextkey;
+	}
+
+	if (!maxitems)
+		return FALSE;
+
+	*arr = calloc(maxitems, sizeof(kv));
+	if (!arr) {
+		xerror();
+		return FALSE;
+	}
+
+	kvarr = *arr;
 
 	*envcpy = strdup(ptr);
 	ptr = *envcpy;
@@ -2936,9 +2954,10 @@ static bool parsekvpair(kv *kvarr, char **envcpy, const char *cfgstr, uchar maxi
 	}
 
 	for (i = 0; i < maxitems && kvarr[i].key; ++i)
-		if (strlen(kvarr[i].val) >= maxlen)
+		if (strlen(kvarr[i].val) >= PATH_MAX)
 			return FALSE;
 
+	*items = maxitems;
 	return TRUE;
 }
 
@@ -4047,13 +4066,13 @@ static void show_help(const char *path)
 
 	if (bookmark[0].val) {
 		fprintf(fp, "BOOKMARKS\n");
-		printkv(bookmark, fp, BM_MAX);
+		printkv(bookmark, fp, maxbm);
 		fprintf(fp, "\n");
 	}
 
 	if (plug[0].val) {
 		fprintf(fp, "PLUGIN KEYS\n");
-		printkv(plug, fp, PLUGIN_MAX);
+		printkv(plug, fp, maxplug);
 		fprintf(fp, "\n");
 	}
 
@@ -5372,14 +5391,14 @@ nochange:
 				g_buf[++r] = '\0';
 				++r;
 			}
-			printkeys(bookmark, g_buf + r - 1, BM_MAX);
+			printkeys(bookmark, g_buf + r - 1, maxbm);
 			printprompt(g_buf);
 			fd = get_input(NULL);
 
 			r = FALSE;
 			if (fd == ',') /* Visit pinned directory */
 				mark ? xstrlcpy(newpath, mark, PATH_MAX) : (r = MSG_NOT_SET);
-			else if (!get_kv_val(bookmark, newpath, fd, BM_MAX, TRUE))
+			else if (!get_kv_val(bookmark, newpath, fd, maxbm, TRUE))
 				r = MSG_INVALID_KEY;
 
 			if (!r && !xdiraccess(newpath))
@@ -5935,12 +5954,12 @@ nochange:
 			}
 
 			r = xstrlcpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
-			printkeys(plug, g_buf + r - 1, PLUGIN_MAX);
+			printkeys(plug, g_buf + r - 1, maxplug);
 			printprompt(g_buf);
 			r = get_input(NULL);
 			if (r != '\r') {
 				endselection();
-				tmp = get_kv_val(plug, NULL, r, PLUGIN_MAX, FALSE);
+				tmp = get_kv_val(plug, NULL, r, maxplug, FALSE);
 				if (!tmp) {
 					printwait(messages[MSG_INVALID_KEY], &presel);
 					goto nochange;
@@ -6529,6 +6548,8 @@ static void cleanup(void)
 	free(pluginstr);
 	free(g_prefixpath);
 	free(ihashbmp);
+	free(bookmark);
+	free(plug);
 
 	unlink(g_pipepath);
 
@@ -6695,13 +6716,13 @@ int main(int argc, char *argv[])
 	DPRINTF_S(opener);
 
 	/* Parse bookmarks string */
-	if (!parsekvpair(bookmark, &bmstr, env_cfg[NNN_BMS], BM_MAX, PATH_MAX)) {
+	if (!parsekvpair(&bookmark, &bmstr, NNN_BMS, &maxbm)) {
 		fprintf(stderr, "%s\n", env_cfg[NNN_BMS]);
 		return _FAILURE;
 	}
 
 	/* Parse plugins string */
-	if (!parsekvpair(plug, &pluginstr, env_cfg[NNN_PLUG], PLUGIN_MAX, PATH_MAX)) {
+	if (!parsekvpair(&plug, &pluginstr, NNN_PLUG, &maxplug)) {
 		fprintf(stderr, "%s\n", env_cfg[NNN_PLUG]);
 		return _FAILURE;
 	}
@@ -6709,7 +6730,7 @@ int main(int argc, char *argv[])
 	if (!initpath) {
 		if (arg) { /* Open a bookmark directly */
 			if (!arg[1]) /* Bookmarks keys are single char */
-				initpath = get_kv_val(bookmark, NULL, *arg, BM_MAX, TRUE);
+				initpath = get_kv_val(bookmark, NULL, *arg, maxbm, TRUE);
 
 			if (!initpath) {
 				fprintf(stderr, "%s\n", messages[MSG_INVALID_KEY]);
