@@ -5700,18 +5700,22 @@ nochange:
 				}
 
 				if (r == 'c') {
-					tmp = (g_listpath && xstrcmp(path, g_listpath) == 0) ? g_prefixpath : path;
+					tmp = (g_listpath && xstrcmp(path, g_listpath) == 0)
+					      ? g_prefixpath : path;
 					mkpath(tmp, dents[cur].name, newpath);
 					xrm(newpath);
 
-					if (cur && access(newpath, F_OK) == -1) {
-						move_cursor(cur - 1, 0);
+					if (cfg.filtermode)
+						presel = FILTER;
+
+					if (access(newpath, F_OK) == 0) /* File not removed */
+						goto nochange;
+					else if (cur) {
+						cur += (cur != (ndents - 1)) ? 1 : -1;
 						copycurname();
 					} else
 						lastname[0] = '\0';
 
-					if (cfg.filtermode)
-						presel = FILTER;
 					goto begin;
 				}
 			}
