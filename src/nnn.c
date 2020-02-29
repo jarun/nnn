@@ -5372,8 +5372,11 @@ nochange:
 				goto nochange;
 			}
 
-			if (strcmp(path, dir) == 0)
+			if (strcmp(path, dir) == 0) {
+				if (cfg.filtermode)
+					presel = FILTER;
 				goto nochange;
+			}
 
 			/* SEL_CDLAST: dir pointing to lastdir */
 			xstrlcpy(newpath, dir, PATH_MAX);
@@ -6053,8 +6056,11 @@ nochange:
 #endif
 				if (tmp && *tmp) // NOLINT
 					prompt_run(tmp, (ndents ? dents[cur].name : ""), path);
-				else
+				else {
+					if (cfg.filtermode)
+						presel = FILTER;
 					goto nochange;
+				}
 			}
 
 			/* Continue in navigate-as-you-type mode, if enabled */
@@ -6100,6 +6106,8 @@ nochange:
 			goto nochange;
 		case SEL_AUTONEXT:
 			g_states ^= STATE_AUTONEXT;
+			if (cfg.filtermode)
+				presel = FILTER;
 			goto nochange;
 		case SEL_QUITCTX: // fallthrough
 		case SEL_QUITCD: // fallthrough
