@@ -254,9 +254,8 @@ typedef struct {
 	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved1  : 2;
+	uint reserved1  : 3;
 	/* The following settings are global */
-	uint forcequit  : 1;  /* Do not confirm when quitting program */
 	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint picker     : 1;  /* Write selection to user-specified file */
@@ -309,7 +308,6 @@ static settings cfg = {
 	0, /* showdetail */
 	1, /* ctxactive */
 	0, /* reserved1 */
-	0, /* forcequit */
 	0, /* curctx */
 	0, /* dircolor */
 	0, /* picker */
@@ -398,6 +396,7 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define STATE_AUTONEXT 0x10
 #define STATE_MSG 0x20
 #define STATE_TRASH 0x40
+#define STATE_FORCEQUIT 0x80
 
 static uchar g_states;
 
@@ -6145,7 +6144,7 @@ nochange:
 					setdirwatch();
 					goto begin;
 				}
-			} else if (!cfg.forcequit) {
+			} else if (!(g_states & STATE_FORCEQUIT)) {
 				for (r = 0; r < CTX_MAX; ++r)
 					if (r != cfg.curctx && g_ctx[r].c_cfg.ctxactive) {
 						r = get_input(messages[MSG_QUIT_ALL]);
@@ -6649,7 +6648,7 @@ int main(int argc, char *argv[])
 			}
 			break;
 		case 'Q':
-			cfg.forcequit = 1;
+			g_states |= STATE_FORCEQUIT;
 			break;
 		case 'r':
 #ifdef __linux__
