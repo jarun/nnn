@@ -91,12 +91,12 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 ## Quickstart
 
-1. Install the [utilities you may need](https://github.com/jarun/nnn#utility-dependencies) based on your regular workflows.
+1. Install optional [deps](https://github.com/jarun/nnn#utility-dependencies) (if you need any).
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
-3. To open text files in `$VISUAL` (else `$EDITOR`, fallback vi) add program option `-e` in your alias.
-4. For additional functionality [install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins).
-5. To copy selected file paths to system clipboard and show notis on cp, mv, rm completion use option `-x`.
-6. For a strictly CLI environment, customize and use plugin [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke) with option `-c`.
+3. Use option `-e` in your alias to open text files in `$VISUAL` (else `$EDITOR`, fallback vi).
+4. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins).
+5. Use option `-x` to copy selected file paths to system clipboard and show notis on cp, mv, rm completion.
+6. For a CLI-only environment, customize and use plugin [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke) with option `-c` (overrides `-e`).
 
 Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates, cycles contexts. <kbd>?</kbd> lists shortcuts.
 
