@@ -1915,14 +1915,18 @@ finish:
 
 static void get_archive_cmd(char *cmd, char *archive)
 {
+	uchar i = 3;
+	const char *arcmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
+
 	if (getutil(utils[UTIL_ATOOL]))
-		xstrlcpy(cmd, "atool -a", ARCHIVE_CMD_LEN);
+		i = 0;
 	else if (getutil(utils[UTIL_BSDTAR]))
-		xstrlcpy(cmd, "bsdtar -acvf", ARCHIVE_CMD_LEN);
+		i = 1;
 	else if (is_suffix(archive, ".zip"))
-		xstrlcpy(cmd, "zip -r", ARCHIVE_CMD_LEN);
-	else
-		xstrlcpy(cmd, "tar -acvf", ARCHIVE_CMD_LEN);
+		i = 2;
+	// else tar
+
+	xstrlcpy(cmd, arcmd[i], ARCHIVE_CMD_LEN);
 }
 
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
