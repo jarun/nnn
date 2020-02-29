@@ -2469,7 +2469,7 @@ static int filterentries(char *path, char *lastname)
 				wcstombs(ln, wln, REGEX_MAX);
 				ndents = total;
 			} else
-				*ch = CONTROL('L');
+				continue;
 			// fallthrough
 		case CONTROL('L'):
 			if (*ch == CONTROL('L')) {
