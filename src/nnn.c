@@ -2925,6 +2925,14 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 		xerror();
 		return FALSE;
 	}
+
+	if (nextkey - ptr > 1) {
+		--nextkey;
+		/* Clear trailing ; or / */
+		if (*nextkey == ';' || (*nextkey == '/' && *(nextkey - 1) != ':'))
+			*(*envcpy + (nextkey - ptr)) = '\0';
+	}
+
 	ptr = *envcpy;
 	nextkey = ptr;
 
@@ -2934,6 +2942,8 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 			if (*++ptr != ':')
 				return FALSE;
 			if (*++ptr == '\0')
+				return FALSE;
+			if (*ptr == ';') /* Empty location */
 				return FALSE;
 			kvarr[i].val = ptr;
 			++i;
@@ -2951,11 +2961,10 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 		++ptr;
 	}
 
-	if (i < maxitems) {
-		if (kvarr[i - 1].val && *kvarr[i - 1].val == '\0')
-			return FALSE;
-		kvarr[i].key = '\0';
-	}
+	maxitems = i;
+
+	if (kvarr[i - 1].val && *kvarr[i - 1].val == '\0')
+		return FALSE;
 
 	for (i = 0; i < maxitems && kvarr[i].key; ++i)
 		if (strlen(kvarr[i].val) >= PATH_MAX)
@@ -2974,6 +2983,9 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool path)
 {
 	int r = 0;
+
+	if (!kvarr)
+		return NULL;
 
 	for (; kvarr[r].key && r < max; ++r) {
 		if (kvarr[r].key == key) {
@@ -4068,13 +4080,13 @@ static void show_help(const char *path)
 	fprintf(fp, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
 	fprintf(fp, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
 
-	if (bookmark[0].val) {
+	if (bookmark) {
 		fprintf(fp, "BOOKMARKS\n");
 		printkv(bookmark, fp, maxbm);
 		fprintf(fp, "\n");
 	}
 
-	if (plug[0].val) {
+	if (plug) {
 		fprintf(fp, "PLUGIN KEYS\n");
 		printkv(plug, fp, maxplug);
 		fprintf(fp, "\n");
