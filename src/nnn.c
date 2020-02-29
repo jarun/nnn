@@ -2926,12 +2926,10 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 		return FALSE;
 	}
 
-	if (nextkey - ptr > 1) {
-		--nextkey;
+	if (nextkey - ptr > 1)
 		/* Clear trailing ; or / */
-		if (*nextkey == ';' || (*nextkey == '/' && *(nextkey - 1) != ':'))
+		if (*--nextkey == ';')
 			*(*envcpy + (nextkey - ptr)) = '\0';
-	}
 
 	ptr = *envcpy;
 	nextkey = ptr;
@@ -2950,10 +2948,6 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 		}
 
 		if (*ptr == ';') {
-			/* Remove trailing space */
-			if (i > 0 && *(ptr - 1) == '/')
-				*(ptr - 1) = '\0';
-
 			*ptr = '\0';
 			nextkey = ptr + 1;
 		}
@@ -2996,20 +2990,11 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool path)
 				ssize_t len = strlen(home);
 				ssize_t loclen = strlen(kvarr[r].val);
 
-				if (!buf) {
-					buf = (char *)malloc(len + loclen);
-					if (!buf) {
-						DPRINTF_S(strerror(errno));
-						return NULL;
-					}
-				}
-
-				xstrlcpy(buf, home, len + 1);
-				xstrlcpy(buf + len, kvarr[r].val + 1, loclen);
-				return buf;
+				xstrlcpy(g_buf, home, len + 1);
+				xstrlcpy(g_buf + len, kvarr[r].val + 1, loclen);
 			}
 
-			return realpath(kvarr[r].val, buf);
+			return realpath(((kvarr[r].val[0] == '~') ? g_buf : kvarr[r].val), buf);
 		}
 	}
 
