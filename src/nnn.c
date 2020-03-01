@@ -6508,10 +6508,8 @@ static bool setup_config(void)
 	DPRINTF_S(cfgdir);
 
 	/* Create ~/.config/nnn/plugins */
-	xstrlcpy(cfgdir + r + 4 - 1, "/plugins", 9); /* subtract length of "/nnn" (4) */
-	DPRINTF_S(cfgdir);
-
-	xstrlcpy(plugindir, cfgdir, len);
+	xstrlcpy(plugindir, cfgdir, PATH_MAX);
+	xstrlcpy(plugindir + r + 4 - 1, "/plugins", 9); /* subtract length of "/nnn" (4) */
 	DPRINTF_S(plugindir);
 
 	if (access(plugindir, F_OK) && !xmktree(plugindir, TRUE)) {
@@ -6520,20 +6518,14 @@ static bool setup_config(void)
 	}
 
 	/* Create ~/.config/nnn/sessions */
-	xstrlcpy(cfgdir + r + 4 - 1, "/sessions", 10); /* subtract length of "/nnn" (4) */
-	DPRINTF_S(cfgdir);
-
-	xstrlcpy(sessiondir, cfgdir, len);
+	xstrlcpy(sessiondir, cfgdir, PATH_MAX);
+	xstrlcpy(sessiondir + r + 4 - 1, "/sessions", 10); /* subtract length of "/nnn" (4) */
 	DPRINTF_S(sessiondir);
 
 	if (access(sessiondir, F_OK) && !xmktree(sessiondir, TRUE)) {
 		xerror();
 		return FALSE;
 	}
-
-	/* Reset to config path */
-	cfgdir[r + 3] = '\0';
-	DPRINTF_S(cfgdir);
 
 	/* Set selection file path */
 	if (!cfg.picker) {
