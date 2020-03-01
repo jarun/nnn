@@ -48,6 +48,10 @@ ifeq ($(O_NOLOC),1)
 	CPPFLAGS += -DNOLOCALE
 endif
 
+ifeq ($(O_NOMOUSE),1)
+	CPPFLAGS += -DNOMOUSE
+endif
+
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
 	CFLAGS_CURSES ?= $(shell $(PKG_CONFIG) --cflags ncursesw)
 	LDLIBS_CURSES ?= $(shell $(PKG_CONFIG) --libs   ncursesw)
@@ -135,8 +139,8 @@ upload-local: sign static
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION).tar.gz.sig' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/pgp-signature' \
 	    --upload-file nnn-$(VERSION).tar.gz.sig
-	tar -cf $(BIN)-static-$(VERSION).x86-64.tar.gz $(BIN)-static
-	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION)-static-$(VERSION).x86-64.tar.gz' \
+	tar -zcf $(BIN)-static-$(VERSION).x86-64.tar.gz $(BIN)-static
+	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-static-$(VERSION).x86-64.tar.gz' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
 	    --upload-file $(BIN)-static-$(VERSION).x86-64.tar.gz
 
