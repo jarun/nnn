@@ -2918,7 +2918,7 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 	if (!maxitems)
 		return FALSE;
 
-	*arr = malloc(maxitems * sizeof(kv));
+	*arr = calloc(maxitems, sizeof(kv));
 	if (!arr) {
 		xerror();
 		return FALSE;
