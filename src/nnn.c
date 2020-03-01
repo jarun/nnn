@@ -144,6 +144,7 @@
 #define RFILTER '\\'
 #define CASE ':'
 #define MSGWAIT '$'
+#define SELECT ' '
 #define REGEX_MAX 48
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per filename = 64*32B = 2KB */
@@ -5174,7 +5175,8 @@ nochange:
 				/* Handle right click selection */
 				if (event.bstate == BUTTON3_PRESSED) {
 					rightclicksel = 1;
-					goto selection;
+					presel = SELECT;
+					goto nochange;
 				}
 
 				currentmouse ^= 1;
@@ -5612,7 +5614,6 @@ nochange:
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		}
-selection:
 		case SEL_SEL:
 			if (!ndents)
 				goto nochange;
@@ -5643,14 +5644,13 @@ selection:
 			if (!nselected)
 				unlink(g_selpath);
 #ifndef NOMOUSE
-			if (rightclicksel) {
+			if (rightclicksel)
 				rightclicksel = 0;
-				break;
-			}
+			else
 #endif
-			/* move cursor to the next entry if this is not the last entry */
-			if (!cfg.picker && cur != ndents - 1)
-				move_cursor((cur + 1) % ndents, 0);
+				/* move cursor to the next entry if this is not the last entry */
+				if (!cfg.picker && cur != ndents - 1)
+					move_cursor((cur + 1) % ndents, 0);
 			break;
 		case SEL_SELMUL:
 			if (!ndents)
