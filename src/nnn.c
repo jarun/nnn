@@ -2915,7 +2915,7 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 		++nextkey;
 	}
 
-	if (!maxitems)
+	if (!maxitems || maxitems > 100)
 		return FALSE;
 
 	*arr = calloc(maxitems, sizeof(kv));
