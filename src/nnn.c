@@ -2918,7 +2918,7 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 	if (!maxitems)
 		return FALSE;
 
-	*arr = calloc(maxitems, sizeof(kv));
+	*arr = malloc(maxitems * sizeof(kv));
 	if (!arr) {
 		xerror();
 		return FALSE;
@@ -2966,9 +2966,10 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
 	if (kvarr[i - 1].val && *kvarr[i - 1].val == '\0')
 		return FALSE;
 
-	for (i = 0; i < maxitems && kvarr[i].key; ++i)
-		if (strlen(kvarr[i].val) >= PATH_MAX)
-			return FALSE;
+	/* Redundant check so far, all paths will get evaluated and fail */
+	//for (i = 0; i < maxitems && kvarr[i].key; ++i)
+	//	if (strlen(kvarr[i].val) >= PATH_MAX)
+	//		return FALSE;
 
 	*items = maxitems;
 	return TRUE;
@@ -2980,7 +2981,7 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
  * NULL is returned in case of no match, path resolution failure etc.
  * buf would be modified, so check return value before access
  */
-static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool path)
+static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool bookmark)
 {
 	int r = 0;
 
@@ -2989,7 +2990,8 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool path)
 
 	for (; kvarr[r].key && r < max; ++r) {
 		if (kvarr[r].key == key) {
-			if (!path)
+			/* Do not allocate new memory for plugin */
+			if (!bookmark)
 				return kvarr[r].val;
 
 			if (kvarr[r].val[0] == '~') {
