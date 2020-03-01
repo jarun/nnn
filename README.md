@@ -115,8 +115,8 @@ A curses library with wide char support (e.g. ncursesw), libreadline (optional) 
 | xdg-open (Linux), open(1) (macOS), cygstart<br>(Cygwin), open (Haiku) | base | desktop opener |
 | file, coreutils (cp, mv, rm), xargs | base | file type, copy, move and remove |
 | tar, (un)zip [atool/bsdtar for more formats] | base | create, list, extract bzip2, (g)zip, tar |
-| archivemount, fusermount(3) | optional | mount, unmount archives |
-| sshfs, [rclone](https://rclone.org/), fusermount(3) | optional | mount, unmount remotes |
+| archivemount, fusermount(3)/umount (macOS) | optional | mount, unmount archives |
+| sshfs, [rclone](https://rclone.org/), fusermount(3)/umount (macOS) | optional | mount, unmount remotes |
 | trash-cli | optional | trash files (default action: rm) |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD),<br>peaclock (Haiku) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/Advanced-use-cases#show-cp-mv-progress)) | optional | copy, move progress |
