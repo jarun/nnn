@@ -849,10 +849,10 @@ static void xdelay(useconds_t delay)
 
 static char confirm_force(bool selection)
 {
-	char str[64];
+	char str[32];
 	int r;
 
-	snprintf(str, 64, messages[MSG_FORCE_RM],
+	snprintf(str, 32, messages[MSG_FORCE_RM],
 		 (selection ? xitoa(nselected) : "current"), (selection ? "(s)" : ""));
 	r = get_input(str);
 
@@ -1589,7 +1589,7 @@ static int join(pid_t p, uchar flag)
 static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag)
 {
 	pid_t pid;
-	int status, retstatus = 0xFFFF;
+	int status = 0, retstatus = 0xFFFF;
 	char *argv[EXEC_ARGS_MAX] = {0};
 	char *cmd = NULL;
 
@@ -1618,14 +1618,11 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 			DPRINTF_S("NULL or too many args");
 			return retstatus;
 		}
+	} else
+		argv[status++] = file;
 
-		argv[status++] = arg1;
-		argv[status] = arg2;
-	} else {
-		argv[0] = file;
-		argv[1] = arg1;
-		argv[2] = arg2;
-	}
+	argv[status] = arg1;
+	argv[++status] = arg2;
 
 	if (flag & F_NORMAL)
 		exitcurses();
@@ -6483,7 +6480,7 @@ static bool setup_config(void)
 	if (!xdg)
 		len = strlen(home) + 1 + 21; /* add length of "/.config/nnn/sessions" */
 
-	cfgdir = (char *)malloc(len);
+	cfgdir = (char *)malloc(len - 9); /* Subtract length of sessions */
 	plugindir = (char *)malloc(len);
 	sessiondir = (char *)malloc(len);
 	if (!cfgdir || !plugindir || !sessiondir) {
