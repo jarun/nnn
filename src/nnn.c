@@ -3196,10 +3196,7 @@ static void print_time(const time_t *timep)
 static void printent(const struct entry *ent, uint namecols, bool sel)
 {
 	char ind = get_ind(ent->mode, FALSE);
-	int attrs = sel ? A_REVERSE : 0;
-
-	if (ind == '@' || (ent->flags & HARD_LINK))
-		attrs |= A_DIM;
+	int attrs = ((ind == '@' || (ent->flags & HARD_LINK)) ? A_DIM : 0) | (sel ? A_REVERSE : 0);
 
 	if (!ind)
 		++namecols;
