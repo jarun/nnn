@@ -1458,9 +1458,11 @@ static bool initcurses(void *oldmask)
 	keypad(stdscr, TRUE);
 #ifndef NOMOUSE
 #if NCURSES_MOUSE_VERSION <= 1
-	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED, (mmask_t *)oldmask);
+	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED | BUTTON3_PRESSED,
+			(mmask_t *)oldmask);
 #else
-	mousemask(BUTTON1_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED, (mmask_t *)oldmask);
+	mousemask(BUTTON1_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED,
+			(mmask_t *)oldmask);
 #endif
 	mouseinterval(0);
 #endif
@@ -4952,6 +4954,7 @@ static bool browse(char *ipath, const char *session)
 	MEVENT event;
 	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0} };
 	bool currentmouse = 1;
+	bool rightclicksel = 0;
 #endif
 
 #ifndef DIR_LIMITED_SELECTION
@@ -5165,9 +5168,18 @@ nochange:
 			}
 
 			/* Handle clicking on a file */
-			if (event.y >= 2 && event.y <= ndents + 1 && event.bstate == BUTTON1_PRESSED) {
+			if (event.y >= 2 && event.y <= ndents + 1 &&
+					(event.bstate == BUTTON1_PRESSED ||
+					 event.bstate == BUTTON3_PRESSED)) {
 				r = curscroll + (event.y - 2);
 				move_cursor(r, 1);
+
+				/* Handle right click selection */
+				if (event.bstate == BUTTON3_PRESSED) {
+					rightclicksel = 1;
+					goto selection;
+				}
+
 				currentmouse ^= 1;
 				clock_gettime(
 #if defined(CLOCK_MONOTONIC_RAW)
@@ -5603,6 +5615,7 @@ nochange:
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		}
+selection:
 		case SEL_SEL:
 			if (!ndents)
 				goto nochange;
@@ -5632,7 +5645,12 @@ nochange:
 
 			if (!nselected)
 				unlink(g_selpath);
-
+#ifndef NOMOUSE
+			if (rightclicksel) {
+				rightclicksel = 0;
+				break;
+			}
+#endif
 			/* move cursor to the next entry if this is not the last entry */
 			if (!cfg.picker && cur != ndents - 1)
 				move_cursor((cur + 1) % ndents, 0);
