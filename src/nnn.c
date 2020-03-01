@@ -331,11 +331,11 @@ static settings cfg = {
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static int ndents, cur, last, curscroll, last_curscroll, total_dents = ENTRY_INCR;
-static ushort xlines, xcols;
 static int nselected;
 static uint idletimeout, selbufpos, lastappendpos, selbuflen;
+static ushort xlines, xcols;
 static ushort idle;
-static ushort maxbm, maxplug;
+static uchar maxbm, maxplug;
 static char *bmstr;
 static char *pluginstr;
 static char *opener;
@@ -346,9 +346,9 @@ static char *shell;
 static char *home;
 static char *initpath;
 static char *cfgdir;
-static char *g_selpath;
-static char *g_listpath;
-static char *g_prefixpath;
+static char *selpath;
+static char *listpath;
+static char *prefixpath;
 static char *plugindir;
 static char *sessiondir;
 static char *pnamebuf, *pselbuf;
@@ -359,7 +359,7 @@ static blkcnt_t dir_blocks;
 static ulong num_files;
 static kv *bookmark;
 static kv *plug;
-static uchar g_tmpfplen;
+static uchar tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
 static const uint _WSHIFT = (LONG_SIZE == 8) ? 3 : 2;
 #ifdef PCRE
@@ -782,8 +782,8 @@ static void printerr(int linenum)
 {
 	exitcurses();
 	perror(xitoa(linenum));
-	if (!cfg.picker && g_selpath)
-		unlink(g_selpath);
+	if (!cfg.picker && selpath)
+		unlink(selpath);
 	free(pselbuf);
 	exit(1);
 }
@@ -1099,7 +1099,7 @@ static char *xbasename(char *path)
 
 static int create_tmp_file(void)
 {
-	xstrlcpy(g_tmpfpath + g_tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - g_tmpfplen);
+	xstrlcpy(g_tmpfpath + tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - tmpfplen);
 
 	int fd = mkstemp(g_tmpfpath);
 
@@ -1113,10 +1113,10 @@ static int create_tmp_file(void)
 /* Writes buflen char(s) from buf to a file */
 static void writesel(const char *buf, const size_t buflen)
 {
-	if (cfg.pickraw || !g_selpath)
+	if (cfg.pickraw || !selpath)
 		return;
 
-	FILE *fp = fopen(g_selpath, "w");
+	FILE *fp = fopen(selpath, "w");
 
 	if (fp) {
 		if (fwrite(buf, 1, buflen, fp) != buflen)
@@ -1182,14 +1182,14 @@ static bool listselfile(void)
 {
 	struct stat sb;
 
-	if (stat(g_selpath, &sb) == -1)
+	if (stat(selpath, &sb) == -1)
 		return FALSE;
 
 	/* Nothing selected if file size is 0 */
 	if (!sb.st_size)
 		return FALSE;
 
-	snprintf(g_buf, CMD_LEN_MAX, "tr \'\\0\' \'\\n\' < %s", g_selpath);
+	snprintf(g_buf, CMD_LEN_MAX, "tr \'\\0\' \'\\n\' < %s", selpath);
 	spawn(utils[UTIL_SH_EXEC], g_buf, NULL, NULL, F_CLI | F_CONFIRM);
 
 	return TRUE;
@@ -1243,7 +1243,7 @@ static void endselection(void)
 	if (cfg.selmode)
 		cfg.selmode = 0;
 
-	if (!g_listpath || !selbufpos)
+	if (!listpath || !selbufpos)
 		return;
 
 	fd = create_tmp_file();
@@ -1259,7 +1259,7 @@ static void endselection(void)
 		return;
 	}
 
-	snprintf(buf, sizeof(buf), patterns[P_REPLACE], g_listpath, g_prefixpath, g_tmpfpath);
+	snprintf(buf, sizeof(buf), patterns[P_REPLACE], listpath, prefixpath, g_tmpfpath);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
 
 	fd = open(g_tmpfpath, O_RDONLY);
@@ -1417,13 +1417,13 @@ emptyedit:
 static bool selsafe(void)
 {
 	/* Fail if selection file path not generated */
-	if (!g_selpath) {
+	if (!selpath) {
 		printmsg(messages[MSG_SEL_MISSING]);
 		return FALSE;
 	}
 
 	/* Fail if selection file path isn't accessible */
-	if (access(g_selpath, R_OK | W_OK) == -1) {
+	if (access(selpath, R_OK | W_OK) == -1) {
 		errno == ENOENT ? printmsg(messages[MSG_0_SELECTED]) : printwarn(NULL);
 		return FALSE;
 	}
@@ -1707,16 +1707,16 @@ static bool xdiraccess(const char *path)
 static void opstr(char *buf, char *op)
 {
 	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s \"$0\" \"$@\" . < /dev/tty' < %s",
-		 op, g_selpath);
+		 op, selpath);
 }
 
 static void rmmulstr(char *buf)
 {
 	if (g_states & STATE_TRASH)
-		snprintf(buf, CMD_LEN_MAX, "xargs -0 trash-put < %s", g_selpath);
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 trash-put < %s", selpath);
 	else
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr \"$0\" \"$@\" < /dev/tty' < %s",
-			 confirm_force(TRUE), g_selpath);
+			 confirm_force(TRUE), selpath);
 }
 
 static void xrm(char *path)
@@ -1758,7 +1758,7 @@ static bool cpmv_rename(int choice, const char *path)
 
 	/* selsafe() returned TRUE for this to be called */
 	if (!selbufpos) {
-		snprintf(buf, sizeof(buf), "tr '\\0' '\\n' < %s > %s", g_selpath, g_tmpfpath);
+		snprintf(buf, sizeof(buf), "tr '\\0' '\\n' < %s > %s", selpath, g_tmpfpath);
 		spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
 
 		count = lines_in_file(fd, buf, sizeof(buf));
@@ -1935,7 +1935,7 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 {
 	/* The 70 comes from the string below */
 	char *buf = (char *)malloc((70 + strlen(cmd) + strlen(archive)
-				       + strlen(curpath) + strlen(g_selpath)) * sizeof(char));
+				       + strlen(curpath) + strlen(selpath)) * sizeof(char));
 	if (!buf) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
@@ -1944,10 +1944,10 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-		"sed -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, g_selpath, cmd, archive);
+		"sed -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, selpath, cmd, archive);
 #else
 		"tr '\\0' '\n' < '%s' | sed -e 's|^%s/||' | tr '\n' '\\0' | xargs -0 %s %s",
-		g_selpath, curpath, cmd, archive);
+		selpath, curpath, cmd, archive);
 #endif
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, curpath, F_CLI);
 	free(buf);
@@ -2898,7 +2898,7 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int *prese
 	return count;
 }
 
-static bool parsekvpair(kv **arr, char **envcpy, const uchar id, ushort *items)
+static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 {
 	uint maxitems = 0, i = 0;
 	char *nextkey;
@@ -4088,8 +4088,8 @@ static void show_help(const char *path)
 			fprintf(fp, "%s: %s\n", env_cfg[i], start);
 	}
 
-	if (g_selpath)
-		fprintf(fp, "SELECTION FILE: %s\n", g_selpath);
+	if (selpath)
+		fprintf(fp, "SELECTION FILE: %s\n", selpath);
 
 	fprintf(fp, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
 	fclose(fp);
@@ -4142,7 +4142,7 @@ static bool plctrl_init(void)
 {
 	snprintf(g_buf, CMD_LEN_MAX, "nnn-pipe.%d", getpid());
 	/* g_tmpfpath is used to generate tmp file names */
-	g_tmpfpath[g_tmpfplen - 1] = '\0';
+	g_tmpfpath[tmpfplen - 1] = '\0';
 	mkpath(g_tmpfpath, g_buf, g_pipepath);
 	unlink(g_pipepath);
 	if (mkfifo(g_pipepath, 0600) != 0)
@@ -4428,7 +4428,7 @@ static int dentfill(char *path, struct entry **dents)
 		if (!flags && dp->d_type == DT_LNK) {
 			 /* Do not add sizes for links */
 			dentp->mode = (sb.st_mode & ~S_IFMT) | S_IFLNK;
-			dentp->size = g_listpath ? sb.st_size : 0;
+			dentp->size = listpath ? sb.st_size : 0;
 		} else {
 			dentp->mode = sb.st_mode;
 			dentp->size = sb.st_size;
@@ -5054,7 +5054,7 @@ begin:
 		redraw(path);
 
 		/* Display a one-time message */
-		if (g_listpath && (g_states & STATE_MSG)) {
+		if (listpath && (g_states & STATE_MSG)) {
 			g_states &= ~STATE_MSG;
 			printwait(messages[MSG_IGNORED], &presel);
 		}
@@ -5551,7 +5551,7 @@ nochange:
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
 			if (ndents) {
-				tmp = (g_listpath && xstrcmp(path, g_listpath) == 0) ? g_prefixpath : path;
+				tmp = (listpath && xstrcmp(path, listpath) == 0) ? prefixpath : path;
 				mkpath(tmp, dents[cur].name, newpath);
 
 				if (lstat(newpath, &sb) == -1
@@ -5644,7 +5644,7 @@ nochange:
 				plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
 
 			if (!nselected)
-				unlink(g_selpath);
+				unlink(selpath);
 #ifndef NOMOUSE
 			if (rightclicksel)
 				rightclicksel = 0;
@@ -5743,8 +5743,8 @@ nochange:
 				}
 
 				if (r == 'c') {
-					tmp = (g_listpath && xstrcmp(path, g_listpath) == 0)
-					      ? g_prefixpath : path;
+					tmp = (listpath && xstrcmp(path, listpath) == 0)
+					      ? prefixpath : path;
 					mkpath(tmp, dents[cur].name, newpath);
 					xrm(newpath);
 
@@ -6210,8 +6210,8 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 		return NULL;
 	}
 
-	tmp = tmpdir + g_tmpfplen - 1;
-	xstrlcpy(tmpdir, g_tmpfpath, g_tmpfplen);
+	tmp = tmpdir + tmpfplen - 1;
+	xstrlcpy(tmpdir, g_tmpfpath, tmpfplen);
 	xstrlcpy(tmp, "/nnnXXXXXX", 11);
 
 	/* Points right after the base tmp dir */
@@ -6224,7 +6224,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 		return NULL;
 	}
 
-	g_listpath = tmpdir;
+	listpath = tmpdir;
 
 	for (i = 0; i < entries; ++i) {
 		if (!paths[i])
@@ -6352,10 +6352,10 @@ static char *load_input()
 	for (i = 0; i < entries; ++i)
 		paths[i] = input + offsets[i];
 
-	g_prefixpath = malloc(sizeof(char) * PATH_MAX);
-	if (!g_prefixpath)
+	prefixpath = malloc(sizeof(char) * PATH_MAX);
+	if (!prefixpath)
 		goto malloc_1;
-	g_prefixpath[0] = '\0';
+	prefixpath[0] = '\0';
 
 	DPRINTF_S(paths[0]);
 
@@ -6374,26 +6374,26 @@ static char *load_input()
 		DPRINTF_S(paths[i]);
 
 		xstrlcpy(g_buf, paths[i], PATH_MAX);
-		if (!common_prefix(dirname(g_buf), g_prefixpath)) {
+		if (!common_prefix(dirname(g_buf), prefixpath)) {
 			entries = i + 1; // free from the current entry
 			goto malloc_2;
 		}
 
-		DPRINTF_S(g_prefixpath);
+		DPRINTF_S(prefixpath);
 	}
 
-	DPRINTF_S(g_prefixpath);
+	DPRINTF_S(prefixpath);
 
-	if (g_prefixpath[0]) {
+	if (prefixpath[0]) {
 		if (entries == 1) {
-			tmp = xmemrchr((uchar *)g_prefixpath, '/', strlen(g_prefixpath));
+			tmp = xmemrchr((uchar *)prefixpath, '/', strlen(prefixpath));
 			if (!tmp)
 				goto malloc_2;
 
-			*(tmp != g_prefixpath ? tmp : tmp + 1) = '\0';
+			*(tmp != prefixpath ? tmp : tmp + 1) = '\0';
 		}
 
-		tmpdir = make_tmp_tree(paths, entries, g_prefixpath);
+		tmpdir = make_tmp_tree(paths, entries, prefixpath);
 	}
 
 malloc_2:
@@ -6538,15 +6538,15 @@ static bool setup_config(void)
 	/* Set selection file path */
 	if (!cfg.picker) {
 		/* Length of "/.config/nnn/.selection" */
-		g_selpath = (char *)malloc(len + 3);
-		if (!g_selpath) {
+		selpath = (char *)malloc(len + 3);
+		if (!selpath) {
 			xerror();
 			return FALSE;
 		}
 
-		r = xstrlcpy(g_selpath, cfgdir, len + 3);
-		xstrlcpy(g_selpath + r - 1, "/.selection", 12);
-		DPRINTF_S(g_selpath);
+		r = xstrlcpy(selpath, cfgdir, len + 3);
+		xstrlcpy(selpath + r - 1, "/.selection", 12);
+		DPRINTF_S(selpath);
 	}
 
 	return TRUE;
@@ -6562,20 +6562,20 @@ static bool set_tmp_path(void)
                 return FALSE;
         }
 
-        g_tmpfplen = (uchar)xstrlcpy(g_tmpfpath, path, TMP_LEN_MAX);
+        tmpfplen = (uchar)xstrlcpy(g_tmpfpath, path, TMP_LEN_MAX);
         return TRUE;
 }
 
 static void cleanup(void)
 {
-	free(g_selpath);
+	free(selpath);
 	free(plugindir);
 	free(sessiondir);
 	free(cfgdir);
 	free(initpath);
 	free(bmstr);
 	free(pluginstr);
-	free(g_prefixpath);
+	free(prefixpath);
 	free(ihashbmp);
 	free(bookmark);
 	free(plug);
@@ -6660,8 +6660,8 @@ int main(int argc, char *argv[])
 				}
 
 				close(fd);
-				g_selpath = realpath(optarg, NULL);
-				unlink(g_selpath);
+				selpath = realpath(optarg, NULL);
+				unlink(selpath);
 			}
 			break;
 		case 'Q':
@@ -6720,7 +6720,7 @@ int main(int argc, char *argv[])
 
 		/* Now we are in path list mode */
 		if (!isatty(STDIN_FILENO)) {
-			/* This is the same as g_listpath */
+			/* This is the same as listpath */
 			initpath = load_input();
 			if (!initpath)
 				exit(1);
@@ -6904,7 +6904,7 @@ int main(int argc, char *argv[])
 	mousemask(mask, NULL);
 #endif
 
-	if (g_listpath)
+	if (listpath)
 		spawn("rm -rf", initpath, NULL, NULL, F_SILENT);
 
 	exitcurses();
@@ -6920,8 +6920,8 @@ int main(int argc, char *argv[])
 	} else if (cfg.picker) {
 		if (selbufpos)
 			writesel(pselbuf, selbufpos - 1);
-	} else if (g_selpath)
-		unlink(g_selpath);
+	} else if (selpath)
+		unlink(selpath);
 
 	/* Free the regex */
 #ifdef PCRE
