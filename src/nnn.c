@@ -1481,7 +1481,7 @@ static bool initcurses(void *oldmask)
 
 		init_pair(i + 1, g_ctx[i].color, -1);
 
-		g_ctx[i].c_fltr[REGEX_MAX - 1] = '\0';
+		memset(g_ctx[i].c_fltr, 0, REGEX_MAX);
 	}
 
 	settimeout(); /* One second */
