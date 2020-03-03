@@ -240,6 +240,29 @@ handle_extension() {
     esac
 }
 
+abspath() {
+    case "$1" in
+        /*) printf "%s\n" "$1";;
+        *)  printf "%s\n" "$PWD/$1";;
+    esac
+}
+
+listimages() {
+    find -L "$(dirname "$target")" -maxdepth 1 -type f -iregex \
+      '.*\(jpe?g\|bmp\|png\|gif\)$' -print0 | sort -z
+}
+
+sxiv_load_dir() {
+    target="$(abspath "$1")"
+    count="$(listimages | grep -a -m 1 -ZznF "$target" | cut -d: -f1)"
+
+    if [ -n "$count" ]; then
+        listimages | xargs -0 sxiv -n "$count" --
+    else
+        sxiv -- "$@" # fallback
+    fi
+}
+
 handle_multimedia() {
     ## Size of the preview if there are multiple options or it has to be
     ## rendered from vector graphics. If the conversion program allows
@@ -263,7 +286,7 @@ handle_multimedia() {
         ## Image
         image/*)
             if [ $GUI -ne 0 ] && which sxiv >/dev/null 2>&1; then
-                sxiv -q "${FPATH}" &
+                sxiv_load_dir "${FPATH}" >/dev/null 2>&1 &
                 exit 0
             elif which viu >/dev/null 2>&1; then
                 viu -n "${FPATH}" | less -R

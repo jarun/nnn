@@ -6,6 +6,29 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
+abspath() {
+    case "$1" in
+        /*) printf "%s\n" "$1";;
+        *)  printf "%s\n" "$PWD/$1";;
+    esac
+}
+
+listimages() {
+    find -L "$(dirname "$target")" -maxdepth 1 -type f -iregex \
+      '.*\(jpe?g\|bmp\|png\|gif\)$' -print0 | sort -z
+}
+
+sxiv_view_dir() {
+    target="$(abspath "$1")"
+    count="$(listimages | grep -a -m 1 -ZznF "$target" | cut -d: -f1)"
+
+    if [ -n "$count" ]; then
+        listimages | xargs -0 sxiv -n "$count" --
+    else
+        sxiv -- "$@" # fallback
+    fi
+}
+
 if [ -z "$1" ] || ! [ -s "$1" ]; then
     printf "empty file"
     read -r _
@@ -14,9 +37,9 @@ fi
 
 if command -v sxiv >/dev/null 2>&1; then
     if [ -f "$1" ]; then
-        sxiv -q "$1" "$PWD"
+        sxiv_view_dir "$1" >/dev/null 2>&1 &
     elif [ -d "$1" ] || [ -h "$1" ]; then
-        sxiv -qt "$1"
+        sxiv -qt "$1" >/dev/null 2>&1 &
     fi
 elif command -v viu >/dev/null 2>&1; then
     viu -n "$1" | less -R
