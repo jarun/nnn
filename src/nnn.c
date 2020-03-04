@@ -3281,7 +3281,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	default:
 		if (!ind1)
 			ind1 = ind2 = '?';
-		addstr("       ");
+		addstr("        ");
 		addch(ind1);
 		break;
 	}
