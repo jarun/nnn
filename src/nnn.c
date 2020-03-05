@@ -551,7 +551,7 @@ static const char * const messages[] = {
 	"plugin keys:",
 	"bookmark keys:",
 	"invalid regex",
-	"'a'u / 'd'u / 'e'xtn / 'r'ev / 's'ize / 't'ime / 'v'er?",
+	"'a'u / 'd'u / 'e'xtn / 'r'ev / 's'ize / 't'ime / 'v'er / 'c'lear?",
 	"unmount failed! try lazy?",
 	"ignoring invalid paths...",
 #ifndef DIR_LIMITED_SELECTION
@@ -4660,6 +4660,15 @@ static bool set_sort_flags(void)
 		entrycmpfn = &entrycmp;
 
 	switch (r) {
+	case 'c':
+		cfg.mtimeorder = 0;
+		cfg.sizeorder = 0;
+		cfg.apparentsz = 0;
+		cfg.blkorder = 0;
+		cfg.extnorder = 0;
+		entrycmpfn = &entrycmp;
+		namecmpfn = &xstricmp;
+		break;
 	case 'a': /* Apparent du */
 		cfg.apparentsz ^= 1;
 		if (cfg.apparentsz) {
