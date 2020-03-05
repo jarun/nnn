@@ -6489,7 +6489,7 @@ static bool setup_config(void)
 	if (!xdg)
 		len = strlen(home) + 1 + 21; /* add length of "/.config/nnn/sessions" */
 
-	cfgdir = (char *)malloc(len - 9); /* Subtract length of sessions */
+	cfgdir = (char *)malloc(len - 8); /* Subtract length of sessions */
 	plugindir = (char *)malloc(len);
 	sessiondir = (char *)malloc(len);
 	if (!cfgdir || !plugindir || !sessiondir) {
