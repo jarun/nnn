@@ -5541,7 +5541,7 @@ nochange:
 				}
 			}
 
-			if (cfg.filtermode)
+			if (!cfg.blkorder && cfg.filtermode)
 				presel = FILTER;
 
 			/* Save current */
