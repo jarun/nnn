@@ -4237,7 +4237,7 @@ static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typef
 static int sum_asize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
 	if (sb->st_size && (typeflag == FTW_D
-	    || (typeflag == FTW_D && (sb->st_nlink <= 1 || test_set_bit((uint)sb->st_ino)))))
+	    || (typeflag == FTW_F && (sb->st_nlink <= 1 || test_set_bit((uint)sb->st_ino)))))
 		ent_blocks += sb->st_size;
 
 	++num_files;
@@ -4660,15 +4660,6 @@ static bool set_sort_flags(void)
 		entrycmpfn = &entrycmp;
 
 	switch (r) {
-	case 'c':
-		cfg.mtimeorder = 0;
-		cfg.sizeorder = 0;
-		cfg.apparentsz = 0;
-		cfg.blkorder = 0;
-		cfg.extnorder = 0;
-		entrycmpfn = &entrycmp;
-		namecmpfn = &xstricmp;
-		break;
 	case 'a': /* Apparent du */
 		cfg.apparentsz ^= 1;
 		if (cfg.apparentsz) {
@@ -4696,6 +4687,15 @@ static bool set_sort_flags(void)
 		cfg.extnorder = 0;
 		clearfilter(); /* Reload directory */
 		endselection(); /* We are going to reload dir */
+		break;
+	case 'c':
+		cfg.mtimeorder = 0;
+		cfg.sizeorder = 0;
+		cfg.apparentsz = 0;
+		cfg.blkorder = 0;
+		cfg.extnorder = 0;
+		entrycmpfn = &entrycmp;
+		namecmpfn = &xstricmp;
 		break;
 	case 'e': /* File extension */
 		cfg.extnorder ^= 1;
