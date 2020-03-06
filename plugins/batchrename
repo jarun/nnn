@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Description: A fully POSIX compliant way to batch rename files
+# Description: An almost fully POSIX compliant way to batch rename files
 #
 # Shell: POSIX compliant
 # Author: KlzXS
