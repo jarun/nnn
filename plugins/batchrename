@@ -1,22 +1,38 @@
 #!/usr/bin/env sh
 
-# Description: An almost fully POSIX compliant way to batch rename files
+# Description: An almost fully POSIX compliant batch file renamer
 #
 # Shell: POSIX compliant
 # Author: KlzXS
 
-EDITOR="${EDITOR:-vim}"
+EDITOR="${EDITOR:-vi}"
 TMPDIR="${TMPDIR:-/tmp}"
+INCLUDE_HIDDEN="${INCLUDE_HIDDEN:-0}"
 
 selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 exit_status=0
 
 dst_file=$(mktemp "$TMPDIR/.nnnXXXXXX")
 
-arr=$(tr '\0' '\n' < "$selection" | sed "s/'/'\\\\''/g;s/^\(.*\)$/'\1'/" | tr '\n' ' ')
+if [ -s "$selection" ]; then
+	printf "Rename 'c'urrent / 's'election? "
+	read -r resp
+fi
+
+if [ "$resp" = "s" ]; then
+	arr=$(tr '\0' '\n' < "$selection")
+else
+	if [ "$INCLUDE_HIDDEN" -eq 0 ]; then
+		arr=$(find . ! -name . -prune ! -name ".*" -print | sort)
+	else
+		arr=$(find . ! -name . -prune -print | sort)
+	fi
+fi
+
+printf "%s" "$arr" | awk '{print NR " " $0}' > "$dst_file"
+arr=$(printf "%s" "$arr" | sed "s/'/'\\\\''/g;s/^\(.*\)$/'\1'/" | tr '\n' ' ')
 
 eval "set -- $arr"
-tr '\0' '\n' < "$selection" | awk '{print NR " " $0}' > "$dst_file"
 $EDITOR "$dst_file"
 
 while read -r num name; do
