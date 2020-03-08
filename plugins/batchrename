@@ -1,0 +1,184 @@
+#!/usr/bin/env sh
+
+# Description: An almost fully POSIX compliant batch file renamer
+#
+# Shell: POSIX compliant
+# Author: KlzXS
+
+EDITOR="${EDITOR:-vi}"
+TMPDIR="${TMPDIR:-/tmp}"
+INCLUDE_HIDDEN="${INCLUDE_HIDDEN:-0}"
+
+selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+exit_status=0
+
+dst_file=$(mktemp "$TMPDIR/.nnnXXXXXX")
+
+if [ -s "$selection" ]; then
+	printf "Rename 'c'urrent / 's'election? "
+	read -r resp
+fi
+
+if [ "$resp" = "s" ]; then
+	arr=$(tr '\0' '\n' < "$selection")
+else
+	if [ "$INCLUDE_HIDDEN" -eq 0 ]; then
+		arr=$(find . ! -name . -prune ! -name ".*" -print | sort)
+	else
+		arr=$(find . ! -name . -prune -print | sort)
+	fi
+fi
+
+printf "%s" "$arr" | awk '{print NR " " $0}' > "$dst_file"
+arr=$(printf "%s" "$arr" | sed "s/'/'\\\\''/g;s/^\(.*\)$/'\1'/" | tr '\n' ' ')
+
+eval "set -- $arr"
+$EDITOR "$dst_file"
+
+while read -r num name; do
+	if [ -z "$name" ]; then
+		if [ -z "$num" ]; then
+			continue
+		fi
+
+		printf "%s: unable to parse line, aborting\n" "$0"
+	fi
+
+	# check if $num is an integer
+	if [ ! "$num" -eq "$num" ] 2> /dev/null; then
+		printf "%s: unable to parse line, aborting\n" "$0"
+	fi
+
+	src=$(eval printf "%s" "\${$num}")
+
+	if [ -z "$src" ]; then
+		printf "%s: unknown item number %s\n" "$0" "$num" > /dev/stderr
+		continue
+	elif [ "$name" != "$src" ]; then
+		if [ -z "$name" ]; then
+			continue
+		fi
+
+		if [ ! -e "$src" ] && [ ! -L "$src" ]; then
+			printf "%s: %s does not exit\n" "$0" "$src" > /dev/stderr
+
+			c=1
+			new_args=""
+			while [ $c -le $# ]; do
+				tmp=$(eval printf "%s" "\${$c}")
+				if [ "$c" -eq "$num" ]; then
+					new_args="$new_args ''"
+				else
+					if [ -z "$tmp" ]; then
+						tmp="''"
+					else
+						tmp=$(printf %s "$tmp" | sed "s/'/'\\\\''/g;s/^\(.*\)$/'\1'/")
+					fi
+					new_args="$new_args $tmp"
+				fi
+				c=$((c+1))
+			done
+
+			eval "set -- $new_args"
+			continue
+		fi
+
+		# handle swaps
+		if [ -e "$name" ] || [ -L "$name" ]; then
+			tmp="$name~"
+			c=0
+
+			while [ -e "$tmp" ] || [ -L "$tmp" ]; do
+				c=$((c+1))
+				tmp="$tmp~$c"
+			done
+
+			if mv "$name" "$tmp"; then
+				printf "'%s' -> '%s'\n" "$name" "$tmp"
+			else
+				printf "%s: failed to rename %s to %s: %s\n" "$0" "$name" "$tmp" "$!" > /dev/stderr
+				exit_status=1
+			fi
+
+			c=1
+			new_args=""
+			while [ $c -le $# ]; do
+				item=$(eval printf "%s" "\${$c}")
+				if [ "$item" = "$name" ]; then
+					item=$(printf %s "$tmp" | sed "s/'/'\\\\''/g;s/^\(.*\)$/'\1'/")
+					new_args="$new_args $item"
+				else
+					if [ -z "$item" ]; then
+						item="''"
+					else
+						item=$(printf %s "$item" | sed "s/'/'\\\\''/g;s/^\(.*\)$/'\1'/")
+					fi
+					new_args="$new_args $item"
+				fi
+				c=$((c+1))
+			done
+
+			eval "set -- $new_args"
+		fi
+
+		dir=$(dirname "$name")
+		if [ ! -d "$dir" ] && ! mkdir -p "$dir"; then
+			printf "%s: failed to create directory tree %s\n" "$0" "$dir" > /dev/stderr
+			exit_status=1
+		elif ! mv "$src" "$name"; then
+			printf "%s: failed to rename %s to %s: %s\n" "$0" "$name" "$tmp" "$!" > /dev/stderr
+			exit_status=1
+		else
+			printf "'%s' -> '%s'\n" "$src" "$name"
+			if [ -d "$name" ]; then
+				c=1
+				new_args=""
+				while [ $c -le $# ]; do
+					tmp=$(eval printf "\${$c}")
+					if [ -z "$tmp" ]; then
+						tmp="''"
+					else
+						tmp=$(printf "%s" "$tmp" | sed "s/^$src\(\$\|\/\)/$name\1/;s/'/'\\\\''/g;s/^\(.*\)$/'\1'/")
+					fi
+					new_args="$new_args $tmp"
+					c=$((c+1))
+				done
+
+				eval "set -- $new_args"
+				printf "'%s' => '%s'\n" "$src" "$name"
+			fi
+		fi
+	fi
+
+	c=1
+	new_args=""
+	while [ $c -le $# ]; do
+		tmp=$(eval printf "%s" "\${$c}")
+		if [ "$c" -eq "$num" ]; then
+			new_args="$new_args ''"
+		else
+			if [ -z "$tmp" ]; then
+				tmp="''"
+			else
+				tmp=$(printf %s "$tmp" | sed "s/'/'\\\\''/g;s/^\(.*\)$/'\1'/")
+			fi
+			new_args="$new_args $tmp"
+		fi
+		c=$((c+1))
+	done
+
+	eval "set -- $new_args"
+done <"$dst_file"
+
+c=1
+new_args=""
+while [ $c -le $# ]; do
+	tmp=$(eval printf "%s" "\${$c}")
+	if [ -n "$tmp" ]; then
+		rm -ri "$tmp"
+	fi
+	c=$((c+1))
+done
+
+rm "$dst_file"
+exit $exit_status
