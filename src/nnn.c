@@ -145,6 +145,7 @@
 #define CASE ':'
 #define MSGWAIT '$'
 #define SELECT ' '
+#define COPY 'p'
 #define REGEX_MAX 48
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per filename = 64*32B = 2KB */
@@ -1459,10 +1460,10 @@ static bool initcurses(void *oldmask)
 	keypad(stdscr, TRUE);
 #ifndef NOMOUSE
 #if NCURSES_MOUSE_VERSION <= 1
-	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED | BUTTON3_PRESSED,
+	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED | BUTTON2_PRESSED | BUTTON3_PRESSED,
 			(mmask_t *)oldmask);
 #else
-	mousemask(BUTTON1_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED,
+	mousemask(BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED,
 			(mmask_t *)oldmask);
 #endif
 	mouseinterval(0);
@@ -5141,6 +5142,11 @@ nochange:
 #endif
 
 #ifndef NOMOUSE
+			/* Middle click copy */
+			if (event.bstate == BUTTON2_PRESSED) {
+				presel = COPY;
+				goto nochange;
+			}
 #if NCURSES_MOUSE_VERSION > 1
 			/* Scroll up */
 			if (event.bstate == BUTTON4_PRESSED && ndents && (cfg.rollover || cur)) {
