@@ -377,14 +377,9 @@ separated by \fI;\fR:
 .Pp
 \fBNNN_MCLICK:\fR key emulated by a middle mouse click.
 .Bd -literal
-    export NNN_MCLICK='p'
+    export NNN_MCLICK='^R'
 
-    NOTES:
-    1. To specify a \fICtrl+key\fR combo:
-
-    export NNN_MCLICK='^A'
-
-    2. Otherwise, only the first character is considered.
+    NOTE: Only the first character is considered if not a \fICtrl+key\fR combo.
 .Ed
 .Pp
 \fBnnn:\fR this is a special variable set to the hovered entry before executing
