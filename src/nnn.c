@@ -6603,7 +6603,10 @@ int main(int argc, char *argv[])
 #ifndef NOMOUSE
 	mmask_t mask;
 	char *middle_click_env = xgetenv(env_cfg[NNN_MCLICK], "\0");
-	middle_click_key = middle_click_env[0];
+	if (middle_click_env[0] == '^' && middle_click_env[1])
+		middle_click_key = CONTROL(middle_click_env[1]);
+	else
+		middle_click_key = middle_click_env[0];
 #endif
 	const char* const env_opts = xgetenv(env_cfg[NNN_OPTS], NULL);
 	int env_opts_id = env_opts ? (int)strlen(env_opts) : -1;

@@ -380,9 +380,11 @@ separated by \fI;\fR:
     export NNN_MCLICK='p'
 
     NOTES:
-    1. Only the first character is taken into account.
-    2. Use your shell/editor's quoted insert function (usually \fICtrl+V\fR)
-       to set it to a \fICtrl+key\fR combo.
+    1. You can use the '^\fIkey\fR' syntax to assign it to a \fICtrl+key\fR combo, e.g.:
+
+    export NNN_MCLICK='^A'
+
+    2. Otherwise, only the first character is taken into account.
 .Ed
 .Pp
 \fBnnn:\fR this is a special variable set to the hovered entry before executing
