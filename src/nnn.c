@@ -362,6 +362,9 @@ static kv *plug;
 static uchar tmpfplen;
 static uchar blk_shift = BLK_SHIFT_512;
 static const uint _WSHIFT = (LONG_SIZE == 8) ? 3 : 2;
+#ifndef NOMOUSE
+static int middle_click_key;
+#endif
 #ifdef PCRE
 static pcre *archive_pcre;
 #else
@@ -567,8 +570,9 @@ static const char * const messages[] = {
 #define NNN_COLORS 4
 #define NNNLVL 5
 #define NNN_PIPE 6
-#define NNN_ARCHIVE 7 /* strings end here */
-#define NNN_TRASH 8 /* flags begin here */
+#define NNN_MCLICK 7
+#define NNN_ARCHIVE 8 /* strings end here */
+#define NNN_TRASH 9 /* flags begin here */
 
 static const char * const env_cfg[] = {
 	"NNN_OPTS",
@@ -578,6 +582,7 @@ static const char * const env_cfg[] = {
 	"NNN_COLORS",
 	"NNNLVL",
 	"NNN_PIPE",
+	"NNN_MCLICK",
 	"NNN_ARCHIVE",
 	"NNN_TRASH",
 };
@@ -1459,10 +1464,10 @@ static bool initcurses(void *oldmask)
 	keypad(stdscr, TRUE);
 #ifndef NOMOUSE
 #if NCURSES_MOUSE_VERSION <= 1
-	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED | BUTTON3_PRESSED,
+	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED | BUTTON2_PRESSED | BUTTON3_PRESSED,
 			(mmask_t *)oldmask);
 #else
-	mousemask(BUTTON1_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED,
+	mousemask(BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED,
 			(mmask_t *)oldmask);
 #endif
 	mouseinterval(0);
@@ -5141,6 +5146,11 @@ nochange:
 #endif
 
 #ifndef NOMOUSE
+			/* Middle click action */
+			if (event.bstate == BUTTON2_PRESSED) {
+				presel = middle_click_key;
+				goto nochange;
+			}
 #if NCURSES_MOUSE_VERSION > 1
 			/* Scroll up */
 			if (event.bstate == BUTTON4_PRESSED && ndents && (cfg.rollover || cur)) {
@@ -6592,6 +6602,11 @@ int main(int argc, char *argv[])
 	int opt;
 #ifndef NOMOUSE
 	mmask_t mask;
+	char *middle_click_env = xgetenv(env_cfg[NNN_MCLICK], "\0");
+	if (middle_click_env[0] == '^' && middle_click_env[1])
+		middle_click_key = CONTROL(middle_click_env[1]);
+	else
+		middle_click_key = middle_click_env[0];
 #endif
 	const char* const env_opts = xgetenv(env_cfg[NNN_OPTS], NULL);
 	int env_opts_id = env_opts ? (int)strlen(env_opts) : -1;
