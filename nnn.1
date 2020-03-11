@@ -375,6 +375,16 @@ separated by \fI;\fR:
     export NNN_TRASH=1
 .Ed
 .Pp
+\fBNNN_MIDDLECLICK:\fR key emulated by a middle mouse click.
+.Bd -literal
+    export NNN_MIDDLECLICK='p'
+
+    NOTES:
+    1. Only the first character is taken into account.
+    2. Use your shell/editor's quoted insert function (usually \fICtrl+V\fR)
+       to set it to a \fICtrl+key\fR combo.
+.Ed
+.Pp
 \fBnnn:\fR this is a special variable set to the hovered entry before executing
 a command from the command prompt or spawning a shell.
 .Sh KNOWN ISSUES
