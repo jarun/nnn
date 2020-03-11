@@ -78,7 +78,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Run plugins and custom commands with hotkeys
   - FreeDesktop compliant trash (needs trash-cli)
   - Cross-dir file/all/range selection
-  - Batch renamer (feature-limited) for selection or dir
+  - Batch renamer for selection or dir
   - Display a list of files from stdin
   - Copy (as), move (as), delete, archive, link selection
   - Dir updates, notification on cp, mv, rm completion

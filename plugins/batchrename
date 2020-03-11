@@ -2,6 +2,15 @@
 
 # Description: An almost fully POSIX compliant batch file renamer
 #
+# Note: nnn auto-detects and invokes this plugin if available
+#
+# Capabilities:
+#    1. Basic file rename
+#    2. Detects order change
+#    3. Can move files
+#    4. Can remove files
+#    5. Switch number pairs to swap filenames
+#
 # Shell: POSIX compliant
 # Author: KlzXS
 

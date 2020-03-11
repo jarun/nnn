@@ -431,6 +431,7 @@ static uchar g_states;
 #define UTIL_FZY 16
 #define UTIL_NTFY 17
 #define UTIL_CBCP 18
+#define UTIL_BATCHRENAME 19
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -469,6 +470,7 @@ static char * const utils[] = {
 	"fzy",
 	".ntfy",
 	".cbcp",
+	"batchrename",
 };
 
 /* Common strings */
@@ -681,7 +683,7 @@ static void move_cursor(int target, int ignore_scrolloff);
 static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
 static char *xgetenv(const char *name, char *fallback);
-static void plugscript(const char *plugin, char *newpath, uchar flags);
+static bool plugscript(const char *plugin, char *newpath, const char *path, uchar flags);
 
 /* Functions */
 
@@ -4206,11 +4208,15 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 	return TRUE;
 }
 
-static void plugscript(const char *plugin, char *newpath, uchar flags)
+static bool plugscript(const char *plugin, char *newpath, const char *path, uchar flags)
 {
 	mkpath(plugindir, plugin, newpath);
-	if (!access(newpath, X_OK))
-		spawn(newpath, NULL, NULL, NULL, flags);
+	if (!access(newpath, X_OK)) {
+		spawn(newpath, NULL, NULL, path, flags);
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 static void launch_app(const char *path, char *newpath)
@@ -5601,7 +5607,8 @@ nochange:
 			case SEL_RENAMEMUL:
 				endselection();
 
-				if (!batch_rename(path)) {
+				if (!plugscript(utils[UTIL_BATCHRENAME], newpath, path, F_CLI)
+				    && !batch_rename(path)) {
 					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;
 				}
@@ -5657,7 +5664,7 @@ nochange:
 			}
 
 			if (cfg.x11)
-				plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
+				plugscript(utils[UTIL_CBCP], newpath, NULL, F_NOWAIT | F_NOTRACE);
 
 			if (!nselected)
 				unlink(selpath);
@@ -5733,7 +5740,7 @@ nochange:
 
 			writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			if (cfg.x11)
-				plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
+				plugscript(utils[UTIL_CBCP], newpath, NULL, F_NOWAIT | F_NOTRACE);
 			continue;
 		case SEL_SELEDIT:
 			r = editselection();
@@ -5742,7 +5749,7 @@ nochange:
 				printwait(messages[r], &presel);
 			} else {
 				if (cfg.x11)
-					plugscript(utils[UTIL_CBCP], newpath, F_NOWAIT | F_NOTRACE);
+					plugscript(utils[UTIL_CBCP], newpath, NULL, F_NOWAIT | F_NOTRACE);
 				cfg.filtermode ?  presel = FILTER : statusbar(path);
 			}
 			goto nochange;
@@ -5788,7 +5795,7 @@ nochange:
 
 			/* Show notification on operation complete */
 			if (cfg.x11)
-				plugscript(utils[UTIL_NTFY], newpath, F_NOWAIT | F_NOTRACE);
+				plugscript(utils[UTIL_NTFY], newpath, NULL, F_NOWAIT | F_NOTRACE);
 
 			if (ndents)
 				copycurname();
