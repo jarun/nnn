@@ -4232,7 +4232,7 @@ static void launch_app(const char *path, char *newpath)
 	}
 
 	if (tmp && *tmp) // NOLINT
-		spawn(tmp, "0", NULL, path, r);
+		spawn(tmp, (r == F_NORMAL) ? "0" : NULL, NULL, path, r);
 }
 
 static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
