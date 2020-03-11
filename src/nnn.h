@@ -32,7 +32,7 @@
 
 #include <curses.h>
 
-#define CONTROL(c) ((c) ^ 0x40)
+#define CONTROL(c) ((c) & 0x1f)
 
 /* Supported actions */
 enum action {
