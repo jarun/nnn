@@ -51,7 +51,7 @@ while read -r num name; do
 		exit 1
 	fi
 
-	src=$(eval printf "%s" "\${$num}")
+	src=$(eval printf "%s" "\"\${$num}\"")
 
 	if [ -z "$src" ]; then
 		printf "%s: unknown item number %s\n" "$0" "$num" > /dev/stderr
