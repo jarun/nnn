@@ -570,7 +570,7 @@ static const char * const messages[] = {
 #define NNN_COLORS 4
 #define NNNLVL 5
 #define NNN_PIPE 6
-#define NNN_MIDDLECLICK 7
+#define NNN_MCLICK 7
 #define NNN_ARCHIVE 8 /* strings end here */
 #define NNN_TRASH 9 /* flags begin here */
 
@@ -582,7 +582,7 @@ static const char * const env_cfg[] = {
 	"NNN_COLORS",
 	"NNNLVL",
 	"NNN_PIPE",
-	"NNN_MIDDLECLICK",
+	"NNN_MCLICK",
 	"NNN_ARCHIVE",
 	"NNN_TRASH",
 };
@@ -6602,7 +6602,7 @@ int main(int argc, char *argv[])
 	int opt;
 #ifndef NOMOUSE
 	mmask_t mask;
-	char *middle_click_env = xgetenv(env_cfg[NNN_MIDDLECLICK], "\0");
+	char *middle_click_env = xgetenv(env_cfg[NNN_MCLICK], "\0");
 	middle_click_key = middle_click_env[0];
 #endif
 	const char* const env_opts = xgetenv(env_cfg[NNN_OPTS], NULL);
