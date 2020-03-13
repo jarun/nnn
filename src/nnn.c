@@ -5534,7 +5534,11 @@ nochange:
 
 				/* Start watching the directory */
 				dir_changed = TRUE;
-				break;
+
+				/* Save current */
+				if (ndents)
+					copycurname();
+				goto begin;
 			case SEL_HIDDEN:
 				cfg.showhidden ^= 1;
 				if (ndents)
@@ -5568,7 +5572,6 @@ nochange:
 			if (!g_ctx[cfg.curctx].c_fltr[1])
 				goto begin;
 
-			presel = FILTER; /* If there's a filter, apply it */
 			break;
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
