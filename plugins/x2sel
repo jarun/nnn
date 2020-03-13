@@ -1,0 +1,57 @@
+#!/usr/bin/env sh
+
+# Description: Copy system clipboard newline-separated file list to selection
+# Requires: tr and
+#           xclip/xsel (Linux)
+#           pbpaste (macOS)
+#           termux-clipboard-get (Termux)
+#           powershell (WSL)
+#           cygwim's /dev/clipboard (Cygwin)
+#           wl-paste (Wayland)
+#
+# LIMITATION: breaks if a filename has newline in it
+#
+# Shell: POSIX compliant
+# Author: Léo Villeveygoux, after Arun Prakash Jana's .cbcp
+
+IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}" # protect trailing \n
+
+SELECTION=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+
+getclip () {
+
+	if which xsel >/dev/null 2>&1; then
+		# Linux
+		xsel -bo
+	elif which xclip >/dev/null 2>&1; then
+		# Linux
+		xclip -sel clip -o
+	elif which pbpaste >/dev/null 2>&1; then
+		# macOS
+		pbpaste
+	elif which termux-clipboard-get >/dev/null 2>&1; then
+		# Termux
+		termux-clipboard-get
+	elif which powershell.exe >/dev/null 2>&1; then
+		# WSL
+		powershell.exe Get-Clipboard
+	elif [ -r /dev/clipboard ] ; then
+		# Cygwin
+		cat /dev/clipboard
+	elif which wl-paste >/dev/null 2>&1; then
+		# Wayland
+		wl-paste
+	fi
+
+}
+
+CLIPBOARD=$(getclip)
+
+# Check if clipboard actually contains a file list
+for file in $CLIPBOARD ; do
+	if [ ! -e "$file" ] ; then
+		exit 1;
+	fi
+done
+
+printf "%s" "$CLIPBOARD" | tr '\n' '\0' > "$SELECTION"
