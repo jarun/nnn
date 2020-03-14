@@ -631,7 +631,7 @@ static const char * const patterns[] = {
 
 /* Event handling */
 #ifdef LINUX_INOTIFY
-#define NUM_EVENT_SLOTS 8 /* Make room for 8 events */
+#define NUM_EVENT_SLOTS 32 /* Make room for 8 events */
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define EVENT_BUF_LEN (EVENT_SIZE * NUM_EVENT_SLOTS)
 static int inotify_fd, inotify_wd = -1;
