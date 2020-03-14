@@ -68,6 +68,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | upload | Paste text to ix.io, upload binary to file.io | sh | curl, jq, tr |
 | vidthumb | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
 | wall | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
+| x2sel | Copy newline-separated file list from system clipboard to selection | sh | tr, xsel/xclip<br>pbpaste/wl-paste<br>termux-clipboard-get<br>powershell.exe/`/dev/clipboard`|
 
 ## Invoking a plugin
 
