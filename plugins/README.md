@@ -26,7 +26,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 
 | Plugin (a-z) | Description | Lang | Deps |
 | --- | --- | --- | --- |
-| autojump | Navigate to dir/path (**autojump stores navigation patterns**) | sh | autojump |
+| autojump | Navigate to dir/path | sh | autojump |
 | batchrename | Batch rename selection or dir entries | sh | mktemp |
 | boom | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | dups | List non-empty duplicate files in current dir | sh | find, md5sum,<br>sort uniq xargs |
@@ -68,7 +68,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | upload | Paste text to ix.io, upload binary to file.io | sh | curl, jq, tr |
 | vidthumb | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
 | wall | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
-| x2sel | Copy newline-separated file list from system clipboard to selection | sh | tr, xsel/xclip<br>pbpaste/wl-paste<br>termux-clipboard-get<br>powershell.exe/`/dev/clipboard`|
+| x2sel | Copy `\n`-separated file list from system clipboard to sel | sh | _see in-file docs_ |
 
 ## Invoking a plugin
 
