@@ -5807,7 +5807,7 @@ nochange:
 				rundir[0] = '\0';
 			}
 
-			if (newpath[0])
+			if (newpath[0] && !access(newpath, F_OK))
 				xstrlcpy(lastname, xbasename(newpath), NAME_MAX+1);
 			else if (ndents)
 				copycurname();
