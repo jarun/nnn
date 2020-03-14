@@ -4446,7 +4446,6 @@ static int dentfill(char *path, struct entry **dents)
 		dentp->size = sb.st_size;
 #endif
 		dentp->flags = S_ISDIR(sb.st_mode) ? 0 : ((sb.st_nlink > 1) ? HARD_LINK : 0);
-		DPRINTF_D(dentp->flags);
 
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
@@ -5789,6 +5788,11 @@ nochange:
 				}
 			}
 
+			if (nselected == 1 && (sel == SEL_CP || sel == SEL_MV))
+				mkpath(path, xbasename(pselbuf), newpath);
+			else
+				newpath[0] = '\0';
+
 			endselection();
 
 			if (!cpmvrm_selection(sel, path, &presel))
@@ -5797,10 +5801,15 @@ nochange:
 			clearfilter();
 
 			/* Show notification on operation complete */
-			if (cfg.x11)
-				plugscript(utils[UTIL_NTFY], newpath, NULL, F_NOWAIT | F_NOTRACE);
+			if (cfg.x11) {
+				/* rundir is used as tmp var, note that we MUST clear it again */
+				plugscript(utils[UTIL_NTFY], rundir, NULL, F_NOWAIT | F_NOTRACE);
+				rundir[0] = '\0';
+			}
 
-			if (ndents)
+			if (newpath[0])
+				xstrlcpy(lastname, xbasename(newpath), NAME_MAX+1);
+			else if (ndents)
 				copycurname();
 			goto begin;
 		}
