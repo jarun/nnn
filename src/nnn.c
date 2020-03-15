@@ -431,7 +431,7 @@ static uchar g_states;
 #define UTIL_FZY 16
 #define UTIL_NTFY 17
 #define UTIL_CBCP 18
-#define UTIL_BATCHRENAME 19
+#define UTIL_NMV 19
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -470,7 +470,7 @@ static char * const utils[] = {
 	"fzy",
 	".ntfy",
 	".cbcp",
-	"batchrename",
+	".nmv",
 };
 
 /* Common strings */
@@ -4666,9 +4666,6 @@ static bool set_sort_flags(void)
 {
 	int r = get_input(messages[MSG_ORDER]);
 
-	if ((r == 'a' || r == 'd' || r == 'e' || r == 's' || r == 't') && (entrycmpfn == &reventrycmp))
-		entrycmpfn = &entrycmp;
-
 	switch (r) {
 	case 'a': /* Apparent du */
 		cfg.apparentsz ^= 1;
@@ -4695,6 +4692,7 @@ static bool set_sort_flags(void)
 		cfg.mtimeorder = 0;
 		cfg.sizeorder = 0;
 		cfg.extnorder = 0;
+		entrycmpfn = &entrycmp;
 		clearfilter(); /* Reload directory */
 		endselection(); /* We are going to reload dir */
 		break;
@@ -4713,6 +4711,7 @@ static bool set_sort_flags(void)
 		cfg.mtimeorder = 0;
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
+		entrycmpfn = &entrycmp;
 		break;
 	case 'r': /* Reverse sort */
 		entrycmpfn = (entrycmpfn == &entrycmp) ? &reventrycmp : &entrycmp;
@@ -4723,6 +4722,7 @@ static bool set_sort_flags(void)
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
 		cfg.extnorder = 0;
+		entrycmpfn = &entrycmp;
 		break;
 	case 't': /* Modification or access time */
 		cfg.mtimeorder ^= 1;
@@ -4730,6 +4730,7 @@ static bool set_sort_flags(void)
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
 		cfg.extnorder = 0;
+		entrycmpfn = &entrycmp;
 		break;
 	case 'v': /* Version */
 		namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
@@ -5609,7 +5610,7 @@ nochange:
 			case SEL_RENAMEMUL:
 				endselection();
 
-				if (!plugscript(utils[UTIL_BATCHRENAME], newpath, path, F_CLI)
+				if (!plugscript(utils[UTIL_NMV], newpath, path, F_CLI)
 				    && !batch_rename(path)) {
 					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;
