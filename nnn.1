@@ -290,11 +290,17 @@ The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y
 The SHELL, EDITOR (VISUAL, if defined) and PAGER environment variables are
 used. A single combination of arguments is supported for SHELL and PAGER.
 .Pp
+\fBNNN_OPTS:\fR binary options to
+.Nm
+.Bd -literal
+    export NNN_OPTS="cEnrx"
+.Ed
+.Pp
 \fBNNN_OPENER:\fR specify a custom file opener.
 .Bd -literal
     export NNN_OPENER=nuke
 
-    NOTE: `nuke` is a file opener available in plugin repository
+    NOTE: 'nuke' is a file opener available in the plugin repository.
 .Ed
 .Pp
 \fBNNN_BMS:\fR bookmark string as \fIkey_char:location\fR pairs
@@ -309,8 +315,8 @@ separated by \fI;\fR:
     export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;t:imgthumb'
 
     NOTES:
-    1. To run a plugin directly, press \fI;\fR followed by the plugin key
-    2. To skip directory refresh after running a plugin, prefix with \fB-\fR
+    1. To run a plugin directly, press \fI;\fR followed by the plugin key.
+    2. To skip directory refresh after running a plugin, prefix with \fB-\fR.
 
     export NNN_PLUG='m:-mediainfo'
 .Ed
@@ -356,18 +362,25 @@ separated by \fI;\fR:
     codes: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
 .Ed
 .Pp
+\fBNNN_ARCHIVE:\fR archive types to be handled silently (default: bzip2, (g)zip, tar).
+.Bd -literal
+    export NNN_ARCHIVE="\\\\.(7z|bz2|gz|tar|tgz|zip)$"
+
+    NOTE: Non-default formats may require a third-party utility.
+.Ed
+.Pp
 \fBNNN_SSHFS:\fR pass additional options to sshfs command:
 .Bd -literal
     export NNN_SSHFS='sshfs -o reconnect,idmap=user,cache_timeout=3600'
 
-    NOTE: The options must be preceded by `sshfs` and comma-separated without any space between them.
+    NOTE: The options must be preceded by "sshfs" and comma-separated without any space between them.
 .Ed
 .Pp
 \fBNNN_RCLONE:\fR pass additional options to rclone command:
 .Bd -literal
     export NNN_RCLONE='rclone mount --read-only --no-checksum'
 
-    NOTE: The options must be preceded by `rclone` and max 5 flags are supported.
+    NOTE: The options must be preceded by "rclone" and max 5 flags are supported.
 .Ed
 .Pp
 \fBNNN_TRASH:\fR trash (instead of \fIdelete\fR) files to desktop Trash.
