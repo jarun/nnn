@@ -431,7 +431,8 @@ static uchar g_states;
 #define UTIL_FZY 16
 #define UTIL_NTFY 17
 #define UTIL_CBCP 18
-#define UTIL_NMV 19
+#define UTIL_BASH 19
+#define UTIL_NMV 20
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -470,6 +471,7 @@ static char * const utils[] = {
 	"fzy",
 	".ntfy",
 	".cbcp",
+	"bash",
 	".nmv",
 };
 
@@ -5610,7 +5612,8 @@ nochange:
 			case SEL_RENAMEMUL:
 				endselection();
 
-				if (!plugscript(utils[UTIL_NMV], newpath, path, F_CLI)
+				if (!(getutil(utils[UTIL_BASH])
+				      && plugscript(utils[UTIL_NMV], newpath, path, F_CLI))
 				    && !batch_rename(path)) {
 					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;

@@ -26,6 +26,10 @@ dst_file=$(mktemp "$TMPDIR/.nnnXXXXXX")
 if [ -s "$selection" ]; then
 	printf "Rename 'c'urrent / 's'election? "
 	read -r resp
+
+    if ! [ "$resp" = "c" ] && ! [ "$resp" = "s" ]; then
+        exit 1
+    fi
 fi
 
 if [ "$resp" = "s" ]; then
@@ -96,7 +100,7 @@ while read -r num name; do
 				printf "%s: failed to rename %s to %s: %s\n" "$0" "$name" "$tmp" "$!" > /dev/stderr
 				exit_status=1
 			fi
-			
+
 			for key in "${!items[@]}"; do
 				if [ "${items[$key]}" = "$name" ]; then
 					items[$key]="$tmp"
@@ -116,7 +120,7 @@ while read -r num name; do
 				for key in "${!items[@]}"; do
 					items[$key]=$(printf "%s" "${items[$key]}" | sed "s|^$src\(\$\|\/\)|$name\1|")
 				done
-				
+
 				printf "'%s' => '%s'\n" "$src" "$name"
 			else
 				printf "'%s' -> '%s'\n" "$src" "$name"
