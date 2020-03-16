@@ -16,7 +16,7 @@ jobs:
             wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|apt-key add -
             apt-add-repository -y "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-8 main"
             apt update -qq
-            apt install -y --no-install-recommends git gcc gcc-8 gcc-9 clang clang-8 clang-tidy-8 make pkg-config libncursesw5-dev libreadline-dev
+            apt install -y --no-install-recommends git gcc gcc-8 gcc-9 clang clang-8 clang-9 clang-tidy-9 make pkg-config libncursesw5-dev libreadline-dev
       - checkout
       - run:
           command: |
@@ -48,8 +48,13 @@ jobs:
             ls -l nnn
             make clean
             echo
-            echo "########## clang-tidy-8 ##########"
-            clang-tidy-8 src/* -- -I/usr/include -I/usr/include/ncursesw
+            echo "########## clang-9 ##########"
+            CC=clang-9 make strip
+            ls -l nnn
+            make clean
+            echo
+            echo "########## clang-tidy-9 ##########"
+            clang-tidy-9 src/* -- -I/usr/include -I/usr/include/ncursesw
             echo "########## checllcheck ##########"
             find plugins/ -type f -not -name "*.md" -exec shellcheck -e SC1090 {} +
 
