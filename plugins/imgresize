@@ -5,7 +5,7 @@
 #
 # Notes:
 # 1. Set res if you don't want to be prompted for desktop resolution every time
-# 2. minsize is set to 1MB by default, adjust it if you want
+# 2. MINSIZE is set to 1MB by default, adjust it if you want
 # 3. imgp options used:
 #       a - adaptive mode
 #       c - convert PNG to JPG
@@ -15,16 +15,16 @@
 # Author: Arun Prakash Jana
 
 # set resolution (e.g. 1920x1080)
-res=
+res="${RESOLUTION}"
 
 # set minimum image size (in bytes) to resize (default: 1MB)
-minsize=1048576
+MINSIZE="${MINSIZE:-1048576}"
 
 if [ -z "$res" ]; then
     printf "desktop resolution (hxv): "
     read -r res
 fi
 
-if ! [ -z "$res" ] && ! [ -z "$minsize" ]; then
-    imgp -ackx "$res" -s "$minsize"
+if ! [ -z "$res" ] && ! [ -z "$MINSIZE" ]; then
+    imgp -ackx "$res" -s "$MINSIZE"
 fi

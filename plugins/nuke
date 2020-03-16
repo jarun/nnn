@@ -66,7 +66,7 @@
 # #############################################################################
 
 # set to 1 to enable GUI apps
-GUI=0
+GUI="${GUI:-0}"
 
 set -euf -o noclobber -o noglob -o nounset
 IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}" # protect trailing \n
@@ -82,7 +82,7 @@ if ! [ -z "$ext" ]; then
 fi
 
 handle_pdf() {
-    if [ $GUI -ne 0 ] && which zathura >/dev/null 2>&1; then
+    if [ "$GUI" -ne 0 ] && which zathura >/dev/null 2>&1; then
         zathura "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif which pdftotext >/dev/null 2>&1; then
@@ -115,10 +115,10 @@ handle_audio() {
 }
 
 handle_video() {
-    if [ $GUI -ne 0 ] && which smplayer >/dev/null 2>&1; then
+    if [ "$GUI" -ne 0 ] && which smplayer >/dev/null 2>&1; then
         smplayer "${FPATH}" >/dev/null 2>&1 &
         exit 0
-    elif [ $GUI -ne 0 ] && which mpv >/dev/null 2>&1; then
+    elif [ "$GUI" -ne 0 ] && which mpv >/dev/null 2>&1; then
         mpv "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif which ffmpegthumbnailer >/dev/null 2>&1; then
@@ -285,7 +285,7 @@ handle_multimedia() {
 
         ## Image
         image/*)
-            if [ $GUI -ne 0 ] && which sxiv >/dev/null 2>&1; then
+            if [ "$GUI" -ne 0 ] && which sxiv >/dev/null 2>&1; then
                 sxiv_load_dir "${FPATH}" >/dev/null 2>&1 &
                 exit 0
             elif which viu >/dev/null 2>&1; then
@@ -450,7 +450,7 @@ handle_mime() {
 }
 
 handle_fallback() {
-    if [ $GUI -ne 0 ]; then
+    if [ "$GUI" -ne 0 ]; then
         xdg-open "${FPATH}" >/dev/null 2>&1 &
         exit 0
     fi

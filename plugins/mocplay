@@ -16,11 +16,11 @@ selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 cmd=$(pgrep -x mocp 2>/dev/null)
 ret=$cmd
 
-SHUFFLE=0
+SHUFFLE="${SHUFFLE:-0}"
 
 mocp_add ()
 {
-    if [ $SHUFFLE = 1 ]; then
+    if [ "$SHUFFLE" = 1 ]; then
         if [ "$resp" = "y" ]; then
             arr=$(tr '\0' '\n' < "$selection")
         elif [ -n "$1" ]; then

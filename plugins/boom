@@ -6,25 +6,36 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-#GUIPLAYER=smplayer
-
-NUMTRACKS=100
+GUIPLAYER="${GUIPLAYER}"
+NUMTRACKS="${NUMTRACKS:-100}"
 
 if [ ! -z "$GUIPLAYER" ]; then
-    PLAYER="$GUIPLAYER"
-    find . -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.m4a" -o -iname "*.webm" -o -iname "*.wma" \) | shuf | head -n $NUMTRACKS | xargs -d "\n" "$PLAYER" > /dev/null 2>&1 &
+    find . -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.m4a" -o -iname "*.webm" -o -iname "*.wma" \) | shuf | head -n "$NUMTRACKS" | xargs -d "\n" "$GUIPLAYER" > /dev/null 2>&1 &
 
     # detach the player
     sleep 1
 elif which mocp >/dev/null 2>&1; then
-    # start MOC server
-    mocp -S
+    cmd=$(pgrep -x mocp 2>/dev/null)
+    ret=$cmd
+
+    if [ -z "$ret" ]; then
+        # start MOC server
+        mocp -S
+    else
+        # mocp running, check if it's playing
+        state=$(mocp -i | grep "State:" | cut -d' ' -f2)
+        if [ "$state" = 'PLAY' ]; then
+            # add up to 100 random audio files
+            find . -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.m4a" -o -iname "*.webm" -o -iname "*.wma" \) | shuf | head -n "$NUMTRACKS" | xargs -d "\n" mocp -a
+            exit
+        fi
+    fi
 
     # clear MOC playlist
     mocp -c
 
     # add up to 100 random audio files
-    find . -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.m4a" -o -iname "*.webm" -o -iname "*.wma" \) | shuf | head -n $NUMTRACKS | xargs -d "\n" mocp -a
+    find . -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.m4a" -o -iname "*.webm" -o -iname "*.wma" \) | shuf | head -n "$NUMTRACKS" | xargs -d "\n" mocp -a
 
     # start playing
     mocp -p

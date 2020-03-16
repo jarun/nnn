@@ -18,11 +18,11 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-EBOOK_ID=
+EBOOK_ID="${EBOOK_ID}"
 DIR="${XDG_CACHE_HOME:-$HOME/.cache}/nnn/gutenbooks/$EBOOK_ID"
 BROWSE_LINK="http://www.gutenberg.org/ebooks/search/?sort_order=downloads"
-BROWSER=w3m
-READER=
+BROWSER="${BROWSER:-w3m}"
+READER="${READER}"
 
 if [ -n "$EBOOK_ID" ]; then
     if [ ! -e "$DIR" ]; then
