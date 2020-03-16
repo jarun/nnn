@@ -4871,8 +4871,9 @@ static void redraw(char *path)
 			return draw_line(path, ncols);
 	}
 
-	/* Clear screen */
-	erase();
+	/* Clear first line */
+	move(0, 0);
+	clrtoeol();
 
 	/* Enforce scroll/cursor invariants */
 	move_cursor(cur, 1);
@@ -4934,10 +4935,10 @@ static void redraw(char *path)
 		}
 	}
 
+	attroff(A_UNDERLINE);
+
 	/* Go to first entry */
 	move(2, 0);
-
-	attroff(A_UNDERLINE);
 
 	ncols = adjust_cols(ncols);
 
@@ -4953,6 +4954,9 @@ static void redraw(char *path)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		cfg.dircolor = 0;
 	}
+
+	/* Clear from last entry to end */
+	clrtobot();
 
 	statusbar(path);
 }
