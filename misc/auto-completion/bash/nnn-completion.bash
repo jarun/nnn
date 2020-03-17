@@ -31,6 +31,7 @@ _nnn ()
         -s
         -S
         -t
+        -T
         -v
         -V
         -x
@@ -46,6 +47,9 @@ _nnn ()
         COMPREPLY=( $(cd "$sessions_dir" && compgen -f -d -- "$cur") )
     elif [[ $prev == -t ]]; then
         return 1
+    elif [[ $prev == -T ]]; then
+        local keys=$(echo "a d e r s t v" | awk -v RS=' ' '{print $0}')
+        COMPREPLY=( $(compgen -W "$keys" -- "$cur") )
     elif [[ $cur == -* ]]; then
         COMPREPLY=( $(compgen -W "${opts[*]}" -- "$cur") )
     else

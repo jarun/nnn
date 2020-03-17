@@ -28,6 +28,7 @@ args=(
     '(-s)-s[load session]:session name'
     '(-S)-S[start in disk usage analyzer mode]'
     '(-t)-t[timeout to lock]:seconds'
+    '(-T)-T[a d e r s t v]:key'
     '(-v)-v[use version compare to sort files]'
     '(-V)-V[show program version and exit]'
     '(-x)-x[notis, sel to system clipboard]'
