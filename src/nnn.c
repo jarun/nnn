@@ -6490,7 +6490,6 @@ static void usage(void)
 		" -S      du mode\n"
 		" -t secs timeout to lock\n"
 		" -T key  sort order [a/d/e/r/s/t/v]\n"
-		" -v      version sort\n"
 		" -V      show version\n"
 		" -x      notis, sel to system clipboard\n"
 		" -h      show help\n\n"
@@ -6639,7 +6638,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cdeEgHKnop:QrRs:St:T:vVxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cdeEgHKnop:QrRs:St:T:Vxh"))) != -1) {
 		switch (opt) {
 		case 'a':
 			cfg.mtime = 0;
@@ -6726,9 +6725,6 @@ int main(int argc, char *argv[])
 		case 'T':
 			if (env_opts_id < 0)
 				sort = optarg[0];
-			break;
-		case 'v':
-			namecmpfn = &xstrverscasecmp;
 			break;
 		case 'V':
 			fprintf(stdout, "%s\n", VERSION);

@@ -31,7 +31,6 @@ complete -c nnn -s s -r -d 'load session by name' -x -a '@\t"last session" (ls $
 complete -c nnn -s S    -d 'start in disk usage analyzer mode'
 complete -c nnn -s t -r -d 'timeout in seconds to lock'
 complete -c nnn -s T -r -d 'a d e r s t v'
-complete -c nnn -s v    -d 'use version compare to sort files'
 complete -c nnn -s V    -d 'show program version and exit'
 complete -c nnn -s x    -d 'notis, sel to system clipboard'
 complete -c nnn -s h    -d 'show program help'
