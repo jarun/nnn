@@ -516,8 +516,9 @@ static char * const utils[] = {
 #define MSG_ORDER 37
 #define MSG_LAZY 38
 #define MSG_IGNORED 39
+#define MSG_RM_TMP 40
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 40 /* Must be the last entry */
+#define MSG_DIR_CHANGED 41 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -561,6 +562,7 @@ static const char * const messages[] = {
 	"'a'u / 'd'u / 'e'xtn / 'r'ev / 's'ize / 't'ime / 'v'er / 'c'lear?",
 	"unmount failed! try lazy?",
 	"ignoring invalid paths...",
+	"remove tmp file?",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -1438,6 +1440,39 @@ static bool selsafe(void)
 	}
 
 	return TRUE;
+}
+
+static void export_file_list(void)
+{
+	int fd, r = 0;
+	struct entry *pdent = dents;
+
+	if (!ndents)
+		return;
+
+	fd = create_tmp_file();
+	if (fd == -1) {
+		DPRINTF_S(strerror(errno));
+		return;
+	}
+
+	for (; r < ndents; ++pdent, ++r) {
+		if (write(fd, pdent->name, pdent->nlen - 1) != (pdent->nlen - 1))
+			break;
+
+		if ((r != ndents - 1) && (write(fd, "\n", 1) != 1))
+			break;
+	}
+
+	if (close(fd)) {
+		DPRINTF_S(strerror(errno));
+	}
+
+	spawn(editor, g_tmpfpath, NULL, NULL, F_CLI);
+
+	r = get_input(messages[MSG_RM_TMP]);
+	if (xconfirm(r))
+		unlink(g_tmpfpath);
 }
 
 /* Initialize curses mode */
@@ -2532,6 +2567,7 @@ static int filterentries(char *path, char *lastname)
 				case '.': // fallthrough /* Show hidden files */
 				case ';': // fallthrough /* Run plugin key */
 				case '=': // fallthrough /* Launch app */
+				case '>': // fallthrough /* Export file list */
 				case '@': // fallthrough /* Visit start dir */
 				case ']': // fallthorugh /* Prompt key */
 				case '`': // fallthrough /* Visit / */
@@ -4041,9 +4077,9 @@ static void show_help(const char *path)
 		  "cz  Archive%-17ce  Edit in EDITOR\n"
 	   "5Space ^J  (Un)select%-11cm ^K  Mark range/clear\n"
 	       "9p ^P  Copy sel here%-11ca  Select all\n"
-	       "9v ^V  Move sel here%-8cw ^W  Copy/move sel as\n"
+	       "9v ^V  Move sel here%-8cw ^W  cp/mv sel as\n"
 	       "9x ^X  Delete%-18cE  Edit sel\n"
-	          "c*  Toggle exe%-0c\n"
+	          "c*  Toggle exe%-14c>  Export list\n"
 		"1MISC\n"
 	       "9; ^S  Select plugin%-11c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
@@ -6220,6 +6256,10 @@ nochange:
 				cfg.picker ? selbufpos = 0 : write_lastdir(path);
 			free(mark);
 			return sel == SEL_QUITFAIL ? _FAILURE : _SUCCESS;
+		case SEL_EXPORT:
+			export_file_list();
+			cfg.filtermode ?  presel = FILTER : statusbar(path);
+			goto nochange;
 		default:
 			if (xlines != LINES || xcols != COLS)
 				setdirwatch(); /* Terminal resized */
