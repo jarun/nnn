@@ -17,6 +17,7 @@
 EDITOR="${EDITOR:-vi}"
 TMPDIR="${TMPDIR:-/tmp}"
 INCLUDE_HIDDEN="${INCLUDE_HIDDEN:-0}"
+VERBOSE="${VERBOSE:-0}"
 
 selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
 exit_status=0
@@ -95,7 +96,9 @@ while read -r num name; do
 			done
 
 			if mv "$name" "$tmp"; then
-				printf "'%s' -> '%s'\n" "$name" "$tmp"
+				if [ "$VERBOSE" -ne 0 ]; then
+					printf "'%s' -> '%s'\n" "$name" "$tmp"
+				fi
 			else
 				printf "%s: failed to rename %s to %s: %s\n" "$0" "$name" "$tmp" "$!" > /dev/stderr
 				exit_status=1
@@ -121,9 +124,14 @@ while read -r num name; do
 					items[$key]=$(printf "%s" "${items[$key]}" | sed "s|^$src\(\$\|\/\)|$name\1|")
 				done
 
-				printf "'%s' => '%s'\n" "$src" "$name"
+				if [ "$VERBOSE" -ne 0 ]; then
+					printf "'%s' => '%s'\n" "$src" "$name"
+				fi
 			else
-				printf "'%s' -> '%s'\n" "$src" "$name"
+				true
+				if [ "$VERBOSE" -ne 0 ]; then
+					printf "'%s' -> '%s'\n" "$src" "$name"
+				fi
 			fi
 		fi
 	fi
