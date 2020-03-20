@@ -6477,6 +6477,9 @@ static void usage(void)
 		" -d      detail mode\n"
 		" -e      text in $VISUAL ($EDITOR/vi)\n"
 		" -E      use EDITOR for undetached edits\n"
+#ifndef NORL
+		" -f      use readline history file\n"
+#endif
 		" -g      regex filters [default: string]\n"
 		" -H      show hidden files\n"
 		" -K      detect key collision\n"
@@ -6635,10 +6638,13 @@ int main(int argc, char *argv[])
 #endif
 	const char* const env_opts = xgetenv(env_cfg[NNN_OPTS], NULL);
 	int env_opts_id = env_opts ? (int)strlen(env_opts) : -1;
+#ifndef NORL
+	bool rlhist = FALSE;
+#endif
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cdeEgHKnop:QrRs:St:T:Vxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cdeEfgHKnop:QrRs:St:T:Vxh"))) != -1) {
 		switch (opt) {
 		case 'a':
 			cfg.mtime = 0;
@@ -6665,6 +6671,11 @@ int main(int argc, char *argv[])
 			break;
 		case 'E':
 			cfg.waitedit = 1;
+			break;
+		case 'f':
+#ifndef NORL
+			rlhist = TRUE;
+#endif
 			break;
 		case 'g':
 			cfg.regex = 1;
@@ -6926,8 +6937,10 @@ int main(int argc, char *argv[])
 #else
 	rl_bind_key('\t', rl_complete);
 #endif
-	mkpath(cfgdir, ".history", g_buf);
-	read_history(g_buf);
+	if (rlhist) {
+		mkpath(cfgdir, ".history", g_buf);
+		read_history(g_buf);
+	}
 #endif
 
 #ifndef NOMOUSE
@@ -6952,8 +6965,10 @@ int main(int argc, char *argv[])
 	exitcurses();
 
 #ifndef NORL
-	mkpath(cfgdir, ".history", g_buf);
-	write_history(g_buf);
+	if (rlhist) {
+		mkpath(cfgdir, ".history", g_buf);
+		write_history(g_buf);
+	}
 #endif
 
 	if (cfg.pickraw) {
