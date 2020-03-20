@@ -229,6 +229,8 @@ Common regex use cases:
 (2) Type '\\.mkv' to list all MKV files.
 .br
 (3) Use '.*' to match any character (\fIsort of\fR fuzzy search).
+.br
+(4) Exclude filenames having 'nnn' (compiled with PCRE lib): '^(?!nnn)'
 .Pp
 In the \fInavigate-as-you-type\fR mode directories are opened in filter
 mode, allowing continuous navigation. Works best with the \fBarrow keys\fR.
