@@ -670,7 +670,6 @@ static haiku_nm_h haiku_hnd;
 /* A faster version of xisdigit */
 #define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
 #define xerror() perror(xitoa(__LINE__))
-#define xconfirm(c) ((c) == 'y' || (c) == 'Y')
 
 #ifdef __GNUC__
 #define UNUSED(x) UNUSED_##x __attribute__((__unused__))
@@ -812,6 +811,11 @@ static void printinfoln(const char *str)
 	mvaddstr(xlines - 2, xcols - strlen(str), str);
 }
 
+static inline bool xconfirm(int c)
+{
+	return (c == 'y' || c == 'Y');
+}
+
 static int get_input(const char *prompt)
 {
 	int r;
@@ -861,13 +865,11 @@ static void xdelay(useconds_t delay)
 static char confirm_force(bool selection)
 {
 	char str[32];
-	int r;
 
 	snprintf(str, 32, messages[MSG_FORCE_RM],
 		 (selection ? xitoa(nselected) : "current"), (selection ? "(s)" : ""));
-	r = get_input(str);
 
-	if (xconfirm(r))
+	if (xconfirm(get_input(str)))
 		return 'f'; /* forceful */
 	return 'i'; /* interactive */
 }
@@ -1444,13 +1446,12 @@ static bool selsafe(void)
 
 static void export_file_list(void)
 {
-	int fd, r = 0;
-	struct entry *pdent = dents;
-
 	if (!ndents)
 		return;
 
-	fd = create_tmp_file();
+	struct entry *pdent = dents;
+	int r = 0, fd = create_tmp_file();
+
 	if (fd == -1) {
 		DPRINTF_S(strerror(errno));
 		return;
@@ -1470,8 +1471,7 @@ static void export_file_list(void)
 
 	spawn(editor, g_tmpfpath, NULL, NULL, F_CLI);
 
-	r = get_input(messages[MSG_RM_TMP]);
-	if (xconfirm(r))
+	if (xconfirm(get_input(messages[MSG_RM_TMP])))
 		unlink(g_tmpfpath);
 }
 
@@ -3993,9 +3993,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 #else
 	if (spawn(cmd, "-u", newpath, NULL, F_NORMAL)) {
 #endif
-		int r = get_input(messages[MSG_LAZY]);
-
-		if (!xconfirm(r))
+		if (!xconfirm(get_input(messages[MSG_LAZY])))
 			return FALSE;
 
 #ifdef __APPLE__
@@ -4197,10 +4195,9 @@ static bool run_cmd_as_plugin(const char *path, const char *file, char *newpath,
 		--len;
 	}
 
-	if (is_suffix(newpath, " $nnn")) {
-		/* Set `\0` to clear ' $nnn' suffix */
-		newpath[len - 5] = '\0';
-	} else
+	if (is_suffix(newpath, " $nnn"))
+		newpath[len - 5] = '\0'; /* Set `\0` to clear ' $nnn' suffix */
+	else
 		runfile = NULL;
 
 	spawn(newpath, runfile, NULL, path, flags);
@@ -4689,7 +4686,7 @@ static void handle_screen_move(enum action sel)
 
 static int handle_context_switch(enum action sel, char *newpath)
 {
-	int r = -1, input;
+	int r = -1;
 
 	switch (sel) {
 	case SEL_CYCLE: // fallthrough
@@ -4715,8 +4712,7 @@ static int handle_context_switch(enum action sel, char *newpath)
 
 			(r == CTX_MAX - 1) ? (r = 0) : ++r;
 			snprintf(newpath, PATH_MAX, messages[MSG_CREATE_CTX], r + 1);
-			input = get_input(newpath);
-			if (!xconfirm(input))
+			if (!xconfirm(get_input(newpath)))
 				return -1;
 		}
 
@@ -5937,8 +5933,7 @@ nochange:
 
 				mkpath(path, tmp, newpath);
 				if (access(newpath, F_OK) == 0) {
-					fd = get_input(messages[MSG_OVERWRITE]);
-					if (!xconfirm(fd)) {
+					if (!xconfirm(get_input(messages[MSG_OVERWRITE]))) {
 						statusbar(path);
 						goto nochange;
 					}
@@ -5995,8 +5990,7 @@ nochange:
 			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
 				if (sel == SEL_RENAME) {
 					/* Overwrite file with same name? */
-					r = get_input(messages[MSG_OVERWRITE]);
-					if (!xconfirm(r)) {
+					if (!xconfirm(get_input(messages[MSG_OVERWRITE]))) {
 						close(fd);
 						break;
 					}
