@@ -4041,6 +4041,33 @@ static void printkeys(kv *kvarr, char *buf, uchar max)
 	buf[i << 1] = '\0';
 }
 
+static size_t handle_bookmark(const char *mark, char *newpath)
+{
+	int fd;
+	size_t r = xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
+
+	if (mark) { /* There is a pinned directory */
+		g_buf[--r] = ' ';
+		g_buf[++r] = ',';
+		g_buf[++r] = '\0';
+		++r;
+	}
+	printkeys(bookmark, g_buf + r - 1, maxbm);
+	printprompt(g_buf);
+
+	r = FALSE;
+	fd = get_input(NULL);
+	if (fd == ',') /* Visit pinned directory */
+		mark ? xstrlcpy(newpath, mark, PATH_MAX) : (r = MSG_NOT_SET);
+	else if (!get_kv_val(bookmark, newpath, fd, maxbm, TRUE))
+		r = MSG_INVALID_KEY;
+
+	if (!r && !xdiraccess(newpath))
+		r = MSG_ACCESS;
+
+	return r;
+}
+
 /*
  * The help string tokens (each line) start with a HEX value
  * which indicates the number of spaces to print before the
@@ -4077,7 +4104,7 @@ static void show_help(const char *path)
 		  "cz  Archive%-17ce  Edit in EDITOR\n"
 	   "5Space ^J  (Un)select%-11cm ^K  Mark range/clear\n"
 	       "9p ^P  Copy sel here%-11ca  Select all\n"
-	       "9v ^V  Move sel here%-8cw ^W  cp/mv sel as\n"
+	       "9v ^V  Move sel here%-8cw ^W  Cp/mv sel as\n"
 	       "9x ^X  Delete%-18cE  Edit sel\n"
 	          "c*  Toggle exe%-14c>  Export list\n"
 		"1MISC\n"
@@ -5466,26 +5493,7 @@ nochange:
 			setdirwatch();
 			goto begin;
 		case SEL_BOOKMARK:
-			r = xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
-			if (mark) { /* There is a pinned directory */
-				g_buf[--r] = ' ';
-				g_buf[++r] = ',';
-				g_buf[++r] = '\0';
-				++r;
-			}
-			printkeys(bookmark, g_buf + r - 1, maxbm);
-			printprompt(g_buf);
-			fd = get_input(NULL);
-
-			r = FALSE;
-			if (fd == ',') /* Visit pinned directory */
-				mark ? xstrlcpy(newpath, mark, PATH_MAX) : (r = MSG_NOT_SET);
-			else if (!get_kv_val(bookmark, newpath, fd, maxbm, TRUE))
-				r = MSG_INVALID_KEY;
-
-			if (!r && !xdiraccess(newpath))
-				r = MSG_ACCESS;
-
+			r = (int)handle_bookmark(mark, newpath);
 			if (r) {
 				printwait(messages[r], &presel);
 				goto nochange;
