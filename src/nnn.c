@@ -5026,7 +5026,7 @@ static bool browse(char *ipath, const char *session)
 	char *path, *lastdir, *lastname, *dir, *tmp, *mark = NULL;
 	enum action sel;
 	struct stat sb;
-	int r = -1, fd, presel, selstartid = 0, selendid = 0;
+	int r = -1, presel, selstartid = 0, selendid = 0;
 	const uchar opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
 	bool dir_changed = FALSE;
 
@@ -5864,7 +5864,7 @@ nochange:
 		case SEL_NEW: // fallthrough
 		case SEL_RENAME:
 		{
-			int dup = 'n';
+			int fd, ret = 'n';
 
 			if (!ndents && (sel == SEL_OPENWITH || sel == SEL_RENAME))
 				break;
@@ -5968,7 +5968,7 @@ nochange:
 					if (strcmp(tmp, dents[cur].name) == 0)
 						goto nochange;
 
-					dup = 'd';
+					ret = 'd';
 				}
 				break;
 			default: /* SEL_NEW */
@@ -6004,7 +6004,7 @@ nochange:
 
 			if (sel == SEL_RENAME) {
 				/* Rename the file */
-				if (dup == 'd')
+				if (ret == 'd')
 					spawn("cp -rp", dents[cur].name, tmp, path, F_SILENT);
 				else if (renameat(fd, dents[cur].name, fd, tmp) != 0) {
 					close(fd);
@@ -6014,28 +6014,28 @@ nochange:
 				close(fd);
 				xstrlcpy(lastname, tmp, NAME_MAX + 1);
 			} else { /* SEL_NEW */
-				close(fd); /* Use fd as tmp var */
+				close(fd);
 				presel = 0;
 
 				/* Check if it's a dir or file */
 				if (r == 'f') {
 					mkpath(path, tmp, newpath);
-					fd = xmktree(newpath, FALSE);
+					ret = xmktree(newpath, FALSE);
 				} else if (r == 'd') {
 					mkpath(path, tmp, newpath);
-					fd = xmktree(newpath, TRUE);
+					ret = xmktree(newpath, TRUE);
 				} else if (r == 's' || r == 'h') {
 
 					if (tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
-					fd = xlink(tmp, path, (ndents ? dents[cur].name : NULL),
+					ret = xlink(tmp, path, (ndents ? dents[cur].name : NULL),
 						  newpath, &presel, r);
 				}
 
-				if (!fd)
+				if (!ret)
 					printwait(messages[MSG_FAILED], &presel);
 
-				if (fd <= 0)
+				if (ret <= 0)
 					goto nochange;
 
 				if (r == 'f' || r == 'd')
@@ -6210,16 +6210,16 @@ nochange:
 		case SEL_QUIT:
 		case SEL_QUITFAIL:
 			if (sel == SEL_QUITCTX) {
-				fd = cfg.curctx; /* fd used as tmp var */
-				for (r = (fd + 1) & ~CTX_MAX;
-				     (r != fd) && !g_ctx[r].c_cfg.ctxactive;
+				int ctx = cfg.curctx;
+				for (r = (ctx + 1) & ~CTX_MAX;
+				     (r != ctx) && !g_ctx[r].c_cfg.ctxactive;
 				     r = ((r + 1) & ~CTX_MAX)) {
 				};
 
-				if (r != fd) {
+				if (r != ctx) {
 					bool selmode = cfg.selmode ? TRUE : FALSE;
 
-					g_ctx[fd].c_cfg.ctxactive = 0;
+					g_ctx[ctx].c_cfg.ctxactive = 0;
 
 					/* Switch to next active context */
 					path = g_ctx[r].c_path;
