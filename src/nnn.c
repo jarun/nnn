@@ -6517,7 +6517,7 @@ static void usage(void)
 		" -b key  open bookmark key\n"
 		" -c      cli-only opener (overrides -e)\n"
 		" -d      detail mode\n"
-		" -e      text in $VISUAL ($EDITOR/vi)\n"
+		" -e      text in $VISUAL/$EDITOR/vi\n"
 		" -E      use EDITOR for undetached edits\n"
 #ifndef NORL
 		" -f      use readline history file\n"
