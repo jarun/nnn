@@ -65,7 +65,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 - Sort
   - Ordered pure numeric names by default (visit _/proc_)
   - Case-insensitive version (_aka_ natural) sort
-  - By file name, modification/access time, size, extension
+  - By file name, access/change/mod (default) time, size, extension
   - Reverse sort
 - Mimes
   - Open with desktop opener or specify a custom app

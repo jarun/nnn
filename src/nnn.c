@@ -246,7 +246,7 @@ typedef struct {
  */
 typedef struct {
 	uint filtermode : 1;  /* Set to enter filter mode */
-	uint mtimeorder : 1;  /* Set to sort by time modified */
+	uint timeorder  : 1;  /* Set to sort by time */
 	uint sizeorder  : 1;  /* Set to sort by file size */
 	uint apparentsz : 1;  /* Set to sort by apparent size (disk usage) */
 	uint blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
@@ -269,8 +269,7 @@ typedef struct {
 	uint runctx     : 2;  /* The context in which plugin is to be run */
 	uint regex      : 1;  /* Use regex filters */
 	uint x11        : 1;  /* Copy to system clipboard and show notis */
-	uint reserved2  : 1;
-	uint mtime      : 1;  /* Use modification time (else access time) */
+	uint timetype   : 2;  /* Time sort type (0: access, 1: change, 2: modification) */
 	uint cliopener  : 1;  /* All-CLI app opener */
 	uint waitedit   : 1;  /* For ops that can't be detached, used EDITOR */
 	uint rollover   : 1;  /* Roll over at edges */
@@ -299,7 +298,7 @@ typedef struct {
 /* Configuration, contexts */
 static settings cfg = {
 	0, /* filtermode */
-	0, /* mtimeorder */
+	0, /* timeorder */
 	0, /* sizeorder */
 	0, /* apparentsz */
 	0, /* blkorder */
@@ -321,8 +320,7 @@ static settings cfg = {
 	0, /* runctx */
 	0, /* regex */
 	0, /* x11 */
-	0, /* reserved2 */
-	1, /* mtime */
+	2, /* timetype (T_MOD) */
 	0, /* cliopener */
 	0, /* waitedit */
 	1, /* rollover */
@@ -517,8 +515,9 @@ static char * const utils[] = {
 #define MSG_LAZY 38
 #define MSG_IGNORED 39
 #define MSG_RM_TMP 40
+#define MSG_NOCHNAGE 41
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 41 /* Must be the last entry */
+#define MSG_DIR_CHANGED 42 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -563,6 +562,7 @@ static const char * const messages[] = {
 	"unmount failed! try lazy?",
 	"ignoring invalid paths...",
 	"remove tmp file?",
+	"unchanged",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -606,6 +606,17 @@ static const char * const envs[] = {
 	"EDITOR",
 	"PAGER",
 	"nnn",
+};
+
+/* Time type used */
+#define T_ACCESS 0
+#define T_CHANGE 1
+#define T_MOD 2
+
+static const char * const time_type[] = {
+	"'a'ccess",
+	"'c'hange",
+	"'m'od",
 };
 
 #ifdef __linux__
@@ -2217,7 +2228,7 @@ static int entrycmp(const void *va, const void *vb)
 	}
 
 	/* Sort based on specified order */
-	if (cfg.mtimeorder) {
+	if (cfg.timeorder) {
 		if (pb->t > pa->t)
 			return 1;
 		if (pb->t < pa->t)
@@ -2356,8 +2367,8 @@ static int getorderstr(char *sort)
 {
 	int i = 0;
 
-	if (cfg.mtimeorder)
-		sort[0] = cfg.mtime ? 'T' : 'A';
+	if (cfg.timeorder)
+		sort[0] = (cfg.timetype == T_MOD) ? 'M' : ((cfg.timetype == T_ACCESS) ? 'A' : 'C');
 	else if (cfg.sizeorder)
 		sort[0] = 'S';
 	else if (cfg.extnorder)
@@ -4108,6 +4119,7 @@ static void show_help(const char *path)
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
 		  "cc  Connect remote%-10cu  Unmount\n"
 	       "9t ^T  Sort toggles%-12cs  Manage session\n"
+	          "cT  Set time type%-0c\n"
 	};
 
 	fd = create_tmp_file();
@@ -4491,7 +4503,9 @@ static int dentfill(char *path, struct entry **dents)
 		off += dentp->nlen;
 
 		/* Copy other fields */
-		dentp->t = cfg.mtime ? sb.st_mtime : sb.st_atime;
+		dentp->t = ((cfg.timetype == T_MOD)
+				? sb.st_mtime
+				: ((cfg.timetype == T_ACCESS) ? sb.st_atime : sb.st_ctime));
 #if !(defined(__sun) || defined(__HAIKU__))
 		if (!flags && dp->d_type == DT_LNK) {
 			 /* Do not add sizes for links */
@@ -4746,7 +4760,7 @@ static bool set_sort_flags(int r)
 			cfg.showdetail = 1;
 			printptr = &printent_long;
 		}
-		cfg.mtimeorder = 0;
+		cfg.timeorder = 0;
 		cfg.sizeorder = 0;
 		cfg.extnorder = 0;
 		entrycmpfn = &entrycmp;
@@ -4754,7 +4768,7 @@ static bool set_sort_flags(int r)
 		endselection(); /* We are going to reload dir */
 		break;
 	case 'c':
-		cfg.mtimeorder = 0;
+		cfg.timeorder = 0;
 		cfg.sizeorder = 0;
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
@@ -4765,7 +4779,7 @@ static bool set_sort_flags(int r)
 	case 'e': /* File extension */
 		cfg.extnorder ^= 1;
 		cfg.sizeorder = 0;
-		cfg.mtimeorder = 0;
+		cfg.timeorder = 0;
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
 		entrycmpfn = &entrycmp;
@@ -4775,14 +4789,14 @@ static bool set_sort_flags(int r)
 		break;
 	case 's': /* File size */
 		cfg.sizeorder ^= 1;
-		cfg.mtimeorder = 0;
+		cfg.timeorder = 0;
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
 		cfg.extnorder = 0;
 		entrycmpfn = &entrycmp;
 		break;
-	case 't': /* Modification or access time */
-		cfg.mtimeorder ^= 1;
+	case 't': /* Time */
+		cfg.timeorder ^= 1;
 		cfg.sizeorder = 0;
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
@@ -4797,6 +4811,47 @@ static bool set_sort_flags(int r)
 	}
 
 	return TRUE;
+}
+
+static bool set_time_type(int *presel)
+{
+	char buf[24];
+	bool first = TRUE;
+	int r = 0;
+	size_t chars = 0;
+
+	for (; r < (int)ELEMENTS(time_type); ++r)
+		if (r != cfg.timetype) {
+			chars += xstrlcpy(buf + chars, time_type[r], sizeof(buf) - chars) - 1;
+			if (first) {
+				buf[chars++] = ' ';
+				buf[chars++] = '/';
+				buf[chars++] = ' ';
+				first = FALSE;
+			} else {
+				buf[chars++] = '?';
+				buf[chars] = '\n';
+			}
+		}
+
+	r = get_input(buf);
+	if (r == 'a' || r == 'c' || r == 'm') {
+		r = (r == 'm') ? T_MOD : ((r == 'a') ? T_ACCESS : T_CHANGE);
+		if (cfg.timetype == r) {
+			printwait(messages[MSG_NOCHNAGE], presel);
+			return FALSE;
+		}
+
+		cfg.timetype = r;
+
+		if (cfg.filtermode || g_ctx[cfg.curctx].c_fltr[1])
+			*presel = FILTER;
+
+		return TRUE;
+	}
+
+	printwait(messages[MSG_INVALID_KEY], presel);
+	return FALSE;
 }
 
 static void statusbar(char *path)
@@ -5596,8 +5651,6 @@ nochange:
 				continue;
 			default: /* SEL_SORT */
 				if (!set_sort_flags(get_input(messages[MSG_ORDER]))) {
-					if (cfg.filtermode)
-						presel = FILTER;
 					printwait(messages[MSG_INVALID_KEY], &presel);
 					goto nochange;
 				}
@@ -6261,6 +6314,11 @@ nochange:
 			export_file_list();
 			cfg.filtermode ?  presel = FILTER : statusbar(path);
 			goto nochange;
+		case SEL_TIMETYPE:
+			if (!set_time_type(&presel))
+				goto nochange;
+
+			goto begin;
 		default:
 			if (xlines != LINES || xcols != COLS)
 				setdirwatch(); /* Terminal resized */
@@ -6511,7 +6569,6 @@ static void usage(void)
 		"positional args:\n"
 		"  PATH   start dir [default: .]\n\n"
 		"optional args:\n"
-		" -a      use access time\n"
 		" -A      no dir auto-select\n"
 		" -b key  open bookmark key\n"
 		" -c      cli-only opener (overrides -e)\n"
@@ -6685,11 +6742,8 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cdeEfgHKnop:QrRs:St:T:Vxh"))) != -1) {
+		       : getopt(argc, argv, "Ab:cdeEfgHKnop:QrRs:St:T:Vxh"))) != -1) {
 		switch (opt) {
-		case 'a':
-			cfg.mtime = 0;
-			break;
 		case 'A':
 			cfg.autoselect = 0;
 			break;

@@ -9,7 +9,6 @@
 setopt localoptions noshwordsplit noksharrays
 local -a args
 args=(
-    '(-a)-a[use access time]'
     '(-A)-A[disable dir auto-select]'
     '(-b)-b[bookmark key to open]:key char'
     '(-c)-c[cli-only opener]'
