@@ -84,6 +84,7 @@ enum action {
 	SEL_REMOTE,
 	SEL_UMOUNT,
 	SEL_HELP,
+	SEL_AUTONEXT,
 	SEL_EDIT,
 	SEL_PLUGIN,
 	SEL_SHELL,
@@ -91,7 +92,6 @@ enum action {
 	SEL_RUNCMD,
 	SEL_LOCK,
 	SEL_SESSIONS,
-	SEL_AUTONEXT,
 	SEL_QUITCTX,
 	SEL_QUITCD,
 	SEL_QUIT,
@@ -223,6 +223,8 @@ static struct key bindings[] = {
 	{ 'u',            SEL_UMOUNT },
 	/* Show help */
 	{ '?',            SEL_HELP },
+	/* Quit a context */
+	{ '+',            SEL_AUTONEXT },
 	/* Edit in EDITOR */
 	{ 'e',            SEL_EDIT },
 	/* Run a plugin */
@@ -240,8 +242,6 @@ static struct key bindings[] = {
 	/* Manage sessions */
 	{ 's',            SEL_SESSIONS },
 	/* Quit a context */
-	{ '+',            SEL_AUTONEXT },
-	/* Quit a context */
 	{ 'q',            SEL_QUITCTX },
 	/* Change dir on quit */
 	{ CONTROL('G'),   SEL_QUITCD },
@@ -249,7 +249,9 @@ static struct key bindings[] = {
 	{ CONTROL('Q'),   SEL_QUIT },
 	/* Quit with an error code */
 	{ 'Q',            SEL_QUITFAIL },
+	/* Export list */
 	{ '>',            SEL_EXPORT },
+	/* Set time type */
 	{ 'T',            SEL_TIMETYPE },
 #ifndef NOMOUSE
 	{ KEY_MOUSE,      SEL_CLICK },

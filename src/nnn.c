@@ -676,6 +676,7 @@ static haiku_nm_h haiku_hnd;
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
 #define setdirwatch() (cfg.filtermode ? (presel = FILTER) : (dir_changed = TRUE))
+#define filterset() (g_ctx[cfg.curctx].c_fltr[1])
 /* We don't care about the return value from strcmp() */
 #define xstrcmp(a, b)  (*(a) != *(b) ? -1 : strcmp((a), (b)))
 /* A faster version of xisdigit */
@@ -1969,7 +1970,7 @@ finish:
 	return ret;
 }
 
-static void get_archive_cmd(char *cmd, char *archive)
+static void get_archive_cmd(char *cmd, const char *archive)
 {
 	uchar i = 3;
 	const char *arcmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
@@ -2310,7 +2311,7 @@ static int nextsel(int presel)
 		//DPRINTF_S(keyname(c));
 
 		if (c == ERR && presel == MSGWAIT)
-			c = (cfg.filtermode) ? FILTER : CONTROL('L');
+			c = (cfg.filtermode || filterset()) ? FILTER : CONTROL('L');
 		else if (c == FILTER || c == CONTROL('L'))
 			/* Clear previous filter when manually starting */
 			clearfilter();
@@ -2497,6 +2498,9 @@ static int filterentries(char *path, char *lastname)
 			redraw(path);
 		}
 
+		if (!cfg.filtermode)
+			return 0;
+
 		len = mbstowcs(wln, ln, REGEX_MAX);
 	} else {
 		ln[0] = wln[0] = cfg.regex ? RFILTER : FILTER;
@@ -2656,11 +2660,6 @@ end:
 	/* Save last working filter in-filter */
 	if (ln[1])
 		ln[REGEX_MAX - 1] = ln[1];
-
-	if (*ch != 27 && *ch != '\t' && *ch != KEY_UP && *ch != KEY_DOWN && *ch != CONTROL('T')) {
-		ln[0] = ln[1] = '\0';
-		move_cursor(cur, 0);
-	}
 
 	/* Save current */
 	if (ndents)
@@ -4741,7 +4740,7 @@ static int handle_context_switch(enum action sel, char *newpath)
 	return r;
 }
 
-static bool set_sort_flags(int r)
+static int set_sort_flags(int r)
 {
 	switch (r) {
 	case 'a': /* Apparent du */
@@ -4770,7 +4769,6 @@ static bool set_sort_flags(int r)
 		cfg.sizeorder = 0;
 		cfg.extnorder = 0;
 		entrycmpfn = &entrycmp;
-		clearfilter(); /* Reload directory */
 		endselection(); /* We are going to reload dir */
 		break;
 	case 'c':
@@ -4813,10 +4811,10 @@ static bool set_sort_flags(int r)
 		namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
 		break;
 	default:
-		return FALSE;
+		return 0;
 	}
 
-	return TRUE;
+	return r;
 }
 
 static bool set_time_type(int *presel)
@@ -4973,6 +4971,8 @@ static void redraw(char *path)
 {
 	xlines = LINES;
 	xcols = COLS;
+
+	DPRINTF_S(__FUNCTION__);
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int onscreen = xlines - 4;
@@ -5342,8 +5342,13 @@ nochange:
 					> DOUBLECLICK_INTERVAL_NS)
 					break;
 				mousetimings[currentmouse].tv_sec = 0;
-			} else
+			} else {
+				if (cfg.filtermode || filterset())
+					presel = FILTER;
+				if (ndents)
+					copycurname();
 				goto nochange;
+			}
 #endif
 			// fallthrough
 		case SEL_NAV_IN: // fallthrough
@@ -5445,6 +5450,10 @@ nochange:
 						mkpath(path, dents[cur].name, newpath);
 						handle_archive(newpath, path, r);
 						copycurname();
+						if (r == 'l') {
+							statusbar(path);
+							goto nochange;
+						}
 						goto begin;
 					}
 
@@ -5478,7 +5487,6 @@ nochange:
 				/* Move cursor to the next entry if not the last entry */
 				if ((g_states & STATE_AUTONEXT) && cur != ndents - 1)
 					move_cursor((cur + 1) % ndents, 0);
-
 				continue;
 			}
 			default:
@@ -5653,24 +5661,23 @@ nochange:
 				cfg.blkorder = 0;
 				continue;
 			default: /* SEL_SORT */
-				if (!set_sort_flags(get_input(messages[MSG_ORDER]))) {
+				r = set_sort_flags(get_input(messages[MSG_ORDER]));
+				if (!r) {
 					printwait(messages[MSG_INVALID_KEY], &presel);
 					goto nochange;
 				}
 			}
 
-			if (!cfg.blkorder && cfg.filtermode)
-				presel = FILTER;
-
 			/* Save current */
 			if (ndents)
 				copycurname();
 
-			/* If there's no filter, reload the directory */
-			if (!g_ctx[cfg.curctx].c_fltr[1])
+			if (cfg.filtermode || filterset())
+				presel = FILTER;
+
+			if (r == 'd' || r == 'a')
 				goto begin;
 
-			presel = FILTER; /* If there's a filter, apply it */
 			break;
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
@@ -5692,6 +5699,7 @@ nochange:
 		case SEL_REDRAW: // fallthrough
 		case SEL_RENAMEMUL: // fallthrough
 		case SEL_HELP: // fallthrough
+		case SEL_AUTONEXT: // fallthrough
 		case SEL_EDIT: // fallthrough
 		case SEL_LOCK:
 		{
@@ -5718,10 +5726,15 @@ nochange:
 				refresh = TRUE;
 				break;
 			case SEL_HELP:
-				show_help(path);
+				show_help(path); // fallthrough
+			case SEL_AUTONEXT:
+				if (sel == SEL_AUTONEXT)
+					g_states ^= STATE_AUTONEXT;
 				if (cfg.filtermode)
 					presel = FILTER;
-				continue;
+				if (ndents)
+					copycurname();
+				goto nochange;
 			case SEL_EDIT:
 				spawn(editor, dents[cur].name, NULL, path, F_CLI);
 				continue;
@@ -5733,7 +5746,7 @@ nochange:
 			/* In case of successful operation, reload contents */
 
 			/* Continue in navigate-as-you-type mode, if enabled */
-			if (cfg.filtermode && !refresh)
+			if ((cfg.filtermode || filterset()) && !refresh)
 				break;
 
 			/* Save current */
@@ -5874,13 +5887,15 @@ nochange:
 					mkpath(tmp, dents[cur].name, newpath);
 					xrm(newpath);
 
-					if (cfg.filtermode)
+					if (cfg.filtermode || filterset())
 						presel = FILTER;
 
 					if (access(newpath, F_OK) == 0) { /* File not removed */
 						copycurname();
+						if (!cfg.filtermode)
+							statusbar(path);
 						goto nochange;
-					} else if (cur) {
+					} else if (ndents) {
 						cur += (cur != (ndents - 1)) ? 1 : -1;
 						copycurname();
 					} else
@@ -5998,25 +6013,30 @@ nochange:
 				(r == 's') ? archive_selection(newpath, tmp, path)
 					   : spawn(newpath, tmp, dents[cur].name,
 						    path, F_NORMAL | F_MULTI);
-				// fallthrough
+
+				mkpath(path, tmp, newpath);
+				if (access(newpath, F_OK) == 0) { /* File created */
+					xstrlcpy(lastname, tmp, NAME_MAX + 1);
+					clearfilter(); /* Archive name may not match */
+				} else {
+					if (cfg.filtermode)
+						presel = FILTER;
+					copycurname();
+				}
+				goto begin;
 			case SEL_OPENWITH:
-				if (sel == SEL_OPENWITH) {
-					/* Confirm if app is CLI or GUI */
-					r = get_input(messages[MSG_CLI_MODE]);
-					r = (r == 'c' ? F_CLI :
-					     (r == 'g' ? F_NOWAIT | F_NOTRACE | F_MULTI : 0));
-					if (!r) {
-						cfg.filtermode ? presel = FILTER : statusbar(path);
-						goto nochange;
-					}
+				/* Confirm if app is CLI or GUI */
+				r = get_input(messages[MSG_CLI_MODE]);
+				r = (r == 'c' ? F_CLI :
+				     (r == 'g' ? F_NOWAIT | F_NOTRACE | F_MULTI : 0));
+				if (r) {
 					mkpath(path, dents[cur].name, newpath);
 					spawn(tmp, newpath, NULL, path, r);
 				}
 
-				if (cfg.filtermode)
-					presel = FILTER;
+				cfg.filtermode ?  presel = FILTER : statusbar(path);
 				copycurname();
-				goto begin;
+				goto nochange;
 			case SEL_RENAME:
 				/* Skip renaming to same name */
 				if (strcmp(tmp, dents[cur].name) == 0) {
@@ -6081,7 +6101,6 @@ nochange:
 					mkpath(path, tmp, newpath);
 					ret = xmktree(newpath, TRUE);
 				} else if (r == 's' || r == 'h') {
-
 					if (tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
 					ret = xlink(tmp, path, (ndents ? dents[cur].name : NULL),
@@ -6101,6 +6120,7 @@ nochange:
 						presel = FILTER;
 					copycurname();
 				}
+				clearfilter();
 			}
 
 			goto begin;
@@ -6192,8 +6212,11 @@ nochange:
 
 				if (cfg.filtermode)
 					presel = FILTER;
+				if (ndents)
+					copycurname();
 				goto nochange;
 			default: /* SEL_RUNCMD */
+				r = TRUE;
 #ifndef NORL
 				if (cfg.picker) {
 #endif
@@ -6208,11 +6231,8 @@ nochange:
 #endif
 				if (tmp && *tmp) // NOLINT
 					prompt_run(tmp, (ndents ? dents[cur].name : ""), path);
-				else {
-					if (cfg.filtermode)
-						presel = FILTER;
-					goto nochange;
-				}
+				else
+					r = FALSE;
 			}
 
 			/* Continue in navigate-as-you-type mode, if enabled */
@@ -6222,6 +6242,10 @@ nochange:
 			/* Save current */
 			if (ndents)
 				copycurname();
+
+			if (!r)
+				goto nochange;
+
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_REMOTE:
@@ -6255,11 +6279,6 @@ nochange:
 			}
 
 			statusbar(path);
-			goto nochange;
-		case SEL_AUTONEXT:
-			g_states ^= STATE_AUTONEXT;
-			if (cfg.filtermode)
-				presel = FILTER;
 			goto nochange;
 		case SEL_QUITCTX: // fallthrough
 		case SEL_QUITCD: // fallthrough
@@ -6323,17 +6342,21 @@ nochange:
 				goto nochange;
 			goto begin;
 		default:
-			if (xlines != LINES || xcols != COLS)
+			r = FALSE;
+			if (xlines != LINES || xcols != COLS) {
 				setdirwatch(); /* Terminal resized */
-			else if (idletimeout && idle == idletimeout)
+				r = TRUE;
+			} else if (idletimeout && idle == idletimeout)
 				lock_terminal(); /* Locker */
-			else
-				goto nochange;
 
 			idle = 0;
 			if (ndents)
 				copycurname();
-			goto begin;
+
+			if (r)
+				continue;
+
+			goto nochange;
 		} /* switch (sel) */
 	}
 }
