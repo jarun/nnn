@@ -689,6 +689,7 @@ static haiku_nm_h haiku_hnd;
 #endif /* __GNUC__ */
 
 /* Forward declarations */
+static size_t xstrlcpy(char *dest, const char *src, size_t n);
 static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag);
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
@@ -794,8 +795,11 @@ static void printmsg(const char *msg)
 static void printwait(const char *msg, int *presel)
 {
 	printmsg(msg);
-	if (presel)
+	if (presel) {
 		*presel = MSGWAIT;
+		if (ndents)
+			xstrlcpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
+	}
 }
 
 /* Kill curses and display error before exiting */
@@ -3420,7 +3424,7 @@ static void save_session(bool last_session, int *presel)
 
 	fsession = fopen(spath, "wb");
 	if (!fsession) {
-		printwait(messages[MSG_ACCESS], presel);
+		printwait(messages[MSG_SEL_MISSING], presel);
 		return;
 	}
 
@@ -3473,7 +3477,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 
 	fsession = fopen(spath, "rb");
 	if (!fsession) {
-		printmsg(messages[MSG_ACCESS]);
+		printmsg(messages[MSG_SEL_MISSING]);
 		xdelay(XDELAY_INTERVAL_MS);
 		return FALSE;
 	}
@@ -3847,8 +3851,10 @@ static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 	}
 
 	dir = strdup(name);
-	if (!dir)
+	if (!dir) {
+		printwait(messages[MSG_FAILED], presel);
 		return FALSE;
+	}
 
 	len = strlen(dir);
 
@@ -5336,12 +5342,10 @@ nochange:
 					> DOUBLECLICK_INTERVAL_NS)
 					break;
 				mousetimings[currentmouse].tv_sec = 0;
-			} else {
-				if (cfg.filtermode)
-					presel = FILTER;
-				goto nochange; // fallthrough
-			}
+			} else
+				goto nochange;
 #endif
+			// fallthrough
 		case SEL_NAV_IN: // fallthrough
 		case SEL_GOIN:
 			/* Cannot descend in empty directories */
@@ -5457,10 +5461,9 @@ nochange:
 
 							setdirwatch();
 							goto begin;
-						} else {
-							printwait(messages[MSG_FAILED], &presel);
-							goto nochange;
 						}
+
+						goto nochange;
 					}
 
 					if (r != 'd') {
@@ -5874,9 +5877,10 @@ nochange:
 					if (cfg.filtermode)
 						presel = FILTER;
 
-					if (access(newpath, F_OK) == 0) /* File not removed */
+					if (access(newpath, F_OK) == 0) { /* File not removed */
+						copycurname();
 						goto nochange;
-					else if (cur) {
+					} else if (cur) {
 						cur += (cur != (ndents - 1)) ? 1 : -1;
 						copycurname();
 					} else
@@ -6317,7 +6321,6 @@ nochange:
 		case SEL_TIMETYPE:
 			if (!set_time_type(&presel))
 				goto nochange;
-
 			goto begin;
 		default:
 			if (xlines != LINES || xcols != COLS)
