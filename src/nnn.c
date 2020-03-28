@@ -4809,6 +4809,11 @@ static int set_sort_flags(int r)
 		break;
 	case 'v': /* Version */
 		namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
+		cfg.timeorder = 0;
+		cfg.sizeorder = 0;
+		cfg.apparentsz = 0;
+		cfg.blkorder = 0;
+		cfg.extnorder = 0;
 		break;
 	default:
 		return 0;
@@ -5678,7 +5683,8 @@ nochange:
 			if (r == 'd' || r == 'a')
 				goto begin;
 
-			break;
+			qsort(dents, ndents, sizeof(*dents), entrycmpfn);
+			continue;
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
 			if (ndents) {
