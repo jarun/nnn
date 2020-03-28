@@ -4430,7 +4430,7 @@ static int dentfill(char *path, struct entry **dents)
 				continue;
 
 			if (S_ISDIR(sb.st_mode)) {
-				if (sb_path.st_dev == sb.st_dev) {
+				if (sb_path.st_dev == sb.st_dev) { // NOLINT
 					mkpath(path, namep, buf);
 
 					dir_blocks += dirwalk(buf, &sb);
