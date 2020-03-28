@@ -691,6 +691,7 @@ static haiku_nm_h haiku_hnd;
 
 /* Forward declarations */
 static size_t xstrlcpy(char *dest, const char *src, size_t n);
+static int dentfill(char *path, struct entry **dents);
 static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag);
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
@@ -2493,6 +2494,7 @@ static int filterentries(char *path, char *lastname)
 	char *pln = g_ctx[cfg.curctx].c_fltr + 1;
 
 	if (ndents && (ln[0] == FILTER || ln[0] == RFILTER) && *pln) {
+		total = ndents = dentfill(path, &dents);
 		if (matches(pln) != -1) {
 			move_cursor(dentfind(lastname, ndents), 0);
 			redraw(path);
