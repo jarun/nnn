@@ -3885,7 +3885,7 @@ static bool remote_mount(char *newpath)
 {
 	uchar flag = F_CLI;
 	int opt;
-	char *tmp, *env, *cmd;
+	char *tmp, *env;
 	bool r, s;
 
 	r = getutil(utils[UTIL_RCLONE]);
@@ -3901,12 +3901,10 @@ static bool remote_mount(char *newpath)
 	else
 		opt = (!s) ? 'r' : 's';
 
-	if (opt == 's') {
-		cmd = utils[UTIL_SSHFS];
-		env = xgetenv("NNN_SSHFS", cmd);
-	} else if (opt == 'r') {
+	if (opt == 's')
+		env = xgetenv("NNN_SSHFS", utils[UTIL_SSHFS]);
+	else if (opt == 'r') {
 		flag |= F_NOWAIT | F_NOTRACE;
-		cmd = utils[UTIL_RCLONE];
 		env = xgetenv("NNN_RCLONE", "rclone mount");
 	} else {
 		printmsg(messages[MSG_INVALID_KEY]);
