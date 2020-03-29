@@ -517,8 +517,9 @@ static char * const utils[] = {
 #define MSG_RM_TMP 40
 #define MSG_NOCHNAGE 41
 #define MSG_CANCEL 42
+#define MSG_LIMIT 43
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 43 /* Must be the last entry */
+#define MSG_DIR_CHANGED 44 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -565,6 +566,7 @@ static const char * const messages[] = {
 	"remove tmp file?",
 	"unchanged",
 	"cancelled",
+	"limit exceeded\n",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -6435,15 +6437,19 @@ static char *load_input()
 				continue;
 			}
 
-			if (entries == LIST_FILES_MAX)
+			if (entries == LIST_FILES_MAX) {
+				fprintf(stderr, messages[MSG_LIMIT], NULL);
 				goto malloc_1;
+			}
 
 			offsets[entries++] = off;
 			off = next - input;
 		}
 
-		if (chunk_count == 512)
+		if (chunk_count == 512) {
+			fprintf(stderr, messages[MSG_LIMIT], NULL);
 			goto malloc_1;
+		}
 
 		/* We don't need to allocate another chunk */
 		if (chunk_count == (total_read - input_read) / chunk)
@@ -6459,8 +6465,10 @@ static char *load_input()
 	}
 
 	if (off != total_read) {
-		if (entries == LIST_FILES_MAX)
+		if (entries == LIST_FILES_MAX) {
+			fprintf(stderr, messages[MSG_LIMIT], NULL);
 			goto malloc_1;
+		}
 
 		offsets[entries++] = off;
 	}
