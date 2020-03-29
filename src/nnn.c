@@ -5877,7 +5877,7 @@ nochange:
 					if (access(newpath, F_OK) == 0) /* File not removed */
 						continue;
 
-					if (ndents) {
+					if (cur) {
 						cur += (cur != (ndents - 1)) ? 1 : -1;
 						copycurname();
 					} else
