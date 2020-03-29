@@ -3762,8 +3762,7 @@ static void find_accessible_parent(char *path, char *newpath, char *lastname, in
 	}
 
 	xstrlcpy(path, dir, PATH_MAX);
-
-	printmsg(messages[MSG_ACCESS]);
+	printwarn(NULL);
 	xdelay(XDELAY_INTERVAL_MS);
 }
 
@@ -5387,8 +5386,7 @@ nochange:
 					goto nochange;
 				}
 
-				cdprep(lastdir, lastname, path, newpath)
-					? (presel = FILTER) : (watch = TRUE);
+				cdprep(lastdir, lastname, path, newpath) ? (presel = FILTER) : (watch = TRUE);
 				goto begin;
 			case S_IFREG:
 			{
