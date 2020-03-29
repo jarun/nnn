@@ -690,7 +690,6 @@ static haiku_nm_h haiku_hnd;
 #endif /* __GNUC__ */
 
 /* Forward declarations */
-static size_t xstrlcpy(char *dest, const char *src, size_t n);
 static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag);
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
@@ -796,11 +795,8 @@ static void printmsg(const char *msg)
 static void printwait(const char *msg, int *presel)
 {
 	printmsg(msg);
-	if (presel) {
+	if (presel)
 		*presel = MSGWAIT;
-		if (ndents)
-			xstrlcpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
-	}
 }
 
 /* Kill curses and display error before exiting */
