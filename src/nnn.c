@@ -2310,8 +2310,8 @@ static int nextsel(int presel)
 		//DPRINTF_D(c);
 		//DPRINTF_S(keyname(c));
 
-		if (c == ERR && presel == MSGWAIT)
-			c = (cfg.filtermode || filterset()) ? FILTER : CONTROL('L');
+		if (c == ERR)
+			c = 0;
 		else if (c == FILTER || c == CONTROL('L'))
 			/* Clear previous filter when manually starting */
 			clearfilter();
@@ -5225,8 +5225,11 @@ nochange:
 		}
 
 		sel = nextsel(presel);
-		if (presel)
+		if (presel) {
+			if (presel == MSGWAIT)
+				statusbar(path);
 			presel = 0;
+		}
 
 		switch (sel) {
 #ifndef NOMOUSE
@@ -5897,20 +5900,17 @@ nochange:
 					mkpath(tmp, dents[cur].name, newpath);
 					xrm(newpath);
 
-					if (cfg.filtermode || filterset())
-						presel = FILTER;
+					if (access(newpath, F_OK) == 0) /* File not removed */
+						continue;
 
-					if (access(newpath, F_OK) == 0) { /* File not removed */
-						copycurname();
-						if (!cfg.filtermode)
-							statusbar(path);
-						goto nochange;
-					} else if (ndents) {
+					if (ndents) {
 						cur += (cur != (ndents - 1)) ? 1 : -1;
 						copycurname();
 					} else
 						lastname[0] = '\0';
 
+					if (cfg.filtermode || filterset())
+						presel = FILTER;
 					goto begin;
 				}
 			}
@@ -6028,12 +6028,9 @@ nochange:
 				if (access(newpath, F_OK) == 0) { /* File created */
 					xstrlcpy(lastname, tmp, NAME_MAX + 1);
 					clearfilter(); /* Archive name may not match */
-				} else {
-					if (cfg.filtermode)
-						presel = FILTER;
-					copycurname();
+					goto begin;
 				}
-				goto begin;
+				continue;
 			case SEL_OPENWITH:
 				/* Confirm if app is CLI or GUI */
 				r = get_input(messages[MSG_CLI_MODE]);
@@ -6219,12 +6216,8 @@ nochange:
 				break;
 			case SEL_LAUNCH:
 				launch_app(path, newpath);
-
-				if (cfg.filtermode)
-					presel = FILTER;
-				if (ndents)
-					copycurname();
-				goto nochange;
+				r = FALSE;
+				break;
 			default: /* SEL_RUNCMD */
 				r = TRUE;
 #ifndef NORL
