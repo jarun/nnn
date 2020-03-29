@@ -675,7 +675,7 @@ static haiku_nm_h haiku_hnd;
 #define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
-#define setdirwatch() (cfg.filtermode ? (presel = FILTER) : (dir_changed = TRUE))
+#define setdirwatch() (cfg.filtermode ? (presel = FILTER) : (watch = TRUE))
 #define filterset() (g_ctx[cfg.curctx].c_fltr[1])
 /* We don't care about the return value from strcmp() */
 #define xstrcmp(a, b)  (*(a) != *(b) ? -1 : strcmp((a), (b)))
@@ -5082,6 +5082,22 @@ static void redraw(char *path)
 	statusbar(path);
 }
 
+static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)
+{
+	if (lastname)
+		lastname[0] =  '\0';
+
+	/* Save last working directory */
+	xstrlcpy(lastdir, path, PATH_MAX);
+
+	/* Save the newly opted dir in path */
+	xstrlcpy(path, newpath, PATH_MAX);
+	DPRINTF_S(path);
+
+	clearfilter();
+	return cfg.filtermode;
+}
+
 static bool browse(char *ipath, const char *session)
 {
 	char newpath[PATH_MAX] __attribute__ ((aligned));
@@ -5092,7 +5108,7 @@ static bool browse(char *ipath, const char *session)
 	struct stat sb;
 	int r = -1, presel, selstartid = 0, selendid = 0;
 	const uchar opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
-	bool dir_changed = FALSE;
+	bool watch = FALSE;
 
 #ifndef NOMOUSE
 	MEVENT event;
@@ -5148,22 +5164,22 @@ begin:
 		lastappendpos = selbufpos;
 
 #ifdef LINUX_INOTIFY
-	if ((presel == FILTER || dir_changed) && inotify_wd >= 0) {
+	if ((presel == FILTER || watch) && inotify_wd >= 0) {
 		inotify_rm_watch(inotify_fd, inotify_wd);
 		inotify_wd = -1;
-		dir_changed = FALSE;
+		watch = FALSE;
 	}
 #elif defined(BSD_KQUEUE)
-	if ((presel == FILTER || dir_changed) && event_fd >= 0) {
+	if ((presel == FILTER || watch) && event_fd >= 0) {
 		close(event_fd);
 		event_fd = -1;
-		dir_changed = FALSE;
+		watch = FALSE;
 	}
 #elif defined(HAIKU_NM)
-	if ((presel == FILTER || dir_changed) && haiku_hnd != NULL) {
+	if ((presel == FILTER || watch) && haiku_hnd != NULL) {
 		haiku_stop_watch(haiku_hnd);
 		haiku_nm_active = FALSE;
-		dir_changed = FALSE;
+		watch = FALSE;
 	}
 #endif
 
@@ -5266,16 +5282,10 @@ nochange:
 				if (!dir)
 					goto nochange;
 
-				/* Save last working directory */
-				xstrlcpy(lastdir, path, PATH_MAX);
-
 				/* Save history */
 				xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
-				clearfilter();
 
-				xstrlcpy(path, dir, PATH_MAX);
-
-				setdirwatch();
+				cdprep(lastdir, NULL, path, dir) ? (presel = FILTER) : (watch = TRUE);
 				goto begin;
 #ifndef NOMOUSE
 			}
@@ -5312,7 +5322,7 @@ nochange:
 				}
 
 				/* Start watching the directory */
-				dir_changed = TRUE;
+				watch = TRUE;
 
 				if (ndents)
 					copycurname();
@@ -5382,13 +5392,8 @@ nochange:
 					goto nochange;
 				}
 
-				/* Save last working directory */
-				xstrlcpy(lastdir, path, PATH_MAX);
-
-				xstrlcpy(path, newpath, PATH_MAX);
-				lastname[0] = '\0';
-				clearfilter();
-				setdirwatch();
+				cdprep(lastdir, lastname, path, newpath)
+					? (presel = FILTER) : (watch = TRUE);
 				goto begin;
 			case S_IFREG:
 			{
@@ -5423,7 +5428,6 @@ nochange:
 						if (runfile[0])
 							runfile[0] = '\0';
 						clearfilter();
-
 						setdirwatch();
 						goto begin;
 					}
@@ -5457,26 +5461,20 @@ nochange:
 					if (r == 'l' || r == 'x') {
 						mkpath(path, dents[cur].name, newpath);
 						handle_archive(newpath, path, r);
-						copycurname();
 						if (r == 'l') {
 							statusbar(path);
 							goto nochange;
 						}
+						copycurname();
+						clearfilter();
 						goto begin;
 					}
 
 					if (r == 'm') {
 						if (archive_mount(dents[cur].name,
 								  path, newpath, &presel)) {
-							lastname[0] = '\0';
-
-							/* Save last working directory */
-							xstrlcpy(lastdir, path, PATH_MAX);
-
-							/* Switch to mount point */
-							xstrlcpy(path, newpath, PATH_MAX);
-
-							setdirwatch();
+							cdprep(lastdir, lastname, path, newpath)
+								? (presel = FILTER) : (watch = TRUE);
 							goto begin;
 						}
 
@@ -5549,38 +5547,23 @@ nochange:
 			}
 
 			/* SEL_CDLAST: dir pointing to lastdir */
-			xstrlcpy(newpath, dir, PATH_MAX);
-
-			/* Save last working directory */
-			xstrlcpy(lastdir, path, PATH_MAX);
-
-			xstrlcpy(path, newpath, PATH_MAX);
-			lastname[0] = '\0';
-			clearfilter();
-			DPRINTF_S(path);
-			setdirwatch();
-			goto begin;
+			xstrlcpy(newpath, dir, PATH_MAX); // fallthrough
 		case SEL_BOOKMARK:
-			r = (int)handle_bookmark(mark, newpath);
-			if (r) {
-				printwait(messages[r], &presel);
+			if (sel == SEL_BOOKMARK) {
+				r = (int)handle_bookmark(mark, newpath);
+				if (r) {
+					printwait(messages[r], &presel);
+					goto nochange;
+				}
+
+				if (strcmp(path, newpath) == 0)
+					break;
+			} // fallthrough
+		case SEL_REMOTE:
+			if (sel == SEL_REMOTE && !remote_mount(newpath, &presel))
 				goto nochange;
-			}
 
-			if (strcmp(path, newpath) == 0)
-				break;
-
-			lastname[0] =  '\0';
-			clearfilter();
-
-			/* Save last working directory */
-			xstrlcpy(lastdir, path, PATH_MAX);
-
-			/* Save the newly opted dir in path */
-			xstrlcpy(path, newpath, PATH_MAX);
-			DPRINTF_S(path);
-
-			setdirwatch();
+			cdprep(lastdir, lastname, path, newpath) ? (presel = FILTER) : (watch = TRUE);
 			goto begin;
 		case SEL_CYCLE: // fallthrough
 		case SEL_CYCLER: // fallthrough
@@ -5602,7 +5585,7 @@ nochange:
 			if (cfg.filtermode || ((tmp[0] == FILTER || tmp[0] == RFILTER) && tmp[1]))
 				presel = FILTER;
 			else
-				dir_changed = TRUE;
+				watch = TRUE;
 
 			goto begin;
 		case SEL_PIN:
@@ -5648,20 +5631,16 @@ nochange:
 					goto nochange;
 				}
 
-				/* Start watching the directory */
-				dir_changed = TRUE;
-
-				/* Save current */
-				if (ndents)
-					copycurname();
-				goto begin;
+				watch = TRUE; // fallthrough
 			case SEL_HIDDEN:
-				cfg.showhidden ^= 1;
+				if (sel == SEL_HIDDEN) {
+					cfg.showhidden ^= 1;
+					if (cfg.filtermode)
+						presel = FILTER;
+					clearfilter();
+				}
 				if (ndents)
 					copycurname();
-				if (cfg.filtermode)
-					presel = FILTER;
-				clearfilter();
 				goto begin;
 			case SEL_DETAIL:
 				cfg.showdetail ^= 1;
@@ -6246,20 +6225,6 @@ nochange:
 				goto nochange;
 
 			/* Repopulate as directory content may have changed */
-			goto begin;
-		case SEL_REMOTE:
-			if (sel == SEL_REMOTE && !remote_mount(newpath, &presel))
-				goto nochange;
-
-			lastname[0] = '\0';
-
-			/* Save last working directory */
-			xstrlcpy(lastdir, path, PATH_MAX);
-
-			/* Switch to mount point */
-			xstrlcpy(path, newpath, PATH_MAX);
-
-			setdirwatch();
 			goto begin;
 		case SEL_UMOUNT:
 			tmp = ndents ? dents[cur].name : NULL;

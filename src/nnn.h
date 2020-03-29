@@ -53,6 +53,7 @@ enum action {
 	SEL_CDLAST,
 	SEL_CDROOT,
 	SEL_BOOKMARK,
+	SEL_REMOTE,
 	SEL_CYCLE,
 	SEL_CYCLER,
 	SEL_CTX1,
@@ -81,7 +82,6 @@ enum action {
 	SEL_NEW,
 	SEL_RENAME,
 	SEL_RENAMEMUL,
-	SEL_REMOTE,
 	SEL_UMOUNT,
 	SEL_HELP,
 	SEL_AUTONEXT,
@@ -154,6 +154,8 @@ static struct key bindings[] = {
 	/* Leader key */
 	{ 'b',            SEL_BOOKMARK },
 	{ CONTROL('_'),   SEL_BOOKMARK },
+	/* Connect to server over SSHFS */
+	{ 'c',            SEL_REMOTE },
 	/* Cycle contexts in forward direction */
 	{ '\t',           SEL_CYCLE },
 	/* Cycle contexts in reverse direction */
@@ -217,8 +219,6 @@ static struct key bindings[] = {
 	{ CONTROL('R'),   SEL_RENAME },
 	/* Rename contents of current dir */
 	{ 'r',            SEL_RENAMEMUL },
-	/* Connect to server over SSHFS */
-	{ 'c',            SEL_REMOTE },
 	/* Disconnect a SSHFS mount point */
 	{ 'u',            SEL_UMOUNT },
 	/* Show help */
