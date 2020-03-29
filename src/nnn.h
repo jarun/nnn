@@ -92,12 +92,12 @@ enum action {
 	SEL_RUNCMD,
 	SEL_LOCK,
 	SEL_SESSIONS,
+	SEL_EXPORT,
+	SEL_TIMETYPE,
 	SEL_QUITCTX,
 	SEL_QUITCD,
 	SEL_QUIT,
 	SEL_QUITFAIL,
-	SEL_EXPORT,
-	SEL_TIMETYPE,
 #ifndef NOMOUSE
 	SEL_CLICK,
 #endif
@@ -241,6 +241,10 @@ static struct key bindings[] = {
 	{ '0',            SEL_LOCK },
 	/* Manage sessions */
 	{ 's',            SEL_SESSIONS },
+	/* Export list */
+	{ '>',            SEL_EXPORT },
+	/* Set time type */
+	{ 'T',            SEL_TIMETYPE },
 	/* Quit a context */
 	{ 'q',            SEL_QUITCTX },
 	/* Change dir on quit */
@@ -249,10 +253,6 @@ static struct key bindings[] = {
 	{ CONTROL('Q'),   SEL_QUIT },
 	/* Quit with an error code */
 	{ 'Q',            SEL_QUITFAIL },
-	/* Export list */
-	{ '>',            SEL_EXPORT },
-	/* Set time type */
-	{ 'T',            SEL_TIMETYPE },
 #ifndef NOMOUSE
 	{ KEY_MOUSE,      SEL_CLICK },
 #endif

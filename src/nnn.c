@@ -516,8 +516,9 @@ static char * const utils[] = {
 #define MSG_IGNORED 39
 #define MSG_RM_TMP 40
 #define MSG_NOCHNAGE 41
+#define MSG_CANCEL 42
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 42 /* Must be the last entry */
+#define MSG_DIR_CHANGED 43 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -563,6 +564,7 @@ static const char * const messages[] = {
 	"ignoring invalid paths...",
 	"remove tmp file?",
 	"unchanged",
+	"cancelled",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -1848,14 +1850,12 @@ finish:
 	return ret;
 }
 
-static bool cpmvrm_selection(enum action sel, char *path, int *presel)
+static bool cpmvrm_selection(enum action sel, char *path)
 {
 	int r;
 
-	if (!selsafe()) {
-		*presel = MSGWAIT;
+	if (!selsafe())
 		return FALSE;
-	}
 
 	switch (sel) {
 	case SEL_CP:
@@ -1867,12 +1867,12 @@ static bool cpmvrm_selection(enum action sel, char *path, int *presel)
 	case SEL_CPMVAS:
 		r = get_input(messages[MSG_CP_MV_AS]);
 		if (r != 'c' && r != 'm') {
-			printwait(messages[MSG_INVALID_KEY], presel);
+			printmsg(messages[MSG_INVALID_KEY]);
 			return FALSE;
 		}
 
 		if (!cpmv_rename(r, path)) {
-			printwait(messages[MSG_FAILED], presel);
+			printmsg(messages[MSG_FAILED]);
 			return FALSE;
 		}
 		break;
@@ -1887,9 +1887,6 @@ static bool cpmvrm_selection(enum action sel, char *path, int *presel)
 	/* Clear selection on move or delete */
 	if (sel != SEL_CP)
 		clearselection();
-
-	if (cfg.filtermode)
-		*presel = FILTER;
 
 	return TRUE;
 }
@@ -3837,19 +3834,20 @@ next:
 	return TRUE;
 }
 
-static bool archive_mount(char *name, char *path, char *newpath, int *presel)
+static bool archive_mount(char *path, char *newpath)
 {
 	char *dir, *cmd = utils[UTIL_ARCHIVEMOUNT];
+	char *name = dents[cur].name;
 	size_t len;
 
 	if (!getutil(cmd)) {
-		printwait(messages[MSG_UTIL_MISSING], presel);
+		printmsg(messages[MSG_UTIL_MISSING]);
 		return FALSE;
 	}
 
 	dir = strdup(name);
 	if (!dir) {
-		printwait(messages[MSG_FAILED], presel);
+		printmsg(messages[MSG_FAILED]);
 		return FALSE;
 	}
 
@@ -3868,7 +3866,7 @@ static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 	free(dir);
 
 	if (!xmktree(newpath, TRUE)) {
-		printwarn(presel);
+		printwarn(NULL);
 		return FALSE;
 	}
 
@@ -3876,14 +3874,14 @@ static bool archive_mount(char *name, char *path, char *newpath, int *presel)
 	DPRINTF_S(name);
 	DPRINTF_S(newpath);
 	if (spawn(cmd, name, newpath, path, F_NORMAL)) {
-		printwait(messages[MSG_FAILED], presel);
+		printmsg(messages[MSG_FAILED]);
 		return FALSE;
 	}
 
 	return TRUE;
 }
 
-static bool remote_mount(char *newpath, int *presel)
+static bool remote_mount(char *newpath)
 {
 	uchar flag = F_CLI;
 	int opt;
@@ -3893,8 +3891,10 @@ static bool remote_mount(char *newpath, int *presel)
 	r = getutil(utils[UTIL_RCLONE]);
 	s = getutil(utils[UTIL_SSHFS]);
 
-	if (!(r || s))
+	if (!(r || s)) {
+		printmsg(messages[MSG_UTIL_MISSING]);
 		return FALSE;
+	}
 
 	if (r && s)
 		opt = get_input(messages[MSG_REMOTE_OPTS]);
@@ -3909,23 +3909,20 @@ static bool remote_mount(char *newpath, int *presel)
 		cmd = utils[UTIL_RCLONE];
 		env = xgetenv("NNN_RCLONE", "rclone mount");
 	} else {
-		printwait(messages[MSG_INVALID_KEY], presel);
-		return FALSE;
-	}
-
-	if (!getutil(cmd)) {
-		printwait(messages[MSG_UTIL_MISSING], presel);
+		printmsg(messages[MSG_INVALID_KEY]);
 		return FALSE;
 	}
 
 	tmp = xreadline(NULL, messages[MSG_HOSTNAME]);
-	if (!tmp[0])
+	if (!tmp[0]) {
+		printmsg(messages[MSG_CANCEL]);
 		return FALSE;
+	}
 
 	/* Create the mount point */
 	mkpath(cfgdir, tmp, newpath);
 	if (!xmktree(newpath, TRUE)) {
-		printwarn(presel);
+		printwarn(NULL);
 		return FALSE;
 	}
 
@@ -3940,7 +3937,7 @@ static bool remote_mount(char *newpath, int *presel)
 	/* Connect to remote */
 	if (opt == 's') {
 		if (spawn(env, tmp, newpath, NULL, flag)) {
-			printwait(messages[MSG_FAILED], presel);
+			printmsg(messages[MSG_FAILED]);
 			return FALSE;
 		}
 	} else {
@@ -5471,14 +5468,14 @@ nochange:
 					}
 
 					if (r == 'm') {
-						if (archive_mount(dents[cur].name,
-								  path, newpath, &presel)) {
-							cdprep(lastdir, lastname, path, newpath)
-								? (presel = FILTER) : (watch = TRUE);
-							goto begin;
+						if (!archive_mount(path, newpath)) {
+							presel = MSGWAIT;
+							goto nochange;
 						}
 
-						goto nochange;
+						cdprep(lastdir, lastname, path, newpath)
+							? (presel = FILTER) : (watch = TRUE);
+						goto begin;
 					}
 
 					if (r != 'd') {
@@ -5560,8 +5557,10 @@ nochange:
 					break;
 			} // fallthrough
 		case SEL_REMOTE:
-			if (sel == SEL_REMOTE && !remote_mount(newpath, &presel))
+			if (sel == SEL_REMOTE && !remote_mount(newpath)) {
+				presel = MSGWAIT;
 				goto nochange;
+			}
 
 			cdprep(lastdir, lastname, path, newpath) ? (presel = FILTER) : (watch = TRUE);
 			goto begin;
@@ -5897,9 +5896,13 @@ nochange:
 
 			endselection();
 
-			if (!cpmvrm_selection(sel, path, &presel))
+			if (!cpmvrm_selection(sel, path)) {
+				presel = MSGWAIT;
 				goto nochange;
+			}
 
+			if (cfg.filtermode)
+				presel = FILTER;
 			clearfilter();
 
 			/* Show notification on operation complete */
@@ -6244,6 +6247,14 @@ nochange:
 
 			statusbar(path);
 			goto nochange;
+		case SEL_EXPORT:
+			export_file_list();
+			cfg.filtermode ?  presel = FILTER : statusbar(path);
+			goto nochange;
+		case SEL_TIMETYPE:
+			if (!set_time_type(&presel))
+				goto nochange;
+			goto begin;
 		case SEL_QUITCTX: // fallthrough
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
@@ -6297,14 +6308,6 @@ nochange:
 				cfg.picker ? selbufpos = 0 : write_lastdir(path);
 			free(mark);
 			return sel == SEL_QUITFAIL ? _FAILURE : _SUCCESS;
-		case SEL_EXPORT:
-			export_file_list();
-			cfg.filtermode ?  presel = FILTER : statusbar(path);
-			goto nochange;
-		case SEL_TIMETYPE:
-			if (!set_time_type(&presel))
-				goto nochange;
-			goto begin;
 		default:
 			r = FALSE;
 			if (xlines != LINES || xcols != COLS) {
