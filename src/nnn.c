@@ -6198,6 +6198,7 @@ nochange:
 
 				setenv(envs[ENV_NCUR], (ndents ? dents[cur].name : ""), 1);
 				spawn(shell, NULL, NULL, path, F_CLI);
+				r = TRUE;
 				break;
 			case SEL_LAUNCH:
 				launch_app(path, newpath);

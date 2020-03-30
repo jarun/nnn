@@ -92,7 +92,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 1. Install optional [deps](https://github.com/jarun/nnn#utility-dependencies) (if you need any).
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
-3. Use option `-e` in your alias to open text files in `$VISUAL`/`$EDITOR`/ vi. [Open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#text-file-in-new-panetabwindow) if you wish.
+3. Use option `-e` in your alias to open text files in `$VISUAL`/`$EDITOR`/ vi. [Open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text) if you wish.
 4. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins).
 5. Use option `-x` to copy selected file paths to system clipboard and show notis on cp, mv, rm completion.
 6. For a CLI-only environment, customize and use plugin [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke) with option `-c` (overrides `-e`).
@@ -118,7 +118,7 @@ A curses library with wide char support (e.g. ncursesw), libreadline (optional) 
 | sshfs, [rclone](https://rclone.org/), fusermount(3)/umount (macOS) | optional | mount, unmount remotes |
 | trash-cli | optional | trash files (default action: rm) |
 | vlock (Linux), bashlock (macOS), lock(1) (BSD),<br>peaclock (Haiku) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
-| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/Advanced-use-cases#show-cp-mv-progress)) | optional | copy, move progress |
+| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/Advanced-use-cases#cp-mv-progress)) | optional | copy, move progress |
 | fortune | optional | random quotes in help screen |
 | `$VISUAL` (else `$EDITOR`), `$PAGER`, `$SHELL` | optional | fallback vi, less, sh |
 
