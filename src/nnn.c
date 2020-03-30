@@ -635,16 +635,13 @@ static char mv[] = "mv -i";
 /* Patterns */
 #define P_CPMVFMT 0
 #define P_CPMVRNM 1
-#define P_BATCHRNM 2
-#define P_ARCHIVE 3
-#define P_REPLACE 4
+#define P_ARCHIVE 2
+#define P_REPLACE 3
 
 static const char * const patterns[] = {
 	"sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s",
 	"sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
 		"%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
-	"paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
-		"tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null",
 	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$",
 	"sed -i 's|^%s\\(.*\\)$|%s\\1|' %s",
 };
@@ -1894,13 +1891,16 @@ static bool cpmvrm_selection(enum action sel, char *path)
 	return TRUE;
 }
 
+#ifndef NOBATCH
 static bool batch_rename(const char *path)
 {
 	int fd1, fd2, i;
 	uint count = 0, lines = 0;
 	bool dir = FALSE, ret = FALSE;
 	char foriginal[TMP_LEN_MAX] = {0};
-	char buf[sizeof(patterns[P_BATCHRNM]) + (PATH_MAX << 1)];
+	static const char batchrenamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
+					     "tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
+	char buf[sizeof(batchrenamecmd) + (PATH_MAX << 1)];
 
 	i = get_cur_or_sel();
 	if (!i)
@@ -1950,7 +1950,7 @@ static bool batch_rename(const char *path)
 		goto finish;
 	}
 
-	snprintf(buf, sizeof(buf), patterns[P_BATCHRNM], foriginal, g_tmpfpath);
+	snprintf(buf, sizeof(buf), batchrenamecmd, foriginal, g_tmpfpath);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, path, F_CLI);
 	ret = TRUE;
 
@@ -1965,6 +1965,7 @@ finish:
 
 	return ret;
 }
+#endif
 
 static void get_archive_cmd(char *cmd, const char *archive)
 {
@@ -5708,7 +5709,11 @@ nochange:
 
 				if (!(getutil(utils[UTIL_BASH])
 				      && plugscript(utils[UTIL_NMV], newpath, path, F_CLI))
+#ifndef NOBATCH
 				    && !batch_rename(path)) {
+#else
+				) {
+#endif
 					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;
 				}
