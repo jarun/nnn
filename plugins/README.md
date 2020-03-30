@@ -133,7 +133,8 @@ Notes:
 | Key:Command | Description |
 |---|---|
 | `k:-_fuser -kiv $nnn*` | Interactively kill process(es) using hovered file |
-| `l:_git log` | Show git log |
+| `g:-_git diff*` | Show git diff |
+| `l:-_git log*` | Show git log |
 | `n:-_vi /home/user/Dropbox/dir/note*` | Take quick notes in a synced file/dir of notes |
 | `p:-_less -iR $nnn*` | Page through hovered file in less |
 | `s:-_\|smplayer -minigui $nnn` | Play hovered media file, even unfinished download |

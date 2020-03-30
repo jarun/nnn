@@ -399,8 +399,9 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define STATE_MSG 0x20
 #define STATE_TRASH 0x40
 #define STATE_FORCEQUIT 0x80
+#define STATE_FORTUNE 0x100
 
-static uchar g_states;
+static uint g_states;
 
 /* Options to identify file mime */
 #if defined(__APPLE__)
@@ -4131,6 +4132,9 @@ static void show_help(const char *path)
 		return;
 	}
 
+	if ((g_states & STATE_FORTUNE) && getutil("fortune"))
+		pipetof("fortune -s", fp);
+
 	start = end = helpstr;
 	while (*end) {
 		if (*end == '\n') {
@@ -6575,6 +6579,7 @@ static void usage(void)
 #ifndef NORL
 		" -f      use readline history file\n"
 #endif
+		" -F      show fortune\n"
 		" -g      regex filters [default: string]\n"
 		" -H      show hidden files\n"
 		" -K      detect key collision\n"
@@ -6739,7 +6744,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "Ab:cdeEfgHKnop:QrRs:St:T:Vxh"))) != -1) {
+		       : getopt(argc, argv, "Ab:cdeEfFgHKnop:QrRs:St:T:Vxh"))) != -1) {
 		switch (opt) {
 		case 'A':
 			cfg.autoselect = 0;
@@ -6768,6 +6773,9 @@ int main(int argc, char *argv[])
 #ifndef NORL
 			rlhist = TRUE;
 #endif
+			break;
+		case 'F':
+			g_states |= STATE_FORTUNE;
 			break;
 		case 'g':
 			cfg.regex = 1;
