@@ -2138,7 +2138,7 @@ static int xstrverscasecmp(const char * const s1, const char * const s2)
 		state += (c1 == '0') + (xisdigit(c1) != 0);
 	}
 
-	state = result_type[state * 3 + (((c2 == '0') + (xisdigit(c2) != 0)))];
+	state = (uchar)result_type[state * 3 + (((c2 == '0') + (xisdigit(c2) != 0)))];
 
 	switch (state) {
 	case VCMP:
@@ -2609,7 +2609,8 @@ static int filterentries(char *path, char *lastname)
 
 			/* toggle string or regex filter */
 			if (*ch == FILTER) {
-				wln[0] = ln[0] = (ln[0] == FILTER) ? RFILTER : FILTER;
+				ln[0] = (ln[0] == FILTER) ? RFILTER : FILTER;
+				wln[0] = (uchar)ln[0];
 				cfg.regex ^= 1;
 				filterfn = (filterfn == &visible_str) ? &visible_re : &visible_str;
 				showfilter(ln);
@@ -2998,7 +2999,7 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 
 	while (*ptr && i < maxitems) {
 		if (ptr == nextkey) {
-			kvarr[i].key = *ptr;
+			kvarr[i].key = (uchar)*ptr;
 			if (*++ptr != ':')
 				return FALSE;
 			if (*++ptr == '\0')
@@ -6733,7 +6734,7 @@ int main(int argc, char *argv[])
 	if (middle_click_env[0] == '^' && middle_click_env[1])
 		middle_click_key = CONTROL(middle_click_env[1]);
 	else
-		middle_click_key = middle_click_env[0];
+		middle_click_key = (uchar)middle_click_env[0];
 #endif
 	const char* const env_opts = xgetenv(env_cfg[NNN_OPTS], NULL);
 	int env_opts_id = env_opts ? (int)strlen(env_opts) : -1;
@@ -6834,7 +6835,7 @@ int main(int argc, char *argv[])
 			break;
 		case 'T':
 			if (env_opts_id < 0)
-				sort = optarg[0];
+				sort = (uchar)optarg[0];
 			break;
 		case 'V':
 			fprintf(stdout, "%s\n", VERSION);
