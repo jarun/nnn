@@ -1710,7 +1710,6 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 		if (flag & F_NORMAL) {
 			if (flag & F_CONFIRM) {
 				printf("%s", messages[MSG_CONTINUE]);
-				fflush(stdout);
 				while (getchar() != '\n');
 			}
 			refresh();
@@ -6212,7 +6211,7 @@ nochange:
 #ifndef NORL
 				} else {
 					presel = 0;
-					tmp = getreadline(">>> ", path, ipath, &presel);
+					tmp = getreadline("\n>>> ", path, ipath, &presel);
 					if (presel == MSGWAIT)
 						goto nochange;
 				}
