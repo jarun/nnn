@@ -2,6 +2,7 @@ VERSION = $(shell grep -m1 VERSION $(SRC) | cut -f 2 -d'"')
 
 PREFIX ?= /usr/local
 MANPREFIX ?= $(PREFIX)/share/man
+DESKTOPPREFIX ?= $(PREFIX)/share/applications
 STRIP ?= strip
 PKG_CONFIG ?= pkg-config
 INSTALL ?= install
@@ -81,6 +82,7 @@ DISTFILES = src nnn.1 Makefile README.md LICENSE
 SRC = src/nnn.c
 HEADERS = src/nnn.h
 BIN = nnn
+DESKTOPFILE = misc/desktop/nnn.desktop
 
 all: $(BIN)
 
@@ -91,6 +93,13 @@ $(BIN): $(SRC) $(HEADERS)
 debug: $(BIN)
 norl: $(BIN)
 noloc: $(BIN)
+
+install-desktop: $(DESKTOPFILE)
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)
+	$(INSTALL) -m 0644 $(DESKTOPFILE) $(DESTDIR)$(DESKTOPPREFIX)
+
+uninstall-desktop:
+	$(RM) $(DESTDIR)$(DESKTOPPREFIX)/$(DESKTOPFILE)
 
 install: all
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
@@ -135,4 +144,4 @@ clean:
 
 skip: ;
 
-.PHONY: all install uninstall strip static dist sign upload-local clean
+.PHONY: all install uninstall strip static dist sign upload-local clean install-desktop uninstall-desktop
