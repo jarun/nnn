@@ -4617,10 +4617,7 @@ static void populate(char *path, char *lastname)
 
 	/* Find cur from history */
 	/* No NULL check for lastname, always points to an array */
-	if (!*lastname)
-		move_cursor(0, 0);
-	else
-		move_cursor(dentfind(lastname, ndents), 0);
+	move_cursor(*lastname ? dentfind(lastname, ndents) : 0, 0);
 
 	// Force full redraw
 	last_curscroll = -1;

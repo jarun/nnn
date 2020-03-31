@@ -32,5 +32,9 @@ if [ -n "$sel" ]; then
 
     # Remove "./" prefix if it exists
     sel="${sel#./}"
-	nnn_cd "$PWD/$sel"
+    if [ "$PWD" = "/" ]; then
+	    nnn_cd "/$sel"
+    else
+	    nnn_cd "$PWD/$sel"
+    fi
 fi
