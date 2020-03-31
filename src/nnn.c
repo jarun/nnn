@@ -701,7 +701,7 @@ static void move_cursor(int target, int ignore_scrolloff);
 static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
 static char *xgetenv(const char *name, char *fallback);
-static bool plugscript(const char *plugin, char *newpath, const char *path, uchar flags);
+static bool plugscript(const char *plugin, const char *path, uchar flags);
 
 /* Functions */
 
@@ -4183,7 +4183,7 @@ static void show_help(const char *path)
 	unlink(g_tmpfpath);
 }
 
-static bool run_cmd_as_plugin(const char *path, const char *file, char *newpath, char *runfile)
+static bool run_cmd_as_plugin(const char *path, const char *file, char *runfile)
 {
 	uchar flags = F_CLI | F_CONFIRM;
 	size_t len;
@@ -4203,21 +4203,21 @@ static bool run_cmd_as_plugin(const char *path, const char *file, char *newpath,
 			return FALSE;
 	}
 
-	xstrlcpy(newpath, file, PATH_MAX);
+	xstrlcpy(g_buf, file, PATH_MAX);
 
-	len = strlen(newpath);
-	if (len > 1 && newpath[len - 1] == '*') {
+	len = strlen(g_buf);
+	if (len > 1 && g_buf[len - 1] == '*') {
 		flags &= ~F_CONFIRM; /* Skip user confirmation */
-		newpath[len - 1] = '\0'; /* Get rid of trailing no confirmation symbol */
+		g_buf[len - 1] = '\0'; /* Get rid of trailing no confirmation symbol */
 		--len;
 	}
 
-	if (is_suffix(newpath, " $nnn"))
-		newpath[len - 5] = '\0'; /* Set `\0` to clear ' $nnn' suffix */
+	if (is_suffix(g_buf, " $nnn"))
+		g_buf[len - 5] = '\0'; /* Set `\0` to clear ' $nnn' suffix */
 	else
 		runfile = NULL;
 
-	spawn(newpath, runfile, NULL, path, flags);
+	spawn(g_buf, runfile, NULL, path, flags);
 	return TRUE;
 }
 
@@ -4236,13 +4236,13 @@ static bool plctrl_init(void)
 	return _SUCCESS;
 }
 
-static bool run_selected_plugin(char **path, const char *file, char *newpath, char *runfile, char **lastname, char **lastdir)
+static bool run_selected_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir)
 {
 	int fd;
 	size_t len;
 
 	if (*file == '_')
-		return run_cmd_as_plugin(*path, file, newpath, runfile);
+		return run_cmd_as_plugin(*path, file, runfile);
 
 	if (!(g_states & STATE_PLUGIN_INIT)) {
 		plctrl_init();
@@ -4254,13 +4254,13 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 		return FALSE;
 
 	/* Generate absolute path to plugin */
-	mkpath(plugindir, file, newpath);
+	mkpath(plugindir, file, g_buf);
 
 	if (runfile && runfile[0]) {
 		xstrlcpy(*lastname, runfile, NAME_MAX);
-		spawn(newpath, *lastname, *path, *path, F_NORMAL);
+		spawn(g_buf, *lastname, *path, *path, F_NORMAL);
 	} else
-		spawn(newpath, NULL, *path, *path, F_NORMAL);
+		spawn(g_buf, NULL, *path, *path, F_NORMAL);
 
 	len = read(fd, g_buf, PATH_MAX);
 	g_buf[len] = '\0';
@@ -4287,11 +4287,11 @@ static bool run_selected_plugin(char **path, const char *file, char *newpath, ch
 	return TRUE;
 }
 
-static bool plugscript(const char *plugin, char *newpath, const char *path, uchar flags)
+static bool plugscript(const char *plugin, const char *path, uchar flags)
 {
-	mkpath(plugindir, plugin, newpath);
-	if (!access(newpath, X_OK)) {
-		spawn(newpath, NULL, NULL, path, flags);
+	mkpath(plugindir, plugin, g_buf);
+	if (!access(g_buf, X_OK)) {
+		spawn(g_buf, NULL, NULL, path, flags);
 		return TRUE;
 	}
 
@@ -5417,8 +5417,7 @@ nochange:
 						rundir[0] = '\0';
 
 						if (!run_selected_plugin(&path, dents[cur].name,
-									 newpath, runfile, &lastname,
-									 &lastdir)) {
+									 runfile, &lastname, &lastdir)) {
 							DPRINTF_S("plugin failed!");
 						}
 
@@ -5706,7 +5705,7 @@ nochange:
 				endselection();
 
 				if (!(getutil(utils[UTIL_BASH])
-				      && plugscript(utils[UTIL_NMV], newpath, path, F_CLI))
+				      && plugscript(utils[UTIL_NMV], path, F_CLI))
 #ifndef NOBATCH
 				    && !batch_rename(path)) {
 #else
@@ -5772,7 +5771,7 @@ nochange:
 			}
 
 			if (cfg.x11)
-				plugscript(utils[UTIL_CBCP], newpath, NULL, F_NOWAIT | F_NOTRACE);
+				plugscript(utils[UTIL_CBCP], NULL, F_NOWAIT | F_NOTRACE);
 
 			if (!nselected)
 				unlink(selpath);
@@ -5848,7 +5847,7 @@ nochange:
 
 			writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			if (cfg.x11)
-				plugscript(utils[UTIL_CBCP], newpath, NULL, F_NOWAIT | F_NOTRACE);
+				plugscript(utils[UTIL_CBCP], NULL, F_NOWAIT | F_NOTRACE);
 			continue;
 		case SEL_SELEDIT:
 			r = editselection();
@@ -5857,7 +5856,7 @@ nochange:
 				printwait(messages[r], &presel);
 			} else {
 				if (cfg.x11)
-					plugscript(utils[UTIL_CBCP], newpath, NULL, F_NOWAIT | F_NOTRACE);
+					plugscript(utils[UTIL_CBCP], NULL, F_NOWAIT | F_NOTRACE);
 				cfg.filtermode ?  presel = FILTER : statusbar(path);
 			}
 			goto nochange;
@@ -5911,11 +5910,8 @@ nochange:
 			clearfilter();
 
 			/* Show notification on operation complete */
-			if (cfg.x11) {
-				/* rundir is used as tmp var, note that we MUST clear it again */
-				plugscript(utils[UTIL_NTFY], rundir, NULL, F_NOWAIT | F_NOTRACE);
-				rundir[0] = '\0';
-			}
+			if (cfg.x11)
+				plugscript(utils[UTIL_NTFY], NULL, F_NOWAIT | F_NOTRACE);
 
 			if (newpath[0] && !access(newpath, F_OK))
 				xstrlcpy(lastname, xbasename(newpath), NAME_MAX+1);
@@ -6140,8 +6136,7 @@ nochange:
 				} else
 					r = TRUE;
 
-				if (!run_selected_plugin(&path, tmp, newpath,
-							 (ndents ? dents[cur].name : NULL),
+				if (!run_selected_plugin(&path, tmp, (ndents ? dents[cur].name : NULL),
 							 &lastname, &lastdir)) {
 					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;
