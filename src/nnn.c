@@ -5190,6 +5190,7 @@ static bool browse(char *ipath, const char *session)
 #ifndef NOMOUSE
 	MEVENT event;
 	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0} };
+	int mousedent[2] = {-1, -1};
 	bool currentmouse = 1;
 	bool rightclicksel = 0;
 #endif
@@ -5423,13 +5424,16 @@ nochange:
 				    CLOCK_REALTIME,
 #endif
 				    &mousetimings[currentmouse]);
+				mousedent[currentmouse] = cur;
 
-				/*Single click just selects, double click also opens */
-				if (((_ABSSUB(mousetimings[0].tv_sec, mousetimings[1].tv_sec) << 30)
-				  + (mousetimings[0].tv_nsec - mousetimings[1].tv_nsec))
-					> DOUBLECLICK_INTERVAL_NS)
+				/* Single click just selects, double click falls through to SEL_GOIN */
+				if ((mousedent[0] != mousedent[1]) ||
+				  (((_ABSSUB(mousetimings[0].tv_sec, mousetimings[1].tv_sec) << 30)
+				  + (_ABSSUB(mousetimings[0].tv_nsec, mousetimings[1].tv_nsec)))
+					> DOUBLECLICK_INTERVAL_NS))
 					break;
 				mousetimings[currentmouse].tv_sec = 0;
+				mousedent[currentmouse] = -1;
 			} else {
 				if (cfg.filtermode || filterset())
 					presel = FILTER;
