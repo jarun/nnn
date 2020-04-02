@@ -485,7 +485,7 @@ static char * const utils[] = {
 #define MSG_CP_MV_AS 7
 #define MSG_CUR_SEL_OPTS 8
 #define MSG_FORCE_RM 9
-#define MSG_CREATE_CTX 10
+#define MSG_LIMIT 10
 #define MSG_NEW_OPTS 11
 #define MSG_CLI_MODE 12
 #define MSG_OVERWRITE 13
@@ -518,9 +518,8 @@ static char * const utils[] = {
 #define MSG_RM_TMP 40
 #define MSG_NOCHNAGE 41
 #define MSG_CANCEL 42
-#define MSG_LIMIT 43
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 44 /* Must be the last entry */
+#define MSG_DIR_CHANGED 43 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -534,7 +533,7 @@ static const char * const messages[] = {
 	"'c'p / 'm'v as?",
 	"'c'urrent / 's'el?",
 	"rm -rf %s file%s?",
-	"create context %d?",
+	"limit exceeded\n",
 	"'f'ile / 'd'ir / 's'ym / 'h'ard?",
 	"'c'li / 'g'ui?",
 	"overwrite?",
@@ -567,7 +566,6 @@ static const char * const messages[] = {
 	"remove tmp file?",
 	"unchanged",
 	"cancelled",
-	"limit exceeded\n",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -4706,7 +4704,7 @@ static void handle_screen_move(enum action sel)
 	}
 }
 
-static int handle_context_switch(enum action sel, char *newpath)
+static int handle_context_switch(enum action sel)
 {
 	int r = -1;
 
@@ -4729,12 +4727,11 @@ static int handle_context_switch(enum action sel, char *newpath)
 			r = sel - SEL_CTX1; /* Save the next context id */
 
 		if (cfg.curctx == r) {
-			if (sel != SEL_CYCLE)
-				return -1;
-
-			(r == CTX_MAX - 1) ? (r = 0) : ++r;
-			snprintf(newpath, PATH_MAX, messages[MSG_CREATE_CTX], r + 1);
-			if (!xconfirm(get_input(newpath)))
+			if (sel == SEL_CYCLE)
+				(r == CTX_MAX - 1) ? (r = 0) : ++r;
+			else if (sel == SEL_CYCLER)
+				(r == 0) ? (r = CTX_MAX - 1) : --r;
+			else
 				return -1;
 		}
 
@@ -5573,7 +5570,7 @@ nochange:
 		case SEL_CTX2: // fallthrough
 		case SEL_CTX3: // fallthrough
 		case SEL_CTX4:
-			r = handle_context_switch(sel, newpath);
+			r = handle_context_switch(sel);
 			if (r < 0)
 				continue;
 			savecurctx(&cfg, path, dents[cur].name, r);
