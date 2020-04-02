@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+
+# Description: cd to any dir in the z database using an fzf pane
+#
+# Shell: POSIX compliant
+# Author: Nick Waywood
+
+. "$(dirname "$0")"/.nnn-plugin-helper
+
+if which fzf >/dev/null 2>&1; then
+    fuzzy=fzf
+elif which fzy >/dev/null 2>&1; then
+    fuzzy=fzy
+else
+    exit 1
+fi
+
+if [ -f "$HOME/.z" ]; then
+    # I read the data from z's file instead of calling the z command so that the data doesn't need to be processed twice
+    sel=$(awk -F "|" '{print $1}' "$HOME/.z" | "$fuzzy" | awk '{$1=$1};1')
+    # NOTE: Uncomment this line and comment out the line above if you want to see the weightings of the dir's in the fzf/fzy pane
+    # sel=$(awk -F "|" '{printf "%s %s\n", $2, $1}' "$HOME/.z" | "$fuzzy" | sed 's/^[0-9,.]* *//' | awk '{$1=$1};1')
+else
+    exit 1
+fi
+
+printf "%s" "0$sel" > "$NNN_PIPE"

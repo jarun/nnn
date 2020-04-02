@@ -33,9 +33,9 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | diffs | Diff for selection (limited to 2 for directories) | sh | vimdiff |
 | dragdrop | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
 | fzcd | Change to the directory of a fuzzy-selected file/dir | sh | fzf/fzy<br>fd/fdfind/find |
-| fzfz | Change to any directory in the z database with fzf | sh | fzf, z |
 | fzhist | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf/fzy |
 | fzopen | Fuzzy find a file in dir subtree and edit or open | sh | fzf/fzy, xdg-open |
+| fzz | Change to any directory in the z database with fzf/fzy | sh | fzf/fzy, z |
 | getplugs | Update plugins | sh | curl |
 | gutenread | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
 | hexview | View a file in hex in `$PAGER` | sh | xxd |
