@@ -19,7 +19,7 @@
 
 `nnn` is also a du analyzer, an app launcher, a batch renamer and a file picker. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further. You can _plug_ new functionality _and play_ with a hotkey. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
 
-It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
+It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw) (Android), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
 
 <p align="center">
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
@@ -147,7 +147,7 @@ Packages for Arch Linux, CentOS, Debian, Fedora and Ubuntu are auto-generated wi
 
 #### From source
 
-Download the latest stable release or clone this repository (*risky*), install deps and compile. On Ubuntu 18.04:
+Download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*), install deps and compile. On Ubuntu 18.04:
 
 ```sh
 sudo apt-get install pkg-config libncursesw5-dev libreadline-dev
@@ -183,4 +183,4 @@ Completion scripts for Bash, Fish and Zsh are [available](misc/auto-completion).
 - [Maxim Baz](https://github.com/maximbaz)
 - and other contributors
 
-`nnn` is actively developed. Visit the to the [ToDo list](https://github.com/jarun/nnn/issues/472) to contribute or see the features in progress.
+`nnn` is actively developed. Visit the to the [ToDo list](https://github.com/jarun/nnn/issues/506) to contribute or see the features in progress.
