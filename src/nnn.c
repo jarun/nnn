@@ -668,7 +668,6 @@ static haiku_nm_h haiku_hnd;
 /* Function macros */
 #define tolastln() move(xlines - 1, 0)
 #define exitcurses() endwin()
-#define clearprompt() printmsg("")
 #define printwarn(presel) printwait(strerror(errno), presel)
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
 #define copycurname() xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1)
@@ -789,8 +788,10 @@ static void clearoldprompt(void)
 static void printmsg(const char *msg)
 {
 	tolastln();
+	attron(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
 	addstr(msg);
-	addch('\n');
+	hline(' ', xcols);
+	attroff(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
 }
 
 static void printwait(const char *msg, int *presel)
@@ -814,13 +815,6 @@ static void printerr(int linenum)
 	exit(1);
 }
 
-/* Print prompt on the last line */
-static void printprompt(const char *str)
-{
-	clearprompt();
-	addstr(str);
-}
-
 static void printinfoln(const char *str)
 {
 	clearinfoln();
@@ -837,7 +831,7 @@ static int get_input(const char *prompt)
 	int r;
 
 	if (prompt)
-		printprompt(prompt);
+		printmsg(prompt);
 	cleartimeout();
 #ifdef KEY_RESIZE
 	do {
@@ -845,7 +839,7 @@ static int get_input(const char *prompt)
 		if (r == KEY_RESIZE && prompt) {
 			clearoldprompt();
 			xlines = LINES;
-			printprompt(prompt);
+			printmsg(prompt);
 		}
 	} while (r == KEY_RESIZE);
 #else
@@ -2415,7 +2409,7 @@ static void showfilterinfo(void)
 static void showfilter(char *str)
 {
 	showfilterinfo();
-	printprompt(str);
+	printmsg(str);
 }
 
 static inline void swap_ent(int id1, int id2)
@@ -2689,7 +2683,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 		errexit();
 
 	cleartimeout();
-	printprompt(prompt);
+	printmsg(prompt);
 
 	if (prefill) {
 		DPRINTF_S(prefill);
@@ -2707,8 +2701,10 @@ static char *xreadline(const char *prefill, const char *prompt)
 
 	while (1) {
 		buf[len] = ' ';
+		attron(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
 		mvaddnwstr(xlines - 1, x, buf, len + 1);
 		move(xlines - 1, x + wcswidth(buf, pos));
+		attroff(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
 
 		r = get_wch(ch);
 		if (r == ERR)
@@ -2747,7 +2743,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 					--pos;
 				continue;
 			case CONTROL('W'):
-				printprompt(prompt);
+				printmsg(prompt);
 				do {
 					if (pos == 0)
 						break;
@@ -2757,11 +2753,11 @@ static char *xreadline(const char *prefill, const char *prompt)
 				} while (buf[pos - 1] != ' ' && buf[pos - 1] != '/'); // NOLINT
 				continue;
 			case CONTROL('K'):
-				printprompt(prompt);
+				printmsg(prompt);
 				len = pos;
 				continue;
 			case CONTROL('L'):
-				printprompt(prompt);
+				printmsg(prompt);
 				len = pos = 0;
 				continue;
 			case CONTROL('A'):
@@ -2771,7 +2767,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 				pos = len;
 				continue;
 			case CONTROL('U'):
-				printprompt(prompt);
+				printmsg(prompt);
 				memmove(buf, buf + pos, (len - pos) * WCHAR_T_WIDTH);
 				len -= pos;
 				pos = 0;
@@ -2798,7 +2794,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 			case KEY_RESIZE:
 				clearoldprompt();
 				xlines = LINES;
-				printprompt(prompt);
+				printmsg(prompt);
 				break;
 #endif
 			case KEY_LEFT:
@@ -2838,7 +2834,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 END:
 	curs_set(FALSE);
 	settimeout();
-	clearprompt();
+	printmsg("");
 
 	buf[len] = '\0';
 
@@ -4066,7 +4062,7 @@ static size_t handle_bookmark(const char *mark, char *newpath)
 		++r;
 	}
 	printkeys(bookmark, g_buf + r - 1, maxbm);
-	printprompt(g_buf);
+	printmsg(g_buf);
 
 	r = FALSE;
 	fd = get_input(NULL);
@@ -4353,7 +4349,8 @@ static blkcnt_t dirwalk(char *path, struct stat *psb)
 	ent_blocks = 0;
 	tolastln();
 	addstr(xbasename(path));
-	addstr(" [^C aborts]\n");
+	addstr(" [^C aborts]");
+	hline(' ', xcols);
 	refresh();
 
 	if (nftw(path, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) < 0) {
@@ -4402,6 +4399,8 @@ static int dentfill(char *path, struct entry **dents)
 				goto exit;
 		} else
 			clear_hash();
+
+		attron(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
 	}
 
 #if _POSIX_C_SOURCE >= 200112L
@@ -4575,6 +4574,9 @@ static int dentfill(char *path, struct entry **dents)
 	} while ((dp = readdir(dirp)));
 
 exit:
+	if (cfg.blkorder)
+		attroff(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
+
 	/* Should never be null */
 	if (closedir(dirp) == -1)
 		errexit();
@@ -4890,6 +4892,7 @@ static void statusbar(char *path)
 		ptr = "\b";
 
 	tolastln();
+	attron(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
 
 	if (cfg.blkorder) { /* du mode */
 		char buf[24];
@@ -4921,7 +4924,8 @@ static void statusbar(char *path)
 		addstr(ptr);
 	}
 
-	addch('\n');
+	hline(' ', xcols);
+	attroff(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
 }
 
 static int adjust_cols(int ncols)
@@ -6121,7 +6125,7 @@ nochange:
 
 			r = xstrlcpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
 			printkeys(plug, g_buf + r - 1, maxplug);
-			printprompt(g_buf);
+			printmsg(g_buf);
 			r = get_input(NULL);
 			if (r != '\r') {
 				endselection();
