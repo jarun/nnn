@@ -400,6 +400,7 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define STATE_TRASH 0x40
 #define STATE_FORCEQUIT 0x80
 #define STATE_FORTUNE 0x100
+#define STATE_NOCOLOR 0x200
 
 static uint g_states;
 
@@ -1522,18 +1523,21 @@ static bool initcurses(void *oldmask)
 	mouseinterval(0);
 #endif
 	curs_set(FALSE); /* Hide cursor */
-	start_color();
-	use_default_colors();
 
-	/* Get and set the context colors */
-	for (i = 0; i <  CTX_MAX; ++i) {
-		if (*colors) {
-			g_ctx[i].color = (*colors < '0' || *colors > '7') ? 4 : *colors - '0';
-			++colors;
-		} else
-			g_ctx[i].color = 4;
+	if (!(g_states & STATE_NOCOLOR)) {
+		start_color();
+		use_default_colors();
 
-		init_pair(i + 1, g_ctx[i].color, -1);
+		/* Get and set the context colors */
+		for (i = 0; i <  CTX_MAX; ++i) {
+			if (*colors) {
+				g_ctx[i].color = (*colors < '0' || *colors > '7') ? 4 : *colors - '0';
+				++colors;
+			} else
+				g_ctx[i].color = 4;
+
+			init_pair(i + 1, g_ctx[i].color, -1);
+		}
 	}
 
 	settimeout(); /* One second */
@@ -3206,7 +3210,7 @@ static char get_ind(mode_t mode, bool perms)
 			return '*';
 		return '\0';
 	case S_IFDIR:
-		return perms ? 'd' : '\0';
+		return perms ? 'd' : '/';
 	case S_IFLNK:
 		return perms ? 'l' : '@';
 	case S_IFSOCK:
@@ -3303,16 +3307,19 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	addch('0' + (ent->mode & 7));
 
 	switch (ent->mode & S_IFMT) {
-	case S_IFREG:
-		if (ent->flags & HARD_LINK)
-			ln = TRUE;
-
-		if (ent->mode & 0100)
-			ind2 = '*';
-		// fallthrough
 	case S_IFDIR:
-		if (!ind2) /* Add a column if end indicator is not needed */
-			++namecols;
+		ind2 = '/'; // fallthrough
+	case S_IFREG:
+		if (!ind2) {
+			if (ent->flags & HARD_LINK)
+				ln = TRUE;
+
+			if (ent->mode & 0100)
+				ind2 = '*';
+
+			if (!ind2) /* Add a column if end indicator is not needed */
+				++namecols;
+		}
 
 		size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
 		len = 10 - (uint)strlen(size);
@@ -6577,6 +6584,7 @@ static void usage(void)
 		" -A      no dir auto-select\n"
 		" -b key  open bookmark key\n"
 		" -c      cli-only opener (overrides -e)\n"
+		" -C      disable color\n"
 		" -d      detail mode\n"
 		" -e      text in $VISUAL/$EDITOR/vi\n"
 		" -E      use EDITOR for undetached edits\n"
@@ -6748,7 +6756,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "Ab:cdeEfFgHKnop:QrRs:St:T:Vxh"))) != -1) {
+		       : getopt(argc, argv, "Ab:cCdeEfFgHKnop:QrRs:St:T:Vxh"))) != -1) {
 		switch (opt) {
 		case 'A':
 			cfg.autoselect = 0;
@@ -6758,6 +6766,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'c':
 			cfg.cliopener = 1;
+			break;
+		case 'C':
+			g_states |= STATE_NOCOLOR;
 			break;
 		case 'S':
 			cfg.blkorder = 1;

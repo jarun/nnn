@@ -12,6 +12,7 @@ args=(
     '(-A)-A[disable dir auto-select]'
     '(-b)-b[bookmark key to open]:key char'
     '(-c)-c[cli-only opener]'
+    '(-C)-C[disable color]'
     '(-d)-d[start in detail mode]'
     '(-e)-e[open text files in $VISUAL/$EDITOR/vi]'
     '(-E)-E[use EDITOR for undetached edits]'
