@@ -5016,6 +5016,8 @@ static void redraw(char *path)
 
 	/* Fail redraw if < than 10 columns, context info prints 10 chars */
 	if (ncols < MIN_DISPLAY_COLS) {
+		/* Clear from last entry to end */
+		clrtobot();
 		printmsg(messages[MSG_FEW_COLUMNS]);
 		return;
 	}
