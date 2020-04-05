@@ -221,7 +221,7 @@ typedef struct entry {
 	off_t size;
 	blkcnt_t blocks; /* number of 512B blocks allocated */
 	mode_t mode;
-	ushort nlen; /* Length of file name; can be uchar (< NAME_MAX + 1) */
+	ushort nlen; /* Length of file name */
 	uchar flags; /* Flags specific to the file */
 } *pEntry;
 
@@ -3719,13 +3719,10 @@ static void handle_archive(char *fpath, const char *dir, char op)
 			arg[1] = op;
 	}
 
-	if (op == 'x') { /* extract */
+	if (op == 'x') /* extract */
 		spawn(util, arg, fpath, dir, F_NORMAL);
-	} else { /* list */
-		exitcurses();
+	else /* list */
 		get_output(NULL, 0, util, arg, fpath, TRUE);
-		refresh();
-	}
 }
 
 static char *visit_parent(char *path, char *newpath, int *presel)
