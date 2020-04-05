@@ -3260,6 +3260,8 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 {
 	char ind = get_ind(ent->mode, FALSE);
 	int attrs = ((ind == '@' || (ent->flags & HARD_LINK)) ? A_DIM : 0) | (sel ? A_REVERSE : 0);
+	if (ind == '@' && (ent->flags & DIR_OR_LINK_TO_DIR))
+		ind = '/';
 
 	if (!ind)
 		++namecols;
