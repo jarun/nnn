@@ -400,7 +400,6 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define STATE_TRASH 0x40
 #define STATE_FORCEQUIT 0x80
 #define STATE_FORTUNE 0x100
-#define STATE_NOCOLOR 0x200
 
 static uint g_states;
 
@@ -1489,9 +1488,6 @@ static void export_file_list(void)
 /* Initialize curses mode */
 static bool initcurses(void *oldmask)
 {
-	short i;
-	char *colors = xgetenv(env_cfg[NNN_COLORS], "4444");
-
 #ifdef NOMOUSE
 	(void) oldmask;
 #endif
@@ -1524,7 +1520,10 @@ static bool initcurses(void *oldmask)
 #endif
 	curs_set(FALSE); /* Hide cursor */
 
-	if (!(g_states & STATE_NOCOLOR || getenv("NO_COLOR"))) {
+	if (!getenv("NO_COLOR")) {
+		short i;
+		char *colors = xgetenv(env_cfg[NNN_COLORS], "4444");
+
 		start_color();
 		use_default_colors();
 
@@ -6588,7 +6587,6 @@ static void usage(void)
 		" -A      no dir auto-select\n"
 		" -b key  open bookmark key\n"
 		" -c      cli-only opener (overrides -e)\n"
-		" -C      disable color\n"
 		" -d      detail mode\n"
 		" -e      text in $VISUAL/$EDITOR/vi\n"
 		" -E      use EDITOR for undetached edits\n"
@@ -6760,7 +6758,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "Ab:cCdeEfFgHKnop:QrRs:St:T:Vxh"))) != -1) {
+		       : getopt(argc, argv, "Ab:cdeEfFgHKnop:QrRs:St:T:Vxh"))) != -1) {
 		switch (opt) {
 		case 'A':
 			cfg.autoselect = 0;
@@ -6770,9 +6768,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'c':
 			cfg.cliopener = 1;
-			break;
-		case 'C':
-			g_states |= STATE_NOCOLOR;
 			break;
 		case 'S':
 			cfg.blkorder = 1;

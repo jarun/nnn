@@ -14,7 +14,6 @@ end
 complete -c nnn -s A    -d 'disable dir auto-select'
 complete -c nnn -s b -r -d 'bookmark key to open' -x -a '(echo $NNN_BMS | awk -F: -v RS=\; \'{print $1"\t"$2}\')'
 complete -c nnn -s c    -d 'cli-only opener'
-complete -c nnn -s C    -d 'disable color'
 complete -c nnn -s d    -d 'start in detail mode'
 complete -c nnn -s e    -d 'open text files in $VISUAL/$EDITOR/vi'
 complete -c nnn -s E    -d 'use EDITOR for undetached edits'
