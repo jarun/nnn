@@ -6042,9 +6042,11 @@ nochange:
 				/* Skip renaming to same name */
 				if (strcmp(tmp, dents[cur].name) == 0) {
 					tmp = xreadline(dents[cur].name, messages[MSG_COPY_NAME]);
-					if (strcmp(tmp, dents[cur].name) == 0)
+					if (!tmp || !tmp[0] || !strcmp(tmp, dents[cur].name)) {
+						cfg.filtermode ?  presel = FILTER : statusbar(path);
+						copycurname();
 						goto nochange;
-
+					}
 					ret = 'd';
 				}
 				break;
