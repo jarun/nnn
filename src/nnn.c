@@ -1524,7 +1524,7 @@ static bool initcurses(void *oldmask)
 #endif
 	curs_set(FALSE); /* Hide cursor */
 
-	if (!(g_states & STATE_NOCOLOR)) {
+	if (!(g_states & STATE_NOCOLOR || getenv("NO_COLOR"))) {
 		start_color();
 		use_default_colors();
 
