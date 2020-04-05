@@ -556,7 +556,7 @@ static const char * const messages[] = {
 	"'s'shfs / 'r'clone?",
 	"refresh if slow",
 	"app name: ",
-	"'d'efault / e'x'tract / 'l'ist / 'm'ount?",
+	"'d'efault / 'e'xtract / 'l'ist / 'm'ount?",
 	"plugin keys:",
 	"bookmark keys:",
 	"invalid regex",
@@ -785,12 +785,17 @@ static void clearoldprompt(void)
 #endif
 
 /* Messages show up at the bottom */
-static void printmsg(const char *msg)
+static inline void printmsg_nc(const char *msg)
 {
 	tolastln();
-	attron(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
 	addstr(msg);
 	hline(' ', xcols);
+}
+
+static void printmsg(const char *msg)
+{
+	attron(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
+	printmsg_nc(msg);
 	attroff(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
 }
 
