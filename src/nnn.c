@@ -2619,14 +2619,15 @@ static int filterentries(char *path, char *lastname)
 				showfilter(ln);
 				continue;
 			}
-		}
 
-		/* Reset cur in case it's a repeat search */
-		if (len == 1)
+			/* Reset cur in case it's a repeat search */
 			cur = 0;
-
-		if (len == REGEX_MAX - 1)
+		} else if (len == REGEX_MAX - 1) {
+			printmsg(messages[MSG_LIMIT]);
+			xdelay(XDELAY_INTERVAL_MS);
+			*ch = MSGWAIT;
 			break;
+		}
 
 		wln[len] = (wchar_t)*ch;
 		wln[++len] = '\0';
