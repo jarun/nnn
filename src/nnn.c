@@ -2622,12 +2622,8 @@ static int filterentries(char *path, char *lastname)
 
 			/* Reset cur in case it's a repeat search */
 			cur = 0;
-		} else if (len == REGEX_MAX - 1) {
-			printmsg(messages[MSG_LIMIT]);
-			xdelay(XDELAY_INTERVAL_MS);
-			*ch = MSGWAIT;
-			break;
-		}
+		} else if (len == REGEX_MAX - 1)
+			continue;
 
 		wln[len] = (wchar_t)*ch;
 		wln[++len] = '\0';
