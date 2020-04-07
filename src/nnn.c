@@ -556,7 +556,7 @@ static const char * const messages[] = {
 	"'s'shfs / 'r'clone?",
 	"refresh if slow",
 	"app name: ",
-	"'d'efault / 'e'xtract / 'l'ist / 'm'ount?",
+	"'d'efault / e'x'tract / 'l'ist / 'm'ount?",
 	"plugin keys:",
 	"bookmark keys:",
 	"invalid regex",
