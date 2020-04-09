@@ -4992,7 +4992,7 @@ static void redraw(char *path)
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int onscreen = xlines - 4;
-	int i;
+	int i, attrs;
 	char *ptr = path;
 
 	// Fast redraw
@@ -5026,9 +5026,9 @@ static void redraw(char *path)
 		if (!g_ctx[i].c_cfg.ctxactive) {
 			addch(i + '1');
 		} else {
-			int attrs = (cfg.curctx != i)
-				     ? (COLOR_PAIR(i + 1) | A_BOLD | A_UNDERLINE) /* Active */
-				     : (COLOR_PAIR(i + 1) | A_BOLD | A_REVERSE); /* Current */
+			attrs = COLOR_PAIR(i + 1) | A_BOLD
+				/* active: underline, current: reverse */
+				| ((cfg.curctx != i) ? A_UNDERLINE : A_REVERSE );
 			attron(attrs);
 			addch(i + '1');
 			attroff(attrs);
