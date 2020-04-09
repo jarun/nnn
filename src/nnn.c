@@ -789,14 +789,14 @@ static inline void printmsg_nc(const char *msg)
 {
 	tolastln();
 	addstr(msg);
-	hline(' ', xcols);
+	addch('\n');
 }
 
 static void printmsg(const char *msg)
 {
-	attron(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
+	attron(COLOR_PAIR(cfg.curctx + 1));
 	printmsg_nc(msg);
-	attroff(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
+	attroff(COLOR_PAIR(cfg.curctx + 1));
 }
 
 static void printwait(const char *msg, int *presel)
@@ -2706,10 +2706,10 @@ static char *xreadline(const char *prefill, const char *prompt)
 
 	while (1) {
 		buf[len] = ' ';
-		attron(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
+		attron(COLOR_PAIR(cfg.curctx + 1));
 		mvaddnwstr(xlines - 1, x, buf, len + 1);
 		move(xlines - 1, x + wcswidth(buf, pos));
-		attroff(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
+		attroff(COLOR_PAIR(cfg.curctx + 1));
 
 		r = get_wch(ch);
 		if (r == ERR)
@@ -4356,8 +4356,7 @@ static blkcnt_t dirwalk(char *path, struct stat *psb)
 	ent_blocks = 0;
 	tolastln();
 	addstr(xbasename(path));
-	addstr(" [^C aborts]");
-	hline(' ', xcols);
+	addstr(" [^C aborts]\n");
 	refresh();
 
 	if (nftw(path, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) < 0) {
@@ -4407,7 +4406,7 @@ static int dentfill(char *path, struct entry **dents)
 		} else
 			clear_hash();
 
-		attron(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
+		attron(COLOR_PAIR(cfg.curctx + 1));
 	}
 
 #if _POSIX_C_SOURCE >= 200112L
@@ -4582,7 +4581,7 @@ static int dentfill(char *path, struct entry **dents)
 
 exit:
 	if (cfg.blkorder)
-		attroff(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
+		attroff(COLOR_PAIR(cfg.curctx + 1));
 
 	/* Should never be null */
 	if (closedir(dirp) == -1)
@@ -4899,14 +4898,14 @@ static void statusbar(char *path)
 		ptr = "\b";
 
 	tolastln();
-	attron(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
+	attron(COLOR_PAIR(cfg.curctx + 1));
 
 	if (cfg.blkorder) { /* du mode */
 		char buf[24];
 
 		xstrlcpy(buf, coolsize(dir_blocks << blk_shift), 12);
 
-		printw("%d/%d [%s:%s] %cu:%s free:%s files:%lu %lldB %s",
+		printw("%d/%d [%s:%s] %cu:%s free:%s files:%lu %lldB %s\n",
 		       cur + 1, ndents, (cfg.selmode ? "s" : ""),
 		       ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
 		       (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
@@ -4916,7 +4915,7 @@ static void statusbar(char *path)
 
 		getorderstr(sort);
 
-		printw("%d/%d [%s:%s] %s", cur + 1, ndents, (cfg.selmode ? "s" : ""),
+		printw("%d/%d [%s:%s] %s\n", cur + 1, ndents, (cfg.selmode ? "s" : ""),
 			 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
 			 sort);
 
@@ -4931,8 +4930,7 @@ static void statusbar(char *path)
 		addstr(ptr);
 	}
 
-	hline(' ', xcols);
-	attroff(COLOR_PAIR(cfg.curctx + 1) | A_REVERSE);
+	attroff(COLOR_PAIR(cfg.curctx + 1));
 }
 
 static int adjust_cols(int ncols)
