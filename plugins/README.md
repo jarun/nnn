@@ -10,7 +10,7 @@
 
 Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or binaries) which `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins.
 
-`nnn` is language-agnostic when it comes to plugins. You can write a plugin in any (scripting) language you are comfortable in!
+`nnn` is _**language-agnostic**_ when it comes to plugins. You can write a plugin in any (scripting) language you are comfortable in!
 
 ## Installing plugins
 
@@ -51,7 +51,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | mocplay | Append (and/or play) selection/dir/file in moc | sh | [moc](http://moc.daper.net/) |
 | mp3conv | Extract audio from multimedia as mp3 | sh | ffmpeg |
 | nmount | Toggle mount status of a device as normal user | sh | pmount, udisks2 |
-| nuke | Sample file opener (CLI-only by default) | sh | various |
+| nuke | Sample file opener (CLI-only by default) | sh | _see in-file docs_ |
 | oldbigfile | List large files by access time | sh | find, sort |
 | organize | Auto-organize files in directories by file type | sh | file |
 | pdfread | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
