@@ -22,35 +22,36 @@
 
 It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw) (Android), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
 
-Once installed (instructions below), visit the [Wiki](https://github.com/jarun/nnn/wiki).
+## Black magic! :dark_sunglasses:
 
-## Black magic!
+1. Load and filter thousands of files instantly
+2. Turbo navigate with automatic dir selection
+3. Select files from anywhere (not just a single dir)
+4. Run custom commands with custom hotkeys
+5. Edit and preview markdown, man page, html
+6. Open a file and auto-proceed to the next
+7. Export (filtered) list of visible files
+8. Find files by mime-type and list in `nnn`
+9. Write a plugin in any language you know
+10. Configure the middle mouse click to do anything
+11. Fuzzy search subtree and open the dir of a file
+12. Load four dirs with custom settings at once
+13. Show notifications on cp, mv completion
+14. Auto-sync selection to system clipboard
+15. Open text files detached in another pane/tab/window
+16. Create files/dirs/duplicates with parents (like `mkdir -p`)
+17. Toggle hidden with <kbd>.</kbd>, go HOME with <kbd>~</kbd> or to the last dir with <kbd>-</kbd>
+18. Pin a frequently visited dir at runtime
+19. Mount any cloud storage service in a few keypresses
+20. Mount and modify archives
+21. Filter filtered entries
+22. Sort files by access time and inode change time
+23. Access selection from another instance of `nnn`
+24. Compile out features you don't need
+25. Watch matrix text fly or read fortune messages
+26. Configure it in 5 minutes!
 
-1. Turbo navigate with automatic dir selection
-2. Select files from anywhere (not just a single dir)
-3. Run custom commands with custom hotkeys
-4. Edit and preview markdown, man page, html quickly
-5. Open a file and auto-proceed to the next
-6. Export (filtered) list of files to a text file
-7. Find files by mime-type and list in `nnn`
-8. Write a plugin in any language you know
-9. Configure the middle mouse click to do anything
-10. Fuzzy search subtree and open the directory of a file
-11. Load four dirs with custom settings at once
-12. Show notifications on cp, mv completion
-13. Auto-sync selection to system clipboard
-14. Open text files detached in another pane/tab/window
-15. Create files/dirs/duplicates with parents (like `mkdir -p`)
-16. Toggle hidden with <kbd>.</kbd>, go HOME with <kbd>~</kbd> or to the last dir with <kbd>-</kbd>
-17. Pin a frequently visited directory at runtime
-18. Mount any cloud storage service in few keypresses
-19. Mount and modify archives
-20. Filter filtered entries
-21. Sort files by access time and inode change time
-22. Access selection from another instance of `nnn`
-23. Compile out features you don't need
-24. Watch matrix text flying or read random fortune messages
-25. Configure it in 5 minutes!
+Once installed (instructions below), _**read the fine [manual](https://github.com/jarun/nnn/wiki)**_.
 
 ## Features
 

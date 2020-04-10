@@ -539,7 +539,7 @@ static const char * const messages[] = {
 	"overwrite?",
 	"'s'ave / 'l'oad / 'r'estore?",
 	"Quit all contexts?",
-	"remote name: ",
+	"remote name ('-' for hovered): ",
 	"archive name: ",
 	"open with: ",
 	"relative path: ",
@@ -3892,7 +3892,7 @@ static bool archive_mount(char *path, char *newpath)
 	return TRUE;
 }
 
-static bool remote_mount(char *newpath)
+static bool remote_mount(char *newpath, char *currentpath)
 {
 	uchar flag = F_CLI;
 	int opt;
@@ -3926,6 +3926,15 @@ static bool remote_mount(char *newpath)
 	if (!tmp[0]) {
 		printmsg(messages[MSG_CANCEL]);
 		return FALSE;
+	}
+
+	if (tmp[0] == '-' && !tmp[1]) {
+		if (!strcmp(cfgdir, currentpath) && ndents && (dents[cur].flags & DIR_OR_LINK_TO_DIR))
+			xstrlcpy(tmp, dents[cur].name, NAME_MAX + 1);
+		else {
+			printmsg(messages[MSG_FAILED]);
+			return FALSE;
+		}
 	}
 
 	/* Create the mount point */
@@ -5568,7 +5577,7 @@ nochange:
 					break;
 			} // fallthrough
 		case SEL_REMOTE:
-			if (sel == SEL_REMOTE && !remote_mount(newpath)) {
+			if (sel == SEL_REMOTE && !remote_mount(newpath, path)) {
 				presel = MSGWAIT;
 				goto nochange;
 			}
