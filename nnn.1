@@ -280,6 +280,16 @@ or redirect a list from a file:
     nnn < files.txt
 .Ed
 .Pp
+Handy bash/zsh shell function to list files by mime-type in current directory:
+.Bd -literal
+    # to show video files, run: list video
+
+    list ()
+    {
+        find . -maxdepth 1 | file -if- | grep "$1" | awk -F: '{printf "%s\0", $1}' | nnn
+    }
+.Ed
+.Pp
 A temporary directory will be created containing symlinks to the given
 paths. Any action performed on these symlinks will be performed only on their
 targets, after which they might become invalid.

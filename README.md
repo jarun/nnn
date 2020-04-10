@@ -8,6 +8,7 @@
 <a href="https://en.wikipedia.org/wiki/Privacy-invasive_software"><img src="https://img.shields.io/badge/privacy-✓-crimson?maxAge=2592000" alt="Privacy Awareness" /></a>
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow.svg?maxAge=2592000" alt="License" /></a>
 <a href="https://github.com/jarun/nnn/wiki"><img src="https://img.shields.io/badge/nnn-Wiki-important?maxAge=2592000" alt="Wiki" /></a>
+<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
 
 <p align="center"><a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a></p>
@@ -23,9 +24,33 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 Once installed (instructions below), visit the [Wiki](https://github.com/jarun/nnn/wiki).
 
-<p align="center">
-<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
-</p>
+## Black magic!
+
+1. Turbo navigate with automatic dir selection
+2. Select files from anywhere (not just a single dir)
+3. Run custom commands with custom hotkeys
+4. Edit and preview markdown, man page, html quickly
+5. Open a file and auto-proceed to the next
+6. Export (filtered) list of files to a text file
+7. Find files by mime-type and list in `nnn`
+8. Write a plugin in any language you know
+9. Configure the middle mouse click to do anything
+10. Fuzzy search subtree and open the directory of a file
+11. Load four dirs with custom settings at once
+12. Show notifications on cp, mv completion
+13. Auto-sync selection to system clipboard
+14. Open text files detached in another pane/tab/window
+15. Create files/dirs/duplicates with parents (like `mkdir -p`)
+16. Toggle hidden with <kbd>.</kbd>, go HOME with <kbd>~</kbd> or to the last dir with <kbd>-</kbd>
+17. Pin a frequently visited directory at runtime
+18. Mount any cloud storage service in few keypresses
+19. Mount and modify archives
+20. Filter filtered entries
+21. Sort files by access time and inode change time
+22. Access selection from another instance of `nnn`
+23. Compile out features you don't need
+24. Watch matrix text flying or read random fortune messages
+25. Configure it in 5 minutes!
 
 ## Features
 
