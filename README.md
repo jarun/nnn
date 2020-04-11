@@ -24,14 +24,14 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 ## Black magic! :dark_sunglasses:
 
-1. Load and filter thousands of files instantly
+1. Load, sort, filter thousands of files instantly
 2. Turbo navigate with automatic dir selection
 3. Select files from anywhere (not just a single dir)
-4. Run custom commands with custom hotkeys
-5. Edit and preview markdown, man page, html
-6. Open a file and auto-proceed to the next
-7. Export (filtered) list of visible files
-8. Find files by mime-type and list in `nnn`
+4. Edit and preview markdown, man page, html
+5. Open a file and auto-proceed to the next
+6. Export (filtered) list of visible files
+7. Find files by mime-type and list in `nnn`
+8. Unlimited bookmarks, plugins, commands with custom hotkeys
 9. Write a plugin in any language you know
 10. Configure the middle mouse click to do anything
 11. Fuzzy search subtree and open the dir of a file
@@ -40,7 +40,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 14. Auto-sync selection to system clipboard
 15. Open text files detached in another pane/tab/window
 16. Create files/dirs/duplicates with parents (like `mkdir -p`)
-17. Toggle hidden with <kbd>.</kbd>, go HOME with <kbd>~</kbd> or to the last dir with <kbd>-</kbd>
+17. Toggle hidden with <kbd>.</kbd>, visit HOME with <kbd>~</kbd>, last dir with <kbd>-</kbd>
 18. Pin a frequently visited dir at runtime
 19. Mount any cloud storage service in a few keypresses
 20. Mount and modify archives
@@ -49,7 +49,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 23. Access selection from another instance of `nnn`
 24. Compile out features you don't need
 25. Watch matrix text fly or read fortune messages
-26. Configure it in 5 minutes!
+26. Configure in 5 minutes!
 
 Once installed (instructions below), _**read the fine [manual](https://github.com/jarun/nnn/wiki)**_.
 
