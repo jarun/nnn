@@ -4897,10 +4897,8 @@ static void statusbar(char *path)
 	if (S_ISREG(pent->mode)) {
 		i = (int)(pent->nlen - 1);
 		ptr = xmemrchr((uchar *)pent->name, '.', i);
-		if (ptr) {
-			extnlen = ptr - pent->name;
-			extnlen = i - extnlen;
-		}
+		if (ptr)
+			extnlen = i - (ptr - pent->name);
 		if (!ptr || extnlen > 5 || extnlen < 2)
 			ptr = "\b";
 	} else
@@ -4924,7 +4922,7 @@ static void statusbar(char *path)
 
 		getorderstr(sort);
 
-		printw("%d/%d [%s:%s] %s\n", cur + 1, ndents, (cfg.selmode ? "s" : ""),
+		printw("%d/%d [%s:%s] %s", cur + 1, ndents, (cfg.selmode ? "s" : ""),
 			 ((g_states & STATE_RANGESEL) ? "*" : (nselected ? xitoa(nselected) : "")),
 			 sort);
 
@@ -4937,6 +4935,7 @@ static void statusbar(char *path)
 		addstr(coolsize(pent->size));
 		addch(' ');
 		addstr(ptr);
+		addch('\n');
 	}
 
 	attroff(COLOR_PAIR(cfg.curctx + 1));
@@ -5053,7 +5052,7 @@ static void redraw(char *path)
 	if ((i + MIN_DISPLAY_COLS) <= ncols)
 		addnstr(path, ncols - MIN_DISPLAY_COLS);
 	else {
-		char *base = xbasename(path);
+		char *base = xmemrchr((uchar *)path, '/', i);;
 
 		if ((base - ptr) <= 1)
 			addnstr(path, ncols - MIN_DISPLAY_COLS);
