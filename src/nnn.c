@@ -5000,7 +5000,7 @@ static void redraw(char *path)
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int onscreen = xlines - 4;
-	int i, attrs;
+	int i;
 	char *ptr = path;
 
 	// Fast redraw
@@ -5031,16 +5031,12 @@ static void redraw(char *path)
 
 	addch('[');
 	for (i = 0; i < CTX_MAX; ++i) {
-		if (!g_ctx[i].c_cfg.ctxactive) {
+		if (!g_ctx[i].c_cfg.ctxactive)
 			addch(i + '1');
-		} else {
-			attrs = COLOR_PAIR(i + 1) | A_BOLD
+		else
+			addch((i + '1') | (COLOR_PAIR(i + 1) | A_BOLD
 				/* active: underline, current: reverse */
-				| ((cfg.curctx != i) ? A_UNDERLINE : A_REVERSE );
-			attron(attrs);
-			addch(i + '1');
-			attroff(attrs);
-		}
+				| ((cfg.curctx != i) ? A_UNDERLINE : A_REVERSE)));
 		addch(' ');
 	}
 	addstr("\b] "); /* 10 chars printed for contexts - "[1 2 3 4] " */
@@ -5052,13 +5048,11 @@ static void redraw(char *path)
 	if ((i + MIN_DISPLAY_COLS) <= ncols)
 		addnstr(path, ncols - MIN_DISPLAY_COLS);
 	else {
-		char *base = xmemrchr((uchar *)path, '/', i);;
+		char *base = xmemrchr((uchar *)path, '/', i);
 
-		if ((base - ptr) <= 1)
-			addnstr(path, ncols - MIN_DISPLAY_COLS);
-		else {
-			i = 0;
-			--base;
+		i = 0;
+
+		if (base != ptr) {
 			while (ptr < base) {
 				if (*ptr == '/') {
 					i += 2; /* 2 characters added */
@@ -5072,9 +5066,9 @@ static void redraw(char *path)
 				}
 				++ptr;
 			}
-
-			addnstr(base, ncols - (MIN_DISPLAY_COLS + i));
 		}
+
+		addnstr(base, ncols - (MIN_DISPLAY_COLS + i));
 	}
 
 	attroff(A_UNDERLINE);
