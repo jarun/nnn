@@ -1084,6 +1084,19 @@ static char *abspath(const char *path, const char *cwd)
 	return resolved_path;
 }
 
+/* A very simplified implementation, changes path */
+static char *xdirname(char *path)
+{
+	char *base = xmemrchr((uchar *)path, '/', strlen(path));
+
+	if (base == path)
+		path[1] = '\0';
+	else
+		*base = '\0';
+
+	return path;
+}
+
 static char *xbasename(char *path)
 {
 	char *base = xmemrchr((uchar *)path, '/', strlen(path)); // NOLINT
@@ -3705,13 +3718,13 @@ static char *visit_parent(char *path, char *newpath, int *presel)
 		return NULL;
 	}
 
-	/* Use a copy as dirname() may change the string passed */
+	/* Use a copy as xdirname() may change the string passed */
 	if (newpath)
 		xstrsncpy(newpath, path, PATH_MAX);
 	else
 		newpath = path;
 
-	dir = dirname(newpath);
+	dir = xdirname(newpath);
 	if (access(dir, R_OK) == -1) {
 		printwarn(presel);
 		return NULL;
@@ -3950,7 +3963,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	if (tmp && strcmp(cfgdir, currentpath) == 0) {
 		mkpath(cfgdir, tmp, newpath);
 		child = lstat(newpath, &sb) != -1;
-		parent = lstat(dirname(newpath), &psb) != -1;
+		parent = lstat(xdirname(newpath), &psb) != -1;
 		if (!child && !parent) {
 			*presel = MSGWAIT;
 			return FALSE;
@@ -6486,7 +6499,7 @@ static char *load_input()
 		DPRINTF_S(paths[i]);
 
 		xstrsncpy(g_buf, paths[i], PATH_MAX);
-		if (!common_prefix(dirname(g_buf), prefixpath)) {
+		if (!common_prefix(xdirname(g_buf), prefixpath)) {
 			entries = i + 1; // free from the current entry
 			goto malloc_2;
 		}
