@@ -1887,7 +1887,7 @@ static bool batch_rename(const char *path)
 	if (fd1 == -1)
 		return ret;
 
-	xstrsncpy(foriginal, g_tmpfpath, strlen(g_tmpfpath)+1);
+	xstrsncpy(foriginal, g_tmpfpath, strlen(g_tmpfpath) + 1);
 
 	fd2 = create_tmp_file();
 	if (fd2 == -1) {
