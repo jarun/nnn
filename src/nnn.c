@@ -262,7 +262,7 @@ typedef struct {
 	uint picker     : 1;  /* Write selection to user-specified file */
 	uint pickraw    : 1;  /* Write selection to sdtout before exit */
 	uint nonavopen  : 1;  /* Open file on right arrow or `l` */
-	uint autoselect : 1;  /* Auto-select dir in nav-as-you-type mode */
+	uint autoselect : 1;  /* Auto-select dir in type-to-nav mode */
 	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
 	uint useeditor  : 1;  /* Use VISUAL to open text files */
 	uint runplugin  : 1;  /* Choose plugin mode */
@@ -2562,7 +2562,7 @@ static int filterentries(char *path, char *lastname)
 			if (cfg.filtermode) {
 				switch (*ch) {
 				case '\'': // fallthrough /* Go to first non-dir file */
-				case '+': // fallthrough /* Toggle proceed on open */
+				case '+': // fallthrough /* Toggle auto-advance */
 				case ',': // fallthrough /* Pin CWD */
 				case '-': // fallthrough /* Visit last visited dir */
 				case '.': // fallthrough /* Show hidden files */
@@ -3712,7 +3712,7 @@ static char *visit_parent(char *path, char *newpath, int *presel)
 
 	/* There is no going back */
 	if (istopdir(path)) {
-		/* Continue in navigate-as-you-type mode, if enabled */
+		/* Continue in type-to-nav mode, if enabled */
 		if (cfg.filtermode && presel)
 			*presel = FILTER;
 		return NULL;
@@ -4085,14 +4085,14 @@ static void show_help(const char *path)
 	       "9G ^E  End%-21c0  Lock terminal\n"
 	       "9b ^/  Bookmark key%-12c,  Pin CWD\n"
 		"a1-4  Context 1-4%-7c(Sh)Tab  Cycle context\n"
-		  "c/  Filter%-17c^N  Nav-as-you-type toggle\n"
+		  "c/  Filter%-17c^N  Toggle type-to-nav\n"
 		"aEsc  Exit prompt%-12c^L  Redraw/clear prompt\n"
-		  "c?  Help, conf%-14c+  Toggle proceed on open\n"
+		  "c?  Help, conf%-14c+  Toggle auto-advance\n"
 		  "cq  Quit context%-11c^G  QuitCD\n"
 		 "b^Q  Quit%-20cQ  Quit with err\n"
 		"1FILES\n"
 	       "9o ^O  Open with...%-12cn  Create new/link\n"
-	       "9f ^F  File details%-12cd  Detail view toggle\n"
+	       "9f ^F  File details%-12cd  Detail mode toggle\n"
 		 "b^R  Rename/dup%-14cr  Batch rename\n"
 		  "cz  Archive%-17ce  Edit in EDITOR\n"
 	   "5Space ^J  (Un)select%-11cm ^K  Mark range/clear\n"
@@ -5718,7 +5718,7 @@ nochange:
 
 			/* In case of successful operation, reload contents */
 
-			/* Continue in navigate-as-you-type mode, if enabled */
+			/* Continue in type-to-nav mode, if enabled */
 			if ((cfg.filtermode || filterset()) && !refresh)
 				break;
 
@@ -6202,7 +6202,7 @@ nochange:
 					r = FALSE;
 			}
 
-			/* Continue in navigate-as-you-type mode, if enabled */
+			/* Continue in type-to-nav mode, if enabled */
 			if (cfg.filtermode)
 				presel = FILTER;
 
@@ -6567,7 +6567,7 @@ static void usage(void)
 		" -g      regex filters [default: string]\n"
 		" -H      show hidden files\n"
 		" -K      detect key collision\n"
-		" -n      nav-as-you-type mode\n"
+		" -n      type-to-nav mode\n"
 		" -o      open files only on Enter\n"
 		" -p file selection file [stdout if '-']\n"
 		" -Q      no quit confirmation\n"

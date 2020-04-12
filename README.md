@@ -12,7 +12,7 @@
 </p>
 
 <p align="center"><a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a></p>
-<p align="center"><i>navigate-as-you-type & du (click to see demo video)</i></p>
+<p align="center"><i>type-to-nav & du (click to see demo video)</i></p>
 
 ## Introduction
 
@@ -25,10 +25,10 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 ## Black magic! :dark_sunglasses:
 
 1. Load, sort, filter thousands of files instantly
-2. Turbo navigate with automatic dir selection
+2. Type to navigate with automatic dir selection
 3. Select files from anywhere (not just a single dir)
 4. Edit and preview markdown, man page, html
-5. Open a file and auto-proceed to the next
+5. Open a file and auto-advance to the next
 6. Export (filtered) list of visible files
 7. Find files by mime-type and list in `nnn`
 8. Unlimited bookmarks, plugins, commands with custom hotkeys
@@ -79,13 +79,13 @@ Once installed (instructions below), _**read the fine [manual](https://github.co
   - Disk usage analyzer (block/apparent)
   - File picker, (neo)vim plugin
 - Navigation
-  - *Navigate-as-you-type* with dir auto-select
+  - *Type-to-nav* mode with dir auto-select
   - Contexts (_aka_ tabs/workspaces) with custom colors
   - Sessions, bookmarks with hotkeys; pin and visit a dir
   - Remote mounts (needs sshfs, rclone)
   - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick reference
   - CD on quit (*easy* shell integration)
-  - Auto-proceed on opening files
+  - Auto-advance on opening files
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex (POSIX/PCRE) and string (default) filters

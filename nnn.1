@@ -34,7 +34,7 @@
 .Nm
 (Nnn's Not Noice) is a performance-optimized, feature-packed fork of
 noice (http://git.2f30.org/noice/) with seamless desktop
-integration, simplified navigation, \fInavigate-as-you-type\fR mode with
+integration, simplified navigation, \fItype-to-nav\fR mode with
 auto select, disk usage analyzer mode, bookmarks, contexts, application
 launcher, familiar navigation shortcuts, subshell spawning and much
 more.It remains a simple and efficient file manager that stays out of your way.
@@ -54,7 +54,7 @@ to see the list of keybinds.
 supports the following options:
 .Pp
 .Fl A
-        disable directory auto-select in navigate-as-you-type mode
+        disable directory auto-select in type-to-nav mode
 .Pp
 .Fl "b key"
         specify bookmark key to open
@@ -87,7 +87,7 @@ supports the following options:
         test for keybind collision
 .Pp
 .Fl n
-        start in navigate-as-you-type mode
+        start in type-to-nav mode
 .Pp
 .Fl o
         open files only on Enter key
@@ -197,13 +197,13 @@ Special keys at \fBempty filter prompt\fR:
 .Ed
 .Pp
 Additional special keys at \fBempty filter prompt\fR
-in \fBnav-as-you-type\fR mode:
+in \fBtype-to-nav\fR mode:
 .Bd -literal
 ------ + ------------------------
   Key  |         Function
 ------ + ------------------------
    '   | Go to first non-dir file
-   +   | Toggle proceed on open
+   +   | Toggle auto-advance
    ,   | Pin CWD
    -   | Go to last visited dir
    .   | Show hidden files
@@ -228,7 +228,7 @@ Common regex use cases:
 .br
 (4) Exclude filenames having 'nnn' (compiled with PCRE lib): '^(?!nnn)'
 .Pp
-In the \fInavigate-as-you-type\fR mode directories are opened in filter
+In the \fItype-to-nav\fR mode directories are opened in filter
 mode, allowing continuous navigation.
 .br
 When there's a unique match and it's a directory,
