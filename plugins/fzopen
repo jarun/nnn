@@ -10,7 +10,9 @@
 # Author: Arun Prakash Jana
 
 if which fzf >/dev/null 2>&1; then
-    entry=$(find . -type f 2>/dev/null | fzf --delimiter / --nth=-1 --tiebreak=begin --info=hidden)
+    cmd="$FZF_DEFAULT_COMMAND"
+    [ -z "$cmd" ] && cmd="find . -type f 2>/dev/null"
+    entry="$(eval "$cmd" | fzf --delimiter / --nth=-1 --tiebreak=begin --info=hidden)"
     # To show only the file name
     # entry=$(find . -type f 2>/dev/null | fzf --delimiter / --with-nth=-1 --tiebreak=begin --info=hidden)
 elif which fzy >/dev/null 2>&1; then
