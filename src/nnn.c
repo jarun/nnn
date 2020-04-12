@@ -3700,13 +3700,16 @@ static char *visit_parent(char *path, char *newpath, int *presel)
 	/* There is no going back */
 	if (istopdir(path)) {
 		/* Continue in navigate-as-you-type mode, if enabled */
-		if (cfg.filtermode)
+		if (cfg.filtermode && presel)
 			*presel = FILTER;
 		return NULL;
 	}
 
 	/* Use a copy as dirname() may change the string passed */
-	xstrsncpy(newpath, path, PATH_MAX);
+	if (newpath)
+		xstrsncpy(newpath, path, PATH_MAX);
+	else
+		newpath = path;
 
 	dir = dirname(newpath);
 	if (access(dir, R_OK) == -1) {
@@ -3717,29 +3720,15 @@ static char *visit_parent(char *path, char *newpath, int *presel)
 	return dir;
 }
 
-static void find_accessible_parent(char *path, char *newpath, char *lastname, int *presel)
+static void valid_parent(char *path, char *lastname)
 {
-	char *dir;
-
 	/* Save history */
 	xstrsncpy(lastname, xbasename(path), NAME_MAX + 1);
 
-	xstrsncpy(newpath, path, PATH_MAX);
-	while (true) {
-		dir = visit_parent(path, newpath, presel);
-		if (istopdir(path) || istopdir(newpath)) {
-			if (!dir)
-				dir = dirname(newpath);
+	while (!istopdir(path))
+		if (visit_parent(path, NULL, NULL))
 			break;
-		}
-		if (!dir) {
-			xstrsncpy(path, newpath, PATH_MAX);
-			continue;
-		}
-		break;
-	}
 
-	xstrsncpy(path, dir, PATH_MAX);
 	printwarn(NULL);
 	xdelay(XDELAY_INTERVAL_MS);
 }
@@ -5137,7 +5126,7 @@ begin:
 	 */
 	if (access(path, R_OK) == -1) {
 		DPRINTF_S("directory inaccessible");
-		find_accessible_parent(path, newpath, lastname, &presel);
+		valid_parent(path, lastname);
 		setdirwatch();
 	}
 
