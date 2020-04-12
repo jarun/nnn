@@ -669,7 +669,7 @@ static haiku_nm_h haiku_hnd;
 #define exitcurses() endwin()
 #define printwarn(presel) printwait(strerror(errno), presel)
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
-#define copycurname() xstrlcpy(lastname, dents[cur].name, NAME_MAX + 1)
+#define copycurname() xstrsncpy(lastname, dents[cur].name, NAME_MAX + 1)
 #define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
@@ -688,7 +688,7 @@ static haiku_nm_h haiku_hnd;
 #endif /* __GNUC__ */
 
 /* Forward declarations */
-static size_t xstrlcpy(char *dest, const char *src, size_t n);
+static size_t xstrsncpy(char *dest, const char *src, size_t n);
 static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag);
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
@@ -804,7 +804,7 @@ static void printwait(const char *msg, int *presel)
 	if (presel) {
 		*presel = MSGWAIT;
 		if (ndents)
-			xstrlcpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
+			xstrsncpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
 	}
 }
 
@@ -936,7 +936,7 @@ static void *xrealloc(void *pcur, size_t len)
  * Always null ('\0') terminates if both src and dest are valid pointers.
  * Returns the number of bytes copied including terminating null byte.
  */
-static size_t xstrlcpy(char *restrict dest, const char *restrict src, size_t n)
+static size_t xstrsncpy(char *restrict dest, const char *restrict src, size_t n)
 {
 	if (!src || !dest || !n)
 		return 0;
@@ -998,7 +998,7 @@ static char *common_prefix(const char *path, char *prefix)
 		return NULL;
 
 	if (!*prefix) {
-		xstrlcpy(prefix, path, PATH_MAX);
+		xstrsncpy(prefix, path, PATH_MAX);
 		return prefix;
 	}
 
@@ -1011,7 +1011,7 @@ static char *common_prefix(const char *path, char *prefix)
 
 	/* Path is shorter */
 	if (!*x && *y == '/') {
-		xstrlcpy(prefix, path, y - path);
+		xstrsncpy(prefix, path, y - path);
 		return prefix;
 	}
 
@@ -1049,7 +1049,7 @@ static char *abspath(const char *path, const char *cwd)
 
 	/* Turn relative paths into absolute */
 	if (path[0] != '/')
-		dst_size = xstrlcpy(resolved_path, cwd, cwd_size + 1) - 1;
+		dst_size = xstrsncpy(resolved_path, cwd, cwd_size + 1) - 1;
 	else
 		resolved_path[0] = '\0';
 
@@ -1069,7 +1069,7 @@ static char *abspath(const char *path, const char *cwd)
 			/* NOP */
 		} else if (next - src) {
 			*(dst++) = '/';
-			xstrlcpy(dst, src, next - src + 1);
+			xstrsncpy(dst, src, next - src + 1);
 			dst += next - src;
 		}
 
@@ -1093,7 +1093,7 @@ static char *xbasename(char *path)
 
 static int create_tmp_file(void)
 {
-	xstrlcpy(g_tmpfpath + tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - tmpfplen);
+	xstrsncpy(g_tmpfpath + tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - tmpfplen);
 
 	int fd = mkstemp(g_tmpfpath);
 
@@ -1129,7 +1129,7 @@ static void appendfpath(const char *path, const size_t len)
 			errexit();
 	}
 
-	selbufpos += xstrlcpy(pselbuf + selbufpos, path, len);
+	selbufpos += xstrsncpy(pselbuf + selbufpos, path, len);
 }
 
 /* Write selected file paths to fd, linefeed separated */
@@ -1637,7 +1637,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 			return retstatus;
 		}
 
-		xstrlcpy(cmd, file, len);
+		xstrsncpy(cmd, file, len);
 		status = parseargs(cmd, argv);
 		if (status == -1 || status > (EXEC_ARGS_MAX - 3)) { /* arg1, arg2 and last NULL */
 			free(cmd);
@@ -1887,7 +1887,7 @@ static bool batch_rename(const char *path)
 	if (fd1 == -1)
 		return ret;
 
-	xstrlcpy(foriginal, g_tmpfpath, strlen(g_tmpfpath)+1);
+	xstrsncpy(foriginal, g_tmpfpath, strlen(g_tmpfpath)+1);
 
 	fd2 = create_tmp_file();
 	if (fd2 == -1) {
@@ -1952,7 +1952,7 @@ static void get_archive_cmd(char *cmd, const char *archive)
 		i = 2;
 	// else tar
 
-	xstrlcpy(cmd, arcmd[i], ARCHIVE_CMD_LEN);
+	xstrsncpy(cmd, arcmd[i], ARCHIVE_CMD_LEN);
 }
 
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
@@ -1982,7 +1982,7 @@ static bool write_lastdir(const char *curpath)
 	bool ret = TRUE;
 	size_t len = strlen(cfgdir);
 
-	xstrlcpy(cfgdir + len, "/.lastd", 8);
+	xstrsncpy(cfgdir + len, "/.lastd", 8);
 	DPRINTF_S(cfgdir);
 
 	FILE *fp = fopen(cfgdir, "w");
@@ -2839,7 +2839,7 @@ static char *getreadline(const char *prompt, char *path, char *curpath, int *pre
 		printwarn(presel);
 	else if (input && input[0]) {
 		add_history(input);
-		xstrlcpy(g_buf, input, CMD_LEN_MAX);
+		xstrsncpy(g_buf, input, CMD_LEN_MAX);
 		free(input);
 		return g_buf;
 	}
@@ -2859,16 +2859,16 @@ static size_t mkpath(const char *dir, const char *name, char *out)
 
 	/* Handle absolute path */
 	if (name[0] == '/')
-		return xstrlcpy(out, name, PATH_MAX);
+		return xstrsncpy(out, name, PATH_MAX);
 
 	/* Handle root case */
 	if (istopdir(dir))
 		len = 1;
 	else
-		len = xstrlcpy(out, dir, PATH_MAX);
+		len = xstrsncpy(out, dir, PATH_MAX);
 
 	out[len - 1] = '/'; // NOLINT
-	return (xstrlcpy(out + len, name, PATH_MAX - len) + len);
+	return (xstrsncpy(out + len, name, PATH_MAX - len) + len);
 }
 
 /*
@@ -2893,8 +2893,8 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int *prese
 		link_fn = &link;
 
 	if (choice == 'c') {
-		r = xstrlcpy(buf, prefix, NAME_MAX + 1); /* Copy prefix */
-		xstrlcpy(buf + r - 1, curfname, NAME_MAX - r); /* Suffix target file name */
+		r = xstrsncpy(buf, prefix, NAME_MAX + 1); /* Copy prefix */
+		xstrsncpy(buf + r - 1, curfname, NAME_MAX - r); /* Suffix target file name */
 		mkpath(path, buf, lnpath); /* Generate link path */
 		mkpath(path, curfname, buf); /* Generate target file path */
 
@@ -2909,8 +2909,8 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int *prese
 		len = strlen(psel);
 		fname = xbasename(psel);
 
-		r = xstrlcpy(buf, prefix, NAME_MAX + 1); /* Copy prefix */
-		xstrlcpy(buf + r - 1, fname, NAME_MAX - r); /* Suffix target file name */
+		r = xstrsncpy(buf, prefix, NAME_MAX + 1); /* Copy prefix */
+		xstrsncpy(buf + r - 1, fname, NAME_MAX - r); /* Suffix target file name */
 		mkpath(path, buf, lnpath); /* Generate link path */
 
 		if (!link_fn(psel, lnpath))
@@ -3023,8 +3023,8 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool bookmark)
 				ssize_t len = strlen(home);
 				ssize_t loclen = strlen(kvarr[r].val);
 
-				xstrlcpy(g_buf, home, len + 1);
-				xstrlcpy(g_buf + len, kvarr[r].val + 1, loclen);
+				xstrsncpy(g_buf, home, len + 1);
+				xstrsncpy(g_buf + len, kvarr[r].val + 1, loclen);
 			}
 
 			return realpath(((kvarr[r].val[0] == '~') ? g_buf : kvarr[r].val), buf);
@@ -3142,7 +3142,7 @@ static char *coolsize(off_t size)
 	}
 
 	if (i > 0 && i < 6 && rem) {
-		ret = xstrlcpy(size_buf, xitoa(size), 12);
+		ret = xstrsncpy(size_buf, xitoa(size), 12);
 		size_buf[ret - 1] = '.';
 
 		char *frac = xitoa(rem);
@@ -3151,13 +3151,13 @@ static char *coolsize(off_t size)
 
 		if (len < toprint) {
 			size_buf[ret] = size_buf[ret + 1] = size_buf[ret + 2] = '0';
-			xstrlcpy(size_buf + ret + (toprint - len), frac, len + 1);
+			xstrsncpy(size_buf + ret + (toprint - len), frac, len + 1);
 		} else
-			xstrlcpy(size_buf + ret, frac, toprint + 1);
+			xstrsncpy(size_buf + ret, frac, toprint + 1);
 
 		ret += toprint;
 	} else {
-		ret = xstrlcpy(size_buf, size ? xitoa(size) : "0", 12);
+		ret = xstrsncpy(size_buf, size ? xitoa(size) : "0", 12);
 		--ret;
 	}
 
@@ -3201,9 +3201,9 @@ static char *get_lsperms(mode_t mode)
 
 	bits[0] = get_ind(mode, TRUE);
 
-	xstrlcpy(&bits[1], rwx[(mode >> 6) & 7], 4);
-	xstrlcpy(&bits[4], rwx[(mode >> 3) & 7], 4);
-	xstrlcpy(&bits[7], rwx[(mode & 7)], 4);
+	xstrsncpy(&bits[1], rwx[(mode >> 6) & 7], 4);
+	xstrsncpy(&bits[4], rwx[(mode >> 3) & 7], 4);
+	xstrsncpy(&bits[7], rwx[(mode & 7)], 4);
 
 	if (mode & S_ISUID)
 		bits[3] = (mode & 0100) ? 's' : 'S';  /* user executable */
@@ -3340,7 +3340,7 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 	bool selmode = cfg.selmode ? TRUE : FALSE;
 
 	/* Save current context */
-	xstrlcpy(g_ctx[cfg.curctx].c_name, curname, NAME_MAX + 1);
+	xstrsncpy(g_ctx[cfg.curctx].c_name, curname, NAME_MAX + 1);
 	g_ctx[cfg.curctx].c_cfg = cfg;
 
 	if (g_ctx[r].c_cfg.ctxactive) { /* Switch to saved context */
@@ -3352,7 +3352,7 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 		cfg = g_ctx[r].c_cfg;
 	} else { /* Setup a new context from current context */
 		g_ctx[r].c_cfg.ctxactive = 1;
-		xstrlcpy(g_ctx[r].c_path, path, PATH_MAX);
+		xstrsncpy(g_ctx[r].c_path, path, PATH_MAX);
 		g_ctx[r].c_last[0] = '\0';
 		g_ctx[r].c_name[0] = '\0';
 		g_ctx[r].c_fltr[0] = g_ctx[r].c_fltr[1] = '\0';
@@ -3384,7 +3384,7 @@ static void save_session(bool last_session, int *presel)
 		if (g_ctx[i].c_cfg.ctxactive) {
 			if (cfg.curctx == i && ndents)
 				/* Update current file name, arrows don't update it */
-				xstrlcpy(g_ctx[i].c_name, dents[cur].name, NAME_MAX + 1);
+				xstrsncpy(g_ctx[i].c_name, dents[cur].name, NAME_MAX + 1);
 			header.pathln[i] = strnlen(g_ctx[i].c_path, PATH_MAX) + 1;
 			header.lastln[i] = strnlen(g_ctx[i].c_last, PATH_MAX) + 1;
 			header.nameln[i] = strnlen(g_ctx[i].c_name, NAME_MAX) + 1;
@@ -3597,8 +3597,8 @@ static bool show_stats(const char *fpath, const struct stat *sb)
 	if (fd == -1)
 		return FALSE;
 
-	r = xstrlcpy(g_buf, "stat \"", PATH_MAX);
-	r += xstrlcpy(g_buf + r - 1, fpath, PATH_MAX);
+	r = xstrsncpy(g_buf, "stat \"", PATH_MAX);
+	r += xstrsncpy(g_buf + r - 1, fpath, PATH_MAX);
 	g_buf[r - 2] = '\"';
 	g_buf[r - 1] = '\0';
 	DPRINTF_S(g_buf);
@@ -3706,7 +3706,7 @@ static char *visit_parent(char *path, char *newpath, int *presel)
 	}
 
 	/* Use a copy as dirname() may change the string passed */
-	xstrlcpy(newpath, path, PATH_MAX);
+	xstrsncpy(newpath, path, PATH_MAX);
 
 	dir = dirname(newpath);
 	if (access(dir, R_OK) == -1) {
@@ -3722,9 +3722,9 @@ static void find_accessible_parent(char *path, char *newpath, char *lastname, in
 	char *dir;
 
 	/* Save history */
-	xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
+	xstrsncpy(lastname, xbasename(path), NAME_MAX + 1);
 
-	xstrlcpy(newpath, path, PATH_MAX);
+	xstrsncpy(newpath, path, PATH_MAX);
 	while (true) {
 		dir = visit_parent(path, newpath, presel);
 		if (istopdir(path) || istopdir(newpath)) {
@@ -3733,13 +3733,13 @@ static void find_accessible_parent(char *path, char *newpath, char *lastname, in
 			break;
 		}
 		if (!dir) {
-			xstrlcpy(path, newpath, PATH_MAX);
+			xstrsncpy(path, newpath, PATH_MAX);
 			continue;
 		}
 		break;
 	}
 
-	xstrlcpy(path, dir, PATH_MAX);
+	xstrsncpy(path, dir, PATH_MAX);
 	printwarn(NULL);
 	xdelay(XDELAY_INTERVAL_MS);
 }
@@ -3896,7 +3896,7 @@ static bool remote_mount(char *newpath, char *currentpath)
 
 	if (tmp[0] == '-' && !tmp[1]) {
 		if (!strcmp(cfgdir, currentpath) && ndents && (dents[cur].flags & DIR_OR_LINK_TO_DIR))
-			xstrlcpy(tmp, dents[cur].name, NAME_MAX + 1);
+			xstrsncpy(tmp, dents[cur].name, NAME_MAX + 1);
 		else {
 			printmsg(messages[MSG_FAILED]);
 			return FALSE;
@@ -4035,7 +4035,7 @@ static void printkeys(kv *kvarr, char *buf, uchar max)
 static size_t handle_bookmark(const char *mark, char *newpath)
 {
 	int fd;
-	size_t r = xstrlcpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
+	size_t r = xstrsncpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
 
 	if (mark) { /* There is a pinned directory */
 		g_buf[--r] = ' ';
@@ -4049,7 +4049,7 @@ static size_t handle_bookmark(const char *mark, char *newpath)
 	r = FALSE;
 	fd = get_input(NULL);
 	if (fd == ',') /* Visit pinned directory */
-		mark ? xstrlcpy(newpath, mark, PATH_MAX) : (r = MSG_NOT_SET);
+		mark ? xstrsncpy(newpath, mark, PATH_MAX) : (r = MSG_NOT_SET);
 	else if (!get_kv_val(bookmark, newpath, fd, maxbm, TRUE))
 		r = MSG_INVALID_KEY;
 
@@ -4183,7 +4183,7 @@ static bool run_cmd_as_plugin(const char *path, const char *file, char *runfile)
 			return FALSE;
 	}
 
-	xstrlcpy(g_buf, file, PATH_MAX);
+	xstrsncpy(g_buf, file, PATH_MAX);
 
 	len = strlen(g_buf);
 	if (len > 1 && g_buf[len - 1] == '*') {
@@ -4237,7 +4237,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 	mkpath(plugindir, file, g_buf);
 
 	if (runfile && runfile[0]) {
-		xstrlcpy(*lastname, runfile, NAME_MAX);
+		xstrsncpy(*lastname, runfile, NAME_MAX);
 		spawn(g_buf, *lastname, *path, *path, F_NORMAL);
 	} else
 		spawn(g_buf, NULL, *path, *path, F_NORMAL);
@@ -4251,8 +4251,8 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 		int ctx = g_buf[0] - '0';
 
 		if (ctx == 0 || ctx == cfg.curctx + 1) {
-			xstrlcpy(*lastdir, *path, PATH_MAX);
-			xstrlcpy(*path, g_buf + 1, PATH_MAX);
+			xstrsncpy(*lastdir, *path, PATH_MAX);
+			xstrsncpy(*path, g_buf + 1, PATH_MAX);
 		} else if (ctx >= 1 && ctx <= CTX_MAX) {
 			int r = ctx - 1;
 
@@ -4490,7 +4490,7 @@ static int dentfill(char *path, struct entry **dents)
 
 		/* Selection file name */
 		dentp->name = (char *)((size_t)pnamebuf + off);
-		dentp->nlen = xstrlcpy(dentp->name, namep, NAME_MAX + 1);
+		dentp->nlen = xstrsncpy(dentp->name, namep, NAME_MAX + 1);
 		off += dentp->nlen;
 
 		/* Copy other fields */
@@ -4816,7 +4816,7 @@ static bool set_time_type(int *presel)
 
 	for (; r < (int)ELEMENTS(time_type); ++r)
 		if (r != cfg.timetype) {
-			chars += xstrlcpy(buf + chars, time_type[r], sizeof(buf) - chars) - 1;
+			chars += xstrsncpy(buf + chars, time_type[r], sizeof(buf) - chars) - 1;
 			if (first) {
 				buf[chars++] = ' ';
 				buf[chars++] = '/';
@@ -4876,7 +4876,7 @@ static void statusbar(char *path)
 	if (cfg.blkorder) { /* du mode */
 		char buf[24];
 
-		xstrlcpy(buf, coolsize(dir_blocks << blk_shift), 12);
+		xstrsncpy(buf, coolsize(dir_blocks << blk_shift), 12);
 
 		printw("%d/%d [%s:%s] %cu:%s free:%s files:%lu %lldB %s\n",
 		       cur + 1, ndents, (cfg.selmode ? "s" : ""),
@@ -5069,10 +5069,10 @@ static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)
 		lastname[0] =  '\0';
 
 	/* Save last working directory */
-	xstrlcpy(lastdir, path, PATH_MAX);
+	xstrsncpy(lastdir, path, PATH_MAX);
 
 	/* Save the newly opted dir in path */
-	xstrlcpy(path, newpath, PATH_MAX);
+	xstrsncpy(path, newpath, PATH_MAX);
 	DPRINTF_S(path);
 
 	clearfilter();
@@ -5109,7 +5109,7 @@ static bool browse(char *ipath, const char *session)
 
 	/* setup first context */
 	if (!session || !load_session(session, &path, &lastdir, &lastname, FALSE)) {
-		xstrlcpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
+		xstrsncpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
 		path = g_ctx[0].c_path;
 		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = '\0';
 		lastdir = g_ctx[0].c_last; /* last visited directory */
@@ -5261,7 +5261,7 @@ nochange:
 					goto nochange;
 
 				/* Save history */
-				xstrlcpy(lastname, xbasename(path), NAME_MAX + 1);
+				xstrsncpy(lastname, xbasename(path), NAME_MAX + 1);
 
 				cdprep(lastdir, NULL, path, dir) ? (presel = FILTER) : (watch = TRUE);
 				goto begin;
@@ -5393,7 +5393,7 @@ nochange:
 					if ((cfg.runctx == cfg.curctx) && !strcmp(path, plugindir)) {
 						endselection();
 						/* Copy path so we can return back to earlier dir */
-						xstrlcpy(path, rundir, PATH_MAX);
+						xstrsncpy(path, rundir, PATH_MAX);
 						rundir[0] = '\0';
 
 						if (!run_selected_plugin(&path, dents[cur].name,
@@ -5523,7 +5523,7 @@ nochange:
 			}
 
 			/* SEL_CDLAST: dir pointing to lastdir */
-			xstrlcpy(newpath, dir, PATH_MAX); // fallthrough
+			xstrsncpy(newpath, dir, PATH_MAX); // fallthrough
 		case SEL_BOOKMARK:
 			if (sel == SEL_BOOKMARK) {
 				r = (int)handle_bookmark(mark, newpath);
@@ -5894,7 +5894,7 @@ nochange:
 				plugscript(utils[UTIL_NTFY], NULL, F_NOWAIT | F_NOTRACE);
 
 			if (newpath[0] && !access(newpath, F_OK))
-				xstrlcpy(lastname, xbasename(newpath), NAME_MAX+1);
+				xstrsncpy(lastname, xbasename(newpath), NAME_MAX+1);
 			else if (ndents)
 				copycurname();
 			goto begin;
@@ -5985,7 +5985,7 @@ nochange:
 
 				mkpath(path, tmp, newpath);
 				if (access(newpath, F_OK) == 0) { /* File created */
-					xstrlcpy(lastname, tmp, NAME_MAX + 1);
+					xstrsncpy(lastname, tmp, NAME_MAX + 1);
 					clearfilter(); /* Archive name may not match */
 					goto begin;
 				}
@@ -6056,7 +6056,7 @@ nochange:
 					goto nochange;
 				}
 				close(fd);
-				xstrlcpy(lastname, tmp, NAME_MAX + 1);
+				xstrsncpy(lastname, tmp, NAME_MAX + 1);
 			} else { /* SEL_NEW */
 				close(fd);
 				presel = 0;
@@ -6082,7 +6082,7 @@ nochange:
 					goto nochange;
 
 				if (r == 'f' || r == 'd')
-					xstrlcpy(lastname, tmp, NAME_MAX + 1);
+					xstrsncpy(lastname, tmp, NAME_MAX + 1);
 				else if (ndents) {
 					if (cfg.filtermode)
 						presel = FILTER;
@@ -6100,7 +6100,7 @@ nochange:
 				goto nochange;
 			}
 
-			r = xstrlcpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
+			r = xstrsncpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
 			printkeys(plug, g_buf + r - 1, maxplug);
 			printmsg(g_buf);
 			r = get_input(NULL);
@@ -6139,8 +6139,8 @@ nochange:
 					 * switch to original directory
 					 */
 					if (strcmp(path, plugindir) == 0) {
-						xstrlcpy(path, rundir, PATH_MAX);
-						xstrlcpy(lastname, runfile, NAME_MAX);
+						xstrsncpy(path, rundir, PATH_MAX);
+						xstrsncpy(lastname, runfile, NAME_MAX);
 						rundir[0] = runfile[0] = '\0';
 						setdirwatch();
 						goto begin;
@@ -6150,10 +6150,10 @@ nochange:
 					cfg.runplugin = 1;
 				}
 
-				xstrlcpy(rundir, path, PATH_MAX);
-				xstrlcpy(path, plugindir, PATH_MAX);
+				xstrsncpy(rundir, path, PATH_MAX);
+				xstrsncpy(path, plugindir, PATH_MAX);
 				if (ndents)
-					xstrlcpy(runfile, dents[cur].name, NAME_MAX);
+					xstrsncpy(runfile, dents[cur].name, NAME_MAX);
 				cfg.runctx = cfg.curctx;
 				lastname[0] = '\0';
 			}
@@ -6328,8 +6328,8 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 	}
 
 	tmp = tmpdir + tmpfplen - 1;
-	xstrlcpy(tmpdir, g_tmpfpath, tmpfplen);
-	xstrlcpy(tmp, "/nnnXXXXXX", 11);
+	xstrsncpy(tmpdir, g_tmpfpath, tmpfplen);
+	xstrsncpy(tmp, "/nnnXXXXXX", 11);
 
 	/* Points right after the base tmp dir */
 	tmp += 10;
@@ -6354,7 +6354,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 		}
 
 		/* Don't copy the common prefix */
-		xstrlcpy(tmp, paths[i] + len, strlen(paths[i]) - len + 1);
+		xstrsncpy(tmp, paths[i] + len, strlen(paths[i]) - len + 1);
 
 		/* Get the dir containing the path */
 		slash = xmemrchr((uchar *)tmp, '/', strlen(paths[i]) - len);
@@ -6496,7 +6496,7 @@ static char *load_input()
 
 		DPRINTF_S(paths[i]);
 
-		xstrlcpy(g_buf, paths[i], PATH_MAX);
+		xstrsncpy(g_buf, paths[i], PATH_MAX);
 		if (!common_prefix(dirname(g_buf), prefixpath)) {
 			entries = i + 1; // free from the current entry
 			goto malloc_2;
@@ -6591,8 +6591,8 @@ static bool setup_config(void)
 	if (xdgcfg && xdgcfg[0]) {
 		DPRINTF_S(xdgcfg);
 		if (xdgcfg[0] == '~') {
-			r = xstrlcpy(g_buf, home, PATH_MAX);
-			xstrlcpy(g_buf + r - 1, xdgcfg + 1, PATH_MAX);
+			r = xstrsncpy(g_buf, home, PATH_MAX);
+			xstrsncpy(g_buf + r - 1, xdgcfg + 1, PATH_MAX);
 			xdgcfg = g_buf;
 			DPRINTF_S(xdgcfg);
 		}
@@ -6618,24 +6618,24 @@ static bool setup_config(void)
 	}
 
 	if (xdg) {
-		xstrlcpy(cfgdir, xdgcfg, len);
+		xstrsncpy(cfgdir, xdgcfg, len);
 		r = len - 13; /* subtract length of "/nnn/sessions" */
 	} else {
-		r = xstrlcpy(cfgdir, home, len);
+		r = xstrsncpy(cfgdir, home, len);
 
 		/* Create ~/.config */
-		xstrlcpy(cfgdir + r - 1, "/.config", len - r);
+		xstrsncpy(cfgdir + r - 1, "/.config", len - r);
 		DPRINTF_S(cfgdir);
 		r += 8; /* length of "/.config" */
 	}
 
 	/* Create ~/.config/nnn */
-	xstrlcpy(cfgdir + r - 1, "/nnn", len - r);
+	xstrsncpy(cfgdir + r - 1, "/nnn", len - r);
 	DPRINTF_S(cfgdir);
 
 	/* Create ~/.config/nnn/plugins */
-	xstrlcpy(plugindir, cfgdir, PATH_MAX);
-	xstrlcpy(plugindir + r + 4 - 1, "/plugins", 9); /* subtract length of "/nnn" (4) */
+	xstrsncpy(plugindir, cfgdir, PATH_MAX);
+	xstrsncpy(plugindir + r + 4 - 1, "/plugins", 9); /* subtract length of "/nnn" (4) */
 	DPRINTF_S(plugindir);
 
 	if (access(plugindir, F_OK) && !xmktree(plugindir, TRUE)) {
@@ -6644,8 +6644,8 @@ static bool setup_config(void)
 	}
 
 	/* Create ~/.config/nnn/sessions */
-	xstrlcpy(sessiondir, cfgdir, PATH_MAX);
-	xstrlcpy(sessiondir + r + 4 - 1, "/sessions", 10); /* subtract length of "/nnn" (4) */
+	xstrsncpy(sessiondir, cfgdir, PATH_MAX);
+	xstrsncpy(sessiondir + r + 4 - 1, "/sessions", 10); /* subtract length of "/nnn" (4) */
 	DPRINTF_S(sessiondir);
 
 	if (access(sessiondir, F_OK) && !xmktree(sessiondir, TRUE)) {
@@ -6662,8 +6662,8 @@ static bool setup_config(void)
 			return FALSE;
 		}
 
-		r = xstrlcpy(selpath, cfgdir, len + 3);
-		xstrlcpy(selpath + r - 1, "/.selection", 12);
+		r = xstrsncpy(selpath, cfgdir, len + 3);
+		xstrsncpy(selpath + r - 1, "/.selection", 12);
 		DPRINTF_S(selpath);
 	}
 
@@ -6680,7 +6680,7 @@ static bool set_tmp_path(void)
                 return FALSE;
         }
 
-        tmpfplen = (uchar)xstrlcpy(g_tmpfpath, path, TMP_LEN_MAX);
+        tmpfplen = (uchar)xstrsncpy(g_tmpfpath, path, TMP_LEN_MAX);
         return TRUE;
 }
 
