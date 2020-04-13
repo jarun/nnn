@@ -936,7 +936,7 @@ static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 	char *end = memccpy(dst, src, '\0', n);
 
 	if (!end) {
-		dst[n - 1] = '\0';
+		dst[n - 1] = '\0'; // NOLINT
 		end = dst + n;
 	}
 
