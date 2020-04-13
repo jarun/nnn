@@ -757,16 +757,6 @@ static bool test_clear_bit(uint nr)
 }
 #endif
 
-static void clear_hash()
-{
-	ulong i = 0;
-	ull *addr = ihashbmp;
-
-	for (; i < HASH_OCTETS; ++i, ++addr)
-		if (*addr)
-			*addr = 0;
-}
-
 static void clearinfoln(void)
 {
 	move(xlines - 2, 0);
@@ -1031,7 +1021,7 @@ static char *abspath(const char *path, const char *cwd)
 		return NULL;
 
 	size_t dst_size = 0, src_size = strlen(path), cwd_size = strlen(cwd);
-	const char *src, *next;
+	const char *src;
 	char *dst;
 	char *resolved_path = malloc(src_size + (*path == '/' ? 0 : cwd_size) + 1);
 	if (!resolved_path)
@@ -1045,7 +1035,7 @@ static char *abspath(const char *path, const char *cwd)
 
 	src = path;
 	dst = resolved_path + dst_size;
-	for (next = NULL; next != path + src_size;) {
+	for (const char *next = NULL; next != path + src_size;) {
 		next = strchr(src, '/');
 		if (!next)
 			next = path + src_size;
@@ -1195,9 +1185,7 @@ static bool listselfile(void)
 /* Reset selection indicators */
 static void resetselind(void)
 {
-	int r = 0;
-
-	for (; r < ndents; ++r)
+	for (int r = 0; r < ndents; ++r)
 		if (dents[r].flags & FILE_SELECTED)
 			dents[r].flags &= ~FILE_SELECTED;
 }
@@ -1220,10 +1208,9 @@ static void startselection(void)
 
 static void updateselbuf(const char *path, char *newpath)
 {
-	int i = 0;
 	size_t r;
 
-	for (; i < ndents; ++i)
+	for (int i = 0; i < ndents; ++i)
 		if (dents[i].flags & FILE_SELECTED) {
 			r = mkpath(path, dents[i].name, newpath);
 			appendfpath(newpath, r);
@@ -1434,14 +1421,14 @@ static void export_file_list(void)
 		return;
 
 	struct entry *pdent = dents;
-	int r = 0, fd = create_tmp_file();
+	int fd = create_tmp_file();
 
 	if (fd == -1) {
 		DPRINTF_S(strerror(errno));
 		return;
 	}
 
-	for (; r < ndents; ++pdent, ++r) {
+	for (int r = 0; r < ndents; ++pdent, ++r) {
 		if (write(fd, pdent->name, pdent->nlen - 1) != (pdent->nlen - 1))
 			break;
 
@@ -1497,17 +1484,12 @@ static bool initcurses(void *oldmask)
 	char *colors = getenv(env_cfg[NNN_COLORS]);
 
 	if (colors || !getenv("NO_COLOR")) {
-		short i;
-
-		if (!colors)
-			colors = "4444";
-
 		start_color();
 		use_default_colors();
 
 		/* Get and set the context colors */
-		for (i = 0; i <  CTX_MAX; ++i) {
-			if (*colors) {
+		for (uchar i = 0; i <  CTX_MAX; ++i) {
+			if (colors && *colors) {
 				g_ctx[i].color = (*colors < '0' || *colors > '7') ? 4 : *colors - '0';
 				++colors;
 			} else
@@ -1873,15 +1855,15 @@ static bool cpmvrm_selection(enum action sel, char *path)
 #ifndef NOBATCH
 static bool batch_rename(const char *path)
 {
-	int fd1, fd2, i;
+	int fd1, fd2;
 	uint count = 0, lines = 0;
 	bool dir = FALSE, ret = FALSE;
 	char foriginal[TMP_LEN_MAX] = {0};
 	static const char batchrenamecmd[] = "paste -d'\n' %s %s | sed 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
 					     "tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
 	char buf[sizeof(batchrenamecmd) + (PATH_MAX << 1)];
+	int i = get_cur_or_sel();
 
-	i = get_cur_or_sel();
 	if (!i)
 		return ret;
 
@@ -2305,9 +2287,7 @@ static int nextsel(int presel)
 		if (!cfg.selmode && !cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
 			i = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
 			if (i > 0) {
-				char *ptr;
-
-				for (ptr = inotify_buf;
+				for (char *ptr = inotify_buf;
 				     ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
 				     ptr += sizeof(struct inotify_event) + event->len) {
 					event = (struct inotify_event *) ptr;
@@ -2412,14 +2392,13 @@ static int fill(const char *fltr, pcre *pcrex)
 static int fill(const char *fltr, regex_t *re)
 #endif
 {
-	int count = 0;
 #ifdef PCRE
 	fltrexp_t fltrexp = { .pcrex = pcrex, .str = fltr };
 #else
 	fltrexp_t fltrexp = { .regex = re, .str = fltr };
 #endif
 
-	for (; count < ndents; ++count) {
+	for (int count = 0; count < ndents; ++count) {
 		if (filterfn(&fltrexp, dents[count].name) == 0) {
 			if (count != --ndents) {
 				swap_ent(count, ndents);
@@ -3019,12 +2998,10 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
  */
 static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool bookmark)
 {
-	int r = 0;
-
 	if (!kvarr)
 		return NULL;
 
-	for (; kvarr[r].key && r < max; ++r) {
+	for (int r = 0; kvarr[r].key && r < max; ++r) {
 		if (kvarr[r].key == key) {
 			/* Do not allocate new memory for plugin */
 			if (!bookmark)
@@ -4015,9 +3992,7 @@ static void lock_terminal(void)
 
 static void printkv(kv *kvarr, FILE *fp, uchar max)
 {
-	uchar i = 0;
-
-	for (; i < max && kvarr[i].key; ++i)
+	for (uchar i = 0; i < max && kvarr[i].key; ++i)
 		fprintf(fp, " %c: %s\n", (char)kvarr[i].key, kvarr[i].val);
 }
 
@@ -4070,7 +4045,7 @@ static size_t handle_bookmark(const char *mark, char *newpath)
  */
 static void show_help(const char *path)
 {
-	int i, fd;
+	int fd;
 	FILE *fp;
 	const char *start, *end;
 	const char helpstr[] = {
@@ -4147,7 +4122,7 @@ static void show_help(const char *path)
 		fprintf(fp, "\n");
 	}
 
-	for (i = NNN_OPENER; i <= NNN_TRASH; ++i) {
+	for (uchar i = NNN_OPENER; i <= NNN_TRASH; ++i) {
 		start = getenv(env_cfg[i]);
 		if (start)
 			fprintf(fp, "%s: %s\n", env_cfg[i], start);
@@ -4351,7 +4326,7 @@ static bool selforparent(const char *path)
 
 static int dentfill(char *path, struct entry **dents)
 {
-	int n = 0, count, flags = 0;
+	int n = 0, flags = 0;
 	ulong num_saved;
 	struct dirent *dp;
 	char *namep, *pnb, *buf = NULL;
@@ -4382,7 +4357,7 @@ static int dentfill(char *path, struct entry **dents)
 			if (!ihashbmp)
 				goto exit;
 		} else
-			clear_hash();
+			memset(ihashbmp, 0, HASH_OCTETS << 3);
 
 		attron(COLOR_PAIR(cfg.curctx + 1));
 	}
@@ -4483,7 +4458,7 @@ static int dentfill(char *path, struct entry **dents)
 				dentp = *dents;
 				dentp->name = pnamebuf;
 
-				for (count = 1; count < n; ++dentp, ++count)
+				for (int count = 1; count < n; ++dentp, ++count)
 					/* Current filename starts at last filename start + length */
 					(dentp + 1)->name = (char *)((size_t)dentp->name + dentp->nlen);
 			}
@@ -4574,9 +4549,7 @@ exit:
  */
 static int dentfind(const char *fname, int n)
 {
-	int i = 0;
-
-	for (; i < n; ++i)
+	for (int i = 0; i < n; ++i)
 		if (xstrcmp(fname, dents[i].name) == 0)
 			return i;
 
@@ -4677,9 +4650,7 @@ static void handle_screen_move(enum action sel)
 		break;
 	default: /* case SEL_FIRST */
 	{
-		int r = 0;
-
-		for (; r < ndents; ++r) {
+		for (int r = 0; r < ndents; ++r) {
 			if (!(dents[r].flags & DIR_OR_LINK_TO_DIR)) {
 				move_cursor((r) % ndents, 0);
 				break;
@@ -6322,7 +6293,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 	int err, ignore = 0;
 	struct stat sb;
 	char *slash, *tmp;
-	ssize_t i, len = strlen(prefix);
+	ssize_t len = strlen(prefix);
 	char *tmpdir = malloc(sizeof(char) * (PATH_MAX + TMP_LEN_MAX));
 
 	if (!tmpdir) {
@@ -6346,7 +6317,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 
 	listpath = tmpdir;
 
-	for (i = 0; i < entries; ++i) {
+	for (ssize_t i = 0; i < entries; ++i) {
 		if (!paths[i])
 			continue;
 
@@ -6534,10 +6505,9 @@ malloc_1:
 static void check_key_collision(void)
 {
 	int key;
-	ulong i = 0;
 	bool bitmap[KEY_MAX] = {FALSE};
 
-	for (; i < sizeof(bindings) / sizeof(struct key); ++i) {
+	for (ulong i = 0; i < sizeof(bindings) / sizeof(struct key); ++i) {
 		key = bindings[i].sym;
 
 		if (bitmap[key])
