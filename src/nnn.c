@@ -3305,7 +3305,8 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		break;
 	case S_IFLNK:
 		ln = TRUE;
-		ind1 = ind2 = '@'; // fallthrough
+		ind1 = '@';
+		ind2 = (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@'; // fallthrough
 	case S_IFSOCK:
 		if (!ind1)
 			ind1 = ind2 = '='; // fallthrough
