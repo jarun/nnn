@@ -688,7 +688,7 @@ static haiku_nm_h haiku_hnd;
 #endif /* __GNUC__ */
 
 /* Forward declarations */
-static size_t xstrsncpy(char *dest, const char *src, size_t n);
+static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);
 static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag);
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
@@ -888,21 +888,22 @@ static rlim_t max_openfds(void)
 	struct rlimit rl;
 	rlim_t limit = getrlimit(RLIMIT_NOFILE, &rl);
 
-	if (limit != 0)
-		return 32;
+	if (!limit) {
+		limit = rl.rlim_cur;
+		rl.rlim_cur = rl.rlim_max;
 
-	limit = rl.rlim_cur;
-	rl.rlim_cur = rl.rlim_max;
-
-	/* Return ~75% of max possible */
-	if (setrlimit(RLIMIT_NOFILE, &rl) == 0) {
-		limit = rl.rlim_max - (rl.rlim_max >> 2);
-		/*
-		 * 20K is arbitrary. If the limit is set to max possible
-		 * value, the memory usage increases to more than double.
-		 */
-		return limit > 20480 ?  20480 : limit;
-	}
+		/* Return ~75% of max possible */
+		if (setrlimit(RLIMIT_NOFILE, &rl) == 0) {
+			limit = rl.rlim_max - (rl.rlim_max >> 2);
+			/*
+			 * 20K is arbitrary. If the limit is set to max possible
+			 * value, the memory usage increases to more than double.
+			 */
+			if (limit > 20480)
+				limit = 20480;
+		}
+	} else
+		limit = 32;
 
 	return limit;
 }
@@ -930,21 +931,16 @@ static void *xrealloc(void *pcur, size_t len)
  * Always null ('\0') terminates if both src and dest are valid pointers.
  * Returns the number of bytes copied including terminating null byte.
  */
-static size_t xstrsncpy(char *dest, const char *src, size_t n)
+static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 {
-	if (!src || !dest || !n)
-		return 0;
+	char *end = memccpy(dst, src, '\0', n);
 
-	size_t len = strlen(src) + 1;
-	if (len <= n) {
-		memcpy(dest, src, len);
-		n = len;
-	} else {
-		memcpy(dest, src, n - 1);
-		dest[n - 1] = '\0';
+	if (!end) {
+		dst[n - 1] = '\0';
+		end = dst + n;
 	}
 
-	return n;
+	return end - dst;
 }
 
 static bool is_suffix(const char *str, const char *suffix)

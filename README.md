@@ -35,7 +35,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 10. Configure the middle mouse click to do anything
 11. Fuzzy search subtree and open the dir of a file
 12. Load four dirs with custom settings at once
-13. Show notifications on cp, mv completion
+13. Notifications on cp, mv, rm completion
 14. Auto-sync selection to system clipboard
 15. Open text files detached in another pane/tab/window
 16. Create files/dirs/duplicates with parents (like `mkdir -p`)
