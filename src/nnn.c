@@ -1498,9 +1498,13 @@ static bool initcurses(void *oldmask)
 #endif
 	curs_set(FALSE); /* Hide cursor */
 
-	if (!getenv("NO_COLOR")) {
+	char *colors = getenv(env_cfg[NNN_COLORS]);
+
+	if (colors || !getenv("NO_COLOR")) {
 		short i;
-		char *colors = xgetenv(env_cfg[NNN_COLORS], "4444");
+
+		if (!colors)
+			colors = "4444";
 
 		start_color();
 		use_default_colors();
