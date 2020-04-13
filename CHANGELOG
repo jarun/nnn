@@ -1,3 +1,48 @@
+nnn v3.1
+2020-04-13
+
+- unlimited bookmarks and plugin keys
+- status bar text in context color
+- support config `NO_COLOR` to disable colors
+- config `NNN_OPTS` to specify binary options to `nnn`
+- config `NNN_MCLICK` to emulate configurable key
+- toggle selection on right click
+- ignore hard links when calculating disk usage
+- dim (hard/sym) link names (symlink to file has `@`)
+- more special keys at empty filter prompt in _type-to-nav_
+- key <kbd>></kbd> to export file list
+- option `-F` to show fortune in help and settings screen
+- option `-T` to specify sort order (obsoletes `-v`)
+- option to clear sort order
+- key <kbd>T</kbd> to change time type (access/change/mod)
+- `.nmv` - internal fully-functional batch renamer plugin
+- make var `O_NOBATCH` to disable native batch renamer
+- `nuke` & `imgview` - open all images in directory sxiv
+- `nuke` - open log files in vi
+- plugin `x2sel` - system clipboard to selection copier
+- plugin `fzy` - cd using z database
+- plugin `fzopen` - support `FZF_DEFAULT_COMMAND`
+- create new context on TAB without prompt
+- hover and connect by dir name (within config dir)
+- move to next entry on current file delete
+- on single file copy/move, select the copied/moved file
+- option `-f` to to use readline history file (off by default)
+- use `s` in status bar to indicate selection in progress
+- make var `O_NOMOUSE` to disable mouse support
+- do not store `NNN_TRASH` and `-Q` in config/session
+- add sample .desktop file for XDG compatible DEs
+- rename _nav-as-you-type_ to _type-to-nav_ mode
+- fix PCRE case-insensitive regex search
+- fix no error msg when filter length limit exceeded
+- fix static package generation
+- fix broken abort message when started in du-mode
+- fix filter lost on context switch in non _type-to-nav_ mode
+- fix broken readline prompt
+- fix long strings treated as action keys in filter prompt
+- fix `NNNLVL` not reset when spawned shell is exited
+
+-------------------------------------------------------------------------------
+
 nnn v3.0
 2020-02-12
 

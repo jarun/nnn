@@ -7,7 +7,6 @@
 <a href="https://circleci.com/gh/jarun/workflows/nnn"><img src="https://img.shields.io/circleci/project/github/jarun/nnn.svg?label=circleci" alt="CircleCI Status" /></a>
 <a href="https://en.wikipedia.org/wiki/Privacy-invasive_software"><img src="https://img.shields.io/badge/privacy-✓-crimson?maxAge=2592000" alt="Privacy Awareness" /></a>
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow.svg?maxAge=2592000" alt="License" /></a>
-<a href="https://github.com/jarun/nnn/wiki"><img src="https://img.shields.io/badge/nnn-Wiki-important?maxAge=2592000" alt="Wiki" /></a>
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/PayPal-donate-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
 
@@ -51,7 +50,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 25. Watch matrix text fly or read fortune messages
 26. Configure in 5 minutes!
 
-Once installed (instructions below), _**read the fine [manual](https://github.com/jarun/nnn/wiki)**_.
+Once installed (instructions below), _**read the fine manual**_. [![Wiki](https://img.shields.io/badge/nnn-Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
 
 ## Features
 

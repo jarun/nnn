@@ -107,7 +107,7 @@
 #include "dbg.h"
 
 /* Macro definitions */
-#define VERSION "3.0"
+#define VERSION "3.1"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
 #define SESSIONS_VERSION 1
 
@@ -770,7 +770,7 @@ static void clear_hash()
 static void clearinfoln(void)
 {
 	move(xlines - 2, 0);
-	addch('\n');
+	clrtoeol();
 }
 
 #ifdef KEY_RESIZE
@@ -817,12 +817,6 @@ static void printerr(int linenum)
 		unlink(selpath);
 	free(pselbuf);
 	exit(1);
-}
-
-static void printinfoln(const char *str)
-{
-	clearinfoln();
-	mvaddstr(xlines - 2, xcols - strlen(str), str);
 }
 
 static inline bool xconfirm(int c)
@@ -936,7 +930,7 @@ static void *xrealloc(void *pcur, size_t len)
  * Always null ('\0') terminates if both src and dest are valid pointers.
  * Returns the number of bytes copied including terminating null byte.
  */
-static size_t xstrsncpy(char *restrict dest, const char *restrict src, size_t n)
+static size_t xstrsncpy(char *dest, const char *src, size_t n)
 {
 	if (!src || !dest || !n)
 		return 0;
@@ -2390,13 +2384,17 @@ static void showfilterinfo(void)
 	snprintf(info + i, REGEX_MAX - i - 1, "  %s [/], %s [:]",
 		 (cfg.regex ? "regex" : "str"),
 		 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
-	printinfoln(info);
+
+	clearinfoln();
+	mvaddstr(xlines - 2, xcols - strlen(info), info);
 }
 
 static void showfilter(char *str)
 {
+	attron(COLOR_PAIR(cfg.curctx + 1));
 	showfilterinfo();
 	printmsg(str);
+	// printmsg calls attroff()
 }
 
 static inline void swap_ent(int id1, int id2)
