@@ -170,11 +170,11 @@ Unlisted packagers:
 
 #### Release packages
 
-Packages for Arch Linux, CentOS, Debian, Fedora and Ubuntu are auto-generated with the [latest stable release](https://github.com/jarun/nnn/releases/latest).
+Packages for Arch Linux, CentOS, Debian, Fedora, Ubuntu and a static binary are generated with the [latest release](https://github.com/jarun/nnn/releases/latest).
 
 #### From source
 
-Download the [latest stable release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*), install deps and compile. On Ubuntu 18.04:
+Download the [latest release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*), install deps and compile. On Ubuntu 18.04:
 
 ```sh
 sudo apt-get install pkg-config libncursesw5-dev libreadline-dev
