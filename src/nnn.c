@@ -615,12 +615,6 @@ static const char * const envs[] = {
 #define T_CHANGE 1
 #define T_MOD 2
 
-static const char * const time_type[] = {
-	"'a'ccess",
-	"'c'hange",
-	"'m'od",
-};
-
 #ifdef __linux__
 static char cp[] = "cp   -iRp";
 static char mv[] = "mv   -i";
@@ -4784,43 +4778,31 @@ static int set_sort_flags(int r)
 
 static bool set_time_type(int *presel)
 {
-	char buf[24];
-	bool first = TRUE;
-	int r = 0;
-	size_t chars = 0;
+	bool ret = FALSE;
+	char buf[] = "'a'ccess / 'c'hange / 'm'od [ ]";
 
-	for (; r < (int)ELEMENTS(time_type); ++r)
-		if (r != cfg.timetype) {
-			chars += xstrsncpy(buf + chars, time_type[r], sizeof(buf) - chars) - 1;
-			if (first) {
-				buf[chars++] = ' ';
-				buf[chars++] = '/';
-				buf[chars++] = ' ';
-				first = FALSE;
-			} else {
-				buf[chars++] = '?';
-				buf[chars] = '\n';
-			}
-		}
+	buf[sizeof(buf) - 3] = cfg.timetype == T_MOD ? 'm' : (cfg.timetype == T_ACCESS ? 'a' : 'c');
 
-	r = get_input(buf);
+	int r = get_input(buf);
+
 	if (r == 'a' || r == 'c' || r == 'm') {
 		r = (r == 'm') ? T_MOD : ((r == 'a') ? T_ACCESS : T_CHANGE);
-		if (cfg.timetype == r) {
-			printwait(messages[MSG_NOCHNAGE], presel);
-			return FALSE;
-		}
+		if (cfg.timetype != r) {
+			cfg.timetype = r;
 
-		cfg.timetype = r;
+			if (cfg.filtermode || g_ctx[cfg.curctx].c_fltr[1])
+				*presel = FILTER;
 
-		if (cfg.filtermode || g_ctx[cfg.curctx].c_fltr[1])
-			*presel = FILTER;
+			ret = TRUE;
+		} else
+			r = MSG_NOCHNAGE;
+	} else
+		r = MSG_INVALID_KEY;
 
-		return TRUE;
-	}
+	if (!ret)
+		printwait(messages[r], presel);
 
-	printwait(messages[MSG_INVALID_KEY], presel);
-	return FALSE;
+	return ret;
 }
 
 static void statusbar(char *path)
