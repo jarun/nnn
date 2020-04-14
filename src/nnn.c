@@ -4271,8 +4271,9 @@ static void launch_app(const char *path, char *newpath)
 
 static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
-	if (sb->st_blocks && (typeflag == FTW_D
-	    || (typeflag == FTW_F && (sb->st_nlink <= 1 || test_set_bit((uint)sb->st_ino)))))
+	if (sb->st_blocks
+	    && ((typeflag == FTW_F && (sb->st_nlink <= 1 || test_set_bit((uint)sb->st_ino)))
+	    || typeflag == FTW_D))
 		ent_blocks += sb->st_blocks;
 
 	++num_files;
@@ -4281,8 +4282,9 @@ static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typef
 
 static int sum_asize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
-	if (sb->st_size && (typeflag == FTW_D
-	    || (typeflag == FTW_F && (sb->st_nlink <= 1 || test_set_bit((uint)sb->st_ino)))))
+	if (sb->st_size
+	    && ((typeflag == FTW_F && (sb->st_nlink <= 1 || test_set_bit((uint)sb->st_ino)))
+	    || typeflag == FTW_D))
 		ent_blocks += sb->st_size;
 
 	++num_files;
