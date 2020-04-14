@@ -3326,27 +3326,26 @@ static void (*printptr)(const struct entry *ent, uint namecols, bool sel) = &pri
 static void savecurctx(settings *curcfg, char *path, char *curname, int r /* next context num */)
 {
 	settings cfg = *curcfg;
+	context *ctxr = &g_ctx[r];
 	bool selmode = cfg.selmode ? TRUE : FALSE;
 
 	/* Save current context */
 	xstrsncpy(g_ctx[cfg.curctx].c_name, curname, NAME_MAX + 1);
 	g_ctx[cfg.curctx].c_cfg = cfg;
 
-	if (g_ctx[r].c_cfg.ctxactive) { /* Switch to saved context */
+	if (ctxr->c_cfg.ctxactive) { /* Switch to saved context */
 		/* Switch light/detail mode */
-		if (cfg.showdetail != g_ctx[r].c_cfg.showdetail)
+		if (cfg.showdetail != ctxr->c_cfg.showdetail)
 			/* set the reverse */
 			printptr = cfg.showdetail ? &printent : &printent_long;
 
-		cfg = g_ctx[r].c_cfg;
+		cfg = ctxr->c_cfg;
 	} else { /* Setup a new context from current context */
-		g_ctx[r].c_cfg.ctxactive = 1;
-		xstrsncpy(g_ctx[r].c_path, path, PATH_MAX);
-		g_ctx[r].c_last[0] = '\0';
-		g_ctx[r].c_name[0] = '\0';
-		g_ctx[r].c_fltr[0] = g_ctx[r].c_fltr[1] = '\0';
-		g_ctx[r].c_cfg = cfg;
-		g_ctx[r].c_cfg.runplugin = 0;
+		ctxr->c_cfg.ctxactive = 1;
+		xstrsncpy(ctxr->c_path, path, PATH_MAX);
+		ctxr->c_last[0] = ctxr->c_name[0] = ctxr->c_fltr[0] = ctxr->c_fltr[1] = '\0';
+		ctxr->c_cfg = cfg;
+		ctxr->c_cfg.runplugin = 0;
 	}
 
 	/* Continue selection mode */
