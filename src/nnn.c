@@ -930,9 +930,9 @@ static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 static inline size_t xstrlen(const char *s)
 {
 #if !defined(__GLIBC__)
-	return strlen(s);
+	return strlen(s); // NOLINT
 #else
-	return (char *)rawmemchr(s, '\0') - s;
+	return (char *)rawmemchr(s, '\0') - s; // NOLINT
 #endif
 }
 
