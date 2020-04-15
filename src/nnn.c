@@ -927,13 +927,32 @@ static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 	return end - dst;
 }
 
+static inline size_t xstrlen(const char *s)
+{
+#if !defined(__GLIBC__)
+	return strlen(s);
+#else
+	return (char *)rawmemchr(s, '\0') - s;
+#endif
+}
+
+static char *xstrdup(const char* s)
+{
+	size_t len = xstrlen(s) + 1;
+	char *ptr = malloc(len);
+
+	if (ptr)
+		xstrsncpy(ptr, s, len);
+	return ptr;
+}
+
 static bool is_suffix(const char *str, const char *suffix)
 {
 	if (!str || !suffix)
 		return FALSE;
 
-	size_t lenstr = strlen(str);
-	size_t lensuffix = strlen(suffix);
+	size_t lenstr = xstrlen(str);
+	size_t lensuffix = xstrlen(suffix);
 
 	if (lensuffix > lenstr)
 		return FALSE;
@@ -945,7 +964,7 @@ static bool is_suffix(const char *str, const char *suffix)
  * The poor man's implementation of memrchr(3).
  * We are only looking for '/' in this program.
  * And we are NOT expecting a '/' at the end.
- * Ideally 0 < n <= strlen(s).
+ * Ideally 0 < n <= xstrlen(s).
  */
 static void *xmemrchr(uchar *s, uchar ch, size_t n)
 {
@@ -1014,7 +1033,7 @@ static char *abspath(const char *path, const char *cwd)
 	if (!path || !cwd)
 		return NULL;
 
-	size_t dst_size = 0, src_size = strlen(path), cwd_size = strlen(cwd);
+	size_t dst_size = 0, src_size = xstrlen(path), cwd_size = xstrlen(cwd);
 	const char *src;
 	char *dst;
 	char *resolved_path = malloc(src_size + (*path == '/' ? 0 : cwd_size) + 1);
@@ -1061,7 +1080,7 @@ static char *abspath(const char *path, const char *cwd)
 /* A very simplified implementation, changes path */
 static char *xdirname(char *path)
 {
-	char *base = xmemrchr((uchar *)path, '/', strlen(path));
+	char *base = xmemrchr((uchar *)path, '/', xstrlen(path));
 
 	if (base == path)
 		path[1] = '\0';
@@ -1073,7 +1092,7 @@ static char *xdirname(char *path)
 
 static char *xbasename(char *path)
 {
-	char *base = xmemrchr((uchar *)path, '/', strlen(path)); // NOLINT
+	char *base = xmemrchr((uchar *)path, '/', xstrlen(path)); // NOLINT
 
 	return base ? base + 1 : path;
 }
@@ -1136,7 +1155,7 @@ static size_t seltofile(int fd, uint *pcount)
 	lastpos = selbufpos - 1;
 
 	while (pos <= lastpos) {
-		len = strlen(pbuf);
+		len = xstrlen(pbuf);
 		pos += len;
 
 		r = write(fd, pbuf, len);
@@ -1612,7 +1631,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 	}
 
 	if (flag & F_MULTI) {
-		size_t len = strlen(file) + 1;
+		size_t len = xstrlen(file) + 1;
 
 		cmd = (char *)malloc(len);
 		if (!cmd) {
@@ -1870,7 +1889,7 @@ static bool batch_rename(const char *path)
 	if (fd1 == -1)
 		return ret;
 
-	xstrsncpy(foriginal, g_tmpfpath, strlen(g_tmpfpath) + 1);
+	xstrsncpy(foriginal, g_tmpfpath, xstrlen(g_tmpfpath) + 1);
 
 	fd2 = create_tmp_file();
 	if (fd2 == -1) {
@@ -1941,8 +1960,8 @@ static void get_archive_cmd(char *cmd, const char *archive)
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
 {
 	/* The 70 comes from the string below */
-	char *buf = (char *)malloc((70 + strlen(cmd) + strlen(archive)
-				       + strlen(curpath) + strlen(selpath)) * sizeof(char));
+	char *buf = (char *)malloc((70 + xstrlen(cmd) + xstrlen(archive)
+				       + xstrlen(curpath) + xstrlen(selpath)) * sizeof(char));
 	if (!buf) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
@@ -1963,7 +1982,7 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 static bool write_lastdir(const char *curpath)
 {
 	bool ret = TRUE;
-	size_t len = strlen(cfgdir);
+	size_t len = xstrlen(cfgdir);
 
 	xstrsncpy(cfgdir + len, "/.lastd", 8);
 	DPRINTF_S(cfgdir);
@@ -2150,7 +2169,7 @@ static int setfilter(regex_t *regex, const char *filter)
 static int visible_re(const fltrexp_t *fltrexp, const char *fname)
 {
 #ifdef PCRE
-	return pcre_exec(fltrexp->pcrex, NULL, fname, strlen(fname), 0, 0, NULL, 0) == 0;
+	return pcre_exec(fltrexp->pcrex, NULL, fname, xstrlen(fname), 0, 0, NULL, 0) == 0;
 #else
 	return regexec(fltrexp->regex, fname, 0, NULL, 0) == 0;
 #endif
@@ -2360,7 +2379,7 @@ static void showfilterinfo(void)
 		 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
 
 	clearinfoln();
-	mvaddstr(xlines - 2, xcols - strlen(info), info);
+	mvaddstr(xlines - 2, xcols - xstrlen(info), info);
 }
 
 static void showfilter(char *str)
@@ -2890,7 +2909,7 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int *prese
 	}
 
 	while (pos < selbufpos) {
-		len = strlen(psel);
+		len = xstrlen(psel);
 		fname = xbasename(psel);
 
 		r = xstrsncpy(buf, prefix, NAME_MAX + 1); /* Copy prefix */
@@ -2918,11 +2937,9 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 		return TRUE;
 
 	nextkey = ptr;
-	while (*nextkey) {
-		if (*nextkey == ':')
+	while (*nextkey)
+		if (*nextkey++ == ':')
 			++maxitems;
-		++nextkey;
-	}
 
 	if (!maxitems || maxitems > 100)
 		return FALSE;
@@ -2935,16 +2952,15 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 
 	kvarr = *arr;
 
-	*envcpy = strdup(ptr);
+	*envcpy = xstrdup(ptr);
 	if (!*envcpy) {
 		xerror();
 		return FALSE;
 	}
 
-	if (nextkey - ptr > 1)
-		/* Clear trailing ; or / */
-		if (*--nextkey == ';')
-			*(*envcpy + (nextkey - ptr)) = '\0';
+	/* Clear trailing ;s */
+	if (*--nextkey == ';')
+		*(*envcpy + (nextkey - ptr)) = '\0';
 
 	ptr = *envcpy;
 	nextkey = ptr;
@@ -2977,7 +2993,7 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 
 	/* Redundant check so far, all paths will get evaluated and fail */
 	//for (i = 0; i < maxitems && kvarr[i].key; ++i)
-	//	if (strlen(kvarr[i].val) >= PATH_MAX)
+	//	if (xstrlen(kvarr[i].val) >= PATH_MAX)
 	//		return FALSE;
 
 	*items = maxitems;
@@ -3002,8 +3018,8 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool bookmark)
 				return kvarr[r].val;
 
 			if (kvarr[r].val[0] == '~') {
-				ssize_t len = strlen(home);
-				ssize_t loclen = strlen(kvarr[r].val);
+				ssize_t len = xstrlen(home);
+				ssize_t loclen = xstrlen(kvarr[r].val);
 
 				xstrsncpy(g_buf, home, len + 1);
 				xstrsncpy(g_buf + len, kvarr[r].val + 1, loclen);
@@ -3129,7 +3145,7 @@ static char *coolsize(off_t size)
 
 		char *frac = xitoa(rem);
 		size_t toprint = i > 3 ? 3 : i;
-		size_t len = strlen(frac);
+		size_t len = xstrlen(frac);
 
 		if (len < toprint) {
 			size_buf[ret] = size_buf[ret + 1] = size_buf[ret + 2] = '0';
@@ -3273,7 +3289,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		}
 
 		size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
-		len = 10 - (uint)strlen(size);
+		len = 10 - (uint)xstrlen(size);
 		while (--len)
 			addch(' ');
 		addstr(size);
@@ -3786,20 +3802,18 @@ static bool archive_mount(char *path, char *newpath)
 {
 	char *dir, *cmd = utils[UTIL_ARCHIVEMOUNT];
 	char *name = dents[cur].name;
-	size_t len;
+	size_t len = dents[cur].nlen;
 
 	if (!getutil(cmd)) {
 		printmsg(messages[MSG_UTIL_MISSING]);
 		return FALSE;
 	}
 
-	dir = strdup(name);
+	dir = xstrdup(name);
 	if (!dir) {
 		printmsg(messages[MSG_FAILED]);
 		return FALSE;
 	}
-
-	len = strlen(dir);
 
 	while (len > 1)
 		if (dir[--len] == '.') {
@@ -3882,7 +3896,7 @@ static bool remote_mount(char *newpath, char *currentpath)
 	}
 
 	/* Convert "Host" to "Host:" */
-	size_t len = strlen(tmp);
+	size_t len = xstrlen(tmp);
 
 	if (tmp[len - 1] != ':') { /* Append ':' if missing */
 		tmp[len] = ':';
@@ -4154,7 +4168,7 @@ static bool run_cmd_as_plugin(const char *path, const char *file, char *runfile)
 
 	xstrsncpy(g_buf, file, PATH_MAX);
 
-	len = strlen(g_buf);
+	len = xstrlen(g_buf);
 	if (len > 1 && g_buf[len - 1] == '*') {
 		flags &= ~F_CONFIRM; /* Skip user confirmation */
 		g_buf[len - 1] = '\0'; /* Get rid of trailing no confirmation symbol */
@@ -4340,7 +4354,7 @@ static int dentfill(char *path, struct entry **dents)
 	if (cfg.blkorder) {
 		num_files = 0;
 		dir_blocks = 0;
-		buf = (char *)alloca(strlen(path) + NAME_MAX + 2);
+		buf = (char *)alloca(xstrlen(path) + NAME_MAX + 2);
 		if (!buf)
 			return 0;
 
@@ -4967,7 +4981,7 @@ static void redraw(char *path)
 	attron(A_UNDERLINE);
 
 	/* Print path */
-	i = (int)strlen(path);
+	i = (int)xstrlen(path);
 	if ((i + MIN_DISPLAY_COLS) <= ncols)
 		addnstr(path, ncols - MIN_DISPLAY_COLS);
 	else {
@@ -5386,7 +5400,7 @@ nochange:
 
 #ifdef PCRE
 				if (!pcre_exec(archive_pcre, NULL, dents[cur].name,
-					       strlen(dents[cur].name), 0, 0, NULL, 0)) {
+					       xstrlen(dents[cur].name), 0, 0, NULL, 0)) {
 #else
 				if (!regexec(&archive_re, dents[cur].name, 0, NULL, 0)) {
 #endif
@@ -5525,7 +5539,7 @@ nochange:
 			goto begin;
 		case SEL_PIN:
 			free(mark);
-			mark = strdup(path);
+			mark = xstrdup(path);
 			printwait(mark, &presel);
 			goto nochange;
 		case SEL_FLTR:
@@ -6276,7 +6290,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 	int err, ignore = 0;
 	struct stat sb;
 	char *slash, *tmp;
-	ssize_t len = strlen(prefix);
+	ssize_t len = xstrlen(prefix);
 	char *tmpdir = malloc(sizeof(char) * (PATH_MAX + TMP_LEN_MAX));
 
 	if (!tmpdir) {
@@ -6311,10 +6325,10 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 		}
 
 		/* Don't copy the common prefix */
-		xstrsncpy(tmp, paths[i] + len, strlen(paths[i]) - len + 1);
+		xstrsncpy(tmp, paths[i] + len, xstrlen(paths[i]) - len + 1);
 
 		/* Get the dir containing the path */
-		slash = xmemrchr((uchar *)tmp, '/', strlen(paths[i]) - len);
+		slash = xmemrchr((uchar *)tmp, '/', xstrlen(paths[i]) - len);
 		if (slash)
 			*slash = '\0';
 
@@ -6466,7 +6480,7 @@ static char *load_input()
 
 	if (prefixpath[0]) {
 		if (entries == 1) {
-			tmp = xmemrchr((uchar *)prefixpath, '/', strlen(prefixpath));
+			tmp = xmemrchr((uchar *)prefixpath, '/', xstrlen(prefixpath));
 			if (!tmp)
 				goto malloc_2;
 
@@ -6558,12 +6572,12 @@ static bool setup_config(void)
 			return FALSE;
 		}
 
-		len = strlen(xdgcfg) + 1 + 13; /* add length of "/nnn/sessions" */
+		len = xstrlen(xdgcfg) + 1 + 13; /* add length of "/nnn/sessions" */
 		xdg = TRUE;
 	}
 
 	if (!xdg)
-		len = strlen(home) + 1 + 21; /* add length of "/.config/nnn/sessions" */
+		len = xstrlen(home) + 1 + 21; /* add length of "/.config/nnn/sessions" */
 
 	cfgdir = (char *)malloc(len);
 	plugindir = (char *)malloc(len);
@@ -6675,7 +6689,7 @@ int main(int argc, char *argv[])
 		middle_click_key = (uchar)middle_click_env[0];
 #endif
 	const char* const env_opts = xgetenv(env_cfg[NNN_OPTS], NULL);
-	int env_opts_id = env_opts ? (int)strlen(env_opts) : -1;
+	int env_opts_id = env_opts ? (int)xstrlen(env_opts) : -1;
 #ifndef NORL
 	bool rlhist = FALSE;
 #endif
@@ -6861,7 +6875,7 @@ int main(int argc, char *argv[])
 		} else {
 			arg = argv[optind];
 			DPRINTF_S(arg);
-			if (strlen(arg) > 7 && !strncmp(arg, "file://", 7))
+			if (xstrlen(arg) > 7 && !strncmp(arg, "file://", 7))
 				arg = arg + 7;
 			initpath = realpath(arg, NULL);
 			DPRINTF_S(initpath);
