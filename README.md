@@ -144,7 +144,7 @@ A curses library with wide char support (e.g. ncursesw), libreadline (optional) 
 | archivemount, fusermount(3)/umount (macOS) | optional | mount, unmount archives |
 | sshfs, [rclone](https://rclone.org/), fusermount(3)/umount (macOS) | optional | mount, unmount remotes |
 | trash-cli | optional | trash files (default action: rm) |
-| vlock (Linux), bashlock (macOS), lock(1) (BSD),<br>peaclock (Haiku) | optional | terminal locker (fallback: [cmatrix](https://github.com/abishekvashok/cmatrix)) |
+| vlock (Linux), bashlock (macOS), lock(1) (BSD),<br>peaclock (Haiku) | optional | terminal locker (else `$NNN_LOCKER`) |
 | advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/Advanced-use-cases#cp-mv-progress)) | optional | copy, move progress |
 | fortune | optional | random quotes in help screen |
 | `$VISUAL` (else `$EDITOR`), `$PAGER`, `$SHELL` | optional | fallback vi, less, sh |

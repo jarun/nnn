@@ -416,9 +416,9 @@ static uint g_states;
 #define UTIL_UNZIP 3
 #define UTIL_TAR 4
 #define UTIL_LOCKER 5
-#define UTIL_CMATRIX 6
-#define UTIL_LAUNCH 7
-#define UTIL_SH_EXEC 8
+#define UTIL_LAUNCH 6
+#define UTIL_SH_EXEC 7
+#define UTIL_BASH 8
 #define UTIL_ARCHIVEMOUNT 9
 #define UTIL_SSHFS 10
 #define UTIL_RCLONE 11
@@ -429,8 +429,7 @@ static uint g_states;
 #define UTIL_FZY 16
 #define UTIL_NTFY 17
 #define UTIL_CBCP 18
-#define UTIL_BASH 19
-#define UTIL_NMV 20
+#define UTIL_NMV 19
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -456,9 +455,9 @@ static char * const utils[] = {
 #else
 	"vlock",
 #endif
-	"cmatrix",
 	"launch",
 	"sh -c",
+	"bash",
 	"archivemount",
 	"sshfs",
 	"rclone",
@@ -469,7 +468,6 @@ static char * const utils[] = {
 	"fzy",
 	".ntfy",
 	".cbcp",
-	"bash",
 	".nmv",
 };
 
@@ -3969,12 +3967,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 
 static void lock_terminal(void)
 {
-	char *tmp = utils[UTIL_LOCKER];
-
-	if (!getutil(tmp))
-		tmp = utils[UTIL_CMATRIX];
-
-	spawn(tmp, NULL, NULL, NULL, F_NORMAL);
+	spawn(xgetenv("NNN_LOCKER", utils[UTIL_LOCKER]), NULL, NULL, NULL, F_CLI);
 }
 
 static void printkv(kv *kvarr, FILE *fp, uchar max)
