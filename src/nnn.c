@@ -936,7 +936,7 @@ static inline size_t xstrlen(const char *s)
 #endif
 }
 
-static char *xstrdup(const char* s)
+static char *xstrdup(const char *s)
 {
 	size_t len = xstrlen(s) + 1;
 	char *ptr = malloc(len);
@@ -2928,29 +2928,14 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int *prese
 
 static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 {
-	uint maxitems = 0, i = 0;
+	const uchar INCR = 8;
+	uint i = 0;
 	char *nextkey;
+	kv *kvarr = NULL;
 	char *ptr = getenv(env_cfg[id]);
-	kv *kvarr;
 
 	if (!ptr || !*ptr)
 		return TRUE;
-
-	nextkey = ptr;
-	while (*nextkey)
-		if (*nextkey++ == ':')
-			++maxitems;
-
-	if (!maxitems || maxitems > 100)
-		return FALSE;
-
-	*arr = calloc(maxitems, sizeof(kv));
-	if (!arr) {
-		xerror();
-		return FALSE;
-	}
-
-	kvarr = *arr;
 
 	*envcpy = xstrdup(ptr);
 	if (!*envcpy) {
@@ -2958,15 +2943,20 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 		return FALSE;
 	}
 
-	/* Clear trailing ;s */
-	if (*--nextkey == ';')
-		*(*envcpy + (nextkey - ptr)) = '\0';
-
 	ptr = *envcpy;
 	nextkey = ptr;
 
-	while (*ptr && i < maxitems) {
+	while (*ptr && i < 100) {
 		if (ptr == nextkey) {
+			if (!(i & (INCR - 1))) {
+				kvarr = xrealloc(kvarr, sizeof(kv) * (i + INCR));
+				*arr = kvarr;
+				if (!kvarr) {
+					xerror();
+					return FALSE;
+				}
+				memset(kvarr + i, 0, sizeof(kv) * INCR);
+			}
 			kvarr[i].key = (uchar)*ptr;
 			if (*++ptr != ':')
 				return FALSE;
@@ -2986,18 +2976,8 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 		++ptr;
 	}
 
-	maxitems = i;
-
-	if (kvarr[i - 1].val && *kvarr[i - 1].val == '\0')
-		return FALSE;
-
-	/* Redundant check so far, all paths will get evaluated and fail */
-	//for (i = 0; i < maxitems && kvarr[i].key; ++i)
-	//	if (xstrlen(kvarr[i].val) >= PATH_MAX)
-	//		return FALSE;
-
-	*items = maxitems;
-	return TRUE;
+	*items = i;
+	return (i != 0);
 }
 
 /*
