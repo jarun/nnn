@@ -4928,17 +4928,14 @@ static void redraw(char *path)
 			return draw_line(path, ncols);
 	}
 
-	/* Clear first line */
-	move(0, 0);
-	clrtoeol();
+	/* Clear screen */
+	erase();
 
 	/* Enforce scroll/cursor invariants */
 	move_cursor(cur, 1);
 
 	/* Fail redraw if < than 10 columns, context info prints 10 chars */
 	if (ncols < MIN_DISPLAY_COLS) {
-		/* Clear from last entry to end */
-		clrtobot();
 		printmsg(messages[MSG_FEW_COLUMNS]);
 		return;
 	}
@@ -5007,9 +5004,6 @@ static void redraw(char *path)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		cfg.dircolor = 0;
 	}
-
-	/* Clear from last entry to end */
-	clrtobot();
 
 	statusbar(path);
 }
