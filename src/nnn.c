@@ -4434,7 +4434,7 @@ static int dentfill(char *path, struct entry **dents)
 					DPRINTF_S(namep);
 					DPRINTF_S(strerror(errno));
 				}
-				continue;
+				memset(&sb, 0, sizeof(struct stat));
 			}
 		}
 
