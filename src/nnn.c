@@ -515,8 +515,9 @@ static char * const utils[] = {
 #define MSG_RM_TMP 40
 #define MSG_NOCHNAGE 41
 #define MSG_CANCEL 42
+#define MSG_FIRST 43
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 43 /* Must be the last entry */
+#define MSG_DIR_CHANGED 44 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -563,6 +564,7 @@ static const char * const messages[] = {
 	"remove tmp file?",
 	"unchanged",
 	"cancelled",
+	"first file (\')/char?",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -4034,7 +4036,7 @@ static void show_help(const char *path)
 	       "9Up k  Up%-16cPgUp ^U  Scroll up\n"
 	       "9Dn j  Down%-14cPgDn ^D  Scroll down\n"
 	       "9Lt h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
-	   "5Ret Rt l  Open%-20c'  First file\n"
+	   "5Ret Rt l  Open%-20c'  First file/match\n"
 	       "9g ^A  Top%-18c. F5  Toggle hidden\n"
 	       "9G ^E  End%-21c0  Lock terminal\n"
 	       "9b ^/  Bookmark key%-12c,  Pin CWD\n"
@@ -4632,8 +4634,17 @@ static void handle_screen_move(enum action sel)
 		break;
 	default: /* case SEL_FIRST */
 	{
-		for (int r = 0; r < ndents; ++r) {
-			if (!(dents[r].flags & DIR_OR_LINK_TO_DIR)) {
+		int c = get_input(messages[MSG_FIRST]);
+		if (!c)
+			break;
+
+		c = TOUPPER(c);
+
+		int r = (c == TOUPPER(*dents[cur].name)) ? (cur + 1) : 0;
+
+		for (; r < ndents; ++r) {
+			if (((c == '\'') && !(dents[r].flags & DIR_OR_LINK_TO_DIR))
+			    || (c == TOUPPER(*dents[r].name))) {
 				move_cursor((r) % ndents, 0);
 				break;
 			}
@@ -5423,7 +5434,8 @@ nochange:
 		case SEL_END: // fallthrough
 		case SEL_FIRST:
 			g_states |= STATE_MOVE_OP;
-			handle_screen_move(sel);
+			if (ndents)
+				handle_screen_move(sel);
 			break;
 		case SEL_CDHOME: // fallthrough
 		case SEL_CDBEGIN: // fallthrough
