@@ -4917,8 +4917,6 @@ static void redraw(char *path)
 	xlines = LINES;
 	xcols = COLS;
 
-	DPRINTF_S(__FUNCTION__);
-
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int onscreen = xlines - 4;
 	int i;
@@ -4931,6 +4929,8 @@ static void redraw(char *path)
 		if (ndents && (last_curscroll == curscroll))
 			return draw_line(path, ncols);
 	}
+
+	DPRINTF_S(__FUNCTION__);
 
 	/* Clear screen */
 	erase();
@@ -5141,7 +5141,9 @@ begin:
 #endif
 
 	while (1) {
-		redraw(path);
+		/* Do not do a double redraw in filterentries */
+		if ((presel != FILTER) || !filterset())
+			redraw(path);
 
 		/* Display a one-time message */
 		if (listpath && (g_states & STATE_MSG)) {
@@ -5667,8 +5669,10 @@ nochange:
 			/* In case of successful operation, reload contents */
 
 			/* Continue in type-to-nav mode, if enabled */
-			if ((cfg.filtermode || filterset()) && !refresh)
-				break;
+			if ((cfg.filtermode || filterset()) && !refresh) {
+				presel = FILTER;
+				goto nochange;
+			}
 
 			/* Save current */
 			if (ndents)
