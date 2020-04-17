@@ -4187,25 +4187,28 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 		g_states |= STATE_PLUGIN_INIT;
 	}
 
-	if (*file == '_')
-		return run_cmd_as_plugin(*path, file, runfile);
-
 	fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
 	if (fd == -1)
 		return FALSE;
 
-	/* Generate absolute path to plugin */
-	mkpath(plugindir, file, g_buf);
+	/* Run plugin from command */
+	if (*file == '_')
+		run_cmd_as_plugin(*path, file, runfile);
 
-	if (runfile && runfile[0]) {
-		xstrsncpy(*lastname, runfile, NAME_MAX);
-		spawn(g_buf, *lastname, *path, *path, F_NORMAL);
-	} else
-		spawn(g_buf, NULL, *path, *path, F_NORMAL);
+	/* Run command from plugin */
+	else {
+		/* Generate absolute path to plugin */
+		mkpath(plugindir, file, g_buf);
+
+		if (runfile && runfile[0]) {
+			xstrsncpy(*lastname, runfile, NAME_MAX);
+			spawn(g_buf, *lastname, *path, *path, F_NORMAL);
+		} else
+			spawn(g_buf, NULL, *path, *path, F_NORMAL);
+	}
 
 	len = read(fd, g_buf, PATH_MAX);
 	g_buf[len] = '\0';
-
 	close(fd);
 
 	if (len > 1) {
