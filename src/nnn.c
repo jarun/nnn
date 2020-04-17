@@ -4179,13 +4179,13 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 	int fd;
 	size_t len;
 
-	if (*file == '_')
-		return run_cmd_as_plugin(*path, file, runfile);
-
 	if (!(g_states & STATE_PLUGIN_INIT)) {
 		plctrl_init();
 		g_states |= STATE_PLUGIN_INIT;
 	}
+
+	if (*file == '_')
+		return run_cmd_as_plugin(*path, file, runfile);
 
 	fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
 	if (fd == -1)
