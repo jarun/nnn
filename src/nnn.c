@@ -228,7 +228,7 @@ typedef struct entry {
 /* Key-value pairs from env */
 typedef struct {
 	int key;
-	char *val;
+	int off;
 } kv;
 
 typedef struct {
@@ -921,7 +921,7 @@ static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 
 	if (!end) {
 		dst[n - 1] = '\0'; // NOLINT
-		end = dst + n;
+		end = dst + n; /* If we return n here, binary size increases due to auto-inlining */
 	}
 
 	return end - dst;
@@ -2928,9 +2928,9 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int *prese
 
 static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 {
+	bool next = TRUE;
 	const uchar INCR = 8;
 	uint i = 0;
-	char *nextkey;
 	kv *kvarr = NULL;
 	char *ptr = getenv(env_cfg[id]);
 
@@ -2944,10 +2944,9 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 	}
 
 	ptr = *envcpy;
-	nextkey = ptr;
 
 	while (*ptr && i < 100) {
-		if (ptr == nextkey) {
+		if (next) {
 			if (!(i & (INCR - 1))) {
 				kvarr = xrealloc(kvarr, sizeof(kv) * (i + INCR));
 				*arr = kvarr;
@@ -2958,20 +2957,17 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 				memset(kvarr + i, 0, sizeof(kv) * INCR);
 			}
 			kvarr[i].key = (uchar)*ptr;
-			if (*++ptr != ':')
+			if (*++ptr != ':' || *++ptr == '\0' || *ptr == ';')
 				return FALSE;
-			if (*++ptr == '\0')
-				return FALSE;
-			if (*ptr == ';') /* Empty location */
-				return FALSE;
-			kvarr[i].val = ptr;
+			kvarr[i].off = ptr - *envcpy;
 			++i;
 		}
 
 		if (*ptr == ';') {
 			*ptr = '\0';
-			nextkey = ptr + 1;
-		}
+			next = TRUE;
+		} else if (next)
+			next = FALSE;
 
 		++ptr;
 	}
@@ -2986,26 +2982,30 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
  * NULL is returned in case of no match, path resolution failure etc.
  * buf would be modified, so check return value before access
  */
-static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, bool bookmark)
+static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, uchar id)
 {
+	char *val;
+
 	if (!kvarr)
 		return NULL;
 
 	for (int r = 0; kvarr[r].key && r < max; ++r) {
 		if (kvarr[r].key == key) {
 			/* Do not allocate new memory for plugin */
-			if (!bookmark)
-				return kvarr[r].val;
+			if (id == NNN_PLUG)
+				return pluginstr + kvarr[r].off;
 
-			if (kvarr[r].val[0] == '~') {
+			val = bmstr + kvarr[r].off;
+
+			if (val[0] == '~') {
 				ssize_t len = xstrlen(home);
-				ssize_t loclen = xstrlen(kvarr[r].val);
+				ssize_t loclen = xstrlen(val);
 
 				xstrsncpy(g_buf, home, len + 1);
-				xstrsncpy(g_buf + len, kvarr[r].val + 1, loclen);
+				xstrsncpy(g_buf + len, val + 1, loclen);
 			}
 
-			return realpath(((kvarr[r].val[0] == '~') ? g_buf : kvarr[r].val), buf);
+			return realpath(((val[0] == '~') ? g_buf : val), buf);
 		}
 	}
 
@@ -3972,10 +3972,13 @@ static void lock_terminal(void)
 	spawn(xgetenv("NNN_LOCKER", utils[UTIL_LOCKER]), NULL, NULL, NULL, F_CLI);
 }
 
-static void printkv(kv *kvarr, FILE *fp, uchar max)
+static void printkv(kv *kvarr, FILE *fp, uchar max, uchar id)
 {
-	for (uchar i = 0; i < max && kvarr[i].key; ++i)
-		fprintf(fp, " %c: %s\n", (char)kvarr[i].key, kvarr[i].val);
+	char *val = (id == NNN_BMS) ? bmstr : pluginstr;
+
+	for (uchar i = 0; i < max && kvarr[i].key; ++i) {
+		fprintf(fp, " %c: %s\n", (char)kvarr[i].key, val + kvarr[i].off);
+	}
 }
 
 static void printkeys(kv *kvarr, char *buf, uchar max)
@@ -4008,7 +4011,7 @@ static size_t handle_bookmark(const char *mark, char *newpath)
 	fd = get_input(NULL);
 	if (fd == ',') /* Visit pinned directory */
 		mark ? xstrsncpy(newpath, mark, PATH_MAX) : (r = MSG_NOT_SET);
-	else if (!get_kv_val(bookmark, newpath, fd, maxbm, TRUE))
+	else if (!get_kv_val(bookmark, newpath, fd, maxbm, NNN_BMS))
 		r = MSG_INVALID_KEY;
 
 	if (!r && !xdiraccess(newpath))
@@ -4094,13 +4097,13 @@ static void show_help(const char *path)
 
 	if (bookmark) {
 		fprintf(fp, "BOOKMARKS\n");
-		printkv(bookmark, fp, maxbm);
+		printkv(bookmark, fp, maxbm, NNN_BMS);
 		fprintf(fp, "\n");
 	}
 
 	if (plug) {
 		fprintf(fp, "PLUGIN KEYS\n");
-		printkv(plug, fp, maxplug);
+		printkv(plug, fp, maxplug, NNN_PLUG);
 		fprintf(fp, "\n");
 	}
 
@@ -6060,7 +6063,7 @@ nochange:
 			r = get_input(NULL);
 			if (r != '\r') {
 				endselection();
-				tmp = get_kv_val(plug, NULL, r, maxplug, FALSE);
+				tmp = get_kv_val(plug, NULL, r, maxplug, NNN_PLUG);
 				if (!tmp) {
 					printwait(messages[MSG_INVALID_KEY], &presel);
 					goto nochange;
@@ -6844,7 +6847,7 @@ int main(int argc, char *argv[])
 	if (!initpath) {
 		if (arg) { /* Open a bookmark directly */
 			if (!arg[1]) /* Bookmarks keys are single char */
-				initpath = get_kv_val(bookmark, NULL, *arg, maxbm, TRUE);
+				initpath = get_kv_val(bookmark, NULL, *arg, maxbm, NNN_BMS);
 
 			if (!initpath) {
 				fprintf(stderr, "%s\n", messages[MSG_INVALID_KEY]);
