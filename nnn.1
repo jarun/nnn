@@ -109,7 +109,7 @@ supports the following options:
         load a session by name
 .Pp
 .Fl S
-        start in disk usage analyzer mode
+        persistent session
 .Pp
 .Fl "t secs"
         idle timeout in seconds to lock terminal
@@ -160,7 +160,8 @@ Sessions can be loaded dynamically from within a running
 instance, or with a program option.
 .Pp
 When a session is loaded dynamically, the last working session is saved
-automatically to a dedicated -- "last session" -- session file.
+automatically to a dedicated -- "last session" -- session file. The "last
+session" is also used in persistent session mode.
 .Pp
 All the session files are located by session name in the directory
 .Pp

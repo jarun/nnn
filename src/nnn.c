@@ -6245,6 +6245,9 @@ nochange:
 					break; // fallthrough
 			}
 
+			if (session && *session == '@' && !session[1])
+				save_session(TRUE, NULL);
+
 			/* CD on Quit */
 			/* In vim picker mode, clear selection and exit */
 			/* Picker mode: reset buffer or clear file */
@@ -6531,7 +6534,7 @@ static void usage(void)
 		" -r      use advcpmv patched cp, mv\n"
 		" -R      no rollover at edges\n"
 		" -s name load session by name\n"
-		" -S      du mode\n"
+		" -S      persistent session\n"
 		" -t secs timeout to lock\n"
 		" -T key  sort order [a/d/e/r/s/t/v]\n"
 		" -V      show version\n"
@@ -6696,10 +6699,6 @@ int main(int argc, char *argv[])
 		case 'c':
 			cfg.cliopener = 1;
 			break;
-		case 'S':
-			cfg.blkorder = 1;
-			nftw_fn = sum_bsize;
-			blk_shift = ffs(S_BLKSIZE) - 1; // fallthrough
 		case 'd':
 			cfg.showdetail = 1;
 			printptr = &printent_long;
@@ -6769,6 +6768,9 @@ int main(int argc, char *argv[])
 		case 's':
 			if (env_opts_id < 0)
 				session = optarg;
+			break;
+		case 'S':
+			session = "@";
 			break;
 		case 't':
 			if (env_opts_id < 0)
