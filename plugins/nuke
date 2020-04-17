@@ -47,7 +47,7 @@
 #      log: vi
 #      torrent: rtorrent, transmission-show
 #      odt|ods|odp|sxw: odt2txt
-#      md: glow (https://github.com/charmbracelet/glow)
+#      md: glow (https://github.com/charmbracelet/glow), lowdown (https://kristaps.bsd.lv/lowdown)
 #      htm|html|xhtml: w3m, lynx, elinks
 #      json: jq, python (json.tool module)
 #   Multimedia by mime:
@@ -208,6 +208,9 @@ handle_extension() {
         md)
             if which glow >/dev/null 2>&1; then
                 glow -sdark "${FPATH}" | less -R
+                exit 0
+            elif which lowdown >/dev/null 2>&1; then
+                lowdown -Tterm "${FPATH}" | less -R
                 exit 0
             fi
             ;;
