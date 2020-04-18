@@ -6352,7 +6352,7 @@ static char *load_input()
 	/* 512 KiB chunk size */
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
 	char *input = malloc(sizeof(char) * chunk), *tmpdir = NULL;
-	char cwd[PATH_MAX], *next, *tmp;
+	char cwd[PATH_MAX], *next;
 	size_t offsets[LIST_FILES_MAX];
 	char **paths = NULL;
 	ssize_t input_read, total_read = 0, off = 0;
@@ -6474,17 +6474,8 @@ static char *load_input()
 
 	DPRINTF_S(prefixpath);
 
-	if (prefixpath[0]) {
-		if (entries == 1) {
-			tmp = xmemrchr((uchar *)prefixpath, '/', xstrlen(prefixpath));
-			if (!tmp)
-				goto malloc_2;
-
-			*(tmp != prefixpath ? tmp : tmp + 1) = '\0';
-		}
-
+	if (prefixpath[0])
 		tmpdir = make_tmp_tree(paths, entries, prefixpath);
-	}
 
 malloc_2:
 	for (i = entries - 1; i >= 0; --i)
