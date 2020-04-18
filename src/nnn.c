@@ -6301,6 +6301,10 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 	/* Points right after the base tmp dir */
 	tmp += 10;
 
+	/* handle the case where files are directly under / */
+	if (!prefix[1] && (prefix[0] == '/'))
+		len = 0;
+
 	if (!mkdtemp(tmpdir)) {
 		free(tmpdir);
 
