@@ -14,7 +14,11 @@ is_cmd_exists () {
 }
 
 merge () {
-	vimdiff +0 "$1" "$2"
+	if which nvim >/dev/null 2>&1; then
+		nvim -d "$1" "$2"
+	else
+		vimdiff +0 "$1" "$2"
+	fi
 }
 
 prompt () {
