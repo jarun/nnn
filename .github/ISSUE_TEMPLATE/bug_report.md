@@ -1,4 +1,10 @@
-#### BUG REPORTS
+---
+name: Bug report
+about: Create a report to help us improve
+title: ''
+labels: bug
+assignees: ''
+---
 
 If it looks like a local environment issue, please try to debug yourself. Debugging local setup issues is not our top priority.
 
@@ -28,6 +34,8 @@ Please consider contributing the feature back to `nnn` yourself. Feel free to di
 [ ] Terminal Emulator:
 [ ] Shell:
 [ ] Custom desktop opener (if applicable):
+[ ] Program options used:
+[ ] Configuration options set:
 [ ] Issue exists on `nnn` master
 
 #### Exact steps to reproduce the issue
