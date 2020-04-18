@@ -4938,14 +4938,15 @@ static void redraw(char *path)
 
 	DPRINTF_S(__FUNCTION__);
 
-	/* Clear screen */
-	erase();
+	/* Go to first line */
+	move(0, 0);
 
 	/* Enforce scroll/cursor invariants */
 	move_cursor(cur, 1);
 
 	/* Fail redraw if < than 10 columns, context info prints 10 chars */
 	if (ncols < MIN_DISPLAY_COLS) {
+		clrtobot();
 		printmsg(messages[MSG_FEW_COLUMNS]);
 		return;
 	}
@@ -4997,8 +4998,8 @@ static void redraw(char *path)
 
 	attroff(A_UNDERLINE);
 
-	/* Go to first entry */
-	move(2, 0);
+	/* Clear everthing till first entry */
+	addstr("\n\n");
 
 	ncols = adjust_cols(ncols);
 
@@ -5014,6 +5015,9 @@ static void redraw(char *path)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		cfg.dircolor = 0;
 	}
+
+	/* Clear from last entry to end */
+	clrtobot();
 
 	statusbar(path);
 }
