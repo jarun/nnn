@@ -18,7 +18,7 @@ configdir="${XDG_CONFIG_HOME:-$HOME/.config}/nnn"
 workdir="$PWD"
 
 if [ "$1" = "--show" ] ; then
-	if [ -z "$2" -o ! -r "$2" ] ; then
+	if [ -z "$2" ] || [ ! -r "$2" ] ; then
 		echo "Please provide a backup file"
 		exit 1
 	fi
@@ -45,8 +45,8 @@ env | sed "s/'/'\\\\''/" |\
 case "$shellname" in
 	bash)
 		for name in $nnn_names ; do
-			if [ "$(type -t "$name")" = "function" ] ; then
-				type "$name" | tail -n+2 >> "$shellfile"
+			if [ "$(bash -c "type -t $name")" = "function" ] ; then
+				bash -c "type $name" | tail -n+2 >> "$shellfile"
 			elif alias "$name" >/dev/null 2>&1 ; then
 				alias "$name" >> "$shellfile"
 			fi
