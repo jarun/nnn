@@ -61,7 +61,9 @@ if [ -d "$configdir" ] ; then
 	cp -r "$configdir" config.d
 fi
 
-tar caf "$workdir/$outfile" ./*
+printf "Saving as '%s' ... " "$workdir/$outfile"
+
+tar caf "$workdir/$outfile" ./* && echo "Done" || echo "Failed"
 
 cd "$workdir" && rm -rf "$tempdir"
 
