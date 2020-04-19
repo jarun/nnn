@@ -11,11 +11,22 @@ outfile="nnn-$(whoami)@$(hostname).tar.bz2"
 
 shellname="$(basename "$SHELL")"
 
-shellfile="config.$shellname"
+shellfile="config.sh"
 
 configdir="${XDG_CONFIG_HOME:-$HOME/.config}/nnn"
 
 workdir="$PWD"
+
+if [ "$1" = "--show" ] ; then
+	if [ -z "$2" -o ! -r "$2" ] ; then
+		echo "Please provide a backup file"
+		exit 1
+	fi
+
+	tar xOf "$2" "./$shellfile" || exit 1
+
+	exit 0
+fi
 
 tempdir="$(mktemp -d)"
 
