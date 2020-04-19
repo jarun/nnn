@@ -8,10 +8,10 @@
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/
 PLUGIN_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins
 
-is_cmd_exists () {
-    which "$1" > /dev/null 2>&1
-    echo $?
-}
+# is_cmd_exists () {
+#     which "$1" > /dev/null 2>&1
+#     echo $?
+# }
 
 merge () {
 	if which nvim >/dev/null 2>&1; then
