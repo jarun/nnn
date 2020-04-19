@@ -24,11 +24,13 @@ if [ ! -d "$tempdir" ]; then
 	exit 1
 fi
 
-cd "$tempdir"
+cd "$tempdir" || exit 1
 
 # Environment config
-env | awk '/^NNN_/{print "export "$0}' > "$shellfile"
+env | sed "s/'/'\\\\''/" |\
+	awk '/^NNN_/{print "export '\''"$0"'\''"}' > "$shellfile"
 
+# Shell functions/aliases
 case "$shellname" in
 	bash)
 		for name in $nnn_names ; do
@@ -54,13 +56,12 @@ case "$shellname" in
 		;;
 esac
 
+# Config dir backup
 if [ -d "$configdir" ] ; then
 	cp -r "$configdir" config.d
 fi
 
 tar caf "$workdir/$outfile" ./*
 
-cd "$workdir"
-
-rm -rf "$tempdir"
+cd "$workdir" && rm -rf "$tempdir"
 
