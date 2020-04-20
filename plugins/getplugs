@@ -8,17 +8,21 @@
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/
 PLUGIN_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins
 
-is_cmd_exists () {
-    which "$1" > /dev/null 2>&1
-    echo $?
-}
+# is_cmd_exists () {
+#     which "$1" > /dev/null 2>&1
+#     echo $?
+# }
 
 merge () {
-	vimdiff +0 "$1" "$2"
+	if which nvim >/dev/null 2>&1; then
+		nvim -d "$1" "$2"
+	else
+		vimdiff +0 "$1" "$2"
+	fi
 }
 
 prompt () {
-	printf "%s" "Plugin $1 already exists and is different.\n"
+	printf "%s\n" "Plugin $1 already exists and is different."
 	printf "Keep (k), merge (m), overwrite (o) [default: k]? "
 	read -r operation
 
