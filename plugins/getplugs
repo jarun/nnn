@@ -22,7 +22,7 @@ merge () {
 }
 
 prompt () {
-	printf "%s" "Plugin $1 already exists and is different.\n"
+	printf "%s\n" "Plugin $1 already exists and is different."
 	printf "Keep (k), merge (m), overwrite (o) [default: k]? "
 	read -r operation
 
