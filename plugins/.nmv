@@ -3,6 +3,8 @@
 # Description: An almost fully POSIX compliant batch file renamer
 #
 # Note: nnn auto-detects and invokes this plugin if available
+#       Whitespace is used as delimiter for read.
+#       The plugin doesn't support filenames with leading or trailing whitespace
 #
 # Capabilities:
 #    1. Basic file rename
