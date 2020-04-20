@@ -15,6 +15,8 @@ if which fzf >/dev/null 2>&1; then
     # entry=$(find . -type f 2>/dev/null | fzf --delimiter / --with-nth=-1 --tiebreak=begin --info=hidden)
 elif which fzy >/dev/null 2>&1; then
     entry=$(find . -type f 2>/dev/null | fzy)
+elif which sk >/dev/null 2>&1; then
+	entry=$(find . -type f 2>/dev/null | sk)
 else
     exit 1
 fi
