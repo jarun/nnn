@@ -43,7 +43,10 @@ else
 	fi
 fi
 
-printf "%s" "$arr" | awk '{print NR " " $0}' > "$dst_file"
+lines=$(printf "%s\n" "$arr" | wc -l)
+width=${#lines}
+
+eval "printf \"%s\" \"$arr\" | awk '{printf(\"%${width}d %s\\n\", NR, \$0)}' > \"$dst_file\""
 
 items=("~")
 while IFS='' read -r line; do
