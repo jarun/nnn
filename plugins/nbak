@@ -5,17 +5,26 @@
 # Shell: POSIX compliant
 # Author: Léo Villeveygoux
 
-nnn_names="n nnn"
+nnn_aliases="n nnn"
 
-outfile="nnn-$(whoami)@$(hostname).tar.bz2"
+outdir="nnn-$(whoami)@$(hostname)"
+
+outfile="${outdir}.tar.bz2"
 
 shellname="$(basename "$SHELL")"
 
-shellfile="config.sh"
+conffile="config.txt"
 
 configdir="${XDG_CONFIG_HOME:-$HOME/.config}/nnn"
 
 workdir="$PWD"
+
+bak() {
+	if [ -e "$1.bak" ] ; then
+		bak "$1.bak" || return 1
+	fi
+	mv "$1" "$1".bak || return 1
+}
 
 if [ "$1" = "--show" ] ; then
 	if [ -z "$2" ] || [ ! -r "$2" ] ; then
@@ -23,7 +32,7 @@ if [ "$1" = "--show" ] ; then
 		exit 1
 	fi
 
-	tar xOf "$2" "./$shellfile" || exit 1
+	tar xOf "$2" "$(tar tf "$2" | grep "${conffile}\$")" || exit 1
 
 	exit 0
 fi
@@ -37,27 +46,36 @@ fi
 
 cd "$tempdir" || exit 1
 
+# Backing up config dir content
+cp -r "$configdir" "$outdir" || mkdir "$outdir" || exit 1
+
+cd "$outdir" || exit 1
+
+if [ -e "conffile" ] ; then
+	bak conffile
+fi
+
 # Environment config
 env | sed "s/'/'\\\\''/" |\
-	awk '/^NNN_/{print "export '\''"$0"'\''"}' > "$shellfile"
+	awk '/^NNN_/{print "export '\''"$0"'\''"}' > "$conffile"
 
 # Shell functions/aliases
 case "$shellname" in
 	bash)
-		for name in $nnn_names ; do
+		for name in $nnn_aliases ; do
 			if [ "$(bash -c "type -t $name")" = "function" ] ; then
-				bash -c "type $name" | tail -n+2 >> "$shellfile"
+				bash -c "type $name" | tail -n+2 >> "$conffile"
 			elif alias "$name" >/dev/null 2>&1 ; then
-				alias "$name" >> "$shellfile"
+				alias "$name" >> "$conffile"
 			fi
 		done
 		;;
 	zsh)
-		for name in $nnn_names ; do
+		for name in $nnn_aliases ; do
 			if functions "$name" ; then
-				functions "$name" >> "$shellfile"
+				functions "$name" >> "$conffile"
 			elif alias "$name" ; then
-				echo alias "$(alias "$name")" >> "$shellfile"
+				echo alias "$(alias "$name")" >> "$conffile"
 			fi
 		done
 		;;
@@ -67,14 +85,11 @@ case "$shellname" in
 		;;
 esac
 
-# Config dir backup
-if [ -d "$configdir" ] ; then
-	cp -r "$configdir" config.d
-fi
+cd .. || exit 1
 
 printf "Saving as '%s' ... " "$workdir/$outfile"
 
-tar caf "$workdir/$outfile" ./* && echo "Done" || echo "Failed"
+tar caf "$workdir/$outfile" "$outdir" && echo "Done" || echo "Failed"
 
 cd "$workdir" && rm -rf "$tempdir"
 
