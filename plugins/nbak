@@ -26,17 +26,6 @@ bak() {
 	mv "$1" "$1".bak || return 1
 }
 
-if [ "$1" = "--show" ] ; then
-	if [ -z "$2" ] || [ ! -r "$2" ] ; then
-		echo "Please provide a backup file"
-		exit 1
-	fi
-
-	tar xOf "$2" "$(tar tf "$2" | grep "${conffile}\$")" || exit 1
-
-	exit 0
-fi
-
 tempdir="$(mktemp -d)"
 
 if [ ! -d "$tempdir" ]; then
