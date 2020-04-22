@@ -51,8 +51,8 @@ cp -r "$configdir" "$outdir" || mkdir "$outdir" || exit 1
 
 cd "$outdir" || exit 1
 
-if [ -e "conffile" ] ; then
-	bak conffile
+if [ -e "$conffile" ] ; then
+	bak "$conffile"
 fi
 
 # Environment config
