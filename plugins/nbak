@@ -1,0 +1,73 @@
+#!/usr/bin/env sh
+
+# Description: Backup of all nnn config
+#
+# Shell: POSIX compliant
+# Author: Léo Villeveygoux
+
+nnn_aliases="n nnn"
+
+outdir="nnn-$(whoami)@$(hostname)"
+
+outfile="${outdir}.tar.bz2"
+
+shellname="$(basename "$SHELL")"
+
+conffile="config.txt"
+
+configdir="${XDG_CONFIG_HOME:-$HOME/.config}/nnn"
+
+workdir="$PWD"
+
+tempdir="$(mktemp -d)"
+
+mkdir "$tempdir/$outdir"
+
+if [ ! -d "$tempdir" ]; then
+	echo "Can't create work directory." >&2
+	exit 1
+fi
+
+cd "$tempdir/$outdir" || exit 1
+
+# Backing up config dir content
+cp -r "$configdir" . || exit 1
+
+# Environment config
+env | sed "s/'/'\\\\''/" |\
+	awk '/^NNN_/{print "export '\''"$0"'\''"}' > "$conffile"
+
+# Shell functions/aliases
+case "$shellname" in
+	bash)
+		for name in $nnn_aliases ; do
+			if [ "$(bash -ic "type -t $name")" = "function" ] ; then
+				bash -ic "type $name" | tail -n+2 >> "$conffile"
+			elif bash -ic "alias $name" >/dev/null 2>&1 ; then
+				bash -ic "alias $name" >> "$conffile"
+			fi
+		done
+		;;
+	zsh)
+		for name in $nnn_aliases ; do
+			if zsh -ic "functions $name" ; then
+				zsh -ic "functions $name" >> "$conffile"
+			elif zsh -ic "alias $name" ; then
+				echo alias "$(zsh -ic "alias $name")" >> "$conffile"
+			fi
+		done
+		;;
+
+	*)
+		echo "Unknown shell, skipping alias/function checking." >&2
+		;;
+esac
+
+cd .. || exit 1
+
+printf "Saving as '%s' ... " "$workdir/$outfile"
+
+tar caf "$workdir/$outfile" "$outdir" && echo "Done" || echo "Failed"
+
+cd "$workdir" && rm -rf "$tempdir"
+
