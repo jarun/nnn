@@ -52,19 +52,19 @@ env | sed "s/'/'\\\\''/" |\
 case "$shellname" in
 	bash)
 		for name in $nnn_aliases ; do
-			if [ "$(bash -c "type -t $name")" = "function" ] ; then
-				bash -c "type $name" | tail -n+2 >> "$conffile"
-			elif alias "$name" >/dev/null 2>&1 ; then
-				alias "$name" >> "$conffile"
+			if [ "$(bash -ic "type -t $name")" = "function" ] ; then
+				bash -ic "type $name" | tail -n+2 >> "$conffile"
+			elif bash -ic "alias $name" >/dev/null 2>&1 ; then
+				bash -ic "alias $name" >> "$conffile"
 			fi
 		done
 		;;
 	zsh)
 		for name in $nnn_aliases ; do
-			if functions "$name" ; then
-				functions "$name" >> "$conffile"
-			elif alias "$name" ; then
-				echo alias "$(alias "$name")" >> "$conffile"
+			if zsh -ic "functions $name" ; then
+				zsh -ic "functions $name" >> "$conffile"
+			elif zsh -ic "alias $name" ; then
+				echo alias "$(zsh -ic "alias $name")" >> "$conffile"
 			fi
 		done
 		;;
