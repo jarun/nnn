@@ -19,30 +19,19 @@ configdir="${XDG_CONFIG_HOME:-$HOME/.config}/nnn"
 
 workdir="$PWD"
 
-bak() {
-	if [ -e "$1.bak" ] ; then
-		bak "$1.bak" || return 1
-	fi
-	mv "$1" "$1".bak || return 1
-}
-
 tempdir="$(mktemp -d)"
+
+mkdir "$tempdir/$outdir"
 
 if [ ! -d "$tempdir" ]; then
 	echo "Can't create work directory." >&2
 	exit 1
 fi
 
-cd "$tempdir" || exit 1
+cd "$tempdir/$outdir" || exit 1
 
 # Backing up config dir content
-cp -r "$configdir" "$outdir" || mkdir "$outdir" || exit 1
-
-cd "$outdir" || exit 1
-
-if [ -e "$conffile" ] ; then
-	bak "$conffile"
-fi
+cp -r "$configdir" . || exit 1
 
 # Environment config
 env | sed "s/'/'\\\\''/" |\
