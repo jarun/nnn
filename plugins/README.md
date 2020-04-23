@@ -50,6 +50,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | moclyrics | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
 | mocplay | Append (and/or play) selection/dir/file in moc | sh | [moc](http://moc.daper.net/) |
 | mp3conv | Extract audio from multimedia as mp3 | sh | ffmpeg |
+| nbak | Creates an archive in CWD with all `nnn` (shell, dir) config | sh | tar, awk |
 | nmount | Toggle mount status of a device as normal user | sh | pmount, udisks2 |
 | nuke | Sample file opener (CLI-only by default) | sh | _see in-file docs_ |
 | oldbigfile | List large files by access time | sh | find, sort |
