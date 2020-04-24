@@ -27,7 +27,7 @@ args=(
     '(-r)-r[show cp, mv progress (Linux-only)]'
     '(-R)-R[disable rollover at edges]'
     '(-s)-s[load session]:session name'
-    '(-S)-S[start in disk usage analyzer mode]'
+    '(-S)-S[persistent session]'
     '(-t)-t[timeout to lock]:seconds'
     '(-T)-T[a d e r s t v]:key'
     '(-V)-V[show program version and exit]'
