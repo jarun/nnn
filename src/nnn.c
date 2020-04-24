@@ -6510,8 +6510,8 @@ static void usage(void)
 		"  PATH   start dir [default: .]\n\n"
 		"optional args:\n"
 		" -A      no dir auto-select\n"
-		" -b key  open bookmark key\n"
-		" -c      cli-only opener (overrides -e)\n"
+		" -b key  open bookmark key (trumps -s/S)\n"
+		" -c      cli-only NNN_OPENER (trumps -e)\n"
 		" -d      detail mode\n"
 		" -e      text in $VISUAL/$EDITOR/vi\n"
 		" -E      use EDITOR for undetached edits\n"
@@ -6853,6 +6853,9 @@ int main(int argc, char *argv[])
 				fprintf(stderr, "%s\n", messages[MSG_INVALID_KEY]);
 				return _FAILURE;
 			}
+
+			if (session)
+				session = NULL;
 		} else if (argc == optind) {
 			/* Start in the current directory */
 			initpath = getcwd(NULL, PATH_MAX);
