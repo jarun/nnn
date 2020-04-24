@@ -1141,12 +1141,12 @@ static void appendfpath(const char *path, const size_t len)
 }
 
 /* Write selected file paths to fd, linefeed separated */
-static size_t seltofile(int fd, uint *pcount)
+static size_t seltofile(int fd, uint *pcount, bool tgt)
 {
 	uint lastpos, count = 0;
 	char *pbuf = pselbuf;
 	size_t pos = 0, len;
-	ssize_t r;
+	ssize_t r, prefixlen, initlen, tgtlen;
 
 	if (pcount)
 		*pcount = 0;
@@ -1156,13 +1156,33 @@ static size_t seltofile(int fd, uint *pcount)
 
 	lastpos = selbufpos - 1;
 
+	if (tgt) {
+		prefixlen = (ssize_t)xstrsncpy(g_buf, prefixpath, PATH_MAX) - 1;
+		initlen = strlen(initpath);
+	}
+
 	while (pos <= lastpos) {
 		len = xstrlen(pbuf);
 		pos += len;
 
-		r = write(fd, pbuf, len);
-		if (r != (ssize_t)len)
-			return pos;
+		if (!tgt) {
+			r = write(fd, pbuf, len);
+			if (r != (ssize_t)len)
+				return pos;
+		} else {
+			if (!strncmp(initpath, pbuf, initlen)) {
+				tgtlen = xstrsncpy(g_buf + prefixlen, pbuf + initlen, PATH_MAX - prefixlen - 1);
+				tgtlen += prefixlen - 1;
+			} else
+				tgtlen = (ssize_t)xstrsncpy(g_buf, pbuf, PATH_MAX) - 1;
+
+			r = write(fd, g_buf, tgtlen);
+			if (r != tgtlen) {
+				DPRINTF_S(pbuf);
+				DPRINTF_S(g_buf);
+				return 0;
+			}
+		}
 
 		if (pos <= lastpos) {
 			if (write(fd, "\n", 1) != 1)
@@ -1251,7 +1271,7 @@ static void endselection(void)
 		return;
 	}
 
-	seltofile(fd, NULL);
+	seltofile(fd, NULL, FALSE);
 	if (close(fd)) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
@@ -1323,7 +1343,7 @@ static int editselection(void)
 		return -1;
 	}
 
-	seltofile(fd, NULL);
+	seltofile(fd, NULL, FALSE);
 	if (close(fd)) {
 		DPRINTF_S(strerror(errno));
 		return -1;
@@ -1794,7 +1814,7 @@ static bool cpmv_rename(int choice, const char *path)
 		if (!count)
 			goto finish;
 	} else
-		seltofile(fd, &count);
+		seltofile(fd, &count, FALSE);
 
 	close(fd);
 
@@ -1904,8 +1924,8 @@ static bool batch_rename(const char *path)
 		for (i = 0; i < ndents; ++i)
 			appendfpath(dents[i].name, NAME_MAX);
 
-	seltofile(fd1, &count);
-	seltofile(fd2, NULL);
+	seltofile(fd1, &count, FALSE);
+	seltofile(fd2, NULL, FALSE);
 	close(fd2);
 
 	if (dir) /* Don't retain dir entries in selection */
@@ -6742,9 +6762,13 @@ int main(int argc, char *argv[])
 				break;
 
 			cfg.picker = 1;
-			if (optarg[0] == '-' && optarg[1] == '\0')
+			if (optarg[0] == '-' && optarg[1] == '\0') {
 				cfg.pickraw = 1;
-			else {
+				if (!isatty(STDOUT_FILENO)) {
+					fprintf(stderr, "stdout !tty\n");
+					return _FAILURE;
+				}
+			} else {
 				int fd = open(optarg, O_WRONLY | O_CREAT, 0600);
 
 				if (fd == -1) {
@@ -6810,27 +6834,17 @@ int main(int argc, char *argv[])
 
 	atexit(cleanup);
 
-	if (!cfg.picker) {
-		/* Confirm we are in a terminal */
-		if (!isatty(STDOUT_FILENO))
-			exit(1);
-
-		/* Now we are in path list mode */
-		if (!isatty(STDIN_FILENO)) {
-			/* This is the same as listpath */
-			initpath = load_input();
-			if (!initpath)
-				exit(1);
-
-			/* We return to tty */
-			dup2(STDOUT_FILENO, STDIN_FILENO);
+	/* Check if we are in path list mode */
+	if (!isatty(STDIN_FILENO)) {
+		/* This is the same as listpath */
+		initpath = load_input();
+		if (!initpath) {
+			fprintf(stderr, "!initpath\n");
+			return _FAILURE;
 		}
-	}
 
-	/* Prevent picker and list mode conflict */
-	if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO)) {
-		fprintf(stderr, "stdin/out conflict\n");
-		return _FAILURE;
+		/* We return to tty */
+		dup2(STDOUT_FILENO, STDIN_FILENO);
 	}
 
 	home = getenv("HOME");
@@ -7015,9 +7029,6 @@ int main(int argc, char *argv[])
 	mousemask(mask, NULL);
 #endif
 
-	if (listpath)
-		spawn("rm -rf", initpath, NULL, NULL, F_SILENT);
-
 	exitcurses();
 
 #ifndef NORL
@@ -7027,14 +7038,22 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	if (cfg.pickraw) {
-		if (selbufpos && (seltofile(1, NULL) != (size_t)(selbufpos)))
-			xerror();
-	} else if (cfg.picker) {
-		if (selbufpos)
-			writesel(pselbuf, selbufpos - 1);
+	if (cfg.pickraw || cfg.picker) {
+		if (selbufpos) {
+			int fd = cfg.pickraw ? 1 : open(selpath, O_WRONLY | O_CREAT, 0600);
+
+			if ((fd == -1) || (seltofile(fd, NULL, TRUE) != (size_t)(selbufpos)))
+				xerror();
+
+			if (fd > 1)
+				close(fd);
+		}
 	} else if (selpath)
 		unlink(selpath);
+
+	/* Remove tmp dir in list mode */
+	if (listpath)
+		spawn("rm -rf", initpath, NULL, NULL, F_NOTRACE | F_MULTI);
 
 	/* Free the regex */
 #ifdef PCRE
