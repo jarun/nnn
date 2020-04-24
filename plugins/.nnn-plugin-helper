@@ -5,7 +5,7 @@
 # Shell: POSIX compliant
 # Author: Anna Arad
 
-selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 export selection
 
 ## Set CUR_CTX to 1 to open directory in current context

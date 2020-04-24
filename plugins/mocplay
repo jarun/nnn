@@ -12,7 +12,7 @@
 # Author: Arun Prakash Jana, ath3
 
 IFS="$(printf '\n\r')"
-selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 cmd=$(pgrep -x mocp 2>/dev/null)
 ret=$cmd
 

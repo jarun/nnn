@@ -16,7 +16,7 @@
 
 IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}" # protect trailing \n
 
-SELECTION=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
 getclip () {
 
@@ -54,4 +54,4 @@ for file in $CLIPBOARD ; do
 	fi
 done
 
-printf "%s" "$CLIPBOARD" | tr '\n' '\0' > "$SELECTION"
+printf "%s" "$CLIPBOARD" | tr '\n' '\0' > "$selection"

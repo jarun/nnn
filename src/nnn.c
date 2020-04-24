@@ -579,8 +579,9 @@ static const char * const messages[] = {
 #define NNNLVL 5
 #define NNN_PIPE 6
 #define NNN_MCLICK 7
-#define NNN_ARCHIVE 8 /* strings end here */
-#define NNN_TRASH 9 /* flags begin here */
+#define NNN_SEL 8
+#define NNN_ARCHIVE 9 /* strings end here */
+#define NNN_TRASH 10 /* flags begin here */
 
 static const char * const env_cfg[] = {
 	"NNN_OPTS",
@@ -591,6 +592,7 @@ static const char * const env_cfg[] = {
 	"NNNLVL",
 	"NNN_PIPE",
 	"NNN_MCLICK",
+	"NNN_SEL",
 	"NNN_ARCHIVE",
 	"NNN_TRASH",
 };
@@ -6612,16 +6614,23 @@ static bool setup_config(void)
 
 	/* Set selection file path */
 	if (!cfg.picker) {
-		/* Length of "/.config/nnn/.selection" */
-		selpath = (char *)malloc(len + 3);
+		char *env_sel = xgetenv(env_cfg[NNN_SEL], NULL);
+		if (env_sel)
+			selpath = xstrdup(env_sel);
+		else
+			/* Length of "/.config/nnn/.selection" */
+			selpath = (char *)malloc(len + 3);
+
 		if (!selpath) {
 			xerror();
 			return FALSE;
 		}
 
-		r = xstrsncpy(selpath, cfgdir, len + 3);
-		xstrsncpy(selpath + r - 1, "/.selection", 12);
-		DPRINTF_S(selpath);
+		if (!env_sel) {
+			r = xstrsncpy(selpath, cfgdir, len + 3);
+			xstrsncpy(selpath + r - 1, "/.selection", 12);
+			DPRINTF_S(selpath);
+		}
 	}
 
 	return TRUE;

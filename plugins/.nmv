@@ -21,7 +21,7 @@ TMPDIR="${TMPDIR:-/tmp}"
 INCLUDE_HIDDEN="${INCLUDE_HIDDEN:-0}"
 VERBOSE="${VERBOSE:-0}"
 
-selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 exit_status=0
 
 dst_file=$(mktemp "$TMPDIR/.nnnXXXXXX")

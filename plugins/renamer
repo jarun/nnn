@@ -12,7 +12,7 @@
 # Shell: POSIX compliant
 # Author: José Neder
 
-selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
 if command -v qmv >/dev/null 2>&1; then
 	batchrenamesel="qmv -fdo -da"

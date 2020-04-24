@@ -8,7 +8,7 @@
 # Shell: POSIX compliant
 # Authors: Arun Prakash Jana, ath3
 
-selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 resp=s
 
 if [ -s "$selection" ]; then

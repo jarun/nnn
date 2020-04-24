@@ -14,7 +14,7 @@
 # Shell: POSIX compliant
 # Author: ath3, Arun Prakash Jana
 
-selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 resp=f
 chsum=md5
 

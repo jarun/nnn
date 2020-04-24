@@ -13,7 +13,7 @@
 # Shell: POSIX compliant
 # Author: 0xACE
 
-selection=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 resp=f
 all=
 if which dragon-drag-and-drop >/dev/null 2>&1; then

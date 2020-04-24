@@ -19,27 +19,27 @@
 
 IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}" # protect trailing \n
 
-SELECTION=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
 if which xsel >/dev/null 2>&1; then
     # Linux
-    tr '\0' '\n' < "$SELECTION" | xsel -bi
+    tr '\0' '\n' < "$selection" | xsel -bi
 elif which xclip >/dev/null 2>&1; then
     # Linux
-    tr '\0' '\n' < "$SELECTION" | xclip -sel clip
+    tr '\0' '\n' < "$selection" | xclip -sel clip
 elif which pbcopy >/dev/null 2>&1; then
     # macOS
-    tr '\0' '\n' < "$SELECTION" | pbcopy
+    tr '\0' '\n' < "$selection" | pbcopy
 elif which termux-clipboard-set >/dev/null 2>&1; then
     # Termux
-    tr '\0' '\n' < "$SELECTION" | termux-clipboard-set
+    tr '\0' '\n' < "$selection" | termux-clipboard-set
 elif which clip.exe >/dev/null 2>&1; then
     # WSL
-    tr '\0' '\n' < "$SELECTION" | clip.exe
+    tr '\0' '\n' < "$selection" | clip.exe
 elif which clip >/dev/null 2>&1; then
     # Cygwin
-    tr '\0' '\n' < "$SELECTION" | clip
+    tr '\0' '\n' < "$selection" | clip
 elif which wl-copy >/dev/null 2>&1; then
     # Wayland
-    tr '\0' '\n' < "$SELECTION" | wl-copy
+    tr '\0' '\n' < "$selection" | wl-copy
 fi
