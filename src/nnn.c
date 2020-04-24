@@ -6827,6 +6827,10 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	/* Prevent picker and list mode conflict */
+	if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))
+		exit(1);
+
 	home = getenv("HOME");
 	if (!home) {
 		fprintf(stderr, "set HOME\n");
