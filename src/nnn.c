@@ -6827,6 +6827,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	/* Prevent picker and list mode conflict */
 	if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))
 		exit(1);
 
