@@ -395,10 +395,9 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define STATE_RANGESEL 0x4
 #define STATE_MOVE_OP 0x8
 #define STATE_AUTONEXT 0x10
-#define STATE_MSG 0x20
+#define STATE_FORTUNE 0x20
 #define STATE_TRASH 0x40
 #define STATE_FORCEQUIT 0x80
-#define STATE_FORTUNE 0x100
 
 static uint g_states;
 
@@ -511,13 +510,12 @@ static char * const utils[] = {
 #define MSG_INVALID_REG 36
 #define MSG_ORDER 37
 #define MSG_LAZY 38
-#define MSG_IGNORED 39
+#define MSG_FIRST 39
 #define MSG_RM_TMP 40
 #define MSG_NOCHNAGE 41
 #define MSG_CANCEL 42
-#define MSG_FIRST 43
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 44 /* Must be the last entry */
+#define MSG_DIR_CHANGED 43 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -560,7 +558,6 @@ static const char * const messages[] = {
 	"invalid regex",
 	"'a'u / 'd'u / 'e'xtn / 'r'ev / 's'ize / 't'ime / 'v'er / 'c'lear?",
 	"unmount failed! try lazy?",
-	"ignoring invalid paths...",
 	"remove tmp file?",
 	"unchanged",
 	"cancelled",
@@ -5173,12 +5170,6 @@ begin:
 		if ((presel != FILTER) || !filterset())
 			redraw(path);
 
-		/* Display a one-time message */
-		if (listpath && (g_states & STATE_MSG)) {
-			g_states &= ~STATE_MSG;
-			printwait(messages[MSG_IGNORED], &presel);
-		}
-
 nochange:
 		/* Exit if parent has exited */
 		if (getppid() == 1) {
@@ -6301,7 +6292,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 {
 	/* tmpdir holds the full path */
 	/* tmp holds the path without the tmp dir prefix */
-	int err, ignore = 0;
+	int err;
 	struct stat sb;
 	char *slash, *tmp;
 	ssize_t len = xstrlen(prefix);
@@ -6337,10 +6328,8 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 			continue;
 
 		err = stat(paths[i], &sb);
-		if (err && errno == ENOENT) {
-			ignore = 1;
+		if (err && errno == ENOENT)
 			continue;
-		}
 
 		/* Don't copy the common prefix */
 		xstrsncpy(tmp, paths[i] + len, xstrlen(paths[i]) - len + 1);
@@ -6360,9 +6349,6 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 			DPRINTF_S(strerror(errno));
 		}
 	}
-
-	if (ignore)
-		g_states |= STATE_MSG;
 
 	/* Get the dir in which to start */
 	*tmp = '\0';
