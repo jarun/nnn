@@ -6828,8 +6828,10 @@ int main(int argc, char *argv[])
 	}
 
 	/* Prevent picker and list mode conflict */
-	if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))
-		exit(1);
+	if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO)) {
+		fprintf(stderr, "stdin/out conflict\n");
+		return _FAILURE;
+	}
 
 	home = getenv("HOME");
 	if (!home) {
