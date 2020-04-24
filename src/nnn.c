@@ -1142,8 +1142,8 @@ static size_t seltofile(int fd, uint *pcount, bool tgt)
 {
 	uint lastpos, count = 0;
 	char *pbuf = pselbuf;
-	size_t pos = 0, len;
-	ssize_t r, prefixlen, initlen, tgtlen;
+	size_t pos = 0;
+	ssize_t len, prefixlen, initlen;
 
 	if (pcount)
 		*pcount = 0;
@@ -1154,33 +1154,25 @@ static size_t seltofile(int fd, uint *pcount, bool tgt)
 	lastpos = selbufpos - 1;
 
 	if (tgt) {
-		prefixlen = (ssize_t)xstrsncpy(g_buf, prefixpath, PATH_MAX) - 1;
-		initlen = strlen(initpath);
+		prefixlen = (ssize_t)xstrlen(prefixpath);
+		initlen = (ssize_t)xstrlen(initpath);
 	}
 
 	while (pos <= lastpos) {
-		len = xstrlen(pbuf);
-		pos += len;
+		DPRINTF_S(pbuf);
+		len = (ssize_t)xstrlen(pbuf);
 
-		if (!tgt) {
-			r = write(fd, pbuf, len);
-			if (r != (ssize_t)len)
+		if (!tgt || (strncmp(initpath, pbuf, initlen) != 0)) {
+			if (write(fd, pbuf, len) != len)
 				return pos;
 		} else {
-			if (!strncmp(initpath, pbuf, initlen)) {
-				tgtlen = xstrsncpy(g_buf + prefixlen, pbuf + initlen, PATH_MAX - prefixlen - 1);
-				tgtlen += prefixlen - 1;
-			} else
-				tgtlen = (ssize_t)xstrsncpy(g_buf, pbuf, PATH_MAX) - 1;
-
-			r = write(fd, g_buf, tgtlen);
-			if (r != tgtlen) {
-				DPRINTF_S(pbuf);
-				DPRINTF_S(g_buf);
-				return 0;
-			}
+			if (write(fd, prefixpath, prefixlen) != prefixlen)
+				return pos;
+			if (write(fd, pbuf + initlen, len - initlen) != (len - initlen))
+				return pos;
 		}
 
+		pos += len;
 		if (pos <= lastpos) {
 			if (write(fd, "\n", 1) != 1)
 				return pos;
@@ -5382,7 +5374,7 @@ nochange:
 				if (cfg.useeditor && (!sb.st_size ||
 #ifdef FILE_MIME_OPTS
 				    (get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
-				    && !strncmp(g_buf, "text/", 5)))) {
+				    && !(((int *)g_buf)[0] == *(int *)"text" && g_buf[4] == '/')))) {
 #else
 				    /* no mime option; guess from description instead */
 				    (get_output(g_buf, CMD_LEN_MAX, "file", "-b", newpath, FALSE)
