@@ -1138,12 +1138,12 @@ static void appendfpath(const char *path, const size_t len)
 }
 
 /* Write selected file paths to fd, linefeed separated */
-static size_t seltofile(int fd, uint *pcount, bool tgt)
+static size_t seltofile(int fd, uint *pcount)
 {
 	uint lastpos, count = 0;
 	char *pbuf = pselbuf;
 	size_t pos = 0;
-	ssize_t len, prefixlen, initlen;
+	ssize_t len, prefixlen = 0, initlen = 0;
 
 	if (pcount)
 		*pcount = 0;
@@ -1153,7 +1153,7 @@ static size_t seltofile(int fd, uint *pcount, bool tgt)
 
 	lastpos = selbufpos - 1;
 
-	if (tgt) {
+	if (listpath) {
 		prefixlen = (ssize_t)xstrlen(prefixpath);
 		initlen = (ssize_t)xstrlen(initpath);
 	}
@@ -1162,7 +1162,7 @@ static size_t seltofile(int fd, uint *pcount, bool tgt)
 		DPRINTF_S(pbuf);
 		len = (ssize_t)xstrlen(pbuf);
 
-		if (!tgt || (strncmp(initpath, pbuf, initlen) != 0)) {
+		if (!listpath || strncmp(initpath, pbuf, initlen) != 0) {
 			if (write(fd, pbuf, len) != len)
 				return pos;
 		} else {
@@ -1260,7 +1260,7 @@ static void endselection(void)
 		return;
 	}
 
-	seltofile(fd, NULL, FALSE);
+	seltofile(fd, NULL);
 	if (close(fd)) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
@@ -1332,7 +1332,7 @@ static int editselection(void)
 		return -1;
 	}
 
-	seltofile(fd, NULL, FALSE);
+	seltofile(fd, NULL);
 	if (close(fd)) {
 		DPRINTF_S(strerror(errno));
 		return -1;
@@ -1803,7 +1803,7 @@ static bool cpmv_rename(int choice, const char *path)
 		if (!count)
 			goto finish;
 	} else
-		seltofile(fd, &count, FALSE);
+		seltofile(fd, &count);
 
 	close(fd);
 
@@ -1913,8 +1913,8 @@ static bool batch_rename(const char *path)
 		for (i = 0; i < ndents; ++i)
 			appendfpath(dents[i].name, NAME_MAX);
 
-	seltofile(fd1, &count, FALSE);
-	seltofile(fd2, NULL, FALSE);
+	seltofile(fd1, &count);
+	seltofile(fd2, NULL);
 	close(fd2);
 
 	if (dir) /* Don't retain dir entries in selection */
@@ -6673,7 +6673,7 @@ int main(int argc, char *argv[])
 {
 	char *arg = NULL;
 	char *session = NULL;
-	int opt, sort = 0;
+	int fd, opt, sort = 0;
 #ifndef NOMOUSE
 	mmask_t mask;
 	char *middle_click_env = xgetenv(env_cfg[NNN_MCLICK], "\0");
@@ -6740,15 +6740,10 @@ int main(int argc, char *argv[])
 				break;
 
 			cfg.picker = 1;
-			if (optarg[0] == '-' && optarg[1] == '\0') {
+			if (optarg[0] == '-' && optarg[1] == '\0')
 				cfg.pickraw = 1;
-				if (!isatty(STDOUT_FILENO)) {
-					fprintf(stderr, "stdout !tty\n");
-					return _FAILURE;
-				}
-			} else {
-				int fd = open(optarg, O_WRONLY | O_CREAT, 0600);
-
+			else {
+				fd = open(optarg, O_WRONLY | O_CREAT, 0600);
 				if (fd == -1) {
 					xerror();
 					return _FAILURE;
@@ -7018,9 +7013,8 @@ int main(int argc, char *argv[])
 
 	if (cfg.pickraw || cfg.picker) {
 		if (selbufpos) {
-			int fd = cfg.pickraw ? 1 : open(selpath, O_WRONLY | O_CREAT, 0600);
-
-			if ((fd == -1) || (seltofile(fd, NULL, TRUE) != (size_t)(selbufpos)))
+			fd = cfg.pickraw ? 1 : open(selpath, O_WRONLY | O_CREAT, 0600);
+			if ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos)))
 				xerror();
 
 			if (fd > 1)
