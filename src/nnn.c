@@ -926,7 +926,7 @@ static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 	return end - dst;
 }
 
-static inline size_t xstrlen(const char *s)
+static inline size_t xstrlen(const char *restrict s)
 {
 #if !defined(__GLIBC__)
 	return strlen(s); // NOLINT
@@ -935,7 +935,7 @@ static inline size_t xstrlen(const char *s)
 #endif
 }
 
-static char *xstrdup(const char *s)
+static char *xstrdup(const char *restrict s)
 {
 	size_t len = xstrlen(s) + 1;
 	char *ptr = malloc(len);
@@ -965,8 +965,12 @@ static bool is_suffix(const char *str, const char *suffix)
  * And we are NOT expecting a '/' at the end.
  * Ideally 0 < n <= xstrlen(s).
  */
-static void *xmemrchr(uchar *s, uchar ch, size_t n)
+static void *xmemrchr(uchar *restrict s, uchar ch, size_t n)
 {
+#if defined(__GLIBC__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+	return memrchr(s, ch, n);
+#else
+
 	if (!s || !n)
 		return NULL;
 
@@ -978,6 +982,7 @@ static void *xmemrchr(uchar *s, uchar ch, size_t n)
 	while (s != ptr);
 
 	return NULL;
+#endif
 }
 
 /* Assumes both the paths passed are directories */
