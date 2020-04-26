@@ -1040,7 +1040,12 @@ static char *abspath(const char *path, const char *cwd)
 	size_t dst_size = 0, src_size = xstrlen(path), cwd_size = xstrlen(cwd);
 	const char *src;
 	char *dst;
-	char *resolved_path = malloc(src_size + (*path == '/' ? 0 : cwd_size) + 1);
+	/*
+	 * We need to add 2 chars at the end as relative paths may start with:
+	 * ./ (find .)
+	 * no separator (fd .): this needs an additional char for '/'
+	 */
+	char *resolved_path = malloc(src_size + (*path == '/' ? 0 : cwd_size) + 2);
 	if (!resolved_path)
 		return NULL;
 
