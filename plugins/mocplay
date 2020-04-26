@@ -7,6 +7,7 @@
 # - appends tracks and exits is MOC is running, else clears playlist and adds tracks
 # - to randomize the order of files appended to the playlist, set SHUFFLE=1
 #   if you add a directory with many files when SHUFFLE=1 is set, it might take a very long time to finish!
+# - max 100 files are added
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana, ath3
@@ -30,20 +31,13 @@ mocp_add ()
         for entry in $arr
         do
             if [ -d "$entry" ]; then
-                arr2=$arr2$(find "$entry" -type f)
-            else
+                arr2=$arr2$(find "$entry" -type f \( ! -iname "*.m3u" ! -iname "*.pls" \))
+            elif echo "$entry" | grep -qv '\.m3u$\|\.pls$' ; then
                 arr2=$(printf "%s\n%s" "$entry" "$arr2")
             fi
         done
 
-        arr2=$(echo "$arr2" | awk 'BEGIN{srand();}{print rand()"\t"$0}' | sort -k1 -n | cut -f2-)
-        for entry in $arr2
-        do
-            if [ -f "$entry" ] &&  echo "$entry" | grep -qv '\.m3u$\|\.pls$' ; then
-                mocp -a "$entry"
-            fi
-        done
-
+        echo "$arr2" | shuf -n 100 | xargs -d "\n" mocp -a
     else
         if [ "$resp" = "y" ]; then
             xargs < "$selection" -0 mocp -a

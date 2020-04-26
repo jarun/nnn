@@ -4,14 +4,18 @@
 #              Opens in $VISUAL or $EDITOR if text
 #              Opens other type of files with xdg-open
 #
-# Requires: fzf/fzy, xdg-open
+# Requires: fd/find, fzf/fzy/skim, xdg-open
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
 if which fzf >/dev/null 2>&1; then
     cmd="$FZF_DEFAULT_COMMAND"
-    [ -z "$cmd" ] && cmd="find . -type f 2>/dev/null"
+    if which fd >/dev/null 2>&1; then
+        [ -z "$cmd" ] && cmd="fd -t f 2>/dev/null"
+    else
+        [ -z "$cmd" ] && cmd="find . -type f 2>/dev/null"
+    fi
     entry="$(eval "$cmd" | fzf --delimiter / --nth=-1 --tiebreak=begin --info=hidden)"
     # To show only the file name
     # entry=$(find . -type f 2>/dev/null | fzf --delimiter / --with-nth=-1 --tiebreak=begin --info=hidden)
