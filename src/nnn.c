@@ -6440,8 +6440,10 @@ static char *load_input()
 	DPRINTF_D(total_read);
 	DPRINTF_D(chunk_count);
 
-	if (!entries)
+	if (!entries) {
+		fprintf(stderr, "0 entries\n");
 		goto malloc_1;
+	}
 
 	input[total_read] = '\0';
 
@@ -6821,10 +6823,8 @@ int main(int argc, char *argv[])
 	if (!isatty(STDIN_FILENO)) {
 		/* This is the same as listpath */
 		initpath = load_input();
-		if (!initpath) {
-			fprintf(stderr, "!initpath\n");
+		if (!initpath)
 			return _FAILURE;
-		}
 
 		/* We return to tty */
 		dup2(STDOUT_FILENO, STDIN_FILENO);
