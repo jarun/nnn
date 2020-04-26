@@ -7,9 +7,9 @@
 # Requires: find md5sum sort uniq xargs
 #
 # Shell: POSIX compliant
-# Author: syssyphus
+# Author: syssyphus, KlzXS
 
-find . -size +0 -type f -printf "%s\n" | sort -rn | uniq -d | xargs -I{} -n1 find -type f -size {}c -print0 | xargs -0 md5sum | sort | uniq -w32 --all-repeated=separate
+find . -size +0 -type f -printf "%s %p\n" | sort -rn | sed -n 'N; /^\([0-9]*\) .*\n\1.*$/p;$d;D' | awk '{printf("%s\0", substr($0, index($0, $2)))}' | xargs -0 md5sum | sort | uniq -w32 --all-repeated=separate
 
 printf "Press any key to exit"
 read -r _
