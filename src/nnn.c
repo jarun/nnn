@@ -3049,7 +3049,7 @@ static wchar_t *unescape(const char *str, uint maxcols)
 	size_t lencount = 0;
 
 #ifdef NOLOCALE
-	memset(wbuf, 0, NAME_MAX + 1);
+	memset(wbuf, 0, (NAME_MAX + 1) * sizeof(wchar_t));
 #endif
 
 	/* Convert multi-byte to wide char */
