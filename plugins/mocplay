@@ -37,7 +37,7 @@ mocp_add ()
             fi
         done
 
-        echo "$arr2" | shuf -n 100 | xargs -d "\n" mocp -a
+        echo "$arr2" | shuf -n 100 | xargs -n1 -d "\n" mocp -a
     else
         if [ "$resp" = "y" ]; then
             xargs < "$selection" -0 mocp -a
