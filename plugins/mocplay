@@ -5,9 +5,7 @@
 # Notes:
 # - if selection is available, plays it, else plays the current file or directory
 # - appends tracks and exits is MOC is running, else clears playlist and adds tracks
-# - to randomize the order of files appended to the playlist, set SHUFFLE=1
-#   if you add a directory with many files when SHUFFLE=1 is set, it might take a very long time to finish!
-# - max 100 files are added
+# - to let mocp shuffle tracks, set SHUFFLE=1
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana, ath3
@@ -37,7 +35,8 @@ mocp_add ()
             fi
         done
 
-        echo "$arr2" | shuf -n 100 | xargs -n1 -d "\n" mocp -a
+        mocp -o shuffle
+        echo "$arr2" | xargs -d "\n" mocp -a
     else
         if [ "$resp" = "y" ]; then
             xargs < "$selection" -0 mocp -a
