@@ -1038,6 +1038,7 @@ static char *abspath(const char *path, const char *cwd)
 		return NULL;
 
 	size_t dst_size = 0, src_size = xstrlen(path), cwd_size = xstrlen(cwd);
+	size_t len = src_size;
 	const char *src;
 	char *dst;
 	/*
@@ -1058,7 +1059,7 @@ static char *abspath(const char *path, const char *cwd)
 	src = path;
 	dst = resolved_path + dst_size;
 	for (const char *next = NULL; next != path + src_size;) {
-		next = strchr(src, '/');
+		next = memchr(src, '/', len);
 		if (!next)
 			next = path + src_size;
 
@@ -1076,6 +1077,7 @@ static char *abspath(const char *path, const char *cwd)
 		}
 
 		src = next + 1;
+		len = src_size - (src - path);
 	}
 
 	if (*resolved_path == '\0') {
