@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="63.999996"
+   height="63.999996"
+   viewBox="0 0 16.933332 16.933333"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)"
+   sodipodi:docname="logo.svg"
+   inkscape:export-filename="logo-256x256.png"
+   inkscape:export-xdpi="384.00003"
+   inkscape:export-ydpi="384.00003">
+  <title
+     id="title819">n³ logo</title>
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="11.313708"
+     inkscape:cx="18.597869"
+     inkscape:cy="31.297711"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     units="px"
+     inkscape:snap-bbox="true"
+     inkscape:snap-bbox-midpoints="false"
+     inkscape:bbox-nodes="true"
+     inkscape:object-nodes="true"
+     inkscape:snap-global="false"
+     inkscape:snap-nodes="true"
+     inkscape:window-width="1246"
+     inkscape:window-height="1060"
+     inkscape:window-x="0"
+     inkscape:window-y="18"
+     inkscape:window-maximized="0"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0">
+    <inkscape:grid
+       type="xygrid"
+       id="grid815"
+       empspacing="8"
+       dotted="true"
+       originx="5.4968261e-07"
+       originy="-4.0170493e-06" />
+    <inkscape:grid
+       type="xygrid"
+       id="grid1158"
+       spacingx="16.933333"
+       spacingy="16.933333"
+       empcolor="#3fff3f"
+       empopacity="0.25098039"
+       enabled="true"
+       color="#52ff3f"
+       opacity="0.1254902"
+       originx="5.4968261e-07"
+       originy="-4.0170493e-06" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title>n³ logo</dc:title>
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>Léo Villeveygoux</dc:title>
+          </cc:Agent>
+        </dc:creator>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Calque 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(5.4968262e-7,-280.06665)">
+    <path
+       style="color:#000000;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:14.11111069px;line-height:80.00000119%;font-family:'Ubuntu Mono';-inkscape-font-specification:'Ubuntu Mono Bold';font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-feature-settings:normal;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000000;letter-spacing:0px;word-spacing:0px;text-transform:none;writing-mode:lr-tb;direction:ltr;text-orientation:mixed;dominant-baseline:auto;baseline-shift:baseline;text-anchor:start;white-space:normal;shape-padding:0;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;vector-effect:none;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.11666656;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+       d="m 12.263672,280.8125 c -0.486479,0 -0.969653,0.0853 -1.439453,0.23633 -0.435507,0.13272 -0.829272,0.29654 -1.1796878,0.51953 l -0.7949218,0.50781 1.4238286,2.92969 0.04492,0.25784 -0.5624996,-0.25 -0.1386719,0.53321 c -0.3867559,-0.45231 -0.8443959,-0.84889 -1.4082031,-1.08008 -0.6769657,-0.29136 -1.4423427,-0.41016 -2.296875,-0.41016 -0.8209918,0 -1.5945919,0.0566 -2.3222656,0.17578 h -0.00195 -0.00195 c -0.6743037,0.11269 -1.2525098,0.23364 -1.7480469,0.36914 l -0.7792968,0.21289 v 0.8086 10.31836 h 4.4980468 v -7.58399 c 0.081777,-0.003 0.1648127,-0.008 0.2460938,-0.008 0.1674239,0 0.3459752,0.0183 0.3554687,0.0332 0.052969,0.0986 0.1914063,0.62134 0.1914063,1.4336 v 6.125 h 4.4980463 v -6.45118 c 0,-0.10185 -0.02658,-0.18524 -0.0293,-0.28515 h 0.0039 l 0.01758,0.002 c 0.441959,0.0777 0.863897,0.11914 1.283203,0.11914 0.564047,0 1.075898,-0.0553 1.550781,-0.20117 0.436808,-0.13416 0.840801,-0.32699 1.185547,-0.61133 l 0.01172,-0.01 0.01367,-0.0117 c 0.323674,-0.28478 0.585783,-0.64838 0.742187,-1.05469 0.143737,-0.37346 0.210938,-0.77153 0.210938,-1.17383 0,-0.47209 -0.130896,-0.94832 -0.369141,-1.35937 -0.04349,-0.081 -0.175586,-0.13876 -0.230469,-0.22071 0.0039,-0.007 0.01178,-0.0103 0.01563,-0.0176 0.182331,-0.33531 0.28711,-0.72337 0.28711,-1.10743 0,-0.33116 -0.0549,-0.6626 -0.16211,-0.97656 -0.127432,-0.3851 -0.372081,-0.73811 -0.679687,-1 -0.312068,-0.27593 -0.6791,-0.46244 -1.070313,-0.58398 -0.424728,-0.13581 -0.872261,-0.18555 -1.365234,-0.18555 z"
+       id="path2897"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cccccccccscccccccccscsccscccscccccscccsccccc" />
+    <path
+       d="m 2.116667,285.62295 c 0.4465708,-0.12211 0.9946361,-0.23744 1.6441959,-0.34599 0.6630914,-0.10856 1.3803126,-0.16283 2.1516636,-0.16283 0.7578195,0 1.3870798,0.10855 1.8877806,0.32565 0.5007023,0.20352 0.8931443,0.50201 1.1773259,0.89548 0.2977153,0.37993 0.5074687,0.84125 0.6292606,1.38398 0.1217932,0.52917 0.1826897,1.11939 0.1826897,1.77068 v 5.3934 h -2.38125 v -5.06777 c 0,-0.89552 -0.1056877,-1.54001 -0.3170635,-1.93348 -0.2113742,-0.39348 -0.6411699,-0.59022 -1.289387,-0.59022 -0.1972842,0 -0.3945678,0.007 -0.5918507,0.0204 -0.1831923,0.0136 -0.5007403,0.0339 -0.7121154,0.061 v 7.51006 l -2.3812497,-10e-6 z m 9.989288,1.21046 c 0.372742,0 0.629003,-0.0576 0.768782,-0.17293 0.151427,-0.11529 0.22714,-0.25364 0.22714,-0.41503 0,-0.41503 -0.366863,-0.62255 -1.100757,-0.62255 h -0.624037 v -1.32291 h 0.624037 c 0.244613,0 0.442632,-0.045 0.594059,-0.13493 0.151427,-0.0899 0.227141,-0.2305 0.227141,-0.42165 0,-0.31483 -0.227141,-0.47224 -0.681421,-0.47224 -0.244613,0 -0.471474,0.0394 -0.696352,0.11808 -0.224878,0.0787 -0.444134,0.16305 -0.657769,0.25298 l -0.573439,-1.1806 c 0.247366,-0.15741 0.556574,-0.29234 0.927623,-0.40478 0.382292,-0.12368 0.7495,-0.18552 1.122243,-0.18552 0.419336,0 0.768783,0.045 1.04834,0.13492 0.291205,0.0899 0.524169,0.21364 0.698892,0.37105 0.174724,0.14617 0.29703,0.32608 0.366919,0.53971 0.0699,0.20239 0.104838,0.41603 0.104838,0.6409 0,0.21363 -0.05242,0.41602 -0.157252,0.60717 -0.09318,0.17991 -0.25626,0.36543 -0.489224,0.55658 0.337797,0.14617 0.576587,0.4286 0.716365,0.69376 0.151427,0.25362 0.22714,0.53607 0.22714,0.84734 0,0.28822 -0.0466,0.55338 -0.139778,0.79548 -0.09319,0.24209 -0.244613,0.45537 -0.454281,0.63984 -0.209669,0.17293 -0.483401,0.31127 -0.821198,0.41502 -0.337798,0.10376 -0.75131,0.15564 -1.240536,0.15564 -0.349446,0 -0.706989,-0.0346 -1.100526,-0.1038 -0.382293,-0.0807 -0.685879,-0.18447 -0.910757,-0.31127 l 0.354183,-1.36614 c 0.337318,0.14987 0.624038,0.24787 0.86016,0.29398 0.236121,0.0346 0.488262,0.0519 0.779468,0.0519 z"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:14.11111069px;line-height:80.00000119%;font-family:'Ubuntu Mono';-inkscape-font-specification:'Ubuntu Mono Bold';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:2.11666656;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path2893"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccscccsccscscccccccssccscssccccscccscccsscsscccccc" />
+  </g>
+</svg>
