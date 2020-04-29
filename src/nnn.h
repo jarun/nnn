@@ -188,6 +188,7 @@ static struct key bindings[] = {
 	{ CONTROL('T'),   SEL_SORT },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
+	{ 'R',            SEL_REDRAW },
 	/* Select current file path */
 	{ CONTROL('J'),   SEL_SEL },
 	{ ' ',            SEL_SEL },
