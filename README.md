@@ -15,9 +15,11 @@
 
 ## Introduction
 
+<img align="left" src="misc/logo/logo-128x128.png">
+
 `nnn` (or `n³`) is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible performance](https://github.com/jarun/nnn/wiki/Performance).
 
-`nnn` is also a du analyzer, an app launcher, a batch renamer and a file picker. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further. You can _plug_ new functionality _and play_ with a hotkey. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
+`nnn` can analyze disk usage, batch rename, launch apps and pick files. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further. You can _plug_ new functionality _and play_ with a hotkey. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
 
 It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw) (Android), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
 
@@ -52,7 +54,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 ## Features
 
-- Resource sensitive
+- Frugal
   - Typically needs less than 3.5MB resident memory
   - Works with 8-bit colors
   - Disk-IO sensitive (few disk reads and writes)
@@ -124,7 +126,18 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates, cycles contexts. <kbd>?</kbd> lists shortcuts.
 
-_**Read the fine manual**_. [![Wiki](https://img.shields.io/badge/nnn-Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
+[![Wiki](https://img.shields.io/badge/RTFM-nnn%20Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
+
+## Developers
+
+- [Arun Prakash Jana](https://github.com/jarun) (Copyright © 2016-2020)
+- [0xACE](https://github.com/0xACE)
+- [Anna Arad](https://github.com/annagrram)
+- [KlzXS](https://github.com/KlzXS)
+- [Maxim Baz](https://github.com/maximbaz)
+- and other contributors
+
+Visit the [ToDo list](https://github.com/jarun/nnn/issues/506) to contribute or see the features in progress.
 
 ## Elsewhere
 
@@ -137,14 +150,3 @@ _**Read the fine manual**_. [![Wiki](https://img.shields.io/badge/nnn-Wiki-impor
 - LinuxLinks [[1](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)] [[2](https://www.linuxlinks.com/bestconsolefilemanagers/)] [[3](https://www.linuxlinks.com/excellent-system-tools-nnn-portable-terminal-file-manager/)]
 - [Suckless Rocks](https://suckless.org/rocks/)
 - [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
-
-## Developers
-
-- [Arun Prakash Jana](https://github.com/jarun) (Copyright © 2016-2020)
-- [0xACE](https://github.com/0xACE)
-- [Anna Arad](https://github.com/annagrram)
-- [KlzXS](https://github.com/KlzXS)
-- [Maxim Baz](https://github.com/maximbaz)
-- and other contributors
-
-`nnn` is actively developed. Visit the [ToDo list](https://github.com/jarun/nnn/issues/506) to contribute or see the features in progress.
