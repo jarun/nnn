@@ -50,8 +50,6 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 25. Watch matrix text fly or read fortune messages
 26. Configure in 5 minutes!
 
-Once installed (instructions below), _**read the fine manual**_. [![Wiki](https://img.shields.io/badge/nnn-Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
-
 ## Features
 
 - Resource sensitive
@@ -117,7 +115,7 @@ Once installed (instructions below), _**read the fine manual**_. [![Wiki](https:
 
 ## Quickstart
 
-1. Install optional [deps](https://github.com/jarun/nnn#utility-dependencies) (if you need any).
+1. [Install](https://github.com/jarun/nnn/wiki/Usage#installation) `nnn`.
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 3. Use option `-e` in your alias to open text files in `$VISUAL`/`$EDITOR`/ vi. [Open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text) if you wish.
 4. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins).
@@ -126,68 +124,7 @@ Once installed (instructions below), _**read the fine manual**_. [![Wiki](https:
 
 Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates, cycles contexts. <kbd>?</kbd> lists shortcuts.
 
-## Installation
-
-No permission to install packages? Get the statically linked binary from the latest release.
-
-#### Library dependencies
-
-A curses library with wide char support (e.g. ncursesw), libreadline (optional) and standard libc.
-
-#### Utility dependencies
-
-| Dependency | Install? | Operation |
-| --- | --- | --- |
-| xdg-open (Linux), open(1) (macOS), cygstart<br>(Cygwin), open (Haiku) | base | desktop opener |
-| file, coreutils (cp, mv, rm), xargs | base | file type, copy, move and remove |
-| tar, (un)zip [atool/bsdtar for more formats] | base | create, list, extract bzip2, (g)zip, tar |
-| archivemount, fusermount(3)/umount (macOS) | optional | mount, unmount archives |
-| sshfs, [rclone](https://rclone.org/), fusermount(3)/umount (macOS) | optional | mount, unmount remotes |
-| trash-cli | optional | trash files (default action: rm) |
-| vlock (Linux), bashlock (macOS), lock(1) (BSD),<br>peaclock (Haiku) | optional | terminal locker (else `$NNN_LOCKER`) |
-| advcpmv (Linux) ([integration](https://github.com/jarun/nnn/wiki/Advanced-use-cases#cp-mv-progress)) | optional | copy, move progress |
-| fortune | optional | random quotes in help screen |
-| `$VISUAL` (else `$EDITOR`), `$PAGER`, `$SHELL` | optional | fallback vi, less, sh |
-
-#### From a package manager
-
-Install `nnn` from your package manager. If the version available is dated try an alternative installation method.
-
-<details><summary>Packaging status (expand)</summary>
-<p>
-<br>
-<a href="https://repology.org/project/nnn/versions"><img src="https://repology.org/badge/vertical-allrepos/nnn.svg" alt="Packaging status"></a>
-</p>
-Unlisted packagers:
-<p>
-<br>
-● CentOS (<code>yum --enablerepo=epel install nnn</code>)<br>
-● <a href="https://notabug.org/milislinux/milis/src/master/talimatname/genel/n/nnn/talimat">Milis Linux</a> (<code>mps kur nnn</code>)<br>
-● <a href="https://www.nutyx.org/en/?type=pkg&branch=rolling&arch=x86_64&searchpkg=nnn">NuTyX</a> (<code>cards install nnn</code>)<br>
-● <a href="http://codex.sourcemage.org/test/shell-term-fm/nnn/">Source Mage</a> (<code>cast nnn</code>)<br>
-</p>
-</details>
-
-#### Release packages
-
-Packages for Arch Linux, CentOS, Debian, Fedora, Ubuntu and a static binary are generated with the [latest release](https://github.com/jarun/nnn/releases/latest).
-
-#### From source
-
-Download the [latest release](https://github.com/jarun/nnn/releases/latest) or clone this repository (*risky*), install deps and compile. On Ubuntu 18.04:
-
-```sh
-sudo apt-get install pkg-config libncursesw5-dev libreadline-dev
-sudo make strip install
-```
-
-`PREFIX` is supported, in case you want to install to a different location.
-
-See the [developer guides](https://github.com/jarun/nnn/wiki/Developer-guides) for source verification, compilation notes on the Pi, Cygwin and other tips.
-
-#### Shell completion
-
-Completion scripts for Bash, Fish and Zsh are [available](misc/auto-completion). Refer to your shell's manual for installation instructions.
+_**Read the fine manual**_. [![Wiki](https://img.shields.io/badge/nnn-Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
 
 ## Elsewhere
 
