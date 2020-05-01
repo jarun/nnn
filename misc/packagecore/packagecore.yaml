@@ -42,6 +42,19 @@ packages:
     commands:
       pre:
         - yum install epel-release
+  centos7.7:
+    builddeps:
+      - make
+      - gcc
+      - pkgconfig
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
+    commands:
+      pre:
+        - yum install epel-release
   centos8.0:
     builddeps:
       - make
@@ -55,6 +68,16 @@ packages:
     commands:
       pre:
         - yum install epel-release
+  debian8:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - libncursesw5-dev
+      - libreadline-dev
+    deps:
+      - libncursesw5
+      - readline-common
   debian9:
     builddeps:
       - make
@@ -105,6 +128,16 @@ packages:
     deps:
       - ncurses
       - readline
+  fedora32:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - ncurses-devel
+      - readline-devel
+    deps:
+      - ncurses
+      - readline
   opensuse15.1:
     builddeps:
       - make
@@ -115,6 +148,16 @@ packages:
     deps:
       - libncurses6
       - libreadline7
+  ubuntu14.04:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - libncursesw5-dev
+      - libreadline6-dev
+    deps:
+      - libncursesw5
+      - libreadline6
   ubuntu16.04:
     builddeps:
       - make
@@ -135,3 +178,13 @@ packages:
     deps:
       - libncursesw5
       - libreadline7
+  ubuntu20.04:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - libncursesw5-dev
+      - libreadline-dev
+    deps:
+      - libncursesw6
+      - libreadline8

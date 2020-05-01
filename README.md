@@ -136,7 +136,7 @@ A curses library with wide char support (e.g. ncursesw), libreadline (optional) 
 
 #### Utility dependencies
 
-| Dependency | Installation | Operation |
+| Dependency | Install? | Operation |
 | --- | --- | --- |
 | xdg-open (Linux), open(1) (macOS), cygstart<br>(Cygwin), open (Haiku) | base | desktop opener |
 | file, coreutils (cp, mv, rm), xargs | base | file type, copy, move and remove |
