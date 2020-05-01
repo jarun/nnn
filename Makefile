@@ -3,6 +3,7 @@ VERSION = $(shell grep -m1 VERSION $(SRC) | cut -f 2 -d'"')
 PREFIX ?= /usr/local
 MANPREFIX ?= $(PREFIX)/share/man
 DESKTOPPREFIX ?= $(PREFIX)/share/applications
+DESKTOPICONPREFIX ?= $(PREFIX)/share/icons/hicolor
 STRIP ?= strip
 PKG_CONFIG ?= pkg-config
 INSTALL ?= install
@@ -83,6 +84,8 @@ SRC = src/nnn.c
 HEADERS = src/nnn.h
 BIN = nnn
 DESKTOPFILE = misc/desktop/nnn.desktop
+LOGOSVG = misc/logo/logo.svg
+LOGO64X64 = misc/logo/logo-64x64.png
 
 all: $(BIN)
 
@@ -97,9 +100,15 @@ noloc: $(BIN)
 install-desktop: $(DESKTOPFILE)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)
 	$(INSTALL) -m 0644 $(DESKTOPFILE) $(DESTDIR)$(DESKTOPPREFIX)
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps
+	$(INSTALL) -m 0644 $(LOGOSVG) $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps/nnn.svg
+	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPICONPREFIX)/64x64/apps
+	$(INSTALL) -m 0644 $(LOGO64X64) $(DESTDIR)$(DESKTOPICONPREFIX)/64x64/apps/nnn.png
 
 uninstall-desktop:
 	$(RM) $(DESTDIR)$(DESKTOPPREFIX)/$(DESKTOPFILE)
+	$(RM) $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps/nnn.svg
+	$(RM) $(DESTDIR)$(DESKTOPICONPREFIX)/64x64/apps/nnn.png
 
 install: all
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
