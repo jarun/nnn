@@ -1,4 +1,4 @@
-<h1 align="center">n³ - <i>supercharge your productivity!</i></h1>
+<h1 align="center">nnn - <i>supercharge your productivity!</i></h1>
 
 <p align="center">
 <a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600" alt="Latest release" /></a>
@@ -25,32 +25,32 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 ## Black magic! :dark_sunglasses:
 
-1. Load, sort, filter thousands of files instantly
-2. Type to navigate with automatic dir selection
-3. Select files from anywhere (not just a single dir)
-4. Edit and preview markdown, man page, html
-5. Open a file and auto-advance to the next
-6. Export (filtered) list of visible files
-7. Find files by mime-type and list in `nnn`
-8. Unlimited bookmarks, plugins, commands with custom hotkeys
-9. Write a plugin in any language you know
-10. Configure the middle mouse click to do anything
-11. Fuzzy search subtree and open the dir of a file
-12. Load four dirs with custom settings at once
-13. Notifications on cp, mv, rm completion
-14. Auto-sync selection to system clipboard
-15. Open text files detached in another pane/tab/window
-16. Create files/dirs/duplicates with parents (like `mkdir -p`)
-17. Toggle hidden with <kbd>.</kbd>, visit HOME with <kbd>~</kbd>, last dir with <kbd>-</kbd>
-18. Pin a frequently visited dir at runtime
-19. Mount any cloud storage service in a few keypresses
-20. Mount and modify archives
-21. Filter filtered entries
-22. Sort files by access time and inode change time
-23. Access selection from another instance of `nnn`
-24. Compile out features you don't need
-25. Watch matrix text fly or read fortune messages
-26. Configure in 5 minutes!
+- Load, sort, filter thousands of files instantly
+- Type to navigate with automatic dir selection
+- Select files from anywhere (not just a single dir)
+- Edit and preview markdown, man page, html
+- Open a file and auto-advance to the next
+- Export (filtered) list of visible files
+- Find files by mime-type and list in `nnn`
+- Unlimited bookmarks, plugins, commands with custom hotkeys
+- Write a plugin in any language you know
+- Configure the middle mouse click to do anything
+- Fuzzy search subtree and open the dir of a file
+- Load four dirs with custom settings at once
+- Notifications on cp, mv, rm completion
+- Auto-sync selection to system clipboard
+- Open text files detached in another pane/tab/window
+- Create files/dirs/duplicates with parents (like `mkdir -p`)
+- Toggle hidden with <kbd>.</kbd>, visit HOME with <kbd>~</kbd>, last dir with <kbd>-</kbd>
+- Pin a frequently visited dir at runtime
+- Mount any cloud storage service in a few keypresses
+- Mount and modify archives
+- Filter filtered entries
+- Sort files by access time and inode change time
+- Access selection from another instance of `nnn`
+- Compile out features you don't need
+- Watch matrix text fly or read fortune messages
+- Configure in 5 minutes!
 
 ## Features
 
@@ -117,7 +117,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 ## Quickstart
 
-1. [Install](https://github.com/jarun/nnn/wiki/Usage#installation) `nnn`.
+1. [Install](https://github.com/jarun/nnn/wiki/Usage#installation) `nnn` and deps (if you need any).
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 3. Use option `-e` in your alias to open text files in `$VISUAL`/`$EDITOR`/ vi. [Open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text) if you wish.
 4. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins).
