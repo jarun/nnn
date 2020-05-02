@@ -3254,7 +3254,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 {
 	bool ln = FALSE;
 	char ind1 = '\0', ind2 = '\0';
-	int attrs = sel ? A_REVERSE : 0;
+	int attrs = sel ? A_REVERSE | A_DIM : A_DIM;
 	uint len;
 	char *size;
 
@@ -3322,9 +3322,9 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	}
 
 	addstr("  ");
-	if (ln) {
-		attron(A_DIM);
-		attrs |=  A_DIM;
+	if (!ln) {
+		attroff(A_DIM);
+		attrs ^=  A_DIM;
 	}
 	addwstr(unescape(ent->name, namecols));
 	if (attrs)
