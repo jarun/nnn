@@ -3049,15 +3049,12 @@ static void resetdircolor(int flags)
  * Adjust string length to maxcols if > 0;
  * Max supported str length: NAME_MAX;
  */
+#ifndef NOLOCALE
 static wchar_t *unescape(const char *str, uint maxcols)
 {
 	wchar_t * const wbuf = (wchar_t *)g_buf;
 	wchar_t *buf = wbuf;
 	size_t lencount = 0;
-
-#ifdef NOLOCALE
-	memset(wbuf, 0, (NAME_MAX + 1) * sizeof(wchar_t));
-#endif
 
 	/* Convert multi-byte to wide char */
 	size_t len = mbstowcs(wbuf, str, NAME_MAX);
@@ -3091,6 +3088,19 @@ static wchar_t *unescape(const char *str, uint maxcols)
 
 	return wbuf;
 }
+#else
+static char *unescape(const char *str, uint maxcols)
+{
+	ssize_t len = (ssize_t)xstrsncpy(g_buf, str, maxcols);
+
+	--len;
+	while (--len >= 0)
+		if (g_buf[len] <= '\x1f' || g_buf[len] == '\x7f')
+			g_buf[len] = '\?';
+
+	return g_buf;
+}
+#endif
 
 static char *coolsize(off_t size)
 {
@@ -3241,7 +3251,11 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 
 	if (attrs)
 		attron(attrs);
+#ifndef NOLOCALE
 	addwstr(unescape(ent->name, namecols));
+#else
+	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
+#endif
 	if (attrs)
 		attroff(attrs);
 
@@ -3326,7 +3340,11 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		attroff(A_DIM);
 		attrs ^=  A_DIM;
 	}
+#ifndef NOLOCALE
 	addwstr(unescape(ent->name, namecols));
+#else
+	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
+#endif
 	if (attrs)
 		attroff(attrs);
 	if (ind2)
