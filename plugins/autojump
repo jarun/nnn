@@ -13,7 +13,7 @@ if which autojump >/dev/null 2>&1; then
     printf "jump to: "
     read -r dir
     odir="$(autojump "$dir")"
-    printf "%s" "0$odir" > "$NNN_PIPE"
+    printf "%s" "0c$odir" > "$NNN_PIPE"
 else
     printf "autojump missing"
     read -r _

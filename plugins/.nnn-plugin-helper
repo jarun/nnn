@@ -29,7 +29,7 @@ nnn_cd () {
         read -r context
     fi
 
-    printf "%s" "${context:-0}$dir" > "$NNN_PIPE"
+    printf "%s" "${context:-0}c$dir" > "$NNN_PIPE"
 }
 
 cmd_exists () {

@@ -514,8 +514,9 @@ static char * const utils[] = {
 #define MSG_RM_TMP 40
 #define MSG_NOCHNAGE 41
 #define MSG_CANCEL 42
+#define MSG_0_ENTRIES 43
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 43 /* Must be the last entry */
+#define MSG_DIR_CHANGED 44 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -562,6 +563,7 @@ static const char * const messages[] = {
 	"unchanged",
 	"cancelled",
 	"first file (\')/char?",
+	"0 entries",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -691,6 +693,7 @@ static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
 static char *xgetenv(const char *name, char *fallback);
 static bool plugscript(const char *plugin, const char *path, uchar flags);
+static char *load_input(int fd, char *path);
 
 /* Functions */
 
@@ -4218,11 +4221,72 @@ static bool plctrl_init(void)
 	return _SUCCESS;
 }
 
+static void rmlistpath()
+{
+	if (listpath) {
+		DPRINTF_S(__FUNCTION__);
+		DPRINTF_S(initpath);
+		spawn("rm -rf", initpath, NULL, NULL, F_NOTRACE | F_MULTI);
+		listpath = NULL;
+	}
+}
+
+static void readpipe(int fd, char **path, char **lastname, char **lastdir)
+{
+	char *nextpath = NULL;
+	ssize_t len = read(fd, g_buf, 1);
+
+	if (len != 1)
+		return;
+
+	char ctx = g_buf[0] - '0';
+
+	if (ctx > CTX_MAX)
+		return;
+
+	len = read(fd, g_buf, 1);
+	if (len != 1)
+		return;
+
+	char op = g_buf[0];
+
+	if (op == 'c') {
+		len = read(fd, g_buf, PATH_MAX);
+		if (len <= 0)
+			return;
+
+		nextpath = g_buf;
+	} else if (op == 'l') {
+		/* Remove last list mode path, if any */
+		rmlistpath();
+
+		nextpath = load_input(fd, *path);
+		if (nextpath) {
+			free(initpath);
+			initpath = nextpath;
+			DPRINTF_S(initpath);
+		}
+	}
+
+	if (nextpath) {
+		if (ctx == 0 || ctx == cfg.curctx + 1) {
+			xstrsncpy(*lastdir, *path, PATH_MAX);
+			xstrsncpy(*path, nextpath, PATH_MAX);
+		} else {
+			int r = ctx - 1;
+
+			g_ctx[r].c_cfg.ctxactive = 0;
+			savecurctx(&cfg, nextpath, dents[cur].name, r);
+			*path = g_ctx[r].c_path;
+			*lastdir = g_ctx[r].c_last;
+			*lastname = g_ctx[r].c_name;
+		}
+	}
+}
+
 static bool run_selected_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir)
 {
 	int fd;
-	size_t len;
-
 	if (!(g_states & STATE_PLUGIN_INIT)) {
 		plctrl_init();
 		g_states |= STATE_PLUGIN_INIT;
@@ -4248,27 +4312,9 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 			spawn(g_buf, NULL, *path, *path, F_NORMAL);
 	}
 
-	len = read(fd, g_buf, PATH_MAX);
-	g_buf[len] = '\0';
+	readpipe(fd, path, lastname, lastdir);
+
 	close(fd);
-
-	if (len > 1) {
-		int ctx = g_buf[0] - '0';
-
-		if (ctx == 0 || ctx == cfg.curctx + 1) {
-			xstrsncpy(*lastdir, *path, PATH_MAX);
-			xstrsncpy(*path, g_buf + 1, PATH_MAX);
-		} else if (ctx >= 1 && ctx <= CTX_MAX) {
-			int r = ctx - 1;
-
-			g_ctx[r].c_cfg.ctxactive = 0;
-			savecurctx(&cfg, g_buf + 1, dents[cur].name, r);
-			*path = g_ctx[r].c_path;
-			*lastdir = g_ctx[r].c_last;
-			*lastname = g_ctx[r].c_name;
-		}
-	}
-
 	return TRUE;
 }
 
@@ -6318,7 +6364,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 	struct stat sb;
 	char *slash, *tmp;
 	ssize_t len = xstrlen(prefix);
-	char *tmpdir = malloc(sizeof(char) * (PATH_MAX + TMP_LEN_MAX));
+	char *tmpdir = malloc(PATH_MAX);
 
 	if (!tmpdir) {
 		DPRINTF_S(strerror(errno));
@@ -6377,7 +6423,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 	return tmpdir;
 }
 
-static char *load_input()
+static char *load_input(int fd, char *path)
 {
 	/* 512 KiB chunk size */
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
@@ -6392,13 +6438,16 @@ static char *load_input()
 		return NULL;
 	}
 
-	if (!getcwd(cwd, PATH_MAX)) {
-		free(input);
-		return NULL;
-	}
+	if (!path) {
+		if (!getcwd(cwd, PATH_MAX)) {
+			free(input);
+			return NULL;
+		}
+	} else
+		xstrsncpy(cwd, path, PATH_MAX);
 
 	while (chunk_count < 512) {
-		input_read = read(STDIN_FILENO, input + total_read, chunk);
+		input_read = read(fd, input + total_read, chunk);
 		if (input_read < 0) {
 			DPRINTF_S(strerror(errno));
 			goto malloc_1;
@@ -6461,7 +6510,11 @@ static char *load_input()
 	DPRINTF_D(chunk_count);
 
 	if (!entries) {
-		fprintf(stderr, "0 entries\n");
+		if (g_states & STATE_PLUGIN_INIT) {
+			printmsg(messages[MSG_0_ENTRIES]);
+			xdelay(XDELAY_INTERVAL_MS);
+		} else
+			fprintf(stderr, "%s\n", messages[MSG_0_ENTRIES]);
 		goto malloc_1;
 	}
 
@@ -6842,7 +6895,7 @@ int main(int argc, char *argv[])
 	/* Check if we are in path list mode */
 	if (!isatty(STDIN_FILENO)) {
 		/* This is the same as listpath */
-		initpath = load_input();
+		initpath = load_input(STDIN_FILENO, NULL);
 		if (!initpath)
 			return _FAILURE;
 
@@ -7054,8 +7107,7 @@ int main(int argc, char *argv[])
 		unlink(selpath);
 
 	/* Remove tmp dir in list mode */
-	if (listpath)
-		spawn("rm -rf", initpath, NULL, NULL, F_NOTRACE | F_MULTI);
+	rmlistpath();
 
 	/* Free the regex */
 #ifdef PCRE

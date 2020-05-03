@@ -47,6 +47,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | kdeconnect | Send selected files to an Android device | sh | kdeconnect-cli |
 | launch | GUI application launcher | sh | fzf/fzy |
 | mediainf | Show media information | sh | mediainfo |
+| mimelist | List files by mime in subtree | sh | fd/find |
 | moclyrics | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
 | mocplay | Append (and/or play) selection/dir/file in moc | sh | [moc](http://moc.daper.net/) |
 | mp3conv | Extract audio from multimedia as mp3 | sh | ffmpeg |
@@ -163,8 +164,14 @@ Drop the plugin in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins` and make it e
 #### Controlling `nnn`'s active directory
 `nnn` provides a mechanism for plugins to control its active directory.
 The way to do so is by writing to the pipe pointed by the environment variable `NNN_PIPE`.
-The plugin should write a single string in the format `<number><path>` without a newline at the end. For example, `1/etc`.
-The number indicates the context to change the active directory of (0 is used to indicate the current context).
+The plugin should write a single string in the format `<context number><char><path>` without a newline at the end. For example, `1c/etc`.
+The context number indicates the context to change the active directory of (0 is used to indicate the current context).
+The `<char>` indicates the operation type.
+
+: Char : Operation :
+|:---:| --- |
+| c | cd |
+| l | list files in list mode |
 
 For convenience, we provided a helper script named `.nnn-plugin-helper` and a function named `nnn_cd` to ease this process. `nnn_cd` receives the path to change to as the first argument, and the context as an optional second argument.
 If a context is not provided, it is asked for explicitly. To skip this and choose the current context, set the `CUR_CTX` variable in `.nnn-plugin-helper` to `1`.
@@ -201,7 +208,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
     printf "cd to: "
     read -r dir
 
-    printf "%s" "0$dir" > "$NNN_PIPE"
+    printf "%s" "0c$dir" > "$NNN_PIPE"
     ```
 
 ## Contributing plugins

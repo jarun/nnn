@@ -25,4 +25,4 @@ else
     exit 1
 fi
 
-printf "%s" "0$sel" > "$NNN_PIPE"
+printf "%s" "0c$sel" > "$NNN_PIPE"
