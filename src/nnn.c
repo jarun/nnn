@@ -530,7 +530,7 @@ static const char * const messages[] = {
 	"'c'p / 'm'v as?",
 	"'c'urrent / 's'el?",
 	"rm -rf %s file%s?",
-	"limit exceeded\n",
+	"limit exceeded",
 	"'f'ile / 'd'ir / 's'ym / 'h'ard?",
 	"'c'li / 'g'ui?",
 	"overwrite?",
@@ -6432,6 +6432,7 @@ static char *load_input(int fd, char *path)
 	size_t offsets[LIST_FILES_MAX];
 	char **paths = NULL;
 	ssize_t input_read, total_read = 0, off = 0;
+	int msgnum = 0;
 
 	if (!input) {
 		DPRINTF_S(strerror(errno));
@@ -6470,7 +6471,7 @@ static char *load_input(int fd, char *path)
 			}
 
 			if (entries == LIST_FILES_MAX) {
-				fprintf(stderr, messages[MSG_LIMIT], NULL);
+				msgnum = MSG_LIMIT;
 				goto malloc_1;
 			}
 
@@ -6479,7 +6480,7 @@ static char *load_input(int fd, char *path)
 		}
 
 		if (chunk_count == 512) {
-			fprintf(stderr, messages[MSG_LIMIT], NULL);
+			msgnum = MSG_LIMIT;
 			goto malloc_1;
 		}
 
@@ -6498,7 +6499,7 @@ static char *load_input(int fd, char *path)
 
 	if (off != total_read) {
 		if (entries == LIST_FILES_MAX) {
-			fprintf(stderr, messages[MSG_LIMIT], NULL);
+			msgnum = MSG_LIMIT;
 			goto malloc_1;
 		}
 
@@ -6510,11 +6511,7 @@ static char *load_input(int fd, char *path)
 	DPRINTF_D(chunk_count);
 
 	if (!entries) {
-		if (g_states & STATE_PLUGIN_INIT) {
-			printmsg(messages[MSG_0_ENTRIES]);
-			xdelay(XDELAY_INTERVAL_MS);
-		} else
-			fprintf(stderr, "%s\n", messages[MSG_0_ENTRIES]);
+		msgnum = MSG_0_ENTRIES;
 		goto malloc_1;
 	}
 
@@ -6566,6 +6563,13 @@ malloc_2:
 	for (i = entries - 1; i >= 0; --i)
 		free(paths[i]);
 malloc_1:
+	if (msgnum) {
+		if (g_states & STATE_PLUGIN_INIT) {
+			printmsg(messages[msgnum]);
+			xdelay(XDELAY_INTERVAL_MS);
+		} else
+			fprintf(stderr, "%s\n", messages[msgnum]);
+	}
 	free(input);
 	free(paths);
 	return tmpdir;
