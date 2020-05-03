@@ -423,6 +423,15 @@ separated by \fI;\fR:
 .Pp
 \fBNNN_SEL:\fR absolute path to custom selection file.
 .Pp
+\fBNNN_FIFO:\fR path of a named pipe to write current file path:
+.Bd -literal
+    export NNN_FIFO='/tmp/nnn.fifo'
+
+    NOTES:
+    1. If the FIFO file doesn't exist it will be created, but it will never be removed.
+    2. You can actually give a path to a regular file, and get a persistant log.
+.Ed
+.Pp
 \fBnnn:\fR this is a special variable set to the hovered entry before executing
 a command from the command prompt or spawning a shell.
 .Pp
