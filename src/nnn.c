@@ -1170,14 +1170,14 @@ static size_t seltofile(int fd, uint *pcount)
 
 	if (listpath) {
 		prefixlen = (ssize_t)xstrlen(prefixpath);
-		initlen = (ssize_t)xstrlen(initpath);
+		initlen = (ssize_t)xstrlen(listpath);
 	}
 
 	while (pos <= lastpos) {
 		DPRINTF_S(pbuf);
 		len = (ssize_t)xstrlen(pbuf);
 
-		if (!listpath || strncmp(initpath, pbuf, initlen) != 0) {
+		if (!listpath || strncmp(listpath, pbuf, initlen) != 0) {
 			if (write(fd, pbuf, len) != len)
 				return pos;
 		} else {
@@ -4225,8 +4225,9 @@ static void rmlistpath()
 {
 	if (listpath) {
 		DPRINTF_S(__FUNCTION__);
-		DPRINTF_S(initpath);
-		spawn("rm -rf", initpath, NULL, NULL, F_NOTRACE | F_MULTI);
+		DPRINTF_S(listpath);
+		spawn("rm -rf", listpath, NULL, NULL, F_NOTRACE | F_MULTI);
+		free(listpath);
 		listpath = NULL;
 	}
 }
@@ -4261,11 +4262,6 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 		rmlistpath();
 
 		nextpath = load_input(fd, *path);
-		if (nextpath) {
-			free(initpath);
-			initpath = nextpath;
-			DPRINTF_S(initpath);
-		}
 	}
 
 	if (nextpath) {
