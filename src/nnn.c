@@ -948,7 +948,7 @@ static char *xstrdup(const char *restrict s)
 	return ptr;
 }
 
-static bool is_suffix(const char *str, const char *suffix)
+static bool is_suffix(const char *restrict str, const char *restrict suffix)
 {
 	if (!str || !suffix)
 		return FALSE;
@@ -960,6 +960,11 @@ static bool is_suffix(const char *str, const char *suffix)
 		return FALSE;
 
 	return (xstrcmp(str + (lenstr - lensuffix), suffix) == 0);
+}
+
+static bool is_prefix(const char *restrict str, const char *restrict prefix, size_t len)
+{
+	return !strncmp(str, prefix, len);
 }
 
 /*
@@ -1177,7 +1182,7 @@ static size_t seltofile(int fd, uint *pcount)
 		DPRINTF_S(pbuf);
 		len = (ssize_t)xstrlen(pbuf);
 
-		if (!listpath || strncmp(listpath, pbuf, initlen) != 0) {
+		if (!listpath || !is_prefix(pbuf, listpath, initlen)) {
 			if (write(fd, pbuf, len) != len)
 				return pos;
 		} else {
@@ -1996,11 +2001,12 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 
 	snprintf(buf, CMD_LEN_MAX,
 #ifdef __linux__
-		"sed -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, selpath, cmd, archive);
+		"sed -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, selpath, cmd, archive
 #else
 		"tr '\\0' '\n' < '%s' | sed -e 's|^%s/||' | tr '\n' '\\0' | xargs -0 %s %s",
-		selpath, curpath, cmd, archive);
+		selpath, curpath, cmd, archive
 #endif
+		);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, curpath, F_CLI);
 	free(buf);
 }
@@ -3872,10 +3878,7 @@ static bool remote_mount(char *newpath, char *currentpath)
 	uchar flag = F_CLI;
 	int opt;
 	char *tmp, *env;
-	bool r, s;
-
-	r = getutil(utils[UTIL_RCLONE]);
-	s = getutil(utils[UTIL_SSHFS]);
+	bool r = getutil(utils[UTIL_RCLONE]), s = getutil(utils[UTIL_SSHFS]);
 
 	if (!(r || s)) {
 		printmsg(messages[MSG_UTIL_MISSING]);
@@ -4290,13 +4293,13 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 
 static bool run_selected_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir)
 {
-	int fd;
 	if (!(g_states & STATE_PLUGIN_INIT)) {
 		plctrl_init();
 		g_states |= STATE_PLUGIN_INIT;
 	}
 
-	fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
+	int fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
+
 	if (fd == -1)
 		return FALSE;
 
@@ -5451,22 +5454,23 @@ nochange:
 					}
 				}
 
-				if (cfg.useeditor && (!sb.st_size ||
-#ifdef FILE_MIME_OPTS
-				    (get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
-				    && !strncmp(g_buf, "text/", 5)))) {
-#else
-				    /* no mime option; guess from description instead */
-				    (get_output(g_buf, CMD_LEN_MAX, "file", "-b", newpath, FALSE)
-				    && strstr(g_buf, "text")))) {
-#endif
-					spawn(editor, newpath, NULL, path, F_CLI);
-					continue;
-				}
-
 				if (!sb.st_size) {
 					printwait(messages[MSG_EMPTY_FILE], &presel);
 					goto nochange;
+				}
+
+				if (cfg.useeditor
+#ifdef FILE_MIME_OPTS
+				    && get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
+				    && is_prefix(g_buf, "text/", 5)
+#else
+				    /* no mime option; guess from description instead */
+				    && get_output(g_buf, CMD_LEN_MAX, "file", "-b", newpath, FALSE)
+				    && strstr(g_buf, "text")
+#endif
+				) {
+					spawn(editor, newpath, NULL, path, F_CLI);
+					continue;
 				}
 
 #ifdef PCRE
@@ -5730,10 +5734,9 @@ nochange:
 				if (!(getutil(utils[UTIL_BASH])
 				      && plugscript(utils[UTIL_NMV], path, F_CLI))
 #ifndef NOBATCH
-				    && !batch_rename(path)) {
-#else
-				) {
+				    && !batch_rename(path)
 #endif
+				) {
 					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;
 				}
@@ -6957,7 +6960,7 @@ int main(int argc, char *argv[])
 		} else {
 			arg = argv[optind];
 			DPRINTF_S(arg);
-			if (xstrlen(arg) > 7 && !strncmp(arg, "file://", 7))
+			if (xstrlen(arg) > 7 && is_prefix(arg, "file://", 7))
 				arg = arg + 7;
 			initpath = realpath(arg, NULL);
 			DPRINTF_S(initpath);
