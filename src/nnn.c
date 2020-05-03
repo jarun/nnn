@@ -5404,7 +5404,7 @@ nochange:
 				if (cfg.useeditor && (!sb.st_size ||
 #ifdef FILE_MIME_OPTS
 				    (get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
-				    && !(((int *)g_buf)[0] == *(int *)"text" && g_buf[4] == '/')))) {
+				    && !strncmp(g_buf, "text/", 5)))) {
 #else
 				    /* no mime option; guess from description instead */
 				    (get_output(g_buf, CMD_LEN_MAX, "file", "-b", newpath, FALSE)
