@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+
+# Description: Run custom search and list results in smart context
+#
+# Note: To enable multi select in fzf, export the following:
+#       - export FZF_DEFAULT_OPTS='--bind ctrl-a:select-all,ctrl-d:deselect-all'
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash jana
+
+. "$(dirname "$0")"/.nnn-plugin-helper
+
+printf "Examples:\n"
+printf "  find . -name \"pattern*\" -print0\n"
+printf "  fd pattern -0\n"
+printf "  find -maxdepth 1 -size +100M -print0\n"
+printf "  fd -d 2 -S +100M -0\n"
+printf "  grep -rlZ pattern\n"
+printf "  rg -l0 pattern\n"
+printf "  fzf -m | tr %s %s\n\n" "'\n'" "'\0'"
+
+printf "cmd: "
+read -r cmd
+
+if ! [ -z "$cmd" ]; then
+    printf "%s" "+l" > "$NNN_PIPE"
+    eval "$cmd" > "$NNN_PIPE"
+fi
