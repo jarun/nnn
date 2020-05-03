@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Description: Run fd/find in subtree and list files by mime type in current context
+# Description: Run fd/find in subtree and list files by mime type in smart context
 # Requires: fd/find
 #
 # Shell: POSIX compliant
@@ -17,5 +17,5 @@ fi
 printf "mime: "
 read -r mime
 
-printf "%s" "0l" > "$NNN_PIPE"
+printf "%s" "+l" > "$NNN_PIPE"
 $fd | file -if- | grep "$mime" | awk -F: '{printf "%s\0", $1}' > "$NNN_PIPE"

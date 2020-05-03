@@ -4234,16 +4234,24 @@ static void rmlistpath()
 
 static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 {
-	char *nextpath = NULL;
+	int r;
+	char ctx, *nextpath = NULL;
 	ssize_t len = read(fd, g_buf, 1);
 
 	if (len != 1)
 		return;
 
-	char ctx = g_buf[0] - '0';
-
-	if (ctx > CTX_MAX)
-		return;
+	if (g_buf[0] == '+') {
+		r = cfg.curctx;
+		do
+			r = (r + 1) & ~CTX_MAX;
+		while (g_ctx[r].c_cfg.ctxactive && (r != cfg.curctx));
+		ctx = r + 1;
+	} else {
+		ctx = g_buf[0] - '0';
+		if (ctx > CTX_MAX)
+			return;
+	}
 
 	len = read(fd, g_buf, 1);
 	if (len != 1)
@@ -4269,7 +4277,7 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 			xstrsncpy(*lastdir, *path, PATH_MAX);
 			xstrsncpy(*path, nextpath, PATH_MAX);
 		} else {
-			int r = ctx - 1;
+			r = ctx - 1;
 
 			g_ctx[r].c_cfg.ctxactive = 0;
 			savecurctx(&cfg, nextpath, dents[cur].name, r);

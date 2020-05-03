@@ -161,17 +161,25 @@ Plugins can be written in any scripting language. However, POSIX-compliant shell
 
 Drop the plugin in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins` and make it executable. Optionally add a hotkey in `$NNN_PLUG` for frequent usage.
 
-#### Controlling `nnn`'s active directory
-`nnn` provides a mechanism for plugins to control its active directory.
+#### Send data to `nnn`
+`nnn` provides a mechanism for plugins to send data to `nnn` to control its active directory or invoke the list mode.
 The way to do so is by writing to the pipe pointed by the environment variable `NNN_PIPE`.
-The plugin should write a single string in the format `<context number><char><path>` without a newline at the end. For example, `1c/etc`.
-The context number indicates the context to change the active directory of (0 is used to indicate the current context).
-The `<char>` indicates the operation type.
+The plugin should write a single string in the format `<ctxcode><opcode><data>` without a newline at the end. For example, `1c/etc`.
 
-: Char : Operation :
+The `ctxcode` indicates the context to change the active directory of.
+
+| Context code | Meaning |
 |:---:| --- |
-| c | cd |
-| l | list files in list mode |
+| `1`-`4` | context number |
+| `0` | current context |
+| `+` | next inactive context or current (if all active) |
+
+The `opcode` indicates the operation type.
+
+| Opcode | Operation |
+|:---:| --- |
+| `c` | change directory |
+| `l` | list files in list mode |
 
 For convenience, we provided a helper script named `.nnn-plugin-helper` and a function named `nnn_cd` to ease this process. `nnn_cd` receives the path to change to as the first argument, and the context as an optional second argument.
 If a context is not provided, it is asked for explicitly. To skip this and choose the current context, set the `CUR_CTX` variable in `.nnn-plugin-helper` to `1`.
