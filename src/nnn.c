@@ -2141,7 +2141,7 @@ static int xstrverscasecmp(const char * const s1, const char * const s2)
 		state += (c1 == '0') + (xisdigit(c1) != 0);
 	}
 
-	state = (uchar)result_type[state * 3 + (((c2 == '0') + (xisdigit(c2) != 0)))];
+	state = result_type[state * 3 + (((c2 == '0') + (xisdigit(c2) != 0)))]; // NOLINT
 
 	switch (state) {
 	case VCMP:
