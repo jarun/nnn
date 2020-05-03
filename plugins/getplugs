@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Description: Update nnn plugins
+# Description: Update nnn plugins to installed nnn version
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana, KlzXS
@@ -43,6 +43,13 @@ prompt () {
 #     sucmd=: # noop
 # fi
 
+if which nnn >/dev/null 2>&1; then
+    VER=$(nnn -V)
+else
+    echo "nnn is not installed"
+    exit 1
+fi
+
 # backup any earlier plugins
 if [ -d "$PLUGIN_DIR" ]; then
     tar -C "$CONFIG_DIR" -czf "$CONFIG_DIR""plugins-$(date '+%Y%m%d%H%M').tar.gz" plugins/
@@ -50,10 +57,10 @@ fi
 
 mkdir -p "$PLUGIN_DIR"
 cd "$CONFIG_DIR" || exit 1
-curl -Ls -O https://github.com/jarun/nnn/archive/master.tar.gz
-tar -zxf master.tar.gz
+curl -Ls -O https://github.com/jarun/nnn/releases/download/v"$VER"/nnn-v"$VER".tar.gz
+tar -zxf nnn-v"$VER".tar.gz
 
-cd nnn-master/plugins || exit 1
+cd nnn-"$VER"/plugins || exit 1
 
 # shellcheck disable=SC2044
 # We do not use obnoxious names for plugins
@@ -69,4 +76,4 @@ for f in $(find . -maxdepth 1 \( ! -iname "." ! -iname "*.md" \)); do
 done
 cd ../.. || exit 1
 
-rm -rf nnn-master/ master.tar.gz
+rm -rf nnn-"$VER"/ nnn-v"$VER".tar.gz
