@@ -4695,7 +4695,7 @@ static void notify_fifo()
 	name = dents[cur].name;
 
 	char path[PATH_MAX];
-	size_t len = mkpath(g_ctx[cfg.curctx].c_path, dents[cur].name, path);
+	size_t len = mkpath(g_ctx[cfg.curctx].c_path, ndents ? name : "", path);
 
 	path[len - 1] = '\n';
 
