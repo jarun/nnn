@@ -4687,14 +4687,15 @@ static void notify_fifo()
 		}
 	}
 
-	static char oldpath[PATH_MAX] = {0};
-	char path[PATH_MAX];
-	size_t len = mkpath(g_ctx[cfg.curctx].c_path, dents[cur].name, path);
+	static char *name = NULL;
 
-	if (xstrcmp(oldpath, path) == 0)
+	if (dents[cur].name == name)
 		return;
 
-	xstrsncpy(oldpath, path, len);
+	name = dents[cur].name;
+
+	char path[PATH_MAX];
+	size_t len = mkpath(g_ctx[cfg.curctx].c_path, dents[cur].name, path);
 
 	path[len - 1] = '\n';
 
