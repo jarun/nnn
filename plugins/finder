@@ -3,7 +3,7 @@
 # Description: Run custom search and list results in smart context
 #
 # Note: To enable multi select in fzf, export the following:
-#       - export FZF_DEFAULT_OPTS='--bind ctrl-a:select-all,ctrl-d:deselect-all'
+#       - export FZF_DEFAULT_OPTS='--bind ctrl-a:select-all,ctrl-d:deselect-all,ctrl-t:toggle'
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

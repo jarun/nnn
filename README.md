@@ -31,7 +31,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 - Edit and preview markdown, man page, html
 - Open a file and auto-advance to the next
 - Export (filtered) list of visible files
-- Find and list in `nnn` from `nnn`
+- find/fd/fzf/grep/ripgrep/fzf from `nnn` and list in `nnn`
 - Unlimited bookmarks, plugins, commands with custom hotkeys
 - Write a plugin in any language you know
 - Configure the middle mouse click to do anything

@@ -78,7 +78,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 Use the plugin shortcut (<kbd>;key</kbd> or <kbd>^Skey</kbd>) to list the defined plugin keys and press the required key. E.g., with the below config:
 
 ```sh
-export NNN_PLUG='o:fzopen;p:mocplay;d:diffs;m:nmount;n:notes;v:imgviu;t:imgthumb'
+export NNN_PLUG='f:finder;o:fzopen;p:mocplay;d:diffs;t:nmount;v:imgview'
 ```
 
 Plugin `fzopen` can be run with the keybind <kbd>;o</kbd>, `mocplay` can be run with <kbd>;p</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
@@ -90,7 +90,7 @@ To select and invoke a plugin from the plugin directory, press <kbd>Enter</kbd> 
 `nnn` refreshes the directory after running a plugin to reflect any changes by the plugin. To disable this (say while running the `mediainfo` plugin on some filtered files), add a `-` before the plugin name:
 
 ```sh
-export NNN_PLUG='m:-mediainfo'
+export NNN_PLUG='m:-mediainf'
 ```
 
 Now `nnn` will not refresh the directory after running the `mediainfo` plugin.
@@ -102,7 +102,7 @@ To assign keys to arbitrary non-background, non-shell-interpreted cli commands a
 For example:
 
 ```sh
-export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn;o:fzopen'
+export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn'
 ```
 
 Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be used to the git log of a git project directory, <kbd>;s</kbd> can be used to preview a partially downloaded media file.
@@ -136,8 +136,8 @@ Notes:
 
 | Key:Command | Description |
 |---|---|
-| `k:-_fuser -kiv $nnn*` | Interactively kill process(es) using hovered file |
 | `g:-_git diff` | Show git diff |
+| `k:-_fuser -kiv $nnn*` | Interactively kill process(es) using hovered file |
 | `l:-_git log` | Show git log |
 | `n:-_vi /home/user/Dropbox/dir/note*` | Take quick notes in a synced file/dir of notes |
 | `p:-_less -iR $nnn*` | Page through hovered file in less |
