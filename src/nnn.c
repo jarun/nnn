@@ -4669,15 +4669,17 @@ static void populate(char *path, char *lastname)
 
 static void move_cursor(int target, int ignore_scrolloff)
 {
-	int delta, scrolloff, onscreen = xlines - 4;
+	int onscreen = xlines - 4; /* Leave top 2 and bottom 2 lines */
 
-	last_curscroll = curscroll;
 	target = MAX(0, MIN(ndents - 1, target));
-	delta = target - cur;
+	last_curscroll = curscroll;
 	last = cur;
 	cur = target;
+
 	if (!ignore_scrolloff) {
-		scrolloff = MIN(SCROLLOFF, onscreen >> 1);
+		int delta = target - last;
+		int scrolloff = MIN(SCROLLOFF, onscreen >> 1);
+
 		/*
 		 * When ignore_scrolloff is 1, the cursor can jump into the scrolloff
 		 * margin area, but when ignore_scrolloff is 0, act like a boa

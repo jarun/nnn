@@ -6,7 +6,7 @@
 #       - export FZF_DEFAULT_OPTS='--bind ctrl-a:select-all,ctrl-d:deselect-all'
 #
 # Shell: POSIX compliant
-# Author: Arun Prakash jana
+# Author: Arun Prakash Jana
 
 . "$(dirname "$0")"/.nnn-plugin-helper
 

@@ -4,7 +4,7 @@
 # Requires: fd/find
 #
 # Shell: POSIX compliant
-# Author: Arun Prakash jana
+# Author: Arun Prakash Jana
 
 . "$(dirname "$0")"/.nnn-plugin-helper
 
