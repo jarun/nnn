@@ -330,6 +330,9 @@ static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
 static int ndents, cur, last, curscroll, last_curscroll, total_dents = ENTRY_INCR;
 static int nselected;
+#ifndef NOFIFO
+static int fifofd = -1;
+#endif
 static uint idletimeout, selbufpos, lastappendpos, selbuflen;
 static ushort xlines, xcols;
 static ushort idle;
@@ -350,6 +353,9 @@ static char *prefixpath;
 static char *plugindir;
 static char *sessiondir;
 static char *pnamebuf, *pselbuf;
+#ifndef NOFIFO
+static char *fifopath;
+#endif
 static ull *ihashbmp;
 static struct entry *dents;
 static blkcnt_t ent_blocks;
@@ -4667,6 +4673,40 @@ static void populate(char *path, char *lastname)
 	last_curscroll = -1;
 }
 
+#ifndef NOFIFO
+static void notify_fifo()
+{
+	if (fifofd == -1) {
+		fifofd = open(fifopath, O_WRONLY|O_NONBLOCK);
+		if (fifofd == -1) {
+			if (errno != ENXIO)
+				/* Unexpected error, the FIFO file might have been removed */
+				/* We give up FIFO notification */
+				fifopath = NULL;
+			return;
+		}
+	}
+
+	static char *name = NULL;
+
+	if (dents[cur].name == name)
+		return;
+
+	name = dents[cur].name;
+
+	char path[PATH_MAX];
+	size_t len = mkpath(g_ctx[cfg.curctx].c_path, ndents ? name : "", path);
+
+	path[len - 1] = '\n';
+
+	ssize_t ret = write(fifofd, path, len);
+
+	if (ret != (ssize_t)len && !(ret == -1 && (errno == EAGAIN || errno == EPIPE))) {
+		DPRINTF_S(strerror(errno));
+	}
+}
+#endif
+
 static void move_cursor(int target, int ignore_scrolloff)
 {
 	int onscreen = xlines - 4; /* Leave top 2 and bottom 2 lines */
@@ -4693,6 +4733,11 @@ static void move_cursor(int target, int ignore_scrolloff)
 	}
 	curscroll = MIN(curscroll, MIN(cur, ndents - onscreen));
 	curscroll = MAX(curscroll, MAX(cur - (onscreen - 1), 0));
+
+#ifndef NOFIFO
+	if (fifopath)
+		notify_fifo();
+#endif
 }
 
 static void handle_screen_move(enum action sel)
@@ -7022,6 +7067,19 @@ int main(int argc, char *argv[])
 
 	DPRINTF_S(getenv("PWD"));
 
+#ifndef NOFIFO
+	/* Create fifo */
+	fifopath = getenv("NNN_FIFO");
+	if (fifopath) {
+		if (mkfifo(fifopath, 0600) != 0 && !(errno == EEXIST && access(fifopath, W_OK) == 0)) {
+			xerror();
+			return _FAILURE;
+		}
+
+		signal(SIGPIPE, SIG_IGN);
+	}
+#endif
+
 #ifdef LINUX_INOTIFY
 	/* Initialize inotify */
 	inotify_fd = inotify_init1(IN_NONBLOCK);
@@ -7143,6 +7201,11 @@ int main(int argc, char *argv[])
 	close(kq);
 #elif defined(HAIKU_NM)
 	haiku_close_nm(haiku_hnd);
+#endif
+
+#ifndef NOFIFO
+	if (fifofd != -1)
+		close(fifofd);
 #endif
 
 	return opt;

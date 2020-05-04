@@ -57,6 +57,10 @@ ifeq ($(O_NOBATCH),1)
 	CPPFLAGS += -DNOBATCH
 endif
 
+ifeq ($(O_NOFIFO),1)
+	CPPFLAGS += -DNOFIFO
+endif
+
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
 	CFLAGS_CURSES ?= $(shell $(PKG_CONFIG) --cflags ncursesw)
 	LDLIBS_CURSES ?= $(shell $(PKG_CONFIG) --libs   ncursesw)
