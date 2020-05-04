@@ -693,7 +693,7 @@ static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
 static char *xgetenv(const char *name, char *fallback);
 static bool plugscript(const char *plugin, const char *path, uchar flags);
-static char *load_input(int fd, char *path);
+static char *load_input(int fd, const char *path);
 
 /* Functions */
 
@@ -6432,7 +6432,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 	return tmpdir;
 }
 
-static char *load_input(int fd, char *path)
+static char *load_input(int fd, const char *path)
 {
 	/* 512 KiB chunk size */
 	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
