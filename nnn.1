@@ -408,6 +408,15 @@ separated by \fI;\fR:
     export NNN_TRASH=1
 .Ed
 .Pp
+\fBNNN_SEL:\fR absolute path to custom selection file.
+.Pp
+\fBNNN_FIFO:\fR path of a named pipe to write current file path:
+.Bd -literal
+    export NNN_FIFO='/tmp/nnn.fifo'
+
+    NOTE: If the FIFO file doesn't exist it will be created, but it will never be removed.
+.Ed
+.Pp
 \fBNNN_LOCKER:\fR terminal locker program.
 .Bd -literal
     export NNN_LOCKER='bmon -p wlp1s0'
@@ -419,15 +428,6 @@ separated by \fI;\fR:
     export NNN_MCLICK='^R'
 
     NOTE: Only the first character is considered if not a \fICtrl+key\fR combo.
-.Ed
-.Pp
-\fBNNN_SEL:\fR absolute path to custom selection file.
-.Pp
-\fBNNN_FIFO:\fR path of a named pipe to write current file path:
-.Bd -literal
-    export NNN_FIFO='/tmp/nnn.fifo'
-
-    NOTE: If the FIFO file doesn't exist it will be created, but it will never be removed.
 .Ed
 .Pp
 \fBnnn:\fR this is a special variable set to the hovered entry before executing

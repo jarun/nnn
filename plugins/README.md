@@ -186,6 +186,16 @@ For convenience, we provided a helper script named `.nnn-plugin-helper` and a fu
 If a context is not provided, it is asked for explicitly. To skip this and choose the current context, set the `CUR_CTX` variable in `.nnn-plugin-helper` to `1`.
 Usage examples can be found in the Examples section below.
 
+#### Get notified on file hover
+
+If `NNN_FIFO` is set, `nnn` will open it and write every hovered files. This can be used in plugins, e.g. to implement file previews.
+
+If a `NNN_FIFO` is set globally, each `nnn` instance will write to it, and a process reading from the pipe will get hovered path from every instance, interleaved.
+
+If you want to prevent this and be sure to have a private pipe to one `nnn` instance, you can unlink (remove) the FIFO file. If you had opened the FIFO before and you have read from it (so that `nnn` have it opened too), you can still read from it while you don't close it. But new `nnn` instances will recreate a new FIFO not linked to the previous one.
+
+Don't forget to fork in the background to avoid blocking `nnn`.
+
 #### Examples
 There are many plugins provided by `nnn` which can be used as examples. Here are a few simple selected examples.
 
@@ -220,39 +230,25 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
     printf "%s" "0c$dir" > "$NNN_PIPE"
     ```
 
-#### Get notified on file hover
+- Send every hovered file to X selection
+    ```sh
+    #!/usr/bin/env sh
+    if [ -z "$NNN_FIFO" ] ; then
+        exit 1
+    fi
 
-If `NNN_FIFO` is set, `nnn` will open it and write every hovered files.
-This can be used in plugins, e.g. to implement file previews.
-
-If a `NNN_FIFO` is set globally, each `nnn` instance will write to it, and a process reading from the pipe will get hovered path from every instance, interleaved.
-
-If you want to prevent this and be sure to have a private pipe to one `nnn` instance, you can unlink (remove) the FIFO file.
-If you opened the FIFO before and you have read from it (so that `nnn` have it opened too), you can still read from it while you don't close it.
-But new `nnn` instances will recreate a new FIFO not linked to the previous one.
-
-Don't forget to fork in the background to avoid blocking `nnn`.
-
-Example (send every hovered file to X selection):
-
-```sh
-#!/usr/bin/env sh
-if [ -z "$NNN_FIFO" ] ; then
-	exit 1
-fi
-
-while read FILE ; do
-	if [ -n "$NNN_FIFO" ] ; then
-		# If you want to remove the FIFO,
-		# don't do it before first read,
-		# nnn won't have it opened yet
-		rm "$NNN_FIFO"
-		NNN_FIFO=
-	fi
-	printf "%s" "$FILE" | xsel
-done < "$NNN_FIFO" &
-disown
-```
+    while read FILE ; do
+        if [ -n "$NNN_FIFO" ] ; then
+            # If you want to remove the FIFO,
+            # don't do it before first read,
+            # nnn won't have it opened yet
+            rm "$NNN_FIFO"
+            NNN_FIFO=
+        fi
+        printf "%s" "$FILE" | xsel
+    done < "$NNN_FIFO" &
+    disown
+    ```
 
 ## Contributing plugins
 
