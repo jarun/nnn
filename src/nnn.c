@@ -4679,7 +4679,7 @@ static void populate(char *path, char *lastname)
 static void notify_fifo()
 {
 	if (fifofd == -1) {
-		fifofd = open(fifopath, O_WRONLY|O_NONBLOCK);
+		fifofd = open(fifopath, O_WRONLY|O_NONBLOCK|O_CLOEXEC);
 		if (fifofd == -1) {
 			if (errno != ENXIO)
 				/* Unexpected error, the FIFO file might have been removed */
