@@ -95,7 +95,8 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - By file name, access/change/mod (default) time, size, extension
   - Reverse sort
 - Mimes
-  - Open with desktop opener or specify a custom app
+  - Open with desktop opener or specify a custom opener
+  - Preview files with FIFO-based previewer
   - Create, list, extract, mount (FUSE based) archives
   - Option to open all text files in EDITOR
 - Information
@@ -134,6 +135,7 @@ Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>),
 - [0xACE](https://github.com/0xACE)
 - [Anna Arad](https://github.com/annagrram)
 - [KlzXS](https://github.com/KlzXS)
+- [leovilok](https://github.com/leovilok)
 - [Maxim Baz](https://github.com/maximbaz)
 - and other contributors
 

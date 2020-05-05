@@ -5,7 +5,7 @@
 # Note: This plugin needs a "NNN_FIFO" to work. See man.
 #
 # Shell: Bash (job control is weakly specified in POSIX)
-# 
+#
 # Dependencies:
 #  - tabbed (https://tools.suckless.org/tabbed): xembed host
 #  - xterm (or urxvt or st) : xembed client for text-based preview
@@ -45,6 +45,8 @@
 #
 # [1]: http://tools.suckless.org/tabbed/
 # [2]: https://specifications.freedesktop.org/xembed-spec/xembed-spec-latest.html
+#
+# Author: leovilok
 
 
 XDOTOOL_TIMEOUT=2
@@ -109,7 +111,7 @@ previewer_loop () {
     # (uncomment to use):
     #xdotool behave "$XID" focus windowactivate "$MAINWINDOW" &
 
-        while read -r FILE ; do
+    while read -r FILE ; do
 
         jobs # Get rid of the "Completed" entries
 
