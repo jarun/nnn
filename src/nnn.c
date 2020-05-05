@@ -565,10 +565,10 @@ static const char * const messages[] = {
 	"invalid regex",
 	"'a'u / 'd'u / 'e'xtn / 'r'ev / 's'ize / 't'ime / 'v'er / 'c'lear?",
 	"unmount failed! try lazy?",
+	"first file (\')/char?",
 	"remove tmp file?",
 	"unchanged",
 	"cancelled",
-	"first file (\')/char?",
 	"0 entries",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
