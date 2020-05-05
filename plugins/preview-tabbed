@@ -52,39 +52,39 @@ NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
 
 
 if which xterm ; then
-	TERMINAL="xterm -into"
+    TERMINAL="xterm -into"
 elif which urxvt ; then
-	TERMINAL="urxvt -embed"
+    TERMINAL="urxvt -embed"
 elif which st ; then
-	TERMINAL="st -w"
+    TERMINAL="st -w"
 else
-	echo "No xembed term found" >&2
+    echo "No xembed term found" >&2
 fi
 
 
 term_nuke () {
-	# $1 -> $XID, $2 -> $FILE
-	$TERMINAL "$1" -e "$NUKE" "$2" &
+    # $1 -> $XID, $2 -> $FILE
+    $TERMINAL "$1" -e "$NUKE" "$2" &
 }
 
 start_tabbed () {
-	FIFO="$(mktemp -u)"
-	mkfifo "$FIFO"
+    FIFO="$(mktemp -u)"
+    mkfifo "$FIFO"
 
-	tabbed > "$FIFO" &
+    tabbed > "$FIFO" &
 
-	jobs # Get rid of the "Completed" entries
+    jobs # Get rid of the "Completed" entries
 
-	TABBEDPID="$(jobs -p %%)"
+    TABBEDPID="$(jobs -p %%)"
 
-	if [ -z "$TABBEDPID" ] ; then
-		echo "Can't start tabbed"
-		exit 1
-	fi
+    if [ -z "$TABBEDPID" ] ; then
+        echo "Can't start tabbed"
+        exit 1
+    fi
 
-	read -r XID < "$FIFO"
+    read -r XID < "$FIFO"
 
-	rm "$FIFO"
+    rm "$FIFO"
 }
 
 get_viewer_pid () {
@@ -92,93 +92,93 @@ get_viewer_pid () {
 }
 
 previewer_loop () {
-	unset -v NNN_FIFO
-	# mute from now
-	exec >/dev/null 2>&1
+    unset -v NNN_FIFO
+    # mute from now
+    exec >/dev/null 2>&1
 
-	MAINWINDOW="$(xdotool getactivewindow)"
+    MAINWINDOW="$(xdotool getactivewindow)"
 
-	start_tabbed
+    start_tabbed
 
-	xdotool windowactivate "$MAINWINDOW"
-	xdotool behave "$XID" focus windowactivate "$MAINWINDOW" &
+    xdotool windowactivate "$MAINWINDOW"
+    xdotool behave "$XID" focus windowactivate "$MAINWINDOW" &
 
         while read -r FILE ; do
 
-		jobs # Get rid of the "Completed" entries
+        jobs # Get rid of the "Completed" entries
 
-		if ! jobs | grep tabbed ; then
-		# Uncomment and remove `break` want to restart tabbed everytime its window is closed
-		#	start_tabbed
-			break
-		fi
+        if ! jobs | grep tabbed ; then
+        # Uncomment and remove `break` want to restart tabbed everytime its window is closed
+        #   start_tabbed
+            break
+        fi
 
-		if [ ! -e "$FILE" ] ; then
-			continue
-		fi
+        if [ ! -e "$FILE" ] ; then
+            continue
+        fi
 
-		if [ -n "$VIEWERPID" ] && jobs -p | grep "$VIEWERPID" ; then
-			kill "$VIEWERPID"
-		fi
+        if [ -n "$VIEWERPID" ] && jobs -p | grep "$VIEWERPID" ; then
+            kill "$VIEWERPID"
+        fi
 
-		MIME="$(file -b --mime-type "$FILE")"
+        MIME="$(file -b --mime-type "$FILE")"
 
-		case "$MIME" in
-			video/*)
-				if which mpv ; then
-					mpv --wid="$XID" "$FILE" &
-				else
-					term_nuke "$XID" "$FILE"
-				fi
-				;;
-			audio/*)
-				if which mpv ; then
-					mpv --force-window --wid="$XID" "$FILE" &
-				else
-					term_nuke "$XID" "$FILE"
-				fi
-				;;
-			image/*)
-				if which sxiv ; then
-					sxiv -e "$XID" "$FILE" &
-				else
-					term_nuke "$XID" "$FILE"
-				fi
-				;;
-			application/pdf)
-				if which zathura ; then
-					zathura -e "$XID" "$FILE" &
-				else
-					term_nuke "$XID" "$FILE"
-				fi
-				;;
-			inode/directory)
-				$TERMINAL "$XID" -e nnn "$FILE" &
-				;;
-			text/*)
-				if [ -x "$NUKE" ] ; then
-					term_nuke "$XID" "$FILE"
-				else
-					# shellcheck disable=SC2086
-					$TERMINAL "$XID" -e $PAGER "$FILE" &
-				fi
-				;;
-			*)
-				if [ -x "$NUKE" ] ; then
-					term_nuke "$XID" "$FILE"
-				else
-					$TERMINAL "$XID" -e sh -c "file '$FILE' | $PAGER -" &
-				fi
-				;;
-		esac
-		get_viewer_pid
-	done
-	kill "$TABBEDPID"
+        case "$MIME" in
+            video/*)
+                if which mpv ; then
+                    mpv --wid="$XID" "$FILE" &
+                else
+                    term_nuke "$XID" "$FILE"
+                fi
+                ;;
+            audio/*)
+                if which mpv ; then
+                    mpv --force-window --wid="$XID" "$FILE" &
+                else
+                    term_nuke "$XID" "$FILE"
+                fi
+                ;;
+            image/*)
+                if which sxiv ; then
+                    sxiv -e "$XID" "$FILE" &
+                else
+                    term_nuke "$XID" "$FILE"
+                fi
+                ;;
+            application/pdf)
+                if which zathura ; then
+                    zathura -e "$XID" "$FILE" &
+                else
+                    term_nuke "$XID" "$FILE"
+                fi
+                ;;
+            inode/directory)
+                $TERMINAL "$XID" -e nnn "$FILE" &
+                ;;
+            text/*)
+                if [ -x "$NUKE" ] ; then
+                    term_nuke "$XID" "$FILE"
+                else
+                    # shellcheck disable=SC2086
+                    $TERMINAL "$XID" -e $PAGER "$FILE" &
+                fi
+                ;;
+            *)
+                if [ -x "$NUKE" ] ; then
+                    term_nuke "$XID" "$FILE"
+                else
+                    $TERMINAL "$XID" -e sh -c "file '$FILE' | $PAGER -" &
+                fi
+                ;;
+        esac
+        get_viewer_pid
+    done
+    kill "$TABBEDPID"
 }
 
 if [ ! -r "$NNN_FIFO" ] ; then
-	echo "Can't read \$NNN_FIFO ('$NNN_FIFO')"
-	exit 1
+    echo "Can't read \$NNN_FIFO ('$NNN_FIFO')"
+    exit 1
 fi
 
 previewer_loop < "$NNN_FIFO" &
