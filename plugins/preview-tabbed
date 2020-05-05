@@ -17,6 +17,7 @@
 #    dependencies, see the script itself
 #  - vim (or any editor/pager really)
 #  - file
+#  - xdotool (optional, to keep main window focused)
 #
 # How to use:
 #  First, install the dependencies. Then you need to set a NNN_FIFO path
@@ -72,7 +73,7 @@ start_tabbed () {
 
 	tabbed > "$FIFO" &
 
-	jobs >/dev/null 2>&1 # Get rid of the "Completed" entries
+	jobs # Get rid of the "Completed" entries
 
 	TABBEDPID="$(jobs -p %%)"
 
@@ -92,10 +93,15 @@ get_viewer_pid () {
 
 previewer_loop () {
 	unset -v NNN_FIFO
-	start_tabbed
-
 	# mute from now
 	exec >/dev/null 2>&1
+
+	MAINWINDOW="$(xdotool getactivewindow)"
+
+	start_tabbed
+
+	xdotool windowactivate "$MAINWINDOW"
+	xdotool behave "$XID" focus windowactivate "$MAINWINDOW" &
 
         while read -r FILE ; do
 
