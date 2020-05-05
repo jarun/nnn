@@ -4236,7 +4236,9 @@ static void rmlistpath()
 		DPRINTF_S(__FUNCTION__);
 		DPRINTF_S(listpath);
 		spawn("rm -rf", listpath, NULL, NULL, F_NOTRACE | F_MULTI);
-		free(listpath);
+		/* Do not free if program was started in list mode */
+		if (listpath != initpath)
+			free(listpath);
 		listpath = NULL;
 	}
 }
