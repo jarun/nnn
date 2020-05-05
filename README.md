@@ -96,7 +96,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Reverse sort
 - Mimes
   - Open with desktop opener or specify a custom opener
-  - Preview files with FIFO-based previewer
+  - Preview hovered files in FIFO-based previewer
   - Create, list, extract, mount (FUSE based) archives
   - Option to open all text files in EDITOR
 - Information
