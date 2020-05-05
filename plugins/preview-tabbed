@@ -46,8 +46,9 @@
 # [1]: http://tools.suckless.org/tabbed/
 # [2]: https://specifications.freedesktop.org/xembed-spec/xembed-spec-latest.html
 
-PAGER=${PAGER:-"vim -R"}
 
+XDOTOOL_TIMEOUT=2
+PAGER=${PAGER:-"vim -R"}
 NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
 
 
@@ -101,15 +102,18 @@ previewer_loop () {
     start_tabbed
 
     xdotool windowactivate "$MAINWINDOW"
-    xdotool behave "$XID" focus windowactivate "$MAINWINDOW" &
+
+    # Bruteforce focus stealing prevention method,
+    # works well in floating window managers like XFCE
+    # but make interaction with the preview window harder
+    # (uncomment to use):
+    #xdotool behave "$XID" focus windowactivate "$MAINWINDOW" &
 
         while read -r FILE ; do
 
         jobs # Get rid of the "Completed" entries
 
         if ! jobs | grep tabbed ; then
-        # Uncomment and remove `break` want to restart tabbed everytime its window is closed
-        #   start_tabbed
             break
         fi
 
@@ -126,14 +130,14 @@ previewer_loop () {
         case "$MIME" in
             video/*)
                 if which mpv ; then
-                    mpv --wid="$XID" "$FILE" &
+                    mpv --force-window=immediate --loop-file --wid="$XID" "$FILE" &
                 else
                     term_nuke "$XID" "$FILE"
                 fi
                 ;;
             audio/*)
                 if which mpv ; then
-                    mpv --force-window --wid="$XID" "$FILE" &
+                    mpv --force-window=immediate --loop-file --wid="$XID" "$FILE" &
                 else
                     term_nuke "$XID" "$FILE"
                 fi
@@ -172,6 +176,14 @@ previewer_loop () {
                 ;;
         esac
         get_viewer_pid
+
+        # following lines are not needed with the bruteforce xdotool method
+        ACTIVE_XID="$(xdotool getactivewindow)"
+        if [ $((ACTIVE_XID == XID)) -ne 0 ] ; then
+            xdotool windowactivate "$MAINWINDOW"
+        else
+            timeout "$XDOTOOL_TIMEOUT" xdotool behave "$XID" focus windowactivate "$MAINWINDOW" &
+        fi
     done
     kill "$TABBEDPID"
 }
