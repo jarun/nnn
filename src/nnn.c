@@ -4258,7 +4258,7 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 		ctx = r + 1;
 	} else {
 		ctx = g_buf[0] - '0';
-		if (ctx > CTX_MAX)
+		if (ctx < 0 || ctx > CTX_MAX)
 			return;
 	}
 

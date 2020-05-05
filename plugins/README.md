@@ -188,7 +188,7 @@ Usage examples can be found in the Examples section below.
 
 #### Get notified on file hover
 
-If `NNN_FIFO` is set, `nnn` will open it and write every hovered files. This can be used in plugins, e.g. to implement file previews.
+If `NNN_FIFO` is set, `nnn` will open it and write every hovered files. This can be used in plugins and external scripts, e.g. to implement file previews.
 
 If a `NNN_FIFO` is set globally, each `nnn` instance will write to it, and a process reading from the pipe will get hovered path from every instance, interleaved.
 
