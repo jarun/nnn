@@ -1,0 +1,68 @@
+#!/usr/bin/env sh
+
+# Description: Text based file previewer
+#
+# Note: This plugin needs a "NNN_FIFO" to work.
+#
+# Dependencies: tmux or xterm (or set $TERMINAL), file, tree
+#
+# How to use:
+#   You need to set a NNN_FIFO path and set a key for the plugin,
+#   then start `nnn`:
+#
+#     $ NNN_FIFO=/tmp/nnn.fifo nnn
+#
+#   Then in `nnn`, launch the `preview-tui` plugin.
+#
+#   If you provide the same NNN_FIFO to all nnn instances, there will be a
+#   single common preview window. I you provide different FIFO path, they
+#   will be independent.
+#
+# Authors: Todd Yamakawa and Léo Villeveygoux
+
+TERMINAL="${TERMINAL:-xterm}"
+NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
+
+if [ ! -r "$NNN_FIFO" ] ; then
+    echo "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')" >&2
+    exit 1
+fi
+if [ ! -x "$NUKE" ] ; then
+    echo "Nuke not found!" >&2
+    exit 1
+fi
+
+if [ "$PREVIEW_MODE" ] ; then
+    exec < "$NNN_FIFO"
+    while read -r selection ; do
+        clear
+        lines=$(($(tput lines)-1))
+        cols=$(tput cols)
+        mime="$(file -b --mime-type "$selection")"
+
+        if [ "$mime" = "inode/directory" ] ; then
+            # Print directory tree
+            cd "$selection" && tree | head -n $lines | cut -c 1-"$cols"
+        elif [ "${mime%%/*}" = "text" ] ; then
+            # Print file head
+            head -n $lines "$selection" | cut -c 1-"$cols"
+        else
+            # Binary file
+            echo "-------- Binary file --------"
+            file -b "$selection"
+        fi
+    done
+
+    if [ -e "${TMUX%%,*}" ] ; then
+        tmux kill-pane
+    fi
+
+    exit 0
+fi
+
+if [ -e "${TMUX%%,*}" ] ; then
+    tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0"
+else
+    PREVIEW_MODE=1 GUI=0 $TERMINAL -e "$0" &
+fi
+
