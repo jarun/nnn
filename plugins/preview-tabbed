@@ -1,0 +1,197 @@
+#!/bin/bash
+
+# Description: tabbed/xembed based file previewer
+#
+# Note: This plugin needs a "NNN_FIFO" to work. See man.
+#
+# Shell: Bash (job control is weakly specified in POSIX)
+# 
+# Dependencies:
+#  - tabbed (https://tools.suckless.org/tabbed): xembed host
+#  - xterm (or urxvt or st) : xembed client for text-based preview
+#  - mpv (https://mpv.io): xembed client for video/audio
+#  - sxiv (https://github.com/muennich/sxiv): xembed client for images
+#  - zathura (https://pwmt.org/projects/zathura): xembed client for PDF documents
+#  - nnn's nuke plugin for text preview and fallback (should be in plugins directory)
+#    nuke is a fallback for 'mpv', 'sxiv', and 'zathura', but it has has its own
+#    dependencies, see the script itself
+#  - vim (or any editor/pager really)
+#  - file
+#  - xdotool (optional, to keep main window focused)
+#
+# How to use:
+#  First, install the dependencies. Then you need to set a NNN_FIFO path
+#  and set a key for the plugin, then start `nnn`:
+#
+#    $ NNN_FIFO=/tmp/nnn.fifo nnn
+#
+#  Then in `nnn`, launch the `preview-tabbed` plugin.
+#
+#  If you provide the same NNN_FIFO to all nnn instances, there will be a
+#  single common preview window. I you provide different FIFO path, they
+#  will be independent.
+#
+# How it works:
+#   We use `tabbed` [1] as a xembed [2] host, to have a single window
+#   owning each previewer window. So each previewer must be a xembed client.
+#   For text previewers, this is not an issue, as there are a lot of
+#   xembed-able terminal emulator (we default to `xterm`, but examples are
+#   provided for `urxvt` and `st`). For graphic preview this can be trickier,
+#   but a few popular viewers are xembed-able, we use:
+#     - `mpv`: multimedia player, for video/audio preview
+#     - `sxiv`: image viewer
+#     - `zathura`: PDF viewer
+#     - but we allways fallback to `nuke` plugin
+#
+# [1]: http://tools.suckless.org/tabbed/
+# [2]: https://specifications.freedesktop.org/xembed-spec/xembed-spec-latest.html
+
+
+XDOTOOL_TIMEOUT=2
+PAGER=${PAGER:-"vim -R"}
+NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
+
+
+if which xterm ; then
+    TERMINAL="xterm -into"
+elif which urxvt ; then
+    TERMINAL="urxvt -embed"
+elif which st ; then
+    TERMINAL="st -w"
+else
+    echo "No xembed term found" >&2
+fi
+
+
+term_nuke () {
+    # $1 -> $XID, $2 -> $FILE
+    $TERMINAL "$1" -e "$NUKE" "$2" &
+}
+
+start_tabbed () {
+    FIFO="$(mktemp -u)"
+    mkfifo "$FIFO"
+
+    tabbed > "$FIFO" &
+
+    jobs # Get rid of the "Completed" entries
+
+    TABBEDPID="$(jobs -p %%)"
+
+    if [ -z "$TABBEDPID" ] ; then
+        echo "Can't start tabbed"
+        exit 1
+    fi
+
+    read -r XID < "$FIFO"
+
+    rm "$FIFO"
+}
+
+get_viewer_pid () {
+        VIEWERPID="$(jobs -p %%)"
+}
+
+previewer_loop () {
+    unset -v NNN_FIFO
+    # mute from now
+    exec >/dev/null 2>&1
+
+    MAINWINDOW="$(xdotool getactivewindow)"
+
+    start_tabbed
+
+    xdotool windowactivate "$MAINWINDOW"
+
+    # Bruteforce focus stealing prevention method,
+    # works well in floating window managers like XFCE
+    # but make interaction with the preview window harder
+    # (uncomment to use):
+    #xdotool behave "$XID" focus windowactivate "$MAINWINDOW" &
+
+        while read -r FILE ; do
+
+        jobs # Get rid of the "Completed" entries
+
+        if ! jobs | grep tabbed ; then
+            break
+        fi
+
+        if [ ! -e "$FILE" ] ; then
+            continue
+        fi
+
+        if [ -n "$VIEWERPID" ] && jobs -p | grep "$VIEWERPID" ; then
+            kill "$VIEWERPID"
+        fi
+
+        MIME="$(file -b --mime-type "$FILE")"
+
+        case "$MIME" in
+            video/*)
+                if which mpv ; then
+                    mpv --force-window=immediate --loop-file --wid="$XID" "$FILE" &
+                else
+                    term_nuke "$XID" "$FILE"
+                fi
+                ;;
+            audio/*)
+                if which mpv ; then
+                    mpv --force-window=immediate --loop-file --wid="$XID" "$FILE" &
+                else
+                    term_nuke "$XID" "$FILE"
+                fi
+                ;;
+            image/*)
+                if which sxiv ; then
+                    sxiv -e "$XID" "$FILE" &
+                else
+                    term_nuke "$XID" "$FILE"
+                fi
+                ;;
+            application/pdf)
+                if which zathura ; then
+                    zathura -e "$XID" "$FILE" &
+                else
+                    term_nuke "$XID" "$FILE"
+                fi
+                ;;
+            inode/directory)
+                $TERMINAL "$XID" -e nnn "$FILE" &
+                ;;
+            text/*)
+                if [ -x "$NUKE" ] ; then
+                    term_nuke "$XID" "$FILE"
+                else
+                    # shellcheck disable=SC2086
+                    $TERMINAL "$XID" -e $PAGER "$FILE" &
+                fi
+                ;;
+            *)
+                if [ -x "$NUKE" ] ; then
+                    term_nuke "$XID" "$FILE"
+                else
+                    $TERMINAL "$XID" -e sh -c "file '$FILE' | $PAGER -" &
+                fi
+                ;;
+        esac
+        get_viewer_pid
+
+        # following lines are not needed with the bruteforce xdotool method
+        ACTIVE_XID="$(xdotool getactivewindow)"
+        if [ $((ACTIVE_XID == XID)) -ne 0 ] ; then
+            xdotool windowactivate "$MAINWINDOW"
+        else
+            timeout "$XDOTOOL_TIMEOUT" xdotool behave "$XID" focus windowactivate "$MAINWINDOW" &
+        fi
+    done
+    kill "$TABBEDPID"
+}
+
+if [ ! -r "$NNN_FIFO" ] ; then
+    echo "Can't read \$NNN_FIFO ('$NNN_FIFO')"
+    exit 1
+fi
+
+previewer_loop < "$NNN_FIFO" &
+disown
