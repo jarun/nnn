@@ -23,6 +23,25 @@
 
 TERMINAL="${TERMINAL:-xterm}"
 
+preview_file () {
+    clear
+    lines=$(($(tput lines)-1))
+    cols=$(tput cols)
+    mime="$(file -b --mime-type "$1")"
+
+    if [ -d "$1" ]; then
+        # Print directory tree
+        cd "$1" && tree | head -n $lines | cut -c 1-"$cols"
+    elif [ "${mime%%/*}" = "text" ] ; then
+        # Print file head
+        head -n $lines "$1" | cut -c 1-"$cols"
+    else
+        # Binary file
+        echo "-------- Binary file --------"
+        file -b "$1"
+    fi
+}
+
 if [ "$PREVIEW_MODE" ] ; then
     if [ ! -r "$NNN_FIFO" ] ; then
         echo "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')" >&2
@@ -30,30 +49,17 @@ if [ "$PREVIEW_MODE" ] ; then
         exit 1
     fi
 
+    preview_file "$1"
+
     exec < "$NNN_FIFO"
     while read -r selection ; do
-        clear
-        lines=$(($(tput lines)-1))
-        cols=$(tput cols)
-        mime="$(file -b --mime-type "$selection")"
-
-        if [ -d "$selection" ]; then
-            # Print directory tree
-            cd "$selection" && tree | head -n $lines | cut -c 1-"$cols"
-        elif [ "${mime%%/*}" = "text" ] ; then
-            # Print file head
-            head -n $lines "$selection" | cut -c 1-"$cols"
-        else
-            # Binary file
-            echo "-------- Binary file --------"
-            file -b "$selection"
-        fi
+        preview_file "$selection"
     done
     exit 0
 fi
 
 if [ -e "${TMUX%%,*}" ] && [ "$(tmux -V | cut -c6)" -eq 3 ] ; then
-    tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0"
+    tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
 else
-    PREVIEW_MODE=1 $TERMINAL -e "$0" &
+    PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
