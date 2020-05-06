@@ -1,10 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Description: tabbed/xembed based file previewer
 #
 # Note: This plugin needs a "NNN_FIFO" to work. See man.
-#
-# Shell: Bash (job control is weakly specified in POSIX)
 #
 # Dependencies:
 #  - tabbed (https://tools.suckless.org/tabbed): xembed host
@@ -46,6 +44,7 @@
 # [1]: http://tools.suckless.org/tabbed/
 # [2]: https://specifications.freedesktop.org/xembed-spec/xembed-spec-latest.html
 #
+# Shell: bash (job control is weakly specified in POSIX)
 # Author: leovilok
 
 

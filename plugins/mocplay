@@ -8,7 +8,7 @@
 # - to let mocp shuffle tracks, set SHUFFLE=1
 #
 # Shell: POSIX compliant
-# Author: Arun Prakash Jana, ath3
+# Authors: Arun Prakash Jana, ath3
 
 IFS="$(printf '\n\r')"
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}

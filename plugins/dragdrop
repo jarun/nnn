@@ -1,15 +1,16 @@
 #!/usr/bin/env sh
 
 # Description: Open a Drag and drop window, to drop files onto other programs.
-# Also provides drag and drop window for files.
+#              Also provides drag and drop window for files.
 #
-# Files that are dropped will be added to nnn's selection
-# Some webbased files will be downloaded to current directory with curl
-# and it may overwrite some existing files
+# Requires: https://github.com/mwh/dragon
 #
-# The user has to mm to clear nnn's selection first
+# Notes:
+# - Files that are dropped will be added to nnn's selection
+#   Some webbased files will be downloaded to current directory with curl
+#   and it may overwrite some existing files
+# - The user has to mm to clear nnn's selection first
 #
-# Dependency: https://github.com/mwh/dragon
 # Shell: POSIX compliant
 # Author: 0xACE
 

@@ -12,7 +12,7 @@
 #                the output checksum filename will be directory.checksum_type
 #
 # Shell: POSIX compliant
-# Author: ath3, Arun Prakash Jana
+# Authors: ath3, Arun Prakash Jana
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 resp=f

@@ -3,7 +3,7 @@
 # Description: list uid and gid of files
 #
 # Shell: POSIX compliant
-# Author: Arun Prakash Jana, superDuperCyberTechno
+# Authors: Arun Prakash Jana, superDuperCyberTechno
 
 # shellcheck disable=SC2012
 ls -lah --group-directories-first | less

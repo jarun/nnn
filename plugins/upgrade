@@ -2,9 +2,10 @@
 
 # Description: Check and update to latest version of nnn manually on Debian 9 Stretch
 #
+# Note: This script installs a package, should be issued with admin privilege
+#
 # Shell: POSIX-compliant
 # Author: Arun Prakash Jana
-# NOTE: This script installs a package, should be issued with admin privilege
 
 cur="$(nnn -v)"
 new="$(curl -s "https://github.com/jarun/nnn/releases/latest" | grep -Eo "[0-9]+\.[0-9]+")"

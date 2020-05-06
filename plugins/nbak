@@ -1,6 +1,9 @@
 #!/usr/bin/env sh
 
-# Description: Backup of all nnn config
+# Description: Backup nnn configuration
+#              - config dir content
+#              - environment config
+#              - shell functions and aliases
 #
 # Shell: POSIX compliant
 # Author: Léo Villeveygoux
@@ -70,4 +73,3 @@ printf "Saving as '%s' ... " "$workdir/$outfile"
 tar caf "$workdir/$outfile" "$outdir" && echo "Done" || echo "Failed"
 
 cd "$workdir" && rm -rf "$tempdir"
-

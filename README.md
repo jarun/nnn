@@ -135,8 +135,9 @@ Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>),
 - [0xACE](https://github.com/0xACE)
 - [Anna Arad](https://github.com/annagrram)
 - [KlzXS](https://github.com/KlzXS)
-- [leovilok](https://github.com/leovilok)
+- [Léo Villeveygoux](https://github.com/leovilok)
 - [Maxim Baz](https://github.com/maximbaz)
+- [Todd Yamakawa](https://github.com/toddyamakawa)
 - and other contributors
 
 Visit the [ToDo list](https://github.com/jarun/nnn/issues/506) to contribute or see the features in progress.

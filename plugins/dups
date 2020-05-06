@@ -7,7 +7,7 @@
 # Requires: find md5sum sort uniq xargs
 #
 # Shell: POSIX compliant
-# Author: syssyphus, KlzXS
+# Authors: syssyphus, KlzXS
 
 find . -size +0 -type f -printf "%s %p\n" | sort -rn | sed -n 'N; /^\([0-9]*\) .*\n\1.*$/p;$d;D' | awk '{printf("%s\0", substr($0, index($0, $2)))}' | xargs -0 md5sum | sort | uniq -w32 --all-repeated=separate
 

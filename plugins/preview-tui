@@ -6,7 +6,7 @@
 #
 # Dependencies: tmux (>=3.0) or xterm (or set $TERMINAL), file, tree
 #
-# How to use:
+# Usage:
 #   You need to set a NNN_FIFO path and set a key for the plugin,
 #   then start `nnn`:
 #
@@ -18,7 +18,8 @@
 #   single common preview window. I you provide different FIFO path, they
 #   will be independent.
 #
-# Authors: Todd Yamakawa and Léo Villeveygoux
+# Shell: POSIX compliant
+# Authors: Todd Yamakawa, Léo Villeveygoux
 
 TERMINAL="${TERMINAL:-xterm}"
 

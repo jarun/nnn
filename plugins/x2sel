@@ -9,7 +9,7 @@
 #           cygwim's /dev/clipboard (Cygwin)
 #           wl-paste (Wayland)
 #
-# LIMITATION: breaks if a filename has newline in it
+# Limitation: breaks if a filename has newline in it
 #
 # Shell: POSIX compliant
 # Author: Léo Villeveygoux, after Arun Prakash Jana's .cbcp
