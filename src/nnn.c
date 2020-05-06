@@ -7041,6 +7041,9 @@ int main(int argc, char *argv[])
 				spawn(opener, arg, NULL, NULL, cfg.cliopener ? F_CLI : F_NOTRACE | F_NOWAIT);
 				return _SUCCESS;
 			}
+
+			if (session)
+				session = NULL;
 		}
 	}
 
