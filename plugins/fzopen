@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 
-# Description: Fuzzy find a file in directory subtree with fzy
+# Description: Fuzzy find a file in directory subtree
 #              Opens in $VISUAL or $EDITOR if text
 #              Opens other type of files with xdg-open
 #
-# Dependencies: fd/find, fzf/fzy/skim, xdg-open
+# Dependencies: fd/find, fzf/skim, xdg-open
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
@@ -19,8 +19,6 @@ if which fzf >/dev/null 2>&1; then
     entry="$(eval "$cmd" | fzf --delimiter / --nth=-1 --tiebreak=begin --info=hidden)"
     # To show only the file name
     # entry=$(find . -type f 2>/dev/null | fzf --delimiter / --with-nth=-1 --tiebreak=begin --info=hidden)
-elif which fzy >/dev/null 2>&1; then
-    entry=$(find . -type f 2>/dev/null | fzy)
 elif which sk >/dev/null 2>&1; then
 	entry=$(find . -type f 2>/dev/null | sk)
 else

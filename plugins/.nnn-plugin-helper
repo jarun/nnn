@@ -15,7 +15,7 @@ export CUR_CTX
 ## Ask nnn to switch to directory $1 in context $2.
 ## If $2 is not provided, the function asks explicitly.
 nnn_cd () {
-    dir=$1
+    dir="$1"
 
     if [ -z "$NNN_PIPE" ]; then
         echo "No pipe file found" 1>&2

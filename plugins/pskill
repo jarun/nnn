@@ -2,7 +2,7 @@
 
 # Description: Fuzzy list and kill a (zombie) process by name
 #
-# Dependencies: fzf or fzy, ps
+# Dependencies: fzf, ps
 #
 # Note: To kill a zombie process enter "zombie"
 #
@@ -24,8 +24,6 @@ if ! [ -z "$psname" ]; then
 
     if which fzf >/dev/null 2>&1; then
         fuzzy=fzf
-    elif which fzy >/dev/null 2>&1; then
-        fuzzy=fzy
     else
         exit 1
     fi

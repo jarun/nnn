@@ -8,8 +8,6 @@
 
 if which fzf >/dev/null 2>&1; then
     fuzzy=fzf
-elif which fzy >/dev/null 2>&1; then
-    fuzzy=fzy
 else
     exit 1
 fi

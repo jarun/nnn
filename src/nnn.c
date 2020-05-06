@@ -431,10 +431,9 @@ static uint g_states;
 #define UTIL_LESS 13
 #define UTIL_SH 14
 #define UTIL_FZF 15
-#define UTIL_FZY 16
-#define UTIL_NTFY 17
-#define UTIL_CBCP 18
-#define UTIL_NMV 19
+#define UTIL_NTFY 16
+#define UTIL_CBCP 17
+#define UTIL_NMV 18
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -470,7 +469,6 @@ static char * const utils[] = {
 	"less",
 	"sh",
 	"fzf",
-	"fzy",
 	".ntfy",
 	".cbcp",
 	".nmv",
@@ -4287,6 +4285,7 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 		if (ctx == 0 || ctx == cfg.curctx + 1) {
 			xstrsncpy(*lastdir, *path, PATH_MAX);
 			xstrsncpy(*path, nextpath, PATH_MAX);
+			DPRINTF_S(*path);
 		} else {
 			r = ctx - 1;
 
@@ -4351,7 +4350,7 @@ static void launch_app(const char *path, char *newpath)
 
 	mkpath(plugindir, utils[UTIL_LAUNCH], newpath);
 
-	if (!(getutil(utils[UTIL_FZF]) || getutil(utils[UTIL_FZY])) || access(newpath, X_OK) < 0) {
+	if (!getutil(utils[UTIL_FZF]) || access(newpath, X_OK) < 0) {
 		tmp = xreadline(NULL, messages[MSG_APP_NAME]);
 		r = F_NOWAIT | F_NOTRACE | F_MULTI;
 	}

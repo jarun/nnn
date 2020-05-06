@@ -9,8 +9,6 @@
 
 if which fzf >/dev/null 2>&1; then
     fuzzy=fzf
-elif which fzy >/dev/null 2>&1; then
-    fuzzy=fzy
 else
     exit 1
 fi
@@ -19,7 +17,7 @@ datafile="${_Z_DATA:-$HOME/.z}"
 if [ -f "$datafile" ]; then
     # I read the data from z's file instead of calling the z command so that the data doesn't need to be processed twice
     sel=$(awk -F "|" '{print $1}' "$datafile" | "$fuzzy" | awk '{$1=$1};1')
-    # NOTE: Uncomment this line and comment out the line above if you want to see the weightings of the dir's in the fzf/fzy pane
+    # NOTE: Uncomment this line and comment out the line above if you want to see the weightings of the dir's in the fzf pane
     # sel=$(awk -F "|" '{printf "%s %s\n", $2, $1}' "$datafile" | "$fuzzy" | sed 's/^[0-9,.]* *//' | awk '{$1=$1};1')
 else
     exit 1
