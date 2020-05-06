@@ -19,7 +19,7 @@
 
 `nnn` (or `n³`) is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible performance](https://github.com/jarun/nnn/wiki/Performance).
 
-`nnn` can analyze disk usage, batch rename, launch apps and pick files. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
+`nnn` can analyze disk usage, batch rename, launch apps and pick files. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further e.g. preview hovered, (un)mount disks, find & list, file/dir diff, upload files. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
 
 It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw) (Android), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
 
@@ -35,7 +35,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 - Unlimited bookmarks, plugins, commands with custom hotkeys
 - Write a plugin in any language you know
 - Configure the middle mouse click to do anything
-- Fuzzy search subtree and open the dir of a file
+- Fuzzy search subtree and open a file (or its parent dir)
 - Load four dirs with custom settings at once
 - Notifications on cp, mv, rm completion
 - Auto-sync selection to system clipboard

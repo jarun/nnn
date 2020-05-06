@@ -258,3 +258,4 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 2. Add an entry in the table above.
 3. Keep non-portable commands (like `notify-send`) commented so users from any other OS/DE aren't surprised.
 4. The plugin file should be executable.
+5. If your plugin stores data, use `${XDG_CACHE_HOME:-$HOME/.cache}/nnn`. Document it _in-file_.
