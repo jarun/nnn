@@ -2897,7 +2897,7 @@ static size_t mkpath(const char *dir, const char *name, char *out)
 	size_t len;
 
 	/* Handle absolute path */
-	if (name[0] == '/')
+	if (name[0] == '/') // NOLINT
 		return xstrsncpy(out, name, PATH_MAX);
 
 	/* Handle root case */
