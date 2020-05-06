@@ -1,0 +1,51 @@
+#!/usr/bin/env sh
+
+# Description: Use named bookmarks using symlinks
+#
+# Dependencies: fzf
+#
+# Usage:
+#   1. Create a $BOOKMARKS_DIR directory
+#      By default, $BOOKMARKS_DIR is set to: ${XDG_CACHE_HOME:-$HOME/.cache}/nnn/bookmarks
+#
+#   2. Create symlinks to directories
+#     `cd $BOOKMARKS_DIR`
+#     `ln -s /path/to/useful/directory    bookmark_name`
+#     `ln -s $XDG_CONFIG_HOME/nnn/plugins nnn_plugins"
+#     `ln -s /path/to/documents           docs`
+#     `ln -s /path/to/media               media`
+#     `ln -s /path/to/movies              movies`
+#
+# Bonus tip: Add `$BOOKMARKS_DIR` to your `$CDPATH`
+#
+# TODO:
+#   1. Remove `fzf` dependency
+#
+# Shell: POSIX compliant
+# Author: Todd Yamakawa
+
+BOOKMARKS_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/nnn/bookmarks"
+
+# Check if NNN_PIPE is set
+[ -z "$NNN_PIPE" ] && { echo 'NNN_PIPE is not set'; exit 2; }
+
+# Get all directory symlinks
+get_links() {
+    for entry in "$1"/*; do
+
+        # Skip unless directory symlink
+        [ -h "$entry" ] || continue
+        [ -d "$entry" ] || continue
+
+        echo "$(basename "$entry") ->  $(readlink -f "$entry")"
+    done | column -t
+}
+
+# Choose symlink with fzf
+cddir="$(get_links "$BOOKMARKS_DIR" | fzf | awk 'END { print "'"$BOOKMARKS_DIR"'/"$1 }')"
+
+# Writing result to NNN_PIPE will change nnn's active directory
+# https://github.com/jarun/nnn/tree/master/plugins#send-data-to-nnn
+context=0
+printf "%s" "${context}c$(readlink -f "$cddir")" > "$NNN_PIPE"
+
