@@ -2,7 +2,7 @@
 
 # Description: List files bigger than input size by ascending access date.
 #
-# Requires: find sort
+# Dependencies: find sort
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

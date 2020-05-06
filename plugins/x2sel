@@ -1,13 +1,14 @@
 #!/usr/bin/env sh
 
 # Description: Copy system clipboard newline-separated file list to selection
-# Requires: tr and
-#           xclip/xsel (Linux)
-#           pbpaste (macOS)
-#           termux-clipboard-get (Termux)
-#           powershell (WSL)
-#           cygwim's /dev/clipboard (Cygwin)
-#           wl-paste (Wayland)
+# Dependencies:
+#  - tr
+#  - xclip/xsel (Linux)
+#  - pbpaste (macOS)
+#  - termux-clipboard-get (Termux)
+#  - powershell (WSL)
+#  - cygwim's /dev/clipboard (Cygwin)
+#  - wl-paste (Wayland)
 #
 # Limitation: breaks if a filename has newline in it
 #

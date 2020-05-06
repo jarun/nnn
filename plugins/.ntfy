@@ -4,7 +4,7 @@
 #
 # Details: nnn invokes this plugin to show notification when a cp/mv/rm operation is complete.
 #
-# Requires: notify-send (Ubuntu)/ntfy (https://github.com/dschep/ntfy)/osascript (macOS)
+# Dependencies: notify-send (Ubuntu)/ntfy (https://github.com/dschep/ntfy)/osascript (macOS)
 #
 # Shell: POSIX compliant
 # Author: Anna Arad

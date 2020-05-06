@@ -2,7 +2,7 @@
 
 # Description: Show media information of a file in pager
 #
-# Requires: mediainfo
+# Dependencies: mediainfo
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

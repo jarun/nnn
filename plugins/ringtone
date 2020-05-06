@@ -7,7 +7,7 @@
 #              Tip: To convert a complete media file, set start as 0 and
 #              the runtime of the file as end.
 #
-# Requires: date, ffmpeg
+# Dependencies: date, ffmpeg
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

@@ -2,7 +2,7 @@
 
 # Description: Navigate to directory using autojump
 #
-# Requires: autojump - https://github.com/wting/autojump
+# Dependencies: autojump - https://github.com/wting/autojump
 #
 # Note: autojump STORES NAVIGATION PATTERNS
 #

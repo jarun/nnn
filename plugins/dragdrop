@@ -3,7 +3,7 @@
 # Description: Open a Drag and drop window, to drop files onto other programs.
 #              Also provides drag and drop window for files.
 #
-# Requires: https://github.com/mwh/dragon
+# Dependencies: https://github.com/mwh/dragon
 #
 # Notes:
 # - Files that are dropped will be added to nnn's selection

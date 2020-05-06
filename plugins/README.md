@@ -24,7 +24,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 
 ## List of plugins
 
-| Plugin (a-z) | Description | Lang | Deps |
+| Plugin (a-z) | Description | Lang | Dependencies |
 | --- | --- | --- | --- |
 | autojump | Navigate to dir/path | sh | autojump |
 | boom | Play random music from dir | sh | [moc](http://moc.daper.net/) |

@@ -4,7 +4,7 @@
 #
 # Source: https://www.commandlinefu.com/commands/view/3555/find-duplicate-files-based-on-size-first-then-md5-hash
 #
-# Requires: find md5sum sort uniq xargs
+# Dependencies: find md5sum sort uniq xargs
 #
 # Shell: POSIX compliant
 # Authors: syssyphus, KlzXS

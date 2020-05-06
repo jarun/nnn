@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # Description: View a file in hex
-# Requires: xxd and $PAGER
+# Dependencies: xxd and $PAGER
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

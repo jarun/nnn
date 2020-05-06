@@ -1,15 +1,16 @@
 #!/usr/bin/env sh
 
 # Description: Copy selection to system clipboard as newline-separated entries
-# Requires: tr and
-#           xclip/xsel (Linux)
-#           pbcopy (macOS)
-#           termux-clipboard-set (Termux)
-#           clip.exe (WSL)
-#           clip (Cygwin)
-#           wl-copy (Wayland)
+# Dependencies:
+# - tr
+# - xclip/xsel (Linux)
+# - pbcopy (macOS)
+# - termux-clipboard-set (Termux)
+# - clip.exe (WSL)
+# - clip (Cygwin)
+# - wl-copy (Wayland)
 #
-# LIMITATION: breaks if a filename has newline in it
+# Limitation: breaks if a filename has newline in it
 #
 # Note: For a space-separated list:
 #       xargs -0 < "$SELECTION"

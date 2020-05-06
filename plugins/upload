@@ -2,7 +2,7 @@
 
 # Description: Paste contents of a text a file http://ix.io
 #              Upload a binary file to file.io
-# Requires: curl, jq, tr
+# Dependencies: curl, jq, tr
 # Note: Binary file set to expire after a week
 #
 # Shell: POSIX compliant

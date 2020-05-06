@@ -9,7 +9,7 @@
 #
 #              xfce4-terminal -e "${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/launch
 #
-# Requires: fzf/fzy
+# Dependencies: fzf/fzy
 #
 # Usage: launch [delay]
 #        delay is in seconds, if omitted launch waits for 1 sec

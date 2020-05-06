@@ -4,7 +4,7 @@
 #              Opens in $VISUAL or $EDITOR if text
 #              Opens other type of files with xdg-open
 #
-# Requires: fd/find, fzf/fzy/skim, xdg-open
+# Dependencies: fd/find, fzf/fzy/skim, xdg-open
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

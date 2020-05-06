@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # Description: Run fd/find in subtree and list files by mime type in smart context
-# Requires: fd/find
+# Dependencies: fd/find
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

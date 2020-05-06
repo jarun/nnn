@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # Description: Fetches the lyrics of the track currently playing in MOC
-#              Requires ddgr (https://github.com/jarun/ddgr)
+# Dependencies: ddgr (https://github.com/jarun/ddgr)
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

@@ -2,7 +2,7 @@
 
 # Description: Fuzzy list and kill a (zombie) process by name
 #
-# Requires: fzf or fzy, ps
+# Dependencies: fzf or fzy, ps
 #
 # Note: To kill a zombie process enter "zombie"
 #

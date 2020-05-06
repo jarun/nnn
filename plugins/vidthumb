@@ -2,7 +2,7 @@
 
 # Description: Generate video thumbnails and view them
 #
-# Requires:
+# Dependencies:
 #    ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer
 #    lsix: https://github.com/hackerb9/lsix
 #
