@@ -4,7 +4,7 @@
 #
 # Note: This plugin needs a "NNN_FIFO" to work.
 #
-# Dependencies: tmux or xterm (or set $TERMINAL), file, tree
+# Dependencies: tmux (>=3.0) or xterm (or set $TERMINAL), file, tree
 #
 # How to use:
 #   You need to set a NNN_FIFO path and set a key for the plugin,
@@ -21,18 +21,14 @@
 # Authors: Todd Yamakawa and Léo Villeveygoux
 
 TERMINAL="${TERMINAL:-xterm}"
-NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
-
-if [ ! -r "$NNN_FIFO" ] ; then
-    echo "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')" >&2
-    exit 1
-fi
-if [ ! -x "$NUKE" ] ; then
-    echo "Nuke not found!" >&2
-    exit 1
-fi
 
 if [ "$PREVIEW_MODE" ] ; then
+    if [ ! -r "$NNN_FIFO" ] ; then
+        echo "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')" >&2
+        read -r
+        exit 1
+    fi
+
     exec < "$NNN_FIFO"
     while read -r selection ; do
         clear
@@ -40,7 +36,7 @@ if [ "$PREVIEW_MODE" ] ; then
         cols=$(tput cols)
         mime="$(file -b --mime-type "$selection")"
 
-        if [ "$mime" = "inode/directory" ] ; then
+        if [ -d "$selection" ]; then
             # Print directory tree
             cd "$selection" && tree | head -n $lines | cut -c 1-"$cols"
         elif [ "${mime%%/*}" = "text" ] ; then
@@ -52,17 +48,11 @@ if [ "$PREVIEW_MODE" ] ; then
             file -b "$selection"
         fi
     done
-
-    if [ -e "${TMUX%%,*}" ] ; then
-        tmux kill-pane
-    fi
-
     exit 0
 fi
 
-if [ -e "${TMUX%%,*}" ] ; then
+if [ -e "${TMUX%%,*}" ] && [ "$(tmux -V | cut -c6)" -eq 3 ] ; then
     tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0"
 else
-    PREVIEW_MODE=1 GUI=0 $TERMINAL -e "$0" &
+    PREVIEW_MODE=1 $TERMINAL -e "$0" &
 fi
-
