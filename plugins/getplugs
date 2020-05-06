@@ -43,8 +43,12 @@ prompt () {
 #     sucmd=: # noop
 # fi
 
-if which nnn >/dev/null 2>&1; then
+if [ "$1" = "master" ] ; then
+    VER="master"
+    ARCHIVE_URL=https://github.com/jarun/nnn/archive/master.tar.gz
+elif which nnn >/dev/null 2>&1; then
     VER=$(nnn -V)
+    ARCHIVE_URL=https://github.com/jarun/nnn/releases/download/v"$VER"/nnn-v"$VER".tar.gz
 else
     echo "nnn is not installed"
     exit 1
@@ -57,8 +61,8 @@ fi
 
 mkdir -p "$PLUGIN_DIR"
 cd "$CONFIG_DIR" || exit 1
-curl -Ls -O https://github.com/jarun/nnn/releases/download/v"$VER"/nnn-v"$VER".tar.gz
-tar -zxf nnn-v"$VER".tar.gz
+curl -Ls "$ARCHIVE_URL" -o nnn-"$VER".tar.gz
+tar -zxf nnn-"$VER".tar.gz
 
 cd nnn-"$VER"/plugins || exit 1
 
@@ -76,4 +80,4 @@ for f in $(find . -maxdepth 1 \( ! -iname "." ! -iname "*.md" \)); do
 done
 cd ../.. || exit 1
 
-rm -rf nnn-"$VER"/ nnn-v"$VER".tar.gz
+rm -rf nnn-"$VER"/ nnn-"$VER".tar.gz
