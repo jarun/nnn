@@ -4273,6 +4273,8 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 		if (len <= 0)
 			return;
 
+		/* Terminate the path read */
+		g_buf[len] = '\0';
 		nextpath = g_buf;
 	} else if (op == 'l') {
 		/* Remove last list mode path, if any */
