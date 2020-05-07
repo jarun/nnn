@@ -28,11 +28,12 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 - Load, sort, filter thousands of files instantly
 - Type to navigate with automatic dir selection
 - Select files from anywhere (not just a single dir)
+- Never lose context - start where you quit `nnn`
 - Edit and preview markdown, man page, html
 - Open a file and auto-advance to the next
 - Export (filtered) list of visible files
-- find/fd/fzf/grep/ripgrep/fzf from `nnn` and list in `nnn`
-- Unlimited bookmarks, plugins, commands with custom hotkeys
+- find/fd/grep/ripgrep/fzf from `nnn` and list in `nnn`
+- Unlimited bookmarks, plugins, cmds with custom hotkeys
 - Write a plugin in any language you know
 - Configure the middle mouse click to do anything
 - Fuzzy search subtree and open a file (or its parent dir)

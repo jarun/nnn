@@ -45,7 +45,7 @@
 # [2]: https://specifications.freedesktop.org/xembed-spec/xembed-spec-latest.html
 #
 # Shell: bash (job control is weakly specified in POSIX)
-# Author: leovilok
+# Author: Léo Villeveygoux
 
 
 XDOTOOL_TIMEOUT=2
