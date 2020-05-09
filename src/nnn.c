@@ -87,6 +87,7 @@
 #else
 #include <regex.h>
 #endif
+#include <poll.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -4245,6 +4246,35 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 {
 	int r;
 	char ctx, *nextpath = NULL;
+
+	struct pollfd pfd = { .fd = fd, .events = POLLIN };
+
+	/* This will block indefinitely if fd is opened for writiing by someone,
+	 * but there is no data yet */
+	int ret = poll(&pfd, 1, -1);
+
+	if (ret == -1 || pfd.revents & (POLLERR|POLLHUP))
+		/* Nobody has the pipe open for writing, nothing to do */
+		return;
+
+	/* Re open the same pipe in blocking mode
+	 * to avoid EAGAIN when no data is available yet */
+	int newfd = open(g_pipepath, O_RDONLY);
+
+	if (newfd == -1) {
+		/* TODO: log error */
+		return;
+	}
+
+	ret = dup2(newfd, fd);
+
+	if (ret == -1) {
+		/* TODO: log error */
+		return;
+	}
+
+	close(newfd);
+
 	ssize_t len = read(fd, g_buf, 1);
 
 	if (len != 1)
@@ -4307,7 +4337,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 		g_states |= STATE_PLUGIN_INIT;
 	}
 
-	int fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
+	int fd = open(g_pipepath, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 
 	if (fd == -1)
 		return FALSE;
