@@ -477,6 +477,9 @@ handle_blocked() {
 
         application/x-shellscript)
             exit 0;;
+
+        application/octet-stream)
+            exit 0;;
     esac
 }
 
