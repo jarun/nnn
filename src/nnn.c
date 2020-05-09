@@ -4312,6 +4312,15 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 	if (fd == -1)
 		return FALSE;
 
+#ifdef __linux__
+	DPRINTF_D(fcntl(fd, F_GETPIPE_SZ));
+	/* Increase the pipe buffer size to 1 MB */
+	if (fcntl(fd, F_SETPIPE_SZ, 1024*1024) == -1) {
+		DPRINTF_S(strerror(errno));
+	}
+	DPRINTF_D(fcntl(fd, F_GETPIPE_SZ));
+#endif
+
 	/* Run plugin from command */
 	if (*file == '_')
 		run_cmd_as_plugin(*path, file, runfile);
