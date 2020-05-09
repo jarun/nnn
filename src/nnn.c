@@ -1710,16 +1710,17 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 		retstatus = join(pid, flag);
 
 		DPRINTF_D(pid);
-		if (flag & F_NORMAL) {
-			if (flag & F_CONFIRM) {
-				printf("%s", messages[MSG_CONTINUE]);
+
+		if (flag & F_CONFIRM) {
+			printf("%s", messages[MSG_CONTINUE]);
 #ifndef NORL
-				fflush(stdout);
+			fflush(stdout);
 #endif
-				while (getchar() != '\n');
-			}
-			refresh();
+			while (getchar() != '\n');
 		}
+
+		if (flag & F_NORMAL)
+			refresh();
 
 		free(cmd);
 	}
@@ -4175,25 +4176,9 @@ static void show_help(const char *path)
 	unlink(g_tmpfpath);
 }
 
-static bool run_cmd_as_plugin(const char *path, const char *file, char *runfile)
+static bool run_cmd_as_plugin(const char *path, const char *file, char *runfile, uchar flags)
 {
-	uchar flags = F_CLI | F_CONFIRM;
 	size_t len;
-
-	/* Get rid of preceding _ */
-	++file;
-
-	if (!*file)
-		return FALSE;
-
-	/* Check if GUI flags are to be used */
-	if (*file == '|') {
-		flags = F_NOTRACE | F_NOWAIT;
-		++file;
-
-		if (!*file)
-			return FALSE;
-	}
 
 	xstrsncpy(g_buf, file, PATH_MAX);
 
@@ -4219,10 +4204,6 @@ static bool plctrl_init(void)
 	/* g_tmpfpath is used to generate tmp file names */
 	g_tmpfpath[tmpfplen - 1] = '\0';
 	mkpath(g_tmpfpath, g_buf, g_pipepath);
-	unlink(g_pipepath);
-	if (mkfifo(g_pipepath, 0600) != 0)
-		return _FAILURE;
-
 	setenv(env_cfg[NNN_PIPE], g_pipepath, TRUE);
 
 	return _SUCCESS;
@@ -4302,44 +4283,73 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 
 static bool run_selected_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir)
 {
+	bool cmd_as_plugin = FALSE;
+	uchar flags = 0;
+
 	if (!(g_states & STATE_PLUGIN_INIT)) {
 		plctrl_init();
 		g_states |= STATE_PLUGIN_INIT;
 	}
 
-	int fd = open(g_pipepath, O_RDONLY | O_NONBLOCK);
+	if (*file == '_') {
+		flags = F_MULTI | F_CONFIRM;
 
-	if (fd == -1)
-		return FALSE;
+		/* Get rid of preceding _ */
+		++file;
+		if (!*file)
+			return FALSE;
 
-#ifdef __linux__
-	DPRINTF_D(fcntl(fd, F_GETPIPE_SZ));
-	/* Increase the pipe buffer size to 1 MB */
-	if (fcntl(fd, F_SETPIPE_SZ, 1024*1024) == -1) {
-		DPRINTF_S(strerror(errno));
+		/* Check if GUI flags are to be used */
+		if (*file == '|') {
+			flags = F_NOTRACE | F_NOWAIT;
+			++file;
+
+			if (!*file)
+				return FALSE;
+
+			run_cmd_as_plugin(*path, file, runfile, flags);
+			return TRUE;
+		}
+
+		cmd_as_plugin = TRUE;
 	}
-	DPRINTF_D(fcntl(fd, F_GETPIPE_SZ));
-#endif
 
-	/* Run plugin from command */
-	if (*file == '_')
-		run_cmd_as_plugin(*path, file, runfile);
+	if (mkfifo(g_pipepath, 0600) != 0)
+		return _FAILURE;
 
-	/* Run command from plugin */
-	else {
-		/* Generate absolute path to plugin */
-		mkpath(plugindir, file, g_buf);
+	exitcurses();
 
-		if (runfile && runfile[0]) {
-			xstrsncpy(*lastname, runfile, NAME_MAX);
-			spawn(g_buf, *lastname, *path, *path, F_NORMAL);
+	if (fork() == 0) { // In child
+		int wfd = open(g_pipepath, O_WRONLY | O_NONBLOCK);
+
+		if (wfd == -1)
+			return FALSE;
+
+		if (!cmd_as_plugin) {
+			/* Generate absolute path to plugin */
+			mkpath(plugindir, file, g_buf);
+
+			if (runfile && runfile[0]) {
+				xstrsncpy(*lastname, runfile, NAME_MAX);
+				spawn(g_buf, *lastname, *path, *path, 0);
+			} else
+				spawn(g_buf, NULL, *path, *path, 0);
 		} else
-			spawn(g_buf, NULL, *path, *path, F_NORMAL);
+			run_cmd_as_plugin(*path, file, runfile, flags);
+
+		close(wfd);
+		_exit(0);
 	}
 
-	readpipe(fd, path, lastname, lastdir);
+	int rfd = open(g_pipepath, O_RDONLY);
 
-	close(fd);
+	readpipe(rfd, path, lastname, lastdir);
+	close(rfd);
+
+	refresh();
+
+	unlink(g_pipepath);
+
 	return TRUE;
 }
 
@@ -6822,9 +6832,6 @@ static void cleanup(void)
 	free(ihashbmp);
 	free(bookmark);
 	free(plug);
-
-	unlink(g_pipepath);
-
 #ifdef DBGMODE
 	disabledbg();
 #endif
