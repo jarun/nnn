@@ -1592,7 +1592,7 @@ static pid_t xfork(uchar flag)
 			p = fork();
 
 			if (p > 0)
-				_exit(0);
+				_exit(EXIT_SUCCESS);
 			else if (p == 0) {
 				signal(SIGHUP, SIG_DFL);
 				signal(SIGINT, SIG_DFL);
@@ -1604,7 +1604,7 @@ static pid_t xfork(uchar flag)
 			}
 
 			perror("fork");
-			_exit(0);
+			_exit(EXIT_FAILURE);
 		}
 
 		/* so they can be used to stop the child */
@@ -1693,7 +1693,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 	pid = xfork(flag);
 	if (pid == 0) {
 		if (dir && chdir(dir) == -1)
-			_exit(1);
+			_exit(EXIT_FAILURE);
 
 		/* Suppress stdout and stderr */
 		if (flag & F_NOTRACE) {
@@ -1705,7 +1705,7 @@ static int spawn(char *file, char *arg1, char *arg2, const char *dir, uchar flag
 		}
 
 		execvp(*argv, argv);
-		_exit(1);
+		_exit(EXIT_SUCCESS);
 	} else {
 		retstatus = join(pid, flag);
 
@@ -3566,7 +3566,7 @@ static char *get_output(char *buf, const size_t bytes, const char *file,
 		dup2(pipefd[1], STDERR_FILENO);
 		close(pipefd[1]);
 		execlp(file, file, arg1, arg2, NULL);
-		_exit(1);
+		_exit(EXIT_SUCCESS);
 	}
 
 	/* In parent */
@@ -3590,7 +3590,7 @@ static char *get_output(char *buf, const size_t bytes, const char *file,
 		dup2(pipefd[0], STDIN_FILENO);
 		close(pipefd[0]);
 		spawn(pager, NULL, NULL, NULL, F_CLI);
-		_exit(1);
+		_exit(EXIT_SUCCESS);
 	}
 
 	/* In parent */
@@ -4323,7 +4323,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 		int wfd = open(g_pipepath, O_WRONLY | O_NONBLOCK);
 
 		if (wfd == -1)
-			return FALSE;
+			_exit(EXIT_FAILURE);
 
 		if (!cmd_as_plugin) {
 			/* Generate absolute path to plugin */
@@ -4338,7 +4338,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 			run_cmd_as_plugin(*path, file, runfile, flags);
 
 		close(wfd);
-		_exit(0);
+		_exit(EXIT_SUCCESS);
 	}
 
 	int rfd = open(g_pipepath, O_RDONLY);
@@ -5321,7 +5321,7 @@ nochange:
 		/* Exit if parent has exited */
 		if (getppid() == 1) {
 			free(mark);
-			_exit(0);
+			_exit(EXIT_FAILURE);
 		}
 
 		/* If CWD is deleted or moved or perms changed, find an accessible parent */
