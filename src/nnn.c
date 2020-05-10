@@ -4305,7 +4305,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 	exitcurses();
 
 	if (fork() == 0) { // In child
-		int wfd = open(g_pipepath, O_WRONLY);
+		int wfd = open(g_pipepath, O_WRONLY | O_CLOEXEC);
 
 		if (wfd == -1)
 			_exit(EXIT_FAILURE);
