@@ -5461,6 +5461,16 @@ nochange:
 			mkpath(path, dents[cur].name, newpath);
 			DPRINTF_S(newpath);
 
+			if (dents[cur].flags & DIR_OR_LINK_TO_DIR) {
+				if (chdir(newpath) == -1) {
+					printwarn(&presel);
+					goto nochange;
+				}
+
+				cdprep(lastdir, lastname, path, newpath) ? (presel = FILTER) : (watch = TRUE);
+				goto begin;
+			}
+
 			/* Cannot use stale data in entry, file may be missing by now */
 			if (stat(newpath, &sb) == -1) {
 				printwarn(&presel);
@@ -5469,14 +5479,6 @@ nochange:
 			DPRINTF_U(sb.st_mode);
 
 			switch (sb.st_mode & S_IFMT) {
-			case S_IFDIR:
-				if (chdir(newpath) == -1) {
-					printwarn(&presel);
-					goto nochange;
-				}
-
-				cdprep(lastdir, lastname, path, newpath) ? (presel = FILTER) : (watch = TRUE);
-				goto begin;
 			case S_IFREG:
 			{
 				/* If opened as vim plugin and Enter/^M pressed, pick */
