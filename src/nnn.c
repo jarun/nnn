@@ -324,7 +324,7 @@ static settings cfg = {
 
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 
-static int ndents, cur, last, curscroll, last_curscroll, total_dents = ENTRY_INCR;
+static int ndents, cur, last, curscroll, last_curscroll, total_dents = ENTRY_INCR, scroll_lines = 1;
 static int nselected;
 #ifndef NOFIFO
 static int fifofd = -1;
@@ -5391,14 +5391,14 @@ nochange:
 #if NCURSES_MOUSE_VERSION > 1
 			/* Scroll up */
 			if (event.bstate == BUTTON4_PRESSED && ndents && (cfg.rollover || cur)) {
-				move_cursor((cur + ndents - 1) % ndents, 0);
+				move_cursor((cur + ndents - scroll_lines) % ndents, 0);
 				break;
 			}
 
 			/* Scroll down */
 			if (event.bstate == BUTTON5_PRESSED && ndents
 			    && (cfg.rollover || (cur != ndents - 1))) {
-				move_cursor((cur + 1) % ndents, 0);
+				move_cursor((cur + scroll_lines) % ndents, 0);
 				break;
 			}
 #endif
@@ -6689,6 +6689,7 @@ static void usage(void)
 		" -g      regex filters [default: string]\n"
 		" -H      show hidden files\n"
 		" -K      detect key collision\n"
+		" -l val  set scroll lines\n"
 		" -n      type-to-nav mode\n"
 		" -o      open files only on Enter\n"
 		" -p file selection file [stdout if '-']\n"
@@ -6854,7 +6855,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "Ab:cdeEfFgHKnop:QrRs:St:T:Vxh"))) != -1) {
+		       : getopt(argc, argv, "Ab:cdeEfFgHKl:nop:QrRs:St:T:Vxh"))) != -1) {
 		switch (opt) {
 		case 'A':
 			cfg.autoselect = 0;
@@ -6893,6 +6894,10 @@ int main(int argc, char *argv[])
 		case 'K':
 			check_key_collision();
 			return EXIT_SUCCESS;
+		case 'l':
+			if (env_opts_id < 0)
+				scroll_lines = atoi(optarg);
+			break;
 		case 'n':
 			cfg.filtermode = 1;
 			break;

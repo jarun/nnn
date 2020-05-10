@@ -23,6 +23,7 @@ _nnn ()
         -g
         -H
         -K
+        -l
         -n
         -o
         -p
@@ -40,6 +41,8 @@ _nnn ()
     if [[ $prev == -b ]]; then
         local bookmarks=$(echo $NNN_BMS | awk -F: -v RS=\; '{print $1}')
         COMPREPLY=( $(compgen -W "$bookmarks" -- "$cur") )
+    elif [[ $prev == -l ]]; then
+        return 1
     elif [[ $prev == -p ]]; then
         COMPREPLY=( $(compgen -f -d -- "$cur") )
     elif [[ $prev == -s ]]; then

@@ -20,6 +20,7 @@ args=(
     '(-g)-g[regex filters]'
     '(-H)-H[show hidden files]'
     '(-K)-K[detect key collision]'
+    '(-l)-l[lines to move per scroll]:val'
     '(-n)-n[start in type-to-nav mode]'
     '(-o)-o[open files only on Enter]'
     '(-p)-p[copy selection to file]:file name'
