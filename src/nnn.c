@@ -167,10 +167,6 @@
 #define HASH_BITS (0xFFFFFF)
 #define HASH_OCTETS (HASH_BITS >> 6) /* 2^6 = 64 */
 
-/* Program return codes */
-#define _SUCCESS 0
-#define _FAILURE !_SUCCESS
-
 /* Entry flags */
 #define DIR_OR_LINK_TO_DIR 0x01
 #define HARD_LINK 0x02
@@ -4206,7 +4202,7 @@ static bool plctrl_init(void)
 	mkpath(g_tmpfpath, g_buf, g_pipepath);
 	setenv(env_cfg[NNN_PIPE], g_pipepath, TRUE);
 
-	return _SUCCESS;
+	return EXIT_SUCCESS;
 }
 
 static void rmlistpath()
@@ -4315,7 +4311,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 	}
 
 	if (mkfifo(g_pipepath, 0600) != 0)
-		return _FAILURE;
+		return EXIT_FAILURE;
 
 	exitcurses();
 
@@ -5309,7 +5305,7 @@ begin:
 			       EV_ADD | EV_CLEAR, KQUEUE_FFLAGS, 0, path);
 	}
 #elif defined(HAIKU_NM)
-	haiku_nm_active = haiku_watch_dir(haiku_hnd, path) == _SUCCESS;
+	haiku_nm_active = haiku_watch_dir(haiku_hnd, path) == EXIT_SUCCESS;
 #endif
 
 	while (1) {
@@ -5331,7 +5327,7 @@ nochange:
 		/* If STDIN is no longer a tty (closed) we should exit */
 		if (!isatty(STDIN_FILENO) && !cfg.picker) {
 			free(mark);
-			return _FAILURE;
+			return EXIT_FAILURE;
 		}
 
 		sel = nextsel(presel);
@@ -5499,7 +5495,7 @@ nochange:
 					appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 					writesel(pselbuf, selbufpos - 1);
 					free(mark);
-					return _SUCCESS;
+					return EXIT_SUCCESS;
 				}
 
 				/* If open file is disabled on right arrow or `l`, return */
@@ -6417,7 +6413,7 @@ nochange:
 			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE"))
 				cfg.picker ? selbufpos = 0 : write_lastdir(path);
 			free(mark);
-			return sel == SEL_QUITFAIL ? _FAILURE : _SUCCESS;
+			return sel == SEL_QUITFAIL ? EXIT_FAILURE : EXIT_SUCCESS;
 		default:
 			r = FALSE;
 			if (xlines != LINES || xcols != COLS) {
@@ -6896,7 +6892,7 @@ int main(int argc, char *argv[])
 			break;
 		case 'K':
 			check_key_collision();
-			return _SUCCESS;
+			return EXIT_SUCCESS;
 		case 'n':
 			cfg.filtermode = 1;
 			break;
@@ -6914,7 +6910,7 @@ int main(int argc, char *argv[])
 				fd = open(optarg, O_WRONLY | O_CREAT, 0600);
 				if (fd == -1) {
 					xerror();
-					return _FAILURE;
+					return EXIT_FAILURE;
 				}
 
 				close(fd);
@@ -6951,16 +6947,16 @@ int main(int argc, char *argv[])
 			break;
 		case 'V':
 			fprintf(stdout, "%s\n", VERSION);
-			return _SUCCESS;
+			return EXIT_SUCCESS;
 		case 'x':
 			cfg.x11 = 1;
 			break;
 		case 'h':
 			usage();
-			return _SUCCESS;
+			return EXIT_SUCCESS;
 		default:
 			usage();
-			return _FAILURE;
+			return EXIT_FAILURE;
 		}
 	}
 
@@ -6971,7 +6967,7 @@ int main(int argc, char *argv[])
 
 	/* Prefix for temporary files */
 	if (!set_tmp_path())
-		return _FAILURE;
+		return EXIT_FAILURE;
 
 	atexit(cleanup);
 
@@ -6980,7 +6976,7 @@ int main(int argc, char *argv[])
 		/* This is the same as listpath */
 		initpath = load_input(STDIN_FILENO, NULL);
 		if (!initpath)
-			return _FAILURE;
+			return EXIT_FAILURE;
 
 		/* We return to tty */
 		dup2(STDOUT_FILENO, STDIN_FILENO);
@@ -6989,12 +6985,12 @@ int main(int argc, char *argv[])
 	home = getenv("HOME");
 	if (!home) {
 		fprintf(stderr, "set HOME\n");
-		return _FAILURE;
+		return EXIT_FAILURE;
 	}
 	DPRINTF_S(home);
 
 	if (!setup_config())
-		return _FAILURE;
+		return EXIT_FAILURE;
 
 	/* Get custom opener, if set */
 	opener = xgetenv(env_cfg[NNN_OPENER], utils[UTIL_OPENER]);
@@ -7003,13 +6999,13 @@ int main(int argc, char *argv[])
 	/* Parse bookmarks string */
 	if (!parsekvpair(&bookmark, &bmstr, NNN_BMS, &maxbm)) {
 		fprintf(stderr, "%s\n", env_cfg[NNN_BMS]);
-		return _FAILURE;
+		return EXIT_FAILURE;
 	}
 
 	/* Parse plugins string */
 	if (!parsekvpair(&plug, &pluginstr, NNN_PLUG, &maxplug)) {
 		fprintf(stderr, "%s\n", env_cfg[NNN_PLUG]);
-		return _FAILURE;
+		return EXIT_FAILURE;
 	}
 
 	if (!initpath) {
@@ -7019,7 +7015,7 @@ int main(int argc, char *argv[])
 
 			if (!initpath) {
 				fprintf(stderr, "%s\n", messages[MSG_INVALID_KEY]);
-				return _FAILURE;
+				return EXIT_FAILURE;
 			}
 
 			if (session)
@@ -7038,7 +7034,7 @@ int main(int argc, char *argv[])
 			DPRINTF_S(initpath);
 			if (!initpath) {
 				xerror();
-				return _FAILURE;
+				return EXIT_FAILURE;
 			}
 
 			/*
@@ -7050,12 +7046,12 @@ int main(int argc, char *argv[])
 
 			if (stat(initpath, &sb) == -1) {
 				xerror();
-				return _FAILURE;
+				return EXIT_FAILURE;
 			}
 
 			if (S_ISREG(sb.st_mode)) {
 				spawn(opener, arg, NULL, NULL, cfg.cliopener ? F_CLI : F_NOTRACE | F_NOWAIT);
-				return _SUCCESS;
+				return EXIT_SUCCESS;
 			}
 
 			if (session)
@@ -7071,7 +7067,7 @@ int main(int argc, char *argv[])
 	if (setfilter(&archive_re, (enveditor ? enveditor : patterns[P_ARCHIVE]))) {
 #endif
 		fprintf(stderr, "%s\n", messages[MSG_INVALID_REG]);
-		return _FAILURE;
+		return EXIT_FAILURE;
 	}
 
 	/* An all-CLI opener overrides option -e) */
@@ -7101,7 +7097,7 @@ int main(int argc, char *argv[])
 	if (fifopath) {
 		if (mkfifo(fifopath, 0600) != 0 && !(errno == EEXIST && access(fifopath, W_OK) == 0)) {
 			xerror();
-			return _FAILURE;
+			return EXIT_FAILURE;
 		}
 
 		signal(SIGPIPE, SIG_IGN);
@@ -7113,19 +7109,19 @@ int main(int argc, char *argv[])
 	inotify_fd = inotify_init1(IN_NONBLOCK);
 	if (inotify_fd < 0) {
 		xerror();
-		return _FAILURE;
+		return EXIT_FAILURE;
 	}
 #elif defined(BSD_KQUEUE)
 	kq = kqueue();
 	if (kq < 0) {
 		xerror();
-		return _FAILURE;
+		return EXIT_FAILURE;
 	}
 #elif defined(HAIKU_NM)
 	haiku_hnd = haiku_init_nm();
 	if (!haiku_hnd) {
 		xerror();
-		return _FAILURE;
+		return EXIT_FAILURE;
 	}
 #endif
 
@@ -7138,7 +7134,7 @@ int main(int argc, char *argv[])
 
 	if (sigaction(SIGINT, &act, NULL) < 0) {
 		xerror();
-		return _FAILURE;
+		return EXIT_FAILURE;
 	}
 	signal(SIGQUIT, SIG_IGN);
 
@@ -7173,7 +7169,7 @@ int main(int argc, char *argv[])
 #else
 	if (!initcurses(NULL))
 #endif
-		return _FAILURE;
+		return EXIT_FAILURE;
 
 	if (sort)
 		set_sort_flags(sort);
