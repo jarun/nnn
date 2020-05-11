@@ -10,8 +10,8 @@
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/donate-PayPal-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
 
-<p align="center"><a href="https://asciinema.org/a/329162"><img src="https://asciinema.org/a/329162.png" alt="Asciicast" width="734"/></a></p>
-<p align="center"><i>Project dir preview</i></p>
+<p align="center"><a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a></p>
+<p align="center"><i>type-to-nav & du (click to see demo video)</i></p>
 
 ## Introduction
 
@@ -54,9 +54,6 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 - Configure in 5 minutes!
 
 ## Features
-
-<p align="center"><a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a></p>
-<p align="center"><i>type-to-nav & du (click to see demo video)</i></p>
 
 - Frugal
   - Typically needs less than 3.5MB resident memory
