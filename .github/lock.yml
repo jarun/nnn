@@ -1,0 +1,7 @@
+daysUntilLock: 30
+lockComment: >
+  This thread has been automatically locked since there has not been
+  any recent activity after it was closed. Please open a new issue for
+  related bugs.
+setLockReason: false
+exemptLabels: planning
