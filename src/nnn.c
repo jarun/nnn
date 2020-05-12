@@ -5111,9 +5111,11 @@ static void redraw(char *path)
 			addch((i + '1') | (COLOR_PAIR(i + 1) | A_BOLD
 				/* active: underline, current: reverse */
 				| ((cfg.curctx != i) ? A_UNDERLINE : A_REVERSE)));
-		addch(' ');
+
+		if (i != CTX_MAX - 1)
+			addch(' ');
 	}
-	addstr("\b] "); /* 10 chars printed for contexts - "[1 2 3 4] " */
+	addstr("] "); /* 10 chars printed for contexts - "[1 2 3 4] " */
 
 	attron(A_UNDERLINE);
 
