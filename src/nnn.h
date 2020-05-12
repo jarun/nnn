@@ -86,6 +86,18 @@ enum action {
 	SEL_HELP,
 	SEL_AUTONEXT,
 	SEL_EDIT,
+	SEL_F1,
+	SEL_F2,
+	SEL_F3,
+	SEL_F4,
+	SEL_F5,
+	SEL_F6,
+	SEL_F7,
+	SEL_F8,
+	SEL_F9,
+	SEL_F10,
+	SEL_F11,
+	SEL_F12,
 	SEL_PLUGIN,
 	SEL_SHELL,
 	SEL_LAUNCH,
@@ -173,7 +185,6 @@ static struct key bindings[] = {
 	{ CONTROL('N'),   SEL_MFLTR },
 	/* Toggle hide .dot files */
 	{ '.',            SEL_HIDDEN },
-	{ KEY_F(5),       SEL_HIDDEN },
 	/* Detailed listing */
 	{ 'd',            SEL_DETAIL },
 	/* File details */
@@ -228,6 +239,18 @@ static struct key bindings[] = {
 	/* Edit in EDITOR */
 	{ 'e',            SEL_EDIT },
 	/* Run a plugin */
+	{ KEY_F(1),       SEL_F1 },
+	{ KEY_F(2),       SEL_F2 },
+	{ KEY_F(3),       SEL_F3 },
+	{ KEY_F(4),       SEL_F4 },
+	{ KEY_F(5),       SEL_F5 },
+	{ KEY_F(6),       SEL_F6 },
+	{ KEY_F(7),       SEL_F7 },
+	{ KEY_F(8),       SEL_F8 },
+	{ KEY_F(9),       SEL_F9 },
+	{ KEY_F(10),      SEL_F10 },
+	{ KEY_F(11),      SEL_F11 },
+	{ KEY_F(12),      SEL_F12 },
 	{ ';',            SEL_PLUGIN },
 	{ CONTROL('S'),   SEL_PLUGIN },
 	/* Run command */

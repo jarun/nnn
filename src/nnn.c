@@ -2979,6 +2979,15 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 				memset(kvarr + i, 0, sizeof(kv) * INCR);
 			}
 			kvarr[i].key = (uchar)*ptr;
+
+			/* Parse F* keys */
+			if (ptr[0] == 'F' && ptr[1] > '0' && ptr[1] <= '9') {
+				if (*++ptr == '1' && (ptr[1] == '1' || ptr[1] =='2'))
+					kvarr[i].key = 10 + *++ptr - '0';
+				else
+					kvarr[i].key = *ptr - '0';
+			}
+
 			if (*++ptr != ':' || *++ptr == '\0' || *ptr == ';')
 				return FALSE;
 			kvarr[i].off = ptr - *envcpy;
@@ -4014,20 +4023,30 @@ static void printkv(kv *kvarr, FILE *fp, uchar max, uchar id)
 	char *val = (id == NNN_BMS) ? bmstr : pluginstr;
 
 	for (uchar i = 0; i < max && kvarr[i].key; ++i) {
-		fprintf(fp, " %c: %s\n", (char)kvarr[i].key, val + kvarr[i].off);
+		if (kvarr[i].key <= 12 && kvarr[i].key >= 1) /* F* keys */
+			fprintf(fp, " F%c: %s\n", '0' + (char)kvarr[i].key, val + kvarr[i].off);
+		else
+			fprintf(fp, " %c: %s\n", (char)kvarr[i].key, val + kvarr[i].off);
 	}
 }
 
 static void printkeys(kv *kvarr, char *buf, uchar max)
 {
 	uchar i = 0;
+	uchar pass = 0;
 
 	for (; i < max && kvarr[i].key; ++i) {
-		buf[i << 1] = ' ';
-		buf[(i << 1) + 1] = kvarr[i].key;
+		if (kvarr[i].key < ' ') {
+			/* non printable */
+			++pass;
+			continue;
+		}
+
+		buf[(i - pass) << 1] = ' ';
+		buf[((i - pass) << 1) + 1] = kvarr[i].key;
 	}
 
-	buf[i << 1] = '\0';
+	buf[(i - pass) << 1] = '\0';
 }
 
 static size_t handle_bookmark(const char *mark, char *newpath)
@@ -6203,6 +6222,18 @@ nochange:
 
 			goto begin;
 		}
+		case SEL_F1:
+		case SEL_F2:
+		case SEL_F3:
+		case SEL_F4:
+		case SEL_F5:
+		case SEL_F6:
+		case SEL_F7:
+		case SEL_F8:
+		case SEL_F9:
+		case SEL_F10:
+		case SEL_F11:
+		case SEL_F12:
 		case SEL_PLUGIN:
 			/* Check if directory is accessible */
 			if (!xdiraccess(plugindir)) {
@@ -6210,10 +6241,15 @@ nochange:
 				goto nochange;
 			}
 
-			r = xstrsncpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
-			printkeys(plug, g_buf + r - 1, maxplug);
-			printmsg(g_buf);
-			r = get_input(NULL);
+			if (sel >= SEL_F1 && sel <= SEL_F12)
+				r = sel - SEL_F1 + 1;
+			else {
+				r = xstrsncpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
+				printkeys(plug, g_buf + r - 1, maxplug);
+				printmsg(g_buf);
+				r = get_input(NULL);
+			}
+
 			if (r != '\r') {
 				endselection();
 				tmp = get_kv_val(plug, NULL, r, maxplug, NNN_PLUG);
