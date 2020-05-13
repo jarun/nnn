@@ -2284,6 +2284,18 @@ static int reventrycmp(const void *va, const void *vb)
 
 static int (*entrycmpfn)(const void *va, const void *vb) = &entrycmp;
 
+/* In case of an error, resets *wch to Esc */
+static int handle_alt_key(wint_t *wch)
+{
+	timeout(0);
+	int r = get_wch(wch);
+	if (r == ERR)
+		*wch = 27;
+	cleartimeout();
+
+	return r;
+}
+
 /*
  * Returns SEL_* if key is bound and 0 otherwise.
  * Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}).
@@ -2310,6 +2322,18 @@ static int nextsel(int presel)
 		c = getch();
 		//DPRINTF_D(c);
 		//DPRINTF_S(keyname(c));
+
+		/* Handle Alt+key */
+		if (c == 27) {
+			timeout(0);
+			c = getch();
+			if (c != ERR) {
+				ungetch(c);
+				c = CONTROL('S');
+			} else
+				c = 27;
+			settimeout();
+		}
 
 		if (c == ERR && presel == MSGWAIT)
 			c = (cfg.filtermode || filterset()) ? FILTER : CONTROL('L');
@@ -2564,7 +2588,11 @@ static int filterentries(char *path, char *lastname)
 #ifndef NOMOUSE
 		case KEY_MOUSE: // fallthrough
 #endif
-		case 27: /* Exit filter mode on Escape */
+		case 27: /* Exit filter mode on Escape and Alt+key */
+			if (handle_alt_key(ch) != ERR) {
+				unget_wch(*ch);
+				*ch = CONTROL('S');
+			}
 			goto end;
 		}
 
@@ -2776,7 +2804,10 @@ static char *xreadline(const char *prefill, const char *prompt)
 				len -= pos;
 				pos = 0;
 				continue;
-			case 27: /* Exit prompt on Escape */
+			case 27: /* Exit prompt on Escape, but just filter out Alt+key */
+				if (handle_alt_key(ch) != ERR)
+					continue;
+
 				len = 0;
 				goto END;
 			}
@@ -4097,7 +4128,7 @@ static void show_help(const char *path)
 	       "9x ^X  Delete%-18cE  Edit sel\n"
 	          "c*  Toggle exe%-14c>  Export list\n"
 		"1MISC\n"
-	       "9; ^S  Select plugin%-11c=  Launch app\n"
+	   "5Alt ; ^S  Select plugin%-11c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
 		  "cc  Connect remote%-10cu  Unmount\n"
 	       "9t ^T  Sort toggles%-12cs  Manage session\n"
