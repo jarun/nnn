@@ -919,11 +919,20 @@ static void *xrealloc(void *pcur, size_t len)
  */
 static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 {
-	char *end = memccpy(dst, src, '\0', n);
 
-	if (!end) {
-		dst[n - 1] = '\0'; // NOLINT
-		end = dst + n; /* If we return n here, binary size increases due to auto-inlining */
+	char *end;
+	if (!src) {
+		dst[0] = '\0';
+		end = &dst[1];
+	}
+	else
+	{
+		end = memccpy(dst, src, '\0', n);
+
+		if (!end) {
+			dst[n - 1] = '\0'; // NOLINT
+			end = dst + n; /* If we return n here, binary size increases due to auto-inlining */
+		}
 	}
 
 	return end - dst;
