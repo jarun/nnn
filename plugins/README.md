@@ -86,7 +86,7 @@ export NNN_PLUG='f:finder;o:fzopen;p:mocplay;d:diffs;t:nmount;v:imgview'
 
 Plugin `finder` can be run with the keybind <kbd>;f</kbd>, `fzopen` can be run with <kbd>;o</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
 
-Alternative way to run a plugin directly - prefix with <kbd>Alt</kbd> (i.e. <kbd>Alt+key_char</kbd>).
+Alternatively, combine with <kbd>Alt</kbd> (i.e. <kbd>Alt+key</kbd>).
 
 To select and invoke a plugin from the plugin directory, press <kbd>Enter</kbd> (to _enter_ the plugin dir) after the plugin shortcut.
 
