@@ -2564,7 +2564,14 @@ static int filterentries(char *path, char *lastname)
 #ifndef NOMOUSE
 		case KEY_MOUSE: // fallthrough
 #endif
-		case 27: /* Exit filter mode on Escape */
+		case 27: /* Exit filter mode on Escape and Alt+key */
+			nodelay(getwin(stdout), TRUE);
+			r = get_wch(ch);
+			nodelay(getwin(stdout), FALSE);
+			if (r != ERR) {
+				unget_wch(*ch);
+				*ch = CONTROL('S');
+			}
 			goto end;
 		}
 
@@ -2776,7 +2783,12 @@ static char *xreadline(const char *prefill, const char *prompt)
 				len -= pos;
 				pos = 0;
 				continue;
-			case 27: /* Exit prompt on Escape */
+			case 27: /* Exit prompt on Escape, but just filter out Alt+key */
+				nodelay(getwin(stdout), TRUE);
+				r = get_wch(ch);
+				nodelay(getwin(stdout), FALSE);
+				if (r != ERR)
+					continue;
 				len = 0;
 				goto END;
 			}
