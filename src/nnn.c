@@ -152,7 +152,7 @@
 #define _ALIGNMENT 0x10 /* 16-byte alignment */
 #define _ALIGNMENT_MASK 0xF
 #define TMP_LEN_MAX 64
-#define CTX_MAX 4
+#define CTX_MAX 10
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
 #define EXEC_ARGS_MAX 8
@@ -253,7 +253,7 @@ typedef struct {
 	uint ctxactive  : 1;  /* Context active or not */
 	uint reserved1  : 3;
 	/* The following settings are global */
-	uint curctx     : 2;  /* Current context number */
+	uint curctx     : 4;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint picker     : 1;  /* Write selection to user-specified file */
 	uint pickraw    : 1;  /* Write selection to sdtout before exit */
@@ -4250,7 +4250,7 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 	if (g_buf[0] == '+') {
 		r = cfg.curctx;
 		do
-			r = (r + 1) & ~CTX_MAX;
+			r = (r + 1) % CTX_MAX;
 		while (g_ctx[r].c_cfg.ctxactive && (r != cfg.curctx));
 		ctx = r + 1;
 	} else {
@@ -4852,11 +4852,11 @@ static int handle_context_switch(enum action sel)
 		r = cfg.curctx;
 		if (sel == SEL_CYCLE)
 			do
-				r = (r + 1) & ~CTX_MAX;
+				r = (r + 1) % CTX_MAX;
 			while (!g_ctx[r].c_cfg.ctxactive);
 		else
 			do
-				r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
+				r = (r + (CTX_MAX - 1)) % (CTX_MAX - 1);
 			while (!g_ctx[r].c_cfg.ctxactive);
 		// fallthrough
 	default: /* SEL_CTXN */
@@ -5137,9 +5137,9 @@ static void redraw(char *path)
 	addch('[');
 	for (i = 0; i < CTX_MAX; ++i) {
 		if (!g_ctx[i].c_cfg.ctxactive)
-			addch(i + '1');
+			addch((i + 1) % CTX_MAX + '0');
 		else
-			addch((i + '1') | (COLOR_PAIR(i + 1) | A_BOLD
+			addch(((i + 1) % CTX_MAX + '0') | (COLOR_PAIR(i + 1) | A_BOLD
 				/* active: underline, current: reverse */
 				| ((cfg.curctx != i) ? A_UNDERLINE : A_REVERSE)));
 
@@ -5692,7 +5692,13 @@ nochange:
 		case SEL_CTX1: // fallthrough
 		case SEL_CTX2: // fallthrough
 		case SEL_CTX3: // fallthrough
-		case SEL_CTX4:
+		case SEL_CTX4: // fallthrough
+		case SEL_CTX5: // fallthrough
+		case SEL_CTX6: // fallthrough
+		case SEL_CTX7: // fallthrough
+		case SEL_CTX8: // fallthrough
+		case SEL_CTX9: // fallthrough
+		case SEL_CTX10:
 			r = handle_context_switch(sel);
 			if (r < 0)
 				continue;
@@ -6382,9 +6388,9 @@ nochange:
 		case SEL_QUITFAIL:
 			if (sel == SEL_QUITCTX) {
 				int ctx = cfg.curctx;
-				for (r = (ctx + 1) & ~CTX_MAX;
+				for (r = (ctx + 1) % CTX_MAX;
 				     (r != ctx) && !g_ctx[r].c_cfg.ctxactive;
-				     r = ((r + 1) & ~CTX_MAX)) {
+				     r = ((r + 1) % CTX_MAX)) {
 				};
 
 				if (r != ctx) {
