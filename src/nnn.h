@@ -230,6 +230,7 @@ static struct key bindings[] = {
 	/* Run a plugin */
 	{ ';',            SEL_PLUGIN },
 	{ CONTROL('S'),   SEL_PLUGIN },
+	{ '\033',         SEL_PLUGIN }, /* 'Alt' modifier prefix */
 	/* Run command */
 	{ '!',            SEL_SHELL },
 	{ CONTROL(']'),   SEL_SHELL },
