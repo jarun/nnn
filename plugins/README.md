@@ -122,6 +122,8 @@ export NNN_PLUG='s:_smplayer $nnn*;n:-_vim /home/vaio/Dropbox/Public/synced_note
 
 Now there will be no prompt after <kbd>;s</kbd> and <kbd>;n</kbd>.
 
+Note: Do not use `*` with programs those run and exit e.g. cat.
+
 #### Run GUI app as plugin
 
 To run a GUI app as plugin, add a `|` after `_`. For example:
