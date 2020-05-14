@@ -3391,7 +3391,11 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 	bool selmode = cfg.selmode ? TRUE : FALSE;
 
 	/* Save current context */
-	xstrsncpy(g_ctx[cfg.curctx].c_name, curname, NAME_MAX + 1);
+	if (ndents)
+		xstrsncpy(g_ctx[cfg.curctx].c_name, curname, NAME_MAX + 1);
+	else
+		g_ctx[cfg.curctx].c_name[0] = '\0';
+
 	g_ctx[cfg.curctx].c_cfg = cfg;
 
 	if (ctxr->c_cfg.ctxactive) { /* Switch to saved context */
