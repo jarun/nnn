@@ -484,10 +484,10 @@ handle_blocked() {
 }
 
 MIMETYPE="$( file --dereference --brief --mime-type -- "${FPATH}" )"
-handle_blocked "${MIMETYPE}"
 handle_extension
 handle_multimedia "${MIMETYPE}"
 handle_mime "${MIMETYPE}"
+handle_blocked "${MIMETYPE}"
 handle_fallback
 
 exit 1
