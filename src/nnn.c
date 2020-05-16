@@ -691,7 +691,6 @@ static int dentfind(const char *fname, int n);
 static void move_cursor(int target, int ignore_scrolloff);
 static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
-static char *xgetenv(const char *name, char *fallback);
 static bool plugscript(const char *plugin, uchar flags);
 static char *load_input(int fd, const char *path);
 
@@ -7120,7 +7119,7 @@ int main(int argc, char *argv[])
 
 #ifndef NOFIFO
 	/* Create fifo */
-	fifopath = getenv("NNN_FIFO");
+	fifopath = xgetenv("NNN_FIFO", NULL);
 	if (fifopath) {
 		if (mkfifo(fifopath, 0600) != 0 && !(errno == EEXIST && access(fifopath, W_OK) == 0)) {
 			xerror();
