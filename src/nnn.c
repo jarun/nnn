@@ -3548,6 +3548,17 @@ END:
 	return status;
 }
 
+static uchar get_free_ctx(void)
+{
+	uchar r = cfg.curctx;
+
+	do
+		r = (r + 1) & ~CTX_MAX;
+	while (g_ctx[r].c_cfg.ctxactive && (r != cfg.curctx));
+
+	return r;
+}
+
 /*
  * Gets only a single line (that's what we need
  * for now) or shows full command output in pager.
@@ -4250,13 +4261,9 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 	if (len != 1)
 		return;
 
-	if (g_buf[0] == '+') {
-		r = cfg.curctx;
-		do
-			r = (r + 1) & ~CTX_MAX;
-		while (g_ctx[r].c_cfg.ctxactive && (r != cfg.curctx));
-		ctx = r + 1;
-	} else {
+	if (g_buf[0] == '+')
+		ctx = (char)(get_free_ctx() + 1);
+	else {
 		ctx = g_buf[0] - '0';
 		if (ctx < 0 || ctx > CTX_MAX)
 			return;
@@ -5525,9 +5532,29 @@ nochange:
 					return EXIT_SUCCESS;
 				}
 
-				/* If open file is disabled on right arrow or `l`, return */
-				if (cfg.nonavopen && sel == SEL_NAV_IN)
-					goto nochange;
+				if (sel == SEL_NAV_IN) {
+					/* If in listing dir, go to target on `l` or Right on symlink */
+					if (listpath && S_ISLNK(dents[cur].mode)
+					    && is_prefix(path, listpath, strlen(listpath))) {
+						if (!realpath(dents[cur].name, newpath)) {
+							printwarn(&presel);
+							goto nochange;
+						}
+
+						xdirname(newpath);
+
+						if (chdir(newpath) == -1) {
+							printwarn(&presel);
+							goto nochange;
+						}
+
+						cdprep(lastdir, NULL, path, newpath)
+						       ? (presel = FILTER) : (watch = TRUE);
+						xstrsncpy(lastname, dents[cur].name, NAME_MAX + 1);
+						goto begin;
+					} else if (cfg.nonavopen)
+						goto nochange; /* Open file disabled on right arrow or `l` */
+				}
 
 				/* Handle plugin selection mode */
 				if (cfg.runplugin) {
@@ -5688,7 +5715,9 @@ nochange:
 				goto nochange;
 			}
 
-			cdprep(lastdir, lastname, path, newpath) ? (presel = FILTER) : (watch = TRUE);
+			/* In list mode, retain the last file name to highlight it, if possible */
+			cdprep(lastdir, listpath && sel == SEL_CDLAST ? NULL : lastname, path, newpath)
+			       ? (presel = FILTER) : (watch = TRUE);
 			goto begin;
 		case SEL_CYCLE: // fallthrough
 		case SEL_CYCLER: // fallthrough

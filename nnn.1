@@ -272,7 +272,7 @@ list again. If no file is selected in the current session, this option attempts
 to list the selection file.
 .Sh LIST INPUT
 .Nm
-can receive a list of NUL-separated ('\\0') file pathss as input. Paths and can
+can receive a list of NUL-separated ('\\0') file paths as input. Paths and can
 be relative to the current directory or absolute.
 .Pp
 Input is limited by 65,536 paths or 256 MiB of input.
@@ -305,7 +305,10 @@ A temporary directory will be created containing symlinks to the given
 paths. Any action performed on these symlinks will be performed only on their
 targets, after which they might become invalid.
 .Pp
-\fBInvalid paths in the iput are ignored.\fR
+Right arrow or 'l' on a symlink in the listing dir takes to the target file.
+Press '-' to return to the listing dir. Press 'Enter' to open the symlink.
+.Pp
+\fBInvalid paths in the input are ignored.\fR
 .Sh UNITS
 The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y
 (powers of 1024), same as the default units in \fIls\fR.
