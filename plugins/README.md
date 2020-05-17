@@ -61,6 +61,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | pdfread | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
 | pdfview | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
 | picker | Pick files and list one per line (to pipe) | sh | nnn |
+| preview-kitty | File previewer in a kitty terminal pane | sh | [kitty](https://sw.kovidgoyal.net/kitty/), Optionally:<br>[exa](https://github.com/ogham/exa) [bat](https://github.com/sharkdp/bat) mediainfo |
 | preview-tabbed | `tabbed`/xembed based file previewer | bash | _see in-file docs_ |
 | preview-tui | Simple TUI file previewer (needs NNN_FIFO) | sh | tmux (>= 3.0)/xterm/<br>\$TERMINAL, file, tree |
 | pskill | Fuzzy list by name and kill process or zombie | sh | fzf, ps, sudo/doas |
