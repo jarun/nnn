@@ -27,6 +27,7 @@ _nnn ()
         -n
         -o
         -p
+        -P
         -Q
         -r
         -R
@@ -45,6 +46,9 @@ _nnn ()
         return 1
     elif [[ $prev == -p ]]; then
         COMPREPLY=( $(compgen -f -d -- "$cur") )
+    elif [[ $prev == -P ]]; then
+        local plugins=$(echo $NNN_PLUG | awk -F: -v RS=\; '{print $1}')
+        COMPREPLY=( $(compgen -W "$plugins" -- "$cur") )
     elif [[ $prev == -s ]]; then
         local sessions_dir=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions
         COMPREPLY=( $(cd "$sessions_dir" && compgen -f -d -- "$cur") )

@@ -5227,7 +5227,7 @@ static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)
 	return cfg.filtermode;
 }
 
-static bool browse(char *ipath, const char *session)
+static bool browse(char *ipath, const char *session, int pkey)
 {
 	char newpath[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
@@ -5269,7 +5269,7 @@ static bool browse(char *ipath, const char *session)
 
 	newpath[0] = rundir[0] = runfile[0] = '\0';
 
-	presel = cfg.filtermode ? FILTER : 0;
+	presel = pkey ? ';' : (cfg.filtermode ? FILTER : 0);
 
 	dents = xrealloc(dents, total_dents * sizeof(struct entry));
 	if (!dents)
@@ -6273,10 +6273,16 @@ nochange:
 				goto nochange;
 			}
 
-			r = xstrsncpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
-			printkeys(plug, g_buf + r - 1, maxplug);
-			printmsg(g_buf);
-			r = get_input(NULL);
+			if (!pkey) {
+				r = xstrsncpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
+				printkeys(plug, g_buf + r - 1, maxplug);
+				printmsg(g_buf);
+				r = get_input(NULL);
+			} else {
+				r = pkey;
+				pkey = '\0';
+			}
+
 			if (r != '\r') {
 				endselection();
 				tmp = get_kv_val(plug, NULL, r, maxplug, NNN_PLUG);
@@ -6743,6 +6749,7 @@ static void usage(void)
 		" -n      type-to-nav mode\n"
 		" -o      open files only on Enter\n"
 		" -p file selection file [stdout if '-']\n"
+		" -P key  run plugin key\n"
 		" -Q      no quit confirmation\n"
 		" -r      use advcpmv patched cp, mv\n"
 		" -R      no rollover at edges\n"
@@ -6888,7 +6895,7 @@ int main(int argc, char *argv[])
 {
 	char *arg = NULL;
 	char *session = NULL;
-	int fd, opt, sort = 0;
+	int fd, opt, sort = 0, pkey = '\0'; /* Plugin key */
 #ifndef NOMOUSE
 	mmask_t mask;
 	char *middle_click_env = xgetenv(env_cfg[NNN_MCLICK], "\0");
@@ -6905,13 +6912,14 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "Ab:cdeEfFgHKl:nop:QrRs:St:T:Vxh"))) != -1) {
+		       : getopt(argc, argv, "Ab:cdeEfFgHKl:nop:P:QrRs:St:T:Vxh"))) != -1) {
 		switch (opt) {
 		case 'A':
 			cfg.autoselect = 0;
 			break;
 		case 'b':
-			arg = optarg;
+			if (env_opts_id < 0)
+				arg = optarg;
 			break;
 		case 'c':
 			cfg.cliopener = 1;
@@ -6972,6 +6980,10 @@ int main(int argc, char *argv[])
 				selpath = realpath(optarg, NULL);
 				unlink(selpath);
 			}
+			break;
+		case 'P':
+			if (env_opts_id < 0 && !optarg[1])
+				pkey = optarg[0];
 			break;
 		case 'Q':
 			g_states |= STATE_FORCEQUIT;
@@ -7229,7 +7241,7 @@ int main(int argc, char *argv[])
 	if (sort)
 		set_sort_flags(sort);
 
-	opt = browse(initpath, session);
+	opt = browse(initpath, session, pkey);
 
 #ifndef NOMOUSE
 	mousemask(mask, NULL);
