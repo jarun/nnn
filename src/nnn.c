@@ -7291,6 +7291,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifndef NOFIFO
+	notify_fifo();
 	if (fifofd != -1)
 		close(fifofd);
 #endif
