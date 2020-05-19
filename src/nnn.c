@@ -2304,18 +2304,6 @@ static int nextsel(int presel)
 {
 	int c = presel;
 	uint i;
-#ifdef LINUX_INOTIFY
-	struct inotify_event *event;
-	char inotify_buf[EVENT_BUF_LEN];
-
-	memset((void *)inotify_buf, 0x0, EVENT_BUF_LEN);
-#elif defined(BSD_KQUEUE)
-	struct kevent event_data[NUM_EVENT_SLOTS];
-
-	memset((void *)event_data, 0x0, sizeof(struct kevent) * NUM_EVENT_SLOTS);
-#elif defined(HAIKU_NM)
-// TODO: Do some Haiku declarations
-#endif
 
 	if (c == 0 || c == MSGWAIT) {
 		c = getch();
@@ -2351,6 +2339,10 @@ static int nextsel(int presel)
 		 */
 #ifdef LINUX_INOTIFY
 		if (!cfg.selmode && !cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
+			struct inotify_event *event;
+			char inotify_buf[EVENT_BUF_LEN];
+
+			memset((void *)inotify_buf, 0x0, EVENT_BUF_LEN);
 			i = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
 			if (i > 0) {
 				for (char *ptr = inotify_buf;
@@ -2372,10 +2364,13 @@ static int nextsel(int presel)
 			}
 		}
 #elif defined(BSD_KQUEUE)
-		if (!cfg.selmode && !cfg.blkorder && event_fd >= 0 && idle & 1
-		    && kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
-			      event_data, NUM_EVENT_FDS, &gtimeout) > 0)
-			c = CONTROL('L');
+		if (!cfg.selmode && !cfg.blkorder && event_fd >= 0 && idle & 1) {
+			struct kevent event_data[NUM_EVENT_SLOTS];
+
+			memset((void *)event_data, 0x0, sizeof(struct kevent) * NUM_EVENT_SLOTS);
+			if (kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, event_data, NUM_EVENT_FDS, &gtimeout) > 0)
+				c = CONTROL('L');
+		}
 #elif defined(HAIKU_NM)
 		if (!cfg.selmode && !cfg.blkorder && haiku_nm_active && idle & 1 && haiku_is_update_needed(haiku_hnd))
 			c = CONTROL('L');
@@ -6983,7 +6978,7 @@ int main(int argc, char *argv[])
 			break;
 		case 'P':
 			if (env_opts_id < 0 && !optarg[1])
-				pkey = optarg[0];
+				pkey = (uchar)optarg[0];
 			break;
 		case 'Q':
 			g_states |= STATE_FORCEQUIT;
