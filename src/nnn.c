@@ -2580,7 +2580,8 @@ static int filterentries(char *path, char *lastname)
 			showfilter(ln);
 			continue;
 #ifndef NOMOUSE
-		case KEY_MOUSE: // fallthrough
+		case KEY_MOUSE:
+			goto end;
 #endif
 		case 27: /* Exit filter mode on Escape and Alt+key */
 			if (handle_alt_key(ch) != ERR) {
