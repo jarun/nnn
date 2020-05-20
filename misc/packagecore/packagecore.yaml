@@ -98,16 +98,6 @@ packages:
     deps:
       - libncursesw5
       - readline-common
-  fedora29:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - ncurses-devel
-      - readline-devel
-    deps:
-      - ncurses
-      - readline
   fedora30:
     builddeps:
       - make
