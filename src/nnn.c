@@ -4731,7 +4731,7 @@ static void notify_fifo()
 		}
 	}
 
-	static struct entry lastentry = {0};
+	static struct entry lastentry;
 
 	if (!memcmp(&lastentry, &dents[cur], sizeof(struct entry)))
 		return;
