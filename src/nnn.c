@@ -4731,17 +4731,15 @@ static void notify_fifo()
 		}
 	}
 
-	static char *name = NULL;
-	static time_t t = {0};
+	static struct entry lastentry = {0};
 
-	if (dents[cur].name == name && dents[cur].t == t)
+	if (!memcmp(&lastentry, &dents[cur], sizeof(struct entry)))
 		return;
 
-	name = dents[cur].name;
-	t = dents[cur].t;
+	lastentry = dents[cur];
 
 	char path[PATH_MAX];
-	size_t len = mkpath(g_ctx[cfg.curctx].c_path, ndents ? name : "", path);
+	size_t len = mkpath(g_ctx[cfg.curctx].c_path, ndents ? dents[cur].name : "", path);
 
 	path[len - 1] = '\n';
 
