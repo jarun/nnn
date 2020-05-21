@@ -31,22 +31,23 @@ preview_file () {
     lines=$(($(tput lines)-1))
     cols=$(tput cols)
     mime="$(file -b --mime-type "$1")"
+    encoding="$(file -b --mime-encoding "$1")"
 
     if [ -d "$1" ]; then
         # Print directory tree
         # shellcheck disable=SC2015
         cd "$1" && \
         COLUMNS=$cols exa -G --colour=always 2>/dev/null || ls --color=alway
-    elif [ "${mime%%/*}" = "text" ] ; then
-        # Print file head
-        bat --terminal-width="$cols" --paging=never --decorations=always \
-            --color=always "$1" 2>/dev/null || cat
     elif [ "${mime%%/*}" = "image" ] ; then
         kitty +kitten icat --silent --transfer-mode=stream --stdin=no "$1"
-    else
-        # Binary file
+    elif [ "$encoding" = "binary" ] ; then
+        # Binary file: show file info
         printf -- "-------- \033[1;31mBinary file\033[0m --------\n"
         mediainfo "$1" 2>/dev/null || file -b "$1"
+    else
+        # Text file: print colored file content
+        bat --terminal-width="$cols" --paging=never --decorations=always \
+            --color=always "$1" 2>/dev/null || cat
     fi | head -n $lines
 }
 

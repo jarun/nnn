@@ -27,18 +27,18 @@ preview_file () {
     clear
     lines=$(($(tput lines)-1))
     cols=$(tput cols)
-    mime="$(file -b --mime-type "$1")"
+    encoding="$(file -b --mime-encoding "$1")"
 
     if [ -d "$1" ]; then
         # Print directory tree
         cd "$1" && tree | head -n $lines | cut -c 1-"$cols"
-    elif [ "${mime%%/*}" = "text" ] ; then
-        # Print file head
-        head -n $lines "$1" | cut -c 1-"$cols"
-    else
-        # Binary file
+    elif [ "$encoding" = "binary" ] ; then
+        # Binary file: just print filetype info
         echo "-------- Binary file --------"
         file -b "$1"
+    else
+        # Text file: print file head
+        head -n $lines "$1" | cut -c 1-"$cols"
     fi
 }
 
