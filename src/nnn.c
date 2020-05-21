@@ -351,6 +351,7 @@ static char *sessiondir;
 static char *pnamebuf, *pselbuf;
 #ifndef NOFIFO
 static char *fifopath;
+static bool autofifo;
 #endif
 static ull *ihashbmp;
 static struct entry *dents;
@@ -6880,6 +6881,11 @@ static void cleanup(void)
 	free(ihashbmp);
 	free(bookmark);
 	free(plug);
+#ifndef NOFIFO
+	if (autofifo)
+		unlink(fifopath);
+#endif
+
 #ifdef DBGMODE
 	disabledbg();
 #endif
@@ -6906,8 +6912,13 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "Ab:cdeEfFgHKl:nop:P:QrRs:St:T:Vxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cdeEfFgHKl:nop:P:QrRs:St:T:Vxh"))) != -1) {
 		switch (opt) {
+#ifndef NOFIFO
+		case 'a':
+			autofifo = TRUE;
+			break;
+#endif
 		case 'A':
 			cfg.autoselect = 0;
 			break;
@@ -7154,6 +7165,12 @@ int main(int argc, char *argv[])
 
 #ifndef NOFIFO
 	/* Create fifo */
+	if (autofifo) {
+		g_tmpfpath[tmpfplen - 1] = '\0';
+		snprintf(g_buf, CMD_LEN_MAX, "%s/nnn-fifo.%d", g_tmpfpath, getpid());
+		setenv("NNN_FIFO", g_buf, TRUE);
+	}
+
 	fifopath = xgetenv("NNN_FIFO", NULL);
 	if (fifopath) {
 		if (mkfifo(fifopath, 0600) != 0 && !(errno == EEXIST && access(fifopath, W_OK) == 0)) {
