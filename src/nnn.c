@@ -6727,6 +6727,9 @@ static void usage(void)
 		"positional args:\n"
 		"  PATH   start dir [default: .]\n\n"
 		"optional args:\n"
+#ifndef NOFIFO
+		" -a      auto NNN_FIFO\n"
+#endif
 		" -A      no dir auto-select\n"
 		" -b key  open bookmark key (trumps -s/S)\n"
 		" -c      cli-only NNN_OPENER (trumps -e)\n"
