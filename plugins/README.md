@@ -198,9 +198,9 @@ Usage examples can be found in the Examples section below.
 
 If `NNN_FIFO` is set, `nnn` will open it and write every hovered files. This can be used in plugins and external scripts, e.g. to implement file previews.
 
-If a `NNN_FIFO` is set globally, each `nnn` instance will write to it, and a process reading from the pipe will get hovered path from every instance, interleaved.
+The easiest way to set `NNN_FIFO` is to start `nnn` with the `-a` option, to automatically setup a temporary FIFO file for this `nnn` instance.
 
-If you want to prevent this and be sure to have a private pipe to one `nnn` instance, you can unlink (remove) the FIFO file. If you had opened the FIFO before and you have read from it (so that `nnn` have it opened too), you can still read from it while you don't close it. But new `nnn` instances will recreate a new FIFO not linked to the previous one.
+If a `NNN_FIFO` environment variable is set globally (and `-a` is not passed to `nnn`), each `nnn` instance will write to the same FIFO, and a process reading from the pipe will get hovered path from every instance, interleaved.
 
 Don't forget to fork in the background to avoid blocking `nnn`.
 
@@ -246,13 +246,6 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
     fi
 
     while read FILE ; do
-        if [ -n "$NNN_FIFO" ] ; then
-            # If you want to remove the FIFO,
-            # don't do it before first read,
-            # nnn won't have it opened yet
-            rm "$NNN_FIFO"
-            NNN_FIFO=
-        fi
         printf "%s" "$FILE" | xsel
     done < "$NNN_FIFO" &
     disown
