@@ -38,8 +38,10 @@ preview_file () {
         # Print directory tree
         # shellcheck disable=SC2015
         cd "$1" && \
-        (COLUMNS=$cols exa -G --colour=always 2>/dev/null || ls --color=alway) | head -n $lines &
-    elif [ "${mime%%/*}" = "image" ] ; then
+        (COLUMNS=$cols exa -G --colour=always 2>/dev/null ||\
+        ls --color=alway) | head -n $lines &
+    # remove second clause to preview SVG files (but this is slow)
+    elif [ "${mime%%/*}" = "image" ] && [ "$encoding" = "binary" ] ; then
         kitty +kitten icat --silent --transfer-mode=stream --stdin=no "$1" &
     elif [ "$encoding" = "binary" ] ; then
         # Binary file: show file info
