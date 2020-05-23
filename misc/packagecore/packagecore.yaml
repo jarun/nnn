@@ -128,6 +128,16 @@ packages:
     deps:
       - ncurses
       - readline
+  opensuse.tumbleweed:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - readline-devel
+      - ncurses-devel
+    deps:
+      - libncurses6
+      - libreadline7
   opensuse15.1:
     builddeps:
       - make
