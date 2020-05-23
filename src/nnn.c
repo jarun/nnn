@@ -401,6 +401,7 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 #define STATE_TRASH 0x40
 #define STATE_FORCEQUIT 0x80
 #define STATE_AUTOFIFO 0x100
+#define STATE_INITFILE 0x200
 
 static uint g_states;
 
@@ -5253,11 +5254,20 @@ static bool browse(char *ipath, const char *session, int pkey)
 
 	/* setup first context */
 	if (!session || !load_session(session, &path, &lastdir, &lastname, FALSE)) {
-		xstrsncpy(g_ctx[0].c_path, ipath, PATH_MAX); /* current directory */
-		path = g_ctx[0].c_path;
-		g_ctx[0].c_last[0] = g_ctx[0].c_name[0] = '\0';
+		g_ctx[0].c_last[0] = '\0';
 		lastdir = g_ctx[0].c_last; /* last visited directory */
+
+		if (g_states & STATE_INITFILE) {
+			xstrsncpy(g_ctx[0].c_name, xbasename(ipath), sizeof(g_ctx[0].c_name));
+			xdirname(ipath);
+		} else
+			g_ctx[0].c_name[0] = '\0';
+
 		lastname = g_ctx[0].c_name; /* last visited filename */
+
+		xstrsncpy(g_ctx[0].c_path, ipath, PATH_MAX);
+		path = g_ctx[0].c_path; /* current directory */
+
 		g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
 		g_ctx[0].c_cfg = cfg; /* current configuration */
 	}
@@ -6725,7 +6735,7 @@ static void usage(void)
 		"%s: nnn [OPTIONS] [PATH]\n\n"
 		"The missing terminal file manager for X.\n\n"
 		"positional args:\n"
-		"  PATH   start dir [default: .]\n\n"
+		"  PATH   start dir/file [default: .]\n\n"
 		"optional args:\n"
 #ifndef NOFIFO
 		" -a      auto NNN_FIFO\n"
@@ -7124,10 +7134,8 @@ int main(int argc, char *argv[])
 				return EXIT_FAILURE;
 			}
 
-			if (S_ISREG(sb.st_mode)) {
-				spawn(opener, arg, NULL, cfg.cliopener ? F_CLI : F_NOTRACE | F_NOWAIT);
-				return EXIT_SUCCESS;
-			}
+			if (!S_ISDIR(sb.st_mode))
+				g_states |= STATE_INITFILE;
 
 			if (session)
 				session = NULL;
