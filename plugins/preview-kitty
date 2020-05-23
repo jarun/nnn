@@ -27,6 +27,7 @@
 # Authors: Léo Villeveygoux
 
 preview_file () {
+    kill %% 2>/dev/null
     clear
     lines=$(($(tput lines)-1))
     cols=$(tput cols)
@@ -37,18 +38,20 @@ preview_file () {
         # Print directory tree
         # shellcheck disable=SC2015
         cd "$1" && \
-        COLUMNS=$cols exa -G --colour=always 2>/dev/null || ls --color=alway
-    elif [ "${mime%%/*}" = "image" ] ; then
-        kitty +kitten icat --silent --transfer-mode=stream --stdin=no "$1"
+        (COLUMNS=$cols exa -G --colour=always 2>/dev/null ||\
+        ls --color=alway) | head -n $lines &
+    # remove second clause to preview SVG files (but this is slow)
+    elif [ "${mime%%/*}" = "image" ] && [ "$encoding" = "binary" ] ; then
+        kitty +kitten icat --silent --transfer-mode=stream --stdin=no "$1" &
     elif [ "$encoding" = "binary" ] ; then
         # Binary file: show file info
         printf -- "-------- \033[1;31mBinary file\033[0m --------\n"
-        mediainfo "$1" 2>/dev/null || file -b "$1"
+        (mediainfo "$1" 2>/dev/null || file -b "$1") | head -n $((lines - 1)) &
     else
         # Text file: print colored file content
-        bat --terminal-width="$cols" --paging=never --decorations=always \
-            --color=always "$1" 2>/dev/null || cat
-    fi | head -n $lines
+        (bat --terminal-width="$cols" --paging=never --decorations=always \
+            --color=always "$1" 2>/dev/null || cat) | head -n $lines &
+    fi
 }
 
 if [ "$PREVIEW_MODE" ] ; then
