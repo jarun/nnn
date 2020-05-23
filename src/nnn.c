@@ -2638,7 +2638,7 @@ static int filterentries(char *path, char *lastname)
 				ln[0] = (ln[0] == FILTER) ? RFILTER : FILTER;
 				wln[0] = (uchar)ln[0];
 				cfg.regex ^= 1;
-				filterfn = (filterfn == &visible_str) ? &visible_re : &visible_str;
+				filterfn = cfg.regex ? &visible_re : &visible_str;
 				showfilter(ln);
 				continue;
 			}
