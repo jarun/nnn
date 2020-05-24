@@ -349,6 +349,7 @@ static char *prefixpath;
 static char *plugindir;
 static char *sessiondir;
 static char *pnamebuf, *pselbuf;
+static char *mark;
 #ifndef NOFIFO
 static char *fifopath;
 #endif
@@ -4430,6 +4431,7 @@ static void dentfree(void)
 {
 	free(pnamebuf);
 	free(dents);
+	free(mark);
 }
 
 static blkcnt_t dirwalk(char *path, struct stat *psb)
@@ -5228,7 +5230,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 	char newpath[PATH_MAX] __attribute__ ((aligned));
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
-	char *path, *lastdir, *lastname, *dir, *tmp, *mark = NULL;
+	char *path, *lastdir, *lastname, *dir, *tmp;
 	enum action sel;
 	struct stat sb;
 	int r = -1, presel, selstartid = 0, selendid = 0;
@@ -5352,20 +5354,16 @@ begin:
 
 nochange:
 		/* Exit if parent has exited */
-		if (getppid() == 1) {
-			free(mark);
+		if (getppid() == 1)
 			_exit(EXIT_FAILURE);
-		}
 
 		/* If CWD is deleted or moved or perms changed, find an accessible parent */
 		if (chdir(path) == -1)
 			goto begin;
 
 		/* If STDIN is no longer a tty (closed) we should exit */
-		if (!isatty(STDIN_FILENO) && !cfg.picker) {
-			free(mark);
+		if (!isatty(STDIN_FILENO) && !cfg.picker)
 			return EXIT_FAILURE;
-		}
 
 		sel = nextsel(presel);
 		if (presel)
@@ -5533,7 +5531,6 @@ nochange:
 				if (cfg.picker && sel == SEL_GOIN) {
 					appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 					writesel(pselbuf, selbufpos - 1);
-					free(mark);
 					return EXIT_SUCCESS;
 				}
 
@@ -6473,7 +6470,6 @@ nochange:
 			/* Picker mode: reset buffer or clear file */
 			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE"))
 				cfg.picker ? selbufpos = 0 : write_lastdir(path);
-			free(mark);
 			return sel == SEL_QUITFAIL ? EXIT_FAILURE : EXIT_SUCCESS;
 		default:
 			r = FALSE;
