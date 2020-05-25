@@ -1,3 +1,49 @@
+nnn v3.2
+2020-05-26
+
+- an official logo
+- previews
+  - config `NNN_FIFO` to write hovered file paths a previewer can read
+  - plugin `preview-tabbed`: [tabbed](https://tools.suckless.org/tabbed)/xembed based file previewer
+  - plugin `preview-tui`: simple TUI file previewer in tmux/xterm
+  - plugin `preview-kitty`: preview using kitty terminal's capabilities
+  - [live preview](https://github.com/jarun/nnn/wiki/Live-previews) configuration example
+- find & list
+  - send list of files from (cmd run as) plugin to  `nnn`
+  - plugin `finder`: find/fd/fzf/grep/ripgrep/fzf (in subtree) and list in `nnn`
+  - <kbd>Right</kbd> or <kbd>l</kbd> on symlink in list dir takes to target file
+- persistent session option `-S` [for disk usage, run `nnn -T d` (see help)]
+- hover on the file when a file path is passed as positional argument
+- go to first file or match with <kbd>'</kbd> (followed by <kbd>'</kbd> or <kbd>char</kbd>)
+- config `NNN_SEL` to specify custom selection file
+- config `NNN_LOCKER` to specify locker program
+- dim file details in detail mode
+- call `chdir()` on directory change
+- option `-l`: number of lines to move on mouse scroll
+- graphical [keybind map](https://github.com/jarun/nnn/wiki/Usage#graphical-map)
+- let `NNN_COLORS` override `NO_COLOR`
+- plugins
+  - option `-P`: run plugin by key at start
+  - run plugins with <kbd>Alt+key</kbd>
+  - allow `NNN_PIPE` usage by commands run as plugin
+  - input format to `NNN_PIPE`: `<ctxcode><opcode><data>` (see plugins doc)
+  - set `ctxcode` to `+` for smart context usage (next inactive, else current)
+  - `getplugs` to fetch plugins by installed version of `nnn`
+  - plugin `mimelist`: list files by mime type in subtree
+  - plugin `bookmarks`: named bookmarks using symlinks
+  - plugin `nbak`: backup `nnn` config
+  - `nuke` adds lowdown as alternative markdown viewer
+  - several plugin improvements
+- fix broken screen on resize (see #520)
+- fix broken version sort (see #550)
+- fix list and pipe modes not working together
+- fix multiple issues with listing files
+- fix `@` shown in detail mode for symlink to dir
+- fix listing files directly under `/`
+- move to `-std=c11`
+
+-------------------------------------------------------------------------------
+
 nnn v3.1
 2020-04-13
 
