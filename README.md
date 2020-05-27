@@ -157,3 +157,4 @@ Visit the [ToDo list](https://github.com/jarun/nnn/issues/594) to contribute or 
 - LinuxLinks [[1](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)] [[2](https://www.linuxlinks.com/bestconsolefilemanagers/)] [[3](https://www.linuxlinks.com/excellent-system-tools-nnn-portable-terminal-file-manager/)]
 - [Suckless Rocks](https://suckless.org/rocks/)
 - [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
+- [Linux Unplugged](https://linuxunplugged.com/articles/build-your-own-desktop-in-the-terminal)
