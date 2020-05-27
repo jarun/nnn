@@ -25,35 +25,36 @@ TERMINAL="${TERMINAL:-xterm}"
 PAGER="${PAGER:-less}"
 
 preview_file () {
-    kill %- %+ 2>/dev/null
+    kill "$(jobs -p)" 2>/dev/null
     clear
-
-    # prevent shell pipe reuse
-    tmpfifopath="${TMPDIR:-/tmp}/nnn-preview-tui-fifo.$$"
-    mkfifo "$tmpfifopath" || return
 
     encoding="$(file -b --mime-encoding "$1")"
 
-    $PAGER < "$tmpfifopath" &
+    if [ -d "$1" ]; then
+        # Print directory tree
 
-    (
-        exec > "$tmpfifopath"
+        cd "$1" || return
 
-        if [ -d "$1" ]; then
-            # Print directory tree
-            cd "$1" && tree
-        elif [ "$encoding" = "binary" ] ; then
-            # Binary file: just print filetype info
-            echo "-------- Binary file --------"
-            file -b "$1"
-        else
-            # Text file:
-            cat "$1"
-        fi &
+        # we use a FIFO to access less PID
+        tmpfifopath="${TMPDIR:-/tmp}/nnn-preview-tui-fifo.$$"
+        mkfifo "$tmpfifopath" || return
 
-    )
+        $PAGER < "$tmpfifopath" &
 
-    rm "$tmpfifopath"
+        (
+            exec > "$tmpfifopath"
+            tree&
+        )
+
+        rm "$tmpfifopath"
+    elif [ "$encoding" = "binary" ] ; then
+        # Binary file: just print filetype info
+        echo "-------- Binary file --------"
+        file -b "$1"
+    else
+        # Text file:
+        $PAGER "$1" &
+    fi
 }
 
 if [ "$PREVIEW_MODE" ] ; then
