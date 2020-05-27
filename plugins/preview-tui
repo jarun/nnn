@@ -4,7 +4,7 @@
 #
 # Note: This plugin needs a "NNN_FIFO" to work.
 #
-# Dependencies: tmux (>=3.0) or xterm (or set $TERMINAL), file, tree
+# Dependencies: tmux (>=3.0) or xterm or $TERMINAL, less or $PAGER, file, tree
 #
 # Usage:
 #   You need to set a NNN_FIFO path and set a key for the plugin,
@@ -22,24 +22,38 @@
 # Authors: Todd Yamakawa, Léo Villeveygoux
 
 TERMINAL="${TERMINAL:-xterm}"
+PAGER="${PAGER:-less}"
 
 preview_file () {
+    kill %- %+ 2>/dev/null
     clear
-    lines=$(($(tput lines)-1))
-    cols=$(tput cols)
+
+    # prevent shell pipe reuse
+    tmpfifopath="${TMPDIR:-/tmp}/nnn-preview-tui-fifo.$$"
+    mkfifo "$tmpfifopath" || return
+
     encoding="$(file -b --mime-encoding "$1")"
 
-    if [ -d "$1" ]; then
-        # Print directory tree
-        cd "$1" && tree | head -n $lines | cut -c 1-"$cols"
-    elif [ "$encoding" = "binary" ] ; then
-        # Binary file: just print filetype info
-        echo "-------- Binary file --------"
-        file -b "$1"
-    else
-        # Text file: print file head
-        head -n $lines "$1" | cut -c 1-"$cols"
-    fi
+    $PAGER < "$tmpfifopath" &
+
+    (
+        exec > "$tmpfifopath"
+
+        if [ -d "$1" ]; then
+            # Print directory tree
+            cd "$1" && tree
+        elif [ "$encoding" = "binary" ] ; then
+            # Binary file: just print filetype info
+            echo "-------- Binary file --------"
+            file -b "$1"
+        else
+            # Text file:
+            cat "$1"
+        fi &
+
+    )
+
+    rm "$tmpfifopath"
 }
 
 if [ "$PREVIEW_MODE" ] ; then
