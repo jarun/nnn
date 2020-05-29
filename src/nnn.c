@@ -704,6 +704,13 @@ static void sigint_handler(int UNUSED(sig))
 	g_states |= STATE_INTERRUPTED;
 }
 
+static void clean_exit_sighandler(int UNUSED(sig))
+{
+	exitcurses();
+	/* This triggers cleanup() thanks to atexit() */
+	exit(EXIT_SUCCESS);
+}
+
 static char *xitoa(uint val)
 {
 	static char ascbuf[32] = {0};
@@ -7230,6 +7237,8 @@ int main(int argc, char *argv[])
 		xerror();
 		return EXIT_FAILURE;
 	}
+	signal(SIGTERM, clean_exit_sighandler);
+	signal(SIGHUP, clean_exit_sighandler);
 	signal(SIGQUIT, SIG_IGN);
 
 #ifndef NOLOCALE
