@@ -4130,7 +4130,7 @@ static void show_help(const char *path)
 	       "9Dn j  Down%-14cPgDn ^D  Scroll down\n"
 	       "9Lt h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
 	   "5Ret Rt l  Open%-20c'  First file/match\n"
-	       "9g ^A  Top%-18c. F5  Toggle hidden\n"
+	       "9g ^A  Top%-21c.  Toggle hidden\n"
 	       "9G ^E  End%-21c+  Toggle auto-advance\n"
 	       "9b ^/  Bookmark key%-12c,  Pin CWD\n"
 		"a1-4  Context 1-4%-7c(Sh)Tab  Cycle context\n"
