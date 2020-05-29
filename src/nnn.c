@@ -7048,6 +7048,8 @@ int main(int argc, char *argv[])
 			usage();
 			return EXIT_FAILURE;
 		}
+		if (env_opts_id == 0)
+			env_opts_id = -1;
 	}
 
 #ifdef DBGMODE
