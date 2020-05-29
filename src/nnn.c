@@ -1546,7 +1546,7 @@ static bool initcurses(void *oldmask)
 	}
 
 	settimeout(); /* One second */
-	set_escdelay(25);
+	set_escdelay(0);
 	return TRUE;
 }
 
