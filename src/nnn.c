@@ -372,14 +372,8 @@ static regex_t archive_re;
 #endif
 
 /* Retain old signal handlers */
-#ifdef __linux__
-static sighandler_t oldsighup; /* old value of hangup signal */
-static sighandler_t oldsigtstp; /* old value of SIGTSTP */
-#else
-/* note: no sig_t on Solaris-derivs */
-static void (*oldsighup)(int);
-static void (*oldsigtstp)(int);
-#endif
+static struct sigaction oldsighup;
+static struct sigaction oldsigtstp;
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
@@ -1586,11 +1580,12 @@ static pid_t xfork(uchar flag)
 {
 	int status;
 	pid_t p = fork();
+	struct sigaction dfl_act = {.sa_handler = SIG_DFL};
 
 	if (p > 0) {
 		/* the parent ignores the interrupt, quit and hangup signals */
-		oldsighup = signal(SIGHUP, SIG_IGN);
-		oldsigtstp = signal(SIGTSTP, SIG_DFL);
+		sigaction(SIGHUP, &(struct sigaction){.sa_handler = SIG_IGN}, &oldsighup);
+		sigaction(SIGTSTP, &dfl_act, &oldsigtstp);
 	} else if (p == 0) {
 		/* We create a grandchild to detach */
 		if (flag & F_NOWAIT) {
@@ -1599,10 +1594,10 @@ static pid_t xfork(uchar flag)
 			if (p > 0)
 				_exit(EXIT_SUCCESS);
 			else if (p == 0) {
-				signal(SIGHUP, SIG_DFL);
-				signal(SIGINT, SIG_DFL);
-				signal(SIGQUIT, SIG_DFL);
-				signal(SIGTSTP, SIG_DFL);
+				sigaction(SIGHUP, &dfl_act, NULL);
+				sigaction(SIGINT, &dfl_act, NULL);
+				sigaction(SIGQUIT, &dfl_act, NULL);
+				sigaction(SIGTSTP, &dfl_act, NULL);
 
 				setsid();
 				return p;
@@ -1613,10 +1608,10 @@ static pid_t xfork(uchar flag)
 		}
 
 		/* so they can be used to stop the child */
-		signal(SIGHUP, SIG_DFL);
-		signal(SIGINT, SIG_DFL);
-		signal(SIGQUIT, SIG_DFL);
-		signal(SIGTSTP, SIG_DFL);
+		sigaction(SIGHUP, &dfl_act, NULL);
+		sigaction(SIGINT, &dfl_act, NULL);
+		sigaction(SIGQUIT, &dfl_act, NULL);
+		sigaction(SIGTSTP, &dfl_act, NULL);
 	}
 
 	/* This is the parent waiting for the child to create grandchild*/
@@ -1644,8 +1639,8 @@ static int join(pid_t p, uchar flag)
 	}
 
 	/* restore parent's signal handling */
-	signal(SIGHUP, oldsighup);
-	signal(SIGTSTP, oldsigtstp);
+	sigaction(SIGHUP, &oldsighup, NULL);
+	sigaction(SIGTSTP, &oldsigtstp, NULL);
 
 	return status;
 }
@@ -7201,7 +7196,7 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 
-		signal(SIGPIPE, SIG_IGN);
+		sigaction(SIGPIPE, &(struct sigaction){.sa_handler = SIG_IGN}, NULL);
 	}
 #endif
 
@@ -7237,9 +7232,20 @@ int main(int argc, char *argv[])
 		xerror();
 		return EXIT_FAILURE;
 	}
-	signal(SIGTERM, clean_exit_sighandler);
-	signal(SIGHUP, clean_exit_sighandler);
-	signal(SIGQUIT, SIG_IGN);
+
+	act.sa_handler = clean_exit_sighandler;
+
+	if (sigaction(SIGTERM, &act, NULL) < 0 || sigaction(SIGHUP, &act, NULL) < 0) {
+		xerror();
+		return EXIT_FAILURE;
+	}
+
+	act.sa_handler = SIG_IGN;
+
+	if (sigaction(SIGQUIT, &act, NULL) < 0) {
+		xerror();
+		return EXIT_FAILURE;
+	}
 
 #ifndef NOLOCALE
 	/* Set locale */
