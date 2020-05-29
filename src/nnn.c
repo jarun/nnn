@@ -2588,8 +2588,17 @@ static int filterentries(char *path, char *lastname)
 #endif
 		case 27: /* Exit filter mode on Escape and Alt+key */
 			if (handle_alt_key(ch) != ERR) {
-				unget_wch(*ch);
-				*ch = CONTROL('S');
+				if (*ch == 27) { /* Handle Alt + Esc */
+					if (wln[1]) {
+						ln[REGEX_MAX - 1] = ln[1];
+						ln[1] = wln[1] = '\0';
+						ndents = total;
+						*ch = CONTROL('L');
+					}
+				} else {
+					unget_wch(*ch);
+					*ch = CONTROL('S');
+				}
 			}
 			goto end;
 		}
@@ -4122,14 +4131,14 @@ static void show_help(const char *path)
 	       "9Lt h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
 	   "5Ret Rt l  Open%-20c'  First file/match\n"
 	       "9g ^A  Top%-18c. F5  Toggle hidden\n"
-	       "9G ^E  End%-21c0  Lock terminal\n"
+	       "9G ^E  End%-21c+  Toggle auto-advance\n"
 	       "9b ^/  Bookmark key%-12c,  Pin CWD\n"
 		"a1-4  Context 1-4%-7c(Sh)Tab  Cycle context\n"
 		  "c/  Filter%-17c^N  Toggle type-to-nav\n"
 		"aEsc  Exit prompt%-12c^L  Redraw/clear prompt\n"
-		  "c?  Help, conf%-14c+  Toggle auto-advance\n"
-		  "cq  Quit context%-11c^G  QuitCD\n"
-		 "b^Q  Quit%-20cQ  Quit with err\n"
+		  "c0  Lock%-14cAlt+Esc  Clear filter, redraw\n"
+		  "c?  Help, conf%-13c^G  QuitCD\n"
+		  "cq  Quit context%-7c^Q (Q)  Quit (with err)\n"
 		"1FILES\n"
 	       "9o ^O  Open with...%-12cn  Create new/link\n"
 	       "9f ^F  File details%-12cd  Detail mode toggle\n"
