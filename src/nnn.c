@@ -4159,7 +4159,7 @@ static void show_help(const char *path)
 	       "9x ^X  Delete%-18cE  Edit sel\n"
 	          "c*  Toggle exe%-14c>  Export list\n"
 		"1MISC\n"
-	   "5Alt ; ^S  Select plugin%-11c=  Launch app\n"
+	      "8Alt ;  Select plugin%-11c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
 		  "cc  Connect remote%-10cu  Unmount\n"
 	       "9t ^T  Sort toggles%-12cs  Manage session\n"
@@ -6583,8 +6583,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 
 static char *load_input(int fd, const char *path)
 {
-	/* 512 KiB chunk size */
-	ssize_t i, chunk_count = 1, chunk = 512 * 1024, entries = 0;
+	ssize_t i, chunk_count = 1, chunk = 512 * 1024 /* 512 KiB chunk size */, entries = 0;
 	char *input = malloc(sizeof(char) * chunk), *tmpdir = NULL;
 	char cwd[PATH_MAX], *next;
 	size_t offsets[LIST_FILES_MAX];
