@@ -157,7 +157,13 @@
 #define EXEC_ARGS_MAX 8
 #define LIST_FILES_MAX (1 << 16)
 #define SCROLLOFF 3
+
+#ifndef CTX8
 #define CTX_MAX 4
+#else
+#define CTX_MAX 8
+#endif
+
 #define MIN_DISPLAY_COLS ((CTX_MAX * 2) + 2) /* Two chars for [ and ] */
 #define LONG_SIZE sizeof(ulong)
 #define ARCHIVE_CMD_LEN 16
@@ -5738,6 +5744,12 @@ nochange:
 		case SEL_CTX2: // fallthrough
 		case SEL_CTX3: // fallthrough
 		case SEL_CTX4:
+#ifdef CTX8
+		case SEL_CTX5:
+		case SEL_CTX6:
+		case SEL_CTX7:
+		case SEL_CTX8:
+#endif
 			r = handle_context_switch(sel);
 			if (r < 0)
 				continue;
