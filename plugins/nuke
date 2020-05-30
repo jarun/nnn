@@ -92,7 +92,7 @@ handle_pdf() {
         pdftotext -l 10 -nopgbrk -q -- "${FPATH}" - | eval "$PAGER"
         exit 0
     elif which mutool >/dev/null 2>&1; then
-        mutool draw -F txt -i -- "${FPATH}" 1-10
+        mutool draw -F txt -i -- "${FPATH}" 1-10 | eval "$PAGER"
         exit 0
     elif which exiftool >/dev/null 2>&1; then
         exiftool "${FPATH}" | eval "$PAGER"
