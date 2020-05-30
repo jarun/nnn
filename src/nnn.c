@@ -152,13 +152,13 @@
 #define _ALIGNMENT 0x10 /* 16-byte alignment */
 #define _ALIGNMENT_MASK 0xF
 #define TMP_LEN_MAX 64
-#define CTX_MAX 4
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
 #define EXEC_ARGS_MAX 8
 #define LIST_FILES_MAX (1 << 16)
 #define SCROLLOFF 3
-#define MIN_DISPLAY_COLS 10
+#define CTX_MAX 4
+#define MIN_DISPLAY_COLS ((CTX_MAX * 2) + 2) /* Two chars for [ and ] */
 #define LONG_SIZE sizeof(ulong)
 #define ARCHIVE_CMD_LEN 16
 #define BLK_SHIFT_512 9
@@ -251,10 +251,10 @@ typedef struct {
 	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved1  : 3;
+	uint reserved1  : 2;
 	/* The following settings are global */
-	uint curctx     : 2;  /* Current context number */
 	uint dircolor   : 1;  /* Current status of dir color */
+	uint curctx     : 3;  /* Current context number */
 	uint picker     : 1;  /* Write selection to user-specified file */
 	uint pickraw    : 1;  /* Write selection to sdtout before exit */
 	uint nonavopen  : 1;  /* Open file on right arrow or `l` */
