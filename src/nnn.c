@@ -3570,7 +3570,7 @@ static uchar get_free_ctx(void)
 	uchar r = cfg.curctx;
 
 	do
-		r = (r + 1) & ~CTX_MAX;
+		(r == CTX_MAX - 1) ? (r = 0) : ++r;
 	while (g_ctx[r].c_cfg.ctxactive && (r != cfg.curctx));
 
 	return r;
@@ -4878,11 +4878,11 @@ static int handle_context_switch(enum action sel)
 		r = cfg.curctx;
 		if (sel == SEL_CYCLE)
 			do
-				r = (r + 1) & ~CTX_MAX;
+				(r == CTX_MAX - 1) ? (r = 0) : ++r;
 			while (!g_ctx[r].c_cfg.ctxactive);
 		else
 			do
-				r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
+				(r == 0) ? (r = CTX_MAX - 1) : --r;
 			while (!g_ctx[r].c_cfg.ctxactive);
 		// fallthrough
 	default: /* SEL_CTXN */
@@ -6445,9 +6445,9 @@ nochange:
 		case SEL_QUITFAIL:
 			if (sel == SEL_QUITCTX) {
 				int ctx = cfg.curctx;
-				for (r = (ctx + 1) & ~CTX_MAX;
+				for ((r == CTX_MAX - 1) ? (r = 0) : ++r;
 				     (r != ctx) && !g_ctx[r].c_cfg.ctxactive;
-				     r = ((r + 1) & ~CTX_MAX)) {
+				     (r == CTX_MAX - 1) ? (r = 0) : ++r) {
 				};
 
 				if (r != ctx) {
