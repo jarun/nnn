@@ -66,9 +66,9 @@ preview_file () {
      	viu "$1" | head -n "$lines"
     elif [ "$encoding" = "binary" ] ; then
         # Binary file: just print filetype info
-        printf "-------- Binary file --------\n"
+        echo -e "-------- Binary file --------\n"
         file -b "$1"
-	printf "\n\n------- Informations -------\n"
+	echo -e "\n\n------- Informations -------\n"
 	stat "$1"
     else
         # Text file:
@@ -98,10 +98,10 @@ fi
 
 if [ -e "${TMUX%%,*}" ] && [ "$(tmux -V | cut -c6)" -eq 3 ] ; then
 	if [ -z $SPLIT ]; then
-		if [ "$(( lines * 2 )) -le $cols" ]; then
-			tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
-		else
+		if [ "$(( lines * 2 )) -gt $cols" ]; then
 			tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d "$0" "$1"
+		else
+			tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
 		fi
 	elif [ $SPLIT = "h" ]; then
 		tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
