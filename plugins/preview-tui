@@ -23,6 +23,10 @@
 
 TERMINAL="${TERMINAL:-xterm}"
 PAGER="${PAGER:-less -r}"
+SPLIT="h"
+
+lines=$(($(tput lines)-1))
+cols=$(tput cols)
 
 preview_file () {
     kill "$(jobs -p)" 2>/dev/null
@@ -30,7 +34,6 @@ preview_file () {
 
     encoding="$(file -b --mime-encoding "$1")"
     typ="$(file -b "$1" | sed 's/ .*//')"
-    lines=$(($(tput lines)-1))
 
     if [ -d "$1" ]; then
         # Print directory tree
@@ -63,9 +66,9 @@ preview_file () {
      	viu "$1" | head -n "$lines"
     elif [ "$encoding" = "binary" ] ; then
         # Binary file: just print filetype info
-        echo "-------- Binary file --------"
+        echo "-------- Binary file --------\n"
         file -b "$1"
-	echo "------- Informations -------"
+	echo -e "\n\n------- Informations -------\n"
 	stat "$1"
     else
         # Text file:
@@ -94,16 +97,21 @@ if [ "$PREVIEW_MODE" ] ; then
 fi
 
 if [ -e "${TMUX%%,*}" ] && [ "$(tmux -V | cut -c6)" -eq 3 ] ; then
-   printf "split 'h'orizontal/'v'ertical :"
-   read -r spl
-   case $spl in
-   	h*) tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
-   		;;
-   	v*) tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d "$0" "$1"
-   		;;
-   	*) tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
-   		;;
-   esac
+	if [ -z $SPLIT ]; then
+		if [ $(( $lines * 2 )) -lt $cols ]; then
+			tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+		elif [ $(( $lines * 2 )) -eq $cols ]; then
+			tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+		else
+			tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d "$0" "$1"
+		fi
+	elif [ $SPLIT = "h" ]; then
+		tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+	elif [ $SPLIT = "v" ]; then
+		tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d "$0" "$1"
+	else
+		tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+	fi
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
