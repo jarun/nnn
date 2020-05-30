@@ -199,6 +199,7 @@ static struct key bindings[] = {
 	{ CONTROL('T'),   SEL_SORT },
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
+	{ KEY_F(5),       SEL_REDRAW },
 	/* Select current file path */
 	{ CONTROL('J'),   SEL_SEL },
 	{ ' ',            SEL_SEL },
@@ -240,7 +241,6 @@ static struct key bindings[] = {
 	{ 'e',            SEL_EDIT },
 	/* Run a plugin */
 	{ ';',            SEL_PLUGIN },
-	{ CONTROL('S'),   SEL_PLUGIN },
 	/* Run command */
 	{ '!',            SEL_SHELL },
 	{ CONTROL(']'),   SEL_SHELL },
