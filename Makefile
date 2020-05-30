@@ -61,8 +61,8 @@ ifeq ($(O_NOFIFO),1)
 	CPPFLAGS += -DNOFIFO
 endif
 
-ifeq ($(O_CTX8),1)
-	CPPFLAGS += -DCTX8
+ifdef O_CTXMAX
+	CPPFLAGS += -DCTX_MAX=$(O_CTXMAX)
 endif
 
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)

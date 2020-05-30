@@ -32,6 +32,27 @@
 
 #include <curses.h>
 
+/* Handle variable CTX_MAX */
+#ifndef CTX_MAX
+#    define CTX_MAX 4
+#elif (CTX_MAX < 1) || (CTX_MAX > 8)
+#    error "CTX_MAX should be in range 1..8"
+#endif
+
+#define REPEAT(num, macro) REPEAT_START(num, macro)
+#define REPEAT_START(num, macro) REPEAT_##num(macro)
+#define REPEAT_1(macro) macro(1)
+#define REPEAT_2(macro) REPEAT_1(macro) macro(2)
+#define REPEAT_3(macro) REPEAT_2(macro) macro(3)
+#define REPEAT_4(macro) REPEAT_3(macro) macro(4)
+#define REPEAT_5(macro) REPEAT_4(macro) macro(5)
+#define REPEAT_6(macro) REPEAT_5(macro) macro(6)
+#define REPEAT_7(macro) REPEAT_6(macro) macro(7)
+#define REPEAT_8(macro) REPEAT_7(macro) macro(8)
+
+#define SEL_CTX(num) SEL_CTX##num,
+#define CTX_KEYDEF(num) {'0' + (num), SEL_CTX##num},
+
 #define CONTROL(c) ((c) & 0x1f)
 
 /* Supported actions */
@@ -56,16 +77,9 @@ enum action {
 	SEL_REMOTE,
 	SEL_CYCLE,
 	SEL_CYCLER,
-	SEL_CTX1,
-	SEL_CTX2,
-	SEL_CTX3,
-	SEL_CTX4,
-#ifdef CTX8
-	SEL_CTX5,
-	SEL_CTX6,
-	SEL_CTX7,
-	SEL_CTX8,
-#endif
+
+	REPEAT(CTX_MAX, SEL_CTX)
+
 	SEL_PIN,
 	SEL_FLTR,
 	SEL_MFLTR,
@@ -167,16 +181,7 @@ static struct key bindings[] = {
 	/* Cycle contexts in reverse direction */
 	{ KEY_BTAB,       SEL_CYCLER },
 	/* Go to/create context N */
-	{ '1',            SEL_CTX1 },
-	{ '2',            SEL_CTX2 },
-	{ '3',            SEL_CTX3 },
-	{ '4',            SEL_CTX4 },
-#ifdef CTX8
-	{ '5',            SEL_CTX5 },
-	{ '6',            SEL_CTX6 },
-	{ '7',            SEL_CTX7 },
-	{ '8',            SEL_CTX8 },
-#endif
+	REPEAT(CTX_MAX, CTX_KEYDEF)
 	/* Mark a path to visit later */
 	{ ',',            SEL_PIN },
 	/* Filter */
