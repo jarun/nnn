@@ -30,6 +30,7 @@ preview_file () {
 
     encoding="$(file -b --mime-encoding "$1")"
     typ="$(file -b "$1" | sed 's/ .*//')"
+    lines=$(($(tput lines)-1))
 
     if [ -d "$1" ]; then
         # Print directory tree
