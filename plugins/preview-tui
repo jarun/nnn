@@ -48,18 +48,18 @@ preview_file () {
         )
 
         rm "$tmpfifopath"
-     elif [ "$typ" = "Zip" ] && [ $(command -v zip) ]; then
+     elif [ "$typ" = "Zip" ] && [ "$(command -v zip)" ]; then
      	# Display content of Zip
      	zip -sf "$1" | $PAGER &
-     elif [ "$typ" = "gzip" ] && [ $(command -v tar) ]; then
+     elif [ "$typ" = "gzip" ] && [ "$(command -v tar)" ]; then
      	# Display content of archive
      	tar -tvf "$1" | $PAGER &
-     elif [ "$typ" = "PDF" ] && [ $(command -v pdftotext) ]; then
+     elif [ "$typ" = "PDF" ] && [ "$(command -v pdftotext)" ]; then
      	# Display content of PDF
      	pdftotext "$1" - | $PAGER &
-     elif ( [ "$typ" = "PNG" ] || [ "$typ" = "JPEG" ] ) && [ $(command -v viu) ]; then
+     elif ( [ "$typ" = "PNG" ] || [ "$typ" = "JPEG" ] ) && [ "$(command -v viu)" ]; then
      	# Display image in terminal (more or less lowered resolution)
-     	viu "$1" | head -n $lines
+     	viu "$1" | head -n "$lines"
     elif [ "$encoding" = "binary" ] ; then
         # Binary file: just print filetype info
         echo "-------- Binary file --------"
@@ -68,7 +68,7 @@ preview_file () {
 	stat "$1"
     else
         # Text file:
-	if [ $(command -v highlight) ]; then
+	if [ "$(command -v highlight)" ]; then
 		highlight --out-format=ansi --force "$1" | $PAGER &
 	else
 		$PAGER "$1" &
