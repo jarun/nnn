@@ -124,7 +124,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 1. [Install](https://github.com/jarun/nnn/wiki/Usage#installation) `nnn` and deps (if you need any).
 2. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
-3. Use option `-e` in your alias to open text files in `$VISUAL`/`$EDITOR`/ vi. [Open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text) if you wish.
+3. Files are opened with the desktop opener by default. Add `-e` in your alias to open text files in `$VISUAL`/`$EDITOR`/ vi. [Open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text) if you wish.
 4. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins).
 5. Use option `-x` to copy selected file paths to system clipboard and show notis on cp, mv, rm completion.
 6. For a CLI-only environment, customize and use plugin [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke) with option `-c` (overrides `-e`).
