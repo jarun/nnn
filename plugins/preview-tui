@@ -22,13 +22,14 @@
 # Authors: Todd Yamakawa, Léo Villeveygoux
 
 TERMINAL="${TERMINAL:-xterm}"
-PAGER="${PAGER:-less}"
+PAGER="${PAGER:-less -r}"
 
 preview_file () {
     kill "$(jobs -p)" 2>/dev/null
     clear
 
     encoding="$(file -b --mime-encoding "$1")"
+    typ="$(file -b "$1" | sed 's/ .*//')"
 
     if [ -d "$1" ]; then
         # Print directory tree
@@ -47,13 +48,31 @@ preview_file () {
         )
 
         rm "$tmpfifopath"
+     elif [ "$typ" = "Zip" ] && [ $(command -v zip) ]; then
+     	# Display content of Zip
+     	zip -sf "$1" | $PAGER &
+     elif [ "$typ" = "gzip" ] && [ $(command -v tar) ]; then
+     	# Display content of archive
+     	tar -tvf "$1" | $PAGER &
+     elif [ "$typ" = "PDF" ] && [ $(command -v pdftotext) ]; then
+     	# Display content of PDF
+     	pdftotext "$1" - | $PAGER &
+     elif ( [ "$typ" = "PNG" ] || [ "$typ" = "JPEG" ] ) && [ $(command -v viu) ]; then
+     	# Display image in terminal (more or less lowered resolution)
+     	viu "$1" | head -n $lines
     elif [ "$encoding" = "binary" ] ; then
         # Binary file: just print filetype info
         echo "-------- Binary file --------"
         file -b "$1"
+	echo "------- Informations -------"
+	stat "$1"
     else
         # Text file:
-        $PAGER "$1" &
+	if [ $(command -v highlight) ]; then
+		highlight --out-format=ansi --force "$1" | $PAGER &
+	else
+		$PAGER "$1" &
+	fi
     fi
 }
 
@@ -74,7 +93,16 @@ if [ "$PREVIEW_MODE" ] ; then
 fi
 
 if [ -e "${TMUX%%,*}" ] && [ "$(tmux -V | cut -c6)" -eq 3 ] ; then
-    tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+   printf "split 'h'orizontal/'v'ertical :"
+   read -r spl
+   case $spl in
+   	h*) tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+   		;;
+   	v*) tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d "$0" "$1"
+   		;;
+   	*) tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+   		;;
+   esac
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
