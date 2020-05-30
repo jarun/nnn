@@ -6917,7 +6917,8 @@ static void cleanup(void)
 	if (g_state.autofifo)
 		unlink(fifopath);
 #endif
-
+	if (g_state.pluginit)
+		unlink(g_pipepath);
 #ifdef DBGMODE
 	disabledbg();
 #endif
