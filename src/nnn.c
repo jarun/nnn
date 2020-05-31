@@ -822,22 +822,22 @@ static inline bool xconfirm(int c)
 
 static int get_input(const char *prompt)
 {
-	int r;
-
 	if (prompt)
 		printmsg(prompt);
 	cleartimeout();
+
+	int r = getch();
+
 #ifdef KEY_RESIZE
-	do {
-		r = getch();
-		if (r == KEY_RESIZE && prompt) {
+	while (r == KEY_RESIZE) {
+		if (prompt) {
 			clearoldprompt();
 			xlines = LINES;
 			printmsg(prompt);
 		}
-	} while (r == KEY_RESIZE);
-#else
-	r = getch();
+
+		r = getch();
+	}
 #endif
 	settimeout();
 	return r;
