@@ -8,6 +8,8 @@ assignees: ''
 
 If it looks like a local environment issue, please try to debug yourself. Debugging local setup issues is not our top priority.
 
+If you are looking for a new feature or program option, ensure you have the correct version with the feature installed. Refer to the release notes to confirm.
+
 Before opening an issue, please try to reproduce on latest master. The bug you noticed might have already been fixed.
 
 Useful links:

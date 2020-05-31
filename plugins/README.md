@@ -93,13 +93,13 @@ To select and invoke a plugin from the plugin directory, press <kbd>Enter</kbd> 
 
 #### Skip directory refresh after running a plugin
 
-`nnn` refreshes the directory after running a plugin to reflect any changes by the plugin. To disable this (say while running the `mediainfo` plugin on some filtered files), add a `-` before the plugin name:
+`nnn` refreshes the directory after running a plugin to reflect any changes by the plugin. To disable this (say while running the `mediainf` plugin on some filtered files), add a `-` before the plugin name:
 
 ```sh
 export NNN_PLUG='m:-mediainf'
 ```
 
-Now `nnn` will not refresh the directory after running the `mediainfo` plugin.
+Now `nnn` will not refresh the directory after running the `mediainf` plugin.
 
 ## Running commands as plugin
 

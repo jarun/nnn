@@ -2328,7 +2328,7 @@ static int nextsel(int presel)
 			c = getch();
 			if (c != ERR) {
 				ungetch(c);
-				c = CONTROL('S');
+				c = ';';
 			} else
 				c = 27;
 			settimeout();
@@ -2603,7 +2603,7 @@ static int filterentries(char *path, char *lastname)
 		case 27: /* Exit filter mode on Escape and Alt+key */
 			if (handle_alt_key(ch) != ERR) {
 				unget_wch(*ch);
-				*ch = CONTROL('S');
+				*ch = ';';
 			}
 			goto end;
 		}
