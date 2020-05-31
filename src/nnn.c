@@ -6491,19 +6491,15 @@ nochange:
 				cfg.picker ? selbufpos = 0 : write_lastdir(path);
 			return sel == SEL_QUITFAIL ? EXIT_FAILURE : EXIT_SUCCESS;
 		default:
-			r = FALSE;
-			if (xlines != LINES || xcols != COLS) {
-				setdirwatch(); /* Terminal resized */
-				r = TRUE;
-			} else if (idletimeout && idle == idletimeout)
+			if (xlines != LINES || xcols != COLS)
+				continue;
+
+			if (idletimeout && idle == idletimeout)
 				lock_terminal(); /* Locker */
 
 			idle = 0;
 			if (ndents)
 				copycurname();
-
-			if (r)
-				continue;
 
 			goto nochange;
 		} /* switch (sel) */
