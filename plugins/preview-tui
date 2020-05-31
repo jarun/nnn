@@ -18,12 +18,14 @@
 #   single common preview window. I you provide different FIFO path, they
 #   will be independent.
 #
+#   
+#
 # Shell: POSIX compliant
 # Authors: Todd Yamakawa, Léo Villeveygoux
 
 TERMINAL="${TERMINAL:-xterm}"
 PAGER="${PAGER:-less -r}"
-SPLIT="h"
+SPLIT=
 
 lines=$(($(tput lines)-1))
 cols=$(tput cols)
@@ -34,6 +36,7 @@ preview_file () {
 
     encoding="$(file -b --mime-encoding "$1")"
     typ="$(file -b "$1" | sed 's/ .*//')"
+    LESSOPEN="${LESSOPEN:'|highlight --out-format=ansi --force %s'}"
 
     if [ -d "$1" ]; then
         # Print directory tree
@@ -52,7 +55,7 @@ preview_file () {
         )
 
         rm "$tmpfifopath"
-     elif [ "$typ" = "Zip" ] && [ "$(command -v zip)" ]; then
+    elif [ "$typ" = "Zip" ] && [ "$(command -v zip)" ]; then
      	# Display content of Zip
      	zip -sf "$1" | $PAGER &
      elif [ "$typ" = "gzip" ] && [ "$(command -v tar)" ]; then
@@ -68,7 +71,7 @@ preview_file () {
         # Binary file: just print filetype info
         echo '-------- Binary file --------'
         file -b "$1"
-	echo '------- Informations -------'
+	echo '------- Details -------'
 	stat "$1"
     else
         # Text file:
