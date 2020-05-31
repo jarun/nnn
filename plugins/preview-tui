@@ -18,7 +18,8 @@
 #   single common preview window. I you provide different FIFO path, they
 #   will be independent.
 #
-#   
+#   Configure SPLIT to either "h" or "v" to set a 'h'orizontal split or a
+#   'v'ertical split
 #
 # Shell: POSIX compliant
 # Authors: Todd Yamakawa, Léo Villeveygoux
@@ -35,7 +36,7 @@ preview_file () {
     clear
 
     encoding="$(file -b --mime-encoding "$1")"
-    typ="$(file -b "$1" | sed 's/ .*//')"
+    typ="$(file -b --mime-type)"
     LESSOPEN="${LESSOPEN:'|highlight --out-format=ansi --force %s'}"
 
     if [ -d "$1" ]; then
@@ -56,15 +57,15 @@ preview_file () {
 
         rm "$tmpfifopath"
     elif [ "$typ" = "Zip" ] && [ "$(command -v zip)" ]; then
-     	# Display content of Zip
-     	zip -sf "$1" | $PAGER &
-     elif [ "$typ" = "gzip" ] && [ "$(command -v tar)" ]; then
-     	# Display content of archive
-     	tar -tvf "$1" | $PAGER &
-     elif [ "$typ" = "PDF" ] && [ "$(command -v pdftotext)" ]; then
-     	# Display content of PDF
-     	pdftotext "$1" - | $PAGER &
-     elif ( [ "$typ" = "PNG" ] || [ "$typ" = "JPEG" ] ) && [ "$(command -v viu)" ]; then
+    	# Display content of Zip
+    	zip -sf "$1" | $PAGER &
+    elif [ "$typ" = "gzip" ] && [ "$(command -v tar)" ]; then
+    	# Display content of archive
+    	tar -tvf "$1" | $PAGER &
+    elif [ "$typ" = "PDF" ] && [ "$(command -v pdftotext)" ]; then
+    	# Display content of PDF
+    	pdftotext "$1" - | $PAGER &
+    elif ( [ "$typ" = "PNG" ] || [ "$typ" = "JPEG" ] ) && [ "$(command -v viu)" ]; then
      	# Display image in terminal (more or less lowered resolution)
      	viu "$1" | head -n "$lines"
     elif [ "$encoding" = "binary" ] ; then
