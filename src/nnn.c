@@ -3698,9 +3698,11 @@ static bool show_stats(const char *fpath, const struct stat *sb)
 			}
 			fprintf(fp, " %s\n  ", begin);
 
+#ifdef FILE_MIME_OPTS
 			/* Show the file mime type */
 			get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, fpath, FALSE);
 			fprintf(fp, "%s", g_buf);
+#endif
 		}
 	}
 
