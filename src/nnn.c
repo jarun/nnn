@@ -2569,23 +2569,18 @@ static int filterentries(char *path, char *lastname)
 			} else
 				continue;
 			// fallthrough
-		case KEY_F(5): // fallthrough
 		case CONTROL('L'):
-			if (*ch == CONTROL('L') || *ch == KEY_F(5)) {
+			if (*ch == CONTROL('L')) {
 				if (wln[1]) {
 					ln[REGEX_MAX - 1] = ln[1];
 					ln[1] = wln[1] = '\0';
 					len = 1;
 					ndents = total;
-				} else if (*ch == CONTROL('L') && ln[REGEX_MAX - 1]) {
-					/* Show the previous filter */
+				} else if (ln[REGEX_MAX - 1]) { /* Show the previous filter */
 					ln[1] = ln[REGEX_MAX - 1];
 					ln[REGEX_MAX - 1] = '\0';
 					len = mbstowcs(wln, ln, REGEX_MAX);
 				}
-
-				if (*ch == KEY_F(5))
-					goto end;
 			}
 
 			/* Go to the top, we don't know if the hovered file will match the filter */
@@ -4141,7 +4136,6 @@ static void show_help(const char *path)
 		"a1-4  Context 1-4%-7c(Sh)Tab  Cycle context\n"
 		  "c/  Filter%-17c^N  Toggle type-to-nav\n"
 		"aEsc  Exit prompt%-12c^L  Redraw/clear prompt\n"
-		  "c0  Lock%-19cF5  Redraw\n"
 		  "c?  Help, conf%-13c^G  QuitCD\n"
 		  "cq  Quit context%-7c^Q (Q)  Quit (with err)\n"
 		"1FILES\n"
@@ -4159,7 +4153,7 @@ static void show_help(const char *path)
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
 		  "cc  Connect remote%-10cu  Unmount\n"
 	       "9t ^T  Sort toggles%-12cs  Manage session\n"
-	          "cT  Set time type%-0c\n"
+	          "cT  Set time type%-11c0  Lock\n"
 	};
 
 	fd = create_tmp_file();
