@@ -31,11 +31,21 @@ SPLIT=
 lines=$(($(tput lines)-1))
 cols=$(tput cols)
 
+beginswith() {
+    case $1 in "$2"*) true;; *) false;; esac;
+}
+
 preview_file () {
     kill "$(jobs -p)" 2>/dev/null
     clear
 
     encoding="$(file -b --mime-encoding "$1")"
+    mimetype="$(file --dereference --brief --mime-type -- "$1")"
+
+    ext="${1##*.}"
+    if ! [ -z "$ext" ]; then
+        ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
+    fi
 
     if [ -d "$1" ]; then
         # Print directory tree
@@ -54,6 +64,10 @@ preview_file () {
         )
 
         rm "$tmpfifopath"
+    elif beginswith "$mimetype" "image/" ; then
+        viu "$1" | head -n "$lines"
+    elif beginswith "$mimetype" "text/troff" ; then
+        man -l "$1" &
     elif [ "$encoding" = "binary" ] ; then
         # Binary file: just print filetype info
         echo "-------- binary file --------"
