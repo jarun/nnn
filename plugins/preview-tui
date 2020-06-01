@@ -18,11 +18,18 @@
 #   single common preview window. I you provide different FIFO path, they
 #   will be independent.
 #
+#   Configure SPLIT to either "h" or "v" to set a 'h'orizontal split or a
+#   'v'ertical split
+#
 # Shell: POSIX compliant
-# Authors: Todd Yamakawa, Léo Villeveygoux
+# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste
 
 TERMINAL="${TERMINAL:-xterm}"
 PAGER="${PAGER:-less}"
+SPLIT=
+
+lines=$(($(tput lines)-1))
+cols=$(tput cols)
 
 preview_file () {
     kill "$(jobs -p)" 2>/dev/null
@@ -49,8 +56,10 @@ preview_file () {
         rm "$tmpfifopath"
     elif [ "$encoding" = "binary" ] ; then
         # Binary file: just print filetype info
-        echo "-------- Binary file --------"
+        echo "-------- binary file --------"
         file -b "$1"
+        echo "\n-------- stat --------"
+        stat "$1"
     else
         # Text file:
         $PAGER "$1" &
@@ -74,7 +83,19 @@ if [ "$PREVIEW_MODE" ] ; then
 fi
 
 if [ -e "${TMUX%%,*}" ] && [ "$(tmux -V | cut -c6)" -eq 3 ] ; then
-    tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+    if [ -z "$SPLIT" ]; then
+        if [ "$(( lines * 2 ))" -gt "$cols" ]; then
+            tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dv "$0" "$1"
+        else
+            tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+        fi
+    elif [ "$SPLIT" = "h" ]; then
+        tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+    elif [ "$SPLIT" = "v" ]; then
+        tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dv "$0" "$1"
+    else
+        tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+    fi
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
