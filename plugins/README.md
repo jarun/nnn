@@ -204,7 +204,7 @@ If a `NNN_FIFO` environment variable is set globally (and `-a` is not passed to 
 
 Don't forget to fork in the background to avoid blocking `nnn`.
 
-Note that `nnn` does not watch the hovered file and update the path if it's modified while under preview.
+Note that `nnn` does not watch the hovered file and update the path if it's modified while under preview. Press <kbd>^L</kbd> to update the preview without changing the hovered entry.
 
 #### Examples
 There are many plugins provided by `nnn` which can be used as examples. Here are a few simple selected examples.
