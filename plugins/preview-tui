@@ -58,7 +58,7 @@ preview_file () {
         # Binary file: just print filetype info
         echo "-------- binary file --------"
         file -b "$1"
-        echo "\n-------- stat --------"
+        echo "-------- stat --------"
         stat "$1"
     else
         # Text file:
