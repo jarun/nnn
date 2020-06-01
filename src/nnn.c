@@ -185,6 +185,7 @@
 #define F_NOTRACE 0x04  /* suppress stdout and strerr (no traces) */
 #define F_NORMAL  0x08  /* spawn child process in non-curses regular CLI mode */
 #define F_CONFIRM 0x10  /* run command - show results before exit (must have F_NORMAL) */
+#define F_CHKRTN  0x20  /* wait for user prompt if cmd returns failure status */
 #define F_CLI     (F_NORMAL | F_MULTI)
 #define F_SILENT  (F_CLI | F_NOTRACE)
 
@@ -1715,7 +1716,7 @@ static int spawn(char *file, char *arg1, char *arg2, uchar flag)
 
 		DPRINTF_D(pid);
 
-		if (flag & F_CONFIRM) {
+		if ((flag & F_CONFIRM) || ((flag & F_CHKRTN) && retstatus)) {
 			printf("%s", messages[MSG_CONTINUE]);
 #ifndef NORL
 			fflush(stdout);
@@ -1794,7 +1795,7 @@ static void xrm(char *fpath)
 		char rm_opts[] = "-ir";
 
 		rm_opts[1] = confirm_force(FALSE);
-		spawn("rm", rm_opts, fpath, F_NORMAL);
+		spawn("rm", rm_opts, fpath, F_NORMAL | F_CHKRTN);
 	}
 }
 
@@ -1854,9 +1855,8 @@ static bool cpmv_rename(int choice, const char *path)
 	}
 
 	snprintf(buf, sizeof(buf), patterns[P_CPMVRNM], path, g_tmpfpath, cmd);
-	spawn(utils[UTIL_SH_EXEC], buf, NULL, F_CLI);
-	ret = TRUE;
-
+	if (!spawn(utils[UTIL_SH_EXEC], buf, NULL, F_CLI | F_CHKRTN))
+		ret = TRUE;
 finish:
 	if (fd >= 0)
 		close(fd);
@@ -1895,8 +1895,10 @@ static bool cpmvrm_selection(enum action sel, char *path)
 		break;
 	}
 
-	if (sel != SEL_CPMVAS)
-		spawn(utils[UTIL_SH_EXEC], g_buf, NULL, F_CLI);
+	if (sel != SEL_CPMVAS && spawn(utils[UTIL_SH_EXEC], g_buf, NULL, F_CLI | F_CHKRTN)) {
+		printmsg(messages[MSG_FAILED]);
+		return FALSE;
+	}
 
 	/* Clear selection on move or delete */
 	if (sel != SEL_CP)
