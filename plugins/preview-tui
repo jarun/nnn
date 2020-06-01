@@ -85,17 +85,15 @@ fi
 if [ -e "${TMUX%%,*}" ] && [ "$(tmux -V | cut -c6)" -eq 3 ] ; then
     if [ -z "$SPLIT" ]; then
         if [ "$(( lines * 2 ))" -gt "$cols" ]; then
-            tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dv "$0" "$1"
+            SPLIT='v'
         else
-            tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+            SPLIT='h'
         fi
-    elif [ "$SPLIT" = "h" ]; then
-        tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
-    elif [ "$SPLIT" = "v" ]; then
-        tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dv "$0" "$1"
-    else
-        tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -dh "$0" "$1"
+    elif [ "$SPLIT" != "h" ] && [ "$SPLIT" != "v" ] ; then
+        SPLIT='h'
     fi
+
+    tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d"$SPLIT" "$0" "$1"
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
