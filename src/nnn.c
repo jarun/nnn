@@ -4734,7 +4734,7 @@ static void populate(char *path, char *lastname)
 }
 
 #ifndef NOFIFO
-static void notify_fifo()
+static void notify_fifo(bool force)
 {
 	if (fifofd == -1) {
 		fifofd = open(fifopath, O_WRONLY|O_NONBLOCK|O_CLOEXEC);
@@ -4749,7 +4749,7 @@ static void notify_fifo()
 
 	static struct entry lastentry;
 
-	if (!memcmp(&lastentry, &dents[cur], sizeof(struct entry)))
+	if (!force && !memcmp(&lastentry, &dents[cur], sizeof(struct entry)))
 		return;
 
 	lastentry = dents[cur];
@@ -4796,7 +4796,7 @@ static void move_cursor(int target, int ignore_scrolloff)
 
 #ifndef NOFIFO
 	if (fifopath)
-		notify_fifo();
+		notify_fifo(FALSE);
 #endif
 }
 
@@ -5471,8 +5471,12 @@ nochange:
 					(event.bstate == BUTTON1_PRESSED ||
 					 event.bstate == BUTTON3_PRESSED)) {
 				r = curscroll + (event.y - 2);
-				move_cursor(r, 1);
-
+				if (r != cur)
+					move_cursor(r, 1);
+#ifndef NOFIFO
+				else
+					notify_fifo(TRUE);
+#endif
 				/* Handle right click selection */
 				if (event.bstate == BUTTON3_PRESSED) {
 					rightclicksel = 1;
@@ -7341,7 +7345,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifndef NOFIFO
-	notify_fifo();
+	notify_fifo(FALSE);
 	if (fifofd != -1)
 		close(fifofd);
 #endif
