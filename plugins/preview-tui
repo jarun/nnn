@@ -5,7 +5,8 @@
 # Note: This plugin needs a "NNN_FIFO" to work.
 #
 # Dependencies: tmux (>=3.0) or xterm or $TERMINAL, less or $PAGER,
-#               file, stat, tree, add you own! (see examples in code)
+#               file, stat, tree, man, tar, unzip, ...
+#                      ... add you own! (see examples in code)
 #
 # Usage:
 #   You need to set a NNN_FIFO path and set a key for the plugin,
@@ -57,13 +58,13 @@ preview_file () {
     encoding="$(file -Lb --mime-encoding -- "$1")"
 
     # Detect mime type
-    #mimetype="$(file -Lb --mime-type -- "$1")"
+    mimetype="$(file -Lb --mime-type -- "$1")"
 
     # Detect file extention - use if you need
-    #ext="${1##*.}"
-    #if [ -n "$ext" ]; then
-    #    ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
-    #fi
+    ext="${1##*.}"
+    if [ -n "$ext" ]; then
+        ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
+    fi
 
     if [ -d "$1" ]; then
         # Print directory tree
@@ -71,12 +72,12 @@ preview_file () {
         fifo_pager tree
     #elif [ "${mimetype%%/*}" = "image" ] ; then
     #    catimg "$1"
-    #elif [ "$mimetype" = "text/troff" ] ; then
-    #    fifo_pager man -Pcat -l "$1"
-    #elif [ "$mimetype" = "application/zip" ] ; then
-    #    fifo_pager unzip -l "$1"
-    #elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ] ; then
-    #    fifo_pager tar -tvf "$1"
+    elif [ "$mimetype" = "text/troff" ] ; then
+        fifo_pager man -Pcat -l "$1"
+    elif [ "$mimetype" = "application/zip" ] ; then
+        fifo_pager unzip -l "$1"
+    elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ] ; then
+        fifo_pager tar -tvf "$1"
     elif [ "$encoding" = "binary" ] ; then
         # Binary file: just print filetype info
         echo "-------- binary file --------"
