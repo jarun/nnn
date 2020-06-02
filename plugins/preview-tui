@@ -40,8 +40,11 @@ preview_file () {
     clear
 
     encoding="$(file -b --mime-encoding "$1")"
+
+    # Detect mime type
     mimetype="$(file --dereference --brief --mime-type -- "$1")"
 
+    # Detect file extention
     ext="${1##*.}"
     if ! [ -z "$ext" ]; then
         ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
@@ -52,7 +55,7 @@ preview_file () {
 
         cd "$1" || return
 
-        # we use a FIFO to access less PID
+        # We use a FIFO to access less PID
         tmpfifopath="${TMPDIR:-/tmp}/nnn-preview-tui-fifo.$$"
         mkfifo "$tmpfifopath" || return
 
@@ -64,15 +67,20 @@ preview_file () {
         )
 
         rm "$tmpfifopath"
-    elif beginswith "$mimetype" "image/" ; then
-        viu "$1" | head -n "$lines"
-    elif beginswith "$mimetype" "text/troff" ; then
-        man -l "$1" &
+    #elif beginswith "$mimetype" "image/" ; then
+    #    viu "$1" | head -n "$lines"
+    #elif beginswith "$mimetype" "text/troff" ; then
+    #    man -l "$1" &
+    elif beginswith "$mimetype" "application/zip" ; then
+        #$PAGER "$(zip -sf "$1")" &
+        $PAGER "$(unzip -l "$1")" &
+    elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ] ; then
+        $PAGER "$(tar -tvf "$1")" &
     elif [ "$encoding" = "binary" ] ; then
         # Binary file: just print filetype info
         echo "-------- binary file --------"
         file -b "$1"
-        echo "-------- stat --------"
+        echo ''
         stat "$1"
     else
         # Text file:
