@@ -4151,13 +4151,16 @@ static void show_help(const char *path)
 	       "9p ^P  Copy sel here%-11ca  Select all\n"
 	       "9v ^V  Move sel here%-8cw ^W  Cp/mv sel as\n"
 	       "9x ^X  Delete%-18cE  Edit sel\n"
-	          "c*  Toggle exe%-14c>  Export list\n"
+		  "c*  Toggle exe%-14c>  Export list\n"
 		"1MISC\n"
 	      "8Alt ;  Select plugin%-11c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
 		  "cc  Connect remote%-10cu  Unmount\n"
 	       "9t ^T  Sort toggles%-12cs  Manage session\n"
-	          "cT  Set time type%-11c0  Lock\n"
+		  "cT  Set time type%-11c0  Lock\n"
+#ifndef NOFIFO
+		  "c|  Send to FIFO%-0c\n"
+#endif
 	};
 
 	fd = create_tmp_file();
@@ -6492,6 +6495,11 @@ nochange:
 			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE"))
 				cfg.picker ? selbufpos = 0 : write_lastdir(path);
 			return sel == SEL_QUITFAIL ? EXIT_FAILURE : EXIT_SUCCESS;
+#ifndef NOFIFO
+		case SEL_FIFO:
+			notify_fifo(TRUE);
+			goto nochange;
+#endif
 		default:
 			if (xlines != LINES || xcols != COLS)
 				continue;
