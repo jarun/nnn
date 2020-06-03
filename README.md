@@ -144,7 +144,7 @@ Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>),
 - [Todd Yamakawa](https://github.com/toddyamakawa)
 - and other contributors
 
-Visit the [ToDo list](https://github.com/jarun/nnn/issues/594) to contribute or see the features in progress.
+Visit the [ToDo list](https://github.com/jarun/nnn/issues/629) to contribute or see the features in progress.
 
 ## Elsewhere
 
