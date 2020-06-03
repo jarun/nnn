@@ -5477,7 +5477,7 @@ nochange:
 				if (r != cur)
 					move_cursor(r, 1);
 #ifndef NOFIFO
-				else
+				else if (event.bstate == BUTTON1_PRESSED)
 					notify_fifo(TRUE);
 #endif
 				/* Handle right click selection */
