@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+# Description: gpg decryption
+#
+# Shell: POSIX compliant
+# Author: KlzXS
+
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+files=$(tr '\0' '\n' < "$selection")
+
+printf "%s" "$files" | xargs -n1 -I{} gpg --decrypt --output "{}.dec" {}
+
