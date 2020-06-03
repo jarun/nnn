@@ -106,7 +106,7 @@ if [ "$PREVIEW_MODE" ] ; then
     exit 0
 fi
 
-if [ -e "${TMUX%%,*}" ] && [ "$(tmux -V | cut -c6)" -eq 3 ] ; then
+if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.' ; then
     if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ] ; then
         SPLIT='v'
     elif [ "$SPLIT" != 'v' ] ; then
