@@ -267,7 +267,8 @@ static struct key bindings[] = {
 	/* Quit with an error code */
 	{ 'Q',            SEL_QUITFAIL },
 #ifndef NOFIFO
-	{ '|',            SEL_FIFO },
+	/* Send hovered path to NNN_FIFO */
+	{ 27,            SEL_FIFO },
 #endif
 #ifndef NOMOUSE
 	{ KEY_MOUSE,      SEL_CLICK },
