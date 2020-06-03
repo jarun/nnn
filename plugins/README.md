@@ -198,13 +198,9 @@ Usage examples can be found in the Examples section below.
 
 If `NNN_FIFO` is set, `nnn` will open it and write every hovered files. This can be used in plugins and external scripts, e.g. to implement file previews.
 
-The easiest way to set `NNN_FIFO` is to start `nnn` with the `-a` option, to automatically setup a temporary FIFO file for this `nnn` instance.
-
-If a `NNN_FIFO` environment variable is set globally (and `-a` is not passed to `nnn`), each `nnn` instance will write to the same FIFO, and a process reading from the pipe will get hovered path from every instance, interleaved.
-
 Don't forget to fork in the background to avoid blocking `nnn`.
 
-Note that `nnn` does not watch the hovered file and update the path if it's modified while under preview. Press <kbd>|</kbd> to update the preview without changing the hovered entry.
+For more details on configuration and usage of the preview plugins, visit [Live Previews](https://github.com/jarun/nnn/wiki/Live-previews).
 
 #### Examples
 There are many plugins provided by `nnn` which can be used as examples. Here are a few simple selected examples.
