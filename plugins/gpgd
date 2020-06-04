@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # Description: Decrypts selected files using gpg. The contents of the decrypted file are stored in a file with extension .dec
 #
@@ -9,7 +9,14 @@
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
-files=$(tr '\0' '\n' < "$selection")
+printf "(s)election/(c)urrent? [default=c] "
+read -r resp
+
+if [ "$resp" = "s" ]; then
+	files=$(tr '\0' '\n' < "$selection")
+else
+	files=$1
+fi
 
 printf "%s" "$files" | xargs -n1 -I{} gpg --decrypt --output "{}.dec" {}
 
