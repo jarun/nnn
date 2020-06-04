@@ -41,7 +41,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | getplugs | Update plugins to installed `nnn` version | sh | curl |
 | gutenread | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
 | gpgd | Decrypt files using gpg | sh | gpg |
-| gpge | Encrypt files using gpg | sh | gpg, fzf (see in-file docs) |
+| gpge | Encrypt files using gpg | sh | gpg, fzf |
 | hexview | View a file in hex in `$PAGER` | sh | xxd |
 | imgresize | Resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |
 | imgthumb | View thumbnail of an image or dir of images | sh | [lsix](https://github.com/hackerb9/lsix) |
