@@ -3,8 +3,8 @@
 <p align="center"><img src="https://i.imgur.com/SpT0L2W.png" /></p>
 <p align="center"><i>read ebooks with plugin gutenread (Android)</i></p>
 
-<p align="center"><img src="https://i.imgur.com/14iPDIq.png" /></p>
-<p align="center"><i>image preview with plugin imgthumb</i></p>
+<p align="center"><a href="https://asciinema.org/a/336443"><img src="https://asciinema.org/a/336443.png" width="734"/></a></p>
+<p align="center"><i>Live Previews</i></p>
 
 ## Introduction
 
