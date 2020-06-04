@@ -35,7 +35,7 @@ PAGER="${PAGER:-less -R}"
 
 if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
     TERMINAL=tmux
-elif [ -n "$KITTY_WINDOW_ID" ]; then
+elif [ -n "$KITTY_WINDOW_ID" ] && kitty @ ls >/dev/null 2>&1; then
     TERMINAL=kitty
 else
     TERMINAL="${TERMINAL:-xterm}"
