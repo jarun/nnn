@@ -33,6 +33,10 @@
 TERMINAL="${TERMINAL:-xterm}"
 PAGER="${PAGER:-less -R}"
 
+exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
 fifo_pager() {
     cmd="$1"
     shift
@@ -55,38 +59,55 @@ preview_file () {
     kill %- %+ 2>/dev/null && wait %- %+ 2>/dev/null
     clear
 
+    # Detecting the exact type of the file: the encoding, mime type, and
+    # extension in lowercase.
     encoding="$(file -Lb --mime-encoding -- "$1")"
-
-    # Detect mime type
     mimetype="$(file -Lb --mime-type -- "$1")"
-
-    # Detect file extention
     ext="${1##*.}"
     if [ -n "$ext" ]; then
         ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
     fi
 
     if [ -d "$1" ]; then
-        # Print directory tree
         cd "$1" || return
-        fifo_pager tree
-    #elif [ "${mimetype%%/*}" = "image" ] ; then
-    #    catimg "$1"
+        if exists tree; then
+            fifo_pager tree
+        elif exists exa; then
+            fifo_pager exa -G --colour=always 2>/dev/null
+        else
+            fifo_pager ls --color=always
+        fi
+    elif [ "$encoding" = "binary" ]; then
+        if [ "${mimetype%%/*}" = "image" ] ; then
+            if [ -n "$KITTY_WINDOW_ID" ]; then
+                # Kitty terminal users can use the native image preview method.
+                kitty +kitten icat --silent --transfer-mode=stream --stdin=no \
+                    "$1" &
+            elif exists catimg; then
+                catimg "$1"
+            fi
+        elif [ "$mimetype" = "application/zip" ] ; then
+            fifo_pager unzip -l "$1"
+        elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ] ; then
+            fifo_pager tar -tvf "$1"
+        else
+            # Binary file: show file info
+            printf -- "-------- \033[1;31mBinary file\033[0m --------\n"
+            if exists mediainfo; then
+                fifo_pager mediainfo "$1" 2>/dev/null
+            else
+                fifo_pager file -b "$1"
+            fi
+        fi
     elif [ "$mimetype" = "text/troff" ] ; then
         fifo_pager man -Pcat -l "$1"
-    elif [ "$mimetype" = "application/zip" ] ; then
-        fifo_pager unzip -l "$1"
-    elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ] ; then
-        fifo_pager tar -tvf "$1"
-    elif [ "$encoding" = "binary" ] ; then
-        # Binary file: just print filetype info
-        echo "-------- binary file --------"
-        file -b "$1"
-        echo
-        stat "$1"
     else
-        # Text file:
-        $PAGER "$1" &
+        if exists bat; then
+            bat --terminal-width="$cols" --paging=never --decorations=always \
+                --color=always "$1" 2>/dev/null
+        else
+            $PAGER "$1" &
+        fi
     fi
 }
 
@@ -114,6 +135,11 @@ if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.' ; then
     fi
 
     tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d"$SPLIT" "$0" "$1"
+elif [ "$TERMINAL" = "xterm-kitty" ]; then
+    # Trying to use kitty's integrated window management as the split window.
+    kitty @ launch --no-response --title "nnn preview" --keep-focus \
+          --cwd="$PWD" --env "NNN_FIFO=$NNN_FIFO" --env "PREVIEW_MODE=1" \
+          "$0" "$1" > /dev/null
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
