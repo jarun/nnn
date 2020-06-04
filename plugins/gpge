@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Description: gpg encryption
+# Description: Encrypts selected files using gpg. Can encrypt either asymmetrically (key) or symmetrically (passphrase).
+#              If asymmetric encryption is chosen a key can be chosen from the list of capable public keys using fzf.
 #
 # Note: symmetric encryption only works for a single file as per gpg limitations
 #
