@@ -30,6 +30,7 @@
 # Shell: POSIX compliant
 # Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste
 
+SCOPE_SCRIPT="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/scope.sh"
 TERMINAL="${TERMINAL:-xterm}"
 PAGER="${PAGER:-less -R}"
 
@@ -66,6 +67,15 @@ preview_file () {
     ext="${1##*.}"
     if [ -n "$ext" ]; then
         ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
+    fi
+    lines=$(($(tput lines)-1))
+    cols=$(tput cols)
+
+    # Trying to use scope.sh if it's available.
+    if [ -f "$SCOPE_SCRIPT" ] && [ -x "$SCOPE_SCRIPT" ]; then
+        fifo_pager "$SCOPE_SCRIPT" "$1" "$cols" "$lines" "$(mktemp -d)" \
+            "True" 2>/dev/null
+        return
     fi
 
     if [ -d "$1" ]; then
