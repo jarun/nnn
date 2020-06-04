@@ -103,8 +103,8 @@ preview_file () {
         fifo_pager man -Pcat -l "$1"
     else
         if exists bat; then
-            bat --terminal-width="$cols" --paging=never --decorations=always \
-                --color=always "$1" 2>/dev/null
+            bat --paging=never --decorations=always --color=always \
+                "$1" 2>/dev/null
         else
             $PAGER "$1" &
         fi
