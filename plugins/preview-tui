@@ -135,7 +135,7 @@ if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.' ; then
     fi
 
     tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d"$SPLIT" "$0" "$1"
-elif [ "$TERMINAL" = "xterm-kitty" ]; then
+elif [ -n "$KITTY_WINDOW_ID" ]; then
     # Trying to use kitty's integrated window management as the split window.
     kitty @ launch --no-response --title "nnn preview" --keep-focus \
           --cwd="$PWD" --env "NNN_FIFO=$NNN_FIFO" --env "PREVIEW_MODE=1" \
