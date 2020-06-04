@@ -31,8 +31,15 @@
 # Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste
 
 SCOPE_SCRIPT="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/scope.sh"
-TERMINAL="${TERMINAL:-xterm}"
 PAGER="${PAGER:-less -R}"
+
+if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
+    TERMINAL=tmux
+elif [ -n "$KITTY_WINDOW_ID" ]; then
+    TERMINAL=kitty
+else
+    TERMINAL="${TERMINAL:-xterm}"
+fi
 
 exists() {
     command -v "$1" >/dev/null 2>&1
@@ -72,12 +79,13 @@ preview_file () {
     cols=$(tput cols)
 
     # Trying to use scope.sh if it's available.
-    if [ -f "$SCOPE_SCRIPT" ] && [ -x "$SCOPE_SCRIPT" ]; then
+    if [ -x "$SCOPE_SCRIPT" ]; then
         fifo_pager "$SCOPE_SCRIPT" "$1" "$cols" "$lines" "$(mktemp -d)" \
             "True" 2>/dev/null
         return
     fi
 
+    # Otherwise, falling back to the defaults.
     if [ -d "$1" ]; then
         cd "$1" || return
         if exists tree; then
@@ -89,7 +97,7 @@ preview_file () {
         fi
     elif [ "$encoding" = "binary" ]; then
         if [ "${mimetype%%/*}" = "image" ] ; then
-            if [ -n "$KITTY_WINDOW_ID" ]; then
+            if [ "$TERMINAL" = "kitty" ]; then
                 # Kitty terminal users can use the native image preview method.
                 kitty +kitten icat --silent --transfer-mode=stream --stdin=no \
                     "$1" &
@@ -101,19 +109,22 @@ preview_file () {
         elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ] ; then
             fifo_pager tar -tvf "$1"
         else
-            # Binary file: show file info
-            printf -- "-------- \033[1;31mBinary file\033[0m --------\n"
-            if exists mediainfo; then
-                fifo_pager mediainfo "$1" 2>/dev/null
-            else
-                fifo_pager file -b "$1"
-            fi
+            # Binary file: show file info inside the pager
+            print_bin_info() {
+                printf -- "-------- \033[1;31mBinary file\033[0m --------\n"
+                if exists mediainfo; then
+                    mediainfo "$1" 2>/dev/null
+                else
+                    file -b "$1"
+                fi
+            }
+            fifo_pager print_bin_info "$1"
         fi
     elif [ "$mimetype" = "text/troff" ] ; then
         fifo_pager man -Pcat -l "$1"
     else
         if exists bat; then
-            bat --paging=never --decorations=always --color=always \
+            fifo_pager bat --paging=never --decorations=always --color=always \
                 "$1" 2>/dev/null
         else
             $PAGER "$1" &
@@ -137,7 +148,7 @@ if [ "$PREVIEW_MODE" ] ; then
     exit 0
 fi
 
-if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.' ; then
+if [ "$TERMINAL" = "tmux" ]; then
     if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ] ; then
         SPLIT='v'
     elif [ "$SPLIT" != 'v' ] ; then
@@ -145,7 +156,7 @@ if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.' ; then
     fi
 
     tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d"$SPLIT" "$0" "$1"
-elif [ -n "$KITTY_WINDOW_ID" ]; then
+elif [ "$TERMINAL" = "kitty" ]; then
     # Trying to use kitty's integrated window management as the split window.
     kitty @ launch --no-response --title "nnn preview" --keep-focus \
           --cwd="$PWD" --env "NNN_FIFO=$NNN_FIFO" --env "PREVIEW_MODE=1" \
