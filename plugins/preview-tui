@@ -52,7 +52,7 @@ fifo_pager() {
 }
 
 preview_file () {
-    kill %- %+ 2>/dev/null
+    kill %- %+ 2>/dev/null && wait %- %+ 2>/dev/null
     clear
 
     encoding="$(file -Lb --mime-encoding -- "$1")"
@@ -60,7 +60,7 @@ preview_file () {
     # Detect mime type
     mimetype="$(file -Lb --mime-type -- "$1")"
 
-    # Detect file extention - use if you need
+    # Detect file extention
     ext="${1##*.}"
     if [ -n "$ext" ]; then
         ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
