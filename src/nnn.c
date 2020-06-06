@@ -6377,11 +6377,12 @@ nochange:
 			case SEL_SHELL:
 				/* Set nnn nesting level */
 				tmp = getenv(env_cfg[NNNLVL]);
-				setenv(env_cfg[NNNLVL], xitoa((tmp ? atoi(tmp) : 0) + 1), 1);
+				r = tmp ? atoi(tmp) : 0;
+				setenv(env_cfg[NNNLVL], xitoa(r + 1), 1);
 
 				setenv(envs[ENV_NCUR], (ndents ? dents[cur].name : ""), 1);
 				spawn(shell, NULL, NULL, F_CLI);
-				setenv(env_cfg[NNNLVL], xitoa(tmp ? atoi(tmp) : 0), 1);
+				setenv(env_cfg[NNNLVL], xitoa(r), 1);
 				r = TRUE;
 				break;
 			case SEL_LAUNCH:
