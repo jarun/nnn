@@ -20,7 +20,7 @@
 #   Then in `nnn`, launch the `preview-kitty` plugin.
 #
 #   If you provide the same NNN_FIFO to all nnn instances, there will be a
-#   single common preview window. I you provide different FIFO path, they
+#   single common preview window. If you provide different FIFO path, they
 #   will be independent.
 #
 # Shell: POSIX compliant
