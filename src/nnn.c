@@ -1787,7 +1787,8 @@ static void rmmulstr(char *buf)
 			 confirm_force(TRUE), selpath);
 }
 
-static void xrm(char *fpath)
+/* Returns TRUE if file is removed, else FALSE */
+static bool xrm(char *fpath)
 {
 	if (g_state.trash)
 		spawn("trash-put", fpath, NULL, F_NORMAL);
@@ -1797,6 +1798,8 @@ static void xrm(char *fpath)
 		rm_opts[1] = confirm_force(FALSE);
 		spawn("rm", rm_opts, fpath, F_NORMAL | F_CHKRTN);
 	}
+
+	return (access(fpath, F_OK) == -1); /* File is removed */
 }
 
 static uint lines_in_file(int fd, char *buf, size_t buflen)
@@ -3920,7 +3923,7 @@ static bool archive_mount(char *newpath)
 	return TRUE;
 }
 
-static bool remote_mount(char *newpath, char *currentpath)
+static bool remote_mount(char *newpath)
 {
 	uchar flag = F_CLI;
 	int opt;
@@ -3947,19 +3950,10 @@ static bool remote_mount(char *newpath, char *currentpath)
 		return FALSE;
 	}
 
-	tmp = xreadline(NULL, messages[MSG_HOSTNAME]);
+	tmp = xreadline(NULL, "remote name: ");
 	if (!tmp[0]) {
 		printmsg(messages[MSG_CANCEL]);
 		return FALSE;
-	}
-
-	if (tmp[0] == '-' && !tmp[1]) {
-		if (!strcmp(cfgdir, currentpath) && ndents && (dents[cur].flags & DIR_OR_LINK_TO_DIR))
-			xstrsncpy(tmp, dents[cur].name, NAME_MAX + 1);
-		else {
-			printmsg(messages[MSG_FAILED]);
-			return FALSE;
-		}
 	}
 
 	/* Create the mount point */
@@ -3995,6 +3989,7 @@ static bool remote_mount(char *newpath, char *currentpath)
 /*
  * Unmounts if the directory represented by name is a mount point.
  * Otherwise, asks for hostname
+ * Returns TRUE if directory needs to be refreshed *.
  */
 static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 {
@@ -4008,6 +4003,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	struct stat sb, psb;
 	bool child = FALSE;
 	bool parent = FALSE;
+	bool hovered = TRUE;
 
 #ifndef __APPLE__
 	/* On Ubuntu it's fusermount */
@@ -4031,6 +4027,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 		tmp = xreadline(NULL, messages[MSG_HOSTNAME]);
 		if (!tmp[0])
 			return FALSE;
+		hovered = FALSE;
 	}
 
 	/* Create the mount point */
@@ -4058,7 +4055,12 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 		}
 	}
 
-	return TRUE;
+	if (rmdir(newpath) == -1) {
+		printwarn(presel);
+		return FALSE;
+	}
+
+	return hovered;
 }
 
 static void lock_terminal(void)
@@ -4861,6 +4863,15 @@ static void handle_screen_move(enum action sel)
 		break;
 	}
 	}
+}
+
+static void copynextname(char *lastname)
+{
+	if (cur) {
+		cur += (cur != (ndents - 1)) ? 1 : -1;
+		copycurname();
+	} else
+		lastname[0] = '\0';
 }
 
 static int handle_context_switch(enum action sel)
@@ -5728,7 +5739,7 @@ nochange:
 					break;
 			} // fallthrough
 		case SEL_REMOTE:
-			if (sel == SEL_REMOTE && !remote_mount(newpath, path)) {
+			if (sel == SEL_REMOTE && !remote_mount(newpath)) {
 				presel = MSGWAIT;
 				goto nochange;
 			}
@@ -6057,16 +6068,10 @@ nochange:
 					tmp = (listpath && xstrcmp(path, listpath) == 0)
 					      ? prefixpath : path;
 					mkpath(tmp, dents[cur].name, newpath);
-					xrm(newpath);
-
-					if (access(newpath, F_OK) == 0) /* File not removed */
+					if (!xrm(newpath))
 						continue;
 
-					if (cur) {
-						cur += (cur != (ndents - 1)) ? 1 : -1;
-						copycurname();
-					} else
-						lastname[0] = '\0';
+					copynextname(lastname);
 
 					if (cfg.filtermode || filterset())
 						presel = FILTER;
@@ -6372,11 +6377,12 @@ nochange:
 			case SEL_SHELL:
 				/* Set nnn nesting level */
 				tmp = getenv(env_cfg[NNNLVL]);
-				setenv(env_cfg[NNNLVL], xitoa((tmp ? atoi(tmp) : 0) + 1), 1);
+				r = tmp ? atoi(tmp) : 0;
+				setenv(env_cfg[NNNLVL], xitoa(r + 1), 1);
 
 				setenv(envs[ENV_NCUR], (ndents ? dents[cur].name : ""), 1);
 				spawn(shell, NULL, NULL, F_CLI);
-				setenv(env_cfg[NNNLVL], xitoa(tmp ? atoi(tmp) : 0), 1);
+				setenv(env_cfg[NNNLVL], xitoa(r), 1);
 				r = TRUE;
 				break;
 			case SEL_LAUNCH:
@@ -6414,8 +6420,12 @@ nochange:
 			goto begin;
 		case SEL_UMOUNT:
 			tmp = ndents ? dents[cur].name : NULL;
-			unmount(tmp, newpath, &presel, path);
-			goto nochange;
+			if (!unmount(tmp, newpath, &presel, path))
+				goto nochange;
+
+			/* Dir removed, go to next entry */
+			copynextname(lastname);
+			goto begin;
 		case SEL_SESSIONS:
 			r = get_input(messages[MSG_SSN_OPTS]);
 

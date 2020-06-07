@@ -141,7 +141,9 @@ if [ "$PREVIEW_MODE" ] ; then
 
     preview_file "$1"
 
-    exec < "$NNN_FIFO"
+    # use cat instead of 'exec <' to avoid issues with dash shell
+    # shellcheck disable=SC2002
+    cat "$NNN_FIFO" |\
     while read -r selection ; do
         preview_file "$selection"
     done
