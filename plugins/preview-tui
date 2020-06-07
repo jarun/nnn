@@ -1,15 +1,24 @@
 #!/usr/bin/env sh
 
-# Description: Text based file previewer
+# Description: Terminal based file previewer
 #
 # Note: This plugin needs a "NNN_FIFO" to work.
 #
-# Dependencies: tmux (>=3.0) or xterm or $TERMINAL, less or $PAGER,
-#               file, stat, tree, man, tar, unzip, ...
-#                      ... add you own! (see examples in code)
+# Dependencies (see the preview_file function):
+#    - tmux (>=3.0), or kitty (https://sw.kovidgoyal.net/kitty/) with
+#      allow_remote_control on, or $TERMINAL set to a terminal (it's xterm
+#      by default).
+#    - less or $PAGER
+#    - tree or exa or ls
+#    - mediainfo or file
+#    - unzip
+#    - tar
+#    - man
+#    - optional: bat for code syntax highlighting
+#    - optional: kitty terminal or catimg for images
 #
 # Usage:
-#   You need to set a NNN_FIFO path and set a key for the plugin,
+#   You need to set a NNN_FIFO path and a key for the plugin with NNN_PLUG,
 #   then start `nnn`:
 #
 #     $ nnn -a
@@ -24,11 +33,20 @@
 #   single common preview window. I you provide different FIFO path (e.g.
 #   with -a), they will be independent.
 #
-#   Configure SPLIT to either "h" or "v" to set a 'h'orizontal split or a
-#   'v'ertical split
+#   The previews will be shown in a tmux split. If that isn't possible, it
+#   will try to use a kitty terminal split. And as a final fallback, a
+#   different terminal window will be used ($TERMINAL).
+#
+#   Tmux and kitty users can configure $SPLIT to either "h" or "v" to set a
+#   'h'orizontal split or a 'v'ertical split.
+#
+#   Kitty users need `allow_remote_control` set to `yes`. To customize the
+#   window split, `enabled_layouts` has to be set to `all` or `splits` (the
+#   former is the default value). This terminal is also able to show images
+#   without extra dependencies.
 #
 # Shell: POSIX compliant
-# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste
+# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero
 
 SCOPE_SCRIPT="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/scope.sh"
 PAGER="${PAGER:-less -R}"
@@ -39,6 +57,12 @@ elif [ -n "$KITTY_WINDOW_ID" ] && kitty @ ls >/dev/null 2>&1; then
     TERMINAL=kitty
 else
     TERMINAL="${TERMINAL:-xterm}"
+fi
+
+if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ] ; then
+    SPLIT='v'
+elif [ "$SPLIT" != 'v' ] ; then
+    SPLIT='h'
 fi
 
 exists() {
@@ -61,6 +85,16 @@ fifo_pager() {
     )
 
     rm "$tmpfifopath"
+}
+
+# Binary file: show file info inside the pager
+print_bin_info() {
+    printf -- "-------- \033[1;31mBinary file\033[0m --------\n"
+    if exists mediainfo; then
+        mediainfo "$1" 2>/dev/null
+    else
+        file -b "$1"
+    fi
 }
 
 preview_file () {
@@ -103,21 +137,14 @@ preview_file () {
                     "$1" &
             elif exists catimg; then
                 catimg "$1"
+            else
+                fifo_pager print_bin_info "$1"
             fi
         elif [ "$mimetype" = "application/zip" ] ; then
             fifo_pager unzip -l "$1"
         elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ] ; then
             fifo_pager tar -tvf "$1"
         else
-            # Binary file: show file info inside the pager
-            print_bin_info() {
-                printf -- "-------- \033[1;31mBinary file\033[0m --------\n"
-                if exists mediainfo; then
-                    mediainfo "$1" 2>/dev/null
-                else
-                    file -b "$1"
-                fi
-            }
             fifo_pager print_bin_info "$1"
         fi
     elif [ "$mimetype" = "text/troff" ] ; then
@@ -151,18 +178,21 @@ if [ "$PREVIEW_MODE" ] ; then
 fi
 
 if [ "$TERMINAL" = "tmux" ]; then
-    if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ] ; then
-        SPLIT='v'
-    elif [ "$SPLIT" != 'v' ] ; then
-        SPLIT='h'
-    fi
+    # tmux splits are inverted
+    if [ "$SPLIT" = "v" ]; then SPLIT="h"; else SPLIT="v"; fi
 
     tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d"$SPLIT" "$0" "$1"
 elif [ "$TERMINAL" = "kitty" ]; then
+    # Setting the layout for the new window.
+    kitty @ goto-layout splits >/dev/null
+
     # Trying to use kitty's integrated window management as the split window.
     kitty @ launch --no-response --title "nnn preview" --keep-focus \
-          --cwd="$PWD" --env "NNN_FIFO=$NNN_FIFO" --env "PREVIEW_MODE=1" \
-          "$0" "$1" > /dev/null
+          --cwd "$PWD" --env "NNN_FIFO=$NNN_FIFO" --env "PREVIEW_MODE=1" \
+          --location "${SPLIT}split" "$0" "$1" >/dev/null
+
+    # Restoring the previous layout.
+    # kitty @ last-used-layout >/dev/null
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
