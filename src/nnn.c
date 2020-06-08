@@ -363,13 +363,11 @@ static char *pager;
 static char *shell;
 static char *home;
 static char *initpath;
-static char *cfgdir;
+static char *cfgpath;
 static char *selpath;
 static char *listpath;
-static char *prefixpath;
-static char *plugindir;
-static char *sessiondir;
-static char *mountdir;
+static char *listroot;
+static char *plgpath;
 static char *pnamebuf, *pselbuf;
 static char *mark;
 #ifndef NOFIFO
@@ -629,6 +627,17 @@ static char mv[] = "mv   -i";
 static char cp[] = "cp -iRp";
 static char mv[] = "mv -i";
 #endif
+
+/* Tokens used for path creation */
+#define TOK_PLG 0
+#define TOK_SSN 1
+#define TOK_MNT 2
+
+static const char * const toks[] = {
+	"plugins",
+	"sessions",
+	"mounts",
+};
 
 /* Patterns */
 #define P_CPMVFMT 0
@@ -1186,7 +1195,7 @@ static size_t seltofile(int fd, uint *pcount)
 	lastpos = selbufpos - 1;
 
 	if (listpath) {
-		prefixlen = (ssize_t)xstrlen(prefixpath);
+		prefixlen = (ssize_t)xstrlen(listroot);
 		initlen = (ssize_t)xstrlen(listpath);
 	}
 
@@ -1198,7 +1207,7 @@ static size_t seltofile(int fd, uint *pcount)
 			if (write(fd, pbuf, len) != len)
 				return pos;
 		} else {
-			if (write(fd, prefixpath, prefixlen) != prefixlen)
+			if (write(fd, listroot, prefixlen) != prefixlen)
 				return pos;
 			if (write(fd, pbuf + initlen, len - initlen) != (len - initlen))
 				return pos;
@@ -1299,7 +1308,7 @@ static void endselection(void)
 		return;
 	}
 
-	snprintf(buf, sizeof(buf), patterns[P_REPLACE], listpath, prefixpath, g_tmpfpath);
+	snprintf(buf, sizeof(buf), patterns[P_REPLACE], listpath, listroot, g_tmpfpath);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, F_CLI);
 
 	fd = open(g_tmpfpath, O_RDONLY);
@@ -2029,12 +2038,12 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 static bool write_lastdir(const char *curpath)
 {
 	bool ret = TRUE;
-	size_t len = xstrlen(cfgdir);
+	size_t len = xstrlen(cfgpath);
 
-	xstrsncpy(cfgdir + len, "/.lastd", 8);
-	DPRINTF_S(cfgdir);
+	xstrsncpy(cfgpath + len, "/.lastd", 8);
+	DPRINTF_S(cfgpath);
 
-	FILE *fp = fopen(cfgdir, "w");
+	FILE *fp = fopen(cfgpath, "w");
 
 	if (fp) {
 		if (fprintf(fp, "cd \"%s\"", curpath) < 0)
@@ -3435,12 +3444,13 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 
 static void save_session(bool last_session, int *presel)
 {
-	char spath[PATH_MAX];
 	int i;
 	session_header_t header;
 	FILE *fsession;
 	char *sname;
 	bool status = FALSE;
+	char ssnpath[PATH_MAX];
+	char spath[PATH_MAX];
 
 	memset(&header, 0, sizeof(session_header_t));
 
@@ -3461,7 +3471,9 @@ static void save_session(bool last_session, int *presel)
 	sname = !last_session ? xreadline(NULL, messages[MSG_SSN_NAME]) : "@";
 	if (!sname[0])
 		return;
-	mkpath(sessiondir, sname, spath);
+
+	mkpath(cfgpath, toks[TOK_SSN], ssnpath);
+	mkpath(ssnpath, sname, spath);
 
 	fsession = fopen(spath, "wb");
 	if (!fsession) {
@@ -3497,21 +3509,24 @@ END:
 
 static bool load_session(const char *sname, char **path, char **lastdir, char **lastname, bool restore)
 {
-	char spath[PATH_MAX];
 	int i = 0;
 	session_header_t header;
 	FILE *fsession;
 	bool has_loaded_dynamically = !(sname || restore);
 	bool status = FALSE;
+	char ssnpath[PATH_MAX];
+	char spath[PATH_MAX];
+
+	mkpath(cfgpath, toks[TOK_SSN], ssnpath);
 
 	if (!restore) {
 		sname = sname ? sname : xreadline(NULL, messages[MSG_SSN_NAME]);
 		if (!sname[0])
 			return FALSE;
 
-		mkpath(sessiondir, sname, spath);
+		mkpath(ssnpath, sname, spath);
 	} else
-		mkpath(sessiondir, "@", spath);
+		mkpath(ssnpath, "@", spath);
 
 	if (has_loaded_dynamically)
 		save_session(TRUE, NULL);
@@ -3884,6 +3899,7 @@ static bool archive_mount(char *newpath)
 	char *dir, *cmd = utils[UTIL_ARCHIVEMOUNT];
 	char *name = dents[cur].name;
 	size_t len = dents[cur].nlen;
+	char mntpath[PATH_MAX];
 
 	if (!getutil(cmd)) {
 		printmsg(messages[MSG_UTIL_MISSING]);
@@ -3905,7 +3921,8 @@ static bool archive_mount(char *newpath)
 	DPRINTF_S(dir);
 
 	/* Create the mount point */
-	mkpath(mountdir, dir, newpath);
+	mkpath(cfgpath, toks[TOK_MNT], mntpath);
+	mkpath(mntpath, dir, newpath);
 	free(dir);
 
 	if (!xmktree(newpath, TRUE)) {
@@ -3930,6 +3947,7 @@ static bool remote_mount(char *newpath)
 	int opt;
 	char *tmp, *env;
 	bool r = getutil(utils[UTIL_RCLONE]), s = getutil(utils[UTIL_SSHFS]);
+	char mntpath[PATH_MAX];
 
 	if (!(r || s)) {
 		printmsg(messages[MSG_UTIL_MISSING]);
@@ -3958,7 +3976,8 @@ static bool remote_mount(char *newpath)
 	}
 
 	/* Create the mount point */
-	mkpath(mountdir, tmp, newpath);
+	mkpath(cfgpath, toks[TOK_MNT], mntpath);
+	mkpath(mntpath, tmp, newpath);
 	if (!xmktree(newpath, TRUE)) {
 		printwarn(NULL);
 		return FALSE;
@@ -4005,6 +4024,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	bool child = FALSE;
 	bool parent = FALSE;
 	bool hovered = TRUE;
+	char mntpath[PATH_MAX];
 
 #ifndef __APPLE__
 	/* On Ubuntu it's fusermount */
@@ -4014,8 +4034,10 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	}
 #endif
 
-	if (tmp && strcmp(mountdir, currentpath) == 0) {
-		mkpath(mountdir, tmp, newpath);
+	mkpath(cfgpath, toks[TOK_MNT], mntpath);
+
+	if (tmp && strcmp(mntpath, currentpath) == 0) {
+		mkpath(mntpath, tmp, newpath);
 		child = lstat(newpath, &sb) != -1;
 		parent = lstat(xdirname(newpath), &psb) != -1;
 		if (!child && !parent) {
@@ -4032,7 +4054,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	}
 
 	/* Create the mount point */
-	mkpath(mountdir, tmp, newpath);
+	mkpath(mntpath, tmp, newpath);
 	if (!xdiraccess(newpath)) {
 		*presel = MSGWAIT;
 		return FALSE;
@@ -4369,7 +4391,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 
 		if (!cmd_as_plugin) {
 			/* Generate absolute path to plugin */
-			mkpath(plugindir, file, g_buf);
+			mkpath(plgpath, file, g_buf);
 
 			if (runfile && runfile[0]) {
 				xstrsncpy(*lastname, runfile, NAME_MAX);
@@ -4397,7 +4419,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 
 static bool plugscript(const char *plugin, uchar flags)
 {
-	mkpath(plugindir, plugin, g_buf);
+	mkpath(plgpath, plugin, g_buf);
 	if (!access(g_buf, X_OK)) {
 		spawn(g_buf, NULL, NULL, flags);
 		return TRUE;
@@ -4411,7 +4433,7 @@ static void launch_app(char *newpath)
 	int r = F_NORMAL;
 	char *tmp = newpath;
 
-	mkpath(plugindir, utils[UTIL_LAUNCH], newpath);
+	mkpath(plgpath, utils[UTIL_LAUNCH], newpath);
 
 	if (!getutil(utils[UTIL_FZF]) || access(newpath, X_OK) < 0) {
 		tmp = xreadline(NULL, messages[MSG_APP_NAME]);
@@ -5590,7 +5612,7 @@ nochange:
 				if (cfg.runplugin) {
 					cfg.runplugin = 0;
 					/* Must be in plugin dir and same context to select plugin */
-					if ((cfg.runctx == cfg.curctx) && !strcmp(path, plugindir)) {
+					if ((cfg.runctx == cfg.curctx) && !strcmp(path, plgpath)) {
 						endselection();
 						/* Copy path so we can return back to earlier dir */
 						xstrsncpy(path, rundir, PATH_MAX);
@@ -5861,7 +5883,7 @@ nochange:
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
 			if (ndents) {
-				tmp = (listpath && xstrcmp(path, listpath) == 0) ? prefixpath : path;
+				tmp = (listpath && xstrcmp(path, listpath) == 0) ? listroot : path;
 				mkpath(tmp, dents[cur].name, newpath);
 
 				if (lstat(newpath, &sb) == -1
@@ -6067,7 +6089,7 @@ nochange:
 
 				if (r == 'c') {
 					tmp = (listpath && xstrcmp(path, listpath) == 0)
-					      ? prefixpath : path;
+					      ? listroot : path;
 					mkpath(tmp, dents[cur].name, newpath);
 					if (!xrm(newpath))
 						continue;
@@ -6298,7 +6320,7 @@ nochange:
 		}
 		case SEL_PLUGIN:
 			/* Check if directory is accessible */
-			if (!xdiraccess(plugindir)) {
+			if (!xdiraccess(plgpath)) {
 				printwarn(&presel);
 				goto nochange;
 			}
@@ -6347,7 +6369,7 @@ nochange:
 					 * If toggled, and still in the plugin dir,
 					 * switch to original directory
 					 */
-					if (strcmp(path, plugindir) == 0) {
+					if (strcmp(path, plgpath) == 0) {
 						xstrsncpy(path, rundir, PATH_MAX);
 						xstrsncpy(lastname, runfile, NAME_MAX);
 						rundir[0] = runfile[0] = '\0';
@@ -6360,7 +6382,7 @@ nochange:
 				}
 
 				xstrsncpy(rundir, path, PATH_MAX);
-				xstrsncpy(path, plugindir, PATH_MAX);
+				xstrsncpy(path, plgpath, PATH_MAX);
 				if (ndents)
 					xstrsncpy(runfile, dents[cur].name, NAME_MAX);
 				cfg.runctx = cfg.curctx;
@@ -6692,10 +6714,10 @@ static char *load_input(int fd, const char *path)
 	for (i = 0; i < entries; ++i)
 		paths[i] = input + offsets[i];
 
-	prefixpath = malloc(sizeof(char) * PATH_MAX);
-	if (!prefixpath)
+	listroot = malloc(sizeof(char) * PATH_MAX);
+	if (!listroot)
 		goto malloc_1;
-	prefixpath[0] = '\0';
+	listroot[0] = '\0';
 
 	DPRINTF_S(paths[0]);
 
@@ -6714,18 +6736,18 @@ static char *load_input(int fd, const char *path)
 		DPRINTF_S(paths[i]);
 
 		xstrsncpy(g_buf, paths[i], PATH_MAX);
-		if (!common_prefix(xdirname(g_buf), prefixpath)) {
+		if (!common_prefix(xdirname(g_buf), listroot)) {
 			entries = i + 1; // free from the current entry
 			goto malloc_2;
 		}
 
-		DPRINTF_S(prefixpath);
+		DPRINTF_S(listroot);
 	}
 
-	DPRINTF_S(prefixpath);
+	DPRINTF_S(listroot);
 
-	if (prefixpath[0])
-		tmpdir = make_tmp_tree(paths, entries, prefixpath);
+	if (listroot[0])
+		tmpdir = make_tmp_tree(paths, entries, listroot);
 
 malloc_2:
 	for (i = entries - 1; i >= 0; --i)
@@ -6828,48 +6850,50 @@ static bool setup_config(void)
 	if (!xdg)
 		len = xstrlen(home) + 1 + 21; /* add length of "/.config/nnn/sessions" */
 
-	cfgdir = (char *)malloc(len);
-	plugindir = (char *)malloc(len);
-	sessiondir = (char *)malloc(len);
-	mountdir = (char *)malloc(len);
-	if (!cfgdir || !plugindir || !sessiondir) {
+	cfgpath = (char *)malloc(len);
+	plgpath = (char *)malloc(len);
+	if (!cfgpath || !plgpath) {
 		xerror();
 		return FALSE;
 	}
 
 	if (xdg) {
-		xstrsncpy(cfgdir, xdgcfg, len);
+		xstrsncpy(cfgpath, xdgcfg, len);
 		r = len - 13; /* subtract length of "/nnn/sessions" */
 	} else {
-		r = xstrsncpy(cfgdir, home, len);
+		r = xstrsncpy(cfgpath, home, len);
 
 		/* Create ~/.config */
-		xstrsncpy(cfgdir + r - 1, "/.config", len - r);
-		DPRINTF_S(cfgdir);
+		xstrsncpy(cfgpath + r - 1, "/.config", len - r);
+		DPRINTF_S(cfgpath);
 		r += 8; /* length of "/.config" */
 	}
 
 	/* Create ~/.config/nnn */
-	xstrsncpy(cfgdir + r - 1, "/nnn", len - r);
-	DPRINTF_S(cfgdir);
+	xstrsncpy(cfgpath + r - 1, "/nnn", len - r);
+	DPRINTF_S(cfgpath);
 
 	/* Create ~/.config/nnn/plugins */
-	mkpath(cfgdir, "plugins", plugindir);
-	if (!xmktree(plugindir, TRUE)) {
+	mkpath(cfgpath, toks[TOK_PLG], plgpath);
+	if (!xmktree(plgpath, TRUE)) {
 		xerror();
 		return FALSE;
 	}
 
 	/* Create ~/.config/nnn/sessions */
-	mkpath(cfgdir, "sessions", sessiondir);
-	if (!xmktree(sessiondir, TRUE)) {
+	char ssnpath[len];
+
+	mkpath(cfgpath, toks[TOK_SSN], ssnpath);
+	if (!xmktree(ssnpath, TRUE)) {
 		xerror();
 		return FALSE;
 	}
 
 	/* Create ~/.config/nnn/mounts */
-	mkpath(cfgdir, "mounts", mountdir);
-	if (!xmktree(mountdir, TRUE)) {
+	char mntpath[len];
+
+	mkpath(cfgpath, toks[TOK_MNT], mntpath);
+	if (!xmktree(mntpath, TRUE)) {
 		xerror();
 		return FALSE;
 	}
@@ -6889,7 +6913,7 @@ static bool setup_config(void)
 		}
 
 		if (!env_sel) {
-			r = xstrsncpy(selpath, cfgdir, len + 3);
+			r = xstrsncpy(selpath, cfgpath, len + 3);
 			xstrsncpy(selpath + r - 1, "/.selection", 12);
 			DPRINTF_S(selpath);
 		}
@@ -6915,14 +6939,12 @@ static bool set_tmp_path(void)
 static void cleanup(void)
 {
 	free(selpath);
-	free(plugindir);
-	free(sessiondir);
-	free(mountdir);
-	free(cfgdir);
+	free(plgpath);
+	free(cfgpath);
 	free(initpath);
 	free(bmstr);
 	free(pluginstr);
-	free(prefixpath);
+	free(listroot);
 	free(ihashbmp);
 	free(bookmark);
 	free(plug);
@@ -7296,7 +7318,7 @@ int main(int argc, char *argv[])
 	rl_bind_key('\t', rl_complete);
 #endif
 	if (rlhist) {
-		mkpath(cfgdir, ".history", g_buf);
+		mkpath(cfgpath, ".history", g_buf);
 		read_history(g_buf);
 	}
 #endif
@@ -7321,7 +7343,7 @@ int main(int argc, char *argv[])
 
 #ifndef NORL
 	if (rlhist) {
-		mkpath(cfgdir, ".history", g_buf);
+		mkpath(cfgpath, ".history", g_buf);
 		write_history(g_buf);
 	}
 #endif
