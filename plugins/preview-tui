@@ -192,7 +192,7 @@ elif [ "$TERMINAL" = "kitty" ]; then
           --location "${SPLIT}split" "$0" "$1" >/dev/null
 
     # Restoring the previous layout.
-    # kitty @ last-used-layout >/dev/null
+    kitty @ last-used-layout --no-response >/dev/null 2>&1
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
