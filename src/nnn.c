@@ -369,6 +369,7 @@ static char *listpath;
 static char *prefixpath;
 static char *plugindir;
 static char *sessiondir;
+static char *mountdir;
 static char *pnamebuf, *pselbuf;
 static char *mark;
 #ifndef NOFIFO
@@ -3904,7 +3905,7 @@ static bool archive_mount(char *newpath)
 	DPRINTF_S(dir);
 
 	/* Create the mount point */
-	mkpath(cfgdir, dir, newpath);
+	mkpath(mountdir, dir, newpath);
 	free(dir);
 
 	if (!xmktree(newpath, TRUE)) {
@@ -3957,7 +3958,7 @@ static bool remote_mount(char *newpath)
 	}
 
 	/* Create the mount point */
-	mkpath(cfgdir, tmp, newpath);
+	mkpath(mountdir, tmp, newpath);
 	if (!xmktree(newpath, TRUE)) {
 		printwarn(NULL);
 		return FALSE;
@@ -4013,8 +4014,8 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	}
 #endif
 
-	if (tmp && strcmp(cfgdir, currentpath) == 0) {
-		mkpath(cfgdir, tmp, newpath);
+	if (tmp && strcmp(mountdir, currentpath) == 0) {
+		mkpath(mountdir, tmp, newpath);
 		child = lstat(newpath, &sb) != -1;
 		parent = lstat(xdirname(newpath), &psb) != -1;
 		if (!child && !parent) {
@@ -4031,7 +4032,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	}
 
 	/* Create the mount point */
-	mkpath(cfgdir, tmp, newpath);
+	mkpath(mountdir, tmp, newpath);
 	if (!xdiraccess(newpath)) {
 		*presel = MSGWAIT;
 		return FALSE;
@@ -6830,6 +6831,7 @@ static bool setup_config(void)
 	cfgdir = (char *)malloc(len);
 	plugindir = (char *)malloc(len);
 	sessiondir = (char *)malloc(len);
+	mountdir = (char *)malloc(len);
 	if (!cfgdir || !plugindir || !sessiondir) {
 		xerror();
 		return FALSE;
@@ -6852,21 +6854,22 @@ static bool setup_config(void)
 	DPRINTF_S(cfgdir);
 
 	/* Create ~/.config/nnn/plugins */
-	xstrsncpy(plugindir, cfgdir, PATH_MAX);
-	xstrsncpy(plugindir + r + 4 - 1, "/plugins", 9); /* subtract length of "/nnn" (4) */
-	DPRINTF_S(plugindir);
-
-	if (access(plugindir, F_OK) && !xmktree(plugindir, TRUE)) {
+	mkpath(cfgdir, "plugins", plugindir);
+	if (!xmktree(plugindir, TRUE)) {
 		xerror();
 		return FALSE;
 	}
 
 	/* Create ~/.config/nnn/sessions */
-	xstrsncpy(sessiondir, cfgdir, PATH_MAX);
-	xstrsncpy(sessiondir + r + 4 - 1, "/sessions", 10); /* subtract length of "/nnn" (4) */
-	DPRINTF_S(sessiondir);
+	mkpath(cfgdir, "sessions", sessiondir);
+	if (!xmktree(sessiondir, TRUE)) {
+		xerror();
+		return FALSE;
+	}
 
-	if (access(sessiondir, F_OK) && !xmktree(sessiondir, TRUE)) {
+	/* Create ~/.config/nnn/mounts */
+	mkpath(cfgdir, "mounts", mountdir);
+	if (!xmktree(mountdir, TRUE)) {
 		xerror();
 		return FALSE;
 	}
@@ -6914,6 +6917,7 @@ static void cleanup(void)
 	free(selpath);
 	free(plugindir);
 	free(sessiondir);
+	free(mountdir);
 	free(cfgdir);
 	free(initpath);
 	free(bmstr);
