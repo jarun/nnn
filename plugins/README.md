@@ -4,7 +4,7 @@
 <p align="center"><i>read ebooks with plugin gutenread (Android)</i></p>
 
 <p align="center"><a href="https://asciinema.org/a/336443"><img src="https://asciinema.org/a/336443.png" width="734"/></a></p>
-<p align="center"><i>Live Previews</i></p>
+<p align="center"><i>Live Previews asciicast</i></p>
 
 ## Introduction
 

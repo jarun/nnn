@@ -629,14 +629,14 @@ static char mv[] = "mv -i";
 #endif
 
 /* Tokens used for path creation */
-#define TOK_PLG 0
-#define TOK_SSN 1
-#define TOK_MNT 2
+#define TOK_SSN 0
+#define TOK_MNT 1
+#define TOK_PLG 2
 
 static const char * const toks[] = {
-	"plugins",
 	"sessions",
 	"mounts",
+	"plugins", /* must be the last entry */
 };
 
 /* Patterns */
@@ -6873,29 +6873,14 @@ static bool setup_config(void)
 	xstrsncpy(cfgpath + r - 1, "/nnn", len - r);
 	DPRINTF_S(cfgpath);
 
-	/* Create ~/.config/nnn/plugins */
-	mkpath(cfgpath, toks[TOK_PLG], plgpath);
-	if (!xmktree(plgpath, TRUE)) {
-		xerror();
-		return FALSE;
-	}
-
-	/* Create ~/.config/nnn/sessions */
-	char ssnpath[len];
-
-	mkpath(cfgpath, toks[TOK_SSN], ssnpath);
-	if (!xmktree(ssnpath, TRUE)) {
-		xerror();
-		return FALSE;
-	}
-
-	/* Create ~/.config/nnn/mounts */
-	char mntpath[len];
-
-	mkpath(cfgpath, toks[TOK_MNT], mntpath);
-	if (!xmktree(mntpath, TRUE)) {
-		xerror();
-		return FALSE;
+	/* Create sessions, mounts and plugins directories */
+	for (r = 0; r < ELEMENTS(toks); ++r) {
+		mkpath(cfgpath, toks[r], plgpath);
+		if (!xmktree(plgpath, TRUE)) {
+			DPRINTF_S(toks[r]);
+			xerror();
+			return FALSE;
+		}
 	}
 
 	/* Set selection file path */
