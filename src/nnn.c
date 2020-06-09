@@ -268,8 +268,7 @@ typedef struct {
 	uint autoselect : 1;  /* Auto-select dir in type-to-nav mode */
 	uint reserved3  : 1;
 	uint useeditor  : 1;  /* Use VISUAL to open text files */
-	uint runplugin  : 1;  /* Choose plugin mode */
-	uint runctx     : 2;  /* The context in which plugin is to be run */
+	uint reserved4  : 3;
 	uint regex      : 1;  /* Use regex filters */
 	uint x11        : 1;  /* Copy to system clipboard and show notis */
 	uint timetype   : 2;  /* Time sort type (0: access, 1: change, 2: modification) */
@@ -293,7 +292,9 @@ typedef struct {
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint picker     : 1;  /* Write selection to user-specified file */
 	uint pickraw    : 1;  /* Write selection to sdtout before exit */
-	uint reserved   : 19;
+	uint runplugin  : 1;  /* Choose plugin mode */
+	uint runctx     : 2;  /* The context in which plugin is to be run */
+	uint reserved   : 16;
 } runstate;
 
 /* Contexts or workspaces */
@@ -337,8 +338,7 @@ static settings cfg = {
 	1, /* autoselect */
 	0, /* reserved3 */
 	0, /* useeditor */
-	0, /* runplugin */
-	0, /* runctx */
+	0, /* reserved4 */
 	0, /* regex */
 	0, /* x11 */
 	2, /* timetype (T_MOD) */
@@ -3437,7 +3437,6 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 		xstrsncpy(ctxr->c_path, path, PATH_MAX);
 		ctxr->c_last[0] = ctxr->c_name[0] = ctxr->c_fltr[0] = ctxr->c_fltr[1] = '\0';
 		ctxr->c_cfg = cfg;
-		ctxr->c_cfg.runplugin = 0;
 	}
 
 	/* Continue selection mode */
@@ -5644,10 +5643,10 @@ nochange:
 				}
 
 				/* Handle plugin selection mode */
-				if (cfg.runplugin) {
-					cfg.runplugin = 0;
+				if (g_state.runplugin) {
+					g_state.runplugin = 0;
 					/* Must be in plugin dir and same context to select plugin */
-					if ((cfg.runctx == cfg.curctx) && !strcmp(path, plgpath)) {
+					if ((g_state.runctx == cfg.curctx) && !strcmp(path, plgpath)) {
 						endselection();
 						/* Copy path so we can return back to earlier dir */
 						xstrsncpy(path, rundir, PATH_MAX);
@@ -6398,8 +6397,8 @@ nochange:
 					goto nochange;
 				}
 			} else { /* 'Return/Enter' enters the plugin directory */
-				cfg.runplugin ^= 1;
-				if (!cfg.runplugin && rundir[0]) {
+				g_state.runplugin ^= 1;
+				if (!g_state.runplugin && rundir[0]) {
 					/*
 					 * If toggled, and still in the plugin dir,
 					 * switch to original directory
@@ -6413,14 +6412,14 @@ nochange:
 					}
 
 					/* Otherwise, initiate choosing plugin again */
-					cfg.runplugin = 1;
+					g_state.runplugin = 1;
 				}
 
 				xstrsncpy(rundir, path, PATH_MAX);
 				xstrsncpy(path, plgpath, PATH_MAX);
 				if (ndents)
 					xstrsncpy(runfile, dents[cur].name, NAME_MAX);
-				cfg.runctx = cfg.curctx;
+				g_state.runctx = cfg.curctx;
 				lastname[0] = '\0';
 			}
 			setdirwatch();
