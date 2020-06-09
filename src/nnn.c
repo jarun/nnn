@@ -256,18 +256,17 @@ typedef struct {
 	uint extnorder  : 1;  /* Order by extension */
 	uint showhidden : 1;  /* Set to show hidden files */
 	uint selmode    : 1;  /* Set when selecting files */
-	uint showdetail : 1;  /* Clear to show fewer file info */
+	uint showdetail : 1;  /* Clear to show lesser file info */
 	uint ctxactive  : 1;  /* Context active or not */
 	uint reverse    : 1;  /* Reverse sort */
 	uint version    : 1;  /* Version sort */
 	uint reserved1  : 1;
 	/* The following settings are global */
 	uint curctx     : 3;  /* Current context number */
-	uint picker     : 1;  /* Write selection to user-specified file */
-	uint pickraw    : 1;  /* Write selection to sdtout before exit */
+	uint reserved2  : 2;
 	uint nonavopen  : 1;  /* Open file on right arrow or `l` */
 	uint autoselect : 1;  /* Auto-select dir in type-to-nav mode */
-	uint metaviewer : 1;  /* Index of metadata viewer in utils[] */
+	uint reserved3  : 1;
 	uint useeditor  : 1;  /* Use VISUAL to open text files */
 	uint runplugin  : 1;  /* Choose plugin mode */
 	uint runctx     : 2;  /* The context in which plugin is to be run */
@@ -292,7 +291,9 @@ typedef struct {
 	uint autofifo   : 1;  /* Auto-create NNN_FIFO */
 	uint initfile   : 1;  /* Positional arg is a file */
 	uint dircolor   : 1;  /* Current status of dir color */
-	uint reserved   : 21;
+	uint picker     : 1;  /* Write selection to user-specified file */
+	uint pickraw    : 1;  /* Write selection to sdtout before exit */
+	uint reserved   : 19;
 } runstate;
 
 /* Contexts or workspaces */
@@ -331,11 +332,10 @@ static settings cfg = {
 	0, /* version */
 	0, /* reserved1 */
 	0, /* curctx */
-	0, /* picker */
-	0, /* pickraw */
+	0, /* reserved2 */
 	0, /* nonavopen */
 	1, /* autoselect */
-	0, /* metaviewer */
+	0, /* reserved3 */
 	0, /* useeditor */
 	0, /* runplugin */
 	0, /* runctx */
@@ -825,7 +825,7 @@ static void printerr(int linenum)
 {
 	exitcurses();
 	perror(xitoa(linenum));
-	if (!cfg.picker && selpath)
+	if (!g_state.picker && selpath)
 		unlink(selpath);
 	free(pselbuf);
 	exit(1);
@@ -1158,7 +1158,7 @@ static int create_tmp_file(void)
 /* Writes buflen char(s) from buf to a file */
 static void writesel(const char *buf, const size_t buflen)
 {
-	if (cfg.pickraw || !selpath)
+	if (g_state.pickraw || !selpath)
 		return;
 
 	FILE *fp = fopen(selpath, "w");
@@ -1523,7 +1523,7 @@ static bool initcurses(void *oldmask)
 	(void) oldmask;
 #endif
 
-	if (cfg.picker) {
+	if (g_state.picker) {
 		if (!newterm(NULL, stderr, stdin)) {
 			fprintf(stderr, "newterm!\n");
 			return FALSE;
@@ -5443,7 +5443,7 @@ nochange:
 			goto begin;
 
 		/* If STDIN is no longer a tty (closed) we should exit */
-		if (!isatty(STDIN_FILENO) && !cfg.picker)
+		if (!isatty(STDIN_FILENO) && !g_state.picker)
 			return EXIT_FAILURE;
 
 		sel = nextsel(presel);
@@ -5613,7 +5613,7 @@ nochange:
 			case S_IFREG:
 			{
 				/* If opened as vim plugin and Enter/^M pressed, pick */
-				if (cfg.picker && sel == SEL_GOIN) {
+				if (g_state.picker && sel == SEL_GOIN) {
 					appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
 					writesel(pselbuf, selbufpos - 1);
 					return EXIT_SUCCESS;
@@ -6031,7 +6031,7 @@ nochange:
 			else
 #endif
 				/* move cursor to the next entry if this is not the last entry */
-				if (!cfg.picker && cur != ndents - 1)
+				if (!g_state.picker && cur != ndents - 1)
 					move_cursor((cur + 1) % ndents, 0);
 			break;
 		case SEL_SELMUL:
@@ -6450,7 +6450,7 @@ nochange:
 			default: /* SEL_RUNCMD */
 				r = TRUE;
 #ifndef NORL
-				if (cfg.picker) {
+				if (g_state.picker) {
 #endif
 					tmp = xreadline(NULL, ">>> ");
 #ifndef NORL
@@ -6559,7 +6559,7 @@ nochange:
 			/* In vim picker mode, clear selection and exit */
 			/* Picker mode: reset buffer or clear file */
 			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE"))
-				cfg.picker ? selbufpos = 0 : write_lastdir(path);
+				g_state.picker ? selbufpos = 0 : write_lastdir(path);
 			return sel == SEL_QUITFAIL ? EXIT_FAILURE : EXIT_SUCCESS;
 #ifndef NOFIFO
 		case SEL_FIFO:
@@ -6919,7 +6919,7 @@ static bool setup_config(void)
 	}
 
 	/* Set selection file path */
-	if (!cfg.picker) {
+	if (!g_state.picker) {
 		char *env_sel = xgetenv(env_cfg[NNN_SEL], NULL);
 		if (env_sel)
 			selpath = xstrdup(env_sel);
@@ -7059,9 +7059,9 @@ int main(int argc, char *argv[])
 			if (env_opts_id >= 0)
 				break;
 
-			cfg.picker = 1;
+			g_state.picker = 1;
 			if (optarg[0] == '-' && optarg[1] == '\0')
-				cfg.pickraw = 1;
+				g_state.pickraw = 1;
 			else {
 				fd = open(optarg, O_WRONLY | O_CREAT, 0600);
 				if (fd == -1) {
@@ -7368,9 +7368,9 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	if (cfg.pickraw || cfg.picker) {
+	if (g_state.pickraw || g_state.picker) {
 		if (selbufpos) {
-			fd = cfg.pickraw ? 1 : open(selpath, O_WRONLY | O_CREAT, 0600);
+			fd = g_state.pickraw ? 1 : open(selpath, O_WRONLY | O_CREAT, 0600);
 			if ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos)))
 				xerror();
 
