@@ -40,8 +40,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | fzz | Change to any directory in the z database with fzf | sh | fzf, z |
 | getplugs | Update plugins to installed `nnn` version | sh | curl |
 | gutenread | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
-| gpgd | Decrypt files using gpg | sh | gpg |
-| gpge | Encrypt files using gpg | sh | gpg, fzf |
+| gpg\* | Encrypt/decrypt files using GPG | sh | gpg |
 | hexview | View a file in hex in `$PAGER` | sh | xxd |
 | imgresize | Resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |
 | imgthumb | View thumbnail of an image or dir of images | sh | [lsix](https://github.com/hackerb9/lsix) |
@@ -63,8 +62,8 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | pdfread | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
 | pdfview | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
 | picker | Pick files and list one per line (to pipe) | sh | nnn |
-| preview-tabbed | `tabbed`/xembed based file previewer | bash | _see in-file docs_ |
-| preview-tui | Tmux/kitty/`$TERMINAL` based file previewer | sh | _see in-file docs_ |
+| preview-tabbed | Tabbed/xembed based file previewer | bash | _see in-file docs_ |
+| preview-tui | Tmux/kitty/xterm/`$TERMINAL` based file previewer | sh | _see in-file docs_ |
 | pskill | Fuzzy list by name and kill process or zombie | sh | fzf, ps, sudo/doas |
 | renamer | Batch rename selection or files in dir | sh | [qmv](https://www.nongnu.org/renameutils/)/[vidir](https://joeyh.name/code/moreutils/) |
 | ringtone | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
