@@ -43,7 +43,8 @@
 #   different terminal window will be used ($TERMINAL).
 #
 #   Tmux and kitty users can configure $SPLIT to either "h" or "v" to set a
-#   'h'orizontal split or a 'v'ertical split.
+#   'h'orizontal split or a 'v'ertical split (as in, the line that splits the
+#   windows will be horizontal or vertical).
 #
 #   Kitty users need `allow_remote_control` set to `yes`. To customize the
 #   window split, `enabled_layouts` has to be set to `all` or `splits` (the
@@ -53,6 +54,8 @@
 # Shell: POSIX compliant
 # Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero
 
+SPLIT="$SPLIT"  # you can set a permanent split here
+TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
 PAGER="${PAGER:-less -R}"
 
@@ -64,10 +67,10 @@ else
     TERMINAL="${TERMINAL:-xterm}"
 fi
 
-if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ] ; then
-    SPLIT='v'
-elif [ "$SPLIT" != 'v' ] ; then
+if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ]; then
     SPLIT='h'
+elif [ "$SPLIT" != 'h' ]; then
+    SPLIT='v'
 fi
 
 exists() {
