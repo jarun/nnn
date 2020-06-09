@@ -3,8 +3,8 @@
 <p align="center"><img src="https://i.imgur.com/SpT0L2W.png" /></p>
 <p align="center"><i>read ebooks with plugin gutenread (Android)</i></p>
 
-<p align="center"><a href="https://asciinema.org/a/336443"><img src="https://asciinema.org/a/336443.png" width="734"/></a></p>
-<p align="center"><i>Live Previews asciicast</i></p>
+<p align="center"><a href="https://asciinema.org/a/336443"><img src="https://asciinema.org/a/336443.svg" width="734"/></a></p>
+<p align="center"><i>Live Previews</i></p>
 
 ## Introduction
 
@@ -63,9 +63,8 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | pdfread | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
 | pdfview | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
 | picker | Pick files and list one per line (to pipe) | sh | nnn |
-| preview-kitty | File previewer in a kitty terminal pane | sh | [kitty](https://sw.kovidgoyal.net/kitty/), optional:<br>[exa](https://github.com/ogham/exa) [bat](https://github.com/sharkdp/bat) mediainfo |
 | preview-tabbed | `tabbed`/xembed based file previewer | bash | _see in-file docs_ |
-| preview-tui | Simple TUI file previewer (needs NNN_FIFO) | sh | tmux (>= 3.0)/xterm/<br>\$TERMINAL, file, tree |
+| preview-tui | Tmux/kitty/`$TERMINAL` based file previewer | sh | _see in-file docs_ |
 | pskill | Fuzzy list by name and kill process or zombie | sh | fzf, ps, sudo/doas |
 | renamer | Batch rename selection or files in dir | sh | [qmv](https://www.nongnu.org/renameutils/)/[vidir](https://joeyh.name/code/moreutils/) |
 | ringtone | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |

@@ -1,15 +1,29 @@
 #!/usr/bin/env sh
 
-# Description: Text based file previewer
+# Description: Terminal based file previewer
 #
-# Note: This plugin needs a "NNN_FIFO" to work.
+# Note: This plugin needs a "NNN_FIFO" to work. See man.
 #
-# Dependencies: tmux (>=3.0) or xterm or $TERMINAL, less or $PAGER,
-#               file, stat, tree, man, tar, unzip, ...
-#                      ... add you own! (see examples in code)
+# Dependencies:
+#    - Supports 3 independent methods to preview with:
+#        - tmux (>=3.0), or
+#        - kitty with allow_remote_control on, or
+#        - $TERMINAL set to a terminal (it's xterm by default).
+#    - less or $PAGER
+#    - tree or exa or ls
+#    - mediainfo or file
+#    - unzip
+#    - tar
+#    - man
+#    - optional: bat for code syntax highlighting
+#    - optional: kitty terminal or catimg for images
+#    - optional: scope.sh file viewer from ranger.
+#                To use:
+#                1. drop scope.sh executable in $PATH
+#                2. set/export $USE_SCOPE as 1
 #
 # Usage:
-#   You need to set a NNN_FIFO path and set a key for the plugin,
+#   You need to set a NNN_FIFO path and a key for the plugin with NNN_PLUG,
 #   then start `nnn`:
 #
 #     $ nnn -a
@@ -24,14 +38,41 @@
 #   single common preview window. I you provide different FIFO path (e.g.
 #   with -a), they will be independent.
 #
-#   Configure SPLIT to either "h" or "v" to set a 'h'orizontal split or a
-#   'v'ertical split
+#   The previews will be shown in a tmux split. If that isn't possible, it
+#   will try to use a kitty terminal split. And as a final fallback, a
+#   different terminal window will be used ($TERMINAL).
+#
+#   Tmux and kitty users can configure $SPLIT to either "h" or "v" to set a
+#   'h'orizontal split or a 'v'ertical split.
+#
+#   Kitty users need `allow_remote_control` set to `yes`. To customize the
+#   window split, `enabled_layouts` has to be set to `all` or `splits` (the
+#   former is the default value). This terminal is also able to show images
+#   without extra dependencies.
 #
 # Shell: POSIX compliant
-# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste
+# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero
 
-TERMINAL="${TERMINAL:-xterm}"
+USE_SCOPE="${USE_SCOPE:-0}"
 PAGER="${PAGER:-less -R}"
+
+if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
+    TERMINAL=tmux
+elif [ -n "$KITTY_WINDOW_ID" ] && kitty @ ls >/dev/null 2>&1; then
+    TERMINAL=kitty
+else
+    TERMINAL="${TERMINAL:-xterm}"
+fi
+
+if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ] ; then
+    SPLIT='v'
+elif [ "$SPLIT" != 'v' ] ; then
+    SPLIT='h'
+fi
+
+exists() {
+    command -v "$1" >/dev/null 2>&1
+}
 
 fifo_pager() {
     cmd="$1"
@@ -51,42 +92,75 @@ fifo_pager() {
     rm "$tmpfifopath"
 }
 
+# Binary file: show file info inside the pager
+print_bin_info() {
+    printf -- "-------- \033[1;31mBinary file\033[0m --------\n"
+    if exists mediainfo; then
+        mediainfo "$1" 2>/dev/null
+    else
+        file -b "$1"
+    fi
+}
+
 preview_file () {
     kill %- %+ 2>/dev/null && wait %- %+ 2>/dev/null
     clear
 
+    # Detecting the exact type of the file: the encoding, mime type, and
+    # extension in lowercase.
     encoding="$(file -Lb --mime-encoding -- "$1")"
-
-    # Detect mime type
     mimetype="$(file -Lb --mime-type -- "$1")"
-
-    # Detect file extention
     ext="${1##*.}"
     if [ -n "$ext" ]; then
         ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
     fi
+    lines=$(($(tput lines)-1))
+    cols=$(tput cols)
 
+    # Trying to use scope.sh if it's available.
+    if [ "$USE_SCOPE" -ne 0 ] && exists scope.sh; then
+        fifo_pager scope.sh "$1" "$cols" "$lines" "$(mktemp -d)" \
+            "True" 2>/dev/null
+        return
+    fi
+
+    # Otherwise, falling back to the defaults.
     if [ -d "$1" ]; then
-        # Print directory tree
         cd "$1" || return
-        fifo_pager tree
-    #elif [ "${mimetype%%/*}" = "image" ] ; then
-    #    catimg "$1"
+        if exists tree; then
+            fifo_pager tree
+        elif exists exa; then
+            fifo_pager exa -G --colour=always 2>/dev/null
+        else
+            fifo_pager ls --color=always
+        fi
+    elif [ "$encoding" = "binary" ]; then
+        if [ "${mimetype%%/*}" = "image" ] ; then
+            if [ "$TERMINAL" = "kitty" ]; then
+                # Kitty terminal users can use the native image preview method.
+                kitty +kitten icat --silent --transfer-mode=stream --stdin=no \
+                    "$1" &
+            elif exists catimg; then
+                catimg "$1"
+            else
+                fifo_pager print_bin_info "$1"
+            fi
+        elif [ "$mimetype" = "application/zip" ] ; then
+            fifo_pager unzip -l "$1"
+        elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ] ; then
+            fifo_pager tar -tvf "$1"
+        else
+            fifo_pager print_bin_info "$1"
+        fi
     elif [ "$mimetype" = "text/troff" ] ; then
         fifo_pager man -Pcat -l "$1"
-    elif [ "$mimetype" = "application/zip" ] ; then
-        fifo_pager unzip -l "$1"
-    elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ] ; then
-        fifo_pager tar -tvf "$1"
-    elif [ "$encoding" = "binary" ] ; then
-        # Binary file: just print filetype info
-        echo "-------- binary file --------"
-        file -b "$1"
-        echo
-        stat "$1"
     else
-        # Text file:
-        $PAGER "$1" &
+        if exists bat; then
+            fifo_pager bat --paging=never --decorations=always --color=always \
+                "$1" 2>/dev/null
+        else
+            $PAGER "$1" &
+        fi
     fi
 }
 
@@ -99,21 +173,31 @@ if [ "$PREVIEW_MODE" ] ; then
 
     preview_file "$1"
 
-    exec < "$NNN_FIFO"
+    # use cat instead of 'exec <' to avoid issues with dash shell
+    # shellcheck disable=SC2002
+    cat "$NNN_FIFO" |\
     while read -r selection ; do
         preview_file "$selection"
     done
     exit 0
 fi
 
-if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.' ; then
-    if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ] ; then
-        SPLIT='v'
-    elif [ "$SPLIT" != 'v' ] ; then
-        SPLIT='h'
-    fi
+if [ "$TERMINAL" = "tmux" ]; then
+    # tmux splits are inverted
+    if [ "$SPLIT" = "v" ]; then SPLIT="h"; else SPLIT="v"; fi
 
     tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d"$SPLIT" "$0" "$1"
+elif [ "$TERMINAL" = "kitty" ]; then
+    # Setting the layout for the new window.
+    kitty @ goto-layout splits >/dev/null
+
+    # Trying to use kitty's integrated window management as the split window.
+    kitty @ launch --no-response --title "nnn preview" --keep-focus \
+          --cwd "$PWD" --env "NNN_FIFO=$NNN_FIFO" --env "PREVIEW_MODE=1" \
+          --location "${SPLIT}split" "$0" "$1" >/dev/null
+
+    # Restoring the previous layout.
+    kitty @ last-used-layout --no-response >/dev/null 2>&1
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
