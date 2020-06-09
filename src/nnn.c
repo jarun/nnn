@@ -255,7 +255,7 @@ typedef struct {
 	uint blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
 	uint extnorder  : 1;  /* Order by extension */
 	uint showhidden : 1;  /* Set to show hidden files */
-	uint selmode    : 1;  /* Set when selecting files */
+	uint reserved0  : 1;
 	uint showdetail : 1;  /* Clear to show lesser file info */
 	uint ctxactive  : 1;  /* Context active or not */
 	uint reverse    : 1;  /* Reverse sort */
@@ -294,7 +294,8 @@ typedef struct {
 	uint pickraw    : 1;  /* Write selection to sdtout before exit */
 	uint runplugin  : 1;  /* Choose plugin mode */
 	uint runctx     : 2;  /* The context in which plugin is to be run */
-	uint reserved   : 16;
+	uint selmode    : 1;  /* Set when selecting files */
+	uint reserved   : 15;
 } runstate;
 
 /* Contexts or workspaces */
@@ -326,7 +327,7 @@ static settings cfg = {
 	0, /* blkorder */
 	0, /* extnorder */
 	0, /* showhidden */
-	0, /* selmode */
+	0, /* reserved0 */
 	0, /* showdetail */
 	1, /* ctxactive */
 	0, /* reverse */
@@ -1262,8 +1263,8 @@ static void resetselind(void)
 
 static void startselection(void)
 {
-	if (!cfg.selmode) {
-		cfg.selmode = 1;
+	if (!g_state.selmode) {
+		g_state.selmode = 1;
 		nselected = 0;
 
 		if (selbufpos) {
@@ -1294,8 +1295,8 @@ static void endselection(void)
 	ssize_t count;
 	char buf[sizeof(patterns[P_REPLACE]) + PATH_MAX + (TMP_LEN_MAX << 1)];
 
-	if (cfg.selmode)
-		cfg.selmode = 0;
+	if (g_state.selmode)
+		g_state.selmode = 0;
 
 	if (!listpath || !selbufpos)
 		return;
@@ -1356,7 +1357,7 @@ static void clearselection(void)
 {
 	nselected = 0;
 	selbufpos = 0;
-	cfg.selmode = 0;
+	g_state.selmode = 0;
 	writesel(NULL, 0);
 }
 
@@ -2370,7 +2371,7 @@ static int nextsel(int presel)
 		 * Check for changes every odd second.
 		 */
 #ifdef LINUX_INOTIFY
-		if (!cfg.selmode && !cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
+		if (!g_state.selmode && !cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
 			struct inotify_event *event;
 			char inotify_buf[EVENT_BUF_LEN];
 
@@ -2396,7 +2397,7 @@ static int nextsel(int presel)
 			}
 		}
 #elif defined(BSD_KQUEUE)
-		if (!cfg.selmode && !cfg.blkorder && event_fd >= 0 && idle & 1) {
+		if (!g_state.selmode && !cfg.blkorder && event_fd >= 0 && idle & 1) {
 			struct kevent event_data[NUM_EVENT_SLOTS];
 
 			memset((void *)event_data, 0x0, sizeof(struct kevent) * NUM_EVENT_SLOTS);
@@ -2404,7 +2405,7 @@ static int nextsel(int presel)
 				c = CONTROL('L');
 		}
 #elif defined(HAIKU_NM)
-		if (!cfg.selmode && !cfg.blkorder && haiku_nm_active && idle & 1 && haiku_is_update_needed(haiku_hnd))
+		if (!g_state.selmode && !cfg.blkorder && haiku_nm_active && idle & 1 && haiku_is_update_needed(haiku_hnd))
 			c = CONTROL('L');
 #endif
 	} else
@@ -3415,7 +3416,6 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 {
 	settings cfg = *curcfg;
 	context *ctxr = &g_ctx[r];
-	bool selmode = cfg.selmode ? TRUE : FALSE;
 
 	/* Save current context */
 	if (ndents)
@@ -3439,10 +3439,7 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 		ctxr->c_cfg = cfg;
 	}
 
-	/* Continue selection mode */
-	cfg.selmode = selmode;
 	cfg.curctx = r;
-
 	*curcfg = cfg;
 }
 
@@ -4933,7 +4930,7 @@ static int handle_context_switch(enum action sel)
 				return -1;
 		}
 
-		if (cfg.selmode)
+		if (g_state.selmode)
 			lastappendpos = selbufpos;
 	}
 
@@ -5111,7 +5108,7 @@ static void statusbar(char *path)
 		xstrsncpy(buf, coolsize(dir_blocks << blk_shift), 12);
 
 		printw("%d/%d [%s:%s] %cu:%s free:%s files:%lu %lldB %s\n",
-		       cur + 1, ndents, (cfg.selmode ? "s" : ""),
+		       cur + 1, ndents, (g_state.selmode ? "s" : ""),
 		       (g_state.rangesel ? "*" : (nselected ? xitoa(nselected) : "")),
 		       (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
 		       num_files, (ll)pent->blocks << blk_shift, ptr);
@@ -5120,7 +5117,7 @@ static void statusbar(char *path)
 
 		getorderstr(sort);
 
-		printw("%d/%d [%s:%s] %s", cur + 1, ndents, (cfg.selmode ? "s" : ""),
+		printw("%d/%d [%s:%s] %s", cur + 1, ndents, (g_state.selmode ? "s" : ""),
 			 (g_state.rangesel ? "*" : (nselected ? xitoa(nselected) : "")), sort);
 
 		/* Timestamp */
@@ -5377,7 +5374,7 @@ begin:
 		setdirwatch();
 	}
 
-	if (cfg.selmode && lastdir[0])
+	if (g_state.selmode && lastdir[0])
 		lastappendpos = selbufpos;
 
 #ifdef LINUX_INOTIFY
@@ -5464,7 +5461,7 @@ nochange:
 				if (r >= CTX_MAX)
 					sel = SEL_BACK;
 				else if (r >= 0 && r != cfg.curctx) {
-					if (cfg.selmode)
+					if (g_state.selmode)
 						lastappendpos = selbufpos;
 
 					savecurctx(&cfg, path, dents[cur].name, r);
@@ -6517,8 +6514,6 @@ nochange:
 				};
 
 				if (r != ctx) {
-					bool selmode = cfg.selmode ? TRUE : FALSE;
-
 					g_ctx[ctx].c_cfg.ctxactive = 0;
 
 					/* Switch to next active context */
@@ -6534,8 +6529,6 @@ nochange:
 
 					cfg = g_ctx[r].c_cfg;
 
-					/* Continue selection mode */
-					cfg.selmode = selmode;
 					cfg.curctx = r;
 					setdirwatch();
 					goto begin;
