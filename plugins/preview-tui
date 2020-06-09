@@ -57,6 +57,7 @@
 SPLIT="$SPLIT"  # you can set a permanent split here
 TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
+USE_PISTOL="${USE_PISTOL:-0}"
 PAGER="${PAGER:-less -R}"
 
 if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
@@ -124,6 +125,12 @@ preview_file () {
     if [ "$USE_SCOPE" -ne 0 ] && exists scope.sh; then
         fifo_pager scope.sh "$1" "$cols" "$lines" "$(mktemp -d)" \
             "True" 2>/dev/null
+        return
+    fi
+
+    # Trying to use pistol if it's available.
+    if [ "$USE_PISTOL" -ne 0 ] && exists pistol; then
+        fifo_pager pistol "$1"
         return
     fi
 
@@ -201,6 +208,7 @@ elif [ "$TERMINAL" = "kitty" ]; then
           --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" \
           --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" \
           --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" \
+          --env "USE_PISTOL=$USE_PISTOL" \
           --location "${SPLIT}split" "$0" "$1" >/dev/null
 
     # Restoring the previous layout.
