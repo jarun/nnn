@@ -258,7 +258,9 @@ typedef struct {
 	uint selmode    : 1;  /* Set when selecting files */
 	uint showdetail : 1;  /* Clear to show fewer file info */
 	uint ctxactive  : 1;  /* Context active or not */
-	uint reserved1  : 3;
+	uint reverse    : 1;  /* Reverse sort */
+	uint version    : 1;  /* Version sort */
+	uint reserved1  : 1;
 	/* The following settings are global */
 	uint curctx     : 3;  /* Current context number */
 	uint picker     : 1;  /* Write selection to user-specified file */
@@ -325,6 +327,8 @@ static settings cfg = {
 	0, /* selmode */
 	0, /* showdetail */
 	1, /* ctxactive */
+	0, /* reverse */
+	0, /* version */
 	0, /* reserved1 */
 	0, /* curctx */
 	0, /* picker */
@@ -708,6 +712,7 @@ static inline bool getutil(char *util);
 static size_t mkpath(const char *dir, const char *name, char *out);
 static bool plugscript(const char *plugin, uchar flags);
 static char *load_input(int fd, const char *path);
+static int set_sort_flags(int r);
 
 /* Functions */
 
@@ -3563,6 +3568,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	*lastdir = g_ctx[cfg.curctx].c_last;
 	*lastname = g_ctx[cfg.curctx].c_name;
 	printptr = cfg.showdetail ? &printent_long : &printent;
+	set_sort_flags('\0'); /* Set correct sort options */
 	status = TRUE;
 
 END:
@@ -4937,6 +4943,25 @@ static int handle_context_switch(enum action sel)
 
 static int set_sort_flags(int r)
 {
+	bool session = !r;
+
+	/* Set the correct input in case of a session load */
+	if (session) {
+		if (cfg.apparentsz) {
+			cfg.apparentsz = 0;
+			r = 'a';
+		} else if (cfg.blkorder) {
+			cfg.blkorder = 0;
+			r = 'd';
+		}
+
+		if (cfg.version)
+			namecmpfn = &xstrverscasecmp;
+
+		if (cfg.reverse)
+			entrycmpfn = &reventrycmp;
+	}
+
 	switch (r) {
 	case 'a': /* Apparent du */
 		cfg.apparentsz ^= 1;
@@ -4963,7 +4988,10 @@ static int set_sort_flags(int r)
 		cfg.timeorder = 0;
 		cfg.sizeorder = 0;
 		cfg.extnorder = 0;
-		entrycmpfn = &entrycmp;
+		if (!session) {
+			cfg.reverse = 0;
+			entrycmpfn = &entrycmp;
+		}
 		endselection(); /* We are going to reload dir */
 		break;
 	case 'c':
@@ -4972,6 +5000,8 @@ static int set_sort_flags(int r)
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
 		cfg.extnorder = 0;
+		cfg.reverse = 0;
+		cfg.version = 0;
 		entrycmpfn = &entrycmp;
 		namecmpfn = &xstricmp;
 		break;
@@ -4981,10 +5011,12 @@ static int set_sort_flags(int r)
 		cfg.timeorder = 0;
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
+		cfg.reverse = 0;
 		entrycmpfn = &entrycmp;
 		break;
 	case 'r': /* Reverse sort */
-		entrycmpfn = (entrycmpfn == &entrycmp) ? &reventrycmp : &entrycmp;
+		cfg.reverse ^= 1;
+		entrycmpfn = cfg.reverse ? &reventrycmp : &entrycmp;
 		break;
 	case 's': /* File size */
 		cfg.sizeorder ^= 1;
@@ -4992,6 +5024,7 @@ static int set_sort_flags(int r)
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
 		cfg.extnorder = 0;
+		cfg.reverse = 0;
 		entrycmpfn = &entrycmp;
 		break;
 	case 't': /* Time */
@@ -5000,10 +5033,12 @@ static int set_sort_flags(int r)
 		cfg.apparentsz = 0;
 		cfg.blkorder = 0;
 		cfg.extnorder = 0;
+		cfg.reverse = 0;
 		entrycmpfn = &entrycmp;
 		break;
 	case 'v': /* Version */
-		namecmpfn = (namecmpfn == &xstrverscasecmp) ? &xstricmp : &xstrverscasecmp;
+		cfg.version ^= 1;
+		namecmpfn = cfg.version ? &xstrverscasecmp : &xstricmp;
 		cfg.timeorder = 0;
 		cfg.sizeorder = 0;
 		cfg.apparentsz = 0;
