@@ -26,56 +26,56 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 
 | Plugin (a-z) | Description | Lang | Dependencies |
 | --- | --- | --- | --- |
-| autojump | Navigate to dir/path | sh | autojump |
-| bookmarks | Use named bookmarks managed with symlinks | sh | fzf |
-| boom | Play random music from dir | sh | [moc](http://moc.daper.net/) |
-| dups | List non-empty duplicate files in current dir | sh | find, md5sum,<br>sort uniq xargs |
-| chksum | Create and verify checksums | sh | md5sum,<br>sha256sum |
-| diffs | Diff for selection (limited to 2 for directories) | sh | vimdiff |
-| dragdrop | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
-| finder | Run custom find command and list | sh | - |
-| fzcd | Change to the directory of a fuzzy-selected file/dir | sh | fzf |
-| fzhist | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf |
-| fzopen | Fuzzy find a file in dir subtree and edit or open | sh | fzf, xdg-open |
-| fzz | Change to any directory in the z database with fzf | sh | fzf, z |
-| getplugs | Update plugins to installed `nnn` version | sh | curl |
-| gutenread | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
-| gpg\* | Encrypt/decrypt files using GPG | sh | gpg |
-| hexview | View a file in hex in `$PAGER` | sh | xxd |
-| imgresize | Resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |
-| imgthumb | View thumbnail of an image or dir of images | sh | [lsix](https://github.com/hackerb9/lsix) |
-| imgur | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) | bash | - |
-| imgview | Browse images, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)), [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images)| sh | sxiv/[viu](https://github.com/atanunq/viu), less|
-| ipinfo | Fetch external IP address and whois information | sh | curl, whois |
-| kdeconnect | Send selected files to an Android device | sh | kdeconnect-cli |
-| launch | GUI application launcher | sh | fzf |
-| mediainf | Show media information | sh | mediainfo |
-| mimelist | List files by mime in subtree | sh | fd/find |
-| moclyrics | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
-| mocplay | Append (and/or play) selection/dir/file in moc | sh | [moc](http://moc.daper.net/) |
-| mp3conv | Extract audio from multimedia as mp3 | sh | ffmpeg |
-| nbak | Backs up `nnn` config | sh | tar, awk |
-| nmount | Toggle mount status of a device as normal user | sh | pmount, udisks2 |
-| nuke | Sample file opener (CLI-only by default) | sh | _see in-file docs_ |
-| oldbigfile | List large files by access time | sh | find, sort |
-| organize | Auto-organize files in directories by file type | sh | file |
-| pdfread | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
-| pdfview | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
-| picker | Pick files and list one per line (to pipe) | sh | nnn |
-| preview-tabbed | Tabbed/xembed based file previewer | bash | _see in-file docs_ |
-| preview-tui | Tmux/kitty/xterm/`$TERMINAL` based file previewer | sh | _see in-file docs_ |
-| pskill | Fuzzy list by name and kill process or zombie | sh | fzf, ps, sudo/doas |
-| renamer | Batch rename selection or files in dir | sh | [qmv](https://www.nongnu.org/renameutils/)/[vidir](https://joeyh.name/code/moreutils/) |
-| ringtone | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
-| splitjoin | Split file or join selection | sh | split, cat |
-| suedit | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
-| treeview | Informative tree output in `$EDITOR` | sh | tree |
-| uidgid | List user and group of all files in dir | sh | ls, less |
-| upgrade | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
-| upload | Paste text to ix.io, upload binary to file.io | sh | curl, jq, tr |
-| vidthumb | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
-| wall | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
-| x2sel | Copy `\n`-separated file list from system clipboard to sel | sh | _see in-file docs_ |
+| [autojump](autojump) | Navigate to dir/path | sh | autojump |
+| [bookmarks](bookmarks) | Use named bookmarks managed with symlinks | sh | fzf |
+| [boom](boom) | Play random music from dir | sh | [moc](http://moc.daper.net/) |
+| [dups](dups) | List non-empty duplicate files in current dir | sh | find, md5sum,<br>sort uniq xargs |
+| [chksum](chksum) | Create and verify checksums | sh | md5sum,<br>sha256sum |
+| [diffs](diffs) | Diff for selection (limited to 2 for directories) | sh | vimdiff |
+| [dragdrop](dragdrop) | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
+| [finder](finder) | Run custom find command and list | sh | - |
+| [fzcd](fzcd) | Change to the directory of a fuzzy-selected file/dir | sh | fzf |
+| [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf |
+| [fzopen](fzopen) | Fuzzy find a file in dir subtree and edit or open | sh | fzf, xdg-open |
+| [fzz](fzz) | Change to any directory in the z database with fzf | sh | fzf, z |
+| [getplugs](getplugs) | Update plugins to installed `nnn` version | sh | curl |
+| [gutenread](gutenread) | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
+| [gpg\*](gpg\*) | Encrypt/decrypt files using GPG | sh | gpg |
+| [hexview](hexview) | View a file in hex in `$PAGER` | sh | xxd |
+| [imgresize](imgresize) | Resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |
+| [imgthumb](imgthumb) | View thumbnail of an image or dir of images | sh | [lsix](https://github.com/hackerb9/lsix) |
+| [imgur](imgur) | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) | bash | - |
+| [imgview](imgview) | Browse images, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)), [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images)| sh | sxiv/[viu](https://github.com/atanunq/viu), less|
+| [ipinfo](ipinfo) | Fetch external IP address and whois information | sh | curl, whois |
+| [kdeconnect](kdeconnect) | Send selected files to an Android device | sh | kdeconnect-cli |
+| [launch](launch) | GUI application launcher | sh | fzf |
+| [mediainf](mediainf) | Show media information | sh | mediainfo |
+| [mimelist](mimelist) | List files by mime in subtree | sh | fd/find |
+| [moclyrics](moclyrics) | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
+| [mocplay](mocplay) | Append (and/or play) selection/dir/file in moc | sh | [moc](http://moc.daper.net/) |
+| [mp3conv](mp3conv) | Extract audio from multimedia as mp3 | sh | ffmpeg |
+| [nbak](nbak) | Backs up `nnn` config | sh | tar, awk |
+| [nmount](nmount) | Toggle mount status of a device as normal user | sh | pmount, udisks2 |
+| [nuke](nuke) | Sample file opener (CLI-only by default) | sh | _see in-file docs_ |
+| [oldbigfile](oldbigfile) | List large files by access time | sh | find, sort |
+| [organize](organize) | Auto-organize files in directories by file type | sh | file |
+| [pdfread](pdfread) | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
+| [pdfview](pdfview) | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
+| [picker](picker) | Pick files and list one per line (to pipe) | sh | nnn |
+| [preview-tabbed](preview-tabbed) | Tabbed/xembed based file previewer | bash | _see in-file docs_ |
+| [preview-tui](preview-tui) | Tmux/kitty/xterm/`$TERMINAL` based file previewer | sh | _see in-file docs_ |
+| [pskill](pskill) | Fuzzy list by name and kill process or zombie | sh | fzf, ps, sudo/doas |
+| [renamer](renamer) | Batch rename selection or files in dir | sh | [qmv](https://www.nongnu.org/renameutils/)/[vidir](https://joeyh.name/code/moreutils/) |
+| [ringtone](ringtone) | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
+| [splitjoin](splitjoin) | Split file or join selection | sh | split, cat |
+| [suedit](suedit) | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
+| [treeview](treeview) | Informative tree output in `$EDITOR` | sh | tree |
+| [uidgid](uidgid) | List user and group of all files in dir | sh | ls, less |
+| [upgrade](upgrade) | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
+| [upload](upload) | Paste text to ix.io, upload binary to file.io | sh | curl, jq, tr |
+| [vidthumb](vidthumb) | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
+| [wall](wall) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
+| [x2sel](x2sel) | Copy `\n`-separated file list from system clipboard to sel | sh | _see in-file docs_ |
 
 ## Invoking a plugin
 
