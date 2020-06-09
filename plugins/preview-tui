@@ -64,10 +64,10 @@ else
     TERMINAL="${TERMINAL:-xterm}"
 fi
 
-if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ] ; then
-    SPLIT='v'
-elif [ "$SPLIT" != 'v' ] ; then
+if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ]; then
     SPLIT='h'
+elif [ "$SPLIT" != 'h' ]; then
+    SPLIT='v'
 fi
 
 exists() {
