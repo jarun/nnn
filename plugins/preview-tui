@@ -21,6 +21,10 @@
 #                To use:
 #                1. drop scope.sh executable in $PATH
 #                2. set/export $USE_SCOPE as 1
+#    - optional: pistol file viewer (https://github.com/doronbehar/pistol).
+#                To use:
+#                1. install pistol
+#                2. set/export $USE_PISTOL as 1
 #
 # Usage:
 #   You need to set a NNN_FIFO path and a key for the plugin with NNN_PLUG,
