@@ -192,12 +192,11 @@ elif [ "$TERMINAL" = "kitty" ]; then
     kitty @ goto-layout splits >/dev/null
 
     # Trying to use kitty's integrated window management as the split window.
+    # The layout will be restored after the script ends.
     kitty @ launch --no-response --title "nnn preview" --keep-focus \
           --cwd "$PWD" --env "NNN_FIFO=$NNN_FIFO" --env "PREVIEW_MODE=1" \
-          --location "${SPLIT}split" "$0" "$1" >/dev/null
-
-    # Restoring the previous layout.
-    kitty @ last-used-layout --no-response >/dev/null 2>&1
+          --location "${SPLIT}split" sh -c "\"$0\" \"$1\";" \
+          "kitty @ last-used-layout --no-response >/dev/null 2>&1" >/dev/null
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
