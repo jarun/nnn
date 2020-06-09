@@ -180,7 +180,8 @@ if [ "$PREVIEW_MODE" ] ; then
         preview_file "$selection"
     done
 
-    # Restoring the previous preview for kitty users
+    # Restoring the previous layout for kitty users. This will only work for
+    # kitty >= 0.18.0.
     if [ "$TERMINAL" = "kitty" ]; then
         kitty @ last-used-layout --no-response >/dev/null 2>&1
     fi
@@ -194,11 +195,11 @@ if [ "$TERMINAL" = "tmux" ]; then
 
     tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d"$SPLIT" "$0" "$1"
 elif [ "$TERMINAL" = "kitty" ]; then
-    # Setting the layout for the new window.
+    # Setting the layout for the new window. It will be restored after the
+    # script ends.
     kitty @ goto-layout splits >/dev/null
 
     # Trying to use kitty's integrated window management as the split window.
-    # The layout will be restored after the script ends.
     kitty @ launch --no-response --title "nnn preview" --keep-focus \
           --cwd "$PWD" --env "NNN_FIFO=$NNN_FIFO" --env "PREVIEW_MODE=1" \
           --location "${SPLIT}split" "$0" "$1" >/dev/null
