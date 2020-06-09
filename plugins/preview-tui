@@ -64,10 +64,10 @@ else
     TERMINAL="${TERMINAL:-xterm}"
 fi
 
-if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ]; then
-    SPLIT='h'
-elif [ "$SPLIT" != 'h' ]; then
+if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ] ; then
     SPLIT='v'
+elif [ "$SPLIT" != 'v' ] ; then
+    SPLIT='h'
 fi
 
 exists() {
@@ -179,6 +179,12 @@ if [ "$PREVIEW_MODE" ] ; then
     while read -r selection ; do
         preview_file "$selection"
     done
+
+    # Restoring the previous preview for kitty users
+    if [ "$TERMINAL" = "kitty" ]; then
+        kitty @ last-used-layout --no-response >/dev/null 2>&1
+    fi
+
     exit 0
 fi
 
@@ -195,8 +201,7 @@ elif [ "$TERMINAL" = "kitty" ]; then
     # The layout will be restored after the script ends.
     kitty @ launch --no-response --title "nnn preview" --keep-focus \
           --cwd "$PWD" --env "NNN_FIFO=$NNN_FIFO" --env "PREVIEW_MODE=1" \
-          --location "${SPLIT}split" sh -c "\"$0\" \"$1\";" \
-          "kitty @ last-used-layout --no-response >/dev/null 2>&1" >/dev/null
+          --location "${SPLIT}split" "$0" "$1" >/dev/null
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
