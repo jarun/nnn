@@ -195,8 +195,12 @@ elif [ "$TERMINAL" = "kitty" ]; then
     kitty @ goto-layout splits >/dev/null
 
     # Trying to use kitty's integrated window management as the split window.
+    # All environmental variables that will be used in the new window must
+    # be explicitly passed.
     kitty @ launch --no-response --title "nnn preview" --keep-focus \
-          --cwd "$PWD" --env "NNN_FIFO=$NNN_FIFO" --env "PREVIEW_MODE=1" \
+          --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" \
+          --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" \
+          --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" \
           --location "${SPLIT}split" "$0" "$1" >/dev/null
 
     # Restoring the previous layout.
