@@ -275,6 +275,7 @@ typedef struct {
 	uint cliopener  : 1;  /* All-CLI app opener */
 	uint waitedit   : 1;  /* For ops that can't be detached, used EDITOR */
 	uint rollover   : 1;  /* Roll over at edges */
+	uint cursormode : 1;  /* Move hardware cursor with selection */
 } settings;
 
 /* Non-persistent program-internal states */
@@ -346,6 +347,7 @@ static settings cfg = {
 	0, /* cliopener */
 	0, /* waitedit */
 	1, /* rollover */
+	0  /* cursormode */
 };
 
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
@@ -681,6 +683,7 @@ static haiku_nm_h haiku_hnd;
 
 /* Function macros */
 #define tolastln() move(xlines - 1, 0)
+#define tocursor() move(cur + 2, 0)
 #define exitcurses() endwin()
 #define printwarn(presel) printwait(strerror(errno), presel)
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
@@ -5133,6 +5136,9 @@ static void statusbar(char *path)
 	}
 
 	attroff(COLOR_PAIR(cfg.curctx + 1));
+	
+	if(cfg.cursormode)
+		tocursor();
 }
 
 static int adjust_cols(int ncols)
@@ -5181,7 +5187,6 @@ static void draw_line(char *path, int ncols)
 	/* Must reset e.g. no files in dir */
 	if (dir)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
-
 	statusbar(path);
 }
 
@@ -5198,7 +5203,6 @@ static void redraw(char *path)
 	// Fast redraw
 	if (g_state.move) {
 		g_state.move = 0;
-
 		if (ndents && (last_curscroll == curscroll))
 			return draw_line(path, ncols);
 	}
@@ -6821,6 +6825,7 @@ static void usage(void)
 		" -A      no dir auto-select\n"
 		" -b key  open bookmark key (trumps -s/S)\n"
 		" -c      cli-only NNN_OPENER (trumps -e)\n"
+		" -C	 Move hardware cursor with selected item\n"
 		" -d      detail mode\n"
 		" -e      text in $VISUAL/$EDITOR/vi\n"
 		" -E      use EDITOR for undetached edits\n"
@@ -6992,7 +6997,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cdeEfFgHKl:nop:P:QrRs:St:T:Vxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdeEfFgHKl:nop:P:QrRs:St:T:Vxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7030,6 +7035,9 @@ int main(int argc, char *argv[])
 		case 'g':
 			cfg.regex = 1;
 			filterfn = &visible_re;
+			break;
+		case 'C':
+			cfg.cursormode = 1;
 			break;
 		case 'H':
 			cfg.showhidden = 1;
@@ -7097,6 +7105,7 @@ int main(int argc, char *argv[])
 			if (env_opts_id < 0)
 				sort = (uchar)optarg[0];
 			break;
+
 		case 'V':
 			fprintf(stdout, "%s\n", VERSION);
 			return EXIT_SUCCESS;
