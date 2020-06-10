@@ -114,17 +114,6 @@ preview_file () {
     kill %- %+ 2>/dev/null && wait %- %+ 2>/dev/null
     clear
 
-    # Detecting the exact type of the file: the encoding, mime type, and
-    # extension in lowercase.
-    encoding="$(file -Lb --mime-encoding -- "$1")"
-    mimetype="$(file -Lb --mime-type -- "$1")"
-    ext="${1##*.}"
-    if [ -n "$ext" ]; then
-        ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
-    fi
-    lines=$(($(tput lines)-1))
-    cols=$(tput cols)
-
     # Trying to use pistol if it's available.
     if [ "$USE_PISTOL" -ne 0 ] && exists pistol; then
         fifo_pager pistol "$1"
@@ -137,6 +126,17 @@ preview_file () {
             "True" 2>/dev/null
         return
     fi
+
+    # Detecting the exact type of the file: the encoding, mime type, and
+    # extension in lowercase.
+    encoding="$(file -Lb --mime-encoding -- "$1")"
+    mimetype="$(file -Lb --mime-type -- "$1")"
+    ext="${1##*.}"
+    if [ -n "$ext" ]; then
+        ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
+    fi
+    lines=$(($(tput lines)-1))
+    cols=$(tput cols)
 
     # Otherwise, falling back to the defaults.
     if [ -d "$1" ]; then
