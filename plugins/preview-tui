@@ -21,6 +21,10 @@
 #                To use:
 #                1. drop scope.sh executable in $PATH
 #                2. set/export $USE_SCOPE as 1
+#    - optional: pistol file viewer (https://github.com/doronbehar/pistol).
+#                To use:
+#                1. install pistol
+#                2. set/export $USE_PISTOL as 1
 #
 # Usage:
 #   You need to set a NNN_FIFO path and a key for the plugin with NNN_PLUG,
@@ -57,6 +61,7 @@
 SPLIT="$SPLIT"  # you can set a permanent split here
 TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
+USE_PISTOL="${USE_PISTOL:-0}"
 PAGER="${PAGER:-less -R}"
 
 if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
@@ -119,6 +124,12 @@ preview_file () {
     fi
     lines=$(($(tput lines)-1))
     cols=$(tput cols)
+
+    # Trying to use pistol if it's available.
+    if [ "$USE_PISTOL" -ne 0 ] && exists pistol; then
+        fifo_pager pistol "$1"
+        return
+    fi
 
     # Trying to use scope.sh if it's available.
     if [ "$USE_SCOPE" -ne 0 ] && exists scope.sh; then
@@ -209,6 +220,7 @@ elif [ "$TERMINAL" = "kitty" ]; then
           --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" \
           --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" \
           --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" \
+          --env "USE_PISTOL=$USE_PISTOL" \
           --location "${SPLIT}split" "$0" "$1" >/dev/null
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
