@@ -1,15 +1,18 @@
 #!/usr/bin/env sh
 
-# Description: Paste contents of a text a file http://ix.io
+# Description: Upload to Firefox Send if ffsend is found, else
+#              Paste contents of a text a file http://ix.io
 #              Upload a binary file to file.io
-# Dependencies: curl, jq, tr
+# Dependencies: ffsend (https://github.com/timvisee/ffsend), curl, jq, tr
 # Note: Binary file set to expire after a week
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
 if ! [ -z "$1" ] && [ -s "$1" ]; then
-    if [ "$(mimetype --output-format %m "$1" | awk -F '/' '{print $1}')" = "text" ]; then
+    if which ffsend >/dev/null 2>&1; then
+        ffsend -iq u "$1"
+    elif [ "$(mimetype --output-format %m "$1" | awk -F '/' '{print $1}')" = "text" ]; then
         curl -F "f:1=@$1" ix.io
     else
         # Upload the file, show the download link and wait till user presses any key

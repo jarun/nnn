@@ -72,7 +72,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | [treeview](treeview) | Informative tree output in `$EDITOR` | sh | tree |
 | [uidgid](uidgid) | List user and group of all files in dir | sh | ls, less |
 | [upgrade](upgrade) | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
-| [upload](upload) | Paste text to ix.io, upload binary to file.io | sh | curl, jq, tr |
+| [upload](upload) | Upload to Firefox Send or ix.io (text) or file.io (bin) | sh | [ffsend](https://github.com/timvisee/ffsend), curl, jq, tr |
 | [vidthumb](vidthumb) | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
 | [wall](wall) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 | [x2sel](x2sel) | Copy `\n`-separated file list from system clipboard to sel | sh | _see in-file docs_ |
