@@ -45,7 +45,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | [imgresize](imgresize) | Resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |
 | [imgthumb](imgthumb) | View thumbnail of an image or dir of images | sh | [lsix](https://github.com/hackerb9/lsix) |
 | [imgur](imgur) | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) | bash | - |
-| [imgview](imgview) | Browse images, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)), [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images)| sh | sxiv/[viu](https://github.com/atanunq/viu), less|
+| [imgview](imgview) | Browse images, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)), [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images)| sh | [imv](https://github.com/eXeC64/imv)/[sxiv](https://github.com/muennich/sxiv)/[viu](https://github.com/atanunq/viu), less|
 | [ipinfo](ipinfo) | Fetch external IP address and whois information | sh | curl, whois |
 | [kdeconnect](kdeconnect) | Send selected files to an Android device | sh | kdeconnect-cli |
 | [launch](launch) | GUI application launcher | sh | fzf |

@@ -51,7 +51,7 @@
 #      htm|html|xhtml: w3m, lynx, elinks
 #      json: jq, python (json.tool module)
 #   Multimedia by mime:
-#      image/*: sxiv (GUI), viu (https://github.com/atanunq/viu), img2txt, exiftool
+#      image/*: imv/sxiv (GUI), viu (https://github.com/atanunq/viu), img2txt, exiftool
 #      video/*: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
 #      audio/*: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
 #      application/pdf: zathura (GUI), pdftotext, mutool, exiftool
@@ -257,14 +257,15 @@ listimages() {
       '.*\(jpe?g\|bmp\|png\|gif\)$' -print0 | sort -z
 }
 
-sxiv_load_dir() {
-    target="$(abspath "$1")"
+load_dir() {
+    target="$(abspath "$2")"
     count="$(listimages | grep -a -m 1 -ZznF "$target" | cut -d: -f1)"
 
     if [ -n "$count" ]; then
-        listimages | xargs -0 sxiv -n "$count" --
+        listimages | xargs -0 "$1" -n "$count" --
     else
-        sxiv -- "$@" # fallback
+        shift
+        "$1" -- "$@" # fallback
     fi
 }
 
@@ -290,8 +291,11 @@ handle_multimedia() {
 
         ## Image
         image/*)
-            if [ "$GUI" -ne 0 ] && which sxiv >/dev/null 2>&1; then
-                sxiv_load_dir "${FPATH}" >/dev/null 2>&1 &
+            if [ "$GUI" -ne 0 ] && which imvr >/dev/null 2>&1; then
+                load_dir imvr "${FPATH}" >/dev/null 2>&1 &
+                exit 0
+            elif [ "$GUI" -ne 0 ] && which sxiv >/dev/null 2>&1; then
+                load_dir sxiv "${FPATH}" >/dev/null 2>&1 &
                 exit 0
             elif which viu >/dev/null 2>&1; then
                 viu -n "${FPATH}" | eval "$PAGER"
