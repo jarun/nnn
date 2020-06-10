@@ -182,6 +182,13 @@ if [ "$PREVIEW_MODE" ] ; then
     while read -r selection ; do
         preview_file "$selection"
     done
+
+    # Restoring the previous layout for kitty users. This will only work for
+    # kitty >= 0.18.0.
+    if [ "$TERMINAL" = "kitty" ]; then
+        kitty @ last-used-layout --no-response >/dev/null 2>&1
+    fi
+
     exit 0
 fi
 
@@ -191,7 +198,8 @@ if [ "$TERMINAL" = "tmux" ]; then
 
     tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d"$SPLIT" "$0" "$1"
 elif [ "$TERMINAL" = "kitty" ]; then
-    # Setting the layout for the new window.
+    # Setting the layout for the new window. It will be restored after the
+    # script ends.
     kitty @ goto-layout splits >/dev/null
 
     # Trying to use kitty's integrated window management as the split window.
@@ -202,9 +210,6 @@ elif [ "$TERMINAL" = "kitty" ]; then
           --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" \
           --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" \
           --location "${SPLIT}split" "$0" "$1" >/dev/null
-
-    # Restoring the previous layout.
-    kitty @ last-used-layout --no-response >/dev/null 2>&1
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
