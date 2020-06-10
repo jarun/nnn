@@ -1,11 +1,15 @@
 #!/usr/bin/env sh
 
 # Description: View a file in hex
-# Dependencies: xxd and $PAGER
+# Dependencies: hx (https://github.com/krpors/hx)/xxd and $PAGER
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
 if ! [ -z "$1" ]; then
-    xxd "$1" | $PAGER
+    if which hx >/dev/null 2>&1; then
+        hx "$1"
+    else
+        xxd "$1" | $PAGER
+    fi
 fi
