@@ -142,7 +142,7 @@ preview_file () {
     if [ -d "$1" ]; then
         cd "$1" || return
         if exists tree; then
-            fifo_pager tree
+            fifo_pager tree -L 3 -F
         elif exists exa; then
             fifo_pager exa -G --colour=always 2>/dev/null
         else
@@ -156,6 +156,8 @@ preview_file () {
                     "$1" &
             elif exists catimg; then
                 catimg "$1"
+            elif exists viu; then
+                viu -t "$1"
             else
                 fifo_pager print_bin_info "$1"
             fi
