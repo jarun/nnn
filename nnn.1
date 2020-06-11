@@ -152,8 +152,8 @@ uses \fIxdg-open\fR (on Linux), \fIopen(1)\fR (on macOS), \fIcygstart\fR on
 (Cygwin) and \fIopen\fR on (Haiku) as the desktop opener. It's also possible
 to specify a custom opener. See ENVIRONMENT section.
 .Sh CONTEXTS
-Explore multiple directories simultaneously with 4 contexts. The status is
-shown in the top left corner:
+Open multiple locations with 4 contexts. The status is shown in the top left
+corner:
 .Pp
 - the current context is in reverse video
 .br
@@ -167,9 +167,7 @@ its own color. See ENVIRONMENT section.
 Sessions are a way to save and restore states of work. A session stores the
 settings and contexts.
 .Pp
-Sessions can be loaded dynamically from within a running
-.Nm
-instance, or with a program option.
+Sessions can be loaded dynamically at runtime or with a program option.
 .Pp
 When a session is loaded dynamically, the last working session is saved
 automatically to a dedicated -- "last session" -- session file. The "last
@@ -287,7 +285,7 @@ There are two ways to search and list:
 .Pp
 File paths must be NUL-separated ('\\0'). Paths and can be relative to the
 current directory or absolute. Invalid paths in the input are ignored. Input
-is limited by 65,536 paths or 256 MiB of input.
+limit is 65,536 paths or 256 MiB of data.
 .Pp
 To list the input stream, start
 .Nm
