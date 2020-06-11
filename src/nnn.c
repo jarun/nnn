@@ -266,9 +266,9 @@ typedef struct {
 	uint reserved2  : 2;
 	uint nonavopen  : 1;  /* Open file on right arrow or `l` */
 	uint autoselect : 1;  /* Auto-select dir in type-to-nav mode */
-	uint reserved3  : 1;
+	uint cursormode : 1;  /* Move hardware cursor with selection */
 	uint useeditor  : 1;  /* Use VISUAL to open text files */
-	uint reserved4  : 3;
+	uint reserved3  : 3;
 	uint regex      : 1;  /* Use regex filters */
 	uint x11        : 1;  /* Copy to system clipboard and show notis */
 	uint timetype   : 2;  /* Time sort type (0: access, 1: change, 2: modification) */
@@ -337,9 +337,9 @@ static settings cfg = {
 	0, /* reserved2 */
 	0, /* nonavopen */
 	1, /* autoselect */
-	0, /* reserved3 */
+	0, /* cursormode */
 	0, /* useeditor */
-	0, /* reserved4 */
+	0, /* reserved3 */
 	0, /* regex */
 	0, /* x11 */
 	2, /* timetype (T_MOD) */
@@ -681,6 +681,7 @@ static haiku_nm_h haiku_hnd;
 
 /* Function macros */
 #define tolastln() move(xlines - 1, 0)
+#define tocursor() move(cur + 2, 0)
 #define exitcurses() endwin()
 #define printwarn(presel) printwait(strerror(errno), presel)
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
@@ -5133,6 +5134,9 @@ static void statusbar(char *path)
 	}
 
 	attroff(COLOR_PAIR(cfg.curctx + 1));
+
+	if (cfg.cursormode)
+		tocursor();
 }
 
 static int adjust_cols(int ncols)
@@ -6821,6 +6825,7 @@ static void usage(void)
 		" -A      no dir auto-select\n"
 		" -b key  open bookmark key (trumps -s/S)\n"
 		" -c      cli-only NNN_OPENER (trumps -e)\n"
+		" -C      place HW cursor on hovered\n"
 		" -d      detail mode\n"
 		" -e      text in $VISUAL/$EDITOR/vi\n"
 		" -E      use EDITOR for undetached edits\n"
@@ -6992,7 +6997,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cdeEfFgHKl:nop:P:QrRs:St:T:Vxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdeEfFgHKl:nop:P:QrRs:St:T:Vxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7030,6 +7035,9 @@ int main(int argc, char *argv[])
 		case 'g':
 			cfg.regex = 1;
 			filterfn = &visible_re;
+			break;
+		case 'C':
+			cfg.cursormode = 1;
 			break;
 		case 'H':
 			cfg.showhidden = 1;
