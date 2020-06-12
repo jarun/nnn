@@ -119,6 +119,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Launch GUI apps, run commands, spawn a shell, toggle executable
   - Hovered file set as `$nnn` at prompt and spawned shell
   - Lock terminal after configurable idle timeout
+  - Supports screen readers and braille displays
 
 ## Quickstart
 
