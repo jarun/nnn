@@ -3010,7 +3010,7 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int *prese
 
 static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 {
-	bool next = TRUE;
+	bool new = TRUE;
 	const uchar INCR = 8;
 	uint i = 0;
 	kv *kvarr = NULL;
@@ -3028,7 +3028,7 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 	ptr = *envcpy;
 
 	while (*ptr && i < 100) {
-		if (next) {
+		if (new) {
 			if (!(i & (INCR - 1))) {
 				kvarr = xrealloc(kvarr, sizeof(kv) * (i + INCR));
 				*arr = kvarr;
@@ -3043,13 +3043,14 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar id, uchar *items)
 				return FALSE;
 			kvarr[i].off = ptr - *envcpy;
 			++i;
+
+			new = FALSE;
 		}
 
 		if (*ptr == ';') {
 			*ptr = '\0';
-			next = TRUE;
-		} else if (next)
-			next = FALSE;
+			new = TRUE;
+		}
 
 		++ptr;
 	}
