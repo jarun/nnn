@@ -1765,7 +1765,7 @@ static char *xgetenv(const char * const name, char *fallback)
 }
 
 /* Checks if an env variable is set to 1 */
-static bool xgetenv_set(const char *name)
+static inline bool xgetenv_set(const char *name)
 {
 	char *value = getenv(name);
 
