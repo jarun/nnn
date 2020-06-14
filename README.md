@@ -6,7 +6,7 @@
 <a href="https://travis-ci.org/jarun/nnn"><img src="https://img.shields.io/travis/jarun/nnn/master.svg?label=travis" alt="Travis Status" /></a>
 <a href="https://circleci.com/gh/jarun/workflows/nnn"><img src="https://img.shields.io/circleci/project/github/jarun/nnn.svg?label=circleci" alt="CircleCI Status" /></a>
 <a href="https://en.wikipedia.org/wiki/Privacy-invasive_software"><img src="https://img.shields.io/badge/privacy-✓-crimson?maxAge=2592000" alt="Privacy Awareness" /></a>
-<a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellow.svg?maxAge=2592000" alt="License" /></a>
+<a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellowgreen.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
 <p align="center"><a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a></p>
@@ -50,9 +50,9 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 - Mount any cloud storage service in a few keypresses
 - Mount and modify archives
 - Filter filtered entries
-- Sort files by access time and inode change time
+- Sort by modification, access and inode change time
 - Access selection from another instance of `nnn`
-- Compile out features you don't need
+- Compile out/in features with make options
 - Watch matrix text fly or read fortune messages
 - Configure in 5 minutes!
 
@@ -119,7 +119,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Launch GUI apps, run commands, spawn a shell, toggle executable
   - Hovered file set as `$nnn` at prompt and spawned shell
   - Lock terminal after configurable idle timeout
-  - Supports screen readers and braille displays
+  - Basic support for screen readers and braille displays
 
 ## Quickstart
 
