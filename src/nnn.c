@@ -5110,7 +5110,7 @@ static void statusbar(char *path)
 		xstrsncpy(buf, coolsize(dir_blocks << blk_shift), 12);
 
 		printw("%d/%d [%s:%s] %cu:%s free:%s files:%lu %lldB %s\n",
-		       cur + 1, ndents, (g_state.selmode ? "s" : ""),
+		       cur + 1, ndents, (g_state.selmode ? "+" : ""),
 		       (g_state.rangesel ? "*" : (nselected ? xitoa(nselected) : "")),
 		       (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
 		       num_files, (ll)pent->blocks << blk_shift, ptr);
@@ -5119,7 +5119,7 @@ static void statusbar(char *path)
 
 		getorderstr(sort);
 
-		printw("%d/%d [%s:%s] %s", cur + 1, ndents, (g_state.selmode ? "s" : ""),
+		printw("%d/%d [%s:%s] %s", cur + 1, ndents, (g_state.selmode ? "+" : ""),
 			 (g_state.rangesel ? "*" : (nselected ? xitoa(nselected) : "")), sort);
 
 		/* Timestamp */
