@@ -3005,6 +3005,7 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int *prese
 		psel += len + 1;
 	}
 
+	clearselection();
 	return count;
 }
 
@@ -5963,6 +5964,7 @@ nochange:
 					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;
 				}
+				clearselection();
 				refresh = TRUE;
 				break;
 			case SEL_HELP:
