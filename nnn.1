@@ -30,6 +30,7 @@
 .Op Ar -S
 .Op Ar -t secs
 .Op Ar -T key
+.Op Ar -u
 .Op Ar -V
 .Op Ar -x
 .Op Ar -h
@@ -133,6 +134,9 @@ supports the following options:
 .Fl "T key"
         sort order
         keys: 'a'u / 'd'u / 'e'xtension / 'r'everse / 's'ize / 't'ime / 'v'ersion
+.Pp
+.Fl u
+        use selection if available, don't prompt to choose between selection and current entry
 .Pp
 .Fl V
         show version and exit
@@ -274,6 +278,11 @@ from earlier writes. If you have 2 instances if
 \fIopen\fR in 2 panes of a terminal multiplexer, you can select in one pane and
 use the selection (e.g. to copy or move) in the other pane (if the instance
 doesn't have any local selection already).
+.Pp
+.Nm
+clears the selection after successful file removal, batch-rename and link
+creation with selection. However, it is retained after archive creation
+with selection as the user may want to delete the archived files next.
 .Pp
 To edit the selection use the _edit selection_ key. Use this key to remove a
 file from selection after you navigate away from its directory. Editing doesn't

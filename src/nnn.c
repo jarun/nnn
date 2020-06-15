@@ -263,7 +263,8 @@ typedef struct {
 	uint reserved1  : 1;
 	/* The following settings are global */
 	uint curctx     : 3;  /* Current context number */
-	uint reserved2  : 2;
+	uint prefersel  : 1;  /* Prefer selection over current, if exists */
+	uint reserved2  : 1;
 	uint nonavopen  : 1;  /* Open file on right arrow or `l` */
 	uint autoselect : 1;  /* Auto-select dir in type-to-nav mode */
 	uint cursormode : 1;  /* Move hardware cursor with selection */
@@ -334,6 +335,7 @@ static settings cfg = {
 	0, /* version */
 	0, /* reserved1 */
 	0, /* curctx */
+	0, /* prefersel */
 	0, /* reserved2 */
 	0, /* nonavopen */
 	1, /* autoselect */
@@ -864,6 +866,9 @@ static int get_input(const char *prompt)
 static int get_cur_or_sel(void)
 {
 	if (selbufpos && ndents) {
+		if (cfg.prefersel)
+			return 's';
+
 		int choice = get_input(messages[MSG_CUR_SEL_OPTS]);
 
 		return ((choice == 'c' || choice == 's') ? choice : 0);
@@ -6851,6 +6856,7 @@ static void usage(void)
 		" -S      persistent session\n"
 		" -t secs timeout to lock\n"
 		" -T key  sort order [a/d/e/r/s/t/v]\n"
+		" -u      use selection (no prompt)\n"
 		" -V      show version\n"
 		" -x      notis, sel to system clipboard\n"
 		" -h      show help\n\n"
@@ -7000,7 +7006,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdeEfFgHKl:nop:P:QrRs:St:T:Vxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdeEfFgHKl:nop:P:QrRs:St:T:uVxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7107,6 +7113,9 @@ int main(int argc, char *argv[])
 		case 'T':
 			if (env_opts_id < 0)
 				sort = (uchar)optarg[0];
+			break;
+		case 'u':
+			cfg.prefersel = 1;
 			break;
 		case 'V':
 			fprintf(stdout, "%s\n", VERSION);
