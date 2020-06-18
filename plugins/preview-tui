@@ -53,7 +53,9 @@
 #   Kitty users need `allow_remote_control` set to `yes`. To customize the
 #   window split, `enabled_layouts` has to be set to `all` or `splits` (the
 #   former is the default value). This terminal is also able to show images
-#   without extra dependencies.
+#   without extra dependencies. For image previews with kitty using scope.sh
+#   or pistol, you'll need to configure it with --transfer-mode=stream, as
+#   it's done in this script.
 #
 # Shell: POSIX compliant
 # Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero
@@ -116,14 +118,14 @@ preview_file () {
 
     # Trying to use pistol if it's available.
     if [ "$USE_PISTOL" -ne 0 ] && exists pistol; then
-        fifo_pager pistol "$1"
+        fifo_pager pistol "$1" &
         return
     fi
 
     # Trying to use scope.sh if it's available.
     if [ "$USE_SCOPE" -ne 0 ] && exists scope.sh; then
         fifo_pager scope.sh "$1" "$cols" "$lines" "$(mktemp -d)" \
-            "True" 2>/dev/null
+            "True" 2>/dev/null &
         return
     fi
 
