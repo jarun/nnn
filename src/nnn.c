@@ -4300,11 +4300,20 @@ static void rmlistpath()
 	}
 }
 
+static ssize_t read_nointr(int fd, void *buf, size_t count)
+{
+	ssize_t len;
+	do{
+		len = read(fd, buf, count);
+	} while (len == -1 && errno == EINTR);
+	return len;
+}
+
 static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 {
 	int r;
 	char ctx, *nextpath = NULL;
-	ssize_t len = read(fd, g_buf, 1);
+	ssize_t len = read_nointr(fd, g_buf, 1);
 
 	if (len != 1)
 		return;
@@ -4317,14 +4326,14 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 			return;
 	}
 
-	len = read(fd, g_buf, 1);
+	len = read_nointr(fd, g_buf, 1);
 	if (len != 1)
 		return;
 
 	char op = g_buf[0];
 
 	if (op == 'c') {
-		len = read(fd, g_buf, PATH_MAX);
+		len = read_nointr(fd, g_buf, PATH_MAX);
 		if (len <= 0)
 			return;
 
@@ -4415,7 +4424,10 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 		_exit(EXIT_SUCCESS);
 	}
 
-	int rfd = open(g_pipepath, O_RDONLY);
+	int rfd;
+	do {
+		rfd = open(g_pipepath, O_RDONLY);
+	} while (rfd == -1 && errno == EINTR);
 
 	readpipe(rfd, path, lastname, lastdir);
 	close(rfd);
