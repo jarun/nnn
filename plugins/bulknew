@@ -5,7 +5,7 @@
 #
 # Note: Only relative paths are supported. Absolute paths are ignored
 #
-# Shell: bash
+# Shell: POSIX compliant
 # Author: KlzXS
 
 EDITOR="${EDITOR:-vi}"
