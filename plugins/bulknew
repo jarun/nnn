@@ -3,6 +3,8 @@
 # Description: Allows for creation of multiple files/directories at the same time.
 #              Plugin opens a temp file where each entry is to be written on a separate line
 #
+# Note: Only relative paths are supported. Absolute paths are ignored
+#
 # Shell: bash
 # Author: KlzXS
 

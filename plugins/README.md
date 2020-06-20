@@ -29,6 +29,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | [autojump](autojump) | Navigate to dir/path | sh | autojump |
 | [bookmarks](bookmarks) | Use named bookmarks managed with symlinks | sh | fzf |
 | [boom](boom) | Play random music from dir | sh | [moc](http://moc.daper.net/) |
+| [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs |
 | [dups](dups) | List non-empty duplicate files in current dir | sh | find, md5sum,<br>sort uniq xargs |
 | [chksum](chksum) | Create and verify checksums | sh | md5sum,<br>sha256sum |
 | [diffs](diffs) | Diff for selection (limited to 2 for directories) | sh | vimdiff |
