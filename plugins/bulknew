@@ -4,6 +4,7 @@
 #              Plugin opens a temp file where each entry is to be written on a separate line
 #
 # Note: Only relative paths are supported. Absolute paths are ignored
+#       Leading and trailing whitespace in path names is also ignored
 #
 # Shell: POSIX compliant
 # Author: KlzXS
