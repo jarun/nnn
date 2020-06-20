@@ -15,6 +15,7 @@
 #    dependencies, see the script itself
 #  - vim (or any editor/pager really)
 #  - file
+#  - mktemp
 #  - xdotool (optional, to keep main window focused)
 #
 # How to use:
