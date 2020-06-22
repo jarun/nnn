@@ -75,7 +75,7 @@ else
 	LDLIBS_CURSES ?= -lncurses
 endif
 
-CFLAGS += -std=c11 -Wall -Wextra
+CFLAGS += -std=c11 -Wall -Wextra -Wshadow
 CFLAGS += $(CFLAGS_OPTIMIZATION)
 CFLAGS += $(CFLAGS_CURSES)
 

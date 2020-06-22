@@ -381,7 +381,7 @@ static char *mark;
 static char *fifopath;
 #endif
 static ull *ihashbmp;
-static struct entry *dents;
+static struct entry *pdents;
 static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
 static ulong num_files;
@@ -687,7 +687,7 @@ static haiku_nm_h haiku_hnd;
 #define exitcurses() endwin()
 #define printwarn(presel) printwait(strerror(errno), presel)
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
-#define copycurname() xstrsncpy(lastname, dents[cur].name, NAME_MAX + 1)
+#define copycurname() xstrsncpy(lastname, pdents[cur].name, NAME_MAX + 1)
 #define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
@@ -820,7 +820,7 @@ static void printwait(const char *msg, int *presel)
 	if (presel) {
 		*presel = MSGWAIT;
 		if (ndents)
-			xstrsncpy(g_ctx[cfg.curctx].c_name, dents[cur].name, NAME_MAX + 1);
+			xstrsncpy(g_ctx[cfg.curctx].c_name, pdents[cur].name, NAME_MAX + 1);
 	}
 }
 
@@ -1263,8 +1263,8 @@ static bool listselfile(void)
 static void resetselind(void)
 {
 	for (int r = 0; r < ndents; ++r)
-		if (dents[r].flags & FILE_SELECTED)
-			dents[r].flags &= ~FILE_SELECTED;
+		if (pdents[r].flags & FILE_SELECTED)
+			pdents[r].flags &= ~FILE_SELECTED;
 }
 
 static void startselection(void)
@@ -1288,8 +1288,8 @@ static void updateselbuf(const char *path, char *newpath)
 	size_t r;
 
 	for (int i = 0; i < ndents; ++i)
-		if (dents[i].flags & FILE_SELECTED) {
-			r = mkpath(path, dents[i].name, newpath);
+		if (pdents[i].flags & FILE_SELECTED) {
+			r = mkpath(path, pdents[i].name, newpath);
 			appendfpath(newpath, r);
 		}
 }
@@ -1497,7 +1497,7 @@ static void export_file_list(void)
 	if (!ndents)
 		return;
 
-	struct entry *pdent = dents;
+	struct entry *pdent = pdents;
 	int fd = create_tmp_file();
 
 	if (fd == -1) {
@@ -1755,9 +1755,9 @@ static int spawn(char *file, char *arg1, char *arg2, uchar flag)
 	return retstatus;
 }
 
-static void prompt_run(char *cmd, const char *cur)
+static void prompt_run(char *cmd, const char *current)
 {
-	setenv(envs[ENV_NCUR], cur, 1);
+	setenv(envs[ENV_NCUR], current, 1);
 	spawn(shell, "-c", cmd, F_CLI | F_CONFIRM);
 }
 
@@ -1967,7 +1967,7 @@ static bool batch_rename(void)
 
 	if (dir)
 		for (i = 0; i < ndents; ++i)
-			appendfpath(dents[i].name, NAME_MAX);
+			appendfpath(pdents[i].name, NAME_MAX);
 
 	seltofile(fd1, &count);
 	seltofile(fd2, NULL);
@@ -2479,7 +2479,7 @@ static void showfilter(char *str)
 
 static inline void swap_ent(int id1, int id2)
 {
-	struct entry _dent, *pdent1 = &dents[id1], *pdent2 =  &dents[id2];
+	struct entry _dent, *pdent1 = &pdents[id1], *pdent2 =  &pdents[id2];
 
 	*(&_dent) = *pdent1;
 	*pdent1 = *pdent2;
@@ -2499,7 +2499,7 @@ static int fill(const char *fltr, regex_t *re)
 #endif
 
 	for (int count = 0; count < ndents; ++count) {
-		if (filterfn(&fltrexp, dents[count].name) == 0) {
+		if (filterfn(&fltrexp, pdents[count].name) == 0) {
 			if (count != --ndents) {
 				swap_ent(count, ndents);
 				--count;
@@ -2538,7 +2538,7 @@ static int matches(const char *fltr)
 		regfree(&re);
 #endif
 
-	qsort(dents, ndents, sizeof(*dents), entrycmpfn);
+	qsort(pdents, ndents, sizeof(*pdents), entrycmpfn);
 
 	return ndents;
 }
@@ -2702,7 +2702,7 @@ static int filterentries(char *path, char *lastname)
 
 		/* If the only match is a dir, auto-select and cd into it */
 		if (ndents == 1 && cfg.filtermode
-		    && cfg.autoselect && (dents[0].flags & DIR_OR_LINK_TO_DIR)) {
+		    && cfg.autoselect && (pdents[0].flags & DIR_OR_LINK_TO_DIR)) {
 			*ch = KEY_ENTER;
 			cur = 0;
 			goto end;
@@ -3422,33 +3422,33 @@ static void (*printptr)(const struct entry *ent, uint namecols, bool sel) = &pri
 
 static void savecurctx(settings *curcfg, char *path, char *curname, int r /* next context num */)
 {
-	settings cfg = *curcfg;
+	settings tmpcfg = *curcfg;
 	context *ctxr = &g_ctx[r];
 
 	/* Save current context */
 	if (ndents)
-		xstrsncpy(g_ctx[cfg.curctx].c_name, curname, NAME_MAX + 1);
+		xstrsncpy(g_ctx[tmpcfg.curctx].c_name, curname, NAME_MAX + 1);
 	else
-		g_ctx[cfg.curctx].c_name[0] = '\0';
+		g_ctx[tmpcfg.curctx].c_name[0] = '\0';
 
-	g_ctx[cfg.curctx].c_cfg = cfg;
+	g_ctx[tmpcfg.curctx].c_cfg = tmpcfg;
 
 	if (ctxr->c_cfg.ctxactive) { /* Switch to saved context */
 		/* Switch light/detail mode */
-		if (cfg.showdetail != ctxr->c_cfg.showdetail)
+		if (tmpcfg.showdetail != ctxr->c_cfg.showdetail)
 			/* set the reverse */
-			printptr = cfg.showdetail ? &printent : &printent_long;
+			printptr = tmpcfg.showdetail ? &printent : &printent_long;
 
-		cfg = ctxr->c_cfg;
+		tmpcfg = ctxr->c_cfg;
 	} else { /* Setup a new context from current context */
 		ctxr->c_cfg.ctxactive = 1;
 		xstrsncpy(ctxr->c_path, path, PATH_MAX);
 		ctxr->c_last[0] = ctxr->c_name[0] = ctxr->c_fltr[0] = ctxr->c_fltr[1] = '\0';
-		ctxr->c_cfg = cfg;
+		ctxr->c_cfg = tmpcfg;
 	}
 
-	cfg.curctx = r;
-	*curcfg = cfg;
+	tmpcfg.curctx = r;
+	*curcfg = tmpcfg;
 }
 
 static void save_session(bool last_session, int *presel)
@@ -3469,7 +3469,7 @@ static void save_session(bool last_session, int *presel)
 		if (g_ctx[i].c_cfg.ctxactive) {
 			if (cfg.curctx == i && ndents)
 				/* Update current file name, arrows don't update it */
-				xstrsncpy(g_ctx[i].c_name, dents[cur].name, NAME_MAX + 1);
+				xstrsncpy(g_ctx[i].c_name, pdents[cur].name, NAME_MAX + 1);
 			header.pathln[i] = strnlen(g_ctx[i].c_path, PATH_MAX) + 1;
 			header.lastln[i] = strnlen(g_ctx[i].c_last, PATH_MAX) + 1;
 			header.nameln[i] = strnlen(g_ctx[i].c_name, NAME_MAX) + 1;
@@ -3907,8 +3907,8 @@ next:
 static bool archive_mount(char *newpath)
 {
 	char *dir, *cmd = utils[UTIL_ARCHIVEMOUNT];
-	char *name = dents[cur].name;
-	size_t len = dents[cur].nlen;
+	char *name = pdents[cur].name;
+	size_t len = pdents[cur].nlen;
 	char mntpath[PATH_MAX];
 
 	if (!getutil(cmd)) {
@@ -4122,12 +4122,12 @@ static void printkeys(kv *kvarr, char *buf, uchar max)
 	buf[i << 1] = '\0';
 }
 
-static size_t handle_bookmark(const char *mark, char *newpath)
+static size_t handle_bookmark(const char *bmark, char *newpath)
 {
 	int fd;
 	size_t r = xstrsncpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
 
-	if (mark) { /* There is a pinned directory */
+	if (bmark) { /* There is a pinned directory */
 		g_buf[--r] = ' ';
 		g_buf[++r] = ',';
 		g_buf[++r] = '\0';
@@ -4139,7 +4139,7 @@ static size_t handle_bookmark(const char *mark, char *newpath)
 	r = FALSE;
 	fd = get_input(NULL);
 	if (fd == ',') /* Visit pinned directory */
-		mark ? xstrsncpy(newpath, mark, PATH_MAX) : (r = MSG_NOT_SET);
+		bmark ? xstrsncpy(newpath, bmark, PATH_MAX) : (r = MSG_NOT_SET);
 	else if (!get_kv_val(bookmark, newpath, fd, maxbm, NNN_BMS))
 		r = MSG_INVALID_KEY;
 
@@ -4356,7 +4356,7 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 			r = ctx - 1;
 
 			g_ctx[r].c_cfg.ctxactive = 0;
-			savecurctx(&cfg, nextpath, dents[cur].name, r);
+			savecurctx(&cfg, nextpath, pdents[cur].name, r);
 			*path = g_ctx[r].c_path;
 			*lastdir = g_ctx[r].c_last;
 			*lastname = g_ctx[r].c_name;
@@ -4491,7 +4491,7 @@ static int sum_asize(const char *UNUSED(fpath), const struct stat *sb, int typef
 static void dentfree(void)
 {
 	free(pnamebuf);
-	free(dents);
+	free(pdents);
 	free(mark);
 }
 
@@ -4523,7 +4523,7 @@ static bool selforparent(const char *path)
 	return path[0] == '.' && (path[1] == '\0' || (path[1] == '.' && path[2] == '\0'));
 }
 
-static int dentfill(char *path, struct entry **dents)
+static int dentfill(char *path, struct entry **ppdents)
 {
 	int n = 0, flags = 0;
 	ulong num_saved;
@@ -4630,13 +4630,13 @@ static int dentfill(char *path, struct entry **dents)
 
 		if (n == total_dents) {
 			total_dents += ENTRY_INCR;
-			*dents = xrealloc(*dents, total_dents * sizeof(**dents));
-			if (!*dents) {
+			*ppdents = xrealloc(*ppdents, total_dents * sizeof(**ppdents));
+			if (!*ppdents) {
 				free(pnamebuf);
 				closedir(dirp);
 				errexit();
 			}
-			DPRINTF_P(*dents);
+			DPRINTF_P(*ppdents);
 		}
 
 		/* If not enough bytes left to copy a file name of length NAME_MAX, re-allocate */
@@ -4646,7 +4646,7 @@ static int dentfill(char *path, struct entry **dents)
 			pnb = pnamebuf;
 			pnamebuf = (char *)xrealloc(pnamebuf, namebuflen);
 			if (!pnamebuf) {
-				free(*dents);
+				free(*ppdents);
 				closedir(dirp);
 				errexit();
 			}
@@ -4654,7 +4654,7 @@ static int dentfill(char *path, struct entry **dents)
 
 			/* realloc() may result in memory move, we must re-adjust if that happens */
 			if (pnb != pnamebuf) {
-				dentp = *dents;
+				dentp = *ppdents;
 				dentp->name = pnamebuf;
 
 				for (int count = 1; count < n; ++dentp, ++count)
@@ -4663,7 +4663,7 @@ static int dentfill(char *path, struct entry **dents)
 			}
 		}
 
-		dentp = *dents + n;
+		dentp = *ppdents + n;
 
 		/* Selection file name */
 		dentp->name = (char *)((size_t)pnamebuf + off);
@@ -4749,7 +4749,7 @@ exit:
 static int dentfind(const char *fname, int n)
 {
 	for (int i = 0; i < n; ++i)
-		if (xstrcmp(fname, dents[i].name) == 0)
+		if (xstrcmp(fname, pdents[i].name) == 0)
 			return i;
 
 	return 0;
@@ -4763,11 +4763,11 @@ static void populate(char *path, char *lastname)
 	clock_gettime(CLOCK_REALTIME, &ts1); /* Use CLOCK_MONOTONIC on FreeBSD */
 #endif
 
-	ndents = dentfill(path, &dents);
+	ndents = dentfill(path, &pdents);
 	if (!ndents)
 		return;
 
-	qsort(dents, ndents, sizeof(*dents), entrycmpfn);
+	qsort(pdents, ndents, sizeof(*pdents), entrycmpfn);
 
 #ifdef DBGMODE
 	clock_gettime(CLOCK_REALTIME, &ts2);
@@ -4798,13 +4798,13 @@ static void notify_fifo(bool force)
 
 	static struct entry lastentry;
 
-	if (!force && !memcmp(&lastentry, &dents[cur], sizeof(struct entry)))
+	if (!force && !memcmp(&lastentry, &pdents[cur], sizeof(struct entry)))
 		return;
 
-	lastentry = dents[cur];
+	lastentry = pdents[cur];
 
 	char path[PATH_MAX];
-	size_t len = mkpath(g_ctx[cfg.curctx].c_path, ndents ? dents[cur].name : "", path);
+	size_t len = mkpath(g_ctx[cfg.curctx].c_path, ndents ? pdents[cur].name : "", path);
 
 	path[len - 1] = '\n';
 
@@ -4896,11 +4896,11 @@ static void handle_screen_move(enum action sel)
 
 		c = TOUPPER(c);
 
-		int r = (c == TOUPPER(*dents[cur].name)) ? (cur + 1) : 0;
+		int r = (c == TOUPPER(*pdents[cur].name)) ? (cur + 1) : 0;
 
 		for (; r < ndents; ++r) {
-			if (((c == '\'') && !(dents[r].flags & DIR_OR_LINK_TO_DIR))
-			    || (c == TOUPPER(*dents[r].name))) {
+			if (((c == '\'') && !(pdents[r].flags & DIR_OR_LINK_TO_DIR))
+			    || (c == TOUPPER(*pdents[r].name))) {
 				move_cursor((r) % ndents, 0);
 				break;
 			}
@@ -5101,7 +5101,7 @@ static void statusbar(char *path)
 {
 	int i = 0, extnlen = 0;
 	char *ptr;
-	pEntry pent = &dents[cur];
+	pEntry pent = &pdents[cur];
 
 	if (!ndents) {
 		printmsg("0/0");
@@ -5181,14 +5181,14 @@ static void draw_line(char *path, int ncols)
 
 	ncols = adjust_cols(ncols);
 
-	if (dents[last].flags & DIR_OR_LINK_TO_DIR) {
+	if (pdents[last].flags & DIR_OR_LINK_TO_DIR) {
 		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		dir = TRUE;
 	}
 	move(2 + last - curscroll, 0);
-	printptr(&dents[last], ncols, false);
+	printptr(&pdents[last], ncols, false);
 
-	if (dents[cur].flags & DIR_OR_LINK_TO_DIR) {
+	if (pdents[cur].flags & DIR_OR_LINK_TO_DIR) {
 		if (!dir)  {/* First file is not a directory */
 			attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 			dir = TRUE;
@@ -5199,7 +5199,7 @@ static void draw_line(char *path, int ncols)
 	}
 
 	move(2 + cur - curscroll, 0);
-	printptr(&dents[cur], ncols, true);
+	printptr(&pdents[cur], ncols, true);
 
 	/* Must reset e.g. no files in dir */
 	if (dir)
@@ -5299,7 +5299,7 @@ static void redraw(char *path)
 
 	/* Print listing */
 	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
-		printptr(&dents[i], ncols, i == cur);
+		printptr(&pdents[i], ncols, i == cur);
 
 	/* Must reset e.g. no files in dir */
 	if (g_state.dircolor) {
@@ -5378,8 +5378,8 @@ static bool browse(char *ipath, const char *session, int pkey)
 
 	presel = pkey ? ';' : (cfg.filtermode ? FILTER : 0);
 
-	dents = xrealloc(dents, total_dents * sizeof(struct entry));
-	if (!dents)
+	pdents = xrealloc(pdents, total_dents * sizeof(struct entry));
+	if (!pdents)
 		errexit();
 
 	/* Allocate buffer to hold names */
@@ -5487,7 +5487,7 @@ nochange:
 					if (g_state.selmode)
 						lastappendpos = selbufpos;
 
-					savecurctx(&cfg, path, dents[cur].name, r);
+					savecurctx(&cfg, path, pdents[cur].name, r);
 
 					/* Reset the pointers */
 					path = g_ctx[r].c_path;
@@ -5608,10 +5608,10 @@ nochange:
 			if (!ndents)
 				goto begin;
 
-			mkpath(path, dents[cur].name, newpath);
+			mkpath(path, pdents[cur].name, newpath);
 			DPRINTF_S(newpath);
 
-			if (dents[cur].flags & DIR_OR_LINK_TO_DIR) {
+			if (pdents[cur].flags & DIR_OR_LINK_TO_DIR) {
 				if (chdir(newpath) == -1) {
 					printwarn(&presel);
 					goto nochange;
@@ -5633,16 +5633,16 @@ nochange:
 			{
 				/* If opened as vim plugin and Enter/^M pressed, pick */
 				if (g_state.picker && sel == SEL_GOIN) {
-					appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
+					appendfpath(newpath, mkpath(path, pdents[cur].name, newpath));
 					writesel(pselbuf, selbufpos - 1);
 					return EXIT_SUCCESS;
 				}
 
 				if (sel == SEL_NAV_IN) {
 					/* If in listing dir, go to target on `l` or Right on symlink */
-					if (listpath && S_ISLNK(dents[cur].mode)
+					if (listpath && S_ISLNK(pdents[cur].mode)
 					    && is_prefix(path, listpath, strlen(listpath))) {
-						if (!realpath(dents[cur].name, newpath)) {
+						if (!realpath(pdents[cur].name, newpath)) {
 							printwarn(&presel);
 							goto nochange;
 						}
@@ -5656,7 +5656,7 @@ nochange:
 
 						cdprep(lastdir, NULL, path, newpath)
 						       ? (presel = FILTER) : (watch = TRUE);
-						xstrsncpy(lastname, dents[cur].name, NAME_MAX + 1);
+						xstrsncpy(lastname, pdents[cur].name, NAME_MAX + 1);
 						goto begin;
 					} else if (cfg.nonavopen)
 						goto nochange; /* Open file disabled on right arrow or `l` */
@@ -5673,7 +5673,7 @@ nochange:
 						rundir[0] = '\0';
 
 						if (chdir(path) == -1
-						    || !run_selected_plugin(&path, dents[cur].name,
+						    || !run_selected_plugin(&path, pdents[cur].name,
 									    runfile, &lastname,
 									    &lastdir)) {
 							DPRINTF_S("plugin failed!");
@@ -5707,14 +5707,14 @@ nochange:
 				}
 
 #ifdef PCRE
-				if (!pcre_exec(archive_pcre, NULL, dents[cur].name,
-					       xstrlen(dents[cur].name), 0, 0, NULL, 0)) {
+				if (!pcre_exec(archive_pcre, NULL, pdents[cur].name,
+					       xstrlen(pdents[cur].name), 0, 0, NULL, 0)) {
 #else
-				if (!regexec(&archive_re, dents[cur].name, 0, NULL, 0)) {
+				if (!regexec(&archive_re, pdents[cur].name, 0, NULL, 0)) {
 #endif
 					r = get_input(messages[MSG_ARCHIVE_OPTS]);
 					if (r == 'l' || r == 'x') {
-						mkpath(path, dents[cur].name, newpath);
+						mkpath(path, pdents[cur].name, newpath);
 						handle_archive(newpath, r);
 						if (r == 'l') {
 							statusbar(path);
@@ -5840,7 +5840,7 @@ nochange:
 			r = handle_context_switch(sel);
 			if (r < 0)
 				continue;
-			savecurctx(&cfg, path, dents[cur].name, r);
+			savecurctx(&cfg, path, pdents[cur].name, r);
 
 			/* Reset the pointers */
 			path = g_ctx[r].c_path;
@@ -5930,7 +5930,7 @@ nochange:
 				if (r == 'd' || r == 'a')
 					goto begin;
 
-				qsort(dents, ndents, sizeof(*dents), entrycmpfn);
+				qsort(pdents, ndents, sizeof(*pdents), entrycmpfn);
 				move_cursor(ndents ? dentfind(lastname, ndents) : 0, 0);
 			}
 			continue;
@@ -5938,7 +5938,7 @@ nochange:
 		case SEL_CHMODX:
 			if (ndents) {
 				tmp = (listpath && xstrcmp(path, listpath) == 0) ? listroot : path;
-				mkpath(tmp, dents[cur].name, newpath);
+				mkpath(tmp, pdents[cur].name, newpath);
 
 				if (lstat(newpath, &sb) == -1
 				    || (sel == SEL_STATS && !show_stats(newpath, &sb))
@@ -5948,7 +5948,7 @@ nochange:
 				}
 
 				if (sel == SEL_CHMODX)
-					dents[cur].mode ^= 0111;
+					pdents[cur].mode ^= 0111;
 			}
 			break;
 		case SEL_REDRAW: // fallthrough
@@ -5961,7 +5961,7 @@ nochange:
 			bool refresh = FALSE;
 
 			if (ndents)
-				mkpath(path, dents[cur].name, newpath);
+				mkpath(path, pdents[cur].name, newpath);
 			else if (sel == SEL_EDIT) /* Avoid trying to edit a non-existing file */
 				goto nochange;
 
@@ -5995,7 +5995,7 @@ nochange:
 					copycurname();
 				goto nochange;
 			case SEL_EDIT:
-				spawn(editor, dents[cur].name, NULL, F_CLI);
+				spawn(editor, pdents[cur].name, NULL, F_CLI);
 				continue;
 			default: /* SEL_LOCK */
 				lock_terminal();
@@ -6025,11 +6025,11 @@ nochange:
 				g_state.rangesel = 0;
 
 			/* Toggle selection status */
-			dents[cur].flags ^= FILE_SELECTED;
+			pdents[cur].flags ^= FILE_SELECTED;
 
-			if (dents[cur].flags & FILE_SELECTED) {
+			if (pdents[cur].flags & FILE_SELECTED) {
 				++nselected;
-				appendfpath(newpath, mkpath(path, dents[cur].name, newpath));
+				appendfpath(newpath, mkpath(path, pdents[cur].name, newpath));
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			} else {
 				selbufpos = lastappendpos;
@@ -6107,11 +6107,11 @@ nochange:
 
 			/* Remember current selection buffer position */
 			for (r = selstartid; r <= selendid; ++r)
-				if (!(dents[r].flags & FILE_SELECTED)) {
+				if (!(pdents[r].flags & FILE_SELECTED)) {
 					/* Write the path to selection file to avoid flush */
-					appendfpath(newpath, mkpath(path, dents[r].name, newpath));
+					appendfpath(newpath, mkpath(path, pdents[r].name, newpath));
 
-					dents[r].flags |= FILE_SELECTED;
+					pdents[r].flags |= FILE_SELECTED;
 					++nselected;
 				}
 
@@ -6145,7 +6145,7 @@ nochange:
 				if (r == 'c') {
 					tmp = (listpath && xstrcmp(path, listpath) == 0)
 					      ? listroot : path;
-					mkpath(tmp, dents[cur].name, newpath);
+					mkpath(tmp, pdents[cur].name, newpath);
 					if (!xrm(newpath))
 						continue;
 
@@ -6212,7 +6212,7 @@ nochange:
 
 					tmp = NULL;
 				} else
-					tmp = dents[cur].name;
+					tmp = pdents[cur].name;
 
 				tmp = xreadline(tmp, messages[MSG_ARCHIVE_NAME]);
 				break;
@@ -6233,7 +6233,7 @@ nochange:
 					tmp = NULL;
 				break;
 			default: /* SEL_RENAME */
-				tmp = xreadline(dents[cur].name, "");
+				tmp = xreadline(pdents[cur].name, "");
 				break;
 			}
 
@@ -6249,7 +6249,7 @@ nochange:
 
 			switch (sel) {
 			case SEL_ARCHIVE:
-				if (r == 'c' && strcmp(tmp, dents[cur].name) == 0)
+				if (r == 'c' && strcmp(tmp, pdents[cur].name) == 0)
 					goto nochange;
 
 				mkpath(path, tmp, newpath);
@@ -6261,7 +6261,7 @@ nochange:
 				}
 				get_archive_cmd(newpath, tmp);
 				(r == 's') ? archive_selection(newpath, tmp, path)
-					   : spawn(newpath, tmp, dents[cur].name, F_NORMAL | F_MULTI);
+					   : spawn(newpath, tmp, pdents[cur].name, F_NORMAL | F_MULTI);
 
 				mkpath(path, tmp, newpath);
 				if (access(newpath, F_OK) == 0) { /* File created */
@@ -6276,7 +6276,7 @@ nochange:
 				r = (r == 'c' ? F_CLI :
 				     (r == 'g' ? F_NOWAIT | F_NOTRACE | F_MULTI : 0));
 				if (r) {
-					mkpath(path, dents[cur].name, newpath);
+					mkpath(path, pdents[cur].name, newpath);
 					spawn(tmp, newpath, NULL, r);
 				}
 
@@ -6285,9 +6285,9 @@ nochange:
 				goto nochange;
 			case SEL_RENAME:
 				/* Skip renaming to same name */
-				if (strcmp(tmp, dents[cur].name) == 0) {
-					tmp = xreadline(dents[cur].name, messages[MSG_COPY_NAME]);
-					if (!tmp || !tmp[0] || !strcmp(tmp, dents[cur].name)) {
+				if (strcmp(tmp, pdents[cur].name) == 0) {
+					tmp = xreadline(pdents[cur].name, messages[MSG_COPY_NAME]);
+					if (!tmp || !tmp[0] || !strcmp(tmp, pdents[cur].name)) {
 						cfg.filtermode ?  presel = FILTER : statusbar(path);
 						copycurname();
 						goto nochange;
@@ -6329,8 +6329,8 @@ nochange:
 			if (sel == SEL_RENAME) {
 				/* Rename the file */
 				if (ret == 'd')
-					spawn("cp -rp", dents[cur].name, tmp, F_SILENT);
-				else if (renameat(fd, dents[cur].name, fd, tmp) != 0) {
+					spawn("cp -rp", pdents[cur].name, tmp, F_SILENT);
+				else if (renameat(fd, pdents[cur].name, fd, tmp) != 0) {
 					close(fd);
 					printwarn(&presel);
 					goto nochange;
@@ -6351,7 +6351,7 @@ nochange:
 				} else if (r == 's' || r == 'h') {
 					if (tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
-					ret = xlink(tmp, path, (ndents ? dents[cur].name : NULL),
+					ret = xlink(tmp, path, (ndents ? pdents[cur].name : NULL),
 						  newpath, &presel, r);
 				}
 
@@ -6404,7 +6404,7 @@ nochange:
 				} else
 					r = TRUE;
 
-				if (!run_selected_plugin(&path, tmp, (ndents ? dents[cur].name : NULL),
+				if (!run_selected_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL),
 							 &lastname, &lastdir)) {
 					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;
@@ -6439,7 +6439,7 @@ nochange:
 				xstrsncpy(rundir, path, PATH_MAX);
 				xstrsncpy(path, plgpath, PATH_MAX);
 				if (ndents)
-					xstrsncpy(runfile, dents[cur].name, NAME_MAX);
+					xstrsncpy(runfile, pdents[cur].name, NAME_MAX);
 				g_state.runctx = cfg.curctx;
 				lastname[0] = '\0';
 			}
@@ -6458,7 +6458,7 @@ nochange:
 				r = tmp ? atoi(tmp) : 0;
 				setenv(env_cfg[NNNLVL], xitoa(r + 1), 1);
 
-				setenv(envs[ENV_NCUR], (ndents ? dents[cur].name : ""), 1);
+				setenv(envs[ENV_NCUR], (ndents ? pdents[cur].name : ""), 1);
 				spawn(shell, NULL, NULL, F_CLI);
 				setenv(env_cfg[NNNLVL], xitoa(r), 1);
 				r = TRUE;
@@ -6478,7 +6478,7 @@ nochange:
 					tmp = getreadline("\n>>> ");
 #endif
 				if (tmp && *tmp) // NOLINT
-					prompt_run(tmp, (ndents ? dents[cur].name : ""));
+					prompt_run(tmp, (ndents ? pdents[cur].name : ""));
 				else
 					r = FALSE;
 			}
@@ -6497,7 +6497,7 @@ nochange:
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_UMOUNT:
-			tmp = ndents ? dents[cur].name : NULL;
+			tmp = ndents ? pdents[cur].name : NULL;
 			if (!unmount(tmp, newpath, &presel, path))
 				goto nochange;
 
