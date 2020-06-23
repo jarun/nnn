@@ -90,9 +90,6 @@
 #include <signal.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#ifdef __sun
-#include <alloca.h>
-#endif
 #include <string.h>
 #include <strings.h>
 #include <time.h>
@@ -102,6 +99,15 @@
 #endif
 #include <ftw.h>
 #include <wchar.h>
+
+#if !defined(alloca) && defined(__GNUC__)
+/*
+ * GCC doesn't expand alloca() to __builtin_alloca() in standards mode
+ * (-std=...) and not all standard libraries do or supply it, e.g.
+ * NetBSD/arm64 so explicitly use the builtin.
+ */
+#define alloca(size) __builtin_alloca(size)
+#endif
 
 #include "nnn.h"
 #include "dbg.h"
