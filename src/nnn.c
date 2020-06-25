@@ -4321,13 +4321,11 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 	char ctx, *nextpath = NULL;
 	ssize_t len = read_nointr(fd, g_buf, 1);
 
-	if (len != 1)
+	if (len != 1 || g_buf[0] < '0')
 		return;
 
 	if (g_buf[0] == '+')
 		ctx = (char)(get_free_ctx() + 1);
-	else if (g_buf[0] < '0')
-		return;
 	else {
 		ctx = g_buf[0] - '0';
 		if (ctx > CTX_MAX)
