@@ -30,28 +30,28 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 - Load, sort, filter thousands of files instantly
 - Type to navigate with automatic dir selection
-- Select files from anywhere (not just a single dir)
 - Never lose context - start where you quit `nnn`
-- Edit and preview markdown, man page, html
-- Open a file and auto-advance to the next
-- Export (filtered) list of visible files
 - find/fd/grep/ripgrep/fzf from `nnn` and list in `nnn`
+- Mount any cloud storage service in a few keypresses
+- Select files from anywhere (not just a single dir)
 - Unlimited bookmarks, plugins, cmds with custom hotkeys
 - Write a plugin in any language you know
+- Edit and preview markdown, man page, html
+- Open a file and auto-advance to the next
+- Filter filtered entries
+- Export (filtered) list of visible files
 - Configure the middle mouse click to do anything
 - Fuzzy search subtree and open a file (or its parent dir)
 - Load four dirs with custom settings at once
 - Notifications on cp, mv, rm completion
 - Auto-sync selection to system clipboard
+- Access selection from another instance of `nnn`
 - Open text files detached in another pane/tab/window
+- Mount and modify archives
 - Create files/dirs/duplicates with parents (like `mkdir -p`)
 - Toggle hidden with <kbd>.</kbd>, visit HOME with <kbd>~</kbd>, last dir with <kbd>-</kbd>
 - Pin a frequently visited dir at runtime
-- Mount any cloud storage service in a few keypresses
-- Mount and modify archives
-- Filter filtered entries
 - Sort by modification, access and inode change time
-- Access selection from another instance of `nnn`
 - Compile out/in features with make options
 - Watch matrix text fly or read fortune messages
 - Configure in 5 minutes!
