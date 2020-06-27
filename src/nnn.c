@@ -660,7 +660,7 @@ static const char * const toks[] = {
 
 static const char * const patterns[] = {
 	"sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s",
-	"sed 's|^\\([^#][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
+	"sed 's|^\\([^#/][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
 		"%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
 	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$",
 	"sed -i 's|^%s\\(.*\\)$|%s\\1|' %s",
