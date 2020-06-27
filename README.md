@@ -30,7 +30,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 - Instantly load, sort, filter thousands of files
 - Type to navigate with automatic dir selection
-- Never lose context - start where you quit `nnn`
+- Never lose context - start where you quit
 - find/fd/grep/ripgrep/fzf from `nnn` and list in `nnn`
 - Mount any cloud storage service in a few keypresses
 - Select files from anywhere (not just a single dir)

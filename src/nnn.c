@@ -6433,7 +6433,7 @@ nochange:
 					 */
 					if (strcmp(path, plgpath) == 0) {
 						xstrsncpy(path, rundir, PATH_MAX);
-						xstrsncpy(lastname, runfile, NAME_MAX);
+						xstrsncpy(lastname, runfile, NAME_MAX + 1);
 						rundir[0] = runfile[0] = '\0';
 						setdirwatch();
 						goto begin;
