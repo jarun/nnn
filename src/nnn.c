@@ -5773,9 +5773,10 @@ nochange:
 		case SEL_HOME: // fallthrough
 		case SEL_END: // fallthrough
 		case SEL_FIRST:
-			g_state.move = 1;
-			if (ndents)
+			if (ndents) {
+				g_state.move = 1;
 				handle_screen_move(sel);
+			}
 			break;
 		case SEL_CDHOME: // fallthrough
 		case SEL_CDBEGIN: // fallthrough
@@ -6350,12 +6351,9 @@ nochange:
 				presel = 0;
 
 				/* Check if it's a dir or file */
-				if (r == 'f') {
+				if (r == 'f' || r == 'd') {
 					mkpath(path, tmp, newpath);
-					ret = xmktree(newpath, FALSE);
-				} else if (r == 'd') {
-					mkpath(path, tmp, newpath);
-					ret = xmktree(newpath, TRUE);
+					ret = xmktree(newpath, r == 'f' ? FALSE : TRUE);
 				} else if (r == 's' || r == 'h') {
 					if (tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
@@ -6505,8 +6503,7 @@ nochange:
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_UMOUNT:
-			tmp = ndents ? pdents[cur].name : NULL;
-			if (!unmount(tmp, newpath, &presel, path))
+			if (!unmount((ndents ? pdents[cur].name : NULL), newpath, &presel, path))
 				goto nochange;
 
 			/* Dir removed, go to next entry */
