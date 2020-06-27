@@ -28,7 +28,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 ## Black magic! :dark_sunglasses:
 
-- Load, sort, filter thousands of files instantly
+- Instantly load, sort, filter thousands of files
 - Type to navigate with automatic dir selection
 - Never lose context - start where you quit `nnn`
 - find/fd/grep/ripgrep/fzf from `nnn` and list in `nnn`

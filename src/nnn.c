@@ -5617,6 +5617,7 @@ nochange:
 			mkpath(path, pdents[cur].name, newpath);
 			DPRINTF_S(newpath);
 
+			/* Visit directory */
 			if (pdents[cur].flags & DIR_OR_LINK_TO_DIR) {
 				if (chdir(newpath) == -1) {
 					printwarn(&presel);
@@ -5634,136 +5635,136 @@ nochange:
 			}
 			DPRINTF_U(sb.st_mode);
 
-			switch (sb.st_mode & S_IFMT) {
-			case S_IFREG:
-			{
-				/* If opened as vim plugin and Enter/^M pressed, pick */
-				if (g_state.picker && sel == SEL_GOIN) {
-					appendfpath(newpath, mkpath(path, pdents[cur].name, newpath));
-					writesel(pselbuf, selbufpos - 1);
-					return EXIT_SUCCESS;
-				}
-
-				if (sel == SEL_NAV_IN) {
-					/* If in listing dir, go to target on `l` or Right on symlink */
-					if (listpath && S_ISLNK(pdents[cur].mode)
-					    && is_prefix(path, listpath, strlen(listpath))) {
-						if (!realpath(pdents[cur].name, newpath)) {
-							printwarn(&presel);
-							goto nochange;
-						}
-
-						xdirname(newpath);
-
-						if (chdir(newpath) == -1) {
-							printwarn(&presel);
-							goto nochange;
-						}
-
-						cdprep(lastdir, NULL, path, newpath)
-						       ? (presel = FILTER) : (watch = TRUE);
-						xstrsncpy(lastname, pdents[cur].name, NAME_MAX + 1);
-						goto begin;
-					} else if (cfg.nonavopen)
-						goto nochange; /* Open file disabled on right arrow or `l` */
-				}
-
-				/* Handle plugin selection mode */
-				if (g_state.runplugin) {
-					g_state.runplugin = 0;
-					/* Must be in plugin dir and same context to select plugin */
-					if ((g_state.runctx == cfg.curctx) && !strcmp(path, plgpath)) {
-						endselection();
-						/* Copy path so we can return back to earlier dir */
-						xstrsncpy(path, rundir, PATH_MAX);
-						rundir[0] = '\0';
-
-						if (chdir(path) == -1
-						    || !run_selected_plugin(&path, pdents[cur].name,
-									    runfile, &lastname,
-									    &lastdir)) {
-							DPRINTF_S("plugin failed!");
-						}
-
-						if (runfile[0])
-							runfile[0] = '\0';
-						clearfilter();
-						setdirwatch();
-						goto begin;
-					}
-				}
-
-				if (!sb.st_size) {
-					printwait(messages[MSG_EMPTY_FILE], &presel);
-					goto nochange;
-				}
-
-				if (cfg.useeditor
-#ifdef FILE_MIME_OPTS
-				    && get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
-				    && is_prefix(g_buf, "text/", 5)
-#else
-				    /* no mime option; guess from description instead */
-				    && get_output(g_buf, CMD_LEN_MAX, "file", "-b", newpath, FALSE)
-				    && strstr(g_buf, "text")
-#endif
-				) {
-					spawn(editor, newpath, NULL, F_CLI);
-					continue;
-				}
-
-#ifdef PCRE
-				if (!pcre_exec(archive_pcre, NULL, pdents[cur].name,
-					       xstrlen(pdents[cur].name), 0, 0, NULL, 0)) {
-#else
-				if (!regexec(&archive_re, pdents[cur].name, 0, NULL, 0)) {
-#endif
-					r = get_input(messages[MSG_ARCHIVE_OPTS]);
-					if (r == 'l' || r == 'x') {
-						mkpath(path, pdents[cur].name, newpath);
-						handle_archive(newpath, r);
-						if (r == 'l') {
-							statusbar(path);
-							goto nochange;
-						}
-						copycurname();
-						clearfilter();
-						goto begin;
-					}
-
-					if (r == 'm') {
-						if (!archive_mount(newpath)) {
-							presel = MSGWAIT;
-							goto nochange;
-						}
-
-						/* Pin current directory */
-						free(mark);
-						mark = xstrdup(path);
-
-						cdprep(lastdir, lastname, path, newpath)
-							? (presel = FILTER) : (watch = TRUE);
-						goto begin;
-					}
-
-					if (r != 'd') {
-						printwait(messages[MSG_INVALID_KEY], &presel);
-						goto nochange;
-					}
-				}
-
-				/* Invoke desktop opener as last resort */
-				spawn(opener, newpath, NULL, opener_flags);
-
-				/* Move cursor to the next entry if not the last entry */
-				if (g_state.autonext && cur != ndents - 1)
-					move_cursor((cur + 1) % ndents, 0);
-				continue;
-			}
-			default:
+			/* Do not open non-regular files */
+			if (!S_ISREG(sb.st_mode)) {
 				printwait(messages[MSG_UNSUPPORTED], &presel);
 				goto nochange;
 			}
+
+			/* If opened as vim plugin and Enter/^M pressed, pick */
+			if (g_state.picker && sel == SEL_GOIN) {
+				appendfpath(newpath, mkpath(path, pdents[cur].name, newpath));
+				writesel(pselbuf, selbufpos - 1);
+				return EXIT_SUCCESS;
+			}
+
+			if (sel == SEL_NAV_IN) {
+				/* If in listing dir, go to target on `l` or Right on symlink */
+				if (listpath && S_ISLNK(pdents[cur].mode)
+				    && is_prefix(path, listpath, strlen(listpath))) {
+					if (!realpath(pdents[cur].name, newpath)) {
+						printwarn(&presel);
+						goto nochange;
+					}
+
+					xdirname(newpath);
+
+					if (chdir(newpath) == -1) {
+						printwarn(&presel);
+						goto nochange;
+					}
+
+					cdprep(lastdir, NULL, path, newpath)
+					       ? (presel = FILTER) : (watch = TRUE);
+					xstrsncpy(lastname, pdents[cur].name, NAME_MAX + 1);
+					goto begin;
+				}
+
+				/* Open file disabled on right arrow or `l` */
+				if (cfg.nonavopen)
+					goto nochange;
+			}
+
+			/* Handle plugin selection mode */
+			if (g_state.runplugin) {
+				g_state.runplugin = 0;
+				/* Must be in plugin dir and same context to select plugin */
+				if ((g_state.runctx == cfg.curctx) && !strcmp(path, plgpath)) {
+					endselection();
+					/* Copy path so we can return back to earlier dir */
+					xstrsncpy(path, rundir, PATH_MAX);
+					rundir[0] = '\0';
+
+					if (chdir(path) == -1
+					    || !run_selected_plugin(&path, pdents[cur].name,
+								    runfile, &lastname, &lastdir)) {
+						DPRINTF_S("plugin failed!");
+					}
+
+					if (runfile[0])
+						runfile[0] = '\0';
+					clearfilter();
+					setdirwatch();
+					goto begin;
+				}
+			}
+
+			if (!sb.st_size) {
+				printwait(messages[MSG_EMPTY_FILE], &presel);
+				goto nochange;
+			}
+
+			if (cfg.useeditor
+#ifdef FILE_MIME
+			    && get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
+			    && is_prefix(g_buf, "text/", 5)
+#else
+			    /* no mime option; guess from description instead */
+			    && get_output(g_buf, CMD_LEN_MAX, "file", "-b", newpath, FALSE)
+			    && strstr(g_buf, "text")
+#endif
+			) {
+				spawn(editor, newpath, NULL, F_CLI);
+				continue;
+			}
+
+#ifdef PCRE
+			if (!pcre_exec(archive_pcre, NULL, pdents[cur].name,
+				       xstrlen(pdents[cur].name), 0, 0, NULL, 0)) {
+#else
+			if (!regexec(&archive_re, pdents[cur].name, 0, NULL, 0)) {
+#endif
+				r = get_input(messages[MSG_ARCHIVE_OPTS]);
+				if (r == 'l' || r == 'x') {
+					mkpath(path, pdents[cur].name, newpath);
+					handle_archive(newpath, r);
+					if (r == 'l') {
+						statusbar(path);
+						goto nochange;
+					}
+					copycurname();
+					clearfilter();
+					goto begin;
+				}
+
+				if (r == 'm') {
+					if (!archive_mount(newpath)) {
+						presel = MSGWAIT;
+						goto nochange;
+					}
+
+					/* Pin current directory */
+					free(mark);
+					mark = xstrdup(path);
+
+					cdprep(lastdir, lastname, path, newpath)
+						? (presel = FILTER) : (watch = TRUE);
+					goto begin;
+				}
+
+				if (r != 'd') {
+					printwait(messages[MSG_INVALID_KEY], &presel);
+					goto nochange;
+				}
+			}
+
+			/* Invoke desktop opener as last resort */
+			spawn(opener, newpath, NULL, opener_flags);
+
+			/* Move cursor to the next entry if not the last entry */
+			if (g_state.autonext && cur != ndents - 1)
+				move_cursor((cur + 1) % ndents, 0);
+			continue;
 		case SEL_NEXT: // fallthrough
 		case SEL_PREV: // fallthrough
 		case SEL_PGDN: // fallthrough
