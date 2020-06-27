@@ -5737,6 +5737,10 @@ nochange:
 							goto nochange;
 						}
 
+						/* Pin current directory */
+						free(mark);
+						mark = xstrdup(path);
+
 						cdprep(lastdir, lastname, path, newpath)
 							? (presel = FILTER) : (watch = TRUE);
 						goto begin;
@@ -5826,6 +5830,10 @@ nochange:
 				presel = MSGWAIT;
 				goto nochange;
 			}
+
+			/* Pin current directory */
+			free(mark);
+			mark = xstrdup(path);
 
 			/* In list mode, retain the last file name to highlight it, if possible */
 			cdprep(lastdir, listpath && sel == SEL_CDLAST ? NULL : lastname, path, newpath)
