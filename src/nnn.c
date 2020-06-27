@@ -5781,20 +5781,14 @@ nochange:
 		case SEL_CDBEGIN: // fallthrough
 		case SEL_CDLAST: // fallthrough
 		case SEL_CDROOT:
-			switch (sel) {
-			case SEL_CDHOME:
+			if (sel == SEL_CDHOME)
 				dir = home;
-				break;
-			case SEL_CDBEGIN:
+			else if (sel == SEL_CDBEGIN)
 				dir = ipath;
-				break;
-			case SEL_CDLAST:
+			else if (sel == SEL_CDLAST)
 				dir = lastdir;
-				break;
-			default: /* SEL_CDROOT */
-				dir = "/";
-				break;
-			}
+			else
+				dir = "/"; /* SEL_CDROOT */
 
 			if (!dir || !*dir) {
 				printwait(messages[MSG_NOT_SET], &presel);
