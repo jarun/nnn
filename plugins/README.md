@@ -29,13 +29,14 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | [autojump](autojump) | Navigate to dir/path | sh | autojump |
 | [bookmarks](bookmarks) | Use named bookmarks managed with symlinks | sh | fzf |
 | [boom](boom) | Play random music from dir | sh | [moc](http://moc.daper.net/) |
+| [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs, mktemp |
 | [dups](dups) | List non-empty duplicate files in current dir | sh | find, md5sum,<br>sort uniq xargs |
 | [chksum](chksum) | Create and verify checksums | sh | md5sum,<br>sha256sum |
-| [diffs](diffs) | Diff for selection (limited to 2 for directories) | sh | vimdiff |
+| [diffs](diffs) | Diff for selection (limited to 2 for directories) | sh | vimdiff, mktemp |
 | [dragdrop](dragdrop) | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
 | [finder](finder) | Run custom find command and list | sh | - |
 | [fzcd](fzcd) | Change to the directory of a fuzzy-selected file/dir | sh | fzf |
-| [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf |
+| [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |
 | [fzopen](fzopen) | Fuzzy find a file in dir subtree and edit or open | sh | fzf, xdg-open |
 | [fzz](fzz) | Change to any directory in the z database with fzf | sh | fzf, z |
 | [getplugs](getplugs) | Update plugins to installed `nnn` version | sh | curl |
@@ -54,7 +55,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | [moclyrics](moclyrics) | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
 | [mocplay](mocplay) | Append (and/or play) selection/dir/file in moc | sh | [moc](http://moc.daper.net/) |
 | [mp3conv](mp3conv) | Extract audio from multimedia as mp3 | sh | ffmpeg |
-| [nbak](nbak) | Backs up `nnn` config | sh | tar, awk |
+| [nbak](nbak) | Backs up `nnn` config | sh | tar, awk, mktemp |
 | [nmount](nmount) | Toggle mount status of a device as normal user | sh | pmount, udisks2 |
 | [nuke](nuke) | Sample file opener (CLI-only by default) | sh | _see in-file docs_ |
 | [oldbigfile](oldbigfile) | List large files by access time | sh | find, sort |

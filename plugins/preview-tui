@@ -12,6 +12,7 @@
 #    - less or $PAGER
 #    - tree or exa or ls
 #    - mediainfo or file
+#    - mktemp
 #    - unzip
 #    - tar
 #    - man
