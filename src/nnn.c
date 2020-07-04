@@ -7287,7 +7287,10 @@ int main(int argc, char *argv[])
 	/* Create fifo */
 	if (g_state.autofifo) {
 		g_tmpfpath[tmpfplen - 1] = '\0';
-		snprintf(g_buf, CMD_LEN_MAX, "%s/nnn-fifo.%d", g_tmpfpath, getpid());
+
+		size_t r = mkpath(g_tmpfpath, "nnn-fifo.", g_buf);
+
+		xstrsncpy(g_buf + r - 1, xitoa(getpid()), PATH_MAX - r);
 		setenv("NNN_FIFO", g_buf, TRUE);
 	}
 
