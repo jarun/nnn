@@ -250,6 +250,36 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
     disown
     ```
 
+- Quick find (using `fd`)
+    ```sh
+    #!/usr/bin/env sh
+
+    . "$(dirname "$0")"/.nnn-plugin-helper
+
+    printf "pattern: "
+    read -r pattern
+
+    if ! [ -z "$pattern" ]; then
+        printf "%s" "+l" > "$NNN_PIPE"
+        eval "fd -HI $pattern -0" > "$NNN_PIPE"
+    fi
+    ```
+
+- Quick grep (using `rg`)
+    ```sh
+    #!/usr/bin/env sh
+
+    . "$(dirname "$0")"/.nnn-plugin-helper
+
+    printf "pattern: "
+    read -r pattern
+
+    if ! [ -z "$pattern" ]; then
+        printf "%s" "+l" > "$NNN_PIPE"
+        eval "rg -l0 --hidden -S $pattern" > "$NNN_PIPE"
+    fi
+    ```
+
 ## Contributing plugins
 
 1. Add informative sections like _Description_, _Notes_, _Dependencies_, _Shell_, _Author_ etc. in the plugin.
