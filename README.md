@@ -50,7 +50,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 - Mount and modify archives
 - Create files/dirs/duplicates with parents (like `mkdir -p`)
 - Toggle hidden with <kbd>.</kbd>, visit HOME with <kbd>~</kbd>, last dir with <kbd>-</kbd>
-- Pin a frequently visited dir at runtime
+- Mark a frequently visited dir at runtime
 - Sort by modification, access and inode change time
 - Compile out/in features with make options
 - Watch matrix text fly or read fortune messages
@@ -84,7 +84,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 - Navigation
   - *Type-to-nav* mode with dir auto-select
   - Contexts (_aka_ tabs/workspaces) with custom colors
-  - Sessions, bookmarks with hotkeys; pin and visit a dir
+  - Sessions, bookmarks with hotkeys; mark and visit a dir
   - Remote mounts (needs sshfs, rclone)
   - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick reference
   - CD on quit (*easy* shell integration)

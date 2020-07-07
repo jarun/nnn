@@ -2651,7 +2651,7 @@ static int filterentries(char *path, char *lastname)
 				switch (*ch) {
 				case '\'': // fallthrough /* Go to first non-dir file */
 				case '+': // fallthrough /* Toggle auto-advance */
-				case ',': // fallthrough /* Pin CWD */
+				case ',': // fallthrough /* Mark CWD */
 				case '-': // fallthrough /* Visit last visited dir */
 				case '.': // fallthrough /* Show hidden files */
 				case ';': // fallthrough /* Run plugin key */
@@ -4133,7 +4133,7 @@ static size_t handle_bookmark(const char *bmark, char *newpath)
 	int fd;
 	size_t r = xstrsncpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
 
-	if (bmark) { /* There is a pinned directory */
+	if (bmark) { /* There is a marked directory */
 		g_buf[--r] = ' ';
 		g_buf[++r] = ',';
 		g_buf[++r] = '\0';
@@ -4144,7 +4144,7 @@ static size_t handle_bookmark(const char *bmark, char *newpath)
 
 	r = FALSE;
 	fd = get_input(NULL);
-	if (fd == ',') /* Visit pinned directory */
+	if (fd == ',') /* Visit marked directory */
 		bmark ? xstrsncpy(newpath, bmark, PATH_MAX) : (r = MSG_NOT_SET);
 	else if (!get_kv_val(bookmark, newpath, fd, maxbm, NNN_BMS))
 		r = MSG_INVALID_KEY;
@@ -4177,7 +4177,7 @@ static void show_help(const char *path)
 	   "5Ret Rt l  Open%-20c'  First file/match\n"
 	       "9g ^A  Top%-21c.  Toggle hidden\n"
 	       "9G ^E  End%-21c+  Toggle auto-advance\n"
-	       "9b ^/  Bookmark key%-12c,  Pin CWD\n"
+	       "9b ^/  Bookmark key%-12c,  Mark CWD\n"
 		"a1-4  Context 1-4%-7c(Sh)Tab  Cycle context\n"
 		"aEsc  Send to FIFO%-11c^L  Redraw\n"
 		  "c?  Help, conf%-13c^G  QuitCD\n"
@@ -5666,7 +5666,7 @@ nochange:
 						goto nochange;
 					}
 
-					/* Pin current directory */
+					/* Mark current directory */
 					free(mark);
 					mark = xstrdup(path);
 
@@ -5749,7 +5749,7 @@ nochange:
 						goto nochange;
 					}
 
-					/* Pin current directory */
+					/* Mark current directory */
 					free(mark);
 					mark = xstrdup(path);
 
@@ -5833,7 +5833,7 @@ nochange:
 				goto nochange;
 			}
 
-			/* Pin current directory */
+			/* Mark current directory */
 			free(mark);
 			mark = xstrdup(path);
 
@@ -5870,7 +5870,7 @@ nochange:
 				watch = TRUE;
 
 			goto begin;
-		case SEL_PIN:
+		case SEL_MARK:
 			free(mark);
 			mark = xstrdup(path);
 			printwait(mark, &presel);

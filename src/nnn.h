@@ -66,7 +66,7 @@ enum action {
 	SEL_CTX7,
 	SEL_CTX8,
 #endif
-	SEL_PIN,
+	SEL_MARK,
 	SEL_FLTR,
 	SEL_MFLTR,
 	SEL_HIDDEN,
@@ -181,7 +181,7 @@ static struct key bindings[] = {
 	{ '8',            SEL_CTX8 },
 #endif
 	/* Mark a path to visit later */
-	{ ',',            SEL_PIN },
+	{ ',',            SEL_MARK },
 	/* Filter */
 	{ '/',            SEL_FLTR },
 	/* Toggle filter mode */
