@@ -5666,6 +5666,10 @@ nochange:
 						goto nochange;
 					}
 
+					/* Pin current directory */
+					free(mark);
+					mark = xstrdup(path);
+
 					cdprep(lastdir, NULL, path, newpath)
 					       ? (presel = FILTER) : (watch = TRUE);
 					xstrsncpy(lastname, pdents[cur].name, NAME_MAX + 1);
