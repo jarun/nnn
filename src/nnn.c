@@ -546,7 +546,7 @@ static const char * const messages[] = {
 	"session name: ",
 	"'c'p / 'm'v as?",
 	"'c'urrent / 's'el?",
-	"rm -rf %s file%s?",
+	"rm -rf %s file%s? [Esc cancels]",
 	"limit exceeded",
 	"'f'ile / 'd'ir / 's'ym / 'h'ard?",
 	"'c'li / 'g'ui?",
@@ -897,9 +897,9 @@ static void xdelay(useconds_t delay)
 
 static char confirm_force(bool selection)
 {
-	char str[32];
+	char str[64];
 
-	snprintf(str, 32, messages[MSG_FORCE_RM],
+	snprintf(str, 64, messages[MSG_FORCE_RM],
 		 (selection ? xitoa(nselected) : "current"), (selection ? "(s)" : ""));
 
 	int r = get_input(str);
