@@ -902,7 +902,11 @@ static char confirm_force(bool selection)
 	snprintf(str, 32, messages[MSG_FORCE_RM],
 		 (selection ? xitoa(nselected) : "current"), (selection ? "(s)" : ""));
 
-	if (xconfirm(get_input(str)))
+	int r = get_input(str);
+
+	if (r == 27)
+		return '\0'; /* cancel */
+	if (r == 'y' || r == 'Y')
 		return 'f'; /* forceful */
 	return 'i'; /* interactive */
 }
@@ -1806,13 +1810,21 @@ static void opstr(char *buf, char *op)
 		 op, selpath);
 }
 
-static void rmmulstr(char *buf)
+static bool rmmulstr(char *buf)
 {
 	if (g_state.trash)
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 trash-put < %s", selpath);
-	else
+	else {
+		char r = confirm_force(TRUE);
+
+		if (!r)
+			return FALSE;
+
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr \"$0\" \"$@\" < /dev/tty' < %s",
-			 confirm_force(TRUE), selpath);
+			 r, selpath);
+	}
+
+	return TRUE;
 }
 
 /* Returns TRUE if file is removed, else FALSE */
@@ -1824,6 +1836,9 @@ static bool xrm(char *fpath)
 		char rm_opts[] = "-ir";
 
 		rm_opts[1] = confirm_force(FALSE);
+		if (!rm_opts[1])
+			return FALSE;
+
 		spawn("rm", rm_opts, fpath, F_NORMAL | F_CHKRTN);
 	}
 
@@ -1922,8 +1937,10 @@ static bool cpmvrm_selection(enum action sel, char *path)
 		}
 		break;
 	default: /* SEL_RM */
-		rmmulstr(g_buf);
-		break;
+		if (!rmmulstr(g_buf)) {
+			printmsg(messages[MSG_CANCEL]);
+			return FALSE;
+		}
 	}
 
 	if (sel != SEL_CPMVAS && spawn(utils[UTIL_SH_EXEC], g_buf, NULL, F_CLI | F_CHKRTN)) {
