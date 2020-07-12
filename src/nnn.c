@@ -2377,8 +2377,12 @@ static int nextsel(int presel)
 			timeout(0);
 			c = getch();
 			if (c != ERR) {
-				ungetch(c);
-				c = ';';
+				if (c == 27)
+					c = CONTROL('L');
+				else {
+					ungetch(c);
+					c = ';';
+				}
 			} else
 				c = 27;
 			settimeout();
@@ -2647,8 +2651,17 @@ static int filterentries(char *path, char *lastname)
 #endif
 		case 27: /* Exit filter mode on Escape and Alt+key */
 			if (handle_alt_key(ch) != ERR) {
-				unget_wch(*ch);
-				*ch = ';';
+				if (*ch == 27) { /* Handle Alt + Esc */
+					if (wln[1]) {
+						ln[REGEX_MAX - 1] = ln[1];
+						ln[1] = wln[1] = '\0';
+						ndents = total;
+						*ch = CONTROL('L');
+					}
+				} else {
+					unget_wch(*ch);
+					*ch = ';';
+				}
 			}
 			goto end;
 		}
