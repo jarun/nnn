@@ -40,7 +40,7 @@
 #   Then in `nnn`, launch the `preview-tui` plugin.
 #
 #   If you provide the same NNN_FIFO to all nnn instances, there will be a
-#   single common preview window. I you provide different FIFO path (e.g.
+#   single common preview window. If you provide different FIFO path (e.g.
 #   with -a), they will be independent.
 #
 #   The previews will be shown in a tmux split. If that isn't possible, it
