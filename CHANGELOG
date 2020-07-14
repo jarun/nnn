@@ -1,3 +1,39 @@
+nnn v3.3
+2020-07-14
+
+- subdir `mounts` for remote and archive mounts
+- remove mount point on successful unmount of remote/archive
+- show error and prompt user if `cp`/`mv`/`rm` operation fails
+- support absolute/relative paths in cp/mv as
+- mark current path automatically on archive/remote mount
+- mark current path automatically on target file visit in _find and list_ mode
+- option `-C` to place HW cursor on hovered for screen readers and braille displays
+- option `-u` to use selection (if available) and skip `current/sel` prompt
+- key <kbd>Alt+Esc</kbd> to clear filter prompt and redraw
+- support <kbd>Esc</kbd> to cancel remove operation
+- `gpge` & `gpgd`: encrypt and decrypt with GPG
+- `blknew`: create new files and directories in bulk
+- `preview-tui`
+  - unified to support `tmux`/`kitty`/`xterm`/`$TERMINAL`
+  - auto-determine split orientation based on terminal height and width
+  - provision to use [`scope.sh`](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [`pistol`](https://github.com/doronbehar/pistol)
+- various other improvements
+- `upload`: send to Firefox Send if [`ffsend`](https://github.com/timvisee/ffsend) is found
+- `hexview`: add [`hx`](https://github.com/krpors/hx) as alternative hex viewer
+- `nuke` and `imgview`: add [`imv`](https://github.com/eXeC64/imv) as alternative image viewer
+- add find (with `fd`) and grep (with `rg`) examples in plugins doc
+- key <kbd>Esc</kbd> or left click to resend hovered file path to `NNN_FIFO`
+- show `+` instead of `s` in status bar on selection
+- <kbd>F5</kbd> removed (misfit for toggle hidden), <kbd>^S</kbd> removed (often masked, redundant)
+- handle abnormal program termination and remove NNN_PIPE and/or NNN_FIFO
+- clear selection after successful batch rename, link creation
+- make option `O_CTX8` for 8 contexts (NOT backward compatible with 4 contexts)
+- fix issue with child window resize (see #656)
+- fix issue with `NNNLVL` on macOS (see #639)
+- fix issue with restoring session with du/au enabled
+
+-------------------------------------------------------------------------------
+
 nnn v3.2
 2020-05-26
 

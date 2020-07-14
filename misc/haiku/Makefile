@@ -52,6 +52,14 @@ ifeq ($(O_NOMOUSE),1)
 	CPPFLAGS += -DNOMOUSE
 endif
 
+ifeq ($(O_NOBATCH),1)
+	CPPFLAGS += -DNOBATCH
+endif
+
+ifeq ($(O_NOFIFO),1)
+	CPPFLAGS += -DNOFIFO
+endif
+
 ifeq ($(O_CTX8),1)
 	CPPFLAGS += -DCTX8
 endif

@@ -113,7 +113,7 @@
 #include "dbg.h"
 
 /* Macro definitions */
-#define VERSION "3.2"
+#define VERSION "3.3"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
 #define SESSIONS_VERSION 1
 
