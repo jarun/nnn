@@ -20,6 +20,10 @@ if [ -n "$sel" ]; then
         exit 0
 	fi
 
+    # Check if selected path returned
+    # by fzf command is absolute and
+    # change directory then without
+    # further manipulation
     case $sel in
     /*) nnn_cd "$sel" ;;
     *)  
