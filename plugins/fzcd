@@ -20,11 +20,16 @@ if [ -n "$sel" ]; then
         exit 0
 	fi
 
-    # Remove "./" prefix if it exists
-    sel="${sel#./}"
-    if [ "$PWD" = "/" ]; then
-	    nnn_cd "/$sel"
+    if [[ "$sel" = /* ]]; then
+        nnn_cd "$sel"
     else
-	    nnn_cd "$PWD/$sel"
+        # Remove "./" prefix if it exists
+        sel="${sel#./}"
+        
+        if [ "$PWD" = "/" ]; then
+            nnn_cd "/$sel"
+        else
+            nnn_cd "$PWD/$sel"
+        fi
     fi
 fi
