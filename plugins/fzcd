@@ -20,11 +20,18 @@ if [ -n "$sel" ]; then
         exit 0
 	fi
 
-    # Remove "./" prefix if it exists
-    sel="${sel#./}"
-    if [ "$PWD" = "/" ]; then
-	    nnn_cd "/$sel"
-    else
-	    nnn_cd "$PWD/$sel"
-    fi
+    # Check if selected path returned
+    # by fzf command is absolute
+    case $sel in
+    /*) nnn_cd "$sel" ;;
+    *)  
+        # Remove "./" prefix if it exists
+        sel="${sel#./}"
+        
+        if [ "$PWD" = "/" ]; then
+            nnn_cd "/$sel"
+        else
+            nnn_cd "$PWD/$sel"
+        fi;;
+    esac    
 fi
