@@ -1,12 +1,6 @@
 #!/usr/bin/env sh
 
 # Description: Run fzf and go to the directory of the file selected
-# Note: by adding an environment variable called FZF_DEFAULT_COMMAND
-# it's possible to manipulate the default collection of items
-# piped to fzf. For Example:
-#   export FZF_DEFAULT_COMMAND="fd -H --type d . $HOME"
-# Then all paths piped to fzf are absolute and therefore
-# they need to be handled in such a way by this plugin.
 #
 # Shell: POSIX compliant
 # Author: Anna Arad
@@ -27,9 +21,7 @@ if [ -n "$sel" ]; then
 	fi
 
     # Check if selected path returned
-    # by fzf command is absolute and
-    # change directory then without
-    # further manipulation
+    # by fzf command is absolute
     case $sel in
     /*) nnn_cd "$sel" ;;
     *)  
