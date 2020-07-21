@@ -2455,25 +2455,21 @@ static int getorderstr(char *sort)
 {
 	int i = 0;
 
+	if (cfg.showhidden)
+		sort[i++] = 'H';
+
 	if (cfg.timeorder)
-		sort[0] = (cfg.timetype == T_MOD) ? 'M' : ((cfg.timetype == T_ACCESS) ? 'A' : 'C');
+		sort[i++] = (cfg.timetype == T_MOD) ? 'M' : ((cfg.timetype == T_ACCESS) ? 'A' : 'C');
 	else if (cfg.sizeorder)
-		sort[0] = 'S';
+		sort[i++] = 'S';
 	else if (cfg.extnorder)
-		sort[0] = 'E';
+		sort[i++] = 'E';
 
-	if (sort[i])
-		++i;
+	if (entrycmpfn == &reventrycmp)
+		sort[i++] = 'R';
 
-	if (entrycmpfn == &reventrycmp) {
-		sort[i] = 'R';
-		++i;
-	}
-
-	if (namecmpfn == &xstrverscasecmp) {
-		sort[i] = 'V';
-		++i;
-	}
+	if (namecmpfn == &xstrverscasecmp)
+		sort[i++] = 'V';
 
 	if (i)
 		sort[i] = ' ';
@@ -2484,7 +2480,7 @@ static int getorderstr(char *sort)
 static void showfilterinfo(void)
 {
 	int i = 0;
-	char info[REGEX_MAX] = "\0\0\0\0";
+	char info[REGEX_MAX] = "\0\0\0\0\0";
 
 	i = getorderstr(info);
 
@@ -5172,7 +5168,7 @@ static void statusbar(char *path)
 		       (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
 		       num_files, (ll)pent->blocks << blk_shift, ptr);
 	} else { /* light or detail mode */
-		char sort[] = "\0\0\0\0";
+		char sort[] = "\0\0\0\0\0";
 
 		getorderstr(sort);
 
