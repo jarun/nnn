@@ -149,12 +149,12 @@ Visit the [ToDo list](https://github.com/jarun/nnn/issues/629) to contribute or 
 
 ## Elsewhere
 
-- [Wikipedia](https://en.wikipedia.org/wiki/Nnn_(file_manager))
 - [ArchWiki](https://wiki.archlinux.org/index.php/Nnn)
 - [FOSSMint](https://www.fossmint.com/nnn-linux-terminal-file-browser/)
 - [gHacks Tech News](https://www.ghacks.net/2019/11/01/nnn-is-an-excellent-command-line-based-file-manager-for-linux-macos-and-bsds/)
 - Hacker News [[1](https://news.ycombinator.com/item?id=18520898)] [[2](https://news.ycombinator.com/item?id=19850656)]
 - [It's FOSS](https://itsfoss.com/nnn-file-browser-linux/)
 - LinuxLinks [[1](https://www.linuxlinks.com/nnn-fast-and-flexible-file-manager/)] [[2](https://www.linuxlinks.com/bestconsolefilemanagers/)] [[3](https://www.linuxlinks.com/excellent-system-tools-nnn-portable-terminal-file-manager/)]
+- [Open Source For You](https://www.opensourceforu.com/2019/12/nnn-this-feature-rich-terminal-file-manager-will-enhance-your-productivity/)
 - [Suckless Rocks](https://suckless.org/rocks/)
 - [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
