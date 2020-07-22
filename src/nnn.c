@@ -4017,17 +4017,10 @@ static bool remote_mount(char *newpath)
 		return FALSE;
 	}
 
-	/* Convert "Host" to "Host:" */
-	size_t len = xstrlen(tmp);
-	bool path = FALSE;
+	char *div = strchr(tmp, ':');
 
-	for (size_t count = 0; count < len; ++count)
-		if (tmp[count] == ':') {
-			tmp[count] = '\0';
-			len = count;
-			path = TRUE;
-			break;
-		}
+	if (div)
+		*div = '\0';
 
 	/* Create the mount point */
 	mkpath(cfgpath, toks[TOK_MNT], mntpath);
@@ -4037,10 +4030,12 @@ static bool remote_mount(char *newpath)
 		return FALSE;
 	}
 
-	tmp[len] = ':';
-
-	if (!path) /* Append ':' at the end */
+	if (!div) { /* Convert "host" to "host:" */
+		size_t len = xstrlen(tmp);
+		tmp[len] = ':';
 		tmp[len + 1] = '\0';
+	} else
+		*div = ':';
 
 	/* Connect to remote */
 	if (opt == 's') {
