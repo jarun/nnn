@@ -4011,17 +4011,9 @@ static bool remote_mount(char *newpath)
 		return FALSE;
 	}
 
-	tmp = xreadline(NULL, "remote name: ");
+	tmp = xreadline(NULL, "host[:dir] > ");
 	if (!tmp[0]) {
 		printmsg(messages[MSG_CANCEL]);
-		return FALSE;
-	}
-
-	/* Create the mount point */
-	mkpath(cfgpath, toks[TOK_MNT], mntpath);
-	mkpath(mntpath, tmp, newpath);
-	if (!xmktree(newpath, TRUE)) {
-		printwarn(NULL);
 		return FALSE;
 	}
 
@@ -4031,14 +4023,24 @@ static bool remote_mount(char *newpath)
 
 	for (size_t count = 0; count < len; ++count)
 		if (tmp[count] == ':') {
+			tmp[count] = '\0';
+			len = count;
 			path = TRUE;
 			break;
 		}
 
-	if (!path) { /* Append ':' if missing */
-		tmp[len] = ':';
-		tmp[len + 1] = '\0';
+	/* Create the mount point */
+	mkpath(cfgpath, toks[TOK_MNT], mntpath);
+	mkpath(mntpath, tmp, newpath);
+	if (!xmktree(newpath, TRUE)) {
+		printwarn(NULL);
+		return FALSE;
 	}
+
+	tmp[len] = ':';
+
+	if (!path) /* Append ':' at the end */
+		tmp[len + 1] = '\0';
 
 	/* Connect to remote */
 	if (opt == 's') {
