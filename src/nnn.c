@@ -4028,7 +4028,7 @@ static bool remote_mount(char *newpath)
 	/* Convert "Host" to "Host:" */
 	size_t len = xstrlen(tmp);
 
-	if (tmp[len - 1] != ':') { /* Append ':' if missing */
+	if (strchr(tmp, ':') == NULL) { /* Append ':' if missing */
 		tmp[len] = ':';
 		tmp[len + 1] = '\0';
 	}
