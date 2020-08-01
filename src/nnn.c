@@ -5188,9 +5188,8 @@ static void statusbar(char *path)
 	} else { /* light or detail mode */
 		char sort[] = "\0\0\0\0\0";
 
-		getorderstr(sort);
-
-		printw("%s", sort);
+		if (getorderstr(sort))
+			printw("%s", sort);
 
 		/* Timestamp */
 		print_time(&pent->t);
