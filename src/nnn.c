@@ -5161,14 +5161,28 @@ static void statusbar(char *path)
 	tolastln();
 	attron(COLOR_PAIR(cfg.curctx + 1));
 
+	printw("%d/%d ", cur + 1, ndents);
+
+	if (g_state.selmode) {
+		attron(A_REVERSE);
+		addch(' ');
+		if (g_state.rangesel)
+			addch('*');
+		else if (nselected)
+			addstr(xitoa(nselected));
+		else
+			addch('+');
+		addch(' ');
+		attroff(A_REVERSE);
+		addch(' ');
+	}
+
 	if (cfg.blkorder) { /* du mode */
 		char buf[24];
 
 		xstrsncpy(buf, coolsize(dir_blocks << blk_shift), 12);
 
-		printw("%d/%d [%s:%s] %cu:%s free:%s files:%lu %lldB %s\n",
-		       cur + 1, ndents, (g_state.selmode ? "+" : ""),
-		       (g_state.rangesel ? "*" : (nselected ? xitoa(nselected) : "")),
+		printw("%cu:%s free:%s files:%lu %lldB %s\n",
 		       (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
 		       num_files, (ll)pent->blocks << blk_shift, ptr);
 	} else { /* light or detail mode */
@@ -5176,8 +5190,7 @@ static void statusbar(char *path)
 
 		getorderstr(sort);
 
-		printw("%d/%d [%s:%s] %s", cur + 1, ndents, (g_state.selmode ? "+" : ""),
-			 (g_state.rangesel ? "*" : (nselected ? xitoa(nselected) : "")), sort);
+		printw("%s", sort);
 
 		/* Timestamp */
 		print_time(&pent->t);
