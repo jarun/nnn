@@ -66,7 +66,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Minimizes screen refresh with fast line redraws
   - Tiny binary (typically less than 100KB)
 - Portable
-  - Statically-linked binary available
+  - Static binary available (no need to install)
   - Language-agnostic plugins
   - Minimal library deps, easy to compile
   - Compile in/out features with make variables
