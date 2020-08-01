@@ -6615,10 +6615,11 @@ nochange:
 				save_session(TRUE, NULL);
 
 			/* CD on Quit */
-			/* In vim picker mode, clear selection and exit */
-			/* Picker mode: reset buffer or clear file */
-			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE"))
-				g_state.picker ? selbufpos = 0 : write_lastdir(path);
+			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE")) {
+				write_lastdir(path);
+				if (g_state.picker)
+					selbufpos = 0;
+			}
 			return sel == SEL_QUITFAIL ? EXIT_FAILURE : EXIT_SUCCESS;
 #ifndef NOFIFO
 		case SEL_FIFO:
