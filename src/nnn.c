@@ -6615,9 +6615,9 @@ nochange:
 				save_session(TRUE, NULL);
 
 			/* CD on Quit */
-			if(sel == SEL_QUITCD || getenv("NNN_TMPFILE")) {
+			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE")) {
 				write_lastdir(path);
-				if(g_state.picker)
+				if (g_state.picker)
 					selbufpos = 0;
 			}
 			return sel == SEL_QUITFAIL ? EXIT_FAILURE : EXIT_SUCCESS;
