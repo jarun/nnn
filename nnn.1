@@ -408,9 +408,18 @@ separated by \fI;\fR:
 .Pp
 \fBNNN_COLORS:\fR string of color codes for each context, e.g.:
 .Bd -literal
+    # 8 color codes
+    # codes: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
     export NNN_COLORS='1234'
 
-    codes: 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
+    # xterm 256 color codes (in hex)
+    # codes: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
+    export NNN_COLORS='#0a1b2c3d'
+
+    # both (256 followed by 8 as fallback, separated by ';')
+    export NNN_COLORS='#0a1b2c3d;1234'
+
+    NOTE: If only 256 colors are specified and the terminal doesn't support, default (4-blue) is used.
 .Ed
 .Pp
 \fBNNN_ARCHIVE:\fR archive types to be handled silently (default: bzip2, (g)zip, tar).

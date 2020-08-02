@@ -757,6 +757,21 @@ static char *xitoa(uint val)
 	return &ascbuf[++i];
 }
 
+/* Return the integer value of a char representing HEX */
+static uchar xchartohex(uchar c)
+{
+	if (xisdigit(c))
+		return c - '0';
+
+	if (c >= 'a' && c <= 'f')
+		return c - 'a' + 10;
+
+	if (c >= 'A' && c <= 'F')
+		return c - 'A' + 10;
+
+	return c;
+}
+
 /*
  * Source: https://elixir.bootlin.com/linux/latest/source/arch/alpha/include/asm/bitops.h
  */
@@ -1571,18 +1586,51 @@ static bool initcurses(void *oldmask)
 	char *colors = getenv(env_cfg[NNN_COLORS]);
 
 	if (colors || !getenv("NO_COLOR")) {
+		uint *pcode;
+		char ch;
+		bool ext = FALSE;
+
 		start_color();
 		use_default_colors();
 
+		if (colors && *colors == '#') {
+			if (COLORS >= 256) {
+				++colors;
+				ext = TRUE;
+
+				/*
+				 * If fallback colors are specified, set the separator
+				 * to NULL so we don't interpret separator and fallback
+				 * if fewer than CTX_MAX xterm 256 colors are specified.
+				 */
+				char *sep = strchr(colors, ';');
+				if (sep)
+					*sep = '\0';
+			} else
+				/* Check if 8 colors fallback is appended */
+				colors = strchr(colors, ';') + 1;
+		}
+
 		/* Get and set the context colors */
 		for (uchar i = 0; i <  CTX_MAX; ++i) {
-			if (colors && *colors) {
-				g_ctx[i].color = (*colors < '0' || *colors > '7') ? 4 : *colors - '0';
-				++colors;
-			} else
-				g_ctx[i].color = 4;
+			pcode = &g_ctx[i].color;
 
-			init_pair(i + 1, g_ctx[i].color, -1);
+			if (colors && *colors) {
+				if (ext) {
+					ch = *colors;
+					if (*++colors) {
+						*pcode = (16 * xchartohex(ch)) + xchartohex(*colors);
+						++colors;
+					} else
+						*pcode = xchartohex(ch);
+				} else {
+					*pcode = (*colors < '0' || *colors > '7') ? 4 : *colors - '0';
+					++colors;
+				}
+			} else
+				*pcode = 4;
+
+			init_pair(i + 1, *pcode, -1);
 		}
 	}
 
@@ -2216,21 +2264,6 @@ static int xstrverscasecmp(const char * const s1, const char * const s2)
 }
 
 static int (*namecmpfn)(const char * const s1, const char * const s2) = &xstricmp;
-
-/* Return the integer value of a char representing HEX */
-static char xchartohex(char c)
-{
-	if (xisdigit(c))
-		return c - '0';
-
-	if (c >= 'a' && c <= 'f')
-		return c - 'a' + 10;
-
-	if (c >= 'A' && c <= 'F')
-		return c - 'A' + 10;
-
-	return c;
-}
 
 static char * (*fnstrstr)(const char *haystack, const char *needle) = &strcasestr;
 #ifdef PCRE

@@ -60,7 +60,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 - Frugal
   - Typically needs less than 3.5MB resident memory
-  - Works with 8-bit colors
+  - Works with 8 colors (and xterm 256 colors)
   - Disk-IO sensitive (few disk reads and writes)
   - No FPU usage (all integer maths, even for file size)
   - Minimizes screen refresh with fast line redraws
