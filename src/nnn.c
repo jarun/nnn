@@ -1999,9 +1999,8 @@ static bool cpmvrm_selection(enum action sel, char *path)
 		return FALSE;
 	}
 
-	/* Clear selection on move or delete */
-	if (sel != SEL_CP)
-		clearselection();
+	/* Clear selection */
+	clearselection();
 
 	return TRUE;
 }
