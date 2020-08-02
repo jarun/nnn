@@ -1594,6 +1594,8 @@ static bool initcurses(void *oldmask)
 		use_default_colors();
 
 		if (colors && *colors == '#') {
+			char *sep = strchr(colors, ';');
+
 			if (COLORS >= 256) {
 				++colors;
 				ext = TRUE;
@@ -1603,12 +1605,13 @@ static bool initcurses(void *oldmask)
 				 * to NULL so we don't interpret separator and fallback
 				 * if fewer than CTX_MAX xterm 256 colors are specified.
 				 */
-				char *sep = strchr(colors, ';');
 				if (sep)
 					*sep = '\0';
-			} else
-				/* Check if 8 colors fallback is appended */
-				colors = strchr(colors, ';') + 1;
+			} else {
+				colors = sep; /* Detect if 8 colors fallback is appended */
+				if (colors)
+					++colors;
+			}
 		}
 
 		/* Get and set the context colors */
