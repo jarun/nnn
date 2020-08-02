@@ -1586,56 +1586,54 @@ static bool initcurses(void *oldmask)
 	char *colors = getenv(env_cfg[NNN_COLORS]);
 
 	if (colors || !getenv("NO_COLOR")) {
-		uint *pclr;
+		uint *pcode;
 		char ch;
 		bool ext = FALSE;
 
 		start_color();
 		use_default_colors();
 
-		if (colors) {
-			if (*colors == '#') {
-				char *sep = strchr(colors, ';');
+		if (colors && *colors == '#') {
+			char *sep = strchr(colors, ';');
 
-				if (COLORS >= 256) {
+			if (COLORS >= 256) {
+				++colors;
+				ext = TRUE;
+
+				/*
+				 * If fallback colors are specified, set the separator
+				 * to NULL so we don't interpret separator and fallback
+				 * if fewer than CTX_MAX xterm 256 colors are specified.
+				 */
+				if (sep)
+					*sep = '\0';
+			} else {
+				colors = sep; /* Detect if 8 colors fallback is appended */
+				if (colors)
 					++colors;
-					ext = TRUE;
+			}
+		}
 
-					/*
-					 * If fallback colors are specified, set the separator
-					 * to NULL so we don't interpret separator and fallback
-					 * if fewer than CTX_MAX xterm 256 colors are specified.
-					 */
-					if (sep)
-						*sep = '\0';
+		/* Get and set the context colors */
+		for (uchar i = 0; i <  CTX_MAX; ++i) {
+			pcode = &g_ctx[i].color;
+
+			if (colors && *colors) {
+				if (ext) {
+					ch = *colors;
+					if (*++colors) {
+						*pcode = (16 * xchartohex(ch)) + xchartohex(*colors);
+						++colors;
+					} else
+						*pcode = xchartohex(ch);
 				} else {
-					colors = sep; /* Detect if 8 colors fallback is appended */
-					if (colors)
-						++colors;
+					*pcode = (*colors < '0' || *colors > '7') ? 4 : *colors - '0';
+					++colors;
 				}
-			}
+			} else
+				*pcode = 4;
 
-			/* Get and set the context colors */
-			for (uchar i = 0; i <  CTX_MAX; ++i) {
-				pclr = &g_ctx[i].color;
-
-				if (*colors) {
-					if (ext) {
-						ch = *colors;
-						if (*++colors) {
-							*pclr = (16 * xchartohex(ch)) + xchartohex(*colors);
-							++colors;
-						} else
-							*pclr = xchartohex(ch);
-					} else {
-						*pclr = (*colors < '0' || *colors > '7') ? 4 : *colors - '0';
-						++colors;
-					}
-				} else
-					*pclr = 4;
-
-				init_pair(i + 1, *pclr, -1);
-			}
+			init_pair(i + 1, *pcode, -1);
 		}
 	}
 
