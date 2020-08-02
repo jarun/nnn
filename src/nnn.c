@@ -7026,11 +7026,8 @@ static bool setup_config(void)
 	/* Set selection file path */
 	if (!g_state.picker) {
 		char *env_sel = xgetenv(env_cfg[NNN_SEL], NULL);
-		if (env_sel)
-			selpath = xstrdup(env_sel);
-		else
-			/* Length of "/.config/nnn/.selection" */
-			selpath = (char *)malloc(len + 3);
+		selpath = env_sel ? xstrdup(env_sel)
+				  : (char *)malloc(len + 3); /* Length of "/.config/nnn/.selection" */
 
 		if (!selpath) {
 			xerror();
