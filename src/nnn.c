@@ -2116,7 +2116,7 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 		selpath, curpath, cmd, archive
 #endif
 		);
-	spawn(utils[UTIL_SH_EXEC], buf, NULL, F_CLI);
+	spawn(utils[UTIL_SH_EXEC], buf, NULL, F_CLI | F_CONFIRM);
 	free(buf);
 }
 
@@ -6351,12 +6351,13 @@ nochange:
 				}
 				get_archive_cmd(newpath, tmp);
 				(r == 's') ? archive_selection(newpath, tmp, path)
-					   : spawn(newpath, tmp, pdents[cur].name, F_NORMAL | F_MULTI);
+					   : spawn(newpath, tmp, pdents[cur].name, F_CLI | F_CONFIRM);
 
 				mkpath(path, tmp, newpath);
 				if (access(newpath, F_OK) == 0) { /* File created */
 					xstrsncpy(lastname, tmp, NAME_MAX + 1);
 					clearfilter(); /* Archive name may not match */
+					clearselection(); /* Archive operation complete */
 					goto begin;
 				}
 				continue;
