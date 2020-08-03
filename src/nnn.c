@@ -5731,7 +5731,7 @@ nochange:
 			if (sel == SEL_NAV_IN) {
 				/* If in listing dir, go to target on `l` or Right on symlink */
 				if (listpath && S_ISLNK(pdents[cur].mode)
-				    && is_prefix(path, listpath, strlen(listpath))) {
+				    && is_prefix(path, listpath, xstrlen(listpath))) {
 					if (!realpath(pdents[cur].name, newpath)) {
 						printwarn(&presel);
 						goto nochange;
