@@ -1589,7 +1589,6 @@ static bool initcurses(void *oldmask)
 
 	if (colors || !getenv("NO_COLOR")) {
 		uint *pcode;
-		char ch;
 		bool ext = FALSE;
 
 		start_color();
@@ -1622,16 +1621,17 @@ static bool initcurses(void *oldmask)
 
 			if (colors && *colors) {
 				if (ext) {
-					ch = *colors;
-					if (*++colors) {
-						*pcode = (16 * xchartohex(ch)) + xchartohex(*colors);
-						++colors;
-					} else
-						*pcode = xchartohex(ch);
-				} else {
+					*pcode = xchartohex(*colors) << 4;
+					if (*++colors)
+						*pcode += xchartohex(*colors);
+					else { /* Each color code must be 2 hex symbols */
+						exitcurses();
+						fprintf(stderr, "NNN_COLORS!\n");
+						return FALSE;
+					}
+				} else
 					*pcode = (*colors < '0' || *colors > '7') ? 4 : *colors - '0';
-					++colors;
-				}
+				++colors;
 			} else
 				*pcode = 4;
 
