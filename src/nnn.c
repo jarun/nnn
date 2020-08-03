@@ -182,6 +182,8 @@
 /* Entry flags */
 #define DIR_OR_LINK_TO_DIR 0x01
 #define HARD_LINK 0x02
+#define SYM_ORPHAN 0x04
+#define FILE_MISSING 0x08
 #define FILE_SELECTED 0x10
 
 /* Macros to define process spawn behaviour as flags */
@@ -4599,6 +4601,7 @@ static bool selforparent(const char *path)
 
 static int dentfill(char *path, struct entry **ppdents)
 {
+	uchar entflags = 0;
 	int n = 0, flags = 0;
 	ulong num_saved;
 	struct dirent *dp;
@@ -4691,15 +4694,18 @@ static int dentfill(char *path, struct entry **ppdents)
 		}
 
 		if (fstatat(fd, namep, &sb, flags) == -1) {
-			/* List a symlink with target missing */
-			if (flags || (!flags && fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW) == -1)) {
+			if (flags || (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW) == -1)) {
+				/* Missing file */
 				DPRINTF_U(flags);
 				if (!flags) {
 					DPRINTF_S(namep);
 					DPRINTF_S(strerror(errno));
 				}
+
+				entflags = FILE_MISSING;
 				memset(&sb, 0, sizeof(struct stat));
-			}
+			} else /* Orphaned symlink */
+				entflags = SYM_ORPHAN;
 		}
 
 		if (n == total_dents) {
@@ -4762,6 +4768,10 @@ static int dentfill(char *path, struct entry **ppdents)
 		dentp->size = sb.st_size;
 #endif
 		dentp->flags = S_ISDIR(sb.st_mode) ? 0 : ((sb.st_nlink > 1) ? HARD_LINK : 0);
+		if (entflags) {
+			dentp->flags |= entflags;
+			entflags = 0;
+		}
 
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
