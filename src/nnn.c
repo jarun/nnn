@@ -3400,7 +3400,8 @@ static char get_ind(mode_t mode, bool perms, uchar *pair)
 		*pair = C_CHR;
 		return '\0';
 	default:
-		*pair = C_UND;
+		if (!perms)
+			*pair = C_UND;
 		return '?';
 	}
 }
