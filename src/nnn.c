@@ -3451,11 +3451,15 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 			attrs |= A_DIM;
 	} else {
 		if (ind == '@') {
-			if (ent->flags & DIR_OR_LINK_TO_DIR)
+			if (ent->flags & DIR_OR_LINK_TO_DIR) {
 				ind = '/';
+				attrs |= A_BOLD;
+			}
 			pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
 		} else if (!ent->size && (pair == C_FIL || pair == C_EXE))
 			pair = C_UND;
+		else if (pair == C_DIR)
+			attrs |= A_BOLD;
 		else if (ent->flags & HARD_LINK)
 			pair = C_HRD;
 		else if (ent->flags & FILE_MISSING)
@@ -3520,6 +3524,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	switch (ent->mode & S_IFMT) {
 	case S_IFDIR:
 		pair = C_DIR;
+		attrs |= A_BOLD;
 		ind2 = '/'; // fallthrough
 	case S_IFREG:
 		if (!ind2) {
@@ -3532,7 +3537,9 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 				ln = TRUE;
 			}
 
-			if (!pair)
+			if (!ent->size)
+				pair = C_UND;
+			else if (!pair)
 				pair = C_FIL;
 
 			if (!ind2) /* Add a column if end indicator is not needed */
@@ -3549,7 +3556,9 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		ln = TRUE;
 		pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
 		ind1 = '@';
-		ind2 = (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@'; // fallthrough
+		ind2 = (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@';
+		if (ind2 == '/')
+			attrs |= A_BOLD; // fallthrough
 	case S_IFSOCK:
 		if (!ind1) {
 			pair = C_SOC;
@@ -3580,9 +3589,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		break;
 	}
 
-	if (!ent->size && (pair == C_FIL || pair == C_EXE))
-		pair = C_UND;
-	else if (ent->flags & FILE_MISSING)
+	if (ent->flags & FILE_MISSING)
 		pair = C_MIS;
 
 	addstr("  ");
@@ -3592,7 +3599,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 
 		if (!g_state.ctxcolor && pair && fcolors[pair]) {
 			attrs |= COLOR_PAIR(pair);
-			attron(COLOR_PAIR(pair));
+			attron(attrs);
 		}
 	}
 #ifndef NOLOCALE
