@@ -3491,6 +3491,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 {
 	bool ln = FALSE;
 	char ind1 = '\0', ind2 = '\0';
+	uchar pair = 0;
 	int attrs = sel ? A_REVERSE | A_DIM : A_DIM;
 	uint len;
 	char *size;
@@ -3515,14 +3516,21 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 
 	switch (ent->mode & S_IFMT) {
 	case S_IFDIR:
+		pair = C_DIR;
 		ind2 = '/'; // fallthrough
 	case S_IFREG:
 		if (!ind2) {
-			if (ent->flags & HARD_LINK)
-				ln = TRUE;
-
-			if (ent->mode & 0100)
+			if (ent->mode & 0100) {
+				pair = C_EXE;
 				ind2 = '*';
+			}
+			if (ent->flags & HARD_LINK) {
+				pair = C_HRD;
+				ln = TRUE;
+			}
+
+			if (!pair)
+				pair = C_FIL;
 
 			if (!ind2) /* Add a column if end indicator is not needed */
 				++namecols;
@@ -3536,32 +3544,53 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		break;
 	case S_IFLNK:
 		ln = TRUE;
+		pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
 		ind1 = '@';
 		ind2 = (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@'; // fallthrough
 	case S_IFSOCK:
-		if (!ind1)
-			ind1 = ind2 = '='; // fallthrough
+		if (!ind1) {
+			pair = C_SOC;
+			ind1 = ind2 = '=';
+		} // fallthrough
 	case S_IFIFO:
-		if (!ind1)
-			ind1 = ind2 = '|'; // fallthrough
+		if (!ind1) {
+			pair = C_PIP;
+			ind1 = ind2 = '|';
+		} // fallthrough
 	case S_IFBLK:
-		if (!ind1)
-			ind1 = 'b'; // fallthrough
+		if (!ind1) {
+			pair = C_BLK;
+			ind1 = 'b';
+		} // fallthrough
 	case S_IFCHR:
-		if (!ind1)
-			ind1 = 'c'; // fallthrough
+		if (!ind1) {
+			pair = C_CHR;
+			ind1 = 'c';
+		} // fallthrough
 	default:
-		if (!ind1)
+		if (!ind1) {
+			pair = C_UND;
 			ind1 = ind2 = '?';
+		}
 		addstr("        ");
 		addch(ind1);
 		break;
 	}
 
+	if (!ent->size && (pair == C_FIL || pair == C_EXE))
+		pair = C_UND;
+	else if (ent->flags & FILE_MISSING)
+		pair = C_MIS;
+
 	addstr("  ");
-	if (!ln) {
+	if (!(ln && g_state.ctxcolor)) {
 		attroff(A_DIM);
 		attrs ^=  A_DIM;
+
+		if (!g_state.ctxcolor && pair && fcolors[pair]) {
+			attrs |= COLOR_PAIR(pair);
+			attron(COLOR_PAIR(pair));
+		}
 	}
 #ifndef NOLOCALE
 	addwstr(unescape(ent->name, namecols));
