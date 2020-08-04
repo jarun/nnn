@@ -1657,8 +1657,10 @@ static bool initcurses(void *oldmask)
 				colors = sep; /* Detect if 8 colors fallback is appended */
 				if (colors)
 					++colors;
+				g_state.ctxcolor = 1;
 			}
-		}
+		} else
+			g_state.ctxcolor = 1;
 
 		/* Get and set the context colors */
 		for (uchar i = 0; i <  CTX_MAX; ++i) {
