@@ -304,7 +304,8 @@ typedef struct {
 	uint runplugin  : 1;  /* Choose plugin mode */
 	uint runctx     : 2;  /* The context in which plugin is to be run */
 	uint selmode    : 1;  /* Set when selecting files */
-	uint reserved   : 15;
+	uint ctxcolor   : 1;  /* Show dirs in context colors */
+	uint reserved   : 14;
 } runstate;
 
 /* Contexts or workspaces */
@@ -682,10 +683,8 @@ static const char * const patterns[] = {
 #define C_SOC (C_PIP + 1) /* Socket: MediumOrchid1 */
 #define C_UND (C_SOC + 1) /* Unknown OR 0B regular/exe file: Red1 */
 
-#ifndef NOFCOLORS
 static char gcolors[] = "c1e2272e006033f9c6d6abc4";
 static uint fcolors[C_UND + 1] = {0};
-#endif
 
 /* Event handling */
 #ifdef LINUX_INOTIFY
@@ -1569,27 +1568,26 @@ static void export_file_list(void)
 		unlink(g_tmpfpath);
 }
 
-#ifndef NOFCOLORS
 static bool init_fcolors(void)
 {
 	char *f_colors = getenv("NNN_FCOLORS");
 
-	if (f_colors) {
-		for (uchar id = C_BLK; *f_colors && id <= C_UND; ++id) {
-			fcolors[id] = xchartohex(*f_colors) << 4;
-			if (*++f_colors) {
-				fcolors[id] += xchartohex(*f_colors);
-				if (fcolors[id])
-					init_pair(id, fcolors[id], -1);
-			} else
-				return FALSE;
-			++f_colors;
-		}
+	if (!f_colors || !*f_colors)
+		f_colors = gcolors;
+
+	for (uchar id = C_BLK; *f_colors && id <= C_UND; ++id) {
+		fcolors[id] = xchartohex(*f_colors) << 4;
+		if (*++f_colors) {
+			fcolors[id] += xchartohex(*f_colors);
+			if (fcolors[id])
+				init_pair(id, fcolors[id], -1);
+		} else
+			return FALSE;
+		++f_colors;
 	}
 
 	return TRUE;
 }
-#endif
 
 /* Initialize curses mode */
 static bool initcurses(void *oldmask)
@@ -1650,13 +1648,11 @@ static bool initcurses(void *oldmask)
 				if (sep)
 					*sep = '\0';
 
-#ifndef NOFCOLORS
-				if (!init_fcolors()) {
+				if (!(g_state.ctxcolor || init_fcolors())) {
 					exitcurses();
 					fprintf(stderr, "NNN_FCOLORS!\n");
 					return FALSE;
 				}
-#endif
 			} else {
 				colors = sep; /* Detect if 8 colors fallback is appended */
 				if (colors)
@@ -3220,7 +3216,6 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, uchar id)
 	return NULL;
 }
 
-#ifdef NOFCOLORS
 static void resetdircolor(int flags)
 {
 	if (g_state.dircolor && !(flags & DIR_OR_LINK_TO_DIR)) {
@@ -3228,7 +3223,6 @@ static void resetdircolor(int flags)
 		g_state.dircolor = 0;
 	}
 }
-#endif
 
 /*
  * Replace escape characters in a string with '?'
@@ -3443,38 +3437,39 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 {
 	uchar pair = 0;
 	char ind = get_ind(ent->mode, FALSE, &pair);
-#ifdef NOFCOLORS
-	int attrs = ((ind == '@' || (ent->flags & HARD_LINK)) ? A_DIM : 0) | (sel ? A_REVERSE : 0);
-#else
 	int attrs = sel ? A_REVERSE : 0;
-#endif
 
-	if (ind == '@') {
-		pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
+	if (g_state.ctxcolor) {
+		if (ind == '@') {
+			if (ent->flags & DIR_OR_LINK_TO_DIR)
+				ind = '/';
+			attrs |= A_DIM;
+		} else if (ent->flags & HARD_LINK)
+			attrs |= A_DIM;
+	} else {
+		if (ind == '@') {
+			if (ent->flags & DIR_OR_LINK_TO_DIR)
+				ind = '/';
+			pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
+		} else if (!ent->size && (pair == C_FIL || pair == C_EXE))
+			pair = C_UND;
+		else if (ent->flags & HARD_LINK)
+			pair = C_HRD;
+		else if (ent->flags & FILE_MISSING)
+			pair = C_MIS;
 
-		if (ent->flags & DIR_OR_LINK_TO_DIR)
-			ind = '/';
-	} else if (!ent->size && (pair == C_FIL || pair == C_EXE))
-		pair = C_UND;
-	else if (ent->flags & HARD_LINK)
-		pair = C_HRD;
-	else if (ent->flags & FILE_MISSING)
-		pair = C_MIS;
+		if (pair && fcolors[pair])
+			attrs |= COLOR_PAIR(pair);
+	}
 
 	if (!ind)
 		++namecols;
 
-#ifdef NOFCOLORS
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
-#endif
 
 	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
-#ifndef NOFCOLORS
-	if (pair && fcolors[pair])
-		attrs |= COLOR_PAIR(pair);
-#endif
 	if (attrs)
 		attron(attrs);
 
@@ -3484,10 +3479,6 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
 #endif
 
-#ifndef NOFCOLORS
-	if (pair && fcolors[pair])
-		attrs |= COLOR_PAIR(pair);
-#endif
 	if (attrs)
 		attroff(attrs);
 
@@ -3504,10 +3495,8 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	uint len;
 	char *size;
 
-#ifdef NOFCOLORS
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
-#endif
 
 	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
@@ -5372,22 +5361,19 @@ static int adjust_cols(int ncols)
 
 static void draw_line(char *path, int ncols)
 {
-	ncols = adjust_cols(ncols);
-
-#ifdef NOFCOLORS
 	bool dir = FALSE;
 
-	if (pdents[last].flags & DIR_OR_LINK_TO_DIR) {
+	ncols = adjust_cols(ncols);
+
+	if (g_state.ctxcolor && (pdents[last].flags & DIR_OR_LINK_TO_DIR)) {
 		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		dir = TRUE;
 	}
-#endif
 
 	move(2 + last - curscroll, 0);
 	printptr(&pdents[last], ncols, false);
 
-#ifdef NOFCOLORS
-	if (pdents[cur].flags & DIR_OR_LINK_TO_DIR) {
+	if (g_state.ctxcolor && (pdents[cur].flags & DIR_OR_LINK_TO_DIR)) {
 		if (!dir)  {/* First file is not a directory */
 			attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 			dir = TRUE;
@@ -5396,16 +5382,13 @@ static void draw_line(char *path, int ncols)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		dir = FALSE;
 	}
-#endif
 
 	move(2 + cur - curscroll, 0);
 	printptr(&pdents[cur], ncols, true);
 
-#ifdef NOFCOLORS
 	/* Must reset e.g. no files in dir */
 	if (dir)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
-#endif
 
 	statusbar(path);
 }
@@ -5496,22 +5479,20 @@ static void redraw(char *path)
 
 	ncols = adjust_cols(ncols);
 
-#ifdef NOFCOLORS
-	attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
-	g_state.dircolor = 1;
-#endif
+	if (g_state.ctxcolor) {
+		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+		g_state.dircolor = 1;
+	}
 
 	/* Print listing */
 	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
 		printptr(&pdents[i], ncols, i == cur);
 
-#ifdef NOFCOLORS
 	/* Must reset e.g. no files in dir */
 	if (g_state.dircolor) {
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		g_state.dircolor = 0;
 	}
-#endif
 
 	statusbar(path);
 }
@@ -7053,7 +7034,7 @@ static void usage(void)
 		" -A      no dir auto-select\n"
 		" -b key  open bookmark key (trumps -s/S)\n"
 		" -c      cli-only NNN_OPENER (trumps -e)\n"
-		" -C      place HW cursor on hovered\n"
+		" -C      color by context\n"
 		" -d      detail mode\n"
 		" -e      text in $VISUAL/$EDITOR/vi\n"
 		" -E      use EDITOR for undetached edits\n"
@@ -7078,6 +7059,7 @@ static void usage(void)
 		" -T key  sort order [a/d/e/r/s/t/v]\n"
 		" -u      use selection (no prompt)\n"
 		" -V      show version\n"
+		" -w      place HW cursor on hovered\n"
 		" -x      notis, sel to system clipboard\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
@@ -7223,7 +7205,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdeEfFgHKl:nop:P:QrRs:St:T:uVxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdeEfFgHKl:nop:P:QrRs:St:T:uVwxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7239,6 +7221,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'c':
 			cfg.cliopener = 1;
+			break;
+		case 'C':
+			g_state.ctxcolor = 1;
 			break;
 		case 'd':
 			cfg.showdetail = 1;
@@ -7261,9 +7246,6 @@ int main(int argc, char *argv[])
 		case 'g':
 			cfg.regex = 1;
 			filterfn = &visible_re;
-			break;
-		case 'C':
-			cfg.cursormode = 1;
 			break;
 		case 'H':
 			cfg.showhidden = 1;
@@ -7337,6 +7319,9 @@ int main(int argc, char *argv[])
 		case 'V':
 			fprintf(stdout, "%s\n", VERSION);
 			return EXIT_SUCCESS;
+		case 'w':
+			cfg.cursormode = 1;
+			break;
 		case 'x':
 			cfg.x11 = 1;
 			break;

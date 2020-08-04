@@ -17,6 +17,7 @@
 .Op Ar -f
 .Op Ar -F
 .Op Ar -g
+.Op Ar -h
 .Op Ar -H
 .Op Ar -K
 .Op Ar -l
@@ -71,7 +72,7 @@ supports the following options:
         indicates that the opener is a cli-only opener (overrides -e)
 .Pp
 .Fl C
-        place hardware cursor on hovered entry
+        color directories by context, disable file colors
 .Pp
 .Fl d
         detail mode
@@ -90,6 +91,9 @@ supports the following options:
 .Pp
 .Fl g
         use regex filters instead of substring match
+.Pp
+.Fl h
+        place hardware cursor on hovered entry
 .Pp
 .Fl H
         show hidden files

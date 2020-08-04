@@ -61,10 +61,6 @@ ifeq ($(O_NOFIFO),1)
 	CPPFLAGS += -DNOFIFO
 endif
 
-ifeq ($(O_NOFCOLORS),1)
-	CPPFLAGS += -DNOFCOLORS
-endif
-
 ifeq ($(O_CTX8),1)
 	CPPFLAGS += -DCTX8
 endif
