@@ -668,6 +668,25 @@ static const char * const patterns[] = {
 	"sed -i 's|^%s\\(.*\\)$|%s\\1|' %s",
 };
 
+/* Colors */
+#define C_BLK (CTX_MAX + 1) /* Block device: DarkSeaGreen1 */
+#define C_CHR (C_BLK + 1) /* Character device: Yellow1 */
+#define C_DIR (C_CHR + 1) /* Directory: DeepSkyBlue1 */
+#define C_EXE (C_DIR + 1) /* Executable file: Green1 */
+#define C_FIL (C_EXE + 1) /* Regular file: Normal */
+#define C_HRD (C_FIL + 1) /* Hard link: Plum4 */
+#define C_LNK (C_HRD + 1) /* Symbolic link: Cyan1 */
+#define C_MIS (C_LNK + 1) /* Missing file: Grey70 */
+#define C_ORP (C_MIS + 1) /* Orphaned symlink: DeepPink1 */
+#define C_PIP (C_ORP + 1) /* Named pipe (FIFO): Orange1 */
+#define C_SOC (C_PIP + 1) /* Socket: MediumOrchid1 */
+#define C_UND (C_SOC + 1) /* Unknown OR 0B regular/exe file: Red1 */
+
+#ifndef NOFCOLORS
+static char gcolors[] = "c1e2272e006033f9c6d6abc4";
+static uint fcolors[C_UND + 1] = {0};
+#endif
+
 /* Event handling */
 #ifdef LINUX_INOTIFY
 #define NUM_EVENT_SLOTS 32 /* Make room for 8 events */
@@ -1550,6 +1569,28 @@ static void export_file_list(void)
 		unlink(g_tmpfpath);
 }
 
+#ifndef NOFCOLORS
+static bool init_fcolors(void)
+{
+	char *f_colors = getenv("NNN_FCOLORS");
+
+	if (f_colors) {
+		for (uchar id = C_BLK; *f_colors && id <= C_UND; ++id) {
+			fcolors[id] = xchartohex(*f_colors) << 4;
+			if (*++f_colors) {
+				fcolors[id] += xchartohex(*f_colors);
+				if (fcolors[id])
+					init_pair(id, fcolors[id], -1);
+			} else
+				return FALSE;
+			++f_colors;
+		}
+	}
+
+	return TRUE;
+}
+#endif
+
 /* Initialize curses mode */
 static bool initcurses(void *oldmask)
 {
@@ -1608,6 +1649,14 @@ static bool initcurses(void *oldmask)
 				 */
 				if (sep)
 					*sep = '\0';
+
+#ifndef NOFCOLORS
+				if (!init_fcolors()) {
+					exitcurses();
+					fprintf(stderr, "NNN_FCOLORS!\n");
+					return FALSE;
+				}
+#endif
 			} else {
 				colors = sep; /* Detect if 8 colors fallback is appended */
 				if (colors)
@@ -3171,6 +3220,7 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar max, uchar id)
 	return NULL;
 }
 
+#ifdef NOFCOLORS
 static void resetdircolor(int flags)
 {
 	if (g_state.dircolor && !(flags & DIR_OR_LINK_TO_DIR)) {
@@ -3178,6 +3228,7 @@ static void resetdircolor(int flags)
 		g_state.dircolor = 0;
 	}
 }
+#endif
 
 /*
  * Replace escape characters in a string with '?'
@@ -3313,28 +3364,47 @@ static char *coolsize(off_t size)
 	return size_buf;
 }
 
-static char get_ind(mode_t mode, bool perms)
+static char get_ind(mode_t mode, bool perms, uchar *pair)
 {
 	switch (mode & S_IFMT) {
 	case S_IFREG:
 		if (perms)
 			return '-';
-		if (mode & 0100)
+		if (mode & 0100) {
+			*pair = C_EXE;
 			return '*';
+		}
+		*pair = C_FIL;
 		return '\0';
 	case S_IFDIR:
-		return perms ? 'd' : '/';
+		if (perms)
+			return 'd';
+		*pair = C_DIR;
+		return '/';
 	case S_IFLNK:
 		return perms ? 'l' : '@';
 	case S_IFSOCK:
-		return perms ? 's' : '=';
+		if (perms)
+			return 's';
+		*pair = C_SOC;
+		return '=';
 	case S_IFIFO:
-		return perms ? 'p' : '|';
+		if (perms)
+			return 'p';
+		*pair = C_PIP;
+		return '|';
 	case S_IFBLK:
-		return perms ? 'b' : '\0';
+		if (perms)
+			return 'b';
+		*pair = C_BLK;
+		return '\0';
 	case S_IFCHR:
-		return perms ? 'c' : '\0';
+		if (perms)
+			return 'c';
+		*pair = C_CHR;
+		return '\0';
 	default:
+		*pair = C_UND;
 		return '?';
 	}
 }
@@ -3345,7 +3415,7 @@ static char *get_lsperms(mode_t mode)
 	static const char * const rwx[] = {"---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx"};
 	static char bits[11] = {'\0'};
 
-	bits[0] = get_ind(mode, TRUE);
+	bits[0] = get_ind(mode, TRUE, NULL);
 
 	xstrsncpy(&bits[1], rwx[(mode >> 6) & 7], 4);
 	xstrsncpy(&bits[4], rwx[(mode >> 3) & 7], 4);
@@ -3371,25 +3441,52 @@ static void print_time(const time_t *timep)
 
 static void printent(const struct entry *ent, uint namecols, bool sel)
 {
-	char ind = get_ind(ent->mode, FALSE);
+	uchar pair = 0;
+	char ind = get_ind(ent->mode, FALSE, &pair);
+#ifdef NOFCOLORS
 	int attrs = ((ind == '@' || (ent->flags & HARD_LINK)) ? A_DIM : 0) | (sel ? A_REVERSE : 0);
-	if (ind == '@' && (ent->flags & DIR_OR_LINK_TO_DIR))
-		ind = '/';
+#else
+	int attrs = sel ? A_REVERSE : 0;
+#endif
+
+	if (ind == '@') {
+		pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
+
+		if (ent->flags & DIR_OR_LINK_TO_DIR)
+			ind = '/';
+	} else if (!ent->size && (pair == C_FIL || pair == C_EXE))
+		pair = C_UND;
+	else if (ent->flags & HARD_LINK)
+		pair = C_HRD;
+	else if (ent->flags & FILE_MISSING)
+		pair = C_MIS;
 
 	if (!ind)
 		++namecols;
 
+#ifdef NOFCOLORS
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
+#endif
 
 	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
+#ifndef NOFCOLORS
+	if (pair && fcolors[pair])
+		attrs |= COLOR_PAIR(pair);
+#endif
 	if (attrs)
 		attron(attrs);
+
 #ifndef NOLOCALE
 	addwstr(unescape(ent->name, namecols));
 #else
 	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
+#endif
+
+#ifndef NOFCOLORS
+	if (pair && fcolors[pair])
+		attrs |= COLOR_PAIR(pair);
 #endif
 	if (attrs)
 		attroff(attrs);
@@ -3407,8 +3504,10 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	uint len;
 	char *size;
 
+#ifdef NOFCOLORS
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
+#endif
 
 	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
@@ -5273,17 +5372,21 @@ static int adjust_cols(int ncols)
 
 static void draw_line(char *path, int ncols)
 {
-	bool dir = FALSE;
-
 	ncols = adjust_cols(ncols);
+
+#ifdef NOFCOLORS
+	bool dir = FALSE;
 
 	if (pdents[last].flags & DIR_OR_LINK_TO_DIR) {
 		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		dir = TRUE;
 	}
+#endif
+
 	move(2 + last - curscroll, 0);
 	printptr(&pdents[last], ncols, false);
 
+#ifdef NOFCOLORS
 	if (pdents[cur].flags & DIR_OR_LINK_TO_DIR) {
 		if (!dir)  {/* First file is not a directory */
 			attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
@@ -5293,13 +5396,16 @@ static void draw_line(char *path, int ncols)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		dir = FALSE;
 	}
+#endif
 
 	move(2 + cur - curscroll, 0);
 	printptr(&pdents[cur], ncols, true);
 
+#ifdef NOFCOLORS
 	/* Must reset e.g. no files in dir */
 	if (dir)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+#endif
 
 	statusbar(path);
 }
@@ -5390,18 +5496,22 @@ static void redraw(char *path)
 
 	ncols = adjust_cols(ncols);
 
+#ifdef NOFCOLORS
 	attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 	g_state.dircolor = 1;
+#endif
 
 	/* Print listing */
 	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
 		printptr(&pdents[i], ncols, i == cur);
 
+#ifdef NOFCOLORS
 	/* Must reset e.g. no files in dir */
 	if (g_state.dircolor) {
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		g_state.dircolor = 0;
 	}
+#endif
 
 	statusbar(path);
 }
