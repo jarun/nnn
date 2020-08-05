@@ -3438,12 +3438,14 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 		break;
 	case S_IFDIR:
 		pair = C_DIR;
-		attrs |= A_BOLD;
+		if (!g_state.ctxcolor)
+			attrs |= A_BOLD;
 		ind = '/';
 		break;
 	case S_IFLNK:
 		if (ent->flags & DIR_OR_LINK_TO_DIR) {
-			attrs |= A_BOLD;
+			if (!g_state.ctxcolor)
+				attrs |= A_BOLD;
 			ind = '/';
 		} else
 			ind = '@';
@@ -3536,7 +3538,8 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	switch (ent->mode & S_IFMT) {
 	case S_IFDIR:
 		pair = C_DIR;
-		attrs |= A_BOLD;
+		if (!g_state.ctxcolor)
+			attrs |= A_BOLD;
 		ind2 = '/'; // fallthrough
 	case S_IFREG:
 		if (!ind2) {
@@ -3570,7 +3573,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
 		ind1 = '@';
 		ind2 = (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@';
-		if (ind2 == '/')
+		if (ind2 == '/' && !g_state.ctxcolor)
 			attrs |= A_BOLD; // fallthrough
 	case S_IFSOCK:
 		if (!ind1) {
