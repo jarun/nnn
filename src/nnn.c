@@ -677,13 +677,13 @@ static const char * const patterns[] = {
 #define C_FIL (C_EXE + 1) /* Regular file: Normal */
 #define C_HRD (C_FIL + 1) /* Hard link: Plum4 */
 #define C_LNK (C_HRD + 1) /* Symbolic link: Cyan1 */
-#define C_MIS (C_LNK + 1) /* Missing file: Grey70 */
+#define C_MIS (C_LNK + 1) /* Missing file OR file details: Grey62 */
 #define C_ORP (C_MIS + 1) /* Orphaned symlink: DeepPink1 */
 #define C_PIP (C_ORP + 1) /* Named pipe (FIFO): Orange1 */
 #define C_SOC (C_PIP + 1) /* Socket: MediumOrchid1 */
 #define C_UND (C_SOC + 1) /* Unknown OR 0B regular/exe file: Red1 */
 
-static char gcolors[] = "c1e2272e006033f9c6d6abc4";
+static char gcolors[] = "c1e2272e006033f7c6d6abc4";
 static uint fcolors[C_UND + 1] = {0};
 
 /* Event handling */
@@ -3513,7 +3513,8 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	bool ln = FALSE;
 	char ind1 = '\0', ind2 = '\0';
 	uchar pair = 0;
-	int attrs = sel ? A_REVERSE | A_DIM : A_DIM;
+	int attrs = sel ? A_REVERSE | (g_state.ctxcolor ? A_DIM : COLOR_PAIR(C_MIS))
+			: (g_state.ctxcolor ? A_DIM : COLOR_PAIR(C_MIS));
 	uint len;
 	char *size;
 
@@ -3606,18 +3607,23 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	}
 
 	addstr("  ");
-	if (!(ln && g_state.ctxcolor)) {
-		attroff(A_DIM);
-		attrs ^=  A_DIM;
 
-		if (!g_state.ctxcolor) {
-			if (ent->flags & FILE_MISSING)
-				pair = C_MIS;
+	if (g_state.ctxcolor) {
+		if (!ln) {
+			attroff(A_DIM);
+			attrs ^=  A_DIM;
+		}
+	} else {
+		if (ent->flags & FILE_MISSING)
+			pair = C_MIS;
+		else {
+			attroff(COLOR_PAIR(C_MIS));
+			attrs ^= (COLOR_PAIR(C_MIS));
+		}
 
-			if (pair && fcolors[pair]) {
-				attrs |= COLOR_PAIR(pair);
-				attron(attrs);
-			}
+		if (pair && fcolors[pair]) {
+			attrs |= COLOR_PAIR(pair);
+			attron(attrs);
 		}
 	}
 #ifndef NOLOCALE
