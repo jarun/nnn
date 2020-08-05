@@ -732,15 +732,10 @@ static haiku_nm_h haiku_hnd;
 #endif /* __GNUC__ */
 
 /* Forward declarations */
-static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n);
 static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, uchar flag);
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
-static int dentfind(const char *fname, int n);
 static void move_cursor(int target, int ignore_scrolloff);
-static inline bool getutil(char *util);
-static size_t mkpath(const char *dir, const char *name, char *out);
-static bool plugscript(const char *plugin, uchar flags);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
 
@@ -823,128 +818,6 @@ static bool test_clear_bit(uint nr)
 	return TRUE;
 }
 #endif
-
-static void clearinfoln(void)
-{
-	move(xlines - 2, 0);
-	clrtoeol();
-}
-
-#ifdef KEY_RESIZE
-/* Clear the old prompt */
-static void clearoldprompt(void)
-{
-	clearinfoln();
-	tolastln();
-	addch('\n');
-}
-#endif
-
-/* Messages show up at the bottom */
-static inline void printmsg_nc(const char *msg)
-{
-	tolastln();
-	addstr(msg);
-	addch('\n');
-}
-
-static void printmsg(const char *msg)
-{
-	attron(COLOR_PAIR(cfg.curctx + 1));
-	printmsg_nc(msg);
-	attroff(COLOR_PAIR(cfg.curctx + 1));
-}
-
-static void printwait(const char *msg, int *presel)
-{
-	printmsg(msg);
-	if (presel) {
-		*presel = MSGWAIT;
-		if (ndents)
-			xstrsncpy(g_ctx[cfg.curctx].c_name, pdents[cur].name, NAME_MAX + 1);
-	}
-}
-
-/* Kill curses and display error before exiting */
-static void printerr(int linenum)
-{
-	exitcurses();
-	perror(xitoa(linenum));
-	if (!g_state.picker && selpath)
-		unlink(selpath);
-	free(pselbuf);
-	exit(1);
-}
-
-static inline bool xconfirm(int c)
-{
-	return (c == 'y' || c == 'Y');
-}
-
-static int get_input(const char *prompt)
-{
-	if (prompt)
-		printmsg(prompt);
-	cleartimeout();
-
-	int r = getch();
-
-#ifdef KEY_RESIZE
-	while (r == KEY_RESIZE) {
-		if (prompt) {
-			clearoldprompt();
-			xlines = LINES;
-			printmsg(prompt);
-		}
-
-		r = getch();
-	}
-#endif
-	settimeout();
-	return r;
-}
-
-static int get_cur_or_sel(void)
-{
-	if (selbufpos && ndents) {
-		if (cfg.prefersel)
-			return 's';
-
-		int choice = get_input(messages[MSG_CUR_SEL_OPTS]);
-
-		return ((choice == 'c' || choice == 's') ? choice : 0);
-	}
-
-	if (selbufpos)
-		return 's';
-
-	if (ndents)
-		return 'c';
-
-	return 0;
-}
-
-static void xdelay(useconds_t delay)
-{
-	refresh();
-	usleep(delay);
-}
-
-static char confirm_force(bool selection)
-{
-	char str[64];
-
-	snprintf(str, 64, messages[MSG_FORCE_RM],
-		 (selection ? xitoa(nselected) : "current"), (selection ? "(s)" : ""));
-
-	int r = get_input(str);
-
-	if (r == 27)
-		return '\0'; /* cancel */
-	if (r == 'y' || r == 'Y')
-		return 'f'; /* forceful */
-	return 'i'; /* interactive */
-}
 
 /* Increase the limit on open file descriptors, if possible */
 static rlim_t max_openfds(void)
@@ -1071,6 +944,58 @@ static void *xmemrchr(uchar *restrict s, uchar ch, size_t n)
 #endif
 }
 
+/* A very simplified implementation, changes path */
+static char *xdirname(char *path)
+{
+	char *base = xmemrchr((uchar *)path, '/', xstrlen(path));
+
+	if (base == path)
+		path[1] = '\0';
+	else
+		*base = '\0';
+
+	return path;
+}
+
+static char *xbasename(char *path)
+{
+	char *base = xmemrchr((uchar *)path, '/', xstrlen(path)); // NOLINT
+
+	return base ? base + 1 : path;
+}
+
+static char *xextension(const char *fname, size_t len)
+{
+	return xmemrchr((uchar *)fname, '.', len);
+}
+
+static inline bool getutil(char *util)
+{
+	return spawn("which", util, NULL, F_NORMAL | F_NOTRACE) == 0;
+}
+
+/*
+ * Updates out with "dir/name or "/name"
+ * Returns the number of bytes copied including the terminating NULL byte
+ */
+static size_t mkpath(const char *dir, const char *name, char *out)
+{
+	size_t len;
+
+	/* Handle absolute path */
+	if (name[0] == '/') // NOLINT
+		return xstrsncpy(out, name, PATH_MAX);
+
+	/* Handle root case */
+	if (istopdir(dir))
+		len = 1;
+	else
+		len = xstrsncpy(out, dir, PATH_MAX);
+
+	out[len - 1] = '/'; // NOLINT
+	return (xstrsncpy(out + len, name, PATH_MAX - len) + len);
+}
+
 /* Assumes both the paths passed are directories */
 static char *common_prefix(const char *path, char *prefix)
 {
@@ -1174,26 +1099,6 @@ static char *abspath(const char *path, const char *cwd)
 	return resolved_path;
 }
 
-/* A very simplified implementation, changes path */
-static char *xdirname(char *path)
-{
-	char *base = xmemrchr((uchar *)path, '/', xstrlen(path));
-
-	if (base == path)
-		path[1] = '\0';
-	else
-		*base = '\0';
-
-	return path;
-}
-
-static char *xbasename(char *path)
-{
-	char *base = xmemrchr((uchar *)path, '/', xstrlen(path)); // NOLINT
-
-	return base ? base + 1 : path;
-}
-
 static int create_tmp_file(void)
 {
 	xstrsncpy(g_tmpfpath + tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - tmpfplen);
@@ -1205,6 +1110,128 @@ static int create_tmp_file(void)
 	}
 
 	return fd;
+}
+
+static void clearinfoln(void)
+{
+	move(xlines - 2, 0);
+	clrtoeol();
+}
+
+#ifdef KEY_RESIZE
+/* Clear the old prompt */
+static void clearoldprompt(void)
+{
+	clearinfoln();
+	tolastln();
+	addch('\n');
+}
+#endif
+
+/* Messages show up at the bottom */
+static inline void printmsg_nc(const char *msg)
+{
+	tolastln();
+	addstr(msg);
+	addch('\n');
+}
+
+static void printmsg(const char *msg)
+{
+	attron(COLOR_PAIR(cfg.curctx + 1));
+	printmsg_nc(msg);
+	attroff(COLOR_PAIR(cfg.curctx + 1));
+}
+
+static void printwait(const char *msg, int *presel)
+{
+	printmsg(msg);
+	if (presel) {
+		*presel = MSGWAIT;
+		if (ndents)
+			xstrsncpy(g_ctx[cfg.curctx].c_name, pdents[cur].name, NAME_MAX + 1);
+	}
+}
+
+/* Kill curses and display error before exiting */
+static void printerr(int linenum)
+{
+	exitcurses();
+	perror(xitoa(linenum));
+	if (!g_state.picker && selpath)
+		unlink(selpath);
+	free(pselbuf);
+	exit(1);
+}
+
+static inline bool xconfirm(int c)
+{
+	return (c == 'y' || c == 'Y');
+}
+
+static int get_input(const char *prompt)
+{
+	if (prompt)
+		printmsg(prompt);
+	cleartimeout();
+
+	int r = getch();
+
+#ifdef KEY_RESIZE
+	while (r == KEY_RESIZE) {
+		if (prompt) {
+			clearoldprompt();
+			xlines = LINES;
+			printmsg(prompt);
+		}
+
+		r = getch();
+	}
+#endif
+	settimeout();
+	return r;
+}
+
+static int get_cur_or_sel(void)
+{
+	if (selbufpos && ndents) {
+		if (cfg.prefersel)
+			return 's';
+
+		int choice = get_input(messages[MSG_CUR_SEL_OPTS]);
+
+		return ((choice == 'c' || choice == 's') ? choice : 0);
+	}
+
+	if (selbufpos)
+		return 's';
+
+	if (ndents)
+		return 'c';
+
+	return 0;
+}
+
+static void xdelay(useconds_t delay)
+{
+	refresh();
+	usleep(delay);
+}
+
+static char confirm_force(bool selection)
+{
+	char str[64];
+
+	snprintf(str, 64, messages[MSG_FORCE_RM],
+		 (selection ? xitoa(nselected) : "current"), (selection ? "(s)" : ""));
+
+	int r = get_input(str);
+
+	if (r == 27)
+		return '\0'; /* cancel */
+	if (r == 'y' || r == 'Y')
+		return 'f'; /* forceful */
+	return 'i'; /* interactive */
 }
 
 /* Writes buflen char(s) from buf to a file */
@@ -2395,8 +2422,8 @@ static int entrycmp(const void *va, const void *vb)
 		if (pb->blocks < pa->blocks)
 			return -1;
 	} else if (cfg.extnorder && !(pb->flags & DIR_OR_LINK_TO_DIR)) {
-		char *extna = xmemrchr((uchar *)pa->name, '.', pa->nlen - 1);
-		char *extnb = xmemrchr((uchar *)pb->name, '.', pb->nlen - 1);
+		char *extna = xextension(pa->name, pa->nlen - 1);
+		char *extnb = xextension(pb->name, pb->nlen - 1);
 
 		if (extna || extnb) {
 			if (!extna)
@@ -2648,6 +2675,19 @@ static int matches(const char *fltr)
 	qsort(pdents, ndents, sizeof(*pdents), entrycmpfn);
 
 	return ndents;
+}
+
+/*
+ * Return the position of the matching entry or 0 otherwise
+ * Note there's no NULL check for fname
+ */
+static int dentfind(const char *fname, int n)
+{
+	for (int i = 0; i < n; ++i)
+		if (xstrcmp(fname, pdents[i].name) == 0)
+			return i;
+
+	return 0;
 }
 
 static int filterentries(char *path, char *lastname)
@@ -3054,28 +3094,6 @@ static char *getreadline(const char *prompt)
 	return NULL;
 }
 #endif
-
-/*
- * Updates out with "dir/name or "/name"
- * Returns the number of bytes copied including the terminating NULL byte
- */
-static size_t mkpath(const char *dir, const char *name, char *out)
-{
-	size_t len;
-
-	/* Handle absolute path */
-	if (name[0] == '/') // NOLINT
-		return xstrsncpy(out, name, PATH_MAX);
-
-	/* Handle root case */
-	if (istopdir(dir))
-		len = 1;
-	else
-		len = xstrsncpy(out, dir, PATH_MAX);
-
-	out[len - 1] = '/'; // NOLINT
-	return (xstrsncpy(out + len, name, PATH_MAX - len) + len);
-}
 
 /*
  * Create symbolic/hard link(s) to file(s) in selection list
@@ -3887,11 +3905,6 @@ static char *get_output(char *buf, const size_t bytes, const char *file,
 	close(pipefd[0]);
 
 	return NULL;
-}
-
-static inline bool getutil(char *util)
-{
-	return spawn("which", util, NULL, F_NORMAL | F_NOTRACE) == 0;
 }
 
 static void pipetof(char *cmd, FILE *fout)
@@ -4977,19 +4990,6 @@ exit:
 	return n;
 }
 
-/*
- * Return the position of the matching entry or 0 otherwise
- * Note there's no NULL check for fname
- */
-static int dentfind(const char *fname, int n)
-{
-	for (int i = 0; i < n; ++i)
-		if (xstrcmp(fname, pdents[i].name) == 0)
-			return i;
-
-	return 0;
-}
-
 static void populate(char *path, char *lastname)
 {
 #ifdef DBGMODE
@@ -5346,7 +5346,7 @@ static void statusbar(char *path)
 	/* Get the file extension for regular files */
 	if (S_ISREG(pent->mode)) {
 		i = (int)(pent->nlen - 1);
-		ptr = xmemrchr((uchar *)pent->name, '.', i);
+		ptr = xextension(pent->name, i);
 		if (ptr)
 			extnlen = i - (ptr - pent->name);
 		if (!ptr || extnlen > 5 || extnlen < 2)
