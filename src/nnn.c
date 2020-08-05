@@ -1661,11 +1661,14 @@ static bool initcurses(void *oldmask)
 		use_default_colors();
 
 		/* Initialize file colors */
-		if (COLORS >= 256 && !(g_state.oldcolor || init_fcolors())) {
-			exitcurses();
-			fprintf(stderr, "NNN_FCOLORS!\n");
-			return FALSE;
-		}
+		if (COLORS >= 256) {
+			if (!(g_state.oldcolor || init_fcolors())) {
+				exitcurses();
+				fprintf(stderr, "NNN_FCOLORS!\n");
+				return FALSE;
+			}
+		} else
+			g_state.oldcolor = 1;
 
 		if (colors && *colors == '#') {
 			char *sep = strchr(colors, ';');
@@ -1685,10 +1688,8 @@ static bool initcurses(void *oldmask)
 				colors = sep; /* Detect if 8 colors fallback is appended */
 				if (colors)
 					++colors;
-				g_state.oldcolor = 1;
 			}
-		} else
-			g_state.oldcolor = 1;
+		}
 
 		/* Get and set the context colors */
 		for (uchar i = 0; i <  CTX_MAX; ++i) {
