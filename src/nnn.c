@@ -3360,59 +3360,38 @@ static char *coolsize(off_t size)
 	return size_buf;
 }
 
-static char get_ind(mode_t mode, bool perms, uchar *pair)
-{
-	switch (mode & S_IFMT) {
-	case S_IFREG:
-		if (perms)
-			return '-';
-		if (mode & 0100) {
-			*pair = C_EXE;
-			return '*';
-		}
-		*pair = C_FIL;
-		return '\0';
-	case S_IFDIR:
-		if (perms)
-			return 'd';
-		*pair = C_DIR;
-		return '/';
-	case S_IFLNK:
-		return perms ? 'l' : '@';
-	case S_IFSOCK:
-		if (perms)
-			return 's';
-		*pair = C_SOC;
-		return '=';
-	case S_IFIFO:
-		if (perms)
-			return 'p';
-		*pair = C_PIP;
-		return '|';
-	case S_IFBLK:
-		if (perms)
-			return 'b';
-		*pair = C_BLK;
-		return '\0';
-	case S_IFCHR:
-		if (perms)
-			return 'c';
-		*pair = C_CHR;
-		return '\0';
-	default:
-		if (!perms)
-			*pair = C_UND;
-		return '?';
-	}
-}
-
 /* Convert a mode field into "ls -l" type perms field. */
 static char *get_lsperms(mode_t mode)
 {
 	static const char * const rwx[] = {"---", "--x", "-w-", "-wx", "r--", "r-x", "rw-", "rwx"};
 	static char bits[11] = {'\0'};
 
-	bits[0] = get_ind(mode, TRUE, NULL);
+	switch (mode & S_IFMT) {
+	case S_IFREG:
+		bits[0] = '-';
+		break;
+	case S_IFDIR:
+		bits[0] = 'd';
+		break;
+	case S_IFLNK:
+		bits[0] = 'l';
+		break;
+	case S_IFSOCK:
+		bits[0] = 's';
+		break;
+	case S_IFIFO:
+		bits[0] = 'p';
+		break;
+	case S_IFBLK:
+		bits[0] = 'b';
+		break;
+	case S_IFCHR:
+		bits[0] = 'c';
+		break;
+	default:
+		bits[0] = '?';
+		break;
+	}
 
 	xstrsncpy(&bits[1], rwx[(mode >> 6) & 7], 4);
 	xstrsncpy(&bits[4], rwx[(mode >> 3) & 7], 4);
@@ -3439,30 +3418,63 @@ static void print_time(const time_t *timep)
 static void printent(const struct entry *ent, uint namecols, bool sel)
 {
 	uchar pair = 0;
-	char ind = get_ind(ent->mode, FALSE, &pair);
+	char ind = '\0';
 	int attrs = sel ? A_REVERSE : 0;
 
-	if (g_state.ctxcolor) {
-		if (ind == '@') {
-			if (ent->flags & DIR_OR_LINK_TO_DIR)
-				ind = '/';
-			attrs |= A_DIM;
-		} else if (ent->flags & HARD_LINK)
-			attrs |= A_DIM;
-	} else {
-		if (ind == '@') {
-			if (ent->flags & DIR_OR_LINK_TO_DIR) {
-				ind = '/';
-				attrs |= A_BOLD;
-			}
-			pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
-		} else if (!ent->size && (pair == C_FIL || pair == C_EXE))
-			pair = C_UND;
-		else if (pair == C_DIR)
-			attrs |= A_BOLD;
-		else if (ent->flags & HARD_LINK)
+	switch (ent->mode & S_IFMT) {
+	case S_IFREG:
+		if (ent->mode & 0100) {
+			pair = C_EXE;
+			ind = '*';
+		}
+
+		if (ent->flags & HARD_LINK)
 			pair = C_HRD;
-		else if (ent->flags & FILE_MISSING)
+
+		if (!ent->size)
+			pair = C_UND;
+		else if (!pair)
+			pair = C_FIL;
+		break;
+	case S_IFDIR:
+		pair = C_DIR;
+		attrs |= A_BOLD;
+		ind = '/';
+		break;
+	case S_IFLNK:
+		if (ent->flags & DIR_OR_LINK_TO_DIR) {
+			attrs |= A_BOLD;
+			ind = '/';
+		} else
+			ind = '@';
+
+		if (g_state.ctxcolor)
+			attrs |= A_DIM;
+		else
+			pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
+		break;
+	case S_IFSOCK:
+		pair = C_SOC;
+		ind = '=';
+		break;
+	case S_IFIFO:
+		pair = C_PIP;
+		ind = '|';
+		break;
+	case S_IFBLK:
+		pair = C_BLK;
+		break;
+	case S_IFCHR:
+		pair = C_CHR;
+		break;
+	default:
+		pair = C_UND;
+		ind = '?';
+		break;
+	}
+
+	if (!g_state.ctxcolor) {
+		if (ent->flags & FILE_MISSING)
 			pair = C_MIS;
 
 		if (pair && fcolors[pair])
@@ -3532,6 +3544,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 				pair = C_EXE;
 				ind2 = '*';
 			}
+
 			if (ent->flags & HARD_LINK) {
 				pair = C_HRD;
 				ln = TRUE;
@@ -3589,17 +3602,19 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		break;
 	}
 
-	if (ent->flags & FILE_MISSING)
-		pair = C_MIS;
-
 	addstr("  ");
 	if (!(ln && g_state.ctxcolor)) {
 		attroff(A_DIM);
 		attrs ^=  A_DIM;
 
-		if (!g_state.ctxcolor && pair && fcolors[pair]) {
-			attrs |= COLOR_PAIR(pair);
-			attron(attrs);
+		if (!g_state.ctxcolor) {
+			if (ent->flags & FILE_MISSING)
+				pair = C_MIS;
+
+			if (pair && fcolors[pair]) {
+				attrs |= COLOR_PAIR(pair);
+				attron(attrs);
+			}
 		}
 	}
 #ifndef NOLOCALE
