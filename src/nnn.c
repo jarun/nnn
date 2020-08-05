@@ -304,7 +304,7 @@ typedef struct {
 	uint runplugin  : 1;  /* Choose plugin mode */
 	uint runctx     : 2;  /* The context in which plugin is to be run */
 	uint selmode    : 1;  /* Set when selecting files */
-	uint ctxcolor   : 1;  /* Show dirs in context colors */
+	uint oldcolor   : 1;  /* Show dirs in context colors */
 	uint reserved   : 14;
 } runstate;
 
@@ -1648,7 +1648,7 @@ static bool initcurses(void *oldmask)
 				if (sep)
 					*sep = '\0';
 
-				if (!(g_state.ctxcolor || init_fcolors())) {
+				if (!(g_state.oldcolor || init_fcolors())) {
 					exitcurses();
 					fprintf(stderr, "NNN_FCOLORS!\n");
 					return FALSE;
@@ -1657,10 +1657,10 @@ static bool initcurses(void *oldmask)
 				colors = sep; /* Detect if 8 colors fallback is appended */
 				if (colors)
 					++colors;
-				g_state.ctxcolor = 1;
+				g_state.oldcolor = 1;
 			}
 		} else
-			g_state.ctxcolor = 1;
+			g_state.oldcolor = 1;
 
 		/* Get and set the context colors */
 		for (uchar i = 0; i <  CTX_MAX; ++i) {
@@ -3438,19 +3438,19 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 		break;
 	case S_IFDIR:
 		pair = C_DIR;
-		if (!g_state.ctxcolor)
+		if (!g_state.oldcolor)
 			attrs |= A_BOLD;
 		ind = '/';
 		break;
 	case S_IFLNK:
 		if (ent->flags & DIR_OR_LINK_TO_DIR) {
-			if (!g_state.ctxcolor)
+			if (!g_state.oldcolor)
 				attrs |= A_BOLD;
 			ind = '/';
 		} else
 			ind = '@';
 
-		if (g_state.ctxcolor)
+		if (g_state.oldcolor)
 			attrs |= A_DIM;
 		else
 			pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
@@ -3475,7 +3475,7 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 		break;
 	}
 
-	if (!g_state.ctxcolor) {
+	if (!g_state.oldcolor) {
 		if (ent->flags & FILE_MISSING)
 			pair = C_MIS;
 
@@ -3513,8 +3513,8 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	bool ln = FALSE;
 	char ind1 = '\0', ind2 = '\0';
 	uchar pair = 0;
-	int attrs = sel ? A_REVERSE | (g_state.ctxcolor ? A_DIM : COLOR_PAIR(C_MIS))
-			: (g_state.ctxcolor ? A_DIM : COLOR_PAIR(C_MIS));
+	int attrs = sel ? A_REVERSE | (g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS))
+			: (g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS));
 	uint len;
 	char *size;
 
@@ -3539,7 +3539,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	switch (ent->mode & S_IFMT) {
 	case S_IFDIR:
 		pair = C_DIR;
-		if (!g_state.ctxcolor)
+		if (!g_state.oldcolor)
 			attrs |= A_BOLD;
 		ind2 = '/'; // fallthrough
 	case S_IFREG:
@@ -3574,7 +3574,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
 		ind1 = '@';
 		ind2 = (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@';
-		if (ind2 == '/' && !g_state.ctxcolor)
+		if (ind2 == '/' && !g_state.oldcolor)
 			attrs |= A_BOLD; // fallthrough
 	case S_IFSOCK:
 		if (!ind1) {
@@ -3608,7 +3608,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 
 	addstr("  ");
 
-	if (g_state.ctxcolor) {
+	if (g_state.oldcolor) {
 		if (!ln) {
 			attroff(A_DIM);
 			attrs ^=  A_DIM;
@@ -5428,7 +5428,7 @@ static void draw_line(char *path, int ncols)
 
 	ncols = adjust_cols(ncols);
 
-	if (g_state.ctxcolor && (pdents[last].flags & DIR_OR_LINK_TO_DIR)) {
+	if (g_state.oldcolor && (pdents[last].flags & DIR_OR_LINK_TO_DIR)) {
 		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		dir = TRUE;
 	}
@@ -5436,7 +5436,7 @@ static void draw_line(char *path, int ncols)
 	move(2 + last - curscroll, 0);
 	printptr(&pdents[last], ncols, false);
 
-	if (g_state.ctxcolor && (pdents[cur].flags & DIR_OR_LINK_TO_DIR)) {
+	if (g_state.oldcolor && (pdents[cur].flags & DIR_OR_LINK_TO_DIR)) {
 		if (!dir)  {/* First file is not a directory */
 			attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 			dir = TRUE;
@@ -5505,7 +5505,7 @@ static void redraw(char *path)
 	}
 	addstr("] "); /* 10 chars printed for contexts - "[1 2 3 4] " */
 
-	attron(A_UNDERLINE);
+	attron(A_UNDERLINE | COLOR_PAIR(cfg.curctx + 1));
 
 	/* Print path */
 	i = (int)xstrlen(path);
@@ -5535,14 +5535,14 @@ static void redraw(char *path)
 		addnstr(base, ncols - (MIN_DISPLAY_COLS + i));
 	}
 
-	attroff(A_UNDERLINE);
+	attroff(A_UNDERLINE | COLOR_PAIR(cfg.curctx + 1));
 
 	/* Go to first entry */
 	move(2, 0);
 
 	ncols = adjust_cols(ncols);
 
-	if (g_state.ctxcolor) {
+	if (g_state.oldcolor) {
 		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		g_state.dircolor = 1;
 	}
@@ -7286,7 +7286,7 @@ int main(int argc, char *argv[])
 			cfg.cliopener = 1;
 			break;
 		case 'C':
-			g_state.ctxcolor = 1;
+			g_state.oldcolor = 1;
 			break;
 		case 'd':
 			cfg.showdetail = 1;
