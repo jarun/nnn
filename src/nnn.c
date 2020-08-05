@@ -688,7 +688,7 @@ static uint fcolors[C_UND + 1] = {0};
 
 /* Event handling */
 #ifdef LINUX_INOTIFY
-#define NUM_EVENT_SLOTS 32 /* Make room for 8 events */
+#define NUM_EVENT_SLOTS 32 /* Make room for 32 events */
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define EVENT_BUF_LEN (EVENT_SIZE * NUM_EVENT_SLOTS)
 static int inotify_fd, inotify_wd = -1;
@@ -2527,7 +2527,7 @@ static int nextsel(int presel)
 				for (char *ptr = inotify_buf;
 				     ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
 				     ptr += sizeof(struct inotify_event) + event->len) {
-					event = (struct inotify_event *) ptr;
+					event = (struct inotify_event *)ptr;
 					DPRINTF_D(event->wd);
 					DPRINTF_D(event->mask);
 					if (!event->wd)
@@ -5022,6 +5022,9 @@ static void populate(char *path, char *lastname)
 #ifndef NOFIFO
 static void notify_fifo(bool force)
 {
+	if (!fifopath)
+		return;
+
 	if (fifofd == -1) {
 		fifofd = open(fifopath, O_WRONLY|O_NONBLOCK|O_CLOEXEC);
 		if (fifofd == -1) {
@@ -5081,8 +5084,7 @@ static void move_cursor(int target, int ignore_scrolloff)
 	curscroll = MAX(curscroll, MAX(cur - (onscreen - 1), 0));
 
 #ifndef NOFIFO
-	if (fifopath)
-		notify_fifo(FALSE);
+	notify_fifo(FALSE);
 #endif
 }
 
