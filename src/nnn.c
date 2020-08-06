@@ -7101,7 +7101,7 @@ static void usage(void)
 		" -A      no dir auto-select\n"
 		" -b key  open bookmark key (trumps -s/S)\n"
 		" -c      cli-only NNN_OPENER (trumps -e)\n"
-		" -C      color by context\n"
+		" -C      earlier colorscheme\n"
 		" -d      detail mode\n"
 		" -e      text in $VISUAL/$EDITOR/vi\n"
 		" -E      use EDITOR for undetached edits\n"

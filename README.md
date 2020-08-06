@@ -30,8 +30,8 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 
 - Instantly load, sort, filter thousands of files
 - Type to navigate with automatic dir selection
-- Never lose context - start where you quit
 - find/fd/grep/ripgrep/fzf from `nnn` and list in `nnn`
+- Never lose context - start where you quit
 - Mount any cloud storage service in a few keypresses
 - Select files from anywhere (not just a single dir)
 - Unlimited bookmarks, plugins, cmds with custom hotkeys
@@ -111,7 +111,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - FreeDesktop compliant trash (needs trash-cli)
   - Cross-dir file/all/range selection
   - Batch renamer for selection or dir
-  - Display a list of files from stdin
+  - Display file list from stdin or plugin
   - Copy (as), move (as), delete, archive, link selection
   - Dir updates, notification on cp, mv, rm completion
   - Copy file paths to system clipboard on select
