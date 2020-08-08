@@ -491,7 +491,7 @@ static char * const utils[] = {
 };
 
 /* Common strings */
-#define MSG_NO_TRAVERSAL 0
+#define MSG_0_ENTRIES 0
 #define MSG_INVALID_KEY 1
 #define STR_TMPFILE 2
 #define MSG_0_SELECTED 3
@@ -510,7 +510,7 @@ static char * const utils[] = {
 #define MSG_HOSTNAME 16
 #define MSG_ARCHIVE_NAME 17
 #define MSG_OPEN_WITH 18
-#define MSG_REL_PATH 19
+#define MSG_NEW_PATH 19
 #define MSG_LINK_PREFIX 20
 #define MSG_COPY_NAME 21
 #define MSG_CONTINUE 22
@@ -534,13 +534,12 @@ static char * const utils[] = {
 #define MSG_RM_TMP 40
 #define MSG_NOCHNAGE 41
 #define MSG_CANCEL 42
-#define MSG_0_ENTRIES 43
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 44 /* Must be the last entry */
+#define MSG_DIR_CHANGED 43 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
-	"no traversal",
+	"0 entries",
 	"invalid key",
 	"/.nnnXXXXXX",
 	"0 selected",
@@ -557,11 +556,11 @@ static const char * const messages[] = {
 	"'s'ave / 'l'oad / 'r'estore?",
 	"Quit all contexts?",
 	"remote name ('-' for hovered): ",
-	"archive name: ",
+	"archive [path/]name: ",
 	"open with: ",
-	"relative path: ",
+	"[path/]name: ",
 	"link prefix [@ for none]: ",
-	"copy name: ",
+	"copy [path/]name: ",
 	"\n'Enter' to continue",
 	"open failed",
 	"dir inaccessible",
@@ -583,7 +582,6 @@ static const char * const messages[] = {
 	"remove tmp file?",
 	"unchanged",
 	"cancelled",
-	"0 entries",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -6484,7 +6482,7 @@ nochange:
 			case SEL_NEW:
 				r = get_input(messages[MSG_NEW_OPTS]);
 				if (r == 'f' || r == 'd')
-					tmp = xreadline(NULL, messages[MSG_REL_PATH]);
+					tmp = xreadline(NULL, messages[MSG_NEW_PATH]);
 				else if (r == 's' || r == 'h')
 					tmp = xreadline(NULL, messages[MSG_LINK_PREFIX]);
 				else
@@ -6497,13 +6495,6 @@ nochange:
 
 			if (!tmp || !*tmp)
 				break;
-
-			/* Allow only relative, same dir paths */
-			if (tmp[0] == '/'
-			    || ((r != 'f' && r != 'd') && (xstrcmp(xbasename(tmp), tmp) != 0))) {
-				printwait(messages[MSG_NO_TRAVERSAL], &presel);
-				goto nochange;
-			}
 
 			switch (sel) {
 			case SEL_ARCHIVE:

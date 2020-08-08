@@ -64,10 +64,10 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Disk-IO sensitive (few disk reads and writes)
   - No FPU usage (all integer maths, even for file size)
   - Minimizes screen refresh with fast line redraws
-  - Tiny binary (typically less than 100KB)
+  - Tiny binary (typically around 100KB)
 - Portable
-  - Static binary available (no need to install)
   - Language-agnostic plugins
+  - Static binary available (no need to install)
   - Minimal library deps, easy to compile
   - Compile in/out features with make variables
   - No config file, minimal config with sensible defaults
@@ -86,7 +86,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Contexts (_aka_ tabs/workspaces) with custom colors
   - Sessions, bookmarks with hotkeys; mark and visit a dir
   - Remote mounts (needs sshfs, rclone)
-  - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick reference
+  - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick look-up
   - CD on quit (*easy* shell integration)
   - Auto-advance on opening files
 - Search
@@ -96,11 +96,12 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 - Sort
   - Ordered pure numeric names by default (visit _/proc_)
   - Case-insensitive version (_aka_ natural) sort
-  - By file name, access/change/mod (default) time, size, extension
+  - By name, access/change/mod (default) time, size, extn
   - Reverse sort
 - Mimes
   - Open with desktop opener or specify a custom opener
   - Preview hovered files in FIFO-based previewer
+  - Plugins for image and video thumbnails
   - Create, list, extract, mount (FUSE based) archives
   - Option to open all text files in EDITOR
 - Information
@@ -115,8 +116,8 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Copy (as), move (as), delete, archive, link selection
   - Dir updates, notification on cp, mv, rm completion
   - Copy file paths to system clipboard on select
-  - Create (with parents), rename, duplicate (anywhere) files and dirs
-  - Launch GUI apps, run commands, spawn a shell, toggle executable
+  - Create (with parents), rename, duplicate files and dirs
+  - Launch apps, run commands, spawn a shell, toggle exe
   - Hovered file set as `$nnn` at prompt and spawned shell
   - Lock terminal after configurable idle timeout
   - Basic support for screen readers and braille displays
