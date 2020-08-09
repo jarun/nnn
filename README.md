@@ -65,6 +65,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - No FPU usage (all integer maths, even for file size)
   - Minimizes screen refresh with fast line redraws
   - Tiny binary (typically around 100KB)
+  - 1-column mode for smaller terminals and form factors
 - Portable
   - Language-agnostic plugins
   - Static binary available (no need to install)
@@ -72,6 +73,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Compile in/out features with make variables
   - No config file, minimal config with sensible defaults
   - Widely available on many packagers
+  - Touch enabled, comfortable on handhelds too!
   - Unicode support
 - Quality
   - Privacy-aware (no unconfirmed user data collection)
