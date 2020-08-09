@@ -9,6 +9,7 @@
 #  - powershell (WSL)
 #  - cygwim's /dev/clipboard (Cygwin)
 #  - wl-paste (Wayland)
+#  - clipboard (Haiku)
 #
 # Limitation: breaks if a filename has newline in it
 #
@@ -42,6 +43,9 @@ getclip () {
 	elif which wl-paste >/dev/null 2>&1; then
 		# Wayland
 		wl-paste
+	elif which clipboard >/dev/null 2>&1; then
+		# Haiku
+		clipboard --print
 	fi
 
 }
