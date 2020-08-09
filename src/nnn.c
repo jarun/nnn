@@ -3446,11 +3446,10 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 			ind = '*';
 		}
 
-		if (ent->flags & HARD_LINK)
-			pair = C_HRD;
-
 		if (!ent->size)
 			pair = C_UND;
+		else if (ent->flags & HARD_LINK)
+			pair = C_HRD;
 		else if (!pair)
 			pair = C_FIL;
 		break;
