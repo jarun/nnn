@@ -4970,7 +4970,7 @@ static int dentfill(char *path, struct entry **ppdents)
 			if (S_ISDIR(sb.st_mode))
 				dentp->flags |= DIR_OR_LINK_TO_DIR;
 #if !(defined(__sun) || defined(__HAIKU__)) /* no d_type */
-		} else if (dp->d_type == DT_DIR || (dp->d_type == DT_LNK && S_ISDIR(sb.st_mode))) {
+		} else if (dp->d_type == DT_DIR || ((dp->d_type == DT_LNK || dp->d_type == DT_UNKNOWN) && S_ISDIR(sb.st_mode))) {
 			dentp->flags |= DIR_OR_LINK_TO_DIR;
 #endif
 		}
