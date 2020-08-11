@@ -4,7 +4,7 @@
 #
 # Details: nnn invokes this plugin to show notification when a cp/mv/rm operation is complete.
 #
-# Dependencies: notify-send (Ubuntu)/ntfy (https://github.com/dschep/ntfy)/osascript (macOS)
+# Dependencies: notify-send (Ubuntu)/ntfy (https://github.com/dschep/ntfy)/osascript (macOS)/notify (Haiku)
 #
 # Shell: POSIX compliant
 # Author: Anna Arad
@@ -17,4 +17,6 @@ elif [ "$OS" = "Darwin" ]; then
     osascript -e 'display notification "Done!" with title "nnn"'
 elif which ntfy >/dev/null 2>&1; then
     ntfy -t nnn send "Done!"
+elif [ "$OS" = "Haiku" ]; then
+    notify --title "nnn" "Done!"
 fi

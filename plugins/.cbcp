@@ -9,6 +9,7 @@
 # - clip.exe (WSL)
 # - clip (Cygwin)
 # - wl-copy (Wayland)
+# - clipboard (Haiku)
 #
 # Limitation: breaks if a filename has newline in it
 #
@@ -43,4 +44,7 @@ elif which clip >/dev/null 2>&1; then
 elif which wl-copy >/dev/null 2>&1; then
     # Wayland
     tr '\0' '\n' < "$selection" | wl-copy
+elif which clipboard >/dev/null 2>&1; then
+    # Haiku
+    tr '\0' '\n' < "$selection" | clipboard --stdin
 fi

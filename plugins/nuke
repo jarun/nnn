@@ -32,7 +32,7 @@
 #   3. Start GUI apps in bg to unblock. Redirect stdout and strerr if required.
 #   4. Some CLI utilities are piped to the $PAGER, to wait and quit uniformly.
 #   5. If the output cannot be paged use "read -r _" to wait for user input.
-#   6. On a DE, try 'xdg-open' in handle_fallback() as last resort.
+#   6. On a DE, try 'xdg-open' or 'open' in handle_fallback() as last resort.
 #
 #   Feel free to change the utilities to your favourites and add more mimes.
 #
@@ -42,7 +42,7 @@
 #      rar: list with unrar
 #      7-zip: list with 7z
 #      pdf: zathura (GUI), pdftotext, mutool, exiftool
-#      audio: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
+#      audio: mocplay (nnn plugin using MOC), mpv, media_client (Haiku), mediainfo, exiftool
 #      avi|mkv|mp4: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
 #      log: vi
 #      torrent: rtorrent, transmission-show
@@ -53,7 +53,7 @@
 #   Multimedia by mime:
 #      image/*: imv/sxiv (GUI), viu (https://github.com/atanunq/viu), img2txt, exiftool
 #      video/*: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
-#      audio/*: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
+#      audio/*: mocplay (nnn plugin using MOC), mpv, media_client (Haiku), mediainfo, exiftool
 #      application/pdf: zathura (GUI), pdftotext, mutool, exiftool
 #   Other mimes:
 #      text/troff: man -l
@@ -106,6 +106,9 @@ handle_audio() {
         exit 0
     elif which mpv >/dev/null 2>&1; then
         mpv "${FPATH}" >/dev/null 2>&1 &
+        exit 0
+    elif which media_client >/dev/null 2>&1; then
+        media_client play "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif which mediainfo >/dev/null 2>&1; then
         mediainfo "${FPATH}" | eval "$PAGER"
@@ -459,8 +462,11 @@ handle_mime() {
 }
 
 handle_fallback() {
-    if [ "$GUI" -ne 0 ]; then
+    if [ "$GUI" -ne 0 ] && which xdg-open >/dev/null 2>&1; then
         xdg-open "${FPATH}" >/dev/null 2>&1 &
+        exit 0
+    elif [ "$GUI" -ne 0 ] && which open >/dev/null 2>&1; then
+        open "${FPATH}" >/dev/null 2>&1 &
         exit 0
     fi
 

@@ -4445,7 +4445,11 @@ static void show_help(const char *path)
 	}
 
 	if (g_state.fortune && getutil("fortune"))
+#ifndef __HAIKU__
 		pipetof("fortune -s", fp);
+#else
+		pipetof("fortune", fp);
+#endif
 
 	start = end = helpstr;
 	while (*end) {
