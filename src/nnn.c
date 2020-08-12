@@ -2367,37 +2367,6 @@ static int xstrverscasecmp(const char * const s1, const char * const s2)
 	}
 }
 
-/* If in the future this gets another use remove the if */
-#ifdef ICONS
-static int xstrcasecmp(const char * const s1, const char * const s2) {
-	const char *p1 = (const char *)s1;
-	const char *p2 = (const char *)s2;
-	char c1, c2;
-
-
-	while (*p1 != '\0') {
-		if (*p2 == '\0')
-			return 1;
-
-		c1 = TOUPPER(*p1);
-		c2 = TOUPPER(*p2);
-
-		if (c1 > c2)
-			return 1;
-		else if (c1 < c2)
-			return -1;
-
-		++p1;
-		++p2;
-	}
-
-	if (*p2 == '\0')
-		return 0;
-	else
-		return -1;
-}
-#endif
-
 static int (*namecmpfn)(const char * const s1, const char * const s2) = &xstricmp;
 
 static char * (*fnstrstr)(const char *haystack, const char *needle) = &strcasestr;
@@ -3488,7 +3457,7 @@ static const char *get_icon(const struct entry *ent){
 	char *tmp;
 
 	for (i = 0; i < sizeof(icons_name)/sizeof(struct icon_pair); ++i)
-		if (xstrcasecmp(ent->name, icons_name[i].match) == 0)
+		if (strcasecmp(ent->name, icons_name[i].match) == 0)
 			return icons_name[i].icon;
 
 	if (ent->flags & DIR_OR_LINK_TO_DIR)
@@ -3503,13 +3472,13 @@ static const char *get_icon(const struct entry *ent){
 
 	if (*tmp >= '0' && *tmp <= '9')
 		i = 0;
-	else if(TOUPPER(*tmp) >= 'A' && TOUPPER(*tmp) <= 'Z')
+	else if (TOUPPER(*tmp) >= 'A' && TOUPPER(*tmp) <= 'Z')
 		i = TOUPPER(*tmp) - 'A' + 1;
 	else
 		i = 26;
 
 	for (j = icon_positions[i]; j < MIN(icon_positions[i + 1], sizeof(icons_ext)/sizeof(struct icon_pair)); ++j) {
-		if (xstrcasecmp(tmp, icons_ext[j].match) == 0)
+		if (strcasecmp(tmp, icons_ext[j].match) == 0)
 			return icons_ext[j].icon;
 	}
 
@@ -5528,8 +5497,12 @@ static int adjust_cols(int ncols)
 #ifdef ICONS
 			ncols -= xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT) + 1;
 #endif
-		} else
+		} else {
 			ncols -= 35;
+#ifdef ICONS
+			ncols -= xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT) + 1;
+#endif
+		}
 	} else {
 		ncols -= 3; /* Preceding space, indicator, newline */
 #ifdef ICONS
