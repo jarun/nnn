@@ -2367,6 +2367,8 @@ static int xstrverscasecmp(const char * const s1, const char * const s2)
 	}
 }
 
+/* If in the future this gets another use remove the if */
+#ifdef ICONS
 static int xstrcasecmp(const char * const s1, const char * const s2) {
 	const char *p1 = (const char *)s1;
 	const char *p2 = (const char *)s2;
@@ -2394,6 +2396,7 @@ static int xstrcasecmp(const char * const s1, const char * const s2) {
 	else
 		return -1;
 }
+#endif
 
 static int (*namecmpfn)(const char * const s1, const char * const s2) = &xstricmp;
 
