@@ -112,6 +112,10 @@
 #include "nnn.h"
 #include "dbg.h"
 
+#ifdef ICONS
+#include "icons.h"
+#endif
+
 /* Macro definitions */
 #define VERSION "3.3"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
@@ -680,6 +684,11 @@ static const char * const patterns[] = {
 #define C_PIP (C_ORP + 1) /* Named pipe (FIFO): Orange1 */
 #define C_SOC (C_PIP + 1) /* Socket: MediumOrchid1 */
 #define C_UND (C_SOC + 1) /* Unknown OR 0B regular/exe file: Red1 */
+
+#ifdef ICONS
+/* NUMBERS, A-Z, END = 28. Other treated as Z */
+static uint icon_positions[28];
+#endif
 
 static char gcolors[] = "c1e2272e006033f7c6d6abc4";
 static uint fcolors[C_UND + 1] = {0};
@@ -1713,6 +1722,23 @@ static bool initcurses(void *oldmask)
 		}
 	}
 
+#ifdef ICONS
+	memset(icon_positions, 0x7f, sizeof(icon_positions));
+
+	if (icons_ext[0].match[0] >= '0' && icons_ext[0].match[0] <= '9')
+		icon_positions[0] = 0;
+
+	icon_positions[27] = sizeof(icons_ext)/sizeof(struct icon_pair);
+
+	for (uint i = 0; i < sizeof(icons_ext)/sizeof(struct icon_pair); ++i) {
+		char c = TOUPPER(icons_ext[i].match[0]);
+		if (c >= 'A' && c <= 'Z') {
+			if (icon_positions[c - 'A' + 1] == 0x7f7f7f7f)
+				icon_positions[c - 'A' + 1] = i;
+		}
+	}
+#endif
+
 	settimeout(); /* One second */
 	set_escdelay(25);
 	return TRUE;
@@ -2339,6 +2365,34 @@ static int xstrverscasecmp(const char * const s1, const char * const s2)
 	default:
 		return state;
 	}
+}
+
+static int xstrcasecmp(const char * const s1, const char * const s2) {
+	const char *p1 = (const char *)s1;
+	const char *p2 = (const char *)s2;
+	char c1, c2;
+
+
+	while (*p1 != '\0') {
+		if (*p2 == '\0')
+			return 1;
+
+		c1 = TOUPPER(*p1);
+		c2 = TOUPPER(*p2);
+
+		if (c1 > c2)
+			return 1;
+		else if (c1 < c2)
+			return -1;
+
+		++p1;
+		++p2;
+	}
+
+	if (*p2 == '\0')
+		return 0;
+	else
+		return -1;
 }
 
 static int (*namecmpfn)(const char * const s1, const char * const s2) = &xstricmp;
@@ -3425,6 +3479,41 @@ static char *get_lsperms(mode_t mode)
 	return bits;
 }
 
+#ifdef ICONS
+static const char *get_icon(const struct entry *ent){
+	uint i, j;
+	char *tmp;
+
+	for (i = 0; i < sizeof(icons_name)/sizeof(struct icon_pair); ++i)
+		if (xstrcasecmp(ent->name, icons_name[i].match) == 0)
+			return icons_name[i].icon;
+
+	if (ent->flags & DIR_OR_LINK_TO_DIR)
+		return dir_icon;
+
+	tmp = xextension(ent->name, ent->nlen);
+	if (!tmp)
+		return file_icon;
+
+	/* Skip the . */
+	++tmp;
+
+	if (*tmp >= '0' && *tmp <= '9')
+		i = 0;
+	else if(TOUPPER(*tmp) >= 'A' && TOUPPER(*tmp) <= 'Z')
+		i = TOUPPER(*tmp) - 'A' + 1;
+	else
+		i = 26;
+
+	for (j = icon_positions[i]; j < MIN(icon_positions[i + 1], sizeof(icons_ext)/sizeof(struct icon_pair)); ++j) {
+		if (xstrcasecmp(tmp, icons_ext[j].match) == 0)
+			return icons_ext[j].icon;
+	}
+
+	return file_icon;
+}
+#endif
+
 static void print_time(const time_t *timep)
 {
 	struct tm *t = localtime(timep);
@@ -3511,6 +3600,12 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 	if (attrs)
 		attron(attrs);
 
+#ifdef ICONS
+	addstr(ICON_PADDING_LEFT);
+	addstr(get_icon(ent));
+	addstr(ICON_PADDING_RIGHT);
+#endif
+
 #ifndef NOLOCALE
 	addwstr(unescape(ent->name, namecols));
 #else
@@ -3542,6 +3637,12 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 
 	if (attrs)
 		attron(attrs);
+
+#ifdef ICONS
+	addstr(ICON_PADDING_LEFT);
+	addstr(get_icon(ent));
+	addstr(ICON_PADDING_RIGHT);
+#endif
 
 	/* Timestamp */
 	print_time(&ent->t);
@@ -5419,10 +5520,17 @@ static int adjust_cols(int ncols)
 			cfg.showdetail ^= 1;
 			printptr = &printent;
 			ncols -= 3; /* Preceding space, indicator, newline */
+#ifdef ICONS
+			ncols -= xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT) + 1;
+#endif
 		} else
 			ncols -= 35;
-	} else
+	} else {
 		ncols -= 3; /* Preceding space, indicator, newline */
+#ifdef ICONS
+		ncols -= xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT) + 1;
+#endif
+	}
 
 	return ncols;
 }
