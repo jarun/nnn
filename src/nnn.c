@@ -3641,12 +3641,6 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	if (attrs)
 		attron(attrs);
 
-#ifdef ICONS
-	addstr(ICON_PADDING_LEFT);
-	addstr(get_icon(ent));
-	addstr(ICON_PADDING_RIGHT);
-#endif
-
 	/* Timestamp */
 	print_time(&ent->t);
 
@@ -3747,11 +3741,19 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 			attron(attrs);
 		}
 	}
+
+#ifdef ICONS
+	addstr(ICON_PADDING_LEFT);
+	addstr(get_icon(ent));
+	addstr(ICON_PADDING_RIGHT);
+#endif
+
 #ifndef NOLOCALE
 	addwstr(unescape(ent->name, namecols));
 #else
 	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
 #endif
+
 	if (attrs)
 		attroff(attrs);
 	if (ind2)
