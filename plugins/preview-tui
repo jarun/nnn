@@ -64,7 +64,7 @@ TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
 PAGER="${PAGER:-less -R}"
-exists bat && [ "$PAGER" = "most" ] && PAGER="less -R"
+[ "$PAGER" = "most" ] && exists bat && PAGER="less -R"
 
 if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
     TERMINAL=tmux
