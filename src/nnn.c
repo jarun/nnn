@@ -663,7 +663,7 @@ static const char * const patterns[] = {
 	"sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s",
 	"sed 's|^\\([^#/][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
 		"%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
-	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$",
+	"(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$",
 	"sed -i 's|^%s\\(.*\\)$|%s\\1|' %s",
 };
 
@@ -5587,6 +5587,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 	char rundir[PATH_MAX] __attribute__ ((aligned));
 	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	char *path, *lastdir, *lastname, *dir, *tmp;
+	pEntry pent;
 	enum action sel;
 	struct stat sb;
 	int r = -1, presel, selstartid = 0, selendid = 0;
@@ -5863,11 +5864,12 @@ nochange:
 			if (!ndents)
 				goto begin;
 
-			mkpath(path, pdents[cur].name, newpath);
+			pent = &pdents[cur];
+			mkpath(path, pent->name, newpath);
 			DPRINTF_S(newpath);
 
 			/* Visit directory */
-			if (pdents[cur].flags & DIR_OR_LINK_TO_DIR) {
+			if (pent->flags & DIR_OR_LINK_TO_DIR) {
 				if (chdir(newpath) == -1) {
 					printwarn(&presel);
 					goto nochange;
@@ -5892,16 +5894,16 @@ nochange:
 
 			/* If opened as vim plugin and Enter/^M pressed, pick */
 			if (g_state.picker && sel == SEL_GOIN) {
-				appendfpath(newpath, mkpath(path, pdents[cur].name, newpath));
+				appendfpath(newpath, mkpath(path, pent->name, newpath));
 				writesel(pselbuf, selbufpos - 1);
 				return EXIT_SUCCESS;
 			}
 
 			if (sel == SEL_NAV_IN) {
 				/* If in listing dir, go to target on `l` or Right on symlink */
-				if (listpath && S_ISLNK(pdents[cur].mode)
+				if (listpath && S_ISLNK(pent->mode)
 				    && is_prefix(path, listpath, xstrlen(listpath))) {
-					if (!realpath(pdents[cur].name, newpath)) {
+					if (!realpath(pent->name, newpath)) {
 						printwarn(&presel);
 						goto nochange;
 					}
@@ -5919,7 +5921,7 @@ nochange:
 
 					cdprep(lastdir, NULL, path, newpath)
 					       ? (presel = FILTER) : (watch = TRUE);
-					xstrsncpy(lastname, pdents[cur].name, NAME_MAX + 1);
+					xstrsncpy(lastname, pent->name, NAME_MAX + 1);
 					goto begin;
 				}
 
@@ -5939,7 +5941,7 @@ nochange:
 					rundir[0] = '\0';
 
 					if (chdir(path) == -1
-					    || !run_selected_plugin(&path, pdents[cur].name,
+					    || !run_selected_plugin(&path, pent->name,
 								    runfile, &lastname, &lastdir)) {
 						DPRINTF_S("plugin failed!");
 					}
@@ -5971,15 +5973,19 @@ nochange:
 				continue;
 			}
 
+			/* Get the extension for regext match */
+			tmp = xextension(pent->name, pent->nlen - 1);
+			if (tmp)
+				++tmp;
 #ifdef PCRE
-			if (!pcre_exec(archive_pcre, NULL, pdents[cur].name,
-				       xstrlen(pdents[cur].name), 0, 0, NULL, 0)) {
+			if (tmp && !pcre_exec(archive_pcre, NULL, tmp,
+					      pent->nlen - (tmp - pent->name) - 1, 0, 0, NULL, 0)) {
 #else
-			if (!regexec(&archive_re, pdents[cur].name, 0, NULL, 0)) {
+			if (tmp && !regexec(&archive_re, tmp, 0, NULL, 0)) {
 #endif
 				r = get_input(messages[MSG_ARCHIVE_OPTS]);
 				if (r == 'l' || r == 'x') {
-					mkpath(path, pdents[cur].name, newpath);
+					mkpath(path, pent->name, newpath);
 					handle_archive(newpath, r);
 					if (r == 'l') {
 						statusbar(path);

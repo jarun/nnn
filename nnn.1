@@ -455,9 +455,9 @@ separated by \fI;\fR:
     If xterm 256 colors aren't supported, earlier colorscheme will be used.
 .Ed
 .Pp
-\fBNNN_ARCHIVE:\fR archive types to be handled silently (default: bzip2, (g)zip, tar).
+\fBNNN_ARCHIVE:\fR archive extensions to be handled silently (default: bzip2, (g)zip, tar).
 .Bd -literal
-    export NNN_ARCHIVE="\\\\.(7z|bz2|gz|tar|tgz|zip)$"
+    export NNN_ARCHIVE="(7z|bz2|gz|tar|tgz|zip)$"
 
     NOTE: Non-default formats may require a third-party utility.
 .Ed
