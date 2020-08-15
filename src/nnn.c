@@ -5841,7 +5841,7 @@ nochange:
 				    &mousetimings[currentmouse]);
 				mousedent[currentmouse] = cur;
 
-				/* Single click just selects, double click falls through to SEL_GOIN */
+				/* Single click just selects, double click falls through to SEL_OPEN */
 				if ((mousedent[0] != mousedent[1]) ||
 				  (((_ABSSUB(mousetimings[0].tv_sec, mousetimings[1].tv_sec) << 30)
 				  + (_ABSSUB(mousetimings[0].tv_nsec, mousetimings[1].tv_nsec)))
@@ -5859,7 +5859,7 @@ nochange:
 #endif
 			// fallthrough
 		case SEL_NAV_IN: // fallthrough
-		case SEL_GOIN:
+		case SEL_OPEN:
 			/* Cannot descend in empty directories */
 			if (!ndents)
 				goto begin;
@@ -5893,7 +5893,7 @@ nochange:
 			}
 
 			/* If opened as vim plugin and Enter/^M pressed, pick */
-			if (g_state.picker && sel == SEL_GOIN) {
+			if (g_state.picker && sel == SEL_OPEN) {
 				appendfpath(newpath, mkpath(path, pent->name, newpath));
 				writesel(pselbuf, selbufpos - 1);
 				return EXIT_SUCCESS;

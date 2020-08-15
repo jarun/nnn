@@ -37,7 +37,7 @@
 /* Supported actions */
 enum action {
 	SEL_BACK = 1,
-	SEL_GOIN,
+	SEL_OPEN,
 	SEL_NAV_IN,
 	SEL_NEXT,
 	SEL_PREV,
@@ -123,8 +123,8 @@ static struct key bindings[] = {
 	{ KEY_LEFT,       SEL_BACK },
 	{ 'h',            SEL_BACK },
 	/* Inside or select */
-	{ KEY_ENTER,      SEL_GOIN },
-	{ '\r',           SEL_GOIN },
+	{ KEY_ENTER,      SEL_OPEN },
+	{ '\r',           SEL_OPEN },
 	/* Pure navigate inside */
 	{ KEY_RIGHT,      SEL_NAV_IN },
 	{ 'l',            SEL_NAV_IN },
