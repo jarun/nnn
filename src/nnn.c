@@ -663,7 +663,7 @@ static const char * const patterns[] = {
 	"sed -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s",
 	"sed 's|^\\([^#/][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
 		"%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
-	"(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$",
+	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$",
 	"sed -i 's|^%s\\(.*\\)$|%s\\1|' %s",
 };
 
@@ -5975,8 +5975,6 @@ nochange:
 
 			/* Get the extension for regext match */
 			tmp = xextension(pent->name, pent->nlen - 1);
-			if (tmp)
-				++tmp;
 #ifdef PCRE
 			if (tmp && !pcre_exec(archive_pcre, NULL, tmp,
 					      pent->nlen - (tmp - pent->name) - 1, 0, 0, NULL, 0)) {

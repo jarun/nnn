@@ -457,7 +457,7 @@ separated by \fI;\fR:
 .Pp
 \fBNNN_ARCHIVE:\fR archive extensions to be handled silently (default: bzip2, (g)zip, tar).
 .Bd -literal
-    export NNN_ARCHIVE="(7z|bz2|gz|tar|tgz|zip)$"
+    export NNN_ARCHIVE="\\\\.(7z|bz2|gz|tar|tgz|zip)$"
 
     NOTE: Non-default formats may require a third-party utility.
 .Ed
