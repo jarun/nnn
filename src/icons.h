@@ -30,27 +30,26 @@ struct icon_pair {
  * If you are using icons-in-terminal the creator recommends that you do use the symbols in the generated header.
  */
 
-static const struct icon_pair dir_icon  = {"", FA_FOLDER,   0};
-static const struct icon_pair file_icon = {"", FA_FILE_O,   0};
-static const struct icon_pair exec_icon = {"", FA_TERMINAL, 0};
+static const struct icon_pair dir_icon  = {"", FA_FOLDER, 0};
+static const struct icon_pair file_icon = {"", FA_FILE_O, 0};
+static const struct icon_pair exec_icon = {"", FA_COG,    0};
 
 /* All entries are case-insensitive */
 
 static const struct icon_pair icons_name[] = {
-	{".git",         FA_GITHUB_SQUARE,  0},
-	{"Desktop",      FA_HOME,           0},
-	{"Documents",    FA_LIST_ALT,       0},
-	{"Downloads",    FA_DOWNLOAD,       0},
-	{"Music",        FA_MUSIC,          0},
-	{"node_modules", MFIZZ_NPM,         0},
-	{"Pictures",     FA_IMAGE,          0},
-	{"Public",       FA_INBOX,          0},
-	{"Templates",    FA_COG,            0},
-	{"Videos",       FA_FILM,           0},
-	{"CHANGELOG",    MD_CHANGE_HISTORY, 0},
-	{"configure",    FILE_CONFIG,       0},
-	{"License",      FA_COPYRIGHT,      0},
-	{"Makefile",     FILE_CMAKE,        0},
+	{".git",         FA_GIT,        0},
+	{"Desktop",      FA_DESKTOP,    0},
+	{"Documents",    FA_BRIEFCASE,  0},
+	{"Downloads",    FA_DOWNLOAD,   0},
+	{"Music",        FA_MUSIC,      0},
+	{"Pictures",     MD_CAMERA_ALT, 0},
+	{"Public",       FA_INBOX,      0},
+	{"Templates",    FA_PAPERCLIP,  0},
+	{"Videos",       FA_FILM,       0},
+	{"CHANGELOG",    FA_HISTORY,    0},
+	{"configure",    FILE_CONFIG,   0},
+	{"License",      FA_COPYRIGHT,  0},
+	{"Makefile",     FILE_CMAKE,    0},
 };
 
 /*
@@ -73,6 +72,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* B */
 	{"bat",      MFIZZ_SCRIPT,         0},
+	{"bin",      OCT_FILE_BINARY,      0},
 	{"bmp",      FA_FILE_IMAGE_O,      IMAGE_COLOR},
 	{"bz2",      FA_FILE_ARCHIVE_O,    ARCHIVE_COLOR},
 
@@ -100,6 +100,7 @@ static const struct icon_pair icons_ext[] = {
 	/* D */
 	{"db",       MFIZZ_DATABASE_ALT2,  0},
 	{"deb",      MFIZZ_DEBIAN,         ARCHIVE_COLOR},
+	{"diff",     FILE_DIFF,            0},
 	{"dll",      FILE_MANPAGE,         0},
 	{"doc",      FILE_WORD,            0},
 	{"docx",     FILE_WORD,            0},
@@ -182,6 +183,7 @@ static const struct icon_pair icons_ext[] = {
 	{"out",      FA_LINUX,             0},
 
 	/* P */
+	{"patch",    FILE_PATCH,           0},
 	{"pdf",      FA_FILE_PDF_O,        BOOKS_COLOR},
 	{"php",      MFIZZ_PHP,            0},
 	{"png",      FA_FILE_IMAGE_O,      IMAGE_COLOR},
@@ -211,6 +213,8 @@ static const struct icon_pair icons_ext[] = {
 	{"slim",     FA_FILE_CODE_O,       0},
 	{"sln",      DEV_VISUALSTUDIO,     0},
 	{"sql",      MFIZZ_MYSQL,          0},
+	{"srt",      FA_COMMENTS_O,        0},
+	{"sub",      FA_COMMENTS_O,        0},
 	{"svg",      FA_FILE_IMAGE_O,      IMAGE_COLOR},
 
 	/* T */
