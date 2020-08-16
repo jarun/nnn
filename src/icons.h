@@ -178,11 +178,13 @@ static const struct icon_pair icons_ext[] = {
 	/* N */
 
 	/* O */
-	{"o",        FILE_MANPAGE,         0},
-	{"ogg",      FA_FILE_AUDIO_O,      AUDIO_COLOR},
-	{"out",      FA_LINUX,             0},
+	{"o",          FILE_MANPAGE,       0},
+	{"ogg",        FA_FILE_AUDIO_O,    AUDIO_COLOR},
+	{"opdownload", FA_DOWNLOAD,        0},
+	{"out",        FA_LINUX,           0},
 
 	/* P */
+	{"part",     FA_DOWNLOAD,          0},
 	{"patch",    FILE_PATCH,           0},
 	{"pdf",      FA_FILE_PDF_O,        BOOKS_COLOR},
 	{"php",      MFIZZ_PHP,            0},
@@ -229,6 +231,7 @@ static const struct icon_pair icons_ext[] = {
 	/* U */
 
 	/* V */
+	{"vid",      FA_FILE_MOVIE_O,      VIDEO_COLOR},
 	{"vim",      DEV_VIM,              0},
 	{"vimrc",    DEV_VIM,              0},
 
