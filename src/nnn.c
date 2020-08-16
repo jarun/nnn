@@ -686,7 +686,7 @@ static const char * const patterns[] = {
 #define C_UND (C_SOC + 1) /* Unknown OR 0B regular/exe file: Red1 */
 
 #ifdef ICONS
-/* NUMBERS, A-Z, END = 28. Other treated as Z */
+/* NUMBERS, A-Z, OTHER = 28. */
 static ushort icon_positions[28];
 #endif
 
@@ -1729,14 +1729,15 @@ static bool initcurses(void *oldmask)
 		if (icons_ext[0].match[0] >= '0' && icons_ext[0].match[0] <= '9')
 			icon_positions[0] = 0;
 
-		icon_positions[27] = sizeof(icons_ext)/sizeof(struct icon_pair);
-
 		char c;
 		for (uint i = 0; i < sizeof(icons_ext)/sizeof(struct icon_pair); ++i) {
 			c = TOUPPER(icons_ext[i].match[0]);
 			if (c >= 'A' && c <= 'Z') {
 				if (icon_positions[c - 'A' + 1] == 0x7f7f)
 					icon_positions[c - 'A' + 1] = i;
+			} else if (!(c >= '0' && c <= '9')) {
+				if (icon_positions[27] == 0x7f7f)
+					icon_positions[27] = i;
 			}
 		}
 	}
@@ -3474,13 +3475,14 @@ static const char *get_icon(const struct entry *ent){
 	++tmp;
 
 	if (*tmp >= '0' && *tmp <= '9')
-		i = 0;
+		i = 0; /* NUMBER */
 	else if (TOUPPER(*tmp) >= 'A' && TOUPPER(*tmp) <= 'Z')
-		i = TOUPPER(*tmp) - 'A' + 1;
+		i = TOUPPER(*tmp) - 'A' + 1; /* LETTER A-Z */
 	else
-		i = 26;
+		i = 27; /* OTHER */
 
-	for (j = icon_positions[i]; icons_ext[j].match[0] == icons_ext[icon_positions[i]].match[0]; ++j) {
+	for (j = icon_positions[i]; j < sizeof(icons_ext)/sizeof(struct icon_pair) &&
+	     icons_ext[j].match[0] == icons_ext[icon_positions[i]].match[0]; ++j) {
 		if (strcasecmp(tmp, icons_ext[j].match) == 0)
 			return icons_ext[j].icon;
 	}
