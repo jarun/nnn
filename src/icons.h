@@ -3,10 +3,10 @@
 struct icon_pair {
 	const char *match;
 	const char *icon;
-	const unsigned char color;
+	const unsigned char color; /* Hex xterm 256 color code, 0 to follow file specific */
 };
 
-/* 
+/*
  * Define a string to be printed before and after the icon
  * Adjust if the icons are not printed properly
  */
@@ -38,7 +38,7 @@ static const struct icon_pair icons_name[] = {
 	{"Videos",       FA_FILM,          0},
 };
 
-/* 
+/*
  * New entries should bu added such that the first character of the extension is in the correct group .
  * This is done for performance reason so that the correct icon can be found faster.
  * All entries are case-insensitive
@@ -93,7 +93,7 @@ static const struct icon_pair icons_ext[] = {
 	{"elf",      FA_LINUX,             0},
 	{"epub",     FA_FILE_PDF_O,        0},
 	{"exe",      FA_WINDOWS,           0},
-	
+
 	/* F */
 	{"f#",       DEV_FSHARP,           0},
 	{"flac",     FA_FILE_AUDIO_O,      0},

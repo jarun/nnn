@@ -3482,10 +3482,9 @@ static const char *get_icon(const struct entry *ent){
 		i = 27; /* OTHER */
 
 	for (j = icon_positions[i]; j < sizeof(icons_ext)/sizeof(struct icon_pair) &&
-	     icons_ext[j].match[0] == icons_ext[icon_positions[i]].match[0]; ++j) {
+	     icons_ext[j].match[0] == icons_ext[icon_positions[i]].match[0]; ++j)
 		if (strcasecmp(tmp, icons_ext[j].match) == 0)
 			return icons_ext[j].icon;
-	}
 
 	return file_icon.icon;
 }
@@ -3582,7 +3581,7 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 		addstr(ICON_PADDING_LEFT);
 		addstr(get_icon(ent));
 		addstr(ICON_PADDING_RIGHT);
-	} 
+	}
 #endif
 
 #ifndef NOLOCALE
