@@ -687,7 +687,7 @@ static const char * const patterns[] = {
 
 #ifdef ICONS
 /* NUMBERS, A-Z, END = 28. Other treated as Z */
-static uint icon_positions[28];
+static ushort icon_positions[28];
 #endif
 
 static char gcolors[] = "c1e2272e006033f7c6d6abc4";
@@ -1723,18 +1723,21 @@ static bool initcurses(void *oldmask)
 	}
 
 #ifdef ICONS
-	memset(icon_positions, 0x7f, sizeof(icon_positions));
+	if (!g_state.oldcolor) {
+		memset(icon_positions, 0x7f, sizeof(icon_positions));
 
-	if (icons_ext[0].match[0] >= '0' && icons_ext[0].match[0] <= '9')
-		icon_positions[0] = 0;
+		if (icons_ext[0].match[0] >= '0' && icons_ext[0].match[0] <= '9')
+			icon_positions[0] = 0;
 
-	icon_positions[27] = sizeof(icons_ext)/sizeof(struct icon_pair);
+		icon_positions[27] = sizeof(icons_ext)/sizeof(struct icon_pair);
 
-	for (uint i = 0; i < sizeof(icons_ext)/sizeof(struct icon_pair); ++i) {
-		char c = TOUPPER(icons_ext[i].match[0]);
-		if (c >= 'A' && c <= 'Z') {
-			if (icon_positions[c - 'A' + 1] == 0x7f7f7f7f)
-				icon_positions[c - 'A' + 1] = i;
+		char c;
+		for (uint i = 0; i < sizeof(icons_ext)/sizeof(struct icon_pair); ++i) {
+			c = TOUPPER(icons_ext[i].match[0]);
+			if (c >= 'A' && c <= 'Z') {
+				if (icon_positions[c - 'A' + 1] == 0x7f7f)
+					icon_positions[c - 'A' + 1] = i;
+			}
 		}
 	}
 #endif
@@ -3453,7 +3456,7 @@ static char *get_lsperms(mode_t mode)
 
 #ifdef ICONS
 static const char *get_icon(const struct entry *ent){
-	uint i, j;
+	ushort i, j;
 	char *tmp;
 
 	for (i = 0; i < sizeof(icons_name)/sizeof(struct icon_pair); ++i)
@@ -3461,11 +3464,11 @@ static const char *get_icon(const struct entry *ent){
 			return icons_name[i].icon;
 
 	if (ent->flags & DIR_OR_LINK_TO_DIR)
-		return dir_icon;
+		return dir_icon.icon;
 
 	tmp = xextension(ent->name, ent->nlen);
 	if (!tmp)
-		return file_icon;
+		return file_icon.icon;
 
 	/* Skip the . */
 	++tmp;
@@ -3477,12 +3480,12 @@ static const char *get_icon(const struct entry *ent){
 	else
 		i = 26;
 
-	for (j = icon_positions[i]; j < MIN(icon_positions[i + 1], sizeof(icons_ext)/sizeof(struct icon_pair)); ++j) {
+	for (j = icon_positions[i]; icons_ext[j].match[0] == icons_ext[icon_positions[i]].match[0]; ++j) {
 		if (strcasecmp(tmp, icons_ext[j].match) == 0)
 			return icons_ext[j].icon;
 	}
 
-	return file_icon;
+	return file_icon.icon;
 }
 #endif
 
@@ -3573,9 +3576,11 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 		attron(attrs);
 
 #ifdef ICONS
-	addstr(ICON_PADDING_LEFT);
-	addstr(get_icon(ent));
-	addstr(ICON_PADDING_RIGHT);
+	if (!g_state.oldcolor) {
+		addstr(ICON_PADDING_LEFT);
+		addstr(get_icon(ent));
+		addstr(ICON_PADDING_RIGHT);
+	} 
 #endif
 
 #ifndef NOLOCALE
@@ -3712,9 +3717,11 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	}
 
 #ifdef ICONS
-	addstr(ICON_PADDING_LEFT);
-	addstr(get_icon(ent));
-	addstr(ICON_PADDING_RIGHT);
+	if (!g_state.oldcolor) {
+		addstr(ICON_PADDING_LEFT);
+		addstr(get_icon(ent));
+		addstr(ICON_PADDING_RIGHT);
+	}
 #endif
 
 #ifndef NOLOCALE
@@ -5493,22 +5500,18 @@ static int adjust_cols(int ncols)
 		if (ncols < 36) {
 			cfg.showdetail ^= 1;
 			printptr = &printent;
-			ncols -= 3; /* Preceding space, indicator, newline */
-#ifdef ICONS
-			ncols -= xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT) + 1;
-#endif
 		} else {
-			ncols -= 35;
-#ifdef ICONS
-			ncols -= xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT) + 1;
-#endif
+			/* 3 more accounted for below */
+			ncols -= 32;
 		}
-	} else {
-		ncols -= 3; /* Preceding space, indicator, newline */
-#ifdef ICONS
-		ncols -= xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT) + 1;
-#endif
 	}
+
+/* 3 = Preceding space, indicator, newline */
+#ifdef ICONS
+	ncols -= 3 + xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT) + 1;
+#else
+	ncols -= 3;
+#endif
 
 	return ncols;
 }

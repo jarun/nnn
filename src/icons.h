@@ -3,6 +3,7 @@
 struct icon_pair {
 	const char *match;
 	const char *icon;
+	const unsigned char color;
 };
 
 /* 
@@ -19,22 +20,22 @@ struct icon_pair {
  * If you are using icons-in-terminal the creator recommends that you do use the symbols in the generated header.
  */
 
-static const char *dir_icon = FA_FOLDER;
-static const char *file_icon = FA_FILE;
+static const struct icon_pair dir_icon  = {"", FA_FOLDER, 0};
+static const struct icon_pair file_icon = {"", FA_FILE,   0};
 
 /* All entries are case-insensitive */
 
 static const struct icon_pair icons_name[] = {
-	{".git",         FA_GITHUB_SQUARE},
-	{"Desktop",      FA_HOME},
-	{"Documents",    FA_LIST_ALT},
-	{"Downloads",    FA_DOWNLOAD},
-	{"Music",        FA_MUSIC},
-	{"node_modules", MFIZZ_NPM},
-	{"Pictures",     FA_IMAGE},
-	{"Public",       FA_INBOX},
-	{"Templates",    FA_COG},
-	{"Videos",       FA_FILM},
+	{".git",         FA_GITHUB_SQUARE, 0},
+	{"Desktop",      FA_HOME,          0},
+	{"Documents",    FA_LIST_ALT,      0},
+	{"Downloads",    FA_DOWNLOAD,      0},
+	{"Music",        FA_MUSIC,         0},
+	{"node_modules", MFIZZ_NPM,        0},
+	{"Pictures",     FA_IMAGE,         0},
+	{"Public",       FA_INBOX,         0},
+	{"Templates",    FA_COG,           0},
+	{"Videos",       FA_FILM,          0},
 };
 
 /* 
@@ -45,188 +46,188 @@ static const struct icon_pair icons_name[] = {
 
 static const struct icon_pair icons_ext[] = {
 	/* Numbers */
-	{"7z",       FA_FILE_ARCHIVE_O},
+	{"7z",       FA_FILE_ARCHIVE_O,    0},
 
 	/* A */
-	{"a",        FILE_MANPAGE},
-	{"apk",      FA_FILE_ARCHIVE_O},
-	{"asm",      FILE_NASM},
-	{"aup",      FA_FILE_AUDIO_O},
-	{"avi",      FA_FILE_MOVIE_O},
+	{"a",        FILE_MANPAGE,         0},
+	{"apk",      FA_FILE_ARCHIVE_O,    0},
+	{"asm",      FILE_NASM,            0},
+	{"aup",      FA_FILE_AUDIO_O,      0},
+	{"avi",      FA_FILE_MOVIE_O,      0},
 
 	/* B */
-	{"bat",      MFIZZ_SCRIPT},
-	{"bmp",      FA_FILE_IMAGE_O},
-	{"bz2",      FA_FILE_ARCHIVE_O},
+	{"bat",      MFIZZ_SCRIPT,         0},
+	{"bmp",      FA_FILE_IMAGE_O,      0},
+	{"bz2",      FA_FILE_ARCHIVE_O,    0},
 
 	 /* C */
-	{"c",        MFIZZ_C},
-	{"c++",      MFIZZ_CPLUSPLUS},
-	{"cab",      FA_FILE_ARCHIVE_O},
-	{"cbr",      FA_FILE_ARCHIVE_O},
-	{"cbz",      FA_FILE_ARCHIVE_O},
-	{"cc",       MFIZZ_CPLUSPLUS},
-	{"class",    MFIZZ_JAVA},
-	{"clj",      MFIZZ_CLOJURE},
-	{"cljc",     MFIZZ_CLOJURE},
-	{"cljs",     MFIZZ_CLOJURE},
-	{"cmake",    FILE_CMAKE},
-	{"coffee",   MFIZZ_COFFEE_BEAN},
-	{"conf",     FA_COGS},
-	{"cpio",     FA_FILE_ARCHIVE_O},
-	{"cpp",      MFIZZ_CPLUSPLUS},
-	{"css",      MFIZZ_CSS3},
-	{"cue",      FA_FILE_AUDIO_O},
-	{"cvs",      FA_COGS},
-	{"cxx",      MFIZZ_CPLUSPLUS},
+	{"c",        MFIZZ_C,              0},
+	{"c++",      MFIZZ_CPLUSPLUS,      0},
+	{"cab",      FA_FILE_ARCHIVE_O,    0},
+	{"cbr",      FA_FILE_ARCHIVE_O,    0},
+	{"cbz",      FA_FILE_ARCHIVE_O,    0},
+	{"cc",       MFIZZ_CPLUSPLUS,      0},
+	{"class",    MFIZZ_JAVA,           0},
+	{"clj",      MFIZZ_CLOJURE,        0},
+	{"cljc",     MFIZZ_CLOJURE,        0},
+	{"cljs",     MFIZZ_CLOJURE,        0},
+	{"cmake",    FILE_CMAKE,           0},
+	{"coffee",   MFIZZ_COFFEE_BEAN,    0},
+	{"conf",     FA_COGS,              0},
+	{"cpio",     FA_FILE_ARCHIVE_O,    0},
+	{"cpp",      MFIZZ_CPLUSPLUS,      0},
+	{"css",      MFIZZ_CSS3,           0},
+	{"cue",      FA_FILE_AUDIO_O,      0},
+	{"cvs",      FA_COGS,              0},
+	{"cxx",      MFIZZ_CPLUSPLUS,      0},
 
 	/* D */
-	{"db",       MFIZZ_DATABASE_ALT2},
-	{"deb",      MFIZZ_DEBIAN},
-	{"dll",      FILE_MANPAGE},
-	{"doc",      FILE_WORD},
-	{"docx",     FILE_WORD},
+	{"db",       MFIZZ_DATABASE_ALT2,  0},
+	{"deb",      MFIZZ_DEBIAN,         0},
+	{"dll",      FILE_MANPAGE,         0},
+	{"doc",      FILE_WORD,            0},
+	{"docx",     FILE_WORD,            0},
 
 	 /* E */
-	{"ejs",      FA_FILE_CODE_O},
-	{"elf",      FA_LINUX},
-	{"epub",     FA_FILE_PDF_O},
-	{"exe",      FA_WINDOWS},
+	{"ejs",      FA_FILE_CODE_O,       0},
+	{"elf",      FA_LINUX,             0},
+	{"epub",     FA_FILE_PDF_O,        0},
+	{"exe",      FA_WINDOWS,           0},
 	
 	/* F */
-	{"f#",       DEV_FSHARP},
-	{"flac",     FA_FILE_AUDIO_O},
-	{"flv",      FA_FILE_MOVIE_O},
-	{"fs",       DEV_FSHARP},
-	{"fsi",      DEV_FSHARP},
-	{"fsscript", DEV_FSHARP},
-	{"fsx",      DEV_FSHARP},
+	{"f#",       DEV_FSHARP,           0},
+	{"flac",     FA_FILE_AUDIO_O,      0},
+	{"flv",      FA_FILE_MOVIE_O,      0},
+	{"fs",       DEV_FSHARP,           0},
+	{"fsi",      DEV_FSHARP,           0},
+	{"fsscript", DEV_FSHARP,           0},
+	{"fsx",      DEV_FSHARP,           0},
 
 	/* G */
-	{"gem",      FA_FILE_ARCHIVE_O},
-	{"gif",      FA_FILE_IMAGE_O},
-	{"go",       MFIZZ_GO},
-	{"gz",       FA_FILE_ARCHIVE_O},
-	{"gzip",     FA_FILE_ARCHIVE_O},
+	{"gem",      FA_FILE_ARCHIVE_O,    0},
+	{"gif",      FA_FILE_IMAGE_O,      0},
+	{"go",       MFIZZ_GO,             0},
+	{"gz",       FA_FILE_ARCHIVE_O,    0},
+	{"gzip",     FA_FILE_ARCHIVE_O,    0},
 
 	/* H */
-	{"h",        MFIZZ_C},
-	{"hh",       MFIZZ_CPLUSPLUS},
-	{"htaccess", FA_COGS},
-	{"htpasswd", FA_COGS},
-	{"htm",      FA_FILE_CODE_O},
-	{"html",     FA_FILE_CODE_O},
-	{"hxx",      MFIZZ_CPLUSPLUS},
+	{"h",        MFIZZ_C,              0},
+	{"hh",       MFIZZ_CPLUSPLUS,      0},
+	{"htaccess", FA_COGS,              0},
+	{"htpasswd", FA_COGS,              0},
+	{"htm",      FA_FILE_CODE_O,       0},
+	{"html",     FA_FILE_CODE_O,       0},
+	{"hxx",      MFIZZ_CPLUSPLUS,      0},
 
 	/* I */
-	{"ico",      FA_FILE_IMAGE_O},
-	{"img",      FA_FILE_IMAGE_O},
-	{"ini",      FA_COGS},
-	{"iso",      LINEA_MUSIC_CD},
+	{"ico",      FA_FILE_IMAGE_O,      0},
+	{"img",      FA_FILE_IMAGE_O,      0},
+	{"ini",      FA_COGS,              0},
+	{"iso",      LINEA_MUSIC_CD,       0},
 
 	/* J */
-	{"jar",      MFIZZ_JAVA},
-	{"java",     MFIZZ_JAVA},
-	{"jl",       FA_COGS},
-	{"jpeg",     FA_FILE_IMAGE_O},
-	{"jpg",      FA_FILE_IMAGE_O},
-	{"js",       DEV_JAVASCRIPT_BADGE},
-	{"json",     MFIZZ_JAVASCRIPT},
-	{"jsx",      FILE_JSX},
+	{"jar",      MFIZZ_JAVA,           0},
+	{"java",     MFIZZ_JAVA,           0},
+	{"jl",       FA_COGS,              0},
+	{"jpeg",     FA_FILE_IMAGE_O,      0},
+	{"jpg",      FA_FILE_IMAGE_O,      0},
+	{"js",       DEV_JAVASCRIPT_BADGE, 0},
+	{"json",     MFIZZ_JAVASCRIPT,     0},
+	{"jsx",      FILE_JSX,             0},
 
 	/* K */
 
 	/* L */
-	{"lha",      FA_FILE_ARCHIVE_O},
-	{"log",      FA_FILE_TEXT_O},
-	{"lua",      FILE_LUA},
-	{"lzh",      FA_FILE_ARCHIVE_O},
-	{"lzma",     FA_FILE_ARCHIVE_O},
+	{"lha",      FA_FILE_ARCHIVE_O,    0},
+	{"log",      FA_FILE_TEXT_O,       0},
+	{"lua",      FILE_LUA,             0},
+	{"lzh",      FA_FILE_ARCHIVE_O,    0},
+	{"lzma",     FA_FILE_ARCHIVE_O,    0},
 
 	/* M */
-	{"m4a",      FA_FILE_AUDIO_O},
-	{"m4v",      FA_FILE_MOVIE_O},
-	{"markdown", OCT_MARKDOWN},
-	{"md",       OCT_MARKDOWN},
-	{"mkv",      FA_FILE_MOVIE_O},
-	{"mov",      FA_FILE_MOVIE_O},
-	{"mp3",      FA_FILE_AUDIO_O},
-	{"mp4",      FA_FILE_MOVIE_O},
-	{"mpeg",     FA_FILE_MOVIE_O},
-	{"mpg",      FA_FILE_MOVIE_O},
-	{"msi",      FA_WINDOWS},
+	{"m4a",      FA_FILE_AUDIO_O,      0},
+	{"m4v",      FA_FILE_MOVIE_O,      0},
+	{"markdown", OCT_MARKDOWN,         0},
+	{"md",       OCT_MARKDOWN,         0},
+	{"mkv",      FA_FILE_MOVIE_O,      0},
+	{"mov",      FA_FILE_MOVIE_O,      0},
+	{"mp3",      FA_FILE_AUDIO_O,      0},
+	{"mp4",      FA_FILE_MOVIE_O,      0},
+	{"mpeg",     FA_FILE_MOVIE_O,      0},
+	{"mpg",      FA_FILE_MOVIE_O,      0},
+	{"msi",      FA_WINDOWS,           0},
 
 	/* N */
 
 	/* O */
-	{"o",        FILE_MANPAGE},
-	{"ogg",      FA_FILE_AUDIO_O},
-	{"out",      FA_LINUX},
+	{"o",        FILE_MANPAGE,         0},
+	{"ogg",      FA_FILE_AUDIO_O,      0},
+	{"out",      FA_LINUX,             0},
 
 	/* P */
-	{"pdf",      FA_FILE_PDF_O},
-	{"php",      MFIZZ_PHP},
-	{"png",      FA_FILE_IMAGE_O},
-	{"ppt",      FILE_POWERPOINT},
-	{"pptx",     FILE_POWERPOINT},
-	{"psb",      DEV_PHOTOSHOP},
-	{"psd",      DEV_PHOTOSHOP},
-	{"py",       MFIZZ_PYTHON},
-	{"pyc",      MFIZZ_PYTHON},
-	{"pyd",      MFIZZ_PYTHON},
-	{"pyo",      MFIZZ_PYTHON},
+	{"pdf",      FA_FILE_PDF_O,        0},
+	{"php",      MFIZZ_PHP,            0},
+	{"png",      FA_FILE_IMAGE_O,      0},
+	{"ppt",      FILE_POWERPOINT,      0},
+	{"pptx",     FILE_POWERPOINT,      0},
+	{"psb",      DEV_PHOTOSHOP,        0},
+	{"psd",      DEV_PHOTOSHOP,        0},
+	{"py",       MFIZZ_PYTHON,         0},
+	{"pyc",      MFIZZ_PYTHON,         0},
+	{"pyd",      MFIZZ_PYTHON,         0},
+	{"pyo",      MFIZZ_PYTHON,         0},
 
 	/* Q */
 
 	/* R */
-	{"rar",      FA_FILE_ARCHIVE_O},
-	{"rc",       FA_COGS},
-	{"rom",      FA_LOCK},
-	{"rpm",      FA_FILE_ARCHIVE_O},
-	{"rss",      FA_RSS_SQUARE},
-	{"rtf",      FA_FILE_PDF_O},
+	{"rar",      FA_FILE_ARCHIVE_O,    0},
+	{"rc",       FA_COGS,              0},
+	{"rom",      FA_LOCK,              0},
+	{"rpm",      FA_FILE_ARCHIVE_O,    0},
+	{"rss",      FA_RSS_SQUARE,        0},
+	{"rtf",      FA_FILE_PDF_O,        0},
 
 	/* S */
-	{"so",       FILE_MANPAGE},
-	{"scala",    MFIZZ_SCALA},
-	{"sh",       MFIZZ_SCRIPT},
-	{"slim",     FA_FILE_CODE_O},
-	{"sln",      DEV_VISUALSTUDIO},
-	{"sql",      MFIZZ_MYSQL},
-	{"svg",      FA_FILE_IMAGE_O},
+	{"so",       FILE_MANPAGE,         0},
+	{"scala",    MFIZZ_SCALA,          0},
+	{"sh",       MFIZZ_SCRIPT,         0},
+	{"slim",     FA_FILE_CODE_O,       0},
+	{"sln",      DEV_VISUALSTUDIO,     0},
+	{"sql",      MFIZZ_MYSQL,          0},
+	{"svg",      FA_FILE_IMAGE_O,      0},
 
 	/* T */
-	{"tar",      FA_FILE_ARCHIVE_O},
-	{"tex",      FILE_TEX},
-	{"tgz",      FA_FILE_ARCHIVE_O},
-	{"ts",       FILE_TS},
-	{"tsx",      FILE_TSX},
-	{"txt",      FA_FILE_TEXT_O},
+	{"tar",      FA_FILE_ARCHIVE_O,    0},
+	{"tex",      FILE_TEX,             0},
+	{"tgz",      FA_FILE_ARCHIVE_O,    0},
+	{"ts",       FILE_TS,              0},
+	{"tsx",      FILE_TSX,             0},
+	{"txt",      FA_FILE_TEXT_O,       0},
 
 	/* U */
 
 	/* V */
-	{"vim",      DEV_VIM},
-	{"vimrc",    DEV_VIM},
+	{"vim",      DEV_VIM,              0},
+	{"vimrc",    DEV_VIM,              0},
 
 	/* W */
-	{"wav",      FA_FILE_AUDIO_O},
-	{"webm",     FA_FILE_MOVIE_O},
+	{"wav",      FA_FILE_AUDIO_O,      0},
+	{"webm",     FA_FILE_MOVIE_O,      0},
 
 	/* X */
-	{"xbps",     FA_FILE_ARCHIVE_O},
-	{"xhtml",    FA_FILE_CODE_O},
-	{"xls",      FILE_EXCEL},
-	{"xlsx",     FILE_EXCEL},
-	{"xml",      FA_FILE_CODE_O},
-	{"xz",       FA_FILE_ARCHIVE_O},
+	{"xbps",     FA_FILE_ARCHIVE_O,    0},
+	{"xhtml",    FA_FILE_CODE_O,       0},
+	{"xls",      FILE_EXCEL,           0},
+	{"xlsx",     FILE_EXCEL,           0},
+	{"xml",      FA_FILE_CODE_O,       0},
+	{"xz",       FA_FILE_ARCHIVE_O,    0},
 
 	/* Y */
-	{"yaml",     FA_COGS},
-	{"yml",      FA_COGS},
+	{"yaml",     FA_COGS,              0},
+	{"yml",      FA_COGS,              0},
 
 	/* Z */
-	{"zip",      FA_FILE_ARCHIVE_O}
+	{"zip",      FA_FILE_ARCHIVE_O,    0}
 
 	/* Other */
 };
