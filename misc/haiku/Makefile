@@ -17,6 +17,7 @@ O_NOMOUSE := 0  # no mouse support
 O_NOBATCH := 0  # no built-in batch renamer
 O_NOFIFO := 0  # no FIFO previewer support
 O_CTX8 := 0  # enable 8 contexts
+O_ICONS := 0 # support icons
 
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
@@ -67,6 +68,10 @@ endif
 
 ifeq ($(O_CTX8),1)
 	CPPFLAGS += -DCTX8
+endif
+
+ifeq ($(O_ICONS),1)
+	CPPFLAGS += -DICONS
 endif
 
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
