@@ -1677,6 +1677,9 @@ static bool initcurses(void *oldmask)
 		} else
 			g_state.oldcolor = 1;
 
+		DPRINTF_D(COLORS);
+		DPRINTF_D(COLOR_PAIRS);
+
 		if (colors && *colors == '#') {
 			char *sep = strchr(colors, ';');
 
@@ -1724,12 +1727,20 @@ static bool initcurses(void *oldmask)
 
 #ifdef ICONS
 	if (!g_state.oldcolor) {
+		uchar icolors[256] = {0};
+		char c;
+		bool found = TRUE;
+
 		memset(icon_positions, 0x7f, sizeof(icon_positions));
 
-		if (icons_ext[0].match[0] >= '0' && icons_ext[0].match[0] <= '9')
+		if (icons_ext[0].match[0] >= '0' && icons_ext[0].match[0] <= '9') {
 			icon_positions[0] = 0;
+			if (icons_ext[0].color && !icolors[icons_ext[0].color]) {
+				init_pair(C_UND + 1 + icons_ext[0].color, icons_ext[0].color, -1);
+				icolors[icons_ext[0].color] = 1;
+			}
+		}
 
-		char c;
 		for (uint i = 0; i < sizeof(icons_ext)/sizeof(struct icon_pair); ++i) {
 			c = TOUPPER(icons_ext[i].match[0]);
 			if (c >= 'A' && c <= 'Z') {
@@ -1738,7 +1749,16 @@ static bool initcurses(void *oldmask)
 			} else if (!(c >= '0' && c <= '9')) {
 				if (icon_positions[27] == 0x7f7f)
 					icon_positions[27] = i;
-			}
+			} else
+				found = FALSE;
+
+			if (found) {
+				if (icons_ext[i].color && !icolors[icons_ext[i].color]) {
+					init_pair(C_UND + 1 + icons_ext[i].color, icons_ext[i].color, -1);
+					icolors[icons_ext[i].color] = 1;
+				}
+			} else
+				found = TRUE;
 		}
 	}
 #endif
@@ -3456,20 +3476,24 @@ static char *get_lsperms(mode_t mode)
 }
 
 #ifdef ICONS
-static const char *get_icon(const struct entry *ent){
+static const struct icon_pair * get_icon(const struct entry *ent){
 	ushort i, j;
 	char *tmp;
 
 	for (i = 0; i < sizeof(icons_name)/sizeof(struct icon_pair); ++i)
 		if (strcasecmp(ent->name, icons_name[i].match) == 0)
-			return icons_name[i].icon;
+			return &icons_name[i];
 
 	if (ent->flags & DIR_OR_LINK_TO_DIR)
-		return dir_icon.icon;
+		return &dir_icon;
 
 	tmp = xextension(ent->name, ent->nlen);
-	if (!tmp)
-		return file_icon.icon;
+	if (!tmp) {
+		if (ent->mode & 0100)
+			return &exec_icon;
+
+		return &file_icon;
+	}
 
 	/* Skip the . */
 	++tmp;
@@ -3484,9 +3508,30 @@ static const char *get_icon(const struct entry *ent){
 	for (j = icon_positions[i]; j < sizeof(icons_ext)/sizeof(struct icon_pair) &&
 	     icons_ext[j].match[0] == icons_ext[icon_positions[i]].match[0]; ++j)
 		if (strcasecmp(tmp, icons_ext[j].match) == 0)
-			return icons_ext[j].icon;
+			return &icons_ext[j];
 
-	return file_icon.icon;
+	/* If there's no match and the file is executable, icon that */
+	if (ent->mode & 0100)
+		return &exec_icon;
+
+	return &file_icon;
+}
+
+static void print_icon(const struct entry *ent, const int attrs)
+{
+	const struct icon_pair *picon = get_icon(ent);
+
+	addstr(ICON_PADDING_LEFT);
+	if (picon->color)
+		attron(COLOR_PAIR(C_UND + 1 + picon->color));
+	else if (attrs)
+		attron(attrs);
+	addstr(picon->icon);
+	if (picon->color)
+		attroff(COLOR_PAIR(C_UND + 1 + picon->color));
+	else if (attrs)
+		attroff(attrs);
+	addstr(ICON_PADDING_RIGHT);
 }
 #endif
 
@@ -3502,7 +3547,7 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 {
 	uchar pair = 0;
 	char ind = '\0';
-	int attrs = sel ? A_REVERSE : 0;
+	int attrs = 0;
 
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
@@ -3573,16 +3618,15 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 
 	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
+#ifdef ICONS
+	if (!g_state.oldcolor)
+		print_icon(ent, attrs);
+#endif
+
+	if (sel)
+		attrs |= A_REVERSE;
 	if (attrs)
 		attron(attrs);
-
-#ifdef ICONS
-	if (!g_state.oldcolor) {
-		addstr(ICON_PADDING_LEFT);
-		addstr(get_icon(ent));
-		addstr(ICON_PADDING_RIGHT);
-	}
-#endif
 
 #ifndef NOLOCALE
 	addwstr(unescape(ent->name, namecols));
@@ -3696,14 +3740,16 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		break;
 	}
 
-	addstr("  ");
-
 	if (g_state.oldcolor) {
+		addstr("  ");
 		if (!ln) {
 			attroff(A_DIM);
 			attrs ^=  A_DIM;
 		}
 	} else {
+#ifndef ICONS
+		addstr("  ");
+#endif
 		if (ent->flags & FILE_MISSING)
 			pair = C_MIS;
 		else {
@@ -3711,19 +3757,19 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 			attrs ^= (COLOR_PAIR(C_MIS));
 		}
 
-		if (pair && fcolors[pair]) {
+		if (pair && fcolors[pair])
 			attrs |= COLOR_PAIR(pair);
-			attron(attrs);
-		}
-	}
-
 #ifdef ICONS
-	if (!g_state.oldcolor) {
-		addstr(ICON_PADDING_LEFT);
-		addstr(get_icon(ent));
-		addstr(ICON_PADDING_RIGHT);
-	}
+		attroff(attrs);
+		addstr("  ");
+		if (sel)
+			attrs &= ~A_REVERSE;
+		print_icon(ent, attrs);
+		if (sel)
+			attrs |= A_REVERSE;
 #endif
+		attron(attrs);
+	}
 
 #ifndef NOLOCALE
 	addwstr(unescape(ent->name, namecols));
