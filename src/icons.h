@@ -37,16 +37,20 @@ static const struct icon_pair exec_icon = {"", FA_TERMINAL, 0};
 /* All entries are case-insensitive */
 
 static const struct icon_pair icons_name[] = {
-	{".git",         FA_GITHUB_SQUARE, 0},
-	{"Desktop",      FA_HOME,          0},
-	{"Documents",    FA_LIST_ALT,      0},
-	{"Downloads",    FA_DOWNLOAD,      0},
-	{"Music",        FA_MUSIC,         0},
-	{"node_modules", MFIZZ_NPM,        0},
-	{"Pictures",     FA_IMAGE,         0},
-	{"Public",       FA_INBOX,         0},
-	{"Templates",    FA_COG,           0},
-	{"Videos",       FA_FILM,          0},
+	{".git",         FA_GITHUB_SQUARE,  0},
+	{"Desktop",      FA_HOME,           0},
+	{"Documents",    FA_LIST_ALT,       0},
+	{"Downloads",    FA_DOWNLOAD,       0},
+	{"Music",        FA_MUSIC,          0},
+	{"node_modules", MFIZZ_NPM,         0},
+	{"Pictures",     FA_IMAGE,          0},
+	{"Public",       FA_INBOX,          0},
+	{"Templates",    FA_COG,            0},
+	{"Videos",       FA_FILM,           0},
+	{"CHANGELOG",    MD_CHANGE_HISTORY, 0},
+	{"configure",    FILE_CONFIG,       0},
+	{"License",      FA_COPYRIGHT,      0},
+	{"Makefile",     FILE_CMAKE,        0},
 };
 
 /*
@@ -57,6 +61,7 @@ static const struct icon_pair icons_name[] = {
 
 static const struct icon_pair icons_ext[] = {
 	/* Numbers */
+	{"1",        FILE_MANPAGE,         0},
 	{"7z",       FA_FILE_ARCHIVE_O,    ARCHIVE_COLOR},
 
 	/* A */
@@ -158,8 +163,9 @@ static const struct icon_pair icons_ext[] = {
 	/* M */
 	{"m4a",      FA_FILE_AUDIO_O,      AUDIO_COLOR},
 	{"m4v",      FA_FILE_MOVIE_O,      VIDEO_COLOR},
-	{"markdown", OCT_MARKDOWN,         0},
-	{"md",       OCT_MARKDOWN,         0},
+	{"markdown", DEV_MARKDOWN,         0},
+	{"md",       DEV_MARKDOWN,         0},
+	{"mk",       FILE_CMAKE,           0},
 	{"mkv",      FA_FILE_MOVIE_O,      VIDEO_COLOR},
 	{"mov",      FA_FILE_MOVIE_O,      VIDEO_COLOR},
 	{"mp3",      FA_FILE_AUDIO_O,      AUDIO_COLOR},

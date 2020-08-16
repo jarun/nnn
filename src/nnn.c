@@ -687,7 +687,7 @@ static const char * const patterns[] = {
 
 #ifdef ICONS
 /* NUMBERS, A-Z, OTHER = 28. */
-static ushort icon_positions[28];
+static ushort icon_positions[37];
 #endif
 
 static char gcolors[] = "c1e2272e006033f7c6d6abc4";
@@ -1729,36 +1729,26 @@ static bool initcurses(void *oldmask)
 	if (!g_state.oldcolor) {
 		uchar icolors[256] = {0};
 		char c;
-		bool found = TRUE;
 
 		memset(icon_positions, 0x7f, sizeof(icon_positions));
-
-		if (icons_ext[0].match[0] >= '0' && icons_ext[0].match[0] <= '9') {
-			icon_positions[0] = 0;
-			if (icons_ext[0].color && !icolors[icons_ext[0].color]) {
-				init_pair(C_UND + 1 + icons_ext[0].color, icons_ext[0].color, -1);
-				icolors[icons_ext[0].color] = 1;
-			}
-		}
 
 		for (uint i = 0; i < sizeof(icons_ext)/sizeof(struct icon_pair); ++i) {
 			c = TOUPPER(icons_ext[i].match[0]);
 			if (c >= 'A' && c <= 'Z') {
-				if (icon_positions[c - 'A' + 1] == 0x7f7f)
-					icon_positions[c - 'A' + 1] = i;
-			} else if (!(c >= '0' && c <= '9')) {
-				if (icon_positions[27] == 0x7f7f)
-					icon_positions[27] = i;
-			} else
-				found = FALSE;
+				if (icon_positions[c - 'A' + 10] == 0x7f7f)
+					icon_positions[c - 'A' + 10] = i;
+			} else if (c >= '0' && c <= '9') {
+				if (icon_positions[c - '0'] == 0x7f7f)
+					icon_positions[c - '0'] = i;
+			} else {
+				if (icon_positions[36] == 0x7f7f)
+					icon_positions[36] = i;
+			}
 
-			if (found) {
-				if (icons_ext[i].color && !icolors[icons_ext[i].color]) {
-					init_pair(C_UND + 1 + icons_ext[i].color, icons_ext[i].color, -1);
-					icolors[icons_ext[i].color] = 1;
-				}
-			} else
-				found = TRUE;
+			if (icons_ext[i].color && !icolors[icons_ext[i].color]) {
+				init_pair(C_UND + 1 + icons_ext[i].color, icons_ext[i].color, -1);
+				icolors[icons_ext[i].color] = 1;
+			}
 		}
 	}
 #endif
@@ -3499,11 +3489,11 @@ static const struct icon_pair * get_icon(const struct entry *ent){
 	++tmp;
 
 	if (*tmp >= '0' && *tmp <= '9')
-		i = 0; /* NUMBER */
+		i = *tmp - '0'; /* NUMBER */
 	else if (TOUPPER(*tmp) >= 'A' && TOUPPER(*tmp) <= 'Z')
-		i = TOUPPER(*tmp) - 'A' + 1; /* LETTER A-Z */
+		i = TOUPPER(*tmp) - 'A' + 10; /* LETTER A-Z */
 	else
-		i = 27; /* OTHER */
+		i = 36; /* OTHER */
 
 	for (j = icon_positions[i]; j < sizeof(icons_ext)/sizeof(struct icon_pair) &&
 	     icons_ext[j].match[0] == icons_ext[icon_positions[i]].match[0]; ++j)
