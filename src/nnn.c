@@ -686,7 +686,7 @@ static const char * const patterns[] = {
 #define C_UND (C_SOC + 1) /* Unknown OR 0B regular/exe file: Red1 */
 
 #ifdef ICONS
-/* NUMBERS, A-Z, OTHER = 28. */
+/* 0-9, A-Z, OTHER = 36. */
 static ushort icon_positions[37];
 #endif
 
@@ -1234,7 +1234,7 @@ static char confirm_force(bool selection)
 
 	int r = get_input(str);
 
-	if (r == 27)
+	if (r == ESC)
 		return '\0'; /* cancel */
 	if (r == 'y' || r == 'Y')
 		return 'f'; /* forceful */
@@ -1740,10 +1740,8 @@ static bool initcurses(void *oldmask)
 			} else if (c >= '0' && c <= '9') {
 				if (icon_positions[c - '0'] == 0x7f7f)
 					icon_positions[c - '0'] = i;
-			} else {
-				if (icon_positions[36] == 0x7f7f)
-					icon_positions[36] = i;
-			}
+			} else if (icon_positions[36] == 0x7f7f)
+				icon_positions[36] = i;
 
 			if (icons_ext[i].color && !icolors[icons_ext[i].color]) {
 				init_pair(C_UND + 1 + icons_ext[i].color, icons_ext[i].color, -1);
@@ -2502,7 +2500,7 @@ static int handle_alt_key(wint_t *wch)
 	timeout(0);
 	int r = get_wch(wch);
 	if (r == ERR)
-		*wch = 27;
+		*wch = ESC;
 	cleartimeout();
 
 	return r;
@@ -2524,18 +2522,18 @@ static int nextsel(int presel)
 		//DPRINTF_S(keyname(c));
 
 		/* Handle Alt+key */
-		if (c == 27) {
+		if (c == ESC) {
 			timeout(0);
 			c = getch();
 			if (c != ERR) {
-				if (c == 27)
+				if (c == ESC)
 					c = CONTROL('L');
 				else {
 					ungetch(c);
 					c = ';';
 				}
 			} else
-				c = 27;
+				c = ESC;
 			settimeout();
 		}
 
@@ -2775,7 +2773,7 @@ static int filterentries(char *path, char *lastname)
 		case KEY_DC: // fallthrough
 		case KEY_BACKSPACE: // fallthrough
 		case '\b': // fallthrough
-		case 127: /* handle DEL */
+		case DEL: /* handle DEL */
 			if (len != 1) {
 				wln[--len] = '\0';
 				wcstombs(ln, wln, REGEX_MAX);
@@ -2809,9 +2807,9 @@ static int filterentries(char *path, char *lastname)
 		case KEY_MOUSE:
 			goto end;
 #endif
-		case 27: /* Exit filter mode on Escape and Alt+key */
+		case ESC: /* Exit filter mode on Escape and Alt+key */
 			if (handle_alt_key(ch) != ERR) {
-				if (*ch == 27) { /* Handle Alt + Esc */
+				if (*ch == ESC) { /* Handle Alt + Esc */
 					if (wln[1]) {
 						ln[REGEX_MAX - 1] = ln[1];
 						ln[1] = wln[1] = '\0';
@@ -2987,7 +2985,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 				} else
 					continue;
 				// fallthrough
-			case 127: // fallthrough
+			case DEL: // fallthrough
 			case '\b': /* rhel25 sends '\b' for backspace */
 				if (pos > 0) {
 					memmove(buf + pos - 1, buf + pos,
@@ -3034,7 +3032,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 				len -= pos;
 				pos = 0;
 				continue;
-			case 27: /* Exit prompt on Escape, but just filter out Alt+key */
+			case ESC: /* Exit prompt on Escape, but just filter out Alt+key */
 				if (handle_alt_key(ch) != ERR)
 					continue;
 
@@ -3467,17 +3465,17 @@ static char *get_lsperms(mode_t mode)
 
 #ifdef ICONS
 static const struct icon_pair * get_icon(const struct entry *ent){
-	ushort i, j;
-	char *tmp;
+	ushort i = 0;
 
-	for (i = 0; i < sizeof(icons_name)/sizeof(struct icon_pair); ++i)
+	for (; i < sizeof(icons_name)/sizeof(struct icon_pair); ++i)
 		if (strcasecmp(ent->name, icons_name[i].match) == 0)
 			return &icons_name[i];
 
 	if (ent->flags & DIR_OR_LINK_TO_DIR)
 		return &dir_icon;
 
-	tmp = xextension(ent->name, ent->nlen);
+	char *tmp = xextension(ent->name, ent->nlen);
+
 	if (!tmp) {
 		if (ent->mode & 0100)
 			return &exec_icon;
@@ -3489,14 +3487,14 @@ static const struct icon_pair * get_icon(const struct entry *ent){
 	++tmp;
 
 	if (*tmp >= '0' && *tmp <= '9')
-		i = *tmp - '0'; /* NUMBER */
+		i = *tmp - '0'; /* NUMBER 0-9 */
 	else if (TOUPPER(*tmp) >= 'A' && TOUPPER(*tmp) <= 'Z')
 		i = TOUPPER(*tmp) - 'A' + 10; /* LETTER A-Z */
 	else
 		i = 36; /* OTHER */
 
-	for (j = icon_positions[i]; j < sizeof(icons_ext)/sizeof(struct icon_pair) &&
-	     icons_ext[j].match[0] == icons_ext[icon_positions[i]].match[0]; ++j)
+	for (ushort j = icon_positions[i]; j < sizeof(icons_ext)/sizeof(struct icon_pair) &&
+			icons_ext[j].match[0] == icons_ext[icon_positions[i]].match[0]; ++j)
 		if (strcasecmp(tmp, icons_ext[j].match) == 0)
 			return &icons_ext[j];
 
@@ -6268,7 +6266,7 @@ nochange:
 #endif
 			presel = filterentries(path, lastname);
 
-			if (presel == 27) {
+			if (presel == ESC) {
 				presel = 0;
 				break;
 			}
