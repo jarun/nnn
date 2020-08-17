@@ -1,3 +1,5 @@
+<a href="https://asciinema.org/a/353811"><img src="https://i.imgur.com/InHB5DB.png" height="400px" align="right" /></a>
+
 <p align="center"><img src="misc/logo/logo-64x64.png" alt="nnn"><br/>nnn - <i>Supercharge your productivity!</i></p>
 
 <p align="center">
@@ -9,7 +11,7 @@
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellowgreen.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
-<a href="https://asciinema.org/a/353811"><img src="https://i.imgur.com/InHB5DB.png" height="460px" align="right" /></a>
+<img align="left" src="misc/logo/logo-128x128.png">
 
 `nnn` (or `n³`) is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible performance](https://github.com/jarun/nnn/wiki/Performance).
 
