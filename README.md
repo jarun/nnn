@@ -1,5 +1,7 @@
 <a href="https://asciinema.org/a/353811"><img src="https://asciinema.org/a/353811.svg" height="450px" align="right" /></a>
 
+# nnn - Supercharge your productivity!
+
 <p align="center">
 <a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600" alt="Latest release" /></a>
 <a href="https://repology.org/project/nnn/versions"><img src="https://repology.org/badge/tiny-repos/nnn.svg?header=in repos" alt="Availability"></a>
