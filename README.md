@@ -1,4 +1,4 @@
-<a href="https://asciinema.org/a/353811"><img src="https://asciinema.org/a/353811.svg" height="450px" align="right" /></a>
+<a href="https://asciinema.org/a/353811"><img src="https://asciinema.org/a/353811.svg" height="400px" align="right" /></a>
 
 <h1>nnn - <i>Supercharge your productivity!</i></h1>
 
