@@ -9,11 +9,8 @@
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellowgreen.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
-<p align="center"><a href="https://asciinema.org/a/353811"><img src="https://i.imgur.com/InHB5DB.png" /></a></p>
+<p align="center"><a href="https://asciinema.org/a/353811"><img src="https://i.imgur.com/InHB5DB.png" /><br></a></p>
 <p align="center"><i>icons and colors (click for asciicast) </i></p>
-
-<p align="center"><a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a></p>
-<p align="center"><i>type-to-nav & du (click for demo video)</i></p>
 
 ## Introduction
 
@@ -28,6 +25,11 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 <p align="center">
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/donate-PayPal-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
+
+<br>
+
+<p align="center"><a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a></p>
+<p align="center"><i>type-to-nav & du (click for demo video)</i></p>
 
 ## Black magic! :dark_sunglasses:
 

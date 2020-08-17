@@ -34,6 +34,14 @@
 
 #define CONTROL(c) ((c) & 0x1f)
 
+#ifndef ESC
+#define ESC (27)
+#endif
+
+#ifndef DEL
+#define DEL (127)
+#endif
+
 /* Supported actions */
 enum action {
 	SEL_BACK = 1,
@@ -268,7 +276,7 @@ static struct key bindings[] = {
 	{ 'Q',            SEL_QUITFAIL },
 #ifndef NOFIFO
 	/* Send hovered path to NNN_FIFO */
-	{ 27,            SEL_FIFO },
+	{ ESC,            SEL_FIFO },
 #endif
 #ifndef NOMOUSE
 	{ KEY_MOUSE,      SEL_CLICK },
