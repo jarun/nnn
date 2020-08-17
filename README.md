@@ -1,4 +1,4 @@
-<a href="https://asciinema.org/a/353811"><img src="https://asciinema.org/a/353811.svg" height="400px" align="right" /></a>
+<a href="https://asciinema.org/a/353811"><img src="https://asciinema.org/a/353811.svg" height="450px" align="right" /></a>
 
 <p align="center">
 <a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600" alt="Latest release" /></a>
