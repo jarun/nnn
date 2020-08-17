@@ -9,8 +9,11 @@
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellowgreen.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
+<p align="center"><a href="https://asciinema.org/a/353811"><img src="https://i.imgur.com/InHB5DB.png" /></a></p>
+<p align="center"><i>icons and colors (click for asciicast) </i></p>
+
 <p align="center"><a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a></p>
-<p align="center"><i>type-to-nav & du (click to see demo video)</i></p>
+<p align="center"><i>type-to-nav & du (click for demo video)</i></p>
 
 ## Introduction
 
@@ -104,7 +107,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Preview hovered files in FIFO-based previewer
   - Open with desktop opener or specify a custom opener
   - File-specific colors (or minimal _dirs in context color_)
-  - Icons (can be compiled-in using relevant make option)
+  - Icons (customize and compile-in)
   - Plugins for image and video thumbnails
   - Create, list, extract, mount (FUSE based) archives
   - Option to open all text files in EDITOR
