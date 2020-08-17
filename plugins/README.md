@@ -12,16 +12,6 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 
 `nnn` is _**language-agnostic**_ when it comes to plugins. You can write a plugin in any (scripting) language you are comfortable in!
 
-## Installing plugins
-
-The following command installs or updates (after backup) all plugins:
-
-```sh
-curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs | sh
-```
-
-Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
-
 ## List of plugins
 
 | Plugin (a-z) | Description | Lang | Dependencies |
@@ -78,19 +68,31 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | [wall](wall) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 | [x2sel](x2sel) | Copy `\n`-separated file list from system clipboard to sel | sh | _see in-file docs_ |
 
-## Invoking a plugin
+## Installation
 
-Press the plugin shortcut (<kbd>;</kbd>) followed by the assigned key character. E.g., with the below config:
+The following command installs or updates (after backup) all plugins:
+
+```sh
+curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs | sh
+```
+
+Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
+
+## Configuration
+
+Set environment variable `NNN_PLUG` to assign keybinds and invoke plugins directly using the plugin shortcut (<kbd>;</kbd>) followed by the assigned key character. E.g., with the below config:
 
 ```sh
 export NNN_PLUG='f:finder;o:fzopen;p:mocplay;d:diffs;t:nmount;v:imgview'
 ```
 
-Plugin `finder` can be run with the keybind <kbd>;f</kbd>, `fzopen` can be run with <kbd>;o</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
+plugin `finder` can be invoked with the keybind <kbd>;f</kbd>, `fzopen` can be run with <kbd>;o</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
 
 Alternatively, combine with <kbd>Alt</kbd> (i.e. <kbd>Alt+key</kbd>).
 
-To select and invoke a plugin from the plugin directory, press <kbd>Enter</kbd> (to _enter_ the plugin dir) after the plugin shortcut.
+To pick and run an unassigned plugin, press <kbd>Enter</kbd> (to _enter_ the plugin dir) at the plugin prompt.
+
+To run a plugin at startup, use the option `-P` followed by the plugin key.
 
 #### Skip directory refresh after running a plugin
 

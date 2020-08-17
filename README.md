@@ -101,8 +101,10 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - By name, access/change/mod (default) time, size, extn
   - Reverse sort
 - Mimes
-  - Open with desktop opener or specify a custom opener
   - Preview hovered files in FIFO-based previewer
+  - Open with desktop opener or specify a custom opener
+  - File-specific colors (or minimal _dirs in context color_)
+  - Icons (can be compiled-in using relevant make option)
   - Plugins for image and video thumbnails
   - Create, list, extract, mount (FUSE based) archives
   - Option to open all text files in EDITOR
@@ -129,7 +131,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 1. [Install](https://github.com/jarun/nnn/wiki/Usage#installation) `nnn` and deps (if you need any). All files are opened with the desktop opener by default.
 2. Add option `-e` to your alias to open text files in `$VISUAL`/`$EDITOR`/ vi. [Open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text) if you wish.
 3. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
-4. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installing-plugins).
+4. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installation).
 5. Use option `-x` to copy selected file paths to system clipboard and show notis on cp, mv, rm completion.
 6. For a CLI-only environment, customize and use plugin [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke) with option `-c` (overrides `-e`).
 

@@ -380,6 +380,9 @@ separated by \fI;\fR:
 .Bd -literal
     export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn'
 
+    To pick and run an unassigned plugin, press \fBEnter\fR at the plugin prompt.
+    To run a plugin at startup, use the option `-P` followed by the plugin key.
+
     NOTES:
     1. Use single quotes for $NNN_PLUG so $nnn is not interpreted
     2. $nnn should be the last argument (IF used)
