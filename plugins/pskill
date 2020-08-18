@@ -29,5 +29,7 @@ if ! [ -z "$psname" ]; then
     fi
 
     cmd="$(ps -ax | grep -iw "$psname" | "$fuzzy" | sed -e 's/^[ \t]*//' | cut -d' ' -f1)"
-    $sucmd kill -9 "$cmd"
+    if [ -n "$cmd" ]; then
+        $sucmd kill -9 "$cmd"
+    fi
 fi
