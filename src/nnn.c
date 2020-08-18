@@ -117,7 +117,7 @@
 #endif
 
 /* Macro definitions */
-#define VERSION "3.3"
+#define VERSION "3.4"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
 #define SESSIONS_VERSION 1
 

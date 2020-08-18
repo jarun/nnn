@@ -1,3 +1,24 @@
+nnn v3.4
+2020-08-18
+
+- icons with icon-specific colors (thanks @KlzXS)
+- enhanced `NNN_COLORS` with xterm 256 colors support
+- new colorscheme with `NNN_FCOLORS` (file type specific colors)
+- switch `-C` to force earlier colorscheme (dirs follow context color)
+- updates for Haiku (thanks @CodeforEvolution)
+- fix XFS navigation issue (thanks @ucs1)
+- optimize archive extension matching on file open
+- show location in context color
+- support `host[:dir]` format for remote mounts
+- clear selection after copy
+- support traversal on file/dir creation
+- show selection in reverse in status bar
+- show status bar indicator `H` when hidden files are listed
+- show and confirm archive command output
+- support _cd on quit_ in picker mode
+
+-------------------------------------------------------------------------------
+
 nnn v3.3
 2020-07-14
 

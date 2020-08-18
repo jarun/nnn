@@ -7,15 +7,6 @@ commands:
   install:
     - make PREFIX="/usr" strip install DESTDIR="${BP_DESTDIR}"
 packages:
-  archlinux:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-    deps:
-      - ncurses
-      - readline
-    container: "archlinux/base"
   centos7.5:
     builddeps:
       - make
@@ -68,16 +59,6 @@ packages:
     commands:
       pre:
         - yum install epel-release
-  debian8:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - libncursesw5-dev
-      - libreadline-dev
-    deps:
-      - libncursesw5
-      - readline-common
   debian9:
     builddeps:
       - make
@@ -98,16 +79,6 @@ packages:
     deps:
       - libncursesw5
       - readline-common
-  fedora30:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - ncurses-devel
-      - readline-devel
-    deps:
-      - ncurses
-      - readline
   fedora31:
     builddeps:
       - make
@@ -138,6 +109,16 @@ packages:
     deps:
       - libncurses6
       - libreadline7
+  opensuse15.2:
+    builddeps:
+      - make
+      - gcc
+      - pkg-config
+      - readline-devel
+      - ncurses-devel
+    deps:
+      - libncurses6
+      - libreadline7
   opensuse.tumbleweed:
     builddeps:
       - make
@@ -148,16 +129,6 @@ packages:
     deps:
       - libncurses6
       - libreadline8
-  ubuntu14.04:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - libncursesw5-dev
-      - libreadline6-dev
-    deps:
-      - libncursesw5
-      - libreadline6
   ubuntu16.04:
     builddeps:
       - make

@@ -12,7 +12,7 @@ resource app_version {
 	middle = 4,
 	minor  = 0,
 
-	variety = B_APPV_DEVELOPMENT,
+	variety = B_APPV_FINAL,
 	internal = 0,
 
 	short_info = "nnn",
