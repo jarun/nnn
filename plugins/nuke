@@ -83,10 +83,12 @@ if [ -n "$ext" ]; then
     ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
 fi
 
-uname=$(uname)
+is_mac() {
+    uname | grep -q "Darwin"
+}
 
 handle_pdf() {
-    if [ "$GUI" -ne 0 ] && [ "$uname" = Darwin ]; then
+    if [ "$GUI" -ne 0 ] && is_mac; then
         open "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif [ "$GUI" -ne 0 ] && which zathura >/dev/null 2>&1; then
@@ -125,7 +127,7 @@ handle_audio() {
 }
 
 handle_video() {
-    if [ "$GUI" -ne 0 ] && [ "$uname" = Darwin ]; then
+    if [ "$GUI" -ne 0 ] && is_mac; then
         open "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif [ "$GUI" -ne 0 ] && which smplayer >/dev/null 2>&1; then
@@ -302,7 +304,7 @@ handle_multimedia() {
 
         ## Image
         image/*)
-            if [ "$GUI" -ne 0 ] && [ "$uname" = Darwin ]; then
+            if [ "$GUI" -ne 0 ] && is_mac; then
                 open "${FPATH}" >/dev/null 2>&1 &
                 exit 0
             elif [ "$GUI" -ne 0 ] && which imvr >/dev/null 2>&1; then
