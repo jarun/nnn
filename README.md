@@ -1,24 +1,26 @@
-<h1 align="center">nnn - <i>supercharge your productivity!</i></h1>
+<h3 align="center"><img src="misc/logo/logo-128x128.png" alt="nnn"><br>nnn - <i>Supercharge your productivity!</i></h3>
 
 <p align="center">
-<a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600" alt="Latest release" /></a>
-<a href="https://repology.org/project/nnn/versions"><img src="https://repology.org/badge/tiny-repos/nnn.svg?header=in repos" alt="Availability"></a>
+<a href="https://github.com/jarun/nnn/releases/latest"><img src="https://img.shields.io/github/release/jarun/nnn.svg?maxAge=600&label=rel" alt="Latest release" /></a>
+<a href="https://repology.org/project/nnn/versions"><img src="https://repology.org/badge/tiny-repos/nnn.svg?header=repos" alt="Availability"></a>
 <a href="https://travis-ci.org/jarun/nnn"><img src="https://img.shields.io/travis/jarun/nnn/master.svg?label=travis" alt="Travis Status" /></a>
 <a href="https://circleci.com/gh/jarun/workflows/nnn"><img src="https://img.shields.io/circleci/project/github/jarun/nnn.svg?label=circleci" alt="CircleCI Status" /></a>
 <a href="https://en.wikipedia.org/wiki/Privacy-invasive_software"><img src="https://img.shields.io/badge/privacy-✓-crimson?maxAge=2592000" alt="Privacy Awareness" /></a>
-<a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-BSD%202--Clause-yellowgreen.svg?maxAge=2592000" alt="License" /></a>
+<a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/©-BSD%202--Clause-important.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
 <p align="center"><a href="https://asciinema.org/a/353811"><img src="https://i.imgur.com/InHB5DB.png" /><br></a></p>
 <p align="center"><i>icons and colors (click for asciicast) </i></p>
 
-## Introduction
+<h3 align="center">[<a
+href="https://github.com/jarun/nnn#features">Features</a>] [<a
+href="https://github.com/jarun/nnn#quickstart">Quickstart</a>] [<a
+href="https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins">Plugins</a>] [<a
+href="https://github.com/jarun/nnn/wiki/Performance">Performance</a>]</h3>
 
-<img align="left" src="misc/logo/logo-128x128.png">
+`nnn` (_n³_) is a full-featured terminal file manager. It's tiny and nearly 0-config with an incredible performance.
 
-`nnn` (or `n³`) is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible performance](https://github.com/jarun/nnn/wiki/Performance).
-
-`nnn` can analyze disk usage, batch rename, launch apps and pick files. The [plugin repository](https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins) has tons of plugins and documentation to extend the capabilities further e.g. [preview](https://github.com/jarun/nnn/wiki/Live-previews), (un)mount disks, find & list, file/dir diff, upload files. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
+`nnn` can analyze disk usage, batch rename, launch apps and pick files. The plugin repository has tons of plugins and documentation to extend the capabilities further e.g. [preview](https://github.com/jarun/nnn/wiki/Live-previews), (un)mount disks, find & list, file/dir diff, upload files. There's an independent [(neo)vim plugin](https://github.com/mcchrish/nnn.vim).
 
 It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw) (Android), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
 
@@ -57,7 +59,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 - Toggle hidden with <kbd>.</kbd>, visit HOME with <kbd>~</kbd>, last dir with <kbd>-</kbd>
 - Mark a frequently visited dir at runtime
 - Sort by modification, access and inode change time
-- Compile out/in features with make options
+- Compile out/in features with make variables
 - Watch matrix text fly or read fortune messages
 - Configure in 5 minutes!
 
@@ -71,11 +73,11 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Minimizes screen refresh with fast line redraws
   - Tiny binary (typically around 100KB)
   - 1-column mode for smaller terminals and form factors
+  - Hackable - compile in/out features and dependencies
 - Portable
   - Language-agnostic plugins
   - Static binary available (no need to install)
   - Minimal library deps, easy to compile
-  - Compile in/out features with make variables
   - No config file, minimal config with sensible defaults
   - Widely available on many packagers
   - Touch enabled, comfortable on handhelds too!
