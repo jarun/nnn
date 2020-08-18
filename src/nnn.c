@@ -6382,7 +6382,7 @@ nochange:
 					copycurname();
 				goto nochange;
 			case SEL_EDIT:
-				spawn(editor, pdents[cur].name, NULL, F_CLI);
+				spawn(editor, newpath, NULL, F_CLI);
 				continue;
 			default: /* SEL_LOCK */
 				lock_terminal();
