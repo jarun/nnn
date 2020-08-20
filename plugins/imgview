@@ -39,7 +39,11 @@ if [ -z "$1" ] || ! [ -s "$1" ]; then
     exit 1
 fi
 
-if command -v imvr >/dev/null 2>&1; then
+if uname | grep -q "Darwin"; then
+    if [ -f "$1" ]; then
+        open "$1" >/dev/null 2>&1 &
+    fi
+elif command -v imvr >/dev/null 2>&1; then
     if [ -f "$1" ]; then
         view_dir imvr "$1" >/dev/null 2>&1 &
     elif [ -d "$1" ] || [ -h "$1" ]; then
