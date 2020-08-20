@@ -2525,6 +2525,9 @@ static int handle_alt_key(wint_t *wch)
  */
 static int nextsel(int presel)
 {
+#ifdef BENCH
+	return SEL_QUIT;
+#endif
 	int c = presel;
 	uint i;
 

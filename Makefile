@@ -79,6 +79,10 @@ ifeq ($(O_NO_TOURBIN_QSORT),1)
 	CPPFLAGS += -DNO_TOURBIN_QSORT
 endif
 
+ifeq ($(O_BENCHMARK),1)
+	CPPFLAGS += -DBENCH
+endif
+
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
 	CFLAGS_CURSES ?= $(shell $(PKG_CONFIG) --cflags ncursesw)
 	LDLIBS_CURSES ?= $(shell $(PKG_CONFIG) --libs   ncursesw)
