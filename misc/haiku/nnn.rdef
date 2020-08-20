@@ -1,9 +1,9 @@
 
-# How to apply this resource definition file manually (Haiku only):
-# First, make sure that nnn is compiled.
-# Next, run "rc nnn.rdef -o nnn.rsrc" to compile this resource file.
-# Then, run "xres -o nnn nnn.rsrc" to apply the resource file to nnn.
-# Finally, run "mimeset -f nnn" to refresh Haiku's MIME database.
+// How to apply this resource definition file manually (Haiku only):
+// First, make sure that nnn is compiled.
+// Next, run "rc nnn.rdef -o nnn.rsrc" to compile this resource file.
+// Then, run "xres -o nnn nnn.rsrc" to apply the resource file to nnn.
+// Finally, run "mimeset -f nnn" to refresh Haiku's MIME database.
 
 resource app_signature "application/x-vnd.Jarun-nnn";
 
