@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+#
+# Usage: ./plot-bench.py datafile
+# (where datafile is the output of benchmark.sh)
 
 import matplotlib.pyplot as plt
 import sys

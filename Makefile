@@ -20,6 +20,8 @@ O_NOBATCH := 0  # no built-in batch renamer
 O_NOFIFO := 0  # no FIFO previewer support
 O_CTX8 := 0  # enable 8 contexts
 O_ICONS := 0  # support icons
+O_QSORT := 0  # use Alexey Tourbin's QSORT implementation
+O_BENCH := 0  # benchmark mode (stops at first user input)
 
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
@@ -75,11 +77,11 @@ ifeq ($(O_ICONS),1)
 	CPPFLAGS += -DICONS
 endif
 
-ifeq ($(O_NO_TOURBIN_QSORT),1)
-	CPPFLAGS += -DNO_TOURBIN_QSORT
+ifeq ($(O_QSORT),1)
+	CPPFLAGS += -DTOURBIN_QSORT
 endif
 
-ifeq ($(O_BENCHMARK),1)
+ifeq ($(O_BENCH),1)
 	CPPFLAGS += -DBENCH
 endif
 

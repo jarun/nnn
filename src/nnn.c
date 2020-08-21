@@ -116,7 +116,7 @@
 #include "icons.h"
 #endif
 
-#ifndef NO_TOURBIN_QSORT
+#ifdef TOURBIN_QSORT
 #include "qsort.h"
 #endif
 
@@ -736,12 +736,12 @@ static haiku_nm_h haiku_hnd;
 #define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
 #define xerror() perror(xitoa(__LINE__))
 
-#ifndef NO_TOURBIN_QSORT
-#define ENTLESS(i,j) (entrycmpfn(pdents + i, pdents + j) < 0)
-#define ENTSWAP(i,j) (swap_ent(i,j))
-#define ENTSORT(pdents, ndents, entrycmpfn) QSORT(ndents, ENTLESS, ENTSWAP)
+#ifdef TOURBIN_QSORT
+#define ENTLESS(i,j) (entrycmpfn(pdents + (i), pdents + (j)) < 0)
+#define ENTSWAP(i,j) (swap_ent((i),(j)))
+#define ENTSORT(pdents, ndents, entrycmpfn) QSORT((ndents), ENTLESS, ENTSWAP)
 #else
-#define ENTSORT(pdents, ndents, entrycmpfn) qsort(pdents, ndents, sizeof(*pdents), entrycmpfn)
+#define ENTSORT(pdents, ndents, entrycmpfn) qsort((pdents), (ndents), sizeof(*(pdents)), (entrycmpfn))
 #endif
 
 #ifdef __GNUC__

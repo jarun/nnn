@@ -62,32 +62,32 @@ do {					\
 #define Q_PARTITION(q_l, q_r, q_i, q_j, Q_UINT, Q_LESS, Q_SWAP)		\
 do {									\
     /* The middle element, not to be confused with the median. */	\
-    Q_UINT q_m = q_l + ((q_r - q_l) >> 1);				\
+    Q_UINT q_m = (q_l) + (((q_r) - (q_l)) >> 1);			\
     /* Reorder the second, the middle, and the last items.		\
      * As [Edelkamp Weiss 2016] explain, using the second element	\
      * instead of the first one helps avoid bad behaviour for		\
      * decreasingly sorted arrays.  This method is used in recent	\
      * versions of gcc's std::sort, see gcc bug 58437#c13, although	\
      * the details are somewhat different (cf. #c14). */		\
-    Q_SORT3(q_l + 1, q_m, q_r, Q_LESS, Q_SWAP);				\
+    Q_SORT3((q_l) + 1, q_m, q_r, Q_LESS, Q_SWAP);			\
     /* Place the median at the beginning. */				\
     Q_SWAP(q_l, q_m);							\
     /* Partition [q_l+2, q_r-1] around the median which is in q_l.	\
      * q_i and q_j are initially off by one, they get decremented	\
      * in the do-while loops. */					\
-    q_i = q_l + 1; q_j = q_r;						\
+    (q_i) = (q_l) + 1; (q_j) = q_r;					\
     while (1) {								\
-	do q_i++; while (Q_LESS(q_i, q_l));				\
-	do q_j--; while (Q_LESS(q_l, q_j));				\
-	if (q_i >= q_j) break; /* Sedgewick says "until j < i" */	\
+	do (q_i)++; while (Q_LESS(q_i, q_l));				\
+	do (q_j)--; while (Q_LESS(q_l, q_j));				\
+	if ((q_i) >= (q_j)) break; /* Sedgewick says "until j < i" */	\
 	Q_SWAP(q_i, q_j);						\
     }									\
     /* Compensate for the i==j case. */					\
-    q_i = q_j + 1;							\
+    (q_i) = (q_j) + 1;							\
     /* Put the median to its final place. */				\
     Q_SWAP(q_l, q_j);							\
     /* The median is not part of the left subfile. */			\
-    q_j--;								\
+    (q_j)--;								\
 } while (0)
 
 /* Insertion sort is applied to small subfiles - this is contrary to
@@ -101,9 +101,9 @@ do {									\
 do {									\
     Q_UINT q_i, q_j;							\
     /* For each item starting with the second... */			\
-    for (q_i = q_l + 1; q_i <= q_r; q_i++)				\
+    for (q_i = (q_l) + 1; q_i <= (q_r); q_i++)				\
     /* move it down the array so that the first part is sorted. */	\
-    for (q_j = q_i; q_j > q_l && (Q_LESS(q_j, q_j - 1)); q_j--)		\
+    for (q_j = q_i; q_j > (q_l) && (Q_LESS(q_j, q_j - 1)); q_j--)	\
 	Q_SWAP(q_j, q_j - 1);						\
 } while (0)
 
@@ -156,7 +156,7 @@ do {									\
      * no further processing.  The first subfile will be processed	\
      * on the next iteration (both subfiles cannot be only a single	\
      * element, due to Q_THRESH). */					\
-    if (q_l2 == q_r2) {							\
+    if ((q_l2) == (q_r2)) {						\
 	q_l = q_l1;							\
 	q_r = q_r1;							\
     }									\

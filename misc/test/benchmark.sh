@@ -2,7 +2,7 @@
 #
 # Usage: ./misc/test/benchmark.sh ./nnn /tmp/testdir1 ./testdir2 ...
 #
-# Don't forget to build nnn in benchmark mode: make O_BENCHMARK=1
+# Don't forget to build nnn in benchmark mode: make O_BENCH=1
 
 # Use a test dir filled with genfiles.sh to get interesting output
 # (or maybe /usr/lib/)
