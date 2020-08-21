@@ -116,6 +116,10 @@
 #include "icons.h"
 #endif
 
+#ifdef TOURBIN_QSORT
+#include "qsort.h"
+#endif
+
 /* Macro definitions */
 #define VERSION "3.4"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
@@ -731,6 +735,14 @@ static haiku_nm_h haiku_hnd;
 /* A faster version of xisdigit */
 #define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
 #define xerror() perror(xitoa(__LINE__))
+
+#ifdef TOURBIN_QSORT
+#define ENTLESS(i,j) (entrycmpfn(pdents + (i), pdents + (j)) < 0)
+#define ENTSWAP(i,j) (swap_ent((i),(j)))
+#define ENTSORT(pdents, ndents, entrycmpfn) QSORT((ndents), ENTLESS, ENTSWAP)
+#else
+#define ENTSORT(pdents, ndents, entrycmpfn) qsort((pdents), (ndents), sizeof(*(pdents)), (entrycmpfn))
+#endif
 
 #ifdef __GNUC__
 #define UNUSED(x) UNUSED_##x __attribute__((__unused__))
@@ -2513,6 +2525,9 @@ static int handle_alt_key(wint_t *wch)
  */
 static int nextsel(int presel)
 {
+#ifdef BENCH
+	return SEL_QUIT;
+#endif
 	int c = presel;
 	uint i;
 
@@ -2710,7 +2725,7 @@ static int matches(const char *fltr)
 		regfree(&re);
 #endif
 
-	qsort(pdents, ndents, sizeof(*pdents), entrycmpfn);
+	ENTSORT(pdents, ndents, entrycmpfn);
 
 	return ndents;
 }
@@ -5122,7 +5137,7 @@ static void populate(char *path, char *lastname)
 	if (!ndents)
 		return;
 
-	qsort(pdents, ndents, sizeof(*pdents), entrycmpfn);
+	ENTSORT(pdents, ndents, entrycmpfn);
 
 #ifdef DBGMODE
 	clock_gettime(CLOCK_REALTIME, &ts2);
@@ -6317,7 +6332,7 @@ nochange:
 				if (r == 'd' || r == 'a')
 					goto begin;
 
-				qsort(pdents, ndents, sizeof(*pdents), entrycmpfn);
+				ENTSORT(pdents, ndents, entrycmpfn);
 				move_cursor(ndents ? dentfind(lastname, ndents) : 0, 0);
 			}
 			continue;
