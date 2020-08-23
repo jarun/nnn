@@ -9,7 +9,7 @@
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/©-BSD%202--Clause-important.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
-<p align="center"><a href="https://asciinema.org/a/353811"><img src="https://i.imgur.com/InHB5DB.png" /></a></p>
+<p align="center"><a href="https://asciinema.org/a/353811"><img src="https://i.imgur.com/uk7dEWa.png" /></a></p>
 <p align="center"><i>icons and colors (click for asciicast)</i></p>
 
 <h3 align="center">[<a
