@@ -584,7 +584,7 @@ static const char * const messages[] = {
 	"plugin keys:",
 	"bookmark keys:",
 	"invalid regex",
-	"'a'u / 'd'u / 'e'xtn / 'r'ev / 's'ize / 't'ime / 'v'er / 'c'lear?",
+	"'a'u / 'd'u / 'e'xtn / 'r'ev / 's'ize / 't'ime / 'v'er / 'c'lr / '^T' (cycle)?",
 	"unmount failed! try lazy?",
 	"first file (\')/char?",
 	"remove tmp file?",
@@ -5348,6 +5348,14 @@ static int set_sort_flags(int r)
 
 		if (cfg.reverse)
 			entrycmpfn = &reventrycmp;
+	} else if ( r == CONTROL('T')) {
+		/* Cycling order: clear -> size -> time -> clear */
+		if (cfg.timeorder)
+			r = 's';
+		else if (cfg.sizeorder)
+			r = 'c';
+		else
+			r = 't';
 	}
 
 	switch (r) {
