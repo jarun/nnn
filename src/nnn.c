@@ -314,6 +314,7 @@ typedef struct {
 	uint selmode    : 1;  /* Set when selecting files */
 	uint oldcolor   : 1;  /* Show dirs in context colors */
 	uint reserved   : 14;
+	uint stayonsel	: 1;  /* Disable auto-proceed on select */
 } runstate;
 
 /* Contexts or workspaces */
@@ -6453,7 +6454,7 @@ nochange:
 			else
 #endif
 				/* move cursor to the next entry if this is not the last entry */
-				if (!g_state.picker && cur != ndents - 1)
+				if (!g_state.stayonsel && !g_state.picker && cur != ndents - 1)
 					move_cursor((cur + 1) % ndents, 0);
 			break;
 		case SEL_SELMUL:
@@ -7248,6 +7249,7 @@ static void usage(void)
 		" -F      show fortune\n"
 		" -g      regex filters [default: string]\n"
 		" -H      show hidden files\n"
+		" -j      disable auto-proceed on select"
 		" -K      detect key collision\n"
 		" -l val  set scroll lines\n"
 		" -n      type-to-nav mode\n"
@@ -7409,7 +7411,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdeEfFgHKl:nop:P:QrRs:St:T:uVwxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdeEfFgHjKl:nop:P:QrRs:St:T:uVwxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7453,6 +7455,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'H':
 			cfg.showhidden = 1;
+			break;
+		case 'j':
+			g_state.stayonsel = 1;
 			break;
 		case 'K':
 			check_key_collision();
