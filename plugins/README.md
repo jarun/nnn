@@ -16,7 +16,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 
 | Plugin (a-z) | Description | Lang | Dependencies |
 | --- | --- | --- | --- |
-| [autojump](autojump) | Navigate to dir/path | sh | autojump |
+| [autojump](autojump) | Navigate to dir/path | sh | [jump](https://github.com/gsamokovarov/jump)/autojump |
 | [bookmarks](bookmarks) | Use named bookmarks managed with symlinks | sh | fzf |
 | [boom](boom) | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs, mktemp |
