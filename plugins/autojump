@@ -9,6 +9,11 @@
 # Shell: POSIX compliant
 # Author: Marty Buchaus
 
+if [ -z "$NNN_PIPE" ]; then
+  echo 'ERROR: NNN_PIPE is not set' | ${PAGER:-less}
+  exit 2
+fi
+
 if which autojump >/dev/null 2>&1; then
     printf "jump to: "
     read -r dir
