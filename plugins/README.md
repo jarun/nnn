@@ -38,6 +38,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [imgur](imgur) | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) | bash | - |
 | [imgview](imgview) | Browse images, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)), [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images)| sh | [imv](https://github.com/eXeC64/imv)/[sxiv](https://github.com/muennich/sxiv)/[viu](https://github.com/atanunq/viu), less|
 | [ipinfo](ipinfo) | Fetch external IP address and whois information | sh | curl, whois |
+| [jump](jump) | Navigate to dir/path | sh | [jump](https://github.com/gsamokovarov/jump) |
 | [kdeconnect](kdeconnect) | Send selected files to an Android device | sh | kdeconnect-cli |
 | [launch](launch) | GUI application launcher | sh | fzf |
 | [mediainf](mediainf) | Show media information | sh | mediainfo |
