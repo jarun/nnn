@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+
+# Description: Navigate to directory using jump
+#
+# Dependencies: jump - https://github.com/gsamokovarov/jump
+#
+# Note: JUMP STORES NAVIGATION PATTERNS
+#
+# Shell: POSIX compliant
+# Author: Dave Snider
+
+if [ -z "$NNN_PIPE" ]; then
+echo 'ERROR: NNN_PIPE is not set' | ${PAGER:-less}
+exit 2
+fi
+
+if which jump >/dev/null 2>&1; then
+printf "jump to: "
+read -r dir
+odir="$(jump cd "$dir")"
+printf "%s" "0c$odir" > "$NNN_PIPE"
+else
+printf "jump missing"
+read -r _
+fi
