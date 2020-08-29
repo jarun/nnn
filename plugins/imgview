@@ -43,22 +43,24 @@ if uname | grep -q "Darwin"; then
     if [ -f "$1" ]; then
         open "$1" >/dev/null 2>&1 &
     fi
-elif command -v imvr >/dev/null 2>&1; then
+# `imvr` is often callable as `imv` on Linux distros
+# You might need to change the reference below
+elif which imvr >/dev/null 2>&1; then
     if [ -f "$1" ]; then
         view_dir imvr "$1" >/dev/null 2>&1 &
     elif [ -d "$1" ] || [ -h "$1" ]; then
         imvr "$1" >/dev/null 2>&1 &
     fi
-elif command -v sxiv >/dev/null 2>&1; then
+elif which sxiv >/dev/null 2>&1; then
     if [ -f "$1" ]; then
         view_dir sxiv "$1" >/dev/null 2>&1 &
     elif [ -d "$1" ] || [ -h "$1" ]; then
         sxiv -qt "$1" >/dev/null 2>&1 &
     fi
-elif command -v viu >/dev/null 2>&1; then
+elif which viu >/dev/null 2>&1; then
     viu -n "$1" | less -R
 else
-    printf "install imv/sxiv/viu"
+    printf "Please install imv/sxiv/viu and check their callable names match the plugin source"
     read -r _
     exit 2
 fi
