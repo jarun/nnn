@@ -312,9 +312,10 @@ typedef struct {
 	uint runplugin  : 1;  /* Choose plugin mode */
 	uint runctx     : 2;  /* The context in which plugin is to be run */
 	uint selmode    : 1;  /* Set when selecting files */
-	uint oldcolor   : 1;  /* Show dirs in context colors */
-	uint reserved   : 14;
+	uint oldcolor   : 1;  /* Use older colorscheme */
 	uint stayonsel	: 1;  /* Disable auto-proceed on select */
+	uint dirctx     : 1;  /* Show dirs in context color */
+	uint reserved   : 12;
 } runstate;
 
 /* Contexts or workspaces */
@@ -1722,7 +1723,7 @@ static bool initcurses(void *oldmask)
 				if (ext) {
 					*pcode = xchartohex(*colors) << 4;
 					if (*++colors)
-						*pcode += xchartohex(*colors);
+						fcolors[i + 1] = *pcode += xchartohex(*colors);
 					else { /* Each color code must be 2 hex symbols */
 						exitcurses();
 						fprintf(stderr, "NNN_COLORS!\n");
@@ -3569,8 +3570,11 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 		break;
 	case S_IFDIR:
 		pair = C_DIR;
-		if (!g_state.oldcolor)
+		if (!g_state.oldcolor) {
 			attrs |= A_BOLD;
+			if (g_state.dirctx)
+				pair = cfg.curctx + 1;
+		}
 		ind = '/';
 		break;
 	case S_IFLNK:
@@ -3651,7 +3655,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	bool ln = FALSE;
 	char ind1 = '\0', ind2 = '\0';
 	uchar pair = 0;
-	int attrs = sel ? A_REVERSE | (g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS))
+	int attrs = sel ? (A_REVERSE | (g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS)))
 			: (g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS));
 	uint len;
 	char *size;
@@ -3677,8 +3681,11 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	switch (ent->mode & S_IFMT) {
 	case S_IFDIR:
 		pair = C_DIR;
-		if (!g_state.oldcolor)
+		if (!g_state.oldcolor) {
 			attrs |= A_BOLD;
+			if (g_state.dirctx)
+				pair = cfg.curctx + 1;
+		}
 		ind2 = '/'; // fallthrough
 	case S_IFREG:
 		if (!ind2) {
@@ -7249,6 +7256,7 @@ static void usage(void)
 		" -c      cli-only NNN_OPENER (trumps -e)\n"
 		" -C      earlier colorscheme\n"
 		" -d      detail mode\n"
+		" -D      dirs in context color\n"
 		" -e      text in $VISUAL/$EDITOR/vi\n"
 		" -E      use EDITOR for undetached edits\n"
 #ifndef NORL
@@ -7419,7 +7427,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdeEfFgHJKl:nop:P:QrRs:St:T:uVwxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdDeEfFgHJKl:nop:P:QrRs:St:T:uVwxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7442,6 +7450,9 @@ int main(int argc, char *argv[])
 		case 'd':
 			cfg.showdetail = 1;
 			printptr = &printent_long;
+			break;
+		case 'D':
+			g_state.dirctx = 1;
 			break;
 		case 'e':
 			cfg.useeditor = 1;
