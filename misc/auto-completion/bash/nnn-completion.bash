@@ -18,12 +18,14 @@ _nnn ()
         -c
         -C
         -d
+        -D
         -e
         -E
         -f
         -F
         -g
         -H
+        -J
         -K
         -l
         -n
