@@ -315,7 +315,7 @@ typedef struct {
 	uint oldcolor   : 1;  /* Use older colorscheme */
 	uint stayonsel	: 1;  /* Disable auto-proceed on select */
 	uint dirctx     : 1;  /* Show dirs in context color */
-	uint reserved   : 12;
+	uint reserved   : 12; /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
