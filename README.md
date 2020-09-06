@@ -18,7 +18,9 @@ href="https://github.com/jarun/nnn#quickstart">Quickstart</a>] [<a
 href="https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins">Plugins</a>] [<a
 href="https://github.com/jarun/nnn/wiki/Performance">Performance</a>]</h3>
 
-`nnn` (_n³_) is a full-featured terminal file manager. It's tiny and nearly 0-config with an incredible performance.
+`nnn` (_n³_) is a full-featured terminal file manager. It's tiny and nearly 0-config with an incredible speed.
+
+It is designed to be unobtrusive with smart workflows to match the trains of thought.
 
 `nnn` can analyze disk usage, batch rename, launch apps and pick files. The plugin repository has tons of plugins and documentation to extend the capabilities further e.g. [preview](https://github.com/jarun/nnn/wiki/Live-previews), (un)mount disks, find & list, file/dir diff, upload files.
 
