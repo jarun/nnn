@@ -1697,7 +1697,7 @@ static bool initcurses(void *oldmask)
 		if (colors && *colors == '#') {
 			char *sep = strchr(colors, ';');
 
-			if (COLORS >= 256) {
+			if (!g_state.oldcolor && COLORS >= 256) {
 				++colors;
 				ext = TRUE;
 

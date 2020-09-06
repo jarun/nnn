@@ -81,6 +81,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
   - Static binary available (no need to install)
   - Minimal library deps, easy to compile
   - No config file, minimal config with sensible defaults
+  - Plugin to backup configuration
   - Widely available on many packagers
   - Touch enabled, comfortable on handhelds too!
   - Unicode support
