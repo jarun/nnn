@@ -1,47 +1,47 @@
-#ifndef ICONS_IN_TERMINAL
-# define ICONS_IN_TERMINAL
+#ifndef ICONS_NERDFONT
+# define ICONS_NERDFONT
 
-// Hex codes reference icons-in-terminal
-// https://github.com/sebastiencs/icons-in-terminal
+// You can find hex codes for nerd fonts here
+// https://www.nerdfonts.com/cheat-sheet
 
 // Generics
-# define ICON_DIRECTORY     "\ue155"
-# define ICON_FILE          "\ue0f6"
-# define ICON_EXEC          "\ue0f3"
+# define ICON_DIRECTORY     "\ue5ff"
+# define ICON_FILE          "\uf713"
+# define ICON_EXEC          "\uf90b"
 # define ICON_MANUAL        "\uf5bd"
 
 // Top level and common icons
-# define ICON_GIT           "\ue28b"
-# define ICON_DESKTOP       "\ue1cd"
-# define ICON_BRIEFCASE     "\ue187"
-# define ICON_DOCUMENT      "\ue0f6"
-# define ICON_DOWNLOADS     "\ue0f9"
-# define ICON_MUSIC         "\ue0e2"
-# define ICON_MUSICFILE     "\ue280"
-# define ICON_PICTURES      "\ue4fb"
-# define ICON_PICTUREFILE   "\ue27e"
-# define ICON_PUBLIC        "\ue0fc"
-# define ICON_TEMPLATES     "\ue18f"
-# define ICON_VIDEOS        "\ue0e9"
-# define ICON_VIDEOFILE     "\ue281"
-# define ICON_CHANGELOG     "\ue292"
-# define ICON_CONFIGURE     "\ue8df"
-# define ICON_LICENSE       "\ue2af"
-# define ICON_MAKEFILE      "\ue7a2"
-# define ICON_ARCHIVE       "\ue27f"
-# define ICON_SCRIPT        "\uee1d"
-# define ICON_CPLUSPLUS     "\uedb8"
-# define ICON_JAVA          "\uede3"
-# define ICON_CLOJURE       "\uedb4"
-# define ICON_JAVASCRIPT    "\uede6"
-# define ICON_LINUX         "\ue23a"
-# define ICON_FSHARP        "\ueaae"
-# define ICON_RUBY          "\uee15"
-# define ICON_C             "\uedb1"
-# define ICON_HTML          "\ue282"
-# define ICON_REACT         "\uee12"
-# define ICON_PYTHON        "\uee10"
-# define ICON_DATABASE      "\uedc0"
+# define ICON_GIT           "\ue5fb"
+# define ICON_DESKTOP       "\ufcbe"
+# define ICON_BRIEFCASE     "\uf5d5"
+# define ICON_DOCUMENT      "\uf718"
+# define ICON_DOWNLOADS     "\uf5d7"
+# define ICON_MUSIC         "\uf832"
+# define ICON_MUSICFILE     "\uf886"
+# define ICON_PICTURES      "\uf753"
+# define ICON_PICTUREFILE   "\uf71e"
+# define ICON_PUBLIC        "\ue5ff"
+# define ICON_TEMPLATES     "\ufac6"
+# define ICON_VIDEOS        "\uf72f"
+# define ICON_VIDEOFILE     "\ufcdc"
+# define ICON_CHANGELOG     "\uf7d9"
+# define ICON_CONFIGURE     "\uf423"
+# define ICON_LICENSE       "\uf718"
+# define ICON_MAKEFILE      "\uf909"
+# define ICON_ARCHIVE       "\ufac3"
+# define ICON_SCRIPT        "\uf977"
+# define ICON_CPLUSPLUS     "\ue61d"
+# define ICON_JAVA          "\ue738"
+# define ICON_CLOJURE       "\ue76a"
+# define ICON_JAVASCRIPT    "\ue74e"
+# define ICON_LINUX         "\uf83c"
+# define ICON_FSHARP        "\ue7a7"
+# define ICON_RUBY          "\ue23e"
+# define ICON_C             "\ue61e"
+# define ICON_HTML          "\uf72d"
+# define ICON_REACT         "\ue625"
+# define ICON_PYTHON        "\ue235"
+# define ICON_DATABASE      "\uf6b7"
 
 
 /* Numbers */
@@ -57,7 +57,7 @@
 
 /* B */
 # define ICON_EXT_BAT       ICON_SCRIPT
-# define ICON_EXT_BIN       "\ue073"
+# define ICON_EXT_BIN       "\uf471"
 # define ICON_EXT_BMP       ICON_PICTUREFILE
 # define ICON_EXT_BZ2       ICON_ARCHIVE
 
@@ -73,19 +73,19 @@
 # define ICON_EXT_CLJC      ICON_CLOJURE
 # define ICON_EXT_CLJS      ICON_CLOJURE
 # define ICON_EXT_CMAKE     ICON_MAKEFILE
-# define ICON_EXT_COFFEE    "\uedb7"
+# define ICON_EXT_COFFEE    "\ue751"
 # define ICON_EXT_CONF      ICON_CONFIGURE
 # define ICON_EXT_CPIO      ICON_ARCHIVE
 # define ICON_EXT_CPP       ICON_CPLUSPLUS
-# define ICON_EXT_CSS       "\uedbb"
+# define ICON_EXT_CSS       "\ue614"
 # define ICON_EXT_CUE       ICON_MUSICFILE
 # define ICON_EXT_CVS       ICON_CONFIGURE
 # define ICON_EXT_CXX       ICON_CPLUSPLUS
 
 /* D */
 # define ICON_EXT_DB        ICON_DATABASE
-# define ICON_EXT_DEB       "\uedc1"
-# define ICON_EXT_DIFF      "\ue7c3"
+# define ICON_EXT_DEB       "\ue77d"
+# define ICON_EXT_DIFF      "\ufa59"
 # define ICON_EXT_DLL       ICON_MANUAL
 # define ICON_EXT_DOC       ICON_DOCUMENT
 # define ICON_EXT_DOCX      ICON_DOCUMENT
@@ -108,7 +108,7 @@
 /* G */
 # define ICON_EXT_GEM       ICON_RUBY
 # define ICON_EXT_GIF       ICON_PICTUREFILE
-# define ICON_EXT_GO        "\uedd0"
+# define ICON_EXT_GO        "\ufcd1"
 # define ICON_EXT_GZ        ICON_ARCHIVE
 # define ICON_EXT_GZIP      ICON_ARCHIVE
 
@@ -125,7 +125,7 @@
 # define ICON_EXT_ICO       ICON_PICTUREFILE
 # define ICON_EXT_IMG       ICON_PICTUREFILE
 # define ICON_EXT_INI       ICON_CONFIGURE
-# define ICON_EXT_ISO       "\uecd3"
+# define ICON_EXT_ISO       "\ufaed"
 
 /* J */
 # define ICON_EXT_JAR       ICON_JAVA
@@ -134,7 +134,7 @@
 # define ICON_EXT_JPEG      ICON_PICTUREFILE
 # define ICON_EXT_JPG       ICON_PICTUREFILE
 # define ICON_EXT_JS        ICON_JAVASCRIPT
-# define ICON_EXT_JSON      "\uede6"
+# define ICON_EXT_JSON      "\ufb25"
 # define ICON_EXT_JSX       ICON_REACT
 
 /* K */
@@ -142,14 +142,14 @@
 /* L */
 # define ICON_EXT_LHA       ICON_ARCHIVE
 # define ICON_EXT_LOG       ICON_DOCUMENT
-# define ICON_EXT_LUA       "\ue77e"
+# define ICON_EXT_LUA       "\ue620"
 # define ICON_EXT_LZH       ICON_ARCHIVE
 # define ICON_EXT_LZMA      ICON_ARCHIVE
 
 /* M */
 # define ICON_EXT_M4A       ICON_MUSICFILE
 # define ICON_EXT_M4V       ICON_VIDEOFILE
-# define ICON_EXT_MD        "\uea45"
+# define ICON_EXT_MD        "\ue609"
 # define ICON_EXT_MK        ICON_MAKEFILE
 # define ICON_EXT_MKV       ICON_VIDEOFILE
 # define ICON_EXT_MOV       ICON_VIDEOFILE
@@ -157,7 +157,7 @@
 # define ICON_EXT_MP4       ICON_VIDEOFILE
 # define ICON_EXT_MPEG      ICON_VIDEOFILE
 # define ICON_EXT_MPG       ICON_VIDEOFILE
-# define ICON_EXT_MSI       "\ue238"
+# define ICON_EXT_MSI       "\ufab2"
 
 /* N */
 
@@ -169,14 +169,14 @@
 
 /* P */
 # define ICON_EXT_PART      ICON_DOWNLOADS
-# define ICON_EXT_PATCH     "\ue7c4"
-# define ICON_EXT_PDF       "\ue27a"
-# define ICON_EXT_PHP       "\uee09"
+# define ICON_EXT_PATCH     "\ufa59"
+# define ICON_EXT_PDF       "\uf724"
+# define ICON_EXT_PHP       "\ue73d"
 # define ICON_EXT_PNG       ICON_PICTUREFILE
-# define ICON_EXT_PPT       "\ue84f"
-# define ICON_EXT_PPTX      "\ue84f"
-# define ICON_EXT_PSB       "\ueabf"
-# define ICON_EXT_PSD       "\ueabf"
+# define ICON_EXT_PPT       "\uf726"
+# define ICON_EXT_PPTX      "\uf726"
+# define ICON_EXT_PSB       "\ue7b8"
+# define ICON_EXT_PSD       "\ue7b8"
 # define ICON_EXT_PY        ICON_PYTHON
 # define ICON_EXT_PYC       ICON_PYTHON
 # define ICON_EXT_PYD       ICON_PYTHON
@@ -187,29 +187,29 @@
 /* R */
 # define ICON_EXT_RAR       ICON_ARCHIVE
 # define ICON_EXT_RC        ICON_CONFIGURE
-# define ICON_EXT_ROM       "\ue101"
+# define ICON_EXT_ROM       "\uf795"
 # define ICON_EXT_RPM       ICON_ARCHIVE
-# define ICON_EXT_RSS       "\ue204"
-# define ICON_EXT_RTF       "\ue27a"
+# define ICON_EXT_RSS       "\uf96b"
+# define ICON_EXT_RTF       "\uf724"
 
 /* S */
-# define ICON_EXT_SASS      "\uee19"
-# define ICON_EXT_SCSS      "\uee19"
+# define ICON_EXT_SASS      "\ue603"
+# define ICON_EXT_SCSS      "\ue603"
 # define ICON_EXT_SO        ICON_MANUAL
 # define ICON_EXT_SCALA     "\ue737"
 # define ICON_EXT_SH        ICON_SCRIPT
 # define ICON_EXT_SLIM      ICON_DOCUMENT
-# define ICON_EXT_SLN       "\uea13"
+# define ICON_EXT_SLN       "\ufb0f"
 # define ICON_EXT_SQL       ICON_DATABASE
-# define ICON_EXT_SRT       "\ue1ad"
-# define ICON_EXT_SUB       "\ue1ad"
+# define ICON_EXT_SRT       "\uf679"
+# define ICON_EXT_SUB       "\uf679"
 # define ICON_EXT_SVG       ICON_PICTUREFILE
 
 /* T */
 # define ICON_EXT_TAR       ICON_ARCHIVE
-# define ICON_EXT_TEX       "\ue755"
+# define ICON_EXT_TEX       "\uf6fc"
 # define ICON_EXT_TGZ       ICON_ARCHIVE
-# define ICON_EXT_TS        "\ue73f"
+# define ICON_EXT_TS        "\ue628"
 # define ICON_EXT_TSX       ICON_REACT
 # define ICON_EXT_TXT       ICON_DOCUMENT
 # define ICON_EXT_TXZ       ICON_ARCHIVE
@@ -218,8 +218,8 @@
 
 /* V */
 # define ICON_EXT_VID       ICON_VIDEOFILE
-# define ICON_EXT_VIM       "\ueacc"
-# define ICON_EXT_VIMRC     "\ueacc"
+# define ICON_EXT_VIM       "\ue62b"
+# define ICON_EXT_VIMRC     "\ue62b"
 
 /* W */
 # define ICON_EXT_WAV       ICON_MUSICFILE
@@ -230,8 +230,8 @@
 /* X */
 # define ICON_EXT_XBPS      ICON_ARCHIVE
 # define ICON_EXT_XHTML     ICON_HTML
-# define ICON_EXT_XLS       "\ue851"
-# define ICON_EXT_XLSX      "\ue851"
+# define ICON_EXT_XLS       "\uf71a"
+# define ICON_EXT_XLSX      "\uf71a"
 # define ICON_EXT_XML       ICON_HTML
 # define ICON_EXT_XZ        ICON_ARCHIVE
 
@@ -242,4 +242,4 @@
 /* Z */
 # define ICON_EXT_ZIP       ICON_ARCHIVE
 
-#endif // ICONS_IN_TERMINAL
+#endif // ICONS_NERDFONT
