@@ -4,8 +4,8 @@
  * If you are a Vim user you are likely already using a patched font and Nerdfont will be easier
 */
 
-#include "icons-in-terminal.h"
-// #include "icons-nerdfont.h"
+// #include "icons-in-terminal.h"
+#include "icons-nerdfont.h"
 
 struct icon_pair {
 	const char *match;
