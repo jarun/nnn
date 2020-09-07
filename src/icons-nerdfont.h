@@ -1,5 +1,5 @@
 #ifndef ICONS_NERDFONT
-# define ICONS_NERDFONT
+#define ICONS_NERDFONT
 
 // You can find hex codes for nerd fonts here
 // https://www.nerdfonts.com/cheat-sheet
