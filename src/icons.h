@@ -10,11 +10,11 @@
 struct icon_pair {
 	const char *match;
 	const char *icon;
-	/*
-	 * Hex xterm 256 color code, 0 to follow file specific (if any)
-	 * Codes: https://jonasjacek.github.io/colors/
+  /*
+   * Hex xterm 256 color code, 0 to follow file specific (if any)
+   * Codes: https://jonasjacek.github.io/colors/
    * Spectrum sorted: https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
-	 */
+   */
 	const unsigned char color;
 };
 
@@ -23,26 +23,26 @@ struct icon_pair {
  * Adjust if the icons are not printed properly
  */
 
-# define ICON_PADDING_LEFT  ""
-# define ICON_PADDING_RIGHT " "
+#define ICON_PADDING_LEFT  ""
+#define ICON_PADDING_RIGHT " "
 
-# define COLOR_VIDEO        93  /* Purple */
-# define COLOR_MUSIC        220 /* Gold1 */
-# define COLOR_PICTURE      82  /* Chartreuse2 */
-# define COLOR_MANUAL       202 /* OrangeRed1 */
-# define COLOR_ARCHIVE      209 /* Salmon1 */
-# define COLOR_C            81  /* SteelBlue1 */
-# define COLOR_JAVA         32  /* DeepSkyBlue3 */
-# define COLOR_JAVASCRIPT   47  /* SpringGreen2 */
-# define COLOR_REACT        39  /* DeepSkyBlue1 */
-# define COLOR_CSS          199 /* DeepPink1 */
-# define COLOR_PYTHON       227 /* LightGoldenrod1 */
-# define COLOR_LUA          19  /* LightGoldenrod1 */
-# define COLOR_DOCUMENT     15  /* WHITE */
-# define COLOR_FSHARP       31  /* DeepSkyBlue3 */
-# define RUBY_COLOR         160 /* Red3 */
-# define COLOR_SCALA        196 /* Red1 */
-# define COLOR_VIM          28  /* Green4 */
+#define COLOR_VIDEO        93  /* Purple */
+#define COLOR_MUSIC        220 /* Gold1 */
+#define COLOR_PICTURE      82  /* Chartreuse2 */
+#define COLOR_MANUAL       202 /* OrangeRed1 */
+#define COLOR_ARCHIVE      209 /* Salmon1 */
+#define COLOR_C            81  /* SteelBlue1 */
+#define COLOR_JAVA         32  /* DeepSkyBlue3 */
+#define COLOR_JAVASCRIPT   47  /* SpringGreen2 */
+#define COLOR_REACT        39  /* DeepSkyBlue1 */
+#define COLOR_CSS          199 /* DeepPink1 */
+#define COLOR_PYTHON       227 /* LightGoldenrod1 */
+#define COLOR_LUA          19  /* LightGoldenrod1 */
+#define COLOR_DOCUMENT     15  /* WHITE */
+#define COLOR_FSHARP       31  /* DeepSkyBlue3 */
+#define RUBY_COLOR         160 /* Red3 */
+#define COLOR_SCALA        196 /* Red1 */
+#define COLOR_VIM          28  /* Green4 */
 
 /*
  * Using symbols defined in icons-in-terminal.h, or even using icons-in-terminal is not necessary.
