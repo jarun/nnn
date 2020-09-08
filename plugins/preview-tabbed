@@ -94,6 +94,12 @@ get_viewer_pid () {
         VIEWERPID="$(jobs -p %%)"
 }
 
+kill_viewer () {
+        if [ -n "$VIEWERPID" ] && jobs -p | grep "$VIEWERPID" ; then
+            kill "$VIEWERPID"
+        fi
+}
+
 previewer_loop () {
     unset -v NNN_FIFO
     # mute from now
@@ -123,9 +129,7 @@ previewer_loop () {
             continue
         fi
 
-        if [ -n "$VIEWERPID" ] && jobs -p | grep "$VIEWERPID" ; then
-            kill "$VIEWERPID"
-        fi
+        kill_viewer
 
         MIME="$(file -b --mime-type "$FILE")"
 
@@ -188,6 +192,7 @@ previewer_loop () {
         fi
     done
     kill "$TABBEDPID"
+    kill_viewer
 }
 
 if [ ! -r "$NNN_FIFO" ] ; then
