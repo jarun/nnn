@@ -74,10 +74,10 @@ packages:
       - make
       - gcc
       - pkg-config
-      - libncursesw5-dev
+      - libncurses-dev
       - libreadline-dev
     deps:
-      - libncursesw5
+      - libncursesw6
       - readline-common
   fedora31:
     builddeps:
@@ -154,7 +154,7 @@ packages:
       - make
       - gcc
       - pkg-config
-      - libncursesw5-dev
+      - libncurses-dev
       - libreadline-dev
     deps:
       - libncursesw6
