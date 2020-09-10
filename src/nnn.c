@@ -7244,7 +7244,7 @@ static void usage(void)
 {
 	fprintf(stdout,
 		"%s: nnn [OPTIONS] [PATH]\n\n"
-		"The missing terminal file manager for X.\n\n"
+		"The unorthodox terminal file manager.\n\n"
 		"positional args:\n"
 		"  PATH   start dir/file [default: .]\n\n"
 		"optional args:\n"

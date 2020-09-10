@@ -1,7 +1,7 @@
 name: nnn
 maintainer: Arun Prakash Jana <engineerarun@gmail.com>
 license: BSD 2-Clause
-summary: The missing terminal file manager for X.
+summary: The unorthodox terminal file manager.
 homepage: https://github.com/jarun/nnn
 commands:
   install:
