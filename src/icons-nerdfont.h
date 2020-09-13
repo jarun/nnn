@@ -1,5 +1,5 @@
-#ifndef ICONS_NERDFONT
-#define ICONS_NERDFONT
+#ifndef NERD
+#define NERD
 
 // You can find hex codes for nerd fonts here
 // https://www.nerdfonts.com/cheat-sheet
@@ -7,7 +7,7 @@
 // Generics
 #define ICON_DIRECTORY     "\ue5ff"
 #define ICON_FILE          "\uf713"
-#define ICON_EXEC          "\uf90b"
+#define ICON_EXEC          "\uf144"
 #define ICON_MANUAL        "\uf5bd"
 
 // Top level and common icons
@@ -42,6 +42,9 @@
 #define ICON_REACT         "\ue625"
 #define ICON_PYTHON        "\ue235"
 #define ICON_DATABASE      "\uf6b7"
+#define ICON_WORDDOC       "\uf72b"
+#define ICON_PLAYLIST      "\uf910"
+#define ICON_OPTICALDISK   "\ufd1e"
 
 
 /* Numbers */
@@ -78,7 +81,7 @@
 #define ICON_EXT_CPIO      ICON_ARCHIVE
 #define ICON_EXT_CPP       ICON_CPLUSPLUS
 #define ICON_EXT_CSS       "\ue614"
-#define ICON_EXT_CUE       ICON_MUSICFILE
+#define ICON_EXT_CUE       ICON_PLAYLIST
 #define ICON_EXT_CVS       ICON_CONFIGURE
 #define ICON_EXT_CXX       ICON_CPLUSPLUS
 
@@ -86,9 +89,9 @@
 #define ICON_EXT_DB        ICON_DATABASE
 #define ICON_EXT_DEB       "\ue77d"
 #define ICON_EXT_DIFF      "\ufa59"
-#define ICON_EXT_DLL       ICON_MANUAL
-#define ICON_EXT_DOC       ICON_DOCUMENT
-#define ICON_EXT_DOCX      ICON_DOCUMENT
+#define ICON_EXT_DLL       ICON_SCRIPT
+#define ICON_EXT_DOC       ICON_WORDDOC
+#define ICON_EXT_DOCX      ICON_WORDDOC
 
 /* E */
 #define ICON_EXT_EJS       ICON_JAVASCRIPT
@@ -125,7 +128,7 @@
 #define ICON_EXT_ICO       ICON_PICTUREFILE
 #define ICON_EXT_IMG       ICON_PICTUREFILE
 #define ICON_EXT_INI       ICON_CONFIGURE
-#define ICON_EXT_ISO       "\ufaed"
+#define ICON_EXT_ISO       ICON_OPTICALDISK
 
 /* J */
 #define ICON_EXT_JAR       ICON_JAVA
@@ -198,8 +201,8 @@
 #define ICON_EXT_SO        ICON_MANUAL
 #define ICON_EXT_SCALA     "\ue737"
 #define ICON_EXT_SH        ICON_SCRIPT
-#define ICON_EXT_SLIM      ICON_DOCUMENT
-#define ICON_EXT_SLN       "\ufb0f"
+#define ICON_EXT_SLIM      ICON_SCRIPT
+#define ICON_EXT_SLN       "\ue70c"
 #define ICON_EXT_SQL       ICON_DATABASE
 #define ICON_EXT_SRT       "\uf679"
 #define ICON_EXT_SUB       "\uf679"
@@ -236,10 +239,10 @@
 #define ICON_EXT_XZ        ICON_ARCHIVE
 
 /* Y */
-#define ICON_EXT_YAML      ICON_DOCUMENT
-#define ICON_EXT_YML       ICON_DOCUMENT
+#define ICON_EXT_YAML      ICON_CONFIGURE
+#define ICON_EXT_YML       ICON_CONFIGURE
 
 /* Z */
 #define ICON_EXT_ZIP       ICON_ARCHIVE
 
-#endif // ICONS_NERDFONT
+#endif // NERD

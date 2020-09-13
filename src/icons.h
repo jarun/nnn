@@ -229,8 +229,8 @@ static const struct icon_pair icons_ext[] = {
 	{"rtf",        ICON_EXT_RTF,       0},
 
 	/* S */
-  {"sass",       ICON_EXT_SASS,      COLOR_CSS},
-  {"scss",       ICON_EXT_SCSS,      COLOR_CSS},
+	{"sass",       ICON_EXT_SASS,      COLOR_CSS},
+	{"scss",       ICON_EXT_SCSS,      COLOR_CSS},
 	{"so",         ICON_EXT_SO,        0},
 	{"scala",      ICON_EXT_SCALA,     COLOR_SCALA},
 	{"sh",         ICON_EXT_SH,        0},
