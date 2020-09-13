@@ -427,21 +427,22 @@ separated by \fI;\fR:
     # 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
     export NNN_COLORS='1234'
 
-    # xterm 256 color numbers (in hex, 2 symbols per context):
+    # xterm 256 color numbers (converted to hex, 2 symbols per context):
     # see https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
     export NNN_COLORS='#0a1b2c3d'
 
     # both (256 followed by 8 as fallback, separated by ';')
     export NNN_COLORS='#0a1b2c3d;1234'
 
-    NOTE: If only 256 colors are specified and the terminal doesn't support, default (4-blue) is used.
+    NOTE: If only 256 colors are specified and the terminal doesn't support, default is used.
 .Ed
 .Pp
 \fBNNN_FCOLORS:\fR specify file-type specific colors:
 .Bd -literal
     export NNN_FCOLORS='c1e2272e006033f7c6d6abc4'
 
-    Specify file-specific colors with xterm 256 color numbers (2 hex symbols per color).
+    Specify file-specific colors with decimal xterm 256 color numbers converted
+    to 2 hex symbols per color.
     Order is strict, use 00 to omit/use default terminal color. Defaults:
 
     ------------------------- + --- + -------------
@@ -473,11 +474,11 @@ separated by \fI;\fR:
     NOTE: Non-default formats may require a third-party utility.
 .Ed
 .Pp
-\fBNNN_SSHFS:\fR pass additional options to sshfs command:
+\fBNNN_SSHFS:\fR specify custom sshfs command with options:
 .Bd -literal
     export NNN_SSHFS='sshfs -o reconnect,idmap=user,cache_timeout=3600'
 
-    NOTE: The options must be preceded by "sshfs" and comma-separated without any space between them.
+    NOTE: The options must be comma-separated without any space between them.
 .Ed
 .Pp
 \fBNNN_RCLONE:\fR pass additional options to rclone command:
