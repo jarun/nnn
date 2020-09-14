@@ -112,8 +112,9 @@
 #include "nnn.h"
 #include "dbg.h"
 
-#ifdef ICONS
+#if defined(ICONS) || defined(NERD)
 #include "icons.h"
+#define ICONS_ENABLED
 #endif
 
 #ifdef TOURBIN_QSORT
@@ -691,7 +692,7 @@ static const char * const patterns[] = {
 #define C_SOC (C_PIP + 1) /* Socket: MediumOrchid1 */
 #define C_UND (C_SOC + 1) /* Unknown OR 0B regular/exe file: Red1 */
 
-#ifdef ICONS
+#ifdef ICONS_ENABLED
 /* 0-9, A-Z, OTHER = 36. */
 static ushort icon_positions[37];
 #endif
@@ -1739,7 +1740,7 @@ static bool initcurses(void *oldmask)
 		}
 	}
 
-#ifdef ICONS
+#ifdef ICONS_ENABLED
 	if (!g_state.oldcolor) {
 		uchar icolors[256] = {0};
 		char c;
@@ -3480,7 +3481,7 @@ static char *get_lsperms(mode_t mode)
 	return bits;
 }
 
-#ifdef ICONS
+#ifdef ICONS_ENABLED
 static const struct icon_pair * get_icon(const struct entry *ent){
 	ushort i = 0;
 
@@ -3626,7 +3627,7 @@ static void printent(const struct entry *ent, uint namecols, bool sel)
 
 	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
-#ifdef ICONS
+#ifdef ICONS_ENABLED
 	if (!g_state.oldcolor)
 		print_icon(ent, attrs);
 #endif
@@ -3758,7 +3759,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 			attrs ^=  A_DIM;
 		}
 	} else {
-#ifndef ICONS
+#ifndef ICONS_ENABLED
 		addstr("  ");
 #endif
 		if (ent->flags & FILE_MISSING)
@@ -3770,7 +3771,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 
 		if (pair && fcolors[pair])
 			attrs |= COLOR_PAIR(pair);
-#ifdef ICONS
+#ifdef ICONS_ENABLED
 		attroff(attrs);
 		addstr("  ");
 		if (sel)
@@ -5573,7 +5574,7 @@ static int adjust_cols(int ncols)
 	}
 
 /* 3 = Preceding space, indicator, newline */
-#ifdef ICONS
+#ifdef ICONS_ENABLED
 	ncols -= 3 + xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT) + 1;
 #else
 	ncols -= 3;

@@ -1,5 +1,5 @@
 #ifndef ICONS_IN_TERMINAL
-# define ICONS_IN_TERMINAL
+#define ICONS_IN_TERMINAL
 
 # define POWERLINE_BRANCH "\ue0a0"
 # define POWERLINE_LINE_NUMBER "\ue0a1"

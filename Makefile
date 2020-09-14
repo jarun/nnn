@@ -19,7 +19,8 @@ O_NOMOUSE := 0  # no mouse support
 O_NOBATCH := 0  # no built-in batch renamer
 O_NOFIFO := 0  # no FIFO previewer support
 O_CTX8 := 0  # enable 8 contexts
-O_ICONS := 0  # support icons
+O_ICONS := 0  # support icons-in-terminal
+O_NERD := 0  # support icons-nerdfont
 O_QSORT := 0  # use Alexey Tourbin's QSORT implementation
 O_BENCH := 0  # benchmark mode (stops at first user input)
 
@@ -75,6 +76,10 @@ endif
 
 ifeq ($(O_ICONS),1)
 	CPPFLAGS += -DICONS
+endif
+
+ifeq ($(O_NERD),1)
+	CPPFLAGS += -DNERD
 endif
 
 ifeq ($(O_QSORT),1)
