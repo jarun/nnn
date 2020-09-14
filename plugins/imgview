@@ -55,7 +55,7 @@ elif which sxiv >/dev/null 2>&1; then
     if [ -f "$1" ]; then
         view_dir sxiv "$1" >/dev/null 2>&1 &
     elif [ -d "$1" ] || [ -h "$1" ]; then
-        sxiv -qt "$1" >/dev/null 2>&1 &
+        sxiv -aqt "$1" >/dev/null 2>&1 &
     fi
 elif which viu >/dev/null 2>&1; then
     viu -n "$1" | less -R
