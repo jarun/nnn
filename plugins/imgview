@@ -26,7 +26,7 @@ view_dir() {
     count="$(listimages | grep -a -m 1 -ZznF "$target" | cut -d: -f1)"
 
     if [ -n "$count" ]; then
-        if [ "$1" == 'sxiv' ]; then
+        if [ "$1" = 'sxiv' ]; then
             listimages | xargs -0 "$1" -an "$count" --
         else
             listimages | xargs -0 "$1" -n "$count" --
