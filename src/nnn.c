@@ -6414,7 +6414,7 @@ nochange:
 					copycurname();
 				goto nochange;
 			case SEL_EDIT:
-				spawn(editor, newpath, NULL, F_CLI);
+				spawn(enveditor, newpath, NULL, F_CLI);
 				continue;
 			default: /* SEL_LOCK */
 				lock_terminal();
