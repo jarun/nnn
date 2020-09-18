@@ -28,7 +28,7 @@ struct icon_pair {
 #define COLOR_VIDEO        93  /* Purple */
 #define COLOR_AUDIO        220 /* Gold1 */
 #define COLOR_IMAGE        82  /* Chartreuse2 */
-#define COLOR_BOOKS        202 /* OrangeRed1 */
+#define COLOR_DOCS         202 /* OrangeRed1 */
 #define COLOR_ARCHIVE      209 /* Salmon1 */
 #define COLOR_C            81  /* SteelBlue1 */
 #define COLOR_JAVA         32  /* DeepSkyBlue3 */
@@ -72,9 +72,9 @@ static const struct icon_pair icons_name[] = {
 	{"Public",       FA_INBOX,      0},
 	{"Templates",    FA_PAPERCLIP,  0},
 	{"Videos",       FA_FILM,       0},
-	{"CHANGELOG",    FA_HISTORY,    0},
+	{"CHANGELOG",    FA_HISTORY,    COLOR_DOCS},
 	{"configure",    FILE_CONFIG,   0},
-	{"License",      FA_COPYRIGHT,  0},
+	{"License",      FA_COPYRIGHT,  COLOR_DOCS},
 	{"Makefile",     FILE_CMAKE,    0},
 #elif defined(NERD)
 	{".git",         ICON_GIT,       0},
@@ -86,9 +86,9 @@ static const struct icon_pair icons_name[] = {
 	{"Public",       ICON_PUBLIC,    0},
 	{"Templates",    ICON_TEMPLATES, 0},
 	{"Videos",       ICON_VIDEOS,    0},
-	{"CHANGELOG",    ICON_CHANGELOG, 0},
+	{"CHANGELOG",    ICON_CHANGELOG, COLOR_DOCS},
 	{"configure",    ICON_CONFIGURE, 0},
-	{"License",      ICON_LICENSE,   0},
+	{"License",      ICON_LICENSE,   COLOR_DOCS},
 	{"Makefile",     ICON_MAKEFILE,  0},
 #endif
 };
@@ -102,7 +102,7 @@ static const struct icon_pair icons_name[] = {
 static const struct icon_pair icons_ext[] = {
 #if defined(ICONS)
 	/* Numbers */
-	{"1",        FILE_MANPAGE,         0},
+	{"1",        FILE_MANPAGE,         COLOR_DOCS},
 	{"7z",       FA_FILE_ARCHIVE_O,    COLOR_ARCHIVE},
 
 	/* A */
@@ -150,7 +150,7 @@ static const struct icon_pair icons_ext[] = {
 	 /* E */
 	{"ejs",      FA_FILE_CODE_O,       0},
 	{"elf",      FA_LINUX,             0},
-	{"epub",     FA_FILE_PDF_O,        COLOR_BOOKS},
+	{"epub",     FA_FILE_PDF_O,        COLOR_DOCS},
 	{"exe",      FA_WINDOWS,           0},
 
 	/* F */
@@ -206,8 +206,8 @@ static const struct icon_pair icons_ext[] = {
 	/* M */
 	{"m4a",      FA_FILE_AUDIO_O,      COLOR_AUDIO},
 	{"m4v",      FA_FILE_MOVIE_O,      COLOR_VIDEO},
-	{"markdown", DEV_MARKDOWN,         0},
-	{"md",       DEV_MARKDOWN,         0},
+	{"markdown", DEV_MARKDOWN,         COLOR_DOCS},
+	{"md",       DEV_MARKDOWN,         COLOR_DOCS},
 	{"mk",       FILE_CMAKE,           0},
 	{"mkv",      FA_FILE_MOVIE_O,      COLOR_VIDEO},
 	{"mov",      FA_FILE_MOVIE_O,      COLOR_VIDEO},
@@ -228,7 +228,7 @@ static const struct icon_pair icons_ext[] = {
 	/* P */
 	{"part",     FA_DOWNLOAD,          0},
 	{"patch",    FILE_PATCH,           0},
-	{"pdf",      FA_FILE_PDF_O,        COLOR_BOOKS},
+	{"pdf",      FA_FILE_PDF_O,        COLOR_DOCS},
 	{"php",      MFIZZ_PHP,            0},
 	{"png",      FA_FILE_IMAGE_O,      COLOR_IMAGE},
 	{"ppt",      FILE_POWERPOINT,      0},
@@ -301,7 +301,7 @@ static const struct icon_pair icons_ext[] = {
 	/* Other */
 #elif defined(NERD)
 	/* Numbers */
-	{"1",          ICON_EXT_1,         0},
+	{"1",          ICON_EXT_1,         COLOR_DOCS},
 	{"7z",         ICON_EXT_7Z,        COLOR_ARCHIVE},
 
 	/* A */
@@ -349,7 +349,7 @@ static const struct icon_pair icons_ext[] = {
 	 /* E */
 	{"ejs",        ICON_EXT_EJS,       COLOR_JAVASCRIPT},
 	{"elf",        ICON_EXT_ELF,       0},
-	{"epub",       ICON_EXT_EPUB,      COLOR_BOOKS},
+	{"epub",       ICON_EXT_EPUB,      COLOR_DOCS},
 	{"exe",        ICON_EXT_EXE,       0},
 
 	/* F */
@@ -405,8 +405,8 @@ static const struct icon_pair icons_ext[] = {
 	/* M */
 	{"m4a",        ICON_EXT_M4A,       COLOR_AUDIO},
 	{"m4v",        ICON_EXT_M4V,       COLOR_VIDEO},
-	{"markdown",   ICON_EXT_MD,        0},
-	{"md",         ICON_EXT_MD,        0},
+	{"markdown",   ICON_EXT_MD,        COLOR_DOCS},
+	{"md",         ICON_EXT_MD,        COLOR_DOCS},
 	{"mk",         ICON_EXT_MK,        0},
 	{"mkv",        ICON_EXT_MKV,       COLOR_VIDEO},
 	{"mov",        ICON_EXT_MOV,       COLOR_VIDEO},
@@ -427,7 +427,7 @@ static const struct icon_pair icons_ext[] = {
 	/* P */
 	{"part",       ICON_EXT_PART,      0},
 	{"patch",      ICON_EXT_PATCH,     0},
-	{"pdf",        ICON_EXT_PDF,       COLOR_BOOKS},
+	{"pdf",        ICON_EXT_PDF,       COLOR_DOCS},
 	{"php",        ICON_EXT_PHP,       0},
 	{"png",        ICON_EXT_PNG,       COLOR_IMAGE},
 	{"ppt",        ICON_EXT_PPT,       0},
