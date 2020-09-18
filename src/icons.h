@@ -276,6 +276,7 @@ static const struct icon_pair icons_ext[] = {
 	{"vid",      FA_FILE_MOVIE_O,      COLOR_VIDEO},
 	{"vim",      DEV_VIM,              0},
 	{"vimrc",    DEV_VIM,              0},
+	{"vtt",      FA_COMMENTS_O,        0},
 
 	/* W */
 	{"wav",      FA_FILE_AUDIO_O,      COLOR_AUDIO},
@@ -477,6 +478,7 @@ static const struct icon_pair icons_ext[] = {
 	{"vid",        ICON_EXT_VID,       COLOR_VIDEO},
 	{"vim",        ICON_EXT_VIM,       COLOR_VIM},
 	{"vimrc",      ICON_EXT_VIMRC,     COLOR_VIM},
+	{"vtt",        ICON_EXT_SRT,       0},
 
 	/* W */
 	{"wav",        ICON_EXT_WAV,       COLOR_AUDIO},
