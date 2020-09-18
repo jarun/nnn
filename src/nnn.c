@@ -723,7 +723,7 @@ static haiku_nm_h haiku_hnd;
 
 /* Function macros */
 #define tolastln() move(xlines - 1, 0)
-#define tocursor() move(cur + 2, 0)
+#define tocursor() move(cur + 2 - curscroll, 0)
 #define exitcurses() endwin()
 #define printwarn(presel) printwait(strerror(errno), presel)
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
