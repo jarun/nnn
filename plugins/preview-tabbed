@@ -100,6 +100,12 @@ kill_viewer () {
         fi
 }
 
+sigint_kill () {
+	kill_viewer
+	kill "$TABBEDPID"
+	exit 0
+}
+
 previewer_loop () {
     unset -v NNN_FIFO
     # mute from now
@@ -108,6 +114,7 @@ previewer_loop () {
     MAINWINDOW="$(xdotool getactivewindow)"
 
     start_tabbed
+    trap sigint_kill SIGINT
 
     xdotool windowactivate "$MAINWINDOW"
 
