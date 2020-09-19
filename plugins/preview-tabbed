@@ -103,7 +103,6 @@ kill_viewer () {
 sigint_kill () {
 	kill_viewer
 	kill "$TABBEDPID"
-	disown
 	exit 0
 }
 
