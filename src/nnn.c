@@ -124,7 +124,10 @@
 /* Macro definitions */
 #define VERSION "3.4"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
+
+#ifndef NOSSN
 #define SESSIONS_VERSION 1
+#endif
 
 #ifndef S_BLKSIZE
 #define S_BLKSIZE 512 /* S_BLKSIZE is missing on Android NDK (Termux) */
@@ -335,6 +338,7 @@ typedef struct {
 	uint color; /* Color code for directories */
 } context;
 
+#ifndef NOSSN
 typedef struct {
 	size_t ver;
 	size_t pathln[CTX_MAX];
@@ -342,6 +346,7 @@ typedef struct {
 	size_t nameln[CTX_MAX];
 	size_t fltrln[CTX_MAX];
 } session_header_t;
+#endif
 
 /* GLOBALS */
 
@@ -3835,6 +3840,7 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 	*curcfg = tmpcfg;
 }
 
+#ifndef NOSSN
 static void save_session(bool last_session, int *presel)
 {
 	int i;
@@ -3970,6 +3976,7 @@ END:
 
 	return status;
 }
+#endif
 
 static uchar get_free_ctx(void)
 {
@@ -5772,8 +5779,12 @@ static bool browse(char *ipath, const char *session, int pkey)
 	xlines = LINES;
 	xcols = COLS;
 
+#ifndef NOSSN
 	/* setup first context */
 	if (!session || !load_session(session, &path, &lastdir, &lastname, FALSE)) {
+#else
+		(void)session;
+#endif
 		g_ctx[0].c_last[0] = '\0';
 		lastdir = g_ctx[0].c_last; /* last visited directory */
 
@@ -5790,7 +5801,9 @@ static bool browse(char *ipath, const char *session, int pkey)
 
 		g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
 		g_ctx[0].c_cfg = cfg; /* current configuration */
+#ifndef NOSSN
 	}
+#endif
 
 	newpath[0] = rundir[0] = runfile[0] = '\0';
 
@@ -6919,6 +6932,7 @@ nochange:
 			/* Dir removed, go to next entry */
 			copynextname(lastname);
 			goto begin;
+#ifndef NOSSN
 		case SEL_SESSIONS:
 			r = get_input(messages[MSG_SSN_OPTS]);
 
@@ -6933,6 +6947,7 @@ nochange:
 
 			statusbar(path);
 			goto nochange;
+#endif
 		case SEL_EXPORT:
 			export_file_list();
 			cfg.filtermode ?  presel = FILTER : statusbar(path);
@@ -6983,8 +6998,10 @@ nochange:
 					break; // fallthrough
 			}
 
+#ifndef NOSSN
 			if (session && *session == '@' && !session[1])
 				save_session(TRUE, NULL);
+#endif
 
 			/* CD on Quit */
 			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE")) {
@@ -7282,8 +7299,10 @@ static void usage(void)
 		" -Q      no quit confirmation\n"
 		" -r      use advcpmv patched cp, mv\n"
 		" -R      no rollover at edges\n"
+#ifndef NOSSN
 		" -s name load session by name\n"
 		" -S      persistent session\n"
+#endif
 		" -t secs timeout to lock\n"
 		" -T key  sort order [a/d/e/r/s/t/v]\n"
 		" -u      use selection (no prompt)\n"
@@ -7533,6 +7552,7 @@ int main(int argc, char *argv[])
 		case 'R':
 			cfg.rollover = 0;
 			break;
+#ifndef NOSSN
 		case 's':
 			if (env_opts_id < 0)
 				session = optarg;
@@ -7540,6 +7560,7 @@ int main(int argc, char *argv[])
 		case 'S':
 			session = "@";
 			break;
+#endif
 		case 't':
 			if (env_opts_id < 0)
 				idletimeout = atoi(optarg);

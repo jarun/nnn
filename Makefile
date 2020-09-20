@@ -23,6 +23,7 @@ O_ICONS := 0  # support icons-in-terminal
 O_NERD := 0  # support icons-nerdfont
 O_QSORT := 0  # use Alexey Tourbin's QSORT implementation
 O_BENCH := 0  # benchmark mode (stops at first user input)
+O_NOSSN := 0  # enable session support
 
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
@@ -88,6 +89,10 @@ endif
 
 ifeq ($(O_BENCH),1)
 	CPPFLAGS += -DBENCH
+endif
+
+ifeq ($(O_NOSSN),1)
+	CPPFLAGS += -DNOSSN
 endif
 
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
