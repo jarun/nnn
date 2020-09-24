@@ -2857,8 +2857,11 @@ static int filterentries(char *path, char *lastname)
 			break;
 
 		/* Handle all control chars in main loop */
-		if (*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^')
+		if (*ch < ASCII_MAX && keyname(*ch)[0] == '^' && *ch != '^') {
+			if (keyname(*ch)[1] == '@')
+				*ch = 'm';
 			goto end;
+		}
 
 		if (len == 1) {
 			if (*ch == '?') /* Help and config key, '?' is an invalid regex */
@@ -4576,7 +4579,7 @@ static void show_help(const char *path)
 		 "b^R  Rename/dup%-14cr  Batch rename\n"
 		  "cz  Archive%-17ce  Edit file\n"
 		  "c*  Toggle exe%-14c>  Export list\n"
-	   "5Space ^J  (Un)select%-11cm ^K  Mark range/clear\n"
+	   "5Space ^J  (Un)select%-7cm ^Space  Mark range/clear\n"
 	       "9p ^P  Copy sel here%-11ca  Select all\n"
 	       "9v ^V  Move sel here%-8cw ^W  Cp/mv sel as\n"
 	       "9x ^X  Delete%-18cE  Edit sel\n"

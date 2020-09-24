@@ -215,7 +215,7 @@ static struct key bindings[] = {
 	{ ' ',            SEL_SEL },
 	/* Toggle select multiple files */
 	{ 'm',            SEL_SELMUL },
-	{ CONTROL('K'),   SEL_SELMUL },
+	{ CONTROL(' '),   SEL_SELMUL },
 	/* Select all files in current dir */
 	{ 'a',            SEL_SELALL },
 	/* List, edit selection */
