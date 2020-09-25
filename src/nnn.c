@@ -7657,7 +7657,7 @@ int main(int argc, char *argv[])
 				session = NULL;
 		} else if (argc == optind) {
 			/* Start in the current directory */
-			initpath = getcwd(NULL, PATH_MAX);
+			initpath = getcwd(NULL, 0);
 			if (!initpath)
 				initpath = "/";
 		} else {
