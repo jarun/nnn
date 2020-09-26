@@ -312,7 +312,7 @@ typedef struct {
 	uint move       : 1;  /* Move operation */
 	uint autonext   : 1;  /* Auto-proceed on open */
 	uint fortune    : 1;  /* Show fortune messages in help */
-	uint trash      : 1;  /* Use trash to delete files */
+	uint trash      : 2;  /* Use trash to delete files 1: trash-cli, 2: gio trash */
 	uint forcequit  : 1;  /* Do not prompt on quit */
 	uint autofifo   : 1;  /* Auto-create NNN_FIFO */
 	uint initfile   : 1;  /* Positional arg is a file */
@@ -325,7 +325,7 @@ typedef struct {
 	uint oldcolor   : 1;  /* Use older colorscheme */
 	uint stayonsel	: 1;  /* Disable auto-proceed on select */
 	uint dirctx     : 1;  /* Show dirs in context color */
-	uint reserved   : 12; /* Adjust when adding/removing a field */
+	uint reserved   : 11; /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -1971,14 +1971,14 @@ static char *xgetenv(const char * const name, char *fallback)
 }
 
 /* Checks if an env variable is set to 1 */
-static inline bool xgetenv_set(const char *name)
+static uint xgetenv_val(const char *name)
 {
-	char *value = getenv(name);
+	char *str = getenv(name);
 
-	if (value && value[0] == '1' && !value[1])
-		return TRUE;
+	if (str && str[0])
+		return atoi(str);
 
-	return FALSE;
+	return 0;
 }
 
 /* Check if a dir exists, IS a dir and is readable */
@@ -2003,9 +2003,7 @@ static void opstr(char *buf, char *op)
 
 static bool rmmulstr(char *buf)
 {
-	if (g_state.trash)
-		snprintf(buf, CMD_LEN_MAX, "xargs -0 trash-put < %s", selpath);
-	else {
+	if (!g_state.trash) {
 		char r = confirm_force(TRUE);
 
 		if (!r)
@@ -2013,7 +2011,10 @@ static bool rmmulstr(char *buf)
 
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr \"$0\" \"$@\" < /dev/tty' < %s",
 			 r, selpath);
-	}
+	} else if (g_state.trash == 1)
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 trash-put < %s", selpath);
+	else
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 gio trash < %s", selpath);
 
 	return TRUE;
 }
@@ -2021,9 +2022,7 @@ static bool rmmulstr(char *buf)
 /* Returns TRUE if file is removed, else FALSE */
 static bool xrm(char *fpath)
 {
-	if (g_state.trash)
-		spawn("trash-put", fpath, NULL, F_NORMAL);
-	else {
+	if (!g_state.trash) {
 		char rm_opts[] = "-ir";
 
 		rm_opts[1] = confirm_force(FALSE);
@@ -2031,7 +2030,10 @@ static bool xrm(char *fpath)
 			return FALSE;
 
 		spawn("rm", rm_opts, fpath, F_NORMAL | F_CHKRTN);
-	}
+	} else if (g_state.trash == 1)
+		spawn("trash-put", fpath, NULL, F_NORMAL);
+	else
+		spawn("gio trash", fpath, NULL, F_NORMAL | F_MULTI);
 
 	return (access(fpath, F_OK) == -1); /* File is removed */
 }
@@ -7768,8 +7770,9 @@ int main(int argc, char *argv[])
 #endif
 
 	/* Configure trash preference */
-	if (xgetenv_set(env_cfg[NNN_TRASH]))
-		g_state.trash = 1;
+	opt = xgetenv_val(env_cfg[NNN_TRASH]);
+	if (opt && opt <= 2)
+		g_state.trash = opt;
 
 	/* Ignore/handle certain signals */
 	struct sigaction act = {.sa_handler = sigint_handler};

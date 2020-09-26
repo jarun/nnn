@@ -488,9 +488,10 @@ separated by \fI;\fR:
     NOTE: The options must be preceded by "rclone" and max 5 flags are supported.
 .Ed
 .Pp
-\fBNNN_TRASH:\fR trash (instead of \fIdelete\fR) files to desktop Trash.
+\fBNNN_TRASH:\fR trash (instead of \fIrm -rf\fR) files to desktop Trash.
 .Bd -literal
-    export NNN_TRASH=1
+    export NNN_TRASH=n
+    # n=1: trash-cli, n=2: gio trash
 .Ed
 .Pp
 \fBNNN_SEL:\fR absolute path to custom selection file.
