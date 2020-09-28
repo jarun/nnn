@@ -5716,10 +5716,15 @@ static void redraw(char *path)
 
 	attroff(A_UNDERLINE | COLOR_PAIR(cfg.curctx + 1));
 
-	/* Go to first entry */
-	move(2, 0);
-
 	ncols = adjust_cols(ncols);
+
+	/* Go to first entry */
+	if (curscroll > 0) {
+		move(1, 0);
+		addch('^');
+	}
+
+	move(2, 0);
 
 	if (g_state.oldcolor) {
 		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
@@ -5734,6 +5739,12 @@ static void redraw(char *path)
 	if (g_state.dircolor) {
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		g_state.dircolor = 0;
+	}
+
+	/* Go to first entry */
+	if (i < ndents) {
+		move(xlines - 2, 0);
+		addch('v');
 	}
 
 	statusbar(path);
