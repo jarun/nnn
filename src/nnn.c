@@ -3789,9 +3789,9 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 		if (pair && fcolors[pair])
 			attrs |= COLOR_PAIR(pair);
 
+		attroff(attrs);
 
 #ifdef ICONS_ENABLED
-		attroff(attrs);
 		addstr("  ");
 #endif
 
