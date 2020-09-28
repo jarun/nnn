@@ -3680,7 +3680,8 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
 
-	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
+	/* Padding from the edge, ex selection marker */
+	addch(' ');
 
 	if (attrs)
 		attron(attrs);
@@ -3787,9 +3788,16 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 
 		if (pair && fcolors[pair])
 			attrs |= COLOR_PAIR(pair);
+
+
 #ifdef ICONS_ENABLED
 		attroff(attrs);
 		addstr("  ");
+#endif
+
+		addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
+
+#ifdef ICONS_ENABLED
 		if (sel)
 			attrs &= ~A_REVERSE;
 		print_icon(ent, attrs);
