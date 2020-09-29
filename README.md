@@ -177,3 +177,10 @@ Visit the [ToDo list](https://github.com/jarun/nnn/issues/719) to contribute or 
 - [Open Source For You](https://www.opensourceforu.com/2019/12/nnn-this-feature-rich-terminal-file-manager-will-enhance-your-productivity/)
 - [Suckless Rocks](https://suckless.org/rocks/)
 - [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
+
+## Videos
+
+- [I'M GOING TO USE THE NNN FILE BROWSER! 😮](https://www.youtube.com/watch?v=U2n5aGqou9E)
+- [NNN: Is This Terminal File Manager As Good As People Say?](https://www.youtube.com/watch?v=KuJHo-aO_FA)
+- [nnn - A File Manager (By Uoou, again.)](https://www.youtube.com/watch?v=cnzuzcCPYsk)
+- [NNN File Manager](https://www.youtube.com/watch?v=1QXU4XSqXNo)
