@@ -5974,7 +5974,7 @@ nochange:
 			/* Scroll up */
 			if (event.bstate == BUTTON4_PRESSED && ndents && (cfg.rollover || cur)) {
 				if (!cfg.rollover && cur < scroll_lines)
-					move_cursor(0,0);
+					move_cursor(0, 0);
 				else
 					move_cursor((cur + ndents - scroll_lines) % ndents, 0);
 				break;
