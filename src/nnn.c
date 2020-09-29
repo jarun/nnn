@@ -5972,14 +5972,14 @@ nochange:
 			}
 #if NCURSES_MOUSE_VERSION > 1
 			/* Scroll up */
-			if (event.bstate == BUTTON4_PRESSED && ndents && (cfg.rollover || cur)) {
+			if (event.bstate == BUTTON4_PRESSED && ndents && (cfg.rollover || cur >= scroll_lines)) {
 				move_cursor((cur + ndents - scroll_lines) % ndents, 0);
 				break;
 			}
 
 			/* Scroll down */
 			if (event.bstate == BUTTON5_PRESSED && ndents
-			    && (cfg.rollover || (cur != ndents - 1))) {
+			    && (cfg.rollover || (cur + scroll_lines < ndents))) {
 				move_cursor((cur + scroll_lines) % ndents, 0);
 				break;
 			}
