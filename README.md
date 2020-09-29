@@ -18,6 +18,12 @@ href="https://github.com/jarun/nnn#quickstart">Quickstart</a>] [<a
 href="https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins">Plugins</a>] [<a
 href="https://github.com/jarun/nnn/wiki/Performance">Performance</a>]</h3>
 
+<br>
+
+[![](https://user-images.githubusercontent.com/324519/94587860-062d7a80-0238-11eb-99b1-a9c9f0c32ac2.png)](https://youtu.be/-knZwdd1ScU)
+
+<br>
+
 `nnn` (_n³_) is a full-featured terminal file manager. It's tiny and nearly 0-config with an incredible speed.
 
 It is designed to be unobtrusive with smart workflows to match the trains of thought.
@@ -31,11 +37,6 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 <p align="center">
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/donate-PayPal-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
-
-<br>
-
-<p align="center"><a href="https://www.youtube.com/watch?v=U2n5aGqou9E"><img src="https://i.imgur.com/MPWpmos.png" /></a></p>
-<p align="center"><i>type-to-nav & du (click for demo video)</i></p>
 
 ## Black magic! :dark_sunglasses:
 
