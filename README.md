@@ -50,8 +50,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw
 - Write a plugin in any language you know
 - Edit and preview markdown, man page, html
 - Open a file and auto-advance to the next
-- Filter filtered entries
-- Export (filtered) list of visible files
+- Filter filtered entries, export list of visible files
 - Configure the middle mouse click to do anything
 - Fuzzy search subtree and open a file (or its parent dir)
 - Load four dirs with custom settings at once
