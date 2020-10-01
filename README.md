@@ -10,7 +10,7 @@
 </p>
 
 <p align="center"><a href="https://asciinema.org/a/353811"><img src="https://i.imgur.com/InHB5DB.png" /></a></p>
-<p align="center"><i>icons and colors (click for asciicast)</i></p>
+<p align="center"><i>icons and colors asciicast</i></p>
 
 <h3 align="center">[<a
 href="https://github.com/jarun/nnn#features">Features</a>] [<a
@@ -20,7 +20,7 @@ href="https://github.com/jarun/nnn/wiki/Performance">Performance</a>]</h3>
 
 <br>
 
-[![](https://user-images.githubusercontent.com/324519/94587860-062d7a80-0238-11eb-99b1-a9c9f0c32ac2.png)](https://youtu.be/-knZwdd1ScU)
+[![](https://user-images.githubusercontent.com/324519/94587860-062d7a80-0238-11eb-99b1-a9c9f0c32ac2.png)](https://www.youtube.com/embed/-knZwdd1ScU)
 
 <br>
 
@@ -32,7 +32,7 @@ It is designed to be unobtrusive with smart workflows to match the trains of tho
 
 There are 2 independent (neo)vim plugins - [nnn.vim](https://github.com/mcchrish/nnn.vim) and [vim-floaterm nnn wrapper](https://github.com/voldikss/vim-floaterm#nnn).
 
-It runs smoothly on the Pi, [Termux](https://www.youtube.com/watch?v=AbaauM7gUJw) (Android), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
+It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
 
 <p align="center">
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/donate-PayPal-1eb0fc.svg" alt="Donate via PayPal!" /></a>
@@ -179,7 +179,8 @@ Visit the [ToDo list](https://github.com/jarun/nnn/issues/719) to contribute or 
 
 ## Videos
 
-- [I'M GOING TO USE THE NNN FILE BROWSER! 😮](https://www.youtube.com/watch?v=U2n5aGqou9E)
-- [NNN: Is This Terminal File Manager As Good As People Say?](https://www.youtube.com/watch?v=KuJHo-aO_FA)
-- [nnn - A File Manager (By Uoou, again.)](https://www.youtube.com/watch?v=cnzuzcCPYsk)
-- [NNN File Manager](https://www.youtube.com/watch?v=1QXU4XSqXNo)
+- [I'M GOING TO USE THE NNN FILE BROWSER! 😮](https://www.youtube.com/embed/U2n5aGqou9E)
+- [NNN: Is This Terminal File Manager As Good As People Say?](https://www.youtube.com/embed/KuJHo-aO_FA)
+- [nnn - A File Manager (By Uoou, again.)](https://www.youtube.com/embed/cnzuzcCPYsk)
+- [NNN File Manager](https://www.youtube.com/embed/1QXU4XSqXNo)
+- [nnn file manager on Termux (Android)](https://www.youtube.com/embed/AbaauM7gUJw)
