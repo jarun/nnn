@@ -3676,11 +3676,15 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 			: (g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS));
 	uint len;
 	char *size;
+	char selgap[]="  ";
+
+	if (ent->flags & FILE_SELECTED)
+		selgap[1] = '+';
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
 
-	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
+	addch(' ');
 
 	if (attrs)
 		attron(attrs);
@@ -3769,14 +3773,18 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 	}
 
 	if (g_state.oldcolor) {
-		addstr("  ");
+		if (!sel)
+			attroff(A_DIM);
+		addstr(selgap);
 		if (!ln) {
 			attroff(A_DIM);
-			attrs ^=  A_DIM;
+			attrs ^= A_DIM;
 		}
 	} else {
+		if (!sel)
+			attroff(COLOR_PAIR(C_MIS));
 #ifndef ICONS_ENABLED
-		addstr("  ");
+		addstr(selgap);
 #endif
 		if (ent->flags & FILE_MISSING)
 			pair = C_MIS;
@@ -3789,7 +3797,7 @@ static void printent_long(const struct entry *ent, uint namecols, bool sel)
 			attrs |= COLOR_PAIR(pair);
 #ifdef ICONS_ENABLED
 		attroff(attrs);
-		addstr("  ");
+		addstr(selgap);
 		if (sel)
 			attrs &= ~A_REVERSE;
 		print_icon(ent, attrs);
