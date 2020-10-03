@@ -181,6 +181,7 @@ Visit the [ToDo list](https://github.com/jarun/nnn/issues/719) to contribute or 
 
 - [I'M GOING TO USE THE NNN FILE BROWSER! 😮](https://www.youtube.com/embed/U2n5aGqou9E)
 - [NNN: Is This Terminal File Manager As Good As People Say?](https://www.youtube.com/embed/KuJHo-aO_FA)
-- [nnn - A File Manager (By Uoou, again.)](https://www.youtube.com/embed/cnzuzcCPYsk)
+- [This Week in Linux 114 - TuxDigital](https://www.youtube.com/watch?v=5W9ja0DQjSY&t=2059s)
 - [NNN File Manager](https://www.youtube.com/embed/1QXU4XSqXNo)
 - [nnn file manager on Termux (Android)](https://www.youtube.com/embed/AbaauM7gUJw)
+- [nnn - A File Manager (By Uoou, again.)](https://www.youtube.com/embed/cnzuzcCPYsk)
