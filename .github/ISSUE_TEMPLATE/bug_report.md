@@ -6,6 +6,8 @@ labels: bug
 assignees: ''
 ---
 
+`nnn` comes with excellent documentation (including a Troubleshooting section). If you have a _How to do x_ question, it may have already been answered. Wiki: https://github.com/jarun/nnn/wiki
+
 If it looks like a local environment issue, please try to debug yourself. Debugging local setup issues is not our top priority.
 
 If you are looking for a new feature or program option, ensure you have the correct version with the feature installed. Refer to the release notes to confirm.
@@ -14,8 +16,8 @@ Before opening an issue, please try to reproduce on latest master. The bug you n
 
 Useful links:
 
-- compile `nnn` from source - https://github.com/jarun/nnn#from-source
-- debugging `nnn` - https://github.com/jarun/nnn/wiki/debugging-nnn
+- compile `nnn` from source - https://github.com/jarun/nnn/wiki/Usage#from-source
+- debugging `nnn` - https://github.com/jarun/nnn/wiki/Developer-guides#debugging-nnn
 
 If the issue can be reproduced on master, log it.
 
