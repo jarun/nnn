@@ -4596,7 +4596,7 @@ static void show_help(const char *path)
 		"1MISC\n"
 	      "8Alt ;  Select plugin%-11c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
-		  "cc  Connect remote%-10cu  Unmount\n"
+		  "cc  Connect remote%-10cu  Unmount remote/archive\n"
 	       "9t ^T  Sort toggles%-12cs  Manage session\n"
 		  "cT  Set time type%-11c0  Lock\n"
 	};
