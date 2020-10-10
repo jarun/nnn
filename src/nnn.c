@@ -462,16 +462,15 @@ static runstate g_state;
 #define UTIL_LAUNCH 6
 #define UTIL_SH_EXEC 7
 #define UTIL_BASH 8
-#define UTIL_ARCHIVEMOUNT 9
-#define UTIL_SSHFS 10
-#define UTIL_RCLONE 11
-#define UTIL_VI 12
-#define UTIL_LESS 13
-#define UTIL_SH 14
-#define UTIL_FZF 15
-#define UTIL_NTFY 16
-#define UTIL_CBCP 17
-#define UTIL_NMV 18
+#define UTIL_SSHFS 9
+#define UTIL_RCLONE 10
+#define UTIL_VI 11
+#define UTIL_LESS 12
+#define UTIL_SH 13
+#define UTIL_FZF 14
+#define UTIL_NTFY 15
+#define UTIL_CBCP 16
+#define UTIL_NMV 17
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -500,7 +499,6 @@ static char * const utils[] = {
 	"launch",
 	"sh -c",
 	"bash",
-	"archivemount",
 	"sshfs",
 	"rclone",
 	"vi",
@@ -517,7 +515,7 @@ static char * const utils[] = {
 #define MSG_INVALID_KEY 1
 #define STR_TMPFILE 2
 #define MSG_0_SELECTED 3
-#define MSG_UTIL_MISSING 4
+#define MSG_CANCEL 4
 #define MSG_FAILED 5
 #define MSG_SSN_NAME 6
 #define MSG_CP_MV_AS 7
@@ -555,9 +553,8 @@ static char * const utils[] = {
 #define MSG_FIRST 39
 #define MSG_RM_TMP 40
 #define MSG_NOCHNAGE 41
-#define MSG_CANCEL 42
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 43 /* Must be the last entry */
+#define MSG_DIR_CHANGED 42 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -565,7 +562,7 @@ static const char * const messages[] = {
 	"invalid key",
 	"/.nnnXXXXXX",
 	"0 selected",
-	"missing util",
+	"cancelled",
 	"failed!",
 	"session name: ",
 	"'c'p / 'm'v as?",
@@ -603,7 +600,6 @@ static const char * const messages[] = {
 	"first file (\')/char?",
 	"remove tmp file?",
 	"unchanged",
-	"cancelled",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -4305,13 +4301,14 @@ next:
 
 static bool archive_mount(char *newpath)
 {
-	char *dir, *cmd = utils[UTIL_ARCHIVEMOUNT];
+	char *str = "install archivemount";
+	char *dir, *cmd = str + 8; /* Start of "archivemount" */
 	char *name = pdents[cur].name;
 	size_t len = pdents[cur].nlen;
 	char mntpath[PATH_MAX];
 
 	if (!getutil(cmd)) {
-		printmsg(messages[MSG_UTIL_MISSING]);
+		printmsg(str);
 		return FALSE;
 	}
 
@@ -4359,7 +4356,7 @@ static bool remote_mount(char *newpath)
 	char mntpath[PATH_MAX];
 
 	if (!(r || s)) {
-		printmsg(messages[MSG_UTIL_MISSING]);
+		printmsg("install sshfs/rclone");
 		return FALSE;
 	}
 
