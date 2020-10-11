@@ -34,38 +34,38 @@ There are 2 independent (neo)vim plugins - [nnn.vim](https://github.com/mcchrish
 
 It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
 
+<details><summary><i><b>Expand</b></i> for some nnn magic! :dark_sunglasses:</summary><br><ul>
+  <li>Instantly load, sort, filter thousands of files</li>
+  <li>Type to navigate with automatic dir selection</li>
+  <li>find/fd/grep/ripgrep/fzf from nnn and list in nnn</li>
+  <li> Never lose context - start where you quit</li>
+  <li>Mount any cloud storage service in a few keypresses</li>
+  <li>Select files from anywhere (not just a single dir)</li>
+  <li>Unlimited bookmarks, plugins, cmds with custom hotkeys</li>
+  <li>Write a plugin in any language you know</li>
+  <li>Edit and preview markdown, man page, html</li>
+  <li>Open a file and auto-advance to the next</li>
+  <li>Filter filtered entries, export list of visible files</li>
+  <li>Configure the middle mouse click to do anything</li>
+  <li>Fuzzy search subtree and open a file (or its parent dir)</li>
+  <li>Load four dirs with custom settings at once</li>
+  <li>Notifications on cp, mv, rm completion</li>
+  <li>Auto-sync selection to system clipboard</li>
+  <li>Access selection from another instance of nnn</li>
+  <li>Open text files detached in another pane/tab/window</li>
+  <li>Mount and modify archives</li>
+  <li>Create files/dirs/duplicates with parents (like <i>mkdir -p</i>)</li>
+  <li>Toggle hidden with <kbd>.</kbd>, visit HOME with <kbd>~</kbd>, last dir with <kbd>-</kbd></li>
+  <li>Mark a frequently visited dir at runtime</li>
+  <li>Sort by modification, access and inode change time</li>
+  <li>Compile out/in features with make variables</li>
+  <li>Watch matrix text fly or read fortune messages</li>
+  <li>Configure in 5 minutes!</li>
+</ul></details>
+
 <p align="center">
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/donate-PayPal-1eb0fc.svg" alt="Donate via PayPal!" /></a>
 </p>
-
-## Black magic! :dark_sunglasses:
-
-- Instantly load, sort, filter thousands of files
-- Type to navigate with automatic dir selection
-- find/fd/grep/ripgrep/fzf from `nnn` and list in `nnn`
-- Never lose context - start where you quit
-- Mount any cloud storage service in a few keypresses
-- Select files from anywhere (not just a single dir)
-- Unlimited bookmarks, plugins, cmds with custom hotkeys
-- Write a plugin in any language you know
-- Edit and preview markdown, man page, html
-- Open a file and auto-advance to the next
-- Filter filtered entries, export list of visible files
-- Configure the middle mouse click to do anything
-- Fuzzy search subtree and open a file (or its parent dir)
-- Load four dirs with custom settings at once
-- Notifications on cp, mv, rm completion
-- Auto-sync selection to system clipboard
-- Access selection from another instance of `nnn`
-- Open text files detached in another pane/tab/window
-- Mount and modify archives
-- Create files/dirs/duplicates with parents (like `mkdir -p`)
-- Toggle hidden with <kbd>.</kbd>, visit HOME with <kbd>~</kbd>, last dir with <kbd>-</kbd>
-- Mark a frequently visited dir at runtime
-- Sort by modification, access and inode change time
-- Compile out/in features with make variables
-- Watch matrix text fly or read fortune messages
-- Configure in 5 minutes!
 
 ## Features
 
@@ -140,7 +140,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 
 ## Quickstart
 
-1. [Install](https://github.com/jarun/nnn/wiki/Usage#installation) `nnn` and deps (if you need any). All files are opened with the desktop opener by default.
+1. [Install](https://github.com/jarun/nnn/wiki/Usage) `nnn` and any dependecies you need. All files are opened with the desktop opener by default.
 2. Add option `-e` to your alias to open text files in `$VISUAL`/`$EDITOR`/ vi. [Open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text) if you wish.
 3. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 4. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installation).
@@ -150,7 +150,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 
 Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates, cycles contexts. <kbd>?</kbd> lists shortcuts.
 
-[![Wiki](https://img.shields.io/badge/RTFM-nnn%20Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
+[![Wiki](https://img.shields.io/badge/documentation-nnn%20Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
 
 ## Developers
 
