@@ -318,7 +318,7 @@ typedef struct {
 	uint initfile   : 1;  /* Positional arg is a file */
 	uint dircolor   : 1;  /* Current status of dir color */
 	uint picker     : 1;  /* Write selection to user-specified file */
-	uint pickraw    : 1;  /* Write selection to sdtout before exit */
+	uint pickraw    : 1;  /* Write selection to stdout before exit */
 	uint runplugin  : 1;  /* Choose plugin mode */
 	uint runctx     : 2;  /* The context in which plugin is to be run */
 	uint selmode    : 1;  /* Set when selecting files */
