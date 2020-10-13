@@ -25,7 +25,7 @@
 # Shell: POSIX compliant
 # Author: Todd Yamakawa
 
-if [[ -z "$BOOKMARKS_DIR" ]]; then
+if [ -z "$BOOKMARKS_DIR" ]; then
   BOOKMARKS_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/nnn/bookmarks"
 fi
 
