@@ -25,7 +25,9 @@
 # Shell: POSIX compliant
 # Author: Todd Yamakawa
 
-BOOKMARKS_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/nnn/bookmarks"
+if [[ -z "$BOOKMARKS_DIR" ]]; then
+  BOOKMARKS_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/nnn/bookmarks"
+fi
 
 # Check if NNN_PIPE is set
 if [ -z "$NNN_PIPE" ]; then
