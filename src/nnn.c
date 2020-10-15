@@ -7854,6 +7854,10 @@ int main(int argc, char *argv[])
 	if (sort)
 		set_sort_flags(sort);
 
+	/* Set the process group to current process */
+	setpgid(0, 0);
+	tcsetpgrp(STDOUT_FILENO, getpid());
+
 	opt = browse(initpath, session, pkey);
 
 #ifndef NOMOUSE
