@@ -46,9 +46,10 @@ get_links() {
         printf "%20s -> %s\n" "$(basename "$entry")" "$(readlink -f "$entry")"
     done | fzf |
     awk 'END {
-        if(length($1) == 0){ print "'"$PWD"'" }
+        if (length($1) == 0) { print "'"$PWD"'" }
         else { print "'"$BOOKMARKS_DIR"'/"$1 }
-        }'
+    }'
+
 }
 
 # Choose symlink with fzf
