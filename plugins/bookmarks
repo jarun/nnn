@@ -49,7 +49,6 @@ get_links() {
         if (length($1) == 0) { print "'"$PWD"'" }
         else { print "'"$BOOKMARKS_DIR"'/"$1 }
     }'
-
 }
 
 # Choose symlink with fzf
