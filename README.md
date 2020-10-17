@@ -16,7 +16,7 @@
 href="https://github.com/jarun/nnn#features">Features</a>] [<a
 href="https://github.com/jarun/nnn#quickstart">Quickstart</a>] [<a
 href="https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins">Plugins</a>] [<a
-href="https://github.com/jarun/nnn/wiki/Performance">Performance</a>]</h3>
+href="https://github.com/jarun/nnn/wiki">Documentation</a>]</h3>
 
 <br>
 
@@ -24,7 +24,7 @@ href="https://github.com/jarun/nnn/wiki/Performance">Performance</a>]</h3>
 
 <br>
 
-`nnn` (_n³_) is a full-featured terminal file manager. It's tiny and nearly 0-config with an incredible speed.
+`nnn` (_n³_) is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible speed](https://github.com/jarun/nnn/wiki/Performance).
 
 It is designed to be unobtrusive with smart workflows to match the trains of thought.
 
@@ -150,7 +150,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 
 Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates, cycles contexts. <kbd>?</kbd> lists shortcuts.
 
-[![Wiki](https://img.shields.io/badge/documentation-nnn%20Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
+[![Wiki](https://img.shields.io/badge/RTFM-nnn%20Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
 
 ## Developers
 
