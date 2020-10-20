@@ -162,8 +162,15 @@ strip: $(BIN)
 	$(STRIP) $^
 
 static:
+	# regular static binary
 	make O_STATIC=1 strip
 	mv $(BIN) $(BIN)-static
+	# static binary with icons-in-terminal support
+	make O_STATIC=1 O_ICONS=1 strip
+	mv $(BIN) $(BIN)-icons-static
+	# static binary with patched nerd font support
+	make O_STATIC=1 O_NERD=1 strip
+	mv $(BIN) $(BIN)-nerd-static
 
 dist:
 	mkdir -p nnn-$(VERSION)
@@ -178,16 +185,28 @@ sign:
 
 upload-local: sign static
 	$(eval ID=$(shell curl -s 'https://api.github.com/repos/jarun/nnn/releases/tags/v$(VERSION)' | jq .id))
+	# upload sign file
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION).tar.gz.sig' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/pgp-signature' \
 	    --upload-file nnn-$(VERSION).tar.gz.sig
 	tar -zcf $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-static
+	# upload static binary
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-static-$(VERSION).x86_64.tar.gz' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
 	    --upload-file $(BIN)-static-$(VERSION).x86_64.tar.gz
+	tar -zcf $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static
+	# upload icons-in-terminal compiled static binary
+	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-icons-static-$(VERSION).x86_64.tar.gz' \
+	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
+	    --upload-file $(BIN)-icons-static-$(VERSION).x86_64.tar.gz
+	# upload patched nerd font compiled static binary
+	tar -zcf $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static
+	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-nerd-static-$(VERSION).x86_64.tar.gz' \
+	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
+	    --upload-file $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz
 
 clean:
-	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz
+	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz
 
 skip: ;
 
