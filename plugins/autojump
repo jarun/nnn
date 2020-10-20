@@ -16,16 +16,26 @@ if [ -z "$NNN_PIPE" ]; then
 fi
 
 if which jump >/dev/null 2>&1; then
-    printf "jump to: "
+    printf "jump to : "
     read -r dir
     odir="$(jump cd "$dir")"
     printf "%s" "0c$odir" > "$NNN_PIPE"
 elif which autojump >/dev/null 2>&1; then
-    printf "jump to: "
+    printf "jump to : "
     read -r dir
     odir="$(autojump "$dir")"
     printf "%s" "0c$odir" > "$NNN_PIPE"
+elif which zoxide >/dev/null 2>&1; then
+    if which fzf >/dev/null 2>&1; then
+    	odir="$(zoxide query -i --)"
+    	printf "%s" "0c$odir" > "$NNN_PIPE"
+    else
+	printf "jump to : "
+    	read -r dir
+    	odir="$(zoxide query -- "$dir")"
+    	printf "%s" "0c$odir" > "$NNN_PIPE"
+    fi
 else
-    printf "jump/autojump missing"
+    printf "No supported autojump script found. (jump/autojump/zoxide are supported)"
     read -r _
 fi
