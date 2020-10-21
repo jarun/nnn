@@ -1,14 +1,15 @@
 #!/usr/bin/env sh
 
-# Description: Navigate to directory using jump/autojump
+# Description: Navigate to directory using jump/autojump/zoxide
 #
 # Dependencies: jump - https://github.com/gsamokovarov/jump
 #               OR autojump - https://github.com/wting/autojump
+#               OR zoxide - https://github.com/ajeetdsouza/zoxide
 #
-# Note: jump/autojump STORES NAVIGATION PATTERNS
+# Note: The dependencies STORE NAVIGATION PATTERNS
 #
 # Shell: POSIX compliant
-# Authors: Marty Buchaus, Dave Snider
+# Authors: Marty Buchaus, Dave Snider, Tim Adler
 
 if [ -z "$NNN_PIPE" ]; then
     echo 'ERROR: NNN_PIPE is not set' | ${PAGER:-less}
