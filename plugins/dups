@@ -6,10 +6,39 @@
 #
 # Dependencies: find md5sum sort uniq xargs
 #
-# Shell: POSIX compliant
+# Note: bash compatible required for mktemp
+#
+# Shell: bash
 # Authors: syssyphus, KlzXS
 
-find . -size +0 -type f -printf "%s %p\n" | sort -rn | sed -n 'N; /^\([0-9]*\) .*\n\1.*$/p;$d;D' | awk '{printf("%s\0", substr($0, index($0, $2)))}' | xargs -0 md5sum | sort | uniq -w32 --all-repeated=separate
+# If the size of a file has more that $size_digits digits the file will be misplaced
+# 12 digits fit files up to 931GiB
+
+EDITOR="${EDITOR:-vi}"
+TMPDIR="${TMPDIR:-/tmp}"
+
+size_digits=12
+tmpfile=$(mktemp "$TMPDIR/.nnnXXXXXX")
+
+# shellcheck disable=SC2016
+find . -size +0 -type f -printf "%${size_digits}s %p\n" | sort -rn | uniq -w"${size_digits}" -D | tr '\n' '\0' | xargs -0 -n1 sh -c 'printf "%s %s\n" "$(md5sum $@)" "d$0"' | sort | { uniq -w32 --all-repeated=separate; echo; } | sed -nE '
+h
+s/^(.{32}).* d([0-9]*)$/md5sum: \1 size: \2 bytes/p
+g
+
+:loop
+N
+/.*\n$/!b loop
+p' | sed -E 's/^.{32} (.*) d[0-9]*$/\1/' > "$tmpfile"
+
+"$EDITOR" "$tmpfile"
+
+cat "$tmpfile"
+
+# shellcheck disable=SC2016
+sed -e 's/md5sum.*//' "$tmpfile" | tr '\n' '\0' | xargs -0 sh -c 'rm -i $0 $@ < /dev/tty'
+
+rm "$tmpfile"
 
 printf "Press any key to exit"
 read -r _
