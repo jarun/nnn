@@ -94,6 +94,23 @@ To pick and run an unassigned plugin, press <kbd>Enter</kbd> (to _enter_ the plu
 
 To run a plugin at startup, use the option `-P` followed by the plugin key.
 
+If the plugins list gets too long, try breaking them up into sections:
+
+```
+NNN_PLUG_PERSONAL='g:personal/convert2zoom;p:personal/echo'
+NNN_PLUG_WORK='j:work/prettyjson;d:work/foobar'
+NNN_PLUG_INLINE='e:_go run $nnn*'
+NNN_PLUG_DEFAULT='1:bookmarks;2:ipinfo;p:preview-tui;o:fzz;b:nbak'
+NNN_PLUG="$NNN_PLUG_PERSONAL;$NNN_PLUG_WORK;$NNN_PLUG_DEFAULT;$NNN_PLUG_INLINE"
+export NNN_PLUG
+```
+
+Note:
+- `'g:personal/convert2zoom'` will look in the personal sub-folder inside the plugin folder.
+- `'b:boom;b:bookmarks` will result in only the first definition of *b* (`b:boom`) being used.
+- A keybinding definition of more than 1 character will prevent nnn from starting.
+
+
 #### Skip directory refresh after running a plugin
 
 `nnn` refreshes the directory after running a plugin to reflect any changes by the plugin. To disable this (say while running the `mediainf` plugin on some filtered files), add a `-` before the plugin name:
