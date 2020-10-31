@@ -252,8 +252,10 @@ typedef struct entry {
 	off_t size;
 	blkcnt_t blocks; /* number of 512B blocks allocated */
 	mode_t mode;
+#ifndef NOUG
 	uid_t uid;
 	gid_t gid;
+#endif
 	ushort nlen; /* Length of file name */
 	uchar flags; /* Flags specific to the file */
 } *pEntry;
@@ -5103,8 +5105,11 @@ static int dentfill(char *path, struct entry **ppdents)
 		dentp->mode = sb.st_mode;
 		dentp->size = sb.st_size;
 #endif
+
+#ifndef NOUG
 		dentp->uid = sb.st_uid;
 		dentp->gid = sb.st_gid;
+#endif
 
 		dentp->flags = S_ISDIR(sb.st_mode) ? 0 : ((sb.st_nlink > 1) ? HARD_LINK : 0);
 		if (entflags) {
@@ -5578,6 +5583,7 @@ static void statusbar(char *path)
 		addch(' ');
 		addstr(get_lsperms(pent->mode));
 		addch(' ');
+#ifndef NOUG
 		if (g_state.uidgid) {
 			struct passwd *pw = getpwuid(pent->uid);
 			struct group  *gr = getgrgid(pent->gid);
@@ -5594,6 +5600,7 @@ static void statusbar(char *path)
 				addch('-');
 			addch(' ');
 		}
+#endif
 		addstr(coolsize(pent->size));
 		addch(' ');
 		addstr(ptr);
@@ -7357,7 +7364,9 @@ static void usage(void)
 		" -t secs timeout to lock\n"
 		" -T key  sort order [a/d/e/r/s/t/v]\n"
 		" -u      use selection (no prompt)\n"
+#ifndef NOUG
 		" -U      show user and group\n"
+#endif
 		" -V      show version\n"
 		" -w      place HW cursor on hovered\n"
 		" -x      notis, sel to system clipboard\n"
