@@ -99,6 +99,8 @@
 #endif
 #include <ftw.h>
 #include <wchar.h>
+#include <pwd.h>
+#include <grp.h>
 
 #if !defined(alloca) && defined(__GNUC__)
 /*
@@ -250,6 +252,8 @@ typedef struct entry {
 	off_t size;
 	blkcnt_t blocks; /* number of 512B blocks allocated */
 	mode_t mode;
+	uid_t uid;
+	gid_t gid;
 	ushort nlen; /* Length of file name */
 	uchar flags; /* Flags specific to the file */
 } *pEntry;
@@ -325,7 +329,8 @@ typedef struct {
 	uint oldcolor   : 1;  /* Use older colorscheme */
 	uint stayonsel	: 1;  /* Disable auto-proceed on select */
 	uint dirctx     : 1;  /* Show dirs in context color */
-	uint reserved   : 11; /* Adjust when adding/removing a field */
+	uint uidgid     : 1;  /* Show owner and group info */
+	uint reserved   : 10; /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -5098,6 +5103,9 @@ static int dentfill(char *path, struct entry **ppdents)
 		dentp->mode = sb.st_mode;
 		dentp->size = sb.st_size;
 #endif
+		dentp->uid = sb.st_uid;
+		dentp->gid = sb.st_gid;
+
 		dentp->flags = S_ISDIR(sb.st_mode) ? 0 : ((sb.st_nlink > 1) ? HARD_LINK : 0);
 		if (entflags) {
 			dentp->flags |= entflags;
@@ -5570,6 +5578,22 @@ static void statusbar(char *path)
 		addch(' ');
 		addstr(get_lsperms(pent->mode));
 		addch(' ');
+		if (g_state.uidgid) {
+			struct passwd *pw = getpwuid(pent->uid);
+			struct group  *gr = getgrgid(pent->gid);
+
+			if (pw)
+				addstr(pw->pw_name);
+			else
+				addch('-');
+			addch(' ');
+
+			if (gr)
+				addstr(gr->gr_name);
+			else
+				addch('-');
+			addch(' ');
+		}
 		addstr(coolsize(pent->size));
 		addch(' ');
 		addstr(ptr);
@@ -7333,6 +7357,7 @@ static void usage(void)
 		" -t secs timeout to lock\n"
 		" -T key  sort order [a/d/e/r/s/t/v]\n"
 		" -u      use selection (no prompt)\n"
+		" -U      show user and group\n"
 		" -V      show version\n"
 		" -w      place HW cursor on hovered\n"
 		" -x      notis, sel to system clipboard\n"
@@ -7480,7 +7505,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdDeEfFgHJKl:nop:P:QrRs:St:T:uVwxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdDeEfFgHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7598,6 +7623,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'u':
 			cfg.prefersel = 1;
+			break;
+		case 'U':
+			g_state.uidgid = 1;
 			break;
 		case 'V':
 			fprintf(stdout, "%s\n", VERSION);
