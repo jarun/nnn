@@ -17,9 +17,12 @@ O_NOMOUSE := 0  # no mouse support
 O_NOBATCH := 0  # no built-in batch renamer
 O_NOFIFO := 0  # no FIFO previewer support
 O_CTX8 := 0  # enable 8 contexts
-O_ICONS := 0  # support icons
+O_ICONS := 0  # support icons-in-terminal
+O_NERD := 0  # support icons-nerdfont
 O_QSORT := 0  # use Alexey Tourbin's QSORT implementation
 O_BENCH := 0  # benchmark mode (stops at first user input)
+O_NOSSN := 0  # enable session support
+O_NOUG := 0  # disable user, group name in status bar
 
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
@@ -76,12 +79,24 @@ ifeq ($(O_ICONS),1)
 	CPPFLAGS += -DICONS
 endif
 
+ifeq ($(O_NERD),1)
+	CPPFLAGS += -DNERD
+endif
+
 ifeq ($(O_QSORT),1)
 	CPPFLAGS += -DTOURBIN_QSORT
 endif
 
 ifeq ($(O_BENCH),1)
 	CPPFLAGS += -DBENCH
+endif
+
+ifeq ($(O_NOSSN),1)
+	CPPFLAGS += -DNOSSN
+endif
+
+ifeq ($(O_NOUG),1)
+	CPPFLAGS += -DNOUG
 endif
 
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
@@ -100,7 +115,7 @@ ifeq ($(shell uname -s), Haiku)
 	OBJS_HAIKU ?= misc/haiku/nm.o
 endif
 
-CFLAGS += -Wall -Wextra
+CFLAGS += -std=c11 -Wall -Wextra -Wshadow
 CFLAGS += $(CFLAGS_OPTIMIZATION)
 CFLAGS += $(CFLAGS_CURSES)
 
@@ -168,10 +183,12 @@ sign:
 
 upload-local: sign static
 	$(eval ID=$(shell curl -s 'https://api.github.com/repos/jarun/nnn/releases/tags/v$(VERSION)' | jq .id))
+	# upload sign file
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION).tar.gz.sig' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/pgp-signature' \
 	    --upload-file nnn-$(VERSION).tar.gz.sig
 	tar -zcf $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-static
+	# upload static binary
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-static-$(VERSION).x86_64.tar.gz' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
 	    --upload-file $(BIN)-static-$(VERSION).x86_64.tar.gz
