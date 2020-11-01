@@ -176,6 +176,7 @@ Visit the [ToDo list](https://github.com/jarun/nnn/issues/719) to contribute or 
 - [Open Source For You](https://www.opensourceforu.com/2019/12/nnn-this-feature-rich-terminal-file-manager-will-enhance-your-productivity/)
 - [Suckless Rocks](https://suckless.org/rocks/)
 - [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
+- [Wikipedia](https://en.wikipedia.org/wiki/Nnn_(file_manager))
 
 ## Videos
 
