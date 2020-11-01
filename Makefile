@@ -166,6 +166,10 @@ uninstall:
 strip: $(BIN)
 	$(STRIP) $^
 
+upx: $(BIN)
+	$(STRIP) $^
+	upx -qqq $^
+
 static:
 	# regular static binary
 	make O_STATIC=1 strip
