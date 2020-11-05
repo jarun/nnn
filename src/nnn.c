@@ -7077,10 +7077,11 @@ nochange:
 			if (xlines != LINES || xcols != COLS)
 				continue;
 
-			if (idletimeout && idle == idletimeout)
+			if (idletimeout && idle == idletimeout) {
 				lock_terminal(); /* Locker */
+				idle = 0;
+			}
 
-			idle = 0;
 			if (ndents)
 				copycurname();
 
