@@ -4,7 +4,7 @@
 #
 # Source: https://www.commandlinefu.com/commands/view/3555/find-duplicate-files-based-on-size-first-then-md5-hash
 #
-# Dependencies: find md5sum sort uniq xargs
+# Dependencies: find md5sum sort uniq xargs gsed
 #
 # Note: bash compatible required for mktemp
 #
@@ -20,12 +20,20 @@ TMPDIR="${TMPDIR:-/tmp}"
 size_digits=12
 tmpfile=$(mktemp "$TMPDIR/.nnnXXXXXX")
 
+printf "\
+## This is an overview of all duplicate files found.
+## After editiing this file you will be prompted to remove some of them.
+## You can choose between removing all the commented out files, all the uncommented ones or none at all.
+## All the lines begining with '##','#md5sum' or 'md5sum' will be ignored either way.
+## If you choose to remove, you will be given a choice between removing with force or interactively for each file.
+" > "$tmpfile"
+
 # shellcheck disable=SC2016
 find . -size +0 -type f -printf "%${size_digits}s %p\n" | sort -rn | uniq -w"${size_digits}" -D | sed -E '
 s/^ {,12}([0-9]{,12}) (.*)$/printf "%s %s\\n" "$(md5sum "\2")" "d\1"/
 ' | tr '\n' '\0' | xargs -0 -n1 sh -c | sort | { uniq -w32 --all-repeated=separate; echo; } | sed -nE '
 h
-s/^(.{32}).* d([0-9]*)$/md5sum: \1 size: \2 bytes/p
+s/^(.{32}).* d([0-9]*)$/#md5sum: \1 size: \2 bytes/p
 g
 
 :loop
@@ -35,10 +43,26 @@ p' | sed -E 's/^.{32} (.*) d[0-9]*$/\1/' > "$tmpfile"
 
 "$EDITOR" "$tmpfile"
 
-cat "$tmpfile"
+printf "Remove commented files? (yes/no/abort) [default=a]: "
+read -r commented
+
+if [ "$commented" = "y" ]; then
+	sedcmd="/^(##|#?md5sum|[^#]).*/d"
+elif [ "$commented" = "n" ]; then
+	sedcmd="/^(#|#?md5sum).*/d"
+else
+	printf "Press any key to exit"
+	read -r _
+	exit
+fi
+
+printf "Remove with force or interactive? (f/i) [default=i]: "
+read -r force
+
+rmcmd="'rm -$force \"\$0\" \"\$@\" < /dev/tty'"
 
 # shellcheck disable=SC2016
-sed -e 's/md5sum.*//' "$tmpfile" | tr '\n' '\0' | xargs -0 sh -c 'rm -i "$0" "$@" < /dev/tty'
+sed -e $sedcmd "$tmpfile" | tr '\n' '\0' | xargs -0 sh -c "$rmcmd"
 
 rm "$tmpfile"
 
