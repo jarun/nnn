@@ -55,7 +55,7 @@ jobs:
             echo
             echo "########## clang-tidy-9 ##########"
             clang-tidy-9 src/* -- -I/usr/include -I/usr/include/ncursesw
-            echo "########## checllcheck ##########"
+            echo "########## shellcheck ##########"
             find plugins/ -type f -not -name "*.md" -exec shellcheck -e SC1090 {} +
 
   package-and-publish:
