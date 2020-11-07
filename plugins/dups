@@ -25,7 +25,7 @@ printf "\
 ## After editiing this file you will be prompted to remove some of them.
 ## You can choose between removing all the commented out files, all the uncommented ones or none at all.
 ## All the lines begining with '##','#md5sum' or 'md5sum' will be ignored either way.
-## If you choose to remove, you will be given a choice between removing with force or interactively for each file.
+## If you choose to remove, you will be given a choice between removing with force or interactively for each file.\n
 " > "$tmpfile"
 
 # shellcheck disable=SC2016
@@ -39,7 +39,7 @@ g
 :loop
 N
 /.*\n$/!b loop
-p' | sed -E 's/^.{32} (.*) d[0-9]*$/\1/' > "$tmpfile"
+p' | sed -E 's/^.{32}  (.*) d[0-9]*$/\1/' >> "$tmpfile"
 
 "$EDITOR" "$tmpfile"
 
@@ -47,9 +47,9 @@ printf "Remove commented files? (yes/no/abort) [default=a]: "
 read -r commented
 
 if [ "$commented" = "y" ]; then
-	sedcmd="/^(##|#?md5sum|[^#]).*/d"
+	sedcmd="/^(##|#?md5sum|[^#]).*/d; /^$/d; s/^# *(.*)$/\1/"
 elif [ "$commented" = "n" ]; then
-	sedcmd="/^(#|#?md5sum).*/d"
+	sedcmd="/^(#|#?md5sum).*/d; /^$/d; s/^ *(.*)$/\1/"
 else
 	printf "Press any key to exit"
 	read -r _
@@ -59,10 +59,13 @@ fi
 printf "Remove with force or interactive? (f/i) [default=i]: "
 read -r force
 
-rmcmd="'rm -$force \"\$0\" \"\$@\" < /dev/tty'"
-
-# shellcheck disable=SC2016
-sed -e "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 sh -c "$rmcmd"
+if [ "$force" = "f" ]; then
+	#shellcheck disable=SC2016
+	sed -E "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 sh -c 'rm -f "$0" "$@" </dev/tty'
+else
+	#shellcheck disable=SC2016
+	sed -E "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 sh -c 'rm -i "$0" "$@" </dev/tty'
+fi
 
 rm "$tmpfile"
 
