@@ -62,7 +62,7 @@ read -r force
 rmcmd="'rm -$force \"\$0\" \"\$@\" < /dev/tty'"
 
 # shellcheck disable=SC2016
-sed -e $sedcmd "$tmpfile" | tr '\n' '\0' | xargs -0 sh -c "$rmcmd"
+sed -e "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 sh -c "$rmcmd"
 
 rm "$tmpfile"
 
