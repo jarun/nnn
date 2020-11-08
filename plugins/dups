@@ -24,7 +24,7 @@ printf "\
 ## This is an overview of all duplicate files found.
 ## Comment out the files you wish to remove. You will be given an option to cancel.
 ## Lines with double comments (##) are ignored.
-## If you choose to remove, you will be given a choice between removing files with force or interactively.\n
+## You will have the option to remove the files with force or interactively.\n
 " > "$tmpfile"
 
 # shellcheck disable=SC2016
