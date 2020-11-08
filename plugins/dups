@@ -22,10 +22,9 @@ tmpfile=$(mktemp "$TMPDIR/.nnnXXXXXX")
 
 printf "\
 ## This is an overview of all duplicate files found.
-## After editiing this file you will be prompted to remove some of them.
-## You can choose between removing all the commented out files, all the uncommented ones or none at all.
-## Lines with double comments (##) are always ignored.
-## If you choose to remove, you will be given a choice between removing with force or interactively for each file.\n
+## Comment out the files you wish to remove. You will be given an option to cancel.
+## Lines with double comments (##) are ignored.
+## If you choose to remove, you will be given a choice between removing files with force or interactively.\n
 " > "$tmpfile"
 
 # shellcheck disable=SC2016
@@ -43,13 +42,11 @@ p' | sed -E 's/^.{32}  (.*) d[0-9]*$/\1/' >> "$tmpfile"
 
 "$EDITOR" "$tmpfile"
 
-printf "Remove commented files? (yes/no/abort) [default=a]: "
+printf "Remove commented files? (yes/no) [default=n]: "
 read -r commented
 
 if [ "$commented" = "y" ]; then
 	sedcmd="/^(##|[^#]).*/d; /^$/d; s/^# *(.*)$/\1/"
-elif [ "$commented" = "n" ]; then
-	sedcmd="/^#.*/d; /^$/d; s/^ *(.*)$/\1/"
 else
 	printf "Press any key to exit"
 	read -r _
