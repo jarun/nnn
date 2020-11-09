@@ -58,10 +58,10 @@ read -r force
 
 if [ "$force" = "f" ]; then
 	#shellcheck disable=SC2016
-	sed -E "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 sh -c 'rm -f "$0" "$@" </dev/tty'
+	sed -E "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 -r sh -c 'rm -f "$0" "$@" </dev/tty'
 else
 	#shellcheck disable=SC2016
-	sed -E "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 sh -c 'rm -i "$0" "$@" </dev/tty'
+	sed -E "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 -r sh -c 'rm -i "$0" "$@" </dev/tty'
 fi
 
 rm "$tmpfile"
