@@ -774,6 +774,9 @@ static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, st
 static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
+#ifndef NOFIFO
+static void notify_fifo(bool force);
+#endif
 
 /* Functions */
 
@@ -2549,8 +2552,10 @@ static int nextsel(int presel)
 #endif
 	int c = presel;
 	uint i;
+	bool escaped = FALSE;
 
 	if (c == 0 || c == MSGWAIT) {
+try_quit:
 		c = getch();
 		//DPRINTF_D(c);
 		//DPRINTF_S(keyname(c));
@@ -2566,9 +2571,19 @@ static int nextsel(int presel)
 					ungetch(c);
 					c = ';';
 				}
-			} else
-				c = ESC;
-			settimeout();
+				settimeout();
+			} else if (escaped) {
+				settimeout();
+				c = CONTROL('Q');
+			} else {
+#ifndef NOFIFO
+				/* Send hovered path to NNN_FIFO */
+				notify_fifo(TRUE);
+#endif
+				escaped = TRUE;
+				settimeout();
+				goto try_quit;
+			}
 		}
 
 		if (c == ERR && presel == MSGWAIT)
@@ -4582,7 +4597,7 @@ static void show_help(const char *path)
 		"a1-4  Context 1-4%-7c(Sh)Tab  Cycle context\n"
 		"aEsc  Send to FIFO%-11c^L  Redraw\n"
 		  "c?  Help, conf%-13c^G  QuitCD\n"
-		  "cq  Quit context%-7c^Q (Q)  Quit (with err)\n"
+	"2^Q 2Esc (Q)  Quit (with err)%-9cq  Quit context\n"
 		"1FILTER & PROMPT\n"
 		  "c/  Filter%-12cAlt+Esc  Clear filter & redraw\n"
 		"aEsc  Exit prompt%-12c^L  Clear prompt/last filter\n"
@@ -4593,7 +4608,7 @@ static void show_help(const char *path)
 		 "b^R  Rename/dup%-14cr  Batch rename\n"
 		  "cz  Archive%-17ce  Edit file\n"
 		  "c*  Toggle exe%-14c>  Export list\n"
-	   "5Space ^J  (Un)select%-7cm ^Space  Mark range/clear\n"
+	   "5Space ^J  (Un)select%-7cm ^Space  Mark range/clear sel\n"
 	       "9p ^P  Copy sel here%-11ca  Select all\n"
 	       "9v ^V  Move sel here%-8cw ^W  Cp/mv sel as\n"
 	       "9x ^X  Delete%-18cE  Edit sel\n"
@@ -7068,11 +7083,6 @@ nochange:
 					selbufpos = 0;
 			}
 			return sel == SEL_QUITFAIL ? EXIT_FAILURE : EXIT_SUCCESS;
-#ifndef NOFIFO
-		case SEL_FIFO:
-			notify_fifo(TRUE);
-			goto nochange;
-#endif
 		default:
 			if (xlines != LINES || xcols != COLS)
 				continue;
