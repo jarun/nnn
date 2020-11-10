@@ -4597,7 +4597,7 @@ static void show_help(const char *path)
 		"a1-4  Context 1-4%-7c(Sh)Tab  Cycle context\n"
 		"aEsc  Send to FIFO%-11c^L  Redraw\n"
 		  "c?  Help, conf%-13c^G  QuitCD\n"
-	"2^Q 2Esc (Q)  Quit (with err)%-9cq  Quit context\n"
+	          "cq  Quit context%-6c^Q 2Esc  Quit\n"
 		"1FILTER & PROMPT\n"
 		  "c/  Filter%-12cAlt+Esc  Clear filter & redraw\n"
 		"aEsc  Exit prompt%-12c^L  Clear prompt/last filter\n"
