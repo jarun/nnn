@@ -14,7 +14,7 @@ else
 	fd=find
 fi
 
-printf "mime: "
+printf "mime (e.g., video/audio/image): "
 read -r mime
 
 printf "%s" "+l" > "$NNN_PIPE"
