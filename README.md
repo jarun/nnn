@@ -37,6 +37,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 <details><summary><i><b>Expand</b></i> for some nnn magic! :dark_sunglasses:</summary><br><ul>
   <li>Instantly load, sort, filter thousands of files</li>
   <li>Type to navigate with automatic dir selection</li>
+  <li>List input stream and pick entries to stdout or file</li>
   <li>find/fd/grep/ripgrep/fzf from nnn and list in nnn</li>
   <li> Never lose context - start where you quit</li>
   <li>Mount any cloud storage service in a few keypresses</li>

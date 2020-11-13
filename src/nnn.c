@@ -4602,6 +4602,7 @@ static void show_help(const char *path)
 		"aEsc  Send to FIFO%-11c^L  Redraw\n"
 		  "c?  Help, conf%-13c^G  QuitCD\n"
 	          "cq  Quit context%-6c^Q 2Esc  Quit\n"
+	          "cQ  Pick sel/err & quit\n"
 		"1FILTER & PROMPT\n"
 		  "c/  Filter%-12cAlt+Esc  Clear filter & redraw\n"
 		"aEsc  Exit prompt%-12c^L  Clear prompt/last filter\n"
@@ -7036,7 +7037,7 @@ nochange:
 		case SEL_QUITCTX: // fallthrough
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
-		case SEL_QUITFAIL:
+		case SEL_QUITERR:
 			if (sel == SEL_QUITCTX) {
 				int ctx = cfg.curctx;
 				for (r = (ctx + 1) & ~CTX_MAX;
@@ -7086,7 +7087,16 @@ nochange:
 				if (g_state.picker)
 					selbufpos = 0;
 			}
-			return sel == SEL_QUITFAIL ? EXIT_FAILURE : EXIT_SUCCESS;
+
+			if (sel != SEL_QUITERR)
+				return EXIT_SUCCESS;
+
+			if (selbufpos && !g_state.picker) {
+				g_state.pickraw = 1;
+				return EXIT_SUCCESS;
+			}
+
+			return EXIT_FAILURE;
 		default:
 			if (xlines != LINES || xcols != COLS)
 				continue;
@@ -7926,7 +7936,7 @@ int main(int argc, char *argv[])
 
 	if (g_state.pickraw || g_state.picker) {
 		if (selbufpos) {
-			fd = g_state.pickraw ? 1 : open(selpath, O_WRONLY | O_CREAT, 0600);
+			fd = g_state.pickraw ? STDOUT_FILENO : open(selpath, O_WRONLY | O_CREAT, 0600);
 			if ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos)))
 				xerror();
 
