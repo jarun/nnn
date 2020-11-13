@@ -3955,6 +3955,10 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 			return FALSE;
 
 		mkpath(ssnpath, sname, spath);
+
+		/* If user is explicitly loading the "last session", skip auto-save */
+		if ((sname[0] == '@') && !sname[1])
+			has_loaded_dynamically = FALSE;
 	} else
 		mkpath(ssnpath, "@", spath);
 
@@ -7687,6 +7691,9 @@ int main(int argc, char *argv[])
 
 		/* We return to tty */
 		dup2(STDOUT_FILENO, STDIN_FILENO);
+
+		if (session)
+			session = NULL;
 	}
 
 	home = getenv("HOME");

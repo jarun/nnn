@@ -197,6 +197,9 @@ When a session is loaded dynamically, the last working session is saved
 automatically to a dedicated -- "last session" -- session file. The "last
 session" is also used in persistent session mode.
 .Pp
+Listing input stream is given a higher priority to persistent sessions. Use
+session option \fIrestore\fR to restore the persistent session at runtime.
+.Pp
 All the session files are located by session name in the directory
 .Pp
 \fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions\fR
@@ -345,8 +348,8 @@ A temporary directory will be created containing symlinks to the given
 paths. Any action performed on these symlinks will be performed only on their
 targets, after which they might become invalid.
 .Pp
-Right arrow or 'l' on a symlink in the listing dir takes to the target file.
-Press '-' to return to the listing dir. Press 'Enter' to open the symlink.
+Right arrow or 'l' on a symlink in the listing dir takes to the target
+file. Press '-' to return to the listing dir. Press 'Enter' to open the symlink.
 .Sh UNITS
 The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y
 (powers of 1024), same as the default units in \fIls\fR.
