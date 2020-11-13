@@ -197,8 +197,9 @@ When a session is loaded dynamically, the last working session is saved
 automatically to a dedicated -- "last session" -- session file. The "last
 session" is also used in persistent session mode.
 .Pp
-Listing input stream is given a higher priority to persistent sessions. Use
-session option \fIrestore\fR to restore the persistent session at runtime.
+Listing input stream has a higher priority to session options (-s/-S). Sessions
+can be loaded explicitly at runtime. Session option \fIrestore\fR would restore
+the persistent session at runtime.
 .Pp
 All the session files are located by session name in the directory
 .Pp
@@ -350,6 +351,9 @@ targets, after which they might become invalid.
 .Pp
 Right arrow or 'l' on a symlink in the listing dir takes to the target
 file. Press '-' to return to the listing dir. Press 'Enter' to open the symlink.
+.Pp
+Listing input stream can be scripted. It can be extended to pick (option -p)
+selected entries from the listed results.
 .Sh UNITS
 The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y
 (powers of 1024), same as the default units in \fIls\fR.
