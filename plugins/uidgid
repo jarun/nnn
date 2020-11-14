@@ -2,6 +2,10 @@
 
 # Description: list uid and gid of files
 #
+# Note: To list UID and GID of all users in a pretty format, run:
+#
+#           cut -d':' -f1,3,4,5 < /etc/passwd | column -ts ":"
+#
 # Shell: POSIX compliant
 # Authors: Arun Prakash Jana, superDuperCyberTechno
 
