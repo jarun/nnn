@@ -199,6 +199,10 @@ upload-local: sign static
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/pgp-signature' \
 	    --upload-file nnn-$(VERSION).tar.gz.sig
 	tar -zcf $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-static
+	# upx compress all static binaries
+	upx -qqq $(BIN)-static
+	upx -qqq $(BIN)-icons-static
+	upx -qqq $(BIN)-nerd-static
 	# upload static binary
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-static-$(VERSION).x86_64.tar.gz' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
