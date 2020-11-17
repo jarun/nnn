@@ -1,3 +1,37 @@
+nnn v3.5 Freddie
+2020-11-17
+
+- compile-in Alexey Tourbin's QSORT macro
+- support Nerd Font patched icons [`make O_NERD=1`]
+- auto-generate static binaries with icons support
+- audit and adapt all plugins for macOS
+- enhance plugin `dups` to delete duplicates interactively
+- plugin `autojump` now supports `jump` and `zoxide`
+- support `gio trash` to Trash [`export NNN_TRASH=2`] (#740)
+- quit program on double <kbd>Esc</kbd> in normal mode (#775)
+- <kbd>^Space</kbd> replaces <kbd>^K</kbd> for range selection/clear selection
+- show selection symbol (`+`) next to filename in detail mode (#741)
+- error & quit on <kbd>Q</kbd> if no selection, else pick to stdout
+- repeat <kbd>^T</kbd> to cycle sort by time, size and clear
+- option `-U` to show user & group info in status bar
+- option `-J` to disable auto-proceed on select (#713)
+- option `-D` to show dirs in context color with `NNN_FCOLORS`
+- honor option `-C` for context colors
+- show indicators if more entries above/below listing (#744)
+- show missing utility name in flash msg (#753)
+- exit `preview-tabbed` on <kbd>^C</kbd> (#727)
+- invoke GNU sed (_gsed_) on macOS (#728)
+- fix HW cursor moves to wrong line (#735)
+- fix rollover bug with multiline scroll (#743)
+- fix input stream not listed with `-s`/`-S` (#777)
+- fix locker not being invoked
+- make target `upx` for additional binary compression
+- compress auto-generated static binaries with upx
+- make variable `O_NOSSN` to compile out sessions
+- make variable `O_NOUG` to compile out user & group info
+
+-------------------------------------------------------------------------------
+
 nnn v3.4 Emilia
 2020-08-18
 
