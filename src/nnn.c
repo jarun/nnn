@@ -518,8 +518,8 @@ static char * const utils[] = {
 };
 
 /* Common strings */
-#define MSG_0_ENTRIES 0
-#define MSG_INVALID_KEY 1
+#define MSG_INVALID_KEY 0
+#define MSG_0_ENTRIES 1
 #define STR_TMPFILE 2
 #define MSG_0_SELECTED 3
 #define MSG_CANCEL 4
@@ -565,8 +565,8 @@ static char * const utils[] = {
 #endif
 
 static const char * const messages[] = {
-	"0 entries",
 	"invalid key",
+	"0 entries",
 	"/.nnnXXXXXX",
 	"0 selected",
 	"cancelled",
@@ -7321,7 +7321,7 @@ malloc_2:
 		free(paths[i]);
 malloc_1:
 	if (msgnum) {
-		if (g_state.pluginit) {
+		if (home) { /* We are past init stage */
 			printmsg(messages[msgnum]);
 			xdelay(XDELAY_INTERVAL_MS);
 		} else
