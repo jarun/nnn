@@ -1016,6 +1016,8 @@ static inline bool getutil(char *util)
 /*
  * Updates out with "dir/name or "/name"
  * Returns the number of bytes copied including the terminating NULL byte
+ *
+ * Note: dir and out must be PATH_MAX in length to avoid macOS fault
  */
 static size_t mkpath(const char *dir, const char *name, char *out)
 {
@@ -4710,10 +4712,14 @@ static bool run_cmd_as_plugin(const char *file, char *runfile, uchar flags)
 
 static bool plctrl_init(void)
 {
-	snprintf(g_buf, CMD_LEN_MAX, "nnn-pipe.%d", getpid());
+	size_t len;
+
 	/* g_tmpfpath is used to generate tmp file names */
 	g_tmpfpath[tmpfplen - 1] = '\0';
-	mkpath(g_tmpfpath, g_buf, g_pipepath);
+	len = xstrsncpy(g_pipepath, g_tmpfpath, TMP_LEN_MAX);
+	g_pipepath[len - 1] = '/';
+	len = xstrsncpy(g_pipepath + len, "nnn-pipe.", TMP_LEN_MAX - len) + len;
+	xstrsncpy(g_pipepath + len - 1, xitoa(getpid()), TMP_LEN_MAX - len);
 	setenv(env_cfg[NNN_PIPE], g_pipepath, TRUE);
 
 	return EXIT_SUCCESS;
