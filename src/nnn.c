@@ -2843,7 +2843,8 @@ static int filterentries(char *path, char *lastname)
 					ln[1] = ln[REGEX_MAX - 1];
 					ln[REGEX_MAX - 1] = '\0';
 					len = mbstowcs(wln, ln, REGEX_MAX);
-				}
+				} else
+					goto end;
 			}
 
 			/* Go to the top, we don't know if the hovered file will match the filter */
