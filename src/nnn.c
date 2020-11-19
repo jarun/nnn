@@ -4617,9 +4617,10 @@ static void show_help(const char *path)
 		  "cz  Archive%-17ce  Edit file\n"
 		  "c*  Toggle exe%-14c>  Export list\n"
 	   "5Space ^J  (Un)select%-7cm ^Space  Mark range/clear sel\n"
-	       "9p ^P  Copy sel here%-11ca  Select all\n"
-	       "9v ^V  Move sel here%-8cw ^W  Cp/mv sel as\n"
-	       "9x ^X  Delete%-18cE  Edit sel\n"
+	          "ca  Select all%-14cA  Invert sel\n"
+	       "9p ^P  Copy sel here%-8cw ^W  Cp/mv sel as\n"
+	       "9v ^V  Move sel here%-11cE  Edit sel\n"
+	       "9x ^X  Delete\n"
 		"1MISC\n"
 	      "8Alt ;  Select plugin%-11c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
@@ -6615,8 +6616,9 @@ nochange:
 				clearselection();
 				break;
 			} // fallthrough
-		case SEL_SELALL:
-			if (sel == SEL_SELALL) {
+		case SEL_SELALL: // fallthrough
+		case SEL_SELINV:
+			if (sel == SEL_SELALL || sel == SEL_SELINV) {
 				if (!ndents)
 					goto nochange;
 
@@ -6628,17 +6630,34 @@ nochange:
 				selendid = ndents - 1;
 			}
 
-			/* Remember current selection buffer position */
-			for (r = selstartid; r <= selendid; ++r)
-				if (!(pdents[r].flags & FILE_SELECTED)) {
-					/* Write the path to selection file to avoid flush */
-					appendfpath(newpath, mkpath(path, pdents[r].name, newpath));
-
-					pdents[r].flags |= FILE_SELECTED;
-					++nselected;
+			if (sel == SEL_SELINV) {
+				/* Toggle selection status */
+				for (r = selstartid; r <= selendid; ++r) {
+					pdents[r].flags ^= FILE_SELECTED;
+					pdents[r].flags & FILE_SELECTED ? ++nselected : --nselected;
 				}
 
-			writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+				selbufpos = lastappendpos;
+				if (nselected) {
+					updateselbuf(path, newpath);
+					writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+				} else
+					writesel(NULL, 0);
+			} else {
+				/* Remember current selection buffer position */
+				for (r = selstartid; r <= selendid; ++r) {
+					if (!(pdents[r].flags & FILE_SELECTED)) {
+						/* Write the path to selection file to avoid flush */
+						appendfpath(newpath, mkpath(path, pdents[r].name, newpath));
+
+						pdents[r].flags |= FILE_SELECTED;
+						++nselected;
+					}
+				}
+
+				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+			}
+
 			if (cfg.x11)
 				plugscript(utils[UTIL_CBCP], F_NOWAIT | F_NOTRACE);
 			continue;
