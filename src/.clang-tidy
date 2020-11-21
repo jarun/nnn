@@ -11,5 +11,5 @@ CheckOptions:
   - key:             fuchsia-restrict-system-includes.Includes
     value:           '*,-stdint.h,-stdbool.h'
   - key:             readability-function-size.StatementThreshold
-    value:           '900'
+    value:           '915'
 ...
