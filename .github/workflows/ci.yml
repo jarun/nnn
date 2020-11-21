@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  macOS-gcc:
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Compile with gcc
+        env:
+          CC: gcc
+        run: |
+          export CFLAGS="$CFLAGS -Werror"
+          make clean
+          make
+          make clean
+  macOS-clang:
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Compile with clang
+        env:
+          CC: clang
+        run: |
+          brew update
+          brew install llvm
+          export PATH="/usr/local/opt/llvm/bin:$PATH"
+          export CFLAGS="$CFLAGS -Werror"
+          make clean
+          make
+          make clean
+          clang-tidy src/* -- -I/usr/include
