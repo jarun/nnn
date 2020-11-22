@@ -14,7 +14,7 @@
 # If the size of a file has more that $size_digits digits the file will be misplaced
 # 12 digits fit files up to 931GiB
 
-EDITOR="${EDITOR:-vi}"
+EDITOR="${VISUAL:-${EDITOR:-vi}}"
 TMPDIR="${TMPDIR:-/tmp}"
 
 size_digits=12

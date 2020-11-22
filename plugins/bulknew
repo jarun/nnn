@@ -9,7 +9,7 @@
 # Shell: POSIX compliant
 # Author: KlzXS
 
-EDITOR="${EDITOR:-vi}"
+EDITOR="${VISUAL:-${EDITOR:-vi}}"
 TMPDIR="${TMPDIR:-/tmp}"
 
 printf "'f'ile / 'd'ir? "
