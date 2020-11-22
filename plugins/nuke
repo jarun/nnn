@@ -76,7 +76,7 @@ IMAGE_CACHE_PATH="$(dirname "$1")"/.thumbs
 
 FPATH="$1"
 FNAME=$(basename "$1")
-EDITOR="${EDITOR:-vi}"
+EDITOR="${VISUAL:-${EDITOR:-vi}}"
 PAGER="${PAGER:-less -R}"
 ext="${FNAME##*.}"
 if [ -n "$ext" ]; then
