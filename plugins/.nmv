@@ -16,7 +16,7 @@
 # Shell: bash
 # Author: KlzXS
 
-EDITOR="${EDITOR:-vi}"
+EDITOR="${VISUAL:-${EDITOR:-vi}}"
 TMPDIR="${TMPDIR:-/tmp}"
 INCLUDE_HIDDEN="${INCLUDE_HIDDEN:-0}"
 VERBOSE="${VERBOSE:-0}"
