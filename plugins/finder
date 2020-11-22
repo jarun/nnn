@@ -22,7 +22,7 @@ printf "  fzf -m | tr %s %s\n\n" "'\n'" "'\0'"
 printf "cmd: "
 read -r cmd
 
-if ! [ -z "$cmd" ]; then
+if [ -n "$cmd" ]; then
     printf "%s" "+l" > "$NNN_PIPE"
     eval "$cmd" > "$NNN_PIPE"
 fi

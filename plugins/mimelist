@@ -1,21 +1,14 @@
 #!/usr/bin/env sh
 
-# Description: Run fd/find in subtree and list files by mime type in smart context
-# Dependencies: fd/find
+# Description: Find and list files by mime type in smart context
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
 . "$(dirname "$0")"/.nnn-plugin-helper
 
-if [ "$(cmd_exists fd)" -eq "0" ]; then
-	fd=fd
-else
-	fd=find
-fi
-
 printf "mime (e.g., video/audio/image): "
 read -r mime
 
 printf "%s" "+l" > "$NNN_PIPE"
-$fd | file -if- | grep "$mime" | awk -F: '{printf "%s\0", $1}' > "$NNN_PIPE"
+find . | file -if- | grep "$mime" | awk -F: '{printf "%s\0", $1}' > "$NNN_PIPE"

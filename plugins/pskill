@@ -13,7 +13,7 @@ printf "Enter process name ['defunct' for zombies]: "
 read -r psname
 
 # shellcheck disable=SC2009
-if ! [ -z "$psname" ]; then
+if [ -n "$psname" ]; then
     if which sudo >/dev/null 2>&1; then
         sucmd=sudo
     elif which doas >/dev/null 2>&1; then

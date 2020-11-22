@@ -70,7 +70,7 @@ jobs:
             echo "########## clang-tidy-10 ##########"
             clang-tidy-10 src/* -- -I/usr/include -I/usr/include/ncursesw
             echo "########## shellcheck ##########"
-            find plugins/ -type f -not -name "*.md" -exec shellcheck -e SC1090 {} +
+            find plugins/ -type f -not -name "*.md" -exec shellcheck -e SC1090,SC2230 {} +
 
   package-and-publish:
     machine: true

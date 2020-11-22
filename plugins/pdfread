@@ -5,7 +5,7 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-if ! [ -z "$1" ]; then
+if [ -n "$1" ]; then
     tmpf="$(basename "$1")"
     tmpf="${TMPDIR:-/tmp}"/"${tmpf%.*}"
 

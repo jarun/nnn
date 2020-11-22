@@ -6,7 +6,7 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-if ! [ -z "$1" ]; then
+if [ -n "$1" ]; then
     if which hx >/dev/null 2>&1; then
         hx "$1"
     else

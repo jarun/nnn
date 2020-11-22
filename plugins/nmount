@@ -24,7 +24,7 @@ printf "\nEnsure you aren't still in the mounted device.\n"
 printf "%s" "$prompt"
 read -r dev
 
-while ! [ -z "$dev" ]
+while [ -n "$dev" ]
 do
     if [ "$dev" = "l" ]; then
         lsblk

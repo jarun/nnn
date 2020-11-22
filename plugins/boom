@@ -9,7 +9,7 @@
 GUIPLAYER="${GUIPLAYER}"
 NUMTRACKS="${NUMTRACKS:-100}"
 
-if [ ! -z "$GUIPLAYER" ]; then
+if [ -n "$GUIPLAYER" ]; then
     find . -type f \( -iname "*.mp3" -o -iname "*.flac" -o -iname "*.m4a" -o -iname "*.webm" -o -iname "*.wma" \) | shuf -n "$NUMTRACKS" | xargs -d "\n" "$GUIPLAYER" > /dev/null 2>&1 &
 
     # detach the player

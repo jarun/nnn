@@ -7,7 +7,7 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-if ! [ -z "$1" ] && [ -f "$1" ]; then
+if [ -n "$1" ] && [ -f "$1" ]; then
     mediainfo "$1" | $PAGER
     # exiftool "$1" | $PAGER
 fi

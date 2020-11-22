@@ -25,6 +25,6 @@ if [ -z "$res" ]; then
     read -r res
 fi
 
-if ! [ -z "$res" ] && ! [ -z "$MINSIZE" ]; then
+if [ -n "$res" ] && [ -n "$MINSIZE" ]; then
     imgp -ackx "$res" -s "$MINSIZE"
 fi

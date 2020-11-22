@@ -9,7 +9,7 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-if ! [ -z "$1" ] && [ -s "$1" ]; then
+if [ -n "$1" ] && [ -s "$1" ]; then
     if which ffsend >/dev/null 2>&1; then
         ffsend -iq u "$1"
     elif [ "$(mimetype --output-format %m "$1" | awk -F '/' '{print $1}')" = "text" ]; then
