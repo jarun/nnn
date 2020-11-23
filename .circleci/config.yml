@@ -38,7 +38,7 @@ jobs:
             make clean
             echo
             echo "########## gcc-10 ##########"
-            CC=gcc-8 make strip
+            CC=gcc-10 make strip
             ls -l nnn
             make clean
             echo
