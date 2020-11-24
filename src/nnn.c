@@ -3184,33 +3184,6 @@ static char *getreadline(const char *prompt)
 }
 #endif
 
-/* Returns TRUE if at least  command was run */
-static bool prompt_run(const char *current)
-{
-	bool ret = FALSE;
-	char *tmp;
-
-	setenv(envs[ENV_NCUR], current, 1);
-
-	while (1) {
-#ifndef NORL
-		if (g_state.picker) {
-#endif
-			tmp = xreadline(NULL, ">>> ");
-#ifndef NORL
-		} else
-			tmp = getreadline("\n>>> ");
-#endif
-		if (tmp && *tmp) { // NOLINT
-			ret = TRUE;
-			spawn(shell, "-c", tmp, F_CLI | F_CONFIRM);
-		} else
-			break;
-	}
-
-	return ret;
-}
-
 /*
  * Create symbolic/hard link(s) to file(s) in selection list
  * Returns the number of links created, -1 on error
@@ -4915,7 +4888,7 @@ static bool plugscript(const char *plugin, uchar flags)
 	return FALSE;
 }
 
-static void launch_app(char *newpath)
+static bool launch_app(char *newpath)
 {
 	int r = F_NORMAL;
 	char *tmp = newpath;
@@ -4929,6 +4902,56 @@ static void launch_app(char *newpath)
 
 	if (tmp && *tmp) // NOLINT
 		spawn(tmp, (r == F_NORMAL) ? "0" : NULL, NULL, r);
+
+	return FALSE;
+}
+
+/* Returns TRUE if at least  command was run */
+static bool prompt_run(const char *current)
+{
+	bool ret = FALSE;
+	char *tmp;
+
+	setenv(envs[ENV_NCUR], current, 1);
+
+	while (1) {
+#ifndef NORL
+		if (g_state.picker) {
+#endif
+			tmp = xreadline(NULL, ">>> ");
+#ifndef NORL
+		} else
+			tmp = getreadline("\n>>> ");
+#endif
+		if (tmp && *tmp) { // NOLINT
+			ret = TRUE;
+			spawn(shell, "-c", tmp, F_CLI | F_CONFIRM);
+		} else
+			break;
+	}
+
+	return ret;
+}
+
+static bool handle_cmd(enum action sel, const char *current, char *newpath)
+{
+	endselection();
+
+	if (sel == SEL_RUNCMD)
+		return prompt_run(current);
+
+	if (sel == SEL_LAUNCH)
+		return launch_app(newpath);
+
+	/* Set nnn nesting level */
+	char *tmp = getenv(env_cfg[NNNLVL]);
+	int r = tmp ? atoi(tmp) : 0;
+
+	setenv(env_cfg[NNNLVL], xitoa(r + 1), 1);
+	setenv(envs[ENV_NCUR], current, 1);
+	spawn(shell, NULL, NULL, F_CLI);
+	setenv(env_cfg[NNNLVL], xitoa(r), 1);
+	return TRUE;
 }
 
 static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
@@ -7005,27 +7028,7 @@ nochange:
 		case SEL_SHELL: // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_RUNCMD:
-			endselection();
-
-			switch (sel) {
-			case SEL_SHELL:
-				/* Set nnn nesting level */
-				tmp = getenv(env_cfg[NNNLVL]);
-				r = tmp ? atoi(tmp) : 0;
-				setenv(env_cfg[NNNLVL], xitoa(r + 1), 1);
-
-				setenv(envs[ENV_NCUR], (ndents ? pdents[cur].name : ""), 1);
-				spawn(shell, NULL, NULL, F_CLI);
-				setenv(env_cfg[NNNLVL], xitoa(r), 1);
-				r = TRUE;
-				break;
-			case SEL_LAUNCH:
-				launch_app(newpath);
-				r = FALSE;
-				break;
-			default: /* SEL_RUNCMD */
-				r = prompt_run(ndents ? pdents[cur].name : "");
-			}
+			r = handle_cmd(sel, (ndents ? pdents[cur].name : ""), newpath);
 
 			/* Continue in type-to-nav mode, if enabled */
 			if (cfg.filtermode)
