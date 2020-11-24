@@ -1966,12 +1966,6 @@ static int spawn(char *file, char *arg1, char *arg2, uchar flag)
 	return retstatus;
 }
 
-static void prompt_run(char *cmd, const char *current)
-{
-	setenv(envs[ENV_NCUR], current, 1);
-	spawn(shell, "-c", cmd, F_CLI | F_CONFIRM);
-}
-
 /* Get program name from env var, else return fallback program */
 static char *xgetenv(const char * const name, char *fallback)
 {
@@ -3189,6 +3183,33 @@ static char *getreadline(const char *prompt)
 	return NULL;
 }
 #endif
+
+/* Returns TRUE if at least  command was run */
+static bool prompt_run(const char *current)
+{
+	bool ret = FALSE;
+	char *tmp;
+
+	setenv(envs[ENV_NCUR], current, 1);
+
+	while (1) {
+#ifndef NORL
+		if (g_state.picker) {
+#endif
+			tmp = xreadline(NULL, ">>> ");
+#ifndef NORL
+		} else
+			tmp = getreadline("\n>>> ");
+#endif
+		if (tmp && *tmp) { // NOLINT
+			ret = TRUE;
+			spawn(shell, "-c", tmp, F_CLI | F_CONFIRM);
+		} else
+			break;
+	}
+
+	return ret;
+}
 
 /*
  * Create symbolic/hard link(s) to file(s) in selection list
@@ -7003,19 +7024,7 @@ nochange:
 				r = FALSE;
 				break;
 			default: /* SEL_RUNCMD */
-				r = TRUE;
-#ifndef NORL
-				if (g_state.picker) {
-#endif
-					tmp = xreadline(NULL, ">>> ");
-#ifndef NORL
-				} else
-					tmp = getreadline("\n>>> ");
-#endif
-				if (tmp && *tmp) // NOLINT
-					prompt_run(tmp, (ndents ? pdents[cur].name : ""));
-				else
-					r = FALSE;
+				r = prompt_run(ndents ? pdents[cur].name : "");
 			}
 
 			/* Continue in type-to-nav mode, if enabled */
