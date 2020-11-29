@@ -7532,6 +7532,9 @@ static bool set_tmp_path(void)
         }
 
         tmpfplen = (uchar)xstrsncpy(g_tmpfpath, path, TMP_LEN_MAX);
+	DPRINTF_S(g_tmpfpath);
+	DPRINTF_U(tmpfplen);
+
         return TRUE;
 }
 
