@@ -153,18 +153,15 @@ Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>),
 
 [![Wiki](https://img.shields.io/badge/RTFM-nnn%20Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
 
-## Developers
+## Videos
 
-- [Arun Prakash Jana](https://github.com/jarun) (Copyright © 2016-2020)
-- [0xACE](https://github.com/0xACE)
-- [Anna Arad](https://github.com/annagrram)
-- [KlzXS](https://github.com/KlzXS)
-- [Léo Villeveygoux](https://github.com/leovilok)
-- [Maxim Baz](https://github.com/maximbaz)
-- [Todd Yamakawa](https://github.com/toddyamakawa)
-- and other contributors
-
-Visit the [ToDo list](https://github.com/jarun/nnn/issues/781) to contribute or see the features in progress.
+- [I'M GOING TO USE THE NNN FILE BROWSER! 😮](https://www.youtube.com/embed/U2n5aGqou9E)
+- [NNN: Is This Terminal File Manager As Good As People Say?](https://www.youtube.com/embed/KuJHo-aO_FA)
+- [This Week in Linux 114 - TuxDigital](https://www.youtube.com/watch?v=5W9ja0DQjSY&t=2059s)
+- [NNN File Manager](https://www.youtube.com/embed/1QXU4XSqXNo)
+- [nnn file manager basics - Linux](https://www.youtube.com/embed/il2Fm-KJJfM)
+- [nnn file manager on Termux (Android)](https://www.youtube.com/embed/AbaauM7gUJw)
+- [nnn - A File Manager (By Uoou, again.)](https://www.youtube.com/embed/cnzuzcCPYsk)
 
 ## Elsewhere
 
@@ -179,12 +176,15 @@ Visit the [ToDo list](https://github.com/jarun/nnn/issues/781) to contribute or 
 - [Ubuntu Full Circle Magazine - Issue 135](https://fullcirclemagazine.org/issue-135/)
 - [Wikipedia](https://en.wikipedia.org/wiki/Nnn_(file_manager))
 
-## Videos
+## Developers
 
-- [I'M GOING TO USE THE NNN FILE BROWSER! 😮](https://www.youtube.com/embed/U2n5aGqou9E)
-- [NNN: Is This Terminal File Manager As Good As People Say?](https://www.youtube.com/embed/KuJHo-aO_FA)
-- [This Week in Linux 114 - TuxDigital](https://www.youtube.com/watch?v=5W9ja0DQjSY&t=2059s)
-- [NNN File Manager](https://www.youtube.com/embed/1QXU4XSqXNo)
-- [nnn file manager basics - Linux](https://www.youtube.com/embed/il2Fm-KJJfM)
-- [nnn file manager on Termux (Android)](https://www.youtube.com/embed/AbaauM7gUJw)
-- [nnn - A File Manager (By Uoou, again.)](https://www.youtube.com/embed/cnzuzcCPYsk)
+- [Arun Prakash Jana](https://github.com/jarun) (Copyright © 2016-2020)
+- [0xACE](https://github.com/0xACE)
+- [Anna Arad](https://github.com/annagrram)
+- [KlzXS](https://github.com/KlzXS)
+- [Léo Villeveygoux](https://github.com/leovilok)
+- [Maxim Baz](https://github.com/maximbaz)
+- [Todd Yamakawa](https://github.com/toddyamakawa)
+- and other contributors
+
+Visit the [ToDo list](https://github.com/jarun/nnn/issues/781) to contribute or see the features in progress.
