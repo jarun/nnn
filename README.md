@@ -155,12 +155,12 @@ Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>),
 
 ## Videos
 
+- [nnn file manager on Termux (Android)](https://www.youtube.com/embed/AbaauM7gUJw)
+- [NNN File Manager](https://www.youtube.com/embed/1QXU4XSqXNo)
+- [This Week in Linux 114 - TuxDigital](https://www.youtube.com/watch?v=5W9ja0DQjSY&t=2059s)
+- [nnn file manager basics - Linux](https://www.youtube.com/embed/il2Fm-KJJfM)
 - [I'M GOING TO USE THE NNN FILE BROWSER! 😮](https://www.youtube.com/embed/U2n5aGqou9E)
 - [NNN: Is This Terminal File Manager As Good As People Say?](https://www.youtube.com/embed/KuJHo-aO_FA)
-- [This Week in Linux 114 - TuxDigital](https://www.youtube.com/watch?v=5W9ja0DQjSY&t=2059s)
-- [NNN File Manager](https://www.youtube.com/embed/1QXU4XSqXNo)
-- [nnn file manager basics - Linux](https://www.youtube.com/embed/il2Fm-KJJfM)
-- [nnn file manager on Termux (Android)](https://www.youtube.com/embed/AbaauM7gUJw)
 - [nnn - A File Manager (By Uoou, again.)](https://www.youtube.com/embed/cnzuzcCPYsk)
 
 ## Elsewhere
