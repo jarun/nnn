@@ -79,10 +79,10 @@ static void disabledbg(void)
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-#define DPRINTF_D(x) xprintf(DEBUG_FD, "ln " TOSTRING(__LINE__) ": " #x "=%d\n", x)
-#define DPRINTF_U(x) xprintf(DEBUG_FD, "ln " TOSTRING(__LINE__) ": " #x "=%u\n", x)
-#define DPRINTF_S(x) xprintf(DEBUG_FD, "ln " TOSTRING(__LINE__) ": " #x "=%s\n", x)
-#define DPRINTF_P(x) xprintf(DEBUG_FD, "ln " TOSTRING(__LINE__) ": " #x "=%p\n", x)
+#define DPRINTF_D(x) xprintf(DEBUG_FD, "ln " TOSTRING(__line__) ": " #x "=%d\n", x)
+#define DPRINTF_U(x) xprintf(DEBUG_FD, "ln " TOSTRING(__line__) ": " #x "=%u\n", x)
+#define DPRINTF_S(x) xprintf(DEBUG_FD, "ln " TOSTRING(__line__) ": " #x "=%s\n", x)
+#define DPRINTF_P(x) xprintf(DEBUG_FD, "ln " TOSTRING(__line__) ": " #x "=%p\n", x)
 #else
 #define DPRINTF_D(x)
 #define DPRINTF_U(x)
