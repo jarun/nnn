@@ -35,4 +35,3 @@ else
 
 	printf "%s" "$files" | xargs -n1 gpg --encrypt --recipient "$recipient"
 fi
-

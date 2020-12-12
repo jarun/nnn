@@ -38,4 +38,3 @@ elif [ ! "$(LC_ALL=C ls -a)" = ".
 	# On older systems that don't have ls -A
     $batchrename
 fi
-

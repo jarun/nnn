@@ -58,4 +58,3 @@ cddir="$(get_links "$BOOKMARKS_DIR")"
 # https://github.com/jarun/nnn/tree/master/plugins#send-data-to-nnn
 context=0
 printf "%s" "${context}c$(readlink -f "$cddir")" > "$NNN_PIPE"
-
