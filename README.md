@@ -130,7 +130,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Cross-dir file/all/range selection
   - Create (with parents), rename, duplicate files and dirs
   - Batch renamer for selection or dir
-  - List input file stream from stdin or plugin
+  - List input stream of file paths from stdin or plugin
   - Copy (as), move (as), delete, archive, link selection
   - Dir updates, notification on cp, mv, rm completion
   - Copy file paths to system clipboard on select

@@ -60,6 +60,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [ringtone](ringtone) | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
 | [splitjoin](splitjoin) | Split file or join selection | sh | split, cat |
 | [suedit](suedit) | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
+| [togglex](togglex) | Toggle executable mode for selection | sh | chmod |
 | [treeview](treeview) | Informative tree output in `$EDITOR` | sh | tree |
 | [uidgid](uidgid) | List user and group of all files in dir | sh | ls, less |
 | [upgrade](upgrade) | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
