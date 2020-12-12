@@ -128,14 +128,14 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Run plugins and custom commands with hotkeys
   - FreeDesktop compliant trash (needs trash-cli)
   - Cross-dir file/all/range selection
+  - Create (with parents), rename, duplicate files and dirs
   - Batch renamer for selection or dir
-  - Display file list from stdin or plugin
+  - List input file stream from stdin or plugin
   - Copy (as), move (as), delete, archive, link selection
   - Dir updates, notification on cp, mv, rm completion
   - Copy file paths to system clipboard on select
-  - Create (with parents), rename, duplicate files and dirs
   - Launch apps, run commands, spawn a shell, toggle exe
-  - Hovered file set as `$nnn` at prompt and spawned shell
+  - Access hovered file as `$nnn` at prompt or spawned shell
   - Lock terminal after configurable idle timeout
   - Basic support for screen readers and braille displays
 
