@@ -89,10 +89,10 @@ is_mac() {
 
 handle_pdf() {
     if [ "$GUI" -ne 0 ] && is_mac; then
-        open "${FPATH}" >/dev/null 2>&1 &
+        nohup open "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif [ "$GUI" -ne 0 ] && which zathura >/dev/null 2>&1; then
-        zathura "${FPATH}" >/dev/null 2>&1 &
+        nohup zathura "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif which pdftotext >/dev/null 2>&1; then
         ## Preview as text conversion
@@ -128,13 +128,13 @@ handle_audio() {
 
 handle_video() {
     if [ "$GUI" -ne 0 ] && is_mac; then
-        open "${FPATH}" >/dev/null 2>&1 &
+        nohup open "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif [ "$GUI" -ne 0 ] && which smplayer >/dev/null 2>&1; then
-        smplayer "${FPATH}" >/dev/null 2>&1 &
+        nohup smplayer "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif [ "$GUI" -ne 0 ] && which mpv >/dev/null 2>&1; then
-        mpv "${FPATH}" >/dev/null 2>&1 &
+        nohup mpv "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif which ffmpegthumbnailer >/dev/null 2>&1; then
         # Thumbnail
@@ -275,7 +275,11 @@ load_dir() {
     count="$(listimages | grep -a -m 1 -ZznF "$target" | cut -d: -f1)"
 
     if [ -n "$count" ]; then
-        listimages | xargs -0 "$1" -n "$count" --
+        if [ "$GUI" -ne 0 ]; then
+            listimages | xargs -0 nohup "$1" -n "$count" --
+        else
+            listimages | xargs -0 "$1" -n "$count" --
+        fi
     else
         shift
         "$1" -- "$@" # fallback
@@ -305,7 +309,7 @@ handle_multimedia() {
         ## Image
         image/*)
             if [ "$GUI" -ne 0 ] && is_mac; then
-                open "${FPATH}" >/dev/null 2>&1 &
+                nohup open "${FPATH}" >/dev/null 2>&1 &
                 exit 0
             elif [ "$GUI" -ne 0 ] && which imvr >/dev/null 2>&1; then
                 load_dir imvr "${FPATH}" >/dev/null 2>&1 &
@@ -476,10 +480,10 @@ handle_mime() {
 
 handle_fallback() {
     if [ "$GUI" -ne 0 ] && which xdg-open >/dev/null 2>&1; then
-        xdg-open "${FPATH}" >/dev/null 2>&1 &
+        nohup xdg-open "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif [ "$GUI" -ne 0 ] && which open >/dev/null 2>&1; then
-        open "${FPATH}" >/dev/null 2>&1 &
+        nohup open "${FPATH}" >/dev/null 2>&1 &
         exit 0
     fi
 
