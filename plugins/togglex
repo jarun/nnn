@@ -17,4 +17,4 @@ if [ ! -s "$selection" ]; then
     exit
 fi
 
-xargs -0 -I {} sh -c 'if [ -x {} ] ; then chmod -x {} ; else chmod +x {} ; fi' < "$selection"
+xargs -0 -I {} sh -c 'if [ -x "{}" ] ; then chmod -x "{}" ; else chmod +x "{}" ; fi' < "$selection"
