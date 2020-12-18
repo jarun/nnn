@@ -141,7 +141,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 
 ## Quickstart
 
-1. [Install](https://github.com/jarun/nnn/wiki/Usage) `nnn` and any dependecies you need. All files are opened with the desktop opener by default.
+1. [Install](https://github.com/jarun/nnn/wiki/Usage) `nnn` and any dependencies you need. All files are opened with the desktop opener by default.
 2. Add option `-e` to your alias to open text files in `$VISUAL`/`$EDITOR`/ vi. [Open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text) if you wish.
 3. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 4. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installation).
