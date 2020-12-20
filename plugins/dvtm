@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+
+# Description: Open selected file in new DVTM window
+# Dependencies: $EDITOR, $DVTM_CMD_FIFO (is available with 'dvtm -c FIFO')
+#
+# Shell: POSIX compliant
+# Authors: Vadym Kochan <vadimj@gmail.com>
+
+if [ -z "$EDITOR" ]; then
+	echo 'ERROR: $EDITOR is not set' | ${PAGER:-less}
+	exit 2
+fi
+if [ -z "$DVTM_CMD_FIFO" ]; then
+	echo 'ERROR: $DVTM_CMD_FIFO is not set' | ${PAGER:-less}
+	exit 2
+fi
+
+printf "create \"$EDITOR $2/$1\" $1\n" > ${DVTM_CMD_FIFO}
