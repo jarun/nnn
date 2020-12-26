@@ -374,6 +374,11 @@ used. A single combination of arguments is supported for SHELL and PAGER.
     NOTE: 'nuke' is a file opener available in the plugin repository.
 .Ed
 .Pp
+\fBNNN_ONCHDIR:\fR specify a handler when directory is changed.
+.Bd -literal
+    export NNN_ONCHDIR=${HOME}/bin/nnn-chdir
+.Ed
+.Pp
 \fBNNN_BMS:\fR bookmark string as \fIkey_char:location\fR pairs
 separated by \fI;\fR:
 .Bd -literal

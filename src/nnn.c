@@ -401,6 +401,7 @@ static uchar_t maxbm, maxplug;
 static char *bmstr;
 static char *pluginstr;
 static char *opener;
+static char *onchdir;
 static char *editor;
 static char *enveditor;
 static char *pager;
@@ -623,6 +624,7 @@ static const char * const messages[] = {
 #define NNN_SEL 8
 #define NNN_ARCHIVE 9 /* strings end here */
 #define NNN_TRASH 10 /* flags begin here */
+#define NNN_ONCHDIR 11
 
 static const char * const env_cfg[] = {
 	"NNN_OPTS",
@@ -636,6 +638,7 @@ static const char * const env_cfg[] = {
 	"NNN_SEL",
 	"NNN_ARCHIVE",
 	"NNN_TRASH",
+	"NNN_ONCHDIR",
 };
 
 /* Required environment variables */
@@ -6175,6 +6178,8 @@ nochange:
 				}
 
 				cdprep(lastdir, lastname, path, newpath) ? (presel = FILTER) : (watch = TRUE);
+				/* Invoke chdir handler */
+				spawn(onchdir, newpath, NULL, F_CLI);
 				goto begin;
 			}
 
@@ -7760,6 +7765,10 @@ int main(int argc, char *argv[])
 	/* Get custom opener, if set */
 	opener = xgetenv(env_cfg[NNN_OPENER], utils[UTIL_OPENER]);
 	DPRINTF_S(opener);
+
+	/* Get custom dir change handler */
+	onchdir = xgetenv(env_cfg[NNN_ONCHDIR], NULL);
+	DPRINTF_S(onchdir);
 
 	/* Parse bookmarks string */
 	if (!parsekvpair(&bookmark, &bmstr, NNN_BMS, &maxbm)) {
