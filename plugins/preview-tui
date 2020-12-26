@@ -156,7 +156,12 @@ preview_file () {
             fifo_pager ls --color=always
         fi
     elif [ "$encoding" = "binary" ]; then
-        if [ "${mimetype%%/*}" = "image" ] ; then
+        if [ "${mimetype%%/*}" = "image" ] || [ "${mimetype%%/*}" = "video" ]; then
+            if [ "${mimetype%%/*}" = "video" ] && [ "$USE_VIDEOTHUMB" -ne 0 ] && exists ffmpegthumbnailer; then
+		videothumb="/tmp/videothumb.$$.png"
+		ffmpegthumbnailer -s 0 -i "$1" -o "$videothumb"
+		set "$videothumb"
+	    fi
             if [ "$TERMINAL" = "kitty" ]; then
                 # Kitty terminal users can use the native image preview method.
                 kitty +kitten icat --silent --transfer-mode=stream --stdin=no \
@@ -167,19 +172,6 @@ preview_file () {
                 viu -t "$1"
             else
                 fifo_pager print_bin_info "$1"
-            fi
-        elif [ "${mimetype%%/*}" = "video" ] && [ "$USE_VIDEOTHUMB" -ne 0 ] && exists ffmpegthumbnailer; then
-            ffmpegthumbnailer -s 0 -i "$1" -o "/tmp/videothumb.png"
-            if [ "$TERMINAL" = "kitty" ]; then
-                     # Kitty terminal users can use the native image preview method.
-                     kitty +kitten icat --silent --transfer-mode=stream --stdin=no \
-                          "/tmp/videothumb.png" &
-                elif exists catimg; then
-                     catimg "/tmp/videothumb.png"
-                elif exists viu; then
-                     viu -t "/tmp/videothumb.png"
-                else
-                     fifo_pager print_bin_info "$1"
             fi
         elif [ "$mimetype" = "application/zip" ] ; then
             fifo_pager unzip -l "$1"
@@ -222,6 +214,7 @@ if [ "$PREVIEW_MODE" ] ; then
         kitty @ last-used-layout --no-response >/dev/null 2>&1
     fi
 
+    rm $videothumb
     exit 0
 fi
 
