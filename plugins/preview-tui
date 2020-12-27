@@ -158,10 +158,11 @@ preview_file () {
     elif [ "$encoding" = "binary" ]; then
         if [ "${mimetype%%/*}" = "image" ] || [ "${mimetype%%/*}" = "video" ]; then
             if [ "${mimetype%%/*}" = "video" ] && [ "$USE_VIDEOTHUMB" -ne 0 ] && exists ffmpegthumbnailer; then
-		videothumb="/tmp/videothumb.$$.png"
-		ffmpegthumbnailer -s 0 -i "$1" -o "$videothumb"
-		set "$videothumb"
-	    fi
+                videothumb="/tmp/videothumb.$$.png"
+                ffmpegthumbnailer -s 512 -i "$1" -o "$videothumb" >/dev/null 2>&1
+                set "$videothumb"
+                trap 'rm "$videothumb"' EXIT
+            fi
             if [ "$TERMINAL" = "kitty" ]; then
                 # Kitty terminal users can use the native image preview method.
                 kitty +kitten icat --silent --transfer-mode=stream --stdin=no \
@@ -214,7 +215,6 @@ if [ "$PREVIEW_MODE" ] ; then
         kitty @ last-used-layout --no-response >/dev/null 2>&1
     fi
 
-    rm $videothumb
     exit 0
 fi
 
