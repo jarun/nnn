@@ -180,7 +180,7 @@ Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>),
 
 ## Developers
 
-- [Arun Prakash Jana](https://github.com/jarun) (Copyright © 2016-2020)
+- [Arun Prakash Jana](https://github.com/jarun) (Copyright © 2016-2021)
 - [0xACE](https://github.com/0xACE)
 - [Anna Arad](https://github.com/annagrram)
 - [KlzXS](https://github.com/KlzXS)
