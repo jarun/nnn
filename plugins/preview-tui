@@ -26,6 +26,10 @@
 #                To use:
 #                1. install pistol
 #                2. set/export $USE_PISTOL as 1
+#    - optional: ffmpegthumbnailer for video thumbnails (https://github.com/dirkvdb/ffmpegthumbnailer).
+#                To use:
+#                1. install ffmpegthumbnailer
+#                2. set/export USE_VIDEOTHUMB as 1
 #
 # Usage:
 #   You need to set a NNN_FIFO path and a key for the plugin with NNN_PLUG,
@@ -63,6 +67,7 @@ SPLIT="$SPLIT"  # you can set a permanent split here
 TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
+USE_VIDEOTHUMB="${USE_VIDEOTHUMB:-0}"
 PAGER="${PAGER:-less -R}"
 [ "$PAGER" = "most" ] && PAGER="less -R"
 
@@ -151,7 +156,13 @@ preview_file () {
             fifo_pager ls --color=always
         fi
     elif [ "$encoding" = "binary" ]; then
-        if [ "${mimetype%%/*}" = "image" ] ; then
+        if [ "${mimetype%%/*}" = "image" ] || [ "${mimetype%%/*}" = "video" ]; then
+            if [ "${mimetype%%/*}" = "video" ] && [ "$USE_VIDEOTHUMB" -ne 0 ] && exists ffmpegthumbnailer; then
+                videothumb="/tmp/videothumb.$$.png"
+                ffmpegthumbnailer -s 512 -i "$1" -o "$videothumb" >/dev/null 2>&1
+                set "$videothumb"
+                trap 'rm "$videothumb"' EXIT
+            fi
             if [ "$TERMINAL" = "kitty" ]; then
                 # Kitty terminal users can use the native image preview method.
                 kitty +kitten icat --silent --transfer-mode=stream --stdin=no \
