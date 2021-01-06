@@ -521,7 +521,7 @@ if [ -n "${album_title}" ]; then
     echo "Album '${album_title}' successfully created"
     album_id="$(grep -Eo '"id":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
     del_id="$(grep -Eo '"deletehash":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
-    handle_album_creation_success "http://imgur.com/a/${album_id}" "${del_id}" "${album_title}"
+    handle_album_creation_success "https://imgur.com/a/${album_id}" "${del_id}" "${album_title}"
 
     if [ "${login}" = "false" ]; then
       album_id="${del_id}"

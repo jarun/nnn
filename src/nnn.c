@@ -876,7 +876,7 @@ static rlim_t max_openfds(void)
  * Frees current memory if realloc() fails and returns NULL.
  *
  * As per the docs, the *alloc() family is supposed to be memory aligned:
- * Ubuntu: http://manpages.ubuntu.com/manpages/xenial/man3/malloc.3.html
+ * Ubuntu: https://manpages.ubuntu.com/manpages/xenial/man3/malloc.3.html
  * macOS: https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/malloc.3.html
  */
 static void *xrealloc(void *pcur, size_t len)
