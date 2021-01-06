@@ -42,7 +42,7 @@
 #     - `zathura`: PDF viewer
 #     - but we allways fallback to `nuke` plugin
 #
-# [1]: http://tools.suckless.org/tabbed/
+# [1]: https://tools.suckless.org/tabbed/
 # [2]: https://specifications.freedesktop.org/xembed-spec/xembed-spec-latest.html
 #
 # Shell: bash (job control is weakly specified in POSIX)
