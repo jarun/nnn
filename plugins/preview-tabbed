@@ -50,16 +50,17 @@
 
 
 XDOTOOL_TIMEOUT=2
-PAGER=${PAGER:-"vim -R"}
+PAGER=${PAGER:-"less -r"}
 NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
+TREEVIEW="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/treeview"
 
 
-if which xterm >/dev/null 2>&1 ; then
+if which st >/dev/null 2>&1 ; then
+   TERMINAL="st -w"
+elif which xterm >/dev/null 2>&1 ; then
     TERMINAL="xterm -into"
 elif which urxvt >/dev/null 2>&1 ; then
     TERMINAL="urxvt -embed"
-elif which st >/dev/null 2>&1 ; then
-    TERMINAL="st -w"
 else
     echo "No xembed term found" >&2
 fi
@@ -138,7 +139,11 @@ previewer_loop () {
 
         kill_viewer
 
-        MIME="$(file -b --mime-type "$FILE")"
+       if which xdg-mime >/dev/null 2>&1 ; then
+          MIME="$(xdg-mime query filetype "$FILE")"
+       else
+          MIME="$(file -b --mime-type "$FILE")"
+       fi
 
         case "$MIME" in
             video/*)
@@ -169,8 +174,15 @@ previewer_loop () {
                     term_nuke "$XID" "$FILE"
                 fi
                 ;;
+            application/postscript)
+                if which zathura >/dev/null 2>&1 ; then
+                    zathura -e "$XID" "$FILE" &
+                else
+                    term_nuke "$XID" "$FILE"
+                fi
+                ;;
             inode/directory)
-                $TERMINAL "$XID" -e nnn "$FILE" &
+                $TERMINAL "$XID" -e $TREEVIEW "$FILE" &
                 ;;
             text/*)
                 if [ -x "$NUKE" ] ; then
