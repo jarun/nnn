@@ -36,66 +36,66 @@ ifneq ($(filter noloc,$(MAKECMDGOALS)),)
 	O_NOLOC := 1
 endif
 
-ifeq ($(O_DEBUG),1)
+ifeq ($(strip $(O_DEBUG)),1)
 	CPPFLAGS += -DDBGMODE
 	CFLAGS += -g
 	LDLIBS += -lrt
 endif
 
-ifeq ($(O_NORL),1)
+ifeq ($(strip $(O_NORL)),1)
 	CPPFLAGS += -DNORL
-else ifeq ($(O_STATIC),1)
+else ifeq ($(strip $(O_STATIC)),1)
 	CPPFLAGS += -DNORL
 else
 	LDLIBS += -lreadline
 endif
 
-ifeq ($(O_PCRE),1)
+ifeq ($(strip $(O_PCRE)),1)
 	CPPFLAGS += -DPCRE
 	LDLIBS += -lpcre
 endif
 
-ifeq ($(O_NOLOC),1)
+ifeq ($(strip $(O_NOLOC)),1)
 	CPPFLAGS += -DNOLOCALE
 endif
 
-ifeq ($(O_NOMOUSE),1)
+ifeq ($(strip $(O_NOMOUSE)),1)
 	CPPFLAGS += -DNOMOUSE
 endif
 
-ifeq ($(O_NOBATCH),1)
+ifeq ($(strip $(O_NOBATCH)),1)
 	CPPFLAGS += -DNOBATCH
 endif
 
-ifeq ($(O_NOFIFO),1)
+ifeq ($(strip $(O_NOFIFO)),1)
 	CPPFLAGS += -DNOFIFO
 endif
 
-ifeq ($(O_CTX8),1)
+ifeq ($(strip $(O_CTX8)),1)
 	CPPFLAGS += -DCTX8
 endif
 
-ifeq ($(O_ICONS),1)
+ifeq ($(strip $(O_ICONS)),1)
 	CPPFLAGS += -DICONS
 endif
 
-ifeq ($(O_NERD),1)
+ifeq ($(strip $(O_NERD)),1)
 	CPPFLAGS += -DNERD
 endif
 
-ifeq ($(O_QSORT),1)
+ifeq ($(strip $(O_QSORT)),1)
 	CPPFLAGS += -DTOURBIN_QSORT
 endif
 
-ifeq ($(O_BENCH),1)
+ifeq ($(strip $(O_BENCH)),1)
 	CPPFLAGS += -DBENCH
 endif
 
-ifeq ($(O_NOSSN),1)
+ifeq ($(strip $(O_NOSSN)),1)
 	CPPFLAGS += -DNOSSN
 endif
 
-ifeq ($(O_NOUG),1)
+ifeq ($(strip $(O_NOUG)),1)
 	CPPFLAGS += -DNOUG
 endif
 
@@ -122,7 +122,7 @@ CFLAGS += $(CFLAGS_CURSES)
 LDLIBS += $(LDLIBS_CURSES) $(LDLIBS_HAIKU)
 
 # static compilation needs libgpm development package
-ifeq ($(O_STATIC),1)
+ifeq ($(strip $(O_STATIC)),1)
 	LDFLAGS += -static
 	LDLIBS += -lgpm
 endif
