@@ -6,7 +6,7 @@
 # Details: Set the variable EBOOK_ID to download in html format and read in w3m.
 #          Clear EBOOK_ID to browse available ebooks by popularity and set it to
 #          the ID once you find an interesting one.
-#          To dowload and read in epub format set READER to an epub reader like
+#          To download and read in epub format set READER to an epub reader like
 #          epr: https://github.com/wustho/epr
 #
 #          More on EBOOK_ID:

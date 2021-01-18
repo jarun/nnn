@@ -40,7 +40,7 @@
 #     - `mpv`: multimedia player, for video/audio preview
 #     - `sxiv`: image viewer
 #     - `zathura`: PDF viewer
-#     - but we allways fallback to `nuke` plugin
+#     - but we always fallback to `nuke` plugin
 #
 # [1]: https://tools.suckless.org/tabbed/
 # [2]: https://specifications.freedesktop.org/xembed-spec/xembed-spec-latest.html
