@@ -139,7 +139,7 @@
 
 /*
  * NAME_MAX and PATH_MAX may not exist, e.g. with dirent.c_name being a
- * flexible array on Illumos. Use somewhat accomodating fallback values.
+ * flexible array on Illumos. Use somewhat accommodating fallback values.
  */
 #ifndef NAME_MAX
 #define NAME_MAX 255
