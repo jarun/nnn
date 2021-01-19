@@ -52,7 +52,7 @@
 XDOTOOL_TIMEOUT=2
 PAGER=${PAGER:-"less -r"}
 NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
-TREEVIEW="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/treeview"
+
 
 
 if which st >/dev/null 2>&1 ; then
