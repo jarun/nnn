@@ -182,7 +182,7 @@ previewer_loop () {
                 fi
                 ;;
             inode/directory)
-                $TERMINAL "$XID" -e $TREEVIEW "$FILE" &
+	        $TERMINAL "$XID" -e nnn "$FILE" &
                 ;;
             text/*)
                 if [ -x "$NUKE" ] ; then
