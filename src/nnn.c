@@ -4578,8 +4578,8 @@ static void show_help(const char *path)
 	FILE *fp;
 	const char *start, *end;
 	const char helpstr[] = {
-		"0\n"
-		"1NAVIGATION\n"
+      "0\n"
+       "1NAVIGATION\n"
 	       "9Up k  Up%-16cPgUp ^U  Scroll up\n"
 	       "9Dn j  Down%-14cPgDn ^D  Scroll down\n"
 	       "9Lt h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
@@ -4592,11 +4592,11 @@ static void show_help(const char *path)
 		  "cQ  Pick/err, quit%-9c^G  QuitCD\n"
 	          "cq  Quit context%-6c2Esc ^Q  Quit\n"
 		  "c?  Help, conf\n"
-		"1FILTER & PROMPT\n"
+       "1FILTER & PROMPT\n"
 		  "c/  Filter%-12cAlt+Esc  Clear filter & redraw\n"
 		"aEsc  Exit prompt%-12c^L  Clear prompt/last filter\n"
 		 "b^N  Toggle type-to-nav%-0c\n"
-		"1FILES\n"
+       "1FILES\n"
 	       "9o ^O  Open with...%-12cn  Create new/link\n"
 	       "9f ^F  File details%-12cd  Detail mode toggle\n"
 		 "b^R  Rename/dup%-14cr  Batch rename\n"
@@ -4607,7 +4607,7 @@ static void show_help(const char *path)
 	       "9p ^P  Copy sel here%-8cw ^W  Cp/mv sel as\n"
 	       "9v ^V  Move sel here%-11cE  Edit sel\n"
 	       "9x ^X  Delete\n"
-		"1MISC\n"
+       "1MISC\n"
 	      "8Alt ;  Select plugin%-11c=  Launch app\n"
 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
 		  "cc  Connect remote%-10cu  Unmount remote/archive\n"
