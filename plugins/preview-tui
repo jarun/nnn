@@ -172,7 +172,7 @@ preview_file () {
             elif exists viu; then
                 viu -t "$1"
             elif exists ueberzug; then
-                preview_ueberzug "$1"
+                preview_ueberzug "$cols" "$lines" "$1"
             else
                 fifo_pager print_bin_info "$1"
             fi
@@ -196,12 +196,10 @@ preview_file () {
 }
 
 preview_ueberzug() {
-    height=$(tput lines)
-    width=$(tput cols)
-    ueberzug layer --parser json 0< <(
-        printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "max_width": "%s", "max_height": "%s", "path": "%s"}\n' "$width" "$height" "$1"
-        read
-    )
+    {
+        printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "width": "%s", "height": "%s", "path": "%s"}\n' "$1" "$2" "$3"
+        read -r
+    } | ueberzug layer --parser json
 }
 
 if [ "$PREVIEW_MODE" ] ; then
