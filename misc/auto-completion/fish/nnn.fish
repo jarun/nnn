@@ -38,7 +38,6 @@ complete -c nnn -s s -r -d 'load session by name' -x -a '@\t"last session" (ls $
 complete -c nnn -s S    -d 'persistent session'
 complete -c nnn -s t -r -d 'timeout in seconds to lock'
 complete -c nnn -s T -r -d 'a d e r s t v'
-complete -c nnn -s u    -d 'use selection (no prompt)'
 complete -c nnn -s U    -d 'show user and group'
 complete -c nnn -s V    -d 'show program version and exit'
 complete -c nnn -s w    -d 'hardware cursor mode'

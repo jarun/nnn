@@ -294,8 +294,7 @@ typedef struct {
 	uint_t reserved1  : 1;
 	/* The following settings are global */
 	uint_t curctx     : 3;  /* Current context number */
-	uint_t prefersel  : 1;  /* Prefer selection over current, if exists */
-	uint_t reserved2  : 1;
+	uint_t reserved2  : 2;
 	uint_t nonavopen  : 1;  /* Open file on right arrow or `l` */
 	uint_t autoselect : 1;  /* Auto-select dir in type-to-nav mode */
 	uint_t cursormode : 1;  /* Move hardware cursor with selection */
@@ -372,7 +371,6 @@ static settings cfg = {
 	0, /* version */
 	0, /* reserved1 */
 	0, /* curctx */
-	0, /* prefersel */
 	0, /* reserved2 */
 	0, /* nonavopen */
 	1, /* autoselect */
@@ -525,7 +523,7 @@ static char * const utils[] = {
 #define MSG_FAILED 5
 #define MSG_SSN_NAME 6
 #define MSG_CP_MV_AS 7
-#define MSG_CUR_SEL_OPTS 8
+#define MSG_NOCHNAGE 8
 #define MSG_FORCE_RM 9
 #define MSG_LIMIT 10
 #define MSG_NEW_OPTS 11
@@ -558,9 +556,8 @@ static char * const utils[] = {
 #define MSG_LAZY 38
 #define MSG_FIRST 39
 #define MSG_RM_TMP 40
-#define MSG_NOCHNAGE 41
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 42 /* Must be the last entry */
+#define MSG_DIR_CHANGED 41 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -572,7 +569,7 @@ static const char * const messages[] = {
 	"failed!",
 	"session name: ",
 	"'c'p / 'm'v as?",
-	"'c'urrent / 's'el?",
+	"unchanged",
 	"rm -rf %s file%s? [Esc cancels]",
 	"limit exceeded",
 	"'f'ile / 'd'ir / 's'ym / 'h'ard?",
@@ -605,7 +602,6 @@ static const char * const messages[] = {
 	"unmount failed! try lazy?",
 	"first file (\')/char?",
 	"remove tmp file?",
-	"unchanged",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -1223,15 +1219,6 @@ static int get_input(const char *prompt)
 
 static int get_cur_or_sel(void)
 {
-	if (selbufpos && ndents) {
-		if (cfg.prefersel)
-			return 's';
-
-		int choice = get_input(messages[MSG_CUR_SEL_OPTS]);
-
-		return ((choice == 'c' || choice == 's') ? choice : 0);
-	}
-
 	if (selbufpos)
 		return 's';
 
@@ -7428,7 +7415,6 @@ static void usage(void)
 #endif
 		" -t secs timeout to lock\n"
 		" -T key  sort order [a/d/e/r/s/t/v]\n"
-		" -u      use selection (no prompt)\n"
 #ifndef NOUG
 		" -U      show user and group\n"
 #endif
@@ -7585,7 +7571,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdDeEfFgHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdDeEfFgHJKl:nop:P:QrRs:St:T:UVwxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7700,9 +7686,6 @@ int main(int argc, char *argv[])
 		case 'T':
 			if (env_opts_id < 0)
 				sort = (uchar_t)optarg[0];
-			break;
-		case 'u':
-			cfg.prefersel = 1;
 			break;
 		case 'U':
 			g_state.uidgid = 1;

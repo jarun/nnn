@@ -36,7 +36,6 @@ args=(
     '(-S)-S[persistent session]'
     '(-t)-t[timeout to lock]:seconds'
     '(-T)-T[a d e r s t v]:key'
-    '(-u)-u[use selection (no prompt)]'
     '(-U)-U[show user and group]'
     '(-V)-V[show program version and exit]'
     '(-w)-C[hardware cursor mode]'
