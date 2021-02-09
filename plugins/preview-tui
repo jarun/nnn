@@ -17,7 +17,7 @@
 #    - tar
 #    - man
 #    - optional: bat for code syntax highlighting
-#    - optional: kitty terminal or catimg for images
+#    - optional: kitty terminal, catimg, viu, or ueberzug for images
 #    - optional: scope.sh file viewer from ranger.
 #                To use:
 #                1. drop scope.sh executable in $PATH
@@ -171,6 +171,8 @@ preview_file () {
                 catimg "$1"
             elif exists viu; then
                 viu -t "$1"
+            elif exists ueberzug; then
+                preview_ueberzug "$cols" "$lines" "$1"
             else
                 fifo_pager print_bin_info "$1"
             fi
@@ -191,6 +193,13 @@ preview_file () {
             $PAGER "$1" &
         fi
     fi
+}
+
+preview_ueberzug() {
+    {
+        printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "width": "%s", "height": "%s", "path": "%s"}\n' "$1" "$2" "$3"
+        read -r
+    } | ueberzug layer --parser json
 }
 
 if [ "$PREVIEW_MODE" ] ; then
