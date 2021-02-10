@@ -5904,6 +5904,11 @@ static bool browse(char *ipath, const char *session, int pkey)
 		lastname = g_ctx[0].c_name; /* last visited filename */
 
 		xstrsncpy(g_ctx[0].c_path, ipath, PATH_MAX);
+		/* If the initial path is a file, retain a way to return to start dir */
+		if (g_state.initfile) {
+			free(initpath);
+			initpath = ipath = getcwd(NULL, 0);
+		}
 		path = g_ctx[0].c_path; /* current directory */
 
 		g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
