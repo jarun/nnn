@@ -324,13 +324,13 @@ typedef struct {
 	uint_t picker     : 1;  /* Write selection to user-specified file */
 	uint_t pickraw    : 1;  /* Write selection to stdout before exit */
 	uint_t runplugin  : 1;  /* Choose plugin mode */
-	uint_t runctx     : 2;  /* The context in which plugin is to be run */
+	uint_t runctx     : 3;  /* The context in which plugin is to be run */
 	uint_t selmode    : 1;  /* Set when selecting files */
 	uint_t oldcolor   : 1;  /* Use older colorscheme */
 	uint_t stayonsel	: 1;  /* Disable auto-proceed on select */
 	uint_t dirctx     : 1;  /* Show dirs in context color */
 	uint_t uidgid     : 1;  /* Show owner and group info */
-	uint_t reserved   : 10; /* Adjust when adding/removing a field */
+	uint_t reserved   : 9; /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
