@@ -27,12 +27,9 @@ exit_status=0
 dst_file=$(mktemp "$TMPDIR/.nnnXXXXXX")
 
 if [ -s "$selection" ]; then
-	printf "Rename 'c'urrent / 's'election? "
-	read -r resp
-
-    if ! [ "$resp" = "c" ] && ! [ "$resp" = "s" ]; then
-        exit 1
-    fi
+	resp="s"
+else
+	resp="c"
 fi
 
 if [ "$resp" = "s" ]; then
