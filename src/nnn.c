@@ -215,6 +215,7 @@
 #define F_NORMAL  0x08  /* spawn child process in non-curses regular CLI mode */
 #define F_CONFIRM 0x10  /* run command - show results before exit (must have F_NORMAL) */
 #define F_CHKRTN  0x20  /* wait for user prompt if cmd returns failure status */
+#define F_ALLNULL 0x44  /* stdin, stdout and stderr mapped to /dev/null */
 #define F_CLI     (F_NORMAL | F_MULTI)
 #define F_SILENT  (F_CLI | F_NOTRACE)
 
@@ -1910,6 +1911,8 @@ static int spawn(char *file, char *arg1, char *arg2, uchar_t flag)
 		if (flag & F_NOTRACE) {
 			int fd = open("/dev/null", O_WRONLY, 0200);
 
+			if (flag & F_ALLNULL)
+				dup2(fd, 0);
 			dup2(fd, 1);
 			dup2(fd, 2);
 			close(fd);
