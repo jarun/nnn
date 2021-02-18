@@ -215,6 +215,7 @@
 #define F_NORMAL  0x08  /* spawn child process in non-curses regular CLI mode */
 #define F_CONFIRM 0x10  /* run command - show results before exit (must have F_NORMAL) */
 #define F_CHKRTN  0x20  /* wait for user prompt if cmd returns failure status */
+#define F_NOSTDIN 0x40  /* suppress stdin */
 #define F_CLI     (F_NORMAL | F_MULTI)
 #define F_SILENT  (F_CLI | F_NOTRACE)
 
@@ -1910,6 +1911,8 @@ static int spawn(char *file, char *arg1, char *arg2, uchar_t flag)
 		if (flag & F_NOTRACE) {
 			int fd = open("/dev/null", O_WRONLY, 0200);
 
+			if (flag & F_NOSTDIN)
+				dup2(fd, 0);
 			dup2(fd, 1);
 			dup2(fd, 2);
 			close(fd);
@@ -5872,7 +5875,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 	enum action sel;
 	struct stat sb;
 	int r = -1, presel, selstartid = 0, selendid = 0;
-	const uchar_t opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOWAIT));
+	const uchar_t opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOSTDIN | F_NOWAIT));
 	bool watch = FALSE;
 
 #ifndef NOMOUSE
