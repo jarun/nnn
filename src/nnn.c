@@ -1330,16 +1330,17 @@ static size_t seltofile(int fd, uint_t *pcount)
 	return pos;
 }
 
-/* List selection from selection file (another instance) */
-static bool listselfile(void)
+static bool isselfileempty(void)
 {
 	struct stat sb;
 
-	if (stat(selpath, &sb) == -1)
-		return FALSE;
+	return (stat(selpath, &sb) == -1) || (!sb.st_size);
+}
 
-	/* Nothing selected if file size is 0 */
-	if (!sb.st_size)
+/* List selection from selection file (another instance) */
+static bool listselfile(void)
+{
+	if (isselfileempty())
 		return FALSE;
 
 	snprintf(g_buf, CMD_LEN_MAX, "tr \'\\0\' \'\\n\' < %s", selpath);
@@ -2086,6 +2087,11 @@ finish:
 static bool cpmvrm_selection(enum action sel, char *path)
 {
 	int r;
+
+	if (isselfileempty()) {
+		printmsg(messages[MSG_0_SELECTED]);
+		return FALSE;
+	}
 
 	if (!selsafe())
 		return FALSE;
