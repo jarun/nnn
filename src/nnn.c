@@ -2087,11 +2087,6 @@ static bool cpmvrm_selection(enum action sel, char *path)
 {
 	int r;
 
-	if (!selbufpos) {
-		printmsg(messages[MSG_0_SELECTED]);
-		return FALSE;
-	}
-
 	if (!selsafe())
 		return FALSE;
 
