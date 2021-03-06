@@ -516,7 +516,7 @@ static char * const utils[] = {
 };
 
 /* Common strings */
-#define MSG_INVALID_KEY 0
+#define MSG_ZERO 0 /* Unused */
 #define MSG_0_ENTRIES 1
 #define STR_TMPFILE 2
 #define MSG_0_SELECTED 3
@@ -557,12 +557,13 @@ static char * const utils[] = {
 #define MSG_LAZY 38
 #define MSG_FIRST 39
 #define MSG_RM_TMP 40
+#define MSG_INVALID_KEY 41
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 41 /* Must be the last entry */
+#define MSG_DIR_CHANGED 42 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
-	"invalid key",
+	"",
 	"0 entries",
 	"/.nnnXXXXXX",
 	"0 selected",
@@ -603,6 +604,7 @@ static const char * const messages[] = {
 	"unmount failed! try lazy?",
 	"first file (\')/char?",
 	"remove tmp file?",
+	"invalid key",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
