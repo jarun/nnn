@@ -189,19 +189,19 @@ preview_file () {
         fi
     elif [ "$encoding" = "binary" ]; then
         if [ "$USE_UEBERZUG" -ne 0 ] && exists ueberzug; then
-            if [ "$ext" = "gif" ] && [ "$USE_GIFPREVIEW" -ne 0 ]; then
+            if [ "$ext" = "gif" ]; then
                 preview_ueberzug "$cols" "$lines" "$1" "gif"
             elif [ "${mimetype%%/*}" = "image" ]; then
                 ueberzug_layer "$cols" "$lines" "$1"
-            elif [ "${mimetype%%/*}" = "audio" ]; then
+            elif [ "$USE_AUDIOPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "audio" ]; then
                 preview_ueberzug "$cols" "$lines" "$1" "audio"
-            elif [ "${mimetype%%/*}" = "video" ]; then
+            elif [ "$USE_VIDEOPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "video" ]; then
                 preview_ueberzug "$cols" "$lines" "$1" "video"
-            elif [ "$ext" = "pdf" ]; then
+            elif [ "$USE_PDFPREVIEW" -ne 0 ] && [ "$ext" = "pdf" ]; then
                 preview_ueberzug "$cols" "$lines" "$1" "pdf"
-            elif [ "$ext" = "epub" ]; then
+            elif [ "$USE_EPUBPREVIEW" -ne 0 ] && [ "$ext" = "epub" ]; then
                 preview_ueberzug "$cols" "$lines" "$1" "epub"
-            elif [ "${mimetype%%/*}" = "font" ]; then
+            elif [ "$USE_FONTPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "font" ]; then
                 preview_ueberzug "$cols" "$lines" "$1" "font"
             fi
         elif [ "${mimetype%%/*}" = "image" ] || [ "${mimetype%%/*}" = "video" ]; then
