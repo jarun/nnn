@@ -243,7 +243,7 @@ preview_ueberzug() {
                         mkdir -p "/tmp/$3"
                         convert -coalesce "$3" "/tmp/$3/${3##*/}.png"
                     fi
-                        for frame in $(ls -1 /tmp/$3/*.png | sort -V); do
+                        for frame in $(find /tmp/$3/*.png | sort -V); do
                             ueberzug_layer "$1" "$2" "$frame"
                             sleep 0.1
                         done &
@@ -282,7 +282,7 @@ if [ "$PREVIEW_MODE" ] ; then
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
         fifopid=$!
     fi
-    trap 'ueberzug_resize $fifopid' SIGWINCH
+    trap 'ueberzug_resize $fifopid' 28
 
     # use cat instead of 'exec <' to avoid issues with dash shell
     # shellcheck disable=SC2002
