@@ -29,7 +29,27 @@
 #    - optional: ffmpegthumbnailer for video thumbnails (https://github.com/dirkvdb/ffmpegthumbnailer).
 #                To use:
 #                1. install ffmpegthumbnailer
-#                2. set/export USE_VIDEOTHUMB as 1
+#                2. set/export USE_VIDEOPREVIEW as 1
+#    - optional: convert(ImageMagick) for playing gif preview
+#                To use:
+#                1. install ImageMagick
+#                2. set/export USE_GIFPREVIEW as 1
+#    - optional: ffmpeg for audio thumbnails
+#                To use:
+#                1. install ffmpeg
+#                2. set/export USE_AUDIOPREVIEW as 1
+#    - optional: pdftoppm(poppler) for pdf thumbnails
+#                To use:
+#                1. install poppler
+#                2. set/export USE_PDFPREVIEW as 1
+#    - optional: gnome-epub-thumbnailer for epub thumbnails (https://gitlab.gnome.org/GNOME/gnome-epub-thumbnailer)
+#                To use:
+#                1. install gnome-epub-thumbnailer
+#                2. set/export USE_EPUBPREVIEW as 1
+#    - optional: fontpreview for font preview (https://github.com/sdushantha/fontpreview)
+#                To use:
+#                1. install fontpreview
+#                2. set/export USE_FONTPREVIEW as 1
 #
 # Usage:
 #   You need to set a NNN_FIFO path and a key for the plugin with NNN_PLUG,
@@ -67,8 +87,20 @@ SPLIT="$SPLIT"  # you can set a permanent split here
 TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
-USE_VIDEOTHUMB="${USE_VIDEOTHUMB:-0}"
+USE_UEBERZUG="${USE_UEBERZUG:-0}"
+USE_VIDEOPREVIEW="${USE_VIDEOPREVIEW:-0}"
+USE_AUDIOPREVIEW="${USE_AUDIOPREVIEW:-0}"
+USE_FONTPREVIEW="${USE_FONTPREVIEW:-0}"
+USE_EPUBPREVIEW="${USE_EPUBPREVIEW:-0}"
+USE_PDFPREVIEW="${USE_PDFPREVIEW:-0}"
+USE_GIFPREVIEW="${USE_GIFPREVIEW:-0}"
 PAGER="${PAGER:-less -R}"
+
+if [ "$USE_UEBERZUG" -ne 0 ]; then
+  FIFO_UEBERZUG="/tmp/nnn-$PPID-ueberzug-fifo"
+  mkfifo "$FIFO_UEBERZUG"
+fi
+
 [ "$PAGER" = "most" ] && PAGER="less -R"
 
 if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
@@ -156,13 +188,19 @@ preview_file () {
             fifo_pager ls --color=always
         fi
     elif [ "$encoding" = "binary" ]; then
-        if [ "${mimetype%%/*}" = "image" ] || [ "${mimetype%%/*}" = "video" ]; then
-            if [ "${mimetype%%/*}" = "video" ] && [ "$USE_VIDEOTHUMB" -ne 0 ] && exists ffmpegthumbnailer; then
-                videothumb="/tmp/videothumb.$$.png"
-                ffmpegthumbnailer -s 512 -i "$1" -o "$videothumb" >/dev/null 2>&1
-                set "$videothumb"
-                trap 'rm "$videothumb"' EXIT
+        if [ "$USE_UEBERZUG" -ne 0 ] && exists ueberzug; then
+            if [ "$ext" = "gif" ] && [ "$USE_GIFPREVIEW" -ne 0 ]; then
+                preview_ueberzug "$cols" "$lines" "$1" "gif"
+            elif [ "${mimetype%%/*}" = "image" ]; then
+                ueberzug_layer "$cols" "$lines" "$1"
+            elif [ "${mimetype%%/*}" = "audio" ]; then
+                preview_ueberzug "$cols" "$lines" "$1" "audio"
+            elif [ "${mimetype%%/*}" = "video" ]; then
+                preview_ueberzug "$cols" "$lines" "$1" "video"
+            elif [ "${mimetype%%/*}" = "font" ]; then
+                preview_ueberzug "$cols" "$lines" "$1" "font"
             fi
+        elif [ "${mimetype%%/*}" = "image" ] || [ "${mimetype%%/*}" = "video" ]; then
             if [ "$TERMINAL" = "kitty" ]; then
                 # Kitty terminal users can use the native image preview method.
                 kitty +kitten icat --silent --transfer-mode=stream --stdin=no \
@@ -171,8 +209,6 @@ preview_file () {
                 catimg "$1"
             elif exists viu; then
                 viu -t "$1"
-            elif exists ueberzug; then
-                preview_ueberzug "$cols" "$lines" "$1"
             else
                 fifo_pager print_bin_info "$1"
             fi
@@ -196,10 +232,37 @@ preview_file () {
 }
 
 preview_ueberzug() {
-    {
-        printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "width": "%s", "height": "%s", "path": "%s"}\n' "$1" "$2" "$3"
-        read -r
-    } | ueberzug layer --parser json
+    if [ ! -f "/tmp/$3.png" ]; then
+        mkdir -p "/tmp/${3%/*}"
+        case $4 in
+            audio) ffmpeg -i "$3" "/tmp/$3.png" -y >/dev/null 2>&1 ;;
+            epub) gnome-epub-thumbnailer "$3" "/tmp/$3.png" >/dev/null 2>&1 ;;
+            font) fontpreview -i "$3" -o "/tmp/$3.png" >/dev/null 2>&1 ;;
+            gif) if [ "$USE_GIFPREVIEW" -ne 0 ]; then
+                    if [ ! -d "/tmp/$3" ]; then
+                        mkdir -p "/tmp/$3"
+                        convert -coalesce "$3" "/tmp/$3/${3##*/}.png"
+                    fi
+                        for frame in $(ls -1 /tmp/$3/*.png | sort -V); do
+                            ueberzug_layer "$1" "$2" "$frame"
+                            sleep 0.1
+                        done &
+                        gifloop=$!
+                        return
+                 fi ;;
+            pdf) pdftoppm -png -f 1 -singlefile "$3" "/tmp/$3" >/dev/null 2>&1 ;;
+            video) ffmpegthumbnailer -i "$3" -o "/tmp/$3.png" -s 0 -q 10 >/dev/null 2>&1 ;;
+        esac
+    fi
+    ueberzug_layer "$1" "$2" "/tmp/$3.png"
+}
+
+ueberzug_layer() {
+    printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "width": "%s", "height": "%s", "path": "%s"}\n' "$1" "$2" "$3" > "$FIFO_UEBERZUG"
+}
+
+ueberzug_remove() {
+    printf '{"action": "remove", "identifier": "nnn_ueberzug"}\n' > "$FIFO_UEBERZUG"
 }
 
 if [ "$PREVIEW_MODE" ] ; then
@@ -210,11 +273,18 @@ if [ "$PREVIEW_MODE" ] ; then
     fi
 
     preview_file "$1"
+    if [ "$USE_UEBERZUG" -ne 0 ]; then
+        tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+    fi
 
     # use cat instead of 'exec <' to avoid issues with dash shell
     # shellcheck disable=SC2002
     cat "$NNN_FIFO" |\
     while read -r selection ; do
+        if [ "$USE_UEBERZUG" -ne 0 ]; then
+            kill $gifloop
+            ueberzug_remove
+        fi
         preview_file "$selection"
     done
 
@@ -224,8 +294,11 @@ if [ "$PREVIEW_MODE" ] ; then
         kitty @ last-used-layout --no-response >/dev/null 2>&1
     fi
 
+    [ "$USE_UEBERZUG" -ne 0 ] && rm "$FIFO_UEBERZUG"
     exit 0
 fi
+
+[ "$USE_UEBERZUG" -ne 0 ] && rm "$FIFO_UEBERZUG"
 
 if [ "$TERMINAL" = "tmux" ]; then
     # tmux splits are inverted
