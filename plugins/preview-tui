@@ -50,6 +50,10 @@
 #                To use:
 #                1. install fontpreview
 #                2. set/export USE_FONTPREVIEW as 1
+#    - optional: libreoffce for opendocument/officedocument preview
+#                To use:
+#                1. install libreoffice
+#                2. set/export USE_OFFICEPREVIEW as 1
 #
 # Usage:
 #   You need to set a NNN_FIFO path and a key for the plugin with NNN_PLUG,
@@ -94,6 +98,7 @@ USE_FONTPREVIEW="${USE_FONTPREVIEW:-0}"
 USE_EPUBPREVIEW="${USE_EPUBPREVIEW:-0}"
 USE_PDFPREVIEW="${USE_PDFPREVIEW:-0}"
 USE_GIFPREVIEW="${USE_GIFPREVIEW:-0}"
+USE_OFFICEPREVIEW="${USE_OFFICEPREVIEW:-0}"
 PAGER="${PAGER:-less -R}"
 
 if [ "$USE_UEBERZUG" -ne 0 ]; then
@@ -203,6 +208,12 @@ preview_file () {
                 preview_ueberzug "$cols" "$lines" "$1" "epub"
             elif [ "$USE_FONTPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "font" ]; then
                 preview_ueberzug "$cols" "$lines" "$1" "font"
+            elif [ "$USE_OFFICEPREVIEW" -ne 0 ]; then
+                test1="document"
+                test2="office"
+                if [ "${mimetype#*$test1}" != "$mimetype" ] || [ "${mimetype#*$test2}" != "$mimetype" ]; then
+                    preview_ueberzug "$cols" "$lines" "$1" "office"
+                fi
             fi
         elif [ "${mimetype%%/*}" = "image" ] || [ "${mimetype%%/*}" = "video" ]; then
             if [ "$TERMINAL" = "kitty" ]; then
@@ -254,6 +265,9 @@ preview_ueberzug() {
                         gifloop=$!
                         return
                  fi ;;
+            office) libreoffice --convert-to png "$3" --outdir "/tmp/${3%/*}" > /dev/null 2>&1
+                    filename="$(echo "${3##*/}" | cut -d. -f1)"
+                    mv "/tmp/${3%/*}/$filename.png" "/tmp/$3.png" ;;
             pdf) pdftoppm -png -f 1 -singlefile "$3" "/tmp/$3" >/dev/null 2>&1 ;;
             video) ffmpegthumbnailer -i "$3" -o "/tmp/$3.png" -s 0 -q 10 >/dev/null 2>&1 ;;
         esac
