@@ -197,6 +197,10 @@ preview_file () {
                 preview_ueberzug "$cols" "$lines" "$1" "audio"
             elif [ "${mimetype%%/*}" = "video" ]; then
                 preview_ueberzug "$cols" "$lines" "$1" "video"
+            elif [ "$ext" = "pdf" ]; then
+                preview_ueberzug "$cols" "$lines" "$1" "pdf"
+            elif [ "$ext" = "epub" ]; then
+                preview_ueberzug "$cols" "$lines" "$1" "epub"
             elif [ "${mimetype%%/*}" = "font" ]; then
                 preview_ueberzug "$cols" "$lines" "$1" "font"
             fi
