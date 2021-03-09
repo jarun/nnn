@@ -16,6 +16,7 @@
 #    - unzip
 #    - tar
 #    - man
+#    - atool: for additional archive preview
 #    - optional: bat for code syntax highlighting
 #    - optional: kitty terminal, catimg, viu, or ueberzug for images
 #    - optional: scope.sh file viewer from ranger.
@@ -103,6 +104,7 @@ USE_OFFICEPREVIEW="${USE_OFFICEPREVIEW:-0}"
 USE_GIFPREVIEW="${USE_GIFPREVIEW:-0}"
 LOOP_GIFS="${LOOP_GIFS:-0}"
 PAGER="${PAGER:-less -R}"
+ARCHIVES="$(echo "$NNN_ARCHIVE" | sed 's/.*(\(.*\)).*/\1/;s/|/ /g')"
 
 if [ "$USE_UEBERZUG" -ne 0 ]; then
   FIFO_UEBERZUG="/tmp/nnn-$PPID-ueberzug-fifo"
@@ -210,12 +212,10 @@ preview_file () {
             generate_preview "$cols" "$lines" "$1" "epub"
         elif [ "$USE_FONTPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "font" ]; then
             generate_preview "$cols" "$lines" "$1" "font"
-        elif [ "$USE_OFFICEPREVIEW" -ne 0 ]; then
-            test1="document"
-            test2="office"
-            if [ "${mimetype#*$test1}" != "$mimetype" ] || [ "${mimetype#*$test2}" != "$mimetype" ]; then
-                generate_preview "$cols" "$lines" "$1" "office"
-            fi
+        elif [ "${mimetype#*office}" != "$mimetype" ] || [ "${mimetype#*document}" != "$mimetype" ] && [ "$USE_OFFICEPREVIEW" -ne 0 ]; then
+            generate_preview "$cols" "$lines" "$1" "office"
+        elif [ "${ARCHIVES#*$ext}" != "$ARCHIVES" ] && exists atool; then
+            fifo_pager atool -l "$1"
         elif [ "$mimetype" = "application/zip" ] ; then
             fifo_pager unzip -l "$1"
         elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ] ; then
