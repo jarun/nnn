@@ -310,10 +310,8 @@ if [ "$PREVIEW_MODE" ] ; then
     # shellcheck disable=SC2002
     cat "$NNN_FIFO" |\
     while read -r selection ; do
-        if [ "$gifpid" -ne 0 ]; then
-            kill "$gifpid"
-            [ "$USE_UEBERZUG" -ne 0 ] && ueberzug_remove
-        fi
+        [ "$gifpid" -ne 0 ] && kill "$gifpid"
+        [ "$USE_UEBERZUG" -ne 0 ] && ueberzug_remove
         preview_file "$selection"
     done
 
