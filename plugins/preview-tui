@@ -264,6 +264,9 @@ preview_ueberzug() {
                         done &
                         gifloop=$!
                         return
+                 else
+                    ueberzug_layer "$1" "$2" "$3"
+                    return
                  fi ;;
             office) libreoffice --convert-to png "$3" --outdir "/tmp/${3%/*}" > /dev/null 2>&1
                     filename="$(echo "${3##*/}" | cut -d. -f1)"
@@ -283,11 +286,6 @@ ueberzug_remove() {
     printf '{"action": "remove", "identifier": "nnn_ueberzug"}\n' > "$FIFO_UEBERZUG"
 }
 
-ueberzug_resize() {
-    kill "$1"
-    tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
-}
-
 if [ "$PREVIEW_MODE" ] ; then
     if [ ! -r "$NNN_FIFO" ] ; then
         echo "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')" >&2
@@ -298,9 +296,7 @@ if [ "$PREVIEW_MODE" ] ; then
     preview_file "$1"
     if [ "$USE_UEBERZUG" -ne 0 ]; then
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
-        fifopid=$!
     fi
-    trap 'ueberzug_resize $fifopid' WINCH
 
     # use cat instead of 'exec <' to avoid issues with dash shell
     # shellcheck disable=SC2002
