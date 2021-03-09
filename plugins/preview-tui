@@ -34,6 +34,7 @@
 #                To use:
 #                1. install ImageMagick
 #                2. set/export USE_GIFPREVIEW as 1
+#                3. set/export LOOP_GIF as 1 if you want to loop gif preview
 #    - optional: ffmpeg for audio thumbnails
 #                To use:
 #                1. install ffmpeg
@@ -97,8 +98,9 @@ USE_AUDIOPREVIEW="${USE_AUDIOPREVIEW:-0}"
 USE_FONTPREVIEW="${USE_FONTPREVIEW:-0}"
 USE_EPUBPREVIEW="${USE_EPUBPREVIEW:-0}"
 USE_PDFPREVIEW="${USE_PDFPREVIEW:-0}"
-USE_GIFPREVIEW="${USE_GIFPREVIEW:-0}"
 USE_OFFICEPREVIEW="${USE_OFFICEPREVIEW:-0}"
+USE_GIFPREVIEW="${USE_GIFPREVIEW:-0}"
+LOOP_GIFS="${LOOP_GIFS:-0}"
 PAGER="${PAGER:-less -R}"
 
 if [ "$USE_UEBERZUG" -ne 0 ]; then
@@ -258,9 +260,12 @@ preview_ueberzug() {
                         mkdir -p "/tmp/$3"
                         convert -coalesce "$3" "/tmp/$3/${3##*/}.png"
                     fi
-                        for frame in $(find /tmp/"$3"/*.png | sort -V); do
-                            ueberzug_layer "$1" "$2" "$frame"
-                            sleep 0.1
+                        while true; do
+                            for frame in $(find /tmp/"$3"/*.png | sort -V); do
+                                ueberzug_layer "$1" "$2" "$frame"
+                                sleep 0.1
+                            done
+                            [ "$LOOP_GIFS" -eq 0 ] && return
                         done &
                         gifloop=$!
                         return
