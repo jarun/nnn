@@ -275,7 +275,7 @@ display_preview() {
         ueberzug_layer "$1" "$2" "$3"
     elif [ "$TERMINAL" = "kitty" ]; then
         # Kitty terminal users can use the native image preview method.
-        kitty +kitten icat --silent --transfer-mode=stream --stdin=no \
+        kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no \
             "$3"
     elif exists catimg; then
         catimg "$3" &
