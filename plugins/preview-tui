@@ -16,7 +16,7 @@
 #    - unzip
 #    - tar
 #    - man
-#    - atool: for additional archive preview
+#    - optional: atool for additional archive preview
 #    - optional: bat for code syntax highlighting
 #    - optional: kitty terminal, catimg, viu, or ueberzug for images
 #    - optional: scope.sh file viewer from ranger.
