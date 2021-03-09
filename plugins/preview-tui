@@ -103,7 +103,7 @@ USE_PDFPREVIEW="${USE_PDFPREVIEW:-0}"
 USE_OFFICEPREVIEW="${USE_OFFICEPREVIEW:-0}"
 USE_GIFPREVIEW="${USE_GIFPREVIEW:-0}"
 LOOP_GIFS="${LOOP_GIFS:-0}"
-PAGER="${PAGER:-less -R}"
+PAGER="${PAGER:-less -P?n -R}"
 ARCHIVES="$(echo "$NNN_ARCHIVE" | sed 's/.*(\(.*\)).*/\1/;s/|/ /g')"
 
 if [ "$USE_UEBERZUG" -ne 0 ]; then
@@ -191,7 +191,7 @@ preview_file () {
     if [ -d "$1" ]; then
         cd "$1" || return
         if exists tree; then
-            fifo_pager tree -L 3 -F
+            fifo_pager tree -L 1 --dirsfirst -F -C
         elif exists exa; then
             fifo_pager exa -G --colour=always 2>/dev/null
         else
