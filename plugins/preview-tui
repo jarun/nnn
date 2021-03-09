@@ -93,6 +93,7 @@ TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
 USE_UEBERZUG="${USE_UEBERZUG:-0}"
+USE_IMAGEPREVIEW="${USE_IMAGEPREVIEW:-0}"
 USE_VIDEOPREVIEW="${USE_VIDEOPREVIEW:-0}"
 USE_AUDIOPREVIEW="${USE_AUDIOPREVIEW:-0}"
 USE_FONTPREVIEW="${USE_FONTPREVIEW:-0}"
@@ -195,39 +196,25 @@ preview_file () {
             fifo_pager ls --color=always
         fi
     elif [ "$encoding" = "binary" ]; then
-        if [ "$USE_UEBERZUG" -ne 0 ] && exists ueberzug; then
-            if [ "$ext" = "gif" ]; then
-                preview_ueberzug "$cols" "$lines" "$1" "gif"
-            elif [ "${mimetype%%/*}" = "image" ]; then
-                ueberzug_layer "$cols" "$lines" "$1"
-            elif [ "$USE_AUDIOPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "audio" ]; then
-                preview_ueberzug "$cols" "$lines" "$1" "audio"
-            elif [ "$USE_VIDEOPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "video" ]; then
-                preview_ueberzug "$cols" "$lines" "$1" "video"
-            elif [ "$USE_PDFPREVIEW" -ne 0 ] && [ "$ext" = "pdf" ]; then
-                preview_ueberzug "$cols" "$lines" "$1" "pdf"
-            elif [ "$USE_EPUBPREVIEW" -ne 0 ] && [ "$ext" = "epub" ]; then
-                preview_ueberzug "$cols" "$lines" "$1" "epub"
-            elif [ "$USE_FONTPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "font" ]; then
-                preview_ueberzug "$cols" "$lines" "$1" "font"
-            elif [ "$USE_OFFICEPREVIEW" -ne 0 ]; then
-                test1="document"
-                test2="office"
-                if [ "${mimetype#*$test1}" != "$mimetype" ] || [ "${mimetype#*$test2}" != "$mimetype" ]; then
-                    preview_ueberzug "$cols" "$lines" "$1" "office"
-                fi
-            fi
-        elif [ "${mimetype%%/*}" = "image" ] || [ "${mimetype%%/*}" = "video" ]; then
-            if [ "$TERMINAL" = "kitty" ]; then
-                # Kitty terminal users can use the native image preview method.
-                kitty +kitten icat --silent --transfer-mode=stream --stdin=no \
-                    "$1" &
-            elif exists catimg; then
-                catimg "$1"
-            elif exists viu; then
-                viu -t "$1"
-            else
-                fifo_pager print_bin_info "$1"
+        if [ "$USE_GIFPREVIEW" -ne 0 ] && [ "$ext" = "gif" ]; then
+            generate_preview "$cols" "$lines" "$1" "gif"
+        elif [ "$USE_IMAGEPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "image" ]; then
+            display_preview "$cols" "$lines" "$1"
+        elif [ "$USE_AUDIOPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "audio" ]; then
+            generate_preview "$cols" "$lines" "$1" "audio"
+        elif [ "$USE_VIDEOPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "video" ]; then
+            generate_preview "$cols" "$lines" "$1" "video"
+        elif [ "$USE_PDFPREVIEW" -ne 0 ] && [ "$ext" = "pdf" ]; then
+            generate_preview "$cols" "$lines" "$1" "pdf"
+        elif [ "$USE_EPUBPREVIEW" -ne 0 ] && [ "$ext" = "epub" ]; then
+            generate_preview "$cols" "$lines" "$1" "epub"
+        elif [ "$USE_FONTPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "font" ]; then
+            generate_preview "$cols" "$lines" "$1" "font"
+        elif [ "$USE_OFFICEPREVIEW" -ne 0 ]; then
+            test1="document"
+            test2="office"
+            if [ "${mimetype#*$test1}" != "$mimetype" ] || [ "${mimetype#*$test2}" != "$mimetype" ]; then
+                generate_preview "$cols" "$lines" "$1" "office"
             fi
         elif [ "$mimetype" = "application/zip" ] ; then
             fifo_pager unzip -l "$1"
@@ -248,29 +235,29 @@ preview_file () {
     fi
 }
 
-preview_ueberzug() {
+generate_preview() {
     if [ ! -f "/tmp/$3.png" ]; then
         mkdir -p "/tmp/${3%/*}"
         case $4 in
             audio) ffmpeg -i "$3" "/tmp/$3.png" -y >/dev/null 2>&1 ;;
             epub) gnome-epub-thumbnailer "$3" "/tmp/$3.png" >/dev/null 2>&1 ;;
             font) fontpreview -i "$3" -o "/tmp/$3.png" >/dev/null 2>&1 ;;
-            gif) if [ "$USE_GIFPREVIEW" -ne 0 ]; then
+            gif) if [ "$USE_UEBERZUG" -ne 0 ] || [ "$TERMINAL" = "kitty" ] && [ "$USE_GIFPREVIEW" -ne 0 ]; then
                     if [ ! -d "/tmp/$3" ]; then
                         mkdir -p "/tmp/$3"
                         convert -coalesce "$3" "/tmp/$3/${3##*/}.png"
                     fi
                         while true; do
                             for frame in $(find /tmp/"$3"/*.png | sort -V); do
-                                ueberzug_layer "$1" "$2" "$frame"
+                                display_preview "$1" "$2" "$frame"
                                 sleep 0.1
                             done
                             [ "$LOOP_GIFS" -eq 0 ] && return
                         done &
-                        gifloop=$!
+                        gifpid="$!"
                         return
                  else
-                    ueberzug_layer "$1" "$2" "$3"
+                    display_preview "$1" "$2" "$3"
                     return
                  fi ;;
             office) libreoffice --convert-to png "$3" --outdir "/tmp/${3%/*}" > /dev/null 2>&1
@@ -280,7 +267,23 @@ preview_ueberzug() {
             video) ffmpegthumbnailer -i "$3" -o "/tmp/$3.png" -s 0 -q 10 >/dev/null 2>&1 ;;
         esac
     fi
-    ueberzug_layer "$1" "$2" "/tmp/$3.png"
+    display_preview "$1" "$2" "/tmp/$3.png"
+}
+
+display_preview() {
+    if [ "$USE_UEBERZUG" -ne 0 ] && exists ueberzug; then
+        ueberzug_layer "$1" "$2" "$3"
+    elif [ "$TERMINAL" = "kitty" ]; then
+        # Kitty terminal users can use the native image preview method.
+        kitty +kitten icat --silent --transfer-mode=stream --stdin=no \
+            "$3"
+    elif exists catimg; then
+        catimg "$3" &
+        gifpid="$!"
+    elif exists viu; then
+        viu -t "$3" &
+        gifpid="$!"
+    fi
 }
 
 ueberzug_layer() {
@@ -307,9 +310,9 @@ if [ "$PREVIEW_MODE" ] ; then
     # shellcheck disable=SC2002
     cat "$NNN_FIFO" |\
     while read -r selection ; do
-        if [ "$USE_UEBERZUG" -ne 0 ]; then
-            kill $gifloop
-            ueberzug_remove
+        if [ "$gifpid" -ne 0 ]; then
+            kill "$gifpid"
+            [ "$USE_UEBERZUG" -ne 0 ] && ueberzug_remove
         fi
         preview_file "$selection"
     done
