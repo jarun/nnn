@@ -140,6 +140,7 @@ fifo_pager() {
     mkfifo "$tmpfifopath" || return
 
     $PAGER < "$tmpfifopath" &
+    pagerpid="$!"
 
     (
         exec > "$tmpfifopath"
@@ -237,6 +238,7 @@ preview_file () {
 
 generate_preview() {
     if [ ! -f "/tmp/$3.png" ]; then
+        fifo_pager print_bin_info "$3"
         mkdir -p "/tmp/${3%/*}"
         case $4 in
             audio) ffmpeg -i "$3" "/tmp/$3.png" -y >/dev/null 2>&1 ;;
@@ -266,6 +268,7 @@ generate_preview() {
             pdf) pdftoppm -png -f 1 -singlefile "$3" "/tmp/$3" >/dev/null 2>&1 ;;
             video) ffmpegthumbnailer -i "$3" -o "/tmp/$3.png" -s 0 -q 10 >/dev/null 2>&1 ;;
         esac
+    kill "$pagerpid"
     fi
     display_preview "$1" "$2" "/tmp/$3.png"
 }
@@ -294,6 +297,26 @@ ueberzug_remove() {
     printf '{"action": "remove", "identifier": "nnn_ueberzug"}\n' > "$FIFO_UEBERZUG"
 }
 
+ueberzug_refresh() {
+    pkill -P "$$"
+    pkill -f -n preview-tui
+    tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+    nnn_fifo &
+    wait
+}
+trap 'ueberzug_refresh' WINCH
+
+nnn_fifo() {
+    # use cat instead of 'exec <' to avoid issues with dash shell
+    # shellcheck disable=SC2002
+    cat "$NNN_FIFO" |\
+    while read -r selection ; do
+        [ "$gifpid" -ne 0 ] && kill "$gifpid"
+        [ "$USE_UEBERZUG" -ne 0 ] && ueberzug_remove
+        preview_file "$selection"
+    done
+}
+
 if [ "$PREVIEW_MODE" ] ; then
     if [ ! -r "$NNN_FIFO" ] ; then
         echo "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')" >&2
@@ -306,14 +329,8 @@ if [ "$PREVIEW_MODE" ] ; then
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
 
-    # use cat instead of 'exec <' to avoid issues with dash shell
-    # shellcheck disable=SC2002
-    cat "$NNN_FIFO" |\
-    while read -r selection ; do
-        [ "$gifpid" -ne 0 ] && kill "$gifpid"
-        [ "$USE_UEBERZUG" -ne 0 ] && ueberzug_remove
-        preview_file "$selection"
-    done
+    nnn_fifo &
+    wait
 
     # Restoring the previous layout for kitty users. This will only work for
     # kitty >= 0.18.0.
