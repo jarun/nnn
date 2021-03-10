@@ -300,13 +300,13 @@ ueberzug_remove() {
 ueberzug_refresh() {
     pkill -P "$$"
     pkill -f -n preview-tui
-    [ "$USE_UEBERZUG" -ne 0 ] && tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
-    nnn_fifo &
+    tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+    preview_fifo &
     wait
 }
-trap 'ueberzug_refresh' WINCH
+[ "$USE_UEBERZUG" -ne 0 ] && trap 'ueberzug_refresh' WINCH
 
-nnn_fifo() {
+preview_fifo() {
     # use cat instead of 'exec <' to avoid issues with dash shell
     # shellcheck disable=SC2002
     cat "$NNN_FIFO" |\
@@ -329,7 +329,7 @@ if [ "$PREVIEW_MODE" ] ; then
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
 
-    nnn_fifo &
+    preview_fifo &
     wait
 
     # Restoring the previous layout for kitty users. This will only work for
