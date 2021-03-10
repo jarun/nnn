@@ -300,7 +300,7 @@ ueberzug_remove() {
 ueberzug_refresh() {
     pkill -P "$$"
     pkill -f -n preview-tui
-    tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+    [ "$USE_UEBERZUG" -ne 0 ] && tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     nnn_fifo &
     wait
 }
