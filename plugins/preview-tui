@@ -107,11 +107,6 @@ PAGER="${PAGER:-less -P?n -R}"
 ARCHIVES="$(echo "$NNN_ARCHIVE" | sed 's/.*(\(.*\)).*/\1/;s/|/ /g')"
 TMPDIR="${TMPDIR:-/tmp}"
 
-if [ "$USE_UEBERZUG" -ne 0 ]; then
-  FIFO_UEBERZUG="$TMPDIR/nnn-ueberzug-fifo.$$"
-  mkfifo "$FIFO_UEBERZUG"
-fi
-
 [ "$PAGER" = "most" ] && PAGER="less -R"
 
 if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
@@ -318,6 +313,7 @@ preview_fifo() {
         [ "$USE_UEBERZUG" -ne 0 ] && ueberzug_remove
         preview_file "$selection"
     done
+    [ "$USE_UEBERZUG" -ne 0 ] && rm "$FIFO_UEBERZUG"
 }
 
 
@@ -326,6 +322,11 @@ if [ "$PREVIEW_MODE" ] ; then
         echo "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')" >&2
         read -r
         exit 1
+    fi
+
+    if [ "$USE_UEBERZUG" -ne 0 ]; then
+        FIFO_UEBERZUG="$TMPDIR/nnn-ueberzug-fifo.$$"
+        mkfifo "$FIFO_UEBERZUG"
     fi
 
     preview_file "$1"
@@ -342,7 +343,6 @@ if [ "$PREVIEW_MODE" ] ; then
         kitty @ last-used-layout --no-response >/dev/null 2>&1
     fi
 
-    [ "$USE_UEBERZUG" -ne 0 ] && rm "$FIFO_UEBERZUG"
     exit 0
 fi
 
