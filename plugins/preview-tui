@@ -299,6 +299,7 @@ ueberzug_remove() {
 }
 
 ueberzug_refresh() {
+    clear
     pkill -P "$$"
     pkill -f -n preview-tui
     echo > "$NNN_FIFO"
