@@ -251,7 +251,7 @@ generate_preview() {
                         convert -coalesce "$3" "$TMPDIR/$3/${3##*/}.png"
                     fi
                         while true; do
-                            for frame in $(find $TMPDIR/"$3"/*.png | sort -V); do
+                            for frame in $(find "$TMPDIR/$3"/*.png | sort -V); do
                                 display_preview "$1" "$2" "$frame"
                                 sleep 0.1
                             done
