@@ -105,9 +105,10 @@ USE_GIFPREVIEW="${USE_GIFPREVIEW:-0}"
 LOOP_GIFS="${LOOP_GIFS:-0}"
 PAGER="${PAGER:-less -P?n -R}"
 ARCHIVES="$(echo "$NNN_ARCHIVE" | sed 's/.*(\(.*\)).*/\1/;s/|/ /g')"
+TMPDIR="${TMPDIR:-/tmp}"
 
 if [ "$USE_UEBERZUG" -ne 0 ]; then
-  FIFO_UEBERZUG="/tmp/nnn-$PPID-ueberzug-fifo"
+  FIFO_UEBERZUG="$TMPDIR/nnn-ueberzug-fifo.$$"
   mkfifo "$FIFO_UEBERZUG"
 fi
 
@@ -136,7 +137,7 @@ fifo_pager() {
     shift
 
     # We use a FIFO to access $PAGER PID in jobs control
-    tmpfifopath="${TMPDIR:-/tmp}/nnn-preview-tui-fifo.$$"
+    tmpfifopath="$TMPDIR/nnn-preview-tui-fifo.$$"
     mkfifo "$tmpfifopath" || return
 
     $PAGER < "$tmpfifopath" &
@@ -237,20 +238,20 @@ preview_file () {
 }
 
 generate_preview() {
-    if [ ! -f "/tmp/$3.png" ]; then
+    if [ ! -f "$TMPDIR/$3.png" ]; then
         fifo_pager print_bin_info "$3"
-        mkdir -p "/tmp/${3%/*}"
+        mkdir -p "$TMPDIR/${3%/*}"
         case $4 in
-            audio) ffmpeg -i "$3" "/tmp/$3.png" -y >/dev/null 2>&1 ;;
-            epub) gnome-epub-thumbnailer "$3" "/tmp/$3.png" >/dev/null 2>&1 ;;
-            font) fontpreview -i "$3" -o "/tmp/$3.png" >/dev/null 2>&1 ;;
+            audio) ffmpeg -i "$3" "$TMPDIR/$3.png" -y >/dev/null 2>&1 ;;
+            epub) gnome-epub-thumbnailer "$3" "$TMPDIR/$3.png" >/dev/null 2>&1 ;;
+            font) fontpreview -i "$3" -o "$TMPDIR/$3.png" >/dev/null 2>&1 ;;
             gif) if [ "$USE_UEBERZUG" -ne 0 ] || [ "$TERMINAL" = "kitty" ] && [ "$USE_GIFPREVIEW" -ne 0 ]; then
-                    if [ ! -d "/tmp/$3" ]; then
-                        mkdir -p "/tmp/$3"
-                        convert -coalesce "$3" "/tmp/$3/${3##*/}.png"
+                    if [ ! -d "$TMPDIR/$3" ]; then
+                        mkdir -p "$TMPDIR/$3"
+                        convert -coalesce "$3" "$TMPDIR/$3/${3##*/}.png"
                     fi
                         while true; do
-                            for frame in $(find /tmp/"$3"/*.png | sort -V); do
+                            for frame in $(find $TMPDIR/"$3"/*.png | sort -V); do
                                 display_preview "$1" "$2" "$frame"
                                 sleep 0.1
                             done
@@ -262,15 +263,15 @@ generate_preview() {
                     display_preview "$1" "$2" "$3"
                     return
                  fi ;;
-            office) libreoffice --convert-to png "$3" --outdir "/tmp/${3%/*}" > /dev/null 2>&1
+            office) libreoffice --convert-to png "$3" --outdir "$TMPDIR/${3%/*}" > /dev/null 2>&1
                     filename="$(echo "${3##*/}" | cut -d. -f1)"
-                    mv "/tmp/${3%/*}/$filename.png" "/tmp/$3.png" ;;
-            pdf) pdftoppm -png -f 1 -singlefile "$3" "/tmp/$3" >/dev/null 2>&1 ;;
-            video) ffmpegthumbnailer -i "$3" -o "/tmp/$3.png" -s 0 -q 10 >/dev/null 2>&1 ;;
+                    mv "$TMPDIR/${3%/*}/$filename.png" "$TMPDIR/$3.png" ;;
+            pdf) pdftoppm -png -f 1 -singlefile "$3" "$TMPDIR/$3" >/dev/null 2>&1 ;;
+            video) ffmpegthumbnailer -i "$3" -o "$TMPDIR/$3.png" -s 0 -q 10 >/dev/null 2>&1 ;;
         esac
     kill "$pagerpid"
     fi
-    display_preview "$1" "$2" "/tmp/$3.png"
+    display_preview "$1" "$2" "$TMPDIR/$3.png"
 }
 
 display_preview() {
@@ -317,6 +318,7 @@ preview_fifo() {
     done
 }
 
+
 if [ "$PREVIEW_MODE" ] ; then
     if [ ! -r "$NNN_FIFO" ] ; then
         echo "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')" >&2
@@ -341,8 +343,6 @@ if [ "$PREVIEW_MODE" ] ; then
     [ "$USE_UEBERZUG" -ne 0 ] && rm "$FIFO_UEBERZUG"
     exit 0
 fi
-
-[ "$USE_UEBERZUG" -ne 0 ] && rm "$FIFO_UEBERZUG"
 
 if [ "$TERMINAL" = "tmux" ]; then
     # tmux splits are inverted
