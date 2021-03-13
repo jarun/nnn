@@ -272,7 +272,7 @@ ueberzug_refresh() {
     preview_fifo &
     wait
 }
-[ "$PREVIEW_MODE" ] && exists ueberzug && trap 'ueberzug_refresh' WINCH
+[ "$TERMINAL" != "kitty" ] && [ "$PREVIEW_MODE" ] && exists ueberzug && trap 'ueberzug_refresh' WINCH
 
 preview_fifo() {
     # use cat instead of 'exec <' to avoid issues with dash shell
@@ -280,10 +280,10 @@ preview_fifo() {
     cat "$NNN_FIFO" |\
     while read -r selection ; do
         [ "$gifpid" -ne 0 ] && kill "$gifpid"
-        exists ueberzug && ueberzug_remove
+        [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
         preview_file "$selection"
     done
-    exists ueberzug && rm "$FIFO_UEBERZUG"
+    [ "$TERMINAL" != "kitty" ] && exists ueberzug && rm "$FIFO_UEBERZUG"
 }
 
 
@@ -294,7 +294,7 @@ if [ "$PREVIEW_MODE" ]; then
         exit 1
     fi
 
-    if exists ueberzug; then
+    if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
         FIFO_UEBERZUG="$TMPDIR/nnn-ueberzug-fifo.$$"
         mkfifo "$FIFO_UEBERZUG"
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
