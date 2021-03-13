@@ -19,7 +19,6 @@
 #    - man
 #    - optional: bat for code syntax highlighting
 #    - optional: ueberzug, kitty terminal, viu or catimg for images.
-#                To use ueberzug set/export $USE_UEBERZUG as 1(https://github.com/seebye/ueberzug)
 #    - optional: scope.sh file viewer from ranger.
 #                To use:
 #                1. drop scope.sh executable in $PATH
@@ -65,7 +64,6 @@ SPLIT="$SPLIT"  # you can set a permanent split here
 TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
-USE_UEBERZUG="${USE_UEBERZUG:-0}"
 PAGER="${PAGER:-less -R}"
 TMPDIR="${TMPDIR:-/tmp}"
 [ "$PAGER" = "most" ] && PAGER="less -R"
@@ -156,7 +154,7 @@ preview_file () {
         fi
     elif [ "$encoding" = "binary" ]; then
         if [ "${mimetype%%/*}" = "image" ]; then
-            display_preview "$cols" "$lines" "$1"
+            image_preview "$cols" "$lines" "$1"
         elif [ "$mimetype" = "application/zip" ]; then
             fifo_pager unzip -l "$1"
         elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ]; then
@@ -176,13 +174,13 @@ preview_file () {
     fi
 }
 
-display_preview() {
-    if [ "$USE_UEBERZUG" -ne 0 ] && exists ueberzug; then
-        ueberzug_layer "$1" "$2" "$3"
-    elif [ "$TERMINAL" = "kitty" ]; then
+image_preview() {
+    if [ "$TERMINAL" = "kitty" ]; then
         # Kitty terminal users can use the native image preview method.
         kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no \
             "$3"
+    elif exists ueberzug; then
+        ueberzug_layer "$1" "$2" "$3"
     elif exists catimg; then
         catimg "$3" &
         gifpid="$!"
@@ -211,7 +209,7 @@ ueberzug_refresh() {
     preview_fifo &
     wait
 }
-[ "$PREVIEW_MODE" ] && [ "$USE_UEBERZUG" -ne 0 ] && trap 'ueberzug_refresh' WINCH
+[ "$PREVIEW_MODE" ] && exists ueberzug && trap 'ueberzug_refresh' WINCH
 
 preview_fifo() {
     # use cat instead of 'exec <' to avoid issues with dash shell
@@ -219,10 +217,10 @@ preview_fifo() {
     cat "$NNN_FIFO" |\
     while read -r selection; do
         [ "$gifpid" -ne 0 ] && kill "$gifpid"
-        [ "$USE_UEBERZUG" -ne 0 ] && ueberzug_remove
+        exists ueberzug && ueberzug_remove
         preview_file "$selection"
     done
-    [ "$USE_UEBERZUG" -ne 0 ] && rm "$FIFO_UEBERZUG"
+    exists ueberzug && rm "$FIFO_UEBERZUG"
 }
 
 if [ "$PREVIEW_MODE" ]; then
@@ -232,12 +230,12 @@ if [ "$PREVIEW_MODE" ]; then
         exit 1
     fi
 
-    if [ "$USE_UEBERZUG" -ne 0 ]; then
+    if exists ueberzug; then
         FIFO_UEBERZUG="$TMPDIR/nnn-ueberzug-fifo.$$"
         mkfifo "$FIFO_UEBERZUG"
     fi
 
-    if [ "$USE_UEBERZUG" -ne 0 ]; then
+    if exists ueberzug; then
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
     preview_file "$1"

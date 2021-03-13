@@ -18,7 +18,14 @@
 #    - man
 #    - optional: atool for additional archive preview
 #    - optional: bat for code syntax highlighting
-#    - optional: kitty terminal, catimg, viu, or ueberzug for images
+#    - optional: ueberzug, kitty terminal, viu or catimg for images.
+#    - optional: convert(ImageMagick) for playing gif preview
+#    - optional: ffmpegthumbnailer for video thumbnails (https://github.com/dirkvdb/ffmpegthumbnailer).
+#    - optional: ffmpeg for audio thumbnails
+#    - optional: libreoffce for opendocument/officedocument preview
+#    - optional: pdftoppm(poppler) for pdf thumbnails
+#    - optional: gnome-epub-thumbnailer for epub thumbnails (https://gitlab.gnome.org/GNOME/gnome-epub-thumbnailer)
+#    - optional: fontpreview for font preview (https://github.com/sdushantha/fontpreview)
 #    - optional: scope.sh file viewer from ranger.
 #                To use:
 #                1. drop scope.sh executable in $PATH
@@ -27,35 +34,6 @@
 #                To use:
 #                1. install pistol
 #                2. set/export $USE_PISTOL as 1
-#    - optional: ffmpegthumbnailer for video thumbnails (https://github.com/dirkvdb/ffmpegthumbnailer).
-#                To use:
-#                1. install ffmpegthumbnailer
-#                2. set/export USE_VIDEOPREVIEW as 1
-#    - optional: convert(ImageMagick) for playing gif preview
-#                To use:
-#                1. install ImageMagick
-#                2. set/export USE_GIFPREVIEW as 1
-#                3. set/export LOOP_GIF as 1 if you want to loop gif preview
-#    - optional: ffmpeg for audio thumbnails
-#                To use:
-#                1. install ffmpeg
-#                2. set/export USE_AUDIOPREVIEW as 1
-#    - optional: pdftoppm(poppler) for pdf thumbnails
-#                To use:
-#                1. install poppler
-#                2. set/export USE_PDFPREVIEW as 1
-#    - optional: gnome-epub-thumbnailer for epub thumbnails (https://gitlab.gnome.org/GNOME/gnome-epub-thumbnailer)
-#                To use:
-#                1. install gnome-epub-thumbnailer
-#                2. set/export USE_EPUBPREVIEW as 1
-#    - optional: fontpreview for font preview (https://github.com/sdushantha/fontpreview)
-#                To use:
-#                1. install fontpreview
-#                2. set/export USE_FONTPREVIEW as 1
-#    - optional: libreoffce for opendocument/officedocument preview
-#                To use:
-#                1. install libreoffice
-#                2. set/export USE_OFFICEPREVIEW as 1
 #
 # Usage:
 #   You need to set a NNN_FIFO path and a key for the plugin with NNN_PLUG,
@@ -93,16 +71,6 @@ SPLIT="$SPLIT"  # you can set a permanent split here
 TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
-USE_UEBERZUG="${USE_UEBERZUG:-0}"
-USE_IMAGEPREVIEW="${USE_IMAGEPREVIEW:-0}"
-USE_VIDEOPREVIEW="${USE_VIDEOPREVIEW:-0}"
-USE_AUDIOPREVIEW="${USE_AUDIOPREVIEW:-0}"
-USE_FONTPREVIEW="${USE_FONTPREVIEW:-0}"
-USE_EPUBPREVIEW="${USE_EPUBPREVIEW:-0}"
-USE_PDFPREVIEW="${USE_PDFPREVIEW:-0}"
-USE_OFFICEPREVIEW="${USE_OFFICEPREVIEW:-0}"
-USE_GIFPREVIEW="${USE_GIFPREVIEW:-0}"
-LOOP_GIFS="${LOOP_GIFS:-0}"
 PAGER="${PAGER:-less -P?n -R}"
 ARCHIVES="$(echo "$NNN_ARCHIVE" | sed 's/.*(\(.*\)).*/\1/;s/|/ /g')"
 TMPDIR="${TMPDIR:-/tmp}"
@@ -195,21 +163,21 @@ preview_file () {
             fifo_pager ls --color=always
         fi
     elif [ "$encoding" = "binary" ]; then
-        if [ "$USE_GIFPREVIEW" -ne 0 ] && [ "$ext" = "gif" ]; then
+        if [ "$ext" = "gif" ]; then
             generate_preview "$cols" "$lines" "$1" "gif"
-        elif [ "$USE_IMAGEPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "image" ]; then
-            display_preview "$cols" "$lines" "$1"
-        elif [ "$USE_AUDIOPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "audio" ]; then
+        elif [ "${mimetype%%/*}" = "image" ]; then
+            image_preview "$cols" "$lines" "$1"
+        elif [ "${mimetype%%/*}" = "audio" ] && exists ffmpeg; then
             generate_preview "$cols" "$lines" "$1" "audio"
-        elif [ "$USE_VIDEOPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "video" ]; then
+        elif [ "${mimetype%%/*}" = "video" ] && exists ffmpegthumbnailer; then
             generate_preview "$cols" "$lines" "$1" "video"
-        elif [ "$USE_PDFPREVIEW" -ne 0 ] && [ "$ext" = "pdf" ]; then
+        elif [ "$ext" = "pdf" ] && exists pdftoppm; then
             generate_preview "$cols" "$lines" "$1" "pdf"
-        elif [ "$USE_EPUBPREVIEW" -ne 0 ] && [ "$ext" = "epub" ]; then
+        elif [ "$ext" = "epub" ] && exists gnome-epub-thumbnailer; then
             generate_preview "$cols" "$lines" "$1" "epub"
-        elif [ "$USE_FONTPREVIEW" -ne 0 ] && [ "${mimetype%%/*}" = "font" ]; then
+        elif [ "${mimetype%%/*}" = "font" ] && exists fontpreview; then
             generate_preview "$cols" "$lines" "$1" "font"
-        elif [ "${mimetype#*office}" != "$mimetype" ] || [ "${mimetype#*document}" != "$mimetype" ] && [ "$USE_OFFICEPREVIEW" -ne 0 ]; then
+        elif [ "${mimetype#*office}" != "$mimetype" ] || [ "${mimetype#*document}" != "$mimetype" ] && exists libreoffice; then
             generate_preview "$cols" "$lines" "$1" "office"
         elif [ "${ARCHIVES#*$ext}" != "$ARCHIVES" ] && exists atool; then
             fifo_pager atool -l "$1"
@@ -240,14 +208,14 @@ generate_preview() {
             audio) ffmpeg -i "$3" "$TMPDIR/$3.png" -y >/dev/null 2>&1 ;;
             epub) gnome-epub-thumbnailer "$3" "$TMPDIR/$3.png" >/dev/null 2>&1 ;;
             font) fontpreview -i "$3" -o "$TMPDIR/$3.png" >/dev/null 2>&1 ;;
-            gif) if [ "$USE_UEBERZUG" -ne 0 ] || [ "$TERMINAL" = "kitty" ] && [ "$USE_GIFPREVIEW" -ne 0 ]; then
+            gif) if exists ueberzug || [ "$TERMINAL" = "kitty" ]; then
                     if [ ! -d "$TMPDIR/$3" ]; then
                         mkdir -p "$TMPDIR/$3"
                         convert -coalesce "$3" "$TMPDIR/$3/${3##*/}.png"
                     fi
                         while true; do
                             for frame in $(find "$TMPDIR/$3"/*.png | sort -V); do
-                                display_preview "$1" "$2" "$frame"
+                                image_preview "$1" "$2" "$frame"
                                 sleep 0.1
                             done
                             [ "$LOOP_GIFS" -eq 0 ] && return
@@ -255,7 +223,7 @@ generate_preview() {
                         gifpid="$!"
                         return
                  else
-                    display_preview "$1" "$2" "$3"
+                    image_preview "$1" "$2" "$3"
                     return
                  fi ;;
             office) libreoffice --convert-to png "$3" --outdir "$TMPDIR/${3%/*}" > /dev/null 2>&1
@@ -266,22 +234,24 @@ generate_preview() {
         esac
     kill "$pagerpid"
     fi
-    display_preview "$1" "$2" "$TMPDIR/$3.png"
+    image_preview "$1" "$2" "$TMPDIR/$3.png"
 }
 
-display_preview() {
-    if [ "$USE_UEBERZUG" -ne 0 ] && exists ueberzug; then
-        ueberzug_layer "$1" "$2" "$3"
-    elif [ "$TERMINAL" = "kitty" ]; then
+image_preview() {
+    if [ "$TERMINAL" = "kitty" ]; then
         # Kitty terminal users can use the native image preview method.
         kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no \
             "$3"
+    elif exists ueberzug; then
+        ueberzug_layer "$1" "$2" "$3"
     elif exists catimg; then
         catimg "$3" &
         gifpid="$!"
     elif exists viu; then
         viu -t "$3" &
         gifpid="$!"
+    else
+        fifo_pager print_bin_info "$1"
     fi
 }
 
@@ -302,7 +272,7 @@ ueberzug_refresh() {
     preview_fifo &
     wait
 }
-[ "$PREVIEW_MODE" ] && [ "$USE_UEBERZUG" -ne 0 ] && trap 'ueberzug_refresh' WINCH
+[ "$PREVIEW_MODE" ] && exists ueberzug && trap 'ueberzug_refresh' WINCH
 
 preview_fifo() {
     # use cat instead of 'exec <' to avoid issues with dash shell
@@ -310,10 +280,10 @@ preview_fifo() {
     cat "$NNN_FIFO" |\
     while read -r selection ; do
         [ "$gifpid" -ne 0 ] && kill "$gifpid"
-        [ "$USE_UEBERZUG" -ne 0 ] && ueberzug_remove
+        exists ueberzug && ueberzug_remove
         preview_file "$selection"
     done
-    [ "$USE_UEBERZUG" -ne 0 ] && rm "$FIFO_UEBERZUG"
+    exists ueberzug && rm "$FIFO_UEBERZUG"
 }
 
 
@@ -324,16 +294,13 @@ if [ "$PREVIEW_MODE" ]; then
         exit 1
     fi
 
-    if [ "$USE_UEBERZUG" -ne 0 ]; then
+    if exists ueberzug; then
         FIFO_UEBERZUG="$TMPDIR/nnn-ueberzug-fifo.$$"
         mkfifo "$FIFO_UEBERZUG"
-    fi
-
-    if [ "$USE_UEBERZUG" -ne 0 ]; then
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
-    preview_file "$1"
 
+    preview_file "$1"
     preview_fifo &
     wait
 
