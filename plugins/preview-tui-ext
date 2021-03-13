@@ -296,13 +296,13 @@ ueberzug_remove() {
 ueberzug_refresh() {
     clear
     pkill -P "$$"
-    pkill -f -n preview-tui
+    pkill -f -n preview-tui-ext
     echo > "$NNN_FIFO"
     tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     preview_fifo &
     wait
 }
-[ "$USE_UEBERZUG" -ne 0 ] && trap 'ueberzug_refresh' WINCH
+[ "$PREVIEW_MODE" ] && [ "$USE_UEBERZUG" -ne 0 ] && trap 'ueberzug_refresh' WINCH
 
 preview_fifo() {
     # use cat instead of 'exec <' to avoid issues with dash shell
@@ -329,10 +329,10 @@ if [ "$PREVIEW_MODE" ]; then
         mkfifo "$FIFO_UEBERZUG"
     fi
 
-    preview_file "$1"
     if [ "$USE_UEBERZUG" -ne 0 ]; then
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
+    preview_file "$1"
 
     preview_fifo &
     wait
