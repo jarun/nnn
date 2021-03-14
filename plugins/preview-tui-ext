@@ -272,7 +272,10 @@ ueberzug_refresh() {
     preview_fifo &
     wait
 }
-[ "$TERMINAL" != "kitty" ] && [ "$PREVIEW_MODE" ] && exists ueberzug && trap 'ueberzug_refresh' WINCH
+if [ "$TERMINAL" != "kitty" ] && [ "$PREVIEW_MODE" ] && exists ueberzug; then
+    trap 'ueberzug_refresh' WINCH
+    trap 'rm "$FIFO_UEBERZUG"' INT HUP EXIT
+fi
 
 preview_fifo() {
     # use cat instead of 'exec <' to avoid issues with dash shell
