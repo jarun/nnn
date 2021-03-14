@@ -14,7 +14,7 @@ else
 fi
 
 if [ -n "$sel" ]; then
-    if [ "$sel" = "." ] || (! [ -d "$sel" ] && ! [ -f "$sel" ]); then
+    if [ "$sel" = "." ] || { ! [ -d "$sel" ] && ! [ -f "$sel" ]; }; then
         exit 0
     fi
 
