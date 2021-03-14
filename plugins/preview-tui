@@ -18,7 +18,7 @@
 #    - tar
 #    - man
 #    - optional: bat for code syntax highlighting
-#    - optional: kitty terminal or catimg for images
+#    - optional: ueberzug, kitty terminal, viu or catimg for images.
 #    - optional: scope.sh file viewer from ranger.
 #                To use:
 #                1. drop scope.sh executable in $PATH
@@ -65,6 +65,7 @@ TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
 PAGER="${PAGER:-less -R}"
+TMPDIR="${TMPDIR:-/tmp}"
 [ "$PAGER" = "most" ] && PAGER="less -R"
 
 if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
@@ -152,26 +153,16 @@ preview_file () {
             fifo_pager ls --color=always
         fi
     elif [ "$encoding" = "binary" ]; then
-        if [ "${mimetype%%/*}" = "image" ] ; then
-            if [ "$TERMINAL" = "kitty" ]; then
-                # Kitty terminal users can use the native image preview method.
-                kitty +kitten icat --silent --transfer-mode=stream --stdin=no \
-                    "$1" &
-            elif exists catimg; then
-                catimg "$1"
-            elif exists viu; then
-                viu -t "$1"
-            else
-                fifo_pager print_bin_info "$1"
-            fi
-        elif [ "$mimetype" = "application/zip" ] ; then
+        if [ "${mimetype%%/*}" = "image" ]; then
+            image_preview "$cols" "$lines" "$1"
+        elif [ "$mimetype" = "application/zip" ]; then
             fifo_pager unzip -l "$1"
-        elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ] ; then
+        elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ]; then
             fifo_pager tar -tvf "$1"
         else
             fifo_pager print_bin_info "$1"
         fi
-    elif [ "$mimetype" = "text/troff" ] ; then
+    elif [ "$mimetype" = "text/troff" ]; then
         fifo_pager man -Pcat -l "$1"
     else
         if exists bat; then
@@ -183,21 +174,71 @@ preview_file () {
     fi
 }
 
-if [ "$PREVIEW_MODE" ] ; then
-    if [ ! -r "$NNN_FIFO" ] ; then
+image_preview() {
+    if [ "$TERMINAL" = "kitty" ]; then
+        # Kitty terminal users can use the native image preview method.
+        kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no \
+            "$3"
+    elif exists ueberzug; then
+        ueberzug_layer "$1" "$2" "$3"
+    elif exists catimg; then
+        catimg "$3" &
+        gifpid="$!"
+    elif exists viu; then
+        viu -t "$3" &
+        gifpid="$!"
+    else
+        fifo_pager print_bin_info "$1"
+    fi
+}
+
+ueberzug_layer() {
+    printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "width": "%s", "height": "%s", "path": "%s"}\n' "$1" "$2" "$3" > "$FIFO_UEBERZUG"
+}
+
+ueberzug_remove() {
+    printf '{"action": "remove", "identifier": "nnn_ueberzug"}\n' > "$FIFO_UEBERZUG"
+}
+
+ueberzug_refresh() {
+    clear
+    pkill -P "$$"
+    pkill -f -n preview-tui
+    echo > "$NNN_FIFO"
+    tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+    preview_fifo &
+    wait
+}
+[ "$TERMINAL" != "kitty" ] && [ "$PREVIEW_MODE" ] && exists ueberzug && trap 'ueberzug_refresh' WINCH
+
+preview_fifo() {
+    # use cat instead of 'exec <' to avoid issues with dash shell
+    # shellcheck disable=SC2002
+    cat "$NNN_FIFO" |\
+    while read -r selection; do
+        [ "$gifpid" -ne 0 ] && kill "$gifpid"
+        [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
+        preview_file "$selection"
+    done
+    [ "$TERMINAL" != "kitty" ] && exists ueberzug && rm "$FIFO_UEBERZUG"
+}
+
+if [ "$PREVIEW_MODE" ]; then
+    if [ ! -r "$NNN_FIFO" ]; then
         echo "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')" >&2
         read -r
         exit 1
     fi
 
-    preview_file "$1"
+    if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
+        FIFO_UEBERZUG="$TMPDIR/nnn-ueberzug-fifo.$$"
+        mkfifo "$FIFO_UEBERZUG"
+        tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+    fi
 
-    # use cat instead of 'exec <' to avoid issues with dash shell
-    # shellcheck disable=SC2002
-    cat "$NNN_FIFO" |\
-    while read -r selection ; do
-        preview_file "$selection"
-    done
+    preview_file "$1"
+    preview_fifo &
+    wait
 
     # Restoring the previous layout for kitty users. This will only work for
     # kitty >= 0.18.0.
