@@ -3825,10 +3825,10 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 
 static void (*printptr)(const struct entry *ent, uint_t namecols, bool sel) = &printent;
 
-static void savecurctx(settings *curcfg, char *path, char *curname, int r /* next context num */)
+static void savecurctx(settings *curcfg, char *path, char *curname, int nextctx)
 {
 	settings tmpcfg = *curcfg;
-	context *ctxr = &g_ctx[r];
+	context *ctxr = &g_ctx[nextctx];
 
 	/* Save current context */
 	if (ndents)
@@ -3852,7 +3852,7 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int r /* nex
 		ctxr->c_cfg = tmpcfg;
 	}
 
-	tmpcfg.curctx = r;
+	tmpcfg.curctx = nextctx;
 	*curcfg = tmpcfg;
 }
 
@@ -4776,13 +4776,13 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 	}
 
 	if (nextpath) {
-		if (ctx == 0 || ctx == cfg.curctx + 1) {
+		if (ctx == 0 || ctx == cfg.curctx + 1) { /* Same context */
 			xstrsncpy(*lastdir, *path, PATH_MAX);
 			xstrsncpy(*path, nextpath, PATH_MAX);
 			DPRINTF_S(*path);
-		} else {
+		} else { /* New context */
 			r = ctx - 1;
-
+			/* Deactivate the new context and build from scratch */
 			g_ctx[r].c_cfg.ctxactive = 0;
 			savecurctx(&cfg, nextpath, pdents[cur].name, r);
 			*path = g_ctx[r].c_path;
