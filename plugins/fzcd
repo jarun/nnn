@@ -14,11 +14,9 @@ else
 fi
 
 if [ -n "$sel" ]; then
-	if ! [ -d "$sel" ]; then
-		sel=$(dirname "$sel")
-    elif [ "$sel" = "." ]; then
+    if [ "$sel" = "." ] || (! [ -d "$sel" ] && ! [ -f "$sel" ]); then
         exit 0
-	fi
+    fi
 
     # Check if selected path returned
     # by fzf command is absolute
