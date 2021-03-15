@@ -1,3 +1,26 @@
+nnn v3.6 Nina
+2021-03-16
+
+- REPL command prompt (<kbd>Esc</kbd> or <kbd>Enter</kbd> to exit)
+- invert selection with <kbd>A</kbd>
+- option `-u` removed (always prefer selection to hovered)
+- visit start dir on <kbd>@</kbd> when start path is a file
+- exit filter mode and redraw on <kbd>^L</kbd> if no last filter
+- plugin `fzcd` now selects the chosen file (#876)
+- `ueberzug` support in plugin `preview-tui`
+- new plugin `preview-tui-ext` with extra preview support
+- clear selection after successful plugin invocation
+- add method to sync subshell `$PWD` in WIki
+- clear selection on single file deletion (#812)
+- copy between instances not working (#864)
+- plugin `togglex` to toggle exe mode of a selection (#813)
+- fix `memccpy()` buffer overlap fault on macOS (#786)
+- show `0 selected` msg on cp/mv with empty selection (#855)
+- fix frozen terminal caused by opener (#858)
+- migrate macOS CI to GitHub workflows, retire Travis
+
+-------------------------------------------------------------------------------
+
 nnn v3.5 Freddie
 2020-11-17
 

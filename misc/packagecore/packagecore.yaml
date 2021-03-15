@@ -79,16 +79,6 @@ packages:
     deps:
       - libncursesw6
       - readline-common
-  fedora31:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - ncurses-devel
-      - readline-devel
-    deps:
-      - ncurses
-      - readline
   fedora32:
     builddeps:
       - make
@@ -99,16 +89,6 @@ packages:
     deps:
       - ncurses
       - readline
-  opensuse15.1:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - readline-devel
-      - ncurses-devel
-    deps:
-      - libncurses6
-      - libreadline7
   opensuse15.2:
     builddeps:
       - make
