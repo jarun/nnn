@@ -34,29 +34,29 @@ There are 2 independent (neo)vim plugins - [nnn.vim](https://github.com/mcchrish
 
 It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
 
-<details><summary><i><b>Expand</b></i> for some nnn magic! :dark_sunglasses:</summary><br><ul>
+<details><summary><i><b>Expand</b></i> for some `nnn` magic! :dark_sunglasses:</summary><br><ul>
   <li>Instantly load, sort, filter thousands of files</li>
   <li>Type to navigate with automatic dir selection</li>
   <li>List input stream and pick entries to stdout or file</li>
-  <li>find/fd/grep/ripgrep/fzf from nnn and list in nnn</li>
-  <li> Never lose context - start where you quit</li>
+  <li>`find`/`fd`/`grep`/`ripgrep`/`fzf` from `nnn` and list in `nnn`</li>
+  <li>Never lose context - start where you quit</li>
   <li>Mount any cloud storage service in a few keypresses</li>
   <li>Select files from anywhere (not just a single dir)</li>
   <li>Unlimited bookmarks, plugins, cmds with custom hotkeys</li>
   <li>Write a plugin in any language you know</li>
-  <li>Edit and preview markdown, man page, html</li>
+  <li>Edit and preview markdown, `man` page, HTML</li>
   <li>Open a file and auto-advance to the next</li>
   <li>Filter filtered entries, export list of visible files</li>
   <li>Configure the middle mouse click to do anything</li>
   <li>Fuzzy search subtree and open a file (or its parent dir)</li>
   <li>Load four dirs with custom settings at once</li>
-  <li>Notifications on cp, mv, rm completion</li>
+  <li>Notifications on `cp`, `mv`, `rm` completion</li>
   <li>Auto-sync selection to system clipboard</li>
-  <li>Access selection from another instance of nnn</li>
+  <li>Access selection from another instance of `nnn`</li>
   <li>Open text files detached in another pane/tab/window</li>
   <li>Mount and modify archives</li>
   <li>Create files/dirs/duplicates with parents (like <i>mkdir -p</i>)</li>
-  <li>Toggle hidden with <kbd>.</kbd>, visit HOME with <kbd>~</kbd>, last dir with <kbd>-</kbd></li>
+  <li>Toggle hidden with <kbd>.</kbd>, visit `$HOME` with <kbd>~</kbd>, last dir with <kbd>-</kbd></li>
   <li>Mark a frequently visited dir at runtime</li>
   <li>Sort by modification, access and inode change time</li>
   <li>Compile out/in features with make variables</li>
@@ -100,16 +100,16 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - *Type-to-nav* mode with dir auto-select
   - Contexts (_aka_ tabs/workspaces) with custom colors
   - Sessions, bookmarks with hotkeys; mark and visit a dir
-  - Remote mounts (needs sshfs, rclone)
+  - Remote mounts (needs `sshfs`, `rclone`)
   - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick look-up
-  - CD on quit (*easy* shell integration)
+  - `cd` on quit (*easy* shell integration)
   - Auto-advance on opening files
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex (POSIX/PCRE) and string (default) filters
   - Subtree search plugin to open or edit files
 - Sort
-  - Ordered pure numeric names by default (visit _/proc_)
+  - Ordered pure numeric names by default (visit `/proc`)
   - Case-insensitive version (_aka_ natural) sort
   - By name, access/change/mod (default) time, size, extn
   - Reverse sort
@@ -120,7 +120,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Icons (customize and compile-in)
   - Plugins for image and video thumbnails
   - Create, list, extract, mount (FUSE based) archives
-  - Option to open all text files in EDITOR
+  - Option to open all text files in `$EDITOR`
 - Information
   - Detailed file information
   - Media information plugin
@@ -132,7 +132,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Batch renamer for selection or dir
   - List input stream of file paths from stdin or plugin
   - Copy (as), move (as), delete, archive, link selection
-  - Dir updates, notification on cp, mv, rm completion
+  - Dir updates, notification on `cp`, `mv`, `rm` completion
   - Copy file paths to system clipboard on select
   - Launch apps, run commands, spawn a shell, toggle exe
   - Access hovered file as `$nnn` at prompt or spawned shell
@@ -143,14 +143,14 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 
 1. [Install](https://github.com/jarun/nnn/wiki/Usage) `nnn` and any dependencies you need. All files are opened with the desktop opener by default.
 2. Add option `-e` to your alias to open text files in `$VISUAL`/`$EDITOR`/ vi. [Open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text) if you wish.
-3. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
+3. Configure [`cd` on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 4. [Sync subshell `$PWD`](https://github.com/jarun/nnn/wiki/Basic-use-cases#sync-subshell-pwd) to `nnn`.
 5. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installation).
-6. Use option `-x` to copy selected file paths to system clipboard and show notis on cp, mv, rm completion.
+6. Use option `-x` to copy selected file paths to system clipboard and show notis on `cp`, `mv`, `rm` completion.
 7. For a CLI-only environment, customize and use plugin [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke) with option `-c` (overrides `-e`).
-8. Bid _ls_ goodbye! `alias ls='nnn -de'` :sunglasses:
+8. Bid `ls` goodbye! `alias ls='nnn -de'` :sunglasses:
 
-Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates, cycles contexts. <kbd>?</kbd> lists shortcuts.
+Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates and/or cycles contexts. <kbd>?</kbd> lists shortcuts.
 
 [![Wiki](https://img.shields.io/badge/RTFM-nnn%20Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
 
