@@ -206,8 +206,6 @@ ueberzug_refresh() {
     clear
     pkill -P "$$" >/dev/null 2>&1
     pkill -f -n preview-tui-ext >/dev/null 2>&1
-    kill "$(cat "$PAGERPID" 2>/dev/null)" >/dev/null 2>&1
-    kill "$(cat "$GIFPID" 2>/dev/null)" >/dev/null 2>&1
     echo > "$NNN_FIFO"
     tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     preview_fifo &
