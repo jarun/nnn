@@ -215,6 +215,8 @@ For convenience, we provided a helper script named `.nnn-plugin-helper` and a fu
 If a context is not provided, it is asked for explicitly. To skip this and choose the current context, set the `CUR_CTX` variable in `.nnn-plugin-helper` (or in the specific plugin after sourcing `.nnn-plugin-helper`) to 1.
 Usage examples can be found in the Examples section below.
 
+If a plugin doesn't send any data back to `nnn` and there's a selection, the selection is cleared.
+
 #### Get notified on file hover
 
 If `NNN_FIFO` is set, `nnn` will open it and write every hovered files. This can be used in plugins and external scripts, e.g. to implement file previews.
