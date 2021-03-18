@@ -6277,12 +6277,12 @@ nochange:
 			}
 
 			if (cfg.useeditor
-#ifdef FILE_MIME
+#ifdef FILE_MIME_OPTS
 			    && get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
 			    && is_prefix(g_buf, "text/", 5)
 #else
 			    /* no mime option; guess from description instead */
-			    && get_output(g_buf, CMD_LEN_MAX, "file", "-b", newpath, FALSE)
+			    && get_output(g_buf, CMD_LEN_MAX, "file", "-bL", newpath, FALSE)
 			    && strstr(g_buf, "text")
 #endif
 			) {
