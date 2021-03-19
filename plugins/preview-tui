@@ -3,7 +3,7 @@
 # Description: Terminal based file previewer
 #
 # Note: This plugin needs a "NNN_FIFO" to work. See man.
-# For a more extended version of this script, including ueberzug support, see preview-tui-ext.
+# For a more extended version of this script with additional optional dependencies, see preview-tui-ext.
 #
 # Dependencies:
 #    - Supports 3 independent methods to preview with:
@@ -64,7 +64,7 @@ SPLIT="$SPLIT"  # you can set a permanent split here
 TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
-PAGER="${PAGER:-less -R}"
+PAGER="${PAGER:-less -P?n -R}"
 TMPDIR="${TMPDIR:-/tmp}"
 NUMPREVIEWTUI="$(($(find "$TMPDIR" -maxdepth 1 -name 'nnn-preview-tui-pagerpid*' 2>/dev/null | wc -l) + 1))"
 PAGERPID="$TMPDIR/nnn-preview-tui-pagerpid.$NUMPREVIEWTUI"
@@ -148,7 +148,7 @@ preview_file () {
     if [ -d "$1" ]; then
         cd "$1" || return
         if exists tree; then
-            fifo_pager tree -L 3 -F
+            fifo_pager tree -L 1 --dirsfirst -F -C
         elif exists exa; then
             fifo_pager exa -G --colour=always 2>/dev/null
         else
