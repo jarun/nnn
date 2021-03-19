@@ -120,6 +120,7 @@ print_bin_info() {
 }
 
 preview_file () {
+    clear
     # Trying to use pistol if it's available.
     if [ "$USE_PISTOL" -ne 0 ] && exists pistol; then
         fifo_pager pistol "$1"
