@@ -16,7 +16,7 @@
 #    - unzip
 #    - tar
 #    - man
-#    - optional: atool for additional archive preview
+#    - optional: bsdtar or atool for additional archive preview
 #    - optional: bat for code syntax highlighting
 #    - optional: ueberzug, kitty terminal, viu or catimg for images.
 #    - optional: convert(ImageMagick) for playing gif preview
@@ -26,6 +26,7 @@
 #    - optional: pdftoppm(poppler) for pdf thumbnails
 #    - optional: gnome-epub-thumbnailer for epub thumbnails (https://gitlab.gnome.org/GNOME/gnome-epub-thumbnailer)
 #    - optional: fontpreview for font preview (https://github.com/sdushantha/fontpreview)
+#    - optional: w3m for html
 #    - optional: scope.sh file viewer from ranger.
 #                To use:
 #                1. drop scope.sh executable in $PATH
@@ -181,8 +182,12 @@ preview_file () {
             generate_preview "$cols" "$lines" "$1" "font"
         elif [ "${mimetype#*office}" != "$mimetype" ] || [ "${mimetype#*document}" != "$mimetype" ] && exists libreoffice; then
             generate_preview "$cols" "$lines" "$1" "office"
-        elif [ "${ARCHIVES#*$ext}" != "$ARCHIVES" ] && exists atool; then
-            fifo_pager atool -l "$1"
+        elif [ "${ARCHIVES#*$ext}" != "$ARCHIVES" ]; then
+            if exists bsdtar; then
+                fifo_pager bsdtar -tvf "$1"
+            elif exists atool; then
+                fifo_pager atool -l "$1"
+            fi
         elif [ "$mimetype" = "application/zip" ]; then
             fifo_pager unzip -l "$1"
         elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ]; then
@@ -190,6 +195,8 @@ preview_file () {
         else
             fifo_pager print_bin_info "$1"
         fi
+    elif [ "$mimetype" = "text/html" ]; then
+        fifo_pager w3m "$1"
     elif [ "$mimetype" = "text/troff" ]; then
         fifo_pager man -Pcat -l "$1"
     else
@@ -204,7 +211,6 @@ preview_file () {
 
 generate_preview() {
     if [ ! -f "$TMPDIR/$3.png" ]; then
-        [ "$4" != gif ] && fifo_pager print_bin_info "$3"
         mkdir -p "$TMPDIR/${3%/*}"
         case $4 in
             audio) ffmpeg -i "$3" "$TMPDIR/$3.png" -y >/dev/null 2>&1 ;;
