@@ -3,7 +3,7 @@
 <p align="center"><img src="https://i.imgur.com/SpT0L2W.png" /></p>
 <p align="center"><i>read ebooks with plugin gutenread (Android)</i></p>
 
-<p align="center"><a href="https://asciinema.org/a/336443"><img src="https://asciinema.org/a/336443.svg" width="734"/></a></p>
+<p align="center"><a href="https://s4.gifyu.com/images/previewtuidemo.gif"><img src="https://i.imgur.com/q8J5tzk.png" width="734"></a></p>
 <p align="center"><i>Live Previews</i></p>
 
 ## Introduction
