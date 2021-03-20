@@ -3,7 +3,7 @@
 # Description: Terminal based file previewer
 #
 # Note: This plugin needs a "NNN_FIFO" to work. See man.
-# For a more extended version of this script, including ueberzug support, see preview-tui-ext.
+# For a more extended version of this script with additional optional dependencies, see preview-tui-ext.
 #
 # Dependencies:
 #    - Supports 3 independent methods to preview with:
@@ -58,14 +58,19 @@
 #   without extra dependencies.
 #
 # Shell: POSIX compliant
-# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero
+# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal
 
 SPLIT="$SPLIT"  # you can set a permanent split here
 TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
-PAGER="${PAGER:-less -R}"
+PAGER="${PAGER:-less -P?n -R}"
 TMPDIR="${TMPDIR:-/tmp}"
+NUMPREVIEWTUI="$(($(find "$TMPDIR" -maxdepth 1 -name 'nnn-preview-tui-pagerpid*' 2>/dev/null | wc -l) + 1))"
+PAGERPID="$TMPDIR/nnn-preview-tui-pagerpid.$NUMPREVIEWTUI"
+GIFPID="$TMPDIR/nnn-preview-tui-gifpid.$NUMPREVIEWTUI"
+FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NUMPREVIEWTUI"
+
 [ "$PAGER" = "most" ] && PAGER="less -R"
 
 if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
@@ -115,9 +120,7 @@ print_bin_info() {
 }
 
 preview_file () {
-    kill %- %+ 2>/dev/null && wait %- %+ 2>/dev/null
     clear
-
     # Trying to use pistol if it's available.
     if [ "$USE_PISTOL" -ne 0 ] && exists pistol; then
         fifo_pager pistol "$1"
@@ -146,7 +149,7 @@ preview_file () {
     if [ -d "$1" ]; then
         cd "$1" || return
         if exists tree; then
-            fifo_pager tree -L 3 -F
+            fifo_pager tree -L 1 --dirsfirst -F -C
         elif exists exa; then
             fifo_pager exa -G --colour=always 2>/dev/null
         else
@@ -183,10 +186,10 @@ image_preview() {
         ueberzug_layer "$1" "$2" "$3"
     elif exists catimg; then
         catimg "$3" &
-        gifpid="$!"
+        echo "$!" > "$GIFPID"
     elif exists viu; then
         viu -t "$3" &
-        gifpid="$!"
+        echo "$!" > "$GIFPID"
     else
         fifo_pager print_bin_info "$1"
     fi
@@ -202,8 +205,8 @@ ueberzug_remove() {
 
 ueberzug_refresh() {
     clear
-    pkill -P "$$"
-    pkill -f -n preview-tui
+    pkill -P "$$" >/dev/null 2>&1
+    pkill -f -n preview-tui-ext >/dev/null 2>&1
     echo > "$NNN_FIFO"
     tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     preview_fifo &
@@ -211,7 +214,7 @@ ueberzug_refresh() {
 }
 if [ "$TERMINAL" != "kitty" ] && [ "$PREVIEW_MODE" ] && exists ueberzug; then
     trap 'ueberzug_refresh' WINCH
-    trap 'rm "$FIFO_UEBERZUG"' INT HUP EXIT
+    trap 'rm "$FIFO_UEBERZUG" "$PAGERPID" "$GIFPID"' INT HUP EXIT
 fi
 
 preview_fifo() {
@@ -219,11 +222,13 @@ preview_fifo() {
     # shellcheck disable=SC2002
     cat "$NNN_FIFO" |\
     while read -r selection; do
-        [ "$gifpid" -ne 0 ] && kill "$gifpid"
+        kill "$(cat "$GIFPID" 2>/dev/null)" >/dev/null 2>&1
+        kill "$(cat "$PAGERPID" 2>/dev/null)" >/dev/null 2>&1
         [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
         preview_file "$selection"
     done
     [ "$TERMINAL" != "kitty" ] && exists ueberzug && rm "$FIFO_UEBERZUG"
+    rm "$PAGERPID" "$GIFPID" >/dev/null 2>&1
 }
 
 if [ "$PREVIEW_MODE" ]; then

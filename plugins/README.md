@@ -55,6 +55,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [picker](picker) | Pick files and list one per line (to pipe) | sh | nnn |
 | [preview-tabbed](preview-tabbed) | Tabbed/xembed based file previewer | bash | _see in-file docs_ |
 | [preview-tui](preview-tui) | Tmux/kitty/xterm/`$TERMINAL` based file previewer | sh | _see in-file docs_ |
+| [preview-tui-ext](preview-tui-ext) | Meant to be an exhaustive version of [preview-tui](preview-tui) | sh | _see in-file docs_ |
 | [pskill](pskill) | Fuzzy list by name and kill process or zombie | sh | fzf, ps, sudo/doas |
 | [renamer](renamer) | Batch rename selection or files in dir | sh | [qmv](https://www.nongnu.org/renameutils/)/[vidir](https://joeyh.name/code/moreutils/) |
 | [ringtone](ringtone) | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
