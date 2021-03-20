@@ -26,7 +26,8 @@
 #    - optional: pdftoppm(poppler) for pdf thumbnails
 #    - optional: gnome-epub-thumbnailer for epub thumbnails (https://gitlab.gnome.org/GNOME/gnome-epub-thumbnailer)
 #    - optional: fontpreview for font preview (https://github.com/sdushantha/fontpreview)
-#    - optional: w3m for html
+#    - optional: glow or lowdown for markdown
+#    - optional: w3m or lynx or elinks for html
 #    - optional: scope.sh file viewer from ranger.
 #                To use:
 #                1. drop scope.sh executable in $PATH
@@ -195,8 +196,20 @@ preview_file () {
         else
             fifo_pager print_bin_info "$1"
         fi
-    elif [ "$mimetype" = "text/html" ]; then
-        fifo_pager w3m "$1"
+    elif [ "$ext" = "md" ]; then
+        if exists glow; then
+            fifo_pager glow -s dark "$1"
+        elif exists lowdown; then
+            lowdown -Tterm "$1"
+        fi
+    elif [ "$ext" = "htm" ] || [ "$ext" = "html" ] || [ "$ext" = "xhtml" ]; then
+        if exists w3m; then
+            fifo_pager w3m "$1"
+        elif exists lynx; then
+            fifo_pager lynx "$1"
+        elif exists elinks; then
+            fifo_pager elinks "$1"
+        fi
     elif [ "$mimetype" = "text/troff" ]; then
         fifo_pager man -Pcat -l "$1"
     else
