@@ -282,7 +282,7 @@ image_preview() {
 }
 
 ueberzug_layer() {
-    printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "width": "%s", "height": "%s", "path": "%s"}\n' "$1" "$2" "$3" > "$FIFO_UEBERZUG"
+    printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "width": "%s", "height": "%s", "scaler": "fit_contain", "path": "%s"}\n' "$1" "$2" "$3" > "$FIFO_UEBERZUG"
 }
 
 ueberzug_remove() {
