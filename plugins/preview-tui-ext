@@ -252,7 +252,11 @@ generate_preview() {
                     filename="$(echo "${3##*/}" | cut -d. -f1)"
                     mv "$TMPDIR/${3%/*}/$filename.jpg" "$TMPDIR/$3.jpg" ;;
             pdf) pdftoppm -jpeg -f 1 -singlefile "$3" "$TMPDIR/$3" >/dev/null 2>&1 ;;
-            video) ffmpegthumbnailer -i "$3" -o "$TMPDIR/$3.jpg" -s 0 -q 10 >/dev/null 2>&1 ;;
+            video) if ! ffmpegthumbnailer -i "$3" -o "$TMPDIR/$3.jpg" -s 0 -q 10 >/dev/null 2>&1; then
+									     rm "$TMPDIR/$3.jpg"
+											 fifo_pager print_bin_info "$3"
+											 return
+									 fi
         esac
     fi
     if [ -f "$TMPDIR/$3.jpg" ]; then
