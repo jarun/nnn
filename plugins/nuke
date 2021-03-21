@@ -510,7 +510,7 @@ handle_blocked() {
     esac
 }
 
-MIMETYPE="$( file --dereference --brief --mime-type -- "${FPATH}" )"
+MIMETYPE="$( file -bL --mime-type -- "${FPATH}" )"
 handle_extension
 handle_multimedia "${MIMETYPE}"
 handle_mime "${MIMETYPE}"

@@ -138,7 +138,7 @@ previewer_loop () {
 
         kill_viewer
 
-        MIME="$(file -b --mime-type "$FILE")"
+        MIME="$(file -bL --mime-type "$FILE")"
 
         case "$MIME" in
             video/*)
