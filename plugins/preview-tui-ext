@@ -180,7 +180,7 @@ preview_file () {
             generate_preview "$cols" "$lines" "$1" "pdf"
         elif [ "$ext" = "epub" ] && exists gnome-epub-thumbnailer; then
             generate_preview "$cols" "$lines" "$1" "epub"
-        elif [ "${mimetype%%/*}" = "font" ] && exists fontpreview; then
+        elif [ "${mimetype#*opentype}" != "$mimetype" ] || [ "${mimetype#*font}" != "$mimetype" ] && exists fontpreview; then
             generate_preview "$cols" "$lines" "$1" "font"
         elif [ "${mimetype#*office}" != "$mimetype" ] || [ "${mimetype#*document}" != "$mimetype" ] && exists libreoffice; then
             generate_preview "$cols" "$lines" "$1" "office"
