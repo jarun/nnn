@@ -148,8 +148,8 @@ preview_file () {
 
     # Detecting the exact type of the file: the encoding, mime type, and
     # extension in lowercase.
-    encoding="$(file -Lb --mime-encoding -- "$1")"
-    mimetype="$(file -Lb --mime-type -- "$1")"
+    encoding="$(file -bL --mime-encoding -- "$1")"
+    mimetype="$(file -bL --mime-type -- "$1")"
     ext="${1##*.}"
     if [ -n "$ext" ]; then
         ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
