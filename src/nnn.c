@@ -5688,9 +5688,9 @@ static void statusbar(char *path)
 		{
 			i = readlink(pent->name, g_buf, PATH_MAX);
 
-			addstr(coolsize(i >= 0 ? i : pent->size));
+			addstr(coolsize(i >= 0 ? i : pent->size)); /* Show symlink size */
 
-			if (i > 1) {
+			if (i > 1) { /* Show symlink target */
 				g_buf[i] = '\0';
 				addstr(" ->");
 				addstr(g_buf);
@@ -5699,6 +5699,18 @@ static void statusbar(char *path)
 			addstr(coolsize(pent->size));
 			addch(' ');
 			addstr(ptr);
+			if (pent->flags & HARD_LINK)
+			{
+				struct stat sb;
+
+				if (stat(pent->name, &sb) != -1) {
+					addch(' ');
+					addstr(xitoa((int)sb.st_nlink)); /* Show number of links */
+					addch('-');
+					addstr(xitoa((int)sb.st_ino)); /* Show inode number */
+				}
+			}
+
 		}
 		addch('\n');
 	}
