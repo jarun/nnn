@@ -313,8 +313,8 @@ preview_fifo() {
         echo "$selection" > "$CURSEL"
     done
     [ "$TERMINAL" != "kitty" ] && exists ueberzug && rm "$FIFO_UEBERZUG"
-    pkill -P "$$" >/dev/null 2>&1
     rm "$PAGERPID" "$GIFPID" "$CURSEL" >/dev/null 2>&1
+    pkill -P "$$" >/dev/null 2>&1
 }
 
 
