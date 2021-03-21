@@ -5684,17 +5684,22 @@ static void statusbar(char *path)
 			addch(' ');
 		}
 #endif
-		addstr(coolsize(pent->size));
-		addch(' ');
-		addstr(ptr);
 		if (S_ISLNK(pent->mode))
 		{
 			i = readlink(pent->name, g_buf, PATH_MAX);
+
+			if (i > 0)
+				addstr(coolsize(i));
+
 			if (i > 1) {
 				g_buf[i] = '\0';
 				addstr(" ->");
 				addstr(g_buf);
 			}
+		} else {
+			addstr(coolsize(pent->size));
+			addch(' ');
+			addstr(ptr);
 		}
 		addch('\n');
 	}
