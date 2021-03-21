@@ -273,7 +273,7 @@ image_preview() {
         viu -t "$3" &
         echo "$!" > "$GIFPID"
     else
-        fifo_pager print_bin_info "$1"
+        fifo_pager print_bin_info "$3"
     fi
 }
 
