@@ -148,8 +148,8 @@ preview_file () {
 
     # Detecting the exact type of the file: the encoding, mime type, and
     # extension in lowercase.
-    encoding="$(file -bL --mime-encoding -- "$1")"
-    mimetype="$(file -bL --mime-type -- "$1")"
+    encoding="$(file -Lb --mime-encoding -- "$1")"
+    mimetype="$(file -Lb --mime-type -- "$1")"
     ext="${1##*.}"
     if [ -n "$ext" ]; then
         ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
@@ -170,6 +170,8 @@ preview_file () {
     elif [ "$encoding" = "binary" ]; then
         if [ "$ext" = "gif" ]; then
             generate_preview "$cols" "$lines" "$1" "gif"
+        elif [ "${mimetype#*/}" = "x-xcf" ]; then
+            generate_preview "$cols" "$lines" "$1" "xcf"
         elif [ "${mimetype%%/*}" = "image" ]; then
             image_preview "$cols" "$lines" "$1"
         elif [ "${mimetype%%/*}" = "audio" ] && exists ffmpeg; then
@@ -253,10 +255,11 @@ generate_preview() {
                     mv "$TMPDIR/${3%/*}/$filename.jpg" "$TMPDIR/$3.jpg" ;;
             pdf) pdftoppm -jpeg -f 1 -singlefile "$3" "$TMPDIR/$3" >/dev/null 2>&1 ;;
             video) if ! ffmpegthumbnailer -i "$3" -o "$TMPDIR/$3.jpg" -s 0 -q 10 >/dev/null 2>&1; then
-									     rm "$TMPDIR/$3.jpg"
-											 fifo_pager print_bin_info "$3"
-											 return
-									 fi
+                       rm "$TMPDIR/$3.jpg"
+                       fifo_pager print_bin_info "$3"
+                       return
+                   fi ;;
+            xcf) convert -flatten "$3" "$TMPDIR/$3.jpg" ;;
         esac
     fi
     if [ -f "$TMPDIR/$3.jpg" ]; then
