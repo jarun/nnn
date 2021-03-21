@@ -5688,8 +5688,7 @@ static void statusbar(char *path)
 		{
 			i = readlink(pent->name, g_buf, PATH_MAX);
 
-			if (i > 0)
-				addstr(coolsize(i));
+			addstr(coolsize(i >= 0 ? i : pent->size));
 
 			if (i > 1) {
 				g_buf[i] = '\0';
