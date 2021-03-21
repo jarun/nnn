@@ -255,7 +255,11 @@ generate_preview() {
             video) ffmpegthumbnailer -i "$3" -o "$TMPDIR/$3.png" -s 0 -q 10 >/dev/null 2>&1 ;;
         esac
     fi
-    image_preview "$1" "$2" "$TMPDIR/$3.png"
+    if [ -f "$TMPDIR/$3.png" ]; then
+        image_preview "$1" "$2" "$TMPDIR/$3.png"
+    else
+        fifo_pager print_bin_info "$3"
+    fi
 }
 
 image_preview() {
