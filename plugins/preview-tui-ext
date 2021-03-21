@@ -232,7 +232,7 @@ generate_preview() {
             audio) ffmpeg -i "$3" "$TMPDIR/$3.jpg" -y >/dev/null 2>&1 ;;
             epub) gnome-epub-thumbnailer "$3" "$TMPDIR/$3.jpg" >/dev/null 2>&1 ;;
             font) fontpreview -i "$3" -o "$TMPDIR/$3.jpg" >/dev/null 2>&1 ;;
-            gif) if exists ueberzug || [ "$TERMINAL" = "kitty" ]; then
+            gif) if exists ueberzug && exists convert || [ "$TERMINAL" = "kitty" ]; then
                     if [ ! -d "$TMPDIR/$3" ]; then
                         mkdir -p "$TMPDIR/$3"
                         convert -coalesce "$3" "$TMPDIR/$3/${3##*/}.jpg"
