@@ -5692,9 +5692,8 @@ static void statusbar(char *path)
 			i = readlink(pent->name, g_buf, PATH_MAX);
 			if (i > 1) {
 				g_buf[i] = '\0';
-				addstr(" [-> ");
+				addstr(" ->");
 				addstr(g_buf);
-				addch(']');
 			}
 		}
 		addch('\n');
