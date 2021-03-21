@@ -224,19 +224,19 @@ preview_file () {
 }
 
 generate_preview() {
-    if [ ! -f "$TMPDIR/$3.png" ]; then
+    if [ ! -f "$TMPDIR/$3.jpg" ]; then
         mkdir -p "$TMPDIR/${3%/*}"
         case $4 in
-            audio) ffmpeg -i "$3" "$TMPDIR/$3.png" -y >/dev/null 2>&1 ;;
-            epub) gnome-epub-thumbnailer "$3" "$TMPDIR/$3.png" >/dev/null 2>&1 ;;
-            font) fontpreview -i "$3" -o "$TMPDIR/$3.png" >/dev/null 2>&1 ;;
+            audio) ffmpeg -i "$3" "$TMPDIR/$3.jpg" -y >/dev/null 2>&1 ;;
+            epub) gnome-epub-thumbnailer "$3" "$TMPDIR/$3.jpg" >/dev/null 2>&1 ;;
+            font) fontpreview -i "$3" -o "$TMPDIR/$3.jpg" >/dev/null 2>&1 ;;
             gif) if exists ueberzug || [ "$TERMINAL" = "kitty" ]; then
                     if [ ! -d "$TMPDIR/$3" ]; then
                         mkdir -p "$TMPDIR/$3"
-                        convert -coalesce "$3" "$TMPDIR/$3/${3##*/}.png"
+                        convert -coalesce "$3" "$TMPDIR/$3/${3##*/}.jpg"
                     fi
                         while true; do
-                            for frame in $(find "$TMPDIR/$3"/*.png | sort -V); do
+                            for frame in $(find "$TMPDIR/$3"/*.jpg | sort -V); do
                                 image_preview "$1" "$2" "$frame"
                                 sleep 0.1
                             done
@@ -248,15 +248,15 @@ generate_preview() {
                     image_preview "$1" "$2" "$3"
                     return
                  fi ;;
-            office) libreoffice --convert-to png "$3" --outdir "$TMPDIR/${3%/*}" > /dev/null 2>&1
+            office) libreoffice --convert-to jpg "$3" --outdir "$TMPDIR/${3%/*}" > /dev/null 2>&1
                     filename="$(echo "${3##*/}" | cut -d. -f1)"
-                    mv "$TMPDIR/${3%/*}/$filename.png" "$TMPDIR/$3.png" ;;
-            pdf) pdftoppm -png -f 1 -singlefile "$3" "$TMPDIR/$3" >/dev/null 2>&1 ;;
-            video) ffmpegthumbnailer -i "$3" -o "$TMPDIR/$3.png" -s 0 -q 10 >/dev/null 2>&1 ;;
+                    mv "$TMPDIR/${3%/*}/$filename.jpg" "$TMPDIR/$3.jpg" ;;
+            pdf) pdftoppm -jpeg -f 1 -singlefile "$3" "$TMPDIR/$3" >/dev/null 2>&1 ;;
+            video) ffmpegthumbnailer -i "$3" -o "$TMPDIR/$3.jpg" -s 0 -q 10 >/dev/null 2>&1 ;;
         esac
     fi
-    if [ -f "$TMPDIR/$3.png" ]; then
-        image_preview "$1" "$2" "$TMPDIR/$3.png"
+    if [ -f "$TMPDIR/$3.jpg" ]; then
+        image_preview "$1" "$2" "$TMPDIR/$3.jpg"
     else
         fifo_pager print_bin_info "$3"
     fi
