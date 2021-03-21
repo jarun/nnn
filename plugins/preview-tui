@@ -69,6 +69,7 @@ TMPDIR="${TMPDIR:-/tmp}"
 NUMPREVIEWTUI="$(($(find "$TMPDIR" -maxdepth 1 -name 'nnn-preview-tui-pagerpid*' 2>/dev/null | wc -l) + 1))"
 PAGERPID="$TMPDIR/nnn-preview-tui-pagerpid.$NUMPREVIEWTUI"
 GIFPID="$TMPDIR/nnn-preview-tui-gifpid.$NUMPREVIEWTUI"
+CURSEL="$TMPDIR/nnn-preview-tui-selection.$NUMPREVIEWTUI"
 FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NUMPREVIEWTUI"
 
 [ "$PAGER" = "most" ] && PAGER="less -R"
@@ -191,7 +192,7 @@ image_preview() {
         viu -t "$3" &
         echo "$!" > "$GIFPID"
     else
-        fifo_pager print_bin_info "$1"
+        fifo_pager print_bin_info "$3"
     fi
 }
 
@@ -205,16 +206,18 @@ ueberzug_remove() {
 
 ueberzug_refresh() {
     clear
+    kill "$(cat "$GIFPID" 2>/dev/null)" >/dev/null 2>&1
     pkill -P "$$" >/dev/null 2>&1
     pkill -f -n preview-tui-ext >/dev/null 2>&1
-    echo > "$NNN_FIFO"
     tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+    preview_file "$(cat "$CURSEL")"
+    echo > "$NNN_FIFO"
     preview_fifo &
     wait
 }
 if [ "$TERMINAL" != "kitty" ] && [ "$PREVIEW_MODE" ] && exists ueberzug; then
     trap 'ueberzug_refresh' WINCH
-    trap 'rm "$FIFO_UEBERZUG" "$PAGERPID" "$GIFPID"' INT HUP EXIT
+    trap 'rm "$FIFO_UEBERZUG" "$PAGERPID" "$GIFPID" "$CURSEL"' INT HUP EXIT
 fi
 
 preview_fifo() {
@@ -226,9 +229,11 @@ preview_fifo() {
         kill "$(cat "$PAGERPID" 2>/dev/null)" >/dev/null 2>&1
         [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
         preview_file "$selection"
+        echo "$selection" > "$CURSEL"
     done
     [ "$TERMINAL" != "kitty" ] && exists ueberzug && rm "$FIFO_UEBERZUG"
-    rm "$PAGERPID" "$GIFPID" >/dev/null 2>&1
+    rm "$PAGERPID" "$GIFPID" "$CURSEL" >/dev/null 2>&1
+    pkill -P "$$" >/dev/null 2>&1
 }
 
 if [ "$PREVIEW_MODE" ]; then
