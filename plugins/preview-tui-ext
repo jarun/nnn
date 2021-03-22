@@ -154,7 +154,7 @@ preview_file () {
     if [ -n "$ext" ]; then
         ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
     fi
-    lines=$(($(tput lines)-1))
+    lines=$(tput lines)
     cols=$(tput cols)
 
     # Otherwise, falling back to the defaults.
@@ -170,6 +170,8 @@ preview_file () {
     elif [ "$encoding" = "binary" ]; then
         if [ "$ext" = "gif" ]; then
             generate_preview "$cols" "$lines" "$1" "gif"
+        elif [ "${mimetype#*/}" = "x-xcf" ]; then
+            generate_preview "$cols" "$lines" "$1" "xcf"
         elif [ "${mimetype%%/*}" = "image" ]; then
             image_preview "$cols" "$lines" "$1"
         elif [ "${mimetype%%/*}" = "audio" ] && exists ffmpeg; then
@@ -230,7 +232,7 @@ generate_preview() {
             audio) ffmpeg -i "$3" "$TMPDIR/$3.jpg" -y >/dev/null 2>&1 ;;
             epub) gnome-epub-thumbnailer "$3" "$TMPDIR/$3.jpg" >/dev/null 2>&1 ;;
             font) fontpreview -i "$3" -o "$TMPDIR/$3.jpg" >/dev/null 2>&1 ;;
-            gif) if exists ueberzug || [ "$TERMINAL" = "kitty" ]; then
+            gif) if exists ueberzug && exists convert || [ "$TERMINAL" = "kitty" ]; then
                     if [ ! -d "$TMPDIR/$3" ]; then
                         mkdir -p "$TMPDIR/$3"
                         convert -coalesce "$3" "$TMPDIR/$3/${3##*/}.jpg"
@@ -253,10 +255,11 @@ generate_preview() {
                     mv "$TMPDIR/${3%/*}/$filename.jpg" "$TMPDIR/$3.jpg" ;;
             pdf) pdftoppm -jpeg -f 1 -singlefile "$3" "$TMPDIR/$3" >/dev/null 2>&1 ;;
             video) if ! ffmpegthumbnailer -i "$3" -o "$TMPDIR/$3.jpg" -s 0 -q 10 >/dev/null 2>&1; then
-									     rm "$TMPDIR/$3.jpg"
-											 fifo_pager print_bin_info "$3"
-											 return
-									 fi
+                       rm "$TMPDIR/$3.jpg"
+                       fifo_pager print_bin_info "$3"
+                       return
+                   fi ;;
+            xcf) convert -flatten "$3" "$TMPDIR/$3.jpg" ;;
         esac
     fi
     if [ -f "$TMPDIR/$3.jpg" ]; then

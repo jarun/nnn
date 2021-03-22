@@ -143,7 +143,7 @@ preview_file () {
     if [ -n "$ext" ]; then
         ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
     fi
-    lines=$(($(tput lines)-1))
+    lines=$(tput lines)
     cols=$(tput cols)
 
     # Otherwise, falling back to the defaults.
