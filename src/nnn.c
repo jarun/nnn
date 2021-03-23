@@ -5993,6 +5993,10 @@ begin:
 		setdirwatch();
 	}
 
+	/* Set terminal window title */
+	printf("\033]2;%s\007", path);
+	fflush(stdout);
+
 	if (g_state.selmode && lastdir[0])
 		lastappendpos = selbufpos;
 
