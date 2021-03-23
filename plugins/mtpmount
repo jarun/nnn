@@ -22,13 +22,13 @@
 prompt="Device number ('l' to list): "
 
 lsmtp () {
-    devs=$(gio mount -li | grep -e 'activation_root' | sed 's/^\s*activation_root=//g')
+    devs=$(gio mount -li | grep -e 'activation_root' | sed 's/\s*activation_root=//g')
     c=1
     printf "Devices list:\n"
-    while read i; do
+    printf "%s\n" "$devs" | while read i; do
         printf "%s %s\\n" "${c}" "${i}"
         c=$(( c + 1 ))
-    done <<< ${devs}
+    done
     echo
 }
 
@@ -42,16 +42,8 @@ do
         lsmtp
     elif [ "$input" = "q" ] || [ "$input" -eq 0 ]; then
         exit
-    elif [ "$input" -le $(printf "%s\n" "${devs}" | grep -c '^') ]; then
-
-        c=1
-        while read i; do
-            dev=${i}
-            if [ "$input" -eq $c ]; then
-                break
-            fi
-            c=$(( c + 1 ))
-        done <<< ${devs}
+    elif [ "$input" -le "$(printf '%s\n' ""${devs}"" | grep -c '^')" ]; then
+        dev=$(printf "%s\n" "$devs" | cut -d$'\n' -f${input})
 
         if (gio mount -l | grep '^Mount([1-9]).*'"$dev" ) 1>/dev/null; then
             if gio mount -u "${dev}"; then
