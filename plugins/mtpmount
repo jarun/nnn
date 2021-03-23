@@ -29,7 +29,7 @@ lsmtp () {
     c=1
     printf "Devices list:\n"
     for i in $devs; do
-        printf "%s %s\\n" "${c}" "${i}"
+        printf "%s %s\\n" "$c" "$i"
         c=$(( c + 1 ))
     done
     echo
@@ -50,7 +50,7 @@ do
         c=1
         for i in $devs; do
             dev=$i
-            if [ $input -eq $c ]; then
+            if [ "$input" -eq $c ]; then
                 break
             fi
             c=$(( c + 1 ))
