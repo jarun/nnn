@@ -184,9 +184,9 @@ preview_file() {
             generate_preview "$cols" "$lines" "$1" "audio"
         elif [ "${mimetype%%/*}" = "video" ] && exists ffmpegthumbnailer; then
             generate_preview "$cols" "$lines" "$1" "video"
-        elif [ "${mimetype#*/}" = "pdf" ] && exists pdftoppm; then
+        elif [ "$ext" = "pdf" ] && exists pdftoppm; then
             generate_preview "$cols" "$lines" "$1" "pdf"
-        elif [ "${mimetype#*epub}" != "$mimetype" ] && exists gnome-epub-thumbnailer; then
+        elif [ "$ext" = "epub" ] && exists gnome-epub-thumbnailer; then
             generate_preview "$cols" "$lines" "$1" "epub"
         elif [ "${mimetype#*opentype}" != "$mimetype" ] || [ "${mimetype#*font}" != "$mimetype" ] && exists fontpreview; then
             generate_preview "$cols" "$lines" "$1" "font"
