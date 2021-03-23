@@ -22,12 +22,12 @@
 prompt="Device number ('l' to list): "
 
 function lsmtp() {
-    DEVS=( $(gio mount -li | grep -e activation_root | sed 's/activation_root=//g') )
+    DEVS=( $(gio mount -li | grep -e 'activation_root' | sed 's/activation_root=//g') )
     c=1
     echo
     echo "Devices list:"
     for i in $DEVS; do
-        echo $c $i
+        echo "$c $i"
         (( c++ ))
     done
     echo
