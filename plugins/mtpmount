@@ -21,22 +21,20 @@
 
 prompt="Device number ('l' to list): "
 
-function lsmtp() {
-    DEVS=( $(gio mount -li | grep -e 'activation_root' | sed 's/activation_root=//g') )
+lsmtp () {
+    devs=$(gio mount -li | grep -e 'activation_root' | sed 's/^\s*activation_root=//g')
     c=1
-    echo
-    echo "Devices list:"
-    for i in $DEVS; do
-        echo "$c $i"
-        (( c++ ))
-    done
+    printf "Devices list:\n"
+    while read i; do
+        printf "%s %s\\n" "${c}" "${i}"
+        c=$(( c + 1 ))
+    done <<< ${devs}
     echo
 }
 
 lsmtp
-printf "$prompt"
+printf "%s" "$prompt"
 read -r input
-
 
 while [ -n "$input" ]
 do
@@ -44,23 +42,32 @@ do
         lsmtp
     elif [ "$input" = "q" ] || [ "$input" -eq 0 ]; then
         exit
-    elif [ "$input" -le ${#DEVS[@]} ] 2>/dev/null; then
-        dev=${DEVS[$((input-1))]}
-        if gio mount -l | grep '^Mount([1-9]).*'"$dev"; then
+    elif [ "$input" -le $(printf "%s\n" "${devs}" | grep -c '^') ]; then
+
+        c=1
+        while read i; do
+            dev=${i}
+            if [ "$input" -eq $c ]; then
+                break
+            fi
+            c=$(( c + 1 ))
+        done <<< ${devs}
+
+        if (gio mount -l | grep '^Mount([1-9]).*'"$dev" ) 1>/dev/null; then
             if gio mount -u "${dev}"; then
-                echo "${dev} unmounted"
+                printf "%s unmounted\n" "$dev"
             fi
         else
             if gio mount "${dev}"; then
-                echo "${dev} mounted to /run/user/${UID}/gvfs"
+                printf "%s mounted to /run/user/\$UID/gvfs\n" "$dev"
             fi
         fi
         echo
     else
-        echo "Invalid input"
+        printf "Invalid input\n"
     fi
 
-    printf "$prompt"
+    printf "%s" "$prompt"
     read -r input
 done
 
