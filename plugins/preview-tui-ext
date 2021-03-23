@@ -47,7 +47,7 @@
 #
 #     $ NNN_FIFO=/tmp/nnn.fifo nnn
 #
-#   Then in `nnn`, launch the `preview-tui` plugin.
+#   Then in `nnn`, launch the `preview-tui-ext` plugin.
 #
 #   If you provide the same NNN_FIFO to all nnn instances, there will be a
 #   single common preview window. If you provide different FIFO path (e.g.
@@ -76,7 +76,8 @@ USE_PISTOL="${USE_PISTOL:-0}"
 PAGER="${PAGER:-less -P?n -R}"
 ARCHIVES="$(echo "$NNN_ARCHIVE" | sed 's/.*(\(.*\)).*/\1/;s/|/ /g')"
 TMPDIR="${TMPDIR:-/tmp}"
-NNN_PREVIEWDIR="${NNN_PREVIEWDIR:-$XDG_CACHE_HOME}/nnn/previews"
+# Consider setting NNN_PREVIEWDIR to $XDG_CACHE_DIR if you want to keep previews on disk between reboots
+NNN_PREVIEWDIR="${NNN_PREVIEWDIR:-$TMPDIR}/nnn/previews"
 NNN_PREVIEWWIDTH="${NNN_PREVIEWWIDTH:-1920}"
 NNN_PREVIEWHEIGHT="${NNN_PREVIEWHEIGHT:-1080}"
 NUMPREVIEWTUI="$(($(find "$TMPDIR" -maxdepth 1 -name 'nnn-preview-tui-pagerpid*' 2>/dev/null | wc -l) + 1))"
