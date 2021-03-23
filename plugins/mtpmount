@@ -1,0 +1,66 @@
+#!/usr/bin/env sh
+
+# Description: Toggle mount of MTP device (eg. Android device)
+#              'l' to list mountable devices
+#              'n' integer associated to device to mount
+#              'q'/'Return' exit
+#
+# Notes: The MTP device should be mounted at /run/user/$UID/gvfs.
+#        Put /run/user/$UID/gvfs to bookmark entries (NNN_BMS) for faster access.
+#        Make sure the device is unlocked when mounting.
+#
+#        When doing copy-paste into MTP device, you will get an error like this:
+#            cp: preserving times for './gambar1.png': Operation not supported
+#        That just means the file is copied but timestamp won't be preserved.
+#        It's like doing `cp -p localfile.txt file-to-SMB.txt`.
+#
+# Dependencies: gvfs-mtp
+#
+# Shell: POSIX compliant
+# Author: Benawi Adha
+
+prompt="Device number ('l' to list): "
+
+function lsmtp() {
+    DEVS=( $(gio mount -li | grep -e activation_root | sed 's/activation_root=//g') )
+    c=1
+    echo
+    echo "Devices list:"
+    for i in $DEVS; do
+        echo $c $i
+        (( c++ ))
+    done
+    echo
+}
+
+lsmtp
+printf "$prompt"
+read -r input
+
+
+while [ -n "$input" ]
+do
+    if [ "$input" = "l" ]; then
+        lsmtp
+    elif [ "$input" = "q" ] || [ "$input" -eq 0 ]; then
+        exit
+    elif [ "$input" -le ${#DEVS[@]} ] 2>/dev/null; then
+        dev=${DEVS[$((input-1))]}
+        if gio mount -l | grep '^Mount([1-9]).*'"$dev"; then
+            if gio mount -u "${dev}"; then
+                echo "${dev} unmounted"
+            fi
+        else
+            if gio mount "${dev}"; then
+                echo "${dev} mounted to /run/user/${UID}/gvfs"
+            fi
+        fi
+        echo
+    else
+        echo "Invalid input"
+    fi
+
+    printf "$prompt"
+    read -r input
+done
+
