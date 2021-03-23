@@ -45,6 +45,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [moclyrics](moclyrics) | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
 | [mocplay](mocplay) | Append (and/or play) selection/dir/file in moc | sh | [moc](http://moc.daper.net/) |
 | [mp3conv](mp3conv) | Extract audio from multimedia as mp3 | sh | ffmpeg |
+| [mtpmount](mtpmount) | Toggle mount of MTP device (eg. Android) | sh | gvfs-mtp |
 | [nbak](nbak) | Backs up `nnn` config | sh | tar, awk, mktemp |
 | [nmount](nmount) | Toggle mount status of a device as normal user | sh | pmount, udisks2 |
 | [nuke](nuke) | Sample file opener (CLI-only by default) | sh | _see in-file docs_ |
