@@ -23,7 +23,7 @@ cleanup() {
 }
 
 if [ -f "$sel" ]; then
-    targets=$(sed -e 's/\x0/\n/g;$a\' "$sel" | \
+    targets=$(sed -e "s/\\x0/\\n/g;\$a\\" "$sel" | \
         while read -r i; do
             basename "$i";
         done)
