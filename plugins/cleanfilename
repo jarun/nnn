@@ -3,7 +3,7 @@
 # Description: Clean filename to be more shell-friendly.
 #              This basically replacing any non A-Za-z0-9._- char
 #              to underscore (_).
-# 
+#
 #              Although the name is cleanfilename, but it should work
 #              on directories too.
 #
@@ -24,7 +24,7 @@ cleanup() {
 
 if [ -f "$sel" ]; then
     targets=$(sed -e 's/\x0/\n/g;$a\' "$sel" | \
-        while read i; do
+        while read -r i; do
             basename "$i";
         done)
 else
