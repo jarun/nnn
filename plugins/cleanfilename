@@ -20,7 +20,6 @@ IFS='
 
 cleanup() {
     printf "%s" "$1" | sed -e 's/[^A-Za-z0-9._-]/_/g'
-    echo
 }
 
 if [ -f "$sel" ]; then
