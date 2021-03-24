@@ -7,6 +7,8 @@ Before suggesting changes, please read a bit about [the design principles nnn fo
 
 `nnn` follows the Linux kernel coding style closely. The C source code uses TABs and the plugins use 4 spaces for indentation.
 
+CI runs `shellcheck` on plugins. Please watch out for any failures if you are modifying/adding a plugin.
+
 ## Resources
 The [wiki](https://github.com/jarun/nnn/wiki/Developer-guides) has some resources for developers you might be interested in: building, debugging...
 
