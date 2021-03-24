@@ -20,19 +20,19 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [bookmarks](bookmarks) | Use named bookmarks managed with symlinks | sh | fzf |
 | [boom](boom) | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs, mktemp |
-| [cleanfilename](cleanfilename) | Clean filename to be more shell-friendly | sh | sed |
-| [dups](dups) | List non-empty duplicate files in current dir | bash | find, md5sum,<br>sort uniq xargs |
 | [chksum](chksum) | Create and verify checksums | sh | md5sum,<br>sha256sum |
+| [cleanfilename](cleanfilename) | Clean filename to be more shell-friendly | sh | sed |
 | [diffs](diffs) | Diff for selection (limited to 2 for directories) | sh | vimdiff, mktemp |
 | [dragdrop](dragdrop) | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
+| [dups](dups) | List non-empty duplicate files in current dir | bash | find, md5sum,<br>sort uniq xargs |
 | [finder](finder) | Run custom find command and list | sh | - |
 | [fzcd](fzcd) | Change to the directory of a fuzzy-selected file/dir | sh | fzf |
 | [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |
 | [fzopen](fzopen) | Fuzzy find a file in dir subtree and edit or open | sh | fzf, xdg-open |
 | [fzz](fzz) | Change to any directory in the z database with fzf | sh | fzf, z |
 | [getplugs](getplugs) | Update plugins to installed `nnn` version | sh | curl |
-| [gutenread](gutenread) | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
 | [gpg\*](gpg\*) | Encrypt/decrypt files using GPG | sh | gpg |
+| [gutenread](gutenread) | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
 | [hexview](hexview) | View a file in hex in `$PAGER` | sh | [hx](https://github.com/krpors/hx)/xxd |
 | [imgresize](imgresize) | Resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |
 | [imgthumb](imgthumb) | View thumbnail of an image or dir of images | sh | [lsix](https://github.com/hackerb9/lsix) |
@@ -61,6 +61,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [pskill](pskill) | Fuzzy list by name and kill process or zombie | sh | fzf, ps, sudo/doas |
 | [renamer](renamer) | Batch rename selection or files in dir | sh | [qmv](https://www.nongnu.org/renameutils/)/[vidir](https://joeyh.name/code/moreutils/) |
 | [ringtone](ringtone) | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
+| [rsynccp](rsynccp) | Gives copy-paste verbose progress percentage | sh | rsync |
 | [splitjoin](splitjoin) | Split file or join selection | sh | split, cat |
 | [suedit](suedit) | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
 | [togglex](togglex) | Toggle executable mode for selection | sh | chmod |
@@ -68,7 +69,6 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [uidgid](uidgid) | List user and group of all files in dir | sh | ls, less |
 | [upgrade](upgrade) | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
 | [upload](upload) | Upload to Firefox Send or ix.io (text) or file.io (bin) | sh | [ffsend](https://github.com/timvisee/ffsend), curl, jq, tr |
-| [rsynccp](rsynccp) | Gives copy-paste verbose progress percentage | sh | rsync |
 | [vidthumb](vidthumb) | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
 | [wall](wall) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 | [x2sel](x2sel) | Copy `\n`-separated file list from system clipboard to sel | sh | _see in-file docs_ |
