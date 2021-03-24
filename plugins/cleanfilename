@@ -1,13 +1,14 @@
 #!/usr/bin/env sh
 
-# Description: Clean filename to be more shell-friendly.
-#              This basically replacing any non A-Za-z0-9._- char
-#              to underscore (_).
+# Description: Clean filename (either hovered or selections)
+#              to be more shell-friendly.
+#              This script replaces any non A-Za-z0-9._- char
+#              with underscore (_).
 #
-#              Although the name is cleanfilename, but it should work
+#              Although the name is 'cleanfilename', but it should work
 #              on directories too.
 #
-# Dependencies: -
+# Dependencies: sed
 #
 # Shell: POSIX compliant
 # Author: Benawi Adha
