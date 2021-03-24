@@ -1,0 +1,56 @@
+#!/usr/bin/env sh
+
+# Description: Clean filename to be more shell-friendly.
+#              This basically replacing any non A-Za-z0-9._- char
+#              to underscore (_).
+# 
+#              Although the name is cleanfilename, but it should work
+#              on directories too.
+#
+# Dependencies: -
+#
+# Shell: POSIX compliant
+# Author: Benawi Adha
+
+prompt=true
+sel=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+IFS='
+'
+
+cleanup() {
+    printf "%s" "$1" | sed -e 's/[^A-Za-z0-9._-]/_/g'
+    echo
+}
+
+if [ -f "$sel" ]; then
+    targets=$(sed -e 's/\x0/\n/g;$a\' "$sel" | \
+        while read i; do
+            basename "$i";
+        done)
+else
+    targets=$1
+fi
+
+for i in $targets; do
+    printf "%s --> %s\n" "$i" "$(cleanup "$i")";
+done
+
+if $prompt; then
+    echo
+    printf "Proceed [Yn]? "
+    read -r input
+    case "$input" in
+        y|Y|'')
+            ;;
+        *)
+            echo "Canceled"
+            exit
+            ;;
+    esac
+fi
+
+for i in $targets; do
+    if [ "$i" != "$(cleanup "$i")" ]; then
+        mv "$i" "$(cleanup "$i")";
+    fi
+done
