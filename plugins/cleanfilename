@@ -51,7 +51,7 @@ fi
 for i in $targets; do
     if [ "$i" != "$(cleanup "$i")" ]; then
         tmp=''
-        if [ -f "$(cleanup "$i")" ]; then
+        if [ -e "$(cleanup "$i")" ]; then
             tmp='_'
         fi
         mv "$i" "$tmp$(cleanup "$i")";
