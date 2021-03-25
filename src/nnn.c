@@ -3884,12 +3884,12 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 					addstr("  ");
 				break;
 			case 's':
-				len = sizes.maxsizeln + 3 - (sizeind ? 1 : (uint_t)xstrlen(size));
+				len = sizes.maxsizeln + 3 - (sizeind ? 1 : xstrlen(size));
 				while(--len)
 					addch(' ');
 				break;
 			case 'n':
-				len = sizes.maxnameln + (!nameind ? 2 : 1)  - (uint_t)xstrlen(ent->name);
+				len = sizes.maxnameln + (!nameind ? 2 : 1)  - xstrlen(ent->name);
 				while(--len)
 					addch(' ');
 				break;
@@ -3897,9 +3897,9 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 			case 'o':
 				len = sizes.maxownln + 2;
 				if (pws)
-					len -= (uint)xstrlen(pws);
+					len -= xstrlen(pws);
 				if (grs)
-					len -= (uint)xstrlen(grs);
+					len -= xstrlen(grs);
 				while(--len)
 					addch(' ');
 				break;
