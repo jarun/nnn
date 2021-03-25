@@ -3705,7 +3705,9 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 			: (g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS));
 	int nattrs = attrs;
 	size_t len;
-	char *size, *pws, *grs;
+	char *size = NULL;
+	char *pws = NULL;
+	char *grs = NULL;
 	char selgap[] = " ";
 	if (ent->flags & FILE_SELECTED)
 		selgap[1] = '+';
@@ -3890,7 +3892,11 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 				break;
 #ifndef NOUG
 			case 'o':
-				len = sizes.maxownln + 2 - (uint)(xstrlen(pws) + xstrlen(grs));
+				len = sizes.maxownln + 2;
+				if (pws)
+					len -= (uint)xstrlen(pws);
+				if (grs)
+					len -= (uint)xstrlen(grs);
 				while(--len)
 					addch(' ');
 				break;
@@ -5942,14 +5948,30 @@ static void redraw(char *path)
 		g_state.dircolor = 1;
 	}
 
+#ifndef NOUG
+	struct passwd *pw;
+	struct group  *gr;
+	size_t uidlen;
+	size_t gidlen;
+#endif
 	sizes.maxnameln = sizes.maxsizeln = sizes.maxownln = 0;
 	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
 	{
+#ifndef NOUG
+		pw = getpwuid(pdents[i].uid);
+		if (pw)
+			uidlen = strlen(pw->pw_name);
+		else
+			uidlen = 0;
+		if (gr)
+			gidlen = strlen(gr->gr_name);
+		else
+			uidlen = 0;
+#endif
 		sizes.maxnameln = pdents[i].nlen > sizes.maxnameln ? pdents[i].nlen : sizes.maxnameln;
 	  sizes.maxsizeln = strlen(coolsize(cfg.blkorder ? pdents[i].blocks << blk_shift : pdents[i].size)) > sizes.maxsizeln
 			? strlen(coolsize(cfg.blkorder ? pdents[i].blocks << blk_shift : pdents[i].size)) : sizes.maxsizeln;
-    sizes.maxownln = (strlen(getpwuid(pdents[i].uid)->pw_name) + strlen(getgrgid(pdents[i].gid)->gr_name) + 1) > sizes.maxownln
-			? (strlen(getpwuid(pdents[i].uid)->pw_name) + strlen(getgrgid(pdents[i].gid)->gr_name) + 1) : sizes.maxownln;
+    sizes.maxownln = (uidlen ? uidlen : 1) + gidlen ? gidlen : 1;
 	}
 	sizes.maxentln = sizes.maxnameln + sizes.maxownln + sizes.maxsizeln + 20;
 
