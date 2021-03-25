@@ -5961,8 +5961,8 @@ static void redraw(char *path)
 	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
 	{
 #ifndef NOUG
-		getpwuid(pdents[i].uid);
-		getgrgid(pdents[i].gid);
+		pw = getpwuid(pdents[i].uid);
+		gr = getgrgid(pdents[i].gid);
 		if (pw)
 			uidlen = strlen(pw->pw_name);
 		if (gr)
