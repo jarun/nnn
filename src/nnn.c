@@ -3591,7 +3591,7 @@ static void print_time(const time_t *timep)
 	struct tm *t = localtime(timep);
 
 	printw("%d-%02d-%02d %02d:%02d",
-	       t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
+	       t->tm_year - 100, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
 }
 
 static void printent(const struct entry *ent, uint_t namecols, bool sel)
@@ -5968,7 +5968,7 @@ static void redraw(char *path)
 		sizes.maxnameln = pdents[i].nlen > sizes.maxnameln ? pdents[i].nlen : sizes.maxnameln;
 	  sizes.maxsizeln = strlen(coolsize(cfg.blkorder ? pdents[i].blocks << blk_shift : pdents[i].size)) > sizes.maxsizeln
 			? strlen(coolsize(cfg.blkorder ? pdents[i].blocks << blk_shift : pdents[i].size)) : sizes.maxsizeln;
-    sizes.maxownln = (uidlen ? uidlen : 1) + gidlen ? gidlen : 1;
+    sizes.maxownln = (uidlen ? uidlen : 1) + (gidlen ? gidlen : 1);
 	}
 	sizes.maxentln = sizes.maxnameln + sizes.maxownln + sizes.maxsizeln + 20;
 
