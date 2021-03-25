@@ -5954,7 +5954,7 @@ static void redraw(char *path)
 #ifndef NOUG
 	struct passwd *pw;
 	struct group *gr;
-	size_t uidlen, gidlen;
+	size_t uidlen = 0, gidlen = 0;
 #endif
 
 	sizes.maxnameln = sizes.maxsizeln = sizes.maxownln = 0;
