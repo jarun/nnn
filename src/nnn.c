@@ -237,6 +237,10 @@
 #define FREE 0
 #define CAPACITY 1
 
+/* Default detail mode columns */
+#define DEFAULTDCOLS "tpsn"
+#define ALLOWEDDCOLS "tpPsno"
+
 /* TYPE DEFINITIONS */
 typedef unsigned int uint_t;
 typedef unsigned char uchar_t;
@@ -355,6 +359,12 @@ typedef struct {
 } session_header_t;
 #endif
 
+typedef struct {
+	size_t maxnameln;
+	size_t maxsizeln;
+	size_t maxownln;
+	size_t maxentln;
+} column_sizes;
 /* GLOBALS */
 
 /* Configuration, contexts */
@@ -415,9 +425,11 @@ static char *listroot;
 static char *plgpath;
 static char *pnamebuf, *pselbuf;
 static char *mark;
+static char *dcols;
 #ifndef NOFIFO
 static char *fifopath;
 #endif
+static size_t ndcols;
 static unsigned long long *ihashbmp;
 static struct entry *pdents;
 static blkcnt_t ent_blocks;
@@ -435,6 +447,7 @@ static pcre *archive_pcre;
 #else
 static regex_t archive_re;
 #endif
+static column_sizes sizes;
 
 /* Retain old signal handlers */
 static struct sigaction oldsighup;
@@ -3686,49 +3699,43 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 {
 	bool ln = FALSE;
-	char ind1 = '\0', ind2 = '\0';
+	char nameind = '\0', sizeind = '\0';
 	uchar_t pair = 0;
 	int attrs = sel ? (A_REVERSE | (g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS)))
 			: (g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS));
-	uint_t len;
-	char *size;
-	char selgap[] = "  ";
-
+	int nattrs = attrs;
+	size_t len;
+	char *size, *pws, *grs;
+	char selgap[] = " ";
 	if (ent->flags & FILE_SELECTED)
 		selgap[1] = '+';
 
+#ifndef NOUG
+	struct passwd *pw = getpwuid(ent->uid);
+	struct group  *gr = getgrgid(ent->gid);
+			if (pw)
+				pws = pw->pw_name;
+			if (gr)
+				grs = gr->gr_name;
+#endif
+
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
-
-	addch(' ');
-
-	if (attrs)
-		attron(attrs);
-
-	/* Timestamp */
-	print_time(&ent->t);
-
-	addstr("  ");
-
-	/* Permissions */
-	addch('0' + ((ent->mode >> 6) & 7));
-	addch('0' + ((ent->mode >> 3) & 7));
-	addch('0' + (ent->mode & 7));
 
 	switch (ent->mode & S_IFMT) {
 	case S_IFDIR:
 		pair = C_DIR;
 		if (!g_state.oldcolor) {
-			attrs |= A_BOLD;
+			nattrs |= A_BOLD;
 			if (g_state.dirctx)
 				pair = cfg.curctx + 1;
 		}
-		ind2 = '/'; // fallthrough
+		nameind = '/'; // fallthrough
 	case S_IFREG:
-		if (!ind2) {
+		if (!nameind) {
 			if (ent->mode & 0100) {
 				pair = C_EXE;
-				ind2 = '*';
+				nameind = '*';
 			}
 
 			if (ent->flags & HARD_LINK) {
@@ -3740,99 +3747,159 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 				pair = C_UND;
 			else if (!pair)
 				pair = C_FIL;
-
-			if (!ind2) /* Add a column if end indicator is not needed */
-				++namecols;
 		}
-
-		size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
-		len = 10 - (uint_t)xstrlen(size);
-		while (--len)
-			addch(' ');
-		addstr(size);
 		break;
 	case S_IFLNK:
 		ln = TRUE;
 		pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
-		ind1 = '@';
-		ind2 = (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@';
-		if (ind2 == '/' && !g_state.oldcolor)
-			attrs |= A_BOLD; // fallthrough
+		sizeind = '@';
+		nameind = (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@';
+		if (nameind == '/' && !g_state.oldcolor)
+			nattrs |= A_BOLD; // fallthrough
 	case S_IFSOCK:
-		if (!ind1) {
+		if (!sizeind) {
 			pair = C_SOC;
-			ind1 = ind2 = '=';
+			sizeind = nameind = '=';
 		} // fallthrough
 	case S_IFIFO:
-		if (!ind1) {
+		if (!sizeind) {
 			pair = C_PIP;
-			ind1 = ind2 = '|';
+			sizeind = nameind = '|';
 		} // fallthrough
 	case S_IFBLK:
-		if (!ind1) {
+		if (!sizeind) {
 			pair = C_BLK;
-			ind1 = 'b';
+			sizeind = 'b';
 		} // fallthrough
 	case S_IFCHR:
-		if (!ind1) {
+		if (!nameind) {
 			pair = C_CHR;
-			ind1 = 'c';
+			sizeind = 'c';
 		} // fallthrough
 	default:
-		if (!ind1) {
+		if (!nameind) {
 			pair = C_UND;
-			ind1 = ind2 = '?';
+			sizeind = nameind = '?';
 		}
-		addstr("        ");
-		addch(ind1);
 		break;
 	}
-
-	if (g_state.oldcolor) {
-		if (!sel)
-			attroff(A_DIM);
-		addstr(selgap);
-		if (!ln) {
-			attroff(A_DIM);
-			attrs ^= A_DIM;
-		}
-	} else {
-		if (!sel)
-			attroff(COLOR_PAIR(C_MIS));
-#ifndef ICONS_ENABLED
-		addstr(selgap);
-#endif
-		if (ent->flags & FILE_MISSING)
-			pair = C_MIS;
-		else {
-			attroff(COLOR_PAIR(C_MIS));
-			attrs ^= (COLOR_PAIR(C_MIS));
-		}
-
-		if (pair && fcolors[pair])
-			attrs |= COLOR_PAIR(pair);
-#ifdef ICONS_ENABLED
-		attroff(attrs);
-		addstr(selgap);
-		if (sel)
-			attrs &= ~A_REVERSE;
-		print_icon(ent, attrs);
-		if (sel)
-			attrs |= A_REVERSE;
-#endif
+	for (size_t i = 0; i < ndcols; i++) {
+		attroff(nattrs);
 		attron(attrs);
-	}
+		switch(dcols[i]) {
+		case 't':
+			/* Timestamp */
+			print_time(&ent->t);
+			break;
+		case 'p':
+			/* Permissions */
+			addch('0' + ((ent->mode >> 6) & 7));
+			addch('0' + ((ent->mode >> 3) & 7));
+			addch('0' + (ent->mode & 7));
+			break;
+		case 'P':
+			/* Long permissions */
+			addstr(get_lsperms(ent->mode));
+			break;
+		case 's':
+			if (!sizeind)
+				addstr((size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size)));
+			else
+				addch(sizeind);
+			break;
+		case 'n':
+			if (g_state.oldcolor) {
+				if (!sel)
+					attroff(A_DIM);
+				addstr(selgap);
+				if (!ln) {
+					attroff(A_DIM);
+					nattrs ^= A_DIM;
+				}
+			} else {
+				if (!sel)
+					attroff(COLOR_PAIR(C_MIS));
+#ifndef ICONS_ENABLED
+				addstr(selgap);
+#endif
+				if (ent->flags & FILE_MISSING)
+					pair = C_MIS;
+				else {
+					attroff(COLOR_PAIR(C_MIS));
+					nattrs ^= (COLOR_PAIR(C_MIS));
+				}
+
+				if (pair && fcolors[pair])
+					nattrs |= COLOR_PAIR(pair);
+#ifdef ICONS_ENABLED
+				attroff(nattrs);
+				addstr(selgap);
+				if (sel)
+					nattrs &= ~A_REVERSE;
+				print_icon(ent, nattrs);
+				if (sel)
+					nattrs |= A_REVERSE;
+#endif
+				attron(nattrs);
+			}
 
 #ifndef NOLOCALE
-	addwstr(unescape(ent->name, namecols));
+			addwstr(unescape(ent->name, sizes.maxnameln));
 #else
-	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
+			addstr(unescape(ent->name, MIN(sizes.maxnameln, ent->nlen) + 1));
 #endif
 
-	if (attrs)
-		attroff(attrs);
-	if (ind2)
-		addch(ind2);
+			if (nameind) {
+				if (!sel) {
+					attroff(nattrs);
+				}
+				addch(nameind);
+			}
+			break;
+#ifndef NOUG
+		case 'o':
+			if (pws)
+				addstr(pws);
+			else
+				addch('-');
+			addch(':');
+			if (grs)
+				addstr(grs);
+			else
+				addch('-');
+			break;
+#endif
+		}
+
+		if (i != ndcols - 1) {
+			switch(dcols[i]) {
+			case 't':
+			case 'p':
+			case 'P':
+					addstr("  ");
+				break;
+			case 's':
+				len = sizes.maxsizeln + 3 - (sizeind ? 1 : (uint_t)xstrlen(size));
+				while(--len)
+					addch(' ');
+				break;
+			case 'n':
+				len = sizes.maxnameln + (!nameind ? 2 : 1)  - (uint_t)xstrlen(ent->name);
+				while(--len)
+					addch(' ');
+				break;
+#ifndef NOUG
+			case 'o':
+				len = sizes.maxownln + 2 - (uint)(xstrlen(pws) + xstrlen(grs));
+				while(--len)
+					addch(' ');
+				break;
+#endif
+			}
+		}
+	}
+	attroff(attrs);
+	attroff(nattrs);
 	addch('\n');
 }
 
@@ -5726,7 +5793,7 @@ static int adjust_cols(int ncols)
 	/* Calculate the number of cols available to print entry name */
 	if (cfg.showdetail) {
 		/* Fallback to light mode if less than 35 columns */
-		if (ncols < 36) {
+		if (ncols < (int)sizes.maxentln) {
 			cfg.showdetail ^= 1;
 			printptr = &printent;
 		} else {
@@ -5874,6 +5941,17 @@ static void redraw(char *path)
 		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		g_state.dircolor = 1;
 	}
+
+	sizes.maxnameln = sizes.maxsizeln = sizes.maxownln = 0;
+	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
+	{
+		sizes.maxnameln = pdents[i].nlen > sizes.maxnameln ? pdents[i].nlen : sizes.maxnameln;
+	  sizes.maxsizeln = strlen(coolsize(cfg.blkorder ? pdents[i].blocks << blk_shift : pdents[i].size)) > sizes.maxsizeln
+			? strlen(coolsize(cfg.blkorder ? pdents[i].blocks << blk_shift : pdents[i].size)) : sizes.maxsizeln;
+    sizes.maxownln = (strlen(getpwuid(pdents[i].uid)->pw_name) + strlen(getgrgid(pdents[i].gid)->gr_name) + 1) > sizes.maxownln
+			? (strlen(getpwuid(pdents[i].uid)->pw_name) + strlen(getgrgid(pdents[i].gid)->gr_name) + 1) : sizes.maxownln;
+	}
+	sizes.maxentln = sizes.maxnameln + sizes.maxownln + sizes.maxsizeln + 20;
 
 	/* Print listing */
 	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
@@ -7947,6 +8025,19 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 #endif
+
+	dcols = xgetenv("NNN_DCOLUMNS", DEFAULTDCOLS);
+	ndcols = strlen(dcols);
+	if (strcmp(dcols, DEFAULTDCOLS) != 0) {
+		size_t j = ndcols;
+		for (size_t i = 0; i < j; i++)
+			if (!strchr(ALLOWEDDCOLS, dcols[i])) {
+					memmove(&dcols[i], &dcols[i + 1], ndcols - i);
+					i--;
+					j--;
+			}
+		ndcols = j;
+	}
 
 	/* Configure trash preference */
 	opt = xgetenv_val(env_cfg[NNN_TRASH]);
