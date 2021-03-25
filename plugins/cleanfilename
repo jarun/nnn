@@ -1,12 +1,11 @@
 #!/usr/bin/env sh
 
-# Description: Clean filename (either hovered or selections)
+# Description: Clean filename or dirname (either hovered or selections)
 #              to be more shell-friendly.
 #              This script replaces any non A-Za-z0-9._- char
 #              with underscore (_).
 #
-#              Although the name is 'cleanfilename', but it should work
-#              on directories too.
+#              LIMITATION: Won't work with filename that contains newline
 #
 # Dependencies: sed
 #
@@ -51,6 +50,10 @@ fi
 
 for i in $targets; do
     if [ "$i" != "$(cleanup "$i")" ]; then
-        mv "$i" "$(cleanup "$i")";
+        tmp=''
+        if [ -e "$(cleanup "$i")" ]; then
+            tmp='_'
+        fi
+        mv "$i" "$tmp$(cleanup "$i")";
     fi
 done
