@@ -5952,19 +5952,22 @@ static void redraw(char *path)
 	}
 
 #ifndef NOUG
-	struct passwd *pw = getpwuid(pdents[i].uid);
-	struct group *gr = getgrgid(pdents[i].gid);
-	size_t uidlen = 0;
-	size_t gidlen = 0;
-		if (pw)
-			uidlen = strlen(pw->pw_name);
-		if (gr)
-			gidlen = strlen(gr->gr_name);
+	struct passwd *pw;
+	struct group *gr;
+	size_t uidlen, gidlen;
 #endif
 
 	sizes.maxnameln = sizes.maxsizeln = sizes.maxownln = 0;
 	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
 	{
+#ifndef NOUG
+		getpwuid(pdents[i].uid);
+		getgrgid(pdents[i].gid);
+		if (pw)
+			uidlen = strlen(pw->pw_name);
+		if (gr)
+			gidlen = strlen(gr->gr_name);
+#endif
 		sizes.maxnameln = pdents[i].nlen > sizes.maxnameln ? pdents[i].nlen : sizes.maxnameln;
 	  sizes.maxsizeln = strlen(coolsize(cfg.blkorder ? pdents[i].blocks << blk_shift : pdents[i].size)) > sizes.maxsizeln
 			? strlen(coolsize(cfg.blkorder ? pdents[i].blocks << blk_shift : pdents[i].size)) : sizes.maxsizeln;
