@@ -5865,7 +5865,7 @@ static void redraw(char *path)
 	/* Go to first entry */
 	if (curscroll > 0) {
 		move(1, 0);
-		addch('^');
+		addstr("↑");
 	}
 
 	move(2, 0);
@@ -5888,7 +5888,7 @@ static void redraw(char *path)
 	/* Go to first entry */
 	if (i < ndents) {
 		move(xlines - 2, 0);
-		addch('v');
+		addstr("↓");
 	}
 
 	statusbar(path);
