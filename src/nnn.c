@@ -3833,6 +3833,9 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 
 				if (pair && fcolors[pair])
 					nattrs |= COLOR_PAIR(pair);
+
+				if (!nameind)
+					++namecols;
 #ifdef ICONS_ENABLED
 				attroff(nattrs);
 				addstr(selgap);
@@ -3846,9 +3849,9 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 			}
 
 #ifndef NOLOCALE
-			addwstr(unescape(ent->name, sizes.maxnameln));
+			addwstr(unescape(ent->name, namecols));
 #else
-			addstr(unescape(ent->name, MIN(sizes.maxnameln, ent->nlen) + 1));
+			addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
 #endif
 
 			if (nameind) {
