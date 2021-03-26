@@ -3894,7 +3894,7 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 				len = sizes.maxsizeln + 2 - (sizeind ? 1 : xstrlen(size));
 				break;
 			case 'n':
-				len = sizes.maxnameln + (!nameind ? 1 : 0)  - xstrlen(ent->name);
+				len = MIN(namecols,sizes.maxnameln) + (!nameind ? 1 : 0)  - MIN(namecols,xstrlen(ent->name));
 				break;
 #ifndef NOUG
 			case 'o':
