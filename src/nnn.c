@@ -6028,9 +6028,7 @@ begin:
 
 	populate(path, lastname);
 	if (g_state.interrupt) {
-		g_state.interrupt = 0;
-		cfg.apparentsz = 0;
-		cfg.blkorder = 0;
+		g_state.interrupt = cfg.apparentsz = cfg.blkorder = 0;
 		blk_shift = BLK_SHIFT_512;
 		presel = CONTROL('L');
 	}
