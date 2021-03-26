@@ -3891,17 +3891,19 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 					addstr("  ");
 				break;
 			case 's':
-				len = sizes.maxsizeln + 3 - (sizeind ? 1 : xstrlen(size));
+				len = sizes.maxsizeln + 2 - (sizeind ? 1 : xstrlen(size));
 				break;
 			case 'n':
 				len = sizes.maxnameln + (!nameind ? 1 : 0)  - xstrlen(ent->name);
 				break;
 #ifndef NOUG
 			case 'o':
-				len = sizes.maxownln + 1 - xstrlen(pws ? pws : uidbuf) - xstrlen(grs ? grs : gidbuf);
+				len = sizes.maxownln + 2 - xstrlen(pws ? pws : uidbuf) - xstrlen(grs ? grs : gidbuf);
 				break;
 #endif
 			}
+				if (i < ndcols - 1 && dcols[i+1] == 'n' && len > 0)
+					len--;
 				if (len)
 					while(len--)
 						addch(' ');
