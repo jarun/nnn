@@ -5608,7 +5608,7 @@ static bool set_time_type(int *presel)
 static void statusbar(char *path)
 {
 	int i = 0, extnlen = 0;
-	char *ptr;
+	char *ptr, guidbuf[5];
 	pEntry pent = &pdents[cur];
 
 	if (!ndents) {
@@ -5673,14 +5673,18 @@ static void statusbar(char *path)
 
 			if (pw)
 				addstr(pw->pw_name);
-			else
-				addch('-');
-			addch(' ');
+			else {
+				sprintf(guidbuf, "%d", pent->uid);
+				addstr(guidbuf);
+			}
+			addch(':');
 
 			if (gr)
 				addstr(gr->gr_name);
-			else
-				addch('-');
+			else {
+				sprintf(guidbuf, "%d", pent->gid);
+				addstr(guidbuf);
+			}
 			addch(' ');
 		}
 #endif
