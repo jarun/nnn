@@ -3708,9 +3708,7 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 	char *size = NULL;
 	char *pws = NULL;
 	char *grs = NULL;
-	char selgap[] = " ";
-	if (ent->flags & FILE_SELECTED)
-		selgap[1] = '+';
+	char uidbuf[5], gidbuf[5];
 
 #ifndef NOUG
 	struct passwd *pw = getpwuid(ent->uid);
@@ -3723,6 +3721,9 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
+
+	if (dcols[0] != 'n')
+		addch(' ');
 
 	switch (ent->mode & S_IFMT) {
 	case S_IFDIR:
@@ -3813,7 +3814,7 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 			if (g_state.oldcolor) {
 				if (!sel)
 					attroff(A_DIM);
-				addstr(selgap);
+				addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 				if (!ln) {
 					attroff(A_DIM);
 					nattrs ^= A_DIM;
@@ -3822,7 +3823,8 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 				if (!sel)
 					attroff(COLOR_PAIR(C_MIS));
 #ifndef ICONS_ENABLED
-				addstr(selgap);
+				attroff(nattrs);
+				addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 #endif
 				if (ent->flags & FILE_MISSING)
 					pair = C_MIS;
@@ -3838,7 +3840,7 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 					++namecols;
 #ifdef ICONS_ENABLED
 				attroff(nattrs);
-				addstr(selgap);
+				addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 				if (sel)
 					nattrs &= ~A_REVERSE;
 				print_icon(ent, nattrs);
@@ -3865,17 +3867,22 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 		case 'o':
 			if (pws)
 				addstr(pws);
-			else
-				addch('-');
+			else {
+				sprintf(uidbuf, "%d", ent->uid);
+				addstr(uidbuf);
+			}
 			addch(':');
 			if (grs)
 				addstr(grs);
-			else
-				addch('-');
+			else {
+				sprintf(gidbuf, "%d", ent->uid);
+				addstr(gidbuf);
+			}
 			break;
 #endif
 		}
 
+		len = 0;
 		if (i != ndcols - 1) {
 			switch(dcols[i]) {
 			case 't':
@@ -3885,26 +3892,19 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 				break;
 			case 's':
 				len = sizes.maxsizeln + 3 - (sizeind ? 1 : xstrlen(size));
-				while(--len)
-					addch(' ');
 				break;
 			case 'n':
-				len = sizes.maxnameln + (!nameind ? 2 : 1)  - xstrlen(ent->name);
-				while(--len)
-					addch(' ');
+				len = sizes.maxnameln + (!nameind ? 1 : 0)  - xstrlen(ent->name);
 				break;
 #ifndef NOUG
 			case 'o':
-				len = sizes.maxownln + 2;
-				if (pws)
-					len -= xstrlen(pws);
-				if (grs)
-					len -= xstrlen(grs);
-				while(--len)
-					addch(' ');
+				len = sizes.maxownln + 1 - xstrlen(pws ? pws : uidbuf) - xstrlen(grs ? grs : gidbuf);
 				break;
 #endif
 			}
+				if (len)
+					while(len--)
+						addch(' ');
 		}
 	}
 	attroff(attrs);
