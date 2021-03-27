@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 
 # Description: Clean filename or dirname (either hovered or selections)
-#              to be more shell-friendly. This script replaces
-#              any "weird" character (any char not A-Za-z0-9._-) with underscore (_).
+#              to be more shell-friendly. This script cleans
+#              any character which is not A-Za-z0-9._-
+#              and replaces it with underscore (_).
 #
-#              It supports replacing single/double quote, newline,
+#              It supports cleaning single/double quote, newline,
 #              leading, trailing spaces.
 #
 #              eg.
 #              to be continued (つづく).mp4  -> to_be_continued______.mp4
 #              [work] stuff.txt              -> _work__stuff.txt
+#              home's server                 -> home_s_server
 #                qwe\trty                    -> __qwe_rty
 #
 #              And if there are two almost similar filenames
