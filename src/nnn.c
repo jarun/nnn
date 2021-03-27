@@ -998,6 +998,19 @@ static char *xextension(const char *fname, size_t len)
 	return xmemrchr((uchar_t *)fname, '.', len);
 }
 
+static char *xtildaname(char *path)
+{
+  int pathlen = xstrlen(path);
+  int homelen = xstrlen(home);
+
+  if (!is_prefix(path, home, homelen))
+    return path;
+
+  char *result = (char *)malloc(pathlen - homelen);
+  sprintf(result, "~%s", path + homelen);
+  return result;
+}
+
 static inline bool getutil(char *util)
 {
 	return spawn("which", util, NULL, F_NORMAL | F_NOTRACE) == 0;
@@ -5999,7 +6012,7 @@ begin:
 
 	if (!g_state.picker) {
 		/* Set terminal window title */
-		printf("\033]2;%s (%s)\007", xbasename(path), path);
+		printf("\033]2;%s (%s)\007", xbasename(path), xtildaname(path));
 		fflush(stdout);
 	}
 
