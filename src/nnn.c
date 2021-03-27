@@ -425,7 +425,7 @@ static blkcnt_t dir_blocks;
 static ulong_t num_files;
 static kv *bookmark;
 static kv *plug;
-static uchar_t tmpfplen;
+static uchar_t tmpfplen, homelen;
 static uchar_t blk_shift = BLK_SHIFT_512;
 #ifndef NOMOUSE
 static int middle_click_key;
@@ -1129,6 +1129,23 @@ static char *abspath(const char *path, const char *cwd)
 	}
 
 	return resolved_path;
+}
+
+static bool set_tilde_in_path(char *path)
+{
+	if (is_prefix(path, home, homelen)) {
+		home[homelen] = path[homelen - 1];
+		path[homelen - 1] = '~';
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static void reset_tilde_in_path(char *path)
+{
+	path[homelen - 1] = home[homelen];
+	home[homelen] = '\0';
 }
 
 static int create_tmp_file(void)
@@ -5998,8 +6015,13 @@ begin:
 
 	if (!g_state.picker) {
 		/* Set terminal window title */
-		printf("\033]2;%s (%s)\007", xbasename(path), path);
+		r = set_tilde_in_path(path);
+
+		printf("\033]2;%s\007", r ? &path[homelen - 1] : path);
 		fflush(stdout);
+
+		if (r)
+			reset_tilde_in_path(path);
 	}
 
 	if (g_state.selmode && lastdir[0])
@@ -7810,6 +7832,7 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 	DPRINTF_S(home);
+	homelen = (uchar_t)xstrlen(home);
 
 	if (!setup_config())
 		return EXIT_FAILURE;
