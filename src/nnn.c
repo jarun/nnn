@@ -5960,7 +5960,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 	xcols = COLS;
 
 #ifndef NOSSN
-	/* set up first context */
+	/* set-up first context */
 	if (!session || !load_session(session, &path, &lastdir, &lastname, FALSE)) {
 #else
 		(void)session;
