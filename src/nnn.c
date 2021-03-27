@@ -452,10 +452,10 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 /* Non-persistent runtime states */
 static runstate g_state;
 
-/* Options to identify file mime */
+/* Options to identify file MIME */
 #if defined(__APPLE__)
 #define FILE_MIME_OPTS "-bIL"
-#elif !defined(__sun) /* no mime option for 'file' */
+#elif !defined(__sun) /* no MIME option for 'file' */
 #define FILE_MIME_OPTS "-biL"
 #endif
 
@@ -4166,7 +4166,7 @@ static bool show_stats(const char *fpath, const struct stat *sb)
 			fprintf(fp, " %s\n  ", begin);
 
 #ifdef FILE_MIME_OPTS
-			/* Show the file mime type */
+			/* Show the file MIME type */
 			get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, fpath, FALSE);
 			fprintf(fp, "%s", g_buf);
 #endif
@@ -6339,7 +6339,7 @@ nochange:
 			    && get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
 			    && is_prefix(g_buf, "text/", 5)
 #else
-			    /* no mime option; guess from description instead */
+			    /* no MIME option; guess from description instead */
 			    && get_output(g_buf, CMD_LEN_MAX, "file", "-bL", newpath, FALSE)
 			    && strstr(g_buf, "text")
 #endif
