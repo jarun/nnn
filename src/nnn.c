@@ -1994,7 +1994,7 @@ static inline uint_t xgetenv_val(const char *name)
 	return 0;
 }
 
-/* Check if a dir exists, IS a dir and is readable */
+/* Check if a dir exists, IS a dir, and is readable */
 static bool xdiraccess(const char *path)
 {
 	DIR *dirp = opendir(path);
