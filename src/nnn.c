@@ -2872,7 +2872,7 @@ static int filterentries(char *path, char *lastname)
 #endif
 		case ESC: /* Exit filter mode on Esc and Alt+key */
 			if (handle_alt_key(ch) != ERR) {
-				if (*ch == ESC) { /* Handle Alt + Esc */
+				if (*ch == ESC) { /* Handle Alt+Esc */
 					if (wln[1]) {
 						ln[REGEX_MAX - 1] = ln[1];
 						ln[1] = wln[1] = '\0';
@@ -3058,7 +3058,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 						(len - pos) * WCHAR_T_WIDTH);
 					--len, --pos;
 				} // fallthrough
-			case '\t': /* TAB breaks cursor position, ignore it */
+			case '\t': /* Tab breaks cursor position, ignore it */
 				continue;
 			case CONTROL('F'):
 				if (pos < len)
