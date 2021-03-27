@@ -1000,15 +1000,15 @@ static char *xextension(const char *fname, size_t len)
 
 static char *xtildaname(char *path)
 {
-  int pathlen = xstrlen(path);
-  int homelen = xstrlen(home);
+	int pathlen = xstrlen(path);
+	int homelen = xstrlen(home);
 
-  if (!is_prefix(path, home, homelen))
-    return path;
+	if (!is_prefix(path, home, homelen))
+		return path;
 
-  char *result = (char *)malloc(pathlen - homelen);
-  sprintf(result, "~%s", path + homelen);
-  return result;
+	char *result = (char *)malloc(pathlen - homelen);
+	sprintf(result, "~%s", path + homelen);
+	return result;
 }
 
 static inline bool getutil(char *util)
@@ -6012,10 +6012,10 @@ begin:
 
 	if (!g_state.picker) {
 		/* Set terminal window title */
-    char *nicepath = xtildaname(path);
+		char *nicepath = xtildaname(path);
 		printf("\033]2;%s (%s)\007", xbasename(path), nicepath);
 		fflush(stdout);
-    free(nicepath);
+		free(nicepath);
 	}
 
 	if (g_state.selmode && lastdir[0])
