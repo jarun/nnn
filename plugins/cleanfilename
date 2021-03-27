@@ -1,37 +1,46 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Description: Clean filename or dirname (either hovered or selections)
-#              to be more shell-friendly.
-#              This script replaces any non A-Za-z0-9._- char
-#              with underscore (_).
+#              to be more shell-friendly. This script replaces
+#              any "weird" character (any char not A-Za-z0-9._-) with underscore (_).
 #
-#              LIMITATION: Won't work with filename that contains newline
+#              It supports replacing single/double quote, newline,
+#              leading, trailing spaces.
+#
+#              eg.
+#              to be continued (つづく).mp4  -> to_be_continued______.mp4
+#              [work] stuff.txt              -> _work__stuff.txt
+#                qwe\trty                    -> __qwe_rty
+#
+#              And if there are two almost similar filenames
+#              like: 'asd]f' and 'asd f' which both will be renamed to 'asd_f',
+#              to avoid overwriting, the last file will be prepended by _.
+#              So they will be: 'asd_f' and '_asd_f'
 #
 # Dependencies: sed
 #
-# Shell: POSIX compliant
+# Shell: Bash
 # Author: Benawi Adha
 
 prompt=true
 sel=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
-IFS='
-'
 
 cleanup() {
-    printf "%s" "$1" | sed -e 's/[^A-Za-z0-9._-]/_/g'
+    # printf "%s" "$1" | sed -e 's/[^A-Za-z0-9._-]/_/g'
+    printf "%s" "$1" | sed 's/[^A-Za-z0-9._-]/_/g' | sed ':a;N;$!ba;s/\n/_/g'
 }
 
 if [ -s "$sel" ]; then
-    targets=$(sed -e "s/\\x0/\\n/g;\$a\\" "$sel" | \
-        while read -r i; do
-            basename "$i";
-        done)
+    targets=()
+    while IFS= read -r -d '' i || [ -n "$i" ]; do
+        targets+=( "$(basename "$i")" )
+    done < "$sel"
 else
-    targets=$1
+    targets=("$1")
 fi
 
-for i in $targets; do
-    printf "%s --> %s\n" "$i" "$(cleanup "$i")";
+for i in "${targets[@]}"; do
+    printf "%s -> %s\n" "$i" "$(cleanup "$i")";
 done
 
 if $prompt; then
@@ -48,7 +57,7 @@ if $prompt; then
     esac
 fi
 
-for i in $targets; do
+for i in "${targets[@]}"; do
     if [ "$i" != "$(cleanup "$i")" ]; then
         tmp=''
         if [ -e "$(cleanup "$i")" ]; then
