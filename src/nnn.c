@@ -998,7 +998,7 @@ static char *xextension(const char *fname, size_t len)
 	return xmemrchr((uchar_t *)fname, '.', len);
 }
 
-static char *xtildapath(char *path)
+static char *xtildepath(char *path)
 {
 	int pathlen = xstrlen(path);
 	int homelen = xstrlen(home);
@@ -6012,7 +6012,7 @@ begin:
 
 	if (!g_state.picker) {
 		/* Set terminal window title */
-		printf("\033]2;%s (%s)\007", xbasename(path), xtildapath(path));
+		printf("\033]2;%s (%s)\007", xbasename(path), xtildepath(path));
 		fflush(stdout);
 	}
 
