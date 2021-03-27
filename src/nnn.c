@@ -998,7 +998,7 @@ static char *xextension(const char *fname, size_t len)
 	return xmemrchr((uchar_t *)fname, '.', len);
 }
 
-static char *xtildaname(char *path)
+static char *xtildapath(char *path)
 {
 	int pathlen = xstrlen(path);
 	int homelen = xstrlen(home);
@@ -6012,10 +6012,10 @@ begin:
 
 	if (!g_state.picker) {
 		/* Set terminal window title */
-		char *nicepath = xtildaname(path);
-		printf("\033]2;%s (%s)\007", xbasename(path), nicepath);
+		char *tildapath = xtildapath(path);
+		printf("\033]2;%s (%s)\007", xbasename(path), tildapath);
 		fflush(stdout);
-		free(nicepath);
+		free(tildapath);
 	}
 
 	if (g_state.selmode && lastdir[0])
