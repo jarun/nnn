@@ -2870,7 +2870,7 @@ static int filterentries(char *path, char *lastname)
 		case KEY_MOUSE:
 			goto end;
 #endif
-		case ESC: /* Exit filter mode on Escape and Alt+key */
+		case ESC: /* Exit filter mode on Esc and Alt+key */
 			if (handle_alt_key(ch) != ERR) {
 				if (*ch == ESC) { /* Handle Alt + Esc */
 					if (wln[1]) {
@@ -3098,7 +3098,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 				len -= pos;
 				pos = 0;
 				continue;
-			case ESC: /* Exit prompt on Escape, but just filter out Alt+key */
+			case ESC: /* Exit prompt on Esc, but just filter out Alt+key */
 				if (handle_alt_key(ch) != ERR)
 					continue;
 
