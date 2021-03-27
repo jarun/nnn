@@ -5943,9 +5943,9 @@ static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)
 
 static bool browse(char *ipath, const char *session, int pkey)
 {
-	char newpath[PATH_MAX] __attribute__ ((aligned));
-	char rundir[PATH_MAX] __attribute__ ((aligned));
-	char runfile[NAME_MAX + 1] __attribute__ ((aligned));
+	char newpath[PATH_MAX] __attribute__ ((aligned)),
+	     rundir[PATH_MAX] __attribute__ ((aligned)),
+	     runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	char *path, *lastdir, *lastname, *dir, *tmp;
 	pEntry pent;
 	enum action sel;
