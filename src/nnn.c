@@ -6784,7 +6784,6 @@ nochange:
 						continue;
 
 					copynextname(lastname);
-					clearselection();
 
 					if (cfg.filtermode || filterset())
 						presel = FILTER;
