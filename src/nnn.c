@@ -2931,7 +2931,7 @@ static int filterentries(char *path, char *lastname)
 				continue;
 			}
 
-			/* toggle string or regex filter */
+			/* Toggle string or regex filter */
 			if (*ch == FILTER) {
 				ln[0] = (ln[0] == FILTER) ? RFILTER : FILTER;
 				wln[0] = (uchar_t)ln[0];
