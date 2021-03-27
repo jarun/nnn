@@ -1862,7 +1862,7 @@ static pid_t xfork(uchar_t flag)
 		sigaction(SIGTSTP, &dfl_act, NULL);
 	}
 
-	/* This is the parent waiting for the child to create grandchild*/
+	/* This is the parent waiting for the child to create grandchild */
 	if (flag & F_NOWAIT)
 		waitpid(p, &status, 0);
 
