@@ -11,7 +11,7 @@
 # Shell: POSIX compliant
 # Authors: Marty Buchaus, Dave Snider, Tim Adler
 
-if [ -z "$NNN_PIPE" ]; then
+if [ ! -p "$NNN_PIPE" ]; then
     echo 'ERROR: NNN_PIPE is not set' | ${PAGER:-less}
     exit 2
 fi
