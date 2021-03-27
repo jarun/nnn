@@ -6012,10 +6012,8 @@ begin:
 
 	if (!g_state.picker) {
 		/* Set terminal window title */
-		char *tildapath = xtildapath(path);
-		printf("\033]2;%s (%s)\007", xbasename(path), tildapath);
+		printf("\033]2;%s (%s)\007", xbasename(path), xtildapath(path));
 		fflush(stdout);
-		free(tildapath);
 	}
 
 	if (g_state.selmode && lastdir[0])
