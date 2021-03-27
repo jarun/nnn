@@ -169,7 +169,7 @@
 #define SELECT ' '
 #define REGEX_MAX 48
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
-#define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per filename = 64*32B = 2KB */
+#define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
 #define DESCRIPTOR_LEN 32
 #define _ALIGNMENT 0x10 /* 16-byte alignment */
 #define _ALIGNMENT_MASK 0xF
@@ -5174,7 +5174,7 @@ static int dentfill(char *path, struct entry **ppdents)
 				dentp->name = pnamebuf;
 
 				for (int count = 1; count < n; ++dentp, ++count)
-					/* Current filename starts at last filename start + length */
+					/* Current file name starts at last file name start + length */
 					(dentp + 1)->name = (char *)((size_t)dentp->name + dentp->nlen);
 			}
 		}
@@ -5974,7 +5974,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 		} else
 			g_ctx[0].c_name[0] = '\0';
 
-		lastname = g_ctx[0].c_name; /* last visited filename */
+		lastname = g_ctx[0].c_name; /* last visited file name */
 
 		xstrsncpy(g_ctx[0].c_path, ipath, PATH_MAX);
 		/* If the initial path is a file, retain a way to return to start dir */
