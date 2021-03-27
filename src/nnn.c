@@ -3875,7 +3875,7 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int nextctx)
 			printptr = tmpcfg.showdetail ? &printent : &printent_long;
 
 		tmpcfg = ctxr->c_cfg;
-	} else { /* Setup a new context from current context */
+	} else { /* Set up a new context from current context */
 		ctxr->c_cfg.ctxactive = 1;
 		xstrsncpy(ctxr->c_path, path, PATH_MAX);
 		ctxr->c_last[0] = ctxr->c_name[0] = ctxr->c_fltr[0] = ctxr->c_fltr[1] = '\0';
@@ -5960,7 +5960,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 	xcols = COLS;
 
 #ifndef NOSSN
-	/* setup first context */
+	/* set up first context */
 	if (!session || !load_session(session, &path, &lastdir, &lastname, FALSE)) {
 #else
 		(void)session;
