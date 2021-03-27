@@ -5807,7 +5807,6 @@ static void redraw(char *path)
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int onscreen = xlines - 4;
 	int i;
-	char *ptr = path;
 
 	// Fast redraw
 	if (g_state.move) {
@@ -5851,15 +5850,23 @@ static void redraw(char *path)
 	attron(A_UNDERLINE | COLOR_PAIR(cfg.curctx + 1));
 
 	/* Print path */
-	i = (int)xstrlen(path);
+	bool in_home = set_tilde_in_path(path);
+	char *ptr = in_home ? &path[homelen - 1] : path;
+
+	i = (int)xstrlen(ptr);
 	if ((i + MIN_DISPLAY_COLS) <= ncols)
-		addnstr(path, ncols - MIN_DISPLAY_COLS);
+		addnstr(ptr, ncols - MIN_DISPLAY_COLS);
 	else {
-		char *base = xmemrchr((uchar_t *)path, '/', i);
+		char *base = xmemrchr((uchar_t *)ptr, '/', i);
 
-		i = 0;
+		if (in_home) {
+			addch(*ptr);
+			++ptr;
+			i = 1;
+		} else
+			i = 0;
 
-		if (base != ptr) {
+		if (ptr && (base != ptr)) {
 			while (ptr < base) {
 				if (*ptr == '/') {
 					i += 2; /* 2 characters added */
@@ -5875,8 +5882,12 @@ static void redraw(char *path)
 			}
 		}
 
-		addnstr(base, ncols - (MIN_DISPLAY_COLS + i));
+		if (base)
+			addnstr(base, ncols - (MIN_DISPLAY_COLS + i));
 	}
+
+	if (in_home)
+		reset_tilde_in_path(path);
 
 	attroff(A_UNDERLINE | COLOR_PAIR(cfg.curctx + 1));
 
