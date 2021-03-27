@@ -54,3 +54,8 @@ if [ -s "$selection" ]; then
         echo "needs at least 2 files or directories selected for comparison"
     fi
 fi
+
+# Clear selection
+if [ -p "$NNN_PIPE" ]; then
+    printf "-" > "$NNN_PIPE"
+fi

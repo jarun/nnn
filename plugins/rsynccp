@@ -19,3 +19,8 @@ xargs -0 -a "$sel" -I % rsync -ah --progress % "$PWD"
 
 # less verbose
 # xargs -0 -a "$sel" -I % rsync -ah --info=progress2 % "$PWD"
+
+# Clear selection
+if [ -p "$NNN_PIPE" ]; then
+    printf "-" > "$NNN_PIPE"
+fi

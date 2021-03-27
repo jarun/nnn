@@ -19,3 +19,8 @@ else
 fi
 
 printf "%s" "$files" | xargs -n1 -I{} gpg --decrypt --output "{}.dec" {}
+
+# Clear selection
+if [ "$resp" = "s" ] && [ -p "$NNN_PIPE" ]; then
+    printf "-" > "$NNN_PIPE"
+fi

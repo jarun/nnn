@@ -33,6 +33,11 @@ fi
 if [ "$resp" = "y" ]; then
     # -o flag is necessary for interactive editors
     xargs -o -0 $batchrenamesel < "$selection"
+
+    # Clear selection
+    if [ -p "$NNN_PIPE" ]; then
+        printf "-" > "$NNN_PIPE"
+    fi
 elif [ ! "$(LC_ALL=C ls -a)" = ".
 .." ]; then
 	# On older systems that don't have ls -A

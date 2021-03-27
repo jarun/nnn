@@ -21,7 +21,7 @@ cleanup() {
     printf "%s" "$1" | sed -e 's/[^A-Za-z0-9._-]/_/g'
 }
 
-if [ -f "$sel" ]; then
+if [ -s "$sel" ]; then
     targets=$(sed -e "s/\\x0/\\n/g;\$a\\" "$sel" | \
         while read -r i; do
             basename "$i";
@@ -57,3 +57,8 @@ for i in $targets; do
         mv "$i" "$tmp$(cleanup "$i")";
     fi
 done
+
+# Clear selection
+if [ -s "$sel" ] && [ -p "$NNN_PIPE" ]; then
+    printf "-" > "$NNN_PIPE"
+fi

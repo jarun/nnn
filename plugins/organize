@@ -2,8 +2,12 @@
 
 # Description: Organize files in directories by category
 #
+# Note: This plugin clears the selection as it changes the contents of the current dir
+#
 # Shell: POSIX compliant
 # Author: th3lusive
+
+sel=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
 organize() {
     case "$(file -biL "$1")" in
@@ -48,6 +52,11 @@ main() {
     do
        [ -f "$file" ] && organize "$file"
     done
+
+    # Clear selection
+    if [ -s "$sel" ] && [ -p "$NNN_PIPE" ]; then
+        printf "-" > "$NNN_PIPE"
+    fi
 }
 
 main "$@"

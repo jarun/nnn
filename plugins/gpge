@@ -34,4 +34,9 @@ else
 	recipient=$(printf "%s" "$keyuids" | fzf | awk '{print $1}')
 
 	printf "%s" "$files" | xargs -n1 gpg --encrypt --recipient "$recipient"
+
+    # Clear selection
+    if [ "$resp" = "s" ] && [ -p "$NNN_PIPE" ]; then
+        printf "-" > "$NNN_PIPE"
+    fi
 fi
