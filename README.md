@@ -9,8 +9,8 @@
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/©-BSD%202--Clause-important.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
-<p align="center"><a href="https://asciinema.org/a/353811"><img src="https://i.imgur.com/InHB5DB.png" /></a></p>
-<p align="center"><i>icons and colors asciicast</i></p>
+<p align="center"><a href="https://s4.gifyu.com/images/previewtuidemo.gif"><img src="https://i.imgur.com/q8J5tzk.png"></a></p>
+<p align="center"><i>nnn in action</i></p>
 
 <h3 align="center">[<a
 href="https://github.com/jarun/nnn#features">Features</a>] [<a

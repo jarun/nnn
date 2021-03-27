@@ -3,9 +3,6 @@
 <p align="center"><img src="https://i.imgur.com/SpT0L2W.png" /></p>
 <p align="center"><i>read ebooks with plugin gutenread (Android)</i></p>
 
-<p align="center"><a href="https://s4.gifyu.com/images/previewtuidemo.gif"><img src="https://i.imgur.com/q8J5tzk.png" width="734"></a></p>
-<p align="center"><i>Live Previews</i></p>
-
 ## Introduction
 
 Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or binaries) `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins which can be run with custom hotkeys.
