@@ -17,6 +17,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [bookmarks](bookmarks) | Use named bookmarks managed with symlinks | sh | fzf |
 | [boom](boom) | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs, mktemp |
+| [cdpath](cdpath) | `cd` to the directory from `CDPATH` | sh | fzf |
 | [chksum](chksum) | Create and verify checksums [✓] | sh | md5sum,<br>sha256sum |
 | [cleanfilename](cleanfilename) | Clean filename to be more shell-friendly [✓] | bash | sed |
 | [diffs](diffs) | Diff for selection (limited to 2 for directories) [✓] | sh | vimdiff, mktemp |
