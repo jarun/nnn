@@ -3,7 +3,7 @@
 # Description: 'cd' to the directory from CDPATH
 #
 # Details: If the CDPATH environmet variable is not set, the default value of
-#          ${XDG_CONFIG_HOME:-$HOME/.config}/bookmarks will be used.
+#          ${XDG_CONFIG_HOME:-$HOME/.config}/nnn/bookmarks will be used.
 #          You can create this directory and fill it with symbolic links to your
 #          favorite directories. It's a good idea to add it to CDPATH so that it
 #          could also be used from the command line outside of nnn.
@@ -24,7 +24,7 @@ get_dirs() {
             if [ -d "$entry" ]; then
                 name="$(basename "$entry")"
                 [ -h "$entry" ] && entry="$(readlink -f "$entry")"
-                printf "%-24s :%s\n" "${name:0:24}" "$entry"
+                printf "%-24s :%s\n" "${name}" "$entry"
             fi
         done
     done
@@ -37,7 +37,7 @@ abort() {
 }
 
 if [ -z "$CDPATH" ]; then
-    CDPATH="${XDG_CONFIG_HOME:-$HOME/.config}/bookmarks"
+    CDPATH="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/bookmarks"
     [ -d "$CDPATH" ] || abort "CDPATH is not set and there is no \"$CDPATH\" directory"
 fi
 
