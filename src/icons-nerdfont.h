@@ -29,7 +29,7 @@
 #define ICON_LICENSE       "\uf718"
 #define ICON_MAKEFILE      "\uf68c"
 #define ICON_ARCHIVE       "\ufac3"
-#define ICON_SCRIPT        "\uf977"
+#define ICON_SCRIPT        "\ue795"
 #define ICON_CPLUSPLUS     "\ue61d"
 #define ICON_JAVA          "\ue738"
 #define ICON_CLOJURE       "\ue76a"
