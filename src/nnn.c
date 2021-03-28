@@ -169,7 +169,7 @@
 #define SELECT ' '
 #define REGEX_MAX 48
 #define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
-#define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per filename = 64*32B = 2KB */
+#define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
 #define DESCRIPTOR_LEN 32
 #define _ALIGNMENT 0x10 /* 16-byte alignment */
 #define _ALIGNMENT_MASK 0xF
@@ -452,10 +452,10 @@ static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 /* Non-persistent runtime states */
 static runstate g_state;
 
-/* Options to identify file mime */
+/* Options to identify file MIME */
 #if defined(__APPLE__)
 #define FILE_MIME_OPTS "-bIL"
-#elif !defined(__sun) /* no mime option for 'file' */
+#elif !defined(__sun) /* no MIME option for 'file' */
 #define FILE_MIME_OPTS "-biL"
 #endif
 
@@ -1862,7 +1862,7 @@ static pid_t xfork(uchar_t flag)
 		sigaction(SIGTSTP, &dfl_act, NULL);
 	}
 
-	/* This is the parent waiting for the child to create grandchild*/
+	/* This is the parent waiting for the child to create grandchild */
 	if (flag & F_NOWAIT)
 		waitpid(p, &status, 0);
 
@@ -1994,7 +1994,7 @@ static inline uint_t xgetenv_val(const char *name)
 	return 0;
 }
 
-/* Check if a dir exists, IS a dir and is readable */
+/* Check if a dir exists, IS a dir, and is readable */
 static bool xdiraccess(const char *path)
 {
 	DIR *dirp = opendir(path);
@@ -2870,9 +2870,9 @@ static int filterentries(char *path, char *lastname)
 		case KEY_MOUSE:
 			goto end;
 #endif
-		case ESC: /* Exit filter mode on Escape and Alt+key */
+		case ESC: /* Exit filter mode on Esc and Alt+key */
 			if (handle_alt_key(ch) != ERR) {
-				if (*ch == ESC) { /* Handle Alt + Esc */
+				if (*ch == ESC) { /* Handle Alt+Esc */
 					if (wln[1]) {
 						ln[REGEX_MAX - 1] = ln[1];
 						ln[1] = wln[1] = '\0';
@@ -2931,7 +2931,7 @@ static int filterentries(char *path, char *lastname)
 				continue;
 			}
 
-			/* toggle string or regex filter */
+			/* Toggle string or regex filter */
 			if (*ch == FILTER) {
 				ln[0] = (ln[0] == FILTER) ? RFILTER : FILTER;
 				wln[0] = (uchar_t)ln[0];
@@ -3058,7 +3058,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 						(len - pos) * WCHAR_T_WIDTH);
 					--len, --pos;
 				} // fallthrough
-			case '\t': /* TAB breaks cursor position, ignore it */
+			case '\t': /* Tab breaks cursor position, ignore it */
 				continue;
 			case CONTROL('F'):
 				if (pos < len)
@@ -3098,7 +3098,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 				len -= pos;
 				pos = 0;
 				continue;
-			case ESC: /* Exit prompt on Escape, but just filter out Alt+key */
+			case ESC: /* Exit prompt on Esc, but just filter out Alt+key */
 				if (handle_alt_key(ch) != ERR)
 					continue;
 
@@ -3875,7 +3875,7 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int nextctx)
 			printptr = tmpcfg.showdetail ? &printent : &printent_long;
 
 		tmpcfg = ctxr->c_cfg;
-	} else { /* Setup a new context from current context */
+	} else { /* Set up a new context from current context */
 		ctxr->c_cfg.ctxactive = 1;
 		xstrsncpy(ctxr->c_path, path, PATH_MAX);
 		ctxr->c_last[0] = ctxr->c_name[0] = ctxr->c_fltr[0] = ctxr->c_fltr[1] = '\0';
@@ -4166,7 +4166,7 @@ static bool show_stats(const char *fpath, const struct stat *sb)
 			fprintf(fp, " %s\n  ", begin);
 
 #ifdef FILE_MIME_OPTS
-			/* Show the file mime type */
+			/* Show the file MIME type */
 			get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, fpath, FALSE);
 			fprintf(fp, "%s", g_buf);
 #endif
@@ -5174,7 +5174,7 @@ static int dentfill(char *path, struct entry **ppdents)
 				dentp->name = pnamebuf;
 
 				for (int count = 1; count < n; ++dentp, ++count)
-					/* Current filename starts at last filename start + length */
+					/* Current file name starts at last file name start + length */
 					(dentp + 1)->name = (char *)((size_t)dentp->name + dentp->nlen);
 			}
 		}
@@ -5971,7 +5971,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 	xcols = COLS;
 
 #ifndef NOSSN
-	/* setup first context */
+	/* set-up first context */
 	if (!session || !load_session(session, &path, &lastdir, &lastname, FALSE)) {
 #else
 		(void)session;
@@ -5985,7 +5985,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 		} else
 			g_ctx[0].c_name[0] = '\0';
 
-		lastname = g_ctx[0].c_name; /* last visited filename */
+		lastname = g_ctx[0].c_name; /* last visited file name */
 
 		xstrsncpy(g_ctx[0].c_path, ipath, PATH_MAX);
 		/* If the initial path is a file, retain a way to return to start dir */
@@ -6350,7 +6350,7 @@ nochange:
 			    && get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
 			    && is_prefix(g_buf, "text/", 5)
 #else
-			    /* no mime option; guess from description instead */
+			    /* no MIME option; guess from description instead */
 			    && get_output(g_buf, CMD_LEN_MAX, "file", "-bL", newpath, FALSE)
 			    && strstr(g_buf, "text")
 #endif
