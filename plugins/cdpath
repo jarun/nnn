@@ -23,12 +23,8 @@ get_dirs() {
         for entry in "$path"/*; do
             if [ -d "$entry" ]; then
                 name="$(basename "$entry")"
-                printf "%-24s :" "${name:0:24}"
-                if [ -h "$entry" ]; then
-                    printf "%s\n" "$(readlink -f "$entry")"
-                else
-                    printf "%s\n" "$entry"
-                fi
+                [ -h "$entry" ] && entry="$(readlink -f "$entry")"
+                printf "%-24s :%s\n" "${name:0:24}" "$entry"
             fi
         done
     done
