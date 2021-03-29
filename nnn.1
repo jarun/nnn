@@ -3,548 +3,712 @@
 .Os
 .Sh NAME
 .Nm nnn
-.Nd The unorthodox terminal file manager.
+.Nd The unorthodox terminal file manager
 .Sh SYNOPSIS
 .Nm
-.Op Ar -a
-.Op Ar -A
+.Op Ar -aAcCdDeEfFgHJKlnQrRSuUVwxh
 .Op Ar -b key
-.Op Ar -c
-.Op Ar -C
-.Op Ar -d
-.Op Ar -D
-.Op Ar -e
-.Op Ar -E
-.Op Ar -f
-.Op Ar -F
-.Op Ar -g
-.Op Ar -H
-.Op Ar -J
-.Op Ar -K
-.Op Ar -l
-.Op Ar -n
 .Op Ar -p file
 .Op Ar -P key
-.Op Ar -Q
-.Op Ar -r
-.Op Ar -R
 .Op Ar -s name
-.Op Ar -S
 .Op Ar -t secs
 .Op Ar -T key
-.Op Ar -u
-.Op Ar -U
-.Op Ar -V
-.Op Ar -w
-.Op Ar -x
-.Op Ar -h
-.Op Ar PATH
+.Op Ar path
 .Sh DESCRIPTION
 .Nm
-(Nnn's Not Noice) is a performance-optimized, feature-packed fork of
-noice (http://git.2f30.org/noice/) with seamless desktop
-integration, simplified navigation, \fItype-to-nav\fR mode with
-auto select, disk usage analyzer mode, bookmarks, contexts, application
-launcher, familiar navigation shortcuts, subshell spawning and much
-more. It remains a simple and efficient file manager that stays out of your way.
+.Pq Nnn's Not Noice
+is a performance-optimized, feature-packed fork of noice
+.Pq Lk http://git.2f30.org/noice/
+with seamless desktop integration, simplified navigation,
+.Em type-to-nav
+mode with auto select, disk usage analyzer mode, bookmarks, contexts,
+application launcher, familiar navigation shortcuts,
+subshell spawning and much more.
+It remains a simple and efficient file manager
+that stays out of your way.
 .Pp
 .Nm
 opens the current working directory by default if
-.Ar PATH
+.Ar path
 is not specified.
 .Sh KEYBINDS
-.Pp
-Press \fB?\fR in
+Press
+.Ql \&?
+in
 .Nm
 to see the list of keybinds.
 .Sh OPTIONS
-.Pp
 .Nm
 supports the following options:
-.Pp
-.Fl a
-        auto-setup temporary NNN_FIFO (described in ENVIRONMENT section)
-.Pp
-.Fl A
-        disable directory auto-select in type-to-nav mode
-.Pp
-.Fl "b key"
-        specify bookmark key to open
-.Pp
-.Fl c
-        indicates that the opener is a cli-only opener (overrides -e)
-.Pp
-.Fl C
-        earlier colorscheme - color directories by context, disable file colors
-.Pp
-.Fl d
-        detail mode
-.Pp
-.Fl D
-        show directories in context color with \fBNNN_FCOLORS\fR set
-.Pp
-.Fl e
-        open text files in $VISUAL (else $EDITOR, fallback vi) [preferably CLI]
-.Pp
-.Fl E
-        use $EDITOR for internal undetached edits
-.Pp
-.Fl f
-        use readline history file
-.Pp
-.Fl F
-        show fortune in help and settings screen
-.Pp
-.Fl g
-        use regex filters instead of substring match
-.Pp
-.Fl H
-        show hidden files
-.Pp
-.Fl J
-        disable auto-proceed on select
-.Pp
-.Fl K
-        test for keybind collision
-.Pp
-.Fl "l val"
-        number of lines to move per mouse wheel scroll
-.Pp
-.Fl n
-        start in type-to-nav mode
-.Pp
-.Fl o
-        open files only on Enter key
-.Pp
-.Fl "p file"
-        copy (or \fIpick\fR) selection to file, or stdout if file='-'
-.Pp
-.Fl "P key"
-        specify plugin key to run
-.Pp
-.Fl Q
-        disable confirmation on quit with multiple contexts active
-.Pp
-.Fl r
-        show cp, mv progress
-        (Linux-only, needs advcpmv; '^T' shows the progress on BSD/macOS)
-.Pp
-.Fl R
-        disable rollover at edges
-.Pp
-.Fl "s name"
-        load a session by name
-.Pp
-.Fl S
-        persistent session
-.Pp
-.Fl "t secs"
-        idle timeout in seconds to lock terminal
-.Pp
-.Fl "T key"
-        sort order
-        keys: 'a'u / 'd'u / 'e'xtension / 'r'everse / 's'ize / 't'ime / 'v'ersion
-.Pp
-.Fl u
-        use selection if available, don't prompt to choose between selection and hovered entry
-.Pp
-.Fl U
-        show user and group names in status bar
-.Pp
-.Fl V
-        show version and exit
-.Pp
-.Fl w
-        place hardware cursor on hovered entry
-.Pp
-.Fl x
-        show notis on selection cp, mv, rm completion
-        copy path to system clipboard on select
-.Pp
-.Fl h
-        show program help and exit
+.Bl -tag -width Ds
+.It Fl a
+auto-setup temporary NNN_FIFO
+.Ev NNN_FIFO
+.Po
+described in
+.Sx ENVIRONMENT
+section
+.Pc
+.It Fl A
+disable directory auto-select in type-to-nav mode
+.It Fl b Ar key
+specify bookmark key to open
+.It Fl c
+indicates that the opener is a cli-only opener
+.Pq overrides Fl e
+.It Fl C
+earlier colorscheme - color directories by context, disable file colors
+.It Fl d
+detail mode
+.It Fl D
+show directories in context color with
+.Ev NNN_FCOLORS
+set
+.It Fl e
+open text files in
+.Ev $VISUAL
+.Pq else Ev $EDTIOR , fallback vi
+.Bq preferably CLI
+.It Fl E
+use $EDITOR for internal undetached edits
+.It Fl f
+use
+.Xr readline 3
+history file
+.It Fl F
+show fortune in help and settings screen
+.It Fl g
+use regex filters instead of substring match
+.It Fl H
+show hidden files
+.It Fl J
+disable auto-proceed on select
+.It Fl K
+test for keybind collision
+.It Fl l Ar val
+number of lines to move per mouse wheel scroll
+.It Fl n
+start in type-to-nav mode
+.It Fl o
+open files only on Enter key
+.It Fl p Ar file
+copy
+.Pq or Em pick
+selection to file, or stdout if
+.Ar file
+is
+.Ql \&-
+.It Fl P Ar key
+specify plugin key to run
+.It Fl Q
+disable confirmation on quit with multiple contexts active
+.It Fl r
+show
+.Xr cp 1 ,
+.Xr mv 1 ,
+progress
+.Po
+Linux-only, needs advcpmv;
+.Ql ^T
+shows the progress on BSD/macOS
+.Pc
+.It Fl R
+disable rollover at edges
+.It Fl s Ar name
+load a session by name
+.It Fl S
+persistent session
+.It Fl t Ar secs
+idle timeout in seconds to lock terminal
+.It Fl T Ar key
+sort order.
+keys: 'a'u / 'd'u / 'e'xtension / 'r'everse / 's'ize / 't'ime /
+\&'v'ersion
+.It Fl u
+use selection if available,
+don't prompt to choose between selection and hovered entry
+.It Fl U
+show user and group names in status bar
+.It Fl V
+show version and exit
+.It Fl w
+place hardware cursor on hovered entry
+.It Fl x
+show notis on selection;
+.Xr cp 1 ,
+.Xr mv 1 ,
+.Xr rm 1
+completion;
+copy path to system clipboard on select
+.It Fl h
+show program help and exit
+.El
 .Sh CONFIGURATION
-There is no configuration file. Associated files are at
+There is no configuration file.
+Associated files are at
 .Pp
-\fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/\fR
+.Pa ${XDG_CONFIG_HOME:-$HOME/.config}/nnn/
 .Pp
-Configuration is done using a few optional (set if you need) environment
-variables. See ENVIRONMENT section.
+Configuration is done using a few optional
+.Pq set if you need
+environment variables.
+See
+.Sx ENVIRONMENT
+section.
 .Pp
 .Nm
-uses \fIxdg-open\fR (on Linux), \fIopen(1)\fR (on macOS), \fIcygstart\fR on
-(Cygwin) and \fIopen\fR on (Haiku) as the desktop opener. It's also possible
-to specify a custom opener. See ENVIRONMENT section.
+uses
+.Xr xdg-open 1
+.Pq on Linux ,
+.Xr open 1
+.Pq on macOS and Haiku ,
+and
+.Xr cygstart 1
+.Pq on Cygwin
+as the desktop opener.
+It's also possible to specify a custom opener.
+See
+.Sx ENVIRONMENT
+section.
 .Sh CONTEXTS
-Open multiple locations with 4 contexts. The status is shown in the top left
-corner:
+Open multiple locations with 4 contexts.
+The status is shown in the top left corner:
 .Pp
-- the current context is in reverse video
-.br
-- other active contexts are underlined
-.br
-- rest are inactive
+.Bl -bullet -compact
+.It
+the current context is in reverse video
+.It
+other active contexts are underlined
+.It
+rest are inactive
+.El
 .Pp
-A new context copies the state of the previous context. Each context can have
-its own color. See ENVIRONMENT section.
+A new context copies the state of the previous context.
+Each context can have its own color.
+See
+.Sx ENVIRONMENT
+section.
 .Sh SESSIONS
-Sessions are a way to save and restore states of work. A session stores the
-settings and contexts.
+Sessions are a way to save and restore states of work.
+A session stores the settings and contexts.
 .Pp
 Sessions can be loaded dynamically at runtime or with a program option.
 .Pp
-When a session is loaded dynamically, the last working session is saved
-automatically to a dedicated -- "last session" -- session file. The "last
-session" is also used in persistent session mode.
+When a session is loaded dynamically,
+the last working session is saved automatically to a dedicated
+.Dq last session
+session file.
+The
+.Dq last session
+is also used in persistent session mode.
 .Pp
-Listing input stream has a higher priority to session options (-s/-S). Sessions
-can be loaded explicitly at runtime. Session option \fIrestore\fR would restore
-the persistent session at runtime.
+Listing input stream has a higher priority to session options
+.Po
+.Fl s
+or
+.Fl S
+.Pc .
+Sessions can be loaded explicitly at runtime.
+Session option
+.Ql restore
+would restore the persistent session at runtime.
 .Pp
 All the session files are located by session name in the directory
 .Pp
-\fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions\fR
+.Pa ${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions
 .Pp
-"@" is the "last session" file.
+.Ql @
+is the
+.Dq last session
+file.
 .Sh FILTERS
-Filters are strings (or regex patterns) to find matching entries in the current
-directory instantly (\fIsearch-as-you-type\fR). Matches are case-insensitive by
-default. The last filter in each context is persisted at runtime or in saved
-sessions.
+Filters are strings
+.Pq or regex patterns
+to find matching entries in the current
+directory instantly
+.Pq Em search-as-you-type .
+Matches are case-insensitive by default.
+The last filter in each context is persisted at runtime
+or in saved sessions.
 .Pp
 Special keys at filter prompt:
-.Bd -literal
--------- + ---------------------------------------
-  Key    |                Function
--------- + ---------------------------------------
- ^char   | Usual keybind functionality
- Esc     | Exit filter prompt but skip dir refresh
- Alt+Esc | Exit filter prompt and refresh dir
--------- + ---------------------------------------
-.Ed
 .Pp
-Special keys at \fBempty filter prompt\fR:
-.Bd -literal
------- + ---------------------------------------
-  Key  |                Function
------- + ---------------------------------------
-   ?   | Show help and config screen
-   /   | Toggle between string and regex
-   :   | Toggle case-sensitivity
-  ^L   | Clear filter (\fIif prompt is non-empty\fR)
-       | OR apply last filter
------- + ---------------------------------------
-.Ed
+.Bl -tag -offset indent -width 8n -compact
+.It ^char
+Usual keybind functionality
+.It Esc
+Exit filter prompt but skip dir refresh
+.It Alt+Esc
+Exit filter prompt and refresh dir
+.El
 .Pp
-Additional special keys at \fBempty filter prompt\fR
-in \fBtype-to-nav\fR mode:
-.Bd -literal
------- + ------------------------
-  Key  |         Function
------- + ------------------------
-   '   | Go to first non-dir file
-   +   | Toggle auto-advance
-   ,   | Mark CWD
-   -   | Go to last visited dir
-   .   | Show hidden files
-   ;   | Run a plugin by its key
-   =   | Launch a GUI application
-   >   | Export file list
-   @   | Visit start dir
-   ]   | Show command prompt
-   `   | Visit /
-   ~   | Go HOME
------- + ------------------------
-.Ed
+Special keys at
+.Sy empty
+filter prompt:
+.Pp
+.Bl -tag -offset indent -width 8n -compact
+.It ?
+Show help and config screen
+.It /
+Toggle between string and regex
+.It :
+Toggle case-sensitivity
+.It ^L
+Clear filter
+.Pq if prompt is non-empty
+.Em or
+apply last filter
+.El
+.Pp
+Additional special keys at
+.Sy empty
+filter prompt in
+.Sy type-to-nav
+mode:
+.Pp
+.Bl -tag -offset indent -width 8n -compact
+.It +
+Toggle auto-advance
+.It ,
+Mark CWD
+.It -
+Go to last visited dir
+.It .
+Show hidden files
+.It ;
+Run a plugin by its key
+.It =
+Launch a GUI application
+.It >
+Export file list
+.It @
+Visit start dir
+.It ]
+Show command prompt
+.It `
+Visit /
+.It ~
+Go HOME
+.El
 .Pp
 Common regex use cases:
+.Bl -enum
+.It
+To list all matches starting with the filter expression,
+start the expression with a
+.Ql ^
+.Pq caret
+symbol.
+.It
+Type
+.Ql \e.mkv
+to list all MKV files.
+Use
+.Ql .*
+to match any character
+.Pq sort of fuzzy search .
+.It
+Exclude filenames having
+.Ql nnn
+.Pq compiled with PCRE lib :
+.Ql ^(?!nnn)
+.El
 .Pp
-(1) To list all matches starting with the filter expression,
-    start the expression with a '^' (caret) symbol.
-.br
-(2) Type '\\.mkv' to list all MKV files.
-.br
-(3) Use '.*' to match any character (\fIsort of\fR fuzzy search).
-.br
-(4) Exclude filenames having 'nnn' (compiled with PCRE lib): '^(?!nnn)'
-.Pp
-In the \fItype-to-nav\fR mode directories are opened in filter
+In the
+.Em type-to-nav
+mode directories are opened in filter
 mode, allowing continuous navigation.
-.br
+.Pp
 When there's a unique match and it's a directory,
 .Nm
-auto selects the directory and enters it in this mode. Use the relevant
-program option to disable this behaviour.
+auto selects the directory and enters it in this mode.
+Use the relevant program option to disable this behaviour.
 .Sh SELECTION
 .Nm
 allows file selection across directories and contexts!
 .Pp
 There are 3 groups of keybinds to add files to selection:
-.Pp
-(1) hovered file selection toggle
-    - deselects if '+' is visible before the entry, else adds to selection
-.br
-(2) add a range of files to selection
-    - repeat the range key on the same entry twice to clear selection completely
-.br
-(3) add all files in the current directory to selection
+.Bl -enum
+.It
+Hovered file selection toggle.
+Deselects if
+.Ql +
+is visible before the entry, else adds to selection.
+.It
+Add a range of files to selection.
+Repeat the range key on the same entry twice
+to clear selection completely.
+.It
+Add all files in the current directory to selection.
+.El
 .Pp
 A selection can be edited, copied, moved, removed, archived or linked.
 .Pp
-Absolute paths of the selected files are copied to \fB.selection\fR file in
-the config directory. The selection file is shared between multiple program
-instances. The most recent instance writing to the file overwrites the entries
-from earlier writes. If you have 2 instances if
+Absolute paths of the selected files are copied to
+.Pa .selection
+file in the config directory.
+The selection file is shared between multiple program instances.
+The most recent instance writing to the file overwrites
+the entries from earlier writes.
+If you have 2 instances of
 .Nm
-\fIopen\fR in 2 panes of a terminal multiplexer, you can select in one pane and
-use the selection (e.g. to copy or move) in the other pane (if the instance
-doesn't have any local selection already).
+open in 2 panes of a terminal multiplexer,
+you can select in one pane and use the selection
+.Pq e.g. to copy or move
+in the other pane
+.Pq if the instance doesn't have any local selection already .
 .Pp
 .Nm
-clears the selection after file removal, batch-rename and link creation with
-selection. However, it is retained after archive creation with selection as
-the user may want to delete the archived files next.
+clears the selection after
+file removal, batch-rename and link creation with selection.
+However, it is retained after archive creation with selection
+as the user may want to delete the archived files next.
 .Pp
-To edit the selection use the _edit selection_ key. Use this key to remove a
-file from selection after you navigate away from its directory. Editing doesn't
-end the selection mode. You can add more files to the selection and edit the
-list again. If no file is selected in the current session, this option attempts
-to list the selection file.
+To edit the selection use the
+.Sq edit selection
+key.
+Use this key to remove a file from selection
+after you navigate away from its directory.
+Editing doesn't end the selection mode.
+You can add more files to the selection and edit the list again.
+If no file is selected in the current session,
+this option attempts to list the selection file.
 .Sh FIND AND LIST
 There are two ways to search and list:
 .Pp
-- feed a list of file paths as input
-.br
-- search using a plugin (e.g. \fIfinder\fR) and list the results
+.Bl -bullet -compact
+.It
+feed a list of file paths as input
+.It
+search using a plugin
+.Pq e.g. Em finder
+and list the results
+.El
 .Pp
-File paths must be NUL-separated ('\\0'). Paths and can be relative to the
-current directory or absolute. Invalid paths in the input are ignored. Input
-limit is 65,536 paths or 256 MiB of data.
+File paths must be NUL-separated
+.Pq Ql \e0 .
+Paths and can be relative to the current directory or absolute.
+Invalid paths in the input are ignored.
+Input limit is 65,536 paths or 256 MiB of data.
 .Pp
 To list the input stream, start
 .Nm
-by writing to its standard input. E.g., to list files in current
-directory larger than
-1M:
-.Bd -literal
-    find -maxdepth 1 -size +1M -print0 | nnn
-.Ed
+by writing to its standard input.
+E.g., to list files in current directory larger than 1M:
+.Pp
+.Dl find -maxdepth 1 -size +1M -print0 | nnn
 .Pp
 or redirect a list from a file:
-.Bd -literal
-    nnn < files.txt
-.Ed
 .Pp
-Handy bash/zsh shell function to list files by mime-type in current directory:
-.Bd -literal
-    # to show video files, run: list video
+.Dl nnn < files.txt
+.Pp
+Handy bash/zsh shell function to list files by mime-type
+in current directory:
+.Bd -literal -offset indent
+# to show video files, run: list video
 
-    list ()
-    {
-        find . -maxdepth 1 | file -if- | grep "$1" | awk -F: '{printf "%s\0", $1}' | nnn
-    }
+list ()
+{
+    find . -maxdepth 1 \e
+     | file -if- \e
+     | grep "$1" \e
+     | awk -F: '{printf "%s\0", $1}' \e
+     | nnn
+}
 .Ed
 .Pp
-A temporary directory will be created containing symlinks to the given
-paths. Any action performed on these symlinks will be performed only on their
-targets, after which they might become invalid.
+A temporary directory will be created
+containing symlinks to the given paths.
+Any action performed on these symlinks will be performed
+only on their targets,
+after which they might become invalid.
 .Pp
-Right arrow or 'l' on a symlink in the listing dir takes to the target
-file. Press '-' to return to the listing dir. Press 'Enter' to open the symlink.
+Right arrow or
+.Ql l
+on a symlink in the listing dir takes to the target file.
+Press
+.Ql -
+to return to the listing dir.
+Press Enter to open the symlink.
 .Pp
-Listing input stream can be scripted. It can be extended to pick (option -p)
+Listing input stream can be scripted.
+It can be extended to pick
+.Pq option Fl p
 selected entries from the listed results.
 .Sh UNITS
-The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y
-(powers of 1024), same as the default units in \fIls\fR.
+The minimum file size unit is byte
+.Pq B .
+The rest are K, M, G, T, P, E, Z, Y
+.Pq powers of 1024 ,
+same as the default units in
+.Xr ls 1 .
 .Sh ENVIRONMENT
-The SHELL, VISUAL (else EDITOR) and PAGER environment variables are
-used. A single combination of arguments is supported for SHELL and PAGER.
+The
+.Ev SHELL ,
+.Ev VISUAL
+.Pq else Ev EDITOR
+and
+.Ev PAGER
+environment variables are used.
+A single combination of arguments is supported for
+.Ev SHELL
+and
+.Ev PAGER .
+.Bl -tag -width Ds
+.It Ev NNN_OPTS
+Binary options to
+.Nm ,
+e.g.
+.Ql cEnrx
+.It Ev NNN_OPENER
+Specify a custom file opener, e.g.
+.Ql nuke .
 .Pp
-\fBNNN_OPTS:\fR binary options to
-.Nm
-.Bd -literal
-    export NNN_OPTS="cEnrx"
+.Sy Note :
+.Em nuke
+is a file opener available in the plugin repository.
+.It Ev NNN_BMS
+Bookmark string as
+.Ql key_char:location
+pairs separated by
+.Ql ; .
+.Pp
+Example:
+.Ql d:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/ .
+.It Ev NNN_PLUG
+Directly executable plugins as
+.Ql key_char:plugin
+pairs
+separated by
+.Ql ; .
+.Pp
+Example:
+.Ql f:finder;o:fzopen;p:mocplay;d:diffs;t:nmount;v:imgview .
+.Pp
+.Sy Notes :
+.Pp
+.Bl -enum -compact
+.It
+To run a plugin directly, press
+.Ql ;
+followed by the key.
+.It
+Alternatively, combine with Alt
+.Pq i.e. Alt+key .
+.It
+To skip directory refresh after running a plugin, prefix with
+.Ql - :
+.Ql m:-mediainf
+.El
+.Pp
+To assign keys to arbitrary non-background non-shell-interpreted
+cli commands and invoke like plugins, add
+.Ql _
+.Pq underscore
+before the command:
+.Ql
+x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn .
+.Pp
+To pick and run an unassigned plugin, press Enter at the plugin prompt.
+To run a plugin at startup, use the option
+.Fl P
+followed by the plugin key.
+.Pp
+.Sy Notes :
+.Bl -enum -compact
+.It
+Use single quotes for $NNN_PLUG so $nnn is not interpreted
+.It
+$nnn should be the last argument
+.Pq if used
+.It
+.Pq Again
+add
+.Ql _
+before the command
+.It
+To disable directory refresh after running a
+.Sq command as plugin ,
+prefix with
+.Ql -_ .
+.It
+To skip user confirmation after command execution, suffix with
+.Ql *
+Note: Do not use
+.Ql *
+with programs those run and exit e.g.
+.Xr cat 1 .
+Example:
+.Ql y:-_sync*
+.It
+To run a
+.Sq GUI app as plugin ,
+add a
+.Ql |
+after
+.Ql _ :
+.Ql m:-_|mousepad $nnn .
+.El
+.Pp
+.Sy Examples :
+.Pp
+Show git diff:
+.Dl g:-_git diff
+.Pp
+Interactively kill process(es) using hovered file:
+.Dl k:-_fuser -kiv $nnn*
+.Pp
+Show git log:
+.Dl l:-_git log
+.Pp
+Take quick notes in a synced file/dir of notes:
+.Dl n:-_vi /home/user/Dropbox/dir/note*
+.Pp
+Page through hovered file in
+.Xr less 1 :
+.Dl p:-_less -iR $nnn*
+.Pp
+Play hovered media file, even unfinished download:
+.Dl s:-_|smplayer -minigui $nnn
+.Pp
+Make the hovered file executable:
+.Dl x:_chmod +x $nnn
+.Pp
+Flush cache dwrites:
+.Dl y:_sync*
+.It Ev NNN_COLORS
+String of color numbers for each context, e.g.:
+.Bd -literal -offset indent
+# 8 color numbers:
+# 0-black, 1-red, 2-green, 3-yellow, 4-blue (default),
+# 5-magenta, 6-cyan, 7-white
+export NNN_COLORS='1234'
+
+# xterm 256 color numbers (converted to hex, 2 symbols
+# per context):
+# see https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
+export NNN_COLORS='#0a1b2c3d'
+
+# both (256 followed by 8 as fallback, separated by ';')
+export NNN_COLORS='#0a1b2c3d;1234'
 .Ed
 .Pp
-\fBNNN_OPENER:\fR specify a custom file opener.
-.Bd -literal
-    export NNN_OPENER=nuke
-
-    NOTE: 'nuke' is a file opener available in the plugin repository.
-.Ed
+.Sy Note :
+If only 256 colors are specified and the terminal doesn't support,
+default is used.
+.It Ev NNN_FCOLORS
+Specify file-type specific colors, e.g.
+.Ql c1e2272e006033f7c6d6abc4 .
 .Pp
-\fBNNN_BMS:\fR bookmark string as \fIkey_char:location\fR pairs
-separated by \fI;\fR:
-.Bd -literal
-    export NNN_BMS='d:~/Documents;u:/home/user/Cam Uploads;D:~/Downloads/'
-.Ed
+Specify file-specific colors with decimal xterm 256 color numbers
+converted to 2 hex symbols per color.
+Order is strict, use 00 to omit/use default terminal color.
 .Pp
-\fBNNN_PLUG:\fR directly executable plugins as \fIkey_char:plugin\fR pairs
-separated by \fI;\fR:
-.Bd -literal
-    export NNN_PLUG='f:finder;o:fzopen;p:mocplay;d:diffs;t:nmount;v:imgview'
-
-    NOTES:
-    1. To run a plugin directly, press \fI;\fR followed by the key.
-    2. Alternatively, combine with \fIAlt\fR (i.e. \fIAlt+key\fR).
-    3. To skip directory refresh after running a plugin, prefix with \fB-\fR.
-
-    export NNN_PLUG='m:-mediainf'
-.Ed
+Defaults:
+.Bl -column "Unknown OR 0B regular/exe" "ff"
+.It Em Order                  Ta Em Hex Ta Em Color
+.It Block device              Ta c1     Ta DarkSeaGreen1
+.It Char device               Ta e2     Ta Yellow1
+.It Directory                 Ta 27     Ta DeepSkyBlue1
+.It Executable                Ta 2e     Ta Green1
+.It Regular                   Ta 00     Ta Normal
+.It Hard link                 Ta 60     Ta Plum4
+.It Symbolic link             Ta 33     Ta Cyan1
+.It Missing OR file details   Ta f7     Ta Grey62
+.It Orphaned symbolic link    Ta c6     Ta DeepPink1
+.It FIFO                      Ta d6     Ta Orange1
+.It Socket                    Ta ab     Ta MediumOrchid1
+.It Unknown OR 0B regular/exe Ta c4     Ta Red1
+.El
 .Pp
-    To assign keys to arbitrary non-background non-shell-interpreted cli
-    commands and invoke like plugins, add \fI_\fR (underscore) before the
-    command.
-.Bd -literal
-    export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn'
-
-    To pick and run an unassigned plugin, press \fBEnter\fR at the plugin prompt.
-    To run a plugin at startup, use the option `-P` followed by the plugin key.
-
-    NOTES:
-    1. Use single quotes for $NNN_PLUG so $nnn is not interpreted
-    2. $nnn should be the last argument (IF used)
-    3. (Again) add \fB_\fR before the command
-    4. To disable directory refresh after running a \fIcommand as plugin\fR,
-       prefix with \fB-_\fR
-    5. To skip user confirmation after command execution, suffix with \fB*\fR
-       Note: Do not use \fB*\fR with programs those run and exit e.g. cat
-
-    export NNN_PLUG='y:-_sync*'
-
-    6. To run a \fIGUI app as plugin\fR, add a \fB|\fR after \fB_\fR
-
-    export NNN_PLUG='m:-_|mousepad $nnn'
-
-    EXAMPLES:
-    ----------------------------------- + -------------------------------------------------
-                Key:Command             |                   Description
-    ----------------------------------- + -------------------------------------------------
-    g:-_git diff                        | Show git diff
-    k:-_fuser -kiv $nnn*                | Interactively kill process(es) using hovered file
-    l:-_git log                         | Show git log
-    n:-_vi /home/user/Dropbox/dir/note* | Take quick notes in a synced file/dir of notes
-    p:-_less -iR $nnn*                  | Page through hovered file in less
-    s:-_|smplayer -minigui $nnn         | Play hovered media file, even unfinished download
-    x:_chmod +x $nnn                    | Make the hovered file executable
-    y:-_sync*                           | Flush cached writes
-    ----------------------------------- + -------------------------------------------------
-.Ed
+If the terminal supports xterm 256 colors or more,
+file-specific colors will be rendered.
+To force the earlier colorscheme use option
+.Fl C .
+If xterm 256 colors aren't supported, earlier colorscheme will be used.
+.It Ev NNN_ARCHIVE
+Archive extensions to be handled silently
+.Pq default: bzip2, (g)zip, tar .
 .Pp
-\fBNNN_COLORS:\fR string of color numbers for each context, e.g.:
-.Bd -literal
-    # 8 color numbers:
-    # 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
-    export NNN_COLORS='1234'
-
-    # xterm 256 color numbers (converted to hex, 2 symbols per context):
-    # see https://upload.wikimedia.org/wikipedia/commons/1/15/Xterm_256color_chart.svg
-    export NNN_COLORS='#0a1b2c3d'
-
-    # both (256 followed by 8 as fallback, separated by ';')
-    export NNN_COLORS='#0a1b2c3d;1234'
-
-    NOTE: If only 256 colors are specified and the terminal doesn't support, default is used.
-.Ed
+Example:
+.Ql \e\e.(7z|bz2|gz|tar|tgz|zip)$
 .Pp
-\fBNNN_FCOLORS:\fR specify file-type specific colors:
-.Bd -literal
-    export NNN_FCOLORS='c1e2272e006033f7c6d6abc4'
-
-    Specify file-specific colors with decimal xterm 256 color numbers converted
-    to 2 hex symbols per color.
-    Order is strict, use 00 to omit/use default terminal color. Defaults:
-
-    ------------------------- + --- + -------------
-              Order           | Hex |    Color
-    ------------------------- + --- + -------------
-    Block device              | c1  | DarkSeaGreen1
-    Char device               | e2  | Yellow1
-    Directory                 | 27  | DeepSkyBlue1
-    Executable                | 2e  | Green1
-    Regular                   | 00  | Normal
-    Hard link                 | 60  | Plum4
-    Symbolic link             | 33  | Cyan1
-    Missing OR file details   | f7  | Grey62
-    Orphaned symbolic link    | c6  | DeepPink1
-    FIFO                      | d6  | Orange1
-    Socket                    | ab  | MediumOrchid1
-    Unknown OR 0B regular/exe | c4  | Red1
-    ------------------------- + --- + -------------
-
-    If the terminal supports xterm 256 colors or more, file-specific colors will be rendered.
-    To force the earlier colorscheme use option -C.
-    If xterm 256 colors aren't supported, earlier colorscheme will be used.
-.Ed
+.Sy Note :
+Non-default formats may require a third-party utility.
+.It Ev NNN_SSHFS
+specify custom sshfs command with options, e.g.:
+.Dl sshfs -o reconnect,idmap=user,cache_timeout=3600
 .Pp
-\fBNNN_ARCHIVE:\fR archive extensions to be handled silently (default: bzip2, (g)zip, tar).
-.Bd -literal
-    export NNN_ARCHIVE="\\\\.(7z|bz2|gz|tar|tgz|zip)$"
-
-    NOTE: Non-default formats may require a third-party utility.
-.Ed
+.Sy Note :
+The options must be comma-separated without any space between them.
+.It Ev NNN_RCLONE
+Pass additional options to rclone command, e.g.:
+.Ql rclone mount --read-only --no-checksum
 .Pp
-\fBNNN_SSHFS:\fR specify custom sshfs command with options:
-.Bd -literal
-    export NNN_SSHFS='sshfs -o reconnect,idmap=user,cache_timeout=3600'
-
-    NOTE: The options must be comma-separated without any space between them.
-.Ed
+.Sy Note :
+The options must be preceded by
+.Dq rclone
+and max 5 flags are supported.
+.It Ev NNN_TRASH
+trash
+.Bq
+instead of
+.Ql rm -rf
+files to desktop Trash.
 .Pp
-\fBNNN_RCLONE:\fR pass additional options to rclone command:
-.Bd -literal
-    export NNN_RCLONE='rclone mount --read-only --no-checksum'
-
-    NOTE: The options must be preceded by "rclone" and max 5 flags are supported.
-.Ed
+Example:
+.Ql n
+.Pq n=1: trash-cli, n=2: gio trash
+.It Ev NNN_SEL
+Absolute path to custom selection file.
+.It Ev NNN_FIFO
+Path of a named pipe to write the hovered file path, e.g.
+.Ql /tmp/nnn.fifo
 .Pp
-\fBNNN_TRASH:\fR trash (instead of \fIrm -rf\fR) files to desktop Trash.
-.Bd -literal
-    export NNN_TRASH=n
-    # n=1: trash-cli, n=2: gio trash
-.Ed
+Notes:
+.Bl -enum -compact
+.It
+Overridden by a temporary path with -a option.
+.It
+If the FIFO file doesn't exist it will be created, but not removed
+.Pq unless it is generated by Fl a option .
+.El
 .Pp
-\fBNNN_SEL:\fR absolute path to custom selection file.
+.Lk https://github.com/jarun/nnn/wiki/Live-previews
+.It Ev NNN_LOCKER
+Terminal locker program, e.g.
+.Ql bmon -p wlp1s0
+or
+.Ql cmatrix
+.It Ev NNN_MCLICK
+Key emulated by a middle mouse click, e.g.
+.Ql ^R .
 .Pp
-\fBNNN_FIFO:\fR path of a named pipe to write the hovered file path:
-.Bd -literal
-    export NNN_FIFO='/tmp/nnn.fifo'
-
-    NOTES:
-    1. Overridden by a temporary path with -a option.
-    2. If the FIFO file doesn't exist it will be created,
-       but not removed (unless it is generated by -a option).
-.Ed
-.Pp
-.Em https://github.com/jarun/nnn/wiki/Live-previews
-.Pp
-\fBNNN_LOCKER:\fR terminal locker program.
-.Bd -literal
-    export NNN_LOCKER='bmon -p wlp1s0'
-    export NNN_LOCKER='cmatrix'
-.Ed
-.Pp
-\fBNNN_MCLICK:\fR key emulated by a middle mouse click.
-.Bd -literal
-    export NNN_MCLICK='^R'
-
-    NOTE: Only the first character is considered if not a \fICtrl+key\fR combo.
-.Ed
-.Pp
-\fBnnn:\fR this is a special variable.
-.Bd -literal
-    Set to the hovered file name before starting the command prompt or spawning a shell.
-.Ed
-.Pp
-\fBNO_COLOR:\fR disable ANSI color output (overridden by \fBNNN_COLORS\fR).
+Note: only the first character is considered if not a Ctrl+key combo.
+.It Ev nnn
+This is a special variable,
+set to the hovered file name before starting
+the command prompt or spawning a shell.
+.It Ev NO_COLOR
+Disable ANSI color output
+.Pq overridden by Ev NNN_COLORS .
+.El
 .Sh KNOWN ISSUES
 .Nm
-may not handle keypresses correctly when used with tmux (see issue #104 for
-more details). Set \fBTERM=xterm-256color\fR to address it.
+may not handle keypresses correctly when used with
+.Xr tmux 1
+.Po
+see issue
+.Lk https://github.com/jarun/nnn/issues/104 #104
+for more details
+.Pc .
+Set
+.Ql BTERM=xterm-256color
+to address it.
 .Sh AUTHORS
 .An Arun Prakash Jana Aq Mt engineerarun@gmail.com ,
 .An Lazaros Koromilas Aq Mt lostd@2f30.org ,
-.An Dimitris Papastamos Aq Mt sin@2f30.org .
+.An Dimitris Papastamos Aq Mt sin@2f30.org ,
+.An Sijmen J. Mulder Aq Mt ik@sjmulder.nl
 .Sh HOME
-.Em https://github.com/jarun/nnn
+.Lk https://github.com/jarun/nnn
