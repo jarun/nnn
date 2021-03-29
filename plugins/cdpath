@@ -17,7 +17,7 @@
 . "$(dirname "$0")"/.nnn-plugin-helper
 
 get_dirs() {
-    # Run a list of directories and symbolic links to directories through fzf
+    # Get a list of directories and symbolic links to directories
     IFS=':'
     for path in $CDPATH; do
         for entry in "$path"/*; do
