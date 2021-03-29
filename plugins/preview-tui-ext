@@ -18,9 +18,10 @@
 #    - man
 #    - optional: bsdtar or atool for additional archive preview
 #    - optional: bat for code syntax highlighting
-#    - optional: ueberzug, kitty terminal, viu or catimg for images.
+#    - optional: iconlookup to show icons in tree output (https://github.com/luukvbaal/iconlookup)
+#    - optional: ueberzug, kitty terminal, viu or catimg for images
 #    - optional: convert(ImageMagick) for playing gif preview
-#    - optional: ffmpegthumbnailer for video thumbnails (https://github.com/dirkvdb/ffmpegthumbnailer).
+#    - optional: ffmpegthumbnailer for video thumbnails (https://github.com/dirkvdb/ffmpegthumbnailer)
 #    - optional: ffmpeg for audio thumbnails
 #    - optional: libreoffce for opendocument/officedocument preview
 #    - optional: pdftoppm(poppler) for pdf thumbnails
@@ -165,7 +166,11 @@ preview_file() {
     if [ -d "$1" ]; then
         cd "$1" || return
         if exists tree; then
-            fifo_pager tree -L 1 --dirsfirst -F -C
+          if exists iconlookup; then
+            tree -L 1 --dirsfirst -F --noreport -i | head -n "$((lines - 3))" | iconlookup | sed "1 s/^.*$/\n/"
+          else
+            tree -L 1 --dirsfirst -C -F --noreport -i | head -n "$((lines - 3))" | sed "1 s/^.*$/\n/"
+          fi;
         elif exists exa; then
             fifo_pager exa -G --colour=always 2>/dev/null
         else
