@@ -18,7 +18,6 @@
 #    - man
 #    - optional: bsdtar or atool for additional archive preview
 #    - optional: bat for code syntax highlighting
-#    - optional: iconlookup to show icons in tree output (https://github.com/luukvbaal/iconlookup)
 #    - optional: ueberzug, kitty terminal, viu or catimg for images
 #    - optional: convert(ImageMagick) for playing gif preview
 #    - optional: ffmpegthumbnailer for video thumbnails (https://github.com/dirkvdb/ffmpegthumbnailer)
@@ -29,6 +28,8 @@
 #    - optional: fontpreview for font preview (https://github.com/sdushantha/fontpreview)
 #    - optional: glow or lowdown for markdown
 #    - optional: w3m or lynx or elinks for html
+#    - optional: set/export ICONLOOKUP as 1 to enable file icons in front of directory previews with .iconlookup
+#                Icons and colors are configureable in .iconlookup
 #    - optional: scope.sh file viewer from ranger.
 #                To use:
 #                1. drop scope.sh executable in $PATH
@@ -74,6 +75,7 @@ SPLIT="$SPLIT"  # you can set a permanent split here
 TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
+ICONLOOKUP="${ICONLOOKUP:-0}"
 PAGER="${PAGER:-less -P?n -R}"
 ARCHIVES="$(echo "$NNN_ARCHIVE" | sed 's/.*(\(.*\)).*/\1/;s/|/ /g')"
 TMPDIR="${TMPDIR:-/tmp}"
@@ -166,11 +168,12 @@ preview_file() {
     if [ -d "$1" ]; then
         cd "$1" || return
         if exists tree; then
-          if exists iconlookup; then
-            tree -L 1 --dirsfirst -F --noreport -i | head -n "$((lines - 3))" | iconlookup | sed "1 s/^.*$/\n/"
-          else
-            tree -L 1 --dirsfirst -C -F --noreport -i | head -n "$((lines - 3))" | sed "1 s/^.*$/\n/"
-          fi;
+            if [ "$ICONLOOKUP" -ne 0 ]; then
+                tree -L 1 --dirsfirst -F --noreport -i | head -n "$((lines - 3))" | \
+                "${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/.iconlookup" -l "$cols" -b "\n"
+            else
+                fifo_pager tree -L 1 --dirsfirst -C -F --noreport -i
+            fi;
         elif exists exa; then
             fifo_pager exa -G --colour=always 2>/dev/null
         else
