@@ -10,22 +10,24 @@
 #          The fzf search is done on the directory basename (the first column).
 #
 #          This plugin is an extended version of the bookmarks plugin.
+#          If you set your CDPATH to ${XDG_CACHE_HOME:-$HOME/.cache}/nnn/bookmarks
+#          or to the value of BOOKMARKS_DIR, you can use it as a bookmarks replacement.
 #
 # Shell: POSIX compliant
 # Author: Yuri Kloubakov
 
 . "$(dirname "$0")"/.nnn-plugin-helper
 
+# Get a list of (symbolic links to) directories for every element of CDPATH
 get_dirs() {
-    # Get a list of directories and symbolic links to directories
     IFS=':'
     for path in $CDPATH; do
         for entry in "$path"/*; do
             if [ -d "$entry" ]; then
-                name="$(basename "$entry")"
+                name=$(basename "$entry" | grep -o '^.\{1,24\}')
                 if [ -h "$entry" ]; then
-                    l="$(ls -dl "$entry")"
-                    entry="${l#*"${entry} -> "}"
+                    slink=$(ls -dl -- "$entry")
+                    entry=${slink#*" $entry -> "}
                 fi
                 printf "%-24s :%s\n" "${name}" "$entry"
             fi
@@ -44,10 +46,10 @@ if [ -z "$CDPATH" ]; then
     [ -d "$CDPATH" ] || abort "CDPATH is not set and there is no \"$CDPATH\" directory"
 fi
 
-dir_list="$(get_dirs)"
+dir_list=$(get_dirs)
 [ -n "$dir_list" ] || abort "There are no directories to choose from. Check your \"$CDPATH\"."
 
-dir="$(echo "$dir_list" | fzf --nth=1 --delimiter=':' | awk -F: 'END { print $2 }')"
+dir=$(echo "$dir_list" | fzf --nth=1 --delimiter=':' | awk -F: 'END { print $2 }')
 if [ -n "$dir" ]; then
     nnn_cd "$dir" 0
 fi
