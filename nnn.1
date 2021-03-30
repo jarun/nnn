@@ -6,47 +6,25 @@
 .Nd The unorthodox terminal file manager.
 .Sh SYNOPSIS
 .Nm
-.Op Ar -a
-.Op Ar -A
+.Op Ar -aAcCdDeEfFgHJKlnQrRSuUVwxh
 .Op Ar -b key
-.Op Ar -c
-.Op Ar -C
-.Op Ar -d
-.Op Ar -D
-.Op Ar -e
-.Op Ar -E
-.Op Ar -f
-.Op Ar -F
-.Op Ar -g
-.Op Ar -H
-.Op Ar -J
-.Op Ar -K
-.Op Ar -l
-.Op Ar -n
 .Op Ar -p file
 .Op Ar -P key
-.Op Ar -Q
-.Op Ar -r
-.Op Ar -R
 .Op Ar -s name
-.Op Ar -S
 .Op Ar -t secs
 .Op Ar -T key
-.Op Ar -u
-.Op Ar -U
-.Op Ar -V
-.Op Ar -w
-.Op Ar -x
-.Op Ar -h
 .Op Ar PATH
 .Sh DESCRIPTION
 .Nm
-(Nnn's Not Noice) is a performance-optimized, feature-packed fork of
-noice (http://git.2f30.org/noice/) with seamless desktop
-integration, simplified navigation, \fItype-to-nav\fR mode with
-auto select, disk usage analyzer mode, bookmarks, contexts, application
-launcher, familiar navigation shortcuts, subshell spawning and much
-more. It remains a simple and efficient file manager that stays out of your way.
+.Pq Nnn's Not Noice
+is a performance-optimized, feature-packed fork of noice
+.Em http://git.2f30.org/noice/
+with seamless desktop integration, simplified navigation,
+.Em type-to-nav
+mode with auto select, disk usage analyzer mode, bookmarks,
+contexts, application launcher, familiar navigation shortcuts,
+subshell spawning and much more. It remains a simple and
+efficient file manager that stays out of your way.
 .Pp
 .Nm
 opens the current working directory by default if
@@ -54,7 +32,9 @@ opens the current working directory by default if
 is not specified.
 .Sh KEYBINDS
 .Pp
-Press \fB?\fR in
+Press
+.Ql \&?
+in
 .Nm
 to see the list of keybinds.
 .Sh OPTIONS
@@ -166,7 +146,7 @@ supports the following options:
 .Sh CONFIGURATION
 There is no configuration file. Associated files are at
 .Pp
-\fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/\fR
+.Pa ${XDG_CONFIG_HOME:-$HOME/.config}/nnn/
 .Pp
 Configuration is done using a few optional (set if you need) environment
 variables. See ENVIRONMENT section.

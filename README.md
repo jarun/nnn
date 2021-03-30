@@ -190,6 +190,7 @@ Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>),
 - [KlzXS](https://github.com/KlzXS)
 - [Léo Villeveygoux](https://github.com/leovilok)
 - [Maxim Baz](https://github.com/maximbaz)
+- [Sijmen J. Mulder](https://github.com/sjmulder)
 - [Todd Yamakawa](https://github.com/toddyamakawa)
 - and other contributors
 
