@@ -149,6 +149,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 6. Use option `-x` to copy selected file paths to system clipboard and show notis on `cp`, `mv`, `rm` completion.
 7. For a CLI-only environment, customize and use plugin [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke) with option `-c` (overrides `-e`).
 8. Bid `ls` goodbye! `alias ls='nnn -de'` :sunglasses:
+9. Visit the [Live previews](https://github.com/jarun/nnn/wiki/Live-previews) and [Troubleshooting](https://github.com/jarun/nnn/wiki/Troubleshooting) Wiki pages.
 
 Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates and/or cycles contexts. <kbd>?</kbd> lists shortcuts.
 
