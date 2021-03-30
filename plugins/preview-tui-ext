@@ -169,8 +169,7 @@ preview_file() {
         cd "$1" || return
         if exists tree; then
             if [ "$ICONLOOKUP" -ne 0 ]; then
-                tree -L 1 --dirsfirst -F --noreport -i | head -n "$((lines - 3))" | \
-                "${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/.iconlookup" -l "$cols" -b "\n"
+                tree -L 1 --dirsfirst -F --noreport -i | head -n "$((lines - 3))" | "$(dirname "$0")"/.iconlookup -l "$cols" -b "\n"
             else
                 fifo_pager tree -L 1 --dirsfirst -C -F --noreport -i
             fi;
