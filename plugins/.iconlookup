@@ -6,24 +6,17 @@
 
 # Usage
 #    1. Set colors and/or icons to your liking
-#    2. preview-tui-ext uses the script to prepend icon to directory listings
-#    3. Aditionally you can consider adding it to your PATH and/or FZF_DEFAULT_COMMAND to
-#    make it work with various fzf plugins (make sure you also add --ansi to your FZF_DEFAULT_OPTS)
+#    2. Pipe any directory listing to iconlookup and it will output prepended icons
+#    3. preview-tui-ext uses the script to prepend icon to directory listings
+#    4. Aditionally you can consider adding it to your PATH and/or FZF_DEFAULT_COMMAND to
+#       make it work with various fzf plugins (make sure you also add --ansi to your FZF_DEFAULT_OPTS)
 
 # Shell: POSIX compliant
 
-# Author: Luuk van Baal
+# Author: Luuk van Baal (https://github.com/luukvbaal/iconlookup)
 
 icon_lookup() {
-awk 'BEGIN { FS="." }
-{
-    if ($0 ~/^\.$/)
-        next
-    ent[NR] = $0
-    ext[NR] = $NF
-    limit = ENVIRON["limit"]
-}
-END {
+awk 'BEGIN {
 # Set your ANSI colorscheme below (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors).
 # Default uses standard nnn icon colors, 8 and 24-bit nord themes are commented out.
 colordepth=8      #colordepth=8        #colordepth=24
@@ -47,18 +40,6 @@ color_fsharp=31   #color_fsharp=179    #color_fsharp="180;142;173"
 color_ruby=160    #color_ruby=150      #color_ruby="163;190;140"
 color_scala=196   #color_scala=139     #color_scala="143;188;187"
 color_vim=28      #color_vim=109       #color_vim="143;188;187"
-
-    switch (colordepth) {
-        case "4":
-            escape="\033["
-            break;
-        case "8":
-            escape="\033[38;5;"
-            break;
-        case "24":
-            escape="\033[38;2;"
-            break;
-    }
 
 # icons[][1] contains icon and icons[][2] contains color
     icons["directory"][1] = ""; icons["directory"][2] = color_default
@@ -303,35 +284,53 @@ color_vim=28      #color_vim=109       #color_vim="143;188;187"
 # z
     icons["zip"][1] = icons["archive"][1]; icons["zip"][2] = icons["archive"][2]
 
-# Print icons, set color and bold directories by using ansi escape codes
-    for (i in ent)
-        if (ext[i] in icons)
-            printcolor(icons[ext[i]][1], icons[ext[i]][2], color_filetxt, ent[i], "10")
-        else
-            switch (substr(ent[i], length(ent[i]), 1)) {
-                case "/":
-                    printcolor(icons["directory"][1], color_default, color_dirtxt, ent[i], "1")
-                    break;
-                case "*":
-                    printcolor(icons["exe"][1], color_default, color_filetxt, ent[i], "10")
-                    break;
-                case "|":
-                    printcolor(icons["pipe"][1], color_default, color_filetxt, ent[i], "10")
-                    break;
-                case "=":
-                    printcolor(icons["socket"][1], color_default, color_filetxt, ent[i], "10")
-                    break;
-                case ">":
-                    printcolor(icons["door"][1], color_default, color_filetxt, ent[i], "10")
-                    break;
-                default:
-                    printcolor(icons["file"][1], color_default, color_filetxt, ent[i], "10")
-            }
+    FS = "."
+    limit = ENVIRON["limit"]
+    switch (colordepth) {
+        case "4":
+            escape="\033["
+            break;
+        case "8":
+            escape="\033[38;5;"
+            break;
+        case "24":
+            escape="\033[38;2;"
+            break;
+    }
 }
-
+{
+    # dont print cwd . and leading ./ from tree -f
+    if ($0 ~/^\.$/)
+        next
+    ent = ($0 ~/^\.\//) ? substr($0, 3, length($0) - 2) : $0
+    ext = $NF
+    # Print icons, set color and bold directories by using ansi escape codes
+    if (ext in icons)
+        printcolor(icons[ext][1], icons[ext][2], color_filetxt, ent, "10")
+    else
+        switch (substr(ent, length(ent), 1)) {
+            case "/":
+                printcolor(icons["directory"][1], color_default, color_dirtxt, ent, "1")
+                break;
+            case "*":
+                printcolor(icons["exe"][1], color_default, color_filetxt, ent, "10")
+                break;
+            case "|":
+                printcolor(icons["pipe"][1], color_default, color_filetxt, ent, "10")
+                break;
+            case "=":
+                printcolor(icons["socket"][1], color_default, color_filetxt, ent, "10")
+                break;
+            case ">":
+                printcolor(icons["door"][1], color_default, color_filetxt, ent, "10")
+                break;
+            default:
+                printcolor(icons["file"][1], color_default, color_filetxt, ent, "10")
+        }
+}
 function printcolor(i, c, d, n, b) {
     if (limit != "" && length(n) + 2 > limit)
-        n = substr(n, 1, ENVIRON["limit"] - 2)
+        n = substr(n, 1, limit - 2)
     printf "\033[0m"
     printf "%s%s;%sm%s %s%sm%s\n", escape, c, b, i, escape, d, n
 }'
