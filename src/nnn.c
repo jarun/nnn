@@ -799,21 +799,36 @@ static void clean_exit_sighandler(int UNUSED(sig))
 
 static char *xitoa(uint_t val)
 {
-	static char ascbuf[32] = {0};
-	int i = 30;
-	uint_t rem;
+	static char dst[32];
+	static const char digits[201] =
+		"0001020304050607080910111213141516171819"
+		"2021222324252627282930313233343536373839"
+		"4041424344454647484950515253545556575859"
+		"6061626364656667686970717273747576777879"
+		"8081828384858687888990919293949596979899";
+	uint_t next = 30, rem, i;
 
-	if (!val)
-		return "0";
+	dst[31] = '\0';
 
-	while (val && i) {
-		rem = val / 10;
-		ascbuf[i] = '0' + (val - (rem * 10));
+	while (val >= 100) {
+		rem = val / 100;
+		i = (val - (rem * 100)) * 2;
 		val = rem;
-		--i;
+		dst[next] = digits[i + 1];
+		dst[--next] = digits[i];
+		--next;
 	}
 
-	return &ascbuf[++i];
+	/* Handle last 1-2 digits */
+	if (val < 10)
+		dst[next] = '0' + val;
+	else {
+		i = val * 2;
+		dst[next] = digits[i + 1];
+		dst[--next] = digits[i];
+	}
+
+	return &dst[next];
 }
 
 /* Return the integer value of a char representing HEX */
@@ -3590,12 +3605,30 @@ static void print_icon(const struct entry *ent, const int attrs)
 }
 #endif
 
+static void zeroleft(int val)
+{
+	if (val < 10) {
+		addch('0');
+		addch('0' + val);
+	} else
+		addstr(xitoa(val));
+}
+
 static void print_time(const time_t *timep)
 {
 	struct tm *t = localtime(timep);
 
-	printw("%d-%02d-%02d %02d:%02d",
-	       t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
+	addstr(xitoa(t->tm_year + 1900)); /* YYYY-MM-DD */
+	addch('-');
+	zeroleft(t->tm_mon + 1);
+	addch('-');
+	zeroleft(t->tm_mday);
+
+	addch(' ');
+
+	zeroleft(t->tm_hour); /* HH:MM */
+	addch(':');
+	zeroleft(t->tm_min);
 }
 
 static char get_detail_ind(const mode_t mode)
@@ -5556,7 +5589,10 @@ static void statusbar(char *path)
 	tolastln();
 	attron(COLOR_PAIR(cfg.curctx + 1));
 
-	printw("%d/%d ", cur + 1, ndents);
+	addstr(xitoa(cur + 1));
+	addch('/');
+	addstr(xitoa(ndents));
+	addch(' ');
 
 	if (g_state.selmode) {
 		attron(A_REVERSE);
@@ -5584,7 +5620,7 @@ static void statusbar(char *path)
 		char sort[] = "\0\0\0\0\0";
 
 		if (getorderstr(sort))
-			printw("%s", sort);
+			addstr(sort);
 
 		/* Timestamp */
 		print_time(&pent->t);
