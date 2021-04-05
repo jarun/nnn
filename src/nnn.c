@@ -3768,7 +3768,8 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 	print_details(ent);
 
 #ifdef ICONS_ENABLED
-	attroff(attrs2);
+	if (!g_state.oldcolor)
+		attroff(attrs2);
 #endif
 	addch(' ');
 	if (!sel)
