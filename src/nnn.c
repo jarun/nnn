@@ -3598,9 +3598,9 @@ static void print_time(const time_t *timep)
 	       t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
 }
 
-static char get_detail_ind(const struct entry *ent)
+static char get_detail_ind(const mode_t mode)
 {
-	switch (ent->mode & S_IFMT) {
+	switch (mode & S_IFMT) {
 	case S_IFDIR:  // fallthrough
 	case S_IFREG:  return ' ';
 	case S_IFLNK:  return '@';
@@ -3737,7 +3737,7 @@ static void print_details(const struct entry *ent)
 		addstr(size);
 	} else {
 		addstr("        ");
-		addch(get_detail_ind(ent));
+		addch(get_detail_ind(ent->mode));
 	}
 }
 
