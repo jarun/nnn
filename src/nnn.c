@@ -3601,19 +3601,13 @@ static void print_time(const time_t *timep)
 static char get_detail_ind(const struct entry *ent)
 {
 	switch (ent->mode & S_IFMT) {
-	case S_IFDIR:
-	case S_IFREG:
-		return ' ';
-	case S_IFLNK:
-		return '@';
-	case S_IFSOCK:
-		return '=';
-	case S_IFIFO:
-		return '|';
-	case S_IFBLK:
-		return 'b';
-	case S_IFCHR:
-		return 'c';
+	case S_IFDIR:  // fallthrough
+	case S_IFREG:  return ' ';
+	case S_IFLNK:  return '@';
+	case S_IFSOCK: return '=';
+	case S_IFIFO:  return '|';
+	case S_IFBLK:  return 'b';
+	case S_IFCHR:  return 'c';
 	}
 	return '?';
 }
@@ -3621,19 +3615,13 @@ static char get_detail_ind(const struct entry *ent)
 static char get_name_ind(const struct entry *ent)
 {
 	switch (ent->mode & S_IFMT) {
-	case S_IFREG:
-		return (ent->mode & 0100) ? '*' : '\0';
-	case S_IFDIR:
-		return '/';
-	case S_IFLNK:
-		return (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@';
-	case S_IFSOCK:
-		return '=';
-	case S_IFIFO:
-		return '|';
-	case S_IFBLK:
-	case S_IFCHR:
-		return '\0';
+	case S_IFREG:  return (ent->mode & 0100) ? '*' : '\0';
+	case S_IFDIR:  return '/';
+	case S_IFLNK:  return (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@';
+	case S_IFSOCK: return '=';
+	case S_IFIFO:  return '|';
+	case S_IFBLK:  // fallthrough
+	case S_IFCHR:  return '\0';
 	}
 	return '?';
 }
@@ -3653,16 +3641,11 @@ static uchar_t get_color_pair(const struct entry *ent, bool detailed)
 		if (!g_state.oldcolor || detailed)
 			return (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
 		return 0;
-	case S_IFDIR:
-		return (!g_state.oldcolor && g_state.dirctx) ? cfg.curctx + 1 : C_DIR;
-	case S_IFSOCK:
-		return C_SOC;
-	case S_IFIFO:
-		return C_PIP;
-	case S_IFBLK:
-		return C_BLK;
-	case S_IFCHR:
-		return C_CHR;
+	case S_IFDIR:  return (!g_state.oldcolor && g_state.dirctx) ? cfg.curctx + 1 : C_DIR;
+	case S_IFSOCK: return C_SOC;
+	case S_IFIFO:  return C_PIP;
+	case S_IFBLK:  return C_BLK;
+	case S_IFCHR:  return C_CHR;
 	}
 	return C_UND;
 }
