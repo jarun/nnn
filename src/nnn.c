@@ -799,21 +799,19 @@ static void clean_exit_sighandler(int UNUSED(sig))
 
 static char *xitoa(uint_t val)
 {
-	static char dst[32];
+	static char dst[32] = {'\0'};
 	static const char digits[201] =
 		"0001020304050607080910111213141516171819"
 		"2021222324252627282930313233343536373839"
 		"4041424344454647484950515253545556575859"
 		"6061626364656667686970717273747576777879"
 		"8081828384858687888990919293949596979899";
-	uint_t next = 30, rem, i;
-
-	dst[31] = '\0';
+	uint_t next = 30, quo, i;
 
 	while (val >= 100) {
-		rem = val / 100;
-		i = (val - (rem * 100)) * 2;
-		val = rem;
+		quo = val / 100;
+		i = (val - (quo * 100)) * 2;
+		val = quo;
 		dst[next] = digits[i + 1];
 		dst[--next] = digits[i];
 		--next;
