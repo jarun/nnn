@@ -3598,7 +3598,7 @@ static void print_time(const time_t *timep)
 	       t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
 }
 
-static char get_details_indicator(const struct entry *ent)
+static char get_detail_ind(const struct entry *ent)
 {
 	switch (ent->mode & S_IFMT) {
 	case S_IFDIR:
@@ -3618,7 +3618,7 @@ static char get_details_indicator(const struct entry *ent)
 	return '?';
 }
 
-static char get_name_indicator(const struct entry *ent)
+static char get_name_ind(const struct entry *ent)
 {
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
@@ -3631,6 +3631,9 @@ static char get_name_indicator(const struct entry *ent)
 		return '=';
 	case S_IFIFO:
 		return '|';
+	case S_IFBLK:
+	case S_IFCHR:
+		return '\0';
 	}
 	return '?';
 }
@@ -3671,7 +3674,7 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 {
 	bool detailed = (printptr == &printent_long);
 	uchar_t color_pair = get_color_pair(ent, detailed);
-	char ind = get_name_indicator(ent);
+	char ind = get_name_ind(ent);
 	int attrs = 0;
 
 	if (!detailed)
@@ -3688,7 +3691,7 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 	case S_IFLNK:
 		if (ent->flags & DIR_OR_LINK_TO_DIR && !g_state.oldcolor)
 			attrs |= A_BOLD;
-		if (!detailed && g_state.oldcolor)
+		if (g_state.oldcolor)
 			attrs |= A_DIM;
 		break;
 	}
@@ -3726,7 +3729,7 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 	addch('\n');
 }
 
-static void printent_details(const struct entry *ent)
+static void print_details(const struct entry *ent)
 {
 	int entry_type = ent->mode & S_IFMT;
 	char *size;
@@ -3751,7 +3754,7 @@ static void printent_details(const struct entry *ent)
 		addstr(size);
 	} else {
 		addstr("        ");
-		addch(get_details_indicator(ent));
+		addch(get_detail_ind(ent));
 	}
 }
 
@@ -3762,8 +3765,11 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 
 	addch(' ');
 	attron(attrs1 | attrs2);
-	printent_details(ent);
+	print_details(ent);
 
+#ifdef ICONS_ENABLED
+	attroff(attrs2);
+#endif
 	addch(' ');
 	if (!sel)
 		attroff(attrs1);
