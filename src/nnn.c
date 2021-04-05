@@ -3598,83 +3598,110 @@ static void print_time(const time_t *timep)
 	       t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
 }
 
-static void printent(const struct entry *ent, uint_t namecols, bool sel)
+static char get_detail_ind(const struct entry *ent)
 {
-	uchar_t pair = 0;
-	char ind = '\0';
-	int attrs = 0;
+	switch (ent->mode & S_IFMT) {
+	case S_IFDIR:
+	case S_IFREG:
+		return ' ';
+	case S_IFLNK:
+		return '@';
+	case S_IFSOCK:
+		return '=';
+	case S_IFIFO:
+		return '|';
+	case S_IFBLK:
+		return 'b';
+	case S_IFCHR:
+		return 'c';
+	}
+	return '?';
+}
 
+static char get_name_ind(const struct entry *ent)
+{
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
-		if (ent->mode & 0100) {
-			pair = C_EXE;
-			ind = '*';
-		}
-
-		if (!ent->size)
-			pair = C_UND;
-		else if (ent->flags & HARD_LINK)
-			pair = C_HRD;
-		else if (!pair)
-			pair = C_FIL;
-		break;
+		return (ent->mode & 0100) ? '*' : '\0';
 	case S_IFDIR:
-		pair = C_DIR;
-		if (!g_state.oldcolor) {
+		return '/';
+	case S_IFLNK:
+		return (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@';
+	case S_IFSOCK:
+		return '=';
+	case S_IFIFO:
+		return '|';
+	case S_IFBLK:
+	case S_IFCHR:
+		return '\0';
+	}
+	return '?';
+}
+
+static uchar_t get_color_pair(const struct entry *ent, bool detailed)
+{
+	switch (ent->mode & S_IFMT) {
+	case S_IFREG:
+		if (!ent->size)
+			return C_UND;
+		if (ent->flags & HARD_LINK)
+			return C_HRD;
+		if (ent->mode & 0100)
+			return C_EXE;
+		return C_FIL;
+	case S_IFLNK:
+		if (!g_state.oldcolor || detailed)
+			return (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
+		return 0;
+	case S_IFDIR:
+		return (!g_state.oldcolor && g_state.dirctx) ? cfg.curctx + 1 : C_DIR;
+	case S_IFSOCK:
+		return C_SOC;
+	case S_IFIFO:
+		return C_PIP;
+	case S_IFBLK:
+		return C_BLK;
+	case S_IFCHR:
+		return C_CHR;
+	}
+	return C_UND;
+}
+
+static void (*printptr)(const struct entry *ent, uint_t namecols, bool sel);
+static void printent_long(const struct entry *ent, uint_t namecols, bool sel);
+
+static void printent(const struct entry *ent, uint_t namecols, bool sel)
+{
+	bool detailed = (printptr == &printent_long);
+	uchar_t color_pair = get_color_pair(ent, detailed);
+	char ind = get_name_ind(ent);
+	int attrs = 0;
+
+	if (!detailed)
+		addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
+
+	/* Directories are always shown on top */
+	resetdircolor(ent->flags);
+
+	switch (ent->mode & S_IFMT) {
+	case S_IFDIR:
+		if (!g_state.oldcolor)
 			attrs |= A_BOLD;
-			if (g_state.dirctx)
-				pair = cfg.curctx + 1;
-		}
-		ind = '/';
 		break;
 	case S_IFLNK:
-		if (ent->flags & DIR_OR_LINK_TO_DIR) {
-			if (!g_state.oldcolor)
-				attrs |= A_BOLD;
-			ind = '/';
-		} else
-			ind = '@';
-
+		if (ent->flags & DIR_OR_LINK_TO_DIR && !g_state.oldcolor)
+			attrs |= A_BOLD;
 		if (g_state.oldcolor)
 			attrs |= A_DIM;
-		else
-			pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
-		break;
-	case S_IFSOCK:
-		pair = C_SOC;
-		ind = '=';
-		break;
-	case S_IFIFO:
-		pair = C_PIP;
-		ind = '|';
-		break;
-	case S_IFBLK:
-		pair = C_BLK;
-		break;
-	case S_IFCHR:
-		pair = C_CHR;
-		break;
-	default:
-		pair = C_UND;
-		ind = '?';
 		break;
 	}
 
 	if (!g_state.oldcolor) {
 		if (ent->flags & FILE_MISSING)
-			pair = C_MIS;
-
-		if (pair && fcolors[pair])
-			attrs |= COLOR_PAIR(pair);
+			color_pair = C_MIS;
+		if (color_pair && fcolors[color_pair])
+			attrs |= COLOR_PAIR(color_pair);
 	}
-
-	if (!ind)
-		++namecols;
-
-	/* Directories are always shown on top */
-	resetdircolor(ent->flags);
-
-	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
 #ifdef ICONS_ENABLED
 	if (!g_state.oldcolor)
@@ -3686,6 +3713,9 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 	if (attrs)
 		attron(attrs);
 
+	if (!ind)
+		++namecols;
+
 #ifndef NOLOCALE
 	addwstr(unescape(ent->name, namecols));
 #else
@@ -3694,37 +3724,21 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 
 	if (attrs)
 		attroff(attrs);
-
 	if (ind)
 		addch(ind);
 	addch('\n');
 }
 
-static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
+static void print_details(const struct entry *ent)
 {
-	bool ln = FALSE;
-	char ind1 = '\0', ind2 = '\0';
-	uchar_t pair = 0;
-	int attrs = sel ? (A_REVERSE | (g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS)))
-			: (g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS));
-	uint_t len;
+	int entry_type = ent->mode & S_IFMT;
 	char *size;
-	char selgap[] = "  ";
-
-	if (ent->flags & FILE_SELECTED)
-		selgap[1] = '+';
+	uint_t len;
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
 
-	addch(' ');
-
-	if (attrs)
-		attron(attrs);
-
-	/* Timestamp */
 	print_time(&ent->t);
-
 	addstr("  ");
 
 	/* Permissions */
@@ -3732,125 +3746,37 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 	addch('0' + ((ent->mode >> 3) & 7));
 	addch('0' + (ent->mode & 7));
 
-	switch (ent->mode & S_IFMT) {
-	case S_IFDIR:
-		pair = C_DIR;
-		if (!g_state.oldcolor) {
-			attrs |= A_BOLD;
-			if (g_state.dirctx)
-				pair = cfg.curctx + 1;
-		}
-		ind2 = '/'; // fallthrough
-	case S_IFREG:
-		if (!ind2) {
-			if (ent->mode & 0100) {
-				pair = C_EXE;
-				ind2 = '*';
-			}
-
-			if (ent->flags & HARD_LINK) {
-				pair = C_HRD;
-				ln = TRUE;
-			}
-
-			if (!ent->size)
-				pair = C_UND;
-			else if (!pair)
-				pair = C_FIL;
-
-			if (!ind2) /* Add a column if end indicator is not needed */
-				++namecols;
-		}
-
+	if (entry_type == S_IFREG || entry_type == S_IFDIR) {
 		size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
 		len = 10 - (uint_t)xstrlen(size);
 		while (--len)
 			addch(' ');
 		addstr(size);
-		break;
-	case S_IFLNK:
-		ln = TRUE;
-		pair = (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
-		ind1 = '@';
-		ind2 = (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@';
-		if (ind2 == '/' && !g_state.oldcolor)
-			attrs |= A_BOLD; // fallthrough
-	case S_IFSOCK:
-		if (!ind1) {
-			pair = C_SOC;
-			ind1 = ind2 = '=';
-		} // fallthrough
-	case S_IFIFO:
-		if (!ind1) {
-			pair = C_PIP;
-			ind1 = ind2 = '|';
-		} // fallthrough
-	case S_IFBLK:
-		if (!ind1) {
-			pair = C_BLK;
-			ind1 = 'b';
-		} // fallthrough
-	case S_IFCHR:
-		if (!ind1) {
-			pair = C_CHR;
-			ind1 = 'c';
-		} // fallthrough
-	default:
-		if (!ind1) {
-			pair = C_UND;
-			ind1 = ind2 = '?';
-		}
-		addstr("        ");
-		addch(ind1);
-		break;
-	}
-
-	if (g_state.oldcolor) {
-		if (!sel)
-			attroff(A_DIM);
-		addstr(selgap);
-		if (!ln) {
-			attroff(A_DIM);
-			attrs ^= A_DIM;
-		}
 	} else {
-		if (!sel)
-			attroff(COLOR_PAIR(C_MIS));
-#ifndef ICONS_ENABLED
-		addstr(selgap);
-#endif
-		if (ent->flags & FILE_MISSING)
-			pair = C_MIS;
-		else {
-			attroff(COLOR_PAIR(C_MIS));
-			attrs ^= (COLOR_PAIR(C_MIS));
-		}
-
-		if (pair && fcolors[pair])
-			attrs |= COLOR_PAIR(pair);
-#ifdef ICONS_ENABLED
-		attroff(attrs);
-		addstr(selgap);
-		if (sel)
-			attrs &= ~A_REVERSE;
-		print_icon(ent, attrs);
-		if (sel)
-			attrs |= A_REVERSE;
-#endif
-		attron(attrs);
+		addstr("        ");
+		addch(get_detail_ind(ent));
 	}
+}
 
-#ifndef NOLOCALE
-	addwstr(unescape(ent->name, namecols));
-#else
-	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
+static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
+{
+	int attrs1 = g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS);
+	int attrs2 = sel ? A_REVERSE : 0;
+
+	addch(' ');
+	attron(attrs1 | attrs2);
+	print_details(ent);
+
+#ifdef ICONS_ENABLED
+	attroff(attrs2);
 #endif
+	addch(' ');
+	if (!sel)
+		attroff(attrs1);
+	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
-	if (attrs)
-		attroff(attrs);
-	if (ind2)
-		addch(ind2);
-	addch('\n');
+	attroff(attrs1 | attrs2);
+	printent(ent, namecols, sel);
 }
 
 static void (*printptr)(const struct entry *ent, uint_t namecols, bool sel) = &printent;
