@@ -3687,24 +3687,21 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 {
 	uchar_t color_pair = get_color_pair(ent, (printptr == &printent_long));
 	char ind = get_name_ind(ent);
-	int attrs = 0;
+	int attrs = 0, entry_type = ent->mode & S_IFMT;
 
 	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
 
-	switch (ent->mode & S_IFMT) {
-	case S_IFDIR:
+	if (entry_type == S_IFDIR) {
 		if (!g_state.oldcolor)
 			attrs |= A_BOLD;
-		break;
-	case S_IFLNK:
-		if (ent->flags & DIR_OR_LINK_TO_DIR && !g_state.oldcolor)
+	} else if (entry_type == S_IFLNK) {
+		if (!g_state.oldcolor && (ent->flags & DIR_OR_LINK_TO_DIR))
 			attrs |= A_BOLD;
-		if (g_state.oldcolor)
+		else if (g_state.oldcolor)
 			attrs |= A_DIM;
-		break;
 	}
 
 	if (!g_state.oldcolor) {
@@ -3712,7 +3709,6 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 			color_pair = C_MIS;
 		if (color_pair && fcolors[color_pair])
 			attrs |= COLOR_PAIR(color_pair);
-
 #ifdef ICONS_ENABLED
 		print_icon(ent, attrs);
 #endif
@@ -3742,7 +3738,7 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 static void print_details(const struct entry *ent)
 {
 	int entry_type = ent->mode & S_IFMT;
-	const char blanks[9] = "        ";
+	static const char blanks[9] = "        ";
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
