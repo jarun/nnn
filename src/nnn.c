@@ -3645,24 +3645,11 @@ static char get_detail_ind(const mode_t mode)
 	return '?';
 }
 
-static char get_name_ind(const struct entry *ent)
-{
-	switch (ent->mode & S_IFMT) {
-	case S_IFREG:  return (ent->mode & 0100) ? '*' : '\0';
-	case S_IFDIR:  return '/';
-	case S_IFLNK:  return (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@';
-	case S_IFSOCK: return '=';
-	case S_IFIFO:  return '|';
-	case S_IFBLK:  // fallthrough
-	case S_IFCHR:  return '\0';
-	}
-	return '?';
-}
-
-static uchar_t get_color_pair(const struct entry *ent, bool detailed)
+static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, bool detailed)
 {
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
+		*pind = (ent->mode & 0100) ? '*' : '\0';
 		if (!ent->size)
 			return C_UND;
 		if (ent->flags & HARD_LINK)
@@ -3670,23 +3657,36 @@ static uchar_t get_color_pair(const struct entry *ent, bool detailed)
 		if (ent->mode & 0100)
 			return C_EXE;
 		return C_FIL;
+	case S_IFDIR:
+		*pind = '/';
+		return (!g_state.oldcolor && g_state.dirctx) ? cfg.curctx + 1 : C_DIR;
 	case S_IFLNK:
+		*pind = (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@';
 		if (!g_state.oldcolor || detailed)
 			return (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
 		return 0;
-	case S_IFDIR:  return (!g_state.oldcolor && g_state.dirctx) ? cfg.curctx + 1 : C_DIR;
-	case S_IFSOCK: return C_SOC;
-	case S_IFIFO:  return C_PIP;
-	case S_IFBLK:  return C_BLK;
-	case S_IFCHR:  return C_CHR;
+	case S_IFSOCK:
+		*pind = '=';
+		return C_SOC;
+	case S_IFIFO:
+		*pind = '|';
+		return C_PIP;
+	case S_IFBLK:
+		*pind = '\0';
+		return C_BLK;
+	case S_IFCHR:
+		*pind = '\0';
+		return C_CHR;
 	}
+
+	*pind = '?';
 	return C_UND;
 }
 
 static void printent(const struct entry *ent, uint_t namecols, bool sel)
 {
-	uchar_t color_pair = get_color_pair(ent, (printptr == &printent_long));
-	char ind = get_name_ind(ent);
+	char ind;
+	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, (printptr == &printent_long));
 	int attrs = 0, entry_type = ent->mode & S_IFMT;
 
 	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
