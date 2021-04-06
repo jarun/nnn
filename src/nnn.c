@@ -779,6 +779,8 @@ static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, st
 static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
+static void (*printptr)(const struct entry *ent, uint_t namecols, bool sel);
+static void printent_long(const struct entry *ent, uint_t namecols, bool sel);
 #ifndef NOFIFO
 static void notify_fifo(bool force);
 #endif
@@ -3681,9 +3683,6 @@ static uchar_t get_color_pair(const struct entry *ent, bool detailed)
 	return C_UND;
 }
 
-static void (*printptr)(const struct entry *ent, uint_t namecols, bool sel);
-static void printent_long(const struct entry *ent, uint_t namecols, bool sel);
-
 static void printent(const struct entry *ent, uint_t namecols, bool sel)
 {
 	uchar_t color_pair = get_color_pair(ent, (printptr == &printent_long));
@@ -3713,12 +3712,11 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 			color_pair = C_MIS;
 		if (color_pair && fcolors[color_pair])
 			attrs |= COLOR_PAIR(color_pair);
-	}
 
 #ifdef ICONS_ENABLED
-	if (!g_state.oldcolor)
 		print_icon(ent, attrs);
 #endif
+	}
 
 	if (sel)
 		attrs |= A_REVERSE;
@@ -5664,28 +5662,27 @@ static void statusbar(char *path)
 		tocursor();
 }
 
-static int adjust_cols(int ncols)
+static int adjust_cols(int n)
 {
 	/* Calculate the number of cols available to print entry name */
 	if (cfg.showdetail) {
 		/* Fallback to light mode if less than 35 columns */
-		if (ncols < 36) {
+		if (n < 36) {
 			cfg.showdetail ^= 1;
 			printptr = &printent;
 		} else {
 			/* 3 more accounted for below */
-			ncols -= 32;
+			n -= 32;
 		}
 	}
 
-/* 3 = Preceding space, indicator, newline */
+	/* 3 = Preceding space, indicator, newline */
 #ifdef ICONS_ENABLED
-	ncols -= 3 + xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT) + 1;
+	return (n - (g_state.oldcolor ? 3
+			: 3 + xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT) + 1));
 #else
-	ncols -= 3;
+	return (n - 3);
 #endif
-
-	return ncols;
 }
 
 static void draw_line(char *path, int ncols)
