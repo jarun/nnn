@@ -3758,10 +3758,9 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 {
 	int attrs1 = g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS);
 
-	addch(sel ? '>' : ' ');
+	addch(sel ? ACS_CKBOARD : ' ');
 	attron(attrs1);
 	print_details(ent);
-
 	attroff(attrs1);
 	addch(' ');
 
