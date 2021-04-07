@@ -3747,7 +3747,7 @@ static void print_details(const struct entry *ent)
 		char *size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
 		printw("%*c%s", 9 - (uint_t)xstrlen(size), ' ', size);
 	} else
-		printw("%*c%s", 8, ' ', get_detail_ind(ent->mode));
+		printw("%*c%c", 8, ' ', get_detail_ind(ent->mode));
 }
 
 static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
