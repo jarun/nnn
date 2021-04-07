@@ -3599,30 +3599,12 @@ static void print_icon(const struct entry *ent, const int attrs)
 }
 #endif
 
-static void zeroleft(int val)
-{
-	if (val < 10) {
-		addch('0');
-		addch('0' + val);
-	} else
-		addstr(xitoa(val));
-}
-
 static void print_time(const time_t *timep)
 {
 	struct tm *t = localtime(timep);
 
-	addstr(xitoa(t->tm_year + 1900)); /* YYYY-MM-DD */
-	addch('-');
-	zeroleft(t->tm_mon + 1);
-	addch('-');
-	zeroleft(t->tm_mday);
-
-	addch(' ');
-
-	zeroleft(t->tm_hour); /* HH:MM */
-	addch(':');
-	zeroleft(t->tm_min);
+	printw("%s-%02d-%02d %02d:%02d",
+		xitoa(t->tm_year + 1900), t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
 }
 
 static char get_detail_ind(const mode_t mode)
@@ -5556,10 +5538,7 @@ static void statusbar(char *path)
 	tolastln();
 	attron(COLOR_PAIR(cfg.curctx + 1));
 
-	addstr(xitoa(cur + 1));
-	addch('/');
-	addstr(xitoa(ndents));
-	addch(' ');
+	printw("%d/%s ", cur + 1, xitoa(ndents));
 
 	if (g_state.selmode) {
 		attron(A_REVERSE);
