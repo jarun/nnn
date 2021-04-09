@@ -180,7 +180,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* I */
 	{"ico",      FA_FILE_IMAGE_O,      COLOR_IMAGE},
-	{"img",      FA_FILE_ARCHIVE_O,    COLOR_ARCHIVE},
+	{"img",      LINEA_MUSIC_CD,       COLOR_ARCHIVE},
 	{"ini",      FA_COGS,              0},
 	{"iso",      LINEA_MUSIC_CD,       COLOR_ARCHIVE},
 
@@ -286,6 +286,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* X */
 	{"xbps",     FA_FILE_ARCHIVE_O,    COLOR_ARCHIVE},
+	{"xcf",      FA_FILE_IMAGE_O,      COLOR_IMAGE},
 	{"xhtml",    FA_FILE_CODE_O,       0},
 	{"xls",      FILE_EXCEL,           0},
 	{"xlsx",     FILE_EXCEL,           0},
@@ -488,6 +489,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* X */
 	{"xbps",       ICON_EXT_XBPS,      COLOR_ARCHIVE},
+	{"xcf",        ICON_EXT_XCF,       COLOR_IMAGE},
 	{"xhtml",      ICON_EXT_XHTML,     0},
 	{"xls",        ICON_EXT_XLS,       0},
 	{"xlsx",       ICON_EXT_XLSX,      0},
