@@ -84,7 +84,7 @@ awk 'BEGIN {
     icons["database"][1] = ""; icons["database"][2] = color_default
     icons["worddoc"][1] = ""; icons["worddoc"][2] = color_document
     icons["playlist"][1] = "蘿"; icons["playlist"][2] = color_audio
-    icons["opticaldisk"][1] = "ﴞ"; icons["opticaldisk"][2] = color_archive
+    icons["opticaldisk"][1] = ""; icons["opticaldisk"][2] = color_archive
 
 # numbers
     icons["1"][1] = icons["manual"][1]; icons["1"][2] = icons["manual"][2]
@@ -165,7 +165,7 @@ awk 'BEGIN {
 
 # i
     icons["ico"][1] = icons["picturefile"][1]; icons["ico"][2] = icons["picturefile"][2]
-    icons["img"][1] = icons["picturefile"][1]; icons["img"][2] = icons["picturefile"][2]
+    icons["img"][1] = icons["opticaldisc"][1]; icons["img"][2] = icons["opticaldisc"][2]
     icons["ini"][1] = icons["configure"][1]; icons["ini"][2] = icons["configure"][2]
     icons["iso"][1] = icons["opticaldisc"][1]; icons["iso"][2] = icons["opticaldisc"][2]
 
@@ -271,7 +271,8 @@ awk 'BEGIN {
     icons["wmv"][1] = icons["videofile"][1]; icons["wmv"][2] = icons["videofile"][2]
 
 # x
-    icons["xbps"][1] = icons["archive"][1]" " color_archive
+    icons["xbps"][1] = icons["archive"][1]; icons["xbps"][2] = color_archive
+    icons["xcf"][1] = icons["imagefile"][1]; icons["xcf"][2] = color_image
     icons["xhtml"][1] = icons["htm"][1]; icons["xhtml"][2] = icons["htm"][2]
     icons["xls"][1] = ""; icons["xls"][2] = color_default
     icons["xlsx"][1] = ""; icons["xlsx"][2] = color_default

@@ -44,7 +44,7 @@
 #define ICON_DATABASE      "\uf6b7"
 #define ICON_WORDDOC       "\uf72b"
 #define ICON_PLAYLIST      "\uf910"
-#define ICON_OPTICALDISK   "\ufd1e"
+#define ICON_OPTICALDISK   "\ue271"
 
 
 /* Numbers */
@@ -126,7 +126,7 @@
 
 /* I */
 #define ICON_EXT_ICO       ICON_PICTUREFILE
-#define ICON_EXT_IMG       ICON_PICTUREFILE
+#define ICON_EXT_IMG       ICON_OPTICALDISK
 #define ICON_EXT_INI       ICON_CONFIGURE
 #define ICON_EXT_ISO       ICON_OPTICALDISK
 
@@ -232,6 +232,7 @@
 
 /* X */
 #define ICON_EXT_XBPS      ICON_ARCHIVE
+#define ICON_EXT_XCF       ICON_PICTUREFILE
 #define ICON_EXT_XHTML     ICON_HTML
 #define ICON_EXT_XLS       "\uf71a"
 #define ICON_EXT_XLSX      "\uf71a"
