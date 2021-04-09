@@ -312,19 +312,19 @@ awk 'BEGIN {
     else
         switch (substr(ent, length(ent), 1)) {
             case "/":
-                printcolor(icons["directory"][1], color_default, color_dirtxt, substr(ent, 1, length(ent) - 1), "1")
+                printcolor(icons["directory"][1], color_default, color_dirtxt, ent, "1")
                 break;
             case "*":
-                printcolor(icons["exe"][1], color_default, color_filetxt, substr(ent, 1, length(ent) - 1), "10")
+                printcolor(icons["exe"][1], color_default, color_filetxt, ent, "10")
                 break;
             case "|":
-                printcolor(icons["pipe"][1], color_default, color_filetxt, substr(ent, 1, length(ent) - 1), "10")
+                printcolor(icons["pipe"][1], color_default, color_filetxt, ent, "10")
                 break;
             case "=":
-                printcolor(icons["socket"][1], color_default, color_filetxt, substr(ent, 1, length(ent) - 1), "10")
+                printcolor(icons["socket"][1], color_default, color_filetxt, ent, "10")
                 break;
             case ">":
-                printcolor(icons["door"][1], color_default, color_filetxt, substr(ent, 1, length(ent) - 1), "10")
+                printcolor(icons["door"][1], color_default, color_filetxt, ent, "10")
                 break;
             default:
                 printcolor(icons["file"][1], color_default, color_filetxt, ent, "10")
