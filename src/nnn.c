@@ -3736,7 +3736,11 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 {
 	int attrs1 = g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS);
 
+#ifdef CKBOARD
 	addch(sel ? ACS_CKBOARD : ' ');
+#else
+	addch(sel ? '>' : ' ');
+#endif
 	attron(attrs1);
 	print_details(ent);
 	attroff(attrs1);

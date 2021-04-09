@@ -23,6 +23,7 @@ O_QSORT := 0  # use Alexey Tourbin's QSORT implementation
 O_BENCH := 0  # benchmark mode (stops at first user input)
 O_NOSSN := 0  # enable session support
 O_NOUG := 0  # disable user, group name in status bar
+O_CKBOARD := 0  # use checker board (stipple) in detail mode
 
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
@@ -97,6 +98,10 @@ endif
 
 ifeq ($(strip $(O_NOUG)),1)
 	CPPFLAGS += -DNOUG
+endif
+
+ifeq ($(strip $(O_CKBOARD)),1)
+	CPPFLAGS += -DCKBOARD
 endif
 
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
