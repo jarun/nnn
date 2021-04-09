@@ -19,27 +19,27 @@ icon_lookup() {
 awk 'BEGIN {
 # Set your ANSI colorscheme below (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors).
 # Default uses standard nnn icon colors, 8 and 24-bit nord themes are commented out.
-colordepth=8      #colordepth=8        #colordepth=24
-color_dirtxt=39   #color_dirtxt=111    #color_dirtxt="129;161;193"
-color_filetxt=15  #color_filetxt=111   #color_filetxt="129;161;193"
-color_default=39  #color_default=111   #color_default="129;161;193"
-color_video=93    #color_video=110     #color_video="136;192;208"
-color_audio=220   #color_audio=150     #color_audio="163;190;140"
-color_image=82    #color_image=150     #color_image="163;190;140"
-color_docs=202    #color_docs=173      #color_docs="208;135;112"
-color_archive=209 #color_archive=179   #color_archive="235;203;139"
-color_c=81        #color_c=150         #color_c="163;190;140"
-color_java=32     #color_java=139      #color_java="180;142;173"
-color_js=47       #color_js=109        #color_js="143;188;187"
-color_react=39    #color_react=111     #color_react="129;161;193"
-color_css=199     #color_css=110       #color_css="136;192;208"
-color_python=227  #color_python=68     #color_python="94;129;172"
-color_lua=19      #color_lua=167       #color_lua="191;97;106"
-color_document=15 #color_document=173  #color_document="208;135;112"
-color_fsharp=31   #color_fsharp=179    #color_fsharp="180;142;173"
-color_ruby=160    #color_ruby=150      #color_ruby="163;190;140"
-color_scala=196   #color_scala=139     #color_scala="143;188;187"
-color_vim=28      #color_vim=109       #color_vim="143;188;187"
+    colordepth=8      #colordepth=8        #colordepth=24
+    color_dirtxt=39   #color_dirtxt=111    #color_dirtxt="129;161;193"
+    color_filetxt=15  #color_filetxt=111   #color_filetxt="129;161;193"
+    color_default=39  #color_default=111   #color_default="129;161;193"
+    color_video=93    #color_video=110     #color_video="136;192;208"
+    color_audio=220   #color_audio=150     #color_audio="163;190;140"
+    color_image=82    #color_image=150     #color_image="163;190;140"
+    color_docs=202    #color_docs=173      #color_docs="208;135;112"
+    color_archive=209 #color_archive=179   #color_archive="235;203;139"
+    color_c=81        #color_c=150         #color_c="163;190;140"
+    color_java=32     #color_java=139      #color_java="180;142;173"
+    color_js=47       #color_js=109        #color_js="143;188;187"
+    color_react=39    #color_react=111     #color_react="129;161;193"
+    color_css=199     #color_css=110       #color_css="136;192;208"
+    color_python=227  #color_python=68     #color_python="94;129;172"
+    color_lua=19      #color_lua=167       #color_lua="191;97;106"
+    color_document=15 #color_document=173  #color_document="208;135;112"
+    color_fsharp=31   #color_fsharp=179    #color_fsharp="180;142;173"
+    color_ruby=160    #color_ruby=150      #color_ruby="163;190;140"
+    color_scala=196   #color_scala=139     #color_scala="143;188;187"
+    color_vim=28      #color_vim=109       #color_vim="143;188;187"
 
 # icons[][1] contains icon and icons[][2] contains color
     icons["directory"][1] = ""; icons["directory"][2] = color_default
@@ -68,7 +68,7 @@ color_vim=28      #color_vim=109       #color_vim="143;188;187"
     icons["configure"][1] = ""; icons["configure"][2] = color_default
     icons["license"][1] = ""; icons["license"][2] = color_docs
     icons["makefile"][1] = ""; icons["makefile"][2] = color_default
-    icons["archive"][1] = "遲"; icons["archive"][2] = color_archive
+    icons["archive"][1] = ""; icons["archive"][2] = color_archive
     icons["script"][1] = ""; icons["script"][2] = color_default
     icons["cplusplus"][1] = ""; icons["cplusplus"][2] = color_c
     icons["java"][1] = ""; icons["java"][2] = color_java
@@ -127,7 +127,7 @@ color_vim=28      #color_vim=109       #color_vim="143;188;187"
 # d
     icons["db"][1] = icons["database"][1]; icons["db"][2] = icons["database"][2]
     icons["deb"][1] = ""; icons["deb"][2] = color_archive
-    icons["diff"][1] = "繁"; icons["diff"][2] = color_default
+    icons["diff"][1] = ""; icons["diff"][2] = color_default
     icons["dll"][1] = icons["script"][1]; icons["dll"][2] = icons["script"][2]
     icons["doc"][1] = icons["worddoc"][1]; icons["doc"][2] = icons["worddoc"][2]
     icons["docx"][1] = icons["worddoc"][1]; icons["docx"][2] = icons["worddoc"][2]
@@ -200,7 +200,7 @@ color_vim=28      #color_vim=109       #color_vim="143;188;187"
     icons["mp4"][1] = icons["videofile"][1]; icons["mp4"][2] = icons["videofile"][2]
     icons["mpeg"][1] = icons["videofile"][1]; icons["mpeg"][2] = icons["videofile"][2]
     icons["mpg"][1] = icons["videofile"][1]; icons["mpg"][2] = icons["videofile"][2]
-    icons["msi"][1] = "者"; icons["msi"][2] = color_default
+    icons["msi"][1] = ""; icons["msi"][2] = color_default
 
 # n
 
@@ -212,7 +212,7 @@ color_vim=28      #color_vim=109       #color_vim="143;188;187"
 
 # p
     icons["part"][1] = icons["download"][1]; icons["part"][2] = icons["download"][2]
-    icons["patch"][1] = "繁"; icons["patch"][2] = color_default
+    icons["patch"][1] = icons["diff"][1]; icons["patch"][2] = icons["diff"][2]
     icons["pdf"][1] = ""; icons["pdf"][2] = color_docs
     icons["php"][1] = ""; icons["php"][2] = color_default
     icons["png"][1] = icons["picturefile"][1]; icons["png"][2] = icons["picturefile"][2]
@@ -297,6 +297,7 @@ color_vim=28      #color_vim=109       #color_vim="143;188;187"
             escape="\033[38;2;"
             break;
     }
+    bstr = ENVIRON["beforestr"]
 }
 {
     # dont print cwd . and leading ./ from tree -f
@@ -304,25 +305,26 @@ color_vim=28      #color_vim=109       #color_vim="143;188;187"
         next
     ent = ($0 ~/^\.\//) ? substr($0, 3, length($0) - 2) : $0
     ext = $NF
+
     # Print icons, set color and bold directories by using ansi escape codes
     if (ext in icons)
         printcolor(icons[ext][1], icons[ext][2], color_filetxt, ent, "10")
     else
         switch (substr(ent, length(ent), 1)) {
             case "/":
-                printcolor(icons["directory"][1], color_default, color_dirtxt, ent, "1")
+                printcolor(icons["directory"][1], color_default, color_dirtxt, substr(ent, 1, length(ent) - 1), "1")
                 break;
             case "*":
-                printcolor(icons["exe"][1], color_default, color_filetxt, ent, "10")
+                printcolor(icons["exe"][1], color_default, color_filetxt, substr(ent, 1, length(ent) - 1), "10")
                 break;
             case "|":
-                printcolor(icons["pipe"][1], color_default, color_filetxt, ent, "10")
+                printcolor(icons["pipe"][1], color_default, color_filetxt, substr(ent, 1, length(ent) - 1), "10")
                 break;
             case "=":
-                printcolor(icons["socket"][1], color_default, color_filetxt, ent, "10")
+                printcolor(icons["socket"][1], color_default, color_filetxt, substr(ent, 1, length(ent) - 1), "10")
                 break;
             case ">":
-                printcolor(icons["door"][1], color_default, color_filetxt, ent, "10")
+                printcolor(icons["door"][1], color_default, color_filetxt, substr(ent, 1, length(ent) - 1), "10")
                 break;
             default:
                 printcolor(icons["file"][1], color_default, color_filetxt, ent, "10")
@@ -332,16 +334,16 @@ function printcolor(i, c, d, n, b) {
     if (limit != "" && length(n) + 2 > limit)
         n = substr(n, 1, limit - 2)
     printf "\033[0m"
-    printf "%s%s;%sm%s %s%sm%s\n", escape, c, b, i, escape, d, n
+    printf "%s%s%s;%sm%s %s%sm%s\n", bstr, escape, c, b, i, escape, d, n
 }'
 printf '\033[0m'
 }
 
-print_before() {
+print_begin() {
     printf '%s\n' "$1" | sed 's/\\n/\n/g'
 }
 
-print_after() {
+print_end() {
     printf '%s\n' "$1" | sed 's/\\n/\n/g'
 }
 
@@ -349,8 +351,7 @@ print_help() {
     printf 'Icon Lookup\n
 Usage:
     iconlookup [options]
-    iconlookup -b [string]
-    iconlookup -a [string]
+    iconlookup [-bBe] [string]
     iconlookup -l [number]
     iconlookup (-h | --help)
 
@@ -358,8 +359,9 @@ Usage:
 
 Options:
     -h --help -?         Show this screen.
-    -a --after           Append string after output.
-    -b --before          Prepend string before output.
+    -b --before          Prepend str before icon.
+    -B --begin           Prepend str before output.
+    -e --end             Append str after output.
     -l --limit           Limit line length to [number] characters.'
 }
 
@@ -368,23 +370,22 @@ while :; do
         -h|-\?|--help)
             print_help
             exit ;;
+        -B|--begin)
+            if [ -n "$2" ]; then
+                print_begin "$2"
+            fi
+            shift ;;
+        -e|--end)
+            if [ -n "$2" ]; then
+                end=1
+                endstr="$2"
+            fi
+            shift ;;
         -b|--before)
             if [ -n "$2" ]; then
-                print_before "$2"
-                shift
-            else
-                printf 'ERROR: "--before" requires a non-empty option argument.\n'
-                exit
-            fi ;;
-        -a|--after)
-            if [ -n "$2" ]; then
-                after=1
-                afterstring="$2"
-                shift
-            else
-                printf 'ERROR: "--after" requires a non-empty option argument.\n'
-                exit
-            fi ;;
+                export beforestr="$2"
+            fi
+            shift ;;
         -l|--limit)
             if [ -n "$2" ]; then
                 export limit="$2"
@@ -404,11 +405,12 @@ while :; do
 done
 
 if [ ! -t 0 ]; then
+    [ -n "$beforestr" ] && limit="$((limit - ${#beforestr}))"
     icon_lookup
 else
     printf 'ERROR: no data provided...\nExpecting a directory listing in stdin\n'
 fi
 
-if [ -n "$after" ]; then
-    print_after "$afterstring"
+if [ -n "$end" ]; then
+    print_end "$endstr"
 fi

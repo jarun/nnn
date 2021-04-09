@@ -169,7 +169,8 @@ preview_file() {
         cd "$1" || return
         if exists tree; then
             if [ "$ICONLOOKUP" -ne 0 ]; then
-                tree -L 1 --dirsfirst -F --noreport -i | head -n "$((lines - 3))" | "$(dirname "$0")"/.iconlookup -l "$cols" -b "\n"
+                [ "$SPLIT" = h ] && BSTR="\n"
+                tree -L 1 --dirsfirst -F --noreport -i | head -n "$((lines - 3))" | "$(dirname "$0")"/.iconlookup -l "$cols" -B "$BSTR" -b " "
             else
                 fifo_pager tree -L 1 --dirsfirst -C -F --noreport -i
             fi;
@@ -178,7 +179,7 @@ preview_file() {
         else
             fifo_pager ls --color=always
         fi
-    elif [ "$encoding" = "binary" ]; then
+    elif [ "${encoding#*)}" = "binary" ]; then
         if [ "${mimetype%%/*}" = "image" ]; then
             if [ "${mimetype#*/}" = "gif" ] && exists convert; then
                 generate_preview "$cols" "$lines" "$1" "gif"
@@ -365,7 +366,7 @@ if [ "$TERMINAL" = "tmux" ]; then
     # tmux splits are inverted
     if [ "$SPLIT" = "v" ]; then SPLIT="h"; else SPLIT="v"; fi
 
-    tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d"$SPLIT" "$0" "$1"
+    tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e "SPLIT=$SPLIT" -d"$SPLIT" "$0" "$1"
 elif [ "$TERMINAL" = "kitty" ]; then
     # Setting the layout for the new window. It will be restored after the
     # script ends.

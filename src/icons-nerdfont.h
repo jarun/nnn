@@ -28,7 +28,7 @@
 #define ICON_CONFIGURE     "\uf423"
 #define ICON_LICENSE       "\uf718"
 #define ICON_MAKEFILE      "\uf68c"
-#define ICON_ARCHIVE       "\ufac3"
+#define ICON_ARCHIVE       "\uf53b"
 #define ICON_SCRIPT        "\ue795"
 #define ICON_CPLUSPLUS     "\ue61d"
 #define ICON_JAVA          "\ue738"
@@ -88,7 +88,7 @@
 /* D */
 #define ICON_EXT_DB        ICON_DATABASE
 #define ICON_EXT_DEB       "\ue77d"
-#define ICON_EXT_DIFF      "\ufa59"
+#define ICON_EXT_DIFF      "\uf440"
 #define ICON_EXT_DLL       ICON_SCRIPT
 #define ICON_EXT_DOC       ICON_WORDDOC
 #define ICON_EXT_DOCX      ICON_WORDDOC
@@ -160,7 +160,7 @@
 #define ICON_EXT_MP4       ICON_VIDEOFILE
 #define ICON_EXT_MPEG      ICON_VIDEOFILE
 #define ICON_EXT_MPG       ICON_VIDEOFILE
-#define ICON_EXT_MSI       "\ufab2"
+#define ICON_EXT_MSI       "\uf871"
 
 /* N */
 
@@ -172,7 +172,7 @@
 
 /* P */
 #define ICON_EXT_PART      ICON_DOWNLOADS
-#define ICON_EXT_PATCH     "\ufa59"
+#define ICON_EXT_PATCH     "\uf440"
 #define ICON_EXT_PDF       "\uf724"
 #define ICON_EXT_PHP       "\ue73d"
 #define ICON_EXT_PNG       ICON_PICTUREFILE
