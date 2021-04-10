@@ -863,6 +863,7 @@ static bool test_set_bit(uint_t nr)
 	return TRUE;
 }
 
+#ifndef __APPLE__
 /* Increase the limit on open file descriptors, if possible */
 static rlim_t max_openfds(void)
 {
@@ -888,6 +889,7 @@ static rlim_t max_openfds(void)
 
 	return limit;
 }
+#endif
 
 /*
  * Wrapper to realloc()
@@ -4905,11 +4907,13 @@ static void dentfree(void)
 
 static blkcnt_t dirwalk(char *path, struct stat *psb)
 {
+#ifndef __APPLE__
 	static uint_t open_max;
 
 	/* Increase current open file descriptor limit */
 	if (!open_max)
 		open_max = max_openfds();
+#endif
 
 	ent_blocks = 0;
 	tolastln();
@@ -4917,7 +4921,11 @@ static blkcnt_t dirwalk(char *path, struct stat *psb)
 	addstr(" [^C aborts]\n");
 	refresh();
 
+#ifndef __APPLE__
 	if (nftw(path, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) < 0) {
+#else
+	if (nftw(path, nftw_fn, OPEN_MAX, FTW_MOUNT | FTW_PHYS) < 0) {
+#endif
 		DPRINTF_S("nftw failed");
 		return cfg.apparentsz ? psb->st_size : psb->st_blocks;
 	}
