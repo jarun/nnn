@@ -3715,20 +3715,18 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 static void print_details(const struct entry *ent)
 {
 	int entry_type = ent->mode & S_IFMT;
+	char perms[6] = {' ', ' ', (char)('0' + ((ent->mode >> 6) & 7)),
+			(char)('0' + ((ent->mode >> 3) & 7)), (char)('0' + (ent->mode & 7)), '\0'};
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
 
 	print_time(&ent->t);
-	addstr("  ");
-
-	/* Permissions */
-	addch('0' + ((ent->mode >> 6) & 7));
-	addch('0' + ((ent->mode >> 3) & 7));
-	addch('0' + (ent->mode & 7));
+	addstr(perms);
 
 	if (entry_type == S_IFREG || entry_type == S_IFDIR) {
 		char *size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
+
 		printw("%*c%s", 9 - (uint_t)xstrlen(size), ' ', size);
 	} else
 		printw("%*c%c", 8, ' ', get_detail_ind(ent->mode));
