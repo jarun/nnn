@@ -1,3 +1,28 @@
+nnn v3.7 Sushi
+2021-04-13
+
+- allow plugins to clear selection (#884, #889, #917)
+- do not clear selection on hovered file deletion
+- resurrect `'c'urrent/'s'el` prompt and option `-u` (#889)
+- show only file name in reverse in detail mode
+- more file/mime types supported in `preview-tui-ext`
+- plugin `mtpmount` - (un)mount MTP devices
+- plugin `cleanfilename` - more shell-friendly file names
+- plugin `rsynccp` - copy-paste with visual progress
+- replace `$HOME` by `~` in address bar
+- show current path in terminal title (#911)
+- total links and inode number of hardlink in statusbar
+- fix symlink to text file not opening in CLI editor (#890)
+- fix symlink size shown as 0B in statusbar (#888)
+- show symlink target in statusbar (#893)
+- show correct disk free/total on macOS (#888)
+- fix directory disk usage showing as 0 on macOS (#941)
+- fix name col len with `-C` and icons compiled-in (#936)
+- refactor printing entries in light/detail modes (#934)
+- make option `O_CKBOARD` for checker board as indicator
+
+-------------------------------------------------------------------------------
+
 nnn v3.6 Nina
 2021-03-16
 
