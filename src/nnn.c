@@ -303,7 +303,7 @@ typedef struct {
 	uint_t useeditor  : 1;  /* Use VISUAL to open text files */
 	uint_t reserved3  : 3;
 	uint_t regex      : 1;  /* Use regex filters */
-	uint_t x11        : 1;  /* Copy to system clipboard and show notis */
+	uint_t x11        : 1;  /* Copy to system clipboard, show notis, xterm title */
 	uint_t timetype   : 2;  /* Time sort type (0: access, 1: change, 2: modification) */
 	uint_t cliopener  : 1;  /* All-CLI app opener */
 	uint_t waitedit   : 1;  /* For ops that can't be detached, used EDITOR */
@@ -332,7 +332,7 @@ typedef struct {
 	uint_t stayonsel  : 1;  /* Disable auto-proceed on select */
 	uint_t dirctx     : 1;  /* Show dirs in context color */
 	uint_t uidgid     : 1;  /* Show owner and group info */
-	uint_t reserved   : 9; /* Adjust when adding/removing a field */
+	uint_t reserved   : 9;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -5914,7 +5914,7 @@ begin:
 		setdirwatch();
 	}
 
-	if (!g_state.picker) {
+	if (cfg.x11) {
 		/* Set terminal window title */
 		r = set_tilde_in_path(path);
 
@@ -7405,7 +7405,7 @@ static void usage(void)
 #endif
 		" -V      show version\n"
 		" -w      place HW cursor on hovered\n"
-		" -x      notis, sel to system clipboard\n"
+		" -x      notis, sel to clipboard, xterm title\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
 }
@@ -7512,7 +7512,7 @@ static bool set_tmp_path(void)
 
 static void cleanup(void)
 {
-	if (!g_state.picker) {
+	if (cfg.x11) {
 		printf("\033[23;0t"); /* reset terminal window title */
 		fflush(stdout);
 	}
@@ -7931,7 +7931,7 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	if (!g_state.picker) {
+	if (cfg.x11) {
 		/* Save terminal window title */
 		printf("\033[22;0t");
 		fflush(stdout);
