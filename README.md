@@ -20,7 +20,7 @@ href="https://github.com/jarun/nnn/wiki">Documentation</a>]</h3>
 
 <br>
 
-[![](https://user-images.githubusercontent.com/324519/94587860-062d7a80-0238-11eb-99b1-a9c9f0c32ac2.png)](https://www.youtube.com/embed/-knZwdd1ScU)
+[![](https://i.imgur.com/TN3xYQz.jpg)](https://www.youtube.com/embed/-knZwdd1ScU)
 
 <br>
 
