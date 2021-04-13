@@ -9,7 +9,7 @@
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/©-BSD%202--Clause-important.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
-<p align="center"><a href="https://s4.gifyu.com/images/previewtuidemo.gif"><img src="https://i.imgur.com/q8J5tzk.png"></a></p>
+<p align="center"><a href="https://i.imgur.com/kOld6HT.mp4"><img src="https://i.imgur.com/NUsSA2u.jpg"></a></p>
 <p align="center"><i>nnn in action</i></p>
 
 <h3 align="center">[<a
@@ -20,7 +20,7 @@ href="https://github.com/jarun/nnn/wiki">Documentation</a>]</h3>
 
 <br>
 
-[![](https://user-images.githubusercontent.com/324519/94587860-062d7a80-0238-11eb-99b1-a9c9f0c32ac2.png)](https://www.youtube.com/embed/-knZwdd1ScU)
+[![](https://i.imgur.com/TN3xYQz.jpg)](https://www.youtube.com/embed/-knZwdd1ScU)
 
 <br>
 
