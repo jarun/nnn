@@ -8,11 +8,11 @@
 resource app_signature "application/x-vnd.Jarun-nnn";
 
 resource app_version {
-	major  = 3,
-	middle = 7,
+	major  = 4,
+	middle = 0,
 	minor  = 0,
 
-	variety = B_APPV_DEVELOPMENT,
+	variety = B_APPV_FINAL,
 	internal = 0,
 
 	short_info = "nnn",

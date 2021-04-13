@@ -1,4 +1,11 @@
-nnn v3.7 Sushi
+nnn v4.0 Sushi
+2021-04-13
+
+- show xterm title on option `-x`
+
+-------------------------------------------------------------------------------
+
+nnn v3.7
 2021-04-13
 
 - allow plugins to clear selection (#884, #889, #917)
