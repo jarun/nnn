@@ -146,7 +146,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 3. Configure [`cd` on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 4. [Sync subshell `$PWD`](https://github.com/jarun/nnn/wiki/Basic-use-cases#sync-subshell-pwd) to `nnn`.
 5. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installation).
-6. Use option `-x` to copy selected file paths to system clipboard and show notis on `cp`, `mv`, `rm` completion.
+6. Use `-x` to sync selection to system clipboard, show notis on `cp`, `mv`, `rm` completion and set xterm title.
 7. For a CLI-only environment, customize and use plugin [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke) with option `-c` (overrides `-e`).
 8. Bid `ls` goodbye! `alias ls='nnn -de'` :sunglasses:
 9. Visit the [Live previews](https://github.com/jarun/nnn/wiki/Live-previews) and [Troubleshooting](https://github.com/jarun/nnn/wiki/Troubleshooting) Wiki pages.
@@ -190,9 +190,7 @@ Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>),
 - [Anna Arad](https://github.com/annagrram)
 - [KlzXS](https://github.com/KlzXS)
 - [Léo Villeveygoux](https://github.com/leovilok)
-- [Maxim Baz](https://github.com/maximbaz)
 - [Sijmen J. Mulder](https://github.com/sjmulder)
-- [Todd Yamakawa](https://github.com/toddyamakawa)
 - and other contributors
 
 Visit the [ToDo list](https://github.com/jarun/nnn/issues/881) to contribute or see the features in progress.
