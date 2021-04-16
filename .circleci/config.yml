@@ -15,7 +15,7 @@ jobs:
             apt install -y --no-install-recommends software-properties-common wget gpg-agent shellcheck
             apt install -y --no-install-recommends git make pkg-config libncurses-dev libreadline-dev
             apt install -y --no-install-recommends gcc-7 gcc-8 gcc-9 gcc-10
-            apt install -y --no-install-recommends clang-6.0 clang-7 clang-8 clang-9 clang-10 clang-tidy-10
+            apt install -y --no-install-recommends clang-6.0 clang-7 clang-8 clang-9 clang-10 clang-11 clang-tidy-11
       - checkout
       - run:
           command: |
@@ -67,8 +67,13 @@ jobs:
             ls -l nnn
             make clean
             echo
+            echo "########## clang-11 ##########"
+            CC=clang-11 make strip
+            ls -l nnn
+            make clean
+            echo
             echo "########## clang-tidy-10 ##########"
-            clang-tidy-10 src/* -- -I/usr/include -I/usr/include/ncursesw
+            clang-tidy-11 src/* -- -I/usr/include -I/usr/include/ncursesw
             echo "########## shellcheck ##########"
             find plugins/ -type f -not -name "*.md" -exec shellcheck -e SC1090,SC2230 {} +
 
