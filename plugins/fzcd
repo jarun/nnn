@@ -9,6 +9,8 @@
 
 if [ "$(cmd_exists fzf)" -eq "0" ]; then
 	sel=$(fzf)
+    # Show only the file ane parent dir
+    # sel=$(fzf --delimiter / --with-nth=-2,-1 --tiebreak=begin --info=hidden)
 else
 	exit 1
 fi
