@@ -6329,9 +6329,12 @@ nochange:
 			}
 
 			if (strcmp(path, dir) == 0) {
-				if (cfg.filtermode)
-					presel = FILTER;
-				goto nochange;
+				if (dir == ipath) {
+					if (cfg.filtermode)
+						presel = FILTER;
+					goto nochange;
+				}
+				dir = lastdir; /* Go to last dir on home/root key repeat */
 			}
 
 			if (chdir(dir) == -1) {
