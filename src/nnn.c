@@ -5328,6 +5328,19 @@ static void handle_screen_move(enum action sel)
 	}
 }
 
+static void handle_openwith(const char *path, const char *name, char *newpath, char *tmp)
+{
+	/* Confirm if app is CLI or GUI */
+	int r = get_input(messages[MSG_CLI_MODE]);
+
+	r = (r == 'c' ? F_CLI :
+	     (r == 'g' ? F_NOWAIT | F_NOTRACE | F_MULTI : 0));
+	if (r) {
+		mkpath(path, name, newpath);
+		spawn(tmp, newpath, NULL, r);
+	}
+}
+
 static void copynextname(char *lastname)
 {
 	if (cur) {
@@ -6835,14 +6848,7 @@ nochange:
 				}
 				continue;
 			case SEL_OPENWITH:
-				/* Confirm if app is CLI or GUI */
-				r = get_input(messages[MSG_CLI_MODE]);
-				r = (r == 'c' ? F_CLI :
-				     (r == 'g' ? F_NOWAIT | F_NOTRACE | F_MULTI : 0));
-				if (r) {
-					mkpath(path, pdents[cur].name, newpath);
-					spawn(tmp, newpath, NULL, r);
-				}
+				handle_openwith(path, pdents[cur].name, newpath, tmp);
 
 				cfg.filtermode ?  presel = FILTER : statusbar(path);
 				copycurname();
