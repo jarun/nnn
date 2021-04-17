@@ -26,6 +26,7 @@ O_BENCH := 0  # benchmark mode (stops at first user input)
 O_NOSSN := 0  # enable session support
 O_NOUG := 0  # disable user, group name in status bar
 O_CKBOARD := 0  # use checker board (stipple) in detail mode
+O_NOX11 := 0  # disable X11 integration
 
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
@@ -103,6 +104,10 @@ endif
 
 ifeq ($(strip $(O_CKBOARD)),1)
 	CPPFLAGS += -DCKBOARD
+endif
+
+ifeq ($(strip $(O_NOX11)),1)
+	CPPFLAGS += -DNOX11
 endif
 
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)

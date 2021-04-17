@@ -5914,6 +5914,7 @@ begin:
 		setdirwatch();
 	}
 
+#ifndef NOX11
 	if (cfg.x11) {
 		/* Set terminal window title */
 		r = set_tilde_in_path(path);
@@ -5924,6 +5925,7 @@ begin:
 		if (r)
 			reset_tilde_in_path(path);
 	}
+#endif
 
 	if (g_state.selmode && lastdir[0])
 		lastappendpos = selbufpos;
@@ -6579,8 +6581,10 @@ nochange:
 					writesel(NULL, 0);
 			}
 
+#ifndef NOX11
 			if (cfg.x11)
 				plugscript(utils[UTIL_CBCP], F_NOWAIT | F_NOTRACE);
+#endif
 
 			if (!nselected)
 				unlink(selpath);
@@ -6673,8 +6677,10 @@ nochange:
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			}
 
+#ifndef NOX11
 			if (cfg.x11)
 				plugscript(utils[UTIL_CBCP], F_NOWAIT | F_NOTRACE);
+#endif
 			continue;
 		case SEL_SELEDIT:
 			r = editselection();
@@ -6682,8 +6688,10 @@ nochange:
 				r = !r ? MSG_0_SELECTED : MSG_FAILED;
 				printwait(messages[r], &presel);
 			} else {
+#ifndef NOX11
 				if (cfg.x11)
 					plugscript(utils[UTIL_CBCP], F_NOWAIT | F_NOTRACE);
+#endif
 				cfg.filtermode ?  presel = FILTER : statusbar(path);
 			}
 			goto nochange;
@@ -6730,9 +6738,11 @@ nochange:
 				presel = FILTER;
 			clearfilter();
 
+#ifndef NOX11
 			/* Show notification on operation complete */
 			if (cfg.x11)
 				plugscript(utils[UTIL_NTFY], F_NOWAIT | F_NOTRACE);
+#endif
 
 			if (newpath[0] && !access(newpath, F_OK))
 				xstrsncpy(lastname, xbasename(newpath), NAME_MAX+1);
@@ -7405,7 +7415,9 @@ static void usage(void)
 #endif
 		" -V      show version\n"
 		" -w      place HW cursor on hovered\n"
+#ifndef NOX11
 		" -x      notis, sel to clipboard, xterm title\n"
+#endif
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
 }
@@ -7512,10 +7524,12 @@ static bool set_tmp_path(void)
 
 static void cleanup(void)
 {
+#ifndef NOX11
 	if (cfg.x11) {
 		printf("\033[23;0t"); /* reset terminal window title */
 		fflush(stdout);
 	}
+#endif
 	free(selpath);
 	free(plgpath);
 	free(cfgpath);
@@ -7931,11 +7945,13 @@ int main(int argc, char *argv[])
 	}
 #endif
 
+#ifndef NOX11
 	if (cfg.x11) {
 		/* Save terminal window title */
 		printf("\033[22;0t");
 		fflush(stdout);
 	}
+#endif
 
 #ifndef NOMOUSE
 	if (!initcurses(&mask))
