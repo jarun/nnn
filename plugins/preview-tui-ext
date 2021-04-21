@@ -16,7 +16,8 @@
 #    - unzip
 #    - tar
 #    - man
-#    - optional: bsdtar or atool for additional archive preview
+#    - optional: bsdtar or atool for additional archive preview (make sure to export NNN_ARCHIVE
+#                as suggested in the wiki: https://github.com/jarun/nnn/wiki/Usage#configuration)
 #    - optional: bat for code syntax highlighting
 #    - optional: ueberzug, kitty terminal, viu or catimg for images
 #    - optional: convert(ImageMagick) for playing gif preview
