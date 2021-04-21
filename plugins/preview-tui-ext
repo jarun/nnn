@@ -210,6 +210,8 @@ preview_file() {
             fifo_pager unzip -l "$1"
         elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ]; then
             fifo_pager tar -tvf "$1"
+        elif [ "$mimetype" = "application/x-rpm" ] || [ "$mimetype" = "application/vnd.debian.binary-package" ] && exists atool; then
+            fifo_pager atool -l "$1"
         else
             fifo_pager print_bin_info "$1"
         fi
