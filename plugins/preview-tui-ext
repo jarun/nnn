@@ -16,8 +16,7 @@
 #    - unzip
 #    - tar
 #    - man
-#    - optional: bsdtar or atool for additional archive preview (make sure to export NNN_ARCHIVE
-#                as suggested in the wiki: https://github.com/jarun/nnn/wiki/Usage#configuration)
+#    - optional: bsdtar or atool for additional archive preview
 #    - optional: bat for code syntax highlighting
 #    - optional: ueberzug, kitty terminal, viu or catimg for images
 #    - optional: convert(ImageMagick) for playing gif preview
@@ -78,7 +77,6 @@ USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
 ICONLOOKUP="${ICONLOOKUP:-0}"
 PAGER="${PAGER:-less -P?n -R}"
-ARCHIVES="$(echo "$NNN_ARCHIVE" | sed 's/.*(\(.*\)).*/\1/;s/|/ /g')"
 TMPDIR="${TMPDIR:-/tmp}"
 # Consider setting NNN_PREVIEWDIR to $XDG_CACHE_DIR if you want to keep previews on disk between reboots
 NNN_PREVIEWDIR="${NNN_PREVIEWDIR:-$TMPDIR}/nnn/previews"
@@ -200,20 +198,21 @@ preview_file() {
             generate_preview "$cols" "$lines" "$1" "font"
         elif [ "${mimetype#*office}" != "$mimetype" ] || [ "${mimetype#*document}" != "$mimetype" ] && exists libreoffice; then
             generate_preview "$cols" "$lines" "$1" "office"
-        elif [ "${ARCHIVES#*$ext}" != "$ARCHIVES" ]; then
-            if exists bsdtar; then
-                fifo_pager bsdtar -tvf "$1"
-            elif exists atool; then
-                fifo_pager atool -l "$1"
-            fi
         elif [ "$mimetype" = "application/zip" ]; then
             fifo_pager unzip -l "$1"
         elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ]; then
             fifo_pager tar -tvf "$1"
-        elif [ "$mimetype" = "application/x-rpm" ] || [ "$mimetype" = "application/vnd.debian.binary-package" ] && exists atool; then
-            fifo_pager atool -l "$1"
         else
-            fifo_pager print_bin_info "$1"
+            case "$ext" in
+                7z|a|ace|alz|arc|arj|bz|cab|cpio|deb|jar|lha|lz|lzh|lzma|lzo\
+                |rar|rpm|rz|t7z|tar|tbz|tbz2|tgz|tlz|txz|tZ|tzo|war|xpi|xz|Z)
+                    if exists atool; then
+                        fifo_pager atool -l "$1"
+                    elif exists bsdtar; then
+                        fifo_pager bsdtar -tvf "$1"
+                    fi ;;
+                *) fifo_pager print_bin_info "$1" ;;
+            esac
         fi
     elif [ "$ext" = "md" ]; then
         if exists glow; then
