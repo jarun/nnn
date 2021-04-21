@@ -150,9 +150,9 @@ preview_file () {
     if [ -d "$1" ]; then
         cd "$1" || return
         if exists tree; then
-            fifo_pager tree -L 1 --dirsfirst -F -C
+            fifo_pager tree -L 3 --dirsfirst -C -F --noreport -i
         elif exists exa; then
-            fifo_pager exa -G --colour=always 2>/dev/null
+            exa -G --colour=always 2>/dev/null
         else
             fifo_pager ls --color=always
         fi

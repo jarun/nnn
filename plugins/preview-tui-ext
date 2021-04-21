@@ -167,17 +167,16 @@ preview_file() {
     # Otherwise, falling back to the defaults.
     if [ -d "$1" ]; then
         cd "$1" || return
-        if exists tree; then
-            if [ "$ICONLOOKUP" -ne 0 ] && [ -f "$(dirname "$0")"/.iconlookup ]; then
-                [ "$SPLIT" = h ] && BSTR="\n"
-                tree -L 1 --dirsfirst -F --noreport -i | head -n "$((lines - 3))" | "$(dirname "$0")"/.iconlookup -l "$cols" -B "$BSTR" -b " "
-            else
-                fifo_pager tree -L 1 --dirsfirst -C -F --noreport -i
-            fi;
+        if [ "$ICONLOOKUP" -ne 0 ] && [ -f "$(dirname "$0")"/.iconlookup ]; then
+            [ "$SPLIT" = h ] && BSTR="\n"
+            # shellcheck disable=SC2012
+            ls -F --group-directories-first | head -n "$((lines - 3))" | "$(dirname "$0")"/.iconlookup -l "$cols" -B "$BSTR" -b " "
+        elif exists tree; then
+            fifo_pager tree -L 3 --dirsfirst -C -F --noreport -i
         elif exists exa; then
-            fifo_pager exa -G --colour=always 2>/dev/null
+            exa -G --group-directories-first --colour=always 2>/dev/null
         else
-            fifo_pager ls --color=always
+            fifo_pager ls --group-directories-first --color=always
         fi
     elif [ "${encoding#*)}" = "binary" ]; then
         if [ "${mimetype%%/*}" = "image" ]; then
