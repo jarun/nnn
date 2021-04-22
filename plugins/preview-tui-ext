@@ -5,9 +5,10 @@
 # Note: This plugin needs a "NNN_FIFO" to work. See man.
 #
 # Dependencies:
-#    - Supports 3 independent methods to preview with:
+#    - Supports 4 independent methods to preview with:
 #        - tmux (>=3.0), or
 #        - kitty with allow_remote_control on, or
+#        - QuickLook on WSL (https://github.com/QL-Win/QuickLook)
 #        - $TERMINAL set to a terminal (it's xterm by default).
 #    - less or $PAGER
 #    - tree or exa or ls
@@ -164,7 +165,13 @@ preview_file() {
     cols=$(tput cols)
 
     # Otherwise, falling back to the defaults.
-    if [ -d "$1" ]; then
+    if [ -n "$QUICKLOOK" ]; then
+        if exists QuickLook.exe && stat "$1" >/dev/null 2>&1; then
+            f="$(wslpath -w "$1" 2>&1)" && QuickLook.exe "$f" &
+        elif exists Bridge.exe && stat "$1" >/dev/null 2>&1; then
+            f="$(wslpath -w "$1" 2>&1)" && Bridge.exe "$f" &
+        fi
+    elif [ -d "$1" ]; then
         cd "$1" || return
         if [ "$ICONLOOKUP" -ne 0 ] && [ -f "$(dirname "$0")"/.iconlookup ]; then
             [ "$SPLIT" = h ] && BSTR="\n"
@@ -179,24 +186,24 @@ preview_file() {
         fi
     elif [ "${encoding#*)}" = "binary" ]; then
         if [ "${mimetype%%/*}" = "image" ]; then
-            if [ "${mimetype#*/}" = "gif" ] && exists convert; then
+            if [ "${mimetype#*/}" = "gif" ]; then
                 generate_preview "$cols" "$lines" "$1" "gif"
             elif [ "${mimetype#*/}" != "jpeg" ]; then
                 generate_preview "$cols" "$lines" "$1" "image"
             else
                 image_preview "$cols" "$lines" "$1"
             fi
-        elif [ "${mimetype%%/*}" = "audio" ] && exists ffmpeg; then
+        elif [ "${mimetype%%/*}" = "audio" ]; then
             generate_preview "$cols" "$lines" "$1" "audio"
-        elif [ "${mimetype%%/*}" = "video" ] && exists ffmpegthumbnailer; then
+        elif [ "${mimetype%%/*}" = "video" ]; then
             generate_preview "$cols" "$lines" "$1" "video"
-        elif [ "$ext" = "pdf" ] && exists pdftoppm; then
+        elif [ "$ext" = "pdf" ]; then
             generate_preview "$cols" "$lines" "$1" "pdf"
-        elif [ "$ext" = "epub" ] && exists gnome-epub-thumbnailer; then
+        elif [ "$ext" = "epub" ]; then
             generate_preview "$cols" "$lines" "$1" "epub"
-        elif [ "${mimetype#*opentype}" != "$mimetype" ] || [ "${mimetype#*font}" != "$mimetype" ] && exists fontpreview; then
+        elif [ "${mimetype#*opentype}" != "$mimetype" ] || [ "${mimetype#*font}" != "$mimetype" ]; then
             generate_preview "$cols" "$lines" "$1" "font"
-        elif [ "${mimetype#*office}" != "$mimetype" ] || [ "${mimetype#*document}" != "$mimetype" ] && exists libreoffice; then
+        elif [ "${mimetype#*office}" != "$mimetype" ] || [ "${mimetype#*document}" != "$mimetype" ]; then
             generate_preview "$cols" "$lines" "$1" "office"
         elif [ "$mimetype" = "application/zip" ]; then
             fifo_pager unzip -l "$1"
@@ -241,7 +248,11 @@ preview_file() {
 }
 
 generate_preview() {
-  if [ ! -f "$NNN_PREVIEWDIR/$3.jpg" ] || [ -n "$(find -L "$3" -newer "$NNN_PREVIEWDIR/$3.jpg")" ]; then
+  if exists QuickLook.exe && stat "$3" >/dev/null 2>&1; then
+        f="$(wslpath -w "$3" 2>&1)" && QuickLook.exe "$f" &
+  elif exists Bridge.exe && stat "$3" >/dev/null 2>&1; then
+        f="$(wslpath -w "$3" 2>&1)" && Bridge.exe "$f" &
+  elif [ ! -f "$NNN_PREVIEWDIR/$3.jpg" ] || [ -n "$(find -L "$3" -newer "$NNN_PREVIEWDIR/$3.jpg")" ]; then
         mkdir -p "$NNN_PREVIEWDIR/${3%/*}"
         case $4 in
             audio) ffmpeg -i "$3" -filter_complex "scale=iw*min(1\,min($NNN_PREVIEWWIDTH/iw\,ih)):-1" "$NNN_PREVIEWDIR/$3.jpg" -y >/dev/null 2>&1 ;;
@@ -384,6 +395,8 @@ elif [ "$TERMINAL" = "kitty" ]; then
           --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" \
           --env "USE_PISTOL=$USE_PISTOL" --env "ICONLOOKUP=$ICONLOOKUP" \
           --location "${SPLIT}split" "$0" "$1" >/dev/null
+elif exists QuickLook.exe || exists Bridge.exe; then
+    QUICKLOOK=1 PREVIEW_MODE=1 "$0" "$1" >/dev/null &
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
