@@ -165,12 +165,8 @@ preview_file() {
     cols=$(tput cols)
 
     # Otherwise, falling back to the defaults.
-    if [ -n "$QUICKLOOK" ]; then
-        if exists QuickLook.exe && stat "$1" >/dev/null 2>&1; then
-            f="$(wslpath -w "$1" 2>&1)" && QuickLook.exe "$f" &
-        elif exists Bridge.exe && stat "$1" >/dev/null 2>&1; then
-            f="$(wslpath -w "$1" 2>&1)" && Bridge.exe "$f" &
-        fi
+    if [ -n "$QUICKLOOK" ] && stat "$1" >/dev/null 2>&1; then
+        f="$(wslpath -w "$1" 2>&1)" && "$QLPATH" "$f" &
     elif [ -d "$1" ]; then
         cd "$1" || return
         if [ "$ICONLOOKUP" -ne 0 ] && [ -f "$(dirname "$0")"/.iconlookup ]; then
@@ -248,10 +244,8 @@ preview_file() {
 }
 
 generate_preview() {
-  if exists QuickLook.exe && stat "$3" >/dev/null 2>&1; then
-        f="$(wslpath -w "$3" 2>&1)" && QuickLook.exe "$f" &
-  elif exists Bridge.exe && stat "$3" >/dev/null 2>&1; then
-        f="$(wslpath -w "$3" 2>&1)" && Bridge.exe "$f" &
+  if [ -n "$QLPATH" ] && stat "$3" >/dev/null 2>&1; then
+        f="$(wslpath -w "$3" 2>&1)" && "$QLPATH" "$f" &
   elif [ ! -f "$NNN_PREVIEWDIR/$3.jpg" ] || [ -n "$(find -L "$3" -newer "$NNN_PREVIEWDIR/$3.jpg")" ]; then
         mkdir -p "$NNN_PREVIEWDIR/${3%/*}"
         case $4 in
@@ -374,13 +368,15 @@ if [ "$PREVIEW_MODE" ]; then
     exit 0
 fi
 
-if pgrep -f "cat $NNN_FIFO" >/dev/null; then
-    if exists QuickLook.exe && stat "$1" >/dev/null 2>&1; then
-        f="$(wslpath -w "$1" 2>&1)" && QuickLook.exe "$f" &
-    elif exists Bridge.exe && stat "$1" >/dev/null 2>&1; then
-        f="$(wslpath -w "$1" 2>&1)" && Bridge.exe "$f" &
+if exists QuickLook.exe; then
+    QLPATH="QuickLook.exe"
+elif exists Bridge.exe; then
+    QLPATH="Bridge.exe"
+fi
+if pkill -fx "cat $NNN_FIFO" >/dev/null; then
+    if [ -n "$QLPATH" ] && stat "$1" >/dev/null 2>&1; then
+        f="$(wslpath -w "$1" 2>&1)" && "$QLPATH" "$f" &
     fi
-    pkill -f "cat $NNN_FIO"
     exit 0
 fi
 if [ "$TERMINAL" = "tmux" ]; then
@@ -389,7 +385,7 @@ if [ "$TERMINAL" = "tmux" ]; then
 
     tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e "PAGER=$PAGER" \
     -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
-    -e "ICONLOOKUP=$ICONLOOKUP" -d"$SPLIT" "$0" "$1"
+    -e "ICONLOOKUP=$ICONLOOKUP" -e "QLPATH=$QLPATH" -d"$SPLIT" "$0" "$1"
 elif [ "$TERMINAL" = "kitty" ]; then
     # Setting the layout for the new window. It will be restored after the
     # script ends.
@@ -404,8 +400,8 @@ elif [ "$TERMINAL" = "kitty" ]; then
           --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" \
           --env "USE_PISTOL=$USE_PISTOL" --env "ICONLOOKUP=$ICONLOOKUP" \
           --location "${SPLIT}split" "$0" "$1" >/dev/null
-elif exists QuickLook.exe || exists Bridge.exe; then
-    QUICKLOOK=1 PREVIEW_MODE=1 "$0" "$1" >/dev/null &
+elif [ -n "$QLPATH" ]; then
+    QUICKLOOK=1 QLPATH="$QLPATH" PREVIEW_MODE=1 "$0" "$1" >/dev/null &
 else
     PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
 fi
