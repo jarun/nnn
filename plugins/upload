@@ -11,7 +11,7 @@
 
 if [ -n "$1" ] && [ -s "$1" ]; then
     if which ffsend >/dev/null 2>&1; then
-        ffsend -iq u "$1"
+        ffsend -fiq u "$1"
     elif [ "$(mimetype --output-format %m "$1" | awk -F '/' '{print $1}')" = "text" ]; then
         curl -F "f:1=@$1" ix.io
     else
