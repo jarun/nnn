@@ -2857,8 +2857,10 @@ static int filterentries(char *path, char *lastname)
 				wln[--len] = '\0';
 				wcstombs(ln, wln, REGEX_MAX);
 				ndents = total;
-			} else
-				continue;
+			} else {
+				*ch = FILTER;
+				goto end;
+			}
 			// fallthrough
 		case CONTROL('L'):
 			if (*ch == CONTROL('L')) {
@@ -6436,11 +6438,12 @@ nochange:
 			}
 #endif
 			presel = filterentries(path, lastname);
-
 			if (presel == ESC) {
 				presel = 0;
 				break;
 			}
+			if (presel == FILTER) /* Refresh dir and filter again */
+				goto begin;
 			goto nochange;
 		case SEL_MFLTR: // fallthrough
 		case SEL_HIDDEN: // fallthrough
