@@ -3603,10 +3603,11 @@ static void print_icon(const struct entry *ent, const int attrs)
 
 static void print_time(const time_t *timep)
 {
-	struct tm *t = localtime(timep);
+	struct tm t;
 
+	localtime_r(timep, &t);
 	printw("%s-%02d-%02d %02d:%02d",
-		xitoa(t->tm_year + 1900), t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min);
+		xitoa(t.tm_year + 1900), t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min);
 }
 
 static char get_detail_ind(const mode_t mode)
