@@ -71,7 +71,6 @@
 #
 # Shell: POSIX compliant
 # Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal
-
 SPLIT="$SPLIT"  # you can set a permanent split here
 TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
@@ -83,27 +82,79 @@ TMPDIR="${TMPDIR:-/tmp}"
 NNN_PREVIEWDIR="${NNN_PREVIEWDIR:-$TMPDIR}/nnn/previews"
 NNN_PREVIEWWIDTH="${NNN_PREVIEWWIDTH:-1920}"
 NNN_PREVIEWHEIGHT="${NNN_PREVIEWHEIGHT:-1080}"
-NUMPREVIEWTUI="$(($(find "$TMPDIR" -maxdepth 1 -name 'nnn-preview-tui-pagerpid*' 2>/dev/null | wc -l) + 1))"
-PAGERPID="$TMPDIR/nnn-preview-tui-pagerpid.$NUMPREVIEWTUI"
-GIFPID="$TMPDIR/nnn-preview-tui-gifpid.$NUMPREVIEWTUI"
-CURSEL="$TMPDIR/nnn-preview-tui-selection.$NUMPREVIEWTUI"
-FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NUMPREVIEWTUI"
 
-[ "$PAGER" = "most" ] && PAGER="less -R"
+startpreview() {
+    NUMPREVIEWTUI="$(($(find "$TMPDIR" -maxdepth 1 -name 'nnn-preview-tui-pagerpid*' 2>/dev/null | wc -l) + 1))"
+    PAGERPID="$TMPDIR/nnn-preview-tui-pagerpid.$NUMPREVIEWTUI"
+    GIFPID="$TMPDIR/nnn-preview-tui-gifpid.$NUMPREVIEWTUI"
+    CURSEL="$TMPDIR/nnn-preview-tui-selection.$NUMPREVIEWTUI"
+    FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NUMPREVIEWTUI"
 
-if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
-    TERMINAL=tmux
-elif [ -n "$KITTY_WINDOW_ID" ] && kitty @ ls >/dev/null 2>&1; then
-    TERMINAL=kitty
-else
-    TERMINAL="${TERMINAL:-xterm}"
-fi
+    [ "$PAGER" = "most" ] && PAGER="less -R"
 
-if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ]; then
-    SPLIT='h'
-elif [ "$SPLIT" != 'h' ]; then
-    SPLIT='v'
-fi
+    if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
+        TERMINAL=tmux
+    elif [ -n "$KITTY_WINDOW_ID" ] && kitty @ ls >/dev/null 2>&1; then
+        TERMINAL=kitty
+    else
+        TERMINAL="${TERMINAL:-xterm}"
+    fi
+
+    if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ]; then
+        SPLIT='h'
+    elif [ "$SPLIT" != 'h' ]; then
+        SPLIT='v'
+    fi
+
+    if [ "$TERMINAL" = "tmux" ]; then
+        # tmux splits are inverted
+        if [ "$SPLIT" = "v" ]; then SPLIT="h"; else SPLIT="v"; fi
+
+        tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e "PAGER=$PAGER" \
+            -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
+            -e "PAGERPID=$PAGERPID" -e "GIFPID=$GIFPID" -e "CURSEL=$CURSEL" -e "TMPDIR=$TMPDIR" \
+            -e "ICONLOOKUP=$ICONLOOKUP" -e "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
+            -e "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" -e "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
+            -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$2" -d"$SPLIT" "$0" "$1"
+    elif [ "$TERMINAL" = "kitty" ]; then
+        # Setting the layout for the new window. It will be restored after the
+        # script ends.
+        kitty @ goto-layout splits >/dev/null
+
+        # Trying to use kitty's integrated window management as the split window.
+        # All environmental variables that will be used in the new window must
+        # be explicitly passed.
+        kitty @ launch --no-response --title "nnn preview" --keep-focus \
+            --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" \
+            --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" --env "TMPDIR=$TMPDIR" \
+            --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" --env "TERMINAL=$TERMINAL"\
+            --env "USE_PISTOL=$USE_PISTOL" --env "PAGERPID=$PAGERPID"  \
+            --env "GIFPID=$GIFPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
+            --env "ICONLOOKUP=$ICONLOOKUP" --env "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
+            --env "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" --env "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
+            --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" >/dev/null
+    elif [ -n "$2" ]; then
+        QUICKLOOK=1 QLPATH="$2" PREVIEW_MODE=1 "$0" "$1" >/dev/null &
+    else
+        PAGERPID="$PAGERPID" GIFPID="$GIFPID" CURSEL="$CURSEL" PREVIEW_MODE=1 \
+            FIFO_UEBERZUG="$FIFO_UEBERZUG" $TERMINAL -e "$0" "$1" 2>/dev/null &
+    fi
+}
+
+togglepreview() {
+    if exists QuickLook.exe; then
+        QLPATH="QuickLook.exe"
+    elif exists Bridge.exe; then
+        QLPATH="Bridge.exe"
+    fi
+    if pkill -fx "cat $NNN_FIFO" >/dev/null; then
+        if [ -n "$QLPATH" ] && stat "$1" >/dev/null 2>&1; then
+            f="$(wslpath -w "$1" 2>&1)" && "$QLPATH" "$f" &
+        fi
+    else
+        startpreview "$1" "$QLPATH"
+    fi
+}
 
 exists() {
     which "$1" >/dev/null 2>&1
@@ -170,7 +221,8 @@ preview_file() {
     elif [ -d "$1" ]; then
         cd "$1" || return
         if [ "$ICONLOOKUP" -ne 0 ] && [ -f "$(dirname "$0")"/.iconlookup ]; then
-            [ "$SPLIT" = h ] && BSTR="\n"
+            [ "$SPLIT" = h ] && [ "$TERMINAL" != "kitty" ] && BSTR="\n"
+            [ "$SPLIT" = v ] && [ "$TERMINAL" = "kitty" ] && BSTR="\n"
             # shellcheck disable=SC2012
             ls -F --group-directories-first | head -n "$((lines - 3))" | "$(dirname "$0")"/.iconlookup -l "$cols" -B "$BSTR" -b " "
         elif exists tree; then
@@ -289,8 +341,7 @@ image_preview() {
     clear
     if [ "$TERMINAL" = "kitty" ]; then
         # Kitty terminal users can use the native image preview method.
-        kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no \
-            "$3"
+        kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3"
     elif exists ueberzug; then
         ueberzug_layer "$1" "$2" "$3"
     elif exists catimg; then
@@ -320,7 +371,7 @@ ueberzug_refresh() {
     tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     preview_file "$(cat "$CURSEL")"
     echo > "$NNN_FIFO"
-    preview_fifo &
+    preview_fifo 2>/dev/null &
     wait
 }
 
@@ -328,7 +379,7 @@ preview_fifo() {
     # use cat instead of 'exec <' to avoid issues with dash shell
     # shellcheck disable=SC2002
     cat "$NNN_FIFO" |\
-    while read -r selection ; do
+    while read -r selection; do
         kill "$(cat "$GIFPID" 2>/dev/null)" >/dev/null 2>&1
         kill "$(cat "$PAGERPID" 2>/dev/null)" >/dev/null 2>&1
         [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
@@ -340,7 +391,6 @@ preview_fifo() {
     pkill -P "$$" >/dev/null 2>&1
 }
 
-
 if [ "$PREVIEW_MODE" ]; then
     if [ ! -r "$NNN_FIFO" ]; then
         echo "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')" >&2
@@ -350,58 +400,14 @@ if [ "$PREVIEW_MODE" ]; then
 
     if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
         mkfifo "$FIFO_UEBERZUG"
-        trap 'ueberzug_refresh' WINCH
-        trap 'rm "$FIFO_UEBERZUG" "$PAGERPID" "$GIFPID" "$CURSEL"' INT HUP EXIT
+        trap 'ueberzug_refresh; rm $FIFO_UEBERZUG' WINCH
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
+    trap 'rm "$PAGERPID" "$GIFPID" "$CURSEL" 2>/dev/null' INT HUP EXIT
 
     preview_file "$1"
-    preview_fifo &
+    preview_fifo 2>/dev/null &
     wait
-
-    # Restoring the previous layout for kitty users. This will only work for
-    # kitty >= 0.18.0.
-    if [ "$TERMINAL" = "kitty" ]; then
-        kitty @ last-used-layout --no-response >/dev/null 2>&1
-    fi
-
-    exit 0
 fi
 
-if exists QuickLook.exe; then
-    QLPATH="QuickLook.exe"
-elif exists Bridge.exe; then
-    QLPATH="Bridge.exe"
-fi
-if pkill -fx "cat $NNN_FIFO" >/dev/null; then
-    if [ -n "$QLPATH" ] && stat "$1" >/dev/null 2>&1; then
-        f="$(wslpath -w "$1" 2>&1)" && "$QLPATH" "$f" &
-    fi
-    exit 0
-fi
-if [ "$TERMINAL" = "tmux" ]; then
-    # tmux splits are inverted
-    if [ "$SPLIT" = "v" ]; then SPLIT="h"; else SPLIT="v"; fi
-
-    tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e "PAGER=$PAGER" \
-    -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
-    -e "ICONLOOKUP=$ICONLOOKUP" -e "QLPATH=$QLPATH" -d"$SPLIT" "$0" "$1"
-elif [ "$TERMINAL" = "kitty" ]; then
-    # Setting the layout for the new window. It will be restored after the
-    # script ends.
-    kitty @ goto-layout splits >/dev/null
-
-    # Trying to use kitty's integrated window management as the split window.
-    # All environmental variables that will be used in the new window must
-    # be explicitly passed.
-    kitty @ launch --no-response --title "nnn preview" --keep-focus \
-          --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" \
-          --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" \
-          --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" \
-          --env "USE_PISTOL=$USE_PISTOL" --env "ICONLOOKUP=$ICONLOOKUP" \
-          --location "${SPLIT}split" "$0" "$1" >/dev/null
-elif [ -n "$QLPATH" ]; then
-    QUICKLOOK=1 QLPATH="$QLPATH" PREVIEW_MODE=1 "$0" "$1" >/dev/null &
-else
-    PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
-fi
+togglepreview "$1" &

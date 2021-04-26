@@ -67,27 +67,75 @@ USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
 PAGER="${PAGER:-less -P?n -R}"
 TMPDIR="${TMPDIR:-/tmp}"
-NUMPREVIEWTUI="$(($(find "$TMPDIR" -maxdepth 1 -name 'nnn-preview-tui-pagerpid*' 2>/dev/null | wc -l) + 1))"
-PAGERPID="$TMPDIR/nnn-preview-tui-pagerpid.$NUMPREVIEWTUI"
-GIFPID="$TMPDIR/nnn-preview-tui-gifpid.$NUMPREVIEWTUI"
-CURSEL="$TMPDIR/nnn-preview-tui-selection.$NUMPREVIEWTUI"
-FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NUMPREVIEWTUI"
 
-[ "$PAGER" = "most" ] && PAGER="less -R"
+startpreview() {
+    NUMPREVIEWTUI="$(($(find "$TMPDIR" -maxdepth 1 -name 'nnn-preview-tui-pagerpid*' 2>/dev/null | wc -l) + 1))"
+    PAGERPID="$TMPDIR/nnn-preview-tui-pagerpid.$NUMPREVIEWTUI"
+    GIFPID="$TMPDIR/nnn-preview-tui-gifpid.$NUMPREVIEWTUI"
+    CURSEL="$TMPDIR/nnn-preview-tui-selection.$NUMPREVIEWTUI"
+    FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NUMPREVIEWTUI"
 
-if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
-    TERMINAL=tmux
-elif [ -n "$KITTY_WINDOW_ID" ] && kitty @ ls >/dev/null 2>&1; then
-    TERMINAL=kitty
-else
-    TERMINAL="${TERMINAL:-xterm}"
-fi
+    [ "$PAGER" = "most" ] && PAGER="less -R"
 
-if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ]; then
-    SPLIT='h'
-elif [ "$SPLIT" != 'h' ]; then
-    SPLIT='v'
-fi
+    if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
+        TERMINAL=tmux
+    elif [ -n "$KITTY_WINDOW_ID" ] && kitty @ ls >/dev/null 2>&1; then
+        TERMINAL=kitty
+    else
+        TERMINAL="${TERMINAL:-xterm}"
+    fi
+
+    if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ]; then
+        SPLIT='h'
+    elif [ "$SPLIT" != 'h' ]; then
+        SPLIT='v'
+    fi
+
+    if [ "$TERMINAL" = "tmux" ]; then
+        # tmux splits are inverted
+        if [ "$SPLIT" = "v" ]; then SPLIT="h"; else SPLIT="v"; fi
+
+        tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e "PAGER=$PAGER" \
+            -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
+            -e "PAGERPID=$PAGERPID" -e "GIFPID=$GIFPID" -e "CURSEL=$CURSEL" -e "TMPDIR=$TMPDIR" \
+            -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$QLPATH" -d"$SPLIT" "$0" "$1"
+    elif [ "$TERMINAL" = "kitty" ]; then
+        # Setting the layout for the new window. It will be restored after the
+        # script ends.
+        kitty @ goto-layout splits >/dev/null
+
+        # Trying to use kitty's integrated window management as the split window.
+        # All environmental variables that will be used in the new window must
+        # be explicitly passed.
+        kitty @ launch --no-response --title "nnn preview" --keep-focus \
+            --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" \
+            --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" --env "TMPDIR=$TMPDIR" \
+            --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" --env "TERMINAL=$TERMINAL"\
+            --env "USE_PISTOL=$USE_PISTOL" --env "PAGERPID=$PAGERPID" \
+            --env "GIFPID=$GIFPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
+            --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" >/dev/null
+    elif [ -n "$2" ]; then
+        QUICKLOOK=1 QLPATH="$2" PREVIEW_MODE=1 "$0" "$1" >/dev/null &
+    else
+        PAGERPID="$PAGERPID" GIFPID="$GIFPID" CURSEL="$CURSEL" PREVIEW_MODE=1 \
+            FIFO_UEBERZUG="$FIFO_UEBERZUG" $TERMINAL -e "$0" "$1" 2>/dev/null &
+    fi
+}
+
+togglepreview() {
+    if exists QuickLook.exe; then
+        QLPATH="QuickLook.exe"
+    elif exists Bridge.exe; then
+        QLPATH="Bridge.exe"
+    fi
+    if pkill -fx "cat $NNN_FIFO" >/dev/null; then
+        if [ -n "$QLPATH" ] && stat "$1" >/dev/null 2>&1; then
+            f="$(wslpath -w "$1" 2>&1)" && "$QLPATH" "$f" &
+        fi
+    else
+        startpreview "$1" "$QLPATH"
+    fi
+}
 
 exists() {
     which "$1" >/dev/null 2>&1
@@ -159,7 +207,7 @@ preview_file () {
         else
             fifo_pager ls --color=always
         fi
-    elif [ "$encoding" = "binary" ]; then
+    elif [ "${encoding#*)}" = "binary" ]; then
         if [ "${mimetype%%/*}" = "image" ]; then
             image_preview "$cols" "$lines" "$1"
         elif [ "$mimetype" = "application/zip" ]; then
@@ -202,7 +250,7 @@ image_preview() {
 }
 
 ueberzug_layer() {
-    printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "width": "%s", "height": "%s", "path": "%s"}\n' "$1" "$2" "$3" > "$FIFO_UEBERZUG"
+    printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "width": "%s", "height": "%s", "scaler": "fit_contain", "path": "%s"}\n' "$1" "$2" "$3" > "$FIFO_UEBERZUG"
 }
 
 ueberzug_remove() {
@@ -217,13 +265,9 @@ ueberzug_refresh() {
     tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     preview_file "$(cat "$CURSEL")"
     echo > "$NNN_FIFO"
-    preview_fifo &
+    preview_fifo 2>/dev/null &
     wait
 }
-if [ "$TERMINAL" != "kitty" ] && [ "$PREVIEW_MODE" ] && exists ueberzug; then
-    trap 'ueberzug_refresh' WINCH
-    trap 'rm "$FIFO_UEBERZUG" "$PAGERPID" "$GIFPID" "$CURSEL"' INT HUP EXIT
-fi
 
 preview_fifo() {
     # use cat instead of 'exec <' to avoid issues with dash shell
@@ -249,58 +293,15 @@ if [ "$PREVIEW_MODE" ]; then
     fi
 
     if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
-        FIFO_UEBERZUG="$TMPDIR/nnn-ueberzug-fifo.$$"
         mkfifo "$FIFO_UEBERZUG"
+        trap 'ueberzug_refresh; rm $FIFO_UEBERZUG' WINCH
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
+    trap 'rm "$PAGERPID" "$GIFPID" "$CURSEL" 2>/dev/null' INT HUP EXIT
 
     preview_file "$1"
-    preview_fifo &
+    preview_fifo 2>/dev/null &
     wait
-
-    # Restoring the previous layout for kitty users. This will only work for
-    # kitty >= 0.18.0.
-    if [ "$TERMINAL" = "kitty" ]; then
-        kitty @ last-used-layout --no-response >/dev/null 2>&1
-    fi
-
-    exit 0
 fi
 
-if exists QuickLook.exe; then
-    QLPATH="QuickLook.exe"
-elif exists Bridge.exe; then
-    QLPATH="Bridge.exe"
-fi
-if pkill -fx "cat $NNN_FIFO" >/dev/null; then
-    if [ -n "$QLPATH" ] && stat "$1" >/dev/null 2>&1; then
-        f="$(wslpath -w "$1" 2>&1)" && "$QLPATH" "$f" &
-    fi
-    exit 0
-fi
-if [ "$TERMINAL" = "tmux" ]; then
-    # tmux splits are inverted
-    if [ "$SPLIT" = "v" ]; then SPLIT="h"; else SPLIT="v"; fi
-
-    tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e "PAGER=$PAGER" \
-    -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
-    -e "QLPATH=$QLPATH" -d"$SPLIT" "$0" "$1"
-elif [ "$TERMINAL" = "kitty" ]; then
-    # Setting the layout for the new window. It will be restored after the
-    # script ends.
-    kitty @ goto-layout splits >/dev/null
-
-    # Trying to use kitty's integrated window management as the split window.
-    # All environmental variables that will be used in the new window must
-    # be explicitly passed.
-    kitty @ launch --no-response --title "nnn preview" --keep-focus \
-          --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" \
-          --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" \
-          --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" \
-          --env "USE_PISTOL=$USE_PISTOL" \
-          --location "${SPLIT}split" "$0" "$1" >/dev/null
-elif [ -n "$QLPATH" ]; then
-    QUICKLOOK=1 QLPATH="$QLPATH" PREVIEW_MODE=1 "$0" "$1" >/dev/null &
-else
-    PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
-fi
+togglepreview "$1" &
