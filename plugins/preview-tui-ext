@@ -227,7 +227,7 @@ preview_file() {
             # shellcheck disable=SC2012
             ls -F --group-directories-first | head -n "$((lines - 3))" | "$(dirname "$0")"/.iconlookup -l "$cols" -B "$BSTR" -b " "
         elif exists tree; then
-            fifo_pager tree -L 3 --dirsfirst -C -F --noreport -i
+            fifo_pager tree --filelimit "$(find . -maxdepth 1 | wc -l)" -L 3 -C -F --dirsfirst --noreport
         elif exists exa; then
             exa -G --group-directories-first --colour=always 2>/dev/null
         else

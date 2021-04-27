@@ -201,7 +201,7 @@ preview_file () {
     elif [ -d "$1" ]; then
         cd "$1" || return
         if exists tree; then
-            fifo_pager tree -L 3 --dirsfirst -C -F --noreport -i
+            fifo_pager tree --filelimit "$(find . -maxdepth 1 | wc -l)" -L 3 -C -F --dirsfirst --noreport
         elif exists exa; then
             exa -G --colour=always 2>/dev/null
         else
