@@ -5931,7 +5931,7 @@ begin:
 	}
 
 #ifndef NOX11
-	if (cfg.x11) {
+	if (cfg.x11 && !g_state.picker) {
 		/* Set terminal window title */
 		r = set_tilde_in_path(path);
 
@@ -7536,7 +7536,7 @@ static bool set_tmp_path(void)
 static void cleanup(void)
 {
 #ifndef NOX11
-	if (cfg.x11) {
+	if (cfg.x11 && !g_state.picker) {
 		printf("\033[23;0t"); /* reset terminal window title */
 		fflush(stdout);
 	}
@@ -7957,7 +7957,7 @@ int main(int argc, char *argv[])
 #endif
 
 #ifndef NOX11
-	if (cfg.x11) {
+	if (cfg.x11 && !g_state.picker) {
 		/* Save terminal window title */
 		printf("\033[22;0t");
 		fflush(stdout);
