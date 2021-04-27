@@ -79,7 +79,7 @@ startpreview() {
 
     if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
         TERMINAL=tmux
-    elif [ -n "$KITTY_WINDOW_ID" ] && kitty @ ls >/dev/null 2>&1; then
+    elif [ -n "$KITTY_LISTEN_ON" ]; then
         TERMINAL=kitty
     else
         TERMINAL="${TERMINAL:-xterm}"
@@ -300,6 +300,12 @@ else
     if [ ! -r "$NNN_FIFO" ]; then
         clear
         printf "No FIFO available! (\$NNN_FIFO='%s')\nPlease read the documentation" "$NNN_FIFO"
+        read -r _
+    elif [ "$KITTY_WINDOW_ID" ] && [ -z "$KITTY_LISTEN_ON" ]; then
+        # The escape codes used to control kitty splits cause problems when run from a background process.
+        # Use --listen-on flag or listen_on config variable to avoid(https://sw.kovidgoyal.net/kitty/conf.html)
+        clear
+        printf "\$KITTY_LISTEN_ON not set!\nPlease add listen_on to your kitty.conf or start with the --listen-on flag."
         read -r _
     else
         togglepreview "$1" &
