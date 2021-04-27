@@ -8,7 +8,7 @@
 # Dependencies:
 #    - Supports 4 independent methods to preview with:
 #        - tmux (>=3.0), or
-#        - kitty with allow_remote_control on, or
+#        - kitty with allow_remote_control and listen_on set in kitty.conf, or
 #        - QuickLook on WSL (https://github.com/QL-Win/QuickLook)
 #        - $TERMINAL set to a terminal (it's xterm by default).
 #    - less or $PAGER
@@ -240,10 +240,10 @@ image_preview() {
         ueberzug_layer "$1" "$2" "$3"
     elif exists catimg; then
         catimg "$3" &
-        echo "$!" > "$GIFPID"
+        printf "%s" "$!" > "$GIFPID"
     elif exists viu; then
         viu -t "$3" &
-        echo "$!" > "$GIFPID"
+        printf "%s" "$!" > "$GIFPID"
     else
         fifo_pager print_bin_info "$3"
     fi
@@ -264,7 +264,7 @@ ueberzug_refresh() {
     pkill -f -n preview-tui-ext >/dev/null 2>&1
     tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     preview_file "$(cat "$CURSEL")"
-    echo > "$NNN_FIFO"
+    printf "\n" > "$NNN_FIFO"
     preview_fifo 2>/dev/null &
     wait
 }
@@ -278,7 +278,7 @@ preview_fifo() {
         kill "$(cat "$PAGERPID" 2>/dev/null)" >/dev/null 2>&1
         [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
         preview_file "$selection"
-        echo "$selection" > "$CURSEL"
+        printf "%s" "$selection" > "$CURSEL"
     done
     [ "$TERMINAL" != "kitty" ] && exists ueberzug && rm "$FIFO_UEBERZUG"
     rm "$PAGERPID" "$GIFPID" "$CURSEL" >/dev/null 2>&1
@@ -286,12 +286,6 @@ preview_fifo() {
 }
 
 if [ "$PREVIEW_MODE" ]; then
-    if [ ! -r "$NNN_FIFO" ]; then
-        echo "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')" >&2
-        read -r
-        exit 1
-    fi
-
     if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
         mkfifo "$FIFO_UEBERZUG"
         trap 'ueberzug_refresh; rm $FIFO_UEBERZUG' WINCH
@@ -302,6 +296,12 @@ if [ "$PREVIEW_MODE" ]; then
     preview_file "$1"
     preview_fifo 2>/dev/null &
     wait
+else
+    if [ ! -r "$NNN_FIFO" ]; then
+        clear
+        printf "No FIFO available! (\$NNN_FIFO='%s')\nPlease read the documentation" "$NNN_FIFO"
+        read -r _
+    else
+        togglepreview "$1" &
+    fi
 fi
-
-togglepreview "$1" &
