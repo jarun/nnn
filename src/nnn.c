@@ -1258,10 +1258,21 @@ static int get_input(const char *prompt)
 	return r;
 }
 
+static bool isselfileempty(void)
+{
+	struct stat sb;
+
+	return (stat(selpath, &sb) == -1) || (!sb.st_size);
+}
+
 static int get_cur_or_sel(void)
 {
-	if (selbufpos && ndents) {
-		if (cfg.prefersel)
+	/* Check both local buffer and selection file for external selection */
+	if ((selbufpos || !isselfileempty()) && ndents) {
+		/* If selection is preferred and we have a local selection, return selection.
+		 * Always show the prompt in case of an external selection.
+		 */
+		if (cfg.prefersel && selbufpos)
 			return 's';
 
 		int choice = get_input(messages[MSG_CUR_SEL_OPTS]);
@@ -1377,13 +1388,6 @@ static size_t seltofile(int fd, uint_t *pcount)
 		*pcount = count;
 
 	return pos;
-}
-
-static bool isselfileempty(void)
-{
-	struct stat sb;
-
-	return (stat(selpath, &sb) == -1) || (!sb.st_size);
 }
 
 /* List selection from selection file (another instance) */
