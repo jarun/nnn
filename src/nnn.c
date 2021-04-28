@@ -1280,7 +1280,7 @@ static int get_cur_or_sel(void)
 		return ((choice == 'c' || choice == 's') ? choice : 0);
 	}
 
-	if (selbufpos)
+	if (selbufpos || !isselfileempty())
 		return 's';
 
 	if (ndents)
@@ -1519,7 +1519,7 @@ static int editselection(void)
 	struct stat sb;
 	time_t mtime;
 
-	if (!selbufpos)
+	if (!selbufpos) /* External selection is only editable at source */
 		return listselfile();
 
 	fd = create_tmp_file();
