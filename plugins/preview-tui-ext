@@ -328,7 +328,7 @@ generate_preview() {
                     filename="$(printf "%s" "${3##*/}" | cut -d. -f1)"
                     mv "$NNN_PREVIEWDIR/${3%/*}/$filename.jpg" "$NNN_PREVIEWDIR/$3.jpg" ;;
             pdf) pdftoppm -jpeg -f 1 -singlefile "$3" "$NNN_PREVIEWDIR/$3" >/dev/null 2>&1 ;;
-            video) ffmpegthumbnailer -m -s0 -i "$3" -o "$NNN_PREVIEWDIR/$3.jpg" >/dev/null 2>&1 || rm "$NNN_PREVIEWDIR/$3.jpg" ;;
+            video) ffmpegthumbnailer -s0 -i "$3" -o "$NNN_PREVIEWDIR/$3.jpg" >/dev/null 2>&1 || rm "$NNN_PREVIEWDIR/$3.jpg" ;;
         esac
     fi
     if [ -f "$NNN_PREVIEWDIR/$3.jpg" ]; then
