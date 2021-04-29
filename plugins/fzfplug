@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+
+# Description: Select a nnn plugin with fzf and execute it. Toggle preview pane on/off with `?`.
+#
+# For better compatibility with as many nnn plugins as possible, fzfplug will first execute
+# the chosen script on the file hovered in nnn, and upon failure, try to run it with no target
+# (which should actually run it on selected files if nnn has an active selection). I don't 
+# have the required dependencies to confirm compatibility with all scripts though.
+#
+# Dependencies: find, fzf
+# Shell: POSIX compliant
+# Author: Kabouik
+
+nnnplugins=~/.config/nnn/plugins
+#otherplugins=~/.local/share/nautilus/scripts  # Example for other script source, there are many Git repos with Nautilus scripts
+
+err=0
+plugin=$(find "$nnnplugins" "$otherplugins" -maxdepth 3 -perm -111 -type f | fzf --preview 'bat {}' --preview-window right:66% --delimiter / --with-nth -1 --bind ?:toggle-preview)
+
+"$plugin" "$1" || err=1
+
+if [ "$err" -eq "1" ]; then
+    "$plugin" || err=2
+fi
+
+if [ "$err" -eq "2" ]; then
+    read -n 1 -p -s -r "Failed to execute script, try running it directly without fzfplug. Press any key to continue."
+fi

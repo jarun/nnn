@@ -37,6 +37,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | fzcd | Change to the directory of a fuzzy-selected file/dir | sh | fzf |
 | fzhist | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf |
 | fzopen | Fuzzy find a file in dir subtree and edit or open | sh | fzf, xdg-open |
+| fzfplug | Fuzzy find a nnn plugin (or a plugin in an extra directory) and run it | sh | fzf, find |
 | fzz | Change to any directory in the z database with fzf | sh | fzf, z |
 | getplugs | Update plugins to installed `nnn` version | sh | curl |
 | gutenread | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
