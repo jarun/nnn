@@ -24,5 +24,5 @@ if [ "$err" -eq "1" ]; then
 fi
 
 if [ "$err" -eq "2" ]; then
-    read -n 1 -p -s -r "Failed to execute script, try running it directly without fzfplug. Press any key to continue."
+    read -n 1 -s -r -p "Failed to execute '$plugin', try running it directly without fzfplug. Press any key to continue."
 fi
