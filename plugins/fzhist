@@ -22,7 +22,7 @@ elif [ "$shellname" = "fish" ]; then
     entry="$(grep "\- cmd: " "$hist_file" | cut -c 8- | "$fuzzy")"
 fi
 
-if ! [ -z "$entry" ]; then
+if [ -n "$entry" ]; then
     tmpfile=$(mktemp)
     echo "$entry" >> "$tmpfile"
     $EDITOR "$tmpfile"

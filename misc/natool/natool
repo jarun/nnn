@@ -21,7 +21,7 @@
 # #############################################################################
 
 import sys
-from subprocess import Popen, PIPE, DEVNULL
+from subprocess import Popen, PIPE
 
 if len(sys.argv) < 3:
     print('usage: natool [-a] [-l] [-x] [archive] [file/dir]')

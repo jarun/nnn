@@ -34,7 +34,7 @@ get_selection() {
 if selection=$( get_selection ); then
     setsid "$selection" 2>/dev/null 1>/dev/null &
 
-    if ! [ -z "$1" ]; then
+    if [ -n "$1" ]; then
         sleep "$1"
     else
         sleep 1

@@ -1,0 +1,55 @@
+#!/usr/bin/env sh
+
+# Description: 'cd' to the directory from CDPATH
+#
+# Details: If the CDPATH environmet variable is not set, the default value of
+#          ${XDG_CONFIG_HOME:-$HOME/.config}/nnn/bookmarks will be used.
+#          You can create this directory and fill it with symbolic links to your
+#          favorite directories. It's a good idea to add it to CDPATH so that it
+#          could also be used from the command line outside of nnn.
+#          The fzf search is done on the directory basename (the first column).
+#
+#          This plugin is an extended version of the bookmarks plugin.
+#          If you set your CDPATH to ${XDG_CACHE_HOME:-$HOME/.cache}/nnn/bookmarks
+#          or to the value of BOOKMARKS_DIR, you can use it as a bookmarks replacement.
+#
+# Shell: POSIX compliant
+# Author: Yuri Kloubakov
+
+. "$(dirname "$0")"/.nnn-plugin-helper
+
+# Get a list of (symbolic links to) directories for every element of CDPATH
+get_dirs() {
+    IFS=':'
+    for path in $CDPATH; do
+        for entry in "$path"/*; do
+            if [ -d "$entry" ]; then
+                name=$(basename "$entry" | grep -o '^.\{1,24\}')
+                if [ -h "$entry" ]; then
+                    slink=$(ls -dl -- "$entry")
+                    entry=${slink#*" $entry -> "}
+                fi
+                printf "%-24s :%s\n" "${name}" "$entry"
+            fi
+        done
+    done
+}
+
+abort() {
+    echo "$1"
+    read -r _
+    exit 1
+}
+
+if [ -z "$CDPATH" ]; then
+    CDPATH="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/bookmarks"
+    [ -d "$CDPATH" ] || abort "CDPATH is not set and there is no \"$CDPATH\" directory"
+fi
+
+dir_list=$(get_dirs)
+[ -n "$dir_list" ] || abort "There are no directories to choose from. Check your \"$CDPATH\"."
+
+dir=$(echo "$dir_list" | fzf --nth=1 --delimiter=':' | awk -F: 'END { print $2 }')
+if [ -n "$dir" ]; then
+    nnn_cd "$dir" 0
+fi

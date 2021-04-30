@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+
+# Description: Toggles executable mode for selection
+#
+# Dependencies: chmod
+#
+# Note: Works _only_ with selection (nnn can toggle the mode for the hovered file)
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+if [ -s "$selection" ]; then
+    xargs -0 -I {} sh -c 'if [ -x "{}" ] ; then chmod -x "{}" ; else chmod +x "{}" ; fi' < "$selection"
+
+    # Clear selection
+    if [ -p "$NNN_PIPE" ]; then
+        printf "-" > "$NNN_PIPE"
+    fi
+fi

@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+
+# Description: Simple script to give copy-paste a progress percentage
+#              by utilizing rsync.
+#
+#              LIMITATION: this won't work when pasting to MTP device.
+#
+# Dependencies: rsync
+#
+# Shell: POSIX compliant
+# Author: Benawi Adha
+
+sel=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+# Choose one of these two schemes by commenting
+
+# more verbose
+xargs -0 -a "$sel" -I % rsync -ah --progress % "$PWD"
+
+# less verbose
+# xargs -0 -a "$sel" -I % rsync -ah --info=progress2 % "$PWD"
+
+# Clear selection
+if [ -p "$NNN_PIPE" ]; then
+    printf "-" > "$NNN_PIPE"
+fi

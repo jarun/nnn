@@ -1,0 +1,26 @@
+#!/usr/bin/env sh
+
+# Description: Decrypts selected files using gpg. The contents of the decrypted file are stored in a file with extension .dec
+#
+# Note: If an appropriate private key cannot be found gpg silently prints a message in the background and no files are written.
+#
+# Shell: POSIX compliant
+# Author: KlzXS
+
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+printf "(s)election/(c)urrent? [default=c] "
+read -r resp
+
+if [ "$resp" = "s" ]; then
+	files=$(tr '\0' '\n' < "$selection")
+else
+	files=$1
+fi
+
+printf "%s" "$files" | xargs -n1 -I{} gpg --decrypt --output "{}.dec" {}
+
+# Clear selection
+if [ "$resp" = "s" ] && [ -p "$NNN_PIPE" ]; then
+    printf "-" > "$NNN_PIPE"
+fi

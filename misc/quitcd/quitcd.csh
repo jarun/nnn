@@ -11,4 +11,4 @@ set NNN_TMPFILE=~/.config/nnn/.lastd
 # stty lwrap undef
 # stty lnext undef
 
-alias n 'nnn -fis; source "$NNN_TMPFILE"; rm -f "$NNN_TMPFILE"'
+alias n 'nnn; source "$NNN_TMPFILE"; rm -f "$NNN_TMPFILE"'

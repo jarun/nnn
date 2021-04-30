@@ -2,6 +2,9 @@
 
 # Description: Open images in hovered  directory and thumbnails
 #              open hovered image in sxiv or viu and browse other images in the directory
+# Dependencies: imv (https://github.com/eXeC64/imv) or,
+#               sxiv (https://github.com/muennich/sxiv) or,
+#               viu (https://github.com/atanunq/viu), less
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
@@ -15,17 +18,22 @@ abspath() {
 
 listimages() {
     find -L "$(dirname "$target")" -maxdepth 1 -type f -iregex \
-      '.*\(jpe?g\|bmp\|png\|gif\)$' -print0 | sort -z
+      '.*\(jpe?g\|bmp\|webp\|ico\|svg\|png\|gif\)$' -print0 | sort -z
 }
 
-sxiv_view_dir() {
-    target="$(abspath "$1")"
+view_dir() {
+    target="$(abspath "$2")"
     count="$(listimages | grep -a -m 1 -ZznF "$target" | cut -d: -f1)"
 
     if [ -n "$count" ]; then
-        listimages | xargs -0 sxiv -n "$count" --
+        if [ "$1" = 'sxiv' ]; then
+            listimages | xargs -0 "$1" -an "$count" --
+        else
+            listimages | xargs -0 "$1" -n "$count" --
+        fi
     else
-        sxiv -- "$@" # fallback
+        shift
+        "$1" -- "$@" # fallback
     fi
 }
 
@@ -35,16 +43,28 @@ if [ -z "$1" ] || ! [ -s "$1" ]; then
     exit 1
 fi
 
-if command -v sxiv >/dev/null 2>&1; then
+if uname | grep -q "Darwin"; then
     if [ -f "$1" ]; then
-        sxiv_view_dir "$1" >/dev/null 2>&1 &
-    elif [ -d "$1" ] || [ -h "$1" ]; then
-        sxiv -qt "$1" >/dev/null 2>&1 &
+        open "$1" >/dev/null 2>&1 &
     fi
-elif command -v viu >/dev/null 2>&1; then
+# `imvr` is often callable as `imv` on Linux distros
+# You might need to change the reference below
+elif which imvr >/dev/null 2>&1; then
+    if [ -f "$1" ]; then
+        view_dir imvr "$1" >/dev/null 2>&1 &
+    elif [ -d "$1" ] || [ -h "$1" ]; then
+        imvr "$1" >/dev/null 2>&1 &
+    fi
+elif which sxiv >/dev/null 2>&1; then
+    if [ -f "$1" ]; then
+        view_dir sxiv "$1" >/dev/null 2>&1 &
+    elif [ -d "$1" ] || [ -h "$1" ]; then
+        sxiv -aqt "$1" >/dev/null 2>&1 &
+    fi
+elif which viu >/dev/null 2>&1; then
     viu -n "$1" | less -R
 else
-    printf "install sxiv or viu"
+    printf "Please install imv/sxiv/viu and check their callable names match the plugin source"
     read -r _
     exit 2
 fi

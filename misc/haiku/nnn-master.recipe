@@ -1,4 +1,4 @@
-SUMMARY="The missing terminal file manager for X"
+SUMMARY="A blazing-fast lightweight terminal file manager"
 DESCRIPTION="nnn is a full-featured terminal file manager. It's tiny and \
 nearly 0-config with an incredible performance.
 
@@ -8,16 +8,16 @@ capabilities further. You can plug new functionality and play with a \
 custom keybind instantly. There's an independent (neo)vim plugin.
 
 It runs smoothly on the Raspberry Pi, Termux on Android, Linux, macOS, BSD, \
-Cygwin, WSL and works seamlessly with DEs and GUI utilities.
+Cygwin, WSL, Haiku and works seamlessly with DEs and GUI utilities.
 
 Visit the Wiki for concepts, program usage, how-tos and troubleshooting."
 HOMEPAGE="https://github.com/jarun/nnn"
-COPYRIGHT="2016-2020 Arun Prakash Jana"
+COPYRIGHT="2016-2021 Arun Prakash Jana"
 LICENSE="BSD (2-clause)"
 REVISION="1"
 SOURCE_URI="git://github.com/jarun/nnn.git"
 
-ARCHITECTURES="x86_64"
+ARCHITECTURES="!x86_gcc2 x86_64"
 SECONDARY_ARCHITECTURES="x86"
 
 PROVIDES="
@@ -53,4 +53,6 @@ BUILD()
 INSTALL()
 {
 	make -f misc/haiku/Makefile install PREFIX=$prefix
+
+	addResourcesToBinaries misc/haiku/nnn.rdef $prefix/bin/nnn
 }

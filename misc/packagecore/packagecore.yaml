@@ -1,21 +1,12 @@
 name: nnn
 maintainer: Arun Prakash Jana <engineerarun@gmail.com>
 license: BSD 2-Clause
-summary: The missing terminal file manager for X.
+summary: The unorthodox terminal file manager.
 homepage: https://github.com/jarun/nnn
 commands:
   install:
     - make PREFIX="/usr" strip install DESTDIR="${BP_DESTDIR}"
 packages:
-  archlinux:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-    deps:
-      - ncurses
-      - readline
-    container: "archlinux/base"
   centos7.5:
     builddeps:
       - make
@@ -68,16 +59,6 @@ packages:
     commands:
       pre:
         - yum install epel-release
-  debian8:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - libncursesw5-dev
-      - libreadline-dev
-    deps:
-      - libncursesw5
-      - readline-common
   debian9:
     builddeps:
       - make
@@ -93,31 +74,11 @@ packages:
       - make
       - gcc
       - pkg-config
-      - libncursesw5-dev
+      - libncurses-dev
       - libreadline-dev
     deps:
-      - libncursesw5
+      - libncursesw6
       - readline-common
-  fedora30:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - ncurses-devel
-      - readline-devel
-    deps:
-      - ncurses
-      - readline
-  fedora31:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - ncurses-devel
-      - readline-devel
-    deps:
-      - ncurses
-      - readline
   fedora32:
     builddeps:
       - make
@@ -128,7 +89,7 @@ packages:
     deps:
       - ncurses
       - readline
-  opensuse15.1:
+  opensuse15.2:
     builddeps:
       - make
       - gcc
@@ -148,16 +109,6 @@ packages:
     deps:
       - libncurses6
       - libreadline8
-  ubuntu14.04:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - libncursesw5-dev
-      - libreadline6-dev
-    deps:
-      - libncursesw5
-      - libreadline6
   ubuntu16.04:
     builddeps:
       - make
@@ -183,7 +134,7 @@ packages:
       - make
       - gcc
       - pkg-config
-      - libncursesw5-dev
+      - libncurses-dev
       - libreadline-dev
     deps:
       - libncursesw6

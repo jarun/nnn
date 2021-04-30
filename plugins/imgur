@@ -172,8 +172,8 @@ function take_screenshot() {
 function check_for_update() {
   # exit non-zero on HTTP error, output only the body (no stats) but output errors, follow redirects, output everything to stdout
   remote_version="$(curl --compressed -fsSL --stderr - "https://api.github.com/repos/jomo/imgur-screenshot/releases" | grep -Em 1 --color 'tag_name":\s*".*"' | cut -d '"' -f 4)"
-  if ! [ -z "$remote_version" ]; then
-    if [ ! "${current_version}" = "${remote_version}" ] && [ ! -z "${current_version}" ] && [ ! -z "${remote_version}" ]; then
+  if [ -n "$remote_version" ]; then
+    if [ ! "${current_version}" = "${remote_version}" ] && [ -n "${current_version}" ] && [ -n "${remote_version}" ]; then
       echo "Update found!"
       echo "Version ${remote_version} is available (You have ${current_version})"
       notify ok "Update found" "Version ${remote_version} is available (You have ${current_version}). https://github.com/jomo/imgur-screenshot"
@@ -209,7 +209,7 @@ function load_access_token() {
   current_time="$(date +%s)"
   preemptive_refresh_time="$((10*60))"
   expired="$((current_time > (token_expire_time - preemptive_refresh_time)))"
-  if [ ! -z "${refresh_token}" ]; then
+  if [ -n "${refresh_token}" ]; then
     # token already set
     if [ "${expired}" -eq "0" ]; then
       # token expired
@@ -320,7 +320,7 @@ function upload_authenticated_image() {
     img_ext="$(grep -Eo '"link":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4 | rev | cut -d "." -f 1 | rev)" # "link" itself has ugly '\/' escaping and no https!
     del_id="$(grep -Eo '"deletehash":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
 
-    if [ ! -z "${auto_delete}" ]; then
+    if [ -n "${auto_delete}" ]; then
       export -f delete_image
       echo "Deleting image in ${auto_delete} seconds."
       nohup /bin/bash -c "sleep ${auto_delete} && delete_image ${imgur_anon_id} ${del_id} ${log_file}" &
@@ -348,7 +348,7 @@ function upload_anonymous_image() {
     img_ext="$(grep -Eo '"link":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4 | rev | cut -d "." -f 1 | rev)" # "link" itself has ugly '\/' escaping and no https!
     del_id="$(grep -Eo '"deletehash":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
 
-    if [ ! -z "${auto_delete}" ]; then
+    if [ -n "${auto_delete}" ]; then
       export -f delete_image
       echo "Deleting image in ${auto_delete} seconds."
       nohup /bin/bash -c "sleep ${auto_delete} && delete_image ${imgur_anon_id} ${del_id} ${log_file}" &
@@ -521,7 +521,7 @@ if [ -n "${album_title}" ]; then
     echo "Album '${album_title}' successfully created"
     album_id="$(grep -Eo '"id":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
     del_id="$(grep -Eo '"deletehash":\s*"[^"]+"' <<<"${response}" | cut -d "\"" -f 4)"
-    handle_album_creation_success "http://imgur.com/a/${album_id}" "${del_id}" "${album_title}"
+    handle_album_creation_success "https://imgur.com/a/${album_id}" "${del_id}" "${album_title}"
 
     if [ "${login}" = "false" ]; then
       album_id="${del_id}"

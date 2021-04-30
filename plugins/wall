@@ -11,8 +11,8 @@ cmd_exists () {
 	echo $?
 }
 
-if ! [ -z "$1" ]; then
-    if [ "$(mimetype --output-format %m "$1" | awk -F '/' '{print $1}')" = "image" ]; then
+if [ -n "$1" ]; then
+	if [ "$(file --mime-type "$1" | awk '{print $NF}' | awk -F '/' '{print $1}')" = "image" ]; then
         if [ "$(cmd_exists nitrogen)" -eq "0" ]; then
 	        nitrogen --set-zoom-fill --save "$1"
         elif [ "$(cmd_exists wal)" -eq "0" ]; then

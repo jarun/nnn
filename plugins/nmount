@@ -10,7 +10,7 @@
 # - The script uses Linux-specific lsblk to list block devices. Alternatives:
 #       macOS: "diskutil list"
 #       BSD: "geom disk list"
-# - The script uses udisksctl (from udisks2) to pwoer down devices. This is also Linux-specific.
+# - The script uses udisksctl (from udisks2) to power down devices. This is also Linux-specific.
 #   Users on non-Linux platforms can comment it and use an alterntive to power-down disks.
 #
 # Shell: POSIX compliant
@@ -24,7 +24,7 @@ printf "\nEnsure you aren't still in the mounted device.\n"
 printf "%s" "$prompt"
 read -r dev
 
-while ! [ -z "$dev" ]
+while [ -n "$dev" ]
 do
     if [ "$dev" = "l" ]; then
         lsblk

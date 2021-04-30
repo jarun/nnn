@@ -6,7 +6,7 @@
 # Details: Set the variable EBOOK_ID to download in html format and read in w3m.
 #          Clear EBOOK_ID to browse available ebooks by popularity and set it to
 #          the ID once you find an interesting one.
-#          To dowload and read in epub format set READER to an epub reader like
+#          To download and read in epub format set READER to an epub reader like
 #          epr: https://github.com/wustho/epr
 #
 #          More on EBOOK_ID:
@@ -20,7 +20,7 @@
 
 EBOOK_ID="${EBOOK_ID}"
 DIR="${XDG_CACHE_HOME:-$HOME/.cache}/nnn/gutenbooks/$EBOOK_ID"
-BROWSE_LINK="http://www.gutenberg.org/ebooks/search/?sort_order=downloads"
+BROWSE_LINK="https://www.gutenberg.org/ebooks/search/?sort_order=downloads"
 BROWSER="${BROWSER:-w3m}"
 READER="${READER}"
 
@@ -33,7 +33,7 @@ if [ -n "$EBOOK_ID" ]; then
             curl -L -O "https://www.gutenberg.org/files/$EBOOK_ID/$EBOOK_ID-h.zip"
             unzip "$EBOOK_ID"-h.zip
         else
-            curl -L -o "$EBOOK_ID".epub "http://www.gutenberg.org/ebooks/$EBOOK_ID.epub.noimages"
+            curl -L -o "$EBOOK_ID".epub "https://www.gutenberg.org/ebooks/$EBOOK_ID.epub.noimages"
         fi
     fi
 

@@ -16,13 +16,16 @@ _nnn ()
         -A
         -b
         -c
+        -C
         -d
+        -D
         -e
         -E
         -f
         -F
         -g
         -H
+        -J
         -K
         -l
         -n
@@ -36,7 +39,10 @@ _nnn ()
         -S
         -t
         -T
+        -u
+        -U
         -V
+        -w
         -x
         -h
     )

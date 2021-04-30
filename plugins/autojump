@@ -1,20 +1,42 @@
 #!/usr/bin/env sh
 
-# Description: Navigate to directory using autojump
+# Description: Navigate to directory using jump/autojump/zoxide
 #
-# Dependencies: autojump - https://github.com/wting/autojump
+# Dependencies: jump - https://github.com/gsamokovarov/jump
+#               OR autojump - https://github.com/wting/autojump
+#               OR zoxide - https://github.com/ajeetdsouza/zoxide
 #
-# Note: autojump STORES NAVIGATION PATTERNS
+# Note: The dependencies STORE NAVIGATION PATTERNS
 #
 # Shell: POSIX compliant
-# Author: Marty Buchaus
+# Authors: Marty Buchaus, Dave Snider, Tim Adler
 
-if which autojump >/dev/null 2>&1; then
-    printf "jump to: "
+if [ ! -p "$NNN_PIPE" ]; then
+    echo 'ERROR: NNN_PIPE is not set' | ${PAGER:-less}
+    exit 2
+fi
+
+if which jump >/dev/null 2>&1; then
+    printf "jump to : "
+    read -r dir
+    odir="$(jump cd "$dir")"
+    printf "%s" "0c$odir" > "$NNN_PIPE"
+elif which autojump >/dev/null 2>&1; then
+    printf "jump to : "
     read -r dir
     odir="$(autojump "$dir")"
     printf "%s" "0c$odir" > "$NNN_PIPE"
+elif which zoxide >/dev/null 2>&1; then
+    if which fzf >/dev/null 2>&1; then
+    	odir="$(zoxide query -i --)"
+    	printf "%s" "0c$odir" > "$NNN_PIPE"
+    else
+	printf "jump to : "
+    	read -r dir
+    	odir="$(zoxide query -- "$dir")"
+    	printf "%s" "0c$odir" > "$NNN_PIPE"
+    fi
 else
-    printf "autojump missing"
+    printf "No supported autojump script found. (jump/autojump/zoxide are supported)"
     read -r _
 fi

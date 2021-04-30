@@ -45,6 +45,11 @@ fi
 if [ "$resp" = "s" ]; then
     checksum_type
     sed 's|'"$PWD/"'||g' < "$selection" | xargs -0 -I{} ${chsum}sum {} > "checksum_$(date '+%Y%m%d%H%M').$chsum"
+
+    # Clear selection
+    if [ -p "$NNN_PIPE" ]; then
+        printf "-" > "$NNN_PIPE"
+    fi
 elif [ -n "$1" ]; then
     if [ -f "$1" ]; then
         for chks in md5 sha1 sha224 sha256 sha384 sha512

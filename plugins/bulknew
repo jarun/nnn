@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+
+# Description: Allows for creation of multiple files/directories at the same time.
+#              Plugin opens a temp file where each entry is to be written on a separate line
+#
+# Note: Only relative paths are supported. Absolute paths are ignored
+#       Leading and trailing whitespace in path names is also ignored
+#
+# Shell: POSIX compliant
+# Author: KlzXS
+
+EDITOR="${EDITOR:-vi}"
+TMPDIR="${TMPDIR:-/tmp}"
+
+printf "'f'ile / 'd'ir? "
+read -r resp
+
+if [ "$resp" = "f" ]; then
+	#shellcheck disable=SC2016
+	cmd='mkdir -p "$(dirname "{}")" && touch "{}"'
+elif [ "$resp" = "d" ]; then
+	cmd='mkdir -p {}'
+else
+	exit 1
+fi
+
+tmpfile=$(mktemp "$TMPDIR/.nnnXXXXXX")
+$EDITOR "$tmpfile"
+
+sed "/^\//d" "$tmpfile" | xargs -n1 -I{} sh -c "$cmd"
+
+rm "$tmpfile"

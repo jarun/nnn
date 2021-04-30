@@ -1,15 +1,36 @@
 #!/usr/bin/env sh
 
-# Description: Text based file previewer
+# Description: Terminal based file previewer
 #
-# Note: This plugin needs a "NNN_FIFO" to work.
+# Note: This plugin needs a "NNN_FIFO" to work. See man.
+# For a more extended version of this script with additional optional dependencies, see preview-tui-ext.
 #
-# Dependencies: tmux (>=3.0) or xterm or $TERMINAL, less or $PAGER,
-#               file, stat, tree, man, tar, unzip, ...
-#                      ... add you own! (see examples in code)
+# Dependencies:
+#    - Supports 4 independent methods to preview with:
+#        - tmux (>=3.0), or
+#        - kitty with allow_remote_control and listen_on set in kitty.conf, or
+#        - QuickLook on WSL (https://github.com/QL-Win/QuickLook)
+#        - $TERMINAL set to a terminal (it's xterm by default).
+#    - less or $PAGER
+#    - tree or exa or ls
+#    - mediainfo or file
+#    - mktemp
+#    - unzip
+#    - tar
+#    - man
+#    - optional: bat for code syntax highlighting
+#    - optional: ueberzug, kitty terminal, viu or catimg for images.
+#    - optional: scope.sh file viewer from ranger.
+#                To use:
+#                1. drop scope.sh executable in $PATH
+#                2. set/export $USE_SCOPE as 1
+#    - optional: pistol file viewer (https://github.com/doronbehar/pistol).
+#                To use:
+#                1. install pistol
+#                2. set/export $USE_PISTOL as 1
 #
 # Usage:
-#   You need to set a NNN_FIFO path and set a key for the plugin,
+#   You need to set a NNN_FIFO path and a key for the plugin with NNN_PLUG,
 #   then start `nnn`:
 #
 #     $ nnn -a
@@ -21,17 +42,104 @@
 #   Then in `nnn`, launch the `preview-tui` plugin.
 #
 #   If you provide the same NNN_FIFO to all nnn instances, there will be a
-#   single common preview window. I you provide different FIFO path (e.g.
+#   single common preview window. If you provide different FIFO path (e.g.
 #   with -a), they will be independent.
 #
-#   Configure SPLIT to either "h" or "v" to set a 'h'orizontal split or a
-#   'v'ertical split
+#   The previews will be shown in a tmux split. If that isn't possible, it
+#   will try to use a kitty terminal split. And as a final fallback, a
+#   different terminal window will be used ($TERMINAL).
+#
+#   Tmux and kitty users can configure $SPLIT to either "h" or "v" to set a
+#   'h'orizontal split or a 'v'ertical split (as in, the line that splits the
+#   windows will be horizontal or vertical).
+#
+#   Kitty users need `allow_remote_control` set to `yes`. To customize the
+#   window split, `enabled_layouts` has to be set to `all` or `splits` (the
+#   former is the default value). This terminal is also able to show images
+#   without extra dependencies.
 #
 # Shell: POSIX compliant
-# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste
+# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal
 
-TERMINAL="${TERMINAL:-xterm}"
-PAGER="${PAGER:-less -R}"
+SPLIT="$SPLIT"  # you can set a permanent split here
+TERMINAL="$TERMINAL"  # same goes for the terminal
+USE_SCOPE="${USE_SCOPE:-0}"
+USE_PISTOL="${USE_PISTOL:-0}"
+PAGER="${PAGER:-less -P?n -R}"
+TMPDIR="${TMPDIR:-/tmp}"
+
+startpreview() {
+    NUMPREVIEWTUI="$(($(find "$TMPDIR" -maxdepth 1 -name 'nnn-preview-tui-pagerpid*' 2>/dev/null | wc -l) + 1))"
+    PAGERPID="$TMPDIR/nnn-preview-tui-pagerpid.$NUMPREVIEWTUI"
+    GIFPID="$TMPDIR/nnn-preview-tui-gifpid.$NUMPREVIEWTUI"
+    CURSEL="$TMPDIR/nnn-preview-tui-selection.$NUMPREVIEWTUI"
+    FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NUMPREVIEWTUI"
+
+    [ "$PAGER" = "most" ] && PAGER="less -R"
+
+    if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
+        TERMINAL=tmux
+    elif [ -n "$KITTY_LISTEN_ON" ]; then
+        TERMINAL=kitty
+    else
+        TERMINAL="${TERMINAL:-xterm}"
+    fi
+
+    if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ]; then
+        SPLIT='h'
+    elif [ "$SPLIT" != 'h' ]; then
+        SPLIT='v'
+    fi
+
+    if [ "$TERMINAL" = "tmux" ]; then
+        # tmux splits are inverted
+        if [ "$SPLIT" = "v" ]; then SPLIT="h"; else SPLIT="v"; fi
+
+        tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e "PAGER=$PAGER" \
+            -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
+            -e "PAGERPID=$PAGERPID" -e "GIFPID=$GIFPID" -e "CURSEL=$CURSEL" -e "TMPDIR=$TMPDIR" \
+            -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$QLPATH" -d"$SPLIT" "$0" "$1"
+    elif [ "$TERMINAL" = "kitty" ]; then
+        # Setting the layout for the new window. It will be restored after the
+        # script ends.
+        kitty @ goto-layout splits >/dev/null
+
+        # Trying to use kitty's integrated window management as the split window.
+        # All environmental variables that will be used in the new window must
+        # be explicitly passed.
+        kitty @ launch --no-response --title "nnn preview" --keep-focus \
+            --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" \
+            --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" --env "TMPDIR=$TMPDIR" \
+            --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" --env "TERMINAL=$TERMINAL"\
+            --env "USE_PISTOL=$USE_PISTOL" --env "PAGERPID=$PAGERPID" \
+            --env "GIFPID=$GIFPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
+            --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" >/dev/null
+    elif [ -n "$2" ]; then
+        QUICKLOOK=1 QLPATH="$2" PREVIEW_MODE=1 "$0" "$1" >/dev/null &
+    else
+        PAGERPID="$PAGERPID" GIFPID="$GIFPID" CURSEL="$CURSEL" PREVIEW_MODE=1 \
+            FIFO_UEBERZUG="$FIFO_UEBERZUG" $TERMINAL -e "$0" "$1" 2>/dev/null &
+    fi
+}
+
+togglepreview() {
+    if exists QuickLook.exe; then
+        QLPATH="QuickLook.exe"
+    elif exists Bridge.exe; then
+        QLPATH="Bridge.exe"
+    fi
+    if pkill -fx "cat $NNN_FIFO" >/dev/null; then
+        if [ -n "$QLPATH" ] && stat "$1" >/dev/null 2>&1; then
+            f="$(wslpath -w "$1" 2>&1)" && "$QLPATH" "$f" &
+        fi
+    else
+        startpreview "$1" "$QLPATH"
+    fi
+}
+
+exists() {
+    which "$1" >/dev/null 2>&1
+}
 
 fifo_pager() {
     cmd="$1"
@@ -51,69 +159,155 @@ fifo_pager() {
     rm "$tmpfifopath"
 }
 
+# Binary file: show file info inside the pager
+print_bin_info() {
+    printf -- "-------- \033[1;31mBinary file\033[0m --------\n"
+    if exists mediainfo; then
+        mediainfo "$1" 2>/dev/null
+    else
+        file -b "$1"
+    fi
+}
+
 preview_file () {
-    kill %- %+ 2>/dev/null
     clear
+    # Trying to use pistol if it's available.
+    if [ "$USE_PISTOL" -ne 0 ] && exists pistol; then
+        fifo_pager pistol "$1"
+        return
+    fi
 
-    encoding="$(file -Lb --mime-encoding -- "$1")"
+    # Trying to use scope.sh if it's available.
+    if [ "$USE_SCOPE" -ne 0 ] && exists scope.sh; then
+        fifo_pager scope.sh "$1" "$cols" "$lines" "$(mktemp -d)" \
+            "True" 2>/dev/null
+        return
+    fi
 
-    # Detect mime type
-    mimetype="$(file -Lb --mime-type -- "$1")"
-
-    # Detect file extention - use if you need
+    # Detecting the exact type of the file: the encoding, mime type, and
+    # extension in lowercase.
+    encoding="$(file -bL --mime-encoding -- "$1")"
+    mimetype="$(file -bL --mime-type -- "$1")"
     ext="${1##*.}"
     if [ -n "$ext" ]; then
         ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
     fi
+    lines=$(tput lines)
+    cols=$(tput cols)
 
-    if [ -d "$1" ]; then
-        # Print directory tree
+    # Otherwise, falling back to the defaults.
+    if [ -n "$QUICKLOOK" ] && stat "$1" >/dev/null 2>&1; then
+        f="$(wslpath -w "$1" 2>&1)" && "$QLPATH" "$f" &
+    elif [ -d "$1" ]; then
         cd "$1" || return
-        fifo_pager tree
-    #elif [ "${mimetype%%/*}" = "image" ] ; then
-    #    catimg "$1"
-    elif [ "$mimetype" = "text/troff" ] ; then
+        if exists tree; then
+            fifo_pager tree --filelimit "$(find . -maxdepth 1 | wc -l)" -L 3 -C -F --dirsfirst --noreport
+        elif exists exa; then
+            exa -G --colour=always 2>/dev/null
+        else
+            fifo_pager ls -F --directories-first --color=always
+        fi
+    elif [ "${encoding#*)}" = "binary" ]; then
+        if [ "${mimetype%%/*}" = "image" ]; then
+            image_preview "$cols" "$lines" "$1"
+        elif [ "$mimetype" = "application/zip" ]; then
+            fifo_pager unzip -l "$1"
+        elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ]; then
+            fifo_pager tar -tvf "$1"
+        else
+            fifo_pager print_bin_info "$1"
+        fi
+    elif [ "$mimetype" = "text/troff" ]; then
         fifo_pager man -Pcat -l "$1"
-    elif [ "$mimetype" = "application/zip" ] ; then
-        fifo_pager unzip -l "$1"
-    elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ] ; then
-        fifo_pager tar -tvf "$1"
-    elif [ "$encoding" = "binary" ] ; then
-        # Binary file: just print filetype info
-        echo "-------- binary file --------"
-        file -b "$1"
-        echo
-        stat "$1"
     else
-        # Text file:
-        $PAGER "$1" &
+        if exists bat; then
+            fifo_pager bat --terminal-width="$cols" --paging=never --decorations=always --color=always \
+                "$1" 2>/dev/null
+        else
+            $PAGER "$1" &
+        fi
     fi
 }
 
-if [ "$PREVIEW_MODE" ] ; then
-    if [ ! -r "$NNN_FIFO" ] ; then
-        echo "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')" >&2
-        read -r
-        exit 1
+image_preview() {
+    if [ "$TERMINAL" = "kitty" ]; then
+        # Kitty terminal users can use the native image preview method.
+        kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no \
+            "$3"
+    elif [ -n "$QLPATH" ] && stat "$3" >/dev/null 2>&1; then
+        f="$(wslpath -w "$3" 2>&1)" && "$QLPATH" "$f" &
+    elif exists ueberzug; then
+        ueberzug_layer "$1" "$2" "$3"
+    elif exists catimg; then
+        catimg "$3" &
+        printf "%s" "$!" > "$GIFPID"
+    elif exists viu; then
+        viu -t "$3" &
+        printf "%s" "$!" > "$GIFPID"
+    else
+        fifo_pager print_bin_info "$3"
     fi
+}
+
+ueberzug_layer() {
+    printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "width": "%s", "height": "%s", "scaler": "fit_contain", "path": "%s"}\n' "$1" "$2" "$3" > "$FIFO_UEBERZUG"
+}
+
+ueberzug_remove() {
+    printf '{"action": "remove", "identifier": "nnn_ueberzug"}\n' > "$FIFO_UEBERZUG"
+}
+
+ueberzug_refresh() {
+    clear
+    kill "$(cat "$GIFPID" 2>/dev/null)" >/dev/null 2>&1
+    pkill -P "$$" >/dev/null 2>&1
+    pkill -f -n preview-tui-ext >/dev/null 2>&1
+    tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+    preview_file "$(cat "$CURSEL")"
+    printf "\n" > "$NNN_FIFO"
+    preview_fifo 2>/dev/null &
+    wait
+}
+
+preview_fifo() {
+    # use cat instead of 'exec <' to avoid issues with dash shell
+    # shellcheck disable=SC2002
+    cat "$NNN_FIFO" |\
+    while read -r selection; do
+        kill "$(cat "$GIFPID" 2>/dev/null)" >/dev/null 2>&1
+        kill "$(cat "$PAGERPID" 2>/dev/null)" >/dev/null 2>&1
+        [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
+        preview_file "$selection"
+        printf "%s" "$selection" > "$CURSEL"
+    done
+    [ "$TERMINAL" != "kitty" ] && exists ueberzug && rm "$FIFO_UEBERZUG"
+    rm "$PAGERPID" "$GIFPID" "$CURSEL" >/dev/null 2>&1
+    pkill -P "$$" >/dev/null 2>&1
+}
+
+if [ "$PREVIEW_MODE" ]; then
+    if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
+        mkfifo "$FIFO_UEBERZUG"
+        trap 'ueberzug_refresh; rm $FIFO_UEBERZUG' WINCH
+        tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+    fi
+    trap 'rm "$PAGERPID" "$GIFPID" "$CURSEL" 2>/dev/null' INT HUP EXIT
 
     preview_file "$1"
-
-    exec < "$NNN_FIFO"
-    while read -r selection ; do
-        preview_file "$selection"
-    done
-    exit 0
-fi
-
-if [ -e "${TMUX%%,*}" ] && [ "$(tmux -V | cut -c6)" -eq 3 ] ; then
-    if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ] ; then
-        SPLIT='v'
-    elif [ "$SPLIT" != 'v' ] ; then
-        SPLIT='h'
-    fi
-
-    tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -d"$SPLIT" "$0" "$1"
+    preview_fifo 2>/dev/null &
+    wait
 else
-    PREVIEW_MODE=1 $TERMINAL -e "$0" "$1" &
+    if [ ! -r "$NNN_FIFO" ]; then
+        clear
+        printf "No FIFO available! (\$NNN_FIFO='%s')\nPlease read the documentation" "$NNN_FIFO"
+        read -r _
+    elif [ "$KITTY_WINDOW_ID" ] && [ -z "$KITTY_LISTEN_ON" ]; then
+        # The escape codes used to control kitty splits cause problems when run from a background process.
+        # Use --listen-on flag or listen_on config variable to avoid(https://sw.kovidgoyal.net/kitty/conf.html)
+        clear
+        printf "\$KITTY_LISTEN_ON not set!\nPlease add listen_on to your kitty.conf or start with the --listen-on flag."
+        read -r _
+    else
+        togglepreview "$1" &
+    fi
 fi

@@ -32,7 +32,7 @@
 #   3. Start GUI apps in bg to unblock. Redirect stdout and strerr if required.
 #   4. Some CLI utilities are piped to the $PAGER, to wait and quit uniformly.
 #   5. If the output cannot be paged use "read -r _" to wait for user input.
-#   6. On a DE, try 'xdg-open' in handle_fallback() as last resort.
+#   6. On a DE, try 'xdg-open' or 'open' in handle_fallback() as last resort.
 #
 #   Feel free to change the utilities to your favourites and add more mimes.
 #
@@ -42,7 +42,7 @@
 #      rar: list with unrar
 #      7-zip: list with 7z
 #      pdf: zathura (GUI), pdftotext, mutool, exiftool
-#      audio: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
+#      audio: mocplay (nnn plugin using MOC), mpv, media_client (Haiku), mediainfo, exiftool
 #      avi|mkv|mp4: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
 #      log: vi
 #      torrent: rtorrent, transmission-show
@@ -51,9 +51,9 @@
 #      htm|html|xhtml: w3m, lynx, elinks
 #      json: jq, python (json.tool module)
 #   Multimedia by mime:
-#      image/*: sxiv (GUI), viu (https://github.com/atanunq/viu), img2txt, exiftool
+#      image/*: imv/sxiv (GUI), viu (https://github.com/atanunq/viu), img2txt, exiftool
 #      video/*: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
-#      audio/*: mocplay (nnn plugin using MOC), mpv, mediainfo, exiftool
+#      audio/*: mocplay (nnn plugin using MOC), mpv, media_client (Haiku), mediainfo, exiftool
 #      application/pdf: zathura (GUI), pdftotext, mutool, exiftool
 #   Other mimes:
 #      text/troff: man -l
@@ -76,16 +76,23 @@ IMAGE_CACHE_PATH="$(dirname "$1")"/.thumbs
 
 FPATH="$1"
 FNAME=$(basename "$1")
-EDITOR="${EDITOR:-vi}"
+EDITOR="${VISUAL:-${EDITOR:-vi}}"
 PAGER="${PAGER:-less -R}"
 ext="${FNAME##*.}"
-if ! [ -z "$ext" ]; then
+if [ -n "$ext" ]; then
     ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
 fi
 
+is_mac() {
+    uname | grep -q "Darwin"
+}
+
 handle_pdf() {
-    if [ "$GUI" -ne 0 ] && which zathura >/dev/null 2>&1; then
-        zathura "${FPATH}" >/dev/null 2>&1 &
+    if [ "$GUI" -ne 0 ] && is_mac; then
+        nohup open "${FPATH}" >/dev/null 2>&1 &
+        exit 0
+    elif [ "$GUI" -ne 0 ] && which zathura >/dev/null 2>&1; then
+        nohup zathura "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif which pdftotext >/dev/null 2>&1; then
         ## Preview as text conversion
@@ -107,6 +114,9 @@ handle_audio() {
     elif which mpv >/dev/null 2>&1; then
         mpv "${FPATH}" >/dev/null 2>&1 &
         exit 0
+    elif which media_client >/dev/null 2>&1; then
+        media_client play "${FPATH}" >/dev/null 2>&1 &
+        exit 0
     elif which mediainfo >/dev/null 2>&1; then
         mediainfo "${FPATH}" | eval "$PAGER"
         exit 0
@@ -117,11 +127,14 @@ handle_audio() {
 }
 
 handle_video() {
-    if [ "$GUI" -ne 0 ] && which smplayer >/dev/null 2>&1; then
-        smplayer "${FPATH}" >/dev/null 2>&1 &
+    if [ "$GUI" -ne 0 ] && is_mac; then
+        nohup open "${FPATH}" >/dev/null 2>&1 &
+        exit 0
+    elif [ "$GUI" -ne 0 ] && which smplayer >/dev/null 2>&1; then
+        nohup smplayer "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif [ "$GUI" -ne 0 ] && which mpv >/dev/null 2>&1; then
-        mpv "${FPATH}" >/dev/null 2>&1 &
+        nohup mpv "${FPATH}" >/dev/null 2>&1 &
         exit 0
     elif which ffmpegthumbnailer >/dev/null 2>&1; then
         # Thumbnail
@@ -254,17 +267,22 @@ abspath() {
 
 listimages() {
     find -L "$(dirname "$target")" -maxdepth 1 -type f -iregex \
-      '.*\(jpe?g\|bmp\|png\|gif\)$' -print0 | sort -z
+      '.*\(jpe?g\|bmp\|webp\|ico\|svg\|png\|gif\)$' -print0 | sort -z
 }
 
-sxiv_load_dir() {
-    target="$(abspath "$1")"
+load_dir() {
+    target="$(abspath "$2")"
     count="$(listimages | grep -a -m 1 -ZznF "$target" | cut -d: -f1)"
 
     if [ -n "$count" ]; then
-        listimages | xargs -0 sxiv -n "$count" --
+        if [ "$GUI" -ne 0 ]; then
+            listimages | xargs -0 nohup "$1" -n "$count" --
+        else
+            listimages | xargs -0 "$1" -n "$count" --
+        fi
     else
-        sxiv -- "$@" # fallback
+        shift
+        "$1" -- "$@" # fallback
     fi
 }
 
@@ -290,8 +308,14 @@ handle_multimedia() {
 
         ## Image
         image/*)
-            if [ "$GUI" -ne 0 ] && which sxiv >/dev/null 2>&1; then
-                sxiv_load_dir "${FPATH}" >/dev/null 2>&1 &
+            if [ "$GUI" -ne 0 ] && is_mac; then
+                nohup open "${FPATH}" >/dev/null 2>&1 &
+                exit 0
+            elif [ "$GUI" -ne 0 ] && which imvr >/dev/null 2>&1; then
+                load_dir imvr "${FPATH}" >/dev/null 2>&1 &
+                exit 0
+            elif [ "$GUI" -ne 0 ] && which sxiv >/dev/null 2>&1; then
+                load_dir sxiv "${FPATH}" >/dev/null 2>&1 &
                 exit 0
             elif which viu >/dev/null 2>&1; then
                 viu -n "${FPATH}" | eval "$PAGER"
@@ -455,8 +479,11 @@ handle_mime() {
 }
 
 handle_fallback() {
-    if [ "$GUI" -ne 0 ]; then
-        xdg-open "${FPATH}" >/dev/null 2>&1 &
+    if [ "$GUI" -ne 0 ] && which xdg-open >/dev/null 2>&1; then
+        nohup xdg-open "${FPATH}" >/dev/null 2>&1 &
+        exit 0
+    elif [ "$GUI" -ne 0 ] && which open >/dev/null 2>&1; then
+        nohup open "${FPATH}" >/dev/null 2>&1 &
         exit 0
     fi
 
@@ -483,7 +510,7 @@ handle_blocked() {
     esac
 }
 
-MIMETYPE="$( file --dereference --brief --mime-type -- "${FPATH}" )"
+MIMETYPE="$( file -bL --mime-type -- "${FPATH}" )"
 handle_extension
 handle_multimedia "${MIMETYPE}"
 handle_mime "${MIMETYPE}"

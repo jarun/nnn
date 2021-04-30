@@ -1,0 +1,417 @@
+#!/usr/bin/env sh
+
+# Description: Print icons in front of list of directories/files
+
+# Dependencies: awk
+
+# Usage
+#    1. Set colors and/or icons to your liking
+#    2. Pipe any directory listing to iconlookup and it will output prepended icons
+#    3. preview-tui-ext uses the script to prepend icon to directory listings
+#    4. Aditionally you can consider adding it to your PATH and/or FZF_DEFAULT_COMMAND to
+#       make it work with various fzf plugins (make sure you also add --ansi to your FZF_DEFAULT_OPTS)
+
+# Shell: POSIX compliant
+
+# Author: Luuk van Baal (https://github.com/luukvbaal/iconlookup)
+
+icon_lookup() {
+awk 'BEGIN {
+# Set your ANSI colorscheme below (https://en.wikipedia.org/wiki/ANSI_escape_code#Colors).
+# Default uses standard nnn icon colors, 8 and 24-bit nord themes are commented out.
+    colordepth=8      #colordepth=8        #colordepth=24
+    color_dirtxt=39   #color_dirtxt=111    #color_dirtxt="129;161;193"
+    color_filetxt=15  #color_filetxt=111   #color_filetxt="129;161;193"
+    color_default=39  #color_default=111   #color_default="129;161;193"
+    color_video=93    #color_video=110     #color_video="136;192;208"
+    color_audio=220   #color_audio=150     #color_audio="163;190;140"
+    color_image=82    #color_image=150     #color_image="163;190;140"
+    color_docs=202    #color_docs=173      #color_docs="208;135;112"
+    color_archive=209 #color_archive=179   #color_archive="235;203;139"
+    color_c=81        #color_c=150         #color_c="163;190;140"
+    color_java=32     #color_java=139      #color_java="180;142;173"
+    color_js=47       #color_js=109        #color_js="143;188;187"
+    color_react=39    #color_react=111     #color_react="129;161;193"
+    color_css=199     #color_css=110       #color_css="136;192;208"
+    color_python=227  #color_python=68     #color_python="94;129;172"
+    color_lua=19      #color_lua=167       #color_lua="191;97;106"
+    color_document=15 #color_document=173  #color_document="208;135;112"
+    color_fsharp=31   #color_fsharp=179    #color_fsharp="180;142;173"
+    color_ruby=160    #color_ruby=150      #color_ruby="163;190;140"
+    color_scala=196   #color_scala=139     #color_scala="143;188;187"
+    color_vim=28      #color_vim=109       #color_vim="143;188;187"
+
+# icons[][1] contains icon and icons[][2] contains color
+    icons["directory"][1] = ""; icons["directory"][2] = color_default
+    icons["file"][1] = ""; icons["file"][2] = color_default
+    icons["exec"][1] = ""; icons["exec"][2] = color_default
+    icons["manual"][1] = ""; icons["manual"][2] = color_docs
+    icons["pipe"][1] = "ﳣ"; icons["pipe"][2] = color_default
+    icons["socket"][1] = "ﳧ"; icons["socket"][2] = color_default
+    icons["door"][1] = "➡"; icons["door"][2] = color_default
+
+# top level and common icons
+    icons[".git"][1] = ""; icons[".git"][2] = color_default
+    icons["desktop"][1] = "ﲾ"; icons["desktop"][2] = color_default
+    icons["briefcase"][1] = ""; icons["briefcase"][2] = color_default
+    icons["document"][1] = ""; icons["document"][2] = color_default
+    icons["downloads"][1] = ""; icons["downloads"][2] = color_default
+    icons["music"][1] = ""; icons["music"][2] = color_default
+    icons["musicfile"][1] = ""; icons["musicfile"][2] = color_audio
+    icons["pictures"][1] = ""; icons["pictures"][2] = color_default
+    icons["picturefile"][1] = ""; icons["picturefile"][2] = color_image
+    icons["public"][1] = ""; icons["public"][2] = color_default
+    icons["templates"][1] = "陼"; icons["templates"][2] = color_default
+    icons["videos"][1] = ""; icons["videos"][2] = color_default
+    icons["videofile"][1] = "ﳜ"; icons["videofile"][2] = color_video
+    icons["changelog"][1] = ""; icons["changelog"][2] = color_docs
+    icons["configure"][1] = ""; icons["configure"][2] = color_default
+    icons["license"][1] = ""; icons["license"][2] = color_docs
+    icons["makefile"][1] = ""; icons["makefile"][2] = color_default
+    icons["archive"][1] = ""; icons["archive"][2] = color_archive
+    icons["script"][1] = ""; icons["script"][2] = color_default
+    icons["cplusplus"][1] = ""; icons["cplusplus"][2] = color_c
+    icons["java"][1] = ""; icons["java"][2] = color_java
+    icons["clojure"][1] = ""; icons["clojure"][2] = color_default
+    icons["js"][1] = ""; icons["js"][2] = color_js
+    icons["linux"][1] = ""; icons["linux"][2] = color_default
+    icons["fsharp"][1] = ""; icons["fsharp"][2] = color_fsharp
+    icons["ruby"][1] = ""; icons["ruby"][2] = color_ruby
+    icons["c"][1] = ""; icons["c"][2] = color_c
+    icons["html"][1] = ""; icons["html"][2] = color_default
+    icons["react"][1] = ""; icons["react"][2] = color_react
+    icons["python"][1] = ""; icons["python"][2] = color_python
+    icons["database"][1] = ""; icons["database"][2] = color_default
+    icons["worddoc"][1] = ""; icons["worddoc"][2] = color_document
+    icons["playlist"][1] = "蘿"; icons["playlist"][2] = color_audio
+    icons["opticaldisk"][1] = ""; icons["opticaldisk"][2] = color_archive
+
+# numbers
+    icons["1"][1] = icons["manual"][1]; icons["1"][2] = icons["manual"][2]
+    icons["7z"][1] = icons["archive"][1]; icons["7z"][2] = icons["archive"][2]
+
+# a
+    icons["a"][1] = icons["manual"][1]; icons["a"][2] = icons["manual"][2]
+    icons["apk"][1] = icons["archive"][1]; icons["apk"][2] = icons["archive"][2]
+    icons["asm"][1] = icons["file"][1]; icons["asm"][2] = icons["file"][2]
+    icons["aup"][1] = icons["musicfile"][1]; icons["aup"][2] = icons["musicfile"][2]
+    icons["avi"][1] = icons["videofile"][1]; icons["avi"][2] = icons["videofile"][2]
+
+# b
+    icons["bat"][1] = icons["script"][1]; icons["bat"][2] = icons["script"][2]
+    icons["bin"][1] = ""; icons["bin"][2] = color_default
+    icons["bmp"][1] = icons["picturefile"][1]; icons["bmp"][2] = icons["picturefile"][2]
+    icons["bz2"][1] = icons["archive"][1]; icons["bz2"][2] = icons["archive"][2]
+
+# c
+    icons["c"][1] = icons["c"][1]; icons["c"][2] = icons["c"][2]
+    icons["cplusplus"][1] = icons["cplusplus"][1]; icons["cplusplus"][2] = icons["cplusplus"][2]
+    icons["cab"][1] = icons["archive"][1]; icons["cab"][2] = icons["archive"][2]
+    icons["cbr"][1] = icons["archive"][1]; icons["cbr"][2] = icons["archive"][2]
+    icons["cbz"][1] = icons["archive"][1]; icons["cbz"][2] = icons["archive"][2]
+    icons["cc"][1] = icons["cplusplus"][1]; icons["cc"][2] = icons["cplusplus"][2]
+    icons["class"][1] = icons["java"][1]; icons["class"][2] = icons["java"][2]
+    icons["clj"][1] = icons["clojure"][1]; icons["clj"][2] = icons["clojure"][2]
+    icons["cljc"][1] = icons["clojure"][1]; icons["cljc"][2] = icons["clojure"][2]
+    icons["cljs"][1] = icons["clojure"][1]; icons["cljs"][2] = icons["clojure"][2]
+    icons["cmake"][1] = icons["makefile"][1]; icons["cmake"][2] = icons["makefile"][2]
+    icons["coffee"][1] = ""; icons["coffee"][2] = color_default
+    icons["conf"][1] = icons["configure"][1]; icons["conf"][2] = icons["configure"][2]
+    icons["cpio"][1] = icons["archive"][1]; icons["cpio"][2] = icons["archive"][2]
+    icons["cpp"][1] = icons["cplusplus"][1]; icons["cpp"][2] = icons["cplusplus"][2]
+    icons["css"][1] = ""; icons["css"][2] = color_css
+    icons["cue"][1] = icons["playlist"][1]; icons["cue"][2] = icons["playlist"][2]
+    icons["cvs"][1] = icons["configure"][1]; icons["cvs"][2] = icons["configure"][2]
+    icons["cxx"][1] = icons["cplusplus"][1]; icons["cxx"][2] = icons["cplusplus"][2]
+
+# d
+    icons["db"][1] = icons["database"][1]; icons["db"][2] = icons["database"][2]
+    icons["deb"][1] = ""; icons["deb"][2] = color_archive
+    icons["diff"][1] = ""; icons["diff"][2] = color_default
+    icons["dll"][1] = icons["script"][1]; icons["dll"][2] = icons["script"][2]
+    icons["doc"][1] = icons["worddoc"][1]; icons["doc"][2] = icons["worddoc"][2]
+    icons["docx"][1] = icons["worddoc"][1]; icons["docx"][2] = icons["worddoc"][2]
+
+# e
+    icons["ejs"][1] = icons["js"][1]; icons["ejs"][2] = icons["js"][2]
+    icons["elf"][1] = icons["linux"][1]; icons["elf"][2] = icons["linux"][2]
+    icons["epub"][1] = icons["manual"][1]; icons["epub"][2] = icons["manual"][2]
+    icons["exe"][1] = icons["exec"][1]; icons["exe"][2] = icons["exec"][2]
+
+# f
+    icons["fsharp"][1] = icons["fsharp"][1]; icons["fsharp"][2] = icons["fsharp"][2]
+    icons["flac"][1] = icons["musicfile"][1]; icons["flac"][2] = icons["musicfile"][2]
+    icons["flv"][1] = icons["videofile"][1]; icons["flv"][2] = icons["videofile"][2]
+    icons["fs"][1] = icons["fsharp"][1]; icons["fs"][2] = icons["fsharp"][2]
+    icons["fsi"][1] = icons["fsharp"][1]; icons["fsi"][2] = icons["fsharp"][2]
+    icons["fsscript"][1] = icons["fsharp"][1]; icons["fsscript"][2] = icons["fsharp"][2]
+    icons["fsx"][1] = icons["fsharp"][1]; icons["fsx"][2] = icons["fsharp"][2]
+
+# g
+    icons["gem"][1] = icons["ruby"][1]; icons["gem"][2] = icons["ruby"][2]
+    icons["gif"][1] = icons["picturefile"][1]; icons["gif"][2] = icons["picturefile"][2]
+    icons["go"][1] = "ﳑ"; icons["go"][2] = color_default
+    icons["gz"][1] = icons["archive"][1]; icons["gz"][2] = icons["archive"][2]
+    icons["gzip"][1] = icons["archive"][1]; icons["gzip"][2] = icons["archive"][2]
+
+# h
+    icons["h"][1] = icons["c"][1]; icons["h"][2] = icons["c"][2]
+    icons["hh"][1] = icons["cplusplus"][1]; icons["hh"][2] = icons["cplusplus"][2]
+    icons["htaccess"][1] = icons["configure"][1]; icons["htaccess"][2] = icons["configure"][2]
+    icons["htpasswd"][1] = icons["configure"][1]; icons["htpasswd"][2] = icons["configure"][2]
+    icons["htm"][1] = icons["htm"][1]; icons["htm"][2] = icons["htm"][2]
+    icons["html"][1] = icons["htm"][1]; icons["html"][2] = icons["htm"][2]
+    icons["hxx"][1] = icons["cplusplus"][1]; icons["hxx"][2] = icons["cplusplus"][2]
+
+# i
+    icons["ico"][1] = icons["picturefile"][1]; icons["ico"][2] = icons["picturefile"][2]
+    icons["img"][1] = icons["opticaldisk"][1]; icons["img"][2] = icons["opticaldisk"][2]
+    icons["ini"][1] = icons["configure"][1]; icons["ini"][2] = icons["configure"][2]
+    icons["iso"][1] = icons["opticaldisk"][1]; icons["iso"][2] = icons["opticaldisk"][2]
+
+# j
+    icons["jar"][1] = icons["java"][1]; icons["jar"][2] = icons["java"][2]
+    icons["java"][1] = icons["java"][1]; icons["java"][2] = icons["java"][2]
+    icons["jl"][1] = icons["configure"][1]; icons["jl"][2] = icons["configure"][2]
+    icons["jpeg"][1] = icons["picturefile"][1]; icons["jpeg"][2] = icons["picturefile"][2]
+    icons["jpg"][1] = icons["picturefile"][1]; icons["jpg"][2] = icons["picturefile"][2]
+    icons["js"][1] = icons["js"][1]; icons["js"][2] = icons["js"][2]
+    icons["json"][1] = "ﬥ"; icons["json"][2] = color_js
+    icons["jsx"][1] = icons["react"][1]; icons["jsx"][2] = icons["react"][2]
+
+# k
+
+# l
+    icons["lha"][1] = icons["archive"][1]; icons["lha"][2] = icons["archive"][2]
+    icons["ilog"][1] = icons["document"][1]; icons["ilog"][2] = icons["document"][2]
+    icons["lua"][1] = ""; icons["lua"][2] = color_default
+    icons["lzh"][1] = icons["archive"][1]; icons["lzh"][2] = icons["archive"][2]
+    icons["lzma"][1] = icons["archive"][1]; icons["lzma"][2] = icons["archive"][2]
+
+# m
+    icons["m4a"][1] = icons["musicfile"][1]; icons["m4a"][2] = icons["musicfile"][2]
+    icons["m4v"][1] = icons["videofile"][1]; icons["m4v"][2] = icons["videofile"][2]
+    icons["markdown"][1] = ""; icons["markdown"][2] = color_docs
+    icons["md"][1] = ""; icons["md"][2] = color_docs
+    icons["mk"][1] = icons["makefile"][1]; icons["mk"][2] = icons["makefile"][2]
+    icons["mkv"][1] = icons["videofile"][1]; icons["mkv"][2] = icons["videofile"][2]
+    icons["mov"][1] = icons["videofile"][1]; icons["mov"][2] = icons["videofile"][2]
+    icons["mp3"][1] = icons["musicfile"][1]; icons["mp3"][2] = icons["musicfile"][2]
+    icons["mp4"][1] = icons["videofile"][1]; icons["mp4"][2] = icons["videofile"][2]
+    icons["mpeg"][1] = icons["videofile"][1]; icons["mpeg"][2] = icons["videofile"][2]
+    icons["mpg"][1] = icons["videofile"][1]; icons["mpg"][2] = icons["videofile"][2]
+    icons["msi"][1] = ""; icons["msi"][2] = color_default
+
+# n
+
+# o
+    icons["o"][1] = icons["manual"][1]; icons["o"][2] = icons["manual"][2]
+    icons["ogg"][1] = icons["musicfile"][1]; icons["ogg"][2] = icons["musicfile"][2]
+    icons["odownload"][1] = icons["download"][1]; icons["odownload"][2] = icons["download"][2]
+    icons["out"][1] = icons["linux"][1]; icons["out"][2] = icons["linux"][2]
+
+# p
+    icons["part"][1] = icons["download"][1]; icons["part"][2] = icons["download"][2]
+    icons["patch"][1] = icons["diff"][1]; icons["patch"][2] = icons["diff"][2]
+    icons["pdf"][1] = ""; icons["pdf"][2] = color_docs
+    icons["php"][1] = ""; icons["php"][2] = color_default
+    icons["png"][1] = icons["picturefile"][1]; icons["png"][2] = icons["picturefile"][2]
+    icons["ppt"][1] = ""; icons["ppt"][2] = color_default
+    icons["pptx"][1] = ""; icons["pptx"][2] = color_default
+    icons["psb"][1] = ""; icons["psb"][2] = color_default
+    icons["psd"][1] = ""; icons["psd"][2] = color_default
+    icons["py"][1] = icons["python"][1]; icons["py"][2] = icons["python"][2]
+    icons["pyc"][1] = icons["python"][1]; icons["pyc"][2] = icons["python"][2]
+    icons["pyd"][1] = icons["python"][1]; icons["pyd"][2] = icons["python"][2]
+    icons["pyo"][1] = icons["python"][1]; icons["pyo"][2] = icons["python"][2]
+
+# q
+
+# r
+    icons["rar"][1] = icons["archive"][1]; icons["rar"][2] = icons["archive"][2]
+    icons["rc"][1] = icons["configure"][1]; icons["rc"][2] = icons["configure"][2]
+    icons["rom"][1] = ""; icons["rom"][2] = color_default
+    icons["rpm"][1] = icons["archive"][1]; icons["rpm"][2] = icons["archive"][2]
+    icons["rss"][1] = "參"; icons["rss"][2] = color_default
+    icons["rtf"][1] = ""; icons["rtf"][2] = color_default
+
+# s
+    icons["sass"][1] = ""; icons["sass"][2] = color_css
+    icons["scss"][1] = ""; icons["scss"][2] = color_css
+    icons["so"][1] = icons["manual"][1]; icons["so"][2] = icons["manual"][2]
+    icons["scala"][1] = ""; icons["scala"][2] = color_scala
+    icons["sh"][1] = icons["script"][1]; icons["sh"][2] = icons["script"][2]
+    icons["slim"][1] = icons["script"][1]; icons["slim"][2] = icons["script"][2]
+    icons["sln"][1] = ""; icons["sln"][2] = color_default
+    icons["sql"][1] = icons["database"][1]; icons["sql"][2] = icons["database"][2]
+    icons["srt"][1] = ""; icons["srt"][2] = color_default
+    icons["isub"][1] = ""; icons["isub"][2] = color_default
+    icons["svg"][1] = icons["picturefile"][1]; icons["svg"][2] = icons["picturefile"][2]
+
+# t
+    icons["tar"][1] = icons["archive"][1]; icons["tar"][2] = icons["archive"][2]
+    icons["tex"][1] = ""; icons["tex"][2] = color_default
+    icons["tgz"][1] = icons["archive"][1]; icons["tgz"][2] = icons["archive"][2]
+    icons["ts"][1] = ""; icons["ts"][2] = color_js
+    icons["tsx"][1] = icons["react"][1]; icons["tsx"][2] = icons["react"][2]
+    icons["txt"][1] = icons["document"][1]; icons["txt"][2] = icons["document"][2]
+    icons["txz"][1] = icons["archive"][1]; icons["txz"][2] = icons["archive"][2]
+
+# u
+
+# v
+    icons["vid"][1] = icons["videofile"][1]; icons["vid"][2] = icons["videofile"][2]
+    icons["vim"][1] = ""; icons["vim"][2] = color_vim
+    icons["vimrc"][1] = ""; icons["vimrc"][2] = color_vim
+    icons["vtt"][1] =  ""; icons["vtt"][2] = color_default
+# w
+    icons["wav"][1] = icons["musicfile"][1]; icons["wav"][2] = icons["musicfile"][2]
+    icons["webm"][1] = icons["videofile"][1]; icons["webm"][2] = icons["videofile"][2]
+    icons["wma"][1] = icons["videofile"][1]; icons["wma"][2] = icons["videofile"][2]
+    icons["wmv"][1] = icons["videofile"][1]; icons["wmv"][2] = icons["videofile"][2]
+
+# x
+    icons["xbps"][1] = icons["archive"][1]; icons["xbps"][2] = color_archive
+    icons["xcf"][1] = icons["picturefile"][1]; icons["xcf"][2] = color_image
+    icons["xhtml"][1] = icons["htm"][1]; icons["xhtml"][2] = icons["htm"][2]
+    icons["xls"][1] = ""; icons["xls"][2] = color_default
+    icons["xlsx"][1] = ""; icons["xlsx"][2] = color_default
+    icons["xml"][1] = icons["html"][1]; icons["xml"][2] = icons["html"][2]
+    icons["xz"][1] = icons["archive"][1]; icons["xz"][2] = icons["archive"][2]
+
+# y
+    icons["yaml"][1] = icons["configure"][1]; icons["yaml"][2] = icons["configure"][2]
+    icons["yml"][1] = icons["configure"][1]; icons["yml"][2] = icons["configure"][2]
+# z
+    icons["zip"][1] = icons["archive"][1]; icons["zip"][2] = icons["archive"][2]
+
+    FS = "."
+    limit = ENVIRON["limit"]
+    switch (colordepth) {
+        case "4":
+            escape="\033["
+            break;
+        case "8":
+            escape="\033[38;5;"
+            break;
+        case "24":
+            escape="\033[38;2;"
+            break;
+    }
+    bstr = ENVIRON["beforestr"]
+}
+{
+    # dont print cwd . and leading ./ from tree -f
+    if ($0 ~/^\.$/)
+        next
+    ent = ($0 ~/^\.\//) ? substr($0, 3, length($0) - 2) : $0
+    ext = $NF
+
+    # Print icons, set color and bold directories by using ansi escape codes
+    if (ext in icons)
+        printcolor(icons[ext][1], icons[ext][2], color_filetxt, ent, "10")
+    else
+        switch (substr(ent, length(ent), 1)) {
+            case "/":
+                printcolor(icons["directory"][1], color_default, color_dirtxt, ent, "1")
+                break;
+            case "*":
+                printcolor(icons["exe"][1], color_default, color_filetxt, ent, "10")
+                break;
+            case "|":
+                printcolor(icons["pipe"][1], color_default, color_filetxt, ent, "10")
+                break;
+            case "=":
+                printcolor(icons["socket"][1], color_default, color_filetxt, ent, "10")
+                break;
+            case ">":
+                printcolor(icons["door"][1], color_default, color_filetxt, ent, "10")
+                break;
+            default:
+                printcolor(icons["file"][1], color_default, color_filetxt, ent, "10")
+        }
+}
+function printcolor(i, c, d, n, b) {
+    if (limit != "" && length(n) + 2 > limit)
+        n = substr(n, 1, limit - 2)
+    printf "\033[0m"
+    printf "%s%s%s;%sm%s %s%sm%s\n", bstr, escape, c, b, i, escape, d, n
+}'
+printf '\033[0m'
+}
+
+print_begin() {
+    printf '%s\n' "$1" | sed 's/\\n/\n/g'
+}
+
+print_end() {
+    printf '%s\n' "$1" | sed 's/\\n/\n/g'
+}
+
+print_help() {
+    printf 'Icon Lookup\n
+Usage:
+    iconlookup [options]
+    iconlookup [-bBe] [string]
+    iconlookup -l [number]
+    iconlookup (-h | --help)
+
+    Prepend icons to list of files based on extension or appended indicator by ls/tree "-F" flag ("/" for directory, "*" for executable etc.)
+
+Options:
+    -h --help -?         Show this screen.
+    -b --before          Prepend str before icon.
+    -B --begin           Prepend str before output.
+    -e --end             Append str after output.
+    -l --limit           Limit line length to [number] characters.'
+}
+
+while :; do
+    case $1 in
+        -h|-\?|--help)
+            print_help
+            exit ;;
+        -B|--begin)
+            if [ -n "$2" ]; then
+                print_begin "$2"
+            fi
+            shift ;;
+        -e|--end)
+            if [ -n "$2" ]; then
+                end=1
+                endstr="$2"
+            fi
+            shift ;;
+        -b|--before)
+            if [ -n "$2" ]; then
+                export beforestr="$2"
+            fi
+            shift ;;
+        -l|--limit)
+            if [ -n "$2" ]; then
+                export limit="$2"
+                shift
+            else
+                printf 'ERROR: "--limit" requires a non-empty option argument.\n'
+                exit
+            fi ;;
+        --)
+            shift
+            break ;;
+        -?*)
+            printf 'WARNING: Unknown option ignored: %s\n' "$1" ;;
+        *) break ;;
+    esac
+    shift
+done
+
+if [ ! -t 0 ]; then
+    [ -n "$beforestr" ] && limit="$((limit - ${#beforestr}))"
+    icon_lookup
+else
+    printf 'ERROR: no data provided...\nExpecting a directory listing in stdin\n'
+fi
+
+if [ -n "$end" ]; then
+    print_end "$endstr"
+fi

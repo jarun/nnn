@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2014-2016, Lazaros Koromilas <lostd@2f30.org>
  * Copyright (C) 2014-2016, Dimitris Papastamos <sin@2f30.org>
- * Copyright (C) 2016-2020, Arun Prakash Jana <engineerarun@gmail.com>
+ * Copyright (C) 2016-2021, Arun Prakash Jana <engineerarun@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -79,10 +79,10 @@ static void disabledbg(void)
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 
-#define DPRINTF_D(x) xprintf(DEBUG_FD, "ln " TOSTRING(__LINE__) ": " #x "=%d\n", x)
-#define DPRINTF_U(x) xprintf(DEBUG_FD, "ln " TOSTRING(__LINE__) ": " #x "=%u\n", x)
-#define DPRINTF_S(x) xprintf(DEBUG_FD, "ln " TOSTRING(__LINE__) ": " #x "=%s\n", x)
-#define DPRINTF_P(x) xprintf(DEBUG_FD, "ln " TOSTRING(__LINE__) ": " #x "=%p\n", x)
+#define DPRINTF_D(x) xprintf(DEBUG_FD, "ln " TOSTRING(__line__) ": " #x "=%d\n", x)
+#define DPRINTF_U(x) xprintf(DEBUG_FD, "ln " TOSTRING(__line__) ": " #x "=%u\n", x)
+#define DPRINTF_S(x) xprintf(DEBUG_FD, "ln " TOSTRING(__line__) ": " #x "=%s\n", x)
+#define DPRINTF_P(x) xprintf(DEBUG_FD, "ln " TOSTRING(__line__) ": " #x "=%p\n", x)
 #else
 #define DPRINTF_D(x)
 #define DPRINTF_U(x)

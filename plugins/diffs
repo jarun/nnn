@@ -41,7 +41,7 @@ if [ -s "$selection" ]; then
 
             eval xargs -0 "$diffcmd" < "$selection"
         fi
-    elif ! [ -z "$1" ]; then
+    elif [ -n "$1" ]; then
         f1="$(echo "$arr" | sed -n '1p')"
         if [ -d "$f1" ] && [ -d "$1" ]; then
             dirdiff "$f1" "$1"
@@ -53,4 +53,9 @@ if [ -s "$selection" ]; then
     else
         echo "needs at least 2 files or directories selected for comparison"
     fi
+fi
+
+# Clear selection
+if [ -p "$NNN_PIPE" ]; then
+    printf "-" > "$NNN_PIPE"
 fi

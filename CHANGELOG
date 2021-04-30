@@ -1,3 +1,149 @@
+nnn v4.0 Sushi
+2021-04-13
+
+- show xterm title on option `-x`
+
+-------------------------------------------------------------------------------
+
+nnn v3.7
+2021-04-13
+
+- allow plugins to clear selection (#884, #889, #917)
+- do not clear selection on hovered file deletion
+- resurrect `'c'urrent/'s'el` prompt and option `-u` (#889)
+- show only file name in reverse in detail mode
+- more file/mime types supported in `preview-tui-ext`
+- plugin `mtpmount` - (un)mount MTP devices
+- plugin `cleanfilename` - more shell-friendly file names
+- plugin `rsynccp` - copy-paste with visual progress
+- replace `$HOME` by `~` in address bar
+- show current path in terminal title (#911)
+- total links and inode number of hardlink in statusbar
+- fix symlink to text file not opening in CLI editor (#890)
+- fix symlink size shown as 0B in statusbar (#888)
+- show symlink target in statusbar (#893)
+- show correct disk free/total on macOS (#888)
+- fix directory disk usage showing as 0 on macOS (#941)
+- fix name col len with `-C` and icons compiled-in (#936)
+- refactor printing entries in light/detail modes (#934)
+- make option `O_CKBOARD` for checker board as indicator
+
+-------------------------------------------------------------------------------
+
+nnn v3.6 Nina
+2021-03-16
+
+- REPL command prompt (<kbd>Esc</kbd> or <kbd>Enter</kbd> to exit)
+- invert selection with <kbd>A</kbd>
+- option `-u` removed (always prefer selection to hovered)
+- visit start dir on <kbd>@</kbd> when start path is a file
+- exit filter mode and redraw on <kbd>^L</kbd> if no last filter
+- plugin `fzcd` now selects the chosen file (#876)
+- `ueberzug` support in plugin `preview-tui`
+- new plugin `preview-tui-ext` with extra preview support
+- clear selection after successful plugin invocation
+- add method to sync subshell `$PWD` in WIki
+- clear selection on single file deletion (#812)
+- copy between instances not working (#864)
+- plugin `togglex` to toggle exe mode of a selection (#813)
+- fix `memccpy()` buffer overlap fault on macOS (#786)
+- show `0 selected` msg on cp/mv with empty selection (#855)
+- fix frozen terminal caused by opener (#858)
+- migrate macOS CI to GitHub workflows, retire Travis
+
+-------------------------------------------------------------------------------
+
+nnn v3.5 Freddie
+2020-11-17
+
+- compile-in Alexey Tourbin's QSORT macro
+- support Nerd Font patched icons [`make O_NERD=1`]
+- auto-generate static binaries with icons support
+- audit and adapt all plugins for macOS
+- enhance plugin `dups` to delete duplicates interactively
+- plugin `autojump` now supports `jump` and `zoxide`
+- support `gio trash` to Trash [`export NNN_TRASH=2`] (#740)
+- quit program on double <kbd>Esc</kbd> in normal mode (#775)
+- <kbd>^Space</kbd> replaces <kbd>^K</kbd> for range selection/clear selection
+- show selection symbol (`+`) next to filename in detail mode (#741)
+- error & quit on <kbd>Q</kbd> if no selection, else pick to stdout
+- repeat <kbd>^T</kbd> to cycle sort by time, size and clear
+- option `-U` to show user & group info in status bar
+- option `-J` to disable auto-proceed on select (#713)
+- option `-D` to show dirs in context color with `NNN_FCOLORS`
+- honor option `-C` for context colors
+- show indicators if more entries above/below listing (#744)
+- show missing utility name in flash msg (#753)
+- exit `preview-tabbed` on <kbd>^C</kbd> (#727)
+- invoke GNU sed (_gsed_) on macOS (#728)
+- fix HW cursor moves to wrong line (#735)
+- fix rollover bug with multiline scroll (#743)
+- fix input stream not listed with `-s`/`-S` (#777)
+- fix locker not being invoked
+- make target `upx` for additional binary compression
+- compress auto-generated static binaries with upx
+- make variable `O_NOSSN` to compile out sessions
+- make variable `O_NOUG` to compile out user & group info
+
+-------------------------------------------------------------------------------
+
+nnn v3.4 Emilia
+2020-08-18
+
+- icons with icon-specific colors (thanks @KlzXS)
+- enhanced `NNN_COLORS` with xterm 256 colors support
+- new colorscheme with `NNN_FCOLORS` (file type specific colors)
+- switch `-C` to force earlier colorscheme (dirs follow context color)
+- updates for Haiku (thanks @CodeforEvolution)
+- fix XFS navigation issue (thanks @ucs1)
+- optimize archive extension matching on file open
+- show location in context color
+- support `host[:dir]` format for remote mounts
+- clear selection after copy
+- support traversal on file/dir creation
+- show selection in reverse in status bar
+- show status bar indicator `H` when hidden files are listed
+- show and confirm archive command output
+- support _cd on quit_ in picker mode
+
+-------------------------------------------------------------------------------
+
+nnn v3.3
+2020-07-14
+
+- subdir `mounts` for remote and archive mounts
+- remove mount point on successful unmount of remote/archive
+- show error and prompt user if `cp`/`mv`/`rm` operation fails
+- support absolute/relative paths in cp/mv as
+- mark current path automatically on archive/remote mount
+- mark current path automatically on target file visit in _find and list_ mode
+- option `-C` to place HW cursor on hovered for screen readers and braille displays
+- option `-u` to use selection (if available) and skip `current/sel` prompt
+- key <kbd>Alt+Esc</kbd> to clear filter prompt and redraw
+- support <kbd>Esc</kbd> to cancel remove operation
+- `gpge` & `gpgd`: encrypt and decrypt with GPG
+- `blknew`: create new files and directories in bulk
+- `preview-tui`
+  - unified to support `tmux`/`kitty`/`xterm`/`$TERMINAL`
+  - auto-determine split orientation based on terminal height and width
+  - provision to use [`scope.sh`](https://github.com/ranger/ranger/blob/master/ranger/data/scope.sh) and [`pistol`](https://github.com/doronbehar/pistol)
+- various other improvements
+- `upload`: send to Firefox Send if [`ffsend`](https://github.com/timvisee/ffsend) is found
+- `hexview`: add [`hx`](https://github.com/krpors/hx) as alternative hex viewer
+- `nuke` and `imgview`: add [`imv`](https://github.com/eXeC64/imv) as alternative image viewer
+- add find (with `fd`) and grep (with `rg`) examples in plugins doc
+- key <kbd>Esc</kbd> or left click to resend hovered file path to `NNN_FIFO`
+- show `+` instead of `s` in status bar on selection
+- <kbd>F5</kbd> removed (misfit for toggle hidden), <kbd>^S</kbd> removed (often masked, redundant)
+- handle abnormal program termination and remove NNN_PIPE and/or NNN_FIFO
+- clear selection after successful batch rename, link creation
+- make option `O_CTX8` for 8 contexts (NOT backward compatible with 4 contexts)
+- fix issue with child window resize (see #656)
+- fix issue with `NNNLVL` on macOS (see #639)
+- fix issue with restoring session with du/au enabled
+
+-------------------------------------------------------------------------------
+
 nnn v3.2
 2020-05-26
 

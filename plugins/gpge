@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+
+# Description: Encrypts selected files using gpg. Can encrypt either asymmetrically (key) or symmetrically (passphrase).
+#              If asymmetric encryption is chosen a key can be chosen from the list of capable public keys using fzf.
+#
+# Note: symmetric encryption only works for a single (current) file as per gpg limitations
+#
+# Shell: POSIX compliant
+# Author: KlzXS
+
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+printf "(s)ymmetric, (a)symmetric? [default=a] "
+read -r symmetry
+
+if [ "$symmetry" = "s" ]; then
+	gpg --symmetric "$1"
+else
+	printf "(s)election/(c)urrent? [default=c] "
+	read -r resp
+
+	if [ "$resp" = "s" ]; then
+		files=$(tr '\0' '\n' < "$selection")
+	else
+		files=$1
+	fi
+
+	keyids=$(gpg --list-public-keys --with-colons | grep -E "pub:(.*:){10}.*[eE].*:" | awk -F ":" '{print $5}')
+
+	#awk needs literal $10
+	#shellcheck disable=SC2016
+	keyuids=$(printf "%s" "$keyids" | xargs -n1 -I{} sh -c 'gpg --list-key --with-colons "{}" | grep "uid" | awk -F ":" '\''{printf "%s %s\n", "{}", $10}'\''')
+
+	recipient=$(printf "%s" "$keyuids" | fzf | awk '{print $1}')
+
+	printf "%s" "$files" | xargs -n1 gpg --encrypt --recipient "$recipient"
+
+    # Clear selection
+    if [ "$resp" = "s" ] && [ -p "$NNN_PIPE" ]; then
+        printf "-" > "$NNN_PIPE"
+    fi
+fi

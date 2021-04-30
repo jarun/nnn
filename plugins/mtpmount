@@ -1,0 +1,76 @@
+#!/usr/bin/env sh
+
+# Description: Toggle mount of MTP device (eg. Android device)
+#              'l' to list mountable devices
+#              'n' integer associated to device to mount
+#              'q'/'Return' exit
+#
+# Notes: The MTP device should be mounted at /run/user/$UID/gvfs.
+#        Put /run/user/$UID/gvfs to bookmark entries (NNN_BMS) for faster access.
+#        Make sure the device is unlocked when mounting.
+#
+#        When doing copy-paste into MTP device, you will get an error like this:
+#            cp: preserving times for './gambar1.png': Operation not supported
+#        That just means the file is copied but timestamp won't be preserved.
+#        It's like doing `cp -p localfile.txt file-to-SMB.txt`.
+#
+# Dependencies: gvfs-mtp
+#
+# Shell: POSIX compliant
+# Author: Benawi Adha
+
+prompt="Device number ('l' to list): "
+
+IFS='
+'
+
+lsmtp () {
+    devs=$(gio mount -li | grep -e 'activation_root' | sed 's/\s*activation_root=//g')
+    c=1
+    printf "Devices list:\n"
+    for i in $devs; do
+        printf "%s %s\\n" "$c" "$i"
+        c=$(( c + 1 ))
+    done
+    echo
+}
+
+lsmtp
+printf "%s" "$prompt"
+read -r input
+
+while [ -n "$input" ]
+do
+    if [ "$input" = "l" ]; then
+        lsmtp
+    elif [ "$input" = "q" ] || [ "$input" -eq 0 ]; then
+        exit
+    elif [ "$input" -le "$(printf '%s\n' "${devs}" | grep -c '^')" ]; then
+        # dev=$(printf "%s\n" "$devs" | cut -d$'\n' -f${input})
+        c=1
+        for i in $devs; do
+            dev=$i
+            if [ "$input" -eq $c ]; then
+                break
+            fi
+            c=$(( c + 1 ))
+        done
+
+        if (gio mount -l | grep '^Mount([1-9]).*'"$dev" ) 1>/dev/null; then
+            if gio mount -u "${dev}"; then
+                printf "%s unmounted\n" "$dev"
+            fi
+        else
+            if gio mount "${dev}"; then
+                printf "%s mounted to /run/user/\$UID/gvfs\n" "$dev"
+            fi
+        fi
+        echo
+    else
+        printf "Invalid input\n"
+    fi
+
+    printf "%s" "$prompt"
+    read -r input
+done
+

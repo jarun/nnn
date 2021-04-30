@@ -4,12 +4,67 @@
 #
 # Source: https://www.commandlinefu.com/commands/view/3555/find-duplicate-files-based-on-size-first-then-md5-hash
 #
-# Dependencies: find md5sum sort uniq xargs
+# Dependencies: find md5sum sort uniq xargs gsed
 #
-# Shell: POSIX compliant
+# Note: bash compatible required for mktemp
+#
+# Shell: bash
 # Authors: syssyphus, KlzXS
 
-find . -size +0 -type f -printf "%s %p\n" | sort -rn | sed -n 'N; /^\([0-9]*\) .*\n\1.*$/p;$d;D' | awk '{printf("%s\0", substr($0, index($0, $2)))}' | xargs -0 md5sum | sort | uniq -w32 --all-repeated=separate
+# If the size of a file has more that $size_digits digits the file will be misplaced
+# 12 digits fit files up to 931GiB
+
+EDITOR="${EDITOR:-vi}"
+TMPDIR="${TMPDIR:-/tmp}"
+
+size_digits=12
+tmpfile=$(mktemp "$TMPDIR/.nnnXXXXXX")
+
+printf "\
+## This is an overview of all duplicate files found.
+## Comment out the files you wish to remove. You will be given an option to cancel.
+## Lines with double comments (##) are ignored.
+## You will have the option to remove the files with force or interactively.\n
+" > "$tmpfile"
+
+# shellcheck disable=SC2016
+find . -size +0 -type f -printf "%${size_digits}s %p\n" | sort -rn | uniq -w"${size_digits}" -D | sed -E '
+s/^ {,12}([0-9]{,12}) (.*)$/printf "%s %s\\n" "$(md5sum "\2")" "d\1"/
+' | tr '\n' '\0' | xargs -0 -n1 sh -c | sort | { uniq -w32 --all-repeated=separate; echo; } | sed -nE '
+h
+s/^(.{32}).* d([0-9]*)$/## md5sum: \1 size: \2 bytes/p
+g
+
+:loop
+N
+/.*\n$/!b loop
+p' | sed -E 's/^.{32}  (.*) d[0-9]*$/\1/' >> "$tmpfile"
+
+"$EDITOR" "$tmpfile"
+
+printf "Remove commented files? (yes/no) [default=n]: "
+read -r commented
+
+if [ "$commented" = "y" ]; then
+	sedcmd="/^(##|[^#]).*/d; /^$/d; s/^# *(.*)$/\1/"
+else
+	printf "Press any key to exit"
+	read -r _
+	exit
+fi
+
+printf "Remove with force or interactive? (f/i) [default=i]: "
+read -r force
+
+if [ "$force" = "f" ]; then
+	#shellcheck disable=SC2016
+	sed -E "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 -r sh -c 'rm -f "$0" "$@" </dev/tty'
+else
+	#shellcheck disable=SC2016
+	sed -E "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 -r sh -c 'rm -i "$0" "$@" </dev/tty'
+fi
+
+rm "$tmpfile"
 
 printf "Press any key to exit"
 read -r _

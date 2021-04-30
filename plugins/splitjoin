@@ -33,6 +33,11 @@ if [ "$resp" = "j" ]; then
 
         file="$(basename "$(echo "$arr" | sed -n '1p' | sed -e 's/[0-9][0-9]$//')")"
         sort -z < "$selection" | xargs -0 -I{} cat {} > "${file}.out"
+
+        # Clear selection
+        if [ -p "$NNN_PIPE" ]; then
+            printf "-" > "$NNN_PIPE"
+        fi
     fi
 elif [ "$resp" = "s" ]; then
     if [ -n "$1" ] && [ -f "$1" ]; then

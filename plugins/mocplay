@@ -82,3 +82,8 @@ mocp -p
 
 # uncomment the line below to show mocp interface after appending
 # mocp
+
+# Clear selection
+if [ "$resp" = "y" ] && [ -p "$NNN_PIPE" ]; then
+    printf "-" > "$NNN_PIPE"
+fi

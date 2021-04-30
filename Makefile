@@ -11,9 +11,22 @@ CP ?= cp
 
 CFLAGS_OPTIMIZATION ?= -O3
 
-O_DEBUG := 0
+O_DEBUG := 0  # debug binary
 O_NORL := 0  # no readline support
+O_PCRE := 0  # link with PCRE library
 O_NOLOC := 0  # no locale support
+O_NOMOUSE := 0  # no mouse support
+O_NOBATCH := 0  # no built-in batch renamer
+O_NOFIFO := 0  # no FIFO previewer support
+O_CTX8 := 0  # enable 8 contexts
+O_ICONS := 0  # support icons-in-terminal
+O_NERD := 0  # support icons-nerdfont
+O_QSORT := 0  # use Alexey Tourbin's QSORT implementation
+O_BENCH := 0  # benchmark mode (stops at first user input)
+O_NOSSN := 0  # enable session support
+O_NOUG := 0  # disable user, group name in status bar
+O_CKBOARD := 0  # use checker board (stipple) in detail mode
+O_NOX11 := 0  # disable X11 integration
 
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
@@ -27,42 +40,74 @@ ifneq ($(filter noloc,$(MAKECMDGOALS)),)
 	O_NOLOC := 1
 endif
 
-ifeq ($(O_DEBUG),1)
+ifeq ($(strip $(O_DEBUG)),1)
 	CPPFLAGS += -DDBGMODE
 	CFLAGS += -g
 endif
 
-ifeq ($(O_NORL),1)
+ifeq ($(strip $(O_NORL)),1)
 	CPPFLAGS += -DNORL
-else ifeq ($(O_STATIC),1)
+else ifeq ($(strip $(O_STATIC)),1)
 	CPPFLAGS += -DNORL
 else
 	LDLIBS += -lreadline
 endif
 
-ifeq ($(O_PCRE),1)
+ifeq ($(strip $(O_PCRE)),1)
 	CPPFLAGS += -DPCRE
 	LDLIBS += -lpcre
 endif
 
-ifeq ($(O_NOLOC),1)
+ifeq ($(strip $(O_NOLOC)),1)
 	CPPFLAGS += -DNOLOCALE
 endif
 
-ifeq ($(O_NOMOUSE),1)
+ifeq ($(strip $(O_NOMOUSE)),1)
 	CPPFLAGS += -DNOMOUSE
 endif
 
-ifeq ($(O_NOBATCH),1)
+ifeq ($(strip $(O_NOBATCH)),1)
 	CPPFLAGS += -DNOBATCH
 endif
 
-ifeq ($(O_NOFIFO),1)
+ifeq ($(strip $(O_NOFIFO)),1)
 	CPPFLAGS += -DNOFIFO
 endif
 
-ifeq ($(O_CTX8),1)
+ifeq ($(strip $(O_CTX8)),1)
 	CPPFLAGS += -DCTX8
+endif
+
+ifeq ($(strip $(O_ICONS)),1)
+	CPPFLAGS += -DICONS
+endif
+
+ifeq ($(strip $(O_NERD)),1)
+	CPPFLAGS += -DNERD
+endif
+
+ifeq ($(strip $(O_QSORT)),1)
+	CPPFLAGS += -DTOURBIN_QSORT
+endif
+
+ifeq ($(strip $(O_BENCH)),1)
+	CPPFLAGS += -DBENCH
+endif
+
+ifeq ($(strip $(O_NOSSN)),1)
+	CPPFLAGS += -DNOSSN
+endif
+
+ifeq ($(strip $(O_NOUG)),1)
+	CPPFLAGS += -DNOUG
+endif
+
+ifeq ($(strip $(O_CKBOARD)),1)
+	CPPFLAGS += -DCKBOARD
+endif
+
+ifeq ($(strip $(O_NOX11)),1)
+	CPPFLAGS += -DNOX11
 endif
 
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
@@ -75,14 +120,14 @@ else
 	LDLIBS_CURSES ?= -lncurses
 endif
 
-CFLAGS += -std=c11 -Wall -Wextra
+CFLAGS += -std=c11 -Wall -Wextra -Wshadow
 CFLAGS += $(CFLAGS_OPTIMIZATION)
 CFLAGS += $(CFLAGS_CURSES)
 
 LDLIBS += $(LDLIBS_CURSES)
 
 # static compilation needs libgpm development package
-ifeq ($(O_STATIC),1)
+ifeq ($(strip $(O_STATIC)),1)
 	LDFLAGS += -static
 	LDLIBS += -lgpm
 endif
@@ -131,9 +176,20 @@ uninstall:
 strip: $(BIN)
 	$(STRIP) $^
 
+upx: $(BIN)
+	$(STRIP) $^
+	upx -qqq $^
+
 static:
+	# regular static binary
 	make O_STATIC=1 strip
 	mv $(BIN) $(BIN)-static
+	# static binary with icons-in-terminal support
+	make O_STATIC=1 O_ICONS=1 strip
+	mv $(BIN) $(BIN)-icons-static
+	# static binary with patched nerd font support
+	make O_STATIC=1 O_NERD=1 strip
+	mv $(BIN) $(BIN)-nerd-static
 
 dist:
 	mkdir -p nnn-$(VERSION)
@@ -148,16 +204,32 @@ sign:
 
 upload-local: sign static
 	$(eval ID=$(shell curl -s 'https://api.github.com/repos/jarun/nnn/releases/tags/v$(VERSION)' | jq .id))
+	# upload sign file
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION).tar.gz.sig' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/pgp-signature' \
 	    --upload-file nnn-$(VERSION).tar.gz.sig
 	tar -zcf $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-static
+	# upx compress all static binaries
+	upx -qqq $(BIN)-static
+	upx -qqq $(BIN)-icons-static
+	upx -qqq $(BIN)-nerd-static
+	# upload static binary
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-static-$(VERSION).x86_64.tar.gz' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
 	    --upload-file $(BIN)-static-$(VERSION).x86_64.tar.gz
+	tar -zcf $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static
+	# upload icons-in-terminal compiled static binary
+	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-icons-static-$(VERSION).x86_64.tar.gz' \
+	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
+	    --upload-file $(BIN)-icons-static-$(VERSION).x86_64.tar.gz
+	# upload patched nerd font compiled static binary
+	tar -zcf $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static
+	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-nerd-static-$(VERSION).x86_64.tar.gz' \
+	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
+	    --upload-file $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz
 
 clean:
-	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz
+	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz
 
 skip: ;
 
