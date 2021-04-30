@@ -27,7 +27,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [fzcd](fzcd) | Change to the directory of a fuzzy-selected file/dir | sh | fzf |
 | [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |
 | [fzopen](fzopen) | Fuzzy find a file in dir subtree and edit or open | sh | fzf, xdg-open |
-| [fzfplug](fzfplug) | Fuzzy find a nnn plugin (or a plugin in an extra directory) and run it | sh | fzf |
+| [fzfplug](fzfplug) | Fuzzy find, preview and run nnn plugins (or any plugin in an extra custom directory) | sh | fzf |
 | [fzz](fzz) | Change to any directory in the z database with fzf | sh | fzf, z |
 | [getplugs](getplugs) | Update plugins to installed `nnn` version | sh | curl |
 | [gpg\*](gpg\*) | Encrypt/decrypt files using GPG [✓] | sh | gpg |
