@@ -1,7 +1,10 @@
 #!/usr/bin/env sh
 
-# Description: unmount a nnn mountpoint from any of its subfolders (vanilla `u` in nnn requires either
+# Description: unmount a nnn remote mountpoint from any of its subfolders (vanilla `u` in nnn requires either
 # going back to ~/.config/nnn/mounts to hover the mountpoint, or to enter its name in the `u` prompt)
+#
+# Dependencies: fusermount
+# Shell: POSIX compliant
 # Authors: Kabouik & 0xACE
 
 # Environment
