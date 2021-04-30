@@ -53,10 +53,10 @@
 #   'h'orizontal split or a 'v'ertical split (as in, the line that splits the
 #   windows will be horizontal or vertical).
 #
-#   Kitty users need `allow_remote_control` set to `yes`. To customize the
-#   window split, `enabled_layouts` has to be set to `all` or `splits` (the
-#   former is the default value). This terminal is also able to show images
-#   without extra dependencies.
+#   Kitty users need `allow_remote_control` set to `yes`, and `listen_on` set
+#   to e.g. "$TMPDIR/kitty". To customize the window split, `enabled_layouts`
+#   has to be set to `all` or `splits` (the former is the default value).
+#   This terminal is also able to show images without extra dependencies.
 #
 # Shell: POSIX compliant
 # Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal
@@ -299,14 +299,12 @@ if [ "$PREVIEW_MODE" ]; then
 else
     if [ ! -r "$NNN_FIFO" ]; then
         clear
-        printf "No FIFO available! (\$NNN_FIFO='%s')\nPlease read the documentation" "$NNN_FIFO"
-        read -r _
+        printf "No FIFO available! (\$NNN_FIFO='%s')\nPlease read Usage in preview-tui." "$NNN_FIFO"
+        cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg"
     elif [ "$KITTY_WINDOW_ID" ] && [ -z "$KITTY_LISTEN_ON" ]; then
-        # The escape codes used to control kitty splits cause problems when run from a background process.
-        # Use --listen-on flag or listen_on config variable to avoid(https://sw.kovidgoyal.net/kitty/conf.html)
         clear
-        printf "\$KITTY_LISTEN_ON not set!\nPlease add listen_on to your kitty.conf or start with the --listen-on flag."
-        read -r _
+        printf "\$KITTY_LISTEN_ON not set!\nPlease read Usage in preview-tui."
+        cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg"
     else
         togglepreview "$1" &
     fi
