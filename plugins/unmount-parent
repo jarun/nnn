@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Description: Autodetects a nnn remote mountpoint (mouned with `c`) from any of its subfolders and allows unmounting it
+# Description: Autodetects a nnn remote mountpoint (mounted with `c`) from any of its subfolders and allows unmounting it
 # from there without first going back to the top or entering the remote name. Also works when hovering the mountpoint
 # directly like vanilla `u`.
 #
