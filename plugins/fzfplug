@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Description: Fuzzy search and execute nnn plugins (and, optionally, custom scripts located elsewhere). 
+# Description: Fuzzy find and execute nnn plugins (and, optionally, custom scripts located elsewhere). 
 # Description and details of plugins can be previewed from the fzf interface. Use `?` to toggle preview pane on and off.
 #
 # For better compatibility with as many nnn plugins as possible, fzfplug will first execute
