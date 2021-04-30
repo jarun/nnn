@@ -2194,7 +2194,7 @@ static bool batch_rename(void)
 	bool dir = FALSE, ret = FALSE;
 	char foriginal[TMP_LEN_MAX] = {0};
 	static const char batchrenamecmd[] = "paste -d'\n' %s %s | "SED" 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
-					     "tr '\n' '\\0' | xargs -0 -n2 mv 2>/dev/null";
+					     "tr '\n' '\\0' | xargs -0 -n2 sh -c 'mv -i \"$0\" \"$@\" < /dev/tty'";
 	char buf[sizeof(batchrenamecmd) + (PATH_MAX << 1)];
 	int i = get_cur_or_sel();
 
