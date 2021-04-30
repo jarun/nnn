@@ -9,7 +9,7 @@
 # Authors: Kabouik & 0xACE
 #
 # TODO: Try better avoiding lazy unmount by forcing nnn context to leave the subfolder before fusermount.
-# TI tried `printf "%s" "0c$m" > "$NNN_PIPE"` but this would break nnn UI all the time, see #854.
+# I tried `printf "%s" "0c$m" > "$NNN_PIPE"` but this would break nnn UI all the time, see #854.
 
 # ENVIRONMENT
 err=0
