@@ -22,8 +22,8 @@ otherplugins=""
 
 # OTHER VARIABLES
 err=0
-n="\n"
-plugin=$(find "$nnnplugins" "$otherplugins" -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --preview 'cat {}' --preview-window right:66% --delimiter / --with-nth -1 --bind ?:toggle-preview)
+n="\n---\n"
+plugin=$(find "$nnnplugins" "$otherplugins" -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --preview 'cat {}' --preview-window right:66% --delimiter / --with-nth -1 --bind="?:toggle-preview")
 
 # TRY RUNNING THE SCRIPT ON HOVERED FILE FIRST, AND ABORT IF NO PLUGIN WAS SELECTED IN FZFPLUG (ESC OR ^C), 
 if ! [ "$plugin" = "" ]; then
@@ -37,6 +37,5 @@ fi
 
 # IF THAT FAILS TOO, ABORT AND SHOW AN ERROR
 if [ "$err" -eq "2" ]; then
-    printf "$n""Failed to execute '%s'. See error above or try without fzfplug. Press any key to continue." "$plugin"
-    cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg"; clear
+    printf "$n""Failed to execute '%s'. See error above or try without fzfplug. Press return to continue. " "$plugin" && read -r _ && clear
 fi

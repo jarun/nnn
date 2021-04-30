@@ -27,7 +27,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [fzcd](fzcd) | Change to the directory of a fuzzy-selected file/dir | sh | fzf |
 | [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |
 | [fzopen](fzopen) | Fuzzy find a file in dir subtree and edit or open | sh | fzf, xdg-open |
-| [fzfplug](fzfplug) | Fuzzy find a nnn plugin (or a plugin in an extra directory) and run it | sh | fzf, find |
+| [fzfplug](fzfplug) | Fuzzy find a nnn plugin (or a plugin in an extra directory) and run it | sh | fzf |
 | [fzz](fzz) | Change to any directory in the z database with fzf | sh | fzf, z |
 | [getplugs](getplugs) | Update plugins to installed `nnn` version | sh | curl |
 | [gpg\*](gpg\*) | Encrypt/decrypt files using GPG [✓] | sh | gpg |
@@ -66,7 +66,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [togglex](togglex) | Toggle executable mode for selection [✓] | sh | chmod |
 | [treeview](treeview) | Informative tree output in `$EDITOR` | sh | tree |
 | [uidgid](uidgid) | List user and group of all files in dir | sh | ls, less |
-| [unmount-parent](unmount-parent) | Unmount a remote mounted by nnn without going back to the top mountpoint | bash | fusermount |
+| [unmount-parent](unmount-parent) | Unmount a remote mounted by nnn directly from its subfolders (or when hovering the mountpoint like vanilla nnn) | sh | fusermount |
 | [upgrade](upgrade) | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
 | [upload](upload) | Upload to Firefox Send or ix.io (text) or file.io (bin) | sh | [ffsend](https://github.com/timvisee/ffsend), curl, jq, tr |
 | [vidthumb](vidthumb) | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
