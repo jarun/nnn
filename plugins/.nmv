@@ -120,7 +120,7 @@ while read -r num name; do
 		if [ ! -d "$dir" ] && ! mkdir -p "$dir"; then
 			printf "%s: failed to create directory tree %s\n" "$0" "$dir" > /dev/stderr
 			exit_status=1
-		elif ! mv "$src" "$name"; then
+		elif ! mv -i "$src" "$name"; then
 			printf "%s: failed to rename %s to %s: %s\n" "$0" "$name" "$tmp" "$!" > /dev/stderr
 			exit_status=1
 		else
