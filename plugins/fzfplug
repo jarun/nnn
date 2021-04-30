@@ -7,22 +7,36 @@
 # (which should actually run it on selected files if nnn has an active selection). I don't 
 # have the required dependencies to confirm compatibility with all scripts though.
 #
-# Dependencies: find, fzf
+# Dependencies: find, fzf, cat (for better compatibility, but can easily be replaced by bat at line 26:105 if preferred)
 # Shell: POSIX compliant
 # Author: Kabouik
 
-nnnplugins=$HOME/.config/nnn/plugins
-#otherplugins=$HOME/.local/share/nautilus/scripts  # Example for other script source, there are many Git repos with Nautilus scripts
+# nnn PLUGINS SOURCE
+nnnplugins="$HOME/.config/nnn/plugins"
 
+# OPTIONAL SCRIPTS SOURCE
+# Leave blank or fill with the absolute path to another folder containing executable scripts
+# For instance, "$HOME/.local/share/nautilus/scripts", as you can find plenty of Git repos with Nautilus scripts
+# Feel free to add new variables for additional script folders if need be, but remember to increment `find` at 26:44.
+otherplugins=""
+
+# OTHER VARIABLES
 err=0
-plugin=$(find "$nnnplugins" "$otherplugins" -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --preview 'bat {}' --preview-window right:66% --delimiter / --with-nth -1 --bind ?:toggle-preview)
+n="\n"
+plugin=$(find "$nnnplugins" "$otherplugins" -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --preview 'cat {}' --preview-window right:66% --delimiter / --with-nth -1 --bind ?:toggle-preview)
 
-"$plugin" "$1" || err=1
-
-if [ "$err" -eq "1" ]; then
-    "$plugin" || err=2
+# TRY RUNNING THE SCRIPT ON HOVERED FILE FIRST, AND ABORT IF NO PLUGIN WAS SELECTED IN FZFPLUG (ESC OR ^C), 
+if ! [ "$plugin" = "" ]; then
+    "$plugin" "$1" || err=1
 fi
 
+# IF THAT FAILS WITH HOVERED FILE, TRY WITH NO TARGET (nnn SELECTIONS SHOULD STILL BE PASSED TO THE SCRIPT IN THAT CASE)
+if [ "$err" -eq "1" ]; then
+    clear && "$plugin" || err=2
+fi
+
+# IF THAT FAILS TOO, ABORT AND SHOW AN ERROR
 if [ "$err" -eq "2" ]; then
-    read -n 1 -s -r -p "Failed to execute '$plugin', try running it directly without fzfplug. Press any key to continue."
+    printf "$n""Failed to execute '%s'. See error above or try without fzfplug. Press any key to continue." "$plugin"
+    cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg"; clear
 fi

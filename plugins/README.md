@@ -66,7 +66,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [togglex](togglex) | Toggle executable mode for selection [✓] | sh | chmod |
 | [treeview](treeview) | Informative tree output in `$EDITOR` | sh | tree |
 | [uidgid](uidgid) | List user and group of all files in dir | sh | ls, less |
-| [unmount-parent](unmount-parent) | Unmount a remote mounted by nnn without going back to the top mountpoint | sh | fusermount |
+| [unmount-parent] (unmount-parent) | Unmount a remote mounted by nnn without going back to the top mountpoint | bash | fusermount |
 | [upgrade](upgrade) | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
 | [upload](upload) | Upload to Firefox Send or ix.io (text) or file.io (bin) | sh | [ffsend](https://github.com/timvisee/ffsend), curl, jq, tr |
 | [vidthumb](vidthumb) | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
@@ -88,6 +88,8 @@ curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs | s
 Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 
 ## Configuration
+
+Set environment variable `NNN_PLUG` to assign keybinds and invoke plugins directly using the plugin shortcut (<kbd>;</kbd>) followed by the assigned key character. E.g., with the below config:
 
 ```sh
 export NNN_PLUG='f:finder;o:fzopen;p:mocplay;d:diffs;t:nmount;v:imgview'
