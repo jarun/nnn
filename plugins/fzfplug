@@ -11,8 +11,8 @@
 # Shell: POSIX compliant
 # Author: Kabouik
 
-nnnplugins=~/.config/nnn/plugins
-#otherplugins=~/.local/share/nautilus/scripts  # Example for other script source, there are many Git repos with Nautilus scripts
+nnnplugins=$HOME/.config/nnn/plugins
+#otherplugins=$HOME/.local/share/nautilus/scripts  # Example for other script source, there are many Git repos with Nautilus scripts
 
 err=0
 plugin=$(find "$nnnplugins" "$otherplugins" -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --preview 'bat {}' --preview-window right:66% --delimiter / --with-nth -1 --bind ?:toggle-preview)
