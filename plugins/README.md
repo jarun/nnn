@@ -72,6 +72,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 | suedit | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
 | treeview | Informative tree output in `$EDITOR` | sh | tree |
 | uidgid | List user and group of all files in dir | sh | ls, less |
+| unmount-parent | Unmount a resource mounted using nnn without going back to the top mountpoint | sh | fusermount |
 | upgrade | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
 | upload | Paste text to ix.io, upload binary to file.io | sh | curl, jq, tr |
 | vidthumb | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |

@@ -1,0 +1,41 @@
+#!/usr/bin/env sh
+
+# Description: unmount a nnn mountpoint from any of its subfolders (vanilla `u` in nnn requires either
+# going back to ~/.config/nnn/mounts to hover the mountpoint, or to enter its name in the `u` prompt)
+# Authors: Kabouik & 0xACE
+
+# Environment
+err=0
+m=$HOME/.config/nnn/mounts
+if [ "$PWD" = "$m" ]; then  # Allow using the script on hovered directory if user is in ~/.config/nnn/mounts
+    d="$1"
+else
+    d=$(echo $(dirname $(readlink -f "$1")) | grep -oP "^$m\K.*" | cut -d"/" -f2)
+fi
+
+# Test if user is currently within $m or a subfolder, abort if not
+    if [ "$d" = "" ]; then
+        clear && read -n 1 -s -r -p "You are not in folder mounted with nnn. Press any key to continue."
+    else
+        # Test if $m/$d is a mountpoint and try unmounting if yes
+        mountpoint -q -- "$m/$d"
+        if [ "$?" -eq "1" ]; then
+            clear && read -n 1 -s -r -p "Parent '$d' is not a mountpoint. Press any key to continue."
+        else
+            cd "$m" && fusermount -uq "$m/$d" || err=1
+            if [ "$err" -eq "0" ]; then
+                rmdir "$m/$d" && clear && printf "Parent '$d' unmounted."
+            else
+                clear && read -n 1 -s -r -p "Failed to unmount. Try lazy unmount? Yy/Nn"
+            fi
+        fi
+    fi
+
+# If failure to unmount, offer to try lazy unmount
+    if [ "$REPLY" = "y" -o "$REPLY" = "Y" ]; then 
+        err=0
+        cd "$m" && fusermount -uqz "$m/$d" || err=1
+        if [ "$err" -eq "0" ]; then
+            rmdir "$m/$d" && clear && printf "Parent '$d' unmounted with lazy unmount."
+        fi
+    fi
