@@ -1,10 +1,11 @@
 #!/usr/bin/env sh
 
-# Description: Select a nnn plugin with fzf and execute it. Toggle preview pane on/off with `?`.
+# Description: Fuzzy search and execute nnn plugins (and, optionally, custom scripts located elsewhere). 
+# Description and details of plugins can be previewed from the fzf interface. Use `?` to toggle preview pane on and off.
 #
 # For better compatibility with as many nnn plugins as possible, fzfplug will first execute
 # the chosen script on the file hovered in nnn, and upon failure, try to run it with no target
-# (which should actually run it on selected files if nnn has an active selection). I don't 
+# (which should actually run it on selected files if nnn has an active selection). I do not 
 # have the required dependencies to confirm compatibility with all scripts though.
 #
 # Dependencies: find, fzf, cat (for better compatibility, but can easily be replaced by bat at line 26:105 if preferred)
