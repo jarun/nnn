@@ -292,20 +292,22 @@ preview_fifo() {
         preview_file "$selection"
         printf "%s" "$selection" > "$CURSEL"
     done
-    [ "$TERMINAL" != "kitty" ] && exists ueberzug && rm "$FIFO_UEBERZUG"
-    rm "$PAGERPID" "$GIFPID" "$CURSEL" >/dev/null 2>&1
+    kill "$(cat "$GIFPID" 2>/dev/null)" >/dev/null 2>&1
+    kill "$(cat "$PAGERPID" 2>/dev/null)" >/dev/null 2>&1
+    [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
+    rm "$PAGERPID" "$GIFPID" "$CURSEL" "$FIFO_UEBERZUG" >/dev/null 2>&1
     pkill -P "$$" >/dev/null 2>&1
 }
 
 if [ "$PREVIEW_MODE" ]; then
     if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
         mkfifo "$FIFO_UEBERZUG"
-        trap 'ueberzug_refresh; rm $FIFO_UEBERZUG' WINCH
+        trap 'ueberzug_refresh; rm "$FIFO_UEBERZUG"' WINCH
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
-    trap 'rm "$PAGERPID" "$GIFPID" "$CURSEL" 2>/dev/null' INT HUP EXIT
+    trap 'rm "$PAGERPID" "$GIFPID" "$CURSEL" "$FIFO_UEBERZUG" 2>/dev/null' INT HUP EXIT
 
-    preview_file "$1"
+    preview_file "$PWD/$1"
     preview_fifo 2>/dev/null &
     wait
 else
