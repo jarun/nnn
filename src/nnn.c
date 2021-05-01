@@ -249,6 +249,7 @@ typedef unsigned long long ulong_t;
 typedef struct entry {
 	char *name;
 	time_t t;
+	uint_t t_nsec; /* Enough to hold nanosec */
 	off_t size;
 	blkcnt_t blocks; /* number of 512B blocks allocated */
 	mode_t mode;
@@ -2514,6 +2515,11 @@ static int entrycmp(const void *va, const void *vb)
 		if (pb->t > pa->t)
 			return 1;
 		if (pb->t < pa->t)
+			return -1;
+		/* If sec matches, comare nsec */
+		if (pb->t_nsec > pa->t_nsec)
+			return 1;
+		if (pb->t_nsec < pa->t_nsec)
 			return -1;
 	} else if (cfg.sizeorder) {
 		if (pb->size > pa->size)
@@ -5096,9 +5102,29 @@ static int dentfill(char *path, struct entry **ppdents)
 		off += dentp->nlen;
 
 		/* Copy other fields */
-		dentp->t = ((cfg.timetype == T_MOD)
-				? sb.st_mtime
-				: ((cfg.timetype == T_ACCESS) ? sb.st_atime : sb.st_ctime));
+		if (cfg.timetype == T_MOD) {
+			dentp->t = sb.st_mtime;
+#ifdef __APPLE__
+			dentp->t_nsec = (uint_t)sb.st_mtimespec.tv_nsec;
+#else
+			dentp->t_nsec = (uint_t)sb.st_mtim.tv_nsec;
+#endif
+		} else if (cfg.timetype == T_ACCESS) {
+			dentp->t = sb.st_atime;
+#ifdef __APPLE__
+			dentp->t_nsec = (uint_t)sb.st_atimespec.tv_nsec;
+#else
+			dentp->t_nsec = (uint_t)sb.st_atim.tv_nsec;
+#endif
+		} else {
+			dentp->t = sb.st_ctime;
+#ifdef __APPLE__
+			dentp->t_nsec = (uint_t)sb.st_ctimespec.tv_nsec;
+#else
+			dentp->t_nsec = (uint_t)sb.st_ctim.tv_nsec;
+#endif
+		}
+
 #if !(defined(__sun) || defined(__HAIKU__))
 		if (!flags && dp->d_type == DT_LNK) {
 			 /* Do not add sizes for links */
