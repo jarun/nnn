@@ -247,15 +247,15 @@ typedef unsigned long long ulong_t;
 
 /* Directory entry */
 typedef struct entry {
-	char *name;
-	time_t t;
-	uint_t t_nsec; /* Enough to hold nanosec */
-	off_t size;
-	blkcnt_t blocks; /* number of 512B blocks allocated */
-	mode_t mode;
+	char *name; /* 8 bytes */
+	time_t sec; /* 8 bytes */
+	uint_t nsec; /* 4 bytes (enough to store nanosec) */
+	mode_t mode; /* 4 bytes */
+	off_t size; /* 8 bytes */
+	uint_t blocks; /* number of 512B blocks allocated; 4 bytes (enough to store 2048TiB) */
 #ifndef NOUG
-	uid_t uid;
-	gid_t gid;
+	uid_t uid; /* 4 bytes */
+	gid_t gid; /* 4 bytes */
 #endif
 	ushort_t nlen; /* Length of file name */
 	uchar_t flags; /* Flags specific to the file */
@@ -2512,14 +2512,14 @@ static int entrycmp(const void *va, const void *vb)
 
 	/* Sort based on specified order */
 	if (cfg.timeorder) {
-		if (pb->t > pa->t)
+		if (pb->sec > pa->sec)
 			return 1;
-		if (pb->t < pa->t)
+		if (pb->sec < pa->sec)
 			return -1;
 		/* If sec matches, comare nsec */
-		if (pb->t_nsec > pa->t_nsec)
+		if (pb->nsec > pa->nsec)
 			return 1;
-		if (pb->t_nsec < pa->t_nsec)
+		if (pb->nsec < pa->nsec)
 			return -1;
 	} else if (cfg.sizeorder) {
 		if (pb->size > pa->size)
@@ -3734,11 +3734,11 @@ static void print_details(const struct entry *ent)
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
 
-	print_time(&ent->t);
+	print_time(&ent->sec);
 	addstr(perms);
 
 	if (entry_type == S_IFREG || entry_type == S_IFDIR) {
-		char *size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
+		char *size = coolsize(cfg.blkorder ? (blkcnt_t)ent->blocks << blk_shift : ent->size);
 
 		printw("%*c%s", 9 - (uint_t)xstrlen(size), ' ', size);
 	} else
@@ -5103,25 +5103,25 @@ static int dentfill(char *path, struct entry **ppdents)
 
 		/* Copy other fields */
 		if (cfg.timetype == T_MOD) {
-			dentp->t = sb.st_mtime;
+			dentp->sec = sb.st_mtime;
 #ifdef __APPLE__
-			dentp->t_nsec = (uint_t)sb.st_mtimespec.tv_nsec;
+			dentp->nsec = (uint_t)sb.st_mtimespec.tv_nsec;
 #else
-			dentp->t_nsec = (uint_t)sb.st_mtim.tv_nsec;
+			dentp->nsec = (uint_t)sb.st_mtim.tv_nsec;
 #endif
 		} else if (cfg.timetype == T_ACCESS) {
-			dentp->t = sb.st_atime;
+			dentp->sec = sb.st_atime;
 #ifdef __APPLE__
-			dentp->t_nsec = (uint_t)sb.st_atimespec.tv_nsec;
+			dentp->nsec = (uint_t)sb.st_atimespec.tv_nsec;
 #else
-			dentp->t_nsec = (uint_t)sb.st_atim.tv_nsec;
+			dentp->nsec = (uint_t)sb.st_atim.tv_nsec;
 #endif
 		} else {
-			dentp->t = sb.st_ctime;
+			dentp->sec = sb.st_ctime;
 #ifdef __APPLE__
-			dentp->t_nsec = (uint_t)sb.st_ctimespec.tv_nsec;
+			dentp->nsec = (uint_t)sb.st_ctimespec.tv_nsec;
 #else
-			dentp->t_nsec = (uint_t)sb.st_ctim.tv_nsec;
+			dentp->nsec = (uint_t)sb.st_ctim.tv_nsec;
 #endif
 		}
 
@@ -5615,9 +5615,9 @@ static void statusbar(char *path)
 
 		xstrsncpy(buf, coolsize(dir_blocks << blk_shift), 12);
 
-		printw("%cu:%s free:%s files:%lu %lldB %s\n",
+		printw("%cu:%s free:%s files:%lu %lluB %s\n",
 		       (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
-		       num_files, (long long)pent->blocks << blk_shift, ptr);
+		       num_files, (blkcnt_t)pent->blocks << blk_shift, ptr);
 	} else { /* light or detail mode */
 		char sort[] = "\0\0\0\0\0";
 
@@ -5625,7 +5625,7 @@ static void statusbar(char *path)
 			addstr(sort);
 
 		/* Timestamp */
-		print_time(&pent->t);
+		print_time(&pent->sec);
 
 		addch(' ');
 		addstr(get_lsperms(pent->mode));
