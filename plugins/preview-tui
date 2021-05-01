@@ -193,6 +193,12 @@ preview_file () {
         return
     fi
 
+    # Use QuickLook if it's available.
+    if [ -n "$QUICKLOOK" ]; then
+        stat "$1" >/dev/null 2>&1 && f="$(wslpath -w "$1" 2>&1)" && "$QLPATH" "$f" &
+        return
+    fi
+
     # Detecting the exact type of the file: the encoding, mime type, and
     # extension in lowercase.
     encoding="$(file -bL --mime-encoding -- "$1")"
@@ -205,9 +211,7 @@ preview_file () {
     cols=$(tput cols)
 
     # Otherwise, falling back to the defaults.
-    if [ -n "$QUICKLOOK" ] && stat "$1" >/dev/null 2>&1; then
-        f="$(wslpath -w "$1" 2>&1)" && "$QLPATH" "$f" &
-    elif [ -d "$1" ]; then
+    if [ -d "$1" ]; then
         cd "$1" || return
         if exists tree; then
             fifo_pager tree --filelimit "$(find . -maxdepth 1 | wc -l)" -L 3 -C -F --dirsfirst --noreport
