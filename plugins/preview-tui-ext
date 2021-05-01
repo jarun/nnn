@@ -174,7 +174,15 @@ fifo_pager() {
 
     (
         exec > "$tmpfifopath"
-        "$cmd" "$@" &
+        if [ "$cmd" = "pager" ]; then
+            if exists bat; then
+                bat --terminal-width="$(tput cols)" --paging=never --decorations=always --color=always "$@" &
+            else
+                $PAGER "$@" &
+            fi
+        else
+            "$cmd" "$@" &
+        fi
     )
 
     rm "$tmpfifopath"
@@ -274,7 +282,9 @@ preview_file() {
         if exists glow; then
             fifo_pager glow -s dark "$1"
         elif exists lowdown; then
-            lowdown -Tterm "$1"
+            fifo_pager lowdown -Tterm "$1"
+        else
+            fifo_pager pager "$1"
         fi
     elif [ "$ext" = "htm" ] || [ "$ext" = "html" ] || [ "$ext" = "xhtml" ]; then
         if exists w3m; then
@@ -283,16 +293,17 @@ preview_file() {
             fifo_pager lynx "$1"
         elif exists elinks; then
             fifo_pager elinks "$1"
+        else
+            fifo_pager pager "$1"
         fi
     elif [ "$mimetype" = "text/troff" ]; then
-        fifo_pager man -Pcat -l "$1"
-    else
-        if exists bat; then
-            fifo_pager bat --terminal-width="$cols" --paging=never --decorations=always --color=always \
-                "$1" 2>/dev/null
+        if exists man; then
+            fifo_pager man -Pcat -l "$1"
         else
-            $PAGER "$1" &
+            fifo_pager pager "$1"
         fi
+    else
+        fifo_pager pager "$1"
     fi
 }
 
@@ -305,7 +316,7 @@ generate_preview() {
             audio) ffmpeg -i "$3" -filter_complex "scale=iw*min(1\,min($NNN_PREVIEWWIDTH/iw\,ih)):-1" "$NNN_PREVIEWDIR/$3.jpg" -y >/dev/null 2>&1 ;;
             epub) gnome-epub-thumbnailer "$3" "$NNN_PREVIEWDIR/$3.jpg" >/dev/null 2>&1 ;;
             font) fontpreview -i "$3" -o "$NNN_PREVIEWDIR/$3.jpg" >/dev/null 2>&1 ;;
-            gif) if exists ueberzug && exists convert || [ "$TERMINAL" = "kitty" ]; then
+            gif) if exists ueberzug && exists convert && [ "$TERMINAL" != "kitty" ]; then
                     if [ ! -d "$NNN_PREVIEWDIR/$3" ]; then
                         mkdir -p "$NNN_PREVIEWDIR/$3"
                         convert -coalesce -resize "$NNN_PREVIEWWIDTH"x"$NNN_PREVIEWHEIGHT"\> "$3" "$NNN_PREVIEWDIR/$3/${3##*/}.jpg"
@@ -315,7 +326,6 @@ generate_preview() {
                                 image_preview "$1" "$2" "$frame"
                                 sleep 0.1
                             done
-                            [ "$LOOP_GIFS" -eq 0 ] && return
                         done &
                         printf "%s" "$!" > "$GIFPID"
                         return

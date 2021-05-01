@@ -146,14 +146,23 @@ fifo_pager() {
     shift
 
     # We use a FIFO to access $PAGER PID in jobs control
-    tmpfifopath="${TMPDIR:-/tmp}/nnn-preview-tui-fifo.$$"
+    tmpfifopath="$TMPDIR/nnn-preview-tui-fifo.$$"
     mkfifo "$tmpfifopath" || return
 
     $PAGER < "$tmpfifopath" &
+    printf "%s" "$!" > "$PAGERPID"
 
     (
         exec > "$tmpfifopath"
-        "$cmd" "$@" &
+        if [ "$cmd" = "pager" ]; then
+            if exists bat; then
+                bat --terminal-width="$(tput cols)" --paging=never --decorations=always --color=always "$@" &
+            else
+                $PAGER "$@" &
+            fi
+        else
+            "$cmd" "$@" &
+        fi
     )
 
     rm "$tmpfifopath"
@@ -218,14 +227,13 @@ preview_file () {
             fifo_pager print_bin_info "$1"
         fi
     elif [ "$mimetype" = "text/troff" ]; then
-        fifo_pager man -Pcat -l "$1"
-    else
-        if exists bat; then
-            fifo_pager bat --terminal-width="$cols" --paging=never --decorations=always --color=always \
-                "$1" 2>/dev/null
+        if exists man; then
+            fifo_pager man -Pcat -l "$1"
         else
-            $PAGER "$1" &
+            fifo_pager pager "$1"
         fi
+    else
+        fifo_pager pager "$1"
     fi
 }
 
