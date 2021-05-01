@@ -176,7 +176,7 @@ fifo_pager() {
         exec > "$tmpfifopath"
         if [ "$cmd" = "pager" ]; then
             if exists bat; then
-                bat --terminal-width="$(tput cols)" --paging=never --decorations=always --color=always "$@" &
+                bat --terminal-width="$(tput cols)" --paging=never --decorations=always --color=always "$@" 2>/dev/null &
             else
                 $PAGER "$@" &
             fi
@@ -384,9 +384,9 @@ ueberzug_refresh() {
     pkill -P "$$" >/dev/null 2>&1
     pkill -f -n preview-tui-ext >/dev/null 2>&1
     tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
-    preview_file "$(cat "$CURSEL")"
     printf "\n" > "$NNN_FIFO"
     preview_fifo 2>/dev/null &
+    preview_file "$(cat "$CURSEL")"
     wait
 }
 
@@ -401,20 +401,23 @@ preview_fifo() {
         preview_file "$selection"
         printf "%s" "$selection" > "$CURSEL"
     done
-    [ "$TERMINAL" != "kitty" ] && exists ueberzug && rm "$FIFO_UEBERZUG"
-    rm "$PAGERPID" "$GIFPID" "$CURSEL" >/dev/null 2>&1
+    kill "$(cat "$GIFPID" 2>/dev/null)" >/dev/null 2>&1
+    kill "$(cat "$PAGERPID" 2>/dev/null)" >/dev/null 2>&1
+    [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
+    rm "$PAGERPID" "$GIFPID" "$CURSEL" "$FIFO_UEBERZUG" >/dev/null 2>&1
     pkill -P "$$" >/dev/null 2>&1
 }
 
 if [ "$PREVIEW_MODE" ]; then
     if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
         mkfifo "$FIFO_UEBERZUG"
-        trap 'ueberzug_refresh; rm $FIFO_UEBERZUG' WINCH
+        trap 'ueberzug_refresh; rm "$FIFO_UEBERZUG"' WINCH
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
-    trap 'rm "$PAGERPID" "$GIFPID" "$CURSEL" 2>/dev/null' INT HUP EXIT
+    trap 'rm "$PAGERPID" "$GIFPID" "$CURSEL" "$FIFO_UEBERZUG" 2>/dev/null' INT HUP EXIT
 
-    preview_file "$1"
+    preview_file "$PWD/$1"
+    printf "%s" "$PWD/$1" > "$CURSEL" &
     preview_fifo 2>/dev/null &
     wait
 else
