@@ -6287,10 +6287,14 @@ nochange:
 #endif
 			) {
 				spawn(editor, newpath, NULL, F_CLI);
+				if (cfg.filtermode) {
+					presel = FILTER;
+					clearfilter();
+				}
 				continue;
 			}
 
-			/* Get the extension for regext match */
+			/* Get the extension for regex match */
 			tmp = xextension(pent->name, pent->nlen - 1);
 #ifdef PCRE
 			if (tmp && !pcre_exec(archive_pcre, NULL, tmp,
@@ -6338,6 +6342,10 @@ nochange:
 			/* Move cursor to the next entry if not the last entry */
 			if (g_state.autonext && cur != ndents - 1)
 				move_cursor((cur + 1) % ndents, 0);
+			if (cfg.filtermode) {
+				presel = FILTER;
+				clearfilter();
+			}
 			continue;
 		case SEL_NEXT: // fallthrough
 		case SEL_PREV: // fallthrough
