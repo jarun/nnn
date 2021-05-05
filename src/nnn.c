@@ -192,7 +192,7 @@
 #define SED "sed"
 #endif
 
-#define MIN_DISPLAY_COLS ((CTX_MAX * 2) + 2) /* Two chars for [ and ] */
+#define MIN_DISPLAY_COLS (CTX_MAX * 2)
 #define ARCHIVE_CMD_LEN 16
 #define BLK_SHIFT_512 9
 
@@ -596,7 +596,7 @@ static const char * const messages[] = {
 	"unknown",
 	"not set",
 	"entry exists",
-	"too few columns!",
+	"too few cols!",
 	"'s'shfs / 'r'clone?",
 	"refresh if slow",
 	"app name: ",
@@ -5769,8 +5769,7 @@ static void redraw(char *path)
 	//DPRINTF_D(cur);
 	DPRINTF_S(path);
 
-	addch('[');
-	for (i = 0; i < CTX_MAX; ++i) {
+	for (i = 0; i < CTX_MAX; ++i) { /* 8 chars printed for contexts - "1 2 3 4 " */
 		if (!g_ctx[i].c_cfg.ctxactive)
 			addch(i + '1');
 		else
@@ -5778,10 +5777,8 @@ static void redraw(char *path)
 				/* active: underline, current: reverse */
 				| ((cfg.curctx != i) ? A_UNDERLINE : A_REVERSE)));
 
-		if (i != CTX_MAX - 1)
-			addch(' ');
+		addch(' ');
 	}
-	addstr("] "); /* 10 chars printed for contexts - "[1 2 3 4] " */
 
 	attron(A_UNDERLINE | COLOR_PAIR(cfg.curctx + 1));
 
