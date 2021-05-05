@@ -553,17 +553,16 @@ static char * const utils[] = {
 #define MSG_RCLONE_DELAY 31
 #define MSG_APP_NAME 32
 #define MSG_ARCHIVE_OPTS 33
-#define MSG_PLUGIN_KEYS 34
-#define MSG_BOOKMARK_KEYS 35
-#define MSG_INVALID_REG 36
-#define MSG_ORDER 37
-#define MSG_LAZY 38
-#define MSG_FIRST 39
-#define MSG_RM_TMP 40
-#define MSG_INVALID_KEY 41
-#define MSG_NOCHANGE 42
+#define MSG_KEYS 34
+#define MSG_INVALID_REG 35
+#define MSG_ORDER 36
+#define MSG_LAZY 37
+#define MSG_FIRST 38
+#define MSG_RM_TMP 39
+#define MSG_INVALID_KEY 40
+#define MSG_NOCHANGE 41
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 43 /* Must be the last entry */
+#define MSG_DIR_CHANGED 42 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -583,7 +582,7 @@ static const char * const messages[] = {
 	"overwrite?",
 	"'s'ave / 'l'oad / 'r'estore?",
 	"Quit all contexts?",
-	"remote name ('-' for hovered): ",
+	"remote name (- for hovered): ",
 	"archive [path/]name: ",
 	"open with: ",
 	"[path/]name: ",
@@ -592,19 +591,18 @@ static const char * const messages[] = {
 	"\n'Enter' to continue",
 	"open failed",
 	"dir inaccessible",
-	"empty: edit/open with",
-	"unknown",
+	"empty! edit/open with",
+	"?",
 	"not set",
 	"entry exists",
 	"too few cols!",
 	"'s'shfs / 'r'clone?",
 	"refresh if slow",
 	"app name: ",
-	"'d'efault / e'x'tract / 'l'ist / 'm'ount?",
-	"plugin keys:",
-	"bookmark keys:",
+	"'o'pen / e'x'tract / 'l's / 'm'nt?",
+	"keys:",
 	"invalid regex",
-	"'a'u / 'd'u / 'e'xtn / 'r'ev / 's'ize / 't'ime / 'v'er / 'c'lr / '^T' (cycle)?",
+	"'a'u / 'd'u / 'e'xt / 'r'ev / 's'z / 't'm / 'v'er / 'c'lr / '^T'?",
 	"unmount failed! try lazy?",
 	"first file (\')/char?",
 	"remove tmp file?",
@@ -4477,7 +4475,7 @@ static void printkeys(kv *kvarr, char *buf, uchar_t max)
 static size_t handle_bookmark(const char *bmark, char *newpath)
 {
 	int fd;
-	size_t r = xstrsncpy(g_buf, messages[MSG_BOOKMARK_KEYS], CMD_LEN_MAX);
+	size_t r = xstrsncpy(g_buf, messages[MSG_KEYS], CMD_LEN_MAX);
 
 	if (bmark) { /* There is a marked directory */
 		g_buf[--r] = ' ';
@@ -6977,7 +6975,7 @@ nochange:
 			}
 
 			if (!pkey) {
-				r = xstrsncpy(g_buf, messages[MSG_PLUGIN_KEYS], CMD_LEN_MAX);
+				r = xstrsncpy(g_buf, messages[MSG_KEYS], CMD_LEN_MAX);
 				printkeys(plug, g_buf + r - 1, maxplug);
 				printmsg(g_buf);
 				r = get_input(NULL);
