@@ -5758,7 +5758,7 @@ static void redraw(char *path)
 	move_cursor(cur, 1);
 
 	/* Fail redraw if < than 10 columns, context info prints 10 chars */
-	if (ncols < MIN_DISPLAY_COLS) {
+	if (ncols <= MIN_DISPLAY_COLS) {
 		printmsg(messages[MSG_FEW_COLUMNS]);
 		return;
 	}
