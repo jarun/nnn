@@ -3634,7 +3634,7 @@ static char get_detail_ind(const mode_t mode)
 	return '?';
 }
 
-static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, bool detailed)
+static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int *pattr, bool detailed)
 {
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
@@ -3648,9 +3648,19 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, bool
 		return C_FIL;
 	case S_IFDIR:
 		*pind = '/';
-		return (!g_state.oldcolor && g_state.dirctx) ? cfg.curctx + 1 : C_DIR;
+		if (g_state.oldcolor)
+			return C_DIR;
+		*pattr |= A_BOLD;
+		return g_state.dirctx ? cfg.curctx + 1 : C_DIR;
 	case S_IFLNK:
-		*pind = (ent->flags & DIR_OR_LINK_TO_DIR) ? '/' : '@';
+		if (ent->flags & DIR_OR_LINK_TO_DIR) {
+			*pind = '/';
+			*pattr |= g_state.oldcolor ? A_DIM : A_BOLD;
+		} else {
+			*pind = '@';
+			if (g_state.oldcolor)
+				*pattr |= A_DIM;
+		}
 		if (!g_state.oldcolor || detailed)
 			return (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
 		return 0;
@@ -3675,23 +3685,13 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, bool
 static void printent(const struct entry *ent, uint_t namecols, bool sel)
 {
 	char ind;
-	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, (printptr == &printent_long));
-	int attrs = 0, entry_type = ent->mode & S_IFMT;
+	int attrs = 0;
+	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs, (printptr == &printent_long));
 
 	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
-
-	if (entry_type == S_IFDIR) {
-		if (!g_state.oldcolor)
-			attrs |= A_BOLD;
-	} else if (entry_type == S_IFLNK) {
-		if (!g_state.oldcolor && (ent->flags & DIR_OR_LINK_TO_DIR))
-			attrs |= A_BOLD;
-		else if (g_state.oldcolor)
-			attrs |= A_DIM;
-	}
 
 	if (!g_state.oldcolor) {
 		if (ent->flags & FILE_MISSING)
@@ -3738,9 +3738,9 @@ static void print_details(const struct entry *ent)
 	if (entry_type == S_IFREG || entry_type == S_IFDIR) {
 		char *size = coolsize(cfg.blkorder ? (blkcnt_t)ent->blocks << blk_shift : ent->size);
 
-		printw("%*c%s", 9 - (uint_t)xstrlen(size), ' ', size);
+		printw("%*c%s ", 9 - (uint_t)xstrlen(size), ' ', size);
 	} else
-		printw("%*c%c", 8, ' ', get_detail_ind(ent->mode));
+		printw("%*c%c ", 8, ' ', get_detail_ind(ent->mode));
 }
 
 static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
@@ -3755,7 +3755,6 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 	attron(attrs1);
 	print_details(ent);
 	attroff(attrs1);
-	addch(' ');
 
 	printent(ent, namecols, sel);
 }
