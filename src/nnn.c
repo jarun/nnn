@@ -5751,18 +5751,17 @@ static void redraw(char *path)
 
 	DPRINTF_S(__func__);
 
+	/* Clear screen */
+	erase();
+
+	/* Enforce scroll/cursor invariants */
+	move_cursor(cur, 1);
+
 	/* Fail redraw if < than 10 columns, context info prints 10 chars */
-	/* Note: this should be before the Fast redraw, but we optimize */
-	if (ncols <= MIN_DISPLAY_COLS) {
-		erase();
+	if (ncols < MIN_DISPLAY_COLS) {
 		printmsg(messages[MSG_FEW_COLUMNS]);
 		return;
 	}
-
-	move(0, 0);
-
-	/* Enforce scroll/cursor invariants */
-	//move_cursor(cur, 1);
 
 	//DPRINTF_D(cur);
 	DPRINTF_S(path);
@@ -5824,13 +5823,11 @@ static void redraw(char *path)
 
 	ncols = adjust_cols(ncols);
 
-	clrtoeol(); /* Clear to end of first line */
-
-	move(1, 0);
 	/* Go to first entry */
-	if (curscroll > 0)
+	if (curscroll > 0) {
+		move(1, 0);
 		addch('^');
-	clrtoeol(); /* Clear to end of second line */
+	}
 
 	move(2, 0);
 
@@ -5848,8 +5845,6 @@ static void redraw(char *path)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		g_state.dircolor = 0;
 	}
-
-	clrtobot(); /* clear to end of screen */
 
 	/* Go to first entry */
 	if (i < ndents) {
