@@ -1014,6 +1014,41 @@ static char *xextension(const char *fname, size_t len)
 	return xmemrchr((uchar_t *)fname, '.', len);
 }
 
+#ifndef NOUG
+/* One-shot cache for getpwuid/getgrgid. Returns the cached name if the
+ * provided uid is the same as the previous uid. Returns xitoa(guid) if
+ * the guid is not found in the password database. */
+static char *getpwname(uid_t uid)
+{
+	static uint_t uidcache = UINT_MAX;
+	static char *namecache = NULL;
+	static struct passwd *pw;
+
+	if (uidcache != uid) {
+		pw = getpwuid(uid);
+		uidcache = uid;
+		namecache = pw ? pw->pw_name : NULL;
+  }
+
+	return namecache ? namecache : xitoa(uid);
+}
+
+static char *getgrname(gid_t gid)
+{
+	static uint_t gidcache = UINT_MAX;
+	static char *groupcache = NULL;
+	static struct group *gr;
+
+	if (gidcache != gid) {
+		gr = getgrgid(gid);
+		gidcache = gid;
+		groupcache = gr ? gr->gr_name : NULL;
+  }
+
+	return groupcache ? groupcache : xitoa(gid);
+}
+#endif
+
 static inline bool getutil(char *util)
 {
 	return spawn("which", util, NULL, F_NORMAL | F_NOTRACE) == 0;
@@ -5629,12 +5664,9 @@ static void statusbar(char *path)
 		addch(' ');
 #ifndef NOUG
 		if (g_state.uidgid) {
-			struct passwd *pw = getpwuid(pent->uid);
-			struct group  *gr = getgrgid(pent->gid);
-
-			addstr(pw ? pw->pw_name : xitoa(pent->uid));
+			addstr(getpwname(pent->uid));
 			addch(':');
-			addstr(gr ? gr->gr_name : xitoa(pent->gid));
+			addstr(getgrname(pent->gid));
 			addch(' ');
 		}
 #endif
