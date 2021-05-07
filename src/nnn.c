@@ -3634,7 +3634,7 @@ static char get_detail_ind(const mode_t mode)
 	return '?';
 }
 
-static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int *pattr, bool detailed)
+static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int *pattr)
 {
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
@@ -3661,7 +3661,7 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int 
 			if (g_state.oldcolor)
 				*pattr |= A_DIM;
 		}
-		if (!g_state.oldcolor || detailed)
+		if (!g_state.oldcolor || cfg.showdetail)
 			return (ent->flags & SYM_ORPHAN) ? C_ORP : C_LNK;
 		return 0;
 	case S_IFSOCK:
@@ -3686,7 +3686,7 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 {
 	char ind;
 	int attrs = 0;
-	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs, (printptr == &printent_long));
+	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
 
 	addch((ent->flags & FILE_SELECTED) ? '+' : ' ');
 
