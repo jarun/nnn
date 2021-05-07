@@ -276,23 +276,29 @@ A selection can be edited, copied, moved, removed, archived or linked.
 .Pp
 Absolute paths of the selected files are copied to \fB.selection\fR file in
 the config directory. The selection file is shared between multiple program
-instances. The most recent instance writing to the file overwrites the entries
-from earlier writes. If you have 2 instances if
+instances. Selection from multiple insances are not merged. The last instance
+writing to the file overwrites earlier contents. If you have 2 instances of
 .Nm
 \fIopen\fR in 2 panes of a terminal multiplexer, you can select in one pane and
-use the selection (e.g. to copy or move) in the other pane (if the instance
-doesn't have any local selection already).
+use the selection in the other pane.
 .Pp
 .Nm
-clears the selection after file removal, batch-rename and link creation with
-selection. However, it is retained after archive creation with selection as
-the user may want to delete the archived files next.
+clears the selection after an operation with the selection. Plugins are allowed
+to define the behaviour individually.
+.Pp
+.Nm
+doesn't match directory entries for selected files after a redraw or after the
+user navigates away from the directory. An attempt to do so will increase
+memory consumption and processing significantly as
+.Nm
+allows selection across directories. So the selection marks are cleared. The
+selection can still be edited in the same instance.
 .Pp
 To edit the selection use the _edit selection_ key. Use this key to remove a
-file from selection after you navigate away from its directory. Editing doesn't
-end the selection mode. You can add more files to the selection and edit the
-list again. If no file is selected in the current session, this option attempts
-to list the selection file.
+file from selection after you navigate away from its directory or to remove
+duplicates. Editing doesn't end the selection mode. You can add more files to
+the selection and edit the list again. If no file is selected in the current
+session, this option attempts to list the selection file.
 .Sh FIND AND LIST
 There are two ways to search and list:
 .Pp
