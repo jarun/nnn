@@ -2721,7 +2721,7 @@ static void showfilterinfo(void)
 	i = getorderstr(info);
 
 	snprintf(info + i, REGEX_MAX - i - 1, "  %s [/], %s [:]",
-		 (cfg.regex ? "regex" : "str"),
+		 (cfg.regex ? "reg" : "str"),
 		 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
 
 	clearinfoln();
@@ -7425,16 +7425,16 @@ static void usage(void)
 		" -A      no dir auto-select\n"
 		" -b key  open bookmark key (trumps -s/S)\n"
 		" -c      cli-only NNN_OPENER (trumps -e)\n"
-		" -C      earlier colorscheme\n"
+		" -C      8-color scheme\n"
 		" -d      detail mode\n"
 		" -D      dirs in context color\n"
 		" -e      text in $VISUAL/$EDITOR/vi\n"
-		" -E      use EDITOR for undetached edits\n"
+		" -E      internal edits in EDITOR\n"
 #ifndef NORL
 		" -f      use readline history file\n"
 #endif
 		" -F      show fortune\n"
-		" -g      regex filters [default: string]\n"
+		" -g      regex filters\n"
 		" -H      show hidden files\n"
 		" -J      no auto-proceed on select\n"
 		" -K      detect key collision\n"
@@ -7459,7 +7459,7 @@ static void usage(void)
 		" -V      show version\n"
 		" -w      place HW cursor on hovered\n"
 #ifndef NOX11
-		" -x      notis, sel to clipboard, xterm title\n"
+		" -x      notis, selection sync, xterm title\n"
 #endif
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
