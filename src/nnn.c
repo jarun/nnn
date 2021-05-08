@@ -3404,6 +3404,7 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
 
 static void resetdircolor(int flags)
 {
+	/* Directories are always shown on top, clear the color when moving to first file */
 	if (g_state.dircolor && !(flags & DIR_OR_LINK_TO_DIR)) {
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		g_state.dircolor = 0;
@@ -3725,10 +3726,9 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 
 	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE : ' ');
 
-	/* Directories are always shown on top */
-	resetdircolor(ent->flags);
-
-	if (!g_state.oldcolor) {
+	if (g_state.oldcolor)
+		resetdircolor(ent->flags);
+	else {
 		if (ent->flags & FILE_MISSING)
 			color_pair = C_MIS;
 		if (color_pair && fcolors[color_pair])
@@ -3758,15 +3758,21 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 	addch('\n');
 }
 
-static void print_details(const struct entry *ent)
+/* For the usage of comma operator in C, visit https://en.wikipedia.org/wiki/Comma_operator */
+static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 {
+	int attrs = g_state.oldcolor ? (resetdircolor(ent->flags), A_DIM)
+				     : (fcolors[C_MIS] ? COLOR_PAIR(C_MIS) : 0);
 	int entry_type = ent->mode & S_IFMT;
 	char perms[6] = {' ', ' ', (char)('0' + ((ent->mode >> 6) & 7)),
 			(char)('0' + ((ent->mode >> 3) & 7)), (char)('0' + (ent->mode & 7)), '\0'};
 
-	/* Directories are always shown on top */
-	resetdircolor(ent->flags);
+	addch(sel ? ' ' | A_REVERSE : ' '); /* Reversed block for hovered entry */
 
+	if (attrs)
+		attron(attrs);
+
+	/* Print details */
 	print_time(&ent->sec);
 	addstr(perms);
 
@@ -3776,17 +3782,9 @@ static void print_details(const struct entry *ent)
 		printw("%*c%s ", 9 - (uint_t)xstrlen(size), ' ', size);
 	} else
 		printw("%*c%c ", 8, ' ', get_detail_ind(ent->mode));
-}
 
-static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
-{
-	int attrs1 = g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS);
-
-	addch(sel ? ' ' | A_REVERSE : ' '); /* Reversed block for hovered entry */
-
-	attron(attrs1);
-	print_details(ent);
-	attroff(attrs1);
+	if (attrs)
+		attroff(attrs);
 
 	printent(ent, namecols, sel);
 }
