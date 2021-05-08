@@ -3723,7 +3723,7 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 	int attrs = 0;
 	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
 
-	addch((ent->flags & FILE_SELECTED) ? '+' | A_BOLD : ' ');
+	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE : ' ');
 
 	/* Directories are always shown on top */
 	resetdircolor(ent->flags);
