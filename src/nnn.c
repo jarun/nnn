@@ -3782,12 +3782,8 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 {
 	int attrs1 = g_state.oldcolor ? A_DIM : COLOR_PAIR(C_MIS);
 
-#ifdef CKBOARD
-	//addch(sel ? ACS_CKBOARD : ' ');
-	addch(sel ? ' ' | A_REVERSE : ' ');
-#else
-	addch(sel ? '>' | A_BOLD : ' ');
-#endif
+	addch(sel ? ' ' | A_REVERSE : ' '); /* Reversed block for hovered entry */
+
 	attron(attrs1);
 	print_details(ent);
 	attroff(attrs1);
