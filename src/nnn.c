@@ -3753,6 +3753,7 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 	int entry_type = ent->mode & S_IFMT;
 	char perms[6] = {' ', ' ', (char)('0' + ((ent->mode >> 6) & 7)),
 			(char)('0' + ((ent->mode >> 3) & 7)), (char)('0' + (ent->mode & 7)), '\0'};
+	char ind[2] = {'\0'};
 
 	addch(sel ? ' ' | A_REVERSE : ' '); /* Reversed block for hovered entry */
 
@@ -3761,14 +3762,10 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 
 	/* Print details */
 	print_time(&ent->sec);
-	addstr(perms);
 
-	if (entry_type == S_IFREG || entry_type == S_IFDIR) {
-		char *size = coolsize(cfg.blkorder ? (blkcnt_t)ent->blocks << blk_shift : ent->size);
-
-		printw("%*c%s ", 9 - (uint_t)xstrlen(size), ' ', size);
-	} else
-		printw("%*c%c ", 8, ' ', get_detail_ind(ent->mode));
+	printw("%s%9s ", perms, (entry_type == S_IFREG || entry_type == S_IFDIR)
+		? coolsize(cfg.blkorder ? (blkcnt_t)ent->blocks << blk_shift : ent->size)
+		: (ind[0] = get_detail_ind(ent->mode), ind));
 
 	if (attrs)
 		attroff(attrs);
