@@ -5705,6 +5705,9 @@ static void statusbar(char *path)
 static int adjust_cols(int n)
 {
 	/* Calculate the number of cols available to print entry name */
+#ifdef ICONS_ENABLED
+	n -= (g_state.oldcolor ? 0 : 1 + xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT));
+#endif
 	if (cfg.showdetail) {
 		/* Fallback to light mode if less than 35 columns */
 		if (n < 36) {
@@ -5717,12 +5720,7 @@ static int adjust_cols(int n)
 	}
 
 	/* 3 = Preceding space, indicator, newline */
-#ifdef ICONS_ENABLED
-	return (n - (g_state.oldcolor ? 3
-			: 3 + xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT) + 1));
-#else
 	return (n - 3);
-#endif
 }
 
 static void draw_line(char *path, int ncols)
