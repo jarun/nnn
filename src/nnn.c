@@ -3424,8 +3424,10 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
 	size_t lencount = 0;
 
 	/* Convert multi-byte to wide char */
-	size_t len = mbstowcs(wbuf, str, NAME_MAX);
+	size_t len = mbstowcs(wbuf, str, maxcols);
 
+	if (len >= maxcols)
+		wbuf[maxcols] = '\0';
 	len = wcswidth(wbuf, len);
 
 	/* Reduce number of wide chars to max columns */
@@ -3761,7 +3763,6 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 		attroff(attrs);
 	if (ind)
 		addch(ind);
-	addch('\n');
 }
 
 /* For the usage of comma operator in C, visit https://en.wikipedia.org/wiki/Comma_operator */
@@ -5725,8 +5726,8 @@ static int adjust_cols(int n)
 		}
 	}
 
-	/* 3 = Preceding space, indicator, newline */
-	return (n - 3);
+	/* 2 columns for preceding space and indicator */
+	return (n - 2);
 }
 
 static void draw_line(char *path, int ncols)
@@ -5770,7 +5771,7 @@ static void redraw(char *path)
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int onscreen = xlines - 4;
-	int i;
+	int i, j = 1;
 
 	// Fast redraw
 	if (g_state.move) {
@@ -5860,16 +5861,16 @@ static void redraw(char *path)
 		addch('^');
 	}
 
-	move(2, 0);
-
 	if (g_state.oldcolor) {
 		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		g_state.dircolor = 1;
 	}
 
 	/* Print listing */
-	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i)
+	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i) {
+		move(++j, 0);
 		printptr(&pdents[i], ncols, i == cur);
+	}
 
 	/* Must reset e.g. no files in dir */
 	if (g_state.dircolor) {
