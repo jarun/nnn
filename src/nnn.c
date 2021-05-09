@@ -3670,17 +3670,25 @@ static char get_detail_ind(const mode_t mode)
 	return '?';
 }
 
+/* Note: attribute and indicator values must be initialized to 0 */
 static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int *pattr)
 {
 	switch (ent->mode & S_IFMT) {
 	case S_IFREG:
-		*pind = (ent->mode & 0100) ? '*' : '\0';
-		if (!ent->size)
+		if (!ent->size) {
+			if (ent->mode & 0100)
+				*pind = '*';
 			return C_UND;
-		if (ent->flags & HARD_LINK)
+		}
+		if (ent->flags & HARD_LINK) {
+			if (ent->mode & 0100)
+				*pind = '*';
 			return C_HRD;
-		if (ent->mode & 0100)
+		}
+		if (ent->mode & 0100) {
+			*pind = '*';
 			return C_EXE;
+		}
 		return C_FIL;
 	case S_IFDIR:
 		*pind = '/';
@@ -3707,10 +3715,8 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int 
 		*pind = '|';
 		return C_PIP;
 	case S_IFBLK:
-		*pind = '\0';
 		return C_BLK;
 	case S_IFCHR:
-		*pind = '\0';
 		return C_CHR;
 	}
 
@@ -3720,7 +3726,7 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int 
 
 static void printent(const struct entry *ent, uint_t namecols, bool sel)
 {
-	char ind;
+	char ind = '\0';
 	int attrs = 0;
 	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
 
