@@ -10,19 +10,12 @@
 </p>
 
 <p align="center"><a href="http://i.imgur.com/kOld6HT.gif"><img src="https://i.imgur.com/NUsSA2u.jpg"></a></p>
-<p align="center"><i>nnn in action</i></p>
 
 <h3 align="center">[<a
 href="https://github.com/jarun/nnn#features">Features</a>] [<a
 href="https://github.com/jarun/nnn#quickstart">Quickstart</a>] [<a
 href="https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins">Plugins</a>] [<a
 href="https://github.com/jarun/nnn/wiki">Documentation</a>]</h3>
-
-<br>
-
-[![](https://i.imgur.com/TN3xYQz.jpg)](https://www.youtube.com/embed/-knZwdd1ScU)
-
-<br>
 
 `nnn` (_n³_) is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible speed](https://github.com/jarun/nnn/wiki/Performance).
 
@@ -152,6 +145,8 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 9. Visit the [Live previews](https://github.com/jarun/nnn/wiki/Live-previews) and [Troubleshooting](https://github.com/jarun/nnn/wiki/Troubleshooting) Wiki pages.
 
 Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates and/or cycles contexts. <kbd>?</kbd> lists shortcuts.
+
+[![](https://i.imgur.com/TN3xYQz.jpg)](https://www.youtube.com/embed/-knZwdd1ScU)
 
 [![Wiki](https://img.shields.io/badge/RTFM-nnn%20Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
 
