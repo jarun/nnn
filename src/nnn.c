@@ -3416,60 +3416,40 @@ static void resetdircolor(int flags)
  * Adjust string length to maxcols if > 0;
  * Max supported str length: NAME_MAX;
  */
-#ifndef NOLOCALE
+#ifdef NOLOCALE
+static char *unescape(const char *str, uint_t maxcols)
+{
+	char * const wbuf = g_buf;
+	char *buf = wbuf;
+
+	xstrsncpy(wbuf, str, maxcols);
+#else
 static wchar_t *unescape(const char *str, uint_t maxcols)
 {
 	wchar_t * const wbuf = (wchar_t *)g_buf;
 	wchar_t *buf = wbuf;
-	size_t lencount = 0;
+	size_t len = mbstowcs(wbuf, str, maxcols); /* Convert multi-byte to wide char */
 
-	/* Convert multi-byte to wide char */
-	size_t len = mbstowcs(wbuf, str, maxcols);
-
-	if (len >= maxcols)
-		wbuf[maxcols] = '\0';
 	len = wcswidth(wbuf, len);
 
-	/* Reduce number of wide chars to max columns */
-	if (len > maxcols) {
-		while (*buf && lencount <= maxcols) {
-			if (*buf <= '\x1f' || *buf == '\x7f')
-				*buf = '\?';
-
-			++buf;
-			++lencount;
-		}
-
-		lencount = maxcols + 1;
-
-		/* Reduce wide chars one by one till it fits */
-		do
+	if (len >= maxcols) {
+		size_t lencount = maxcols;
+		while (len > maxcols) /* Reduce wide chars one by one till it fits */
 			len = wcswidth(wbuf, --lencount);
-		while (len > maxcols);
 
 		wbuf[lencount] = L'\0';
-	} else {
-		do { /* We do not expect a NULL string */
-			if (*buf <= '\x1f' || *buf == '\x7f')
-				*buf = '\?';
-		} while (*++buf);
+	}
+#endif
+
+	while (*buf) {
+		if (*buf <= '\x1f' || *buf == '\x7f')
+			*buf = '\?';
+
+		++buf;
 	}
 
 	return wbuf;
 }
-#else
-static char *unescape(const char *str, uint_t maxcols)
-{
-	ssize_t len = (ssize_t)xstrsncpy(g_buf, str, maxcols);
-
-	--len;
-	while (--len >= 0)
-		if (g_buf[len] <= '\x1f' || g_buf[len] == '\x7f')
-			g_buf[len] = '\?';
-
-	return g_buf;
-}
-#endif
 
 static off_t get_size(off_t size, off_t *pval, uint_t comp)
 {
