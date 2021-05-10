@@ -3706,32 +3706,35 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int 
 
 static void printent(const struct entry *ent, uint_t namecols, bool sel)
 {
+	char ind = '\0';
+	int attrs;
+
 	if (cfg.showdetail) {
-		int attrs = g_state.oldcolor ? (resetdircolor(ent->flags), A_DIM)
-							: (fcolors[C_MIS] ? COLOR_PAIR(C_MIS) : 0);
-		int entry_type = ent->mode & S_IFMT;
+		int type = ent->mode & S_IFMT;
 		char perms[6] = {' ', ' ', (char)('0' + ((ent->mode >> 6) & 7)),
-				(char)('0' + ((ent->mode >> 3) & 7)), (char)('0' + (ent->mode & 7)), '\0'};
-		char ind[2] = {'\0'};
+				(char)('0' + ((ent->mode >> 3) & 7)),
+				(char)('0' + (ent->mode & 7)), '\0'};
 
 		addch(sel ? ' ' | A_REVERSE : ' '); /* Reversed block for hovered entry */
 
+		attrs = g_state.oldcolor ? (resetdircolor(ent->flags), A_DIM)
+					 : (fcolors[C_MIS] ? COLOR_PAIR(C_MIS) : 0);
 		if (attrs)
 			attron(attrs);
 
 		/* Print details */
 		print_time(&ent->sec);
 
-		printw("%s%9s ", perms, (entry_type == S_IFREG || entry_type == S_IFDIR)
+		printw("%s%9s ", perms, (type == S_IFREG || type == S_IFDIR)
 			? coolsize(cfg.blkorder ? (blkcnt_t)ent->blocks << blk_shift : ent->size)
-			: (ind[0] = get_detail_ind(ent->mode), ind));
+			: (type = (uchar_t)get_detail_ind(ent->mode), (char *)&type));
 
 		if (attrs)
 			attroff(attrs);
 	}
 
-	char ind = '\0';
-	int attrs = 0;
+	attrs = 0;
+
 	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
 
 	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE : ' ');
