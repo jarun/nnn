@@ -778,8 +778,6 @@ static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, st
 static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
-static void (*printptr)(const struct entry *ent, uint_t namecols, bool sel);
-static void printent_long(const struct entry *ent, uint_t namecols, bool sel);
 #ifndef NOFIFO
 static void notify_fifo(bool force);
 #endif
@@ -3708,6 +3706,30 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int 
 
 static void printent(const struct entry *ent, uint_t namecols, bool sel)
 {
+	if (cfg.showdetail) {
+		int attrs = g_state.oldcolor ? (resetdircolor(ent->flags), A_DIM)
+							: (fcolors[C_MIS] ? COLOR_PAIR(C_MIS) : 0);
+		int entry_type = ent->mode & S_IFMT;
+		char perms[6] = {' ', ' ', (char)('0' + ((ent->mode >> 6) & 7)),
+				(char)('0' + ((ent->mode >> 3) & 7)), (char)('0' + (ent->mode & 7)), '\0'};
+		char ind[2] = {'\0'};
+
+		addch(sel ? ' ' | A_REVERSE : ' '); /* Reversed block for hovered entry */
+
+		if (attrs)
+			attron(attrs);
+
+		/* Print details */
+		print_time(&ent->sec);
+
+		printw("%s%9s ", perms, (entry_type == S_IFREG || entry_type == S_IFDIR)
+			? coolsize(cfg.blkorder ? (blkcnt_t)ent->blocks << blk_shift : ent->size)
+			: (ind[0] = get_detail_ind(ent->mode), ind));
+
+		if (attrs)
+			attroff(attrs);
+	}
+
 	char ind = '\0';
 	int attrs = 0;
 	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
@@ -3745,36 +3767,6 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 		addch(ind);
 }
 
-/* For the usage of comma operator in C, visit https://en.wikipedia.org/wiki/Comma_operator */
-static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
-{
-	int attrs = g_state.oldcolor ? (resetdircolor(ent->flags), A_DIM)
-				     : (fcolors[C_MIS] ? COLOR_PAIR(C_MIS) : 0);
-	int entry_type = ent->mode & S_IFMT;
-	char perms[6] = {' ', ' ', (char)('0' + ((ent->mode >> 6) & 7)),
-			(char)('0' + ((ent->mode >> 3) & 7)), (char)('0' + (ent->mode & 7)), '\0'};
-	char ind[2] = {'\0'};
-
-	addch(sel ? ' ' | A_REVERSE : ' '); /* Reversed block for hovered entry */
-
-	if (attrs)
-		attron(attrs);
-
-	/* Print details */
-	print_time(&ent->sec);
-
-	printw("%s%9s ", perms, (entry_type == S_IFREG || entry_type == S_IFDIR)
-		? coolsize(cfg.blkorder ? (blkcnt_t)ent->blocks << blk_shift : ent->size)
-		: (ind[0] = get_detail_ind(ent->mode), ind));
-
-	if (attrs)
-		attroff(attrs);
-
-	printent(ent, namecols, sel);
-}
-
-static void (*printptr)(const struct entry *ent, uint_t namecols, bool sel) = &printent;
-
 static void savecurctx(settings *curcfg, char *path, char *curname, int nextctx)
 {
 	settings tmpcfg = *curcfg;
@@ -3788,14 +3780,9 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int nextctx)
 
 	g_ctx[tmpcfg.curctx].c_cfg = tmpcfg;
 
-	if (ctxr->c_cfg.ctxactive) { /* Switch to saved context */
-		/* Switch light/detail mode */
-		if (tmpcfg.showdetail != ctxr->c_cfg.showdetail)
-			/* set the reverse */
-			printptr = tmpcfg.showdetail ? &printent : &printent_long;
-
+	if (ctxr->c_cfg.ctxactive) /* Switch to saved context */
 		tmpcfg = ctxr->c_cfg;
-	} else { /* Set up a new context from current context */
+	else { /* Set up a new context from current context */
 		ctxr->c_cfg.ctxactive = 1;
 		xstrsncpy(ctxr->c_path, path, PATH_MAX);
 		ctxr->c_last[0] = ctxr->c_name[0] = ctxr->c_fltr[0] = ctxr->c_fltr[1] = '\0';
@@ -3931,7 +3918,6 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	*path = g_ctx[cfg.curctx].c_path;
 	*lastdir = g_ctx[cfg.curctx].c_last;
 	*lastname = g_ctx[cfg.curctx].c_name;
-	printptr = cfg.showdetail ? &printent_long : &printent;
 	set_sort_flags('\0'); /* Set correct sort options */
 	status = TRUE;
 
@@ -5480,10 +5466,8 @@ static int set_sort_flags(int r)
 			blk_shift = ffs(S_BLKSIZE) - 1;
 		}
 
-		if (cfg.blkorder) {
+		if (cfg.blkorder)
 			cfg.showdetail = 1;
-			printptr = &printent_long;
-		}
 		cfg.timeorder = 0;
 		cfg.sizeorder = 0;
 		cfg.extnorder = 0;
@@ -5694,10 +5678,9 @@ static int adjust_cols(int n)
 #endif
 	if (cfg.showdetail) {
 		/* Fallback to light mode if less than 35 columns */
-		if (n < 36) {
+		if (n < 36)
 			cfg.showdetail ^= 1;
-			printptr = &printent;
-		} else {
+		else {
 			/* 3 more accounted for below */
 			n -= 32;
 		}
@@ -5719,7 +5702,7 @@ static void draw_line(char *path, int ncols)
 	}
 
 	move(2 + last - curscroll, 0);
-	printptr(&pdents[last], ncols, FALSE);
+	printent(&pdents[last], ncols, FALSE);
 
 	if (g_state.oldcolor && (pdents[cur].flags & DIR_OR_LINK_TO_DIR)) {
 		if (!dir)  {/* First file is not a directory */
@@ -5732,7 +5715,7 @@ static void draw_line(char *path, int ncols)
 	}
 
 	move(2 + cur - curscroll, 0);
-	printptr(&pdents[cur], ncols, TRUE);
+	printent(&pdents[cur], ncols, TRUE);
 
 	/* Must reset e.g. no files in dir */
 	if (dir)
@@ -5846,7 +5829,7 @@ static void redraw(char *path)
 	/* Print listing */
 	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i) {
 		move(++j, 0);
-		printptr(&pdents[i], ncols, i == cur);
+		printent(&pdents[i], ncols, i == cur);
 	}
 
 	/* Must reset e.g. no files in dir */
@@ -6510,7 +6493,6 @@ nochange:
 				goto begin;
 			case SEL_DETAIL:
 				cfg.showdetail ^= 1;
-				cfg.showdetail ? (printptr = &printent_long) : (printptr = &printent);
 				cfg.blkorder = 0;
 				continue;
 			default: /* SEL_SORT */
@@ -7125,12 +7107,6 @@ nochange:
 					lastdir = g_ctx[r].c_last;
 					lastname = g_ctx[r].c_name;
 
-					/* Switch light/detail mode */
-					if (cfg.showdetail != g_ctx[r].c_cfg.showdetail)
-						/* Set the reverse */
-						printptr = cfg.showdetail ?
-								&printent : &printent_long;
-
 					cfg = g_ctx[r].c_cfg;
 
 					cfg.curctx = r;
@@ -7648,7 +7624,6 @@ int main(int argc, char *argv[])
 			break;
 		case 'd':
 			cfg.showdetail = 1;
-			printptr = &printent_long;
 			break;
 		case 'D':
 			g_state.dirctx = 1;
