@@ -1458,15 +1458,68 @@ static void startselection(void)
 	}
 }
 
-static void updateselbuf(const char *path, char *newpath)
+static size_t appendslash(char *path)
 {
-	size_t r;
 
-	for (int i = 0; i < ndents; ++i)
-		if (pdents[i].flags & FILE_SELECTED) {
-			r = mkpath(path, pdents[i].name, newpath);
-			appendfpath(newpath, r);
+	size_t len = 1;
+
+	if (path[1] != '\0') {
+		len = xstrlen(path);
+		path[len] = '/';
+		++len;
+	}
+
+	return len;
+}
+
+static void invertselbuf(char *path, bool toggle)
+{
+	selbufpos = lastappendpos;
+
+	if (!nselected) {
+		writesel(NULL, 0);
+		return;
+	}
+
+	size_t len = appendslash(path);
+
+	for (int i = 0; i < ndents; ++i) {
+		if (toggle) { /* Toggle selection status */
+			pdents[i].flags ^= FILE_SELECTED;
+			pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
 		}
+
+		if (pdents[i].flags & FILE_SELECTED)
+			appendfpath(path, len + xstrsncpy(path + len, pdents[i].name, PATH_MAX - len));
+	}
+
+	if (len > 1)
+		--len;
+	path[len] = '\0';
+
+	writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+}
+
+static void addtoselbuf(char *path, int startid, int endid)
+{
+	size_t len = appendslash(path);
+
+	/* Remember current selection buffer position */
+	for (int i = startid; i <= endid; ++i) {
+		if (!(pdents[i].flags & FILE_SELECTED)) {
+			/* Write the path to selection file to avoid flush */
+			appendfpath(path, len + xstrsncpy(path + len, pdents[i].name, PATH_MAX - len));
+
+			pdents[i].flags |= FILE_SELECTED;
+			++nselected;
+		}
+	}
+
+	if (len > 1)
+		--len;
+	path[len] = '\0';
+
+	writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 }
 
 /* Finish selection procedure before an operation */
@@ -6617,12 +6670,8 @@ nochange:
 				appendfpath(newpath, mkpath(path, pdents[cur].name, newpath));
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			} else {
-				selbufpos = lastappendpos;
-				if (--nselected) {
-					updateselbuf(path, newpath);
-					writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-				} else
-					writesel(NULL, 0);
+				--nselected;
+				invertselbuf(path, FALSE);
 			}
 
 #ifndef NOX11
@@ -6693,33 +6742,7 @@ nochange:
 				selendid = ndents - 1;
 			}
 
-			if (sel == SEL_SELINV) {
-				/* Toggle selection status */
-				for (r = selstartid; r <= selendid; ++r) {
-					pdents[r].flags ^= FILE_SELECTED;
-					pdents[r].flags & FILE_SELECTED ? ++nselected : --nselected;
-				}
-
-				selbufpos = lastappendpos;
-				if (nselected) {
-					updateselbuf(path, newpath);
-					writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-				} else
-					writesel(NULL, 0);
-			} else {
-				/* Remember current selection buffer position */
-				for (r = selstartid; r <= selendid; ++r) {
-					if (!(pdents[r].flags & FILE_SELECTED)) {
-						/* Write the path to selection file to avoid flush */
-						appendfpath(newpath, mkpath(path, pdents[r].name, newpath));
-
-						pdents[r].flags |= FILE_SELECTED;
-						++nselected;
-					}
-				}
-
-				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
-			}
+			(sel == SEL_SELINV) ? invertselbuf(path, TRUE) : addtoselbuf(path, selstartid, selendid);
 
 #ifndef NOX11
 			if (cfg.x11)
