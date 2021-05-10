@@ -119,7 +119,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Media information plugin
 - Convenience
   - Run plugins and custom commands with hotkeys
-  - FreeDesktop compliant trash (needs trash-cli)
+  - FreeDesktop compliant trash utility integration
   - Cross-dir file/all/range selection
   - Create (with parents), rename, duplicate files and dirs
   - Batch renamer for selection or dir
