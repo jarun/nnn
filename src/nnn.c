@@ -5613,9 +5613,9 @@ static void statusbar(char *path)
 
 		xstrsncpy(buf, coolsize(dir_blocks << blk_shift), 12);
 
-		printw("%cu:%s free:%s files:%lu %lluB %s\n",
+		printw("%cu:%s free:%s files:%llu %lluB %s\n",
 		       (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
-		       num_files, (blkcnt_t)pent->blocks << blk_shift, ptr);
+		       num_files, (ulong_t)pent->blocks << blk_shift, ptr);
 	} else { /* light or detail mode */
 		char sort[] = "\0\0\0\0\0";
 
