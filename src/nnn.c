@@ -3493,7 +3493,7 @@ static char *coolsize(off_t size)
 		size = get_size(size, &rem, 1000);
 	}
 
-	if (i > 0 && i < 6 && rem) {
+	if (i > 0 && i < 6) {
 		ret = xstrsncpy(size_buf, xitoa(size), 12);
 		size_buf[ret - 1] = '.';
 
