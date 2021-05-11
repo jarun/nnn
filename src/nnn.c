@@ -2064,10 +2064,9 @@ static int spawn(char *file, char *arg1, char *arg2, uchar_t flag)
 		DPRINTF_D(pid);
 
 		if ((flag & F_CONFIRM) || ((flag & F_CHKRTN) && retstatus)) {
-			printf("%s", messages[MSG_CONTINUE]);
-#ifndef NORL
-			fflush(stdout);
-#endif
+			status = write(STDOUT_FILENO, messages[MSG_CONTINUE],
+					xstrlen(messages[MSG_CONTINUE]));
+			(void)status;
 			while (getchar() != '\n') {};
 		}
 
