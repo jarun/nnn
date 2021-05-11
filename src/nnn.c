@@ -1476,28 +1476,27 @@ static void invertselbuf(char *path, bool toggle)
 {
 	selbufpos = lastappendpos;
 
-	if (!nselected) {
-		writesel(NULL, 0);
-		return;
-	}
+	if (toggle || nselected) {
+		size_t len = appendslash(path);
 
-	size_t len = appendslash(path);
+		for (int i = 0; i < ndents; ++i) {
+			if (toggle) { /* Toggle selection status */
+				pdents[i].flags ^= FILE_SELECTED;
+				pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
+			}
 
-	for (int i = 0; i < ndents; ++i) {
-		if (toggle) { /* Toggle selection status */
-			pdents[i].flags ^= FILE_SELECTED;
-			pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
+			if (pdents[i].flags & FILE_SELECTED)
+				appendfpath(path,
+					len + xstrsncpy(path + len, pdents[i].name, PATH_MAX - len));
 		}
 
-		if (pdents[i].flags & FILE_SELECTED)
-			appendfpath(path, len + xstrsncpy(path + len, pdents[i].name, PATH_MAX - len));
-	}
+		if (len > 1)
+			--len;
+		path[len] = '\0';
 
-	if (len > 1)
-		--len;
-	path[len] = '\0';
-
-	writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+		nselected ? writesel(pselbuf, selbufpos - 1) : writesel(NULL, 0);
+	} else
+		writesel(NULL, 0);
 }
 
 static void addtoselbuf(char *path, int startid, int endid)
