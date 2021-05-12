@@ -32,7 +32,7 @@ cp -v libcurses/libcurses.a libterminfo/libterminfo.a libs/
 
 # Compile nnn
 cd ..
-rm "$BIN"
+[ -e "./netbsd-curses" ] || rm "$BIN"
 musl-gcc -O3 -DNORL -I./netbsd-curses/libcurses -o "$BIN" src/nnn.c -Wl,-Bsymbolic-functions -L./netbsd-curses/libs -lcurses -lterminfo -static
 strip "$BIN"
 
