@@ -118,6 +118,7 @@
 /* H */
 #define ICON_EXT_H         ICON_C
 #define ICON_EXT_HH        ICON_CPLUSPLUS
+#define ICON_EXT_HS        "\ue777"
 #define ICON_EXT_HTACCESS  ICON_CONFIGURE
 #define ICON_EXT_HTPASSWD  ICON_CONFIGURE
 #define ICON_EXT_HTM       ICON_HTML
@@ -174,6 +175,7 @@
 #define ICON_EXT_PART      ICON_DOWNLOADS
 #define ICON_EXT_PATCH     "\uf440"
 #define ICON_EXT_PDF       "\uf724"
+#define ICON_EXT_PGN       "\uf639"
 #define ICON_EXT_PHP       "\ue73d"
 #define ICON_EXT_PNG       ICON_PICTUREFILE
 #define ICON_EXT_PPT       "\uf726"
