@@ -1933,7 +1933,6 @@ static int parseargs(char *line, char **argv)
 
 static pid_t xfork(uchar_t flag)
 {
-	int status;
 	pid_t p = fork();
 	struct sigaction dfl_act = {.sa_handler = SIG_DFL};
 
@@ -1971,7 +1970,7 @@ static pid_t xfork(uchar_t flag)
 
 	/* This is the parent waiting for the child to create grandchild */
 	if (flag & F_NOWAIT)
-		waitpid(p, &status, 0);
+		waitpid(p, NULL, 0);
 
 	if (p == -1)
 		perror("fork");
@@ -4040,7 +4039,7 @@ static char *get_output(char *buf, const size_t bytes, const char *file,
 	}
 
 	/* In parent */
-	waitpid(pid, &tmp, 0);
+	waitpid(pid, NULL, 0);
 	close(pipefd[1]);
 
 	if (!page) {
@@ -4064,7 +4063,7 @@ static char *get_output(char *buf, const size_t bytes, const char *file,
 	}
 
 	/* In parent */
-	waitpid(pid, &tmp, 0);
+	waitpid(pid, NULL, 0);
 	close(pipefd[0]);
 
 	return NULL;
@@ -4856,7 +4855,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 	close(rfd);
 
 	/* wait for the child to finish. no zombies allowed */
-	waitpid(p, &rfd, 0);
+	waitpid(p, NULL, 0);
 
 	refresh();
 
