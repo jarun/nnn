@@ -33,7 +33,7 @@ cp -v libcurses/libcurses.a libterminfo/libterminfo.a libs/
 # Compile nnn
 cd ..
 [ -e "./netbsd-curses" ] || rm "$BIN"
-musl-gcc -O3 -DNORL -I./netbsd-curses/libcurses -o "$BIN" src/nnn.c -Wl,-Bsymbolic-functions -L./netbsd-curses/libs -lcurses -lterminfo -static
+musl-gcc -O3 -DNORL -DNOMOUSE -Wall -Wextra -Wshadow -I./netbsd-curses/libcurses -o "$BIN" src/nnn.c -Wl,-Bsymbolic-functions -L./netbsd-curses/libs -lcurses -lterminfo -static
 strip "$BIN"
 
 # Run the binary with it selected
