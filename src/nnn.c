@@ -252,13 +252,15 @@ typedef struct entry {
 	uint_t nsec; /* 4 bytes (enough to store nanosec) */
 	mode_t mode; /* 4 bytes */
 	off_t size; /* 8 bytes */
-	uint_t blocks; /* number of 512B blocks allocated; 4 bytes (enough to store 2048TiB) */
+	struct {
+		ulong_t blocks : 40; /* 8 bytes (enough for 512 TiB in 512B blocks allocated) */
+		ulong_t nlen : 16; /* 2 bytes (length of file name) */
+		ulong_t flags : 8; /* 1 byte (flags specific to the file) */
+	};
 #ifndef NOUG
 	uid_t uid; /* 4 bytes */
 	gid_t gid; /* 4 bytes */
 #endif
-	ushort_t nlen; /* Length of file name */
-	uchar_t flags; /* Flags specific to the file */
 } *pEntry;
 
 /* Key-value pairs from env */
