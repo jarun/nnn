@@ -4785,7 +4785,6 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 
 static bool run_selected_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir)
 {
-	int status;
 	pid_t p;
 	bool cmd_as_plugin = FALSE;
 	uchar_t flags = 0;
@@ -4855,7 +4854,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 	close(rfd);
 
 	/* wait for the child to finish. no zombies allowed */
-	waitpid(p, &status, 0);
+	waitpid(p, &rfd, 0);
 
 	refresh();
 
