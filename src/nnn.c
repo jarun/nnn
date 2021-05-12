@@ -4785,6 +4785,8 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 
 static bool run_selected_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir)
 {
+	int status;
+	pid_t p;
 	bool cmd_as_plugin = FALSE;
 	uchar_t flags = 0;
 
@@ -4821,7 +4823,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 
 	exitcurses();
 
-	if (fork() == 0) { // In child
+	if ((p = fork()) == 0) { // In child
 		int wfd = open(g_pipepath, O_WRONLY | O_CLOEXEC);
 
 		if (wfd == -1)
@@ -4851,6 +4853,9 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 
 	readpipe(rfd, path, lastname, lastdir);
 	close(rfd);
+
+	/* wait for the child to finish. no zombies allowed */
+	waitpid(p, &status, 0);
 
 	refresh();
 
