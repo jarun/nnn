@@ -78,6 +78,8 @@ awk 'BEGIN {
     icons["fsharp"][1] = ""; icons["fsharp"][2] = color_fsharp
     icons["ruby"][1] = ""; icons["ruby"][2] = color_ruby
     icons["c"][1] = ""; icons["c"][2] = color_c
+    icons["chess"][1] = ""; icons["chess"][2] = color_default
+    icons["haskell"][1] = ""; icons["haskell"][2] = color_vim
     icons["html"][1] = ""; icons["html"][2] = color_default
     icons["react"][1] = ""; icons["react"][2] = color_react
     icons["python"][1] = ""; icons["python"][2] = color_python
@@ -104,7 +106,6 @@ awk 'BEGIN {
     icons["bz2"][1] = icons["archive"][1]; icons["bz2"][2] = icons["archive"][2]
 
 # c
-    icons["c"][1] = icons["c"][1]; icons["c"][2] = icons["c"][2]
     icons["cplusplus"][1] = icons["cplusplus"][1]; icons["cplusplus"][2] = icons["cplusplus"][2]
     icons["cab"][1] = icons["archive"][1]; icons["cab"][2] = icons["archive"][2]
     icons["cbr"][1] = icons["archive"][1]; icons["cbr"][2] = icons["archive"][2]
@@ -141,6 +142,7 @@ awk 'BEGIN {
 # f
     icons["fsharp"][1] = icons["fsharp"][1]; icons["fsharp"][2] = icons["fsharp"][2]
     icons["flac"][1] = icons["musicfile"][1]; icons["flac"][2] = icons["musicfile"][2]
+    icons["fen"][1] = icons["chess"]; icons["fen"][2] = icons["chess"][2]
     icons["flv"][1] = icons["videofile"][1]; icons["flv"][2] = icons["videofile"][2]
     icons["fs"][1] = icons["fsharp"][1]; icons["fs"][2] = icons["fsharp"][2]
     icons["fsi"][1] = icons["fsharp"][1]; icons["fsi"][2] = icons["fsharp"][2]
@@ -157,10 +159,11 @@ awk 'BEGIN {
 # h
     icons["h"][1] = icons["c"][1]; icons["h"][2] = icons["c"][2]
     icons["hh"][1] = icons["cplusplus"][1]; icons["hh"][2] = icons["cplusplus"][2]
+    icons["hpp"][1] = icons["cplusplus"][1]; icons["hpp"][2] = icons["cplusplus"][2]
+    icons["hs"][1] = icons["haskell"]; icons["hs"][2] = icons["haskell"][2]
     icons["htaccess"][1] = icons["configure"][1]; icons["htaccess"][2] = icons["configure"][2]
     icons["htpasswd"][1] = icons["configure"][1]; icons["htpasswd"][2] = icons["configure"][2]
-    icons["htm"][1] = icons["htm"][1]; icons["htm"][2] = icons["htm"][2]
-    icons["html"][1] = icons["htm"][1]; icons["html"][2] = icons["htm"][2]
+    icons["htm"][1] = icons["html"][1]; icons["htm"][2] = icons["html"][2]
     icons["hxx"][1] = icons["cplusplus"][1]; icons["hxx"][2] = icons["cplusplus"][2]
 
 # i
@@ -175,7 +178,6 @@ awk 'BEGIN {
     icons["jl"][1] = icons["configure"][1]; icons["jl"][2] = icons["configure"][2]
     icons["jpeg"][1] = icons["picturefile"][1]; icons["jpeg"][2] = icons["picturefile"][2]
     icons["jpg"][1] = icons["picturefile"][1]; icons["jpg"][2] = icons["picturefile"][2]
-    icons["js"][1] = icons["js"][1]; icons["js"][2] = icons["js"][2]
     icons["json"][1] = "ﬥ"; icons["json"][2] = color_js
     icons["jsx"][1] = icons["react"][1]; icons["jsx"][2] = icons["react"][2]
 
@@ -183,6 +185,7 @@ awk 'BEGIN {
 
 # l
     icons["lha"][1] = icons["archive"][1]; icons["lha"][2] = icons["archive"][2]
+    icons["lhs"][1] = icons["haskell"][1]; icons["lhs"][2] = icons["haskell"][2]
     icons["ilog"][1] = icons["document"][1]; icons["ilog"][2] = icons["document"][2]
     icons["lua"][1] = ""; icons["lua"][2] = color_default
     icons["lzh"][1] = icons["archive"][1]; icons["lzh"][2] = icons["archive"][2]
@@ -214,6 +217,7 @@ awk 'BEGIN {
     icons["part"][1] = icons["download"][1]; icons["part"][2] = icons["download"][2]
     icons["patch"][1] = icons["diff"][1]; icons["patch"][2] = icons["diff"][2]
     icons["pdf"][1] = ""; icons["pdf"][2] = color_docs
+    icons["pgn"][1] = icons["chess"][1]; icons["pgn"][2] = icons["chess"][2]
     icons["php"][1] = ""; icons["php"][2] = color_default
     icons["png"][1] = icons["picturefile"][1]; icons["png"][2] = icons["picturefile"][2]
     icons["ppt"][1] = ""; icons["ppt"][2] = color_default
@@ -273,7 +277,7 @@ awk 'BEGIN {
 # x
     icons["xbps"][1] = icons["archive"][1]; icons["xbps"][2] = color_archive
     icons["xcf"][1] = icons["picturefile"][1]; icons["xcf"][2] = color_image
-    icons["xhtml"][1] = icons["htm"][1]; icons["xhtml"][2] = icons["htm"][2]
+    icons["xhtml"][1] = icons["html"][1]; icons["xhtml"][2] = icons["html"][2]
     icons["xls"][1] = ""; icons["xls"][2] = color_default
     icons["xlsx"][1] = ""; icons["xlsx"][2] = color_default
     icons["xml"][1] = icons["html"][1]; icons["xml"][2] = icons["html"][2]

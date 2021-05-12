@@ -356,7 +356,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* F */
 	{"f#",         ICON_EXT_FSHARP,    COLOR_FSHARP},
-	{"fen",        ICON_EXT_PGN,       0},
+	{"fen",        ICON_EXT_FEN,       0},
 	{"flac",       ICON_EXT_FLAC,      COLOR_AUDIO},
 	{"flv",        ICON_EXT_FLV,       COLOR_VIDEO},
 	{"fs",         ICON_EXT_FS,        COLOR_FSHARP},
@@ -374,7 +374,7 @@ static const struct icon_pair icons_ext[] = {
 	/* H */
 	{"h",          ICON_EXT_H,         COLOR_C},
 	{"hh",         ICON_EXT_HH,        COLOR_C},
-	{"hpp",        ICON_EXT_HH,        COLOR_C},
+	{"hpp",        ICON_EXT_HPP,       COLOR_C},
 	{"hs",         ICON_EXT_HS,        COLOR_VIM},
 	{"htaccess",   ICON_EXT_HTACCESS,  0},
 	{"htpasswd",   ICON_EXT_HTPASSWD,  0},
@@ -402,7 +402,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* L */
 	{"lha",        ICON_EXT_LHA,       COLOR_ARCHIVE},
-	{"lhs",        ICON_EXT_HS,        COLOR_VIM},
+	{"lhs",        ICON_EXT_LHS,       COLOR_VIM},
 	{"log",        ICON_EXT_LOG,       0},
 	{"lua",        ICON_EXT_LUA,       0},
 	{"lzh",        ICON_EXT_LZH,       COLOR_ARCHIVE},
