@@ -6932,7 +6932,7 @@ nochange:
 			}
 
 			/* Check if another file with same name exists */
-			if (faccessat(fd, tmp, F_OK, AT_SYMLINK_NOFOLLOW) != -1) {
+			if (fstatat(fd, tmp, &sb, AT_SYMLINK_NOFOLLOW) == 0) {
 				if (sel == SEL_RENAME) {
 					/* Overwrite file with same name? */
 					if (!xconfirm(get_input(messages[MSG_OVERWRITE]))) {
