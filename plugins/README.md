@@ -61,6 +61,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [renamer](renamer) | Batch rename selection or files in dir [✓] | sh | [qmv](https://www.nongnu.org/renameutils/)/[vidir](https://joeyh.name/code/moreutils/) |
 | [ringtone](ringtone) | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
 | [rsynccp](rsynccp) | Gives copy-paste verbose progress percentage [✓] | sh | rsync |
+| [setxdgdef](setxdgdef) | Set the default application for the current entry's file type | sh | xdg-utils, fzf |
 | [splitjoin](splitjoin) | Split file or join selection [✓] | sh | split, cat |
 | [suedit](suedit) | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
 | [togglex](togglex) | Toggle executable mode for selection [✓] | sh | chmod |
