@@ -253,7 +253,7 @@ typedef struct entry {
 	mode_t mode; /* 4 bytes */
 	off_t size; /* 8 bytes */
 	struct {
-		ulong_t blocks : 40; /* 8 bytes (enough for 512 TiB in 512B blocks allocated) */
+		ulong_t blocks : 40; /* 5 bytes (enough for 512 TiB in 512B blocks allocated) */
 		ulong_t nlen : 16; /* 2 bytes (length of file name) */
 		ulong_t flags : 8; /* 1 byte (flags specific to the file) */
 	};
@@ -3787,7 +3787,7 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 
 	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
 
-	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE : ' ');
+	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
 
 	if (g_state.oldcolor)
 		resetdircolor(ent->flags);
