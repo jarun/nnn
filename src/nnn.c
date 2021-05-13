@@ -5783,8 +5783,7 @@ static void draw_line(char *path, int ncols)
 
 static void redraw(char *path)
 {
-	xlines = LINES;
-	xcols = COLS;
+	getmaxyx(stdscr, xlines, xcols);
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	int onscreen = xlines - 4;
