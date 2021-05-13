@@ -72,6 +72,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [vidthumb](vidthumb) | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
 | [wall](wall) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 | [x2sel](x2sel) | Copy `\n`-separated file list from system clipboard to sel | sh | _see in-file docs_ |
+| [xdgdefault](xdgdefault) | Set the default app for the hovered file type | sh | xdg-utils, fzf |
 
 Note:
 
