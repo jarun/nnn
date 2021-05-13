@@ -40,7 +40,7 @@ ifneq ($(filter noloc,$(MAKECMDGOALS)),)
 endif
 
 ifeq ($(strip $(O_DEBUG)),1)
-	CPPFLAGS += -DDBGMODE
+	CPPFLAGS += -DDEBUG
 	CFLAGS += -g
 endif
 

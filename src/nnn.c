@@ -5259,7 +5259,7 @@ exit:
 
 static void populate(char *path, char *lastname)
 {
-#ifdef DBGMODE
+#ifdef DEBUG
 	struct timespec ts1, ts2;
 
 	clock_gettime(CLOCK_REALTIME, &ts1); /* Use CLOCK_MONOTONIC on FreeBSD */
@@ -5271,7 +5271,7 @@ static void populate(char *path, char *lastname)
 
 	ENTSORT(pdents, ndents, entrycmpfn);
 
-#ifdef DBGMODE
+#ifdef DEBUG
 	clock_gettime(CLOCK_REALTIME, &ts2);
 	DPRINTF_U(ts2.tv_nsec - ts1.tv_nsec);
 #endif
@@ -7600,7 +7600,7 @@ static void cleanup(void)
 #endif
 	if (g_state.pluginit)
 		unlink(g_pipepath);
-#ifdef DBGMODE
+#ifdef DEBUG
 	disabledbg();
 #endif
 }
@@ -7769,7 +7769,7 @@ int main(int argc, char *argv[])
 			env_opts_id = -1;
 	}
 
-#ifdef DBGMODE
+#ifdef DEBUG
 	enabledbg();
 	DPRINTF_S(VERSION);
 #endif

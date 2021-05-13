@@ -30,7 +30,7 @@
 
 #pragma once
 
-#ifdef DBGMODE
+#ifdef DEBUG
 static int DEBUG_FD;
 
 static int xprintf(int fd, const char *fmt, ...)
@@ -88,4 +88,4 @@ static void disabledbg(void)
 #define DPRINTF_U(x)
 #define DPRINTF_S(x)
 #define DPRINTF_P(x)
-#endif /* DBGMODE */
+#endif /* DEBUG */
