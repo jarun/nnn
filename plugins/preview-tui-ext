@@ -176,7 +176,7 @@ fifo_pager() {
         exec > "$tmpfifopath"
         if [ "$cmd" = "pager" ]; then
             if exists bat; then
-                bat --terminal-width="$(tput cols)" --paging=never --decorations=always --color=always "$@" 2>/dev/null &
+                bat --terminal-width="$(tput cols)" --paging=never --style=numbers,header,plain --color=always "$@" 2>/dev/null &
             else
                 $PAGER "$@" &
             fi

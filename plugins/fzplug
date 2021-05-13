@@ -2,9 +2,9 @@
 
 # Description: Fuzzy find and execute nnn plugins (and, optionally, custom scripts located elsewhere).
 # Description and details of plugins can be previewed from the fzf interface. Use `?` to toggle preview
-# pane on and off.
+# pane on and off, ^Up/^Dn to scroll.
 #
-# For better compatibility with as many nnn plugins as possible, fzfplug will first execute
+# For better compatibility with as many nnn plugins as possible, fzplug will first execute
 # the chosen script on the file hovered in nnn, and upon failure, try to run it with no target
 # (which should actually run it on selected files if nnn has an active selection). I don't
 # have the required dependencies to confirm compatibility with all scripts though.
@@ -16,7 +16,7 @@
 # OPTIONAL SCRIPTS SOURCES
 # Leave blank or fill with the absolute path of a folder containing executable scripts other than nnn plugins
 # (e.g., "$HOME/.local/share/nautilus/scripts", since there are numerous Nautilus script git repositories).
-# Add extra variables if need be, but be sure to call them in the find command below at lines 28:49 and 30:49.
+# Add extra variables if need be, but be sure to call them in the find command below at lines 29:62 and 31:62.
 #CUSTOMDIR1="$HOME/.local/share/nautilus/scripts"
 CUSTOMDIR1=""
 CUSTOMDIR2=""
@@ -26,9 +26,9 @@ nnnpluginsdir="$HOME/.config/nnn/plugins"
 
 # PREVIEW WITH bat INSTEAD OF cat IF INSTALLED
 if [ -z "$(command -v bat)" ]; then
-    plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview 'cat {}' --preview-window right:66% --delimiter / --with-nth -1 --bind="?:toggle-preview")
+    plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview 'cat {}' --preview-window right:66%:wrap --delimiter / --with-nth -1 --bind="?:toggle-preview")
 else
-    plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview 'bat --color=always --style=grid {}' --preview-window right:66% --delimiter / --with-nth -1 --bind="?:toggle-preview")
+    plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview 'bat --color=always --style=numbers,header,plain {}' --preview-window right:66%:wrap --delimiter / --with-nth -1 --bind="?:toggle-preview")
 fi
 
 # TRY RUNNING THE SCRIPT ON HOVERED FILE FIRST, AND ABORT IF NO PLUGIN WAS SELECTED IN FZFPLUG (ESC OR ^C),
