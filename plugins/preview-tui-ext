@@ -131,7 +131,7 @@ startpreview() {
             --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" --env "TMPDIR=$TMPDIR" \
             --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" --env "TERMINAL=$TERMINAL"\
             --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=${BAT_STYLE:-numbers}" \
-            --env "PAGERPID=$PAGERPID" --env "GIFPID=$GIFPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
+            --env "PAGERPID=$PAGERPID" --env "IMGPID=$IMGPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
             --env "ICONLOOKUP=$ICONLOOKUP" --env "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
             --env "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" --env "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
             --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" >/dev/null
