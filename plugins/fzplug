@@ -26,13 +26,15 @@ nnnpluginsdir="$HOME/.config/nnn/plugins"
 if [ -z "$(command -v bat)" ]; then
     plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" \
         -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview \
-        'cat {}' --preview-window right:66%:wrap --delimiter / --with-nth -1 \
+        "cat {}" \
+        --preview-window right:66%:wrap --delimiter / --with-nth -1 \
         --bind="?:toggle-preview")
 else
     plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" \
         -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview \
-        'bat --terminal-width="$(tput cols)" --decorations=always --color=always --style="${BAT_STYLE:-header,numbers}" {}' \
-        --preview-window right:66% --delimiter / --with-nth -1 \
+        "bat --terminal-width='$(tput cols)' --decorations=always --color=always \
+              --style='${BAT_STYLE:-header,numbers}' {}" \
+        -preview-window right:66% --delimiter / --with-nth -1 \
         --bind="?:toggle-preview")
 fi
 
