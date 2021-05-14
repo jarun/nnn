@@ -14,7 +14,7 @@ if [ -n "$GUIPLAYER" ]; then
 
     # detach the player
     sleep 1
-elif which mocp >/dev/null 2>&1; then
+elif type mocp >/dev/null 2>&1; then
     cmd=$(pgrep -x mocp 2>/dev/null)
     ret=$cmd
 

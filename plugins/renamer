@@ -14,10 +14,10 @@
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
-if which qmv >/dev/null 2>&1; then
+if type qmv >/dev/null 2>&1; then
 	batchrenamesel="qmv -fdo -da"
 	batchrename="qmv -fdo -a"
-elif which vidir >/dev/null 2>&1; then
+elif type vidir >/dev/null 2>&1; then
 	batchrenamesel="vidir"
 	batchrename="vidir"
 else

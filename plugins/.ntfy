@@ -11,11 +11,11 @@
 
 OS="$(uname)"
 
-if which notify-send >/dev/null 2>&1; then
+if type notify-send >/dev/null 2>&1; then
     notify-send nnn "Done!"
 elif [ "$OS" = "Darwin" ]; then
     osascript -e 'display notification "Done!" with title "nnn"'
-elif which ntfy >/dev/null 2>&1; then
+elif type ntfy >/dev/null 2>&1; then
     ntfy -t nnn send "Done!"
 elif [ "$OS" = "Haiku" ]; then
     notify --title "nnn" "Done!"

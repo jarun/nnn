@@ -9,9 +9,9 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-if which fzf >/dev/null 2>&1; then
+if type fzf >/dev/null 2>&1; then
     cmd="$FZF_DEFAULT_COMMAND"
-    if which fd >/dev/null 2>&1; then
+    if type fd >/dev/null 2>&1; then
         [ -z "$cmd" ] && cmd="fd -t f 2>/dev/null"
     else
         [ -z "$cmd" ] && cmd="find . -type f 2>/dev/null"
@@ -19,7 +19,7 @@ if which fzf >/dev/null 2>&1; then
     entry="$(eval "$cmd" | fzf --delimiter / --nth=-1 --tiebreak=begin --info=hidden)"
     # To show only the file name
     # entry=$(find . -type f 2>/dev/null | fzf --delimiter / --with-nth=-1 --tiebreak=begin --info=hidden)
-elif which sk >/dev/null 2>&1; then
+elif type sk >/dev/null 2>&1; then
 	entry=$(find . -type f 2>/dev/null | sk)
 else
     exit 1

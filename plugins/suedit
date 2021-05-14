@@ -7,15 +7,10 @@
 
 EDITOR="${EDITOR:-vim}"
 
-is_cmd_exists () {
-    which "$1" > /dev/null 2>&1
-    echo $?
-}
-
-if [ "$(is_cmd_exists sudo)" -eq "0" ]; then
+if type sudo >/dev/null 2>&1; then
     sudo "$EDITOR" "$1"
-elif [ "$(is_cmd_exists sudoedit)" -eq "0" ]; then
+elif type sudoedit >/dev/null 2>&1; then
     sudoedit "$1"
-elif [ "$(is_cmd_exists doas)" -eq "0" ]; then
+elif type doas >/dev/null 2>&1; then
     doas "$EDITOR" "$1"
 fi

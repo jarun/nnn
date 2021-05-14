@@ -91,36 +91,36 @@ handle_pdf() {
     if [ "$GUI" -ne 0 ] && is_mac; then
         nohup open "${FPATH}" >/dev/null 2>&1 &
         exit 0
-    elif [ "$GUI" -ne 0 ] && which zathura >/dev/null 2>&1; then
+    elif [ "$GUI" -ne 0 ] && type zathura >/dev/null 2>&1; then
         nohup zathura "${FPATH}" >/dev/null 2>&1 &
         exit 0
-    elif which pdftotext >/dev/null 2>&1; then
+    elif type pdftotext >/dev/null 2>&1; then
         ## Preview as text conversion
         pdftotext -l 10 -nopgbrk -q -- "${FPATH}" - | eval "$PAGER"
         exit 0
-    elif which mutool >/dev/null 2>&1; then
+    elif type mutool >/dev/null 2>&1; then
         mutool draw -F txt -i -- "${FPATH}" 1-10 | eval "$PAGER"
         exit 0
-    elif which exiftool >/dev/null 2>&1; then
+    elif type exiftool >/dev/null 2>&1; then
         exiftool "${FPATH}" | eval "$PAGER"
         exit 0
     fi
 }
 
 handle_audio() {
-    if which mocp >/dev/null 2>&1 && which mocplay >/dev/null 2>&1; then
+    if type mocp >/dev/null 2>&1 && type mocplay >/dev/null 2>&1; then
         mocplay "${FPATH}" "opener" >/dev/null 2>&1
         exit 0
-    elif which mpv >/dev/null 2>&1; then
+    elif type mpv >/dev/null 2>&1; then
         mpv "${FPATH}" >/dev/null 2>&1 &
         exit 0
-    elif which media_client >/dev/null 2>&1; then
+    elif type media_client >/dev/null 2>&1; then
         media_client play "${FPATH}" >/dev/null 2>&1 &
         exit 0
-    elif which mediainfo >/dev/null 2>&1; then
+    elif type mediainfo >/dev/null 2>&1; then
         mediainfo "${FPATH}" | eval "$PAGER"
         exit 0
-    elif which exiftool >/dev/null 2>&1; then
+    elif type exiftool >/dev/null 2>&1; then
         exiftool "${FPATH}"| eval "$PAGER"
         exit 0
     fi
@@ -130,22 +130,22 @@ handle_video() {
     if [ "$GUI" -ne 0 ] && is_mac; then
         nohup open "${FPATH}" >/dev/null 2>&1 &
         exit 0
-    elif [ "$GUI" -ne 0 ] && which smplayer >/dev/null 2>&1; then
+    elif [ "$GUI" -ne 0 ] && type smplayer >/dev/null 2>&1; then
         nohup smplayer "${FPATH}" >/dev/null 2>&1 &
         exit 0
-    elif [ "$GUI" -ne 0 ] && which mpv >/dev/null 2>&1; then
+    elif [ "$GUI" -ne 0 ] && type mpv >/dev/null 2>&1; then
         nohup mpv "${FPATH}" >/dev/null 2>&1 &
         exit 0
-    elif which ffmpegthumbnailer >/dev/null 2>&1; then
+    elif type ffmpegthumbnailer >/dev/null 2>&1; then
         # Thumbnail
         [ -d "${IMAGE_CACHE_PATH}" ] || mkdir "${IMAGE_CACHE_PATH}"
         ffmpegthumbnailer -i "${FPATH}" -o "${IMAGE_CACHE_PATH}/${FNAME}.jpg" -s 0
         viu -n "${IMAGE_CACHE_PATH}/${FNAME}.jpg" | eval "$PAGER"
         exit 0
-    elif which mediainfo >/dev/null 2>&1; then
+    elif type mediainfo >/dev/null 2>&1; then
         mediainfo "${FPATH}" | eval "$PAGER"
         exit 0
-    elif which exiftool >/dev/null 2>&1; then
+    elif type exiftool >/dev/null 2>&1; then
         exiftool "${FPATH}"| eval "$PAGER"
         exit 0
     fi
@@ -157,22 +157,22 @@ handle_extension() {
         ## Archive
         a|ace|alz|arc|arj|bz|bz2|cab|cpio|deb|gz|jar|lha|lz|lzh|lzma|lzo|\
         rpm|rz|t7z|tar|tbz|tbz2|tgz|tlz|txz|tZ|tzo|war|xpi|xz|Z|zip)
-            if which atool >/dev/null 2>&1; then
+            if type atool >/dev/null 2>&1; then
                 atool --list -- "${FPATH}" | eval "$PAGER"
                 exit 0
-            elif which bsdtar >/dev/null 2>&1; then
+            elif type bsdtar >/dev/null 2>&1; then
                 bsdtar --list --file "${FPATH}" | eval "$PAGER"
                 exit 0
             fi
             exit 1;;
         rar)
-            if which unrar >/dev/null 2>&1; then
+            if type unrar >/dev/null 2>&1; then
                 ## Avoid password prompt by providing empty password
                 unrar lt -p- -- "${FPATH}" | eval "$PAGER"
             fi
             exit 1;;
         7z)
-            if which 7z >/dev/null 2>&1; then
+            if type 7z >/dev/null 2>&1; then
                 ## Avoid password prompt by providing empty password
                 7z l -p -- "${FPATH}" | eval "$PAGER"
                 exit 0
@@ -201,10 +201,10 @@ handle_extension() {
 
         ## BitTorrent
         torrent)
-            if which rtorrent >/dev/null 2>&1; then
+            if type rtorrent >/dev/null 2>&1; then
                 rtorrent "${FPATH}"
                 exit 0
-            elif which transmission-show >/dev/null 2>&1; then
+            elif type transmission-show >/dev/null 2>&1; then
                 transmission-show -- "${FPATH}"
                 exit 0
             fi
@@ -212,7 +212,7 @@ handle_extension() {
 
         ## OpenDocument
         odt|ods|odp|sxw)
-            if which odt2txt >/dev/null 2>&1; then
+            if type odt2txt >/dev/null 2>&1; then
                 ## Preview as text conversion
                 odt2txt "${FPATH}" | eval "$PAGER"
                 exit 0
@@ -221,10 +221,10 @@ handle_extension() {
 
         ## Markdown
         md)
-            if which glow >/dev/null 2>&1; then
+            if type glow >/dev/null 2>&1; then
                 glow -sdark "${FPATH}" | eval "$PAGER"
                 exit 0
-            elif which lowdown >/dev/null 2>&1; then
+            elif type lowdown >/dev/null 2>&1; then
                 lowdown -Tterm "${FPATH}" | eval "$PAGER"
                 exit 0
             fi
@@ -233,13 +233,13 @@ handle_extension() {
         ## HTML
         htm|html|xhtml)
             ## Preview as text conversion
-            if which w3m >/dev/null 2>&1; then
+            if type w3m >/dev/null 2>&1; then
                 w3m -dump "${FPATH}" | eval "$PAGER"
                 exit 0
-            elif which lynx >/dev/null 2>&1; then
+            elif type lynx >/dev/null 2>&1; then
                 lynx -dump -- "${FPATH}" | eval "$PAGER"
                 exit 0
-            elif which elinks >/dev/null 2>&1; then
+            elif type elinks >/dev/null 2>&1; then
                 elinks -dump "${FPATH}" | eval "$PAGER"
                 exit 0
             fi
@@ -247,10 +247,10 @@ handle_extension() {
 
         ## JSON
         json)
-            if which jq >/dev/null 2>&1; then
+            if type jq >/dev/null 2>&1; then
                 jq --color-output . "${FPATH}" | eval "$PAGER"
                 exit 0
-            elif which python >/dev/null 2>&1; then
+            elif type python >/dev/null 2>&1; then
                 python -m json.tool -- "${FPATH}" | eval "$PAGER"
                 exit 0
             fi
@@ -311,19 +311,19 @@ handle_multimedia() {
             if [ "$GUI" -ne 0 ] && is_mac; then
                 nohup open "${FPATH}" >/dev/null 2>&1 &
                 exit 0
-            elif [ "$GUI" -ne 0 ] && which imvr >/dev/null 2>&1; then
+            elif [ "$GUI" -ne 0 ] && type imvr >/dev/null 2>&1; then
                 load_dir imvr "${FPATH}" >/dev/null 2>&1 &
                 exit 0
-            elif [ "$GUI" -ne 0 ] && which sxiv >/dev/null 2>&1; then
+            elif [ "$GUI" -ne 0 ] && type sxiv >/dev/null 2>&1; then
                 load_dir sxiv "${FPATH}" >/dev/null 2>&1 &
                 exit 0
-            elif which viu >/dev/null 2>&1; then
+            elif type viu >/dev/null 2>&1; then
                 viu -n "${FPATH}" | eval "$PAGER"
                 exit 0
-            elif which img2txt >/dev/null 2>&1; then
+            elif type img2txt >/dev/null 2>&1; then
                 img2txt --gamma=0.6 -- "${FPATH}" | eval "$PAGER"
                 exit 0
-            elif which exiftool >/dev/null 2>&1; then
+            elif type exiftool >/dev/null 2>&1; then
                 exiftool "${FPATH}" | eval "$PAGER"
                 exit 0
             fi
@@ -466,11 +466,11 @@ handle_mime() {
 
         ## DjVu
         image/vnd.djvu)
-            if which djvutxt >/dev/null 2>&1; then
+            if type djvutxt >/dev/null 2>&1; then
                 ## Preview as text conversion (requires djvulibre)
                 djvutxt "${FPATH}" | eval "$PAGER"
                 exit 0
-            elif which exiftool >/dev/null 2>&1; then
+            elif type exiftool >/dev/null 2>&1; then
                 exiftool "${FPATH}" | eval "$PAGER"
                 exit 0
             fi
@@ -479,10 +479,10 @@ handle_mime() {
 }
 
 handle_fallback() {
-    if [ "$GUI" -ne 0 ] && which xdg-open >/dev/null 2>&1; then
+    if [ "$GUI" -ne 0 ] && type xdg-open >/dev/null 2>&1; then
         nohup xdg-open "${FPATH}" >/dev/null 2>&1 &
         exit 0
-    elif [ "$GUI" -ne 0 ] && which open >/dev/null 2>&1; then
+    elif [ "$GUI" -ne 0 ] && type open >/dev/null 2>&1; then
         nohup open "${FPATH}" >/dev/null 2>&1 &
         exit 0
     fi

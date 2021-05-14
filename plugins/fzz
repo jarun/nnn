@@ -7,7 +7,7 @@
 
 . "$(dirname "$0")"/.nnn-plugin-helper
 
-if which fzf >/dev/null 2>&1; then
+if type fzf >/dev/null 2>&1; then
     fuzzy=fzf
 else
     exit 1
