@@ -142,7 +142,7 @@ awk 'BEGIN {
 # f
     icons["fsharp"][1] = icons["fsharp"][1]; icons["fsharp"][2] = icons["fsharp"][2]
     icons["flac"][1] = icons["musicfile"][1]; icons["flac"][2] = icons["musicfile"][2]
-    icons["fen"][1] = icons["chess"]; icons["fen"][2] = icons["chess"][2]
+    icons["fen"][1] = icons["chess"][1]; icons["fen"][2] = icons["chess"][2]
     icons["flv"][1] = icons["videofile"][1]; icons["flv"][2] = icons["videofile"][2]
     icons["fs"][1] = icons["fsharp"][1]; icons["fs"][2] = icons["fsharp"][2]
     icons["fsi"][1] = icons["fsharp"][1]; icons["fsi"][2] = icons["fsharp"][2]
@@ -160,7 +160,7 @@ awk 'BEGIN {
     icons["h"][1] = icons["c"][1]; icons["h"][2] = icons["c"][2]
     icons["hh"][1] = icons["cplusplus"][1]; icons["hh"][2] = icons["cplusplus"][2]
     icons["hpp"][1] = icons["cplusplus"][1]; icons["hpp"][2] = icons["cplusplus"][2]
-    icons["hs"][1] = icons["haskell"]; icons["hs"][2] = icons["haskell"][2]
+    icons["hs"][1] = icons["haskell"][1]; icons["hs"][2] = icons["haskell"][2]
     icons["htaccess"][1] = icons["configure"][1]; icons["htaccess"][2] = icons["configure"][2]
     icons["htpasswd"][1] = icons["configure"][1]; icons["htpasswd"][2] = icons["configure"][2]
     icons["htm"][1] = icons["html"][1]; icons["htm"][2] = icons["html"][2]
