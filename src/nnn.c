@@ -5891,8 +5891,10 @@ static void redraw(char *path)
 		g_state.dircolor = 1;
 	}
 
+	onscreen = MIN(onscreen + curscroll, ndents);
+
 	/* Print listing */
-	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i) {
+	for (i = curscroll; i < onscreen; ++i) {
 		move(++j, 0);
 		printent(&pdents[i], ncols, i == cur);
 	}
