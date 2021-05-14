@@ -3765,8 +3765,7 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 				(char)('0' + ((ent->mode >> 3) & 7)),
 				(char)('0' + (ent->mode & 7)), '\0'};
 
-		addch(sel ? ' ' | A_REVERSE : ' '); /* Reversed block for hovered entry */
-
+		addch(' ');
 		attrs = g_state.oldcolor ? (resetdircolor(ent->flags), A_DIM)
 					 : (fcolors[C_MIS] ? COLOR_PAIR(C_MIS) : 0);
 		if (attrs)
@@ -5778,6 +5777,11 @@ static void draw_line(char *path, int ncols)
 	if (dir)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 
+	if (cfg.showdetail) { /* Reversed block for hovered entry */
+		tocursor();
+		addch(' ' | A_REVERSE);
+	}
+
 	statusbar(path);
 }
 
@@ -5898,6 +5902,11 @@ static void redraw(char *path)
 	if (i < ndents) {
 		move(xlines - 2, 0);
 		addch('v');
+	}
+
+	if (cfg.showdetail) { /* Reversed block for hovered entry */
+		tocursor();
+		addch(' ' | A_REVERSE);
 	}
 
 	statusbar(path);
