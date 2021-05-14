@@ -6,16 +6,11 @@
 # Shell: POSIX Compliant
 # Author: juacq97
 
-cmd_exists () {
-	which "$1" > /dev/null 2>&1
-	echo $?
-}
-
 if [ -n "$1" ]; then
 	if [ "$(file --mime-type "$1" | awk '{print $NF}' | awk -F '/' '{print $1}')" = "image" ]; then
-        if [ "$(cmd_exists nitrogen)" -eq "0" ]; then
+        if type nitrogen >/dev/null 2>&1; then
 	        nitrogen --set-zoom-fill --save "$1"
-        elif [ "$(cmd_exists wal)" -eq "0" ]; then
+        elif type wal >/dev/null 2>&1; then
 	        wal -i "$1"
         else
             printf "nitrogen ir pywal missing"

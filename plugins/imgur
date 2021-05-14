@@ -117,23 +117,23 @@ fi
 
 # dependency check
 if [ "${1}" = "--check" ]; then
-  (which grep &>/dev/null && echo "OK: found grep") || echo "ERROR: grep not found"
+  (type grep &>/dev/null && echo "OK: found grep") || echo "ERROR: grep not found"
   if is_mac; then
-    if which growlnotify &>/dev/null; then
+    if type growlnotify &>/dev/null; then
       echo "OK: found growlnotify"
-    elif which terminal-notifier &>/dev/null; then
+    elif type terminal-notifier &>/dev/null; then
       echo "OK: found terminal-notifier"
     else
       echo "ERROR: growlnotify nor terminal-notifier found"
     fi
-    (which screencapture &>/dev/null && echo "OK: found screencapture") || echo "ERROR: screencapture not found"
-    (which pbcopy &>/dev/null && echo "OK: found pbcopy") || echo "ERROR: pbcopy not found"
+    (type screencapture &>/dev/null && echo "OK: found screencapture") || echo "ERROR: screencapture not found"
+    (type pbcopy &>/dev/null && echo "OK: found pbcopy") || echo "ERROR: pbcopy not found"
   else
-    (which notify-send &>/dev/null && echo "OK: found notify-send") || echo "ERROR: notify-send (from libnotify-bin) not found"
-    (which scrot &>/dev/null && echo "OK: found scrot") || echo "ERROR: scrot not found"
-    (which xclip &>/dev/null && echo "OK: found xclip") || echo "ERROR: xclip not found"
+    (type notify-send &>/dev/null && echo "OK: found notify-send") || echo "ERROR: notify-send (from libnotify-bin) not found"
+    (type scrot &>/dev/null && echo "OK: found scrot") || echo "ERROR: scrot not found"
+    (type xclip &>/dev/null && echo "OK: found xclip") || echo "ERROR: xclip not found"
   fi
-  (which curl &>/dev/null && echo "OK: found curl") || echo "ERROR: curl not found"
+  (type curl &>/dev/null && echo "OK: found curl") || echo "ERROR: curl not found"
   exit 0
 fi
 
@@ -141,7 +141,7 @@ fi
 # notify <'ok'|'error'> <title> <text>
 function notify() {
   if is_mac; then
-    if which growlnotify &>/dev/null; then
+    if type growlnotify &>/dev/null; then
       growlnotify  --icon "${imgur_icon_path}" --iconpath "${imgur_icon_path}" --title "${2}" --message "${3}"
     else
       terminal-notifier -appIcon "${imgur_icon_path}" -contentImage "${imgur_icon_path}" -title "imgur: ${2}" -message "${3}"

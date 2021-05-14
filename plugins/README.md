@@ -291,7 +291,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
     printf "pattern: "
     read -r pattern
 
-    if ! [ -z "$pattern" ]; then
+    if [ -n "$pattern" ]; then
         printf "%s" "+l" > "$NNN_PIPE"
         eval "fd -HI $pattern -0" > "$NNN_PIPE"
     fi
@@ -306,7 +306,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
     printf "pattern: "
     read -r pattern
 
-    if ! [ -z "$pattern" ]; then
+    if [ -n "$pattern" ]; then
         printf "%s" "+l" > "$NNN_PIPE"
         eval "rg -l0 --hidden -S $pattern" > "$NNN_PIPE"
     fi

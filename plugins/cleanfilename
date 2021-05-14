@@ -2,7 +2,7 @@
 
 # Description: Clean filename or dirname (either hovered or selections)
 #              to be more shell-friendly. This script cleans
-#              any character which is not A-Za-z0-9._-
+#              non A-Za-z0-9._- characters.
 #              and replaces it with underscore (_).
 #
 #              It supports cleaning single/double quote, newline,
@@ -15,7 +15,7 @@
 #                qwe\trty                    -> __qwe_rty
 #
 #              And if there are two almost similar filenames
-#              like: 'asd]f' and 'asd f' which both will be renamed to 'asd_f',
+#              like: 'asd]f' and 'asd f' both will be renamed to 'asd_f',
 #              to avoid overwriting, the last file will be prepended by _.
 #              So they will be: 'asd_f' and '_asd_f'
 #

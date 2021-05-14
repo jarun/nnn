@@ -7,7 +7,7 @@
 # Author: Arun Prakash Jana
 
 if [ -n "$1" ]; then
-    if which hx >/dev/null 2>&1; then
+    if type hx >/dev/null 2>&1; then
         hx "$1"
     else
         xxd "$1" | $PAGER

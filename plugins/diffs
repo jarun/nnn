@@ -12,7 +12,7 @@
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
-if which nvim >/dev/null 2>&1; then
+if type nvim >/dev/null 2>&1; then
     diffcmd="nvim -d"
 else
     diffcmd="vimdiff +0"

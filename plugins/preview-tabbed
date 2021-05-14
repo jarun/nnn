@@ -54,11 +54,11 @@ PAGER=${PAGER:-"vim -R"}
 NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
 
 
-if which xterm >/dev/null 2>&1 ; then
+if type xterm >/dev/null 2>&1 ; then
     TERMINAL="xterm -into"
-elif which urxvt >/dev/null 2>&1 ; then
+elif type urxvt >/dev/null 2>&1 ; then
     TERMINAL="urxvt -embed"
-elif which st >/dev/null 2>&1 ; then
+elif type st >/dev/null 2>&1 ; then
     TERMINAL="st -w"
 else
     echo "No xembed term found" >&2
@@ -142,28 +142,28 @@ previewer_loop () {
 
         case "$MIME" in
             video/*)
-                if which mpv >/dev/null 2>&1 ; then
+                if type mpv >/dev/null 2>&1 ; then
                     mpv --force-window=immediate --loop-file --wid="$XID" "$FILE" &
                 else
                     term_nuke "$XID" "$FILE"
                 fi
                 ;;
             audio/*)
-                if which mpv >/dev/null 2>&1 ; then
+                if type mpv >/dev/null 2>&1 ; then
                     mpv --force-window=immediate --loop-file --wid="$XID" "$FILE" &
                 else
                     term_nuke "$XID" "$FILE"
                 fi
                 ;;
             image/*)
-                if which sxiv >/dev/null 2>&1 ; then
+                if type sxiv >/dev/null 2>&1 ; then
                     sxiv -e "$XID" "$FILE" &
                 else
                     term_nuke "$XID" "$FILE"
                 fi
                 ;;
             application/pdf)
-                if which zathura >/dev/null 2>&1 ; then
+                if type zathura >/dev/null 2>&1 ; then
                     zathura -e "$XID" "$FILE" &
                 else
                     term_nuke "$XID" "$FILE"
