@@ -12,7 +12,8 @@
 # Authors: Marty Buchaus, Dave Snider, Tim Adler
 
 if [ ! -p "$NNN_PIPE" ]; then
-    echo 'ERROR: NNN_PIPE is not set' | ${PAGER:-less}
+    printf 'ERROR: NNN_PIPE is not set!'
+    read -r _
     exit 2
 fi
 
