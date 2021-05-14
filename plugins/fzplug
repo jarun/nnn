@@ -33,8 +33,7 @@ if [ -z "$(command -v bat)" ]; then
 else
     plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" \
         -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview \
-        'bat --terminal-width="$(tput cols)" --decorations=always --color=always \
-             --style="${BAT_STYLE:-header,numbers}" {}' \
+        'bat --terminal-width="$(tput cols)" --decorations=always --color=always --style="${BAT_STYLE:-header,numbers}" {}' \
         --preview-window right:66% --delimiter / --with-nth -1 \
         --bind="?:toggle-preview")
 fi
