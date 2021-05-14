@@ -113,7 +113,7 @@ startpreview() {
             --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" --env "TMPDIR=$TMPDIR" \
             --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" --env "TERMINAL=$TERMINAL"\
             --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=${BAT_STYLE:-numbers}" \
-            --env "PAGERPID=$PAGERPID" --env "GIFPID=$GIFPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
+            --env "PAGERPID=$PAGERPID" --env "IMGPID=$IMGPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
             --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" >/dev/null
     elif [ -n "$2" ]; then
         QUICKLOOK=1 QLPATH="$2" PREVIEW_MODE=1 "$0" "$1" >/dev/null &
@@ -180,6 +180,31 @@ print_bin_info() {
     fi
 }
 
+handle_mime() {
+    case "$2" in
+        image/*) image_preview "$cols" "$lines" "$1" ;;
+        application/zip) fifo_pager unzip -l "$1" ;;
+        text/troff)
+            if exists man; then
+                fifo_pager man -Pcat -l "$1"
+            else
+                fifo_pager pager "$1"
+            fi ;;
+        *) handle_ext "$1" "$3" "$4" ;;
+    esac
+}
+
+handle_ext() {
+    case "$2" in
+        gz|bz2) fifo_pager tar -tvf "$1" ;;
+        *) if [ "$3" = "bin" ]; then
+               fifo_pager print_bin_info "$1"
+           else
+               fifo_pager pager "$1"
+           fi ;;
+    esac
+}
+
 preview_file () {
     clear
     # Trying to use pistol if it's available.
@@ -223,29 +248,16 @@ preview_file () {
             fifo_pager ls -F --directories-first --color=always
         fi
     elif [ "${encoding#*)}" = "binary" ]; then
-        if [ "${mimetype%%/*}" = "image" ]; then
-            image_preview "$cols" "$lines" "$1"
-        elif [ "$mimetype" = "application/zip" ]; then
-            fifo_pager unzip -l "$1"
-        elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ]; then
-            fifo_pager tar -tvf "$1"
-        else
-            fifo_pager print_bin_info "$1"
-        fi
-    elif [ "$mimetype" = "text/troff" ]; then
-        if exists man; then
-            fifo_pager man -Pcat -l "$1"
-        else
-            fifo_pager pager "$1"
-        fi
+        handle_mime "$1" "$mimetype" "$ext" "bin"
     else
-        fifo_pager pager "$1"
+        handle_mime "$1" "$mimetype" "$ext"
     fi
 }
 
 image_preview() {
     if [ "$TERMINAL" = "kitty" ]; then
-        # Kitty terminal users can use the native image preview method.
+        # Kitty terminal users can use the native image preview method although one might consider
+        # installing ueberzug and moving the ueberzug clause to the top since it performs alot better.
         kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
         printf "%s" "$!" > "$IMGPID"
     elif [ -n "$QLPATH" ] && stat "$3" >/dev/null 2>&1; then

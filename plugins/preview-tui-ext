@@ -131,7 +131,7 @@ startpreview() {
             --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" --env "TMPDIR=$TMPDIR" \
             --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" --env "TERMINAL=$TERMINAL"\
             --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=${BAT_STYLE:-numbers}" \
-            --env "PAGERPID=$PAGERPID" --env "GIFPID=$GIFPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
+            --env "PAGERPID=$PAGERPID" --env "IMGPID=$IMGPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
             --env "ICONLOOKUP=$ICONLOOKUP" --env "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
             --env "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" --env "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
             --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" >/dev/null
@@ -200,6 +200,63 @@ print_bin_info() {
     fi
 }
 
+handle_mime() {
+    case "$2" in
+        image/jpg) image_preview "$cols" "$lines" "$1" ;;
+        image/gif) generate_preview "$cols" "$lines" "$1" "gif" ;;
+        image/*) generate_preview "$cols" "$lines" "$1" "image" ;;
+        video/*) generate_preview "$cols" "$lines" "$1" "video" ;;
+        audio/*) generate_preview "$cols" "$lines" "$1" "audio" ;;
+        application/font*|application/*opentype) generate_preview "$cols" "$lines" "$1" "font" ;;
+        */*office*|*/*document*) generate_preview "$cols" "$lines" "$1" "office" ;;
+        application/zip) fifo_pager unzip -l "$1" ;;
+        text/troff)
+            if exists man; then
+                fifo_pager man -Pcat -l "$1"
+            else
+                fifo_pager pager "$1"
+            fi ;;
+        *) handle_ext "$1" "$3" "$4" ;;
+    esac
+}
+
+handle_ext() {
+    case "$2" in
+        epub) generate_preview "$cols" "$lines" "$1" "epub" ;;
+        pdf) generate_preview "$cols" "$lines" "$1" "pdf" ;;
+        gz|bz2) fifo_pager tar -tvf "$1" ;;
+        md) if exists glow; then
+                fifo_pager glow -s dark "$1"
+            elif exists lowdown; then
+                fifo_pager lowdown -Tterm "$1"
+            else
+                fifo_pager pager "$1"
+            fi ;;
+        htm|html|xhtml)
+            if exists w3m; then
+                fifo_pager w3m "$1"
+            elif exists lynx; then
+                fifo_pager lynx "$1"
+            elif exists elinks; then
+                fifo_pager elinks "$1"
+            else
+                fifo_pager pager "$1"
+            fi ;;
+        7z|a|ace|alz|arc|arj|bz|cab|cpio|deb|jar|lha|lz|lzh|lzma|lzo\
+        |rar|rpm|rz|t7z|tar|tbz|tbz2|tgz|tlz|txz|tZ|tzo|war|xpi|xz|Z)
+            if exists atool; then
+                fifo_pager atool -l "$1"
+            elif exists bsdtar; then
+                fifo_pager bsdtar -tvf "$1"
+            fi ;;
+        *) if [ "$3" = "bin" ]; then
+               fifo_pager print_bin_info "$1"
+           else
+               fifo_pager pager "$1"
+           fi ;;
+    esac
+}
+
 preview_file() {
     clear
     # Trying to use pistol if it's available.
@@ -226,9 +283,7 @@ preview_file() {
     encoding="$(file -bL --mime-encoding -- "$1")"
     mimetype="$(file -bL --mime-type -- "$1")"
     ext="${1##*.}"
-    if [ -n "$ext" ]; then
-        ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
-    fi
+    [ -n "$ext" ] && ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
     lines=$(tput lines)
     cols=$(tput cols)
 
@@ -248,68 +303,9 @@ preview_file() {
             fifo_pager ls -F --group-directories-first --color=always
         fi
     elif [ "${encoding#*)}" = "binary" ]; then
-        if [ "${mimetype%%/*}" = "image" ]; then
-            if [ "${mimetype#*/}" = "gif" ]; then
-                generate_preview "$cols" "$lines" "$1" "gif"
-            elif [ "${mimetype#*/}" != "jpeg" ]; then
-                generate_preview "$cols" "$lines" "$1" "image"
-            else
-                image_preview "$cols" "$lines" "$1"
-            fi
-        elif [ "${mimetype%%/*}" = "audio" ]; then
-            generate_preview "$cols" "$lines" "$1" "audio"
-        elif [ "${mimetype%%/*}" = "video" ]; then
-            generate_preview "$cols" "$lines" "$1" "video"
-        elif [ "$ext" = "pdf" ]; then
-            generate_preview "$cols" "$lines" "$1" "pdf"
-        elif [ "$ext" = "epub" ]; then
-            generate_preview "$cols" "$lines" "$1" "epub"
-        elif [ "${mimetype#*opentype}" != "$mimetype" ] || [ "${mimetype#*font}" != "$mimetype" ]; then
-            generate_preview "$cols" "$lines" "$1" "font"
-        elif [ "${mimetype#*office}" != "$mimetype" ] || [ "${mimetype#*document}" != "$mimetype" ]; then
-            generate_preview "$cols" "$lines" "$1" "office"
-        elif [ "$mimetype" = "application/zip" ]; then
-            fifo_pager unzip -l "$1"
-        elif [ "$ext" = "gz" ] || [ "$ext" = "bz2" ]; then
-            fifo_pager tar -tvf "$1"
-        else
-            case "$ext" in
-                7z|a|ace|alz|arc|arj|bz|cab|cpio|deb|jar|lha|lz|lzh|lzma|lzo\
-                |rar|rpm|rz|t7z|tar|tbz|tbz2|tgz|tlz|txz|tZ|tzo|war|xpi|xz|Z)
-                    if exists atool; then
-                        fifo_pager atool -l "$1"
-                    elif exists bsdtar; then
-                        fifo_pager bsdtar -tvf "$1"
-                    fi ;;
-                *) fifo_pager print_bin_info "$1" ;;
-            esac
-        fi
-    elif [ "$ext" = "md" ]; then
-        if exists glow; then
-            fifo_pager glow -s dark "$1"
-        elif exists lowdown; then
-            fifo_pager lowdown -Tterm "$1"
-        else
-            fifo_pager pager "$1"
-        fi
-    elif [ "$ext" = "htm" ] || [ "$ext" = "html" ] || [ "$ext" = "xhtml" ]; then
-        if exists w3m; then
-            fifo_pager w3m "$1"
-        elif exists lynx; then
-            fifo_pager lynx "$1"
-        elif exists elinks; then
-            fifo_pager elinks "$1"
-        else
-            fifo_pager pager "$1"
-        fi
-    elif [ "$mimetype" = "text/troff" ]; then
-        if exists man; then
-            fifo_pager man -Pcat -l "$1"
-        else
-            fifo_pager pager "$1"
-        fi
+        handle_mime "$1" "$mimetype" "$ext" "bin"
     else
-        fifo_pager pager "$1"
+        handle_mime "$1" "$mimetype" "$ext"
     fi
 }
 
@@ -357,7 +353,8 @@ generate_preview() {
 image_preview() {
     clear
     if [ "$TERMINAL" = "kitty" ]; then
-        # Kitty terminal users can use the native image preview method.
+        # Kitty terminal users can use the native image preview method although one might consider
+        # installing ueberzug and moving the ueberzug clause to the top since it performs alot better.
         kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
         printf "%s" "$!" > "$IMGPID"
     elif exists ueberzug; then
