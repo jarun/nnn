@@ -5726,6 +5726,14 @@ static void statusbar(char *path)
 		tocursor();
 }
 
+static inline void markhovered(void)
+{
+	if (cfg.showdetail && ndents) { /* Reversed block for hovered entry */
+		tocursor();
+		addch(' ' | A_REVERSE);
+	}
+}
+
 static int adjust_cols(int n)
 {
 	/* Calculate the number of cols available to print entry name */
@@ -5777,10 +5785,7 @@ static void draw_line(char *path, int ncols)
 	if (dir)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 
-	if (cfg.showdetail) { /* Reversed block for hovered entry */
-		tocursor();
-		addch(' ' | A_REVERSE);
-	}
+	markhovered();
 
 	statusbar(path);
 }
@@ -5904,10 +5909,7 @@ static void redraw(char *path)
 		addch('v');
 	}
 
-	if (cfg.showdetail) { /* Reversed block for hovered entry */
-		tocursor();
-		addch(' ' | A_REVERSE);
-	}
+	markhovered();
 
 	statusbar(path);
 }
