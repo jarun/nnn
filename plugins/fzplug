@@ -6,14 +6,13 @@
 #
 # For better compatibility with as many nnn plugins as possible, fzplug will first execute
 # the chosen script on the file hovered in nnn, and upon failure, try to run it with no target
-# (which should actually run it on selected files if nnn has an active selection). I don't
-# have the required dependencies to confirm compatibility with all scripts though.
+# (i.e on an active selection, if present).
 #
 # Dependencies: find, fzf, cat (or bat, if installed)
 # Shell: POSIX compliant
 # Author: Kabouik
 
-# OPTIONAL SCRIPTS SOURCES
+# Optional scripts sources
 # Leave blank or fill with the absolute path of a folder containing executable scripts other than nnn plugins
 # (e.g., "$HOME/.local/share/nautilus/scripts", since there are numerous Nautilus script git repositories).
 # Add extra variables if need be, but be sure to call them in the find command below at lines 29:62 and 34:62.
@@ -21,10 +20,9 @@
 CUSTOMDIR1=""
 CUSTOMDIR2=""
 
-# REQUIRED VARIABLES
 nnnpluginsdir="$HOME/.config/nnn/plugins"
 
-# PREVIEW WITH bat INSTEAD OF cat IF INSTALLED
+# Preview with bat if installed
 if [ -z "$(command -v bat)" ]; then
     plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" \
         -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview \
@@ -38,18 +36,19 @@ else
         --bind="?:toggle-preview")
 fi
 
-# TRY RUNNING THE SCRIPT ON HOVERED FILE FIRST, AND ABORT IF NO PLUGIN WAS SELECTED IN FZFPLUG (ESC OR ^C),
+# Try running the script on the hovered file, and abort if no plugin was selected (ESC or ^C pressed),
 err=0
 if ! [ "$plugin" = "" ]; then
     "$plugin" "$1" || err=1
 fi
 
-# IF THAT FAILS WITH HOVERED FILE, TRY WITH NO TARGET (nnn SELECTIONS SHOULD STILL BE PASSED TO THE SCRIPT IN THAT CASE)
+# If attempt with hovered file fails, try without any target
+# (nnn selections should still be passed to the script int hat case)
 if [ "$err" -eq "1" ]; then
     clear && "$plugin" || err=2
 fi
 
-# IF THAT FAILS TOO, ABORT AND SHOW AN ERROR
+# Abort and show error if both fail
 if [ "$err" -eq "2" ]; then
     sep="\n---\n"
     printf "$sep""Failed to execute '%s'. See error above or try without fzfplug. Press return to continue. " "$plugin" && read -r _ && clear

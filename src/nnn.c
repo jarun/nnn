@@ -3765,8 +3765,7 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 				(char)('0' + ((ent->mode >> 3) & 7)),
 				(char)('0' + (ent->mode & 7)), '\0'};
 
-		addch(sel ? ' ' | A_REVERSE : ' '); /* Reversed block for hovered entry */
-
+		addch(' ');
 		attrs = g_state.oldcolor ? (resetdircolor(ent->flags), A_DIM)
 					 : (fcolors[C_MIS] ? COLOR_PAIR(C_MIS) : 0);
 		if (attrs)
@@ -5727,6 +5726,14 @@ static void statusbar(char *path)
 		tocursor();
 }
 
+static inline void markhovered(void)
+{
+	if (cfg.showdetail && ndents) { /* Reversed block for hovered entry */
+		tocursor();
+		addch(' ' | A_REVERSE);
+	}
+}
+
 static int adjust_cols(int n)
 {
 	/* Calculate the number of cols available to print entry name */
@@ -5777,6 +5784,8 @@ static void draw_line(char *path, int ncols)
 	/* Must reset e.g. no files in dir */
 	if (dir)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+
+	markhovered();
 
 	statusbar(path);
 }
@@ -5882,8 +5891,10 @@ static void redraw(char *path)
 		g_state.dircolor = 1;
 	}
 
+	onscreen = MIN(onscreen + curscroll, ndents);
+
 	/* Print listing */
-	for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i) {
+	for (i = curscroll; i < onscreen; ++i) {
 		move(++j, 0);
 		printent(&pdents[i], ncols, i == cur);
 	}
@@ -5899,6 +5910,8 @@ static void redraw(char *path)
 		move(xlines - 2, 0);
 		addch('v');
 	}
+
+	markhovered();
 
 	statusbar(path);
 }
@@ -6565,8 +6578,10 @@ nochange:
 			if (ndents) {
 				copycurname();
 
-				if (r == 'd' || r == 'a')
+				if (r == 'd' || r == 'a') {
+					presel = 0;
 					goto begin;
+				}
 
 				ENTSORT(pdents, ndents, entrycmpfn);
 				move_cursor(ndents ? dentfind(lastname, ndents) : 0, 0);

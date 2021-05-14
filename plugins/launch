@@ -24,7 +24,7 @@
 IFS=':'
 
 get_selection() {
-    if which fzf >/dev/null 2>&1; then
+    if type fzf >/dev/null 2>&1; then
         { IFS=':'; ls -H $PATH; } | sort | fzf
     else
         exit 1

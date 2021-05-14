@@ -14,15 +14,15 @@ read -r psname
 
 # shellcheck disable=SC2009
 if [ -n "$psname" ]; then
-    if which sudo >/dev/null 2>&1; then
+    if type sudo >/dev/null 2>&1; then
         sucmd=sudo
-    elif which doas >/dev/null 2>&1; then
+    elif type doas >/dev/null 2>&1; then
         sucmd=doas
     else
         sucmd=: # noop
     fi
 
-    if which fzf >/dev/null 2>&1; then
+    if type fzf >/dev/null 2>&1; then
         fuzzy=fzf
     else
         exit 1

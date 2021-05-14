@@ -11,38 +11,38 @@
 # TODO: Try better avoiding lazy unmount by forcing nnn context to leave the subfolder before fusermount.
 # I tried `printf "%s" "0c$m" > "$NNN_PIPE"` but this would break nnn UI all the time, see #854.
 
-# ENVIRONMENT
 err=0
 m=$HOME/.config/nnn/mounts
-if [ "$PWD" = "$m" ]; then  # ALLOW USING THE SCRIPT ON HOVERED DIRECTORY IF USER IS IN ~/.config/nnn/mounts
+if [ "$PWD" = "$m" ]; then
+    # Allow running the script on hovered directory if user is in ~/.config/nnn/mounts
     d="$1"
 else
     d=$(dirname "$(readlink -f "$1")" | grep -oP "^$m\K.*" | cut -d"/" -f2)
 fi
 
-# TEST IF USER IS CURRENTLY WITHIN $m OR A SUBFOLDER, ABORT IF NOT
-    if [ "$d" = "" ]; then
-        clear && printf "You are not in a remote folder mounted with nnn. Press return to continue. " && read -r _
+# Test if user is within $m or a subdir, abort if not
+if [ "$d" = "" ]; then
+    clear && printf "You are not in a remote folder mounted with nnn. Press return to continue. " && read -r _
+else
+    # Test if $m/$d is a mountpoint and try unmounting if it is
+    mountpoint -q -- "$m/$d"
+    if [ "$?" -eq "1" ]; then
+        clear && printf "Parent '%s' is not a mountpoint. Press return to continue. " "$d" && read -r _
     else
-        # TEST IF $m/$d IS A MOUNTPOINT AND TRY UNMOUNTING IF YES
-        mountpoint -q -- "$m/$d"
-        if [ "$?" -eq "1" ]; then
-            clear && printf "Parent '%s' is not a mountpoint. Press return to continue. " "$d" && read -r _
-        else
-            cd "$m" && fusermount -uq "$m/$d" || err=1
-            if [ "$err" -eq "0" ]; then
-                rmdir "$m/$d" && clear && printf "Parent '%s' unmounted." "$d"
-            else
-                clear && printf "Failed to unmount. Try lazy unmount? [Yy/Nn] " && read -r
-            fi
-        fi
-    fi
-
-# IF FAILURE TO UNMOUNT, OFFER TO TRY LAZY UNMOUNT
-    if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then 
-        err=0
-        cd "$m" && fusermount -uqz "$m/$d" || err=1
+        cd "$m" && fusermount -uq "$m/$d" || err=1
         if [ "$err" -eq "0" ]; then
-            rmdir "$m/$d" && clear && printf "Parent '%s' unmounted with lazy unmount. " "$d"
+            rmdir "$m/$d" && clear && printf "Parent '%s' unmounted." "$d"
+        else
+            clear && printf "Failed to unmount. Try lazy unmount? [Yy/Nn] " && read -r
         fi
     fi
+fi
+
+# If unmount fails, offer lazy unmount
+if [ "$REPLY" = "y" ] || [ "$REPLY" = "Y" ]; then
+    err=0
+    cd "$m" && fusermount -uqz "$m/$d" || err=1
+    if [ "$err" -eq "0" ]; then
+        rmdir "$m/$d" && clear && printf "Parent '%s' unmounted with lazy unmount. " "$d"
+    fi
+fi

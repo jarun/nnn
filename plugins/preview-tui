@@ -71,7 +71,7 @@ TMPDIR="${TMPDIR:-/tmp}"
 startpreview() {
     NUMPREVIEWTUI="$(($(find "$TMPDIR" -maxdepth 1 -name 'nnn-preview-tui-pagerpid*' 2>/dev/null | wc -l) + 1))"
     PAGERPID="$TMPDIR/nnn-preview-tui-pagerpid.$NUMPREVIEWTUI"
-    GIFPID="$TMPDIR/nnn-preview-tui-gifpid.$NUMPREVIEWTUI"
+    IMGPID="$TMPDIR/nnn-preview-tui-gifpid.$NUMPREVIEWTUI"
     CURSEL="$TMPDIR/nnn-preview-tui-selection.$NUMPREVIEWTUI"
     FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NUMPREVIEWTUI"
 
@@ -97,7 +97,7 @@ startpreview() {
 
         tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e "PAGER=$PAGER" \
             -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
-            -e "PAGERPID=$PAGERPID" -e "GIFPID=$GIFPID" -e "CURSEL=$CURSEL" -e "TMPDIR=$TMPDIR" \
+            -e "PAGERPID=$PAGERPID" -e "IMGPID=$IMGPID" -e "CURSEL=$CURSEL" -e "TMPDIR=$TMPDIR" \
             -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$QLPATH" -d"$SPLIT" "$0" "$1"
     elif [ "$TERMINAL" = "kitty" ]; then
         # Setting the layout for the new window. It will be restored after the
@@ -117,7 +117,7 @@ startpreview() {
     elif [ -n "$2" ]; then
         QUICKLOOK=1 QLPATH="$2" PREVIEW_MODE=1 "$0" "$1" >/dev/null &
     else
-        PAGERPID="$PAGERPID" GIFPID="$GIFPID" CURSEL="$CURSEL" PREVIEW_MODE=1 \
+        PAGERPID="$PAGERPID" IMGPID="$IMGPID" CURSEL="$CURSEL" PREVIEW_MODE=1 \
             FIFO_UEBERZUG="$FIFO_UEBERZUG" $TERMINAL -e "$0" "$1" 2>/dev/null &
     fi
 }
@@ -138,7 +138,7 @@ togglepreview() {
 }
 
 exists() {
-    which "$1" >/dev/null 2>&1
+    type "$1" >/dev/null 2>&1
 }
 
 fifo_pager() {
@@ -245,18 +245,18 @@ preview_file () {
 image_preview() {
     if [ "$TERMINAL" = "kitty" ]; then
         # Kitty terminal users can use the native image preview method.
-        kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no \
-            "$3"
+        kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
+        printf "%s" "$!" > "$IMGPID"
     elif [ -n "$QLPATH" ] && stat "$3" >/dev/null 2>&1; then
         f="$(wslpath -w "$3" 2>&1)" && "$QLPATH" "$f" &
     elif exists ueberzug; then
         ueberzug_layer "$1" "$2" "$3"
     elif exists catimg; then
         catimg "$3" &
-        printf "%s" "$!" > "$GIFPID"
+        printf "%s" "$!" > "$IMGPID"
     elif exists viu; then
         viu -t "$3" &
-        printf "%s" "$!" > "$GIFPID"
+        printf "%s" "$!" > "$IMGPID"
     else
         fifo_pager print_bin_info "$3"
     fi
@@ -272,7 +272,7 @@ ueberzug_remove() {
 
 ueberzug_refresh() {
     clear
-    kill "$(cat "$GIFPID" 2>/dev/null)" >/dev/null 2>&1
+    kill "$(cat "$IMGPID" 2>/dev/null)" >/dev/null 2>&1
     pkill -P "$$" >/dev/null 2>&1
     pkill -f -n preview-tui-ext >/dev/null 2>&1
     tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
@@ -287,16 +287,16 @@ preview_fifo() {
     # shellcheck disable=SC2002
     cat "$NNN_FIFO" |\
     while read -r selection; do
-        kill "$(cat "$GIFPID" 2>/dev/null)" >/dev/null 2>&1
+        kill "$(cat "$IMGPID" 2>/dev/null)" >/dev/null 2>&1
         kill "$(cat "$PAGERPID" 2>/dev/null)" >/dev/null 2>&1
         [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
         preview_file "$selection"
         printf "%s" "$selection" > "$CURSEL"
     done
-    kill "$(cat "$GIFPID" 2>/dev/null)" >/dev/null 2>&1
+    kill "$(cat "$IMGPID" 2>/dev/null)" >/dev/null 2>&1
     kill "$(cat "$PAGERPID" 2>/dev/null)" >/dev/null 2>&1
     [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
-    rm "$PAGERPID" "$GIFPID" "$CURSEL" "$FIFO_UEBERZUG" >/dev/null 2>&1
+    rm "$PAGERPID" "$IMGPID" "$CURSEL" "$FIFO_UEBERZUG" >/dev/null 2>&1
     pkill -P "$$" >/dev/null 2>&1
 }
 
@@ -306,7 +306,7 @@ if [ "$PREVIEW_MODE" ]; then
         trap 'ueberzug_refresh; rm "$FIFO_UEBERZUG"' WINCH
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
-    trap 'rm "$PAGERPID" "$GIFPID" "$CURSEL" "$FIFO_UEBERZUG" 2>/dev/null' INT HUP EXIT
+    trap 'rm "$PAGERPID" "$IMGPID" "$CURSEL" "$FIFO_UEBERZUG" 2>/dev/null' INT HUP EXIT
 
     preview_file "$PWD/$1"
     printf "%s" "$PWD/$1" > "$CURSEL" &

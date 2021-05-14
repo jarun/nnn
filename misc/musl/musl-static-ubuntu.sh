@@ -5,8 +5,10 @@
 # netbsd-curses: https://github.com/sabotage-linux/netbsd-curses
 # musl libc: https://www.musl-libc.org/
 #
+# Dependencies: git
+#
 # Notes:
-#   - Run the script within the top-level nnn directory
+#   - run the script within the top-level nnn directory
 #   - installs musl and downloads netbsd-curses library
 #
 # Tested on Ubuntu 20.04 x86_64
@@ -22,12 +24,21 @@ BIN=nnn-musl-static
 sudo apt install -y --no-install-recommends musl musl-dev musl-tools
 
 # Get netbsd-curses
-[ ! -d "./netbsd-curses" ] && git clone https://github.com/sabotage-linux/netbsd-curses --depth=1
+[ ! -d "./netbsd-curses" ] && git clone https://github.com/sabotage-linux/netbsd-curses
 
-# Compile the static libraries
+# Enter the library dir
 cd netbsd-curses
-[ ! -d "./libs" ] && mkdir libs || rm -vf libs/*
-make CC=musl-gcc CFLAGS=-O3 LDFLAGS=-static all-static -j$((`nproc`+1))
+
+# Get the last known good commit before cursor stuck issue is introduced
+git checkout f1fa19a1f36a25d0971b3d08449303e6af6f3da5
+
+# Compile the static netbsd-curses libraries
+if [ ! -d "./libs" ]; then
+    mkdir libs
+else
+    rm -vf libs/*
+fi
+make CC=musl-gcc CFLAGS=-O3 LDFLAGS=-static all-static -j$(($(nproc)+1))
 cp -v libcurses/libcurses.a libterminfo/libterminfo.a libs/
 
 # Compile nnn

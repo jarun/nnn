@@ -17,7 +17,7 @@
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 resp=f
 all=
-if which dragon-drag-and-drop >/dev/null 2>&1; then
+if type dragon-drag-and-drop >/dev/null 2>&1; then
     dnd="dragon-drag-and-drop"
 else
     dnd="dragon"

@@ -8,13 +8,8 @@
 CONFIG_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/
 PLUGIN_DIR=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins
 
-# is_cmd_exists () {
-#     which "$1" > /dev/null 2>&1
-#     echo $?
-# }
-
 merge () {
-	if which nvim >/dev/null 2>&1; then
+	if type nvim >/dev/null 2>&1; then
 		nvim -d "$1" "$2"
 	else
 		vimdiff +0 "$1" "$2"
@@ -35,18 +30,10 @@ prompt () {
 	fi
 }
 
-# if [ "$(is_cmd_exists sudo)" -eq "0" ]; then
-#     sucmd=sudo
-# elif [ "$(is_cmd_exists doas)" -eq "0" ]; then
-#     sucmd=doas
-# else
-#     sucmd=: # noop
-# fi
-
 if [ "$1" = "master" ] ; then
     VER="master"
     ARCHIVE_URL=https://github.com/jarun/nnn/archive/master.tar.gz
-elif which nnn >/dev/null 2>&1; then
+elif type nnn >/dev/null 2>&1; then
     VER=$(nnn -V)
     ARCHIVE_URL=https://github.com/jarun/nnn/releases/download/v"$VER"/nnn-v"$VER".tar.gz
 else
