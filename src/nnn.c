@@ -6574,8 +6574,10 @@ nochange:
 			if (ndents) {
 				copycurname();
 
-				if (r == 'd' || r == 'a')
+				if (r == 'd' || r == 'a') {
+					presel = 0;
 					goto begin;
+				}
 
 				ENTSORT(pdents, ndents, entrycmpfn);
 				move_cursor(ndents ? dentfind(lastname, ndents) : 0, 0);
