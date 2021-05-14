@@ -129,8 +129,8 @@ startpreview() {
             --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" \
             --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" --env "TMPDIR=$TMPDIR" \
             --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" --env "TERMINAL=$TERMINAL"\
-            --env "USE_PISTOL=$USE_PISTOL" --env "PAGERPID=$PAGERPID"  \
-            --env "GIFPID=$GIFPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
+            --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=${BAT_STYLE:-numbers}" \
+            --env "PAGERPID=$PAGERPID" --env "GIFPID=$GIFPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
             --env "ICONLOOKUP=$ICONLOOKUP" --env "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
             --env "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" --env "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
             --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" >/dev/null
@@ -176,7 +176,8 @@ fifo_pager() {
         exec > "$tmpfifopath"
         if [ "$cmd" = "pager" ]; then
             if exists bat; then
-                bat --terminal-width="$(tput cols)" --paging=never --style=numbers,header,plain --color=always "$@" 2>/dev/null &
+                bat --terminal-width="$(tput cols)" --decorations=always --color=always \
+                    --paging=never --style="${BAT_STYLE:-numbers}" "$@" 2>/dev/null &
             else
                 $PAGER "$@" &
             fi

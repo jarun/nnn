@@ -16,7 +16,7 @@
 # OPTIONAL SCRIPTS SOURCES
 # Leave blank or fill with the absolute path of a folder containing executable scripts other than nnn plugins
 # (e.g., "$HOME/.local/share/nautilus/scripts", since there are numerous Nautilus script git repositories).
-# Add extra variables if need be, but be sure to call them in the find command below at lines 29:62 and 31:62.
+# Add extra variables if need be, but be sure to call them in the find command below at lines 29:62 and 34:62.
 #CUSTOMDIR1="$HOME/.local/share/nautilus/scripts"
 CUSTOMDIR1=""
 CUSTOMDIR2=""
@@ -26,9 +26,17 @@ nnnpluginsdir="$HOME/.config/nnn/plugins"
 
 # PREVIEW WITH bat INSTEAD OF cat IF INSTALLED
 if [ -z "$(command -v bat)" ]; then
-    plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview 'cat {}' --preview-window right:66%:wrap --delimiter / --with-nth -1 --bind="?:toggle-preview")
+    plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" \
+        -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview \
+        'cat {}' --preview-window right:66%:wrap --delimiter / --with-nth -1 \
+        --bind="?:toggle-preview")
 else
-    plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview 'bat --color=always --style=numbers,header,plain {}' --preview-window right:66%:wrap --delimiter / --with-nth -1 --bind="?:toggle-preview")
+    plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" \
+        -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview \
+        'bat --terminal-width="$(tput cols)" --decorations=always --color=always \
+             --style="${BAT_STYLE:-header,numbers}" {}' \
+        --preview-window right:66% --delimiter / --with-nth -1 \
+        --bind="?:toggle-preview")
 fi
 
 # TRY RUNNING THE SCRIPT ON HOVERED FILE FIRST, AND ABORT IF NO PLUGIN WAS SELECTED IN FZFPLUG (ESC OR ^C),
