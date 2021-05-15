@@ -1,21 +1,22 @@
 #!/usr/bin/env sh
 
-# Description: Fuzzy find and execute nnn plugins (and, optionally, custom scripts located elsewhere).
-# Description and details of plugins can be previewed from the fzf interface. Use `?` to toggle preview
-# pane on and off, ^Up/^Dn to scroll.
-#
-# For better compatibility with as many nnn plugins as possible, fzplug will first execute
-# the chosen script on the file hovered in nnn, and upon failure, try to run it with no target
-# (i.e on an active selection, if present).
+# Description: Fuzzy find and execute nnn plugins (and, optionally, custom scripts located elsewhere)
 #
 # Dependencies: find, fzf, cat (or bat, if installed)
+#
+# Notes : Description and details of plugins can be previewed from the fzf interface.
+#         Use `?` to toggle preview pane on and off, ^Up/^Dn to scroll.
+#         For better compatibility with as many nnn plugins as possible, fzplug will first execute
+#         the chosen script on the file hovered in nnn, and upon failure, try to run it with no target
+#         (i.e., on an active selection, if present).
+#
 # Shell: POSIX compliant
 # Author: Kabouik
 
 # Optional scripts sources
 # Leave blank or fill with the absolute path of a folder containing executable scripts other than nnn plugins
 # (e.g., "$HOME/.local/share/nautilus/scripts", since there are numerous Nautilus script git repositories).
-# Add extra variables if need be, but be sure to call them in the find command below at lines 27 and 33.
+# Add extra variables if need be, but be sure to call them in the find command below at lines 28 and 34.
 #CUSTOMDIR1="$HOME/.local/share/nautilus/scripts"
 CUSTOMDIR1=""
 CUSTOMDIR2=""
@@ -38,14 +39,14 @@ else
         --bind="?:toggle-preview")
 fi
 
-# Try running the script on the hovered file, and abort if no plugin was selected (ESC or ^C pressed),
+# Try running the script on the hovered file, and abort if no plugin was selected (ESC or ^C pressed)
 err=0
 if ! [ "$plugin" = "" ]; then
     "$plugin" "$1" || err=1
 fi
 
 # If attempt with hovered file fails, try without any target
-# (nnn selections should still be passed to the script int hat case)
+# (nnn selections should still be passed to the script in that case)
 if [ "$err" -eq "1" ]; then
     clear && "$plugin" || err=2
 fi
