@@ -5,6 +5,8 @@
 #              'n' integer associated to device to mount
 #              'q'/'Return' exit
 #
+# Dependencies: gvfs-mtp
+#
 # Notes: The MTP device should be mounted at /run/user/$UID/gvfs.
 #        Put /run/user/$UID/gvfs to bookmark entries (NNN_BMS) for faster access.
 #        Make sure the device is unlocked when mounting.
@@ -13,8 +15,6 @@
 #            cp: preserving times for './gambar1.png': Operation not supported
 #        That just means the file is copied but timestamp won't be preserved.
 #        It's like doing `cp -p localfile.txt file-to-SMB.txt`.
-#
-# Dependencies: gvfs-mtp
 #
 # Shell: POSIX compliant
 # Author: Benawi Adha

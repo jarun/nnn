@@ -1,9 +1,10 @@
 #!/usr/bin/env sh
 
 # Description: Set the selected image as wallpaper using nitrogen or pywal.
+#
 # Usage: Hover on an image and run the script to set it as wallpaper.
 #
-# Shell: POSIX Compliant
+# Shell: POSIX compliant
 # Author: juacq97
 
 if [ -n "$1" ]; then

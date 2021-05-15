@@ -32,7 +32,7 @@
 #
 # Slightly modified for `nnn` integration
 #
-# Shell: bash
+# Shell: Bash
 # Description: Upload an image file to imgur
 
 if [ "${1}" = "--debug" ]; then

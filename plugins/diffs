@@ -2,10 +2,11 @@
 
 # Description: Show diff of 2 directories or multiple files in vimdiff
 #
-# Note: 1. vim may show the warning: 'Vim: Warning: Input is not from a terminal'
-#          press 'Enter' to ignore and proceed.
-#       2. if only one file is in selection, the hovered file is considered as the
-#          second file to diff with
+# Notes:
+#   1. vim may show the warning: 'Vim: Warning: Input is not from a terminal'
+#      press 'Enter' to ignore and proceed.
+#   2. if only one file is in selection, the hovered file is considered as the
+#      second file to diff with
 #
 # Shell: POSIX compliant
 # Authors: Arun Prakash Jana, ath3

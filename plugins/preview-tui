@@ -6,28 +6,26 @@
 # For a more extended version of this script with additional optional dependencies, see preview-tui-ext.
 #
 # Dependencies:
-#    - Supports 4 independent methods to preview with:
-#        - tmux (>=3.0), or
-#        - kitty with allow_remote_control and listen_on set in kitty.conf, or
-#        - QuickLook on WSL (https://github.com/QL-Win/QuickLook)
-#        - $TERMINAL set to a terminal (it's xterm by default).
-#    - less or $PAGER
-#    - tree or exa or ls
-#    - mediainfo or file
-#    - mktemp
-#    - unzip
-#    - tar
-#    - man
-#    - optional: bat for code syntax highlighting
-#    - optional: ueberzug, kitty terminal, viu or catimg for images.
-#    - optional: scope.sh file viewer from ranger.
-#                To use:
-#                1. drop scope.sh executable in $PATH
-#                2. set/export $USE_SCOPE as 1
-#    - optional: pistol file viewer (https://github.com/doronbehar/pistol).
-#                To use:
-#                1. install pistol
-#                2. set/export $USE_PISTOL as 1
+#   - Supports 4 independent methods to preview with:
+#       - tmux (>=3.0), or
+#       - kitty with allow_remote_control and listen_on set in kitty.conf, or
+#       - QuickLook on WSL (https://github.com/QL-Win/QuickLook)
+#       - $TERMINAL set to a terminal (it's xterm by default).
+#   - less or $PAGER
+#   - tree or exa or ls
+#   - mediainfo or file
+#   - mktemp
+#   - unzip
+#   - tar
+#   - man
+#   - optional: bat for code syntax highlighting
+#   - optional: ueberzug, kitty terminal, viu or catimg for images.
+#   - optional: scope.sh file viewer from ranger.
+#       1. drop scope.sh executable in $PATH
+#       2. set/export $USE_SCOPE as 1
+#   - optional: pistol file viewer (https://github.com/doronbehar/pistol).
+#       1. install pistol
+#       2. set/export $USE_PISTOL as 1
 #
 # Usage:
 #   You need to set a NNN_FIFO path and a key for the plugin with NNN_PLUG,
@@ -39,7 +37,7 @@
 #
 #     $ NNN_FIFO=/tmp/nnn.fifo nnn
 #
-#   Then in `nnn`, launch the `preview-tui` plugin.
+#   Then launch the `preview-tui` plugin in `nnn`.
 #
 #   If you provide the same NNN_FIFO to all nnn instances, there will be a
 #   single common preview window. If you provide different FIFO path (e.g.

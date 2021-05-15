@@ -1,6 +1,5 @@
 #!/usr/bin/env sh
 
-# #############################################################################
 # Description: Sample script to play files in apps by file type or mime
 #
 # Shell: POSIX compliant
@@ -60,10 +59,9 @@
 #      text/* | */xml: vi
 #      image/vnd.djvu): djvutxt, exiftool
 #
-# ToDo:
+# TODO:
 #   1. Adapt, test and enable all mimes
 #   2. Clean-up the unnecessary exit codes
-# #############################################################################
 
 # set to 1 to enable GUI apps
 GUI="${GUI:-0}"

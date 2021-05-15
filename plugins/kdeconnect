@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
-# Description: Send the selected files to your Android device using kdeconnect-cli. You must have installed and configured kdeconnect both on the Android device and on the PC.
+# Description: Send the selected files to your Android device using kdeconnect-cli.
+#              kdeconnect must be configured on the Android device and the PC.
 #
 # Shell: POSIX compliant
 # Author: juacq97

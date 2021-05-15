@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
-# Description: Allows for creation of multiple files/directories at the same time.
-#              Plugin opens a temp file where each entry is to be written on a separate line
+# Description: Allows for creation of multiple files/dirs simultaneously
+#              Creates a tmp file to write each entry in a separate line
 #
 # Note: Only relative paths are supported. Absolute paths are ignored
 #       Leading and trailing whitespace in path names is also ignored

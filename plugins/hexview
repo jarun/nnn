@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
 # Description: View a file in hex
+#
 # Dependencies: hx (https://github.com/krpors/hx)/xxd and $PAGER
 #
 # Shell: POSIX compliant

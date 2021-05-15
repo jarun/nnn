@@ -2,9 +2,11 @@
 
 # Description: Open images in hovered  directory and thumbnails
 #              open hovered image in sxiv or viu and browse other images in the directory
-# Dependencies: imv (https://github.com/eXeC64/imv) or,
-#               sxiv (https://github.com/muennich/sxiv) or,
-#               viu (https://github.com/atanunq/viu), less
+#
+# Dependencies:
+#   - imv (https://github.com/eXeC64/imv) or,
+#   - sxiv (https://github.com/muennich/sxiv) or,
+#   - viu (https://github.com/atanunq/viu), less
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

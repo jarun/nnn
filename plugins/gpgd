@@ -1,8 +1,10 @@
 #!/usr/bin/env sh
 
-# Description: Decrypts selected files using gpg. The contents of the decrypted file are stored in a file with extension .dec
+# Description: Decrypts selected files using gpg. The contents of the
+#              decrypted file are stored in a file with extension .dec
 #
-# Note: If an appropriate private key cannot be found gpg silently prints a message in the background and no files are written.
+# Note: If an appropriate private key cannot be found gpg silently
+#       prints a message in the background and no files are written.
 #
 # Shell: POSIX compliant
 # Author: KlzXS

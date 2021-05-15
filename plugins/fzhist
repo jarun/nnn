@@ -1,7 +1,9 @@
 #!/usr/bin/env sh
 
-# Description: Fuzzy find a command from history, edit in $EDITOR and run as a command
-#              Currently supports only bash and fish history
+# Description: Fuzzy find a command from history,
+#              edit in $EDITOR and run as a command
+#
+# Note: Supports only bash and fish history
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

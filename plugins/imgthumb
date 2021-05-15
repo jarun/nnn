@@ -2,6 +2,8 @@
 
 # Description: View thumbnail of an image or a directory of images with lsix
 #
+# Dependencies: lsix
+#
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
