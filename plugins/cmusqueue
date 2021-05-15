@@ -56,11 +56,12 @@ fi
 if [ "$REPLY" = "s" ]; then
     if ! pgrep cmus >/dev/null; then
         start_cmus
+        printf "Appending files to current cmus queue\n"
         # Queue, change view and play
         cmus-remote -C "view 4"; xargs < "$selection" -0 cmus-remote -q; cmus-remote -p; unset cmuspid
     else
         # Queue in existing cmus if already running and change view
-        printf "Appending files to current cmus queue"
+        printf "Appending files to current cmus queue\n"
         cmus-remote -C "view 4"; xargs < "$selection" -0 cmus-remote -q
     fi
     # Clear selection
@@ -72,11 +73,12 @@ if [ "$REPLY" = "s" ]; then
 elif [ -n "$1" ]; then
     if ! pgrep cmus >/dev/null; then
         start_cmus
+        printf "Appending '%s' to current cmus queue\n" "$1"
         # Queue, change view and play
         cmus-remote -C "view 4"; cmus-remote -q "$1"; cmus-remote -p; unset cmuspid
     else
         # Queue in existing cmus if already running and change view
-        printf "Appending '%s' to current cmus queue" "$1"
+        printf "Appending '%s' to current cmus queue\n" "$1"
         cmus-remote -C "view 4"; cmus-remote -q "$1"
     fi
 fi
