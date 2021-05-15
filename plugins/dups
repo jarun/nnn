@@ -9,7 +9,7 @@
 # Notes:
 #   1. If the file size exceeds $size_digits digits the file will be misplaced
 #      12 digits fit files up to 931GiB
-#   2. bash compatible required for mktemp
+#   2. Bash compatible required for mktemp
 #
 # Shell: Bash
 # Authors: syssyphus, KlzXS
