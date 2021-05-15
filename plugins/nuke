@@ -13,7 +13,7 @@
 #   2. Run nnn with the program option to indicate a CLI opener
 #         nnn -c
 #         # The -c program option overrides option -e
-#   3. nuke can use nnn plugins (e.g. mocplay is used for audio), $PATH is updated.
+#   3. nuke can use nnn plugins (e.g. mocq is used for audio), $PATH is updated.
 #
 # Details:
 #   Inspired by ranger's scope.sh, modified for usage with nnn.
@@ -41,7 +41,7 @@
 #      rar: list with unrar
 #      7-zip: list with 7z
 #      pdf: zathura (GUI), pdftotext, mutool, exiftool
-#      audio: mocplay (nnn plugin using MOC), mpv, media_client (Haiku), mediainfo, exiftool
+#      audio: mocq (nnn plugin using MOC), mpv, media_client (Haiku), mediainfo, exiftool
 #      avi|mkv|mp4: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
 #      log: vi
 #      torrent: rtorrent, transmission-show
@@ -52,7 +52,7 @@
 #   Multimedia by mime:
 #      image/*: imv/sxiv (GUI), viu (https://github.com/atanunq/viu), img2txt, exiftool
 #      video/*: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
-#      audio/*: mocplay (nnn plugin using MOC), mpv, media_client (Haiku), mediainfo, exiftool
+#      audio/*: mocq (nnn plugin using MOC), mpv, media_client (Haiku), mediainfo, exiftool
 #      application/pdf: zathura (GUI), pdftotext, mutool, exiftool
 #   Other mimes:
 #      text/troff: man -l
@@ -106,8 +106,8 @@ handle_pdf() {
 }
 
 handle_audio() {
-    if type mocp >/dev/null 2>&1 && type mocplay >/dev/null 2>&1; then
-        mocplay "${FPATH}" "opener" >/dev/null 2>&1
+    if type mocp >/dev/null 2>&1 && type mocq >/dev/null 2>&1; then
+        mocq "${FPATH}" "opener" >/dev/null 2>&1
         exit 0
     elif type mpv >/dev/null 2>&1; then
         mpv "${FPATH}" >/dev/null 2>&1 &
