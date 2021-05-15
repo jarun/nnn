@@ -101,6 +101,3 @@ elif [ -n "$1" ]; then
     fi
 
 fi
-
-# bash -c "(! pg-C 'view 4' rep cmus && tilix -e cmus && tilix -a session-add-down -e cava); sleep 2.1 && cmus-remote -q %f"
-# Terminal=false
