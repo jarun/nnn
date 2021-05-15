@@ -40,7 +40,7 @@ start_cmus() {
             nohup "$TERMINAL" -e cmus & ;;
     esac
     # Give the new terminal some time to open
-    until pidof cmus >/dev/null; do sleep 0.1; done
+    until cmus-remote -C; do sleep 0.1; done
     [ -n "$nnnwindow" ] && xdotool windowactivate "$nnnwindow"
 } >/dev/null 2>&1
 
