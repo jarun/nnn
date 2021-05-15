@@ -8,12 +8,13 @@
 #
 # Dependencies: fusermount
 #
+
 # Shell: POSIX compliant
 # Authors: Kabouik & 0xACE
 #
 # TODO:
 # - Avoid lazy unmount by forcing nnn context to leave the subfolder before fusermount.
-#   Tried `printf "%s" "0c$m" > "$NNN_PIPE"` but it breaks the nnn interfacee, see #854.
+#   Tried `printf "%s" "0c$m" > "$NNN_PIPE"` but it breaks the nnn interface, see #854.
 
 err=0
 m=$HOME/.config/nnn/mounts

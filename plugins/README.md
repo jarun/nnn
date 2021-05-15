@@ -20,6 +20,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [cdpath](cdpath) | `cd` to the directory from `CDPATH` | sh | fzf |
 | [chksum](chksum) | Create and verify checksums [✓] | sh | md5sum,<br>sha256sum |
 | [cleanfilename](cleanfilename) | Clean filename to be more shell-friendly [✓] | bash | sed |
+| [cmusq](cmusq) | Queue files/dirs in cmus player | sh | cmus, pgrep | 
 | [diffs](diffs) | Diff for selection (limited to 2 for directories) [✓] | sh | vimdiff, mktemp |
 | [dragdrop](dragdrop) | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
 | [dups](dups) | List non-empty duplicate files in current dir | bash | find, md5sum,<br>sort uniq xargs |

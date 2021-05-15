@@ -17,6 +17,7 @@
 # Author: Kabouik
 
 # Optional scripts sources
+
 # Leave blank or fill with the absolute path of a folder containing executable
 # scripts other than nnn plugins (e.g., "$HOME/.local/share/nautilus/scripts",
 # since there are numerous Nautilus script git repositories).
@@ -29,7 +30,7 @@ CUSTOMDIR2=""
 nnnpluginsdir="$HOME/.config/nnn/plugins"
 
 # Preview with bat if installed
-if [ -z "$(command -v bat)" ]; then
+if type bat >/dev/null; then
     plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" \
         -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview \
         "cat {}" \
@@ -52,7 +53,7 @@ if ! [ "$plugin" = "" ]; then
 fi
 
 # If attempt with hovered file fails, try without any target
-# (nnn selections should still be passed to the script int hat case)
+# (nnn selections should still be passed to the script in that case)
 if [ "$err" -eq "1" ]; then
     clear && "$plugin" || err=2
 fi
