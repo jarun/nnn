@@ -31,19 +31,13 @@ nnnpluginsdir="$HOME/.config/nnn/plugins"
 
 # Preview with bat if installed
 if type bat >/dev/null; then
-    plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" \
-        -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview \
-        "cat {}" \
-        --preview-window right:66%:wrap --delimiter / --with-nth -1 \
-        --bind="?:toggle-preview")
-else
-    plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" \
-        -maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview \
-        "bat --terminal-width='$(tput cols)' --decorations=always --color=always \
-              --style='${BAT_STYLE:-header,numbers}' {}" \
-        --preview-window right:66% --delimiter / --with-nth -1 \
-        --bind="?:toggle-preview")
+    BAT="bat --terminal-width='$(tput cols)' --decorations=always --color=always --style='${BAT_STYLE:-header,numbers}'"
 fi
+
+plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" \
+-maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview \
+    "${BAT:-cat} {}" --preview-window="right:66%:wrap" --delimiter / \
+    --with-nth -1 --bind="?:toggle-preview")
 
 # Try running the script on the hovered file, and abort
 # abort if no plugin was selected (ESC or ^C pressed).
