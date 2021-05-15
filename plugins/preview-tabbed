@@ -2,33 +2,30 @@
 
 # Description: tabbed/xembed based file previewer
 #
-# Note: This plugin needs a "NNN_FIFO" to work. See man.
-#
 # Dependencies:
-#  - tabbed (https://tools.suckless.org/tabbed): xembed host
-#  - xterm (or urxvt or st) : xembed client for text-based preview
-#  - mpv (https://mpv.io): xembed client for video/audio
-#  - sxiv (https://github.com/muennich/sxiv): xembed client for images
-#  - zathura (https://pwmt.org/projects/zathura): xembed client for PDF documents
-#  - nnn's nuke plugin for text preview and fallback (should be in plugins directory)
-#    nuke is a fallback for 'mpv', 'sxiv', and 'zathura', but it has has its own
-#    dependencies, see the script itself
-#  - vim (or any editor/pager really)
-#  - file
-#  - mktemp
-#  - xdotool (optional, to keep main window focused)
+#   - tabbed (https://tools.suckless.org/tabbed): xembed host
+#   - xterm (or urxvt or st) : xembed client for text-based preview
+#   - mpv (https://mpv.io): xembed client for video/audio
+#   - sxiv (https://github.com/muennich/sxiv): xembed client for images
+#   - zathura (https://pwmt.org/projects/zathura): xembed client for PDF
+#   - nnn's nuke plugin for text preview and fallback
+#     nuke is a fallback for 'mpv', 'sxiv', and 'zathura', but has its
+#     own dependencies, see the script for more information
+#   - vim (or any editor/pager really)
+#   - file
+#   - mktemp
+#   - xdotool (optional, to keep main window focused)
 #
-# How to use:
-#  First, install the dependencies. Then you need to set a NNN_FIFO path
-#  and set a key for the plugin, then start `nnn`:
+# Usage:
+#   - Install the dependencies. Then set a NNN_FIFO
+#     and set a key for the plugin, then start `nnn`:
+#       $ NNN_FIFO=/tmp/nnn.fifo nnn
+#   - Launch the plugin with the designated key from nnn
 #
-#    $ NNN_FIFO=/tmp/nnn.fifo nnn
-#
-#  Then in `nnn`, launch the `preview-tabbed` plugin.
-#
-#  If you provide the same NNN_FIFO to all nnn instances, there will be a
-#  single common preview window. I you provide different FIFO path, they
-#  will be independent.
+# Notes:
+#   1. This plugin needs a "NNN_FIFO" to work. See man.
+#   2. If the same NNN_FIFO is used in multiple nnn instances, there will be one
+#      common preview window. With different FIFO paths, they will be independent.
 #
 # How it works:
 #   We use `tabbed` [1] as a xembed [2] host, to have a single window
@@ -45,7 +42,7 @@
 # [1]: https://tools.suckless.org/tabbed/
 # [2]: https://specifications.freedesktop.org/xembed-spec/xembed-spec-latest.html
 #
-# Shell: bash (job control is weakly specified in POSIX)
+# Shell: Bash (job control is weakly specified in POSIX)
 # Author: Léo Villeveygoux
 
 

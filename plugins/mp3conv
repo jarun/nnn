@@ -2,7 +2,7 @@
 
 # Description: Extract audio from multimedia files and convert to mp3
 #
-# Dependency: ffmpeg compiled with libmp3lame audio codec support
+# Dependencies: ffmpeg compiled with libmp3lame audio codec support
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

@@ -3,8 +3,8 @@
 # Description: Generate video thumbnails and view them
 #
 # Dependencies:
-#    ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer
-#    lsix: https://github.com/hackerb9/lsix
+#   - ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer
+#   - lsix: https://github.com/hackerb9/lsix
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

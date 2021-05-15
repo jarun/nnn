@@ -4,7 +4,7 @@
 #
 # Note: This script installs a package, should be issued with admin privilege
 #
-# Shell: POSIX-compliant
+# Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
 cur="$(nnn -v)"

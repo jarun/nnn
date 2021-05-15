@@ -1,15 +1,16 @@
 #!/usr/bin/env sh
 
 # Description: Resize images in a directory to screen resolution with imgp
-# imgp homepage: https://github.com/jarun/imgp
+#
+# Dependencipes: imgp - https://github.com/jarun/imgp
 #
 # Notes:
-# 1. Set res if you don't want to be prompted for desktop resolution every time
-# 2. MINSIZE is set to 1MB by default, adjust it if you want
-# 3. imgp options used:
-#       a - adaptive mode
-#       c - convert PNG to JPG
-#       k - skip images matching specified hres/vres
+#   1. Set res to avoid the desktop resolution prompt each time
+#   2. MINSIZE is set to 1MB by default, adjust it if you want
+#   3. imgp options used:
+#      a - adaptive mode
+#      c - convert PNG to JPG
+#      k - skip images matching specified hres/vres
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

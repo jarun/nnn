@@ -1,9 +1,11 @@
 #!/usr/bin/env sh
 
-# Description: Encrypts selected files using gpg. Can encrypt either asymmetrically (key) or symmetrically (passphrase).
-#              If asymmetric encryption is chosen a key can be chosen from the list of capable public keys using fzf.
+# Description: Encrypts selected files using gpg. Can encrypt
+#              asymmetrically (key) or symmetrically (passphrase).
+#              If asymmetric encryption is chosen a key can be
+#              chosen from the list of capable public keys using fzf.
 #
-# Note: symmetric encryption only works for a single (current) file as per gpg limitations
+# Note: Symmetric encryption only works for a single (current) file as per gpg limitations
 #
 # Shell: POSIX compliant
 # Author: KlzXS

@@ -1,13 +1,13 @@
 #!/usr/bin/env sh
 
-# Description: Sets the xdg-open's default application for the current entry's
-# file type. ${XDG_DATA_DIRS} and ${XDG_DATA_HOME} are set to the recommended
-# defaults if unset, as specified in XDG Base Directory Specification,
-# [ http://specifications.freedesktop.org/basedir-spec/ ].
+# Description: Sets the xdg-open's default application for the current entry's file
+#              type. ${XDG_DATA_DIRS} and ${XDG_DATA_HOME} are set to the recommended
+#              defaults if unset, as specified in XDG Base Directory Specification
+#              - http://specifications.freedesktop.org/basedir-spec/.
 #
 # Dependencies: xdg-utils, fzf
 #
-# Shell: POSIX
+# Shell: POSIX compliant
 # Author: lwnctd
 
 if [ -z "$1" ] || ! command -v fzf > /dev/null 2>& 1; then
