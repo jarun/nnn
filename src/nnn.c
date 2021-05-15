@@ -7171,9 +7171,9 @@ nochange:
 #endif
 
 			/* CD on Quit */
-			if (sel == SEL_QUITCD || getenv("NNN_TMPFILE")) {
+			if ((sel == SEL_QUITCD) || getenv("NNN_TMPFILE")) {
 				write_lastdir(path);
-				if (g_state.picker)
+				if ((sel == SEL_QUITCD) && g_state.picker)
 					selbufpos = 0;
 			}
 
