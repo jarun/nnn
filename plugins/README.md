@@ -20,7 +20,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [cdpath](cdpath) | `cd` to the directory from `CDPATH` | sh | fzf |
 | [chksum](chksum) | Create and verify checksums [✓] | sh | md5sum,<br>sha256sum |
 | [cleanfilename](cleanfilename) | Clean filename to be more shell-friendly [✓] | bash | sed |
-| [cmusq](cmusq) | Queue files/dirs in cmus player | sh | cmus, pgrep | 
+| [cmusq](cmusq) | Queue/play files/dirs in cmus player [✓] | sh | cmus, pgrep |
 | [diffs](diffs) | Diff for selection (limited to 2 for directories) [✓] | sh | vimdiff, mktemp |
 | [dragdrop](dragdrop) | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
 | [dups](dups) | List non-empty duplicate files in current dir | bash | find, md5sum,<br>sort uniq xargs |
@@ -44,7 +44,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [mediainf](mediainf) | Show media information | sh | mediainfo |
 | [mimelist](mimelist) | List files by mime in subtree | sh | - |
 | [moclyrics](moclyrics) | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
-| [mocplay](mocplay) | Append (and/or play) selection/dir/file in moc [✓] | sh | [moc](http://moc.daper.net/) |
+| [mocq](mocq) | Queue/play selection/dir/file in moc [✓] | sh | [moc](http://moc.daper.net/) |
 | [mp3conv](mp3conv) | Extract audio from multimedia as mp3 | sh | ffmpeg |
 | [mtpmount](mtpmount) | Toggle mount of MTP device (eg. Android) | sh | gvfs-mtp |
 | [nbak](nbak) | Backs up `nnn` config | sh | tar, awk, mktemp |
