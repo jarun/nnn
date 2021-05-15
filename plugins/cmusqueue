@@ -1,0 +1,106 @@
+#!/usr/bin/env sh
+
+# Description: Add selection or hovered file/directory to cmus queue.
+# If adding selection, files/dirs are added in the same order they were selected in nnn.
+# cmus will be started in a new window if not already running and playback will start immediately.
+# If cmus is already running, files will just be appended to the queue (no forced playback).
+#
+# Todo: Add cava as optional dependency
+#
+# Dependencies: cmus
+# Shell: POSIX compliant
+# Author: Kabouik
+
+# User variables
+# Set desired delay to let cmus start in a new terminal;
+# this value is conservative so lower it if your machine is fast
+delay="1.5"
+# (Optionak) Set preferred terminal emulator if not set in your env,
+# or leave commented to use default
+#TERMINAL="kitty"
+
+# Required variables
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+REPLY=c
+
+# If active selection, ask what to do
+if [ -s "$selection" ]; then
+    printf "Queue [s]election or [c]urrently hovered? [default=c]: "
+    read -r REPLY
+fi
+
+# If selection, start cmus in new window (if necessary) and append selection to queue
+if [ "$REPLY" = "s" ]; then
+    if [ "$(pgrep cmus)" = "" ]; then
+        printf "cmus is not running, starting it in a new window."
+        case "$TERMINAL" in
+            kitty | gnome-terminal | st)
+                nohup "$TERMINAL" -- cmus > /dev/null 2>&1 &
+                cmuspid=$!
+                ;;
+            havoc)
+                nohup "$TERMINAL" cmus > /dev/null 2>&1 &
+                cmuspid=$!
+                ;;
+            "")
+                nohup x-terminal-emulator -e cmus > /dev/null 2>&1 &
+                cmuspid=$!
+                ;;
+            *)
+                nohup "$TERMINAL" -e cmus > /dev/null 2>&1 &
+                cmuspid=$!
+                ;;
+        esac
+        until [ -n "$cmuspid" ]; do # Give the new terminal some time to open
+            sleep 0.25
+        done
+        # Give cmus some extra time to fully start, then queue, change view and play
+        sleep "$delay"; cmus-remote -C "view 4"; xargs < "$selection" -0 cmus-remote -q; cmus-remote -p; unset cmuspid
+    else
+        # Queue in existing cmus if already running
+        printf "Appending files to current cmus queue"
+        cmus-remote -C "view 4"; xargs < "$selection" -0 cmus-remote -q
+    fi
+
+    # Clear selection
+    if [ -p "$NNN_PIPE" ]; then
+        printf "-" > "$NNN_PIPE"
+    fi
+
+# If current, start cmus in new window (if necessary) and append hovered file or dir to queue
+elif [ -n "$1" ]; then
+    if [ "$(pgrep cmus)" = "" ]; then
+        printf "cmus is not running, starting it in a new window."
+        case "$TERMINAL" in
+            kitty | gnome-terminal | st)
+                nohup "$TERMINAL" -- cmus > /dev/null 2>&1 &
+                cmuspid=$!
+                ;;
+            havoc)
+                nohup "$TERMINAL" cmus > /dev/null 2>&1 &
+                cmuspid=$!
+                ;;
+            "")
+                nohup x-terminal-emulator -e cmus > /dev/null 2>&1 &
+                cmuspid=$!
+                ;;
+            *)
+                nohup "$TERMINAL" -e cmus > /dev/null 2>&1 &
+                cmuspid=$!
+                ;;
+        esac
+        until [ -n "$cmuspid" ]; do # Give the new terminal some time to open
+            sleep 0.25
+        done
+        # Give cmus some extra time to fully start, then queue, change view and play
+        sleep "$delay"; cmus-remote -C "view 4"; cmus-remote -q "$1"; cmus-remote -p; unset cmuspid
+    else
+        # Queue in existing cmus if already running
+        printf "Appending '%s' to current cmus queue" "$1"
+        cmus-remote -C "view 4"; cmus-remote -q "$1"
+    fi
+
+fi
+
+# bash -c "(! pg-C 'view 4' rep cmus && tilix -e cmus && tilix -a session-add-down -e cava); sleep 2.1 && cmus-remote -q %f"
+# Terminal=false
