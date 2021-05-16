@@ -404,8 +404,8 @@ if [ "$PREVIEW_MODE" ]; then
     preview_file "$PWD/$1"
     preview_fifo &
     wait "$!"
-    rm "$PAGERPID" "$IMGPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" 2>/dev/null
     pkill -P "$$"
+    rm "$PAGERPID" "$IMGPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" 2>/dev/null
 else
     if [ ! -r "$NNN_FIFO" ]; then
         clear
