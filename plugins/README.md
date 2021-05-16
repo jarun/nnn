@@ -27,7 +27,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [finder](finder) | Run custom find command and list | sh | - |
 | [fzcd](fzcd) | Change to the directory of a fuzzy-selected file/dir | sh | fzf |
 | [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |
-| [fzopen](fzopen) | Fuzzy find a file in dir subtree and edit or open | sh | fzf, xdg-open |
+| [fzopen](fzopen) | Fuzzy find file(s) in subtree to edit/open/pick | sh | fzf, xdg-open |
 | [fzplug](fzplug) | Fuzzy find, preview and run other plugins | sh | fzf |
 | [fzz](fzz) | Change to any directory in the z database with fzf | sh | fzf, z |
 | [getplugs](getplugs) | Update plugins to installed `nnn` version | sh | curl |
@@ -188,9 +188,10 @@ Notes:
 
 When `nnn` executes a plugin, it does the following:
 - Changes to the directory where the plugin is to be run (`$PWD` pointing to the active directory)
-- Passes two arguments to the script:
+- Passes three arguments to the script:
     1. The hovered file's name.
     2. The working directory (might differ from `$PWD` in case of symlinked paths; non-canonical).
+    3. The picker mode output file (`-` for stdout) if `nnn` is executed as a file picker.
 - Sets the environment variable `NNN_PIPE` used to control `nnn` active directory.
 
 Plugins can also read the `.selection` file in the config directory.
@@ -221,6 +222,7 @@ The `opcode` indicates the operation type.
 |:---:| --- |
 | `c` | change directory |
 | `l` | list files in list mode |
+| `p` | picker file overwritten |
 
 For convenience, we provided a helper script named `.nnn-plugin-helper` and a function named `nnn_cd` to ease this process. `nnn_cd` receives the path to change to as the first argument, and the context as an optional second argument.
 If a context is not provided, it is asked for explicitly. To skip this and choose the current context, set the `CUR_CTX` variable in `.nnn-plugin-helper` (or in the specific plugin after sourcing `.nnn-plugin-helper`) to 1.

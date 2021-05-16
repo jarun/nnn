@@ -176,7 +176,7 @@
 #define TMP_LEN_MAX 64
 #define DOT_FILTER_LEN 7
 #define ASCII_MAX 128
-#define EXEC_ARGS_MAX 8
+#define EXEC_ARGS_MAX 10
 #define LIST_FILES_MAX (1 << 16)
 #define SCROLLOFF 3
 
@@ -775,7 +775,7 @@ static haiku_nm_h haiku_hnd;
 
 /* Forward declarations */
 static void redraw(char *path);
-static int spawn(char *file, char *arg1, char *arg2, uchar_t flag);
+static int spawn(char *file, char *arg1, char *arg2, char *arg3, uchar_t flag);
 static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
@@ -1051,7 +1051,7 @@ static char *getgrname(gid_t gid)
 
 static inline bool getutil(char *util)
 {
-	return spawn("which", util, NULL, F_NORMAL | F_NOTRACE) == 0;
+	return spawn("which", util, NULL, NULL, F_NORMAL | F_NOTRACE) == 0;
 }
 
 /*
@@ -1431,7 +1431,7 @@ static bool listselfile(void)
 		return FALSE;
 
 	snprintf(g_buf, CMD_LEN_MAX, "tr \'\\0\' \'\\n\' < %s", selpath);
-	spawn(utils[UTIL_SH_EXEC], g_buf, NULL, F_CLI | F_CONFIRM);
+	spawn(utils[UTIL_SH_EXEC], g_buf, NULL, NULL, F_CLI | F_CONFIRM);
 
 	return TRUE;
 }
@@ -1550,7 +1550,7 @@ static void endselection(void)
 	}
 
 	snprintf(buf, sizeof(buf), patterns[P_REPLACE], listpath, listroot, g_tmpfpath);
-	spawn(utils[UTIL_SH_EXEC], buf, NULL, F_CLI);
+	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
 
 	fd = open(g_tmpfpath, O_RDONLY);
 	if (fd == -1) {
@@ -1628,7 +1628,7 @@ static int editselection(void)
 	}
 	mtime = sb.st_mtime;
 
-	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, F_CLI);
+	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, NULL, F_CLI);
 
 	fd = open(g_tmpfpath, O_RDONLY);
 	if (fd == -1) {
@@ -1746,7 +1746,7 @@ static void export_file_list(void)
 		DPRINTF_S(strerror(errno));
 	}
 
-	spawn(editor, g_tmpfpath, NULL, F_CLI);
+	spawn(editor, g_tmpfpath, NULL, NULL, F_CLI);
 
 	if (xconfirm(get_input(messages[MSG_RM_TMP])))
 		unlink(g_tmpfpath);
@@ -2001,9 +2001,9 @@ static int join(pid_t p, uchar_t flag)
 
 /*
  * Spawns a child process. Behaviour can be controlled using flag.
- * Limited to 2 arguments to a program, flag works on bit set.
+ * Limited to 3 arguments to a program, flag works on bit set.
  */
-static int spawn(char *file, char *arg1, char *arg2, uchar_t flag)
+static int spawn(char *file, char *arg1, char *arg2, char *arg3, uchar_t flag)
 {
 	pid_t pid;
 	int status = 0, retstatus = 0xFFFF;
@@ -2013,10 +2013,14 @@ static int spawn(char *file, char *arg1, char *arg2, uchar_t flag)
 	if (!file || !*file)
 		return retstatus;
 
-	/* Swap args if the first arg is NULL and second isn't */
+	/* Swap args if the first arg is NULL and the other 2 aren't */
 	if (!arg1 && arg2) {
 		arg1 = arg2;
-		arg2 = NULL;
+		if (arg3) {
+			arg2 = arg3;
+			arg3 = NULL;
+		} else
+			arg2 = NULL;
 	}
 
 	if (flag & F_MULTI) {
@@ -2030,7 +2034,7 @@ static int spawn(char *file, char *arg1, char *arg2, uchar_t flag)
 
 		xstrsncpy(cmd, file, len);
 		status = parseargs(cmd, argv);
-		if (status == -1 || status > (EXEC_ARGS_MAX - 3)) { /* arg1, arg2 and last NULL */
+		if (status == -1 || status > (EXEC_ARGS_MAX - 4)) { /* 3 args and last NULL */
 			free(cmd);
 			DPRINTF_S("NULL or too many args");
 			return retstatus;
@@ -2040,6 +2044,7 @@ static int spawn(char *file, char *arg1, char *arg2, uchar_t flag)
 
 	argv[status] = arg1;
 	argv[++status] = arg2;
+	argv[++status] = arg3;
 
 	if (flag & F_NORMAL)
 		exitcurses();
@@ -2147,11 +2152,11 @@ static bool xrm(char *fpath)
 		if (!rm_opts[1])
 			return FALSE;
 
-		spawn("rm", rm_opts, fpath, F_NORMAL | F_CHKRTN);
+		spawn("rm", rm_opts, fpath, NULL, F_NORMAL | F_CHKRTN);
 	} else if (g_state.trash == 1)
-		spawn("trash-put", fpath, NULL, F_NORMAL);
+		spawn("trash-put", fpath, NULL, NULL, F_NORMAL);
 	else
-		spawn("gio trash", fpath, NULL, F_NORMAL | F_MULTI);
+		spawn("gio trash", fpath, NULL, NULL, F_NORMAL | F_MULTI);
 
 	return (access(fpath, F_OK) == -1); /* File is removed */
 }
@@ -2184,7 +2189,7 @@ static bool cpmv_rename(int choice, const char *path)
 	/* selsafe() returned TRUE for this to be called */
 	if (!selbufpos) {
 		snprintf(buf, sizeof(buf), "tr '\\0' '\\n' < %s > %s", selpath, g_tmpfpath);
-		spawn(utils[UTIL_SH_EXEC], buf, NULL, F_CLI);
+		spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
 
 		count = lines_in_file(fd, buf, sizeof(buf));
 		if (!count)
@@ -2195,9 +2200,9 @@ static bool cpmv_rename(int choice, const char *path)
 	close(fd);
 
 	snprintf(buf, sizeof(buf), patterns[P_CPMVFMT], g_tmpfpath);
-	spawn(utils[UTIL_SH_EXEC], buf, NULL, F_CLI);
+	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
 
-	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, F_CLI);
+	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, NULL, F_CLI);
 
 	fd = open(g_tmpfpath, O_RDONLY);
 	if (fd == -1)
@@ -2212,7 +2217,7 @@ static bool cpmv_rename(int choice, const char *path)
 	}
 
 	snprintf(buf, sizeof(buf), patterns[P_CPMVRNM], path, g_tmpfpath, cmd);
-	if (!spawn(utils[UTIL_SH_EXEC], buf, NULL, F_CLI | F_CHKRTN))
+	if (!spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI | F_CHKRTN))
 		ret = TRUE;
 finish:
 	if (fd >= 0)
@@ -2259,7 +2264,7 @@ static bool cpmvrm_selection(enum action sel, char *path)
 		}
 	}
 
-	if (sel != SEL_CPMVAS && spawn(utils[UTIL_SH_EXEC], g_buf, NULL, F_CLI | F_CHKRTN)) {
+	if (sel != SEL_CPMVAS && spawn(utils[UTIL_SH_EXEC], g_buf, NULL, NULL, F_CLI | F_CHKRTN)) {
 		printmsg(messages[MSG_FAILED]);
 		return FALSE;
 	}
@@ -2314,7 +2319,7 @@ static bool batch_rename(void)
 	if (dir) /* Don't retain dir entries in selection */
 		selbufpos = 0;
 
-	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, F_CLI);
+	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, NULL, F_CLI);
 
 	/* Reopen file descriptor to get updated contents */
 	fd2 = open(g_tmpfpath, O_RDONLY);
@@ -2330,7 +2335,7 @@ static bool batch_rename(void)
 	}
 
 	snprintf(buf, sizeof(buf), batchrenamecmd, foriginal, g_tmpfpath);
-	spawn(utils[UTIL_SH_EXEC], buf, NULL, F_CLI);
+	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
 	ret = TRUE;
 
 finish:
@@ -2380,7 +2385,7 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 		selpath, curpath, cmd, archive
 #endif
 		);
-	spawn(utils[UTIL_SH_EXEC], buf, NULL, F_CLI | F_CONFIRM);
+	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI | F_CONFIRM);
 	free(buf);
 }
 
@@ -4057,7 +4062,7 @@ static char *get_output(char *buf, const size_t bytes, const char *file,
 		/* Show in pager in child */
 		dup2(pipefd[0], STDIN_FILENO);
 		close(pipefd[0]);
-		spawn(pager, NULL, NULL, F_CLI);
+		spawn(pager, NULL, NULL, NULL, F_CLI);
 		_exit(EXIT_SUCCESS);
 	}
 
@@ -4135,7 +4140,7 @@ static bool show_stats(const char *fpath, const struct stat *sb)
 	fclose(fp);
 	close(fd);
 
-	spawn(pager, g_tmpfpath, NULL, F_CLI);
+	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
 	unlink(g_tmpfpath);
 	return TRUE;
 }
@@ -4186,7 +4191,7 @@ static void handle_archive(char *fpath, char op)
 	}
 
 	if (op == 'x') /* extract */
-		spawn(util, arg, fpath, F_NORMAL);
+		spawn(util, arg, fpath, NULL, F_NORMAL);
 	else /* list */
 		get_output(NULL, 0, util, arg, fpath, TRUE);
 }
@@ -4338,7 +4343,7 @@ static bool archive_mount(char *newpath)
 	/* Mount archive */
 	DPRINTF_S(name);
 	DPRINTF_S(newpath);
-	if (spawn(cmd, name, newpath, F_NORMAL)) {
+	if (spawn(cmd, name, newpath, NULL, F_NORMAL)) {
 		printmsg(messages[MSG_FAILED]);
 		return FALSE;
 	}
@@ -4403,12 +4408,12 @@ static bool remote_mount(char *newpath)
 
 	/* Connect to remote */
 	if (opt == 's') {
-		if (spawn(env, tmp, newpath, flag)) {
+		if (spawn(env, tmp, newpath, NULL, flag)) {
 			printmsg(messages[MSG_FAILED]);
 			return FALSE;
 		}
 	} else {
-		spawn(env, tmp, newpath, flag);
+		spawn(env, tmp, newpath, NULL, flag);
 		printmsg(messages[MSG_RCLONE_DELAY]);
 		xdelay(XDELAY_INTERVAL_MS << 2); /* Set 4 times the usual delay */
 	}
@@ -4471,19 +4476,19 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	}
 
 #if defined (__APPLE__) || defined (__FreeBSD__)
-	if (spawn(cmd, newpath, NULL, F_NORMAL)) {
+	if (spawn(cmd, newpath, NULL, NULL, F_NORMAL)) {
 #else
-	if (spawn(cmd, "-u", newpath, F_NORMAL)) {
+	if (spawn(cmd, "-u", newpath, NULL, F_NORMAL)) {
 #endif
 		if (!xconfirm(get_input(messages[MSG_LAZY])))
 			return FALSE;
 
 #ifdef __APPLE__
-		if (spawn(cmd, "-l", newpath, F_NORMAL)) {
+		if (spawn(cmd, "-l", newpath, NULL, F_NORMAL)) {
 #elif defined (__FreeBSD__)
-		if (spawn(cmd, "-f", newpath, F_NORMAL)) {
+		if (spawn(cmd, "-f", newpath, NULL, F_NORMAL)) {
 #else
-		if (spawn(cmd, "-uz", newpath, F_NORMAL)) {
+		if (spawn(cmd, "-uz", newpath, NULL, F_NORMAL)) {
 #endif
 			printwait(messages[MSG_FAILED], presel);
 			return FALSE;
@@ -4500,7 +4505,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 
 static void lock_terminal(void)
 {
-	spawn(xgetenv("NNN_LOCKER", utils[UTIL_LOCKER]), NULL, NULL, F_CLI);
+	spawn(xgetenv("NNN_LOCKER", utils[UTIL_LOCKER]), NULL, NULL, NULL, F_CLI);
 }
 
 static void printkv(kv *kvarr, FILE *fp, uchar_t max, uchar_t id)
@@ -4658,7 +4663,7 @@ static void show_help(const char *path)
 	fclose(fp);
 	close(fd);
 
-	spawn(pager, g_tmpfpath, NULL, F_CLI);
+	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
 	unlink(g_tmpfpath);
 }
 
@@ -4680,7 +4685,7 @@ static bool run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 	else
 		runfile = NULL;
 
-	spawn(g_buf, runfile, NULL, flags);
+	spawn(g_buf, runfile, NULL, NULL, flags);
 	return TRUE;
 }
 
@@ -4704,7 +4709,7 @@ static void rmlistpath(void)
 	if (listpath) {
 		DPRINTF_S(__func__);
 		DPRINTF_S(listpath);
-		spawn("rm -rf", listpath, NULL, F_NOTRACE | F_MULTI);
+		spawn("rm -rf", listpath, NULL, NULL, F_NOTRACE | F_MULTI);
 		/* Do not free if program was started in list mode */
 		if (listpath != initpath)
 			free(listpath);
@@ -4756,14 +4761,16 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 		if (len <= 0)
 			return;
 
-		/* Terminate the path read */
-		g_buf[len] = '\0';
+		g_buf[len] = '\0'; /* Terminate the path read */
 		nextpath = g_buf;
 	} else if (op == 'l') {
-		/* Remove last list mode path, if any */
-		rmlistpath();
-
+		rmlistpath(); /* Remove last list mode path, if any */
 		nextpath = load_input(fd, *path);
+	} else if (op == 'p') {
+		free(selpath);
+		selpath = NULL;
+		clearselection();
+		g_state.picker = 0;
 	}
 
 	if (nextpath) {
@@ -4829,14 +4836,20 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 			_exit(EXIT_FAILURE);
 
 		if (!cmd_as_plugin) {
+			char *sel = NULL;
+			char std[2] = "-";
+
 			/* Generate absolute path to plugin */
 			mkpath(plgpath, file, g_buf);
 
+			if (g_state.picker)
+				sel = selpath ? selpath : std;
+
 			if (runfile && runfile[0]) {
 				xstrsncpy(*lastname, runfile, NAME_MAX);
-				spawn(g_buf, *lastname, *path, 0);
+				spawn(g_buf, *lastname, *path, sel, 0);
 			} else
-				spawn(g_buf, NULL, *path, 0);
+				spawn(g_buf, NULL, *path, sel, 0);
 		} else
 			run_cmd_as_plugin(file, runfile, flags);
 
@@ -4867,7 +4880,7 @@ static bool plugscript(const char *plugin, uchar_t flags)
 {
 	mkpath(plgpath, plugin, g_buf);
 	if (!access(g_buf, X_OK)) {
-		spawn(g_buf, NULL, NULL, flags);
+		spawn(g_buf, NULL, NULL, NULL, flags);
 		return TRUE;
 	}
 
@@ -4887,7 +4900,7 @@ static bool launch_app(char *newpath)
 	}
 
 	if (tmp && *tmp) // NOLINT
-		spawn(tmp, (r == F_NORMAL) ? "0" : NULL, NULL, r);
+		spawn(tmp, (r == F_NORMAL) ? "0" : NULL, NULL, NULL, r);
 
 	return FALSE;
 }
@@ -4911,7 +4924,7 @@ static bool prompt_run(const char *current)
 #endif
 		if (tmp && *tmp) { // NOLINT
 			ret = TRUE;
-			spawn(shell, "-c", tmp, F_CLI | F_CONFIRM);
+			spawn(shell, "-c", tmp, NULL, F_CLI | F_CONFIRM);
 		} else
 			break;
 	}
@@ -4935,7 +4948,7 @@ static bool handle_cmd(enum action sel, const char *current, char *newpath)
 
 	setenv(env_cfg[NNNLVL], xitoa(r + 1), 1);
 	setenv(envs[ENV_NCUR], current, 1);
-	spawn(shell, NULL, NULL, F_CLI);
+	spawn(shell, NULL, NULL, NULL, F_CLI);
 	setenv(env_cfg[NNNLVL], xitoa(r), 1);
 	return TRUE;
 }
@@ -5423,7 +5436,7 @@ static void handle_openwith(const char *path, const char *name, char *newpath, c
 	     (r == 'g' ? F_NOWAIT | F_NOTRACE | F_MULTI : 0));
 	if (r) {
 		mkpath(path, name, newpath);
-		spawn(tmp, newpath, NULL, r);
+		spawn(tmp, newpath, NULL, NULL, r);
 	}
 }
 
@@ -6346,7 +6359,7 @@ nochange:
 			    && strstr(g_buf, "text")
 #endif
 			) {
-				spawn(editor, newpath, NULL, F_CLI);
+				spawn(editor, newpath, NULL, NULL, F_CLI);
 				if (cfg.filtermode) {
 					presel = FILTER;
 					clearfilter();
@@ -6397,7 +6410,7 @@ nochange:
 			}
 
 			/* Invoke desktop opener as last resort */
-			spawn(opener, newpath, NULL, opener_flags);
+			spawn(opener, newpath, NULL, NULL, opener_flags);
 
 			/* Move cursor to the next entry if not the last entry */
 			if (g_state.autonext && cur != ndents - 1)
@@ -6648,7 +6661,7 @@ nochange:
 					copycurname();
 				goto nochange;
 			case SEL_EDIT:
-				spawn(editor, newpath, NULL, F_CLI);
+				spawn(editor, newpath, NULL, NULL, F_CLI);
 				continue;
 			default: /* SEL_LOCK */
 				lock_terminal();
@@ -6903,7 +6916,7 @@ nochange:
 				}
 				get_archive_cmd(newpath, tmp);
 				(r == 's') ? archive_selection(newpath, tmp, path)
-					   : spawn(newpath, tmp, pdents[cur].name, F_CLI | F_CONFIRM);
+					   : spawn(newpath, tmp, pdents[cur].name, NULL, F_CLI | F_CONFIRM);
 
 				mkpath(path, tmp, newpath);
 				if (access(newpath, F_OK) == 0) { /* File created */
@@ -6965,7 +6978,7 @@ nochange:
 			if (sel == SEL_RENAME) {
 				/* Rename the file */
 				if (ret == 'd')
-					spawn("cp -rp", pdents[cur].name, tmp, F_SILENT);
+					spawn("cp -rp", pdents[cur].name, tmp, NULL, F_SILENT);
 				else if (renameat(fd, pdents[cur].name, fd, tmp) != 0) {
 					close(fd);
 					printwarn(&presel);
@@ -8046,7 +8059,7 @@ int main(int argc, char *argv[])
 	}
 #endif
 
-	if (g_state.pickraw || g_state.picker) {
+	if (g_state.picker) {
 		if (selbufpos) {
 			fd = g_state.pickraw ? STDOUT_FILENO : open(selpath, O_WRONLY | O_CREAT, 0600);
 			if ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos)))

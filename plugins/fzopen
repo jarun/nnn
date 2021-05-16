@@ -1,13 +1,23 @@
 #!/usr/bin/env sh
 
-# Description: Fuzzy find a file in directory subtree
-#              Opens in $VISUAL or $EDITOR if text
-#              Opens other type of files with xdg-open
+# Description: Regular mode:
+#                Fuzzy find a file in directory subtree.
+#                Opens in $VISUAL or $EDITOR if text.
+#                Opens other type of files with xdg-open.
+#                Work only with a single file selected.
+#
+#              Picker mode:
+#                If picker mode output file is passed, it
+#                will be overwritten with any picked files.
+#                Leaves untouched if no file is picked.
+#                Works with single/multiple files selected.
 #
 # Dependencies: fd/find, fzf/skim, xdg-open
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
+
+. "$(dirname "$0")"/.nnn-plugin-helper
 
 if type fzf >/dev/null 2>&1; then
     cmd="$FZF_DEFAULT_COMMAND"
@@ -16,7 +26,7 @@ if type fzf >/dev/null 2>&1; then
     else
         [ -z "$cmd" ] && cmd="find . -type f 2>/dev/null"
     fi
-    entry="$(eval "$cmd" | fzf --delimiter / --nth=-1 --tiebreak=begin --info=hidden)"
+    entry="$(eval "$cmd" | fzf -m --delimiter / --nth=-1 --tiebreak=begin --info=hidden)"
     # To show only the file name
     # entry=$(find . -type f 2>/dev/null | fzf --delimiter / --with-nth=-1 --tiebreak=begin --info=hidden)
 elif type sk >/dev/null 2>&1; then
@@ -25,6 +35,23 @@ else
     exit 1
 fi
 
+# Check for picker mode
+if [ "$3" ]; then
+    if [ "$entry" ]; then
+        if [ "-" = "$3" ]; then
+            printf "%s\n" "$entry"
+        else
+            printf "%s\n" "$entry" > "$3"
+        fi
+
+        # Tell `nnn` to clear its internal selection
+        printf "%s" "0p" > "$NNN_PIPE"
+    fi
+
+    exit 0
+fi
+
+# Open the file (works for a single file only)
 case "$(file -biL "$entry")" in
     *text*)
         "${VISUAL:-$EDITOR}" "$entry" ;;
