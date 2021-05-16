@@ -23,6 +23,7 @@
 if ! type cmus >/dev/null; then
     printf "cmus missing"
     read -r _
+    exit 1
 fi
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
