@@ -313,7 +313,7 @@ generate_preview() {
             audio) ffmpeg -i "$3" -filter_complex "scale=iw*min(1\,min($NNN_PREVIEWWIDTH/iw\,ih)):-1" "$NNN_PREVIEWDIR/$3.jpg" -y ;;
             epub) gnome-epub-thumbnailer "$3" "$NNN_PREVIEWDIR/$3.jpg" ;;
             font) fontpreview -i "$3" -o "$NNN_PREVIEWDIR/$3.jpg" ;;
-            gif) if exists ueberzug && exists convert && [ "$TERMINAL" != "kitty" ]; then
+            gif) if [ -p "$FIFO_UEBERZUG" ] && exists convert; then
                     if [ ! -d "$NNN_PREVIEWDIR/$3" ]; then
                         mkdir -p "$NNN_PREVIEWDIR/$3"
                         convert -coalesce -resize "$NNN_PREVIEWWIDTH"x"$NNN_PREVIEWHEIGHT"\> "$3" "$NNN_PREVIEWDIR/$3/${3##*/}.jpg"
@@ -337,13 +337,13 @@ generate_preview() {
             pdf) pdftoppm -jpeg -f 1 -singlefile "$3" "$NNN_PREVIEWDIR/$3" ;;
             video) ffmpegthumbnailer -s0 -i "$3" -o "$NNN_PREVIEWDIR/$3.jpg" || rm "$NNN_PREVIEWDIR/$3.jpg" ;;
         esac
-    fi
+    fi >/dev/null
     if [ -f "$NNN_PREVIEWDIR/$3.jpg" ]; then
         image_preview "$1" "$2" "$NNN_PREVIEWDIR/$3.jpg"
     else
         fifo_pager print_bin_info "$3"
     fi
-} >/dev/null 2>&1
+} 2>/dev/null
 
 image_preview() {
     clear
@@ -370,24 +370,22 @@ ueberzug_remove() {
     printf '{"action": "remove", "identifier": "nnn_ueberzug"}\n' > "$FIFO_UEBERZUG"
 }
 
-ueberzug_refresh() {
+winch_handler() {
     clear
-    kill "$(cat "$IMGPID")"
-    kill "$(cat "$PAGERPID")"
+    kill "$(cat "$IMGPID")" "$(cat "$PAGERPID")"
     pkill -P "$$"
-    tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+    if [ -p "$FIFO_UEBERZUG" ]; then tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json & fi
     cat "$CURSEL" > "$NNN_FIFO"
-    preview_fifo &
     preview_file "$(cat "$CURSEL")"
+    preview_fifo &
     wait "$!"
 } 2>/dev/null
 
 preview_fifo() {
     printf "%s" "$$" > "$FIFOPID"
     while read -r selection; do
-        kill "$(cat "$IMGPID")"
-        kill "$(cat "$PAGERPID")"
-        [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
+        kill "$(cat "$IMGPID")" "$(cat "$PAGERPID")"
+        [ -p "$FIFO_UEBERZUG" ] && ueberzug_remove
         preview_file "$selection"
         printf "%s" "$selection" > "$CURSEL"
     done < "$NNN_FIFO"
@@ -396,16 +394,15 @@ preview_fifo() {
 if [ "$PREVIEW_MODE" ]; then
     if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
         mkfifo "$FIFO_UEBERZUG"
-        trap 'ueberzug_refresh' WINCH
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
 
     printf "%s" "$PWD/$1" > "$CURSEL"
     preview_file "$PWD/$1"
     preview_fifo &
+    trap 'winch_handler' WINCH
+    trap 'rm "$PAGERPID" "$IMGPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" 2>/dev/null' INT HUP EXIT
     wait "$!" 2>/dev/null
-    pkill -P "$$"
-    rm "$PAGERPID" "$IMGPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" 2>/dev/null
 else
     if [ ! -r "$NNN_FIFO" ]; then
         clear

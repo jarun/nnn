@@ -249,7 +249,7 @@ image_preview() {
     if [ "$TERMINAL" = "kitty" ]; then
         # Kitty terminal users can use the native image preview method
         kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
-    elif [ -n "$QLPATH" ] && stat "$3" >/dev/null 2>&1; then
+    elif [ -n "$QLPATH" ] && stat "$3"; then
         f="$(wslpath -w "$3")" && "$QLPATH" "$f" && return
     elif exists ueberzug; then
         ueberzug_layer "$1" "$2" "$3" && return
@@ -271,24 +271,22 @@ ueberzug_remove() {
     printf '{"action": "remove", "identifier": "nnn_ueberzug"}\n' > "$FIFO_UEBERZUG"
 }
 
-ueberzug_refresh() {
+winch_handler() {
     clear
-    kill "$(cat "$IMGPID")"
-    kill "$(cat "$PAGERPID")"
+    kill "$(cat "$IMGPID")" "$(cat "$PAGERPID")"
     pkill -P "$$"
-    tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+    if [ -p "$FIFO_UEBERZUG" ]; then tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json & fi
     cat "$CURSEL" > "$NNN_FIFO"
-    preview_fifo &
     preview_file "$(cat "$CURSEL")"
+    preview_fifo &
     wait "$!"
 } 2>/dev/null
 
 preview_fifo() {
     printf "%s" "$$" > "$FIFOPID"
     while read -r selection; do
-        kill "$(cat "$IMGPID")"
-        kill "$(cat "$PAGERPID")"
-        [ "$TERMINAL" != "kitty" ] && exists ueberzug && ueberzug_remove
+        kill "$(cat "$IMGPID")" "$(cat "$PAGERPID")"
+        [ -p "$FIFO_UEBERZUG" ] && ueberzug_remove
         preview_file "$selection"
         printf "%s" "$selection" > "$CURSEL"
     done < "$NNN_FIFO"
@@ -297,16 +295,15 @@ preview_fifo() {
 if [ "$PREVIEW_MODE" ]; then
     if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
         mkfifo "$FIFO_UEBERZUG"
-        trap 'ueberzug_refresh' WINCH
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
 
     printf "%s" "$PWD/$1" > "$CURSEL"
     preview_file "$PWD/$1"
     preview_fifo &
+    trap 'winch_handler' WINCH
+    trap 'rm "$PAGERPID" "$IMGPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" 2>/dev/null' INT HUP EXIT
     wait "$!" 2>/dev/null
-    pkill -P "$$"
-    rm "$PAGERPID" "$IMGPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" 2>/dev/null
 else
     if [ ! -r "$NNN_FIFO" ]; then
         clear
