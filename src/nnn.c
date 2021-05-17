@@ -6330,11 +6330,16 @@ nochange:
 					xstrsncpy(path, rundir, PATH_MAX);
 					rundir[0] = '\0';
 
+					bool picker = g_state.picker;
+
 					if (chdir(path) == -1
 					    || !run_selected_plugin(&path, pent->name,
 								    runfile, &lastname, &lastdir)) {
 						DPRINTF_S("plugin failed!");
 					}
+
+					if (picker != g_state.picker)
+						return EXIT_SUCCESS;
 
 					if (runfile[0])
 						runfile[0] = '\0';
@@ -7050,11 +7055,16 @@ nochange:
 				} else
 					r = TRUE;
 
+				bool picker = g_state.picker;
+
 				if (!run_selected_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL),
 							 &lastname, &lastdir)) {
 					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;
 				}
+
+				if (picker != g_state.picker)
+					return EXIT_SUCCESS;
 
 				if (ndents)
 					copycurname();
