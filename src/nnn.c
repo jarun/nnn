@@ -327,7 +327,7 @@ typedef struct {
 	uint_t initfile   : 1;  /* Positional arg is a file */
 	uint_t dircolor   : 1;  /* Current status of dir color */
 	uint_t picker     : 1;  /* Write selection to user-specified file */
-	uint_t pickraw    : 1;  /* Write selection to stdout before exit */
+	uint_t picked     : 1;  /* Plugin has picked files */
 	uint_t runplugin  : 1;  /* Choose plugin mode */
 	uint_t runctx     : 3;  /* The context in which plugin is to be run */
 	uint_t selmode    : 1;  /* Set when selecting files */
@@ -1348,7 +1348,7 @@ static char confirm_force(bool selection)
 /* Writes buflen char(s) from buf to a file */
 static void writesel(const char *buf, const size_t buflen)
 {
-	if (g_state.pickraw || !selpath)
+	if (!selpath)
 		return;
 
 	FILE *fp = fopen(selpath, "w");
@@ -4771,6 +4771,7 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 		selpath = NULL;
 		clearselection();
 		g_state.picker = 0;
+		g_state.picked = 1;
 	}
 
 	if (nextpath) {
@@ -6330,15 +6331,13 @@ nochange:
 					xstrsncpy(path, rundir, PATH_MAX);
 					rundir[0] = '\0';
 
-					bool picker = g_state.picker;
-
 					if (chdir(path) == -1
 					    || !run_selected_plugin(&path, pent->name,
 								    runfile, &lastname, &lastdir)) {
 						DPRINTF_S("plugin failed!");
 					}
 
-					if (picker != g_state.picker)
+					if (g_state.picked)
 						return EXIT_SUCCESS;
 
 					if (runfile[0])
@@ -7055,15 +7054,13 @@ nochange:
 				} else
 					r = TRUE;
 
-				bool picker = g_state.picker;
-
 				if (!run_selected_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL),
 							 &lastname, &lastdir)) {
 					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;
 				}
 
-				if (picker != g_state.picker)
+				if (g_state.picked)
 					return EXIT_SUCCESS;
 
 				if (ndents)
@@ -7204,7 +7201,10 @@ nochange:
 				return EXIT_SUCCESS;
 
 			if (selbufpos && !g_state.picker) {
-				g_state.pickraw = 1;
+				/* Pick files to stdout and exit */
+				g_state.picker = 1;
+				free(selpath);
+				selpath = NULL;
 				return EXIT_SUCCESS;
 			}
 
@@ -7734,9 +7734,7 @@ int main(int argc, char *argv[])
 				break;
 
 			g_state.picker = 1;
-			if (optarg[0] == '-' && optarg[1] == '\0')
-				g_state.pickraw = 1;
-			else {
+			if (!(optarg[0] == '-' && optarg[1] == '\0')) {
 				fd = open(optarg, O_WRONLY | O_CREAT, 0600);
 				if (fd == -1) {
 					xerror();
@@ -8071,7 +8069,7 @@ int main(int argc, char *argv[])
 
 	if (g_state.picker) {
 		if (selbufpos) {
-			fd = g_state.pickraw ? STDOUT_FILENO : open(selpath, O_WRONLY | O_CREAT, 0600);
+			fd = selpath ? open(selpath, O_WRONLY | O_CREAT, 0600) : STDOUT_FILENO;
 			if ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos)))
 				xerror();
 
