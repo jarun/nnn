@@ -6408,7 +6408,7 @@ nochange:
 					goto begin;
 				}
 
-				if (r != 'd') {
+				if (r != 'o') {
 					printwait(messages[MSG_INVALID_KEY], &presel);
 					goto nochange;
 				}
