@@ -373,8 +373,10 @@ ueberzug_remove() {
 winch_handler() {
     clear
     kill "$(cat "$IMGPID")" "$(cat "$PAGERPID")"
-    pkill -P "$$"
-    if [ -p "$FIFO_UEBERZUG" ]; then tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json & fi
+    if [ -p "$FIFO_UEBERZUG" ]; then
+        pkill -P "$$"
+        tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
+    fi
     cat "$CURSEL" > "$NNN_FIFO"
     preview_file "$(cat "$CURSEL")"
     preview_fifo &
