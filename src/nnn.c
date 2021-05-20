@@ -335,7 +335,8 @@ typedef struct {
 	uint_t stayonsel  : 1;  /* Disable auto-proceed on select */
 	uint_t dirctx     : 1;  /* Show dirs in context color */
 	uint_t uidgid     : 1;  /* Show owner and group info */
-	uint_t reserved   : 9;  /* Adjust when adding/removing a field */
+	uint_t prstssn    : 1;  /* Persistent session */
+	uint_t reserved   : 8;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -3851,12 +3852,11 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int nextctx)
 }
 
 #ifndef NOSSN
-static void save_session(bool last_session, int *presel)
+static void save_session(const char *sname, int *presel)
 {
 	int i;
 	session_header_t header;
 	FILE *fsession;
-	char *sname;
 	bool status = FALSE;
 	char ssnpath[PATH_MAX];
 	char spath[PATH_MAX];
@@ -3876,10 +3876,6 @@ static void save_session(bool last_session, int *presel)
 			header.fltrln[i] = strnlen(g_ctx[i].c_fltr, REGEX_MAX) + 1;
 		}
 	}
-
-	sname = !last_session ? xreadline(NULL, messages[MSG_SSN_NAME]) : "@";
-	if (!sname[0])
-		return;
 
 	mkpath(cfgpath, toks[TOK_SSN], ssnpath);
 	mkpath(ssnpath, sname, spath);
@@ -3942,7 +3938,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 		mkpath(ssnpath, "@", spath);
 
 	if (has_loaded_dynamically)
-		save_session(TRUE, NULL);
+		save_session("@", NULL);
 
 	fsession = fopen(spath, "rb");
 	if (!fsession) {
@@ -7128,9 +7124,11 @@ nochange:
 		case SEL_SESSIONS:
 			r = get_input(messages[MSG_SSN_OPTS]);
 
-			if (r == 's')
-				save_session(FALSE, &presel);
-			else if (r == 'l' || r == 'r') {
+			if (r == 's') {
+				tmp = xreadline(NULL, messages[MSG_SSN_NAME]);
+				if (tmp && *tmp)
+					save_session(FALSE, &presel);
+			} else if (r == 'l' || r == 'r') {
 				if (load_session(NULL, &path, &lastdir, &lastname, r == 'r')) {
 					setdirwatch();
 					goto begin;
@@ -7186,8 +7184,8 @@ nochange:
 			}
 
 #ifndef NOSSN
-			if (session && *session == '@' && !session[1])
-				save_session(TRUE, NULL);
+			if (session && g_state.prstssn)
+				save_session(session, NULL);
 #endif
 
 			/* CD on Quit */
@@ -7768,7 +7766,9 @@ int main(int argc, char *argv[])
 				session = optarg;
 			break;
 		case 'S':
-			session = "@";
+			g_state.prstssn = 1;
+			if (!session) /* Support named persistent sessions */
+				session = "@";
 			break;
 #endif
 		case 't':

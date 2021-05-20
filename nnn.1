@@ -170,23 +170,26 @@ A new context copies the state of the previous context. Each context can have
 its own color. See ENVIRONMENT section.
 .Sh SESSIONS
 Sessions are a way to save and restore states of work. A session stores the
-settings and contexts.
+settings and contexts. Sessions can be loaded at runtime or with a program
+option.
 .Pp
-Sessions can be loaded dynamically at runtime or with a program option.
-.Pp
-When a session is loaded dynamically, the last working session is saved
-automatically to a dedicated -- "last session" -- session file. The "last
-session" is also used in persistent session mode.
-.Pp
-Listing input stream has a higher priority to session options (-s/-S). Sessions
-can be loaded explicitly at runtime. Session option \fIrestore\fR would restore
-the persistent session at runtime.
+- When a session is loaded at runtime, the last working state is saved
+automatically to a dedicated "auto session" session file. Session option
+\fIrestore\fR would restore the "auto session".
+.br
+- The persistent session option is global. If it is used, the last active session
+will be updated with the final state at program quit.
+.br
+- The "auto session" is used in persistent session mode if no session is active.
+.br
+- Listing input stream and opening a bookmark by key have a higher priority to
+session options (-s/-S).
 .Pp
 All the session files are located by session name in the directory
 .Pp
 \fB${XDG_CONFIG_HOME:-$HOME/.config}/nnn/sessions\fR
 .Pp
-"@" is the "last session" file.
+"@" is the "auto session" file.
 .Sh FILTERS
 Filters are strings (or regex patterns) to find matching entries in the current
 directory instantly (\fIsearch-as-you-type\fR). Matches are case-insensitive by
