@@ -125,6 +125,8 @@
 #include "qsort.h"
 #endif
 
+#include <git2.h>
+
 /* Macro definitions */
 #define VERSION "3.5"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
@@ -242,6 +244,18 @@ typedef unsigned char uchar_t;
 typedef unsigned short ushort_t;
 typedef unsigned long long ulong_t;
 
+typedef enum {
+    SIMP_STATUS_NONE = 0,
+    SIMP_STATUS_UNMOD,
+    SIMP_STATUS_NEW,
+    SIMP_STATUS_MODIFIED,
+    SIMP_STATUS_DELETED,
+    SIMP_STATUS_RENAMED,
+    SIMP_STATUS_TYPE_CHANGE,
+    SIMP_STATUS_IGNORED,
+    SIMP_STATUS_CONFLICTED,
+} simp_status_t;
+
 /* STRUCTURES */
 
 /* Directory entry */
@@ -257,6 +271,8 @@ typedef struct entry {
 #endif
 	ushort_t nlen; /* Length of file name */
 	uchar_t flags; /* Flags specific to the file */
+    simp_status_t status_indexed;
+    simp_status_t status_staged;
 } *pEntry;
 
 /* Key-value pairs from env */
@@ -353,8 +369,19 @@ typedef struct {
 } session_header_t;
 #endif
 
+typedef struct {
+    char *path;
+    uint32_t status;
+} status_t;
+
+typedef struct {
+    status_t *statuses;
+    size_t len;
+} statuses_t;
+
 /* GLOBALS */
 
+statuses_t git_statuses;
 /* Configuration, contexts */
 static settings cfg = {
 	0, /* filtermode */
@@ -777,6 +804,98 @@ static void notify_fifo(bool force);
 #endif
 
 /* Functions */
+
+static simp_status_t git_get_indexed_status(const uint32_t status) {
+    if (status & GIT_STATUS_INDEX_NEW)              return SIMP_STATUS_NEW;
+    else if (status & GIT_STATUS_INDEX_MODIFIED)    return SIMP_STATUS_MODIFIED;
+    else if (status & GIT_STATUS_INDEX_DELETED)     return SIMP_STATUS_DELETED;
+    else if (status & GIT_STATUS_INDEX_RENAMED)     return SIMP_STATUS_RENAMED;
+    else if (status & GIT_STATUS_INDEX_TYPECHANGE)  return SIMP_STATUS_TYPE_CHANGE;
+    return SIMP_STATUS_UNMOD;
+}
+
+static simp_status_t git_get_staged_status(const uint32_t status) {
+    if (status & GIT_STATUS_WT_NEW)              return SIMP_STATUS_NEW;
+    else if (status & GIT_STATUS_WT_MODIFIED)    return SIMP_STATUS_MODIFIED;
+    else if (status & GIT_STATUS_WT_DELETED)     return SIMP_STATUS_DELETED;
+    else if (status & GIT_STATUS_WT_RENAMED)     return SIMP_STATUS_RENAMED;
+    else if (status & GIT_STATUS_WT_TYPECHANGE)  return SIMP_STATUS_TYPE_CHANGE;
+    else if (status & GIT_STATUS_IGNORED)        return SIMP_STATUS_IGNORED;
+    else if (status & GIT_STATUS_CONFLICTED)     return SIMP_STATUS_CONFLICTED;
+    return SIMP_STATUS_UNMOD;
+}
+
+static void git_render_simp_status(simp_status_t status) {
+    switch (status) {
+    case SIMP_STATUS_NONE:          break;
+    case SIMP_STATUS_UNMOD:         addch('-' | COLOR_PAIR(C_MIS)); break;
+    case SIMP_STATUS_NEW:           addch('N' | COLOR_PAIR(C_EXE)); break;
+    case SIMP_STATUS_MODIFIED:      addch('M' | COLOR_PAIR(4)); break;
+    case SIMP_STATUS_DELETED:       addch('D' | COLOR_PAIR(C_UND)); break;
+    case SIMP_STATUS_RENAMED:       addch('R' | COLOR_PAIR(C_CHR)); break;
+    case SIMP_STATUS_TYPE_CHANGE:   addch('T' | COLOR_PAIR(C_HRD)); break;
+    case SIMP_STATUS_IGNORED:       addch('I' | COLOR_PAIR(C_MIS)); break;
+    case SIMP_STATUS_CONFLICTED:    addch('U' | COLOR_PAIR(C_UND)); break;
+    }
+}
+
+static bool starts_with(const char *const s, const char *const start) {
+    const bool test = 0 == strcmp("/home/steven/gitproj/Iosevka/font-src", s);
+    const size_t s_len = strlen(s);
+    const size_t start_len = strlen(start);
+    if (test) {
+        DPRINTF_U(s_len);
+        DPRINTF_U(start_len);
+        DPRINTF_D(strncmp(s, start, start_len));
+    }
+    return (start_len <= s_len) && (0 == strncmp(s, start, start_len));
+}
+
+static statuses_t statuses_from_path(const char *path) {
+    statuses_t statuses = { .statuses = NULL, .len = 0 };
+    git_buf ret = { .ptr = 0, .asize = 0, .size = 0 };
+    git_repository *repo;
+    git_repository_discover(&ret, path, false, NULL);
+    git_repository_open(&repo, ret.ptr);
+    git_buf_dispose(&ret);
+    if (repo) {
+        git_status_list *status_list = NULL;
+        git_status_list_new(&status_list, repo, NULL);
+        statuses.len = git_status_list_entrycount(status_list);
+        statuses.statuses = malloc(statuses.len * sizeof(status_t));
+        const char *workdir = git_repository_workdir(repo);
+        for (size_t i = 0; i < statuses.len; i ++) {
+            const git_status_entry *status_ent = git_status_byindex(status_list, i);
+            const char *entry_path = status_ent->head_to_index
+                    ? status_ent->head_to_index->old_file.path
+                    : status_ent->index_to_workdir->old_file.path;
+            const size_t joined_len = strlen(workdir) + strlen(entry_path) + 1;
+            char *joined = malloc(joined_len * sizeof(char));
+            strcpy(joined, workdir);
+            strcat(joined, entry_path);
+            char *canon_path = realpath(joined, NULL);
+            if (canon_path) {
+                statuses.statuses[i].path = canon_path;
+                free(joined);
+            } else {
+                statuses.statuses[i].path = joined;
+            }
+            DPRINTF_S(statuses.statuses[i].path);
+            DPRINTF_P(status_ent->status);
+            statuses.statuses[i].status = status_ent->status;
+        }
+        git_status_list_free(status_list);
+        git_repository_free(repo);
+    }
+    return statuses;
+}
+
+static void statuses_free(statuses_t statuses) {
+    for (size_t i = 0; i < statuses.len; i ++) {
+        free(statuses.statuses[i].path);
+    }
+    free(statuses.statuses);
+}
 
 static void sigint_handler(int UNUSED(sig))
 {
@@ -2585,8 +2704,8 @@ try_quit:
 				     ptr + ((struct inotify_event *)ptr)->len < inotify_buf + i;
 				     ptr += sizeof(struct inotify_event) + event->len) {
 					event = (struct inotify_event *)ptr;
-					DPRINTF_D(event->wd);
-					DPRINTF_D(event->mask);
+					/* DPRINTF_D(event->wd); */
+					/* DPRINTF_D(event->mask); */
 					if (!event->wd)
 						break;
 
@@ -2596,7 +2715,7 @@ try_quit:
 						break;
 					}
 				}
-				DPRINTF_S("inotify read done");
+				/* DPRINTF_S("inotify read done"); */
 			}
 		}
 #elif defined(BSD_KQUEUE)
@@ -3789,6 +3908,11 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 			attrs |= COLOR_PAIR(pair);
 #ifdef ICONS_ENABLED
 		attroff(attrs);
+        if (ent->status_indexed != SIMP_STATUS_NONE) {
+            addch(' ');
+        }
+        git_render_simp_status(ent->status_indexed);
+        git_render_simp_status(ent->status_staged);
 		addstr(selgap);
 		if (sel)
 			attrs &= ~A_REVERSE;
@@ -5002,6 +5126,8 @@ static int dentfill(char *path, struct entry **ppdents)
 	size_t off = 0, namebuflen = NAMEBUF_INCR;
 	struct stat sb_path, sb;
 	DIR *dirp = opendir(path);
+    statuses_free(git_statuses);
+    git_statuses = statuses_from_path(path);
 
 	DPRINTF_S(__func__);
 
@@ -5164,6 +5290,66 @@ static int dentfill(char *path, struct entry **ppdents)
 		dentp->uid = sb.st_uid;
 		dentp->gid = sb.st_gid;
 #endif
+
+        if (git_statuses.len) {
+            uint32_t merged_status = 0;
+            char joined[PATH_MAX];
+            strcpy(joined, path);
+            strcat(joined, "/");
+            strcat(joined, dentp->name);
+            char *real = realpath(joined, NULL);
+            char *canon_path = real ? real : joined;
+            DPRINTF_S(canon_path);
+            const bool test = 0 == strcmp("/home/steven/gitproj/Iosevka/font-src", canon_path);
+            if ((dentp->mode & S_IFMT) == S_IFDIR) {
+                for (size_t i = 0; i < git_statuses.len; i ++) {
+                    const char *entry_path = git_statuses.statuses[i].path;
+                    const uint32_t status = git_statuses.statuses[i].status;
+                    if (test) {
+                        DPRINTF_S(entry_path);
+                        DPRINTF_P(status);
+                    }
+                    if (status == GIT_STATUS_IGNORED) {
+                        if (test) {
+                            DPRINTF_S("ignore");
+                        }
+                        if (starts_with(canon_path, entry_path)) {
+                            merged_status |= GIT_STATUS_IGNORED;
+                        }
+                    } else {
+                        if (test) {
+                            DPRINTF_S("not ignore");
+                        }
+                        if (starts_with(entry_path, canon_path)) {
+                            merged_status |= status;
+                        }
+                    }
+                    if (test) {
+                        DPRINTF_P(merged_status);
+                    }
+                }
+            } else {
+                for (size_t i = 0; i < git_statuses.len; i ++) {
+                    const char *entry_path = git_statuses.statuses[i].path;
+                    const uint32_t status = git_statuses.statuses[i].status;
+                    if (git_statuses.statuses[i].status == GIT_STATUS_IGNORED) {
+                        if (starts_with(canon_path, entry_path)) {
+                            merged_status |= GIT_STATUS_IGNORED;
+                        }
+                    } else {
+                        if (0 == strcmp(entry_path, canon_path)) {
+                            merged_status |= status;
+                        }
+                    }
+                }
+            }
+            dentp->status_indexed = git_get_indexed_status(merged_status);
+            dentp->status_staged = git_get_staged_status(merged_status);
+            free(real);
+        } else {
+            dentp->status_indexed = SIMP_STATUS_NONE;
+            dentp->status_staged = SIMP_STATUS_NONE;
+        }
 
 		dentp->flags = S_ISDIR(sb.st_mode) ? 0 : ((sb.st_nlink > 1) ? HARD_LINK : 0);
 		if (entflags) {
@@ -5703,6 +5889,9 @@ static void draw_line(char *path, int ncols)
 		dir = TRUE;
 	}
 
+    DPRINTF_S(__func__);
+    DPRINTF_S(path);
+    DPRINTF_D(ncols);
 	move(2 + last - curscroll, 0);
 	printptr(&pdents[last], ncols, false);
 
@@ -5851,6 +6040,7 @@ static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)
 
 	/* Save the newly opted dir in path */
 	xstrsncpy(path, newpath, PATH_MAX);
+	DPRINTF_S(__func__);
 	DPRINTF_S(path);
 
 	clearfilter();
@@ -7532,6 +7722,8 @@ static bool set_tmp_path(void)
 
 static void cleanup(void)
 {
+    statuses_free(git_statuses);
+    git_libgit2_shutdown();
 	free(selpath);
 	free(plgpath);
 	free(cfgpath);
@@ -7725,6 +7917,7 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 
 	atexit(cleanup);
+    git_libgit2_init();
 
 	/* Check if we are in path list mode */
 	if (!isatty(STDIN_FILENO)) {
