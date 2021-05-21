@@ -3918,7 +3918,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	session_header_t header;
 	FILE *fsession;
 	bool has_loaded_dynamically = !(sname || restore);
-	bool status = FALSE;
+	bool status = (sname && g_state.picker); /* Picker mode with session program option */
 	char ssnpath[PATH_MAX];
 	char spath[PATH_MAX];
 
@@ -3942,10 +3942,14 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 
 	fsession = fopen(spath, "rb");
 	if (!fsession) {
-		printmsg(messages[MSG_SEL_MISSING]);
-		xdelay(XDELAY_INTERVAL_MS);
+		if (!status) {
+			printmsg(messages[MSG_SEL_MISSING]);
+			xdelay(XDELAY_INTERVAL_MS);
+		}
 		return FALSE;
 	}
+
+	status = FALSE;
 
 	if ((fread(&header, sizeof(header), 1, fsession) != 1)
 		|| (header.ver != SESSIONS_VERSION)
