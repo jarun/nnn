@@ -245,16 +245,16 @@ typedef unsigned short ushort_t;
 typedef unsigned long long ulong_t;
 
 typedef enum {
-    SIMP_STATUS_NONE = 0,
-    SIMP_STATUS_UNMOD,
-    SIMP_STATUS_NEW,
-    SIMP_STATUS_MODIFIED,
-    SIMP_STATUS_DELETED,
-    SIMP_STATUS_RENAMED,
-    SIMP_STATUS_TYPE_CHANGE,
-    SIMP_STATUS_IGNORED,
-    SIMP_STATUS_CONFLICTED,
-} simp_status_t;
+    GIT_COLUMN_STATUS_NONE = 0,
+    GIT_COLUMN_STATUS_UNMOD,
+    GIT_COLUMN_STATUS_NEW,
+    GIT_COLUMN_STATUS_MODIFIED,
+    GIT_COLUMN_STATUS_DELETED,
+    GIT_COLUMN_STATUS_RENAMED,
+    GIT_COLUMN_STATUS_TYPE_CHANGE,
+    GIT_COLUMN_STATUS_IGNORED,
+    GIT_COLUMN_STATUS_CONFLICTED,
+} git_column_status_t;
 
 /* STRUCTURES */
 
@@ -271,8 +271,8 @@ typedef struct entry {
 #endif
 	ushort_t nlen; /* Length of file name */
 	uchar_t flags; /* Flags specific to the file */
-    simp_status_t status_indexed;
-    simp_status_t status_staged;
+    git_column_status_t status_indexed;
+    git_column_status_t status_staged;
 } *pEntry;
 
 /* Key-value pairs from env */
@@ -371,17 +371,17 @@ typedef struct {
 
 typedef struct {
     char *path;
-    uint32_t status;
-} status_t;
+    git_status_t status;
+} simple_git_status_t;
 
 typedef struct {
-    status_t *statuses;
+    simple_git_status_t *statuses;
     size_t len;
-} statuses_t;
+} simple_git_statuses_t;
 
 /* GLOBALS */
 
-statuses_t git_statuses;
+simple_git_statuses_t git_statuses;
 /* Configuration, contexts */
 static settings cfg = {
 	0, /* filtermode */
@@ -805,37 +805,37 @@ static void notify_fifo(bool force);
 
 /* Functions */
 
-static simp_status_t git_get_indexed_status(const uint32_t status) {
-    if (status & GIT_STATUS_INDEX_NEW)         return SIMP_STATUS_NEW;
-    if (status & GIT_STATUS_INDEX_MODIFIED)    return SIMP_STATUS_MODIFIED;
-    if (status & GIT_STATUS_INDEX_DELETED)     return SIMP_STATUS_DELETED;
-    if (status & GIT_STATUS_INDEX_RENAMED)     return SIMP_STATUS_RENAMED;
-    if (status & GIT_STATUS_INDEX_TYPECHANGE)  return SIMP_STATUS_TYPE_CHANGE;
-    return SIMP_STATUS_UNMOD;
+static git_column_status_t git_get_indexed_status(const uint32_t status) {
+    if (status & GIT_STATUS_INDEX_NEW)         return GIT_COLUMN_STATUS_NEW;
+    if (status & GIT_STATUS_INDEX_MODIFIED)    return GIT_COLUMN_STATUS_MODIFIED;
+    if (status & GIT_STATUS_INDEX_DELETED)     return GIT_COLUMN_STATUS_DELETED;
+    if (status & GIT_STATUS_INDEX_RENAMED)     return GIT_COLUMN_STATUS_RENAMED;
+    if (status & GIT_STATUS_INDEX_TYPECHANGE)  return GIT_COLUMN_STATUS_TYPE_CHANGE;
+    return GIT_COLUMN_STATUS_UNMOD;
 }
 
-static simp_status_t git_get_staged_status(const uint32_t status) {
-    if (status & GIT_STATUS_WT_NEW)         return SIMP_STATUS_NEW;
-    if (status & GIT_STATUS_WT_MODIFIED)    return SIMP_STATUS_MODIFIED;
-    if (status & GIT_STATUS_WT_DELETED)     return SIMP_STATUS_DELETED;
-    if (status & GIT_STATUS_WT_RENAMED)     return SIMP_STATUS_RENAMED;
-    if (status & GIT_STATUS_WT_TYPECHANGE)  return SIMP_STATUS_TYPE_CHANGE;
-    if (status & GIT_STATUS_IGNORED)        return SIMP_STATUS_IGNORED;
-    if (status & GIT_STATUS_CONFLICTED)     return SIMP_STATUS_CONFLICTED;
-    return SIMP_STATUS_UNMOD;
+static git_column_status_t git_get_staged_status(const uint32_t status) {
+    if (status & GIT_STATUS_WT_NEW)         return GIT_COLUMN_STATUS_NEW;
+    if (status & GIT_STATUS_WT_MODIFIED)    return GIT_COLUMN_STATUS_MODIFIED;
+    if (status & GIT_STATUS_WT_DELETED)     return GIT_COLUMN_STATUS_DELETED;
+    if (status & GIT_STATUS_WT_RENAMED)     return GIT_COLUMN_STATUS_RENAMED;
+    if (status & GIT_STATUS_WT_TYPECHANGE)  return GIT_COLUMN_STATUS_TYPE_CHANGE;
+    if (status & GIT_STATUS_IGNORED)        return GIT_COLUMN_STATUS_IGNORED;
+    if (status & GIT_STATUS_CONFLICTED)     return GIT_COLUMN_STATUS_CONFLICTED;
+    return GIT_COLUMN_STATUS_UNMOD;
 }
 
-static void git_render_simp_status(simp_status_t status) {
+static void git_render_simp_status(git_column_status_t status) {
     switch (status) {
-    case SIMP_STATUS_NONE:          break;
-    case SIMP_STATUS_UNMOD:         addch('-' | COLOR_PAIR(C_MIS)); break;
-    case SIMP_STATUS_NEW:           addch('N' | COLOR_PAIR(C_EXE)); break;
-    case SIMP_STATUS_MODIFIED:      addch('M' | COLOR_PAIR(4)); break;
-    case SIMP_STATUS_DELETED:       addch('D' | COLOR_PAIR(C_UND)); break;
-    case SIMP_STATUS_RENAMED:       addch('R' | COLOR_PAIR(C_CHR)); break;
-    case SIMP_STATUS_TYPE_CHANGE:   addch('T' | COLOR_PAIR(C_HRD)); break;
-    case SIMP_STATUS_IGNORED:       addch('I' | COLOR_PAIR(C_MIS)); break;
-    case SIMP_STATUS_CONFLICTED:    addch('U' | COLOR_PAIR(C_UND)); break;
+    case GIT_COLUMN_STATUS_NONE:          break;
+    case GIT_COLUMN_STATUS_UNMOD:         addch('-' | COLOR_PAIR(C_MIS)); break;
+    case GIT_COLUMN_STATUS_NEW:           addch('N' | COLOR_PAIR(C_EXE)); break;
+    case GIT_COLUMN_STATUS_MODIFIED:      addch('M' | COLOR_PAIR(4)); break;
+    case GIT_COLUMN_STATUS_DELETED:       addch('D' | COLOR_PAIR(C_UND)); break;
+    case GIT_COLUMN_STATUS_RENAMED:       addch('R' | COLOR_PAIR(C_CHR)); break;
+    case GIT_COLUMN_STATUS_TYPE_CHANGE:   addch('T' | COLOR_PAIR(C_HRD)); break;
+    case GIT_COLUMN_STATUS_IGNORED:       addch('I' | COLOR_PAIR(C_MIS)); break;
+    case GIT_COLUMN_STATUS_CONFLICTED:    addch('U' | COLOR_PAIR(C_UND)); break;
     }
 }
 
@@ -852,8 +852,8 @@ static bool starts_with(const char *const s, const char *const start) {
 }
 
 static size_t mkpath(const char *dir, const char *name, char *out);
-static statuses_t statuses_from_path(const char *path) {
-    statuses_t statuses = { .statuses = NULL, .len = 0 };
+static simple_git_statuses_t statuses_from_path(const char *path) {
+    simple_git_statuses_t statuses = { .statuses = NULL, .len = 0 };
     git_buf ret = { .ptr = 0, .asize = 0, .size = 0 };
     git_repository *repo;
     git_repository_discover(&ret, path, false, NULL);
@@ -863,7 +863,7 @@ static statuses_t statuses_from_path(const char *path) {
         git_status_list *status_list = NULL;
         git_status_list_new(&status_list, repo, NULL);
         statuses.len = git_status_list_entrycount(status_list);
-        statuses.statuses = malloc(statuses.len * sizeof(status_t));
+        statuses.statuses = malloc(statuses.len * sizeof(simple_git_status_t));
         const char *workdir = git_repository_workdir(repo);
         for (size_t i = 0; i < statuses.len; i ++) {
             const git_status_entry *status_ent = git_status_byindex(status_list, i);
@@ -889,7 +889,7 @@ static statuses_t statuses_from_path(const char *path) {
     return statuses;
 }
 
-static void statuses_free(statuses_t statuses) {
+static void statuses_free(simple_git_statuses_t statuses) {
     for (size_t i = 0; i < statuses.len; i ++) {
         free(statuses.statuses[i].path);
     }
@@ -3908,7 +3908,7 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 #ifdef ICONS_ENABLED
 		attroff(attrs);
 #endif
-        if (ent->status_indexed != SIMP_STATUS_NONE) {
+        if (ent->status_indexed != GIT_COLUMN_STATUS_NONE) {
             addch(' ');
         }
         git_render_simp_status(ent->status_indexed);
@@ -5303,7 +5303,7 @@ static int dentfill(char *path, struct entry **ppdents)
             if ((dentp->mode & S_IFMT) == S_IFDIR) {
                 for (size_t i = 0; i < git_statuses.len; i ++) {
                     const char *entry_path = git_statuses.statuses[i].path;
-                    const uint32_t status = git_statuses.statuses[i].status;
+                    const git_status_t status = git_statuses.statuses[i].status;
                     if (test) {
                         DPRINTF_S(entry_path);
                         DPRINTF_P(status);
@@ -5346,8 +5346,8 @@ static int dentfill(char *path, struct entry **ppdents)
             dentp->status_staged = git_get_staged_status(merged_status);
             free(real);
         } else {
-            dentp->status_indexed = SIMP_STATUS_NONE;
-            dentp->status_staged = SIMP_STATUS_NONE;
+            dentp->status_indexed = GIT_COLUMN_STATUS_NONE;
+            dentp->status_staged = GIT_COLUMN_STATUS_NONE;
         }
 
 		dentp->flags = S_ISDIR(sb.st_mode) ? 0 : ((sb.st_nlink > 1) ? HARD_LINK : 0);
