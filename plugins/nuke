@@ -86,67 +86,68 @@ is_mac() {
 }
 
 handle_pdf() {
-    if [ "$GUI" -ne 0 ] && is_mac; then
-        nohup open "${FPATH}" >/dev/null 2>&1 &
-        exit 0
-    elif [ "$GUI" -ne 0 ] && type zathura >/dev/null 2>&1; then
-        nohup zathura "${FPATH}" >/dev/null 2>&1 &
-        exit 0
+    if [ "$GUI" -ne 0 ]; then
+        if is_mac; then
+            nohup open "${FPATH}" >/dev/null 2>&1 &
+        elif type zathura >/dev/null 2>&1; then
+            nohup zathura "${FPATH}" >/dev/null 2>&1 &
+        else
+            return
+        fi
     elif type pdftotext >/dev/null 2>&1; then
         ## Preview as text conversion
         pdftotext -l 10 -nopgbrk -q -- "${FPATH}" - | eval "$PAGER"
-        exit 0
     elif type mutool >/dev/null 2>&1; then
         mutool draw -F txt -i -- "${FPATH}" 1-10 | eval "$PAGER"
-        exit 0
     elif type exiftool >/dev/null 2>&1; then
         exiftool "${FPATH}" | eval "$PAGER"
-        exit 0
+    else
+        return
     fi
+    exit 0
 }
 
 handle_audio() {
     if type mocp >/dev/null 2>&1 && type mocq >/dev/null 2>&1; then
         mocq "${FPATH}" "opener" >/dev/null 2>&1
-        exit 0
     elif type mpv >/dev/null 2>&1; then
         mpv "${FPATH}" >/dev/null 2>&1 &
-        exit 0
     elif type media_client >/dev/null 2>&1; then
         media_client play "${FPATH}" >/dev/null 2>&1 &
-        exit 0
     elif type mediainfo >/dev/null 2>&1; then
         mediainfo "${FPATH}" | eval "$PAGER"
-        exit 0
     elif type exiftool >/dev/null 2>&1; then
         exiftool "${FPATH}"| eval "$PAGER"
-        exit 0
+    else
+        return
     fi
+    exit 0
 }
 
 handle_video() {
-    if [ "$GUI" -ne 0 ] && is_mac; then
-        nohup open "${FPATH}" >/dev/null 2>&1 &
-        exit 0
-    elif [ "$GUI" -ne 0 ] && type smplayer >/dev/null 2>&1; then
-        nohup smplayer "${FPATH}" >/dev/null 2>&1 &
-        exit 0
-    elif [ "$GUI" -ne 0 ] && type mpv >/dev/null 2>&1; then
-        nohup mpv "${FPATH}" >/dev/null 2>&1 &
-        exit 0
+    if [ "$GUI" -ne 0 ]; then
+        if is_mac; then
+            nohup open "${FPATH}" >/dev/null 2>&1 &
+        elif type smplayer >/dev/null 2>&1; then
+            nohup smplayer "${FPATH}" >/dev/null 2>&1 &
+        elif type mpv >/dev/null 2>&1; then
+            nohup mpv "${FPATH}" >/dev/null 2>&1 &
+        else
+            return
+        fi
     elif type ffmpegthumbnailer >/dev/null 2>&1; then
         # Thumbnail
         [ -d "${IMAGE_CACHE_PATH}" ] || mkdir "${IMAGE_CACHE_PATH}"
         ffmpegthumbnailer -i "${FPATH}" -o "${IMAGE_CACHE_PATH}/${FNAME}.jpg" -s 0
         viu -n "${IMAGE_CACHE_PATH}/${FNAME}.jpg" | eval "$PAGER"
-        exit 0
     elif type mediainfo >/dev/null 2>&1; then
         mediainfo "${FPATH}" | eval "$PAGER"
-        exit 0
     elif type exiftool >/dev/null 2>&1; then
         exiftool "${FPATH}"| eval "$PAGER"
-        exit 0
+    else
+        return
     fi
+    exit 0
 }
 
 # handle this extension and exit
@@ -306,15 +307,17 @@ handle_multimedia() {
 
         ## Image
         image/*)
-            if [ "$GUI" -ne 0 ] && is_mac; then
-                nohup open "${FPATH}" >/dev/null 2>&1 &
-                exit 0
-            elif [ "$GUI" -ne 0 ] && type imvr >/dev/null 2>&1; then
-                load_dir imvr "${FPATH}" >/dev/null 2>&1 &
-                exit 0
-            elif [ "$GUI" -ne 0 ] && type sxiv >/dev/null 2>&1; then
-                load_dir sxiv "${FPATH}" >/dev/null 2>&1 &
-                exit 0
+            if [ "$GUI" -ne 0 ]; then
+                if is_mac; then
+                    nohup open "${FPATH}" >/dev/null 2>&1 &
+                    exit 0
+                elif type imvr >/dev/null 2>&1; then
+                    load_dir imvr "${FPATH}" >/dev/null 2>&1 &
+                    exit 0
+                elif type sxiv >/dev/null 2>&1; then
+                    load_dir sxiv "${FPATH}" >/dev/null 2>&1 &
+                    exit 0
+                fi
             elif type viu >/dev/null 2>&1; then
                 viu -n "${FPATH}" | eval "$PAGER"
                 exit 0
@@ -477,12 +480,14 @@ handle_mime() {
 }
 
 handle_fallback() {
-    if [ "$GUI" -ne 0 ] && type xdg-open >/dev/null 2>&1; then
-        nohup xdg-open "${FPATH}" >/dev/null 2>&1 &
-        exit 0
-    elif [ "$GUI" -ne 0 ] && type open >/dev/null 2>&1; then
-        nohup open "${FPATH}" >/dev/null 2>&1 &
-        exit 0
+    if [ "$GUI" -ne 0 ]; then
+        if type xdg-open >/dev/null 2>&1; then
+            nohup xdg-open "${FPATH}" >/dev/null 2>&1 &
+            exit 0
+        elif type open >/dev/null 2>&1; then
+            nohup open "${FPATH}" >/dev/null 2>&1 &
+            exit 0
+        fi
     fi
 
     echo '----- File details -----' && file --dereference --brief -- "${FPATH}"
