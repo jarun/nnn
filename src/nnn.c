@@ -806,22 +806,22 @@ static void notify_fifo(bool force);
 /* Functions */
 
 static simp_status_t git_get_indexed_status(const uint32_t status) {
-    if (status & GIT_STATUS_INDEX_NEW)              return SIMP_STATUS_NEW;
-    else if (status & GIT_STATUS_INDEX_MODIFIED)    return SIMP_STATUS_MODIFIED;
-    else if (status & GIT_STATUS_INDEX_DELETED)     return SIMP_STATUS_DELETED;
-    else if (status & GIT_STATUS_INDEX_RENAMED)     return SIMP_STATUS_RENAMED;
-    else if (status & GIT_STATUS_INDEX_TYPECHANGE)  return SIMP_STATUS_TYPE_CHANGE;
+    if (status & GIT_STATUS_INDEX_NEW)         return SIMP_STATUS_NEW;
+    if (status & GIT_STATUS_INDEX_MODIFIED)    return SIMP_STATUS_MODIFIED;
+    if (status & GIT_STATUS_INDEX_DELETED)     return SIMP_STATUS_DELETED;
+    if (status & GIT_STATUS_INDEX_RENAMED)     return SIMP_STATUS_RENAMED;
+    if (status & GIT_STATUS_INDEX_TYPECHANGE)  return SIMP_STATUS_TYPE_CHANGE;
     return SIMP_STATUS_UNMOD;
 }
 
 static simp_status_t git_get_staged_status(const uint32_t status) {
-    if (status & GIT_STATUS_WT_NEW)              return SIMP_STATUS_NEW;
-    else if (status & GIT_STATUS_WT_MODIFIED)    return SIMP_STATUS_MODIFIED;
-    else if (status & GIT_STATUS_WT_DELETED)     return SIMP_STATUS_DELETED;
-    else if (status & GIT_STATUS_WT_RENAMED)     return SIMP_STATUS_RENAMED;
-    else if (status & GIT_STATUS_WT_TYPECHANGE)  return SIMP_STATUS_TYPE_CHANGE;
-    else if (status & GIT_STATUS_IGNORED)        return SIMP_STATUS_IGNORED;
-    else if (status & GIT_STATUS_CONFLICTED)     return SIMP_STATUS_CONFLICTED;
+    if (status & GIT_STATUS_WT_NEW)         return SIMP_STATUS_NEW;
+    if (status & GIT_STATUS_WT_MODIFIED)    return SIMP_STATUS_MODIFIED;
+    if (status & GIT_STATUS_WT_DELETED)     return SIMP_STATUS_DELETED;
+    if (status & GIT_STATUS_WT_RENAMED)     return SIMP_STATUS_RENAMED;
+    if (status & GIT_STATUS_WT_TYPECHANGE)  return SIMP_STATUS_TYPE_CHANGE;
+    if (status & GIT_STATUS_IGNORED)        return SIMP_STATUS_IGNORED;
+    if (status & GIT_STATUS_CONFLICTED)     return SIMP_STATUS_CONFLICTED;
     return SIMP_STATUS_UNMOD;
 }
 
@@ -851,6 +851,7 @@ static bool starts_with(const char *const s, const char *const start) {
     return (start_len <= s_len) && (0 == strncmp(s, start, start_len));
 }
 
+static size_t mkpath(const char *dir, const char *name, char *out);
 static statuses_t statuses_from_path(const char *path) {
     statuses_t statuses = { .statuses = NULL, .len = 0 };
     git_buf ret = { .ptr = 0, .asize = 0, .size = 0 };
@@ -869,10 +870,8 @@ static statuses_t statuses_from_path(const char *path) {
             const char *entry_path = status_ent->head_to_index
                     ? status_ent->head_to_index->old_file.path
                     : status_ent->index_to_workdir->old_file.path;
-            const size_t joined_len = strlen(workdir) + strlen(entry_path) + 1;
-            char *joined = malloc(joined_len * sizeof(char));
-            strcpy(joined, workdir);
-            strcat(joined, entry_path);
+            char *joined = malloc(PATH_MAX * sizeof(char));
+            mkpath(workdir, entry_path, joined);
             char *canon_path = realpath(joined, NULL);
             if (canon_path) {
                 statuses.statuses[i].path = canon_path;
@@ -3908,11 +3907,13 @@ static void printent_long(const struct entry *ent, uint_t namecols, bool sel)
 			attrs |= COLOR_PAIR(pair);
 #ifdef ICONS_ENABLED
 		attroff(attrs);
+#endif
         if (ent->status_indexed != SIMP_STATUS_NONE) {
             addch(' ');
         }
         git_render_simp_status(ent->status_indexed);
         git_render_simp_status(ent->status_staged);
+#ifdef ICONS_ENABLED
 		addstr(selgap);
 		if (sel)
 			attrs &= ~A_REVERSE;
@@ -5294,9 +5295,7 @@ static int dentfill(char *path, struct entry **ppdents)
         if (git_statuses.len) {
             uint32_t merged_status = 0;
             char joined[PATH_MAX];
-            strcpy(joined, path);
-            strcat(joined, "/");
-            strcat(joined, dentp->name);
+            mkpath(path, dentp->name, joined);
             char *real = realpath(joined, NULL);
             char *canon_path = real ? real : joined;
             DPRINTF_S(canon_path);
