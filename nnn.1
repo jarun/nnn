@@ -279,7 +279,7 @@ A selection can be edited, copied, moved, removed, archived or linked.
 .Pp
 Absolute paths of the selected files are copied to \fB.selection\fR file in
 the config directory. The selection file is shared between multiple program
-instances. Selection from multiple insances are not merged. The last instance
+instances. Selection from multiple instances are not merged. The last instance
 writing to the file overwrites earlier contents. If you have 2 instances of
 .Nm
 \fIopen\fR in 2 panes of a terminal multiplexer, you can select in one pane and
@@ -531,10 +531,6 @@ separated by \fI;\fR:
 .Ed
 .Pp
 \fBNO_COLOR:\fR disable ANSI color output (overridden by \fBNNN_COLORS\fR).
-.Sh KNOWN ISSUES
-.Nm
-may not handle keypresses correctly when used with tmux (see issue #104 for
-more details). Set \fBTERM=xterm-256color\fR to address it.
 .Sh AUTHORS
 .An Arun Prakash Jana Aq Mt engineerarun@gmail.com ,
 .An Lazaros Koromilas Aq Mt lostd@2f30.org ,
