@@ -76,7 +76,7 @@
 #include <fcntl.h>
 #include <libgen.h>
 #include <limits.h>
-#ifndef NOLOCALE
+#ifndef NOLC
 #include <locale.h>
 #endif
 #include <stdio.h>
@@ -2447,7 +2447,7 @@ static int xstricmp(const char * const s1, const char * const s2)
 	}
 
 	/* Handle 1. all non-numeric and 2. both same numeric value cases */
-#ifndef NOLOCALE
+#ifndef NOLC
 	return strcoll(s1, s2);
 #else
 	return strcasecmp(s1, s2);
@@ -3470,7 +3470,7 @@ static void resetdircolor(int flags)
  * Adjust string length to maxcols if > 0;
  * Max supported str length: NAME_MAX;
  */
-#ifdef NOLOCALE
+#ifdef NOLC
 static char *unescape(const char *str, uint_t maxcols)
 {
 	char * const wbuf = g_buf;
@@ -3813,7 +3813,7 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 	if (!ind)
 		++namecols;
 
-#ifndef NOLOCALE
+#ifndef NOLC
 	addwstr(unescape(ent->name, namecols));
 #else
 	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
@@ -8012,7 +8012,7 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-#ifndef NOLOCALE
+#ifndef NOLC
 	/* Set locale */
 	setlocale(LC_ALL, "");
 #ifdef PCRE

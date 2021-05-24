@@ -12,7 +12,7 @@ CFLAGS_OPTIMIZATION ?= -O3
 O_DEBUG := 0  # debug binary
 O_NORL := 0  # no readline support
 O_PCRE := 0  # link with PCRE library
-O_NOLOC := 0  # no locale support
+O_NOLC := 0  # no locale support
 O_NOMOUSE := 0  # no mouse support
 O_NOBATCH := 0  # no built-in batch renamer
 O_NOFIFO := 0  # no FIFO previewer support
@@ -32,13 +32,13 @@ endif
 ifneq ($(filter norl,$(MAKECMDGOALS)),)
 	O_NORL := 1
 endif
-ifneq ($(filter noloc,$(MAKECMDGOALS)),)
+ifneq ($(filter nolc,$(MAKECMDGOALS)),)
 	O_NORL := 1
-	O_NOLOC := 1
+	O_NOLC := 1
 endif
 
 ifeq ($(strip $(O_DEBUG)),1)
-	CPPFLAGS += -DDBGMODE
+	CPPFLAGS += -DDEBUG
 	CFLAGS += -g
 	LDLIBS += -lrt
 endif
@@ -56,8 +56,8 @@ ifeq ($(strip $(O_PCRE)),1)
 	LDLIBS += -lpcre
 endif
 
-ifeq ($(strip $(O_NOLOC)),1)
-	CPPFLAGS += -DNOLOCALE
+ifeq ($(strip $(O_NOLC)),1)
+	CPPFLAGS += -DNOLC
 endif
 
 ifeq ($(strip $(O_NOMOUSE)),1)
@@ -154,7 +154,7 @@ $(BIN): $(OBJS)
 # targets for backwards compatibility
 debug: $(BIN)
 norl: $(BIN)
-noloc: $(BIN)
+nolc: $(BIN)
 
 install: all
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
@@ -170,6 +170,7 @@ strip: $(BIN)
 	$(STRIP) $^
 
 static:
+	# regular static binary
 	make O_STATIC=1 strip
 	mv $(BIN) $(BIN)-static
 
