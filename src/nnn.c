@@ -4954,18 +4954,22 @@ static bool handle_cmd(enum action sel, const char *current, char *newpath)
 	return TRUE;
 }
 
-static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int UNUSED(typeflag), struct FTW *UNUSED(ftwbuf))
+static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
-	if (sb->st_blocks && (sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino)))
+	if (sb->st_blocks
+	    && ((typeflag == FTW_F && (sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino)))
+	    || typeflag == FTW_D))
 		ent_blocks += sb->st_blocks;
 
 	++num_files;
 	return 0;
 }
 
-static int sum_asize(const char *UNUSED(fpath), const struct stat *sb, int UNUSED(typeflag), struct FTW *UNUSED(ftwbuf))
+static int sum_asize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
 {
-	if (sb->st_size && (sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino)))
+	if (sb->st_size
+	    && ((typeflag == FTW_F && (sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino)))
+	    || typeflag == FTW_D))
 		ent_blocks += sb->st_size;
 
 	++num_files;
