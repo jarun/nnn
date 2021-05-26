@@ -74,11 +74,13 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <fts.h>
 #include <libgen.h>
 #include <limits.h>
 #ifndef NOLC
 #include <locale.h>
 #endif
+#include <pthread.h>
 #include <stdio.h>
 #ifndef NORL
 #include <readline/history.h>
@@ -336,7 +338,8 @@ typedef struct {
 	uint_t dirctx     : 1;  /* Show dirs in context color */
 	uint_t uidgid     : 1;  /* Show owner and group info */
 	uint_t prstssn    : 1;  /* Persistent session */
-	uint_t reserved   : 8;  /* Adjust when adding/removing a field */
+	uint_t duinit     : 1;  /* Initialize disk usage */
+	uint_t reserved   : 7;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -424,9 +427,7 @@ static char *fifopath;
 #endif
 static unsigned long long *ihashbmp;
 static struct entry *pdents;
-static blkcnt_t ent_blocks;
 static blkcnt_t dir_blocks;
-static ulong_t num_files;
 static kv *bookmark;
 static kv *plug;
 static uchar_t tmpfplen, homelen;
@@ -439,6 +440,28 @@ static pcre *archive_pcre;
 #else
 static regex_t archive_re;
 #endif
+
+/* pthread related */
+#define NUM_DU_THREADS (4) /* Can use sysconf(_SC_NPROCESSORS_ONLN) */
+#define DU_TEST (((node->fts_info & FTS_F) && \
+			(sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino))) || node->fts_info & FTS_DP)
+
+static int threadbmp = -1; /* Has 1 in the bit position for idle threads */
+static volatile int active_threads = 0;
+static pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t hardlink_mutex = PTHREAD_MUTEX_INITIALIZER;
+static ulong_t *core_files;
+static blkcnt_t *core_blocks;
+static _Atomic volatile ulong_t num_files;
+
+typedef struct {
+	char path[PATH_MAX];
+	int entnum;
+	ushort_t core;
+	bool mntpoint;
+} thread_data;
+
+static thread_data *core_data;
 
 /* Retain old signal handlers */
 static struct sigaction oldsighup;
@@ -777,7 +800,6 @@ static haiku_nm_h haiku_hnd;
 /* Forward declarations */
 static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, char *arg3, uchar_t flag);
-static int (*nftw_fn)(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf);
 static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
@@ -853,12 +875,16 @@ static bool test_set_bit(uint_t nr)
 {
 	nr &= HASH_BITS;
 
-	unsigned long long *m = ((unsigned long long *)ihashbmp) + (nr >> 6);
+	pthread_mutex_lock(&hardlink_mutex);
+	ulong_t *m = ((ulong_t *)ihashbmp) + (nr >> 6);
 
-	if (*m & (1 << (nr & 63)))
+	if (*m & (1 << (nr & 63))) {
+		pthread_mutex_unlock(&hardlink_mutex);
 		return FALSE;
+	}
 
 	*m |= 1 << (nr & 63);
+	pthread_mutex_unlock(&hardlink_mutex);
 
 	return TRUE;
 }
@@ -4954,36 +4980,63 @@ static bool handle_cmd(enum action sel, const char *current, char *newpath)
 	return TRUE;
 }
 
-static int sum_bsize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
-{
-	if (sb->st_blocks
-	    && ((typeflag == FTW_F && (sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino)))
-	    || typeflag == FTW_D))
-		ent_blocks += sb->st_blocks;
-
-	++num_files;
-	return 0;
-}
-
-static int sum_asize(const char *UNUSED(fpath), const struct stat *sb, int typeflag, struct FTW *UNUSED(ftwbuf))
-{
-	if (sb->st_size
-	    && ((typeflag == FTW_F && (sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino)))
-	    || typeflag == FTW_D))
-		ent_blocks += sb->st_size;
-
-	++num_files;
-	return 0;
-}
-
 static void dentfree(void)
 {
 	free(pnamebuf);
 	free(pdents);
 	free(mark);
+
+	/* Thread data cleanup */
+	free(core_blocks);
+	free(core_data);
+	free(core_files);
 }
 
-static blkcnt_t dirwalk(char *path, struct stat *psb)
+static void *du_thread(void *p_data)
+{
+	thread_data *pdata = (thread_data *)p_data;
+	char *path[2] = {pdata->path, NULL};
+	ulong_t tfiles = 0;
+	blkcnt_t tblocks = 0;
+	struct stat *sb;
+	FTS *tree = fts_open(path, FTS_PHYSICAL | FTS_XDEV | FTS_NOCHDIR, 0);
+	FTSENT *node;
+
+	while ((node = fts_read(tree))) {
+		if (node->fts_info & FTS_D)
+			continue;
+
+		sb = node->fts_statp;
+
+		if (cfg.apparentsz) {
+			if (sb->st_size && DU_TEST)
+				tblocks += sb->st_size;
+		} else if (sb->st_blocks && DU_TEST)
+				tblocks += sb->st_blocks;
+
+		++tfiles;
+	}
+
+	fts_close(tree);
+
+	if (pdata->entnum >= 0)
+		pdents[pdata->entnum].blocks = tblocks;
+
+	if (!pdata->mntpoint) {
+		core_blocks[pdata->core] += tblocks;
+		core_files[pdata->core] += tfiles;
+	} else
+		core_files[pdata->core] += 1;
+
+	pthread_mutex_lock(&running_mutex);
+	threadbmp |= (1 << pdata->core);
+	--active_threads;
+	pthread_mutex_unlock(&running_mutex);
+
+	return NULL;
+}
+
+static void dirwalk(char *dir, char *path, int entnum, bool mountpoint)
 {
 #ifndef __APPLE__
 	static uint_t open_max;
@@ -4993,22 +5046,49 @@ static blkcnt_t dirwalk(char *path, struct stat *psb)
 		open_max = max_openfds();
 #endif
 
-	ent_blocks = 0;
+	/* Loop till any core is free */
+	while (active_threads == NUM_DU_THREADS){}
+
+	if (g_state.interrupt)
+		return;
+
+	pthread_mutex_lock(&running_mutex);
+	++active_threads;
+	int core = ffs(threadbmp) - 1;
+	threadbmp &= ~(1 << core);
+	pthread_mutex_unlock(&running_mutex);
+
+	xstrsncpy(core_data[core].path, path, PATH_MAX);
+	core_data[core].entnum = entnum;
+	core_data[core].core = (ushort_t)core;
+	core_data[core].mntpoint = mountpoint;
+
+	pthread_t tid = 0;
+
+	pthread_create(&tid, NULL, du_thread, (void *)&(core_data[core]));
+
+	redraw(dir);
 	tolastln();
-	addstr(xbasename(path));
 	addstr(" [^C aborts]\n");
 	refresh();
+}
 
-#ifndef __APPLE__
-	if (nftw(path, nftw_fn, open_max, FTW_MOUNT | FTW_PHYS) < 0) {
-#else
-	if (nftw(path, nftw_fn, OPEN_MAX, FTW_MOUNT | FTW_PHYS) < 0) {
-#endif
-		DPRINTF_S("nftw failed");
-		return cfg.apparentsz ? psb->st_size : psb->st_blocks;
+static void prep_threads(void)
+{
+	if (!g_state.duinit) {
+		/* drop MSB 1s */
+		threadbmp >>= (32 - NUM_DU_THREADS);
+
+		core_blocks = calloc(NUM_DU_THREADS, sizeof(blkcnt_t));
+		core_data = calloc(NUM_DU_THREADS, sizeof(thread_data));
+		core_files = calloc(NUM_DU_THREADS, sizeof(ulong_t));
+
+		g_state.duinit = TRUE;
+	} else {
+		memset(core_blocks, 0, NUM_DU_THREADS * sizeof(blkcnt_t));
+		memset(core_data, 0, NUM_DU_THREADS * sizeof(thread_data));
+		memset(core_files, 0, NUM_DU_THREADS * sizeof(ulong_t));
 	}
-
-	return ent_blocks;
 }
 
 /* Skip self and parent */
@@ -5020,14 +5100,15 @@ static bool selforparent(const char *path)
 static int dentfill(char *path, struct entry **ppdents)
 {
 	uchar_t entflags = 0;
-	int n = 0, flags = 0;
-	ulong_t num_saved;
+	int flags = 0;
 	struct dirent *dp;
 	char *namep, *pnb, *buf = NULL;
 	struct entry *dentp;
 	size_t off = 0, namebuflen = NAMEBUF_INCR;
 	struct stat sb_path, sb;
 	DIR *dirp = opendir(path);
+
+	ndents = 0;
 
 	DPRINTF_S(__func__);
 
@@ -5052,6 +5133,8 @@ static int dentfill(char *path, struct entry **ppdents)
 				goto exit;
 		} else
 			memset(ihashbmp, 0, HASH_OCTETS << 3);
+
+		prep_threads();
 
 		attron(COLOR_PAIR(cfg.curctx + 1));
 	}
@@ -5095,13 +5178,11 @@ static int dentfill(char *path, struct entry **ppdents)
 			if (S_ISDIR(sb.st_mode)) {
 				if (sb_path.st_dev == sb.st_dev) { // NOLINT
 					mkpath(path, namep, buf);
-
-					dir_blocks += dirwalk(buf, &sb);
+					dirwalk(path, buf, -1, FALSE);
 
 					if (g_state.interrupt)
 						goto exit;
-					ndents = n;
-					redraw(path);
+
 				}
 			} else {
 				/* Do not recount hard links */
@@ -5128,7 +5209,10 @@ static int dentfill(char *path, struct entry **ppdents)
 				entflags = SYM_ORPHAN;
 		}
 
-		if (n == total_dents) {
+		if (ndents == total_dents) {
+			if (cfg.blkorder)
+				while (active_threads) {}
+
 			total_dents += ENTRY_INCR;
 			*ppdents = xrealloc(*ppdents, total_dents * sizeof(**ppdents));
 			if (!*ppdents) {
@@ -5157,13 +5241,13 @@ static int dentfill(char *path, struct entry **ppdents)
 				dentp = *ppdents;
 				dentp->name = pnamebuf;
 
-				for (int count = 1; count < n; ++dentp, ++count)
+				for (int count = 1; count < ndents; ++dentp, ++count)
 					/* Current file name starts at last file name start + length */
 					(dentp + 1)->name = (char *)((size_t)dentp->name + dentp->nlen);
 			}
 		}
 
-		dentp = *ppdents + n;
+		dentp = *ppdents + ndents;
 
 		/* Selection file name */
 		dentp->name = (char *)((size_t)pnamebuf + off);
@@ -5221,21 +5305,13 @@ static int dentfill(char *path, struct entry **ppdents)
 
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
-				num_saved = num_files + 1;
 				mkpath(path, namep, buf);
 
 				/* Need to show the disk usage of this dir */
-				dentp->blocks = dirwalk(buf, &sb);
-
-				if (sb_path.st_dev == sb.st_dev) // NOLINT
-					dir_blocks += dentp->blocks;
-				else
-					num_files = num_saved;
+				dirwalk(path, buf, ndents, (sb_path.st_dev != sb.st_dev)); // NOLINT
 
 				if (g_state.interrupt)
 					goto exit;
-				ndents = n;
-				redraw(path);
 			} else {
 				dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				/* Do not recount hard links */
@@ -5260,18 +5336,25 @@ static int dentfill(char *path, struct entry **ppdents)
 #endif
 		}
 
-		++n;
+		++ndents;
 	} while ((dp = readdir(dirp)));
 
 exit:
-	if (cfg.blkorder)
+	if (cfg.blkorder) {
+		while (active_threads) {}
+
 		attroff(COLOR_PAIR(cfg.curctx + 1));
+		for (int i = 0; i < NUM_DU_THREADS; ++i) {
+			num_files += core_files[i];
+			dir_blocks += core_blocks[i];
+		}
+	}
 
 	/* Should never be null */
 	if (closedir(dirp) == -1)
 		errexit();
 
-	return n;
+	return ndents;
 }
 
 static void populate(char *path, char *lastname)
@@ -5525,7 +5608,6 @@ static int set_sort_flags(int r)
 	case 'a': /* Apparent du */
 		cfg.apparentsz ^= 1;
 		if (cfg.apparentsz) {
-			nftw_fn = &sum_asize;
 			cfg.blkorder = 1;
 			blk_shift = 0;
 		} else
@@ -5535,7 +5617,6 @@ static int set_sort_flags(int r)
 		if (r == 'd') {
 			if (!cfg.apparentsz)
 				cfg.blkorder ^= 1;
-			nftw_fn = &sum_bsize;
 			cfg.apparentsz = 0;
 			blk_shift = ffs(S_BLKSIZE) - 1;
 		}

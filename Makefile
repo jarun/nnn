@@ -119,7 +119,7 @@ CFLAGS += -std=c11 -Wall -Wextra -Wshadow
 CFLAGS += $(CFLAGS_OPTIMIZATION)
 CFLAGS += $(CFLAGS_CURSES)
 
-LDLIBS += $(LDLIBS_CURSES)
+LDLIBS += $(LDLIBS_CURSES) -lpthread
 
 # static compilation needs libgpm development package
 ifeq ($(strip $(O_STATIC)),1)
