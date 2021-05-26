@@ -58,7 +58,13 @@ ifeq ($(strip $(O_PCRE)),1)
 endif
 
 ifeq ($(strip $(O_NOLC)),1)
-	CPPFLAGS += -DNOLC
+	ifeq ($(strip $(O_ICONS)),1)
+$(info *** Ignoring O_NOLC since O_ICONS is set ***)
+	else ifeq ($(strip $(O_NERD)),1)
+$(info *** Ignoring O_NOLC since O_NERD is set ***)
+	else
+		CPPFLAGS += -DNOLC
+	endif
 endif
 
 ifeq ($(strip $(O_NOMOUSE)),1)
