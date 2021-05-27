@@ -4599,12 +4599,12 @@ static void show_help(const char *path)
        "1NAVIGATION\n"
 	       "9Up k  Up%-16cPgUp ^U  Scroll up\n"
 	       "9Dn j  Down%-14cPgDn ^D  Scroll down\n"
-	       "9Lt h  Parent%-12c~ ` @ -  HOME, /, start, last\n"
+	       "9Lt h  Parent%-12c~ ` @ -  ~, /, start, prev\n"
 	   "5Ret Rt l  Open%-20c'  First file/match\n"
 	       "9g ^A  Top%-21c.  Toggle hidden\n"
 	       "9G ^E  End%-21c+  Toggle auto-advance\n"
 	       "9b ^/  Bookmark key%-12c,  Mark CWD\n"
-		"a1-4  Context 1-4%-7c(Sh)Tab  Cycle context\n"
+		"a1-4  Context 1-4%-7c(Sh)Tab  Cycle/new context\n"
 		"aEsc  Send to FIFO%-11c^L  Redraw\n"
 		  "cQ  Pick/err, quit%-9c^G  QuitCD\n"
 	          "cq  Quit context%-6c2Esc ^Q  Quit\n"
@@ -5012,7 +5012,7 @@ static void *du_thread(void *p_data)
 			if (sb->st_size && DU_TEST)
 				tblocks += sb->st_size;
 		} else if (sb->st_blocks && DU_TEST)
-				tblocks += sb->st_blocks;
+			tblocks += sb->st_blocks;
 
 		++tfiles;
 	}
@@ -5550,11 +5550,16 @@ static int handle_context_switch(enum action sel)
 			do
 				r = (r + 1) & ~CTX_MAX;
 			while (!g_ctx[r].c_cfg.ctxactive);
-		else
-			do
-				r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
-			while (!g_ctx[r].c_cfg.ctxactive);
-		// fallthrough
+		else {
+			do /* Attempt to create a new context */
+				r = (r + 1) & ~CTX_MAX;
+			while (g_ctx[r].c_cfg.ctxactive && (r != cfg.curctx));
+
+			if (r == cfg.curctx) /* If all contexts are active, reverse cycle */
+				do
+					r = (r + (CTX_MAX - 1)) & (CTX_MAX - 1);
+				while (!g_ctx[r].c_cfg.ctxactive);
+		} // fallthrough
 	default: /* SEL_CTXN */
 		if (sel >= SEL_CTX1) /* CYCLE keys are lesser in value */
 			r = sel - SEL_CTX1; /* Save the next context id */
@@ -5568,7 +5573,7 @@ static int handle_context_switch(enum action sel)
 				return -1;
 		}
 
-		if (g_state.selmode)
+		if (g_state.selmode) /* Remember the position from where to continue selection */
 			lastappendpos = selbufpos;
 	}
 
