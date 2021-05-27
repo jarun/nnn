@@ -5751,15 +5751,15 @@ static void statusbar(char *path)
 
 	printw("%d/%s ", cur + 1, xitoa(ndents));
 
-	if (g_state.selmode) {
+	if (g_state.selmode || nselected) {
 		attron(A_REVERSE);
 		addch(' ');
 		if (g_state.rangesel)
 			addch('*');
-		else if (nselected)
-			addstr(xitoa(nselected));
-		else
+		else if (g_state.selmode)
 			addch('+');
+		if (nselected)
+			addstr(xitoa(nselected));
 		addch(' ');
 		attroff(A_REVERSE);
 		addch(' ');
