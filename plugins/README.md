@@ -19,12 +19,12 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs, mktemp |
 | [cdpath](cdpath) | `cd` to the directory from `CDPATH` | sh | fzf |
 | [chksum](chksum) | Create and verify checksums [✓] | sh | md5sum,<br>sha256sum |
-| [cleanfilename](cleanfilename) | Clean filename to be more shell-friendly [✓] | bash | sed |
 | [cmusq](cmusq) | Queue/play files/dirs in cmus player [✓] | sh | cmus, pgrep |
 | [diffs](diffs) | Diff for selection (limited to 2 for directories) [✓] | sh | vimdiff, mktemp |
 | [dragdrop](dragdrop) | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
 | [dups](dups) | List non-empty duplicate files in current dir | bash | find, md5sum,<br>sort uniq xargs |
 | [finder](finder) | Run custom find command and list | sh | - |
+| [fixname](fixname) | Clean filename to be more shell-friendly [✓] | bash | sed |
 | [fzcd](fzcd) | Change to the directory of a fuzzy-selected file/dir | sh | fzf |
 | [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |
 | [fzopen](fzopen) | Fuzzy find file(s) in subtree to edit/open/pick | sh | fzf, xdg-open |
@@ -67,7 +67,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [togglex](togglex) | Toggle executable mode for selection [✓] | sh | chmod |
 | [treeview](treeview) | Informative tree output in `$EDITOR` | sh | tree |
 | [uidgid](uidgid) | List user and group of all files in dir | sh | ls, less |
-| [unmount-parent](unmount-parent) | Unmount a remote mountpoint from within | sh | fusermount |
+| [umounttree](umounttree) | Unmount a remote mountpoint from within | sh | fusermount |
 | [upgrade](upgrade) | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
 | [upload](upload) | Upload to Firefox Send or ix.io (text) or file.io (bin) | sh | [ffsend](https://github.com/timvisee/ffsend), curl, jq, tr |
 | [vidthumb](vidthumb) | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
