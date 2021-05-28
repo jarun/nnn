@@ -1,0 +1,70 @@
+#!/usr/bin/env sh
+
+# Description: Fuzzy search multiple locations read-in from a path-list
+#              file and open the selected file's directory in a smart context.
+# Dependencies: fzf, fd
+#
+# Details: Paths in list file should be newline-separated absolute paths.
+#          Paths can be file paths; the script will scan the parent dirs.
+#
+#          The path-list file can be generated easily:
+#          - pick the (file)paths in picker mode to path-list file
+#          - OR, edit selection in nnn and save as path-list file
+#
+#          The plugin clears nnn selection as the user can be tempted to delete
+#          duplicate files after finding copies and remove selection by mistake.
+#
+# Shell: POSIX compliant
+# Author: Arun Prakash Jana
+
+IFS="$(printf '\n\r')"
+
+. "$(dirname "$0")"/.nnn-plugin-helper
+
+CTX=+
+
+if [ "$(cmd_exists fzf)" -eq "0" ] && [ -s "$1" ]; then
+
+    tmpfile=$(mktemp /tmp/abc-script.XXXXXX)
+
+    for entry in $(tr '\0' '\n' < "$1")
+    do
+        if [ -d "$entry" ]; then
+            printf "%s\n" "$entry" >> "$tmpfile"
+        elif [ -f "$entry" ]; then
+            printf "%s\n" "$(dirname "$entry")" >> "$tmpfile"
+        fi
+    done
+
+    # Clear selection
+    if [ -p "$NNN_PIPE" ]; then
+        printf "-" >"$NNN_PIPE"
+    fi
+
+    sel=$(xargs -d '\n' -a "$tmpfile" fd -H . | fzf --delimiter / --tiebreak=begin --info=hidden)
+
+    rm "$tmpfile"
+else
+	exit 1
+fi
+
+if [ -n "$sel" ]; then
+    if [ "$sel" = "." ] || { ! [ -d "$sel" ] && ! [ -f "$sel" ]; }; then
+        exit 0
+    fi
+
+    # Check if selected path returned
+    # by fzf command is absolute
+    case $sel in
+    /*) nnn_cd "$sel" "$CTX" ;;
+    *)
+        # Remove "./" prefix if it exists
+        sel="${sel#./}"
+
+        if [ "$PWD" = "/" ]; then
+            nnn_cd "/$sel" "$CTX"
+        else
+            nnn_cd "$PWD/$sel" "$CTX"
+        fi;;
+    esac
+fi

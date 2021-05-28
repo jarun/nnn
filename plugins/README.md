@@ -26,6 +26,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [finder](finder) | Run custom find command and list | sh | - |
 | [fixname](fixname) | Clean filename to be more shell-friendly [✓] | bash | sed |
 | [fzcd](fzcd) | Change to the directory of a fuzzy-selected file/dir | sh | fzf |
+| [fzdirs](fzdirs) | Fuzzy search multiple directories [✓] | sh | fzf, fd |
 | [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |
 | [fzopen](fzopen) | Fuzzy find file(s) in subtree to edit/open/pick | sh | fzf, xdg-open |
 | [fzplug](fzplug) | Fuzzy find, preview and run other plugins | sh | fzf |
@@ -189,9 +190,9 @@ Notes:
 When `nnn` executes a plugin, it does the following:
 - Changes to the directory where the plugin is to be run (`$PWD` pointing to the active directory)
 - Passes three arguments to the script:
-    1. The hovered file's name.
-    2. The working directory (might differ from `$PWD` in case of symlinked paths; non-canonical).
-    3. The picker mode output file (`-` for stdout) if `nnn` is executed as a file picker.
+    1. `$1`: The hovered file's name.
+    2. `$2`: The working directory (might differ from `$PWD` in case of symlinked paths; non-canonical).
+    3. `$3`: The picker mode output file (`-` for stdout) if `nnn` is executed as a file picker.
 - Sets the environment variable `NNN_PIPE` used to control `nnn` active directory.
 
 Plugins can also read the `.selection` file in the config directory.
@@ -200,21 +201,24 @@ Plugins can also read the `.selection` file in the config directory.
 
 Plugins can be written in any scripting language. However, POSIX-compliant shell scripts runnable in `sh` are preferred.
 
-Drop the plugin in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins` and make it executable. Optionally add a hotkey in `$NNN_PLUG` for frequent usage.
+Make the file executable and drop it in the plugin install directory. Optionally add a hotkey in `$NNN_PLUG` for frequent usage.
 
 #### Send data to `nnn`
 `nnn` provides a mechanism for plugins to send data to `nnn` to control its active directory or invoke the list mode.
 The way to do so is by writing to the pipe pointed by the environment variable `NNN_PIPE`.
-The plugin should write a single string in the format `<ctxcode><opcode><data>` without a newline at the end. For example, `1c/etc`.
+The plugin should write a single string in the format `(<->)<ctxcode><opcode><data>` without a newline at the end. For example, `1c/etc`.
+
+The optional `-` at the **beginning of the stream** instructs `nnn` to clear the selection.
+In cases where the data transfer to `nnn` has to happen while the selection file is being read (e.g. in a loop), the plugin should
+create a tmp copy of the selection file, inform `nnn` to clear the selection and then do the subsequent processing with the tmp file.
 
 The `ctxcode` indicates the context to change the active directory of.
 
 | Context code | Meaning |
 |:---:| --- |
-| `1`-`4` | context number |
-| `0` | current context |
 | `+` | smart context (next inactive else current) |
-| `-` | clear the selection |
+| `0` | current context |
+| `1`-`4` | context number |
 
 The `opcode` indicates the operation type.
 

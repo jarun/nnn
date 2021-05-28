@@ -4758,17 +4758,19 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 {
 	int r;
 	char ctx, *nextpath = NULL;
-	ssize_t len = read_nointr(fd, g_buf, 1);
 
-	if (len != 1)
+	if (read_nointr(fd, g_buf, 1) != 1)
 		return;
+
+	if (g_buf[0] == '-') { /* Clear selection on '-' */
+		clearselection();
+		if (read_nointr(fd, g_buf, 1) != 1)
+			return;
+	}
 
 	if (g_buf[0] == '+')
 		ctx = (char)(get_free_ctx() + 1);
-	else if (g_buf[0] == '-') { /* Clear selection on '-' */
-		clearselection();
-		return;
-	} else if (g_buf[0] < '0')
+	else if (g_buf[0] < '0')
 		return;
 	else {
 		ctx = g_buf[0] - '0';
@@ -4776,14 +4778,14 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 			return;
 	}
 
-	len = read_nointr(fd, g_buf, 1);
-	if (len != 1)
+	if (read_nointr(fd, g_buf, 1) != 1)
 		return;
 
 	char op = g_buf[0];
 
 	if (op == 'c') {
-		len = read_nointr(fd, g_buf, PATH_MAX);
+		ssize_t len = read_nointr(fd, g_buf, PATH_MAX);
+
 		if (len <= 0)
 			return;
 
