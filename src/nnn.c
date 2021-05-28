@@ -6011,8 +6011,8 @@ static void redraw(char *path)
 		g_state.dircolor = 0;
 	}
 
-	/* Go to first entry */
-	if (i < ndents) {
+	/* Go to last entry */
+	if (onscreen < ndents) {
 		move(xlines - 2, 0);
 		addch('v');
 	}
