@@ -25,8 +25,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [dups](dups) | List non-empty duplicate files in current dir | bash | find, md5sum,<br>sort uniq xargs |
 | [finder](finder) | Run custom find command and list | sh | - |
 | [fixname](fixname) | Clean filename to be more shell-friendly [✓] | bash | sed |
-| [fzcd](fzcd) | Change to the directory of a fuzzy-selected file/dir | sh | fzf |
-| [fzdirs](fzdirs) | Fuzzy search multiple directories [✓] | sh | fzf, fd |
+| [fzcd](fzcd) | Fuzzy search multiple dirs (or `$PWD`) and visit file [✓] | sh | fzf |
 | [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |
 | [fzopen](fzopen) | Fuzzy find file(s) in subtree to edit/open/pick | sh | fzf, xdg-open |
 | [fzplug](fzplug) | Fuzzy find, preview and run other plugins | sh | fzf |
