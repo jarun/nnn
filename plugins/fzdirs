@@ -7,6 +7,11 @@
 # Details: Paths in list file should be newline-separated absolute paths.
 #          Paths can be file paths; the script will scan the parent dirs.
 #
+#          The path-list file precedence is:
+#          - "$1" (the hovered file) if it exists and is plaintext
+#          - "$LIST" if set below
+#          - "$2" (the current directory) [mimics plugin fzcd behaviour]
+#
 #          The path-list file can be generated easily:
 #          - pick the (file)paths in picker mode to path-list file
 #          - OR, edit selection in nnn and save as path-list file
@@ -22,19 +27,24 @@ IFS="$(printf '\n\r')"
 . "$(dirname "$0")"/.nnn-plugin-helper
 
 CTX=+
+LIST="$LIST"
 
-if [ "$(cmd_exists fzf)" -eq "0" ] && [ -s "$1" ]; then
+if [ -n "$1" ] && [ $(file -b --mime-type "$1") = 'text/plain' ]; then
+    LIST="$1"
+elif ! [ -s "$LIST" ]; then
+    LIST="$2"
+fi
 
+if [ "$(cmd_exists fzf)" -eq "0" ]; then
     tmpfile=$(mktemp /tmp/abc-script.XXXXXX)
 
-    for entry in $(tr '\0' '\n' < "$1")
-    do
-        if [ -d "$entry" ]; then
-            printf "%s\n" "$entry" >> "$tmpfile"
-        elif [ -f "$entry" ]; then
-            printf "%s\n" "$(dirname "$entry")" >> "$tmpfile"
+    while IFS= read -r path; do
+        if [ -d "$path" ]; then
+            printf "%s\n" "$path" >> "$tmpfile"
+        elif [ -f "$path" ]; then
+            printf "%s\n" "$(dirname "$path")" >> "$tmpfile"
         fi
-    done
+    done < "$LIST"
 
     # Clear selection
     if [ -p "$NNN_PIPE" ]; then
@@ -53,8 +63,7 @@ if [ -n "$sel" ]; then
         exit 0
     fi
 
-    # Check if selected path returned
-    # by fzf command is absolute
+    # Check if the selected path returned by fzf command is absolute
     case $sel in
     /*) nnn_cd "$sel" "$CTX" ;;
     *)
