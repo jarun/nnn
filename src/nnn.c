@@ -6432,8 +6432,10 @@ nochange:
 					if (g_state.picked)
 						return EXIT_SUCCESS;
 
-					if (runfile[0])
+					if (runfile[0]) {
+						xstrsncpy(lastname, runfile, NAME_MAX + 1);
 						runfile[0] = '\0';
+					}
 					clearfilter();
 					setdirwatch();
 					goto begin;
