@@ -8,7 +8,8 @@
 #          Paths can be file paths; the script will scan the parent dirs.
 #
 #          The path-list file precedence is:
-#          - "$1" (the hovered file) if it exists and is plaintext
+#          - "$1" (the hovered file) if it exists, is plain-text and the
+#                 first line points to an existing file
 #          - "$LIST" if set below
 #          - "$2" (the current directory) [mimics plugin fzcd behaviour]
 #
@@ -29,7 +30,7 @@ IFS="$(printf '\n\r')"
 CTX=+
 LIST="$LIST"
 
-if [ -n "$1" ] && [ $(file -b --mime-type "$1") = 'text/plain' ]; then
+if [ -n "$1" ] && [ "$(file -b --mime-type "$1")" = 'text/plain' ] && [ -e "$(head -1 "$1")" ]; then
     LIST="$1"
 elif ! [ -s "$LIST" ]; then
     LIST="$2"
