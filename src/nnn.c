@@ -567,7 +567,7 @@ static char * const utils[] = {
 #define MSG_NEW_PATH 19
 #define MSG_LINK_PREFIX 20
 #define MSG_COPY_NAME 21
-#define MSG_CONTINUE 22
+#define MSG_RETURN 22
 #define MSG_SEL_MISSING 23
 #define MSG_ACCESS 24
 #define MSG_EMPTY_FILE 25
@@ -2084,10 +2084,10 @@ static int spawn(char *file, char *arg1, char *arg2, char *arg3, uchar_t flag)
 		DPRINTF_D(pid);
 
 		if ((flag & F_CONFIRM) || ((flag & F_CHKRTN) && retstatus)) {
-			status = write(STDOUT_FILENO, messages[MSG_CONTINUE],
-					xstrlen(messages[MSG_CONTINUE]));
+			status = write(STDOUT_FILENO, messages[MSG_RETURN], xstrlen(messages[MSG_RETURN]));
 			(void)status;
-			while (getchar() != '\n') {};
+			status = read(STDIN_FILENO, g_buf, PATH_MAX);
+			(void)status;
 		}
 
 		if (flag & F_NORMAL)
