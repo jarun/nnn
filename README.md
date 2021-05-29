@@ -27,35 +27,7 @@ There are 2 independent (neo)vim plugins - [nnn.vim](https://github.com/mcchrish
 
 It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
 
-<details><summary><i><b>Expand</b></i> for some <code>nnn</code> magic! :dark_sunglasses:</summary><br><ul>
-  <li>Instantly load, sort, filter thousands of files</li>
-  <li>Type to navigate with automatic dir selection</li>
-  <li>List input stream and pick entries to stdout or file</li>
-  <li><code>find</code>/<code>fd</code>/<code>grep</code>/<code>ripgrep</code>/<code>fzf</code> from <code>nnn</code> and list in <code>nnn</code></li>
-  <li>Never lose context - start where you quit</li>
-  <li>Mount any cloud storage service in a few keypresses</li>
-  <li>Select files from anywhere (not just a single dir)</li>
-  <li>Unlimited bookmarks, plugins, cmds with custom hotkeys</li>
-  <li>Write a plugin in any language you know</li>
-  <li>Edit and preview markdown, man page, HTML</li>
-  <li>Open a file and auto-advance to the next</li>
-  <li>Filter filtered entries, export list of visible files</li>
-  <li>Configure the middle mouse click to do anything</li>
-  <li>Fuzzy search subtree and open a file (or its parent dir)</li>
-  <li>Load four dirs with custom settings at once</li>
-  <li>Notifications on <code>cp</code>, <code>mv</code>, <code>rm</code> completion</li>
-  <li>Auto-sync selection to system clipboard</li>
-  <li>Access selection from another instance of <code>nnn</code></li>
-  <li>Open text files detached in another pane/tab/window</li>
-  <li>Mount and modify archives</li>
-  <li>Create files/dirs/duplicates with parents (like <code>mkdir -p</code>)</li>
-  <li>Toggle hidden with <kbd>.</kbd>, visit <code>$HOME</code> with <kbd>~</kbd>, last dir with <kbd>-</kbd></li>
-  <li>Mark a frequently visited dir at runtime</li>
-  <li>Sort by modification, access and inode change time</li>
-  <li>Compile out/in features with make variables</li>
-  <li>Watch matrix text fly or read fortune messages</li>
-  <li>Configure in 5 minutes!</li>
-</ul></details>
+[_(there's more)_](https://github.com/jarun/nnn/wiki/Basic-use-cases#the_nnn-magic)
 
 <p align="center">
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/donate-@PayPal-1eb0fc.svg" alt="Donate via PayPal!" /></a>
