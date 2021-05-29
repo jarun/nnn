@@ -3002,18 +3002,13 @@ static int filterentries(char *path, char *lastname)
 		case KEY_MOUSE:
 			goto end;
 #endif
-		case ESC: /* Exit filter mode on Esc and Alt+key */
+		case ESC:
 			if (handle_alt_key(ch) != ERR) {
-				if (*ch == ESC) { /* Handle Alt+Esc */
-					if (wln[1]) {
-						ln[REGEX_MAX - 1] = ln[1];
-						ln[1] = wln[1] = '\0';
-						ndents = total;
-						*ch = CONTROL('L');
-					}
-				} else {
+				if (*ch == ESC) /* Handle Alt+Esc */
+					*ch = 'q'; /* Quit context */
+				else {
 					unget_wch(*ch);
-					*ch = ';';
+					*ch = ';'; /* Run plugin */
 				}
 			}
 			goto end;
@@ -4597,7 +4592,7 @@ static void show_help(const char *path)
 	          "cq  Quit context%-6c2Esc ^Q  Quit\n"
 		  "c?  Help, conf\n"
        "1FILTER & PROMPT\n"
-		  "c/  Filter%-12cAlt+Esc  Clear filter & redraw\n"
+		  "c/  Filter%-12cAlt+Esc  Unfilter, quit context\n"
 		"aEsc  Exit prompt%-12c^L  Clear prompt/last filter\n"
 		 "b^N  Toggle type-to-nav%-0c\n"
        "1FILES\n"
