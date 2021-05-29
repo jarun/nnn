@@ -891,29 +891,16 @@ static bool test_set_bit(uint_t nr)
 
 #ifndef __APPLE__
 /* Increase the limit on open file descriptors, if possible */
-static rlim_t max_openfds(void)
+static void max_openfds(void)
 {
 	struct rlimit rl;
-	rlim_t limit = getrlimit(RLIMIT_NOFILE, &rl);
 
-	if (!limit) {
-		limit = rl.rlim_cur;
-		rl.rlim_cur = rl.rlim_max;
-
-		/* Return ~75% of max possible */
-		if (setrlimit(RLIMIT_NOFILE, &rl) == 0) {
-			limit = rl.rlim_max - (rl.rlim_max >> 2);
-			/*
-			 * 20K is arbitrary. If the limit is set to max possible
-			 * value, the memory usage increases to more than double.
-			 */
-			if (limit > 20480)
-				limit = 20480;
+	if (!getrlimit(RLIMIT_NOFILE, &rl)) {
+		if (rl.rlim_cur < rl.rlim_max) {
+			rl.rlim_cur = rl.rlim_max;
+			setrlimit(RLIMIT_NOFILE, &rl);
 		}
-	} else
-		limit = 32;
-
-	return limit;
+	}
 }
 #endif
 
@@ -5040,14 +5027,6 @@ static void *du_thread(void *p_data)
 
 static void dirwalk(char *dir, char *path, int entnum, bool mountpoint)
 {
-#ifndef __APPLE__
-	static uint_t open_max;
-
-	/* Increase current open file descriptor limit */
-	if (!open_max)
-		open_max = max_openfds();
-#endif
-
 	/* Loop till any core is free */
 	while (active_threads == NUM_DU_THREADS){}
 
@@ -5085,6 +5064,10 @@ static void prep_threads(void)
 		core_data = calloc(NUM_DU_THREADS, sizeof(thread_data));
 		core_files = calloc(NUM_DU_THREADS, sizeof(ulong_t));
 
+#ifndef __APPLE__
+		/* Increase current open file descriptor limit */
+		max_openfds();
+#endif
 		g_state.duinit = TRUE;
 	} else {
 		memset(core_blocks, 0, NUM_DU_THREADS * sizeof(blkcnt_t));
