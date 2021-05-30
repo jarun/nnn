@@ -3,7 +3,6 @@
 # Description: Terminal based file previewer
 #
 # Note: This plugin needs a "NNN_FIFO" to work. See man.
-# For a more extended version of this script with additional optional dependencies, see preview-tui-ext.
 #
 # Dependencies:
 #   - Supports 4 independent methods to preview with:
@@ -18,8 +17,20 @@
 #   - unzip
 #   - tar
 #   - man
+#   - optional: bsdtar or atool for additional archive preview
 #   - optional: bat for code syntax highlighting
-#   - optional: ueberzug, kitty terminal, viu or catimg for images.
+#   - optional: ueberzug, kitty terminal, viu or catimg for images
+#   - optional: convert(ImageMagick) for playing gif preview
+#   - optional: ffmpegthumbnailer for video thumbnails (https://github.com/dirkvdb/ffmpegthumbnailer)
+#   - optional: ffmpeg for audio thumbnails
+#   - optional: libreoffce for opendocument/officedocument preview
+#   - optional: pdftoppm(poppler) for pdf thumbnails
+#   - optional: gnome-epub-thumbnailer for epub thumbnails (https://gitlab.gnome.org/GNOME/gnome-epub-thumbnailer)
+#   - optional: fontpreview for font preview (https://github.com/sdushantha/fontpreview)
+#   - optional: glow or lowdown for markdown
+#   - optional: w3m or lynx or elinks for html
+#   - optional: set/export ICONLOOKUP as 1 to enable file icons in front of directory previews with .iconlookup
+#       Icons and colors are configureable in .iconlookup
 #   - optional: scope.sh file viewer from ranger.
 #       1. drop scope.sh executable in $PATH
 #       2. set/export $USE_SCOPE as 1
@@ -63,9 +74,14 @@
 #TERMINAL="$TERMINAL"  # same goes for the terminal
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
+ICONLOOKUP="${ICONLOOKUP:-0}"
 PAGER="${PAGER:-less -P?n -R}"
 TMPDIR="${TMPDIR:-/tmp}"
 BAT_STYLE="${BAT_STYLE:-numbers}"
+# Consider setting NNN_PREVIEWDIR to $XDG_CACHE_HOME/nnn/previews if you want to keep previews on disk between reboots
+NNN_PREVIEWDIR="${NNN_PREVIEWDIR:-$TMPDIR/nnn/previews}"
+NNN_PREVIEWWIDTH="${NNN_PREVIEWWIDTH:-1920}"
+NNN_PREVIEWHEIGHT="${NNN_PREVIEWHEIGHT:-1080}"
 NNN_PARENT="${NNN_FIFO#*.}"
 FIFOPID="$TMPDIR/nnn-preview-tui-fifopid.$NNN_PARENT"
 PAGERPID="$TMPDIR/nnn-preview-tui-pagerpid.$NNN_PARENT"
@@ -97,17 +113,21 @@ start_preview() {
                 -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
                 -e "BAT_STYLE=$BAT_STYLE" -e "PAGERPID=$PAGERPID" -e "FIFOPID=$FIFOPID" \
                 -e "IMGPID=$IMGPID" -e "CURSEL=$CURSEL" -e "TMPDIR=$TMPDIR" \
-                -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$QLPATH" -d"$DSPLIT" "$0" "$1" ;;
+                -e "ICONLOOKUP=$ICONLOOKUP" -e "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
+                -e "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" -e "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
+                -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$2" -d"$DSPLIT" "$0" "$1" ;;
         kitty) # Setting the layout for the new window. It will be restored after the script ends.
             kitty @ goto-layout splits
             # Trying to use kitty's integrated window management as the split window. All
             # environmental variables that will be used in the new window must be explicitly passed.
             kitty @ launch --no-response --title "nnn preview" --keep-focus \
-                --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" --env "FIFOPID=$FIFOPID" \
+                --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" \
                 --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" --env "TMPDIR=$TMPDIR" \
                 --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" --env "TERMINAL=$TERMINAL"\
-                --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=${BAT_STYLE:-numbers}" \
+                --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=$BAT_STYLE" --env "FIFOPID=$FIFOPID" \
                 --env "PAGERPID=$PAGERPID" --env "IMGPID=$IMGPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
+                --env "ICONLOOKUP=$ICONLOOKUP" --env "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
+                --env "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" --env "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
                 --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" ;;
         *)  if [ -n "$2" ]; then
                 QUICKLOOK=1 QLPATH="$2" PREVIEW_MODE=1 "$0" "$1" &
@@ -177,7 +197,13 @@ print_bin_info() {
 
 handle_mime() {
     case "$2" in
-        image/*) image_preview "$cols" "$lines" "$1" ;;
+        image/jpg) image_preview "$cols" "$lines" "$1" ;;
+        image/gif) generate_preview "$cols" "$lines" "$1" "gif" ;;
+        image/*) generate_preview "$cols" "$lines" "$1" "image" ;;
+        video/*) generate_preview "$cols" "$lines" "$1" "video" ;;
+        audio/*) generate_preview "$cols" "$lines" "$1" "audio" ;;
+        application/font*|application/*opentype) generate_preview "$cols" "$lines" "$1" "font" ;;
+        */*office*|*/*document*) generate_preview "$cols" "$lines" "$1" "office" ;;
         application/zip) fifo_pager unzip -l "$1" ;;
         text/troff)
             if exists man; then
@@ -191,7 +217,33 @@ handle_mime() {
 
 handle_ext() {
     case "$2" in
+        epub) generate_preview "$cols" "$lines" "$1" "epub" ;;
+        pdf) generate_preview "$cols" "$lines" "$1" "pdf" ;;
         gz|bz2) fifo_pager tar -tvf "$1" ;;
+        md) if exists glow; then
+                fifo_pager glow -s dark "$1"
+            elif exists lowdown; then
+                fifo_pager lowdown -Tterm "$1"
+            else
+                fifo_pager pager "$1"
+            fi ;;
+        htm|html|xhtml)
+            if exists w3m; then
+                fifo_pager w3m "$1"
+            elif exists lynx; then
+                fifo_pager lynx "$1"
+            elif exists elinks; then
+                fifo_pager elinks "$1"
+            else
+                fifo_pager pager "$1"
+            fi ;;
+        7z|a|ace|alz|arc|arj|bz|cab|cpio|deb|jar|lha|lz|lzh|lzma|lzo\
+        |rar|rpm|rz|t7z|tar|tbz|tbz2|tgz|tlz|txz|tZ|tzo|war|xpi|xz|Z)
+            if exists atool; then
+                fifo_pager atool -l "$1"
+            elif exists bsdtar; then
+                fifo_pager bsdtar -tvf "$1"
+            fi ;;
         *) if [ "$3" = "bin" ]; then
                fifo_pager print_bin_info "$1"
            else
@@ -200,7 +252,7 @@ handle_ext() {
     esac
 }
 
-preview_file () {
+preview_file() {
     clear
     # Trying to use pistol if it's available.
     if [ "$USE_PISTOL" -ne 0 ] && exists pistol; then
@@ -231,7 +283,11 @@ preview_file () {
     # Otherwise, falling back to the defaults.
     if [ -d "$1" ]; then
         cd "$1" || return
-        if exists tree; then
+        if [ "$ICONLOOKUP" -ne 0 ] && [ -f "$(dirname "$0")"/.iconlookup ]; then
+            [ "$SPLIT" = v ] && BSTR="\n"
+            # shellcheck disable=SC2012
+            ls -F --group-directories-first | head -n "$((lines - 3))" | "$(dirname "$0")"/.iconlookup -l "$cols" -B "$BSTR" -b " "
+        elif exists tree; then
             fifo_pager tree --filelimit "$(find . -maxdepth 1 | wc -l)" -L 3 -C -F --dirsfirst --noreport
         elif exists exa; then
             exa -G --group-directories-first --colour=always
@@ -245,12 +301,52 @@ preview_file () {
     fi
 } 2>/dev/null
 
+generate_preview() {
+  if [ -n "$QLPATH" ] && stat "$3"; then
+        f="$(wslpath -w "$3")" && "$QLPATH" "$f" &
+  elif [ ! -f "$NNN_PREVIEWDIR/$3.jpg" ] || [ -n "$(find -L "$3" -newer "$NNN_PREVIEWDIR/$3.jpg")" ]; then
+        mkdir -p "$NNN_PREVIEWDIR/${3%/*}"
+        case $4 in
+            audio) ffmpeg -i "$3" -filter_complex "scale=iw*min(1\,min($NNN_PREVIEWWIDTH/iw\,ih)):-1" "$NNN_PREVIEWDIR/$3.jpg" -y ;;
+            epub) gnome-epub-thumbnailer "$3" "$NNN_PREVIEWDIR/$3.jpg" ;;
+            font) fontpreview -i "$3" -o "$NNN_PREVIEWDIR/$3.jpg" ;;
+            gif) if [ -p "$FIFO_UEBERZUG" ] && exists convert; then
+                    if [ ! -d "$NNN_PREVIEWDIR/$3" ]; then
+                        mkdir -p "$NNN_PREVIEWDIR/$3"
+                        convert -coalesce -resize "$NNN_PREVIEWWIDTH"x"$NNN_PREVIEWHEIGHT"\> "$3" "$NNN_PREVIEWDIR/$3/${3##*/}.jpg"
+                    fi
+                        while true; do
+                            for frame in $(find "$NNN_PREVIEWDIR/$3"/*.jpg | sort -V); do
+                                image_preview "$1" "$2" "$frame"
+                                sleep 0.1
+                            done
+                        done &
+                        printf "%s" "$!" > "$IMGPID"
+                        return
+                 else
+                    image_preview "$1" "$2" "$3"
+                    return
+                 fi ;;
+            image) convert "$3" -flatten -resize "$NNN_PREVIEWWIDTH"x"$NNN_PREVIEWHEIGHT"\> "$NNN_PREVIEWDIR/$3.jpg" ;;
+            office) libreoffice --convert-to jpg "$3" --outdir "$NNN_PREVIEWDIR/${3%/*}"
+                    filename="$(printf "%s" "${3##*/}" | cut -d. -f1)"
+                    mv "$NNN_PREVIEWDIR/${3%/*}/$filename.jpg" "$NNN_PREVIEWDIR/$3.jpg" ;;
+            pdf) pdftoppm -jpeg -f 1 -singlefile "$3" "$NNN_PREVIEWDIR/$3" ;;
+            video) ffmpegthumbnailer -s0 -i "$3" -o "$NNN_PREVIEWDIR/$3.jpg" || rm "$NNN_PREVIEWDIR/$3.jpg" ;;
+        esac
+    fi >/dev/null
+    if [ -f "$NNN_PREVIEWDIR/$3.jpg" ]; then
+        image_preview "$1" "$2" "$NNN_PREVIEWDIR/$3.jpg"
+    else
+        fifo_pager print_bin_info "$3"
+    fi
+} 2>/dev/null
+
 image_preview() {
+    clear
     if [ "$TERMINAL" = "kitty" ]; then
         # Kitty terminal users can use the native image preview method
         kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
-    elif [ -n "$QLPATH" ] && stat "$3"; then
-        f="$(wslpath -w "$3")" && "$QLPATH" "$f" && return
     elif exists ueberzug; then
         ueberzug_layer "$1" "$2" "$3" && return
     elif exists catimg; then

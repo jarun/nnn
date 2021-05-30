@@ -7,7 +7,7 @@
 # Usage
 #    1. Set colors and/or icons to your liking
 #    2. Pipe any directory listing to iconlookup and it will output prepended icons
-#    3. preview-tui-ext uses the script to prepend icon to directory listings
+#    3. preview-tui uses the script to prepend icon to directory listings
 #    4. Aditionally you can consider adding it to your PATH and/or FZF_DEFAULT_COMMAND to
 #       make it work with various fzf plugins (make sure you also add --ansi to your FZF_DEFAULT_OPTS)
 
