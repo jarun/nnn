@@ -4,7 +4,7 @@
 #              If the device is not mounted, it will be mounted.
 #              If the device is mounted, it will be unmounted and powered down.
 #
-# Dependencies: lsblk
+# Dependencies: lsblk, pmount
 #
 # Usage: Runs `lsblk` on 'l', exits on 'Return`.
 #
@@ -18,7 +18,7 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-prompt="device name ['l' lists]: "
+prompt="device name [e.g. sdXn] ('l'ist, 'q'uit): "
 
 lsblk
 
