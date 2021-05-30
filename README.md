@@ -83,7 +83,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Open with desktop opener or specify a custom opener
   - File-specific colors (or minimal _dirs in context color_)
   - Icons (customize and compile-in)
-  - Plugins for image and video thumbnails
+  - Plugin for image, video and audio thumbnails
   - Create, list, extract, mount (FUSE based) archives
   - Option to open all text files in `$EDITOR`
 - Information
