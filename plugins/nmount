@@ -1,12 +1,10 @@
 #!/usr/bin/env sh
 
-# Description: Toggle mount status of a device using pmount
+# Description: Toggle mount status of a device using udevil
 #              If the device is not mounted, it will be mounted.
 #              If the device is mounted, it will be unmounted and powered down.
 #
-# Dependencies: lsblk
-#
-# Usage: Runs `lsblk` on 'l', exits on 'Return`.
+# Dependencies: lsblk, udevil, udisks2
 #
 # Notes:
 #   - The script uses Linux-specific lsblk to list block devices. Alternatives:
@@ -18,13 +16,17 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-prompt="device name ['l' lists]: "
+prompt="device name [eg. sdXn]: "
+inst_prompt () {
+  printf "\nEnsure you aren't still in the mounted device.\n"
+  printf "➤ 'l': list\n"
+  printf "➤ 'q' quit\n"
+  printf "%s" "$prompt"
+  read -r dev
+}
 
 lsblk
-
-printf "\nEnsure you aren't still in the mounted device.\n"
-printf "%s" "$prompt"
-read -r dev
+inst_prompt
 
 while [ -n "$dev" ]
 do
@@ -33,23 +35,25 @@ do
     elif [ "$dev" = "q" ]; then
         exit
     else
+        TO_MOUNT="/dev/$dev"
         if grep -qs "$dev " /proc/mounts; then
             sync
-            if pumount "$dev"
+            if udevil umount $TO_MOUNT
             then
                 echo "$dev" unmounted.
-                if udisksctl power-off -b /dev/"$dev"
+                if udisksctl power-off -b $TO_MOUNT
                 then
                     echo "$dev" ejected.
                 fi
             fi
         else
-            pmount "$dev"
-            echo "$dev" mounted to "$(lsblk -n /dev/"$dev" | rev | cut -d' ' -f1 | rev)".
+            if udevil mount $TO_MOUNT
+            then
+              echo "$dev" mounted to "$(lsblk -n $TO_MOUNT | rev | cut -d' ' -f1 | rev)".
+            fi
         fi
     fi
 
     echo
-    printf "%s" "$prompt"
-    read -r dev
+    inst_prompt
 done
