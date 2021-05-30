@@ -1,16 +1,18 @@
 #!/usr/bin/env sh
 
 # Description: Open hovered or current directory in image viewer.
-#              Thumbnails for audio and video files are generated
-#              and deleted on exit. Supported image viewers open
-#              in thumbnail mode when the hovered entry is a directory.
+#              Supported image viewers open in thumbnail mode when
+#              the hovered entry is a directory.
 #
 # Dependencies:
 #   - imv (https://github.com/eXeC64/imv) or,
 #   - sxiv (https://github.com/muennich/sxiv) or,
+#   - ucollage (https://github.com/ckardaris/ucollage) or,
+#   - lsix (https://github.com/hackerb9/lsix), or
 #   - viu (https://github.com/atanunq/viu), or
 #   - catimg (https://github.com/posva/catimg), or
-#   - lsix (https://github.com/hackerb9/lsix)
+#   - optional: ffmpegthumbnailer for video thumbnails
+#   - optional: ffmpeg for audio thumbnails (album art)
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana, Luuk van Baal
@@ -66,6 +68,11 @@ elif type lsix >/dev/null 2>&1; then
     lsix
     nthumb_cleanup
     exit_prompt
+elif type ucollage >/dev/null 2>&1; then
+    make_thumbs
+    ucollage
+    nthumb_cleanup
+    exit
 elif type sxiv >/dev/null 2>&1; then
     make_thumbs
     if [ -f "$target" ]; then
