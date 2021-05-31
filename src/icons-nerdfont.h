@@ -4,6 +4,11 @@
 // You can find hex codes for nerd fonts here
 // https://www.nerdfonts.com/cheat-sheet
 
+// Arrows
+#define MD_ARROW_UPWARD    "\uf55c"
+#define MD_ARROW_FORWARD   "\uf553"
+#define MD_ARROW_DOWNWARD  "\uf544"
+
 // Generics
 #define ICON_DIRECTORY     "\ue5ff"
 #define ICON_FILE          "\uf713"

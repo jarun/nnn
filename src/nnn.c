@@ -5781,7 +5781,11 @@ static void statusbar(char *path)
 
 			if (i > 1) { /* Show symlink target */
 				g_buf[i] = '\0';
+#ifdef ICONS_ENABLED
+				addstr(" "MD_ARROW_FORWARD);
+#else
 				addstr(" ->");
+#endif
 				addstr(g_buf);
 			}
 		} else {
@@ -5814,7 +5818,11 @@ static inline void markhovered(void)
 {
 	if (cfg.showdetail && ndents) { /* Reversed block for hovered entry */
 		tocursor();
+#ifdef ICONS_ENABLED
+		addstr(MD_ARROW_FORWARD);
+#else
 		addch(' ' | A_REVERSE);
+#endif
 	}
 }
 
@@ -5967,7 +5975,11 @@ static void redraw(char *path)
 	/* Go to first entry */
 	if (curscroll > 0) {
 		move(1, 0);
+#ifdef ICONS_ENABLED
+		addstr(MD_ARROW_UPWARD);
+#else
 		addch('^');
+#endif
 	}
 
 	if (g_state.oldcolor) {
@@ -5992,7 +6004,11 @@ static void redraw(char *path)
 	/* Go to last entry */
 	if (onscreen < ndents) {
 		move(xlines - 2, 0);
+#ifdef ICONS_ENABLED
+		addstr(MD_ARROW_DOWNWARD);
+#else
 		addch('v');
+#endif
 	}
 
 	markhovered();
