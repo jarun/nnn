@@ -197,7 +197,7 @@ print_bin_info() {
 
 handle_mime() {
     case "$2" in
-        image/jpg) image_preview "$cols" "$lines" "$1" ;;
+        image/jpeg) image_preview "$cols" "$lines" "$1" ;;
         image/gif) generate_preview "$cols" "$lines" "$1" "gif" ;;
         image/*) generate_preview "$cols" "$lines" "$1" "image" ;;
         video/*) generate_preview "$cols" "$lines" "$1" "video" ;;
