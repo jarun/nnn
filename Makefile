@@ -149,24 +149,28 @@ DESKTOPFILE = misc/desktop/nnn.desktop
 LOGOSVG = misc/logo/logo.svg
 LOGO64X64 = misc/logo/logo-64x64.png
 
-GITSTATUS = misc/patches/gitstatus.diff
-NAMEFIRST = misc/patches/namefirst.diff
+GITSTATUS = misc/patches/gitstatus
+NAMEFIRST = misc/patches/namefirst
 
 all: $(BIN)
 
 $(BIN): $(SRC) $(HEADERS)
-ifeq ($(strip $(O_GITSTATUS)),1)
-	patch --forward --strip=1 --input=$(GITSTATUS)
-endif
 ifeq ($(strip $(O_NAMEFIRST)),1)
-	patch --forward --strip=1 --input=$(NAMEFIRST)
+	patch --forward --strip=1 --input=$(NAMEFIRST)/mainline.diff
+ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --forward --strip=1 --input=$(GITSTATUS)/namefirst.diff
+endif
+else ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --forward --strip=1 --input=$(GITSTATUS)/mainline.diff
 endif
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LDLIBS)
-ifeq ($(strip $(O_GITSTATUS)),1)
-	patch --reverse --strip=1 --input=$(GITSTATUS)
-endif
 ifeq ($(strip $(O_NAMEFIRST)),1)
-	patch --reverse --strip=1 --input=$(NAMEFIRST)
+ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --reverse --strip=1 --input=$(GITSTATUS)/namefirst.diff
+endif
+	patch --reverse --strip=1 --input=$(NAMEFIRST)/mainline.diff
+else ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --reverse --strip=1 --input=$(GITSTATUS)/mainline.diff
 endif
 
 # targets for backwards compatibility

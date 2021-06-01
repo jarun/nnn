@@ -151,8 +151,8 @@ HEADERS = src/nnn.h
 BIN = nnn
 OBJS := nnn.o $(OBJS_HAIKU)
 
-GITSTATUS = misc/patches/gitstatus.diff
-NAMEFIRST = misc/patches/namefirst.diff
+GITSTATUS = misc/patches/gitstatus
+NAMEFIRST = misc/patches/namefirst
 
 all: $(BIN)
 
@@ -165,18 +165,22 @@ nnn.o: $(SRC) $(HEADERS)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
 $(BIN): $(OBJS)
-ifeq ($(strip $(O_GITSTATUS)),1)
-	patch --forward --strip=1 --input=$(GITSTATUS)
-endif
 ifeq ($(strip $(O_NAMEFIRST)),1)
-	patch --forward --strip=1 --input=$(NAMEFIRST)
+	patch --forward --strip=1 --input=$(NAMEFIRST)/mainline.diff
+ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --forward --strip=1 --input=$(GITSTATUS)/namefirst.diff
+endif
+else ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --forward --strip=1 --input=$(GITSTATUS)/mainline.diff
 endif
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
-ifeq ($(strip $(O_GITSTATUS)),1)
-	patch --reverse --strip=1 --input=$(GITSTATUS)
-endif
 ifeq ($(strip $(O_NAMEFIRST)),1)
-	patch --reverse --strip=1 --input=$(NAMEFIRST)
+ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --reverse --strip=1 --input=$(GITSTATUS)/namefirst.diff
+endif
+	patch --reverse --strip=1 --input=$(NAMEFIRST)/mainline.diff
+else ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --reverse --strip=1 --input=$(GITSTATUS)/mainline.diff
 endif
 
 # targets for backwards compatibility

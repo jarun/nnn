@@ -1,4 +1,4 @@
-# Description: Add git status column to detail mode
+# Description: Add git status column to detail mode.
 #
 # Dependencies: libgit2
 #
@@ -39,8 +39,8 @@ index 562622f..96d946a 100644
  		ulong_t blocks : 40; /* 5 bytes (enough for 512 TiB in 512B blocks allocated) */
  		ulong_t nlen : 16; /* 2 bytes (length of file name) */
  		ulong_t flags : 8; /* 1 byte (flags specific to the file) */
-+    git_column_status_t status_indexed;
-+    git_column_status_t status_staged;
++		git_column_status_t status_indexed;
++		git_column_status_t status_staged;
  	};
  #ifndef NOUG
  	uid_t uid; /* 4 bytes */
@@ -164,8 +164,8 @@ index 562622f..96d946a 100644
 +		if (ent->status_indexed != GIT_COLUMN_STATUS_NONE)
 +			addch(' ');
 +
-+  	git_render_simp_status(ent->status_indexed);
-+  	git_render_simp_status(ent->status_staged);
++		git_render_simp_status(ent->status_indexed);
++		git_render_simp_status(ent->status_staged);
  	}
 
  	attrs = 0;
@@ -181,8 +181,8 @@ index 562622f..96d946a 100644
  	struct stat sb_path, sb;
  	DIR *dirp = opendir(path);
 
-+  statuses_free(git_statuses);
-+  git_statuses = statuses_from_path(path);
++	statuses_free(git_statuses);
++	git_statuses = statuses_from_path(path);
 +
  	ndents = 0;
 
@@ -191,25 +191,25 @@ index 562622f..96d946a 100644
  		dentp->gid = sb.st_gid;
  #endif
 
-+    if (git_statuses.len) {
++		if (git_statuses.len) {
 +			uint32_t merged_status = 0;
 +			char joined[PATH_MAX];
 +			mkpath(path, dentp->name, joined);
 +			char *real = realpath(joined, NULL);
 +			char *canon_path = real ? real : joined;
 +
-+      for (size_t i = 0; i < git_statuses.len; i ++)
++			for (size_t i = 0; i < git_statuses.len; i ++)
 +				if (((dentp->mode & S_IFMT) == S_IFDIR) ? starts_with(git_statuses.statuses[i].path, canon_path) :
 +						!xstrcmp(git_statuses.statuses[i].path, canon_path) || starts_with(canon_path, git_statuses.statuses[i].path))
 +					merged_status |= git_statuses.statuses[i].status;
 +
-+      dentp->status_indexed = git_get_indexed_status(merged_status);
-+      dentp->status_staged = git_get_staged_status(merged_status);
-+      free(real);
-+    } else {
++			dentp->status_indexed = git_get_indexed_status(merged_status);
++			dentp->status_staged = git_get_staged_status(merged_status);
++			free(real);
++		} else {
 +			dentp->status_indexed = GIT_COLUMN_STATUS_NONE;
 +			dentp->status_staged = GIT_COLUMN_STATUS_NONE;
-+    }
++		}
 +
  		dentp->flags = S_ISDIR(sb.st_mode) ? 0 : ((sb.st_nlink > 1) ? HARD_LINK : 0);
  		if (entflags) {
@@ -218,8 +218,8 @@ index 562622f..96d946a 100644
  		fflush(stdout);
  	}
  #endif
-+  statuses_free(git_statuses);
-+  git_libgit2_shutdown();
++	statuses_free(git_statuses);
++	git_libgit2_shutdown();
  	free(selpath);
  	free(plgpath);
  	free(cfgpath);
