@@ -25,6 +25,9 @@ O_NOSSN := 0  # enable session support
 O_NOUG := 0  # disable user, group name in status bar
 O_NOX11 := 0  # disable X11 integration
 
+# User patches
+O_NAMEFIRST := 0 # change detail view to file print name first, add uid and guid columns
+
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
 	O_DEBUG := 1
@@ -143,6 +146,8 @@ HEADERS = src/nnn.h
 BIN = nnn
 OBJS := nnn.o $(OBJS_HAIKU)
 
+NAMEFIRST = misc/patches/namefirst.diff
+
 all: $(BIN)
 
 ifeq ($(shell uname -s), Haiku)
@@ -154,7 +159,13 @@ nnn.o: $(SRC) $(HEADERS)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
 $(BIN): $(OBJS)
+ifeq ($(strip $(O_NAMEFIRST)),1)
+	patch --forward --strip=1 --input=$(NAMEFIRST)
+endif
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+ifeq ($(strip $(O_NAMEFIRST)),1)
+	patch --reverse --strip=1 --input=$(NAMEFIRST)
+endif
 
 # targets for backwards compatibility
 debug: $(BIN)

@@ -27,6 +27,9 @@ O_NOSSN := 0  # enable session support
 O_NOUG := 0  # disable user, group name in status bar
 O_NOX11 := 0  # disable X11 integration
 
+# User patches
+O_NAMEFIRST := 0 # change detail view to file print name first, add uid and guid columns
+
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
 	O_DEBUG := 1
@@ -141,10 +144,18 @@ DESKTOPFILE = misc/desktop/nnn.desktop
 LOGOSVG = misc/logo/logo.svg
 LOGO64X64 = misc/logo/logo-64x64.png
 
+NAMEFIRST = misc/patches/namefirst.diff
+
 all: $(BIN)
 
 $(BIN): $(SRC) $(HEADERS)
+ifeq ($(strip $(O_NAMEFIRST)),1)
+	patch --forward --strip=1 --input=$(NAMEFIRST)
+endif
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LDLIBS)
+ifeq ($(strip $(O_NAMEFIRST)),1)
+	patch --reverse --strip=1 --input=$(NAMEFIRST)
+endif
 
 # targets for backwards compatibility
 debug: $(BIN)
