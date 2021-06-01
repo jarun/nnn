@@ -1,3 +1,7 @@
+# Description: Prints filenames first in the detail view.  Prints user/group
+#              columns when a directory contains different users/groups.
+#
+# Author: Luuk van Baal
 diff --git a/src/nnn.c b/src/nnn.c
 index 562622fa..d66e5dac 100644
 --- a/src/nnn.c

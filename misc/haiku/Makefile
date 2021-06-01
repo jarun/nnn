@@ -26,7 +26,12 @@ O_NOUG := 0  # disable user, group name in status bar
 O_NOX11 := 0  # disable X11 integration
 
 # User patches
+O_GITSTATUS := 0 # add git status to detail view
 O_NAMEFIRST := 0 # change detail view to file print name first, add uid and guid columns
+
+ifeq ($(strip $(O_GITSTATUS)),1)
+	LDLIBS += -lgit2
+endif
 
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
@@ -146,6 +151,7 @@ HEADERS = src/nnn.h
 BIN = nnn
 OBJS := nnn.o $(OBJS_HAIKU)
 
+GITSTATUS = misc/patches/gitstatus.diff
 NAMEFIRST = misc/patches/namefirst.diff
 
 all: $(BIN)
@@ -159,10 +165,16 @@ nnn.o: $(SRC) $(HEADERS)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
 $(BIN): $(OBJS)
+ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --forward --strip=1 --input=$(GITSTATUS)
+endif
 ifeq ($(strip $(O_NAMEFIRST)),1)
 	patch --forward --strip=1 --input=$(NAMEFIRST)
 endif
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --reverse --strip=1 --input=$(GITSTATUS)
+endif
 ifeq ($(strip $(O_NAMEFIRST)),1)
 	patch --reverse --strip=1 --input=$(NAMEFIRST)
 endif
