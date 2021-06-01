@@ -5,10 +5,10 @@ This directory contains user submitted patches that were rejected from mainline 
 ## List of patches
 | Patch (a-z) | Description | Make variable |
 | --- | --- | --- |
-| gitstatus | Add gitstatus column to the gitstatus view. Requires [libgit2](https://github.com/libgit2/libgit2). | O_GISTATUS |
-| namefirst | Prints filenames first in the detail view. Prints user/group columns when a directory contains different users/groups. | O_NAMEFIRST |
+| gitstatus | Add git status column to the detail view. Requires [libgit2](https://github.com/libgit2/libgit2). | O_GISTATUS |
+| namefirst | Print filenames first in the detail view. Print user/group columns when a directory contains different users/groups. | O_NAMEFIRST |
 
 To apply the patches, use the corresponding make variables, e.g.:
 
-	make O_NAMEFIRST=1
+    make O_NAMEFIRST=1
 
