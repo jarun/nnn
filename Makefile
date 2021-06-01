@@ -246,13 +246,13 @@ clean:
 	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz
 
 prepatch:
-ifeq ($(strip $(O_GITSTATUS)),1)
 ifeq ($(strip $(O_NAMEFIRST)),1)
 	patch --forward --strip=1 --input=$(NAMEFIRST)/mainline.diff
-endif
+ifeq ($(strip $(O_GITSTATUS)),1)
 	patch --forward --strip=1 --input=$(GITSTATUS)/namefirst.diff
-else ifeq ($(strip $(O_NAMEFIRST)),1)
-	patch --forward --strip=1 --input=$(NAMEFIRST)/mainline.diff
+endif
+else ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --forward --strip=1 --input=$(GITSTATUS)/mainline.diff
 endif
 
 postpatch:

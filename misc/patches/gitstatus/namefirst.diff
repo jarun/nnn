@@ -87,17 +87,17 @@ index d66e5da..5770f1a 100644
 +	return GIT_COLUMN_STATUS_UNMOD;
 +}
 +
-+static void git_render_simp_status(git_column_status_t status) {
++static void print_gitstatus(git_column_status_t status) {
 +	switch (status) {
 +		case GIT_COLUMN_STATUS_NONE:         break;
-+		case GIT_COLUMN_STATUS_UNMOD:        addch('-' | COLOR_PAIR(C_MIS)); break;
-+		case GIT_COLUMN_STATUS_NEW:          addch('N' | COLOR_PAIR(C_EXE)); break;
-+		case GIT_COLUMN_STATUS_MODIFIED:     addch('M' | COLOR_PAIR(4)); break;
-+		case GIT_COLUMN_STATUS_DELETED:      addch('D' | COLOR_PAIR(C_UND)); break;
-+		case GIT_COLUMN_STATUS_RENAMED:      addch('R' | COLOR_PAIR(C_CHR)); break;
-+		case GIT_COLUMN_STATUS_TYPE_CHANGE:  addch('T' | COLOR_PAIR(C_HRD)); break;
-+		case GIT_COLUMN_STATUS_IGNORED:      addch('I' | COLOR_PAIR(C_MIS)); break;
-+		case GIT_COLUMN_STATUS_CONFLICTED:   addch('U' | COLOR_PAIR(C_UND)); break;
++		case GIT_COLUMN_STATUS_UNMOD:        addch('-' | 0); break;
++		case GIT_COLUMN_STATUS_NEW:          addch('N' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_EXE))); break;
++		case GIT_COLUMN_STATUS_MODIFIED:     addch('M' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(4))); break;
++		case GIT_COLUMN_STATUS_DELETED:      addch('D' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_UND))); break;
++		case GIT_COLUMN_STATUS_RENAMED:      addch('R' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_CHR))); break;
++		case GIT_COLUMN_STATUS_TYPE_CHANGE:  addch('T' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_HRD))); break;
++		case GIT_COLUMN_STATUS_IGNORED:      addch('I' | 0); break;
++		case GIT_COLUMN_STATUS_CONFLICTED:   addch('U' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_UND))); break;
 +	}
 +}
 +
@@ -161,8 +161,8 @@ index d66e5da..5770f1a 100644
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
 
 +	if (cfg.showdetail) {
-+		git_render_simp_status(ent->status_indexed);
-+		git_render_simp_status(ent->status_staged);
++		print_gitstatus(ent->status_indexed);
++		print_gitstatus(ent->status_staged);
 +		if (ent->status_indexed != GIT_COLUMN_STATUS_NONE)
 +			addch(' ');
 +	}

@@ -222,10 +222,10 @@ clean:
 
 prepatch:
 ifeq ($(strip $(O_NAMEFIRST)),1)
+	patch --forward --strip=1 --input=$(NAMEFIRST)/mainline.diff
 ifeq ($(strip $(O_GITSTATUS)),1)
 	patch --forward --strip=1 --input=$(GITSTATUS)/namefirst.diff
 endif
-	patch --forward --strip=1 --input=$(NAMEFIRST)/mainline.diff
 else ifeq ($(strip $(O_GITSTATUS)),1)
 	patch --forward --strip=1 --input=$(GITSTATUS)/mainline.diff
 endif
