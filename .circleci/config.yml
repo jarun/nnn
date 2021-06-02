@@ -119,11 +119,11 @@ workflows:
                 - master
     jobs: *all-tests
 
-  publish-github-release:
-    jobs:
-      - package-and-publish:
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
+#  publish-github-release:
+#    jobs:
+#      - package-and-publish:
+#          filters:
+#            tags:
+#              only: /^v.*/
+#            branches:
+#              ignore: /.*/
