@@ -1,0 +1,227 @@
+# Description: Prints filenames first in the detail view.  Prints user/group
+#              columns when a directory contains different users/groups.
+#
+# Author: Luuk van Baal
+diff --git a/src/nnn.c b/src/nnn.c
+index 562622fa..d66e5dac 100644
+--- a/src/nnn.c
++++ b/src/nnn.c
+@@ -362,6 +362,10 @@ typedef struct {
+ } session_header_t;
+ #endif
+
++static struct {
++	ushort_t maxnameln, maxsizeln, maxuidln, maxgidln, maxentln, uidln, gidln, printguid;
++} dtls;
++
+ /* GLOBALS */
+
+ /* Configuration, contexts */
+@@ -1038,10 +1042,12 @@ static char *getpwname(uid_t uid)
+ 	static char *namecache = NULL;
+
+ 	if (uidcache != uid) {
++		if (dtls.maxuidln && !dtls.printguid) dtls.printguid = 1;
+ 		struct passwd *pw = getpwuid(uid);
+
+ 		uidcache = uid;
+ 		namecache = pw ? pw->pw_name : NULL;
++		dtls.uidln = xstrlen(namecache ? namecache : xitoa(uid));
+ 	}
+
+ 	return namecache ? namecache : xitoa(uid);
+@@ -1053,10 +1059,12 @@ static char *getgrname(gid_t gid)
+ 	static char *grpcache = NULL;
+
+ 	if (gidcache != gid) {
++		if (dtls.maxgidln && !dtls.printguid) dtls.printguid = 1;
+ 		struct group *gr = getgrgid(gid);
+
+ 		gidcache = gid;
+ 		grpcache = gr ? gr->gr_name : NULL;
++		dtls.gidln = xstrlen(grpcache ? grpcache : xitoa(gid));
+ 	}
+
+ 	return grpcache ? grpcache : xitoa(gid);
+@@ -3479,14 +3487,13 @@ static void resetdircolor(int flags)
+  * Max supported str length: NAME_MAX;
+  */
+ #ifdef NOLC
+-static char *unescape(const char *str, uint_t maxcols)
++static size_t unescape(const char *str, uint_t maxcols)
+ {
+ 	char * const wbuf = g_buf;
+ 	char *buf = wbuf;
+-
+-	xstrsncpy(wbuf, str, maxcols);
++	size_t len = xstrsncpy(wbuf, str, maxcols);
+ #else
+-static wchar_t *unescape(const char *str, uint_t maxcols)
++static size_t unescape(const char *str, uint_t maxcols)
+ {
+ 	wchar_t * const wbuf = (wchar_t *)g_buf;
+ 	wchar_t *buf = wbuf;
+@@ -3510,7 +3517,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
+ 		++buf;
+ 	}
+
+-	return wbuf;
++	return len;
+ }
+
+ static off_t get_size(off_t size, off_t *pval, uint_t comp)
+@@ -3771,33 +3778,7 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int
+ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+ {
+ 	char ind = '\0';
+-	int attrs;
+-
+-	if (cfg.showdetail) {
+-		int type = ent->mode & S_IFMT;
+-		char perms[6] = {' ', ' ', (char)('0' + ((ent->mode >> 6) & 7)),
+-				(char)('0' + ((ent->mode >> 3) & 7)),
+-				(char)('0' + (ent->mode & 7)), '\0'};
+-
+-		addch(' ');
+-		attrs = g_state.oldcolor ? (resetdircolor(ent->flags), A_DIM)
+-					 : (fcolors[C_MIS] ? COLOR_PAIR(C_MIS) : 0);
+-		if (attrs)
+-			attron(attrs);
+-
+-		/* Print details */
+-		print_time(&ent->sec);
+-
+-		printw("%s%9s ", perms, (type == S_IFREG || type == S_IFDIR)
+-			? coolsize(cfg.blkorder ? (blkcnt_t)ent->blocks << blk_shift : ent->size)
+-			: (type = (uchar_t)get_detail_ind(ent->mode), (char *)&type));
+-
+-		if (attrs)
+-			attroff(attrs);
+-	}
+-
+-	attrs = 0;
+-
++	int attrs = 0, namelen;
+ 	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
+
+ 	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
+@@ -3822,15 +3803,40 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+ 		++namecols;
+
+ #ifndef NOLC
+-	addwstr(unescape(ent->name, namecols));
++	addwstr((namelen = unescape(ent->name, namecols), (wchar_t *)g_buf));
+ #else
+-	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
++	addstr((namelen = unescape(ent->name, MIN(namecols, ent->nlen) + 1), (char *)g_buf));
+ #endif
+
+-	if (attrs)
++	if (!sel && attrs)
+ 		attroff(attrs);
+ 	if (ind)
+ 		addch(ind);
++	if (cfg.showdetail) {
++		int type = ent->mode & S_IFMT;
++		char perms[6] = {(char)('0' + ((ent->mode >> 6) & 7)),
++				(char)('0' + ((ent->mode >> 3) & 7)),
++				(char)('0' + (ent->mode & 7)), ' ', ' ', '\0'}, *size = NULL;
++
++		if (attrs)
++			attron(attrs);
++		if (!g_state.oldcolor && (type == S_IFDIR || (type == S_IFLNK && ent->flags & DIR_OR_LINK_TO_DIR)))
++			attroff(A_BOLD);
++		size_t sizelen = (type == S_IFREG || type == S_IFDIR) ? xstrlen(size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size)) : 1;
++		printw("%*c%*s%s%s", 1 + MIN(namecols, dtls.maxnameln + (size_t)(ind ? 0 : 1)) - namelen, ' ',
++				dtls.maxsizeln - sizelen, "", size ? size : (type = (uchar_t)get_detail_ind(ent->mode), (char *)&type), "  ");
++#ifndef NOUG
++		if (g_state.uidgid && dtls.printguid) {
++			addstr(getpwname(ent->uid));
++			printw("%*c%s", dtls.maxuidln + 1 - dtls.uidln, ' ', getgrname(ent->gid));
++			printw("%*c", dtls.maxgidln + 2 - dtls.gidln, ' ');
++		}
++#endif
++		addstr(perms);
++		print_time(&ent->sec);
++	}
++	if (attrs)
++		attroff(attrs);
+ }
+
+ static void savecurctx(settings *curcfg, char *path, char *curname, int nextctx)
+@@ -5814,18 +5820,6 @@ static void statusbar(char *path)
+ 		tocursor();
+ }
+
+-static inline void markhovered(void)
+-{
+-	if (cfg.showdetail && ndents) { /* Reversed block for hovered entry */
+-		tocursor();
+-#ifdef ICONS_ENABLED
+-		addstr(MD_ARROW_FORWARD);
+-#else
+-		addch(' ' | A_REVERSE);
+-#endif
+-	}
+-}
+-
+ static int adjust_cols(int n)
+ {
+ 	/* Calculate the number of cols available to print entry name */
+@@ -5833,13 +5827,10 @@ static int adjust_cols(int n)
+ 	n -= (g_state.oldcolor ? 0 : 1 + xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT));
+ #endif
+ 	if (cfg.showdetail) {
+-		/* Fallback to light mode if less than 35 columns */
+-		if (n < 36)
++		if (n < (dtls.maxentln + 1 - dtls.maxnameln))
+ 			cfg.showdetail ^= 1;
+-		else {
+-			/* 3 more accounted for below */
+-			n -= 32;
+-		}
++		else
++			n -= (dtls.maxentln - 2 - dtls.maxnameln);
+ 	}
+
+ 	/* 2 columns for preceding space and indicator */
+@@ -5877,8 +5868,6 @@ static void draw_line(char *path, int ncols)
+ 	if (dir)
+ 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
+
+-	markhovered();
+-
+ 	statusbar(path);
+ }
+
+@@ -5970,6 +5959,21 @@ static void redraw(char *path)
+
+ 	attroff(A_UNDERLINE | COLOR_PAIR(cfg.curctx + 1));
+
++	if (cfg.showdetail) {
++	ushort_t lenbuf = dtls.maxnameln = dtls.maxsizeln = dtls.maxuidln = dtls.maxgidln = dtls.printguid = 0;
++		for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i) {
++			if ((lenbuf = pdents[i].nlen - 1) > dtls.maxnameln) dtls.maxnameln = lenbuf;
++			if ((lenbuf = xstrlen(coolsize(cfg.blkorder ? pdents[i].blocks << blk_shift : pdents[i].size))) > dtls.maxsizeln) dtls.maxsizeln = lenbuf;
++#ifndef NOUG
++			if (g_state.uidgid) {
++				if ((getpwname(pdents[i].uid), dtls.uidln) > dtls.maxuidln) dtls.maxuidln = dtls.uidln;
++				if ((getgrname(pdents[i].gid), dtls.gidln) > dtls.maxgidln) dtls.maxgidln = dtls.gidln;
++			}
++#endif
++		}
++	}
++	dtls.maxentln = dtls.maxnameln + dtls.maxsizeln + dtls.maxuidln + dtls.maxgidln + (g_state.uidgid ? 29 : 26);
++
+ 	ncols = adjust_cols(ncols);
+
+ 	/* Go to first entry */
+@@ -6011,8 +6015,6 @@ static void redraw(char *path)
+ #endif
+ 	}
+
+-	markhovered();
+-
+ 	statusbar(path);
+ }
+

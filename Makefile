@@ -27,6 +27,14 @@ O_NOSSN := 0  # enable session support
 O_NOUG := 0  # disable user, group name in status bar
 O_NOX11 := 0  # disable X11 integration
 
+# User patches
+O_GITSTATUS := 0 # add git status to detail view
+O_NAMEFIRST := 0 # print file name first, add uid and guid to detail view
+
+ifeq ($(strip $(O_GITSTATUS)),1)
+	LDLIBS += -lgit2
+endif
+
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
 	O_DEBUG := 1
@@ -141,10 +149,15 @@ DESKTOPFILE = misc/desktop/nnn.desktop
 LOGOSVG = misc/logo/logo.svg
 LOGO64X64 = misc/logo/logo-64x64.png
 
+GITSTATUS = misc/patches/gitstatus
+NAMEFIRST = misc/patches/namefirst
+
 all: $(BIN)
 
 $(BIN): $(SRC) $(HEADERS)
+	@$(MAKE) --silent prepatch
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LDLIBS)
+	@$(MAKE) --silent postpatch
 
 # targets for backwards compatibility
 debug: $(BIN)
@@ -231,6 +244,26 @@ upload-local: sign static
 
 clean:
 	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz
+
+prepatch:
+ifeq ($(strip $(O_NAMEFIRST)),1)
+	patch --forward --strip=1 --input=$(NAMEFIRST)/mainline.diff
+ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --forward --strip=1 --input=$(GITSTATUS)/namefirst.diff
+endif
+else ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --forward --strip=1 --input=$(GITSTATUS)/mainline.diff
+endif
+
+postpatch:
+ifeq ($(strip $(O_NAMEFIRST)),1)
+ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --reverse --strip=1 --input=$(GITSTATUS)/namefirst.diff
+endif
+	patch --reverse --strip=1 --input=$(NAMEFIRST)/mainline.diff
+else ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --reverse --strip=1 --input=$(GITSTATUS)/mainline.diff
+endif
 
 skip: ;
 
