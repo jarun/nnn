@@ -149,8 +149,8 @@ DESKTOPFILE = misc/desktop/nnn.desktop
 LOGOSVG = misc/logo/logo.svg
 LOGO64X64 = misc/logo/logo-64x64.png
 
-GITSTATUS = misc/patches/gitstatus
-NAMEFIRST = misc/patches/namefirst
+GITSTATUS = patches/gitstatus
+NAMEFIRST = patches/namefirst
 
 all: $(BIN)
 
