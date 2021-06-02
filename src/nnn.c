@@ -7219,7 +7219,7 @@ nochange:
 			if (r == 's') {
 				tmp = xreadline(NULL, messages[MSG_SSN_NAME]);
 				if (tmp && *tmp)
-					save_session(FALSE, &presel);
+					save_session(tmp, &presel);
 			} else if (r == 'l' || r == 'r') {
 				if (load_session(NULL, &path, &lastdir, &lastname, r == 'r')) {
 					setdirwatch();
