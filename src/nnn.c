@@ -452,7 +452,7 @@ static pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t hardlink_mutex = PTHREAD_MUTEX_INITIALIZER;
 static ulong_t *core_files;
 static blkcnt_t *core_blocks;
-static _Atomic volatile ulong_t num_files;
+static ulong_t num_files;
 
 typedef struct {
 	char path[PATH_MAX];
