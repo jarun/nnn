@@ -2,8 +2,9 @@
 #              columns when a directory contains different users/groups.
 #
 # Author: Luuk van Baal
+
 diff --git a/src/nnn.c b/src/nnn.c
-index 562622fa..d66e5dac 100644
+index d83d7f6..22402fa 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
 @@ -362,6 +362,10 @@ typedef struct {
@@ -211,7 +212,7 @@ index 562622fa..d66e5dac 100644
 +#endif
 +		}
 +	}
-+	dtls.maxentln = dtls.maxnameln + dtls.maxsizeln + dtls.maxuidln + dtls.maxgidln + (g_state.uidgid ? 29 : 26);
++	dtls.maxentln = dtls.maxnameln + dtls.maxsizeln + (dtls.printguid ? (dtls.maxuidln + dtls.maxgidln) : 0) + (g_state.uidgid ? 26 : 23);
 +
  	ncols = adjust_cols(ncols);
 
