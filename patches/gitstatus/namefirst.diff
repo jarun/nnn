@@ -6,7 +6,7 @@
 # Authors: @crides, Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index 22402fa..33be591 100644
+index 9b55d5d..240ace2 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
 @@ -105,6 +105,7 @@
@@ -34,15 +34,15 @@ index 22402fa..33be591 100644
 
  /* STRUCTURES */
 
-@@ -258,6 +269,8 @@ typedef struct entry {
- 		ulong_t blocks : 40; /* 5 bytes (enough for 512 TiB in 512B blocks allocated) */
- 		ulong_t nlen : 16; /* 2 bytes (length of file name) */
- 		ulong_t flags : 8; /* 1 byte (flags specific to the file) */
-+		git_column_status_t status_indexed;
-+		git_column_status_t status_staged;
- 	};
+@@ -262,6 +273,8 @@ typedef struct entry {
  #ifndef NOUG
  	uid_t uid; /* 4 bytes */
+ 	gid_t gid; /* 4 bytes */
++	git_column_status_t status_indexed;
++	git_column_status_t status_staged;
+ #endif
+ } *pEntry;
+
 @@ -366,7 +379,18 @@ static struct {
  	ushort_t maxnameln, maxsizeln, maxuidln, maxgidln, maxentln, uidln, gidln, printguid;
  } dtls;
@@ -62,7 +62,7 @@ index 22402fa..33be591 100644
 
  /* Configuration, contexts */
  static settings cfg = {
-@@ -3472,6 +3496,85 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
+@@ -3472,6 +3496,79 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
  	return NULL;
  }
 
@@ -99,12 +99,6 @@ index 22402fa..33be591 100644
 +	}
 +}
 +
-+static bool starts_with(const char *const s, const char *const start) {
-+	const size_t start_len = xstrlen(start);
-+
-+	return (start_len <= xstrlen(s)) && !strncmp(s, start, start_len);
-+}
-+
 +static simple_git_statuses_t statuses_from_path(const char *path) {
 +	git_repository *repo;
 +	git_buf ret = { .ptr = NULL, .asize = 0, .size = 0 };
@@ -138,17 +132,17 @@ index 22402fa..33be591 100644
 +	return statuses;
 +}
 +
-+static void statuses_free(simple_git_statuses_t statuses) {
-+	for (size_t i = 0; i < statuses.len; ++i)
-+		free(statuses.statuses[i].path);
++static void git_statuses_free(void) {
++	for (size_t i = 0; i < git_statuses.len; ++i)
++		free(git_statuses.statuses[i].path);
 +
-+	free(statuses.statuses);
++	free(git_statuses.statuses);
 +}
 +
  static void resetdircolor(int flags)
  {
  	/* Directories are always shown on top, clear the color when moving to first file */
-@@ -3783,6 +3886,12 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+@@ -3783,6 +3880,12 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
 
@@ -161,32 +155,38 @@ index 22402fa..33be591 100644
  	if (g_state.oldcolor)
  		resetdircolor(ent->flags);
  	else {
-@@ -5125,6 +5234,11 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5125,6 +5228,10 @@ static int dentfill(char *path, struct entry **ppdents)
  		attron(COLOR_PAIR(cfg.curctx + 1));
  	}
 
 +	if (git_statuses.len)
-+		statuses_free(git_statuses);
-+	if (cfg.showdetail)
-+		git_statuses = statuses_from_path(path);
++		git_statuses_free();
++	git_statuses = statuses_from_path(path);
 +
  #if _POSIX_C_SOURCE >= 200112L
  	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
  #endif
-@@ -5322,6 +5436,18 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5322,6 +5429,25 @@ static int dentfill(char *path, struct entry **ppdents)
  #endif
  		}
 
 +		if (git_statuses.len) {
 +			uint merged_status = 0;
++			char *dentpath = abspath(dentp->name, path);
 +
-+			for (size_t i = 0; i < git_statuses.len; i ++)
-+				if ((dentp->flags & DIR_OR_LINK_TO_DIR) ? starts_with(git_statuses.statuses[i].path, abspath(dentp->name, path))
-+						: !xstrcmp(git_statuses.statuses[i].path, abspath(dentp->name, path)))
-+					merged_status |= git_statuses.statuses[i].status;
++			for (size_t i = 0; i < git_statuses.len; ++i) {
++				if (dentp->flags & DIR_OR_LINK_TO_DIR) {
++					size_t dentlen = xstrlen(dentpath);
++
++					if ((dentlen <= xstrlen(git_statuses.statuses[i].path)) && is_prefix(git_statuses.statuses[i].path, dentpath, dentlen))
++						merged_status |= git_statuses.statuses[i].status;
++				} else if (!xstrcmp(git_statuses.statuses[i].path, dentpath))
++						merged_status |= git_statuses.statuses[i].status;
++			}
 +
 +			dentp->status_indexed = git_get_indexed_status(merged_status);
 +			dentp->status_staged = git_get_staged_status(merged_status);
++			free(dentpath);
 +		}
 +
  		++ndents;
@@ -205,8 +205,8 @@ index 22402fa..33be591 100644
  		fflush(stdout);
  	}
  #endif
-+  statuses_free(git_statuses);
-+  git_libgit2_shutdown();
++	git_statuses_free();
++	git_libgit2_shutdown();
  	free(selpath);
  	free(plgpath);
  	free(cfgpath);
