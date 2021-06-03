@@ -85,6 +85,8 @@ jobs:
       - run:
           name: "auto-generate packages"
           command: |
+            # Create dist directory if it doesn't exist
+            mkdir ./dist
             # Clean up
             rm -rf ./dist/*
             # Pack source
@@ -94,7 +96,7 @@ jobs:
             #pip install packagecore
             #packagecore -c misc/packagecore/packagecore.yaml -o ./dist/ ${CIRCLE_TAG#v}
             # Move source pack to dist
-            mv ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz dist/
+            mv ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz ./dist/
 
       - run:
           name: "publish to GitHub"
