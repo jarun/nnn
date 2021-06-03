@@ -11,8 +11,8 @@
 #   - lsix (https://github.com/hackerb9/lsix), or
 #   - viu (https://github.com/atanunq/viu), or
 #   - catimg (https://github.com/posva/catimg), or
-#   - optional: ffmpegthumbnailer for video thumbnails
 #   - optional: ffmpeg for audio thumbnails (album art)
+#   - optional: ffmpegthumbnailer for video thumbnails
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana, Luuk van Baal
@@ -37,24 +37,35 @@ nthumb_cleanup() {
 }
 
 make_thumbs() {
-    if [ -d "$target" ]; then cd "$target" || exit_prompt; fi
+    if [ -d "$target" ]; then
+        [ "$1" -eq 4 ] && exit_prompt "$3 can only display a single image"
+        cd "$target" || exit_prompt
+    fi
     if mkdir .nthumbs >/dev/null; then
         thumbs=1
     else
         exit_prompt
     fi
+    if [ "$1" -eq 4 ]; then
+      mime="$(file -bL --mime-type -- "$2")"
+        case "$mime" in
+          audio/*) ffmpeg -i "$2" ".nthumbs/${2%%.*}.jpg" -y >/dev/null 2>&1
+              ret=".nthumbs/${2%%.*}.jpg" ;;
+          video/*) ffmpegthumbnailer -i "$2" -o .nthumbs/"${2%%.*}".jpg 2> /dev/null
+              ret=".nthumbs/${2%%.*}.jpg" ;;
+          *) ret="$2" ;;
+        esac
+    fi
     for file in *; do
         case "$(file -bL --mime-type -- "$file")" in
-          image/*) ln -s "$PWD/$file" "$PWD/.nthumbs/$file" ;;
-          audio/*) ffmpeg -i "$file" ".nthumbs/${file%%.*}.jpg" -y >/dev/null 2>&1;;
-          video/*) ffmpegthumbnailer -i "$file" -o .nthumbs/"${file%%.*}".jpg 2> /dev/null ;;
+          audio/*) [ "$1" -ne 0 ] && ffmpeg -i "$file" ".nthumbs/${file%%.*}.jpg" -y >/dev/null 2>&1 ;;
+          video/*) [ "$1" -ne 1 ] && ffmpegthumbnailer -i "$file" -o .nthumbs/"${file%%.*}".jpg 2> /dev/null ;;
         esac
     done
-    cd .nthumbs || return
 }
 
-view_dir() {
-  find . -maxdepth 0 -print0 | xargs -0 "$1" --
+view_files() {
+    find . .nthumbs -maxdepth 1 -type f -print0 | xargs -0 "$@" --
 }
 
 if uname | grep -q "Darwin"; then
@@ -63,46 +74,44 @@ elif type lsix >/dev/null 2>&1; then
     if [ -d "$target" ]; then
         cd "$target" || exit_prompt
     fi
-    make_thumbs
+    make_thumbs ""
     clear
     lsix
+    cd .nthumbs && lsix
     nthumb_cleanup
     exit_prompt
 elif type ucollage >/dev/null 2>&1; then
-    make_thumbs
-    ucollage
+    make_thumbs 1
+    if ! UCOLLAGE_EXPAND_DIRS=1 ucollage . .nthumbs; then
+      nthumb_cleanup && exit_prompt
+    fi
     nthumb_cleanup
     exit
 elif type sxiv >/dev/null 2>&1; then
-    make_thumbs
+    make_thumbs 0
     if [ -f "$target" ]; then
-        view_dir sxiv >/dev/null 2>&1 &
+        view_files sxiv >/dev/null 2>&1 &
     elif [ -d "$target" ]; then
-        sxiv -aqt . >/dev/null 2>&1 &
+        view_files sxiv -aqt >/dev/null 2>&1 &
     fi
 elif type imv >/dev/null 2>&1; then
-    make_thumbs
-    if [ -f "$target" ]; then
-        view_dir imv >/dev/null 2>&1 &
-    elif [ -d "$target" ]; then
-        imv . >/dev/null 2>&1 &
-    fi
+    make_thumbs 3
+    view_files imv >/dev/null 2>&1 &
 elif type imvr >/dev/null 2>&1; then
-    make_thumbs
-    if [ -f "$target" ]; then
-        view_dir imvr >/dev/null 2>&1 &
-    elif [ -d "$target" ]; then
-        imvr . >/dev/null 2>&1 &
-    fi
+    make_thumbs 3
+    view_files imvr >/dev/null 2>&1 &
 elif type viu >/dev/null 2>&1; then
     clear
-    viu -n "$1"
+    make_thumbs 4 "$1" viu
+    viu -n "$ret"
+    nthumb_cleanup
     exit_prompt
 elif type catimg >/dev/null 2>&1; then
-    clear
-    catimg "$1"
+    make_thumbs 4 "$1" catimg
+    catimg "$ret"
+    nthumb_cleanup
     exit_prompt
 else
     exit_prompt "Please install sxiv/imv/viu/catimg/lsix."
 fi
-[ -n "$thumbs" ] && nthumb_cleanup &
+[ "$thumbs" -ne 0 ] && nthumb_cleanup &
