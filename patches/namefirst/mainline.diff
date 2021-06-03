@@ -178,7 +178,7 @@ index d83d7f6..22402fa 100644
 +		if (n < (dtls.maxentln + 1 - dtls.maxnameln))
  			cfg.showdetail ^= 1;
 -		else {
--			/* 3 more accounted for below */
+-			/* 2 more accounted for below */
 -			n -= 32;
 -		}
 +		else

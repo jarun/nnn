@@ -5837,7 +5837,7 @@ static int adjust_cols(int n)
 		if (n < 36)
 			cfg.showdetail ^= 1;
 		else {
-			/* 3 more accounted for below */
+			/* 2 more accounted for below */
 			n -= 32;
 		}
 	}
