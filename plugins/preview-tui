@@ -144,7 +144,10 @@ toggle_preview() {
     elif exists Bridge.exe; then
         QLPATH="Bridge.exe"
     fi
-    if pkill -P "$(cat "$FIFOPID")"; then
+    if kill "$(cat "$FIFOPID")"; then
+        kill "$(cat "$IMGPID")"
+        kill "$(cat "$PAGERPID")"
+        pkill -f "tail --follow $FIFO_UEBERZUG"
         if [ -n "$QLPATH" ] && stat "$1"; then
             f="$(wslpath -w "$1")" && "$QLPATH" "$f" &
         fi
@@ -324,6 +327,7 @@ generate_preview() {
                         printf "%s" "$!" > "$IMGPID"
                         return
                  else
+                    exec >/dev/tty
                     image_preview "$1" "$2" "$3"
                     return
                  fi ;;
@@ -369,25 +373,26 @@ ueberzug_remove() {
 
 winch_handler() {
     clear
-    kill "$(cat "$IMGPID")" "$(cat "$PAGERPID")"
+    kill "$(cat "$IMGPID")"
+    kill "$(cat "$PAGERPID")"
     if [ -p "$FIFO_UEBERZUG" ]; then
-        pkill -P "$$"
+        pkill -f "tail --follow $FIFO_UEBERZUG"
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
-    cat "$CURSEL" > "$NNN_FIFO"
     preview_file "$(cat "$CURSEL")"
-    preview_fifo &
-    wait "$!"
 } 2>/dev/null
 
 preview_fifo() {
-    printf "%s" "$$" > "$FIFOPID"
     while read -r selection; do
-        kill "$(cat "$IMGPID")" "$(cat "$PAGERPID")"
-        [ -p "$FIFO_UEBERZUG" ] && ueberzug_remove
-        preview_file "$selection"
-        printf "%s" "$selection" > "$CURSEL"
+        if [ -n "$selection" ]; then
+            kill "$(cat "$IMGPID")"
+            kill "$(cat "$PAGERPID")"
+            [ -p "$FIFO_UEBERZUG" ] && ueberzug_remove
+            preview_file "$selection"
+            printf "%s" "$selection" > "$CURSEL"
+        fi
     done < "$NNN_FIFO"
+    pkill -P "$$"
 } 2>/dev/null
 
 if [ "$PREVIEW_MODE" ]; then
@@ -396,10 +401,11 @@ if [ "$PREVIEW_MODE" ]; then
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
 
-    printf "%s" "$PWD/$1" > "$CURSEL"
     preview_file "$PWD/$1"
     preview_fifo &
-    trap 'winch_handler' WINCH
+    printf "%s" "$!" > "$FIFOPID"
+    printf "%s" "$PWD/$1" > "$CURSEL"
+    trap 'winch_handler; wait' WINCH
     trap 'rm "$PAGERPID" "$IMGPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" 2>/dev/null' INT HUP EXIT
     wait "$!" 2>/dev/null
 else
