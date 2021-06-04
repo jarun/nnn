@@ -380,7 +380,7 @@ winch_handler() {
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
     preview_file "$(cat "$CURSEL")"
-    if ! kill -0 "$NNN_PARENT" || ! pgrep nnn; then
+    if ! kill -0 "$NNN_PARENT" || ! pgrep nnn >/dev/null; then
         pkill -P "$$"
     fi
 } 2>/dev/null
