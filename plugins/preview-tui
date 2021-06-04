@@ -84,8 +84,7 @@ NNN_PREVIEWWIDTH="${NNN_PREVIEWWIDTH:-1920}"
 NNN_PREVIEWHEIGHT="${NNN_PREVIEWHEIGHT:-1080}"
 NNN_PARENT="${NNN_FIFO#*.}"
 FIFOPID="$TMPDIR/nnn-preview-tui-fifopid.$NNN_PARENT"
-PAGERPID="$TMPDIR/nnn-preview-tui-pagerpid.$NNN_PARENT"
-IMGPID="$TMPDIR/nnn-preview-tui-imgpid.$NNN_PARENT"
+PREVIEWPID="$TMPDIR/nnn-preview-tui-pagerpid.$NNN_PARENT"
 CURSEL="$TMPDIR/nnn-preview-tui-selection.$NNN_PARENT"
 FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NNN_PARENT"
 
@@ -109,12 +108,12 @@ start_preview() {
     case "$TERMINAL" in
         tmux) # tmux splits are inverted
             if [ "$SPLIT" = "v" ]; then DSPLIT="h"; else DSPLIT="v"; fi
-            tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e "PAGER=$PAGER" \
+            tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1"  \
+                -e "CURSEL=$CURSEL" -e "TMPDIR=$TMPDIR" -e "FIFOPID=$FIFOPID" \
+                -e "BAT_STYLE=$BAT_STYLE" -e "PREVIEWPID=$PREVIEWPID" -e "PAGER=$PAGER" \
+                -e "ICONLOOKUP=$ICONLOOKUP" -e "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" \
                 -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
-                -e "BAT_STYLE=$BAT_STYLE" -e "PAGERPID=$PAGERPID" -e "FIFOPID=$FIFOPID" \
-                -e "IMGPID=$IMGPID" -e "CURSEL=$CURSEL" -e "TMPDIR=$TMPDIR" \
-                -e "ICONLOOKUP=$ICONLOOKUP" -e "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
-                -e "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" -e "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
+                -e "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" -e "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
                 -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$2" -d"$DSPLIT" "$0" "$1" ;;
         kitty) # Setting the layout for the new window. It will be restored after the script ends.
             kitty @ goto-layout splits
@@ -124,15 +123,15 @@ start_preview() {
                 --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" \
                 --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" --env "TMPDIR=$TMPDIR" \
                 --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" --env "TERMINAL=$TERMINAL"\
+                --env "PREVIEWPID=$PREVIEWPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
+                --env "ICONLOOKUP=$ICONLOOKUP" --env "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
+                --env "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" --env "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
                 --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=$BAT_STYLE" --env "FIFOPID=$FIFOPID" \
-                --env "PAGERPID=$PAGERPID" --env "IMGPID=$IMGPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
-                --env "ICONLOOKUP=$ICONLOOKUP" --env "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
-                --env "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" --env "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
                 --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" ;;
         *)  if [ -n "$2" ]; then
                 QUICKLOOK=1 QLPATH="$2" PREVIEW_MODE=1 "$0" "$1" &
             else
-                PAGERPID="$PAGERPID" IMGPID="$IMGPID" CURSEL="$CURSEL" PREVIEW_MODE=1 \
+                PREVIEWPID="$PREVIEWPID" CURSEL="$CURSEL" PREVIEW_MODE=1 \
                      FIFOPID="$FIFOPID" FIFO_UEBERZUG="$FIFO_UEBERZUG" $TERMINAL -e "$0" "$1" &
             fi ;;
     esac
@@ -145,8 +144,7 @@ toggle_preview() {
         QLPATH="Bridge.exe"
     fi
     if kill "$(cat "$FIFOPID")"; then
-        kill "$(cat "$IMGPID")"
-        kill "$(cat "$PAGERPID")"
+        kill "$(cat "$PREVIEWPID")"
         pkill -f "tail --follow $FIFO_UEBERZUG"
         if [ -n "$QLPATH" ] && stat "$1"; then
             f="$(wslpath -w "$1")" && "$QLPATH" "$f" &
@@ -169,7 +167,7 @@ fifo_pager() {
     mkfifo "$tmpfifopath" || return
 
     $PAGER < "$tmpfifopath" &
-    printf "%s" "$!" > "$PAGERPID"
+    printf "%s" "$!" > "$PREVIEWPID"
 
     (
         exec > "$tmpfifopath"
@@ -324,7 +322,7 @@ generate_preview() {
                                 sleep 0.1
                             done
                         done &
-                        printf "%s" "$!" > "$IMGPID"
+                        printf "%s" "$!" > "$PREVIEWPID"
                         return
                  else
                     exec >/dev/tty
@@ -360,7 +358,7 @@ image_preview() {
     else
         fifo_pager print_bin_info "$3" && return
     fi
-    printf "%s" "$!" > "$IMGPID"
+    printf "%s" "$!" > "$PREVIEWPID"
 } 2>/dev/null
 
 ueberzug_layer() {
@@ -373,8 +371,7 @@ ueberzug_remove() {
 
 winch_handler() {
     clear
-    kill "$(cat "$IMGPID")"
-    kill "$(cat "$PAGERPID")"
+    kill "$(cat "$PREVIEWPID")"
     if [ -p "$FIFO_UEBERZUG" ]; then
         pkill -f "tail --follow $FIFO_UEBERZUG"
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
@@ -388,8 +385,7 @@ winch_handler() {
 preview_fifo() {
     while read -r selection; do
         if [ -n "$selection" ]; then
-            kill "$(cat "$IMGPID")"
-            kill "$(cat "$PAGERPID")"
+            kill "$(cat "$PREVIEWPID")"
             [ -p "$FIFO_UEBERZUG" ] && ueberzug_remove
             preview_file "$selection"
             printf "%s" "$selection" > "$CURSEL"
@@ -409,7 +405,7 @@ if [ "$PREVIEW_MODE" ]; then
     printf "%s" "$!" > "$FIFOPID"
     printf "%s" "$PWD/$1" > "$CURSEL"
     trap 'winch_handler; wait' WINCH
-    trap 'rm "$PAGERPID" "$IMGPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" 2>/dev/null' INT HUP EXIT
+    trap 'rm "$PREVIEWPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" 2>/dev/null' INT HUP EXIT
     wait "$!" 2>/dev/null
 else
     if [ ! -r "$NNN_FIFO" ]; then
