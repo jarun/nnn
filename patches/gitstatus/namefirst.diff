@@ -1,12 +1,16 @@
-# Description: Add git status column to detail mode.
+# Description: Add git status column to detail mode. Provides additional
+#              command line flag -G which will render the git status
+#              column also in normal mode. nnn.vim users may consider
+#              adding `let g:nnn#command = 'nnn -G' to their vim config.
 #              Compatibility patch for the namefirst patch.
 #
 # Dependencies: libgit2
 #
+#
 # Authors: @crides, Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index 9b55d5d..240ace2 100644
+index 9141d78..de4d9f0 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
 @@ -105,6 +105,7 @@
@@ -43,7 +47,15 @@ index 9b55d5d..240ace2 100644
  #endif
  } *pEntry;
 
-@@ -366,7 +379,18 @@ static struct {
+@@ -313,6 +326,7 @@ typedef struct {
+ 	uint_t cliopener  : 1;  /* All-CLI app opener */
+ 	uint_t waitedit   : 1;  /* For ops that can't be detached, used EDITOR */
+ 	uint_t rollover   : 1;  /* Roll over at edges */
++	uint_t normalgit  : 1;  /* Show git status in normal mode */
+ } settings;
+
+ /* Non-persistent program-internal states */
+@@ -366,7 +380,18 @@ static struct {
  	ushort_t maxnameln, maxsizeln, maxuidln, maxgidln, maxentln, uidln, gidln, printguid;
  } dtls;
 
@@ -62,7 +74,15 @@ index 9b55d5d..240ace2 100644
 
  /* Configuration, contexts */
  static settings cfg = {
-@@ -3472,6 +3496,79 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
+@@ -397,6 +422,7 @@ static settings cfg = {
+ 	0, /* cliopener */
+ 	0, /* waitedit */
+ 	1, /* rollover */
++	0, /* normalgit */
+ };
+
+ static context g_ctx[CTX_MAX] __attribute__ ((aligned));
+@@ -3472,6 +3498,79 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
  	return NULL;
  }
 
@@ -142,20 +162,20 @@ index 9b55d5d..240ace2 100644
  static void resetdircolor(int flags)
  {
  	/* Directories are always shown on top, clear the color when moving to first file */
-@@ -3783,6 +3880,12 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+@@ -3781,6 +3880,12 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+ 	int attrs = 0, namelen;
+ 	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
 
- 	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
-
-+	if (cfg.showdetail && git_statuses.len) {
++	if (git_statuses.len && (cfg.showdetail || cfg.normalgit)) {
++		addch(' ');
 +		print_gitstatus(ent->status_indexed);
 +		print_gitstatus(ent->status_staged);
-+		addch(' ');
 +	}
 +
+ 	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
+
  	if (g_state.oldcolor)
- 		resetdircolor(ent->flags);
- 	else {
-@@ -5125,6 +5228,10 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5125,6 +5230,10 @@ static int dentfill(char *path, struct entry **ppdents)
  		attron(COLOR_PAIR(cfg.curctx + 1));
  	}
 
@@ -166,23 +186,20 @@ index 9b55d5d..240ace2 100644
  #if _POSIX_C_SOURCE >= 200112L
  	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
  #endif
-@@ -5322,6 +5429,25 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5322,6 +5431,22 @@ static int dentfill(char *path, struct entry **ppdents)
  #endif
  		}
 
 +		if (git_statuses.len) {
-+			uint merged_status = 0;
 +			char *dentpath = abspath(dentp->name, path);
++			namebuflen = xstrlen(dentpath);
++			uint merged_status = 0;
 +
-+			for (size_t i = 0; i < git_statuses.len; ++i) {
-+				if (dentp->flags & DIR_OR_LINK_TO_DIR) {
-+					size_t dentlen = xstrlen(dentpath);
-+
-+					if ((dentlen <= xstrlen(git_statuses.statuses[i].path)) && is_prefix(git_statuses.statuses[i].path, dentpath, dentlen))
-+						merged_status |= git_statuses.statuses[i].status;
-+				} else if (!xstrcmp(git_statuses.statuses[i].path, dentpath))
-+						merged_status |= git_statuses.statuses[i].status;
-+			}
++			for (size_t i = 0; i < git_statuses.len; ++i)
++				if (!(dentp->flags & DIR_OR_LINK_TO_DIR) ? !xstrcmp(git_statuses.statuses[i].path, dentpath) :
++						(is_prefix(git_statuses.statuses[i].path, dentpath, namebuflen) &&
++						(namebuflen <= xstrlen(git_statuses.statuses[i].path))))
++					merged_status |= git_statuses.statuses[i].status;
 +
 +			dentp->status_indexed = git_get_indexed_status(merged_status);
 +			dentp->status_staged = git_get_staged_status(merged_status);
@@ -192,7 +209,16 @@ index 9b55d5d..240ace2 100644
  		++ndents;
  	} while ((dp = readdir(dirp)));
 
-@@ -5972,7 +6098,7 @@ static void redraw(char *path)
+@@ -5834,7 +5959,7 @@ static int adjust_cols(int n)
+ 	}
+
+ 	/* 2 columns for preceding space and indicator */
+-	return (n - 2);
++	return (n - ((cfg.normalgit && !cfg.showdetail) ? 5 : 2));
+ }
+
+ static void draw_line(char *path, int ncols)
+@@ -5972,7 +6097,7 @@ static void redraw(char *path)
  #endif
  		}
  	}
@@ -201,6 +227,14 @@ index 9b55d5d..240ace2 100644
 
  	ncols = adjust_cols(ncols);
 
+@@ -7576,6 +7701,7 @@ static void usage(void)
+ #endif
+ 		" -F      show fortune\n"
+ 		" -g      regex filters\n"
++		" -G      always show git status\n"
+ 		" -H      show hidden files\n"
+ 		" -J      no auto-proceed on select\n"
+ 		" -K      detect key collision\n"
 @@ -7714,6 +7840,8 @@ static void cleanup(void)
  		fflush(stdout);
  	}
@@ -210,7 +244,26 @@ index 9b55d5d..240ace2 100644
  	free(selpath);
  	free(plgpath);
  	free(cfgpath);
-@@ -7909,6 +8037,7 @@ int main(int argc, char *argv[])
+@@ -7758,7 +7886,7 @@ int main(int argc, char *argv[])
+
+ 	while ((opt = (env_opts_id > 0
+ 		       ? env_opts[--env_opts_id]
+-		       : getopt(argc, argv, "aAb:cCdDeEfFgHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
++		       : getopt(argc, argv, "aAb:cCdDeEfFgGHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
+ 		switch (opt) {
+ #ifndef NOFIFO
+ 		case 'a':
+@@ -7802,6 +7930,9 @@ int main(int argc, char *argv[])
+ 			cfg.regex = 1;
+ 			filterfn = &visible_re;
+ 			break;
++		case 'G':
++			cfg.normalgit = 1;
++			break;
+ 		case 'H':
+ 			cfg.showhidden = 1;
+ 			break;
+@@ -7909,6 +8040,7 @@ int main(int argc, char *argv[])
  		return EXIT_FAILURE;
 
  	atexit(cleanup);
