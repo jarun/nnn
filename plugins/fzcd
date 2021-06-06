@@ -17,9 +17,6 @@
 #          - pick the (file)paths in picker mode to path-list file
 #          - OR, edit selection in nnn and save as path-list file
 #
-#          The plugin clears nnn selection as the user can be tempted to delete
-#          duplicate files after finding copies and remove selection by mistake.
-#
 # Shell: POSIX compliant
 # Author: Anna Arad, Arun Prakash Jana
 
@@ -39,11 +36,6 @@ fi
 if [ -n "$1" ] && [ "$(file -b --mime-type "$1")" = 'text/plain' ] && [ -e "$(head -1 "$1")" ]; then
     LIST="$1"
 elif ! [ -s "$LIST" ]; then
-    # Clear selection
-    if [ -p "$NNN_PIPE" ]; then
-        printf "-" >"$NNN_PIPE"
-    fi
-
     sel=$(fzf)
     # Show only the file and parent dir
     # sel=$(fzf --delimiter / --with-nth=-2,-1 --tiebreak=begin --info=hidden)
@@ -62,11 +54,6 @@ if [ -n "$LIST" ]; then
                 printf "%s\n" "$(dirname "$path")" >> "$tmpfile"
             fi
         done < "$LIST"
-
-        # Clear selection
-        if [ -p "$NNN_PIPE" ]; then
-            printf "-" >"$NNN_PIPE"
-        fi
 
         sel=$(xargs -d '\n' -a "$tmpfile" fd -H . | fzf --delimiter / --tiebreak=begin --info=hidden)
 
