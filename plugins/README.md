@@ -230,136 +230,146 @@ Don't forget to fork in the background to avoid blocking `nnn`.
 
 For more details on configuration and usage of the preview plugins, visit [Live Previews](https://github.com/jarun/nnn/wiki/Live-previews).
 
-#### Examples
+## Examples
+
 There are many plugins provided by `nnn` which can be used as examples. Here are a few simple selected examples.
 
-- Show the git log of changes to the particular file along with the code for a quick and easy review.
-    ```sh
-    #!/usr/bin/env sh
-    git log -p -- "$1"
-    ```
+#### Show the git log of changes to the particular file along with the code for a quick and easy review.
 
-- Change to directory in clipboard using helper script
-    ```sh
-    #!/usr/bin/env sh
-    . $(dirname $0)/.nnn-plugin-helper
+```sh
+#!/usr/bin/env sh
+git log -p -- "$1"
+```
 
-    nnn_cd "$(xsel -ob)"
-    ```
+#### Change to directory in clipboard using helper script
 
-- Change directory to the location of a link using helper script with specific context (current)
-    ```sh
-    #!/usr/bin/env sh
-    . $(dirname $0)/.nnn-plugin-helper
+```sh
+#!/usr/bin/env sh
+. $(dirname $0)/.nnn-plugin-helper
 
-    nnn_cd "$(dirname $(readlink -fn $1))" 0
-    ```
+nnn_cd "$(xsel -ob)"
+```
 
-- Change to arbitrary directory without helper script
-    ```sh
-    #!/usr/bin/env sh
-    printf "cd to: "
-    read -r dir
+#### Change directory to the location of a link using helper script with specific context (current)
 
-    printf "%s" "0c$dir" > "$NNN_PIPE"
-    ```
+```sh
+#!/usr/bin/env sh
+. $(dirname $0)/.nnn-plugin-helper
 
-- Send every hovered file to X selection
-    ```sh
-    #!/usr/bin/env sh
-    if [ -z "$NNN_FIFO" ] ; then
-        exit 1
-    fi
+nnn_cd "$(dirname $(readlink -fn $1))" 0
+```
 
-    while read FILE ; do
-        printf "%s" "$FILE" | xsel
-    done < "$NNN_FIFO" &
-    disown
-    ```
+#### Change to arbitrary directory without helper script
 
-- Quick find (using `fd`)
-    ```sh
-    #!/usr/bin/env sh
+```sh
+#!/usr/bin/env sh
+printf "cd to: "
+read -r dir
 
-    . "$(dirname "$0")"/.nnn-plugin-helper
+printf "%s" "0c$dir" > "$NNN_PIPE"
+```
 
-    printf "pattern: "
-    read -r pattern
+#### Send every hovered file to X selection
 
-    if [ -n "$pattern" ]; then
-        printf "%s" "+l" > "$NNN_PIPE"
-        eval "fd -HI $pattern -0" > "$NNN_PIPE"
-    fi
-    ```
+```sh
+#!/usr/bin/env sh
+if [ -z "$NNN_FIFO" ] ; then
+    exit 1
+fi
 
-- Quick grep (using `rg`)
-    ```sh
-    #!/usr/bin/env sh
+while read FILE ; do
+    printf "%s" "$FILE" | xsel
+done < "$NNN_FIFO" &
+disown
+```
 
-    . "$(dirname "$0")"/.nnn-plugin-helper
+#### Quick find (using `fd`)
 
-    printf "pattern: "
-    read -r pattern
+```sh
+#!/usr/bin/env sh
 
-    if [ -n "$pattern" ]; then
-        printf "%s" "+l" > "$NNN_PIPE"
-        eval "rg -l0 --hidden -S $pattern" > "$NNN_PIPE"
-    fi
-    ```
-- Quick scripts for paged output
-    ```sh
-    #!/usr/bin/env sh
+. "$(dirname "$0")"/.nnn-plugin-helper
 
-    # Show media information for hovered file
-    # Save as file mediainf
-    # m:-!mediainf
+printf "pattern: "
+read -r pattern
 
-    mediainfo "$1" | eval "$PAGER"
-    # exiftool "$1" | $PAGER
-    -------------------------------------------------
-    #!/usr/bin/env sh
+if [ -n "$pattern" ]; then
+    printf "%s" "+l" > "$NNN_PIPE"
+    eval "fd -HI $pattern -0" > "$NNN_PIPE"
+fi
+```
 
-    # Show tree output with permissions and file size
-    # Save as file treeplug
-    # t:-!treeplug
+#### Quick grep (using `rg`)
 
-    tree -ps | $EDITOR -
-    -------------------------------------------------
-    #!/usr/bin/env sh
+```sh
+#!/usr/bin/env sh
 
-    # List files with UID/GID
-    # Save as file uidgid
-    # u:-!uidgid
+. "$(dirname "$0")"/.nnn-plugin-helper
 
-    ls -lah --group-directories-first | less
-    -------------------------------------------------
-    #!/usr/bin/env sh
+printf "pattern: "
+read -r pattern
 
-    # Show hovered file data in hex
-    # Save as file hexview
-    # x:-!hexview
+if [ -n "$pattern" ]; then
+    printf "%s" "+l" > "$NNN_PIPE"
+    eval "rg -l0 --hidden -S $pattern" > "$NNN_PIPE"
+fi
+```
 
-    if [ -f "$1" ]; then
-        xxd "$1" | $PAGER
-    fi
-    -------------------------------------------------
-    #!/usr/bin/env sh
+#### Quick scripts for paged output
 
-    # Show hovered PDF text
-    # Save as file pdftxt
-    # p:-!pdftxt
+```sh
+#!/usr/bin/env sh
 
-    if [ -f "$1" ] && [ "$(head -c 4 "$1")" = "%PDF" ]; then
-        pdftotext -nopgbrk -layout "$1" - | sed 's/\xe2\x80\x8b//g' | $PAGER
+# Show media information for hovered file
+# Save as file mediainf
+# m:-!mediainf
 
-        # Convert using mutool
-        # file=`basename "$1"`
-        # txt=/tmp/"$file".txt
-        # mutool convert -o "$txt" "$1"
-        # eval $PAGER $txt
-        # rm "$txt
-    fi
-    ```
+mediainfo "$1" | eval "$PAGER"
+# exiftool "$1" | $PAGER
+-------------------------------------------------
+#!/usr/bin/env sh
+
+# Show tree output with permissions and file size
+# Save as file treeplug
+# t:-!treeplug
+
+tree -ps | $EDITOR -
+-------------------------------------------------
+#!/usr/bin/env sh
+
+# List files with UID/GID
+# Save as file uidgid
+# u:-!uidgid
+
+ls -lah --group-directories-first | less
+-------------------------------------------------
+#!/usr/bin/env sh
+
+# Show hovered file data in hex
+# Save as file hexview
+# x:-!hexview
+
+if [ -f "$1" ]; then
+    xxd "$1" | $PAGER
+fi
+-------------------------------------------------
+#!/usr/bin/env sh
+
+# Show hovered PDF text
+# Save as file pdftxt
+# p:-!pdftxt
+
+if [ -f "$1" ] && [ "$(head -c 4 "$1")" = "%PDF" ]; then
+    pdftotext -nopgbrk -layout "$1" - | sed 's/\xe2\x80\x8b//g' | $PAGER
+
+    # Convert using mutool
+    # file=`basename "$1"`
+    # txt=/tmp/"$file".txt
+    # mutool convert -o "$txt" "$1"
+    # eval $PAGER $txt
+    # rm "$txt
+fi
+```
 
 ## Contributing plugins
 
