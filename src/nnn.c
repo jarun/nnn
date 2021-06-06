@@ -4812,10 +4812,10 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 		g_state.pluginit = 1;
 	}
 
-	if (*file == '_') {
+	if (*file == '!') {
 		flags = F_MULTI | F_CONFIRM;
 
-		/* Get rid of preceding _ */
+		/* Get rid of preceding ! */
 		++file;
 		if (!*file)
 			return FALSE;

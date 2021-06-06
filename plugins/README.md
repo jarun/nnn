@@ -100,7 +100,7 @@ If the plugins list gets too long, try breaking them up into sections:
 ```
 NNN_PLUG_PERSONAL='g:personal/convert2zoom;p:personal/echo'
 NNN_PLUG_WORK='j:work/prettyjson;d:work/foobar'
-NNN_PLUG_INLINE='e:_go run $nnn*'
+NNN_PLUG_INLINE='e:!go run $nnn*'
 NNN_PLUG_DEFAULT='1:bookmarks;2:ipinfo;p:preview-tui;o:fzz;b:nbak'
 NNN_PLUG="$NNN_PLUG_PERSONAL;$NNN_PLUG_WORK;$NNN_PLUG_DEFAULT;$NNN_PLUG_INLINE"
 export NNN_PLUG
@@ -114,22 +114,20 @@ Note:
 
 #### Skip directory refresh after running a plugin
 
-`nnn` refreshes the directory after running a plugin to reflect any changes by the plugin. To disable this (say while running the `mediainf` plugin on some filtered files), add a `-` before the plugin name:
+`nnn` refreshes the directory after running a plugin to reflect any changes by the plugin. To disable this add a `-` before the plugin name:
 
 ```sh
-export NNN_PLUG='m:-mediainf'
+export NNN_PLUG='p:-plugin'
 ```
-
-Now `nnn` will not refresh the directory after running the `mediainf` plugin.
 
 ## Running commands as plugin
 
-To assign keys to arbitrary non-background, non-shell-interpreted cli commands and invoke like plugins, add `_` (underscore) before the command.
+To assign keys to arbitrary non-background, non-shell-interpreted cli commands and invoke like plugins, add `!` (underscore) before the command.
 
 For example:
 
 ```sh
-export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn'
+export NNN_PLUG='x:!chmod +x $nnn;g:!git log;s:!smplayer $nnn'
 ```
 
 Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be used to the git log of a git project directory, <kbd>;s</kbd> can be used to preview a partially downloaded media file.
@@ -139,7 +137,7 @@ Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be us
 `nnn` waits for user confirmation (the prompt `Press Enter to continue`) after it executes a command as plugin (unlike plugins which can add a `read` to wait). To skip this, add a `*` after the command. For example:
 
 ```sh
-export NNN_PLUG='s:_smplayer $nnn*;n:-_vim /home/vaio/Dropbox/Public/synced_note*'
+export NNN_PLUG='s:!smplayer $nnn*;n:-!vim /home/vaio/Dropbox/Public/synced_note*'
 ```
 
 Now there will be no prompt after <kbd>;s</kbd> and <kbd>;n</kbd>.
@@ -148,32 +146,32 @@ Note: Do not use `*` with programs those run and exit e.g. cat.
 
 #### Run GUI app as plugin
 
-To run a GUI app as plugin, add a `|` after `_`. For example:
+To run a GUI app as plugin, add a `|` after `!`. For example:
 
 ```sh
-export NNN_PLUG='m:-_|mousepad $nnn'
+export NNN_PLUG='m:-!|mousepad $nnn'
 ```
 
 Notes:
 
 1. Use single quotes for `$NNN_PLUG` so `$nnn` is not interpreted
 2. `$nnn` should be the last argument (IF used)
-3. (_Again_) add `_` before the command
-4. To disable directory refresh after running a _command as plugin_, prefix with `-_`
+3. (_Again_) add `!` before the command
+4. To disable directory refresh after running a _command as plugin_, prefix with `-!`
 
 #### Some useful key-command examples
 
 | Key:Command | Description |
 |---|---|
-| `g:-_git diff` | Show git diff |
-| `h:-_hx $nnn*` | Open hovered file in [hx](https://github.com/krpors/hx) hex editor |
-| `k:-_fuser -kiv $nnn*` | Interactively kill process(es) using hovered file |
-| `l:-_git log` | Show git log |
-| `n:-_vi /home/user/Dropbox/dir/note*` | Take quick notes in a synced file/dir of notes |
-| `p:-_less -iR $nnn*` | Page through hovered file in less |
-| `s:-_\|smplayer -minigui $nnn` | Play hovered media file, even unfinished download |
-| `x:_chmod +x $nnn` | Make the hovered file executable |
-| `y:-_sync*` | Flush cached writes |
+| `g:-!git diff` | Show git diff |
+| `h:-!hx $nnn*` | Open hovered file in [hx](https://github.com/krpors/hx) hex editor |
+| `k:-!fuser -kiv $nnn*` | Interactively kill process(es) using hovered file |
+| `l:-!git log` | Show git log |
+| `n:-!vi /home/user/Dropbox/dir/note*` | Take quick notes in a synced file/dir of notes |
+| `p:-!less -iR $nnn*` | Page through hovered file in less |
+| `s:-!\|smplayer -minigui $nnn` | Play hovered media file, even unfinished download |
+| `x:!chmod +x $nnn` | Make the hovered file executable |
+| `y:-!sync*` | Flush cached writes |
 
 ## Access level of plugins
 
@@ -314,7 +312,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 
     # Show media information for hovered file
     # Save as file mediainf
-    # m:-_mediainf
+    # m:-!mediainf
 
     mediainfo "$1" | eval "$PAGER"
     # exiftool "$1" | $PAGER
@@ -323,7 +321,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 
     # Show tree output with permissions and file size
     # Save as file treeplug
-    # t:-_treeplug
+    # t:-!treeplug
 
     tree -ps | $EDITOR -
     -------------------------------------------------
@@ -331,7 +329,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 
     # List files with UID/GID
     # Save as file uidgid
-    # u:-_uidgid
+    # u:-!uidgid
 
     ls -lah --group-directories-first | less
     -------------------------------------------------
@@ -339,7 +337,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 
     # Show hovered file data in hex
     # Save as file hexview
-    # x:-_hexview
+    # x:-!hexview
 
     if [ -f "$1" ]; then
         xxd "$1" | $PAGER
@@ -349,7 +347,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 
     # Show hovered PDF text
     # Save as file pdftxt
-    # p:-_pdftxt
+    # p:-!pdftxt
 
     if [ -f "$1" ] && [ "$(head -c 4 "$1")" = "%PDF" ]; then
         pdftotext -nopgbrk -layout "$1" - | sed 's/\xe2\x80\x8b//g' | $PAGER

@@ -30,7 +30,7 @@ LIST="$LIST"
 if ! type fzf >/dev/null 2>&1; then
     printf "fzf missing"
     read -r _
-	exit 1
+    exit 1
 fi
 
 if [ -n "$1" ] && [ "$(file -b --mime-type "$1")" = 'text/plain' ] && [ -e "$(head -1 "$1")" ]; then
