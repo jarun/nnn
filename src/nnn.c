@@ -4821,7 +4821,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 			return FALSE;
 
 		/* Check if GUI flags are to be used */
-		if (*file == '|') {
+		if (*file == '&') {
 			flags = F_NOTRACE | F_NOWAIT;
 			++file;
 

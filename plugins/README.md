@@ -146,10 +146,10 @@ Note: Do not use `*` with programs those run and exit e.g. cat.
 
 #### Run GUI app as plugin
 
-To run a GUI app as plugin, add a `|` after `!`. For example:
+To run a GUI app as plugin, add a `&` after `!`. For example:
 
 ```sh
-export NNN_PLUG='m:-!|mousepad $nnn'
+export NNN_PLUG='m:-!&mousepad $nnn'
 ```
 
 Notes:
@@ -169,7 +169,7 @@ Notes:
 | `l:-!git log` | Show git log |
 | `n:-!vi /home/user/Dropbox/dir/note*` | Take quick notes in a synced file/dir of notes |
 | `p:-!less -iR $nnn*` | Page through hovered file in less |
-| `s:-!\|smplayer -minigui $nnn` | Play hovered media file, even unfinished download |
+| `s:-!&smplayer -minigui $nnn` | Play hovered media file, even unfinished download |
 | `x:!chmod +x $nnn` | Make the hovered file executable |
 | `y:-!sync*` | Flush cached writes |
 
