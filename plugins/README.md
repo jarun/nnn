@@ -33,14 +33,12 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [getplugs](getplugs) | Update plugins to installed `nnn` version | sh | curl |
 | [gpg\*](gpg\*) | Encrypt/decrypt files using GPG [✓] | sh | gpg |
 | [gutenread](gutenread) | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
-| [hexview](hexview) | View a file in hex in `$PAGER` | sh | [hx](https://github.com/krpors/hx)/xxd |
 | [imgresize](imgresize) | Resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |
 | [imgur](imgur) | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) | bash | - |
 | [imgview](imgview) | View (thumbnail)images, set wallpaper, [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images) and [more](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)| sh | [imv](https://github.com/eXeC64/imv)/[sxiv](https://github.com/muennich/sxiv)/[viu](https://github.com/atanunq/viu)/<br>[ucollage](https://github.com/ckardaris/ucollage)/[catimg](https://github.com/posva/catimg)/[lsix](https://github.com/hackerb9/lsix)|
 | [ipinfo](ipinfo) | Fetch external IP address and whois information | sh | curl, whois |
 | [kdeconnect](kdeconnect) | Send selected files to an Android device [✓] | sh | kdeconnect-cli |
 | [launch](launch) | GUI application launcher | sh | fzf |
-| [mediainf](mediainf) | Show media information | sh | mediainfo |
 | [mimelist](mimelist) | List files by mime in subtree | sh | - |
 | [moclyrics](moclyrics) | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
 | [mocq](mocq) | Queue/play selection/dir/file in moc [✓] | sh | [moc](http://moc.daper.net/) |
@@ -52,7 +50,6 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [oldbigfile](oldbigfile) | List large files by access time | sh | find, sort |
 | [organize](organize) | Auto-organize files in directories by file type [✓] | sh | file |
 | [pdfread](pdfread) | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
-| [pdfview](pdfview) | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
 | [preview-tabbed](preview-tabbed) | Preview files with Tabbed/xembed | bash | _see in-file docs_ |
 | [preview-tui](preview-tui) | Preview with Tmux/kitty/[QuickLook](https://github.com/QL-Win/QuickLook)/xterm/`$TERMINAL` | sh | _see in-file docs_ |
 | [pskill](pskill) | Fuzzy list by name and kill process or zombie | sh | fzf, ps, sudo/doas |
@@ -62,7 +59,6 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [splitjoin](splitjoin) | Split file or join selection [✓] | sh | split, cat |
 | [suedit](suedit) | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
 | [togglex](togglex) | Toggle executable mode for selection [✓] | sh | chmod |
-| [uidgid](uidgid) | List user and group of all files in dir | sh | ls, less |
 | [umounttree](umounttree) | Unmount a remote mountpoint from within | sh | fusermount |
 | [upload](upload) | Upload to Firefox Send or ix.io (text) or file.io (bin) | sh | [ffsend](https://github.com/timvisee/ffsend), curl, jq, tr |
 | [wallpaper](wall) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
@@ -309,6 +305,60 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
     if [ -n "$pattern" ]; then
         printf "%s" "+l" > "$NNN_PIPE"
         eval "rg -l0 --hidden -S $pattern" > "$NNN_PIPE"
+    fi
+    ```
+- Quick scripts for paged output
+    ```sh
+    #!/usr/bin/env sh
+
+    # Show media information for hovered file
+    # Save as file mediainf
+    # m:-_mediainf
+
+    mediainfo "$1" | eval "$PAGER"
+    # exiftool "$1" | $PAGER
+    -------------------------------------------------
+    #!/usr/bin/env sh
+
+    # Show tree output with permissions and file size
+    # Save as file treeplug
+    # t:-_treeplug
+
+    tree -ps | $EDITOR -
+    -------------------------------------------------
+    #!/usr/bin/env sh
+
+    # List files with UID/GID
+    # Save as file uidgid
+    # u:-_uidgid
+
+    ls -lah --group-directories-first | less
+    -------------------------------------------------
+    #!/usr/bin/env sh
+
+    # Show hovered file data in hex
+    # Save as file hexview
+    # x:-_hexview
+
+    if [ -f "$1" ]; then
+        xxd "$1" | $PAGER
+    fi
+    -------------------------------------------------
+    #!/usr/bin/env sh
+
+    # Show hovered PDF text
+    # Save as file pdftxt
+    # p:-_pdftxt
+
+    if [ -f "$1" ] && [ "$(head -c 4 "$1")" = "%PDF" ]; then
+        pdftotext -nopgbrk -layout "$1" - | sed 's/\xe2\x80\x8b//g' | $PAGER
+
+        # Convert using mutool
+        # file=`basename "$1"`
+        # txt=/tmp/"$file".txt
+        # mutool convert -o "$txt" "$1"
+        # eval $PAGER $txt
+        # rm "$txt
     fi
     ```
 
