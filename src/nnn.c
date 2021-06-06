@@ -213,11 +213,12 @@
 #define F_NONE    0x00  /* no flag set */
 #define F_MULTI   0x01  /* first arg can be combination of args; to be used with F_NORMAL */
 #define F_NOWAIT  0x02  /* don't wait for child process (e.g. file manager) */
-#define F_NOTRACE 0x04  /* suppress stdout and strerr (no traces) */
+#define F_NOTRACE 0x04  /* suppress stdout and stderr (no traces) */
 #define F_NORMAL  0x08  /* spawn child process in non-curses regular CLI mode */
 #define F_CONFIRM 0x10  /* run command - show results before exit (must have F_NORMAL) */
 #define F_CHKRTN  0x20  /* wait for user prompt if cmd returns failure status */
 #define F_NOSTDIN 0x40  /* suppress stdin */
+#define F_PAGE    0x80  /* page output in run-cmd-as-plugin mode */
 #define F_CLI     (F_NORMAL | F_MULTI)
 #define F_SILENT  (F_CLI | F_NOTRACE)
 
@@ -1921,28 +1922,46 @@ static bool initcurses(void *oldmask)
 }
 
 /* No NULL check here as spawn() guards against it */
-static int parseargs(char *line, char **argv)
+static char *parseargs(char *cmd, char **argv, int *pindex)
 {
 	int count = 0;
+	size_t len = xstrlen(cmd) + 1;
+	char *line = (char *)malloc(len);
 
+	if (!line) {
+		DPRINTF_S("malloc()!");
+		return NULL;
+	}
+
+	xstrsncpy(line, cmd, len);
 	argv[count++] = line;
+	cmd = line;
 
 	while (*line) { // NOLINT
 		if (ISBLANK(*line)) {
 			*line++ = '\0';
 
 			if (!*line) // NOLINT
-				return count;
+				break;
 
 			argv[count++] = line;
-			if (count == EXEC_ARGS_MAX)
-				return -1;
+			if (count == EXEC_ARGS_MAX) {
+				count = -1;
+				break;
+			}
 		}
 
 		++line;
 	}
 
-	return count;
+	if (count == -1 || count > (EXEC_ARGS_MAX - 4)) { /* 3 args and last NULL */
+		free(cmd);
+		cmd = NULL;
+		DPRINTF_S("NULL or too many args");
+	}
+
+	*pindex = count;
+	return cmd;
 }
 
 static pid_t xfork(uchar_t flag)
@@ -2038,21 +2057,9 @@ static int spawn(char *file, char *arg1, char *arg2, char *arg3, uchar_t flag)
 	}
 
 	if (flag & F_MULTI) {
-		size_t len = xstrlen(file) + 1;
-
-		cmd = (char *)malloc(len);
-		if (!cmd) {
-			DPRINTF_S("malloc()!");
-			return retstatus;
-		}
-
-		xstrsncpy(cmd, file, len);
-		status = parseargs(cmd, argv);
-		if (status == -1 || status > (EXEC_ARGS_MAX - 4)) { /* 3 args and last NULL */
-			free(cmd);
-			DPRINTF_S("NULL or too many args");
-			return retstatus;
-		}
+		cmd = parseargs(file, argv, &status);
+		if (!cmd)
+			return -1;
 	} else
 		argv[status++] = file;
 
@@ -4014,29 +4021,42 @@ static uchar_t get_free_ctx(void)
  * Gets only a single line (that's what we need
  * for now) or shows full command output in pager.
  *
- * If page is valid, returns NULL
+ * If page is valid, parses argument 'file' as multi-arg, returns NULL
  */
-static char *get_output(char *buf, const size_t bytes, const char *file,
-			const char *arg1, const char *arg2, const bool page)
+static char *get_output(char *buf, const size_t bytes, char *file, char *arg1, char *arg2, bool page)
 {
 	pid_t pid;
 	int pipefd[2];
 	FILE *pf;
-	int tmp, flags;
+	int index = 0, flags;
 	char *ret = NULL;
+	char * argv[EXEC_ARGS_MAX];
+	char *cmd = NULL;
 
-	if (pipe(pipefd) == -1)
+	if (page) {
+		cmd = parseargs(file, argv, &index);
+		if (!cmd)
+			return NULL;
+	} else
+		argv[index++] = file;
+
+	argv[index] = arg1;
+	argv[++index] = arg2;
+
+	if (pipe(pipefd) == -1) {
+		free(cmd);
 		errexit();
+	}
 
-	for (tmp = 0; tmp < 2; ++tmp) {
+	for (index = 0; index < 2; ++index) {
 		/* Get previous flags */
-		flags = fcntl(pipefd[tmp], F_GETFL, 0);
+		flags = fcntl(pipefd[index], F_GETFL, 0);
 
 		/* Set bit for non-blocking flag */
 		flags |= O_NONBLOCK;
 
 		/* Change flags on fd */
-		fcntl(pipefd[tmp], F_SETFL, flags);
+		fcntl(pipefd[index], F_SETFL, flags);
 	}
 
 	pid = fork();
@@ -4046,13 +4066,14 @@ static char *get_output(char *buf, const size_t bytes, const char *file,
 		dup2(pipefd[1], STDOUT_FILENO);
 		dup2(pipefd[1], STDERR_FILENO);
 		close(pipefd[1]);
-		execlp(file, file, arg1, arg2, NULL);
+		execvp(*argv, argv);
 		_exit(EXIT_SUCCESS);
 	}
 
 	/* In parent */
 	waitpid(pid, NULL, 0);
 	close(pipefd[1]);
+	free(cmd);
 
 	if (!page) {
 		pf = fdopen(pipefd[0], "r");
@@ -4095,7 +4116,7 @@ static void pipetof(char *cmd, FILE *fout)
 /*
  * Follows the stat(1) output closely
  */
-static bool show_stats(const char *fpath, const struct stat *sb)
+static bool show_stats(char *fpath, const struct stat *sb)
 {
 	int fd;
 	FILE *fp;
@@ -4693,7 +4714,11 @@ static bool run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 	else
 		runfile = NULL;
 
-	spawn(g_buf, runfile, NULL, NULL, flags);
+	if (flags & F_PAGE)
+		get_output(NULL, 0, g_buf, runfile, NULL, TRUE);
+	else
+		spawn(g_buf, runfile, NULL, NULL, flags);
+
 	return TRUE;
 }
 
@@ -4812,22 +4837,27 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 		g_state.pluginit = 1;
 	}
 
+	/* Check for run-cmd-as-plugin mode */
 	if (*file == '!') {
 		flags = F_MULTI | F_CONFIRM;
-
-		/* Get rid of preceding ! */
 		++file;
-		if (!*file)
-			return FALSE;
+
+		/* Check if output should be paged */
+		if (*file == '|') {
+			flags |= F_PAGE;
+			++file;
+		}
 
 		/* Check if GUI flags are to be used */
 		if (*file == '&') {
 			flags = F_NOTRACE | F_NOWAIT;
 			++file;
+		}
 
-			if (!*file)
-				return FALSE;
+		if (!*file)
+			return FALSE;
 
+		if (flags & F_NOTRACE) {
 			run_cmd_as_plugin(file, runfile, flags);
 			return TRUE;
 		}

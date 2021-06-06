@@ -124,8 +124,6 @@ export NNN_PLUG='p:-plugin'
 
 To assign keys to arbitrary non-background, non-shell-interpreted cli commands and invoke like plugins, add `!` (underscore) before the command.
 
-For example:
-
 ```sh
 export NNN_PLUG='x:!chmod +x $nnn;g:!git log;s:!smplayer $nnn'
 ```
@@ -134,7 +132,7 @@ Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be us
 
 #### Skip user confirmation after command execution
 
-`nnn` waits for user confirmation (the prompt `Press Enter to continue`) after it executes a command as plugin (unlike plugins which can add a `read` to wait). To skip this, add a `*` after the command. For example:
+`nnn` waits for user confirmation (the prompt `Press Enter to continue`) after it executes a command as plugin (unlike plugins which can add a `read` to wait). To skip this, add a `*` after the command.
 
 ```sh
 export NNN_PLUG='s:!smplayer $nnn*;n:-!vim /home/vaio/Dropbox/Public/synced_note*'
@@ -146,11 +144,21 @@ Note: Do not use `*` with programs those run and exit e.g. cat.
 
 #### Run GUI app as plugin
 
-To run a GUI app as plugin, add a `&` after `!`. For example:
+To run a GUI app as plugin, add a `&` after `!`.
 
 ```sh
 export NNN_PLUG='m:-!&mousepad $nnn'
 ```
+
+#### Page run-and-exit command output
+
+To show the output of run-to-completion commands which do not need user input, add `|` (pipe) after `!`.
+
+```sh
+export NNN_PLUG='m:-!|mediainfo $nnn'
+```
+
+This option is incompatible with `&` (terminal output is masked for GUI programs) and ignores `*` (output is already paged for user).
 
 Notes:
 
