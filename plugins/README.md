@@ -166,6 +166,7 @@ Notes:
 | Key:Command | Description |
 |---|---|
 | `g:-_git diff` | Show git diff |
+| `h:-_hx $nnn*` | Open hovered file in [hx](https://github.com/krpors/hx) hex editor |
 | `k:-_fuser -kiv $nnn*` | Interactively kill process(es) using hovered file |
 | `l:-_git log` | Show git log |
 | `n:-_vi /home/user/Dropbox/dir/note*` | Take quick notes in a synced file/dir of notes |
