@@ -53,7 +53,6 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [organize](organize) | Auto-organize files in directories by file type [✓] | sh | file |
 | [pdfread](pdfread) | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
 | [pdfview](pdfview) | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
-| [picker](picker) | Pick files and list one per line (to pipe) | sh | nnn |
 | [preview-tabbed](preview-tabbed) | Preview files with Tabbed/xembed | bash | _see in-file docs_ |
 | [preview-tui](preview-tui) | Preview with Tmux/kitty/[QuickLook](https://github.com/QL-Win/QuickLook)/xterm/`$TERMINAL` | sh | _see in-file docs_ |
 | [pskill](pskill) | Fuzzy list by name and kill process or zombie | sh | fzf, ps, sudo/doas |
@@ -63,12 +62,10 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [splitjoin](splitjoin) | Split file or join selection [✓] | sh | split, cat |
 | [suedit](suedit) | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
 | [togglex](togglex) | Toggle executable mode for selection [✓] | sh | chmod |
-| [treeview](treeview) | Informative tree output in `$EDITOR` | sh | tree |
 | [uidgid](uidgid) | List user and group of all files in dir | sh | ls, less |
 | [umounttree](umounttree) | Unmount a remote mountpoint from within | sh | fusermount |
-| [upgrade](upgrade) | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
 | [upload](upload) | Upload to Firefox Send or ix.io (text) or file.io (bin) | sh | [ffsend](https://github.com/timvisee/ffsend), curl, jq, tr |
-| [wall](wall) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
+| [wallpaper](wall) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 | [x2sel](x2sel) | Copy file list from system clipboard to selection | sh | _see in-file docs_ |
 | [xdgdefault](xdgdefault) | Set the default app for the hovered file type | sh | xdg-utils, fzf |
 

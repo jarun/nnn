@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Description: Batch rename selection or current directory with qmv
+# Description: Batch rename selection or current directory with qmv or vidir
 #
 # Notes:
 #   - Try to mimic current batch rename functionality but with correct
