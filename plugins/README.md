@@ -150,9 +150,9 @@ To run a GUI app as plugin, add a `&` after `!`.
 export NNN_PLUG='m:-!&mousepad $nnn'
 ```
 
-#### Page run-and-exit command output
+#### Page non-interactive command output
 
-To show the output of run-to-completion commands which do not need user input, add `|` (pipe) after `!`.
+To show the output of run-and-exit commands which do not need user input, add `|` (pipe) after `!`.
 
 ```sh
 export NNN_PLUG='m:-!|mediainfo $nnn;t:-!|tree -ps;l:-!|ls -lah --group-directories-first'
