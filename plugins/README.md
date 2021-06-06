@@ -246,6 +246,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
 
 ```sh
 #!/usr/bin/env sh
+
 git log -p -- "$1"
 ```
 
@@ -253,6 +254,7 @@ git log -p -- "$1"
 
 ```sh
 #!/usr/bin/env sh
+
 . $(dirname $0)/.nnn-plugin-helper
 
 nnn_cd "$(xsel -ob)"
@@ -262,6 +264,7 @@ nnn_cd "$(xsel -ob)"
 
 ```sh
 #!/usr/bin/env sh
+
 . $(dirname $0)/.nnn-plugin-helper
 
 nnn_cd "$(dirname $(readlink -fn $1))" 0
@@ -271,6 +274,7 @@ nnn_cd "$(dirname $(readlink -fn $1))" 0
 
 ```sh
 #!/usr/bin/env sh
+
 printf "cd to: "
 read -r dir
 
@@ -281,6 +285,7 @@ printf "%s" "0c$dir" > "$NNN_PIPE"
 
 ```sh
 #!/usr/bin/env sh
+
 if [ -z "$NNN_FIFO" ] ; then
     exit 1
 fi
