@@ -155,7 +155,7 @@ export NNN_PLUG='m:-!&mousepad $nnn'
 To show the output of run-to-completion commands which do not need user input, add `|` (pipe) after `!`.
 
 ```sh
-export NNN_PLUG='m:-!|mediainfo $nnn'
+export NNN_PLUG='m:-!|mediainfo $nnn;t:-!|tree -ps;l:-!|ls -lah --group-directories-first'
 ```
 
 This option is incompatible with `&` (terminal output is masked for GUI programs) and ignores `*` (output is already paged for user).
@@ -320,62 +320,6 @@ read -r pattern
 if [ -n "$pattern" ]; then
     printf "%s" "+l" > "$NNN_PIPE"
     eval "rg -l0 --hidden -S $pattern" > "$NNN_PIPE"
-fi
-```
-
-#### Quick scripts for paged output
-
-```sh
-#!/usr/bin/env sh
-
-# Show media information for hovered file
-# Save as file mediainf
-# m:-!mediainf
-
-mediainfo "$1" | eval "$PAGER"
-# exiftool "$1" | $PAGER
--------------------------------------------------
-#!/usr/bin/env sh
-
-# Show tree output with permissions and file size
-# Save as file treeplug
-# t:-!treeplug
-
-tree -ps | $EDITOR -
--------------------------------------------------
-#!/usr/bin/env sh
-
-# List files with UID/GID
-# Save as file uidgid
-# u:-!uidgid
-
-ls -lah --group-directories-first | less
--------------------------------------------------
-#!/usr/bin/env sh
-
-# Show hovered file data in hex
-# Save as file hexview
-# x:-!hexview
-
-if [ -f "$1" ]; then
-    xxd "$1" | $PAGER
-fi
--------------------------------------------------
-#!/usr/bin/env sh
-
-# Show hovered PDF text
-# Save as file pdftxt
-# p:-!pdftxt
-
-if [ -f "$1" ] && [ "$(head -c 4 "$1")" = "%PDF" ]; then
-    pdftotext -nopgbrk -layout "$1" - | sed 's/\xe2\x80\x8b//g' | $PAGER
-
-    # Convert using mutool
-    # file=`basename "$1"`
-    # txt=/tmp/"$file".txt
-    # mutool convert -o "$txt" "$1"
-    # eval $PAGER $txt
-    # rm "$txt
 fi
 ```
 
