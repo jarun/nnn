@@ -696,7 +696,7 @@ static char mv[] = "mv -i";
 #endif
 
 /* Archive commands */
-const char *archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
+static const char *archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
 
 /* Tokens used for path creation */
 #define TOK_SSN 0
