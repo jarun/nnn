@@ -281,7 +281,7 @@ nnn v3.1
 - hover and connect by dir name (within config dir)
 - move to next entry on current file delete
 - on single file copy/move, select the copied/moved file
-- option `-f` to to use readline history file (off by default)
+- option `-f` to use readline history file (off by default)
 - use `s` in status bar to indicate selection in progress
 - make var `O_NOMOUSE` to disable mouse support
 - do not store `NNN_TRASH` and `-Q` in config/session

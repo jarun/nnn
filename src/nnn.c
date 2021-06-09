@@ -448,7 +448,7 @@ static regex_t archive_re;
 			(sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino))) || node->fts_info & FTS_DP)
 
 static int threadbmp = -1; /* Has 1 in the bit position for idle threads */
-static volatile int active_threads = 0;
+static volatile int active_threads;
 static pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t hardlink_mutex = PTHREAD_MUTEX_INITIALIZER;
 static ulong_t *core_files;
@@ -696,7 +696,7 @@ static char mv[] = "mv -i";
 #endif
 
 /* Archive commands */
-static const char *archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
+static const char * const archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
 
 /* Tokens used for path creation */
 #define TOK_SSN 0
@@ -1030,13 +1030,15 @@ static char *xextension(const char *fname, size_t len)
 }
 
 #ifndef NOUG
-/* One-shot cache for getpwuid/getgrgid. Returns the cached name if the
+/*
+ * One-shot cache for getpwuid/getgrgid. Returns the cached name if the
  * provided uid is the same as the previous uid. Returns xitoa(guid) if
- * the guid is not found in the password database. */
+ * the guid is not found in the password database.
+ */
 static char *getpwname(uid_t uid)
 {
 	static uint_t uidcache = UINT_MAX;
-	static char *namecache = NULL;
+	static char *namecache;
 
 	if (uidcache != uid) {
 		struct passwd *pw = getpwuid(uid);
@@ -1051,7 +1053,7 @@ static char *getpwname(uid_t uid)
 static char *getgrname(gid_t gid)
 {
 	static uint_t gidcache = UINT_MAX;
-	static char *grpcache = NULL;
+	static char *grpcache;
 
 	if (gidcache != gid) {
 		struct group *gr = getgrgid(gid);
@@ -3503,6 +3505,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
 
 	if (len >= maxcols) {
 		size_t lencount = maxcols;
+
 		while (len > maxcols) /* Reduce wide chars one by one till it fits */
 			len = wcswidth(wbuf, --lencount);
 
@@ -4030,7 +4033,7 @@ static char *get_output(char *buf, const size_t bytes, char *file, char *arg1, c
 	FILE *pf;
 	int index = 0, flags;
 	char *ret = NULL;
-	char * argv[EXEC_ARGS_MAX];
+	char *argv[EXEC_ARGS_MAX];
 	char *cmd = NULL;
 
 	if (page) {
@@ -4457,7 +4460,7 @@ static bool remote_mount(char *newpath)
  */
 static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 {
-#if defined (__APPLE__) || defined (__FreeBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__)
 	static char cmd[] = "umount";
 #else
 	static char cmd[] = "fusermount3"; /* Arch Linux utility */
@@ -4470,7 +4473,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	bool hovered = TRUE;
 	char mntpath[PATH_MAX];
 
-#if !defined ( __APPLE__) && !defined (__FreeBSD__)
+#if !defined(__APPLE__) && !defined(__FreeBSD__)
 	/* On Ubuntu it's fusermount */
 	if (!found && !getutil(cmd)) {
 		cmd[10] = '\0';
@@ -4504,7 +4507,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 		return FALSE;
 	}
 
-#if defined (__APPLE__) || defined (__FreeBSD__)
+#if defined(__APPLE__) || defined(__FreeBSD__)
 	if (spawn(cmd, newpath, NULL, NULL, F_NORMAL)) {
 #else
 	if (spawn(cmd, "-u", newpath, NULL, F_NORMAL)) {
@@ -4514,7 +4517,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 
 #ifdef __APPLE__
 		if (spawn(cmd, "-l", newpath, NULL, F_NORMAL)) {
-#elif defined (__FreeBSD__)
+#elif defined(__FreeBSD__)
 		if (spawn(cmd, "-f", newpath, NULL, F_NORMAL)) {
 #else
 		if (spawn(cmd, "-uz", newpath, NULL, F_NORMAL)) {
@@ -4870,7 +4873,9 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 
 	exitcurses();
 
-	if ((p = fork()) == 0) { // In child
+	p = fork();
+
+	if (!p) { // In child
 		int wfd = open(g_pipepath, O_WRONLY | O_CLOEXEC);
 
 		if (wfd == -1)
@@ -5053,15 +5058,16 @@ static void *du_thread(void *p_data)
 static void dirwalk(char *dir, char *path, int entnum, bool mountpoint)
 {
 	/* Loop till any core is free */
-	while (active_threads == NUM_DU_THREADS){}
+	while (active_threads == NUM_DU_THREADS);
 
 	if (g_state.interrupt)
 		return;
 
 	pthread_mutex_lock(&running_mutex);
-	++active_threads;
 	int core = ffs(threadbmp) - 1;
+
 	threadbmp &= ~(1 << core);
+	++active_threads;
 	pthread_mutex_unlock(&running_mutex);
 
 	xstrsncpy(core_data[core].path, path, PATH_MAX);
@@ -5221,7 +5227,7 @@ static int dentfill(char *path, struct entry **ppdents)
 
 		if (ndents == total_dents) {
 			if (cfg.blkorder)
-				while (active_threads) {}
+				while (active_threads);
 
 			total_dents += ENTRY_INCR;
 			*ppdents = xrealloc(*ppdents, total_dents * sizeof(**ppdents));
@@ -5351,7 +5357,7 @@ static int dentfill(char *path, struct entry **ppdents)
 
 exit:
 	if (cfg.blkorder) {
-		while (active_threads) {}
+		while (active_threads);
 
 		attroff(COLOR_PAIR(cfg.curctx + 1));
 		for (int i = 0; i < NUM_DU_THREADS; ++i) {
@@ -5803,8 +5809,7 @@ static void statusbar(char *path)
 			addch(' ');
 		}
 #endif
-		if (S_ISLNK(pent->mode))
-		{
+		if (S_ISLNK(pent->mode)) {
 			i = readlink(pent->name, g_buf, PATH_MAX);
 
 			addstr(coolsize(i >= 0 ? i : pent->size)); /* Show symlink size */
@@ -5822,8 +5827,7 @@ static void statusbar(char *path)
 			addstr(coolsize(pent->size));
 			addch(' ');
 			addstr(ptr);
-			if (pent->flags & HARD_LINK)
-			{
+			if (pent->flags & HARD_LINK) {
 				struct stat sb;
 
 				if (stat(pent->name, &sb) != -1) {
