@@ -27,7 +27,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [fixname](fixname) | Clean filename to be more shell-friendly [✓] | bash | sed |
 | [fzcd](fzcd) | Fuzzy search multiple dirs (or `$PWD`) and visit file | sh | fzf, (fd) |
 | [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |
-| [fzopen](fzopen) | Fuzzy find file(s) in subtree to edit/open/pick | sh | fzf, xdg-open |
+| [fzopen](fzopen) | Fuzzy find file(s) in subtree to edit/open/pick | sh | fzf, xdg-open/open |
 | [fzplug](fzplug) | Fuzzy find, preview and run other plugins | sh | fzf |
 | [fzz](fzz) | Change to any directory in the z database with fzf | sh | fzf, z |
 | [getplugs](getplugs) | Update plugins to installed `nnn` version | sh | curl |
@@ -35,7 +35,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [gutenread](gutenread) | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
 | [imgresize](imgresize) | Resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |
 | [imgur](imgur) | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) | bash | - |
-| [imgview](imgview) | View (thumbnail)images, set wallpaper, [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images) and [more](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)| sh | [imv](https://github.com/eXeC64/imv)/[sxiv](https://github.com/muennich/sxiv)/[viu](https://github.com/atanunq/viu)/<br>[ucollage](https://github.com/ckardaris/ucollage)/[catimg](https://github.com/posva/catimg)/[lsix](https://github.com/hackerb9/lsix)|
+| [imgview](imgview) | View (thumbnail)images, set wallpaper, [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images) and [more](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)| sh | _see in-file docs_ |
 | [ipinfo](ipinfo) | Fetch external IP address and whois information | sh | curl, whois |
 | [kdeconnect](kdeconnect) | Send selected files to an Android device [✓] | sh | kdeconnect-cli |
 | [launch](launch) | GUI application launcher | sh | fzf |

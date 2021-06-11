@@ -12,7 +12,7 @@
 #                Leaves untouched if no file is picked.
 #                Works with single/multiple files selected.
 #
-# Dependencies: fd/find, fzf/skim, xdg-open
+# Dependencies: fd/find, fzf/skim, xdg-open/open (on macOS)
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
@@ -52,14 +52,19 @@ if [ "$3" ]; then
 fi
 
 # Open the file (works for a single file only)
-case "$(file -biL "$entry")" in
+cmd_file=""
+cmd_open=""
+if uname | grep -q "Darwin"; then
+    cmd_file="file -bIL"
+    cmd_open="open"
+else
+    cmd_file="file -biL"
+    cmd_open="xdg-open"
+fi
+
+case "$($cmd_file "$entry")" in
     *text*)
         "${VISUAL:-$EDITOR}" "$entry" ;;
     *)
-        if uname | grep -q "Darwin"; then
-            open "$entry" >/dev/null 2>&1
-        else
-            xdg-open "$entry" >/dev/null 2>&1
-        fi
-        ;;
+        $cmd_open "$entry" >/dev/null 2>&1 ;;
 esac
