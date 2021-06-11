@@ -26,7 +26,7 @@ if type fzf >/dev/null 2>&1; then
     else
         [ -z "$cmd" ] && cmd="find . -type f 2>/dev/null"
     fi
-    entry="$(eval "$cmd" | fzf -m --delimiter / --nth=-1 --tiebreak=begin --info=hidden)"
+    entry="$(eval "$cmd" | fzf -m)"
     # To show only the file name
     # entry=$(find . -type f 2>/dev/null | fzf --delimiter / --with-nth=-1 --tiebreak=begin --info=hidden)
 elif type sk >/dev/null 2>&1; then
