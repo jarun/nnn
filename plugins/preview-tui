@@ -10,6 +10,7 @@
 #       - kitty with allow_remote_control and listen_on set in kitty.conf, or
 #       - QuickLook on WSL (https://github.com/QL-Win/QuickLook)
 #       - $TERMINAL set to a terminal (it's xterm by default).
+#   - ImageMagic for Kitty
 #   - less or $PAGER
 #   - tree or exa or ls
 #   - mediainfo or file
