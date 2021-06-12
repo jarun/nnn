@@ -1241,7 +1241,8 @@ static void clearoldprompt(void)
 {
 	clearinfoln();
 	tolastln();
-	addch('\n');
+	clrtoeol();
+	resize_term(0, 0);
 }
 #endif
 
@@ -1250,7 +1251,7 @@ static inline void printmsg_nc(const char *msg)
 {
 	tolastln();
 	addstr(msg);
-	addch('\n');
+	clrtoeol();
 }
 
 static void printmsg(const char *msg)
@@ -2710,6 +2711,11 @@ try_quit:
 		c = getch();
 		//DPRINTF_D(c);
 		//DPRINTF_S(keyname(c));
+
+#ifdef KEY_RESIZE
+		if (c == KEY_RESIZE)
+			resize_term(0, 0);
+#endif
 
 		/* Handle Alt+key */
 		if (c == ESC) {
@@ -5839,7 +5845,7 @@ static void statusbar(char *path)
 			}
 
 		}
-		addch('\n');
+		clrtoeol();
 	}
 
 	attroff(COLOR_PAIR(cfg.curctx + 1));
