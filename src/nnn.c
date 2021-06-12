@@ -4094,7 +4094,6 @@ static char *get_output(char *buf, const size_t bytes, char *file, char *arg1, c
 		return ret;
 	}
 
-
 	pid = fork();
 	if (pid == 0) {
 		/* Show in pager in child */
@@ -4111,15 +4110,26 @@ static char *get_output(char *buf, const size_t bytes, char *file, char *arg1, c
 	return NULL;
 }
 
-static void pipetof(char *cmd, FILE *fout)
+static void pipetof(char *cmd, FILE *fout, uint_t lines)
 {
 	FILE *fin = popen(cmd, "r");
 
 	if (fin) {
-		while (fgets(g_buf, CMD_LEN_MAX - 1, fin))
+		while (lines && fgets(g_buf, CMD_LEN_MAX - 1, fin)) {
 			fprintf(fout, "%s", g_buf);
+			--lines;
+		}
 		pclose(fin);
 	}
+}
+
+static void wrap_cmd(char *buf, const char *cmd, char *fpath)
+{
+	size_t r = xstrsncpy(buf, cmd, CMD_LEN_MAX);
+
+	r += xstrsncpy(buf + r - 1, fpath, PATH_MAX);
+	buf[r - 2] = '\"';
+	buf[r - 1] = '\0';
 }
 
 /*
@@ -4127,54 +4137,31 @@ static void pipetof(char *cmd, FILE *fout)
  */
 static bool show_stats(char *fpath, const struct stat *sb)
 {
-	int fd;
-	FILE *fp;
-	char *p, *begin = g_buf;
-	size_t r;
+	static const char * const cmds[] = {
+#ifdef FILE_MIME_OPTS
+		"file " FILE_MIME_OPTS " \"",
+#endif
+		"file -b \"",
+		"stat \"",
+	};
 
-	fd = create_tmp_file();
+	char *p, *begin = g_buf;
+	size_t r = ELEMENTS(cmds);
+	int fd = create_tmp_file();
 	if (fd == -1)
 		return FALSE;
 
-	r = xstrsncpy(g_buf, "stat \"", PATH_MAX);
-	r += xstrsncpy(g_buf + r - 1, fpath, PATH_MAX);
-	g_buf[r - 2] = '\"';
-	g_buf[r - 1] = '\0';
-	DPRINTF_S(g_buf);
-
-	fp = fdopen(fd, "w");
+	FILE *fp = fdopen(fd, "w");
 	if (!fp) {
 		close(fd);
 		return FALSE;
 	}
 
-	pipetof(g_buf, fp);
-
-	if (S_ISREG(sb->st_mode)) {
-		/* Show file(1) output */
-		p = get_output(g_buf, CMD_LEN_MAX, "file", "-b", fpath, FALSE);
-		if (p) {
-			fprintf(fp, "\n\n ");
-			while (*p) {
-				if (*p == ',') {
-					*p = '\0';
-					fprintf(fp, " %s\n", begin);
-					begin = p + 1;
-				}
-
-				++p;
-			}
-			fprintf(fp, " %s\n  ", begin);
-
-#ifdef FILE_MIME_OPTS
-			/* Show the file MIME type */
-			get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, fpath, FALSE);
-			fprintf(fp, "%s", g_buf);
-#endif
-		}
+	while (r) {
+		wrap_cmd(g_buf, cmds[--r], fpath);
+		pipetof(g_buf, fp, (uint_t)-1);
+		fprintf(fp, "\n");
 	}
-
-	fprintf(fp, "\n");
 	fclose(fp);
 	close(fd);
 
@@ -4656,9 +4643,9 @@ static void show_help(const char *path)
 
 	if (g_state.fortune && getutil("fortune"))
 #ifndef __HAIKU__
-		pipetof("fortune -s", fp);
+		pipetof("fortune -s", fp, (uint_t)-1);
 #else
-		pipetof("fortune", fp);
+		pipetof("fortune", fp, (uint_t)-1);
 #endif
 
 	start = end = helpstr;
