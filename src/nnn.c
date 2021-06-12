@@ -4039,7 +4039,7 @@ static char *get_output(char *buf, const size_t bytes, char *file, char *arg1, c
 	FILE *pf;
 	int index = 0, flags;
 	char *ret = NULL;
-	char *argv[EXEC_ARGS_MAX];
+	char *argv[EXEC_ARGS_MAX] = {0};
 	char *cmd = NULL;
 
 	if (page) {
