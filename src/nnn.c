@@ -1237,13 +1237,19 @@ static void clearinfoln(void)
 }
 
 #ifdef KEY_RESIZE
+static void handle_key_resize()
+{
+	endwin();
+	refresh();
+}
+
 /* Clear the old prompt */
 static void clearoldprompt(void)
 {
 	clearinfoln();
 	tolastln();
 	clrtoeol();
-	resize_term(0, 0);
+	handle_key_resize();
 }
 #endif
 
@@ -2722,7 +2728,7 @@ try_quit:
 
 #ifdef KEY_RESIZE
 		if (c == KEY_RESIZE)
-			resize_term(0, 0);
+			handle_key_resize();
 #endif
 
 		/* Handle Alt+key */
