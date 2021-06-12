@@ -210,15 +210,16 @@
 #define FILE_SELECTED 0x10
 
 /* Macros to define process spawn behaviour as flags */
-#define F_NONE    0x00  /* no flag set */
-#define F_MULTI   0x01  /* first arg can be combination of args; to be used with F_NORMAL */
-#define F_NOWAIT  0x02  /* don't wait for child process (e.g. file manager) */
-#define F_NOTRACE 0x04  /* suppress stdout and stderr (no traces) */
-#define F_NORMAL  0x08  /* spawn child process in non-curses regular CLI mode */
-#define F_CONFIRM 0x10  /* run command - show results before exit (must have F_NORMAL) */
-#define F_CHKRTN  0x20  /* wait for user prompt if cmd returns failure status */
-#define F_NOSTDIN 0x40  /* suppress stdin */
-#define F_PAGE    0x80  /* page output in run-cmd-as-plugin mode */
+#define F_NONE      0x00  /* no flag set */
+#define F_MULTI     0x01  /* first arg can be combination of args; to be used with F_NORMAL */
+#define F_NOWAIT    0x02  /* don't wait for child process (e.g. file manager) */
+#define F_NOTRACE   0x04  /* suppress stdout and stderr (no traces) */
+#define F_NORMAL    0x08  /* spawn child process in non-curses regular CLI mode */
+#define F_CONFIRM   0x10  /* run command - show results before exit (must have F_NORMAL) */
+#define F_CHKRTN    0x20  /* wait for user prompt if cmd returns failure status */
+#define F_NOSTDIN   0x40  /* suppress stdin */
+#define F_PAGE      0x80  /* page output in run-cmd-as-plugin mode */
+#define F_FORCE_TTY 0x100 /* Force stdout to go to tty if redirected to a non-tty */
 #define F_CLI     (F_NORMAL | F_MULTI)
 #define F_SILENT  (F_CLI | F_NOTRACE)
 
@@ -800,7 +801,7 @@ static haiku_nm_h haiku_hnd;
 
 /* Forward declarations */
 static void redraw(char *path);
-static int spawn(char *file, char *arg1, char *arg2, char *arg3, uchar_t flag);
+static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag);
 static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
@@ -2039,7 +2040,7 @@ static int join(pid_t p, uchar_t flag)
  * Spawns a child process. Behaviour can be controlled using flag.
  * Limited to 3 arguments to a program, flag works on bit set.
  */
-static int spawn(char *file, char *arg1, char *arg2, char *arg3, uchar_t flag)
+static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag)
 {
 	pid_t pid;
 	int status = 0, retstatus = 0xFFFF;
@@ -2084,6 +2085,13 @@ static int spawn(char *file, char *arg1, char *arg2, char *arg3, uchar_t flag)
 			dup2(fd, STDOUT_FILENO);
 			dup2(fd, STDERR_FILENO);
 			close(fd);
+		} else if (flag & F_FORCE_TTY) {
+			/* If stdout has been redirected to a non-tty, force output to tty */
+			if (!isatty(STDOUT_FILENO)) {
+				int fd = open(ctermid(NULL), O_WRONLY, 0200);
+				dup2(fd, STDOUT_FILENO);
+				close(fd);
+			}
 		}
 
 		execvp(*argv, argv);
@@ -4104,7 +4112,7 @@ static bool get_output(char *file, char *arg1, char *arg2, FILE *fout, bool mult
 		/* Show in pager in child */
 		dup2(pipefd[0], STDIN_FILENO);
 		close(pipefd[0]);
-		spawn(pager, NULL, NULL, NULL, F_CLI);
+		spawn(pager, NULL, NULL, NULL, F_CLI | F_FORCE_TTY);
 		_exit(EXIT_SUCCESS);
 	}
 
@@ -4146,7 +4154,7 @@ static bool show_stats(char *fpath)
 	fclose(fp);
 	close(fd);
 
-	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
+	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_FORCE_TTY);
 	unlink(g_tmpfpath);
 	return TRUE;
 }
@@ -4669,7 +4677,7 @@ static void show_help(const char *path)
 	fclose(fp);
 	close(fd);
 
-	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI);
+	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_FORCE_TTY);
 	unlink(g_tmpfpath);
 }
 
