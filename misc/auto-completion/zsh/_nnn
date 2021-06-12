@@ -19,7 +19,6 @@ args=(
     '(-e)-e[open text files in $VISUAL/$EDITOR/vi]'
     '(-E)-E[use EDITOR for undetached edits]'
     '(-f)-f[use readline history file]'
-    '(-F)-F[show fortune]'
     '(-g)-g[regex filters]'
     '(-H)-H[show hidden files]'
     '(-J)-J[no auto-proceed on select]'
