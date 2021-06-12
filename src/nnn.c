@@ -4027,25 +4027,24 @@ static uchar_t get_free_ctx(void)
 }
 
 /*
- * Gets only a single line (that's what we need
- * for now) or shows full command output in pager.
- *
- * If page is valid, parses argument 'file' as multi-arg, returns NULL
+ * Gets only a single line (that's what we need for now) or shows full command output in pager.
+ * Uses g_buf internally.
+ * If page is valid, parses argument 'file' as multi-arg, returns NULL.
  */
-static char *get_output(char *buf, const size_t bytes, char *file, char *arg1, char *arg2, bool page)
+static bool get_output(char *file, char *arg1, char *arg2, FILE *fout, bool multi, bool page)
 {
 	pid_t pid;
 	int pipefd[2];
-	FILE *pf;
+	FILE *fin;
 	int index = 0, flags;
-	char *ret = NULL;
+	bool ret = FALSE;
 	char *argv[EXEC_ARGS_MAX] = {0};
 	char *cmd = NULL;
 
-	if (page) {
+	if (multi) {
 		cmd = parseargs(file, argv, &index);
 		if (!cmd)
-			return NULL;
+			return FALSE;
 	} else
 		argv[index++] = file;
 
@@ -4085,12 +4084,18 @@ static char *get_output(char *buf, const size_t bytes, char *file, char *arg1, c
 	free(cmd);
 
 	if (!page) {
-		pf = fdopen(pipefd[0], "r");
-		if (pf) {
-			ret = fgets(buf, bytes, pf);
-			close(pipefd[0]);
+		fin = fdopen(pipefd[0], "r");
+		if (fin) {
+			while (fgets(g_buf, CMD_LEN_MAX - 1, fin)) {
+				ret = TRUE;
+				if (!fout) /* Read only the first line of output to buffer */
+					break;
+				fprintf(fout, "%s", g_buf);
+			}
+			fclose(fin);
 		}
 
+		close(pipefd[0]);
 		return ret;
 	}
 
@@ -4107,45 +4112,22 @@ static char *get_output(char *buf, const size_t bytes, char *file, char *arg1, c
 	waitpid(pid, NULL, 0);
 	close(pipefd[0]);
 
-	return NULL;
-}
-
-static void pipetof(char *cmd, FILE *fout, uint_t lines)
-{
-	FILE *fin = popen(cmd, "r");
-
-	if (fin) {
-		while (lines && fgets(g_buf, CMD_LEN_MAX - 1, fin)) {
-			fprintf(fout, "%s", g_buf);
-			--lines;
-		}
-		pclose(fin);
-	}
-}
-
-static void wrap_cmd(char *buf, const char *cmd, char *fpath)
-{
-	size_t r = xstrsncpy(buf, cmd, CMD_LEN_MAX);
-
-	r += xstrsncpy(buf + r - 1, fpath, PATH_MAX);
-	buf[r - 2] = '\"';
-	buf[r - 1] = '\0';
+	return FALSE;
 }
 
 /*
  * Follows the stat(1) output closely
  */
-static bool show_stats(char *fpath, const struct stat *sb)
+static bool show_stats(char *fpath)
 {
-	static const char * const cmds[] = {
+	static char * const cmds[] = {
 #ifdef FILE_MIME_OPTS
-		"file " FILE_MIME_OPTS " \"",
+		("file " FILE_MIME_OPTS),
 #endif
-		"file -b \"",
-		"stat \"",
+		"file -b",
+		"stat",
 	};
 
-	char *p, *begin = g_buf;
 	size_t r = ELEMENTS(cmds);
 	int fd = create_tmp_file();
 	if (fd == -1)
@@ -4158,8 +4140,7 @@ static bool show_stats(char *fpath, const struct stat *sb)
 	}
 
 	while (r) {
-		wrap_cmd(g_buf, cmds[--r], fpath);
-		pipetof(g_buf, fp, (uint_t)-1);
+		get_output(cmds[--r], fpath, NULL, fp, TRUE, FALSE);
 		fprintf(fp, "\n");
 	}
 	fclose(fp);
@@ -4218,7 +4199,7 @@ static void handle_archive(char *fpath, char op)
 	if (op == 'x') /* extract */
 		spawn(util, arg, fpath, NULL, F_NORMAL);
 	else /* list */
-		get_output(NULL, 0, util, arg, fpath, TRUE);
+		get_output(util, arg, fpath, NULL, TRUE, TRUE);
 }
 
 static char *visit_parent(char *path, char *newpath, int *presel)
@@ -4643,9 +4624,9 @@ static void show_help(const char *path)
 
 	if (g_state.fortune && getutil("fortune"))
 #ifndef __HAIKU__
-		pipetof("fortune -s", fp, (uint_t)-1);
+		get_output("fortune", "-s", NULL, fp, FALSE, FALSE);
 #else
-		pipetof("fortune", fp, (uint_t)-1);
+		get_output("fortune", NULL, NULL, fp, FALSE, FALSE);
 #endif
 
 	start = end = helpstr;
@@ -4711,7 +4692,7 @@ static bool run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 		runfile = NULL;
 
 	if (flags & F_PAGE)
-		get_output(NULL, 0, g_buf, runfile, NULL, TRUE);
+		get_output(g_buf, runfile, NULL, NULL, TRUE, TRUE);
 	else
 		spawn(g_buf, runfile, NULL, NULL, flags);
 
@@ -6470,11 +6451,11 @@ nochange:
 
 			if (cfg.useeditor
 #ifdef FILE_MIME_OPTS
-			    && get_output(g_buf, CMD_LEN_MAX, "file", FILE_MIME_OPTS, newpath, FALSE)
+			    && get_output("file", FILE_MIME_OPTS, newpath, NULL, FALSE, FALSE)
 			    && is_prefix(g_buf, "text/", 5)
 #else
 			    /* no MIME option; guess from description instead */
-			    && get_output(g_buf, CMD_LEN_MAX, "file", "-bL", newpath, FALSE)
+			    && get_output("file", "-bL", newpath, NULL, FALSE, FALSE)
 			    && strstr(g_buf, "text")
 #endif
 			) {
@@ -6725,8 +6706,8 @@ nochange:
 				tmp = (listpath && xstrcmp(path, listpath) == 0) ? listroot : path;
 				mkpath(tmp, pdents[cur].name, newpath);
 
-				if (lstat(newpath, &sb) == -1
-				    || (sel == SEL_STATS && !show_stats(newpath, &sb))
+				if ((sel == SEL_STATS && !show_stats(newpath))
+				    || (lstat(newpath, &sb) == -1)
 				    || (sel == SEL_CHMODX && !xchmod(newpath, sb.st_mode))) {
 					printwarn(&presel);
 					goto nochange;
