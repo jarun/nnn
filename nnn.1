@@ -6,7 +6,7 @@
 .Nd The unorthodox terminal file manager.
 .Sh SYNOPSIS
 .Nm
-.Op Ar -aAcCdDeEfFgHJKlnQrRSuUVwxh
+.Op Ar -aAcCdDeEfgHJKlnQrRSuUVwxh
 .Op Ar -b key
 .Op Ar -p file
 .Op Ar -P key
@@ -71,9 +71,6 @@ supports the following options:
 .Pp
 .Fl f
         use readline history file
-.Pp
-.Fl F
-        show fortune in help and settings screen
 .Pp
 .Fl g
         use regex filters instead of substring match
@@ -524,6 +521,12 @@ separated by \fI;\fR:
 .Bd -literal
     export NNN_LOCKER='bmon -p wlp1s0'
     export NNN_LOCKER='cmatrix'
+.Ed
+.Pp
+\fBNNN_HELP:\fR run a program and show the output on top of the program help page.
+.Bd -literal
+    export NNN_HELP='fortune'
+    export NNN_HELP='pwy paris'
 .Ed
 .Pp
 \fBNNN_MCLICK:\fR key emulated by a middle mouse click.

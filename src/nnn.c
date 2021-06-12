@@ -324,7 +324,6 @@ typedef struct {
 	uint_t rangesel   : 1;  /* Range selection on */
 	uint_t move       : 1;  /* Move operation */
 	uint_t autonext   : 1;  /* Auto-proceed on open */
-	uint_t fortune    : 1;  /* Show fortune messages in help */
 	uint_t trash      : 2;  /* Use trash to delete files 1: trash-cli, 2: gio trash */
 	uint_t forcequit  : 1;  /* Do not prompt on quit */
 	uint_t autofifo   : 1;  /* Auto-create NNN_FIFO */
@@ -341,7 +340,7 @@ typedef struct {
 	uint_t uidgid     : 1;  /* Show owner and group info */
 	uint_t prstssn    : 1;  /* Persistent session */
 	uint_t duinit     : 1;  /* Initialize disk usage */
-	uint_t reserved   : 7;  /* Adjust when adding/removing a field */
+	uint_t reserved   : 8;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -651,8 +650,9 @@ static const char * const messages[] = {
 #define NNN_PIPE 6
 #define NNN_MCLICK 7
 #define NNN_SEL 8
-#define NNN_ARCHIVE 9 /* strings end here */
-#define NNN_TRASH 10 /* flags begin here */
+#define NNN_ARCHIVE 9
+#define NNN_HELP 10 /* strings end here */
+#define NNN_TRASH 11 /* flags begin here */
 
 static const char * const env_cfg[] = {
 	"NNN_OPTS",
@@ -665,6 +665,7 @@ static const char * const env_cfg[] = {
 	"NNN_MCLICK",
 	"NNN_SEL",
 	"NNN_ARCHIVE",
+	"NNN_HELP",
 	"NNN_TRASH",
 };
 
@@ -4636,12 +4637,10 @@ static void show_help(const char *path)
 		return;
 	}
 
-	if (g_state.fortune && getutil("fortune"))
-#ifndef __HAIKU__
-		get_output("fortune", "-s", NULL, fp, FALSE, FALSE);
-#else
-		get_output("fortune", NULL, NULL, fp, FALSE, FALSE);
-#endif
+
+	char *prog = xgetenv(env_cfg[NNN_HELP], NULL);
+	if (prog)
+		get_output(prog, NULL, NULL, fp, TRUE, FALSE);
 
 	start = end = helpstr;
 	while (*end) {
@@ -7594,7 +7593,6 @@ static void usage(void)
 #ifndef NORL
 		" -f      use readline history file\n"
 #endif
-		" -F      show fortune\n"
 		" -g      regex filters\n"
 		" -H      show hidden files\n"
 		" -J      no auto-proceed on select\n"
@@ -7778,7 +7776,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdDeEfFgHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdDeEfgHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7814,9 +7812,6 @@ int main(int argc, char *argv[])
 #ifndef NORL
 			rlhist = TRUE;
 #endif
-			break;
-		case 'F':
-			g_state.fortune = 1;
 			break;
 		case 'g':
 			cfg.regex = 1;
