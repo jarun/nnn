@@ -33,8 +33,8 @@ sudo apt install -y --no-install-recommends musl musl-dev musl-tools
 # Enter the library dir
 cd netbsd-curses
 
-# Get the last known good commit before cursor stuck issue is introduced
-git checkout f1fa19a1f36a25d0971b3d08449303e6af6f3da5
+# Get the last known working version
+git checkout v0.3.2
 
 # Compile the static netbsd-curses libraries
 if [ ! -d "./libs" ]; then
