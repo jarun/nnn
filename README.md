@@ -15,7 +15,7 @@
 href="https://github.com/jarun/nnn#features">Features</a>] [<a
 href="https://github.com/jarun/nnn#quickstart">Quickstart</a>] [<a
 href="https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins">Plugins</a>] [<a
-href="https://github.com/jarun/nnn/wiki">Documentation</a>]</h3>
+href="https://github.com/jarun/nnn/wiki">Wiki</a>]</h3>
 
 `nnn` (_n³_) is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible speed](https://github.com/jarun/nnn/wiki/Performance).
 
@@ -35,6 +35,10 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 
 ## Features
 
+- Quality
+  - Privacy-aware (no unconfirmed user data collection)
+  - POSIX-compliant, follows Linux kernel coding style
+  - Highly optimized, static analysis integrated code
 - Frugal
   - Typically needs less than 3.5MB resident memory
   - Works with 8 colors (and xterm 256 colors)
@@ -53,10 +57,6 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Widely available on many packagers
   - Touch enabled, comfortable on handhelds too!
   - Unicode support
-- Quality
-  - Privacy-aware (no unconfirmed user data collection)
-  - POSIX-compliant, follows Linux kernel coding style
-  - Highly optimized, static analysis integrated code
 - Modes
   - Light (default), detail
   - Disk usage analyzer (block/apparent)
