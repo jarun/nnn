@@ -4041,6 +4041,30 @@ static uchar_t get_free_ctx(void)
 	return r;
 }
 
+/* ctx is absolute: 1 to 4, + for smart context */
+static void set_smart_ctx(int ctx, char *nextpath, char **path, char **lastname, char **lastdir)
+{
+	if (ctx == '+') /* Get smart context */
+		ctx = (int)(get_free_ctx() + 1);
+
+	if (ctx == 0 || ctx == cfg.curctx + 1) { /* Same context */
+		/* Mark current directory */
+		free(mark);
+		mark = xstrdup(*path);
+
+		xstrsncpy(*lastdir, *path, PATH_MAX);
+		xstrsncpy(*path, nextpath, PATH_MAX);
+	} else { /* New context */
+		--ctx;
+		/* Deactivate the new context and build from scratch */
+		g_ctx[ctx].c_cfg.ctxactive = 0;
+		savecurctx(&cfg, nextpath, pdents[cur].name, ctx);
+		*path = g_ctx[ctx].c_path;
+		*lastdir = g_ctx[ctx].c_last;
+		*lastname = g_ctx[ctx].c_name;
+	}
+}
+
 /*
  * Gets only a single line (that's what we need for now) or shows full command output in pager.
  * Uses g_buf internally.
@@ -4255,7 +4279,7 @@ next:
 }
 
 /* List or extract archive */
-static bool handle_archive(char *fpath, char op)
+static bool handle_archive(char *fpath /* in-out param */, char op)
 {
 	char arg[] = "-tvf"; /* options for tar/bsdtar to list files */
 	char *util, *outdir;
@@ -4268,6 +4292,7 @@ static bool handle_archive(char *fpath, char op)
 				printwarn(NULL);
 				return FALSE;
 			}
+			outdir = realpath(".", NULL);
 			x_to = TRUE;
 		}
 	}
@@ -4295,9 +4320,13 @@ static bool handle_archive(char *fpath, char op)
 	else /* list */
 		get_output(util, arg, fpath, NULL, TRUE, TRUE);
 
-	if (x_to && (chdir(xdirname(fpath)) == -1)) {
-		printwarn(NULL);
-		return FALSE;
+	if (x_to) {
+		if (chdir(xdirname(fpath)) == -1) {
+			printwarn(NULL);
+			return FALSE;
+		}
+		xstrsncpy(fpath, outdir, PATH_MAX);
+		free(outdir);
 	}
 
 	return TRUE;
@@ -4772,7 +4801,6 @@ static ssize_t read_nointr(int fd, void *buf, size_t count)
 
 static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 {
-	int r;
 	char ctx, *nextpath = NULL;
 
 	if (read_nointr(fd, g_buf, 1) != 1)
@@ -4818,21 +4846,8 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 		g_state.picked = 1;
 	}
 
-	if (nextpath) {
-		if (ctx == 0 || ctx == cfg.curctx + 1) { /* Same context */
-			xstrsncpy(*lastdir, *path, PATH_MAX);
-			xstrsncpy(*path, nextpath, PATH_MAX);
-			DPRINTF_S(*path);
-		} else { /* New context */
-			r = ctx - 1;
-			/* Deactivate the new context and build from scratch */
-			g_ctx[r].c_cfg.ctxactive = 0;
-			savecurctx(&cfg, nextpath, pdents[cur].name, r);
-			*path = g_ctx[r].c_path;
-			*lastdir = g_ctx[r].c_last;
-			*lastname = g_ctx[r].c_name;
-		}
-	}
+	if (nextpath)
+		set_smart_ctx(ctx, nextpath, path, lastname, lastdir);
 }
 
 static bool run_selected_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir)
@@ -6518,23 +6533,16 @@ nochange:
 						statusbar(path);
 						goto nochange;
 					}
-					copycurname();
-					clearfilter();
-					goto begin;
 				}
 
-				if (r == 'm') {
-					if (!archive_mount(newpath)) {
-						presel = MSGWAIT;
-						goto nochange;
-					}
+				if ((r == 'm') && !archive_mount(newpath)) {
+					presel = MSGWAIT;
+					goto nochange;
+				}
 
-					/* Mark current directory */
-					free(mark);
-					mark = xstrdup(path);
-
-					cdprep(lastdir, lastname, path, newpath)
-						? (presel = FILTER) : (watch = TRUE);
+				if (r == 'x' || r == 'm') {
+					set_smart_ctx('+', newpath, &path, &lastname, &lastdir);
+					clearfilter();
 					goto begin;
 				}
 
@@ -6609,20 +6617,20 @@ nochange:
 
 				if (strcmp(path, newpath) == 0)
 					break;
-			} // fallthrough
-		case SEL_REMOTE:
-			if (sel == SEL_REMOTE && !remote_mount(newpath)) {
-				presel = MSGWAIT;
-				goto nochange;
 			}
-
-			/* Mark current directory */
-			free(mark);
-			mark = xstrdup(path);
 
 			/* In list mode, retain the last file name to highlight it, if possible */
 			cdprep(lastdir, listpath && sel == SEL_CDLAST ? NULL : lastname, path, newpath)
 			       ? (presel = FILTER) : (watch = TRUE);
+			goto begin;
+		case SEL_REMOTE:
+			if ((sel == SEL_REMOTE) && !remote_mount(newpath)) {
+				presel = MSGWAIT;
+				goto nochange;
+			}
+
+			set_smart_ctx('+', newpath, &path, &lastname, &lastdir);
+			clearfilter();
 			goto begin;
 		case SEL_CYCLE: // fallthrough
 		case SEL_CYCLER: // fallthrough
