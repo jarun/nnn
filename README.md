@@ -84,7 +84,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - File-specific colors (or minimal _dirs in context color_)
   - Icons (customize and compile-in)
   - Plugin for image, video and audio thumbnails
-  - Create, list, extract, mount (FUSE based) archives
+  - Create, list, extract (to), mount (FUSE based) archives
   - Option to open all text files in `$EDITOR`
 - Information
   - Detailed file information

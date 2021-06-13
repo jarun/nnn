@@ -4187,76 +4187,6 @@ static size_t get_fs_info(const char *path, bool type)
 	return (size_t)svb.f_bavail << ffs((int)(svb.f_frsize >> 1));
 }
 
-/* List or extract archive */
-static void handle_archive(char *fpath, char op)
-{
-	char arg[] = "-tvf"; /* options for tar/bsdtar to list files */
-	char *util;
-
-	if (getutil(utils[UTIL_ATOOL])) {
-		util = utils[UTIL_ATOOL];
-		arg[1] = op;
-		arg[2] = '\0';
-	} else if (getutil(utils[UTIL_BSDTAR])) {
-		util = utils[UTIL_BSDTAR];
-		if (op == 'x')
-			arg[1] = op;
-	} else if (is_suffix(fpath, ".zip")) {
-		util = utils[UTIL_UNZIP];
-		arg[1] = (op == 'l') ? 'v' /* verbose listing */ : '\0';
-		arg[2] = '\0';
-	} else {
-		util = utils[UTIL_TAR];
-		if (op == 'x')
-			arg[1] = op;
-	}
-
-	if (op == 'x') /* extract */
-		spawn(util, arg, fpath, NULL, F_NORMAL);
-	else /* list */
-		get_output(util, arg, fpath, NULL, TRUE, TRUE);
-}
-
-static char *visit_parent(char *path, char *newpath, int *presel)
-{
-	char *dir;
-
-	/* There is no going back */
-	if (istopdir(path)) {
-		/* Continue in type-to-nav mode, if enabled */
-		if (cfg.filtermode && presel)
-			*presel = FILTER;
-		return NULL;
-	}
-
-	/* Use a copy as xdirname() may change the string passed */
-	if (newpath)
-		xstrsncpy(newpath, path, PATH_MAX);
-	else
-		newpath = path;
-
-	dir = xdirname(newpath);
-	if (chdir(dir) == -1) {
-		printwarn(presel);
-		return NULL;
-	}
-
-	return dir;
-}
-
-static void valid_parent(char *path, char *lastname)
-{
-	/* Save history */
-	xstrsncpy(lastname, xbasename(path), NAME_MAX + 1);
-
-	while (!istopdir(path))
-		if (visit_parent(path, NULL, NULL))
-			break;
-
-	printwarn(NULL);
-	xdelay(XDELAY_INTERVAL_MS);
-}
-
 /* Create non-existent parents and a file or dir */
 static bool xmktree(char *path, bool dir)
 {
@@ -4322,6 +4252,95 @@ next:
 	}
 
 	return TRUE;
+}
+
+/* List or extract archive */
+static bool handle_archive(char *fpath, char op)
+{
+	char arg[] = "-tvf"; /* options for tar/bsdtar to list files */
+	char *util, *outdir;
+	bool x_to = FALSE;
+
+	if (op == 'x') {
+		outdir = xreadline(NULL, messages[MSG_NEW_PATH]);
+		if (outdir && *outdir && !(*outdir == '.' && outdir[1] == '\0')) {
+			if (!xmktree(outdir, TRUE) || (chdir(outdir) == -1)) {
+				printwarn(NULL);
+				return FALSE;
+			}
+			x_to = TRUE;
+		}
+	}
+
+	if (getutil(utils[UTIL_ATOOL])) {
+		util = utils[UTIL_ATOOL];
+		arg[1] = op;
+		arg[2] = '\0';
+	} else if (getutil(utils[UTIL_BSDTAR])) {
+		util = utils[UTIL_BSDTAR];
+		if (op == 'x')
+			arg[1] = op;
+	} else if (is_suffix(fpath, ".zip")) {
+		util = utils[UTIL_UNZIP];
+		arg[1] = (op == 'l') ? 'v' /* verbose listing */ : '\0';
+		arg[2] = '\0';
+	} else {
+		util = utils[UTIL_TAR];
+		if (op == 'x')
+			arg[1] = op;
+	}
+
+	if (op == 'x') /* extract */
+		spawn(util, arg, fpath, NULL, F_NORMAL | F_MULTI);
+	else /* list */
+		get_output(util, arg, fpath, NULL, TRUE, TRUE);
+
+	if (x_to && (chdir(xdirname(fpath)) == -1)) {
+		printwarn(NULL);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+static char *visit_parent(char *path, char *newpath, int *presel)
+{
+	char *dir;
+
+	/* There is no going back */
+	if (istopdir(path)) {
+		/* Continue in type-to-nav mode, if enabled */
+		if (cfg.filtermode && presel)
+			*presel = FILTER;
+		return NULL;
+	}
+
+	/* Use a copy as xdirname() may change the string passed */
+	if (newpath)
+		xstrsncpy(newpath, path, PATH_MAX);
+	else
+		newpath = path;
+
+	dir = xdirname(newpath);
+	if (chdir(dir) == -1) {
+		printwarn(presel);
+		return NULL;
+	}
+
+	return dir;
+}
+
+static void valid_parent(char *path, char *lastname)
+{
+	/* Save history */
+	xstrsncpy(lastname, xbasename(path), NAME_MAX + 1);
+
+	while (!istopdir(path))
+		if (visit_parent(path, NULL, NULL))
+			break;
+
+	printwarn(NULL);
+	xdelay(XDELAY_INTERVAL_MS);
 }
 
 static bool archive_mount(char *newpath)
@@ -6491,7 +6510,10 @@ nochange:
 				r = get_input(messages[MSG_ARCHIVE_OPTS]);
 				if (r == 'l' || r == 'x') {
 					mkpath(path, pent->name, newpath);
-					handle_archive(newpath, r);
+					if (!handle_archive(newpath, r)) {
+						presel = MSGWAIT;
+						goto nochange;
+					}
 					if (r == 'l') {
 						statusbar(path);
 						goto nochange;
