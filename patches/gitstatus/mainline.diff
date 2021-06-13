@@ -250,8 +250,8 @@ index 402d905..e10035b 100644
 
  	while ((opt = (env_opts_id > 0
  		       ? env_opts[--env_opts_id]
--		       : getopt(argc, argv, "aAb:cCdDeEfFgHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
-+		       : getopt(argc, argv, "aAb:cCdDeEfFgGHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
+-		       : getopt(argc, argv, "aAb:cCdDeEfgHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
++		       : getopt(argc, argv, "aAb:cCdDeEfgGHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
  		switch (opt) {
  #ifndef NOFIFO
  		case 'a':
