@@ -4178,10 +4178,9 @@ static bool show_stats(char *fpath)
 		return FALSE;
 	}
 
-	while (r) {
+	while (r)
 		get_output(cmds[--r], fpath, NULL, fp, TRUE, FALSE);
-		fprintf(fp, "\n");
-	}
+
 	fclose(fp);
 	close(fd);
 
