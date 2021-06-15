@@ -1231,6 +1231,11 @@ static int create_tmp_file(void)
 	return fd;
 }
 
+static void msg(const char *message)
+{
+	dprintf(STDERR_FILENO, "%s\n", message);
+}
+
 static void clearinfoln(void)
 {
 	move(xlines - 2, 0);
@@ -1808,11 +1813,11 @@ static bool initcurses(void *oldmask)
 
 	if (g_state.picker) {
 		if (!newterm(NULL, stderr, stdin)) {
-			fprintf(stderr, "newterm!\n");
+			msg("newterm!");
 			return FALSE;
 		}
 	} else if (!initscr()) {
-		fprintf(stderr, "initscr!\n");
+		msg("initscr!");
 		DPRINTF_S(getenv("TERM"));
 		return FALSE;
 	}
@@ -1847,7 +1852,7 @@ static bool initcurses(void *oldmask)
 		if (COLORS >= 256) {
 			if (!(g_state.oldcolor || init_fcolors())) {
 				exitcurses();
-				fprintf(stderr, "NNN_FCOLORS!\n");
+				msg("NNN_FCOLORS!");
 				return FALSE;
 			}
 		} else
@@ -1888,7 +1893,7 @@ static bool initcurses(void *oldmask)
 						fcolors[i + 1] = *pcode += xchartohex(*colors);
 					else { /* Each color code must be 2 hex symbols */
 						exitcurses();
-						fprintf(stderr, "NNN_COLORS!\n");
+						msg("NNN_COLORS!");
 						return FALSE;
 					}
 				} else
@@ -1975,15 +1980,25 @@ static char *parseargs(char *cmd, char **argv, int *pindex)
 	return cmd;
 }
 
+static void enable_signals(void)
+{
+	struct sigaction dfl_act = {.sa_handler = SIG_DFL};
+
+	sigaction(SIGHUP, &dfl_act, NULL);
+	sigaction(SIGINT, &dfl_act, NULL);
+	sigaction(SIGQUIT, &dfl_act, NULL);
+	sigaction(SIGTSTP, &dfl_act, NULL);
+	sigaction(SIGWINCH, &dfl_act, NULL);
+}
+
 static pid_t xfork(uchar_t flag)
 {
 	pid_t p = fork();
-	struct sigaction dfl_act = {.sa_handler = SIG_DFL};
 
 	if (p > 0) {
 		/* the parent ignores the interrupt, quit and hangup signals */
 		sigaction(SIGHUP, &(struct sigaction){.sa_handler = SIG_IGN}, &oldsighup);
-		sigaction(SIGTSTP, &dfl_act, &oldsigtstp);
+		sigaction(SIGTSTP, &(struct sigaction){.sa_handler = SIG_DFL}, &oldsigtstp);
 	} else if (p == 0) {
 		/* We create a grandchild to detach */
 		if (flag & F_NOWAIT) {
@@ -1992,12 +2007,7 @@ static pid_t xfork(uchar_t flag)
 			if (p > 0)
 				_exit(EXIT_SUCCESS);
 			else if (p == 0) {
-				sigaction(SIGHUP, &dfl_act, NULL);
-				sigaction(SIGINT, &dfl_act, NULL);
-				sigaction(SIGQUIT, &dfl_act, NULL);
-				sigaction(SIGTSTP, &dfl_act, NULL);
-				sigaction(SIGWINCH, &dfl_act, NULL);
-
+				enable_signals();
 				setsid();
 				return p;
 			}
@@ -2006,12 +2016,8 @@ static pid_t xfork(uchar_t flag)
 			_exit(EXIT_FAILURE);
 		}
 
-		/* so they can be used to stop the child */
-		sigaction(SIGHUP, &dfl_act, NULL);
-		sigaction(SIGINT, &dfl_act, NULL);
-		sigaction(SIGQUIT, &dfl_act, NULL);
-		sigaction(SIGTSTP, &dfl_act, NULL);
-		sigaction(SIGWINCH, &dfl_act, NULL);
+		/* So they can be used to stop the child */
+		enable_signals();
 	}
 
 	/* This is the parent waiting for the child to create grandchild */
@@ -2432,22 +2438,18 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 
 static bool write_lastdir(const char *curpath)
 {
-	bool ret = TRUE;
+	bool ret = FALSE;
 	size_t len = xstrlen(cfgpath);
 
 	xstrsncpy(cfgpath + len, "/.lastd", 8);
-	DPRINTF_S(cfgpath);
 
-	FILE *fp = fopen(cfgpath, "w");
+	int fd = open(cfgpath, O_CREAT | O_WRONLY | O_TRUNC, 0666);
 
-	if (fp) {
-		if (fprintf(fp, "cd \"%s\"", curpath) < 0)
-			ret = FALSE;
-
-		fclose(fp);
-	} else
-		ret = FALSE;
-
+	if (fd != -1) {
+		dprintf(fd, "cd \"%s\"", curpath);
+		close(fd);
+		ret = TRUE;
+	}
 	return ret;
 }
 
@@ -3895,9 +3897,8 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int nextctx)
 #ifndef NOSSN
 static void save_session(const char *sname, int *presel)
 {
-	int i;
+	int fd, i;
 	session_header_t header;
-	FILE *fsession;
 	bool status = FALSE;
 	char ssnpath[PATH_MAX];
 	char spath[PATH_MAX];
@@ -3921,33 +3922,33 @@ static void save_session(const char *sname, int *presel)
 	mkpath(cfgpath, toks[TOK_SSN], ssnpath);
 	mkpath(ssnpath, sname, spath);
 
-	fsession = fopen(spath, "wb");
-	if (!fsession) {
+	fd = open(spath, O_CREAT | O_WRONLY | O_TRUNC, 0666);
+	if (fd == -1) {
 		printwait(messages[MSG_SEL_MISSING], presel);
 		return;
 	}
 
-	if ((fwrite(&header, sizeof(header), 1, fsession) != 1)
-		|| (fwrite(&cfg, sizeof(cfg), 1, fsession) != 1))
+	if ((write(fd, &header, sizeof(header)) != (ssize_t)sizeof(header))
+		|| (write(fd, &cfg, sizeof(cfg)) != (ssize_t)sizeof(cfg)))
 		goto END;
 
 	for (i = 0; i < CTX_MAX; ++i)
-		if ((fwrite(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1)
-			|| (fwrite(&g_ctx[i].color, sizeof(uint_t), 1, fsession) != 1)
+		if ((write(fd, &g_ctx[i].c_cfg, sizeof(settings)) != (ssize_t)sizeof(settings))
+			|| (write(fd, &g_ctx[i].color, sizeof(uint_t)) != (ssize_t)sizeof(uint_t))
 			|| (header.nameln[i] > 0
-			    && fwrite(g_ctx[i].c_name, header.nameln[i], 1, fsession) != 1)
+			    && write(fd, g_ctx[i].c_name, header.nameln[i]) != (ssize_t)header.nameln[i])
 			|| (header.lastln[i] > 0
-			    && fwrite(g_ctx[i].c_last, header.lastln[i], 1, fsession) != 1)
+			    && write(fd, g_ctx[i].c_last, header.lastln[i]) != (ssize_t)header.lastln[i])
 			|| (header.fltrln[i] > 0
-			    && fwrite(g_ctx[i].c_fltr, header.fltrln[i], 1, fsession) != 1)
+			    && write(fd, g_ctx[i].c_fltr, header.fltrln[i]) != (ssize_t)header.fltrln[i])
 			|| (header.pathln[i] > 0
-			    && fwrite(g_ctx[i].c_path, header.pathln[i], 1, fsession) != 1))
+			    && write(fd, g_ctx[i].c_path, header.pathln[i]) != (ssize_t)header.pathln[i]))
 			goto END;
 
 	status = TRUE;
 
 END:
-	fclose(fsession);
+	close(fd);
 
 	if (!status)
 		printwait(messages[MSG_FAILED], presel);
@@ -3955,9 +3956,8 @@ END:
 
 static bool load_session(const char *sname, char **path, char **lastdir, char **lastname, bool restore)
 {
-	int i = 0;
+	int fd, i = 0;
 	session_header_t header;
-	FILE *fsession;
 	bool has_loaded_dynamically = !(sname || restore);
 	bool status = (sname && g_state.picker); /* Picker mode with session program option */
 	char ssnpath[PATH_MAX];
@@ -3981,8 +3981,8 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	if (has_loaded_dynamically)
 		save_session("@", NULL);
 
-	fsession = fopen(spath, "rb");
-	if (!fsession) {
+	fd = open(spath, O_RDONLY, 0666);
+	if (fd == -1) {
 		if (!status) {
 			printmsg(messages[MSG_SEL_MISSING]);
 			xdelay(XDELAY_INTERVAL_MS);
@@ -3992,25 +3992,25 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 
 	status = FALSE;
 
-	if ((fread(&header, sizeof(header), 1, fsession) != 1)
+	if ((read(fd, &header, sizeof(header)) != (ssize_t)sizeof(header))
 		|| (header.ver != SESSIONS_VERSION)
-		|| (fread(&cfg, sizeof(cfg), 1, fsession) != 1))
+		|| (read(fd, &cfg, sizeof(cfg)) != (ssize_t)sizeof(cfg)))
 		goto END;
 
 	g_ctx[cfg.curctx].c_name[0] = g_ctx[cfg.curctx].c_last[0]
 		= g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
 
 	for (; i < CTX_MAX; ++i)
-		if ((fread(&g_ctx[i].c_cfg, sizeof(settings), 1, fsession) != 1)
-			|| (fread(&g_ctx[i].color, sizeof(uint_t), 1, fsession) != 1)
+		if ((read(fd, &g_ctx[i].c_cfg, sizeof(settings)) != (ssize_t)sizeof(settings))
+			|| (read(fd, &g_ctx[i].color, sizeof(uint_t)) != (ssize_t)sizeof(uint_t))
 			|| (header.nameln[i] > 0
-			    && fread(g_ctx[i].c_name, header.nameln[i], 1, fsession) != 1)
+			    && read(fd, g_ctx[i].c_name, header.nameln[i]) != (ssize_t)header.nameln[i])
 			|| (header.lastln[i] > 0
-			    && fread(g_ctx[i].c_last, header.lastln[i], 1, fsession) != 1)
+			    && read(fd, g_ctx[i].c_last, header.lastln[i]) != (ssize_t)header.lastln[i])
 			|| (header.fltrln[i] > 0
-			    && fread(g_ctx[i].c_fltr, header.fltrln[i], 1, fsession) != 1)
+			    && read(fd, g_ctx[i].c_fltr, header.fltrln[i]) != (ssize_t)header.fltrln[i])
 			|| (header.pathln[i] > 0
-			    && fread(g_ctx[i].c_path, header.pathln[i], 1, fsession) != 1))
+			    && read(fd, g_ctx[i].c_path, header.pathln[i]) != (ssize_t)header.pathln[i]))
 			goto END;
 
 	*path = g_ctx[cfg.curctx].c_path;
@@ -4020,7 +4020,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	status = TRUE;
 
 END:
-	fclose(fsession);
+	close(fd);
 
 	if (!status) {
 		printmsg(messages[MSG_FAILED]);
@@ -7589,7 +7589,7 @@ malloc_1:
 			printmsg(messages[msgnum]);
 			xdelay(XDELAY_INTERVAL_MS);
 		} else
-			fprintf(stderr, "%s\n", messages[msgnum]);
+			msg(messages[msgnum]);
 	}
 	free(input);
 	free(paths);
@@ -7605,7 +7605,7 @@ static void check_key_collision(void)
 		key = bindings[i].sym;
 
 		if (bitmap[key])
-			fprintf(stdout, "key collision! [%s]\n", keyname(key));
+			dprintf(STDERR_FILENO, "key collision! [%s]\n", keyname(key));
 		else
 			bitmap[key] = TRUE;
 	}
@@ -7613,7 +7613,7 @@ static void check_key_collision(void)
 
 static void usage(void)
 {
-	fprintf(stdout,
+	dprintf(STDERR_FILENO,
 		"%s: nnn [OPTIONS] [PATH]\n\n"
 		"The unorthodox terminal file manager.\n\n"
 		"positional args:\n"
@@ -7753,7 +7753,7 @@ static bool set_tmp_path(void)
 	char *path = xdiraccess(tmp) ? tmp : getenv("TMPDIR");
 
 	if (!path) {
-		fprintf(stderr, "set TMPDIR\n");
+		msg("set TMPDIR");
 		return FALSE;
 	}
 
@@ -7935,7 +7935,7 @@ int main(int argc, char *argv[])
 			g_state.uidgid = 1;
 			break;
 		case 'V':
-			fprintf(stdout, "%s\n", VERSION);
+			msg(VERSION);
 			return EXIT_SUCCESS;
 		case 'w':
 			cfg.cursormode = 1;
@@ -7981,7 +7981,7 @@ int main(int argc, char *argv[])
 
 	home = getenv("HOME");
 	if (!home) {
-		fprintf(stderr, "set HOME\n");
+		msg("set HOME");
 		return EXIT_FAILURE;
 	}
 	DPRINTF_S(home);
@@ -7996,13 +7996,13 @@ int main(int argc, char *argv[])
 
 	/* Parse bookmarks string */
 	if (!parsekvpair(&bookmark, &bmstr, NNN_BMS, &maxbm)) {
-		fprintf(stderr, "%s\n", env_cfg[NNN_BMS]);
+		msg(env_cfg[NNN_BMS]);
 		return EXIT_FAILURE;
 	}
 
 	/* Parse plugins string */
 	if (!parsekvpair(&plug, &pluginstr, NNN_PLUG, &maxplug)) {
-		fprintf(stderr, "%s\n", env_cfg[NNN_PLUG]);
+		msg(env_cfg[NNN_PLUG]);
 		return EXIT_FAILURE;
 	}
 
@@ -8012,7 +8012,7 @@ int main(int argc, char *argv[])
 				initpath = get_kv_val(bookmark, NULL, *arg, maxbm, NNN_BMS);
 
 			if (!initpath) {
-				fprintf(stderr, "%s\n", messages[MSG_INVALID_KEY]);
+				msg(messages[MSG_INVALID_KEY]);
 				return EXIT_FAILURE;
 			}
 
@@ -8062,7 +8062,7 @@ int main(int argc, char *argv[])
 #else
 	if (setfilter(&archive_re, (enveditor ? enveditor : patterns[P_ARCHIVE]))) {
 #endif
-		fprintf(stderr, "%s\n", messages[MSG_INVALID_REG]);
+		msg(messages[MSG_INVALID_REG]);
 		return EXIT_FAILURE;
 	}
 
