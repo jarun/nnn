@@ -6411,8 +6411,10 @@ nochange:
 			/* If opened as vim plugin and Enter/^M pressed, pick */
 			if (g_state.picker && sel == SEL_OPEN) {
 				appendfpath(newpath, mkpath(path, pent->name, newpath));
-				writesel(pselbuf, selbufpos - 1);
-				return EXIT_SUCCESS;
+				// add a newline to the file to make it easier to parse `tail -F`
+				strcat(pselbuf, "\n");
+				writesel(pselbuf, selbufpos);
+				break;
 			}
 
 			if (sel == SEL_NAV_IN) {
