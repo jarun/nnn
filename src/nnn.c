@@ -6429,7 +6429,10 @@ nochange:
 				appendfpath(newpath, mkpath(path, pent->name, newpath));
 				// add a newline to the file to make it easier to parse `tail -F`
 				strcat(pselbuf, "\n");
-				writesel(pselbuf, selbufpos);
+				appendsel(pselbuf, selbufpos);
+				selbufpos = 0;
+				// is this necessary?
+				/* pselbuf[0] = '\0'; */
 				break;
 			}
 
