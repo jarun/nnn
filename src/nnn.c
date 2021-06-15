@@ -1996,6 +1996,7 @@ static pid_t xfork(uchar_t flag)
 				sigaction(SIGINT, &dfl_act, NULL);
 				sigaction(SIGQUIT, &dfl_act, NULL);
 				sigaction(SIGTSTP, &dfl_act, NULL);
+				sigaction(SIGWINCH, &dfl_act, NULL);
 
 				setsid();
 				return p;
@@ -2010,6 +2011,7 @@ static pid_t xfork(uchar_t flag)
 		sigaction(SIGINT, &dfl_act, NULL);
 		sigaction(SIGQUIT, &dfl_act, NULL);
 		sigaction(SIGTSTP, &dfl_act, NULL);
+		sigaction(SIGWINCH, &dfl_act, NULL);
 	}
 
 	/* This is the parent waiting for the child to create grandchild */
@@ -4068,7 +4070,6 @@ static void set_smart_ctx(int ctx, char *nextpath, char **path, char **lastname,
 /*
  * Gets only a single line (that's what we need for now) or shows full command output in pager.
  * Uses g_buf internally.
- * If page is valid, parses argument 'file' as multi-arg, returns NULL.
  */
 static bool get_output(char *file, char *arg1, char *arg2, FILE *fout, bool multi, bool page)
 {
@@ -4077,8 +4078,22 @@ static bool get_output(char *file, char *arg1, char *arg2, FILE *fout, bool mult
 	FILE *fin;
 	int index = 0, flags;
 	bool ret = FALSE;
+	bool tmpfile = (!fout && page);
 	char *argv[EXEC_ARGS_MAX] = {0};
 	char *cmd = NULL;
+	int fd = -1;
+
+	if (tmpfile) {
+		fd = create_tmp_file();
+		if (fd == -1)
+			return FALSE;
+
+		fout = fdopen(fd, "w");
+		if (!fout) {
+			close(fd);
+			return FALSE;
+		}
+	}
 
 	if (multi) {
 		cmd = parseargs(file, argv, &index);
@@ -4122,36 +4137,32 @@ static bool get_output(char *file, char *arg1, char *arg2, FILE *fout, bool mult
 	close(pipefd[1]);
 	free(cmd);
 
-	if (!page) {
-		fin = fdopen(pipefd[0], "r");
-		if (fin) {
-			while (fgets(g_buf, CMD_LEN_MAX - 1, fin)) {
-				ret = TRUE;
-				if (!fout) /* Read only the first line of output to buffer */
-					break;
-				fprintf(fout, "%s", g_buf);
-			}
-			fclose(fin);
+	fin = fdopen(pipefd[0], "r");
+	if (fin) {
+		while (fgets(g_buf, CMD_LEN_MAX - 1, fin)) {
+			ret = TRUE;
+			if (!fout) /* Read only the first line of output to buffer */
+				break;
+			fprintf(fout, "%s", g_buf);
 		}
-
-		close(pipefd[0]);
-		return ret;
+		fclose(fin);
 	}
 
-	pid = fork();
-	if (pid == 0) {
-		/* Show in pager in child */
-		dup2(pipefd[0], STDIN_FILENO);
-		close(pipefd[0]);
-		spawn(pager, NULL, NULL, NULL, F_CLI | F_FORCE_TTY);
-		_exit(EXIT_SUCCESS);
-	}
-
-	/* In parent */
-	waitpid(pid, NULL, 0);
 	close(pipefd[0]);
+	if (!page)
+		return ret;
 
-	return FALSE;
+	if (tmpfile) {
+		fclose(fout);
+		close(fd);
+	}
+
+	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_FORCE_TTY);
+
+	if (tmpfile)
+		unlink(g_tmpfpath);
+
+	return TRUE;
 }
 
 /*
@@ -8141,7 +8152,7 @@ int main(int argc, char *argv[])
 
 	act.sa_handler = SIG_IGN;
 
-	if (sigaction(SIGQUIT, &act, NULL) < 0) {
+	if (sigaction(SIGQUIT, &act, NULL) < 0 || sigaction(SIGWINCH, &act, NULL) < 0) {
 		xerror();
 		return EXIT_FAILURE;
 	}
