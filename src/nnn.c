@@ -4071,28 +4071,22 @@ static void set_smart_ctx(int ctx, char *nextpath, char **path, char **lastname,
  * Gets only a single line (that's what we need for now) or shows full command output in pager.
  * Uses g_buf internally.
  */
-static bool get_output(char *file, char *arg1, char *arg2, FILE *fout, bool multi, bool page)
+static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool multi, bool page)
 {
 	pid_t pid;
 	int pipefd[2];
-	FILE *fin;
 	int index = 0, flags;
 	bool ret = FALSE;
-	bool tmpfile = (!fout && page);
+	bool tmpfile = ((fdout == -1) && page);
 	char *argv[EXEC_ARGS_MAX] = {0};
 	char *cmd = NULL;
 	int fd = -1;
+	ssize_t len;
 
 	if (tmpfile) {
-		fd = create_tmp_file();
-		if (fd == -1)
+		fdout = create_tmp_file();
+		if (fdout == -1)
 			return FALSE;
-
-		fout = fdopen(fd, "w");
-		if (!fout) {
-			close(fd);
-			return FALSE;
-		}
 	}
 
 	if (multi) {
@@ -4137,15 +4131,12 @@ static bool get_output(char *file, char *arg1, char *arg2, FILE *fout, bool mult
 	close(pipefd[1]);
 	free(cmd);
 
-	fin = fdopen(pipefd[0], "r");
-	if (fin) {
-		while (fgets(g_buf, CMD_LEN_MAX - 1, fin)) {
-			ret = TRUE;
-			if (!fout) /* Read only the first line of output to buffer */
-				break;
-			fprintf(fout, "%s", g_buf);
-		}
-		fclose(fin);
+	while ((len = read(pipefd[0], g_buf, CMD_LEN_MAX - 1)) > 0) {
+		ret = TRUE;
+		if (fdout == -1) /* Read only the first line of output to buffer */
+			break;
+		if (write(fdout, g_buf, len) != len)
+			break;
 	}
 
 	close(pipefd[0]);
@@ -4153,7 +4144,7 @@ static bool get_output(char *file, char *arg1, char *arg2, FILE *fout, bool mult
 		return ret;
 
 	if (tmpfile) {
-		fclose(fout);
+		close(fdout);
 		close(fd);
 	}
 
@@ -4183,16 +4174,9 @@ static bool show_stats(char *fpath)
 	if (fd == -1)
 		return FALSE;
 
-	FILE *fp = fdopen(fd, "w");
-	if (!fp) {
-		close(fd);
-		return FALSE;
-	}
-
 	while (r)
-		get_output(cmds[--r], fpath, NULL, fp, TRUE, FALSE);
+		get_output(cmds[--r], fpath, NULL, fd, TRUE, FALSE);
 
-	fclose(fp);
 	close(fd);
 
 	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_FORCE_TTY);
@@ -4328,7 +4312,7 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	if (op == 'x') /* extract */
 		spawn(util, arg, fpath, NULL, F_NORMAL | F_MULTI);
 	else /* list */
-		get_output(util, arg, fpath, NULL, TRUE, TRUE);
+		get_output(util, arg, fpath, -1, TRUE, TRUE);
 
 	if (x_to) {
 		if (chdir(xdirname(fpath)) == -1) {
@@ -4587,12 +4571,12 @@ static void lock_terminal(void)
 	spawn(xgetenv("NNN_LOCKER", utils[UTIL_LOCKER]), NULL, NULL, NULL, F_CLI);
 }
 
-static void printkv(kv *kvarr, FILE *fp, uchar_t max, uchar_t id)
+static void printkv(kv *kvarr, int fd, uchar_t max, uchar_t id)
 {
 	char *val = (id == NNN_BMS) ? bmstr : pluginstr;
 
 	for (uchar_t i = 0; i < max && kvarr[i].key; ++i)
-		fprintf(fp, " %c: %s\n", (char)kvarr[i].key, val + kvarr[i].off);
+		dprintf(fd, " %c: %s\n", (char)kvarr[i].key, val + kvarr[i].off);
 }
 
 static void printkeys(kv *kvarr, char *buf, uchar_t max)
@@ -4644,8 +4628,6 @@ static size_t handle_bookmark(const char *bmark, char *newpath)
  */
 static void show_help(const char *path)
 {
-	int fd;
-	FILE *fp;
 	const char *start, *end;
 	const char helpstr[] = {
       "0\n"
@@ -4685,59 +4667,51 @@ static void show_help(const char *path)
 		  "cT  Set time type%-11c0  Lock\n"
 	};
 
-	fd = create_tmp_file();
+	int fd = create_tmp_file();
 	if (fd == -1)
 		return;
 
-	fp = fdopen(fd, "w");
-	if (!fp) {
-		close(fd);
-		return;
-	}
-
-
 	char *prog = xgetenv(env_cfg[NNN_HELP], NULL);
 	if (prog)
-		get_output(prog, NULL, NULL, fp, TRUE, FALSE);
+		get_output(prog, NULL, NULL, fd, TRUE, FALSE);
 
 	start = end = helpstr;
 	while (*end) {
 		if (*end == '\n') {
 			snprintf(g_buf, CMD_LEN_MAX, "%*c%.*s",
 				 xchartohex(*start), ' ', (int)(end - start), start + 1);
-			fprintf(fp, g_buf, ' ');
+			dprintf(fd, g_buf, ' ');
 			start = end + 1;
 		}
 
 		++end;
 	}
 
-	fprintf(fp, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
-	fprintf(fp, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
+	dprintf(fd, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
+	dprintf(fd, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
 
 	if (bookmark) {
-		fprintf(fp, "BOOKMARKS\n");
-		printkv(bookmark, fp, maxbm, NNN_BMS);
-		fprintf(fp, "\n");
+		dprintf(fd, "BOOKMARKS\n");
+		printkv(bookmark, fd, maxbm, NNN_BMS);
+		dprintf(fd, "\n");
 	}
 
 	if (plug) {
-		fprintf(fp, "PLUGIN KEYS\n");
-		printkv(plug, fp, maxplug, NNN_PLUG);
-		fprintf(fp, "\n");
+		dprintf(fd, "PLUGIN KEYS\n");
+		printkv(plug, fd, maxplug, NNN_PLUG);
+		dprintf(fd, "\n");
 	}
 
 	for (uchar_t i = NNN_OPENER; i <= NNN_TRASH; ++i) {
 		start = getenv(env_cfg[i]);
 		if (start)
-			fprintf(fp, "%s: %s\n", env_cfg[i], start);
+			dprintf(fd, "%s: %s\n", env_cfg[i], start);
 	}
 
 	if (selpath)
-		fprintf(fp, "SELECTION FILE: %s\n", selpath);
+		dprintf(fd, "SELECTION FILE: %s\n", selpath);
 
-	fprintf(fp, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
-	fclose(fp);
+	dprintf(fd, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
 
 	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_FORCE_TTY);
@@ -4763,7 +4737,7 @@ static bool run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 		runfile = NULL;
 
 	if (flags & F_PAGE)
-		get_output(g_buf, runfile, NULL, NULL, TRUE, TRUE);
+		get_output(g_buf, runfile, NULL, -1, TRUE, TRUE);
 	else
 		spawn(g_buf, runfile, NULL, NULL, flags);
 
@@ -6508,11 +6482,11 @@ nochange:
 
 			if (cfg.useeditor
 #ifdef FILE_MIME_OPTS
-			    && get_output("file", FILE_MIME_OPTS, newpath, NULL, FALSE, FALSE)
+			    && get_output("file", FILE_MIME_OPTS, newpath, -1, FALSE, FALSE)
 			    && is_prefix(g_buf, "text/", 5)
 #else
 			    /* no MIME option; guess from description instead */
-			    && get_output("file", "-bL", newpath, NULL, FALSE, FALSE)
+			    && get_output("file", "-bL", newpath, -1, FALSE, FALSE)
 			    && strstr(g_buf, "text")
 #endif
 			) {
