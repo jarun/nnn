@@ -6430,7 +6430,7 @@ nochange:
 				// do not exit if in explorer mode
 				if (g_state.explorer) {
 					// add a newline to the file to make it easier to parse `tail -F`
-					strlcat(pselbuf, "\n", selbufpos + 2);
+					appendfpath("\n", 2);
 					appendsel(pselbuf, selbufpos);
 					selbufpos = 0;
 					// is this necessary?
