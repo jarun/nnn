@@ -6427,13 +6427,19 @@ nochange:
 			/* If opened as vim plugin and Enter/^M pressed, pick */
 			if (g_state.picker && sel == SEL_OPEN) {
 				appendfpath(newpath, mkpath(path, pent->name, newpath));
-				// add a newline to the file to make it easier to parse `tail -F`
-				strcat(pselbuf, "\n");
-				appendsel(pselbuf, selbufpos);
-				selbufpos = 0;
-				// is this necessary?
-				/* pselbuf[0] = '\0'; */
-				break;
+				// do not exit if in explorer mode
+				if (explorer) {
+					// add a newline to the file to make it easier to parse `tail -F`
+					strcat(pselbuf, "\n");
+					appendsel(pselbuf, selbufpos);
+					selbufpos = 0;
+				        // is this necessary?
+				        /* pselbuf[0] = '\0'; */
+					break;
+				} else {
+					writesel(pselbuf, selbufpos - 1);
+					return EXIT_SUCCESS;
+				}
 			}
 
 			if (sel == SEL_NAV_IN) {
