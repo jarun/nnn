@@ -1393,6 +1393,21 @@ static void writesel(const char *buf, const size_t buflen)
 		printwarn(NULL);
 }
 
+static void appendsel(const char *buf, const size_t buflen)
+{
+	if (!selpath)
+		return;
+
+	FILE *fp = fopen(selpath, "a");
+
+	if (fp) {
+		if (fwrite(buf, 1, buflen, fp) != buflen)
+			printwarn(NULL);
+		fclose(fp);
+	} else
+		printwarn(NULL);
+}
+
 static void appendfpath(const char *path, const size_t len)
 {
 	if ((selbufpos >= selbuflen) || ((len + 3) > (selbuflen - selbufpos))) {
