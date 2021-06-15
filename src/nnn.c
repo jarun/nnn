@@ -1377,12 +1377,12 @@ static void writesel(const char *buf, const size_t buflen)
 	if (!selpath)
 		return;
 
-	FILE *fp = fopen(selpath, "w");
+	int fd = open(selpath, O_CREAT | O_WRONLY | O_TRUNC, 0666);
 
-	if (fp) {
-		if (fwrite(buf, 1, buflen, fp) != buflen)
+	if (fd != -1) {
+		if (write(fd, buf, buflen) != (ssize_t)buflen)
 			printwarn(NULL);
-		fclose(fp);
+		close(fd);
 	} else
 		printwarn(NULL);
 }
