@@ -6433,8 +6433,8 @@ nochange:
 					strcat(pselbuf, "\n");
 					appendsel(pselbuf, selbufpos);
 					selbufpos = 0;
-				        // is this necessary?
-				        /* pselbuf[0] = '\0'; */
+					// is this necessary?
+					/* pselbuf[0] = '\0'; */
 					break;
 				} else {
 					writesel(pselbuf, selbufpos - 1);
