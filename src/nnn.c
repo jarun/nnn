@@ -6430,16 +6430,16 @@ nochange:
 				// do not exit if in explorer mode
 				if (g_state.explorer) {
 					// add a newline to the file to make it easier to parse `tail -F`
-					strcat(pselbuf, "\n");
+					strlcat(pselbuf, "\n", selbufpos + 2);
 					appendsel(pselbuf, selbufpos);
 					selbufpos = 0;
 					// is this necessary?
 					/* pselbuf[0] = '\0'; */
 					break;
-				} else {
-					writesel(pselbuf, selbufpos - 1);
-					return EXIT_SUCCESS;
 				}
+
+				writesel(pselbuf, selbufpos - 1);
+				return EXIT_SUCCESS;
 			}
 
 			if (sel == SEL_NAV_IN) {
