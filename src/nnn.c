@@ -339,6 +339,7 @@ typedef struct {
 	uint_t dirctx     : 1;  /* Show dirs in context color */
 	uint_t uidgid     : 1;  /* Show owner and group info */
 	uint_t prstssn    : 1;  /* Persistent session */
+	uint_t explorer   : 1;  /* Explorer mode: don't exit after selection is opened */
 	uint_t duinit     : 1;  /* Initialize disk usage */
 	uint_t reserved   : 8;  /* Adjust when adding/removing a field */
 } runstate;
