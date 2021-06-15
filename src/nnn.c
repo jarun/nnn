@@ -6428,7 +6428,7 @@ nochange:
 			if (g_state.picker && sel == SEL_OPEN) {
 				appendfpath(newpath, mkpath(path, pent->name, newpath));
 				// do not exit if in explorer mode
-				if (explorer) {
+				if (g_state.explorer) {
 					// add a newline to the file to make it easier to parse `tail -F`
 					strcat(pselbuf, "\n");
 					appendsel(pselbuf, selbufpos);
@@ -7817,7 +7817,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdDeEfgHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdDeEfFgHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7853,6 +7853,9 @@ int main(int argc, char *argv[])
 #ifndef NORL
 			rlhist = TRUE;
 #endif
+			break;
+		case 'F':
+		  	g_state.explorer = 1;
 			break;
 		case 'g':
 			cfg.regex = 1;
@@ -8221,7 +8224,7 @@ int main(int argc, char *argv[])
 		if (selbufpos) {
 			fd = selpath ? open(selpath, O_WRONLY | O_CREAT, 0600) : STDOUT_FILENO;
 			// HACK: don't send seltofile if in explorer mode
-			if (!explorer && ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos))))
+			if (!g_state.explorer && ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos))))
 				xerror();
 
 			if (fd > 1)
