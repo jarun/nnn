@@ -17,7 +17,7 @@ href="https://github.com/jarun/nnn#quickstart">Quickstart</a>] [<a
 href="https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins">Plugins</a>] [<a
 href="https://github.com/jarun/nnn/wiki">Wiki</a>]</h3>
 
-`nnn` (_n³_) is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible speed](https://github.com/jarun/nnn/wiki/Performance).
+`nnn` (_n³_) is a full-featured terminal file manager. It's tiny, nearly 0-config and [incredibly fast](https://github.com/jarun/nnn/wiki/Performance).
 
 It is designed to be unobtrusive with smart workflows to match the trains of thought.
 
@@ -158,6 +158,7 @@ Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creat
 - [Anna Arad](https://github.com/annagrram)
 - [KlzXS](https://github.com/KlzXS)
 - [Léo Villeveygoux](https://github.com/leovilok)
+- [Luuk van Baal](https://github.com/luukvbaal)
 - [Sijmen J. Mulder](https://github.com/sjmulder)
 - and other contributors
 
