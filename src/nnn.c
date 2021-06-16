@@ -464,6 +464,10 @@ typedef struct {
 
 static thread_data *core_data;
 
+/* Retain old signal handlers */
+static struct sigaction oldsighup;
+static struct sigaction oldsigtstp;
+
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 
@@ -1993,8 +1997,8 @@ static pid_t xfork(uchar_t flag)
 
 	if (p > 0) {
 		/* the parent ignores the interrupt, quit and hangup signals */
-		sigaction(SIGHUP, &(struct sigaction){.sa_handler = SIG_IGN}, NULL);
-		sigaction(SIGTSTP, &(struct sigaction){.sa_handler = SIG_DFL}, NULL);
+		sigaction(SIGHUP, &(struct sigaction){.sa_handler = SIG_IGN}, &oldsighup);
+		sigaction(SIGTSTP, &(struct sigaction){.sa_handler = SIG_DFL}, &oldsigtstp);
 	} else if (p == 0) {
 		/* We create a grandchild to detach */
 		if (flag & F_NOWAIT) {
@@ -2041,8 +2045,8 @@ static int join(pid_t p, uchar_t flag)
 	}
 
 	/* restore parent's signal handling */
-	sigaction(SIGHUP, &(struct sigaction){.sa_handler = clean_exit_sighandler}, NULL);
-	sigaction(SIGTSTP, &(struct sigaction){.sa_handler = clean_exit_sighandler}, NULL);
+	sigaction(SIGHUP, &oldsighup, NULL);
+	sigaction(SIGTSTP, &oldsigtstp, NULL);
 
 	return status;
 }
