@@ -8102,6 +8102,15 @@ int main(int argc, char *argv[])
 
 		sigaction(SIGPIPE, &(struct sigaction){.sa_handler = SIG_IGN}, NULL);
 	}
+
+	if (g_state.explorer && explorer_fifopath) {
+		if (mkfifo(explorer_fifopath, 0600) != 0 && !(errno == EEXIST && access(explorer_fifopath, W_OK) == 0)) {
+			xerror();
+			return EXIT_FAILURE;
+		}
+
+		sigaction(SIGPIPE, &(struct sigaction){.sa_handler = SIG_IGN}, NULL);
+	}
 #endif
 
 #ifdef LINUX_INOTIFY
