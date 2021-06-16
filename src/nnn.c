@@ -6416,6 +6416,11 @@ nochange:
 			if (!S_ISREG(sb.st_mode)) {
 				printwait(messages[MSG_UNSUPPORTED], &presel);
 				goto nochange;
+                        }
+
+			if (g_state.explorer && sel == SEL_OPEN) {
+				notify_fifo(TRUE, TRUE);
+				goto nochange;
 			}
 
 			/* If opened as vim plugin and Enter/^M pressed, pick */
