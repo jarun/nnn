@@ -401,7 +401,8 @@ static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 static int ndents, cur, last, curscroll, last_curscroll, total_dents = ENTRY_INCR, scroll_lines = 1;
 static int nselected;
 #ifndef NOFIFO
-static int fifofd = -1;
+static int hover_fifofd = -1;
+static int explorer_fifofd = -1;
 #endif
 static uint_t idletimeout, selbufpos, lastappendpos, selbuflen;
 static ushort_t xlines, xcols;
@@ -424,7 +425,8 @@ static char *plgpath;
 static char *pnamebuf, *pselbuf;
 static char *mark;
 #ifndef NOFIFO
-static char *fifopath;
+static char *hover_fifopath;
+static char *explorer_fifopath;
 #endif
 static unsigned long long *ihashbmp;
 static struct entry *pdents;
@@ -808,7 +810,7 @@ static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
 #ifndef NOFIFO
-static void notify_fifo(bool force);
+static void notify_fifo(bool force, bool is_explorer); /* explorer has a separate fifo */
 #endif
 
 /* Functions */
@@ -2757,7 +2759,7 @@ try_quit:
 			} else {
 #ifndef NOFIFO
 				/* Send hovered path to NNN_FIFO */
-				notify_fifo(TRUE);
+				notify_fifo(TRUE, FALSE);
 #endif
 				escaped = TRUE;
 				settimeout();
@@ -5409,18 +5411,22 @@ static void populate(char *path, char *lastname)
 }
 
 #ifndef NOFIFO
-static void notify_fifo(bool force)
+static void notify_fifo(bool force, bool is_explorer)
 {
-	if (!fifopath)
+	/* refer to the explorer fifo instead of the hover fifo if is_explorer is true */
+	char **fifopath_ptr = is_explorer ? &explorer_fifopath : &hover_fifopath;
+	int *fifofd_ptr = is_explorer ? &explorer_fifofd : &hover_fifofd;
+
+	if (!(*fifopath_ptr))
 		return;
 
-	if (fifofd == -1) {
-		fifofd = open(fifopath, O_WRONLY|O_NONBLOCK|O_CLOEXEC);
-		if (fifofd == -1) {
+	if (*fifofd_ptr == -1) {
+		*fifofd_ptr = open(*fifopath_ptr, O_WRONLY|O_NONBLOCK|O_CLOEXEC);
+		if (*fifofd_ptr == -1) {
 			if (errno != ENXIO)
 				/* Unexpected error, the FIFO file might have been removed */
 				/* We give up FIFO notification */
-				fifopath = NULL;
+				*fifopath_ptr = NULL;
 			return;
 		}
 	}
@@ -5437,7 +5443,7 @@ static void notify_fifo(bool force)
 
 	path[len - 1] = '\n';
 
-	ssize_t ret = write(fifofd, path, len);
+	ssize_t ret = write(*fifofd_ptr, path, len);
 
 	if (ret != (ssize_t)len && !(ret == -1 && (errno == EAGAIN || errno == EPIPE))) {
 		DPRINTF_S(strerror(errno));
@@ -5473,7 +5479,7 @@ static void move_cursor(int target, int ignore_scrolloff)
 	curscroll = MAX(curscroll, MAX(cur - (onscreen - 1), 0));
 
 #ifndef NOFIFO
-	notify_fifo(FALSE);
+	notify_fifo(FALSE, FALSE);
 #endif
 }
 
@@ -6339,7 +6345,7 @@ nochange:
 					move_cursor(r, 1);
 #ifndef NOFIFO
 				else if (event.bstate == BUTTON1_PRESSED)
-					notify_fifo(TRUE);
+					notify_fifo(TRUE, FALSE);
 #endif
 				/* Handle right click selection */
 				if (event.bstate == BUTTON3_PRESSED) {
@@ -7761,7 +7767,7 @@ static void cleanup(void)
 	free(plug);
 #ifndef NOFIFO
 	if (g_state.autofifo)
-		unlink(fifopath);
+		unlink(hover_fifopath);
 #endif
 	if (g_state.pluginit)
 		unlink(g_pipepath);
@@ -8075,9 +8081,9 @@ int main(int argc, char *argv[])
 		setenv("NNN_FIFO", g_buf, TRUE);
 	}
 
-	fifopath = xgetenv("NNN_FIFO", NULL);
-	if (fifopath) {
-		if (mkfifo(fifopath, 0600) != 0 && !(errno == EEXIST && access(fifopath, W_OK) == 0)) {
+	hover_fifopath = xgetenv("NNN_FIFO", NULL);
+	if (hover_fifopath) {
+		if (mkfifo(hover_fifopath, 0600) != 0 && !(errno == EEXIST && access(hover_fifopath, W_OK) == 0)) {
 			xerror();
 			return EXIT_FAILURE;
 		}
@@ -8232,9 +8238,9 @@ int main(int argc, char *argv[])
 #endif
 
 #ifndef NOFIFO
-	notify_fifo(FALSE);
-	if (fifofd != -1)
-		close(fifofd);
+	notify_fifo(FALSE, FALSE);
+	if (hover_fifofd != -1)
+		close(hover_fifofd);
 #endif
 
 	return opt;
