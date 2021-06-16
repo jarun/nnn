@@ -7845,7 +7845,7 @@ int main(int argc, char *argv[])
 		case 'F':
 #ifndef NOFIFO
 			g_state.explorer = TRUE;
-			explorer_fifopath = realpath(optarg, NULL);
+			explorer_fifopath = optarg;
 			break;
 #endif
 		case 'g':
