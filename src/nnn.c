@@ -7774,6 +7774,8 @@ static void cleanup(void)
 #ifndef NOFIFO
 	if (g_state.autofifo)
 		unlink(hover_fifopath);
+	if (g_state.explorer)
+		unlink(explorer_fifopath);
 #endif
 	if (g_state.pluginit)
 		unlink(g_pipepath);
