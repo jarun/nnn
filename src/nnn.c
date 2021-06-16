@@ -8253,6 +8253,8 @@ int main(int argc, char *argv[])
 	notify_fifo(FALSE, FALSE);
 	if (hover_fifofd != -1)
 		close(hover_fifofd);
+	if (explorer_fifofd != -1)
+		close(explorer_fifofd);
 #endif
 
 	return opt;
