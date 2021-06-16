@@ -331,6 +331,7 @@ typedef struct {
 	uint_t dircolor   : 1;  /* Current status of dir color */
 	uint_t picker     : 1;  /* Write selection to user-specified file */
 	uint_t picked     : 1;  /* Plugin has picked files */
+	uint_t explorer   : 1;  /* Explorer mode: send picked files to FIFO without exiting */
 	uint_t runplugin  : 1;  /* Choose plugin mode */
 	uint_t runctx     : 3;  /* The context in which plugin is to be run */
 	uint_t selmode    : 1;  /* Set when selecting files */
@@ -340,7 +341,7 @@ typedef struct {
 	uint_t uidgid     : 1;  /* Show owner and group info */
 	uint_t prstssn    : 1;  /* Persistent session */
 	uint_t duinit     : 1;  /* Initialize disk usage */
-	uint_t reserved   : 8;  /* Adjust when adding/removing a field */
+	uint_t reserved   : 7;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -7799,7 +7800,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdDeEfgHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdDeEfF:gHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7836,6 +7837,12 @@ int main(int argc, char *argv[])
 			rlhist = TRUE;
 #endif
 			break;
+		case 'F':
+#ifndef NOFIFO
+			g_state.explorer = TRUE;
+			explorer_fifopath = realpath(optarg, NULL);
+			break;
+#endif
 		case 'g':
 			cfg.regex = 1;
 			filterfn = &visible_re;
