@@ -402,8 +402,8 @@ static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 static int ndents, cur, last, curscroll, last_curscroll, total_dents = ENTRY_INCR, scroll_lines = 1;
 static int nselected;
 #ifndef NOFIFO
-static int hover_fifofd = -1;
-static int explorer_fifofd = -1;
+static int hfifofd = -1; /* FIFO used in hover (NNN_FIFO) */
+static int efifofd = -1; /* FIFO used in explorer mode (-X) */
 #endif
 static uint_t idletimeout, selbufpos, lastappendpos, selbuflen;
 static ushort_t xlines, xcols;
@@ -426,8 +426,8 @@ static char *plgpath;
 static char *pnamebuf, *pselbuf;
 static char *mark;
 #ifndef NOFIFO
-static char *hover_fifopath;
-static char *explorer_fifopath;
+static char *hfifopath; /* FIFO used in hover (NNN_FIFO) */
+static char *efifopath; /* FIFO used in explorer mode (-X) */
 #endif
 static unsigned long long *ihashbmp;
 static struct entry *pdents;
@@ -811,7 +811,7 @@ static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
 #ifndef NOFIFO
-static void notify_fifo(bool force, bool is_explorer); /* explorer has a separate fifo */
+static void notify_fifo(bool force, bool explorer);
 #endif
 
 /* Functions */
@@ -5412,22 +5412,22 @@ static void populate(char *path, char *lastname)
 }
 
 #ifndef NOFIFO
-static void notify_fifo(bool force, bool is_explorer)
+static void notify_fifo(bool force, bool explorer)
 {
-	/* refer to the explorer fifo instead of the hover fifo if is_explorer is true */
-	char **fifopath_ptr = is_explorer ? &explorer_fifopath : &hover_fifopath;
-	int *fifofd_ptr = is_explorer ? &explorer_fifofd : &hover_fifofd;
+	/* refer to the explorer fifo instead of the hover fifo if explorer is true */
+	char **ppath = explorer ? &efifopath : &hfifopath;
+	int *pptr = explorer ? &efifofd : &hfifofd;
 
-	if (!(*fifopath_ptr))
+	if (!(*ppath))
 		return;
 
-	if (*fifofd_ptr == -1) {
-		*fifofd_ptr = open(*fifopath_ptr, O_WRONLY|O_NONBLOCK|O_CLOEXEC);
-		if (*fifofd_ptr == -1) {
+	if (*pptr == -1) {
+		*pptr = open(*ppath, O_WRONLY|O_NONBLOCK|O_CLOEXEC);
+		if (*pptr == -1) {
 			if (errno != ENXIO)
 				/* Unexpected error, the FIFO file might have been removed */
 				/* We give up FIFO notification */
-				*fifopath_ptr = NULL;
+				*ppath = NULL;
 			return;
 		}
 	}
@@ -5444,7 +5444,7 @@ static void notify_fifo(bool force, bool is_explorer)
 
 	path[len - 1] = '\n';
 
-	ssize_t ret = write(*fifofd_ptr, path, len);
+	ssize_t ret = write(*pptr, path, len);
 
 	if (ret != (ssize_t)len && !(ret == -1 && (errno == EAGAIN || errno == EPIPE))) {
 		DPRINTF_S(strerror(errno));
@@ -7773,9 +7773,9 @@ static void cleanup(void)
 	free(plug);
 #ifndef NOFIFO
 	if (g_state.autofifo)
-		unlink(hover_fifopath);
+		unlink(hfifopath);
 	if (g_state.explorer)
-		unlink(explorer_fifopath);
+		unlink(efifopath);
 #endif
 	if (g_state.pluginit)
 		unlink(g_pipepath);
@@ -7847,7 +7847,7 @@ int main(int argc, char *argv[])
 		case 'F':
 #ifndef NOFIFO
 			g_state.explorer = TRUE;
-			explorer_fifopath = optarg;
+			efifopath = optarg;
 #endif
 			break;
 		case 'g':
@@ -8095,9 +8095,9 @@ int main(int argc, char *argv[])
 		setenv("NNN_FIFO", g_buf, TRUE);
 	}
 
-	hover_fifopath = xgetenv("NNN_FIFO", NULL);
-	if (hover_fifopath) {
-		if (mkfifo(hover_fifopath, 0600) != 0 && !(errno == EEXIST && access(hover_fifopath, W_OK) == 0)) {
+	hfifopath = xgetenv("NNN_FIFO", NULL);
+	if (hfifopath) {
+		if (mkfifo(hfifopath, 0600) != 0 && !(errno == EEXIST && access(hfifopath, W_OK) == 0)) {
 			xerror();
 			return EXIT_FAILURE;
 		}
@@ -8105,8 +8105,8 @@ int main(int argc, char *argv[])
 		sigaction(SIGPIPE, &(struct sigaction){.sa_handler = SIG_IGN}, NULL);
 	}
 
-	if (g_state.explorer && explorer_fifopath) {
-		if (mkfifo(explorer_fifopath, 0600) != 0 && !(errno == EEXIST && access(explorer_fifopath, W_OK) == 0)) {
+	if (g_state.explorer && efifopath) {
+		if (mkfifo(efifopath, 0600) != 0 && !(errno == EEXIST && access(efifopath, W_OK) == 0)) {
 			xerror();
 			return EXIT_FAILURE;
 		}
@@ -8262,10 +8262,10 @@ int main(int argc, char *argv[])
 
 #ifndef NOFIFO
 	notify_fifo(FALSE, FALSE);
-	if (hover_fifofd != -1)
-		close(hover_fifofd);
-	if (explorer_fifofd != -1)
-		close(explorer_fifofd);
+	if (hfifofd != -1)
+		close(hfifofd);
+	if (efifofd != -1)
+		close(efifofd);
 #endif
 
 	return opt;
