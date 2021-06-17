@@ -7848,8 +7848,8 @@ int main(int argc, char *argv[])
 #ifndef NOFIFO
 			g_state.explorer = TRUE;
 			explorer_fifopath = optarg;
-			break;
 #endif
+			break;
 		case 'g':
 			cfg.regex = 1;
 			filterfn = &visible_re;
