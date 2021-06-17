@@ -467,6 +467,7 @@ static thread_data *core_data;
 /* Retain old signal handlers */
 static struct sigaction oldsighup;
 static struct sigaction oldsigtstp;
+static struct sigaction oldsigwinch;
 
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
@@ -1999,6 +2000,7 @@ static pid_t xfork(uchar_t flag)
 		/* the parent ignores the interrupt, quit and hangup signals */
 		sigaction(SIGHUP, &(struct sigaction){.sa_handler = SIG_IGN}, &oldsighup);
 		sigaction(SIGTSTP, &(struct sigaction){.sa_handler = SIG_DFL}, &oldsigtstp);
+		sigaction(SIGWINCH, &(struct sigaction){.sa_handler = SIG_IGN}, &oldsigwinch);
 	} else if (p == 0) {
 		/* We create a grandchild to detach */
 		if (flag & F_NOWAIT) {
@@ -2047,6 +2049,7 @@ static int join(pid_t p, uchar_t flag)
 	/* restore parent's signal handling */
 	sigaction(SIGHUP, &oldsighup, NULL);
 	sigaction(SIGTSTP, &oldsigtstp, NULL);
+	sigaction(SIGWINCH, &oldsigwinch, NULL);
 
 	return status;
 }
@@ -8126,7 +8129,7 @@ int main(int argc, char *argv[])
 
 	act.sa_handler = SIG_IGN;
 
-	if (sigaction(SIGQUIT, &act, NULL) < 0 || sigaction(SIGWINCH, &act, NULL) < 0) {
+	if (sigaction(SIGQUIT, &act, NULL) < 0) {
 		xerror();
 		return EXIT_FAILURE;
 	}
