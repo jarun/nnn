@@ -331,6 +331,7 @@ typedef struct {
 	uint_t dircolor   : 1;  /* Current status of dir color */
 	uint_t picker     : 1;  /* Write selection to user-specified file */
 	uint_t picked     : 1;  /* Plugin has picked files */
+	uint_t explorer   : 1;  /* Explorer mode: send picked files to FIFO without exiting */
 	uint_t runplugin  : 1;  /* Choose plugin mode */
 	uint_t runctx     : 3;  /* The context in which plugin is to be run */
 	uint_t selmode    : 1;  /* Set when selecting files */
@@ -340,7 +341,7 @@ typedef struct {
 	uint_t uidgid     : 1;  /* Show owner and group info */
 	uint_t prstssn    : 1;  /* Persistent session */
 	uint_t duinit     : 1;  /* Initialize disk usage */
-	uint_t reserved   : 8;  /* Adjust when adding/removing a field */
+	uint_t reserved   : 7;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -401,7 +402,8 @@ static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 static int ndents, cur, last, curscroll, last_curscroll, total_dents = ENTRY_INCR, scroll_lines = 1;
 static int nselected;
 #ifndef NOFIFO
-static int fifofd = -1;
+static int hfifofd = -1; /* FIFO used in hover (NNN_FIFO) */
+static int efifofd = -1; /* FIFO used in explorer mode (-X) */
 #endif
 static uint_t idletimeout, selbufpos, lastappendpos, selbuflen;
 static ushort_t xlines, xcols;
@@ -424,7 +426,8 @@ static char *plgpath;
 static char *pnamebuf, *pselbuf;
 static char *mark;
 #ifndef NOFIFO
-static char *fifopath;
+static char *hfifopath; /* FIFO used in hover (NNN_FIFO) */
+static char *efifopath; /* FIFO used in explorer mode (-X) */
 #endif
 static unsigned long long *ihashbmp;
 static struct entry *pdents;
@@ -808,7 +811,7 @@ static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
 #ifndef NOFIFO
-static void notify_fifo(bool force);
+static void notify_fifo(bool force, bool explorer);
 #endif
 
 /* Functions */
@@ -2757,7 +2760,7 @@ try_quit:
 			} else {
 #ifndef NOFIFO
 				/* Send hovered path to NNN_FIFO */
-				notify_fifo(TRUE);
+				notify_fifo(TRUE, FALSE);
 #endif
 				escaped = TRUE;
 				settimeout();
@@ -5409,18 +5412,22 @@ static void populate(char *path, char *lastname)
 }
 
 #ifndef NOFIFO
-static void notify_fifo(bool force)
+static void notify_fifo(bool force, bool explorer)
 {
-	if (!fifopath)
+	/* refer to the explorer fifo instead of the hover fifo if explorer is true */
+	char **ppath = explorer ? &efifopath : &hfifopath;
+	int *pptr = explorer ? &efifofd : &hfifofd;
+
+	if (!(*ppath))
 		return;
 
-	if (fifofd == -1) {
-		fifofd = open(fifopath, O_WRONLY|O_NONBLOCK|O_CLOEXEC);
-		if (fifofd == -1) {
+	if (*pptr == -1) {
+		*pptr = open(*ppath, O_WRONLY|O_NONBLOCK|O_CLOEXEC);
+		if (*pptr == -1) {
 			if (errno != ENXIO)
 				/* Unexpected error, the FIFO file might have been removed */
 				/* We give up FIFO notification */
-				fifopath = NULL;
+				*ppath = NULL;
 			return;
 		}
 	}
@@ -5437,7 +5444,7 @@ static void notify_fifo(bool force)
 
 	path[len - 1] = '\n';
 
-	ssize_t ret = write(fifofd, path, len);
+	ssize_t ret = write(*pptr, path, len);
 
 	if (ret != (ssize_t)len && !(ret == -1 && (errno == EAGAIN || errno == EPIPE))) {
 		DPRINTF_S(strerror(errno));
@@ -5473,7 +5480,7 @@ static void move_cursor(int target, int ignore_scrolloff)
 	curscroll = MAX(curscroll, MAX(cur - (onscreen - 1), 0));
 
 #ifndef NOFIFO
-	notify_fifo(FALSE);
+	notify_fifo(FALSE, FALSE);
 #endif
 }
 
@@ -6339,7 +6346,7 @@ nochange:
 					move_cursor(r, 1);
 #ifndef NOFIFO
 				else if (event.bstate == BUTTON1_PRESSED)
-					notify_fifo(TRUE);
+					notify_fifo(TRUE, FALSE);
 #endif
 				/* Handle right click selection */
 				if (event.bstate == BUTTON3_PRESSED) {
@@ -6408,6 +6415,11 @@ nochange:
 			/* Do not open non-regular files */
 			if (!S_ISREG(sb.st_mode)) {
 				printwait(messages[MSG_UNSUPPORTED], &presel);
+				goto nochange;
+                        }
+
+			if (g_state.explorer && sel == SEL_OPEN) {
+				notify_fifo(TRUE, TRUE);
 				goto nochange;
 			}
 
@@ -7637,6 +7649,9 @@ static void usage(void)
 #ifndef NOX11
 		" -x      notis, selection sync, xterm title\n"
 #endif
+#ifndef NOFIFO
+		" -X fifo explorer mode\n"
+#endif
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
 }
@@ -7761,7 +7776,9 @@ static void cleanup(void)
 	free(plug);
 #ifndef NOFIFO
 	if (g_state.autofifo)
-		unlink(fifopath);
+		unlink(hfifopath);
+	if (g_state.explorer)
+		unlink(efifopath);
 #endif
 	if (g_state.pluginit)
 		unlink(g_pipepath);
@@ -7793,7 +7810,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdDeEfgHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdDeEfgHJKl:nop:P:QrRs:St:T:uUVwxX:h"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7919,6 +7936,12 @@ int main(int argc, char *argv[])
 			break;
 		case 'x':
 			cfg.x11 = 1;
+			break;
+		case 'X':
+#ifndef NOFIFO
+			g_state.explorer = TRUE;
+			efifopath = optarg;
+#endif
 			break;
 		case 'h':
 			usage();
@@ -8075,9 +8098,18 @@ int main(int argc, char *argv[])
 		setenv("NNN_FIFO", g_buf, TRUE);
 	}
 
-	fifopath = xgetenv("NNN_FIFO", NULL);
-	if (fifopath) {
-		if (mkfifo(fifopath, 0600) != 0 && !(errno == EEXIST && access(fifopath, W_OK) == 0)) {
+	hfifopath = xgetenv("NNN_FIFO", NULL);
+	if (hfifopath) {
+		if (mkfifo(hfifopath, 0600) != 0 && !(errno == EEXIST && access(hfifopath, W_OK) == 0)) {
+			xerror();
+			return EXIT_FAILURE;
+		}
+
+		sigaction(SIGPIPE, &(struct sigaction){.sa_handler = SIG_IGN}, NULL);
+	}
+
+	if (g_state.explorer) {
+		if (mkfifo(efifopath, 0600) != 0 && !(errno == EEXIST && access(efifopath, W_OK) == 0)) {
 			xerror();
 			return EXIT_FAILURE;
 		}
@@ -8232,9 +8264,11 @@ int main(int argc, char *argv[])
 #endif
 
 #ifndef NOFIFO
-	notify_fifo(FALSE);
-	if (fifofd != -1)
-		close(fifofd);
+	notify_fifo(FALSE, FALSE);
+	if (hfifofd != -1)
+		close(hfifofd);
+	if (efifofd != -1)
+		close(efifofd);
 #endif
 
 	return opt;

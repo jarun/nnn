@@ -6,7 +6,7 @@
 .Nd The unorthodox terminal file manager.
 .Sh SYNOPSIS
 .Nm
-.Op Ar -aAcCdDeEfgHJKlnQrRSuUVwxh
+.Op Ar -aAcCdDeEfgHJKlnQrRSuUVwxXh
 .Op Ar -b key
 .Op Ar -p file
 .Op Ar -P key
@@ -138,6 +138,9 @@ supports the following options:
         show notis on selection cp, mv, rm completion
         copy path to system clipboard on select
         show xterm title (if non-picker mode)
+.Pp
+.Fl "X fifo"
+        run in explorer mode, where file path is sent to 'fifo' on 'Enter' or '^M'
 .Pp
 .Fl h
         show program help and exit
