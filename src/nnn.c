@@ -7649,6 +7649,9 @@ static void usage(void)
 #ifndef NOX11
 		" -x      notis, selection sync, xterm title\n"
 #endif
+#ifndef NOFIFO
+		"-X       explorer mode\n"
+#endif
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
 }
@@ -7807,7 +7810,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdDeEfF:gHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdDeEfgHJKl:nop:P:QrRs:St:T:uUVwxX:h"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -7842,12 +7845,6 @@ int main(int argc, char *argv[])
 		case 'f':
 #ifndef NORL
 			rlhist = TRUE;
-#endif
-			break;
-		case 'F':
-#ifndef NOFIFO
-			g_state.explorer = TRUE;
-			efifopath = optarg;
 #endif
 			break;
 		case 'g':
@@ -7939,6 +7936,12 @@ int main(int argc, char *argv[])
 			break;
 		case 'x':
 			cfg.x11 = 1;
+			break;
+		case 'X':
+#ifndef NOFIFO
+			g_state.explorer = TRUE;
+			efifopath = optarg;
+#endif
 			break;
 		case 'h':
 			usage();
