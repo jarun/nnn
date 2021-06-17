@@ -8105,7 +8105,7 @@ int main(int argc, char *argv[])
 		sigaction(SIGPIPE, &(struct sigaction){.sa_handler = SIG_IGN}, NULL);
 	}
 
-	if (g_state.explorer && efifopath) {
+	if (g_state.explorer) {
 		if (mkfifo(efifopath, 0600) != 0 && !(errno == EEXIST && access(efifopath, W_OK) == 0)) {
 			xerror();
 			return EXIT_FAILURE;
