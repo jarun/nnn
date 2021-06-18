@@ -4867,16 +4867,14 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 		if (!*file)
 			return FALSE;
 
-		if ((flags & F_NOTRACE) || (flags & F_PAGE)) {
-			run_cmd_as_plugin(file, runfile, flags);
-			return TRUE;
-		}
+		if ((flags & F_NOTRACE) || (flags & F_PAGE))
+			return run_cmd_as_plugin(file, runfile, flags);
 
 		cmd_as_plugin = TRUE;
 	}
 
 	if (mkfifo(g_pipepath, 0600) != 0)
-		return EXIT_FAILURE;
+		return FALSE;
 
 	exitcurses();
 
