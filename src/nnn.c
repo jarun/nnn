@@ -4856,14 +4856,10 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 		flags = F_MULTI | F_CONFIRM;
 		++file;
 
-		/* Check if output should be paged */
-		if (*file == '|') {
+		if (*file == '|') { /* Check if output should be paged */
 			flags |= F_PAGE;
 			++file;
-		}
-
-		/* Check if GUI flags are to be used */
-		if (*file == '&') {
+		} else if (*file == '&') { /* Check if GUI flags are to be used */
 			flags = F_NOTRACE | F_NOWAIT;
 			++file;
 		}
@@ -4871,7 +4867,7 @@ static bool run_selected_plugin(char **path, const char *file, char *runfile, ch
 		if (!*file)
 			return FALSE;
 
-		if (flags & F_NOTRACE) {
+		if ((flags & F_NOTRACE) || (flags & F_PAGE)) {
 			run_cmd_as_plugin(file, runfile, flags);
 			return TRUE;
 		}
