@@ -4286,15 +4286,19 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	bool x_to = FALSE;
 
 	if (op == 'x') {
-		outdir = xreadline(NULL, messages[MSG_NEW_PATH]);
-		if (outdir && *outdir && !(*outdir == '.' && outdir[1] == '\0')) {
-			if (!xmktree(outdir, TRUE) || (chdir(outdir) == -1)) {
-				printwarn(NULL);
-				return FALSE;
-			}
-			outdir = realpath(".", NULL);
-			x_to = TRUE;
+		outdir = xreadline(xbasename(fpath), messages[MSG_NEW_PATH]);
+		if (!outdir || !*outdir) { /* Cancelled */
+			printwait(messages[MSG_CANCEL], NULL);
+			return FALSE;
 		}
+
+		if (!xmktree(outdir, TRUE) || (chdir(outdir) == -1)) {
+			printwarn(NULL);
+			return FALSE;
+		}
+		/* Copy the new dir path to open it in smart context */
+		outdir = realpath(".", NULL);
+		x_to = TRUE;
 	}
 
 	if (getutil(utils[UTIL_ATOOL])) {
