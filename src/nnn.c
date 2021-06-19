@@ -2125,8 +2125,7 @@ static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag)
 		if ((flag & F_CONFIRM) || ((flag & F_CHKRTN) && retstatus)) {
 			status = write(STDOUT_FILENO, messages[MSG_RETURN], xstrlen(messages[MSG_RETURN]));
 			(void)status;
-			status = read(STDIN_FILENO, g_buf, PATH_MAX);
-			(void)status;
+			while ((read(STDIN_FILENO, &status, 1) > 0) && (status != '\n'));
 		}
 
 		if (flag & F_NORMAL)
