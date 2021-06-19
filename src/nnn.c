@@ -6419,12 +6419,12 @@ nochange:
 				printwait(messages[MSG_UNSUPPORTED], &presel);
 				goto nochange;
                         }
-
+#ifndef NOFIFO
 			if (g_state.explorer && sel == SEL_OPEN) {
 				notify_fifo(TRUE, TRUE);
 				goto nochange;
 			}
-
+#endif
 			/* If opened as vim plugin and Enter/^M pressed, pick */
 			if (g_state.picker && sel == SEL_OPEN) {
 				appendfpath(newpath, mkpath(path, pent->name, newpath));
