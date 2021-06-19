@@ -4282,11 +4282,12 @@ next:
 static bool handle_archive(char *fpath /* in-out param */, char op)
 {
 	char arg[] = "-tvf"; /* options for tar/bsdtar to list files */
-	char *util, *outdir;
+	char *util, *outdir = NULL;
 	bool x_to = FALSE;
+	bool is_atool = getutil(utils[UTIL_ATOOL]);
 
 	if (op == 'x') {
-		outdir = xreadline(xbasename(fpath), messages[MSG_NEW_PATH]);
+		outdir = xreadline(is_atool ? "." : xbasename(fpath), messages[MSG_NEW_PATH]);
 		if (!outdir || !*outdir) { /* Cancelled */
 			printwait(messages[MSG_CANCEL], NULL);
 			return FALSE;
@@ -4303,7 +4304,7 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 		}
 	}
 
-	if (getutil(utils[UTIL_ATOOL])) {
+	if (is_atool) {
 		util = utils[UTIL_ATOOL];
 		arg[1] = op;
 		arg[2] = '\0';
@@ -4332,8 +4333,8 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 			return FALSE;
 		}
 		xstrsncpy(fpath, outdir, PATH_MAX);
-		free(outdir);
-	}
+	} else if (op == 'x')
+		fpath[0] = '\0';
 
 	return TRUE;
 }
@@ -6540,7 +6541,10 @@ nochange:
 				}
 
 				if (r == 'x' || r == 'm') {
-					set_smart_ctx('+', newpath, &path, &lastname, &lastdir);
+					if (newpath[0])
+						set_smart_ctx('+', newpath, &path, &lastname, &lastdir);
+					else
+						copycurname();
 					clearfilter();
 					goto begin;
 				}
