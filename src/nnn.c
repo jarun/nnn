@@ -7259,8 +7259,12 @@ nochange:
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		case SEL_UMOUNT:
-			if (!unmount((ndents ? pdents[cur].name : NULL), newpath, &presel, path))
+			presel = MSG_ZERO;
+			if (!unmount((ndents ? pdents[cur].name : NULL), newpath, &presel, path)) {
+				if (presel == MSG_ZERO)
+					statusbar(path);
 				goto nochange;
+			}
 
 			/* Dir removed, go to next entry */
 			copynextname(lastname);
