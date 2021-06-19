@@ -245,7 +245,7 @@
 typedef unsigned int uint_t;
 typedef unsigned char uchar_t;
 typedef unsigned short ushort_t;
-typedef unsigned long long ulong_t;
+typedef unsigned long long ullong_t;
 
 /* STRUCTURES */
 
@@ -257,9 +257,9 @@ typedef struct entry {
 	mode_t mode; /* 4 bytes */
 	off_t size; /* 8 bytes */
 	struct {
-		ulong_t blocks : 40; /* 5 bytes (enough for 512 TiB in 512B blocks allocated) */
-		ulong_t nlen : 16; /* 2 bytes (length of file name) */
-		ulong_t flags : 8; /* 1 byte (flags specific to the file) */
+		ullong_t blocks : 40; /* 5 bytes (enough for 512 TiB in 512B blocks allocated) */
+		ullong_t nlen : 16; /* 2 bytes (length of file name) */
+		ullong_t flags : 8; /* 1 byte (flags specific to the file) */
 	};
 #ifndef NOUG
 	uid_t uid; /* 4 bytes */
@@ -429,7 +429,7 @@ static char *mark;
 static char *hfifopath; /* FIFO used in hover (NNN_FIFO) */
 static char *efifopath; /* FIFO used in explorer mode (-X) */
 #endif
-static unsigned long long *ihashbmp;
+static ullong_t *ihashbmp;
 static struct entry *pdents;
 static blkcnt_t dir_blocks;
 static kv *bookmark;
@@ -454,9 +454,9 @@ static int threadbmp = -1; /* Has 1 in the bit position for idle threads */
 static volatile int active_threads;
 static pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t hardlink_mutex = PTHREAD_MUTEX_INITIALIZER;
-static ulong_t *core_files;
+static ullong_t *core_files;
 static blkcnt_t *core_blocks;
-static ulong_t num_files;
+static ullong_t num_files;
 
 typedef struct {
 	char path[PATH_MAX];
@@ -883,7 +883,7 @@ static bool test_set_bit(uint_t nr)
 	nr &= HASH_BITS;
 
 	pthread_mutex_lock(&hardlink_mutex);
-	ulong_t *m = ((ulong_t *)ihashbmp) + (nr >> 6);
+	ullong_t *m = ((ullong_t *)ihashbmp) + (nr >> 6);
 
 	if (*m & (1 << (nr & 63))) {
 		pthread_mutex_unlock(&hardlink_mutex);
@@ -5026,7 +5026,7 @@ static void *du_thread(void *p_data)
 {
 	thread_data *pdata = (thread_data *)p_data;
 	char *path[2] = {pdata->path, NULL};
-	ulong_t tfiles = 0;
+	ullong_t tfiles = 0;
 	blkcnt_t tblocks = 0;
 	struct stat *sb;
 	FTS *tree = fts_open(path, FTS_PHYSICAL | FTS_XDEV | FTS_NOCHDIR, 0);
@@ -5104,7 +5104,7 @@ static void prep_threads(void)
 
 		core_blocks = calloc(NUM_DU_THREADS, sizeof(blkcnt_t));
 		core_data = calloc(NUM_DU_THREADS, sizeof(thread_data));
-		core_files = calloc(NUM_DU_THREADS, sizeof(ulong_t));
+		core_files = calloc(NUM_DU_THREADS, sizeof(ullong_t));
 
 #ifndef __APPLE__
 		/* Increase current open file descriptor limit */
@@ -5114,7 +5114,7 @@ static void prep_threads(void)
 	} else {
 		memset(core_blocks, 0, NUM_DU_THREADS * sizeof(blkcnt_t));
 		memset(core_data, 0, NUM_DU_THREADS * sizeof(thread_data));
-		memset(core_files, 0, NUM_DU_THREADS * sizeof(ulong_t));
+		memset(core_files, 0, NUM_DU_THREADS * sizeof(ullong_t));
 	}
 }
 
@@ -5803,7 +5803,7 @@ static void statusbar(char *path)
 
 		printw("%cu:%s free:%s files:%llu %lluB %s\n",
 		       (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
-		       num_files, (ulong_t)pent->blocks << blk_shift, ptr);
+		       num_files, (ullong_t)pent->blocks << blk_shift, ptr);
 	} else { /* light or detail mode */
 		char sort[] = "\0\0\0\0\0";
 
@@ -7597,7 +7597,7 @@ static void check_key_collision(void)
 	int key;
 	bool bitmap[KEY_MAX] = {FALSE};
 
-	for (ulong_t i = 0; i < sizeof(bindings) / sizeof(struct key); ++i) {
+	for (ullong_t i = 0; i < sizeof(bindings) / sizeof(struct key); ++i) {
 		key = bindings[i].sym;
 
 		if (bitmap[key])
