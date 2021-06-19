@@ -650,13 +650,14 @@ static const char * const messages[] = {
 #define NNN_PLUG 2
 #define NNN_OPENER 3
 #define NNN_COLORS 4
-#define NNNLVL 5
-#define NNN_PIPE 6
-#define NNN_MCLICK 7
-#define NNN_SEL 8
-#define NNN_ARCHIVE 9
-#define NNN_HELP 10 /* strings end here */
-#define NNN_TRASH 11 /* flags begin here */
+#define NNN_FCOLORS 5
+#define NNNLVL 6
+#define NNN_PIPE 7
+#define NNN_MCLICK 8
+#define NNN_SEL 9
+#define NNN_ARCHIVE 10
+#define NNN_HELP 11 /* strings end here */
+#define NNN_TRASH 12 /* flags begin here */
 
 static const char * const env_cfg[] = {
 	"NNN_OPTS",
@@ -664,6 +665,7 @@ static const char * const env_cfg[] = {
 	"NNN_PLUG",
 	"NNN_OPENER",
 	"NNN_COLORS",
+	"NNN_FCOLORS",
 	"NNNLVL",
 	"NNN_PIPE",
 	"NNN_MCLICK",
@@ -1789,7 +1791,7 @@ static void export_file_list(void)
 
 static bool init_fcolors(void)
 {
-	char *f_colors = getenv("NNN_FCOLORS");
+	char *f_colors = getenv(env_cfg[NNN_FCOLORS]);
 
 	if (!f_colors || !*f_colors)
 		f_colors = gcolors;
@@ -1856,7 +1858,7 @@ static bool initcurses(void *oldmask)
 		if (COLORS >= 256) {
 			if (!(g_state.oldcolor || init_fcolors())) {
 				exitcurses();
-				msg("NNN_FCOLORS!");
+				msg(env_cfg[NNN_FCOLORS]);
 				return FALSE;
 			}
 		} else
@@ -1897,7 +1899,7 @@ static bool initcurses(void *oldmask)
 						fcolors[i + 1] = *pcode += xchartohex(*colors);
 					else { /* Each color code must be 2 hex symbols */
 						exitcurses();
-						msg("NNN_COLORS!");
+						msg(env_cfg[NNN_COLORS]);
 						return FALSE;
 					}
 				} else
