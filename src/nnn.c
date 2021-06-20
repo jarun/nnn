@@ -7857,8 +7857,12 @@ int main(int argc, char *argv[])
 			break;
 #ifndef NOFIFO
 		case 'F':
-			if (env_opts_id < 0)
-				g_state.fifobits = atoi(optarg);
+			if (env_opts_id < 0) {
+				fd = atoi(optarg);
+				if ((fd < 0) || (fd > 2))
+					return EXIT_FAILURE;
+				g_state.fifobits = fd;
+			}
 			break;
 #endif
 		case 'g':
