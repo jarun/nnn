@@ -6,8 +6,10 @@
 .Nd The unorthodox terminal file manager.
 .Sh SYNOPSIS
 .Nm
-.Op Ar -aAcCdDeEfgHJKlnQrRSuUVwxXh
+.Op Ar -aAcCdDeEfgHJKnQrRSuUVwxh
 .Op Ar -b key
+.Op Ar -F val
+.Op Ar -l val
 .Op Ar -p file
 .Op Ar -P key
 .Op Ar -s name
@@ -71,6 +73,10 @@ supports the following options:
 .Pp
 .Fl f
         use readline history file
+.Pp
+.Fl "F val"
+        fifo notification mode
+        0: notify as previewer, 1: notify as explorer, 2: both
 .Pp
 .Fl g
         use regex filters instead of substring match
@@ -138,9 +144,6 @@ supports the following options:
         show notis on selection cp, mv, rm completion
         copy path to system clipboard on select
         show xterm title (if non-picker mode)
-.Pp
-.Fl "X fifo"
-        run in explorer mode, where file path is sent to 'fifo' on 'Enter' or '^M'
 .Pp
 .Fl h
         show program help and exit
