@@ -446,7 +446,7 @@ static regex_t archive_re;
 /* pthread related */
 #define NUM_DU_THREADS (4) /* Can use sysconf(_SC_NPROCESSORS_ONLN) */
 #define DU_TEST (((node->fts_info & FTS_F) && \
-			(sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino))) || node->fts_info & FTS_DP)
+		(sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino))) || node->fts_info & FTS_DP)
 
 static int threadbmp = -1; /* Has 1 in the bit position for idle threads */
 static volatile int active_threads;
@@ -508,6 +508,8 @@ static runstate g_state;
 #define UTIL_NTFY 15
 #define UTIL_CBCP 16
 #define UTIL_NMV 17
+#define UTIL_TRASH_CLI 18
+#define UTIL_GIO_TRASH 19
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -545,6 +547,8 @@ static char * const utils[] = {
 	".ntfy",
 	".cbcp",
 	".nmv",
+	"trash-put",
+	"gio trash",
 };
 
 /* Common strings */
@@ -570,7 +574,7 @@ static char * const utils[] = {
 #define MSG_NEW_PATH 19
 #define MSG_LINK_PREFIX 20
 #define MSG_COPY_NAME 21
-#define MSG_RETURN 22
+#define MSG_ENTER 22
 #define MSG_SEL_MISSING 23
 #define MSG_ACCESS 24
 #define MSG_EMPTY_FILE 25
@@ -915,9 +919,7 @@ static void max_openfds(void)
  * Wrapper to realloc()
  * Frees current memory if realloc() fails and returns NULL.
  *
- * As per the docs, the *alloc() family is supposed to be memory aligned:
- * Ubuntu: https://manpages.ubuntu.com/manpages/xenial/man3/malloc.3.html
- * macOS: https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/malloc.3.html
+ * The *alloc() family returns aligned address: https://man7.org/linux/man-pages/man3/malloc.3.html
  */
 static void *xrealloc(void *pcur, size_t len)
 {
@@ -1834,10 +1836,10 @@ static bool initcurses(void *oldmask)
 #ifndef NOMOUSE
 #if NCURSES_MOUSE_VERSION <= 1
 	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED | BUTTON2_PRESSED | BUTTON3_PRESSED,
-			(mmask_t *)oldmask);
+		  (mmask_t *)oldmask);
 #else
-	mousemask(BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED | BUTTON5_PRESSED,
-			(mmask_t *)oldmask);
+	mousemask(BUTTON1_PRESSED | BUTTON2_PRESSED | BUTTON3_PRESSED | BUTTON4_PRESSED
+		  | BUTTON5_PRESSED, (mmask_t *)oldmask);
 #endif
 	mouseinterval(0);
 #endif
@@ -2119,11 +2121,10 @@ static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag)
 		_exit(EXIT_SUCCESS);
 	} else {
 		retstatus = join(pid, flag);
-
 		DPRINTF_D(pid);
 
 		if ((flag & F_CONFIRM) || ((flag & F_CHKRTN) && retstatus)) {
-			status = write(STDOUT_FILENO, messages[MSG_RETURN], xstrlen(messages[MSG_RETURN]));
+			status = write(STDOUT_FILENO, messages[MSG_ENTER], xstrlen(messages[MSG_ENTER]));
 			(void)status;
 			while ((read(STDIN_FILENO, &status, 1) > 0) && (status != '\n'));
 		}
@@ -2186,10 +2187,9 @@ static bool rmmulstr(char *buf)
 
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr \"$0\" \"$@\" < /dev/tty' < %s",
 			 r, selpath);
-	} else if (g_state.trash == 1)
-		snprintf(buf, CMD_LEN_MAX, "xargs -0 trash-put < %s", selpath);
-	else
-		snprintf(buf, CMD_LEN_MAX, "xargs -0 gio trash < %s", selpath);
+	} else
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 %s < %s",
+			 utils[(g_state.trash == 1) ? UTIL_TRASH_CLI : UTIL_GIO_TRASH], selpath);
 
 	return TRUE;
 }
@@ -2205,10 +2205,9 @@ static bool xrm(char *fpath)
 			return FALSE;
 
 		spawn("rm", rm_opts, fpath, NULL, F_NORMAL | F_CHKRTN);
-	} else if (g_state.trash == 1)
-		spawn("trash-put", fpath, NULL, NULL, F_NORMAL);
-	else
-		spawn("gio trash", fpath, NULL, NULL, F_NORMAL | F_MULTI);
+	} else
+		spawn(utils[(g_state.trash == 1) ? UTIL_TRASH_CLI : UTIL_GIO_TRASH],
+		      fpath, NULL, NULL, F_NORMAL | F_MULTI);
 
 	return (access(fpath, F_OK) == -1); /* File is removed */
 }
@@ -2335,7 +2334,8 @@ static bool batch_rename(void)
 	bool dir = FALSE, ret = FALSE;
 	char foriginal[TMP_LEN_MAX] = {0};
 	static const char batchrenamecmd[] = "paste -d'\n' %s %s | "SED" 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
-					     "tr '\n' '\\0' | xargs -0 -n2 sh -c 'mv -i \"$0\" \"$@\" < /dev/tty'";
+					     "tr '\n' '\\0' | xargs -0 -n2 sh -c 'mv -i \"$0\" \"$@\" <"
+					     " /dev/tty'";
 	char buf[sizeof(batchrenamecmd) + (PATH_MAX << 1)];
 	int i = get_cur_or_sel();
 
@@ -2813,11 +2813,13 @@ try_quit:
 			struct kevent event_data[NUM_EVENT_SLOTS];
 
 			memset((void *)event_data, 0x0, sizeof(struct kevent) * NUM_EVENT_SLOTS);
-			if (kevent(kq, events_to_monitor, NUM_EVENT_SLOTS, event_data, NUM_EVENT_FDS, &gtimeout) > 0)
+			if (kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
+				   event_data, NUM_EVENT_FDS, &gtimeout) > 0)
 				c = CONTROL('L');
 		}
 #elif defined(HAIKU_NM)
-		if (!g_state.selmode && !cfg.blkorder && haiku_nm_active && idle & 1 && haiku_is_update_needed(haiku_hnd))
+		if (!g_state.selmode && !cfg.blkorder && haiku_nm_active
+		    && (idle & 1) && haiku_is_update_needed(haiku_hnd))
 			c = CONTROL('L');
 #endif
 	} else
@@ -4846,7 +4848,7 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 		set_smart_ctx(ctx, nextpath, path, lastname, lastdir);
 }
 
-static bool run_selected_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir)
+static bool run_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir)
 {
 	pid_t p;
 	bool cmd_as_plugin = FALSE;
@@ -5358,7 +5360,8 @@ static int dentfill(char *path, struct entry **ppdents)
 			if (S_ISDIR(sb.st_mode))
 				dentp->flags |= DIR_OR_LINK_TO_DIR;
 #if !(defined(__sun) || defined(__HAIKU__)) /* no d_type */
-		} else if (dp->d_type == DT_DIR || ((dp->d_type == DT_LNK || dp->d_type == DT_UNKNOWN) && S_ISDIR(sb.st_mode))) {
+		} else if (dp->d_type == DT_DIR || ((dp->d_type == DT_LNK
+			   || dp->d_type == DT_UNKNOWN) && S_ISDIR(sb.st_mode))) {
 			dentp->flags |= DIR_OR_LINK_TO_DIR;
 #endif
 		}
@@ -6342,9 +6345,8 @@ nochange:
 				if (r != cur)
 					move_cursor(r, 1);
 #ifndef NOFIFO
-				else if ((event.bstate == BUTTON1_PRESSED) && !(g_state.fifobits & 1)) {
+				else if ((event.bstate == BUTTON1_PRESSED) && !(g_state.fifobits & 1))
 					notify_fifo(TRUE); /* Send clicked path to NNN_FIFO */
-				}
 #endif
 				/* Handle right click selection */
 				if (event.bstate == BUTTON3_PRESSED) {
@@ -6399,7 +6401,8 @@ nochange:
 					goto nochange;
 				}
 
-				cdprep(lastdir, lastname, path, newpath) ? (presel = FILTER) : (watch = TRUE);
+				cdprep(lastdir, lastname, path, newpath)
+					? (presel = FILTER) : (watch = TRUE);
 				goto begin;
 			}
 
@@ -6470,7 +6473,7 @@ nochange:
 					rundir[0] = '\0';
 
 					if (chdir(path) == -1
-					    || !run_selected_plugin(&path, pent->name,
+					    || !run_plugin(&path, pent->name,
 								    runfile, &lastname, &lastdir)) {
 						DPRINTF_S("plugin failed!");
 					}
@@ -6913,7 +6916,8 @@ nochange:
 				selendid = ndents - 1;
 			}
 
-			(sel == SEL_SELINV) ? invertselbuf(path, TRUE) : addtoselbuf(path, selstartid, selendid);
+			(sel == SEL_SELINV)
+				? invertselbuf(path, TRUE) : addtoselbuf(path, selstartid, selendid);
 
 #ifndef NOX11
 			if (cfg.x11)
@@ -7059,7 +7063,8 @@ nochange:
 				}
 				get_archive_cmd(newpath, tmp);
 				(r == 's') ? archive_selection(newpath, tmp, path)
-					   : spawn(newpath, tmp, pdents[cur].name, NULL, F_CLI | F_CONFIRM);
+					   : spawn(newpath, tmp, pdents[cur].name,
+						   NULL, F_CLI | F_CONFIRM);
 
 				mkpath(path, tmp, newpath);
 				if (access(newpath, F_OK) == 0) { /* File created */
@@ -7193,7 +7198,7 @@ nochange:
 				} else
 					r = TRUE;
 
-				if (!run_selected_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL),
+				if (!run_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL),
 							 &lastname, &lastdir)) {
 					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;
