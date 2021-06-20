@@ -128,7 +128,7 @@
 #endif
 
 /* Macro definitions */
-#define VERSION "4.1.1"
+#define VERSION      "4.1.1"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
 
 #ifndef NOSSN
@@ -151,36 +151,38 @@
 #define PATH_MAX 4096
 #endif
 
-#define _ABSSUB(N, M) (((N) <= (M)) ? ((M) - (N)) : ((N) - (M)))
-#define DOUBLECLICK_INTERVAL_NS (400000000)
-#define XDELAY_INTERVAL_MS (350000) /* 350 ms delay */
-#define ELEMENTS(x) (sizeof(x) / sizeof(*(x)))
+#define _ABSSUB(N, M)   (((N) <= (M)) ? ((M) - (N)) : ((N) - (M)))
+#define ELEMENTS(x)     (sizeof(x) / sizeof(*(x)))
 #undef MIN
-#define MIN(x, y) ((x) < (y) ? (x) : (y))
+#define MIN(x, y)       ((x) < (y) ? (x) : (y))
 #undef MAX
-#define MAX(x, y) ((x) > (y) ? (x) : (y))
-#define ISODD(x) ((x) & 1)
-#define ISBLANK(x) ((x) == ' ' || (x) == '\t')
-#define TOUPPER(ch) (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
-#define CMD_LEN_MAX (PATH_MAX + ((NAME_MAX + 1) << 1))
-#define READLINE_MAX 256
-#define FILTER '/'
-#define RFILTER '\\'
-#define CASE ':'
-#define MSGWAIT '$'
-#define SELECT ' '
-#define REGEX_MAX 48
-#define ENTRY_INCR 64 /* Number of dir 'entry' structures to allocate per shot */
-#define NAMEBUF_INCR 0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
-#define DESCRIPTOR_LEN 32
-#define _ALIGNMENT 0x10 /* 16-byte alignment */
+#define MAX(x, y)       ((x) > (y) ? (x) : (y))
+#define ISODD(x)        ((x) & 1)
+#define ISBLANK(x)      ((x) == ' ' || (x) == '\t')
+#define TOUPPER(ch)     (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
+#define CMD_LEN_MAX     (PATH_MAX + ((NAME_MAX + 1) << 1))
+#define READLINE_MAX    256
+#define FILTER          '/'
+#define RFILTER         '\\'
+#define CASE            ':'
+#define MSGWAIT         '$'
+#define SELECT          ' '
+#define REGEX_MAX       48
+#define ENTRY_INCR      64 /* Number of dir 'entry' structures to allocate per shot */
+#define NAMEBUF_INCR    0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
+#define DESCRIPTOR_LEN  32
+#define _ALIGNMENT      0x10 /* 16-byte alignment */
 #define _ALIGNMENT_MASK 0xF
-#define TMP_LEN_MAX 64
-#define DOT_FILTER_LEN 7
-#define ASCII_MAX 128
-#define EXEC_ARGS_MAX 10
-#define LIST_FILES_MAX (1 << 16)
-#define SCROLLOFF 3
+#define TMP_LEN_MAX     64
+#define DOT_FILTER_LEN  7
+#define ASCII_MAX       128
+#define EXEC_ARGS_MAX   10
+#define LIST_FILES_MAX  (1 << 16)
+#define SCROLLOFF       3
+
+/* Time intervals */
+#define DBLCLK_INTERVAL_NS (400000000)
+#define XDELAY_INTERVAL_MS (350000) /* 350 ms delay */
 
 #ifndef CTX8
 #define CTX_MAX 4
@@ -194,32 +196,32 @@
 #define SED "sed"
 #endif
 
-#define MIN_DISPLAY_COLS (CTX_MAX * 2)
+#define MIN_DISPLAY_COL (CTX_MAX * 2)
 #define ARCHIVE_CMD_LEN 16
-#define BLK_SHIFT_512 9
+#define BLK_SHIFT_512   9
 
 /* Detect hardlinks in du */
-#define HASH_BITS (0xFFFFFF)
+#define HASH_BITS   (0xFFFFFF)
 #define HASH_OCTETS (HASH_BITS >> 6) /* 2^6 = 64 */
 
 /* Entry flags */
-#define DIR_OR_LINK_TO_DIR 0x01
-#define HARD_LINK 0x02
-#define SYM_ORPHAN 0x04
-#define FILE_MISSING 0x08
+#define DIR_OR_DIRLNK 0x01
+#define HARD_LINK     0x02
+#define SYM_ORPHAN    0x04
+#define FILE_MISSING  0x08
 #define FILE_SELECTED 0x10
 
 /* Macros to define process spawn behaviour as flags */
-#define F_NONE      0x00  /* no flag set */
-#define F_MULTI     0x01  /* first arg can be combination of args; to be used with F_NORMAL */
-#define F_NOWAIT    0x02  /* don't wait for child process (e.g. file manager) */
-#define F_NOTRACE   0x04  /* suppress stdout and stderr (no traces) */
-#define F_NORMAL    0x08  /* spawn child process in non-curses regular CLI mode */
-#define F_CONFIRM   0x10  /* run command - show results before exit (must have F_NORMAL) */
-#define F_CHKRTN    0x20  /* wait for user prompt if cmd returns failure status */
-#define F_NOSTDIN   0x40  /* suppress stdin */
-#define F_PAGE      0x80  /* page output in run-cmd-as-plugin mode */
-#define F_FORCE_TTY 0x100 /* Force stdout to go to tty if redirected to a non-tty */
+#define F_NONE    0x00  /* no flag set */
+#define F_MULTI   0x01  /* first arg can be combination of args; to be used with F_NORMAL */
+#define F_NOWAIT  0x02  /* don't wait for child process (e.g. file manager) */
+#define F_NOTRACE 0x04  /* suppress stdout and stderr (no traces) */
+#define F_NORMAL  0x08  /* spawn child process in non-curses regular CLI mode */
+#define F_CONFIRM 0x10  /* run command - show results before exit (must have F_NORMAL) */
+#define F_CHKRTN  0x20  /* wait for user prompt if cmd returns failure status */
+#define F_NOSTDIN 0x40  /* suppress stdin */
+#define F_PAGE    0x80  /* page output in run-cmd-as-plugin mode */
+#define F_TTY     0x100 /* Force stdout to go to tty if redirected to a non-tty */
 #define F_CLI     (F_NORMAL | F_MULTI)
 #define F_SILENT  (F_CLI | F_NOTRACE)
 
@@ -238,7 +240,7 @@
 #define VLEN 3
 
 /* Volume info */
-#define FREE 0
+#define FREE     0
 #define CAPACITY 1
 
 /* TYPE DEFINITIONS */
@@ -251,15 +253,15 @@ typedef unsigned long long ullong_t;
 
 /* Directory entry */
 typedef struct entry {
-	char *name; /* 8 bytes */
-	time_t sec; /* 8 bytes */
+	char *name;  /* 8 bytes */
+	time_t sec;  /* 8 bytes */
 	uint_t nsec; /* 4 bytes (enough to store nanosec) */
 	mode_t mode; /* 4 bytes */
-	off_t size; /* 8 bytes */
+	off_t size;  /* 8 bytes */
 	struct {
 		ullong_t blocks : 40; /* 5 bytes (enough for 512 TiB in 512B blocks allocated) */
-		ullong_t nlen : 16; /* 2 bytes (length of file name) */
-		ullong_t flags : 8; /* 1 byte (flags specific to the file) */
+		ullong_t nlen   : 16; /* 2 bytes (length of file name) */
+		ullong_t flags  : 8;  /* 1 byte (flags specific to the file) */
 	};
 #ifndef NOUG
 	uid_t uid; /* 4 bytes */
@@ -346,12 +348,12 @@ typedef struct {
 
 /* Contexts or workspaces */
 typedef struct {
-	char c_path[PATH_MAX]; /* Current dir */
-	char c_last[PATH_MAX]; /* Last visited dir */
+	char c_path[PATH_MAX];     /* Current dir */
+	char c_last[PATH_MAX];     /* Last visited dir */
 	char c_name[NAME_MAX + 1]; /* Current file name */
-	char c_fltr[REGEX_MAX]; /* Current filter */
-	settings c_cfg; /* Current configuration */
-	uint_t color; /* Color code for directories */
+	char c_fltr[REGEX_MAX];    /* Current filter */
+	settings c_cfg;            /* Current configuration */
+	uint_t color;              /* Color code for directories */
 } context;
 
 #ifndef NOSSN
@@ -490,24 +492,24 @@ static runstate g_state;
 #endif
 
 /* Macros for utilities */
-#define UTIL_OPENER 0
-#define UTIL_ATOOL 1
-#define UTIL_BSDTAR 2
-#define UTIL_UNZIP 3
-#define UTIL_TAR 4
-#define UTIL_LOCKER 5
-#define UTIL_LAUNCH 6
-#define UTIL_SH_EXEC 7
-#define UTIL_BASH 8
-#define UTIL_SSHFS 9
-#define UTIL_RCLONE 10
-#define UTIL_VI 11
-#define UTIL_LESS 12
-#define UTIL_SH 13
-#define UTIL_FZF 14
-#define UTIL_NTFY 15
-#define UTIL_CBCP 16
-#define UTIL_NMV 17
+#define UTIL_OPENER    0
+#define UTIL_ATOOL     1
+#define UTIL_BSDTAR    2
+#define UTIL_UNZIP     3
+#define UTIL_TAR       4
+#define UTIL_LOCKER    5
+#define UTIL_LAUNCH    6
+#define UTIL_SH_EXEC   7
+#define UTIL_BASH      8
+#define UTIL_SSHFS     9
+#define UTIL_RCLONE    10
+#define UTIL_VI        11
+#define UTIL_LESS      12
+#define UTIL_SH        13
+#define UTIL_FZF       14
+#define UTIL_NTFY      15
+#define UTIL_CBCP      16
+#define UTIL_NMV       17
 #define UTIL_TRASH_CLI 18
 #define UTIL_GIO_TRASH 19
 
@@ -552,50 +554,50 @@ static char * const utils[] = {
 };
 
 /* Common strings */
-#define MSG_ZERO 0 /* Unused */
-#define MSG_0_ENTRIES 1
-#define STR_TMPFILE 2
-#define MSG_0_SELECTED 3
-#define MSG_CANCEL 4
-#define MSG_FAILED 5
-#define MSG_SSN_NAME 6
-#define MSG_CP_MV_AS 7
+#define MSG_ZERO         0 /* Unused */
+#define MSG_0_ENTRIES    1
+#define STR_TMPFILE      2
+#define MSG_0_SELECTED   3
+#define MSG_CANCEL       4
+#define MSG_FAILED       5
+#define MSG_SSN_NAME     6
+#define MSG_CP_MV_AS     7
 #define MSG_CUR_SEL_OPTS 8
-#define MSG_FORCE_RM 9
-#define MSG_LIMIT 10
-#define MSG_NEW_OPTS 11
-#define MSG_CLI_MODE 12
-#define MSG_OVERWRITE 13
-#define MSG_SSN_OPTS 14
-#define MSG_QUIT_ALL 15
-#define MSG_HOSTNAME 16
+#define MSG_FORCE_RM     9
+#define MSG_LIMIT        10
+#define MSG_NEW_OPTS     11
+#define MSG_CLI_MODE     12
+#define MSG_OVERWRITE    13
+#define MSG_SSN_OPTS     14
+#define MSG_QUIT_ALL     15
+#define MSG_HOSTNAME     16
 #define MSG_ARCHIVE_NAME 17
-#define MSG_OPEN_WITH 18
-#define MSG_NEW_PATH 19
-#define MSG_LINK_PREFIX 20
-#define MSG_COPY_NAME 21
-#define MSG_ENTER 22
-#define MSG_SEL_MISSING 23
-#define MSG_ACCESS 24
-#define MSG_EMPTY_FILE 25
-#define MSG_UNSUPPORTED 26
-#define MSG_NOT_SET 27
-#define MSG_EXISTS 28
-#define MSG_FEW_COLUMNS 29
-#define MSG_REMOTE_OPTS 30
+#define MSG_OPEN_WITH    18
+#define MSG_NEW_PATH     19
+#define MSG_LINK_PREFIX  20
+#define MSG_COPY_NAME    21
+#define MSG_ENTER        22
+#define MSG_SEL_MISSING  23
+#define MSG_ACCESS       24
+#define MSG_EMPTY_FILE   25
+#define MSG_UNSUPPORTED  26
+#define MSG_NOT_SET      27
+#define MSG_EXISTS       28
+#define MSG_FEW_COLUMNS  29
+#define MSG_REMOTE_OPTS  30
 #define MSG_RCLONE_DELAY 31
-#define MSG_APP_NAME 32
+#define MSG_APP_NAME     32
 #define MSG_ARCHIVE_OPTS 33
-#define MSG_KEYS 34
-#define MSG_INVALID_REG 35
-#define MSG_ORDER 36
-#define MSG_LAZY 37
-#define MSG_FIRST 38
-#define MSG_RM_TMP 39
-#define MSG_INVALID_KEY 40
-#define MSG_NOCHANGE 41
+#define MSG_KEYS         34
+#define MSG_INVALID_REG  35
+#define MSG_ORDER        36
+#define MSG_LAZY         37
+#define MSG_FIRST        38
+#define MSG_RM_TMP       39
+#define MSG_INVALID_KEY  40
+#define MSG_NOCHANGE     41
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED 42 /* Must be the last entry */
+#define MSG_DIR_CHANGED  42 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -647,19 +649,19 @@ static const char * const messages[] = {
 };
 
 /* Supported configuration environment variables */
-#define NNN_OPTS 0
-#define NNN_BMS 1
-#define NNN_PLUG 2
-#define NNN_OPENER 3
-#define NNN_COLORS 4
+#define NNN_OPTS    0
+#define NNN_BMS     1
+#define NNN_PLUG    2
+#define NNN_OPENER  3
+#define NNN_COLORS  4
 #define NNN_FCOLORS 5
-#define NNNLVL 6
-#define NNN_PIPE 7
-#define NNN_MCLICK 8
-#define NNN_SEL 9
+#define NNNLVL      6
+#define NNN_PIPE    7
+#define NNN_MCLICK  8
+#define NNN_SEL     9
 #define NNN_ARCHIVE 10
-#define NNN_HELP 11 /* strings end here */
-#define NNN_TRASH 12 /* flags begin here */
+#define NNN_HELP    11 /* strings end here */
+#define NNN_TRASH   12 /* flags begin here */
 
 static const char * const env_cfg[] = {
 	"NNN_OPTS",
@@ -678,11 +680,11 @@ static const char * const env_cfg[] = {
 };
 
 /* Required environment variables */
-#define ENV_SHELL 0
+#define ENV_SHELL  0
 #define ENV_VISUAL 1
 #define ENV_EDITOR 2
-#define ENV_PAGER 3
-#define ENV_NCUR 4
+#define ENV_PAGER  3
+#define ENV_NCUR   4
 
 static const char * const envs[] = {
 	"SHELL",
@@ -695,7 +697,7 @@ static const char * const envs[] = {
 /* Time type used */
 #define T_ACCESS 0
 #define T_CHANGE 1
-#define T_MOD 2
+#define T_MOD    2
 
 #ifdef __linux__
 static char cp[] = "cp   -iRp";
@@ -735,17 +737,17 @@ static const char * const patterns[] = {
 
 /* Colors */
 #define C_BLK (CTX_MAX + 1) /* Block device: DarkSeaGreen1 */
-#define C_CHR (C_BLK + 1) /* Character device: Yellow1 */
-#define C_DIR (C_CHR + 1) /* Directory: DeepSkyBlue1 */
-#define C_EXE (C_DIR + 1) /* Executable file: Green1 */
-#define C_FIL (C_EXE + 1) /* Regular file: Normal */
-#define C_HRD (C_FIL + 1) /* Hard link: Plum4 */
-#define C_LNK (C_HRD + 1) /* Symbolic link: Cyan1 */
-#define C_MIS (C_LNK + 1) /* Missing file OR file details: Grey62 */
-#define C_ORP (C_MIS + 1) /* Orphaned symlink: DeepPink1 */
-#define C_PIP (C_ORP + 1) /* Named pipe (FIFO): Orange1 */
-#define C_SOC (C_PIP + 1) /* Socket: MediumOrchid1 */
-#define C_UND (C_SOC + 1) /* Unknown OR 0B regular/exe file: Red1 */
+#define C_CHR (C_BLK + 1)   /* Character device: Yellow1 */
+#define C_DIR (C_CHR + 1)   /* Directory: DeepSkyBlue1 */
+#define C_EXE (C_DIR + 1)   /* Executable file: Green1 */
+#define C_FIL (C_EXE + 1)   /* Regular file: Normal */
+#define C_HRD (C_FIL + 1)   /* Hard link: Plum4 */
+#define C_LNK (C_HRD + 1)   /* Symbolic link: Cyan1 */
+#define C_MIS (C_LNK + 1)   /* Missing file OR file details: Grey62 */
+#define C_ORP (C_MIS + 1)   /* Orphaned symlink: DeepPink1 */
+#define C_PIP (C_ORP + 1)   /* Named pipe (FIFO): Orange1 */
+#define C_SOC (C_PIP + 1)   /* Socket: MediumOrchid1 */
+#define C_UND (C_SOC + 1)   /* Unknown OR 0B regular/exe file: Red1 */
 
 #ifdef ICONS_ENABLED
 /* 0-9, A-Z, OTHER = 36. */
@@ -2108,7 +2110,7 @@ static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag)
 			dup2(fd, STDOUT_FILENO);
 			dup2(fd, STDERR_FILENO);
 			close(fd);
-		} else if (flag & F_FORCE_TTY) {
+		} else if (flag & F_TTY) {
 			/* If stdout has been redirected to a non-tty, force output to tty */
 			if (!isatty(STDOUT_FILENO)) {
 				int fd = open(ctermid(NULL), O_WRONLY, 0200);
@@ -2640,8 +2642,8 @@ static int entrycmp(const void *va, const void *vb)
 	const struct entry *pa = (pEntry)va;
 	const struct entry *pb = (pEntry)vb;
 
-	if ((pb->flags & DIR_OR_LINK_TO_DIR) != (pa->flags & DIR_OR_LINK_TO_DIR)) {
-		if (pb->flags & DIR_OR_LINK_TO_DIR)
+	if ((pb->flags & DIR_OR_DIRLNK) != (pa->flags & DIR_OR_DIRLNK)) {
+		if (pb->flags & DIR_OR_DIRLNK)
 			return 1;
 		return -1;
 	}
@@ -2667,7 +2669,7 @@ static int entrycmp(const void *va, const void *vb)
 			return 1;
 		if (pb->blocks < pa->blocks)
 			return -1;
-	} else if (cfg.extnorder && !(pb->flags & DIR_OR_LINK_TO_DIR)) {
+	} else if (cfg.extnorder && !(pb->flags & DIR_OR_DIRLNK)) {
 		char *extna = xextension(pa->name, pa->nlen - 1);
 		char *extnb = xextension(pb->name, pb->nlen - 1);
 
@@ -2690,9 +2692,9 @@ static int entrycmp(const void *va, const void *vb)
 
 static int reventrycmp(const void *va, const void *vb)
 {
-	if ((((pEntry)vb)->flags & DIR_OR_LINK_TO_DIR)
-	    != (((pEntry)va)->flags & DIR_OR_LINK_TO_DIR)) {
-		if (((pEntry)vb)->flags & DIR_OR_LINK_TO_DIR)
+	if ((((pEntry)vb)->flags & DIR_OR_DIRLNK)
+	    != (((pEntry)va)->flags & DIR_OR_DIRLNK)) {
+		if (((pEntry)vb)->flags & DIR_OR_DIRLNK)
 			return 1;
 		return -1;
 	}
@@ -3127,7 +3129,7 @@ static int filterentries(char *path, char *lastname)
 
 		/* If the only match is a dir, auto-select and cd into it */
 		if (ndents == 1 && cfg.filtermode
-		    && cfg.autoselect && (pdents[0].flags & DIR_OR_LINK_TO_DIR)) {
+		    && cfg.autoselect && (pdents[0].flags & DIR_OR_DIRLNK)) {
 			*ch = KEY_ENTER;
 			cur = 0;
 			goto end;
@@ -3508,7 +3510,7 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
 static void resetdircolor(int flags)
 {
 	/* Directories are always shown on top, clear the color when moving to first file */
-	if (g_state.dircolor && !(flags & DIR_OR_LINK_TO_DIR)) {
+	if (g_state.dircolor && !(flags & DIR_OR_DIRLNK)) {
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		g_state.dircolor = 0;
 	}
@@ -3681,7 +3683,7 @@ static const struct icon_pair *get_icon(const struct entry *ent)
 		if (strcasecmp(ent->name, icons_name[i].match) == 0)
 			return &icons_name[i];
 
-	if (ent->flags & DIR_OR_LINK_TO_DIR)
+	if (ent->flags & DIR_OR_DIRLNK)
 		return &dir_icon;
 
 	char *tmp = xextension(ent->name, ent->nlen);
@@ -3783,7 +3785,7 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int 
 		*pattr |= A_BOLD;
 		return g_state.dirctx ? cfg.curctx + 1 : C_DIR;
 	case S_IFLNK:
-		if (ent->flags & DIR_OR_LINK_TO_DIR) {
+		if (ent->flags & DIR_OR_DIRLNK) {
 			*pind = '/';
 			*pattr |= g_state.oldcolor ? A_DIM : A_BOLD;
 		} else {
@@ -4155,7 +4157,7 @@ static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool multi
 		close(fd);
 	}
 
-	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_FORCE_TTY);
+	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_TTY);
 
 	if (tmpfile)
 		unlink(g_tmpfpath);
@@ -4186,7 +4188,7 @@ static bool show_stats(char *fpath)
 
 	close(fd);
 
-	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_FORCE_TTY);
+	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_TTY);
 	unlink(g_tmpfpath);
 	return TRUE;
 }
@@ -4728,7 +4730,7 @@ static void show_help(const char *path)
 	dprintf(fd, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
 	close(fd);
 
-	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_FORCE_TTY);
+	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_TTY);
 	unlink(g_tmpfpath);
 }
 
@@ -5358,11 +5360,11 @@ static int dentfill(char *path, struct entry **ppdents)
 			}
 
 			if (S_ISDIR(sb.st_mode))
-				dentp->flags |= DIR_OR_LINK_TO_DIR;
+				dentp->flags |= DIR_OR_DIRLNK;
 #if !(defined(__sun) || defined(__HAIKU__)) /* no d_type */
 		} else if (dp->d_type == DT_DIR || ((dp->d_type == DT_LNK
 			   || dp->d_type == DT_UNKNOWN) && S_ISDIR(sb.st_mode))) {
-			dentp->flags |= DIR_OR_LINK_TO_DIR;
+			dentp->flags |= DIR_OR_DIRLNK;
 #endif
 		}
 
@@ -5535,7 +5537,7 @@ static void handle_screen_move(enum action sel)
 		int r = (c == TOUPPER(*pdents[cur].name)) ? (cur + 1) : 0;
 
 		for (; r < ndents; ++r) {
-			if (((c == '\'') && !(pdents[r].flags & DIR_OR_LINK_TO_DIR))
+			if (((c == '\'') && !(pdents[r].flags & DIR_OR_DIRLNK))
 			    || (c == TOUPPER(*pdents[r].name))) {
 				move_cursor((r) % ndents, 0);
 				break;
@@ -5901,7 +5903,7 @@ static void draw_line(char *path, int ncols)
 
 	ncols = adjust_cols(ncols);
 
-	if (g_state.oldcolor && (pdents[last].flags & DIR_OR_LINK_TO_DIR)) {
+	if (g_state.oldcolor && (pdents[last].flags & DIR_OR_DIRLNK)) {
 		attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 		dir = TRUE;
 	}
@@ -5909,7 +5911,7 @@ static void draw_line(char *path, int ncols)
 	move(2 + last - curscroll, 0);
 	printent(&pdents[last], ncols, FALSE);
 
-	if (g_state.oldcolor && (pdents[cur].flags & DIR_OR_LINK_TO_DIR)) {
+	if (g_state.oldcolor && (pdents[cur].flags & DIR_OR_DIRLNK)) {
 		if (!dir)  {/* First file is not a directory */
 			attron(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 			dir = TRUE;
@@ -5956,7 +5958,7 @@ static void redraw(char *path)
 	move_cursor(cur, 1);
 
 	/* Fail redraw if < than 10 columns, context info prints 10 chars */
-	if (ncols <= MIN_DISPLAY_COLS) {
+	if (ncols <= MIN_DISPLAY_COL) {
 		printmsg(messages[MSG_FEW_COLUMNS]);
 		return;
 	}
@@ -5982,8 +5984,8 @@ static void redraw(char *path)
 	char *ptr = in_home ? &path[homelen - 1] : path;
 
 	i = (int)xstrlen(ptr);
-	if ((i + MIN_DISPLAY_COLS) <= ncols)
-		addnstr(ptr, ncols - MIN_DISPLAY_COLS);
+	if ((i + MIN_DISPLAY_COL) <= ncols)
+		addnstr(ptr, ncols - MIN_DISPLAY_COL);
 	else {
 		char *base = xmemrchr((uchar_t *)ptr, '/', i);
 
@@ -5998,7 +6000,7 @@ static void redraw(char *path)
 			while (ptr < base) {
 				if (*ptr == '/') {
 					i += 2; /* 2 characters added */
-					if (ncols < i + MIN_DISPLAY_COLS) {
+					if (ncols < i + MIN_DISPLAY_COL) {
 						base = NULL; /* Can't print more characters */
 						break;
 					}
@@ -6011,7 +6013,7 @@ static void redraw(char *path)
 		}
 
 		if (base)
-			addnstr(base, ncols - (MIN_DISPLAY_COLS + i));
+			addnstr(base, ncols - (MIN_DISPLAY_COL + i));
 	}
 
 	if (in_home)
@@ -6371,7 +6373,7 @@ nochange:
 				if ((mousedent[0] != mousedent[1]) ||
 				  (((_ABSSUB(mousetimings[0].tv_sec, mousetimings[1].tv_sec) << 30)
 				  + (_ABSSUB(mousetimings[0].tv_nsec, mousetimings[1].tv_nsec)))
-					> DOUBLECLICK_INTERVAL_NS))
+					> DBLCLK_INTERVAL_NS))
 					break;
 				mousetimings[currentmouse].tv_sec = 0;
 				mousedent[currentmouse] = -1;
@@ -6395,7 +6397,7 @@ nochange:
 			DPRINTF_S(newpath);
 
 			/* Visit directory */
-			if (pent->flags & DIR_OR_LINK_TO_DIR) {
+			if (pent->flags & DIR_OR_DIRLNK) {
 				if (chdir(newpath) == -1) {
 					printwarn(&presel);
 					goto nochange;
