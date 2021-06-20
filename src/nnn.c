@@ -28,7 +28,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if defined(__linux__) || defined(MINGW) || defined(__MINGW32__) || defined(__MINGW64__) || defined(__CYGWIN__)
+#if defined(__linux__) || defined(MINGW) || defined(__MINGW32__) \
+	|| defined(__MINGW64__) || defined(__CYGWIN__)
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
@@ -63,7 +64,8 @@
 #ifndef NCURSES_WIDECHAR
 #define NCURSES_WIDECHAR 1
 #endif
-#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__) || defined(__sun)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) \
+	|| defined(__APPLE__) || defined(__sun)
 #ifndef _XOPEN_SOURCE_EXTENDED
 #define _XOPEN_SOURCE_EXTENDED
 #endif
