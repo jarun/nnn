@@ -317,30 +317,30 @@ typedef struct {
 	uint_t rollover   : 1;  /* Roll over at edges */
 } settings;
 
-/* Non-persistent program-internal states */
+/* Non-persistent program-internal states (alphabeical order) */
 typedef struct {
-	uint_t pluginit   : 1;  /* Plugin framework initialized */
-	uint_t interrupt  : 1;  /* Program received an interrupt */
-	uint_t rangesel   : 1;  /* Range selection on */
-	uint_t move       : 1;  /* Move operation */
-	uint_t autonext   : 1;  /* Auto-proceed on open */
-	uint_t trash      : 2;  /* Use trash to delete files 1: trash-cli, 2: gio trash */
-	uint_t forcequit  : 1;  /* Do not prompt on quit */
 	uint_t autofifo   : 1;  /* Auto-create NNN_FIFO */
-	uint_t initfile   : 1;  /* Positional arg is a file */
+	uint_t autonext   : 1;  /* Auto-proceed on open */
 	uint_t dircolor   : 1;  /* Current status of dir color */
-	uint_t picker     : 1;  /* Write selection to user-specified file */
-	uint_t picked     : 1;  /* Plugin has picked files */
-	uint_t runplugin  : 1;  /* Choose plugin mode */
-	uint_t runctx     : 3;  /* The context in which plugin is to be run */
-	uint_t selmode    : 1;  /* Set when selecting files */
-	uint_t oldcolor   : 1;  /* Use older colorscheme */
-	uint_t stayonsel  : 1;  /* Disable auto-proceed on select */
 	uint_t dirctx     : 1;  /* Show dirs in context color */
-	uint_t uidgid     : 1;  /* Show owner and group info */
-	uint_t prstssn    : 1;  /* Persistent session */
 	uint_t duinit     : 1;  /* Initialize disk usage */
-	uint_t fifobits   : 2;  /* b00: notify previewer, b01: notify explorer, b10: notify both */
+	uint_t fifobits   : 2;  /* FIFO notify mode: b00: previewer, b01: explorer, b10: both */
+	uint_t forcequit  : 1;  /* Do not prompt on quit */
+	uint_t initfile   : 1;  /* Positional arg is a file */
+	uint_t interrupt  : 1;  /* Program received an interrupt */
+	uint_t move       : 1;  /* Move operation */
+	uint_t oldcolor   : 1;  /* Use older colorscheme */
+	uint_t picked     : 1;  /* Plugin has picked files */
+	uint_t picker     : 1;  /* Write selection to user-specified file */
+	uint_t pluginit   : 1;  /* Plugin framework initialized */
+	uint_t prstssn    : 1;  /* Persistent session */
+	uint_t rangesel   : 1;  /* Range selection on */
+	uint_t runctx     : 3;  /* The context in which plugin is to be run */
+	uint_t runplugin  : 1;  /* Choose plugin mode */
+	uint_t selmode    : 1;  /* Set when selecting files */
+	uint_t stayonsel  : 1;  /* Disable auto-proceed on select */
+	uint_t trash      : 2;  /* Use trash to delete files 1: trash-cli, 2: gio trash */
+	uint_t uidgid     : 1;  /* Show owner and group info */
 	uint_t reserved   : 6;  /* Adjust when adding/removing a field */
 } runstate;
 
