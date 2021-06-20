@@ -2,7 +2,7 @@
 
 # Description: Fuzzy search multiple locations read-in from a path-list file
 #              (or $PWD) and open the selected file's dir in a smart context.
-# Dependencies: fzf, fd (only for multi-location search)
+# Dependencies: fzf, find (only for multi-location search)
 #
 # Details: Paths in list file should be newline-separated absolute paths.
 #          Paths can be file paths; the script will scan the parent dirs.
@@ -18,7 +18,7 @@
 #          - OR, edit selection in nnn and save as path-list file
 #
 # Shell: POSIX compliant
-# Author: Anna Arad, Arun Prakash Jana
+# Author: Anna Arad, Arun Prakash Jana, KlzXS
 
 IFS="$(printf '\n\r')"
 
@@ -44,7 +44,7 @@ elif ! [ -s "$LIST" ]; then
 fi
 
 if [ -n "$LIST" ]; then
-    if type fd >/dev/null 2>&1; then
+    if type find >/dev/null 2>&1; then
         tmpfile=$(mktemp /tmp/abc-script.XXXXXX)
 
         while IFS= read -r path; do
@@ -55,11 +55,11 @@ if [ -n "$LIST" ]; then
             fi
         done < "$LIST"
 
-        sel=$(xargs -d '\n' -a "$tmpfile" fd -H . | fzf --delimiter / --tiebreak=begin --info=hidden)
+        sel=$(xargs -d '\n' -a "$tmpfile" -I{} find {} -type f -printf "%H//%P\n" | sed '/.*\/\/\(\..*\|.*\/\..*\)/d; s:/\+:/:g' | fzf --delimiter / --tiebreak=begin --info=hidden)
 
         rm "$tmpfile"
     else
-        printf "fd missing"
+        printf "find missing"
         read -r _
 	    exit 1
     fi
