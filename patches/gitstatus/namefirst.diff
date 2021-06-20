@@ -166,7 +166,7 @@ index b8b222d4..80ef884f 100644
 +
 +			for (size_t i = 0; i < git_statuses.len; ++i)
 +				if (git_statuses.statuses[i].status)
-+					if ((dentp->flags & DIR_OR_LINK_TO_DIR) ? (is_prefix(git_statuses.statuses[i].path, dentpath, namebuflen) &&
++					if ((dentp->flags & DIR_OR_DIRLNK) ? (is_prefix(git_statuses.statuses[i].path, dentpath, namebuflen) &&
 +							namebuflen <= xstrlen(git_statuses.statuses[i].path)) : !xstrcmp(git_statuses.statuses[i].path, dentpath)) {
 +						if (git_statuses.statuses[i].status != GIT_STATUS_IGNORED)
 +							git_statuses.show = TRUE;

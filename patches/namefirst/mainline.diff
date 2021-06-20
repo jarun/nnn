@@ -130,7 +130,7 @@ index eabe30f0..d8dc5925 100644
 +
 +		if (attrs)
 +			attron(attrs);
-+		if (!g_state.oldcolor && (type == S_IFDIR || (type == S_IFLNK && ent->flags & DIR_OR_LINK_TO_DIR)))
++		if (!g_state.oldcolor && (type == S_IFDIR || (type == S_IFLNK && ent->flags & DIR_OR_DIRLNK)))
 +			attroff(A_BOLD);
 +		size_t sizelen = (type == S_IFREG || type == S_IFDIR) ? xstrlen(size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size)) : 1;
 +		printw("%*c%*s%s%s", 1 + MIN(namecols, dtls.maxnameln + (size_t)(ind ? 0 : 1)) - namelen, ' ',
