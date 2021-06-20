@@ -326,7 +326,7 @@ typedef struct {
 	uint_t dircolor   : 1;  /* Current status of dir color */
 	uint_t dirctx     : 1;  /* Show dirs in context color */
 	uint_t duinit     : 1;  /* Initialize disk usage */
-	uint_t fifobits   : 2;  /* FIFO notify mode: b00: previewer, b01: explorer, b10: both */
+	uint_t fifomode   : 1;  /* FIFO notify mode: 0: preview, 1: explore */
 	uint_t forcequit  : 1;  /* Do not prompt on quit */
 	uint_t initfile   : 1;  /* Positional arg is a file */
 	uint_t interrupt  : 1;  /* Program received an interrupt */
@@ -343,7 +343,7 @@ typedef struct {
 	uint_t stayonsel  : 1;  /* Disable auto-proceed on select */
 	uint_t trash      : 2;  /* Use trash to delete files 1: trash-cli, 2: gio trash */
 	uint_t uidgid     : 1;  /* Show owner and group info */
-	uint_t reserved   : 6;  /* Adjust when adding/removing a field */
+	uint_t reserved   : 7;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -2760,7 +2760,7 @@ try_quit:
 				c = CONTROL('Q');
 			} else {
 #ifndef NOFIFO
-				if (!(g_state.fifobits & 1))
+				if (!g_state.fifomode)
 					notify_fifo(TRUE); /* Send hovered path to NNN_FIFO */
 #endif
 				escaped = TRUE;
@@ -5481,7 +5481,7 @@ static void move_cursor(int target, int ignore_scrolloff)
 	curscroll = MAX(curscroll, MAX(cur - (onscreen - 1), 0));
 
 #ifndef NOFIFO
-	if (!(g_state.fifobits & 1))
+	if (!g_state.fifomode)
 		notify_fifo(FALSE); /* Send hovered path to NNN_FIFO */
 #endif
 }
@@ -6347,7 +6347,7 @@ nochange:
 				if (r != cur)
 					move_cursor(r, 1);
 #ifndef NOFIFO
-				else if ((event.bstate == BUTTON1_PRESSED) && !(g_state.fifobits & 1))
+				else if ((event.bstate == BUTTON1_PRESSED) && !g_state.fifomode)
 					notify_fifo(TRUE); /* Send clicked path to NNN_FIFO */
 #endif
 				/* Handle right click selection */
@@ -6421,13 +6421,13 @@ nochange:
 				goto nochange;
                         }
 #ifndef NOFIFO
-			if (g_state.fifobits && sel == SEL_OPEN) {
+			if (g_state.fifomode && (sel == SEL_OPEN)) {
 				notify_fifo(TRUE); /* Send opened path to NNN_FIFO */
 				goto nochange;
 			}
 #endif
 			/* If opened as vim plugin and Enter/^M pressed, pick */
-			if (g_state.picker && sel == SEL_OPEN) {
+			if (g_state.picker && (sel == SEL_OPEN)) {
 				appendfpath(newpath, mkpath(path, pent->name, newpath));
 				writesel(pselbuf, selbufpos - 1);
 				return EXIT_SUCCESS;
@@ -7635,7 +7635,7 @@ static void usage(void)
 		" -f      use readline history file\n"
 #endif
 #ifndef NOFIFO
-		" -F val  fifo mode [0:preview 1:explore 2:both]\n"
+		" -F val  fifo mode [0:preview 1:explore]\n"
 #endif
 		" -g      regex filters\n"
 		" -H      show hidden files\n"
@@ -7861,9 +7861,9 @@ int main(int argc, char *argv[])
 		case 'F':
 			if (env_opts_id < 0) {
 				fd = atoi(optarg);
-				if ((fd < 0) || (fd > 2))
+				if ((fd < 0) || (fd > 1))
 					return EXIT_FAILURE;
-				g_state.fifobits = fd;
+				g_state.fifomode = fd;
 			}
 			break;
 #endif
@@ -8269,7 +8269,8 @@ int main(int argc, char *argv[])
 #endif
 
 #ifndef NOFIFO
-	notify_fifo(FALSE);
+	if (!g_state.fifomode)
+		notify_fifo(FALSE);
 	if (fifofd != -1)
 		close(fifofd);
 #endif
