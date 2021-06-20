@@ -7938,7 +7938,7 @@ int main(int argc, char *argv[])
 			g_state.uidgid = 1;
 			break;
 		case 'V':
-			msg(VERSION);
+			dprintf(STDOUT_FILENO, "%s\n", VERSION);
 			return EXIT_SUCCESS;
 		case 'w':
 			cfg.cursormode = 1;
