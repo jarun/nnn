@@ -910,12 +910,11 @@ static void max_openfds(void)
 {
 	struct rlimit rl;
 
-	if (!getrlimit(RLIMIT_NOFILE, &rl)) {
+	if (!getrlimit(RLIMIT_NOFILE, &rl))
 		if (rl.rlim_cur < rl.rlim_max) {
 			rl.rlim_cur = rl.rlim_max;
 			setrlimit(RLIMIT_NOFILE, &rl);
 		}
-	}
 }
 #endif
 
@@ -1036,7 +1035,7 @@ static char *xbasename(char *path)
 	return base ? base + 1 : path;
 }
 
-static char *xextension(const char *fname, size_t len)
+static inline char *xextension(const char *fname, size_t len)
 {
 	return xmemrchr((uchar_t *)fname, '.', len);
 }
@@ -1091,19 +1090,17 @@ static inline bool getutil(char *util)
  */
 static size_t mkpath(const char *dir, const char *name, char *out)
 {
-	size_t len;
+	size_t len = 0;
 
-	/* Handle absolute path */
-	if (name[0] == '/') // NOLINT
-		return xstrsncpy(out, name, PATH_MAX);
+	if (name[0] != '/') { // NOLINT
+		/* Handle root case */
+		if (istopdir(dir))
+			len = 1;
+		else
+			len = xstrsncpy(out, dir, PATH_MAX);
 
-	/* Handle root case */
-	if (istopdir(dir))
-		len = 1;
-	else
-		len = xstrsncpy(out, dir, PATH_MAX);
-
-	out[len - 1] = '/'; // NOLINT
+		out[len - 1] = '/'; // NOLINT
+	}
 	return (xstrsncpy(out + len, name, PATH_MAX - len) + len);
 }
 
