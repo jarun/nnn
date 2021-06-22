@@ -4332,9 +4332,11 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	if (x_to) {
 		if (chdir(xdirname(fpath)) == -1) {
 			printwarn(NULL);
+			free(outdir);
 			return FALSE;
 		}
 		xstrsncpy(fpath, outdir, PATH_MAX);
+		free(outdir);
 	} else if (op == 'x')
 		fpath[0] = '\0';
 
