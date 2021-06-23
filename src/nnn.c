@@ -3876,9 +3876,9 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 		addch(ind);
 }
 
-static void savecurctx(settings *curcfg, char *path, char *curname, int nextctx)
+static void savecurctx(char *path, char *curname, int nextctx)
 {
-	settings tmpcfg = *curcfg;
+	settings tmpcfg = cfg;
 	context *ctxr = &g_ctx[nextctx];
 
 	/* Save current context */
@@ -3899,7 +3899,7 @@ static void savecurctx(settings *curcfg, char *path, char *curname, int nextctx)
 	}
 
 	tmpcfg.curctx = nextctx;
-	*curcfg = tmpcfg;
+	cfg = tmpcfg;
 }
 
 #ifndef NOSSN
@@ -4068,7 +4068,7 @@ static void set_smart_ctx(int ctx, char *nextpath, char **path, char **lastname,
 		--ctx;
 		/* Deactivate the new context and build from scratch */
 		g_ctx[ctx].c_cfg.ctxactive = 0;
-		savecurctx(&cfg, nextpath, pdents[cur].name, ctx);
+		savecurctx(nextpath, pdents[cur].name, ctx);
 		*path = g_ctx[ctx].c_path;
 		*lastdir = g_ctx[ctx].c_last;
 		*lastname = g_ctx[ctx].c_name;
@@ -5855,7 +5855,6 @@ static void statusbar(char *path)
 					addstr(xitoa((int)sb.st_ino)); /* Show inode number */
 				}
 			}
-
 		}
 		clrtoeol();
 	}
@@ -6268,7 +6267,7 @@ nochange:
 					if (g_state.selmode)
 						lastappendpos = selbufpos;
 
-					savecurctx(&cfg, path, pdents[cur].name, r);
+					savecurctx(path, pdents[cur].name, r);
 
 					/* Reset the pointers */
 					path = g_ctx[r].c_path;
@@ -6653,7 +6652,7 @@ nochange:
 			r = handle_context_switch(sel);
 			if (r < 0)
 				continue;
-			savecurctx(&cfg, path, pdents[cur].name, r);
+			savecurctx(path, pdents[cur].name, r);
 
 			/* Reset the pointers */
 			path = g_ctx[r].c_path;
@@ -7807,10 +7806,9 @@ int main(int argc, char *argv[])
 	mmask_t mask;
 	char *middle_click_env = xgetenv(env_cfg[NNN_MCLICK], "\0");
 
-	if (middle_click_env[0] == '^' && middle_click_env[1])
-		middle_click_key = CONTROL(middle_click_env[1]);
-	else
-		middle_click_key = (uchar_t)middle_click_env[0];
+	middle_click_key = (middle_click_env[0] == '^' && middle_click_env[1])
+			    ? CONTROL(middle_click_env[1])
+			    : (uchar_t)middle_click_env[0];
 #endif
 
 	const char * const env_opts = xgetenv(env_cfg[NNN_OPTS], NULL);
