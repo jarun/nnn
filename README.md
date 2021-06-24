@@ -55,7 +55,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - No config file, minimal config with sensible defaults
   - Plugin to backup configuration
   - Widely available on many packagers
-  - Touch enabled, comfortable on handhelds too!
+  - Touch enabled, handheld-friendly shortcuts
   - Unicode support
 - Modes
   - Light (default), detail
@@ -86,10 +86,8 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Plugin for image, video and audio thumbnails
   - Create, list, extract (to), mount (FUSE based) archives
   - Option to open all text files in `$EDITOR`
-- Information
-  - Detailed file information
-  - Media information plugin
 - Convenience
+  - Detailed file stats and mime information
   - Run plugins and custom commands with hotkeys
   - FreeDesktop compliant trash utility integration
   - Cross-dir file/all/range selection
@@ -100,7 +98,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Dir updates, notification on `cp`, `mv`, `rm` completion
   - Copy file paths to system clipboard on select
   - Launch apps, run commands, spawn a shell, toggle exe
-  - Access hovered file as `$nnn` at prompt or spawned shell
+  - Access hovered file at prompt or spawned shell
   - Lock terminal after configurable idle timeout
   - Basic support for screen readers and braille displays
 
