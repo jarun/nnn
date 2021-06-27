@@ -4518,7 +4518,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	struct stat sb, psb;
 	bool child = FALSE;
 	bool parent = FALSE;
-	bool hovered = TRUE;
+	bool hovered = FALSE;
 	char mntpath[PATH_MAX];
 
 #if !defined(__APPLE__) && !defined(__FreeBSD__)
@@ -4545,11 +4545,15 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 		tmp = xreadline(NULL, messages[MSG_HOSTNAME]);
 		if (!tmp[0])
 			return FALSE;
-		hovered = FALSE;
+		if (name && (tmp[0] == '-') && (tmp[1] == '\0')) {
+			mkpath(currentpath, name, newpath);
+			hovered = TRUE;
+		}
 	}
 
-	/* Create the mount point */
-	mkpath(mntpath, tmp, newpath);
+	if (!hovered)
+		mkpath(mntpath, tmp, newpath);
+
 	if (!xdiraccess(newpath)) {
 		*presel = MSGWAIT;
 		return FALSE;
@@ -4558,7 +4562,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 #if defined(__APPLE__) || defined(__FreeBSD__)
 	if (spawn(cmd, newpath, NULL, NULL, F_NORMAL)) {
 #else
-	if (spawn(cmd, "-u", newpath, NULL, F_NORMAL)) {
+	if (spawn(cmd, "-qu", newpath, NULL, F_NORMAL)) {
 #endif
 		if (!xconfirm(get_input(messages[MSG_LAZY])))
 			return FALSE;
@@ -4568,7 +4572,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 #elif defined(__FreeBSD__)
 		if (spawn(cmd, "-f", newpath, NULL, F_NORMAL)) {
 #else
-		if (spawn(cmd, "-uz", newpath, NULL, F_NORMAL)) {
+		if (spawn(cmd, "-quz", newpath, NULL, F_NORMAL)) {
 #endif
 			printwait(messages[MSG_FAILED], presel);
 			return FALSE;
@@ -4580,7 +4584,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 		return FALSE;
 	}
 
-	return hovered;
+	return TRUE;
 }
 
 static void lock_terminal(void)
