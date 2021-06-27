@@ -90,7 +90,7 @@ elif type ucollage >/dev/null 2>&1; then
 elif type sxiv >/dev/null 2>&1; then
     make_thumbs 0
     if [ -f "$target" ]; then
-        view_files sxiv >/dev/null 2>&1 &
+        view_files sxiv -a >/dev/null 2>&1 &
     elif [ -d "$target" ]; then
         view_files sxiv -aqt >/dev/null 2>&1 &
     fi
