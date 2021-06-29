@@ -263,7 +263,7 @@ else ifeq ($(strip $(O_GITSTATUS)),1)
 	patch --forward --strip=1 --input=$(GITSTATUS)/mainline.diff
 endif
 
-ifeq($(strip $(O_PERSISTSEL)),1)
+ifeq ($(strip $(O_PERSISTSEL)),1)
 	patch --forward --strip=1 --input=$(PERSISTSEL)/mainline.diff
 endif
 
@@ -277,7 +277,7 @@ else ifeq ($(strip $(O_GITSTATUS)),1)
 	patch --reverse --strip=1 --input=$(GITSTATUS)/mainline.diff
 endif
 
-ifeq($(strip $(O_PERSISTSEL)),1)
+ifeq ($(strip $(O_PERSISTSEL)),1)
 	patch --reverse --strip=1 --input=$(PERSISTSEL)/mainline.diff
 endif
 
