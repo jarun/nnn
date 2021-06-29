@@ -8,60 +8,155 @@
 # Author: KlzXS
 
 diff --git a/src/nnn.c b/src/nnn.c
-index 402d905..865a4c2 100644
+index 402d905..80c5045 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -1488,12 +1488,24 @@ static size_t appendslash(char *path)
+@@ -265,6 +265,12 @@ typedef struct entry {
+ #endif
+ } *pEntry;
+ 
++/* Selection marker */
++typedef struct {
++	char *startpos;
++	size_t len;
++} selmark;
++
+ /* Key-value pairs from env */
+ typedef struct {
+ 	int key;
+@@ -806,6 +812,7 @@ static int set_sort_flags(int r);
+ #ifndef NOFIFO
+ static void notify_fifo(bool force);
+ #endif
++static int markcmp(const void *va, const void *vb);
+ 
+ /* Functions */
+ 
+@@ -1488,33 +1495,95 @@ static size_t appendslash(char *path)
  	return len;
  }
  
+-static void invertselbuf(char *path, bool toggle)
 +static char *findinsel(int len)
-+{
+ {
+-	selbufpos = lastappendpos;
 +	if (!selbufpos)
 +		return FALSE;
-+
+ 
+-	if (toggle || nselected) {
+-		size_t len = appendslash(path);
 +	/* memmem(3):
 +	 * This function is not specified in POSIX.1, but is present on a number of other systems.
 +	 */
 +	return memmem(pselbuf, selbufpos, g_buf, len);
 +}
 +
- static void invertselbuf(char *path, bool toggle)
- {
- 	selbufpos = lastappendpos;
- 
- 	if (toggle || nselected) {
--		size_t len = appendslash(path);
++static void invertselbuf(char *path)
++{
++	if (nselected) {
 +		size_t len;
 +		char *found;
++		int nmarked = 0, prev = 0;
++		selmark *marked = malloc(nselected * sizeof(selmark));
  
  		for (int i = 0; i < ndents; ++i) {
- 			if (toggle) { /* Toggle selection status */
-@@ -1501,14 +1513,16 @@ static void invertselbuf(char *path, bool toggle)
- 				pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
+-			if (toggle) { /* Toggle selection status */
+-				pdents[i].flags ^= FILE_SELECTED;
+-				pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
++			 /* Toggle selection status */
++			pdents[i].flags ^= FILE_SELECTED;
++			pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
++		}
++
++		for (int i = 0; i < ndents; ++i){
++			/* Find no longer selected */
++			if(pdents[i].flags & FILE_SELECTED)
++				continue;
++
++			len = mkpath(path, pdents[i].name, g_buf);
++			found = findinsel(len);
++
++			if (found) {
++				marked[nmarked].startpos = found;
++				marked[nmarked].len = len;
++				++nmarked;
  			}
++		}
  
 -			if (pdents[i].flags & FILE_SELECTED)
 -				appendfpath(path,
 -					len + xstrsncpy(path + len, pdents[i].name, PATH_MAX - len));
--		}
-+			len = mkpath(path, pdents[i].name, g_buf);
-+			found = findinsel(len);
++		/* Remove no longer selected */
++		qsort(marked, nmarked, sizeof(selmark), &markcmp);
++
++		for (int i = 1; i < nmarked; ++i) {
++			if (marked[i].startpos == marked[prev].startpos + marked[prev].len)
++				marked[prev].len += marked[i].len;
++			else
++				++prev;
+ 		}
  
 -		if (len > 1)
 -			--len;
 -		path[len] = '\0';
-+			if (pdents[i].flags & FILE_SELECTED && !found) /* append if missing from selection*/
-+				appendfpath(g_buf, len);
-+			else if (!(pdents[i].flags & FILE_SELECTED) && found) { /* remove if no longer selected */
-+				memcpy(found, found+len, selbufpos - (pselbuf - (found+len)));
-+				selbufpos -= len;
-+			}
++		nmarked = prev + 1;
++
++		for (int i = 0; i < nmarked; ++i) {
++			found = marked[i].startpos;
++			len = marked[i].len;
++
++			memmove(found, found+len, selbufpos - ((found+len) - pselbuf));
++			selbufpos -= len;
++		}
++
++		free(marked);
++
++		/* Add newly selected */
++		for (int i = 0; i < ndents; ++i) {
++			if(!(pdents[i].flags & FILE_SELECTED))
++				continue;
++
++			len = mkpath(path, pdents[i].name, g_buf);
++			appendfpath(g_buf, len);
 +		}
  
  		nselected ? writesel(pselbuf, selbufpos - 1) : writesel(NULL, 0);
  	} else
-@@ -5283,6 +5297,9 @@ static int dentfill(char *path, struct entry **ppdents)
+ 		writesel(NULL, 0);
+ }
+ 
++/* removes g_buf from selbuf */
++static void rmfromselbuf(size_t len)
++{
++	char *found = findinsel(len);
++	if (!found)
++		return;
++
++	memmove(found, found+len, selbufpos - ((found+len) - pselbuf));
++	selbufpos -= len;
++
++	nselected ? writesel(pselbuf, selbufpos - 1) : writesel(NULL, 0);
++}
++
+ static void addtoselbuf(char *path, int startid, int endid)
+ {
+ 	size_t len = appendslash(path);
+@@ -2601,6 +2670,14 @@ static void clearfilter(void)
+ 	}
+ }
+ 
++static int markcmp(const void *va, const void *vb)
++{
++	const selmark *ma = (selmark*)va;
++	const selmark *mb = (selmark*)vb;
++
++	return ma->startpos - mb->startpos;
++}
++
+ static int entrycmp(const void *va, const void *vb)
+ {
+ 	const struct entry *pa = (pEntry)va;
+@@ -5283,6 +5360,9 @@ static int dentfill(char *path, struct entry **ppdents)
  			entflags = 0;
  		}
  
@@ -71,3 +166,21 @@ index 402d905..865a4c2 100644
  		if (cfg.blkorder) {
  			if (S_ISDIR(sb.st_mode)) {
  				mkpath(path, namep, buf);
+@@ -6791,7 +6871,7 @@ nochange:
+ 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+ 			} else {
+ 				--nselected;
+-				invertselbuf(path, FALSE);
++				rmfromselbuf(mkpath(path, pdents[cur].name, g_buf));
+ 			}
+ 
+ #ifndef NOX11
+@@ -6862,7 +6942,7 @@ nochange:
+ 				selendid = ndents - 1;
+ 			}
+ 
+-			(sel == SEL_SELINV) ? invertselbuf(path, TRUE) : addtoselbuf(path, selstartid, selendid);
++			(sel == SEL_SELINV) ? invertselbuf(path) : addtoselbuf(path, selstartid, selendid);
+ 
+ #ifndef NOX11
+ 			if (cfg.x11)
