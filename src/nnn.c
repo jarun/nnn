@@ -198,6 +198,11 @@
 #define SED "sed"
 #endif
 
+/* Large selection threshold */
+#ifndef LARGESEL
+#define LARGESEL 1000
+#endif
+
 #define MIN_DISPLAY_COL (CTX_MAX * 2)
 #define ARCHIVE_CMD_LEN 16
 #define BLK_SHIFT_512   9
@@ -270,6 +275,12 @@ typedef struct entry {
 	gid_t gid; /* 4 bytes */
 #endif
 } *pEntry;
+
+/* Selection marker */
+typedef struct {
+	char *startpos;
+	size_t len;
+} selmark;
 
 /* Key-value pairs from env */
 typedef struct {
@@ -408,7 +419,7 @@ static int nselected;
 #ifndef NOFIFO
 static int fifofd = -1;
 #endif
-static uint_t idletimeout, selbufpos, lastappendpos, selbuflen;
+static uint_t idletimeout, selbufpos, selbuflen;
 static ushort_t xlines, xcols;
 static ushort_t idle;
 static uchar_t maxbm, maxplug;
@@ -598,8 +609,9 @@ static char * const utils[] = {
 #define MSG_RM_TMP       39
 #define MSG_INVALID_KEY  40
 #define MSG_NOCHANGE     41
+#define MSG_LARGESEL     42
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED  42 /* Must be the last entry */
+#define MSG_DIR_CHANGED  43 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -645,6 +657,7 @@ static const char * const messages[] = {
 	"remove tmp file?",
 	"invalid key",
 	"unchanged",
+	"continue with large selection? 'y'es, 'n'o, 'e'dit",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -821,6 +834,8 @@ static int set_sort_flags(int r);
 #ifndef NOFIFO
 static void notify_fifo(bool force);
 #endif
+static int markcmp(const void *va, const void *vb);
+static int editselection(void);
 
 /* Functions */
 
@@ -1493,8 +1508,6 @@ static void startselection(void)
 			writesel(NULL, 0);
 			selbufpos = 0;
 		}
-
-		lastappendpos = 0;
 	}
 }
 
@@ -1520,30 +1533,129 @@ static size_t appendslash(char *path)
 	return len;
 }
 
-static void invertselbuf(char *path, bool toggle)
+static char *findinsel(int len)
 {
-	selbufpos = lastappendpos;
+	if (!selbufpos)
+		return FALSE;
 
-	if (toggle || nselected) {
-		size_t len = appendslash(path);
+	char *found = pselbuf;
+	do {
+		/* memmem(3):
+		 * This function is not specified in POSIX.1, but is present on a number of other systems.
+		 */
+		found = memmem(found, selbufpos - (found - pselbuf), g_buf, len);
+	} while (found > pselbuf && *(found - 1));
+	return found;
+}
 
-		for (int i = 0; i < ndents; ++i) {
-			if (toggle) { /* Toggle selection status */
-				pdents[i].flags ^= FILE_SELECTED;
-				pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
-			}
+static void invertselbuf(char *path)
+{
+	if (nselected) {
+		size_t len, endpos, offset = 0;
+		char *found;
 
-			if (pdents[i].flags & FILE_SELECTED)
-				appendfpath(path,
-					len + xstrsncpy(path + len, pdents[i].name, PATH_MAX - len));
+		if (nselected > LARGESEL) {
+			int r = get_input(messages[MSG_LARGESEL]);
+			if (r == 'e') {
+				/* Add all entires for manual inversion */
+				for (int i = 0; i < ndents; ++i) {
+					if (pdents[i].flags & FILE_SELECTED)
+						continue;
+
+					pdents[i].flags |= FILE_SELECTED;
+					++nselected;
+
+					len = mkpath(path, pdents[i].name, g_buf);
+					appendfpath(g_buf, len);
+				}
+
+				r = editselection(); /* Should never return 0 */
+				if (r < 0)
+					/* this does nothing since we can't access presel */
+					printwait(messages[MSG_FAILED], NULL);
+
+				nselected ? writesel(pselbuf, selbufpos - 1) : writesel(NULL, 0);
+				return;
+			} else if (r != 'y')
+				return;
 		}
 
-		if (len > 1)
-			--len;
-		path[len] = '\0';
-	}
+		int nmarked = 0, prev = 0;
+		selmark *marked = malloc(nselected * sizeof(selmark));
+
+		for (int i = 0; i < ndents; ++i) {
+			 /* Toggle selection status */
+			pdents[i].flags ^= FILE_SELECTED;
+			pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
+		}
+
+		for (int i = 0; i < ndents; ++i){
+			/* Find no longer selected */
+			if(pdents[i].flags & FILE_SELECTED)
+				continue;
+
+			len = mkpath(path, pdents[i].name, g_buf);
+			found = findinsel(len);
+
+			if (found) {
+				marked[nmarked].startpos = found;
+				marked[nmarked].len = len;
+				++nmarked;
+			}
+		}
+
+		/* Merge non-selected into blocks */
+		qsort(marked, nmarked, sizeof(selmark), &markcmp);
+
+		for (int i = 1; i < nmarked; ++i) {
+			if (marked[i].startpos == marked[prev].startpos + marked[prev].len)
+				marked[prev].len += marked[i].len;
+			else {
+				++prev;
+				marked[prev].startpos = marked[i].startpos;
+				marked[prev].len = marked[i].len;
+			}
+		}
+
+		nmarked = prev + 1;
+
+		/* Remove no longer selected */
+		for (int i = 0; i < nmarked; ++i) {
+			found = marked[i].startpos;
+			endpos = (i + 1 == nmarked ? selbufpos : marked[i + 1].startpos - pselbuf);
+			len = marked[i].len;
+
+			memmove(found, found + len, endpos - (found + len - pselbuf));
+			offset += len;
+		}
+
+		selbufpos -= offset;
+
+		free(marked);
+
+		/* Add newly selected */
+		for (int i = 0; i < ndents; ++i) {
+			if(!(pdents[i].flags & FILE_SELECTED))
+				continue;
+
+			len = mkpath(path, pdents[i].name, g_buf);
+			appendfpath(g_buf, len);
+		}
 
 	nselected ? writesel(pselbuf, selbufpos - 1) : clearselection();
+}
+
+/* removes g_buf from selbuf */
+static void rmfromselbuf(size_t len)
+{
+	char *found = findinsel(len);
+	if (!found)
+		return;
+
+	memmove(found, found+len, selbufpos - ((found+len) - pselbuf));
+	selbufpos -= len;
+
+	nselected ? writesel(pselbuf, selbufpos - 1) : writesel(NULL, 0);
 }
 
 static void addtoselbuf(char *path, int startid, int endid)
@@ -2633,6 +2745,14 @@ static void clearfilter(void)
 		fltr[REGEX_MAX - 1] = fltr[1];
 		fltr[1] = '\0';
 	}
+}
+
+static int markcmp(const void *va, const void *vb)
+{
+	const selmark *ma = (selmark*)va;
+	const selmark *mb = (selmark*)vb;
+
+	return ma->startpos - mb->startpos;
 }
 
 static int entrycmp(const void *va, const void *vb)
@@ -5139,7 +5259,7 @@ static int dentfill(char *path, struct entry **ppdents)
 	uchar_t entflags = 0;
 	int flags = 0;
 	struct dirent *dp;
-	char *namep, *pnb, *buf = NULL;
+	char *found, *namep, *pnb, *buf = NULL;
 	struct entry *dentp;
 	size_t off = 0, namebuflen = NAMEBUF_INCR;
 	struct stat sb_path, sb;
@@ -5198,6 +5318,8 @@ static int dentfill(char *path, struct entry **ppdents)
 		flags = AT_SYMLINK_NOFOLLOW;
 	}
 #endif
+
+	found = findinsel(xstrsncpy(g_buf, path, xstrlen(path)) - 1);
 
 	do {
 		namep = dp->d_name;
@@ -5339,6 +5461,9 @@ static int dentfill(char *path, struct entry **ppdents)
 			dentp->flags |= entflags;
 			entflags = 0;
 		}
+
+		if (found && findinsel(mkpath(path, dentp->name, g_buf)) != NULL)
+			dentp->flags |= FILE_SELECTED;
 
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
@@ -5611,9 +5736,6 @@ static int handle_context_switch(enum action sel)
 			else
 				return -1;
 		}
-
-		if (g_state.selmode) /* Remember the position from where to continue selection */
-			lastappendpos = selbufpos;
 	}
 
 	return r;
@@ -6182,9 +6304,6 @@ begin:
 	}
 #endif
 
-	if (g_state.selmode && lastdir[0])
-		lastappendpos = selbufpos;
-
 #ifdef LINUX_INOTIFY
 	if ((presel == FILTER || watch) && inotify_wd >= 0) {
 		inotify_rm_watch(inotify_fd, inotify_wd);
@@ -6267,9 +6386,6 @@ nochange:
 				if (r >= CTX_MAX)
 					sel = SEL_BACK;
 				else if (r >= 0 && r != cfg.curctx) {
-					if (g_state.selmode)
-						lastappendpos = selbufpos;
-
 					savecurctx(path, pdents[cur].name, r);
 
 					/* Reset the pointers */
@@ -6850,7 +6966,7 @@ nochange:
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			} else {
 				--nselected;
-				invertselbuf(path, FALSE);
+				rmfromselbuf(mkpath(path, pdents[cur].name, g_buf));
 			}
 
 #ifndef NOX11
@@ -6919,7 +7035,7 @@ nochange:
 			}
 
 			(sel == SEL_SELINV)
-				? invertselbuf(path, TRUE) : addtoselbuf(path, selstartid, selendid);
+			    ? invertselbuf(path) : addtoselbuf(path, selstartid, selendid);
 
 #ifndef NOX11
 			if (cfg.x11)

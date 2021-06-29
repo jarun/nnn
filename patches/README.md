@@ -9,7 +9,6 @@ The patches will be adapted on each release when necessary (v4.1 onwards). Each 
 | --- | --- | --- |
 | gitstatus | Add git status column to the detail view. Provides command line flag `-G` to show column in normal mode. | `O_GISTATUS` |
 | namefirst | Print filenames first in the detail view. Print user/group columns when a directory contains different users/groups. | `O_NAMEFIRST` |
-| persistsel | Preserve selection marker across directory change. Read notes inside diff file for more information. | `O_PERSISTSEL` |
 
 To apply a patch, use the corresponding make variable, e.g.:
 
