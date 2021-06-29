@@ -28,6 +28,7 @@ O_NOX11 := 0  # disable X11 integration
 # User patches
 O_GITSTATUS := 0 # add git status to detail view
 O_NAMEFIRST := 0 # print file name first, add uid and guid to detail view
+O_PERSISTSEL := 0 # presreve selection marker across directory change
 
 ifeq ($(strip $(O_GITSTATUS)),1)
 	LDLIBS += -lgit2
@@ -230,6 +231,10 @@ else ifeq ($(strip $(O_GITSTATUS)),1)
 	patch --forward --strip=1 --input=$(GITSTATUS)/mainline.diff
 endif
 
+ifeq ($(strip $(O_PERSISTSEL)),1)
+	patch --forward --strip=1 --input=$(PERSISTSEL)/mainline.diff
+endif
+
 postpatch:
 ifeq ($(strip $(O_NAMEFIRST)),1)
 ifeq ($(strip $(O_GITSTATUS)),1)
@@ -238,6 +243,10 @@ endif
 	patch --reverse --strip=1 --input=$(NAMEFIRST)/mainline.diff
 else ifeq ($(strip $(O_GITSTATUS)),1)
 	patch --reverse --strip=1 --input=$(GITSTATUS)/mainline.diff
+endif
+
+ifeq ($(strip $(O_PERSISTSEL)),1)
+	patch --reverse --strip=1 --input=$(PERSISTSEL)/mainline.diff
 endif
 
 skip: ;
