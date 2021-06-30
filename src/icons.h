@@ -36,8 +36,8 @@ struct icon_pair {
 #define COLOR_REACT        39  /* DeepSkyBlue1 */
 #define COLOR_CSS          199 /* DeepPink1 */
 #define COLOR_PYTHON       227 /* LightGoldenrod1 */
-#define COLOR_LUA          19  /* LightGoldenrod1 */
-#define COLOR_DOCUMENT     15  /* WHITE */
+#define COLOR_LUA          19  /* Blue3 */
+#define COLOR_DOCUMENT     15  /* White */
 #define COLOR_FSHARP       31  /* DeepSkyBlue3 */
 #define COLOR_RUBY         160 /* Red3 */
 #define COLOR_SCALA        196 /* Red1 */
