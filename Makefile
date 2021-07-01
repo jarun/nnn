@@ -264,7 +264,9 @@ else ifeq ($(strip $(O_GITSTATUS)),1)
 endif
 
 ifeq ($(strip $(O_PERSISTSEL)),1)
-	patch --forward --strip=1 --input=$(PERSISTSEL)/mainline.diff
+	patch --forward --strip=1 --input=$(PERSISTSEL)/mainline-1pass.diff
+else ifeq ($(strip $(O_PERSISTSEL)),2)
+	patch --forward --strip=1 --input=$(PERSISTSEL)/mainline-2pass.diff
 endif
 
 postpatch:
@@ -278,7 +280,9 @@ else ifeq ($(strip $(O_GITSTATUS)),1)
 endif
 
 ifeq ($(strip $(O_PERSISTSEL)),1)
-	patch --reverse --strip=1 --input=$(PERSISTSEL)/mainline.diff
+	patch --reverse --strip=1 --input=$(PERSISTSEL)/mainline-1pass.diff
+else ifeq ($(strip $(O_PERSISTSEL)),2)
+	patch --reverse --strip=1 --input=$(PERSISTSEL)/mainline-2pass.diff
 endif
 
 skip: ;

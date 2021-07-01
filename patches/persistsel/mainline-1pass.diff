@@ -1,0 +1,125 @@
+diff --git a/src/nnn.c b/src/nnn.1pass.c
+index 402d905..342048c 100644
+--- a/src/nnn.c
++++ b/src/nnn.1pass.c
+@@ -402,7 +402,7 @@ static int nselected;
+ #ifndef NOFIFO
+ static int fifofd = -1;
+ #endif
+-static uint_t idletimeout, selbufpos, lastappendpos, selbuflen;
++static uint_t idletimeout, selbufpos, selbuflen;
+ static ushort_t xlines, xcols;
+ static ushort_t idle;
+ static uchar_t maxbm, maxplug;
+@@ -806,6 +806,7 @@ static int set_sort_flags(int r);
+ #ifndef NOFIFO
+ static void notify_fifo(bool force);
+ #endif
++static int markcmp(const void *va, const void *vb);
+ 
+ /* Functions */
+ 
+@@ -1469,8 +1470,6 @@ static void startselection(void)
+ 			writesel(NULL, 0);
+ 			selbufpos = 0;
+ 		}
+-
+-		lastappendpos = 0;
+ 	}
+ }
+ 
+@@ -1488,12 +1487,26 @@ static size_t appendslash(char *path)
+ 	return len;
+ }
+ 
+-static void invertselbuf(char *path, bool toggle)
++static char *findinsel(int len)
+ {
+-	selbufpos = lastappendpos;
++	if (!selbufpos)
++		return FALSE;
+ 
+-	if (toggle || nselected) {
+-		size_t len = appendslash(path);
++	char *found = pselbuf;
++	do {
++		/* memmem(3):
++		 * This function is not specified in POSIX.1, but is present on a number of other systems.
++		 */
++		memmem(found, selbufpos - (found - pselbuf), g_buf, len);
++	} while (found > pselbuf && *(found - 1) == '\0');
++	return found;
++}
++
++static void invertselbuf(char *path, bool toggle)
++{
++	if (nselected) {
++		size_t len;
++		char *found;
+ 
+ 		for (int i = 0; i < ndents; ++i) {
+ 			if (toggle) { /* Toggle selection status */
+@@ -1501,14 +1514,16 @@ static void invertselbuf(char *path, bool toggle)
+ 				pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
+ 			}
+ 
+-			if (pdents[i].flags & FILE_SELECTED)
+-				appendfpath(path,
+-					len + xstrsncpy(path + len, pdents[i].name, PATH_MAX - len));
+-		}
++			len = mkpath(path, pdents[i].name, g_buf);
++			found = findinsel(len);
+ 
+-		if (len > 1)
+-			--len;
+-		path[len] = '\0';
++			if (pdents[i].flags & FILE_SELECTED && !found) /* Append if missing from selection */
++				appendfpath(g_buf, len);
++			else if (!(pdents[i].flags & FILE_SELECTED) && found) { /* Remove if no longer selected */
++				memmove(found, found+len, selbufpos - ((found+len) - pselbuf));
++				selbufpos -= len;
++			}
++		}
+ 
+ 		nselected ? writesel(pselbuf, selbufpos - 1) : writesel(NULL, 0);
+ 	} else
+@@ -5283,6 +5298,9 @@ static int dentfill(char *path, struct entry **ppdents)
+ 			entflags = 0;
+ 		}
+ 
++		if (findinsel(mkpath(path, dentp->name, g_buf)) != NULL)
++			dentp->flags |= FILE_SELECTED;
++
+ 		if (cfg.blkorder) {
+ 			if (S_ISDIR(sb.st_mode)) {
+ 				mkpath(path, namep, buf);
+@@ -5552,9 +5570,6 @@ static int handle_context_switch(enum action sel)
+ 			else
+ 				return -1;
+ 		}
+-
+-		if (g_state.selmode) /* Remember the position from where to continue selection */
+-			lastappendpos = selbufpos;
+ 	}
+ 
+ 	return r;
+@@ -6128,9 +6143,6 @@ begin:
+ 	}
+ #endif
+ 
+-	if (g_state.selmode && lastdir[0])
+-		lastappendpos = selbufpos;
+-
+ #ifdef LINUX_INOTIFY
+ 	if ((presel == FILTER || watch) && inotify_wd >= 0) {
+ 		inotify_rm_watch(inotify_fd, inotify_wd);
+@@ -6213,9 +6225,6 @@ nochange:
+ 				if (r >= CTX_MAX)
+ 					sel = SEL_BACK;
+ 				else if (r >= 0 && r != cfg.curctx) {
+-					if (g_state.selmode)
+-						lastappendpos = selbufpos;
+-
+ 					savecurctx(&cfg, path, pdents[cur].name, r);
+ 
+ 					/* Reset the pointers */
