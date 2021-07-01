@@ -1,5 +1,5 @@
 diff --git a/src/nnn.c b/src/nnn.2pass.c
-index 402d905..ec1600c 100644
+index 402d905..1fdd2ec 100644
 --- a/src/nnn.c
 +++ b/src/nnn.2pass.c
 @@ -265,6 +265,12 @@ typedef struct entry {
@@ -41,7 +41,7 @@ index 402d905..ec1600c 100644
  	}
  }
  
-@@ -1488,33 +1493,99 @@ static size_t appendslash(char *path)
+@@ -1488,33 +1493,103 @@ static size_t appendslash(char *path)
  	return len;
  }
  
@@ -59,15 +59,15 @@ index 402d905..ec1600c 100644
 +		/* memmem(3):
 +		 * This function is not specified in POSIX.1, but is present on a number of other systems.
 +		 */
-+		memmem(found, selbufpos - (found - pselbuf), g_buf, len);
-+	} while (found > pselbuf && *(found - 1) == '\0');
++		found = memmem(found, selbufpos - (found - pselbuf), g_buf, len);
++	} while (found > pselbuf && *(found - 1));
 +	return found;
 +}
 +
 +static void invertselbuf(char *path)
 +{
 +	if (nselected) {
-+		size_t len;
++		size_t len, offset = 0;
 +		char *found;
 +		int nmarked = 0, prev = 0;
 +		selmark *marked = malloc(nselected * sizeof(selmark));
@@ -95,33 +95,37 @@ index 402d905..ec1600c 100644
 +				++nmarked;
  			}
 +		}
-+
+ 
+-			if (pdents[i].flags & FILE_SELECTED)
+-				appendfpath(path,
+-					len + xstrsncpy(path + len, pdents[i].name, PATH_MAX - len));
 +		/* Remove no longer selected */
 +		qsort(marked, nmarked, sizeof(selmark), &markcmp);
 +
 +		for (int i = 1; i < nmarked; ++i) {
 +			if (marked[i].startpos == marked[prev].startpos + marked[prev].len)
 +				marked[prev].len += marked[i].len;
-+			else
++			else {
 +				++prev;
-+		}
- 
--			if (pdents[i].flags & FILE_SELECTED)
--				appendfpath(path,
--					len + xstrsncpy(path + len, pdents[i].name, PATH_MAX - len));
-+		nmarked = prev + 1;
-+
-+		for (int i = 0; i < nmarked; ++i) {
-+			found = marked[i].startpos;
-+			len = marked[i].len;
-+
-+			memmove(found, found+len, selbufpos - ((found+len) - pselbuf));
-+			selbufpos -= len;
++				marked[prev].startpos = marked[i].startpos;
++				marked[prev].len = marked[i].len;
++			}
  		}
  
 -		if (len > 1)
 -			--len;
 -		path[len] = '\0';
++		nmarked = prev + 1;
++
++		for (int i = 0; i < nmarked; ++i) {
++			found = marked[i].startpos - offset;
++			len = marked[i].len;
++
++			memmove(found, found+len, selbufpos - ((found+len) - pselbuf));
++			offset += len;
++			selbufpos -= len;
++		}
++
 +		free(marked);
 +
 +		/* Add newly selected */
@@ -154,7 +158,7 @@ index 402d905..ec1600c 100644
  static void addtoselbuf(char *path, int startid, int endid)
  {
  	size_t len = appendslash(path);
-@@ -2601,6 +2672,14 @@ static void clearfilter(void)
+@@ -2601,6 +2676,14 @@ static void clearfilter(void)
  	}
  }
  
@@ -169,17 +173,35 @@ index 402d905..ec1600c 100644
  static int entrycmp(const void *va, const void *vb)
  {
  	const struct entry *pa = (pEntry)va;
-@@ -5283,6 +5362,9 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5082,7 +5165,7 @@ static int dentfill(char *path, struct entry **ppdents)
+ 	uchar_t entflags = 0;
+ 	int flags = 0;
+ 	struct dirent *dp;
+-	char *namep, *pnb, *buf = NULL;
++	char *found, *namep, *pnb, *buf = NULL;
+ 	struct entry *dentp;
+ 	size_t off = 0, namebuflen = NAMEBUF_INCR;
+ 	struct stat sb_path, sb;
+@@ -5142,6 +5225,8 @@ static int dentfill(char *path, struct entry **ppdents)
+ 	}
+ #endif
+ 
++	found = findinsel(xstrsncpy(g_buf, path, xstrlen(path)) - 1);
++
+ 	do {
+ 		namep = dp->d_name;
+ 
+@@ -5283,6 +5368,9 @@ static int dentfill(char *path, struct entry **ppdents)
  			entflags = 0;
  		}
  
-+		if (findinsel(mkpath(path, dentp->name, g_buf)) != NULL)
++		if (found && findinsel(mkpath(path, dentp->name, g_buf)) != NULL)
 +			dentp->flags |= FILE_SELECTED;
 +
  		if (cfg.blkorder) {
  			if (S_ISDIR(sb.st_mode)) {
  				mkpath(path, namep, buf);
-@@ -5552,9 +5634,6 @@ static int handle_context_switch(enum action sel)
+@@ -5552,9 +5640,6 @@ static int handle_context_switch(enum action sel)
  			else
  				return -1;
  		}
@@ -189,7 +211,7 @@ index 402d905..ec1600c 100644
  	}
  
  	return r;
-@@ -6128,9 +6207,6 @@ begin:
+@@ -6128,9 +6213,6 @@ begin:
  	}
  #endif
  
@@ -199,7 +221,7 @@ index 402d905..ec1600c 100644
  #ifdef LINUX_INOTIFY
  	if ((presel == FILTER || watch) && inotify_wd >= 0) {
  		inotify_rm_watch(inotify_fd, inotify_wd);
-@@ -6213,9 +6289,6 @@ nochange:
+@@ -6213,9 +6295,6 @@ nochange:
  				if (r >= CTX_MAX)
  					sel = SEL_BACK;
  				else if (r >= 0 && r != cfg.curctx) {
@@ -209,7 +231,7 @@ index 402d905..ec1600c 100644
  					savecurctx(&cfg, path, pdents[cur].name, r);
  
  					/* Reset the pointers */
-@@ -6791,7 +6864,7 @@ nochange:
+@@ -6791,7 +6870,7 @@ nochange:
  				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
  			} else {
  				--nselected;
@@ -218,7 +240,7 @@ index 402d905..ec1600c 100644
  			}
  
  #ifndef NOX11
-@@ -6862,7 +6935,7 @@ nochange:
+@@ -6862,7 +6941,7 @@ nochange:
  				selendid = ndents - 1;
  			}
  
