@@ -5893,10 +5893,8 @@ static int adjust_cols(int n)
 		/* Fallback to light mode if less than 35 columns */
 		if (n < 36)
 			cfg.showdetail ^= 1;
-		else {
-			/* 2 more accounted for below */
+		else /* 2 more accounted for below */
 			n -= 32;
-		}
 	}
 
 	/* 2 columns for preceding space and indicator */
@@ -6027,8 +6025,6 @@ static void redraw(char *path)
 
 	attroff(A_UNDERLINE | COLOR_PAIR(cfg.curctx + 1));
 
-	ncols = adjust_cols(ncols);
-
 	/* Go to first entry */
 	if (curscroll > 0) {
 		move(1, 0);
@@ -6045,6 +6041,8 @@ static void redraw(char *path)
 	}
 
 	onscreen = MIN(onscreen + curscroll, ndents);
+
+	ncols = adjust_cols(ncols);
 
 	/* Print listing */
 	for (i = curscroll; i < onscreen; ++i) {
