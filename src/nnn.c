@@ -3556,7 +3556,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
 	return wbuf;
 }
 
-static off_t get_size(off_t size, off_t *pval, uint_t comp)
+static off_t get_size(off_t size, off_t *pval, int comp)
 {
 	off_t rem = *pval;
 	off_t quo = rem / 10;
