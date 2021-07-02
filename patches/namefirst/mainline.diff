@@ -4,10 +4,10 @@
 # Author: Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index eabe30f0..d8dc5925 100644
+index c4bced5..d1bc16d 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -363,6 +363,10 @@ typedef struct {
+@@ -368,6 +368,10 @@ typedef struct {
  } session_header_t;
  #endif
 
@@ -18,7 +18,7 @@ index eabe30f0..d8dc5925 100644
  /* GLOBALS */
 
  /* Configuration, contexts */
-@@ -1039,10 +1043,12 @@ static char *getpwname(uid_t uid)
+@@ -1052,10 +1056,12 @@ static char *getpwname(uid_t uid)
  	static char *namecache;
 
  	if (uidcache != uid) {
@@ -31,7 +31,7 @@ index eabe30f0..d8dc5925 100644
  	}
 
  	return namecache ? namecache : xitoa(uid);
-@@ -1054,10 +1060,12 @@ static char *getgrname(gid_t gid)
+@@ -1067,10 +1073,12 @@ static char *getgrname(gid_t gid)
  	static char *grpcache;
 
  	if (gidcache != gid) {
@@ -44,7 +44,7 @@ index eabe30f0..d8dc5925 100644
  	}
 
  	return grpcache ? grpcache : xitoa(gid);
-@@ -3509,14 +3517,13 @@ static void resetdircolor(int flags)
+@@ -3521,14 +3529,13 @@ static void resetdircolor(int flags)
   * Max supported str length: NAME_MAX;
   */
  #ifdef NOLC
@@ -62,7 +62,7 @@ index eabe30f0..d8dc5925 100644
  {
  	wchar_t * const wbuf = (wchar_t *)g_buf;
  	wchar_t *buf = wbuf;
-@@ -3541,7 +3548,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
+@@ -3553,7 +3560,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
  		++buf;
  	}
 
@@ -70,8 +70,8 @@ index eabe30f0..d8dc5925 100644
 +	return len;
  }
 
- static off_t get_size(off_t size, off_t *pval, uint_t comp)
-@@ -3802,33 +3809,7 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int
+ static off_t get_size(off_t size, off_t *pval, int comp)
+@@ -3814,33 +3821,7 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int
  static void printent(const struct entry *ent, uint_t namecols, bool sel)
  {
  	char ind = '\0';
@@ -106,7 +106,7 @@ index eabe30f0..d8dc5925 100644
  	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
 
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
-@@ -3853,15 +3834,40 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+@@ -3865,15 +3846,40 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
  		++namecols;
 
  #ifndef NOLC
@@ -149,8 +149,8 @@ index eabe30f0..d8dc5925 100644
 +		attroff(attrs);
  }
 
- static void savecurctx(settings *curcfg, char *path, char *curname, int nextctx)
-@@ -5849,18 +5855,6 @@ static void statusbar(char *path)
+ static void savecurctx(char *path, char *curname, int nextctx)
+@@ -5871,18 +5877,6 @@ static void statusbar(char *path)
  		tocursor();
  }
 
@@ -169,7 +169,7 @@ index eabe30f0..d8dc5925 100644
  static int adjust_cols(int n)
  {
  	/* Calculate the number of cols available to print entry name */
-@@ -5868,13 +5862,10 @@ static int adjust_cols(int n)
+@@ -5890,11 +5884,10 @@ static int adjust_cols(int n)
  	n -= (g_state.oldcolor ? 0 : 1 + xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT));
  #endif
  	if (cfg.showdetail) {
@@ -177,16 +177,14 @@ index eabe30f0..d8dc5925 100644
 -		if (n < 36)
 +		if (n < (dtls.maxentln + 1 - dtls.maxnameln))
  			cfg.showdetail ^= 1;
--		else {
--			/* 2 more accounted for below */
+-		else /* 2 more accounted for below */
 -			n -= 32;
--		}
 +		else
 +			n -= (dtls.maxentln - 2 - dtls.maxnameln);
  	}
 
  	/* 2 columns for preceding space and indicator */
-@@ -5912,8 +5903,6 @@ static void draw_line(char *path, int ncols)
+@@ -5932,8 +5925,6 @@ static void draw_line(char *path, int ncols)
  	if (dir)
  		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 
@@ -195,13 +193,13 @@ index eabe30f0..d8dc5925 100644
  	statusbar(path);
  }
 
-@@ -6005,6 +5994,21 @@ static void redraw(char *path)
+@@ -6042,6 +6033,21 @@ static void redraw(char *path)
 
- 	attroff(A_UNDERLINE | COLOR_PAIR(cfg.curctx + 1));
+ 	onscreen = MIN(onscreen + curscroll, ndents);
 
 +	if (cfg.showdetail) {
-+	ushort_t lenbuf = dtls.maxnameln = dtls.maxsizeln = dtls.maxuidln = dtls.maxgidln = dtls.printguid = 0;
-+		for (i = curscroll; i < ndents && i < curscroll + onscreen; ++i) {
++		ushort_t lenbuf = dtls.maxnameln = dtls.maxsizeln = dtls.maxuidln = dtls.maxgidln = dtls.printguid = 0;
++		for (i = curscroll; i < onscreen; ++i) {
 +			if ((lenbuf = pdents[i].nlen - 1) > dtls.maxnameln) dtls.maxnameln = lenbuf;
 +			if ((lenbuf = xstrlen(coolsize(cfg.blkorder ? pdents[i].blocks << blk_shift : pdents[i].size))) > dtls.maxsizeln) dtls.maxsizeln = lenbuf;
 +#ifndef NOUG
@@ -211,13 +209,13 @@ index eabe30f0..d8dc5925 100644
 +			}
 +#endif
 +		}
++		dtls.maxentln = dtls.maxnameln + dtls.maxsizeln + (dtls.printguid ? (dtls.maxuidln + dtls.maxgidln + 29) : 26);
 +	}
-+	dtls.maxentln = dtls.maxnameln + dtls.maxsizeln + (dtls.printguid ? (dtls.maxuidln + dtls.maxgidln) : 0) + (g_state.uidgid ? 26 : 23);
 +
  	ncols = adjust_cols(ncols);
 
- 	/* Go to first entry */
-@@ -6046,8 +6050,6 @@ static void redraw(char *path)
+ 	/* Print listing */
+@@ -6066,8 +6072,6 @@ static void redraw(char *path)
  #endif
  	}
 
