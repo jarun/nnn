@@ -1550,97 +1550,103 @@ static char *findinsel(int len)
 
 static void invertselbuf(char *path)
 {
-	if (nselected) {
-		size_t len, endpos, offset = 0;
-		char *found;
+	if (!nselected) {
+		writesel(NULL, 0);
+		return;
+	}
 
-		if (nselected > LARGESEL) {
-			int r = get_input(messages[MSG_LARGESEL]);
-			if (r == 'e') {
-				/* Add all entires for manual inversion */
-				for (int i = 0; i < ndents; ++i) {
-					if (pdents[i].flags & FILE_SELECTED)
-						continue;
+	size_t len, endpos, offset = 0;
+	char *found;
 
-					pdents[i].flags |= FILE_SELECTED;
-					++nselected;
+	if (nselected > LARGESEL) {
+		int r = get_input(messages[MSG_LARGESEL]);
+		if (r == 'n')
+			return;
 
-					len = mkpath(path, pdents[i].name, g_buf);
-					appendfpath(g_buf, len);
-				}
+		if (r == 'e') {
+			/* Add all entires for manual inversion */
+			for (int i = 0; i < ndents; ++i) {
+				if (pdents[i].flags & FILE_SELECTED)
+					continue;
 
-				r = editselection(); /* Should never return 0 */
-				if (r < 0)
-					/* this does nothing since we can't access presel */
-					printwait(messages[MSG_FAILED], NULL);
+				pdents[i].flags |= FILE_SELECTED;
+				++nselected;
 
-				nselected ? writesel(pselbuf, selbufpos - 1) : writesel(NULL, 0);
-				return;
-			} else if (r != 'y')
-				return;
-		}
-
-		int nmarked = 0, prev = 0;
-		selmark *marked = malloc(nselected * sizeof(selmark));
-
-		for (int i = 0; i < ndents; ++i) {
-			 /* Toggle selection status */
-			pdents[i].flags ^= FILE_SELECTED;
-			pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
-		}
-
-		for (int i = 0; i < ndents; ++i){
-			/* Find no longer selected */
-			if(pdents[i].flags & FILE_SELECTED)
-				continue;
-
-			len = mkpath(path, pdents[i].name, g_buf);
-			found = findinsel(len);
-
-			if (found) {
-				marked[nmarked].startpos = found;
-				marked[nmarked].len = len;
-				++nmarked;
+				len = mkpath(path, pdents[i].name, g_buf);
+				appendfpath(g_buf, len);
 			}
+
+			r = editselection(); /* Should never return 0 */
+			if (r < 0)
+				/* this does nothing since we can't access presel */
+				printwait(messages[MSG_FAILED], NULL);
+
+			nselected ? writesel(pselbuf, selbufpos - 1) : writesel(NULL, 0);
+			return;
 		}
+	}
 
-		/* Merge non-selected into blocks */
-		qsort(marked, nmarked, sizeof(selmark), &markcmp);
+	int nmarked = 0, prev = 0;
+	selmark *marked = malloc(nselected * sizeof(selmark));
 
-		for (int i = 1; i < nmarked; ++i) {
-			if (marked[i].startpos == marked[prev].startpos + marked[prev].len)
-				marked[prev].len += marked[i].len;
-			else {
-				++prev;
-				marked[prev].startpos = marked[i].startpos;
-				marked[prev].len = marked[i].len;
-			}
+	for (int i = 0; i < ndents; ++i) {
+		 /* Toggle selection status */
+		pdents[i].flags ^= FILE_SELECTED;
+		pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
+	}
+
+	for (int i = 0; i < ndents; ++i){
+		/* Find no longer selected */
+		if(pdents[i].flags & FILE_SELECTED)
+			continue;
+
+		len = mkpath(path, pdents[i].name, g_buf);
+		found = findinsel(len);
+
+		if (found) {
+			marked[nmarked].startpos = found;
+			marked[nmarked].len = len;
+			++nmarked;
 		}
+	}
 
-		nmarked = prev + 1;
+	/* Merge non-selected into blocks */
+	qsort(marked, nmarked, sizeof(selmark), &markcmp);
 
-		/* Remove no longer selected */
-		for (int i = 0; i < nmarked; ++i) {
-			found = marked[i].startpos;
-			endpos = (i + 1 == nmarked ? selbufpos : marked[i + 1].startpos - pselbuf);
-			len = marked[i].len;
-
-			memmove(found, found + len, endpos - (found + len - pselbuf));
-			offset += len;
+	for (int i = 1; i < nmarked; ++i) {
+		if (marked[i].startpos == marked[prev].startpos + marked[prev].len)
+			marked[prev].len += marked[i].len;
+		else {
+			++prev;
+			marked[prev].startpos = marked[i].startpos;
+			marked[prev].len = marked[i].len;
 		}
+	}
 
-		selbufpos -= offset;
+	nmarked = prev + 1;
 
-		free(marked);
+	/* Remove no longer selected */
+	for (int i = 0; i < nmarked; ++i) {
+		found = marked[i].startpos;
+		endpos = (i + 1 == nmarked ? selbufpos : marked[i + 1].startpos - pselbuf);
+		len = marked[i].len;
 
-		/* Add newly selected */
-		for (int i = 0; i < ndents; ++i) {
-			if(!(pdents[i].flags & FILE_SELECTED))
-				continue;
+		memmove(found, found + len, endpos - (found + len - pselbuf));
+		offset += len;
+	}
 
-			len = mkpath(path, pdents[i].name, g_buf);
-			appendfpath(g_buf, len);
-		}
+	selbufpos -= offset;
+
+	free(marked);
+
+	/* Add newly selected */
+	for (int i = 0; i < ndents; ++i) {
+		if(!(pdents[i].flags & FILE_SELECTED))
+			continue;
+
+		len = mkpath(path, pdents[i].name, g_buf);
+		appendfpath(g_buf, len);
+	}
 
 	nselected ? writesel(pselbuf, selbufpos - 1) : clearselection();
 }
@@ -7035,7 +7041,7 @@ nochange:
 			}
 
 			(sel == SEL_SELINV)
-			    ? invertselbuf(path) : addtoselbuf(path, selstartid, selendid);
+				? invertselbuf(path) : addtoselbuf(path, selstartid, selendid);
 
 #ifndef NOX11
 			if (cfg.x11)
