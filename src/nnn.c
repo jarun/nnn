@@ -657,7 +657,7 @@ static const char * const messages[] = {
 	"remove tmp file?",
 	"invalid key",
 	"unchanged",
-	"continue with large selection? 'y'es, 'n'o, 'e'dit",
+	"operation may be slow, continue?",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -1555,36 +1555,11 @@ static void invertselbuf(char *path)
 		return;
 	}
 
+	if (nselected > LARGESEL && !xconfirm(get_input(messages[MSG_LARGESEL])))
+		return;
+
 	size_t len, endpos, offset = 0;
 	char *found;
-
-	if (nselected > LARGESEL) {
-		int r = get_input(messages[MSG_LARGESEL]);
-		if (r == 'n')
-			return;
-
-		if (r == 'e') {
-			/* Add all entires for manual inversion */
-			for (int i = 0; i < ndents; ++i) {
-				if (pdents[i].flags & FILE_SELECTED)
-					continue;
-
-				pdents[i].flags |= FILE_SELECTED;
-				++nselected;
-
-				len = mkpath(path, pdents[i].name, g_buf);
-				appendfpath(g_buf, len);
-			}
-
-			r = editselection(); /* Should never return 0 */
-			if (r < 0)
-				/* this does nothing since we can't access presel */
-				printwait(messages[MSG_FAILED], NULL);
-
-			nselected ? writesel(pselbuf, selbufpos - 1) : writesel(NULL, 0);
-			return;
-		}
-	}
 
 	int nmarked = 0, prev = 0;
 	selmark *marked = malloc(nselected * sizeof(selmark));
@@ -5265,7 +5240,7 @@ static int dentfill(char *path, struct entry **ppdents)
 	uchar_t entflags = 0;
 	int flags = 0;
 	struct dirent *dp;
-	char *found, *namep, *pnb, *buf = NULL;
+	char *found, *namep, *pnb;
 	struct entry *dentp;
 	size_t off = 0, namebuflen = NAMEBUF_INCR;
 	struct stat sb_path, sb;
@@ -5283,9 +5258,6 @@ static int dentfill(char *path, struct entry **ppdents)
 	if (cfg.blkorder) {
 		num_files = 0;
 		dir_blocks = 0;
-		buf = (char *)alloca(xstrlen(path) + NAME_MAX + 2);
-		if (!buf)
-			return 0;
 
 		if (fstatat(fd, path, &sb_path, 0) == -1)
 			goto exit;
@@ -5342,8 +5314,8 @@ static int dentfill(char *path, struct entry **ppdents)
 
 			if (S_ISDIR(sb.st_mode)) {
 				if (sb_path.st_dev == sb.st_dev) { // NOLINT
-					mkpath(path, namep, buf);
-					dirwalk(path, buf, -1, FALSE);
+					mkpath(path, namep, g_buf);
+					dirwalk(path, g_buf, -1, FALSE);
 
 					if (g_state.interrupt)
 						goto exit;
@@ -5473,10 +5445,10 @@ static int dentfill(char *path, struct entry **ppdents)
 
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
-				mkpath(path, namep, buf);
+				mkpath(path, namep, g_buf);
 
 				/* Need to show the disk usage of this dir */
-				dirwalk(path, buf, ndents, (sb_path.st_dev != sb.st_dev)); // NOLINT
+				dirwalk(path, g_buf, ndents, (sb_path.st_dev != sb.st_dev)); // NOLINT
 
 				if (g_state.interrupt)
 					goto exit;
