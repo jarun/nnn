@@ -152,7 +152,6 @@ LOGO64X64 = misc/logo/logo-64x64.png
 
 GITSTATUS = patches/gitstatus
 NAMEFIRST = patches/namefirst
-PERSISTSEL = patches/persistsel
 
 all: $(BIN)
 
