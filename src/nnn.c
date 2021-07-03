@@ -830,12 +830,12 @@ static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag);
 static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
+static int markcmp(const void *va, const void *vb);
+static int editselection(void);
 static int set_sort_flags(int r);
 #ifndef NOFIFO
 static void notify_fifo(bool force);
 #endif
-static int markcmp(const void *va, const void *vb);
-static int editselection(void);
 
 /* Functions */
 
