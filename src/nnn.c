@@ -830,7 +830,6 @@ static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag);
 static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
-static int markcmp(const void *va, const void *vb);
 static int editselection(void);
 static int set_sort_flags(int r);
 #ifndef NOFIFO
@@ -1548,8 +1547,17 @@ static char *findinsel(int len)
 	return found;
 }
 
+static int markcmp(const void *va, const void *vb)
+{
+	const selmark *ma = (selmark*)va;
+	const selmark *mb = (selmark*)vb;
+
+	return ma->startpos - mb->startpos;
+}
+
 static void invertselbuf(char *path)
 {
+	/* This may be slow for large selection, ask for confirmation */
 	if (nselected > LARGESEL && !xconfirm(get_input(messages[MSG_LARGESEL])))
 		return;
 
@@ -1558,30 +1566,34 @@ static void invertselbuf(char *path)
 	int nmarked = 0, prev = 0;
 	selmark *marked = malloc(nselected * sizeof(selmark));
 
+	/* First pass: inversion */
 	for (int i = 0; i < ndents; ++i) {
 		 /* Toggle selection status */
 		pdents[i].flags ^= FILE_SELECTED;
 		pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
-	}
 
-	for (int i = 0; i < ndents; ++i){
-		/* Find no longer selected */
-		if(pdents[i].flags & FILE_SELECTED)
-			continue;
 
-		len = mkpath(path, pdents[i].name, g_buf);
-		found = findinsel(len);
+		/* Find where the files marked for deselection are in selection buffer */
+		if (!(pdents[i].flags & FILE_SELECTED)) {
+			len = mkpath(path, pdents[i].name, g_buf);
+			found = findinsel(len);
 
-		if (found) {
 			marked[nmarked].startpos = found;
 			marked[nmarked].len = len;
 			++nmarked;
+
+			offset += len; /* buffer size adjustment */
 		}
 	}
 
-	/* Merge non-selected into blocks */
+	/* Files marked for deselection could be found in arbitrary order.
+	 * Sort by appearance in selection buffer.
+	 * With entries sorted we can merge adjacent ones allowing us to
+	 * move them in a single go.
+	 */
 	qsort(marked, nmarked, sizeof(selmark), &markcmp);
 
+	/* Some files might be adjacent. Merge them into a single entry */
 	for (int i = 1; i < nmarked; ++i) {
 		if (marked[i].startpos == marked[prev].startpos + marked[prev].len)
 			marked[prev].len += marked[i].len;
@@ -1592,24 +1604,37 @@ static void invertselbuf(char *path)
 		}
 	}
 
+	/* Number of entries is increased by encountering a non-adjacent entry 
+	 * After we finish the loop we should increment it once more.
+	 */
 	nmarked = prev + 1;
 
-	/* Remove no longer selected */
+	/* Using merged entries remove unselected chunks from selection buffer */
 	for (int i = 0; i < nmarked; ++i) {
+		/*
+		 * found: points to where the current block starts
+		 *        variable is recycled from previous for readability
+		 * endpos: points to where the the next block starts
+		 *         area between the end of current block (found + len)
+		 *         and endpos is selected entries. This is what we are 
+		 *         moving back.
+		 */
 		found = marked[i].startpos;
 		endpos = (i + 1 == nmarked ? selbufpos : marked[i + 1].startpos - pselbuf);
 		len = marked[i].len;
 
+		/* Move back only selected entries. No selected memory is moved twice */
 		memmove(found, found + len, endpos - (found + len - pselbuf));
-		offset += len;
 	}
 
+	/* buffer size adjustment */
 	selbufpos -= offset;
 
 	free(marked);
 
-	/* Add newly selected */
+	/* Second pass: append newly selected to buffer */
 	for (int i = 0; i < ndents; ++i) {
+		/* Skip unselected */
 		if (!(pdents[i].flags & FILE_SELECTED))
 			continue;
 
@@ -2720,14 +2745,6 @@ static void clearfilter(void)
 		fltr[REGEX_MAX - 1] = fltr[1];
 		fltr[1] = '\0';
 	}
-}
-
-static int markcmp(const void *va, const void *vb)
-{
-	const selmark *ma = (selmark*)va;
-	const selmark *mb = (selmark*)vb;
-
-	return ma->startpos - mb->startpos;
 }
 
 static int entrycmp(const void *va, const void *vb)
