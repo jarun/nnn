@@ -1616,7 +1616,9 @@ static void invertselbuf(char *path)
 	/* Number of entries is increased by encountering a non-adjacent entry 
 	 * After we finish the loop we should increment it once more.
 	 */
-	nmarked = prev + 1;
+
+	if (nmarked) /* Make sure there is something to deselect */
+		nmarked = prev + 1;
 
 	/* Using merged entries remove unselected chunks from selection buffer */
 	for (int i = 0; i < nmarked; ++i) {
