@@ -1538,13 +1538,22 @@ static char *findinsel(int len)
 		return FALSE;
 
 	char *found = pselbuf;
-	do {
+	while (1) {
 		/* memmem(3):
 		 * This function is not specified in POSIX.1, but is present on a number of other systems.
 		 */
 		found = memmem(found, selbufpos - (found - pselbuf), g_buf, len);
-	} while (found > pselbuf && *(found - 1));
-	return found;
+		if (!found)
+			return NULL;
+
+		if (found == pselbuf || *(found - 1) == '\0')
+			return found;
+
+		/* We found g_buf as a substring of a path. Move forward */
+		found += len;
+		if (found >= pselbuf + selbufpos)
+			return NULL;
+	}
 }
 
 static int markcmp(const void *va, const void *vb)
@@ -5309,7 +5318,8 @@ static int dentfill(char *path, struct entry **ppdents)
 	}
 #endif
 
-	found = findinsel(xstrsncpy(buf, path, xstrlen(path)) - 1) != NULL;
+	/* We don't include NULL since we only want to know if dir path is present */
+	found = findinsel(xstrsncpy(buf, path, xstrlen(path))) != NULL;
 
 	do {
 		namep = dp->d_name;
