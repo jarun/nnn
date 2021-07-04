@@ -657,7 +657,7 @@ static const char * const messages[] = {
 	"remove tmp file?",
 	"invalid key",
 	"unchanged",
-	"operation may be slow, continue?",
+	"inversion may be slow, continue?",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -1570,8 +1570,6 @@ static void invertselbuf(char *path)
 	for (int i = 0; i < ndents; ++i) {
 		 /* Toggle selection status */
 		pdents[i].flags ^= FILE_SELECTED;
-		pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
-
 
 		/* Find where the files marked for deselection are in selection buffer */
 		if (!(pdents[i].flags & FILE_SELECTED)) {
@@ -1582,8 +1580,10 @@ static void invertselbuf(char *path)
 			marked[nmarked].len = len;
 			++nmarked;
 
+			--nselected;
 			offset += len; /* buffer size adjustment */
-		}
+		} else
+			++nselected;
 	}
 
 	/* Files marked for deselection could be found in arbitrary order.
