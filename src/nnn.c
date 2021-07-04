@@ -1550,17 +1550,11 @@ static char *findinsel(int len)
 
 static void invertselbuf(char *path)
 {
-	if (!nselected) {
-		writesel(NULL, 0);
-		return;
-	}
-
 	if (nselected > LARGESEL && !xconfirm(get_input(messages[MSG_LARGESEL])))
 		return;
 
 	size_t len, endpos, offset = 0;
 	char *found;
-
 	int nmarked = 0, prev = 0;
 	selmark *marked = malloc(nselected * sizeof(selmark));
 
@@ -1616,7 +1610,7 @@ static void invertselbuf(char *path)
 
 	/* Add newly selected */
 	for (int i = 0; i < ndents; ++i) {
-		if(!(pdents[i].flags & FILE_SELECTED))
+		if (!(pdents[i].flags & FILE_SELECTED))
 			continue;
 
 		len = mkpath(path, pdents[i].name, g_buf);
@@ -1633,7 +1627,7 @@ static void rmfromselbuf(size_t len)
 	if (!found)
 		return;
 
-	memmove(found, found+len, selbufpos - ((found+len) - pselbuf));
+	memmove(found, found + len, selbufpos - (found + len - pselbuf));
 	selbufpos -= len;
 
 	nselected ? writesel(pselbuf, selbufpos - 1) : writesel(NULL, 0);
@@ -5240,7 +5234,8 @@ static int dentfill(char *path, struct entry **ppdents)
 	uchar_t entflags = 0;
 	int flags = 0;
 	struct dirent *dp;
-	char *found, *namep, *pnb;
+	bool found;
+	char *namep, *pnb, *buf = g_buf;
 	struct entry *dentp;
 	size_t off = 0, namebuflen = NAMEBUF_INCR;
 	struct stat sb_path, sb;
@@ -5297,7 +5292,7 @@ static int dentfill(char *path, struct entry **ppdents)
 	}
 #endif
 
-	found = findinsel(xstrsncpy(g_buf, path, xstrlen(path)) - 1);
+	found = findinsel(xstrsncpy(buf, path, xstrlen(path)) - 1) != NULL;
 
 	do {
 		namep = dp->d_name;
@@ -5314,8 +5309,8 @@ static int dentfill(char *path, struct entry **ppdents)
 
 			if (S_ISDIR(sb.st_mode)) {
 				if (sb_path.st_dev == sb.st_dev) { // NOLINT
-					mkpath(path, namep, g_buf);
-					dirwalk(path, g_buf, -1, FALSE);
+					mkpath(path, namep, buf);
+					dirwalk(path, buf, -1, FALSE);
 
 					if (g_state.interrupt)
 						goto exit;
@@ -5440,15 +5435,15 @@ static int dentfill(char *path, struct entry **ppdents)
 			entflags = 0;
 		}
 
-		if (found && findinsel(mkpath(path, dentp->name, g_buf)) != NULL)
+		if (found && findinsel(mkpath(path, dentp->name, buf)) != NULL)
 			dentp->flags |= FILE_SELECTED;
 
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
-				mkpath(path, namep, g_buf);
+				mkpath(path, namep, buf);
 
 				/* Need to show the disk usage of this dir */
-				dirwalk(path, g_buf, ndents, (sb_path.st_dev != sb.st_dev)); // NOLINT
+				dirwalk(path, buf, ndents, (sb_path.st_dev != sb.st_dev)); // NOLINT
 
 				if (g_state.interrupt)
 					goto exit;
