@@ -412,7 +412,7 @@ else
         clear
         printf "No FIFO available! (\$NNN_FIFO='%s')\nPlease read Usage in preview-tui." "$NNN_FIFO"
         cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg"
-    elif [ "$KITTY_WINDOW_ID" ] && [ -z "$KITTY_LISTEN_ON" ]; then
+    elif [ "$KITTY_WINDOW_ID" ] && [ -z "$TMUX" ] && [ -z "$KITTY_LISTEN_ON" ]; then
         clear
         printf "\$KITTY_LISTEN_ON not set!\nPlease read Usage in preview-tui."
         cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg"
