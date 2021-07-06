@@ -1498,6 +1498,14 @@ static void startselection(void)
 	}
 }
 
+static void clearselection(void)
+{
+	nselected = 0;
+	selbufpos = 0;
+	g_state.selmode = 0;
+	writesel(NULL, 0);
+}
+
 static size_t appendslash(char *path)
 {
 
@@ -1533,10 +1541,9 @@ static void invertselbuf(char *path, bool toggle)
 		if (len > 1)
 			--len;
 		path[len] = '\0';
+	}
 
-		nselected ? writesel(pselbuf, selbufpos - 1) : writesel(NULL, 0);
-	} else
-		writesel(NULL, 0);
+	nselected ? writesel(pselbuf, selbufpos - 1) : clearselection();
 }
 
 static void addtoselbuf(char *path, int startid, int endid)
@@ -1624,14 +1631,6 @@ static void endselection(void)
 			pselbuf[count] = '\0';
 
 	writesel(pselbuf, selbufpos - 1);
-}
-
-static void clearselection(void)
-{
-	nselected = 0;
-	selbufpos = 0;
-	g_state.selmode = 0;
-	writesel(NULL, 0);
 }
 
 /* Returns: 1 - success, 0 - none selected, -1 - other failure */
@@ -6858,9 +6857,6 @@ nochange:
 			if (cfg.x11)
 				plugscript(utils[UTIL_CBCP], F_NOWAIT | F_NOTRACE);
 #endif
-
-			if (!nselected)
-				unlink(selpath);
 #ifndef NOMOUSE
 			if (rightclicksel)
 				rightclicksel = 0;
