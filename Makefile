@@ -31,10 +31,6 @@ O_NOX11 := 0  # disable X11 integration
 O_GITSTATUS := 0 # add git status to detail view
 O_NAMEFIRST := 0 # print file name first, add uid and guid to detail view
 
-ifeq ($(strip $(O_GITSTATUS)),1)
-	LDLIBS += -lgit2
-endif
-
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
 	O_DEBUG := 1

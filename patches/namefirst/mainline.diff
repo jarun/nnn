@@ -4,7 +4,7 @@
 # Author: Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index c4bced5..d1bc16d 100644
+index c4bced5..f5101b1 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
 @@ -368,6 +368,10 @@ typedef struct {
@@ -177,9 +177,8 @@ index c4bced5..d1bc16d 100644
 -		if (n < 36)
 +		if (n < (dtls.maxentln + 1 - dtls.maxnameln))
  			cfg.showdetail ^= 1;
--		else /* 2 more accounted for below */
+ 		else /* 2 more accounted for below */
 -			n -= 32;
-+		else
 +			n -= (dtls.maxentln - 2 - dtls.maxnameln);
  	}
 
