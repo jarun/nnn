@@ -1666,7 +1666,7 @@ static void rmfromselbuf(size_t len)
 	memmove(found, found + len, selbufpos - (found + len - pselbuf));
 	selbufpos -= len;
 
-	nselected ? writesel(pselbuf, selbufpos - 1) : writesel(NULL, 0);
+	nselected ? writesel(pselbuf, selbufpos - 1) : clearselection();
 }
 
 static void addtoselbuf(char *path, int startid, int endid)
