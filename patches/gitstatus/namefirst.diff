@@ -4,60 +4,47 @@
 #              adding `let g:nnn#command = 'nnn -G' to their vim config.
 #              Compatibility patch for the namefirst patch.
 #
-# Dependencies: libgit2
-#
-#
-# Authors: @crides, Luuk van Baal
+# Authors: Luuk van Baal, @crides
 
 diff --git a/src/nnn.c b/src/nnn.c
-index b8b222d4..80ef884f 100644
+index f5101b1..4691b43 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -105,6 +105,7 @@
- #include <wchar.h>
- #include <pwd.h>
- #include <grp.h>
-+#include <git2.h>
-
- #if !defined(alloca) && defined(__GNUC__)
- /*
-@@ -265,6 +266,7 @@ typedef struct entry {
+@@ -269,6 +269,7 @@ typedef struct entry {
  	uid_t uid; /* 4 bytes */
  	gid_t gid; /* 4 bytes */
  #endif
-+	git_status_t git_status;
++	char git_status[2];
  } *pEntry;
 
  /* Key-value pairs from env */
-@@ -315,6 +317,7 @@ typedef struct {
+@@ -319,6 +320,7 @@ typedef struct {
  	uint_t cliopener  : 1;  /* All-CLI app opener */
  	uint_t waitedit   : 1;  /* For ops that can't be detached, used EDITOR */
  	uint_t rollover   : 1;  /* Roll over at edges */
 +	uint_t normalgit  : 1;  /* Show git status in normal mode */
  } settings;
 
- /* Non-persistent program-internal states */
-@@ -367,7 +370,19 @@ static struct {
+ /* Non-persistent program-internal states (alphabeical order) */
+@@ -372,7 +374,17 @@ static struct {
  	ushort_t maxnameln, maxsizeln, maxuidln, maxgidln, maxentln, uidln, gidln, printguid;
  } dtls;
 
 +typedef struct {
-+	char *path;
-+	git_status_t status;
-+} simple_git_status_t;
-+
-+typedef struct {
-+	simple_git_status_t *statuses;
-+	size_t len;
-+	bool show;
-+} simple_git_statuses_t;
++	char status[2];
++	char path[PATH_MAX];
++} git_status_t;
 +
  /* GLOBALS */
-+simple_git_statuses_t git_statuses;
++struct {
++	bool show;
++	size_t len;
++	git_status_t *statuses;
++} git_statuses;
 
  /* Configuration, contexts */
  static settings cfg = {
-@@ -398,6 +413,7 @@ static settings cfg = {
+@@ -403,6 +415,7 @@ static settings cfg = {
  	0, /* cliopener */
  	0, /* waitedit */
  	1, /* rollover */
@@ -65,156 +52,138 @@ index b8b222d4..80ef884f 100644
  };
 
  static context g_ctx[CTX_MAX] __attribute__ ((aligned));
-@@ -3506,6 +3522,66 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
+@@ -3514,6 +3527,39 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
  	return NULL;
  }
 
-+static void print_gitstatus(git_status_t status) {
-+	if (status & GIT_STATUS_INDEX_NEW)             addch('N' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_EXE)));
-+	else if (status & GIT_STATUS_INDEX_MODIFIED)   addch('M' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(4)));
-+	else if (status & GIT_STATUS_INDEX_DELETED)    addch('D' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_UND)));
-+	else if (status & GIT_STATUS_INDEX_RENAMED)    addch('R' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_CHR)));
-+	else if (status & GIT_STATUS_INDEX_TYPECHANGE) addch('T' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_HRD)));
-+	else                                           addch('-' | 0);
++static size_t get_git_statuses(const char *path)
++{
++	static char gitrev[] = "git rev-parse --show-toplevel 2>/dev/null";
++	char workdir[PATH_MAX];
++	FILE *fp = popen(gitrev, "r");
 +
-+	if (status & GIT_STATUS_WT_NEW)             addch('N' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_EXE)));
-+	else if (status & GIT_STATUS_WT_MODIFIED)   addch('M' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(4)));
-+	else if (status & GIT_STATUS_WT_DELETED)    addch('D' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_UND)));
-+	else if (status & GIT_STATUS_WT_RENAMED)    addch('R' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_CHR)));
-+	else if (status & GIT_STATUS_WT_TYPECHANGE) addch('T' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_HRD)));
-+	else if (status & GIT_STATUS_IGNORED)       addch('I' | 0);
-+	else if (status & GIT_STATUS_CONFLICTED)    addch('U' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_UND)));
-+	else                                        addch('-' | 0);
-+}
++	fgets(workdir, PATH_MAX, fp);
++	pclose(fp);
 +
-+static simple_git_statuses_t statuses_from_path(const char *path) {
-+	git_repository *repo;
-+	git_buf ret = { .ptr = NULL, .asize = 0, .size = 0 };
-+	simple_git_statuses_t statuses = { .statuses = NULL, .len = 0 };
-+	git_repository_discover(&ret, path, false, NULL);
-+	git_repository_open(&repo, ret.ptr);
-+	git_buf_dispose(&ret);
++	if (!workdir[0])
++		return 0;
 +
-+	if (repo) {
-+		char buf[PATH_MAX];
-+		const char *workdir = git_repository_workdir(repo);
-+		git_status_list *status_list;
-+
-+		git_status_list_new(&status_list, repo, NULL);
-+		statuses.len = git_status_list_entrycount(status_list);
-+		statuses.statuses = malloc(statuses.len * sizeof(simple_git_status_t));
-+
-+		for (size_t i = 0; i < statuses.len; ++i) {
-+			const git_status_entry *status_ent = git_status_byindex(status_list, i);
-+			const char *entry_path = status_ent->head_to_index ? status_ent->head_to_index->old_file.path
-+					: status_ent->index_to_workdir->old_file.path;
-+
-+			xstrsncpy(buf, workdir, xstrlen(workdir));
-+			statuses.statuses[i].path = abspath(entry_path, buf);
-+			statuses.statuses[i].status = status_ent->status;
-+		}
-+
-+		git_status_list_free(status_list);
-+		git_repository_free(repo);
-+	}
-+	return statuses;
-+}
-+
-+static void git_statuses_free(void) {
-+	for (size_t i = 0; i < git_statuses.len; ++i)
-+		free(git_statuses.statuses[i].path);
-+
-+	free(git_statuses.statuses);
-+	git_statuses.len = 0;
++	static char gitstat[] = "git -c core.quotePath= status --porcelain --ignored=matching -u ";
++	char pathspec[PATH_MAX], status[PATH_MAX];
++	size_t i = -1;
 +	git_statuses.show = FALSE;
++	workdir[xstrlen(workdir) - 1] = '\0';
++	snprintf(pathspec, PATH_MAX, "%s%s%s 2>/dev/null", gitstat, path, cfg.showhidden ? "" : "/*");
++	fp = popen(pathspec, "r");
++
++	while (fgets(status, PATH_MAX, fp)) {
++		size_t pathindex = (status[3] == '"') ? 4 : 3;
++		status[xstrlen(status) - pathindex + 2] = '\0';
++		git_statuses.statuses = xrealloc(git_statuses.statuses, sizeof(git_status_t) * (++i + 1));
++		git_statuses.statuses[i].status[0] = (status[0] == ' ') ? '-' : status[0];
++		git_statuses.statuses[i].status[1] = (status[1] == ' ') ? '-' : status[1];
++		mkpath(workdir, status + pathindex, git_statuses.statuses[i].path);
++	}
++
++	pclose(fp);
++	return (i + 1);
 +}
 +
  static void resetdircolor(int flags)
  {
  	/* Directories are always shown on top, clear the color when moving to first file */
-@@ -3816,6 +3892,11 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+@@ -3824,6 +3870,9 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
  	int attrs = 0, namelen;
  	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
 
-+	if (git_statuses.show && (cfg.showdetail || cfg.normalgit)) {
-+		addch(' ');
-+		print_gitstatus(ent->git_status);
-+	}
++	if (git_statuses.show && (cfg.showdetail || cfg.normalgit))
++		printw(" %c%c", ent->git_status[0], ent->git_status[1]);
 +
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
 
  	if (g_state.oldcolor)
-@@ -5166,6 +5247,10 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5183,6 +5232,10 @@ static int dentfill(char *path, struct entry **ppdents)
  		attron(COLOR_PAIR(cfg.curctx + 1));
  	}
 
-+	if (git_statuses.len)
-+		git_statuses_free();
-+	git_statuses = statuses_from_path(path);
++	char linkpath[PATH_MAX];
++	if ((git_statuses.len = get_git_statuses(path)))
++		realpath(path, linkpath);
 +
  #if _POSIX_C_SOURCE >= 200112L
  	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
  #endif
-@@ -5363,6 +5448,23 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5381,6 +5434,34 @@ static int dentfill(char *path, struct entry **ppdents)
  #endif
  		}
 
 +		if (git_statuses.len) {
-+			char *dentpath = abspath(dentp->name, path);
-+			namebuflen = xstrlen(dentpath);
-+			dentp->git_status = GIT_STATUS_CURRENT;
++			char dentpath[PATH_MAX];
++			size_t pathlen = mkpath(linkpath, dentp->name, dentpath) - 1;
++			dentp->git_status[0] = dentp->git_status[1] = '-';
 +
-+			for (size_t i = 0; i < git_statuses.len; ++i)
-+				if (git_statuses.statuses[i].status)
-+					if ((dentp->flags & DIR_OR_DIRLNK) ? (is_prefix(git_statuses.statuses[i].path, dentpath, namebuflen) &&
-+							namebuflen <= xstrlen(git_statuses.statuses[i].path)) : !xstrcmp(git_statuses.statuses[i].path, dentpath)) {
-+						if (git_statuses.statuses[i].status != GIT_STATUS_IGNORED)
++			if (dentp->flags & DIR_OR_DIRLNK) {
++				for (size_t i = 0; i < git_statuses.len; ++i)
++					if (is_prefix(git_statuses.statuses[i].path, dentpath, pathlen)) {
++						dentp->git_status[0] = git_statuses.statuses[i].status[0];
++						dentp->git_status[1] = git_statuses.statuses[i].status[1];
++						if (dentp->git_status[1] != '!') {
 +							git_statuses.show = TRUE;
-+						dentp->git_status |= git_statuses.statuses[i].status;
++							if (dentp->git_status[1] == '?')
++								break;
++						}
 +					}
-+
-+			free(dentpath);
++			} else {
++				for (size_t i = 0; i < git_statuses.len; ++i)
++					if (!xstrcmp(git_statuses.statuses[i].path, dentpath)) {
++						dentp->git_status[0] = git_statuses.statuses[i].status[0];
++						dentp->git_status[1] = git_statuses.statuses[i].status[1];
++						if (dentp->git_status[1] != '!')
++							git_statuses.show = TRUE;
++						break;
++					}
++			}
 +		}
 +
  		++ndents;
  	} while ((dp = readdir(dirp)));
 
-@@ -5873,7 +5975,7 @@ static int adjust_cols(int n)
- 	}
+@@ -5888,7 +5969,8 @@ static int adjust_cols(int n)
+ 			cfg.showdetail ^= 1;
+ 		else /* 2 more accounted for below */
+ 			n -= (dtls.maxentln - 2 - dtls.maxnameln);
+-	}
++	} else if (cfg.normalgit && git_statuses.show)
++		n -= 3;
 
  	/* 2 columns for preceding space and indicator */
--	return (n - 2);
-+	return (n - ((git_statuses.show && (cfg.normalgit && !cfg.showdetail)) ? 5 : 2));
- }
-
- static void draw_line(char *path, int ncols)
-@@ -6011,7 +6113,7 @@ static void redraw(char *path)
+ 	return (n - 2);
+@@ -6045,7 +6127,7 @@ static void redraw(char *path)
+ 			}
  #endif
  		}
+-		dtls.maxentln = dtls.maxnameln + dtls.maxsizeln + (dtls.printguid ? (dtls.maxuidln + dtls.maxgidln + 29) : 26);
++		dtls.maxentln = dtls.maxnameln + dtls.maxsizeln + (dtls.printguid ? (dtls.maxuidln + dtls.maxgidln + 3) : 0) + (git_statuses.show ? 29 : 26);
  	}
--	dtls.maxentln = dtls.maxnameln + dtls.maxsizeln + (dtls.printguid ? (dtls.maxuidln + dtls.maxgidln) : 0) + (g_state.uidgid ? 26 : 23);
-+	dtls.maxentln = dtls.maxnameln + dtls.maxsizeln + (dtls.printguid ? (dtls.maxuidln + dtls.maxgidln) : 0) + (git_statuses.show ? 3 : 0) + (g_state.uidgid ? 26 : 23);
 
  	ncols = adjust_cols(ncols);
-
-@@ -7610,6 +7712,7 @@ static void usage(void)
- 		" -f      use readline history file\n"
+@@ -7646,6 +7728,7 @@ static void usage(void)
+ 		" -F val  fifo mode [0:preview 1:explore]\n"
  #endif
  		" -g      regex filters\n"
 +		" -G      always show git status\n"
  		" -H      show hidden files\n"
  		" -J      no auto-proceed on select\n"
  		" -K      detect key collision\n"
-@@ -7748,6 +7851,8 @@ static void cleanup(void)
+@@ -7784,6 +7867,7 @@ static void cleanup(void)
  		fflush(stdout);
  	}
  #endif
-+	git_statuses_free();
-+	git_libgit2_shutdown();
++	free(git_statuses.statuses);
  	free(selpath);
  	free(plgpath);
  	free(cfgpath);
-@@ -7792,7 +7897,7 @@ int main(int argc, char *argv[])
+@@ -7827,7 +7911,7 @@ int main(int argc, char *argv[])
 
  	while ((opt = (env_opts_id > 0
  		       ? env_opts[--env_opts_id]
@@ -223,7 +192,7 @@ index b8b222d4..80ef884f 100644
  		switch (opt) {
  #ifndef NOFIFO
  		case 'a':
-@@ -7833,6 +7938,9 @@ int main(int argc, char *argv[])
+@@ -7878,6 +7962,9 @@ int main(int argc, char *argv[])
  			cfg.regex = 1;
  			filterfn = &visible_re;
  			break;
@@ -233,11 +202,3 @@ index b8b222d4..80ef884f 100644
  		case 'H':
  			cfg.showhidden = 1;
  			break;
-@@ -7940,6 +8048,7 @@ int main(int argc, char *argv[])
- 		return EXIT_FAILURE;
-
- 	atexit(cleanup);
-+	git_libgit2_init();
-
- 	/* Check if we are in path list mode */
- 	if (!isatty(STDIN_FILENO)) {
