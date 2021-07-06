@@ -5321,7 +5321,7 @@ static int dentfill(char *path, struct entry **ppdents)
 #endif
 
 	/* We don't include NULL since we only want to know if dir path is present */
-	found = findinsel(xstrsncpy(buf, path, xstrlen(path))) != NULL;
+	found = findinsel(xstrsncpy(buf, path, xstrlen(path) + 1) - 1) != NULL;
 
 	do {
 		namep = dp->d_name;
