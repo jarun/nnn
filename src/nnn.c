@@ -5262,10 +5262,10 @@ static int dentfill(char *path, struct entry **ppdents)
 	uchar_t entflags = 0;
 	int flags = 0;
 	struct dirent *dp;
-	bool found = TRUE;
+	bool found;
 	char *namep, *pnb, *buf = g_buf;
 	struct entry *dentp;
-	size_t off = 0, namebuflen = NAMEBUF_INCR;
+	size_t off, namebuflen = NAMEBUF_INCR;
 	struct stat sb_path, sb;
 	DIR *dirp = opendir(path);
 
@@ -5320,12 +5320,14 @@ static int dentfill(char *path, struct entry **ppdents)
 	}
 #endif
 
-	if (path[1] != '\0') { /* path should always be at least two bytes (including NULL) */
+	if (path[1]) { /* path should always be at least two bytes (including NULL) */
 		off = xstrsncpy(buf, path, PATH_MAX);
 		buf[off - 1] = '/';
 		found = findinsel(off) != NULL;
-		off = 0;
-	}
+	} else
+		found = TRUE;
+
+	off = 0;
 
 	do {
 		namep = dp->d_name;
