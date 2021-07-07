@@ -5320,7 +5320,7 @@ static int dentfill(char *path, struct entry **ppdents)
 	}
 #endif
 
-	if (buf[1] != '\0') { /* path should always be at least two bytes (including NULL) */
+	if (path[1] != '\0') { /* path should always be at least two bytes (including NULL) */
 		off = xstrsncpy(buf, path, PATH_MAX);
 		buf[off - 1] = '/';
 		found = findinsel(off) != NULL;
