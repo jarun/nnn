@@ -1539,7 +1539,8 @@ static char *findinsel(int len)
 
 	char *found = pselbuf;
 	while (1) {
-		/* memmem(3):
+		/*
+		 * memmem(3):
 		 * This function is not specified in POSIX.1, but is present on a number of other systems.
 		 */
 		found = memmem(found, selbufpos - (found - pselbuf), g_buf, len);
@@ -1549,7 +1550,7 @@ static char *findinsel(int len)
 		if (found == pselbuf || *(found - 1) == '\0')
 			return found;
 
-		/* We found g_buf as a substring of a path. Move forward */
+		/* We found g_buf as a substring of a path, move forward */
 		found += len;
 		if (found >= pselbuf + selbufpos)
 			return NULL;
@@ -1595,7 +1596,8 @@ static void invertselbuf(char *path)
 			++nselected;
 	}
 
-	/* Files marked for deselection could be found in arbitrary order.
+	/*
+	 * Files marked for deselection could be found in arbitrary order.
 	 * Sort by appearance in selection buffer.
 	 * With entries sorted we can merge adjacent ones allowing us to
 	 * move them in a single go.
@@ -1613,7 +1615,8 @@ static void invertselbuf(char *path)
 		}
 	}
 
-	/* Number of entries is increased by encountering a non-adjacent entry 
+	/*
+	 * Number of entries is increased by encountering a non-adjacent entry
 	 * After we finish the loop we should increment it once more.
 	 */
 
@@ -1627,7 +1630,7 @@ static void invertselbuf(char *path)
 		 *        variable is recycled from previous for readability
 		 * endpos: points to where the the next block starts
 		 *         area between the end of current block (found + len)
-		 *         and endpos is selected entries. This is what we are 
+		 *         and endpos is selected entries. This is what we are
 		 *         moving back.
 		 */
 		found = marked[i].startpos;
@@ -1638,7 +1641,7 @@ static void invertselbuf(char *path)
 		memmove(found, found + len, endpos - (found + len - pselbuf));
 	}
 
-	/* buffer size adjustment */
+	/* Buffer size adjustment */
 	selbufpos -= offset;
 
 	free(marked);
