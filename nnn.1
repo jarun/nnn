@@ -292,14 +292,6 @@ use the selection in the other pane.
 clears the selection after an operation with the selection. Plugins are allowed
 to define the behaviour individually.
 .Pp
-.Nm
-matches directory entries for selected files after a redraw or after the
-user navigates away from the directory. Keep in mind that the larger the
-selection the slower operations on it will be, including entering a directory.
-If the selection exceeds a 1000 entries the user will be prompted to proceed
-before inverting entries in the current directory. No such prompt is provided
-when deselecting a single entry.
-.Pp
 To edit the selection use the _edit selection_ key. Use this key to remove a
 file from selection after you navigate away from its directory or to remove
 duplicates. Editing doesn't end the selection mode. You can add more files to
