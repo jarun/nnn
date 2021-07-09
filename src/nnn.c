@@ -514,6 +514,7 @@ static runstate g_state;
 #define UTIL_NMV       17
 #define UTIL_TRASH_CLI 18
 #define UTIL_GIO_TRASH 19
+#define UTIL_RM_RF     20
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -553,6 +554,7 @@ static char * const utils[] = {
 	".nmv",
 	"trash-put",
 	"gio trash",
+	"rm -rf",
 };
 
 /* Common strings */
@@ -612,7 +614,7 @@ static const char * const messages[] = {
 	"session name: ",
 	"'c'p / 'm'v as?",
 	"'c'urrent / 's'el?",
-	"rm -rf %s file%s? [Esc cancels]",
+	"%s %s file%s? [Esc cancels]",
 	"limit exceeded",
 	"'f'ile / 'd'ir / 's'ym / 'h'ard?",
 	"'c'li / 'g'ui?",
@@ -1372,6 +1374,7 @@ static char confirm_force(bool selection)
 	char str[64];
 
 	snprintf(str, 64, messages[MSG_FORCE_RM],
+		 g_state.trash ? utils[UTIL_GIO_TRASH] + 4 : utils[UTIL_RM_RF],
 		 (selection ? xitoa(nselected) : "current"), (selection ? "(s)" : ""));
 
 	int r = get_input(str);
@@ -1379,8 +1382,8 @@ static char confirm_force(bool selection)
 	if (r == ESC)
 		return '\0'; /* cancel */
 	if (r == 'y' || r == 'Y')
-		return 'f'; /* forceful */
-	return 'i'; /* interactive */
+		return 'f'; /* forceful for rm */
+	return (g_state.trash ? '\0' : 'i'); /* interactive for rm */
 }
 
 /* Writes buflen char(s) from buf to a file */
@@ -2179,15 +2182,14 @@ static void opstr(char *buf, char *op)
 
 static bool rmmulstr(char *buf)
 {
-	if (!g_state.trash) {
-		char r = confirm_force(TRUE);
+	char r = confirm_force(TRUE);
+	if (!r)
+		return FALSE;
 
-		if (!r)
-			return FALSE;
-
+	if (!g_state.trash)
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr \"$0\" \"$@\" < /dev/tty' < %s",
 			 r, selpath);
-	} else
+	else
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 %s < %s",
 			 utils[(g_state.trash == 1) ? UTIL_TRASH_CLI : UTIL_GIO_TRASH], selpath);
 
@@ -2197,13 +2199,14 @@ static bool rmmulstr(char *buf)
 /* Returns TRUE if file is removed, else FALSE */
 static bool xrm(char *fpath)
 {
+	char r = confirm_force(FALSE);
+	if (!r)
+		return FALSE;
+
 	if (!g_state.trash) {
 		char rm_opts[] = "-ir";
 
-		rm_opts[1] = confirm_force(FALSE);
-		if (!rm_opts[1])
-			return FALSE;
-
+		rm_opts[1] = r;
 		spawn("rm", rm_opts, fpath, NULL, F_NORMAL | F_CHKRTN);
 	} else
 		spawn(utils[(g_state.trash == 1) ? UTIL_TRASH_CLI : UTIL_GIO_TRASH],
@@ -4786,7 +4789,7 @@ static void rmlistpath(void)
 	if (listpath) {
 		DPRINTF_S(__func__);
 		DPRINTF_S(listpath);
-		spawn("rm -rf", listpath, NULL, NULL, F_NOTRACE | F_MULTI);
+		spawn(utils[UTIL_RM_RF], listpath, NULL, NULL, F_NOTRACE | F_MULTI);
 		/* Do not free if program was started in list mode */
 		if (listpath != initpath)
 			free(listpath);
