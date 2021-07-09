@@ -808,12 +808,6 @@ static haiku_nm_h haiku_hnd;
 #define ENTSORT(pdents, ndents, entrycmpfn) qsort((pdents), (ndents), sizeof(*(pdents)), (entrycmpfn))
 #endif
 
-#ifdef __GNUC__
-#define UNUSED(x) UNUSED_##x __attribute__((__unused__))
-#else
-#define UNUSED(x) UNUSED_##x
-#endif /* __GNUC__ */
-
 /* Forward declarations */
 static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag);
@@ -826,13 +820,15 @@ static void notify_fifo(bool force);
 
 /* Functions */
 
-static void sigint_handler(int UNUSED(sig))
+static void sigint_handler(int sig)
 {
+	(void) sig;
 	g_state.interrupt = 1;
 }
 
-static void clean_exit_sighandler(int UNUSED(sig))
+static void clean_exit_sighandler(int sig)
 {
+	(void) sig;
 	exitcurses();
 	/* This triggers cleanup() thanks to atexit() */
 	exit(EXIT_SUCCESS);
