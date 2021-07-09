@@ -437,7 +437,7 @@ static char *selpath;
 static char *listpath;
 static char *listroot;
 static char *plgpath;
-static char *pnamebuf, *pselbuf;
+static char *pnamebuf, *pselbuf, *findselpos;
 static char *mark;
 #ifndef NOFIFO
 static char *fifopath;
@@ -1532,27 +1532,31 @@ static size_t appendslash(char *path)
 	return len;
 }
 
-static char *findinsel(int len)
+static char *findinsel(char *startpos, int len)
 {
 	if (!selbufpos)
 		return FALSE;
 
-	char *found = pselbuf;
+	if (!startpos)
+		startpos = pselbuf;
+
+	char *found = startpos;
+	size_t buflen = (selbuflen + pselbuf) - startpos;
 	while (1) {
 		/*
 		 * memmem(3):
 		 * This function is not specified in POSIX.1, but is present on a number of other systems.
 		 */
-		found = memmem(found, selbufpos - (found - pselbuf), g_buf, len);
+		found = memmem(found, buflen - (found - startpos), g_buf, len);
 		if (!found)
 			return NULL;
 
-		if (found == pselbuf || *(found - 1) == '\0')
+		if (found == startpos || *(found - 1) == '\0')
 			return found;
 
 		/* We found g_buf as a substring of a path, move forward */
 		found += len;
-		if (found >= pselbuf + selbufpos)
+		if (found >= startpos + buflen)
 			return NULL;
 	}
 }
@@ -1576,6 +1580,10 @@ static void invertselbuf(char *path)
 	int nmarked = 0, prev = 0;
 	selmark *marked = malloc(nselected * sizeof(selmark));
 
+	tolastln();
+	addstr(" in progress...\n");
+	refresh();
+
 	/* First pass: inversion */
 	for (int i = 0; i < ndents; ++i) {
 		 /* Toggle selection status */
@@ -1584,7 +1592,7 @@ static void invertselbuf(char *path)
 		/* Find where the files marked for deselection are in selection buffer */
 		if (!(pdents[i].flags & FILE_SELECTED)) {
 			len = mkpath(path, pdents[i].name, g_buf);
-			found = findinsel(len);
+			found = findinsel(findselpos, len);
 
 			marked[nmarked].startpos = found;
 			marked[nmarked].len = len;
@@ -1662,7 +1670,7 @@ static void invertselbuf(char *path)
 /* removes g_buf from selbuf */
 static void rmfromselbuf(size_t len)
 {
-	char *found = findinsel(len);
+	char *found = findinsel(findselpos, len);
 	if (!found)
 		return;
 
@@ -5326,9 +5334,15 @@ static int dentfill(char *path, struct entry **ppdents)
 	if (path[1]) { /* path should always be at least two bytes (including NULL) */
 		off = xstrsncpy(buf, path, PATH_MAX);
 		buf[off - 1] = '/';
-		found = findinsel(off) != NULL;
-	} else
+		/*
+		 * We set findselpos only here. Directories can be listed in arbitrary order.
+		 * This is the best best we can do for remembering position.
+		 */
+		found = (findselpos = findinsel(NULL, off)) != NULL;
+	} else {
+		findselpos = NULL;
 		found = TRUE;
+	}
 
 	off = 0;
 
@@ -5473,7 +5487,7 @@ static int dentfill(char *path, struct entry **ppdents)
 			entflags = 0;
 		}
 
-		if (found && findinsel(mkpath(path, dentp->name, buf)) != NULL)
+		if (found && findinsel(findselpos, mkpath(path, dentp->name, buf)) != NULL)
 			dentp->flags |= FILE_SELECTED;
 
 		if (cfg.blkorder) {
