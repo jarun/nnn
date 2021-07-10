@@ -292,19 +292,10 @@ use the selection in the other pane.
 clears the selection after an operation with the selection. Plugins are allowed
 to define the behaviour individually.
 .Pp
-.Nm
-doesn't match directory entries for selected files after a redraw or after the
-user navigates away from the directory. An attempt to do so will increase
-memory consumption and processing significantly as
-.Nm
-allows selection across directories. So the selection marks are cleared. The
-selection can still be edited in the same instance.
-.Pp
-To edit the selection use the _edit selection_ key. Use this key to remove a
-file from selection after you navigate away from its directory or to remove
-duplicates. Editing doesn't end the selection mode. You can add more files to
-the selection and edit the list again. If no file is selected in the current
-session, this option attempts to list the selection file.
+To edit the selection use the _edit selection_ key. Editing doesn't end the
+selection mode. You can add more files to the selection and edit the list again.
+If no file is selected in the current session, this option attempts to list the
+selection file.
 .Sh FIND AND LIST
 There are two ways to search and list:
 .Pp

@@ -26,6 +26,7 @@ O_BENCH := 0  # benchmark mode (stops at first user input)
 O_NOSSN := 0  # enable session support
 O_NOUG := 0  # disable user, group name in status bar
 O_NOX11 := 0  # disable X11 integration
+O_LARGESEL := 0 # set threshold for large selection
 
 # User patches
 O_GITSTATUS := 0 # add git status to detail view
@@ -113,6 +114,10 @@ endif
 
 ifeq ($(strip $(O_NOX11)),1)
 	CPPFLAGS += -DNOX11
+endif
+
+ifneq ($(strip $(O_LARGESEL)),0)
+	CPPFLAGS += -DLARGESEL=$(strip $(O_LARGESEL))
 endif
 
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)

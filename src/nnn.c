@@ -198,6 +198,11 @@
 #define SED "sed"
 #endif
 
+/* Large selection threshold */
+#ifndef LARGESEL
+#define LARGESEL 1000
+#endif
+
 #define MIN_DISPLAY_COL (CTX_MAX * 2)
 #define ARCHIVE_CMD_LEN 16
 #define BLK_SHIFT_512   9
@@ -270,6 +275,12 @@ typedef struct entry {
 	gid_t gid; /* 4 bytes */
 #endif
 } *pEntry;
+
+/* Selection marker */
+typedef struct {
+	char *startpos;
+	size_t len;
+} selmark;
 
 /* Key-value pairs from env */
 typedef struct {
@@ -408,7 +419,7 @@ static int nselected;
 #ifndef NOFIFO
 static int fifofd = -1;
 #endif
-static uint_t idletimeout, selbufpos, lastappendpos, selbuflen;
+static uint_t idletimeout, selbufpos, selbuflen;
 static ushort_t xlines, xcols;
 static ushort_t idle;
 static uchar_t maxbm, maxplug;
@@ -426,7 +437,7 @@ static char *selpath;
 static char *listpath;
 static char *listroot;
 static char *plgpath;
-static char *pnamebuf, *pselbuf;
+static char *pnamebuf, *pselbuf, *findselpos;
 static char *mark;
 #ifndef NOFIFO
 static char *fifopath;
@@ -600,8 +611,9 @@ static char * const utils[] = {
 #define MSG_RM_TMP       39
 #define MSG_INVALID_KEY  40
 #define MSG_NOCHANGE     41
+#define MSG_LARGESEL     42
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED  42 /* Must be the last entry */
+#define MSG_DIR_CHANGED  43 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -647,6 +659,7 @@ static const char * const messages[] = {
 	"remove tmp file?",
 	"invalid key",
 	"unchanged",
+	"inversion may be slow, continue?",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -813,6 +826,7 @@ static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag);
 static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
+static int editselection(void);
 static int set_sort_flags(int r);
 #ifndef NOFIFO
 static void notify_fifo(bool force);
@@ -1492,8 +1506,6 @@ static void startselection(void)
 			writesel(NULL, 0);
 			selbufpos = 0;
 		}
-
-		lastappendpos = 0;
 	}
 }
 
@@ -1519,28 +1531,150 @@ static size_t appendslash(char *path)
 	return len;
 }
 
-static void invertselbuf(char *path, bool toggle)
+static char *findinsel(char *startpos, int len)
 {
-	selbufpos = lastappendpos;
+	if (!selbufpos)
+		return FALSE;
 
-	if (toggle || nselected) {
-		size_t len = appendslash(path);
+	if (!startpos)
+		startpos = pselbuf;
 
-		for (int i = 0; i < ndents; ++i) {
-			if (toggle) { /* Toggle selection status */
-				pdents[i].flags ^= FILE_SELECTED;
-				pdents[i].flags & FILE_SELECTED ? ++nselected : --nselected;
-			}
+	char *found = startpos;
+	size_t buflen = selbuflen - (startpos - pselbuf);
 
-			if (pdents[i].flags & FILE_SELECTED)
-				appendfpath(path,
-					len + xstrsncpy(path + len, pdents[i].name, PATH_MAX - len));
-		}
+	while (1) {
+		/*
+		 * memmem(3):
+		 * This function is not specified in POSIX.1, but is present on a number of other systems.
+		 */
+		found = memmem(found, buflen - (found - startpos), g_buf, len);
+		if (!found)
+			return NULL;
 
-		if (len > 1)
-			--len;
-		path[len] = '\0';
+		if (found == startpos || *(found - 1) == '\0')
+			return found;
+
+		/* We found g_buf as a substring of a path, move forward */
+		found += len;
+		if (found >= startpos + buflen)
+			return NULL;
 	}
+}
+
+static int markcmp(const void *va, const void *vb)
+{
+	const selmark *ma = (selmark*)va;
+	const selmark *mb = (selmark*)vb;
+
+	return ma->startpos - mb->startpos;
+}
+
+static void invertselbuf(char *path)
+{
+	/* This may be slow for large selection, ask for confirmation */
+	if (nselected > LARGESEL && !xconfirm(get_input(messages[MSG_LARGESEL])))
+		return;
+
+	size_t len, endpos, offset = 0;
+	char *found;
+	int nmarked = 0, prev = 0;
+	selmark *marked = malloc(nselected * sizeof(selmark));
+
+	printmsg("processing...");
+	refresh();
+
+	/* First pass: inversion */
+	for (int i = 0; i < ndents; ++i) {
+		 /* Toggle selection status */
+		pdents[i].flags ^= FILE_SELECTED;
+
+		/* Find where the files marked for deselection are in selection buffer */
+		if (!(pdents[i].flags & FILE_SELECTED)) {
+			len = mkpath(path, pdents[i].name, g_buf);
+			found = findinsel(findselpos, len);
+
+			marked[nmarked].startpos = found;
+			marked[nmarked].len = len;
+			++nmarked;
+
+			--nselected;
+			offset += len; /* buffer size adjustment */
+		} else
+			++nselected;
+	}
+
+	/*
+	 * Files marked for deselection could be found in arbitrary order.
+	 * Sort by appearance in selection buffer.
+	 * With entries sorted we can merge adjacent ones allowing us to
+	 * move them in a single go.
+	 */
+	qsort(marked, nmarked, sizeof(selmark), &markcmp);
+
+	/* Some files might be adjacent. Merge them into a single entry */
+	for (int i = 1; i < nmarked; ++i) {
+		if (marked[i].startpos == marked[prev].startpos + marked[prev].len)
+			marked[prev].len += marked[i].len;
+		else {
+			++prev;
+			marked[prev].startpos = marked[i].startpos;
+			marked[prev].len = marked[i].len;
+		}
+	}
+
+	/*
+	 * Number of entries is increased by encountering a non-adjacent entry
+	 * After we finish the loop we should increment it once more.
+	 */
+
+	if (nmarked) /* Make sure there is something to deselect */
+		nmarked = prev + 1;
+
+	/* Using merged entries remove unselected chunks from selection buffer */
+	for (int i = 0; i < nmarked; ++i) {
+		/*
+		 * found: points to where the current block starts
+		 *        variable is recycled from previous for readability
+		 * endpos: points to where the the next block starts
+		 *         area between the end of current block (found + len)
+		 *         and endpos is selected entries. This is what we are
+		 *         moving back.
+		 */
+		found = marked[i].startpos;
+		endpos = (i + 1 == nmarked ? selbufpos : marked[i + 1].startpos - pselbuf);
+		len = marked[i].len;
+
+		/* Move back only selected entries. No selected memory is moved twice */
+		memmove(found, found + len, endpos - (found + len - pselbuf));
+	}
+
+	/* Buffer size adjustment */
+	selbufpos -= offset;
+
+	free(marked);
+
+	/* Second pass: append newly selected to buffer */
+	for (int i = 0; i < ndents; ++i) {
+		/* Skip unselected */
+		if (!(pdents[i].flags & FILE_SELECTED))
+			continue;
+
+		len = mkpath(path, pdents[i].name, g_buf);
+		appendfpath(g_buf, len);
+	}
+
+	nselected ? writesel(pselbuf, selbufpos - 1) : clearselection();
+}
+
+/* removes g_buf from selbuf */
+static void rmfromselbuf(size_t len)
+{
+	char *found = findinsel(findselpos, len);
+	if (!found)
+		return;
+
+	memmove(found, found + len, selbufpos - (found + len - pselbuf));
+	selbufpos -= len;
 
 	nselected ? writesel(pselbuf, selbufpos - 1) : clearselection();
 }
@@ -5100,8 +5234,7 @@ static void dirwalk(char *dir, char *path, int entnum, bool mountpoint)
 	pthread_create(&tid, NULL, du_thread, (void *)&(core_data[core]));
 
 	redraw(dir);
-	tolastln();
-	addstr(" [^C aborts]\n");
+	printmsg("^C aborts");
 	refresh();
 }
 
@@ -5138,9 +5271,10 @@ static int dentfill(char *path, struct entry **ppdents)
 	uchar_t entflags = 0;
 	int flags = 0;
 	struct dirent *dp;
-	char *namep, *pnb, *buf = NULL;
+	bool found;
+	char *namep, *pnb, *buf = g_buf;
 	struct entry *dentp;
-	size_t off = 0, namebuflen = NAMEBUF_INCR;
+	size_t off, namebuflen = NAMEBUF_INCR;
 	struct stat sb_path, sb;
 	DIR *dirp = opendir(path);
 
@@ -5156,9 +5290,6 @@ static int dentfill(char *path, struct entry **ppdents)
 	if (cfg.blkorder) {
 		num_files = 0;
 		dir_blocks = 0;
-		buf = (char *)alloca(xstrlen(path) + NAME_MAX + 2);
-		if (!buf)
-			return 0;
 
 		if (fstatat(fd, path, &sb_path, 0) == -1)
 			goto exit;
@@ -5197,6 +5328,21 @@ static int dentfill(char *path, struct entry **ppdents)
 		flags = AT_SYMLINK_NOFOLLOW;
 	}
 #endif
+
+	if (path[1]) { /* path should always be at least two bytes (including NULL) */
+		off = xstrsncpy(buf, path, PATH_MAX);
+		buf[off - 1] = '/';
+		/*
+		 * We set findselpos only here. Directories can be listed in arbitrary order.
+		 * This is the best best we can do for remembering position.
+		 */
+		found = (findselpos = findinsel(NULL, off)) != NULL;
+	} else {
+		findselpos = NULL;
+		found = TRUE;
+	}
+
+	off = 0;
 
 	do {
 		namep = dp->d_name;
@@ -5338,6 +5484,9 @@ static int dentfill(char *path, struct entry **ppdents)
 			dentp->flags |= entflags;
 			entflags = 0;
 		}
+
+		if (found && findinsel(findselpos, mkpath(path, dentp->name, buf)) != NULL)
+			dentp->flags |= FILE_SELECTED;
 
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
@@ -5610,9 +5759,6 @@ static int handle_context_switch(enum action sel)
 			else
 				return -1;
 		}
-
-		if (g_state.selmode) /* Remember the position from where to continue selection */
-			lastappendpos = selbufpos;
 	}
 
 	return r;
@@ -6181,9 +6327,6 @@ begin:
 	}
 #endif
 
-	if (g_state.selmode && lastdir[0])
-		lastappendpos = selbufpos;
-
 #ifdef LINUX_INOTIFY
 	if ((presel == FILTER || watch) && inotify_wd >= 0) {
 		inotify_rm_watch(inotify_fd, inotify_wd);
@@ -6266,9 +6409,6 @@ nochange:
 				if (r >= CTX_MAX)
 					sel = SEL_BACK;
 				else if (r >= 0 && r != cfg.curctx) {
-					if (g_state.selmode)
-						lastappendpos = selbufpos;
-
 					savecurctx(path, pdents[cur].name, r);
 
 					/* Reset the pointers */
@@ -6849,7 +6989,7 @@ nochange:
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			} else {
 				--nselected;
-				invertselbuf(path, FALSE);
+				rmfromselbuf(mkpath(path, pdents[cur].name, g_buf));
 			}
 
 #ifndef NOX11
@@ -6918,7 +7058,7 @@ nochange:
 			}
 
 			(sel == SEL_SELINV)
-				? invertselbuf(path, TRUE) : addtoselbuf(path, selstartid, selendid);
+				? invertselbuf(path) : addtoselbuf(path, selstartid, selendid);
 
 #ifndef NOX11
 			if (cfg.x11)
