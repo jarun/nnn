@@ -611,9 +611,7 @@ static char * const utils[] = {
 #define MSG_RM_TMP       39
 #define MSG_INVALID_KEY  40
 #define MSG_NOCHANGE     41
-#ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED  42 /* Must be the last entry */
-#endif
+#define MSG_DIR_CHANGED  42
 
 static const char * const messages[] = {
 	"",
@@ -658,9 +656,7 @@ static const char * const messages[] = {
 	"remove tmp file?",
 	"invalid key",
 	"unchanged",
-#ifndef DIR_LIMITED_SELECTION
-	"dir changed, range sel off", /* Must be the last entry */
-#endif
+	"dir changed, range sel off",
 };
 
 /* Supported configuration environment variables */
@@ -6239,16 +6235,13 @@ static bool browse(char *ipath, const char *session, int pkey)
 	int r = -1, presel, selstartid = 0, selendid = 0;
 	const uchar_t opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOSTDIN | F_NOWAIT));
 	bool watch = FALSE;
+	ino_t inode = 0;
 
 #ifndef NOMOUSE
 	MEVENT event = {0};
 	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0} };
 	int mousedent[2] = {-1, -1};
 	bool currentmouse = 1, rightclicksel = 0;
-#endif
-
-#ifndef DIR_LIMITED_SELECTION
-	ino_t inode = 0;
 #endif
 
 	atexit(dentfree);
@@ -7014,19 +7007,16 @@ nochange:
 			}
 
 			if (g_state.rangesel) { /* Range selection started */
-#ifndef DIR_LIMITED_SELECTION
 				inode = sb.st_ino;
-#endif
 				selstartid = cur;
 				continue;
 			}
 
-#ifndef DIR_LIMITED_SELECTION
 			if (inode != sb.st_ino) {
 				printwait(messages[MSG_DIR_CHANGED], &presel);
 				goto nochange;
 			}
-#endif
+
 			if (cur < selstartid) {
 				selendid = selstartid;
 				selstartid = cur;
