@@ -1540,7 +1540,7 @@ static char *findinsel(char *startpos, int len)
 		startpos = pselbuf;
 
 	char *found = startpos;
-	size_t buflen = selbuflen - (startpos - pselbuf);
+	size_t buflen = selbufpos - (startpos - pselbuf);
 
 	while (1) {
 		/*
