@@ -611,9 +611,8 @@ static char * const utils[] = {
 #define MSG_RM_TMP       39
 #define MSG_INVALID_KEY  40
 #define MSG_NOCHANGE     41
-#define MSG_LARGESEL     42
 #ifndef DIR_LIMITED_SELECTION
-#define MSG_DIR_CHANGED  43 /* Must be the last entry */
+#define MSG_DIR_CHANGED  42 /* Must be the last entry */
 #endif
 
 static const char * const messages[] = {
@@ -659,7 +658,6 @@ static const char * const messages[] = {
 	"remove tmp file?",
 	"invalid key",
 	"unchanged",
-	"inversion may be slow, continue?",
 #ifndef DIR_LIMITED_SELECTION
 	"dir changed, range sel off", /* Must be the last entry */
 #endif
@@ -1571,17 +1569,15 @@ static int markcmp(const void *va, const void *vb)
 
 static void invertselbuf(char *path)
 {
-	/* This may be slow for large selection, ask for confirmation */
-	if (nselected > LARGESEL && !xconfirm(get_input(messages[MSG_LARGESEL])))
-		return;
-
 	size_t len, endpos, offset = 0;
 	char *found;
 	int nmarked = 0, prev = 0;
 	selmark *marked = malloc(nselected * sizeof(selmark));
 
-	printmsg("processing...");
-	refresh();
+	if (nselected > LARGESEL) {
+		printmsg("processing...");
+		refresh();
+	}
 
 	/* First pass: inversion */
 	for (int i = 0; i < ndents; ++i) {
