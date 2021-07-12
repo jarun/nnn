@@ -217,6 +217,7 @@
 #define SYM_ORPHAN    0x04
 #define FILE_MISSING  0x08
 #define FILE_SELECTED 0x10
+#define FILE_SCANNED  0x20
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE    0x00  /* no flag set */
@@ -820,7 +821,6 @@ static void redraw(char *path);
 static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag);
 static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
-static int editselection(void);
 static int set_sort_flags(int r);
 #ifndef NOFIFO
 static void notify_fifo(bool force);
@@ -1406,16 +1406,20 @@ static void writesel(const char *buf, const size_t buflen)
 		printwarn(NULL);
 }
 
-static void appendfpath(const char *path, const size_t len)
+static bool appendfpath(const char *path, const size_t len)
 {
+	bool ret = FALSE;
+
 	if ((selbufpos >= selbuflen) || ((len + 3) > (selbuflen - selbufpos))) {
 		selbuflen += PATH_MAX;
 		pselbuf = xrealloc(pselbuf, selbuflen);
+		ret = TRUE;
 		if (!pselbuf)
 			errexit();
 	}
 
 	selbufpos += xstrsncpy(pselbuf + selbufpos, path, len);
+	return ret;
 }
 
 /* Write selected file paths to fd, linefeed separated */
@@ -1544,10 +1548,8 @@ static char *findinsel(char *startpos, int len)
 		found = memmem(found, buflen - (found - startpos), g_buf, len);
 		if (!found)
 			return NULL;
-
 		if (found == startpos || *(found - 1) == '\0')
 			return found;
-
 		/* We found g_buf as a substring of a path, move forward */
 		found += len;
 		if (found >= startpos + buflen)
@@ -1563,11 +1565,21 @@ static int markcmp(const void *va, const void *vb)
 	return ma->startpos - mb->startpos;
 }
 
+static void findmarkentry(char *path, struct entry *dentp)
+{
+	if (!(dentp->flags & FILE_SCANNED)) {
+		if (findinsel(findselpos, mkpath(path, dentp->name, g_buf)))
+			dentp->flags |= FILE_SELECTED;
+		dentp->flags |= FILE_SCANNED;
+	}
+}
+
 static void invertselbuf(char *path)
 {
 	size_t len, endpos, offset = 0;
 	char *found;
 	int nmarked = 0, prev = 0;
+	struct entry *dentp;
 	selmark *marked = malloc(nselected * sizeof(selmark));
 
 	if (nselected > LARGESEL) {
@@ -1577,12 +1589,15 @@ static void invertselbuf(char *path)
 
 	/* First pass: inversion */
 	for (int i = 0; i < ndents; ++i) {
-		 /* Toggle selection status */
-		pdents[i].flags ^= FILE_SELECTED;
+		dentp = &pdents[i];
+		findmarkentry(path, dentp);
+
+		/* Toggle selection status */
+		dentp->flags ^= FILE_SELECTED;
 
 		/* Find where the files marked for deselection are in selection buffer */
-		if (!(pdents[i].flags & FILE_SELECTED)) {
-			len = mkpath(path, pdents[i].name, g_buf);
+		if (!(dentp->flags & FILE_SELECTED)) {
+			len = mkpath(path, dentp->name, g_buf);
 			found = findinsel(findselpos, len);
 
 			marked[nmarked].startpos = found;
@@ -1658,7 +1673,7 @@ static void invertselbuf(char *path)
 	nselected ? writesel(pselbuf, selbufpos - 1) : clearselection();
 }
 
-/* removes g_buf from selbuf */
+/* Removes g_buf from selbuf */
 static void rmfromselbuf(size_t len)
 {
 	char *found = findinsel(findselpos, len);
@@ -1671,17 +1686,42 @@ static void rmfromselbuf(size_t len)
 	nselected ? writesel(pselbuf, selbufpos - 1) : clearselection();
 }
 
+static bool scanselforpath(const char *path)
+{
+	if (!path[1]) { /* path should always be at least two bytes (including NULL) */
+		findselpos = pselbuf;
+		return TRUE;
+	}
+
+	size_t off = xstrsncpy(g_buf, path, PATH_MAX);
+
+	g_buf[off - 1] = '/';
+	/*
+	 * We set findselpos only here. Directories can be listed in arbitrary order.
+	 * This is the best best we can do for remembering position.
+	 */
+	findselpos = findinsel(NULL, off);
+	return (findselpos != NULL);
+}
+
 static void addtoselbuf(char *path, int startid, int endid)
 {
 	size_t len = appendslash(path);
+	struct entry *dentp;
 
 	/* Remember current selection buffer position */
 	for (int i = startid; i <= endid; ++i) {
-		if (!(pdents[i].flags & FILE_SELECTED)) {
-			/* Write the path to selection file to avoid flush */
-			appendfpath(path, len + xstrsncpy(path + len, pdents[i].name, PATH_MAX - len));
+		dentp = &pdents[i];
+		if (findselpos)
+			findmarkentry(path, dentp);
+		else
+			dentp->flags |= FILE_SCANNED;
 
-			pdents[i].flags |= FILE_SELECTED;
+		if (!(dentp->flags & FILE_SELECTED)) {
+			/* Write the path to selection file to avoid flush */
+			if (appendfpath(path, len + xstrsncpy(path + len, dentp->name, PATH_MAX - len)))
+				scanselforpath(path);
+			dentp->flags |= FILE_SELECTED;
 			++nselected;
 		}
 	}
@@ -5263,10 +5303,9 @@ static int dentfill(char *path, struct entry **ppdents)
 	uchar_t entflags = 0;
 	int flags = 0;
 	struct dirent *dp;
-	bool found;
-	char *namep, *pnb, *buf = g_buf;
+	char *namep, *pnb, *buf;
 	struct entry *dentp;
-	size_t off, namebuflen = NAMEBUF_INCR;
+	size_t off = 0, namebuflen = NAMEBUF_INCR;
 	struct stat sb_path, sb;
 	DIR *dirp = opendir(path);
 
@@ -5282,6 +5321,7 @@ static int dentfill(char *path, struct entry **ppdents)
 	if (cfg.blkorder) {
 		num_files = 0;
 		dir_blocks = 0;
+		buf = g_buf;
 
 		if (fstatat(fd, path, &sb_path, 0) == -1)
 			goto exit;
@@ -5321,21 +5361,6 @@ static int dentfill(char *path, struct entry **ppdents)
 	}
 #endif
 
-	if (path[1]) { /* path should always be at least two bytes (including NULL) */
-		off = xstrsncpy(buf, path, PATH_MAX);
-		buf[off - 1] = '/';
-		/*
-		 * We set findselpos only here. Directories can be listed in arbitrary order.
-		 * This is the best best we can do for remembering position.
-		 */
-		found = (findselpos = findinsel(NULL, off)) != NULL;
-	} else {
-		findselpos = NULL;
-		found = TRUE;
-	}
-
-	off = 0;
-
 	do {
 		namep = dp->d_name;
 
@@ -5351,7 +5376,7 @@ static int dentfill(char *path, struct entry **ppdents)
 
 			if (S_ISDIR(sb.st_mode)) {
 				if (sb_path.st_dev == sb.st_dev) { // NOLINT
-					mkpath(path, namep, buf);
+					mkpath(path, namep, buf); // NOLINT
 					dirwalk(path, buf, -1, FALSE);
 
 					if (g_state.interrupt)
@@ -5477,12 +5502,9 @@ static int dentfill(char *path, struct entry **ppdents)
 			entflags = 0;
 		}
 
-		if (found && findinsel(findselpos, mkpath(path, dentp->name, buf)) != NULL)
-			dentp->flags |= FILE_SELECTED;
-
 		if (cfg.blkorder) {
 			if (S_ISDIR(sb.st_mode)) {
-				mkpath(path, namep, buf);
+				mkpath(path, namep, buf); // NOLINT
 
 				/* Need to show the disk usage of this dir */
 				dirwalk(path, buf, ndents, (sb_path.st_dev != sb.st_dev)); // NOLINT
@@ -6180,9 +6202,15 @@ static void redraw(char *path)
 
 	ncols = adjust_cols(ncols);
 
+	bool found = scanselforpath(path);
+
 	/* Print listing */
 	for (i = curscroll; i < onscreen; ++i) {
 		move(++j, 0);
+
+		if (found)
+			findmarkentry(path, &pdents[i]);
+
 		printent(&pdents[i], ncols, i == cur);
 	}
 
@@ -7041,9 +7069,11 @@ nochange:
 
 				selstartid = 0;
 				selendid = ndents - 1;
+
+				scanselforpath(path);
 			}
 
-			(sel == SEL_SELINV)
+			((sel == SEL_SELINV) && findselpos)
 				? invertselbuf(path) : addtoselbuf(path, selstartid, selendid);
 
 #ifndef NOX11
