@@ -1515,20 +1515,6 @@ static void clearselection(void)
 	writesel(NULL, 0);
 }
 
-static size_t appendslash(char *path)
-{
-
-	size_t len = 1;
-
-	if (path[1] != '\0') {
-		len = xstrlen(path);
-		path[len] = '/';
-		++len;
-	}
-
-	return len;
-}
-
 static char *findinsel(char *startpos, int len)
 {
 	if (!selbufpos)
@@ -1565,7 +1551,7 @@ static int markcmp(const void *va, const void *vb)
 	return ma->startpos - mb->startpos;
 }
 
-static void findmarkentry(char *path, struct entry *dentp)
+static inline void findmarkentry(char *path, struct entry *dentp)
 {
 	if (!(dentp->flags & FILE_SCANNED)) {
 		if (findinsel(findselpos, mkpath(path, dentp->name, g_buf)))
@@ -1581,6 +1567,7 @@ static void invertselbuf(char *path)
 	int nmarked = 0, prev = 0;
 	struct entry *dentp;
 	selmark *marked = malloc(nselected * sizeof(selmark));
+	bool scan = FALSE;
 
 	if (nselected > LARGESEL) {
 		printmsg("processing...");
@@ -1590,24 +1577,36 @@ static void invertselbuf(char *path)
 	/* First pass: inversion */
 	for (int i = 0; i < ndents; ++i) {
 		dentp = &pdents[i];
-		findmarkentry(path, dentp);
 
-		/* Toggle selection status */
-		dentp->flags ^= FILE_SELECTED;
+		if (dentp->flags & FILE_SCANNED) {
+			if (dentp->flags & FILE_SELECTED) {
+				dentp->flags ^= FILE_SELECTED; /* Clear selection status */
+				scan = TRUE;
+			} else {
+				++nselected;
+				dentp->flags |= FILE_SELECTED;
+			}
+		} else {
+			dentp->flags |= FILE_SCANNED;
+			scan = TRUE;
+		}
 
-		/* Find where the files marked for deselection are in selection buffer */
-		if (!(dentp->flags & FILE_SELECTED)) {
+		if (scan) {
 			len = mkpath(path, dentp->name, g_buf);
 			found = findinsel(findselpos, len);
+			if (found) {
+				marked[nmarked].startpos = found;
+				marked[nmarked].len = len;
+				++nmarked;
 
-			marked[nmarked].startpos = found;
-			marked[nmarked].len = len;
-			++nmarked;
-
-			--nselected;
-			offset += len; /* buffer size adjustment */
-		} else
-			++nselected;
+				--nselected;
+				offset += len; /* buffer size adjustment */
+			} else {
+				++nselected;
+				dentp->flags |= FILE_SELECTED;
+			}
+			scan = FALSE;
+		}
 	}
 
 	/*
@@ -1706,29 +1705,33 @@ static bool scanselforpath(const char *path)
 
 static void addtoselbuf(char *path, int startid, int endid)
 {
-	size_t len = appendslash(path);
+	size_t len;
 	struct entry *dentp;
+	bool add = FALSE;
 
 	/* Remember current selection buffer position */
 	for (int i = startid; i <= endid; ++i) {
 		dentp = &pdents[i];
-		if (findselpos)
-			findmarkentry(path, dentp);
-		else
-			dentp->flags |= FILE_SCANNED;
+		len = mkpath(path, dentp->name, g_buf);
 
-		if (!(dentp->flags & FILE_SELECTED)) {
+		if (findselpos) {
+			if (dentp->flags & FILE_SCANNED) {
+				if (!(dentp->flags & FILE_SELECTED))
+					add = TRUE;
+			} else
+				add = !findinsel(findselpos, len);
+		} else
+			add = TRUE;
+
+		if (add) {
 			/* Write the path to selection file to avoid flush */
-			if (appendfpath(path, len + xstrsncpy(path + len, dentp->name, PATH_MAX - len)))
+			if (appendfpath(g_buf, len) && findselpos)
 				scanselforpath(path);
-			dentp->flags |= FILE_SELECTED;
 			++nselected;
+			add = FALSE;
 		}
+		dentp->flags |= (FILE_SCANNED | FILE_SELECTED);
 	}
-
-	if (len > 1)
-		--len;
-	path[len] = '\0';
 
 	writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 }
