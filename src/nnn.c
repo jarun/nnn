@@ -1595,9 +1595,14 @@ static void invertselbuf(char *path)
 			len = mkpath(path, dentp->name, g_buf);
 			found = findinsel(findselpos, len);
 			if (found) {
-				marked[nmarked].startpos = found;
-				marked[nmarked].len = len;
-				++nmarked;
+				if (nmarked && (found
+				    == (marked[nmarked - 1].startpos + marked[nmarked - 1].len)))
+					marked[nmarked - 1].len += len;
+				else {
+					marked[nmarked].startpos = found;
+					marked[nmarked].len = len;
+					++nmarked;
+				}
 
 				--nselected;
 				offset += len; /* buffer size adjustment */
