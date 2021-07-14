@@ -1595,6 +1595,9 @@ static void invertselbuf(char *path)
 			len = mkpath(path, dentp->name, g_buf);
 			found = findinsel(findselpos, len);
 			if (found) {
+				if (findselpos == found)
+					findselpos += len;
+
 				if (nmarked && (found
 				    == (marked[nmarked - 1].startpos + marked[nmarked - 1].len)))
 					marked[nmarked - 1].len += len;
