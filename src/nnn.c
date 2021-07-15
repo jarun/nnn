@@ -1569,11 +1569,6 @@ static void invertselbuf(char *path)
 	selmark *marked = malloc(nselected * sizeof(selmark));
 	bool scan = FALSE;
 
-	if (nselected > LARGESEL) {
-		printmsg("processing...");
-		refresh();
-	}
-
 	/* First pass: inversion */
 	for (int i = 0; i < ndents; ++i) {
 		dentp = &pdents[i];
@@ -7082,6 +7077,11 @@ nochange:
 				selendid = ndents - 1;
 
 				scanselforpath(path);
+			}
+
+			if ((nselected > LARGESEL) || (nselected && (ndents > LARGESEL))) {
+				printmsg("processing...");
+				refresh();
 			}
 
 			((sel == SEL_SELINV) && findselpos)
