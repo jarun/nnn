@@ -163,6 +163,7 @@
 #define ISBLANK(x)      ((x) == ' ' || (x) == '\t')
 #define TOUPPER(ch)     (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define CMD_LEN_MAX     (PATH_MAX + ((NAME_MAX + 1) << 1))
+#define ALIGN_UP(x, A)  ((((x) + (A) - 1) / (A)) * (A))
 #define READLINE_MAX    256
 #define FILTER          '/'
 #define RFILTER         '\\'
@@ -1663,8 +1664,9 @@ static void invertselbuf(const int pathlen)
 	/* Buffer size adjustment */
 	selbufpos -= shrinklen;
 
-	if (alloclen > shrinklen) {
-		pselbuf = xrealloc(pselbuf, selbuflen + (alloclen - shrinklen));
+	if (alloclen > shrinklen && ((selbufpos + (alloclen - shrinklen)) > selbuflen)) {
+		selbuflen = ALIGN_UP(selbufpos + (alloclen - shrinklen), PATH_MAX);
+		pselbuf = xrealloc(pselbuf, selbuflen);
 		if (!pselbuf)
 			errexit();
 	}
@@ -1715,9 +1717,12 @@ static void addtoselbuf(const int pathlen, int startid, int endid)
 			alloclen += pathlen + dentp->nlen;
 	}
 
-	pselbuf = xrealloc(pselbuf, selbuflen + alloclen);
-	if (!pselbuf)
-		errexit();
+	if ((selbufpos + alloclen) > selbuflen) {
+		selbuflen = ALIGN_UP(selbufpos + alloclen, PATH_MAX);
+		pselbuf = xrealloc(pselbuf, selbuflen);
+		if (!pselbuf)
+			errexit();
+	}
 
 	for (int i = startid; i <= endid; ++i) {
 		if (!(pdents[i].flags & FILE_SELECTED)) {
