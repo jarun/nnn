@@ -1547,7 +1547,7 @@ static int markcmp(const void *va, const void *vb)
 	return ma->startpos - mb->startpos;
 }
 
-static inline void findmarkentry(char *path, struct entry *dentp)
+static inline void findmarkentry(const char *path, struct entry *dentp)
 {
 	if (!(dentp->flags & FILE_SCANNED)) {
 		if (findinsel(findselpos, mkpath(path, dentp->name, g_buf)))
@@ -1556,10 +1556,14 @@ static inline void findmarkentry(char *path, struct entry *dentp)
 	}
 }
 
-static void invertselbuf(char *path)
+/*
+ * scanselforpath() must be called before calling this
+ * pathlen = length of path + 1 (+1 for trailing slash)
+ */
+static void invertselbuf(const int pathlen)
 {
 	size_t len, endpos, shrinklen = 0, alloclen = 0;
-	size_t const pathlen = xstrlen(path);
+	char * const pbuf = g_buf + pathlen;
 	char *found;
 	int nmarked = 0, prev = 0;
 	struct entry *dentp;
@@ -1585,7 +1589,7 @@ static void invertselbuf(char *path)
 		}
 
 		if (scan) {
-			len = mkpath(path, dentp->name, g_buf);
+			len = pathlen + xstrsncpy(pbuf, dentp->name, NAME_MAX);
 			found = findinsel(findselpos, len);
 			if (found) {
 				if (findselpos == found)
@@ -1673,57 +1677,30 @@ static void invertselbuf(char *path)
 		if (!(pdents[i].flags & FILE_SELECTED))
 			continue;
 
-		len = mkpath(path, pdents[i].name, g_buf);
+		len = pathlen + xstrsncpy(pbuf, pdents[i].name, NAME_MAX);
 		appendfpath(g_buf, len);
 	}
 
 	nselected ? writesel(pselbuf, selbufpos - 1) : clearselection();
 }
 
-/* Removes g_buf from selbuf */
-static void rmfromselbuf(size_t len)
-{
-	char *found = findinsel(findselpos, len);
-	if (!found)
-		return;
-
-	memmove(found, found + len, selbufpos - (found + len - pselbuf));
-	selbufpos -= len;
-
-	nselected ? writesel(pselbuf, selbufpos - 1) : clearselection();
-}
-
-static bool scanselforpath(const char *path)
-{
-	if (!path[1]) { /* path should always be at least two bytes (including NULL) */
-		findselpos = pselbuf;
-		return TRUE;
-	}
-
-	size_t off = xstrsncpy(g_buf, path, PATH_MAX);
-
-	g_buf[off - 1] = '/';
-	/*
-	 * We set findselpos only here. Directories can be listed in arbitrary order.
-	 * This is the best best we can do for remembering position.
-	 */
-	findselpos = findinsel(NULL, off);
-	return (findselpos != NULL);
-}
-
-static void addtoselbuf(char *path, int startid, int endid)
+/*
+ * scanselforpath() must be called before calling this
+ * pathlen = length of path + 1 (+1 for trailing slash)
+ */
+static void addtoselbuf(const int pathlen, int startid, int endid)
 {
 	size_t len, alloclen = 0;
-	size_t const pathlen = xstrlen(path);
 	struct entry *dentp;
 	char *found;
+	char * const pbuf = g_buf + pathlen;
 
 	/* Remember current selection buffer position */
 	for (int i = startid; i <= endid; ++i) {
 		dentp = &pdents[i];
 
 		if (findselpos) {
-			len = mkpath(path, dentp->name, g_buf);
+			len = pathlen + xstrsncpy(pbuf, dentp->name, NAME_MAX);
 			found = findinsel(findselpos, len);
 			if (found) {
 				dentp->flags |= (FILE_SCANNED | FILE_SELECTED);
@@ -1744,7 +1721,7 @@ static void addtoselbuf(char *path, int startid, int endid)
 
 	for (int i = startid; i <= endid; ++i) {
 		if (!(pdents[i].flags & FILE_SELECTED)) {
-			len = mkpath(path, pdents[i].name, g_buf);
+			len = pathlen + xstrsncpy(pbuf, pdents[i].name, NAME_MAX);
 			appendfpath(g_buf, len);
 			++nselected;
 			pdents[i].flags |= (FILE_SCANNED | FILE_SELECTED);
@@ -1752,6 +1729,40 @@ static void addtoselbuf(char *path, int startid, int endid)
 	}
 
 	writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
+}
+
+/* Removes g_buf from selbuf */
+static void rmfromselbuf(size_t len)
+{
+	char *found = findinsel(findselpos, len);
+	if (!found)
+		return;
+
+	memmove(found, found + len, selbufpos - (found + len - pselbuf));
+	selbufpos -= len;
+
+	nselected ? writesel(pselbuf, selbufpos - 1) : clearselection();
+}
+
+static int scanselforpath(const char *path, bool getsize)
+{
+	if (!path[1]) { /* path should always be at least two bytes (including NULL) */
+		findselpos = pselbuf;
+		return TRUE;
+	}
+
+	size_t off = xstrsncpy(g_buf, path, PATH_MAX);
+
+	g_buf[off - 1] = '/';
+	/*
+	 * We set findselpos only here. Directories can be listed in arbitrary order.
+	 * This is the best best we can do for remembering position.
+	 */
+	findselpos = findinsel(NULL, off);
+
+	if (getsize)
+		return off;
+	return (findselpos ? off : 0);
 }
 
 /* Finish selection procedure before an operation */
@@ -6223,13 +6234,13 @@ static void redraw(char *path)
 
 	ncols = adjust_cols(ncols);
 
-	bool found = scanselforpath(path);
+	int len = scanselforpath(path, FALSE);
 
 	/* Print listing */
 	for (i = curscroll; i < onscreen; ++i) {
 		move(++j, 0);
 
-		if (found)
+		if (len)
 			findmarkentry(path, &pdents[i]);
 
 		printent(&pdents[i], ncols, i == cur);
@@ -7090,8 +7101,6 @@ nochange:
 
 				selstartid = 0;
 				selendid = ndents - 1;
-
-				scanselforpath(path);
 			}
 
 			if ((nselected > LARGESEL) || (nselected && (ndents > LARGESEL))) {
@@ -7099,8 +7108,9 @@ nochange:
 				refresh();
 			}
 
+			r = scanselforpath(path, TRUE); /* Get path length suffixed by '/' */
 			((sel == SEL_SELINV) && findselpos)
-				? invertselbuf(path) : addtoselbuf(path, selstartid, selendid);
+				? invertselbuf(r) : addtoselbuf(r, selstartid, selendid);
 
 #ifndef NOX11
 			if (cfg.x11)
