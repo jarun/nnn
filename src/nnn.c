@@ -2373,6 +2373,17 @@ static bool xdiraccess(const char *path)
 	return TRUE;
 }
 
+static bool plugscript(const char *plugin, uchar_t flags)
+{
+	mkpath(plgpath, plugin, g_buf);
+	if (!access(g_buf, X_OK)) {
+		spawn(g_buf, NULL, NULL, NULL, flags);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 static void opstr(char *buf, char *op)
 {
 	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s \"$0\" \"$@\" . < /dev/tty' < %s",
@@ -2396,7 +2407,7 @@ static bool rmmulstr(char *buf)
 }
 
 /* Returns TRUE if file is removed, else FALSE */
-static bool xrm(char *fpath)
+static bool xrm(char * const fpath)
 {
 	char r = confirm_force(FALSE);
 	if (!r)
@@ -2412,6 +2423,24 @@ static bool xrm(char *fpath)
 		      fpath, NULL, NULL, F_NORMAL | F_MULTI);
 
 	return (access(fpath, F_OK) == -1); /* File is removed */
+}
+
+static void xrmfromsel(char *path, char *fpath)
+{
+	bool selected = TRUE;
+
+	if ((pdents[cur].flags & DIR_OR_DIRLNK) && scanselforpath(fpath, FALSE))
+		clearselection();
+	else if (pdents[cur].flags & FILE_SELECTED) {
+		--nselected;
+		rmfromselbuf(mkpath(path, pdents[cur].name, g_buf));
+	} else
+		selected = FALSE;
+
+#ifndef NOX11
+	if (selected && cfg.x11)
+		plugscript(utils[UTIL_CBCP], F_NOWAIT | F_NOTRACE);
+#endif
 }
 
 static uint_t lines_in_file(int fd, char *buf, size_t buflen)
@@ -5145,17 +5174,6 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 	return TRUE;
 }
 
-static bool plugscript(const char *plugin, uchar_t flags)
-{
-	mkpath(plgpath, plugin, g_buf);
-	if (!access(g_buf, X_OK)) {
-		spawn(g_buf, NULL, NULL, NULL, flags);
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
 static bool launch_app(char *newpath)
 {
 	int r = F_NORMAL;
@@ -7155,6 +7173,8 @@ nochange:
 					mkpath(tmp, pdents[cur].name, newpath);
 					if (!xrm(newpath))
 						continue;
+
+					xrmfromsel(tmp, newpath);
 
 					copynextname(lastname);
 
