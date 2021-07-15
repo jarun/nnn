@@ -1406,20 +1406,16 @@ static void writesel(const char *buf, const size_t buflen)
 		printwarn(NULL);
 }
 
-static bool appendfpath(const char *path, const size_t len)
+static void appendfpath(const char *path, const size_t len)
 {
-	bool ret = FALSE;
-
 	if ((selbufpos >= selbuflen) || ((len + 3) > (selbuflen - selbufpos))) {
 		selbuflen += PATH_MAX;
 		pselbuf = xrealloc(pselbuf, selbuflen);
-		ret = TRUE;
 		if (!pselbuf)
 			errexit();
 	}
 
 	selbufpos += xstrsncpy(pselbuf + selbufpos, path, len);
-	return ret;
 }
 
 /* Write selected file paths to fd, linefeed separated */
@@ -1717,32 +1713,42 @@ static bool scanselforpath(const char *path)
 
 static void addtoselbuf(char *path, int startid, int endid)
 {
-	size_t len;
+	size_t len, alloclen = 0;
+	size_t const pathlen = xstrlen(path);
 	struct entry *dentp;
-	bool add = FALSE;
+	char *found;
 
 	/* Remember current selection buffer position */
 	for (int i = startid; i <= endid; ++i) {
 		dentp = &pdents[i];
-		len = mkpath(path, dentp->name, g_buf);
 
 		if (findselpos) {
-			if (dentp->flags & FILE_SCANNED) {
-				if (!(dentp->flags & FILE_SELECTED))
-					add = TRUE;
+			len = mkpath(path, dentp->name, g_buf);
+			found = findinsel(findselpos, len);
+			if (found) {
+				dentp->flags |= (FILE_SCANNED | FILE_SELECTED);
+				if (found == findselpos) {
+					findselpos += len;
+					if (findselpos == (pselbuf + selbufpos))
+						findselpos = NULL;
+				}
 			} else
-				add = !findinsel(findselpos, len);
+				alloclen += pathlen + dentp->nlen;
 		} else
-			add = TRUE;
+			alloclen += pathlen + dentp->nlen;
+	}
 
-		if (add) {
-			/* Write the path to selection file to avoid flush */
-			if (appendfpath(g_buf, len) && findselpos)
-				scanselforpath(path);
+	pselbuf = xrealloc(pselbuf, selbuflen + alloclen);
+	if (!pselbuf)
+		errexit();
+
+	for (int i = startid; i <= endid; ++i) {
+		if (!(pdents[i].flags & FILE_SELECTED)) {
+			len = mkpath(path, pdents[i].name, g_buf);
+			appendfpath(g_buf, len);
 			++nselected;
-			add = FALSE;
+			pdents[i].flags |= (FILE_SCANNED | FILE_SELECTED);
 		}
-		dentp->flags |= (FILE_SCANNED | FILE_SELECTED);
 	}
 
 	writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
