@@ -1562,7 +1562,8 @@ static inline void findmarkentry(char *path, struct entry *dentp)
 
 static void invertselbuf(char *path)
 {
-	size_t len, endpos, offset = 0;
+	size_t len, endpos, shrinklen = 0, alloclen = 0;
+	size_t const pathlen = xstrlen(path);
 	char *found;
 	int nmarked = 0, prev = 0;
 	struct entry *dentp;
@@ -1580,6 +1581,7 @@ static void invertselbuf(char *path)
 			} else {
 				++nselected;
 				dentp->flags |= FILE_SELECTED;
+				alloclen += pathlen + dentp->nlen;
 			}
 		} else {
 			dentp->flags |= FILE_SCANNED;
@@ -1603,10 +1605,11 @@ static void invertselbuf(char *path)
 				}
 
 				--nselected;
-				offset += len; /* buffer size adjustment */
+				shrinklen += len; /* buffer size adjustment */
 			} else {
 				++nselected;
 				dentp->flags |= FILE_SELECTED;
+				alloclen += pathlen + dentp->nlen;
 			}
 			scan = FALSE;
 		}
@@ -1658,7 +1661,13 @@ static void invertselbuf(char *path)
 	}
 
 	/* Buffer size adjustment */
-	selbufpos -= offset;
+	selbufpos -= shrinklen;
+
+	if (alloclen > shrinklen) {
+		pselbuf = xrealloc(pselbuf, selbuflen + (alloclen - shrinklen));
+		if (!pselbuf)
+			errexit();
+	}
 
 	free(marked);
 
