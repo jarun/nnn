@@ -2426,17 +2426,20 @@ static bool xrm(char * const fpath)
 
 static void xrmfromsel(char *path, char *fpath)
 {
+#ifndef NOX11
 	bool selected = TRUE;
+#endif
 
 	if ((pdents[cur].flags & DIR_OR_DIRLNK) && scanselforpath(fpath, FALSE))
 		clearselection();
 	else if (pdents[cur].flags & FILE_SELECTED) {
 		--nselected;
 		rmfromselbuf(mkpath(path, pdents[cur].name, g_buf));
-	} else
+	}
+#ifndef NOX11
+	else
 		selected = FALSE;
 
-#ifndef NOX11
 	if (selected && cfg.x11)
 		plugscript(utils[UTIL_CBCP], F_NOWAIT | F_NOTRACE);
 #endif
