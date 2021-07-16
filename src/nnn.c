@@ -1752,8 +1752,9 @@ static void rmfromselbuf(size_t len)
 static int scanselforpath(const char *path, bool getsize)
 {
 	if (!path[1]) { /* path should always be at least two bytes (including NULL) */
+		g_buf[0] = '/';
 		findselpos = pselbuf;
-		return TRUE;
+		return 1; /* Length of '/' is 1 */
 	}
 
 	size_t off = xstrsncpy(g_buf, path, PATH_MAX);
