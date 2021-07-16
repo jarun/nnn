@@ -1419,6 +1419,16 @@ static void appendfpath(const char *path, const size_t len)
 	selbufpos += xstrsncpy(pselbuf + selbufpos, path, len);
 }
 
+static void selbufrealloc(const size_t alloclen)
+{
+	if ((selbufpos + alloclen) > selbuflen) {
+		selbuflen = ALIGN_UP(selbufpos + alloclen, PATH_MAX);
+		pselbuf = xrealloc(pselbuf, selbuflen);
+		if (!pselbuf)
+			errexit();
+	}
+}
+
 /* Write selected file paths to fd, linefeed separated */
 static size_t seltofile(int fd, uint_t *pcount)
 {
@@ -1566,13 +1576,13 @@ static void invertselbuf(const int pathlen)
 	size_t len, endpos, shrinklen = 0, alloclen = 0;
 	char * const pbuf = g_buf + pathlen;
 	char *found;
-	int nmarked = 0, prev = 0;
+	int i, nmarked = 0, prev = 0;
 	struct entry *dentp;
 	selmark *marked = malloc(nselected * sizeof(selmark));
 	bool scan = FALSE;
 
 	/* First pass: inversion */
-	for (int i = 0; i < ndents; ++i) {
+	for (i = 0; i < ndents; ++i) {
 		dentp = &pdents[i];
 
 		if (dentp->flags & FILE_SCANNED) {
@@ -1580,7 +1590,6 @@ static void invertselbuf(const int pathlen)
 				dentp->flags ^= FILE_SELECTED; /* Clear selection status */
 				scan = TRUE;
 			} else {
-				++nselected;
 				dentp->flags |= FILE_SELECTED;
 				alloclen += pathlen + dentp->nlen;
 			}
@@ -1608,7 +1617,6 @@ static void invertselbuf(const int pathlen)
 				--nselected;
 				shrinklen += len; /* buffer size adjustment */
 			} else {
-				++nselected;
 				dentp->flags |= FILE_SELECTED;
 				alloclen += pathlen + dentp->nlen;
 			}
@@ -1625,7 +1633,7 @@ static void invertselbuf(const int pathlen)
 	qsort(marked, nmarked, sizeof(selmark), &markcmp);
 
 	/* Some files might be adjacent. Merge them into a single entry */
-	for (int i = 1; i < nmarked; ++i) {
+	for (i = 1; i < nmarked; ++i) {
 		if (marked[i].startpos == marked[prev].startpos + marked[prev].len)
 			marked[prev].len += marked[i].len;
 		else {
@@ -1644,7 +1652,7 @@ static void invertselbuf(const int pathlen)
 		nmarked = prev + 1;
 
 	/* Using merged entries remove unselected chunks from selection buffer */
-	for (int i = 0; i < nmarked; ++i) {
+	for (i = 0; i < nmarked; ++i) {
 		/*
 		 * found: points to where the current block starts
 		 *        variable is recycled from previous for readability
@@ -1661,26 +1669,20 @@ static void invertselbuf(const int pathlen)
 		memmove(found, found + len, endpos - (found + len - pselbuf));
 	}
 
+	free(marked);
+
 	/* Buffer size adjustment */
 	selbufpos -= shrinklen;
 
-	if (alloclen > shrinklen && ((selbufpos + (alloclen - shrinklen)) > selbuflen)) {
-		selbuflen = ALIGN_UP(selbufpos + (alloclen - shrinklen), PATH_MAX);
-		pselbuf = xrealloc(pselbuf, selbuflen);
-		if (!pselbuf)
-			errexit();
-	}
-
-	free(marked);
+	selbufrealloc(alloclen);
 
 	/* Second pass: append newly selected to buffer */
-	for (int i = 0; i < ndents; ++i) {
-		/* Skip unselected */
-		if (!(pdents[i].flags & FILE_SELECTED))
-			continue;
-
-		len = pathlen + xstrsncpy(pbuf, pdents[i].name, NAME_MAX);
-		appendfpath(g_buf, len);
+	for (i = 0; i < ndents; ++i) {
+		if (pdents[i].flags & FILE_SELECTED) {
+			len = pathlen + xstrsncpy(pbuf, pdents[i].name, NAME_MAX);
+			appendfpath(g_buf, len);
+			++nselected;
+		}
 	}
 
 	nselected ? writesel(pselbuf, selbufpos - 1) : clearselection();
@@ -1692,13 +1694,14 @@ static void invertselbuf(const int pathlen)
  */
 static void addtoselbuf(const int pathlen, int startid, int endid)
 {
+	int i;
 	size_t len, alloclen = 0;
 	struct entry *dentp;
 	char *found;
 	char * const pbuf = g_buf + pathlen;
 
 	/* Remember current selection buffer position */
-	for (int i = startid; i <= endid; ++i) {
+	for (i = startid; i <= endid; ++i) {
 		dentp = &pdents[i];
 
 		if (findselpos) {
@@ -1717,14 +1720,9 @@ static void addtoselbuf(const int pathlen, int startid, int endid)
 			alloclen += pathlen + dentp->nlen;
 	}
 
-	if ((selbufpos + alloclen) > selbuflen) {
-		selbuflen = ALIGN_UP(selbufpos + alloclen, PATH_MAX);
-		pselbuf = xrealloc(pselbuf, selbuflen);
-		if (!pselbuf)
-			errexit();
-	}
+	selbufrealloc(alloclen);
 
-	for (int i = startid; i <= endid; ++i) {
+	for (i = startid; i <= endid; ++i) {
 		if (!(pdents[i].flags & FILE_SELECTED)) {
 			len = pathlen + xstrsncpy(pbuf, pdents[i].name, NAME_MAX);
 			appendfpath(g_buf, len);
