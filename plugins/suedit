@@ -8,9 +8,9 @@
 EDITOR="${EDITOR:-vim}"
 
 if type sudo >/dev/null 2>&1; then
-    sudo "$EDITOR" "$1"
+    sudo -E "$EDITOR" "$1"
 elif type sudoedit >/dev/null 2>&1; then
-    sudoedit "$1"
+    sudoedit -E "$1"
 elif type doas >/dev/null 2>&1; then
     doas "$EDITOR" "$1"
 fi

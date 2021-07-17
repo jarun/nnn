@@ -170,6 +170,7 @@ Notes:
 
 | Key:Command | Description |
 |---|---|
+| `e:-!sudo -E vim $nnn*` | Edit file as root in vim |
 | `g:-!git diff` | Show git diff |
 | `h:-!hx $nnn*` | Open hovered file in [hx](https://github.com/krpors/hx) hex editor |
 | `k:-!fuser -kiv $nnn*` | Interactively kill process(es) using hovered file |
