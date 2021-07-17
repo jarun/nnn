@@ -1,16 +1,17 @@
 #!/usr/bin/env sh
 
-# Description: Navigate to directory using jump/autojump/zoxide
+# Description: Navigate to directory using jump/autojump/zoxide/z
 #
 # Dependencies:
 #   - jump - https://github.com/gsamokovarov/jump
 #   - OR autojump - https://github.com/wting/autojump
 #   - OR zoxide - https://github.com/ajeetdsouza/zoxide
+#   - OR z - https://github.com/rupa/z (z requires fzf)
 #
 # Note: The dependencies STORE NAVIGATION PATTERNS
 #
 # Shell: POSIX compliant
-# Authors: Marty Buchaus, Dave Snider, Tim Adler
+# Authors: Marty Buchaus, Dave Snider, Tim Adler, Nick Waywood
 
 if [ ! -p "$NNN_PIPE" ]; then
     printf 'ERROR: NNN_PIPE is not set!'
@@ -39,6 +40,19 @@ elif type zoxide >/dev/null 2>&1; then
     	printf "%s" "0c$odir" > "$NNN_PIPE"
     fi
 else
-    printf "No supported autojump script found. (jump/autojump/zoxide are supported)"
-    read -r _
+    datafile="${_Z_DATA:-$HOME/.z}"
+    if type fzf >/dev/null 2>&1 && [ -f "$datafile" ]; then
+        # Read the data from z's file instead of calling
+        # z so the data doesn't need to be processed twice
+        sel=$(awk -F "|" '{print $1}' "$datafile" | fzf | awk '{$1=$1};1')
+
+        # NOTE: Uncomment this line and comment out the line above if
+        # you want to see the weightings of the dir's in the fzf pane
+        # sel=$(awk -F "|" '{printf "%s %s\n", $2, $1}' "$datafile" | fzf | sed 's/^[0-9,.]* *//' | awk '{$1=$1};1')
+
+        printf "%s" "0c$sel" > "$NNN_PIPE"
+    else
+        printf "No supported autojump script [jump/autojump/zoxide/z (needs fzf)] found"
+        read -r _
+    fi
 fi
