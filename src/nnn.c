@@ -170,6 +170,7 @@
 #define CASE            ':'
 #define MSGWAIT         '$'
 #define SELECT          ' '
+#define PROMPT          ">>> "
 #define REGEX_MAX       48
 #define ENTRY_INCR      64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR    0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
@@ -5206,10 +5207,10 @@ static bool prompt_run(const char *current)
 #ifndef NORL
 		if (g_state.picker) {
 #endif
-			tmp = xreadline(NULL, ">>> ");
+			tmp = xreadline(NULL, PROMPT);
 #ifndef NORL
 		} else
-			tmp = getreadline("\n>>> ");
+			tmp = getreadline("\n"PROMPT);
 #endif
 		if (tmp && *tmp) { // NOLINT
 			ret = TRUE;
