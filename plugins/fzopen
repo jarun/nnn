@@ -17,6 +17,9 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
+NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
+USE_NUKE=0
+
 . "$(dirname "$0")"/.nnn-plugin-helper
 
 if type fzf >/dev/null 2>&1; then
@@ -48,6 +51,11 @@ if [ "$3" ]; then
         printf "%s" "0p" > "$NNN_PIPE"
     fi
 
+    exit 0
+fi
+
+if [ "$USE_NUKE" -ne 0 ]; then
+    "$NUKE" "$entry"
     exit 0
 fi
 
