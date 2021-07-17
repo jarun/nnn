@@ -8016,6 +8016,7 @@ static void cleanup(void)
 	free(ihashbmp);
 	free(bookmark);
 	free(plug);
+	free(lastcmd);
 #ifndef NOFIFO
 	if (g_state.autofifo)
 		unlink(fifopath);
