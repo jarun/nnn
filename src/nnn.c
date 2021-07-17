@@ -5225,7 +5225,7 @@ static bool handle_cmd(enum action sel, const char *current, char *newpath)
 {
 	endselection();
 
-	if (sel == SEL_RUNCMD)
+	if (sel == SEL_PROMPT)
 		return prompt_run(current);
 
 	if (sel == SEL_LAUNCH)
@@ -7467,7 +7467,7 @@ nochange:
 			goto begin;
 		case SEL_SHELL: // fallthrough
 		case SEL_LAUNCH: // fallthrough
-		case SEL_RUNCMD:
+		case SEL_PROMPT:
 			r = handle_cmd(sel, (ndents ? pdents[cur].name : ""), newpath);
 
 			/* Continue in type-to-nav mode, if enabled */
