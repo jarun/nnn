@@ -445,6 +445,7 @@ static char *mark;
 #ifndef NOFIFO
 static char *fifopath;
 #endif
+static char *lastcmd;
 static ullong_t *ihashbmp;
 static struct entry *pdents;
 static blkcnt_t dir_blocks;
@@ -3553,6 +3554,12 @@ static char *xreadline(const char *prefill, const char *prompt)
 			case KEY_HOME:
 				pos = 0;
 				break;
+			case KEY_UP: // fallthrough
+			case KEY_DOWN:
+				if (prompt && lastcmd && (xstrcmp(prompt, PROMPT) == 0)) {
+					printmsg(prompt);
+					len = pos = mbstowcs(buf, lastcmd, READLINE_MAX); // fallthrough
+				}
 			default:
 				break;
 			}
@@ -5213,6 +5220,8 @@ static bool prompt_run(const char *current)
 			tmp = getreadline("\n"PROMPT);
 #endif
 		if (tmp && *tmp) { // NOLINT
+			free(lastcmd);
+			lastcmd = xstrdup(tmp);
 			ret = TRUE;
 			spawn(shell, "-c", tmp, NULL, F_CLI | F_CONFIRM);
 		} else
