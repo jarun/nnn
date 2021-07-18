@@ -5084,7 +5084,12 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 			return;
 
 		g_buf[len] = '\0'; /* Terminate the path read */
-		nextpath = g_buf;
+		if (g_buf[0] == '/') {
+			nextpath = g_buf;
+			len = xstrlen(g_buf);
+			while (--len && (g_buf[len] == '/')) /* Trim all trailing '/' */
+				g_buf[len] = '\0';
+		}
 	} else if (op == 'l') {
 		rmlistpath(); /* Remove last list mode path, if any */
 		nextpath = load_input(fd, *path);
