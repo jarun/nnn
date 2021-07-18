@@ -492,6 +492,9 @@ static struct sigaction oldsigwinch;
 /* For use in functions which are isolated and don't return the buffer */
 static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
 
+/* For use as a scratch buffer in selection manipulation */
+static char g_sel[PATH_MAX] __attribute__ ((aligned));
+
 /* Buffer to store tmp file path to show selection, file stats and help */
 static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 
@@ -1540,12 +1543,12 @@ static char *findinsel(char *startpos, int len)
 		 * memmem(3):
 		 * This function is not specified in POSIX.1, but is present on a number of other systems.
 		 */
-		found = memmem(found, buflen - (found - startpos), g_buf, len);
+		found = memmem(found, buflen - (found - startpos), g_sel, len);
 		if (!found)
 			return NULL;
 		if (found == startpos || *(found - 1) == '\0')
 			return found;
-		/* We found g_buf as a substring of a path, move forward */
+		/* We found g_sel as a substring of a path, move forward */
 		found += len;
 		if (found >= startpos + buflen)
 			return NULL;
@@ -1560,10 +1563,10 @@ static int markcmp(const void *va, const void *vb)
 	return ma->startpos - mb->startpos;
 }
 
-static inline void findmarkentry(const char *path, struct entry *dentp)
+static inline void findmarkentry(size_t len, struct entry *dentp)
 {
 	if (!(dentp->flags & FILE_SCANNED)) {
-		if (findinsel(findselpos, mkpath(path, dentp->name, g_buf)))
+		if (findinsel(findselpos, len + xstrsncpy(g_sel + len, dentp->name, dentp->nlen)))
 			dentp->flags |= FILE_SELECTED;
 		dentp->flags |= FILE_SCANNED;
 	}
@@ -1576,7 +1579,7 @@ static inline void findmarkentry(const char *path, struct entry *dentp)
 static void invertselbuf(const int pathlen)
 {
 	size_t len, endpos, shrinklen = 0, alloclen = 0;
-	char * const pbuf = g_buf + pathlen;
+	char * const pbuf = g_sel + pathlen;
 	char *found;
 	int i, nmarked = 0, prev = 0;
 	struct entry *dentp;
@@ -1682,7 +1685,7 @@ static void invertselbuf(const int pathlen)
 	for (i = 0; i < ndents; ++i) {
 		if (pdents[i].flags & FILE_SELECTED) {
 			len = pathlen + xstrsncpy(pbuf, pdents[i].name, NAME_MAX);
-			appendfpath(g_buf, len);
+			appendfpath(g_sel, len);
 			++nselected;
 		}
 	}
@@ -1700,7 +1703,7 @@ static void addtoselbuf(const int pathlen, int startid, int endid)
 	size_t len, alloclen = 0;
 	struct entry *dentp;
 	char *found;
-	char * const pbuf = g_buf + pathlen;
+	char * const pbuf = g_sel + pathlen;
 
 	/* Remember current selection buffer position */
 	for (i = startid; i <= endid; ++i) {
@@ -1727,7 +1730,7 @@ static void addtoselbuf(const int pathlen, int startid, int endid)
 	for (i = startid; i <= endid; ++i) {
 		if (!(pdents[i].flags & FILE_SELECTED)) {
 			len = pathlen + xstrsncpy(pbuf, pdents[i].name, NAME_MAX);
-			appendfpath(g_buf, len);
+			appendfpath(g_sel, len);
 			++nselected;
 			pdents[i].flags |= (FILE_SCANNED | FILE_SELECTED);
 		}
@@ -1736,7 +1739,7 @@ static void addtoselbuf(const int pathlen, int startid, int endid)
 	writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 }
 
-/* Removes g_buf from selbuf */
+/* Removes g_sel from selbuf */
 static void rmfromselbuf(size_t len)
 {
 	char *found = findinsel(findselpos, len);
@@ -1752,14 +1755,14 @@ static void rmfromselbuf(size_t len)
 static int scanselforpath(const char *path, bool getsize)
 {
 	if (!path[1]) { /* path should always be at least two bytes (including NULL) */
-		g_buf[0] = '/';
+		g_sel[0] = '/';
 		findselpos = pselbuf;
 		return 1; /* Length of '/' is 1 */
 	}
 
-	size_t off = xstrsncpy(g_buf, path, PATH_MAX);
+	size_t off = xstrsncpy(g_sel, path, PATH_MAX);
 
-	g_buf[off - 1] = '/';
+	g_sel[off - 1] = '/';
 	/*
 	 * We set findselpos only here. Directories can be listed in arbitrary order.
 	 * This is the best best we can do for remembering position.
@@ -2436,7 +2439,7 @@ static void xrmfromsel(char *path, char *fpath)
 		clearselection();
 	else if (pdents[cur].flags & FILE_SELECTED) {
 		--nselected;
-		rmfromselbuf(mkpath(path, pdents[cur].name, g_buf));
+		rmfromselbuf(mkpath(path, pdents[cur].name, g_sel));
 	}
 #ifndef NOX11
 	else
@@ -6276,7 +6279,7 @@ static void redraw(char *path)
 		move(++j, 0);
 
 		if (len)
-			findmarkentry(path, &pdents[i]);
+			findmarkentry(len, &pdents[i]);
 
 		printent(&pdents[i], ncols, i == cur);
 	}
@@ -7075,7 +7078,7 @@ nochange:
 				writesel(pselbuf, selbufpos - 1); /* Truncate NULL from end */
 			} else {
 				--nselected;
-				rmfromselbuf(mkpath(path, pdents[cur].name, g_buf));
+				rmfromselbuf(mkpath(path, pdents[cur].name, g_sel));
 			}
 
 #ifndef NOX11
