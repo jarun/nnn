@@ -6702,6 +6702,7 @@ nochange:
 					/* Copy path so we can return back to earlier dir */
 					xstrsncpy(path, rundir, PATH_MAX);
 					rundir[0] = '\0';
+					clearfilter();
 
 					if (chdir(path) == -1
 					    || !run_plugin(&path, pent->name,
@@ -6716,7 +6717,6 @@ nochange:
 						xstrsncpy(lastname, runfile, NAME_MAX + 1);
 						runfile[0] = '\0';
 					}
-					clearfilter();
 					setdirwatch();
 					goto begin;
 				}
