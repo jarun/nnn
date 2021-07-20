@@ -63,8 +63,9 @@
 #   1. Adapt, test and enable all mimes
 #   2. Clean-up the unnecessary exit codes
 
-# set to 1 to enable GUI apps
+# set to 1 to enable GUI apps and/or BIN execution
 GUI="${GUI:-0}"
+BIN="${BIN:-0}"
 
 set -euf -o noclobber -o noglob -o nounset
 IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}" # protect trailing \n
@@ -513,10 +514,25 @@ handle_blocked() {
     esac
 }
 
+handle_bin() {
+    case "${MIMETYPE}" in
+        application/x-executable|application/x-shellscript)
+        clear
+        echo '-------- Executable File --------' && file --dereference --brief -- "${FPATH}"
+        read -pn 1 "Run executable? (Y/N): " answer
+        case "$answer" in
+            [Yy]* ) exec "${FPATH}";;
+            [Nn]* ) exit;;
+            * ) echo "Please answer Y or N.";;
+        esac
+    esac
+}
+
 MIMETYPE="$( file -bL --mime-type -- "${FPATH}" )"
 handle_extension
 handle_multimedia "${MIMETYPE}"
 handle_mime "${MIMETYPE}"
+[ "$BIN" -ne 0 ] && handle_bin
 handle_blocked "${MIMETYPE}"
 handle_fallback
 
