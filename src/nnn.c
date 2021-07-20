@@ -1539,17 +1539,13 @@ static char *findinsel(char *startpos, int len)
 	size_t buflen = selbufpos - (startpos - pselbuf);
 
 	while (1) {
-		/*
-		 * memmem(3):
-		 * This function is not specified in POSIX.1, but is present on a number of other systems.
-		 */
+		/* memmem(3): not specified in POSIX.1, but present on a number of other systems. */
 		found = memmem(found, buflen - (found - startpos), g_sel, len);
 		if (!found)
 			return NULL;
 		if (found == startpos || *(found - 1) == '\0')
 			return found;
-		/* We found g_sel as a substring of a path, move forward */
-		found += len;
+		found += len; /* We found g_sel as a substring of a path, move forward */
 		if (found >= startpos + buflen)
 			return NULL;
 	}
@@ -1563,6 +1559,7 @@ static int markcmp(const void *va, const void *vb)
 	return ma->startpos - mb->startpos;
 }
 
+/* scanselforpath() must be called before calling this */
 static inline void findmarkentry(size_t len, struct entry *dentp)
 {
 	if (!(dentp->flags & FILE_SCANNED)) {
