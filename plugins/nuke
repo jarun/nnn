@@ -519,11 +519,10 @@ handle_bin() {
         application/x-executable|application/x-shellscript)
         clear
         echo '-------- Executable File --------' && file --dereference --brief -- "${FPATH}"
-        read -pn 1 "Run executable? (Y/N): " answer
+        read -n 1 -p "Run executable? (Y/N): " answer
         case "$answer" in
             [Yy]* ) exec "${FPATH}";;
             [Nn]* ) exit;;
-            * ) echo "Please answer Y or N.";;
         esac
     esac
 }
