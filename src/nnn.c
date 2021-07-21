@@ -3457,8 +3457,11 @@ static char *xreadline(const char *prefill, const char *prompt)
 					memmove(buf + pos - 1, buf + pos,
 						(len - pos) * WCHAR_T_WIDTH);
 					--len, --pos;
-				} // fallthrough
-			case '\t': /* Tab breaks cursor position, ignore it */
+				}
+				continue;
+			case '\t':
+				if (!(len || pos) && ndents)
+					len = pos = mbstowcs(buf, pdents[cur].name, READLINE_MAX);
 				continue;
 			case CONTROL('F'):
 				if (pos < len)
