@@ -520,10 +520,14 @@ handle_bin() {
         application/x-executable|application/x-shellscript)
         clear
         echo '-------- Executable File --------' && file --dereference --brief -- "${FPATH}"
-        printf "Run executable (y/N)? "
+        printf "Run executable (y/N/'a'rgs)? "
         read -r answer
         case "$answer" in
             [Yy]* ) exec "${FPATH}";;
+            [Aa]* )
+                printf "args: "
+                read -r args
+                exec "${FPATH}" "$args";;
             [Nn]* ) exit;;
         esac
     esac
