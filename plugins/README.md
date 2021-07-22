@@ -68,6 +68,23 @@ Note:
 
 1. A plugin has to explicitly request `nnn` to clear the selection e.g. after operating on the selected files.
 
+### Table of contents
+
+- [Installation](#installation)
+- [Configuration](#configuration)
+  - [Skip directory refresh after running a plugin](#skip-directory-refresh-after-running-a-plugin)
+- [Running commands as plugin](#running-commands-as-plugin)
+  - [Skip user confirmation after command execution](#skip-user-confirmation-after-command-execution)
+  - [Run a GUI app as plugin](#run-a-gui-app-as-plugin)
+  - [Page non-interactive command output](#page-non-interactive-command-output)
+  - [Some useful key-command examples](#some-useful-key-command-examples)
+- [Access level of plugins](#access-level-of-plugins)
+- [Create your own plugins](#create-your-own-plugins)
+  - [Send data to `nnn`](#send-data-to-nnn)
+  - [Get notified on file hover](#get-notified-on-file-hover)
+- [Examples](#examples)
+- [Contributing plugins](#contributing-plugins)
+
 ## Installation
 
 The following command installs or updates (after backup) all plugins:
@@ -141,7 +158,7 @@ Now there will be no prompt after <kbd>;s</kbd> and <kbd>;n</kbd>.
 
 Note: Do not use `*` with programs those run and exit e.g. cat.
 
-#### Run GUI app as plugin
+#### Run a GUI app as plugin
 
 To run a GUI app as plugin, add a `&` after `!`.
 
@@ -197,7 +214,7 @@ Plugins can also read the `.selection` file in the config directory.
 
 Plugins can be written in any scripting language. However, POSIX-compliant shell scripts runnable in `sh` are preferred.
 
-Make the file executable and drop it in the plugin install directory. Optionally add a hotkey in `$NNN_PLUG` for frequent usage.
+**Make the file executable**. Drop it in the plugin directory. Optionally add a hotkey in `$NNN_PLUG` for frequent usage.
 
 #### Send data to `nnn`
 `nnn` provides a mechanism for plugins to send data to `nnn` to control its active directory or invoke the list mode.
