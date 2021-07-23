@@ -5,12 +5,21 @@
 #              defaults if unset, as specified in XDG Base Directory Specification
 #              - http://specifications.freedesktop.org/basedir-spec/.
 #
-# Dependencies: xdg-utils, fzf
+# Dependencies: xdg-utils, fzf or dmenu (GUI)
 #
 # Shell: POSIX compliant
 # Author: lwnctd
 
-if [ -z "$1" ] || ! command -v fzf > /dev/null 2>& 1; then
+# set to 1 to enable GUI apps
+GUI="${GUI:-0}"
+
+if [ "$GUI" -ne 0 ] && command -v dmenu >/dev/null 2>& 1; then
+  menu="dmenu -l 7"
+elif command -v fzf > /dev/null 2>& 1; then
+  menu="fzf -e --tiebreak=begin"
+fi
+
+if [ -z "$1" ] || [ -z "$menu" ] > /dev/null 2>& 1; then
     exit 1
 fi
 
@@ -36,7 +45,7 @@ app=$(find "$@" -iname '*.desktop' -exec grep '^Name=' {} + \
     | sed -E 's;.+/(.+desktop):Name=(.+);\2:\1;' \
     | sort -t ':' -k 1,1 \
     | column -t -s ':' -o "$(printf '\t')" \
-    | fzf -e --tiebreak=begin \
+    | $menu \
     | cut -f 2)
 
 if [ -n "$app" ]; then
