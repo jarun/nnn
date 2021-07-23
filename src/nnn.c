@@ -8225,7 +8225,13 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 
 		/* We return to tty */
-		dup2(STDOUT_FILENO, STDIN_FILENO);
+		if (!isatty(STDOUT_FILENO)) {
+			fd = open(ctermid(NULL), O_RDWR, 0400);
+			dup2(fd, STDOUT_FILENO);
+			dup2(fd, STDIN_FILENO);
+			close(fd);
+		} else
+			dup2(STDOUT_FILENO, STDIN_FILENO);
 
 		if (session)
 			session = NULL;
