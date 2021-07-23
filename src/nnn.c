@@ -8476,7 +8476,7 @@ int main(int argc, char *argv[])
 
 	if (g_state.picker) {
 		if (selbufpos) {
-			fd = selpath ? open(selpath, O_WRONLY | O_CREAT, 0600) : STDOUT_FILENO;
+			fd = selpath ? open(selpath, O_WRONLY | O_CREAT | O_TRUNC, 0600) : STDOUT_FILENO;
 			if ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos)))
 				xerror();
 
