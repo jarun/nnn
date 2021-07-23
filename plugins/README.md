@@ -62,7 +62,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [upload](upload) | Upload to Firefox Send or ix.io (text) or file.io (bin) | sh | [ffsend](https://github.com/timvisee/ffsend), curl, jq, tr |
 | [wallpaper](wall) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 | [x2sel](x2sel) | Copy file list from system clipboard to selection | sh | _see in-file docs_ |
-| [xdgdefault](xdgdefault) | Set the default app for the hovered file type | sh | xdg-utils, fzf |
+| [xdgdefault](xdgdefault) | Set the default app for the hovered file type | sh | xdg-utils, fzf/dmenu |
 
 Note:
 
