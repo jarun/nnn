@@ -8226,8 +8226,7 @@ int main(int argc, char *argv[])
 
 		/* We return to tty */
 		if (!isatty(STDOUT_FILENO)) {
-			fd = open(ctermid(NULL), O_RDWR, 0400);
-			dup2(fd, STDOUT_FILENO);
+			fd = open(ctermid(NULL), O_RDONLY, 0400);
 			dup2(fd, STDIN_FILENO);
 			close(fd);
 		} else
