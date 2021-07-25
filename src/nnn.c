@@ -1237,6 +1237,17 @@ static void reset_tilde_in_path(char *path)
 	home[homelen] = '\0';
 }
 
+static void convert_tilde(const char *path, char *buf)
+{
+	if (path[0] == '~') {
+		ssize_t len = xstrlen(home);
+		ssize_t loclen = xstrlen(path);
+
+		xstrsncpy(buf, home, len + 1);
+		xstrsncpy(buf + len, path + 1, loclen);
+	}
+}
+
 static int create_tmp_file(void)
 {
 	xstrsncpy(g_tmpfpath + tmpfplen - 1, messages[STR_TMPFILE], TMP_LEN_MAX - tmpfplen);
@@ -2676,21 +2687,21 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 	free(buf);
 }
 
-static bool write_lastdir(const char *curpath)
+static void write_lastdir(const char *curpath, const char *outfile)
 {
-	bool ret = FALSE;
-	size_t len = xstrlen(cfgpath);
+	if (!outfile)
+		xstrsncpy(cfgpath + xstrlen(cfgpath), "/.lastd", 8);
+	else
+		convert_tilde(outfile, g_buf);
 
-	xstrsncpy(cfgpath + len, "/.lastd", 8);
-
-	int fd = open(cfgpath, O_CREAT | O_WRONLY | O_TRUNC, 0666);
+	int fd = open(outfile
+			? (outfile[0] == '~' ? g_buf : outfile)
+			: cfgpath, O_CREAT | O_WRONLY | O_TRUNC, 0666);
 
 	if (fd != -1) {
 		dprintf(fd, "cd \"%s\"", curpath);
 		close(fd);
-		ret = TRUE;
 	}
-	return ret;
 }
 
 /*
@@ -3732,15 +3743,7 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
 				return pluginstr + kvarr[r].off;
 
 			val = bmstr + kvarr[r].off;
-
-			if (val[0] == '~') {
-				ssize_t len = xstrlen(home);
-				ssize_t loclen = xstrlen(val);
-
-				xstrsncpy(g_buf, home, len + 1);
-				xstrsncpy(g_buf + len, val + 1, loclen);
-			}
-
+			convert_tilde(val, g_buf);
 			return realpath(((val[0] == '~') ? g_buf : val), buf);
 		}
 	}
@@ -7581,8 +7584,10 @@ nochange:
 #endif
 
 			/* CD on Quit */
-			if ((sel == SEL_QUITCD) || getenv("NNN_TMPFILE")) {
-				write_lastdir(path);
+			tmp = getenv("NNN_TMPFILE");
+			if ((sel == SEL_QUITCD) || tmp) {
+				write_lastdir(path, tmp);
+				/* ^G is a way to quit picker mode without picking anything */
 				if ((sel == SEL_QUITCD) && g_state.picker)
 					selbufpos = 0;
 			}
