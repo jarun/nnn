@@ -7207,10 +7207,9 @@ nochange:
 				}
 			}
 
-			if (nselected == 1 && (sel == SEL_CP || sel == SEL_MV))
-				mkpath(path, xbasename(pselbuf), newpath);
-			else
-				newpath[0] = '\0';
+			(nselected == 1 && (sel == SEL_CP || sel == SEL_MV))
+				? mkpath(path, xbasename(pselbuf), newpath)
+				: (newpath[0] = '\0');
 
 			endselection();
 
