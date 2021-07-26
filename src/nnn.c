@@ -5319,7 +5319,7 @@ static void *du_thread(void *p_data)
 	return NULL;
 }
 
-static void dirwalk(char *dir, char *path, int entnum, bool mountpoint)
+static void dirwalk(char *path, int entnum, bool mountpoint)
 {
 	/* Loop till any core is free */
 	while (active_threads == NUM_DU_THREADS);
@@ -5343,8 +5343,9 @@ static void dirwalk(char *dir, char *path, int entnum, bool mountpoint)
 
 	pthread_create(&tid, NULL, du_thread, (void *)&(core_data[core]));
 
-	redraw(dir);
-	printmsg("^C aborts");
+	tolastln();
+	addstr(xbasename(path));
+	addstr(" [^C aborts]\n");
 	refresh();
 }
 
@@ -5455,7 +5456,7 @@ static int dentfill(char *path, struct entry **ppdents)
 			if (S_ISDIR(sb.st_mode)) {
 				if (sb_path.st_dev == sb.st_dev) { // NOLINT
 					mkpath(path, namep, buf); // NOLINT
-					dirwalk(path, buf, -1, FALSE);
+					dirwalk(buf, -1, FALSE);
 
 					if (g_state.interrupt)
 						goto exit;
@@ -5585,7 +5586,7 @@ static int dentfill(char *path, struct entry **ppdents)
 				mkpath(path, namep, buf); // NOLINT
 
 				/* Need to show the disk usage of this dir */
-				dirwalk(path, buf, ndents, (sb_path.st_dev != sb.st_dev)); // NOLINT
+				dirwalk(buf, ndents, (sb_path.st_dev != sb.st_dev)); // NOLINT
 
 				if (g_state.interrupt)
 					goto exit;
