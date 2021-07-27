@@ -1362,8 +1362,10 @@ static bool isselfileempty(void)
 
 static int get_cur_or_sel(void)
 {
+	bool sel = (selbufpos || !isselfileempty());
+
 	/* Check both local buffer and selection file for external selection */
-	if ((selbufpos || !isselfileempty()) && ndents) {
+	if (sel && ndents) {
 		/* If selection is preferred and we have a local selection, return selection.
 		 * Always show the prompt in case of an external selection.
 		 */
@@ -1375,7 +1377,7 @@ static int get_cur_or_sel(void)
 		return ((choice == 'c' || choice == 's') ? choice : 0);
 	}
 
-	if (selbufpos || !isselfileempty())
+	if (sel)
 		return 's';
 
 	if (ndents)
