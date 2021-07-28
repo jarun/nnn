@@ -3367,9 +3367,9 @@ static int filterentries(char *path, char *lastname)
 		 * - new matches can only be a subset of current matches.
 		 */
 		/* ndents = total; */
-		r = matches(pln);
-		if (r <= 0) {
-			!r ? unget_wch(KEY_BACKSPACE) : showfilter(ln);
+
+		if (matches(pln) == -1) {
+			showfilter(ln);
 			continue;
 		}
 
