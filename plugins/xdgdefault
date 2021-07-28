@@ -13,10 +13,10 @@
 # set to 1 to enable GUI apps
 GUI="${GUI:-0}"
 
-if [ "$GUI" -ne 0 ] && command -v dmenu >/dev/null 2>& 1; then
-  menu="dmenu -l 7"
+if [ "$GUI" -ne 0 ] && command -v dmenu > /dev/null 2>& 1; then
+    menu="dmenu -i -l 7"
 elif command -v fzf > /dev/null 2>& 1; then
-  menu="fzf -e --tiebreak=begin"
+    menu="fzf -e --tiebreak=begin"
 fi
 
 if [ -z "$1" ] || [ -z "$menu" ] > /dev/null 2>& 1; then
