@@ -4963,6 +4963,11 @@ static void show_help(const char *path)
 		++end;
 	}
 
+	dprintf(fd, "\nLOCATIONS:\n");
+	for (uchar_t i = 0; i < CTX_MAX; ++i)
+		if (g_ctx[i].c_cfg.ctxactive)
+			dprintf(fd, " %u: %s\n", i + 1, g_ctx[i].c_path);
+
 	dprintf(fd, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
 	dprintf(fd, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
 
