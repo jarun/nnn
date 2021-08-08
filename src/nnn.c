@@ -1163,12 +1163,12 @@ static char *common_prefix(const char *path, char *prefix)
  * The library function realpath() resolves symlinks.
  * If there's a symlink in file list we want to show the symlink not what it's points to.
  */
-static char *abspath(const char *path, const char *cwd)
+static char *abspath(const char *path, const char *cwd, char *buf)
 {
-	if (!path || !cwd)
+	if (!path)
 		return NULL;
 
-	size_t dst_size = 0, src_size = xstrlen(path), cwd_size = xstrlen(cwd);
+	size_t dst_size = 0, src_size = xstrlen(path), cwd_size = cwd ? xstrlen(cwd) : 0;
 	size_t len = src_size;
 	const char *src;
 	char *dst;
@@ -1177,15 +1177,20 @@ static char *abspath(const char *path, const char *cwd)
 	 * ./ (find .)
 	 * no separator (fd .): this needs an additional char for '/'
 	 */
-	char *resolved_path = malloc(src_size + (*path == '/' ? 0 : cwd_size) + 2);
+	char *resolved_path = buf ? buf : malloc(src_size + (*path == '/' ? 0 : cwd_size) + 2);
 
 	if (!resolved_path)
 		return NULL;
 
 	/* Turn relative paths into absolute */
-	if (path[0] != '/')
+	if (path[0] != '/') {
+		if (!cwd) {
+			if (!buf)
+				free(resolved_path);
+			return NULL;
+		}
 		dst_size = xstrsncpy(resolved_path, cwd, cwd_size + 1) - 1;
-	else
+	} else
 		resolved_path[0] = '\0';
 
 	src = path;
@@ -3752,7 +3757,7 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
 
 			val = bmstr + kvarr[r].off;
 			convert_tilde(val, g_buf);
-			return realpath(((val[0] == '~') ? g_buf : val), buf);
+			return abspath(((val[0] == '~') ? g_buf : val), NULL, buf);
 		}
 	}
 
@@ -7814,7 +7819,7 @@ static char *load_input(int fd, const char *path)
 			continue;
 		}
 
-		paths[i] = abspath(paths[i], cwd);
+		paths[i] = abspath(paths[i], cwd, NULL);
 		if (!paths[i]) {
 			entries = i; // free from the previous entry
 			goto malloc_2;
