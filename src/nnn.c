@@ -5257,7 +5257,7 @@ static bool prompt_run(const char *current)
 
 static bool handle_cmd(enum action sel, const char *current, char *newpath)
 {
-	endselection(TRUE);
+	endselection(FALSE);
 
 	if (sel == SEL_PROMPT)
 		return prompt_run(current);
