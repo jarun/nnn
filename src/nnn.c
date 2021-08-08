@@ -1785,15 +1785,16 @@ static int scanselforpath(const char *path, bool getsize)
 }
 
 /* Finish selection procedure before an operation */
-static void endselection(void)
+static void endselection(bool endselmode)
 {
 	int fd;
 	ssize_t count;
 	char buf[sizeof(patterns[P_REPLACE]) + PATH_MAX + (TMP_LEN_MAX << 1)];
 
-	if (g_state.selmode)
+	if (endselmode && g_state.selmode)
 		g_state.selmode = 0;
 
+	/* The code below is only for listing mode */
 	if (!listpath || !selbufpos)
 		return;
 
@@ -5256,7 +5257,7 @@ static bool prompt_run(const char *current)
 
 static bool handle_cmd(enum action sel, const char *current, char *newpath)
 {
-	endselection();
+	endselection(TRUE);
 
 	if (sel == SEL_PROMPT)
 		return prompt_run(current);
@@ -5924,7 +5925,7 @@ static int set_sort_flags(int r)
 			cfg.reverse = 0;
 			entrycmpfn = &entrycmp;
 		}
-		endselection(); /* We are going to reload dir */
+		endselection(TRUE); /* We are going to reload dir */
 		break;
 	case 'c':
 		cfg.timeorder = 0;
@@ -6719,7 +6720,7 @@ nochange:
 				g_state.runplugin = 0;
 				/* Must be in plugin dir and same context to select plugin */
 				if ((g_state.runctx == cfg.curctx) && !strcmp(path, plgpath)) {
-					endselection();
+					endselection(FALSE);
 					/* Copy path so we can return back to earlier dir */
 					xstrsncpy(path, rundir, PATH_MAX);
 					rundir[0] = '\0';
@@ -7036,7 +7037,7 @@ nochange:
 				refresh = TRUE;
 				break;
 			case SEL_RENAMEMUL:
-				endselection();
+				endselection(TRUE);
 
 				if (!(getutil(utils[UTIL_BASH])
 				      && plugscript(utils[UTIL_NMV], F_CLI))
@@ -7224,7 +7225,7 @@ nochange:
 				? mkpath(path, xbasename(pselbuf), newpath)
 				: (newpath[0] = '\0');
 
-			endselection();
+			endselection(TRUE);
 
 			if (!cpmvrm_selection(sel, path)) {
 				presel = MSGWAIT;
@@ -7258,7 +7259,7 @@ nochange:
 				break;
 
 			if (sel != SEL_OPENWITH)
-				endselection();
+				endselection(TRUE);
 
 			switch (sel) {
 			case SEL_ARCHIVE:
@@ -7440,7 +7441,7 @@ nochange:
 			}
 
 			if (r != '\r') {
-				endselection();
+				endselection(FALSE);
 				tmp = get_kv_val(plug, NULL, r, maxplug, NNN_PLUG);
 				if (!tmp) {
 					printwait(messages[MSG_INVALID_KEY], &presel);
