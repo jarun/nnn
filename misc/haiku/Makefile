@@ -134,7 +134,7 @@ else
 endif
 
 ifeq ($(shell uname -s), Haiku)
-	LDLIBS_HAIKU ?= -lstdc++ -lbe
+	LDLIBS_HAIKU ?= -lstdc++ -lgnu -lbe
 	SRC_HAIKU ?= misc/haiku/nm.cpp
 	OBJS_HAIKU ?= misc/haiku/nm.o
 endif
