@@ -4566,7 +4566,7 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 				return FALSE;
 			}
 			/* Copy the new dir path to open it in smart context */
-			outdir = realpath(".", NULL);
+			outdir = getcwd(NULL, 0);
 			x_to = TRUE;
 		}
 	}
