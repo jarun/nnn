@@ -1162,11 +1162,17 @@ static char *common_prefix(const char *path, char *prefix)
 /*
  * The library function realpath() resolves symlinks.
  * If there's a symlink in file list we want to show the symlink not what it's points to.
+ * Resolves ./../~ in path
  */
 static char *abspath(const char *path, const char *cwd, char *buf)
 {
 	if (!path)
 		return NULL;
+
+	if (path[0] == '~')
+		cwd = home;
+	else if ((path[0] != '/') && !cwd)
+		cwd = getcwd(NULL, 0);
 
 	size_t dst_size = 0, src_size = xstrlen(path), cwd_size = cwd ? xstrlen(cwd) : 0;
 	size_t len = src_size;
@@ -1177,7 +1183,7 @@ static char *abspath(const char *path, const char *cwd, char *buf)
 	 * ./ (find .)
 	 * no separator (fd .): this needs an additional char for '/'
 	 */
-	char *resolved_path = buf ? buf : malloc(src_size + (*path == '/' ? 0 : cwd_size) + 2);
+	char *resolved_path = buf ? buf : malloc(src_size + cwd_size + 2);
 
 	if (!resolved_path)
 		return NULL;
@@ -8164,7 +8170,7 @@ int main(int argc, char *argv[])
 				}
 
 				close(fd);
-				selpath = realpath(optarg, NULL);
+				selpath = abspath(optarg, NULL, NULL);
 				unlink(selpath);
 			}
 			break;
@@ -8308,7 +8314,7 @@ int main(int argc, char *argv[])
 			DPRINTF_S(arg);
 			if (xstrlen(arg) > 7 && is_prefix(arg, "file://", 7))
 				arg = arg + 7;
-			initpath = realpath(arg, NULL);
+			initpath = abspath(arg, NULL, NULL);
 			DPRINTF_S(initpath);
 			if (!initpath) {
 				xerror();
