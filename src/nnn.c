@@ -2541,7 +2541,9 @@ static bool cpmvrm_selection(enum action sel, char *path)
 {
 	int r;
 
-	if (!selbufpos && isselfileempty()) {
+	if (isselfileempty()) {
+		if (nselected)
+			clearselection();
 		printmsg(messages[MSG_0_SELECTED]);
 		return FALSE;
 	}
