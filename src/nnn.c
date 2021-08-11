@@ -630,7 +630,7 @@ static const char * const messages[] = {
 	"session name: ",
 	"'c'p / 'm'v as?",
 	"'c'urrent / 's'el?",
-	"%s %s file%s? [Esc cancels]",
+	"%s %s? [Esc cancels]",
 	"limit exceeded",
 	"'f'ile / 'd'ir / 's'ym / 'h'ard?",
 	"'c'li / 'g'ui?",
@@ -1409,7 +1409,7 @@ static char confirm_force(bool selection)
 
 	snprintf(str, 64, messages[MSG_FORCE_RM],
 		 g_state.trash ? utils[UTIL_GIO_TRASH] + 4 : utils[UTIL_RM_RF],
-		 (selection ? xitoa(nselected) : "current"), (selection ? "(s)" : ""));
+		 (selection ? "selection" : "hovered"));
 
 	int r = get_input(str);
 
@@ -3043,7 +3043,7 @@ try_quit:
 		 * Check for changes every odd second.
 		 */
 #ifdef LINUX_INOTIFY
-		if (!g_state.selmode && !cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
+		if (!cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
 			struct inotify_event *event;
 			char inotify_buf[EVENT_BUF_LEN];
 
@@ -3061,6 +3061,8 @@ try_quit:
 
 					if (event->mask & INOTIFY_MASK) {
 						c = CONTROL('L');
+						if (nselected && isselfileempty())
+							clearselection();
 						DPRINTF_S("issue refresh");
 						break;
 					}
@@ -3069,18 +3071,23 @@ try_quit:
 			}
 		}
 #elif defined(BSD_KQUEUE)
-		if (!g_state.selmode && !cfg.blkorder && event_fd >= 0 && idle & 1) {
+		if (!cfg.blkorder && event_fd >= 0 && (idle & 1)) {
 			struct kevent event_data[NUM_EVENT_SLOTS];
 
 			memset((void *)event_data, 0x0, sizeof(struct kevent) * NUM_EVENT_SLOTS);
 			if (kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
-				   event_data, NUM_EVENT_FDS, &gtimeout) > 0)
+				   event_data, NUM_EVENT_FDS, &gtimeout) > 0) {
 				c = CONTROL('L');
+				if (nselected && isselfileempty())
+					clearselection();
+			}
 		}
 #elif defined(HAIKU_NM)
-		if (!g_state.selmode && !cfg.blkorder && haiku_nm_active
-		    && (idle & 1) && haiku_is_update_needed(haiku_hnd))
+		if (!cfg.blkorder && haiku_nm_active && (idle & 1) && haiku_is_update_needed(haiku_hnd)) {
 			c = CONTROL('L');
+			if (nselected && isselfileempty())
+				clearselection();
+		}
 #endif
 	} else
 		idle = 0;
