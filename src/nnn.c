@@ -828,6 +828,7 @@ static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag);
 static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
+static void statusbar(char *path);
 #ifndef NOFIFO
 static void notify_fifo(bool force);
 #endif
@@ -3245,8 +3246,10 @@ static int filterentries(char *path, char *lastname)
 			redraw(path);
 		}
 
-		if (!cfg.filtermode)
+		if (!cfg.filtermode) {
+			statusbar(path);
 			return 0;
+		}
 
 		len = mbstowcs(wln, ln, REGEX_MAX);
 	} else {
@@ -4197,7 +4200,7 @@ static void save_session(const char *sname, int *presel)
 			header.pathln[i] = strnlen(g_ctx[i].c_path, PATH_MAX) + 1;
 			header.lastln[i] = strnlen(g_ctx[i].c_last, PATH_MAX) + 1;
 			header.nameln[i] = strnlen(g_ctx[i].c_name, NAME_MAX) + 1;
-			header.fltrln[i] = strnlen(g_ctx[i].c_fltr, REGEX_MAX) + 1;
+			header.fltrln[i] = REGEX_MAX;
 		}
 	}
 
@@ -6382,8 +6385,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 
 	atexit(dentfree);
 
-	xlines = LINES;
-	xcols = COLS;
+	getmaxyx(stdscr, xlines, xcols);
 
 #ifndef NOSSN
 	/* set-up first context */
@@ -6418,7 +6420,10 @@ static bool browse(char *ipath, const char *session, int pkey)
 
 	newpath[0] = rundir[0] = runfile[0] = '\0';
 
-	presel = pkey ? ';' : (cfg.filtermode ? FILTER : 0);
+	presel = pkey ? ';' : ((cfg.filtermode
+			|| (session && (g_ctx[cfg.curctx].c_fltr[0] == FILTER
+				|| g_ctx[cfg.curctx].c_fltr[0] == RFILTER)
+				&& g_ctx[cfg.curctx].c_fltr[1])) ? FILTER : 0);
 
 	pdents = xrealloc(pdents, total_dents * sizeof(struct entry));
 	if (!pdents)
