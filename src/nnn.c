@@ -8315,8 +8315,9 @@ int main(int argc, char *argv[])
 				session = NULL;
 		} else if (argc == optind) {
 			/* Start in the current directory */
-			initpath = getenv("PWD");
-			initpath = initpath ? xstrdup(initpath) : getcwd(NULL, 0);
+			char *startpath = getenv("PWD");
+
+			initpath = startpath ? xstrdup(startpath) : getcwd(NULL, 0);
 			if (!initpath)
 				initpath = "/";
 		} else {
