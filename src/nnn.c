@@ -6171,7 +6171,7 @@ static int adjust_cols(int n)
 	return (n - 2);
 }
 
-static void draw_line(char *path, int ncols)
+static void draw_line(int ncols)
 {
 	bool dir = FALSE;
 
@@ -6203,8 +6203,6 @@ static void draw_line(char *path, int ncols)
 		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
 
 	markhovered();
-
-	statusbar(path);
 }
 
 static void redraw(char *path)
@@ -6220,7 +6218,7 @@ static void redraw(char *path)
 		g_state.move = 0;
 
 		if (ndents && (last_curscroll == curscroll))
-			return draw_line(path, ncols);
+			return draw_line(ncols);
 	}
 
 	DPRINTF_S(__func__);
@@ -6343,8 +6341,6 @@ static void redraw(char *path)
 	}
 
 	markhovered();
-
-	statusbar(path);
 }
 
 static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)
@@ -6503,8 +6499,10 @@ begin:
 
 	while (1) {
 		/* Do not do a double redraw in filterentries */
-		if ((presel != FILTER) || !filterset())
+		if ((presel != FILTER) || !filterset()) {
 			redraw(path);
+			statusbar(path);
+		}
 
 nochange:
 		/* Exit if parent has exited */
