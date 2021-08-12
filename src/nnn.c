@@ -7206,7 +7206,8 @@ nochange:
 				copycurname();
 				goto nochange;
 			case SEL_EDIT:
-				spawn(editor, newpath, NULL, NULL, F_CLI);
+				if (!g_state.picker)
+					spawn(editor, newpath, NULL, NULL, F_CLI);
 				continue;
 			default: /* SEL_LOCK */
 				lock_terminal();
