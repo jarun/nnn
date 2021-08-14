@@ -105,13 +105,13 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 
 ## Quickstart
 
-1. [Install](https://github.com/jarun/nnn/wiki/Usage) `nnn` and any dependencies you need. All files are opened with the desktop opener by default.
-2. Add option `-e` to your alias to open text files in `$VISUAL`/`$EDITOR`/ `vi`. [Open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text) if you wish.
+1. [Install](https://github.com/jarun/nnn/wiki/Usage) `nnn` and the deps you need.
+2. The desktop opener is default. Use `-e` to open text files in the terminal. Optionally [open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text).
 3. Configure [`cd` on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 4. [Sync subshell `$PWD`](https://github.com/jarun/nnn/wiki/Basic-use-cases#sync-subshell-pwd) to `nnn`.
 5. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installation).
-6. Use `-x` to sync selection to system clipboard, show notis on `cp`, `mv`, `rm` completion and set xterm title.
-7. For a CLI-only environment, customize and use plugin [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke) with option `-c` (overrides `-e`).
+6. Use `-x` to sync selection to clipboard, show notis on `cp`, `mv`, `rm` and set xterm title.
+7. For a CLI-only environment, set [`NNN_OPENER`](https://github.com/jarun/nnn/wiki/Usage#configuration) to [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke). Use option `-c`.
 8. Bid `ls` goodbye! `alias ls='nnn -de'` :sunglasses:
 9. Visit the [Live previews](https://github.com/jarun/nnn/wiki/Live-previews) and [Troubleshooting](https://github.com/jarun/nnn/wiki/Troubleshooting) Wiki pages.
 
