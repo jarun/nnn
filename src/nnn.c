@@ -2979,6 +2979,13 @@ static int handle_alt_key(wint_t *wch)
 	return r;
 }
 
+static inline int handle_event(void)
+{
+	if (nselected && isselfileempty())
+		clearselection();
+	return CONTROL('L');
+}
+
 /*
  * Returns SEL_* if key is bound and 0 otherwise.
  * Also modifies the run and env pointers (used on SEL_{RUN,RUNARG}).
@@ -3063,10 +3070,7 @@ try_quit:
 						break;
 
 					if (event->mask & INOTIFY_MASK) {
-						c = CONTROL('L');
-						if (nselected && isselfileempty())
-							clearselection();
-						DPRINTF_S("issue refresh");
+						c = handle_event();
 						break;
 					}
 				}
@@ -3079,18 +3083,12 @@ try_quit:
 
 			memset((void *)event_data, 0x0, sizeof(struct kevent) * NUM_EVENT_SLOTS);
 			if (kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
-				   event_data, NUM_EVENT_FDS, &gtimeout) > 0) {
-				c = CONTROL('L');
-				if (nselected && isselfileempty())
-					clearselection();
-			}
+				   event_data, NUM_EVENT_FDS, &gtimeout) > 0)
+				c = handle_event();
 		}
 #elif defined(HAIKU_NM)
-		if (!cfg.blkorder && haiku_nm_active && (idle & 1) && haiku_is_update_needed(haiku_hnd)) {
-			c = CONTROL('L');
-			if (nselected && isselfileempty())
-				clearselection();
-		}
+		if (!cfg.blkorder && haiku_nm_active && (idle & 1) && haiku_is_update_needed(haiku_hnd))
+			c = handle_event();
 #endif
 	} else
 		idle = 0;
