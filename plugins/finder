@@ -16,8 +16,8 @@
 # Shell: Bash
 # Author: Arun Prakash Jana, Luuk van Baal
 TMPDIR="${TMPDIR:-/tmp}"
-HISTFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/finderbms"
-HISTLEN=10000
+NNN_FINDHIST="${NNN_FINDHIST:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/finderbms}"
+NNN_FINDHISTLEN="${NNN_FINDHISTLEN:-10000}"
 
 printexamples() {
     printf -- "-maxdepth 1 -name pattern
@@ -39,36 +39,36 @@ mapexpr() {
     if [ "$fexpr" -eq "$fexpr" ] 2>/dev/null; then
         fexpr=${fexprs[$((fexpr - 1))]}
         read -r -e -p "Search expression: " -i "$fexpr" fexpr
+    else
+        return 1
     fi
 }
 
 readexpr() {
     case "$fexpr" in
-        [1-9]|10)
-             mapexpr
-             readexpr ;;
         h)   clear
              printf "Examples:\n"
              mapfile -t fexprs < <(printexamples)
              printexprs
              read -r -p "Search expression or index: " fexpr
              mapexpr
-             readexpr ;;
+             [ -n "$fexpr" ] && readexpr ;;
         \$*) cmd="${fexpr:1}" ;;
-        *)   cmd="find $fexpr -print0" ;;
+        *)   mapexpr && readexpr
+             cmd="find $fexpr -print0" ;;
     esac
 }
 
 clear
-[ -f "$HISTFILE" ] || printexamples > "$HISTFILE"
+[ -f "$NNN_FINDHIST" ] || printexamples > "$NNN_FINDHIST"
 
-mapfile -t fexprs < <(sort "$HISTFILE" | uniq -c | sort -nr | head -n5 |\
+mapfile -t fexprs < <(sort "$NNN_FINDHIST" | uniq -c | sort -nr | head -n5 |\
   awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}')
 printf "Most used earch expressions:\n"
 printexprs
 i=$((i + 1))
 
-mapfile -t -O"$i" fexprs < <(tail -n20 "$HISTFILE" | tac | awk '!a[$0]++' | head -n5)
+mapfile -t -O"$i" fexprs < <(tac "$NNN_FINDHIST" | awk '!a[$0]++' | head -n5)
 printf "Most recently used search expressions:\n"
 for ((j = i; j < ${#fexprs[@]}; j++)); do
     printf '%s\t%s\n' "$((j + 1))" "${fexprs[$j]}"
@@ -85,8 +85,8 @@ if [ -n "$fexpr" ]; then
         read -r -e -p "Search expression: " -i "$fexpr" fexpr
     done
     if [ -n "$fexpr" ]; then
-        tail -n"$HISTLEN" "$HISTFILE" > "$TMPDIR/finderbms"
+        tail -n"$NNN_FINDHISTLEN" "$NNN_FINDHIST" > "$TMPDIR/finderbms"
         printf "%s\n" "$fexpr" >> "$TMPDIR/finderbms"
-        mv "$TMPDIR/finderbms" "$HISTFILE"
+        mv "$TMPDIR/finderbms" "$NNN_FINDHIST"
     fi
 fi
