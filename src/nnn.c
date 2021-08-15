@@ -6037,7 +6037,7 @@ static bool set_time_type(int *presel)
 
 static void statusbar(char *path)
 {
-	int i = 0, extnlen = 0;
+	int i = 0, len = 0;
 	char *ptr;
 	pEntry pent = &pdents[cur];
 
@@ -6051,8 +6051,8 @@ static void statusbar(char *path)
 		i = (int)(pent->nlen - 1);
 		ptr = xextension(pent->name, i);
 		if (ptr)
-			extnlen = i - (ptr - pent->name);
-		if (!ptr || extnlen > 5 || extnlen < 2)
+			len = i - (ptr - pent->name);
+		if (!ptr || len > 5 || len < 2)
 			ptr = "\b";
 	} else
 		ptr = "\b";
@@ -6106,16 +6106,14 @@ static void statusbar(char *path)
 #endif
 		if (S_ISLNK(pent->mode)) {
 			i = readlink(pent->name, g_buf, PATH_MAX);
-
 			addstr(coolsize(i >= 0 ? i : pent->size)); /* Show symlink size */
-
 			if (i > 1) { /* Show symlink target */
-				g_buf[i] = '\0';
-#ifdef ICONS_ENABLED
-				addstr(" "MD_ARROW_FORWARD);
-#else
+				int y;
+
 				addstr(" ->");
-#endif
+				getyx(stdscr, len, y);
+				i = MIN(i, xcols - y);
+				g_buf[i] = '\0';
 				addstr(g_buf);
 			}
 		} else {
