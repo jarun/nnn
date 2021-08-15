@@ -18,8 +18,8 @@ HISTFILE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/finderbms"
 HISTLEN=10000
 
 printexamples() {
-    printf ". -maxdepth 1 -name pattern
-. -maxdepth 1 -size +100M
+    printf -- "-maxdepth 1 -name pattern
+-maxdepth 1 -size +100M
 \$fd pattern -0
 \$fd -d 2 -S +100M -0
 \$grep -rlZ pattern
@@ -66,7 +66,7 @@ printf "Most used earch expressions:\n"
 printexprs
 i=$((i + 1))
 
-mapfile -t -O"$i" fexprs < <(tail -n20 "$HISTFILE" | tac | uniq | head -n5)
+mapfile -t -O"$i" fexprs < <(tail -n20 "$HISTFILE" | tac | awk '!a[$0]++' | head -n5)
 printf "Most recently used search expressions:\n"
 for ((j = i; j < ${#fexprs[@]}; j++)); do
     printf '%s\t%s\n' "$((j + 1))" "${fexprs[$j]}"
