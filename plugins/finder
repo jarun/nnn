@@ -22,15 +22,15 @@ NNN_FINDHISTLEN="${NNN_FINDHISTLEN:-10000}"
 printexamples() {
     printf -- "-maxdepth 1 -name pattern
 -maxdepth 1 -size +100M
-\$fd pattern -0
-\$fd -d 2 -S +100M -0
+\$fd -0 pattern
+\$fd -0 -d 2 -S +100M
 \$grep -rlZ pattern
 \$rg -l0 pattern
 \$fzf -m | tr '\\\n' '\\\0'\n"
 }
 
 printexprs() {
-    for i in "${!fexprs[@]}"; do
+    for ((i = "$1"; i < ${#fexprs[@]}; i++)); do
         printf '%s\t%s\n' "$((i + 1))" "${fexprs[$i]}"
     done
 }
@@ -49,7 +49,7 @@ readexpr() {
         h)   clear
              printf "Examples:\n"
              mapfile -t fexprs < <(printexamples)
-             printexprs
+             printexprs 0
              read -r -p "Search expression or index: " fexpr
              mapexpr
              [ -n "$fexpr" ] && readexpr ;;
@@ -65,14 +65,11 @@ clear
 mapfile -t fexprs < <(sort "$NNN_FINDHIST" | uniq -c | sort -nr | head -n5 |\
   awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}')
 printf "Most used earch expressions:\n"
-printexprs
-i=$((i + 1))
+printexprs 0
 
 mapfile -t -O"$i" fexprs < <(tac "$NNN_FINDHIST" | awk '!a[$0]++' | head -n5)
 printf "Most recently used search expressions:\n"
-for ((j = i; j < ${#fexprs[@]}; j++)); do
-    printf '%s\t%s\n' "$((j + 1))" "${fexprs[$j]}"
-done
+printexprs "$i"
 read -r -p "Search expression or index (h for help): " fexpr
 
 mapexpr
