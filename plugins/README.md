@@ -23,7 +23,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [diffs](diffs) | Diff for selection (limited to 2 for directories) [✓] | sh | vimdiff, mktemp |
 | [dragdrop](dragdrop) | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
 | [dups](dups) | List non-empty duplicate files in current dir | bash | find, md5sum,<br>sort uniq xargs |
-| [finder](finder) | Run custom find command (stored in histfile) and list | sh | - |
+| [finder](finder) | Run custom find command (**stored in histfile**) and list | sh | - |
 | [fixname](fixname) | Clean filename to be more shell-friendly [✓] | bash | sed |
 | [fzcd](fzcd) | Fuzzy search multiple dirs (or `$PWD`) and visit file | sh | fzf, (find) |
 | [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |

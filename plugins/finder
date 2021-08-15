@@ -2,6 +2,8 @@
 
 # Description: Run custom search and list results in smart context
 #
+# Note: This plugin retains search history
+#
 # Usage:
 #   Run plugin and enter e.g. "-size +10M" to list files in current
 #   directory larger than 10M. By default entered expressions are
