@@ -7972,12 +7972,12 @@ static bool setup_config(void)
 			return FALSE;
 		}
 
-		len = xstrlen(xdgcfg) + 1 + 13; /* add length of "/nnn/sessions" */
+		len = xstrlen(xdgcfg) + 1 + 14; /* add length of "/nnn/bookmarks" */
 		xdg = TRUE;
 	}
 
 	if (!xdg)
-		len = xstrlen(home) + 1 + 21; /* add length of "/.config/nnn/sessions" */
+		len = xstrlen(home) + 1 + 22; /* add length of "/.config/nnn/bookmarks" */
 
 	cfgpath = (char *)malloc(len);
 	plgpath = (char *)malloc(len);
