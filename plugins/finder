@@ -64,7 +64,7 @@ clear
 
 mapfile -t fexprs < <(sort "$NNN_FINDHIST" | uniq -c | sort -nr | head -n5 |\
   awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}')
-printf "Most used earch expressions:\n"
+printf "Most used search expressions:\n"
 printexprs 0
 
 mapfile -t -O"$i" fexprs < <(tac "$NNN_FINDHIST" | awk '!a[$0]++' | head -n5)
