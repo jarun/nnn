@@ -7,18 +7,18 @@
 # Authors: Luuk van Baal, @crides
 
 diff --git a/src/nnn.c b/src/nnn.c
-index f5101b1..4691b43 100644
+index 2d33716..b190177 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -269,6 +269,7 @@ typedef struct entry {
+@@ -277,6 +277,7 @@ typedef struct entry {
  	uid_t uid; /* 4 bytes */
  	gid_t gid; /* 4 bytes */
  #endif
 +	char git_status[2];
  } *pEntry;
 
- /* Key-value pairs from env */
-@@ -319,6 +320,7 @@ typedef struct {
+ /* Selection marker */
+@@ -333,6 +334,7 @@ typedef struct {
  	uint_t cliopener  : 1;  /* All-CLI app opener */
  	uint_t waitedit   : 1;  /* For ops that can't be detached, used EDITOR */
  	uint_t rollover   : 1;  /* Roll over at edges */
@@ -26,7 +26,7 @@ index f5101b1..4691b43 100644
  } settings;
 
  /* Non-persistent program-internal states (alphabeical order) */
-@@ -372,7 +374,17 @@ static struct {
+@@ -386,7 +388,17 @@ static struct {
  	ushort_t maxnameln, maxsizeln, maxuidln, maxgidln, maxentln, uidln, gidln, printguid;
  } dtls;
 
@@ -44,7 +44,7 @@ index f5101b1..4691b43 100644
 
  /* Configuration, contexts */
  static settings cfg = {
-@@ -403,6 +415,7 @@ static settings cfg = {
+@@ -417,6 +429,7 @@ static settings cfg = {
  	0, /* cliopener */
  	0, /* waitedit */
  	1, /* rollover */
@@ -52,7 +52,7 @@ index f5101b1..4691b43 100644
  };
 
  static context g_ctx[CTX_MAX] __attribute__ ((aligned));
-@@ -3514,6 +3527,39 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
+@@ -3789,6 +3802,39 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
  	return NULL;
  }
 
@@ -92,7 +92,7 @@ index f5101b1..4691b43 100644
  static void resetdircolor(int flags)
  {
  	/* Directories are always shown on top, clear the color when moving to first file */
-@@ -3824,6 +3870,9 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+@@ -4099,6 +4145,9 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
  	int attrs = 0, namelen;
  	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
 
@@ -102,7 +102,7 @@ index f5101b1..4691b43 100644
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
 
  	if (g_state.oldcolor)
-@@ -5183,6 +5232,10 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5457,6 +5506,10 @@ static int dentfill(char *path, struct entry **ppdents)
  		attron(COLOR_PAIR(cfg.curctx + 1));
  	}
 
@@ -113,7 +113,7 @@ index f5101b1..4691b43 100644
  #if _POSIX_C_SOURCE >= 200112L
  	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
  #endif
-@@ -5381,6 +5434,34 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5655,6 +5708,34 @@ static int dentfill(char *path, struct entry **ppdents)
  #endif
  		}
 
@@ -148,7 +148,7 @@ index f5101b1..4691b43 100644
  		++ndents;
  	} while ((dp = readdir(dirp)));
 
-@@ -5888,7 +5969,8 @@ static int adjust_cols(int n)
+@@ -6157,7 +6238,8 @@ static int adjust_cols(int n)
  			cfg.showdetail ^= 1;
  		else /* 2 more accounted for below */
  			n -= (dtls.maxentln - 2 - dtls.maxnameln);
@@ -158,7 +158,7 @@ index f5101b1..4691b43 100644
 
  	/* 2 columns for preceding space and indicator */
  	return (n - 2);
-@@ -6045,7 +6127,7 @@ static void redraw(char *path)
+@@ -6312,7 +6394,7 @@ static void redraw(char *path)
  			}
  #endif
  		}
@@ -167,7 +167,7 @@ index f5101b1..4691b43 100644
  	}
 
  	ncols = adjust_cols(ncols);
-@@ -7646,6 +7728,7 @@ static void usage(void)
+@@ -7919,6 +8001,7 @@ static void usage(void)
  		" -F val  fifo mode [0:preview 1:explore]\n"
  #endif
  		" -g      regex filters\n"
@@ -175,7 +175,7 @@ index f5101b1..4691b43 100644
  		" -H      show hidden files\n"
  		" -J      no auto-proceed on select\n"
  		" -K      detect key collision\n"
-@@ -7784,6 +7867,7 @@ static void cleanup(void)
+@@ -8057,6 +8140,7 @@ static void cleanup(void)
  		fflush(stdout);
  	}
  #endif
@@ -183,7 +183,7 @@ index f5101b1..4691b43 100644
  	free(selpath);
  	free(plgpath);
  	free(cfgpath);
-@@ -7827,7 +7911,7 @@ int main(int argc, char *argv[])
+@@ -8101,7 +8185,7 @@ int main(int argc, char *argv[])
 
  	while ((opt = (env_opts_id > 0
  		       ? env_opts[--env_opts_id]
@@ -192,7 +192,7 @@ index f5101b1..4691b43 100644
  		switch (opt) {
  #ifndef NOFIFO
  		case 'a':
-@@ -7878,6 +7962,9 @@ int main(int argc, char *argv[])
+@@ -8152,6 +8236,9 @@ int main(int argc, char *argv[])
  			cfg.regex = 1;
  			filterfn = &visible_re;
  			break;
