@@ -729,11 +729,13 @@ static char mv[] = "mv -i";
 static const char * const archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
 
 /* Tokens used for path creation */
-#define TOK_SSN 0
-#define TOK_MNT 1
-#define TOK_PLG 2
+#define TOK_BM  0
+#define TOK_SSN 1
+#define TOK_MNT 2
+#define TOK_PLG 3
 
 static const char * const toks[] = {
+	"bookmarks",
 	"sessions",
 	"mounts",
 	"plugins", /* must be the last entry */
@@ -4889,22 +4891,28 @@ static void printkeys(kv *kvarr, char *buf, uchar_t max)
 
 static size_t handle_bookmark(const char *bmark, char *newpath)
 {
-	int fd;
-	size_t r = xstrsncpy(g_buf, messages[MSG_KEYS], CMD_LEN_MAX);
+	int fd = '\r';
+	size_t r;
 
-	if (bmark) { /* There is a marked directory */
-		g_buf[--r] = ' ';
-		g_buf[++r] = ',';
-		g_buf[++r] = '\0';
-		++r;
+	if (maxbm || bmark) {
+		r = xstrsncpy(g_buf, messages[MSG_KEYS], CMD_LEN_MAX);
+
+		if (bmark) { /* There is a marked directory */
+			g_buf[--r] = ' ';
+			g_buf[++r] = ',';
+			g_buf[++r] = '\0';
+			++r;
+		}
+		printkeys(bookmark, g_buf + r - 1, maxbm);
+		printmsg(g_buf);
+		fd = get_input(NULL);
 	}
-	printkeys(bookmark, g_buf + r - 1, maxbm);
-	printmsg(g_buf);
 
 	r = FALSE;
-	fd = get_input(NULL);
 	if (fd == ',') /* Visit marked directory */
 		bmark ? xstrsncpy(newpath, bmark, PATH_MAX) : (r = MSG_NOT_SET);
+	else if (fd == '\r') /* Visit bookmarks directory */
+		mkpath(cfgpath, toks[TOK_BM], newpath);
 	else if (!get_kv_val(bookmark, newpath, fd, maxbm, NNN_BMS))
 		r = MSG_INVALID_KEY;
 
@@ -7994,7 +8002,7 @@ static bool setup_config(void)
 	xstrsncpy(cfgpath + r - 1, "/nnn", len - r);
 	DPRINTF_S(cfgpath);
 
-	/* Create sessions, mounts and plugins directories */
+	/* Create bookmarks, sessions, mounts and plugins directories */
 	for (r = 0; r < ELEMENTS(toks); ++r) {
 		mkpath(cfgpath, toks[r], plgpath);
 		if (!xmktree(plgpath, TRUE)) {

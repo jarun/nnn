@@ -14,7 +14,6 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | Plugin (a-z) | Description [Clears selection<sup>1</sup>] | Lang | Dependencies |
 | --- | --- | --- | --- |
 | [autojump](autojump) | Navigate to dir/path | sh | [jump](https://github.com/gsamokovarov/jump)/autojump/<br>zoxide/z (needs fzf) |
-| [bookmarks](bookmarks) | Use named bookmarks managed with symlinks | sh | fzf |
 | [boom](boom) | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs, mktemp |
 | [cdpath](cdpath) | `cd` to the directory from `CDPATH` | sh | fzf |
@@ -117,14 +116,14 @@ If the plugins list gets too long, try breaking them up into sections:
 NNN_PLUG_PERSONAL='g:personal/convert2zoom;p:personal/echo'
 NNN_PLUG_WORK='j:work/prettyjson;d:work/foobar'
 NNN_PLUG_INLINE='e:!go run $nnn*'
-NNN_PLUG_DEFAULT='1:bookmarks;2:ipinfo;p:preview-tui;o:fzz;b:nbak'
+NNN_PLUG_DEFAULT='1:ipinfo;p:preview-tui;o:fzz;b:nbak'
 NNN_PLUG="$NNN_PLUG_PERSONAL;$NNN_PLUG_WORK;$NNN_PLUG_DEFAULT;$NNN_PLUG_INLINE"
 export NNN_PLUG
 ```
 
 Note:
 - `'g:personal/convert2zoom'` will look in the personal sub-folder inside the plugin folder.
-- `'b:boom;b:bookmarks` will result in only the first definition of *b* (`b:boom`) being used.
+- `'b:boom;b:bulknew` will result in only the first definition of *b* (`b:boom`) being used.
 - A keybinding definition of more than 1 character will prevent nnn from starting.
 
 
