@@ -39,6 +39,7 @@ awk 'BEGIN {
     color_fsharp=31   #color_fsharp=179    #color_fsharp="180;142;173"
     color_ruby=160    #color_ruby=150      #color_ruby="163;190;140"
     color_scala=196   #color_scala=139     #color_scala="143;188;187"
+    color_shell=47    #color_shell=109     #color_shell="143;188;187"
     color_vim=28      #color_vim=109       #color_vim="143;188;187"
 
 # icons[][1] contains icon and icons[][2] contains color
@@ -69,7 +70,7 @@ awk 'BEGIN {
     icons["license"][1] = ""; icons["license"][2] = color_docs
     icons["makefile"][1] = ""; icons["makefile"][2] = color_default
     icons["archive"][1] = ""; icons["archive"][2] = color_archive
-    icons["script"][1] = ""; icons["script"][2] = color_default
+    icons["script"][1] = ""; icons["script"][2] = color_shell
     icons["cplusplus"][1] = ""; icons["cplusplus"][2] = color_c
     icons["java"][1] = ""; icons["java"][2] = color_java
     icons["clojure"][1] = ""; icons["clojure"][2] = color_default
@@ -187,13 +188,15 @@ awk 'BEGIN {
     icons["lha"][1] = icons["archive"][1]; icons["lha"][2] = icons["archive"][2]
     icons["lhs"][1] = icons["haskell"][1]; icons["lhs"][2] = icons["haskell"][2]
     icons["ilog"][1] = icons["document"][1]; icons["ilog"][2] = icons["document"][2]
-    icons["lua"][1] = ""; icons["lua"][2] = color_default
+    icons["lua"][1] = ""; icons["lua"][2] = color_lua
     icons["lzh"][1] = icons["archive"][1]; icons["lzh"][2] = icons["archive"][2]
     icons["lzma"][1] = icons["archive"][1]; icons["lzma"][2] = icons["archive"][2]
 
 # m
+    icons["m"][1] = "ﴜ"; icons["mat"][2] = color_c
     icons["m4a"][1] = icons["musicfile"][1]; icons["m4a"][2] = icons["musicfile"][2]
     icons["m4v"][1] = icons["videofile"][1]; icons["m4v"][2] = icons["videofile"][2]
+    icons["mat"][1] = ""; icons["mat"][2] = color_c
     icons["markdown"][1] = ""; icons["markdown"][2] = color_docs
     icons["md"][1] = ""; icons["md"][2] = color_docs
     icons["mk"][1] = icons["makefile"][1]; icons["mk"][2] = icons["makefile"][2]
@@ -206,6 +209,7 @@ awk 'BEGIN {
     icons["msi"][1] = ""; icons["msi"][2] = color_default
 
 # n
+    icons["nix"][1] = ""; icons["nix"][2] = color_fsharp
 
 # o
     icons["o"][1] = icons["manual"][1]; icons["o"][2] = icons["manual"][2]
@@ -288,6 +292,7 @@ awk 'BEGIN {
     icons["yml"][1] = icons["configure"][1]; icons["yml"][2] = icons["configure"][2]
 # z
     icons["zip"][1] = icons["archive"][1]; icons["zip"][2] = icons["archive"][2]
+    icons["zsh"][1] = icons["script"][1]; icons["zsh"][2] = icons["script"][2]
 
     FS = "."
     limit = ENVIRON["limit"]
