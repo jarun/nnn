@@ -199,7 +199,7 @@ static const struct icon_pair icons_ext[] = {
 	/* L */
 	{"lha",      FA_FILE_ARCHIVE_O,    COLOR_ARCHIVE},
 	{"log",      FA_FILE_TEXT_O,       0},
-	{"lua",      FILE_LUA,             0},
+	{"lua",      FILE_LUA,             COLOR_LUA},
 	{"lzh",      FA_FILE_ARCHIVE_O,    COLOR_ARCHIVE},
 	{"lzma",     FA_FILE_ARCHIVE_O,    COLOR_ARCHIVE},
 
@@ -404,14 +404,16 @@ static const struct icon_pair icons_ext[] = {
 	{"lha",        ICON_EXT_LHA,       COLOR_ARCHIVE},
 	{"lhs",        ICON_EXT_LHS,       COLOR_VIM},
 	{"log",        ICON_EXT_LOG,       0},
-	{"lua",        ICON_EXT_LUA,       0},
+	{"lua",        ICON_EXT_LUA,       COLOR_LUA},
 	{"lzh",        ICON_EXT_LZH,       COLOR_ARCHIVE},
 	{"lzma",       ICON_EXT_LZMA,      COLOR_ARCHIVE},
 
 	/* M */
+	{"m",          ICON_EXT_C,         COLOR_C},
 	{"m4a",        ICON_EXT_M4A,       COLOR_AUDIO},
 	{"m4v",        ICON_EXT_M4V,       COLOR_VIDEO},
 	{"markdown",   ICON_EXT_MD,        COLOR_DOCS},
+	{"mat",        ICON_EXT_MAT,       COLOR_C},
 	{"md",         ICON_EXT_MD,        COLOR_DOCS},
 	{"mk",         ICON_EXT_MK,        0},
 	{"mkv",        ICON_EXT_MKV,       COLOR_VIDEO},
@@ -423,6 +425,7 @@ static const struct icon_pair icons_ext[] = {
 	{"msi",        ICON_EXT_MSI,       0},
 
 	/* N */
+	{"nix",        ICON_EXT_NIX,       COLOR_FSHARP},
 
 	/* O */
 	{"o",          ICON_EXT_O,         0},
@@ -507,6 +510,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* Z */
 	{"zip",        ICON_EXT_ZIP,       COLOR_ARCHIVE},
+	{"zsh",        ICON_EXT_ZSH,       0},
 
 	/* Other */
 #endif
