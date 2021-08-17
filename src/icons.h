@@ -41,6 +41,7 @@ struct icon_pair {
 #define COLOR_FSHARP       31  /* DeepSkyBlue3 */
 #define COLOR_RUBY         160 /* Red3 */
 #define COLOR_SCALA        196 /* Red1 */
+#define COLOR_SHELL        47  /* SpringGreen2 */
 #define COLOR_VIM          28  /* Green4 */
 
 /*
@@ -253,7 +254,7 @@ static const struct icon_pair icons_ext[] = {
 	/* S */
 	{"so",       FILE_MANPAGE,         0},
 	{"scala",    MFIZZ_SCALA,          0},
-	{"sh",       MFIZZ_SCRIPT,         0},
+	{"sh",       MFIZZ_SCRIPT,         COLOR_SHELL},
 	{"slim",     FA_FILE_CODE_O,       0},
 	{"sln",      DEV_VISUALSTUDIO,     0},
 	{"sql",      MFIZZ_MYSQL,          0},
@@ -409,7 +410,7 @@ static const struct icon_pair icons_ext[] = {
 	{"lzma",       ICON_EXT_LZMA,      COLOR_ARCHIVE},
 
 	/* M */
-	{"m",          ICON_EXT_C,         COLOR_C},
+	{"m",          ICON_EXT_M,         COLOR_C},
 	{"m4a",        ICON_EXT_M4A,       COLOR_AUDIO},
 	{"m4v",        ICON_EXT_M4V,       COLOR_VIDEO},
 	{"markdown",   ICON_EXT_MD,        COLOR_DOCS},
@@ -464,7 +465,7 @@ static const struct icon_pair icons_ext[] = {
 	{"scss",       ICON_EXT_SCSS,      COLOR_CSS},
 	{"so",         ICON_EXT_SO,        0},
 	{"scala",      ICON_EXT_SCALA,     COLOR_SCALA},
-	{"sh",         ICON_EXT_SH,        0},
+	{"sh",         ICON_EXT_SH,        COLOR_SHELL},
 	{"slim",       ICON_EXT_SLIM,      COLOR_DOCUMENT},
 	{"sln",        ICON_EXT_SLN,       0},
 	{"sql",        ICON_EXT_SQL,       0},
@@ -510,7 +511,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* Z */
 	{"zip",        ICON_EXT_ZIP,       COLOR_ARCHIVE},
-	{"zsh",        ICON_EXT_ZSH,       0},
+	{"zsh",        ICON_EXT_ZSH,       COLOR_SHELL},
 
 	/* Other */
 #endif
