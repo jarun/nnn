@@ -7972,12 +7972,12 @@ static bool setup_config(void)
 			return FALSE;
 		}
 
-		len = xstrlen(xdgcfg) + 1 + 14; /* add length of "/nnn/bookmarks" */
+		len = xstrlen(xdgcfg) + xstrlen("/nnn/bookmarks") + 1;
 		xdg = TRUE;
 	}
 
 	if (!xdg)
-		len = xstrlen(home) + 1 + 22; /* add length of "/.config/nnn/bookmarks" */
+		len = xstrlen(home) + xstrlen("/.config/nnn/bookmarks") + 1;
 
 	cfgpath = (char *)malloc(len);
 	plgpath = (char *)malloc(len);
@@ -7988,7 +7988,7 @@ static bool setup_config(void)
 
 	if (xdg) {
 		xstrsncpy(cfgpath, xdgcfg, len);
-		r = len - 13; /* subtract length of "/nnn/sessions" */
+		r = len - xstrlen("/nnn/bookmarks");
 	} else {
 		r = xstrsncpy(cfgpath, home, len);
 
