@@ -163,6 +163,7 @@
 /* M */
 #define ICON_EXT_M4A       ICON_MUSICFILE
 #define ICON_EXT_M4V       ICON_VIDEOFILE
+#define ICON_EXT_M         "\ufd1c"
 #define ICON_EXT_MAT       "\uf0ce"
 #define ICON_EXT_MD        "\ue609"
 #define ICON_EXT_MK        ICON_MAKEFILE
@@ -259,5 +260,6 @@
 
 /* Z */
 #define ICON_EXT_ZIP       ICON_ARCHIVE
+#define ICON_EXT_ZSH       ICON_SCRIPT
 
 #endif // ICONS_NERDFONT
