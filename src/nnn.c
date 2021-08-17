@@ -4335,10 +4335,6 @@ static void set_smart_ctx(int ctx, char *nextpath, char **path, char **lastname,
 		ctx = (int)(get_free_ctx() + 1);
 
 	if (ctx == 0 || ctx == cfg.curctx + 1) { /* Same context */
-		/* Mark current directory */
-		free(mark);
-		mark = xstrdup(*path);
-
 		xstrsncpy(*lastdir, *path, PATH_MAX);
 		xstrsncpy(*path, nextpath, PATH_MAX);
 	} else { /* New context */
@@ -6726,10 +6722,6 @@ nochange:
 						printwarn(&presel);
 						goto nochange;
 					}
-
-					/* Mark current directory */
-					free(mark);
-					mark = xstrdup(path);
 
 					cdprep(lastdir, NULL, path, newpath)
 					       ? (presel = FILTER) : (watch = TRUE);
