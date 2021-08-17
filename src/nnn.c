@@ -4918,6 +4918,21 @@ static size_t handle_bookmark(const char *bmark, char *newpath)
 	return r;
 }
 
+static void add_bookmark(char *path, char *newpath, int *presel)
+{
+	char *dir = xbasename(path);
+
+	dir = xreadline(dir[0] ? dir : NULL, "name: ");
+	if (dir && *dir) {
+		size_t r = mkpath(cfgpath, toks[TOK_BM], newpath);
+
+		newpath[r - 1] = '/';
+		xstrsncpy(newpath + r, dir, PATH_MAX - r);
+		printwait((symlink(path, newpath) == -1) ? strerror(errno) : newpath, presel);
+	} else
+		printwait(messages[MSG_CANCEL], presel);
+}
+
 /*
  * The help string tokens (each line) start with a HEX value
  * which indicates the number of spaces to print before the
@@ -4938,7 +4953,7 @@ static void show_help(const char *path)
 	   "5Ret Rt l  Open%-20c'  First file/match\n"
 	       "9g ^A  Top%-21c.  Toggle hidden\n"
 	       "9G ^E  End%-21c+  Toggle auto-advance\n"
-		  "c,  Mark CWD%-13cb ^/  Select bookmark\n"
+	      "8B (,)  Book(mark)%-11cb ^/  Select bookmark\n"
 		"a1-4  Context%-11c(Sh)Tab  Cycle/new context\n"
 	    "62Esc ^Q  Quit%-20cq  Quit context\n"
 		 "b^G  QuitCD%-18cQ  Pick/err, quit\n"
@@ -6882,8 +6897,8 @@ nochange:
 
 			/* SEL_CDLAST: dir pointing to lastdir */
 			xstrsncpy(newpath, dir, PATH_MAX); // fallthrough
-		case SEL_BOOKMARK:
-			if (sel == SEL_BOOKMARK) {
+		case SEL_BMOPEN:
+			if (sel == SEL_BMOPEN) {
 				r = (int)handle_bookmark(mark, newpath);
 				if (r) {
 					printwait(messages[r], &presel);
@@ -6940,6 +6955,9 @@ nochange:
 			free(mark);
 			mark = xstrdup(path);
 			printwait(mark, &presel);
+			goto nochange;
+		case SEL_BMARK:
+			add_bookmark(path, newpath, &presel);
 			goto nochange;
 		case SEL_FLTR:
 			if (!ndents)
