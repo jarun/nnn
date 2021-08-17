@@ -72,7 +72,7 @@ index fe5d650..059c7bf 100644
 +	size_t i = -1;
 +	git_statuses.show = FALSE;
 +	workdir[xstrlen(workdir) - 1] = '\0';
-+	snprintf(pathspec, PATH_MAX, "%s%s%s 2>/dev/null", gitstat, path, cfg.showhidden ? "" : "/*");
++	snprintf(pathspec, PATH_MAX, "%s\"%s\"%s 2>/dev/null", gitstat, path, cfg.showhidden ? "" : "/*");
 +	fp = popen(pathspec, "r");
 +
 +	while (fgets(status, PATH_MAX, fp)) {
