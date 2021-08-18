@@ -323,6 +323,7 @@ static const struct icon_pair icons_ext[] = {
 	 /* C */
 	{"c",          ICON_EXT_C,         COLOR_C},
 	{"c++",        ICON_EXT_CPLUSPLUS, COLOR_C},
+	{"cabal",      ICON_EXT_HS,        COLOR_VIDEO},
 	{"cab",        ICON_EXT_CAB,       COLOR_ARCHIVE},
 	{"cbr",        ICON_EXT_CBR,       COLOR_ARCHIVE},
 	{"cbz",        ICON_EXT_CBZ,       COLOR_ARCHIVE},
@@ -335,7 +336,7 @@ static const struct icon_pair icons_ext[] = {
 	{"coffee",     ICON_EXT_COFFEE,    0},
 	{"conf",       ICON_EXT_CONF,      0},
 	{"cpio",       ICON_EXT_CPIO,      COLOR_ARCHIVE},
-	{"cpp",        ICON_EXT_CPP,       0},
+	{"cpp",        ICON_EXT_CPP,       COLOR_C},
 	{"css",        ICON_EXT_CSS,       COLOR_CSS},
 	{"cue",        ICON_EXT_CUE,       COLOR_AUDIO},
 	{"cvs",        ICON_EXT_CVS,       0},
@@ -512,6 +513,7 @@ static const struct icon_pair icons_ext[] = {
 	/* Z */
 	{"zip",        ICON_EXT_ZIP,       COLOR_ARCHIVE},
 	{"zsh",        ICON_EXT_ZSH,       COLOR_SHELL},
+	{"zst",        ICON_EXT_ZST,       COLOR_ARCHIVE},
 
 	/* Other */
 #endif

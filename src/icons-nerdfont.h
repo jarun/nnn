@@ -28,17 +28,17 @@
 #define ICON_PUBLIC        "\ue5ff"
 #define ICON_TEMPLATES     "\ufac6"
 #define ICON_VIDEOS        "\uf72f"
-#define ICON_VIDEOFILE     "\ufcdc"
+#define ICON_VIDEOFILE     "\uf72a"
 #define ICON_CHANGELOG     "\uf7d9"
 #define ICON_CONFIGURE     "\uf423"
 #define ICON_LICENSE       "\uf718"
 #define ICON_MAKEFILE      "\uf68c"
-#define ICON_ARCHIVE       "\uf53b"
+#define ICON_ARCHIVE       "\ufac3"
 #define ICON_SCRIPT        "\ue795"
 #define ICON_CPLUSPLUS     "\ue61d"
 #define ICON_JAVA          "\ue738"
 #define ICON_CLOJURE       "\ue76a"
-#define ICON_JAVASCRIPT    "\ue74e"
+#define ICON_JAVASCRIPT    "\uf81d"
 #define ICON_LINUX         "\uf83c"
 #define ICON_FSHARP        "\ue7a7"
 #define ICON_RUBY          "\ue23e"
@@ -87,7 +87,7 @@
 #define ICON_EXT_CONF      ICON_CONFIGURE
 #define ICON_EXT_CPIO      ICON_ARCHIVE
 #define ICON_EXT_CPP       ICON_CPLUSPLUS
-#define ICON_EXT_CSS       "\ue614"
+#define ICON_EXT_CSS       "\ue749"
 #define ICON_EXT_CUE       ICON_PLAYLIST
 #define ICON_EXT_CVS       ICON_CONFIGURE
 #define ICON_EXT_CXX       ICON_CPLUSPLUS
@@ -261,5 +261,6 @@
 /* Z */
 #define ICON_EXT_ZIP       ICON_ARCHIVE
 #define ICON_EXT_ZSH       ICON_SCRIPT
+#define ICON_EXT_ZST       ICON_ARCHIVE
 
 #endif // ICONS_NERDFONT
