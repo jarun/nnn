@@ -33,7 +33,7 @@
 #define ICON_CONFIGURE     "\uf423"
 #define ICON_LICENSE       "\uf718"
 #define ICON_MAKEFILE      "\uf68c"
-#define ICON_ARCHIVE       "\ufac3"
+#define ICON_ARCHIVE       "\uf53b"
 #define ICON_SCRIPT        "\ue795"
 #define ICON_CPLUSPLUS     "\ue61d"
 #define ICON_JAVA          "\ue738"
@@ -75,6 +75,7 @@
 #define ICON_EXT_C         ICON_C
 #define ICON_EXT_CPLUSPLUS ICON_CPLUSPLUS
 #define ICON_EXT_CAB       ICON_ARCHIVE
+#define ICON_EXT_CABAL     ICON_HASKELL
 #define ICON_EXT_CBR       ICON_ARCHIVE
 #define ICON_EXT_CBZ       ICON_ARCHIVE
 #define ICON_EXT_CC        ICON_CPLUSPLUS

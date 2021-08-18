@@ -63,7 +63,7 @@ awk 'BEGIN {
     icons["picturefile"][1] = ""; icons["picturefile"][2] = color_image
     icons["public"][1] = ""; icons["public"][2] = color_default
     icons["templates"][1] = "陼"; icons["templates"][2] = color_default
-    icons["videos"][1] = ""; icons["videos"][2] = color_default
+    icons["videos"][1] = ""; icons["videos"][2] = color_default
     icons["videofile"][1] = "ﳜ"; icons["videofile"][2] = color_video
     icons["changelog"][1] = ""; icons["changelog"][2] = color_docs
     icons["configure"][1] = ""; icons["configure"][2] = color_default
@@ -74,7 +74,7 @@ awk 'BEGIN {
     icons["cplusplus"][1] = ""; icons["cplusplus"][2] = color_c
     icons["java"][1] = ""; icons["java"][2] = color_java
     icons["clojure"][1] = ""; icons["clojure"][2] = color_default
-    icons["js"][1] = ""; icons["js"][2] = color_js
+    icons["js"][1] = ""; icons["js"][2] = color_js
     icons["linux"][1] = ""; icons["linux"][2] = color_default
     icons["fsharp"][1] = ""; icons["fsharp"][2] = color_fsharp
     icons["ruby"][1] = ""; icons["ruby"][2] = color_ruby
@@ -108,6 +108,7 @@ awk 'BEGIN {
 
 # c
     icons["cplusplus"][1] = icons["cplusplus"][1]; icons["cplusplus"][2] = icons["cplusplus"][2]
+    icons["cabal"][1] = icons["haskell"][1]; icons["cab"][2] = icons["haskell"][2]
     icons["cab"][1] = icons["archive"][1]; icons["cab"][2] = icons["archive"][2]
     icons["cbr"][1] = icons["archive"][1]; icons["cbr"][2] = icons["archive"][2]
     icons["cbz"][1] = icons["archive"][1]; icons["cbz"][2] = icons["archive"][2]
@@ -121,7 +122,7 @@ awk 'BEGIN {
     icons["conf"][1] = icons["configure"][1]; icons["conf"][2] = icons["configure"][2]
     icons["cpio"][1] = icons["archive"][1]; icons["cpio"][2] = icons["archive"][2]
     icons["cpp"][1] = icons["cplusplus"][1]; icons["cpp"][2] = icons["cplusplus"][2]
-    icons["css"][1] = ""; icons["css"][2] = color_css
+    icons["css"][1] = ""; icons["css"][2] = color_css
     icons["cue"][1] = icons["playlist"][1]; icons["cue"][2] = icons["playlist"][2]
     icons["cvs"][1] = icons["configure"][1]; icons["cvs"][2] = icons["configure"][2]
     icons["cxx"][1] = icons["cplusplus"][1]; icons["cxx"][2] = icons["cplusplus"][2]
@@ -293,6 +294,7 @@ awk 'BEGIN {
 # z
     icons["zip"][1] = icons["archive"][1]; icons["zip"][2] = icons["archive"][2]
     icons["zsh"][1] = icons["script"][1]; icons["zsh"][2] = icons["script"][2]
+    icons["zst"][1] = icons["archive"][1]; icons["zst"][2] = icons["archive"][2]
 
     FS = "."
     limit = ENVIRON["limit"]
