@@ -323,7 +323,7 @@ static const struct icon_pair icons_ext[] = {
 	 /* C */
 	{"c",          ICON_EXT_C,         COLOR_C},
 	{"c++",        ICON_EXT_CPLUSPLUS, COLOR_C},
-	{"cabal",      ICON_EXT_HS,        COLOR_VIDEO},
+	{"cabal",      ICON_EXT_CABAL,     COLOR_VIDEO},
 	{"cab",        ICON_EXT_CAB,       COLOR_ARCHIVE},
 	{"cbr",        ICON_EXT_CBR,       COLOR_ARCHIVE},
 	{"cbz",        ICON_EXT_CBZ,       COLOR_ARCHIVE},
