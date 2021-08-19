@@ -7526,6 +7526,7 @@ nochange:
 					g_state.runplugin = 1;
 				}
 
+				xstrsncpy(lastdir, path, PATH_MAX);
 				xstrsncpy(rundir, path, PATH_MAX);
 				xstrsncpy(path, plgpath, PATH_MAX);
 				if (ndents)
