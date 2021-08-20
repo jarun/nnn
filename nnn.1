@@ -286,7 +286,9 @@ instances. Selection from multiple instances are not merged. The last instance
 writing to the file overwrites earlier contents. If you have 2 instances of
 .Nm
 \fIopen\fR in 2 panes of a terminal multiplexer, you can select in one pane and
-use the selection in the other pane.
+use the selection in the other pane. The selection gets cleared in the
+.Nm
+instance where the selection was made on mv/rm (but not on cp).
 .Pp
 .Nm
 clears the selection after a successful operation with the selection. Plugins
@@ -380,8 +382,7 @@ separated by \fI;\fR:
 .Ed
 .Pp
     To assign keys to arbitrary non-background non-shell-interpreted cli
-    commands and invoke like plugins, add \fI!\fR (underscore) before the
-    command.
+    commands and invoke like plugins, add \fI!\fR before the command.
 .Bd -literal
     export NNN_PLUG='x:!chmod +x $nnn;g:!git log;s:!smplayer $nnn'
 
@@ -519,6 +520,11 @@ separated by \fI;\fR:
 .Bd -literal
     export NNN_LOCKER='bmon -p wlp1s0'
     export NNN_LOCKER='cmatrix'
+.Ed
+.Pp
+\fBNNN_TMPFILE:\fR \fIalways\fR cd on quit and write the command in the file specified.
+.Bd -literal
+    export NNN_TMPFILE='/tmp/.lastd'
 .Ed
 .Pp
 \fBNNN_HELP:\fR run a program and show the output on top of the program help page.

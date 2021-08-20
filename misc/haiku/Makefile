@@ -21,9 +21,10 @@ O_ICONS := 0  # support icons-in-terminal
 O_NERD := 0  # support icons-nerdfont
 O_QSORT := 0  # use Alexey Tourbin's QSORT implementation
 O_BENCH := 0  # benchmark mode (stops at first user input)
-O_NOSSN := 0  # enable session support
+O_NOSSN := 0  # disable session support
 O_NOUG := 0  # disable user, group name in status bar
 O_NOX11 := 0  # disable X11 integration
+O_MATCHFLTR := 0  # allow filters without matches
 
 # User patches
 O_GITSTATUS := 0 # add git status to detail view
@@ -118,6 +119,10 @@ ifeq ($(strip $(O_NOX11)),1)
 	CPPFLAGS += -DNOX11
 endif
 
+ifeq ($(strip $(O_MATCHFLTR)),1)
+	CPPFLAGS += -DMATCHFLTR
+endif
+
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
 	CFLAGS_CURSES ?= $(shell $(PKG_CONFIG) --cflags ncursesw)
 	LDLIBS_CURSES ?= $(shell $(PKG_CONFIG) --libs   ncursesw)
@@ -129,7 +134,7 @@ else
 endif
 
 ifeq ($(shell uname -s), Haiku)
-	LDLIBS_HAIKU ?= -lstdc++ -lbe
+	LDLIBS_HAIKU ?= -lstdc++ -lgnu -lbe
 	SRC_HAIKU ?= misc/haiku/nm.cpp
 	OBJS_HAIKU ?= misc/haiku/nm.o
 endif
