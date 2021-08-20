@@ -30,6 +30,10 @@
 
 #pragma once
 
+#ifdef MACOS1011
+#include "mach_gettime.h"
+#endif
+
 #include <curses.h>
 
 #define CONTROL(c) ((c) & 0x1f)

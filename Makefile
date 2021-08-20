@@ -135,10 +135,19 @@ DESKTOPFILE = misc/desktop/nnn.desktop
 LOGOSVG = misc/logo/logo.svg
 LOGO64X64 = misc/logo/logo-64x64.png
 
+OSX := $(shell [ "`sw_vers -productName`" = "Mac OS X" ] && sw_vers -productVersion | cut -f1,2 -d.)
+ifeq ($(OSX),10.11)
+	GETTIME_C = src/mach_gettime.c
+	GETTIME_H = src/mach_gettime.h
+	SRC += $(GETTIME_C)
+	HEADERS += $(GETTIME_H)
+	CPPFLAGS += -DMACOS1011
+endif
+
 all: $(BIN)
 
 $(BIN): $(SRC) $(HEADERS)
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LDLIBS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $(GETTIME_C) $< $(LDLIBS)
 
 # targets for backwards compatibility
 debug: $(BIN)
