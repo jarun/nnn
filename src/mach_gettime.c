@@ -12,8 +12,8 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp)
 {
     kern_return_t retval = KERN_SUCCESS;
     if( clk_id == TIMER_ABSTIME) {
-        if (!mt_timestart) { // only one timer, initilized on the first call to the TIMER
-            mach_timebase_info_data_t tb = { 0 };
+        if (!mt_timestart) { // only one timer, initialized on the first call to the TIMER
+            mach_timebase_info_data_t tb;
             mach_timebase_info(&tb);
             mt_timebase = tb.numer;
             mt_timebase /= tb.denom;
