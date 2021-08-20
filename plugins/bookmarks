@@ -7,7 +7,6 @@
 # Usage:
 #   1. Create a $BOOKMARKS_DIR directory
 #      By default, $BOOKMARKS_DIR is set to: ${XDG_CACHE_HOME:-$HOME/.cache}/nnn/bookmarks
-#
 #   2. Create symlinks to directories
 #     `cd $BOOKMARKS_DIR`
 #     `ln -s /path/to/useful/directory    bookmark_name`
@@ -20,7 +19,7 @@
 # https://linux.101hacks.com/cd-command/cdpath/
 #
 # TODO:
-#   1. Remove `fzf` dependency
+#   - Remove `fzf` dependency
 #
 # Shell: POSIX compliant
 # Author: Todd Yamakawa
@@ -31,7 +30,8 @@ fi
 
 # Check if NNN_PIPE is set
 if [ -z "$NNN_PIPE" ]; then
-    echo 'ERROR: NNN_PIPE is not set' | ${PAGER:-less}
+    printf 'ERROR: NNN_PIPE is not set!'
+    read -r _
     exit 2
 fi
 

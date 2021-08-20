@@ -1,0 +1,59 @@
+#!/usr/bin/env sh
+
+# Description: Fuzzy find and execute nnn plugins (and optionally,
+#              custom scripts located elsewhere).
+#              Description and details of plugins can be previewed
+#              from the fzf interface. Use `?` to toggle preview
+#              pane on and off, ^Up/^Dn to scroll.
+#
+# Dependencies: find, fzf, cat (or bat, if installed)
+#
+# Note: For better compatibility with as many nnn plugins as possible,
+#       fzplug will first execute the chosen script on the file hovered
+#       in nnn, and upon failure, try to run it with no target (i.e on
+#       an active selection, if present).
+#
+# Shell: POSIX compliant
+# Author: Kabouik
+
+# Optional scripts sources
+
+# Leave blank or fill with the absolute path of a folder containing executable
+# scripts other than nnn plugins (e.g., "$HOME/.local/share/nautilus/scripts",
+# since there are numerous Nautilus script git repositories).
+# Add extra variables if needed, make sure you call them in the find command.
+
+#CUSTOMDIR1="$HOME/.local/share/nautilus/scripts"
+CUSTOMDIR1=""
+CUSTOMDIR2=""
+
+nnnpluginsdir="$HOME/.config/nnn/plugins"
+
+# Preview with bat if installed
+if type bat >/dev/null; then
+    BAT="bat --terminal-width='$(tput cols)' --decorations=always --color=always --style='${BAT_STYLE:-header,numbers}'"
+fi
+
+plugin=$(find "$nnnpluginsdir" "$CUSTOMDIR1" "$CUSTOMDIR2" \
+-maxdepth 3 -perm -111 -type f 2>/dev/null | fzf --ansi --preview \
+    "${BAT:-cat} {}" --preview-window="right:66%:wrap" --delimiter / \
+    --with-nth -1 --bind="?:toggle-preview")
+
+# Try running the script on the hovered file, and abort
+# abort if no plugin was selected (ESC or ^C pressed).
+err=0
+if ! [ "$plugin" = "" ]; then
+    "$plugin" "$1" || err=1
+fi
+
+# If attempt with hovered file fails, try without any target
+# (nnn selections should still be passed to the script in that case)
+if [ "$err" -eq "1" ]; then
+    clear && "$plugin" || err=2
+fi
+
+# Abort and show error if both fail
+if [ "$err" -eq "2" ]; then
+    sep="\n---\n"
+    printf "$sep""Failed to execute '%s'. See error above or try without fzfplug. Press return to continue. " "$plugin" && read -r _ && clear
+fi

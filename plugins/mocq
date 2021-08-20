@@ -3,9 +3,9 @@
 # Description: Appends and optionally plays music in MOC
 #
 # Notes:
-# - if selection is available, plays it, else plays the current file or directory
-# - appends tracks and exits is MOC is running, else clears playlist and adds tracks
-# - to let mocp shuffle tracks, set SHUFFLE=1
+#   - if selection is available, plays it, else plays the current file or directory
+#   - appends tracks and exits is MOC is running, else clears playlist and adds tracks
+#   - to let mocp shuffle tracks, set SHUFFLE=1
 #
 # Shell: POSIX compliant
 # Authors: Arun Prakash Jana, ath3

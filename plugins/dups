@@ -1,18 +1,18 @@
 #!/usr/bin/env sh
 
-# Description: List non-empty duplicate files in the current directory (based on size followed by MD5)
+# Description: List non-empty duplicates in the current dir (based on size followed by MD5)
 #
 # Source: https://www.commandlinefu.com/commands/view/3555/find-duplicate-files-based-on-size-first-then-md5-hash
 #
 # Dependencies: find md5sum sort uniq xargs gsed
 #
-# Note: bash compatible required for mktemp
+# Notes:
+#   1. If the file size exceeds $size_digits digits the file will be misplaced
+#      12 digits fit files up to 931GiB
+#   2. Bash compatible required for mktemp
 #
-# Shell: bash
+# Shell: Bash
 # Authors: syssyphus, KlzXS
-
-# If the size of a file has more that $size_digits digits the file will be misplaced
-# 12 digits fit files up to 931GiB
 
 EDITOR="${EDITOR:-vi}"
 TMPDIR="${TMPDIR:-/tmp}"

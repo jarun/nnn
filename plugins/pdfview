@@ -3,8 +3,8 @@
 # Description: View a PDF file in pager
 #
 # Notes:
-# - $PAGER must be 'less -R' or 'most'
-# - To use mutool, uncomment the relevant lines and comment the pdftotext line
+#   - $PAGER must be 'less -R' or 'most'
+#   - To use mutool, uncomment the relevant lines and comment the pdftotext line
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana

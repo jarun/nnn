@@ -1,17 +1,19 @@
 #!/usr/bin/env sh
 
 # Description: Copy system clipboard newline-separated file list to selection
-# Dependencies:
-#  - tr
-#  - xclip/xsel (Linux)
-#  - pbpaste (macOS)
-#  - termux-clipboard-get (Termux)
-#  - powershell (WSL)
-#  - cygwim's /dev/clipboard (Cygwin)
-#  - wl-paste (Wayland)
-#  - clipboard (Haiku)
 #
-# Limitation: breaks if a filename has newline in it
+# Dependencies:
+#   - tr
+#   - xclip/xsel (Linux)
+#   - pbpaste (macOS)
+#   - termux-clipboard-get (Termux)
+#   - powershell (WSL)
+#   - cygwim's /dev/clipboard (Cygwin)
+#   - wl-paste (Wayland)
+#   - clipboard (Haiku)
+#
+# Note:
+#   - Limitation: breaks if a filename has newline in it
 #
 # Shell: POSIX compliant
 # Author: Léo Villeveygoux, after Arun Prakash Jana's .cbcp
@@ -21,33 +23,31 @@ IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}" # protect trailing \n
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
 getclip () {
-
-	if which xsel >/dev/null 2>&1; then
+	if type xsel >/dev/null 2>&1; then
 		# Linux
 		xsel -bo
-	elif which xclip >/dev/null 2>&1; then
+	elif type xclip >/dev/null 2>&1; then
 		# Linux
 		xclip -sel clip -o
-	elif which pbpaste >/dev/null 2>&1; then
+	elif type pbpaste >/dev/null 2>&1; then
 		# macOS
 		pbpaste
-	elif which termux-clipboard-get >/dev/null 2>&1; then
+	elif type termux-clipboard-get >/dev/null 2>&1; then
 		# Termux
 		termux-clipboard-get
-	elif which powershell.exe >/dev/null 2>&1; then
+	elif type powershell.exe >/dev/null 2>&1; then
 		# WSL
 		powershell.exe Get-Clipboard
 	elif [ -r /dev/clipboard ] ; then
 		# Cygwin
 		cat /dev/clipboard
-	elif which wl-paste >/dev/null 2>&1; then
+	elif type wl-paste >/dev/null 2>&1; then
 		# Wayland
 		wl-paste
-	elif which clipboard >/dev/null 2>&1; then
+	elif type clipboard >/dev/null 2>&1; then
 		# Haiku
 		clipboard --print
 	fi
-
 }
 
 CLIPBOARD=$(getclip)

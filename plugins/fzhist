@@ -1,12 +1,14 @@
 #!/usr/bin/env sh
 
-# Description: Fuzzy find a command from history, edit in $EDITOR and run as a command
-#              Currently supports only bash and fish history
+# Description: Fuzzy find a command from history,
+#              edit in $EDITOR and run as a command
+#
+# Note: Supports only bash and fish history
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-if which fzf >/dev/null 2>&1; then
+if type fzf >/dev/null 2>&1; then
     fuzzy=fzf
 else
     exit 1

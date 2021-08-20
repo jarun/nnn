@@ -33,6 +33,6 @@ nnn_cd () {
 }
 
 cmd_exists () {
-	which "$1" > /dev/null 2>&1
-	echo $?
+    type "$1" > /dev/null 2>&1
+    echo $?
 }

@@ -1,0 +1,44 @@
+#!/usr/bin/env sh
+
+# Description: Sets the xdg-open's default application for the current entry's file
+#              type. ${XDG_DATA_DIRS} and ${XDG_DATA_HOME} are set to the recommended
+#              defaults if unset, as specified in XDG Base Directory Specification
+#              - http://specifications.freedesktop.org/basedir-spec/.
+#
+# Dependencies: xdg-utils, fzf
+#
+# Shell: POSIX compliant
+# Author: lwnctd
+
+if [ -z "$1" ] || ! command -v fzf > /dev/null 2>& 1; then
+    exit 1
+fi
+
+ftype=$(xdg-mime query filetype "$2/$1")
+
+if [ -z "$ftype" ]; then
+    exit 1
+fi
+
+dirs=${XDG_DATA_DIRS:-/usr/local/share:/usr/share}
+dirs=${dirs}:${XDG_DATA_HOME:-$HOME/.local/share}:
+
+while [ -n "$dirs" ]; do
+    d=${dirs%%:*}
+    if [ -n "$d" ] && [ -d "$d"/applications ]; then
+        set -- "$@" "$d"/applications
+    fi
+    dirs=${dirs#*:}
+done
+
+app=$(find "$@" -iname '*.desktop' -exec grep '^Name=' {} + \
+    | sort -u -t ':' -k 1,1 \
+    | sed -E 's;.+/(.+desktop):Name=(.+);\2:\1;' \
+    | sort -t ':' -k 1,1 \
+    | column -t -s ':' -o "$(printf '\t')" \
+    | fzf -e --tiebreak=begin \
+    | cut -f 2)
+
+if [ -n "$app" ]; then
+    xdg-mime default "$app" "$ftype"
+fi

@@ -1,16 +1,81 @@
 #!/usr/bin/env sh
 
-# Description: Run fzf and go to the directory of the file selected
+# Description: Fuzzy search multiple locations read-in from a path-list file
+#              (or $PWD) and open the selected file's dir in a smart context.
+# Dependencies: fzf, fd (only for multi-location search)
+#
+# Details: Paths in list file should be newline-separated absolute paths.
+#          Paths can be file paths; the script will scan the parent dirs.
+#
+#          The path-list file precedence is:
+#          - "$1" (the hovered file) if it exists, is plain-text and the
+#                 first line points to an existing file
+#          - "$LIST" if set below
+#          - "$2" (the current directory) [mimics plugin fzcd behaviour]
+#
+#          The path-list file can be generated easily:
+#          - pick the (file)paths in picker mode to path-list file
+#          - OR, edit selection in nnn and save as path-list file
+#
+#          The plugin clears nnn selection as the user can be tempted to delete
+#          duplicate files after finding copies and remove selection by mistake.
 #
 # Shell: POSIX compliant
-# Author: Anna Arad
+# Author: Anna Arad, Arun Prakash Jana
+
+IFS="$(printf '\n\r')"
 
 . "$(dirname "$0")"/.nnn-plugin-helper
 
-if [ "$(cmd_exists fzf)" -eq "0" ]; then
-	sel=$(fzf)
-else
+CTX=+
+LIST="$LIST"
+
+if ! type fzf >/dev/null 2>&1; then
+    printf "fzf missing"
+    read -r _
 	exit 1
+fi
+
+if [ -n "$1" ] && [ "$(file -b --mime-type "$1")" = 'text/plain' ] && [ -e "$(head -1 "$1")" ]; then
+    LIST="$1"
+elif ! [ -s "$LIST" ]; then
+    # Clear selection
+    if [ -p "$NNN_PIPE" ]; then
+        printf "-" >"$NNN_PIPE"
+    fi
+
+    sel=$(fzf)
+    # Show only the file and parent dir
+    # sel=$(fzf --delimiter / --with-nth=-2,-1 --tiebreak=begin --info=hidden)
+
+    LIST=''
+fi
+
+if [ -n "$LIST" ]; then
+    if type fd >/dev/null 2>&1; then
+        tmpfile=$(mktemp /tmp/abc-script.XXXXXX)
+
+        while IFS= read -r path; do
+            if [ -d "$path" ]; then
+                printf "%s\n" "$path" >> "$tmpfile"
+            elif [ -f "$path" ]; then
+                printf "%s\n" "$(dirname "$path")" >> "$tmpfile"
+            fi
+        done < "$LIST"
+
+        # Clear selection
+        if [ -p "$NNN_PIPE" ]; then
+            printf "-" >"$NNN_PIPE"
+        fi
+
+        sel=$(xargs -d '\n' -a "$tmpfile" fd -H . | fzf --delimiter / --tiebreak=begin --info=hidden)
+
+        rm "$tmpfile"
+    else
+        printf "fd missing"
+        read -r _
+	    exit 1
+    fi
 fi
 
 if [ -n "$sel" ]; then
@@ -18,18 +83,17 @@ if [ -n "$sel" ]; then
         exit 0
     fi
 
-    # Check if selected path returned
-    # by fzf command is absolute
+    # Check if the selected path returned by fzf command is absolute
     case $sel in
-    /*) nnn_cd "$sel" ;;
+    /*) nnn_cd "$sel" "$CTX" ;;
     *)
         # Remove "./" prefix if it exists
         sel="${sel#./}"
 
         if [ "$PWD" = "/" ]; then
-            nnn_cd "/$sel"
+            nnn_cd "/$sel" "$CTX"
         else
-            nnn_cd "$PWD/$sel"
+            nnn_cd "$PWD/$sel" "$CTX"
         fi;;
     esac
 fi

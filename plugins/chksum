@@ -2,13 +2,14 @@
 
 # Description: Create and verify checksums
 #
-# For selection: it will generate one file containing the checksums with file names
-#                [and with paths if they are in another directory]
-#                the output checksum filename will be checksum_timestamp.checksum_type
-# For file: if the file is a checksum, the plugin does the verification
+# Details:
+#   - selection: it will generate one file with the checksums and filenames
+#                (and with paths if they are in another directory)
+#                output checksum filename format: checksum_timestamp.checksum_type
+#   - file: if the file is a checksum, the plugin does the verification
 #           if the file is not a checksum, checksum will be generated for it
 #           the output checksum filename will be filename.checksum_type
-# For directory: recursively calculates checksum for all the files in the directory
+#   - directory: recursively calculates checksum for all the files in the dir
 #                the output checksum filename will be directory.checksum_type
 #
 # Shell: POSIX compliant

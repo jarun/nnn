@@ -1,7 +1,10 @@
 #!/usr/bin/env sh
 
-# Description: Play random music from current directory. Identifies MP3, FLAC, M4A, WEBM, WMA.
-#              You may want to set GUIPLAYER.
+# Description: Play random music (MP3, FLAC, M4A, WEBM, WMA) from current dir.
+#
+# Dependencies: mocp (or custom)
+#
+# Note: You may want to set GUIPLAYER.
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
@@ -14,7 +17,7 @@ if [ -n "$GUIPLAYER" ]; then
 
     # detach the player
     sleep 1
-elif which mocp >/dev/null 2>&1; then
+elif type mocp >/dev/null 2>&1; then
     cmd=$(pgrep -x mocp 2>/dev/null)
     ret=$cmd
 

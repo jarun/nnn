@@ -1,0 +1,80 @@
+#!/usr/bin/env sh
+
+# Description: Add selection or hovered file/directory to cmus queue
+#
+# Dependencies: cmus, pgrep, xdotool (optional)
+#
+# Notes:
+#   1. If adding selection, files/dirs are added in the same order they were selected in nnn
+#   2. A new window will be opened if cmus is not running already, playback will start immediately
+#   3. If cmus is already running, files will be appended to the queue with no forced playback
+#
+# TODO:
+#   1. Add cava and cmus-lyrics as optional dependencies
+#   2. Start cava and/or cmus-lyrics in tmux or kitty panes next to cmus
+#
+# Shell: POSIX compliant
+# Author: Kabouik
+
+# (Optional) Set preferred terminal emulator for cmus if not set in your env,
+# or leave commented out to use OS default
+#TERMINAL="kitty"
+
+if ! type cmus >/dev/null; then
+    printf "cmus missing"
+    read -r _
+    exit 1
+fi
+
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+start_cmus() {
+    type xdotool >/dev/null && nnnwindow="$(xdotool getactivewindow)"
+    case "$TERMINAL" in
+        kitty | gnome-terminal | st)
+            nohup "$TERMINAL" -- cmus & ;;
+        havoc)
+            nohup "$TERMINAL" cmus & ;;
+        "")
+            nohup x-terminal-emulator -e cmus & ;;
+        *)
+            nohup "$TERMINAL" -e cmus & ;;
+    esac
+    # Give the new terminal some time to open
+    until cmus-remote -C; do sleep 0.1; done
+    [ -n "$nnnwindow" ] && xdotool windowactivate "$nnnwindow"
+} >/dev/null 2>&1
+
+fill_queue() {
+  if [ "$REPLY" = "s" ]; then
+      xargs < "$selection" -0 cmus-remote -q
+  elif [ -n "$1" ]; then
+      cmus-remote -q "$1"
+  fi
+}
+
+# If active selection,then ask what to do
+if [ -s "$selection" ]; then
+    printf "Queue [s]election or [c]urrently hovered? [default=c]: "
+    read -r REPLY
+fi
+
+# If cmus is not running, start and play queue
+if ! pgrep cmus >/dev/null; then
+    printf "cmus is not running, starting it in a new %s window.\n" "$TERMINAL"
+    start_cmus
+    fill_queue "$1"
+    cmus-remote -p
+    printf "Files added to cmus queue.\n"
+else # Append to existing queue if cmus is already running
+    fill_queue "$1"
+    printf "Files appended to current cmus queue.\n"
+fi
+
+# Change view
+cmus-remote -C "view 4"
+
+# Clear selection
+if [ -p "$NNN_PIPE" ]; then
+    printf "-" > "$NNN_PIPE"
+fi

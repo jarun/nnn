@@ -29,13 +29,13 @@ If we need more information and there is no communication from the bug reporter 
 
 #### Environment details (Put `x` in the checkbox along with the information)
 
-[ ] Operating System:
-[ ] Desktop Environment:
-[ ] Terminal Emulator:
-[ ] Shell:
-[ ] Custom desktop opener (if applicable):
-[ ] Program options used:
-[ ] Configuration options set:
-[ ] Issue exists on `nnn` master
+- [ ] Operating System:
+- [ ] Desktop Environment:
+- [ ] Terminal Emulator:
+- [ ] Shell:
+- [ ] Custom desktop opener (if applicable):
+- [ ] Program options used:
+- [ ] Configuration options set:
+- [ ] Issue exists on `nnn` master
 
 #### Exact steps to reproduce the issue

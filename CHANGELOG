@@ -1,3 +1,53 @@
+nnn v4.1 Sake
+2021-06-02
+
+- a patch management model for approved patches
+- multi-threaded disk usage calculation using pthreads and FTS
+- dynamic view update when calculating disk usage
+- <kbd>Bksp</kbd>/<kbd>Del</kbd> at empty filter prompt to refresh dir
+- Try to create new context with <kbd>Shift-TAB</kbd>, else reverse cycle
+- <kbd>Alt+Esc</kbd> to quit context from filter prompt
+- fix zombies left behind after running plugins (#999)
+- named persistent sessions (mcchrish/nnn.vim#43)
+- consider nanosecond resolution when sorting by time (#978)
+- check external selection in `'c'urrent / 's'el` prompt (#976)
+- show number of files selected in local selection buffer, if any
+- `nnn` & picker plugin (e.g. `fzopen`) sync (mcchrish/nnn.vim#82)
+- make batch rename interactive (#971)
+- cached uid/gid for performance improvement
+- fixes for `nnn` with `netbsd-curses`, `musl-fts`, `musl` (#998)
+- script to statically compile `nnn` with `musl gcc` on Ubuntu
+- restore hovered file when plugin is chosen from plugin dir
+- support QuickLook on WSL in `preview-tui` (#959)
+- toggle `preview-tui` with the same _custom_ plugin key
+- smoother preview toggling in `preview-tui` (#966)
+- `listen_on` should be set in kitty.conf for `preview-tui` (#970)
+- minimal `bat` style in `preview-tui`, honors `$BAT_STYLE`
+- plugin `preview-tui-ext` supersedes `preview-tui` (#1033)
+- plugin `fzcd` can now fuzzy search multiple directories
+- plugin `imgview` supersedes `imgthumb` and `vidthumb`
+- plugin `umounttree`: unmount remote mntpoint from within
+- plugin `xdgdefault`: set the default app for hovered file type
+- plugin `fzplug`: fuzzy find, preview and run other plugins
+- plugin `cmusq`: queue/play music in `cmus`
+- plugin `mocplay` renamed to `mocq`
+- plugin `cleanfilename` renamed to `fixname`
+- go to last dir on <kbd>~</kbd> (HOME) or <kbd>`</kbd> (ROOT) key repeat
+- ambiguous key <kbd>^Space</kbd> to select/clear range dropped (#998)
+- user wiki page for [Themes](https://github.com/jarun/nnn/wiki/Themes)
+- show selection mark (`+`) in reverse bold for improved visibility
+- reverse block replaces `>` to mark hovered entry in detail mode
+- make option `O_CKBOARD` removed
+- make option `O_NOLOC` renamed to `O_NOLC`
+- ignore `O_NOLC` if `O_ICONS` or `O_NERD` is specified (#1026)
+- unicode arrow indicators if `O_ICONS` or `O_NERD` is specified
+- make option `NOX11`: disable notis, sel-clipboard sync, xterm title
+- retain filter in _nav-to-type_ mode after file open
+- fix no files picked with `NNN_TMPFILE` exported and <kbd>q</kbd> to quit
+- disable xterm title setting in picker mode (#974)
+
+-------------------------------------------------------------------------------
+
 nnn v4.0 Sushi
 2021-04-13
 

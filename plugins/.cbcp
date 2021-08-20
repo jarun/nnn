@@ -23,28 +23,28 @@ IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}" # protect trailing \n
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
-if which xsel >/dev/null 2>&1; then
+if type xsel >/dev/null 2>&1; then
     # Linux
     tr '\0' '\n' < "$selection" | xsel -bi
-elif which xclip >/dev/null 2>&1; then
+elif type xclip >/dev/null 2>&1; then
     # Linux
     tr '\0' '\n' < "$selection" | xclip -sel clip
-elif which pbcopy >/dev/null 2>&1; then
+elif type pbcopy >/dev/null 2>&1; then
     # macOS
     tr '\0' '\n' < "$selection" | pbcopy
-elif which termux-clipboard-set >/dev/null 2>&1; then
+elif type termux-clipboard-set >/dev/null 2>&1; then
     # Termux
     tr '\0' '\n' < "$selection" | termux-clipboard-set
-elif which clip.exe >/dev/null 2>&1; then
+elif type clip.exe >/dev/null 2>&1; then
     # WSL
     tr '\0' '\n' < "$selection" | clip.exe
-elif which clip >/dev/null 2>&1; then
+elif type clip >/dev/null 2>&1; then
     # Cygwin
     tr '\0' '\n' < "$selection" | clip
-elif which wl-copy >/dev/null 2>&1; then
+elif type wl-copy >/dev/null 2>&1; then
     # Wayland
     tr '\0' '\n' < "$selection" | wl-copy
-elif which clipboard >/dev/null 2>&1; then
+elif type clipboard >/dev/null 2>&1; then
     # Haiku
     tr '\0' '\n' < "$selection" | clipboard --stdin
 fi

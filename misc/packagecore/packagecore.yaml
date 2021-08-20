@@ -89,26 +89,26 @@ packages:
     deps:
       - ncurses
       - readline
-  opensuse15.2:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - readline-devel
-      - ncurses-devel
-    deps:
-      - libncurses6
-      - libreadline7
-  opensuse.tumbleweed:
-    builddeps:
-      - make
-      - gcc
-      - pkg-config
-      - readline-devel
-      - ncurses-devel
-    deps:
-      - libncurses6
-      - libreadline8
+#  opensuse15.2:
+#    builddeps:
+#      - make
+#      - gcc
+#      - pkg-config
+#      - readline-devel
+#      - ncurses-devel
+#    deps:
+#      - libncurses6
+#      - libreadline7
+#  opensuse.tumbleweed:
+#    builddeps:
+#      - make
+#      - gcc
+#      - pkg-config
+#      - readline-devel
+#      - ncurses-devel
+#    deps:
+#      - libncurses6
+#      - libreadline8
   ubuntu16.04:
     builddeps:
       - make

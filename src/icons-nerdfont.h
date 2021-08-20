@@ -4,6 +4,11 @@
 // You can find hex codes for nerd fonts here
 // https://www.nerdfonts.com/cheat-sheet
 
+// Arrows
+#define MD_ARROW_UPWARD    "\uf55c"
+#define MD_ARROW_FORWARD   "\uf553"
+#define MD_ARROW_DOWNWARD  "\uf544"
+
 // Generics
 #define ICON_DIRECTORY     "\ue5ff"
 #define ICON_FILE          "\uf713"
@@ -38,6 +43,8 @@
 #define ICON_FSHARP        "\ue7a7"
 #define ICON_RUBY          "\ue23e"
 #define ICON_C             "\ue61e"
+#define ICON_CHESS         "\uf639"
+#define ICON_HASKELL       "\ue777"
 #define ICON_HTML          "\uf72d"
 #define ICON_REACT         "\ue625"
 #define ICON_PYTHON        "\ue235"
@@ -100,6 +107,7 @@
 #define ICON_EXT_EXE       ICON_EXEC
 
 /* F */
+#define ICON_EXT_FEN       ICON_CHESS
 #define ICON_EXT_FSHARP    ICON_FSHARP
 #define ICON_EXT_FLAC      ICON_MUSICFILE
 #define ICON_EXT_FLV       ICON_VIDEOFILE
@@ -118,6 +126,8 @@
 /* H */
 #define ICON_EXT_H         ICON_C
 #define ICON_EXT_HH        ICON_CPLUSPLUS
+#define ICON_EXT_HPP       ICON_CPLUSPLUS
+#define ICON_EXT_HS        ICON_HASKELL
 #define ICON_EXT_HTACCESS  ICON_CONFIGURE
 #define ICON_EXT_HTPASSWD  ICON_CONFIGURE
 #define ICON_EXT_HTM       ICON_HTML
@@ -144,6 +154,7 @@
 
 /* L */
 #define ICON_EXT_LHA       ICON_ARCHIVE
+#define ICON_EXT_LHS       ICON_HASKELL
 #define ICON_EXT_LOG       ICON_DOCUMENT
 #define ICON_EXT_LUA       "\ue620"
 #define ICON_EXT_LZH       ICON_ARCHIVE
@@ -174,6 +185,7 @@
 #define ICON_EXT_PART      ICON_DOWNLOADS
 #define ICON_EXT_PATCH     "\uf440"
 #define ICON_EXT_PDF       "\uf724"
+#define ICON_EXT_PGN       ICON_CHESS
 #define ICON_EXT_PHP       "\ue73d"
 #define ICON_EXT_PNG       ICON_PICTUREFILE
 #define ICON_EXT_PPT       "\uf726"

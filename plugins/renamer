@@ -3,21 +3,21 @@
 # Description: Batch rename selection or current directory with qmv
 #
 # Notes:
-# - Try to mimic current batch rename functionality but with correct
-#   handling of edge cases by qmv or vidir.
-#	Qmv opens with hidden files if no selection is used. Selected
-#	directories are shown.
-#   Vidir don't show directories nor hidden files.
+#   - Try to mimic current batch rename functionality but with correct
+#     handling of edge cases by qmv or vidir.
+#   - Qmv opens with hidden files if no selection is used. Selected
+#	  directories are shown.
+#   - Vidir don't show directories nor hidden files.
 #
 # Shell: POSIX compliant
 # Author: José Neder
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
-if which qmv >/dev/null 2>&1; then
+if type qmv >/dev/null 2>&1; then
 	batchrenamesel="qmv -fdo -da"
 	batchrename="qmv -fdo -a"
-elif which vidir >/dev/null 2>&1; then
+elif type vidir >/dev/null 2>&1; then
 	batchrenamesel="vidir"
 	batchrename="vidir"
 else

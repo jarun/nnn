@@ -9,8 +9,7 @@
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/©-BSD%202--Clause-important.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
-<p align="center"><a href="https://i.imgur.com/kOld6HT.mp4"><img src="https://i.imgur.com/NUsSA2u.jpg"></a></p>
-<p align="center"><i>nnn in action</i></p>
+<p align="center"><a href="http://i.imgur.com/kOld6HT.gif"><img src="https://i.imgur.com/NUsSA2u.jpg"></a></p>
 
 <h3 align="center">[<a
 href="https://github.com/jarun/nnn#features">Features</a>] [<a
@@ -18,51 +17,17 @@ href="https://github.com/jarun/nnn#quickstart">Quickstart</a>] [<a
 href="https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins">Plugins</a>] [<a
 href="https://github.com/jarun/nnn/wiki">Documentation</a>]</h3>
 
-<br>
-
-[![](https://i.imgur.com/TN3xYQz.jpg)](https://www.youtube.com/embed/-knZwdd1ScU)
-
-<br>
-
 `nnn` (_n³_) is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible speed](https://github.com/jarun/nnn/wiki/Performance).
 
 It is designed to be unobtrusive with smart workflows to match the trains of thought.
 
-`nnn` can analyze disk usage, batch rename, launch apps and pick files. The plugin repository has tons of plugins and documentation to extend the capabilities further e.g. [preview](https://github.com/jarun/nnn/wiki/Live-previews), (un)mount disks, find & list, file/dir diff, upload files.
+`nnn` can analyze disk usage, batch rename, launch apps and pick files. The plugin repository has tons of plugins to extend the capabilities further e.g. [preview](https://github.com/jarun/nnn/wiki/Live-previews), (un)mount disks, find & list, file/dir diff, upload files.
 
 There are 2 independent (neo)vim plugins - [nnn.vim](https://github.com/mcchrish/nnn.vim) and [vim-floaterm nnn wrapper](https://github.com/voldikss/vim-floaterm#nnn).
 
 It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs and GUI utilities or a strictly CLI environment.
 
-<details><summary><i><b>Expand</b></i> for some <code>nnn</code> magic! :dark_sunglasses:</summary><br><ul>
-  <li>Instantly load, sort, filter thousands of files</li>
-  <li>Type to navigate with automatic dir selection</li>
-  <li>List input stream and pick entries to stdout or file</li>
-  <li><code>find</code>/<code>fd</code>/<code>grep</code>/<code>ripgrep</code>/<code>fzf</code> from <code>nnn</code> and list in <code>nnn</code></li>
-  <li>Never lose context - start where you quit</li>
-  <li>Mount any cloud storage service in a few keypresses</li>
-  <li>Select files from anywhere (not just a single dir)</li>
-  <li>Unlimited bookmarks, plugins, cmds with custom hotkeys</li>
-  <li>Write a plugin in any language you know</li>
-  <li>Edit and preview markdown, man page, HTML</li>
-  <li>Open a file and auto-advance to the next</li>
-  <li>Filter filtered entries, export list of visible files</li>
-  <li>Configure the middle mouse click to do anything</li>
-  <li>Fuzzy search subtree and open a file (or its parent dir)</li>
-  <li>Load four dirs with custom settings at once</li>
-  <li>Notifications on <code>cp</code>, <code>mv</code>, <code>rm</code> completion</li>
-  <li>Auto-sync selection to system clipboard</li>
-  <li>Access selection from another instance of <code>nnn</code></li>
-  <li>Open text files detached in another pane/tab/window</li>
-  <li>Mount and modify archives</li>
-  <li>Create files/dirs/duplicates with parents (like <code>mkdir -p</code>)</li>
-  <li>Toggle hidden with <kbd>.</kbd>, visit <code>$HOME</code> with <kbd>~</kbd>, last dir with <kbd>-</kbd></li>
-  <li>Mark a frequently visited dir at runtime</li>
-  <li>Sort by modification, access and inode change time</li>
-  <li>Compile out/in features with make variables</li>
-  <li>Watch matrix text fly or read fortune messages</li>
-  <li>Configure in 5 minutes!</li>
-</ul></details>
+[_(there's more)_](https://github.com/jarun/nnn/wiki/Basic-use-cases#the_nnn-magic)
 
 <p align="center">
 <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RMLTQ76JSXJ4Q"><img src="https://img.shields.io/badge/donate-@PayPal-1eb0fc.svg" alt="Donate via PayPal!" /></a>
@@ -118,7 +83,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Open with desktop opener or specify a custom opener
   - File-specific colors (or minimal _dirs in context color_)
   - Icons (customize and compile-in)
-  - Plugins for image and video thumbnails
+  - Plugin for image, video and audio thumbnails
   - Create, list, extract, mount (FUSE based) archives
   - Option to open all text files in `$EDITOR`
 - Information
@@ -126,7 +91,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Media information plugin
 - Convenience
   - Run plugins and custom commands with hotkeys
-  - FreeDesktop compliant trash (needs trash-cli)
+  - FreeDesktop compliant trash utility integration
   - Cross-dir file/all/range selection
   - Create (with parents), rename, duplicate files and dirs
   - Batch renamer for selection or dir
@@ -146,12 +111,14 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 3. Configure [`cd` on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 4. [Sync subshell `$PWD`](https://github.com/jarun/nnn/wiki/Basic-use-cases#sync-subshell-pwd) to `nnn`.
 5. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installation).
-6. Use option `-x` to copy selected file paths to system clipboard and show notis on `cp`, `mv`, `rm` completion.
+6. Use `-x` to sync selection to system clipboard, show notis on `cp`, `mv`, `rm` completion and set xterm title.
 7. For a CLI-only environment, customize and use plugin [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke) with option `-c` (overrides `-e`).
 8. Bid `ls` goodbye! `alias ls='nnn -de'` :sunglasses:
 9. Visit the [Live previews](https://github.com/jarun/nnn/wiki/Live-previews) and [Troubleshooting](https://github.com/jarun/nnn/wiki/Troubleshooting) Wiki pages.
 
-Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>), <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates and/or cycles contexts. <kbd>?</kbd> lists shortcuts.
+Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates and/or cycles contexts. <kbd>?</kbd> lists shortcuts.
+
+[![](https://i.imgur.com/TN3xYQz.jpg)](https://www.youtube.com/embed/-knZwdd1ScU)
 
 [![Wiki](https://img.shields.io/badge/RTFM-nnn%20Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
 
@@ -190,9 +157,7 @@ Don't memorize! Arrows (or <kbd>h</kbd> <kbd>j</kbd> <kbd>k</kbd> <kbd>l</kbd>),
 - [Anna Arad](https://github.com/annagrram)
 - [KlzXS](https://github.com/KlzXS)
 - [Léo Villeveygoux](https://github.com/leovilok)
-- [Maxim Baz](https://github.com/maximbaz)
 - [Sijmen J. Mulder](https://github.com/sjmulder)
-- [Todd Yamakawa](https://github.com/toddyamakawa)
 - and other contributors
 
-Visit the [ToDo list](https://github.com/jarun/nnn/issues/881) to contribute or see the features in progress.
+Visit the [ToDo list](https://github.com/jarun/nnn/issues/1040) to contribute or see the features in progress.

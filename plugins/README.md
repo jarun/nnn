@@ -19,30 +19,31 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs, mktemp |
 | [cdpath](cdpath) | `cd` to the directory from `CDPATH` | sh | fzf |
 | [chksum](chksum) | Create and verify checksums [✓] | sh | md5sum,<br>sha256sum |
-| [cleanfilename](cleanfilename) | Clean filename to be more shell-friendly [✓] | bash | sed |
+| [cmusq](cmusq) | Queue/play files/dirs in cmus player [✓] | sh | cmus, pgrep |
 | [diffs](diffs) | Diff for selection (limited to 2 for directories) [✓] | sh | vimdiff, mktemp |
 | [dragdrop](dragdrop) | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
 | [dups](dups) | List non-empty duplicate files in current dir | bash | find, md5sum,<br>sort uniq xargs |
 | [finder](finder) | Run custom find command and list | sh | - |
-| [fzcd](fzcd) | Change to the directory of a fuzzy-selected file/dir | sh | fzf |
+| [fixname](fixname) | Clean filename to be more shell-friendly [✓] | bash | sed |
+| [fzcd](fzcd) | Fuzzy search multiple dirs (or `$PWD`) and visit file [✓] | sh | fzf, (fd) |
 | [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |
-| [fzopen](fzopen) | Fuzzy find a file in dir subtree and edit or open | sh | fzf, xdg-open |
+| [fzopen](fzopen) | Fuzzy find file(s) in subtree to edit/open/pick | sh | fzf, xdg-open |
+| [fzplug](fzplug) | Fuzzy find, preview and run other plugins | sh | fzf |
 | [fzz](fzz) | Change to any directory in the z database with fzf | sh | fzf, z |
 | [getplugs](getplugs) | Update plugins to installed `nnn` version | sh | curl |
 | [gpg\*](gpg\*) | Encrypt/decrypt files using GPG [✓] | sh | gpg |
 | [gutenread](gutenread) | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
 | [hexview](hexview) | View a file in hex in `$PAGER` | sh | [hx](https://github.com/krpors/hx)/xxd |
 | [imgresize](imgresize) | Resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |
-| [imgthumb](imgthumb) | View thumbnail of an image or dir of images | sh | [lsix](https://github.com/hackerb9/lsix) |
 | [imgur](imgur) | Upload an image to imgur (from [imgur-screenshot](https://github.com/jomo/imgur-screenshot)) | bash | - |
-| [imgview](imgview) | Browse images, set wallpaper, copy path ([config](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)), [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images)| sh | [imv](https://github.com/eXeC64/imv)/[sxiv](https://github.com/muennich/sxiv)/[viu](https://github.com/atanunq/viu), less|
+| [imgview](imgview) | View (thumbnail)images, set wallpaper, [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images) and [more](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)| sh | [imv](https://github.com/eXeC64/imv)/[sxiv](https://github.com/muennich/sxiv)/[viu](https://github.com/atanunq/viu)/<br>[ucollage](https://github.com/ckardaris/ucollage)/[catimg](https://github.com/posva/catimg)/[lsix](https://github.com/hackerb9/lsix)|
 | [ipinfo](ipinfo) | Fetch external IP address and whois information | sh | curl, whois |
 | [kdeconnect](kdeconnect) | Send selected files to an Android device [✓] | sh | kdeconnect-cli |
 | [launch](launch) | GUI application launcher | sh | fzf |
 | [mediainf](mediainf) | Show media information | sh | mediainfo |
 | [mimelist](mimelist) | List files by mime in subtree | sh | - |
 | [moclyrics](moclyrics) | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
-| [mocplay](mocplay) | Append (and/or play) selection/dir/file in moc [✓] | sh | [moc](http://moc.daper.net/) |
+| [mocq](mocq) | Queue/play selection/dir/file in moc [✓] | sh | [moc](http://moc.daper.net/) |
 | [mp3conv](mp3conv) | Extract audio from multimedia as mp3 | sh | ffmpeg |
 | [mtpmount](mtpmount) | Toggle mount of MTP device (eg. Android) | sh | gvfs-mtp |
 | [nbak](nbak) | Backs up `nnn` config | sh | tar, awk, mktemp |
@@ -53,9 +54,8 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [pdfread](pdfread) | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
 | [pdfview](pdfview) | View PDF file in `$PAGER` | sh | pdftotext/<br>mupdf-tools |
 | [picker](picker) | Pick files and list one per line (to pipe) | sh | nnn |
-| [preview-tabbed](preview-tabbed) | Tabbed/xembed based file previewer | bash | _see in-file docs_ |
-| [preview-tui](preview-tui) | Tmux/kitty/xterm/`$TERMINAL` based file previewer | sh | _see in-file docs_ |
-| [preview-tui-ext](preview-tui-ext) | Meant to be an exhaustive version of [preview-tui](preview-tui) | sh | _see in-file docs_ |
+| [preview-tabbed](preview-tabbed) | Preview files with Tabbed/xembed | bash | _see in-file docs_ |
+| [preview-tui](preview-tui) | Preview with Tmux/kitty/[QuickLook](https://github.com/QL-Win/QuickLook)/xterm/`$TERMINAL` | sh | _see in-file docs_ |
 | [pskill](pskill) | Fuzzy list by name and kill process or zombie | sh | fzf, ps, sudo/doas |
 | [renamer](renamer) | Batch rename selection or files in dir [✓] | sh | [qmv](https://www.nongnu.org/renameutils/)/[vidir](https://joeyh.name/code/moreutils/) |
 | [ringtone](ringtone) | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
@@ -65,11 +65,12 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [togglex](togglex) | Toggle executable mode for selection [✓] | sh | chmod |
 | [treeview](treeview) | Informative tree output in `$EDITOR` | sh | tree |
 | [uidgid](uidgid) | List user and group of all files in dir | sh | ls, less |
+| [umounttree](umounttree) | Unmount a remote mountpoint from within | sh | fusermount |
 | [upgrade](upgrade) | Upgrade nnn manually on Debian 9 Stretch | sh | curl |
 | [upload](upload) | Upload to Firefox Send or ix.io (text) or file.io (bin) | sh | [ffsend](https://github.com/timvisee/ffsend), curl, jq, tr |
-| [vidthumb](vidthumb) | Show video thumbnails in terminal | sh | [ffmpegthumbnailer](https://github.com/dirkvdb/ffmpegthumbnailer),<br>[lsix](https://github.com/hackerb9/lsix) |
 | [wall](wall) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
-| [x2sel](x2sel) | Copy `\n`-separated file list from system clipboard to sel | sh | _see in-file docs_ |
+| [x2sel](x2sel) | Copy file list from system clipboard to selection | sh | _see in-file docs_ |
+| [xdgdefault](xdgdefault) | Set the default app for the hovered file type | sh | xdg-utils, fzf |
 
 Note:
 
@@ -184,9 +185,10 @@ Notes:
 
 When `nnn` executes a plugin, it does the following:
 - Changes to the directory where the plugin is to be run (`$PWD` pointing to the active directory)
-- Passes two arguments to the script:
-    1. The hovered file's name.
-    2. The working directory (might differ from `$PWD` in case of symlinked paths; non-canonical).
+- Passes three arguments to the script:
+    1. `$1`: The hovered file's name.
+    2. `$2`: The working directory (might differ from `$PWD` in case of symlinked paths; non-canonical).
+    3. `$3`: The picker mode output file (`-` for stdout) if `nnn` is executed as a file picker.
 - Sets the environment variable `NNN_PIPE` used to control `nnn` active directory.
 
 Plugins can also read the `.selection` file in the config directory.
@@ -195,21 +197,24 @@ Plugins can also read the `.selection` file in the config directory.
 
 Plugins can be written in any scripting language. However, POSIX-compliant shell scripts runnable in `sh` are preferred.
 
-Drop the plugin in `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins` and make it executable. Optionally add a hotkey in `$NNN_PLUG` for frequent usage.
+Make the file executable and drop it in the plugin install directory. Optionally add a hotkey in `$NNN_PLUG` for frequent usage.
 
 #### Send data to `nnn`
 `nnn` provides a mechanism for plugins to send data to `nnn` to control its active directory or invoke the list mode.
 The way to do so is by writing to the pipe pointed by the environment variable `NNN_PIPE`.
-The plugin should write a single string in the format `<ctxcode><opcode><data>` without a newline at the end. For example, `1c/etc`.
+The plugin should write a single string in the format `(<->)<ctxcode><opcode><data>` without a newline at the end. For example, `1c/etc`.
+
+The optional `-` at the **beginning of the stream** instructs `nnn` to clear the selection.
+In cases where the data transfer to `nnn` has to happen while the selection file is being read (e.g. in a loop), the plugin should
+create a tmp copy of the selection file, inform `nnn` to clear the selection and then do the subsequent processing with the tmp file.
 
 The `ctxcode` indicates the context to change the active directory of.
 
 | Context code | Meaning |
 |:---:| --- |
-| `1`-`4` | context number |
-| `0` | current context |
 | `+` | smart context (next inactive else current) |
-| `-` | clear the selection |
+| `0` | current context |
+| `1`-`4` | context number |
 
 The `opcode` indicates the operation type.
 
@@ -217,6 +222,7 @@ The `opcode` indicates the operation type.
 |:---:| --- |
 | `c` | change directory |
 | `l` | list files in list mode |
+| `p` | picker file overwritten |
 
 For convenience, we provided a helper script named `.nnn-plugin-helper` and a function named `nnn_cd` to ease this process. `nnn_cd` receives the path to change to as the first argument, and the context as an optional second argument.
 If a context is not provided, it is asked for explicitly. To skip this and choose the current context, set the `CUR_CTX` variable in `.nnn-plugin-helper` (or in the specific plugin after sourcing `.nnn-plugin-helper`) to 1.
@@ -288,7 +294,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
     printf "pattern: "
     read -r pattern
 
-    if ! [ -z "$pattern" ]; then
+    if [ -n "$pattern" ]; then
         printf "%s" "+l" > "$NNN_PIPE"
         eval "fd -HI $pattern -0" > "$NNN_PIPE"
     fi
@@ -303,7 +309,7 @@ There are many plugins provided by `nnn` which can be used as examples. Here are
     printf "pattern: "
     read -r pattern
 
-    if ! [ -z "$pattern" ]; then
+    if [ -n "$pattern" ]; then
         printf "%s" "+l" > "$NNN_PIPE"
         eval "rg -l0 --hidden -S $pattern" > "$NNN_PIPE"
     fi

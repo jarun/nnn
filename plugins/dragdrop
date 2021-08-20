@@ -3,13 +3,13 @@
 # Description: Open a Drag and drop window, to drop files onto other programs.
 #              Also provides drag and drop window for files.
 #
-# Dependencies: https://github.com/mwh/dragon
+# Dependencies: dragon - https://github.com/mwh/dragon
 #
 # Notes:
-# - Files that are dropped will be added to nnn's selection
-#   Some webbased files will be downloaded to current directory with curl
-#   and it may overwrite some existing files
-# - The user has to mm to clear nnn's selection first
+#   1. Files that are dropped will be added to nnn's selection
+#      Some web-based files will be downloaded to current dir
+#      with curl and it may overwrite some existing files
+#   2. The user has to mm to clear nnn's selection first
 #
 # Shell: POSIX compliant
 # Author: 0xACE
@@ -17,7 +17,7 @@
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 resp=f
 all=
-if which dragon-drag-and-drop >/dev/null 2>&1; then
+if type dragon-drag-and-drop >/dev/null 2>&1; then
     dnd="dragon-drag-and-drop"
 else
     dnd="dragon"

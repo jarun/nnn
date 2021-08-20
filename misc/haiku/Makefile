@@ -12,7 +12,7 @@ CFLAGS_OPTIMIZATION ?= -O3
 O_DEBUG := 0  # debug binary
 O_NORL := 0  # no readline support
 O_PCRE := 0  # link with PCRE library
-O_NOLOC := 0  # no locale support
+O_NOLC := 0  # no locale support
 O_NOMOUSE := 0  # no mouse support
 O_NOBATCH := 0  # no built-in batch renamer
 O_NOFIFO := 0  # no FIFO previewer support
@@ -23,7 +23,15 @@ O_QSORT := 0  # use Alexey Tourbin's QSORT implementation
 O_BENCH := 0  # benchmark mode (stops at first user input)
 O_NOSSN := 0  # enable session support
 O_NOUG := 0  # disable user, group name in status bar
-O_CKBOARD := 0  # use checker board (stipple) in detail mode
+O_NOX11 := 0  # disable X11 integration
+
+# User patches
+O_GITSTATUS := 0 # add git status to detail view
+O_NAMEFIRST := 0 # print file name first, add uid and guid to detail view
+
+ifeq ($(strip $(O_GITSTATUS)),1)
+	LDLIBS += -lgit2
+endif
 
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
@@ -32,13 +40,13 @@ endif
 ifneq ($(filter norl,$(MAKECMDGOALS)),)
 	O_NORL := 1
 endif
-ifneq ($(filter noloc,$(MAKECMDGOALS)),)
+ifneq ($(filter nolc,$(MAKECMDGOALS)),)
 	O_NORL := 1
-	O_NOLOC := 1
+	O_NOLC := 1
 endif
 
 ifeq ($(strip $(O_DEBUG)),1)
-	CPPFLAGS += -DDBGMODE
+	CPPFLAGS += -DDEBUG
 	CFLAGS += -g
 	LDLIBS += -lrt
 endif
@@ -56,8 +64,14 @@ ifeq ($(strip $(O_PCRE)),1)
 	LDLIBS += -lpcre
 endif
 
-ifeq ($(strip $(O_NOLOC)),1)
-	CPPFLAGS += -DNOLOCALE
+ifeq ($(strip $(O_NOLC)),1)
+	ifeq ($(strip $(O_ICONS)),1)
+$(info *** Ignoring O_NOLC since O_ICONS is set ***)
+	else ifeq ($(strip $(O_NERD)),1)
+$(info *** Ignoring O_NOLC since O_NERD is set ***)
+	else
+		CPPFLAGS += -DNOLC
+	endif
 endif
 
 ifeq ($(strip $(O_NOMOUSE)),1)
@@ -100,8 +114,8 @@ ifeq ($(strip $(O_NOUG)),1)
 	CPPFLAGS += -DNOUG
 endif
 
-ifeq ($(strip $(O_CKBOARD)),1)
-	CPPFLAGS += -DCKBOARD
+ifeq ($(strip $(O_NOX11)),1)
+	CPPFLAGS += -DNOX11
 endif
 
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)
@@ -124,8 +138,7 @@ CFLAGS += -std=c11 -Wall -Wextra -Wshadow
 CFLAGS += $(CFLAGS_OPTIMIZATION)
 CFLAGS += $(CFLAGS_CURSES)
 
-LDLIBS += $(LDLIBS_CURSES) $(LDLIBS_HAIKU)
-
+LDLIBS += $(LDLIBS_CURSES) -lpthread $(LDLIBS_HAIKU)
 # static compilation needs libgpm development package
 ifeq ($(strip $(O_STATIC)),1)
 	LDFLAGS += -static
@@ -138,6 +151,9 @@ HEADERS = src/nnn.h
 BIN = nnn
 OBJS := nnn.o $(OBJS_HAIKU)
 
+GITSTATUS = misc/patches/gitstatus
+NAMEFIRST = misc/patches/namefirst
+
 all: $(BIN)
 
 ifeq ($(shell uname -s), Haiku)
@@ -149,12 +165,14 @@ nnn.o: $(SRC) $(HEADERS)
 	$(CC) -c $(CPPFLAGS) $(CFLAGS) -o $@ $<
 
 $(BIN): $(OBJS)
+	@$(MAKE) --silent prepatch
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
+	@$(MAKE) --silent postpatch
 
 # targets for backwards compatibility
 debug: $(BIN)
 norl: $(BIN)
-noloc: $(BIN)
+nolc: $(BIN)
 
 install: all
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
@@ -170,6 +188,7 @@ strip: $(BIN)
 	$(STRIP) $^
 
 static:
+	# regular static binary
 	make O_STATIC=1 strip
 	mv $(BIN) $(BIN)-static
 
@@ -200,6 +219,26 @@ upload-local: sign static
 
 clean:
 	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz
+
+prepatch:
+ifeq ($(strip $(O_NAMEFIRST)),1)
+	patch --forward --strip=1 --input=$(NAMEFIRST)/mainline.diff
+ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --forward --strip=1 --input=$(GITSTATUS)/namefirst.diff
+endif
+else ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --forward --strip=1 --input=$(GITSTATUS)/mainline.diff
+endif
+
+postpatch:
+ifeq ($(strip $(O_NAMEFIRST)),1)
+ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --reverse --strip=1 --input=$(GITSTATUS)/namefirst.diff
+endif
+	patch --reverse --strip=1 --input=$(NAMEFIRST)/mainline.diff
+else ifeq ($(strip $(O_GITSTATUS)),1)
+	patch --reverse --strip=1 --input=$(GITSTATUS)/mainline.diff
+endif
 
 skip: ;
 
