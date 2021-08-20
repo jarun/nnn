@@ -8,6 +8,9 @@
 #
 # Dependencies: git
 #
+# Usage: musl-static-ubuntu.sh [no_run]
+#        # optional argument - do not to execute the binary after compilation
+#
 # Notes:
 #   - run the script within the top-level nnn directory
 #   - installs musl & gits netbsd-curses, musl-fts libs
@@ -58,5 +61,7 @@ cd ..
 musl-gcc -O3 -DNORL -DNOMOUSE -std=c11 -Wall -Wextra -Wshadow -I./netbsd-curses/libcurses -I./musl-fts -o "$BIN" src/nnn.c -Wl,-Bsymbolic-functions -lpthread -L./netbsd-curses/libs -lcurses -lterminfo -static -L./musl-fts/.libs -lfts
 strip "$BIN"
 
-# Run the binary with it selected
-./"$BIN" -d "$BIN"
+if [ -z "$1" ]; then
+    # Run the binary with it selected
+    ./"$BIN" -d "$BIN"
+fi

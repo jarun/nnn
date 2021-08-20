@@ -128,7 +128,7 @@
 #endif
 
 /* Macro definitions */
-#define VERSION "4.1"
+#define VERSION "4.1.1"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
 
 #ifndef NOSSN
@@ -452,7 +452,7 @@ static pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t hardlink_mutex = PTHREAD_MUTEX_INITIALIZER;
 static ulong_t *core_files;
 static blkcnt_t *core_blocks;
-static _Atomic volatile ulong_t num_files;
+static ulong_t num_files;
 
 typedef struct {
 	char path[PATH_MAX];
@@ -5837,7 +5837,7 @@ static int adjust_cols(int n)
 		if (n < 36)
 			cfg.showdetail ^= 1;
 		else {
-			/* 3 more accounted for below */
+			/* 2 more accounted for below */
 			n -= 32;
 		}
 	}
@@ -7219,7 +7219,7 @@ nochange:
 			if (r == 's') {
 				tmp = xreadline(NULL, messages[MSG_SSN_NAME]);
 				if (tmp && *tmp)
-					save_session(FALSE, &presel);
+					save_session(tmp, &presel);
 			} else if (r == 'l' || r == 'r') {
 				if (load_session(NULL, &path, &lastdir, &lastname, r == 'r')) {
 					setdirwatch();

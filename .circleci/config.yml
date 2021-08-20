@@ -83,18 +83,20 @@ jobs:
     steps:
       - checkout
       - run:
-          name: "package with packagecore"
+          name: "auto-generate packages"
           command: |
+            # Create dist directory if it doesn't exist
+            mkdir ./dist
             # Clean up
             rm -rf ./dist/*
             # Pack source
             git archive -o ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz --format tar.gz --prefix=${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG#v}/ ${CIRCLE_TAG}
             # Use latest installed python3 from pyenv
             export PYENV_VERSION="$(pyenv versions | grep -Po '\b3\.\d+\.\d+' | tail -1)"
-            pip install packagecore
-            packagecore -c misc/packagecore/packagecore.yaml -o ./dist/ ${CIRCLE_TAG#v}
+            #pip install packagecore
+            #packagecore -c misc/packagecore/packagecore.yaml -o ./dist/ ${CIRCLE_TAG#v}
             # Move source pack to dist
-            mv ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz dist/
+            mv ../${CIRCLE_PROJECT_REPONAME}-${CIRCLE_TAG}.tar.gz ./dist/
 
       - run:
           name: "publish to GitHub"
@@ -119,11 +121,11 @@ workflows:
                 - master
     jobs: *all-tests
 
-#  publish-github-release:
-#    jobs:
-#      - package-and-publish:
-#          filters:
-#            tags:
-#              only: /^v.*/
-#            branches:
-#              ignore: /.*/
+  publish-github-release:
+    jobs:
+      - package-and-publish:
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/

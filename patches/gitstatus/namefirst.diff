@@ -3,26 +3,26 @@
 #
 # Dependencies: libgit2
 #
-# Authors: @crides, Luuk van Baaldiff --git a/src/nnn.c b/src/nnn.c
-index d66e5da..5770f1a 100644
+# Authors: @crides, Luuk van Baal
+
+diff --git a/src/nnn.c b/src/nnn.c
+index 9b55d5d..240ace2 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -127,6 +127,8 @@
- #include "qsort.h"
- #endif
-
+@@ -105,6 +105,7 @@
+ #include <wchar.h>
+ #include <pwd.h>
+ #include <grp.h>
 +#include <git2.h>
-+
- /* Macro definitions */
- #define VERSION "4.0"
- #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
-@@ -245,6 +247,18 @@ typedef unsigned char uchar_t;
+
+ #if !defined(alloca) && defined(__GNUC__)
+ /*
+@@ -244,6 +245,16 @@ typedef unsigned int uint_t;
+ typedef unsigned char uchar_t;
  typedef unsigned short ushort_t;
  typedef unsigned long long ulong_t;
-
 +typedef enum {
-+	GIT_COLUMN_STATUS_NONE = 0,
-+	GIT_COLUMN_STATUS_UNMOD,
++	GIT_COLUMN_STATUS_UNMOD = 0,
 +	GIT_COLUMN_STATUS_NEW,
 +	GIT_COLUMN_STATUS_MODIFIED,
 +	GIT_COLUMN_STATUS_DELETED,
@@ -31,20 +31,19 @@ index d66e5da..5770f1a 100644
 +	GIT_COLUMN_STATUS_IGNORED,
 +	GIT_COLUMN_STATUS_CONFLICTED,
 +} git_column_status_t;
-+
+
  /* STRUCTURES */
 
- /* Directory entry */
-@@ -258,6 +272,8 @@ typedef struct entry {
- 		ulong_t blocks : 40; /* 5 bytes (enough for 512 TiB in 512B blocks allocated) */
- 		ulong_t nlen : 16; /* 2 bytes (length of file name) */
- 		ulong_t flags : 8; /* 1 byte (flags specific to the file) */
-+		git_column_status_t status_indexed;
-+		git_column_status_t status_staged;
- 	};
+@@ -262,6 +273,8 @@ typedef struct entry {
  #ifndef NOUG
  	uid_t uid; /* 4 bytes */
-@@ -366,7 +382,18 @@ static struct {
+ 	gid_t gid; /* 4 bytes */
++	git_column_status_t status_indexed;
++	git_column_status_t status_staged;
+ #endif
+ } *pEntry;
+
+@@ -366,7 +379,18 @@ static struct {
  	ushort_t maxnameln, maxsizeln, maxuidln, maxgidln, maxentln, uidln, gidln, printguid;
  } dtls;
 
@@ -63,9 +62,9 @@ index d66e5da..5770f1a 100644
 
  /* Configuration, contexts */
  static settings cfg = {
-@@ -813,6 +840,92 @@ static void notify_fifo(bool force);
-
- /* Functions */
+@@ -3472,6 +3496,79 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
+ 	return NULL;
+ }
 
 +static git_column_status_t git_get_indexed_status(const uint32_t status) {
 +	if (status & GIT_STATUS_INDEX_NEW)         return GIT_COLUMN_STATUS_NEW;
@@ -89,7 +88,6 @@ index d66e5da..5770f1a 100644
 +
 +static void print_gitstatus(git_column_status_t status) {
 +	switch (status) {
-+		case GIT_COLUMN_STATUS_NONE:         break;
 +		case GIT_COLUMN_STATUS_UNMOD:        addch('-' | 0); break;
 +		case GIT_COLUMN_STATUS_NEW:          addch('N' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(C_EXE))); break;
 +		case GIT_COLUMN_STATUS_MODIFIED:     addch('M' | (g_state.oldcolor ? COLOR_PAIR(1) : COLOR_PAIR(4))); break;
@@ -101,42 +99,30 @@ index d66e5da..5770f1a 100644
 +	}
 +}
 +
-+static bool starts_with(const char *const s, const char *const start) {
-+	const size_t start_len = strlen(start);
-+
-+	return (start_len <= strlen(s)) && (0 == strncmp(s, start, start_len));
-+}
-+
-+static size_t mkpath(const char *dir, const char *name, char *out);
 +static simple_git_statuses_t statuses_from_path(const char *path) {
-+	simple_git_statuses_t statuses = { .statuses = NULL, .len = 0 };
-+	git_buf ret = { .ptr = 0, .asize = 0, .size = 0 };
 +	git_repository *repo;
++	git_buf ret = { .ptr = NULL, .asize = 0, .size = 0 };
++	simple_git_statuses_t statuses = { .statuses = NULL, .len = 0 };
 +	git_repository_discover(&ret, path, false, NULL);
 +	git_repository_open(&repo, ret.ptr);
 +	git_buf_dispose(&ret);
 +
 +	if (repo) {
-+		git_status_list *status_list = NULL;
++		char buf[PATH_MAX];
++		const char *workdir = git_repository_workdir(repo);
++		git_status_list *status_list;
++
 +		git_status_list_new(&status_list, repo, NULL);
 +		statuses.len = git_status_list_entrycount(status_list);
 +		statuses.statuses = malloc(statuses.len * sizeof(simple_git_status_t));
-+		const char *workdir = git_repository_workdir(repo);
 +
-+		for (size_t i = 0; i < statuses.len; i ++) {
++		for (size_t i = 0; i < statuses.len; ++i) {
 +			const git_status_entry *status_ent = git_status_byindex(status_list, i);
 +			const char *entry_path = status_ent->head_to_index ? status_ent->head_to_index->old_file.path
 +					: status_ent->index_to_workdir->old_file.path;
-+			char *joined = malloc(PATH_MAX * sizeof(char));
-+			mkpath(workdir, entry_path, joined);
-+			char *canon_path = realpath(joined, NULL);
 +
-+			if (canon_path) {
-+				statuses.statuses[i].path = canon_path;
-+				free(joined);
-+			} else
-+				statuses.statuses[i].path = joined;
-+
++			xstrsncpy(buf, workdir, xstrlen(workdir));
++			statuses.statuses[i].path = abspath(entry_path, buf);
 +			statuses.statuses[i].status = status_ent->status;
 +		}
 +
@@ -146,77 +132,85 @@ index d66e5da..5770f1a 100644
 +	return statuses;
 +}
 +
-+static void statuses_free(simple_git_statuses_t statuses) {
-+	for (size_t i = 0; i < statuses.len; i ++)
-+		free(statuses.statuses[i].path);
++static void git_statuses_free(void) {
++	for (size_t i = 0; i < git_statuses.len; ++i)
++		free(git_statuses.statuses[i].path);
 +
-+	free(statuses.statuses);
++	free(git_statuses.statuses);
 +}
 +
- static void sigint_handler(int UNUSED(sig))
+ static void resetdircolor(int flags)
  {
- 	g_state.interrupt = 1;
-@@ -3783,6 +3896,13 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+ 	/* Directories are always shown on top, clear the color when moving to first file */
+@@ -3783,6 +3880,12 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
 
-+	if (cfg.showdetail) {
++	if (cfg.showdetail && git_statuses.len) {
 +		print_gitstatus(ent->status_indexed);
 +		print_gitstatus(ent->status_staged);
-+		if (ent->status_indexed != GIT_COLUMN_STATUS_NONE)
-+			addch(' ');
++		addch(' ');
 +	}
 +
  	if (g_state.oldcolor)
  		resetdircolor(ent->flags);
  	else {
-@@ -5094,6 +5214,9 @@ static int dentfill(char *path, struct entry **ppdents)
- 	struct stat sb_path, sb;
- 	DIR *dirp = opendir(path);
+@@ -5125,6 +5228,10 @@ static int dentfill(char *path, struct entry **ppdents)
+ 		attron(COLOR_PAIR(cfg.curctx + 1));
+ 	}
 
-+	statuses_free(git_statuses);
++	if (git_statuses.len)
++		git_statuses_free();
 +	git_statuses = statuses_from_path(path);
 +
- 	ndents = 0;
-
- 	DPRINTF_S(__func__);
-@@ -5283,6 +5406,26 @@ static int dentfill(char *path, struct entry **ppdents)
- 		dentp->gid = sb.st_gid;
+ #if _POSIX_C_SOURCE >= 200112L
+ 	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
  #endif
+@@ -5322,6 +5429,25 @@ static int dentfill(char *path, struct entry **ppdents)
+ #endif
+ 		}
 
 +		if (git_statuses.len) {
-+			uint32_t merged_status = 0;
-+			char joined[PATH_MAX];
-+			mkpath(path, dentp->name, joined);
-+			char *real = realpath(joined, NULL);
-+			char *canon_path = real ? real : joined;
++			uint merged_status = 0;
++			char *dentpath = abspath(dentp->name, path);
 +
-+			for (size_t i = 0; i < git_statuses.len; i ++)
-+				if (((dentp->mode & S_IFMT) == S_IFDIR) ? starts_with(git_statuses.statuses[i].path, canon_path) :
-+						!xstrcmp(git_statuses.statuses[i].path, canon_path) || starts_with(canon_path, git_statuses.statuses[i].path))
-+					merged_status |= git_statuses.statuses[i].status;
++			for (size_t i = 0; i < git_statuses.len; ++i) {
++				if (dentp->flags & DIR_OR_LINK_TO_DIR) {
++					size_t dentlen = xstrlen(dentpath);
++
++					if ((dentlen <= xstrlen(git_statuses.statuses[i].path)) && is_prefix(git_statuses.statuses[i].path, dentpath, dentlen))
++						merged_status |= git_statuses.statuses[i].status;
++				} else if (!xstrcmp(git_statuses.statuses[i].path, dentpath))
++						merged_status |= git_statuses.statuses[i].status;
++			}
 +
 +			dentp->status_indexed = git_get_indexed_status(merged_status);
 +			dentp->status_staged = git_get_staged_status(merged_status);
-+			free(real);
-+		} else {
-+			dentp->status_indexed = GIT_COLUMN_STATUS_NONE;
-+			dentp->status_staged = GIT_COLUMN_STATUS_NONE;
++			free(dentpath);
 +		}
 +
- 		dentp->flags = S_ISDIR(sb.st_mode) ? 0 : ((sb.st_nlink > 1) ? HARD_LINK : 0);
- 		if (entflags) {
- 			dentp->flags |= entflags;
-@@ -7714,6 +7857,8 @@ static void cleanup(void)
+ 		++ndents;
+ 	} while ((dp = readdir(dirp)));
+
+@@ -5972,7 +6098,7 @@ static void redraw(char *path)
+ #endif
+ 		}
+ 	}
+-	dtls.maxentln = dtls.maxnameln + dtls.maxsizeln + (dtls.printguid ? (dtls.maxuidln + dtls.maxgidln) : 0) + (g_state.uidgid ? 26 : 23);
++	dtls.maxentln = dtls.maxnameln + dtls.maxsizeln + (dtls.printguid ? (dtls.maxuidln + dtls.maxgidln) : 0) + (g_state.uidgid ? 29 : 26);
+
+ 	ncols = adjust_cols(ncols);
+
+@@ -7714,6 +7840,8 @@ static void cleanup(void)
  		fflush(stdout);
  	}
  #endif
-+	statuses_free(git_statuses);
++	git_statuses_free();
 +	git_libgit2_shutdown();
  	free(selpath);
  	free(plgpath);
  	free(cfgpath);
-@@ -7909,6 +8054,7 @@ int main(int argc, char *argv[])
+@@ -7909,6 +8037,7 @@ int main(int argc, char *argv[])
  		return EXIT_FAILURE;
 
  	atexit(cleanup);

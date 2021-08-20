@@ -151,8 +151,8 @@ HEADERS = src/nnn.h
 BIN = nnn
 OBJS := nnn.o $(OBJS_HAIKU)
 
-GITSTATUS = misc/patches/gitstatus
-NAMEFIRST = misc/patches/namefirst
+GITSTATUS = patches/gitstatus
+NAMEFIRST = patches/namefirst
 
 all: $(BIN)
 

@@ -148,8 +148,9 @@ BIN = nnn
 DESKTOPFILE = misc/desktop/nnn.desktop
 LOGOSVG = misc/logo/logo.svg
 LOGO64X64 = misc/logo/logo-64x64.png
-GITSTATUS = misc/patches/gitstatus
-NAMEFIRST = misc/patches/namefirst
+
+GITSTATUS = patches/gitstatus
+NAMEFIRST = patches/namefirst
 
 OSX := $(shell [ "`sw_vers -productName`" = "Mac OS X" ] && sw_vers -productVersion | cut -f1,2 -d.)
 ifeq ($(OSX),10.11)
@@ -213,6 +214,11 @@ static:
 	make O_STATIC=1 O_NERD=1 strip
 	mv $(BIN) $(BIN)-nerd-static
 
+musl:
+	cp misc/musl/musl-static-ubuntu.sh .
+	./musl-static-ubuntu.sh 1
+	rm ./musl-static-ubuntu.sh
+
 dist:
 	mkdir -p nnn-$(VERSION)
 	$(CP) -r $(DISTFILES) nnn-$(VERSION)
@@ -224,23 +230,23 @@ sign:
 	gpg --detach-sign --yes nnn-$(VERSION).tar.gz
 	rm -f nnn-$(VERSION).tar.gz
 
-upload-local: sign static
+upload-local: sign static musl-static
 	$(eval ID=$(shell curl -s 'https://api.github.com/repos/jarun/nnn/releases/tags/v$(VERSION)' | jq .id))
 	# upload sign file
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=nnn-$(VERSION).tar.gz.sig' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/pgp-signature' \
 	    --upload-file nnn-$(VERSION).tar.gz.sig
-	tar -zcf $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-static
 	# upx compress all static binaries
 	upx -qqq $(BIN)-static
 	upx -qqq $(BIN)-icons-static
 	upx -qqq $(BIN)-nerd-static
 	# upload static binary
+	tar -zcf $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-static
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-static-$(VERSION).x86_64.tar.gz' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
 	    --upload-file $(BIN)-static-$(VERSION).x86_64.tar.gz
-	tar -zcf $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static
 	# upload icons-in-terminal compiled static binary
+	tar -zcf $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-icons-static-$(VERSION).x86_64.tar.gz' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
 	    --upload-file $(BIN)-icons-static-$(VERSION).x86_64.tar.gz
@@ -249,6 +255,11 @@ upload-local: sign static
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-nerd-static-$(VERSION).x86_64.tar.gz' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
 	    --upload-file $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz
+	# upload musl static binary
+	tar -zcf $(BIN)-musl-static-$(VERSION).x86_64.tar.gz $(BIN)-musl-static
+	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-musl-static-$(VERSION).x86_64.tar.gz' \
+	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
+	    --upload-file $(BIN)-musl-static-$(VERSION).x86_64.tar.gz
 
 clean:
 	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz
