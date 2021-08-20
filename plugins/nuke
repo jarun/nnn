@@ -21,9 +21,10 @@
 #   Guards against accidentally opening mime types like executables, shared libs etc.
 #
 #   Tries to play 'file' (1st argument) in the following order:
-#   i. by extension
-#   ii. by mime (image, video, audio, pdf)
-#   iii. by mime (other file types)
+#     1. by extension
+#     2. by mime (image, video, audio, pdf)
+#     3. by mime (other file types)
+#     4. by mime (prompt and run executables)
 #
 # Modification tips:
 #   1. Invokes CLI utilities by default. Set GUI to 1 to enable GUI apps.
@@ -63,8 +64,9 @@
 #   1. Adapt, test and enable all mimes
 #   2. Clean-up the unnecessary exit codes
 
-# set to 1 to enable GUI apps
+# set to 1 to enable GUI apps and/or BIN execution
 GUI="${GUI:-0}"
+BIN="${BIN:-0}"
 
 set -euf -o noclobber -o noglob -o nounset
 IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}" # protect trailing \n
@@ -513,10 +515,29 @@ handle_blocked() {
     esac
 }
 
+handle_bin() {
+    case "${MIMETYPE}" in
+        application/x-executable|application/x-shellscript)
+        clear
+        echo '-------- Executable File --------' && file --dereference --brief -- "${FPATH}"
+        printf "Run executable (y/N/'a'rgs)? "
+        read -r answer
+        case "$answer" in
+            [Yy]* ) exec "${FPATH}";;
+            [Aa]* )
+                printf "args: "
+                read -r args
+                exec "${FPATH}" "$args";;
+            [Nn]* ) exit;;
+        esac
+    esac
+}
+
 MIMETYPE="$( file -bL --mime-type -- "${FPATH}" )"
 handle_extension
 handle_multimedia "${MIMETYPE}"
 handle_mime "${MIMETYPE}"
+[ "$BIN" -ne 0 ] && [ -x "${FPATH}" ] && handle_bin
 handle_blocked "${MIMETYPE}"
 handle_fallback
 

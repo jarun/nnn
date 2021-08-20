@@ -108,7 +108,7 @@ enum action {
 	SEL_PLUGIN,
 	SEL_SHELL,
 	SEL_LAUNCH,
-	SEL_RUNCMD,
+	SEL_PROMPT,
 	SEL_LOCK,
 	SEL_SESSIONS,
 	SEL_EXPORT,
@@ -259,8 +259,8 @@ static struct key bindings[] = {
 	{ CONTROL(']'),   SEL_SHELL },
 	/* Launcher */
 	{ '=',            SEL_LAUNCH },
-	/* Run a command */
-	{ ']',            SEL_RUNCMD },
+	/* Show command prompt */
+	{ ']',            SEL_PROMPT },
 	/* Lock screen */
 	{ '0',            SEL_LOCK },
 	/* Manage sessions */

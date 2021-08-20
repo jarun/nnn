@@ -7,7 +7,7 @@ The patches will be adapted on each release when necessary (v4.1 onwards). Each 
 ## List of patches
 | Patch (a-z) | Description | Make var |
 | --- | --- | --- |
-| gitstatus | Add git status column to the detail view. Requires [libgit2](https://github.com/libgit2/libgit2). | `O_GISTATUS` |
+| gitstatus | Add git status column to the detail view. Provides command line flag `-G` to show column in normal mode. | `O_GISTATUS` |
 | namefirst | Print filenames first in the detail view. Print user/group columns when a directory contains different users/groups. | `O_NAMEFIRST` |
 
 To apply a patch, use the corresponding make variable, e.g.:

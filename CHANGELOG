@@ -1,3 +1,46 @@
+nnn v4.2 Mojito
+2021-07-21
+
+- `NNN_PLUG` indicator symbol interpretation has **changed**:
+  - `!` - _run-cmd-as-plugin_ (earlier `_`)
+  - `&` - _run-gui-cmd-as-plugin_ (earlier `|`)
+  - `|` (new) - page noninteractive _run-cmd-as-plugin_ output
+- persistent selection markers (#1086)
+- option _extract to..._ for archives
+- mount remote and mount/extract archive to a smart context
+- confirm file trashing to avoid accidental press of <kbd>x</kbd> (#1101)
+- insert the last command executed at prompt on <kbd>Up</kbd> or <kbd>Down</kbd>
+- insert the current file name at empty prompt on <kbd>TAB</kbd>
+- handle redraw issue on missed `KEY_RESIZE` (#1067)
+- add force-tty capability to spawn and set pagers to it (#1064)
+- clear selection mode on deselecting last selected file (#1098)
+- remove selected hovered entry from selection on deletion
+- disable filtering in empty directories
+- ignore last pressed filter character when no matches
+- fix broken screen on resize while paging (#1072)
+- fix archive not hovered on creation
+- remove libgit2 dependency in `gitstatus` patch (#1095)
+- add `-G` flag for `gitstatus` patch
+- option `-X` for explorer (persistent picker) mode
+- option `-F` decommissioned in favour of config `NNN_HELP`
+- `-F` redefined to multiplex `NNN_FIFO` to preview or explore
+- support paging noninterative _run-cmd-as-plugin_ output
+- `nuke` - add option to execute binaries (#1111)
+- plugin `fzopen` - call `open` on macOS, add option to use `nuke`
+- plugin `fzcd` will not modify selection
+- plugin `suedit` - preserve environment
+- several `preview-tui` fixes
+- plugin `wall` renamed to `wallpaper`
+- remove plugin `fzz` - merged into plugin `autojump`
+- remove plugin `upgrade` - packaging is on OBS now
+- remove plugin `treeview` - needs minor `preview-tui` tweak
+- remove plugin `picker` - `nnn -p -` does the same
+- remove plugin `pdfview` - needs simple change in `pdfread`
+- remove plugin `uidgid` - use program option `-U`
+- remove plugins `mediainf`, `hexview` - simple one-liners
+
+-------------------------------------------------------------------------------
+
 nnn v4.1.1 Sake
 2021-06-03
 
@@ -281,7 +324,7 @@ nnn v3.1
 - hover and connect by dir name (within config dir)
 - move to next entry on current file delete
 - on single file copy/move, select the copied/moved file
-- option `-f` to to use readline history file (off by default)
+- option `-f` to use readline history file (off by default)
 - use `s` in status bar to indicate selection in progress
 - make var `O_NOMOUSE` to disable mouse support
 - do not store `NNN_TRASH` and `-Q` in config/session

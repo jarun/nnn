@@ -14,7 +14,7 @@ if [ -n "$1" ]; then
         elif type wal >/dev/null 2>&1; then
 	        wal -i "$1"
         else
-            printf "nitrogen ir pywal missing"
+            printf "nitrogen or pywal missing"
             read -r _
         fi
 

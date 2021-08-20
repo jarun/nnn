@@ -1,4 +1,4 @@
-.Dd Jun 03, 2021
+.Dd Jul 21, 2021
 .Dt NNN 1
 .Os
 .Sh NAME
@@ -6,8 +6,10 @@
 .Nd The unorthodox terminal file manager.
 .Sh SYNOPSIS
 .Nm
-.Op Ar -aAcCdDeEfFgHJKlnQrRSuUVwxh
+.Op Ar -aAcCdDeEfgHJKnQrRSuUVwxh
 .Op Ar -b key
+.Op Ar -F val
+.Op Ar -l val
 .Op Ar -p file
 .Op Ar -P key
 .Op Ar -s name
@@ -72,8 +74,9 @@ supports the following options:
 .Fl f
         use readline history file
 .Pp
-.Fl F
-        show fortune in help and settings screen
+.Fl "F val"
+        fifo notification mode
+        0: notify as previewer, 1: notify as explorer
 .Pp
 .Fl g
         use regex filters instead of substring match
@@ -286,22 +289,13 @@ writing to the file overwrites earlier contents. If you have 2 instances of
 use the selection in the other pane.
 .Pp
 .Nm
-clears the selection after an operation with the selection. Plugins are allowed
-to define the behaviour individually.
+clears the selection after a successful operation with the selection. Plugins
+are allowed to define the behaviour individually.
 .Pp
-.Nm
-doesn't match directory entries for selected files after a redraw or after the
-user navigates away from the directory. An attempt to do so will increase
-memory consumption and processing significantly as
-.Nm
-allows selection across directories. So the selection marks are cleared. The
-selection can still be edited in the same instance.
-.Pp
-To edit the selection use the _edit selection_ key. Use this key to remove a
-file from selection after you navigate away from its directory or to remove
-duplicates. Editing doesn't end the selection mode. You can add more files to
-the selection and edit the list again. If no file is selected in the current
-session, this option attempts to list the selection file.
+To edit the selection use the _edit selection_ key. Editing doesn't end the
+selection mode. You can add more files to the selection and edit the list
+again. If no file is selected in the current session, this option attempts
+to list the selection file.
 .Sh FIND AND LIST
 There are two ways to search and list:
 .Pp
@@ -369,7 +363,7 @@ used. A single combination of arguments is supported for SHELL and PAGER.
 \fBNNN_BMS:\fR bookmark string as \fIkey_char:location\fR pairs
 separated by \fI;\fR:
 .Bd -literal
-    export NNN_BMS="d:$HOME/Documents;u:/home/user/Cam Uploads;D:$HOME/Downloads/"
+    export NNN_BMS="d:$HOME/Docs;u:/home/user/Cam Uploads;D:$HOME/Downloads/"
 .Ed
 .Pp
 \fBNNN_PLUG:\fR directly executable plugins as \fIkey_char:plugin\fR pairs
@@ -382,14 +376,14 @@ separated by \fI;\fR:
     2. Alternatively, combine with \fIAlt\fR (i.e. \fIAlt+key\fR).
     3. To skip directory refresh after running a plugin, prefix with \fB-\fR.
 
-    export NNN_PLUG='m:-mediainf'
+    export NNN_PLUG='p:-plugin'
 .Ed
 .Pp
     To assign keys to arbitrary non-background non-shell-interpreted cli
-    commands and invoke like plugins, add \fI_\fR (underscore) before the
+    commands and invoke like plugins, add \fI!\fR (underscore) before the
     command.
 .Bd -literal
-    export NNN_PLUG='x:_chmod +x $nnn;g:_git log;s:_smplayer $nnn'
+    export NNN_PLUG='x:!chmod +x $nnn;g:!git log;s:!smplayer $nnn'
 
     To pick and run an unassigned plugin, press \fBEnter\fR at the plugin prompt.
     To run a plugin at startup, use the option `-P` followed by the plugin key.
@@ -397,30 +391,39 @@ separated by \fI;\fR:
     NOTES:
     1. Use single quotes for $NNN_PLUG so $nnn is not interpreted
     2. $nnn should be the last argument (IF used)
-    3. (Again) add \fB_\fR before the command
+    3. (Again) add \fB!\fR before the command
     4. To disable directory refresh after running a \fIcommand as plugin\fR,
-       prefix with \fB-_\fR
+       prefix with \fB-!\fR
     5. To skip user confirmation after command execution, suffix with \fB*\fR
        Note: Do not use \fB*\fR with programs those run and exit e.g. cat
 
-    export NNN_PLUG='y:-_sync*'
+        export NNN_PLUG='y:-!sync*'
 
-    6. To run a \fIGUI app as plugin\fR, add a \fB|\fR after \fB_\fR
+    6. To run a \fIGUI app as plugin\fR, add a \fB&\fR after \fB!\fR
 
-    export NNN_PLUG='m:-_|mousepad $nnn'
+        export NNN_PLUG='m:-!&mousepad $nnn'
+
+    7. To show the output of run-and-exit commands which do not need user input,
+       add \fB|\fR (pipe) after \fB!\fR
+       Note: This option is incompatible with \fB&\fR (terminal output is masked
+       for GUI programs) and ignores \fB*\fR (output is already paged for user)
+
+        export NNN_PLUG='m:-!|mediainfo $nnn;t:-!|tree -ps;l:-!|ls -lah --group-directories-first'
 
     EXAMPLES:
     ----------------------------------- + -------------------------------------------------
                 Key:Command             |                   Description
     ----------------------------------- + -------------------------------------------------
-    g:-_git diff                        | Show git diff
-    k:-_fuser -kiv $nnn*                | Interactively kill process(es) using hovered file
-    l:-_git log                         | Show git log
-    n:-_vi /home/user/Dropbox/dir/note* | Take quick notes in a synced file/dir of notes
-    p:-_less -iR $nnn*                  | Page through hovered file in less
-    s:-_|smplayer -minigui $nnn         | Play hovered media file, even unfinished download
-    x:_chmod +x $nnn                    | Make the hovered file executable
-    y:-_sync*                           | Flush cached writes
+    e:-!sudo -E vim $nnn*               | Edit file as root in vim
+    g:-!git diff                        | Show git diff
+    h:-!hx $nnn*                        | Open hovered file in hx hex editor
+    k:-!fuser -kiv $nnn*                | Interactively kill process(es) using hovered file
+    l:-!git log                         | Show git log
+    n:-!vi /home/user/Dropbox/dir/note* | Take quick notes in a synced file/dir of notes
+    p:-!less -iR $nnn*                  | Page through hovered file in less
+    s:-!&smplayer -minigui $nnn         | Play hovered media file, even unfinished download
+    x:!chmod +x $nnn                    | Make the hovered file executable
+    y:-!sync*                           | Flush cached writes
     ----------------------------------- + -------------------------------------------------
 
     Online docs: https://github.com/jarun/nnn/tree/master/plugins
@@ -516,6 +519,11 @@ separated by \fI;\fR:
 .Bd -literal
     export NNN_LOCKER='bmon -p wlp1s0'
     export NNN_LOCKER='cmatrix'
+.Ed
+.Pp
+\fBNNN_HELP:\fR run a program and show the output on top of the program help page.
+.Bd -literal
+    export NNN_HELP='fortune'
 .Ed
 .Pp
 \fBNNN_MCLICK:\fR key emulated by a middle mouse click.

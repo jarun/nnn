@@ -2,7 +2,7 @@
 
 # Description: Fuzzy search multiple locations read-in from a path-list file
 #              (or $PWD) and open the selected file's dir in a smart context.
-# Dependencies: fzf, fd (only for multi-location search)
+# Dependencies: fzf, find (only for multi-location search)
 #
 # Details: Paths in list file should be newline-separated absolute paths.
 #          Paths can be file paths; the script will scan the parent dirs.
@@ -17,11 +17,8 @@
 #          - pick the (file)paths in picker mode to path-list file
 #          - OR, edit selection in nnn and save as path-list file
 #
-#          The plugin clears nnn selection as the user can be tempted to delete
-#          duplicate files after finding copies and remove selection by mistake.
-#
 # Shell: POSIX compliant
-# Author: Anna Arad, Arun Prakash Jana
+# Author: Anna Arad, Arun Prakash Jana, KlzXS
 
 IFS="$(printf '\n\r')"
 
@@ -33,17 +30,12 @@ LIST="$LIST"
 if ! type fzf >/dev/null 2>&1; then
     printf "fzf missing"
     read -r _
-	exit 1
+    exit 1
 fi
 
 if [ -n "$1" ] && [ "$(file -b --mime-type "$1")" = 'text/plain' ] && [ -e "$(head -1 "$1")" ]; then
     LIST="$1"
 elif ! [ -s "$LIST" ]; then
-    # Clear selection
-    if [ -p "$NNN_PIPE" ]; then
-        printf "-" >"$NNN_PIPE"
-    fi
-
     sel=$(fzf)
     # Show only the file and parent dir
     # sel=$(fzf --delimiter / --with-nth=-2,-1 --tiebreak=begin --info=hidden)
@@ -52,7 +44,7 @@ elif ! [ -s "$LIST" ]; then
 fi
 
 if [ -n "$LIST" ]; then
-    if type fd >/dev/null 2>&1; then
+    if type find >/dev/null 2>&1; then
         tmpfile=$(mktemp /tmp/abc-script.XXXXXX)
 
         while IFS= read -r path; do
@@ -63,16 +55,13 @@ if [ -n "$LIST" ]; then
             fi
         done < "$LIST"
 
-        # Clear selection
-        if [ -p "$NNN_PIPE" ]; then
-            printf "-" >"$NNN_PIPE"
-        fi
-
-        sel=$(xargs -d '\n' -a "$tmpfile" fd -H . | fzf --delimiter / --tiebreak=begin --info=hidden)
+        sel=$(xargs -d '\n' -a "$tmpfile" -I{} find {} -type f -printf "%H//%P\n" | sed '/.*\/\/\(\..*\|.*\/\..*\)/d; s:/\+:/:g' | fzf --delimiter / --tiebreak=begin --info=hidden)
+        # Alternative for 'fd'
+        # sel=$(xargs -d '\n' -a "$tmpfile" fd . | fzf --delimiter / --tiebreak=begin --info=hidden)
 
         rm "$tmpfile"
     else
-        printf "fd missing"
+        printf "find missing"
         read -r _
 	    exit 1
     fi

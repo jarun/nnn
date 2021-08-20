@@ -12,10 +12,13 @@
 #                Leaves untouched if no file is picked.
 #                Works with single/multiple files selected.
 #
-# Dependencies: fd/find, fzf/skim, xdg-open
+# Dependencies: fd/find, fzf/skim, xdg-open/open (on macOS)
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
+
+NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
+USE_NUKE=0
 
 . "$(dirname "$0")"/.nnn-plugin-helper
 
@@ -26,7 +29,7 @@ if type fzf >/dev/null 2>&1; then
     else
         [ -z "$cmd" ] && cmd="find . -type f 2>/dev/null"
     fi
-    entry="$(eval "$cmd" | fzf -m --delimiter / --nth=-1 --tiebreak=begin --info=hidden)"
+    entry="$(eval "$cmd" | fzf -m)"
     # To show only the file name
     # entry=$(find . -type f 2>/dev/null | fzf --delimiter / --with-nth=-1 --tiebreak=begin --info=hidden)
 elif type sk >/dev/null 2>&1; then
@@ -51,15 +54,25 @@ if [ "$3" ]; then
     exit 0
 fi
 
+if [ "$USE_NUKE" -ne 0 ]; then
+    "$NUKE" "$entry"
+    exit 0
+fi
+
 # Open the file (works for a single file only)
-case "$(file -biL "$entry")" in
+cmd_file=""
+cmd_open=""
+if uname | grep -q "Darwin"; then
+    cmd_file="file -bIL"
+    cmd_open="open"
+else
+    cmd_file="file -biL"
+    cmd_open="xdg-open"
+fi
+
+case "$($cmd_file "$entry")" in
     *text*)
         "${VISUAL:-$EDITOR}" "$entry" ;;
     *)
-        if uname | grep -q "Darwin"; then
-            open "$entry" >/dev/null 2>&1
-        else
-            xdg-open "$entry" >/dev/null 2>&1
-        fi
-        ;;
+        $cmd_open "$entry" >/dev/null 2>&1 ;;
 esac

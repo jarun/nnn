@@ -15,13 +15,13 @@
 href="https://github.com/jarun/nnn#features">Features</a>] [<a
 href="https://github.com/jarun/nnn#quickstart">Quickstart</a>] [<a
 href="https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins">Plugins</a>] [<a
-href="https://github.com/jarun/nnn/wiki">Documentation</a>]</h3>
+href="https://github.com/jarun/nnn/wiki">Wiki</a>]</h3>
 
-`nnn` (_n³_) is a full-featured terminal file manager. It's tiny and nearly 0-config with an [incredible speed](https://github.com/jarun/nnn/wiki/Performance).
+`nnn` (_n³_) is a full-featured terminal file manager. It's tiny, nearly 0-config and [incredibly fast](https://github.com/jarun/nnn/wiki/Performance).
 
 It is designed to be unobtrusive with smart workflows to match the trains of thought.
 
-`nnn` can analyze disk usage, batch rename, launch apps and pick files. The plugin repository has tons of plugins to extend the capabilities further e.g. [preview](https://github.com/jarun/nnn/wiki/Live-previews), (un)mount disks, find & list, file/dir diff, upload files.
+`nnn` can analyze disk usage, batch rename, launch apps and pick files. The plugin repository has tons of plugins to extend the capabilities further e.g. [preview](https://github.com/jarun/nnn/wiki/Live-previews), (un)mount disks, find & list, file/dir diff, upload files. A [patch framework](https://github.com/jarun/nnn/tree/master/patches) hosts sizable user-submitted patches which are subjective in nature.
 
 There are 2 independent (neo)vim plugins - [nnn.vim](https://github.com/mcchrish/nnn.vim) and [vim-floaterm nnn wrapper](https://github.com/voldikss/vim-floaterm#nnn).
 
@@ -35,6 +35,10 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
 
 ## Features
 
+- Quality
+  - Privacy-aware (no unconfirmed user data collection)
+  - POSIX-compliant, follows Linux kernel coding style
+  - Highly optimized, static analysis integrated code
 - Frugal
   - Typically needs less than 3.5MB resident memory
   - Works with 8 colors (and xterm 256 colors)
@@ -51,12 +55,8 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - No config file, minimal config with sensible defaults
   - Plugin to backup configuration
   - Widely available on many packagers
-  - Touch enabled, comfortable on handhelds too!
+  - Touch enabled, handheld-friendly shortcuts
   - Unicode support
-- Quality
-  - Privacy-aware (no unconfirmed user data collection)
-  - POSIX-compliant, follows Linux kernel coding style
-  - Highly optimized, static analysis integrated code
 - Modes
   - Light (default), detail
   - Disk usage analyzer (block/apparent)
@@ -84,12 +84,10 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - File-specific colors (or minimal _dirs in context color_)
   - Icons (customize and compile-in)
   - Plugin for image, video and audio thumbnails
-  - Create, list, extract, mount (FUSE based) archives
+  - Create, list, extract (to), mount (FUSE based) archives
   - Option to open all text files in `$EDITOR`
-- Information
-  - Detailed file information
-  - Media information plugin
 - Convenience
+  - Detailed file stats and mime information
   - Run plugins and custom commands with hotkeys
   - FreeDesktop compliant trash utility integration
   - Cross-dir file/all/range selection
@@ -100,8 +98,9 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Dir updates, notification on `cp`, `mv`, `rm` completion
   - Copy file paths to system clipboard on select
   - Launch apps, run commands, spawn a shell, toggle exe
-  - Access hovered file as `$nnn` at prompt or spawned shell
+  - Access hovered file at prompt or spawned shell
   - Lock terminal after configurable idle timeout
+  - Capture and show output of a program in help screen
   - Basic support for screen readers and braille displays
 
 ## Quickstart
@@ -145,6 +144,7 @@ Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creat
 - [Linux Magazine; FOSSPicks](https://www.linux-magazine.com/Issues/2017/205/FOSSPicks/(offset)/15)
 - [Make Tech Easier](https://www.maketecheasier.com/nnn-file-manager-terminal/)
 - [Open Source For You](https://www.opensourceforu.com/2019/12/nnn-this-feature-rich-terminal-file-manager-will-enhance-your-productivity/)
+- [PCLinuxOS Magazine Issue June 2021](https://pclosmag.com/html/Issues/202106/page08.html)
 - [Suckless Rocks](https://suckless.org/rocks/)
 - [Ubuntu Full Circle Magazine Issue 135; Review: nnn](https://fullcirclemagazine.org/issue-135/)
 - [Using and Administering Linux: Volume 2: Zero to SysAdmin: Advanced Topics](https://books.google.com/books?id=MqjDDwAAQBAJ&pg=PA32)
@@ -157,6 +157,7 @@ Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creat
 - [Anna Arad](https://github.com/annagrram)
 - [KlzXS](https://github.com/KlzXS)
 - [Léo Villeveygoux](https://github.com/leovilok)
+- [Luuk van Baal](https://github.com/luukvbaal)
 - [Sijmen J. Mulder](https://github.com/sjmulder)
 - and other contributors
 
