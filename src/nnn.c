@@ -108,6 +108,10 @@
 #include <pwd.h>
 #include <grp.h>
 
+#ifdef MACOSX_BELOW_1012
+#include "../misc/macosx-legacy/mach_gettime.h"
+#endif
+
 #if !defined(alloca) && defined(__GNUC__)
 /*
  * GCC doesn't expand alloca() to __builtin_alloca() in standards mode

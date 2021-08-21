@@ -148,11 +148,23 @@ LOGO64X64 = misc/logo/logo-64x64.png
 GITSTATUS = patches/gitstatus
 NAMEFIRST = patches/namefirst
 
+MACOSX_VERSION := $(strip $(shell command -v sw_vers >/dev/null && [ "`sw_vers -productName`" = "Mac OS X" ] && sw_vers -productVersion))
+ifneq ($(MACOSX_VERSION),)
+	MACOSX_BELOW_1012 := $(if $(strip $(shell printf '10.12.0\n%s' "$(MACOSX_VERSION)" | sort -ct. -k1,1n -k2,2n -k3,3n 2>&1)),1)
+endif
+ifneq ($(MACOSX_BELOW_1012),)
+	GETTIME_C = misc/macosx-legacy/mach_gettime.c
+	GETTIME_H = misc/macosx-legacy/mach_gettime.h
+	SRC += $(GETTIME_C)
+	HEADERS += $(GETTIME_H)
+	CPPFLAGS += -DMACOSX_BELOW_1012
+endif
+
 all: $(BIN)
 
 $(BIN): $(SRC) $(HEADERS)
 	@$(MAKE) --silent prepatch
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LDLIBS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $(GETTIME_C) $< $(LDLIBS)
 	@$(MAKE) --silent postpatch
 
 # targets for backwards compatibility
