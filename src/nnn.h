@@ -60,7 +60,7 @@ enum action {
 	SEL_CDBEGIN,
 	SEL_CDLAST,
 	SEL_CDROOT,
-	SEL_BOOKMARK,
+	SEL_BMOPEN,
 	SEL_REMOTE,
 	SEL_CYCLE,
 	SEL_CYCLER,
@@ -75,6 +75,7 @@ enum action {
 	SEL_CTX8,
 #endif
 	SEL_MARK,
+	SEL_BMARK,
 	SEL_FLTR,
 	SEL_MFLTR,
 	SEL_HIDDEN,
@@ -167,8 +168,8 @@ static struct key bindings[] = {
 	/* Go to / */
 	{ '`',            SEL_CDROOT },
 	/* Leader key */
-	{ 'b',            SEL_BOOKMARK },
-	{ CONTROL('_'),   SEL_BOOKMARK },
+	{ 'b',            SEL_BMOPEN },
+	{ CONTROL('_'),   SEL_BMOPEN },
 	/* Connect to server over SSHFS */
 	{ 'c',            SEL_REMOTE },
 	/* Cycle contexts in forward direction */
@@ -188,6 +189,8 @@ static struct key bindings[] = {
 #endif
 	/* Mark a path to visit later */
 	{ ',',            SEL_MARK },
+	/* Create a bookmark */
+	{ 'B',            SEL_BMARK },
 	/* Filter */
 	{ '/',            SEL_FLTR },
 	/* Toggle filter mode */

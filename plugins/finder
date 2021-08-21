@@ -1,28 +1,89 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Description: Run custom search and list results in smart context
 #
-# Note: To enable multi select in fzf, export the following:
-#       - export FZF_DEFAULT_OPTS='--bind ctrl-a:select-all,ctrl-d:deselect-all,ctrl-t:toggle'
+# Note: This plugin retains search history
 #
-# Shell: POSIX compliant
-# Author: Arun Prakash Jana
+# Usage:
+#   Run plugin and enter e.g. "-size +10M" to list files in current
+#   directory larger than 10M. By default entered expressions are
+#   interpreted as arguments to find. Results have to be NUL
+#   terminated which is done by default for find. Alternatively one
+#   can prepend a '$' to run a custom search program such as fd or
+#   ripgrep. Entered expressions will be saved in history file to
+#   be listed as bookmarks and and can be entered by index and edited.
+#
+# Shell: Bash
+# Author: Arun Prakash Jana, Luuk van Baal
+TMPDIR="${TMPDIR:-/tmp}"
+NNN_FINDHIST="${NNN_FINDHIST:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/finderbms}"
+NNN_FINDHISTLEN="${NNN_FINDHISTLEN:-10000}"
 
-. "$(dirname "$0")"/.nnn-plugin-helper
+printexamples() {
+    printf -- "-maxdepth 1 -name pattern
+-maxdepth 1 -size +100M
+\$fd -0 pattern
+\$fd -0 -d 2 -S +100M
+\$grep -rlZ pattern
+\$rg -l0 pattern
+\$fzf -m | tr '\\\n' '\\\0'\n"
+}
 
-printf "Examples:\n"
-printf "  find . -name \"pattern*\" -print0\n"
-printf "  fd pattern -0\n"
-printf "  find -maxdepth 1 -size +100M -print0\n"
-printf "  fd -d 2 -S +100M -0\n"
-printf "  grep -rlZ pattern\n"
-printf "  rg -l0 pattern\n"
-printf "  fzf -m | tr %s %s\n\n" "'\n'" "'\0'"
+printexprs() {
+    for ((i = "$1"; i < ${#fexprs[@]}; i++)); do
+        printf '%s\t%s\n' "$((i + 1))" "${fexprs[$i]}"
+    done
+}
 
-printf "cmd: "
-read -r cmd
+mapexpr() {
+    if [ "$fexpr" -eq "$fexpr" ] 2>/dev/null; then
+        fexpr=${fexprs[$((fexpr - 1))]}
+        read -r -e -p "Search expression: " -i "$fexpr" fexpr
+    else
+        return 1
+    fi
+}
 
-if [ -n "$cmd" ]; then
-    printf "%s" "+l" > "$NNN_PIPE"
-    eval "$cmd" > "$NNN_PIPE"
+readexpr() {
+    case "$fexpr" in
+        h)   clear
+             printf "Examples:\n"
+             mapfile -t fexprs < <(printexamples)
+             printexprs 0
+             read -r -p "Search expression or index: " fexpr
+             mapexpr
+             [ -n "$fexpr" ] && readexpr ;;
+        \$*) cmd="${fexpr:1}" ;;
+        *)   mapexpr && readexpr
+             cmd="find $fexpr -print0" ;;
+    esac
+}
+
+clear
+[ -f "$NNN_FINDHIST" ] || printexamples > "$NNN_FINDHIST"
+
+mapfile -t fexprs < <(sort "$NNN_FINDHIST" | uniq -c | sort -nr | head -n5 |\
+  awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}')
+printf "Most used search expressions:\n"
+printexprs 0
+
+mapfile -t -O"$i" fexprs < <(tac "$NNN_FINDHIST" | awk '!a[$0]++' | head -n5)
+printf "Most recently used search expressions:\n"
+printexprs "$i"
+read -r -p "Search expression or index (h for help): " fexpr
+
+mapexpr
+
+if [ -n "$fexpr" ]; then
+    printf "+l" > "$NNN_PIPE"
+    while :; do
+        readexpr
+        eval "$cmd" > "$NNN_PIPE" && break
+        read -r -e -p "Search expression: " -i "$fexpr" fexpr
+    done
+    if [ -n "$fexpr" ]; then
+        tail -n"$NNN_FINDHISTLEN" "$NNN_FINDHIST" > "$TMPDIR/finderbms"
+        printf "%s\n" "$fexpr" >> "$TMPDIR/finderbms"
+        mv "$TMPDIR/finderbms" "$NNN_FINDHIST"
+    fi
 fi

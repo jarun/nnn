@@ -14,7 +14,6 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | Plugin (a-z) | Description [Clears selection<sup>1</sup>] | Lang | Dependencies |
 | --- | --- | --- | --- |
 | [autojump](autojump) | Navigate to dir/path | sh | [jump](https://github.com/gsamokovarov/jump)/autojump/<br>zoxide/z (needs fzf) |
-| [bookmarks](bookmarks) | Use named bookmarks managed with symlinks | sh | fzf |
 | [boom](boom) | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs, mktemp |
 | [cdpath](cdpath) | `cd` to the directory from `CDPATH` | sh | fzf |
@@ -23,7 +22,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [diffs](diffs) | Diff for selection (limited to 2 for directories) [✓] | sh | vimdiff, mktemp |
 | [dragdrop](dragdrop) | Drag/drop files from/into nnn | sh | [dragon](https://github.com/mwh/dragon) |
 | [dups](dups) | List non-empty duplicate files in current dir | bash | find, md5sum,<br>sort uniq xargs |
-| [finder](finder) | Run custom find command and list | sh | - |
+| [finder](finder) | Run custom find command (**stored in histfile**) and list | sh | - |
 | [fixname](fixname) | Clean filename to be more shell-friendly [✓] | bash | sed |
 | [fzcd](fzcd) | Fuzzy search multiple dirs (or `$PWD`) and visit file | sh | fzf, (find) |
 | [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |
@@ -62,11 +61,28 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [upload](upload) | Upload to Firefox Send or ix.io (text) or file.io (bin) | sh | [ffsend](https://github.com/timvisee/ffsend), curl, jq, tr |
 | [wallpaper](wall) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 | [x2sel](x2sel) | Copy file list from system clipboard to selection | sh | _see in-file docs_ |
-| [xdgdefault](xdgdefault) | Set the default app for the hovered file type | sh | xdg-utils, fzf |
+| [xdgdefault](xdgdefault) | Set the default app for the hovered file type | sh | xdg-utils, fzf/dmenu |
 
 Note:
 
 1. A plugin has to explicitly request `nnn` to clear the selection e.g. after operating on the selected files.
+
+### Table of contents
+
+- [Installation](#installation)
+- [Configuration](#configuration)
+  - [Skip directory refresh after running a plugin](#skip-directory-refresh-after-running-a-plugin)
+- [Running commands as plugin](#running-commands-as-plugin)
+  - [Skip user confirmation after command execution](#skip-user-confirmation-after-command-execution)
+  - [Run a GUI app as plugin](#run-a-gui-app-as-plugin)
+  - [Page non-interactive command output](#page-non-interactive-command-output)
+  - [Some useful key-command examples](#some-useful-key-command-examples)
+- [Access level of plugins](#access-level-of-plugins)
+- [Create your own plugins](#create-your-own-plugins)
+  - [Send data to `nnn`](#send-data-to-nnn)
+  - [Get notified on file hover](#get-notified-on-file-hover)
+- [Examples](#examples)
+- [Contributing plugins](#contributing-plugins)
 
 ## Installation
 
@@ -100,14 +116,14 @@ If the plugins list gets too long, try breaking them up into sections:
 NNN_PLUG_PERSONAL='g:personal/convert2zoom;p:personal/echo'
 NNN_PLUG_WORK='j:work/prettyjson;d:work/foobar'
 NNN_PLUG_INLINE='e:!go run $nnn*'
-NNN_PLUG_DEFAULT='1:bookmarks;2:ipinfo;p:preview-tui;o:fzz;b:nbak'
+NNN_PLUG_DEFAULT='1:ipinfo;p:preview-tui;o:fzz;b:nbak'
 NNN_PLUG="$NNN_PLUG_PERSONAL;$NNN_PLUG_WORK;$NNN_PLUG_DEFAULT;$NNN_PLUG_INLINE"
 export NNN_PLUG
 ```
 
 Note:
 - `'g:personal/convert2zoom'` will look in the personal sub-folder inside the plugin folder.
-- `'b:boom;b:bookmarks` will result in only the first definition of *b* (`b:boom`) being used.
+- `'b:boom;b:bulknew` will result in only the first definition of *b* (`b:boom`) being used.
 - A keybinding definition of more than 1 character will prevent nnn from starting.
 
 
@@ -141,7 +157,7 @@ Now there will be no prompt after <kbd>;s</kbd> and <kbd>;n</kbd>.
 
 Note: Do not use `*` with programs those run and exit e.g. cat.
 
-#### Run GUI app as plugin
+#### Run a GUI app as plugin
 
 To run a GUI app as plugin, add a `&` after `!`.
 
@@ -197,7 +213,7 @@ Plugins can also read the `.selection` file in the config directory.
 
 Plugins can be written in any scripting language. However, POSIX-compliant shell scripts runnable in `sh` are preferred.
 
-Make the file executable and drop it in the plugin install directory. Optionally add a hotkey in `$NNN_PLUG` for frequent usage.
+**Make the file executable**. Drop it in the plugin directory. Optionally add a hotkey in `$NNN_PLUG` for frequent usage.
 
 #### Send data to `nnn`
 `nnn` provides a mechanism for plugins to send data to `nnn` to control its active directory or invoke the list mode.
@@ -227,8 +243,6 @@ The `opcode` indicates the operation type.
 For convenience, we provided a helper script named `.nnn-plugin-helper` and a function named `nnn_cd` to ease this process. `nnn_cd` receives the path to change to as the first argument, and the context as an optional second argument.
 If a context is not provided, it is asked for explicitly. To skip this and choose the current context, set the `CUR_CTX` variable in `.nnn-plugin-helper` (or in the specific plugin after sourcing `.nnn-plugin-helper`) to 1.
 Usage examples can be found in the Examples section below.
-
-If a plugin doesn't send any data back to `nnn` and there's a selection, the selection is cleared.
 
 #### Get notified on file hover
 

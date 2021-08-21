@@ -28,7 +28,7 @@
 #define ICON_PUBLIC        "\ue5ff"
 #define ICON_TEMPLATES     "\ufac6"
 #define ICON_VIDEOS        "\uf72f"
-#define ICON_VIDEOFILE     "\ufcdc"
+#define ICON_VIDEOFILE     "\uf72a"
 #define ICON_CHANGELOG     "\uf7d9"
 #define ICON_CONFIGURE     "\uf423"
 #define ICON_LICENSE       "\uf718"
@@ -38,7 +38,7 @@
 #define ICON_CPLUSPLUS     "\ue61d"
 #define ICON_JAVA          "\ue738"
 #define ICON_CLOJURE       "\ue76a"
-#define ICON_JAVASCRIPT    "\ue74e"
+#define ICON_JAVASCRIPT    "\uf81d"
 #define ICON_LINUX         "\uf83c"
 #define ICON_FSHARP        "\ue7a7"
 #define ICON_RUBY          "\ue23e"
@@ -75,6 +75,7 @@
 #define ICON_EXT_C         ICON_C
 #define ICON_EXT_CPLUSPLUS ICON_CPLUSPLUS
 #define ICON_EXT_CAB       ICON_ARCHIVE
+#define ICON_EXT_CABAL     ICON_HASKELL
 #define ICON_EXT_CBR       ICON_ARCHIVE
 #define ICON_EXT_CBZ       ICON_ARCHIVE
 #define ICON_EXT_CC        ICON_CPLUSPLUS
@@ -87,7 +88,7 @@
 #define ICON_EXT_CONF      ICON_CONFIGURE
 #define ICON_EXT_CPIO      ICON_ARCHIVE
 #define ICON_EXT_CPP       ICON_CPLUSPLUS
-#define ICON_EXT_CSS       "\ue614"
+#define ICON_EXT_CSS       "\ue749"
 #define ICON_EXT_CUE       ICON_PLAYLIST
 #define ICON_EXT_CVS       ICON_CONFIGURE
 #define ICON_EXT_CXX       ICON_CPLUSPLUS
@@ -163,6 +164,8 @@
 /* M */
 #define ICON_EXT_M4A       ICON_MUSICFILE
 #define ICON_EXT_M4V       ICON_VIDEOFILE
+#define ICON_EXT_M         "\ufd1c"
+#define ICON_EXT_MAT       "\uf0ce"
 #define ICON_EXT_MD        "\ue609"
 #define ICON_EXT_MK        ICON_MAKEFILE
 #define ICON_EXT_MKV       ICON_VIDEOFILE
@@ -174,6 +177,7 @@
 #define ICON_EXT_MSI       "\uf871"
 
 /* N */
+#define ICON_EXT_NIX       "\uf313"
 
 /* O */
 #define ICON_EXT_O         ICON_MANUAL
@@ -257,5 +261,7 @@
 
 /* Z */
 #define ICON_EXT_ZIP       ICON_ARCHIVE
+#define ICON_EXT_ZSH       ICON_SCRIPT
+#define ICON_EXT_ZST       ICON_ARCHIVE
 
 #endif // ICONS_NERDFONT

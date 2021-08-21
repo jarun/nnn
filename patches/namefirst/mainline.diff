@@ -4,10 +4,10 @@
 # Author: Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index c4bced5..f5101b1 100644
+index fe5d650..2d33716 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -368,6 +368,10 @@ typedef struct {
+@@ -382,6 +382,10 @@ typedef struct {
  } session_header_t;
  #endif
 
@@ -18,7 +18,7 @@ index c4bced5..f5101b1 100644
  /* GLOBALS */
 
  /* Configuration, contexts */
-@@ -1052,10 +1056,12 @@ static char *getpwname(uid_t uid)
+@@ -1065,10 +1069,12 @@ static char *getpwname(uid_t uid)
  	static char *namecache;
 
  	if (uidcache != uid) {
@@ -31,7 +31,7 @@ index c4bced5..f5101b1 100644
  	}
 
  	return namecache ? namecache : xitoa(uid);
-@@ -1067,10 +1073,12 @@ static char *getgrname(gid_t gid)
+@@ -1080,10 +1086,12 @@ static char *getgrname(gid_t gid)
  	static char *grpcache;
 
  	if (gidcache != gid) {
@@ -44,7 +44,7 @@ index c4bced5..f5101b1 100644
  	}
 
  	return grpcache ? grpcache : xitoa(gid);
-@@ -3521,14 +3529,13 @@ static void resetdircolor(int flags)
+@@ -3796,14 +3804,13 @@ static void resetdircolor(int flags)
   * Max supported str length: NAME_MAX;
   */
  #ifdef NOLC
@@ -62,7 +62,7 @@ index c4bced5..f5101b1 100644
  {
  	wchar_t * const wbuf = (wchar_t *)g_buf;
  	wchar_t *buf = wbuf;
-@@ -3553,7 +3560,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
+@@ -3828,7 +3835,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
  		++buf;
  	}
 
@@ -71,7 +71,7 @@ index c4bced5..f5101b1 100644
  }
 
  static off_t get_size(off_t size, off_t *pval, int comp)
-@@ -3814,33 +3821,7 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int
+@@ -4089,33 +4096,7 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int
  static void printent(const struct entry *ent, uint_t namecols, bool sel)
  {
  	char ind = '\0';
@@ -106,7 +106,7 @@ index c4bced5..f5101b1 100644
  	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
 
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
-@@ -3865,15 +3846,40 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+@@ -4140,15 +4121,40 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
  		++namecols;
 
  #ifndef NOLC
@@ -150,7 +150,7 @@ index c4bced5..f5101b1 100644
  }
 
  static void savecurctx(char *path, char *curname, int nextctx)
-@@ -5871,18 +5877,6 @@ static void statusbar(char *path)
+@@ -6140,18 +6146,6 @@ static void statusbar(char *path)
  		tocursor();
  }
 
@@ -169,7 +169,7 @@ index c4bced5..f5101b1 100644
  static int adjust_cols(int n)
  {
  	/* Calculate the number of cols available to print entry name */
-@@ -5890,11 +5884,10 @@ static int adjust_cols(int n)
+@@ -6159,11 +6153,10 @@ static int adjust_cols(int n)
  	n -= (g_state.oldcolor ? 0 : 1 + xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT));
  #endif
  	if (cfg.showdetail) {
@@ -183,16 +183,16 @@ index c4bced5..f5101b1 100644
  	}
 
  	/* 2 columns for preceding space and indicator */
-@@ -5932,8 +5925,6 @@ static void draw_line(char *path, int ncols)
+@@ -6200,8 +6193,6 @@ static void draw_line(int ncols)
+ 	/* Must reset e.g. no files in dir */
  	if (dir)
  		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
-
--	markhovered();
 -
- 	statusbar(path);
+-	markhovered();
  }
 
-@@ -6042,6 +6033,21 @@ static void redraw(char *path)
+ static void redraw(char *path)
+@@ -6309,6 +6300,21 @@ static void redraw(char *path)
 
  	onscreen = MIN(onscreen + curscroll, ndents);
 
@@ -213,13 +213,13 @@ index c4bced5..f5101b1 100644
 +
  	ncols = adjust_cols(ncols);
 
- 	/* Print listing */
-@@ -6066,8 +6072,6 @@ static void redraw(char *path)
+ 	int len = scanselforpath(path, FALSE);
+@@ -6339,7 +6345,7 @@ static void redraw(char *path)
  #endif
  	}
 
 -	markhovered();
--
- 	statusbar(path);
++	statusbar(path);
  }
 
+ static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)
