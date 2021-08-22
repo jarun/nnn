@@ -153,11 +153,26 @@ LOGO64X64 = misc/logo/logo-64x64.png
 GITSTATUS = patches/gitstatus
 NAMEFIRST = patches/namefirst
 
+# test if we are on Mac OS X and get X.Y.Z OS version with system binary /usr/bin/sw_vers
+MACOS_VERSION := $(strip $(shell command -v sw_vers >/dev/null && [ "`sw_vers -productName`" = "Mac OS X" ] && sw_vers -productVersion))
+# if Mac OS X detected, test if its version is below 10.12.0 relying on "sort -c" returning "disorder" message if the input is not sorted
+ifneq ($(MACOS_VERSION),)
+	MACOS_BELOW_1012 := $(if $(strip $(shell printf '10.12.0\n%s' "$(MACOS_VERSION)" | sort -ct. -k1,1n -k2,2n -k3,3n 2>&1)),1)
+endif
+# if Mac OS X version is below 10.12.0, compile in the replacement clock_gettime and define MACOS_BELOW_1012 so that it's included in nnn.c
+ifneq ($(MACOS_BELOW_1012),)
+	GETTIME_C = misc/macos-legacy/mach_gettime.c
+	GETTIME_H = misc/macos-legacy/mach_gettime.h
+	SRC += $(GETTIME_C)
+	HEADERS += $(GETTIME_H)
+	CPPFLAGS += -DMACOS_BELOW_1012
+endif
+
 all: $(BIN)
 
 $(BIN): $(SRC) $(HEADERS)
 	@$(MAKE) --silent prepatch
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $< $(LDLIBS)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $(GETTIME_C) $< $(LDLIBS)
 	@$(MAKE) --silent postpatch
 
 # targets for backwards compatibility
