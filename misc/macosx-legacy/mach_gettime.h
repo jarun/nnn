@@ -1,10 +1,10 @@
+#ifndef mach_time_h
+#define mach_time_h
+
 #include <sys/types.h>
 #include <sys/_types/_timespec.h>
 #include <mach/mach.h>
 #include <mach/clock.h>
-
-#ifndef mach_time_h
-#define mach_time_h
 
 /* The opengroup spec isn't clear on the mapping from REALTIME to CALENDAR
  being appropriate or not.
