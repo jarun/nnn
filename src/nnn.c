@@ -4994,9 +4994,9 @@ static void show_help(const char *path)
 
 	dprintf(fd, "  |V\\_\n"
 		    "  /. \\\\\n"
-		    " (.~; ||\n"
-		    "   /__3\\\n"
-		    "  (__n_))\n");
+		    " (;^; ||\n"
+		    "   /___3\n"
+		    "  (___n))\n");
 
 	char *prog = xgetenv(env_cfg[NNN_HELP], NULL);
 	if (prog)
