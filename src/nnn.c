@@ -4163,7 +4163,7 @@ static void savecurctx(char *path, char *curname, int nextctx)
 	context *ctxr = &g_ctx[nextctx];
 
 	/* Save current context */
-	if (ndents)
+	if (curname)
 		xstrsncpy(g_ctx[tmpcfg.curctx].c_name, curname, NAME_MAX + 1);
 	else
 		g_ctx[tmpcfg.curctx].c_name[0] = '\0';
@@ -4345,7 +4345,8 @@ static void set_smart_ctx(int ctx, char *nextpath, char **path, char **lastname,
 		--ctx;
 		/* Deactivate the new context and build from scratch */
 		g_ctx[ctx].c_cfg.ctxactive = 0;
-		savecurctx(nextpath, pdents[cur].name, ctx);
+		DPRINTF_S(nextpath);
+		savecurctx(nextpath, ndents ? pdents[cur].name : NULL, ctx);
 		*path = g_ctx[ctx].c_path;
 		*lastdir = g_ctx[ctx].c_last;
 		*lastname = g_ctx[ctx].c_name;
@@ -6589,7 +6590,7 @@ nochange:
 				if (r >= CTX_MAX)
 					sel = SEL_BACK;
 				else if (r >= 0 && r != cfg.curctx) {
-					savecurctx(path, pdents[cur].name, r);
+					savecurctx(path, ndents ? pdents[cur].name : NULL, r);
 
 					/* Reset the pointers */
 					path = g_ctx[r].c_path;
@@ -6970,7 +6971,7 @@ nochange:
 			r = handle_context_switch(sel);
 			if (r < 0)
 				continue;
-			savecurctx(path, pdents[cur].name, r);
+			savecurctx(path, ndents ? pdents[cur].name : NULL, r);
 
 			/* Reset the pointers */
 			path = g_ctx[r].c_path;
