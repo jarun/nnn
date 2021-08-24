@@ -5276,13 +5276,11 @@ static bool launch_app(char *newpath)
 	return FALSE;
 }
 
-/* Returns TRUE if at least  command was run */
-static bool prompt_run(const char *current)
+/* Returns TRUE if at least one command was run */
+static bool prompt_run(void)
 {
 	bool ret = FALSE;
 	char *tmp;
-
-	setenv(envs[ENV_NCUR], current, 1);
 
 	while (1) {
 #ifndef NORL
@@ -5305,22 +5303,47 @@ static bool prompt_run(const char *current)
 	return ret;
 }
 
-static bool handle_cmd(enum action sel, const char *current, char *newpath)
+static void setexports(char *buf)
+{
+	char dvar[] = "d0";
+	char fvar[] = "f0";
+
+	if (ndents) {
+		setenv(envs[ENV_NCUR], pdents[cur].name, 1);
+		xstrsncpy(g_ctx[cfg.curctx].c_name, pdents[cur].name, NAME_MAX + 1);
+	} else if (g_ctx[cfg.curctx].c_name[0])
+		g_ctx[cfg.curctx].c_name[0] = '\0';
+
+	for (uchar_t i = 0; i < CTX_MAX; ++i) {
+		if (g_ctx[i].c_cfg.ctxactive) {
+			dvar[1] = fvar[1] = '1' + i;
+			setenv(dvar, g_ctx[i].c_path, 1);
+
+			if (g_ctx[i].c_name[0]) {
+				mkpath(g_ctx[i].c_path, g_ctx[i].c_name, buf);
+				setenv(fvar, buf, 1);
+			}
+		}
+	}
+}
+
+static bool handle_cmd(enum action sel, char *newpath)
 {
 	endselection(FALSE);
 
-	if (sel == SEL_PROMPT)
-		return prompt_run(current);
-
 	if (sel == SEL_LAUNCH)
 		return launch_app(newpath);
+
+	setexports(newpath);
+
+	if (sel == SEL_PROMPT)
+		return prompt_run();
 
 	/* Set nnn nesting level */
 	char *tmp = getenv(env_cfg[NNNLVL]);
 	int r = tmp ? atoi(tmp) : 0;
 
 	setenv(env_cfg[NNNLVL], xitoa(r + 1), 1);
-	setenv(envs[ENV_NCUR], current, 1);
 	spawn(shell, NULL, NULL, NULL, F_CLI);
 	setenv(env_cfg[NNNLVL], xitoa(r), 1);
 	return TRUE;
@@ -7550,7 +7573,7 @@ nochange:
 		case SEL_SHELL: // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_PROMPT:
-			r = handle_cmd(sel, (ndents ? pdents[cur].name : ""), newpath);
+			r = handle_cmd(sel, newpath);
 
 			/* Continue in type-to-nav mode, if enabled */
 			if (cfg.filtermode)

@@ -98,7 +98,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Dir updates, notification on `cp`, `mv`, `rm` completion
   - Copy file paths to system clipboard on select
   - Launch apps, run commands, spawn a shell, toggle exe
-  - Access hovered file at prompt or spawned shell
+  - Access context paths/files at prompt or spawned shell
   - Lock terminal after configurable idle timeout
   - Capture and show output of a program in help screen
   - Basic support for screen readers and braille displays
