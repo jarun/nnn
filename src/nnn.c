@@ -4333,7 +4333,7 @@ static uchar_t get_free_ctx(void)
 }
 
 /* ctx is absolute: 1 to 4, + for smart context */
-static void set_smart_ctx(int ctx, char *nextpath, char **path, char **lastname, char **lastdir)
+static void set_smart_ctx(int ctx, char *nextpath, char **path, char *file, char **lastname, char **lastdir)
 {
 	if (ctx == '+') /* Get smart context */
 		ctx = (int)(get_free_ctx() + 1);
@@ -4346,7 +4346,7 @@ static void set_smart_ctx(int ctx, char *nextpath, char **path, char **lastname,
 		/* Deactivate the new context and build from scratch */
 		g_ctx[ctx].c_cfg.ctxactive = 0;
 		DPRINTF_S(nextpath);
-		savecurctx(nextpath, ndents ? pdents[cur].name : NULL, ctx);
+		savecurctx(nextpath, file, ctx);
 		*path = g_ctx[ctx].c_path;
 		*lastdir = g_ctx[ctx].c_last;
 		*lastname = g_ctx[ctx].c_name;
@@ -5116,31 +5116,31 @@ static ssize_t read_nointr(int fd, void *buf, size_t count)
 	return len;
 }
 
-static void readpipe(int fd, char **path, char **lastname, char **lastdir)
+static char *readpipe(int fd, char *ctxnum, char **path)
 {
 	char ctx, *nextpath = NULL;
 
 	if (read_nointr(fd, g_buf, 1) != 1)
-		return;
+		return NULL;
 
 	if (g_buf[0] == '-') { /* Clear selection on '-' */
 		clearselection();
 		if (read_nointr(fd, g_buf, 1) != 1)
-			return;
+			return NULL;
 	}
 
 	if (g_buf[0] == '+')
 		ctx = (char)(get_free_ctx() + 1);
 	else if (g_buf[0] < '0')
-		return;
+		return NULL;
 	else {
 		ctx = g_buf[0] - '0';
 		if (ctx > CTX_MAX)
-			return;
+			return NULL;
 	}
 
 	if (read_nointr(fd, g_buf, 1) != 1)
-		return;
+		return NULL;
 
 	char op = g_buf[0];
 
@@ -5148,7 +5148,7 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 		ssize_t len = read_nointr(fd, g_buf, PATH_MAX);
 
 		if (len <= 0)
-			return;
+			return NULL;
 
 		g_buf[len] = '\0'; /* Terminate the path read */
 		if (g_buf[0] == '/') {
@@ -5168,15 +5168,18 @@ static void readpipe(int fd, char **path, char **lastname, char **lastdir)
 		g_state.picked = 1;
 	}
 
-	if (nextpath)
-		set_smart_ctx(ctx, nextpath, path, lastname, lastdir);
+	*ctxnum = ctx;
+
+	return nextpath;
 }
 
 static bool run_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir)
 {
 	pid_t p;
-	bool cmd_as_plugin = FALSE;
+	char ctx = 0;
 	uchar_t flags = 0;
+	bool cmd_as_plugin = FALSE;
+	char *nextpath;
 
 	if (!g_state.pluginit) {
 		plctrl_init();
@@ -5246,7 +5249,10 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 		rfd = open(g_pipepath, O_RDONLY);
 	while (rfd == -1 && errno == EINTR);
 
-	readpipe(rfd, path, lastname, lastdir);
+	nextpath = readpipe(rfd, &ctx, path);
+	if (nextpath)
+		set_smart_ctx(ctx, nextpath, path, runfile, lastname, lastdir);
+
 	close(rfd);
 
 	/* wait for the child to finish. no zombies allowed */
@@ -6863,7 +6869,9 @@ nochange:
 
 				if (r == 'x' || r == 'm') {
 					if (newpath[0])
-						set_smart_ctx('+', newpath, &path, &lastname, &lastdir);
+						set_smart_ctx('+', newpath, &path,
+							      ndents ? pdents[cur].name : NULL,
+							      &lastname, &lastdir);
 					else
 						copycurname();
 					clearfilter();
@@ -6953,7 +6961,8 @@ nochange:
 				goto nochange;
 			}
 
-			set_smart_ctx('+', newpath, &path, &lastname, &lastdir);
+			set_smart_ctx('+', newpath, &path,
+				      ndents ? pdents[cur].name : NULL, &lastname, &lastdir);
 			clearfilter();
 			goto begin;
 		case SEL_CYCLE: // fallthrough
