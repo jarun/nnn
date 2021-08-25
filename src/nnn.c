@@ -6800,6 +6800,8 @@ nochange:
 					rundir[0] = '\0';
 					clearfilter();
 
+					setexports(newpath);
+
 					if (chdir(path) == -1
 					    || !run_plugin(&path, pent->name,
 								    runfile, &lastname, &lastdir)) {
@@ -7533,6 +7535,8 @@ nochange:
 					r = FALSE; /* Do not refresh dir after completion */
 				} else
 					r = TRUE;
+
+				setexports(newpath);
 
 				if (!run_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL),
 							 &lastname, &lastdir)) {
