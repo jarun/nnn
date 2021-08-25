@@ -5051,6 +5051,30 @@ static void show_help(const char *path)
 	unlink(g_tmpfpath);
 }
 
+static void setexports(void)
+{
+	char dvar[] = "d0";
+	char fvar[] = "f0";
+
+	if (ndents) {
+		setenv(envs[ENV_NCUR], pdents[cur].name, 1);
+		xstrsncpy(g_ctx[cfg.curctx].c_name, pdents[cur].name, NAME_MAX + 1);
+	} else if (g_ctx[cfg.curctx].c_name[0])
+		g_ctx[cfg.curctx].c_name[0] = '\0';
+
+	for (uchar_t i = 0; i < CTX_MAX; ++i) {
+		if (g_ctx[i].c_cfg.ctxactive) {
+			dvar[1] = fvar[1] = '1' + i;
+			setenv(dvar, g_ctx[i].c_path, 1);
+
+			if (g_ctx[i].c_name[0]) {
+				mkpath(g_ctx[i].c_path, g_ctx[i].c_name, g_buf);
+				setenv(fvar, g_buf, 1);
+			}
+		}
+	}
+}
+
 static bool run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 {
 	size_t len;
@@ -5186,6 +5210,8 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 		g_state.pluginit = 1;
 	}
 
+	setexports();
+
 	/* Check for run-cmd-as-plugin mode */
 	if (*file == '!') {
 		flags = F_MULTI | F_CONFIRM;
@@ -5310,30 +5336,6 @@ static bool prompt_run(void)
 	return ret;
 }
 
-static void setexports(char *buf)
-{
-	char dvar[] = "d0";
-	char fvar[] = "f0";
-
-	if (ndents) {
-		setenv(envs[ENV_NCUR], pdents[cur].name, 1);
-		xstrsncpy(g_ctx[cfg.curctx].c_name, pdents[cur].name, NAME_MAX + 1);
-	} else if (g_ctx[cfg.curctx].c_name[0])
-		g_ctx[cfg.curctx].c_name[0] = '\0';
-
-	for (uchar_t i = 0; i < CTX_MAX; ++i) {
-		if (g_ctx[i].c_cfg.ctxactive) {
-			dvar[1] = fvar[1] = '1' + i;
-			setenv(dvar, g_ctx[i].c_path, 1);
-
-			if (g_ctx[i].c_name[0]) {
-				mkpath(g_ctx[i].c_path, g_ctx[i].c_name, buf);
-				setenv(fvar, buf, 1);
-			}
-		}
-	}
-}
-
 static bool handle_cmd(enum action sel, char *newpath)
 {
 	endselection(FALSE);
@@ -5341,7 +5343,7 @@ static bool handle_cmd(enum action sel, char *newpath)
 	if (sel == SEL_LAUNCH)
 		return launch_app(newpath);
 
-	setexports(newpath);
+	setexports();
 
 	if (sel == SEL_PROMPT)
 		return prompt_run();
@@ -6800,8 +6802,6 @@ nochange:
 					rundir[0] = '\0';
 					clearfilter();
 
-					setexports(newpath);
-
 					if (chdir(path) == -1
 					    || !run_plugin(&path, pent->name,
 								    runfile, &lastname, &lastdir)) {
@@ -7535,8 +7535,6 @@ nochange:
 					r = FALSE; /* Do not refresh dir after completion */
 				} else
 					r = TRUE;
-
-				setexports(newpath);
 
 				if (!run_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL),
 							 &lastname, &lastdir)) {
