@@ -6424,7 +6424,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 	char newpath[PATH_MAX] __attribute__ ((aligned)),
 	     rundir[PATH_MAX] __attribute__ ((aligned)),
 	     runfile[NAME_MAX + 1] __attribute__ ((aligned));
-	char *path, *lastdir, *lastname, *dir, *tmp, hostname[_POSIX_HOST_NAME_MAX];
+	char *path, *lastdir, *lastname, *dir, *tmp;
 	pEntry pent;
 	enum action sel;
 	struct stat sb;
@@ -6504,8 +6504,8 @@ begin:
 #ifndef NOX11
 	if (cfg.x11 && !g_state.picker) {
 		/* Signal CWD change to terminal */
-		gethostname(hostname, sizeof(hostname));
-		printf("\033]7;file://%s%s\033\\", hostname, path);
+		gethostname(newpath, sizeof(newpath));
+		printf("\033]7;file://%s%s\033\\", newpath, path);
 
 		/* Set terminal window title */
 		r = set_tilde_in_path(path);
