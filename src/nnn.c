@@ -6501,13 +6501,12 @@ begin:
 		setdirwatch();
 	}
 
-	/* Signal CWD change to terminal */
-	gethostname(hostname, sizeof(hostname));
-	printf("\033]7;file://%s%s\033\\", hostname, path);
-	fflush(stdout);
-
 #ifndef NOX11
 	if (cfg.x11 && !g_state.picker) {
+		/* Signal CWD change to terminal */
+		gethostname(hostname, sizeof(hostname));
+		printf("\033]7;file://%s%s\033\\", hostname, path);
+
 		/* Set terminal window title */
 		r = set_tilde_in_path(path);
 
