@@ -6424,7 +6424,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 	char newpath[PATH_MAX] __attribute__ ((aligned)),
 	     rundir[PATH_MAX] __attribute__ ((aligned)),
 	     runfile[NAME_MAX + 1] __attribute__ ((aligned));
-	char *path, *lastdir, *lastname, *dir, *tmp;
+	char *path, *lastdir, *lastname, *dir, *tmp, hostname[_POSIX_HOST_NAME_MAX];
 	pEntry pent;
 	enum action sel;
 	struct stat sb;
@@ -6500,6 +6500,11 @@ begin:
 		valid_parent(path, lastname);
 		setdirwatch();
 	}
+
+	/* Signal CWD change to terminal */
+	gethostname(hostname, sizeof(hostname));
+	printf("\033]7;file://%s%s\033\\", hostname, path);
+	fflush(stdout);
 
 #ifndef NOX11
 	if (cfg.x11 && !g_state.picker) {
