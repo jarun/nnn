@@ -446,6 +446,7 @@ static char *listroot;
 static char *plgpath;
 static char *pnamebuf, *pselbuf, *findselpos;
 static char *mark;
+static char *hostname;
 #ifndef NOFIFO
 static char *fifopath;
 #endif
@@ -6503,6 +6504,9 @@ begin:
 
 #ifndef NOX11
 	if (cfg.x11 && !g_state.picker) {
+		/* Signal CWD change to terminal */
+		printf("\033]7;file://%s%s\033\\", hostname, path);
+
 		/* Set terminal window title */
 		r = set_tilde_in_path(path);
 
@@ -8113,6 +8117,8 @@ static void cleanup(void)
 	if (cfg.x11 && !g_state.picker) {
 		printf("\033[23;0t"); /* reset terminal window title */
 		fflush(stdout);
+
+		free(hostname);
 	}
 #endif
 	free(selpath);
@@ -8548,6 +8554,14 @@ int main(int argc, char *argv[])
 		/* Save terminal window title */
 		printf("\033[22;0t");
 		fflush(stdout);
+
+		hostname = malloc(_POSIX_HOST_NAME_MAX + 1);
+		if (!hostname) {
+			xerror();
+			return EXIT_FAILURE;
+		}
+		gethostname(hostname, _POSIX_HOST_NAME_MAX);
+		hostname[_POSIX_HOST_NAME_MAX] = '\0';
 	}
 #endif
 
