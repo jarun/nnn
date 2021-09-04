@@ -22,7 +22,8 @@ fi
 if type jump >/dev/null 2>&1; then
     printf "jump to : "
     IFS= read -r line
-    odir="$(jump cd "${line}")"
+    # shellcheck disable=SC2086
+    odir="$(jump cd ${line})"
     printf "%s" "0c$odir" > "$NNN_PIPE"
 elif type autojump >/dev/null 2>&1; then
     printf "jump to : "
