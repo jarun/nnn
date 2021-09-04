@@ -187,6 +187,7 @@
 #define EXEC_ARGS_MAX   10
 #define LIST_FILES_MAX  (1 << 16)
 #define SCROLLOFF       3
+#define COLOR_256       256
 
 /* Time intervals */
 #define DBLCLK_INTERVAL_NS (400000000)
@@ -2091,7 +2092,7 @@ static bool initcurses(void *oldmask)
 		use_default_colors();
 
 		/* Initialize file colors */
-		if (COLORS >= 256) {
+		if (COLORS >= COLOR_256) {
 			if (!(g_state.oldcolor || init_fcolors())) {
 				exitcurses();
 				msg(env_cfg[NNN_FCOLORS]);
@@ -2106,7 +2107,7 @@ static bool initcurses(void *oldmask)
 		if (colors && *colors == '#') {
 			char *sep = strchr(colors, ';');
 
-			if (!g_state.oldcolor && COLORS >= 256) {
+			if (!g_state.oldcolor && COLORS >= COLOR_256) {
 				++colors;
 				ext = TRUE;
 
@@ -2150,7 +2151,7 @@ static bool initcurses(void *oldmask)
 
 #ifdef ICONS_ENABLED
 	if (!g_state.oldcolor) {
-		uchar_t icolors[256] = {0};
+		uchar_t icolors[COLOR_256] = {0};
 		char c;
 
 		memset(icon_positions, 0x7f, sizeof(icon_positions));
