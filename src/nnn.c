@@ -810,7 +810,7 @@ static haiku_nm_h haiku_hnd;
 #define exitcurses() endwin()
 #define printwarn(presel) printwait(strerror(errno), presel)
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
-#define copycurname() xstrsncpy(lastname, pdents[cur].name, NAME_MAX + 1)
+#define copycurname() xstrsncpy(lastname, ndents ? pdents[cur].name : "\0", NAME_MAX + 1)
 #define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
@@ -3434,8 +3434,7 @@ end:
 		ln[REGEX_MAX - 1] = ln[1];
 
 	/* Save current */
-	if (ndents)
-		copycurname();
+	copycurname();
 
 	curs_set(FALSE);
 	settimeout();
@@ -6669,9 +6668,7 @@ nochange:
 
 				/* Start watching the directory */
 				watch = TRUE;
-
-				if (ndents)
-					copycurname();
+				copycurname();
 				goto begin;
 			}
 
@@ -6716,8 +6713,7 @@ nochange:
 			} else {
 				if (cfg.filtermode || filterset())
 					presel = FILTER;
-				if (ndents)
-					copycurname();
+				copycurname();
 				goto nochange;
 			}
 #endif
@@ -7058,8 +7054,7 @@ nochange:
 						presel = FILTER;
 					clearfilter();
 				}
-				if (ndents)
-					copycurname();
+				copycurname();
 				goto begin;
 			case SEL_DETAIL:
 				cfg.showdetail ^= 1;
@@ -7146,8 +7141,7 @@ nochange:
 					g_state.autonext ^= 1;
 				if (cfg.filtermode)
 					presel = FILTER;
-				if (ndents)
-					copycurname();
+				copycurname();
 				goto nochange;
 			case SEL_EDIT:
 				spawn(editor, newpath, NULL, NULL, F_CLI);
@@ -7166,8 +7160,7 @@ nochange:
 			}
 
 			/* Save current */
-			if (ndents)
-				copycurname();
+			copycurname();
 			/* Repopulate as directory content may have changed */
 			goto begin;
 		}
@@ -7332,7 +7325,7 @@ nochange:
 
 			if (newpath[0] && !access(newpath, F_OK))
 				xstrsncpy(lastname, xbasename(newpath), NAME_MAX+1);
-			else if (ndents)
+			else
 				copycurname();
 			goto begin;
 		}
@@ -7551,8 +7544,7 @@ nochange:
 				if (g_state.picked)
 					return EXIT_SUCCESS;
 
-				if (ndents)
-					copycurname();
+				copycurname();
 
 				if (!r) {
 					cfg.filtermode ? presel = FILTER : statusbar(path);
@@ -7598,8 +7590,7 @@ nochange:
 				presel = FILTER;
 
 			/* Save current */
-			if (ndents)
-				copycurname();
+			copycurname();
 
 			if (!r)
 				goto nochange;
@@ -7715,9 +7706,7 @@ nochange:
 				idle = 0;
 			}
 
-			if (ndents)
-				copycurname();
-
+			copycurname();
 			goto nochange;
 		} /* switch (sel) */
 	}
