@@ -391,20 +391,19 @@ separated by \fI;\fR:
 
     NOTES:
     1. Use single quotes for $NNN_PLUG so $nnn is not interpreted
-    2. $nnn should be the last argument (IF used)
-    3. (Again) add \fB!\fR before the command
-    4. To disable directory refresh after running a \fIcommand as plugin\fR,
+    2. (Again) add \fB!\fR before the command
+    3. To disable directory refresh after running a \fIcommand as plugin\fR,
        prefix with \fB-!\fR
-    5. To skip user confirmation after command execution, suffix with \fB*\fR
+    4. To skip user confirmation after command execution, suffix with \fB*\fR
        Note: Do not use \fB*\fR with programs those run and exit e.g. cat
 
         export NNN_PLUG='y:-!sync*'
 
-    6. To run a \fIGUI app as plugin\fR, add a \fB&\fR after \fB!\fR
+    5. To run a \fIGUI app as plugin\fR, add a \fB&\fR after \fB!\fR
 
         export NNN_PLUG='m:-!&mousepad $nnn'
 
-    7. To show the output of run-and-exit commands which do not need user input,
+    6. To show the output of run-and-exit commands which do not need user input,
        add \fB|\fR (pipe) after \fB!\fR
        Note: This option is incompatible with \fB&\fR (terminal output is masked
        for GUI programs) and ignores \fB*\fR (output is already paged for user)

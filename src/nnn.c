@@ -5076,7 +5076,7 @@ static void setexports(void)
 	}
 }
 
-static bool run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
+static bool run_cmd_as_plugin(const char *file, uchar_t flags)
 {
 	size_t len;
 
@@ -5089,15 +5089,10 @@ static bool run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 		--len;
 	}
 
-	if (is_suffix(g_buf, " $nnn"))
-		g_buf[len - 5] = '\0'; /* Set `\0` to clear ' $nnn' suffix */
-	else
-		runfile = NULL;
-
 	if (flags & F_PAGE)
-		get_output(g_buf, runfile, NULL, -1, TRUE, TRUE);
+		get_output(g_buf, NULL, NULL, -1, TRUE, TRUE);
 	else
-		spawn(g_buf, runfile, NULL, NULL, flags);
+		spawn(g_buf, NULL, NULL, NULL, flags);
 
 	return TRUE;
 }
@@ -5230,7 +5225,7 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 			return FALSE;
 
 		if ((flags & F_NOTRACE) || (flags & F_PAGE))
-			return run_cmd_as_plugin(file, runfile, flags);
+			return run_cmd_as_plugin(file, flags);
 
 		cmd_as_plugin = TRUE;
 	}
@@ -5264,7 +5259,7 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 			} else
 				spawn(g_buf, NULL, *path, sel, 0);
 		} else
-			run_cmd_as_plugin(file, runfile, flags);
+			run_cmd_as_plugin(file, flags);
 
 		close(wfd);
 		_exit(EXIT_SUCCESS);
