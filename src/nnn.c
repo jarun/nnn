@@ -166,6 +166,9 @@
 #define ISODD(x)        ((x) & 1)
 #define ISBLANK(x)      ((x) == ' ' || (x) == '\t')
 #define TOUPPER(ch)     (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
+#define TOLOWER(ch)     (((ch) >= 'A' && (ch) <= 'Z') ? ((ch) - 'A' + 'a') : (ch))
+#define ISUPPER_(ch)     ((ch) >= 'A' && (ch) <= 'Z')
+#define ISLOWER_(ch)     ((ch) >= 'a' && (ch) <= 'z')
 #define CMD_LEN_MAX     (PATH_MAX + ((NAME_MAX + 1) << 1))
 #define ALIGN_UP(x, A)  ((((x) + (A) - 1) / (A)) * (A))
 #define READLINE_MAX    256
@@ -430,9 +433,11 @@ static int fifofd = -1;
 static uint_t idletimeout, selbufpos, selbuflen;
 static ushort_t xlines, xcols;
 static ushort_t idle;
-static uchar_t maxbm, maxplug;
+static uchar_t maxbm, maxplug, maxorder;
+static uchar_t cfgsort[CTX_MAX + 1];
 static char *bmstr;
 static char *pluginstr;
+static char *orderstr;
 static char *opener;
 static char *editor;
 static char *enveditor;
@@ -457,6 +462,7 @@ static struct entry *pdents;
 static blkcnt_t dir_blocks;
 static kv *bookmark;
 static kv *plug;
+static kv *order;
 static uchar_t tmpfplen, homelen;
 static uchar_t blk_shift = BLK_SHIFT_512;
 #ifndef NOMOUSE
@@ -684,8 +690,9 @@ static const char * const messages[] = {
 #define NNN_MCLICK  8
 #define NNN_SEL     9
 #define NNN_ARCHIVE 10
-#define NNN_HELP    11 /* strings end here */
-#define NNN_TRASH   12 /* flags begin here */
+#define NNN_ORDER   11
+#define NNN_HELP    12 /* strings end here */
+#define NNN_TRASH   13 /* flags begin here */
 
 static const char * const env_cfg[] = {
 	"NNN_OPTS",
@@ -699,6 +706,7 @@ static const char * const env_cfg[] = {
 	"NNN_MCLICK",
 	"NNN_SEL",
 	"NNN_ARCHIVE",
+	"NNN_ORDER",
 	"NNN_HELP",
 	"NNN_TRASH",
 };
@@ -3788,6 +3796,22 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
 	return NULL;
 }
 
+static int get_kv_key(kv *kvarr, char *val, uchar_t max, uchar_t id)
+{
+	if (!kvarr)
+		return -1;
+
+	if (id != NNN_ORDER) /* For now this function supports only order string */
+		return -1;
+
+	for (int r = 0; kvarr[r].key && r < max; ++r) {
+		if (xstrcmp((orderstr + kvarr[r].off), val) == 0)
+			return kvarr[r].key;
+	}
+
+	return -1;
+}
+
 static void resetdircolor(int flags)
 {
 	/* Directories are always shown on top, clear the color when moving to first file */
@@ -4171,13 +4195,19 @@ static void savecurctx(char *path, char *curname, int nextctx)
 
 	g_ctx[tmpcfg.curctx].c_cfg = tmpcfg;
 
-	if (ctxr->c_cfg.ctxactive) /* Switch to saved context */
+	if (ctxr->c_cfg.ctxactive) { /* Switch to saved context */
 		tmpcfg = ctxr->c_cfg;
-	else { /* Set up a new context from current context */
+		/* Skip ordering an open context */
+		cfgsort[CTX_MAX] = cfgsort[nextctx];
+		cfgsort[nextctx] = '0';
+	} else { /* Set up a new context from current context */
 		ctxr->c_cfg.ctxactive = 1;
 		xstrsncpy(ctxr->c_path, path, PATH_MAX);
 		ctxr->c_last[0] = ctxr->c_name[0] = ctxr->c_fltr[0] = ctxr->c_fltr[1] = '\0';
 		ctxr->c_cfg = tmpcfg;
+		/* If already in an ordered dir, clear ordering for the new context and let it order */
+		if (cfgsort[cfg.curctx] == 'z')
+			cfgsort[nextctx] = 'z';
 	}
 
 	tmpcfg.curctx = nextctx;
@@ -5950,7 +5980,13 @@ static int handle_context_switch(enum action sel)
 
 static int set_sort_flags(int r)
 {
-	bool session = !r;
+	bool session = (r == '\0');
+	bool reverse = FALSE;
+
+	if (ISUPPER_(r) && (r != 'R') && (r != 'C')) {
+		reverse = TRUE;
+		r = TOLOWER(r);
+	}
 
 	/* Set the correct input in case of a session load */
 	if (session) {
@@ -6059,6 +6095,13 @@ static int set_sort_flags(int r)
 	default:
 		return 0;
 	}
+
+	if (reverse) {
+		cfg.reverse = 1;
+		entrycmpfn = &reventrycmp;
+	}
+
+	cfgsort[cfg.curctx] = (uchar_t)r;
 
 	return r;
 }
@@ -6488,7 +6531,8 @@ static bool browse(char *ipath, const char *session, int pkey)
 		errexit();
 
 begin:
-	/* Can fail when permissions change while browsing.
+	/*
+	 * Can fail when permissions change while browsing.
 	 * It's assumed that path IS a directory when we are here.
 	 */
 	if (chdir(path) == -1) {
@@ -6532,6 +6576,16 @@ begin:
 		watch = FALSE;
 	}
 #endif
+
+	if (cfgsort[cfg.curctx] == 'z')
+		set_sort_flags('c');
+	if (order && (!cfgsort[cfg.curctx] || (cfgsort[cfg.curctx] == 'c'))
+	    && ((r = get_kv_key(order, path, maxorder, NNN_ORDER)) > 0)) {
+		set_sort_flags(r);
+		cfgsort[cfg.curctx] = 'z';
+	}
+	if (cfgsort[cfg.curctx] == '0')
+		cfgsort[cfg.curctx] = cfgsort[CTX_MAX];
 
 	populate(path, lastname);
 	if (g_state.interrupt) {
@@ -8353,6 +8407,12 @@ int main(int argc, char *argv[])
 	/* Parse plugins string */
 	if (!parsekvpair(&plug, &pluginstr, NNN_PLUG, &maxplug)) {
 		msg(env_cfg[NNN_PLUG]);
+		return EXIT_FAILURE;
+	}
+
+	/* Parse order string */
+	if (!parsekvpair(&order, &orderstr, NNN_ORDER, &maxorder)) {
+		msg(env_cfg[NNN_ORDER]);
 		return EXIT_FAILURE;
 	}
 

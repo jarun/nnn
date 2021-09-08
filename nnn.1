@@ -127,6 +127,7 @@ supports the following options:
 .Fl "T key"
         sort order
         keys: 'a'u / 'd'u / 'e'xtension / 'r'everse / 's'ize / 't'ime / 'v'ersion
+        capitalize to reverse (except 'r')
 .Pp
 .Fl u
         use selection if available, don't prompt to choose between selection and hovered entry
@@ -427,6 +428,15 @@ separated by \fI;\fR:
     ----------------------------------- + -------------------------------------------------
 
     Online docs: https://github.com/jarun/nnn/tree/master/plugins
+.Ed
+.Pp
+\fBNNN_ORDER:\fR directory-specific sort key.
+.Bd -literal
+    export NNN_ORDER='t:/home/user/Downloads;S:/tmp'
+
+    NOTE: Sort keys can be a/d/e/r/s/t/v (see program option -T).
+          Capitalize to reverse (except 'r').
+          Path must be absolute.
 .Ed
 .Pp
 \fBNNN_COLORS:\fR string of color numbers for each context, e.g.:

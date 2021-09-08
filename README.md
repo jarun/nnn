@@ -78,6 +78,7 @@ It runs smoothly on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) 
   - Case-insensitive version (_aka_ natural) sort
   - By name, access/change/mod (default) time, size, extn
   - Reverse sort
+  - Directory-specific ordering
 - Mimes
   - Preview hovered files in FIFO-based previewer
   - Open with desktop opener or specify a custom opener
