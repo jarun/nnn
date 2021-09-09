@@ -6577,14 +6577,15 @@ begin:
 	}
 #endif
 
-	if (cfgsort[cfg.curctx] == 'z')
-		set_sort_flags('c');
-	if (order && (!cfgsort[cfg.curctx] || (cfgsort[cfg.curctx] == 'c'))
-	    && ((r = get_kv_key(order, path, maxorder, NNN_ORDER)) > 0)) {
-		set_sort_flags(r);
-		cfgsort[cfg.curctx] = 'z';
-	}
-	if (cfgsort[cfg.curctx] == '0')
+	if (cfgsort[cfg.curctx] != '0') {
+		if (cfgsort[cfg.curctx] == 'z')
+			set_sort_flags('c');
+		if (order && (!cfgsort[cfg.curctx] || (cfgsort[cfg.curctx] == 'c'))
+		    && ((r = get_kv_key(order, path, maxorder, NNN_ORDER)) > 0)) {
+			set_sort_flags(r);
+			cfgsort[cfg.curctx] = 'z';
+		}
+	} else
 		cfgsort[cfg.curctx] = cfgsort[CTX_MAX];
 
 	populate(path, lastname);
