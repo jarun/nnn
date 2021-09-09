@@ -4198,8 +4198,10 @@ static void savecurctx(char *path, char *curname, int nextctx)
 	if (ctxr->c_cfg.ctxactive) { /* Switch to saved context */
 		tmpcfg = ctxr->c_cfg;
 		/* Skip ordering an open context */
-		cfgsort[CTX_MAX] = cfgsort[nextctx];
-		cfgsort[nextctx] = '0';
+		if (order) {
+			cfgsort[CTX_MAX] = cfgsort[nextctx];
+			cfgsort[nextctx] = '0';
+		}
 	} else { /* Set up a new context from current context */
 		ctxr->c_cfg.ctxactive = 1;
 		xstrsncpy(ctxr->c_path, path, PATH_MAX);
@@ -6577,16 +6579,18 @@ begin:
 	}
 #endif
 
-	if (order && cfgsort[cfg.curctx] != '0') {
-		if (cfgsort[cfg.curctx] == 'z')
-			set_sort_flags('c');
-		if ((!cfgsort[cfg.curctx] || (cfgsort[cfg.curctx] == 'c'))
-		    && ((r = get_kv_key(order, path, maxorder, NNN_ORDER)) > 0)) {
-			set_sort_flags(r);
-			cfgsort[cfg.curctx] = 'z';
-		}
-	} else
-		cfgsort[cfg.curctx] = cfgsort[CTX_MAX];
+	if (order) {
+		if (cfgsort[cfg.curctx] != '0') {
+			if (cfgsort[cfg.curctx] == 'z')
+				set_sort_flags('c');
+			if ((!cfgsort[cfg.curctx] || (cfgsort[cfg.curctx] == 'c'))
+			    && ((r = get_kv_key(order, path, maxorder, NNN_ORDER)) > 0)) {
+				set_sort_flags(r);
+				cfgsort[cfg.curctx] = 'z';
+			}
+		} else
+			cfgsort[cfg.curctx] = cfgsort[CTX_MAX];
+	}
 
 	populate(path, lastname);
 	if (g_state.interrupt) {
