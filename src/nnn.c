@@ -5120,9 +5120,9 @@ static bool run_cmd_as_plugin(const char *file, uchar_t flags)
 	}
 
 	if (flags & F_PAGE)
-		get_output(g_buf, NULL, NULL, -1, TRUE, TRUE);
+		get_output(utils[UTIL_SH_EXEC], g_buf, NULL, -1, TRUE, TRUE);
 	else
-		spawn(g_buf, NULL, NULL, NULL, flags);
+		spawn(utils[UTIL_SH_EXEC], g_buf, NULL, NULL, flags);
 
 	return TRUE;
 }
