@@ -210,6 +210,7 @@
 #define ICON_EXT_RPM       ICON_ARCHIVE
 #define ICON_EXT_RSS       "\uf96b"
 #define ICON_EXT_RTF       "\uf724"
+#define ICON_EXT_RB        ICON_RUBY
 
 /* S */
 #define ICON_EXT_SASS      "\ue603"

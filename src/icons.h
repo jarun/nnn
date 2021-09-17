@@ -245,6 +245,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* R */
 	{"rar",      FA_FILE_ARCHIVE_O,    COLOR_ARCHIVE},
+	{"rb",       MFIZZ_RUBY,           COLOR_RUBY},
 	{"rc",       FA_COGS,              0},
 	{"rom",      FA_LOCK,              0},
 	{"rpm",      FA_FILE_ARCHIVE_O,    COLOR_ARCHIVE},
@@ -455,6 +456,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* R */
 	{"rar",        ICON_EXT_RAR,       COLOR_ARCHIVE},
+	{"rb",         ICON_EXT_RB,        COLOR_RUBY},
 	{"rc",         ICON_EXT_RC,        0},
 	{"rom",        ICON_EXT_ROM,       0},
 	{"rpm",        ICON_EXT_RPM,       COLOR_ARCHIVE},
