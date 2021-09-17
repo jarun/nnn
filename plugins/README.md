@@ -29,6 +29,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [fzopen](fzopen) | Fuzzy find file(s) in subtree to edit/open/pick | sh | fzf, xdg-open/open |
 | [fzplug](fzplug) | Fuzzy find, preview and run other plugins | sh | fzf |
 | [getplugs](getplugs) | Update plugins to installed `nnn` version | sh | curl |
+| [goto](goto) | Use key combos for quick directory navigation | sh | - |
 | [gpg\*](gpg\*) | Encrypt/decrypt files using GPG [✓] | sh | gpg |
 | [gutenread](gutenread) | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
 | [imgresize](imgresize) | Batch resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |

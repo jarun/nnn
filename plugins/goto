@@ -1,0 +1,79 @@
+#!/usr/bin/env sh
+
+# Description: Use key combos for quick changing directory
+#
+# Usage:
+#   1. Create a gotos file and set $GOTOS_LIST accordingly
+#      By default, $GOTOS_LIST is set to: ${XDG_CACHE_HOME:-$HOME/.cache}/nnn/gotos
+#   2. Add goto shortcuts to the file in this syntax
+#
+#     `<key combos> <absolute path to target directory>`
+#
+#     Eg: cf /home/ichirou2910/.config
+#         h /home/ichirou2910
+#     
+# Notes: This plugin will select the first match it found
+#        Double check for overlapped combos
+#
+#     Eg: For 'cf' and 'cff', 'cf' will be selected
+#
+#
+# Shell: POSIX compliant
+# Author: Ichirou2910
+
+prompt_exit() {
+    read -r _
+    exit 2
+}
+
+if [ -z "$GOTOS_LIST" ]; then
+    GOTOS_LIST="${XDG_CACHE_HOME:-$HOME/.cache}/nnn/gotos"
+fi
+
+if [ ! -f "$GOTOS_LIST" ]; then
+    printf "No available shortcut! Please read USAGE."
+    prompt_exit
+fi
+
+input=""
+match=""
+
+# Check if NNN_PIPE is set
+if [ -z "$NNN_PIPE" ]; then
+    printf 'ERROR: NNN_PIPE is not set!'
+    prompt_exit
+fi
+
+printf "Input keys: "
+
+while [ -z "$target" ]
+do
+    read -rn 1 key
+
+    input="$input$key"
+    match=$(grep "^$input " "$GOTOS_LIST" -m1) # select first match only
+
+    # if current input does not match, check for potential matches
+    if [ -z "$match" ]; then
+        potential=$(grep "^$input" "$GOTOS_LIST")
+
+        # if no potential match, exit
+        if [ -z "$potential" ]; then
+            printf "\nERROR: No shortcut match!\n"
+            prompt_exit
+        fi
+    fi
+done
+
+printf "\n"
+target=$(echo "$match" | cut -d ' ' -f 2)
+
+if [ -n "$target" ] && [ -d "$target" ]; then
+    # Go to target directory
+    context=0
+    printf "%s" "${context}c$target" > "$NNN_PIPE"
+else
+    printf "Target directory not found. Please check again."
+    prompt_exit
+fi
+
