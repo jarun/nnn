@@ -46,7 +46,7 @@ fi
 
 printf "Input keys: "
 
-while [ -z "$target" ]
+while [ -z "$match" ]
 do
     read -rn 1 key
 
@@ -66,7 +66,7 @@ do
 done
 
 printf "\n"
-target=$(echo "$match" | cut -d ' ' -f 2)
+target=$(cut -d ' ' -f 2- <<< "$match")
 
 if [ -n "$target" ] && [ -d "$target" ]; then
     # Go to target directory
