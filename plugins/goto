@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Description: Use key combos for quick changing directory
 #
@@ -18,7 +18,7 @@
 #     Eg: For 'cf' and 'cff', 'cf' will be selected
 #
 #
-# Shell: POSIX compliant
+# Shell: Bash
 # Author: Ichirou2910
 
 prompt_exit() {
