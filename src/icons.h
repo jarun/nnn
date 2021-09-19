@@ -317,6 +317,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* B */
 	{"bat",        ICON_EXT_BAT,       0},
+	{"bib",        ICON_EXT_BIB,       0},
 	{"bin",        ICON_EXT_BIN,       0},
 	{"bmp",        ICON_EXT_BMP,       COLOR_IMAGE},
 	{"bz2",        ICON_EXT_BZ2,       COLOR_ARCHIVE},
@@ -333,6 +334,7 @@ static const struct icon_pair icons_ext[] = {
 	{"clj",        ICON_EXT_CLJ,       0},
 	{"cljc",       ICON_EXT_CLJC,      0},
 	{"cljs",       ICON_EXT_CLJS,      0},
+	{"cls",        ICON_EXT_CLS,       0},
 	{"cmake",      ICON_EXT_CMAKE,     0},
 	{"coffee",     ICON_EXT_COFFEE,    0},
 	{"conf",       ICON_EXT_CONF,      0},
@@ -473,6 +475,7 @@ static const struct icon_pair icons_ext[] = {
 	{"sln",        ICON_EXT_SLN,       0},
 	{"sql",        ICON_EXT_SQL,       0},
 	{"srt",        ICON_EXT_SRT,       0},
+	{"sty",        ICON_EXT_STY,       0},
 	{"sub",        ICON_EXT_SUB,       0},
 	{"svg",        ICON_EXT_SVG,       COLOR_IMAGE},
 
