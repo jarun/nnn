@@ -367,7 +367,8 @@ typedef struct {
 	uint_t stayonsel  : 1;  /* Disable auto-proceed on select */
 	uint_t trash      : 2;  /* Use trash to delete files 1: trash-cli, 2: gio trash */
 	uint_t uidgid     : 1;  /* Show owner and group info */
-	uint_t reserved   : 7;  /* Adjust when adding/removing a field */
+	uint_t previewer  : 1;  /* Run state of previewer */
+	uint_t reserved   : 6;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -512,6 +513,11 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
 
 /* Buffer to store plugins control pipe location */
 static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
+
+#ifndef NOFIFO
+/* Buffer to store preview plugins control pipe location */
+static char g_ppipepath[TMP_LEN_MAX] __attribute__ ((aligned));
+#endif
 
 /* Non-persistent runtime states */
 static runstate g_state;
@@ -687,12 +693,13 @@ static const char * const messages[] = {
 #define NNN_FCOLORS 5
 #define NNNLVL      6
 #define NNN_PIPE    7
-#define NNN_MCLICK  8
-#define NNN_SEL     9
-#define NNN_ARCHIVE 10
-#define NNN_ORDER   11
-#define NNN_HELP    12 /* strings end here */
-#define NNN_TRASH   13 /* flags begin here */
+#define NNN_PPIPE   8
+#define NNN_MCLICK  9
+#define NNN_SEL     10
+#define NNN_ARCHIVE 11
+#define NNN_ORDER   12
+#define NNN_HELP    13 /* strings end here */
+#define NNN_TRASH   14 /* flags begin here */
 
 static const char * const env_cfg[] = {
 	"NNN_OPTS",
@@ -703,6 +710,7 @@ static const char * const env_cfg[] = {
 	"NNN_FCOLORS",
 	"NNNLVL",
 	"NNN_PIPE",
+	"NNN_PPIPE",
 	"NNN_MCLICK",
 	"NNN_SEL",
 	"NNN_ARCHIVE",
@@ -5131,15 +5139,20 @@ static bool run_cmd_as_plugin(const char *file, uchar_t flags)
 
 static bool plctrl_init(void)
 {
-	size_t len;
+	size_t len, lenbuf;
+	pid_t pid = getpid();
 
 	/* g_tmpfpath is used to generate tmp file names */
 	g_tmpfpath[tmpfplen - 1] = '\0';
-	len = xstrsncpy(g_pipepath, g_tmpfpath, TMP_LEN_MAX);
+	len = lenbuf = xstrsncpy(g_pipepath, g_tmpfpath, TMP_LEN_MAX);
 	g_pipepath[len - 1] = '/';
-	len = xstrsncpy(g_pipepath + len, "nnn-pipe.", TMP_LEN_MAX - len) + len;
-	xstrsncpy(g_pipepath + len - 1, xitoa(getpid()), TMP_LEN_MAX - len);
+	xstrsncpy(g_ppipepath, g_pipepath, TMP_LEN_MAX);
+	len += xstrsncpy(g_pipepath + len, "nnn-pipe.", TMP_LEN_MAX - len);
+	xstrsncpy(g_pipepath + len - 1, xitoa(pid), TMP_LEN_MAX - len);
+	len = xstrsncpy(g_ppipepath + lenbuf, "nnn-ppipe.", TMP_LEN_MAX - lenbuf) + lenbuf;
+	xstrsncpy(g_ppipepath + len - 1, xitoa(pid), TMP_LEN_MAX - len);
 	setenv(env_cfg[NNN_PIPE], g_pipepath, TRUE);
+	setenv(env_cfg[NNN_PPIPE], g_ppipepath, TRUE);
 
 	return EXIT_SUCCESS;
 }
@@ -5167,6 +5180,28 @@ static ssize_t read_nointr(int fd, void *buf, size_t count)
 
 	return len;
 }
+
+#ifndef NOFIFO
+void *previewpipe(void *arg)
+{
+	int fd;
+	char buf[1];
+	(void)arg;
+
+	mkfifo(g_ppipepath, 0600);
+	fd = open(g_ppipepath, O_RDONLY);
+
+	if (read(fd, buf, 1) == 1 && buf[0] == 'n') {
+		if (read_nointr(fd, buf, 1) != 1)
+			return NULL;
+		g_state.previewer = (uint_t)buf[0];
+	}
+
+	close(fd);
+	unlink(g_ppipepath);
+	return NULL;
+}
+#endif
 
 static char *readpipe(int fd, char *ctxnum, char **path)
 {
@@ -6486,6 +6521,9 @@ static bool browse(char *ipath, const char *session, int pkey)
 	int mousedent[2] = {-1, -1};
 	bool currentmouse = 1, rightclicksel = 0;
 #endif
+#ifndef NOFIFO
+	static int previewkey;
+#endif
 
 	atexit(dentfree);
 
@@ -6900,6 +6938,12 @@ nochange:
 				notify_fifo(FALSE, TRUE);
 #endif
 				spawn(editor, newpath, NULL, NULL, F_CLI);
+#ifndef NOFIFO
+				if (g_state.previewer) {
+					pkey = previewkey;
+					goto run_plugin;
+				}
+#endif
 				if (cfg.filtermode) {
 					presel = FILTER;
 					clearfilter();
@@ -6951,9 +6995,6 @@ nochange:
 			}
 
 			/* Invoke desktop opener as last resort */
-#ifndef NOFIFO
-			notify_fifo(FALSE, TRUE);
-#endif
 			spawn(opener, newpath, NULL, NULL, opener_flags);
 
 			/* Move cursor to the next entry if not the last entry */
@@ -7214,6 +7255,12 @@ nochange:
 				notify_fifo(FALSE, TRUE);
 #endif
 				spawn(editor, newpath, NULL, NULL, F_CLI);
+#ifndef NOFIFO
+				if (g_state.previewer) {
+					pkey = previewkey;
+					goto run_plugin;
+				}
+#endif
 				continue;
 			default: /* SEL_LOCK */
 				lock_terminal();
@@ -7573,6 +7620,7 @@ nochange:
 
 			goto begin;
 		}
+run_plugin:
 		case SEL_PLUGIN:
 			/* Check if directory is accessible */
 			if (!xdiraccess(plgpath)) {
@@ -7597,6 +7645,14 @@ nochange:
 					printwait(messages[MSG_INVALID_KEY], &presel);
 					goto nochange;
 				}
+
+#ifndef NOFIFO
+				if (xstrcmp(tmp, "preview-tui") == 0) {
+					previewkey = r;
+					pthread_t tid;
+					pthread_create(&tid, NULL, previewpipe, NULL);
+				}
+#endif
 
 				if (tmp[0] == '-' && tmp[1]) {
 					++tmp;
@@ -8196,8 +8252,10 @@ static void cleanup(void)
 	if (g_state.autofifo)
 		unlink(fifopath);
 #endif
-	if (g_state.pluginit)
+	if (g_state.pluginit){
 		unlink(g_pipepath);
+		unlink(g_ppipepath);
+	}
 #ifdef DEBUG
 	disabledbg();
 #endif

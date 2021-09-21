@@ -151,8 +151,10 @@ toggle_preview() {
         if [ -n "$QLPATH" ] && stat "$1"; then
             f="$(wslpath -w "$1")" && "$QLPATH" "$f" &
         fi
+        [ -p "$NNN_PPIPE" ] && printf "n0" > "$NNN_PPIPE"; 
     else
         start_preview "$1" "$QLPATH"
+        [ -p "$NNN_PPIPE" ] && printf "n1" > "$NNN_PPIPE"
     fi
 } >/dev/null 2>&1
 
