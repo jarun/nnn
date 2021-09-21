@@ -16,42 +16,43 @@
 #define ICON_MANUAL        "\uf5bd"
 
 // Top level and common icons
-#define ICON_GIT           "\ue5fb"
-#define ICON_DESKTOP       "\ufcbe"
+#define ICON_ARCHIVE       "\uf53b"
 #define ICON_BRIEFCASE     "\uf5d5"
+#define ICON_C             "\ue61e"
+#define ICON_CHANGELOG     "\uf7d9"
+#define ICON_CHESS         "\uf639"
+#define ICON_CLOJURE       "\ue76a"
+#define ICON_CONFIGURE     "\uf423"
+#define ICON_CPLUSPLUS     "\ue61d"
+#define ICON_DATABASE      "\uf6b7"
+#define ICON_DESKTOP       "\ufcbe"
 #define ICON_DOCUMENT      "\uf718"
 #define ICON_DOWNLOADS     "\uf5d7"
-#define ICON_MUSIC         "\uf832"
-#define ICON_MUSICFILE     "\uf886"
-#define ICON_PICTURES      "\uf753"
-#define ICON_PICTUREFILE   "\uf71e"
-#define ICON_PUBLIC        "\ue5ff"
-#define ICON_TEMPLATES     "\ufac6"
-#define ICON_VIDEOS        "\uf72f"
-#define ICON_VIDEOFILE     "\uf72a"
-#define ICON_CHANGELOG     "\uf7d9"
-#define ICON_CONFIGURE     "\uf423"
-#define ICON_LICENSE       "\uf718"
-#define ICON_MAKEFILE      "\uf68c"
-#define ICON_ARCHIVE       "\uf53b"
-#define ICON_SCRIPT        "\ue795"
-#define ICON_CPLUSPLUS     "\ue61d"
-#define ICON_JAVA          "\ue738"
-#define ICON_CLOJURE       "\ue76a"
-#define ICON_JAVASCRIPT    "\uf81d"
-#define ICON_LINUX         "\uf83c"
 #define ICON_FSHARP        "\ue7a7"
-#define ICON_RUBY          "\ue23e"
-#define ICON_C             "\ue61e"
-#define ICON_CHESS         "\uf639"
+#define ICON_GIT           "\ue5fb"
 #define ICON_HASKELL       "\ue777"
 #define ICON_HTML          "\uf72d"
-#define ICON_REACT         "\ue625"
-#define ICON_PYTHON        "\ue235"
-#define ICON_DATABASE      "\uf6b7"
-#define ICON_WORDDOC       "\uf72b"
-#define ICON_PLAYLIST      "\uf910"
+#define ICON_JAVA          "\ue738"
+#define ICON_JAVASCRIPT    "\uf81d"
+#define ICON_LICENSE       "\uf718"
+#define ICON_LINUX         "\uf83c"
+#define ICON_MAKEFILE      "\uf68c"
+#define ICON_MUSIC         "\uf832"
+#define ICON_MUSICFILE     "\uf886"
 #define ICON_OPTICALDISK   "\ue271"
+#define ICON_PICTUREFILE   "\uf71e"
+#define ICON_PICTURES      "\uf753"
+#define ICON_PLAYLIST      "\uf910"
+#define ICON_PUBLIC        "\ue5ff"
+#define ICON_PYTHON        "\ue235"
+#define ICON_REACT         "\ue625"
+#define ICON_RUBY          "\ue23e"
+#define ICON_SCRIPT        "\ue795"
+#define ICON_TEMPLATES     "\ufac6"
+#define ICON_TEX           "\ufb68"
+#define ICON_VIDEOFILE     "\uf72a"
+#define ICON_VIDEOS        "\uf72f"
+#define ICON_WORDDOC       "\uf72b"
 
 
 /* Numbers */
@@ -67,6 +68,7 @@
 
 /* B */
 #define ICON_EXT_BAT       ICON_SCRIPT
+#define ICON_EXT_BIB       ICON_TEX
 #define ICON_EXT_BIN       "\uf471"
 #define ICON_EXT_BMP       ICON_PICTUREFILE
 #define ICON_EXT_BZ2       ICON_ARCHIVE
@@ -83,6 +85,7 @@
 #define ICON_EXT_CLJ       ICON_CLOJURE
 #define ICON_EXT_CLJC      ICON_CLOJURE
 #define ICON_EXT_CLJS      ICON_CLOJURE
+#define ICON_EXT_CLS       ICON_TEX
 #define ICON_EXT_CMAKE     ICON_MAKEFILE
 #define ICON_EXT_COFFEE    "\ue751"
 #define ICON_EXT_CONF      ICON_CONFIGURE
@@ -222,12 +225,13 @@
 #define ICON_EXT_SLN       "\ue70c"
 #define ICON_EXT_SQL       ICON_DATABASE
 #define ICON_EXT_SRT       "\uf679"
+#define ICON_EXT_STY       ICON_TEX
 #define ICON_EXT_SUB       "\uf679"
 #define ICON_EXT_SVG       ICON_PICTUREFILE
 
 /* T */
 #define ICON_EXT_TAR       ICON_ARCHIVE
-#define ICON_EXT_TEX       "\uf6fc"
+#define ICON_EXT_TEX       ICON_TEX
 #define ICON_EXT_TGZ       ICON_ARCHIVE
 #define ICON_EXT_TS        "\ue628"
 #define ICON_EXT_TSX       ICON_REACT
