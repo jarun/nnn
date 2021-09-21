@@ -133,6 +133,10 @@ previewer_loop () {
             continue
         fi
 
+        if [ "$FILE" = "close" ] ; then
+            break
+        fi
+
         kill_viewer
 
         MIME="$(file -bL --mime-type "$FILE")"
