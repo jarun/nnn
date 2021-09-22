@@ -846,7 +846,7 @@ static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
 static void statusbar(char *path);
 #ifndef NOFIFO
-static void notify_fifo(bool force, bool closepreview);
+static void notify_fifo(bool force);
 #endif
 
 /* Functions */
@@ -3045,7 +3045,7 @@ try_quit:
 			} else {
 #ifndef NOFIFO
 				if (!g_state.fifomode)
-					notify_fifo(TRUE, FALSE); /* Send hovered path to NNN_FIFO */
+					notify_fifo(TRUE); /* Send hovered path to NNN_FIFO */
 #endif
 				escaped = TRUE;
 				settimeout();
@@ -5787,7 +5787,7 @@ static void populate(char *path, char *lastname)
 }
 
 #ifndef NOFIFO
-static void notify_fifo(bool force, bool closepreview)
+static void notify_fifo(bool force)
 {
 	if (!fifopath)
 		return;
@@ -5801,12 +5801,6 @@ static void notify_fifo(bool force, bool closepreview)
 				fifopath = NULL;
 			return;
 		}
-	}
-
-	if (closepreview) {
-		if (write(fifofd, "close\n", 6) != 6)
-			xerror();
-		return;
 	}
 
 	static struct entry lastentry;
@@ -5858,7 +5852,7 @@ static void move_cursor(int target, int ignore_scrolloff)
 
 #ifndef NOFIFO
 	if (!g_state.fifomode)
-		notify_fifo(FALSE, FALSE); /* Send hovered path to NNN_FIFO */
+		notify_fifo(FALSE); /* Send hovered path to NNN_FIFO */
 #endif
 }
 
@@ -6741,7 +6735,7 @@ nochange:
 					move_cursor(r, 1);
 #ifndef NOFIFO
 				else if ((event.bstate == BUTTON1_PRESSED) && !g_state.fifomode)
-					notify_fifo(TRUE, FALSE); /* Send clicked path to NNN_FIFO */
+					notify_fifo(TRUE); /* Send clicked path to NNN_FIFO */
 #endif
 				/* Handle right click selection */
 				if (event.bstate == BUTTON3_PRESSED) {
@@ -6814,7 +6808,7 @@ nochange:
                         }
 #ifndef NOFIFO
 			if (g_state.fifomode && (sel == SEL_OPEN)) {
-				notify_fifo(TRUE, FALSE); /* Send opened path to NNN_FIFO */
+				notify_fifo(TRUE); /* Send opened path to NNN_FIFO */
 				goto nochange;
 			}
 #endif
@@ -6896,9 +6890,6 @@ nochange:
 			    && strstr(g_buf, "text")
 #endif
 			) {
-#ifndef NOFIFO
-				notify_fifo(FALSE, TRUE);
-#endif
 				spawn(editor, newpath, NULL, NULL, F_CLI);
 				if (cfg.filtermode) {
 					presel = FILTER;
@@ -6951,9 +6942,6 @@ nochange:
 			}
 
 			/* Invoke desktop opener as last resort */
-#ifndef NOFIFO
-			notify_fifo(FALSE, TRUE);
-#endif
 			spawn(opener, newpath, NULL, NULL, opener_flags);
 
 			/* Move cursor to the next entry if not the last entry */
@@ -7210,9 +7198,6 @@ nochange:
 				copycurname();
 				goto nochange;
 			case SEL_EDIT:
-#ifndef NOFIFO
-				notify_fifo(FALSE, TRUE);
-#endif
 				spawn(editor, newpath, NULL, NULL, F_CLI);
 				continue;
 			default: /* SEL_LOCK */
@@ -8696,7 +8681,7 @@ int main(int argc, char *argv[])
 
 #ifndef NOFIFO
 	if (!g_state.fifomode)
-		notify_fifo(FALSE, FALSE);
+		notify_fifo(FALSE);
 	if (fifofd != -1)
 		close(fifofd);
 #endif

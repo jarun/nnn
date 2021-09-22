@@ -389,7 +389,6 @@ preview_fifo() {
         if [ -n "$selection" ]; then
             kill "$(cat "$PREVIEWPID")"
             [ -p "$FIFO_UEBERZUG" ] && ueberzug_remove
-            [ "$selection" = "close" ] && break
             preview_file "$selection"
             printf "%s" "$selection" > "$CURSEL"
         fi
