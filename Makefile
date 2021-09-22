@@ -31,6 +31,7 @@ O_MATCHFLTR := 0  # allow filters without matches
 # User patches
 O_GITSTATUS := 0 # add git status to detail view
 O_NAMEFIRST := 0 # print file name first, add uid and guid to detail view
+O_RESTOREPREVIEW := 0 # add preview pipe to close and restore preview pane
 
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
@@ -152,6 +153,7 @@ LOGO64X64 = misc/logo/logo-64x64.png
 
 GITSTATUS = patches/gitstatus
 NAMEFIRST = patches/namefirst
+RESTOREPREVIEW = patches/restorepreview
 
 # test if we are on Mac OS X and get X.Y.Z OS version with system binary /usr/bin/sw_vers
 MACOS_VERSION := $(strip $(shell command -v sw_vers >/dev/null && [ "`sw_vers -productName`" = "Mac OS X" ] && sw_vers -productVersion))
@@ -280,6 +282,9 @@ endif
 else ifeq ($(strip $(O_GITSTATUS)),1)
 	patch --forward --strip=1 --input=$(GITSTATUS)/mainline.diff
 endif
+ifeq ($(strip $(O_RESTOREPREVIEW)),1)
+	patch --forward --strip=1 --input=$(RESTOREPREVIEW)/mainline.diff
+endif
 
 postpatch:
 ifeq ($(strip $(O_NAMEFIRST)),1)
@@ -289,6 +294,9 @@ endif
 	patch --reverse --strip=1 --input=$(NAMEFIRST)/mainline.diff
 else ifeq ($(strip $(O_GITSTATUS)),1)
 	patch --reverse --strip=1 --input=$(GITSTATUS)/mainline.diff
+endif
+ifeq ($(strip $(O_RESTOREPREVIEW)),1)
+	patch --reverse --strip=1 --input=$(RESTOREPREVIEW)/mainline.diff
 endif
 
 skip: ;
