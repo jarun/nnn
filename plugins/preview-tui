@@ -146,15 +146,15 @@ toggle_preview() {
         QLPATH="Bridge.exe"
     fi
     if kill "$(cat "$FIFOPID")"; then
+        printf "0" > "$NNN_PPIPE"
         kill "$(cat "$PREVIEWPID")"
         pkill -f "tail --follow $FIFO_UEBERZUG"
         if [ -n "$QLPATH" ] && stat "$1"; then
             f="$(wslpath -w "$1")" && "$QLPATH" "$f" &
         fi
-        printf "0" > "$NNN_PPIPE"
     else
-        start_preview "$1" "$QLPATH"
         printf "1" > "$NNN_PPIPE"
+        start_preview "$1" "$QLPATH"
     fi
 } >/dev/null 2>&1
 
@@ -391,7 +391,7 @@ preview_fifo() {
         if [ -n "$selection" ]; then
             kill "$(cat "$PREVIEWPID")"
             [ -p "$FIFO_UEBERZUG" ] && ueberzug_remove
-            [ "$selection" = "close" ] && sleep 0.1 && break
+            [ "$selection" = "close" ] && sleep 0.15 && break
             preview_file "$selection"
             printf "%s" "$selection" > "$CURSEL"
         fi
