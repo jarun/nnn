@@ -146,14 +146,14 @@ toggle_preview() {
         QLPATH="Bridge.exe"
     fi
     if kill "$(cat "$FIFOPID")"; then
-        printf "0" > "$NNN_PPIPE"
+        [ -p "$NNN_PPIPE" ] && printf "0" > "$NNN_PPIPE"
         kill "$(cat "$PREVIEWPID")"
         pkill -f "tail --follow $FIFO_UEBERZUG"
         if [ -n "$QLPATH" ] && stat "$1"; then
             f="$(wslpath -w "$1")" && "$QLPATH" "$f" &
         fi
     else
-        printf "1" > "$NNN_PPIPE"
+        [ -p "$NNN_PPIPE" ] && printf "1" > "$NNN_PPIPE"
         start_preview "$1" "$QLPATH"
     fi
 } >/dev/null 2>&1
@@ -333,7 +333,11 @@ generate_preview() {
                     image_preview "$1" "$2" "$3"
                     return
                  fi ;;
-            image) convert "$3" -flatten -resize "$NNN_PREVIEWWIDTH"x"$NNN_PREVIEWHEIGHT"\> "$NNN_PREVIEWDIR/$3.jpg" ;;
+            image) if exists convert; then
+                       convert "$3" -flatten -resize "$NNN_PREVIEWWIDTH"x"$NNN_PREVIEWHEIGHT"\> "$NNN_PREVIEWDIR/$3.jpg"
+                   else
+                       image_preview "$1" "$2" "$3" && return
+                   fi ;;
             office) libreoffice --convert-to jpg "$3" --outdir "$NNN_PREVIEWDIR/${3%/*}"
                     filename="$(printf "%s" "${3##*/}" | cut -d. -f1)"
                     mv "$NNN_PREVIEWDIR/${3%/*}/$filename.jpg" "$NNN_PREVIEWDIR/$3.jpg" ;;
