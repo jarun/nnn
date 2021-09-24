@@ -77,7 +77,7 @@ USE_PISTOL="${USE_PISTOL:-0}"
 ICONLOOKUP="${ICONLOOKUP:-0}"
 PAGER="${PAGER:-less -P?n -R}"
 TMPDIR="${TMPDIR:-/tmp}"
-BAT_STYLE="${BAT_STYLE:-numbers}"
+BAT_STYLE="${BAT_STYLE:-plain}"
 BAT_THEME="${BAT_THEME:-ansi}"
 # Consider setting NNN_PREVIEWDIR to $XDG_CACHE_HOME/nnn/previews if you want to keep previews on disk between reboots
 NNN_PREVIEWDIR="${NNN_PREVIEWDIR:-$TMPDIR/nnn/previews}"
@@ -177,7 +177,7 @@ fifo_pager() {
         exec > "$tmpfifopath"
         if [ "$cmd" = "pager" ]; then
             if exists bat; then
-                bat --terminal-width="$(tput cols)" --decorations=always --color=always \
+                bat --terminal-width="$(tput cols)" --decorations=auto --color=auto \
                     --paging=never --style="$BAT_STYLE" --theme="$BAT_THEME" "$@" &
             else
                 $PAGER "$@" &
@@ -192,7 +192,7 @@ fifo_pager() {
 
 # Binary file: show file info inside the pager
 print_bin_info() {
-    printf -- "-------- \033[1;31mBinary file\033[0m --------\n"
+    printf -- "-------- Binary file --------\n"
     if exists mediainfo; then
         mediainfo "$1"
     else
