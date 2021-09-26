@@ -43,8 +43,7 @@ elif type zoxide >/dev/null 2>&1; then
     fi
 else
     # rupa/z uses $_Z_DATA, jethrokuan/z (=port of z for fish) uses $Z_DATA
-    datafile="${_Z_DATA:-$Z_DATA}"
-    datafile="${datafile:-$HOME/.z}"
+    datafile="${_Z_DATA:-${Z_DATA:-$HOME/.z}}"
     if type fzf >/dev/null 2>&1 && [ -f "$datafile" ]; then
         # Read the data from z's file instead of calling
         # z so the data doesn't need to be processed twice
