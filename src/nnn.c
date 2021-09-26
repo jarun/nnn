@@ -4952,6 +4952,8 @@ static size_t handle_bookmark(const char *bmark, char *newpath)
 
 	if (!r && chdir(newpath) == -1)
 		r = MSG_ACCESS;
+	else if (fd == '\r')
+		r = -1;
 
 	return r;
 }
@@ -6475,7 +6477,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 	pEntry pent;
 	enum action sel;
 	struct stat sb;
-	int r = -1, presel, selstartid = 0, selendid = 0;
+	int r = -1, presel, selstartid = 0, selendid = 0, waitbm = 0;
 	const uchar_t opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOSTDIN | F_NOWAIT));
 	bool watch = FALSE;
 	ino_t inode = 0;
@@ -6785,7 +6787,13 @@ nochange:
 				goto begin;
 
 			pent = &pdents[cur];
-			mkpath(path, pent->name, newpath);
+			if (waitbm) {
+				cfg.filtermode = waitbm - 1;
+				waitbm = FALSE;
+				if (!realpath(pent->name, newpath))
+					mkpath(path, pent->name, newpath);
+			} else
+				mkpath(path, pent->name, newpath);
 			DPRINTF_S(newpath);
 
 			/* Visit directory */
@@ -7005,9 +7013,12 @@ nochange:
 		case SEL_BMOPEN:
 			if (sel == SEL_BMOPEN) {
 				r = (int)handle_bookmark(mark, newpath);
-				if (r) {
+				if (r > 0) {
 					printwait(messages[r], &presel);
 					goto nochange;
+				} else if (r == -1) {
+					waitbm = cfg.filtermode + 1;
+					cfg.filtermode = 1;
 				}
 
 				if (strcmp(path, newpath) == 0)
