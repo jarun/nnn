@@ -452,7 +452,9 @@ static char *listroot;
 static char *plgpath;
 static char *pnamebuf, *pselbuf, *findselpos;
 static char *mark;
+#ifndef NOX11
 static char *hostname;
+#endif
 #ifndef NOFIFO
 static char *fifopath;
 #endif
