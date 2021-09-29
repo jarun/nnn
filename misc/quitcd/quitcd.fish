@@ -11,9 +11,11 @@ function n --wraps nnn --description 'support nnn quit and change directory'
         end
     end
 
-    # The default behaviour is to cd on quit (nnn checks if NNN_TMPFILE is set)
+    # The behaviour is set to cd on quit (nnn checks if NNN_TMPFILE is set)
     # To cd on quit only on ^G, remove the "-x" as in:
     #    set NNN_TMPFILE "$XDG_CONFIG_HOME/nnn/.lastd"
+    #    (or, to a custom path: set NNN_TMPFILE "/tmp/.lastd")
+    # or, export NNN_TMPFILE after nnn invocation
     if test -n "$XDG_CONFIG_HOME"
         set -x NNN_TMPFILE "$XDG_CONFIG_HOME/nnn/.lastd"
     else
