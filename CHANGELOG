@@ -1,3 +1,35 @@
+nnn v4.3 Martini
+2021-09-29
+
+- cool ASCII art logo in the help screen
+- add `bookmarks` directory for flexible symlinked bookmarks
+- new key <kbd>B</kbd> to add a symlinked bookmark for current dir
+- special variables `$dN`, `$fN` available for plugins/prompt/shell to access
+  dir/hovered file in each conext
+- config `NNN_ORDER` to set directory-specific ordering
+- show/hide hidden files as per context state in plugin based batch rename
+- retain search filter history for plugin `finder`
+- sync multiple instances of `nnn` after operation on selection
+- signal CWD change to terminal via OSC-7 (#1147)
+- save complete per-context filter when saving sessions
+- disable symlink resolution for paths in `NNN_BMS` and arg `PATH`
+- do not end selection mode on running plugins/prompt/shell
+- plugin `bookmarks` replaced by symlinked bookmarks support
+- list open locations in active contexts in help page
+- make option `O_MATCHFLTR` to discard filter key if no match
+- configurable `NNN_TMPFILE` to _cd on quit_
+- disable auto marking directories (use <kbd>-</kbd>)
+- picker mode improvements
+  - open tty for input if `STDIN` is non-tty
+  - truncate output file before writing
+  - do not double select a file on <kbd>Enter</kbd>
+- legacy macOS (< 10.12.0) support
+- no redraw during du calculation, show processed dir name
+- plugin `xdgdefault`: add dmenu support
+- user patch `restorepreview`: close/restore `preview-tui` for internal edits
+
+-------------------------------------------------------------------------------
+
 nnn v4.2 Mojito
 2021-07-21
 
