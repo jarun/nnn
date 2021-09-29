@@ -4,10 +4,10 @@
 # Author: Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index fe5d650..2d33716 100644
+index 88263beb..55f32e73 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -382,6 +382,10 @@ typedef struct {
+@@ -390,6 +390,10 @@ typedef struct {
  } session_header_t;
  #endif
 
@@ -18,7 +18,7 @@ index fe5d650..2d33716 100644
  /* GLOBALS */
 
  /* Configuration, contexts */
-@@ -1065,10 +1069,12 @@ static char *getpwname(uid_t uid)
+@@ -1083,10 +1087,12 @@ static char *getpwname(uid_t uid)
  	static char *namecache;
 
  	if (uidcache != uid) {
@@ -31,7 +31,7 @@ index fe5d650..2d33716 100644
  	}
 
  	return namecache ? namecache : xitoa(uid);
-@@ -1080,10 +1086,12 @@ static char *getgrname(gid_t gid)
+@@ -1098,10 +1104,12 @@ static char *getgrname(gid_t gid)
  	static char *grpcache;
 
  	if (gidcache != gid) {
@@ -44,7 +44,7 @@ index fe5d650..2d33716 100644
  	}
 
  	return grpcache ? grpcache : xitoa(gid);
-@@ -3796,14 +3804,13 @@ static void resetdircolor(int flags)
+@@ -3829,14 +3837,13 @@ static void resetdircolor(int flags)
   * Max supported str length: NAME_MAX;
   */
  #ifdef NOLC
@@ -62,7 +62,7 @@ index fe5d650..2d33716 100644
  {
  	wchar_t * const wbuf = (wchar_t *)g_buf;
  	wchar_t *buf = wbuf;
-@@ -3828,7 +3835,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
+@@ -3861,7 +3868,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
  		++buf;
  	}
 
@@ -71,7 +71,7 @@ index fe5d650..2d33716 100644
  }
 
  static off_t get_size(off_t size, off_t *pval, int comp)
-@@ -4089,33 +4096,7 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int
+@@ -4122,33 +4129,7 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int
  static void printent(const struct entry *ent, uint_t namecols, bool sel)
  {
  	char ind = '\0';
@@ -106,7 +106,7 @@ index fe5d650..2d33716 100644
  	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
 
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
-@@ -4140,15 +4121,40 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+@@ -4173,15 +4154,40 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
  		++namecols;
 
  #ifndef NOLC
@@ -150,7 +150,7 @@ index fe5d650..2d33716 100644
  }
 
  static void savecurctx(char *path, char *curname, int nextctx)
-@@ -6140,18 +6146,6 @@ static void statusbar(char *path)
+@@ -6250,18 +6256,6 @@ static void statusbar(char *path)
  		tocursor();
  }
 
@@ -169,7 +169,7 @@ index fe5d650..2d33716 100644
  static int adjust_cols(int n)
  {
  	/* Calculate the number of cols available to print entry name */
-@@ -6159,11 +6153,10 @@ static int adjust_cols(int n)
+@@ -6269,11 +6263,10 @@ static int adjust_cols(int n)
  	n -= (g_state.oldcolor ? 0 : 1 + xstrlen(ICON_PADDING_LEFT) + xstrlen(ICON_PADDING_RIGHT));
  #endif
  	if (cfg.showdetail) {
@@ -183,7 +183,7 @@ index fe5d650..2d33716 100644
  	}
 
  	/* 2 columns for preceding space and indicator */
-@@ -6200,8 +6193,6 @@ static void draw_line(int ncols)
+@@ -6310,8 +6303,6 @@ static void draw_line(int ncols)
  	/* Must reset e.g. no files in dir */
  	if (dir)
  		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
@@ -192,7 +192,7 @@ index fe5d650..2d33716 100644
  }
 
  static void redraw(char *path)
-@@ -6309,6 +6300,21 @@ static void redraw(char *path)
+@@ -6419,6 +6410,21 @@ static void redraw(char *path)
 
  	onscreen = MIN(onscreen + curscroll, ndents);
 
@@ -214,7 +214,7 @@ index fe5d650..2d33716 100644
  	ncols = adjust_cols(ncols);
 
  	int len = scanselforpath(path, FALSE);
-@@ -6339,7 +6345,7 @@ static void redraw(char *path)
+@@ -6449,7 +6455,7 @@ static void redraw(char *path)
  #endif
  	}
 
