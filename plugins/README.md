@@ -165,7 +165,7 @@ To run a GUI app as plugin, add a `&` after `!`.
 export NNN_PLUG='m:-!&mousepad $nnn'
 ```
 
-Note: $nnn must be the last argument in this case.
+Note: `$nnn` must be the last argument in this case.
 
 #### Page non-interactive command output
 
