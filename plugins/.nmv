@@ -20,6 +20,7 @@ EDITOR="${EDITOR:-vi}"
 TMPDIR="${TMPDIR:-/tmp}"
 INCLUDE_HIDDEN="${INCLUDE_HIDDEN:-0}"
 VERBOSE="${VERBOSE:-0}"
+RECURSIVE="${RECURSIVE:-0}"
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 exit_status=0
@@ -38,11 +39,19 @@ fi
 if [ "$resp" = "s" ]; then
 	arr=$(tr '\0' '\n' < "$selection")
 else
-	if [ "$INCLUDE_HIDDEN" -eq 0 ]; then
-		arr=$(find . ! -name . -prune ! -name ".*" -print | sort)
-	else
-		arr=$(find . ! -name . -prune -print | sort)
+	findcmd="find . ! -name ."
+
+	if [ "$RECURSIVE" -eq 0 ]; then
+		findcmd="$findcmd -prune"
 	fi
+
+	if [ "$INCLUDE_HIDDEN" -eq 0 ]; then
+		findcmd="$findcmd ! -name \".*\""
+	fi
+
+	findcmd="$findcmd -print"
+
+	arr=$(eval "$findcmd" | sort)
 fi
 
 lines=$(printf "%s\n" "$arr" | wc -l)
