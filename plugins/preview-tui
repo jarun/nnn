@@ -378,6 +378,13 @@ ueberzug_remove() {
 }
 
 winch_handler() {
+    # workaround for preview-tui tmux child causing zombie pane
+    if [ "$NNN_PARENT" -eq "$NNN_PARENT" ] 2>/dev/null; then
+        kill -0 "$NNN_PARENT" || return
+    else
+        pidof nnn || return
+    fi
+
     clear
     kill "$(cat "$PREVIEWPID")"
     if [ -p "$FIFO_UEBERZUG" ]; then
@@ -385,9 +392,6 @@ winch_handler() {
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
     preview_file "$(cat "$CURSEL")"
-    if ! kill -0 "$NNN_PARENT" || ! pgrep nnn >/dev/null; then
-        pkill -P "$$"
-    fi
 } 2>/dev/null
 
 preview_fifo() {
