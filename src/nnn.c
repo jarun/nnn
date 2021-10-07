@@ -7734,11 +7734,6 @@ nochange:
 					break; // fallthrough
 			}
 
-#ifndef NOSSN
-			if (session && g_state.prstssn)
-				save_session(session, NULL);
-#endif
-
 			/* CD on Quit */
 			tmp = getenv("NNN_TMPFILE");
 			if ((sel == SEL_QUITCD) || tmp) {
@@ -8636,6 +8631,11 @@ int main(int argc, char *argv[])
 		set_sort_flags(sort);
 
 	opt = browse(initpath, session, pkey);
+
+#ifndef NOSSN
+	if (session && g_state.prstssn)
+		save_session(session, NULL);
+#endif
 
 #ifndef NOMOUSE
 	mousemask(mask, NULL);
