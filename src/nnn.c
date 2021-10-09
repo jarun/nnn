@@ -7839,7 +7839,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 
 static char *load_input(int fd, const char *path)
 {
-	ssize_t i, chunk_count = 1, chunk = 512 * 1024 /* 512 KiB chunk size */, entries = 0;
+	ssize_t i, chunk_count = 1, chunk = (ssize_t)(512 * 1024) /* 512 KiB chunk size */, entries = 0;
 	char *input = malloc(sizeof(char) * chunk), *tmpdir = NULL;
 	char cwd[PATH_MAX], *next;
 	size_t offsets[LIST_FILES_MAX];
