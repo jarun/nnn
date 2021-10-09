@@ -6,7 +6,7 @@
 # Authors: Luuk van Baal, @crides
 
 diff --git a/src/nnn.c b/src/nnn.c
-index 88263beb..597ff2b3 100644
+index 897c32f1..00b57c2e 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
 @@ -285,6 +285,7 @@ typedef struct entry {
@@ -61,6 +61,7 @@ index 88263beb..597ff2b3 100644
 +	char workdir[PATH_MAX], *ret;
 +	FILE *fp = popen(gitrev, "r");
 +
++	git_statuses.show = FALSE;
 +	ret = fgets(workdir, PATH_MAX, fp);
 +	pclose(fp);
 +	if (!ret)
@@ -69,7 +70,6 @@ index 88263beb..597ff2b3 100644
 +	static char gitstat[] = "git -c core.quotePath= status --porcelain --ignored=matching -u ";
 +	char pathspec[PATH_MAX], status[PATH_MAX];
 +	size_t i = -1;
-+	git_statuses.show = FALSE;
 +	workdir[xstrlen(workdir) - 1] = '\0';
 +	snprintf(pathspec, PATH_MAX, "%s\"%s\"%s 2>/dev/null", gitstat, path, cfg.showhidden ? "" : "/*");
 +	fp = popen(pathspec, "r");
@@ -113,17 +113,20 @@ index 88263beb..597ff2b3 100644
  #if _POSIX_C_SOURCE >= 200112L
  	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
  #endif
-@@ -5746,6 +5800,36 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5746,6 +5800,39 @@ static int dentfill(char *path, struct entry **ppdents)
  #endif
  		}
 
 +		if (git_statuses.len) {
-+			char dentpath[PATH_MAX], prefix[PATH_MAX + 1];
++			char dentpath[PATH_MAX];
 +			size_t pathlen = mkpath(linkpath, dentp->name, dentpath);
-+			snprintf(prefix, PATH_MAX + 1, "%s/", dentpath);
 +			dentp->git_status[0] = dentp->git_status[1] = '-';
 +
 +			if (dentp->flags & DIR_OR_DIRLNK) {
++				char prefix[PATH_MAX];
++				memccpy(prefix, dentpath, '\0', PATH_MAX);
++				prefix[pathlen - 1] = '/';
++
 +				for (size_t i = 0; i < git_statuses.len; ++i)
 +					if (is_prefix(git_statuses.statuses[i].path, prefix, pathlen)) {
 +						if ((dentp->git_status[0] == '-') && (git_statuses.statuses[i].status[0] != '-'))
@@ -150,7 +153,7 @@ index 88263beb..597ff2b3 100644
  		++ndents;
  	} while ((dp = readdir(dirp)));
 
-@@ -6270,11 +6354,12 @@ static int adjust_cols(int n)
+@@ -6270,11 +6357,12 @@ static int adjust_cols(int n)
  #endif
  	if (cfg.showdetail) {
  		/* Fallback to light mode if less than 35 columns */
@@ -166,7 +169,7 @@ index 88263beb..597ff2b3 100644
 
  	/* 2 columns for preceding space and indicator */
  	return (n - 2);
-@@ -8034,6 +8119,7 @@ static void usage(void)
+@@ -8030,6 +8118,7 @@ static void usage(void)
  		" -F val  fifo mode [0:preview 1:explore]\n"
  #endif
  		" -g      regex filters\n"
@@ -174,7 +177,7 @@ index 88263beb..597ff2b3 100644
  		" -H      show hidden files\n"
  		" -J      no auto-proceed on select\n"
  		" -K      detect key collision\n"
-@@ -8174,6 +8260,7 @@ static void cleanup(void)
+@@ -8170,6 +8259,7 @@ static void cleanup(void)
  		free(hostname);
  	}
  #endif
@@ -182,7 +185,7 @@ index 88263beb..597ff2b3 100644
  	free(selpath);
  	free(plgpath);
  	free(cfgpath);
-@@ -8218,7 +8305,7 @@ int main(int argc, char *argv[])
+@@ -8214,7 +8304,7 @@ int main(int argc, char *argv[])
 
  	while ((opt = (env_opts_id > 0
  		       ? env_opts[--env_opts_id]
@@ -191,7 +194,7 @@ index 88263beb..597ff2b3 100644
  		switch (opt) {
  #ifndef NOFIFO
  		case 'a':
-@@ -8269,6 +8356,9 @@ int main(int argc, char *argv[])
+@@ -8265,6 +8355,9 @@ int main(int argc, char *argv[])
  			cfg.regex = 1;
  			filterfn = &visible_re;
  			break;
