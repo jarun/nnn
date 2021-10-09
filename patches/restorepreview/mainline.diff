@@ -4,7 +4,7 @@
 # Authors: Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index 88263beb..8aa24712 100644
+index 897c32f1..cf589bc8 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
 @@ -367,7 +367,8 @@ typedef struct {
@@ -193,22 +193,22 @@ index 88263beb..8aa24712 100644
  				if (cfg.filtermode) {
  					presel = FILTER;
  					clearfilter();
-@@ -7206,7 +7245,14 @@ nochange:
+@@ -7206,8 +7245,14 @@ nochange:
  				copycurname();
  				goto nochange;
  			case SEL_EDIT:
 +				if (g_state.previewer)
 +					notify_fifo(FALSE, TRUE);
- 				spawn(editor, newpath, NULL, NULL, F_CLI);
+				if (!g_state.picker)
+					spawn(editor, newpath, NULL, NULL, F_CLI);
 +				if (g_state.previewer) {
 +					pkey = previewkey;
 +					goto run_plugin;
 +				}
-+
  				continue;
  			default: /* SEL_LOCK */
  				lock_terminal();
-@@ -7566,6 +7612,7 @@ nochange:
+@@ -7567,6 +7612,7 @@ nochange:
 
  			goto begin;
  		}
@@ -216,7 +216,7 @@ index 88263beb..8aa24712 100644
  		case SEL_PLUGIN:
  			/* Check if directory is accessible */
  			if (!xdiraccess(plgpath)) {
-@@ -7591,6 +7638,12 @@ nochange:
+@@ -7592,6 +7638,12 @@ nochange:
  					goto nochange;
  				}
 
@@ -229,7 +229,7 @@ index 88263beb..8aa24712 100644
  				if (tmp[0] == '-' && tmp[1]) {
  					++tmp;
  					r = FALSE; /* Do not refresh dir after completion */
-@@ -8189,8 +8242,10 @@ static void cleanup(void)
+@@ -8185,8 +8237,10 @@ static void cleanup(void)
  	if (g_state.autofifo)
  		unlink(fifopath);
  #endif
@@ -241,7 +241,7 @@ index 88263beb..8aa24712 100644
  #ifdef DEBUG
  	disabledbg();
  #endif
-@@ -8689,7 +8744,7 @@ int main(int argc, char *argv[])
+@@ -8690,7 +8744,7 @@ int main(int argc, char *argv[])
 
  #ifndef NOFIFO
  	if (!g_state.fifomode)
