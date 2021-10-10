@@ -1,4 +1,4 @@
-n ()
+nnn_ ()
 {
     # Block nesting of nnn in subshells
     if [ -n $NNNLVL ] && [ "${NNNLVL:-0}" -ge 1 ]; then
@@ -19,10 +19,11 @@ n ()
     # stty lwrap undef
     # stty lnext undef
 
-    nnn "$@"
+    \nnn "$@"
 
     if [ -f "$NNN_TMPFILE" ]; then
             . "$NNN_TMPFILE"
             rm -f "$NNN_TMPFILE" > /dev/null
     fi
 }
+alias nnn='nnn_'
