@@ -67,6 +67,8 @@
 #   has to be set to `all` or `splits` (the former is the default value).
 #   This terminal is also able to show images without extra dependencies.
 #
+#   Iterm2 users are recommended to use viu to view images without getting pixelated.
+#
 # Shell: POSIX compliant
 # Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal
 
@@ -96,6 +98,8 @@ start_preview() {
         TERMINAL=tmux
     elif [ -n "$KITTY_LISTEN_ON" ]; then
         TERMINAL=kitty
+    elif [ -z "$TERMINAL" ] && [ "$TERM_PROGRAM" = "iTerm.app" ]; then
+        TERMINAL=iterm
     else
         TERMINAL="${TERMINAL:-xterm}"
     fi
@@ -130,6 +134,24 @@ start_preview() {
                 --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=$BAT_STYLE" \
                 --env "BAT_THEME=$BAT_THEME" --env "FIFOPID=$FIFOPID" \
                 --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" ;;
+        iterm)
+            command="$SHELL -c 'cd $PWD; \
+                PATH=\\\"$PATH\\\" NNN_FIFO=\\\"$NNN_FIFO\\\" PREVIEW_MODE=1 PAGER=\\\"$PAGER\\\" \
+                USE_SCOPE=\\\"$USE_SCOPE\\\" SPLIT=\\\"$SPLIT\\\" TERMINAL=\\\"$TERMINAL\\\" \
+                PREVIEWPID=\\\"$PREVIEWPID\\\" CURSEL=\\\"$CURSEL\\\" TMPDIR=\\\"$TMPDIR\\\" \
+                ICONLOOKUP=\\\"$ICONLOOKUP\\\" NNN_PREVIEWHEIGHT=\\\"$NNN_PREVIEWHEIGHT\\\" \
+                NNN_PREVIEWWIDTH=\\\"$NNN_PREVIEWWIDTH\\\" NNN_PREVIEWDIR=\\\"$NNN_PREVIEWDIR\\\" \
+                USE_PISTOL=\\\"$USE_PISTOL\\\" BAT_STYLE=\\\"$BAT_STYLE\\\" \
+                BAT_THEME=\\\"$BAT_THEME\\\" FIFOPID=\\\"$FIFOPID\\\" \\\"$0\\\" \\\"$1\\\"'"
+            if [ "$SPLIT" = "h" ]; then split="horizontally"; else split="vertically"; fi
+            osascript <<-EOF
+            tell application "iTerm"
+                tell current session of current window
+                    split $split with default profile command "$command"
+                end tell
+            end tell
+EOF
+            ;;
         *)  if [ -n "$2" ]; then
                 QUICKLOOK=1 QLPATH="$2" PREVIEW_MODE=1 "$0" "$1" &
             else
