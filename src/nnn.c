@@ -1297,12 +1297,6 @@ static void msg(const char *message)
 	dprintf(STDERR_FILENO, "%s\n", message);
 }
 
-static void clearinfoln(void)
-{
-	move(xlines - 2, 0);
-	clrtoeol();
-}
-
 #ifdef KEY_RESIZE
 static void handle_key_resize()
 {
@@ -1313,7 +1307,10 @@ static void handle_key_resize()
 /* Clear the old prompt */
 static void clearoldprompt(void)
 {
-	clearinfoln();
+	// clear info line
+	move(xlines - 2, 0);
+	clrtoeol();
+
 	tolastln();
 	clrtoeol();
 	handle_key_resize();
@@ -3156,7 +3153,6 @@ static void showfilterinfo(void)
 		 (cfg.regex ? "reg" : "str"),
 		 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
 
-	clearinfoln();
 #ifdef FILEINFO
 	if (ndents && get_output("file", "-b", pdents[cur].name, -1, FALSE, FALSE))
 		mvaddstr(xlines - 2, 2, g_buf);
@@ -3442,7 +3438,6 @@ static int filterentries(char *path, char *lastname)
 		showfilter(ln);
 	}
 end:
-	clearinfoln();
 
 	/* Save last working filter in-filter */
 	if (ln[1])
