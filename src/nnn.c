@@ -847,6 +847,7 @@ static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
 static void statusbar(char *path);
+static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool multi, bool page);
 #ifndef NOFIFO
 static void notify_fifo(bool force);
 #endif
@@ -3156,6 +3157,10 @@ static void showfilterinfo(void)
 		 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
 
 	clearinfoln();
+#ifdef FILEINFO
+	if (ndents && get_output("file", "-b", pdents[cur].name, -1, FALSE, FALSE))
+		mvaddstr(xlines - 2, 2, g_buf);
+#endif
 	mvaddstr(xlines - 2, xcols - xstrlen(info), info);
 }
 
@@ -6167,8 +6172,14 @@ static void statusbar(char *path)
 	} else
 		ptr = "\b";
 
-	tolastln();
 	attron(COLOR_PAIR(cfg.curctx + 1));
+
+#ifdef FILEINFO
+	if (get_output("file", "-b", pdents[cur].name, -1, FALSE, FALSE))
+		mvaddstr(xlines - 2, 2, g_buf);
+#endif
+
+	tolastln();
 
 	printw("%d/%s ", cur + 1, xitoa(ndents));
 
@@ -6215,6 +6226,7 @@ static void statusbar(char *path)
 		}
 #endif
 		if (S_ISLNK(pent->mode)) {
+#ifndef FILEINFO
 			i = readlink(pent->name, g_buf, PATH_MAX);
 			addstr(coolsize(i >= 0 ? i : pent->size)); /* Show symlink size */
 			if (i > 1) { /* Show symlink target */
@@ -6226,6 +6238,7 @@ static void statusbar(char *path)
 				g_buf[i] = '\0';
 				addstr(g_buf);
 			}
+#endif
 		} else {
 			addstr(coolsize(pent->size));
 			addch(' ');
