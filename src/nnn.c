@@ -329,12 +329,12 @@ typedef struct {
 	/* The following settings are global */
 	uint_t curctx     : 3;  /* Current context number */
 	uint_t prefersel  : 1;  /* Prefer selection over current, if exists */
-	uint_t reserved2  : 1;
+	uint_t fileinfo   : 1;  /* Show file information on hover */
 	uint_t nonavopen  : 1;  /* Open file on right arrow or `l` */
 	uint_t autoselect : 1;  /* Auto-select dir in type-to-nav mode */
 	uint_t cursormode : 1;  /* Move hardware cursor with selection */
 	uint_t useeditor  : 1;  /* Use VISUAL to open text files */
-	uint_t reserved3  : 3;
+	uint_t reserved2  : 3;
 	uint_t regex      : 1;  /* Use regex filters */
 	uint_t x11        : 1;  /* Copy to system clipboard, show notis, xterm title */
 	uint_t timetype   : 2;  /* Time sort type (0: access, 1: change, 2: modification) */
@@ -409,12 +409,12 @@ static settings cfg = {
 	0, /* reserved1 */
 	0, /* curctx */
 	0, /* prefersel */
-	0, /* reserved2 */
+	0, /* fileinfo */
 	0, /* nonavopen */
 	1, /* autoselect */
 	0, /* cursormode */
 	0, /* useeditor */
-	0, /* reserved3 */
+	0, /* reserved2 */
 	0, /* regex */
 	0, /* x11 */
 	2, /* timetype (T_MOD) */
@@ -3153,10 +3153,9 @@ static void showfilterinfo(void)
 		 (cfg.regex ? "reg" : "str"),
 		 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
 
-#ifdef FILEINFO
-	if (ndents && get_output("file", "-b", pdents[cur].name, -1, FALSE, FALSE))
+	if (cfg.fileinfo && ndents && get_output("file", "-b", pdents[cur].name, -1, FALSE, FALSE))
 		mvaddstr(xlines - 2, 2, g_buf);
-#endif
+
 	mvaddstr(xlines - 2, xcols - xstrlen(info), info);
 }
 
@@ -6169,10 +6168,8 @@ static void statusbar(char *path)
 
 	attron(COLOR_PAIR(cfg.curctx + 1));
 
-#ifdef FILEINFO
-	if (get_output("file", "-b", pdents[cur].name, -1, FALSE, FALSE))
+	if (cfg.fileinfo && get_output("file", "-b", pdents[cur].name, -1, FALSE, FALSE))
 		mvaddstr(xlines - 2, 2, g_buf);
-#endif
 
 	tolastln();
 
@@ -6221,19 +6218,19 @@ static void statusbar(char *path)
 		}
 #endif
 		if (S_ISLNK(pent->mode)) {
-#ifndef FILEINFO
-			i = readlink(pent->name, g_buf, PATH_MAX);
-			addstr(coolsize(i >= 0 ? i : pent->size)); /* Show symlink size */
-			if (i > 1) { /* Show symlink target */
-				int y;
+			if (!cfg.fileinfo) {
+				i = readlink(pent->name, g_buf, PATH_MAX);
+				addstr(coolsize(i >= 0 ? i : pent->size)); /* Show symlink size */
+				if (i > 1) { /* Show symlink target */
+					int y;
 
-				addstr(" ->");
-				getyx(stdscr, len, y);
-				i = MIN(i, xcols - y);
-				g_buf[i] = '\0';
-				addstr(g_buf);
+					addstr(" ->");
+					getyx(stdscr, len, y);
+					i = MIN(i, xcols - y);
+					g_buf[i] = '\0';
+					addstr(g_buf);
+				}
 			}
-#endif
 		} else {
 			addstr(coolsize(pent->size));
 			addch(' ');
@@ -8039,6 +8036,7 @@ static void usage(void)
 #endif
 		" -g      regex filters\n"
 		" -H      show hidden files\n"
+		" -i      show file info on hover\n"
 		" -J      no auto-proceed on select\n"
 		" -K      detect key collision\n"
 		" -l val  set scroll lines\n"
@@ -8222,7 +8220,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdDeEfF:gHJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdDeEfF:gHiJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -8275,6 +8273,9 @@ int main(int argc, char *argv[])
 			break;
 		case 'H':
 			cfg.showhidden = 1;
+			break;
+		case 'i':
+			cfg.fileinfo = 1;
 			break;
 		case 'J':
 			g_state.stayonsel = 1;
