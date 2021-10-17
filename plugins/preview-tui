@@ -229,7 +229,7 @@ handle_mime() {
         image/*) generate_preview "$cols" "$lines" "$1" "image" ;;
         video/*) generate_preview "$cols" "$lines" "$1" "video" ;;
         audio/*) generate_preview "$cols" "$lines" "$1" "audio" ;;
-        application/font*|application/*opentype) generate_preview "$cols" "$lines" "$1" "font" ;;
+        application/font*|application/*opentype|font/*) generate_preview "$cols" "$lines" "$1" "font" ;;
         */*office*|*/*document*) generate_preview "$cols" "$lines" "$1" "office" ;;
         application/zip) fifo_pager unzip -l "$1" ;;
         text/troff)
