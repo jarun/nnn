@@ -6828,7 +6828,7 @@ nochange:
 #endif
 			/* If opened as vim plugin and Enter/^M pressed, pick */
 			if (g_state.picker && (sel == SEL_OPEN)) {
-				if (!(pdents[cur].flags & FILE_SELECTED))
+				if (nselected == 0) /* Pick if none selected */
 					appendfpath(newpath, mkpath(path, pent->name, newpath));
 				return EXIT_SUCCESS;
 			}
@@ -7263,7 +7263,7 @@ nochange:
 			else
 #endif
 				/* move cursor to the next entry if this is not the last entry */
-				if (!g_state.stayonsel && !g_state.picker && cur != ndents - 1)
+				if (!g_state.stayonsel && (cur != ndents - 1))
 					move_cursor((cur + 1) % ndents, 0);
 			break;
 		case SEL_SELMUL:
