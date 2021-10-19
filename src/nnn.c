@@ -3685,14 +3685,15 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int *prese
 	else /* hard link */
 		link_fn = &link;
 
-	if (choice == 'c') {
-		r = xstrsncpy(buf, prefix, NAME_MAX + 1); /* Copy prefix */
-		xstrsncpy(buf + r - 1, curfname, NAME_MAX - r); /* Suffix target file name */
-		mkpath(path, buf, lnpath); /* Generate link path */
-		mkpath(path, curfname, buf); /* Generate target file path */
+	if (choice == 'c' || (nselected == 1)) {
+		mkpath(path, prefix, lnpath); /* Generate link path */
+		mkpath(path, (choice == 'c') ? curfname : pselbuf, buf); /* Generate target file path */
 
-		if (!link_fn(buf, lnpath))
+		if (!link_fn(buf, lnpath)) {
+			if (choice == 's')
+				clearselection();
 			return 1; /* One link created */
+		}
 
 		printwarn(presel);
 		return -1;
@@ -7442,7 +7443,8 @@ nochange:
 				if (r == 'f' || r == 'd')
 					tmp = xreadline(NULL, messages[MSG_NEW_PATH]);
 				else if (r == 's' || r == 'h')
-					tmp = xreadline(NULL, messages[MSG_LINK_PREFIX]);
+					tmp = xreadline(NULL,
+						messages[nselected <= 1?MSG_NEW_PATH:MSG_LINK_PREFIX]);
 				else
 					tmp = NULL;
 				break;
