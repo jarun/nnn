@@ -167,8 +167,8 @@
 #define ISBLANK(x)      ((x) == ' ' || (x) == '\t')
 #define TOUPPER(ch)     (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define TOLOWER(ch)     (((ch) >= 'A' && (ch) <= 'Z') ? ((ch) - 'A' + 'a') : (ch))
-#define ISUPPER_(ch)     ((ch) >= 'A' && (ch) <= 'Z')
-#define ISLOWER_(ch)     ((ch) >= 'a' && (ch) <= 'z')
+#define ISUPPER_(ch)    ((ch) >= 'A' && (ch) <= 'Z')
+#define ISLOWER_(ch)    ((ch) >= 'a' && (ch) <= 'z')
 #define CMD_LEN_MAX     (PATH_MAX + ((NAME_MAX + 1) << 1))
 #define ALIGN_UP(x, A)  ((((x) + (A) - 1) / (A)) * (A))
 #define READLINE_MAX    256
@@ -1016,7 +1016,7 @@ static bool is_suffix(const char *restrict str, const char *restrict suffix)
 	return (xstrcmp(str + (lenstr - lensuffix), suffix) == 0);
 }
 
-static bool is_prefix(const char *restrict str, const char *restrict prefix, size_t len)
+static inline bool is_prefix(const char *restrict str, const char *restrict prefix, size_t len)
 {
 	return !strncmp(str, prefix, len);
 }
