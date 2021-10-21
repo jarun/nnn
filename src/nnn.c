@@ -2079,10 +2079,6 @@ static bool initcurses(void *oldmask)
 	//intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
 #ifndef NOMOUSE
-#ifndef NOX11
-	printf("\x1b[?1000h\n"); /* xterm X10 mouse mode */
-	printf("\x1b[?1006h\n"); /* extended SGR mouse mode */
-#endif
 #if NCURSES_MOUSE_VERSION <= 1
 	mousemask(BUTTON1_PRESSED | BUTTON1_DOUBLE_CLICKED | BUTTON2_PRESSED | BUTTON3_PRESSED,
 		  (mmask_t *)oldmask);
