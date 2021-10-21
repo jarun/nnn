@@ -5833,6 +5833,18 @@ static void notify_fifo(bool force)
 		DPRINTF_S(strerror(errno));
 	}
 }
+
+static void send_to_explorer(int *presel)
+{
+	if (nselected) {
+		int fd = open(fifopath, O_WRONLY|O_NONBLOCK|O_CLOEXEC, 0600);
+		if ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos)))
+			printwarn(presel);
+		if (fd > 1)
+			close(fd);
+	} else
+		notify_fifo(TRUE); /* Send opened path to NNN_FIFO */
+}
 #endif
 
 static void move_cursor(int target, int ignore_scrolloff)
@@ -6780,8 +6792,10 @@ nochange:
 				  + (_ABSSUB(mousetimings[0].tv_nsec, mousetimings[1].tv_nsec)))
 					> DBLCLK_INTERVAL_NS))
 					break;
+				/* Double click */
 				mousetimings[currentmouse].tv_sec = 0;
 				mousedent[currentmouse] = -1;
+				sel = SEL_OPEN;
 			} else {
 				if (cfg.filtermode || filterset())
 					presel = FILTER;
@@ -6826,7 +6840,7 @@ nochange:
                         }
 #ifndef NOFIFO
 			if (g_state.fifomode && (sel == SEL_OPEN)) {
-				notify_fifo(TRUE); /* Send opened path to NNN_FIFO */
+				send_to_explorer(&presel); /* Write selection to explorer fifo */
 				goto nochange;
 			}
 #endif
