@@ -6780,8 +6780,10 @@ nochange:
 				  + (_ABSSUB(mousetimings[0].tv_nsec, mousetimings[1].tv_nsec)))
 					> DBLCLK_INTERVAL_NS))
 					break;
+				/* Double click */
 				mousetimings[currentmouse].tv_sec = 0;
 				mousedent[currentmouse] = -1;
+				sel = SEL_OPEN;
 			} else {
 				if (cfg.filtermode || filterset())
 					presel = FILTER;
@@ -6825,8 +6827,17 @@ nochange:
 				goto nochange;
                         }
 #ifndef NOFIFO
-			if (g_state.fifomode && (sel == SEL_OPEN)) {
-				notify_fifo(TRUE); /* Send opened path to NNN_FIFO */
+			if (g_state.fifomode && (sel == SEL_OPEN)) { /* Write selection to explorer fifo */
+				if (nselected) {
+					int fd = open(fifopath, O_WRONLY|O_NONBLOCK|O_CLOEXEC, 0600);
+					if ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos))) {
+						printwarn(&presel);
+						goto nochange;
+					}
+					if (fd > 1)
+						close(fd);
+				} else
+					notify_fifo(TRUE); /* Send opened path to NNN_FIFO */
 				goto nochange;
 			}
 #endif
