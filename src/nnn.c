@@ -5349,24 +5349,68 @@ static bool launch_app(char *newpath)
 static bool prompt_run(void)
 {
 	bool ret = FALSE;
-	char *tmp;
+	char *cmdline, *next;
+	int cnt_j, cnt_J;
+	size_t len, tmplen;
+
+	const char *xargs_j = "xargs -0 -t -I{} sh -c '%s' < %s";
+	const char *xargs_J = "xargs -0 -t sh -c '%s' < %s";
+	char tmpcmd[CMD_LEN_MAX];
+	char cmd[CMD_LEN_MAX + 32]; // 32 for xargs format strings
 
 	while (1) {
 #ifndef NORL
 		if (g_state.picker) {
 #endif
-			tmp = xreadline(NULL, PROMPT);
+			cmdline = xreadline(NULL, PROMPT);
 #ifndef NORL
 		} else
-			tmp = getreadline("\n"PROMPT);
+			cmdline = getreadline("\n"PROMPT);
 #endif
-		if (tmp && *tmp) { // NOLINT
-			free(lastcmd);
-			lastcmd = xstrdup(tmp);
-			ret = TRUE;
-			spawn(shell, "-c", tmp, NULL, F_CLI | F_CONFIRM);
-		} else
+		// Check for an empty command
+		if (!cmdline || !cmdline[0])
 			break;
+
+		free(lastcmd);
+		lastcmd = xstrdup(cmdline);
+		ret = TRUE;
+
+		len = xstrlen(cmdline);
+
+		cnt_j = 0;
+		next = cmdline;
+		while ((next = strstr(next, "%j"))) {
+			++cnt_j;
+
+			// replace %j with {} for xargs later
+			next[0] = '{';
+			next[1] = '}';
+
+			++next;
+		}
+
+		cnt_J = 0;
+		next = cmdline;
+		while ((next = strstr(next, "%J"))) {
+			++cnt_J;
+
+			tmplen = xstrsncpy(tmpcmd, cmdline, next - cmdline + 1) - 1;
+			tmplen += xstrsncpy(tmpcmd + tmplen, "${0} ${@}", sizeof("${0} ${@}")) - 1;
+			xstrsncpy(tmpcmd + tmplen, next + 2, len - (next - cmdline + 2) + 1);
+
+			++next;
+		}
+
+		// We can't handle both %j and %J in a single command
+		if (cnt_j && cnt_J)
+			break;
+
+		if (cnt_j)
+			snprintf(cmd, CMD_LEN_MAX + 32, xargs_j, cmdline, selpath);
+		else if (cnt_J)
+			snprintf(cmd, CMD_LEN_MAX + 32, xargs_J, tmpcmd, selpath);
+
+		spawn(shell, "-c", (cnt_j || cnt_J) ? cmd : cmdline, NULL, F_CLI | F_CONFIRM);
 	}
 
 	return ret;
