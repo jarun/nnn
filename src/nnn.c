@@ -5379,9 +5379,8 @@ static bool prompt_run(void)
 
 		cnt_j = 0;
 		next = cmdline;
-		while ((next = strstr(next, " %j"))) {
+		while ((next = strstr(next, "%j"))) {
 			++cnt_j;
-			++next; // skip the space we don't need it
 
 			// replace %j with {} for xargs later
 			next[0] = '{';
@@ -5392,9 +5391,8 @@ static bool prompt_run(void)
 
 		cnt_J = 0;
 		next = cmdline;
-		while (!cnt_j && (next = strstr(next, " %J"))) {
+		while (!cnt_j && (next = strstr(next, "%J"))) {
 			++cnt_J;
-			++next; // skip the space we don't need it
 
 			tmplen = xstrsncpy(tmpcmd, cmdline, next - cmdline + 1) - 1;
 			tmplen += xstrsncpy(tmpcmd + tmplen, "${0} ${@}", sizeof("${0} ${@}"));
