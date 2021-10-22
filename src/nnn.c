@@ -5836,6 +5836,10 @@ static void send_to_explorer(int *presel)
 		int fd = open(fifopath, O_WRONLY|O_NONBLOCK|O_CLOEXEC, 0600);
 		if ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos)))
 			printwarn(presel);
+		else {
+			resetselind();
+			clearselection();
+		}
 		if (fd > 1)
 			close(fd);
 	} else
@@ -6836,7 +6840,7 @@ nochange:
 #ifndef NOFIFO
 			if (g_state.fifomode && (sel == SEL_OPEN)) {
 				send_to_explorer(&presel); /* Write selection to explorer fifo */
-				goto nochange;
+				break;
 			}
 #endif
 			/* If opened as vim plugin and Enter/^M pressed, pick */
