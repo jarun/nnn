@@ -332,9 +332,9 @@ typedef struct {
 	uint_t fileinfo   : 1;  /* Show file information on hover */
 	uint_t nonavopen  : 1;  /* Open file on right arrow or `l` */
 	uint_t autoselect : 1;  /* Auto-select dir in type-to-nav mode */
-	uint_t cursormode : 1;  /* Move hardware cursor with selection */
+	uint_t reserved2  : 1;
 	uint_t useeditor  : 1;  /* Use VISUAL to open text files */
-	uint_t reserved2  : 3;
+	uint_t reserved3  : 3;
 	uint_t regex      : 1;  /* Use regex filters */
 	uint_t x11        : 1;  /* Copy to system clipboard, show notis, xterm title */
 	uint_t timetype   : 2;  /* Time sort type (0: access, 1: change, 2: modification) */
@@ -412,9 +412,9 @@ static settings cfg = {
 	0, /* fileinfo */
 	0, /* nonavopen */
 	1, /* autoselect */
-	0, /* cursormode */
-	0, /* useeditor */
 	0, /* reserved2 */
+	0, /* useeditor */
+	0, /* reserved3 */
 	0, /* regex */
 	0, /* x11 */
 	2, /* timetype (T_MOD) */
@@ -6263,9 +6263,8 @@ static void statusbar(char *path)
 	}
 
 	attroff(COLOR_PAIR(cfg.curctx + 1));
-
-	if (cfg.cursormode)
-		tocursor();
+	/* Plase HW cursor on current for Braille systems */
+	tocursor();
 }
 
 static inline void markhovered(void)
@@ -8074,7 +8073,6 @@ static void usage(void)
 		" -U      show user and group\n"
 #endif
 		" -V      show version\n"
-		" -w      place HW cursor on hovered\n"
 #ifndef NOX11
 		" -x      notis, selection sync, xterm title\n"
 #endif
@@ -8236,7 +8234,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdDeEfF:gHiJKl:nop:P:QrRs:St:T:uUVwxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:cCdDeEfF:gHiJKl:nop:P:QrRs:St:T:uUVxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -8370,9 +8368,6 @@ int main(int argc, char *argv[])
 		case 'V':
 			dprintf(STDOUT_FILENO, "%s\n", VERSION);
 			return EXIT_SUCCESS;
-		case 'w':
-			cfg.cursormode = 1;
-			break;
 		case 'x':
 			cfg.x11 = 1;
 			break;

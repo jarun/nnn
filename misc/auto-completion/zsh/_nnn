@@ -39,7 +39,6 @@ args=(
     '(-u)-u[use selection (no prompt)]'
     '(-U)-U[show user and group]'
     '(-V)-V[show program version and exit]'
-    '(-w)-C[hardware cursor mode]'
     '(-x)-x[notis, sel to system clipboard, xterm title]'
     '(-h)-h[show program help]'
     '*:filename:_files'
