@@ -5391,12 +5391,12 @@ static bool prompt_run(void)
 
 		cnt_J = 0;
 		next = cmdline;
-		while (!cnt_j && (next = strstr(next, "%J"))) {
+		while ((next = strstr(next, "%J"))) {
 			++cnt_J;
 
 			tmplen = xstrsncpy(tmpcmd, cmdline, next - cmdline + 1) - 1;
-			tmplen += xstrsncpy(tmpcmd + tmplen, "${0} ${@}", sizeof("${0} ${@}"));
-			xstrsncpy(tmpcmd + tmplen, next + 2, len - (next - cmdline + 2));
+			tmplen += xstrsncpy(tmpcmd + tmplen, "${0} ${@}", sizeof("${0} ${@}")) - 1;
+			xstrsncpy(tmpcmd + tmplen, next + 2, len - (next - cmdline + 2) + 1);
 
 			++next;
 		}
