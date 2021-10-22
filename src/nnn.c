@@ -5350,11 +5350,11 @@ static bool prompt_run(void)
 {
 	bool ret = FALSE;
 	char *cmdline, *next;
-	int cnt_s, cnt_S;
+	int cnt_j, cnt_J;
 	size_t len, tmplen;
 
-	const char *xargs_s = "xargs -0 -t -I{} sh -c '%s' < %s";
-	const char *xargs_S = "xargs -0 -t sh -c '%s' < %s";
+	const char *xargs_j = "xargs -0 -t -I{} sh -c '%s' < %s";
+	const char *xargs_J = "xargs -0 -t sh -c '%s' < %s";
 	char tmpcmd[CMD_LEN_MAX];
 	char cmd[CMD_LEN_MAX + 32]; // 32 for xargs format strings
 
@@ -5377,22 +5377,24 @@ static bool prompt_run(void)
 
 		len = xstrlen(cmdline);
 
-		cnt_s = 0;
+		cnt_j = 0;
 		next = cmdline;
-		while ((next = strstr(next, "%s"))) {
-			++cnt_s;
+		while ((next = strstr(next, " %j"))) {
+			++cnt_j;
+			++next; // skip the space we don't need it
 
-			// replace %s with {} for xargs later
+			// replace %j with {} for xargs later
 			next[0] = '{';
 			next[1] = '}';
 
 			++next;
 		}
 
-		cnt_S = 0;
+		cnt_J = 0;
 		next = cmdline;
-		while (!cnt_s && (next = strstr(next, "%S"))) {
-			++cnt_S;
+		while (!cnt_j && (next = strstr(next, " %J"))) {
+			++cnt_J;
+			++next; // skip the space we don't need it
 
 			tmplen = xstrsncpy(tmpcmd, cmdline, next - cmdline + 1) - 1;
 			tmplen += xstrsncpy(tmpcmd + tmplen, "${0} ${@}", sizeof("${0} ${@}"));
@@ -5401,18 +5403,16 @@ static bool prompt_run(void)
 			++next;
 		}
 
-		// We can't handle both %s and %S in a single command
-		if (cnt_s && cnt_S)
-			// Maybe print a warning
-			continue;
+		// We can't handle both %j and %J in a single command
+		if (cnt_j && cnt_J)
+			break;
 
-		if (cnt_s) {
-			snprintf(cmd, CMD_LEN_MAX + 32, xargs_s, cmdline, selpath);
-		} else if (cnt_S) {
-			snprintf(cmd, CMD_LEN_MAX + 32, xargs_S, tmpcmd, selpath);
-		}
+		if (cnt_j)
+			snprintf(cmd, CMD_LEN_MAX + 32, xargs_j, cmdline, selpath);
+		else if (cnt_J)
+			snprintf(cmd, CMD_LEN_MAX + 32, xargs_J, tmpcmd, selpath);
 
-		spawn(shell, "-c", (cnt_s || cnt_S) ? cmd : cmdline, NULL, F_CLI | F_CONFIRM);
+		spawn(shell, "-c", (cnt_j || cnt_J) ? cmd : cmdline, NULL, F_CLI | F_CONFIRM);
 	}
 
 	return ret;
