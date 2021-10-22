@@ -177,7 +177,7 @@
 #define CASE            ':'
 #define MSGWAIT         '$'
 #define SELECT          ' '
-#define PROMPT          ">>> "
+#define PROMPT          "nnn] "
 #define REGEX_MAX       48
 #define ENTRY_INCR      64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR    0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
@@ -5353,8 +5353,8 @@ static bool prompt_run(void)
 	int cnt_j, cnt_J;
 	size_t len, tmplen;
 
-	const char *xargs_j = "xargs -0 -t -I{} sh -c '%s' < %s";
-	const char *xargs_J = "xargs -0 -t sh -c '%s' < %s";
+	const char *xargs_j = "xargs -0 -I{} sh -c '%s' < %s";
+	const char *xargs_J = "xargs -0 sh -c '%s' < %s";
 	char tmpcmd[CMD_LEN_MAX];
 	char cmd[CMD_LEN_MAX + 32]; // 32 for xargs format strings
 
