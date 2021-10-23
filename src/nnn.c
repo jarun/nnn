@@ -8099,7 +8099,7 @@ static void usage(void)
 #endif
 		" -g      regex filters\n"
 		" -H      show hidden files\n"
-		" -i      show file info on hover\n"
+		" -i      show current file info\n"
 		" -J      no auto-proceed on select\n"
 		" -K      detect key collision\n"
 		" -l val  set scroll lines\n"

@@ -21,7 +21,7 @@ args=(
     '(-f)-f[use readline history file]'
     '(-g)-g[regex filters]'
     '(-H)-H[show hidden files]'
-    '(-i)-i[show file info on hover]'
+    '(-i)-i[show current file info]'
     '(-J)-J[no auto-proceed on select]'
     '(-K)-K[detect key collision]'
     '(-l)-l[lines to move per scroll]:val'
