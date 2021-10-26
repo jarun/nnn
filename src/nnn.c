@@ -177,7 +177,7 @@
 #define CASE            ':'
 #define MSGWAIT         '$'
 #define SELECT          ' '
-#define PROMPT          "nnn] "
+#define PROMPT          ">>> "
 #define REGEX_MAX       48
 #define ENTRY_INCR      64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR    0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
@@ -365,7 +365,7 @@ typedef struct {
 	uint_t runplugin  : 1;  /* Choose plugin mode */
 	uint_t selmode    : 1;  /* Set when selecting files */
 	uint_t stayonsel  : 1;  /* Disable auto-proceed on select */
-	uint_t trash      : 2;  /* Use trash to delete files 1: trash-cli, 2: gio trash */
+	uint_t trash      : 2;  /* Trash method 0: rm -rf, 1: trash-cli, 2: gio trash */
 	uint_t uidgid     : 1;  /* Show owner and group info */
 	uint_t reserved   : 7;  /* Adjust when adding/removing a field */
 } runstate;
