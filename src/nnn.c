@@ -202,7 +202,8 @@
 #define CTX_MAX 8
 #endif
 
-#ifdef __APPLE__
+/* BSDs or Solaris or SunOS */
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__) || defined(sun) || defined(__sun)
 #define SED "gsed"
 #else
 #define SED "sed"
