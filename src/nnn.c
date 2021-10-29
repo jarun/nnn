@@ -3485,8 +3485,13 @@ static char *xreadline(const char *prefill, const char *prompt)
 	while (1) {
 		buf[len] = ' ';
 		attron(COLOR_PAIR(cfg.curctx + 1));
-		mvaddnwstr(xlines - 1, x, buf, len + 1);
-		move(xlines - 1, x + wcswidth(buf, pos));
+		if (pos > (size_t)(xcols - x)) {
+			mvaddnwstr(xlines - 1, x, buf + (pos - (xcols - x)), xcols - x);
+			move(xlines - 1, xcols - 1);
+		} else {
+			mvaddnwstr(xlines - 1, x, buf, len + 1);
+			move(xlines - 1, x + wcswidth(buf, pos));
+		}
 		attroff(COLOR_PAIR(cfg.curctx + 1));
 
 		r = get_wch(ch);
