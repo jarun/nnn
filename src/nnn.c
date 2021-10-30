@@ -6550,7 +6550,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 	struct stat sb;
 	int r = -1, presel, selstartid = 0, selendid = 0;
 	const uchar_t opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOSTDIN | F_NOWAIT));
-	bool watch = FALSE;
+	bool watch = FALSE, cd = TRUE;
 	ino_t inode = 0;
 
 #ifndef NOMOUSE
@@ -6658,7 +6658,7 @@ begin:
 	}
 #endif
 
-	if (order) {
+	if (order && cd) {
 		if (cfgsort[cfg.curctx] != '0') {
 			if (cfgsort[cfg.curctx] == 'z')
 				set_sort_flags('c');
@@ -6670,6 +6670,7 @@ begin:
 		} else
 			cfgsort[cfg.curctx] = cfgsort[CTX_MAX];
 	}
+	cd = TRUE;
 
 	populate(path, lastname);
 	if (g_state.interrupt) {
@@ -6782,10 +6783,8 @@ nochange:
 			/* Scroll down */
 			if (event.bstate == BUTTON5_PRESSED && ndents
 			    && (cfg.rollover || (cur != ndents - 1))) {
-				if (!cfg.rollover && cur >= ndents - scroll_lines)
-					move_cursor(ndents-1, 0);
-				else
-					move_cursor((cur + scroll_lines) % ndents, 0);
+				move_cursor((!cfg.rollover && cur >= ndents - scroll_lines)
+						? (ndents - 1) : ((cur + scroll_lines) % ndents), 0);
 				break;
 			}
 #endif
@@ -6802,6 +6801,7 @@ nochange:
 				/* Start watching the directory */
 				watch = TRUE;
 				copycurname();
+				cd = FALSE;
 				goto begin;
 			}
 
@@ -6856,8 +6856,10 @@ nochange:
 		case SEL_NAV_IN: // fallthrough
 		case SEL_OPEN:
 			/* Cannot descend in empty directories */
-			if (!ndents)
+			if (!ndents) {
+				cd = FALSE;
 				goto begin;
+			}
 
 			pent = &pdents[cur];
 			mkpath(path, pent->name, newpath);
@@ -7165,8 +7167,10 @@ nochange:
 				presel = 0;
 				break;
 			}
-			if (presel == FILTER) /* Refresh dir and filter again */
+			if (presel == FILTER) { /* Refresh dir and filter again */
+				cd = FALSE;
 				goto begin;
+			}
 			goto nochange;
 		case SEL_MFLTR: // fallthrough
 		case SEL_HIDDEN: // fallthrough
@@ -7190,6 +7194,7 @@ nochange:
 					clearfilter();
 				}
 				copycurname();
+				cd = FALSE;
 				goto begin;
 			case SEL_DETAIL:
 				cfg.showdetail ^= 1;
@@ -7298,6 +7303,7 @@ nochange:
 			/* Save current */
 			copycurname();
 			/* Repopulate as directory content may have changed */
+			cd = FALSE;
 			goto begin;
 		}
 		case SEL_SEL:
@@ -7434,6 +7440,7 @@ nochange:
 
 					if (cfg.filtermode || filterset())
 						presel = FILTER;
+					cd = FALSE;
 					goto begin;
 				}
 			}
@@ -7463,6 +7470,7 @@ nochange:
 				xstrsncpy(lastname, xbasename(newpath), NAME_MAX+1);
 			else
 				copycurname();
+			cd = FALSE;
 			goto begin;
 		}
 		case SEL_ARCHIVE: // fallthrough
@@ -7545,6 +7553,7 @@ nochange:
 					xstrsncpy(lastname, tmp, NAME_MAX + 1);
 					clearfilter(); /* Archive name may not match */
 					clearselection(); /* Archive operation complete */
+					cd = FALSE;
 					goto begin;
 				}
 				continue;
@@ -7639,6 +7648,7 @@ nochange:
 				clearfilter();
 			}
 
+			cd = FALSE;
 			goto begin;
 		}
 		case SEL_PLUGIN:
@@ -7733,6 +7743,7 @@ nochange:
 				goto nochange;
 
 			/* Repopulate as directory content may have changed */
+			cd = FALSE;
 			goto begin;
 		case SEL_UMOUNT:
 			presel = MSG_ZERO;
@@ -7744,6 +7755,7 @@ nochange:
 
 			/* Dir removed, go to next entry */
 			copynextname(lastname);
+			cd = FALSE;
 			goto begin;
 #ifndef NOSSN
 		case SEL_SESSIONS:
@@ -7770,6 +7782,7 @@ nochange:
 		case SEL_TIMETYPE:
 			if (!set_time_type(&presel))
 				goto nochange;
+			cd = FALSE;
 			goto begin;
 		case SEL_QUITCTX: // fallthrough
 		case SEL_QUITCD: // fallthrough
