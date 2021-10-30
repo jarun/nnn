@@ -1269,6 +1269,25 @@ static void reset_tilde_in_path(char *path)
 	home[homelen] = '\0';
 }
 
+#ifndef NOX11
+static void xterm_cfg(char *path)
+{
+	if (cfg.x11 && !g_state.picker) {
+		/* Signal CWD change to terminal */
+		printf("\033]7;file://%s%s\033\\", hostname, path);
+
+		/* Set terminal window title */
+		bool r = set_tilde_in_path(path);
+
+		printf("\033]2;%s\007", r ? &path[homelen - 1] : path);
+		fflush(stdout);
+
+		if (r)
+			reset_tilde_in_path(path);
+	}
+}
+#endif
+
 static void convert_tilde(const char *path, char *buf)
 {
 	if (path[0] == '~') {
@@ -6623,19 +6642,7 @@ begin:
 	}
 
 #ifndef NOX11
-	if (cfg.x11 && !g_state.picker) {
-		/* Signal CWD change to terminal */
-		printf("\033]7;file://%s%s\033\\", hostname, path);
-
-		/* Set terminal window title */
-		r = set_tilde_in_path(path);
-
-		printf("\033]2;%s\007", r ? &path[homelen - 1] : path);
-		fflush(stdout);
-
-		if (r)
-			reset_tilde_in_path(path);
-	}
+	xterm_cfg(path);
 #endif
 
 #ifdef LINUX_INOTIFY
