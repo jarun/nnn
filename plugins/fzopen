@@ -42,7 +42,7 @@ fi
 if [ "$3" ]; then
     if [ "$entry" ]; then
         case "$entry" in
-            /*) fullpath="${2}/$entry" ;;
+            /*) fullpath="$PWD/$entry" ;;
             *)  fullpath="$entry" ;;
         esac
         if [ "-" = "$3" ]; then
