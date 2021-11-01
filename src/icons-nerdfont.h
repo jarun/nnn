@@ -28,6 +28,7 @@
 #define ICON_DESKTOP       "\ufcbe"
 #define ICON_DOCUMENT      "\uf718"
 #define ICON_DOWNLOADS     "\uf5d7"
+#define ICON_ENCRYPT       "\uf805"
 #define ICON_FSHARP        "\ue7a7"
 #define ICON_GIT           "\ue5fb"
 #define ICON_HASKELL       "\ue777"
@@ -124,6 +125,7 @@
 #define ICON_EXT_GEM       ICON_RUBY
 #define ICON_EXT_GIF       ICON_PICTUREFILE
 #define ICON_EXT_GO        "\ufcd1"
+#define ICON_EXT_GPG       ICON_ENCRYPT
 #define ICON_EXT_GZ        ICON_ARCHIVE
 #define ICON_EXT_GZIP      ICON_ARCHIVE
 
