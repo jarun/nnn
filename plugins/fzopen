@@ -42,9 +42,9 @@ fi
 if [ "$3" ]; then
     if [ "$entry" ]; then
         if [ "-" = "$3" ]; then
-            printf "%s\n" "$entry"
+            printf "%s\n" "${2}/$entry"
         else
-            printf "%s\n" "$entry" > "$3"
+            printf "%s\n" "${2}/$entry" > "$3"
         fi
 
         # Tell `nnn` to clear its internal selection
