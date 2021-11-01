@@ -6896,6 +6896,36 @@ nochange:
 				printwait(messages[MSG_UNSUPPORTED], &presel);
 				goto nochange;
                         }
+
+			/* Handle plugin selection mode */
+			if (g_state.runplugin) {
+				g_state.runplugin = 0;
+				/* Must be in plugin dir and same context to select plugin */
+				if ((g_state.runctx == cfg.curctx) && !strcmp(path, plgpath)) {
+					endselection(FALSE);
+					/* Copy path so we can return back to earlier dir */
+					xstrsncpy(path, rundir, PATH_MAX);
+					rundir[0] = '\0';
+					clearfilter();
+
+					if (chdir(path) == -1
+					    || !run_plugin(&path, pent->name,
+								    runfile, &lastname, &lastdir)) {
+						DPRINTF_S("plugin failed!");
+					}
+
+					if (g_state.picked)
+						return EXIT_SUCCESS;
+
+					if (runfile[0]) {
+						xstrsncpy(lastname, runfile, NAME_MAX + 1);
+						runfile[0] = '\0';
+					}
+					setdirwatch();
+					goto begin;
+				}
+			}
+
 #ifndef NOFIFO
 			if (g_state.fifomode && (sel == SEL_OPEN)) {
 				send_to_explorer(&presel); /* Write selection to explorer fifo */
@@ -6934,35 +6964,6 @@ nochange:
 				/* Open file disabled on right arrow or `l` */
 				if (cfg.nonavopen)
 					goto nochange;
-			}
-
-			/* Handle plugin selection mode */
-			if (g_state.runplugin) {
-				g_state.runplugin = 0;
-				/* Must be in plugin dir and same context to select plugin */
-				if ((g_state.runctx == cfg.curctx) && !strcmp(path, plgpath)) {
-					endselection(FALSE);
-					/* Copy path so we can return back to earlier dir */
-					xstrsncpy(path, rundir, PATH_MAX);
-					rundir[0] = '\0';
-					clearfilter();
-
-					if (chdir(path) == -1
-					    || !run_plugin(&path, pent->name,
-								    runfile, &lastname, &lastdir)) {
-						DPRINTF_S("plugin failed!");
-					}
-
-					if (g_state.picked)
-						return EXIT_SUCCESS;
-
-					if (runfile[0]) {
-						xstrsncpy(lastname, runfile, NAME_MAX + 1);
-						runfile[0] = '\0';
-					}
-					setdirwatch();
-					goto begin;
-				}
 			}
 
 			if (!sb.st_size) {
