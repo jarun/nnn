@@ -259,27 +259,32 @@ handle_extension() {
     esac
 }
 
+# sets the variable abs_target, this should be faster than calling printf
 abspath() {
     case "$1" in
-        /*) printf "%s\n" "$1";;
-        *)  printf "%s\n" "$PWD/$1";;
+        /*) abs_target="$1";;
+        *)  abs_target="$PWD/$1";;
     esac
 }
 
+# storing the result to a tmp file is faster than calling listimages twice
 listimages() {
-    find -L "$(dirname "$target")" -maxdepth 1 -type f -iregex \
-      '.*\(jpe?g\|bmp\|webp\|ico\|svg\|png\|gif\)$' -print0 | sort -z
+    find -L "///${1%/*}" -maxdepth 1 -type f -print0 |
+        grep -izZE '\.(jpe?g|png|gif|webp|tiff|bmp|ico|svg)$' |
+        sort -z | tee "$tmp"
 }
 
 load_dir() {
-    target="$(abspath "$2")"
-    count="$(listimages | grep -a -m 1 -ZznF "$target" | cut -d: -f1)"
+    abspath "$2"
+    tmp="${TMPDIR:-/tmp}/nuke_$$"
+    trap 'rm -f $tmp' EXIT
+    count="$(listimages "$abs_target" | grep -a -m 1 -ZznF "$abs_target" | cut -d: -f1)"
 
     if [ -n "$count" ]; then
         if [ "$GUI" -ne 0 ]; then
-            listimages | xargs -0 nohup "$1" -n "$count" --
+            xargs -0 nohup "$1" -n "$count" -- < "$tmp"
         else
-            listimages | xargs -0 "$1" -n "$count" --
+            xargs -0 "$1" -n "$count" -- < "$tmp"
         fi
     else
         shift
