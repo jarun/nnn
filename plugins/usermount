@@ -1,0 +1,58 @@
+#!/usr/bin/python3
+#
+# Description: Mount and unmount user filesystems in /etc/fstab.
+#              If the filesystem is mounted, it will be unmounted.
+#              If the filesystem is not mounted, it will be mounted.
+#
+# Dependencies: python3, mount
+#
+# Usage: Exits on 'q'
+#
+# Shell: Python3
+# Author: Christopher Bormann
+
+import os
+import re
+import subprocess
+
+# Use regular expression to separate device from mounting point
+p = re.compile("^\s*([^#\s]+)\s+(\S+).*,user")
+
+# The list will be of tuples of the form (device, mount point)
+mountlist = []
+with open("/etc/fstab", "r") as fstab:
+    for line in fstab:
+        m = p.match(line)
+        if m:
+            mountlist.append((m.group(1), m.group(2)))
+
+# Outout the found user mountable devices
+def printdevicelist():
+    for idx, mnt in enumerate(mountlist):
+        print("{idx}: {mnt}".format(idx=idx, mnt=mnt[0]))
+
+# Check if a drive is mounted using 'mount' command
+def ismounted(mountpoint):
+    mounted = subprocess.run(["mount"], stdout=subprocess.PIPE, text=True, input="")
+    return mounted.stdout.find(mountpoint)>=0
+
+
+printdevicelist()
+mountpoint = None
+while True:
+    mountpoint = input("Which one to mount/unmount? ('q' for quit): ")
+    if mountpoint.find("q") >= 0:
+        exit(0)
+    try:
+        number = int(mountpoint)
+        if number < len(mountlist):
+            mount = mountlist[number][1]
+            if ismounted(mountlist[number][1]):
+                os.system("umount {st}".format(st=mount))
+            else:
+                os.system("mount {st}".format(st=mount))
+            exit(0)
+    except ValueError:
+        pass
+
+
