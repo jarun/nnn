@@ -187,7 +187,7 @@ Notes:
 
 | Key:Command | Description |
 |---|---|
-| `c:!convert $nnn png:- | xclip -sel clipboard -t image/png*` | Copy image to clipboard |
+| `c:!convert $nnn png:- \| xclip -sel clipboard -t image/png*` | Copy image to clipboard |
 | `e:-!sudo -E vim $nnn*` | Edit file as root in vim |
 | `g:-!git diff` | Show git diff |
 | `h:-!hx $nnn*` | Open hovered file in [hx](https://github.com/krpors/hx) hex editor |
