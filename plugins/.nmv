@@ -51,7 +51,11 @@ else
 		findcmd="$findcmd ! -name \".*\""
 	fi
 
-	findcmd="$findcmd -print"
+	if [ -z "$NNN_LIST" ]; then
+		findcmd="$findcmd -print"
+	else
+		findcmd="$findcmd -printf "'"'"$NNN_LIST/%P\n"'"'
+	fi
 
 	arr=$(eval "$findcmd" | sort)
 fi

@@ -7267,9 +7267,7 @@ nochange:
 			case SEL_RENAMEMUL:
 				endselection(TRUE);
 				setenv("INCLUDE_HIDDEN", xitoa(cfg.showhidden), 1);
-				setenv("NNN_LIST", listpath
-						? xitoa(is_prefix(path, listpath, xstrlen(listpath)))
-						: "0", 1);
+				setenv("NNN_LIST", listpath ? listroot : "", 1);
 
 				if (!(getutil(utils[UTIL_BASH])
 				      && plugscript(utils[UTIL_NMV], F_CLI))
