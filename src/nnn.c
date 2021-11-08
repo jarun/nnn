@@ -6560,7 +6560,9 @@ static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)
 
 static bool browse(char *ipath, const char *session, int pkey)
 {
-	char *newpath = malloc(PATH_MAX), *rundir = malloc(PATH_MAX), *runfile = malloc(NAME_MAX + 1);
+	char newpath[PATH_MAX] __attribute__ ((aligned)),
+	     rundir[PATH_MAX] __attribute__ ((aligned)),
+	     runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	char *path, *lastdir, *lastname, *dir, *tmp;
 	pEntry pent;
 	enum action sel;
@@ -6720,7 +6722,7 @@ nochange:
 
 		/* If STDIN is no longer a tty (closed) we should exit */
 		if (!isatty(STDIN_FILENO) && !g_state.picker)
-			return EXIT_FAILURE; // NOLINT
+			return EXIT_FAILURE;
 
 		sel = nextsel(presel);
 		if (presel)
