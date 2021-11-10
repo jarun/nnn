@@ -6,6 +6,7 @@
 # Dependencies:
 #   - imv (https://github.com/eXeC64/imv) or,
 #   - sxiv (https://github.com/muennich/sxiv) or,
+#   - nsxiv (https://github.com/nsxiv/nsxiv) or,
 #   - ucollage (https://github.com/ckardaris/ucollage) or,
 #   - lsix (https://github.com/hackerb9/lsix), or
 #   - viu (https://github.com/atanunq/viu), or
@@ -62,6 +63,7 @@ listimages() {
 view_files() {
     [ -f "$target" ] && count="-n $(listimages | grep -a -m 1 -ZznF "$target" | cut -d: -f1)"
     case "$1" in
+        nsxiv) listimages | xargs -0 nsxiv -a "${count:--t}" -- ;;
         sxiv) listimages | xargs -0 sxiv -a "${count:--t}" -- ;;
         imv*) listimages | xargs -0 "$1" "${count:-}" -- ;;
     esac
@@ -86,6 +88,9 @@ elif type ucollage >/dev/null 2>&1; then
 elif type sxiv >/dev/null 2>&1; then
     type ffmpegthumbnailer >/dev/null 2>&1 && make_thumbs 0
     view_files sxiv >/dev/null 2>&1 &
+elif type nsxiv >/dev/null 2>&1; then
+    type ffmpegthumbnailer >/dev/null 2>&1 && make_thumbs 0
+    view_files nsxiv >/dev/null 2>&1 &
 elif type imv >/dev/null 2>&1; then
     make_thumbs ""
     view_files imv >/dev/null 2>&1 &
@@ -102,5 +107,5 @@ elif type catimg >/dev/null 2>&1; then
     catimg "$ret"
     exit_prompt
 else
-    exit_prompt "Please install sxiv/imv/viu/catimg/lsix."
+    exit_prompt "Please install sxiv/nsxiv/imv/viu/catimg/lsix."
 fi
