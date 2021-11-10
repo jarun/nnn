@@ -91,6 +91,7 @@ FIFOPID="$TMPDIR/nnn-preview-tui-fifopid.$NNN_PARENT"
 PREVIEWPID="$TMPDIR/nnn-preview-tui-pagerpid.$NNN_PARENT"
 CURSEL="$TMPDIR/nnn-preview-tui-selection.$NNN_PARENT"
 FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NNN_PARENT"
+PREVIEWSIZE="$TMPDIR/nnn-preview-tui-size.$NNN_PARENT"
 
 start_preview() {
     [ "$PAGER" = "most" ] && PAGER="less -R"
@@ -114,7 +115,7 @@ start_preview() {
     case "$TERMINAL" in
         tmux) # tmux splits are inverted
             if [ "$SPLIT" = "v" ]; then DSPLIT="h"; else DSPLIT="v"; fi
-            tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1"  \
+            tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEWSIZE=$PREVIEWSIZE" -e "PREVIEW_MODE=1"  \
                 -e "CURSEL=$CURSEL" -e "TMPDIR=$TMPDIR" -e "FIFOPID=$FIFOPID" \
                 -e "BAT_STYLE=$BAT_STYLE" -e "BAT_THEME=$BAT_THEME" -e "PREVIEWPID=$PREVIEWPID" \
                 -e "PAGER=$PAGER" -e "ICONLOOKUP=$ICONLOOKUP" -e "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" \
@@ -133,7 +134,7 @@ start_preview() {
                 --env "ICONLOOKUP=$ICONLOOKUP" --env "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
                 --env "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" --env "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
                 --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=$BAT_STYLE" \
-                --env "BAT_THEME=$BAT_THEME" --env "FIFOPID=$FIFOPID" \
+                --env "BAT_THEME=$BAT_THEME" --env "FIFOPID=$FIFOPID" --env "PREVIEWSIZE=$PREVIEWSIZE" \
                 --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" ;;
         iterm)
             command="$SHELL -c 'cd $PWD; \
@@ -142,7 +143,7 @@ start_preview() {
                 PREVIEWPID=\\\"$PREVIEWPID\\\" CURSEL=\\\"$CURSEL\\\" TMPDIR=\\\"$TMPDIR\\\" \
                 ICONLOOKUP=\\\"$ICONLOOKUP\\\" NNN_PREVIEWHEIGHT=\\\"$NNN_PREVIEWHEIGHT\\\" \
                 NNN_PREVIEWWIDTH=\\\"$NNN_PREVIEWWIDTH\\\" NNN_PREVIEWDIR=\\\"$NNN_PREVIEWDIR\\\" \
-                USE_PISTOL=\\\"$USE_PISTOL\\\" BAT_STYLE=\\\"$BAT_STYLE\\\" \
+                USE_PISTOL=\\\"$USE_PISTOL\\\" BAT_STYLE=\\\"$BAT_STYLE\\\" PREVIEWSIZE=\\\"$PREVIEWSIZE\\\" \
                 BAT_THEME=\\\"$BAT_THEME\\\" FIFOPID=\\\"$FIFOPID\\\" \\\"$0\\\" \\\"$1\\\"'"
             if [ "$SPLIT" = "h" ]; then split="horizontally"; else split="vertically"; fi
             osascript <<-EOF
@@ -305,8 +306,9 @@ preview_file() {
     mimetype="$(file -bL --mime-type -- "$1")"
     ext="${1##*.}"
     [ -n "$ext" ] && ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
-    lines=$(tput lines)
-    cols=$(tput cols)
+    size="$(cat "$PREVIEWSIZE")"
+    lines=${size% *}
+    cols=${size#* }
 
     # Otherwise, falling back to the defaults.
     if [ -d "$1" ]; then
@@ -407,6 +409,7 @@ winch_handler() {
         pkill -f "tail --follow $FIFO_UEBERZUG"
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
+    stty size > "$PREVIEWSIZE"
     preview_file "$(cat "$CURSEL")"
 } 2>/dev/null
 
@@ -415,7 +418,7 @@ preview_fifo() {
         if [ -n "$selection" ]; then
             kill "$(cat "$PREVIEWPID")"
             [ -p "$FIFO_UEBERZUG" ] && ueberzug_remove
-            [ "$selection" = "close" ] && sleep 0.15 && break
+            [ "$selection" = "close" ] && sleep 0.15 && pkill -P "$$" && exit
             preview_file "$selection"
             printf "%s" "$selection" > "$CURSEL"
         fi
@@ -430,12 +433,13 @@ if [ "$PREVIEW_MODE" ]; then
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
 
+    stty size > "$PREVIEWSIZE"
     preview_file "$PWD/$1"
     preview_fifo &
     printf "%s" "$!" > "$FIFOPID"
     printf "%s" "$PWD/$1" > "$CURSEL"
     trap 'winch_handler; wait' WINCH
-    trap 'rm "$PREVIEWPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" 2>/dev/null' INT HUP EXIT
+    trap 'rm "$PREVIEWPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID $PREVIEWSIZE" 2>/dev/null' INT HUP EXIT
     wait "$!" 2>/dev/null
 else
     if [ ! -r "$NNN_FIFO" ]; then
