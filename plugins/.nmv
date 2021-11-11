@@ -22,7 +22,6 @@ TMPDIR="${TMPDIR:-/tmp}"
 INCLUDE_HIDDEN="${INCLUDE_HIDDEN:-0}"
 VERBOSE="${VERBOSE:-0}"
 RECURSIVE="${RECURSIVE:-0}"
-NNN_LIST="${NNN_LIST:-0}"
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 exit_status=0
@@ -67,7 +66,7 @@ printf "%s" "$arr" | awk '{printf("%'"${width}"'d %s\n", NR, $0)}' > "$dst_file"
 
 items=("~")
 while IFS='' read -r line; do
-	if [ "$NNN_LIST" -eq 1 ]; then
+	if [ -n "$NNN_LIST" ]; then
 		line=$(readlink "$line" || printf "%s" "$line")
 	fi
 
