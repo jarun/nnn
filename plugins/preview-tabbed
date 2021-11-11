@@ -6,10 +6,11 @@
 #   - tabbed (https://tools.suckless.org/tabbed): xembed host
 #   - xterm (or urxvt or st) : xembed client for text-based preview
 #   - mpv (https://mpv.io): xembed client for video/audio
-#   - sxiv (https://github.com/muennich/sxiv): xembed client for images
+#   - sxiv (https://github.com/muennich/sxiv) or,
+#   - nsxiv (https://github.com/nsxiv/nsxiv) : xembed client for images
 #   - zathura (https://pwmt.org/projects/zathura): xembed client for PDF
 #   - nnn's nuke plugin for text preview and fallback
-#     nuke is a fallback for 'mpv', 'sxiv', and 'zathura', but has its
+#     nuke is a fallback for 'mpv', 'sxiv'/'nsxiv', and 'zathura', but has its
 #     own dependencies, see the script for more information
 #   - vim (or any editor/pager really)
 #   - file
@@ -35,7 +36,7 @@
 #   provided for `urxvt` and `st`). For graphic preview this can be trickier,
 #   but a few popular viewers are xembed-able, we use:
 #     - `mpv`: multimedia player, for video/audio preview
-#     - `sxiv`: image viewer
+#     - `sxiv`/`nsxiv`: image viewer
 #     - `zathura`: PDF viewer
 #     - but we always fallback to `nuke` plugin
 #
@@ -155,6 +156,8 @@ previewer_loop () {
             image/*)
                 if type sxiv >/dev/null 2>&1 ; then
                     sxiv -e "$XID" "$FILE" &
+                elif type nsxiv >/dev/null 2>&1 ; then
+                    nsxiv -e "$XID" "$FILE" &
                 else
                     term_nuke "$XID" "$FILE"
                 fi

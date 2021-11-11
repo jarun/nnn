@@ -51,7 +51,7 @@
 #      htm|html|xhtml: w3m, lynx, elinks
 #      json: jq, python (json.tool module)
 #   Multimedia by mime:
-#      image/*: imv/sxiv (GUI), viu (https://github.com/atanunq/viu), img2txt, exiftool
+#      image/*: imv/sxiv/nsxiv (GUI), viu (https://github.com/atanunq/viu), img2txt, exiftool
 #      video/*: smplayer, mpv (GUI), ffmpegthumbnailer, mediainfo, exiftool
 #      audio/*: mocq (nnn plugin using MOC), mpv, media_client (Haiku), mediainfo, exiftool
 #      application/pdf: zathura (GUI), pdftotext, mutool, exiftool
@@ -323,6 +323,9 @@ handle_multimedia() {
                     exit 0
                 elif type sxiv >/dev/null 2>&1; then
                     load_dir sxiv "${FPATH}" >/dev/null 2>&1 &
+                    exit 0
+                elif type nsxiv >/dev/null 2>&1; then
+                    load_dir nsxiv "${FPATH}" >/dev/null 2>&1 &
                     exit 0
                 fi
             elif type viu >/dev/null 2>&1; then
