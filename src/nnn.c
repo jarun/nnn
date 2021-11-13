@@ -346,6 +346,7 @@ typedef struct {
 
 /* Non-persistent program-internal states (alphabeical order) */
 typedef struct {
+	uint_t interrupt;      	/* Program received an interrupt */
 	uint_t autofifo   : 1;  /* Auto-create NNN_FIFO */
 	uint_t autonext   : 1;  /* Auto-proceed on open */
 	uint_t dircolor   : 1;  /* Current status of dir color */
@@ -354,7 +355,6 @@ typedef struct {
 	uint_t fifomode   : 1;  /* FIFO notify mode: 0: preview, 1: explore */
 	uint_t forcequit  : 1;  /* Do not prompt on quit */
 	uint_t initfile   : 1;  /* Positional arg is a file */
-	uint_t interrupt  : 1;  /* Program received an interrupt */
 	uint_t move       : 1;  /* Move operation */
 	uint_t oldcolor   : 1;  /* Use older colorscheme */
 	uint_t picked     : 1;  /* Plugin has picked files */
@@ -483,7 +483,7 @@ static regex_t archive_re;
 		(sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino))) || node->fts_info & FTS_DP)
 
 static int threadbmp = -1; /* Has 1 in the bit position for idle threads */
-static volatile int active_threads;
+static int active_threads;
 static pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t hardlink_mutex = PTHREAD_MUTEX_INITIALIZER;
 static ullong_t *core_files;
@@ -858,7 +858,7 @@ static void notify_fifo(bool force);
 static void sigint_handler(int sig)
 {
 	(void) sig;
-	g_state.interrupt = 1;
+	__atomic_store_n(&g_state.interrupt, 1, __ATOMIC_SEQ_CST);
 }
 
 static void clean_exit_sighandler(int sig)
@@ -5485,7 +5485,7 @@ static void *du_thread(void *p_data)
 	FTS *tree = fts_open(path, FTS_PHYSICAL | FTS_XDEV | FTS_NOCHDIR, 0);
 	FTSENT *node;
 
-	while ((node = fts_read(tree))) {
+	while ((node = fts_read(tree)) && !__atomic_load_n(&g_state.interrupt, __ATOMIC_SEQ_CST)) {
 		if (node->fts_info & FTS_D)
 			continue;
 
@@ -5513,7 +5513,7 @@ static void *du_thread(void *p_data)
 
 	pthread_mutex_lock(&running_mutex);
 	threadbmp |= (1 << pdata->core);
-	--active_threads;
+	__atomic_sub_fetch(&active_threads, 1, __ATOMIC_SEQ_CST);
 	pthread_mutex_unlock(&running_mutex);
 
 	return NULL;
@@ -5522,16 +5522,16 @@ static void *du_thread(void *p_data)
 static void dirwalk(char *path, int entnum, bool mountpoint)
 {
 	/* Loop till any core is free */
-	while (active_threads == NUM_DU_THREADS);
+	while (__atomic_load_n(&active_threads, __ATOMIC_SEQ_CST) == NUM_DU_THREADS);
 
-	if (g_state.interrupt)
+	if (__atomic_load_n(&g_state.interrupt, __ATOMIC_SEQ_CST))
 		return;
 
 	pthread_mutex_lock(&running_mutex);
 	int core = ffs(threadbmp) - 1;
 
 	threadbmp &= ~(1 << core);
-	++active_threads;
+	__atomic_add_fetch(&active_threads, 1, __ATOMIC_SEQ_CST);
 	pthread_mutex_unlock(&running_mutex);
 
 	xstrsncpy(core_data[core].path, path, PATH_MAX);
@@ -5658,7 +5658,7 @@ static int dentfill(char *path, struct entry **ppdents)
 					mkpath(path, namep, buf); // NOLINT
 					dirwalk(buf, -1, FALSE);
 
-					if (g_state.interrupt)
+					if (__atomic_load_n(&g_state.interrupt, __ATOMIC_SEQ_CST))
 						goto exit;
 
 				}
@@ -5689,7 +5689,7 @@ static int dentfill(char *path, struct entry **ppdents)
 
 		if (ndents == total_dents) {
 			if (cfg.blkorder)
-				while (active_threads);
+				while (__atomic_load_n(&active_threads, __ATOMIC_SEQ_CST));
 
 			total_dents += ENTRY_INCR;
 			*ppdents = xrealloc(*ppdents, total_dents * sizeof(**ppdents));
@@ -5788,7 +5788,7 @@ static int dentfill(char *path, struct entry **ppdents)
 				/* Need to show the disk usage of this dir */
 				dirwalk(buf, ndents, (sb_path.st_dev != sb.st_dev)); // NOLINT
 
-				if (g_state.interrupt)
+				if (__atomic_load_n(&g_state.interrupt, __ATOMIC_SEQ_CST))
 					goto exit;
 			} else {
 				dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
@@ -5820,7 +5820,7 @@ static int dentfill(char *path, struct entry **ppdents)
 
 exit:
 	if (cfg.blkorder) {
-		while (active_threads);
+		while (__atomic_load_n(&active_threads, __ATOMIC_SEQ_CST));
 
 		attroff(COLOR_PAIR(cfg.curctx + 1));
 		for (int i = 0; i < NUM_DU_THREADS; ++i) {
@@ -6680,8 +6680,8 @@ begin:
 	cd = TRUE;
 
 	populate(path, lastname);
-	if (g_state.interrupt) {
-		g_state.interrupt = cfg.apparentsz = cfg.blkorder = 0;
+	if (__atomic_load_n(&g_state.interrupt, __ATOMIC_SEQ_CST)) {
+		__atomic_store_n(&g_state.interrupt, cfg.apparentsz = cfg.blkorder = 0, __ATOMIC_SEQ_CST);
 		blk_shift = BLK_SHIFT_512;
 		presel = CONTROL('L');
 	}
