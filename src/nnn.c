@@ -5486,8 +5486,11 @@ static void *du_thread(void *p_data)
 	FTSENT *node;
 
 	while ((node = fts_read(tree))) {
-		if (node->fts_info & FTS_D)
+		if (node->fts_info & FTS_D) {
+			if (g_state.interrupt)
+				break;
 			continue;
+		}
 
 		sb = node->fts_statp;
 
