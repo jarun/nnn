@@ -155,9 +155,9 @@ previewer_loop () {
                 ;;
             image/*)
                 if type sxiv >/dev/null 2>&1 ; then
-                    sxiv -e "$XID" "$FILE" &
+                    sxiv -ae "$XID" "$FILE" &
                 elif type nsxiv >/dev/null 2>&1 ; then
-                    nsxiv -e "$XID" "$FILE" &
+                    nsxiv -ae "$XID" "$FILE" &
                 else
                     term_nuke "$XID" "$FILE"
                 fi
