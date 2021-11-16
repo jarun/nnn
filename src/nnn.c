@@ -5376,11 +5376,10 @@ static bool prompt_run(void)
 	bool ret = FALSE;
 	char *cmdline, *next;
 	int cnt_j, cnt_J;
-	size_t len, tmplen;
+	size_t len;
 
-	const char *xargs_j = "xargs -0 -I{} sh -c '%s' < %s";
-	const char *xargs_J = "xargs -0 sh -c '%s' < %s";
-	char tmpcmd[CMD_LEN_MAX];
+	const char *xargs_j = "xargs -0 -I{} %s < %s";
+	const char *xargs_J = "xargs -0 %s < %s";
 	char cmd[CMD_LEN_MAX + 32]; // 32 for xargs format strings
 
 	while (1) {
@@ -5419,9 +5418,10 @@ static bool prompt_run(void)
 		while ((next = strstr(next, "%J"))) {
 			++cnt_J;
 
-			tmplen = xstrsncpy(tmpcmd, cmdline, next - cmdline + 1) - 1;
-			tmplen += xstrsncpy(tmpcmd + tmplen, "${0} ${@}", sizeof("${0} ${@}")) - 1;
-			xstrsncpy(tmpcmd + tmplen, next + 2, len - (next - cmdline + 2) + 1);
+			// %J should be the last thing in the command
+			if (next == cmdline + len - 2) {
+				cmdline[len - 2] = '\0';
+			}
 
 			++next;
 		}
@@ -5433,7 +5433,7 @@ static bool prompt_run(void)
 		if (cnt_j)
 			snprintf(cmd, CMD_LEN_MAX + 32, xargs_j, cmdline, selpath);
 		else if (cnt_J)
-			snprintf(cmd, CMD_LEN_MAX + 32, xargs_J, tmpcmd, selpath);
+			snprintf(cmd, CMD_LEN_MAX + 32, xargs_J, cmdline, selpath);
 
 		spawn(shell, "-c", (cnt_j || cnt_J) ? cmd : cmdline, NULL, F_CLI | F_CONFIRM);
 	}
