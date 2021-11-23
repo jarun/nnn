@@ -7519,10 +7519,13 @@ nochange:
 				tmp = xreadline(tmp, messages[MSG_ARCHIVE_NAME]);
 				break;
 			case SEL_OPENWITH:
-#ifdef NORL
-				tmp = xreadline(NULL, messages[MSG_OPEN_WITH]);
-#else
-				tmp = getreadline(messages[MSG_OPEN_WITH]);
+#ifndef NORL
+				if (g_state.picker) {
+#endif
+					tmp = xreadline(NULL, messages[MSG_OPEN_WITH]);
+#ifndef NORL
+				} else
+					tmp = getreadline(messages[MSG_OPEN_WITH]);
 #endif
 				break;
 			case SEL_NEW:
