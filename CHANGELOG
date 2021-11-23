@@ -1,3 +1,33 @@
+nnn v4.4 Tequila
+2021-11-23
+
+- support macOS iterm2 in plugin preview-tui (#1196)
+- use selection at native command prompt with `%j` and `%J`
+  - docs - https://github.com/jarun/nnn/wiki/concepts#special-variables
+- scroll strings longer than columns in rename/new prompts (#1213, #279)
+- batch rename symlink targets in listing mode (#1214)
+- option for recursive rename in plugin .nmv (#1186)
+- more frequent checks for cancellation during du (#1236)
+- picker mode: enable auto-proceed
+- picker mode: don't pick hovered file on <kbd>Enter</kbd> if selection exists
+- picker mode: fix issue in plugin `fzopen` when used to pick files
+- send file to explorer FIFO on double left click instead of opening it
+- new neovim plugin [nnn.nvim](https://github.com/luukvbaal/nnn.nvim)
+  - nvim-only, featuring explorer mode (`-F` flag)
+- explorer mode for [nnn.vim](https://github.com/mcchrish/nnn.vim#explorer)
+- remove option `-w`: always place HW cursor on current entry
+- accept link name when linking a single target (#1201)
+- option `-i` to show current file information in info bar
+- force GNU sed on *BSD and Solaris
+- add `nsxiv` support to nuke, preview-tabbed and imgview (#1230)
+- fix preview-tui without `-a` (#1208)
+- pass `pts` in env var for preview-tui to use in `tput` (#1235)
+- disable editing file in picker mode (#1183)
+- save session in picker mode (#1190)
+- use nerd icons for gitstatus patch (#1220)
+
+-------------------------------------------------------------------------------
+
 nnn v4.3 Martini
 2021-09-29
 
