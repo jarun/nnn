@@ -2719,10 +2719,10 @@ static void get_archive_cmd(char *cmd, const char *archive)
 	xstrsncpy(cmd, archive_cmd[i], ARCHIVE_CMD_LEN);
 }
 
+#define CMD_FMT " -ze 's|^%s/||' '%s' | xargs -0 %s %s"
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
 {
-	/* The 38 comes from the format string below */
-	char *buf = malloc((38 + xstrlen(cmd) + xstrlen(archive)
+	char *buf = malloc((sizeof(CMD_FMT) + xstrlen(cmd) + xstrlen(archive)
 			       + xstrlen(curpath) + xstrlen(selpath)) * sizeof(char));
 	if (!buf) {
 		DPRINTF_S(strerror(errno));
@@ -2730,12 +2730,11 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 		return;
 	}
 
-	snprintf(buf, CMD_LEN_MAX,
-		SED" -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, selpath, cmd, archive
-		);
+	snprintf(buf, CMD_LEN_MAX, SED CMD_FMT, curpath, selpath, cmd, archive);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI | F_CONFIRM);
 	free(buf);
 }
+#undef CMD_FMT
 
 static void write_lastdir(const char *curpath, const char *outfile)
 {
