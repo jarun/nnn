@@ -2721,9 +2721,9 @@ static void get_archive_cmd(char *cmd, const char *archive)
 
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
 {
-	/* The 70 comes from the string below */
-	char *buf = (char *)malloc((70 + xstrlen(cmd) + xstrlen(archive)
-				       + xstrlen(curpath) + xstrlen(selpath)) * sizeof(char));
+	/* The 38 comes from the format string below */
+	char *buf = malloc((38 + xstrlen(cmd) + xstrlen(archive)
+			       + xstrlen(curpath) + xstrlen(selpath)) * sizeof(char));
 	if (!buf) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
