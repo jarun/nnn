@@ -765,6 +765,7 @@ static const char * const toks[] = {
 #define P_CPMVRNM 1
 #define P_ARCHIVE 2
 #define P_REPLACE 3
+#define P_ARCHIVE_CMD 4
 
 static const char * const patterns[] = {
 	SED" -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s",
@@ -772,6 +773,7 @@ static const char * const patterns[] = {
 		"%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
 	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$",
 	SED" -i 's|^%s\\(.*\\)$|%s\\1|' %s",
+	SED" -ze 's|^%s/||' '%s' | xargs -0 %s %s",
 };
 
 /* Colors */
@@ -2719,22 +2721,20 @@ static void get_archive_cmd(char *cmd, const char *archive)
 	xstrsncpy(cmd, archive_cmd[i], ARCHIVE_CMD_LEN);
 }
 
-#define CMD_FMT " -ze 's|^%s/||' '%s' | xargs -0 %s %s"
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
 {
-	char *buf = malloc((sizeof(CMD_FMT) + xstrlen(cmd) + xstrlen(archive)
-			       + xstrlen(curpath) + xstrlen(selpath)) * sizeof(char));
+	char *buf = malloc((xstrlen(patterns[P_ARCHIVE_CMD]) + xstrlen(cmd) + xstrlen(archive)
+	                   + xstrlen(curpath) + xstrlen(selpath)) * sizeof(char));
 	if (!buf) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
 		return;
 	}
 
-	snprintf(buf, CMD_LEN_MAX, SED CMD_FMT, curpath, selpath, cmd, archive);
+	snprintf(buf, CMD_LEN_MAX, patterns[P_ARCHIVE_CMD], curpath, selpath, cmd, archive);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI | F_CONFIRM);
 	free(buf);
 }
-#undef CMD_FMT
 
 static void write_lastdir(const char *curpath, const char *outfile)
 {
