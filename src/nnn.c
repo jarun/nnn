@@ -2729,12 +2729,7 @@ static void archive_selection(const char *cmd, const char *archive, const char *
 	}
 
 	snprintf(buf, CMD_LEN_MAX,
-#ifdef __linux__
 		SED" -ze 's|^%s/||' '%s' | xargs -0 %s %s", curpath, selpath, cmd, archive
-#else
-		"tr '\\0' '\n' < '%s' | "SED" -e 's|^%s/||' | tr '\n' '\\0' | xargs -0 %s %s",
-		selpath, curpath, cmd, archive
-#endif
 		);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI | F_CONFIRM);
 	free(buf);
