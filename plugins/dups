@@ -28,17 +28,17 @@ printf "\
 " > "$tmpfile"
 
 # shellcheck disable=SC2016
-find . -size +0 -type f -printf "%${size_digits}s %p\n" | sort -rn | uniq -w"${size_digits}" -D | sed -E '
-s/^ {,12}([0-9]{,12}) (.*)$/printf "%s %s\\n" "$(md5sum "\2")" "d\1"/
-' | tr '\n' '\0' | xargs -0 -n1 sh -c | sort | { uniq -w32 --all-repeated=separate; echo; } | sed -nE '
+find . -size +0 -type f -printf "%${size_digits}s %p\n" | sort -rn | uniq -w"${size_digits}" -D | sed -e '
+s/^ \{0,12\}\([0-9]\{0,12\}\) \(.*\)$/printf "%s %s\\n" "$(md5sum "\2")" "d\1"/
+' | tr '\n' '\0' | xargs -0 -n1 sh -c | sort | { uniq -w32 --all-repeated=separate; echo; } | sed -ne '
 h
-s/^(.{32}).* d([0-9]*)$/## md5sum: \1 size: \2 bytes/p
+s/^\(.\{32\}\).* d\([0-9]*\)$/## md5sum: \1 size: \2 bytes/p
 g
 
 :loop
 N
 /.*\n$/!b loop
-p' | sed -E 's/^.{32}  (.*) d[0-9]*$/\1/' >> "$tmpfile"
+p' | sed -e 's/^.\{32\}  \(.*\) d[0-9]*$/\1/' >> "$tmpfile"
 
 "$EDITOR" "$tmpfile"
 
@@ -46,7 +46,7 @@ printf "Remove commented files? (yes/no) [default=n]: "
 read -r commented
 
 if [ "$commented" = "y" ]; then
-	sedcmd="/^(##|[^#]).*/d; /^$/d; s/^# *(.*)$/\1/"
+	sedcmd="/^##.*/d; /^[^#].*/d; /^$/d; s/^# *\(.*\)$/\1/"
 else
 	printf "Press any key to exit"
 	read -r _
@@ -58,10 +58,10 @@ read -r force
 
 if [ "$force" = "f" ]; then
 	#shellcheck disable=SC2016
-	sed -E "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 -r sh -c 'rm -f "$0" "$@" </dev/tty'
+	sed -e "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 -r sh -c 'rm -f "$0" "$@" </dev/tty'
 else
 	#shellcheck disable=SC2016
-	sed -E "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 -r sh -c 'rm -i "$0" "$@" </dev/tty'
+	sed -e "$sedcmd" "$tmpfile" | tr '\n' '\0' | xargs -0 -r sh -c 'rm -i "$0" "$@" </dev/tty'
 fi
 
 rm "$tmpfile"
