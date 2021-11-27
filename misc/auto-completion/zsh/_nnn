@@ -28,7 +28,7 @@ args=(
     '(-n)-n[start in type-to-nav mode]'
     '(-o)-o[open files only on Enter]'
     '(-p)-p[copy selection to file]:file name'
-    '(-P)-P[plugin key to runn]:key char'
+    '(-P)-P[plugin key to run]:key char'
     '(-Q)-Q[disable quit confirmation]'
     '(-r)-r[show cp, mv progress (Linux-only)]'
     '(-R)-R[disable rollover at edges]'
