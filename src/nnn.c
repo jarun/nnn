@@ -5659,7 +5659,6 @@ static int dentfill(char *path, struct entry **ppdents)
 
 					if (g_state.interrupt)
 						goto exit;
-
 				}
 			} else {
 				/* Do not recount hard links */
