@@ -42,7 +42,7 @@ done
 
 app=$(find "$@" -iname '*.desktop' -exec grep '^Name=' {} + \
     | sort -u -t ':' -k 1,1 \
-    | sed -E 's;.+/(.+desktop):Name=(.+);\2:\1;' \
+    | sed -e 's;..*/\(..*desktop\):Name=\(..*\);\2:\1;' \
     | sort -t ':' -k 1,1 \
     | column -t -s ':' -o "$(printf '\t')" \
     | $menu \
