@@ -1,5 +1,8 @@
-# Description: Adds preview pipe to enable closing and re-opening
-#              the preview pane when running an undetached editor.
+# Description: Adds preview pipe to enable closing and re-opening the preview
+#              pane when running an undetached editor. If you are using vim 
+#              you might experience incorrectly resized window. Consider adding
+#              the following to your vimrc:
+#              autocmd VimEnter * :silent exec "!kill -s WINCH $PPID"
 #
 # Authors: Luuk van Baal
 
