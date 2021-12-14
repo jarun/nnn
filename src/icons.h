@@ -223,6 +223,7 @@ static const struct icon_pair icons_ext[] = {
 	/* O */
 	{"o",          FILE_MANPAGE,       0},
 	{"ogg",        FA_FILE_AUDIO_O,    COLOR_AUDIO},
+	{"opus",       FA_FILE_AUDIO_O,    COLOR_AUDIO},
 	{"opdownload", FA_DOWNLOAD,        0},
 	{"out",        FA_LINUX,           0},
 
@@ -436,6 +437,7 @@ static const struct icon_pair icons_ext[] = {
 	/* O */
 	{"o",          ICON_EXT_O,         0},
 	{"ogg",        ICON_EXT_OGG,       COLOR_AUDIO},
+	{"opus",       ICON_EXT_OPUS,      COLOR_AUDIO},
 	{"opdownload", ICON_EXT_ODOWNLOAD, 0},
 	{"out",        ICON_EXT_OUT,       0},
 
