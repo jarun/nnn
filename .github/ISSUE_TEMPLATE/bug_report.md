@@ -36,6 +36,7 @@ If we need more information and there is no communication from the bug reporter 
 - [ ] Custom desktop opener (if applicable):
 - [ ] Program options used:
 - [ ] Configuration options set:
+- [ ] Plugins are installed
 - [ ] Issue exists on `nnn` master
 
 #### Exact steps to reproduce the issue
