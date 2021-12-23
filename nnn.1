@@ -89,6 +89,7 @@ supports the following options:
 .Pp
 .Fl J
         disable auto-proceed on select
+        (eg. making a selection will no longer move cursor to the next entry)
 .Pp
 .Fl K
         test for keybind collision
@@ -113,10 +114,11 @@ supports the following options:
 .Pp
 .Fl r
         show cp, mv progress
-        (Linux-only, needs advcpmv; '^T' shows the progress on BSD/macOS)
+        (Linux-only, needs \fIadvcpmv\fR; '^T' shows the progress on BSD/macOS)
 .Pp
 .Fl R
-        disable rollover at edges
+        disable rollover at edges (eg. pressing \fIdown\fR while on the last
+        entry will no longer move cursor to the first entry and vice\-versa)
 .Pp
 .Fl "s name"
         load a session by name
@@ -142,8 +144,8 @@ supports the following options:
         show version and exit
 .Pp
 .Fl x
-        show notis on selection cp, mv, rm completion
-        copy path to system clipboard on select
+        show notis on selection cp, mv, rm completion (requires \fI.cbcp\fR plugin)
+        copy path to system clipboard on select (requires \fI.ntfy\fR plugin)
         show xterm title (if non-picker mode)
 .Pp
 .Fl h
