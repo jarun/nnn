@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+
+# Description: cd to the top level of the current git repository in the current context
+# Dependencies: git
+# Shell: sh
+# Author: https://github.com/PatrickF1
+
+root="$(git rev-parse --show-toplevel 2>/dev/null)"
+if [ -n "$root" ]; then
+    printf "%s" "0c$root" > "$NNN_PIPE"
+else
+    printf "Not in a git repository"
+    read -r _
+    exit 1
+fi
