@@ -78,6 +78,7 @@
 
 #SPLIT="$SPLIT"  # you can set a permanent split here
 #TERMINAL="$TERMINAL"  # same goes for the terminal
+DEBUG_LOG=0  # set to 1 to enable logging for debug purposes
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
 ICONLOOKUP="${ICONLOOKUP:-0}"
@@ -95,6 +96,12 @@ FIFOPID="$TMPDIR/nnn-preview-tui-fifopid.$NNN_PARENT"
 PREVIEWPID="$TMPDIR/nnn-preview-tui-pagerpid.$NNN_PARENT"
 CURSEL="$TMPDIR/nnn-preview-tui-selection.$NNN_PARENT"
 FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NNN_PARENT"
+
+if [ "$DEBUG_LOG" -eq 0 ]; then
+    DEBUG_LOGFILE="/dev/null"
+else
+    DEBUG_LOGFILE="${TMPDIR}/preview-tui-log"
+fi
 
 start_preview() {
     [ "$PAGER" = "most" ] && PAGER="less -R"
@@ -176,7 +183,7 @@ EOF
                      FIFOPID="$FIFOPID" FIFO_UEBERZUG="$FIFO_UEBERZUG" $TERMINAL -e "$0" "$1" &
             fi ;;
     esac
-} >/dev/null 2>&1
+} >"$DEBUG_LOGFILE" 2>&1
 
 toggle_preview() {
     if exists QuickLook.exe; then
@@ -195,7 +202,7 @@ toggle_preview() {
         [ -p "$NNN_PPIPE" ] && printf "1" > "$NNN_PPIPE"
         start_preview "$1" "$QLPATH"
     fi
-} >/dev/null 2>&1
+} >"$DEBUG_LOGFILE" 2>&1
 
 exists() {
     type "$1" >/dev/null
@@ -227,7 +234,7 @@ fifo_pager() {
     )
 
     rm "$tmpfifopath"
-} 2>/dev/null
+} 2>"$DEBUG_LOGFILE"
 
 # Binary file: show file info inside the pager
 print_bin_info() {
@@ -237,7 +244,7 @@ print_bin_info() {
     else
         file -b "$1"
     fi
-} 2>/dev/null
+} 2>"$DEBUG_LOGFILE"
 
 handle_mime() {
     case "$2" in
@@ -343,7 +350,7 @@ preview_file() {
     else
         handle_mime "$1" "$mimetype" "$ext"
     fi
-} 2>/dev/null
+} 2>"$DEBUG_LOGFILE"
 
 generate_preview() {
   if [ -n "$QLPATH" ] && stat "$3"; then
@@ -387,13 +394,13 @@ generate_preview() {
             pdf) pdftoppm -jpeg -f 1 -singlefile "$3" "$NNN_PREVIEWDIR/$3" ;;
             video) ffmpegthumbnailer -s0 -i "$3" -o "$NNN_PREVIEWDIR/$3.jpg" || rm "$NNN_PREVIEWDIR/$3.jpg" ;;
         esac
-    fi >/dev/null
+    fi >"$DEBUG_LOGFILE"
     if [ -f "$NNN_PREVIEWDIR/$3.jpg" ]; then
         image_preview "$1" "$2" "$NNN_PREVIEWDIR/$3.jpg"
     else
         fifo_pager print_bin_info "$3"
     fi
-} 2>/dev/null
+} 2>"$DEBUG_LOGFILE"
 
 image_preview() {
     clear
@@ -410,7 +417,7 @@ image_preview() {
         fifo_pager print_bin_info "$3" && return
     fi
     printf "%s" "$!" > "$PREVIEWPID"
-} 2>/dev/null
+} 2>"$DEBUG_LOGFILE"
 
 ueberzug_layer() {
     printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "width": "%d", "height": "%d", "scaler": "fit_contain", "path": "%s"}\n' "$1" "$2" "$3" > "$FIFO_UEBERZUG"
@@ -428,7 +435,7 @@ winch_handler() {
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
     preview_file "$(cat "$CURSEL")"
-} 2>/dev/null
+} 2>"$DEBUG_LOGFILE"
 
 preview_fifo() {
     while read -r selection; do
@@ -442,7 +449,7 @@ preview_fifo() {
     done < "$NNN_FIFO"
     sleep 0.1 # make sure potential preview by winch_handler is killed
     pkill -P "$$"
-} 2>/dev/null
+} 2>"$DEBUG_LOGFILE"
 
 if [ "$PREVIEW_MODE" ]; then
     if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
