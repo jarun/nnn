@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# Description: cd to the top level of the current git repository in the current context
+# Shell: bash
+# Author: https://github.com/PatrickF1
+
+if git rev-parse --git-dir > /dev/null 2>&1; then
+    . "$(dirname "$0")"/.nnn-plugin-helper
+    nnn_cd "$(git rev-parse --show-toplevel)" 0
+else
+    printf "Not in a git repository"
+    read -r _
+    exit 1
+fi
