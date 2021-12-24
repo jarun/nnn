@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 # Description: cd to the top level of the current git repository in the current context
-# Shell: bash
+# Shell: sh
 # Author: https://github.com/PatrickF1
 
 if git rev-parse --git-dir > /dev/null 2>&1; then
