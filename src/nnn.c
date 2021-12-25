@@ -1322,7 +1322,7 @@ static void msg(const char *message)
 }
 
 #ifdef KEY_RESIZE
-static void handle_key_resize()
+static void handle_key_resize(void)
 {
 	endwin();
 	refresh();
