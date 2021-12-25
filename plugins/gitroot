@@ -5,8 +5,8 @@
 # Shell: sh
 # Author: https://github.com/PatrickF1
 
-if git rev-parse --git-dir > /dev/null 2>&1; then
-    root="$(git rev-parse --show-toplevel)"
+root="$(git rev-parse --show-toplevel 2>/dev/null)"
+if [ -n "$root" ]; then
     printf "%s" "0c$root" > "$NNN_PIPE"
 else
     printf "Not in a git repository"
