@@ -7971,9 +7971,9 @@ static char *load_input(int fd, const char *path)
 		++chunk_count;
 
 		while (off < total_read) {
-			next = memchr(input + off, '\0', total_read - off) + 1;
-			if (next == (void *)1)
+			if ((next = memchr(input + off, '\0', total_read - off)) == NULL)
 				break;
+			++next;
 
 			if (next - input == off + 1) {
 				off = next - input;
