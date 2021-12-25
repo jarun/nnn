@@ -334,7 +334,7 @@ typedef struct {
 	uint_t prefersel  : 1;  /* Prefer selection over current, if exists */
 	uint_t fileinfo   : 1;  /* Show file information on hover */
 	uint_t nonavopen  : 1;  /* Open file on right arrow or `l` */
-	uint_t autoselect : 1;  /* Auto-select dir in type-to-nav mode */
+	uint_t autoenter  : 1;  /* auto-enter dir in type-to-nav mode */
 	uint_t reserved2  : 1;
 	uint_t useeditor  : 1;  /* Use VISUAL to open text files */
 	uint_t reserved3  : 3;
@@ -414,7 +414,7 @@ static settings cfg = {
 	0, /* prefersel */
 	0, /* fileinfo */
 	0, /* nonavopen */
-	1, /* autoselect */
+	1, /* autoenter */
 	0, /* reserved2 */
 	0, /* useeditor */
 	0, /* reserved3 */
@@ -3373,7 +3373,7 @@ static int filterentries(char *path, char *lastname)
 			if (cfg.filtermode) {
 				switch (*ch) {
 				case '\'': // fallthrough /* Go to first non-dir file */
-				case '+': // fallthrough /* Toggle auto-advance */
+				case '+': // fallthrough /* Toggle auto-proceed on open */
 				case ',': // fallthrough /* Mark CWD */
 				case '-': // fallthrough /* Visit last visited dir */
 				case '.': // fallthrough /* Show hidden files */
@@ -3434,17 +3434,17 @@ static int filterentries(char *path, char *lastname)
 			continue;
 		}
 
-		/* If the only match is a dir, auto-select and cd into it */
+		/* If the only match is a dir, auto-enter and cd into it */
 		if (ndents == 1 && cfg.filtermode
-		    && cfg.autoselect && (pdents[0].flags & DIR_OR_DIRLNK)) {
+		    && cfg.autoenter && (pdents[0].flags & DIR_OR_DIRLNK)) {
 			*ch = KEY_ENTER;
 			cur = 0;
 			goto end;
 		}
 
 		/*
-		 * redraw() should be above the auto-select optimization, for
-		 * the case where there's an issue with dir auto-select, say,
+		 * redraw() should be above the auto-enter optimization, for
+		 * the case where there's an issue with dir auto-enter, say,
 		 * due to a permission problem. The transition is _jumpy_ in
 		 * case of such an error. However, we optimize for successful
 		 * cases where the dir has permissions. This skips a redraw().
@@ -5013,7 +5013,7 @@ static void show_help(const char *path)
 	       "9Lt h  Parent%-12c~ ` @ -  ~, /, start, prev\n"
 	   "5Ret Rt l  Open%-20c'  First file/match\n"
 	       "9g ^A  Top%-21c.  Toggle hidden\n"
-	       "9G ^E  End%-21c+  Toggle auto-advance\n"
+	       "9G ^E  End%-21c+  Toggle auto-proceed on open\n"
 	      "8B (,)  Book(mark)%-11cb ^/  Select bookmark\n"
 		"a1-4  Context%-11c(Sh)Tab  Cycle/new context\n"
 	    "62Esc ^Q  Quit%-20cq  Quit context\n"
@@ -8112,7 +8112,7 @@ static void usage(void)
 #ifndef NOFIFO
 		" -a      auto NNN_FIFO\n"
 #endif
-		" -A      no dir auto-select\n"
+		" -A      no dir auto-enter\n"
 		" -b key  open bookmark key (trumps -s/S)\n"
 		" -c      cli-only NNN_OPENER (trumps -e)\n"
 		" -C      8-color scheme\n"
@@ -8129,7 +8129,7 @@ static void usage(void)
 		" -g      regex filters\n"
 		" -H      show hidden files\n"
 		" -i      show current file info\n"
-		" -J      no auto-proceed on select\n"
+		" -J      no auto-proceed on selection\n"
 		" -K      detect key collision\n"
 		" -l val  set scroll lines\n"
 		" -n      type-to-nav mode\n"
@@ -8319,7 +8319,7 @@ int main(int argc, char *argv[])
 			break;
 #endif
 		case 'A':
-			cfg.autoselect = 0;
+			cfg.autoenter = 0;
 			break;
 		case 'b':
 			if (env_opts_id < 0)
