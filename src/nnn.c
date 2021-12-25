@@ -3803,7 +3803,7 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
 	if (!kvarr)
 		return NULL;
 
-	for (int r = 0; kvarr[r].key && r < max; ++r) {
+	for (int r = 0; r < max && kvarr[r].key; ++r) {
 		if (kvarr[r].key == key) {
 			/* Do not allocate new memory for plugin */
 			if (id == NNN_PLUG)
@@ -3827,7 +3827,7 @@ static int get_kv_key(kv *kvarr, char *val, uchar_t max, uchar_t id)
 	if (id != NNN_ORDER) /* For now this function supports only order string */
 		return -1;
 
-	for (int r = 0; kvarr[r].key && r < max; ++r) {
+	for (int r = 0; r < max && kvarr[r].key; ++r) {
 		if (xstrcmp((orderstr + kvarr[r].off), val) == 0)
 			return kvarr[r].key;
 	}
