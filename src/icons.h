@@ -95,7 +95,7 @@ static const struct icon_pair icons_name[] = {
 };
 
 /*
- * New entries should bu added such that the first character of the extension is in the correct group .
+ * New entries should be added such that the first character of the extension is in the correct group .
  * This is done for performance reason so that the correct icon can be found faster.
  * All entries are case-insensitive
  */
@@ -284,6 +284,7 @@ static const struct icon_pair icons_ext[] = {
 	/* W */
 	{"wav",      FA_FILE_AUDIO_O,      COLOR_AUDIO},
 	{"webm",     FA_FILE_MOVIE_O,      COLOR_VIDEO},
+	{"webp",     FA_FILE_IMAGE_O,      COLOR_IMAGE},
 	{"wma",      FA_FILE_AUDIO_O,      COLOR_AUDIO},
 	{"wmv",      FA_FILE_MOVIE_O,      COLOR_VIDEO},
 
@@ -502,6 +503,7 @@ static const struct icon_pair icons_ext[] = {
 	/* W */
 	{"wav",        ICON_EXT_WAV,       COLOR_AUDIO},
 	{"webm",       ICON_EXT_WEBM,      COLOR_VIDEO},
+	{"webp",       ICON_EXT_WEBP,      COLOR_IMAGE},
 	{"wma",        ICON_EXT_WMA,       COLOR_AUDIO},
 	{"wmv",        ICON_EXT_WMV,       COLOR_VIDEO},
 
