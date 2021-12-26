@@ -345,6 +345,20 @@ file. Press '-' to return to the listing dir. Press 'Enter' to open the symlink.
 .Pp
 Listing input stream can be scripted. It can be extended to pick (option -p)
 selected entries from the listed results.
+.Sh BOOKMARKS
+There are 2 ways (can be used together) to manage bookmarks.
+.Pp
+(1) Bookmark keys: See \fINNN_BMS\fR under \fIENVIORNMENT\fR section on how to
+    set bookmark keys.
+.Pp
+(2) Symlinked bookmarks: Symlinked bookmarks can be created at runtime
+    with the \fIB\fR key. They can also be manually created by adding symlinks
+    to bookmarked locations under the bookmarks directory in the nnn config
+    directory (~/.config/nnn/bookmarks).
+.Pp
+Pressing \fIb\fR will list all the bookmark keys set in NNN_BMS. Pressing
+\fIEnter\fR at this prompt will take to the symlink bookmark directory, if
+NNN_BMS is not set, it happens directly on bookmarks key.
 .Sh UNITS
 The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y
 (powers of 1024), same as the default units in \fIls\fR.
@@ -369,10 +383,9 @@ used. A single combination of arguments is supported for SHELL and PAGER.
 separated by \fI;\fR:
 .Bd -literal
     export NNN_BMS="d:$HOME/Docs;u:/home/user/Cam Uploads;D:$HOME/Downloads/"
-
-    Symlinked bookmarks can be created at runtime with the key \fIB\fR. To list
-    the symlinked bookmarks press \fIEnter\fR at the select bookmark prompt.
 .Ed
+.Pp
+These bookmarks are listed in the help and config screen (key ?).
 .Pp
 \fBNNN_PLUG:\fR directly executable plugins as \fIkey_char:plugin\fR pairs
 separated by \fI;\fR:
