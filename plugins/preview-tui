@@ -25,6 +25,7 @@
 #   - optional: ffmpeg for audio thumbnails
 #   - optional: libreoffce for opendocument/officedocument preview
 #   - optional: pdftoppm(poppler) for pdf thumbnails
+#   - optional: pdftotext(poppler) for pdf text preview. Export PDFTOTEXT=1 to use this
 #   - optional: gnome-epub-thumbnailer for epub thumbnails (https://gitlab.gnome.org/GNOME/gnome-epub-thumbnailer)
 #   - optional: fontpreview for font preview (https://github.com/sdushantha/fontpreview)
 #   - optional: glow or lowdown for markdown
@@ -91,6 +92,7 @@ FIFOPID="$TMPDIR/nnn-preview-tui-fifopid.$NNN_PARENT"
 PREVIEWPID="$TMPDIR/nnn-preview-tui-pagerpid.$NNN_PARENT"
 CURSEL="$TMPDIR/nnn-preview-tui-selection.$NNN_PARENT"
 FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NNN_PARENT"
+PDFTOTEXT="${PDFTOTEXT:-0}" # preview pdf's text instead of thumbnail
 
 start_preview() {
     [ "$PAGER" = "most" ] && PAGER="less -R"
@@ -120,7 +122,8 @@ start_preview() {
                 -e "PAGER=$PAGER" -e "ICONLOOKUP=$ICONLOOKUP" -e "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" \
                 -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
                 -e "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" -e "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
-                -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$2" -d"$DSPLIT" "$0" "$1" ;;
+                -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "PDFTOTEXT=$PDFTOTEXT" -e "QLPATH=$2" \
+                -d"$DSPLIT" "$0" "$1" ;;
         kitty) # Setting the layout for the new window. It will be restored after the script ends.
             kitty @ goto-layout splits
             # Trying to use kitty's integrated window management as the split window. All
@@ -134,7 +137,8 @@ start_preview() {
                 --env "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" --env "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
                 --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=$BAT_STYLE" \
                 --env "BAT_THEME=$BAT_THEME" --env "FIFOPID=$FIFOPID" --env TTY="$TTY" \
-                --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" ;;
+                --env "CURSEL=$CURSEL" --env "PDFTOTEXT=$PDFTOTEXT" \
+                --location "${SPLIT}split" "$0" "$1" ;;
         iterm)
             command="$SHELL -c 'cd $PWD; \
                 PATH=\\\"$PATH\\\" NNN_FIFO=\\\"$NNN_FIFO\\\" PREVIEW_MODE=1 PAGER=\\\"$PAGER\\\" \
@@ -143,7 +147,8 @@ start_preview() {
                 ICONLOOKUP=\\\"$ICONLOOKUP\\\" NNN_PREVIEWHEIGHT=\\\"$NNN_PREVIEWHEIGHT\\\" \
                 NNN_PREVIEWWIDTH=\\\"$NNN_PREVIEWWIDTH\\\" NNN_PREVIEWDIR=\\\"$NNN_PREVIEWDIR\\\" \
                 USE_PISTOL=\\\"$USE_PISTOL\\\" BAT_STYLE=\\\"$BAT_STYLE\\\" TTY=\\\"$TTY\\\" \
-                BAT_THEME=\\\"$BAT_THEME\\\" FIFOPID=\\\"$FIFOPID\\\" \\\"$0\\\" \\\"$1\\\"'"
+                BAT_THEME=\\\"$BAT_THEME\\\" FIFOPID=\\\"$FIFOPID\\\" PDFTOTEXT=\\\"$PDFTOTEXT\\\" \
+                \\\"$0\\\" \\\"$1\\\"'"
             if [ "$SPLIT" = "h" ]; then split="horizontally"; else split="vertically"; fi
             osascript <<-EOF
             tell application "iTerm"
@@ -246,7 +251,11 @@ handle_mime() {
 handle_ext() {
     case "$2" in
         epub) generate_preview "$cols" "$lines" "$1" "epub" ;;
-        pdf) generate_preview "$cols" "$lines" "$1" "pdf" ;;
+        pdf) if [ "$PDFTOTEXT" -eq 0 ]; then
+                 generate_preview "$cols" "$lines" "$1" "pdf"
+             else
+                 fifo_pager pdftotext -nopgbrk -layout "$1" -
+             fi ;;
         gz|bz2) fifo_pager tar -tvf "$1" ;;
         md) if exists glow; then
                 fifo_pager glow -s dark "$1"
