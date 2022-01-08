@@ -318,6 +318,9 @@ handle_multimedia() {
                 if is_mac; then
                     nohup open "${FPATH}" >/dev/null 2>&1 &
                     exit 0
+                elif type imv >/dev/null 2>&1; then
+                    load_dir imv "${FPATH}" >/dev/null 2>&1 &
+                    exit 0
                 elif type imvr >/dev/null 2>&1; then
                     load_dir imvr "${FPATH}" >/dev/null 2>&1 &
                     exit 0
