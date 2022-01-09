@@ -49,5 +49,5 @@ app=$(find "$@" -iname '*.desktop' -exec grep '^Name=' {} + \
     | cut -f 2)
 
 if [ -n "$app" ]; then
-    xdg-mime default "$app" "$ftype"
+    xdg-mime default "${app%%[[:blank:]]*}" "$ftype"
 fi
