@@ -5,10 +5,11 @@
 # Note: This plugin needs a "NNN_FIFO" to work. See man.
 #
 # Dependencies:
-#   - Supports 4 independent methods to preview with:
+#   - Supports 5 independent methods to preview with:
 #       - tmux (>=3.0), or
 #       - kitty with allow_remote_control and listen_on set in kitty.conf, or
-#       - QuickLook on WSL (https://github.com/QL-Win/QuickLook)
+#       - QuickLook on WSL (https://github.com/QL-Win/QuickLook), or
+#       - Windows Terminal (https://github.com/Microsoft/Terminal | https://aka.ms/terminal) with WSL, or
 #       - $TERMINAL set to a terminal (it's xterm by default).
 #   - less or $PAGER
 #   - tree or exa or ls
@@ -69,8 +70,11 @@
 #
 #   Iterm2 users are recommended to use viu to view images without getting pixelated.
 #
+#   Windows Terminal users can set "Profile termination behavior" under "Profile > Advanced" settings
+#   to automaticaly close pane on quit when exit code is 0.
+#
 # Shell: POSIX compliant
-# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal
+# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal, @WanderLanz
 
 #SPLIT="$SPLIT"  # you can set a permanent split here
 #TERMINAL="$TERMINAL"  # same goes for the terminal
@@ -101,6 +105,8 @@ start_preview() {
         TERMINAL=kitty
     elif [ -z "$TERMINAL" ] && [ "$TERM_PROGRAM" = "iTerm.app" ]; then
         TERMINAL=iterm
+    elif [ -n "$WT_SESSION" ]; then
+        TERMINAL=winterm
     else
         TERMINAL="${TERMINAL:-xterm}"
     fi
@@ -152,6 +158,16 @@ start_preview() {
                 end tell
             end tell
 EOF
+            ;;
+        winterm)
+            if [ "$SPLIT" = "h" ]; then split="H"; else split="V"; fi
+            cmd.exe /c wt -w 0 sp -$split bash -c "cd $PWD \; PATH='$PATH' NNN_FIFO=$NNN_FIFO \
+                PREVIEW_MODE=1 TTY=$TTY CURSEL=$CURSEL TMPDIR=$TMPDIR FIFOPID=$FIFOPID \
+                BAT_STYLE=$BAT_STYLE BAT_THEME=$BAT_THEME PREVIEWPID=$PREVIEWPID \
+                PAGER='$PAGER' ICONLOOKUP=$ICONLOOKUP NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH \
+                USE_SCOPE=$USE_SCOPE SPLIT=$SPLIT USE_PISTOL=$USE_PISTOL \
+                NNN_PREVIEWDIR=$NNN_PREVIEWDIR NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT \
+                FIFO_UEBERZUG=$FIFO_UEBERZUG QLPATH=$2 $0 $1" \; -w 0 mf previous
             ;;
         *)  if [ -n "$2" ]; then
                 QUICKLOOK=1 QLPATH="$2" PREVIEW_MODE=1 "$0" "$1" &
@@ -441,6 +457,7 @@ if [ "$PREVIEW_MODE" ]; then
     trap 'winch_handler; wait' WINCH
     trap 'rm "$PREVIEWPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" 2>/dev/null' INT HUP EXIT
     wait "$!" 2>/dev/null
+    exit 0
 else
     if [ ! -r "$NNN_FIFO" ]; then
         clear
