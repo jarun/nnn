@@ -3165,12 +3165,13 @@ static void showfilterinfo(void)
 
 	i = getorderstr(info);
 
-	snprintf(info + i, REGEX_MAX - i - 1, "  %s [/], %s [:]",
-		 (cfg.regex ? "reg" : "str"),
-		 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
-
 	if (cfg.fileinfo && ndents && get_output("file", "-b", pdents[cur].name, -1, FALSE, FALSE))
 		mvaddstr(xlines - 2, 2, g_buf);
+	else {
+		snprintf(info + i, REGEX_MAX - i - 1, "  %s [/], %s [:]",
+			 (cfg.regex ? "reg" : "str"),
+			 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
+	}
 
 	mvaddstr(xlines - 2, xcols - xstrlen(info), info);
 }
