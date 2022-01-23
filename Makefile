@@ -27,6 +27,7 @@ O_NOSSN := 0  # disable session support
 O_NOUG := 0  # disable user, group name in status bar
 O_NOX11 := 0  # disable X11 integration
 O_MATCHFLTR := 0  # allow filters without matches
+O_NOSORT := 0  # disable sorting entries on dir load
 
 # User patches
 O_GITSTATUS := 0 # add git status to detail view
@@ -119,6 +120,10 @@ endif
 
 ifeq ($(strip $(O_MATCHFLTR)),1)
 	CPPFLAGS += -DMATCHFLTR
+endif
+
+ifeq ($(strip $(O_NOSORT)),1)
+	CPPFLAGS += -DNOSORT
 endif
 
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)

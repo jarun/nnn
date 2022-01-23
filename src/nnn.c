@@ -5847,7 +5847,9 @@ static void populate(char *path, char *lastname)
 	if (!ndents)
 		return;
 
+#ifndef NOSORT
 	ENTSORT(pdents, ndents, entrycmpfn);
+#endif
 
 #ifdef DEBUG
 	clock_gettime(CLOCK_REALTIME, &ts2);
