@@ -15,10 +15,10 @@ sel=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 # Choose one of these two schemes by commenting
 
 # more verbose
-xargs -0 -a "$sel" -I % rsync -ah --progress % "$PWD"
+xargs -0 -I % rsync -ah --progress % "$PWD" < "$sel"
 
 # less verbose
-# xargs -0 -a "$sel" -I % rsync -ah --info=progress2 % "$PWD"
+# xargs -0 -I % rsync -ah --info=progress2 % "$PWD" < "$sel"
 
 # Clear selection
 if [ -p "$NNN_PIPE" ]; then
