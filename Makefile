@@ -172,7 +172,7 @@ endif
 
 all: $(BIN)
 
-$(BIN): $(SRC) $(HEADERS)
+$(BIN): $(SRC) $(HEADERS) Makefile
 	@$(MAKE) --silent prepatch
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $(GETTIME_C) $< $(LDLIBS)
 	@$(MAKE) --silent postpatch
