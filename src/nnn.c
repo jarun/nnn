@@ -7804,9 +7804,9 @@ nochange:
 			if (sel == SEL_QUITCTX) {
 				int ctx = cfg.curctx;
 
-				for (r = (ctx + 1) & ~CTX_MAX;
+				for (r = (ctx - 1) & (CTX_MAX - 1);
 				     (r != ctx) && !g_ctx[r].c_cfg.ctxactive;
-				     r = ((r + 1) & ~CTX_MAX)) {
+				     r = ((r - 1) & (CTX_MAX - 1))) {
 				};
 
 				if (r != ctx) {
