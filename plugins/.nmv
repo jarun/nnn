@@ -23,6 +23,15 @@ INCLUDE_HIDDEN="${INCLUDE_HIDDEN:-0}"
 VERBOSE="${VERBOSE:-0}"
 RECURSIVE="${RECURSIVE:-0}"
 
+case "$NNN_TRASH" in
+	1)
+		RM_UTIL="trash-put" ;;
+	2)
+		RM_UTIL="gio trash" ;;
+	*)
+		RM_UTIL="rm -ri" ;;
+esac
+
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 exit_status=0
 
@@ -164,7 +173,7 @@ done <"$dst_file"
 
 unset "items[0]"
 for item in "${items[@]}"; do
-	rm -ri "$item"
+	$RM_UTIL "$item"
 done
 
 rm "$dst_file"
