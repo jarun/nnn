@@ -8632,7 +8632,7 @@ int main(int argc, char *argv[])
 
 #ifdef LINUX_INOTIFY
 	/* Initialize inotify */
-	inotify_fd = inotify_init1(IN_NONBLOCK);
+	inotify_fd = inotify_init1(IN_NONBLOCK | IN_CLOEXEC);
 	if (inotify_fd < 0) {
 		xerror();
 		return EXIT_FAILURE;
