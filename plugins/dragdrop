@@ -19,6 +19,8 @@ resp=f
 all=
 if type dragon-drag-and-drop >/dev/null 2>&1; then
     dnd="dragon-drag-and-drop"
+if type dragon-drop >/dev/null 2>&1; then
+    dnd="dragon-drop"
 else
     dnd="dragon"
 fi
