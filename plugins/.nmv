@@ -19,7 +19,7 @@
 
 EDITOR="${EDITOR:-vi}"
 TMPDIR="${TMPDIR:-/tmp}"
-INCLUDE_HIDDEN="${INCLUDE_HIDDEN:-0}"
+NNN_INCLUDE_HIDDEN="${NNN_INCLUDE_HIDDEN:-0}"
 VERBOSE="${VERBOSE:-0}"
 RECURSIVE="${RECURSIVE:-0}"
 
@@ -55,7 +55,7 @@ else
 		findcmd="$findcmd -prune"
 	fi
 
-	if [ "$INCLUDE_HIDDEN" -eq 0 ]; then
+	if [ "$NNN_INCLUDE_HIDDEN" -eq 0 ]; then
 		findcmd="$findcmd ! -name \".*\""
 	fi
 
