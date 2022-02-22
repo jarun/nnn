@@ -15,5 +15,5 @@ if [ -s "$selection" ]; then
     # Clear selection
     printf "-" > "$NNN_PIPE"
 else
-	$gsconnect -d "$id" --share-file="$(pwd)/$1"
+    "$gsconnect" -d "$id" --share-file="$2/$1"
 fi
