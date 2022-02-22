@@ -11,7 +11,7 @@ gsconnect=$HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.
 id=$($gsconnect -l)
 
 if [ -s "$selection" ]; then
-	xargs -0 -a $selection -i $gsconnect -d "$id" --share-file="{}"
+    xargs -0 < "$selection" -I{} "$gsconnect" -d "$id" --share-file="{}"
     # Clear selection
     printf "-" > "$NNN_PIPE"
 else
