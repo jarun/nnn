@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+
+#set -x
+# Description: Send the selected (or hovered) files to your Android device using gsconnect daemon.js.
+#              GSConnect must be configured on the Android device and the PC.
+#
+# Shell: POSIX compliant
+# Author: Darukutsu 
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+gsconnect=$HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/service/daemon.js
+id=$($gsconnect -l)
+
+if [ -s "$selection" ]; then
+    xargs -0 < "$selection" -I{} "$gsconnect" -d "$id" --share-file="{}"
+    # Clear selection
+    printf "-" > "$NNN_PIPE"
+else
+    "$gsconnect" -d "$id" --share-file="$2/$1"
+fi
