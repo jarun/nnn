@@ -7153,8 +7153,6 @@ nochange:
 			add_bookmark(path, newpath, &presel);
 			goto nochange;
 		case SEL_FLTR:
-			if (!ndents)
-				goto nochange;
 			/* Unwatch dir if we are still in a filtered view */
 #ifdef LINUX_INOTIFY
 			if (inotify_wd >= 0) {
