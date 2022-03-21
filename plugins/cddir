@@ -2,5 +2,5 @@
 
 # requires fzf installed
 
-. $(dirname $0)/.nnn-plugin-helper
-nnn_cd "$(find $PWD -type d | fzf)" 0
+source $(dirname $0)/.nnn-plugin-helper
+nnn_cd "$(find ${PWD} -type d | fzf)" 0
