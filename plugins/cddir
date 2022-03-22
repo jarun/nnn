@@ -3,4 +3,4 @@
 # requires fzf installed
 
 . "$(dirname "$0")"/.nnn-plugin-helper
-nnn_cd "$(find "${PWD}" -type d | fzf)" 0
+nnn_cd "$(find "${PWD}" "$(echo ${CDPATH} | tr -s ':' ' ')" -type d | fzf)" 0
