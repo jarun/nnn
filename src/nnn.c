@@ -456,7 +456,7 @@ static char *plgpath;
 static char *pnamebuf, *pselbuf, *findselpos;
 static char *mark;
 #ifndef NOX11
-static char *hostname;
+static char hostname[_POSIX_HOST_NAME_MAX + 1];
 #endif
 #ifndef NOFIFO
 static char *fifopath;
@@ -8265,8 +8265,6 @@ static void cleanup(void)
 	if (cfg.x11 && !g_state.picker) {
 		printf("\033[23;0t"); /* reset terminal window title */
 		fflush(stdout);
-
-		free(hostname);
 	}
 #endif
 	free(selpath);
@@ -8708,14 +8706,8 @@ int main(int argc, char *argv[])
 		/* Save terminal window title */
 		printf("\033[22;0t");
 		fflush(stdout);
-
-		hostname = malloc(_POSIX_HOST_NAME_MAX + 1);
-		if (!hostname) {
-			xerror();
-			return EXIT_FAILURE;
-		}
-		gethostname(hostname, _POSIX_HOST_NAME_MAX);
-		hostname[_POSIX_HOST_NAME_MAX] = '\0';
+		gethostname(hostname, sizeof(hostname));
+		hostname[sizeof(hostname) - 1] = '\0';
 	}
 #endif
 
