@@ -5373,7 +5373,7 @@ static bool prompt_run(void)
 {
 	bool ret = FALSE;
 	char *cmdline, *next;
-	int cnt_j, cnt_J;
+	int cnt_j, cnt_J, cmd_ret;
 	size_t len;
 
 	const char *xargs_j = "xargs -0 -I{} %s < %s";
@@ -5433,7 +5433,9 @@ static bool prompt_run(void)
 		else if (cnt_J)
 			snprintf(cmd, CMD_LEN_MAX + 32, xargs_J, cmdline, selpath);
 
-		spawn(shell, "-c", (cnt_j || cnt_J) ? cmd : cmdline, NULL, F_CLI | F_CONFIRM);
+		cmd_ret = spawn(shell, "-c", (cnt_j || cnt_J) ? cmd : cmdline, NULL, F_CLI | F_CONFIRM);
+		if ((cnt_j || cnt_J) && cmd_ret == 0)
+			clearselection();
 	}
 
 	return ret;
