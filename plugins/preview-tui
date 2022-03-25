@@ -28,6 +28,7 @@
 #   - optional: pdftoppm(poppler) for pdf thumbnails
 #   - optional: gnome-epub-thumbnailer for epub thumbnails (https://gitlab.gnome.org/GNOME/gnome-epub-thumbnailer)
 #   - optional: fontpreview for font preview (https://github.com/sdushantha/fontpreview)
+#   - optional: djvulibre for djvu
 #   - optional: glow or lowdown for markdown
 #   - optional: w3m or lynx or elinks for html
 #   - optional: set/export ICONLOOKUP as 1 to enable file icons in front of directory previews with .iconlookup
@@ -250,6 +251,7 @@ handle_mime() {
     case "$2" in
         image/jpeg) image_preview "$cols" "$lines" "$1" ;;
         image/gif) generate_preview "$cols" "$lines" "$1" "gif" ;;
+        image/vnd.djvu) generate_preview "$cols" "$lines" "$1" "djvu" ;;
         image/*) generate_preview "$cols" "$lines" "$1" "image" ;;
         video/*) generate_preview "$cols" "$lines" "$1" "video" ;;
         audio/*) generate_preview "$cols" "$lines" "$1" "audio" ;;
@@ -392,6 +394,7 @@ generate_preview() {
                     filename="$(printf "%s" "${3##*/}" | cut -d. -f1)"
                     mv "$NNN_PREVIEWDIR/${3%/*}/$filename.jpg" "$NNN_PREVIEWDIR/$3.jpg" ;;
             pdf) pdftoppm -jpeg -f 1 -singlefile "$3" "$NNN_PREVIEWDIR/$3" ;;
+	    djvu) ddjvu -format=ppm -page=1 "$3" "$NNN_PREVIEWDIR/$3.jpg" ;;
             video) ffmpegthumbnailer -s0 -i "$3" -o "$NNN_PREVIEWDIR/$3.jpg" || rm "$NNN_PREVIEWDIR/$3.jpg" ;;
         esac
     fi >"$DEBUG_LOGFILE"
