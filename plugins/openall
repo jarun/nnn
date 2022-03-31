@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+# Description: Open selected files in nuke one by one or in oneshot
+#              Tip: keep pressing "Enter" to open files one by one
+#
+# Note: Uses nuke by default, easy to replace with preferred opener
+#       nuke is invoked once for each file in a loop
+#
+# Shell: bash
+# Author: Arun Prakash Jana
+
+sel=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+nuke="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
+
+printf "open [A]ll? "
+read -r all
+
+if [ -s "$sel" ]; then
+    targets=()
+    while IFS= read -r -d '' entry || [ -n "$entry" ]; do
+        targets+=( "$entry" )
+    done < "$sel"
+fi
+
+last=${targets[${#targets[@]}-1]}
+
+for entry in "${targets[@]}"; do
+    # replace nuke with your preferred opened below
+    "$nuke" "$entry"
+    if [ "$all" != "A" ] && [ "$entry" != "$last" ]; then
+        printf "press Enter to open next\n"
+        read -r -s -n 1 key
+        if [[ $key != "" ]]; then
+            break
+        fi
+    fi
+done
+
+# Clear selection
+if [ -s "$sel" ] && [ -p "$NNN_PIPE" ]; then
+    printf "-" > "$NNN_PIPE"
+fi
