@@ -231,6 +231,7 @@
 #define FILE_MISSING  0x08
 #define FILE_SELECTED 0x10
 #define FILE_SCANNED  0x20
+#define FILE_YOUNG    0x40
 
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE    0x00  /* no flag set */
@@ -433,6 +434,7 @@ static int nselected;
 #ifndef NOFIFO
 static int fifofd = -1;
 #endif
+static time_t gtimesecs;
 static uint_t idletimeout, selbufpos, selbuflen;
 static ushort_t xlines, xcols;
 static ushort_t idle;
@@ -4064,13 +4066,20 @@ static void print_icon(const struct entry *ent, const int attrs)
 }
 #endif
 
-static void print_time(const time_t *timep)
+static void print_time(const time_t *timep, const uchar_t flags)
 {
 	struct tm t;
+
+	/* Highlight timestamp for entries 5 minutes young */
+	if (flags & FILE_YOUNG)
+		attron(A_REVERSE);
 
 	localtime_r(timep, &t);
 	printw("%s-%02d-%02d %02d:%02d",
 		xitoa(t.tm_year + 1900), t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min);
+
+	if (flags & FILE_YOUNG)
+		attroff(A_REVERSE);
 }
 
 static char get_detail_ind(const mode_t mode)
@@ -4159,7 +4168,7 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 			attron(attrs);
 
 		/* Print details */
-		print_time(&ent->sec);
+		print_time(&ent->sec, ent->flags);
 
 		printw("%s%9s ", perms, (type == S_IFREG || type == S_IFDIR)
 			? coolsize(cfg.blkorder ? (blkcnt_t)ent->blocks << blk_shift : ent->size)
@@ -5592,6 +5601,7 @@ static int dentfill(char *path, struct entry **ppdents)
 	DIR *dirp = opendir(path);
 
 	ndents = 0;
+	gtimesecs = time(NULL);
 
 	DPRINTF_S(__func__);
 
@@ -5757,6 +5767,9 @@ static int dentfill(char *path, struct entry **ppdents)
 			dentp->nsec = (uint_t)sb.st_ctim.tv_nsec;
 #endif
 		}
+
+		if ((gtimesecs - sb.st_mtime <= 300) || (gtimesecs - sb.st_ctime <= 300))
+			entflags |= FILE_YOUNG;
 
 #if !(defined(__sun) || defined(__HAIKU__))
 		if (!flags && dp->d_type == DT_LNK) {
@@ -6294,7 +6307,7 @@ static void statusbar(char *path)
 			addstr(sort);
 
 		/* Timestamp */
-		print_time(&pent->sec);
+		print_time(&pent->sec, pent->flags);
 
 		addch(' ');
 		addstr(get_lsperms(pent->mode));
