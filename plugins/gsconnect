@@ -8,12 +8,14 @@
 # Author: Darukutsu 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 gsconnect=$HOME/.local/share/gnome-shell/extensions/gsconnect@andyholmes.github.io/service/daemon.js
-id=$($gsconnect -l)
+ids=$($gsconnect -l)
 
-if [ -s "$selection" ]; then
-    xargs -0 < "$selection" -I{} "$gsconnect" -d "$id" --share-file="{}"
-    # Clear selection
-    printf "-" > "$NNN_PIPE"
-else
-    "$gsconnect" -d "$id" --share-file="$2/$1"
-fi
+for id in $ids; do
+	if [ -s "$selection" ]; then
+		xargs -0 < "$selection" -I{} "$gsconnect" -d "$id" --share-file="{}"
+		# Clear selection
+		printf "-" > "$NNN_PIPE"
+	else
+		"$gsconnect" -d "$id" --share-file="$2/$1"
+	fi
+done
