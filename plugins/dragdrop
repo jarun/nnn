@@ -54,10 +54,10 @@ fi
 
 if [ "$resp" = "s" ]; then
     use_all
-    sed -z 's|'"$PWD/"'||g' < "$selection" | xargs -0 "$dnd" "$all" &
+    sed -z 's|'"$PWD/"'||g' < "$selection" | xargs -0 "$dnd" $all &
 elif [ "$resp" = "d" ]; then
     use_all
-    "$dnd" "$all" "$PWD/"* &
+    "$dnd" $all "$PWD/"* &
 elif [ "$resp" = "r" ]; then
     true > "$selection"
     "$dnd" --print-path --target | while read -r f
