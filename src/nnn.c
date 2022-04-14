@@ -2160,7 +2160,7 @@ static bool initcurses(void *oldmask)
 		}
 
 		/* Get and set the context colors */
-		for (uchar_t i = 0; i <  CTX_MAX; ++i) {
+		for (uchar_t i = 0; i < CTX_MAX; ++i) {
 			pcode = &g_ctx[i].color;
 
 			if (colors && *colors) {
@@ -2190,7 +2190,7 @@ static bool initcurses(void *oldmask)
 
 		memset(icon_positions, 0x7f, sizeof(icon_positions));
 
-		for (uint_t i = 0; i < sizeof(icons_ext)/sizeof(struct icon_pair); ++i) {
+		for (uint_t i = 0; i < ELEMENTS(icons_ext); ++i) {
 			c = TOUPPER(icons_ext[i].match[0]);
 			if (c >= 'A' && c <= 'Z') {
 				if (icon_positions[c - 'A' + 10] == 0x7f7f)
@@ -4010,7 +4010,7 @@ static const struct icon_pair *get_icon(const struct entry *ent)
 {
 	ushort_t i = 0;
 
-	for (; i < sizeof(icons_name)/sizeof(struct icon_pair); ++i)
+	for (; i < ELEMENTS(icons_name); ++i)
 		if (strcasecmp(ent->name, icons_name[i].match) == 0)
 			return &icons_name[i];
 
@@ -4036,7 +4036,7 @@ static const struct icon_pair *get_icon(const struct entry *ent)
 	else
 		i = 36; /* OTHER */
 
-	for (ushort_t j = icon_positions[i]; j < sizeof(icons_ext)/sizeof(struct icon_pair) &&
+	for (ushort_t j = icon_positions[i]; j < ELEMENTS(icons_ext) &&
 			icons_ext[j].match[0] == icons_ext[icon_positions[i]].match[0]; ++j)
 		if (strcasecmp(tmp, icons_ext[j].match) == 0)
 			return &icons_ext[j];
@@ -6912,7 +6912,7 @@ nochange:
 			if (!S_ISREG(sb.st_mode)) {
 				printwait(messages[MSG_UNSUPPORTED], &presel);
 				goto nochange;
-                        }
+			}
 
 			/* Handle plugin selection mode */
 			if (g_state.runplugin) {
@@ -8108,7 +8108,7 @@ static void check_key_collision(void)
 	int key;
 	bool bitmap[KEY_MAX] = {FALSE};
 
-	for (ullong_t i = 0; i < sizeof(bindings) / sizeof(struct key); ++i) {
+	for (ullong_t i = 0; i < ELEMENTS(bindings); ++i) {
 		key = bindings[i].sym;
 
 		if (bitmap[key])
