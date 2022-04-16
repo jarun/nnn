@@ -213,7 +213,7 @@ index af586056..9ebfb203 100644
 +		" -G      always show git status\n"
  		" -H      show hidden files\n"
  		" -i      show current file info\n"
- 		" -J      no auto-proceed on select\n"
+ 		" -J      no auto-jump on select\n"
 @@ -8272,6 +8387,7 @@ static void cleanup(void)
  		free(hostname);
  	}

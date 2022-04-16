@@ -1,5 +1,5 @@
 # Description: Adds preview pipe to enable closing and re-opening the preview
-#              pane when running an undetached editor. If you are using vim 
+#              pane when running an undetached editor. If you are using vim
 #              you might experience incorrectly resized window. Consider adding
 #              the following to your vimrc:
 #              autocmd VimEnter * :silent exec "!kill -s WINCH $PPID"
@@ -11,7 +11,7 @@ index 4243f2cc..b893f573 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
 @@ -370,7 +370,8 @@ typedef struct {
- 	uint_t stayonsel  : 1;  /* Disable auto-proceed on select */
+ 	uint_t stayonsel  : 1;  /* Disable auto-jump on select */
  	uint_t trash      : 2;  /* Trash method 0: rm -rf, 1: trash-cli, 2: gio trash */
  	uint_t uidgid     : 1;  /* Show owner and group info */
 -	uint_t reserved   : 7;  /* Adjust when adding/removing a field */
