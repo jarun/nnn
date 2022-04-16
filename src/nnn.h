@@ -212,8 +212,8 @@ static struct key bindings[] = {
 	/* Redraw window */
 	{ CONTROL('L'),   SEL_REDRAW },
 	/* Select current file path */
-	{ CONTROL('J'),   SEL_SEL },
 	{ ' ',            SEL_SEL },
+	{ '+',            SEL_SEL },
 	/* Toggle select multiple files */
 	{ 'm',            SEL_SELMUL },
 	/* Select all files in current dir */

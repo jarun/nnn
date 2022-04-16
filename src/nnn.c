@@ -5040,7 +5040,7 @@ static void show_help(const char *path)
 		 "b^R  Rename/dup%-14cr  Batch rename\n"
 		  "cz  Archive%-17ce  Edit file\n"
 		  "c*  Toggle exe%-14c>  Export list\n"
-	   "5Space ^J  (Un)select%-12cm-m  Select range/clear\n"
+	    "6Space +  (Un)select%-12cm-m  Select range/clear\n"
 	          "ca  Select all%-14cA  Invert sel\n"
 	       "9p ^P  Copy here%-12cw ^W  Cp/mv sel as\n"
 	       "9v ^V  Move here%-15cE  Edit sel list\n"
