@@ -6647,6 +6647,10 @@ static bool browse(char *ipath, const char *session, int pkey)
 	if (!pnamebuf)
 		errexit();
 
+	/* The following call is added to handle a broken window at start */
+	if (presel == FILTER)
+		handle_key_resize();
+
 begin:
 	/*
 	 * Can fail when permissions change while browsing.
