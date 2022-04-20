@@ -7657,7 +7657,7 @@ nochange:
 					mkpath(path, tmp, newpath);
 					ret = xmktree(newpath, r == 'f' ? FALSE : TRUE);
 				} else if (r == 's' || r == 'h') {
-					if (tmp[0] == '@' && tmp[1] == '\0')
+					if (nselected > 1 && tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
 					ret = xlink(tmp, path, (ndents ? pdents[cur].name : NULL),
 						  newpath, &presel, r);
