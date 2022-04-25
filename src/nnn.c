@@ -6359,13 +6359,9 @@ static void statusbar(char *path)
 
 static inline void markhovered(void)
 {
-	if (cfg.showdetail && ndents) { /* Reversed block for hovered entry */
+	if (cfg.showdetail && ndents) { /* Bold forward arrowhead */
 		tocursor();
-#ifdef ICONS_ENABLED
-		addstr(MD_ARROW_FORWARD);
-#else
-		addch(' ' | A_REVERSE);
-#endif
+		addch('>' | A_BOLD);
 	}
 }
 
