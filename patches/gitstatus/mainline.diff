@@ -6,10 +6,10 @@
 # Authors: Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index 1028906a..c80314de 100644
+index 508ee915..77d56d63 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -262,6 +262,25 @@
+@@ -265,6 +265,25 @@
  #define FREE     0
  #define CAPACITY 1
 
@@ -35,7 +35,7 @@ index 1028906a..c80314de 100644
  /* TYPE DEFINITIONS */
  typedef unsigned int uint_t;
  typedef unsigned char uchar_t;
-@@ -286,6 +305,7 @@ typedef struct entry {
+@@ -289,6 +308,7 @@ typedef struct entry {
  	uid_t uid; /* 4 bytes */
  	gid_t gid; /* 4 bytes */
  #endif
@@ -43,7 +43,7 @@ index 1028906a..c80314de 100644
  } *pEntry;
 
  /* Selection marker */
-@@ -342,6 +362,7 @@ typedef struct {
+@@ -345,6 +365,7 @@ typedef struct {
  	uint_t cliopener  : 1;  /* All-CLI app opener */
  	uint_t waitedit   : 1;  /* For ops that can't be detached, used EDITOR */
  	uint_t rollover   : 1;  /* Roll over at edges */
@@ -51,7 +51,7 @@ index 1028906a..c80314de 100644
  } settings;
 
  /* Non-persistent program-internal states (alphabeical order) */
-@@ -391,7 +412,17 @@ typedef struct {
+@@ -394,7 +415,17 @@ typedef struct {
  } session_header_t;
  #endif
 
@@ -69,7 +69,7 @@ index 1028906a..c80314de 100644
 
  /* Configuration, contexts */
  static settings cfg = {
-@@ -422,6 +453,7 @@ static settings cfg = {
+@@ -425,6 +456,7 @@ static settings cfg = {
  	0, /* cliopener */
  	0, /* waitedit */
  	1, /* rollover */
@@ -77,7 +77,7 @@ index 1028906a..c80314de 100644
  };
 
  static context g_ctx[CTX_MAX] __attribute__ ((aligned));
-@@ -3839,6 +3871,56 @@ static int get_kv_key(kv *kvarr, char *val, uchar_t max, uchar_t id)
+@@ -3838,6 +3870,56 @@ static int get_kv_key(kv *kvarr, char *val, uchar_t max, uchar_t id)
  	return -1;
  }
 
@@ -134,7 +134,7 @@ index 1028906a..c80314de 100644
  static void resetdircolor(int flags)
  {
  	/* Directories are always shown on top, clear the color when moving to first file */
-@@ -4176,6 +4258,10 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+@@ -4182,6 +4264,10 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 
  	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
 
@@ -145,7 +145,7 @@ index 1028906a..c80314de 100644
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
 
  	if (g_state.oldcolor)
-@@ -5617,6 +5703,11 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5630,6 +5716,11 @@ static int dentfill(char *path, struct entry **ppdents)
  		attron(COLOR_PAIR(cfg.curctx + 1));
  	}
 
@@ -157,7 +157,7 @@ index 1028906a..c80314de 100644
  #if _POSIX_C_SOURCE >= 200112L
  	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
  #endif
-@@ -5815,6 +5906,29 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5830,6 +5921,29 @@ static int dentfill(char *path, struct entry **ppdents)
  #endif
  		}
 
@@ -187,7 +187,7 @@ index 1028906a..c80314de 100644
  		++ndents;
  	} while ((dp = readdir(dirp)));
 
-@@ -6360,11 +6474,12 @@ static int adjust_cols(int n)
+@@ -6373,11 +6487,12 @@ static int adjust_cols(int n)
  #endif
  	if (cfg.showdetail) {
  		/* Fallback to light mode if less than 35 columns */
@@ -203,23 +203,23 @@ index 1028906a..c80314de 100644
 
  	/* 2 columns for preceding space and indicator */
  	return (n - 2);
-@@ -8126,6 +8241,7 @@ static void usage(void)
+@@ -8144,6 +8259,7 @@ static void usage(void)
  		" -F val  fifo mode [0:preview 1:explore]\n"
  #endif
  		" -g      regex filters\n"
 +		" -G      always show git status\n"
  		" -H      show hidden files\n"
  		" -i      show current file info\n"
- 		" -J      no auto-jump on select\n"
-@@ -8266,6 +8382,7 @@ static void cleanup(void)
- 		free(hostname);
+ 		" -J      no auto-jump on selection\n"
+@@ -8282,6 +8398,7 @@ static void cleanup(void)
+ 		fflush(stdout);
  	}
  #endif
 +	free(git_statuses.statuses);
  	free(selpath);
  	free(plgpath);
  	free(cfgpath);
-@@ -8310,7 +8427,7 @@ int main(int argc, char *argv[])
+@@ -8326,7 +8443,7 @@ int main(int argc, char *argv[])
 
  	while ((opt = (env_opts_id > 0
  		       ? env_opts[--env_opts_id]
@@ -228,7 +228,7 @@ index 1028906a..c80314de 100644
  		switch (opt) {
  #ifndef NOFIFO
  		case 'a':
-@@ -8361,6 +8478,9 @@ int main(int argc, char *argv[])
+@@ -8377,6 +8494,9 @@ int main(int argc, char *argv[])
  			cfg.regex = 1;
  			filterfn = &visible_re;
  			break;
