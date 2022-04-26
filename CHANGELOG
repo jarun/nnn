@@ -1,3 +1,35 @@
+nnn v4.5 Cachaça
+2022-04-26
+
+- disable filter info if file details (option `-i`) enabled
+- open previous active context on context quit
+- switch <kbd>^J</kbd> and <kbd>+</kbd> functionality:
+  - <kbd>+</kbd>: toggle file selection
+  - <kbd>^J</kbd>: toggle auto-jump on file open
+- allow symlink creation with name `@` to a single file (#1345)
+- clear selection on successful operation at native prompt with "%j" (#1330)
+- reverse timestamps of entries modified/created within 5 minutes
+- avoid using non-portable `xargs` flags on macOS (#1299)
+- quitcd script for Elvish shell > 0.17.0 (#1344)
+- plugin `openall` to open selected files together (#1333)
+- plugin `gitroot` to jump to git root directory from a subtree
+- plugin `gsconnect` to send the selected files to Android using gsconnect
+- icon for opus and webp files
+- `preview-tui` - fix gif conversion and whitespace name
+- `preview-tui` - add support for windows terminal split
+- `preview-tui` - djvu file previews
+- `nuke` - add support for `imv` when named _imv_
+- `gsconnect` - support connection to multiple devices
+- export `NNN_INCLUDE_HIDDEN` to plugins (#1308)
+- respect `NNN_TRASH` in `.nmv` (#1306)
+- add GNU sed as a dependency with support for env var `SED`
+- use bold `>` to point at current entry in detail mode
+- add 2 spaces after icons for better visibility
+- documentation refresh
+- make option `O_NOSORT` to load directories unsorted on entry
+
+-------------------------------------------------------------------------------
+
 nnn v4.4 Tequila
 2021-11-23
 
