@@ -22,6 +22,7 @@
 IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}" # protect trailing \n
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+[ -s "$selection" ] || { echo "plugin .cbcp error: selection file missing or nothing was selected" >&2 ; exit 1; }
 
 if type xsel >/dev/null 2>&1; then
     # Linux
