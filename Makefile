@@ -21,6 +21,7 @@ O_NOFIFO := 0  # no FIFO previewer support
 O_CTX8 := 0  # enable 8 contexts
 O_ICONS := 0  # support icons-in-terminal
 O_NERD := 0  # support icons-nerdfont
+O_EMOJI := 0  # support emoji
 O_QSORT := 0  # use Alexey Tourbin's QSORT implementation
 O_BENCH := 0  # benchmark mode (stops at first user input)
 O_NOSSN := 0  # disable session support
@@ -69,6 +70,8 @@ ifeq ($(strip $(O_NOLC)),1)
 $(info *** Ignoring O_NOLC since O_ICONS is set ***)
 	else ifeq ($(strip $(O_NERD)),1)
 $(info *** Ignoring O_NOLC since O_NERD is set ***)
+	else ifeq ($(strip $(O_EMOJI)),1)
+$(info *** Ignoring O_NOLC since O_EMOJI is set ***)
 	else
 		CPPFLAGS += -DNOLC
 	endif
@@ -96,6 +99,10 @@ endif
 
 ifeq ($(strip $(O_NERD)),1)
 	CPPFLAGS += -DNERD
+endif
+
+ifeq ($(strip $(O_EMOJI)),1)
+	CPPFLAGS += -DEMOJI
 endif
 
 ifeq ($(strip $(O_QSORT)),1)
@@ -227,6 +234,9 @@ static:
 	# static binary with patched nerd font support
 	make O_STATIC=1 O_NERD=1 strip
 	mv $(BIN) $(BIN)-nerd-static
+	# static binary with emoji support
+	make O_STATIC=1 O_EMOJI=1 strip
+	mv $(BIN) $(BIN)-emoji-static
 
 musl:
 	cp misc/musl/musl-static-ubuntu.sh .
@@ -254,6 +264,7 @@ upload-local: sign static musl
 	upx -qqq $(BIN)-static
 	upx -qqq $(BIN)-icons-static
 	upx -qqq $(BIN)-nerd-static
+	upx -qqq $(BIN)-emoji-static
 	# upload static binary
 	tar -zcf $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-static
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-static-$(VERSION).x86_64.tar.gz' \
@@ -269,6 +280,11 @@ upload-local: sign static musl
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-nerd-static-$(VERSION).x86_64.tar.gz' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
 	    --upload-file $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz
+	# upload emoji compiled static binary
+	tar -zcf $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static
+	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-emoji-static-$(VERSION).x86_64.tar.gz' \
+	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
+	    --upload-file $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz
 	# upload musl static binary
 	tar -zcf $(BIN)-musl-static-$(VERSION).x86_64.tar.gz $(BIN)-musl-static
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-musl-static-$(VERSION).x86_64.tar.gz' \
@@ -276,7 +292,7 @@ upload-local: sign static musl
 	    --upload-file $(BIN)-musl-static-$(VERSION).x86_64.tar.gz
 
 clean:
-	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz $(BIN)-musl-static $(BIN)-musl-static-$(VERSION).x86_64.tar.gz
+	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz $(BIN)-emoji-static $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz $(BIN)-musl-static $(BIN)-musl-static-$(VERSION).x86_64.tar.gz
 
 prepatch:
 ifeq ($(strip $(O_NAMEFIRST)),1)
