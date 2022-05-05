@@ -26,12 +26,11 @@ struct icon_pair {
 
 #define ICON_PADDING_LEFT  ""
 #define ICON_PADDING_LEFT_LEN  (0)
+#define ICON_PADDING_RIGHT_LEN (2)
 #if defined(EMOJI)
 #define ICON_PADDING_RIGHT " "
-#define ICON_PADDING_RIGHT_LEN (2)
 #else
 #define ICON_PADDING_RIGHT "  "
-#define ICON_PADDING_RIGHT_LEN (2)
 #endif
 
 #define COLOR_VIDEO        93  /* Purple */
