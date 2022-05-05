@@ -576,6 +576,7 @@ static const struct icon_pair icons_ext[] = {
     /* B */
     {"bat", EMOJI_SCRIPT, 0},
     {"bin", EMOJI_BINARY, 0},
+    {"bib", EMOJI_BOOKS, 0},
     {"bmp", EMOJI_IMAGE, COLOR_IMAGE},
     {"bz2", EMOJI_ARCHIVE, COLOR_ARCHIVE},
 
@@ -601,6 +602,7 @@ static const struct icon_pair icons_ext[] = {
     {"db", EMOJI_DATABASE, 0},
     {"deb", EMOJI_LINUX, COLOR_ARCHIVE},
     {"diff", EMOJI_DIFF, 0},
+    {"djvu", EMOJI_PDF, COLOR_DOCS},
     {"dll", EMOJI_MANUAL, 0},
     {"doc", EMOJI_WORD, 0},
     {"docx", EMOJI_WORD, 0},
@@ -615,8 +617,11 @@ static const struct icon_pair icons_ext[] = {
     {"flv", EMOJI_MOVIE, COLOR_VIDEO},
 
     /* G */
+    {"gba", EMOJI_GAME, 0},
+    {"gdi", EMOJI_GAME, 0},
     {"gem", EMOJI_ARCHIVE, 0},
     {"gif", EMOJI_IMAGE, COLOR_IMAGE},
+    {"gpg", EMOJI_ENCRYPTED, COLOR_IMAGE},
     {"gz", EMOJI_ARCHIVE, COLOR_ARCHIVE},
     {"gzip", EMOJI_ARCHIVE, COLOR_ARCHIVE},
 
@@ -633,14 +638,16 @@ static const struct icon_pair icons_ext[] = {
     {"ico", EMOJI_IMAGE, COLOR_IMAGE},
     {"img", EMOJI_DISK, COLOR_ARCHIVE},
     {"ini", EMOJI_CONF, 0},
+    {"info", EMOJI_INFO, 0},
     {"iso", EMOJI_DISK, COLOR_ARCHIVE},
 
     /* J */
     {"jar", EMOJI_JAVA, 0},
     {"java", EMOJI_JAVA, 0},
     {"jl", EMOJI_CONF, 0},
-    {"jpeg", EMOJI_IMAGE, COLOR_IMAGE},
-    {"jpg", EMOJI_IMAGE, COLOR_IMAGE},
+    {"jpeg", EMOJI_PHOTO, COLOR_IMAGE},
+    {"jpe", EMOJI_PHOTO, COLOR_IMAGE},
+    {"jpg", EMOJI_PHOTO, COLOR_IMAGE},
     {"js", EMOJI_JAVASCRIPT, 0},
     {"json", EMOJI_JAVASCRIPT, 0},
     {"jsx", EMOJI_JAVASCRIPT, 0},
@@ -655,20 +662,27 @@ static const struct icon_pair icons_ext[] = {
     {"lzma", EMOJI_ARCHIVE, COLOR_ARCHIVE},
 
     /* M */
+    {"m", EMOJI_STATS, 0},
     {"m4a", EMOJI_AUDIO, COLOR_AUDIO},
     {"m4v", EMOJI_MOVIE, COLOR_VIDEO},
     {"markdown", EMOJI_NOTE, COLOR_DOCS},
     {"md", EMOJI_NOTE, COLOR_DOCS},
+    {"me", EMOJI_NOTE, COLOR_DOCS},
     {"mk", EMOJI_MAKE, 0},
     {"mkv", EMOJI_MOVIE, COLOR_VIDEO},
+    {"mom", EMOJI_NOTE, COLOR_DOCS},
     {"mov", EMOJI_MOVIE, COLOR_VIDEO},
     {"mp3", EMOJI_AUDIO, COLOR_AUDIO},
     {"mp4", EMOJI_MOVIE, COLOR_VIDEO},
     {"mpeg", EMOJI_MOVIE, COLOR_VIDEO},
     {"mpg", EMOJI_MOVIE, COLOR_VIDEO},
+    {"ms", EMOJI_NOTE, COLOR_DOCS},
     {"msi", EMOJI_WINDOWS, 0},
 
     /* N */
+    {"n64", EMOJI_GAME, 0},
+    {"nes", EMOJI_GAME, 0},
+    {"nfo", EMOJI_INFO, 0},
 
     /* O */
     {"o", EMOJI_MANUAL, 0},
@@ -698,9 +712,11 @@ static const struct icon_pair icons_ext[] = {
     /* Q */
 
     /* R */
+    {"r", EMOJI_STATS, 0},
     {"rar", EMOJI_ARCHIVE, COLOR_ARCHIVE},
     {"rb", EMOJI_RUBY, COLOR_RUBY},
     {"rc", EMOJI_CONF, 0},
+    {"rmd", EMOJI_STATS, 0},
     {"rpm", EMOJI_ARCHIVE, COLOR_ARCHIVE},
     {"rss", EMOJI_RSS, 0},
     {"rtf", EMOJI_PDF, 0},
@@ -711,18 +727,22 @@ static const struct icon_pair icons_ext[] = {
     {"sql", EMOJI_DATABASE, 0},
     {"srt", EMOJI_SUBTITLES, 0},
     {"sub", EMOJI_SUBTITLES, 0},
-    {"svg", EMOJI_IMAGE, COLOR_IMAGE},
+    {"svg", EMOJI_VECTOR, COLOR_IMAGE},
 
     /* T */
     {"tar", EMOJI_ARCHIVE, COLOR_ARCHIVE},
     {"tex", EMOJI_TEXT, 0},
     {"tgz", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"tif", EMOJI_IMAGE, COLOR_IMAGE},
+    {"tiff", EMOJI_IMAGE, COLOR_IMAGE},
+    {"torrent", EMOJI_DOWNLOAD, 0},
     {"txt", EMOJI_TEXT, 0},
     {"txz", EMOJI_ARCHIVE, COLOR_ARCHIVE},
 
     /* U */
 
     /* V */
+    {"v64", EMOJI_GAME, 0},
     {"vid", EMOJI_MOVIE, COLOR_VIDEO},
     {"vim", EMOJI_CONF, 0},
     {"vimrc", EMOJI_CONF, 0},
@@ -749,6 +769,7 @@ static const struct icon_pair icons_ext[] = {
     {"yml", EMOJI_CONF, 0},
 
     /* Z */
+    {"z64", EMOJI_GAME, 0},
     {"zip", EMOJI_ARCHIVE, COLOR_ARCHIVE},
 
     /* Other */
