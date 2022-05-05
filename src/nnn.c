@@ -124,7 +124,7 @@
 #include "nnn.h"
 #include "dbg.h"
 
-#if defined(ICONS) || defined(NERD)
+#if defined(ICONS) || defined(NERD) || defined(EMOJI)
 #include "icons.h"
 #define ICONS_ENABLED
 #endif

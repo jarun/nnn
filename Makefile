@@ -21,6 +21,7 @@ O_NOFIFO := 0  # no FIFO previewer support
 O_CTX8 := 0  # enable 8 contexts
 O_ICONS := 0  # support icons-in-terminal
 O_NERD := 0  # support icons-nerdfont
+O_EMOJI := 1  # support emoji
 O_QSORT := 0  # use Alexey Tourbin's QSORT implementation
 O_BENCH := 0  # benchmark mode (stops at first user input)
 O_NOSSN := 0  # disable session support
@@ -69,6 +70,8 @@ ifeq ($(strip $(O_NOLC)),1)
 $(info *** Ignoring O_NOLC since O_ICONS is set ***)
 	else ifeq ($(strip $(O_NERD)),1)
 $(info *** Ignoring O_NOLC since O_NERD is set ***)
+	else ifeq ($(strip $(O_EMOJI)),1)
+$(info *** Ignoring O_NOLC since O_EMOJI is set ***)
 	else
 		CPPFLAGS += -DNOLC
 	endif
@@ -96,6 +99,10 @@ endif
 
 ifeq ($(strip $(O_NERD)),1)
 	CPPFLAGS += -DNERD
+endif
+
+ifeq ($(strip $(O_EMOJI)),1)
+	CPPFLAGS += -DEMOJI
 endif
 
 ifeq ($(strip $(O_QSORT)),1)
@@ -227,6 +234,9 @@ static:
 	# static binary with patched nerd font support
 	make O_STATIC=1 O_NERD=1 strip
 	mv $(BIN) $(BIN)-nerd-static
+	# static binary with emoji support
+	make O_STATIC=1 O_EMOJI=1 strip
+	mv $(BIN) $(BIN)-icons-static
 
 musl:
 	cp misc/musl/musl-static-ubuntu.sh .

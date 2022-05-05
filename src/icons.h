@@ -4,6 +4,8 @@
 #include "icons-in-terminal.h"
 #elif defined(NERD)
 #include "icons-nerdfont.h"
+#elif defined(EMOJI)
+#include "icons-emoji.h"
 #endif
 
 struct icon_pair {
@@ -24,8 +26,13 @@ struct icon_pair {
 
 #define ICON_PADDING_LEFT  ""
 #define ICON_PADDING_LEFT_LEN  (0)
+#if defined(EMOJI)
+#define ICON_PADDING_RIGHT " "
+#define ICON_PADDING_RIGHT_LEN (2)
+#else
 #define ICON_PADDING_RIGHT "  "
 #define ICON_PADDING_RIGHT_LEN (2)
+#endif
 
 #define COLOR_VIDEO        93  /* Purple */
 #define COLOR_AUDIO        220 /* Gold1 */
@@ -60,6 +67,10 @@ static const struct icon_pair exec_icon = {"", FA_COG,    0};
 static const struct icon_pair dir_icon  = {"", ICON_DIRECTORY, 0};
 static const struct icon_pair file_icon = {"", ICON_FILE,      0};
 static const struct icon_pair exec_icon = {"", ICON_EXEC,      0};
+#elif defined(EMOJI)
+static const struct icon_pair dir_icon  = {"", EMOJI_FOLDER, 0};
+static const struct icon_pair file_icon = {"", EMOJI_FILE, 0};
+static const struct icon_pair exec_icon = {"", EMOJI_EXE,    0};
 #endif
 
 /* All entries are case-insensitive */
@@ -93,6 +104,29 @@ static const struct icon_pair icons_name[] = {
 	{"configure",    ICON_CONFIGURE, 0},
 	{"License",      ICON_LICENSE,   COLOR_DOCS},
 	{"Makefile",     ICON_MAKEFILE,  0},
+#elif defined(EMOJI)
+	{".git",         EMOJI_GIT,        0},
+	{"Desktop",      EMOJI_DESKTOP,    0},
+	{"Documents",    EMOJI_BRIEFCASE,  0},
+	{"Downloads",    EMOJI_DOWNLOAD,   0},
+	{"Music",        EMOJI_MUSIC,      0},
+	{"Pictures",     EMOJI_PICTURE,    0},
+	{"Public",       EMOJI_PUBLIC,     0},
+	{"Templates",    EMOJI_TEMPLATE,   0},
+	{"Videos",       EMOJI_MOVIE,      0},
+	{"Uni",          EMOJI_UNI,        0},
+	{"University",   EMOJI_UNI,        0},
+	{"Work",         EMOJI_WORK,       0},
+	{"Games",        EMOJI_GAME,       0},
+	{"Cloud",        EMOJI_CLOUD,      0},
+	{"Nextcloud",    EMOJI_CLOUD,      0},
+	{"Literature",   EMOJI_BOOKS,      0},
+	{"Code",         EMOJI_CODE,       0},
+	{"Notes",        EMOJI_NOTES,      0},
+	{"CHANGELOG",    EMOJI_CHANGELOG,  COLOR_DOCS},
+	{"configure",    EMOJI_CONF,       0},
+	{"License",      EMOJI_LICENSE,    COLOR_DOCS},
+	{"Makefile",     EMOJI_MAKE,       0},
 #endif
 };
 
@@ -528,5 +562,195 @@ static const struct icon_pair icons_ext[] = {
 	{"zst",        ICON_EXT_ZST,       COLOR_ARCHIVE},
 
 	/* Other */
+#elif defined(EMOJI)
+    /* Numbers */
+    {"1", EMOJI_MANUAL, COLOR_DOCS},
+    {"7z", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+
+    /* A */
+    {"a", EMOJI_MANUAL, 0},
+    {"apk", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"aup", EMOJI_AUDIO, COLOR_AUDIO},
+    {"avi", EMOJI_MOVIE, COLOR_VIDEO},
+
+    /* B */
+    {"bat", EMOJI_SCRIPT, 0},
+    {"bin", EMOJI_BINARY, 0},
+    {"bmp", EMOJI_IMAGE, COLOR_IMAGE},
+    {"bz2", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+
+    /* C */
+    {"c", EMOJI_C, 0},
+    {"c++", EMOJI_CPP, 0},
+    {"cab", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"cbr", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"cbz", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"cc", EMOJI_CPP, 0},
+    {"class", EMOJI_JAVA, 0},
+    {"cmake", EMOJI_MAKE, 0},
+    {"conf", EMOJI_CONF, 0},
+    {"cpio", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"cpp", EMOJI_CPP, 0},
+    {"css", EMOJI_STYLESHEET, 0},
+    {"cue", EMOJI_AUDIO, COLOR_AUDIO},
+    {"cvs", EMOJI_CONF, 0},
+    {"csv", EMOJI_TABLE, 0},
+    {"cxx", EMOJI_CPP, 0},
+
+    /* D */
+    {"db", EMOJI_DATABASE, 0},
+    {"deb", EMOJI_LINUX, COLOR_ARCHIVE},
+    {"diff", EMOJI_DIFF, 0},
+    {"dll", EMOJI_MANUAL, 0},
+    {"doc", EMOJI_WORD, 0},
+    {"docx", EMOJI_WORD, 0},
+
+    /* E */
+    {"elf", EMOJI_LINUX, 0},
+    {"epub", EMOJI_PDF, COLOR_DOCS},
+    {"exe", EMOJI_WINDOWS, 0},
+
+    /* F */
+    {"flac", EMOJI_AUDIO, COLOR_AUDIO},
+    {"flv", EMOJI_MOVIE, COLOR_VIDEO},
+
+    /* G */
+    {"gem", EMOJI_ARCHIVE, 0},
+    {"gif", EMOJI_IMAGE, COLOR_IMAGE},
+    {"gz", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"gzip", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+
+    /* H */
+    {"h", EMOJI_C, 0},
+    {"hh", EMOJI_CPP, 0},
+    {"htaccess", EMOJI_CONF, 0},
+    {"htpasswd", EMOJI_CONF, 0},
+    {"htm", EMOJI_WEB, 0},
+    {"html", EMOJI_WEB, 0},
+    {"hxx", EMOJI_CPP, 0},
+
+    /* I */
+    {"ico", EMOJI_IMAGE, COLOR_IMAGE},
+    {"img", EMOJI_DISK, COLOR_ARCHIVE},
+    {"ini", EMOJI_CONF, 0},
+    {"iso", EMOJI_DISK, COLOR_ARCHIVE},
+
+    /* J */
+    {"jar", EMOJI_JAVA, 0},
+    {"java", EMOJI_JAVA, 0},
+    {"jl", EMOJI_CONF, 0},
+    {"jpeg", EMOJI_IMAGE, COLOR_IMAGE},
+    {"jpg", EMOJI_IMAGE, COLOR_IMAGE},
+    {"js", EMOJI_JAVASCRIPT, 0},
+    {"json", EMOJI_JAVASCRIPT, 0},
+    {"jsx", EMOJI_JAVASCRIPT, 0},
+
+    /* K */
+
+    /* L */
+    {"lha", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"log", EMOJI_TEXT, 0},
+    {"lua", EMOJI_LUA, COLOR_LUA},
+    {"lzh", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"lzma", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+
+    /* M */
+    {"m4a", EMOJI_AUDIO, COLOR_AUDIO},
+    {"m4v", EMOJI_MOVIE, COLOR_VIDEO},
+    {"markdown", EMOJI_NOTE, COLOR_DOCS},
+    {"md", EMOJI_NOTE, COLOR_DOCS},
+    {"mk", EMOJI_MAKE, 0},
+    {"mkv", EMOJI_MOVIE, COLOR_VIDEO},
+    {"mov", EMOJI_MOVIE, COLOR_VIDEO},
+    {"mp3", EMOJI_AUDIO, COLOR_AUDIO},
+    {"mp4", EMOJI_MOVIE, COLOR_VIDEO},
+    {"mpeg", EMOJI_MOVIE, COLOR_VIDEO},
+    {"mpg", EMOJI_MOVIE, COLOR_VIDEO},
+    {"msi", EMOJI_WINDOWS, 0},
+
+    /* N */
+
+    /* O */
+    {"o", EMOJI_MANUAL, 0},
+    {"odp", EMOJI_PRESENTATION, 0},
+    {"ods", EMOJI_TABLE, 0},
+    {"odt", EMOJI_WORD, 0},
+    {"ogg", EMOJI_AUDIO, COLOR_AUDIO},
+    {"opdownload", EMOJI_DOWNLOAD, 0},
+    {"opus", EMOJI_AUDIO, COLOR_AUDIO},
+    {"out", EMOJI_LINUX, 0},
+
+    /* P */
+    {"part", EMOJI_DOWNLOAD, 0},
+    {"patch", EMOJI_PATCH, 0},
+    {"pdf", EMOJI_PDF, COLOR_DOCS},
+    {"php", EMOJI_WEB, 0},
+    {"png", EMOJI_IMAGE, COLOR_IMAGE},
+    {"ppt", EMOJI_PRESENTATION, 0},
+    {"pptx", EMOJI_PRESENTATION, 0},
+    {"psb", EMOJI_IMAGE, 0},
+    {"psd", EMOJI_IMAGE, 0},
+    {"py", EMOJI_PYTHON, 0},
+    {"pyc", EMOJI_PYTHON, 0},
+    {"pyd", EMOJI_PYTHON, 0},
+    {"pyo", EMOJI_PYTHON, 0},
+
+    /* Q */
+
+    /* R */
+    {"rar", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"rb", EMOJI_RUBY, COLOR_RUBY},
+    {"rc", EMOJI_CONF, 0},
+    {"rpm", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"rss", EMOJI_RSS, 0},
+    {"rtf", EMOJI_PDF, 0},
+
+    /* S */
+    {"sh", EMOJI_SCRIPT, COLOR_SHELL},
+    {"so", EMOJI_MANUAL, 0},
+    {"sql", EMOJI_DATABASE, 0},
+    {"srt", EMOJI_SUBTITLES, 0},
+    {"sub", EMOJI_SUBTITLES, 0},
+    {"svg", EMOJI_IMAGE, COLOR_IMAGE},
+
+    /* T */
+    {"tar", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"tex", EMOJI_TEXT, 0},
+    {"tgz", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"txt", EMOJI_TEXT, 0},
+    {"txz", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+
+    /* U */
+
+    /* V */
+    {"vid", EMOJI_MOVIE, COLOR_VIDEO},
+    {"vim", EMOJI_CONF, 0},
+    {"vimrc", EMOJI_CONF, 0},
+    {"vtt", EMOJI_SUBTITLES, 0},
+
+    /* W */
+    {"wav", EMOJI_AUDIO, COLOR_AUDIO},
+    {"webm", EMOJI_MOVIE, COLOR_VIDEO},
+    {"webp", EMOJI_IMAGE, COLOR_IMAGE},
+    {"wma", EMOJI_AUDIO, COLOR_AUDIO},
+    {"wmv", EMOJI_MOVIE, COLOR_VIDEO},
+
+    /* X */
+    {"xbps", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+    {"xcf", EMOJI_IMAGE, COLOR_IMAGE},
+    {"xhtml", EMOJI_WEB, 0},
+    {"xls", EMOJI_TABLE, 0},
+    {"xlsx", EMOJI_TABLE, 0},
+    {"xml", EMOJI_WEB, 0},
+    {"xz", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+
+    /* Y */
+    {"yaml", EMOJI_CONF, 0},
+    {"yml", EMOJI_CONF, 0},
+
+    /* Z */
+    {"zip", EMOJI_ARCHIVE, COLOR_ARCHIVE},
+
+    /* Other */
 #endif
 };
