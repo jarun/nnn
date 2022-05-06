@@ -25,12 +25,18 @@ struct icon_pair {
  */
 
 #define ICON_PADDING_LEFT  ""
-#define ICON_PADDING_LEFT_LEN  (0)
-#define ICON_PADDING_RIGHT_LEN (2)
 #if defined(EMOJI)
 #define ICON_PADDING_RIGHT " "
 #else
 #define ICON_PADDING_RIGHT "  "
+#endif
+#define ICON_PADDING_LEFT_LEN  (sizeof ICON_PADDING_LEFT  - 1)
+#define ICON_PADDING_RIGHT_LEN (sizeof ICON_PADDING_RIGHT - 1)
+
+#if defined(EMOJI) /* emojies take up 2 cells */
+#define ICON_SIZE 2
+#else
+#define ICON_SIZE 1
 #endif
 
 #define COLOR_VIDEO        93  /* Purple */
