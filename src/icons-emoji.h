@@ -1,6 +1,12 @@
 #ifndef ICONS_EMOJI
 #define ICONS_EMOJI
 
+// You can find a list of emoji here:
+// https://unicode.org/Public/emoji/5.0/emoji-test.txt
+
+// Note: As some emoji are stored as two characters, all of these strings must
+// be of width 2. Therefore, right pad single-width emoji with a space.
+
 #define MD_ARROW_UPWARD    "⬆️"
 #define MD_ARROW_FORWARD   "➡️"
 #define MD_ARROW_DOWNWARD  "⬇️"
@@ -22,7 +28,7 @@
 #define EMOJI_DISK "💿"
 #define EMOJI_DOWNLOAD "📥"
 #define EMOJI_ENCRYPTED "🔒"
-#define EMOJI_EXE "⚙️ "
+#define EMOJI_EXEC "⚙️ "
 #define EMOJI_FILE "📄"
 #define EMOJI_FOLDER "📂"
 #define EMOJI_GAME "🧩"

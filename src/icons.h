@@ -74,8 +74,8 @@ static const struct icon_pair file_icon = {"", ICON_FILE,      0};
 static const struct icon_pair exec_icon = {"", ICON_EXEC,      0};
 #elif defined(EMOJI)
 static const struct icon_pair dir_icon  = {"", EMOJI_FOLDER, 0};
-static const struct icon_pair file_icon = {"", EMOJI_FILE, 0};
-static const struct icon_pair exec_icon = {"", EMOJI_EXE,    0};
+static const struct icon_pair file_icon = {"", EMOJI_FILE,   0};
+static const struct icon_pair exec_icon = {"", EMOJI_EXEC,   0};
 #endif
 
 /* All entries are case-insensitive */
@@ -119,14 +119,10 @@ static const struct icon_pair icons_name[] = {
 	{"Public",       EMOJI_PUBLIC,     0},
 	{"Templates",    EMOJI_TEMPLATE,   0},
 	{"Videos",       EMOJI_MOVIE,      0},
-	{"Uni",          EMOJI_UNI,        0},
-	{"University",   EMOJI_UNI,        0},
-	{"Work",         EMOJI_WORK,       0},
-	{"Games",        EMOJI_GAME,       0},
 	{"Cloud",        EMOJI_CLOUD,      0},
-	{"Nextcloud",    EMOJI_CLOUD,      0},
-	{"Literature",   EMOJI_BOOKS,      0},
 	{"Code",         EMOJI_CODE,       0},
+	{"Games",        EMOJI_GAME,       0},
+	{"Literature",   EMOJI_BOOKS,      0},
 	{"Notes",        EMOJI_NOTES,      0},
 	{"CHANGELOG",    EMOJI_CHANGELOG,  COLOR_DOCS},
 	{"configure",    EMOJI_CONF,       0},
