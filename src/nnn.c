@@ -5142,7 +5142,7 @@ static void setexports(void)
 	setenv("NNN_INCLUDE_HIDDEN", xitoa(cfg.showhidden), 1);
 }
 
-static bool run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
+static void run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 {
 	size_t len;
 
@@ -5155,18 +5155,18 @@ static bool run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 		--len;
 	}
 
-	if (flags & F_PAGE)
-		get_output(g_buf, NULL, NULL, -1, TRUE, TRUE);
-	else if (flags & F_NOTRACE) {
+	if ((flags & F_PAGE) || (flags & F_NOTRACE)) {
 		if (is_suffix(g_buf, " $nnn"))
 			g_buf[len - 5] = '\0';
 		else
 			runfile = NULL;
-		spawn(g_buf, runfile, NULL, NULL, flags);
+
+		if (flags & F_PAGE)
+			get_output(g_buf, runfile, NULL, -1, TRUE, TRUE);
+		else // F_NOTRACE
+			spawn(g_buf, runfile, NULL, NULL, flags);
 	} else
 		spawn(utils[UTIL_SH_EXEC], g_buf, NULL, NULL, flags);
-
-	return TRUE;
 }
 
 static bool plctrl_init(void)
@@ -5296,8 +5296,10 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 		if (!*file)
 			return FALSE;
 
-		if ((flags & F_NOTRACE) || (flags & F_PAGE))
-			return run_cmd_as_plugin(file, runfile, flags);
+		if ((flags & F_NOTRACE) || (flags & F_PAGE)) {
+			run_cmd_as_plugin(file, runfile, flags);
+			return TRUE;
+		}
 
 		cmd_as_plugin = TRUE;
 	}
@@ -5331,7 +5333,7 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 			} else
 				spawn(g_buf, NULL, *path, sel, 0);
 		} else
-			run_cmd_as_plugin(file, NULL, flags);
+			run_cmd_as_plugin(file, runfile, flags);
 
 		close(wfd);
 		_exit(EXIT_SUCCESS);

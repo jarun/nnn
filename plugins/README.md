@@ -183,8 +183,9 @@ This option is incompatible with `&` (terminal output is masked for GUI programs
 Notes:
 
 1. Use single quotes for `$NNN_PLUG` so `$nnn` is not interpreted
-2. (_Again_) add `!` before the command
-3. To disable directory refresh after running a _command as plugin_, prefix with `-!`
+2. `$nnn` must be the last argument (if used) to run a _command as plugin_
+3. (_Again_) add `!` before the command
+4. To disable directory refresh after running a _command as plugin_, prefix with `-!`
 
 #### Some useful key-command examples
 
