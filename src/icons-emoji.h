@@ -7,9 +7,9 @@
 // Note: As some emoji are stored as two characters, all of these strings must
 // be of width 2. Therefore, right pad single-width emoji with a space.
 
-#define MD_ARROW_UPWARD    "⬆️"
-#define MD_ARROW_FORWARD   "➡️"
-#define MD_ARROW_DOWNWARD  "⬇️"
+#define MD_ARROW_UPWARD    "⬆"
+#define MD_ARROW_FORWARD   "➡"
+#define MD_ARROW_DOWNWARD  "⬇"
 
 #define EMOJI_ARCHIVE "📦"
 #define EMOJI_AUDIO "🎵"
