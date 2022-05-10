@@ -119,11 +119,6 @@ static const struct icon_pair icons_name[] = {
 	{"Public",       EMOJI_PUBLIC,     0},
 	{"Templates",    EMOJI_TEMPLATE,   0},
 	{"Videos",       EMOJI_MOVIE,      0},
-	{"Cloud",        EMOJI_CLOUD,      0},
-	{"Code",         EMOJI_CODE,       0},
-	{"Games",        EMOJI_GAME,       0},
-	{"Literature",   EMOJI_BOOKS,      0},
-	{"Notes",        EMOJI_NOTES,      0},
 	{"CHANGELOG",    EMOJI_CHANGELOG,  COLOR_DOCS},
 	{"configure",    EMOJI_CONF,       0},
 	{"License",      EMOJI_LICENSE,    COLOR_DOCS},
@@ -577,7 +572,6 @@ static const struct icon_pair icons_ext[] = {
     /* B */
     {"bat", EMOJI_SCRIPT, 0},
     {"bin", EMOJI_BINARY, 0},
-    {"bib", EMOJI_BOOKS, 0},
     {"bmp", EMOJI_IMAGE, COLOR_IMAGE},
     {"bz2", EMOJI_ARCHIVE, COLOR_ARCHIVE},
 
@@ -618,8 +612,6 @@ static const struct icon_pair icons_ext[] = {
     {"flv", EMOJI_MOVIE, COLOR_VIDEO},
 
     /* G */
-    {"gba", EMOJI_GAME, 0},
-    {"gdi", EMOJI_GAME, 0},
     {"gem", EMOJI_ARCHIVE, 0},
     {"gif", EMOJI_IMAGE, COLOR_IMAGE},
     {"gpg", EMOJI_ENCRYPTED, COLOR_IMAGE},
@@ -681,8 +673,6 @@ static const struct icon_pair icons_ext[] = {
     {"msi", EMOJI_WINDOWS, 0},
 
     /* N */
-    {"n64", EMOJI_GAME, 0},
-    {"nes", EMOJI_GAME, 0},
     {"nfo", EMOJI_INFO, 0},
 
     /* O */
@@ -743,7 +733,6 @@ static const struct icon_pair icons_ext[] = {
     /* U */
 
     /* V */
-    {"v64", EMOJI_GAME, 0},
     {"vid", EMOJI_MOVIE, COLOR_VIDEO},
     {"vim", EMOJI_CONF, 0},
     {"vimrc", EMOJI_CONF, 0},
@@ -770,7 +759,6 @@ static const struct icon_pair icons_ext[] = {
     {"yml", EMOJI_CONF, 0},
 
     /* Z */
-    {"z64", EMOJI_GAME, 0},
     {"zip", EMOJI_ARCHIVE, COLOR_ARCHIVE},
 
     /* Other */

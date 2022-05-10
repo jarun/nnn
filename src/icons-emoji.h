@@ -14,12 +14,9 @@
 #define EMOJI_ARCHIVE "📦"
 #define EMOJI_AUDIO "🎵"
 #define EMOJI_BINARY "📓"
-#define EMOJI_BOOKS "📚"
 #define EMOJI_BRIEFCASE "💼"
 #define EMOJI_C "📑"
 #define EMOJI_CHANGELOG "🔖"
-#define EMOJI_CLOUD "☁️ "
-#define EMOJI_CODE "🧮"
 #define EMOJI_CONF "🔧"
 #define EMOJI_CPP EMOJI_C
 #define EMOJI_DATABASE "🗃️ "
@@ -31,7 +28,6 @@
 #define EMOJI_EXEC "⚙️ "
 #define EMOJI_FILE "📄"
 #define EMOJI_FOLDER "📂"
-#define EMOJI_GAME "🧩"
 #define EMOJI_GIT "🌱"
 #define EMOJI_IMAGE "🖼️ "
 #define EMOJI_INFO "ℹ️ "
@@ -45,7 +41,6 @@
 #define EMOJI_MOVIE "🎬"
 #define EMOJI_MUSIC EMOJI_AUDIO
 #define EMOJI_NOTE "📝"
-#define EMOJI_NOTES "📓"
 #define EMOJI_PATCH "🩹"
 #define EMOJI_PDF "📕"
 #define EMOJI_PHOTO "📸"
