@@ -29,7 +29,7 @@
 #define EMOJI_FILE "📄"
 #define EMOJI_FOLDER "📂"
 #define EMOJI_GIT "🌱"
-#define EMOJI_IMAGE "🖼️ "
+#define EMOJI_IMAGE "🖼 "
 #define EMOJI_INFO "ℹ️ "
 #define EMOJI_JAVA "☕"
 #define EMOJI_JAVASCRIPT EMOJI_SCRIPT
@@ -59,7 +59,7 @@
 #define EMOJI_TEXT "🗒️ "
 #define EMOJI_UNI "🏛️ "
 #define EMOJI_VECTOR "🗺️ "
-#define EMOJI_WEB "🌍"
+#define EMOJI_WEB "🌐"
 #define EMOJI_WINDOWS "🪟"
 #define EMOJI_WORD "📘"
 #define EMOJI_WORK EMOJI_UNI
