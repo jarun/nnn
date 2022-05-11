@@ -26,11 +26,13 @@ if type jump >/dev/null 2>&1; then
     # shellcheck disable=SC2086
     odir="$(jump cd ${line})"
     printf "%s" "0c$odir" > "$NNN_PIPE"
+    printf "\033[1A\033[2K\r"
 elif type autojump >/dev/null 2>&1; then
     printf "jump to : "
     read -r dir
     odir="$(autojump "$dir")"
     printf "%s" "0c$odir" > "$NNN_PIPE"
+    printf "\033[1A\033[2K\r"
 elif type zoxide >/dev/null 2>&1; then
     if type fzf >/dev/null 2>&1; then
     	odir="$(zoxide query -i --)"
@@ -40,6 +42,7 @@ elif type zoxide >/dev/null 2>&1; then
     	read -r dir
     	odir="$(zoxide query -- "$dir")"
     	printf "%s" "0c$odir" > "$NNN_PIPE"
+    	printf "\033[1A\033[2K\r"
     fi
 else
     # rupa/z uses $_Z_DATA, jethrokuan/z (=port of z for fish) uses $Z_DATA
