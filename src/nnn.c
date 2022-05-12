@@ -1647,8 +1647,13 @@ static void invertselbuf(const int pathlen)
 	char *found;
 	int i, nmarked = 0, prev = 0;
 	struct entry *dentp;
-	selmark *marked = malloc(nselected * sizeof(selmark));
 	bool scan = FALSE;
+	selmark *marked = malloc(nselected * sizeof(selmark));
+
+	if (!marked) {
+		printwarn(NULL);
+		return;
+	}
 
 	/* First pass: inversion */
 	for (i = 0; i < ndents; ++i) {
@@ -5563,16 +5568,23 @@ static void dirwalk(char *path, int entnum, bool mountpoint)
 	refresh();
 }
 
-static void prep_threads(void)
+static bool prep_threads(void)
 {
 	if (!g_state.duinit) {
 		/* drop MSB 1s */
 		threadbmp >>= (32 - NUM_DU_THREADS);
 
-		core_blocks = calloc(NUM_DU_THREADS, sizeof(blkcnt_t));
-		core_data = calloc(NUM_DU_THREADS, sizeof(thread_data));
-		core_files = calloc(NUM_DU_THREADS, sizeof(ullong_t));
+		if (!core_blocks)
+			core_blocks = calloc(NUM_DU_THREADS, sizeof(blkcnt_t));
+		if (!core_data)
+			core_data = calloc(NUM_DU_THREADS, sizeof(thread_data));
+		if (!core_files)
+			core_files = calloc(NUM_DU_THREADS, sizeof(ullong_t));
 
+		if (!core_blocks || !core_data || !core_files) {
+			printwarn(NULL);
+			return FALSE;
+		}
 #ifndef __APPLE__
 		/* Increase current open file descriptor limit */
 		max_openfds();
@@ -5583,6 +5595,7 @@ static void prep_threads(void)
 		memset(core_data, 0, NUM_DU_THREADS * sizeof(thread_data));
 		memset(core_files, 0, NUM_DU_THREADS * sizeof(ullong_t));
 	}
+	return TRUE;
 }
 
 /* Skip self and parent */
@@ -5627,7 +5640,8 @@ static int dentfill(char *path, struct entry **ppdents)
 		} else
 			memset(ihashbmp, 0, HASH_OCTETS << 3);
 
-		prep_threads();
+		if (!prep_threads())
+			goto exit;
 
 		attron(COLOR_PAIR(cfg.curctx + 1));
 	}
@@ -5836,7 +5850,7 @@ static int dentfill(char *path, struct entry **ppdents)
 	} while ((dp = readdir(dirp)));
 
 exit:
-	if (cfg.blkorder) {
+	if (g_state.duinit && cfg.blkorder) {
 		while (active_threads);
 
 		attroff(COLOR_PAIR(cfg.curctx + 1));
