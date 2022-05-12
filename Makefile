@@ -182,6 +182,22 @@ ifneq ($(MACOS_BELOW_1012),)
 	CPPFLAGS += -DMACOS_BELOW_1012
 endif
 
+ifeq ($(strip $(O_DEBUG)),1)
+	HEADERS += src/dbg.h
+endif
+ifeq ($(strip $(O_EMOJI)),1)
+	HEADERS += src/icons.h src/icons-emoji.h
+endif
+ifeq ($(strip $(O_NERD)),1)
+	HEADERS += src/icons.h src/icons-nerdfont.h
+endif
+ifeq ($(strip $(O_ICONS)),1)
+	HEADERS += src/icons.h src/icons-in-terminal.h
+endif
+ifeq ($(strip $(O_QSORT)),1)
+	HEADERS += src/qsort.h
+endif
+
 all: $(BIN)
 
 $(BIN): $(SRC) $(HEADERS) Makefile
