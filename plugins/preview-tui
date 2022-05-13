@@ -65,7 +65,7 @@
 #   windows will be horizontal or vertical).
 #
 #   Kitty users need `allow_remote_control` set to `yes`, and `listen_on` set
-#   to e.g. "unix:$TMPDIR/kitty". To customize the window split, `enabled_layouts`
+#   to e.g. "unix:$TMPDIR/kitty" and ImageMagick installed (which is required by kitty icat script). To customize the window split, `enabled_layouts`
 #   has to be set to `all` or `splits` (the former is the default value).
 #   This terminal is also able to show images without extra dependencies.
 #
