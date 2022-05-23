@@ -21,7 +21,7 @@
 #   - optional: bsdtar or atool for additional archive preview
 #   - optional: bat for code syntax highlighting
 #   - optional: ueberzug, kitty terminal, viu or catimg for images
-#   - optional: convert(ImageMagick) for playing gif preview
+#   - optional: convert(ImageMagick) for playing gif preview (required for kitty image previews)
 #   - optional: ffmpegthumbnailer for video thumbnails (https://github.com/dirkvdb/ffmpegthumbnailer)
 #   - optional: ffmpeg for audio thumbnails
 #   - optional: libreoffce for opendocument/officedocument preview
@@ -64,10 +64,12 @@
 #   'h'orizontal split or a 'v'ertical split (as in, the line that splits the
 #   windows will be horizontal or vertical).
 #
-#   Kitty users need `allow_remote_control` set to `yes`, and `listen_on` set
-#   to e.g. "unix:$TMPDIR/kitty" and ImageMagick installed (which is required by kitty icat script). To customize the window split, `enabled_layouts`
-#   has to be set to `all` or `splits` (the former is the default value).
-#   This terminal is also able to show images without extra dependencies.
+#   Kitty users need something similar to the following in their kitty.conf:
+#   - `allow_remote_control yes`
+#   - `listen_on unix:$TMPDIR/kitty`
+#   - `enabled_layouts splits` (optional)
+#   With ImageMagick installed, this terminal can use the icat kitten to display images.
+#   Refer to kitty documentation for further details.
 #
 #   Iterm2 users are recommended to use viu to view images without getting pixelated.
 #
