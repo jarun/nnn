@@ -57,7 +57,7 @@
 #define EMOJI_SUBTITLES "💬"
 #define EMOJI_TABLE "📗"
 #define EMOJI_TEMPLATE "📎"
-#define EMOJI_TEXT "🗒"
+#define EMOJI_TEXT "🗒 "
 #define EMOJI_UNI "🏛️ "
 #define EMOJI_VECTOR "🗺️ "
 #define EMOJI_WEB "🌐"
