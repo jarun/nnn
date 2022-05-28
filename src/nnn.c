@@ -4988,14 +4988,14 @@ static size_t handle_bookmark(const char *bmark, char *newpath)
 		bmark ? xstrsncpy(newpath, bmark, PATH_MAX) : (r = MSG_NOT_SET);
 	else if (fd == '\r') { /* Visit bookmarks directory */
 		mkpath(cfgpath, toks[TOK_BM], newpath);
-		g_state.selbm = TRUE;
+		g_state.selbm = 1;
 	} else if (!get_kv_val(bookmark, newpath, fd, maxbm, NNN_BMS))
 		r = MSG_INVALID_KEY;
 
 	if (!r && chdir(newpath) == -1) {
 		r = MSG_ACCESS;
 		if (g_state.selbm)
-			g_state.selbm = FALSE;
+			g_state.selbm = 0;
 	}
 
 	return r;
@@ -6905,6 +6905,7 @@ nochange:
 			/* Cannot descend in empty directories */
 			if (!ndents) {
 				cd = FALSE;
+				g_state.selbm = g_state.runplugin = 0;
 				goto begin;
 			}
 
@@ -6915,7 +6916,7 @@ nochange:
 				S_ISLNK(pent->mode)
 					? (realpath(pent->name, newpath) && xstrsncpy(path, lastdir, PATH_MAX))
 					: mkpath(path, pent->name, newpath);
-				g_state.selbm = FALSE;
+				g_state.selbm = 0;
 			} else
 				mkpath(path, pent->name, newpath);
 			DPRINTF_S(newpath);
