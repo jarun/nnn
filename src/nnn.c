@@ -178,8 +178,6 @@
 #define MSGWAIT         '$'
 #define SELECT          ' '
 #define PROMPT          ">>> "
-#define BM_PREFIX       "n_"
-#define BM_PREFIX_LEN   (sizeof BM_PREFIX - 1)
 #define REGEX_MAX       48
 #define ENTRY_INCR      64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR    0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
@@ -369,11 +367,12 @@ typedef struct {
 	uint_t rangesel   : 1;  /* Range selection on */
 	uint_t runctx     : 3;  /* The context in which plugin is to be run */
 	uint_t runplugin  : 1;  /* Choose plugin mode */
+	uint_t selbm      : 1;  /* Select a bookmark from bookmarks directory */
 	uint_t selmode    : 1;  /* Set when selecting files */
 	uint_t stayonsel  : 1;  /* Disable auto-jump on select */
 	uint_t trash      : 2;  /* Trash method 0: rm -rf, 1: trash-cli, 2: gio trash */
 	uint_t uidgid     : 1;  /* Show owner and group info */
-	uint_t reserved   : 7;  /* Adjust when adding/removing a field */
+	uint_t reserved   : 6;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -686,7 +685,7 @@ static const char * const messages[] = {
 	"invalid key",
 	"unchanged",
 	"dir changed, range sel off",
-	"name (prefix n_ to identify): ",
+	"name: ",
 };
 
 /* Supported configuration environment variables */
@@ -4987,13 +4986,17 @@ static size_t handle_bookmark(const char *bmark, char *newpath)
 	r = FALSE;
 	if (fd == ',') /* Visit marked directory */
 		bmark ? xstrsncpy(newpath, bmark, PATH_MAX) : (r = MSG_NOT_SET);
-	else if (fd == '\r') /* Visit bookmarks directory */
+	else if (fd == '\r') { /* Visit bookmarks directory */
 		mkpath(cfgpath, toks[TOK_BM], newpath);
-	else if (!get_kv_val(bookmark, newpath, fd, maxbm, NNN_BMS))
+		g_state.selbm = TRUE;
+	} else if (!get_kv_val(bookmark, newpath, fd, maxbm, NNN_BMS))
 		r = MSG_INVALID_KEY;
 
-	if (!r && chdir(newpath) == -1)
+	if (!r && chdir(newpath) == -1) {
 		r = MSG_ACCESS;
+		if (g_state.selbm)
+			g_state.selbm = FALSE;
+	}
 
 	return r;
 }
@@ -6907,10 +6910,14 @@ nochange:
 
 			pent = &pdents[cur];
 			r = FALSE;
-			/* Check if it's a symlinked boookmark */
-			(S_ISLNK(pent->mode) && is_prefix(pent->name, BM_PREFIX, BM_PREFIX_LEN))
-				? (realpath(pent->name, newpath) && xstrsncpy(path, lastdir, PATH_MAX))
-				: mkpath(path, pent->name, newpath);
+
+			if (g_state.selbm) {
+				S_ISLNK(pent->mode)
+					? (realpath(pent->name, newpath) && xstrsncpy(path, lastdir, PATH_MAX))
+					: mkpath(path, pent->name, newpath);
+				g_state.selbm = FALSE;
+			} else
+				mkpath(path, pent->name, newpath);
 			DPRINTF_S(newpath);
 
 			/* Visit directory */

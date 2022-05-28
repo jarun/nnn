@@ -348,23 +348,21 @@ selected entries from the listed results.
 .Sh BOOKMARKS
 There are 2 ways (can be used together) to manage bookmarks.
 .Pp
-(1) Bookmark keys: See \fINNN_BMS\fR under \fIENVIORNMENT\fR section on how to
-    set bookmark keys.
-.Pp
-(2) Symlinked bookmarks: A symlinked bookmark to the current directory can be
-    created with the \fIB\fR key.
-    Add prefix \fBn_\fR to the name to open the target of the symlink.
-    Press '-' to return to the original directory.
+(1) Bookmark keys: See \fINNN_BMS\fR under \fIENVIORNMENT\fR section on how to set
+    bookmark keys.
 
-    Symlinks can also be created manually under the "bookmarks" directory in
-    the nnn config directory (~/.config/nnn/bookmarks).
+    The select bookmark key \fIb\fR lists all the bookmark keys set in \fINNN_BMS\fR
+    in the bookmarks prompt.
+.Pp
+(2) Symlinked bookmarks: A symlinked bookmark to the current directory can
+    be created with the \fIB\fR key (or manually under ~/.config/nnn/bookmarks).
 
     Pressing 'Enter' at the bookmarks prompt takes to this directory.
-    If \fINNN_BMS\fR is not set, it happens directly on select bookmark key.
+    If \fINNN_BMS\fR is not set, the select bookmark key directly opens it.
+
+    Press '-' to return to the original directory right after entering a
+    symlinked bookmark.
 .Pp
-Pressing \fIb\fR will list all the bookmark keys set in NNN_BMS. Pressing
-\fIEnter\fR at this prompt will take to the symlink bookmark directory, if
-NNN_BMS is not set, it happens directly on bookmarks key.
 .Sh UNITS
 The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y
 (powers of 1024), same as the default units in \fIls\fR.
