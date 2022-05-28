@@ -178,6 +178,8 @@
 #define MSGWAIT         '$'
 #define SELECT          ' '
 #define PROMPT          ">>> "
+#define BM_PREFIX       "n_"
+#define BM_PREFIX_LEN   (sizeof BM_PREFIX - 1)
 #define REGEX_MAX       48
 #define ENTRY_INCR      64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR    0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
@@ -638,6 +640,7 @@ static char * const utils[] = {
 #define MSG_INVALID_KEY  40
 #define MSG_NOCHANGE     41
 #define MSG_DIR_CHANGED  42
+#define MSG_BM_NAME      43
 
 static const char * const messages[] = {
 	"",
@@ -672,7 +675,7 @@ static const char * const messages[] = {
 	"too few cols!",
 	"'s'shfs / 'r'clone?",
 	"refresh if slow",
-	"app name: ",
+	"app: ",
 	"'o'pen / e'x'tract / 'l's / 'm'nt?",
 	"keys:",
 	"invalid regex",
@@ -683,6 +686,7 @@ static const char * const messages[] = {
 	"invalid key",
 	"unchanged",
 	"dir changed, range sel off",
+	"name (prefix n_ to identify): ",
 };
 
 /* Supported configuration environment variables */
@@ -4998,7 +5002,7 @@ static void add_bookmark(char *path, char *newpath, int *presel)
 {
 	char *dir = xbasename(path);
 
-	dir = xreadline(dir[0] ? dir : NULL, "name: ");
+	dir = xreadline(dir[0] ? dir : NULL, messages[MSG_BM_NAME]);
 	if (dir && *dir) {
 		size_t r = mkpath(cfgpath, toks[TOK_BM], newpath);
 
@@ -6902,7 +6906,11 @@ nochange:
 			}
 
 			pent = &pdents[cur];
-			mkpath(path, pent->name, newpath);
+			r = FALSE;
+			/* Check if it's a symlinked boookmark */
+			(S_ISLNK(pent->mode) && is_prefix(pent->name, BM_PREFIX, BM_PREFIX_LEN))
+				? (realpath(pent->name, newpath) && xstrsncpy(path, lastdir, PATH_MAX))
+				: mkpath(path, pent->name, newpath);
 			DPRINTF_S(newpath);
 
 			/* Visit directory */

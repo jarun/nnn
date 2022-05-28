@@ -351,10 +351,15 @@ There are 2 ways (can be used together) to manage bookmarks.
 (1) Bookmark keys: See \fINNN_BMS\fR under \fIENVIORNMENT\fR section on how to
     set bookmark keys.
 .Pp
-(2) Symlinked bookmarks: Symlinked bookmarks can be created at runtime
-    with the \fIB\fR key. They can also be manually created by adding symlinks
-    to bookmarked locations under the bookmarks directory in the nnn config
-    directory (~/.config/nnn/bookmarks).
+(2) Symlinked bookmarks: A symlinked bookmark to the current directory can be
+    created with the \fIB\fR key.
+    Add prefix \fBn_\fR to the names to open the targets instead of the symlinks.
+
+    Symlinks can also be created manually under the "bookmarks" directory in
+    the nnn config directory (~/.config/nnn/bookmarks).
+
+    Pressing 'Enter' at the bookmarks prompt takes to this directory.
+    If \fINNN_BMS\fR is not set, it happens directly on select bookmark key.
 .Pp
 Pressing \fIb\fR will list all the bookmark keys set in NNN_BMS. Pressing
 \fIEnter\fR at this prompt will take to the symlink bookmark directory, if
