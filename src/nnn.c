@@ -3073,9 +3073,8 @@ try_quit:
 #ifdef LINUX_INOTIFY
 		if (!cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
 			struct inotify_event *event;
-			char inotify_buf[EVENT_BUF_LEN];
+			char inotify_buf[EVENT_BUF_LEN] = {0};
 
-			memset((void *)inotify_buf, 0x0, EVENT_BUF_LEN);
 			i = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
 			if (i > 0) {
 				for (char *ptr = inotify_buf;
@@ -3097,9 +3096,8 @@ try_quit:
 		}
 #elif defined(BSD_KQUEUE)
 		if (!cfg.blkorder && event_fd >= 0 && (idle & 1)) {
-			struct kevent event_data[NUM_EVENT_SLOTS];
+			struct kevent event_data[NUM_EVENT_SLOTS] = {0};
 
-			memset((void *)event_data, 0x0, sizeof(struct kevent) * NUM_EVENT_SLOTS);
 			if (kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
 				   event_data, NUM_EVENT_FDS, &gtimeout) > 0)
 				c = handle_event();
@@ -4236,12 +4234,10 @@ static void savecurctx(char *path, char *curname, int nextctx)
 static void save_session(const char *sname, int *presel)
 {
 	int fd, i;
-	session_header_t header;
+	session_header_t header = {0};
 	bool status = FALSE;
 	char ssnpath[PATH_MAX];
 	char spath[PATH_MAX];
-
-	memset(&header, 0, sizeof(session_header_t));
 
 	header.ver = SESSIONS_VERSION;
 
@@ -6589,7 +6585,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 
 #ifndef NOMOUSE
 	MEVENT event = {0};
-	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0} };
+	struct timespec mousetimings[2] = {0};
 	int mousedent[2] = {-1, -1};
 	bool currentmouse = 1, rightclicksel = 0;
 #endif
