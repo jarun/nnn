@@ -7,20 +7,20 @@
 # Authors: Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index 508ee915..31aa6b53 100644
+index 6b0c1dc5..2aac557b 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -371,7 +371,8 @@ typedef struct {
+@@ -372,7 +372,8 @@ typedef struct {
  	uint_t stayonsel  : 1;  /* Disable auto-jump on select */
  	uint_t trash      : 2;  /* Trash method 0: rm -rf, 1: trash-cli, 2: gio trash */
  	uint_t uidgid     : 1;  /* Show owner and group info */
--	uint_t reserved   : 7;  /* Adjust when adding/removing a field */
+-	uint_t reserved   : 6;  /* Adjust when adding/removing a field */
 +	uint_t previewer  : 1;  /* Run state of previewer */
-+	uint_t reserved   : 6;  /* Adjust when adding/removing a field */
++	uint_t reserved   : 5;  /* Adjust when adding/removing a field */
  } runstate;
 
  /* Contexts or workspaces */
-@@ -520,6 +521,9 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
+@@ -521,6 +522,9 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
  /* Buffer to store plugins control pipe location */
  static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
 
@@ -30,7 +30,7 @@ index 508ee915..31aa6b53 100644
  /* Non-persistent runtime states */
  static runstate g_state;
 
-@@ -694,12 +698,13 @@ static const char * const messages[] = {
+@@ -697,12 +701,13 @@ static const char * const messages[] = {
  #define NNN_FCOLORS 5
  #define NNNLVL      6
  #define NNN_PIPE    7
@@ -50,7 +50,7 @@ index 508ee915..31aa6b53 100644
 
  static const char * const env_cfg[] = {
  	"NNN_OPTS",
-@@ -710,6 +715,7 @@ static const char * const env_cfg[] = {
+@@ -713,6 +718,7 @@ static const char * const env_cfg[] = {
  	"NNN_FCOLORS",
  	"NNNLVL",
  	"NNN_PIPE",
@@ -58,7 +58,7 @@ index 508ee915..31aa6b53 100644
  	"NNN_MCLICK",
  	"NNN_SEL",
  	"NNN_ARCHIVE",
-@@ -856,7 +862,7 @@ static int set_sort_flags(int r);
+@@ -859,7 +865,7 @@ static int set_sort_flags(int r);
  static void statusbar(char *path);
  static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool multi, bool page);
  #ifndef NOFIFO
@@ -67,7 +67,7 @@ index 508ee915..31aa6b53 100644
  #endif
 
  /* Functions */
-@@ -3063,7 +3069,7 @@ try_quit:
+@@ -3071,7 +3077,7 @@ try_quit:
  			} else {
  #ifndef NOFIFO
  				if (!g_state.fifomode)
@@ -76,7 +76,7 @@ index 508ee915..31aa6b53 100644
  #endif
  				escaped = TRUE;
  				settimeout();
-@@ -5171,15 +5177,20 @@ static bool run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
+@@ -5183,15 +5189,20 @@ static void run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 
  static bool plctrl_init(void)
  {
@@ -101,7 +101,7 @@ index 508ee915..31aa6b53 100644
 
  	return EXIT_SUCCESS;
  }
-@@ -5208,6 +5219,21 @@ static ssize_t read_nointr(int fd, void *buf, size_t count)
+@@ -5220,6 +5231,21 @@ static ssize_t read_nointr(int fd, void *buf, size_t count)
  	return len;
  }
 
@@ -123,7 +123,7 @@ index 508ee915..31aa6b53 100644
  static char *readpipe(int fd, char *ctxnum, char **path)
  {
  	char ctx, *nextpath = NULL;
-@@ -5881,7 +5907,7 @@ static void populate(char *path, char *lastname)
+@@ -5904,7 +5930,7 @@ static void populate(char *path, char *lastname)
  }
 
  #ifndef NOFIFO
@@ -132,7 +132,7 @@ index 508ee915..31aa6b53 100644
  {
  	if (!fifopath)
  		return;
-@@ -5897,6 +5923,12 @@ static void notify_fifo(bool force)
+@@ -5920,6 +5946,12 @@ static void notify_fifo(bool force)
  		}
  	}
 
@@ -145,7 +145,7 @@ index 508ee915..31aa6b53 100644
  	static struct entry lastentry;
 
  	if (!force && !memcmp(&lastentry, &pdents[cur], sizeof(struct entry)))
-@@ -5929,7 +5961,7 @@ static void send_to_explorer(int *presel)
+@@ -5952,7 +5984,7 @@ static void send_to_explorer(int *presel)
  		if (fd > 1)
  			close(fd);
  	} else
@@ -154,7 +154,7 @@ index 508ee915..31aa6b53 100644
  }
  #endif
 
-@@ -5962,7 +5994,7 @@ static void move_cursor(int target, int ignore_scrolloff)
+@@ -5985,7 +6017,7 @@ static void move_cursor(int target, int ignore_scrolloff)
 
  #ifndef NOFIFO
  	if (!g_state.fifomode)
@@ -163,7 +163,7 @@ index 508ee915..31aa6b53 100644
  #endif
  }
 
-@@ -6580,7 +6612,7 @@ static bool browse(char *ipath, const char *session, int pkey)
+@@ -6603,7 +6635,7 @@ static bool browse(char *ipath, const char *session, int pkey)
  	pEntry pent;
  	enum action sel;
  	struct stat sb;
@@ -172,7 +172,7 @@ index 508ee915..31aa6b53 100644
  	const uchar_t opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOSTDIN | F_NOWAIT));
  	bool watch = FALSE, cd = TRUE;
  	ino_t inode = 0;
-@@ -6838,7 +6870,7 @@ nochange:
+@@ -6861,7 +6893,7 @@ nochange:
  					move_cursor(r, 1);
  #ifndef NOFIFO
  				else if ((event.bstate == BUTTON1_PRESSED) && !g_state.fifomode)
@@ -181,7 +181,7 @@ index 508ee915..31aa6b53 100644
  #endif
  				/* Handle right click selection */
  				if (event.bstate == BUTTON3_PRESSED) {
-@@ -6998,7 +7030,14 @@ nochange:
+@@ -7030,7 +7062,14 @@ nochange:
  			    && strstr(g_buf, "text")
  #endif
  			) {
@@ -196,7 +196,7 @@ index 508ee915..31aa6b53 100644
  				if (cfg.filtermode) {
  					presel = FILTER;
  					clearfilter();
-@@ -7308,8 +7347,14 @@ nochange:
+@@ -7340,8 +7379,14 @@ nochange:
  				copycurname();
  				goto nochange;
  			case SEL_EDIT:
@@ -211,7 +211,7 @@ index 508ee915..31aa6b53 100644
  				continue;
  			default: /* SEL_LOCK */
  				lock_terminal();
-@@ -7678,6 +7723,7 @@ nochange:
+@@ -7710,6 +7755,7 @@ nochange:
  			cd = FALSE;
  			goto begin;
  		}
@@ -219,7 +219,7 @@ index 508ee915..31aa6b53 100644
  		case SEL_PLUGIN:
  			/* Check if directory is accessible */
  			if (!xdiraccess(plgpath)) {
-@@ -7703,6 +7749,12 @@ nochange:
+@@ -7735,6 +7781,12 @@ nochange:
  					goto nochange;
  				}
 
@@ -232,7 +232,7 @@ index 508ee915..31aa6b53 100644
  				if (tmp[0] == '-' && tmp[1]) {
  					++tmp;
  					r = FALSE; /* Do not refresh dir after completion */
-@@ -7757,7 +7809,13 @@ nochange:
+@@ -7789,7 +7841,13 @@ nochange:
  		case SEL_SHELL: // fallthrough
  		case SEL_LAUNCH: // fallthrough
  		case SEL_PROMPT:
@@ -246,7 +246,7 @@ index 508ee915..31aa6b53 100644
 
  			/* Continue in type-to-nav mode, if enabled */
  			if (cfg.filtermode)
-@@ -8297,8 +8355,10 @@ static void cleanup(void)
+@@ -8329,8 +8387,10 @@ static void cleanup(void)
  	if (g_state.autofifo)
  		unlink(fifopath);
  #endif
@@ -258,7 +258,7 @@ index 508ee915..31aa6b53 100644
  #ifdef DEBUG
  	disabledbg();
  #endif
-@@ -8796,7 +8856,7 @@ int main(int argc, char *argv[])
+@@ -8828,7 +8888,7 @@ int main(int argc, char *argv[])
 
  #ifndef NOFIFO
  	if (!g_state.fifomode)
