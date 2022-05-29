@@ -6600,7 +6600,6 @@ static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)
 static bool browse(char *ipath, const char *session, int pkey)
 {
 	char newpath[PATH_MAX] __attribute__ ((aligned)),
-	     rundir[PATH_MAX] __attribute__ ((aligned)),
 	     runfile[NAME_MAX + 1] __attribute__ ((aligned));
 	char *path, *lastdir, *lastname, *dir, *tmp;
 	pEntry pent;
@@ -6653,7 +6652,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 	}
 #endif
 
-	newpath[0] = rundir[0] = runfile[0] = '\0';
+	newpath[0] = runfile[0] = '\0';
 
 	presel = pkey ? ';' : ((cfg.filtermode
 			|| (session && (g_ctx[cfg.curctx].c_fltr[0] == FILTER
@@ -6956,8 +6955,7 @@ nochange:
 				if ((g_state.runctx == cfg.curctx) && !strcmp(path, plgpath)) {
 					endselection(FALSE);
 					/* Copy path so we can return back to earlier dir */
-					xstrsncpy(path, rundir, PATH_MAX);
-					rundir[0] = '\0';
+					xstrsncpy(path, lastdir, PATH_MAX);
 					clearfilter();
 
 					if (chdir(path) == -1
@@ -7760,15 +7758,15 @@ nochange:
 				}
 			} else { /* 'Return/Enter' enters the plugin directory */
 				g_state.runplugin ^= 1;
-				if (!g_state.runplugin && rundir[0]) {
+				if (!g_state.runplugin) {
 					/*
 					 * If toggled, and still in the plugin dir,
 					 * switch to original directory
 					 */
 					if (strcmp(path, plgpath) == 0) {
-						xstrsncpy(path, rundir, PATH_MAX);
+						xstrsncpy(path, lastdir, PATH_MAX);
 						xstrsncpy(lastname, runfile, NAME_MAX + 1);
-						rundir[0] = runfile[0] = '\0';
+						runfile[0] = '\0';
 						setdirwatch();
 						goto begin;
 					}
@@ -7778,7 +7776,6 @@ nochange:
 				}
 
 				xstrsncpy(lastdir, path, PATH_MAX);
-				xstrsncpy(rundir, path, PATH_MAX);
 				xstrsncpy(path, plgpath, PATH_MAX);
 				if (ndents)
 					xstrsncpy(runfile, pdents[cur].name, NAME_MAX);
