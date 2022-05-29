@@ -6914,8 +6914,6 @@ nochange:
 			}
 
 			pent = &pdents[cur];
-			r = FALSE;
-
 			if (g_state.selbm) {
 				S_ISLNK(pent->mode)
 					? (realpath(pent->name, newpath) && xstrsncpy(path, lastdir, PATH_MAX))
@@ -6933,8 +6931,7 @@ nochange:
 					goto nochange;
 				}
 
-				cdprep(lastdir, lastname, path, newpath)
-					? (presel = FILTER) : (watch = TRUE);
+				cdprep(lastdir, lastname, path, newpath) ? (presel = FILTER) : (watch = TRUE);
 				goto begin;
 			}
 
@@ -6963,8 +6960,7 @@ nochange:
 					clearfilter();
 
 					if (chdir(path) == -1
-					    || !run_plugin(&path, pent->name,
-								    runfile, &lastname, &lastdir)) {
+					    || !run_plugin(&path, pent->name, runfile, &lastname, &lastdir)) {
 						DPRINTF_S("plugin failed!");
 					}
 
