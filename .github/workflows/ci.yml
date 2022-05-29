@@ -35,3 +35,34 @@ jobs:
           make
           make clean
           clang-tidy src/* -- -I/usr/include
+  macOS-patches:
+    runs-on: macOS-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Compile patches with gcc
+        env:
+          CC: gcc
+        run: |
+          export CFLAGS="$CFLAGS -Werror"
+          make clean
+          echo "########## O_NAMEFIRST=1 ##########"
+          make O_NAMEFIRST=1
+          make clean
+          echo "########## O_GITSTATUS=1 ##########"
+          make O_GITSTATUS=1
+          make clean
+          echo "########## O_RESTOREPREVIEW=1 ##########"
+          make O_RESTOREPREVIEW=1
+          make clean
+          echo "########## O_NAMEFIRST=1 O_GITSTATUS=1 ##########"
+          make O_NAMEFIRST=1 O_GITSTATUS=1
+          make clean
+          echo "########## O_NAMEFIRST=1 O_RESTOREPREVIEW=1 ##########"
+          make O_NAMEFIRST=1 O_RESTOREPREVIEW=1
+          make clean
+          echo "########## O_GITSTATUS=1 O_RESTOREPREVIEW=1 ##########"
+          make O_GITSTATUS=1 O_RESTOREPREVIEW=1
+          make clean
+          echo "########## O_NAMEFIRST=1 O_GITSTATUS=1 O_RESTOREPREVIEW=1 ##########"
+          make O_NAMEFIRST=1 O_GITSTATUS=1 O_RESTOREPREVIEW=1
+          make clean
