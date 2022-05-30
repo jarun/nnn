@@ -5,6 +5,7 @@ This directory contains sizable user submitted patches that were rejected from m
 The patches will be adapted on each release when necessary (v4.1 onwards). Each patch can be applied through its respective make variable during compilation. In case inter-patch merge conflicts occur, a compatability patch is provided and will automatically be applied.
 
 ## List of patches
+
 | Patch (a-z) | Description | Make var |
 | --- | --- | --- |
 | gitstatus | Add git status column to the detail view. Provides command line flag `-G` to show column in normal mode. | `O_GITSTATUS` |
@@ -14,6 +15,8 @@ The patches will be adapted on each release when necessary (v4.1 onwards). Each 
 To apply a patch, use the corresponding make variable, e.g.:
 
     make O_NAMEFIRST=1
+
+## Resolving patch conflicts
 
 Whenever patch conflicts occur on the latest master, pull requests resolving them are welcome. Let's say a conflict occurs in the `restorepreview` patch. The best way to resolve this conflict would be something along the lines of:
 
