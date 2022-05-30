@@ -43,26 +43,12 @@ jobs:
         env:
           CC: gcc
         run: |
-          export CFLAGS="$CFLAGS -Werror"
-          make clean
-          echo "########## O_NAMEFIRST=1 ##########"
-          make O_NAMEFIRST=1
-          make clean
-          echo "########## O_GITSTATUS=1 ##########"
-          make O_GITSTATUS=1
-          make clean
-          echo "########## O_RESTOREPREVIEW=1 ##########"
-          make O_RESTOREPREVIEW=1
-          make clean
-          echo "########## O_NAMEFIRST=1 O_GITSTATUS=1 ##########"
-          make O_NAMEFIRST=1 O_GITSTATUS=1
-          make clean
-          echo "########## O_NAMEFIRST=1 O_RESTOREPREVIEW=1 ##########"
-          make O_NAMEFIRST=1 O_RESTOREPREVIEW=1
-          make clean
-          echo "########## O_GITSTATUS=1 O_RESTOREPREVIEW=1 ##########"
-          make O_GITSTATUS=1 O_RESTOREPREVIEW=1
-          make clean
-          echo "########## O_NAMEFIRST=1 O_GITSTATUS=1 O_RESTOREPREVIEW=1 ##########"
-          make O_NAMEFIRST=1 O_GITSTATUS=1 O_RESTOREPREVIEW=1
-          make clean
+          patches=("O_GITSTATUS" "O_NAMEFIRST" "O_RESTOREPREVIEW")
+          z=$(( 1 << ${#patches[@]} ))
+          for ((n=1; n < z; ++n)); do
+            for ((i=0; i < ${#patches[@]}; ++i)); do
+              printf "%s=%d " "${patches[$i]}" "$(( (n & (1 << i)) != 0 ))"
+            done | tee "tmp" ; echo
+            make clean
+            xargs make <"tmp"
+          done
