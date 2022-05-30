@@ -35,8 +35,8 @@ jobs:
           make
           make clean
           clang-tidy src/* -- -I/usr/include
-  macOS-patches:
-    runs-on: macOS-latest
+  ubuntu-patches:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Compile patches with gcc
