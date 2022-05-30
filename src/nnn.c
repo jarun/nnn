@@ -6907,8 +6907,7 @@ nochange:
 			/* Cannot descend in empty directories */
 			if (!ndents) {
 				cd = FALSE;
-				if (g_state.selbm)
-					cfg.filtermode = g_state.selbm - 1;
+				cfg.filtermode = g_state.selbm - 1;
 				g_state.selbm = g_state.runplugin = 0;
 				goto begin;
 			}
