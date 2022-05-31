@@ -638,6 +638,7 @@
 # define FA_EMPIRE "\ue289"
 # define FA_GIT_SQUARE "\ue28a"
 # define FA_GIT "\ue28b"
+# define FA_REPOSITORY "\ue702"
 # define FA_HACKER_NEWS "\ue28c"
 # define FA_TENCENT_WEIBO "\ue28d"
 # define FA_QQ "\ue28e"

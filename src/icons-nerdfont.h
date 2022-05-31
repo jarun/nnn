@@ -47,6 +47,7 @@
 #define ICON_PUBLIC        "\ue5ff"
 #define ICON_PYTHON        "\ue235"
 #define ICON_REACT         "\ue625"
+#define ICON_REPOSITORY    "\ue702"
 #define ICON_RUBY          "\ue23e"
 #define ICON_SCRIPT        "\ue795"
 #define ICON_TEMPLATES     "\ufac6"
