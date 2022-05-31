@@ -20,6 +20,6 @@ To apply a patch, use the corresponding make variable, e.g.:
 
 Whenever patch conflicts occur on the latest master, pull requests resolving them are welcome. Let's say a conflict occurs in the `restorepreview` patch. The best way to resolve this conflict would be something along the lines of:
 
-- Ensure you're on latest master and run `cp src/nnn.c src/nnn.c.orig && make O_RESTOREPREVIEW=1`. This will save a copy of the source from master in `src/nnn.c.orig` and generate conflict markers in `src/nnn.c`.
+- Ensure you're on latest master and run `cp src/nnn.c src/nnn.c.orig && PATCH_OPTS="--merge" make O_RESTOREPREVIEW=1`. This will save a copy of the source from master in `src/nnn.c.orig` and generate conflict markers in `src/nnn.c`.
 - Next edit `src.nnn`, resolve all the conflicts around the conflict markers(`<<<<<<<`), and save.
 - Then run `diff -u src/nnn.c.orig src/nnn.c > patch.diff` to generate the new patch file and copy the contents to `patches/restorepreview/mainline.diff` (keeping the description comment at the start of the file).
