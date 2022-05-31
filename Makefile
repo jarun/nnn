@@ -312,28 +312,28 @@ clean:
 
 prepatch:
 ifeq ($(strip $(O_NAMEFIRST)),1)
-	patch --forward --merge --strip=1 --input=$(NAMEFIRST)/mainline.diff
+	patch --forward $(PATCH_OPTS) --strip=1 --input=$(NAMEFIRST)/mainline.diff
 ifeq ($(strip $(O_GITSTATUS)),1)
-	patch --forward --merge --strip=1 --input=$(GITSTATUS)/namefirst.diff
+	patch --forward $(PATCH_OPTS) --strip=1 --input=$(GITSTATUS)/namefirst.diff
 endif
 else ifeq ($(strip $(O_GITSTATUS)),1)
-	patch --forward --merge --strip=1 --input=$(GITSTATUS)/mainline.diff
+	patch --forward $(PATCH_OPTS) --strip=1 --input=$(GITSTATUS)/mainline.diff
 endif
 ifeq ($(strip $(O_RESTOREPREVIEW)),1)
-	patch --forward --merge --strip=1 --input=$(RESTOREPREVIEW)/mainline.diff
+	patch --forward $(PATCH_OPTS) --strip=1 --input=$(RESTOREPREVIEW)/mainline.diff
 endif
 
 postpatch:
 ifeq ($(strip $(O_NAMEFIRST)),1)
 ifeq ($(strip $(O_GITSTATUS)),1)
-	patch --merge --reverse --strip=1 --input=$(GITSTATUS)/namefirst.diff
+	patch --reverse $(PATCH_OPTS) --strip=1 --input=$(GITSTATUS)/namefirst.diff
 endif
-	patch --merge --reverse --strip=1 --input=$(NAMEFIRST)/mainline.diff
+	patch --reverse $(PATCH_OPTS) --strip=1 --input=$(NAMEFIRST)/mainline.diff
 else ifeq ($(strip $(O_GITSTATUS)),1)
-	patch --merge --reverse --strip=1 --input=$(GITSTATUS)/mainline.diff
+	patch --reverse $(PATCH_OPTS) --strip=1 --input=$(GITSTATUS)/mainline.diff
 endif
 ifeq ($(strip $(O_RESTOREPREVIEW)),1)
-	patch --merge --reverse --strip=1 --input=$(RESTOREPREVIEW)/mainline.diff
+	patch --reverse $(PATCH_OPTS) --strip=1 --input=$(RESTOREPREVIEW)/mainline.diff
 endif
 
 skip: ;
