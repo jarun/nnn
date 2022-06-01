@@ -314,7 +314,6 @@ typedef struct {
 
 /*
  * Settings
- * NOTE: update default values if changing order
  */
 typedef struct {
 	uint_t filtermode : 1;  /* Set to enter filter mode */
@@ -399,33 +398,10 @@ typedef struct {
 
 /* Configuration, contexts */
 static settings cfg = {
-	0, /* filtermode */
-	0, /* timeorder */
-	0, /* sizeorder */
-	0, /* apparentsz */
-	0, /* blkorder */
-	0, /* extnorder */
-	0, /* showhidden */
-	0, /* reserved0 */
-	0, /* showdetail */
-	1, /* ctxactive */
-	0, /* reverse */
-	0, /* version */
-	0, /* reserved1 */
-	0, /* curctx */
-	0, /* prefersel */
-	0, /* fileinfo */
-	0, /* nonavopen */
-	1, /* autoenter */
-	0, /* reserved2 */
-	0, /* useeditor */
-	0, /* reserved3 */
-	0, /* regex */
-	0, /* x11 */
-	2, /* timetype (T_MOD) */
-	0, /* cliopener */
-	0, /* waitedit */
-	1, /* rollover */
+	.ctxactive = 1,
+	.autoenter = 1,
+	.timetype = 2, /* T_MOD */
+	.rollover = 1,
 };
 
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
