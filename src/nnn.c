@@ -1033,7 +1033,7 @@ static inline bool is_prefix(const char *restrict str, const char *restrict pref
 
 /*
  * The poor man's implementation of memrchr(3).
- * We are only looking for '/' in this program.
+ * We are only looking for '/' and '.' in this program.
  * And we are NOT expecting a '/' at the end.
  * Ideally 0 < n <= xstrlen(s).
  */
