@@ -776,7 +776,12 @@ static const char * const patterns[] = {
 	SED" -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s",
 	SED" 's|^\\([^#/][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
 		"%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
-	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$",
+	// https://man.archlinux.org/man/atool.1#ARCHIVE_TYPES
+	// https://man.archlinux.org/man/libarchive-formats.5
+	// https://github.com/libarchive/libarchive/blob/master/tar/creation_set.c#L69
+	// https://github.com/libarchive/libarchive/blob/master/tar/creation_set.c#L90
+	// https://github.com/libarchive/libarchive/blob/master/tar/creation_set.c#L111
+	"\\.(tar|zip|jar|rar|lha|7z|alz|ace|a|ar|arj|arc|rpm|deb|cab|cpio|iso|mtree|xar|warc|t?(gz|grz|bz|bz2|Z|lzma|lzo|lz|lz4|lrz|xz|rz|uu|zst))",
 	SED" -i 's|^%s\\(.*\\)$|%s\\1|' %s",
 	SED" -ze 's|^%s/||' '%s' | xargs -0 %s %s",
 };
@@ -4638,10 +4643,11 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	char arg[] = "-tvf"; /* options for tar/bsdtar to list files */
 	char *util, *outdir = NULL;
 	bool x_to = FALSE;
+	bool is_bsdtar = getutil(utils[UTIL_BSDTAR]);
 	bool is_atool = getutil(utils[UTIL_ATOOL]);
 
 	if (op == 'x') {
-		outdir = xreadline(is_atool ? "." : xbasename(fpath), messages[MSG_NEW_PATH]);
+		outdir = xreadline((!is_bsdtar && is_atool) ? "." : xbasename(fpath), messages[MSG_NEW_PATH]);
 		if (!outdir || !*outdir) { /* Cancelled */
 			printwait(messages[MSG_CANCEL], NULL);
 			return FALSE;
@@ -4658,14 +4664,14 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 		}
 	}
 
-	if (is_atool) {
-		util = utils[UTIL_ATOOL];
-		arg[1] = op;
-		arg[2] = '\0';
-	} else if (getutil(utils[UTIL_BSDTAR])) {
+	if (is_bsdtar) {
 		util = utils[UTIL_BSDTAR];
 		if (op == 'x')
 			arg[1] = op;
+	} else if (is_atool) {
+		util = utils[UTIL_ATOOL];
+		arg[1] = op;
+		arg[2] = '\0';
 	} else if (is_suffix(fpath, ".zip")) {
 		util = utils[UTIL_UNZIP];
 		arg[1] = (op == 'l') ? 'v' /* verbose listing */ : '\0';
