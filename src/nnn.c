@@ -781,7 +781,7 @@ static const char * const patterns[] = {
 	// https://github.com/libarchive/libarchive/blob/master/tar/creation_set.c#L69
 	// https://github.com/libarchive/libarchive/blob/master/tar/creation_set.c#L90
 	// https://github.com/libarchive/libarchive/blob/master/tar/creation_set.c#L111
-	"\\.(tar|zip|jar|rar|lha|7z|alz|ace|a|ar|arj|arc|rpm|deb|cab|cpio|iso|mtree|xar|warc|t?(gz|grz|bz|bz2|Z|lzma|lzo|lz|lz4|lrz|xz|rz|uu|zst))",
+	"\\.(tar|zip|jar|rar|lha|7z|alz|ace|a|ar|arj|arc|rpm|deb|cab|cpio|iso|mtree|xar|warc|(t|ta)?(gz|grz|bz|bz2|z|Z|lzma|lzo|lz|lz4|lrz|xz|rz|uu|zst))",
 	SED" -i 's|^%s\\(.*\\)$|%s\\1|' %s",
 	SED" -ze 's|^%s/||' '%s' | xargs -0 %s %s",
 };
