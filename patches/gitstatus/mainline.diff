@@ -142,7 +142,7 @@ index 508ee915..77d56d63 100644
 +		printw("%*s%s%s", (cfg.normalgit && !cfg.showdetail) ? 1 : 0, "",
 +				ent->git_status[0], ent->git_status[1]);
 +
- 	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
+	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD | COLOR_PAIR(cfg.curctx + 1) : ' ');
 
  	if (g_state.oldcolor)
 @@ -5630,6 +5716,11 @@ static int dentfill(char *path, struct entry **ppdents)
