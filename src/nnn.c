@@ -4641,7 +4641,7 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	bool is_atool = getutil(utils[UTIL_ATOOL]);
 
 	if (op == 'x') {
-		outdir = xreadline(is_atool ? "." : xbasename(fpath), messages[MSG_NEW_PATH]);
+		outdir = xreadline(".", messages[MSG_NEW_PATH]);
 		if (!outdir || !*outdir) { /* Cancelled */
 			printwait(messages[MSG_CANCEL], NULL);
 			return FALSE;
@@ -4655,6 +4655,18 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 			/* Copy the new dir path to open it in smart context */
 			outdir = getcwd(NULL, 0);
 			x_to = TRUE;
+		}
+		if (!is_atool) {
+			char *fname = xbasename(fpath);
+			char *fext = xextension(fname, xstrlen(fname));
+			char tmp = *fext;
+			*fext = '\0';
+			if (!xmktree(fname, TRUE) || (chdir(fname) == -1)) {
+				printwarn(NULL);
+				*fext = tmp;
+				return FALSE;
+			}
+			*fext = tmp;
 		}
 	}
 
