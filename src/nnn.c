@@ -4526,7 +4526,11 @@ static bool show_stats(char *fpath)
 		("file " FILE_MIME_OPTS),
 #endif
 		"file -b",
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+		"stat -x",
+#else
 		"stat",
+#endif
 	};
 
 	size_t r = ELEMENTS(cmds);
