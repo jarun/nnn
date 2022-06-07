@@ -8145,7 +8145,7 @@ static void check_key_collision(void)
 
 static void usage(void)
 {
-	dprintf(STDERR_FILENO,
+	dprintf(STDOUT_FILENO,
 		"%s: nnn [OPTIONS] [PATH]\n\n"
 		"The unorthodox terminal file manager.\n\n"
 		"positional args:\n"
