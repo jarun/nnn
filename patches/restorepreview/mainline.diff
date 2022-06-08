@@ -202,7 +202,7 @@ index 6b0c1dc5..2aac557b 100644
  			case SEL_EDIT:
 +				if (g_state.previewer)
 +					notify_fifo(FALSE, TRUE);
- 				if (!g_state.picker)
+				if (!(g_state.picker || g_state.fifomode))
  					spawn(editor, newpath, NULL, NULL, F_CLI);
 +				if (g_state.previewer) {
 +					pkey = previewkey;
