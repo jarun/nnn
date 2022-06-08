@@ -354,7 +354,7 @@ typedef struct {
 	uint_t dircolor   : 1;  /* Current status of dir color */
 	uint_t dirctx     : 1;  /* Show dirs in context color */
 	uint_t duinit     : 1;  /* Initialize disk usage */
-	uint_t fifomode   : 1;  /* FIFO notify mode: 0: preview, 1: explore */
+	uint_t fifomode   : 1;  /* FIFO notify mode: 0: preview, 1: explorer */
 	uint_t forcequit  : 1;  /* Do not prompt on quit */
 	uint_t initfile   : 1;  /* Positional arg is a file */
 	uint_t interrupt  : 1;  /* Program received an interrupt */
@@ -7338,7 +7338,7 @@ nochange:
 				copycurname();
 				goto nochange;
 			case SEL_EDIT:
-				if (!g_state.picker)
+				if (!(g_state.picker || g_state.fifomode))
 					spawn(editor, newpath, NULL, NULL, F_CLI);
 				continue;
 			default: /* SEL_LOCK */
