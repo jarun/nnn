@@ -66,9 +66,10 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [x2sel](x2sel) | Copy file list from system clipboard to selection | sh | _see in-file docs_ |
 | [xdgdefault](xdgdefault) | Set the default app for the hovered file type | sh | xdg-utils, fzf/dmenu |
 
-Note:
+Notes:
 
 1. A plugin has to explicitly request `nnn` to clear the selection e.g. after operating on the selected files.
+2. Files starting with a dot in the `plugins` directory are internal files and should not be used as plugins.
 
 ### Table of contents
 
