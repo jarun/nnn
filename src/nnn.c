@@ -750,7 +750,7 @@ static char mv[] = "mv -i";
 #endif
 
 /* Archive commands */
-static const char * const archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
+static const char * const archive_cmd[] = {"bsdtar -acvf", "atool -a", "zip -r", "tar -acvf"};
 
 /* Tokens used for path creation */
 #define TOK_BM  0
@@ -2720,9 +2720,9 @@ static void get_archive_cmd(char *cmd, const char *archive)
 {
 	uchar_t i = 3;
 
-	if (getutil(utils[UTIL_ATOOL]))
+	if (getutil(utils[UTIL_BSDTAR]))
 		i = 0;
-	else if (getutil(utils[UTIL_BSDTAR]))
+	else if (getutil(utils[UTIL_ATOOL]))
 		i = 1;
 	else if (is_suffix(archive, ".zip"))
 		i = 2;
@@ -4642,10 +4642,11 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	char arg[] = "-tvf"; /* options for tar/bsdtar to list files */
 	char *util, *outdir = NULL;
 	bool x_to = FALSE;
+	bool is_bsdtar = getutil(utils[UTIL_BSDTAR]);
 	bool is_atool = getutil(utils[UTIL_ATOOL]);
 
 	if (op == 'x') {
-		outdir = xreadline(is_atool ? "." : xbasename(fpath), messages[MSG_NEW_PATH]);
+		outdir = xreadline((!is_bsdtar && is_atool) ? "." : xbasename(fpath), messages[MSG_NEW_PATH]);
 		if (!outdir || !*outdir) { /* Cancelled */
 			printwait(messages[MSG_CANCEL], NULL);
 			return FALSE;
@@ -4662,14 +4663,14 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 		}
 	}
 
-	if (is_atool) {
-		util = utils[UTIL_ATOOL];
-		arg[1] = op;
-		arg[2] = '\0';
-	} else if (getutil(utils[UTIL_BSDTAR])) {
+	if (is_bsdtar) {
 		util = utils[UTIL_BSDTAR];
 		if (op == 'x')
 			arg[1] = op;
+	} else if (is_atool) {
+		util = utils[UTIL_ATOOL];
+		arg[1] = op;
+		arg[2] = '\0';
 	} else if (is_suffix(fpath, ".zip")) {
 		util = utils[UTIL_UNZIP];
 		arg[1] = (op == 'l') ? 'v' /* verbose listing */ : '\0';
