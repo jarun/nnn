@@ -44,7 +44,7 @@ jobs:
           CC: gcc
         run: |
           export PATCH_OPTS="--merge"
-          patches=("O_GITSTATUS" "O_NAMEFIRST" "O_RESTOREPREVIEW")
+          patches=("O_BOOKMARKNAV" "O_GITSTATUS" "O_NAMEFIRST" "O_RESTOREPREVIEW")
           z=$(( 1 << ${#patches[@]} ))
           for ((n=1; n < z; ++n)); do
             for ((i=0; i < ${#patches[@]}; ++i)); do

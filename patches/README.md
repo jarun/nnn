@@ -8,6 +8,7 @@ The patches will be adapted on each release when necessary (v4.1 onwards). Each 
 
 | Patch (a-z) | Description | Make var |
 | --- | --- | --- |
+| bookmarknav | Enter/leave type-to-nav mode when entering/leaving bookmark and plugin dir. | `O_GITSTATUS` |
 | gitstatus | Add git status column to the detail view. Provides command line flag `-G` to show column in normal mode. | `O_GITSTATUS` |
 | namefirst | Print filenames first in the detail view. Print user/group columns when a directory contains different users/groups. | `O_NAMEFIRST` |
 | restorepreview | Add pipe to close and restore [`preview-tui`](https://github.com/jarun/nnn/blob/master/plugins/preview-tui) for internal undetached edits (<kbd>e</kbd> key)| `O_RESTOREPREVIEW` |

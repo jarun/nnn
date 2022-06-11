@@ -31,6 +31,7 @@ O_MATCHFLTR := 0  # allow filters without matches
 O_NOSORT := 0  # disable sorting entries on dir load
 
 # User patches
+O_BOOKMARKNAV := 0 # enter/leave type-to-nav in bookmark/plugin dir
 O_GITSTATUS := 0 # add git status to detail view
 O_NAMEFIRST := 0 # print file name first, add uid and guid to detail view
 O_RESTOREPREVIEW := 0 # add preview pipe to close and restore preview pane
@@ -163,6 +164,7 @@ DESKTOPFILE = misc/desktop/nnn.desktop
 LOGOSVG = misc/logo/logo.svg
 LOGO64X64 = misc/logo/logo-64x64.png
 
+BOOKMARKNAV = patches/bookmarknav
 GITSTATUS = patches/gitstatus
 NAMEFIRST = patches/namefirst
 RESTOREPREVIEW = patches/restorepreview
@@ -322,6 +324,9 @@ endif
 ifeq ($(strip $(O_RESTOREPREVIEW)),1)
 	patch --forward $(PATCH_OPTS) --strip=1 --input=$(RESTOREPREVIEW)/mainline.diff
 endif
+ifeq ($(strip $(O_BOOKMARKNAV)),1)
+	patch --forward $(PATCH_OPTS) --strip=1 --input=$(BOOKMARKNAV)/mainline.diff
+endif
 
 postpatch:
 ifeq ($(strip $(O_NAMEFIRST)),1)
@@ -334,6 +339,9 @@ else ifeq ($(strip $(O_GITSTATUS)),1)
 endif
 ifeq ($(strip $(O_RESTOREPREVIEW)),1)
 	patch --reverse $(PATCH_OPTS) --strip=1 --input=$(RESTOREPREVIEW)/mainline.diff
+endif
+ifeq ($(strip $(O_BOOKMARKNAV)),1)
+	patch --reverse $(PATCH_OPTS) --strip=1 --input=$(BOOKMARKNAV)/mainline.diff
 endif
 
 skip: ;
