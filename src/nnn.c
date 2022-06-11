@@ -4643,10 +4643,10 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	char *util, *outdir = NULL;
 	bool x_to = FALSE;
 	bool is_bsdtar = getutil(utils[UTIL_BSDTAR]);
-	bool is_atool = getutil(utils[UTIL_ATOOL]);
+	bool is_atool = !is_bsdtar && getutil(utils[UTIL_ATOOL]);
 
 	if (op == 'x') {
-		outdir = xreadline((!is_bsdtar && is_atool) ? "." : xbasename(fpath), messages[MSG_NEW_PATH]);
+		outdir = xreadline(is_atool ? "." : xbasename(fpath), messages[MSG_NEW_PATH]);
 		if (!outdir || !*outdir) { /* Cancelled */
 			printwait(messages[MSG_CANCEL], NULL);
 			return FALSE;
