@@ -39,8 +39,11 @@ struct icon_pair {
 #define ICON_SIZE 1
 #endif
 
-#define COLOR_VIDEO        93  /* Purple */
+/* For color names, refer to: https://www.ditig.com/256-colors-cheat-sheet */
+#define COLOR_VIDEO        190 /* Yellow2 */
+#define COLOR_VIDEO1       45  /* Turquoise2 */
 #define COLOR_AUDIO        220 /* Gold1 */
+#define COLOR_AUDIO1       205 /* HotPink */
 #define COLOR_IMAGE        82  /* Chartreuse2 */
 #define COLOR_DOCS         202 /* OrangeRed1 */
 #define COLOR_ARCHIVE      209 /* Salmon1 */
@@ -188,7 +191,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* F */
 	{"f#",       DEV_FSHARP,           0},
-	{"flac",     FA_FILE_AUDIO_O,      COLOR_AUDIO},
+	{"flac",     FA_FILE_AUDIO_O,      COLOR_AUDIO1},
 	{"flv",      FA_FILE_MOVIE_O,      COLOR_VIDEO},
 	{"fs",       DEV_FSHARP,           0},
 	{"fsi",      DEV_FSHARP,           0},
@@ -248,7 +251,7 @@ static const struct icon_pair icons_ext[] = {
 	{"mkv",      FA_FILE_MOVIE_O,      COLOR_VIDEO},
 	{"mov",      FA_FILE_MOVIE_O,      COLOR_VIDEO},
 	{"mp3",      FA_FILE_AUDIO_O,      COLOR_AUDIO},
-	{"mp4",      FA_FILE_MOVIE_O,      COLOR_VIDEO},
+	{"mp4",      FA_FILE_MOVIE_O,      COLOR_VIDEO1},
 	{"mpeg",     FA_FILE_MOVIE_O,      COLOR_VIDEO},
 	{"mpg",      FA_FILE_MOVIE_O,      COLOR_VIDEO},
 	{"msi",      FA_WINDOWS,           0},
@@ -399,7 +402,7 @@ static const struct icon_pair icons_ext[] = {
 	/* F */
 	{"f#",         ICON_EXT_FSHARP,    COLOR_FSHARP},
 	{"fen",        ICON_EXT_FEN,       0},
-	{"flac",       ICON_EXT_FLAC,      COLOR_AUDIO},
+	{"flac",       ICON_EXT_FLAC,      COLOR_AUDIO1},
 	{"flv",        ICON_EXT_FLV,       COLOR_VIDEO},
 	{"fs",         ICON_EXT_FS,        COLOR_FSHARP},
 	{"fsi",        ICON_EXT_FSI,       COLOR_FSHARP},
@@ -462,7 +465,7 @@ static const struct icon_pair icons_ext[] = {
 	{"mkv",        ICON_EXT_MKV,       COLOR_VIDEO},
 	{"mov",        ICON_EXT_MOV,       COLOR_VIDEO},
 	{"mp3",        ICON_EXT_MP3,       COLOR_AUDIO},
-	{"mp4",        ICON_EXT_MP4,       COLOR_VIDEO},
+	{"mp4",        ICON_EXT_MP4,       COLOR_VIDEO1},
 	{"mpeg",       ICON_EXT_MPEG,      COLOR_VIDEO},
 	{"mpg",        ICON_EXT_MPG,       COLOR_VIDEO},
 	{"msi",        ICON_EXT_MSI,       0},
@@ -611,7 +614,7 @@ static const struct icon_pair icons_ext[] = {
 	{"exe", EMOJI_WINDOWS, 0},
 
 	/* F */
-	{"flac", EMOJI_AUDIO, COLOR_AUDIO},
+	{"flac", EMOJI_AUDIO, COLOR_AUDIO1},
 	{"flv", EMOJI_MOVIE, COLOR_VIDEO},
 
 	/* G */
@@ -672,7 +675,7 @@ static const struct icon_pair icons_ext[] = {
 	{"mom", EMOJI_NOTE, COLOR_DOCS},
 	{"mov", EMOJI_MOVIE, COLOR_VIDEO},
 	{"mp3", EMOJI_AUDIO, COLOR_AUDIO},
-	{"mp4", EMOJI_MOVIE, COLOR_VIDEO},
+	{"mp4", EMOJI_MOVIE, COLOR_VIDEO1},
 	{"mpeg", EMOJI_MOVIE, COLOR_VIDEO},
 	{"mpg", EMOJI_MOVIE, COLOR_VIDEO},
 	{"ms", EMOJI_NOTE, COLOR_DOCS},
