@@ -776,7 +776,7 @@ static const char * const patterns[] = {
 	SED" -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s",
 	SED" 's|^\\([^#/][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
 		"%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
-	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$",
+	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$", /* Basic formats that don't need external tools */
 	SED" -i 's|^%s\\(.*\\)$|%s\\1|' %s",
 	SED" -ze 's|^%s/||' '%s' | xargs -0 %s %s",
 };
