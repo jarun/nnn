@@ -535,24 +535,25 @@ static runstate g_state;
 #define UTIL_OPENER    0
 #define UTIL_ATOOL     1
 #define UTIL_BSDTAR    2
-#define UTIL_UNZIP     3
-#define UTIL_TAR       4
-#define UTIL_LOCKER    5
-#define UTIL_LAUNCH    6
-#define UTIL_SH_EXEC   7
-#define UTIL_BASH      8
-#define UTIL_SSHFS     9
-#define UTIL_RCLONE    10
-#define UTIL_VI        11
-#define UTIL_LESS      12
-#define UTIL_SH        13
-#define UTIL_FZF       14
-#define UTIL_NTFY      15
-#define UTIL_CBCP      16
-#define UTIL_NMV       17
-#define UTIL_TRASH_CLI 18
-#define UTIL_GIO_TRASH 19
-#define UTIL_RM_RF     20
+#define UTIL_UNRAR     3
+#define UTIL_UNZIP     4
+#define UTIL_TAR       5
+#define UTIL_LOCKER    6
+#define UTIL_LAUNCH    7
+#define UTIL_SH_EXEC   8
+#define UTIL_BASH      9
+#define UTIL_SSHFS     10
+#define UTIL_RCLONE    11
+#define UTIL_VI        12
+#define UTIL_LESS      13
+#define UTIL_SH        14
+#define UTIL_FZF       15
+#define UTIL_NTFY      16
+#define UTIL_CBCP      17
+#define UTIL_NMV       18
+#define UTIL_TRASH_CLI 19
+#define UTIL_GIO_TRASH 20
+#define UTIL_RM_RF     21
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -567,6 +568,7 @@ static char * const utils[] = {
 #endif
 	"atool",
 	"bsdtar",
+	"unrar",
 	"unzip",
 	"tar",
 #ifdef __APPLE__
@@ -750,7 +752,7 @@ static char mv[] = "mv -i";
 #endif
 
 /* Archive commands */
-static const char * const archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
+static const char * const archive_cmd[] = {"rar a", "bsdtar -acvf", "atool -a", "zip -r", "tar -acvf"};
 
 /* Tokens used for path creation */
 #define TOK_BM  0
@@ -2718,14 +2720,19 @@ finish:
 
 static void get_archive_cmd(char *cmd, const char *archive)
 {
-	uchar_t i = 3;
+	uchar_t i = 4;
 
-	if (getutil(utils[UTIL_ATOOL]))
+	bool is_bsdtar = getutil(utils[UTIL_BSDTAR]);
+	bool is_atool = !is_bsdtar && getutil(utils[UTIL_ATOOL]);
+
+	if (!is_atool && is_suffix(archive, ".rar"))
 		i = 0;
-	else if (getutil(utils[UTIL_BSDTAR]))
+	else if (is_bsdtar)
 		i = 1;
-	else if (is_suffix(archive, ".zip"))
+	else if (is_atool)
 		i = 2;
+	else if (is_suffix(archive, ".zip"))
+		i = 3;
 	// else tar
 
 	xstrsncpy(cmd, archive_cmd[i], ARCHIVE_CMD_LEN);
@@ -4642,19 +4649,23 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	char arg[] = "-tvf"; /* options for tar/bsdtar to list files */
 	char *util, *outdir = NULL;
 	bool x_to = FALSE;
-	bool is_atool = getutil(utils[UTIL_ATOOL]);
+	bool is_bsdtar = getutil(utils[UTIL_BSDTAR]);
+	bool is_atool = !is_bsdtar && getutil(utils[UTIL_ATOOL]);
+
+	bool ret = FALSE;
 
 	if (op == 'x') {
+		/* atool has smart subdirectory */
 		outdir = xreadline(is_atool ? "." : xbasename(fpath), messages[MSG_NEW_PATH]);
 		if (!outdir || !*outdir) { /* Cancelled */
 			printwait(messages[MSG_CANCEL], NULL);
-			return FALSE;
+			goto END;
 		}
 		/* Do not create smart context for current dir */
 		if (!(*outdir == '.' && outdir[1] == '\0')) {
 			if (!xmktree(outdir, TRUE) || (chdir(outdir) == -1)) {
 				printwarn(NULL);
-				return FALSE;
+				goto END;
 			}
 			/* Copy the new dir path to open it in smart context */
 			outdir = getcwd(NULL, 0);
@@ -4662,17 +4673,22 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 		}
 	}
 
-	if (is_atool) {
-		util = utils[UTIL_ATOOL];
-		arg[1] = op;
-		arg[2] = '\0';
-	} else if (getutil(utils[UTIL_BSDTAR])) {
+	/* atool is preferable to unrar for rar */
+	if (!is_atool && is_suffix(fpath, ".rar")) {
+		util = utils[UTIL_UNRAR];
+		arg[0] = (op == 'x') ? 'x' : 'v';
+		arg[1] = '\0';
+	} else if (is_bsdtar) {
 		util = utils[UTIL_BSDTAR];
 		if (op == 'x')
 			arg[1] = op;
+	} else if (is_atool) {
+		util = utils[UTIL_ATOOL];
+		arg[1] = op;
+		arg[2] = '\0';
 	} else if (is_suffix(fpath, ".zip")) {
 		util = utils[UTIL_UNZIP];
-		arg[1] = (op == 'l') ? 'v' /* verbose listing */ : '\0';
+		arg[1] = (op == 'x') ? '\0' : 'v';
 		arg[2] = '\0';
 	} else {
 		util = utils[UTIL_TAR];
@@ -4688,15 +4704,16 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	if (x_to) {
 		if (chdir(xdirname(fpath)) == -1) {
 			printwarn(NULL);
-			free(outdir);
-			return FALSE;
+			goto END;
 		}
 		xstrsncpy(fpath, outdir, PATH_MAX);
-		free(outdir);
 	} else if (op == 'x')
 		fpath[0] = '\0';
 
-	return TRUE;
+	ret = TRUE;
+END:
+	free(outdir);
+	return ret;
 }
 
 static char *visit_parent(char *path, char *newpath, int *presel)
