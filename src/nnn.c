@@ -7143,7 +7143,7 @@ nochange:
 				}
 
 				if (strcmp(path, newpath) == 0) {
-					if (bookmark)
+					if (bookmark || !*lastdir)
 						break;
 
 					dir = lastdir; /* Go to last dir on bookmark key repeat */
