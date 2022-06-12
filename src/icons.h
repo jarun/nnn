@@ -40,8 +40,8 @@ struct icon_pair {
 #endif
 
 /* For color names, refer to: https://www.ditig.com/256-colors-cheat-sheet */
-#define COLOR_VIDEO        190 /* Yellow2 */
-#define COLOR_VIDEO1       45  /* Turquoise2 */
+#define COLOR_VIDEO        45  /* Turquoise2 */
+#define COLOR_VIDEO1       226 /* Yellow1 */
 #define COLOR_AUDIO        220 /* Gold1 */
 #define COLOR_AUDIO1       205 /* HotPink */
 #define COLOR_IMAGE        82  /* Chartreuse2 */
