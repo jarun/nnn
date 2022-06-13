@@ -7119,6 +7119,7 @@ nochange:
 				goto nochange;
 			}
 
+			g_state.selbm = 0;
 			if (strcmp(path, dir) == 0) {
 				if (dir == ipath) {
 					if (cfg.filtermode)
