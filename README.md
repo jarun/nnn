@@ -58,7 +58,8 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
   - Disk usage analyzer (block/apparent)
   - File picker, (neo)vim plugin
 - Navigation
-  - *Type-to-nav* mode with automatic matching dir entry
+  - Filter with automatic dir entry on unique match
+  - *Type-to-nav* (turbo navigation/always filter) mode
   - Contexts (_aka_ tabs/workspaces) with custom colors
   - Sessions, bookmarks, mark and visit a dir
   - Remote mounts (needs `sshfs`, `rclone`)

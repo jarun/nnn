@@ -10,7 +10,7 @@ setopt localoptions noshwordsplit noksharrays
 local -a args
 args=(
     '(-a)-a[auto-create NNN_FIFO]'
-    '(-A)-A[disable dir auto-select]'
+    '(-A)-A[disable dir auto-enter]'
     '(-b)-b[bookmark key to open]:key char'
     '(-c)-c[cli-only opener]'
     '(-C)-C[color by context]'
