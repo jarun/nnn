@@ -7143,10 +7143,10 @@ nochange:
 					goto nochange;
 				}
 
-				if (strcmp(path, newpath) == 0)
-					break;
 				if (g_state.selbm == 1) /* Allow filtering in bookmarks directory */
 					presel = FILTER;
+				if (strcmp(path, newpath) == 0)
+					break;
 			}
 
 			/* In list mode, retain the last file name to highlight it, if possible */
@@ -8163,7 +8163,7 @@ static void usage(void)
 #ifndef NOFIFO
 		" -a      auto NNN_FIFO\n"
 #endif
-		" -A      disable dir auto-enter\n"
+		" -A      no dir auto-enter during filter\n"
 		" -b key  open bookmark key (trumps -s/S)\n"
 		" -c      cli-only NNN_OPENER (trumps -e)\n"
 		" -C      8-color scheme\n"
