@@ -7144,13 +7144,8 @@ nochange:
 					goto nochange;
 				}
 
-				if (strcmp(path, newpath) == 0) {
-					if (bookmark || !*lastdir)
-						break;
-
-					dir = lastdir; /* Go to last dir on bookmark key repeat */
-					xstrsncpy(newpath, dir, PATH_MAX);
-				}
+				if (strcmp(path, newpath) == 0)
+					break;
 			}
 
 			/* In list mode, retain the last file name to highlight it, if possible */
