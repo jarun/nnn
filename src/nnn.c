@@ -3446,8 +3446,7 @@ static int filterentries(char *path, char *lastname)
 		}
 
 		/* If the only match is a dir, auto-enter and cd into it */
-		if (ndents == 1 && cfg.filtermode
-		    && cfg.autoenter && (pdents[0].flags & DIR_OR_DIRLNK)) {
+		if ((ndents == 1) && cfg.autoenter && (pdents[0].flags & DIR_OR_DIRLNK)) {
 			*ch = KEY_ENTER;
 			cur = 0;
 			goto end;
@@ -7146,6 +7145,8 @@ nochange:
 
 				if (strcmp(path, newpath) == 0)
 					break;
+				if (g_state.selbm == 1) /* Allow filtering in bookmarks directory */
+					presel = FILTER;
 			}
 
 			/* In list mode, retain the last file name to highlight it, if possible */
@@ -7784,6 +7785,8 @@ nochange:
 			}
 			setdirwatch();
 			clearfilter();
+			if (g_state.runplugin == 1) /* Allow filtering in plugins directory */
+				presel = FILTER;
 			goto begin;
 		case SEL_SHELL: // fallthrough
 		case SEL_LAUNCH: // fallthrough
