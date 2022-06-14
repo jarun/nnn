@@ -4644,17 +4644,19 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	bool is_bsdtar = getutil(utils[UTIL_BSDTAR]);
 	bool is_atool = !is_bsdtar && getutil(utils[UTIL_ATOOL]);
 
+	bool ret = FALSE;
+
 	if (op == 'x') {
 		outdir = xreadline(is_atool ? "." : xbasename(fpath), messages[MSG_NEW_PATH]);
 		if (!outdir || !*outdir) { /* Cancelled */
 			printwait(messages[MSG_CANCEL], NULL);
-			return FALSE;
+			goto END;
 		}
 		/* Do not create smart context for current dir */
 		if (!(*outdir == '.' && outdir[1] == '\0')) {
 			if (!xmktree(outdir, TRUE) || (chdir(outdir) == -1)) {
 				printwarn(NULL);
-				return FALSE;
+				goto END;
 			}
 			/* Copy the new dir path to open it in smart context */
 			outdir = getcwd(NULL, 0);
@@ -4688,15 +4690,16 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	if (x_to) {
 		if (chdir(xdirname(fpath)) == -1) {
 			printwarn(NULL);
-			free(outdir);
-			return FALSE;
+			goto END;
 		}
 		xstrsncpy(fpath, outdir, PATH_MAX);
-		free(outdir);
 	} else if (op == 'x')
 		fpath[0] = '\0';
 
-	return TRUE;
+	ret = TRUE;
+END:
+	free(outdir);
+	return ret;
 }
 
 static char *visit_parent(char *path, char *newpath, int *presel)
