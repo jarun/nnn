@@ -350,7 +350,7 @@ typedef struct {
 /* Non-persistent program-internal states (alphabeical order) */
 typedef struct {
 	uint_t autofifo   : 1;  /* Auto-create NNN_FIFO */
-	uint_t autonext   : 1;  /* Auto-jump on open */
+	uint_t autonext   : 1;  /* Auto-advance on file open */
 	uint_t dircolor   : 1;  /* Current status of dir color */
 	uint_t dirctx     : 1;  /* Show dirs in context color */
 	uint_t duinit     : 1;  /* Initialize disk usage */
@@ -369,7 +369,7 @@ typedef struct {
 	uint_t runplugin  : 1;  /* Choose plugin mode */
 	uint_t selbm      : 1;  /* Select a bookmark from bookmarks directory */
 	uint_t selmode    : 1;  /* Set when selecting files */
-	uint_t stayonsel  : 1;  /* Disable auto-jump on select */
+	uint_t stayonsel  : 1;  /* Disable auto-advance on selection */
 	uint_t trash      : 2;  /* Trash method 0: rm -rf, 1: trash-cli, 2: gio trash */
 	uint_t uidgid     : 1;  /* Show owner and group info */
 	uint_t reserved   : 6;  /* Adjust when adding/removing a field */
@@ -5039,7 +5039,7 @@ static void show_help(const char *path)
 	       "9Lt h  Parent%-12c~ ` @ -  ~, /, start, prev\n"
 	   "5Ret Rt l  Open%-20c'  First file/match\n"
 	       "9g ^A  Top%-21c.  Toggle hidden\n"
-	       "9G ^E  End%-20c^J  Toggle auto-jump on open\n"
+	       "9G ^E  End%-20c^J  Toggle auto-advance on open\n"
 	      "8B (,)  Book(mark)%-11cb ^/  Select bookmark\n"
 		"a1-4  Context%-11c(Sh)Tab  Cycle/new context\n"
 	    "62Esc ^Q  Quit%-20cq  Quit context\n"
@@ -8180,7 +8180,7 @@ static void usage(void)
 		" -g      regex filters\n"
 		" -H      show hidden files\n"
 		" -i      show current file info\n"
-		" -J      no auto-jump on selection\n"
+		" -J      no auto-advance on selection\n"
 		" -K      detect key collision\n"
 		" -l val  set scroll lines\n"
 		" -n      type-to-nav mode\n"

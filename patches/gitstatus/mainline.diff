@@ -210,7 +210,7 @@ index 508ee915..77d56d63 100644
 +		" -G      always show git status\n"
  		" -H      show hidden files\n"
  		" -i      show current file info\n"
- 		" -J      no auto-jump on selection\n"
+ 		" -J      no auto-advance on selection\n"
 @@ -8282,6 +8398,7 @@ static void cleanup(void)
  		fflush(stdout);
  	}

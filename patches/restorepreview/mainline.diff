@@ -11,7 +11,7 @@ index 6b0c1dc5..2aac557b 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
 @@ -372,7 +372,8 @@ typedef struct {
- 	uint_t stayonsel  : 1;  /* Disable auto-jump on select */
+ 	uint_t stayonsel  : 1;  /* Disable auto-advance on selection */
  	uint_t trash      : 2;  /* Trash method 0: rm -rf, 1: trash-cli, 2: gio trash */
  	uint_t uidgid     : 1;  /* Show owner and group info */
 -	uint_t reserved   : 6;  /* Adjust when adding/removing a field */

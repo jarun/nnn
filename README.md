@@ -65,7 +65,7 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
   - Remote mounts (needs `sshfs`, `rclone`)
   - Familiar shortcuts (arrows, <kbd>~</kbd>, <kbd>-</kbd>, <kbd>@</kbd>), quick look-up
   - `cd` on quit (*easy* shell integration)
-  - Jump to next file on file open and selection
+  - Proceed to next file on file open and selection
 - Search
   - Instant filtering with *search-as-you-type*
   - Regex (POSIX/PCRE) and string (default) filters
