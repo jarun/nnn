@@ -354,7 +354,7 @@ fi
 ## Contributing plugins
 
 1. Add informative sections like _Description_, _Notes_, _Dependencies_, _Shell_, _Author_ etc. in the plugin.
-2. Add an entry in the table above.
+2. Add an entry in the table above. Note that the list is alphabetically ordered by plugin name.
 3. Keep non-portable commands (like `notify-send`) commented so users from any other OS/DE aren't surprised.
 4. The plugin file should be executable.
 5. If your plugin stores data, use `${XDG_CACHE_HOME:-$HOME/.cache}/nnn`. Document it _in-file_.
