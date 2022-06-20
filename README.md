@@ -156,7 +156,7 @@ Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creat
 - [KlzXS](https://github.com/KlzXS)
 - [Léo Villeveygoux](https://github.com/leovilok)
 - [Luuk van Baal](https://github.com/luukvbaal)
-- [N-R-K](https://github.com/N-R-K)
+- [NRK](https://codeberg.org/NRK)
 - [Sijmen J. Mulder](https://github.com/sjmulder)
 - and other contributors
 

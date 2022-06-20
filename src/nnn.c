@@ -6913,13 +6913,11 @@ nochange:
 			}
 
 			pent = &pdents[cur];
-			if (g_state.selbm) {
-				S_ISLNK(pent->mode)
-					? (realpath(pent->name, newpath) && xstrsncpy(path, lastdir, PATH_MAX))
-					: mkpath(path, pent->name, newpath);
-				g_state.selbm = 0;
-			} else
+			if (!g_state.selbm || !(S_ISLNK(pent->mode) &&
+			                        realpath(pent->name, newpath) &&
+			                        xstrsncpy(path, lastdir, PATH_MAX)))
 				mkpath(path, pent->name, newpath);
+			g_state.selbm = 0;
 			DPRINTF_S(newpath);
 
 			/* Visit directory */
