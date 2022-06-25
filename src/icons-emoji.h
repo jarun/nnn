@@ -12,7 +12,7 @@
 #define MD_ARROW_DOWNWARD  "⬇"
 
 #define EMOJI_ARCHIVE "📦"
-#define EMOJI_AUDIO "🎵"
+#define EMOJI_AUDIO "🎧"
 #define EMOJI_BINARY "📓"
 #define EMOJI_BRIEFCASE "💼"
 #define EMOJI_C "📑"
@@ -39,7 +39,7 @@
 #define EMOJI_LUA "🌘"
 #define EMOJI_MAKE "🛠 "
 #define EMOJI_MANUAL "❓"
-#define EMOJI_MOVIE "🎬"
+#define EMOJI_MOVIE "🎞 "
 #define EMOJI_MUSIC EMOJI_AUDIO
 #define EMOJI_NOTE "📝"
 #define EMOJI_PATCH "🩹"
