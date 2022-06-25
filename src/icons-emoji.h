@@ -15,7 +15,7 @@
 #define EMOJI_AUDIO "🎧"
 #define EMOJI_BINARY "📓"
 #define EMOJI_BRIEFCASE "💼"
-#define EMOJI_C "📑"
+#define EMOJI_C "🇨 "
 #define EMOJI_CHANGELOG "🔺"
 #define EMOJI_CONF "🔧"
 #define EMOJI_CPP EMOJI_C
