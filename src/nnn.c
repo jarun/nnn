@@ -5926,7 +5926,7 @@ static void notify_fifo(bool force)
 
 	static struct entry lastentry;
 
-	if (!force && !memcmp(&lastentry, &pdents[cur], sizeof(struct entry)))
+	if (!force && !memcmp(&lastentry, &pdents[cur], sizeof(struct entry))) // NOLINT
 		return;
 
 	lastentry = pdents[cur];
