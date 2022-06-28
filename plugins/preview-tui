@@ -411,7 +411,7 @@ image_preview() {
     clear
     if [ "$TERMINAL" = "kitty" ]; then
         # Kitty terminal users can use the native image preview method
-        kitty +kitten icat --silent --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
+        kitty +kitten icat --silent --scale-up --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
     elif exists ueberzug; then
         ueberzug_layer "$1" "$2" "$3" && return
     elif exists catimg; then
