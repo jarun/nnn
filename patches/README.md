@@ -16,7 +16,11 @@ To apply a patch, use the corresponding make variable, e.g.:
 
     make O_NAMEFIRST=1
 
+When contributing/adding a new patch, make sure to add the make variable to the patches array in `./misc/test/check-patches.sh` as well so that patch failures can be easily tested.
+
 ## Resolving patch conflicts
+
+Patch conflicts can be checked locally by running `make checkpatches` or by running `./patches/check-patches.sh` manually.
 
 Whenever patch conflicts occur on the latest master, pull requests resolving them are welcome. Let's say a conflict occurs in the `restorepreview` patch. The best way to resolve this conflict would be something along the lines of:
 

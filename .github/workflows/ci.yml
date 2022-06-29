@@ -43,13 +43,4 @@ jobs:
         env:
           CC: gcc
         run: |
-          export PATCH_OPTS="--merge"
-          patches=("O_GITSTATUS" "O_NAMEFIRST" "O_RESTOREPREVIEW")
-          z=$(( 1 << ${#patches[@]} ))
-          for ((n=1; n < z; ++n)); do
-            for ((i=0; i < ${#patches[@]}; ++i)); do
-              printf "%s=%d " "${patches[$i]}" "$(( (n & (1 << i)) != 0 ))"
-            done | tee "tmp" ; echo
-            make clean -s
-            xargs make <"tmp"
-          done
+          make checkpatches
