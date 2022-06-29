@@ -99,6 +99,7 @@ FIFOPID="$TMPDIR/nnn-preview-tui-fifopid.$NNN_PARENT"
 PREVIEWPID="$TMPDIR/nnn-preview-tui-pagerpid.$NNN_PARENT"
 CURSEL="$TMPDIR/nnn-preview-tui-selection.$NNN_PARENT"
 FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NNN_PARENT"
+POSOFFSET="$TMPDIR/nnn-preview-tui-posoffset"
 
 if [ "$DEBUG_LOG" -eq 0 ]; then
     DEBUG_LOGFILE="/dev/null"
@@ -131,7 +132,7 @@ start_preview() {
         tmux) # tmux splits are inverted
             if [ "$SPLIT" = "v" ]; then DSPLIT="h"; else DSPLIT="v"; fi
             tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e TTY="$TTY" \
-                -e "CURSEL=$CURSEL" -e "TMPDIR=$TMPDIR" -e "FIFOPID=$FIFOPID" \
+                -e "CURSEL=$CURSEL" -e "TMPDIR=$TMPDIR" -e "FIFOPID=$FIFOPID" -e "POSOFFSET=$POSOFFSET" \
                 -e "BAT_STYLE=$BAT_STYLE" -e "BAT_THEME=$BAT_THEME" -e "PREVIEWPID=$PREVIEWPID" \
                 -e "PAGER=$PAGER" -e "ICONLOOKUP=$ICONLOOKUP" -e "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" \
                 -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
@@ -425,7 +426,9 @@ image_preview() {
 } 2>"$DEBUG_LOGFILE"
 
 ueberzug_layer() {
-    printf '{"action": "add", "identifier": "nnn_ueberzug", "x": 0, "y": 0, "width": "%d", "height": "%d", "scaler": "fit_contain", "path": "%s"}\n' "$1" "$2" "$3" > "$FIFO_UEBERZUG"
+    read -r x y < "$POSOFFSET"
+    printf '{"action": "add", "identifier": "nnn_ueberzug", "x": %d, "y": %d, "width": "%d", "height": "%d", "scaler": "fit_contain", "path": "%s"}\n'\
+        "${x:-0}" "${y:-0}" "$1" "$2" "$3" > "$FIFO_UEBERZUG"
 }
 
 ueberzug_remove() {
@@ -467,7 +470,7 @@ if [ "$PREVIEW_MODE" ]; then
     printf "%s" "$!" > "$FIFOPID"
     printf "%s" "$PWD/$1" > "$CURSEL"
     trap 'winch_handler; wait' WINCH
-    trap 'rm "$PREVIEWPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" 2>/dev/null' INT HUP EXIT
+    trap 'rm "$PREVIEWPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" "$POSOFFSET" 2>/dev/null' INT HUP EXIT
     wait "$!" 2>/dev/null
     exit 0
 else
