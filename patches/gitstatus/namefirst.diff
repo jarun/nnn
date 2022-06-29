@@ -70,14 +70,6 @@ index ee1f5beb..91aab231 100644
 
  /* Configuration, contexts */
  static settings cfg = {
-@@ -429,6 +460,7 @@ static settings cfg = {
- 	0, /* cliopener */
- 	0, /* waitedit */
- 	1, /* rollover */
-+	0, /* normalgit */
- };
-
- static context g_ctx[CTX_MAX] __attribute__ ((aligned));
 @@ -3846,6 +3878,56 @@ static int get_kv_key(kv *kvarr, char *val, uchar_t max, uchar_t id)
  	return -1;
  }

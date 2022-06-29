@@ -314,7 +314,6 @@ typedef struct {
 
 /*
  * Settings
- * NOTE: update default values if changing order
  */
 typedef struct {
 	uint_t filtermode : 1;  /* Set to enter filter mode */
@@ -399,33 +398,10 @@ typedef struct {
 
 /* Configuration, contexts */
 static settings cfg = {
-	0, /* filtermode */
-	0, /* timeorder */
-	0, /* sizeorder */
-	0, /* apparentsz */
-	0, /* blkorder */
-	0, /* extnorder */
-	0, /* showhidden */
-	0, /* reserved0 */
-	0, /* showdetail */
-	1, /* ctxactive */
-	0, /* reverse */
-	0, /* version */
-	0, /* reserved1 */
-	0, /* curctx */
-	0, /* prefersel */
-	0, /* fileinfo */
-	0, /* nonavopen */
-	1, /* autoenter */
-	0, /* reserved2 */
-	0, /* useeditor */
-	0, /* reserved3 */
-	0, /* regex */
-	0, /* x11 */
-	2, /* timetype (T_MOD) */
-	0, /* cliopener */
-	0, /* waitedit */
-	1, /* rollover */
+	.ctxactive = 1,
+	.autoenter = 1,
+	.timetype = 2, /* T_MOD */
+	.rollover = 1,
 };
 
 static context g_ctx[CTX_MAX] __attribute__ ((aligned));
@@ -1033,7 +1009,7 @@ static inline bool is_prefix(const char *restrict str, const char *restrict pref
 
 /*
  * The poor man's implementation of memrchr(3).
- * We are only looking for '/' in this program.
+ * We are only looking for '/' and '.' in this program.
  * And we are NOT expecting a '/' at the end.
  * Ideally 0 < n <= xstrlen(s).
  */
@@ -3097,9 +3073,8 @@ try_quit:
 #ifdef LINUX_INOTIFY
 		if (!cfg.blkorder && inotify_wd >= 0 && (idle & 1)) {
 			struct inotify_event *event;
-			char inotify_buf[EVENT_BUF_LEN];
+			char inotify_buf[EVENT_BUF_LEN] = {0};
 
-			memset((void *)inotify_buf, 0x0, EVENT_BUF_LEN);
 			i = read(inotify_fd, inotify_buf, EVENT_BUF_LEN);
 			if (i > 0) {
 				for (char *ptr = inotify_buf;
@@ -3121,9 +3096,8 @@ try_quit:
 		}
 #elif defined(BSD_KQUEUE)
 		if (!cfg.blkorder && event_fd >= 0 && (idle & 1)) {
-			struct kevent event_data[NUM_EVENT_SLOTS];
+			struct kevent event_data[NUM_EVENT_SLOTS] = {0};
 
-			memset((void *)event_data, 0x0, sizeof(struct kevent) * NUM_EVENT_SLOTS);
 			if (kevent(kq, events_to_monitor, NUM_EVENT_SLOTS,
 				   event_data, NUM_EVENT_FDS, &gtimeout) > 0)
 				c = handle_event();
@@ -4260,12 +4234,10 @@ static void savecurctx(char *path, char *curname, int nextctx)
 static void save_session(const char *sname, int *presel)
 {
 	int fd, i;
-	session_header_t header;
+	session_header_t header = {0};
 	bool status = FALSE;
 	char ssnpath[PATH_MAX];
 	char spath[PATH_MAX];
-
-	memset(&header, 0, sizeof(session_header_t));
 
 	header.ver = SESSIONS_VERSION;
 
@@ -6613,7 +6585,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 
 #ifndef NOMOUSE
 	MEVENT event = {0};
-	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0} };
+	struct timespec mousetimings[2] = {0};
 	int mousedent[2] = {-1, -1};
 	bool currentmouse = 1, rightclicksel = 0;
 #endif
