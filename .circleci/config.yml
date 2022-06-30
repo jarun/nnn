@@ -42,6 +42,8 @@ jobs:
             ls -l nnn
             make clean
             echo
+            # NOTE: `-Wmissing-braces` is buggy on clang versions below 9
+            export CFLAGS="-Werror -Wno-missing-braces"
             echo "########## clang-6 ##########"
             CC=clang-6.0 make strip
             ls -l nnn
@@ -62,6 +64,8 @@ jobs:
             ls -l nnn
             make clean
             echo
+            # NOTE: turn `-Wmissing-braces` back on, it's fixed on these versions
+            export CFLAGS=-Werror
             echo "########## clang-10 ##########"
             CC=clang-10 make strip
             ls -l nnn
