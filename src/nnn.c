@@ -6585,7 +6585,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 
 #ifndef NOMOUSE
 	MEVENT event = {0};
-	struct timespec mousetimings[2] = {0};
+	struct timespec mousetimings[2] = {{.tv_sec = 0, .tv_nsec = 0}, {.tv_sec = 0, .tv_nsec = 0}};
 	int mousedent[2] = {-1, -1};
 	bool currentmouse = 1, rightclicksel = 0;
 #endif
