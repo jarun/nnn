@@ -13,7 +13,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 
 | Plugin (a-z) | Description [Clears selection<sup>1</sup>] | Lang | Dependencies |
 | --- | --- | --- | --- |
-| [autojump](autojump) | Navigate to dir/path | sh | [jump](https://github.com/gsamokovarov/jump)/autojump/<br>zoxide/z (needs fzf) |
+| [autojump](autojump) | Navigate to dir/path | sh | [jump](https://github.com/gsamokovarov/jump)/autojump/<br>zoxide/z/[z.lua](https://github.com/skywind3000/z.lua) |
 | [boom](boom) | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs, mktemp |
 | [cdpath](cdpath) | `cd` to the directory from `CDPATH` | sh | fzf |

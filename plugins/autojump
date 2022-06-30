@@ -8,8 +8,11 @@
 #   - OR zoxide - https://github.com/ajeetdsouza/zoxide
 #   - OR z - https://github.com/rupa/z (z requires fzf)
 #   - OR z (fish) - https://github.com/jethrokuan/z (z requires fzf)
+#   - OR z.lua - https://github.com/skywind3000/z.lua (z.lua can enhanced with fzf)
 #
 # Note: The dependencies STORE NAVIGATION PATTERNS
+#
+# to make z.lua work, you need to set $NNN_ZLUA to the path of script z.lua
 #
 # Shell: POSIX compliant
 # Authors: Marty Buchaus, Dave Snider, Tim Adler, Nick Waywood
@@ -40,6 +43,16 @@ elif type zoxide >/dev/null 2>&1; then
     	read -r dir
     	odir="$(zoxide query -- "$dir")"
     	printf "%s" "0c$odir" > "$NNN_PIPE"
+    fi
+elif type lua >/dev/null 2>&1 && [ -n "$NNN_ZLUA" ]; then
+    printf "jump to : "
+    read -r line
+    if type fzf >/dev/null 2>&1; then
+        odir="$(lua "$NNN_ZLUA" -l "$line" | fzf --nth 2.. --reverse --inline-info --tac +s -e --height 35%)"
+        printf "%s" "0c$(echo "$odir" | awk '{print $2}')" > "$NNN_PIPE"
+    else
+        odir="$(lua "$NNN_ZLUA" -e "$line")"
+        printf "%s" "0c$odir" > "$NNN_PIPE"
     fi
 else
     # rupa/z uses $_Z_DATA, jethrokuan/z (=port of z for fish) uses $Z_DATA
