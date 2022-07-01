@@ -160,4 +160,4 @@ Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creat
 - [Sijmen J. Mulder](https://github.com/sjmulder)
 - and other contributors
 
-Visit the [ToDo list](https://github.com/jarun/nnn/issues/1348) to contribute or see the features in progress.
+Visit the [ToDo list](https://github.com/jarun/nnn/issues/1416) to contribute or see the features in progress.
