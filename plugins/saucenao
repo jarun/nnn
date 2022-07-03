@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+# Description: Send hovered file to saucenao, scrap links to images and put them to file
+#
+# Shell: POSIX compliant
+# Author: gospodin 
+
+printf "$1" | grep '.jpg$\|.jpeg$\|.png$\|.webp$' > /dev/null || exit 
+
+curl -s -F "file=@$1" https://saucenao.com/search.php | grep 'div class="result"' | tr '"' '\n' | grep 'https' | 
+grep -v 'saucenao.com' |
+#remove links to author profiles, delete this line if you want to keep them
+grep -v 'www.pixiv.net/member.php\|twitter.com/i/user\|nijie.info/members.php\|www.deviantart.com\|kemono.party/$\|www.fakku.net/artists' | 
+sort -u > $1_sauce.txt
