@@ -48,6 +48,7 @@ struct icon_pair {
 #define COLOR_DOCS         202 /* OrangeRed1 */
 #define COLOR_ARCHIVE      209 /* Salmon1 */
 #define COLOR_C            81  /* SteelBlue1 */
+#define COLOR_ELIXIR       56  /* Purple3 */
 #define COLOR_JAVA         32  /* DeepSkyBlue3 */
 #define COLOR_JAVASCRIPT   47  /* SpringGreen2 */
 #define COLOR_REACT        39  /* DeepSkyBlue1 */
@@ -187,7 +188,10 @@ static const struct icon_pair icons_ext[] = {
 	{"ejs",      FA_FILE_CODE_O,       0},
 	{"elf",      FA_LINUX,             0},
 	{"epub",     FA_FILE_PDF_O,        COLOR_DOCS},
+  {"eex",      MFIZZ_ELIXIR,         COLOR_ELIXIR},
+  {"ex",       MFIZZ_ELIXIR,         COLOR_ELIXIR},
 	{"exe",      FA_WINDOWS,           0},
+  {"exs",      MFIZZ_ELIXIR,         COLOR_ELIXIR},
 
 	/* F */
 	{"f#",       DEV_FSHARP,           0},
@@ -207,6 +211,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* H */
 	{"h",        MFIZZ_C,              0},
+  {"heex",     MFIZZ_ELIXIR,         COLOR_ELIXIR},
 	{"hh",       MFIZZ_CPLUSPLUS,      0},
 	{"htaccess", FA_COGS,              0},
 	{"htpasswd", FA_COGS,              0},
@@ -394,10 +399,13 @@ static const struct icon_pair icons_ext[] = {
 	{"docx",       ICON_EXT_DOCX,      COLOR_DOCUMENT},
 
 	 /* E */
+  {"eex",        ICON_EXT_ELIXIR,    COLOR_ELIXIR},
 	{"ejs",        ICON_EXT_EJS,       COLOR_JAVASCRIPT},
 	{"elf",        ICON_EXT_ELF,       0},
 	{"epub",       ICON_EXT_EPUB,      COLOR_DOCS},
+  {"ex",         ICON_EXT_ELIXIR,    COLOR_ELIXIR},
 	{"exe",        ICON_EXT_EXE,       0},
+  {"exs",        ICON_EXT_ELIXIR,    COLOR_ELIXIR},
 
 	/* F */
 	{"f#",         ICON_EXT_FSHARP,    COLOR_FSHARP},
@@ -419,6 +427,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* H */
 	{"h",          ICON_EXT_H,         COLOR_C},
+  {"heex",       ICON_EXT_ELIXIR,    COLOR_ELIXIR},
 	{"hh",         ICON_EXT_HH,        COLOR_C},
 	{"hpp",        ICON_EXT_HPP,       COLOR_C},
 	{"hs",         ICON_EXT_HS,        COLOR_VIM},

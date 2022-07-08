@@ -28,6 +28,7 @@
 #define ICON_DESKTOP       "\ufcbe"
 #define ICON_DOCUMENT      "\uf718"
 #define ICON_DOWNLOADS     "\uf5d7"
+#define ICON_ELIXIR        "\ue62d"
 #define ICON_ENCRYPT       "\uf805"
 #define ICON_FSHARP        "\ue7a7"
 #define ICON_GIT           "\ue5fb"
@@ -110,6 +111,7 @@
 #define ICON_EXT_ELF       ICON_LINUX
 #define ICON_EXT_EPUB      ICON_MANUAL
 #define ICON_EXT_EXE       ICON_EXEC
+#define ICON_EXT_ELIXIR    ICON_ELIXIR
 
 /* F */
 #define ICON_EXT_FEN       ICON_CHESS
