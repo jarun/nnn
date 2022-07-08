@@ -103,7 +103,7 @@ Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
 Set environment variable `NNN_PLUG` to assign keybinds and invoke plugins directly using the plugin shortcut (<kbd>;</kbd>) followed by the assigned key character. E.g., with the below config:
 
 ```sh
-export NNN_PLUG='f:finder;o:fzopen;p:mocplay;d:diffs;t:nmount;v:imgview'
+export NNN_PLUG='f:finder;o:fzopen;p:mocq;d:diffs;t:nmount;v:imgview'
 ```
 
 plugin `finder` can be invoked with the keybind <kbd>;f</kbd>, `fzopen` can be run with <kbd>;o</kbd> and so on... The key vs. plugin pairs are shown in the help and config screen.
