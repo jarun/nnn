@@ -1,0 +1,172 @@
+# Description: Change key bindings for comfortable use with Colemak-DH keyboard
+#              layout. This diff was made in 4.5 release version of nnn.
+#
+# Author: github.com/anjerukare
+
+diff --git a/src/nnn.c b/src/nnn.c
+index 9844935e..b56f3591 100644
+--- a/src/nnn.c
++++ b/src/nnn.c
+@@ -5006,39 +5006,39 @@ static void show_help(const char *path)
+ 	const char helpstr[] = {
+ 	"0\n"
+ 	"1NAVIGATION\n"
+-	       "9Up k  Up%-16cPgUp ^U  Page up\n"
+-	       "9Dn j  Down%-14cPgDn ^D  Page down\n"
+-	       "9Lt h  Parent%-12c~ ` @ -  ~, /, start, prev\n"
+-	   "5Ret Rt l  Open%-20c'  First file/match\n"
+-	       "9g ^A  Top%-21c.  Toggle hidden\n"
+-	       "9G ^E  End%-20c^J  Toggle auto-advance on open\n"
++	       "9Up e  Up%-16cPgUp ^U  Page up\n"
++	       "9Dn n  Down%-14cPgDn ^D  Page down\n"
++	       "9Lt m  Parent%-12c~ ` @ -  ~, /, start, prev\n"
++	   "5Ret Rt i  Open%-20c'  First file/match\n"
++	       "9g ^E  Top%-21c.  Toggle hidden\n"
++	       "9G ^N  End%-20c^J  Toggle auto-jump on open\n"
+ 	      "8B (,)  Book(mark)%-11cb ^/  Select bookmark\n"
+ 		"a1-4  Context%-11c(Sh)Tab  Cycle/new context\n"
+ 	    "62Esc ^Q  Quit%-20cq  Quit context\n"
+ 		 "b^G  QuitCD%-18cQ  Pick/err, quit\n"
+ 	"0\n"
+ 	"1FILTER & PROMPT\n"
+-		  "c/  Filter%-17c^N  Toggle type-to-nav\n"
++		  "c/  Filter%-17c^F  Toggle type-to-nav\n"
+ 		"aEsc  Exit prompt%-12c^L  Toggle last filter\n"
+ 			"d%-20cAlt+Esc  Unfilter, quit context\n"
+ 	"0\n"
+ 	"1FILES\n"
+-	       "9o ^O  Open with%-15cn  Create new/link\n"
+-	       "9f ^F  File stats%-14cd  Detail mode toggle\n"
++	       "9o ^O  Open with%-15cc  Create new/link\n"
++	          "cf  File stats%-14cd  Detail mode toggle\n"
+ 		 "b^R  Rename/dup%-14cr  Batch rename\n"
+-		  "cz  Archive%-17ce  Edit file\n"
++		  "cz  Archive%-17cy  Edit file\n"
+ 		  "c*  Toggle exe%-14c>  Export list\n"
+-	    "6Space +  (Un)select%-12cm-m  Select range/clear\n"
++	    "6Space +  (Un)select%-12cs-s  Select range/clear\n"
+ 	          "ca  Select all%-14cA  Invert sel\n"
+ 	       "9p ^P  Copy here%-12cw ^W  Cp/mv sel as\n"
+-	       "9v ^V  Move here%-15cE  Edit sel list\n"
++	       "9v ^V  Move here%-15cl  Edit sel list\n"
+ 	       "9x ^X  Delete%-16cEsc  Send to FIFO\n"
+ 	"0\n"
+ 	"1MISC\n"
+ 	      "8Alt ;  Select plugin%-11c=  Launch app\n"
+ 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
+-		  "cc  Connect remote%-10cu  Unmount remote/archive\n"
+-	       "9t ^T  Sort toggles%-12cs  Manage session\n"
++		  "ch  Connect remote%-10cu  Unmount remote/archive\n"
++	       "9t ^T  Sort toggles%-12ck  Manage session\n"
+ 		  "cT  Set time type%-11c0  Lock\n"
+ 		 "b^L  Redraw%-18c?  Help, conf\n"
+ 	};
+diff --git a/src/nnn.h b/src/nnn.h
+index e603840f..d544a60e 100644
+--- a/src/nnn.h
++++ b/src/nnn.h
+@@ -128,18 +128,18 @@ struct key {
+ static struct key bindings[] = {
+ 	/* Back */
+ 	{ KEY_LEFT,       SEL_BACK },
+-	{ 'h',            SEL_BACK },
++	{ 'm',            SEL_BACK },
+ 	/* Inside or select */
+ 	{ KEY_ENTER,      SEL_OPEN },
+ 	{ '\r',           SEL_OPEN },
+ 	/* Pure navigate inside */
+ 	{ KEY_RIGHT,      SEL_NAV_IN },
+-	{ 'l',            SEL_NAV_IN },
++	{ 'i',            SEL_NAV_IN },
+ 	/* Next */
+-	{ 'j',            SEL_NEXT },
++	{ 'n',            SEL_NEXT },
+ 	{ KEY_DOWN,       SEL_NEXT },
+ 	/* Previous */
+-	{ 'k',            SEL_PREV },
++	{ 'e',            SEL_PREV },
+ 	{ KEY_UP,         SEL_PREV },
+ 	/* Page down */
+ 	{ KEY_NPAGE,      SEL_PGDN },
+@@ -152,11 +152,11 @@ static struct key bindings[] = {
+ 	/* First entry */
+ 	{ KEY_HOME,       SEL_HOME },
+ 	{ 'g',            SEL_HOME },
+-	{ CONTROL('A'),   SEL_HOME },
++	{ CONTROL('E'),   SEL_HOME },
+ 	/* Last entry */
+ 	{ KEY_END,        SEL_END },
+ 	{ 'G',            SEL_END },
+-	{ CONTROL('E'),   SEL_END },
++	{ CONTROL('N'),   SEL_END },
+ 	/* Go to first file */
+ 	{ '\'',           SEL_FIRST },
+ 	/* HOME */
+@@ -171,7 +171,7 @@ static struct key bindings[] = {
+ 	{ 'b',            SEL_BMOPEN },
+ 	{ CONTROL('_'),   SEL_BMOPEN },
+ 	/* Connect to server over SSHFS */
+-	{ 'c',            SEL_REMOTE },
++	{ 'h',            SEL_REMOTE },
+ 	/* Cycle contexts in forward direction */
+ 	{ '\t',           SEL_CYCLE },
+ 	/* Cycle contexts in reverse direction */
+@@ -194,14 +194,13 @@ static struct key bindings[] = {
+ 	/* Filter */
+ 	{ '/',            SEL_FLTR },
+ 	/* Toggle filter mode */
+-	{ CONTROL('N'),   SEL_MFLTR },
++	{ CONTROL('F'),   SEL_MFLTR },
+ 	/* Toggle hide .dot files */
+ 	{ '.',            SEL_HIDDEN },
+ 	/* Detailed listing */
+ 	{ 'd',            SEL_DETAIL },
+ 	/* File details */
+ 	{ 'f',            SEL_STATS },
+-	{ CONTROL('F'),   SEL_STATS },
+ 	/* Toggle executable status */
+ 	{ '*',            SEL_CHMODX },
+ 	/* Create archive */
+@@ -215,13 +214,13 @@ static struct key bindings[] = {
+ 	{ ' ',            SEL_SEL },
+ 	{ '+',            SEL_SEL },
+ 	/* Toggle select multiple files */
+-	{ 'm',            SEL_SELMUL },
++	{ 's',            SEL_SELMUL },
+ 	/* Select all files in current dir */
+ 	{ 'a',            SEL_SELALL },
+ 	/* Invert selection in current dir */
+ 	{ 'A',            SEL_SELINV },
+ 	/* List, edit selection */
+-	{ 'E',            SEL_SELEDIT },
++	{ 'l',            SEL_SELEDIT },
+ 	/* Copy from selection buffer */
+ 	{ 'p',            SEL_CP },
+ 	{ CONTROL('P'),   SEL_CP },
+@@ -238,7 +237,7 @@ static struct key bindings[] = {
+ 	{ 'o',            SEL_OPENWITH },
+ 	{ CONTROL('O'),   SEL_OPENWITH },
+ 	/* Create a new file */
+-	{ 'n',            SEL_NEW },
++	{ 'c',            SEL_NEW },
+ 	/* Show rename prompt */
+ 	{ CONTROL('R'),   SEL_RENAME },
+ 	/* Rename contents of current dir */
+@@ -250,7 +249,7 @@ static struct key bindings[] = {
+ 	/* Toggle auto-advance on file open */
+ 	{ CONTROL('J'),   SEL_AUTONEXT },
+ 	/* Edit in EDITOR */
+-	{ 'e',            SEL_EDIT },
++	{ 'y',            SEL_EDIT },
+ 	/* Run a plugin */
+ 	{ ';',            SEL_PLUGIN },
+ 	/* Run command */
+@@ -263,7 +262,7 @@ static struct key bindings[] = {
+ 	/* Lock screen */
+ 	{ '0',            SEL_LOCK },
+ 	/* Manage sessions */
+-	{ 's',            SEL_SESSIONS },
++	{ 'k',            SEL_SESSIONS },
+ 	/* Export list */
+ 	{ '>',            SEL_EXPORT },
+ 	/* Set time type */

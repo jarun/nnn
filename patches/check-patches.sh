@@ -6,7 +6,7 @@
 # Read patches/README.md for more information.
 
 export PATCH_OPTS="--merge"
-patches=("O_GITSTATUS" "O_NAMEFIRST" "O_RESTOREPREVIEW")
+patches=("O_COLEMAK" "O_GITSTATUS" "O_NAMEFIRST" "O_RESTOREPREVIEW")
 z=$(( 1 << ${#patches[@]} ))
 pid=$$
 ret=0
@@ -18,7 +18,7 @@ for ((n=1; n < z; ++n)); do
     done | tee "/dev/stderr" | (
         make clean -s
         xargs make 2>&1
-        if [ "$?" -ne 0 ]; then
+        if ! xargs make 2>&1; then
             echo "[FAILED]" >&2
             kill -SIGUSR1 "$pid"
         else
