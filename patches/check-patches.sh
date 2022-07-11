@@ -17,7 +17,6 @@ for ((n=1; n < z; ++n)); do
         printf "%s=%d " "${patches[$i]}" "$(( (n & (1 << i)) != 0 ))"
     done | tee "/dev/stderr" | (
         make clean -s
-        xargs make 2>&1
         if ! xargs make 2>&1; then
             echo "[FAILED]" >&2
             kill -SIGUSR1 "$pid"
