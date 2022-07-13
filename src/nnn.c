@@ -3152,7 +3152,7 @@ static void showfilterinfo(void)
 	if (cfg.fileinfo && ndents && get_output("file", "-b", pdents[cur].name, -1, FALSE, FALSE))
 		mvaddstr(xlines - 2, 2, g_buf);
 	else {
-		snprintf(info + i, REGEX_MAX - i - 1, "  %s [/], %s [:]",
+		snprintf(info + i, REGEX_MAX - i - 1, "  %s [/], %4s [:]",
 			 (cfg.regex ? "reg" : "str"),
 			 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
 	}
