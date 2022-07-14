@@ -262,8 +262,9 @@
 #define VLEN 3
 
 /* Volume info */
-#define FREE     0
-#define CAPACITY 1
+#define VFS_AVAIL 0
+#define VFS_USED  1
+#define VFS_SIZE  2
 
 /* TYPE DEFINITIONS */
 typedef unsigned int uint_t;
@@ -4527,17 +4528,20 @@ static bool xchmod(const char *fpath, mode_t mode)
 	return (chmod(fpath, mode) == 0);
 }
 
-static size_t get_fs_info(const char *path, bool type)
+static size_t get_fs_info(const char *path, uchar_t type)
 {
 	struct statvfs svb;
 
 	if (statvfs(path, &svb) == -1)
 		return 0;
 
-	if (type == CAPACITY)
-		return (size_t)svb.f_blocks << ffs((int)(svb.f_frsize >> 1));
+	if (type == VFS_AVAIL)
+		return (size_t)svb.f_bavail << ffs((int)(svb.f_frsize >> 1));
 
-	return (size_t)svb.f_bavail << ffs((int)(svb.f_frsize >> 1));
+	if (type == VFS_USED)
+		return ((size_t)svb.f_blocks - (size_t)svb.f_bfree) << ffs((int)(svb.f_frsize >> 1));
+
+	return (size_t)svb.f_blocks << ffs((int)(svb.f_frsize >> 1)); /* VFS_SIZE */
 }
 
 /* Create non-existent parents and a file or dir */
@@ -5069,13 +5073,14 @@ static void show_help(const char *path)
 		++end;
 	}
 
-	dprintf(fd, "\nLOCATIONS:\n");
+	dprintf(fd, "\nLOCATIONS\n");
 	for (uchar_t i = 0; i < CTX_MAX; ++i)
 		if (g_ctx[i].c_cfg.ctxactive)
 			dprintf(fd, " %u: %s\n", i + 1, g_ctx[i].c_path);
 
-	dprintf(fd, "\nVOLUME: %s of ", coolsize(get_fs_info(path, FREE)));
-	dprintf(fd, "%s free\n\n", coolsize(get_fs_info(path, CAPACITY)));
+	dprintf(fd, "\nVOLUME: avail:%s ", coolsize(get_fs_info(path, VFS_AVAIL)));
+	dprintf(fd, "used:%s ", coolsize(get_fs_info(path, VFS_USED)));
+	dprintf(fd, "size:%s\n\n", coolsize(get_fs_info(path, VFS_SIZE)));
 
 	if (bookmark) {
 		dprintf(fd, "BOOKMARKS\n");
@@ -6296,8 +6301,8 @@ static void statusbar(char *path)
 
 		xstrsncpy(buf, coolsize(dir_blocks << blk_shift), 12);
 
-		printw("%cu:%s free:%s files:%llu %lluB %s\n",
-		       (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, FREE)),
+		printw("%cu:%s avail:%s files:%llu %lluB %s\n",
+		       (cfg.apparentsz ? 'a' : 'd'), buf, coolsize(get_fs_info(path, VFS_AVAIL)),
 		       num_files, (ullong_t)pent->blocks << blk_shift, ptr);
 	} else { /* light or detail mode */
 		char sort[] = "\0\0\0\0\0";
