@@ -16,6 +16,7 @@
 # Shell: POSIX compliant
 # Author: Yuri Kloubakov
 
+# shellcheck disable=SC1090,SC1091
 . "$(dirname "$0")"/.nnn-plugin-helper
 
 # Get a list of (symbolic links to) directories for every element of CDPATH

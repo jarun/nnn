@@ -112,6 +112,7 @@ check_update="true"
 
 settings_path="${HOME}/.config/imgur-screenshot/settings.conf"
 if [ -f "${settings_path}" ]; then
+  # shellcheck disable=SC1090
   source "${settings_path}"
 fi
 
@@ -204,6 +205,7 @@ function load_access_token() {
   token_expire_time=0
   # check for saved access_token and its expiration date
   if [ -f "${credentials_file}" ]; then
+    # shellcheck disable=SC1090
     source "${credentials_file}"
   fi
   current_time="$(date +%s)"

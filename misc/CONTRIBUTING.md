@@ -7,9 +7,10 @@ Before suggesting changes, please read a bit about [the design principles nnn fo
 
 `nnn` follows the Linux kernel coding style closely. The C source code uses TABs and the plugins use 4 spaces for indentation.
 
-Changes should not break the patch framework. Please run `make checkpatches` before raising a PR.
+- Code changes should not break the patch framework. Please run `make checkpatches` to ensure.
+- Run `make shellcheck` if adding/modifying plugins.
 
-CI runs `shellcheck` on plugins. Please watch out for any failures if you are modifying/adding a plugin.
+CI runs patch framework sanity test and `shellcheck`. Please watch out for any failures after raising the PR.
 
 ## Resources
 The [wiki](https://github.com/jarun/nnn/wiki/Developer-guides) has some resources for developers you might be interested in: building, debugging...
