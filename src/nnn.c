@@ -1113,11 +1113,7 @@ static size_t mkpath(const char *dir, const char *name, char *out)
 
 	if (name[0] != '/') { // NOLINT
 		/* Handle root case */
-		if (istopdir(dir))
-			len = 1;
-		else
-			len = xstrsncpy(out, dir, PATH_MAX);
-
+		len = istopdir(dir) ? 1 : xstrsncpy(out, dir, PATH_MAX);
 		out[len - 1] = '/'; // NOLINT
 	}
 	return (xstrsncpy(out + len, name, PATH_MAX - len) + len);
@@ -2440,8 +2436,7 @@ static bool plugscript(const char *plugin, uchar_t flags)
 
 static void opstr(char *buf, char *op)
 {
-	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s \"$0\" \"$@\" . < /dev/tty' < %s",
-		 op, selpath);
+	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s \"$0\" \"$@\" . < /dev/tty' < %s", op, selpath);
 }
 
 static bool rmmulstr(char *buf)
