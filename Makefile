@@ -261,6 +261,9 @@ musl:
 	./musl-static-ubuntu.sh 1
 	rm ./musl-static-ubuntu.sh
 
+shellcheck:
+	find ./plugins/ -type f -not -name "*.md" -exec shellcheck {} +
+
 dist:
 	mkdir -p nnn-$(VERSION)
 	$(CP) -r $(DISTFILES) nnn-$(VERSION)

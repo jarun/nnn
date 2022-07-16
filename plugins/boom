@@ -9,7 +9,7 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-GUIPLAYER="${GUIPLAYER}"
+GUIPLAYER="${GUIPLAYER:-""}"
 NUMTRACKS="${NUMTRACKS:-100}"
 
 if [ -n "$GUIPLAYER" ]; then

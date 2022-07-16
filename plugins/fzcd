@@ -22,10 +22,11 @@
 
 IFS="$(printf '\n\r')"
 
+# shellcheck disable=SC1090,SC1091
 . "$(dirname "$0")"/.nnn-plugin-helper
 
 CTX=+
-LIST="$LIST"
+LIST="${LIST:-""}"
 
 if ! type fzf >/dev/null 2>&1; then
     printf "fzf missing"
