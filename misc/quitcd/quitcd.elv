@@ -30,6 +30,8 @@ fn n {|@a|
   # stty lwrap undef
   # stty lnext undef
 
+	# The e: prefix allows one to alias n to nnn if desired without making an
+	# infinitely recursive alias
 	e:nnn $@a
 
 	if (path:is-regular $E:NNN_TMPFILE) {
