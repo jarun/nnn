@@ -12,6 +12,6 @@ set NNN_TMPFILE=~/.config/nnn/.lastd
 # stty lwrap undef
 # stty lnext undef
 
-# The backslash allows one to alias nnn to n if desired without making an
+# The backslash allows one to alias n to nnn if desired without making an
 # infinitely recursive alias
 alias n '\nnn; source "$NNN_TMPFILE"; rm -f "$NNN_TMPFILE"'
