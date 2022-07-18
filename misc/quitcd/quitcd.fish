@@ -27,7 +27,9 @@ function n --wraps nnn --description 'support nnn quit and change directory'
     # stty lwrap undef
     # stty lnext undef
 
-    nnn $argv
+    # The command function allowa one to alias nnn to n if desired without
+    # making an infinitely recursive alias
+    command nnn $argv
 
     if test -e $NNN_TMPFILE
         source $NNN_TMPFILE
