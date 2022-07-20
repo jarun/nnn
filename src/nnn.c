@@ -123,9 +123,11 @@
 #include "nnn.h"
 #include "dbg.h"
 
-#if defined(ICONS) || defined(NERD) || defined(EMOJI)
-#include "icons.h"
+#if defined(ICONS_IN_TERM) || defined(NERD) || defined(EMOJI)
 #define ICONS_ENABLED
+#include "icons-generated.h"
+#include "icons-hash.c"
+#include "icons.h"
 #endif
 
 #ifdef TOURBIN_QSORT
@@ -770,11 +772,6 @@ static const char * const patterns[] = {
 #define C_PIP (C_ORP + 1)   /* Named pipe (FIFO): Orange1 */
 #define C_SOC (C_PIP + 1)   /* Socket: MediumOrchid1 */
 #define C_UND (C_SOC + 1)   /* Unknown OR 0B regular/exe file: Red1 */
-
-#ifdef ICONS_ENABLED
-/* 0-9, A-Z, OTHER = 36. */
-static ushort_t icon_positions[37];
-#endif
 
 static char gcolors[] = "c1e2272e006033f7c6d6abc4";
 static uint_t fcolors[C_UND + 1] = {0};
@@ -2164,30 +2161,10 @@ static bool initcurses(void *oldmask)
 			init_pair(i + 1, *pcode, -1);
 		}
 	}
-
 #ifdef ICONS_ENABLED
 	if (!g_state.oldcolor) {
-		uchar_t icolors[COLOR_256] = {0};
-		char c;
-
-		memset(icon_positions, 0x7f, sizeof(icon_positions));
-
-		for (uint_t i = 0; i < ELEMENTS(icons_ext); ++i) {
-			c = TOUPPER(icons_ext[i].match[0]);
-			if (c >= 'A' && c <= 'Z') {
-				if (icon_positions[c - 'A' + 10] == 0x7f7f)
-					icon_positions[c - 'A' + 10] = i;
-			} else if (c >= '0' && c <= '9') {
-				if (icon_positions[c - '0'] == 0x7f7f)
-					icon_positions[c - '0'] = i;
-			} else if (icon_positions[36] == 0x7f7f)
-				icon_positions[36] = i;
-
-			if (icons_ext[i].color && !icolors[icons_ext[i].color]) {
-				init_pair(C_UND + 1 + icons_ext[i].color, icons_ext[i].color, -1);
-				icolors[icons_ext[i].color] = 1;
-			}
-		}
+		for (uint_t i = 0; i < ELEMENTS(init_colors); ++i)
+			init_pair(C_UND + 1 + init_colors[i], init_colors[i], -1);
 	}
 #endif
 
@@ -3997,27 +3974,14 @@ static const struct icon_pair *get_icon(const struct entry *ent)
 
 	char *tmp = xextension(ent->name, ent->nlen);
 
-	if (!tmp) {
-		if (ent->mode & 0100)
-			return &exec_icon;
-
-		return &file_icon;
+	if (tmp) {
+		uint16_t z, k, h = icon_ext_hash(++tmp); /* ++tmp to skip '.' */
+		for (k = 0; k < ICONS_PROBE_MAX; ++k) {
+			z = (h + k) % ELEMENTS(icons_ext);
+			if (strcasecmp(tmp, icons_ext[z].match) == 0)
+				return &icons_ext[z];
+		}
 	}
-
-	/* Skip the . */
-	++tmp;
-
-	if (*tmp >= '0' && *tmp <= '9')
-		i = *tmp - '0'; /* NUMBER 0-9 */
-	else if (TOUPPER(*tmp) >= 'A' && TOUPPER(*tmp) <= 'Z')
-		i = TOUPPER(*tmp) - 'A' + 10; /* LETTER A-Z */
-	else
-		i = 36; /* OTHER */
-
-	for (ushort_t j = icon_positions[i]; j < ELEMENTS(icons_ext) &&
-			icons_ext[j].match[0] == icons_ext[icon_positions[i]].match[0]; ++j)
-		if (strcasecmp(tmp, icons_ext[j].match) == 0)
-			return &icons_ext[j];
 
 	/* If there's no match and the file is executable, icon that */
 	if (ent->mode & 0100)
@@ -6509,7 +6473,7 @@ static void redraw(char *path)
 	if (curscroll > 0) {
 		move(1, 0);
 #ifdef ICONS_ENABLED
-		addstr(MD_ARROW_UPWARD);
+		addstr(ICON_ARROW_UP);
 #else
 		addch('^');
 #endif
@@ -6546,7 +6510,7 @@ static void redraw(char *path)
 	if (onscreen < ndents) {
 		move(xlines - 2, 0);
 #ifdef ICONS_ENABLED
-		addstr(MD_ARROW_DOWNWARD);
+		addstr(ICON_ARROW_DOWN);
 #else
 		addch('v');
 #endif
