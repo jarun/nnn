@@ -104,7 +104,6 @@
 #define __USE_XOPEN_EXTENDED 1
 #endif
 #include <ftw.h>
-#include <wchar.h>
 #include <pwd.h>
 #include <grp.h>
 
@@ -1362,25 +1361,27 @@ static inline bool xconfirm(int c)
 
 static int get_input(const char *prompt)
 {
+	wint_t ch[1];
+
 	if (prompt)
 		printmsg(prompt);
 	cleartimeout();
 
-	int r = getch();
+	get_wch(ch);
 
 #ifdef KEY_RESIZE
-	while (r == KEY_RESIZE) {
+	while (*ch == KEY_RESIZE) {
 		if (prompt) {
 			clearoldprompt();
 			xlines = LINES;
 			printmsg(prompt);
 		}
 
-		r = getch();
+		get_wch(ch);
 	}
 #endif
 	settimeout();
-	return r;
+	return (int)*ch;
 }
 
 static bool isselfileempty(void)
@@ -3010,13 +3011,13 @@ static int nextsel(int presel)
 #ifdef BENCH
 	return SEL_QUIT;
 #endif
-	int c = presel;
-	uint_t i;
+	wint_t c = presel;
+	int i = ERR;
 	bool escaped = FALSE;
 
 	if (c == 0 || c == MSGWAIT) {
 try_quit:
-		c = getch();
+		i = get_wch(&c);
 		//DPRINTF_D(c);
 		//DPRINTF_S(keyname(c));
 
@@ -3028,8 +3029,8 @@ try_quit:
 		/* Handle Alt+key */
 		if (c == ESC) {
 			timeout(0);
-			c = getch();
-			if (c != ERR) {
+			i = get_wch(&c);
+			if (i != ERR) {
 				if (c == ESC)
 					c = CONTROL('L');
 				else {
@@ -3051,14 +3052,14 @@ try_quit:
 			}
 		}
 
-		if (c == ERR && presel == MSGWAIT)
+		if (i == ERR && presel == MSGWAIT)
 			c = (cfg.filtermode || filterset()) ? FILTER : CONTROL('L');
 		else if (c == FILTER || c == CONTROL('L'))
 			/* Clear previous filter when manually starting */
 			clearfilter();
 	}
 
-	if (c == -1) {
+	if (i == ERR) {
 		++idle;
 
 		/*

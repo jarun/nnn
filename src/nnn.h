@@ -31,6 +31,7 @@
 #pragma once
 
 #include <curses.h>
+#include <wchar.h>
 
 #define CONTROL(c) ((c) & 0x1f)
 
@@ -121,7 +122,7 @@ enum action {
 
 /* Associate a pressed key to an action */
 struct key {
-	int sym;         /* Key pressed */
+	wint_t sym;      /* Key pressed */
 	enum action act; /* Action */
 };
 
