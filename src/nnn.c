@@ -3247,7 +3247,7 @@ static int filterentries(char *path, char *lastname)
 {
 	wchar_t *wln = (wchar_t *)alloca(sizeof(wchar_t) * REGEX_MAX);
 	char *ln = g_ctx[cfg.curctx].c_fltr;
-	wint_t ch[2] = {0};
+	wint_t ch[1];
 	int r, total = ndents, len;
 	char *pln = g_ctx[cfg.curctx].c_fltr + 1;
 
@@ -3454,7 +3454,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 	size_t len, pos;
 	int x, r;
 	const int WCHAR_T_WIDTH = sizeof(wchar_t);
-	wint_t ch[2] = {0};
+	wint_t ch[1];
 	wchar_t * const buf = malloc(sizeof(wchar_t) * READLINE_MAX);
 
 	if (!buf)
