@@ -2,7 +2,7 @@
 #define ICONS_FONTAWESOME
 
 // You can find hex codes for nerd fonts here
-// https://www.nerdfonts.com/cheat-sheet
+// https://fontawesome.com/icons/
 
 // Arrows
 #define MD_ARROW_UPWARD    "\uf062"
@@ -27,7 +27,7 @@
 #define ICON_DATABASE      "\uf1c0"
 #define ICON_DESKTOP       "\uf390"
 #define ICON_DIFF          "\uf440" //
-#define ICON_DOCUMENT      "\uf0b1"
+#define ICON_DOCUMENT      "\uf15c"
 #define ICON_DOWNLOADS     "\uf019"
 #define ICON_ENCRYPT       "\uf084"
 #define ICON_FSHARP        "\ue7a7" //
