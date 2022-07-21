@@ -3034,7 +3034,7 @@ try_quit:
 				if (c == ESC)
 					c = CONTROL('L');
 				else {
-					ungetch(c);
+					unget_wch(c);
 					c = ';';
 				}
 				settimeout();
