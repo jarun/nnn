@@ -4,6 +4,8 @@
 #include "icons-in-terminal.h"
 #elif defined(NERD)
 #include "icons-nerdfont.h"
+#elif defined(FONTAWESOME)
+#include "icons-fontawesome.h"
 #elif defined(EMOJI)
 #include "icons-emoji.h"
 #endif
@@ -71,7 +73,7 @@ struct icon_pair {
 static const struct icon_pair dir_icon  = {"", FA_FOLDER, 0};
 static const struct icon_pair file_icon = {"", FA_FILE_O, 0};
 static const struct icon_pair exec_icon = {"", FA_COG,    0};
-#elif defined(NERD)
+#elif defined(NERD) || defined(FONTAWESOME)
 static const struct icon_pair dir_icon  = {"", ICON_DIRECTORY, 0};
 static const struct icon_pair file_icon = {"", ICON_FILE,      0};
 static const struct icon_pair exec_icon = {"", ICON_EXEC,      0};
@@ -98,7 +100,7 @@ static const struct icon_pair icons_name[] = {
 	{"configure",    FILE_CONFIG,   0},
 	{"License",      FA_COPYRIGHT,  COLOR_DOCS},
 	{"Makefile",     FILE_CMAKE,    0},
-#elif defined(NERD)
+#elif defined(NERD) || defined(FONTAWESOME)
 	{".git",         ICON_GIT,       0},
 	{"Desktop",      ICON_DESKTOP,   0},
 	{"Documents",    ICON_BRIEFCASE, 0},
@@ -343,7 +345,7 @@ static const struct icon_pair icons_ext[] = {
 	{"zip",      FA_FILE_ARCHIVE_O,    COLOR_ARCHIVE},
 
 	/* Other */
-#elif defined(NERD)
+#elif defined(NERD) || defined(FONTAWESOME)
 	/* Numbers */
 	{"1",          ICON_EXT_1,         COLOR_DOCS},
 	{"7z",         ICON_EXT_7Z,        COLOR_ARCHIVE},

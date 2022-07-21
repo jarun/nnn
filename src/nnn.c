@@ -123,7 +123,7 @@
 #include "nnn.h"
 #include "dbg.h"
 
-#if defined(ICONS) || defined(NERD) || defined(EMOJI)
+#if defined(ICONS) || defined(NERD) || defined(FONTAWESOME) || defined(EMOJI)
 #include "icons.h"
 #define ICONS_ENABLED
 #endif
