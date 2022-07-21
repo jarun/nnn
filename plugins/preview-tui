@@ -80,6 +80,7 @@
 # Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal, @WanderLanz
 
 #SPLIT="$SPLIT"  # you can set a permanent split here
+SPLIT_WIDTH="${SPLIT_WIDTH:-50}"
 #TERMINAL="$TERMINAL"  # same goes for the terminal
 DEBUG_LOG=0  # set to 1 to enable logging for debug purposes
 USE_SCOPE="${USE_SCOPE:-0}"
@@ -137,7 +138,8 @@ start_preview() {
                 -e "PAGER=$PAGER" -e "ICONLOOKUP=$ICONLOOKUP" -e "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" \
                 -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
                 -e "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" -e "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
-                -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$2" -d"$DSPLIT" "$0" "$1" ;;
+                -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$2" -d"$DSPLIT" \
+                -p "$(( 100 - $SPLIT_WIDTH ))" "$0" "$1" ;;
         kitty) # Setting the layout for the new window. It will be restored after the script ends.
             kitty @ goto-layout splits
             # Trying to use kitty's integrated window management as the split window. All
@@ -227,7 +229,7 @@ fifo_pager() {
         exec > "$tmpfifopath"
         if [ "$cmd" = "pager" ]; then
             if exists bat; then
-                bat --terminal-width="$(tput cols <"$TTY")" --decorations=always --color=always \
+                bat --terminal-width="$cols" --decorations=always --color=always \
                     --paging=never --style="$BAT_STYLE" --theme="$BAT_THEME" "$@" &
             else
                 $PAGER "$@" &
@@ -334,7 +336,7 @@ preview_file() {
     ext="${1##*.}"
     [ -n "$ext" ] && ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
     lines=$(tput lines <"$TTY")
-    cols=$(tput cols <"$TTY")
+    cols=$(( $(tput cols <"$TTY") * (100 - $SPLIT_WIDTH) / $SPLIT_WIDTH ))
 
     # Otherwise, falling back to the defaults.
     if [ -d "$1" ]; then
