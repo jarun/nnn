@@ -38,8 +38,11 @@ static uint16_t icon_ext_hash(const char *s);
 /* change ICONS_TABLE_SIZE to increase the size of the table */
 static struct icon_pair table[1u << ICONS_TABLE_SIZE];
 static uint16_t seen[ARRLEN(table)];
-static uint16_t hash_start = 7; /* arbitrarily picked. change if needed. but ensure it's above 1 */
-static uint16_t hash_mul = 251; /* same as above ^ */
+/* arbitrarily picked starting position. change if needed.
+ * but ensure they're above 1 and prefer prime numbers.
+ */
+static uint16_t hash_start = 7;
+static uint16_t hash_mul = 251;
 
 /*
  * use robin-hood insertion to reduce the max probe length
@@ -71,16 +74,16 @@ table_populate(void)
 	memset(seen, 0x0, sizeof seen);
 	memset(table, 0x0, sizeof table);
 	for (size_t i = 0; i < ARRLEN(icons_ext); ++i) {
-		if (icons_ext[i].icon[0] == '\0') continue;
+		if (icons_ext[i].icon[0] == '\0') /* skip empty entries */
+			continue;
 		uint32_t h = icon_ext_hash(icons_ext[i].match);
 		rh_insert(icons_ext[i], h, 1);
 	}
 
-	unsigned int max_try = 0;
-	for (size_t i = 0; i < ARRLEN(seen); ++i) {
-		if (seen[i] > max_try) max_try = seen[i];
-	}
-	return max_try;
+	unsigned int max_probe = 0;
+	for (size_t i = 0; i < ARRLEN(seen); ++i)
+		max_probe = MAX(max_probe, seen[i]);
+	return max_probe;
 }
 
 int
@@ -167,9 +170,8 @@ main(void)
 	for (size_t i = 0; i < ARRLEN(table); ++i) {
 		if (table[i].icon == NULL || table[i].icon[0] == '\0') /* skip empty entries */
 			continue;
-		printf("\t[%u] = {\"%s\", \"%s\", %d },\n",
-		       (unsigned)i, table[i].match, table[i].icon,
-		       (unsigned)table[i].color);
+		printf("\t[%zu] = {\"%s\", \"%s\", %hhu },\n", i,
+		       table[i].match, table[i].icon, table[i].color);
 	}
 	printf("};\n\n");
 
@@ -191,7 +193,7 @@ icon_ext_hash(const char *str)
 	const unsigned int z = 16 - ICONS_TABLE_SIZE; /* 16 == size of `hash` in bits */
 	uint16_t hash = hash_start;
 	for (size_t i = 0; i < ICONS_MATCH_MAX && str[i] != '\0'; ++i) {
-		hash ^= TOUPPER((unsigned char)str[i]) + (i << 3);
+		hash ^= TOUPPER((unsigned char)str[i]) + i;
 		hash *= hash_mul;
 	}
 	hash = (hash >> z) ^ hash;
