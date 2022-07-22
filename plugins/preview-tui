@@ -81,7 +81,7 @@
 
 #SPLIT="$SPLIT"  # you can set a permanent split here
 #TERMINAL="$TERMINAL"  # same goes for the terminal
-DEBUG_LOG=0  # set to 1 to enable logging for debug purposes
+SPLIT_SIZE="${SPLIT_SIZE:-50}" # split size in percentage for supported previewers
 USE_SCOPE="${USE_SCOPE:-0}"
 USE_PISTOL="${USE_PISTOL:-0}"
 ICONLOOKUP="${ICONLOOKUP:-0}"
@@ -101,11 +101,10 @@ CURSEL="$TMPDIR/nnn-preview-tui-selection.$NNN_PARENT"
 FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NNN_PARENT"
 POSOFFSET="$TMPDIR/nnn-preview-tui-posoffset"
 
-if [ "$DEBUG_LOG" -eq 0 ]; then
-    DEBUG_LOGFILE="/dev/null"
-else
-    DEBUG_LOGFILE="${TMPDIR}/preview-tui-log"
-fi
+exists() { type "$1" >/dev/null 2>&1 ;}
+pkill() { command pkill "$@" >/dev/null 2>&1 ;}
+pidkill() { [ -f "$1" ] && kill "$(cat "$1")" >/dev/null 2>&1 ;}
+prompt() { printf "%b" "$@"; cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg" ;}
 
 start_preview() {
     [ "$PAGER" = "most" ] && PAGER="less -R"
@@ -122,7 +121,7 @@ start_preview() {
         TERMINAL="${TERMINAL:-xterm}"
     fi
 
-    if [ -z "$SPLIT" ] && [ $(($(tput lines <"$TTY") * 2)) -gt "$(tput cols <"$TTY")" ]; then
+    if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ]; then
         SPLIT='h'
     elif [ "$SPLIT" != 'h' ]; then
         SPLIT='v'
@@ -131,13 +130,13 @@ start_preview() {
     case "$TERMINAL" in
         tmux) # tmux splits are inverted
             if [ "$SPLIT" = "v" ]; then DSPLIT="h"; else DSPLIT="v"; fi
-            tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e TTY="$TTY" \
-                -e "CURSEL=$CURSEL" -e "TMPDIR=$TMPDIR" -e "FIFOPID=$FIFOPID" -e "POSOFFSET=$POSOFFSET" \
+            tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e "CURSEL=$CURSEL" \
+                -e "TMPDIR=$TMPDIR" -e "FIFOPID=$FIFOPID" -e "POSOFFSET=$POSOFFSET" \
                 -e "BAT_STYLE=$BAT_STYLE" -e "BAT_THEME=$BAT_THEME" -e "PREVIEWPID=$PREVIEWPID" \
                 -e "PAGER=$PAGER" -e "ICONLOOKUP=$ICONLOOKUP" -e "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" \
                 -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
                 -e "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" -e "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
-                -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$2" -d"$DSPLIT" "$0" "$1" ;;
+                -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$2" -d"$DSPLIT" -p"$SPLIT_SIZE" "$0" "$1" ;;
         kitty) # Setting the layout for the new window. It will be restored after the script ends.
             kitty @ goto-layout splits
             # Trying to use kitty's integrated window management as the split window. All
@@ -150,7 +149,7 @@ start_preview() {
                 --env "ICONLOOKUP=$ICONLOOKUP" --env "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
                 --env "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" --env "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
                 --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=$BAT_STYLE" \
-                --env "BAT_THEME=$BAT_THEME" --env "FIFOPID=$FIFOPID" --env TTY="$TTY" \
+                --env "BAT_THEME=$BAT_THEME" --env "FIFOPID=$FIFOPID" \
                 --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" ;;
         iterm)
             command="$SHELL -c 'cd $PWD; \
@@ -159,7 +158,7 @@ start_preview() {
                 PREVIEWPID=\\\"$PREVIEWPID\\\" CURSEL=\\\"$CURSEL\\\" TMPDIR=\\\"$TMPDIR\\\" \
                 ICONLOOKUP=\\\"$ICONLOOKUP\\\" NNN_PREVIEWHEIGHT=\\\"$NNN_PREVIEWHEIGHT\\\" \
                 NNN_PREVIEWWIDTH=\\\"$NNN_PREVIEWWIDTH\\\" NNN_PREVIEWDIR=\\\"$NNN_PREVIEWDIR\\\" \
-                USE_PISTOL=\\\"$USE_PISTOL\\\" BAT_STYLE=\\\"$BAT_STYLE\\\" TTY=\\\"$TTY\\\" \
+                USE_PISTOL=\\\"$USE_PISTOL\\\" BAT_STYLE=\\\"$BAT_STYLE\\\" \
                 BAT_THEME=\\\"$BAT_THEME\\\" FIFOPID=\\\"$FIFOPID\\\" \\\"$0\\\" \\\"$1\\\"'"
             if [ "$SPLIT" = "h" ]; then split="horizontally"; else split="vertically"; fi
             osascript <<-EOF
@@ -172,9 +171,9 @@ EOF
             ;;
         winterm)
             if [ "$SPLIT" = "h" ]; then split="H"; else split="V"; fi
-            cmd.exe /c wt -w 0 sp -$split bash -c "cd $PWD \; PATH='$PATH' NNN_FIFO=$NNN_FIFO \
-                PREVIEW_MODE=1 TTY=$TTY CURSEL=$CURSEL TMPDIR=$TMPDIR FIFOPID=$FIFOPID \
-                BAT_STYLE=$BAT_STYLE BAT_THEME=$BAT_THEME PREVIEWPID=$PREVIEWPID \
+            cmd.exe /c wt -w 0 sp -$split -s$((SPLIT_SIZE / 100)) bash -c "cd $PWD \; \
+                PATH='$PATH' NNN_FIFO=$NNN_FIFO PREVIEW_MODE=1 CURSEL=$CURSEL TMPDIR=$TMPDIR \
+                FIFOPID=$FIFOPID BAT_STYLE=$BAT_STYLE BAT_THEME=$BAT_THEME PREVIEWPID=$PREVIEWPID \
                 PAGER='$PAGER' ICONLOOKUP=$ICONLOOKUP NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH \
                 USE_SCOPE=$USE_SCOPE SPLIT=$SPLIT USE_PISTOL=$USE_PISTOL \
                 NNN_PREVIEWDIR=$NNN_PREVIEWDIR NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT \
@@ -183,11 +182,11 @@ EOF
         *)  if [ -n "$2" ]; then
                 QUICKLOOK=1 QLPATH="$2" PREVIEW_MODE=1 "$0" "$1" &
             else
-                PREVIEWPID="$PREVIEWPID" CURSEL="$CURSEL" PREVIEW_MODE=1 TTY="$TTY" \
+                PREVIEWPID="$PREVIEWPID" CURSEL="$CURSEL" PREVIEW_MODE=1 \
                      FIFOPID="$FIFOPID" FIFO_UEBERZUG="$FIFO_UEBERZUG" $TERMINAL -e "$0" "$1" &
             fi ;;
     esac
-} >"$DEBUG_LOGFILE" 2>&1
+}
 
 toggle_preview() {
     if exists QuickLook.exe; then
@@ -195,9 +194,9 @@ toggle_preview() {
     elif exists Bridge.exe; then
         QLPATH="Bridge.exe"
     fi
-    if kill "$(cat "$FIFOPID")"; then
+    if pidkill "$FIFOPID"; then
         [ -p "$NNN_PPIPE" ] && printf "0" > "$NNN_PPIPE"
-        kill "$(cat "$PREVIEWPID")"
+        pidkill "$PREVIEWPID"
         pkill -f "tail --follow $FIFO_UEBERZUG"
         if [ -n "$QLPATH" ] && stat "$1"; then
             f="$(wslpath -w "$1")" && "$QLPATH" "$f" &
@@ -206,10 +205,6 @@ toggle_preview() {
         [ -p "$NNN_PPIPE" ] && printf "1" > "$NNN_PPIPE"
         start_preview "$1" "$QLPATH"
     fi
-} >"$DEBUG_LOGFILE" 2>&1
-
-exists() {
-    type "$1" >/dev/null
 }
 
 fifo_pager() {
@@ -227,7 +222,7 @@ fifo_pager() {
         exec > "$tmpfifopath"
         if [ "$cmd" = "pager" ]; then
             if exists bat; then
-                bat --terminal-width="$(tput cols <"$TTY")" --decorations=always --color=always \
+                bat --terminal-width="$cols" --decorations=always --color=always \
                     --paging=never --style="$BAT_STYLE" --theme="$BAT_THEME" "$@" &
             else
                 $PAGER "$@" &
@@ -238,7 +233,7 @@ fifo_pager() {
     )
 
     rm "$tmpfifopath"
-} 2>"$DEBUG_LOGFILE"
+}
 
 # Binary file: show file info inside the pager
 print_bin_info() {
@@ -248,7 +243,7 @@ print_bin_info() {
     else
         file -b "$1"
     fi
-} 2>"$DEBUG_LOGFILE"
+}
 
 handle_mime() {
     case "$2" in
@@ -333,8 +328,8 @@ preview_file() {
     mimetype="$(file -bL --mime-type -- "$1")"
     ext="${1##*.}"
     [ -n "$ext" ] && ext="$(printf "%s" "${ext}" | tr '[:upper:]' '[:lower:]')"
-    lines=$(tput lines <"$TTY")
-    cols=$(tput cols <"$TTY")
+    lines=$(tput lines)
+    cols=$(tput cols)
 
     # Otherwise, falling back to the defaults.
     if [ -d "$1" ]; then
@@ -355,7 +350,7 @@ preview_file() {
     else
         handle_mime "$1" "$mimetype" "$ext"
     fi
-} 2>"$DEBUG_LOGFILE"
+}
 
 generate_preview() {
   if [ -n "$QLPATH" ] && stat "$3"; then
@@ -397,16 +392,16 @@ generate_preview() {
                     filename="$(printf "%s" "${3##*/}" | cut -d. -f1)"
                     mv "$NNN_PREVIEWDIR/${3%/*}/$filename.jpg" "$NNN_PREVIEWDIR/$3.jpg" ;;
             pdf) pdftoppm -jpeg -f 1 -singlefile "$3" "$NNN_PREVIEWDIR/$3" ;;
-	    djvu) ddjvu -format=ppm -page=1 "$3" "$NNN_PREVIEWDIR/$3.jpg" ;;
+            djvu) ddjvu -format=ppm -page=1 "$3" "$NNN_PREVIEWDIR/$3.jpg" ;;
             video) ffmpegthumbnailer -s0 -i "$3" -o "$NNN_PREVIEWDIR/$3.jpg" || rm "$NNN_PREVIEWDIR/$3.jpg" ;;
         esac
-    fi >"$DEBUG_LOGFILE"
+    fi
     if [ -f "$NNN_PREVIEWDIR/$3.jpg" ]; then
         image_preview "$1" "$2" "$NNN_PREVIEWDIR/$3.jpg"
     else
         fifo_pager print_bin_info "$3"
     fi
-} 2>"$DEBUG_LOGFILE"
+} >/dev/null 2>&1
 
 image_preview() {
     clear
@@ -423,10 +418,10 @@ image_preview() {
         fifo_pager print_bin_info "$3" && return
     fi
     printf "%s" "$!" > "$PREVIEWPID"
-} 2>"$DEBUG_LOGFILE"
+}
 
 ueberzug_layer() {
-    read -r x y < "$POSOFFSET"
+    [ -f "$POSOFFSET" ] && read -r x y < "$POSOFFSET"
     printf '{"action": "add", "identifier": "nnn_ueberzug", "x": %d, "y": %d, "width": "%d", "height": "%d", "scaler": "fit_contain", "path": "%s"}\n'\
         "${x:-0}" "${y:-0}" "$1" "$2" "$3" > "$FIFO_UEBERZUG"
 }
@@ -437,18 +432,18 @@ ueberzug_remove() {
 
 winch_handler() {
     clear
-    kill "$(cat "$PREVIEWPID")"
+    pidkill "$PREVIEWPID"
     if [ -p "$FIFO_UEBERZUG" ]; then
         pkill -f "tail --follow $FIFO_UEBERZUG"
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
     preview_file "$(cat "$CURSEL")"
-} 2>"$DEBUG_LOGFILE"
+}
 
 preview_fifo() {
     while read -r selection; do
         if [ -n "$selection" ]; then
-            kill "$(cat "$PREVIEWPID")"
+            pidkill "$PREVIEWPID"
             [ -p "$FIFO_UEBERZUG" ] && ueberzug_remove
             [ "$selection" = "close" ] && break
             preview_file "$selection"
@@ -457,7 +452,7 @@ preview_fifo() {
     done < "$NNN_FIFO"
     sleep 0.1 # make sure potential preview by winch_handler is killed
     pkill -P "$$"
-} 2>"$DEBUG_LOGFILE"
+}
 
 if [ "$PREVIEW_MODE" ]; then
     if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
@@ -476,14 +471,11 @@ if [ "$PREVIEW_MODE" ]; then
 else
     if [ ! -r "$NNN_FIFO" ]; then
         clear
-        printf "No FIFO available! (\$NNN_FIFO='%s')\nPlease read Usage in preview-tui." "$NNN_FIFO"
-        cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg"
+        prompt "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')\nPlease read Usage in preview-tui."
     elif [ "$KITTY_WINDOW_ID" ] && [ -z "$TMUX" ] && [ -z "$KITTY_LISTEN_ON" ]; then
         clear
-        printf "\$KITTY_LISTEN_ON not set!\nPlease read Usage in preview-tui."
-        cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg"
+        prompt "\$KITTY_LISTEN_ON not set!\nPlease read Usage in preview-tui."
     else
-        TTY="$(tty)"
-        TTY="$TTY" toggle_preview "$1" &
+        toggle_preview "$1" &
     fi
 fi
