@@ -95,7 +95,7 @@ ifeq ($(strip $(O_CTX8)),1)
 endif
 
 ifeq ($(strip $(O_ICONS)),1)
-	CPPFLAGS += -DICONS
+	CPPFLAGS += -DICONS_IN_TERM
 endif
 
 ifeq ($(strip $(O_NERD)),1)
@@ -187,17 +187,17 @@ endif
 ifeq ($(strip $(O_DEBUG)),1)
 	HEADERS += src/dbg.h
 endif
-ifeq ($(strip $(O_EMOJI)),1)
-	HEADERS += src/icons.h src/icons-emoji.h
-endif
-ifeq ($(strip $(O_NERD)),1)
-	HEADERS += src/icons.h src/icons-nerdfont.h
-endif
-ifeq ($(strip $(O_ICONS)),1)
-	HEADERS += src/icons.h src/icons-in-terminal.h
-endif
 ifeq ($(strip $(O_QSORT)),1)
 	HEADERS += src/qsort.h
+endif
+ifeq ($(strip $(O_EMOJI)),1)
+	HEADERS += src/icons.h src/icons-generated.h
+endif
+ifeq ($(strip $(O_NERD)),1)
+	HEADERS += src/icons.h src/icons-generated.h
+endif
+ifeq ($(strip $(O_ICONS)),1)
+	HEADERS += src/icons.h src/icons-generated.h src/icons-in-terminal.h
 endif
 
 all: $(BIN)
@@ -206,6 +206,11 @@ $(BIN): $(SRC) $(HEADERS) Makefile
 	@$(MAKE) --silent prepatch
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $(GETTIME_C) $< $(LDLIBS)
 	@$(MAKE) --silent postpatch
+
+src/icons-generated.h: src/icons-hash-gen
+	@./$< > $@
+src/icons-hash-gen: src/icons-hash.c src/nnn.c src/icons.h src/nnn.h
+	$(CC) $(CPPFLAGS) -DICONS_GENERATE -o $@ src/icons-hash.c
 
 # targets for backwards compatibility
 debug: $(BIN)
@@ -313,7 +318,7 @@ upload-local: sign static musl
 	    --upload-file $(BIN)-musl-static-$(VERSION).x86_64.tar.gz
 
 clean:
-	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz $(BIN)-emoji-static $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz $(BIN)-musl-static $(BIN)-musl-static-$(VERSION).x86_64.tar.gz
+	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz $(BIN)-emoji-static $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz $(BIN)-musl-static $(BIN)-musl-static-$(VERSION).x86_64.tar.gz src/icons-hash-gen src/icons-generated.h
 
 checkpatches:
 	./patches/check-patches.sh
