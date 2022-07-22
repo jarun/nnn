@@ -184,6 +184,7 @@ main(void)
 	#define TOUPPER(ch)     (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #endif
 
+#if defined(ICONS_GENERATE) || defined(ICONS_ENABLED)
 static uint16_t
 icon_ext_hash(const char *str)
 {
@@ -199,3 +200,4 @@ icon_ext_hash(const char *str)
 	ASSERT(hash < ARRLEN(table));
 	return hash;
 }
+#endif

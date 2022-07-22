@@ -1,6 +1,8 @@
 #ifndef INCLUDE_ICONS_H
 #define INCLUDE_ICONS_H
 
+#if defined(ICONS_GENERATE) || defined(ICONS_ENABLED)
+
 /*
  * 1st arg = ICONS_IN_TERM
  *
@@ -150,7 +152,7 @@
 	COLOR_X(COLOR_VIM,           28)  /* Green4 */ \
 
 /* X-Macro: https://en.wikipedia.org/wiki/X_Macro */
-#define COLOR_X(N, V) N = V,
+#define COLOR_X(N, V) N = (V),
 enum { COLOR_LIST };
 #undef COLOR_X
 #define COLOR_X(N, V) N,
@@ -412,5 +414,7 @@ static const struct icon_pair icons_ext[] = {
 	/* Other */
 };
 #endif
+
+#endif /* defined(ICONS_GENERATE) || defined(ICONS_ENABLED) */
 
 #endif /* INCLUDE_ICONS_H */
