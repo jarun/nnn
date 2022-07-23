@@ -80,7 +80,7 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
   - Preview hovered files in FIFO-based previewer
   - Open with desktop opener or specify a custom opener
   - File-specific colors (or minimal _dirs in context color_)
-  - Icons or Emojis support (customize and compile-in)
+  - Icons and Emojis support (customize and compile-in)
   - Plugin for image, video and audio thumbnails
   - Create, list, extract (to), mount (FUSE based) archives
   - Option to open all text files in `$EDITOR`

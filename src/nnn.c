@@ -8525,7 +8525,7 @@ int main(int argc, char *argv[])
 			initpath = startpath ? xstrdup(startpath) : getcwd(NULL, 0);
 			if (!initpath)
 				initpath = "/";
-		} else {
+		} else { /* Open a file */
 			arg = argv[optind];
 			DPRINTF_S(arg);
 			if (xstrlen(arg) > 7 && is_prefix(arg, "file://", 7))
@@ -8536,6 +8536,10 @@ int main(int argc, char *argv[])
 				xerror();
 				return EXIT_FAILURE;
 			}
+
+			/* If the file is hidden, enable hidden option */
+			if (*xbasename(initpath) == '.')
+				cfg.showhidden = 1;
 
 			/*
 			 * If nnn is set as the file manager, applications may try to open
