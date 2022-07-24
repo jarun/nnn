@@ -167,9 +167,11 @@ static const unsigned char init_colors[] = { COLOR_LIST };
 	struct icon_pair { const char *match; const char *icon; unsigned char color; };
 #endif
 
-static const struct icon_pair dir_icon  = {"", ICON_DIRECTORY, 0};
-static const struct icon_pair file_icon = {"", ICON_FILE, 0};
-static const struct icon_pair exec_icon = {"", ICON_EXEC, 0};
+struct icon { const char *icon; unsigned char color; };
+
+static const struct icon dir_icon  = {ICON_DIRECTORY, 0};
+static const struct icon file_icon = {ICON_FILE, 0};
+static const struct icon exec_icon = {ICON_EXEC, 0};
 
 static const struct icon_pair icons_name[] = {
 	{".git",        ICON_GIT,       0},
