@@ -84,7 +84,7 @@
 #define ICON_PHOTOSHOP     ICON_STR(DEV_PHOTOSHOP, "\ue7b8", ICON_PICTUREFILE)
 #define ICON_PICTUREFILE   ICON_STR(FA_FILE_IMAGE_O, "\uf71e", ICON_PICTURES)
 #define ICON_PICTURES      ICON_STR(MD_CAMERA_ALT, "\uf753", "🎨")
-#define ICON_PLAYLIST      ICON_STR(ICON_MUSICFILE, "\uf910", "")
+#define ICON_PLAYLIST      ICON_STR(ICON_MUSICFILE, "\uf831", "")
 #define ICON_POWERPOINT    ICON_STR(FILE_POWERPOINT, "\uf726", "📊")
 #define ICON_PUBLIC        ICON_STR(FA_INBOX, "\ue5ff", "👀")
 #define ICON_PYTHON        ICON_STR(MFIZZ_PYTHON, "\ue235", "🐍")
@@ -117,7 +117,7 @@
 #define ICON_EXT_PATCH     ICON_STR(FILE_PATCH, "\uf440", "🩹")
 #define ICON_EXT_PHP       ICON_STR(MFIZZ_PHP, "\ue73d", "🌐")
 #define ICON_EXT_ROM       ICON_STR(FA_LOCK, "\uf795", "")
-#define ICON_EXT_RSS       ICON_STR(FA_RSS_SQUARE, "\uf96b", "📡")
+#define ICON_EXT_RSS       ICON_STR(FA_RSS_SQUARE, "\uf143", "📡")
 #define ICON_EXT_RTF       ICON_STR(ICON_PDF, "\uf724", ICON_PDF)
 #define ICON_EXT_SCALA     ICON_STR(MFIZZ_SCALA, "\ue737", "")
 #define ICON_EXT_SLN       ICON_STR(DEV_VISUALSTUDIO, "\ue70c", "")
@@ -260,7 +260,7 @@ static const struct icon_pair icons_ext[] = {
 	/* G */
 	{"gem",        ICON_RUBY,           COLOR_RUBY},
 	{"gif",        ICON_PICTUREFILE,    COLOR_IMAGE},
-	{"go",         ICON_EXT_GO,         0},
+	{"go",         ICON_EXT_GO,         COLOR_C},
 	{"gpg",        ICON_ENCRYPT,        COLOR_ARCHIVE},
 	{"gz",         ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"gzip",       ICON_ARCHIVE,        COLOR_ARCHIVE},
