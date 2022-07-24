@@ -319,6 +319,23 @@ done < "$NNN_FIFO" &
 disown
 ```
 
+#### Quick `find` the first match in subtree and open in `nuke`
+
+```sh
+#!/usr/bin/env sh
+
+NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
+
+printf "file name: "
+read -r pattern
+
+entry=$(find . -type f -iname "$pattern" -print -quit 2>/dev/null)
+
+if [ -n "$entry" ]; then
+    "$NUKE" "$entry"
+fi
+```
+
 #### Quick find (using `fd`)
 
 ```sh
