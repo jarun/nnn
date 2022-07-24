@@ -152,6 +152,28 @@ main(void)
 	icon_max = MAX(icon_max, strlen(exec_icon.icon) + 1);
 	icon_max = MAX(icon_max, strlen(file_icon.icon) + 1);
 
+	const char *uniq[ARRLEN(icons_ext)] = {0};
+	size_t uniq_head = 0;
+	for (size_t i = 0; i < ARRLEN(icons_ext); ++i) {
+		if (icons_ext[i].icon[0] == 0) continue;
+		int isuniq = 1;
+		for (size_t k = 0; k < uniq_head; ++k) {
+			if (strcmp(uniq[k], icons_ext[i].icon) == 0) {
+				isuniq = 0;
+				break;
+			}
+		}
+		if (isuniq) {
+			assert(uniq_head < ARRLEN(uniq));
+			uniq[uniq_head++] = icons_ext[i].icon;
+		}
+	}
+	assert(uniq_head < (unsigned char)-1);
+
+	log("uniq icons: %6zu\n", uniq_head);
+	log("no-compact: %6zu bytes\n", ARRLEN(table) * icon_max);
+	log("compaction: %6zu bytes\n", uniq_head * icon_max + ARRLEN(table));
+
 	printf("#ifndef INCLUDE_ICONS_GENERATED\n");
 	printf("#define INCLUDE_ICONS_GENERATED\n\n");
 
@@ -167,12 +189,22 @@ main(void)
 	printf("struct icon_pair { const char match[%zu]; const char icon[%zu]; unsigned char color; };\n\n",
 	       match_max, icon_max);
 
-	printf("static const struct icon_pair icons_ext[%zu] = {\n", ARRLEN(table));
+	printf("static const char icons_ext_uniq[%zu][%zu] = {\n", uniq_head, icon_max);
+	for (size_t i = 0; i < uniq_head; ++i)
+		printf("\t\"%s\",\n", uniq[i]);
+	printf("};\n\n");
+
+	printf("static const struct {\n\tconst char match[%zu];"
+	       "\n\tunsigned char idx;\n\tunsigned char color;\n} icons_ext[%zu] = {\n",
+	        match_max, ARRLEN(table));
 	for (size_t i = 0; i < ARRLEN(table); ++i) {
 		if (table[i].icon == NULL || table[i].icon[0] == '\0') /* skip empty entries */
 			continue;
-		printf("\t[%zu] = {\"%s\", \"%s\", %hhu },\n", i,
-		       table[i].match, table[i].icon, table[i].color);
+		int k;
+		for (k = 0; k < uniq_head; ++k) if (strcmp(table[i].icon, uniq[k]) == 0) break;
+		assert(k < uniq_head);
+		printf("\t[%3zu] = {\"%s\", %d, %hhu },\n",
+		       i, table[i].match, k, table[i].color);
 	}
 	printf("};\n\n");
 

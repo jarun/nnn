@@ -3961,16 +3961,14 @@ static char *get_lsperms(mode_t mode)
 }
 
 #ifdef ICONS_ENABLED
-static const struct icon_pair *get_icon(const struct entry *ent)
+static struct icon get_icon(const struct entry *ent)
 {
-	ushort_t i = 0;
-
-	for (; i < ELEMENTS(icons_name); ++i)
+	for (size_t i = 0; i < ELEMENTS(icons_name); ++i)
 		if (strcasecmp(ent->name, icons_name[i].match) == 0)
-			return &icons_name[i];
+			return (struct icon){ icons_name[i].icon, icons_name[i].color };
 
 	if (ent->flags & DIR_OR_DIRLNK)
-		return &dir_icon;
+		return dir_icon;
 
 	char *tmp = xextension(ent->name, ent->nlen);
 
@@ -3979,29 +3977,27 @@ static const struct icon_pair *get_icon(const struct entry *ent)
 		for (k = 0; k < ICONS_PROBE_MAX; ++k) {
 			z = (h + k) % ELEMENTS(icons_ext);
 			if (strcasecmp(tmp, icons_ext[z].match) == 0)
-				return &icons_ext[z];
+				return (struct icon){ icons_ext_uniq[icons_ext[z].idx], icons_ext[z].color };
 		}
 	}
 
 	/* If there's no match and the file is executable, icon that */
 	if (ent->mode & 0100)
-		return &exec_icon;
-
-	return &file_icon;
+		return exec_icon;
+	return file_icon;
 }
 
 static void print_icon(const struct entry *ent, const int attrs)
 {
-	const struct icon_pair *picon = get_icon(ent);
-
+	const struct icon icon = get_icon(ent);
 	addstr(ICON_PADDING_LEFT);
-	if (picon->color)
-		attron(COLOR_PAIR(C_UND + 1 + picon->color));
+	if (icon.color)
+		attron(COLOR_PAIR(C_UND + 1 + icon.color));
 	else if (attrs)
 		attron(attrs);
-	addstr(picon->icon);
-	if (picon->color)
-		attroff(COLOR_PAIR(C_UND + 1 + picon->color));
+	addstr(icon.icon);
+	if (icon.color)
+		attroff(COLOR_PAIR(C_UND + 1 + icon.color));
 	else if (attrs)
 		attroff(attrs);
 	addstr(ICON_PADDING_RIGHT);
