@@ -260,7 +260,7 @@ static const struct icon_pair icons_ext[] = {
 	/* G */
 	{"gem",        ICON_RUBY,           COLOR_RUBY},
 	{"gif",        ICON_PICTUREFILE,    COLOR_IMAGE},
-	{"go",         ICON_EXT_GO,         0},
+	{"go",         ICON_EXT_GO,         COLOR_C},
 	{"gpg",        ICON_ENCRYPT,        COLOR_ARCHIVE},
 	{"gz",         ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"gzip",       ICON_ARCHIVE,        COLOR_ARCHIVE},
