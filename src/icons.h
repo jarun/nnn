@@ -65,9 +65,8 @@
 #define ICON_DESKTOP       ICON_STR(FA_DESKTOP, "\ufcbe", "🖥️ ")
 #define ICON_DOCUMENT      ICON_STR(FA_FILE_TEXT_O, "\uf718", "🗒 ")
 #define ICON_DOWNLOADS     ICON_STR(FA_DOWNLOAD, "\uf5d7", "📥")
-#define ICON_ELIXIR        ICON_STR("", "\ue62d", "💧")
+#define ICON_ELIXIR        ICON_STR(MFIZZ_ELIXIR, "\ue62d", "💧")
 #define ICON_ENCRYPT       ICON_STR("", "\uf805", "🔒")
-#define ICON_ERLANG        ICON_STR("", "\ue7b1", "📞")
 #define ICON_FSHARP        ICON_STR(DEV_FSHARP, "\ue7a7", "")
 #define ICON_GIT           ICON_STR(FA_GIT, "\ue5fb", "🌱")
 #define ICON_HASKELL       ICON_STR("", "\ue777", "")
@@ -76,7 +75,6 @@
 #define ICON_JAVASCRIPT    ICON_STR(FA_FILE_CODE_O, "\uf81d", "")
 #define ICON_LICENSE       ICON_STR(FA_COPYRIGHT, "\uf718", "⚖️ ")
 #define ICON_LINUX         ICON_STR(FA_LINUX, "\uf83c", "🐧")
-#define ICON_LOCKFILE      ICON_STR("", "\uf720", "🔒")
 #define ICON_MAKEFILE      ICON_STR(FILE_CMAKE, "\uf68c", "🛠 ")
 #define ICON_MANUAL        ICON_STR(FILE_MANPAGE, "\uf5bd", "❓")
 #define ICON_MS_EXCEL      ICON_STR(FILE_EXCEL, "\uf71a", ICON_WORDDOC)
@@ -153,11 +151,7 @@
 	COLOR_X(COLOR_SCALA,        196)  /* Red1 */ \
 	COLOR_X(COLOR_SHELL,         47)  /* SpringGreen2 */ \
 	COLOR_X(COLOR_VIM,           28)  /* Green4 */ \
-	COLOR_X(COLOR_ERLANG,       124)  /* Red3 */ \
-	COLOR_X(COLOR_ERLANG_HRL,   130)  /* DarkOrange3 */ \
-	COLOR_X(COLOR_ELIXIR,        90)  /* DarkMagenta */ \
-	COLOR_X(COLOR_ELIXIR_SCR,    98)  /* MediumPurple3 */ \
-	COLOR_X(COLOR_ELIXIR_PHX,   104)  /* MediumPurple */ \
+	COLOR_X(COLOR_ELIXIR,       104)  /* MediumPurple */ \
 
 /* X-Macro: https://en.wikipedia.org/wiki/X_Macro */
 #define COLOR_X(N, V) N = (V),
@@ -256,10 +250,9 @@ static const struct icon_pair icons_ext[] = {
 	{"elf",        ICON_LINUX,          0},
 	{"epub",       ICON_PDF,            COLOR_DOCS},
 	{"exe",        ICON_EXEC,           0},
-	{"erl",        ICON_ERLANG,         COLOR_ERLANG},
 	{"ex",         ICON_ELIXIR,         COLOR_ELIXIR},
-	{"eex",        ICON_ELIXIR,         COLOR_ELIXIR_PHX},
-	{"exs",        ICON_ELIXIR,         COLOR_ELIXIR_SCR},
+	{"eex",        ICON_ELIXIR,         COLOR_ELIXIR},
+	{"exs",        ICON_ELIXIR,         COLOR_ELIXIR},
 
 	/* F */
 	{"f#",         ICON_FSHARP,         COLOR_FSHARP},
@@ -289,8 +282,7 @@ static const struct icon_pair icons_ext[] = {
 	{"htm",        ICON_HTML,           0},
 	{"html",       ICON_HTML,           0},
 	{"hxx",        ICON_CPLUSPLUS,      COLOR_C},
-	{"hrl",        ICON_ERLANG,         COLOR_ERLANG_HRL},
-	{"heex",       ICON_ELIXIR,         COLOR_ELIXIR_SCR},
+	{"heex",       ICON_ELIXIR,         COLOR_ELIXIR},
 
 	/* I */
 	{"ico",        ICON_PICTUREFILE,    COLOR_IMAGE},
@@ -317,7 +309,6 @@ static const struct icon_pair icons_ext[] = {
 	{"lua",        ICON_EXT_LUA,        COLOR_LUA},
 	{"lzh",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"lzma",       ICON_ARCHIVE,        COLOR_ARCHIVE},
-	{"lock",       ICON_LOCKFILE,       0},
 
 	/* M */
 	{"m",          ICON_EXT_M,          COLOR_C},
