@@ -76,7 +76,7 @@
 #define ICON_JAVASCRIPT    ICON_STR(FA_FILE_CODE_O, "\uf81d", "")
 #define ICON_LICENSE       ICON_STR(FA_COPYRIGHT, "\uf718", "⚖️ ")
 #define ICON_LINUX         ICON_STR(FA_LINUX, "\uf83c", "🐧")
-#define ICON_LOCKFILE      ICON_STR("", "\uf023", "🔒")
+#define ICON_LOCKFILE      ICON_STR("", "\uf720", "🔒")
 #define ICON_MAKEFILE      ICON_STR(FILE_CMAKE, "\uf68c", "🛠 ")
 #define ICON_MANUAL        ICON_STR(FILE_MANPAGE, "\uf5bd", "❓")
 #define ICON_MS_EXCEL      ICON_STR(FILE_EXCEL, "\uf71a", ICON_WORDDOC)
