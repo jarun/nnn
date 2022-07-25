@@ -154,7 +154,10 @@
 	COLOR_X(COLOR_SHELL,         47)  /* SpringGreen2 */ \
 	COLOR_X(COLOR_VIM,           28)  /* Green4 */ \
 	COLOR_X(COLOR_ERLANG,       124)  /* Red3 */ \
+	COLOR_X(COLOR_ERLANG_HRL,   130)  /* DarkOrange3 */ \
 	COLOR_X(COLOR_ELIXIR,        90)  /* DarkMagenta */ \
+	COLOR_X(COLOR_ELIXIR_SCR,    98)  /* MediumPurple3 */ \
+	COLOR_X(COLOR_ELIXIR_PHX,   104)  /* MediumPurple */ \
 
 /* X-Macro: https://en.wikipedia.org/wiki/X_Macro */
 #define COLOR_X(N, V) N = (V),
@@ -253,6 +256,10 @@ static const struct icon_pair icons_ext[] = {
 	{"elf",        ICON_LINUX,          0},
 	{"epub",       ICON_PDF,            COLOR_DOCS},
 	{"exe",        ICON_EXEC,           0},
+	{"erl",        ICON_ERLANG,         COLOR_ERLANG},
+	{"ex",         ICON_ELIXIR,         COLOR_ELIXIR},
+	{"eex",        ICON_ELIXIR,         COLOR_ELIXIR_PHX},
+	{"exs",        ICON_ELIXIR,         COLOR_ELIXIR_SCR},
 
 	/* F */
 	{"f#",         ICON_FSHARP,         COLOR_FSHARP},
@@ -282,6 +289,8 @@ static const struct icon_pair icons_ext[] = {
 	{"htm",        ICON_HTML,           0},
 	{"html",       ICON_HTML,           0},
 	{"hxx",        ICON_CPLUSPLUS,      COLOR_C},
+	{"hrl",        ICON_ERLANG,         COLOR_ERLANG_HRL},
+	{"heex",       ICON_ELIXIR,         COLOR_ELIXIR_SCR},
 
 	/* I */
 	{"ico",        ICON_PICTUREFILE,    COLOR_IMAGE},
@@ -308,6 +317,7 @@ static const struct icon_pair icons_ext[] = {
 	{"lua",        ICON_EXT_LUA,        COLOR_LUA},
 	{"lzh",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"lzma",       ICON_ARCHIVE,        COLOR_ARCHIVE},
+	{"lock",       ICON_LOCKFILE,       0},
 
 	/* M */
 	{"m",          ICON_EXT_M,          COLOR_C},
