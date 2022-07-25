@@ -153,6 +153,8 @@
 	COLOR_X(COLOR_SCALA,        196)  /* Red1 */ \
 	COLOR_X(COLOR_SHELL,         47)  /* SpringGreen2 */ \
 	COLOR_X(COLOR_VIM,           28)  /* Green4 */ \
+	COLOR_X(COLOR_ERLANG,       124)  /* Red3 */ \
+	COLOR_X(COLOR_ELIXIR,        90)  /* DarkMagenta */ \
 
 /* X-Macro: https://en.wikipedia.org/wiki/X_Macro */
 #define COLOR_X(N, V) N = (V),
