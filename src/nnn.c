@@ -125,7 +125,7 @@
 
 #if defined(ICONS_IN_TERM) || defined(NERD) || defined(EMOJI)
 #define ICONS_ENABLED
-#include "icons-generated.h"
+#include ICONS_INCLUDE
 #include "icons-hash.c"
 #include "icons.h"
 #endif
