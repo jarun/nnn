@@ -95,15 +95,18 @@ ifeq ($(strip $(O_CTX8)),1)
 endif
 
 ifeq ($(strip $(O_ICONS)),1)
-	CPPFLAGS += -DICONS_IN_TERM
+	ICONS_INCLUDE = icons-generated-icons-in-term.h
+	CPPFLAGS += -DICONS_IN_TERM -DICONS_INCLUDE=\"$(ICONS_INCLUDE)\"
 endif
 
 ifeq ($(strip $(O_NERD)),1)
-	CPPFLAGS += -DNERD
+	ICONS_INCLUDE = icons-generated-nerd.h
+	CPPFLAGS += -DNERD -DICONS_INCLUDE=\"$(ICONS_INCLUDE)\"
 endif
 
 ifeq ($(strip $(O_EMOJI)),1)
-	CPPFLAGS += -DEMOJI
+	ICONS_INCLUDE = icons-generated-emoji.h
+	CPPFLAGS += -DEMOJI -DICONS_INCLUDE=\"$(ICONS_INCLUDE)\"
 endif
 
 ifeq ($(strip $(O_QSORT)),1)
@@ -191,13 +194,13 @@ ifeq ($(strip $(O_QSORT)),1)
 	HEADERS += src/qsort.h
 endif
 ifeq ($(strip $(O_EMOJI)),1)
-	HEADERS += src/icons.h src/icons-generated.h
+	HEADERS += src/icons.h src/$(ICONS_INCLUDE)
 endif
 ifeq ($(strip $(O_NERD)),1)
-	HEADERS += src/icons.h src/icons-generated.h
+	HEADERS += src/icons.h src/$(ICONS_INCLUDE)
 endif
 ifeq ($(strip $(O_ICONS)),1)
-	HEADERS += src/icons.h src/icons-generated.h src/icons-in-terminal.h
+	HEADERS += src/icons.h src/$(ICONS_INCLUDE) src/icons-in-terminal.h
 endif
 
 all: $(BIN)
@@ -207,15 +210,14 @@ $(BIN): $(SRC) $(HEADERS) Makefile
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $(GETTIME_C) $< $(LDLIBS)
 	@$(MAKE) --silent postpatch
 
-src/icons-generated.h: src/icons-hash-gen
-	@./$< > $@
-src/icons-hash-gen: src/icons-hash.c src/nnn.c src/icons.h src/nnn.h
-	$(CC) $(CPPFLAGS) -DICONS_GENERATE -o $@ src/icons-hash.c
-
 # targets for backwards compatibility
 debug: $(BIN)
 norl: $(BIN)
 nolc: $(BIN)
+
+src/$(ICONS_INCLUDE): src/icons-hash.c src/icons.h src/icons-in-terminal.h
+	$(CC) $(CPPFLAGS) -DICONS_GENERATE -o src/icons-hash-gen src/icons-hash.c
+	./src/icons-hash-gen > $@
 
 install-desktop: $(DESKTOPFILE)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(DESKTOPPREFIX)
@@ -318,7 +320,7 @@ upload-local: sign static musl
 	    --upload-file $(BIN)-musl-static-$(VERSION).x86_64.tar.gz
 
 clean:
-	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz $(BIN)-emoji-static $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz $(BIN)-musl-static $(BIN)-musl-static-$(VERSION).x86_64.tar.gz src/icons-hash-gen src/icons-generated.h
+	$(RM) -f $(BIN) nnn-$(VERSION).tar.gz *.sig $(BIN)-static $(BIN)-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static $(BIN)-icons-static-$(VERSION).x86_64.tar.gz $(BIN)-nerd-static $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz $(BIN)-emoji-static $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz $(BIN)-musl-static $(BIN)-musl-static-$(VERSION).x86_64.tar.gz src/icons-hash-gen src/icons-generated-*.h
 
 checkpatches:
 	./patches/check-patches.sh
