@@ -1,3 +1,31 @@
+nnn v4.6 Absinthe
+2022-07-26
+
+- icon handling overhaul (#1432, #1436)
+  - better performance, memory usage and reduced binary size
+- emoji support for supporting distros and terminals (#1346)
+- open the target directory of symlinked bookmarks (#1353)
+- enable show hidden when a hidden file is passed as argument
+- add Colemak-DH layout keybinds to patch framework (#1421)
+- set `bsdtar` as the default archive utility
+- support 4 byte unicode keybinds (#1428)
+- enable directory auto-enter during filter operation (`-A` to disable)
+- enable filter prompt inside the bookmark/plugin dirs
+- show volume usage information in help
+- add new icon colors for mp4 and flac files
+- use `stat -x` for file details on *BSD and macOS (#1389)
+- interpret suffix `$nnn` when paging (#1355)
+- disable key <kbd>e</kbd> (edit file) in explorer mode (#1394)
+- fix double order chars on filter case match change
+- `.cbcp`: more verbose message on paste without a selection
+- plugin `preview-tui`: scale-up kitty previews
+- plugin `preview-tui`: account for ueberzug offset
+- plugin `preview-tui`: support `SPLIT_SIZE` for preview pane (#1431)
+- plugin `autojump`: support z.lua
+- new Makefile target `shellcheck` to verify plugins
+
+-------------------------------------------------------------------------------
+
 nnn v4.5 Cachaça
 2022-04-26
 
