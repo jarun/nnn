@@ -309,7 +309,7 @@ upload-local: sign static musl
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
 	    --upload-file $(BIN)-nerd-static-$(VERSION).x86_64.tar.gz
 	# upload emoji compiled static binary
-	tar -zcf $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz $(BIN)-icons-static
+	tar -zcf $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz $(BIN)-emoji-static
 	curl -XPOST 'https://uploads.github.com/repos/jarun/nnn/releases/$(ID)/assets?name=$(BIN)-emoji-static-$(VERSION).x86_64.tar.gz' \
 	    -H 'Authorization: token $(NNN_SIG_UPLOAD_TOKEN)' -H 'Content-Type: application/x-sharedlib' \
 	    --upload-file $(BIN)-emoji-static-$(VERSION).x86_64.tar.gz
