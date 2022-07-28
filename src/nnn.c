@@ -629,7 +629,7 @@ static const char * const messages[] = {
 	"session name: ",
 	"'c'p/'m'v as?",
 	"'c'urrent/'s'el?",
-	"%s %s? [Esc/n/N cancels]",
+	"%s %s? [Esc cancels]",
 	"limit exceeded",
 	"'f'ile/'d'ir/'s'ym/'h'ard?",
 	"'c'li/'g'ui?",
@@ -1430,7 +1430,7 @@ static char confirm_force(bool selection)
 
 	int r = get_input(str);
 
-	if (r == ESC || r == 'n' || r == 'N')
+	if (r == ESC)
 		return '\0'; /* cancel */
 	if (r == 'y' || r == 'Y')
 		return 'f'; /* forceful for rm */
