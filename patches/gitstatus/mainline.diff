@@ -12,7 +12,7 @@ index f8a2c58..157cea5 100644
 @@ -265,6 +265,25 @@
  #define FREE     0
  #define CAPACITY 1
- 
+
 +/* Git icons */
 +#ifdef NERD
 +#define GIT_ADD ""
@@ -41,7 +41,7 @@ index f8a2c58..157cea5 100644
  #endif
 +	char git_status[2][5];
  } *pEntry;
- 
+
  /* Selection marker */
 @@ -344,6 +364,7 @@ typedef struct {
  	uint_t cliopener  : 1;  /* All-CLI app opener */
@@ -49,12 +49,12 @@ index f8a2c58..157cea5 100644
  	uint_t rollover   : 1;  /* Roll over at edges */
 +	uint_t normalgit  : 1;  /* Show git status in normal mode */
  } settings;
- 
+
  /* Non-persistent program-internal states (alphabeical order) */
 @@ -394,7 +415,17 @@ typedef struct {
  } session_header_t;
  #endif
- 
+
 +typedef struct {
 +	char status[2];
 +	char path[PATH_MAX];
@@ -66,13 +66,13 @@ index f8a2c58..157cea5 100644
 +	size_t len;
 +	git_status_t *statuses;
 +} git_statuses;
- 
+
  /* Configuration, contexts */
  static settings cfg = {
 @@ -3819,6 +3850,56 @@ static int get_kv_key(kv *kvarr, char *val, uchar_t max, uchar_t id)
  	return -1;
  }
- 
+
 +static size_t get_git_statuses(const char *path)
 +{
 +	static char gitrev[] = "git rev-parse --show-toplevel 2>/dev/null";
@@ -127,20 +127,20 @@ index f8a2c58..157cea5 100644
  {
  	/* Directories are always shown on top, clear the color when moving to first file */
 @@ -4163,6 +4244,10 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
- 
+
  	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
- 
+
 +	if (git_statuses.show && (cfg.showdetail || cfg.normalgit))
 +		printw("%*s%s%s", (cfg.normalgit && !cfg.showdetail) ? 1 : 0, "",
 +				ent->git_status[0], ent->git_status[1]);
 +
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
- 
+
  	if (g_state.oldcolor)
 @@ -5629,6 +5714,11 @@ static int dentfill(char *path, struct entry **ppdents)
  		attron(COLOR_PAIR(cfg.curctx + 1));
  	}
- 
+
 +	char linkpath[PATH_MAX];
 +	if ((git_statuses.len = get_git_statuses(path)))
 +		if (!realpath(path, linkpath))
@@ -152,7 +152,7 @@ index f8a2c58..157cea5 100644
 @@ -5829,6 +5919,29 @@ static int dentfill(char *path, struct entry **ppdents)
  #endif
  		}
- 
+
 +		if (git_statuses.len) {
 +			char dentpath[PATH_MAX];
 +			size_t pathlen = mkpath(linkpath, dentp->name, dentpath);
@@ -178,7 +178,7 @@ index f8a2c58..157cea5 100644
 +
  		++ndents;
  	} while ((dp = readdir(dirp)));
- 
+
 @@ -6372,11 +6485,12 @@ static int adjust_cols(int n)
  #endif
  	if (cfg.showdetail) {
@@ -192,7 +192,7 @@ index f8a2c58..157cea5 100644
 +			n -= (git_statuses.show ? 34 : 32);
 +	} else if (cfg.normalgit && git_statuses.show)
 +		n -= 3;
- 
+
  	/* 2 columns for preceding space and indicator */
  	return (n - 2);
 @@ -8148,6 +8262,7 @@ static void usage(void)
@@ -212,11 +212,11 @@ index f8a2c58..157cea5 100644
  	free(plgpath);
  	free(cfgpath);
 @@ -8330,7 +8446,7 @@ int main(int argc, char *argv[])
- 
+
  	while ((opt = (env_opts_id > 0
  		       ? env_opts[--env_opts_id]
--		       : getopt(argc, argv, "aAb:cCdDeEfF:gHiJKl:nop:P:QrRs:St:T:uUVxh"))) != -1) {
-+		       : getopt(argc, argv, "aAb:cCdDeEfF:gGHiJKl:nop:P:QrRs:St:T:uUVxh"))) != -1) {
+-		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nop:P:QrRs:St:T:uUVxh"))) != -1) {
++		       : getopt(argc, argv, "aAb:BcCdDeEfF:gGHiJKl:nop:P:QrRs:St:T:uUVxh"))) != -1) {
  		switch (opt) {
  #ifndef NOFIFO
  		case 'a':
