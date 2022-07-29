@@ -12,6 +12,7 @@ args=(
     '(-a)-a[auto-create NNN_FIFO]'
     '(-A)-A[disable dir auto-enter]'
     '(-b)-b[bookmark key to open]:key char'
+    '(-B)-B[use bsdtar for archives]'
     '(-c)-c[cli-only opener]'
     '(-C)-C[color by context]'
     '(-d)-d[start in detail mode]'

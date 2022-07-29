@@ -373,7 +373,8 @@ typedef struct {
 	uint_t stayonsel  : 1;  /* Disable auto-advance on selection */
 	uint_t trash      : 2;  /* Trash method 0: rm -rf, 1: trash-cli, 2: gio trash */
 	uint_t uidgid     : 1;  /* Show owner and group info */
-	uint_t reserved   : 6;  /* Adjust when adding/removing a field */
+	uint_t usebsdtar  : 1;  /* Use bsdtar as default archive utility */
+	uint_t reserved   : 5;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -2670,7 +2671,7 @@ static void get_archive_cmd(char *cmd, const char *archive)
 {
 	uchar_t i = 3;
 
-	if (getutil(utils[UTIL_ATOOL]))
+	if (!g_state.usebsdtar && getutil(utils[UTIL_ATOOL]))
 		i = 0;
 	else if (getutil(utils[UTIL_BSDTAR]))
 		i = 1;
@@ -4573,7 +4574,7 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	char arg[] = "-tvf"; /* options for tar/bsdtar to list files */
 	char *util, *outdir = NULL;
 	bool x_to = FALSE;
-	bool is_atool = getutil(utils[UTIL_ATOOL]);
+	bool is_atool = (!g_state.usebsdtar && getutil(utils[UTIL_ATOOL]));
 
 	if (op == 'x') {
 		outdir = xreadline(is_atool ? "." : xbasename(fpath), messages[MSG_NEW_PATH]);
@@ -8095,6 +8096,7 @@ static void usage(void)
 #endif
 		" -A      no dir auto-enter during filter\n"
 		" -b key  open bookmark key (trumps -s/S)\n"
+		" -B      use bsdtar for archives\n"
 		" -c      cli-only NNN_OPENER (trumps -e)\n"
 		" -C      8-color scheme\n"
 		" -d      detail mode\n"
@@ -8290,7 +8292,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:cCdDeEfF:gHiJKl:nop:P:QrRs:St:T:uUVxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nop:P:QrRs:St:T:uUVxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -8303,6 +8305,9 @@ int main(int argc, char *argv[])
 		case 'b':
 			if (env_opts_id < 0)
 				arg = optarg;
+			break;
+		case 'B':
+			g_state.usebsdtar = 1;
 			break;
 		case 'c':
 			cfg.cliopener = 1;
