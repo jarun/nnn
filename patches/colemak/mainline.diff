@@ -4,10 +4,10 @@
 # Author: github.com/anjerukare
 
 diff --git a/src/nnn.c b/src/nnn.c
-index 9844935e..b56f3591 100644
+index a2f54a23..8ff09d81 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -5006,39 +5006,39 @@ static void show_help(const char *path)
+@@ -4968,39 +4968,39 @@ static void show_help(const char *path)
  	const char helpstr[] = {
  	"0\n"
  	"1NAVIGATION\n"
@@ -15,13 +15,13 @@ index 9844935e..b56f3591 100644
 -	       "9Dn j  Down%-14cPgDn ^D  Page down\n"
 -	       "9Lt h  Parent%-12c~ ` @ -  ~, /, start, prev\n"
 -	   "5Ret Rt l  Open%-20c'  First file/match\n"
--	       "9g ^A  Top%-21c.  Toggle hidden\n"
+-	       "9g ^A  Top%-21cJ  Jump to entry/offset\n"
 -	       "9G ^E  End%-20c^J  Toggle auto-advance on open\n"
 +	       "9Up e  Up%-16cPgUp ^U  Page up\n"
 +	       "9Dn n  Down%-14cPgDn ^D  Page down\n"
 +	       "9Lt m  Parent%-12c~ ` @ -  ~, /, start, prev\n"
 +	   "5Ret Rt i  Open%-20c'  First file/match\n"
-+	       "9g ^E  Top%-21c.  Toggle hidden\n"
++	       "9g ^E  Top%-21cJ  Jump to entry/offset\n"
 +	       "9G ^N  End%-20c^J  Toggle auto-jump on open\n"
  	      "8B (,)  Book(mark)%-11cb ^/  Select bookmark\n"
  		"a1-4  Context%-11c(Sh)Tab  Cycle/new context\n"
@@ -32,7 +32,7 @@ index 9844935e..b56f3591 100644
 -		  "c/  Filter%-17c^N  Toggle type-to-nav\n"
 +		  "c/  Filter%-17c^F  Toggle type-to-nav\n"
  		"aEsc  Exit prompt%-12c^L  Toggle last filter\n"
- 			"d%-20cAlt+Esc  Unfilter, quit context\n"
+ 		  "c.  Toggle hidden%-5cAlt+Esc  Unfilter, quit context\n"
  	"0\n"
  	"1FILES\n"
 -	       "9o ^O  Open with%-15cn  Create new/link\n"
@@ -62,10 +62,10 @@ index 9844935e..b56f3591 100644
  		 "b^L  Redraw%-18c?  Help, conf\n"
  	};
 diff --git a/src/nnn.h b/src/nnn.h
-index e603840f..d544a60e 100644
+index cb4d6d69..8a73ac53 100644
 --- a/src/nnn.h
 +++ b/src/nnn.h
-@@ -128,18 +128,18 @@ struct key {
+@@ -130,18 +130,18 @@ struct key {
  static struct key bindings[] = {
  	/* Back */
  	{ KEY_LEFT,       SEL_BACK },
@@ -88,7 +88,7 @@ index e603840f..d544a60e 100644
  	{ KEY_UP,         SEL_PREV },
  	/* Page down */
  	{ KEY_NPAGE,      SEL_PGDN },
-@@ -152,11 +152,11 @@ static struct key bindings[] = {
+@@ -154,11 +154,11 @@ static struct key bindings[] = {
  	/* First entry */
  	{ KEY_HOME,       SEL_HOME },
  	{ 'g',            SEL_HOME },
@@ -101,8 +101,8 @@ index e603840f..d544a60e 100644
 +	{ CONTROL('N'),   SEL_END },
  	/* Go to first file */
  	{ '\'',           SEL_FIRST },
- 	/* HOME */
-@@ -171,7 +171,7 @@ static struct key bindings[] = {
+ 	/* Jump to an entry number/offset */
+@@ -175,7 +175,7 @@ static struct key bindings[] = {
  	{ 'b',            SEL_BMOPEN },
  	{ CONTROL('_'),   SEL_BMOPEN },
  	/* Connect to server over SSHFS */
@@ -111,7 +111,7 @@ index e603840f..d544a60e 100644
  	/* Cycle contexts in forward direction */
  	{ '\t',           SEL_CYCLE },
  	/* Cycle contexts in reverse direction */
-@@ -194,14 +194,13 @@ static struct key bindings[] = {
+@@ -198,14 +198,13 @@ static struct key bindings[] = {
  	/* Filter */
  	{ '/',            SEL_FLTR },
  	/* Toggle filter mode */
@@ -127,7 +127,7 @@ index e603840f..d544a60e 100644
  	/* Toggle executable status */
  	{ '*',            SEL_CHMODX },
  	/* Create archive */
-@@ -215,13 +214,13 @@ static struct key bindings[] = {
+@@ -219,13 +218,13 @@ static struct key bindings[] = {
  	{ ' ',            SEL_SEL },
  	{ '+',            SEL_SEL },
  	/* Toggle select multiple files */
@@ -143,7 +143,7 @@ index e603840f..d544a60e 100644
  	/* Copy from selection buffer */
  	{ 'p',            SEL_CP },
  	{ CONTROL('P'),   SEL_CP },
-@@ -238,7 +237,7 @@ static struct key bindings[] = {
+@@ -242,7 +241,7 @@ static struct key bindings[] = {
  	{ 'o',            SEL_OPENWITH },
  	{ CONTROL('O'),   SEL_OPENWITH },
  	/* Create a new file */
@@ -152,7 +152,7 @@ index e603840f..d544a60e 100644
  	/* Show rename prompt */
  	{ CONTROL('R'),   SEL_RENAME },
  	/* Rename contents of current dir */
-@@ -250,7 +249,7 @@ static struct key bindings[] = {
+@@ -254,7 +253,7 @@ static struct key bindings[] = {
  	/* Toggle auto-advance on file open */
  	{ CONTROL('J'),   SEL_AUTONEXT },
  	/* Edit in EDITOR */
@@ -161,7 +161,7 @@ index e603840f..d544a60e 100644
  	/* Run a plugin */
  	{ ';',            SEL_PLUGIN },
  	/* Run command */
-@@ -263,7 +262,7 @@ static struct key bindings[] = {
+@@ -267,7 +266,7 @@ static struct key bindings[] = {
  	/* Lock screen */
  	{ '0',            SEL_LOCK },
  	/* Manage sessions */
