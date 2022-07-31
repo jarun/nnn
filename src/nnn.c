@@ -585,7 +585,7 @@ static char * const utils[] = {
 #define MSG_CP_MV_AS     7
 #define MSG_CUR_SEL_OPTS 8
 #define MSG_FORCE_RM     9
-#define MSG_LIMIT        10
+#define MSG_SIZE_LIMIT   10
 #define MSG_NEW_OPTS     11
 #define MSG_CLI_MODE     12
 #define MSG_OVERWRITE    13
@@ -619,6 +619,7 @@ static char * const utils[] = {
 #define MSG_NOCHANGE     41
 #define MSG_DIR_CHANGED  42
 #define MSG_BM_NAME      43
+#define MSG_FILE_LIMIT   44
 
 static const char * const messages[] = {
 	"",
@@ -631,7 +632,7 @@ static const char * const messages[] = {
 	"'c'p/'m'v as?",
 	"'c'urrent/'s'el?",
 	"%s %s? [Esc cancels]",
-	"limit exceeded",
+	"size limit exceeded",
 	"'f'ile/'d'ir/'s'ym/'h'ard?",
 	"'c'li/'g'ui?",
 	"overwrite?",
@@ -665,6 +666,7 @@ static const char * const messages[] = {
 	"unchanged",
 	"dir changed, range sel off",
 	"name: ",
+	"file limit exceeded",
 };
 
 /* Supported configuration environment variables */
@@ -7940,7 +7942,7 @@ static char *load_input(int fd, const char *path)
 	} else
 		xstrsncpy(cwd, path, PATH_MAX);
 
-	while (chunk_count < 512) {
+	while ((chunk_count) < 512 && !msgnum) {
 		input_read = read(fd, input + total_read, chunk);
 		if (input_read < 0) {
 			DPRINTF_S(strerror(errno));
@@ -7964,8 +7966,8 @@ static char *load_input(int fd, const char *path)
 			}
 
 			if (entries == LIST_FILES_MAX) {
-				msgnum = MSG_LIMIT;
-				goto malloc_1;
+				msgnum = MSG_FILE_LIMIT;
+				break;
 			}
 
 			offsets[entries++] = off;
@@ -7973,8 +7975,8 @@ static char *load_input(int fd, const char *path)
 		}
 
 		if (chunk_count == 512) {
-			msgnum = MSG_LIMIT;
-			goto malloc_1;
+			msgnum = MSG_SIZE_LIMIT;
+			break;
 		}
 
 		/* We don't need to allocate another chunk */
@@ -7990,13 +7992,17 @@ static char *load_input(int fd, const char *path)
 			return NULL;
 	}
 
-	if (off != total_read) {
-		if (entries == LIST_FILES_MAX) {
-			msgnum = MSG_LIMIT;
-			goto malloc_1;
-		}
+	/* Read off the extra data if limits exceeded */
+	if (msgnum) {
+		char buf[512];
+		while (read(fd, buf, 512) > 0);
+	}
 
-		offsets[entries++] = off;
+	if (off != total_read) {
+		if (entries == LIST_FILES_MAX)
+			msgnum = MSG_FILE_LIMIT;
+		else
+			offsets[entries++] = off;
 	}
 
 	DPRINTF_D(entries);
@@ -8057,12 +8063,14 @@ malloc_2:
 	for (i = entries - 1; i >= 0; --i)
 		free(paths[i]);
 malloc_1:
-	if (msgnum) {
-		if (home) { /* We are past init stage */
+	if (msgnum) { /* Check if we are past init stage and show msg */
+		if (home) {
 			printmsg(messages[msgnum]);
-			xdelay(XDELAY_INTERVAL_MS);
-		} else
+			xdelay(XDELAY_INTERVAL_MS << 2);
+		} else {
 			msg(messages[msgnum]);
+			usleep(XDELAY_INTERVAL_MS << 2);
+		}
 	}
 	free(input);
 	free(paths);

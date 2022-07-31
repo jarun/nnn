@@ -312,7 +312,7 @@ There are two ways to search and list:
 .Pp
 File paths must be NUL-separated ('\\0'). Paths and can be relative to the
 current directory or absolute. Invalid paths in the input are ignored. Input
-limit is 16,384 paths or 256 MiB of data.
+processing limit is 16,384 paths or 64 MiB (max_paths x max_path_len) of data.
 .Pp
 To list the input stream, start
 .Nm
