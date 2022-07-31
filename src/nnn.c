@@ -4972,7 +4972,7 @@ static void show_help(const char *path)
 	       "9Dn j  Down%-14cPgDn ^D  Page down\n"
 	       "9Lt h  Parent%-12c~ ` @ -  ~, /, start, prev\n"
 	   "5Ret Rt l  Open%-20c'  First file/match\n"
-	       "9g ^A  Top%-21c.  Toggle hidden\n"
+	       "9g ^A  Top%-21cJ  Jump to entry/offset\n"
 	       "9G ^E  End%-20c^J  Toggle auto-advance on open\n"
 	      "8B (,)  Book(mark)%-11cb ^/  Select bookmark\n"
 		"a1-4  Context%-11c(Sh)Tab  Cycle/new context\n"
@@ -4982,7 +4982,7 @@ static void show_help(const char *path)
 	"1FILTER & PROMPT\n"
 		  "c/  Filter%-17c^N  Toggle type-to-nav\n"
 		"aEsc  Exit prompt%-12c^L  Toggle last filter\n"
-			"d%-20cAlt+Esc  Unfilter, quit context\n"
+		  "c.  Toggle hidden%-5cAlt+Esc  Unfilter, quit context\n"
 	"0\n"
 	"1FILES\n"
 	       "9o ^O  Open with%-15cn  Create new/link\n"
@@ -5934,11 +5934,11 @@ static void handle_screen_move(enum action sel)
 
 	switch (sel) {
 	case SEL_NEXT:
-		if (ndents && (cfg.rollover || (cur != ndents - 1)))
+		if (cfg.rollover || (cur != ndents - 1))
 			move_cursor((cur + 1) % ndents, 0);
 		break;
 	case SEL_PREV:
-		if (ndents && (cfg.rollover || cur))
+		if (cfg.rollover || cur)
 			move_cursor((cur + ndents - 1) % ndents, 0);
 		break;
 	case SEL_PGDN:
@@ -5951,7 +5951,7 @@ static void handle_screen_move(enum action sel)
 		move_cursor(curscroll + (onscreen - 1), 1);
 		curscroll += onscreen >> 1;
 		break;
-	case SEL_PGUP: // fallthrough
+	case SEL_PGUP:
 		onscreen = xlines - 4;
 		move_cursor(curscroll, 1);
 		curscroll -= onscreen - 1;
@@ -5961,6 +5961,32 @@ static void handle_screen_move(enum action sel)
 		move_cursor(curscroll, 1);
 		curscroll -= onscreen >> 1;
 		break;
+	case SEL_JUMP:
+	{
+		char *input = xreadline(NULL, "jump (+n/-n/n): ");
+
+		if (!input || !*input)
+			break;
+		if (input[0] == '-') {
+			cur -= atoi(input + 1);
+			if (cur < 0)
+				cur = 0;
+		} else if (input[0] == '+') {
+			cur += atoi(input + 1);
+			if (cur >= ndents)
+				cur = ndents - 1;
+		} else {
+			int index = atoi(input);
+
+			if ((index < 1) || (index > ndents))
+				break;
+			cur = index - 1;
+		}
+		onscreen = xlines - 4;
+		move_cursor(cur, 1);
+		curscroll -= onscreen >> 1;
+		break;
+	}
 	case SEL_HOME:
 		move_cursor(0, 1);
 		break;
@@ -7031,7 +7057,8 @@ nochange:
 		case SEL_CTRL_U: // fallthrough
 		case SEL_HOME: // fallthrough
 		case SEL_END: // fallthrough
-		case SEL_FIRST:
+		case SEL_FIRST: // fallthrough
+		case SEL_JUMP:
 			if (ndents) {
 				g_state.move = 1;
 				handle_screen_move(sel);
