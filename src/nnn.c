@@ -189,7 +189,7 @@
 #define DOT_FILTER_LEN  7
 #define ASCII_MAX       128
 #define EXEC_ARGS_MAX   10
-#define LIST_FILES_MAX  (1 << 16)
+#define LIST_FILES_MAX  (1 << 14) /* Support listing 16K files */
 #define SCROLLOFF       3
 #define COLOR_256       256
 
@@ -5543,7 +5543,7 @@ static bool prep_threads(void)
 }
 
 /* Skip self and parent */
-static bool selforparent(const char *path)
+static inline bool selforparent(const char *path)
 {
 	return path[0] == '.' && (path[1] == '\0' || (path[1] == '.' && path[2] == '\0'));
 }
@@ -7900,7 +7900,8 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 		if (slash)
 			*slash = '\0';
 
-		xmktree(tmpdir, TRUE);
+		if (access(tmpdir, F_OK)) /* Create directory if it doesn't exist */
+			xmktree(tmpdir, TRUE);
 
 		if (slash)
 			*slash = '/';
@@ -8194,7 +8195,8 @@ static bool setup_config(void)
 	/* Create bookmarks, sessions, mounts and plugins directories */
 	for (r = 0; r < ELEMENTS(toks); ++r) {
 		mkpath(cfgpath, toks[r], plgpath);
-		if (!xmktree(plgpath, TRUE)) {
+		/* The dirs are created on first run, check if they already exist */
+		if (access(plgpath, F_OK) && !xmktree(plgpath, TRUE)) {
 			DPRINTF_S(toks[r]);
 			xerror();
 			return FALSE;
