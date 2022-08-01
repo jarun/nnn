@@ -2992,7 +2992,7 @@ static int nextsel(int presel)
 	return SEL_QUIT;
 #endif
 	wint_t c = presel;
-	int i = ERR;
+	int i = 0;
 	bool escaped = FALSE;
 
 	if (c == 0 || c == MSGWAIT) {
