@@ -190,6 +190,7 @@
 #define ASCII_MAX       128
 #define EXEC_ARGS_MAX   10
 #define LIST_FILES_MAX  (1 << 14) /* Support listing 16K files */
+#define LIST_INPUT_MAX  ((size_t)LIST_FILES_MAX * PATH_MAX)
 #define SCROLLOFF       3
 #define COLOR_256       256
 
@@ -7948,7 +7949,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 
 static char *load_input(int fd, const char *path)
 {
-	ssize_t i, chunk_count = 1, chunk = (ssize_t)(512 * 1024) /* 512 KiB chunk size */, entries = 0;
+	size_t i, chunk_count = 1, chunk = 512UL * 1024 /* 512 KiB chunk size */, entries = 0;
 	char *input = malloc(sizeof(char) * chunk), *tmpdir = NULL;
 	char cwd[PATH_MAX], *next;
 	size_t offsets[LIST_FILES_MAX];
@@ -7969,9 +7970,12 @@ static char *load_input(int fd, const char *path)
 	} else
 		xstrsncpy(cwd, path, PATH_MAX);
 
-	while ((chunk_count) < 512 && !msgnum) {
+	while (chunk_count < LIST_INPUT_MAX / chunk && !msgnum) {
 		input_read = read(fd, input + total_read, chunk);
 		if (input_read < 0) {
+			if (errno == EINTR)
+				continue
+
 			DPRINTF_S(strerror(errno));
 			goto malloc_1;
 		}
@@ -7980,7 +7984,6 @@ static char *load_input(int fd, const char *path)
 			break;
 
 		total_read += input_read;
-		++chunk_count;
 
 		while (off < total_read) {
 			if ((next = memchr(input + off, '\0', total_read - off)) == NULL)
@@ -8001,29 +8004,23 @@ static char *load_input(int fd, const char *path)
 			off = next - input;
 		}
 
-		if (chunk_count == 512) {
+		/* We don't need to allocate another chunk */
+		if (chunk_count > (total_read + chunk - 1) / chunk)
+			continue;
+
+		/* We can never need more than one additional chunk */
+		++chunk_count;
+		if (chunk_count > LIST_INPUT_MAX / chunk) {
 			msgnum = MSG_SIZE_LIMIT;
 			break;
 		}
 
-		/* We don't need to allocate another chunk */
-		if (chunk_count == (total_read - input_read) / chunk)
-			continue;
-
-		chunk_count = total_read / chunk;
-		if (total_read % chunk)
-			++chunk_count;
-
-		input = xrealloc(input, (chunk_count + 1) * chunk);
+		input = xrealloc(input, chunk_count * chunk);
 		if (!input)
-			return NULL;
+			goto malloc_1;
 	}
 
-	/* Read off the extra data if limits exceeded */
-	if (msgnum) {
-		char buf[512];
-		while (read(fd, buf, 512) > 0);
-	}
+	/* We close fd outside this function. Any extra data is left to the kernel to handle */
 
 	if (off != total_read) {
 		if (entries == LIST_FILES_MAX)
@@ -8067,7 +8064,6 @@ static char *load_input(int fd, const char *path)
 		if (!paths[i]) {
 			entries = i; // free from the previous entry
 			goto malloc_2;
-
 		}
 
 		DPRINTF_S(paths[i]);
@@ -8087,7 +8083,7 @@ static char *load_input(int fd, const char *path)
 		tmpdir = make_tmp_tree(paths, entries, listroot);
 
 malloc_2:
-	for (i = entries - 1; i >= 0; --i)
+	for (i = 0; i < entries; ++i)
 		free(paths[i]);
 malloc_1:
 	if (msgnum) { /* Check if we are past init stage and show msg */
@@ -8099,6 +8095,7 @@ malloc_1:
 			usleep(XDELAY_INTERVAL_MS << 2);
 		}
 	}
+
 	free(input);
 	free(paths);
 	return tmpdir;
