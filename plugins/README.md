@@ -131,7 +131,7 @@ Note:
 - A keybinding definition of more than 1 character will prevent nnn from starting.
 
 
-#### Skip directory refresh after running a plugin
+#### Skip directory refresh after running a plugin [`-`]
 
 `nnn` refreshes the directory after running a plugin to reflect any changes by the plugin. To disable this add a `-` before the plugin name:
 
@@ -139,7 +139,7 @@ Note:
 export NNN_PLUG='p:-plugin'
 ```
 
-## Running commands as plugin
+## Running commands as plugin [`!`]
 
 To assign keys to arbitrary non-background cli commands and invoke like plugins, add `!` (underscore) before the command.
 
@@ -149,7 +149,7 @@ export NNN_PLUG='x:!chmod +x $nnn;g:!git log;s:!smplayer $nnn'
 
 Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be used to the git log of a git project directory, <kbd>;s</kbd> can be used to preview a partially downloaded media file.
 
-#### Skip user confirmation after command execution
+#### Skip user confirmation after command execution [`*`]
 
 `nnn` waits for user confirmation (the prompt `Press Enter to continue`) after it executes a command as plugin (unlike plugins which can add a `read` to wait). To skip this, add a `*` after the command.
 
@@ -161,7 +161,7 @@ Now there will be no prompt after <kbd>;s</kbd> and <kbd>;n</kbd>.
 
 Note: Do not use `*` with programs those run and exit e.g. cat.
 
-#### Run a GUI app as plugin
+#### Run a GUI app as plugin [`&`]
 
 To run a GUI app as plugin, add a `&` after `!`.
 
@@ -171,7 +171,7 @@ export NNN_PLUG='m:-!&mousepad $nnn'
 
 Note: `$nnn` must be the last argument in this case.
 
-#### Page non-interactive command output
+#### Page non-interactive command output [`|`]
 
 To show the output of run-and-exit commands which do not need user input, add `|` (pipe) after `!`.
 
@@ -232,6 +232,7 @@ The plugin should write a single string in the format `(<->)<ctxcode><opcode><da
 The optional `-` at the **beginning of the stream** instructs `nnn` to clear the selection.
 In cases where the data transfer to `nnn` has to happen while the selection file is being read (e.g. in a loop), the plugin should
 create a tmp copy of the selection file, inform `nnn` to clear the selection and then do the subsequent processing with the tmp file.
+A paged [`|`] or GUI [`&`] cmd run as plugin cannot clear selection.
 
 The `ctxcode` indicates the context to change the active directory of.
 
