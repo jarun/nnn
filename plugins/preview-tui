@@ -379,7 +379,6 @@ generate_preview() {
                     printf "%s" "$!" > "$PREVIEWPID"
                     return
                  else
-                    exec >/dev/tty
                     image_preview "$1" "$2" "$3"
                     return
                  fi ;;
@@ -405,6 +404,7 @@ generate_preview() {
 
 image_preview() {
     clear
+    exec >/dev/tty
     if [ "$TERMINAL" = "kitty" ]; then
         # Kitty terminal users can use the native image preview method
         kitty +kitten icat --silent --scale-up --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
