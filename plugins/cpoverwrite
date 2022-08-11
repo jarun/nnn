@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+
+#set -x
+# Description: Enables you to copy(overwrite) files without needing 
+#              to explicitely state 'y' option for every file
+#
+# Dependencies: cp, rsync
+#
+# Shell: POSIX compliant
+# Author: Darukutsu 
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+echo "
+Do you wish to overwrite existing files? y/N/d 
+y-yes; n-no(default); d-overwrites directory 
+input anything else to cancel ('q' for example)"
+
+read option
+
+case $option in
+     y | yes | Y | YES) option='if [ -d {} ]; then cp -r {} .; else cp {} .; fi';;
+  "" | n | no | N | NO) option='if [ -d {} ]; then cp -nr {} .; else cp {} .; fi';;
+		 d | D) option='if [ -d {} ]; then rsync -a --delete {} .; else cp {} .; fi';;
+		     *) echo "Nothing to do..." exit;;
+esac
+
+xargs -0 < "$selection" -I{} sh -c "$option"
+# Clear selection
+printf "-" > "$NNN_PIPE"
+
