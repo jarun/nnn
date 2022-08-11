@@ -100,6 +100,8 @@
 #include <strings.h>
 #include <time.h>
 #include <unistd.h>
+#include <stddef.h>
+#include <stdalign.h>
 #ifndef __USE_XOPEN_EXTENDED
 #define __USE_XOPEN_EXTENDED 1
 #endif
@@ -408,7 +410,7 @@ static settings cfg = {
 	.rollover = 1,
 };
 
-static context g_ctx[CTX_MAX] __attribute__ ((aligned));
+alignas(max_align_t) static context g_ctx[CTX_MAX];
 
 static int ndents, cur, last, curscroll, last_curscroll, total_dents = ENTRY_INCR, scroll_lines = 1;
 static int nselected;
@@ -490,16 +492,16 @@ static struct sigaction oldsigtstp;
 static struct sigaction oldsigwinch;
 
 /* For use in functions which are isolated and don't return the buffer */
-static char g_buf[CMD_LEN_MAX] __attribute__ ((aligned));
+alignas(max_align_t) static char g_buf[CMD_LEN_MAX];
 
 /* For use as a scratch buffer in selection manipulation */
-static char g_sel[PATH_MAX] __attribute__ ((aligned));
+alignas(max_align_t) static char g_sel[PATH_MAX];
 
 /* Buffer to store tmp file path to show selection, file stats and help */
-static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
+alignas(max_align_t) static char g_tmpfpath[TMP_LEN_MAX];
 
 /* Buffer to store plugins control pipe location */
-static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
+alignas(max_align_t) static char g_pipepath[TMP_LEN_MAX];
 
 /* Non-persistent runtime states */
 static runstate g_state;
@@ -2794,7 +2796,7 @@ static int xstrverscasecmp(const char * const s1, const char * const s2)
 		/* S_Z */  S_N, S_F, S_Z
 	};
 
-	static const int8_t result_type[] __attribute__ ((aligned)) = {
+	alignas(max_align_t) static const int8_t result_type[] = {
 		/* state   x/x  x/d  x/0  d/x  d/d  d/0  0/x  0/d  0/0  */
 
 		/* S_N */  VCMP, VCMP, VCMP, VCMP, VLEN, VCMP, VCMP, VCMP, VCMP,
@@ -3227,7 +3229,7 @@ static int dentfind(const char *fname, int n)
 
 static int filterentries(char *path, char *lastname)
 {
-	wchar_t *wln = (wchar_t *)alloca(sizeof(wchar_t) * REGEX_MAX);
+	alignas(max_align_t) wchar_t wln[REGEX_MAX];
 	char *ln = g_ctx[cfg.curctx].c_fltr;
 	wint_t ch[1];
 	int r, total = ndents, len;
@@ -6562,8 +6564,8 @@ static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)
 
 static bool browse(char *ipath, const char *session, int pkey)
 {
-	char newpath[PATH_MAX] __attribute__ ((aligned)),
-	     runfile[NAME_MAX + 1] __attribute__ ((aligned));
+	alignas(max_align_t) char newpath[PATH_MAX];
+	alignas(max_align_t) char runfile[NAME_MAX + 1];
 	char *path, *lastdir, *lastname, *dir, *tmp;
 	pEntry pent;
 	enum action sel;
