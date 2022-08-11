@@ -15,7 +15,7 @@ Do you wish to overwrite existing files? y/N/d
 y-yes; n-no(default); d-overwrites directory 
 input anything else to cancel ('q' for example)"
 
-read option
+read -r option
 
 case $option in
      y | yes | Y | YES) option='if [ -d {} ]; then cp -r {} .; else cp {} .; fi';;
