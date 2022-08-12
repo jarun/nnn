@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+# Force delete selected files or directories
+# Modified from 
+# https://github.com/jarun/nnn/blob/v4.6/plugins/openall
+
+sel=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+if [ -s "$sel" ]; then
+    targets=()
+    while IFS= read -r -d '' entry || [ -n "$entry" ]; do
+        targets+=( "$entry" )
+    done < "$sel"
+
+    no_of_files=${#targets[@]}
+
+    # Delete if at least one file
+    if (( no_of_files > 0 ))
+    then
+    rm -rf "${targets[@]}"
+    fi
+
+    # Clear selection
+    if [ -s "$sel" ] && [ -p "$NNN_PIPE" ]; then
+        printf "-" > "$NNN_PIPE"
+    fi
+elif [ -n "$1" ]; then
+    : # Do nothing
+fi
