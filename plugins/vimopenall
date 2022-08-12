@@ -19,8 +19,8 @@ if [ -s "$sel" ]; then
 
     no_of_files=${#targets[@]}
 
-    # Open only if > 1 file
-    if (( no_of_files > 1 ))
+    # Open if at least one file
+    if (( no_of_files > 0 ))
     then
     $OPENER -p "${targets[@]}"
     fi
