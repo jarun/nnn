@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+# Open selected files in vim
+# Modified from 
+# https://github.com/jarun/nnn/blob/v4.6/plugins/openall
+
+sel=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+OPENER="vim"
+
+if [ -s "$sel" ]; then
+    targets=()
+    while IFS= read -r -d '' entry || [ -n "$entry" ]; do
+        # Only open files (not directories)
+        if [[ -f $entry ]]
+        then
+        targets+=( "$entry" )
+        fi
+    done < "$sel"
+
+    no_of_files=${#targets[@]}
+
+    # Open only if > 1 file
+    if (( $no_of_files > 1 ))
+    then
+    $OPENER -p ${targets[@]}
+    fi
+
+    # Clear selection
+    if [ -s "$sel" ] && [ -p "$NNN_PIPE" ]; then
+        printf "-" > "$NNN_PIPE"
+    fi
+elif [ -n "$1" ]; then
+    : # Do nothing
+fi
