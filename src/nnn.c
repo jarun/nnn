@@ -985,10 +985,7 @@ static char *xstrdup(const char *restrict s)
 {
 	size_t len = xstrlen(s) + 1;
 	char *ptr = malloc(len);
-
-	if (ptr)
-		xstrsncpy(ptr, s, len);
-	return ptr;
+	return ptr ? memcpy(ptr, s, len) : NULL;
 }
 
 static bool is_suffix(const char *restrict str, const char *restrict suffix)
