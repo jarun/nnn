@@ -8102,7 +8102,7 @@ malloc_1:
 
 static void check_key_collision(void)
 {
-	int key;
+	wint_t key;
 	bool bitmap[KEY_MAX] = {FALSE};
 
 	for (ullong_t i = 0; i < ELEMENTS(bindings); ++i) {
