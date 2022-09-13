@@ -24,7 +24,7 @@ args=(
     '(-H)-H[show hidden files]'
     '(-i)-i[show current file info]'
     '(-J)-J[no auto-advance on selection]'
-    '(-K)-K[detect key collision]'
+    '(-K)-K[detect key collision and exit]'
     '(-l)-l[lines to move per scroll]:val'
     '(-n)-n[start in type-to-nav mode]'
     '(-o)-o[open files only on Enter]'

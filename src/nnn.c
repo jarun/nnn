@@ -8146,7 +8146,7 @@ static void usage(void)
 		" -H      show hidden files\n"
 		" -i      show current file info\n"
 		" -J      no auto-advance on selection\n"
-		" -K      detect key collision\n"
+		" -K      detect key collision and exit\n"
 		" -l val  set scroll lines\n"
 		" -n      type-to-nav mode\n"
 		" -o      open files only on Enter\n"
