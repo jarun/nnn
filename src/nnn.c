@@ -6675,7 +6675,7 @@ begin:
 			if (cfgsort[cfg.curctx] == 'z')
 				set_sort_flags('c');
 			if ((!cfgsort[cfg.curctx] || (cfgsort[cfg.curctx] == 'c'))
-			    && ((r = get_kv_key(order, path, maxorder, NNN_ORDER)) > 0)) {
+			    && ((r = get_kv_key(order, path, maxorder, NNN_ORDER)) > 0)) { // NOLINT
 				set_sort_flags(r);
 				cfgsort[cfg.curctx] = 'z';
 			}
@@ -7986,7 +7986,8 @@ static char *load_input(int fd, const char *path)
 		total_read += input_read;
 
 		while (off < total_read) {
-			if ((next = memchr(input + off, '\0', total_read - off)) == NULL)
+			next = memchr(input + off, '\0', total_read - off);
+			if (!next)
 				break;
 			++next;
 
