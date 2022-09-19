@@ -2,7 +2,8 @@
 
 # Description: Create and verify checksums
 #
-# Note:  On macOS, install the relevant checksum packages from Homebrew.
+# Note:  On macOS, install the relevant checksum packages from Homebrew with:
+#            brew install coreutils
 #
 # Details:
 #   - selection: it will generate one file with the checksums and filenames
