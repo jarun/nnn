@@ -1403,6 +1403,13 @@ static int get_cur_or_sel(void)
 		if (cfg.prefersel && selbufpos)
 			return 's';
 
+		if (nselected == 1) {
+			char choicefullpath[PATH_MAX];
+			snprintf(choicefullpath, PATH_MAX, "%s/%s", g_ctx[cfg.curctx].c_path, pdents[cur].name);
+			if (!strcmp(choicefullpath, pselbuf))
+				return 'c';
+		}
+
 		int choice = get_input(messages[MSG_CUR_SEL_OPTS]);
 
 		return ((choice == 'c' || choice == 's') ? choice : 0);
