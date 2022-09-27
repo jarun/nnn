@@ -634,7 +634,7 @@ static const char * const messages[] = {
 	"session name: ",
 	"'c'p/'m'v as?",
 	"'c'urrent/'s'el?",
-	"%s %s%s? [Esc cancels]",
+	"%s %s? [Esc cancels]",
 	"size limit exceeded",
 	"'f'ile/'d'ir/'s'ym/'h'ard?",
 	"'c'li/'g'ui?",
@@ -1429,8 +1429,7 @@ static char confirm_force(bool selection)
 
 	snprintf(str, 64, messages[MSG_FORCE_RM],
 		 g_state.trash ? utils[UTIL_GIO_TRASH] + 4 : utils[UTIL_RM_RF],
-		 (selection ? "selected " : "hovered"),
-		 (selection ? xitoa(nselected) : ""));
+		 (selection ? "selected" : "hovered"));
 
 	int r = get_input(str);
 
