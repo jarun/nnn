@@ -7973,7 +7973,7 @@ static char *load_input(int fd, const char *path)
 		input_read = read(fd, input + total_read, chunk);
 		if (input_read < 0) {
 			if (errno == EINTR)
-				continue
+				continue;
 
 			DPRINTF_S(strerror(errno));
 			goto malloc_1;
