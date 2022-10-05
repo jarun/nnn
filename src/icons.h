@@ -91,6 +91,7 @@
 #define ICON_PYTHON        ICON_STR(MFIZZ_PYTHON, "\ue235", "🐍")
 #define ICON_REACT         ICON_STR(FILE_JSX, "\ue625", ICON_JAVASCRIPT)
 #define ICON_RUBY          ICON_STR(MFIZZ_RUBY, "\ue23e", "💎")
+#define ICON_RUST          ICON_STR(DEV_RUST, "\ue7a8", "")
 #define ICON_SASS          ICON_STR("", "\ue603", "")
 #define ICON_SCRIPT        ICON_STR(MFIZZ_SCRIPT, "\ue795", "📜")
 #define ICON_SUBTITLE      ICON_STR(FA_COMMENTS_O, "\uf679", "💬")
@@ -123,6 +124,7 @@
 #define ICON_EXT_SCALA     ICON_STR(MFIZZ_SCALA, "\ue737", "")
 #define ICON_EXT_SLN       ICON_STR(DEV_VISUALSTUDIO, "\ue70c", "")
 #define ICON_EXT_TS        ICON_STR(FILE_TS, "\ue628", "")
+
 
 /*
  * Hex xterm 256 color code, 0 to follow file specific (if any)
@@ -360,6 +362,7 @@ static const struct icon_pair icons_ext[] = {
 	{"rc",         ICON_CONFIGURE,      0},
 	{"rom",        ICON_EXT_ROM,        0},
 	{"rpm",        ICON_ARCHIVE,        COLOR_ARCHIVE},
+	{"rs",         ICON_RUST,           COLOR_DOCS},
 	{"rss",        ICON_EXT_RSS,        0},
 	{"rtf",        ICON_EXT_RTF,        0},
 
