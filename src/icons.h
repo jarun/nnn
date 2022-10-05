@@ -91,7 +91,7 @@
 #define ICON_PYTHON        ICON_STR(MFIZZ_PYTHON, "\ue235", "🐍")
 #define ICON_REACT         ICON_STR(FILE_JSX, "\ue625", ICON_JAVASCRIPT)
 #define ICON_RUBY          ICON_STR(MFIZZ_RUBY, "\ue23e", "💎")
-#define ICON_RUST          ICON_STR("", "\ue7a8", "")
+#define ICON_RUST          ICON_STR(DEV_RUST, "\ue7a8", "")
 #define ICON_SASS          ICON_STR("", "\ue603", "")
 #define ICON_SCRIPT        ICON_STR(MFIZZ_SCRIPT, "\ue795", "📜")
 #define ICON_SUBTITLE      ICON_STR(FA_COMMENTS_O, "\uf679", "💬")
