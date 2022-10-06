@@ -7306,8 +7306,14 @@ nochange:
 					spawn(editor, newpath, NULL, NULL, F_CLI);
 				continue;
             case SEL_CEDIT:
-                static char *ceditor;
-                spawn("nvim", newpath, NULL, NULL, F_CLI);
+                static char *ceditor; // specify editor here
+                if (!ceditor) {
+                    if (!(g_state.picker || g_state.fifomode))
+                        spawn(editor, newpath, NULL, NULL, F_CLI);
+                } else {
+                    if (!(g_state.picker || g_state.fifomode))
+                        spawn(ceditor, newpath, NULL, NULL, F_CLI);
+                }
                 continue;
 			default: /* SEL_LOCK */
 				lock_terminal();
