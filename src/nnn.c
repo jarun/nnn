@@ -426,6 +426,7 @@ static uchar_t cfgsort[CTX_MAX + 1];
 static char *bmstr;
 static char *pluginstr;
 static char *orderstr;
+static char *ceditor;
 static char *opener;
 static char *editor;
 static char *enveditor;
@@ -7261,6 +7262,7 @@ nochange:
 		case SEL_HELP: // fallthrough
 		case SEL_AUTONEXT: // fallthrough
 		case SEL_EDIT: // fallthrough
+        case SEL_CEDIT: // fallthrough
 		case SEL_LOCK:
 		{
 			bool refresh = FALSE;
@@ -7304,6 +7306,15 @@ nochange:
 				if (!(g_state.picker || g_state.fifomode))
 					spawn(editor, newpath, NULL, NULL, F_CLI);
 				continue;
+            case SEL_CEDIT:
+                if (!ceditor) {
+                    if (!(g_state.picker || g_state.fifomode))
+                        spawn(editor, newpath, NULL, NULL, F_CLI);
+                } else {
+                    if (!(g_state.picker || g_state.fifomode))
+                        spawn(ceditor, newpath, NULL, NULL, F_CLI);
+                }
+                continue;
 			default: /* SEL_LOCK */
 				lock_terminal();
 				break;

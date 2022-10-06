@@ -116,6 +116,7 @@ enum action {
 	SEL_QUITCD,
 	SEL_QUIT,
 	SEL_QUITERR,
+    SEL_CEDIT,
 #ifndef NOMOUSE
 	SEL_CLICK,
 #endif
@@ -154,6 +155,8 @@ static struct key bindings[] = {
 	/* First entry */
 	{ KEY_HOME,       SEL_HOME },
 	{ 'g',            SEL_HOME },
+    /* Open in specified editor */
+    { CONTROL('G'),   SEL_CEDIT },
 	{ CONTROL('A'),   SEL_HOME },
 	/* Last entry */
 	{ KEY_END,        SEL_END },
