@@ -7,7 +7,7 @@
 #   - xterm (or urxvt or st) : xembed client for text-based preview
 #   - mpv (https://mpv.io): xembed client for video/audio
 #   - sxiv (https://github.com/muennich/sxiv) or,
-#   - nsxiv (https://github.com/nsxiv/nsxiv) : xembed client for images
+#   - nsxiv (https://codeberg.org/nsxiv/nsxiv) : xembed client for images
 #   - zathura (https://pwmt.org/projects/zathura): xembed client for PDF
 #   - nnn's nuke plugin for text preview and fallback
 #     nuke is a fallback for 'mpv', 'sxiv'/'nsxiv', and 'zathura', but has its
