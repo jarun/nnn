@@ -69,7 +69,10 @@
 #define ICON_EMACS         ICON_STR(DEV_GNU, "\ue779", "")
 #define ICON_ENCRYPT       ICON_STR("", "\uf805", "🔒")
 #define ICON_FSHARP        ICON_STR(DEV_FSHARP, "\ue7a7", "")
-#define ICON_GIT           ICON_STR(FA_GIT, "\ue5fb", "🌱")
+#define ICON_GIT           ICON_STR(FA_GIT, "\uf1d3", "")
+#define ICON_GIT_FOLDER    ICON_STR(FA_GIT, "\ue5fb", "🌱")
+#define ICON_GITHUB        ICON_STR(FA_GITHUB, "\uf408", "")
+#define ICON_GITHUB_FOLDER ICON_STR(FA_GITHUB, "\ue5fd", "")
 #define ICON_HASKELL       ICON_STR("", "\ue777", "")
 #define ICON_HTML          ICON_STR(FA_FILE_CODE_O, "\uf72d", "")
 #define ICON_JAVA          ICON_STR(MFIZZ_JAVA, "\ue738", "☕")
@@ -82,7 +85,9 @@
 #define ICON_MS_EXCEL      ICON_STR(FILE_EXCEL, "\uf71a", ICON_WORDDOC)
 #define ICON_MUSIC         ICON_STR(FA_MUSIC, "\uf832", "🎧")
 #define ICON_MUSICFILE     ICON_STR(FA_FILE_AUDIO_O, "\uf886", ICON_MUSIC)
+#define ICON_NPM           ICON_STR(DEV_NPM, "\ue71e", "")
 #define ICON_NODE          ICON_STR(DEV_NODEJS, "\ue718", "")
+#define ICON_NODE_FOLDER   ICON_STR(DEV_NODEJS, "\ue5fa", "")
 #define ICON_OPTICALDISK   ICON_STR(LINEA_MUSIC_CD, "\ue271", "💿")
 #define ICON_PDF           ICON_STR(FA_FILE_PDF_O, "\uf724", "📕")
 #define ICON_PHOTOSHOP     ICON_STR(DEV_PHOTOSHOP, "\ue7b8", ICON_PICTUREFILE)
@@ -182,25 +187,33 @@ static const struct icon file_icon = {ICON_FILE, 0};
 static const struct icon exec_icon = {ICON_EXEC, 0};
 
 static const struct icon_pair icons_name[] = {
-	{".git",        ICON_GIT,       0},
-	{"Desktop",     ICON_DESKTOP,   0},
-	{"Documents",   ICON_BRIEFCASE, 0},
-	{"Downloads",   ICON_DOWNLOADS, 0},
-	{"Music",       ICON_MUSIC,     0},
-	{"Pictures",    ICON_PICTURES,  0},
-	{"Public",      ICON_PUBLIC,    0},
-	{"Templates",   ICON_TEMPLATES, 0},
-	{"Videos",      ICON_VIDEOS,    0},
-	{"CHANGELOG",   ICON_CHANGELOG, COLOR_DOCS},
-	{"composer.json", ICON_EXT_PHP, 0},
-	{"configure",   ICON_CONFIGURE, 0},
-	{"config.el",   ICON_EMACS, 0},
-	{"packages.el", ICON_EMACS, 0},
-	{".doom.d",     ICON_EMACS, 0},
-	{".emacs.d",    ICON_EMACS, 0},
-	{"package.json", ICON_NODE, 0},
-	{"License",     ICON_LICENSE,   COLOR_DOCS},
-	{"Makefile",    ICON_MAKEFILE,  0},
+	{".cargo",             ICON_RUST,          0},
+	{".doom.d",            ICON_EMACS,         0},
+	{".emacs.d",           ICON_EMACS,         0},
+	{".git",               ICON_GIT_FOLDER,    0},
+	{".github",            ICON_GITHUB_FOLDER, 0},
+	{".gitignore",         ICON_GIT,           0},
+	{".node_repl_history", ICON_NODE,          0},
+	{".npmignore",         ICON_NPM,           0},
+	{"CHANGELOG",          ICON_CHANGELOG,     COLOR_DOCS},
+	{"composer.json",      ICON_EXT_PHP,       0},
+	{"configure",          ICON_CONFIGURE,     0},
+	{"config.el",          ICON_EMACS,         0},
+	{"Desktop",            ICON_DESKTOP,       0},
+	{"Documents",          ICON_BRIEFCASE,     0},
+	{"Downloads",          ICON_DOWNLOADS,     0},
+	{"funding.yml",        ICON_GITHUB,        0},
+	{"License",            ICON_LICENSE,       COLOR_DOCS},
+	{"Makefile",           ICON_MAKEFILE,      0},
+	{"Music",              ICON_MUSIC,         0},
+	{"node_modules",       ICON_NODE_FOLDER,   0},
+	{"packages.el",        ICON_EMACS,         0},
+	{"package.json",       ICON_NODE,          0},
+	{"package-lock.json",  ICON_NODE,          0},
+	{"Pictures",           ICON_PICTURES,      0},
+	{"Public",             ICON_PUBLIC,        0},
+	{"Templates",          ICON_TEMPLATES,     0},
+	{"Videos",             ICON_VIDEOS,        0},
 };
 
 #ifdef ICONS_GENERATE
