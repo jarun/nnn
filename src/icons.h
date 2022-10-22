@@ -66,6 +66,7 @@
 #define ICON_DOCUMENT      ICON_STR(FA_FILE_TEXT_O, "\uf718", "🗒 ")
 #define ICON_DOWNLOADS     ICON_STR(FA_DOWNLOAD, "\uf5d7", "📥")
 #define ICON_ELIXIR        ICON_STR(MFIZZ_ELIXIR, "\ue62d", "💧")
+#define ICON_EMACS         ICON_STR(DEV_GNU, "\ue779", "")
 #define ICON_ENCRYPT       ICON_STR("", "\uf805", "🔒")
 #define ICON_FSHARP        ICON_STR(DEV_FSHARP, "\ue7a7", "")
 #define ICON_GIT           ICON_STR(FA_GIT, "\ue5fb", "🌱")
@@ -75,11 +76,13 @@
 #define ICON_JAVASCRIPT    ICON_STR(FA_FILE_CODE_O, "\uf81d", "")
 #define ICON_LICENSE       ICON_STR(FA_COPYRIGHT, "\uf718", "⚖️ ")
 #define ICON_LINUX         ICON_STR(FA_LINUX, "\uf83c", "🐧")
+#define ICON_LISP          ICON_STR(DEV_GNU, "\uf671", "")
 #define ICON_MAKEFILE      ICON_STR(FILE_CMAKE, "\uf68c", "🛠 ")
 #define ICON_MANUAL        ICON_STR(FILE_MANPAGE, "\uf5bd", "❓")
 #define ICON_MS_EXCEL      ICON_STR(FILE_EXCEL, "\uf71a", ICON_WORDDOC)
 #define ICON_MUSIC         ICON_STR(FA_MUSIC, "\uf832", "🎧")
 #define ICON_MUSICFILE     ICON_STR(FA_FILE_AUDIO_O, "\uf886", ICON_MUSIC)
+#define ICON_NODE          ICON_STR(DEV_NODEJS, "\ue718", "")
 #define ICON_OPTICALDISK   ICON_STR(LINEA_MUSIC_CD, "\ue271", "💿")
 #define ICON_PDF           ICON_STR(FA_FILE_PDF_O, "\uf724", "📕")
 #define ICON_PHOTOSHOP     ICON_STR(DEV_PHOTOSHOP, "\ue7b8", ICON_PICTUREFILE)
@@ -102,6 +105,7 @@
 #define ICON_VIM           ICON_STR(DEV_VIM, "\ue62b", "")
 #define ICON_WORDDOC       ICON_STR(FILE_WORD, "\uf72b", "📘")
 
+#define ICON_EXT_O         ICON_STR("", "\ue624", "")
 #define ICON_EXT_ASM       ICON_STR(FILE_NASM, "", "")
 #define ICON_EXT_BIN       ICON_STR(OCT_FILE_BINARY, "\uf471", "📓")
 #define ICON_EXT_COFFEE    ICON_STR(MFIZZ_COFFEE_BEAN, "\ue751", "")
@@ -117,7 +121,7 @@
 #define ICON_EXT_MSI       ICON_STR(FA_WINDOWS, "\uf871", "🪟")
 #define ICON_EXT_NIX       ICON_STR("", "\uf313", "")
 #define ICON_EXT_PATCH     ICON_STR(FILE_PATCH, "\uf440", "🩹")
-#define ICON_EXT_PHP       ICON_STR(MFIZZ_PHP, "\ue73d", "🌐")
+#define ICON_EXT_PHP       ICON_STR(MFIZZ_PHP, "\ue608", "🌐")
 #define ICON_EXT_ROM       ICON_STR(FA_LOCK, "\uf795", "")
 #define ICON_EXT_RSS       ICON_STR(FA_RSS_SQUARE, "\uf143", "📡")
 #define ICON_EXT_RTF       ICON_STR(ICON_PDF, "\uf724", ICON_PDF)
@@ -188,7 +192,13 @@ static const struct icon_pair icons_name[] = {
 	{"Templates",   ICON_TEMPLATES, 0},
 	{"Videos",      ICON_VIDEOS,    0},
 	{"CHANGELOG",   ICON_CHANGELOG, COLOR_DOCS},
+	{"composer.json", ICON_EXT_PHP, 0},
 	{"configure",   ICON_CONFIGURE, 0},
+	{"config.el",   ICON_EMACS, 0},
+	{"packages.el", ICON_EMACS, 0},
+	{".doom.d",     ICON_EMACS, 0},
+	{".emacs.d",    ICON_EMACS, 0},
+	{"package.json", ICON_NODE, 0},
 	{"License",     ICON_LICENSE,   COLOR_DOCS},
 	{"Makefile",    ICON_MAKEFILE,  0},
 };
@@ -249,6 +259,8 @@ static const struct icon_pair icons_ext[] = {
 
 	/* E */
 	{"ejs",        ICON_JAVASCRIPT,     COLOR_JAVASCRIPT},
+	{"el",         ICON_LISP,           0},
+	{"elc",        ICON_LISP,           0},
 	{"elf",        ICON_LINUX,          0},
 	{"epub",       ICON_PDF,            COLOR_DOCS},
 	{"exe",        ICON_EXEC,           0},
@@ -332,8 +344,9 @@ static const struct icon_pair icons_ext[] = {
 	{"nix",        ICON_EXT_NIX,        COLOR_FSHARP},
 
 	/* O */
-	{"o",          ICON_MANUAL,         0},
+	{"o",          ICON_EXT_O,          0},
 	{"ogg",        ICON_MUSICFILE,      COLOR_AUDIO},
+	{"org",        ICON_EMACS,          0},
 	{"opus",       ICON_MUSICFILE,      COLOR_AUDIO},
 	{"opdownload", ICON_DOWNLOADS,      0},
 	{"out",        ICON_LINUX,          0},
