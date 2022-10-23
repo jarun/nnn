@@ -66,6 +66,7 @@
 #define ICON_DESKTOP       ICON_STR(FA_DESKTOP, "\ufcbe", "🖥️ ")
 #define ICON_DOCUMENT      ICON_STR(FA_FILE_TEXT_O, "\uf718", "🗒 ")
 #define ICON_DOWNLOADS     ICON_STR(FA_DOWNLOAD, "\uf5d7", "📥")
+#define ICON_DOWNLOAD      ICON_STR(FA_DOWNLOAD, "\uf43a", "")
 #define ICON_ELIXIR        ICON_STR(MFIZZ_ELIXIR, "\ue62d", "💧")
 #define ICON_EMACS         ICON_STR(DEV_GNU, "\ue779", "")
 #define ICON_ENCRYPT       ICON_STR("", "\uf805", "🔒")
@@ -102,6 +103,7 @@
 #define ICON_POWERPOINT    ICON_STR(FILE_POWERPOINT, "\uf726", "📊")
 #define ICON_PUBLIC        ICON_STR(FA_INBOX, "\ue5ff", "👀")
 #define ICON_PYTHON        ICON_STR(MFIZZ_PYTHON, "\ue235", "🐍")
+#define ICON_R             ICON_STR(FILE_R, "\ufcd2", "")
 #define ICON_REACT         ICON_STR(FILE_JSX, "\ue625", ICON_JAVASCRIPT)
 #define ICON_RUBY          ICON_STR(MFIZZ_RUBY, "\ue23e", "💎")
 #define ICON_RUST          ICON_STR(DEV_RUST, "\ue7a8", "")
@@ -157,8 +159,10 @@
 	COLOR_X(COLOR_AUDIO1,       205)  /* HotPink */ \
 	COLOR_X(COLOR_IMAGE,         82)  /* Chartreuse2 */ \
 	COLOR_X(COLOR_DOCS,         202)  /* OrangeRed1 */ \
-	COLOR_X(COLOR_ARCHIVE,      209)  /* Salmon1 */ \
+	COLOR_X(COLOR_ARCHIVE,      111)  /* SkyBlue2 */ \
+	COLOR_X(COLOR_PKG,          209)  /* Salmon1 */ \
 	COLOR_X(COLOR_C,             81)  /* SteelBlue1 */ \
+	COLOR_X(COLOR_CPLUSPLUS,    151)  /* DarkSeaGreen2 */ \
 	COLOR_X(COLOR_JAVA,          32)  /* DeepSkyBlue3 */ \
 	COLOR_X(COLOR_JAVASCRIPT,    47)  /* SpringGreen2 */ \
 	COLOR_X(COLOR_REACT,         39)  /* DeepSkyBlue1 */ \
@@ -172,6 +176,14 @@
 	COLOR_X(COLOR_SHELL,         47)  /* SpringGreen2 */ \
 	COLOR_X(COLOR_VIM,           28)  /* Green4 */ \
 	COLOR_X(COLOR_ELIXIR,       104)  /* MediumPurple */ \
+	COLOR_X(COLOR_EMACS,        165)  /* Magenta2 */ \
+	COLOR_X(COLOR_RUST,         203)  /* IndianRed1 */ \
+	COLOR_X(COLOR_KEY,          185)  /* Khaki3 */ \
+	COLOR_X(COLOR_LOCK,         102)  /* Gray53 */ \
+	COLOR_X(COLOR_CONFIGURE,    181)  /* MistyRose3 */ \
+	COLOR_X(COLOR_ASM,          220)  /* Gold1 */ \
+	COLOR_X(COLOR_O,            243)  /* Gray46 */ \
+	COLOR_X(COLOR_HTML,         147)  /* LightSteelBlue */ \
 
 /* X-Macro: https://en.wikipedia.org/wiki/X_Macro */
 #define COLOR_X(N, V) N = (V),
@@ -196,36 +208,50 @@ static const struct icon file_icon = {ICON_FILE, 0};
 static const struct icon exec_icon = {ICON_EXEC, 0};
 
 static const struct icon_pair icons_name[] = {
-	{".cargo",             ICON_RUST,          0},
-	{".doom.d",            ICON_EMACS,         0},
-	{".emacs.d",           ICON_EMACS,         0},
+	{".bash_history",      ICON_CONFIGURE,     COLOR_CONFIGURE},
+	{".bash_logout",       ICON_SCRIPT,        COLOR_SHELL},
+	{".bash_profile",      ICON_CONFIGURE,     COLOR_CONFIGURE},
+	{".bashrc",            ICON_SCRIPT,        COLOR_SHELL},
+	{".cargo",             ICON_RUST,          COLOR_RUST},
+	{".doom.d",            ICON_EMACS,         COLOR_EMACS},
+	{".emacs.d",           ICON_EMACS,         COLOR_EMACS},
 	{".git",               ICON_GIT_FOLDER,    0},
 	{".github",            ICON_GITHUB_FOLDER, 0},
 	{".gitignore",         ICON_GIT,           0},
+	{".gnupg",             ICON_LOCK,          COLOR_LOCK},
 	{".node_repl_history", ICON_NODE,          0},
 	{".npmignore",         ICON_NPM,           0},
-	{".release.toml",      ICON_RUST,          0},
-	{"Cargo.toml",         ICON_RUST,          0},
+	{".python_history",    ICON_PYTHON,        COLOR_PYTHON},
+	{".release.toml",      ICON_RUST,          COLOR_RUST},
+	{".ssh",               ICON_LOCK,          COLOR_LOCK},
+	{".viminfo",           ICON_VIM,           COLOR_VIM},
+	{".xinitrc",           ICON_CONFIGURE,     COLOR_CONFIGURE},
+	{".Xresources",        ICON_CONFIGURE,     COLOR_CONFIGURE},
+	{"bspwmrc",            ICON_CONFIGURE,     COLOR_CONFIGURE},
+	{"Cargo.toml",         ICON_RUST,          COLOR_RUST},
 	{"CHANGELOG",          ICON_CHANGELOG,     COLOR_DOCS},
-	{"composer.json",      ICON_EXT_PHP,       0},
+	{"composer.json",      ICON_EXT_PHP,       COLOR_CPLUSPLUS},
 	{"configure",          ICON_CONFIGURE,     0},
-	{"config.el",          ICON_EMACS,         0},
+	{"config.el",          ICON_EMACS,         COLOR_EMACS},
+	{"custom.el",          ICON_EMACS,         COLOR_EMACS},
 	{"Desktop",            ICON_DESKTOP,       0},
 	{"Documents",          ICON_BRIEFCASE,     0},
 	{"Downloads",          ICON_DOWNLOADS,     0},
 	{"funding.yml",        ICON_GITHUB,        0},
+	{"init.el",            ICON_EMACS,         COLOR_EMACS},
 	{"License",            ICON_LICENSE,       COLOR_DOCS},
-	{"Makefile",           ICON_MAKEFILE,      0},
+	{"Makefile",           ICON_MAKEFILE,      COLOR_CONFIGURE},
 	{"Music",              ICON_MUSIC,         0},
 	{"node_modules",       ICON_NODE_FOLDER,   0},
-	{"packages.el",        ICON_EMACS,         0},
-	{"package.json",       ICON_NODE,          0},
-	{"package-lock.json",  ICON_NODE,          0},
+	{"packages.el",        ICON_EMACS,         COLOR_EMACS},
+	{"package.json",       ICON_NODE,          COLOR_JAVASCRIPT},
+	{"package-lock.json",  ICON_NODE,          COLOR_JAVASCRIPT},
 	{"Pictures",           ICON_PICTURES,      0},
 	{"Public",             ICON_PUBLIC,        0},
+	{"sxhkdrc",            ICON_CONFIGURE,     COLOR_CONFIGURE},
 	{"Templates",          ICON_TEMPLATES,     0},
 	{"Videos",             ICON_VIDEOS,        0},
-	{"webpack.config.js",  ICON_WEBPACK,       0},
+	{"webpack.config.js",  ICON_WEBPACK,       COLOR_JAVASCRIPT},
 };
 
 #ifdef ICONS_GENERATE
@@ -240,12 +266,13 @@ static const struct icon_pair icons_ext[] = {
 	/* A */
 	{"a",          ICON_MANUAL,         0},
 	{"apk",        ICON_ARCHIVE,        COLOR_ARCHIVE},
-	{"asc",        ICON_LOCK,           0},
-	{"asm",        ICON_EXT_ASM,        0},
+	{"asc",        ICON_LOCK,           COLOR_LOCK},
+	{"asm",        ICON_EXT_ASM,        COLOR_ASM},
 	{"aup",        ICON_MUSICFILE,      COLOR_AUDIO},
 	{"avi",        ICON_VIDEOFILE,      COLOR_VIDEO},
 
 	/* B */
+	{"bash",       ICON_SCRIPT,         COLOR_SHELL},
 	{"bat",        ICON_SCRIPT,         0},
 	{"bib",        ICON_TEX,            0},
 	{"bin",        ICON_EXT_BIN,        0},
@@ -254,12 +281,12 @@ static const struct icon_pair icons_ext[] = {
 
 	/* C */
 	{"c",          ICON_C,              COLOR_C},
-	{"c++",        ICON_CPLUSPLUS,      COLOR_C},
+	{"c++",        ICON_CPLUSPLUS,      COLOR_CPLUSPLUS},
 	{"cabal",      ICON_HASKELL,        COLOR_VIDEO},
 	{"cab",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"cbr",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"cbz",        ICON_ARCHIVE,        COLOR_ARCHIVE},
-	{"cc",         ICON_CPLUSPLUS,      COLOR_C},
+	{"cc",         ICON_CPLUSPLUS,      COLOR_CPLUSPLUS},
 	{"class",      ICON_JAVA,           COLOR_JAVA},
 	{"clj",        ICON_CLOJURE,        0},
 	{"cljc",       ICON_CLOJURE,        0},
@@ -267,13 +294,14 @@ static const struct icon_pair icons_ext[] = {
 	{"cls",        ICON_TEX,            0},
 	{"cmake",      ICON_MAKEFILE,       0},
 	{"coffee",     ICON_EXT_COFFEE,     0},
-	{"conf",       ICON_CONFIGURE,      0},
+	{"conf",       ICON_CONFIGURE,      COLOR_CONFIGURE},
 	{"cpio",       ICON_ARCHIVE,        COLOR_ARCHIVE},
-	{"cpp",        ICON_CPLUSPLUS,      COLOR_C},
+	{"cpp",        ICON_CPLUSPLUS,      COLOR_CPLUSPLUS},
+	{"crate",      ICON_PKG,            COLOR_ARCHIVE},
 	{"css",        ICON_EXT_CSS,        COLOR_CSS},
 	{"cue",        ICON_PLAYLIST,       COLOR_AUDIO},
 	{"cvs",        ICON_CONFIGURE,      0},
-	{"cxx",        ICON_CPLUSPLUS,      COLOR_C},
+	{"cxx",        ICON_CPLUSPLUS,      COLOR_CPLUSPLUS},
 
 	/* D */
 	{"db",         ICON_DATABASE,       0},
@@ -282,11 +310,12 @@ static const struct icon_pair icons_ext[] = {
 	{"dll",        ICON_SCRIPT,         0},
 	{"doc",        ICON_WORDDOC,        COLOR_DOCUMENT},
 	{"docx",       ICON_WORDDOC,        COLOR_DOCUMENT},
+	{"download",   ICON_DOWNLOAD,       COLOR_O},
 
 	/* E */
 	{"ejs",        ICON_JAVASCRIPT,     COLOR_JAVASCRIPT},
-	{"el",         ICON_LISP,           0},
-	{"elc",        ICON_LISP,           0},
+	{"el",         ICON_LISP,           COLOR_EMACS},
+	{"elc",        ICON_LISP,           COLOR_EMACS},
 	{"elf",        ICON_LINUX,          0},
 	{"epub",       ICON_PDF,            COLOR_DOCS},
 	{"exe",        ICON_EXEC,           0},
@@ -318,23 +347,22 @@ static const struct icon_pair icons_ext[] = {
 	{"hpp",        ICON_CHEADER,        COLOR_C},
 	{"hxx",        ICON_CHEADER,        COLOR_C},
 	{"hs",         ICON_HASKELL,        COLOR_VIM},
-	{"htaccess",   ICON_CONFIGURE,      0},
-	{"htpasswd",   ICON_CONFIGURE,      0},
-	{"htm",        ICON_HTML,           0},
-	{"html",       ICON_HTML,           0},
-	{"hxx",        ICON_CPLUSPLUS,      COLOR_C},
+	{"htaccess",   ICON_CONFIGURE,      COLOR_CONFIGURE},
+	{"htpasswd",   ICON_CONFIGURE,      COLOR_CONFIGURE},
+	{"htm",        ICON_HTML,           COLOR_HTML},
+	{"html",       ICON_HTML,           COLOR_HTML},
 	{"heex",       ICON_ELIXIR,         COLOR_ELIXIR},
 
 	/* I */
 	{"ico",        ICON_PICTUREFILE,    COLOR_IMAGE},
-	{"ini",        ICON_CONFIGURE,      0},
+	{"ini",        ICON_CONFIGURE,      COLOR_CONFIGURE},
 	{"img",        ICON_OPTICALDISK,    COLOR_ARCHIVE},
 	{"iso",        ICON_OPTICALDISK,    COLOR_ARCHIVE},
 
 	/* J */
 	{"jar",        ICON_JAVA,           COLOR_JAVA},
 	{"java",       ICON_JAVA,           COLOR_JAVA},
-	{"jl",         ICON_CONFIGURE,      0},
+	{"jl",         ICON_CONFIGURE,      COLOR_CONFIGURE},
 	{"jpeg",       ICON_PICTUREFILE,    COLOR_IMAGE},
 	{"jpg",        ICON_PICTUREFILE,    COLOR_IMAGE},
 	{"js",         ICON_JAVASCRIPT,     COLOR_JAVASCRIPT},
@@ -342,13 +370,14 @@ static const struct icon_pair icons_ext[] = {
 	{"jsx",        ICON_REACT,          COLOR_REACT},
 
 	/* K */
-	{"kbx",        ICON_KEY,            0},
-	{"key",        ICON_KEY,            0},
+	{"kbx",        ICON_KEY,            COLOR_KEY},
+	{"key",        ICON_KEY,            COLOR_KEY},
+	{"ksh",        ICON_SCRIPT,         COLOR_SHELL},
 
 	/* L */
 	{"lha",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"lhs",        ICON_HASKELL,        COLOR_VIM},
-	{"lock",       ICON_LOCK,           0},
+	{"lock",       ICON_LOCK,           COLOR_LOCK},
 	{"log",        ICON_DOCUMENT,       0},
 	{"lua",        ICON_EXT_LUA,        COLOR_LUA},
 	{"lzh",        ICON_ARCHIVE,        COLOR_ARCHIVE},
@@ -361,7 +390,7 @@ static const struct icon_pair icons_ext[] = {
 	{"markdown",   ICON_EXT_MD,         COLOR_DOCS},
 	{"mat",        ICON_EXT_MAT,        COLOR_C},
 	{"md",         ICON_EXT_MD,         COLOR_DOCS},
-	{"md5",        ICON_LOCK,           0},
+	{"md5",        ICON_LOCK,           COLOR_LOCK},
 	{"mk",         ICON_MAKEFILE,       0},
 	{"mkv",        ICON_VIDEOFILE,      COLOR_VIDEO},
 	{"mov",        ICON_VIDEOFILE,      COLOR_VIDEO},
@@ -375,53 +404,61 @@ static const struct icon_pair icons_ext[] = {
 	{"nix",        ICON_EXT_NIX,        COLOR_FSHARP},
 
 	/* O */
-	{"o",          ICON_EXT_O,          0},
+	{"o",          ICON_EXT_O,          COLOR_O},
 	{"ogg",        ICON_MUSICFILE,      COLOR_AUDIO},
-	{"org",        ICON_EMACS,          0},
+	{"org",        ICON_EMACS,          COLOR_EMACS},
 	{"opus",       ICON_MUSICFILE,      COLOR_AUDIO},
-	{"opdownload", ICON_DOWNLOADS,      0},
-	{"otf",        ICON_FONT,           0},
+	{"opdownload", ICON_DOWNLOAD,       COLOR_O},
+	{"otf",        ICON_FONT,           COLOR_O},
 	{"out",        ICON_LINUX,          0},
 
 	/* P */
-	{"part",       ICON_DOWNLOADS,      0},
+	{"part",       ICON_DOWNLOAD,       COLOR_O},
 	{"patch",      ICON_EXT_PATCH,      0},
 	{"pdf",        ICON_PDF,            COLOR_DOCS},
 	{"pgn",        ICON_CHESS,          0},
-	{"php",        ICON_EXT_PHP,        0},
+	{"php",        ICON_EXT_PHP,        COLOR_CPLUSPLUS},
+	{"pkg",        ICON_PKG,            COLOR_ARCHIVE},
 	{"png",        ICON_PICTUREFILE,    COLOR_IMAGE},
 	{"ppt",        ICON_POWERPOINT,     0},
 	{"pptx",       ICON_POWERPOINT,     0},
-	{"psb",        ICON_PHOTOSHOP,      0},
-	{"psd",        ICON_PHOTOSHOP,      0},
+	{"psb",        ICON_PHOTOSHOP,      COLOR_IMAGE},
+	{"psd",        ICON_PHOTOSHOP,      COLOR_IMAGE},
+	{"pub",        ICON_KEY,            COLOR_KEY},
 	{"py",         ICON_PYTHON,        COLOR_PYTHON},
 	{"pyc",        ICON_PYTHON,        COLOR_PYTHON},
 	{"pyd",        ICON_PYTHON,        COLOR_PYTHON},
 	{"pyo",        ICON_PYTHON,        COLOR_PYTHON},
 
 	/* Q */
+	{"qcow2",      ICON_OPTICALDISK,   COLOR_ARCHIVE},
 	{"qss",        ICON_EXT_CSS,       COLOR_CSS},
 
 	/* R */
+	{"r",          ICON_R,              0},
 	{"rar",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"rb",         ICON_RUBY,           COLOR_RUBY},
-	{"rc",         ICON_CONFIGURE,      0},
+	{"rc",         ICON_CONFIGURE,      COLOR_CONFIGURE},
+	{"rdata",      ICON_R,              0},
+	{"rlib",       ICON_RUST,           COLOR_RUST},
+	{"rmeta",      ICON_RUST,           COLOR_RUST},
 	{"rom",        ICON_EXT_ROM,        0},
 	{"rpm",        ICON_PKG,            COLOR_ARCHIVE},
-	{"rs",         ICON_RUST,           COLOR_DOCS},
+	{"rs",         ICON_RUST,           COLOR_RUST},
+	{"rspec",      ICON_RUBY,           COLOR_RUBY},
 	{"rss",        ICON_EXT_RSS,        0},
 	{"rtf",        ICON_EXT_RTF,        0},
 
 	/* S */
-	{"s",          ICON_EXT_ASM,        0},
+	{"s",          ICON_EXT_ASM,        COLOR_ASM},
 	{"sass",       ICON_SASS,           COLOR_CSS},
 	{"scss",       ICON_SASS,           COLOR_CSS},
-	{"so",         ICON_MANUAL,         0},
+	{"so",         ICON_EXT_O,          COLOR_O},
 	{"scala",      ICON_EXT_SCALA,      COLOR_SCALA},
 	{"sh",         ICON_SCRIPT,         COLOR_SHELL},
-	{"sha1",       ICON_LOCK,           0},
-	{"sha256",     ICON_LOCK,           0},
-	{"sig",        ICON_KEY,            0},
+	{"sha1",       ICON_LOCK,           COLOR_LOCK},
+	{"sha256",     ICON_LOCK,           COLOR_LOCK},
+	{"sig",        ICON_KEY,            COLOR_KEY},
 	{"slim",       ICON_SCRIPT,         COLOR_DOCUMENT},
 	{"sln",        ICON_EXT_SLN,        0},
 	{"sql",        ICON_DATABASE,       0},
@@ -430,8 +467,8 @@ static const struct icon_pair icons_ext[] = {
 	{"sub",        ICON_SUBTITLE,       0},
 	{"svg",        ICON_PICTUREFILE,    COLOR_IMAGE},
 	{"swift",      ICON_SWIFT,          0},
-	{"swp",        ICON_VIM,            0},
-	{"sym",        ICON_EXT_O,          0},
+	{"swp",        ICON_VIM,            COLOR_VIM},
+	{"sym",        ICON_EXT_O,          COLOR_O},
 
 	/* T */
 	{"tar",        ICON_ARCHIVE,        COLOR_ARCHIVE},
@@ -442,8 +479,8 @@ static const struct icon_pair icons_ext[] = {
 	{"torrent",    ICON_TORRENT,        COLOR_ARCHIVE},
 	{"ts",         ICON_EXT_TS,        COLOR_JAVASCRIPT},
 	{"tsx",        ICON_REACT,          COLOR_REACT},
-	{"ttc",        ICON_FONT,           0},
-	{"ttf",        ICON_FONT,           0},
+	{"ttc",        ICON_FONT,           COLOR_O},
+	{"ttf",        ICON_FONT,           COLOR_O},
 	{"txt",        ICON_DOCUMENT,       COLOR_DOCUMENT},
 	{"txz",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 
@@ -457,6 +494,8 @@ static const struct icon_pair icons_ext[] = {
 	{"vue",        ICON_VUE,            COLOR_JAVASCRIPT},
 
 	/* W */
+	{"wasm",       ICON_EXT_ASM,        COLOR_HTML},
+	{"wat",        ICON_EXT_BIN,        COLOR_HTML},
 	{"wav",        ICON_MUSICFILE,      COLOR_AUDIO},
 	{"webm",       ICON_VIDEOFILE,      COLOR_VIDEO},
 	{"webp",       ICON_PICTUREFILE,    COLOR_IMAGE},
@@ -466,10 +505,10 @@ static const struct icon_pair icons_ext[] = {
 	/* X */
 	{"xbps",       ICON_PKG,            COLOR_ARCHIVE},
 	{"xcf",        ICON_PICTUREFILE,    COLOR_IMAGE},
-	{"xhtml",      ICON_HTML,           0},
+	{"xhtml",      ICON_HTML,           COLOR_HTML},
 	{"xls",        ICON_MS_EXCEL,       0},
 	{"xlsx",       ICON_MS_EXCEL,       0},
-	{"xml",        ICON_HTML,           0},
+	{"xml",        ICON_HTML,           COLOR_HTML},
 	{"xz",         ICON_ARCHIVE,        COLOR_ARCHIVE},
 
 	/* Y */
@@ -479,6 +518,8 @@ static const struct icon_pair icons_ext[] = {
 	/* Z */
 	{"zip",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"zsh",        ICON_SCRIPT,         COLOR_SHELL},
+	{"zshrc",      ICON_SCRIPT,         COLOR_SHELL},
+	{"zsh-theme",  ICON_SCRIPT,         COLOR_SHELL},
 	{"zst",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 
 	/* Other */
