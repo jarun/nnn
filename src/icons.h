@@ -61,6 +61,7 @@
 #define ICON_CHESS         ICON_STR("", "\uf639", "")
 #define ICON_CLOJURE       ICON_STR(MFIZZ_CLOJURE, "\ue76a", "")
 #define ICON_CONFIGURE     ICON_STR(FILE_CONFIG, "\uf423", "🔧")
+#define ICON_CONFFOLDER    ICON_STR(FILE_CONFIG, "\ue5fc", "🔧")
 #define ICON_CPLUSPLUS     ICON_STR(MFIZZ_CPLUSPLUS, "\ue61d", ICON_C)
 #define ICON_DATABASE      ICON_STR(MFIZZ_DATABASE_ALT2, "\uf6b7", "🗃️ ")
 #define ICON_DESKTOP       ICON_STR(FA_DESKTOP, "\ufcbe", "🖥️ ")
@@ -213,13 +214,15 @@ static const struct icon_pair icons_name[] = {
 	{".bash_profile",      ICON_CONFIGURE,     COLOR_CONFIGURE},
 	{".bashrc",            ICON_SCRIPT,        COLOR_SHELL},
 	{".cargo",             ICON_RUST,          COLOR_RUST},
+	{".config",            ICON_CONFFOLDER,    COLOR_CONFIGURE},
 	{".doom.d",            ICON_EMACS,         COLOR_EMACS},
 	{".emacs.d",           ICON_EMACS,         COLOR_EMACS},
 	{".git",               ICON_GIT_FOLDER,    0},
 	{".github",            ICON_GITHUB_FOLDER, 0},
 	{".gitignore",         ICON_GIT,           0},
 	{".gnupg",             ICON_LOCK,          COLOR_LOCK},
-	{".node_repl_history", ICON_NODE,          0},
+	{".local",             ICON_CONFFOLDER,    COLOR_CONFIGURE},
+	{".node_repl_history", ICON_NODE,          COLOR_JAVASCRIPT},
 	{".npmignore",         ICON_NPM,           0},
 	{".python_history",    ICON_PYTHON,        COLOR_PYTHON},
 	{".release.toml",      ICON_RUST,          COLOR_RUST},
@@ -227,30 +230,33 @@ static const struct icon_pair icons_name[] = {
 	{".viminfo",           ICON_VIM,           COLOR_VIM},
 	{".xinitrc",           ICON_CONFIGURE,     COLOR_CONFIGURE},
 	{".Xresources",        ICON_CONFIGURE,     COLOR_CONFIGURE},
+	{"authorized_keys",    ICON_KEY,           COLOR_KEY},
 	{"bspwmrc",            ICON_CONFIGURE,     COLOR_CONFIGURE},
 	{"Cargo.toml",         ICON_RUST,          COLOR_RUST},
 	{"CHANGELOG",          ICON_CHANGELOG,     COLOR_DOCS},
 	{"composer.json",      ICON_EXT_PHP,       COLOR_CPLUSPLUS},
-	{"configure",          ICON_CONFIGURE,     0},
+	{"conf.d",             ICON_CONFFOLDER,    COLOR_CONFIGURE},
+	{"configure",          ICON_CONFIGURE,     COLOR_CONFIGURE},
 	{"config.el",          ICON_EMACS,         COLOR_EMACS},
 	{"custom.el",          ICON_EMACS,         COLOR_EMACS},
 	{"Desktop",            ICON_DESKTOP,       0},
 	{"Documents",          ICON_BRIEFCASE,     0},
-	{"Downloads",          ICON_DOWNLOADS,     0},
+	{"Downloads",          ICON_DOWNLOADS,     COLOR_O},
 	{"funding.yml",        ICON_GITHUB,        0},
 	{"init.el",            ICON_EMACS,         COLOR_EMACS},
+	{"known_hosts",        ICON_CONFIGURE,     COLOR_CONFIGURE},
 	{"License",            ICON_LICENSE,       COLOR_DOCS},
 	{"Makefile",           ICON_MAKEFILE,      COLOR_CONFIGURE},
-	{"Music",              ICON_MUSIC,         0},
+	{"Music",              ICON_MUSIC,         COLOR_AUDIO1},
 	{"node_modules",       ICON_NODE_FOLDER,   0},
 	{"packages.el",        ICON_EMACS,         COLOR_EMACS},
 	{"package.json",       ICON_NODE,          COLOR_JAVASCRIPT},
 	{"package-lock.json",  ICON_NODE,          COLOR_JAVASCRIPT},
-	{"Pictures",           ICON_PICTURES,      0},
+	{"Pictures",           ICON_PICTURES,      COLOR_IMAGE},
 	{"Public",             ICON_PUBLIC,        0},
 	{"sxhkdrc",            ICON_CONFIGURE,     COLOR_CONFIGURE},
 	{"Templates",          ICON_TEMPLATES,     0},
-	{"Videos",             ICON_VIDEOS,        0},
+	{"Videos",             ICON_VIDEOS,        COLOR_VIDEO},
 	{"webpack.config.js",  ICON_WEBPACK,       COLOR_JAVASCRIPT},
 };
 
