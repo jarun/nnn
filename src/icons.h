@@ -63,8 +63,10 @@
 #define ICON_CONFIGURE     ICON_STR(FILE_CONFIG, "\uf423", "🔧")
 #define ICON_CONFFOLDER    ICON_STR(FILE_CONFIG, "\ue5fc", "🔧")
 #define ICON_CPLUSPLUS     ICON_STR(MFIZZ_CPLUSPLUS, "\ue61d", ICON_C)
+#define ICON_CSHARP        ICON_STR(MFIZZ_CSHARP, "\uf81a", "")
 #define ICON_DATABASE      ICON_STR(MFIZZ_DATABASE_ALT2, "\uf6b7", "🗃️ ")
 #define ICON_DESKTOP       ICON_STR(FA_DESKTOP, "\ufcbe", "🖥️ ")
+#define ICON_DOCKER        ICON_STR(FILE_DOCKER, "\uf308", "")
 #define ICON_DOCUMENT      ICON_STR(FA_FILE_TEXT_O, "\uf718", "🗒 ")
 #define ICON_DOWNLOADS     ICON_STR(FA_DOWNLOAD, "\uf5d7", "📥")
 #define ICON_DOWNLOAD      ICON_STR(FA_DOWNLOAD, "\uf43a", "")
@@ -77,6 +79,8 @@
 #define ICON_GIT_FOLDER    ICON_STR(FA_GIT, "\ue5fb", "🌱")
 #define ICON_GITHUB        ICON_STR(FA_GITHUB, "\uf408", "")
 #define ICON_GITHUB_FOLDER ICON_STR(FA_GITHUB, "\ue5fd", "")
+#define ICON_GRUNT         ICON_STR(FILE_GRUNT, "\ue611", "")
+#define ICON_GULP          ICON_STR(FILE_GULP, "\ue610", "")
 #define ICON_HASKELL       ICON_STR("", "\ue777", "")
 #define ICON_HTML          ICON_STR(FA_FILE_CODE_O, "\uf72d", "")
 #define ICON_JAVA          ICON_STR(MFIZZ_JAVA, "\ue738", "☕")
@@ -240,9 +244,17 @@ static const struct icon_pair icons_name[] = {
 	{"config.el",          ICON_EMACS,         COLOR_EMACS},
 	{"custom.el",          ICON_EMACS,         COLOR_EMACS},
 	{"Desktop",            ICON_DESKTOP,       0},
+	{"docker-compose.yml", ICON_DOCKER,        0},
+	{"dockerfile",         ICON_DOCKER,        0},
 	{"Documents",          ICON_BRIEFCASE,     0},
 	{"Downloads",          ICON_DOWNLOADS,     COLOR_O},
 	{"funding.yml",        ICON_GITHUB,        0},
+	{"gruntfile.coffee",   ICON_GRUNT,         0},
+	{"gruntfile.js",       ICON_GRUNT,         0},
+	{"gruntfile.ls",       ICON_GRUNT,         0},
+	{"gulpfile.coffee",    ICON_GULP,          0},
+	{"gulpfile.js",        ICON_GULP,          0},
+	{"gulpfile.ls",        ICON_GULP,          0},
 	{"init.el",            ICON_EMACS,         COLOR_EMACS},
 	{"known_hosts",        ICON_CONFIGURE,     COLOR_CONFIGURE},
 	{"License",            ICON_LICENSE,       COLOR_DOCS},
@@ -254,10 +266,14 @@ static const struct icon_pair icons_name[] = {
 	{"package-lock.json",  ICON_NODE,          COLOR_JAVASCRIPT},
 	{"Pictures",           ICON_PICTURES,      COLOR_IMAGE},
 	{"Public",             ICON_PUBLIC,        0},
+	{"Rakefile",           ICON_RUBY,          COLOR_RUBY},
+	{"rc.lua",             ICON_CONFIGURE,     COLOR_LUA},
 	{"sxhkdrc",            ICON_CONFIGURE,     COLOR_CONFIGURE},
 	{"Templates",          ICON_TEMPLATES,     0},
+	{"Vagrantfile",        ICON_CONFIGURE,     COLOR_CONFIGURE},
 	{"Videos",             ICON_VIDEOS,        COLOR_VIDEO},
 	{"webpack.config.js",  ICON_WEBPACK,       COLOR_JAVASCRIPT},
+	{"xmonad.hs",          ICON_CONFIGURE,     COLOR_CONFIGURE},
 };
 
 #ifdef ICONS_GENERATE
@@ -271,6 +287,7 @@ static const struct icon_pair icons_ext[] = {
 
 	/* A */
 	{"a",          ICON_MANUAL,         0},
+	{"ape",        ICON_MUSICFILE,      COLOR_AUDIO},
 	{"apk",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"asc",        ICON_LOCK,           COLOR_LOCK},
 	{"asm",        ICON_EXT_ASM,        COLOR_ASM},
@@ -294,6 +311,7 @@ static const struct icon_pair icons_ext[] = {
 	{"cbz",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"cc",         ICON_CPLUSPLUS,      COLOR_CPLUSPLUS},
 	{"class",      ICON_JAVA,           COLOR_JAVA},
+	{"cl",         ICON_LISP,           0},
 	{"clj",        ICON_CLOJURE,        0},
 	{"cljc",       ICON_CLOJURE,        0},
 	{"cljs",       ICON_CLOJURE,        0},
@@ -304,7 +322,10 @@ static const struct icon_pair icons_ext[] = {
 	{"cpio",       ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"cpp",        ICON_CPLUSPLUS,      COLOR_CPLUSPLUS},
 	{"crate",      ICON_PKG,            COLOR_ARCHIVE},
+	{"cs",         ICON_CSHARP,         COLOR_C},
+	{"csproj",     ICON_CSHARP,         COLOR_C},
 	{"css",        ICON_EXT_CSS,        COLOR_CSS},
+	{"csx",        ICON_CSHARP,         COLOR_C},
 	{"cue",        ICON_PLAYLIST,       COLOR_AUDIO},
 	{"cvs",        ICON_CONFIGURE,      0},
 	{"cxx",        ICON_CPLUSPLUS,      COLOR_CPLUSPLUS},
@@ -312,11 +333,14 @@ static const struct icon_pair icons_ext[] = {
 	/* D */
 	{"db",         ICON_DATABASE,       0},
 	{"deb",        ICON_EXT_DEB,        COLOR_ARCHIVE},
+	{"desktop",    ICON_DESKTOP,        0},
 	{"diff",       ICON_EXT_DIFF,       0},
 	{"dll",        ICON_SCRIPT,         0},
+	{"dmg",        ICON_OPTICALDISK,    COLOR_ARCHIVE},
 	{"doc",        ICON_WORDDOC,        COLOR_DOCUMENT},
 	{"docx",       ICON_WORDDOC,        COLOR_DOCUMENT},
 	{"download",   ICON_DOWNLOAD,       COLOR_O},
+	{"dump",       ICON_DATABASE,       0},
 
 	/* E */
 	{"ejs",        ICON_JAVASCRIPT,     COLOR_JAVASCRIPT},
@@ -383,6 +407,7 @@ static const struct icon_pair icons_ext[] = {
 	/* L */
 	{"lha",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"lhs",        ICON_HASKELL,        COLOR_VIM},
+	{"lisp",       ICON_LISP,           0},
 	{"lock",       ICON_LOCK,           COLOR_LOCK},
 	{"log",        ICON_DOCUMENT,       0},
 	{"lua",        ICON_EXT_LUA,        COLOR_LUA},
@@ -399,6 +424,7 @@ static const struct icon_pair icons_ext[] = {
 	{"md5",        ICON_LOCK,           COLOR_LOCK},
 	{"mk",         ICON_MAKEFILE,       0},
 	{"mkv",        ICON_VIDEOFILE,      COLOR_VIDEO},
+	{"mobi",       ICON_PDF,            COLOR_DOCS},
 	{"mov",        ICON_VIDEOFILE,      COLOR_VIDEO},
 	{"mp3",        ICON_MUSICFILE,      COLOR_AUDIO},
 	{"mp4",        ICON_VIDEOFILE,      COLOR_VIDEO1},
@@ -483,7 +509,7 @@ static const struct icon_pair icons_ext[] = {
 	{"tgz",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"toml",       ICON_EXT_JSON,       0},
 	{"torrent",    ICON_TORRENT,        COLOR_ARCHIVE},
-	{"ts",         ICON_EXT_TS,        COLOR_JAVASCRIPT},
+	{"ts",         ICON_EXT_TS,         COLOR_JAVASCRIPT},
 	{"tsx",        ICON_REACT,          COLOR_REACT},
 	{"ttc",        ICON_FONT,           COLOR_O},
 	{"ttf",        ICON_FONT,           COLOR_O},
