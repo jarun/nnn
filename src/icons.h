@@ -356,10 +356,10 @@ static const struct icon_pair icons_ext[] = { /* All entries are case-insensitiv
 	{"pptx",       ICON_POWERPOINT,     0},
 	{"psb",        ICON_PHOTOSHOP,      0},
 	{"psd",        ICON_PHOTOSHOP,      0},
-	{"py",         ICON_PYTHON,        COLOR_PYTHON},
-	{"pyc",        ICON_PYTHON,        COLOR_PYTHON},
-	{"pyd",        ICON_PYTHON,        COLOR_PYTHON},
-	{"pyo",        ICON_PYTHON,        COLOR_PYTHON},
+	{"py",         ICON_PYTHON,         COLOR_PYTHON},
+	{"pyc",        ICON_PYTHON,         COLOR_PYTHON},
+	{"pyd",        ICON_PYTHON,         COLOR_PYTHON},
+	{"pyo",        ICON_PYTHON,         COLOR_PYTHON},
 
 	/* Q */
 
@@ -391,7 +391,7 @@ static const struct icon_pair icons_ext[] = { /* All entries are case-insensitiv
 	{"tar",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"tex",        ICON_TEX,            0},
 	{"tgz",        ICON_ARCHIVE,        COLOR_ARCHIVE},
-	{"ts",         ICON_EXT_TS,        COLOR_JAVASCRIPT},
+	{"ts",         ICON_EXT_TS,         COLOR_JAVASCRIPT},
 	{"tsx",        ICON_REACT,          COLOR_REACT},
 	{"txt",        ICON_DOCUMENT,       COLOR_DOCUMENT},
 	{"txz",        ICON_ARCHIVE,        COLOR_ARCHIVE},
