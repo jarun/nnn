@@ -68,6 +68,7 @@
 #define ICON_ELIXIR        ICON_STR(MFIZZ_ELIXIR, "\ue62d", "💧")
 #define ICON_ENCRYPT       ICON_STR("", "\uf805", "🔒")
 #define ICON_FSHARP        ICON_STR(DEV_FSHARP, "\ue7a7", "")
+#define ICON_FONT          ICON_STR(FILE_FONT, "\uf031", "")
 #define ICON_GIT           ICON_STR(FA_GIT, "\ue5fb", "🌱")
 #define ICON_HASKELL       ICON_STR("", "\ue777", "")
 #define ICON_HTML          ICON_STR(FA_FILE_CODE_O, "\uf72d", "")
@@ -310,6 +311,7 @@ static const struct icon_pair icons_ext[] = { /* All entries are case-insensitiv
 	{"jsx",        ICON_REACT,          COLOR_REACT},
 
 	/* K */
+	{"ksh",        ICON_SCRIPT,         COLOR_SHELL},
 
 	/* L */
 	{"lha",        ICON_ARCHIVE,        COLOR_ARCHIVE},
@@ -343,6 +345,7 @@ static const struct icon_pair icons_ext[] = { /* All entries are case-insensitiv
 	{"ogg",        ICON_MUSICFILE,      COLOR_AUDIO},
 	{"opus",       ICON_MUSICFILE,      COLOR_AUDIO},
 	{"opdownload", ICON_DOWNLOADS,      0},
+	{"otf",        ICON_FONT,           0},
 	{"out",        ICON_LINUX,          0},
 
 	/* P */
@@ -395,6 +398,7 @@ static const struct icon_pair icons_ext[] = { /* All entries are case-insensitiv
 	{"tsx",        ICON_REACT,          COLOR_REACT},
 	{"txt",        ICON_DOCUMENT,       COLOR_DOCUMENT},
 	{"txz",        ICON_ARCHIVE,        COLOR_ARCHIVE},
+	{"ttf",        ICON_FONT,           0},
 
 	/* U */
 
