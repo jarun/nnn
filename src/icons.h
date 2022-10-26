@@ -195,9 +195,16 @@ static const struct icon_pair icons_name[] = {
 
 #ifdef ICONS_GENERATE
 /*
- * All entries are case-insensitive
+ * The goal here is to provide a small set of default values. We don't try to
+ * provide icons for everything under the sun because keeping a _huge_ table of
+ * icons would: increase binary size, increase memory usage, decrease performance.
+ *
+ * Users are free to customize this *locally* as they see fit. Only open a
+ * pull-request if you think your changes are aligned with the goal described
+ * above.
  */
-static const struct icon_pair icons_ext[] = {
+
+static const struct icon_pair icons_ext[] = { /* All entries are case-insensitive */
 	/* Numbers */
 	{"1",          ICON_MANUAL,         COLOR_DOCS},
 	{"7z",         ICON_ARCHIVE,        COLOR_ARCHIVE},
