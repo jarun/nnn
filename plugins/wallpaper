@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
-# Description: Set the selected image as wallpaper using nitrogen or pywal.
+# Description: Set the selected image as wallpaper.
+# Uses nitrogen or pywal on X11, swww on wayland.
 #
 # Usage: Hover on an image and run the script to set it as wallpaper.
 #
