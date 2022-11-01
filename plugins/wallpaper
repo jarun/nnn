@@ -9,7 +9,7 @@
 
 if [ -n "$1" ]; then
 	if [ "$(file --mime-type "$1" | awk '{print $NF}' | awk -F '/' '{print $1}')" = "image" ]; then
-	  if [ "$XDG_SESSION_TYPE" == "x11" ]; then
+	  if [ "$XDG_SESSION_TYPE" = "x11" ]; then
 	    if type nitrogen >/dev/null 2>&1; then
 		    nitrogen --set-zoom-fill --save "$1"
 	    elif type wal >/dev/null 2>&1; then
