@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
-# Description: Set the selected image as wallpaper using nitrogen or pywal.
+# Description: Set the selected image as wallpaper.
+# Uses nitrogen or pywal on X11, swww on wayland.
 #
 # Usage: Hover on an image and run the script to set it as wallpaper.
 #
@@ -8,19 +9,29 @@
 # Author: juacq97
 
 if [ -n "$1" ]; then
-	if [ "$(file --mime-type "$1" | awk '{print $NF}' | awk -F '/' '{print $1}')" = "image" ]; then
-        if type nitrogen >/dev/null 2>&1; then
-	        nitrogen --set-zoom-fill --save "$1"
-        elif type wal >/dev/null 2>&1; then
-	        wal -i "$1"
+    if [ "$(file --mime-type "$1" | awk '{print $NF}' | awk -F '/' '{print $1}')" = "image" ]; then
+        if [ "$XDG_SESSION_TYPE" = "x11" ]; then
+            if type nitrogen >/dev/null 2>&1; then
+                nitrogen --set-zoom-fill --save "$1"
+            elif type wal >/dev/null 2>&1; then
+                wal -i "$1"
+            else
+                printf "nitrogen or pywal missing"
+                read -r _
+            fi
         else
-            printf "nitrogen or pywal missing"
-            read -r _
+            if type swww >/dev/null 2>&1; then
+                swww img "$1"
+            else
+                printf "swww missing"
+                read -r _
+            fi
         fi
 
     # If you want a system notification, uncomment the next 3 lines.
     # notify-send -a "nnn" "Wallpaper changed!"
     #   else
     # notify-send -a "nnn" "No image selected"
+
     fi
 fi
