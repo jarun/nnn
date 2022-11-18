@@ -7,7 +7,7 @@
 # Dependencies: ffsend (https://github.com/timvisee/ffsend), curl, jq, tr
 #
 # Note: Binary file set to expire after a week
-# 	Sending multiple files at once is handled exclusively using ffsend.
+# 	 Uploading selection is handled using ffsend.
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
