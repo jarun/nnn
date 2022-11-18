@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 
-# Description: Upload to Firefox Send if ffsend is found, else
+# Description: Selections are uploaded using Firefox Send
+#              For single files:
+#              Upload to Firefox Send if ffsend is found, else
 #              Paste contents of a text a file http://ix.io
 #              Upload a binary file to file.io
 #
@@ -11,20 +13,33 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-if [ -n "$1" ] && [ -s "$1" ]; then
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+if [ -s "$selection" ]; then
     if type ffsend >/dev/null 2>&1; then
-        ffsend -fiq u "$1"
-    elif [ "$(mimetype --output-format %m "$1" | awk -F '/' '{print $1}')" = "text" ]; then
-        curl -F "f:1=@$1" ix.io
+      # File name will be randomized foo.tar
+      xargs -0 < "$selection" ffsend u
     else
-        # Upload the file, show the download link and wait till user presses any key
-        curl -s -F "file=@$1" https://file.io/?expires=1w | jq '.link' | tr -d '"'
-
-        # To write download link to "$1".loc and exit
-        # curl -s -F "file=@$1" https://file.io/?expires=1w -o `basename "$1"`.loc
+      printf "ffsend is required to upload selection."
     fi
+
+    # Clear selection
+    printf "-" > "$NNN_PIPE"
 else
-    printf "empty file!"
+    if [ -n "$1" ] && [ -s "$1" ]; then
+	if type ffsend >/dev/null 2>&1; then
+	    ffsend -fiq u "$1"
+	elif [ "$(mimetype --output-format %m "$1" | awk -F '/' '{print $1}')" = "text" ]; then
+	    curl -F "f:1=@$1" ix.io
+	else
+	    # Upload the file, show the download link and wait till user presses any key
+	    curl -s -F "file=@$1" https://file.io/?expires=1w | jq '.link' | tr -d '"'
+
+	    # To write download link to "$1".loc and exit
+	    # curl -s -F "file=@$1" https://file.io/?expires=1w -o `basename "$1"`.loc
+	fi
+    else
+	printf "empty file!"
+    fi
 fi
 
 read -r _
