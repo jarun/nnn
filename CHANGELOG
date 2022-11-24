@@ -1,3 +1,25 @@
+nnn v4.7 Cuba libre
+2022-11-24
+
+
+- fix <kbd>^N</kbd> not working sometimes (#1449)
+- fix file remove confirmation prompt
+- bring back `atool` as the default archive handler
+- add option `-B` to use `bsdtar` as the archive utility
+- find and list mode improvements
+  ntinue even if max paths/data size limit is exceeded
+  eed improvements
+  pport listing maximum 16K paths of 64 MiB of data
+- key <kbd>J</kbd> to jump to an entry or relative offset from current entry
+- prefill the hard link creation prompt when there's a single target (#1507)
+- documented workaround for docker container crash (#1407, #1476)
+- plugin `imgview`: handle arguments as strings (#1509)
+- plugin `wallpaper`: support Wayland (#1512)
+- plugin `upload`: handle selection using `ffsend` (#1523)
+- add Rust icons (#1502)
+
+-------------------------------------------------------------------------------
+
 nnn v4.6 Absinthe
 2022-07-26
 

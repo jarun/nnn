@@ -27,6 +27,7 @@ jobs:
         env:
           CC: clang
         run: |
+          rm '/usr/local/bin/2to3-3.11'
           brew update
           brew install llvm
           export PATH="/usr/local/opt/llvm/bin:$PATH"
