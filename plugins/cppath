@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+# Description: Copy relative paths to clipboard.
+#              Call a first time on file A.
+#              Call a second time on file B.
+#              The relative path from A to B is copied in the clipboard.
+#              If A==B, then the full path of A is copied in the clipboard.
+#
+# Shell: POSIX compliant
+# Author: raffaem
+
+fromfile=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/cppathfrom
+
+if [ -n "$1" ]; then
+
+	if ! [ -f $fromfile ]; then
+		echo "$(realpath "$1")" > $fromfile;
+	else
+		from="$(cat $fromfile)"
+		rm "$fromfile"
+		to="$(realpath "$1")"
+		if [ "$from" == "$to" ]; then
+			path="$from"
+		else
+			from="$(dirname "$from")"
+			path="$(realpath --relative-to="$from" "$to")"
+		fi
+		if [ $XDG_SESSION_TYPE=="wayland" ]; then
+			wl-copy "$path"
+		elif [ $XDG_SESSION_TYPE=="x11" ]; then
+			echo "$path" | xclip -i
+		else
+			print "Unrecognized session type"
+		fi
+		# If you want a system notification, uncomment this line.
+		#notify-send -a "nnn" "Copied '"$path"' to clipboard."
+	fi
+
+else
+	print "No file selected"
+fi
