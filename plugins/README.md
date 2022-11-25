@@ -93,7 +93,7 @@ Notes:
 The following command installs or updates (after backup) all plugins:
 
 ```sh
-curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs | sh
+sh -c "$(curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/plugins/getplugs)"
 ```
 
 Plugins are installed to `${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins`.
