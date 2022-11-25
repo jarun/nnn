@@ -216,7 +216,7 @@ norl: $(BIN)
 nolc: $(BIN)
 
 src/$(ICONS_INCLUDE): src/icons-hash.c src/icons.h src/icons-in-terminal.h
-	$(CC) $(CPPFLAGS) -DICONS_GENERATE -o src/icons-hash-gen src/icons-hash.c
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -DICONS_GENERATE -o src/icons-hash-gen src/icons-hash.c
 	./src/icons-hash-gen > $@
 
 install-desktop: $(DESKTOPFILE)
