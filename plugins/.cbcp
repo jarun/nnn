@@ -24,7 +24,10 @@ IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}" # protect trailing \n
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 [ -s "$selection" ] || { echo "plugin .cbcp error: empty selection" >&2 ; exit 1; }
 
-if type xsel >/dev/null 2>&1; then
+if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+    # Wayland
+    tr '\0' '\n' < "$selection" | wl-copy
+elif type xsel >/dev/null 2>&1; then
     # Linux
     tr '\0' '\n' < "$selection" | xsel -bi
 elif type xclip >/dev/null 2>&1; then
@@ -42,9 +45,6 @@ elif type clip.exe >/dev/null 2>&1; then
 elif type clip >/dev/null 2>&1; then
     # Cygwin
     tr '\0' '\n' < "$selection" | clip
-elif type wl-copy >/dev/null 2>&1; then
-    # Wayland
-    tr '\0' '\n' < "$selection" | wl-copy
 elif type clipboard >/dev/null 2>&1; then
     # Haiku
     tr '\0' '\n' < "$selection" | clipboard --stdin

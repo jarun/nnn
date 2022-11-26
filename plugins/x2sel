@@ -23,7 +23,10 @@ IFS="$(printf '%b_' '\n')"; IFS="${IFS%_}" # protect trailing \n
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
 getclip () {
-	if type xsel >/dev/null 2>&1; then
+	if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
+		# Wayland
+		wl-paste
+	elif type xsel >/dev/null 2>&1; then
 		# Linux
 		xsel -bo
 	elif type xclip >/dev/null 2>&1; then
@@ -41,9 +44,6 @@ getclip () {
 	elif [ -r /dev/clipboard ] ; then
 		# Cygwin
 		cat /dev/clipboard
-	elif type wl-paste >/dev/null 2>&1; then
-		# Wayland
-		wl-paste
 	elif type clipboard >/dev/null 2>&1; then
 		# Haiku
 		clipboard --print
