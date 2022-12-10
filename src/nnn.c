@@ -8573,8 +8573,10 @@ int main(int argc, char *argv[])
 			DPRINTF_S(arg);
 			size_t len = xstrlen(arg);
 
-			if (len > 7 && is_prefix(arg, "file://", 7))
+			if (len > 7 && is_prefix(arg, "file://", 7)) {
 				arg = arg + 7;
+				len -= 7;
+			}
 			initpath = abspath(arg, NULL, NULL);
 			DPRINTF_S(initpath);
 			if (!initpath) {
