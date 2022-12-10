@@ -29,9 +29,14 @@ subshell spawning and much more. It remains a simple and
 efficient file manager that stays out of your way.
 .Pp
 .Nm
-opens the current working directory by default if
+opens the current working directory if
 .Ar PATH
-is not specified.
+is not specified. If the
+.Ar PATH
+doesn't exist,
+.Nm
+will prompt to create a new regular file. If the parent directory
+is specified, it must exist and be accessible.
 .Sh KEYBINDS
 .Pp
 Press

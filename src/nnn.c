@@ -195,6 +195,7 @@
 #define LIST_INPUT_MAX  ((size_t)LIST_FILES_MAX * PATH_MAX)
 #define SCROLLOFF       3
 #define COLOR_256       256
+#define CREATE_NEW_KEY  0xFFFFFFFF
 
 /* Time intervals */
 #define DBLCLK_INTERVAL_NS (400000000)
@@ -6616,7 +6617,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 
 	newpath[0] = runfile[0] = '\0';
 
-	presel = pkey ? ';' : ((cfg.filtermode
+	presel = pkey ? ((pkey == CREATE_NEW_KEY) ? 'n' : ';') : ((cfg.filtermode
 			|| (session && (g_ctx[cfg.curctx].c_fltr[0] == FILTER
 				|| g_ctx[cfg.curctx].c_fltr[0] == RFILTER)
 				&& g_ctx[cfg.curctx].c_fltr[1])) ? FILTER : 0);
@@ -7534,9 +7535,17 @@ nochange:
 #endif
 				break;
 			case SEL_NEW:
-				r = get_input(messages[MSG_NEW_OPTS]);
+				if (!pkey) {
+					r = get_input(messages[MSG_NEW_OPTS]);
+					tmp = NULL;
+				} else {
+					r = 'f';
+					tmp = g_ctx[0].c_name;
+					pkey = '\0';
+				}
+
 				if (r == 'f' || r == 'd')
-					tmp = xreadline(NULL, messages[MSG_NEW_PATH]);
+					tmp = xreadline(tmp, messages[MSG_NEW_PATH]);
 				else if (r == 's' || r == 'h')
 					tmp = xreadline(nselected == 1 ? xbasename(pselbuf) : NULL,
 						messages[nselected <= 1?MSG_NEW_PATH:MSG_LINK_PREFIX]);
@@ -8583,11 +8592,17 @@ int main(int argc, char *argv[])
 			struct stat sb;
 
 			if (stat(initpath, &sb) == -1) {
-				xerror();
-				return EXIT_FAILURE;
-			}
-
-			if (!S_ISDIR(sb.st_mode))
+				arg = xbasename(initpath);
+				if (arg != initpath) { /* We have a directory */
+					if (!xdiraccess(xdirname(initpath))) {
+						xerror(); /* Fail non-existent/inaccessible directory */
+						return EXIT_FAILURE;
+					}
+					*--arg = '/'; /* Restore the complete path */
+				}
+				pkey = CREATE_NEW_KEY; /* Override plugin key */
+				g_state.initfile = 1;
+			} else if (!S_ISDIR(sb.st_mode))
 				g_state.initfile = 1;
 
 			if (session)
