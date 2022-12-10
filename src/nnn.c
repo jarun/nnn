@@ -4556,7 +4556,7 @@ next:
 			return FALSE;
 		}
 	} else {
-		int fd = open(path, O_CREAT, 0666);
+		int fd = open(path, O_CREAT | O_TRUNC, 0666); /* Use forced create mode for files */
 
 		if (fd == -1 && errno != EEXIST) {
 			DPRINTF_S("open!");
@@ -7612,14 +7612,14 @@ nochange:
 
 			/* Check if another file with same name exists */
 			if (fstatat(fd, tmp, &sb, AT_SYMLINK_NOFOLLOW) == 0) {
-				if (sel == SEL_RENAME) {
+				if ((sel == SEL_RENAME) || ((r == 'f') && (S_ISREG(sb.st_mode)))) {
 					/* Overwrite file with same name? */
 					if (!xconfirm(get_input(messages[MSG_OVERWRITE]))) {
 						close(fd);
 						break;
 					}
 				} else {
-					/* Do nothing in case of NEW */
+					/* Do nothing for SEL_NEW if a non-regular entry exists */
 					close(fd);
 					printwait(messages[MSG_EXISTS], &presel);
 					goto nochange;
