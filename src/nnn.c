@@ -8571,7 +8571,9 @@ int main(int argc, char *argv[])
 		} else { /* Open a file */
 			arg = argv[optind];
 			DPRINTF_S(arg);
-			if (xstrlen(arg) > 7 && is_prefix(arg, "file://", 7))
+			size_t len = xstrlen(arg);
+
+			if (len > 7 && is_prefix(arg, "file://", 7))
 				arg = arg + 7;
 			initpath = abspath(arg, NULL, NULL);
 			DPRINTF_S(initpath);
@@ -8592,16 +8594,23 @@ int main(int argc, char *argv[])
 			struct stat sb;
 
 			if (stat(initpath, &sb) == -1) {
-				arg = xbasename(initpath);
-				if (arg != initpath) { /* We have a directory */
-					if (!xdiraccess(xdirname(initpath))) {
-						xerror(); /* Fail non-existent/inaccessible directory */
+				bool dir = (arg[len - 1] == '/');
+
+				if (!dir) {
+					arg = xbasename(initpath);
+					initpath = xdirname(initpath);
+
+					pkey = CREATE_NEW_KEY; /* Override plugin key */
+					g_state.initfile = 1;
+				}
+				if (dir || (arg != initpath)) { /* We have a directory */
+					if (!xdiraccess(initpath) && !xmktree(initpath, TRUE)) {
+						xerror(); /* Fail if directory cannot be created */
 						return EXIT_FAILURE;
 					}
-					*--arg = '/'; /* Restore the complete path */
+					if (!dir) /* Restore the complete path */
+						*--arg = '/';
 				}
-				pkey = CREATE_NEW_KEY; /* Override plugin key */
-				g_state.initfile = 1;
 			} else if (!S_ISDIR(sb.st_mode))
 				g_state.initfile = 1;
 

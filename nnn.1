@@ -31,12 +31,21 @@ efficient file manager that stays out of your way.
 .Nm
 opens the current working directory if
 .Ar PATH
-is not specified. If the
+is not specified. If
 .Ar PATH
-doesn't exist,
+is specified and it exists,
 .Nm
-will prompt to create a new regular file. If the parent directory
-is specified, it must exist and be accessible.
+will open it. If the
+.Ar PATH
+doesn't exist and ends with a \fB/\fR,
+.Nm
+will attempt to create the directory tree and open it. Otherwise,
+.Ar PATH
+is considered a path to a regular file and
+.Nm
+attempts to create the complete directory tree to the file, open
+the parent directory and prompt to create the new file in it with
+the base filename.
 .Sh KEYBINDS
 .Pp
 Press
