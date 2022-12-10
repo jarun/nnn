@@ -4207,9 +4207,9 @@ static void save_session(const char *sname, int *presel)
 			if (cfg.curctx == i && ndents)
 				/* Update current file name, arrows don't update it */
 				xstrsncpy(g_ctx[i].c_name, pdents[cur].name, NAME_MAX + 1);
-			header.pathln[i] = strnlen(g_ctx[i].c_path, PATH_MAX) + 1;
-			header.lastln[i] = strnlen(g_ctx[i].c_last, PATH_MAX) + 1;
-			header.nameln[i] = strnlen(g_ctx[i].c_name, NAME_MAX) + 1;
+			header.pathln[i] = MIN(xstrlen(g_ctx[i].c_path), PATH_MAX) + 1;
+			header.lastln[i] = MIN(xstrlen(g_ctx[i].c_last), PATH_MAX) + 1;
+			header.nameln[i] = MIN(xstrlen(g_ctx[i].c_name), NAME_MAX) + 1;
 			header.fltrln[i] = REGEX_MAX;
 		}
 	}
