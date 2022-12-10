@@ -195,7 +195,7 @@
 #define LIST_INPUT_MAX  ((size_t)LIST_FILES_MAX * PATH_MAX)
 #define SCROLLOFF       3
 #define COLOR_256       256
-#define CREATE_NEW_KEY  0xFFFFFFFF
+#define CREATE_NEW_KEY  (-1)
 
 /* Time intervals */
 #define DBLCLK_INTERVAL_NS (400000000)
