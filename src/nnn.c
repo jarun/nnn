@@ -1447,7 +1447,7 @@ static void writesel(const char *buf, const size_t buflen)
 	if (!selpath)
 		return;
 
-	int fd = open(selpath, O_CREAT | O_WRONLY | O_TRUNC, 0666);
+	int fd = open(selpath, O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR | S_IRUSR);
 
 	if (fd != -1) {
 		if (write(fd, buf, buflen) != (ssize_t)buflen)
@@ -2709,7 +2709,7 @@ static void write_lastdir(const char *curpath, const char *outfile)
 
 	int fd = open(outfile
 			? (outfile[0] == '~' ? g_buf : outfile)
-			: cfgpath, O_CREAT | O_WRONLY | O_TRUNC, 0666);
+			: cfgpath, O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR | S_IRUSR);
 
 	if (fd != -1) {
 		dprintf(fd, "cd \"%s\"", curpath);
@@ -4217,7 +4217,7 @@ static void save_session(const char *sname, int *presel)
 	mkpath(cfgpath, toks[TOK_SSN], ssnpath);
 	mkpath(ssnpath, sname, spath);
 
-	fd = open(spath, O_CREAT | O_WRONLY | O_TRUNC, 0666);
+	fd = open(spath, O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR | S_IRUSR);
 	if (fd == -1) {
 		printwait(messages[MSG_SEL_MISSING], presel);
 		return;
@@ -4276,7 +4276,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	if (has_loaded_dynamically)
 		save_session("@", NULL);
 
-	fd = open(spath, O_RDONLY, 0666);
+	fd = open(spath, O_RDONLY, S_IWUSR | S_IRUSR);
 	if (fd == -1) {
 		if (!status) {
 			printmsg(messages[MSG_SEL_MISSING]);
@@ -4557,7 +4557,7 @@ next:
 			return FALSE;
 		}
 	} else {
-		int fd = open(path, O_CREAT | O_TRUNC, 0666); /* Use forced create mode for files */
+		int fd = open(path, O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR); /* Forced create mode for files */
 
 		if (fd == -1 && errno != EEXIST) {
 			DPRINTF_S("open!");
