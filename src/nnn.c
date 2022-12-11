@@ -1167,15 +1167,21 @@ static char *common_prefix(const char *path, char *prefix)
  * If there's a symlink in file list we want to show the symlink not what it's points to.
  * Resolves ./../~ in path
  */
-static char *abspath(const char *path, const char *cwd, char *buf)
+static char *abspath(const char *path, char *cwd, char *buf)
 {
+	bool allocated = FALSE;
+
 	if (!path)
 		return NULL;
 
 	if (path[0] == '~')
 		cwd = home;
-	else if ((path[0] != '/') && !cwd)
+	else if ((path[0] != '/') && !cwd) {
 		cwd = getcwd(NULL, 0);
+		if (!cwd)
+			return NULL;
+		allocated = TRUE;
+	}
 
 	size_t dst_size = 0, src_size = xstrlen(path), cwd_size = cwd ? xstrlen(cwd) : 0;
 	size_t len = src_size;
@@ -1188,8 +1194,11 @@ static char *abspath(const char *path, const char *cwd, char *buf)
 	 */
 	char *resolved_path = buf ? buf : malloc(src_size + cwd_size + 2);
 
-	if (!resolved_path)
+	if (!resolved_path) {
+		if (allocated)
+			free(cwd);
 		return NULL;
+	}
 
 	/* Turn relative paths into absolute */
 	if (path[0] != '/') {
@@ -1199,6 +1208,8 @@ static char *abspath(const char *path, const char *cwd, char *buf)
 			return NULL;
 		}
 		dst_size = xstrsncpy(resolved_path, cwd, cwd_size + 1) - 1;
+		if (allocated)
+			free(cwd);
 	} else
 		resolved_path[0] = '\0';
 
@@ -7548,7 +7559,7 @@ nochange:
 					tmp = xreadline(tmp, messages[MSG_NEW_PATH]);
 				else if (r == 's' || r == 'h')
 					tmp = xreadline(nselected == 1 ? xbasename(pselbuf) : NULL,
-						messages[nselected <= 1?MSG_NEW_PATH:MSG_LINK_PREFIX]);
+						messages[nselected <= 1 ? MSG_NEW_PATH : MSG_LINK_PREFIX]);
 				else
 					tmp = NULL;
 				break;
