@@ -735,7 +735,7 @@ static char mv[] = "mv -i";
 #endif
 
 /* Archive commands */
-static const char * const archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
+static char * const archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
 
 /* Tokens used for path creation */
 #define TOK_BM  0
@@ -1165,18 +1165,22 @@ static char *common_prefix(const char *path, char *prefix)
 /*
  * The library function realpath() resolves symlinks.
  * If there's a symlink in file list we want to show the symlink not what it's points to.
- * Resolves ./../~ in path
+ * Resolves ./../~ in filepath
  */
-static char *abspath(const char *path, char *cwd, char *buf)
+static char *abspath(const char *filepath, char *cwd, char *buf)
 {
+	const char *path = filepath;
 	bool allocated = FALSE;
 
 	if (!path)
 		return NULL;
 
-	if (path[0] == '~')
+	if (path[0] == '~') {
 		cwd = home;
-	else if ((path[0] != '/') && !cwd) {
+		++path;
+		if (*path == '/')
+			++path;
+	} else if ((path[0] != '/') && !cwd) {
 		cwd = getcwd(NULL, 0);
 		if (!cwd)
 			return NULL;
@@ -2681,7 +2685,7 @@ finish:
 }
 #endif
 
-static void get_archive_cmd(char *cmd, const char *archive)
+static char *get_archive_cmd(const char *archive)
 {
 	uchar_t i = 3;
 
@@ -2693,7 +2697,7 @@ static void get_archive_cmd(char *cmd, const char *archive)
 		i = 2;
 	// else tar
 
-	xstrsncpy(cmd, archive_cmd[i], ARCHIVE_CMD_LEN);
+	return archive_cmd[i];
 }
 
 static void archive_selection(const char *cmd, const char *archive, const char *curpath)
@@ -7573,25 +7577,29 @@ nochange:
 
 			switch (sel) {
 			case SEL_ARCHIVE:
-				if (r == 'c' && strcmp(tmp, pdents[cur].name) == 0)
-					goto nochange;
-
-				mkpath(path, tmp, newpath);
-				if (access(newpath, F_OK) == 0) {
+				tmp = abspath(tmp, NULL, newpath);
+				if (!tmp)
+					continue;
+				if (access(tmp, F_OK) == 0) {
 					if (!xconfirm(get_input(messages[MSG_OVERWRITE]))) {
 						statusbar(path);
 						goto nochange;
 					}
 				}
-				get_archive_cmd(newpath, tmp);
-				(r == 's') ? archive_selection(newpath, tmp, path)
-					   : spawn(newpath, tmp, pdents[cur].name,
+
+				(r == 's') ? archive_selection(get_archive_cmd(tmp), tmp, "/")
+					   : spawn(get_archive_cmd(tmp), tmp, pdents[cur].name,
 						   NULL, F_CLI | F_CONFIRM);
 
-				mkpath(path, tmp, newpath);
-				if (access(newpath, F_OK) == 0) { /* File created */
-					xstrsncpy(lastname, tmp, NAME_MAX + 1);
-					clearfilter(); /* Archive name may not match */
+				if (tmp && (access(tmp, F_OK) == 0)) { /* File created */
+					char *base = xbasename(tmp);
+					char *parent = xdirname(tmp);
+
+					/* Check if file is created in the current directory */
+					if (strcmp(path, parent) == 0) {
+						xstrsncpy(lastname, base, NAME_MAX + 1);
+						clearfilter(); /* Archive name may not match */
+					}
 					clearselection(); /* Archive operation complete */
 					cd = FALSE;
 					goto begin;
