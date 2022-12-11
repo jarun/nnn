@@ -90,6 +90,7 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
   - FreeDesktop compliant trash utility integration
   - Cross-dir file/all/range selection
   - Create (with parents), rename, duplicate files and dirs
+  - Create new file or directory (tree) on startup
   - Batch renamer for selection or dir
   - List input stream of file paths from stdin or plugin
   - Copy (as), move (as), delete, archive, link selection
