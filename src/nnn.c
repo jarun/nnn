@@ -1137,7 +1137,19 @@ static size_t mkpath(const char *dir, const char *name, char *out)
 {
 	size_t len = 0;
 
-	if (name[0] != '/') { // NOLINT
+	if (name[0] == '~') { //NOLINT
+		len = xstrsncpy(out, home, PATH_MAX);
+		if (!name[1])
+			return len;
+
+		if (name[1] != '/') {
+			out[0] = '\0';
+			return 0;
+		}
+
+		--len;
+		++name;
+	} else if (name[0] != '/') { // NOLINT
 		/* Handle root case */
 		len = istopdir(dir) ? 1 : xstrsncpy(out, dir, PATH_MAX);
 		out[len - 1] = '/'; // NOLINT
@@ -1275,6 +1287,8 @@ static char *abspath(const char *filepath, char *cwd, char *buf)
 	if (xstrlen(resolved_path) >= PATH_MAX) {
 		if (!buf)
 			free(resolved_path);
+		else
+			buf[0] = '\0';
 		return NULL;
 	}
 
@@ -3716,10 +3730,14 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int type)
 		link_fn = &link;
 
 	if (choice == 'c' || (nselected == 1)) {
-		mkpath(path, prefix, lnpath); /* Generate link path */
-		mkpath(path, (choice == 'c') ? curfname : pselbuf, buf); /* Generate target file path */
+		prefix = abspath(prefix, path, lnpath); /* Generate link path */
+		if (!prefix)
+			return -1;
 
-		if (!link_fn(buf, lnpath)) {
+		if (choice == 'c')
+			mkpath(path, curfname, buf); /* Generate target file path */
+
+		if (!link_fn((choice == 'c') ? buf : pselbuf, lnpath)) {
 			if (choice == 's')
 				clearselection();
 			return 1; /* One link created */
@@ -3727,11 +3745,12 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int type)
 		return 0;
 	}
 
+	r = xstrsncpy(buf, prefix, NAME_MAX + 1); /* Copy prefix */
+
 	while (pos < selbufpos) {
 		len = xstrlen(psel);
 		fname = xbasename(psel);
 
-		r = xstrsncpy(buf, prefix, NAME_MAX + 1); /* Copy prefix */
 		xstrsncpy(buf + r - 1, fname, NAME_MAX - r); /* Suffix target file name */
 		mkpath(path, buf, lnpath); /* Generate link path */
 
@@ -7594,7 +7613,7 @@ nochange:
 				if (r == 'f' || r == 'd')
 					tmp = xreadline(tmp, messages[MSG_NEW_PATH]);
 				else if (r == 's' || r == 'h')
-					tmp = xreadline(nselected == 1 ? xbasename(pselbuf) : NULL,
+					tmp = xreadline(NULL,
 						messages[nselected <= 1 ? MSG_NEW_PATH : MSG_LINK_PREFIX]);
 				else
 					tmp = NULL;
