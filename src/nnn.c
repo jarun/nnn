@@ -3724,7 +3724,6 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int type)
 				clearselection();
 			return 1; /* One link created */
 		}
-
 		return 0;
 	}
 
@@ -3743,7 +3742,8 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int type)
 		psel += len + 1;
 	}
 
-	clearselection();
+	if (count == nselected) /* Clear selection if all links are generated */
+		clearselection();
 	return count;
 }
 
