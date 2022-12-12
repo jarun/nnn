@@ -1008,6 +1008,32 @@ static inline bool is_prefix(const char *restrict str, const char *restrict pref
 	return !strncmp(str, prefix, len);
 }
 
+static inline bool is_bad_len_or_dir(const char *restrict path)
+{
+	size_t len = xstrlen(path);
+
+	return ((len >= PATH_MAX) || (path[len - 1] == '/'));
+}
+
+static char *get_cwd_entry(const char *restrict cwdpath, char *entrypath, size_t *tokenlen)
+{
+	size_t len = xstrlen(cwdpath);
+	char *end;
+
+	if (!is_prefix(entrypath, cwdpath, len))
+		return NULL;
+
+	entrypath += len + 1; /* Add 1 for trailing / */
+	end = strchr(entrypath, '/');
+	if (end)
+		*tokenlen = end - entrypath;
+	else
+		*tokenlen = xstrlen(entrypath);
+	DPRINTF_U(*tokenlen);
+
+	return entrypath;
+}
+
 /*
  * The poor man's implementation of memrchr(3).
  * We are only looking for '/' and '.' in this program.
@@ -1244,6 +1270,12 @@ static char *abspath(const char *filepath, char *cwd, char *buf)
 	if (*resolved_path == '\0') {
 		resolved_path[0] = '/';
 		resolved_path[1] = '\0';
+	}
+
+	if (xstrlen(resolved_path) >= PATH_MAX) {
+		if (!buf)
+			free(resolved_path);
+		return NULL;
 	}
 
 	return resolved_path;
@@ -7511,7 +7543,8 @@ nochange:
 		case SEL_NEW: // fallthrough
 		case SEL_RENAME:
 		{
-			int fd, ret = 'n';
+			int ret = 'n';
+			size_t len;
 
 			if (!ndents && (sel == SEL_OPENWITH || sel == SEL_RENAME))
 				break;
@@ -7572,7 +7605,7 @@ nochange:
 				break;
 			}
 
-			if (!tmp || !*tmp)
+			if (!tmp || !*tmp || is_bad_len_or_dir(tmp))
 				break;
 
 			switch (sel) {
@@ -7592,15 +7625,16 @@ nochange:
 						   NULL, F_CLI | F_CONFIRM);
 
 				if (tmp && (access(tmp, F_OK) == 0)) { /* File created */
-					char *base = xbasename(tmp);
-					char *parent = xdirname(tmp);
+					if (r == 's')
+						clearselection(); /* Archive operation complete */
 
-					/* Check if file is created in the current directory */
-					if (strcmp(path, parent) == 0) {
-						xstrsncpy(lastname, base, NAME_MAX + 1);
+					/* Check if any entry is created in the current directory */
+					tmp = get_cwd_entry(path, tmp, &len);
+					if (tmp) {
+						xstrsncpy(lastname, tmp, len + 1);
 						clearfilter(); /* Archive name may not match */
-					}
-					clearselection(); /* Archive operation complete */
+					} if (cfg.filtermode)
+						presel = FILTER;
 					cd = FALSE;
 					goto begin;
 				}
@@ -7612,10 +7646,12 @@ nochange:
 				copycurname();
 				goto nochange;
 			case SEL_RENAME:
+				r = 0;
 				/* Skip renaming to same name */
 				if (strcmp(tmp, pdents[cur].name) == 0) {
 					tmp = xreadline(pdents[cur].name, messages[MSG_COPY_NAME]);
-					if (!tmp || !tmp[0] || !strcmp(tmp, pdents[cur].name)) {
+					if (!tmp || !tmp[0] || is_bad_len_or_dir(tmp)
+					    || !strcmp(tmp, pdents[cur].name)) {
 						cfg.filtermode ?  presel = FILTER : statusbar(path);
 						copycurname();
 						goto nochange;
@@ -7627,28 +7663,22 @@ nochange:
 				break;
 			}
 
-			/* Open the descriptor to currently open directory */
-#ifdef O_DIRECTORY
-			fd = open(path, O_RDONLY | O_DIRECTORY);
-#else
-			fd = open(path, O_RDONLY);
-#endif
-			if (fd == -1) {
-				printwarn(&presel);
-				goto nochange;
+			if (!(r == 's' || r == 'h')) {
+				tmp = abspath(tmp, NULL, newpath);
+				if (!tmp) {
+					printwarn(&presel);
+					goto nochange;
+				}
 			}
 
 			/* Check if another file with same name exists */
-			if (fstatat(fd, tmp, &sb, AT_SYMLINK_NOFOLLOW) == 0) {
+			if (lstat(tmp, &sb) == 0) {
 				if ((sel == SEL_RENAME) || ((r == 'f') && (S_ISREG(sb.st_mode)))) {
 					/* Overwrite file with same name? */
-					if (!xconfirm(get_input(messages[MSG_OVERWRITE]))) {
-						close(fd);
+					if (!xconfirm(get_input(messages[MSG_OVERWRITE])))
 						break;
-					}
 				} else {
 					/* Do nothing for SEL_NEW if a non-regular entry exists */
-					close(fd);
 					printwait(messages[MSG_EXISTS], &presel);
 					goto nochange;
 				}
@@ -7658,21 +7688,22 @@ nochange:
 				/* Rename the file */
 				if (ret == 'd')
 					spawn("cp -rp", pdents[cur].name, tmp, NULL, F_SILENT);
-				else if (renameat(fd, pdents[cur].name, fd, tmp) != 0) {
-					close(fd);
+				else if (rename(pdents[cur].name, tmp) != 0) {
 					printwarn(&presel);
 					goto nochange;
 				}
-				close(fd);
-				xstrsncpy(lastname, tmp, NAME_MAX + 1);
+
+				/* Check if any entry is created in the current directory */
+				tmp = get_cwd_entry(path, tmp, &len);
+				if (tmp)
+					xstrsncpy(lastname, tmp, len + 1);
+				/* Directory must be reloeaded for rename case */
 			} else { /* SEL_NEW */
-				close(fd);
 				presel = 0;
 
 				/* Check if it's a dir or file */
 				if (r == 'f' || r == 'd') {
-					mkpath(path, tmp, newpath);
-					ret = xmktree(newpath, r == 'f' ? FALSE : TRUE);
+					ret = xmktree(tmp, r == 'f' ? FALSE : TRUE);
 				} else if (r == 's' || r == 'h') {
 					if (nselected > 1 && tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
@@ -7686,15 +7717,19 @@ nochange:
 				if (ret <= 0)
 					goto nochange;
 
-				if (r == 'f' || r == 'd')
-					xstrsncpy(lastname, tmp, NAME_MAX + 1);
-				else if (ndents) {
+				if (r == 'f' || r == 'd') {
+					tmp = get_cwd_entry(path, tmp, &len);
+					if (tmp)
+						xstrsncpy(lastname, tmp, len + 1);
+					else
+						continue; /* No change in directory */
+				} else if (ndents) {
 					if (cfg.filtermode)
 						presel = FILTER;
 					copycurname();
 				}
-				clearfilter();
 			}
+			clearfilter();
 
 			cd = FALSE;
 			goto begin;
