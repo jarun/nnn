@@ -3698,7 +3698,7 @@ static char *getreadline(const char *prompt)
  * Create symbolic/hard link(s) to file(s) in selection list
  * Returns the number of links created, -1 on error
  */
-static int xlink(char *prefix, char *path, char *curfname, char *buf, int *presel, int type)
+static int xlink(char *prefix, char *path, char *curfname, char *buf, int type)
 {
 	int count = 0, choice;
 	char *psel = pselbuf, *fname;
@@ -3725,8 +3725,7 @@ static int xlink(char *prefix, char *path, char *curfname, char *buf, int *prese
 			return 1; /* One link created */
 		}
 
-		printwarn(presel);
-		return -1;
+		return 0;
 	}
 
 	while (pos < selbufpos) {
@@ -7710,12 +7709,11 @@ nochange:
 				} else if (r == 's' || r == 'h') {
 					if (nselected > 1 && tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
-					ret = xlink(tmp, path, (ndents ? pdents[cur].name : NULL),
-						  newpath, &presel, r);
+					ret = xlink(tmp, path, (ndents ? pdents[cur].name : NULL), newpath, r);
 				}
 
 				if (!ret)
-					printwait(messages[MSG_FAILED], &presel);
+					printwarn(&presel);
 
 				if (ret <= 0)
 					goto nochange;
