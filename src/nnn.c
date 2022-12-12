@@ -7610,6 +7610,9 @@ nochange:
 
 			switch (sel) {
 			case SEL_ARCHIVE:
+				if (r == 'c' && strcmp(tmp, pdents[cur].name) == 0)
+					continue; /* Cannot overwrite the hovered file */
+
 				tmp = abspath(tmp, NULL, newpath);
 				if (!tmp)
 					continue;
