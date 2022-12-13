@@ -1,24 +1,72 @@
 #!/usr/bin/env sh
 
-# Description: Send the selected files to your Android device using kdeconnect-cli.
+# Description: Send files or folders to your Android device using kdeconnect-cli.
 #              kdeconnect must be configured on the Android device and the PC.
 #
+# Usage:
+#   - Hover over a file or a folder and call the plugin.
+#   - Alternatively, select the files and folders you would like to send, and activate the plugin.
+#
 # Shell: POSIX compliant
-# Author: juacq97
+# Author: juacq97, raffaem
 
+# If you want system notification, put this equal to 1
+notify=1
+
+note() {
+	if [ $notify = 1 ]; then
+		notify-send -a "Kdeconnect" "$1"
+	else
+		echo "[Kdeconnect] $1"
+	fi
+}
+
+# If you have only sh, use this
+devname=$(kdeconnect-cli --list-available --name-only 2>/dev/null | awk NR==1)
+if [ -z "$devname" ]; then
+	note "No devices available"
+	exit
+fi
+
+# If you are privileged enough to have bash, use this instead
+# names=$(kdeconnect-cli --list-available --name-only 2>/dev/null)
+# IFS=$'\n' read -rd '' -a namesarr <<<"$names"
+# length=${#namesarr[@]}
+# if [ "$length" = 0 ]; then
+# 	note "No devices available"
+# 	exit
+# elif [ "$length" = 1 ]; then
+# 	devname="${namesarr[0]}"
+# else
+# 	for (( j=0; j<length; j++ ));
+# 	do
+# 	  printf "%d. %s\n" "$j" "${namesarr[$j]}"
+# 	done
+# 	read -r -p "Choice: " choice
+# 	devname="${namesarr[$choice]}"
+# fi
+
+# Get file that contains NULL-separated list of selected files
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
-id=$(kdeconnect-cli -a --id-only | awk '{print $1}')
-if [ -s "$selection" ]; then
-    kdeconnect-cli -d "$id" --share "$(cat "$selection")"
-
-    # If you want a system notification, uncomment the next 3 lines.
-    #notify-send -a "Kdeconnect" "Sending $(cat "$selection")"
-#else
-    #notify-send -a "Kdeconnect" "No file selected"
-
-    # Clear selection
-    if [ -p "$NNN_PIPE" ]; then
-        printf "-" > "$NNN_PIPE"
-    fi
+if [ ! -s "$selection" ]; then
+	if [ -n "$1" ]; then
+		selection=$(mktemp)
+		printf "%s" "$1" > "$selection"
+	else
+		note "No selected files, and no hovered file"
+		exit
+	fi
 fi
+
+# Send files over
+<"$selection" xargs -0 -I{} kdeconnect-cli --name "$devname" --share {}
+
+# Show notification
+note "Files sent"
+
+# Clear selection
+if [ -p "$NNN_PIPE" ]; then
+	printf "-" > "$NNN_PIPE"
+fi
+
