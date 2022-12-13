@@ -763,7 +763,7 @@ static const char * const patterns[] = {
 		"%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
 	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$", /* Basic formats that don't need external tools */
 	SED" -i 's|^%s\\(.*\\)$|%s\\1|' %s",
-	SED" -ze 's|^%s/||' '%s' | xargs -0 %s %s",
+	"xargs -0 %s %s < '%s'",
 };
 
 /* Colors */
@@ -2746,17 +2746,17 @@ static char *get_archive_cmd(const char *archive)
 	return archive_cmd[i];
 }
 
-static void archive_selection(const char *cmd, const char *archive, const char *curpath)
+static void archive_selection(const char *cmd, const char *archive)
 {
 	char *buf = malloc((xstrlen(patterns[P_ARCHIVE_CMD]) + xstrlen(cmd) + xstrlen(archive)
-	                   + xstrlen(curpath) + xstrlen(selpath)) * sizeof(char));
+	                   + xstrlen(selpath)) * sizeof(char));
 	if (!buf) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
 		return;
 	}
 
-	snprintf(buf, CMD_LEN_MAX, patterns[P_ARCHIVE_CMD], curpath, selpath, cmd, archive);
+	snprintf(buf, CMD_LEN_MAX, patterns[P_ARCHIVE_CMD], cmd, archive, selpath);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI | F_CONFIRM);
 	free(buf);
 }
@@ -7641,7 +7641,7 @@ nochange:
 					}
 				}
 
-				(r == 's') ? archive_selection(get_archive_cmd(tmp), tmp, "/")
+				(r == 's') ? archive_selection(get_archive_cmd(tmp), tmp)
 					   : spawn(get_archive_cmd(tmp), tmp, pdents[cur].name,
 						   NULL, F_CLI | F_CONFIRM);
 
