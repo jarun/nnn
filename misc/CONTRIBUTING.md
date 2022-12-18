@@ -3,6 +3,8 @@ Contributions to nnn are welcome! There's always an open issue with the current 
 
 Before suggesting changes, please read a bit about [the design principles nnn follows](https://github.com/jarun/nnn/wiki/concepts#design), and make sure you aren't breaking any of them.
 
+Feel free to join the [Discussions](https://github.com/jarun/nnn/discussions). We highly recommended a discussion before raising a PR.
+
 ## Coding standard
 
 `nnn` follows the Linux kernel coding style closely. The C source code uses TABs and the plugins use 4 spaces for indentation.

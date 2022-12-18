@@ -162,4 +162,4 @@ Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creat
 - [Sijmen J. Mulder](https://github.com/sjmulder)
 - and other contributors
 
-Visit the [ToDo list and discussion](https://github.com/jarun/nnn/issues/1537) thread to contribute or see the features in progress.
+Visit the [Tracker](https://github.com/jarun/nnn/issues/1546) thread for a list of features in progress and anything up for grabs. Feel free to [discuss](https://github.com/jarun/nnn/discussions) new ideas or enhancement requests.
