@@ -1,24 +1,43 @@
 #!/usr/bin/env sh
 
-# Description: Send the selected files to your Android device using kdeconnect-cli.
+# Description: Send files or folders to your Android device using kdeconnect-cli.
 #              kdeconnect must be configured on the Android device and the PC.
 #
+# Usage:
+#   - Hover over a file or a folder and call the plugin.
+#   - Alternatively, select the files and folders you would like to send, and activate the plugin.
+#
 # Shell: POSIX compliant
-# Author: juacq97
+# Author: juacq97, raffaem
+
+# If you want system notification, put this equal to 1
+notify=0
+
+note() {
+	if [ $notify = 1 ]; then
+		notify-send -a "Kdeconnect" "$1"
+	else
+		echo "[Kdeconnect] $1"
+	fi
+}
+
+send() {
+	xargs -0 -I{} kdeconnect-cli --name "$devname" --share {}
+	note "Files sent"
+}
+
+devname=$(kdeconnect-cli --list-available --name-only 2>/dev/null | awk NR==1)
+if [ -z "$devname" ]; then
+	note "No devices available"
+	exit
+fi
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
-
-id=$(kdeconnect-cli -a --id-only | awk '{print $1}')
 if [ -s "$selection" ]; then
-    kdeconnect-cli -d "$id" --share "$(cat "$selection")"
-
-    # If you want a system notification, uncomment the next 3 lines.
-    #notify-send -a "Kdeconnect" "Sending $(cat "$selection")"
-#else
-    #notify-send -a "Kdeconnect" "No file selected"
-
-    # Clear selection
-    if [ -p "$NNN_PIPE" ]; then
-        printf "-" > "$NNN_PIPE"
-    fi
+	send < "$selection"
+	[ -p "$NNN_PIPE" ] && printf "-" > "$NNN_PIPE" # clear selection
+elif [ -n "$1" ]; then
+	printf "%s" "$1" | send
+else
+	note "No selection and no hovered file"
 fi
