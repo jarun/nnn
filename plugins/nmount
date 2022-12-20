@@ -36,8 +36,7 @@ while [ -n "$dev" ]; do
             sync "$(lsblk -n "/dev/$dev" -o MOUNTPOINT | sed "/^$/d")"
             if pumount "/dev/$dev"; then
                 echo "/dev/$dev" unmounted.
-                if udisksctl power-off -b /dev/"$dev"
-                then
+                if udisksctl power-off -b "/dev/$dev" --no-user-interaction; then
                     echo "/dev/$dev" ejected.
                 fi
             fi
