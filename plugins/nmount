@@ -35,9 +35,9 @@ while [ -n "$dev" ]; do
         if grep -qs "$dev " /proc/mounts; then
             sync "$(lsblk -n "/dev/$dev" -o MOUNTPOINT | sed "/^$/d")"
             if pumount "/dev/$dev"; then
-                echo "/dev/$dev" unmounted.
+                echo "/dev/$dev unmounted."
                 if udisksctl power-off -b "/dev/$dev" --no-user-interaction; then
-                    echo "/dev/$dev" ejected.
+                    echo "/dev/$dev ejected."
                 fi
             fi
         elif [ -b "/dev/$dev" ]; then
