@@ -33,7 +33,7 @@ while [ -n "$dev" ]; do
         exit
     else
         if grep -qs "$dev " /proc/mounts; then
-            sync
+            sync "$(lsblk -n "/dev/$dev" -o MOUNTPOINT | sed "/^$/d")"
             if pumount "$dev"
             then
                 echo "$dev" unmounted.
