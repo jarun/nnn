@@ -40,9 +40,11 @@ while [ -n "$dev" ]; do
                     echo "/dev/$dev" ejected.
                 fi
             fi
-        else
+        elif [ -b "/dev/$dev" ]; then
             pmount "/dev/$dev"
             echo "/dev/$dev" mounted to "$(lsblk -n /dev/"$dev" | rev | cut -d' ' -f1 | rev)".
+        else
+            echo "/dev/$dev does not exist or is not a block device."
         fi
     fi
 
