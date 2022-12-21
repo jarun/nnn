@@ -26,26 +26,27 @@ printf "\nEnsure you aren't still in the mounted device.\n"
 printf "%s" "$prompt"
 read -r dev
 
-while [ -n "$dev" ]
-do
+while [ -n "$dev" ]; do
     if [ "$dev" = "l" ]; then
         lsblk
     elif [ "$dev" = "q" ]; then
         exit
     else
         if grep -qs "$dev " /proc/mounts; then
-            sync
-            if pumount "$dev"
-            then
-                echo "$dev" unmounted.
-                if udisksctl power-off -b /dev/"$dev"
-                then
-                    echo "$dev" ejected.
+            sync "$(lsblk -n "/dev/$dev" -o MOUNTPOINT | sed "/^$/d")"
+            if pumount "/dev/$dev"; then
+                echo "/dev/$dev unmounted."
+                if udisksctl power-off -b "/dev/$dev" --no-user-interaction; then
+                    echo "/dev/$dev ejected."
                 fi
             fi
+        elif [ -b "/dev/$dev" ]; then
+            if pmount "/dev/$dev"; then
+                sleep 1
+                echo "/dev/$dev mounted to $(lsblk -n "/dev/$dev" -o MOUNTPOINT | sed "/^$/d")."
+            fi
         else
-            pmount "$dev"
-            echo "$dev" mounted to "$(lsblk -n /dev/"$dev" | rev | cut -d' ' -f1 | rev)".
+            echo "/dev/$dev does not exist or is not a block device."
         fi
     fi
 
