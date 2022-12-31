@@ -53,7 +53,7 @@ static uint8_t seen[ARRLEN(table)];
  * but ensure they're above 1 and prefer prime numbers.
  */
 static uint32_t hash_start = 7;
-static uint32_t hash_mul = 251;
+static uint32_t hash_mul = 251; /* unused as of now */
 
 /*
  * use robin-hood insertion to reduce the max probe length
@@ -265,30 +265,24 @@ static uint32_t
 icon_ext_hash(const char *str)
 {
 	uint32_t i, hash = hash_start;
-	const unsigned int z = (sizeof hash * CHAR_BIT) - ICONS_TABLE_SIZE;
+	enum { wsz = sizeof hash * CHAR_BIT, z = wsz - ICONS_TABLE_SIZE, r = 5 };
 
-	/* FNV style xor-mul hashing. Some other hashing which gives good results:
-	 * Jenkin's one-at-a-time: https://en.wikipedia.org/wiki/Jenkins_hash_function#one_at_a_time
-	 * xor-rotate: ((hash >> (32 - 5)) | (hash << 5)) ^ TOUPPER((unsigned char)str[i]);
+	/* just an xor-rotate hash. in general, this is a horrible hash
+	 * function but for our specific input it works fine while being
+	 * computationally cheap.
 	 */
 	for (i = 0; i < ICONS_MATCH_MAX && str[i] != '\0'; ++i) {
 		hash ^= TOUPPER((unsigned char)str[i]);
-		hash *= hash_mul;
+		hash  = (hash >> (wsz - r)) | (hash << r);
 	}
 
-	/* due to the multiply, the entropy of our hash is hidden in the high
-	 * bits. so we take the high bits as our map into the table.
-	 */
-#if 0
-	/* enable this part if the hash function is to be changed to a non-multiplying one.
-	 * gives better distribution than modulo: https://probablydance.com/2018/06/16/
-	 */
+	/* finalizer: https://probablydance.com/2018/06/16 */
 	hash ^= (hash >> z);
 	hash *= GOLDEN_RATIO_32;
-#endif
-	hash >>= z;
 
+	hash >>= z;
 	ASSERT(hash < ARRLEN(table));
+
 	return hash;
 }
 #endif
