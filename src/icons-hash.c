@@ -9,6 +9,7 @@
 #include <inttypes.h>
 
 #define GOLDEN_RATIO_32  UINT32_C(2654442313) /* golden ratio for 32bits: (2^32) / 1.61803 */
+#define GOLDEN_RATIO_64  UINT64_C(0x9E3793492EEDC3F7)
 #define ICONS_TABLE_SIZE 8 /* size in bits. 8 = 256 */
 
 #ifndef TOUPPER
@@ -33,7 +34,7 @@
 #define ASSERT(X) assert(X)
 #define ARRLEN(X) (sizeof(X) / sizeof((X)[0]))
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
-#define HGEN_ITERARATION (1ul << 14)
+#define HGEN_ITERARATION (1ul << 13)
 #define ICONS_PROBE_MAX_ALLOWED 6
 #define ICONS_MATCH_MAX ((size_t)-1)
 
@@ -100,6 +101,17 @@ table_populate(unsigned int p[static PROBE_CNT])
 	return p;
 }
 
+/* permuted congruential generator */
+static uint32_t
+pcg(uint64_t *state)
+{
+	uint64_t oldstate = *state;
+	*state *= GOLDEN_RATIO_64;
+	uint32_t r = (oldstate >> 59);
+	uint32_t v = (oldstate ^ (oldstate >> 18)) >> 27;
+	return (v >> (32 - r)) | (v << r);
+}
+
 int
 main(void)
 {
@@ -107,6 +119,7 @@ main(void)
 	assert(ICONS_TABLE_SIZE < 16);
 	assert(1u << ICONS_TABLE_SIZE == ARRLEN(table));
 	assert((GOLDEN_RATIO_32 & 1) == 1); /* must be odd */
+	assert((GOLDEN_RATIO_64 & 1) == 1); /* must be odd */
 	assert(hash_start > 1);
 	assert(hash_mul > 1);
 	/* ensure power of 2 hashtable size which allows compiler to optimize
@@ -116,6 +129,7 @@ main(void)
 
 	unsigned int max_probe = (unsigned)-1;
 	uint32_t best_hash_start, best_hash_mul, best_total_probe = 9999;
+	uint64_t hash_start_rng = hash_start, hash_mul_rng = hash_mul;
 
 	for (size_t i = 0; i < HGEN_ITERARATION; ++i) {
 		unsigned *p = table_populate((unsigned [PROBE_CNT]){0});
@@ -127,8 +141,8 @@ main(void)
 			best_hash_start = hash_start;
 			best_hash_mul = hash_mul;
 		}
-		hash_start *= GOLDEN_RATIO_32;
-		hash_mul *= GOLDEN_RATIO_32;
+		hash_start = pcg(&hash_start_rng);
+		hash_mul = pcg(&hash_mul_rng);
 	}
 	assert(max_probe < ICONS_PROBE_MAX_ALLOWED);
 	hash_start = best_hash_start;
