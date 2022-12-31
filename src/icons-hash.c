@@ -36,7 +36,7 @@
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
 #define HGEN_ITERARATION (1ul << 13)
 #define ICONS_PROBE_MAX_ALLOWED 6
-#define ICONS_MATCH_MAX ((size_t)-1)
+#define ICONS_MATCH_MAX (512)
 
 #if 0 /* for logging some interesting info to stderr */
 	#define log(...)  fprintf(stderr, "[INFO]: " __VA_ARGS__)
@@ -128,7 +128,7 @@ main(void)
 	assert((ARRLEN(table) & (ARRLEN(table) - 1)) == 0);
 
 	unsigned int max_probe = (unsigned)-1;
-	uint32_t best_hash_start, best_hash_mul, best_total_probe = 9999;
+	uint32_t best_hash_start = 0, best_hash_mul = 0, best_total_probe = 9999;
 	uint64_t hash_start_rng = hash_start, hash_mul_rng = hash_mul;
 
 	for (size_t i = 0; i < HGEN_ITERARATION; ++i) {
@@ -185,6 +185,7 @@ main(void)
 	icon_max = MAX(icon_max, strlen(dir_icon.icon) + 1);
 	icon_max = MAX(icon_max, strlen(exec_icon.icon) + 1);
 	icon_max = MAX(icon_max, strlen(file_icon.icon) + 1);
+	assert(icon_max < ICONS_MATCH_MAX);
 
 	const char *uniq[ARRLEN(icons_ext)] = {0};
 	size_t uniq_head = 0;
@@ -242,13 +243,13 @@ main(void)
 	for (size_t i = 0; i < ARRLEN(table); ++i) {
 		if (table[i].icon == NULL || table[i].icon[0] == '\0') /* skip empty entries */
 			continue;
-		int k;
+		size_t k;
 		for (k = 0; k < uniq_head; ++k) {
 			if (strcasecmp(table[i].icon, uniq[k]) == 0)
 				break;
 		}
 		assert(k < uniq_head);
-		printf("\t[%3zu] = {\"%s\", %d, %hhu },\n",
+		printf("\t[%3zu] = {\"%s\", %zu, %hhu },\n",
 		       i, table[i].match, k, table[i].color);
 	}
 	printf("};\n\n");
