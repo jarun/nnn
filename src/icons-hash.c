@@ -79,8 +79,9 @@ rh_insert(const struct icon_pair item, uint32_t idx, uint32_t n)
 	assert(0); /* unreachable */
 }
 
-static unsigned int
-table_populate(void)
+enum { PROBE_MAX, PROBE_TOTAL, PROBE_CNT };
+static unsigned int *
+table_populate(unsigned int p[static PROBE_CNT])
 {
 	memset(seen, 0x0, sizeof seen);
 	memset(table, 0x0, sizeof table);
@@ -91,10 +92,12 @@ table_populate(void)
 		rh_insert(icons_ext[i], h, 1);
 	}
 
-	unsigned int max_probe = 0;
-	for (size_t i = 0; i < ARRLEN(seen); ++i)
-		max_probe = MAX(max_probe, seen[i]);
-	return max_probe;
+	p[PROBE_MAX] = p[PROBE_TOTAL] = 0;
+	for (size_t i = 0; i < ARRLEN(seen); ++i) {
+		p[PROBE_MAX] = MAX(p[PROBE_MAX], seen[i]);
+		p[PROBE_TOTAL] += seen[i];
+	}
+	return p;
 }
 
 int
@@ -112,12 +115,15 @@ main(void)
 	assert((ARRLEN(table) & (ARRLEN(table) - 1)) == 0);
 
 	unsigned int max_probe = (unsigned)-1;
-	uint32_t best_hash_start, best_hash_mul;
+	uint32_t best_hash_start, best_hash_mul, best_total_probe = 9999;
 
 	for (size_t i = 0; i < HGEN_ITERARATION; ++i) {
-		unsigned z = table_populate();
-		if (z < max_probe) {
-			max_probe = z;
+		unsigned *p = table_populate((unsigned [PROBE_CNT]){0});
+		if (p[PROBE_MAX] < max_probe ||
+		    (p[PROBE_MAX] == max_probe && p[PROBE_TOTAL] < best_total_probe))
+		{
+			max_probe = p[PROBE_MAX];
+			best_total_probe = p[PROBE_TOTAL];
 			best_hash_start = hash_start;
 			best_hash_mul = hash_mul;
 		}
@@ -128,25 +134,30 @@ main(void)
 	hash_start = best_hash_start;
 	hash_mul = best_hash_mul;
 	{
-		unsigned tmp = table_populate();
-		assert(tmp == max_probe);
+		unsigned *p = table_populate((unsigned [PROBE_CNT]){0});
+		assert(p[PROBE_MAX] == max_probe);
+		assert(p[PROBE_TOTAL] == best_total_probe);
 	}
 
 	/* sanity check */
 	double nitems = 0;
+	unsigned int total_probe = 0;
 	for (size_t i = 0; i < ARRLEN(icons_ext); ++i) {
 		if (icons_ext[i].icon[0] == 0)
 			continue;
 		uint32_t found = 0, h = icon_ext_hash(icons_ext[i].match);
 		for (uint32_t k = 0; k < max_probe; ++k) {
 			uint32_t z = (h + k) % ARRLEN(table);
+			++total_probe;
 			if (table[z].match && strcasecmp(icons_ext[i].match, table[z].match) == 0) {
 				found = 1;
+				break;
 			}
 		}
 		assert(found);
 		++nitems;
 	}
+	assert(total_probe == best_total_probe);
 
 	size_t match_max = 0, icon_max = 0;
 	for (size_t i = 0; i < ARRLEN(icons_name); ++i) {
@@ -183,6 +194,7 @@ main(void)
 	log("load-factor:  %.2f (%u/%zu)\n", (nitems * 100.0) / (double)ARRLEN(table),
 	    (unsigned int)nitems, ARRLEN(table));
 	log("max_probe  : %6u\n", max_probe);
+	log("total_probe: %6u\n", total_probe);
 	log("uniq icons : %6zu\n", uniq_head);
 	log("no-compact : %6zu bytes\n", ARRLEN(table) * icon_max);
 	log("compaction : %6zu bytes\n", uniq_head * icon_max + ARRLEN(table));
