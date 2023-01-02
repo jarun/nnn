@@ -8,7 +8,7 @@
 #   - Alternatively, select the files and folders you would like to send, and activate the plugin.
 #
 # Shell: POSIX compliant
-# Author: juacq97, raffaem
+# Author: juacq97, raffaem, N-R-K
 
 # If you want system notification, put this equal to 1
 notify=0
@@ -21,15 +21,38 @@ note() {
 	fi
 }
 
+# kdeconnect doesn't cope with non-files
+filter_files() {
+	xargs -0 -I{} sh -c '
+		if [ -f "{}" ]; then
+			printf "%s\0" "{}";
+		else
+			printf "Error: not a regular file: %s\n" "{}" >&2;
+		fi;'
+}
+
 send() {
-	xargs -0 -I{} kdeconnect-cli --name "$devname" --share {}
+	filter_files | xargs -0 -I{} kdeconnect-cli --name "$devname" --share {}
 	note "Files sent"
 }
 
-devname=$(kdeconnect-cli --list-available --name-only 2>/dev/null | awk NR==1)
-if [ -z "$devname" ]; then
-	note "No devices available"
+# Select paired device
+names=$(kdeconnect-cli --list-available --name-only 2>/dev/null)
+if [ -z "$names" ]; then
+	note "No devices paired and available"
 	exit
+fi
+
+ndevs=$(printf "%s" "$names" | awk 'END{print NR}')
+if [ "$ndevs" -eq 1 ]; then
+	devname="$names"
+else
+	printf "%s" "$names" | awk '{ print NR ". " $0 }'
+	printf "Pick a device: "
+	read -r pick
+	if [ -n "$pick" ] && [ "$pick" -eq "$pick" ]; then
+		devname=$(printf '%s' "$names" | awk "NR==$pick")
+	fi
 fi
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
