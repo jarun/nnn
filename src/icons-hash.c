@@ -109,7 +109,7 @@ pcg(uint64_t *state)
 	*state *= GOLDEN_RATIO_64;
 	uint32_t r = (oldstate >> 59);
 	uint32_t v = (oldstate ^ (oldstate >> 18)) >> 27;
-	return (v >> (32 - r)) | (v << r);
+	return (v >> (-r & 31)) | (v << r);
 }
 
 int
