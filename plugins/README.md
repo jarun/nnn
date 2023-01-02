@@ -169,7 +169,7 @@ To run a GUI app as plugin, add a `&` after `!`.
 export NNN_PLUG='m:-!&mousepad $nnn'
 ```
 
-Note: `$nnn` must be the last argument in this case.
+`$nnn` must be the last argument in this case.
 
 #### Page non-interactive command output [`|`]
 
@@ -180,11 +180,12 @@ export NNN_PLUG='m:-!|mediainfo $nnn;t:-!|tree -ps;l:-!|ls -lah --group-director
 ```
 
 This option is incompatible with `&` (terminal output is masked for GUI programs) and ignores `*` (output is already paged for user).
+`$nnn` must be the last argument in this case as well.
 
 Notes:
 
 1. Use single quotes for `$NNN_PLUG` so `$nnn` is not interpreted
-2. `$nnn` must be the last argument (if used) to run a _command as plugin_
+2. `$nnn` must be the last argument (if used) to run a _GUI app as plugin_ or to page non-interactive command output
 3. (_Again_) add `!` before the command
 4. To disable directory refresh after running a _command as plugin_, prefix with `-!`
 
@@ -193,6 +194,7 @@ Notes:
 | Key:Command | Description |
 |---|---|
 | `c:!convert $nnn png:- \| xclip -sel clipboard -t image/png*` | Copy image to clipboard |
+| `C:!cp -rv "$nnn" "$nnn".cp` | Create a copy of the hovered file |
 | `e:-!sudo -E vim $nnn*` | Edit file as root in vim |
 | `g:-!git diff` | Show git diff |
 | `h:-!hx $nnn*` | Open hovered file in [hx](https://github.com/krpors/hx) hex editor |

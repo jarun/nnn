@@ -440,14 +440,15 @@ separated by \fI;\fR:
         export NNN_PLUG='y:-!sync*'
 
     6. To run a \fIGUI app as plugin\fR, add a \fB&\fR after \fB!\fR
-       Note: \fI$nnn\fR must be the last argument in this case.
+       \fI$nnn\fR must be the last argument in this case.
 
         export NNN_PLUG='m:-!&mousepad $nnn'
 
     7. To show the output of run-and-exit commands which do not need user input,
        add \fB|\fR (pipe) after \fB!\fR
        Note: This option is incompatible with \fB&\fR (terminal output is masked
-       for GUI programs) and ignores \fB*\fR (output is already paged for user)
+       for GUI programs) and ignores \fB*\fR (output is already paged for user).
+       \fI$nnn\fR must be the last argument in this case as well.
 
         export NNN_PLUG='m:-!|mediainfo $nnn;t:-!|tree -ps;l:-!|ls -lah --group-directories-first'
 
@@ -457,6 +458,7 @@ separated by \fI;\fR:
     ------------------------------------ + -------------------------------------------------
     c:!convert $nnn png:- | xclip -sel \ | Copy image to clipboard
        clipboard -t image/png*           |
+    C:!cp -rv "$nnn" "$nnn".cp*          | Create a copy of the hovered file
     e:-!sudo -E vim $nnn*                | Edit file as root in vim
     g:-!git diff                         | Show git diff
     h:-!hx $nnn*                         | Open hovered file in hx hex editor
