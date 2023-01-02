@@ -9,6 +9,7 @@
 #include <inttypes.h>
 
 #define GOLDEN_RATIO_32  UINT32_C(2654442313) /* golden ratio for 32bits: (2^32) / 1.61803 */
+#define GOLDEN_RATIO_64  UINT64_C(0x9E3793492EEDC3F7)
 #define ICONS_TABLE_SIZE 8 /* size in bits. 8 = 256 */
 
 #ifndef TOUPPER
@@ -33,9 +34,9 @@
 #define ASSERT(X) assert(X)
 #define ARRLEN(X) (sizeof(X) / sizeof((X)[0]))
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
-#define HGEN_ITERARATION (1ul << 14)
+#define HGEN_ITERARATION (1ul << 13)
 #define ICONS_PROBE_MAX_ALLOWED 6
-#define ICONS_MATCH_MAX ((size_t)-1)
+#define ICONS_MATCH_MAX (512)
 
 #if 0 /* for logging some interesting info to stderr */
 	#define log(...)  fprintf(stderr, "[INFO]: " __VA_ARGS__)
@@ -52,7 +53,7 @@ static uint8_t seen[ARRLEN(table)];
  * but ensure they're above 1 and prefer prime numbers.
  */
 static uint32_t hash_start = 7;
-static uint32_t hash_mul = 251;
+static uint32_t hash_mul = 251; /* unused as of now */
 
 /*
  * use robin-hood insertion to reduce the max probe length
@@ -79,8 +80,9 @@ rh_insert(const struct icon_pair item, uint32_t idx, uint32_t n)
 	assert(0); /* unreachable */
 }
 
-static unsigned int
-table_populate(void)
+enum { PROBE_MAX, PROBE_TOTAL, PROBE_CNT };
+static unsigned int *
+table_populate(unsigned int p[static PROBE_CNT])
 {
 	memset(seen, 0x0, sizeof seen);
 	memset(table, 0x0, sizeof table);
@@ -91,10 +93,23 @@ table_populate(void)
 		rh_insert(icons_ext[i], h, 1);
 	}
 
-	unsigned int max_probe = 0;
-	for (size_t i = 0; i < ARRLEN(seen); ++i)
-		max_probe = MAX(max_probe, seen[i]);
-	return max_probe;
+	p[PROBE_MAX] = p[PROBE_TOTAL] = 0;
+	for (size_t i = 0; i < ARRLEN(seen); ++i) {
+		p[PROBE_MAX] = MAX(p[PROBE_MAX], seen[i]);
+		p[PROBE_TOTAL] += seen[i];
+	}
+	return p;
+}
+
+/* permuted congruential generator */
+static uint32_t
+pcg(uint64_t *state)
+{
+	uint64_t oldstate = *state;
+	*state *= GOLDEN_RATIO_64;
+	uint32_t r = (oldstate >> 59);
+	uint32_t v = (oldstate ^ (oldstate >> 18)) >> 27;
+	return (v >> (32 - r)) | (v << r);
 }
 
 int
@@ -104,6 +119,7 @@ main(void)
 	assert(ICONS_TABLE_SIZE < 16);
 	assert(1u << ICONS_TABLE_SIZE == ARRLEN(table));
 	assert((GOLDEN_RATIO_32 & 1) == 1); /* must be odd */
+	assert((GOLDEN_RATIO_64 & 1) == 1); /* must be odd */
 	assert(hash_start > 1);
 	assert(hash_mul > 1);
 	/* ensure power of 2 hashtable size which allows compiler to optimize
@@ -112,41 +128,50 @@ main(void)
 	assert((ARRLEN(table) & (ARRLEN(table) - 1)) == 0);
 
 	unsigned int max_probe = (unsigned)-1;
-	uint32_t best_hash_start, best_hash_mul;
+	uint32_t best_hash_start = 0, best_hash_mul = 0, best_total_probe = 9999;
+	uint64_t hash_start_rng = hash_start, hash_mul_rng = hash_mul;
 
 	for (size_t i = 0; i < HGEN_ITERARATION; ++i) {
-		unsigned z = table_populate();
-		if (z < max_probe) {
-			max_probe = z;
+		unsigned *p = table_populate((unsigned [PROBE_CNT]){0});
+		if (p[PROBE_MAX] < max_probe ||
+		    (p[PROBE_MAX] == max_probe && p[PROBE_TOTAL] < best_total_probe))
+		{
+			max_probe = p[PROBE_MAX];
+			best_total_probe = p[PROBE_TOTAL];
 			best_hash_start = hash_start;
 			best_hash_mul = hash_mul;
 		}
-		hash_start *= GOLDEN_RATIO_32;
-		hash_mul *= GOLDEN_RATIO_32;
+		hash_start = pcg(&hash_start_rng);
+		hash_mul = pcg(&hash_mul_rng);
 	}
 	assert(max_probe < ICONS_PROBE_MAX_ALLOWED);
 	hash_start = best_hash_start;
 	hash_mul = best_hash_mul;
 	{
-		unsigned tmp = table_populate();
-		assert(tmp == max_probe);
+		unsigned *p = table_populate((unsigned [PROBE_CNT]){0});
+		assert(p[PROBE_MAX] == max_probe);
+		assert(p[PROBE_TOTAL] == best_total_probe);
 	}
 
 	/* sanity check */
 	double nitems = 0;
+	unsigned int total_probe = 0;
 	for (size_t i = 0; i < ARRLEN(icons_ext); ++i) {
 		if (icons_ext[i].icon[0] == 0)
 			continue;
 		uint32_t found = 0, h = icon_ext_hash(icons_ext[i].match);
 		for (uint32_t k = 0; k < max_probe; ++k) {
 			uint32_t z = (h + k) % ARRLEN(table);
+			++total_probe;
 			if (table[z].match && strcasecmp(icons_ext[i].match, table[z].match) == 0) {
 				found = 1;
+				break;
 			}
 		}
 		assert(found);
 		++nitems;
 	}
+	assert(total_probe == best_total_probe);
 
 	size_t match_max = 0, icon_max = 0;
 	for (size_t i = 0; i < ARRLEN(icons_name); ++i) {
@@ -160,6 +185,7 @@ main(void)
 	icon_max = MAX(icon_max, strlen(dir_icon.icon) + 1);
 	icon_max = MAX(icon_max, strlen(exec_icon.icon) + 1);
 	icon_max = MAX(icon_max, strlen(file_icon.icon) + 1);
+	assert(icon_max < ICONS_MATCH_MAX);
 
 	const char *uniq[ARRLEN(icons_ext)] = {0};
 	size_t uniq_head = 0;
@@ -183,6 +209,7 @@ main(void)
 	log("load-factor:  %.2f (%u/%zu)\n", (nitems * 100.0) / (double)ARRLEN(table),
 	    (unsigned int)nitems, ARRLEN(table));
 	log("max_probe  : %6u\n", max_probe);
+	log("total_probe: %6u\n", total_probe);
 	log("uniq icons : %6zu\n", uniq_head);
 	log("no-compact : %6zu bytes\n", ARRLEN(table) * icon_max);
 	log("compaction : %6zu bytes\n", uniq_head * icon_max + ARRLEN(table));
@@ -216,13 +243,13 @@ main(void)
 	for (size_t i = 0; i < ARRLEN(table); ++i) {
 		if (table[i].icon == NULL || table[i].icon[0] == '\0') /* skip empty entries */
 			continue;
-		int k;
+		size_t k;
 		for (k = 0; k < uniq_head; ++k) {
 			if (strcasecmp(table[i].icon, uniq[k]) == 0)
 				break;
 		}
 		assert(k < uniq_head);
-		printf("\t[%3zu] = {\"%s\", %d, %hhu },\n",
+		printf("\t[%3zu] = {\"%s\", %zu, %hhu },\n",
 		       i, table[i].match, k, table[i].color);
 	}
 	printf("};\n\n");
@@ -239,30 +266,24 @@ static uint32_t
 icon_ext_hash(const char *str)
 {
 	uint32_t i, hash = hash_start;
-	const unsigned int z = (sizeof hash * CHAR_BIT) - ICONS_TABLE_SIZE;
+	enum { wsz = sizeof hash * CHAR_BIT, z = wsz - ICONS_TABLE_SIZE, r = 5 };
 
-	/* FNV style xor-mul hashing. Some other hashing which gives good results:
-	 * Jenkin's one-at-a-time: https://en.wikipedia.org/wiki/Jenkins_hash_function#one_at_a_time
-	 * xor-rotate: ((hash >> (32 - 5)) | (hash << 5)) ^ TOUPPER((unsigned char)str[i]);
+	/* just an xor-rotate hash. in general, this is a horrible hash
+	 * function but for our specific input it works fine while being
+	 * computationally cheap.
 	 */
 	for (i = 0; i < ICONS_MATCH_MAX && str[i] != '\0'; ++i) {
 		hash ^= TOUPPER((unsigned char)str[i]);
-		hash *= hash_mul;
+		hash  = (hash >> (wsz - r)) | (hash << r);
 	}
 
-	/* due to the multiply, the entropy of our hash is hidden in the high
-	 * bits. so we take the high bits as our map into the table.
-	 */
-#if 0
-	/* enable this part if the hash function is to be changed to a non-multiplying one.
-	 * gives better distribution than modulo: https://probablydance.com/2018/06/16/
-	 */
+	/* finalizer: https://probablydance.com/2018/06/16 */
 	hash ^= (hash >> z);
 	hash *= GOLDEN_RATIO_32;
-#endif
-	hash >>= z;
 
+	hash >>= z;
 	ASSERT(hash < ARRLEN(table));
+
 	return hash;
 }
 #endif
