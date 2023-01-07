@@ -27,6 +27,7 @@
 #   1. This plugin needs a "NNN_FIFO" to work. See man.
 #   2. If the same NNN_FIFO is used in multiple nnn instances, there will be one
 #      common preview window. With different FIFO paths, they will be independent.
+#   3. This plugin only works on X, not on Wayland.
 #
 # How it works:
 #   We use `tabbed` [1] as a xembed [2] host, to have a single window
@@ -51,6 +52,10 @@ XDOTOOL_TIMEOUT=2
 PAGER=${PAGER:-"vim -R"}
 NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
 
+if [ -n "$WAYLAND_DISPLAY" ] ; then
+    echo "Wayland is not supported in preview-tabbed, this plugin could freeze your session!" >&2
+    exit 1
+fi
 
 if type xterm >/dev/null 2>&1 ; then
     TERMINAL="xterm -into"
