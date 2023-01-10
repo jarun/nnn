@@ -27,9 +27,10 @@ jobs:
         env:
           CC: clang
         run: |
-          rm '/usr/local/bin/2to3-3.11'
-          brew update
-          brew install llvm
+          # see: https://github.com/actions/setup-python/issues/577
+          brew update || true
+          brew install llvm || true
+          brew link --overwrite python@3.11
           export PATH="/usr/local/opt/llvm/bin:$PATH"
           export CFLAGS="$CFLAGS -Werror"
           make clean
