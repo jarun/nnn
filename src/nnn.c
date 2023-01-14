@@ -4441,8 +4441,8 @@ static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page)
 	int index = 0, flags;
 	bool ret = FALSE;
 	bool have_file = fdout != -1;
-	int prog_in_fd = -1;
-	int prog_out_fd = -1;
+	int cmd_in_fd = -1;
+	int cmd_out_fd = -1;
 	ssize_t len;
 
 	/*
@@ -4461,12 +4461,12 @@ static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page)
 		if (fdout == -1)
 			return FALSE;
 
-		prog_in_fd = STDIN_FILENO;
-		prog_out_fd = fdout;
+		cmd_in_fd = STDIN_FILENO;
+		cmd_out_fd = fdout;
 	} else if (have_file) {
 		// Case 3
-		prog_in_fd = STDIN_FILENO;
-		prog_out_fd = fdout;
+		cmd_in_fd = STDIN_FILENO;
+		cmd_out_fd = fdout;
 	} else {
 		// Case 1
 		if (pipe(pipefd) == -1)
@@ -4483,16 +4483,17 @@ static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page)
 			fcntl(pipefd[index], F_SETFL, flags);
 		}
 
-		prog_in_fd = pipefd[0];
-		prog_out_fd = pipefd[1];
+		cmd_in_fd = pipefd[0];
+		cmd_out_fd = pipefd[1];
 	}
 
 	pid = fork();
 	if (pid == 0) {
-		close(prog_in_fd);
-		dup2(prog_out_fd, STDOUT_FILENO);
-		dup2(prog_out_fd, STDERR_FILENO);
-		close(prog_out_fd);
+		/* In child */
+		close(cmd_in_fd);
+		dup2(cmd_out_fd, STDOUT_FILENO);
+		dup2(cmd_out_fd, STDERR_FILENO);
+		close(cmd_out_fd);
 
 		spawn(utils[UTIL_SH_EXEC], file, arg1, arg2, F_MULTI);
 		_exit(EXIT_SUCCESS);
