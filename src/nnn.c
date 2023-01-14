@@ -4511,7 +4511,9 @@ static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page)
 
 		unlink(g_tmpfpath);
 		return TRUE;
-	} else if (have_file)
+	}
+
+	if (have_file)
 		// Case 3
 		return TRUE;
 
