@@ -8,8 +8,6 @@ assignees: ''
 
 `nnn` comes with excellent documentation (including a Troubleshooting section). If you have a _How to do x_ question, it may have already been answered. Wiki: https://github.com/jarun/nnn/wiki
 
-If you have a question, please start a new [discussion](https://github.com/jarun/nnn/discussions) instead of creating a new issue.
-
 If it looks like a local environment issue, please try to debug yourself. Debugging local setup issues is not our top priority.
 
 If you are looking for a new feature or program option, ensure you have the correct version with the feature installed. Refer to the release notes to confirm.
