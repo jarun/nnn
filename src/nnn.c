@@ -5192,23 +5192,27 @@ static void setexports(void)
 
 static void run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 {
-	size_t len = xstrsncpy(g_buf, file, PATH_MAX) - 1;
+	size_t len;
 
+	xstrsncpy(g_buf, file, PATH_MAX);
+
+	len = xstrlen(g_buf);
 	if (len > 1 && g_buf[len - 1] == '*') {
 		flags &= ~F_CONFIRM; /* Skip user confirmation */
 		g_buf[len - 1] = '\0'; /* Get rid of trailing no confirmation symbol */
 		--len;
 	}
 
-	if (flags & F_PAGE)
-		get_output(g_buf, NULL, NULL, -1, TRUE);
-	else if (flags & F_NOTRACE) {
+	if ((flags & F_PAGE) || (flags & F_NOTRACE)) {
 		if (is_suffix(g_buf, " $nnn"))
 			g_buf[len - 5] = '\0';
 		else
 			runfile = NULL;
 
-		spawn(g_buf, runfile, NULL, NULL, flags);
+		if (flags & F_PAGE)
+			get_output(g_buf, runfile, NULL, -1, TRUE);
+		else // F_NOTRACE
+			spawn(g_buf, runfile, NULL, NULL, flags);
 	} else
 		spawn(utils[UTIL_SH_EXEC], g_buf, NULL, NULL, flags);
 }

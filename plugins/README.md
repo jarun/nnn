@@ -180,6 +180,7 @@ export NNN_PLUG='m:-!|mediainfo $nnn;t:-!|tree -ps;l:-!|ls -lah --group-director
 ```
 
 This option is incompatible with `&` (terminal output is masked for GUI programs) and ignores `*` (output is already paged for user).
+`$nnn` must be the last argument in this case as well.
 
 Notes:
 
