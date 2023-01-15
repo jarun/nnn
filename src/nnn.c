@@ -4490,29 +4490,12 @@ static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page)
 	pid = fork();
 	if (pid == 0) {
 		/* In child */
-		char *bufptr = file;
-
 		close(cmd_in_fd);
 		dup2(cmd_out_fd, STDOUT_FILENO);
 		dup2(cmd_out_fd, STDERR_FILENO);
 		close(cmd_out_fd);
 
-		if (bufptr && arg1) {
-			char argbuf[CMD_LEN_MAX];
-
-			len = xstrsncpy(argbuf, file, xstrlen(file) + 1);
-			argbuf[len - 1] = ' ';
-			bufptr = argbuf + len;
-			len = xstrsncpy(bufptr, arg1, xstrlen(arg1) + 1);
-			if (arg2) {
-				bufptr[len - 1] = ' ';
-				xstrsncpy(bufptr + len, arg2, xstrlen(arg2) + 1);
-			}
-
-			bufptr = argbuf;
-		}
-
-		spawn(utils[UTIL_SH_EXEC], bufptr, NULL, NULL, F_MULTI);
+		spawn(utils[UTIL_SH_EXEC], file, arg1, arg2, F_MULTI);
 		_exit(EXIT_SUCCESS);
 	}
 
