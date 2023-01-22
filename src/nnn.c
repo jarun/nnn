@@ -4425,92 +4425,106 @@ static void set_smart_ctx(int ctx, char *nextpath, char **path, char *file, char
 }
 
 /*
- * Gets only a single line (that's what we need for now) or shows full command output in pager.
- * Uses g_buf internally.
+ * This function does one of the following depending on the values of `fdout` and `page`:
+ *  1) fdout == -1 && !page: Write up to CMD_LEN_MAX bytes of command output into g_buf
+ *  2) fdout == -1 && page: Create a temp file, write full command output into it and show in pager.
+ *  3) fdout != -1 && !page: Write full command output into the provided file.
+ *  4) fdout != -1 && page: Don't use! Returns FASLE.
+ *
+ * g_buf is modified only in case 1.
+ * g_tmpfpath is modified only in case 2.
  */
-static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool multi, bool page)
+static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page)
 {
 	pid_t pid;
 	int pipefd[2];
 	int index = 0, flags;
 	bool ret = FALSE;
-	bool tmpfile = ((fdout == -1) && page);
-	char *argv[EXEC_ARGS_MAX] = {0};
-	char *cmd = NULL;
-	int fd = -1;
+	bool have_file = fdout != -1;
+	int cmd_in_fd = -1;
+	int cmd_out_fd = -1;
 	ssize_t len;
 
-	if (tmpfile) {
+	/*
+	 * In this case the logic of the function dictates that we should write the output of the command
+	 * to `fd` and show it in the pager. But since we didn't open the file descriptor we have no right
+	 * to close it, the caller must do it. We don't even know the path to pass to the pager and
+	 * it's a real hassle to get it. In general this just invites problems so we are blocking it.
+	 */
+	if (have_file && page)
+		return FALSE;
+
+	/* Setup file descriptors for child command */
+	if (!have_file && page) {
+		// Case 2
 		fdout = create_tmp_file();
 		if (fdout == -1)
 			return FALSE;
-	}
 
-	if (multi) {
-		cmd = parseargs(file, argv, &index);
-		if (!cmd)
-			return FALSE;
-	} else
-		argv[index++] = file;
+		cmd_in_fd = STDIN_FILENO;
+		cmd_out_fd = fdout;
+	} else if (have_file) {
+		// Case 3
+		cmd_in_fd = STDIN_FILENO;
+		cmd_out_fd = fdout;
+	} else {
+		// Case 1
+		if (pipe(pipefd) == -1)
+			errexit();
 
-	argv[index] = arg1;
-	argv[++index] = arg2;
+		for (index = 0; index < 2; ++index) {
+			/* Get previous flags */
+			flags = fcntl(pipefd[index], F_GETFL, 0);
 
-	if (pipe(pipefd) == -1) {
-		free(cmd);
-		errexit();
-	}
+			/* Set bit for non-blocking flag */
+			flags |= O_NONBLOCK;
 
-	for (index = 0; index < 2; ++index) {
-		/* Get previous flags */
-		flags = fcntl(pipefd[index], F_GETFL, 0);
+			/* Change flags on fd */
+			fcntl(pipefd[index], F_SETFL, flags);
+		}
 
-		/* Set bit for non-blocking flag */
-		flags |= O_NONBLOCK;
-
-		/* Change flags on fd */
-		fcntl(pipefd[index], F_SETFL, flags);
+		cmd_in_fd = pipefd[0];
+		cmd_out_fd = pipefd[1];
 	}
 
 	pid = fork();
 	if (pid == 0) {
 		/* In child */
-		close(pipefd[0]);
-		dup2(pipefd[1], STDOUT_FILENO);
-		dup2(pipefd[1], STDERR_FILENO);
-		close(pipefd[1]);
-		execvp(*argv, argv);
+		close(cmd_in_fd);
+		dup2(cmd_out_fd, STDOUT_FILENO);
+		dup2(cmd_out_fd, STDERR_FILENO);
+		close(cmd_out_fd);
+
+		spawn(file, arg1, arg2, NULL, F_MULTI);
 		_exit(EXIT_SUCCESS);
 	}
 
 	/* In parent */
 	waitpid(pid, NULL, 0);
-	close(pipefd[1]);
-	free(cmd);
 
-	while ((len = read(pipefd[0], g_buf, CMD_LEN_MAX - 1)) > 0) {
-		ret = TRUE;
-		if (fdout == -1) /* Read only the first line of output to buffer */
-			break;
-		if (write(fdout, g_buf, len) != len)
-			break;
+	/* Do what each case should do */
+	if (!have_file && page) {
+		// Case 2
+		close(fdout);
+
+		spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_TTY);
+
+		unlink(g_tmpfpath);
+		return TRUE;
 	}
+
+	if (have_file)
+		// Case 3
+		return TRUE;
+
+	// Case 1
+	len = read(pipefd[0], g_buf, CMD_LEN_MAX - 1);
+	if (len > 0)
+		ret = TRUE;
 
 	close(pipefd[0]);
-	if (!page)
-		return ret;
-
-	if (tmpfile) {
-		close(fdout);
-		close(fd);
-	}
-
-	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_TTY);
-
-	if (tmpfile)
-		unlink(g_tmpfpath);
-
-	return TRUE;
+	close(pipefd[1]);
+	return ret;
 }
 
 /*
