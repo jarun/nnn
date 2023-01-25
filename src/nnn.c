@@ -837,7 +837,7 @@ static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
 static void statusbar(char *path);
-static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool multi, bool page);
+static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page);
 #ifndef NOFIFO
 static void notify_fifo(bool force);
 #endif
@@ -3188,7 +3188,7 @@ static void showfilterinfo(void)
 
 	i = getorderstr(info);
 
-	if (cfg.fileinfo && ndents && get_output("file", "-b", pdents[cur].name, -1, FALSE, FALSE))
+	if (cfg.fileinfo && ndents && get_output("file", "-b", pdents[cur].name, -1, FALSE))
 		mvaddstr(xlines - 2, 2, g_buf);
 	else {
 		snprintf(info + i, REGEX_MAX - i - 1, "  %s [/], %4s [:]",
@@ -4550,7 +4550,7 @@ static bool show_stats(char *fpath)
 		return FALSE;
 
 	while (r)
-		get_output(cmds[--r], fpath, NULL, fd, TRUE, FALSE);
+		get_output(cmds[--r], fpath, NULL, fd, FALSE);
 
 	close(fd);
 
@@ -4697,7 +4697,7 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	if (op == 'x') /* extract */
 		spawn(util, arg, fpath, NULL, F_NORMAL | F_MULTI);
 	else /* list */
-		get_output(util, arg, fpath, -1, TRUE, TRUE);
+		get_output(util, arg, fpath, -1, TRUE);
 
 	if (x_to) {
 		if (chdir(xdirname(fpath)) == -1) {
@@ -5097,7 +5097,7 @@ static void show_help(const char *path)
 
 	char *prog = xgetenv(env_cfg[NNN_HELP], NULL);
 	if (prog)
-		get_output(prog, NULL, NULL, fd, TRUE, FALSE);
+		get_output(prog, NULL, NULL, fd, FALSE);
 
 	start = end = helpstr;
 	while (*end) {
@@ -5193,7 +5193,7 @@ static void run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 			runfile = NULL;
 
 		if (flags & F_PAGE)
-			get_output(g_buf, runfile, NULL, -1, TRUE, TRUE);
+			get_output(g_buf, runfile, NULL, -1, TRUE);
 		else // F_NOTRACE
 			spawn(g_buf, runfile, NULL, NULL, flags);
 	} else
@@ -6339,7 +6339,7 @@ static void statusbar(char *path)
 
 	attron(COLOR_PAIR(cfg.curctx + 1));
 
-	if (cfg.fileinfo && get_output("file", "-b", pdents[cur].name, -1, FALSE, FALSE))
+	if (cfg.fileinfo && get_output("file", "-b", pdents[cur].name, -1, FALSE))
 		mvaddstr(xlines - 2, 2, g_buf);
 
 	tolastln();
@@ -7059,11 +7059,11 @@ nochange:
 
 			if (cfg.useeditor
 #ifdef FILE_MIME_OPTS
-			    && get_output("file", FILE_MIME_OPTS, newpath, -1, FALSE, FALSE)
+			    && get_output("file", FILE_MIME_OPTS, newpath, -1, FALSE)
 			    && is_prefix(g_buf, "text/", 5)
 #else
 			    /* no MIME option; guess from description instead */
-			    && get_output("file", "-bL", newpath, -1, FALSE, FALSE)
+			    && get_output("file", "-bL", newpath, -1, FALSE)
 			    && strstr(g_buf, "text")
 #endif
 			) {
