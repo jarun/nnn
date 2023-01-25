@@ -119,7 +119,7 @@ If the plugins list gets too long, try breaking them up into sections:
 ```
 NNN_PLUG_PERSONAL='g:personal/convert2zoom;p:personal/echo'
 NNN_PLUG_WORK='j:work/prettyjson;d:work/foobar'
-NNN_PLUG_INLINE='e:!go run $nnn*'
+NNN_PLUG_INLINE='e:!go run "$nnn"*'
 NNN_PLUG_DEFAULT='1:ipinfo;p:preview-tui;o:fzz;b:nbak'
 NNN_PLUG="$NNN_PLUG_PERSONAL;$NNN_PLUG_WORK;$NNN_PLUG_DEFAULT;$NNN_PLUG_INLINE"
 export NNN_PLUG
@@ -144,7 +144,7 @@ export NNN_PLUG='p:-plugin'
 To assign keys to arbitrary non-background cli commands and invoke like plugins, add `!` (underscore) before the command.
 
 ```sh
-export NNN_PLUG='x:!chmod +x $nnn;g:!git log;s:!smplayer $nnn'
+export NNN_PLUG='x:!chmod +x "$nnn";g:!git log;s:!smplayer "$nnn"'
 ```
 
 Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be used to the git log of a git project directory, <kbd>;s</kbd> can be used to preview a partially downloaded media file.
@@ -154,56 +154,52 @@ Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be us
 `nnn` waits for user confirmation (the prompt `Press Enter to continue`) after it executes a command as plugin (unlike plugins which can add a `read` to wait). To skip this, add a `*` after the command.
 
 ```sh
-export NNN_PLUG='s:!smplayer $nnn*;n:-!vim /home/vaio/Dropbox/Public/synced_note*'
+export NNN_PLUG='s:!smplayer "$nnn"*;n:-!vim /home/vaio/Dropbox/Public/synced_note*'
 ```
 
 Now there will be no prompt after <kbd>;s</kbd> and <kbd>;n</kbd>.
 
-Note: Do not use `*` with programs those run and exit e.g. cat.
+Note: Do not use `*` with programs that run and exit e.g. cat.
 
 #### Run a GUI app as plugin [`&`]
 
 To run a GUI app as plugin, add a `&` after `!`.
 
 ```sh
-export NNN_PLUG='m:-!&mousepad $nnn'
+export NNN_PLUG='m:-!&mousepad "$nnn"'
 ```
-
-`$nnn` must be the last argument in this case.
 
 #### Page non-interactive command output [`|`]
 
 To show the output of run-and-exit commands which do not need user input, add `|` (pipe) after `!`.
 
 ```sh
-export NNN_PLUG='m:-!|mediainfo $nnn;t:-!|tree -ps;l:-!|ls -lah --group-directories-first'
+export NNN_PLUG='m:-!|mediainfo "$nnn";t:-!|tree -ps;l:-!|ls -lah --group-directories-first'
 ```
 
 This option is incompatible with `&` (terminal output is masked for GUI programs) and ignores `*` (output is already paged for user).
-`$nnn` must be the last argument in this case as well.
 
 Notes:
 
-1. Use single quotes for `$NNN_PLUG` so `$nnn` is not interpreted
-2. `$nnn` must be the last argument (if used) to run a _GUI app as plugin_ or to page non-interactive command output
-3. (_Again_) add `!` before the command
-4. To disable directory refresh after running a _command as plugin_, prefix with `-!`
+1. Use single quotes for `$NNN_PLUG` so `"$nnn"` is not interpreted
+2. (_Again_) add `!` before the command
+3. To disable directory refresh after running a _command as plugin_, prefix with `-!`
 
 #### Some useful key-command examples
 
 | Key:Command | Description |
 |---|---|
-| `c:!convert $nnn png:- \| xclip -sel clipboard -t image/png*` | Copy image to clipboard |
+| `c:!convert "$nnn" png:- \| xclip -sel clipboard -t image/png*` | Copy image to clipboard |
 | `C:!cp -rv "$nnn" "$nnn".cp` | Create a copy of the hovered file |
-| `e:-!sudo -E vim $nnn*` | Edit file as root in vim |
+| `e:-!sudo -E vim "$nnn"*` | Edit file as root in vim |
 | `g:-!git diff` | Show git diff |
-| `h:-!hx $nnn*` | Open hovered file in [hx](https://github.com/krpors/hx) hex editor |
-| `k:-!fuser -kiv $nnn*` | Interactively kill process(es) using hovered file |
+| `h:-!hx "$nnn"*` | Open hovered file in [hx](https://github.com/krpors/hx) hex editor |
+| `k:-!fuser -kiv "$nnn"*` | Interactively kill process(es) using hovered file |
 | `l:-!git log` | Show git log |
 | `n:-!vi /home/user/Dropbox/dir/note*` | Take quick notes in a synced file/dir of notes |
-| `p:-!less -iR $nnn*` | Page through hovered file in less |
-| `s:-!&smplayer -minigui $nnn` | Play hovered media file, even unfinished download |
-| `x:!chmod +x $nnn` | Make the hovered file executable |
+| `p:-!less -iR "$nnn"*` | Page through hovered file in less |
+| `s:-!&smplayer -minigui "$nnn"` | Play hovered media file, even unfinished download |
+| `x:!chmod +x "$nnn"` | Make the hovered file executable |
 | `y:-!sync*` | Flush cached writes |
 
 ## Access level of plugins
