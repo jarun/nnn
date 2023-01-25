@@ -4451,8 +4451,10 @@ static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page)
 	 * to close it, the caller must do it. We don't even know the path to pass to the pager and
 	 * it's a real hassle to get it. In general this just invites problems so we are blocking it.
 	 */
-	if (have_file && page)
+	if (have_file && page) {
+		DPRINTF_S("invalid get_ouptput() call");
 		return FALSE;
+	}
 
 	/* Setup file descriptors for child command */
 	if (!have_file && page) {
