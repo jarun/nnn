@@ -61,7 +61,7 @@ elif [ -n "$1" ]; then
             if echo "$1" | grep -q \.${chks}$; then
                 ${chks}sum -c < "$1"
                 read -r _
-                return
+                exit
             fi
         done
         checksum_type
