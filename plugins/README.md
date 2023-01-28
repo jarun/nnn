@@ -180,7 +180,7 @@ export NNN_PLUG='m:-!|mediainfo "$nnn";t:-!|tree -ps;l:-!|ls -lah --group-direct
 This option is incompatible with `&` (terminal output is masked for GUI programs) and ignores `*` (output is already paged for user).
 
 Notes:
-1. Place `$nnn` in double quotes (**`"$nnn"`**)
+1. Place `$nnn` (or exported variables) in double quotes (**`"$nnn"`**)
 2. Use single quotes for `$NNN_PLUG` so `"$nnn"` is not interpreted
 3. (_Again_) add `!` before the command
 4. To disable directory refresh after running a _command as plugin_, prefix with `-!`
