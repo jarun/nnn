@@ -5188,17 +5188,19 @@ static void run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 		--len;
 	}
 
-	if ((flags & F_PAGE) || (flags & F_NOTRACE)) {
-		if (is_suffix(g_buf, " $nnn"))
-			g_buf[len - 5] = '\0';
-		else
-			runfile = NULL;
+	/* This is to catch the old way of doing things so we don't break users' configs */
+	if ((flags & (F_PAGE | F_NOTRACE)) && is_suffix(g_buf, " $nnn")) {
+		g_buf[len - 5] = '\0';
 
 		if (flags & F_PAGE)
 			get_output(g_buf, runfile, NULL, -1, TRUE);
 		else // F_NOTRACE
 			spawn(g_buf, runfile, NULL, NULL, flags);
-	} else
+	}
+
+	if (flags & F_PAGE)
+		get_output(utils[UTIL_SH_EXEC], g_buf, NULL, -1, TRUE);
+	else
 		spawn(utils[UTIL_SH_EXEC], g_buf, NULL, NULL, flags);
 }
 
