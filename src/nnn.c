@@ -637,8 +637,8 @@ static const char * const messages[] = {
 	"'c'urrent/'s'el?",
 	"%s %s? [Esc cancels]",
 	"size limit exceeded",
-	"'f'ile/'d'ir/'s'ym/'h'ard?",
-	"'c'li/'g'ui?",
+	"['f'ile]/'d'ir/'s'ym/'h'ard?",
+	"['g'ui]/'c'li?",
 	"overwrite?",
 	"'s'ave/'l'oad/'r'estore?",
 	"Quit all contexts?",
@@ -659,7 +659,7 @@ static const char * const messages[] = {
 	"'s'shfs/'r'clone?",
 	"refresh if slow",
 	"app: ",
-	"'o'pen/e'x'tract/'l's/'m'nt?",
+	"['l's]/'o'pen/e'x'tract/'m'nt?",
 	"keys:",
 	"invalid regex",
 	"'a'u/'d'u/'e'xt/'r'ev/'s'z/'t'm/'v'er/'c'lr/'^T'?",
@@ -6096,7 +6096,7 @@ static void handle_openwith(const char *path, const char *name, char *newpath, c
 	int r = get_input(messages[MSG_CLI_MODE]);
 
 	r = (r == 'c' ? F_CLI :
-	     (r == 'g' ? F_NOWAIT | F_NOTRACE | F_MULTI : 0));
+	     ((r == 'g' || r == '\r') ? (F_NOWAIT | F_NOTRACE | F_MULTI) : 0));
 	if (r) {
 		mkpath(path, name, newpath);
 		spawn(tmp, newpath, NULL, NULL, r);
@@ -7078,6 +7078,8 @@ nochange:
 			if (tmp && !regexec(&archive_re, tmp, 0, NULL, 0)) {
 #endif
 				r = get_input(messages[MSG_ARCHIVE_OPTS]);
+				if (r == '\r')
+					r = 'l';
 				if (r == 'l' || r == 'x') {
 					mkpath(path, pent->name, newpath);
 					if (!handle_archive(newpath, r)) {
@@ -7611,6 +7613,8 @@ nochange:
 			case SEL_NEW:
 				if (!pkey) {
 					r = get_input(messages[MSG_NEW_OPTS]);
+					if (r == '\r')
+						r = 'f';
 					tmp = NULL;
 				} else {
 					r = 'f';
