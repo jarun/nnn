@@ -423,14 +423,14 @@ separated by \fI;\fR:
     To assign keys to arbitrary non-background cli commands and invoke like
     plugins, add \fB!\fR before the command.
 .Bd -literal
-    export NNN_PLUG='x:!chmod +x $nnn;g:!git log;s:!smplayer $nnn'
+    export NNN_PLUG='x:!chmod +x "$nnn";g:!git log;s:!smplayer "$nnn"'
 
     To pick and run an unassigned plugin, press \fBEnter\fR at the plugin prompt.
     To run a plugin at startup, use the option `-P` followed by the plugin key.
 
     NOTES:
-    1. Use single quotes for $NNN_PLUG so $nnn is not interpreted
-    2. $nnn must be the last argument (if used) to run a \fIcommand as plugin\fR
+    1. Place $nnn in double quotes (\fB"$nnn"\fR)
+    2. Use single quotes for $NNN_PLUG so "$nnn" is not interpreted
     3. (Again) add \fB!\fR before the command
     4. To disable directory refresh after running a \fIcommand as plugin\fR,
        prefix with \fB-!\fR
@@ -439,18 +439,16 @@ separated by \fI;\fR:
 
         export NNN_PLUG='y:-!sync*'
 
-    6. To run a \fIGUI app as plugin\fR, add a \fB&\fR after \fB!\fR
-       \fI$nnn\fR must be the last argument in this case.
+    6. To run a \fIGUI app as plugin\fR, add a \fB&\fR after \fB!\fR.
 
-        export NNN_PLUG='m:-!&mousepad $nnn'
+        export NNN_PLUG='m:-!&mousepad "$nnn"'
 
     7. To show the output of run-and-exit commands which do not need user input,
        add \fB|\fR (pipe) after \fB!\fR
        Note: This option is incompatible with \fB&\fR (terminal output is masked
        for GUI programs) and ignores \fB*\fR (output is already paged for user).
-       \fI$nnn\fR must be the last argument in this case as well.
 
-        export NNN_PLUG='m:-!|mediainfo $nnn;t:-!|tree -ps;l:-!|ls -lah --group-directories-first'
+        export NNN_PLUG='m:-!|mediainfo "$nnn";t:-!|tree -ps;l:-!|ls -lah --group-directories-first'
 
     EXAMPLES:
     ------------------------------------ + -------------------------------------------------

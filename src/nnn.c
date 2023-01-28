@@ -5175,7 +5175,7 @@ static void setexports(void)
 	setenv("NNN_INCLUDE_HIDDEN", xitoa(cfg.showhidden), 1);
 }
 
-static void run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
+static void run_cmd_as_plugin(const char *file, uchar_t flags)
 {
 	size_t len;
 
@@ -5186,16 +5186,6 @@ static void run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
 		flags &= ~F_CONFIRM; /* Skip user confirmation */
 		g_buf[len - 1] = '\0'; /* Get rid of trailing no confirmation symbol */
 		--len;
-	}
-
-	/* This is to catch the old way of doing things so we don't break users' configs */
-	if ((flags & (F_PAGE | F_NOTRACE)) && is_suffix(g_buf, " $nnn")) {
-		g_buf[len - 5] = '\0';
-
-		if (flags & F_PAGE)
-			get_output(g_buf, runfile, NULL, -1, TRUE);
-		else // F_NOTRACE
-			spawn(g_buf, runfile, NULL, NULL, flags);
 	}
 
 	if (flags & F_PAGE)
@@ -5324,7 +5314,7 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 			flags |= F_PAGE;
 			++file;
 		} else if (*file == '&') { /* Check if GUI flags are to be used */
-			flags = F_NOTRACE | F_NOWAIT;
+			flags = F_MULTI | F_NOTRACE | F_NOWAIT;
 			++file;
 		}
 
@@ -5332,7 +5322,7 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 			return FALSE;
 
 		if ((flags & F_NOTRACE) || (flags & F_PAGE)) {
-			run_cmd_as_plugin(file, runfile, flags);
+			run_cmd_as_plugin(file, flags);
 			return TRUE;
 		}
 
@@ -5368,7 +5358,7 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 			} else
 				spawn(g_buf, NULL, *path, sel, 0);
 		} else
-			run_cmd_as_plugin(file, runfile, flags);
+			run_cmd_as_plugin(file, flags);
 
 		close(wfd);
 		_exit(EXIT_SUCCESS);
