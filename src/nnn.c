@@ -5076,7 +5076,8 @@ static void show_help(const char *path)
 	          "ca  Select all%-14cA  Invert sel\n"
 	       "9p ^P  Copy here%-12cw ^W  Cp/mv sel as\n"
 	       "9v ^V  Move here%-15cE  Edit sel list\n"
-	       "9x ^X  Delete%-16cEsc  Send to FIFO\n"
+	       "9x ^X  Delete%-18cS  Listed sel size\n"
+		"aEsc  Send to FIFO\n"
 	"0\n"
 	"1MISC\n"
 	      "8Alt ;  Select plugin%-11c=  Launch app\n"
@@ -6633,6 +6634,19 @@ static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)
 	return cfg.filtermode;
 }
 
+static void showselsize(const char *path)
+{
+	off_t sz = 0;
+	int len = scanselforpath(path, FALSE);
+
+	for (int r = 0; r < ndents; ++r)
+		if (findinsel(findselpos,
+				len + xstrsncpy(g_sel + len, pdents[r].name, pdents[r].nlen)))
+			sz += cfg.blkorder ? pdents[r].blocks : pdents[r].size;
+
+	printmsg(coolsize(cfg.blkorder ? sz << blk_shift : sz));
+}
+
 static bool browse(char *ipath, const char *session, int pkey)
 {
 	alignas(max_align_t) char newpath[PATH_MAX];
@@ -7843,6 +7857,9 @@ nochange:
 			if (g_state.runplugin == 1) /* Allow filtering in plugins directory */
 				presel = FILTER;
 			goto begin;
+		case SEL_SELSIZE:
+			showselsize(path);
+			goto nochange;
 		case SEL_SHELL: // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_PROMPT:

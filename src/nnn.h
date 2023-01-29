@@ -105,6 +105,7 @@ enum action {
 	SEL_AUTONEXT,
 	SEL_EDIT,
 	SEL_PLUGIN,
+	SEL_SELSIZE,
 	SEL_SHELL,
 	SEL_LAUNCH,
 	SEL_PROMPT,
@@ -257,6 +258,8 @@ static struct key bindings[] = {
 	{ 'e',            SEL_EDIT },
 	/* Run a plugin */
 	{ ';',            SEL_PLUGIN },
+	/* Show total size of listed selection */
+	{ 'S',            SEL_SELSIZE },
 	/* Run command */
 	{ '!',            SEL_SHELL },
 	{ CONTROL(']'),   SEL_SHELL },
