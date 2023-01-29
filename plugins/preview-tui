@@ -20,7 +20,7 @@
 #   - man
 #   - optional: bsdtar or atool for additional archive preview
 #   - optional: bat for code syntax highlighting
-#   - optional: ueberzug, kitty terminal, viu or catimg for images
+#   - optional: ueberzug, kitty terminal, viu, catimg or chafa for images
 #   - optional: convert(ImageMagick) for playing gif preview (required for kitty image previews)
 #   - optional: ffmpegthumbnailer for video thumbnails (https://github.com/dirkvdb/ffmpegthumbnailer)
 #   - optional: ffmpeg for audio thumbnails
@@ -100,6 +100,7 @@ PREVIEWPID="$TMPDIR/nnn-preview-tui-pagerpid.$NNN_PARENT"
 CURSEL="$TMPDIR/nnn-preview-tui-selection.$NNN_PARENT"
 FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NNN_PARENT"
 POSOFFSET="$TMPDIR/nnn-preview-tui-posoffset"
+NNN_PREVIEW_IMGPROG="${NNN_PREVIEW_IMGPROG:-}"
 
 exists() { type "$1" >/dev/null 2>&1 ;}
 pkill() { command pkill "$@" >/dev/null 2>&1 ;}
@@ -136,7 +137,8 @@ start_preview() {
                 -e "PAGER=$PAGER" -e "ICONLOOKUP=$ICONLOOKUP" -e "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" \
                 -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
                 -e "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" -e "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
-                -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "QLPATH=$2" -d"$DSPLIT" -p"$SPLIT_SIZE" "$0" "$1" ;;
+                -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "NNN_PREVIEW_IMGPROG=$NNN_PREVIEW_IMGPROG" \
+                -e "QLPATH=$2" -d"$DSPLIT" -p"$SPLIT_SIZE" "$0" "$1" ;;
         kitty) # Setting the layout for the new window. It will be restored after the script ends.
             kitty @ goto-layout splits
             # Trying to use kitty's integrated window management as the split window. All
@@ -408,12 +410,14 @@ image_preview() {
     if [ "$TERMINAL" = "kitty" ]; then
         # Kitty terminal users can use the native image preview method
         kitty +kitten icat --silent --scale-up --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
-    elif exists ueberzug; then
+    elif exists ueberzug && { [ -z "$NNN_PREVIEW_IMGPROG" ] || [ "$NNN_PREVIEW_IMGPROG" = "ueberzug" ] ;}; then
         ueberzug_layer "$1" "$2" "$3" && return
-    elif exists catimg; then
+    elif exists catimg   && { [ -z "$NNN_PREVIEW_IMGPROG" ] || [ "$NNN_PREVIEW_IMGPROG" = "catimg" ] ;}; then
         catimg "$3" &
-    elif exists viu; then
+    elif exists viu      && { [ -z "$NNN_PREVIEW_IMGPROG" ] || [ "$NNN_PREVIEW_IMGPROG" = "viu" ] ;}; then
         viu -t "$3" &
+    elif exists chafa    && { [ -z "$NNN_PREVIEW_IMGPROG" ] || [ "$NNN_PREVIEW_IMGPROG" = "chafa" ] ;}; then
+        chafa "$3" &
     else
         fifo_pager print_bin_info "$3" && return
     fi
