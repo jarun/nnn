@@ -4,10 +4,10 @@
 # Author: github.com/anjerukare
 
 diff --git a/src/nnn.c b/src/nnn.c
-index a2f54a23..8ff09d81 100644
+index b821f808..87ebfbbf 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -4968,39 +4968,39 @@ static void show_help(const char *path)
+@@ -5050,40 +5050,40 @@ static void show_help(const char *path)
  	const char helpstr[] = {
  	"0\n"
  	"1NAVIGATION\n"
@@ -49,7 +49,8 @@ index a2f54a23..8ff09d81 100644
  	       "9p ^P  Copy here%-12cw ^W  Cp/mv sel as\n"
 -	       "9v ^V  Move here%-15cE  Edit sel list\n"
 +	       "9v ^V  Move here%-15cl  Edit sel list\n"
- 	       "9x ^X  Delete%-16cEsc  Send to FIFO\n"
+ 	       "9x ^X  Delete%-18cS  Listed sel size\n"
+ 		"aEsc  Send to FIFO\n"
  	"0\n"
  	"1MISC\n"
  	      "8Alt ;  Select plugin%-11c=  Launch app\n"
@@ -62,10 +63,10 @@ index a2f54a23..8ff09d81 100644
  		 "b^L  Redraw%-18c?  Help, conf\n"
  	};
 diff --git a/src/nnn.h b/src/nnn.h
-index cb4d6d69..8a73ac53 100644
+index 3e4ea19c..c81ef392 100644
 --- a/src/nnn.h
 +++ b/src/nnn.h
-@@ -130,18 +130,18 @@ struct key {
+@@ -131,18 +131,18 @@ struct key {
  static struct key bindings[] = {
  	/* Back */
  	{ KEY_LEFT,       SEL_BACK },
@@ -88,7 +89,7 @@ index cb4d6d69..8a73ac53 100644
  	{ KEY_UP,         SEL_PREV },
  	/* Page down */
  	{ KEY_NPAGE,      SEL_PGDN },
-@@ -154,11 +154,11 @@ static struct key bindings[] = {
+@@ -155,11 +155,11 @@ static struct key bindings[] = {
  	/* First entry */
  	{ KEY_HOME,       SEL_HOME },
  	{ 'g',            SEL_HOME },
@@ -102,7 +103,7 @@ index cb4d6d69..8a73ac53 100644
  	/* Go to first file */
  	{ '\'',           SEL_FIRST },
  	/* Jump to an entry number/offset */
-@@ -175,7 +175,7 @@ static struct key bindings[] = {
+@@ -176,7 +176,7 @@ static struct key bindings[] = {
  	{ 'b',            SEL_BMOPEN },
  	{ CONTROL('_'),   SEL_BMOPEN },
  	/* Connect to server over SSHFS */
@@ -111,7 +112,7 @@ index cb4d6d69..8a73ac53 100644
  	/* Cycle contexts in forward direction */
  	{ '\t',           SEL_CYCLE },
  	/* Cycle contexts in reverse direction */
-@@ -198,14 +198,13 @@ static struct key bindings[] = {
+@@ -199,14 +199,13 @@ static struct key bindings[] = {
  	/* Filter */
  	{ '/',            SEL_FLTR },
  	/* Toggle filter mode */
@@ -127,7 +128,7 @@ index cb4d6d69..8a73ac53 100644
  	/* Toggle executable status */
  	{ '*',            SEL_CHMODX },
  	/* Create archive */
-@@ -219,13 +218,13 @@ static struct key bindings[] = {
+@@ -220,13 +219,13 @@ static struct key bindings[] = {
  	{ ' ',            SEL_SEL },
  	{ '+',            SEL_SEL },
  	/* Toggle select multiple files */
@@ -143,7 +144,7 @@ index cb4d6d69..8a73ac53 100644
  	/* Copy from selection buffer */
  	{ 'p',            SEL_CP },
  	{ CONTROL('P'),   SEL_CP },
-@@ -242,7 +241,7 @@ static struct key bindings[] = {
+@@ -243,7 +242,7 @@ static struct key bindings[] = {
  	{ 'o',            SEL_OPENWITH },
  	{ CONTROL('O'),   SEL_OPENWITH },
  	/* Create a new file */
@@ -152,7 +153,7 @@ index cb4d6d69..8a73ac53 100644
  	/* Show rename prompt */
  	{ CONTROL('R'),   SEL_RENAME },
  	/* Rename contents of current dir */
-@@ -254,7 +253,7 @@ static struct key bindings[] = {
+@@ -255,7 +254,7 @@ static struct key bindings[] = {
  	/* Toggle auto-advance on file open */
  	{ CONTROL('J'),   SEL_AUTONEXT },
  	/* Edit in EDITOR */
@@ -160,8 +161,8 @@ index cb4d6d69..8a73ac53 100644
 +	{ 'y',            SEL_EDIT },
  	/* Run a plugin */
  	{ ';',            SEL_PLUGIN },
- 	/* Run command */
-@@ -267,7 +266,7 @@ static struct key bindings[] = {
+ 	/* Show total size of listed selection */
+@@ -270,7 +269,7 @@ static struct key bindings[] = {
  	/* Lock screen */
  	{ '0',            SEL_LOCK },
  	/* Manage sessions */
