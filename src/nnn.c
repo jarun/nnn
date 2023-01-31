@@ -6639,10 +6639,11 @@ static void showselsize(const char *path)
 	off_t sz = 0;
 	int len = scanselforpath(path, FALSE);
 
-	for (int r = 0; r < ndents; ++r)
-		if (findinsel(findselpos,
-				len + xstrsncpy(g_sel + len, pdents[r].name, pdents[r].nlen)))
+	for (int r = 0, selcount = nselected; (r < ndents) && selcount; ++r)
+		if (findinsel(findselpos, len + xstrsncpy(g_sel + len, pdents[r].name, pdents[r].nlen))) {
 			sz += cfg.blkorder ? pdents[r].blocks : pdents[r].size;
+			--selcount;
+		}
 
 	printmsg(coolsize(cfg.blkorder ? sz << blk_shift : sz));
 }
