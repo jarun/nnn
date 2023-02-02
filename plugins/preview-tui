@@ -114,6 +114,8 @@ start_preview() {
         TERMINAL=tmux
     elif [ -n "$KITTY_LISTEN_ON" ]; then
         TERMINAL=kitty
+    elif [ -n "$WEZTERM_UNIX_SOCKET" ]; then
+        TERMINAL=wezterm
     elif [ -z "$TERMINAL" ] && [ "$TERM_PROGRAM" = "iTerm.app" ]; then
         TERMINAL=iterm
     elif [ -n "$WT_SESSION" ]; then
@@ -153,6 +155,15 @@ start_preview() {
                 --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=$BAT_STYLE" \
                 --env "BAT_THEME=$BAT_THEME" --env "FIFOPID=$FIFOPID" \
                 --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" ;;
+        wezterm)
+            if [ "$SPLIT" = "v" ]; then split="--horizontal"; else split="--bottom"; fi
+                PATH="$PATH" NNN_FIFO=$NNN_FIFO PREVIEW_MODE=1 CURSEL=$CURSEL TMPDIR=$TMPDIR \
+                FIFOPID=$FIFOPID BAT_STYLE=$BAT_STYLE BAT_THEME=$BAT_THEME PREVIEWPID=$PREVIEWPID \
+                PAGER="$PAGER" ICONLOOKUP=$ICONLOOKUP NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH \
+                USE_SCOPE=$USE_SCOPE SPLIT=$SPLIT USE_PISTOL=$USE_PISTOL \
+                NNN_PREVIEWDIR=$NNN_PREVIEWDIR NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT \
+                FIFO_UEBERZUG=$FIFO_UEBERZUG wezterm cli split-pane --cwd "$PWD" $split "$0" "$1";
+                wezterm cli activate-pane-direction Prev ;;
         iterm)
             command="$SHELL -c 'cd $PWD; \
                 PATH=\\\"$PATH\\\" NNN_FIFO=\\\"$NNN_FIFO\\\" PREVIEW_MODE=1 PAGER=\\\"$PAGER\\\" \
