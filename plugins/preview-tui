@@ -118,7 +118,7 @@ start_preview() {
         TERMINAL=tmux
     elif [ -n "$KITTY_LISTEN_ON" ]; then
         TERMINAL=kitty
-    elif [ -n "$WEZTERM_UNIX_SOCKET" ]; then
+    elif [ -n "$WEZTERM_PANE" ]; then
         TERMINAL=wezterm
     elif [ -z "$TERMINAL" ] && [ "$TERM_PROGRAM" = "iTerm.app" ]; then
         TERMINAL=iterm
