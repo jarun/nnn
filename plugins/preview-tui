@@ -5,9 +5,10 @@
 # Note: This plugin needs a "NNN_FIFO" to work. See man.
 #
 # Dependencies:
-#   - Supports 5 independent methods to preview with:
+#   - Supports 6 independent methods to preview with:
 #       - tmux (>=3.0), or
 #       - kitty with allow_remote_control and listen_on set in kitty.conf, or
+#       - wezterm (https://wezfurlong.org/wezterm), or
 #       - QuickLook on WSL (https://github.com/QL-Win/QuickLook), or
 #       - Windows Terminal (https://github.com/Microsoft/Terminal | https://aka.ms/terminal) with WSL, or
 #       - $TERMINAL set to a terminal (it's xterm by default).
@@ -20,7 +21,7 @@
 #   - man
 #   - optional: bsdtar or atool for additional archive preview
 #   - optional: bat for code syntax highlighting
-#   - optional: ueberzug, kitty terminal, viu, catimg or chafa for images
+#   - optional: ueberzug, kitty terminal, wezterm terminal, viu, catimg or chafa for images
 #   - optional: convert(ImageMagick) for playing gif preview (required for kitty image previews)
 #   - optional: ffmpegthumbnailer for video thumbnails (https://github.com/dirkvdb/ffmpegthumbnailer)
 #   - optional: ffmpeg for audio thumbnails
@@ -60,7 +61,7 @@
 #   will try to use a kitty terminal split. And as a final fallback, a
 #   different terminal window will be used ($TERMINAL).
 #
-#   Tmux and kitty users can configure $SPLIT to either "h" or "v" to set a
+#   Tmux, wezterm and kitty users can configure $SPLIT to either "h" or "v" to set a
 #   'h'orizontal split or a 'v'ertical split (as in, the line that splits the
 #   windows will be horizontal or vertical).
 #
@@ -70,6 +71,9 @@
 #   - `enabled_layouts splits` (optional)
 #   With ImageMagick installed, this terminal can use the icat kitten to display images.
 #   Refer to kitty documentation for further details.
+#
+#   Wezterm should work out of the box. If `NNN_PREVIEW_IMGPROG` is not specified it will use
+#   built in iTerm2 image protocol.
 #
 #   Iterm2 users are recommended to use viu to view images without getting pixelated.
 #
@@ -114,6 +118,8 @@ start_preview() {
         TERMINAL=tmux
     elif [ -n "$KITTY_LISTEN_ON" ]; then
         TERMINAL=kitty
+    elif [ -n "$WEZTERM_PANE" ]; then
+        TERMINAL=wezterm
     elif [ -z "$TERMINAL" ] && [ "$TERM_PROGRAM" = "iTerm.app" ]; then
         TERMINAL=iterm
     elif [ -n "$WT_SESSION" ]; then
@@ -153,6 +159,15 @@ start_preview() {
                 --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=$BAT_STYLE" \
                 --env "BAT_THEME=$BAT_THEME" --env "FIFOPID=$FIFOPID" \
                 --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" ;;
+        wezterm)
+            if [ "$SPLIT" = "v" ]; then split="--horizontal"; else split="--bottom"; fi
+                PATH="$PATH" NNN_FIFO=$NNN_FIFO PREVIEW_MODE=1 CURSEL=$CURSEL TMPDIR=$TMPDIR \
+                FIFOPID=$FIFOPID BAT_STYLE=$BAT_STYLE BAT_THEME=$BAT_THEME PREVIEWPID=$PREVIEWPID \
+                PAGER="$PAGER" ICONLOOKUP=$ICONLOOKUP NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH \
+                USE_SCOPE=$USE_SCOPE SPLIT=$SPLIT USE_PISTOL=$USE_PISTOL TERMINAL="$TERMINAL" \
+                NNN_PREVIEWDIR=$NNN_PREVIEWDIR NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT \
+                FIFO_UEBERZUG=$FIFO_UEBERZUG wezterm cli split-pane --cwd "$PWD" $split "$0" "$1";
+                wezterm cli activate-pane-direction Prev ;;
         iterm)
             command="$SHELL -c 'cd $PWD; \
                 PATH=\\\"$PATH\\\" NNN_FIFO=\\\"$NNN_FIFO\\\" PREVIEW_MODE=1 PAGER=\\\"$PAGER\\\" \
@@ -410,6 +425,8 @@ image_preview() {
     if [ "$TERMINAL" = "kitty" ]; then
         # Kitty terminal users can use the native image preview method
         kitty +kitten icat --silent --scale-up --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
+    elif [ "$TERMINAL" = "wezterm" ] && [ -z "$NNN_PREVIEW_IMGPROG" ]; then
+        wezterm imgcat "$3" &
     elif exists ueberzug && { [ -z "$NNN_PREVIEW_IMGPROG" ] || [ "$NNN_PREVIEW_IMGPROG" = "ueberzug" ] ;}; then
         ueberzug_layer "$1" "$2" "$3" && return
     elif exists catimg   && { [ -z "$NNN_PREVIEW_IMGPROG" ] || [ "$NNN_PREVIEW_IMGPROG" = "catimg" ] ;}; then
