@@ -11,8 +11,8 @@
 #       - wezterm (https://wezfurlong.org/wezterm), or
 #       - QuickLook on WSL (https://github.com/QL-Win/QuickLook), or
 #       - Windows Terminal (https://github.com/Microsoft/Terminal | https://aka.ms/terminal) with WSL, or
-#       - $TERMINAL set to a terminal (it's xterm by default).
-#   - less or $PAGER
+#       - $NNN_TERMINAL set to a terminal (it's xterm by default).
+#   - less or $NNN_PAGER
 #   - tree or exa or ls
 #   - mediainfo or file
 #   - mktemp
@@ -32,14 +32,14 @@
 #   - optional: djvulibre for djvu
 #   - optional: glow or lowdown for markdown
 #   - optional: w3m or lynx or elinks for html
-#   - optional: set/export ICONLOOKUP as 1 to enable file icons in front of directory previews with .iconlookup
+#   - optional: set/export NNN_ICONLOOKUP as 1 to enable file icons in front of directory previews with .iconlookup
 #       Icons and colors are configureable in .iconlookup
 #   - optional: scope.sh file viewer from ranger.
 #       1. drop scope.sh executable in $PATH
-#       2. set/export $USE_SCOPE as 1
+#       2. set/export $NNN_SCOPE as 1
 #   - optional: pistol file viewer (https://github.com/doronbehar/pistol).
 #       1. install pistol
-#       2. set/export $USE_PISTOL as 1
+#       2. set/export $NNN_PISTOL as 1
 #
 # Usage:
 #   You need to set a NNN_FIFO path and a key for the plugin with NNN_PLUG,
@@ -59,9 +59,9 @@
 #
 #   The previews will be shown in a tmux split. If that isn't possible, it
 #   will try to use a kitty terminal split. And as a final fallback, a
-#   different terminal window will be used ($TERMINAL).
+#   different terminal window will be used ($NNN_TERMINAL).
 #
-#   Tmux, wezterm and kitty users can configure $SPLIT to either "h" or "v" to set a
+#   Tmux, wezterm and kitty users can configure $NNN_SPLIT to either "h" or "v" to set a
 #   'h'orizontal split or a 'v'ertical split (as in, the line that splits the
 #   windows will be horizontal or vertical).
 #
@@ -72,7 +72,7 @@
 #   With ImageMagick installed, this terminal can use the icat kitten to display images.
 #   Refer to kitty documentation for further details.
 #
-#   Wezterm should work out of the box. If `NNN_PREVIEW_IMGPROG` is not specified it will use
+#   Wezterm should work out of the box. If `NNN_PREVIEWIMGPROG` is not specified it will use
 #   built in iTerm2 image protocol.
 #
 #   Iterm2 users are recommended to use viu to view images without getting pixelated.
@@ -83,101 +83,91 @@
 # Shell: POSIX compliant
 # Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal, @WanderLanz
 
-#SPLIT="$SPLIT"  # you can set a permanent split here
-#TERMINAL="$TERMINAL"  # same goes for the terminal
-SPLIT_SIZE="${SPLIT_SIZE:-50}" # split size in percentage for supported previewers
-USE_SCOPE="${USE_SCOPE:-0}"
-USE_PISTOL="${USE_PISTOL:-0}"
-ICONLOOKUP="${ICONLOOKUP:-0}"
-PAGER="${PAGER:-less -P?n -R}"
-TMPDIR="${TMPDIR:-/tmp}"
-BAT_STYLE="${BAT_STYLE:-numbers}"
-BAT_THEME="${BAT_THEME:-ansi}"
-# Consider setting NNN_PREVIEWDIR to $XDG_CACHE_HOME/nnn/previews if you want to keep previews on disk between reboots
-NNN_PREVIEWDIR="${NNN_PREVIEWDIR:-$TMPDIR/nnn/previews}"
-NNN_PREVIEWWIDTH="${NNN_PREVIEWWIDTH:-1920}"
-NNN_PREVIEWHEIGHT="${NNN_PREVIEWHEIGHT:-1080}"
-NNN_PARENT="${NNN_FIFO#*.}"
-[ "$NNN_PARENT" -eq "$NNN_PARENT" ] 2>/dev/null || NNN_PARENT=""
-FIFOPID="$TMPDIR/nnn-preview-tui-fifopid.$NNN_PARENT"
-PREVIEWPID="$TMPDIR/nnn-preview-tui-pagerpid.$NNN_PARENT"
-CURSEL="$TMPDIR/nnn-preview-tui-selection.$NNN_PARENT"
-FIFO_UEBERZUG="$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NNN_PARENT"
-POSOFFSET="$TMPDIR/nnn-preview-tui-posoffset"
-NNN_PREVIEW_IMGPROG="${NNN_PREVIEW_IMGPROG:-}"
+NNN_SPLIT=${NNN_SPLIT:-}           # Set permanent split direction
+NNN_TERMINAL=${NNN_TERMINAL:-}     # Set external terminal to be used
+NNN_SPLITSIZE=${NNN_SPLITSIZE:-50} # Set previewer split size percentage
+TMPDIR=${TMPDIR:-/tmp}
+NNN_PARENT=${NNN_FIFO#*.}
+[ "$NNN_PARENT" -eq "$NNN_PARENT" ] 2>/dev/null || NNN_PARENT="" # Make empty if non-numeric
+ENVVARS="
+PWD=$PWD
+PATH=$PATH
+PREVIEW_MODE=$2
+NNN_FIFO=$NNN_FIFO
+NNN_SCOPE=${NNN_SCOPE:-0}
+NNN_PISTOL=${NNN_PISTOL:-0}
+NNN_ICONLOOKUP=${NNN_ICONLOOKUP:-0}
+NNN_PAGER=${NNN_PAGER:-less -P?n -R}
+NNN_BATTHEME=${NNN_BATTHEME:-ansi}
+NNN_BATSTYLE=${NNN_BATSTYLE:-numbers}
+NNN_PREVIEWWIDTH=${NNN_PREVIEWWIDTH:-1920}
+NNN_PREVIEWHEIGHT=${NNN_PREVIEWHEIGHT:-1080}
+NNN_PREVIEWDIR=${NNN_PREVIEWDIR:-$TMPDIR/nnn/previews}
+NNN_PREVIEWIMGPROG=${NNN_PREVIEWIMGPROG:-}
+FIFOPID=$TMPDIR/nnn-preview-tui-fifopid.$NNN_PARENT
+FIFOPATH=$TMPDIR/nnn-preview-tui-fifo.$NNN_PARENT
+PREVIEWPID=$TMPDIR/nnn-preview-tui-previewpid.$NNN_PARENT
+CURSEL=$TMPDIR/nnn-preview-tui-selection.$NNN_PARENT
+FIFO_UEBERZUG=$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NNN_PARENT
+POSOFFSET=$TMPDIR/nnn-preview-tui-posoffset"
+
+if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
+    NNN_TERMINAL=tmux
+elif [ -n "$KITTY_LISTEN_ON" ]; then
+    NNN_TERMINAL=kitty
+elif [ -n "$WEZTERM_PANE" ]; then
+    NNN_TERMINAL=wezterm
+elif [ -z "$NNN_TERMINAL" ] && [ "$TERM_PROGRAM" = "iTerm.app" ]; then
+    NNN_TERMINAL=iterm
+elif [ -n "$WT_SESSION" ]; then
+    NNN_TERMINAL=winterm
+else
+    NNN_TERMINAL="${NNN_TERMINAL:-xterm}"
+fi
+
+if [ -z "$NNN_SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ]; then
+    NNN_SPLIT='h'
+elif [ "$NNN_SPLIT" != 'h' ]; then
+    NNN_SPLIT='v'
+fi
+
+ENVVARS="$ENVVARS
+NNN_SPLIT=$NNN_SPLIT
+NNN_TERMINAL=$NNN_TERMINAL"
+IFS='
+'
+for env in $ENVVARS; do
+    export "${env?}"
+    case "$NNN_TERMINAL" in
+        tmux) ENVSTRING="$ENVSTRING -e '$env'" ;;
+        kitty) ENVSTRING="$ENVSTRING --env '$env'" ;;
+        winterm|iterm) ENVSTRING="$ENVSTRING \\\"$env\\\"" ;;
+        *) ENVSTRING="$ENVSTRING $env";;
+    esac
+done; unset IFS
 
 exists() { type "$1" >/dev/null 2>&1 ;}
 pkill() { command pkill "$@" >/dev/null 2>&1 ;}
-pidkill() { [ -f "$1" ] && kill "$(cat "$1")" >/dev/null 2>&1 ;}
+pidkill() { [ -f "$1" ] && kill "$(cat "$1" 2>/dev/null)" >/dev/null 2>&1 ;}
 prompt() { printf "%b" "$@"; cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg" ;}
 
 start_preview() {
-    [ "$PAGER" = "most" ] && PAGER="less -R"
-
-    if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
-        TERMINAL=tmux
-    elif [ -n "$KITTY_LISTEN_ON" ]; then
-        TERMINAL=kitty
-    elif [ -n "$WEZTERM_PANE" ]; then
-        TERMINAL=wezterm
-    elif [ -z "$TERMINAL" ] && [ "$TERM_PROGRAM" = "iTerm.app" ]; then
-        TERMINAL=iterm
-    elif [ -n "$WT_SESSION" ]; then
-        TERMINAL=winterm
-    else
-        TERMINAL="${TERMINAL:-xterm}"
-    fi
-
-    if [ -z "$SPLIT" ] && [ $(($(tput lines) * 2)) -gt "$(tput cols)" ]; then
-        SPLIT='h'
-    elif [ "$SPLIT" != 'h' ]; then
-        SPLIT='v'
-    fi
-
-    case "$TERMINAL" in
+    case "$NNN_TERMINAL" in
         tmux) # tmux splits are inverted
-            if [ "$SPLIT" = "v" ]; then DSPLIT="h"; else DSPLIT="v"; fi
-            tmux split-window -e "NNN_FIFO=$NNN_FIFO" -e "PREVIEW_MODE=1" -e "CURSEL=$CURSEL" \
-                -e "TMPDIR=$TMPDIR" -e "FIFOPID=$FIFOPID" -e "POSOFFSET=$POSOFFSET" \
-                -e "BAT_STYLE=$BAT_STYLE" -e "BAT_THEME=$BAT_THEME" -e "PREVIEWPID=$PREVIEWPID" \
-                -e "PAGER=$PAGER" -e "ICONLOOKUP=$ICONLOOKUP" -e "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" \
-                -e "USE_SCOPE=$USE_SCOPE" -e "SPLIT=$SPLIT" -e "USE_PISTOL=$USE_PISTOL" \
-                -e "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" -e "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
-                -e "FIFO_UEBERZUG=$FIFO_UEBERZUG" -e "NNN_PREVIEW_IMGPROG=$NNN_PREVIEW_IMGPROG" \
-                -e "QLPATH=$2" -d"$DSPLIT" -p"$SPLIT_SIZE" "$0" "$1" ;;
+            if [ "$NNN_SPLIT" = "v" ]; then split="h"; else split="v"; fi
+            eval tmux split-window "$ENVSTRING" -d"$split" -p"$NNN_SPLITSIZE" "$0" "$1" 1 ;;
         kitty) # Setting the layout for the new window. It will be restored after the script ends.
             kitty @ goto-layout splits
-            # Trying to use kitty's integrated window management as the split window. All
-            # environmental variables that will be used in the new window must be explicitly passed.
-            kitty @ launch --no-response --title "nnn preview" --keep-focus \
-                --cwd "$PWD" --env "PATH=$PATH" --env "NNN_FIFO=$NNN_FIFO" \
-                --env "PREVIEW_MODE=1" --env "PAGER=$PAGER" --env "TMPDIR=$TMPDIR" \
-                --env "USE_SCOPE=$USE_SCOPE" --env "SPLIT=$SPLIT" --env "TERMINAL=$TERMINAL"\
-                --env "PREVIEWPID=$PREVIEWPID" --env "FIFO_UEBERZUG=$FIFO_UEBERZUG" \
-                --env "ICONLOOKUP=$ICONLOOKUP" --env "NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT" \
-                --env "NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH" --env "NNN_PREVIEWDIR=$NNN_PREVIEWDIR" \
-                --env "USE_PISTOL=$USE_PISTOL" --env "BAT_STYLE=$BAT_STYLE" \
-                --env "BAT_THEME=$BAT_THEME" --env "FIFOPID=$FIFOPID" \
-                --env "CURSEL=$CURSEL" --location "${SPLIT}split" "$0" "$1" ;;
+            # Trying to use kitty's integrated window management as the split window.
+            eval kitty @ launch --no-response --title "preview-tui" --keep-focus \
+                --cwd "$PWD" "$ENVSTRING" --location "${NNN_SPLIT}split" "$0" "$1" 1 ;;
         wezterm)
-            if [ "$SPLIT" = "v" ]; then split="--horizontal"; else split="--bottom"; fi
-                PATH="$PATH" NNN_FIFO=$NNN_FIFO PREVIEW_MODE=1 CURSEL=$CURSEL TMPDIR=$TMPDIR \
-                FIFOPID=$FIFOPID BAT_STYLE=$BAT_STYLE BAT_THEME=$BAT_THEME PREVIEWPID=$PREVIEWPID \
-                PAGER="$PAGER" ICONLOOKUP=$ICONLOOKUP NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH \
-                USE_SCOPE=$USE_SCOPE SPLIT=$SPLIT USE_PISTOL=$USE_PISTOL TERMINAL="$TERMINAL" \
-                NNN_PREVIEWDIR=$NNN_PREVIEWDIR NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT \
-                FIFO_UEBERZUG=$FIFO_UEBERZUG wezterm cli split-pane --cwd "$PWD" $split "$0" "$1";
-                wezterm cli activate-pane-direction Prev ;;
+            if [ "$NNN_SPLIT" = "v" ]; then split="--horizontal"; else split="--bottom"; fi
+            wezterm cli split-pane --cwd "$PWD" $split "$0" "$1" 1
+            wezterm cli activate-pane-direction Prev ;;
         iterm)
-            command="$SHELL -c 'cd $PWD; \
-                PATH=\\\"$PATH\\\" NNN_FIFO=\\\"$NNN_FIFO\\\" PREVIEW_MODE=1 PAGER=\\\"$PAGER\\\" \
-                USE_SCOPE=\\\"$USE_SCOPE\\\" SPLIT=\\\"$SPLIT\\\" TERMINAL=\\\"$TERMINAL\\\" \
-                PREVIEWPID=\\\"$PREVIEWPID\\\" CURSEL=\\\"$CURSEL\\\" TMPDIR=\\\"$TMPDIR\\\" \
-                ICONLOOKUP=\\\"$ICONLOOKUP\\\" NNN_PREVIEWHEIGHT=\\\"$NNN_PREVIEWHEIGHT\\\" \
-                NNN_PREVIEWWIDTH=\\\"$NNN_PREVIEWWIDTH\\\" NNN_PREVIEWDIR=\\\"$NNN_PREVIEWDIR\\\" \
-                USE_PISTOL=\\\"$USE_PISTOL\\\" BAT_STYLE=\\\"$BAT_STYLE\\\" \
-                BAT_THEME=\\\"$BAT_THEME\\\" FIFOPID=\\\"$FIFOPID\\\" \\\"$0\\\" \\\"$1\\\"'"
-            if [ "$SPLIT" = "h" ]; then split="horizontally"; else split="vertically"; fi
+            command="$SHELL -c 'cd $PWD; env $ENVSTRING $0 $1 1'"
+            if [ "$NNN_SPLIT" = "h" ]; then split="horizontally"; else split="vertically"; fi
             osascript <<-EOF
             tell application "iTerm"
                 tell current session of current window
@@ -187,20 +177,13 @@ start_preview() {
 EOF
             ;;
         winterm)
-            if [ "$SPLIT" = "h" ]; then split="H"; else split="V"; fi
-            cmd.exe /c wt -w 0 sp -$split -s$((SPLIT_SIZE / 100)) bash -c "cd $PWD \; \
-                PATH='$PATH' NNN_FIFO=$NNN_FIFO PREVIEW_MODE=1 CURSEL=$CURSEL TMPDIR=$TMPDIR \
-                FIFOPID=$FIFOPID BAT_STYLE=$BAT_STYLE BAT_THEME=$BAT_THEME PREVIEWPID=$PREVIEWPID \
-                PAGER='$PAGER' ICONLOOKUP=$ICONLOOKUP NNN_PREVIEWWIDTH=$NNN_PREVIEWWIDTH \
-                USE_SCOPE=$USE_SCOPE SPLIT=$SPLIT USE_PISTOL=$USE_PISTOL \
-                NNN_PREVIEWDIR=$NNN_PREVIEWDIR NNN_PREVIEWHEIGHT=$NNN_PREVIEWHEIGHT \
-                FIFO_UEBERZUG=$FIFO_UEBERZUG QLPATH=$2 $0 $1" \; -w 0 mf previous
-            ;;
+            if [ "$NNN_SPLIT" = "h" ]; then split="H"; else split="V"; fi
+            cmd.exe /c wt -w 0 sp -$split -s"0.$NNN_SPLITSIZE" bash -c "cd $PWD \; \
+                env $ENVSTRING QLPATH=$2 $0 $1 1" \; -w 0 mf previous 2>/dev/null ;;
         *)  if [ -n "$2" ]; then
-                QUICKLOOK=1 QLPATH="$2" PREVIEW_MODE=1 "$0" "$1" &
+                env "$ENVSTRING" QUICKLOOK=1 QLPATH="$2" "$0" "$1" 1 &
             else
-                PREVIEWPID="$PREVIEWPID" CURSEL="$CURSEL" PREVIEW_MODE=1 \
-                     FIFOPID="$FIFOPID" FIFO_UEBERZUG="$FIFO_UEBERZUG" $TERMINAL -e "$0" "$1" &
+                env "$ENVSTRING" "$NNN_TERMINAL" -e "$0" "$1" 1 &
             fi ;;
     esac
 }
@@ -228,28 +211,27 @@ fifo_pager() {
     cmd="$1"
     shift
 
-    # We use a FIFO to access $PAGER PID in jobs control
-    tmpfifopath="$TMPDIR/nnn-preview-tui-fifo.$$"
-    mkfifo "$tmpfifopath" || return
+    # We use a FIFO to access $NNN_PAGER PID in jobs control
+    mkfifo "$FIFOPATH" || return
 
-    $PAGER < "$tmpfifopath" &
+    $NNN_PAGER < "$FIFOPATH" &
     printf "%s" "$!" > "$PREVIEWPID"
 
     (
-        exec > "$tmpfifopath"
+        exec > "$FIFOPATH"
         if [ "$cmd" = "pager" ]; then
             if exists bat; then
                 bat --terminal-width="$cols" --decorations=always --color=always \
-                    --paging=never --style="$BAT_STYLE" --theme="$BAT_THEME" "$@" &
+                    --paging=never --style="$NNN_BATSTYLE" --theme="$NNN_BATTHEME" "$@" &
             else
-                $PAGER "$@" &
+                $NNN_PAGER "$@" &
             fi
         else
             "$cmd" "$@" &
         fi
     )
 
-    rm "$tmpfifopath"
+    rm "$FIFOPATH"
 }
 
 # Binary file: show file info inside the pager
@@ -323,13 +305,13 @@ handle_ext() {
 preview_file() {
     clear
     # Trying to use pistol if it's available.
-    if [ "$USE_PISTOL" -ne 0 ] && exists pistol; then
+    if [ "$NNN_PISTOL" -ne 0 ] && exists pistol; then
         fifo_pager pistol "$1"
         return
     fi
 
     # Trying to use scope.sh if it's available.
-    if [ "$USE_SCOPE" -ne 0 ] && exists scope.sh; then
+    if [ "$NNN_SCOPE" -ne 0 ] && exists scope.sh; then
         fifo_pager scope.sh "$1" "$cols" "$lines" "$(mktemp -d)" "True"
         return
     fi
@@ -351,8 +333,8 @@ preview_file() {
     # Otherwise, falling back to the defaults.
     if [ -d "$1" ]; then
         cd "$1" || return
-        if [ "$ICONLOOKUP" -ne 0 ] && [ -f "$(dirname "$0")"/.iconlookup ]; then
-            [ "$SPLIT" = v ] && BSTR="\n"
+        if [ "$NNN_ICONLOOKUP" -ne 0 ] && [ -f "$(dirname "$0")"/.iconlookup ]; then
+            [ "$NNN_SPLIT" = v ] && BSTR="\n"
             # shellcheck disable=SC2012
             ls -F --group-directories-first | head -n "$((lines - 3))" | "$(dirname "$0")"/.iconlookup -l "$cols" -B "$BSTR" -b " "
         elif exists tree; then
@@ -422,18 +404,18 @@ generate_preview() {
 image_preview() {
     clear
     exec >/dev/tty
-    if [ "$TERMINAL" = "kitty" ]; then
+    if [ "$NNN_TERMINAL" = "kitty" ]; then
         # Kitty terminal users can use the native image preview method
         kitty +kitten icat --silent --scale-up --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
-    elif [ "$TERMINAL" = "wezterm" ] && [ -z "$NNN_PREVIEW_IMGPROG" ]; then
+    elif [ "$NNN_TERMINAL" = "wezterm" ] && [ -z "$NNN_PREVIEWIMGPROG" ]; then
         wezterm imgcat "$3" &
-    elif exists ueberzug && { [ -z "$NNN_PREVIEW_IMGPROG" ] || [ "$NNN_PREVIEW_IMGPROG" = "ueberzug" ] ;}; then
+    elif exists ueberzug && { [ -z "$NNN_PREVIEWIMGPROG" ] || [ "$NNN_PREVIEWIMGPROG" = "ueberzug" ] ;}; then
         ueberzug_layer "$1" "$2" "$3" && return
-    elif exists catimg   && { [ -z "$NNN_PREVIEW_IMGPROG" ] || [ "$NNN_PREVIEW_IMGPROG" = "catimg" ] ;}; then
+    elif exists catimg   && { [ -z "$NNN_PREVIEWIMGPROG" ] || [ "$NNN_PREVIEWIMGPROG" = "catimg" ] ;}; then
         catimg "$3" &
-    elif exists viu      && { [ -z "$NNN_PREVIEW_IMGPROG" ] || [ "$NNN_PREVIEW_IMGPROG" = "viu" ] ;}; then
+    elif exists viu      && { [ -z "$NNN_PREVIEWIMGPROG" ] || [ "$NNN_PREVIEWIMGPROG" = "viu" ] ;}; then
         viu -t "$3" &
-    elif exists chafa    && { [ -z "$NNN_PREVIEW_IMGPROG" ] || [ "$NNN_PREVIEW_IMGPROG" = "chafa" ] ;}; then
+    elif exists chafa    && { [ -z "$NNN_PREVIEWIMGPROG" ] || [ "$NNN_PREVIEWIMGPROG" = "chafa" ] ;}; then
         chafa "$3" &
     else
         fifo_pager print_bin_info "$3" && return
@@ -475,8 +457,8 @@ preview_fifo() {
     pkill -P "$$"
 }
 
-if [ "$PREVIEW_MODE" ]; then
-    if [ "$TERMINAL" != "kitty" ] && exists ueberzug; then
+if [ "$PREVIEW_MODE" -eq 1 ] 2>/dev/null; then
+    if [ "$NNN_TERMINAL" != "kitty" ] && exists ueberzug; then
         mkfifo "$FIFO_UEBERZUG"
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
@@ -492,10 +474,10 @@ if [ "$PREVIEW_MODE" ]; then
 else
     if [ ! -r "$NNN_FIFO" ]; then
         clear
-        prompt "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')\nPlease read Usage in preview-tui."
+        prompt "No FIFO available! (\$NNN_FIFO='$NNN_FIFO')\nPlease read Usage in '$0'."
     elif [ "$KITTY_WINDOW_ID" ] && [ -z "$TMUX" ] && [ -z "$KITTY_LISTEN_ON" ]; then
         clear
-        prompt "\$KITTY_LISTEN_ON not set!\nPlease read Usage in preview-tui."
+        prompt "\$KITTY_LISTEN_ON not set!\nPlease read Usage in '$0'."
     else
         toggle_preview "$1" &
     fi
