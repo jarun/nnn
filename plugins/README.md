@@ -141,7 +141,7 @@ export NNN_PLUG='p:-plugin'
 
 ## Running commands as plugin [`!`]
 
-To assign keys to arbitrary non-background cli commands and invoke like plugins, add `!` (underscore) before the command.
+To assign keys to arbitrary non-background cli commands and invoke like plugins, add `!` before the command.
 
 ```sh
 export NNN_PLUG='x:!chmod +x "$nnn";g:!git log;s:!smplayer "$nnn"'
