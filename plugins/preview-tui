@@ -344,6 +344,7 @@ preview_file() {
         else
             fifo_pager ls -F --group-directories-first --color=always
         fi
+        cd ..
     elif [ "${encoding#*)}" = "binary" ]; then
         handle_mime "$1" "$mimetype" "$ext" "bin"
     else
