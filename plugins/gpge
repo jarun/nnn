@@ -21,6 +21,7 @@ if [ "$symmetry" = "s" ]; then
 else
 	if nnn_use_selection; then
 		clear_sel=1
+		# shellcheck disable=SC2154
 		files=$(tr '\0' '\n' < "$selection")
 	else
 		clear_sel=0
