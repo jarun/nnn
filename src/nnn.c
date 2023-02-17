@@ -5174,6 +5174,7 @@ static void setexports(void)
 		}
 	}
 	setenv("NNN_INCLUDE_HIDDEN", xitoa(cfg.showhidden), 1);
+	setenv("NNN_PREFER_SELECTION", xitoa(cfg.prefersel), 1);
 }
 
 static void run_cmd_as_plugin(const char *file, uchar_t flags)

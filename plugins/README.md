@@ -212,6 +212,7 @@ When `nnn` executes a plugin, it does the following:
     3. `$3`: The picker mode output file (`-` for stdout) if `nnn` is executed as a file picker.
 - Sets the environment variable `NNN_PIPE` used to control `nnn` active directory.
 - Sets the environment variable `NNN_INCLUDE_HIDDEN` to `1` if hidden files are active, `0` otherwise.
+- Sets the environment variable `NNN_PREFER_SELECTION` to `1` if user prefers to use selection (see nnn's `-u` flag), `0` otherwise.
 - Exports the [special variables](https://github.com/jarun/nnn/wiki/Concepts#special-variables).
 
 Plugins can also read the `.selection` file in the config directory.
