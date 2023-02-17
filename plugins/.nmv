@@ -20,6 +20,7 @@
 EDITOR="${EDITOR:-vi}"
 TMPDIR="${TMPDIR:-/tmp}"
 NNN_INCLUDE_HIDDEN="${NNN_INCLUDE_HIDDEN:-0}"
+NNN_PREFER_SELECTION="${NNN_PREFER_SELECTION:-0}"
 VERBOSE="${VERBOSE:-0}"
 RECURSIVE="${RECURSIVE:-0}"
 
@@ -38,12 +39,16 @@ exit_status=0
 dst_file=$(mktemp "$TMPDIR/.nnnXXXXXX")
 
 if [ -s "$selection" ]; then
-	printf "Rename 'c'urrent / 's'election? "
-	read -r resp
+	if [ "$NNN_PREFER_SELECTION" -eq 1 ]; then
+		resp="s"
+	else
+		printf "Rename 'c'urrent / 's'election? "
+		read -r resp
 
-    if ! [ "$resp" = "c" ] && ! [ "$resp" = "s" ]; then
-        exit 1
-    fi
+		if ! [ "$resp" = "c" ] && ! [ "$resp" = "s" ]; then
+			exit 1
+		fi
+	fi
 fi
 
 if [ "$resp" = "s" ]; then
