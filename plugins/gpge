@@ -10,7 +10,8 @@
 # Shell: POSIX compliant
 # Author: KlzXS
 
-selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+# shellcheck disable=SC1090,SC1091
+. "$(dirname "$0")"/.nnn-plugin-helper
 
 printf "(s)ymmetric, (a)symmetric? [default=a] "
 read -r symmetry
@@ -18,12 +19,11 @@ read -r symmetry
 if [ "$symmetry" = "s" ]; then
 	gpg --symmetric "$1"
 else
-	printf "(s)election/(c)urrent? [default=c] "
-	read -r resp
-
-	if [ "$resp" = "s" ]; then
+	if nnn_use_selection; then
+		clear_sel=1
 		files=$(tr '\0' '\n' < "$selection")
 	else
+		clear_sel=0
 		files=$1
 	fi
 
@@ -37,8 +37,8 @@ else
 
 	printf "%s" "$files" | xargs -n1 gpg --encrypt --recipient "$recipient"
 
-    # Clear selection
-    if [ "$resp" = "s" ] && [ -p "$NNN_PIPE" ]; then
-        printf "-" > "$NNN_PIPE"
-    fi
+	# Clear selection
+	if [ "$clear_sel" -eq 1 ] && [ -p "$NNN_PIPE" ]; then
+		printf "-" > "$NNN_PIPE"
+	fi
 fi
