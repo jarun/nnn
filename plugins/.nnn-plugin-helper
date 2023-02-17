@@ -48,7 +48,7 @@ nnn_use_selection() {
     if [ "$NNN_PREFER_SELECTION" -eq 1 ]; then
         return 0
     else
-        [ -n "$1" ] && printf "$1 "
+        [ -n "$1" ] && printf "%s " "$1"
         printf "(s)election/(c)urrent? [default=c] "
         read -r resp__
 
