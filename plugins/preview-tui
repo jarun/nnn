@@ -163,7 +163,7 @@ start_preview() {
                 --cwd "$PWD" "$ENVSTRING" --location "${NNN_SPLIT}split" "$0" "$1" 1 ;;
         wezterm)
             if [ "$NNN_SPLIT" = "v" ]; then split="--horizontal"; else split="--bottom"; fi
-            wezterm cli split-pane --cwd "$PWD" $split "$0" "$1" 1
+            wezterm cli split-pane --cwd "$PWD" $split "$0" "$1" 1 >/dev/null
             wezterm cli activate-pane-direction Prev ;;
         iterm)
             command="$SHELL -c 'cd $PWD; env $ENVSTRING $0 $1 1'"
