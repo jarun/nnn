@@ -32,6 +32,7 @@ O_NOSORT := 0  # disable sorting entries on dir load
 
 # User patches
 O_COLEMAK := 0 # change key bindings to colemak compatible layout
+O_COLEMAK-DH := 0 # change key bindings to colemak-dh compatible layout
 O_GITSTATUS := 0 # add git status to detail view
 O_NAMEFIRST := 0 # print file name first, add uid and guid to detail view
 O_RESTOREPREVIEW := 0 # add preview pipe to close and restore preview pane
@@ -168,6 +169,7 @@ LOGOSVG = misc/logo/logo.svg
 LOGO64X64 = misc/logo/logo-64x64.png
 
 COLEMAK = patches/colemak
+COLEMAK-DH = patches/colemak-dh
 GITSTATUS = patches/gitstatus
 NAMEFIRST = patches/namefirst
 RESTOREPREVIEW = patches/restorepreview
@@ -339,6 +341,9 @@ ifeq ($(strip $(O_RESTOREPREVIEW)),1)
 endif
 ifeq ($(strip $(O_COLEMAK)),1)
 	patch --forward $(PATCH_OPTS) --strip=1 --input=$(COLEMAK)/mainline.diff
+endif
+ifeq ($(strip $(O_COLEMAK-DH)),1)
+	patch --forward $(PATCH_OPTS) --strip=1 --input=$(COLEMAK-DH)/mainline.diff
 endif
 
 postpatch:
