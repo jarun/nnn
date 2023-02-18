@@ -6,7 +6,7 @@
 # Read patches/README.md for more information.
 
 export PATCH_OPTS="--merge"
-patches=("O_COLEMAK" "O_GITSTATUS" "O_NAMEFIRST" "O_RESTOREPREVIEW")
+patches=("O_COLEMAK" "O_COLEMAK-DH" "O_GITSTATUS" "O_NAMEFIRST" "O_RESTOREPREVIEW")
 z=$(( 1 << ${#patches[@]} ))
 pid=$$
 ret=0

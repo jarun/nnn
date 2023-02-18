@@ -361,6 +361,9 @@ endif
 ifeq ($(strip $(O_COLEMAK)),1)
 	patch --reverse $(PATCH_OPTS) --strip=1 --input=$(COLEMAK)/mainline.diff
 endif
+ifeq ($(strip $(O_COLEMAK-DH)),1)
+	patch --reverse $(PATCH_OPTS) --strip=1 --input=$(COLEMAK-DH)/mainline.diff
+endif
 
 skip: ;
 
