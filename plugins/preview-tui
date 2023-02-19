@@ -146,10 +146,20 @@ for env in $ENVVARS; do
     esac
 done; unset IFS
 
+trap '' PIPE
 exists() { type "$1" >/dev/null 2>&1 ;}
 pkill() { command pkill "$@" >/dev/null 2>&1 ;}
-pidkill() { [ -f "$1" ] && kill "$(cat "$1" 2>/dev/null)" >/dev/null 2>&1 ;}
 prompt() { printf "%b" "$@"; cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg" ;}
+pidkill() {
+	if [ -f "$1" ]; then
+		PID="$(cat "$1" 2>/dev/null)" || return 1
+		kill "$PID" >/dev/null 2>&1
+		RET=$?
+		wait "$PID" 2>/dev/null
+		return $RET
+	fi
+	return 1
+}
 
 start_preview() {
     case "$NNN_TERMINAL" in
