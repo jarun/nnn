@@ -1,26 +1,28 @@
-# Description: Change key bindings for comfortable use with Colemak keyboard
-#              layout. This diff was made in 4.7 release version of nnn.
+# Description: Change key bindings for comfortable use with Colemak-DH keyboard
+#              layout. This diff was made in 4.5 release version of nnn.
 #
-# Author: github.com/jacmoe
+# Author: github.com/anjerukare
+
 diff --git a/src/nnn.c b/src/nnn.c
-index b351e202..71193476 100644
+index b821f808..87ebfbbf 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -5050,32 +5050,32 @@ static void show_help(const char *path)
+@@ -5050,40 +5050,40 @@ static void show_help(const char *path)
  	const char helpstr[] = {
  	"0\n"
  	"1NAVIGATION\n"
 -	       "9Up k  Up%-16cPgUp ^U  Page up\n"
 -	       "9Dn j  Down%-14cPgDn ^D  Page down\n"
-+	       "9Up e  Up%-16cPgUp ^U  Page up\n"
-+	       "9Dn n  Down%-14cPgDn ^D  Page down\n"
- 	       "9Lt h  Parent%-12c~ ` @ -  ~, /, start, prev\n"
+-	       "9Lt h  Parent%-12c~ ` @ -  ~, /, start, prev\n"
 -	   "5Ret Rt l  Open%-20c'  First file/match\n"
 -	       "9g ^A  Top%-21cJ  Jump to entry/offset\n"
 -	       "9G ^E  End%-20c^J  Toggle auto-advance on open\n"
++	       "9Up e  Up%-16cPgUp ^U  Page up\n"
++	       "9Dn n  Down%-14cPgDn ^D  Page down\n"
++	       "9Lt m  Parent%-12c~ ` @ -  ~, /, start, prev\n"
 +	   "5Ret Rt i  Open%-20c'  First file/match\n"
 +	       "9g ^E  Top%-21cJ  Jump to entry/offset\n"
-+	       "9G ^N  End%-20c^J  Toggle auto-advance on open\n"
++	       "9G ^N  End%-20c^J  Toggle auto-jump on open\n"
  	      "8B (,)  Book(mark)%-11cb ^/  Select bookmark\n"
  		"a1-4  Context%-11c(Sh)Tab  Cycle/new context\n"
  	    "62Esc ^Q  Quit%-20cq  Quit context\n"
@@ -28,19 +30,21 @@ index b351e202..71193476 100644
  	"0\n"
  	"1FILTER & PROMPT\n"
 -		  "c/  Filter%-17c^N  Toggle type-to-nav\n"
-+		  "c/  Filter%-17c^M  Toggle type-to-nav\n"
++		  "c/  Filter%-17c^F  Toggle type-to-nav\n"
  		"aEsc  Exit prompt%-12c^L  Toggle last filter\n"
  		  "c.  Toggle hidden%-5cAlt+Esc  Unfilter, quit context\n"
  	"0\n"
  	"1FILES\n"
 -	       "9o ^O  Open with%-15cn  Create new/link\n"
+-	       "9f ^F  File stats%-14cd  Detail mode toggle\n"
 +	       "9o ^O  Open with%-15cc  Create new/link\n"
- 	       "9f ^F  File stats%-14cd  Detail mode toggle\n"
++	          "cf  File stats%-14cd  Detail mode toggle\n"
  		 "b^R  Rename/dup%-14cr  Batch rename\n"
 -		  "cz  Archive%-17ce  Edit file\n"
 +		  "cz  Archive%-17cy  Edit file\n"
  		  "c*  Toggle exe%-14c>  Export list\n"
- 	    "6Space +  (Un)select%-12cm-m  Select range/clear\n"
+-	    "6Space +  (Un)select%-12cm-m  Select range/clear\n"
++	    "6Space +  (Un)select%-12cs-s  Select range/clear\n"
  	          "ca  Select all%-14cA  Invert sel\n"
  	       "9p ^P  Copy here%-12cw ^W  Cp/mv sel as\n"
 -	       "9v ^V  Move here%-15cE  Edit sel list\n"
@@ -48,11 +52,28 @@ index b351e202..71193476 100644
  	       "9x ^X  Delete%-18cS  Listed sel size\n"
  		"aEsc  Send to FIFO\n"
  	"0\n"
+ 	"1MISC\n"
+ 	      "8Alt ;  Select plugin%-11c=  Launch app\n"
+ 	       "9! ^]  Shell%-19c]  Cmd prompt\n"
+-		  "cc  Connect remote%-10cu  Unmount remote/archive\n"
+-	       "9t ^T  Sort toggles%-12cs  Manage session\n"
++		  "ch  Connect remote%-10cu  Unmount remote/archive\n"
++	       "9t ^T  Sort toggles%-12ck  Manage session\n"
+ 		  "cT  Set time type%-11c0  Lock\n"
+ 		 "b^L  Redraw%-18c?  Help, conf\n"
+ 	};
 diff --git a/src/nnn.h b/src/nnn.h
-index 3e4ea19c..b0eb7cdb 100644
+index 3e4ea19c..c81ef392 100644
 --- a/src/nnn.h
 +++ b/src/nnn.h
-@@ -137,12 +137,12 @@ static struct key bindings[] = {
+@@ -131,18 +131,18 @@ struct key {
+ static struct key bindings[] = {
+ 	/* Back */
+ 	{ KEY_LEFT,       SEL_BACK },
+-	{ 'h',            SEL_BACK },
++	{ 'm',            SEL_BACK },
+ 	/* Inside or select */
+ 	{ KEY_ENTER,      SEL_OPEN },
  	{ '\r',           SEL_OPEN },
  	/* Pure navigate inside */
  	{ KEY_RIGHT,      SEL_NAV_IN },
@@ -82,16 +103,39 @@ index 3e4ea19c..b0eb7cdb 100644
  	/* Go to first file */
  	{ '\'',           SEL_FIRST },
  	/* Jump to an entry number/offset */
-@@ -199,7 +199,7 @@ static struct key bindings[] = {
+@@ -176,7 +176,7 @@ static struct key bindings[] = {
+ 	{ 'b',            SEL_BMOPEN },
+ 	{ CONTROL('_'),   SEL_BMOPEN },
+ 	/* Connect to server over SSHFS */
+-	{ 'c',            SEL_REMOTE },
++	{ 'h',            SEL_REMOTE },
+ 	/* Cycle contexts in forward direction */
+ 	{ '\t',           SEL_CYCLE },
+ 	/* Cycle contexts in reverse direction */
+@@ -199,14 +199,13 @@ static struct key bindings[] = {
  	/* Filter */
  	{ '/',            SEL_FLTR },
  	/* Toggle filter mode */
 -	{ CONTROL('N'),   SEL_MFLTR },
-+	{ CONTROL('M'),   SEL_MFLTR },
++	{ CONTROL('F'),   SEL_MFLTR },
  	/* Toggle hide .dot files */
  	{ '.',            SEL_HIDDEN },
  	/* Detailed listing */
-@@ -226,7 +226,7 @@ static struct key bindings[] = {
+ 	{ 'd',            SEL_DETAIL },
+ 	/* File details */
+ 	{ 'f',            SEL_STATS },
+-	{ CONTROL('F'),   SEL_STATS },
+ 	/* Toggle executable status */
+ 	{ '*',            SEL_CHMODX },
+ 	/* Create archive */
+@@ -220,13 +219,13 @@ static struct key bindings[] = {
+ 	{ ' ',            SEL_SEL },
+ 	{ '+',            SEL_SEL },
+ 	/* Toggle select multiple files */
+-	{ 'm',            SEL_SELMUL },
++	{ 's',            SEL_SELMUL },
+ 	/* Select all files in current dir */
+ 	{ 'a',            SEL_SELALL },
  	/* Invert selection in current dir */
  	{ 'A',            SEL_SELINV },
  	/* List, edit selection */
@@ -100,7 +144,7 @@ index 3e4ea19c..b0eb7cdb 100644
  	/* Copy from selection buffer */
  	{ 'p',            SEL_CP },
  	{ CONTROL('P'),   SEL_CP },
-@@ -243,7 +243,7 @@ static struct key bindings[] = {
+@@ -243,7 +242,7 @@ static struct key bindings[] = {
  	{ 'o',            SEL_OPENWITH },
  	{ CONTROL('O'),   SEL_OPENWITH },
  	/* Create a new file */
@@ -109,7 +153,7 @@ index 3e4ea19c..b0eb7cdb 100644
  	/* Show rename prompt */
  	{ CONTROL('R'),   SEL_RENAME },
  	/* Rename contents of current dir */
-@@ -255,7 +255,7 @@ static struct key bindings[] = {
+@@ -255,7 +254,7 @@ static struct key bindings[] = {
  	/* Toggle auto-advance on file open */
  	{ CONTROL('J'),   SEL_AUTONEXT },
  	/* Edit in EDITOR */
@@ -118,3 +162,12 @@ index 3e4ea19c..b0eb7cdb 100644
  	/* Run a plugin */
  	{ ';',            SEL_PLUGIN },
  	/* Show total size of listed selection */
+@@ -270,7 +269,7 @@ static struct key bindings[] = {
+ 	/* Lock screen */
+ 	{ '0',            SEL_LOCK },
+ 	/* Manage sessions */
+-	{ 's',            SEL_SESSIONS },
++	{ 'k',            SEL_SESSIONS },
+ 	/* Export list */
+ 	{ '>',            SEL_EXPORT },
+ 	/* Set time type */
