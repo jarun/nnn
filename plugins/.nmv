@@ -37,8 +37,6 @@ esac
 
 exit_status=0
 
-dst_file=$(mktemp "$TMPDIR/.nnnXXXXXX")
-
 if nnn_use_selection "Rename"; then
 	# shellcheck disable=SC2154
 	arr=$(tr '\0' '\n' < "$selection")
@@ -64,6 +62,9 @@ fi
 
 lines=$(printf "%s\n" "$arr" | wc -l)
 width=${#lines}
+
+dst_file=$(mktemp "$TMPDIR/.nnnXXXXXX")
+trap 'rm -f "$dst_file"' EXIT
 
 printf "%s" "$arr" | awk '{printf("%'"${width}"'d %s\n", NR, $0)}' > "$dst_file"
 
@@ -170,5 +171,4 @@ for item in "${items[@]}"; do
 	$RM_UTIL "$item"
 done
 
-rm "$dst_file"
 exit $exit_status
