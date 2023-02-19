@@ -148,7 +148,7 @@ done; unset IFS
 
 exists() { type "$1" >/dev/null 2>&1 ;}
 pkill() { command pkill "$@" >/dev/null 2>&1 ;}
-pidkill() { [ -f "$1" ] && kill "$(cat "$1" 2>/dev/null)" >/dev/null 2>&1 ;}
+pidkill() { [ -f "$1" ] && kill -2 "$(cat "$1" 2>/dev/null)" >/dev/null 2>&1 ;}
 prompt() { printf "%b" "$@"; cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg" ;}
 
 start_preview() {
@@ -215,6 +215,7 @@ fifo_pager() {
     mkfifo "$FIFOPATH" || return
 
     $NNN_PAGER < "$FIFOPATH" &
+    printf "%s" "$!" > "$PREVIEWPID"
 
     (
         exec > "$FIFOPATH"
