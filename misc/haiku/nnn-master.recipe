@@ -12,7 +12,7 @@ Cygwin, WSL, Haiku and works seamlessly with DEs and GUI utilities.
 
 Visit the Wiki for concepts, program usage, how-tos and troubleshooting."
 HOMEPAGE="https://github.com/jarun/nnn"
-COPYRIGHT="2016-2022 Arun Prakash Jana"
+COPYRIGHT="2016-2023 Arun Prakash Jana"
 LICENSE="BSD (2-clause)"
 REVISION="1"
 SOURCE_URI="git://github.com/jarun/nnn.git"
