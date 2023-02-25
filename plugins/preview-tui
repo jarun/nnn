@@ -263,7 +263,7 @@ handle_mime() {
         video/*) generate_preview "$cols" "$lines" "$1" "video" ;;
         audio/*) generate_preview "$cols" "$lines" "$1" "audio" ;;
         application/font*|application/*opentype|font/*) generate_preview "$cols" "$lines" "$1" "font" ;;
-        */*office*|*/*document*) generate_preview "$cols" "$lines" "$1" "office" ;;
+        */*office*|*/*document*|*/*msword|*/*ms-excel) generate_preview "$cols" "$lines" "$1" "office" ;;
         application/zip) fifo_pager unzip -l "$1" ;;
         text/troff)
             if exists man; then
