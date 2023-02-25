@@ -1330,7 +1330,7 @@ static void xterm_cfg(char *path)
 }
 #endif
 
-static void convert_tilde(const char *path, char *buf)
+static bool convert_tilde(const char *path, char *buf)
 {
 	if (tilde_is_home(path)) {
 		ssize_t len = xstrlen(home);
@@ -1338,7 +1338,9 @@ static void convert_tilde(const char *path, char *buf)
 
 		xstrsncpy(buf, home, len + 1);
 		xstrsncpy(buf + len, path + 1, loclen);
+		return true;
 	}
+	return false;
 }
 
 static int create_tmp_file(void)
@@ -2762,13 +2764,14 @@ static void archive_selection(const char *cmd, const char *archive)
 
 static void write_lastdir(const char *curpath, const char *outfile)
 {
+	bool tilde = false;
 	if (!outfile)
 		xstrsncpy(cfgpath + xstrlen(cfgpath), "/.lastd", 8);
 	else
-		convert_tilde(outfile, g_buf);
+		tilde = convert_tilde(outfile, g_buf);
 
 	int fd = open(outfile
-			? (tilde_is_home(outfile) ? g_buf : outfile)
+			? (tilde ? g_buf : outfile)
 			: cfgpath, O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR | S_IRUSR);
 
 	if (fd != -1) {
@@ -3836,8 +3839,8 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
 				return pluginstr + kvarr[r].off;
 
 			val = bmstr + kvarr[r].off;
-			convert_tilde(val, g_buf);
-			return abspath((tilde_is_home(val) ? g_buf : val), NULL, buf);
+			bool tilde = convert_tilde(val, g_buf);
+			return abspath((tilde ? g_buf : val), NULL, buf);
 		}
 	}
 
