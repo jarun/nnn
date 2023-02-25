@@ -1127,6 +1127,11 @@ static inline bool getutil(char *util)
 	return spawn("which", util, NULL, NULL, F_NORMAL | F_NOTRACE) == 0;
 }
 
+static inline bool tilde_is_home(const char *s)
+{
+	return s[0] == '~' && (s[1] == '\0' || s[1] == '/');
+}
+
 /*
  * Updates out with "dir/name or "/name"
  * Returns the number of bytes copied including the terminating NULL byte
@@ -1137,16 +1142,10 @@ static size_t mkpath(const char *dir, const char *name, char *out)
 {
 	size_t len = 0;
 
-	if (name[0] == '~') { //NOLINT
+	if (tilde_is_home(name)) { //NOLINT
 		len = xstrsncpy(out, home, PATH_MAX);
 		if (!name[1])
 			return len;
-
-		if (name[1] != '/') {
-			out[0] = '\0';
-			return 0;
-		}
-
 		--len;
 		++name;
 	} else if (name[0] != '/') { // NOLINT
@@ -1213,7 +1212,7 @@ static char *abspath(const char *filepath, char *cwd, char *buf)
 	if (!path)
 		return NULL;
 
-	if (path[0] == '~') {
+	if (tilde_is_home(path)) {
 		cwd = home;
 		++path;
 		if (*path == '/')
@@ -1333,7 +1332,7 @@ static void xterm_cfg(char *path)
 
 static void convert_tilde(const char *path, char *buf)
 {
-	if (path[0] == '~') {
+	if (tilde_is_home(path)) {
 		ssize_t len = xstrlen(home);
 		ssize_t loclen = xstrlen(path);
 
@@ -2769,7 +2768,7 @@ static void write_lastdir(const char *curpath, const char *outfile)
 		convert_tilde(outfile, g_buf);
 
 	int fd = open(outfile
-			? (outfile[0] == '~' ? g_buf : outfile)
+			? (tilde_is_home(outfile) ? g_buf : outfile)
 			: cfgpath, O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR | S_IRUSR);
 
 	if (fd != -1) {
@@ -3838,7 +3837,7 @@ static char *get_kv_val(kv *kvarr, char *buf, int key, uchar_t max, uchar_t id)
 
 			val = bmstr + kvarr[r].off;
 			convert_tilde(val, g_buf);
-			return abspath(((val[0] == '~') ? g_buf : val), NULL, buf);
+			return abspath((tilde_is_home(val) ? g_buf : val), NULL, buf);
 		}
 	}
 
@@ -8297,7 +8296,7 @@ static bool setup_config(void)
 	/* Set up configuration file paths */
 	if (xdgcfg && xdgcfg[0]) {
 		DPRINTF_S(xdgcfg);
-		if (xdgcfg[0] == '~') {
+		if (tilde_is_home(xdgcfg)) {
 			r = xstrsncpy(g_buf, home, PATH_MAX);
 			xstrsncpy(g_buf + r - 1, xdgcfg + 1, PATH_MAX);
 			xdgcfg = g_buf;
