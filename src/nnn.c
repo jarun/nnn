@@ -1132,6 +1132,11 @@ static inline bool tilde_is_home(const char *s)
 	return s[0] == '~' && (s[1] == '\0' || s[1] == '/');
 }
 
+static inline bool tilde_is_home_strict(const char *s)
+{
+	return s[0] == '~' && s[1] == '/';
+}
+
 /*
  * Updates out with "dir/name or "/name"
  * Returns the number of bytes copied including the terminating NULL byte
@@ -1142,10 +1147,8 @@ static size_t mkpath(const char *dir, const char *name, char *out)
 {
 	size_t len = 0;
 
-	if (tilde_is_home(name)) { //NOLINT
+	if (tilde_is_home_strict(name)) { //NOLINT
 		len = xstrsncpy(out, home, PATH_MAX);
-		if (!name[1])
-			return len;
 		--len;
 		++name;
 	} else if (name[0] != '/') { // NOLINT
@@ -1212,11 +1215,9 @@ static char *abspath(const char *filepath, char *cwd, char *buf)
 	if (!path)
 		return NULL;
 
-	if (tilde_is_home(path)) {
+	if (tilde_is_home_strict(path)) {
 		cwd = home;
-		++path;
-		if (*path == '/')
-			++path;
+		path += 2; /* advance 2 bytes past the "~/" */
 	} else if ((path[0] != '/') && !cwd) {
 		cwd = getcwd(NULL, 0);
 		if (!cwd)
