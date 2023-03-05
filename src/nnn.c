@@ -1147,6 +1147,7 @@ static size_t mkpath(const char *dir, const char *name, char *out)
 {
 	size_t len = 0;
 
+	/* same rational for being strict as abspath() */
 	if (tilde_is_home_strict(name)) { //NOLINT
 		len = xstrsncpy(out, home, PATH_MAX);
 		--len;
@@ -1215,6 +1216,9 @@ static char *abspath(const char *filepath, char *cwd, char *buf)
 	if (!path)
 		return NULL;
 
+	/* when dealing with tilde, we need to be strict.
+	 * otherwise a file named "~" can end up expanding to
+	 * $HOME and causing disaster */
 	if (tilde_is_home_strict(path)) {
 		cwd = home;
 		path += 2; /* advance 2 bytes past the "~/" */
