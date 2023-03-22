@@ -131,6 +131,10 @@ elif [ "$NNN_SPLIT" != 'h' ]; then
     NNN_SPLIT='v'
 fi
 
+sh_escape() {
+    printf "%s" "$1" | sed "s|'|'\\\''|g;s|^|'|;s|$|'|"
+}
+
 ENVVARS="$ENVVARS
 NNN_SPLIT=$NNN_SPLIT
 NNN_TERMINAL=$NNN_TERMINAL"
@@ -139,8 +143,8 @@ IFS='
 for env in $ENVVARS; do
     export "${env?}"
     case "$NNN_TERMINAL" in
-        tmux) ENVSTRING="$ENVSTRING -e '$env'" ;;
-        kitty) ENVSTRING="$ENVSTRING --env '$env'" ;;
+        tmux) ENVSTRING="$ENVSTRING -e $(sh_escape "$env")" ;;
+        kitty) ENVSTRING="$ENVSTRING --env $(sh_escape "$env")" ;;
         winterm|iterm) ENVSTRING="$ENVSTRING \\\"$env\\\"" ;;
         *) ENVSTRING="$ENVSTRING $env";;
     esac
@@ -165,12 +169,14 @@ start_preview() {
     case "$NNN_TERMINAL" in
         tmux) # tmux splits are inverted
             if [ "$NNN_SPLIT" = "v" ]; then split="h"; else split="v"; fi
-            eval tmux split-window "$ENVSTRING" -d"$split" -p"$NNN_SPLITSIZE" "$0" "$1" 1 ;;
+            eval tmux split-window "$ENVSTRING" -d"$split" -p"$NNN_SPLITSIZE" \
+                "$0" "$(sh_escape "$1")" 1 ;;
         kitty) # Setting the layout for the new window. It will be restored after the script ends.
             kitty @ goto-layout splits
             # Trying to use kitty's integrated window management as the split window.
             eval kitty @ launch --no-response --title "preview-tui" --keep-focus \
-                --cwd "$PWD" "$ENVSTRING" --location "${NNN_SPLIT}split" "$0" "$1" 1 ;;
+                --cwd "$(sh_escape "$PWD")" "$ENVSTRING" --location "${NNN_SPLIT}split" \
+                "$0" "$(sh_escape "$1")" 1 ;;
         wezterm)
             if [ "$NNN_SPLIT" = "v" ]; then split="--horizontal"; else split="--bottom"; fi
             wezterm cli split-pane --cwd "$PWD" $split "$0" "$1" 1 >/dev/null
