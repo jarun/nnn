@@ -1299,6 +1299,42 @@ static char *abspath(const char *filepath, char *cwd, char *buf)
 	return resolved_path;
 }
 
+/* wraps the argument in single quotes so it can be safely fed to shell */
+static bool shell_escape(char *output, size_t outlen, const char *s)
+{
+	size_t n = xstrlen(s), w = 0;
+
+	if (s == output) {
+		DPRINTF_S("s == output");
+		return FALSE;
+	}
+
+	output[w++] = '\''; /* begin single quote */
+	for (size_t r = 0; r < n; ++r) {
+		/* potentially too big: 4 for the single quote case, 2 from
+		 * outside the loop */
+		if (w + 6 >= outlen)
+			return FALSE;
+
+		switch (s[r]) {
+		/* the only thing that has special meaning inside single
+		 * quotes are single quotes themselves. */
+		case '\'':
+			output[w++] = '\''; /* end single quote */
+			output[w++] = '\\'; /* put \' so it's treated as literal single quote */
+			output[w++] = '\'';
+			output[w++] = '\''; /* start single quoting again */
+			break;
+		default:
+			output[w++] = s[r];
+			break;
+		}
+	}
+	output[w++] = '\''; /* end single quote */
+	output[w++] = '\0'; /* nul terminator */
+	return TRUE;
+}
+
 static bool set_tilde_in_path(char *path)
 {
 	if (is_prefix(path, home, homelen)) {
@@ -2779,8 +2815,8 @@ static void write_lastdir(const char *curpath, const char *outfile)
 			? (tilde ? g_buf : outfile)
 			: cfgpath, O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR | S_IRUSR);
 
-	if (fd != -1) {
-		dprintf(fd, "cd \"%s\"", curpath);
+	if (fd != -1 && shell_escape(g_buf, sizeof(g_buf), curpath)) {
+		dprintf(fd, "cd %s", g_buf);
 		close(fd);
 	}
 }
