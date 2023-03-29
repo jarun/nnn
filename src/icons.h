@@ -309,6 +309,7 @@ static const struct icon_pair icons_ext[] = { /* All entries are case-insensitiv
 	{"js",         ICON_JAVASCRIPT,     COLOR_JAVASCRIPT},
 	{"json",       ICON_EXT_JSON,       COLOR_JAVASCRIPT},
 	{"jsx",        ICON_REACT,          COLOR_REACT},
+	{"jxl",        ICON_PICTUREFILE,    COLOR_IMAGE},
 
 	/* K */
 	{"ksh",        ICON_SCRIPT,         COLOR_SHELL},
