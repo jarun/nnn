@@ -4472,7 +4472,7 @@ static void set_smart_ctx(int ctx, char *nextpath, char **path, char *file, char
  *  1) fdout == -1 && !page: Write up to CMD_LEN_MAX bytes of command output into g_buf
  *  2) fdout == -1 && page: Create a temp file, write full command output into it and show in pager.
  *  3) fdout != -1 && !page: Write full command output into the provided file.
- *  4) fdout != -1 && page: Don't use! Returns FASLE.
+ *  4) fdout != -1 && page: Don't use! Returns FALSE.
  *
  * g_buf is modified only in case 1.
  * g_tmpfpath is modified only in case 2.
@@ -6460,7 +6460,7 @@ static void statusbar(char *path)
 	}
 
 	attroff(COLOR_PAIR(cfg.curctx + 1));
-	/* Plase HW cursor on current for Braille systems */
+	/* Place HW cursor on current for Braille systems */
 	tocursor();
 }
 
