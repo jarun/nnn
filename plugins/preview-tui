@@ -33,7 +33,7 @@
 #   - optional: glow or lowdown for markdown
 #   - optional: w3m or lynx or elinks for html
 #   - optional: set/export NNN_ICONLOOKUP as 1 to enable file icons in front of directory previews with .iconlookup
-#       Icons and colors are configureable in .iconlookup
+#       Icons and colors are configurable in .iconlookup
 #   - optional: scope.sh file viewer from ranger.
 #       1. drop scope.sh executable in $PATH
 #       2. set/export $NNN_SCOPE as 1
@@ -78,7 +78,7 @@
 #   Iterm2 users are recommended to use viu to view images without getting pixelated.
 #
 #   Windows Terminal users can set "Profile termination behavior" under "Profile > Advanced" settings
-#   to automaticaly close pane on quit when exit code is 0.
+#   to automatically close pane on quit when exit code is 0.
 #
 # Shell: POSIX compliant
 # Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal, @WanderLanz

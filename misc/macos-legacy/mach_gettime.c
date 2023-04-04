@@ -24,7 +24,7 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp)
 		double diff = (mach_absolute_time() - mt_timestart) * mt_timebase;
 		tp->tv_sec = diff * MT_NANO;
 		tp->tv_nsec = diff - (tp->tv_sec * MT_GIGA);
-	} else { // other clk_ids are mapped to the coresponding mach clock_service
+	} else { // other clk_ids are mapped to the corresponding mach clock_service
 		clock_serv_t cclock;
 		mach_timespec_t mts;
 

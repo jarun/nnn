@@ -117,7 +117,7 @@ nnn v4.3 Martini
 - add `bookmarks` directory for flexible symlinked bookmarks
 - new key <kbd>B</kbd> to add a symlinked bookmark for current dir
 - special variables `$dN`, `$fN` available for plugins/prompt/shell to access
-  dir/hovered file in each conext
+  dir/hovered file in each context
 - config `NNN_ORDER` to set directory-specific ordering
 - show/hide hidden files as per context state in plugin based batch rename
 - retain search filter history for plugin `finder`

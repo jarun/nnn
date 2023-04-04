@@ -2,7 +2,7 @@
 
 # Description: 'cd' to the directory from CDPATH
 #
-# Details: If the CDPATH environmet variable is not set, the default value of
+# Details: If the CDPATH environment variable is not set, the default value of
 #          ${XDG_CONFIG_HOME:-$HOME/.config}/nnn/bookmarks will be used.
 #          You can create this directory and fill it with symbolic links to your
 #          favorite directories. It's a good idea to add it to CDPATH so that it

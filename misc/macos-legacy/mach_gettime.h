@@ -18,7 +18,7 @@
 typedef int clockid_t;
 
 /* the mach kernel uses struct mach_timespec, so struct timespec
-	is loaded from <sys/_types/_timespec.h> for compatability */
+	is loaded from <sys/_types/_timespec.h> for compatibility */
 // struct timespec { time_t tv_sec; long tv_nsec; };
 
 int clock_gettime(clockid_t clk_id, struct timespec *tp);
