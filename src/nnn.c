@@ -707,19 +707,20 @@ static const char * const env_cfg[] = {
 };
 
 /* Required environment variables */
-#define ENV_SHELL  0
-#define ENV_VISUAL 1
-#define ENV_EDITOR 2
-#define ENV_PAGER  3
-#define ENV_NCUR   4
+#define ENVS \
+	X(ENV_SHELL, "SHELL") \
+	X(ENV_VISUAL, "VISUAL") \
+	X(ENV_EDITOR, "EDITOR") \
+	X(ENV_PAGER, "PAGER") \
+	X(ENV_NCUR, "nnn")
 
-static const char * const envs[] = {
-	"SHELL",
-	"VISUAL",
-	"EDITOR",
-	"PAGER",
-	"nnn",
-};
+#define X(ENUM, STRING) ENUM,
+enum { ENVS };
+#undef X
+
+#define X(ENUM, STRING) STRING,
+static const char * const envs[] = { ENVS };
+#undef X
 
 /* Time type used */
 #define T_ACCESS 0
@@ -738,17 +739,19 @@ static char mv[] = "mv -i";
 static char * const archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
 
 /* Tokens used for path creation */
-#define TOK_BM  0
-#define TOK_SSN 1
-#define TOK_MNT 2
-#define TOK_PLG 3
+#define TOK \
+	X(TOK_BM,  "bookmarks") \
+	X(TOK_SSN, "sessions") \
+	X(TOK_MNT, "mounts") \
+	X(TOK_PLG, "plugins") /* must be the last entry */
 
-static const char * const toks[] = {
-	"bookmarks",
-	"sessions",
-	"mounts",
-	"plugins", /* must be the last entry */
-};
+#define X(ENUM, STRING) ENUM,
+enum { TOK };
+#undef X
+
+#define X(ENUM, STRING) STRING,
+static const char * const toks[] = { TOK };
+#undef X
 
 /* Patterns */
 #define P_CPMVFMT 0
