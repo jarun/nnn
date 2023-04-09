@@ -15,10 +15,14 @@ printf "find: "
 read -r pattern
 
 if type plocate >/dev/null 2>&1; then
-    dest_path=$(plocate $pattern | fzf)
+    dest_path=$(plocate "$pattern" | fzf)
 else
-    dest_path=$(locate $pattern | fzf)
+    dest_path=$(locate "$pattern" | fzf)
 fi
 
-dest_dir=$(dirname "$dest_path")
+if [[ -f "$dest_path" ]]; then
+    dest_dir=$(dirname "$dest_path")
+else
+    dest_dir="$dest_path"
+fi
 nnn_cd "$dest_dir" 0
