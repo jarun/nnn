@@ -51,6 +51,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [openall](openall) | Open selected files together or one by one [✓] | bash | - |
 | [organize](organize) | Auto-organize files in directories by file type [✓] | sh | file |
 | [pdfread](pdfread) | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
+| [plocate](plocate) | Find files using locate/plocate and cd to their path with fzf| sh | locate/plocate, fzf|
 | [preview-tabbed](preview-tabbed) | Preview files with Tabbed/xembed | bash | _see in-file docs_ |
 | [preview-tui](preview-tui) | Preview with Tmux/kitty/[QuickLook](https://github.com/QL-Win/QuickLook)/xterm/`$TERMINAL` | sh | _see in-file docs_ |
 | [pskill](pskill) | Fuzzy list by name and kill process or zombie | sh | fzf, ps, sudo/doas |

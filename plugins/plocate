@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+
+# Description: Find files using locate/plocate and cd to their directory
+#
+# Dependencies: fzf, locate/plocate
+#
+# Note: Plugin automatically fallbacks to locate in absence of plocate
+#
+# Shell: POSIX compliant
+# Author: Jakub Nawalaniec
+
+. "$(dirname "$0")"/.nnn-plugin-helper
+
+printf "find: "
+read -r pattern
+
+if type plocate >/dev/null 2>&1; then
+    dest_path=$(plocate $pattern | fzf)
+else
+    dest_path=$(locate $pattern | fzf)
+fi
+
+dest_dir=$(dirname "$dest_path")
+nnn_cd "$dest_dir" 0
