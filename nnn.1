@@ -59,7 +59,7 @@ to see the list of keybinds.
 supports the following options:
 .Pp
 .Fl a
-        auto-setup temporary NNN_FIFO (described in ENVIRONMENT section)
+        auto-setup temporary \fBNNN_FIFO\fR (described in \fIENVIRONMENT\fR section)
 .Pp
 .Fl A
         disable directory auto-enter on unique filter match
@@ -369,17 +369,17 @@ selected entries from the listed results.
 .Sh BOOKMARKS
 There are 2 ways (can be used together) to manage bookmarks.
 .Pp
-(1) Bookmark keys: See \fINNN_BMS\fR under \fIENVIORNMENT\fR section on how to set
+(1) Bookmark keys: See \fBNNN_BMS\fR under \fIENVIORNMENT\fR section on how to set
     bookmark keys.
 
-    The select bookmark key \fIb\fR lists all the bookmark keys set in \fINNN_BMS\fR
+    The select bookmark key \fIb\fR lists all the bookmark keys set in \fBNNN_BMS\fR
     in the bookmarks prompt.
 .Pp
 (2) Symlinked bookmarks: A symlinked bookmark to the current directory can
     be created with the \fIB\fR key (or manually under ~/.config/nnn/bookmarks).
 
     Pressing 'Enter' at the bookmarks prompt takes to this directory.
-    If \fINNN_BMS\fR is not set, the select bookmark key directly opens it.
+    If \fBNNN_BMS\fR is not set, the select bookmark key directly opens it.
 .Pp
 On entering a bookmark, the directory where the select bookmark key was
 pressed is set as the previous directory. Press '-' to return to it.
@@ -540,6 +540,11 @@ separated by \fI;\fR:
     NOTE: Non-default formats may require a third-party utility.
 .Ed
 .Pp
+\fBNNN_ARCHMNT:\fR optional archive mounter utility (default: archivemount).
+.Bd -literal
+    export NNN_ARCHIVE='fuse-archive'
+.Ed
+.Pp
 \fBNNN_SSHFS:\fR specify custom sshfs command with options:
 .Bd -literal
     export NNN_SSHFS='sshfs -o reconnect,idmap=user,cache_timeout=3600'
@@ -561,6 +566,9 @@ separated by \fI;\fR:
 .Ed
 .Pp
 \fBNNN_SEL:\fR absolute path to custom selection file.
+.Bd -literal
+    export NNN_SEL='/tmp/.sel'
+.Ed
 .Pp
 \fBNNN_FIFO:\fR path of a named pipe to write the hovered file path:
 .Bd -literal

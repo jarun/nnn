@@ -536,6 +536,7 @@ static runstate g_state;
 #define UTIL_TRASH_CLI 18
 #define UTIL_GIO_TRASH 19
 #define UTIL_RM_RF     20
+#define UTIL_ARCHMNT   21
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -576,6 +577,7 @@ static char * const utils[] = {
 	"trash-put",
 	"gio trash",
 	"rm -rf",
+	"archivemount",
 };
 
 /* Common strings */
@@ -4800,14 +4802,13 @@ static void valid_parent(char *path, char *lastname)
 
 static bool archive_mount(char *newpath)
 {
-	char *str = "install archivemount";
-	char *dir, *cmd = str + 8; /* Start of "archivemount" */
+	char *dir, *cmd = xgetenv("NNN_ARCHMNT", utils[UTIL_ARCHMNT]);
 	char *name = pdents[cur].name;
 	size_t len = pdents[cur].nlen;
 	char mntpath[PATH_MAX];
 
 	if (!getutil(cmd)) {
-		printmsg(str);
+		printmsg("install utility");
 		return FALSE;
 	}
 
