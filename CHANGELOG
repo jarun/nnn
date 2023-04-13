@@ -1,3 +1,28 @@
+nnn v4.8 Spritz
+2023-04-13
+
+- show total size (key <kbd>S</kbd>) of non-filtered selection in a directory
+- fix tilde (~) handling in file name
+- plugin `.nmv` now respects `-u` flag
+- env var `$NNN_PREFER_SELECTION` exported to all plugins
+- support for wezterm in `preview-tui`
+- create new file or directory (tree) on startup
+- run command as plugin now supports exported variables
+- use `"$nnn"` anywhere when running command as plugin
+- set defaults for some prompts on <kbd>Enter</kbd>
+- improve archive, rename and create new workflows
+- optimize link creation
+- allow overwriting regular files on new empty file creation
+- add patch for colemak keyboard (existing renamed to colemak-dh)
+- add correct check for Wayland in clipboard plugins
+- add quitcd script for nushell
+- plugin `kdeconnect` - send multiple files
+- plugin `preview-tui`: add `chafa` as preferred image viewer, multiple fixes
+- plugin `nmount` - misc. improvements
+- add icon for jxl files
+
+-------------------------------------------------------------------------------
+
 nnn v4.7 Cuba libre
 2022-11-24
 
