@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Description: Terminal based file previewer
 #
@@ -89,27 +89,29 @@ NNN_SPLITSIZE=${NNN_SPLITSIZE:-50} # Set previewer split size percentage
 TMPDIR=${TMPDIR:-/tmp}
 NNN_PARENT=${NNN_FIFO#*.}
 [ "$NNN_PARENT" -eq "$NNN_PARENT" ] 2>/dev/null || NNN_PARENT="" # Make empty if non-numeric
-ENVVARS="
-PWD=$PWD
-PATH=$PATH
-PREVIEW_MODE=$2
-NNN_FIFO=$NNN_FIFO
-NNN_SCOPE=${NNN_SCOPE:-0}
-NNN_PISTOL=${NNN_PISTOL:-0}
-NNN_ICONLOOKUP=${NNN_ICONLOOKUP:-0}
-NNN_PAGER=${NNN_PAGER:-less -P?n -R}
-NNN_BATTHEME=${NNN_BATTHEME:-ansi}
-NNN_BATSTYLE=${NNN_BATSTYLE:-numbers}
-NNN_PREVIEWWIDTH=${NNN_PREVIEWWIDTH:-1920}
-NNN_PREVIEWHEIGHT=${NNN_PREVIEWHEIGHT:-1080}
-NNN_PREVIEWDIR=${NNN_PREVIEWDIR:-$TMPDIR/nnn/previews}
-NNN_PREVIEWIMGPROG=${NNN_PREVIEWIMGPROG:-}
-FIFOPID=$TMPDIR/nnn-preview-tui-fifopid.$NNN_PARENT
-FIFOPATH=$TMPDIR/nnn-preview-tui-fifo.$NNN_PARENT
-PREVIEWPID=$TMPDIR/nnn-preview-tui-previewpid.$NNN_PARENT
-CURSEL=$TMPDIR/nnn-preview-tui-selection.$NNN_PARENT
-FIFO_UEBERZUG=$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NNN_PARENT
-POSOFFSET=$TMPDIR/nnn-preview-tui-posoffset"
+ENVVARS=(
+  "PWD=$PWD"
+  "PATH=$PATH"
+  "PREVIEW_MODE=$2"
+  "NNN_FIFO=$NNN_FIFO"
+  "NNN_SCOPE=${NNN_SCOPE:-0}"
+  "NNN_PISTOL=${NNN_PISTOL:-0}"
+  "NNN_ICONLOOKUP=${NNN_ICONLOOKUP:-0}"
+  "NNN_PAGER=${NNN_PAGER:-less -P?n -R}"
+  "NNN_BATTHEME=${NNN_BATTHEME:-ansi}"
+  "NNN_BATSTYLE=${NNN_BATSTYLE:-numbers}"
+  "NNN_PREVIEWWIDTH=${NNN_PREVIEWWIDTH:-1920}"
+  "NNN_PREVIEWHEIGHT=${NNN_PREVIEWHEIGHT:-1080}"
+  "NNN_PREVIEWDIR=${NNN_PREVIEWDIR:-$TMPDIR/nnn/previews}"
+  "NNN_PREVIEWIMGPROG=${NNN_PREVIEWIMGPROG:-}"
+  "FIFOPID=$TMPDIR/nnn-preview-tui-fifopid.$NNN_PARENT"
+  "FIFOPATH=$TMPDIR/nnn-preview-tui-fifo.$NNN_PARENT"
+  "PREVIEWPID=$TMPDIR/nnn-preview-tui-previewpid.$NNN_PARENT"
+  "CURSEL=$TMPDIR/nnn-preview-tui-selection.$NNN_PARENT"
+  "FIFO_UEBERZUG=$TMPDIR/nnn-preview-tui-ueberzug-fifo.$NNN_PARENT"
+  "FIFO_OSASCRIPT=$TMPDIR/nnn-preview-tui-osascript-fifo.$NNN_PARENT"
+  "POSOFFSET=$TMPDIR/nnn-preview-tui-posoffset"
+)
 
 if [ -e "${TMUX%%,*}" ] && tmux -V | grep -q '[ -][3456789]\.'; then
     NNN_TERMINAL=tmux
@@ -119,6 +121,7 @@ elif [ -n "$WEZTERM_PANE" ]; then
     NNN_TERMINAL=wezterm
 elif [ -z "$NNN_TERMINAL" ] && [ "$TERM_PROGRAM" = "iTerm.app" ]; then
     NNN_TERMINAL=iterm
+    mkfifo "$FIFO_OSASCRIPT" || exit 1
 elif [ -n "$WT_SESSION" ]; then
     NNN_TERMINAL=winterm
 else
@@ -131,20 +134,19 @@ elif [ "$NNN_SPLIT" != 'h' ]; then
     NNN_SPLIT='v'
 fi
 
-ENVVARS="$ENVVARS
-NNN_SPLIT=$NNN_SPLIT
-NNN_TERMINAL=$NNN_TERMINAL"
-IFS='
-'
-for env in $ENVVARS; do
+ENVVARS+=(
+  "NNN_SPLIT=$NNN_SPLIT"
+  "NNN_TERMINAL=$NNN_TERMINAL"
+)
+ENVARGS=()
+for env in "${ENVVARS[@]}"; do
     export "${env?}"
     case "$NNN_TERMINAL" in
-        tmux) ENVSTRING="$ENVSTRING -e '$env'" ;;
-        kitty) ENVSTRING="$ENVSTRING --env '$env'" ;;
-        winterm|iterm) ENVSTRING="$ENVSTRING \\\"$env\\\"" ;;
-        *) ENVSTRING="$ENVSTRING $env";;
+        tmux) ENVARGS+=(-e "$env") ;;
+        kitty) ENVARGS+=(--env "$env") ;;
+        winterm|iterm|*) ENVARGS+=("$env") ;;
     esac
-done; unset IFS
+done
 
 trap '' PIPE
 exists() { type "$1" >/dev/null 2>&1 ;}
@@ -165,35 +167,35 @@ start_preview() {
     case "$NNN_TERMINAL" in
         tmux) # tmux splits are inverted
             if [ "$NNN_SPLIT" = "v" ]; then split="h"; else split="v"; fi
-            eval tmux split-window "$ENVSTRING" -d"$split" -p"$NNN_SPLITSIZE" "$0" "$1" 1 ;;
+            tmux split-window "${ENVARGS[@]}" -d"$split" -p"$NNN_SPLITSIZE" "$0" "$1" 1 ;;
         kitty) # Setting the layout for the new window. It will be restored after the script ends.
             kitty @ goto-layout splits
             # Trying to use kitty's integrated window management as the split window.
-            eval kitty @ launch --no-response --title "preview-tui" --keep-focus \
-                --cwd "$PWD" "$ENVSTRING" --location "${NNN_SPLIT}split" "$0" "$1" 1 ;;
+            kitty @ launch --no-response --title "preview-tui" --keep-focus \
+                --cwd "$PWD" "${ENVARGS[@]}" --location "${NNN_SPLIT}split" "$0" "$1" 1 ;;
         wezterm)
             if [ "$NNN_SPLIT" = "v" ]; then split="--horizontal"; else split="--bottom"; fi
             wezterm cli split-pane --cwd "$PWD" $split --percent "$NNN_SPLITSIZE" "$0" "$1" 1 >/dev/null
             wezterm cli activate-pane-direction Prev ;;
         iterm)
-            command="$SHELL -c 'cd $PWD; env $ENVSTRING $0 $1 1'"
+            echo "cd ${PWD@Q}; env ${ENVARGS[*]@Q} ${0@Q} ${1@Q} 1" > "$FIFO_OSASCRIPT" &
             if [ "$NNN_SPLIT" = "h" ]; then split="horizontally"; else split="vertically"; fi
             osascript <<-EOF
             tell application "iTerm"
                 tell current session of current window
-                    split $split with default profile command "$command"
+                    split $split with default profile command "$SHELL $FIFO_OSASCRIPT"
                 end tell
             end tell
 EOF
             ;;
         winterm)
             if [ "$NNN_SPLIT" = "h" ]; then split="H"; else split="V"; fi
-            cmd.exe /c wt -w 0 sp -$split -s"0.$NNN_SPLITSIZE" bash -c "cd $PWD \; \
-                env $ENVSTRING QLPATH=$2 $0 $1 1" \; -w 0 mf previous 2>/dev/null ;;
+            wt -w 0 sp -$split -s"0.$NNN_SPLITSIZE" bash -c "cd ${PWD@Q} ; \
+                env ${ENVARGS[*]@Q} QLPATH=${2@Q} ${0@Q} ${1@Q} 1" \; -w 0 mf previous 2>/dev/null ;;
         *)  if [ -n "$2" ]; then
-                env "$ENVSTRING" QUICKLOOK=1 QLPATH="$2" "$0" "$1" 1 &
+                env "${ENVARGS[@]}" QUICKLOOK=1 QLPATH="$2" "$0" "$1" 1 &
             else
-                env "$ENVSTRING" "$NNN_TERMINAL" -e "$0" "$1" 1 &
+                env "${ENVARGS[@]}" "$NNN_TERMINAL" -e "$0" "$1" 1 &
             fi ;;
     esac
 }
