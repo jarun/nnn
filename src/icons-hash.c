@@ -21,17 +21,19 @@
  */
 #ifdef ICONS_GENERATE
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <limits.h>
 #include "icons.h"
 
-#ifdef NDEBUG
-	#error "The hash-table generator relies on assert() to verify correctness."
-#endif
-
-#define ASSERT(X) assert(X)
+/* like assert, but always sticks around during generation. */
+#define ENSURE(X) do { \
+	if (!(X)) { \
+		fprintf(stderr, "%s:%d: `%s`\n", __FILE__, __LINE__, #X); \
+		abort(); \
+	} \
+} while (0)
 #define ARRLEN(X) (sizeof(X) / sizeof((X)[0]))
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
 #define HGEN_ITERARATION (1ul << 13)
@@ -61,13 +63,13 @@ static uint32_t hash_mul = 251; /* unused as of now */
 static void
 rh_insert(const struct icon_pair item, uint32_t idx, uint32_t n)
 {
-	assert(n != 0);
+	ENSURE(n != 0);
 	for (uint32_t tries = 0; tries < ARRLEN(table); ++tries, ++n) {
 		if (seen[idx] < n) {
 			struct icon_pair tmp_item = table[idx];
 			uint32_t tmp_n = seen[idx];
 
-			assert(n < (uint8_t)-1);
+			ENSURE(n < (uint8_t)-1);
 			table[idx] = item;
 			seen[idx] = n;
 
@@ -77,7 +79,7 @@ rh_insert(const struct icon_pair item, uint32_t idx, uint32_t n)
 		}
 		idx = (idx + 1) % ARRLEN(table);
 	}
-	assert(0); /* unreachable */
+	ENSURE(0 && "unreachable");
 }
 
 enum { PROBE_MAX, PROBE_TOTAL, PROBE_CNT };
@@ -115,17 +117,17 @@ pcg(uint64_t *state)
 int
 main(void)
 {
-	assert(ARRLEN(icons_ext) <= ARRLEN(table));
-	assert(ICONS_TABLE_SIZE < 16);
-	assert(1u << ICONS_TABLE_SIZE == ARRLEN(table));
-	assert((GOLDEN_RATIO_32 & 1) == 1); /* must be odd */
-	assert((GOLDEN_RATIO_64 & 1) == 1); /* must be odd */
-	assert(hash_start > 1);
-	assert(hash_mul > 1);
+	ENSURE(ARRLEN(icons_ext) <= ARRLEN(table));
+	ENSURE(ICONS_TABLE_SIZE < 16);
+	ENSURE(1u << ICONS_TABLE_SIZE == ARRLEN(table));
+	ENSURE((GOLDEN_RATIO_32 & 1) == 1); /* must be odd */
+	ENSURE((GOLDEN_RATIO_64 & 1) == 1); /* must be odd */
+	ENSURE(hash_start > 1);
+	ENSURE(hash_mul > 1);
 	/* ensure power of 2 hashtable size which allows compiler to optimize
 	 * away mod (`%`) operations
 	 */
-	assert((ARRLEN(table) & (ARRLEN(table) - 1)) == 0);
+	ENSURE((ARRLEN(table) & (ARRLEN(table) - 1)) == 0);
 
 	unsigned int max_probe = (unsigned)-1;
 	uint32_t best_hash_start = 0, best_hash_mul = 0, best_total_probe = 9999;
@@ -144,13 +146,13 @@ main(void)
 		hash_start = pcg(&hash_start_rng);
 		hash_mul = pcg(&hash_mul_rng);
 	}
-	assert(max_probe < ICONS_PROBE_MAX_ALLOWED);
+	ENSURE(max_probe < ICONS_PROBE_MAX_ALLOWED);
 	hash_start = best_hash_start;
 	hash_mul = best_hash_mul;
 	{
 		unsigned *p = table_populate((unsigned [PROBE_CNT]){0});
-		assert(p[PROBE_MAX] == max_probe);
-		assert(p[PROBE_TOTAL] == best_total_probe);
+		ENSURE(p[PROBE_MAX] == max_probe);
+		ENSURE(p[PROBE_TOTAL] == best_total_probe);
 	}
 
 	/* sanity check */
@@ -168,10 +170,10 @@ main(void)
 				break;
 			}
 		}
-		assert(found);
+		ENSURE(found);
 		++nitems;
 	}
-	assert(total_probe == best_total_probe);
+	ENSURE(total_probe == best_total_probe);
 
 	size_t match_max = 0, icon_max = 0;
 	for (size_t i = 0; i < ARRLEN(icons_name); ++i) {
@@ -185,7 +187,7 @@ main(void)
 	icon_max = MAX(icon_max, strlen(dir_icon.icon) + 1);
 	icon_max = MAX(icon_max, strlen(exec_icon.icon) + 1);
 	icon_max = MAX(icon_max, strlen(file_icon.icon) + 1);
-	assert(icon_max < ICONS_MATCH_MAX);
+	ENSURE(icon_max < ICONS_MATCH_MAX);
 
 	const char *uniq[ARRLEN(icons_ext)] = {0};
 	size_t uniq_head = 0;
@@ -200,11 +202,11 @@ main(void)
 			}
 		}
 		if (isuniq) {
-			assert(uniq_head < ARRLEN(uniq));
+			ENSURE(uniq_head < ARRLEN(uniq));
 			uniq[uniq_head++] = icons_ext[i].icon;
 		}
 	}
-	assert(uniq_head < (unsigned char)-1);
+	ENSURE(uniq_head < (unsigned char)-1);
 
 	log("load-factor:  %.2f (%u/%zu)\n", (nitems * 100.0) / (double)ARRLEN(table),
 	    (unsigned int)nitems, ARRLEN(table));
@@ -248,7 +250,7 @@ main(void)
 			if (strcasecmp(table[i].icon, uniq[k]) == 0)
 				break;
 		}
-		assert(k < uniq_head);
+		ENSURE(k < uniq_head);
 		printf("\t[%3zu] = {\"%s\", %zu, %hhu },\n",
 		       i, table[i].match, k, table[i].color);
 	}
@@ -258,7 +260,7 @@ main(void)
 }
 
 #else
-	#define ASSERT(X) ((void)0)
+	#define ENSURE(X) ((void)0)
 #endif /* ICONS_GENERATE */
 
 #if defined(ICONS_GENERATE) || defined(ICONS_ENABLED)
@@ -282,7 +284,7 @@ icon_ext_hash(const char *str)
 	hash *= GOLDEN_RATIO_32;
 
 	hash >>= z;
-	ASSERT(hash < ARRLEN(table));
+	ENSURE(hash < ARRLEN(table));
 
 	return hash;
 }
