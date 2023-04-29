@@ -2992,7 +2992,7 @@ static int (*filterfn)(const fltrexp_t *fltr, const char *fname) = &visible_str;
 
 static void clearfilter(void)
 {
-	char *fltr = g_ctx[cfg.curctx].c_fltr;
+	char * const fltr = g_ctx[cfg.curctx].c_fltr;
 
 	if (fltr[1]) {
 		fltr[REGEX_MAX - 1] = fltr[1];
@@ -4455,6 +4455,7 @@ static void set_smart_ctx(int ctx, char *nextpath, char **path, char *file, char
 		ctx = (int)(get_free_ctx() + 1);
 
 	if (ctx == 0 || ctx == cfg.curctx + 1) { /* Same context */
+		clearfilter();
 		xstrsncpy(*lastdir, *path, PATH_MAX);
 		xstrsncpy(*path, nextpath, PATH_MAX);
 	} else { /* New context */
@@ -7898,9 +7899,9 @@ nochange:
 					xstrsncpy(runfile, pdents[cur].name, NAME_MAX);
 				g_state.runctx = cfg.curctx;
 				lastname[0] = '\0';
+				clearfilter();
 			}
 			setdirwatch();
-			clearfilter();
 			if (g_state.runplugin == 1) /* Allow filtering in plugins directory */
 				presel = FILTER;
 			goto begin;
