@@ -29,6 +29,7 @@ awk 'BEGIN {
     color_docs=202    #color_docs=173      #color_docs="208;135;112"
     color_archive=209 #color_archive=179   #color_archive="235;203;139"
     color_c=81        #color_c=150         #color_c="163;190;140"
+    color_elixir=104  #color_elixir=109    #color_elixir="143;188;187"
     color_java=32     #color_java=139      #color_java="180;142;173"
     color_js=47       #color_js=109        #color_js="143;188;187"
     color_react=39    #color_react=111     #color_react="129;161;193"
@@ -44,49 +45,53 @@ awk 'BEGIN {
 
 # icons[][1] contains icon and icons[][2] contains color
     icons["directory"][1] = ""; icons["directory"][2] = color_default
-    icons["file"][1] = ""; icons["file"][2] = color_default
+    icons["file"][1] = "󰈔"; icons["file"][2] = color_default
     icons["exec"][1] = ""; icons["exec"][2] = color_default
-    icons["manual"][1] = ""; icons["manual"][2] = color_docs
-    icons["pipe"][1] = "ﳣ"; icons["pipe"][2] = color_default
-    icons["socket"][1] = "ﳧ"; icons["socket"][2] = color_default
+    icons["manual"][1] = "󱓷"; icons["manual"][2] = color_docs
+    icons["pipe"][1] = "󰟥"; icons["pipe"][2] = color_default
+    icons["socket"][1] = "󰟩"; icons["socket"][2] = color_default
     icons["door"][1] = "➡"; icons["door"][2] = color_default
 
 # top level and common icons
     icons[".git"][1] = ""; icons[".git"][2] = color_default
-    icons["desktop"][1] = "ﲾ"; icons["desktop"][2] = color_default
-    icons["briefcase"][1] = ""; icons["briefcase"][2] = color_default
-    icons["document"][1] = ""; icons["document"][2] = color_default
-    icons["downloads"][1] = ""; icons["downloads"][2] = color_default
-    icons["music"][1] = ""; icons["music"][2] = color_default
-    icons["musicfile"][1] = ""; icons["musicfile"][2] = color_audio
-    icons["pictures"][1] = ""; icons["pictures"][2] = color_default
-    icons["picturefile"][1] = ""; icons["picturefile"][2] = color_image
+    icons["desktop"][1] = "󰟀"; icons["desktop"][2] = color_default
+    icons["briefcase"][1] = "󰃖"; icons["briefcase"][2] = color_default
+    icons["document"][1] = "󰃖"; icons["document"][2] = color_default
+    icons["downloads"][1] = "󰃘"; icons["downloads"][2] = color_default
+    icons["music"][1] = "󱍙"; icons["music"][2] = color_default
+    icons["musicfile"][1] = "󰎈"; icons["musicfile"][2] = color_audio
+    icons["pictures"][1] = "󰉔"; icons["pictures"][2] = color_default
+    icons["picturefile"][1] = "󰈟"; icons["picturefile"][2] = color_image
     icons["public"][1] = ""; icons["public"][2] = color_default
-    icons["templates"][1] = "陼"; icons["templates"][2] = color_default
-    icons["videos"][1] = ""; icons["videos"][2] = color_default
-    icons["videofile"][1] = "ﳜ"; icons["videofile"][2] = color_video
-    icons["changelog"][1] = ""; icons["changelog"][2] = color_docs
+    icons["templates"][1] = "󰗇"; icons["templates"][2] = color_default
+    icons["videos"][1] = "󰈰"; icons["videos"][2] = color_default
+    icons["videofile"][1] = "󰈫"; icons["videofile"][2] = color_video
+    icons["changelog"][1] = "󰋚"; icons["changelog"][2] = color_docs
     icons["configure"][1] = ""; icons["configure"][2] = color_default
-    icons["license"][1] = ""; icons["license"][2] = color_docs
-    icons["makefile"][1] = ""; icons["makefile"][2] = color_default
-    icons["archive"][1] = ""; icons["archive"][2] = color_archive
+    icons["license"][1] = "󰈙"; icons["license"][2] = color_docs
+    icons["makefile"][1] = "󰆍"; icons["makefile"][2] = color_default
+    icons["archive"][1] = "󰀼"; icons["archive"][2] = color_archive
+    icons["rust"][1] = ""; icons["rust"][2] = color_default
     icons["script"][1] = ""; icons["script"][2] = color_shell
+    icons["subtitle"][1] = "󰅺"; icons["subtitle"][2] = color_default
     icons["cplusplus"][1] = ""; icons["cplusplus"][2] = color_c
     icons["java"][1] = ""; icons["java"][2] = color_java
     icons["clojure"][1] = ""; icons["clojure"][2] = color_default
-    icons["js"][1] = ""; icons["js"][2] = color_js
-    icons["linux"][1] = ""; icons["linux"][2] = color_default
+    icons["js"][1] = "󰌞"; icons["js"][2] = color_js
+    icons["linux"][1] = "󰌽"; icons["linux"][2] = color_default
+    icons["elixir"][1] = ""; icons["elixir"][2] = color_fsharp
     icons["fsharp"][1] = ""; icons["fsharp"][2] = color_fsharp
     icons["ruby"][1] = ""; icons["ruby"][2] = color_ruby
     icons["c"][1] = ""; icons["c"][2] = color_c
-    icons["chess"][1] = ""; icons["chess"][2] = color_default
+    icons["chess"][1] = "󰄺"; icons["chess"][2] = color_default
     icons["haskell"][1] = ""; icons["haskell"][2] = color_vim
-    icons["html"][1] = ""; icons["html"][2] = color_default
+    icons["font"][1] = ""; icons["font"][2] = color_default
+    icons["html"][1] = "󰌝"; icons["html"][2] = color_default
     icons["react"][1] = ""; icons["react"][2] = color_react
     icons["python"][1] = ""; icons["python"][2] = color_python
-    icons["database"][1] = ""; icons["database"][2] = color_default
-    icons["worddoc"][1] = ""; icons["worddoc"][2] = color_document
-    icons["playlist"][1] = "蘿"; icons["playlist"][2] = color_audio
+    icons["database"][1] = "󰆼"; icons["database"][2] = color_default
+    icons["worddoc"][1] = "󰈬"; icons["worddoc"][2] = color_document
+    icons["playlist"][1] = "󱍙"; icons["playlist"][2] = color_audio
     icons["opticaldisk"][1] = ""; icons["opticaldisk"][2] = color_archive
 
 # numbers
@@ -140,6 +145,9 @@ awk 'BEGIN {
     icons["elf"][1] = icons["linux"][1]; icons["elf"][2] = icons["linux"][2]
     icons["epub"][1] = icons["manual"][1]; icons["epub"][2] = icons["manual"][2]
     icons["exe"][1] = icons["exec"][1]; icons["exe"][2] = icons["exec"][2]
+    icons["ex"][1] = icons["elixir"][1]; icons["ex"][2] = icons["elixir"][2]
+    icons["eex"][1] = icons["elixir"][1]; icons["eee"]2] = icons["elixir"][2]
+    icons["exs"][1] = icons["elixir"][1]; icons["exs"][2] = icons["elixir"][2]
 
 # f
     icons["fsharp"][1] = icons["fsharp"][1]; icons["fsharp"][2] = icons["fsharp"][2]
@@ -154,7 +162,7 @@ awk 'BEGIN {
 # g
     icons["gem"][1] = icons["ruby"][1]; icons["gem"][2] = icons["ruby"][2]
     icons["gif"][1] = icons["picturefile"][1]; icons["gif"][2] = icons["picturefile"][2]
-    icons["go"][1] = "ﳑ"; icons["go"][2] = color_default
+    icons["go"][1] = "󰟓"; icons["go"][2] = color_default
     icons["gz"][1] = icons["archive"][1]; icons["gz"][2] = icons["archive"][2]
     icons["gzip"][1] = icons["archive"][1]; icons["gzip"][2] = icons["archive"][2]
 
@@ -167,12 +175,14 @@ awk 'BEGIN {
     icons["htpasswd"][1] = icons["configure"][1]; icons["htpasswd"][2] = icons["configure"][2]
     icons["htm"][1] = icons["html"][1]; icons["htm"][2] = icons["html"][2]
     icons["hxx"][1] = icons["cplusplus"][1]; icons["hxx"][2] = icons["cplusplus"][2]
+    icons["heex"][1] = icons["elixir"][1]; icons["heex"][2] = icons["elixir"][2]
 
 # i
     icons["ico"][1] = icons["picturefile"][1]; icons["ico"][2] = icons["picturefile"][2]
     icons["img"][1] = icons["opticaldisk"][1]; icons["img"][2] = icons["opticaldisk"][2]
     icons["ini"][1] = icons["configure"][1]; icons["ini"][2] = icons["configure"][2]
     icons["iso"][1] = icons["opticaldisk"][1]; icons["iso"][2] = icons["opticaldisk"][2]
+    icons["isub"][1] = icons["subtitle"][1]; icons["isub"][2] = icons["subtitle"][2]
 
 # j
     icons["jar"][1] = icons["java"][1]; icons["jar"][2] = icons["java"][2]
@@ -180,10 +190,12 @@ awk 'BEGIN {
     icons["jl"][1] = icons["configure"][1]; icons["jl"][2] = icons["configure"][2]
     icons["jpeg"][1] = icons["picturefile"][1]; icons["jpeg"][2] = icons["picturefile"][2]
     icons["jpg"][1] = icons["picturefile"][1]; icons["jpg"][2] = icons["picturefile"][2]
-    icons["json"][1] = "ﬥ"; icons["json"][2] = color_js
+    icons["json"][1] = ""; icons["json"][2] = color_js
     icons["jsx"][1] = icons["react"][1]; icons["jsx"][2] = icons["react"][2]
+    icons["jxl"][1] = icons["picturefile"][1]; icons["jxl"][2] = icons["picturefile"][2]
 
 # k
+    icons["ksh"][1] = icons["font"][1]; icons["ksf"][2] = icons["font"][2]
 
 # l
     icons["lha"][1] = icons["archive"][1]; icons["lha"][2] = icons["archive"][2]
@@ -194,7 +206,7 @@ awk 'BEGIN {
     icons["lzma"][1] = icons["archive"][1]; icons["lzma"][2] = icons["archive"][2]
 
 # m
-    icons["m"][1] = "ﴜ"; icons["mat"][2] = color_c
+    icons["m"][1] = "󰠞"; icons["mat"][2] = color_c
     icons["m4a"][1] = icons["musicfile"][1]; icons["m4a"][2] = icons["musicfile"][2]
     icons["m4v"][1] = icons["videofile"][1]; icons["m4v"][2] = icons["videofile"][2]
     icons["mat"][1] = ""; icons["mat"][2] = color_c
@@ -207,7 +219,7 @@ awk 'BEGIN {
     icons["mp4"][1] = icons["videofile"][1]; icons["mp4"][2] = icons["videofile"][2]
     icons["mpeg"][1] = icons["videofile"][1]; icons["mpeg"][2] = icons["videofile"][2]
     icons["mpg"][1] = icons["videofile"][1]; icons["mpg"][2] = icons["videofile"][2]
-    icons["msi"][1] = ""; icons["msi"][2] = color_default
+    icons["msi"][1] = "󰍲"; icons["msi"][2] = color_default
 
 # n
     icons["nix"][1] = ""; icons["nix"][2] = color_fsharp
@@ -216,17 +228,18 @@ awk 'BEGIN {
     icons["o"][1] = icons["manual"][1]; icons["o"][2] = icons["manual"][2]
     icons["ogg"][1] = icons["musicfile"][1]; icons["ogg"][2] = icons["musicfile"][2]
     icons["odownload"][1] = icons["download"][1]; icons["odownload"][2] = icons["download"][2]
+    icons["otf"][1] = icons["font"][1]; icons["otf"][2] = icons["font"][2]
     icons["out"][1] = icons["linux"][1]; icons["out"][2] = icons["linux"][2]
 
 # p
     icons["part"][1] = icons["download"][1]; icons["part"][2] = icons["download"][2]
     icons["patch"][1] = icons["diff"][1]; icons["patch"][2] = icons["diff"][2]
-    icons["pdf"][1] = ""; icons["pdf"][2] = color_docs
+    icons["pdf"][1] = "󰈦"; icons["pdf"][2] = color_docs
     icons["pgn"][1] = icons["chess"][1]; icons["pgn"][2] = icons["chess"][2]
     icons["php"][1] = ""; icons["php"][2] = color_default
     icons["png"][1] = icons["picturefile"][1]; icons["png"][2] = icons["picturefile"][2]
-    icons["ppt"][1] = ""; icons["ppt"][2] = color_default
-    icons["pptx"][1] = ""; icons["pptx"][2] = color_default
+    icons["ppt"][1] = "󰈧"; icons["ppt"][2] = color_default
+    icons["pptx"][1] = "󰈧"; icons["pptx"][2] = color_default
     icons["psb"][1] = ""; icons["psb"][2] = color_default
     icons["psd"][1] = ""; icons["psd"][2] = color_default
     icons["py"][1] = icons["python"][1]; icons["py"][2] = icons["python"][2]
@@ -239,10 +252,10 @@ awk 'BEGIN {
 # r
     icons["rar"][1] = icons["archive"][1]; icons["rar"][2] = icons["archive"][2]
     icons["rc"][1] = icons["configure"][1]; icons["rc"][2] = icons["configure"][2]
-    icons["rom"][1] = ""; icons["rom"][2] = color_default
+    icons["rom"][1] = "󰊖"; icons["rom"][2] = color_default
     icons["rpm"][1] = icons["archive"][1]; icons["rpm"][2] = icons["archive"][2]
-    icons["rss"][1] = "參"; icons["rss"][2] = color_default
-    icons["rtf"][1] = ""; icons["rtf"][2] = color_default
+    icons["rss"][1] = ""; icons["rss"][2] = color_default
+    icons["rtf"][1] = "󰈦"; icons["rtf"][2] = color_default
 
 # s
     icons["sass"][1] = ""; icons["sass"][2] = color_css
@@ -253,18 +266,18 @@ awk 'BEGIN {
     icons["slim"][1] = icons["script"][1]; icons["slim"][2] = icons["script"][2]
     icons["sln"][1] = ""; icons["sln"][2] = color_default
     icons["sql"][1] = icons["database"][1]; icons["sql"][2] = icons["database"][2]
-    icons["srt"][1] = ""; icons["srt"][2] = color_default
-    icons["isub"][1] = ""; icons["isub"][2] = color_default
+    icons["srt"][1] = icons["subtitle"][1]; icons["srt"][2] = icons["subtitle"][2]
     icons["svg"][1] = icons["picturefile"][1]; icons["svg"][2] = icons["picturefile"][2]
 
 # t
     icons["tar"][1] = icons["archive"][1]; icons["tar"][2] = icons["archive"][2]
-    icons["tex"][1] = ""; icons["tex"][2] = color_default
+    icons["tex"][1] = "󰙩"; icons["tex"][2] = color_default
     icons["tgz"][1] = icons["archive"][1]; icons["tgz"][2] = icons["archive"][2]
     icons["ts"][1] = ""; icons["ts"][2] = color_js
     icons["tsx"][1] = icons["react"][1]; icons["tsx"][2] = icons["react"][2]
     icons["txt"][1] = icons["document"][1]; icons["txt"][2] = icons["document"][2]
     icons["txz"][1] = icons["archive"][1]; icons["txz"][2] = icons["archive"][2]
+    icons["ttf"][1] = icons["font"][1]; icons["ttf"][2] = icons["font"][2]
 
 # u
 
@@ -272,7 +285,7 @@ awk 'BEGIN {
     icons["vid"][1] = icons["videofile"][1]; icons["vid"][2] = icons["videofile"][2]
     icons["vim"][1] = ""; icons["vim"][2] = color_vim
     icons["vimrc"][1] = ""; icons["vimrc"][2] = color_vim
-    icons["vtt"][1] =  ""; icons["vtt"][2] = color_default
+    icons["vtt"][1] = icons["subtitle"][1]; icons["vtt"][2] = icons["subtitle"][2]
 # w
     icons["wav"][1] = icons["musicfile"][1]; icons["wav"][2] = icons["musicfile"][2]
     icons["webm"][1] = icons["videofile"][1]; icons["webm"][2] = icons["videofile"][2]
@@ -283,8 +296,8 @@ awk 'BEGIN {
     icons["xbps"][1] = icons["archive"][1]; icons["xbps"][2] = color_archive
     icons["xcf"][1] = icons["picturefile"][1]; icons["xcf"][2] = color_image
     icons["xhtml"][1] = icons["html"][1]; icons["xhtml"][2] = icons["html"][2]
-    icons["xls"][1] = ""; icons["xls"][2] = color_default
-    icons["xlsx"][1] = ""; icons["xlsx"][2] = color_default
+    icons["xls"][1] = "󰈛"; icons["xls"][2] = color_default
+    icons["xlsx"][1] = "󰈛"; icons["xlsx"][2] = color_default
     icons["xml"][1] = icons["html"][1]; icons["xml"][2] = icons["html"][2]
     icons["xz"][1] = icons["archive"][1]; icons["xz"][2] = icons["archive"][2]
 
