@@ -104,7 +104,7 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
 
 ## Quickstart
 
-1. [Install](https://github.com/jarun/nnn/wiki/Usage) `nnn` and the deps you need.
+1. [Install](https://github.com/jarun/nnn/wiki/Usage) `nnn` and the dependencies you need.
 2. The desktop opener is default. Use `-e` to open text files in the terminal. Optionally [open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text).
 3. Configure [`cd` on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
 4. [Sync subshell `$PWD`](https://github.com/jarun/nnn/wiki/Basic-use-cases#sync-subshell-pwd) to `nnn`.
