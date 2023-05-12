@@ -286,7 +286,7 @@ static const struct icon_pair icons_ext[] = { /* All entries are case-insensitiv
 	{"h",          ICON_C,              COLOR_C},
 	{"hh",         ICON_CPLUSPLUS,      COLOR_C},
 	{"hpp",        ICON_CPLUSPLUS,      COLOR_C},
-	{"hs",         ICON_HASKELL,        COLOR_VIM},
+	{"hs",         ICON_HASKELL,        COLOR_ELIXIR},
 	{"htaccess",   ICON_CONFIGURE,      0},
 	{"htpasswd",   ICON_CONFIGURE,      0},
 	{"htm",        ICON_HTML,           0},
