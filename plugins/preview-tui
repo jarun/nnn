@@ -78,6 +78,11 @@
 #   Windows Terminal users can set "Profile termination behavior" under "Profile > Advanced" settings
 #   to automatically close pane on quit when exit code is 0.
 #
+#   When specifying a different terminal, additional arguments are supported. In particular, you can
+#   append a specific title to the terminal and set it to "nofocus" in your WM config.
+#   E.g for alacritty and i3, you can set $NNN_TERMINAL to 'alacritty --title preview-tui' and add
+#   'no_focus [title="preview-tui"]' to your i3 config file.
+#
 # Shell: Bash (for environment manipulation through arrays)
 # Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal, @WanderLanz
 
@@ -185,7 +190,8 @@ EOF
         *)  if [ -n "$2" ]; then
                 env "${ENVVARS[@]}" QUICKLOOK=1 "$0" "$1" &
             else
-                env "${ENVVARS[@]}" "$NNN_TERMINAL" -e "$0" "$1" &
+                # shellcheck disable=SC2086 # (allow arguments)
+                env "${ENVVARS[@]}" $NNN_TERMINAL -e "$0" "$1" &
             fi ;;
     esac
 }
