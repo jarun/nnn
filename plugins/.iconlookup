@@ -146,7 +146,7 @@ awk 'BEGIN {
     icons["epub"][1] = icons["manual"][1]; icons["epub"][2] = icons["manual"][2]
     icons["exe"][1] = icons["exec"][1]; icons["exe"][2] = icons["exec"][2]
     icons["ex"][1] = icons["elixir"][1]; icons["ex"][2] = icons["elixir"][2]
-    icons["eex"][1] = icons["elixir"][1]; icons["eee"]2] = icons["elixir"][2]
+    icons["eex"][1] = icons["elixir"][1]; icons["eex"][2] = icons["elixir"][2]
     icons["exs"][1] = icons["elixir"][1]; icons["exs"][2] = icons["elixir"][2]
 
 # f
