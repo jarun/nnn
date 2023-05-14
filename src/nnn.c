@@ -331,6 +331,7 @@ typedef struct {
 	uint_t showhidden : 1;  /* Set to show hidden files */
 	uint_t reserved0  : 1;
 	uint_t showdetail : 1;  /* Clear to show lesser file info */
+	uint_t forceyesprompt : 1;  /* Skip prompt / auto yes for cp and mv  */
 	uint_t ctxactive  : 1;  /* Context active or not */
 	uint_t reverse    : 1;  /* Reverse sort */
 	uint_t version    : 1;  /* Version sort */
@@ -8329,6 +8330,7 @@ static void usage(void)
 #ifndef NOX11
 		" -x      notis, selection sync, xterm title\n"
 #endif
+		" -z      force yes in cp/mv prompts\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
 }
@@ -8486,7 +8488,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nop:P:QrRs:St:T:uUVxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:BcCdDzeEfF:gHiJKl:nop:P:QrRs:St:T:uUVxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -8510,7 +8512,15 @@ int main(int argc, char *argv[])
 			g_state.oldcolor = 1;
 			break;
 		case 'd':
-			cfg.showdetail = 1;
+			cfg.showdetail = 1; 
+			break;
+		case 'z':
+			cfg.forceyesprompt = 1; /* unused var, just for easy search */
+#ifdef __linux__
+		cp[6]=mv[6]='f';
+#else
+		cp[4]=cp[4]='f';
+#endif
 			break;
 		case 'D':
 			g_state.dirctx = 1;
@@ -8636,6 +8646,8 @@ int main(int argc, char *argv[])
 		if (env_opts_id == 0)
 			env_opts_id = -1;
 	}
+
+
 
 #ifdef DEBUG
 	enabledbg();

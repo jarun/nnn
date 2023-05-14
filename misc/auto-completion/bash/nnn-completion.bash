@@ -44,6 +44,7 @@ _nnn ()
         -U
         -V
         -x
+        -z
         -h
     )
     if [[ $prev == -b ]]; then
