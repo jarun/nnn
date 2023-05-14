@@ -729,13 +729,8 @@ static const char * const envs[] = {
 #define T_CHANGE 1
 #define T_MOD    2
 
-#ifdef __linux__
-static char cp[] = "cp   -iRp";
-static char mv[] = "mv   -i";
-#else
-static char cp[] = "cp -iRp";
-static char mv[] = "mv -i";
-#endif
+static char cp[20] = "cp -iRp";
+static char mv[20] = "mv -i";
 
 /* Archive commands */
 static char * const archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
@@ -2602,7 +2597,7 @@ static bool cpmv_rename(int choice, const char *path)
 	uint_t count = 0, lines = 0;
 	bool ret = FALSE;
 	char *cmd = (choice == 'c' ? cp : mv);
-	char buf[sizeof(patterns[P_CPMVRNM]) + (MAX(sizeof(cp), sizeof(mv))) + (PATH_MAX << 1)];
+	char buf[sizeof(patterns[P_CPMVRNM]) + (MAX(strlen(cp), strlen(mv))) + (PATH_MAX << 1)];
 
 	fd = create_tmp_file();
 	if (fd == -1)
@@ -8512,15 +8507,12 @@ int main(int argc, char *argv[])
 			g_state.oldcolor = 1;
 			break;
 		case 'd':
-			cfg.showdetail = 1; 
+			cfg.showdetail = 1;
 			break;
 		case 'z':
 			cfg.forceyesprompt = 1; /* unused var, just for easy search */
-#ifdef __linux__
-		cp[6]=mv[6]='f';
-#else
-		cp[4]=cp[4]='f';
-#endif
+			strcpy(cp,"cp -fRP");
+			strcpy(mv,"mv -f");
 			break;
 		case 'D':
 			g_state.dirctx = 1;
@@ -8598,8 +8590,8 @@ int main(int argc, char *argv[])
 			break;
 		case 'r':
 #ifdef __linux__
-			cp[2] = cp[5] = mv[2] = mv[5] = 'g'; /* cp -iRp -> cpg -giRp */
-			cp[4] = mv[4] = '-';
+		strcpy(cp,"cpg -giRp");
+		strcpy(mv,"mvg -giRp");
 #endif
 			break;
 		case 'R':
