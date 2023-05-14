@@ -51,7 +51,7 @@ endif
 
 ifeq ($(strip $(O_DEBUG)),1)
 	CPPFLAGS += -DDEBUG
-	CFLAGS += -g
+	CFLAGS += -g3
 endif
 
 ifeq ($(strip $(O_NORL)),1)
