@@ -63,6 +63,7 @@
 #define ICON_CPLUSPLUS     ICON_STR(MFIZZ_CPLUSPLUS, "", ICON_C)
 #define ICON_DATABASE      ICON_STR(MFIZZ_DATABASE_ALT2, "󰆼", "🗃️ ")
 #define ICON_DESKTOP       ICON_STR(FA_DESKTOP, "󰟀", "🖥️ ")
+#define ICON_DJVU          ICON_STR(FA_PAPERCLIP, "", "📎")
 #define ICON_DOCUMENT      ICON_STR(FA_FILE_TEXT_O, "󰈙", "🗒 ")
 #define ICON_DOWNLOADS     ICON_STR(FA_DOWNLOAD, "󰃘", "📥")
 #define ICON_ELIXIR        ICON_STR(MFIZZ_ELIXIR, "", "💧")
@@ -252,6 +253,7 @@ static const struct icon_pair icons_ext[] = { /* All entries are case-insensitiv
 	{"deb",        ICON_EXT_DEB,        COLOR_ARCHIVE},
 	{"diff",       ICON_EXT_DIFF,       0},
 	{"dll",        ICON_SCRIPT,         0},
+	{"djvu",       ICON_DJVU,           COLOR_DOCS},
 	{"doc",        ICON_WORDDOC,        COLOR_DOCUMENT},
 	{"docx",       ICON_WORDDOC,        COLOR_DOCUMENT},
 
