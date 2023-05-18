@@ -728,13 +728,10 @@ static const char * const envs[] = {
 #define T_CHANGE 1
 #define T_MOD    2
 
-#ifdef __linux__
-static char cp[] = "cp   -iRp";
-static char mv[] = "mv   -i";
-#else
-static char cp[] = "cp -iRp";
-static char mv[] = "mv -i";
-#endif
+#define PROGRESS_CP   "cpg -giRp"
+#define PROGRESS_MV   "mvg -gi"
+static char cp[sizeof PROGRESS_CP] = "cp -iRp";
+static char mv[sizeof PROGRESS_MV] = "mv -i";
 
 /* Archive commands */
 static char * const archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
@@ -8588,8 +8585,8 @@ int main(int argc, char *argv[])
 			break;
 		case 'r':
 #ifdef __linux__
-			cp[2] = cp[5] = mv[2] = mv[5] = 'g'; /* cp -iRp -> cpg -giRp */
-			cp[4] = mv[4] = '-';
+			memcpy(cp, PROGRESS_CP, sizeof PROGRESS_CP);
+			memcpy(mv, PROGRESS_MV, sizeof PROGRESS_MV);
 #endif
 			break;
 		case 'R':
