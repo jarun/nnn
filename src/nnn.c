@@ -8713,7 +8713,7 @@ int main(int argc, char *argv[])
 			/* Start in the current directory */
 			char *startpath = getenv("PWD");
 
-			initpath = startpath ? xstrdup(startpath) : getcwd(NULL, 0);
+			initpath = (startpath && *startpath) ? xstrdup(startpath) : getcwd(NULL, 0);
 			if (!initpath)
 				initpath = "/";
 		} else { /* Open a file */
