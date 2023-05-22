@@ -19,10 +19,10 @@ index 88538787..d4af7c43 100644
 +#define GIT_ADD ""
 +#define GIT_DEL ""
 +#define GIT_IGN ""
-+#define GIT_MOD ""
++#define GIT_MOD ""
 +#define GIT_NEW ""
 +#define GIT_NON "-"
-+#define GIT_UPD "ﮮ"
++#define GIT_UPD "󰚰"
 +#else
 +#define GIT_ADD "A"
 +#define GIT_DEL "D"
