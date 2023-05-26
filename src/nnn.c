@@ -4604,12 +4604,12 @@ static bool show_stats(char *fpath)
 	return TRUE;
 }
 
-static bool xchmod(const char *fpath, mode_t mode)
+static bool xchmod(const char *fpath, mode_t *mode)
 {
 	/* (Un)set (S_IXUSR | S_IXGRP | S_IXOTH) */
-	(0100 & mode) ? (mode &= ~0111) : (mode |= 0111);
+	(0100 & *mode) ? (*mode &= ~0111) : (*mode |= 0111);
 
-	return (chmod(fpath, mode) == 0);
+	return (chmod(fpath, *mode) == 0);
 }
 
 static size_t get_fs_info(const char *path, uchar_t type)
@@ -7381,13 +7381,13 @@ nochange:
 
 				if ((sel == SEL_STATS && !show_stats(newpath))
 				    || (lstat(newpath, &sb) == -1)
-				    || (sel == SEL_CHMODX && !xchmod(newpath, sb.st_mode))) {
+				    || (sel == SEL_CHMODX && !xchmod(newpath, &sb.st_mode))) {
 					printwarn(&presel);
 					goto nochange;
 				}
 
 				if (sel == SEL_CHMODX)
-					pdents[cur].mode ^= 0111;
+					pdents[cur].mode = sb.st_mode;
 			}
 			break;
 		case SEL_REDRAW: // fallthrough
