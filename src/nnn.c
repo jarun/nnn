@@ -8796,7 +8796,7 @@ int main(int argc, char *argv[])
 	DPRINTF_S(pager);
 
 	/* Get SHELL */
-	shell = xgetenv(envs[ENV_SHELL], utils[UTIL_SH]);
+	shell = getenv("NNN_SHELL")?:xgetenv(envs[ENV_SHELL], utils[UTIL_SH]);
 	DPRINTF_S(shell);
 
 	DPRINTF_S(getenv("PWD"));
