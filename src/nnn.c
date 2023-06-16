@@ -5079,82 +5079,87 @@ static void add_bookmark(char *path, char *newpath, int *presel)
 }
 
 /*
- * The help string tokens (each line) start with a HEX value
- * which indicates the number of spaces to print before the
- * particular token. This method was chosen instead of a flat
- * string because the number of bytes in help was increasing
- * the binary size by around a hundred bytes. This would only
- * have increased as we keep adding new options.
+ * The help string tokens (each line) start with a HEX value which indicates
+ * the number of spaces to print before the particular token. In the middle,
+ * %NN can be used to insert a run of spaces, e.g %10 will print 10 spaces.
+ * %NN MUST be 2 characters long, e.g %05 for 5 spaces.
+ *
+ * This method was chosen instead of a flat string because the number of bytes
+ * in help was increasing the binary size by around a hundred bytes. This would
+ * only have increased as we keep adding new options.
  */
 static void show_help(const char *path)
 {
-	const char *start, *end;
-	const char helpstr[] = {
+	static const char helpstr[] = {
+	"2|V\\_\n"
+	"2/. \\\\\n"
+	"1(;^; ||\n"
+	"3/___3\n"
+	"2(___n))\n"
 	"0\n"
 	"1NAVIGATION\n"
-	       "9Up k  Up%-16cPgUp ^U  Page up\n"
-	       "9Dn j  Down%-14cPgDn ^D  Page down\n"
-	       "9Lt h  Parent%-12c~ ` @ -  ~, /, start, prev\n"
-	   "5Ret Rt l  Open%-20c'  First file/match\n"
-	       "9g ^A  Top%-21cJ  Jump to entry/offset\n"
-	       "9G ^E  End%-20c^J  Toggle auto-advance on open\n"
-	      "8B (,)  Book(mark)%-11cb ^/  Select bookmark\n"
-		"a1-4  Context%-11c(Sh)Tab  Cycle/new context\n"
-	    "62Esc ^Q  Quit%-20cq  Quit context\n"
-		 "b^G  QuitCD%-18cQ  Pick/err, quit\n"
+	       "9Up k  Up%16PgUp ^U  Page up\n"
+	       "9Dn j  Down%14PgDn ^D  Page down\n"
+	       "9Lt h  Parent%12~ ` @ -  ~, /, start, prev\n"
+	   "5Ret Rt l  Open%20'  First file/match\n"
+	       "9g ^A  Top%21J  Jump to entry/offset\n"
+	       "9G ^E  End%20^J  Toggle auto-advance on open\n"
+	      "8B (,)  Book(mark)%11b ^/  Select bookmark\n"
+		"a1-4  Context%11(Sh)Tab  Cycle/new context\n"
+	    "62Esc ^Q  Quit%20q  Quit context\n"
+		 "b^G  QuitCD%18Q  Pick/err, quit\n"
 	"0\n"
 	"1FILTER & PROMPT\n"
-		  "c/  Filter%-17c^N  Toggle type-to-nav\n"
-		"aEsc  Exit prompt%-12c^L  Toggle last filter\n"
-		  "c.  Toggle hidden%-5cAlt+Esc  Unfilter, quit context\n"
+		  "c/  Filter%17^N  Toggle type-to-nav\n"
+		"aEsc  Exit prompt%12^L  Toggle last filter\n"
+		  "c.  Toggle hidden%05Alt+Esc  Unfilter, quit context\n"
 	"0\n"
 	"1FILES\n"
-	       "9o ^O  Open with%-15cn  Create new/link\n"
-	       "9f ^F  File stats%-14cd  Detail mode toggle\n"
-		 "b^R  Rename/dup%-14cr  Batch rename\n"
-		  "cz  Archive%-17ce  Edit file\n"
-		  "c*  Toggle exe%-14c>  Export list\n"
-	    "6Space +  (Un)select%-12cm-m  Select range/clear\n"
-	          "ca  Select all%-14cA  Invert sel\n"
-	       "9p ^P  Copy here%-12cw ^W  Cp/mv sel as\n"
-	       "9v ^V  Move here%-15cE  Edit sel list\n"
-	       "9x ^X  Delete%-18cS  Listed sel size\n"
+	       "9o ^O  Open with%15n  Create new/link\n"
+	       "9f ^F  File stats%14d  Detail mode toggle\n"
+		 "b^R  Rename/dup%14r  Batch rename\n"
+		  "cz  Archive%17e  Edit file\n"
+		  "c*  Toggle exe%14>  Export list\n"
+	    "6Space +  (Un)select%12m-m  Select range/clear\n"
+	          "ca  Select all%14A  Invert sel\n"
+	       "9p ^P  Copy here%12w ^W  Cp/mv sel as\n"
+	       "9v ^V  Move here%15E  Edit sel list\n"
+	       "9x ^X  Delete%18S  Listed sel size\n"
 		"aEsc  Send to FIFO\n"
 	"0\n"
 	"1MISC\n"
-	      "8Alt ;  Select plugin%-11c=  Launch app\n"
-	       "9! ^]  Shell%-19c]  Cmd prompt\n"
-		  "cc  Connect remote%-10cu  Unmount remote/archive\n"
-	       "9t ^T  Sort toggles%-12cs  Manage session\n"
-		  "cT  Set time type%-11c0  Lock\n"
-		 "b^L  Redraw%-18c?  Help, conf\n"
+	      "8Alt ;  Select plugin%11=  Launch app\n"
+	       "9! ^]  Shell%19]  Cmd prompt\n"
+		  "cc  Connect remote%10u  Unmount remote/archive\n"
+	       "9t ^T  Sort toggles%12s  Manage session\n"
+		  "cT  Set time type%110  Lock\n"
+		 "b^L  Redraw%18?  Help, conf\n"
 	};
 
 	int fd = create_tmp_file();
 	if (fd == -1)
 		return;
 
-	dprintf(fd, "  |V\\_\n"
-		    "  /. \\\\\n"
-		    " (;^; ||\n"
-		    "   /___3\n"
-		    "  (___n))\n");
-
 	char *prog = xgetenv(env_cfg[NNN_HELP], NULL);
 	if (prog)
 		get_output(prog, NULL, NULL, fd, FALSE);
 
-	start = end = helpstr;
-	while (*end) {
-		if (*end == '\n') {
-			snprintf(g_buf, CMD_LEN_MAX, "%*c%.*s",
-				 xchartohex(*start), ' ', (int)(end - start), start + 1);
-			dprintf(fd, g_buf, ' ');
-			start = end + 1;
+	bool hex = true;
+	char *w = g_buf;
+	const char *end = helpstr + (sizeof helpstr - 1);
+	for (const char *s = helpstr; s < end; ++s) {
+		if (hex) {
+			for (int k = 0, n = xchartohex(*s); k < n; ++k) *w++ = ' ';
+		} else if (*s == '%') {
+			int n = ((s[1] - '0') * 10) + (s[2] - '0');
+			for (int k = 0; k < n; ++k) *w++ = ' ';
+			s += 2;
+		} else {
+			*w++ = *s;
 		}
-
-		++end;
+		hex = *s == '\n';
 	}
+	if (write(fd, g_buf, w - g_buf)) {} // silence warning
 
 	dprintf(fd, "\nLOCATIONS\n");
 	for (uchar_t i = 0; i < CTX_MAX; ++i)
@@ -5178,9 +5183,9 @@ static void show_help(const char *path)
 	}
 
 	for (uchar_t i = NNN_OPENER; i <= NNN_TRASH; ++i) {
-		start = getenv(env_cfg[i]);
-		if (start)
-			dprintf(fd, "%s: %s\n", env_cfg[i], start);
+		char *s = getenv(env_cfg[i]);
+		if (s)
+			dprintf(fd, "%s: %s\n", env_cfg[i], s);
 	}
 
 	if (selpath)
