@@ -28,13 +28,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define _FILE_OFFSET_BITS 64 /* Support large files on 32-bit glibc */
+
 #if defined(__linux__) || defined(MINGW) || defined(__MINGW32__) \
 	|| defined(__MINGW64__) || defined(__CYGWIN__)
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
-#endif
-#if defined(__arm__) || defined(__i386__)
-#define _FILE_OFFSET_BITS 64 /* Support large files on 32-bit */
 #endif
 #if defined(__linux__)
 #include <sys/inotify.h>
