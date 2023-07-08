@@ -4,7 +4,7 @@
 #              If the device is not mounted, it will be mounted.
 #              If the device is mounted, it will be unmounted and powered down.
 #
-# Dependencies: lsblk, pmount
+# Dependencies: lsblk, pmount (optional), udisks2
 #
 # Usage: Runs `lsblk` on 'l', exits on 'Return`.
 #
@@ -13,7 +13,7 @@
 #       macOS: "diskutil list"
 #       BSD: "geom disk list"
 #   - The script uses udisksctl (from udisks2) to power down devices. This is also Linux-specific.
-#     Users on non-Linux platforms can comment it and use an alterntive to power-down disks.
+#     Users on non-Linux platforms can comment it and use an alternative to power-down disks.
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
@@ -34,14 +34,28 @@ while [ -n "$dev" ]; do
     else
         if grep -qs "$dev " /proc/mounts; then
             sync "$(lsblk -n "/dev/$dev" -o MOUNTPOINT | sed "/^$/d")"
-            if pumount "/dev/$dev"; then
+            if type pumount >/dev/null 2>&1; then
+                pumount "/dev/$dev"
+                exit_code="$?"
+            else
+                udisksctl unmount -b "/dev/$dev" --no-user-interaction
+                exit_code="$?"
+            fi
+            if [ $exit_code -eq 0 ]; then
                 echo "/dev/$dev unmounted."
                 if udisksctl power-off -b "/dev/$dev" --no-user-interaction; then
                     echo "/dev/$dev ejected."
                 fi
             fi
         elif [ -b "/dev/$dev" ]; then
-            if pmount "/dev/$dev"; then
+            if type pmount >/dev/null 2>&1; then
+                pmount "/dev/$dev"
+                exit_code="$?"
+            else
+                udisksctl mount -b "/dev/$dev" --no-user-interaction
+                exit_code="$?"
+            fi
+            if [ $exit_code -eq 0 ]; then
                 sleep 1
                 echo "/dev/$dev mounted to $(lsblk -n "/dev/$dev" -o MOUNTPOINT | sed "/^$/d")."
             fi
