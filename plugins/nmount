@@ -32,14 +32,24 @@ while [ -n "$dev" ]; do
     elif [ "$dev" = "q" ]; then
         exit
     else
-        if grep -qs "$dev " /proc/mounts; then
+        # LUKS volumes mounted with udisksctl appear differently than with pmount
+        if grep -qs "$dev " /proc/mounts || [ -n "$(lsblk -n "/dev/$dev" -o MOUNTPOINT)" ]; then
             sync "$(lsblk -n "/dev/$dev" -o MOUNTPOINT | sed "/^$/d")"
             if type pumount >/dev/null 2>&1; then
                 pumount "/dev/$dev"
                 exit_code="$?"
             else
-                udisksctl unmount -b "/dev/$dev" --no-user-interaction
-                exit_code="$?"
+                # Unlike pmount, udisksctl does not transparently handle LUKS volumes
+                # We need to manually get the unlocked device, unmount it, and then lock the volume
+                if lsblk -n "/dev/$dev" -o FSTYPE | grep "crypto_LUKS" >/dev/null; then
+                    dev_map="$(udisksctl info -b /dev/"$dev" | grep "CleartextDevice" | grep -o "dm_2d[[:digit:]]*" | sed "s/_2d/-/")"
+                    udisksctl unmount -b "/dev/$dev_map" --no-user-interaction >/dev/null
+                    exit_code="$?"
+                    udisksctl lock -b "/dev/$dev" --no-user-interaction >/dev/null
+                else
+                    udisksctl unmount -b "/dev/$dev" --no-user-interaction >/dev/null
+                    exit_code="$?"
+                fi
             fi
             if [ $exit_code -eq 0 ]; then
                 echo "/dev/$dev unmounted."
@@ -52,8 +62,16 @@ while [ -n "$dev" ]; do
                 pmount "/dev/$dev"
                 exit_code="$?"
             else
-                udisksctl mount -b "/dev/$dev" --no-user-interaction
-                exit_code="$?"
+                # Unlike pmount, udisksctl does not transparently handle LUKS volumes
+                # We need to manually get the unlocked device and mount that instead of the volume itself
+                if [ "$(lsblk "/dev/$dev" -n -o FSTYPE)" = "crypto_LUKS" ]; then
+                    dev_map=$(udisksctl unlock -b "/dev/$dev" --no-user-interaction | grep -o "dm-[[:digit:]]*")
+                    udisksctl mount -b "/dev/$dev_map" --no-user-interaction >/dev/null
+                    exit_code="$?"
+                else
+                    udisksctl mount -b "/dev/$dev" --no-user-interaction >/dev/null
+                    exit_code="$?"
+                fi
             fi
             if [ $exit_code -eq 0 ]; then
                 sleep 1
