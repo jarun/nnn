@@ -6493,6 +6493,7 @@ static int adjust_cols(int n)
 	return (n - 2);
 }
 
+#if !defined(ICONS_ENABLED) || !defined(__APPLE__)
 static void draw_line(int ncols)
 {
 	bool dir = FALSE;
@@ -6526,6 +6527,7 @@ static void draw_line(int ncols)
 
 	markhovered();
 }
+#endif
 
 static void redraw(char *path)
 {
@@ -6539,14 +6541,20 @@ static void redraw(char *path)
 	if (g_state.move) {
 		g_state.move = 0;
 
+#if !defined(ICONS_ENABLED) || !defined(__APPLE__)
 		if (ndents && (last_curscroll == curscroll))
 			return draw_line(ncols);
+#endif
 	}
 
 	DPRINTF_S(__func__);
 
 	/* Clear screen */
-	erase();
+#if defined(ICONS_ENABLED) && defined(__APPLE__)
+	clear();
+#else
+  erase();
+#endif
 
 	/* Enforce scroll/cursor invariants */
 	move_cursor(cur, 1);
