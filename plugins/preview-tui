@@ -418,7 +418,7 @@ image_preview() {
         kitty +kitten icat --silent --scale-up --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
     elif [ "$NNN_TERMINAL" = "wezterm" ] && [ -z "$NNN_PREVIEWIMGPROG" ]; then
         wezterm imgcat "$3" &
-    elif exists ueberzug && { [ -z "$NNN_PREVIEWIMGPROG" ] || [ "$NNN_PREVIEWIMGPROG" = "ueberzug" ] ;} && [ -z "$SSH_CONNECTION" ] ; then⏎
+    elif exists ueberzug && { [ -z "$NNN_PREVIEWIMGPROG" ] || [ "$NNN_PREVIEWIMGPROG" = "ueberzug" ] ;} && [ -z "$SSH_CONNECTION" ] ; then
         ueberzug_layer "$1" "$2" "$3" && return
     elif exists catimg   && { [ -z "$NNN_PREVIEWIMGPROG" ] || [ "$NNN_PREVIEWIMGPROG" = "catimg" ] ;}; then
         catimg "$3" &
