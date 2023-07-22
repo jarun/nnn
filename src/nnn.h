@@ -58,6 +58,7 @@ enum action {
 	SEL_END,
 	SEL_FIRST,
 	SEL_JUMP,
+	SEL_YOUNG,
 	SEL_CDHOME,
 	SEL_CDBEGIN,
 	SEL_CDLAST,
@@ -164,6 +165,7 @@ static struct key bindings[] = {
 	{ '\'',           SEL_FIRST },
 	/* Jump to an entry number/offset */
 	{ 'J',            SEL_JUMP },
+	{ CONTROL('Y'),   SEL_YOUNG },
 	/* HOME */
 	{ '~',            SEL_CDHOME },
 	/* Initial directory */
