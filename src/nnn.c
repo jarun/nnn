@@ -5107,6 +5107,7 @@ static void show_help(const char *path)
 		"a1-4  Context%11(Sh)Tab  Cycle/new context\n"
 	    "62Esc ^Q  Quit%20q  Quit context\n"
 		 "b^G  QuitCD%18Q  Pick/err, quit\n"
+		 "b^y  Next young file\n"
 	"0\n"
 	"1FILTER & PROMPT\n"
 		  "c/  Filter%17^N  Toggle type-to-nav\n"
@@ -6115,6 +6116,20 @@ static void handle_screen_move(enum action sel)
 	case SEL_END:
 		move_cursor(ndents - 1, 1);
 		break;
+	case SEL_YOUNG:
+	{
+		for (int r = cur;;) {
+			if (++r >= ndents)
+				r = 0;
+			if (r == cur)
+				break;
+			if (pdents[r].flags & FILE_YOUNG) {
+				move_cursor(r, 0);
+				break;
+			}
+		}
+		break;
+	}
 	default: /* case SEL_FIRST */
 	{
 		int c = get_input(messages[MSG_FIRST]);
@@ -7196,7 +7211,8 @@ nochange:
 		case SEL_HOME: // fallthrough
 		case SEL_END: // fallthrough
 		case SEL_FIRST: // fallthrough
-		case SEL_JUMP:
+		case SEL_JUMP: // fallthrough
+		case SEL_YOUNG:
 			if (ndents) {
 				g_state.move = 1;
 				handle_screen_move(sel);
