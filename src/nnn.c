@@ -567,7 +567,7 @@ static char * const utils[] = {
 	"sshfs",
 	"rclone",
 	"vi",
-	"less",
+	"less -+F",
 	"sh",
 	"fzf",
 	".ntfy",
