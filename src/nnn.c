@@ -7704,7 +7704,7 @@ nochange:
 				if (r == 'f' || r == 'd')
 					tmp = xreadline(tmp, messages[MSG_NEW_PATH]);
 				else if (r == 's' || r == 'h')
-					tmp = xreadline(NULL,
+					tmp = xreadline((nselected == 1 && cfg.prefersel) ? xbasename(pselbuf) : NULL,
 						messages[nselected <= 1 ? MSG_NEW_PATH : MSG_LINK_PREFIX]);
 				else
 					tmp = NULL;
