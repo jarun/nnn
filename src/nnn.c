@@ -131,6 +131,18 @@
 #include "icons.h"
 #endif
 
+#if defined(ICONS_ENABLED) && defined(__APPLE__)
+/*
+ * For some reason, wcswidth returns 2 for certain icons on macOS
+ * leading to duplicated first characters in filenames when navigating.
+ * https://github.com/jarun/nnn/issues/1692
+ * There might be a better way to fix it without requiring a refresh.
+ */
+#define macos_icons_hack() do { clrtoeol(); refresh(); } while(0)
+#else
+#define macos_icons_hack()
+#endif
+
 #ifdef TOURBIN_QSORT
 #include "qsort.h"
 #endif
@@ -6520,6 +6532,7 @@ static void draw_line(int ncols)
 	}
 
 	move(2 + last - curscroll, 0);
+	macos_icons_hack();
 	printent(&pdents[last], ncols, FALSE);
 
 	if (g_state.oldcolor && (pdents[cur].flags & DIR_OR_DIRLNK)) {
@@ -6533,6 +6546,7 @@ static void draw_line(int ncols)
 	}
 
 	move(2 + cur - curscroll, 0);
+	macos_icons_hack();
 	printent(&pdents[cur], ncols, TRUE);
 
 	/* Must reset e.g. no files in dir */
