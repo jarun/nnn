@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+# Description: this plugin converts image files to a pdf file
+# Dependencies: ImageMagick, sed
+# Author: Karim Hussein
+#
+#
+#
+# Shell: bash
+#
+# Notes:
+# If you want to turn on notification, make notify=1
+notify=0
+
+note() {
+	if [ $notify = 1 ]; then
+		notify-send -a "nnn-Image2PDF" "$1" "$2"
+	else
+		echo "[nnn-Image2PDF] $1 $2"
+	fi
+}
+
+# Read selections from file with the deletion of null bytes
+selections=$(tr -d '\0' < ~/.config/nnn/.selection)
+
+# Extract file extensions from selections
+extensions=$(echo "$selections" | sed -n 's/.*\(\.[^.]*\)$/\1/p')
+
+# Loop through extensions and replace each extension with itself and a space
+paths="$selections"
+for ext in $extensions; do
+    paths="${paths//$ext/$ext }"
+done
+
+# Remove any leading/trailing spaces
+separated_paths="$(echo "$paths" | sed 's/^ *//;s/ *$//')"
+
+# Check if there are any paths to convert
+if [ -z "$separated_paths" ]; then
+    # Notify user to select image files
+    note "Please select image files first"
+    else
+    # Paths are not empty, proceed with conversion
+    output_dir="$(dirname "${separated_paths%% *}")"
+    IFS=" " read -ra path_array <<< "$separated_paths"
+
+
+    # Run the convert command and check for errors
+    if convert "${path_array[@]}" -density 300 -quality 100 "$output_dir/converted-images-test.pdf"; then
+        note "Conversion successful"
+    else
+        note "Conversion failed" "please select image files with the same format"
+    fi
+fi
+
+# Clear selection
+if [ -p "$NNN_PIPE" ]; then
+    printf "-" > "$NNN_PIPE"
+fi
