@@ -97,7 +97,7 @@ jobs:
 workflows:
   version: 2
 
-  circleci:
+  CircleCI:
     jobs: &all-tests
       - compile
 
