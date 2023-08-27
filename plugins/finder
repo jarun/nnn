@@ -55,7 +55,7 @@ readexpr() {
              [ -n "$fexpr" ] && readexpr ;;
         \$*) cmd="${fexpr:1}" ;;
         *)   mapexpr && readexpr
-             cmd="find $fexpr -print0" ;;
+             cmd="find . $fexpr -print0" ;;
     esac
 }
 
