@@ -3,7 +3,7 @@
 # Description: Fuzzy find a command from history,
 #              edit in $EDITOR and run as a command
 #
-# Note: Supports only bash and fish history
+# Note: Supports only bash, zsh and fish history
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
@@ -18,6 +18,9 @@ shellname="$(basename "$SHELL")"
 
 if [ "$shellname" = "bash" ]; then
     hist_file="$HOME/.bash_history"
+    entry="$("$fuzzy" < "$hist_file")"
+elif [ "$shellname" = "zsh" ]; then
+    hist_file="$HOME/.zsh_history"
     entry="$("$fuzzy" < "$hist_file")"
 elif [ "$shellname" = "fish" ]; then
     hist_file="$HOME/.local/share/fish/fish_history"
