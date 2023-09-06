@@ -30,7 +30,7 @@ elif [ "$shellname" = "zsh" ]; then
         hist_file="$HISTFILE"
     else
         hist_file="$HOME/.zsh_history"
-    fi    
+    fi
     entry="$("$fuzzy" < "$hist_file")"
 elif [ "$shellname" = "fish" ]; then
     hist_file="$HOME/.local/share/fish/fish_history"
