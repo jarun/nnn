@@ -1,0 +1,16 @@
+#!/usr/bin/osascript
+
+# Description: Copy the hovered file to MacOS clipboard.
+#
+# Note: Supports only MacOS
+#
+# Shell: POSIX compliant
+# Author: Syed Umar Anis
+
+
+on run args
+  set filePath to (second item of args & "/" & first item of args)
+  tell application "Finder" 
+    set the clipboard to (filePath as POSIX file)
+  end tell
+end
