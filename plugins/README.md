@@ -16,6 +16,8 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [autojump](autojump) | Navigate to dir/path | sh | [jump](https://github.com/gsamokovarov/jump)/autojump/<br>zoxide/z/[z.lua](https://github.com/skywind3000/z.lua) |
 | [boom](boom) | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs, mktemp |
+| [cbcopy-mac](cbcopy-mac) | Copy the hovered file to MacOS clipboard | applescript | macos |
+| [cbpaste-mac](cbpaste-mac) | Pastes files from MacOS clipboard into currect directory | macos |
 | [cdpath](cdpath) | `cd` to the directory from `CDPATH` | sh | fzf |
 | [chksum](chksum) | Create and verify checksums [✓] | sh | md5sum,<br>sha256sum |
 | [cmusq](cmusq) | Queue/play files/dirs in cmus player [✓] | sh | cmus, pgrep |

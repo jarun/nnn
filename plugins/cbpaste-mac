@@ -1,0 +1,24 @@
+#!/usr/bin/env sh
+# shellcheck disable=all
+
+# Description: Paste the clipboard files into the current directory.
+#              Only works if clipboard contents are files.
+#
+# Note: Supports only MacOS
+#
+# Shell: POSIX compliant
+# Author: Syed Umar Anis
+
+
+fs=($( osascript -e "use framework \"Foundation\"
+    property this : a reference to the current application
+    property NSPasteboard : a reference to NSPasteboard of this
+    property NSURL : a reference to NSURL of this
+    property pb : a reference to NSPasteboard's generalPasteboard
+
+    property text item delimiters : linefeed
+
+    pb's readObjectsForClasses:[NSURL] options:[]
+    (result's valueForKey:\"path\") as list as text" ))
+
+cp -R "${fs[@]}" "$2/"

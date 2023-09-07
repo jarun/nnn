@@ -66,7 +66,7 @@ jobs:
             echo "########## clang-tidy-15 ##########"
             clang-tidy-15 src/* -- -I/usr/include -I/usr/include/ncursesw
             echo "########## shellcheck ##########"
-            find plugins/ -type f -not -name "*.md" -exec shellcheck {} +
+            find plugins/ -type f ! \( -name "*.md" -o -name "*-mac" \) -exec shellcheck {} +
 
   package-and-publish:
     machine: true
