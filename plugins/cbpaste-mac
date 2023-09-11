@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+# shellcheck disable=all
 
 # Description: Paste the clipboard files into the current directory.
 #              Only works if clipboard contents are files.

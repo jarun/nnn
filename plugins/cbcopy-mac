@@ -1,4 +1,5 @@
 #!/usr/bin/osascript
+# shellcheck disable=all
 
 # Description: Copy the hovered file to MacOS clipboard.
 #
