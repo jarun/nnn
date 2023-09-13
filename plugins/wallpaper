@@ -8,11 +8,25 @@
 # Shell: POSIX compliant
 # Author: juacq97
 
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+resp=
+
+add_file ()
+{
+    printf '%s\0' "$@" >> "$selection"
+}
+
 if [ -n "$1" ]; then
     if [ "$(file --mime-type "$1" | awk '{print $NF}' | awk -F '/' '{print $1}')" = "image" ]; then
         if [ "$XDG_SESSION_TYPE" = "x11" ]; then
             if type nitrogen >/dev/null 2>&1; then
-                nitrogen --set-zoom-fill --save "$1"
+            	printf "Set to full desktop or a specific monitors? [0, 1, etc. Defaults to full.]"
+            	read -r resp
+            	if [ "$resp" != "" ]; then
+            		nitrogen --set-zoom-fill --save "$1" --head="$resp"
+            	else
+                	nitrogen --set-zoom-fill --save "$1"
+            	fi
             elif type wal >/dev/null 2>&1; then
                 wal -i "$1"
             else
