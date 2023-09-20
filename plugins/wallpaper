@@ -8,13 +8,7 @@
 # Shell: POSIX compliant
 # Author: juacq97
 
-selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 resp=
-
-add_file ()
-{
-    printf '%s\0' "$@" >> "$selection"
-}
 
 if [ -n "$1" ]; then
     if [ "$(file --mime-type "$1" | awk '{print $NF}' | awk -F '/' '{print $1}')" = "image" ]; then
