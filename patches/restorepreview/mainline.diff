@@ -7,20 +7,22 @@
 # Authors: Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index b10143a4..76d6bc5b 100644
+index 0388b23c..66d3316a 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -374,6 +374,7 @@ typedef struct {
- 	uint_t trash      : 2;  /* Trash method 0: rm -rf, 1: trash-cli, 2: gio trash */
+@@ -390,7 +390,8 @@ typedef struct {
  	uint_t uidgid     : 1;  /* Show owner and group info */
  	uint_t usebsdtar  : 1;  /* Use bsdtar as default archive utility */
+ 	uint_t xprompt    : 1;  /* Use native prompt instead of readline prompt */
+-	uint_t reserved   : 4;  /* Adjust when adding/removing a field */
 +	uint_t previewer  : 1;  /* Run state of previewer */
- 	uint_t reserved   : 5;  /* Adjust when adding/removing a field */
++	uint_t reserved   : 3;  /* Adjust when adding/removing a field */
  } runstate;
  
-@@ -500,6 +501,9 @@ static char g_tmpfpath[TMP_LEN_MAX] __attribute__ ((aligned));
+ /* Contexts or workspaces */
+@@ -516,6 +517,9 @@ alignas(max_align_t) static char g_tmpfpath[TMP_LEN_MAX];
  /* Buffer to store plugins control pipe location */
- static char g_pipepath[TMP_LEN_MAX] __attribute__ ((aligned));
+ alignas(max_align_t) static char g_pipepath[TMP_LEN_MAX];
  
 +/* Buffer to store preview plugins control pipe location */
 +static char g_ppipepath[TMP_LEN_MAX] __attribute__ ((aligned));
@@ -28,7 +30,7 @@ index b10143a4..76d6bc5b 100644
  /* Non-persistent runtime states */
  static runstate g_state;
  
-@@ -676,12 +680,13 @@ static const char * const messages[] = {
+@@ -696,12 +700,13 @@ static const char * const messages[] = {
  #define NNN_FCOLORS 5
  #define NNNLVL      6
  #define NNN_PIPE    7
@@ -48,7 +50,7 @@ index b10143a4..76d6bc5b 100644
  
  static const char * const env_cfg[] = {
  	"NNN_OPTS",
-@@ -692,6 +697,7 @@ static const char * const env_cfg[] = {
+@@ -712,6 +717,7 @@ static const char * const env_cfg[] = {
  	"NNN_FCOLORS",
  	"NNNLVL",
  	"NNN_PIPE",
@@ -56,16 +58,16 @@ index b10143a4..76d6bc5b 100644
  	"NNN_MCLICK",
  	"NNN_SEL",
  	"NNN_ARCHIVE",
-@@ -833,7 +839,7 @@ static int set_sort_flags(int r);
+@@ -850,7 +856,7 @@ static int set_sort_flags(int r);
  static void statusbar(char *path);
- static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool multi, bool page);
+ static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page);
  #ifndef NOFIFO
 -static void notify_fifo(bool force);
 +static void notify_fifo(bool force, bool closepreview);
  #endif
  
  /* Functions */
-@@ -3022,7 +3028,7 @@ try_quit:
+@@ -3140,7 +3146,7 @@ try_quit:
  			} else {
  #ifndef NOFIFO
  				if (!g_state.fifomode)
@@ -74,7 +76,7 @@ index b10143a4..76d6bc5b 100644
  #endif
  				escaped = TRUE;
  				settimeout();
-@@ -5120,15 +5126,20 @@ static void run_cmd_as_plugin(const char *file, char *runfile, uchar_t flags)
+@@ -5258,15 +5264,20 @@ static void run_cmd_as_plugin(const char *file, uchar_t flags)
  
  static bool plctrl_init(void)
  {
@@ -99,7 +101,7 @@ index b10143a4..76d6bc5b 100644
  
  	return EXIT_SUCCESS;
  }
-@@ -5157,6 +5168,21 @@ static ssize_t read_nointr(int fd, void *buf, size_t count)
+@@ -5295,6 +5306,21 @@ static ssize_t read_nointr(int fd, void *buf, size_t count)
  	return len;
  }
  
@@ -121,7 +123,7 @@ index b10143a4..76d6bc5b 100644
  static char *readpipe(int fd, char *ctxnum, char **path)
  {
  	char ctx, *nextpath = NULL;
-@@ -5841,7 +5867,7 @@ static void populate(char *path, char *lastname)
+@@ -5979,7 +6005,7 @@ static void populate(char *path, char *lastname)
  }
  
  #ifndef NOFIFO
@@ -130,7 +132,7 @@ index b10143a4..76d6bc5b 100644
  {
  	if (!fifopath)
  		return;
-@@ -5857,6 +5883,12 @@ static void notify_fifo(bool force)
+@@ -5995,6 +6021,12 @@ static void notify_fifo(bool force)
  		}
  	}
  
@@ -143,7 +145,7 @@ index b10143a4..76d6bc5b 100644
  	static struct entry lastentry;
  
  	if (!force && !memcmp(&lastentry, &pdents[cur], sizeof(struct entry))) // NOLINT
-@@ -5889,7 +5921,7 @@ static void send_to_explorer(int *presel)
+@@ -6027,7 +6059,7 @@ static void send_to_explorer(int *presel)
  		if (fd > 1)
  			close(fd);
  	} else
@@ -152,7 +154,7 @@ index b10143a4..76d6bc5b 100644
  }
  #endif
  
-@@ -5922,7 +5954,7 @@ static void move_cursor(int target, int ignore_scrolloff)
+@@ -6060,7 +6092,7 @@ static void move_cursor(int target, int ignore_scrolloff)
  
  #ifndef NOFIFO
  	if (!g_state.fifomode)
@@ -161,7 +163,7 @@ index b10143a4..76d6bc5b 100644
  #endif
  }
  
-@@ -6539,7 +6571,7 @@ static bool browse(char *ipath, const char *session, int pkey)
+@@ -6733,7 +6765,7 @@ static bool browse(char *ipath, const char *session, int pkey)
  	pEntry pent;
  	enum action sel;
  	struct stat sb;
@@ -170,7 +172,7 @@ index b10143a4..76d6bc5b 100644
  	const uchar_t opener_flags = (cfg.cliopener ? F_CLI : (F_NOTRACE | F_NOSTDIN | F_NOWAIT));
  	bool watch = FALSE, cd = TRUE;
  	ino_t inode = 0;
-@@ -6797,7 +6829,7 @@ nochange:
+@@ -6991,7 +7023,7 @@ nochange:
  					move_cursor(r, 1);
  #ifndef NOFIFO
  				else if ((event.bstate == BUTTON1_PRESSED) && !g_state.fifomode)
@@ -179,7 +181,7 @@ index b10143a4..76d6bc5b 100644
  #endif
  				/* Handle right click selection */
  				if (event.bstate == BUTTON3_PRESSED) {
-@@ -6959,7 +6991,14 @@ nochange:
+@@ -7153,7 +7185,14 @@ nochange:
  			    && strstr(g_buf, "text")
  #endif
  			) {
@@ -194,7 +196,7 @@ index b10143a4..76d6bc5b 100644
  				if (cfg.filtermode) {
  					presel = FILTER;
  					clearfilter();
-@@ -7272,8 +7311,14 @@ nochange:
+@@ -7471,8 +7510,14 @@ nochange:
  				copycurname();
  				goto nochange;
  			case SEL_EDIT:
@@ -209,7 +211,7 @@ index b10143a4..76d6bc5b 100644
  				continue;
  			default: /* SEL_LOCK */
  				lock_terminal();
-@@ -7642,6 +7687,7 @@ nochange:
+@@ -7860,6 +7905,7 @@ nochange:
  			cd = FALSE;
  			goto begin;
  		}
@@ -217,7 +219,7 @@ index b10143a4..76d6bc5b 100644
  		case SEL_PLUGIN:
  			/* Check if directory is accessible */
  			if (!xdiraccess(plgpath)) {
-@@ -7667,6 +7713,12 @@ nochange:
+@@ -7885,6 +7931,12 @@ nochange:
  					goto nochange;
  				}
  
@@ -230,7 +232,7 @@ index b10143a4..76d6bc5b 100644
  				if (tmp[0] == '-' && tmp[1]) {
  					++tmp;
  					r = FALSE; /* Do not refresh dir after completion */
-@@ -7722,7 +7774,13 @@ nochange:
+@@ -7943,7 +7995,13 @@ nochange:
  		case SEL_SHELL: // fallthrough
  		case SEL_LAUNCH: // fallthrough
  		case SEL_PROMPT:
@@ -244,7 +246,7 @@ index b10143a4..76d6bc5b 100644
  
  			/* Continue in type-to-nav mode, if enabled */
  			if (cfg.filtermode)
-@@ -8263,8 +8321,10 @@ static void cleanup(void)
+@@ -8492,8 +8550,10 @@ static void cleanup(void)
  	if (g_state.autofifo)
  		unlink(fifopath);
  #endif
@@ -256,7 +258,7 @@ index b10143a4..76d6bc5b 100644
  #ifdef DEBUG
  	disabledbg();
  #endif
-@@ -8769,7 +8829,7 @@ int main(int argc, char *argv[])
+@@ -9020,7 +9080,7 @@ int main(int argc, char *argv[])
  
  #ifndef NOFIFO
  	if (!g_state.fifomode)
