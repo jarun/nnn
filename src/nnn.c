@@ -389,7 +389,8 @@ typedef struct {
 	uint_t trash      : 2;  /* Trash method 0: rm -rf, 1: trash-cli, 2: gio trash */
 	uint_t uidgid     : 1;  /* Show owner and group info */
 	uint_t usebsdtar  : 1;  /* Use bsdtar as default archive utility */
-	uint_t reserved   : 5;  /* Adjust when adding/removing a field */
+	uint_t xprompt    : 1;  /* Use native prompt instead of readline prompt */
+	uint_t reserved   : 4;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -5479,7 +5480,7 @@ static bool prompt_run(void)
 
 	while (1) {
 #ifndef NORL
-		if (g_state.picker) {
+		if (g_state.picker || g_state.xprompt) {
 #endif
 			cmdline = xreadline(NULL, PROMPT);
 #ifndef NORL
@@ -7695,7 +7696,7 @@ nochange:
 				break;
 			case SEL_OPENWITH:
 #ifndef NORL
-				if (g_state.picker) {
+				if (g_state.picker || g_state.xprompt) {
 #endif
 					tmp = xreadline(NULL, messages[MSG_OPEN_WITH]);
 #ifndef NORL
@@ -8340,6 +8341,9 @@ static void usage(void)
 		" -K      detect key collision and exit\n"
 		" -l val  set scroll lines\n"
 		" -n      type-to-nav mode\n"
+#ifndef NORL
+		" -N      use native prompt\n"
+#endif
 		" -o      open files only on Enter\n"
 		" -p file selection file [-:stdout]\n"
 		" -P key  run plugin key\n"
@@ -8517,7 +8521,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nop:P:QrRs:St:T:uUVxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVxh"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -8590,6 +8594,11 @@ int main(int argc, char *argv[])
 		case 'n':
 			cfg.filtermode = 1;
 			break;
+#ifndef NORL
+		case 'N':
+			g_state.xprompt = 1;
+			break;
+#endif
 		case 'o':
 			cfg.nonavopen = 1;
 			break;
@@ -8965,7 +8974,7 @@ int main(int argc, char *argv[])
 	exitcurses();
 
 #ifndef NORL
-	if (rlhist) {
+	if (rlhist && !g_state.xprompt) {
 		mkpath(cfgpath, ".history", g_buf);
 		write_history(g_buf);
 	}
