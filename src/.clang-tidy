@@ -9,6 +9,7 @@ Checks: >
     google-runtime-int,
     fuchsia-restrict-system-includes,
     -misc-unused-parameters,
+    -misc-include-cleaner,
     -llvm-header-guard,
     -clang-analyzer-valist.Uninitialized,
     -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
@@ -24,6 +25,7 @@ Checks: >
     -bugprone-easily-swappable-parameters,
     -bugprone-narrowing-conversions,
     -bugprone-reserved-identifier,
+    -bugprone-switch-missing-default-case,
 
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*(?<!lookup3.c)$'
