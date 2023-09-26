@@ -7,7 +7,7 @@ def-env n [...x] {
   ^nnn ($x | str join)
   let newpath = (
     if ($env.NNN_TMPFILE | path exists) {
-      let newpath = (open $env.NNN_TMPFILE | parse 'cd "{nnnpath}"').0.nnnpath
+      let newpath = (open $env.NNN_TMPFILE | parse "cd '{nnnpath}'").0.nnnpath
       ^rm -f $env.NNN_TMPFILE
       echo $newpath
     } else {
