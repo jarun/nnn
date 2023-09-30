@@ -7,8 +7,8 @@ def-env n [...x] {
   ^nnn ($x | str join)
   let newpath = (
     if ($env.NNN_TMPFILE | path exists) {
-      let rawpath = (open $env.NNN_TMPFILE | parse --regex 'cd (?P<dir>.+)').0.dir
-      let newpath = ($rawpath | $"echo ($in)" | /bin/bash -s)
+      # FIXME: fails if path contains single-quote
+      let newpath = (open $env.NNN_TMPFILE | parse "cd '{nnnpath}'").0.nnnpath
       ^rm -f $env.NNN_TMPFILE
       echo $newpath
     } else {
