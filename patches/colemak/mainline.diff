@@ -3,10 +3,10 @@
 #
 # Author: github.com/jacmoe
 diff --git a/src/nnn.c b/src/nnn.c
-index ecedee43..fdf5a80e 100644
+index 21a7370b..2ddb4053 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -5098,32 +5098,32 @@ static void show_help(const char *path)
+@@ -5109,12 +5109,12 @@ static void show_help(const char *path)
  	"2(___n))\n"
  	"0\n"
  	"1NAVIGATION\n"
@@ -23,8 +23,9 @@ index ecedee43..fdf5a80e 100644
 +	       "9G ^N  End%20^J  Toggle auto-advance on open\n"
  	      "8B (,)  Book(mark)%11b ^/  Select bookmark\n"
  		"a1-4  Context%11(Sh)Tab  Cycle/new context\n"
- 	    "62Esc ^Q  Quit%20q  Quit context\n"
- 		 "b^G  QuitCD%18Q  Pick/err, quit\n"
+ 	    "62Esc ^Q  Quit%19^y  Next young\n"
+@@ -5122,20 +5122,20 @@ static void show_help(const char *path)
+ 		  "cq  Quit context\n"
  	"0\n"
  	"1FILTER & PROMPT\n"
 -		  "c/  Filter%17^N  Toggle type-to-nav\n"
