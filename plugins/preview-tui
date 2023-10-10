@@ -475,12 +475,14 @@ if [ "$PREVIEW_MODE" -eq 1 ] 2>/dev/null; then
     fi
 
     preview_file "$PWD/$1"
-    preview_fifo &
+    preview_fifo & WAITPID=$!
     printf "%s" "$!" > "$FIFOPID"
     printf "%s" "$PWD/$1" > "$CURSEL"
-    trap 'winch_handler; wait' WINCH
+    trap 'winch_handler' WINCH
     trap 'rm "$PREVIEWPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" "$POSOFFSET" 2>/dev/null' INT HUP EXIT
-    wait "$!" 2>/dev/null
+    while kill -s 0 $WAITPID; do
+      wait $WAITPID 2>/dev/null
+    done
     exit 0
 else
     if [ ! -r "$NNN_FIFO" ]; then
