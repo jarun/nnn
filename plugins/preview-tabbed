@@ -4,7 +4,7 @@
 #
 # Dependencies:
 #   - tabbed (https://tools.suckless.org/tabbed): xembed host
-#   - xterm (or urxvt or st) : xembed client for text-based preview
+#   - xterm (or urxvt or st or alacritty) : xembed client for text-based preview
 #   - mpv (https://mpv.io): xembed client for video/audio
 #   - sxiv (https://github.com/muennich/sxiv) or,
 #   - nsxiv (https://codeberg.org/nsxiv/nsxiv) : xembed client for images
@@ -63,6 +63,8 @@ elif type urxvt >/dev/null 2>&1 ; then
     TERMINAL="urxvt -embed"
 elif type st >/dev/null 2>&1 ; then
     TERMINAL="st -w"
+elif type alacritty >/dev/null 2>&1 ; then
+    TERMINAL="alacritty --embed"
 else
     echo "No xembed term found" >&2
 fi
