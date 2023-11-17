@@ -4308,6 +4308,9 @@ static void savecurctx(char *path, char *curname, int nextctx)
 
 	tmpcfg.curctx = nextctx;
 	cfg = tmpcfg;
+	/* Restore the global function pointers alongside the cfg. */
+	entrycmpfn = cfg.reverse ? &reventrycmp : &entrycmp;
+	namecmpfn = cfg.version ? &xstrverscasecmp : &xstricmp;
 }
 
 #ifndef NOSSN
@@ -6248,11 +6251,8 @@ static int set_sort_flags(int r)
 			r = 'd';
 		}
 
-		if (cfg.version)
-			namecmpfn = &xstrverscasecmp;
-
-		if (cfg.reverse)
-			entrycmpfn = &reventrycmp;
+		entrycmpfn = cfg.reverse ? &reventrycmp : &entrycmp;
+		namecmpfn = cfg.version ? &xstrverscasecmp : &xstricmp;
 	} else if (r == CONTROL('T')) {
 		/* Cycling order: clear -> size -> time -> clear */
 		if (cfg.timeorder)
@@ -8018,6 +8018,9 @@ nochange:
 					lastname = g_ctx[r].c_name;
 
 					cfg = g_ctx[r].c_cfg;
+					/* Restore the global function pointers alongside the cfg. */
+					entrycmpfn = cfg.reverse ? &reventrycmp : &entrycmp;
+					namecmpfn = cfg.version ? &xstrverscasecmp : &xstricmp;
 
 					cfg.curctx = r;
 					setdirwatch();
