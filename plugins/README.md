@@ -370,6 +370,10 @@ if [ -n "$pattern" ]; then
 fi
 ```
 
+#### Change directory
+
+    NNN_PLUG='c:!read -r to && [ -n "$to" ] && printf "0c%s" "${to}" > "$NNN_PIPE"*'
+
 ## Contributing plugins
 
 1. Add informative sections like _Description_, _Notes_, _Dependencies_, _Shell_, _Author_ etc. in the plugin.
