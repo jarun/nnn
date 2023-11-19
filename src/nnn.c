@@ -5394,7 +5394,7 @@ static char *readpipe(int fd, char *ctxnum, char **path)
 	return nextpath;
 }
 
-static bool run_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir)
+static bool run_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir, bool *cd)
 {
 	pid_t p;
 	char ctx = 0;
@@ -5477,6 +5477,8 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 	nextpath = readpipe(rfd, &ctx, path);
 	if (nextpath)
 		set_smart_ctx(ctx, nextpath, path, runfile, lastname, lastdir);
+	else
+		*cd = FALSE;
 
 	close(rfd);
 
@@ -5991,7 +5993,7 @@ exit:
 	return ndents;
 }
 
-static void populate(char *path, char *lastname)
+static void populate(char *path, char *lastname, bool cd)
 {
 #ifdef DEBUG
 	struct timespec ts1, ts2;
@@ -6014,7 +6016,18 @@ static void populate(char *path, char *lastname)
 
 	/* Find cur from history */
 	/* No NULL check for lastname, always points to an array */
-	move_cursor(*lastname ? dentfind(lastname, ndents) : 0, 0);
+	int target;
+	if (*lastname) {
+		target = dentfind(lastname, ndents);
+		/* If we failed to find the previous filename, and we didn't change directories, */
+		/* default to the previous cursor position. This way, when a file is renamed by */
+		/* a plugin, the cursor does not jump to the top of the directory. */
+		if (target == 0 && !cd)
+			target = cur;
+	} else
+		target = 0;
+
+	move_cursor(target, 0);
 
 	// Force full redraw
 	last_curscroll = -1;
@@ -6887,14 +6900,15 @@ begin:
 		} else
 			cfgsort[cfg.curctx] = cfgsort[CTX_MAX];
 	}
-	cd = TRUE;
 
-	populate(path, lastname);
+	populate(path, lastname, cd);
 	if (g_state.interrupt) {
 		g_state.interrupt = cfg.apparentsz = cfg.blkorder = 0;
 		blk_shift = BLK_SHIFT_512;
 		presel = CONTROL('L');
 	}
+
+	cd = TRUE;
 
 #ifdef LINUX_INOTIFY
 	if (presel != FILTER && inotify_wd == -1)
@@ -7122,7 +7136,7 @@ nochange:
 					clearfilter();
 
 					if (chdir(path) == -1
-					    || !run_plugin(&path, pent->name, runfile, &lastname, &lastdir)) {
+					    || !run_plugin(&path, pent->name, runfile, &lastname, &lastdir, &cd)) {
 						DPRINTF_S("plugin failed!");
 					}
 
@@ -7940,7 +7954,7 @@ nochange:
 					r = TRUE;
 
 				if (!run_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL),
-							 &lastname, &lastdir)) {
+							 &lastname, &lastdir, &cd)) {
 					printwait(messages[MSG_FAILED], &presel);
 					goto nochange;
 				}
