@@ -4276,6 +4276,18 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 		addch(ind);
 }
 
+/**
+ * Sets the global cfg variable and restores related state to match the new
+ * cfg.
+ */
+static void setcfg(settings newcfg)
+{
+	cfg = newcfg;
+	/* Synchronize the global function pointers to match the new cfg. */
+	entrycmpfn = cfg.reverse ? &reventrycmp : &entrycmp;
+	namecmpfn = cfg.version ? &xstrverscasecmp : &xstricmp;
+}
+
 static void savecurctx(char *path, char *curname, int nextctx)
 {
 	settings tmpcfg = cfg;
@@ -4307,7 +4319,7 @@ static void savecurctx(char *path, char *curname, int nextctx)
 	}
 
 	tmpcfg.curctx = nextctx;
-	cfg = tmpcfg;
+	setcfg(tmpcfg);
 }
 
 #ifndef NOSSN
@@ -6248,11 +6260,9 @@ static int set_sort_flags(int r)
 			r = 'd';
 		}
 
-		if (cfg.version)
-			namecmpfn = &xstrverscasecmp;
-
-		if (cfg.reverse)
-			entrycmpfn = &reventrycmp;
+		/* Ensure function pointers are in sync with cfg. */
+		entrycmpfn = cfg.reverse ? &reventrycmp : &entrycmp;
+		namecmpfn = cfg.version ? &xstrverscasecmp : &xstricmp;
 	} else if (r == CONTROL('T')) {
 		/* Cycling order: clear -> size -> time -> clear */
 		if (cfg.timeorder)
@@ -8017,9 +8027,9 @@ nochange:
 					lastdir = g_ctx[r].c_last;
 					lastname = g_ctx[r].c_name;
 
-					cfg = g_ctx[r].c_cfg;
+					g_ctx[r].c_cfg.curctx = r;
+					setcfg(g_ctx[r].c_cfg);
 
-					cfg.curctx = r;
 					setdirwatch();
 					goto begin;
 				}
