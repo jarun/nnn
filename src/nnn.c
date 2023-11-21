@@ -5185,7 +5185,8 @@ static void show_help(const char *path)
 		}
 		hex = *s == '\n';
 	}
-	if (write(fd, help_buf, w - help_buf)) {} // silence warning
+	ssize_t res = write(fd, help_buf, w - help_buf);
+	(void)res; // silence warning
 
 	dprintf(fd, "\nLOCATIONS\n");
 	for (uchar_t i = 0; i < CTX_MAX; ++i)
