@@ -7053,7 +7053,7 @@ nochange:
 
 			pent = &pdents[cur];
 			if (!g_state.selbm || !(S_ISLNK(pent->mode) &&
-			                        realpath(pent->name, newpath) &&
+			                        readlink(pent->name, newpath, PATH_MAX) &&
 			                        xstrsncpy(path, lastdir, PATH_MAX)))
 				mkpath(path, pent->name, newpath);
 			g_state.selbm = 0;
