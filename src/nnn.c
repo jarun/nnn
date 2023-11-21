@@ -1310,6 +1310,18 @@ static char *abspath(const char *filepath, char *cwd, char *buf)
 	return resolved_path;
 }
 
+/* finds abspath of link pointed by filepath, taking cwd into account */
+static char *bmtarget(const char *filepath, char *cwd, char *buf) 
+{
+	char target[PATH_MAX + 1];
+	ssize_t n = readlink(filepath, target, PATH_MAX);
+	if (n != -1) {
+		target[n] = '\0';
+		return abspath(target, cwd, buf);
+	} 
+	return NULL;
+}
+
 /* wraps the argument in single quotes so it can be safely fed to shell */
 static bool shell_escape(char *output, size_t outlen, const char *s)
 {
@@ -7053,7 +7065,7 @@ nochange:
 
 			pent = &pdents[cur];
 			if (!g_state.selbm || !(S_ISLNK(pent->mode) &&
-			                        realpath(pent->name, newpath) &&
+			                        bmtarget(pent->name, path, newpath) &&
 			                        xstrsncpy(path, lastdir, PATH_MAX)))
 				mkpath(path, pent->name, newpath);
 			g_state.selbm = 0;
