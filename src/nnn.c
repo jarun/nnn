@@ -2332,7 +2332,7 @@ static char *parseargs(char *cmd, char **argv, int *pindex)
 {
 	int count = 0;
 	size_t len = xstrlen(cmd) + 1;
-	char *line = (char *)malloc(len);
+	char *line = malloc(len);
 
 	if (!line) {
 		DPRINTF_S("malloc()!");
@@ -8562,8 +8562,8 @@ static bool setup_config(void)
 	if (!xdg)
 		len = xstrlen(home) + xstrlen("/.config/nnn/bookmarks") + 1;
 
-	cfgpath = (char *)malloc(len);
-	plgpath = (char *)malloc(len);
+	cfgpath = malloc(len);
+	plgpath = malloc(len);
 	if (!cfgpath || !plgpath) {
 		xerror();
 		return FALSE;
@@ -8601,7 +8601,7 @@ static bool setup_config(void)
 		char *env_sel = xgetenv(env_cfg[NNN_SEL], NULL);
 
 		selpath = env_sel ? xstrdup(env_sel)
-				  : (char *)malloc(len + 3); /* Length of "/.config/nnn/.selection" */
+				  : malloc(len + 3); /* Length of "/.config/nnn/.selection" */
 
 		if (!selpath) {
 			xerror();
