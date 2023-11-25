@@ -7815,7 +7815,7 @@ nochange:
 			}
 
 			if (!(r == 's' || r == 'h')) {
-				tmp = abspath(tmp, NULL, newpath);
+				tmp = abspath(tmp, path, newpath);
 				if (!tmp) {
 					printwarn(&presel);
 					goto nochange;
