@@ -72,6 +72,12 @@
 #   With ImageMagick installed, this terminal can use the icat kitten to display images.
 #   Refer to kitty documentation for further details.
 #
+#   Users with both tmux and kitty can leverage image previews inside tmux with kitty's icat kitten
+#   - setup kitty as stated above
+#   - tmux >= v3.3a required
+#   - add the following to your tmux.conf:
+#     - `set -g allow-passthrough on`
+#
 #   Wezterm should work out of the box. If `NNN_PREVIEWIMGPROG` is not specified it will use
 #   built in iTerm2 image protocol.
 #
@@ -435,6 +441,8 @@ image_preview() {
     exec >/dev/tty
     if [ "$NNN_TERMINAL" = "kitty" ] && [[ "$NNN_PREVIEWIMGPROG" == +(|icat) ]]; then
         kitty +kitten icat --silent --scale-up --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
+    elif [ "$NNN_TERMINAL" = "tmux" ] && [[ -n "$KITTY_LISTEN_ON" ]] && [[ "$NNN_PREVIEWIMGPROG" == +(|icat) ]]; then
+        kitty +kitten icat --silent --scale-up --place "$(($1 - 1))x$(($2 - 1))"@0x0 --transfer-mode=memory --stdin=no "$3" &
     elif [ "$NNN_TERMINAL" = "wezterm" ] && [[ "$NNN_PREVIEWIMGPROG" == +(|imgcat) ]]; then
         wezterm imgcat "$3" &
     elif exists ueberzug && [[ "$NNN_PREVIEWIMGPROG" == +(|ueberzug) ]]; then
