@@ -6835,6 +6835,8 @@ begin:
 		setdirwatch();
 	}
 
+	setenv("PWD", path, TRUE);
+
 #ifndef NOX11
 	xterm_cfg(path);
 #endif
