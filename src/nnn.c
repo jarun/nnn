@@ -5237,7 +5237,7 @@ static void show_help(const char *path)
 	unlink(g_tmpfpath);
 }
 
-static void setexports(void)
+static void setexports(const char *path)
 {
 	char dvar[] = "d0";
 	char fvar[] = "f0";
@@ -5261,6 +5261,7 @@ static void setexports(void)
 	}
 	setenv("NNN_INCLUDE_HIDDEN", xitoa(cfg.showhidden), 1);
 	setenv("NNN_PREFER_SELECTION", xitoa(cfg.prefersel), 1);
+	setenv("PWD", path, 1);
 }
 
 static void run_cmd_as_plugin(const char *file, uchar_t flags)
@@ -5391,7 +5392,7 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 		g_state.pluginit = 1;
 	}
 
-	setexports();
+	setexports(*path);
 
 	/* Check for run-cmd-as-plugin mode */
 	if (*file == '!') {
@@ -5565,14 +5566,14 @@ static bool prompt_run(void)
 	return ret;
 }
 
-static bool handle_cmd(enum action sel, char *newpath)
+static bool handle_cmd(enum action sel, char *path, char *newpath)
 {
 	endselection(FALSE);
 
 	if (sel == SEL_LAUNCH)
 		return launch_app(newpath);
 
-	setexports();
+	setexports(path);
 
 	if (sel == SEL_PROMPT)
 		return prompt_run();
@@ -6835,8 +6836,6 @@ begin:
 		setdirwatch();
 	}
 
-	setenv("PWD", path, TRUE);
-
 #ifndef NOX11
 	xterm_cfg(path);
 #endif
@@ -7969,7 +7968,7 @@ nochange:
 		case SEL_SHELL: // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_PROMPT:
-			r = handle_cmd(sel, newpath);
+			r = handle_cmd(sel, path, newpath);
 
 			/* Continue in type-to-nav mode, if enabled */
 			if (cfg.filtermode)
