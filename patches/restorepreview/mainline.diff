@@ -238,7 +238,7 @@ index 0388b23c..66d3316a 100644
  		case SEL_PROMPT:
 +			if (g_state.previewer)
 +				notify_fifo(FALSE, TRUE);
- 			r = handle_cmd(sel, newpath);
+ 			r = handle_cmd(sel, path, newpath);
 +			if (g_state.previewer) {
 +				pkey = previewkey;
 +				goto run_plugin;
