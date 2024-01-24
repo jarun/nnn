@@ -368,9 +368,9 @@ preview_file() {
         elif exists tree; then
             fifo_pager tree --filelimit "$(find . -maxdepth 1 | wc -l)" -L 3 -C -F --dirsfirst --noreport
         elif exists exa; then
-            exa -T --group-directories-first --colour=always
+            exa -T --group-directories-first --colour=always -L 3
         elif exists eza; then # eza is a community fork of exa (exa is unmaintained)
-            eza -T --group-directories-first --colour=always
+            eza -T --group-directories-first --colour=always -L 3
         else
             fifo_pager ls -F --group-directories-first --color=always
         fi
