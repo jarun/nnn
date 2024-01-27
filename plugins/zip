@@ -39,11 +39,11 @@ choose_alg(){
       ;;
     *)
       alg="$default_alg"
-      printf "picking default - '%s'" "$alg"
+      printf "picking default - '%s'\n" "$alg"
       ;;
   esac
 
-  which "$alg" >/dev/null 2>&1 || (printf "'%s' not installed, cancelling..." "$alg" && exit 1)
+  command -v "$alg" >/dev/null 2>&1 || { printf "'%s' not installed, cancelling...\n" "$alg" >&2; exit 1; }
 }
 
 print_alg(){
@@ -85,57 +85,66 @@ fi
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
-password_protect(){ # filename
+password_protect(){
   if [ "$encrypt" = "y" ] || [ "$encrypt" = "Y" ]; then
     cd "$working_dir" || exit # some needs this
-    find . -maxdepth 1 -type f \( -name "$1.zip" -o -name "$1.tar*" \) \! -name "*.gpg" -exec gpg -c "{}" \; -exec rm "{}" \;
+    if [ "$2" ]; then
+      xargs -0 -I{} sh -c '
+      filename=$('"$1"') &&
+      find . -maxdepth 1 -type f \( -name "$filename.zip" -o -name "$filename.tar*" \) \! -name "*.gpg" -exec gpg -c "{}" \; -exec rm "{}" \;
+      ' < "$2"
+    elif [ "$1" ]; then
+      filename="$1"
+      find . -maxdepth 1 -type f \( -name "$filename.zip" -o -name "$filename.tar*" \) \! -name "*.gpg" -exec gpg -c "{}" \; -exec rm "{}" \;
+    fi
+
   fi
 }
 
-compress_tar(){ # filename
+compress_tar(){
   if [ "$alg" != tar ] && [ "$alg" != zip ]; then
     cd "$working_dir" || exit # some needs this
-    # 'keep' is due to zstd not following standard
-    if $alg -"$compression" --keep "$1.tar"; then
-      rm "$1.tar"
+
+    if [ "$2" ]; then
+      xargs -0 -I{} sh -c '
+      filename=$('"$1"') &&
+      '"$alg"' -'"$compression"' --keep "$filename.tar" &&
+      rm "$filename.tar"
+      ' < "$2"
+    elif [ "$1" ]; then
+      filename="$1"
+      # 'keep' is due to zstd not following standard
+      if $alg -"$compression" --keep "$filename.tar"; then
+        rm "$filename.tar"
+      fi
     fi
   fi
 }
 
 zip_selection_individualy(){
   if [ "$include_abs" = "y" ] || [ "$include_abs" = "Y" ]; then
-    for abspath in $(tr '\0' '\n' < "$selection"); do
-      if [ "$alg" = "zip" ]; then
-        # dont need .zip
-        zip -r -"$compression" "$abspath.zip" "$abspath"
-      else
-        tar -cvf "$abspath.tar" "$abspath"
-        compress_tar "$abspath"
-      fi
-      password_protect "$abspath"
-    done
-    # Could be done this way but for nnn.icons we would need manualy add suffix for each
-    # compression alg which can be done automatically by doing above
-    #if [ "$alg" = "zip" ]; then
-    #  xargs -0 -I{} zip -r -$compression "{}.zip" "{}" < "$selection"
-    #elif [ "$alg" = "tar" ]; then
-    #  xargs -0 -I{} tar -cvf "{}.tar" "{}" < "$selection"
-    #else
-    #  xargs -0 -I{} tar -I"$alg -$compression" -cvf "{}.tar.$suffix" "{}" < "$selection"
-    #fi
+    if [ "$alg" = "zip" ]; then
+      xargs -0 -I{} zip -r -"$compression" "{}.zip"
+    else
+      xargs -0 -I{} tar -cvf "{}.tar" "{}" < "$selection"
+      compress_tar "printf '%s' '{}'" "$selection"
+    fi
   else
-    for abspath in $(tr '\0' '\n' < "$selection"); do
-      ppath=$(dirname "$abspath")
-      file=$(basename "$abspath")
-
-      if [ "$alg" = "zip" ]; then
-        cd "$ppath" && zip -r -"$compression" "$working_dir/$file.zip" "$file"
-      else
-        tar -C "$ppath" -cvf "$file.tar" "$file"
-        compress_tar "$file"
-      fi
-      password_protect "$file"
-    done
+    if [ "$alg" = "zip" ]; then
+      xargs -0 -I{} sh -c '
+      filepath=$(dirname "{}") &&
+      filename=$(basename "{}") &&
+      cd "$filepath" &&
+      zip -r -'"$compression"' '"$working_dir"'/"$filename.zip" "$filename"
+      ' < "$selection"
+    else
+      xargs -0 -I{} sh -c '
+      filepath=$(dirname "{}") &&
+      filename=$(basename "{}") &&
+      tar -C "$filepath" -cvf "$filename.tar" "$filename"
+      ' < "$selection"
+      compress_tar "basename '{}'" "$selection"
+    fi
   fi
 }
 
@@ -147,16 +156,19 @@ zip_selection(){
       xargs -0 tar -cvf "$zipname.tar" < "$selection"
     fi
   else
-    for abspath in $(tr '\0' '\n' < "$selection"); do
-      ppath=$(dirname "$abspath")
-      file=$(basename "$abspath")
-
-      if [ "$alg" = "zip" ]; then
-        cd "$ppath" && zip -r -"$compression" "$working_dir/$zipname.zip" "$file"
-      else
-        tar -C "$ppath" -rvf "$zipname.tar" "$file"
-      fi
-    done
+    if [ "$alg" = "zip" ]; then
+      xargs -0 -I{} sh -c '
+      filepath=$(dirname "{}") &&
+      filename=$(basename "{}") &&
+      cd "$filepath" && zip -r -'"$compression"' '"$working_dir/$zipname.zip"' "$filename"
+      ' < "$selection"
+    else
+      xargs -0 -I{} sh -c '
+      filepath=$(dirname "{}") &&
+      filename=$(basename "{}") &&
+      tar -C "$filepath" -rvf '"$zipname.tar"' "$filename"
+      ' < "$selection"
+    fi
   fi
 
   compress_tar "$zipname"
