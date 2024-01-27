@@ -147,6 +147,7 @@ zip_selection_individualy(){
     fi
     password_protect 'basename "{%}"' "$selection"
   fi
+  password_protect 'basename "{%}"' "$selection"
 }
 
 zip_selection(){
