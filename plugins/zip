@@ -1,0 +1,212 @@
+#!/usr/bin/env sh
+
+#set -x
+# Better zip solution, compress selection - archive or batch(deterministic way '$filename.zip')
+# or hover individual compression
+#
+# Dependencies: gpg, tar & particular compression algorithm
+#
+# Shell: POSIX compliant
+# Author: Darukutsu
+
+# Change these for better suited defaults
+default_alg=zstd
+default_compression=5
+# this will be determined from filename if not provided
+#default_archivename=archive
+
+working_dir=$(pwd)
+
+choose_alg(){
+  case "$alg" in
+    "1"|"bzip2") alg=bzip2
+      ;;
+    "2"|"gzip") alg=gzip
+      ;;
+    "3"|"lzip") alg=lzip
+      ;;
+    "4"|"lzma") alg=lzma
+      ;;
+    "5"|"tar") alg=tar
+      ;;
+    "6"|"zip") alg=zip
+      ;;
+    "7"|"zstd") alg=zstd
+      ;;
+    "8"|"xz") alg=xz
+      ;;
+    "") alg="$default_alg"
+      ;;
+    *)
+      alg="$default_alg"
+      echo "picking default - $alg"
+      ;;
+  esac
+}
+
+print_alg(){
+  printf "
+#https://linuxreviews.org/Comparison_of_Compression_Algorithms
+
+1. bzip2
+2. gzip
+3. lzip
+4. lzma
+5. tar (archive only, no compression)
+6. zip (windows friend :D)
+7. zstd
+8. xz
+  \n\n"
+}
+
+print_alg
+printf "Pick algorithm[%s - default]: " "$default_alg"
+read -r alg
+choose_alg
+
+if ! [ "$alg" = "tar" ]; then
+  # TODO: zstd has more levels
+  printf "Choose compression level(except tar)[1.3.5.7.9, %s - default]: " "$default_compression"
+  read -r compression
+  case $compression in
+    [0123456789])
+      #do nothing
+      ;;
+    *)
+      compression=$default_compression
+      ;;
+  esac
+fi
+
+
+
+
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+password_protect(){ # filename
+  if [ "$encrypt" = "y" ] || [ "$encrypt" = "Y" ]; then
+    cd "$working_dir" || exit # some needs this
+    find . -maxdepth 1 -type f \( -name "$1.zip" -o -name "$1.tar*" \) \! -name "*.gpg" -exec gpg -c "{}" \; -exec rm "{}" \;
+  fi
+}
+
+compress_tar(){ # filename
+  if [ $alg != tar ] && [ $alg != zip ]; then
+    cd "$working_dir" || exit # some needs this
+    # 'keep' is due to zstd not following standard
+    if $alg -"$compression" --keep "$1.tar"; then
+      rm "$1.tar"
+    fi
+  fi
+}
+
+zip_selection_individualy(){
+  if [ "$include_abs" = "y" ] || [ "$include_abs" = "Y" ]; then
+    for abspath in $(sed 's#\x0# #g' < "$selection"); do
+      if [ "$alg" = "zip" ]; then
+        # dont need .zip
+        zip -r -$compression "$abspath.zip" "$abspath"
+      else
+        tar -cvf "$abspath.tar" "$abspath"
+        compress_tar "$abspath"
+      fi
+      password_protect "$abspath"
+    done
+    # Could be done this way but for nnn.icons we would need manualy add suffix for each
+    # compression alg which can be done automatically by doing above
+    #if [ "$alg" = "zip" ]; then
+    #  xargs -0 -I{} zip -r -$compression "{}.zip" "{}" < "$selection"
+    #elif [ "$alg" = "tar" ]; then
+    #  xargs -0 -I{} tar -cvf "{}.tar" "{}" < "$selection"
+    #else
+    #  xargs -0 -I{} tar -I"$alg -$compression" -cvf "{}.tar.$suffix" "{}" < "$selection"
+    #fi
+  else
+    for abspath in $(sed 's#\x0# #g' < "$selection"); do
+      ppath=$(echo "$abspath" | sed 's#\(/.*/\).*#\1#')
+      file=$(echo "$abspath" | sed 's#/.*/\(.*\)#\1#')
+
+      if [ "$alg" = "zip" ]; then
+        cd "$ppath" && zip -r -$compression "$working_dir/$file.zip" "$file"
+      else
+        tar -C "$ppath" -cvf "$file.tar" "$file"
+        compress_tar "$file"
+      fi
+      password_protect "$file"
+    done
+  fi
+}
+
+zip_selection(){
+  if [ "$include_abs" = "y" ] || [ "$include_abs" = "Y" ]; then
+    if [ "$alg" = "zip" ]; then
+      xargs -0 zip -r -$compression "$zipname.zip" < "$selection"
+    else
+      xargs -0 tar -cvf "$zipname.tar" < "$selection"
+    fi
+  else
+    for abspath in $(sed 's#\x0# #g' < "$selection"); do
+      ppath=$(echo "$abspath" | sed 's#\(/.*/\).*#\1#')
+      file=$(echo "$abspath" | sed 's#/.*/\(.*\)#\1#')
+
+      if [ "$alg" = "zip" ]; then
+        cd "$ppath" && zip -r -$compression "$working_dir/$zipname.zip" "$file"
+      else
+        tar -C "$ppath" -rvf "$zipname.tar" "$file"
+      fi
+    done
+  fi
+
+  compress_tar "$zipname"
+  password_protect "$zipname"
+}
+
+zip_hovered(){
+  #zipname=${default_archivename:-"$1"}
+  zipname="$1"
+
+  if [ "$alg" = "zip" ]; then
+    zip -r -$compression "$zipname.zip" "$1"
+  else
+    tar -cvf "$zipname.tar" "$1"
+    compress_tar "$zipname"
+  fi
+  password_protect "$zipname"
+}
+
+
+printf "Encrypt[y/N]: "
+read -r encrypt
+encrypt=${encrypt:-n}
+
+if [ -s "$selection" ]; then
+  printf "Include abs path[y/N]: "
+  read -r include_abs
+  include_abs=${include_abs:-n}
+
+  printf "Compress individualy[y/N]: "
+  read -r individual
+  individual=${individual:-n}
+
+  case $individual in
+    "n"|"N")
+      individual=""
+      printf "Archive name['%s' - default]: " "$default_archivename"
+      read -r zipname
+      zipname=${zipname:-$default_archivename}
+      ;;
+    "y"|"Y")
+      #leave this empty
+      ;;
+  esac
+
+  if test "$individual"; then
+    zip_selection_individualy
+  else
+    zip_selection
+  fi
+  # Clear selection
+  printf "-" > "$NNN_PIPE"
+else
+  zip_hovered "$1" "$2"
+fi
