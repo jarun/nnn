@@ -10,12 +10,12 @@
 # Author: Darukutsu
 
 # Change these for better suited defaults
-default_alg=zstd
+default_alg=gzip
 default_compression=5
 # this will be determined from filename if not provided
-#default_archivename=archive
+default_archivename="archive$(date +%Y%m%d_%H%M%S)"
 
-working_dir=$(pwd)
+working_dir="$2"
 
 choose_alg(){
   case "$alg" in
@@ -39,9 +39,11 @@ choose_alg(){
       ;;
     *)
       alg="$default_alg"
-      echo "picking default - $alg"
+      printf "picking default - '%s'" "$alg"
       ;;
   esac
+
+  which "$alg" >/dev/null 2>&1 || (printf "'%s' not installed, cancelling..." "$alg" && exit 1)
 }
 
 print_alg(){
@@ -102,7 +104,7 @@ compress_tar(){ # filename
 
 zip_selection_individualy(){
   if [ "$include_abs" = "y" ] || [ "$include_abs" = "Y" ]; then
-    for abspath in $(sed 's#\x0# #g' < "$selection"); do
+    for abspath in $(tr '\0' '\n' < "$selection"); do
       if [ "$alg" = "zip" ]; then
         # dont need .zip
         zip -r -$compression "$abspath.zip" "$abspath"
@@ -122,9 +124,9 @@ zip_selection_individualy(){
     #  xargs -0 -I{} tar -I"$alg -$compression" -cvf "{}.tar.$suffix" "{}" < "$selection"
     #fi
   else
-    for abspath in $(sed 's#\x0# #g' < "$selection"); do
-      ppath=$(echo "$abspath" | sed 's#\(/.*/\).*#\1#')
-      file=$(echo "$abspath" | sed 's#/.*/\(.*\)#\1#')
+    for abspath in $(tr '\0' '\n' < "$selection"); do
+      ppath=$(dirname "$abspath")
+      file=$(basename "$abspath")
 
       if [ "$alg" = "zip" ]; then
         cd "$ppath" && zip -r -$compression "$working_dir/$file.zip" "$file"
@@ -145,9 +147,9 @@ zip_selection(){
       xargs -0 tar -cvf "$zipname.tar" < "$selection"
     fi
   else
-    for abspath in $(sed 's#\x0# #g' < "$selection"); do
-      ppath=$(echo "$abspath" | sed 's#\(/.*/\).*#\1#')
-      file=$(echo "$abspath" | sed 's#/.*/\(.*\)#\1#')
+    for abspath in $(tr '\0' '\n' < "$selection"); do
+      ppath=$(dirname "$abspath")
+      file=$(basename "$abspath")
 
       if [ "$alg" = "zip" ]; then
         cd "$ppath" && zip -r -$compression "$working_dir/$zipname.zip" "$file"
@@ -200,7 +202,7 @@ if [ -s "$selection" ]; then
       ;;
   esac
 
-  if test "$individual"; then
+  if [ "$individual" ]; then
     zip_selection_individualy
   else
     zip_selection

@@ -67,6 +67,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [wallpaper](wallpaper) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 | [x2sel](x2sel) | Copy file list from system clipboard to selection | sh | _see in-file docs_ |
 | [xdgdefault](xdgdefault) | Set the default app for the hovered file type | sh | xdg-utils, fzf/dmenu |
+| [zip](zip) | Compress selection with more options | sh | gpg, tar, compression algorithm |
 
 Notes:
 
