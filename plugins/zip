@@ -15,7 +15,7 @@ default_compression=5
 # this will be determined from filename if not provided
 default_archivename="archive$(date +%Y%m%d_%H%M%S)"
 
-working_dir="$2"
+working_dir="$PWD"
 
 choose_alg(){
   case "$alg" in
@@ -70,12 +70,12 @@ if ! [ "$alg" = "tar" ]; then
   # TODO: zstd has more levels
   printf "Choose compression level(except tar)[1.3.5.7.9, %s - default]: " "$default_compression"
   read -r compression
-  case $compression in
+  case "$compression" in
     [0123456789])
       #do nothing
       ;;
     *)
-      compression=$default_compression
+      compression="$default_compression"
       ;;
   esac
 fi
@@ -113,7 +113,7 @@ compress_tar(){
     elif [ "$1" ]; then
       filename="$1"
       # 'keep' is due to zstd not following standard
-      if $alg -"$compression" --keep "$filename.tar"; then
+      if "$alg" -"$compression" --keep "$filename.tar"; then
         rm "$filename.tar"
       fi
     fi
@@ -123,10 +123,16 @@ compress_tar(){
 zip_selection_individualy(){
   if [ "$include_abs" = "y" ] || [ "$include_abs" = "Y" ]; then
     if [ "$alg" = "zip" ]; then
-      xargs -0 -I{} zip -r -"$compression" "{}.zip"
+      xargs -0 -I{} sh -c '
+      filename=$(basename "{}") &&
+      zip -r -'"$compression"' "$filename.zip" "{}"
+      ' < "$selection"
     else
-      xargs -0 -I{} tar -cvf "{}.tar" "{}" < "$selection"
-      compress_tar 'printf "%s" "{}"' "$selection"
+      xargs -0 -I{} sh -c '
+      filename=$(basename "{}") &&
+      tar -cvf "$filename.tar" "{}"
+      ' < "$selection"
+      compress_tar 'basename "{}"' "$selection"
     fi
   else
     if [ "$alg" = "zip" ]; then
@@ -202,7 +208,7 @@ if [ -s "$selection" ]; then
   read -r individual
   individual=${individual:-n}
 
-  case $individual in
+  case "$individual" in
     "n"|"N")
       individual=""
       printf "Archive name['%s' - default]: " "$default_archivename"
