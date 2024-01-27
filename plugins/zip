@@ -93,7 +93,7 @@ password_protect(){ # filename
 }
 
 compress_tar(){ # filename
-  if [ $alg != tar ] && [ $alg != zip ]; then
+  if [ "$alg" != tar ] && [ "$alg" != zip ]; then
     cd "$working_dir" || exit # some needs this
     # 'keep' is due to zstd not following standard
     if $alg -"$compression" --keep "$1.tar"; then
@@ -107,7 +107,7 @@ zip_selection_individualy(){
     for abspath in $(tr '\0' '\n' < "$selection"); do
       if [ "$alg" = "zip" ]; then
         # dont need .zip
-        zip -r -$compression "$abspath.zip" "$abspath"
+        zip -r -"$compression" "$abspath.zip" "$abspath"
       else
         tar -cvf "$abspath.tar" "$abspath"
         compress_tar "$abspath"
@@ -129,7 +129,7 @@ zip_selection_individualy(){
       file=$(basename "$abspath")
 
       if [ "$alg" = "zip" ]; then
-        cd "$ppath" && zip -r -$compression "$working_dir/$file.zip" "$file"
+        cd "$ppath" && zip -r -"$compression" "$working_dir/$file.zip" "$file"
       else
         tar -C "$ppath" -cvf "$file.tar" "$file"
         compress_tar "$file"
@@ -142,7 +142,7 @@ zip_selection_individualy(){
 zip_selection(){
   if [ "$include_abs" = "y" ] || [ "$include_abs" = "Y" ]; then
     if [ "$alg" = "zip" ]; then
-      xargs -0 zip -r -$compression "$zipname.zip" < "$selection"
+      xargs -0 zip -r -"$compression" "$zipname.zip" < "$selection"
     else
       xargs -0 tar -cvf "$zipname.tar" < "$selection"
     fi
@@ -152,7 +152,7 @@ zip_selection(){
       file=$(basename "$abspath")
 
       if [ "$alg" = "zip" ]; then
-        cd "$ppath" && zip -r -$compression "$working_dir/$zipname.zip" "$file"
+        cd "$ppath" && zip -r -"$compression" "$working_dir/$zipname.zip" "$file"
       else
         tar -C "$ppath" -rvf "$zipname.tar" "$file"
       fi
@@ -168,7 +168,7 @@ zip_hovered(){
   zipname="$1"
 
   if [ "$alg" = "zip" ]; then
-    zip -r -$compression "$zipname.zip" "$1"
+    zip -r -"$compression" "$zipname.zip" "$1"
   else
     tar -cvf "$zipname.tar" "$1"
     compress_tar "$zipname"
