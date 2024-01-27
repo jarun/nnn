@@ -128,7 +128,6 @@ zip_selection_individualy(){
       xargs -0 -I{} tar -cvf "{}.tar" "{}" < "$selection"
       compress_tar 'printf "%s" "{}"' "$selection"
     fi
-    password_protect 'basename "{%}"' "$selection"
   else
     if [ "$alg" = "zip" ]; then
       xargs -0 -I{} sh -c '
@@ -145,7 +144,6 @@ zip_selection_individualy(){
       ' < "$selection"
       compress_tar 'basename "{}"' "$selection"
     fi
-    password_protect 'basename "{%}"' "$selection"
   fi
   password_protect 'basename "{%}"' "$selection"
 }
