@@ -89,7 +89,7 @@ password_protect(){
   if [ "$encrypt" = "y" ] || [ "$encrypt" = "Y" ]; then
     cd "$working_dir" || exit # some needs this
     if [ "$2" ]; then
-      xargs -0 -I{} sh -c '
+      xargs -0 -I{%} sh -c '
       filename=$('"$1"') &&
       find . -maxdepth 1 -type f \( -name "$filename.zip" -o -name "$filename.tar*" \) \! -name "*.gpg" -exec gpg -c "{}" \; -exec rm "{}" \;
       ' < "$2"
@@ -97,7 +97,6 @@ password_protect(){
       filename="$1"
       find . -maxdepth 1 -type f \( -name "$filename.zip" -o -name "$filename.tar*" \) \! -name "*.gpg" -exec gpg -c "{}" \; -exec rm "{}" \;
     fi
-
   fi
 }
 
@@ -127,8 +126,9 @@ zip_selection_individualy(){
       xargs -0 -I{} zip -r -"$compression" "{}.zip"
     else
       xargs -0 -I{} tar -cvf "{}.tar" "{}" < "$selection"
-      compress_tar "printf '%s' '{}'" "$selection"
+      compress_tar 'printf "%s" "{}"' "$selection"
     fi
+    password_protect 'basename "{%}"' "$selection"
   else
     if [ "$alg" = "zip" ]; then
       xargs -0 -I{} sh -c '
@@ -143,8 +143,9 @@ zip_selection_individualy(){
       filename=$(basename "{}") &&
       tar -C "$filepath" -cvf "$filename.tar" "$filename"
       ' < "$selection"
-      compress_tar "basename '{}'" "$selection"
+      compress_tar 'basename "{}"' "$selection"
     fi
+    password_protect 'basename "{%}"' "$selection"
   fi
 }
 
