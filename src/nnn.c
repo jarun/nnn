@@ -306,6 +306,7 @@ typedef struct entry {
 	uid_t uid; /* 4 bytes */
 	gid_t gid; /* 4 bytes */
 #endif
+        int ncount;
 } *pEntry;
 
 /* Selection marker */
@@ -518,6 +519,9 @@ alignas(max_align_t) static char g_pipepath[TMP_LEN_MAX];
 
 /* Non-persistent runtime states */
 static runstate g_state;
+
+/* Used for SEL_JUMP */
+static bool show_linenumber;
 
 /* Options to identify file MIME */
 #if defined(__APPLE__)
@@ -4251,6 +4255,14 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 			attroff(attrs);
 	}
 
+        if (show_linenumber) {
+                if (ent->ncount == cur+1 && sel) {
+                  printw("%4d", ent->ncount);
+                } else{
+                  printw("%+4d", ent->ncount);
+                }
+        }
+
 	attrs = 0;
 
 	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
@@ -6124,32 +6136,6 @@ static void handle_screen_move(enum action sel)
 		move_cursor(curscroll, 1);
 		curscroll -= onscreen >> 1;
 		break;
-	case SEL_JUMP:
-	{
-		char *input = xreadline(NULL, "jump (+n/-n/n): ");
-
-		if (!input || !*input)
-			break;
-		if (input[0] == '-') {
-			cur -= atoi(input + 1);
-			if (cur < 0)
-				cur = 0;
-		} else if (input[0] == '+') {
-			cur += atoi(input + 1);
-			if (cur >= ndents)
-				cur = ndents - 1;
-		} else {
-			int index = atoi(input);
-
-			if ((index < 1) || (index > ndents))
-				break;
-			cur = index - 1;
-		}
-		onscreen = xlines - 4;
-		move_cursor(cur, 1);
-		curscroll -= onscreen >> 1;
-		break;
-	}
 	case SEL_HOME:
 		move_cursor(0, 1);
 		break;
@@ -6697,6 +6683,14 @@ static void redraw(char *path)
 
 		if (len)
 			findmarkentry(len, &pdents[i]);
+
+                // relative numbering
+                pdents[i].ncount = i-cur;
+                if (i-cur == 0)
+                        pdents[i].ncount = cur + 1;
+
+                // absolute numbering
+                //pdents[i].ncount = i;
 
 		printent(&pdents[i], ncols, i == cur);
 	}
@@ -7251,13 +7245,43 @@ nochange:
 		case SEL_HOME: // fallthrough
 		case SEL_END: // fallthrough
 		case SEL_FIRST: // fallthrough
-		case SEL_JUMP: // fallthrough
 		case SEL_YOUNG:
 			if (ndents) {
 				g_state.move = 1;
 				handle_screen_move(sel);
 			}
 			break;
+                case SEL_JUMP:
+                {
+                        show_linenumber=true;
+			redraw(path);
+                        show_linenumber=false;
+                        char *input = xreadline(NULL, "jump (+n/-n/n): ");
+
+                        if (!input || !*input) {
+                                redraw(path);
+                                break;
+                        }
+                        if (input[0] == '-') {
+                                cur -= atoi(input + 1);
+                                if (cur < 0)
+                                        cur = 0;
+                        } else if (input[0] == '+') {
+                                cur += atoi(input + 1);
+                                if (cur >= ndents)
+                                        cur = ndents - 1;
+                        } else {
+                                int index = atoi(input);
+
+                                if ((index < 1) || (index > ndents))
+                                        break;
+                                cur = index - 1;
+                        }
+                        int onscreen = xlines - 4;
+                        move_cursor(cur, 1);
+                        curscroll -= onscreen >> 1;
+                        break;
+                }
 		case SEL_CDHOME: // fallthrough
 		case SEL_CDBEGIN: // fallthrough
 		case SEL_CDLAST: // fallthrough

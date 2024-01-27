@@ -35,14 +35,15 @@ index 83ecdb90..4397944a 100644
  /* TYPE DEFINITIONS */
  typedef unsigned int uint_t;
  typedef unsigned char uchar_t;
-@@ -294,6 +313,7 @@ typedef struct entry {
- 	uid_t uid; /* 4 bytes */
- 	gid_t gid; /* 4 bytes */
+@@ -307,6 +326,7 @@ typedef struct entry {
+        gid_t gid; /* 4 bytes */
  #endif
-+	char git_status[2][5];
+        int ncount;
++       char git_status[2][5];
  } *pEntry;
-
+ 
  /* Selection marker */
+
 @@ -349,6 +369,7 @@ typedef struct {
  	uint_t cliopener  : 1;  /* All-CLI app opener */
  	uint_t waitedit   : 1;  /* For ops that can't be detached, used EDITOR */
