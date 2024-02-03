@@ -1312,14 +1312,14 @@ static char *abspath(const char *filepath, char *cwd, char *buf)
 }
 
 /* finds abspath of link pointed by filepath, taking cwd into account */
-static char *bmtarget(const char *filepath, char *cwd, char *buf) 
+static char *bmtarget(const char *filepath, char *cwd, char *buf)
 {
 	char target[PATH_MAX + 1];
 	ssize_t n = readlink(filepath, target, PATH_MAX);
 	if (n != -1) {
 		target[n] = '\0';
 		return abspath(target, cwd, buf);
-	} 
+	}
 	return NULL;
 }
 
@@ -3436,7 +3436,14 @@ static int filterentries(char *path, char *lastname)
 			continue;
 #ifndef NOMOUSE
 		case KEY_MOUSE:
+		{
+			MEVENT event = {0};
+			getmouse(&event);
+			if (event.bstate == 0)
+				continue;
+			ungetmouse(&event);
 			goto end;
+		}
 #endif
 		case ESC:
 			if (handle_alt_key(ch) != ERR) {
