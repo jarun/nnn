@@ -10,13 +10,13 @@ diff --git a/src/nnn.c b/src/nnn.c
 index 0388b23c..66d3316a 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -390,7 +390,8 @@ typedef struct {
- 	uint_t uidgid     : 1;  /* Show owner and group info */
+@@ -391,7 +391,8 @@ typedef struct {
  	uint_t usebsdtar  : 1;  /* Use bsdtar as default archive utility */
  	uint_t xprompt    : 1;  /* Use native prompt instead of readline prompt */
--	uint_t reserved   : 4;  /* Adjust when adding/removing a field */
+ 	uint_t showlines  : 1;  /* Show line numbers */
+-	uint_t reserved   : 3;  /* Adjust when adding/removing a field */
 +	uint_t previewer  : 1;  /* Run state of previewer */
-+	uint_t reserved   : 3;  /* Adjust when adding/removing a field */
++	uint_t reserved   : 2;  /* Adjust when adding/removing a field */
  } runstate;
  
  /* Contexts or workspaces */
