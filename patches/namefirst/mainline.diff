@@ -71,9 +71,9 @@ index f8a2c58..9802a1f 100644
  }
  
  static off_t get_size(off_t size, off_t *pval, int comp)
-@@ -4134,33 +4141,7 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int
- static void printent(const struct entry *ent, uint_t namecols, bool sel)
+@@ -4228,38 +4235,13 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
  {
+ 	const struct entry *ent = &pdents[pdents_index];
  	char ind = '\0';
 -	int attrs;
 -
@@ -99,14 +99,19 @@ index f8a2c58..9802a1f 100644
 -		if (attrs)
 -			attroff(attrs);
 -	}
--
++	int attrs = 0, namelen;
+ 
+ 	if (g_state.showlines) {
+ 		ptrdiff_t rel_num = pdents_index - cur;
+ 		printw(rel_num == 0 ? "%4td" : "%+4td", rel_num);
+ 	}
+ 
 -	attrs = 0;
 -
-+	int attrs = 0, namelen;
  	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
  
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
-@@ -4185,15 +4166,40 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
+@@ -4284,15 +4266,40 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
  		++namecols;
  
  #ifndef NOLC
@@ -149,8 +154,8 @@ index f8a2c58..9802a1f 100644
 +		attroff(attrs);
  }
  
- static void savecurctx(char *path, char *curname, int nextctx)
-@@ -6356,26 +6362,19 @@ static void statusbar(char *path)
+ /**
+@@ -6527,26 +6534,19 @@ static void statusbar(char *path)
  	tocursor();
  }
  

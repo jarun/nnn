@@ -390,7 +390,8 @@ typedef struct {
 	uint_t uidgid     : 1;  /* Show owner and group info */
 	uint_t usebsdtar  : 1;  /* Use bsdtar as default archive utility */
 	uint_t xprompt    : 1;  /* Use native prompt instead of readline prompt */
-	uint_t reserved   : 4;  /* Adjust when adding/removing a field */
+	uint_t showlines  : 1;  /* Show line numbers */
+	uint_t reserved   : 3;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -4223,8 +4224,9 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int 
 	return C_UND;
 }
 
-static void printent(const struct entry *ent, uint_t namecols, bool sel)
+static void printent(int pdents_index, uint_t namecols, bool sel)
 {
+	const struct entry *ent = &pdents[pdents_index];
 	char ind = '\0';
 	int attrs;
 
@@ -4249,6 +4251,11 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
 
 		if (attrs)
 			attroff(attrs);
+	}
+
+	if (g_state.showlines) {
+		ptrdiff_t rel_num = pdents_index - cur;
+		printw(rel_num == 0 ? "%4td" : "%+4td", rel_num);
 	}
 
 	attrs = 0;
@@ -6559,7 +6566,7 @@ static void draw_line(int ncols)
 
 	move(2 + last - curscroll, 0);
 	macos_icons_hack();
-	printent(&pdents[last], ncols, FALSE);
+	printent(last, ncols, FALSE);
 
 	if (g_state.oldcolor && (pdents[cur].flags & DIR_OR_DIRLNK)) {
 		if (!dir)  {/* First file is not a directory */
@@ -6573,7 +6580,7 @@ static void draw_line(int ncols)
 
 	move(2 + cur - curscroll, 0);
 	macos_icons_hack();
-	printent(&pdents[cur], ncols, TRUE);
+	printent(cur, ncols, TRUE);
 
 	/* Must reset e.g. no files in dir */
 	if (dir)
@@ -6698,7 +6705,7 @@ static void redraw(char *path)
 		if (len)
 			findmarkentry(len, &pdents[i]);
 
-		printent(&pdents[i], ncols, i == cur);
+		printent(i, ncols, i == cur);
 	}
 
 	/* Must reset e.g. no files in dir */
@@ -7251,11 +7258,18 @@ nochange:
 		case SEL_HOME: // fallthrough
 		case SEL_END: // fallthrough
 		case SEL_FIRST: // fallthrough
-		case SEL_JUMP: // fallthrough
 		case SEL_YOUNG:
 			if (ndents) {
 				g_state.move = 1;
 				handle_screen_move(sel);
+			}
+			break;
+		case SEL_JUMP:
+			if (ndents) {
+				g_state.showlines = 1;
+				redraw(path);
+				handle_screen_move(sel);
+				g_state.showlines = 0;
 			}
 			break;
 		case SEL_CDHOME: // fallthrough
