@@ -2,8 +2,12 @@
 
 # Description: Find and list files by mime type in smart context
 #
+# Dependencies:
+#   - file
+#   - mimetype (optional, PERL File MimeInfo)
+#
 # Shell: POSIX compliant
-# Author: Arun Prakash Jana
+# Author: Arun Prakash Jana, Michel DHOOGE
 
 # shellcheck disable=SC1090,SC1091
 . "$(dirname "$0")"/.nnn-plugin-helper
