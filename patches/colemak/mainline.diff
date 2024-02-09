@@ -1,12 +1,8 @@
-# Description: Change key bindings for comfortable use with Colemak keyboard
-#              layout. This diff was made in 4.7 release version of nnn.
-#
-# Author: github.com/jacmoe
 diff --git a/src/nnn.c b/src/nnn.c
-index 21a7370b..2ddb4053 100644
+index 6792d503..0a59e8e3 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -5109,12 +5109,12 @@ static void show_help(const char *path)
+@@ -5148,12 +5148,12 @@ static void show_help(const char *path)
  	"2(___n))\n"
  	"0\n"
  	"1NAVIGATION\n"
@@ -24,7 +20,7 @@ index 21a7370b..2ddb4053 100644
  	      "8B (,)  Book(mark)%11b ^/  Select bookmark\n"
  		"a1-4  Context%11(Sh)Tab  Cycle/new context\n"
  	    "62Esc ^Q  Quit%19^y  Next young\n"
-@@ -5122,20 +5122,20 @@ static void show_help(const char *path)
+@@ -5161,20 +5161,20 @@ static void show_help(const char *path)
  		  "cq  Quit context\n"
  	"0\n"
  	"1FILTER & PROMPT\n"
@@ -46,14 +42,14 @@ index 21a7370b..2ddb4053 100644
  	       "9p ^P  Copy here%12w ^W  Cp/mv sel as\n"
 -	       "9v ^V  Move here%15E  Edit sel list\n"
 +	       "9v ^V  Move here%15l  Edit sel list\n"
- 	       "9x ^X  Delete%18S  Listed sel size\n"
- 		"aEsc  Send to FIFO\n"
+ 	       "9x ^X  Delete or trash%09S  Listed sel size\n"
+ 		  "cX  Delete (rm -rf)%07Esc  Send to FIFO\n"
  	"0\n"
 diff --git a/src/nnn.h b/src/nnn.h
-index 3e4ea19c..b0eb7cdb 100644
+index bd500244..b12df5c0 100644
 --- a/src/nnn.h
 +++ b/src/nnn.h
-@@ -137,12 +137,12 @@ static struct key bindings[] = {
+@@ -139,12 +139,12 @@ static struct key bindings[] = {
  	{ '\r',           SEL_OPEN },
  	/* Pure navigate inside */
  	{ KEY_RIGHT,      SEL_NAV_IN },
@@ -69,7 +65,7 @@ index 3e4ea19c..b0eb7cdb 100644
  	{ KEY_UP,         SEL_PREV },
  	/* Page down */
  	{ KEY_NPAGE,      SEL_PGDN },
-@@ -155,11 +155,11 @@ static struct key bindings[] = {
+@@ -157,11 +157,11 @@ static struct key bindings[] = {
  	/* First entry */
  	{ KEY_HOME,       SEL_HOME },
  	{ 'g',            SEL_HOME },
@@ -83,7 +79,7 @@ index 3e4ea19c..b0eb7cdb 100644
  	/* Go to first file */
  	{ '\'',           SEL_FIRST },
  	/* Jump to an entry number/offset */
-@@ -199,7 +199,7 @@ static struct key bindings[] = {
+@@ -202,7 +202,7 @@ static struct key bindings[] = {
  	/* Filter */
  	{ '/',            SEL_FLTR },
  	/* Toggle filter mode */
@@ -92,7 +88,7 @@ index 3e4ea19c..b0eb7cdb 100644
  	/* Toggle hide .dot files */
  	{ '.',            SEL_HIDDEN },
  	/* Detailed listing */
-@@ -226,7 +226,7 @@ static struct key bindings[] = {
+@@ -229,7 +229,7 @@ static struct key bindings[] = {
  	/* Invert selection in current dir */
  	{ 'A',            SEL_SELINV },
  	/* List, edit selection */
@@ -101,7 +97,7 @@ index 3e4ea19c..b0eb7cdb 100644
  	/* Copy from selection buffer */
  	{ 'p',            SEL_CP },
  	{ CONTROL('P'),   SEL_CP },
-@@ -243,7 +243,7 @@ static struct key bindings[] = {
+@@ -247,7 +247,7 @@ static struct key bindings[] = {
  	{ 'o',            SEL_OPENWITH },
  	{ CONTROL('O'),   SEL_OPENWITH },
  	/* Create a new file */
@@ -110,7 +106,7 @@ index 3e4ea19c..b0eb7cdb 100644
  	/* Show rename prompt */
  	{ CONTROL('R'),   SEL_RENAME },
  	/* Rename contents of current dir */
-@@ -255,7 +255,7 @@ static struct key bindings[] = {
+@@ -259,7 +259,7 @@ static struct key bindings[] = {
  	/* Toggle auto-advance on file open */
  	{ CONTROL('J'),   SEL_AUTONEXT },
  	/* Edit in EDITOR */

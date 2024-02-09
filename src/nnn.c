@@ -1551,12 +1551,12 @@ static void xdelay(useconds_t delay)
 	usleep(delay);
 }
 
-static char confirm_force(bool selection)
+static char confirm_force(bool selection, bool use_trash)
 {
 	char str[64];
 
 	snprintf(str, 64, messages[MSG_FORCE_RM],
-		 g_state.trash ? utils[UTIL_GIO_TRASH] + 4 : utils[UTIL_RM_RF],
+		 use_trash ? utils[UTIL_GIO_TRASH] + 4 : utils[UTIL_RM_RF],
 		 (selection ? "selected" : "hovered"));
 
 	int r = get_input(str);
@@ -1565,7 +1565,7 @@ static char confirm_force(bool selection)
 		return '\0'; /* cancel */
 	if (r == 'y' || r == 'Y')
 		return 'f'; /* forceful for rm */
-	return (g_state.trash ? '\0' : 'i'); /* interactive for rm */
+	return (use_trash ? '\0' : 'i'); /* interactive for rm */
 }
 
 /* Writes buflen char(s) from buf to a file */
@@ -2548,13 +2548,13 @@ static void opstr(char *buf, char *op)
 	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s \"$0\" \"$@\" . < /dev/tty' < %s", op, selpath);
 }
 
-static bool rmmulstr(char *buf)
+static bool rmmulstr(char *buf, bool use_trash)
 {
-	char r = confirm_force(TRUE);
+	char r = confirm_force(TRUE, use_trash);
 	if (!r)
 		return FALSE;
 
-	if (!g_state.trash)
+	if (!use_trash)
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr \"$0\" \"$@\" < /dev/tty' < %s",
 			 r, selpath);
 	else
@@ -2565,13 +2565,13 @@ static bool rmmulstr(char *buf)
 }
 
 /* Returns TRUE if file is removed, else FALSE */
-static bool xrm(char * const fpath)
+static bool xrm(char * const fpath, bool use_trash)
 {
-	char r = confirm_force(FALSE);
+	char r = confirm_force(FALSE, use_trash);
 	if (!r)
 		return FALSE;
 
-	if (!g_state.trash) {
+	if (!use_trash) {
 		char rm_opts[] = "-ir";
 
 		rm_opts[1] = r;
@@ -2702,8 +2702,8 @@ static bool cpmvrm_selection(enum action sel, char *path)
 			return FALSE;
 		}
 		break;
-	default: /* SEL_RM */
-		if (!rmmulstr(g_buf)) {
+	default: /* SEL_TRASH, SEL_RM_ONLY */
+		if (!rmmulstr(g_buf, g_state.trash && sel == SEL_TRASH)) {
 			printmsg(messages[MSG_CANCEL]);
 			return FALSE;
 		}
@@ -5175,8 +5175,8 @@ static void show_help(const char *path)
 	          "ca  Select all%14A  Invert sel\n"
 	       "9p ^P  Copy here%12w ^W  Cp/mv sel as\n"
 	       "9v ^V  Move here%15E  Edit sel list\n"
-	       "9x ^X  Delete%18S  Listed sel size\n"
-		"aEsc  Send to FIFO\n"
+	       "9x ^X  Delete or trash%09S  Listed sel size\n"
+		  "cX  Delete (rm -rf)%07Esc  Send to FIFO\n"
 	"0\n"
 	"1MISC\n"
 	      "8Alt ;  Select plugin%11=  Launch app\n"
@@ -7651,9 +7651,10 @@ nochange:
 		case SEL_CP: // fallthrough
 		case SEL_MV: // fallthrough
 		case SEL_CPMVAS: // fallthrough
-		case SEL_RM:
+		case SEL_TRASH: // fallthrough
+		case SEL_RM_ONLY:
 		{
-			if (sel == SEL_RM) {
+			if (sel == SEL_TRASH || sel == SEL_RM_ONLY) {
 				r = get_cur_or_sel();
 				if (!r) {
 					statusbar(path);
@@ -7664,7 +7665,7 @@ nochange:
 					tmp = (listpath && xstrcmp(path, listpath) == 0)
 					      ? listroot : path;
 					mkpath(tmp, pdents[cur].name, newpath);
-					if (!xrm(newpath))
+					if (!xrm(newpath, g_state.trash && sel == SEL_TRASH))
 						continue;
 
 					xrmfromsel(tmp, newpath);
