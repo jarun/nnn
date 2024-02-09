@@ -41,7 +41,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [ipinfo](ipinfo) | Fetch external IP address and whois information | sh | curl, whois |
 | [kdeconnect](kdeconnect) | Send selected files to an Android device [✓] | sh | kdeconnect-cli |
 | [launch](launch) | GUI application launcher | sh | fzf |
-| [mimelist](mimelist) | List files by mime in subtree | sh | - |
+| [mimelist](mimelist) | List files by mime in subtree | sh | file/mimetype |
 | [moclyrics](moclyrics) | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
 | [mocq](mocq) | Queue/play selection/dir/file in moc [✓] | sh | [moc](http://moc.daper.net/) |
 | [mp3conv](mp3conv) | Extract audio from multimedia as mp3 | sh | ffmpeg |

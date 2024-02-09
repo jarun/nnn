@@ -353,7 +353,7 @@ Handy bash/zsh shell function to list files by mime-type in current directory:
 
     list ()
     {
-        find . -maxdepth 1 | file -if- | grep "$1" | awk -F: '{printf "%s\0", $1}' | nnn
+        find . -maxdepth 1 | file -if- | grep "$1" | awk -F: '{printf "%s%c", $1, 0}' | nnn
     }
 .Ed
 .Pp
