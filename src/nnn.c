@@ -589,7 +589,7 @@ static char * const utils[] = {
 	".nmv",
 	"trash-put",
 	"gio trash",
-	"rm -rf",
+	"rm -rf --",
 	"archivemount",
 };
 
@@ -743,8 +743,8 @@ static const char * const envs[] = {
 
 #define PROGRESS_CP   "cpg -giRp"
 #define PROGRESS_MV   "mvg -gi"
-static char cp[sizeof PROGRESS_CP] = "cp -iRp";
-static char mv[sizeof PROGRESS_MV] = "mv -i";
+static char cp[sizeof PROGRESS_CP] = "cp -iRp --";
+static char mv[sizeof PROGRESS_MV] = "mv -i --";
 
 /* Archive commands */
 static char * const archive_cmd[] = {"atool -a", "bsdtar -acvf", "zip -r", "tar -acvf"};
@@ -2555,7 +2555,7 @@ static bool rmmulstr(char *buf, bool use_trash)
 		return FALSE;
 
 	if (!use_trash)
-		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr \"$0\" \"$@\" < /dev/tty' < %s",
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr -- \"$0\" \"$@\" < /dev/tty' < %s",
 			 r, selpath);
 	else
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 %s < %s",
@@ -2575,7 +2575,7 @@ static bool xrm(char * const fpath, bool use_trash)
 		char rm_opts[] = "-ir";
 
 		rm_opts[1] = r;
-		spawn("rm", rm_opts, fpath, NULL, F_NORMAL | F_CHKRTN);
+		spawn("rm", rm_opts, "--", fpath, F_NORMAL | F_CHKRTN);
 	} else
 		spawn(utils[(g_state.trash == 1) ? UTIL_TRASH_CLI : UTIL_GIO_TRASH],
 		      fpath, NULL, NULL, F_NORMAL | F_MULTI);
@@ -2728,7 +2728,7 @@ static bool batch_rename(void)
 	bool dir = FALSE, ret = FALSE;
 	char foriginal[TMP_LEN_MAX] = {0};
 	static const char batchrenamecmd[] = "paste -d'\n' %s %s | "SED" 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
-					     "tr '\n' '\\0' | xargs -0 -n2 sh -c 'mv -i \"$0\" \"$@\" <"
+					     "tr '\n' '\\0' | xargs -0 -n2 sh -c 'mv -i -- \"$0\" \"$@\" <"
 					     " /dev/tty'";
 	char buf[sizeof(batchrenamecmd) + (PATH_MAX << 1)];
 	int i = get_cur_or_sel();
@@ -7861,7 +7861,7 @@ nochange:
 			if (sel == SEL_RENAME) {
 				/* Rename the file */
 				if (ret == 'd')
-					spawn("cp -rp", pdents[cur].name, tmp, NULL, F_SILENT);
+					spawn("cp -rp --", pdents[cur].name, tmp, NULL, F_SILENT);
 				else if (rename(pdents[cur].name, tmp) != 0) {
 					printwarn(&presel);
 					goto nochange;

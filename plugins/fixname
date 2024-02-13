@@ -65,7 +65,7 @@ for i in "${targets[@]}"; do
         if [ -e "$(cleanup "$i")" ]; then
             tmp='_'
         fi
-        mv "$i" "$tmp$(cleanup "$i")";
+        mv -- "$i" "$tmp$(cleanup "$i")";
     fi
 done
 

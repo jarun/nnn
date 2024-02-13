@@ -25,7 +25,7 @@ dirdiff() {
     ls -A1 "$1" > "$dir1"
     ls -A1 "$2" > "$dir2"
     $diffcmd "$dir1" "$dir2"
-    rm "$dir1" "$dir2"
+    rm -- "$dir1" "$dir2"
 }
 
 if [ -s "$selection" ]; then

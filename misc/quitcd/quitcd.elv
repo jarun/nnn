@@ -36,6 +36,6 @@ fn n {|@a|
 
 	if (path:is-regular $E:NNN_TMPFILE) {
 		eval (slurp < $E:NNN_TMPFILE)
-		rm $E:NNN_TMPFILE
+		rm -- $E:NNN_TMPFILE
 	}
 }

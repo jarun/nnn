@@ -21,4 +21,4 @@ fs=($( osascript -e "use framework \"Foundation\"
     pb's readObjectsForClasses:[NSURL] options:[]
     (result's valueForKey:\"path\") as list as text" ))
 
-cp -R "${fs[@]}" "$2/"
+cp -R -- "${fs[@]}" "$2/"

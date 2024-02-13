@@ -54,7 +54,7 @@ make_thumbs() {
     done
     for file in "$NNN_PREVIEWDIR$dir"/*; do
         filename="$(basename "$file" .jpg)"
-        [ ! -e "$dir/$filename" ] && rm "$file" 2>/dev/null
+        [ ! -e "$dir/$filename" ] && rm -- "$file" 2>/dev/null
     done
 }
 

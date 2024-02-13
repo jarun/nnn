@@ -277,7 +277,7 @@ listimages() {
 load_dir() {
     abspath "$2"
     tmp="${TMPDIR:-/tmp}/nuke_$$"
-    trap 'rm -f $tmp' EXIT
+    trap 'rm -f -- "$tmp"' EXIT
     count="$(listimages "$abs_target" | grep -a -m 1 -ZznF "$abs_target" | cut -d: -f1)"
 
     if [ -n "$count" ]; then
@@ -402,7 +402,7 @@ handle_multimedia() {
         #                  "${FPATH}";
         #     then
         #         convert -- "${preview_png}" "${IMAGE_CACHE_PATH}" \
-        #             && rm "${preview_png}" \
+        #             && rm -- "${preview_png}" \
         #             && exit 6
         #     else
         #         exit 1

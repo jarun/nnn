@@ -259,7 +259,7 @@ fifo_pager() {
         fi
     )
 
-    rm "$FIFOPATH"
+    rm -- "$FIFOPATH"
 }
 
 # Binary file: show file info inside the pager
@@ -423,7 +423,7 @@ generate_preview() {
                    fi ;;
             office) libreoffice --convert-to jpg "$3" --outdir "$NNN_PREVIEWDIR/${3%/*}"
                     filename="$(printf "%s" "${3##*/}" | cut -d. -f1)"
-                    mv "$NNN_PREVIEWDIR/${3%/*}/$filename.jpg" "$NNN_PREVIEWDIR/$3.jpg" ;;
+                    mv -- "$NNN_PREVIEWDIR/${3%/*}/$filename.jpg" "$NNN_PREVIEWDIR/$3.jpg" ;;
             pdf) pdftoppm -jpeg -f 1 -singlefile "$3" "$NNN_PREVIEWDIR/$3" ;;
             djvu) ddjvu -format=ppm -page=1 "$3" "$NNN_PREVIEWDIR/$3.jpg" ;;
             video) video_preview "$1" "$2" "$3" && return ;;
@@ -467,7 +467,7 @@ video_preview() {
     if [ -n "$NNN_PREVIEWVIDEO" ]; then
         mpv --no-config --really-quiet --vo="$NNN_PREVIEWVIDEO" --profile=sw-fast --loop-file --no-audio "$4" "$3" &
     else
-        ffmpegthumbnailer -m -s0 -i "$3" -o "$NNN_PREVIEWDIR/$3.jpg" || rm "$NNN_PREVIEWDIR/$3.jpg" &
+        ffmpegthumbnailer -m -s0 -i "$3" -o "$NNN_PREVIEWDIR/$3.jpg" || rm -- "$NNN_PREVIEWDIR/$3.jpg" &
     fi
     printf "%s" "$!" > "$PREVIEWPID"
 }
@@ -517,7 +517,7 @@ if [ "$PREVIEW_MODE" -eq 1 ] 2>/dev/null; then
     printf "%s" "$!" > "$FIFOPID"
     printf "%s" "$PWD/$1" > "$CURSEL"
     trap 'winch_handler' WINCH
-    trap 'rm "$PREVIEWPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" "$POSOFFSET" 2>/dev/null' INT HUP EXIT
+    trap 'rm -- "$PREVIEWPID" "$CURSEL" "$FIFO_UEBERZUG" "$FIFOPID" "$POSOFFSET" 2>/dev/null' INT HUP EXIT
     while kill -s 0 $WAITPID; do
       wait $WAITPID 2>/dev/null
     done

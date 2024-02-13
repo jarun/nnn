@@ -29,4 +29,4 @@ $EDITOR "$tmpfile"
 
 sed "/^\//d" "$tmpfile" | xargs -n1 -I{} sh -c "$cmd"
 
-rm "$tmpfile"
+rm -- "$tmpfile"

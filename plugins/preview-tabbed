@@ -92,7 +92,7 @@ start_tabbed () {
 
     read -r XID < "$FIFO"
 
-    rm "$FIFO"
+    rm -- "$FIFO"
 }
 
 get_viewer_pid () {

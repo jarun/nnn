@@ -60,7 +60,7 @@ if [ -n "$LIST" ]; then
         # Alternative for 'fd'
         # sel=$(xargs -d '\n' < "$tmpfile" fd . | fzf --delimiter / --tiebreak=begin --info=hidden)
 
-        rm "$tmpfile"
+        rm -- "$tmpfile"
     else
         printf "find missing"
         read -r _
