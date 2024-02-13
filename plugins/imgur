@@ -583,7 +583,7 @@ for upload_file in "${upload_files[@]}"; do
   # delete file if configured
   if [ "${keep_file}" = "false" ] && [ -z "${1}" ]; then
     echo "Deleting temp file ${file_dir}/${img_file}"
-    rm -rf "${img_file}"
+    rm -rf -- "${img_file}"
   fi
 
   echo ""

@@ -15,7 +15,7 @@ if [ -n "$1" ]; then
 
         pico2wave -w "$tmpf".wav -l en-GB "$(tr '\n' ' ' < "$tmpf".txt)"
 
-        rm "$tmpf".txt
+        rm -- "$tmpf".txt
     else
         pico2wave -w "$tmpf".wav -l en-GB "$(tr '\n' ' ' < "$1")"
     fi
@@ -26,5 +26,5 @@ if [ -n "$1" ]; then
     # flat read but better quality
     # play -qV0 "$tmpf".wav treble 2 gain -l 2
 
-    rm "$tmpf".wav
+    rm -- "$tmpf".wav
 fi

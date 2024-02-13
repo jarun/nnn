@@ -32,7 +32,7 @@ case "$NNN_TRASH" in
 	2)
 		RM_UTIL="gio trash" ;;
 	*)
-		RM_UTIL="rm -ri" ;;
+		RM_UTIL="rm -ri --" ;;
 esac
 
 exit_status=0
@@ -64,7 +64,7 @@ lines=$(printf "%s\n" "$arr" | wc -l)
 width=${#lines}
 
 dst_file=$(mktemp "$TMPDIR/.nnnXXXXXX")
-trap 'rm -f "$dst_file"' EXIT
+trap 'rm -f -- "$dst_file"' EXIT
 
 printf "%s" "$arr" | awk '{printf("%'"${width}"'d %s\n", NR, $0)}' > "$dst_file"
 
@@ -122,7 +122,7 @@ while read -r num name; do
 				tmp="$tmp~$c"
 			done
 
-			if mv "$name" "$tmp"; then
+			if mv -- "$name" "$tmp"; then
 				if [ "$VERBOSE" -ne 0 ]; then
 					printf "'%s' -> '%s'\n" "$name" "$tmp"
 				fi
@@ -142,7 +142,7 @@ while read -r num name; do
 		if [ ! -d "$dir" ] && ! mkdir -p "$dir"; then
 			printf "%s: failed to create directory tree %s\n" "$0" "$dir" > /dev/stderr
 			exit_status=1
-		elif ! mv -i "$src" "$name"; then
+		elif ! mv -i -- "$src" "$name"; then
 			printf "%s: failed to rename %s to %s: %s\n" "$0" "$name" "$tmp" "$!" > /dev/stderr
 			exit_status=1
 		else

@@ -30,7 +30,7 @@ export def --env n [
 		# Fix post-processing of nnn's given path that escapes its single quotes with POSIX syntax.
 		let path = open $nnn_tmpfile | str substring 4..-1 | str replace --all `'\''` `'`
 
-		^rm $nnn_tmpfile
+		^rm -- $nnn_tmpfile
 
 		cd $path
 	}

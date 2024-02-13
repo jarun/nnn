@@ -40,7 +40,7 @@ git checkout v0.3.2
 if [ ! -d "./libs" ]; then
     mkdir libs
 else
-    rm -vf libs/*
+    rm -vf -- libs/*
 fi
 make CC=musl-gcc CFLAGS=-O3 LDFLAGS=-static all-static -j$(($(nproc)+1))
 cp -v libcurses/libcurses.a libterminfo/libterminfo.a libs/
@@ -57,7 +57,7 @@ make CC=musl-gcc CFLAGS=-O3 LDFLAGS=-static -j$(($(nproc)+1))
 
 # Compile nnn
 cd ..
-[ -e "./netbsd-curses" ] || rm "$BIN"
+[ -e "./netbsd-curses" ] || rm -- "$BIN"
 musl-gcc -O3 -DNORL -DNOMOUSE -std=c11 -Wall -Wextra -Wshadow -I./netbsd-curses/libcurses -I./musl-fts -o "$BIN" src/nnn.c -Wl,-Bsymbolic-functions -lpthread -L./netbsd-curses/libs -lcurses -lterminfo -static -L./musl-fts/.libs -lfts
 strip "$BIN"
 

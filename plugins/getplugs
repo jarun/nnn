@@ -24,7 +24,7 @@ prompt () {
 	if [ "$operation" = "m" ]; then
 		op="merge"
 	elif [ "$operation" = "o" ]; then
-		op="cp -vRf"
+		op="cp -vRf --"
 	else
 		op="true"
 	fi
@@ -62,7 +62,7 @@ for f in $(find . -maxdepth 1 \( ! -iname "." ! -iname "*.md" \)); do
 			$op "$f" ../../plugins/
 		fi
 	else
-		cp -vRf "$f" ../../plugins/
+		cp -vRf -- "$f" ../../plugins/
 	fi
 done
 cd ../.. || exit 1

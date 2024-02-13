@@ -46,7 +46,7 @@ if [ -n "$entry" ]; then
         $SHELL -c "$(cat "$tmpfile")"
     fi
 
-    rm "$tmpfile"
+    rm -- "$tmpfile"
 
     printf "Press any key to exit"
     read -r _
