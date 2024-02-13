@@ -741,8 +741,8 @@ static const char * const envs[] = {
 #define T_CHANGE 1
 #define T_MOD    2
 
-#define PROGRESS_CP   "cpg -giRp"
-#define PROGRESS_MV   "mvg -gi"
+#define PROGRESS_CP   "cpg -giRp --"
+#define PROGRESS_MV   "mvg -gi --"
 static char cp[sizeof PROGRESS_CP] = "cp -iRp --";
 static char mv[sizeof PROGRESS_MV] = "mv -i --";
 
