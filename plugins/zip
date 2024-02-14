@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-#set -x
+# set -x
 # Better zip solution, compress selection - archive or batch(deterministic way '$filename.zip')
 # or hover individual compression
 #
@@ -13,11 +13,26 @@
 default_alg=gzip
 default_compression=5
 # this will be determined from filename if not provided
-default_archivename="archive$(date +%Y%m%d_%H%M%S)"
+default_archivename="archive_$(date +%Y%m%d_%H%M%S)"
 
 working_dir="$PWD"
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
-choose_alg(){
+choose_alg() {
+  cat << EOF
+# Reference: https://linuxreviews.org/Comparison_of_Compression_Algorithms
+1. bzip2
+2. gzip
+3. lzip
+4. lzma
+5. tar (archive only, no compression)
+6. zip
+7. zstd
+8. xz
+EOF
+
+  printf "Pick algorithm [default - %s]: " "$default_alg"
+  read -r alg
   case "$alg" in
     "1"|"bzip2") alg=bzip2
       ;;
@@ -39,53 +54,14 @@ choose_alg(){
       ;;
     *)
       alg="$default_alg"
-      printf "picking default - '%s'\n" "$alg"
+      printf "unrecognized input, picking default - '%s'\n" "$alg" >&2
       ;;
   esac
 
   command -v "$alg" >/dev/null 2>&1 || { printf "'%s' not installed, cancelling...\n" "$alg" >&2; exit 1; }
 }
 
-print_alg(){
-  printf "
-#https://linuxreviews.org/Comparison_of_Compression_Algorithms
-
-1. bzip2
-2. gzip
-3. lzip
-4. lzma
-5. tar (archive only, no compression)
-6. zip (windows friend :D)
-7. zstd
-8. xz
-  \n\n"
-}
-
-print_alg
-printf "Pick algorithm[%s - default]: " "$default_alg"
-read -r alg
-choose_alg
-
-if ! [ "$alg" = "tar" ]; then
-  # TODO: zstd has more levels
-  printf "Choose compression level(except tar)[1.3.5.7.9, %s - default]: " "$default_compression"
-  read -r compression
-  case "$compression" in
-    [0123456789])
-      #do nothing
-      ;;
-    *)
-      compression="$default_compression"
-      ;;
-  esac
-fi
-
-
-
-
-selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
-
-password_protect(){
+password_protect() {
   if [ "$encrypt" = "y" ] || [ "$encrypt" = "Y" ]; then
     cd "$working_dir" || exit # some needs this
     if [ "$2" ]; then
@@ -100,7 +76,7 @@ password_protect(){
   fi
 }
 
-compress_tar(){
+compress_tar() {
   if [ "$alg" != tar ] && [ "$alg" != zip ]; then
     cd "$working_dir" || exit # some needs this
 
@@ -120,7 +96,7 @@ compress_tar(){
   fi
 }
 
-zip_selection_individualy(){
+zip_selection_individualy() {
   if [ "$include_abs" = "y" ] || [ "$include_abs" = "Y" ]; then
     if [ "$alg" = "zip" ]; then
       xargs -0 -I{} sh -c '
@@ -154,7 +130,7 @@ zip_selection_individualy(){
   password_protect 'basename "{%}"' "$selection"
 }
 
-zip_selection(){
+zip_selection() {
   if [ "$include_abs" = "y" ] || [ "$include_abs" = "Y" ]; then
     if [ "$alg" = "zip" ]; then
       xargs -0 zip -r -"$compression" "$zipname.zip" < "$selection"
@@ -181,7 +157,7 @@ zip_selection(){
   password_protect "$zipname"
 }
 
-zip_hovered(){
+zip_hovered() {
   #zipname=${default_archivename:-"$1"}
   zipname="$1"
 
@@ -194,6 +170,28 @@ zip_hovered(){
   password_protect "$zipname"
 }
 
+### main
+
+choose_alg
+
+if ! [ "$alg" = "tar" ]; then
+  compression_limit=9
+  [ "$alg" = "zstd" ] && compression_limit=19
+  printf "Choose compression level 1-%d [default - %s]: " "$compression_limit" "$default_compression"
+  read -r compression
+  case "$compression" in
+    [0123456789]*)
+      #do nothing
+      ;;
+    "")
+      compression="$default_compression"
+      ;;
+    *)
+      compression="$default_compression"
+      printf "unrecognized input, picking default - %s\n" "$default_compression" >&2
+      ;;
+  esac
+fi
 
 printf "Encrypt[y/N]: "
 read -r encrypt
@@ -211,7 +209,7 @@ if [ -s "$selection" ]; then
   case "$individual" in
     "n"|"N")
       individual=""
-      printf "Archive name['%s' - default]: " "$default_archivename"
+      printf "Archive name [default - '%s']: " "$default_archivename"
       read -r zipname
       zipname=${zipname:-$default_archivename}
       ;;
