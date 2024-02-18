@@ -1555,8 +1555,9 @@ static char confirm_force(bool selection, bool use_trash)
 {
 	char str[64];
 
+	/* Note: ideally we should use utils[UTIL_RM_RF] instead of the "rm -rf" string */
 	snprintf(str, 64, messages[MSG_FORCE_RM],
-		 use_trash ? utils[UTIL_GIO_TRASH] + 4 : utils[UTIL_RM_RF],
+		 use_trash ? utils[UTIL_GIO_TRASH] + 4 : "rm -rf",
 		 (selection ? "selected" : "hovered"));
 
 	int r = get_input(str);
