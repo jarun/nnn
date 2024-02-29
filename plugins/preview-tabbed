@@ -182,9 +182,9 @@ previewer_loop () {
             inode/directory)
                 if [[ -z $PICTURES_DIR && "$FILE" == *"$PICTURES_DIR"* ]]; then
                     if type sxiv >/dev/null 2>&1 ; then
-                        sxiv -te "$XID" "$FILE" 2>/dev/null &
+                        ( sxiv -te "$XID" "$FILE" 2>/dev/null || $TERMINAL "$XID" -e nnn "$FILE" ) &
                     elif type nsxiv >/dev/null 2>&1 ; then
-                        nsxiv -te "$XID" "$FILE" 2>/dev/null  &
+                        ( nsxiv -te "$XID" "$FILE" 2>/dev/null || $TERMINAL "$XID" -e nnn "$FILE" )  &
                     else
                         $TERMINAL "$XID" -e nnn "$FILE" &
                     fi
