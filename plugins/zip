@@ -1,0 +1,230 @@
+#!/usr/bin/env sh
+
+# set -x
+# Better zip solution, compress selection - archive or batch(deterministic way '$filename.zip')
+# or hover individual compression
+#
+# Dependencies: gpg, tar & particular compression algorithm
+#
+# Shell: POSIX compliant
+# Author: Darukutsu
+
+# Change these for better suited defaults
+default_alg=gzip
+default_compression=5
+# this will be determined from filename if not provided
+default_archivename="archive_$(date +%Y%m%d_%H%M%S)"
+
+working_dir="$PWD"
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+choose_alg() {
+  cat << EOF
+# Reference: https://linuxreviews.org/Comparison_of_Compression_Algorithms
+1. bzip2
+2. gzip
+3. lzip
+4. lzma
+5. tar (archive only, no compression)
+6. zip
+7. zstd
+8. xz
+EOF
+
+  printf "Pick algorithm [default - %s]: " "$default_alg"
+  read -r alg
+  case "$alg" in
+    "1"|"bzip2") alg=bzip2
+      ;;
+    "2"|"gzip") alg=gzip
+      ;;
+    "3"|"lzip") alg=lzip
+      ;;
+    "4"|"lzma") alg=lzma
+      ;;
+    "5"|"tar") alg=tar
+      ;;
+    "6"|"zip") alg=zip
+      ;;
+    "7"|"zstd") alg=zstd
+      ;;
+    "8"|"xz") alg=xz
+      ;;
+    "") alg="$default_alg"
+      ;;
+    *)
+      alg="$default_alg"
+      printf "unrecognized input, picking default - '%s'\n" "$alg" >&2
+      ;;
+  esac
+
+  command -v "$alg" >/dev/null 2>&1 || { printf "'%s' not installed, cancelling...\n" "$alg" >&2; exit 1; }
+}
+
+password_protect() {
+  if [ "$encrypt" = "y" ] || [ "$encrypt" = "Y" ]; then
+    cd "$working_dir" || exit # some needs this
+    if [ "$2" ]; then
+      xargs -0 -I{%} sh -c '
+      filename=$('"$1"') &&
+      find . -maxdepth 1 -type f \( -name "$filename.zip" -o -name "$filename.tar*" \) \! -name "*.gpg" -exec gpg -c "{}" \; -exec rm "{}" \;
+      ' < "$2"
+    elif [ "$1" ]; then
+      filename="$1"
+      find . -maxdepth 1 -type f \( -name "$filename.zip" -o -name "$filename.tar*" \) \! -name "*.gpg" -exec gpg -c "{}" \; -exec rm "{}" \;
+    fi
+  fi
+}
+
+compress_tar() {
+  if [ "$alg" != tar ] && [ "$alg" != zip ]; then
+    cd "$working_dir" || exit # some needs this
+
+    if [ "$2" ]; then
+      xargs -0 -I{} sh -c '
+      filename=$('"$1"') &&
+      '"$alg"' -'"$compression"' --keep "$filename.tar" &&
+      rm "$filename.tar"
+      ' < "$2"
+    elif [ "$1" ]; then
+      filename="$1"
+      # 'keep' is due to zstd not following standard
+      if "$alg" -"$compression" --keep "$filename.tar"; then
+        rm "$filename.tar"
+      fi
+    fi
+  fi
+}
+
+zip_selection_individualy() {
+  if [ "$include_abs" = "y" ] || [ "$include_abs" = "Y" ]; then
+    if [ "$alg" = "zip" ]; then
+      xargs -0 -I{} sh -c '
+      filename=$(basename "{}") &&
+      zip -r -'"$compression"' "$filename.zip" "{}"
+      ' < "$selection"
+    else
+      xargs -0 -I{} sh -c '
+      filename=$(basename "{}") &&
+      tar -cvf "$filename.tar" "{}"
+      ' < "$selection"
+      compress_tar 'basename "{}"' "$selection"
+    fi
+  else
+    if [ "$alg" = "zip" ]; then
+      xargs -0 -I{} sh -c '
+      filepath=$(dirname "{}") &&
+      filename=$(basename "{}") &&
+      cd "$filepath" &&
+      zip -r -'"$compression"' '"$working_dir"'/"$filename.zip" "$filename"
+      ' < "$selection"
+    else
+      xargs -0 -I{} sh -c '
+      filepath=$(dirname "{}") &&
+      filename=$(basename "{}") &&
+      tar -C "$filepath" -cvf "$filename.tar" "$filename"
+      ' < "$selection"
+      compress_tar 'basename "{}"' "$selection"
+    fi
+  fi
+  password_protect 'basename "{%}"' "$selection"
+}
+
+zip_selection() {
+  if [ "$include_abs" = "y" ] || [ "$include_abs" = "Y" ]; then
+    if [ "$alg" = "zip" ]; then
+      xargs -0 zip -r -"$compression" "$zipname.zip" < "$selection"
+    else
+      xargs -0 tar -cvf "$zipname.tar" < "$selection"
+    fi
+  else
+    if [ "$alg" = "zip" ]; then
+      xargs -0 -I{} sh -c '
+      filepath=$(dirname "{}") &&
+      filename=$(basename "{}") &&
+      cd "$filepath" && zip -r -'"$compression"' '"$working_dir/$zipname.zip"' "$filename"
+      ' < "$selection"
+    else
+      xargs -0 -I{} sh -c '
+      filepath=$(dirname "{}") &&
+      filename=$(basename "{}") &&
+      tar -C "$filepath" -rvf '"$zipname.tar"' "$filename"
+      ' < "$selection"
+    fi
+  fi
+
+  compress_tar "$zipname"
+  password_protect "$zipname"
+}
+
+zip_hovered() {
+  #zipname=${default_archivename:-"$1"}
+  zipname="$1"
+
+  if [ "$alg" = "zip" ]; then
+    zip -r -"$compression" "$zipname.zip" "$1"
+  else
+    tar -cvf "$zipname.tar" "$1"
+    compress_tar "$zipname"
+  fi
+  password_protect "$zipname"
+}
+
+### main
+
+choose_alg
+
+if ! [ "$alg" = "tar" ]; then
+  compression_limit=9
+  [ "$alg" = "zstd" ] && compression_limit=19
+  printf "Choose compression level 1-%d [default - %s]: " "$compression_limit" "$default_compression"
+  read -r compression
+  case "$compression" in
+    [0123456789]*)
+      #do nothing
+      ;;
+    "")
+      compression="$default_compression"
+      ;;
+    *)
+      compression="$default_compression"
+      printf "unrecognized input, picking default - %s\n" "$default_compression" >&2
+      ;;
+  esac
+fi
+
+printf "Encrypt[y/N]: "
+read -r encrypt
+encrypt=${encrypt:-n}
+
+if [ -s "$selection" ]; then
+  printf "Include abs path[y/N]: "
+  read -r include_abs
+  include_abs=${include_abs:-n}
+
+  printf "Compress individualy[y/N]: "
+  read -r individual
+  individual=${individual:-n}
+
+  case "$individual" in
+    "n"|"N")
+      individual=""
+      printf "Archive name [default - '%s']: " "$default_archivename"
+      read -r zipname
+      zipname=${zipname:-$default_archivename}
+      ;;
+    "y"|"Y")
+      #leave this empty
+      ;;
+  esac
+
+  if [ "$individual" ]; then
+    zip_selection_individualy
+  else
+    zip_selection
+  fi
+  # Clear selection
+  printf "-" > "$NNN_PIPE"
+else
+  zip_hovered "$1" "$2"
+fi
