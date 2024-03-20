@@ -4732,7 +4732,7 @@ next:
 			return FALSE;
 		}
 	} else {
-		int fd = open(path, O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR); /* Forced create mode for files */
+		int fd = open(path, O_CREAT | O_TRUNC, S_IWUSR | S_IRUSR | S_IRGRP | S_IWGRP | S_IROTH); /* Forced create mode for files */
 
 		if (fd == -1 && errno != EEXIST) {
 			DPRINTF_S("open!");
