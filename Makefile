@@ -36,6 +36,8 @@ O_GITSTATUS := 0 # add git status to detail view
 O_NAMEFIRST := 0 # print file name first, add uid and guid to detail view
 O_RESTOREPREVIEW := 0 # add preview pipe to close and restore preview pane
 
+T_ICONS := 0 # test if multiple icons options are set and fail
+
 # convert targets to flags for backwards compatibility
 ifneq ($(filter debug,$(MAKECMDGOALS)),)
 	O_DEBUG := 1
@@ -97,16 +99,28 @@ endif
 ifeq ($(strip $(O_ICONS)),1)
 	ICONS_INCLUDE = icons-generated-icons-in-term.h
 	CPPFLAGS += -DICONS_IN_TERM -DICONS_INCLUDE=\"$(ICONS_INCLUDE)\"
+ifeq ($(strip $(T_ICONS)),1)
+$(error Choose only one system for icons (O_ICONS, O_NERD or O_EMOJI))
+endif
+	T_ICONS := 1
 endif
 
 ifeq ($(strip $(O_NERD)),1)
 	ICONS_INCLUDE = icons-generated-nerd.h
 	CPPFLAGS += -DNERD -DICONS_INCLUDE=\"$(ICONS_INCLUDE)\"
+ifeq ($(strip $(T_ICONS)),1)
+$(error Choose only one system for icons (O_ICONS, O_NERD or O_EMOJI))
+endif
+	T_ICONS := 1
 endif
 
 ifeq ($(strip $(O_EMOJI)),1)
 	ICONS_INCLUDE = icons-generated-emoji.h
 	CPPFLAGS += -DEMOJI -DICONS_INCLUDE=\"$(ICONS_INCLUDE)\"
+ifeq ($(strip $(T_ICONS)),1)
+$(error Choose only one system for icons (O_ICONS, O_NERD or O_EMOJI))
+endif
+	T_ICONS := 1
 endif
 
 ifeq ($(strip $(O_QSORT)),1)
