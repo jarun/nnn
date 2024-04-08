@@ -44,6 +44,7 @@
 #   - optional: pistol file viewer (https://github.com/doronbehar/pistol).
 #       1. install pistol
 #       2. set/export $NNN_PISTOL as 1
+#   - optional: librsvg for rsvg-convert
 #
 # Usage:
 #   You need to set a NNN_FIFO path and a key for the plugin with NNN_PLUG,
@@ -94,7 +95,7 @@
 #   'no_focus [title="preview-tui"]' to your i3 config file.
 #
 # Shell: Bash (for environment manipulation through arrays)
-# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal, @WanderLanz
+# Authors: Todd Yamakawa, Léo Villeveygoux, @Recidiviste, Mario Ortiz Manero, Luuk van Baal, @WanderLanz, @flipflop133
 
 # Configurable environment variables:
 NNN_SPLIT=${NNN_SPLIT:-}                                   # permanent split direction
@@ -416,7 +417,9 @@ generate_preview() {
                  else
                     image_preview "$1" "$2" "$3" && return
                  fi ;;
-            image) if exists convert; then
+            image) if exists rsvg-convert && [[ "${3##*.}" == "svg" ]]; then
+                       rsvg-convert -a -w "$NNN_PREVIEWWIDTH" -h "$NNN_PREVIEWHEIGHT" -f png -o "$NNN_PREVIEWDIR/$3.png" "$3"
+                   elif exists convert; then
                        convert "$3" -flatten -resize "$NNN_PREVIEWWIDTH"x"$NNN_PREVIEWHEIGHT"\> "$NNN_PREVIEWDIR/$3.jpg"
                    else
                        image_preview "$1" "$2" "$3" && return
@@ -431,6 +434,8 @@ generate_preview() {
     fi
     if [ -f "$NNN_PREVIEWDIR/$3.jpg" ]; then
         image_preview "$1" "$2" "$NNN_PREVIEWDIR/$3.jpg"
+    elif [[ "${3##*.}" == "svg" ]] && [ -f "$NNN_PREVIEWDIR/$3.png" ]; then
+        image_preview "$1" "$2" "$NNN_PREVIEWDIR/$3.png"
     else
         fifo_pager print_bin_info "$3"
     fi
