@@ -2854,10 +2854,15 @@ static void write_lastdir(const char *curpath, const char *outfile)
  *
  * If the absolute numeric values are same, we fallback to alphasort.
  */
-static int xstricmp(const char * const s1, const char * const s2)
+static int xstricmp(const char *s1, const char *s2)
 {
-	char *p1, *p2;
+	/* Remove the common prefix of both strings. */
+	while (*s1 && *s2 && *s1 == *s2) {
+		s1++;
+		s2++;
+	}
 
+	char *p1, *p2;
 	long long v1 = strtoll(s1, &p1, 10);
 	long long v2 = strtoll(s2, &p2, 10);
 
