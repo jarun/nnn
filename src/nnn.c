@@ -925,7 +925,7 @@ static bool test_set_bit(uint_t nr)
 	nr &= HASH_BITS;
 
 	pthread_mutex_lock(&hardlink_mutex);
-	ullong_t *m = ((ullong_t *)ihashbmp) + (nr >> 6);
+	ullong_t *m = ihashbmp + (nr >> 6);
 
 	if (*m & (1 << (nr & 63))) {
 		pthread_mutex_unlock(&hardlink_mutex);
