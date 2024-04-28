@@ -28,7 +28,7 @@ Checks: >
     -bugprone-reserved-identifier,
     -bugprone-switch-missing-default-case,
     -bugprone-inc-dec-in-conditions,
-    -bugprone-multi-level-implicit-pointer-conversion
+    -bugprone-multi-level-implicit-pointer-conversion,
 
 WarningsAsErrors: '*'
 HeaderFilterRegex: '.*(?<!lookup3.c)$'
