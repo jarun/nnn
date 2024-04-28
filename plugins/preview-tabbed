@@ -69,6 +69,9 @@ else
     echo "No xembed term found" >&2
 fi
 
+if type xdg-user-dir >/dev/null 2>&1 ; then
+    PICTURES_DIR=$(xdg-user-dir PICTURES)
+fi
 
 term_nuke () {
     # $1 -> $XID, $2 -> $FILE
@@ -177,7 +180,17 @@ previewer_loop () {
                 fi
                 ;;
             inode/directory)
-                $TERMINAL "$XID" -e nnn "$FILE" &
+                if [[ -n $PICTURES_DIR && "$FILE" == "$PICTURES_DIR"* ]] ; then
+                    if type sxiv >/dev/null 2>&1 ; then
+                        sxiv -te "$XID" "$FILE" &
+                    elif type nsxiv >/dev/null 2>&1 ; then
+                        nsxiv -te "$XID" "$FILE" &
+                    else
+                        $TERMINAL "$XID" -e nnn "$FILE" &
+                    fi
+                else
+                    $TERMINAL "$XID" -e nnn "$FILE" &
+                fi
                 ;;
             text/*)
                 if [ -x "$NUKE" ] ; then
