@@ -5187,7 +5187,6 @@ static void show_help(const char *path)
 		  "cT  Set time type%110  Lock\n"
 		 "b^L  Redraw%18?  Help, conf\n"
 	};
-	char help_buf[1<<11]; // if editing helpstr, ensure this has enough space to decode it
 
 	int fd = create_tmp_file();
 	if (fd == -1)
@@ -5198,22 +5197,26 @@ static void show_help(const char *path)
 		get_output(prog, NULL, NULL, fd, FALSE);
 
 	bool hex = true;
-	char *w = help_buf;
+	const char space = ' ';
 	const char *end = helpstr + (sizeof helpstr - 1);
+
 	for (const char *s = helpstr; s < end; ++s) {
 		if (hex) {
-			for (int k = 0, n = xchartohex(*s); k < n; ++k) *w++ = ' ';
+			for (int k = 0, n = xchartohex(*s); k < n; ++k)
+				if (write(fd, &space, 1) != 1)
+					break;
 		} else if (*s == '%') {
 			int n = ((s[1] - '0') * 10) + (s[2] - '0');
-			for (int k = 0; k < n; ++k) *w++ = ' ';
+			for (int k = 0; k < n; ++k)
+				if (write(fd, &space, 1) != 1)
+					break;
 			s += 2;
 		} else {
-			*w++ = *s;
+			if (write(fd, s, 1) != 1)
+				break;
 		}
 		hex = *s == '\n';
 	}
-	ssize_t res = write(fd, help_buf, w - help_buf);
-	(void)res; // silence warning
 
 	dprintf(fd, "\nLOCATIONS\n");
 	for (uchar_t i = 0; i < CTX_MAX; ++i)
