@@ -5197,25 +5197,21 @@ static void show_help(const char *path)
 		get_output(prog, NULL, NULL, fd, FALSE);
 
 	bool hex = true;
-	const char space = ' ';
-	const char *end = helpstr + (sizeof helpstr - 1);
+	const char *end = helpstr + sizeof(helpstr) - 1;
 
 	for (const char *s = helpstr; s < end; ++s) {
 		if (hex) {
 			for (int k = 0, n = xchartohex(*s); k < n; ++k)
-				if (write(fd, &space, 1) != 1)
-					break;
+				dprintf(fd, " ");
 		} else if (*s == '%') {
 			int n = ((s[1] - '0') * 10) + (s[2] - '0');
 			for (int k = 0; k < n; ++k)
-				if (write(fd, &space, 1) != 1)
-					break;
+				dprintf(fd, " ");
 			s += 2;
 		} else {
-			if (write(fd, s, 1) != 1)
-				break;
+			dprintf(fd, "%c", *s);
 		}
-		hex = *s == '\n';
+		hex = (*s == '\n');
 	}
 
 	dprintf(fd, "\nLOCATIONS\n");
