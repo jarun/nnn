@@ -5057,12 +5057,12 @@ static void lock_terminal(void)
 	spawn(xgetenv("NNN_LOCKER", utils[UTIL_LOCKER]), NULL, NULL, NULL, F_CLI);
 }
 
-static void printkv(kv *kvarr, int fd, uchar_t max, uchar_t id)
+static void printkv(kv *kvarr, FILE *f, uchar_t max, uchar_t id)
 {
 	char *val = (id == NNN_BMS) ? bmstr : pluginstr;
 
 	for (uchar_t i = 0; i < max && kvarr[i].key; ++i)
-		dprintf(fd, " %c: %s\n", (char)kvarr[i].key, val + kvarr[i].off);
+		fprintf(f, " %c: %s\n", (char)kvarr[i].key, val + kvarr[i].off);
 }
 
 static void printkeys(kv *kvarr, char *buf, uchar_t max)
@@ -5191,6 +5191,12 @@ static void show_help(const char *path)
 	int fd = create_tmp_file();
 	if (fd == -1)
 		return;
+	FILE *f = fdopen(fd, "wb");
+	if (f == NULL) {
+		close(fd);
+		unlink(g_tmpfpath);
+		return;
+	}
 
 	char *prog = xgetenv(env_cfg[NNN_HELP], NULL);
 	if (prog)
@@ -5202,50 +5208,50 @@ static void show_help(const char *path)
 	for (const char *s = helpstr; s < end; ++s) {
 		if (hex) {
 			for (int k = 0, n = xchartohex(*s); k < n; ++k)
-				dprintf(fd, " ");
+				fputc(' ', f);
 		} else if (*s == '%') {
 			int n = ((s[1] - '0') * 10) + (s[2] - '0');
 			for (int k = 0; k < n; ++k)
-				dprintf(fd, " ");
+				fputc(' ', f);
 			s += 2;
 		} else {
-			dprintf(fd, "%c", *s);
+			fputc(*s, f);
 		}
 		hex = (*s == '\n');
 	}
 
-	dprintf(fd, "\nLOCATIONS\n");
+	fprintf(f, "\nLOCATIONS\n");
 	for (uchar_t i = 0; i < CTX_MAX; ++i)
 		if (g_ctx[i].c_cfg.ctxactive)
-			dprintf(fd, " %u: %s\n", i + 1, g_ctx[i].c_path);
+			fprintf(f, " %u: %s\n", i + 1, g_ctx[i].c_path);
 
-	dprintf(fd, "\nVOLUME: avail:%s ", coolsize(get_fs_info(path, VFS_AVAIL)));
-	dprintf(fd, "used:%s ", coolsize(get_fs_info(path, VFS_USED)));
-	dprintf(fd, "size:%s\n\n", coolsize(get_fs_info(path, VFS_SIZE)));
+	fprintf(f, "\nVOLUME: avail:%s ", coolsize(get_fs_info(path, VFS_AVAIL)));
+	fprintf(f, "used:%s ", coolsize(get_fs_info(path, VFS_USED)));
+	fprintf(f, "size:%s\n\n", coolsize(get_fs_info(path, VFS_SIZE)));
 
 	if (bookmark) {
-		dprintf(fd, "BOOKMARKS\n");
-		printkv(bookmark, fd, maxbm, NNN_BMS);
-		dprintf(fd, "\n");
+		fprintf(f, "BOOKMARKS\n");
+		printkv(bookmark, f, maxbm, NNN_BMS);
+		fprintf(f, "\n");
 	}
 
 	if (plug) {
-		dprintf(fd, "PLUGIN KEYS\n");
-		printkv(plug, fd, maxplug, NNN_PLUG);
-		dprintf(fd, "\n");
+		fprintf(f, "PLUGIN KEYS\n");
+		printkv(plug, f, maxplug, NNN_PLUG);
+		fprintf(f, "\n");
 	}
 
 	for (uchar_t i = NNN_OPENER; i <= NNN_TRASH; ++i) {
 		char *s = getenv(env_cfg[i]);
 		if (s)
-			dprintf(fd, "%s: %s\n", env_cfg[i], s);
+			fprintf(f, "%s: %s\n", env_cfg[i], s);
 	}
 
 	if (selpath)
-		dprintf(fd, "SELECTION FILE: %s\n", selpath);
+		fprintf(f, "SELECTION FILE: %s\n", selpath);
 
-	dprintf(fd, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
-	close(fd);
+	fprintf(f, "\nv%s\n%s\n", VERSION, GENERAL_INFO);
+	fclose(f); // also closes fd
 
 	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_TTY);
 	unlink(g_tmpfpath);
