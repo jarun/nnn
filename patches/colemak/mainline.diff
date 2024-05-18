@@ -1,8 +1,8 @@
 diff --git a/src/nnn.c b/src/nnn.c
-index 6792d503..0a59e8e3 100644
+index d7c53166..bb7ff3e8 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -5148,12 +5148,12 @@ static void show_help(const char *path)
+@@ -5149,12 +5149,12 @@ static void show_help(const char *path)
  	"2(___n))\n"
  	"0\n"
  	"1NAVIGATION\n"
@@ -20,12 +20,12 @@ index 6792d503..0a59e8e3 100644
  	      "8B (,)  Book(mark)%11b ^/  Select bookmark\n"
  		"a1-4  Context%11(Sh)Tab  Cycle/new context\n"
  	    "62Esc ^Q  Quit%19^y  Next young\n"
-@@ -5161,20 +5161,20 @@ static void show_help(const char *path)
+@@ -5162,27 +5162,27 @@ static void show_help(const char *path)
  		  "cq  Quit context\n"
  	"0\n"
  	"1FILTER & PROMPT\n"
 -		  "c/  Filter%17^N  Toggle type-to-nav\n"
-+		  "c/  Filter%17^M  Toggle type-to-nav\n"
++		  "c/  Filter%17^K  Toggle type-to-nav\n"
  		"aEsc  Exit prompt%12^L  Toggle last filter\n"
  		  "c.  Toggle hidden%05Alt+Esc  Unfilter, quit context\n"
  	"0\n"
@@ -45,8 +45,16 @@ index 6792d503..0a59e8e3 100644
  	       "9x ^X  Delete or trash%09S  Listed sel size\n"
  		  "cX  Delete (rm -rf)%07Esc  Send to FIFO\n"
  	"0\n"
+ 	"1MISC\n"
+ 	      "8Alt ;  Select plugin%11=  Launch app\n"
+ 	       "9! ^]  Shell%19]  Cmd prompt\n"
+-		  "cc  Connect remote%10u  Unmount remote/archive\n"
++		  "cC  Connect remote%10u  Unmount remote/archive\n"
+ 	       "9t ^T  Sort toggles%12s  Manage session\n"
+ 		  "cT  Set time type%110  Lock\n"
+ 		 "b^L  Redraw%18?  Help, conf\n"
 diff --git a/src/nnn.h b/src/nnn.h
-index bd500244..b12df5c0 100644
+index bd500244..43b7fa22 100644
 --- a/src/nnn.h
 +++ b/src/nnn.h
 @@ -139,12 +139,12 @@ static struct key bindings[] = {
@@ -79,12 +87,21 @@ index bd500244..b12df5c0 100644
  	/* Go to first file */
  	{ '\'',           SEL_FIRST },
  	/* Jump to an entry number/offset */
+@@ -179,7 +179,7 @@ static struct key bindings[] = {
+ 	{ 'b',            SEL_BMOPEN },
+ 	{ CONTROL('_'),   SEL_BMOPEN },
+ 	/* Connect to server over SSHFS */
+-	{ 'c',            SEL_REMOTE },
++	{ 'C',            SEL_REMOTE },
+ 	/* Cycle contexts in forward direction */
+ 	{ '\t',           SEL_CYCLE },
+ 	/* Cycle contexts in reverse direction */
 @@ -202,7 +202,7 @@ static struct key bindings[] = {
  	/* Filter */
  	{ '/',            SEL_FLTR },
  	/* Toggle filter mode */
 -	{ CONTROL('N'),   SEL_MFLTR },
-+	{ CONTROL('M'),   SEL_MFLTR },
++	{ CONTROL('K'),   SEL_MFLTR },
  	/* Toggle hide .dot files */
  	{ '.',            SEL_HIDDEN },
  	/* Detailed listing */
