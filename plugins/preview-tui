@@ -7,7 +7,7 @@
 # Dependencies:
 #   - Supports 6 independent methods to preview with:
 #       - tmux (>=3.0), or
-#       - kitty with allow_remote_control and listen_on set in kitty.conf, or
+#       - kitty with allow_remote_control and listen_on set in kitty.conf (see Kitty below), or
 #       - wezterm (https://wezfurlong.org/wezterm), or
 #       - QuickLook on WSL (https://github.com/QL-Win/QuickLook), or
 #       - Windows Terminal (https://github.com/Microsoft/Terminal | https://aka.ms/terminal) with WSL, or
@@ -66,9 +66,12 @@
 #   will try to use a kitty terminal split. And as a final fallback, a
 #   different terminal window will be used ($NNN_TERMINAL).
 #
+#   KITTY
+#
 #   Kitty users need something similar to the following in their kitty.conf:
 #   - `allow_remote_control yes`
 #   - `listen_on unix:$TMPDIR/kitty`
+#   $TMPDIR is most often `/tmp` unless your distrobution changes it.
 #   - `enabled_layouts splits` (optional)
 #   With ImageMagick installed, this terminal can use the icat kitten to display images.
 #   Refer to kitty documentation for further details.
@@ -78,6 +81,9 @@
 #   - tmux >= v3.3a required
 #   - add the following to your tmux.conf:
 #     - `set -g allow-passthrough on`
+#
+#
+#
 #
 #   Wezterm should work out of the box. If `NNN_PREVIEWIMGPROG` is not specified it will use
 #   built in iTerm2 image protocol.
