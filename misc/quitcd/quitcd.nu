@@ -29,8 +29,7 @@ export def --env n [
 		# Remove <cd '> from the first part of the string and the last single quote <'>.
 		# Fix post-processing of nnn's given path that escapes its single quotes with POSIX syntax.
 		let path = open $nnn_tmpfile
-			| str substring 3..
-			| str trim --char "'"
+			| str replace --all --regex `^cd '|'$` ``
 			| str replace --all `'\''` `'`
 
 		^rm -- $nnn_tmpfile
