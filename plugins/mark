@@ -1,0 +1,34 @@
+#!/usr/bin/env sh
+
+# Description: Mark and unmark files. Name of the files which are marked,
+#              starts with '* '.
+#
+# Shell: POSIX compliant
+# Author: Pooyan Khanjankhani
+
+. "$(dirname "$0")"/.nnn-plugin-helper
+
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+if nnn_use_selection; then
+	files="$(tr '\0' '\n' <"$selection")"
+else
+	files="$(echo "$PWD/$1")"
+fi
+
+is_marked() { echo "$1" | grep '*$' >/dev/null 2>&1; }
+
+echo "$files" | while read -r file; do
+	name="$(basename "$file")"
+	dir="$(dirname "$file")"
+	if is_marked "$name"; then
+		new_name="${name%\*}"
+	else
+		new_name="$name"'*'
+	fi
+
+	mv "$file" "$dir"/"$new_name"
+done
+
+if [ -s "$selection" ] && [ -p "$NNN_PIPE" ]; then
+	printf "-" >"$NNN_PIPE"
+fi
