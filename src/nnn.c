@@ -2284,8 +2284,10 @@ static bool initcurses(void *oldmask)
 						msg(env_cfg[NNN_COLORS]);
 						return FALSE;
 					}
-				} else
+				} else {
 					*pcode = (*colors < '0' || *colors > '7') ? 4 : *colors - '0';
+					fcolors[i + 1] = *pcode;
+				}
 				++colors;
 			} else
 				*pcode = 4;
