@@ -1,0 +1,34 @@
+#!/usr/bin/env sh
+#
+# Description: Upload files to 0x0.st
+#
+# Dependencies: curl
+# Shell: POSIX compliant
+#
+# Author: Zazucki
+# based on "upload" plugin by Arun Prakash Jana
+
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+if [ -s "$selection" ]; then
+    xargs -0 -t -I {} < "$selection" curl -F"file=@{}" -Fsecret= https://0x0.st
+    
+    # Clear selection
+    printf "-" > "$NNN_PIPE"
+else
+    if [ -n "$1" ] && [ -s "$1" ]; then
+        # Upload not limited if text file
+        if [ "$(file --mime-type --brief "$1" | awk -F '/' '{print $1}')" = "text" ]; then
+ 	        # Upload, show download link, wait for user to press Enter
+	        curl -F"file=@$1" -Fsecret= https://0x0.st
+	    else
+	        # Upload limited to 1 week if NOT a text file
+	        curl -F"file=@$1" -Fsecret= -Fexpires=168 https://0x0.st
+            # NOT NECESSARY - 0x0 has auto-limited file retention based on size
+	    fi
+    else
+	printf "File is empty!"
+    fi
+fi
+
+read -r _
