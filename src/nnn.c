@@ -1724,12 +1724,40 @@ static char *findinsel(char *startpos, int len)
 	}
 }
 
-static int markcmp(const void *va, const void *vb)
+/*
+ * Sort selection markers by their starting position in O(n) time. Use one byte
+ * radix and eight passes (starting from the LSB).
+ */
+static void sort_marked(selmark *data, selmark *scratch, size_t nelem)
 {
-	const selmark *ma = (selmark*)va;
-	const selmark *mb = (selmark*)vb;
+	size_t cnt[256];
+	size_t idx[256];
+	size_t value;
+	size_t i, j;
+	void *tmp;
+	int b;
 
-	return ma->startpos - mb->startpos;
+	for (b = 0; b < 8; b++) {
+		memset(cnt, 0, sizeof(cnt));
+		for (i = 0; i < nelem; i++) {
+			value = (size_t)data[i].startpos;
+			cnt[(value >> (b * 8)) & 0xFF]++;
+		}
+
+		idx[0] = 0;
+		for (i = 1; i < 256; i++)
+			idx[i] = idx[i - 1] + cnt[i - 1];
+
+		for (i = 0; i < nelem; i++) {
+			value = (size_t)data[i].startpos;
+			j = idx[(value >> (b * 8)) & 0xFF]++;
+			memcpy(&scratch[j], &data[i], sizeof(selmark));
+		}
+
+		tmp = data;
+		data = scratch;
+		scratch = tmp;
+	}
 }
 
 /* scanselforpath() must be called before calling this */
@@ -1754,10 +1782,13 @@ static void invertselbuf(const int pathlen)
 	int i, nmarked = 0, prev = 0;
 	struct entry *dentp;
 	bool scan = FALSE;
-	selmark *marked = malloc(nselected * sizeof(selmark));
+	selmark *marked = calloc(nselected, sizeof(*marked));
+	selmark *scratch = calloc(nselected, sizeof(*scratch));
 
-	if (!marked) {
+	if (marked == NULL || scratch == NULL) {
 		printwarn(NULL);
+		free(marked);
+		free(scratch);
 		return;
 	}
 
@@ -1810,7 +1841,7 @@ static void invertselbuf(const int pathlen)
 	 * With entries sorted we can merge adjacent ones allowing us to
 	 * move them in a single go.
 	 */
-	qsort(marked, nmarked, sizeof(selmark), &markcmp);
+	sort_marked(marked, scratch, nselected);
 
 	/* Some files might be adjacent. Merge them into a single entry */
 	for (i = 1; i < nmarked; ++i) {
@@ -1850,6 +1881,7 @@ static void invertselbuf(const int pathlen)
 	}
 
 	free(marked);
+	free(scratch);
 
 	/* Buffer size adjustment */
 	selbufpos -= shrinklen;
