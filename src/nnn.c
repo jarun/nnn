@@ -1724,13 +1724,45 @@ static char *findinsel(char *startpos, int len)
 	}
 }
 
-static int markcmp(const void *va, const void *vb)
+static void sort_array(void *data, void *scratch, size_t nelem, size_t elsize,
+		       size_t (*byte)(const void *in, size_t i, int b))
 {
-	const selmark *ma = (selmark*)va;
-	const selmark *mb = (selmark*)vb;
+	size_t cnt[256];
+	size_t idx[256];
+	size_t i, j;
+	void *tmp;
+	int b;
 
-	return ma->startpos - mb->startpos;
+	for (b = 0; b < 8; b++) {
+		memset(cnt, 0, sizeof(cnt));
+		idx[0] = 0;
+
+		for (i = 0; i < nelem; i++)
+			cnt[byte(data, i, b)]++;
+
+		for (i = 1; i < 256; i++)
+			idx[i] = idx[i - 1] + cnt[i - 1];
+
+		for (i = 0; i < nelem; i++) {
+			j = idx[byte(data, i, b)]++;
+
+			memcpy(scratch + j * elsize, data + i * elsize, elsize);
+		}
+
+		tmp = data;
+		data = scratch;
+		scratch = tmp;
+	}
 }
+
+static size_t selmark_byte(const void *data, size_t i, int b)
+{
+	const selmark *marked = (const selmark *)data;
+	size_t startpos = (size_t)marked[i].startpos;
+
+	return (startpos >> (b * 8)) & 0xFF;
+}
+
 
 /* scanselforpath() must be called before calling this */
 static inline void findmarkentry(size_t len, struct entry *dentp)
@@ -1754,7 +1786,7 @@ static void invertselbuf(const int pathlen)
 	int i, nmarked = 0, prev = 0;
 	struct entry *dentp;
 	bool scan = FALSE;
-	selmark *marked = malloc(nselected * sizeof(selmark));
+	selmark *marked = malloc(2 * nselected * sizeof(selmark));
 
 	if (!marked) {
 		printwarn(NULL);
@@ -1810,7 +1842,8 @@ static void invertselbuf(const int pathlen)
 	 * With entries sorted we can merge adjacent ones allowing us to
 	 * move them in a single go.
 	 */
-	qsort(marked, nmarked, sizeof(selmark), &markcmp);
+	sort_array(marked, &marked[nselected], nselected, sizeof(selmark),
+		   selmark_byte);
 
 	/* Some files might be adjacent. Merge them into a single entry */
 	for (i = 1; i < nmarked; ++i) {
