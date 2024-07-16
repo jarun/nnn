@@ -1423,7 +1423,7 @@ static int create_tmp_file(void)
 
 static void msg(const char *message)
 {
-	dprintf(STDERR_FILENO, "%s\n", message);
+	fprintf(stderr, "%s\n", message);
 }
 
 #ifdef KEY_RESIZE
@@ -2843,7 +2843,8 @@ static void write_lastdir(const char *curpath, const char *outfile)
 			: cfgpath, O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR | S_IRUSR);
 
 	if (fd != -1 && shell_escape(g_buf, sizeof(g_buf), curpath)) {
-		dprintf(fd, "cd %s", g_buf);
+		write(fd, "cd ", 3);
+		write(fd, g_buf, strlen(g_buf));
 		close(fd);
 	}
 }
@@ -8357,7 +8358,7 @@ static void check_key_collision(void)
 		key = bindings[i].sym;
 
 		if (bitmap[key])
-			dprintf(STDERR_FILENO, "key collision! [%s]\n", keyname(key));
+			fprintf(stderr, "key collision! [%s]\n", keyname(key));
 		else
 			bitmap[key] = TRUE;
 	}
@@ -8365,7 +8366,7 @@ static void check_key_collision(void)
 
 static void usage(void)
 {
-	dprintf(STDOUT_FILENO,
+	printf(
 		"%s: nnn [OPTIONS] [PATH]\n\n"
 		"The unorthodox terminal file manager.\n\n"
 		"positional args:\n"
@@ -8716,7 +8717,7 @@ int main(int argc, char *argv[])
 			g_state.uidgid = 1;
 			break;
 		case 'V':
-			dprintf(STDOUT_FILENO, "%s\n", VERSION);
+			printf("%s\n", VERSION);
 			return EXIT_SUCCESS;
 		case 'x':
 			cfg.x11 = 1;
