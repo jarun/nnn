@@ -35,7 +35,7 @@
 #endif
 #include <features.h>		/* __GLIBC__ etc */
 /* large file support on 32-bit glibc >= 2.23 where fts.h supports it */
-#if !defined(__GLIBC__) || __GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 23)
+#if __GLIBC__ > 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 23)
 #define _FILE_OFFSET_BITS 64
 #endif
 #if defined(__linux__)
