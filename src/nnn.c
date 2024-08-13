@@ -1566,6 +1566,8 @@ static char confirm_force(bool selection, bool use_trash)
 		return '\0'; /* cancel */
 	if (r == 'y' || r == 'Y')
 		return 'f'; /* forceful for rm */
+	if (r == 'n' || r == 'N')
+		return '\0'; /* cancel */
 	return (use_trash ? '\0' : 'i'); /* interactive for rm */
 }
 
@@ -2558,7 +2560,7 @@ static bool rmmulstr(char *buf, bool use_trash)
 		return FALSE;
 
 	if (!use_trash)
-		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cr -- \"$0\" \"$@\" < /dev/tty' < %s",
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cvr -- \"$0\" \"$@\" < /dev/tty' < %s",
 			 r, selpath);
 	else
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 %s < %s",
@@ -2575,9 +2577,9 @@ static bool xrm(char * const fpath, bool use_trash)
 		return FALSE;
 
 	if (!use_trash) {
-		char rm_opts[] = "-ir";
+		char rm_opts[5] = "-vr\0";
 
-		rm_opts[1] = r;
+		rm_opts[3] = r;
 		spawn("rm", rm_opts, "--", fpath, F_NORMAL | F_CHKRTN);
 	} else
 		spawn(utils[(g_state.trash == 1) ? UTIL_TRASH_CLI : UTIL_GIO_TRASH],
