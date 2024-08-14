@@ -603,7 +603,7 @@ static char * const utils[] = {
 #define MSG_SSN_NAME     6
 #define MSG_CP_MV_AS     7
 #define MSG_CUR_SEL_OPTS 8
-#define MSG_FORCE_RM     9
+#define MSG_FILE_LIMIT   9
 #define MSG_SIZE_LIMIT   10
 #define MSG_NEW_OPTS     11
 #define MSG_CLI_MODE     12
@@ -638,7 +638,6 @@ static char * const utils[] = {
 #define MSG_NOCHANGE     41
 #define MSG_DIR_CHANGED  42
 #define MSG_BM_NAME      43
-#define MSG_FILE_LIMIT   44
 
 static const char * const messages[] = {
 	"",
@@ -650,7 +649,7 @@ static const char * const messages[] = {
 	"session name: ",
 	"'c'p/'m'v as?",
 	"'c'urrent/'s'el?",
-	"%s %s? [Esc cancels]",
+	"file limit exceeded",
 	"size limit exceeded",
 	"['f'ile]/'d'ir/'s'ym/'h'ard?",
 	"['g'ui]/'c'li?",
@@ -685,7 +684,6 @@ static const char * const messages[] = {
 	"unchanged",
 	"dir changed, range sel off",
 	"name: ",
-	"file limit exceeded",
 };
 
 /* Supported configuration environment variables */
@@ -1553,14 +1551,17 @@ static void xdelay(useconds_t delay)
 
 static char confirm_force(bool selection, bool use_trash)
 {
-	char str[64];
+	char str[300];
 
 	/* Note: ideally we should use utils[UTIL_RM_RF] instead of the "rm -rf" string */
-	snprintf(str, 64, messages[MSG_FORCE_RM],
-		 use_trash ? utils[UTIL_GIO_TRASH] + 4 : "rm -rf",
-		 (selection ? "selected" : "hovered"));
+	int r = snprintf(str, 20, "%s", use_trash ? utils[UTIL_GIO_TRASH] + 4 : "rm -rf");
 
-	int r = get_input(str);
+	if (selection)
+		snprintf(str + r, 280, " %d files?", nselected);
+	else
+		snprintf(str + r, 280, " '%s'?", pdents[cur].name);
+
+	r = get_input(str);
 
 	if (r == ESC)
 		return '\0'; /* cancel */
