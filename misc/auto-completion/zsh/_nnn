@@ -42,6 +42,7 @@ args=(
     '(-U)-U[show user and group]'
     '(-V)-V[show program version and exit]'
     '(-x)-x[notis, sel to system clipboard, xterm title]'
+    '(-0)-0[use null separator in picker mode]'
     '(-h)-h[show program help]'
     '*:filename:_files'
 )

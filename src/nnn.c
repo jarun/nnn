@@ -192,6 +192,10 @@
 #define MSGWAIT         '$'
 #define SELECT          ' '
 #define PROMPT          ">>> "
+#undef NEWLINE
+#define NEWLINE         "\n"
+#undef NUL
+#define NUL             "\0"
 #define REGEX_MAX       48
 #define ENTRY_INCR      64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR    0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
@@ -1611,7 +1615,7 @@ static void selbufrealloc(const size_t alloclen)
 }
 
 /* Write selected file paths to fd, linefeed separated */
-static size_t seltofile(int fd, uint_t *pcount)
+static size_t seltofile(int fd, uint_t *pcount, const char *separator)
 {
 	uint_t lastpos, count = 0;
 	char *pbuf = pselbuf;
@@ -1647,7 +1651,7 @@ static size_t seltofile(int fd, uint_t *pcount)
 
 		pos += len;
 		if (pos <= lastpos) {
-			if (write(fd, "\n", 1) != 1)
+			if (write(fd, separator, 1) != 1)
 				return pos;
 			pbuf += len + 1;
 		}
@@ -1972,7 +1976,7 @@ static void endselection(bool endselmode)
 		return;
 	}
 
-	seltofile(fd, NULL);
+	seltofile(fd, NULL, NEWLINE);
 	if (close(fd)) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
@@ -2036,7 +2040,7 @@ static int editselection(void)
 		return -1;
 	}
 
-	seltofile(fd, NULL);
+	seltofile(fd, NULL, NEWLINE);
 	if (close(fd)) {
 		DPRINTF_S(strerror(errno));
 		return -1;
@@ -2644,7 +2648,7 @@ static bool cpmv_rename(int choice, const char *path)
 		if (!count)
 			goto finish;
 	} else
-		seltofile(fd, &count);
+		seltofile(fd, &count, NEWLINE);
 
 	close(fd);
 
@@ -2764,8 +2768,8 @@ static bool batch_rename(void)
 		for (i = 0; i < ndents; ++i)
 			appendfpath(pdents[i].name, NAME_MAX);
 
-	seltofile(fd1, &count);
-	seltofile(fd2, NULL);
+	seltofile(fd1, &count, NEWLINE);
+	seltofile(fd2, NULL, NEWLINE);
 	close(fd2);
 
 	if (dir) /* Don't retain dir entries in selection */
@@ -6074,7 +6078,7 @@ static void send_to_explorer(int *presel)
 {
 	if (nselected) {
 		int fd = open(fifopath, O_WRONLY|O_NONBLOCK|O_CLOEXEC, 0600);
-		if ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos)))
+		if ((fd == -1) || (seltofile(fd, NULL, NEWLINE) != (size_t)(selbufpos)))
 			printwarn(presel);
 		else {
 			resetselind();
@@ -8426,6 +8430,7 @@ static void usage(void)
 #ifndef NOX11
 		" -x      notis, selection sync, xterm title\n"
 #endif
+		" -0      null separator in picker mode\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
 }
@@ -8566,6 +8571,7 @@ int main(int argc, char *argv[])
 	char *arg = NULL;
 	char *session = NULL;
 	int fd, opt, sort = 0, pkey = '\0'; /* Plugin key */
+	bool sepnul = FALSE;
 #ifndef NOMOUSE
 	mmask_t mask;
 	char *middle_click_env = xgetenv(env_cfg[NNN_MCLICK], "\0");
@@ -8583,7 +8589,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVxh"))) != -1) {
+		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVx0h"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -8727,6 +8733,9 @@ int main(int argc, char *argv[])
 			return EXIT_SUCCESS;
 		case 'x':
 			cfg.x11 = 1;
+			break;
+		case '0':
+			sepnul = TRUE;
 			break;
 		case 'h':
 			usage();
@@ -9045,7 +9054,7 @@ int main(int argc, char *argv[])
 	if (g_state.picker) {
 		if (selbufpos) {
 			fd = selpath ? open(selpath, O_WRONLY | O_CREAT | O_TRUNC, 0600) : STDOUT_FILENO;
-			if ((fd == -1) || (seltofile(fd, NULL) != (size_t)(selbufpos)))
+			if ((fd == -1) || (seltofile(fd, NULL, sepnul ? NUL : NEWLINE) != (size_t)(selbufpos)))
 				xerror();
 
 			if (fd > 1)
