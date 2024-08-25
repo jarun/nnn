@@ -1,5 +1,5 @@
 #!/bin/bash
-
+   # If the file has the extension .sh, run it with bash
    # Si el archivo tiene la extensión .sh, ejecútalo con bash
    if [[ "$1" == *.sh ]]; then
        bash "$1"
