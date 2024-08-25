@@ -6,13 +6,13 @@
 # Authors: Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index 83ecdb90..4397944a 100644
+index 936e9c02..22032dcd 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -270,6 +270,25 @@
+@@ -286,6 +286,25 @@
  #define VFS_USED  1
  #define VFS_SIZE  2
-
+ 
 +/* Git icons */
 +#ifdef NERD
 +#define GIT_ADD ""
@@ -35,26 +35,26 @@ index 83ecdb90..4397944a 100644
  /* TYPE DEFINITIONS */
  typedef unsigned int uint_t;
  typedef unsigned char uchar_t;
-@@ -294,6 +313,7 @@ typedef struct entry {
+@@ -310,6 +329,7 @@ typedef struct entry {
  	uid_t uid; /* 4 bytes */
  	gid_t gid; /* 4 bytes */
  #endif
 +	char git_status[2][5];
  } *pEntry;
-
+ 
  /* Selection marker */
-@@ -349,6 +369,7 @@ typedef struct {
+@@ -365,6 +385,7 @@ typedef struct {
  	uint_t cliopener  : 1;  /* All-CLI app opener */
  	uint_t waitedit   : 1;  /* For ops that can't be detached, used EDITOR */
  	uint_t rollover   : 1;  /* Roll over at edges */
 +	uint_t normalgit  : 1;  /* Show git status in normal mode */
  } settings;
-
+ 
  /* Non-persistent program-internal states (alphabeical order) */
-@@ -400,7 +421,17 @@ typedef struct {
+@@ -418,7 +439,17 @@ typedef struct {
  } session_header_t;
  #endif
-
+ 
 +typedef struct {
 +	char status[2];
 +	char path[PATH_MAX];
@@ -66,13 +66,13 @@ index 83ecdb90..4397944a 100644
 +	size_t len;
 +	git_status_t *statuses;
 +} git_statuses;
-
+ 
  /* Configuration, contexts */
  static settings cfg = {
-@@ -3796,6 +3827,47 @@ static int get_kv_key(kv *kvarr, char *val, uchar_t max, uchar_t id)
+@@ -3950,6 +3981,47 @@ static int get_kv_key(kv *kvarr, char *val, uchar_t max, uchar_t id)
  	return -1;
  }
-
+ 
 +static size_t get_git_statuses(const char *path)
 +{
 +	static char gst[] = "git -c core.quotePath= status -s --no-renames --ignored=matching -unormal . 2>/dev/null";
@@ -117,21 +117,21 @@ index 83ecdb90..4397944a 100644
  static void resetdircolor(int flags)
  {
  	/* Directories are always shown on top, clear the color when moving to first file */
-@@ -4123,6 +4195,10 @@ static void printent(const struct entry *ent, uint_t namecols, bool sel)
-
+@@ -4283,6 +4355,10 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
+ 
  	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
-
+ 
 +	if (git_statuses.show && (cfg.showdetail || cfg.normalgit))
 +		printw("%*s%s%s", (cfg.normalgit && !cfg.showdetail) ? 1 : 0, "",
 +				ent->git_status[0], ent->git_status[1]);
 +
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
-
+ 
  	if (g_state.oldcolor)
-@@ -5592,6 +5668,11 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5788,6 +5864,11 @@ static int dentfill(char *path, struct entry **ppdents)
  		attron(COLOR_PAIR(cfg.curctx + 1));
  	}
-
+ 
 +	char linkpath[PATH_MAX];
 +	if ((git_statuses.len = get_git_statuses(path)))
 +		if (!realpath(path, linkpath))
@@ -140,10 +140,10 @@ index 83ecdb90..4397944a 100644
  #if _POSIX_C_SOURCE >= 200112L
  	posix_fadvise(fd, 0, 0, POSIX_FADV_SEQUENTIAL);
  #endif
-@@ -5792,6 +5873,29 @@ static int dentfill(char *path, struct entry **ppdents)
+@@ -5988,6 +6069,29 @@ static int dentfill(char *path, struct entry **ppdents)
  #endif
  		}
-
+ 
 +		if (git_statuses.len) {
 +			char dentpath[PATH_MAX];
 +			size_t pathlen = mkpath(linkpath, dentp->name, dentpath);
@@ -169,8 +169,8 @@ index 83ecdb90..4397944a 100644
 +
  		++ndents;
  	} while ((dp = readdir(dirp)));
-
-@@ -6361,11 +6465,12 @@ static int adjust_cols(int n)
+ 
+@@ -6569,11 +6673,12 @@ static int adjust_cols(int n)
  #endif
  	if (cfg.showdetail) {
  		/* Fallback to light mode if less than 35 columns */
@@ -183,10 +183,10 @@ index 83ecdb90..4397944a 100644
 +			n -= (git_statuses.show ? 34 : 32);
 +	} else if (cfg.normalgit && git_statuses.show)
 +		n -= 3;
-
+ 
  	/* 2 columns for preceding space and indicator */
  	return (n - 2);
-@@ -8143,6 +8248,7 @@ static void usage(void)
+@@ -8401,6 +8506,7 @@ static void usage(void)
  		" -F val  fifo mode [0:preview 1:explore]\n"
  #endif
  		" -g      regex filters\n"
@@ -194,7 +194,7 @@ index 83ecdb90..4397944a 100644
  		" -H      show hidden files\n"
  		" -i      show current file info\n"
  		" -J      no auto-advance on selection\n"
-@@ -8282,6 +8388,7 @@ static void cleanup(void)
+@@ -8544,6 +8650,7 @@ static void cleanup(void)
  		fflush(stdout);
  	}
  #endif
@@ -202,16 +202,16 @@ index 83ecdb90..4397944a 100644
  	free(selpath);
  	free(plgpath);
  	free(cfgpath);
-@@ -8326,7 +8433,7 @@ int main(int argc, char *argv[])
-
+@@ -8589,7 +8696,7 @@ int main(int argc, char *argv[])
+ 
  	while ((opt = (env_opts_id > 0
  		       ? env_opts[--env_opts_id]
--		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVxh"))) != -1) {
-+		       : getopt(argc, argv, "aAb:BcCdDeEfF:gGHiJKl:nNop:P:QrRs:St:T:uUVxh"))) != -1) {
+-		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVx0h"))) != -1) {
++		       : getopt(argc, argv, "aAb:BcCdDeEfF:gGHiJKl:nNop:P:QrRs:St:T:uUVx0h"))) != -1) {
  		switch (opt) {
  #ifndef NOFIFO
  		case 'a':
-@@ -8380,6 +8487,9 @@ int main(int argc, char *argv[])
+@@ -8643,6 +8750,9 @@ int main(int argc, char *argv[])
  			cfg.regex = 1;
  			filterfn = &visible_re;
  			break;
