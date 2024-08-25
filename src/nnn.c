@@ -194,8 +194,6 @@
 #define PROMPT          ">>> "
 #undef NEWLINE
 #define NEWLINE         "\n"
-#undef NUL
-#define NUL             "\0"
 #define REGEX_MAX       48
 #define ENTRY_INCR      64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR    0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
@@ -9054,7 +9052,7 @@ int main(int argc, char *argv[])
 	if (g_state.picker) {
 		if (selbufpos) {
 			fd = selpath ? open(selpath, O_WRONLY | O_CREAT | O_TRUNC, 0600) : STDOUT_FILENO;
-			if ((fd == -1) || (seltofile(fd, NULL, sepnul ? NUL : NEWLINE) != (size_t)(selbufpos)))
+			if ((fd == -1) || (seltofile(fd, NULL, sepnul ? "\0" : NEWLINE) != (size_t)(selbufpos)))
 				xerror();
 
 			if (fd > 1)
