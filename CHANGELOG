@@ -1,3 +1,32 @@
+nnn v5.0 Daiquiri
+2024-08-26
+
+- show relative line numbering when jumping (#1808)
+- option `-N` to use native prompt when compiled with libreadline
+- rm improvements
+  - log removed filename
+  - cancel on 'n' or 'N'
+  - show name of the hovered file to be removed
+  - show number of selected files to be removed
+- new keybind <kbd>X</kbd> to force `rm -rf` always (#1811)
+- fix sort order getting changed on context switch (#1757)
+- fix current selection on new file creation, if symlinks exist (#1767)
+- fix filter toggle with mouse click on last 2 rows (#1765)
+- fix file creation (#1864)
+- when handling bookmark, use readlink, not realpath
+- set `$PWD` on directory switch
+- add option `-0` to null-separate file paths in picker mode
+- quitcd.nu (for nushell) now supports modular import (#1806)
+- add _command as plugin_ example to cd to user input directory
+- `cbcopy-mac`, `cbpaste-mac`: plugins for integration with macOS clipboard
+- `fzhist` plugin: add support for zsh history
+- `preview-tui` plugin: support eza as replacement for exa, multiple fixes
+- `preview-tui` plugin: add full svg support (#1865)
+- `preview-tabbed`: show (n)sxiv in thumbnail mode inside "Pictures" directory
+- mpv sixel/kitty support for preview (#1590)
+
+-------------------------------------------------------------------------------
+
 nnn v4.9 Elixir
 2023-08-27
 
