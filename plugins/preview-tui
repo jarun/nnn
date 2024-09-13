@@ -460,6 +460,8 @@ image_preview() {
         chafa "$3" &
     elif exists img2sixel && [[ "$NNN_PREVIEWIMGPROG" == +(|img2sixel) ]]; then
         img2sixel -g "$3" &
+    elif exists "$NNN_PREVIEWIMGPROG"; then
+        "$NNN_PREVIEWIMGPROG" "$3" &
     else
         fifo_pager print_bin_info "$3" && return
     fi
