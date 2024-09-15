@@ -450,6 +450,8 @@ image_preview() {
         kitty +kitten icat --silent --scale-up --place "$(($1 - 1))x$(($2 - 1))"@0x0 --transfer-mode=memory --stdin=no "$3" &
     elif [ "$NNN_TERMINAL" = "wezterm" ] && [[ "$NNN_PREVIEWIMGPROG" == +(|imgcat) ]]; then
         wezterm imgcat "$3" &
+    elif exists ueberzug && [[ "$NNN_PREVIEWIMGPROG" == +(|ueberzug) ]]; then
+        ueberzug_layer "$1" "$2" "$3" && return
     elif exists "$NNN_PREVIEWIMGPROG"; then
         "$NNN_PREVIEWIMGPROG" "$3" &
     else
