@@ -21,7 +21,7 @@
 #   - man
 #   - optional: bsdtar or atool for additional archive preview
 #   - optional: bat for code syntax highlighting
-#   - optional: ueberzug, kitty terminal, wezterm terminal, img2sixel, viu, catimg or chafa for images
+#   - optional: ueberzug, kitty terminal, wezterm terminal, img2sixel, viu, catimg, timg or chafa for images
 #   - optional: convert(ImageMagick) for playing gif preview (mandatory for kitty image previews)
 #   - optional: mpv for gif and video
 #       Also requires a terminal supporting the sixel (https://www.arewesixelyet.com/)
@@ -131,7 +131,7 @@ ENVVARS+=(
 )
 
 trap '' PIPE
-exists() { type "$1" >/dev/null 2>&1 ;}
+exists() { type "${1%% *}" >/dev/null 2>&1 ;}
 pkill() { command pkill "$@" >/dev/null 2>&1 ;}
 prompt() { clear; printf "%b" "$@"; cfg=$(stty -g); stty raw -echo; head -c 1; stty "$cfg" ;}
 pidkill() {
@@ -450,16 +450,6 @@ image_preview() {
         kitty +kitten icat --silent --scale-up --place "$(($1 - 1))x$(($2 - 1))"@0x0 --transfer-mode=memory --stdin=no "$3" &
     elif [ "$NNN_TERMINAL" = "wezterm" ] && [[ "$NNN_PREVIEWIMGPROG" == +(|imgcat) ]]; then
         wezterm imgcat "$3" &
-    elif exists ueberzug && [[ "$NNN_PREVIEWIMGPROG" == +(|ueberzug) ]]; then
-        ueberzug_layer "$1" "$2" "$3" && return
-    elif exists catimg && [[ "$NNN_PREVIEWIMGPROG" == +(|catimg) ]]; then
-        catimg "$3" &
-    elif exists viu && [[ "$NNN_PREVIEWIMGPROG" == +(|viu) ]]; then
-        viu -t "$3" &
-    elif exists chafa && [[ "$NNN_PREVIEWIMGPROG" == +(|chafa) ]]; then
-        chafa "$3" &
-    elif exists img2sixel && [[ "$NNN_PREVIEWIMGPROG" == +(|img2sixel) ]]; then
-        img2sixel -g "$3" &
     elif exists "$NNN_PREVIEWIMGPROG"; then
         "$NNN_PREVIEWIMGPROG" "$3" &
     else
