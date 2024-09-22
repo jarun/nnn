@@ -4330,6 +4330,7 @@ static void savecurctx(char *path, char *curname, int nextctx)
 {
 	settings tmpcfg = cfg;
 	context *ctxr = &g_ctx[nextctx];
+	uint_t r = cfg.filtermode;
 
 	/* Save current context */
 	if (curname)
@@ -4358,6 +4359,7 @@ static void savecurctx(char *path, char *curname, int nextctx)
 
 	tmpcfg.curctx = nextctx;
 	setcfg(tmpcfg);
+	cfg.filtermode = r;
 }
 
 #ifndef NOSSN
