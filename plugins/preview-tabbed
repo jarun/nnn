@@ -57,14 +57,14 @@ if [ -n "$WAYLAND_DISPLAY" ] ; then
     exit 1
 fi
 
-if type xterm >/dev/null 2>&1 ; then
-    TERMINAL="xterm -into"
-elif type urxvt >/dev/null 2>&1 ; then
-    TERMINAL="urxvt -embed"
+if type alacritty >/dev/null 2>&1 ; then
+    TERMINAL="alacritty --embed"
 elif type st >/dev/null 2>&1 ; then
     TERMINAL="st -w"
-elif type alacritty >/dev/null 2>&1 ; then
-    TERMINAL="alacritty --embed"
+elif type urxvt >/dev/null 2>&1 ; then
+    TERMINAL="urxvt -embed"
+elif type xterm >/dev/null 2>&1 ; then
+    TERMINAL="xterm -into"
 else
     echo "No xembed term found" >&2
 fi
