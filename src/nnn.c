@@ -1426,6 +1426,12 @@ static void msg(const char *message)
 	fprintf(stderr, "%s\n", message);
 }
 
+static void clearinfoln(void)
+{
+	move(xlines - 2, 0);
+	clrtoeol();
+}
+
 #ifdef KEY_RESIZE
 static void handle_key_resize(void)
 {
@@ -1436,9 +1442,7 @@ static void handle_key_resize(void)
 /* Clear the old prompt */
 static void clearoldprompt(void)
 {
-	// clear info line
-	move(xlines - 2, 0);
-	clrtoeol();
+	clearinfoln();
 
 	tolastln();
 	clrtoeol();
@@ -3238,9 +3242,6 @@ static int getorderstr(char *sort)
 {
 	int i = 0;
 
-	if (cfg.filtermode)
-		sort[i++] = 'F';
-
 	if (cfg.showhidden)
 		sort[i++] = 'H';
 
@@ -3565,6 +3566,7 @@ static int filterentries(char *path, char *lastname)
 		showfilter(ln);
 	}
 end:
+	clearinfoln();
 
 	/* Save last working filter in-filter */
 	if (ln[1])
@@ -6500,8 +6502,10 @@ static void statusbar(char *path)
 	} else { /* light or detail mode */
 		char sort[] = "\0\0\0\0\0";
 
-		if (getorderstr(sort))
-			addstr(sort);
+		if (cfg.filtermode)
+			addch('F');
+
+		getorderstr(sort) ? addstr(sort) : addch(' ');
 
 		/* Timestamp */
 		print_time(&pent->sec, pent->flags);
