@@ -3238,6 +3238,9 @@ static int getorderstr(char *sort)
 {
 	int i = 0;
 
+	if (cfg.filtermode)
+		sort[i++] = 'F';
+
 	if (cfg.showhidden)
 		sort[i++] = 'H';
 
