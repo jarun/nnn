@@ -284,6 +284,10 @@
 #define VFS_USED  1
 #define VFS_SIZE  2
 
+/* Command history */
+#define MAX_HISTORY 0x10
+#define INVALID_POS 0xFF
+
 /* TYPE DEFINITIONS */
 typedef unsigned int uint_t;
 typedef unsigned char uchar_t;
@@ -439,6 +443,8 @@ static ushort_t xlines, xcols;
 static ushort_t idle;
 static uchar_t maxbm, maxplug, maxorder;
 static uchar_t cfgsort[CTX_MAX + 1];
+static uchar_t selcmdpos = INVALID_POS, lastcmdpos = INVALID_POS;
+static char *cmd_hist[MAX_HISTORY] = {0};
 static char *bmstr;
 static char *pluginstr;
 static char *orderstr;
@@ -462,7 +468,6 @@ static char hostname[_POSIX_HOST_NAME_MAX + 1];
 #ifndef NOFIFO
 static char *fifopath;
 #endif
-static char *lastcmd;
 static ullong_t *ihashbmp;
 static struct entry *pdents;
 static blkcnt_t dir_blocks;
@@ -3582,6 +3587,49 @@ end:
 	return *ch;
 }
 
+static char *getcmdfromhist(bool up)
+{
+	if (lastcmdpos == INVALID_POS) /* No entry in history */
+		return NULL;
+
+	if (selcmdpos == INVALID_POS) /* Initial position at prompt */
+		selcmdpos = up ? lastcmdpos : 0;
+	else if (up)
+		selcmdpos = (selcmdpos == 0) ? lastcmdpos : selcmdpos - 1;
+	else
+		selcmdpos = (selcmdpos == lastcmdpos) ? 0 : selcmdpos + 1;
+
+	return cmd_hist[selcmdpos];
+}
+
+static void addcmdtohist(char *cmd)
+{
+	bool new = FALSE;
+
+	if (lastcmdpos == INVALID_POS)
+		new = TRUE;
+	else if ((selcmdpos == INVALID_POS) || (xstrcmp(cmd_hist[selcmdpos], cmd) != 0)) { /* New or not matching */
+		if (lastcmdpos == (MAX_HISTORY - 1)) {
+			free(cmd_hist[0]);
+
+			for (uchar_t pos = 0; pos < lastcmdpos; ++pos)
+				cmd_hist[pos] = cmd_hist[pos + 1];
+			--lastcmdpos;
+		}
+
+		new = TRUE;
+	} else if (selcmdpos != lastcmdpos) { /* Command matches, make it the latest if not already */
+		cmd = cmd_hist[selcmdpos];
+
+		for (uchar_t pos = selcmdpos; pos < lastcmdpos; ++pos)
+			cmd_hist[pos] = cmd_hist[pos + 1];
+		cmd_hist[lastcmdpos] = cmd;
+	}
+
+	if (new)
+		cmd_hist[++lastcmdpos] = xstrdup(cmd);
+}
+
 /* Show a prompt with input string and return the changes */
 static char *xreadline(const char *prefill, const char *prompt)
 {
@@ -3750,10 +3798,14 @@ static char *xreadline(const char *prefill, const char *prompt)
 				break;
 			case KEY_UP: // fallthrough
 			case KEY_DOWN:
-				if (prompt && lastcmd && (xstrcmp(prompt, PROMPT) == 0)) {
+			{
+				char *cmd = getcmdfromhist(*ch == KEY_UP);
+
+				if (prompt && cmd && (xstrcmp(prompt, PROMPT) == 0)) {
 					printmsg(prompt);
-					len = pos = mbstowcs(buf, lastcmd, READLINE_MAX); // fallthrough
+					len = pos = mbstowcs(buf, cmd, READLINE_MAX); // fallthrough
 				}
+			}
 			default:
 				break;
 			}
@@ -5541,7 +5593,9 @@ static bool prompt_run(void)
 	const char *xargs_J = "xargs -0 %s < %s";
 	char cmd[CMD_LEN_MAX + 32]; // 32 for xargs format strings
 
+
 	while (1) {
+		selcmdpos = INVALID_POS;
 #ifndef NORL
 		if (g_state.picker || g_state.xprompt) {
 #endif
@@ -5554,8 +5608,7 @@ static bool prompt_run(void)
 		if (!cmdline || !cmdline[0])
 			break;
 
-		free(lastcmd);
-		lastcmd = xstrdup(cmdline);
+		addcmdtohist(cmdline);
 		ret = TRUE;
 
 		len = xstrlen(cmdline);
@@ -8559,7 +8612,9 @@ static void cleanup(void)
 	free(ihashbmp);
 	free(bookmark);
 	free(plug);
-	free(lastcmd);
+	if (lastcmdpos != INVALID_POS)
+		for (uchar_t pos = 0; pos <= lastcmdpos; ++pos)
+			free(cmd_hist[pos]);
 #ifndef NOFIFO
 	if (g_state.autofifo)
 		unlink(fifopath);
