@@ -5293,7 +5293,12 @@ static void show_help(const char *path)
 		hex = (*s == '\n');
 	}
 
-	fprintf(f, "\nLOCATIONS\n");
+#ifndef NOSSN
+	if (curssn[0])
+		fprintf(f, "\nSESSION: %s\n", curssn);
+#endif
+
+	fprintf(f, "\nCONTEXTS\n");
 	for (uchar_t i = 0; i < CTX_MAX; ++i)
 		if (g_ctx[i].c_cfg.ctxactive)
 			fprintf(f, " %u: %s\n", i + 1, g_ctx[i].c_path);
