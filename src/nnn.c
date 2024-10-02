@@ -484,6 +484,9 @@ static pcre *archive_pcre;
 #else
 static regex_t archive_re;
 #endif
+#ifndef NOSSN
+static char curssn[NAME_MAX + 1];
+#endif
 
 /* pthread related */
 #define NUM_DU_THREADS (4) /* Can use sysconf(_SC_NPROCESSORS_ONLN) */
@@ -4487,7 +4490,8 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	mkpath(cfgpath, toks[TOK_SSN], ssnpath);
 
 	if (!restore) {
-		sname = sname ? sname : xreadline(NULL, messages[MSG_SSN_NAME]);
+		if (!sname || !sname[0])
+			sname = xreadline(NULL, messages[MSG_SSN_NAME]);
 		if (!sname[0])
 			return FALSE;
 
@@ -4538,6 +4542,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	*lastdir = g_ctx[cfg.curctx].c_last;
 	*lastname = g_ctx[cfg.curctx].c_name;
 	set_sort_flags('\0'); /* Set correct sort options */
+	xstrsncpy(curssn, sname, NAME_MAX);
 	status = TRUE;
 
 END:
@@ -6841,7 +6846,7 @@ static void showselsize(const char *path)
 	printmsg(coolsize(cfg.blkorder ? sz << blk_shift : sz));
 }
 
-static bool browse(char *ipath, const char *session, int pkey)
+static bool browse(char *ipath, int pkey)
 {
 	alignas(max_align_t) char newpath[PATH_MAX];
 	alignas(max_align_t) char runfile[NAME_MAX + 1];
@@ -6867,9 +6872,7 @@ static bool browse(char *ipath, const char *session, int pkey)
 
 #ifndef NOSSN
 	/* set-up first context */
-	if (!session || !load_session(session, &path, &lastdir, &lastname, FALSE)) {
-#else
-		(void)session;
+	if (!curssn[0] || !load_session(curssn, &path, &lastdir, &lastname, FALSE)) {
 #endif
 		g_ctx[0].c_last[0] = '\0';
 		lastdir = g_ctx[0].c_last; /* last visited directory */
@@ -6899,9 +6902,12 @@ static bool browse(char *ipath, const char *session, int pkey)
 	newpath[0] = runfile[0] = '\0';
 
 	presel = pkey ? ((pkey == CREATE_NEW_KEY) ? 'n' : ';') : ((cfg.filtermode
-			|| (session && (g_ctx[cfg.curctx].c_fltr[0] == FILTER
+#ifndef NOSSN
+			|| (curssn[0] && (g_ctx[cfg.curctx].c_fltr[0] == FILTER
 				|| g_ctx[cfg.curctx].c_fltr[0] == RFILTER)
-				&& g_ctx[cfg.curctx].c_fltr[1])) ? FILTER : 0);
+				&& g_ctx[cfg.curctx].c_fltr[1])
+#endif
+			) ? FILTER : 0);
 
 	pdents = xrealloc(pdents, total_dents * sizeof(struct entry));
 	if (!pdents)
@@ -8099,7 +8105,8 @@ nochange:
 			r = get_input(messages[MSG_SSN_OPTS]);
 
 			if (r == 's') {
-				tmp = xreadline(NULL, messages[MSG_SSN_NAME]);
+				tmp = xreadline(!curssn[0] || ((curssn[0] == '@') && !curssn[1]) ? NULL : curssn,
+					messages[MSG_SSN_NAME]);
 				if (tmp && *tmp)
 					save_session(tmp, &presel);
 			} else if (r == 'l' || r == 'r') {
@@ -8629,7 +8636,6 @@ static void cleanup(void)
 int main(int argc, char *argv[])
 {
 	char *arg = NULL;
-	char *session = NULL;
 	int fd, opt, sort = 0, pkey = '\0'; /* Plugin key */
 	bool sepnul = FALSE;
 #ifndef NOMOUSE
@@ -8766,12 +8772,12 @@ int main(int argc, char *argv[])
 #ifndef NOSSN
 		case 's':
 			if (env_opts_id < 0)
-				session = optarg;
+				xstrsncpy(curssn, optarg, NAME_MAX);
 			break;
 		case 'S':
 			g_state.prstssn = 1;
-			if (!session) /* Support named persistent sessions */
-				session = "@";
+			if (!curssn[0]) /* Support named persistent sessions */
+				curssn[0] = '@';
 			break;
 #endif
 		case 't':
@@ -8834,8 +8840,10 @@ int main(int argc, char *argv[])
 		} else
 			dup2(STDOUT_FILENO, STDIN_FILENO);
 
-		if (session)
-			session = NULL;
+#ifndef NOSSN
+		if (curssn[0])
+			curssn[0] = '\0';
+#endif
 	}
 
 	home = getenv("HOME");
@@ -8881,8 +8889,10 @@ int main(int argc, char *argv[])
 				return EXIT_FAILURE;
 			}
 
-			if (session)
-				session = NULL;
+#ifndef NOSSN
+			if (curssn[0])
+				curssn[0] = '\0';
+#endif
 		} else if (argc == optind) {
 			/* Start in the current directory */
 			char *startpath = getenv("PWD");
@@ -8938,8 +8948,10 @@ int main(int argc, char *argv[])
 			} else if (!S_ISDIR(sb.st_mode))
 				g_state.initfile = 1;
 
-			if (session)
-				session = NULL;
+#ifndef NOSSN
+			if (curssn[0])
+				curssn[0] = '\0';
+#endif
 		}
 	}
 
@@ -9091,11 +9103,11 @@ int main(int argc, char *argv[])
 	if (sort)
 		set_sort_flags(sort);
 
-	opt = browse(initpath, session, pkey);
+	opt = browse(initpath, pkey);
 
 #ifndef NOSSN
-	if (session && g_state.prstssn)
-		save_session(session, NULL);
+	if (curssn[0] && g_state.prstssn)
+		save_session(curssn, NULL);
 #endif
 
 #ifndef NOMOUSE
