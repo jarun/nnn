@@ -279,14 +279,14 @@
 #define VCMP 2
 #define VLEN 3
 
+/* Command history */
+#define MAX_HISTORY 0x10
+#define INVALID_POS 0xFF
+
 /* Volume info */
 #define VFS_AVAIL 0
 #define VFS_USED  1
 #define VFS_SIZE  2
-
-/* Command history */
-#define MAX_HISTORY 0x10
-#define INVALID_POS 0xFF
 
 /* TYPE DEFINITIONS */
 typedef unsigned int uint_t;
