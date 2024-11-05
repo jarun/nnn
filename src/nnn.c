@@ -5529,6 +5529,9 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 		if (wfd == -1)
 			_exit(EXIT_FAILURE);
 
+		/* Restore sigpipe handler to default */
+		sigaction(SIGPIPE, &(struct sigaction){.sa_handler = SIG_DFL}, NULL);
+
 		if (!cmd_as_plugin) {
 			char *sel = NULL;
 			char std[2] = "-";
