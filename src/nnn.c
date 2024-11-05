@@ -5301,7 +5301,7 @@ static void show_help(const char *path)
 	fprintf(f, "\nCONTEXTS\n");
 	for (uchar_t i = 0; i < CTX_MAX; ++i)
 		if (g_ctx[i].c_cfg.ctxactive)
-			fprintf(f, " %u: %s\n", i + 1, g_ctx[i].c_path);
+			fprintf(f, " %u%c %s\n", i + 1, (cfg.curctx == i) ? '*' : ' ', g_ctx[i].c_path);
 
 	fprintf(f, "\nVOLUME: avail:%s ", coolsize(get_fs_info(path, VFS_AVAIL)));
 	fprintf(f, "used:%s ", coolsize(get_fs_info(path, VFS_USED)));
