@@ -110,7 +110,7 @@
 #define ICON_EXT_CSS       ICON_STR(MFIZZ_CSS3, "", "🦋")
 #define ICON_EXT_DEB       ICON_STR(MFIZZ_DEBIAN, "", "🍥")
 #define ICON_EXT_DIFF      ICON_STR(FILE_DIFF, "", "📋")
-#define ICON_EXT_GO        ICON_STR(MFIZZ_GO, "󰟓", "💨")
+#define ICON_EXT_GO        ICON_STR(MFIZZ_GO, "󰟓", "")
 #define ICON_EXT_JSON      ICON_STR(ICON_JAVASCRIPT, "", ICON_JAVASCRIPT)
 #define ICON_EXT_LUA       ICON_STR(FILE_LUA, "", "🌘")
 #define ICON_EXT_M         ICON_STR("", "󰠞", "📊")
