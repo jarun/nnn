@@ -68,7 +68,7 @@
 #define ICON_DOWNLOADS     ICON_STR(FA_DOWNLOAD, "󰃘", "📥")
 #define ICON_ELIXIR        ICON_STR(MFIZZ_ELIXIR, "", "💧")
 #define ICON_ENCRYPT       ICON_STR("", "󰌆", "🔒")
-#define ICON_FSHARP        ICON_STR(DEV_FSHARP, "", "🔷")
+#define ICON_FSHARP        ICON_STR(DEV_FSHARP, "", "")
 #define ICON_FONT          ICON_STR(FILE_FONT, "", "🔤")
 #define ICON_GIT           ICON_STR(FA_GIT, "", "🌱")
 #define ICON_HASKELL       ICON_STR("", "", "")
