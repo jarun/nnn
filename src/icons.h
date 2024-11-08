@@ -101,7 +101,7 @@
 #define ICON_TEX           ICON_STR(FILE_TEX, "󰙩", ICON_DOCUMENT)
 #define ICON_VIDEOFILE     ICON_STR(FA_FILE_MOVIE_O, "󰈫", "🎞 ")
 #define ICON_VIDEOS        ICON_STR(FA_FILM, "󰈰", "🎬")
-#define ICON_VIM           ICON_STR(DEV_VIM, "", "🪛")
+#define ICON_VIM           ICON_STR(DEV_VIM, "", "")
 #define ICON_WORDDOC       ICON_STR(FILE_WORD, "󰈬", "📘")
 
 #define ICON_EXT_ASM       ICON_STR(FILE_NASM, "", "")
