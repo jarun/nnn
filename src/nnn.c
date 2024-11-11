@@ -2834,15 +2834,16 @@ static char *get_archive_cmd(const char *archive)
 
 static void archive_selection(const char *cmd, const char *archive)
 {
-	char *buf = malloc((xstrlen(patterns[P_ARCHIVE_CMD]) + xstrlen(cmd) + xstrlen(archive)
-	                   + xstrlen(selpath)) * sizeof(char));
+	size_t len = xstrlen(patterns[P_ARCHIVE_CMD]) + xstrlen(cmd) + xstrlen(archive)
+	            + xstrlen(selpath) + 1;
+	char *buf = malloc(len);
 	if (!buf) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
 		return;
 	}
 
-	snprintf(buf, CMD_LEN_MAX, patterns[P_ARCHIVE_CMD], cmd, archive, selpath);
+	snprintf(buf, len, patterns[P_ARCHIVE_CMD], cmd, archive, selpath);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI | F_CONFIRM);
 	free(buf);
 }
