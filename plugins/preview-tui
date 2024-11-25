@@ -373,7 +373,7 @@ preview_file() {
         elif exists eza; then # eza is a community fork of exa (exa is unmaintained)
             fifo_pager eza -T --group-directories-first --colour=always -L 3
         else
-            fifo_pager ls -F --group-directories-first --color=always
+            fifo_pager ls -1 --color=always | sort
         fi
         cd ..
     elif [ "${encoding#*)}" = "binary" ]; then
