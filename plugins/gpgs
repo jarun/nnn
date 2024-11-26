@@ -12,6 +12,7 @@
 # Shell: POSIX compliant
 # Author: wassup05
 
+file=$1
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
 printf "(s)election/(c)urrent? [default=c] "
@@ -19,18 +20,20 @@ read -r file_resp
 printf "(s)ign/(c)learsign/(d)etach-sig? [default=s] "
 read -r sig_resp
 
-if [ "$file_resp" = "s" ]; then
-	files=$(tr '\0' '\n' < "$selection")
-else
-	files=$1
-fi
+getfiles(){
+    if [ "$file_resp" = "s" ]; then
+        cat "$selection"
+    else
+        printf "%s\0" "$file"
+    fi
+}
 
 if [ "$sig_resp" = "c" ]; then
-    printf "%s" "$files" | xargs -I{} gpg --clearsign {}
+    getfiles | xargs -0 -I{} gpg --clearsign {}
 elif [ "$sig_resp" = "d" ]; then
-    printf "%s" "$files" | xargs -I{} gpg --detach-sig --output "{}.sig"
+    getfiles | xargs -0 -I{} gpg --detach-sig --output "{}.sig"
 else
-    printf "%s" "$files" | xargs -I{} gpg --sign --output "{}.sig" {}
+    getfiles | xargs -0 -I{} gpg --sign --output "{}.sig" {}
 fi
 
 # Clear selection
