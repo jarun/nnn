@@ -31,6 +31,8 @@ case "$NNN_TRASH" in
 		RM_UTIL="trash-put" ;;
 	2)
 		RM_UTIL="gio trash" ;;
+	3)
+		RM_UTIL="trash" ;;
 	*)
 		RM_UTIL="rm -ri --" ;;
 esac

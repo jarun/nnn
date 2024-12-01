@@ -392,7 +392,7 @@ typedef struct {
 	uint_t selbm      : 1;  /* Select a bookmark from bookmarks directory */
 	uint_t selmode    : 1;  /* Set when selecting files */
 	uint_t stayonsel  : 1;  /* Disable auto-advance on selection */
-	uint_t trash      : 2;  /* Trash method 0: rm -rf, 1: trash-cli, 2: gio trash */
+	uint_t trash      : 2;  /* Trash method 0: rm -rf, 1: trash-cli, 2: gio trash, 3: trash */
 	uint_t uidgid     : 1;  /* Show owner and group info */
 	uint_t usebsdtar  : 1;  /* Use bsdtar as default archive utility */
 	uint_t xprompt    : 1;  /* Use native prompt instead of readline prompt */
@@ -560,6 +560,7 @@ static runstate g_state;
 #define UTIL_GIO_TRASH 19
 #define UTIL_RM_RF     20
 #define UTIL_ARCHMNT   21
+#define UTIL_MAC_TRASH 22
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -601,6 +602,7 @@ static char * const utils[] = {
 	"gio trash",
 	"rm -rf --",
 	"archivemount",
+	"trash",
 };
 
 /* Common strings */
@@ -1145,6 +1147,20 @@ static char *getgrname(gid_t gid)
 static inline bool getutil(char *util)
 {
 	return spawn("which", util, NULL, NULL, F_NORMAL | F_NOTRACE) == 0;
+}
+
+static char *trash_util()
+{
+	switch (g_state.trash) {
+	case 1:
+		return utils[UTIL_TRASH_CLI];
+	case 2:
+		return utils[UTIL_GIO_TRASH];
+	case 3:
+		return utils[UTIL_MAC_TRASH];
+	default:
+		return utils[UTIL_RM_RF];
+	}
 }
 
 static inline bool tilde_is_home(const char *s)
@@ -2578,8 +2594,7 @@ static bool rmmulstr(char *buf, bool use_trash)
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cvr -- \"$0\" \"$@\" < /dev/tty' < %s",
 			 r, selpath);
 	else
-		snprintf(buf, CMD_LEN_MAX, "xargs -0 %s < %s",
-			 utils[(g_state.trash == 1) ? UTIL_TRASH_CLI : UTIL_GIO_TRASH], selpath);
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 %s < %s", trash_util(), selpath);
 
 	return TRUE;
 }
@@ -2597,8 +2612,7 @@ static bool xrm(char * const fpath, bool use_trash)
 		rm_opts[3] = r;
 		spawn("rm", rm_opts, "--", fpath, F_NORMAL | F_CHKRTN);
 	} else
-		spawn(utils[(g_state.trash == 1) ? UTIL_TRASH_CLI : UTIL_GIO_TRASH],
-		      fpath, NULL, NULL, F_NORMAL | F_MULTI);
+		spawn(trash_util(), fpath, NULL, NULL, F_NORMAL | F_MULTI);
 
 	return (access(fpath, F_OK) == -1); /* File is removed */
 }
@@ -9041,7 +9055,7 @@ int main(int argc, char *argv[])
 
 	/* Configure trash preference */
 	opt = xgetenv_val(env_cfg[NNN_TRASH]);
-	if (opt && opt <= 2)
+	if (opt && opt <= 3)
 		g_state.trash = opt;
 
 	/* Ignore/handle certain signals */
