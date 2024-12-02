@@ -1,0 +1,42 @@
+#!/usr/bin/env sh
+
+# Description: signs selected files using gpg.
+#              includes options for clearsigning and
+#              detached signing documents as well
+#
+#              signed and detach signed files are stored with extension .sig
+#              whereas clearsigned one are stored as .asc [by default by gpg]
+#
+# Note: The chosen method of signing is applied to all selected files [if selection is chosen]
+#
+# Shell: POSIX compliant
+# Author: wassup05
+
+file=$1
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+printf "(s)election/(c)urrent? [default=c] "
+read -r file_resp
+printf "(s)ign/(c)learsign/(d)etach-sig? [default=s] "
+read -r sig_resp
+
+getfiles(){
+    if [ "$file_resp" = "s" ]; then
+        cat "$selection"
+    else
+        printf "%s\0" "$file"
+    fi
+}
+
+if [ "$sig_resp" = "c" ]; then
+    getfiles | xargs -0 -I{} gpg --clearsign {}
+elif [ "$sig_resp" = "d" ]; then
+    getfiles | xargs -0 -I{} gpg --detach-sig --output "{}.sig"
+else
+    getfiles | xargs -0 -I{} gpg --sign --output "{}.sig" {}
+fi
+
+# Clear selection
+if [ "$file_resp" = "s" ] && [ -p "$NNN_PIPE" ]; then
+    printf "-" > "$NNN_PIPE"
+fi

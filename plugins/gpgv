@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+
+# Description: verifies signed files using gpg.
+#              includes options for detached signing
+#              (in which case it asks for a document to verify)
+#              as well as normal signing
+#
+# Note: Uses the current file only [selections not supported]
+#
+# Shell: POSIX compliant
+# Author: wassup05
+
+file=$1
+
+printf "(s)ign/(d)etach-sig [default=s] "
+read -r sig_resp
+
+if [ "$sig_resp" = "d" ]; then
+    printf "Enter document name: "
+    read -r doc_name
+    command gpg --verify "$file" "$doc_name"
+else
+    command gpg --verify "$file"
+fi
+
+printf "\n"
+# shellcheck disable=SC2034
+read -r resp     # Waiting for input to go back to nnn
