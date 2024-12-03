@@ -33,6 +33,8 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [getplugs](getplugs) | Update plugins to installed `nnn` version | sh | curl |
 | [gitroot](gitroot) | Cd to the root of current git repo | sh | git |
 | [gpge](gpge) | Encrypt/decrypt files using GPG [✓] | sh | gpg |
+| [gpgs](gpgs) | Digitally sign files using GPG [✓] | sh | gpg |
+| [gpgv](gpgv) | Verify signature files using GPG [✓] | sh | gpg |
 | [gutenread](gutenread) | Browse, download, read from Project Gutenberg | sh | curl, unzip, w3m<br>[epr](https://github.com/wustho/epr) (optional) |
 | [gsconnect](gsconnect) | GNOME's implementation of kdeconnect [✓] | sh | gsconnect |
 | [imgresize](imgresize) | Batch resize images in dir to screen resolution | sh | [imgp](https://github.com/jarun/imgp) |
