@@ -100,6 +100,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <stddef.h>
+#include <wctype.h>
 #include <stdalign.h>
 #ifndef __USE_XOPEN_EXTENDED
 #define __USE_XOPEN_EXTENDED 1
@@ -3637,7 +3638,7 @@ static void addcmdtohist(char *cmd)
 /* Show a prompt with input string and return the changes */
 static char *xreadline(const char *prefill, const char *prompt)
 {
-	size_t len, pos;
+	size_t len, pos, lpos;
 	int x, r;
 	const int WCHAR_T_WIDTH = sizeof(wchar_t);
 	wint_t ch[1];
@@ -3745,8 +3746,42 @@ static char *xreadline(const char *prefill, const char *prompt)
 				pos = 0;
 				continue;
 			case ESC: /* Exit prompt on Esc, but just filter out Alt+key */
-				if (handle_alt_key(ch) != ERR)
+				if (handle_alt_key(ch) != ERR) {
+					switch (*ch) {
+					case 'd':
+						printmsg(prompt);
+						lpos = pos;
+						while (pos < len && !iswalnum(buf[pos + 1]))
+							++pos;
+						while (pos < len && iswalnum(buf[++pos]));
+						memmove(buf + lpos, buf + pos, (len - pos) * WCHAR_T_WIDTH);
+						len -= pos - lpos;
+						pos = lpos;
+						continue;
+					case KEY_BACKSPACE:
+						printmsg(prompt);
+						lpos = pos;
+						while (pos > 0 && !iswalnum(buf[pos - 1]))
+							--pos;
+						while (pos > 0 && iswalnum(buf[pos - 1]))
+							--pos;
+						memmove(buf + pos, buf + lpos, (len - lpos) * WCHAR_T_WIDTH);
+						len -= lpos - pos;
+						continue;
+					case 'f':
+						while (pos < len && !iswalnum(buf[pos + 1]))
+							++pos;
+						while (pos < len && iswalnum(buf[++pos]));
+						continue;
+					case 'b':
+						while (pos > 0 && !iswalnum(buf[pos - 1]))
+							--pos;
+						while (pos > 0 && iswalnum(buf[pos - 1]))
+							--pos;
+						continue;
+					}
 					continue;
+				}
 
 				len = 0;
 				goto END;
