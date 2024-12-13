@@ -4543,7 +4543,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	*lastdir = g_ctx[cfg.curctx].c_last;
 	*lastname = g_ctx[cfg.curctx].c_name;
 	set_sort_flags('\0'); /* Set correct sort options */
-	xstrsncpy(curssn, sname, NAME_MAX);
+	xstrsncpy(curssn, sname ? sname : "@", NAME_MAX);
 	status = TRUE;
 
 END:
