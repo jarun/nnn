@@ -4385,6 +4385,7 @@ static void setcfg(settings newcfg)
 	/* Synchronize the global function pointers to match the new cfg. */
 	entrycmpfn = cfg.reverse ? &reventrycmp : &entrycmp;
 	namecmpfn = cfg.version ? &xstrverscasecmp : &xstricmp;
+	filterfn = cfg.regex ? &visible_re : &visible_str;
 }
 
 static void savecurctx(char *path, char *curname, int nextctx)
