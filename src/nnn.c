@@ -180,6 +180,7 @@
 #define MAX(x, y)       ((x) > (y) ? (x) : (y))
 #define ISODD(x)        ((x) & 1)
 #define ISBLANK(x)      ((x) == ' ' || (x) == '\t')
+#define ISSPACE(x)      (ISBLANK(x) || (x) == '\n' || (x) == '\r' || (x) == '\f' || (x) == '\v')
 #define TOUPPER(ch)     (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
 #define TOLOWER(ch)     (((ch) >= 'A' && (ch) <= 'Z') ? ((ch) - 'A' + 'a') : (ch))
 #define ISUPPER_(ch)    ((ch) >= 'A' && (ch) <= 'Z')
@@ -3717,13 +3718,13 @@ static char *xreadline(const char *prefill, const char *prompt)
 				continue;
 			case CONTROL('W'):
 				printmsg(prompt);
-				do {
-					if (pos == 0)
-						break;
-					memmove(buf + pos - 1, buf + pos,
-						(len - pos) * WCHAR_T_WIDTH);
-					--pos, --len;
-				} while (buf[pos - 1] != ' ' && buf[pos - 1] != '/'); // NOLINT
+				lpos = pos;
+				while (pos > 0 && ISSPACE(buf[pos-1]))
+					--pos;
+				while (pos > 0 && !ISSPACE(buf[pos-1]))
+					--pos;
+				memmove(buf + pos, buf + lpos, (len - lpos) * WCHAR_T_WIDTH);
+				len -= lpos - pos;
 				continue;
 			case CONTROL('K'):
 				printmsg(prompt);
