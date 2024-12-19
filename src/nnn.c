@@ -8759,6 +8759,11 @@ int main(int argc, char *argv[])
 
 				close(fd);
 				selpath = abspath(optarg, NULL, NULL);
+				if (!selpath) {
+					xerror();
+					return EXIT_FAILURE;
+				}
+
 				unlink(selpath);
 			}
 			break;
