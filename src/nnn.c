@@ -392,12 +392,11 @@ typedef struct {
 	uint_t selbm      : 1;  /* Select a bookmark from bookmarks directory */
 	uint_t selmode    : 1;  /* Set when selecting files */
 	uint_t stayonsel  : 1;  /* Disable auto-advance on selection */
-	uint_t trash      : 2;  /* Trash method 0: rm -rf, 1: trash-cli, 2: gio trash */
 	uint_t uidgid     : 1;  /* Show owner and group info */
 	uint_t usebsdtar  : 1;  /* Use bsdtar as default archive utility */
 	uint_t xprompt    : 1;  /* Use native prompt instead of readline prompt */
 	uint_t showlines  : 1;  /* Show line numbers */
-	uint_t reserved   : 3;  /* Adjust when adding/removing a field */
+	uint_t reserved   : 5;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -462,6 +461,7 @@ static char *listroot;
 static char *plgpath;
 static char *pnamebuf, *pselbuf, *findselpos;
 static char *mark;
+static char *trashcmd;
 #ifndef NOX11
 static char hostname[_POSIX_HOST_NAME_MAX + 1];
 #endif
@@ -709,8 +709,8 @@ static const char * const messages[] = {
 #define NNN_SEL     9
 #define NNN_ARCHIVE 10
 #define NNN_ORDER   11
-#define NNN_HELP    12 /* strings end here */
-#define NNN_TRASH   13 /* flags begin here */
+#define NNN_HELP    12
+#define NNN_TRASH   13
 
 static const char * const env_cfg[] = {
 	"NNN_OPTS",
@@ -2527,17 +2527,6 @@ static char *xgetenv(const char * const name, char *fallback)
 	return value && value[0] ? value : fallback;
 }
 
-/* Checks if an env variable is set to 1 */
-static inline uint_t xgetenv_val(const char *name)
-{
-	char *str = getenv(name);
-
-	if (str && str[0])
-		return atoi(str);
-
-	return 0;
-}
-
 /* Check if a dir exists, IS a dir, and is readable */
 static bool xdiraccess(const char *path)
 {
@@ -2579,7 +2568,7 @@ static bool rmmulstr(char *buf, bool use_trash)
 			 r, selpath);
 	else
 		snprintf(buf, CMD_LEN_MAX, "xargs -0 %s < %s",
-			 utils[(g_state.trash == 1) ? UTIL_TRASH_CLI : UTIL_GIO_TRASH], selpath);
+			 trashcmd, selpath);
 
 	return TRUE;
 }
@@ -2597,8 +2586,7 @@ static bool xrm(char * const fpath, bool use_trash)
 		rm_opts[3] = r;
 		spawn("rm", rm_opts, "--", fpath, F_NORMAL | F_CHKRTN);
 	} else
-		spawn(utils[(g_state.trash == 1) ? UTIL_TRASH_CLI : UTIL_GIO_TRASH],
-		      fpath, NULL, NULL, F_NORMAL | F_MULTI);
+		spawn(trashcmd, fpath, NULL, NULL, F_NORMAL | F_MULTI);
 
 	return (access(fpath, F_OK) == -1); /* File is removed */
 }
@@ -2723,7 +2711,7 @@ static bool cpmvrm_selection(enum action sel, char *path)
 		}
 		break;
 	default: /* SEL_TRASH, SEL_RM_ONLY */
-		if (!rmmulstr(g_buf, g_state.trash && sel == SEL_TRASH)) {
+		if (!rmmulstr(g_buf, trashcmd && sel == SEL_TRASH)) {
 			printmsg(messages[MSG_CANCEL]);
 			return FALSE;
 		}
@@ -7757,7 +7745,7 @@ nochange:
 					tmp = (listpath && xstrcmp(path, listpath) == 0)
 					      ? listroot : path;
 					mkpath(tmp, pdents[cur].name, newpath);
-					if (!xrm(newpath, g_state.trash && sel == SEL_TRASH))
+					if (!xrm(newpath, trashcmd && sel == SEL_TRASH))
 						continue;
 
 					xrmfromsel(tmp, newpath);
@@ -9045,9 +9033,13 @@ int main(int argc, char *argv[])
 #endif
 
 	/* Configure trash preference */
-	opt = xgetenv_val(env_cfg[NNN_TRASH]);
-	if (opt && opt <= 2)
-		g_state.trash = opt;
+	trashcmd = getenv(env_cfg[NNN_TRASH]);
+	if (trashcmd) {
+		if (strcmp(trashcmd, "1") == 0)
+			trashcmd = utils[UTIL_TRASH_CLI];
+		else if (strcmp(trashcmd, "2") == 0)
+			trashcmd = utils[UTIL_GIO_TRASH];
+	}
 
 	/* Ignore/handle certain signals */
 	struct sigaction act = {.sa_handler = sigint_handler};

@@ -564,8 +564,14 @@ separated by \fI;\fR:
 .Pp
 \fBNNN_TRASH:\fR trash (instead of \fIrm -rf\fR) files to desktop Trash.
 .Bd -literal
-    export NNN_TRASH=n
-    # n=1: trash-cli, n=2: gio trash
+    export NNN_TRASH=cmd
+
+    NOTES:
+    1. \fBcmd\fR is the name/path of the binary that nnn will call for
+       trashing files. E.g to use macOS's native `trash' command:
+       export NNN_TRASH="trash"
+    2. Special value "1" and "2" for cmd will use trash-cli and
+       gio trash respectively.
 .Ed
 .Pp
 \fBNNN_SEL:\fR absolute path to custom selection file.
