@@ -988,7 +988,8 @@ static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 	char *end = memccpy(dst, src, '\0', n);
 
 	if (!end) {
-		dst[n - 1] = '\0'; // NOLINT
+		if (n)
+			dst[n - 1] = '\0';
 		end = dst + n; /* If we return n here, binary size increases due to auto-inlining */
 	}
 
