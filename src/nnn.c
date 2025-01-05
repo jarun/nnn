@@ -438,6 +438,7 @@ static int nselected;
 #ifndef NOFIFO
 static int fifofd = -1;
 #endif
+static int devnullfd = -1;
 static time_t gtimesecs;
 static uint_t idletimeout, selbufpos, selbuflen;
 static ushort_t xlines, xcols;
@@ -2487,13 +2488,10 @@ static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag)
 	if (pid == 0) {
 		/* Suppress stdout and stderr */
 		if (flag & F_NOTRACE) {
-			int fd = open("/dev/null", O_WRONLY, 0200);
-
 			if (flag & F_NOSTDIN)
-				dup2(fd, STDIN_FILENO);
-			dup2(fd, STDOUT_FILENO); // NOLINT
-			dup2(fd, STDERR_FILENO);
-			close(fd);
+				dup2(devnullfd, STDIN_FILENO);
+			dup2(devnullfd, STDOUT_FILENO);
+			dup2(devnullfd, STDERR_FILENO);
 		} else if (flag & F_TTY) {
 			/* If stdout has been redirected to a non-tty, force output to tty */
 			if (!isatty(STDOUT_FILENO)) {
@@ -8858,6 +8856,12 @@ int main(int argc, char *argv[])
 	enabledbg();
 	DPRINTF_S(VERSION);
 #endif
+
+	devnullfd = open("/dev/null", O_RDWR | O_CLOEXEC);
+	if (devnullfd < 0) {
+		xerror();
+		return EXIT_FAILURE;
+	}
 
 	/* Prefix for temporary files */
 	if (!set_tmp_path())
