@@ -4409,6 +4409,7 @@ static void setcfg(settings newcfg)
 	/* Synchronize the global function pointers to match the new cfg. */
 	entrycmpfn = cfg.reverse ? &reventrycmp : &entrycmp;
 	namecmpfn = cfg.version ? &xstrverscasecmp : &xstricmp;
+	filterfn = cfg.regex ? &visible_re : &visible_str;
 }
 
 static void savecurctx(char *path, char *curname, int nextctx)
@@ -4566,7 +4567,9 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	*path = g_ctx[cfg.curctx].c_path;
 	*lastdir = g_ctx[cfg.curctx].c_last;
 	*lastname = g_ctx[cfg.curctx].c_name;
-	set_sort_flags('\0'); /* Set correct sort options */
+	/* Set correct sort and filter options */
+	set_sort_flags('\0');
+	filterfn = cfg.regex ? &visible_re : &visible_str;
 	xstrsncpy(curssn, sname ? sname : "@", NAME_MAX);
 	status = TRUE;
 
