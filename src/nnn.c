@@ -438,6 +438,7 @@ static int nselected;
 #ifndef NOFIFO
 static int fifofd = -1;
 #endif
+static int devnullfd = -1;
 static time_t gtimesecs;
 static uint_t idletimeout, selbufpos, selbuflen;
 static ushort_t xlines, xcols;
@@ -988,7 +989,8 @@ static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 	char *end = memccpy(dst, src, '\0', n);
 
 	if (!end) {
-		dst[n - 1] = '\0'; // NOLINT
+		if (n)
+			dst[n - 1] = '\0';
 		end = dst + n; /* If we return n here, binary size increases due to auto-inlining */
 	}
 
@@ -1334,21 +1336,23 @@ static char *bmtarget(const char *filepath, char *cwd, char *buf)
 }
 
 /* wraps the argument in single quotes so it can be safely fed to shell */
-static bool shell_escape(char *output, size_t outlen, const char *s)
+static ssize_t shell_escape(char *output, size_t outlen, const char *s)
 {
 	size_t n = xstrlen(s), w = 0;
 
-	if (s == output) {
-		DPRINTF_S("s == output");
-		return FALSE;
+	if (s == output || outlen < 3) {
+		errno = EINVAL;
+		return -1;
 	}
 
 	output[w++] = '\''; /* begin single quote */
 	for (size_t r = 0; r < n; ++r) {
 		/* potentially too big: 4 for the single quote case, 2 from
 		 * outside the loop */
-		if (w + 6 >= outlen)
-			return FALSE;
+		if (w + 6 >= outlen) {
+			errno = ENAMETOOLONG;
+			return -1;
+		}
 
 		switch (s[r]) {
 		/* the only thing that has special meaning inside single
@@ -1365,8 +1369,8 @@ static bool shell_escape(char *output, size_t outlen, const char *s)
 		}
 	}
 	output[w++] = '\''; /* end single quote */
-	output[w++] = '\0'; /* nul terminator */
-	return TRUE;
+	output[w]   = '\0'; /* nul terminator */
+	return w;
 }
 
 static bool set_tilde_in_path(char *path)
@@ -2331,7 +2335,7 @@ static char *parseargs(char *cmd, char **argv, int *pindex)
 {
 	int count = 0;
 	size_t len = xstrlen(cmd) + 1;
-	char *line = (char *)malloc(len);
+	char *line = malloc(len);
 
 	if (!line) {
 		DPRINTF_S("malloc()!");
@@ -2484,13 +2488,10 @@ static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag)
 	if (pid == 0) {
 		/* Suppress stdout and stderr */
 		if (flag & F_NOTRACE) {
-			int fd = open("/dev/null", O_WRONLY, 0200);
-
 			if (flag & F_NOSTDIN)
-				dup2(fd, STDIN_FILENO);
-			dup2(fd, STDOUT_FILENO); // NOLINT
-			dup2(fd, STDERR_FILENO);
-			close(fd);
+				dup2(devnullfd, STDIN_FILENO);
+			dup2(devnullfd, STDOUT_FILENO);
+			dup2(devnullfd, STDERR_FILENO);
 		} else if (flag & F_TTY) {
 			/* If stdout has been redirected to a non-tty, force output to tty */
 			if (!isatty(STDOUT_FILENO)) {
@@ -2840,7 +2841,7 @@ static void archive_selection(const char *cmd, const char *archive)
 
 static void write_lastdir(const char *curpath, const char *outfile)
 {
-	bool tilde = false;
+	bool tilde = false, ok = false;
 	if (!outfile)
 		xstrsncpy(cfgpath + xstrlen(cfgpath), "/.lastd", 8);
 	else
@@ -2849,15 +2850,14 @@ static void write_lastdir(const char *curpath, const char *outfile)
 	int fd = open(outfile
 			? (tilde ? g_buf : outfile)
 			: cfgpath, O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR | S_IRUSR);
-
-	if (fd != -1 && shell_escape(g_buf, sizeof(g_buf), curpath)) {
-		if (write(fd, "cd ", 3) == 3) {
-			if (write(fd, g_buf, strlen(g_buf)) != (ssize_t)strlen(g_buf)) {
-				DPRINTF_S("write failed!");
-			}
-		}
+	if (fd >= 0) {
+		memcpy(g_buf, "cd ", 3);  // NOLINT
+		ssize_t l = shell_escape(g_buf + 3, sizeof(g_buf) - 3, curpath);
+		ok = l >= 0 && write(fd, g_buf, l + 3) == l + 3;
 		close(fd);
 	}
+	if (!ok)
+		errexit();
 }
 
 /*
@@ -8564,8 +8564,8 @@ static bool setup_config(void)
 	if (!xdg)
 		len = xstrlen(home) + xstrlen("/.config/nnn/bookmarks") + 1;
 
-	cfgpath = (char *)malloc(len);
-	plgpath = (char *)malloc(len);
+	cfgpath = malloc(len);
+	plgpath = malloc(len);
 	if (!cfgpath || !plgpath) {
 		xerror();
 		return FALSE;
@@ -8603,7 +8603,7 @@ static bool setup_config(void)
 		char *env_sel = xgetenv(env_cfg[NNN_SEL], NULL);
 
 		selpath = env_sel ? xstrdup(env_sel)
-				  : (char *)malloc(len + 3); /* Length of "/.config/nnn/.selection" */
+				  : malloc(len + 3); /* Length of "/.config/nnn/.selection" */
 
 		if (!selpath) {
 			xerror();
@@ -8859,6 +8859,12 @@ int main(int argc, char *argv[])
 	enabledbg();
 	DPRINTF_S(VERSION);
 #endif
+
+	devnullfd = open("/dev/null", O_RDWR | O_CLOEXEC);
+	if (devnullfd < 0) {
+		xerror();
+		return EXIT_FAILURE;
+	}
 
 	/* Prefix for temporary files */
 	if (!set_tmp_path())

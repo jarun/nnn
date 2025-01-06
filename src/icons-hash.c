@@ -10,7 +10,7 @@
 
 #define GOLDEN_RATIO_32  UINT32_C(2654442313) /* golden ratio for 32bits: (2^32) / 1.61803 */
 #define GOLDEN_RATIO_64  UINT64_C(0x9E3793492EEDC3F7)
-#define ICONS_TABLE_SIZE 8 /* size in bits. 8 = 256 */
+#define ICONS_TABLE_SIZE 8 /* size in bits. 8 = 2^8 = 256 */
 
 #ifndef TOUPPER
 	#define TOUPPER(ch)     (((ch) >= 'a' && (ch) <= 'z') ? ((ch) - 'a' + 'A') : (ch))
@@ -118,7 +118,7 @@ pcg(uint64_t *state)
 int
 main(void)
 {
-	ENSURE(ARRLEN(icons_ext) <= ARRLEN(table));
+	ENSURE(ARRLEN(icons_ext) < ARRLEN(table));
 	ENSURE(ICONS_TABLE_SIZE < 16);
 	ENSURE(1u << ICONS_TABLE_SIZE == ARRLEN(table));
 	ENSURE((GOLDEN_RATIO_32 & 1) == 1); /* must be odd */
