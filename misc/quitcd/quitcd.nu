@@ -7,7 +7,7 @@
 export def --env n [
 	...args : string # Extra flags to launch nnn with.
 	--selective = false # Change directory only when exiting via ^G.
-] -> nothing {
+]: nothing -> nothing {
 
 	# The behaviour is set to cd on quit (nnn checks if $env.NNN_TMPFILE is set).
 	# Hard-coded to its respective behaviour in `nnn` source-code.
