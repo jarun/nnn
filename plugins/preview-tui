@@ -302,7 +302,7 @@ handle_ext() {
         md) if exists glow; then
                 fifo_pager glow -s dark "$1"
             elif exists lowdown; then
-                fifo_pager lowdown -Tterm "$1"
+                fifo_pager lowdown -Tterm --term-width="$cols" --term-column="$cols" "$1"
             else
                 fifo_pager pager "$1"
             fi ;;
