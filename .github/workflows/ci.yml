@@ -46,6 +46,7 @@ jobs:
         env:
           CC: gcc
         run: |
+          sudo apt install libreadline-dev
           make checkpatches
   ubuntu-cppcheck:
     runs-on: ubuntu-latest
@@ -53,7 +54,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Static analysis with cppcheck
         run: |
-          sudo apt install cppcheck
+          sudo apt install cppcheck libreadline-dev
           cppcheck --std="c11" --error-exitcode=1 --enable=performance,portability \
                    --force --inline-suppr --max-ctu-depth=8 -j"$(nproc)" \
                    $(pkg-config --cflags ncurses) src/nnn.c
