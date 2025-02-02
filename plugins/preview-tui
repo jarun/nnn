@@ -323,6 +323,12 @@ handle_ext() {
             elif exists bsdtar; then
                 fifo_pager bsdtar -tvf "$1"
             fi ;;
+        json)
+            if exists jq; then
+                fifo_pager jq --color-output '.' "$1"
+            else
+                fifo_pager pager "$1"
+            fi ;;
         *) if [ "$3" = "bin" ]; then
                fifo_pager print_bin_info "$1"
            else
