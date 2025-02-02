@@ -52,9 +52,15 @@ getclip () {
 
 CLIPBOARD=$(getclip)
 
+if [ -z "$CLIPBOARD" ]; then
+	echo "No content in clipboard"
+	exit 1
+fi
+
 # Check if clipboard actually contains a file list
 for file in $CLIPBOARD ; do
 	if [ ! -e "$file" ] ; then
+		echo "'$file' is not a file"
 		exit 1;
 	fi
 done
