@@ -226,7 +226,8 @@ handle_extension() {
                 glow -sdark "${FPATH}" | eval "$PAGER"
                 exit 0
             elif type lowdown >/dev/null 2>&1; then
-                lowdown -Tterm "${FPATH}" | eval "$PAGER"
+                cols=$(tput cols)
+                lowdown -Tterm --term-width="$cols" --term-column="$cols" "${FPATH}" | eval "$PAGER"
                 exit 0
             fi
             ;;
