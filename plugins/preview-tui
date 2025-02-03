@@ -459,7 +459,7 @@ image_preview() {
     elif exists ueberzug && [[ "$NNN_PREVIEWIMGPROG" == +(|ueberzug) ]]; then
         ueberzug_layer "$1" "$2" "$3" && return
     elif exists "${NNN_PREVIEWIMGPROG%% *}"; then # can include command flags; only check first word
-        "$NNN_PREVIEWIMGPROG" "$3" &
+        $NNN_PREVIEWIMGPROG "$3" &
     else
         fifo_pager print_bin_info "$3" && return
     fi
