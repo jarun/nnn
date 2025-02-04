@@ -34,7 +34,8 @@
 #   - optional: gnome-epub-thumbnailer for epub thumbnails (https://gitlab.gnome.org/GNOME/gnome-epub-thumbnailer)
 #   - optional: fontpreview for font preview (https://github.com/sdushantha/fontpreview)
 #   - optional: djvulibre for djvu
-#   - optional: glow or lowdown for markdown
+#   - optional: hexyl, hexxy or xxd for binary files preview
+#   - optional: glow, lowdown, mdcat for markdown
 #   - optional: w3m or lynx or elinks for html
 #   - optional: set/export NNN_ICONLOOKUP as 1 to enable file icons in front of directory previews with .iconlookup
 #       Icons and colors are configurable in .iconlookup
@@ -271,6 +272,14 @@ print_bin_info() {
     else
         file -b "$1"
     fi
+
+    if exists hexyl; then
+        hexyl --terminal-width "$(tput cols)" "$1"
+    elif exists hexxy; then
+        hexxy -c "$(( ($(tput cols)-14)*2/7 ))" "$1"
+    elif exists xxd; then
+        xxd -c "$(( ($(tput cols)-14)*2/7 ))" "$1"
+    fi
 }
 
 handle_mime() {
@@ -303,6 +312,8 @@ handle_ext() {
                 fifo_pager glow -s dark "$1"
             elif exists lowdown; then
                 fifo_pager lowdown -Tterm --term-width="$cols" --term-column="$cols" "$1"
+            elif exists mdcat; then
+                fifo_pager mdcat "$1"
             else
                 fifo_pager pager "$1"
             fi ;;
