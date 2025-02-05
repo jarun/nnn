@@ -8,7 +8,7 @@
 #   - pbpaste (macOS)
 #   - termux-clipboard-get (Termux)
 #   - powershell (WSL)
-#   - cygwim's /dev/clipboard (Cygwin)
+#   - cygwin's /dev/clipboard (Cygwin)
 #   - wl-paste (Wayland)
 #   - clipboard (Haiku)
 #
@@ -26,6 +26,9 @@ getclip () {
 	if [ "$XDG_SESSION_TYPE" = "wayland" ]; then
 		# Wayland
 		wl-paste
+	elif type powershell.exe >/dev/null 2>&1; then
+		# WSL
+		powershell.exe -noprofile -command Get-Clipboard | tr -d '\r'
 	elif type xsel >/dev/null 2>&1; then
 		# Linux
 		xsel -bo
@@ -38,9 +41,6 @@ getclip () {
 	elif type termux-clipboard-get >/dev/null 2>&1; then
 		# Termux
 		termux-clipboard-get
-	elif type powershell.exe >/dev/null 2>&1; then
-		# WSL
-		powershell.exe Get-Clipboard
 	elif [ -r /dev/clipboard ] ; then
 		# Cygwin
 		cat /dev/clipboard
@@ -52,9 +52,15 @@ getclip () {
 
 CLIPBOARD=$(getclip)
 
+if [ -z "$CLIPBOARD" ]; then
+	echo "No content in clipboard"
+	exit 1
+fi
+
 # Check if clipboard actually contains a file list
 for file in $CLIPBOARD ; do
 	if [ ! -e "$file" ] ; then
+		echo "'$file' is not a file"
 		exit 1;
 	fi
 done
