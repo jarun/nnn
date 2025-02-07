@@ -15,7 +15,7 @@
 # to make z.lua work, you need to set $NNN_ZLUA to the path of script z.lua
 #
 # Shell: POSIX compliant
-# Authors: Marty Buchaus, Dave Snider, Tim Adler, Nick Waywood
+# Authors: Marty Buchaus, Dave Snider, Tim Adler, Nick Waywood, Markus Meier
 
 if [ ! -p "$NNN_PIPE" ]; then
     printf 'ERROR: NNN_PIPE is not set!'
@@ -24,13 +24,13 @@ if [ ! -p "$NNN_PIPE" ]; then
 fi
 
 if type jump >/dev/null 2>&1; then
-    printf "jump to : "
+    printf "Jump to: "
     IFS= read -r line
     # shellcheck disable=SC2086
     odir="$(jump cd ${line})"
     printf "%s" "0c$odir" > "$NNN_PIPE"
 elif type autojump >/dev/null 2>&1; then
-    printf "jump to : "
+    printf "Jump to: "
     read -r dir
     odir="$(autojump "$dir")"
     printf "%s" "0c$odir" > "$NNN_PIPE"
@@ -39,13 +39,13 @@ elif type zoxide >/dev/null 2>&1; then
     	odir="$(zoxide query -i --)"
     	printf "%s" "0c$odir" > "$NNN_PIPE"
     else
-	printf "jump to : "
+	printf "Jump to: "
     	read -r dir
     	odir="$(zoxide query -- "$dir")"
     	printf "%s" "0c$odir" > "$NNN_PIPE"
     fi
 elif type lua >/dev/null 2>&1 && [ -n "$NNN_ZLUA" ]; then
-    printf "jump to : "
+    printf "Jump to: "
     read -r line
     if type fzf >/dev/null 2>&1; then
         odir="$(lua "$NNN_ZLUA" -l "$line" | fzf --nth 2.. --reverse --inline-info --tac +s -e --height 35%)"
