@@ -10,6 +10,10 @@
 #   - OR z (fish) - https://github.com/jethrokuan/z (z requires fzf)
 #   - OR z.lua - https://github.com/skywind3000/z.lua (z.lua can enhanced with fzf)
 #
+# Additionally:
+#   - sed
+#   - awk
+#
 # Note: The dependencies STORE NAVIGATION PATTERNS
 #
 # to make z.lua work, you need to set $NNN_ZLUA to the path of script z.lua
@@ -45,12 +49,12 @@ elif type zoxide >/dev/null 2>&1; then
         printf "%s" "0c$odir" > "$NNN_PIPE"
     fi
 elif type lua >/dev/null 2>&1 && [ -n "$NNN_ZLUA" ]; then
-    printf "Jump to: "
-    read -r line
     if type fzf >/dev/null 2>&1; then
-        odir="$(lua "$NNN_ZLUA" -l "$line" | fzf --nth 2.. --reverse --inline-info --tac +s -e --height 35%)"
-        printf "%s" "0c$(echo "$odir" | awk '{print $2}')" > "$NNN_PIPE"
+        odir="$(lua "$NNN_ZLUA" -l | awk '{print $2}' | fzf --nth -1 --delimiter=/ --reverse --inline-info --tac +s -e --height 35%)"
+        printf "0c%s" "$odir" > "$NNN_PIPE"
     else
+        printf "Jump to: "
+        read -r line
         odir="$(lua "$NNN_ZLUA" -e "$line")"
         printf "%s" "0c$odir" > "$NNN_PIPE"
     fi
