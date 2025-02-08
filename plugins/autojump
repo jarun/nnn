@@ -50,7 +50,9 @@ elif type zoxide >/dev/null 2>&1; then
     fi
 elif type lua >/dev/null 2>&1 && [ -n "$NNN_ZLUA" ]; then
     if type fzf >/dev/null 2>&1; then
-        odir="$(lua "$NNN_ZLUA" -l | awk '{print $2}' | fzf --nth -1 --delimiter=/ --reverse --inline-info --tac +s -e --height 35%)"
+        odir="$(lua "$NNN_ZLUA" -l \
+                    | awk '{print $2}' \
+                    | fzf --nth -1 --delimiter=/ --reverse --inline-info --tac +s -e --height 35%)"
         printf "0c%s" "$odir" > "$NNN_PIPE"
     else
         printf "Jump to: "
