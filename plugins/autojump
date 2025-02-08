@@ -36,13 +36,13 @@ elif type autojump >/dev/null 2>&1; then
     printf "%s" "0c$odir" > "$NNN_PIPE"
 elif type zoxide >/dev/null 2>&1; then
     if type fzf >/dev/null 2>&1; then
-    	odir="$(zoxide query -i --)"
-    	printf "%s" "0c$odir" > "$NNN_PIPE"
+        odir="$(zoxide query -i --)"
+        printf "%s" "0c$odir" > "$NNN_PIPE"
     else
-	printf "Jump to: "
-    	read -r dir
-    	odir="$(zoxide query -- "$dir")"
-    	printf "%s" "0c$odir" > "$NNN_PIPE"
+        printf "Jump to: "
+        read -r dir
+        odir="$(zoxide query -- "$dir")"
+        printf "%s" "0c$odir" > "$NNN_PIPE"
     fi
 elif type lua >/dev/null 2>&1 && [ -n "$NNN_ZLUA" ]; then
     printf "Jump to: "
