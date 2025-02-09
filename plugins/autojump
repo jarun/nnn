@@ -9,11 +9,6 @@
 #   - OR z - https://github.com/rupa/z (z requires fzf)
 #   - OR z (fish) - https://github.com/jethrokuan/z (z requires fzf)
 #   - OR z.lua - https://github.com/skywind3000/z.lua (z.lua can enhanced with fzf)
-#
-# Additionally:
-#   - sed
-#   - awk
-#
 # Note: The dependencies STORE NAVIGATION PATTERNS
 #
 # to make z.lua work, you need to set $NNN_ZLUA to the path of script z.lua
