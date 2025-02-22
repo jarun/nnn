@@ -37,7 +37,7 @@ args=(
     '(-s)-s[load session]:session name'
     '(-S)-S[persistent session]'
     '(-t)-t[timeout to lock]:seconds'
-    '(-T)-T[sort order]:key:(( a\:"apparent disk usasge" d\:"disk usage" e\:"extension" r\:"reverse" s\:"size" t\:"time" v\:"version" ))'
+    '(-T)-T[sort order]:key:(( a\:"apparent disk usage" d\:"disk usage" e\:"extension" r\:"reverse" s\:"size" t\:"time" v\:"version" ))'
     '(-u)-u[use selection (no prompt)]'
     '(-U)-U[show user and group]'
     '(-V)-V[show program version and exit]'

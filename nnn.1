@@ -1,4 +1,4 @@
-.Dd Aug 26, 2024
+.Dd February 22, 2025
 .Dt NNN 1
 .Os
 .Sh NAME
@@ -286,6 +286,55 @@ in \fBtype-to-nav\fR mode:
    ~   | Go HOME
 ------ + ------------------------
 .Ed
+.Sh SORT
+.Nm
+will always show the directories first, followed by the files.
+String order is always case-insensitive.
+.Pp
+The sort key can be set; either on start with the -T flag, or interactively
+using 't' or '^T'.
+The following options exist:
+.Bl -tag -width 2n
+.It Ic a
+apparent disk usage, how large the file appears to be, can be bigger than actual
+disk usage in sparse files.
+.It Ic d
+disk usage, amount of data taken on disk, a multiple of the block size.
+.It Ic e
+extension of the file.
+.It Ic r
+reverse the current order (not available for the -T flag).
+.It Ic s
+size of file, amount of data stored in the file.
+.It Ic t
+time, this depends on the currently selected time type which can be changed
+using the 'T' key.
+Options are:
+.Bl -tag -compact -width 1n
+.It Ic a
+access, last time the file was accessed.
+.It Ic c
+change, last time the metadata of the file was changed (e.g. permissions).
+.It Ic m
+modified, last time the content of the file was changed (default).
+.El
+.It Ic v
+version, sorts by filename while treating digit characters numerically.
+For example: j1.png, j02.png, j3.png.
+.It Ic c
+clear, revert to filename order (not available for the -T flag).
+.It Ic ^T
+cycle between filename/size/time order (not available for the -T flag).
+.El
+.Pp
+The uppercase version of the option can be used to specify the opposite of the
+default order.
+By default, time and size sort keys are ordered in descending order, and
+alphabetical fields are ordered in ascending order.
+For example, when using the 'e' option, the entries will be ordered by
+extension, in ascending order.
+Using 'E' would result in descending order of the extensions.
+This means that 'e' followed by 'r' is the same as 'E'.
 .Sh SELECTION
 .Nm
 allows file selection across directories and contexts!
