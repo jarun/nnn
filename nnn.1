@@ -1,4 +1,4 @@
-.Dd February 22, 2025
+.Dd Aug 26, 2024
 .Dt NNN 1
 .Os
 .Sh NAME
@@ -49,7 +49,7 @@ the base filename.
 .Sh KEYBINDS
 .Pp
 Press
-.Ql \&?
+.Ql \fB?\fR
 in
 .Nm
 to see the list of keybinds.
@@ -59,7 +59,7 @@ to see the list of keybinds.
 supports the following options:
 .Pp
 .Fl a
-        auto-setup temporary \fBNNN_FIFO\fR (described in \fIENVIRONMENT\fR section)
+        auto-setup temporary \fBNNN_FIFO\fR (refer to the \fBENVIRONMENT\fR section)
 .Pp
 .Fl A
         disable directory auto-enter on unique filter match
@@ -71,7 +71,7 @@ supports the following options:
         use bsdtar for archives (default: atool)
 .Pp
 .Fl c
-        indicates that the opener is a cli-only opener (overrides -e)
+        indicates that the opener is a cli-only opener (overrides \fB-e\fR)
 .Pp
 .Fl C
         8-color scheme - color directories by context, disable file colors
@@ -131,10 +131,10 @@ supports the following options:
 .Pp
 .Fl r
         show cp, mv progress
-        (Linux-only, needs \fIadvcpmv\fR; '^T' shows the progress on BSD/macOS)
+        (Linux-only, needs \fIadvcpmv\fR; \fB^T\fR shows the progress on BSD/macOS)
 .Pp
 .Fl R
-        disable rollover at edges (eg. pressing \fIdown\fR while on the last
+        disable rollover at edges (eg. pressing \fBdown\fR while on the last
         entry will no longer move cursor to the first entry and vice\-versa)
 .Pp
 .Fl "s name"
@@ -147,7 +147,7 @@ supports the following options:
         idle timeout in seconds to lock terminal
 .Pp
 .Fl "T key"
-        sort order
+        sort order (refer to the \fBSORTING\fR section)
         keys: 'a'pparent disk usage / 'd'isk usage / 'e'xtension / 'r'everse / 's'ize / 't'ime / 'v'ersion
         capitalize to reverse (except 'r')
 .Pp
@@ -161,8 +161,8 @@ supports the following options:
         show version and exit
 .Pp
 .Fl x
-        show notifications on selection cp, mv, rm completion (requires \fI.ntfy\fR plugin)
-        copy path to system clipboard on selection (requires \fI.cbcp\fR plugin)
+        show notifications on selection cp, mv, rm completion (requires the \fB.ntfy\fR plugin)
+        copy path to system clipboard on selection (requires the \fB.cbcp\fR plugin)
         show xterm title (if non-picker mode)
 .Pp
 .Fl 0
@@ -176,12 +176,12 @@ There is no configuration file. Associated files are at
 .Pa ${XDG_CONFIG_HOME:-$HOME/.config}/nnn/
 .Pp
 Configuration is done using a few optional (set if you need) environment
-variables. See ENVIRONMENT section.
+variables. Refer to the \fBENVIRONMENT\fR section.
 .Pp
 .Nm
-uses \fIxdg-open\fR (on Linux), \fIopen(1)\fR (on macOS), \fIcygstart\fR on
-(Cygwin) and \fIopen\fR on (Haiku) as the desktop opener. It's also possible
-to specify a custom opener. See ENVIRONMENT section.
+uses \fBxdg-open\fR (on Linux), \fBopen(1)\fR (on macOS), \fBcygstart\fR on
+(Cygwin) and \fBopen\fR on (Haiku) as the desktop opener. It's also possible
+to specify a custom opener. Refer to the \fBENVIRONMENT\fR section.
 .Sh CONTEXTS
 Open multiple locations with 4 contexts. The status is shown in the top left
 corner:
@@ -193,7 +193,7 @@ corner:
 - rest are inactive
 .Pp
 A new context copies the state of the previous context. Each context can have
-its own color. See ENVIRONMENT section.
+its own color. Refer to the \fBENVIRONMENT\fR section.
 .Sh SESSIONS
 Sessions are a way to save and restore states of work. A session stores the
 settings and contexts. Sessions can be loaded at runtime or with a program
@@ -209,7 +209,7 @@ will be updated with the final state at program quit.
 - The "auto session" is used in persistent session mode if no session is active.
 .br
 - Listing input stream and opening a bookmark by key have a higher priority to
-session options (-s/-S).
+session options (\fB-s\fR/\fB-S\fR).
 .Pp
 All the session files are located by session name in the directory
 .Pp
@@ -237,7 +237,7 @@ Special keys at filter prompt:
 -------- + ---------------------------------------
 .Ed
 .Pp
-Special keys at \fBempty filter prompt\fR:
+Special keys at \fBempty\fR filter prompt:
 .Bd -literal
 ------ + ---------------------------------------
   Key  |                Function
@@ -245,7 +245,7 @@ Special keys at \fBempty filter prompt\fR:
    ?   | Show help and config screen
    /   | Toggle between string and regex
    :   | Toggle case-sensitivity
-  ^L   | Clear filter (\fIif prompt is non-empty\fR)
+  ^L   | Clear filter (if prompt is \fBnon-empty\fR)
        | OR apply last filter
   Bksp | Stay at filter prompt and refresh dir
   Del  | Stay at filter prompt and refresh dir
@@ -263,11 +263,11 @@ Common regex use cases:
 .br
 (4) Exclude filenames having 'nnn' (compiled with PCRE lib): '^(?!nnn)'
 .Pp
-In the \fBtype-to-nav\fR mode directories are opened in filter
+In the \fItype-to-nav\fR mode directories are opened in filter
 mode, allowing continuous navigation.
 .Pp
-Additional special keys at \fBempty filter prompt\fR
-in \fBtype-to-nav\fR mode:
+Additional special keys at \fBempty\fR filter prompt
+in \fItype-to-nav\fR mode:
 .Bd -literal
 ------ + ------------------------
   Key  |         Function
@@ -286,14 +286,13 @@ in \fBtype-to-nav\fR mode:
    ~   | Go HOME
 ------ + ------------------------
 .Ed
-.Sh SORT
+.Sh SORTING
 .Nm
-will always show the directories first, followed by the files.
-String order is always case-insensitive.
+will always show the directories first, followed by the files. String
+order is always case-insensitive.
 .Pp
-The sort key can be set; either on start with the -T flag, or interactively
-using 't' or '^T'.
-The following options exist:
+The sort key can be set either with the \fB-T\fR program option, or
+interactively using \fBt\fR or \fB^T\fR. The following options are available:
 .Bl -tag -width 2n
 .It Ic a
 apparent disk usage, how large the file appears to be, can be bigger than actual
@@ -303,12 +302,12 @@ disk usage, amount of data taken on disk, a multiple of the block size.
 .It Ic e
 extension of the file.
 .It Ic r
-reverse the current order (not available for the -T flag).
+reverse the current order (not available with \fB-T\fR).
 .It Ic s
 size of file, amount of data stored in the file.
 .It Ic t
 time, this depends on the currently selected time type which can be changed
-using the 'T' key.
+using the \fBT\fR key.
 Options are:
 .Bl -tag -compact -width 1n
 .It Ic a
@@ -322,19 +321,18 @@ modified, last time the content of the file was changed (default).
 version, sorts by filename while treating digit characters numerically.
 For example: j1.png, j02.png, j3.png.
 .It Ic c
-clear, revert to filename order (not available for the -T flag).
+clear, revert to filename order (not available with \fB-T\fR).
 .It Ic ^T
-cycle between filename/size/time order (not available for the -T flag).
+cycle between filename/size/time order (not available with \fB-T\fR).
 .El
 .Pp
-The uppercase version of the option can be used to specify the opposite of the
-default order.
+The uppercase version of the option (except \fBr\fR) reverses the default order.
 By default, time and size sort keys are ordered in descending order, and
 alphabetical fields are ordered in ascending order.
-For example, when using the 'e' option, the entries will be ordered by
+For example, when using the \fBe\fR option, the entries will be ordered by
 extension, in ascending order.
-Using 'E' would result in descending order of the extensions.
-This means that 'e' followed by 'r' is the same as 'E'.
+Using \fBE\fR would result in descending order of the extensions.
+This means that \fBe\fR followed by \fBr\fR is the same as \fBE\fR.
 .Sh SELECTION
 .Nm
 allows file selection across directories and contexts!
@@ -379,7 +377,7 @@ There are two ways to search and list:
 .Pp
 - feed a list of file paths as input
 .br
-- search using a plugin (e.g. \fIfinder\fR) and list the results
+- search using a plugin (e.g. \fBfinder\fR) and list the results
 .Pp
 File paths must be NUL-separated ('\\0'). Paths and can be relative to the
 current directory or absolute. Invalid paths in the input are ignored. Input
@@ -413,32 +411,32 @@ A temporary directory will be created containing symlinks to the given
 paths. Any action performed on these symlinks will be performed only on their
 targets, after which they might become invalid.
 .Pp
-Right arrow or 'l' on a symlink in the listing dir takes to the target
-file. Press '-' to return to the listing dir. Press 'Enter' to open the symlink.
+\fB>\fR or \fBl\fR on a symlink in the listing dir takes to the target
+file. Press \fB-\fR to return to the listing dir. Press \fBEnter\fR to open the symlink.
 .Pp
 Listing input stream can be scripted. It can be extended to pick (option -p)
 selected entries from the listed results.
 .Sh BOOKMARKS
 There are 2 ways (can be used together) to manage bookmarks.
 .Pp
-(1) Bookmark keys: See \fBNNN_BMS\fR under \fIENVIRONMENT\fR section on how to set
+(1) Bookmark keys: See \fBNNN_BMS\fR under \fBENVIRONMENT\fR section on how to set
     bookmark keys.
 
-    The select bookmark key \fIb\fR lists all the bookmark keys set in \fBNNN_BMS\fR
+    The select bookmark key \fBb\fR lists all the bookmark keys set in \fBNNN_BMS\fR
     in the bookmarks prompt.
 .Pp
 (2) Symlinked bookmarks: A symlinked bookmark to the current directory can
-    be created with the \fIB\fR key (or manually under ~/.config/nnn/bookmarks).
+    be created with the \fBB\fR key (or manually under ~/.config/nnn/bookmarks).
 
-    Pressing 'Enter' at the bookmarks prompt takes to this directory.
+    Pressing \fBEnter\fR at the bookmarks prompt takes to this directory.
     If \fBNNN_BMS\fR is not set, the select bookmark key directly opens it.
 .Pp
 On entering a bookmark, the directory where the select bookmark key was
-pressed is set as the previous directory. Press '-' to return to it.
+pressed is set as the previous directory. Press \fB-\fR to return to it.
 .Pp
 .Sh UNITS
 The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y
-(powers of 1024), same as the default units in \fIls\fR.
+(powers of 1024), same as the default units in \fBls\fR.
 .Sh ENVIRONMENT
 The SHELL, VISUAL (else EDITOR) and PAGER environment variables are
 used. A single combination of arguments is supported for SHELL and PAGER.
@@ -453,25 +451,25 @@ used. A single combination of arguments is supported for SHELL and PAGER.
 .Bd -literal
     export NNN_OPENER=nuke
 
-    NOTE: 'nuke' is a file opener available in the plugin repository.
+    NOTE: \fBnuke\fR is a file opener available in the plugin repository.
 .Ed
 .Pp
 \fBNNN_BMS:\fR bookmark string as \fIkey_char:location\fR pairs
-separated by \fI;\fR:
+separated by \fB;\fR:
 .Bd -literal
     export NNN_BMS="d:$HOME/Docs;u:/home/user/Cam Uploads;D:$HOME/Downloads/"
 .Ed
 .Pp
-These bookmarks are listed in the help and config screen (key ?).
+These bookmarks are listed in the help and config screen (key \fB?\fR).
 .Pp
 \fBNNN_PLUG:\fR directly executable plugins as \fIkey_char:plugin\fR pairs
-separated by \fI;\fR:
+separated by \fB;\fR:
 .Bd -literal
     export NNN_PLUG='f:finder;o:fzopen;p:mocplay;d:diffs;t:nmount;v:imgview'
 
     NOTES:
-    1. To run a plugin directly, press \fI;\fR followed by the key.
-    2. Alternatively, combine with \fIAlt\fR (i.e. \fIAlt+key\fR).
+    1. To run a plugin directly, press \fB;\fR followed by the key.
+    2. Alternatively, combine with \fBAlt\fR (i.e. \fBAlt+key\fR).
     3. To skip directory refresh after running a plugin, prefix with \fB-\fR.
 
     export NNN_PLUG='p:-plugin'
@@ -533,8 +531,7 @@ separated by \fI;\fR:
 .Bd -literal
     export NNN_ORDER='t:/home/user/Downloads;S:/tmp'
 
-    NOTE: Sort keys can be a/d/e/r/s/t/v (see program option -T).
-          Capitalize to reverse (except 'r').
+    NOTE: Sort keys can be a/d/e/r/s/t/v (refer to the \fBSORTING\fR section).
           Path must be absolute.
 
           Timestamps for entries modified/created within 5 minutes are shown in reverse.
@@ -611,7 +608,7 @@ separated by \fI;\fR:
     NOTE: The options must be preceded by "rclone" and max 5 flags are supported.
 .Ed
 .Pp
-\fBNNN_TRASH:\fR trash (instead of \fIrm -rf\fR) files to desktop Trash.
+\fBNNN_TRASH:\fR trash (instead of \fBrm -rf\fR) files to desktop Trash.
 .Bd -literal
     export NNN_TRASH=cmd
 
@@ -660,7 +657,7 @@ separated by \fI;\fR:
 .Bd -literal
     export NNN_MCLICK='^R'
 
-    NOTE: Only the first character is considered if not a \fICtrl+key\fR combo.
+    NOTE: Only the first character is considered if not a \fBCtrl+key\fR combo.
 .Ed
 .Pp
 \fBnnn:\fR this is a special variable.
