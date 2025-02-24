@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+# Use the CLI file opener program "opn" which allows selecting the application to open the
+# file with based on the XDG Desktop and MimeApps Specification.
+# See https://github.com/MatthiasKunnen/opn
+#
+# Integration with nnn:
+#   1. Export the required config (change the path if necessary):
+#         export NNN_OPENER=/usr/share/nnn/plugins/opn
+#   2. Run nnn with the program option to indicate a CLI opener
+#         nnn -c
+#      The -c program option overrides option -e
+#
+# Required configuration of opn:
+#   1. Install opn, see https://github.com/MatthiasKunnen/opn/blob/master/Install.md
+#   2. Set OPN_TERM_CMD to configure your preferred terminal.
+#      E.g. "foot" or "gnome-terminal --".
+#      See https://github.com/MatthiasKunnen/opn?tab=readme-ov-file#terminal-applications
+
+set -uo pipefail
+
+FPATH="$1"
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+	clear -x
+fi
+
+opn file "${FPATH}"
+status=$?
+
+if [ $status -eq 0 ]; then
+	exit 0
+fi
+
+# Show any error message to the user
+read -rsn1 -p"Press any key to return to nnn";echo
