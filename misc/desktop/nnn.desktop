@@ -2,7 +2,7 @@
 Type=Application
 Name=nnn
 Comment=Terminal file manager
-Exec=nnn
+Exec=nnn %f
 Terminal=true
 Icon=nnn
 MimeType=inode/directory
