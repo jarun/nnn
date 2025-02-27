@@ -1,0 +1,80 @@
+#!/usr/bin/env sh
+
+# Description: do operations over file selection
+#
+# After pressing enter \`$EDITOR\` will be opened, so you can edit command. wq to continue.
+# DONT FORGET in place of files you want add \`{}\` instead!!!"
+# Files will be parsed one by one instead of all at once
+#
+# Dependencies: fzf, xargs
+# Shell: sh
+# Author: Arun Prakash Jana, Darukutsu
+
+# setting this to 1 will result in using history as additional source of runners
+# it's recommended to enable editor as well
+history=0
+# setting this to 1 will result in opening editor to further edit command
+editor=0
+selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+
+if [ $editor -eq 0 ]; then
+  header="Choose command to run over your file/selection"
+else
+  header="After pressing enter \`$EDITOR\` will be opened, so you can edit command. Add \`{}\` in place of files!!! If \`{}\` are omitted file/selection will be appended at the end of command-string"
+fi
+
+if type fzf >/dev/null 2>&1; then
+  fuzzy=fzf
+# TODO: more examples with rofi etc
+#if type rofi >/dev/null 2>&1; then
+#  fuzzy=rofi
+else
+  exit 1
+fi
+
+shellname="$(basename "$SHELL")"
+
+tmpfile=$(mktemp)
+echo "$PATH" | xargs -d':' -I{} find {} -type f -perm -1 >>"$tmpfile"
+if [ $history -eq 1 ]; then
+  if [ "$shellname" = "bash" ]; then
+    hist_file=${HISTFILE:-$HOME/.bash_history}
+    cat "$hist_file" >>"$tmpfile"
+  elif [ "$shellname" = "fish" ]; then
+    hist_file="$HOME/.local/share/fish/fish_history"
+    grep "\- cmd: " "$hist_file" | cut -c 8- >>"$tmpfile"
+  fi
+fi
+entry="$("$fuzzy" --header="$header" --tac <"$tmpfile")"
+rm "$tmpfile"
+
+if [ -n "$entry" ]; then
+  tmpfile=$(mktemp)
+  echo "$entry" >>"$tmpfile"
+  if [ $editor -eq 1 ]; then
+    $EDITOR "$tmpfile"
+  fi
+
+  if ! grep '{}' "$tmpfile"; then
+    sed -i '$ s/^.*$/& {}/' "$tmpfile"
+  fi
+
+  if [ -s "$tmpfile" ]; then
+    command="$(cat "$tmpfile")"
+    if [ $history -eq 1 ]; then
+      echo "$command" >>"$hist_file"
+    fi
+
+    if ! [ -s "$selection" ]; then
+      printf "%s/%s" "$2" "$1" >"$selection"
+    fi
+
+    xargs -0 -I{} $command <"$selection"
+    # Clear selection
+    printf "-" >"$NNN_PIPE"
+  fi
+  rm "$tmpfile"
+
+  printf "Press any key to exit"
+  read -r _
+fi

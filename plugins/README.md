@@ -53,6 +53,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [nuke](nuke) | Sample file opener (CLI-only by default) | sh | _see in-file docs_ |
 | [oldbigfile](oldbigfile) | List large files by access time | sh | find, sort |
 | [openall](openall) | Open selected files together or one by one [✓] | bash | - |
+| [openwith](openwith) | Open selected files and/or exec arbitrary commands over selection | bash | - |
 | [organize](organize) | Auto-organize files in directories by file type [✓] | sh | file |
 | [pdfread](pdfread) | Read a PDF or text file aloud | sh | pdftotext, mpv,<br>pico2wave |
 | [preview-tabbed](preview-tabbed) | Preview files with Tabbed/xembed | bash | _see in-file docs_ |

@@ -7826,8 +7826,16 @@ nochange:
 			cd = FALSE;
 			goto begin;
 		}
+		case SEL_OPENWITH:
+		{
+			char *open_with = getenv("NNN_OPENWITH");
+			if (open_with != NULL) {
+				spawn(open_with, pdents[cur].name, path, NULL, F_CLI | F_TTY);
+				goto nochange;
+			}
+			__attribute__ ((fallthrough));
+		}
 		case SEL_ARCHIVE: // fallthrough
-		case SEL_OPENWITH: // fallthrough
 		case SEL_NEW: // fallthrough
 		case SEL_RENAME:
 		{
