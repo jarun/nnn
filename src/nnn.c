@@ -196,6 +196,8 @@
 #define PROMPT          ">>> "
 #undef NEWLINE
 #define NEWLINE         "\n"
+#define NEWLINE_CHAR    '\n'
+#define NUL_CHAR        '\0'
 #define REGEX_MAX       48
 #define ENTRY_INCR      64 /* Number of dir 'entry' structures to allocate per shot */
 #define NAMEBUF_INCR    0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
@@ -1569,15 +1571,41 @@ static void xdelay(useconds_t delay)
 	usleep(delay);
 }
 
+static uint_t entries_in_file(int fd, char *buf, size_t buflen, const char delim)
+{
+	ssize_t len;
+	uint_t count = 0;
+
+	while ((len = read(fd, buf, buflen)) > 0)
+		while (len)
+			count += (buf[--len] == delim);
+
+	/* For all use cases 0 count is considered as error */
+	return ((len < 0) ? 0 : ((delim != NUL_CHAR) ? count : ++count));
+}
+
 static char confirm_force(bool selection, bool use_trash)
 {
 	char str[300];
+
+	/* Count selection from file when nothing is selected */
+	if (selection && (nselected == 0)) {
+		int fd = open(selpath, O_RDONLY);
+
+		if (fd != -1) {
+			nselected = entries_in_file(fd, str, 300, NUL_CHAR);
+			close(fd);
+		} else {
+			printwarn(NULL);
+			return '\0';
+		}
+	}
 
 	/* Note: ideally we should use utils[UTIL_RM_RF] instead of the "rm -rf" string */
 	int r = snprintf(str, 20, "%s", use_trash ? utils[UTIL_GIO_TRASH] + 4 : "rm -rf");
 
 	if (selection)
-		snprintf(str + r, 280, " %d files?", nselected);
+		snprintf(str + r, 280, " %d file(s)?", nselected);
 	else
 		snprintf(str + r, 280, " '%s'?", pdents[cur].name);
 
@@ -2615,19 +2643,6 @@ static void xrmfromsel(char *path, char *fpath)
 #endif
 }
 
-static uint_t lines_in_file(int fd, char *buf, size_t buflen)
-{
-	ssize_t len;
-	uint_t count = 0;
-
-	while ((len = read(fd, buf, buflen)) > 0)
-		while (len)
-			count += (buf[--len] == '\n');
-
-	/* For all use cases 0 linecount is considered as error */
-	return ((len < 0) ? 0 : count);
-}
-
 static bool cpmv_rename(int choice, const char *path)
 {
 	int fd;
@@ -2645,7 +2660,7 @@ static bool cpmv_rename(int choice, const char *path)
 		snprintf(buf, sizeof(buf), "tr '\\0' '\\n' < %s > %s", selpath, g_tmpfpath);
 		spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
 
-		count = lines_in_file(fd, buf, sizeof(buf));
+		count = entries_in_file(fd, buf, sizeof(buf), NEWLINE_CHAR);
 		if (!count)
 			goto finish;
 	} else
@@ -2662,7 +2677,7 @@ static bool cpmv_rename(int choice, const char *path)
 	if (fd == -1)
 		goto finish;
 
-	lines = lines_in_file(fd, buf, sizeof(buf));
+	lines = entries_in_file(fd, buf, sizeof(buf), NEWLINE_CHAR);
 	DPRINTF_U(count);
 	DPRINTF_U(lines);
 	if (!lines || (2 * count != lines)) {
@@ -2713,8 +2728,8 @@ static bool cpmvrm_selection(enum action sel, char *path)
 			return FALSE;
 		}
 		break;
-	default: /* SEL_TRASH, SEL_RM_ONLY */
-		if (!rmmulstr(g_buf, trashcmd && sel == SEL_TRASH)) {
+	default: /* SEL_TRASH, SEL_RM_RF */
+		if (!rmmulstr(g_buf, trashcmd && (sel == SEL_TRASH))) {
 			printmsg(messages[MSG_CANCEL]);
 			return FALSE;
 		}
@@ -2783,7 +2798,7 @@ static bool batch_rename(void)
 	if (fd2 == -1)
 		goto finish;
 
-	lines = lines_in_file(fd2, buf, sizeof(buf));
+	lines = entries_in_file(fd2, buf, sizeof(buf), NEWLINE_CHAR);
 	DPRINTF_U(count);
 	DPRINTF_U(lines);
 	if (!lines || (count != lines)) {
@@ -7771,9 +7786,9 @@ nochange:
 		case SEL_MV: // fallthrough
 		case SEL_CPMVAS: // fallthrough
 		case SEL_TRASH: // fallthrough
-		case SEL_RM_ONLY:
+		case SEL_RM_RF:
 		{
-			if (sel == SEL_TRASH || sel == SEL_RM_ONLY) {
+			if ((sel == SEL_TRASH) || (sel == SEL_RM_RF)) {
 				r = get_cur_or_sel();
 				if (!r) {
 					statusbar(path);

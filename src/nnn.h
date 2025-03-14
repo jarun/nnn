@@ -97,7 +97,7 @@ enum action {
 	SEL_MV,
 	SEL_CPMVAS,
 	SEL_TRASH,
-	SEL_RM_ONLY,
+	SEL_RM_RF,
 	SEL_OPENWITH,
 	SEL_NEW,
 	SEL_RENAME,
@@ -242,7 +242,7 @@ static struct key bindings[] = {
 	/* Delete from selection buffer */
 	{ 'x',            SEL_TRASH },
 	{ CONTROL('X'),   SEL_TRASH },
-	{ 'X',            SEL_RM_ONLY },
+	{ 'X',            SEL_RM_RF },
 	/* Open in a custom application */
 	{ 'o',            SEL_OPENWITH },
 	{ CONTROL('O'),   SEL_OPENWITH },
