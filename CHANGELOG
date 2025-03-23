@@ -1,3 +1,21 @@
+nnn v5.1 Moscow Mule
+2025-03-23
+
+- add support for custom trash function
+- remember history of last 16 commands executed in the native prompt in the current session
+- count files from selection file when no file is selected during selection removal
+- show session name in help
+- show current entry in reversed bold
+- show current (non-auto) session name at save session prompt
+- show `F` in the status bar when filter is inactive in _type-to-nav_ mode
+- restore correct filter function on session load, switch filter function on context changes
+- extend xreadline() with some by-word movement
+- added plugins gpgs and gpgv
+- add icon for `lzip` files, more emoji icons
+- suffix the current context number with `*` in help screen
+
+-------------------------------------------------------------------------------
+
 nnn v5.0 Daiquiri
 2024-08-26
 
