@@ -1442,12 +1442,6 @@ static void msg(const char *message)
 	fprintf(stderr, "%s\n", message);
 }
 
-static void clearinfoln(void)
-{
-	move(xlines - 2, 0);
-	clrtoeol();
-}
-
 #ifdef KEY_RESIZE
 static void handle_key_resize(void)
 {
@@ -1455,13 +1449,11 @@ static void handle_key_resize(void)
 	refresh();
 }
 
-/* Clear the old prompt */
+/* Clear the old prompt from the info line to the botton of the screen */
 static void clearoldprompt(void)
 {
-	clearinfoln();
-
-	tolastln();
-	clrtoeol();
+	move(xlines - 2, 0);
+	clrtobot();
 	handle_key_resize();
 }
 #endif
@@ -3578,7 +3570,9 @@ static int filterentries(char *path, char *lastname)
 		showfilter(ln);
 	}
 end:
-	clearinfoln();
+	/* Clear the info line after the down arrow */
+	move(xlines - 2, 2);
+	clrtoeol();
 
 	/* Save last working filter in-filter */
 	if (ln[1])
