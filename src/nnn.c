@@ -3708,8 +3708,12 @@ static char *xreadline(const char *prefill, const char *prompt)
 				}
 				continue;
 			case '\t':
-				if (!(len || pos) && ndents)
-					len = pos = mbstowcs(buf, pdents[cur].name, READLINE_MAX);
+				if ((len == pos) && ndents && (pos < (READLINE_MAX - xstrlen(pdents[cur].name)))) {
+					buf[pos] = '\0';
+					lpos = mbstowcs(NULL, pdents[cur].name, MB_CUR_MAX);
+					pos += mbstowcs(buf + wcslen(buf), pdents[cur].name, lpos);
+					len = pos;
+				}
 				continue;
 			case CONTROL('F'):
 				if (pos < len)
