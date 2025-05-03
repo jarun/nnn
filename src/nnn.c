@@ -3287,11 +3287,9 @@ static void showfilterinfo(void)
 
 	if (cfg.fileinfo && ndents && get_output("file", "-b", pdents[cur].name, -1, FALSE))
 		mvaddstr(xlines - 2, 2, g_buf);
-	else {
-		snprintf(info + i, REGEX_MAX - i - 1, "  %s [/], %4s [:]",
-			 (cfg.regex ? "reg" : "str"),
-			 ((fnstrstr == &strcasestr) ? "ic" : "noic"));
-	}
+	else
+		snprintf(info + i, REGEX_MAX - i - 1, "  %s [/], %s [:]",
+			 (cfg.regex ? "reg" : "str"), ((fnstrstr == &strcasestr) ? "ic" : "noic"));
 
 	mvaddstr(xlines - 2, xcols - xstrlen(info), info);
 }
@@ -3300,8 +3298,8 @@ static void showfilter(char *str)
 {
 	attron(COLOR_PAIR(cfg.curctx + 1));
 	showfilterinfo();
-	printmsg(str);
-	// printmsg calls attroff()
+	printmsg_nc(str);
+	attroff(COLOR_PAIR(cfg.curctx + 1));
 }
 
 static inline void swap_ent(int id1, int id2)
