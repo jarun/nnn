@@ -210,7 +210,8 @@
 #define EXEC_ARGS_MAX   10
 #define LIST_FILES_MAX  (1 << 14) /* Support listing 16K files */
 #define LIST_INPUT_MAX  ((size_t)LIST_FILES_MAX * PATH_MAX)
-#define SCROLLOFF       3
+#define SCROLLOFF       3 /* Leave top 2 lines */
+#define ONSCREEN        (xlines - 4) /* Leave top 2 and bottom 2 lines */
 #define COLOR_256       256
 #define CREATE_NEW_KEY  (-1)
 
@@ -6201,8 +6202,6 @@ static void send_to_explorer(int *presel)
 
 static void move_cursor(int target, int ignore_scrolloff)
 {
-	int onscreen = xlines - 4; /* Leave top 2 and bottom 2 lines */
-
 	target = MAX(0, MIN(ndents - 1, target));
 	last_curscroll = curscroll;
 	last = cur;
@@ -6210,7 +6209,7 @@ static void move_cursor(int target, int ignore_scrolloff)
 
 	if (!ignore_scrolloff) {
 		int delta = target - last;
-		int scrolloff = MIN(SCROLLOFF, onscreen >> 1);
+		int scrolloff = MIN(SCROLLOFF, ONSCREEN >> 1);
 
 		/*
 		 * When ignore_scrolloff is 1, the cursor can jump into the scrolloff
@@ -6220,11 +6219,11 @@ static void move_cursor(int target, int ignore_scrolloff)
 		 * outward (deeper into the scrolloff margin area).
 		 */
 		if (((cur < (curscroll + scrolloff)) && delta < 0)
-		    || ((cur > (curscroll + onscreen - scrolloff - 1)) && delta > 0))
+		    || ((cur > (curscroll + ONSCREEN - scrolloff - 1)) && delta > 0))
 			curscroll += delta;
 	}
-	curscroll = MIN(curscroll, MIN(cur, ndents - onscreen));
-	curscroll = MAX(curscroll, MAX(cur - (onscreen - 1), 0));
+	curscroll = MIN(curscroll, MIN(cur, ndents - ONSCREEN));
+	curscroll = MAX(curscroll, MAX(cur - (ONSCREEN - 1), 0));
 
 #ifndef NOFIFO
 	if (!g_state.fifomode)
@@ -6234,8 +6233,6 @@ static void move_cursor(int target, int ignore_scrolloff)
 
 static void handle_screen_move(enum action sel)
 {
-	int onscreen;
-
 	switch (sel) {
 	case SEL_NEXT:
 		if (cfg.rollover || (cur != ndents - 1))
@@ -6246,24 +6243,20 @@ static void handle_screen_move(enum action sel)
 			move_cursor((cur + ndents - 1) % ndents, 0);
 		break;
 	case SEL_PGDN:
-		onscreen = xlines - 4;
-		move_cursor(curscroll + (onscreen - 1), 1);
-		curscroll += onscreen - 1;
+		move_cursor(curscroll + (ONSCREEN - 1), 1);
+		curscroll += ONSCREEN - 1;
 		break;
 	case SEL_CTRL_D:
-		onscreen = xlines - 4;
-		move_cursor(curscroll + (onscreen - 1), 1);
-		curscroll += onscreen >> 1;
+		move_cursor(curscroll + (ONSCREEN - 1), 1);
+		curscroll += ONSCREEN >> 1;
 		break;
 	case SEL_PGUP:
-		onscreen = xlines - 4;
 		move_cursor(curscroll, 1);
-		curscroll -= onscreen - 1;
+		curscroll -= ONSCREEN - 1;
 		break;
 	case SEL_CTRL_U:
-		onscreen = xlines - 4;
 		move_cursor(curscroll, 1);
-		curscroll -= onscreen >> 1;
+		curscroll -= ONSCREEN >> 1;
 		break;
 	case SEL_JUMP:
 	{
@@ -6286,9 +6279,8 @@ static void handle_screen_move(enum action sel)
 				break;
 			cur = index - 1;
 		}
-		onscreen = xlines - 4;
 		move_cursor(cur, 1);
-		curscroll -= onscreen >> 1;
+		curscroll -= ONSCREEN >> 1;
 		break;
 	}
 	case SEL_HOME:
@@ -6730,7 +6722,6 @@ static void redraw(char *path)
 	getmaxyx(stdscr, xlines, xcols);
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
-	int onscreen = xlines - 4;
 	int i, j = 1;
 
 	// Fast redraw
@@ -6828,11 +6819,10 @@ static void redraw(char *path)
 		g_state.dircolor = 1;
 	}
 
-	onscreen = MIN(onscreen + curscroll, ndents);
+	int onscreen = MIN(ONSCREEN + curscroll, ndents);
+	int len = scanselforpath(path, FALSE);
 
 	ncols = adjust_cols(ncols);
-
-	int len = scanselforpath(path, FALSE);
 
 	/* Print listing */
 	for (i = curscroll; i < onscreen; ++i) {
