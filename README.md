@@ -68,7 +68,7 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
   - Proceed to next file on file open and selection
 - Search
   - Instant filtering with *search-as-you-type*
-  - Regex (POSIX/PCRE) and string (default) filters
+  - Regex (POSIX/PCRE2) and string (default) filters
   - Subtree search plugin to open or edit files
 - Sort
   - Ordered pure numeric names by default (visit `/proc`)

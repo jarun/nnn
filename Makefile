@@ -13,7 +13,7 @@ CFLAGS_OPTIMIZATION ?= -O3
 
 O_DEBUG := 0  # debug binary
 O_NORL := 0  # no readline support
-O_PCRE := 0  # link with PCRE library
+O_PCRE2 := 0  # link with PCRE2 library
 O_NOLC := 0  # no locale support
 O_NOMOUSE := 0  # no mouse support
 O_NOBATCH := 0  # no built-in batch renamer
@@ -63,9 +63,9 @@ else
 	LDLIBS += -lreadline
 endif
 
-ifeq ($(strip $(O_PCRE)),1)
-	CPPFLAGS += -DPCRE
-	LDLIBS += -lpcre
+ifeq ($(strip $(O_PCRE2)),1)
+	CPPFLAGS += -DPCRE2
+	LDLIBS += -lpcre2-8
 endif
 
 ifeq ($(strip $(O_NOLC)),1)

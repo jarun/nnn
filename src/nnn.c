@@ -87,8 +87,9 @@
 #include <readline/history.h>
 #include <readline/readline.h>
 #endif
-#ifdef PCRE
-#include <pcre.h>
+#ifdef PCRE2
+#define PCRE2_CODE_UNIT_WIDTH 8
+#include <pcre2.h>
 #else
 #include <regex.h>
 #endif
@@ -332,8 +333,8 @@ typedef struct {
 } kv;
 
 typedef struct {
-#ifdef PCRE
-	const pcre *pcrex;
+#ifdef PCRE2
+	const pcre2_code *pcre2x;
 #else
 	const regex_t *regex;
 #endif
@@ -485,8 +486,8 @@ static uchar_t blk_shift = BLK_SHIFT_512;
 #ifndef NOMOUSE
 static int middle_click_key;
 #endif
-#ifdef PCRE
-static pcre *archive_pcre;
+#ifdef PCRE2
+static pcre2_code *archive_pcre2;
 #else
 static regex_t archive_re;
 #endif
@@ -2995,22 +2996,21 @@ static int xstrverscasecmp(const char * const s1, const char * const s2)
 static int (*namecmpfn)(const char * const s1, const char * const s2) = &xstricmp;
 
 static char * (*fnstrstr)(const char *haystack, const char *needle) = &strcasestr;
-#ifdef PCRE
+#ifdef PCRE2
 static const unsigned char *tables;
-static int pcreflags = PCRE_NO_AUTO_CAPTURE | PCRE_EXTENDED | PCRE_CASELESS | PCRE_UTF8;
+static int pcre2flags = PCRE2_NO_AUTO_CAPTURE | PCRE2_EXTENDED | PCRE2_CASELESS | PCRE2_UTF;
 #else
 static int regflags = REG_NOSUB | REG_EXTENDED | REG_ICASE;
 #endif
 
-#ifdef PCRE
-static int setfilter(pcre **pcrex, const char *filter)
+#ifdef PCRE2
+static int setfilter(pcre2_code **pcre2x, const char *filter)
 {
-	const char *errstr = NULL;
-	int erroffset = 0;
+	int errcode;
+	PCRE2_SIZE erroffset;
 
-	*pcrex = pcre_compile(filter, pcreflags, &errstr, &erroffset, tables);
-
-	return errstr ? -1 : 0;
+	*pcre2x = pcre2_compile((PCRE2_SPTR)filter, PCRE2_ZERO_TERMINATED, pcre2flags, &errcode, &erroffset, NULL);
+	return *pcre2x ? 0 : -1;
 }
 #else
 static int setfilter(regex_t *regex, const char *filter)
@@ -3021,8 +3021,12 @@ static int setfilter(regex_t *regex, const char *filter)
 
 static int visible_re(const fltrexp_t *fltrexp, const char *fname)
 {
-#ifdef PCRE
-	return pcre_exec(fltrexp->pcrex, NULL, fname, xstrlen(fname), 0, 0, NULL, 0) == 0;
+#ifdef PCRE2
+	pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(fltrexp->pcre2x, NULL);
+	int r = pcre2_match(fltrexp->pcre2x, (PCRE2_SPTR)fname, xstrlen(fname), 0, 0, match_data, NULL);
+
+	pcre2_match_data_free(match_data);
+	return r > 0;
 #else
 	return regexec(fltrexp->regex, fname, 0, NULL, 0) == 0;
 #endif
@@ -3304,14 +3308,14 @@ static inline void swap_ent(int id1, int id2)
 	*pdent2 = *(&_dent);
 }
 
-#ifdef PCRE
-static int fill(const char *fltr, pcre *pcrex)
+#ifdef PCRE2
+static int fill(const char *fltr, pcre2_code *pcre2x)
 #else
 static int fill(const char *fltr, regex_t *re)
 #endif
 {
-#ifdef PCRE
-	fltrexp_t fltrexp = { .pcrex = pcrex, .str = fltr };
+#ifdef PCRE2
+	fltrexp_t fltrexp = { .pcre2x = pcre2x, .str = fltr };
 #else
 	fltrexp_t fltrexp = { .regex = re, .str = fltr };
 #endif
@@ -3332,17 +3336,17 @@ static int fill(const char *fltr, regex_t *re)
 
 static int matches(const char *fltr)
 {
-#ifdef PCRE
-	pcre *pcrex = NULL;
+#ifdef PCRE2
+	pcre2_code *pcre2x = NULL;
 
 	/* Search filter */
-	if (cfg.regex && setfilter(&pcrex, fltr))
+	if (cfg.regex && setfilter(&pcre2x, fltr))
 		return -1;
 
-	ndents = fill(fltr, pcrex);
+	ndents = fill(fltr, pcre2x);
 
 	if (cfg.regex)
-		pcre_free(pcrex);
+		pcre2_code_free(pcre2x);
 #else
 	regex_t re;
 
@@ -3510,8 +3514,8 @@ static int filterentries(char *path, char *lastname)
 			/* Toggle case-sensitivity */
 			if (*ch == CASE) {
 				fnstrstr = (fnstrstr == &strcasestr) ? &strstr : &strcasestr;
-#ifdef PCRE
-				pcreflags ^= PCRE_CASELESS;
+#ifdef PCRE2
+				pcre2flags ^= PCRE2_CASELESS;
 #else
 				regflags ^= REG_ICASE;
 #endif
@@ -7322,9 +7326,16 @@ nochange:
 
 			/* Get the extension for regex match */
 			tmp = xextension(pent->name, pent->nlen - 1);
-#ifdef PCRE
-			if (tmp && !pcre_exec(archive_pcre, NULL, tmp,
-					      pent->nlen - (tmp - pent->name) - 1, 0, 0, NULL, 0)) {
+#ifdef PCRE2
+			if (tmp) {
+				pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(archive_pcre2, NULL);
+
+				r = pcre2_match(archive_pcre2, (PCRE2_SPTR)tmp, pent->nlen - (tmp - pent->name) - 1, 0, 0, match_data, NULL);
+				pcre2_match_data_free(match_data);
+			} else
+				r = 0;
+
+			if (r > 0) {
 #else
 			if (tmp && !regexec(&archive_re, tmp, 0, NULL, 0)) {
 #endif
@@ -9005,8 +9016,8 @@ int main(int argc, char *argv[])
 
 	/* Set archive handling (enveditor used as tmp var) */
 	enveditor = getenv(env_cfg[NNN_ARCHIVE]);
-#ifdef PCRE
-	if (setfilter(&archive_pcre, (enveditor ? enveditor : patterns[P_ARCHIVE]))) {
+#ifdef PCRE2
+	if (setfilter(&archive_pcre2, (enveditor ? enveditor : patterns[P_ARCHIVE]))) {
 #else
 	if (setfilter(&archive_re, (enveditor ? enveditor : patterns[P_ARCHIVE]))) {
 #endif
@@ -9112,8 +9123,8 @@ int main(int argc, char *argv[])
 #ifndef NOLC
 	/* Set locale */
 	setlocale(LC_ALL, "");
-#ifdef PCRE
-	tables = pcre_maketables();
+#ifdef PCRE2
+	tables = pcre2_maketables(NULL);
 #endif
 #endif
 
@@ -9191,8 +9202,8 @@ int main(int argc, char *argv[])
 	rmlistpath();
 
 	/* Free the regex */
-#ifdef PCRE
-	pcre_free(archive_pcre);
+#ifdef PCRE2
+	pcre2_code_free(archive_pcre2);
 #else
 	regfree(&archive_re);
 #endif
