@@ -3022,10 +3022,14 @@ static int setfilter(regex_t *regex, const char *filter)
 static int visible_re(const fltrexp_t *fltrexp, const char *fname)
 {
 #ifdef PCRE2
+	int r = 0;
 	pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(fltrexp->pcre2x, NULL);
-	int r = pcre2_match(fltrexp->pcre2x, (PCRE2_SPTR)fname, xstrlen(fname), 0, 0, match_data, NULL);
 
-	pcre2_match_data_free(match_data);
+	if (match_data) {
+		r = pcre2_match(fltrexp->pcre2x, (PCRE2_SPTR)fname, xstrlen(fname), 0, 0, match_data, NULL);
+		pcre2_match_data_free(match_data);
+	}
+
 	return r > 0;
 #else
 	return regexec(fltrexp->regex, fname, 0, NULL, 0) == 0;
@@ -7330,8 +7334,10 @@ nochange:
 			if (tmp) {
 				pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(archive_pcre2, NULL);
 
-				r = pcre2_match(archive_pcre2, (PCRE2_SPTR)tmp, pent->nlen - (tmp - pent->name) - 1, 0, 0, match_data, NULL);
-				pcre2_match_data_free(match_data);
+				if (match_data) {
+					r = pcre2_match(archive_pcre2, (PCRE2_SPTR)tmp, pent->nlen - (tmp - pent->name) - 1, 0, 0, match_data, NULL);
+					pcre2_match_data_free(match_data);
+				}
 			} else
 				r = 0;
 
