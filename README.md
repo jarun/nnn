@@ -27,7 +27,7 @@ Independent (neo)vim plugins - [nnn.vim](https://github.com/mcchrish/nnn.vim), [
 
 Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), Linux, macOS, BSD, Haiku, Cygwin, WSL, across DEs or a strictly CLI env.
 
-[_(there's more)_](https://github.com/jarun/nnn/wiki/Basic-use-cases#the_nnn-magic)
+[_(more use cases)_](https://github.com/jarun/nnn/wiki/Basic-use-cases#the_nnn-magic)
 
 ## Features
 
