@@ -233,6 +233,7 @@ static const struct icon_pair icons_ext[] = { /* All entries are case-insensitiv
 	{"cbr",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"cbz",        ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"cc",         ICON_CPLUSPLUS,      COLOR_C},
+	{"cjs",        ICON_JAVASCRIPT,     COLOR_JAVASCRIPT},
 	{"class",      ICON_JAVA,           COLOR_JAVA},
 	{"clj",        ICON_CLOJURE,        0},
 	{"cljc",       ICON_CLOJURE,        0},
@@ -244,6 +245,7 @@ static const struct icon_pair icons_ext[] = { /* All entries are case-insensitiv
 	{"cpio",       ICON_ARCHIVE,        COLOR_ARCHIVE},
 	{"cpp",        ICON_CPLUSPLUS,      COLOR_C},
 	{"css",        ICON_EXT_CSS,        COLOR_CSS},
+	{"cts",        ICON_EXT_TS,         COLOR_JAVASCRIPT},
 	{"cue",        ICON_PLAYLIST,       COLOR_AUDIO},
 	{"cvs",        ICON_CONFIGURE,      0},
 	{"cxx",        ICON_CPLUSPLUS,      COLOR_C},
@@ -332,6 +334,7 @@ static const struct icon_pair icons_ext[] = { /* All entries are case-insensitiv
 	{"markdown",   ICON_EXT_MD,         COLOR_DOCS},
 	{"mat",        ICON_EXT_MAT,        COLOR_C},
 	{"md",         ICON_EXT_MD,         COLOR_DOCS},
+	{"mjs",        ICON_JAVASCRIPT,     COLOR_JAVASCRIPT},
 	{"mk",         ICON_MAKEFILE,       0},
 	{"mkv",        ICON_VIDEOFILE,      COLOR_VIDEO},
 	{"mov",        ICON_VIDEOFILE,      COLOR_VIDEO},
@@ -340,6 +343,7 @@ static const struct icon_pair icons_ext[] = { /* All entries are case-insensitiv
 	{"mpeg",       ICON_VIDEOFILE,      COLOR_VIDEO},
 	{"mpg",        ICON_VIDEOFILE,      COLOR_VIDEO},
 	{"msi",        ICON_EXT_MSI,        0},
+	{"mts",        ICON_EXT_TS,         COLOR_JAVASCRIPT},
 
 	/* N */
 	{"nix",        ICON_EXT_NIX,        COLOR_FSHARP},
