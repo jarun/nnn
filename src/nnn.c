@@ -2511,9 +2511,9 @@ static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag)
 		/* Suppress stdout and stderr */
 		if (flag & F_NOTRACE) {
 			if (flag & F_NOSTDIN)
-				dup2(devnullfd, STDIN_FILENO);
-			dup2(devnullfd, STDOUT_FILENO);
-			dup2(devnullfd, STDERR_FILENO);
+				dup2(devnullfd, STDIN_FILENO); // NOLINT
+			dup2(devnullfd, STDOUT_FILENO); // NOLINT
+			dup2(devnullfd, STDERR_FILENO); // NOLINT
 		} else if (flag & F_TTY) {
 			/* If stdout has been redirected to a non-tty, force output to tty */
 			if (!isatty(STDOUT_FILENO)) {
