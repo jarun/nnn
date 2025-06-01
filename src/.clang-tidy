@@ -9,6 +9,7 @@ Checks: >
     google-runtime-int,
     fuchsia-restrict-system-includes,
     -misc-unused-parameters,
+    -misc-header-include-cycle,
     -misc-include-cleaner,
     -llvm-header-guard,
     -clang-analyzer-valist.Uninitialized,
