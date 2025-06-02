@@ -545,8 +545,8 @@ handle_bin() {
     esac
 }
 
-MIMETYPE="$( file -bL --mime-type -- "${FPATH}" )"
 handle_extension
+MIMETYPE="$( file -bL --mime-type -- "${FPATH}" )"
 handle_multimedia "${MIMETYPE}"
 handle_mime "${MIMETYPE}"
 [ "$BIN" -ne 0 ] && [ -x "${FPATH}" ] && handle_bin
