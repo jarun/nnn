@@ -48,7 +48,7 @@ fi
 
 if [ "$resp" = "s" ]; then
     checksum_type
-    sed 's|'"$PWD/"'||g' < "$selection" | xargs -0 -I{} ${chsum}sum {} > "checksum_$(date '+%Y%m%d%H%M').$chsum"
+    sed 's|'"$PWD/"'||g' < "$selection" | xargs -0 -I{} "${chsum}sum" {} > "checksum_$(date '+%Y%m%d%H%M').$chsum"
 
     # Clear selection
     if [ -p "$NNN_PIPE" ]; then
@@ -70,6 +70,6 @@ elif [ -n "$1" ]; then
     elif [ -d "$1" ]; then
         checksum_type
         file=$(basename "$1").$chsum
-        find "$1" -type f -exec ${chsum}sum "{}" + > "$file"
+        find "$1" -type f -exec "${chsum}sum" "{}" + > "$file"
     fi
 fi

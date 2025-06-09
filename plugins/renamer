@@ -6,7 +6,7 @@
 #   - Try to mimic current batch rename functionality but with correct
 #     handling of edge cases by qmv or vidir.
 #   - Qmv opens with hidden files if no selection is used. Selected
-#	  directories are shown.
+#     directories are shown.
 #   - Vidir don't show directories nor hidden files.
 #
 # Shell: POSIX compliant
@@ -15,11 +15,11 @@
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
 if type qmv >/dev/null 2>&1; then
-	batchrenamesel="qmv -fdo -da"
-	batchrename="qmv -fdo -a"
+    batchrenamesel="qmv -fdo -da"
+    batchrename="qmv -fdo -a"
 elif type vidir >/dev/null 2>&1; then
-	batchrenamesel="vidir"
-	batchrename="vidir"
+    batchrenamesel="vidir"
+    batchrename="vidir"
 else
     printf "there is not batchrename program installed."
     exit
@@ -32,6 +32,7 @@ fi
 
 if [ "$resp" = "y" ]; then
     # -o flag is necessary for interactive editors
+    # shellcheck disable=SC2086
     xargs -o -0 $batchrenamesel < "$selection"
 
     # Clear selection
@@ -40,6 +41,6 @@ if [ "$resp" = "y" ]; then
     fi
 elif [ ! "$(LC_ALL=C ls -a)" = ".
 .." ]; then
-	# On older systems that don't have ls -A
+    # On older systems that don't have ls -A
     $batchrename
 fi
