@@ -553,4 +553,5 @@ handle_mime "${MIMETYPE}"
 handle_blocked "${MIMETYPE}"
 handle_fallback
 
+# shellcheck disable=SC2317
 exit 1
