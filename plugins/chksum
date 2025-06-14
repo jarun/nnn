@@ -66,7 +66,7 @@ elif [ -n "$1" ]; then
         done
         checksum_type
         file=$(basename "$1").$chsum
-        ${chsum}sum "$1" > "$file"
+        "${chsum}"sum "$1" > "$file"
     elif [ -d "$1" ]; then
         checksum_type
         file=$(basename "$1").$chsum

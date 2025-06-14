@@ -135,6 +135,7 @@ while read -r num name; do
 
 			for key in "${!items[@]}"; do
 				if [ "${items[$key]}" = "$name" ]; then
+					# shellcheck disable=2004
 					items[$key]="$tmp"
 				fi
 			done
@@ -150,6 +151,7 @@ while read -r num name; do
 		else
 			if [ -d "$name" ]; then
 				for key in "${!items[@]}"; do
+					# shellcheck disable=2004
 					items[$key]=$(printf "%s" "${items[$key]}" | sed "s|^$src\(\$\|\/\)|$name\1|")
 				done
 
