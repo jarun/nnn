@@ -14,6 +14,9 @@
 # Shell: POSIX compliant
 # Author: 0xACE
 
+# If you want system notification, put this equal to 1
+notify=0
+
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 resp=f
 all=
@@ -54,24 +57,29 @@ fi
 
 if [ "$resp" = "s" ]; then
     use_all
-    sed -z 's|'"$PWD/"'||g' < "$selection" | xargs -0 "$dnd" "$all" &
+    sed -z 's|'"$PWD/"'||g' < "$selection" | xargs -0 "$dnd" "$all" 2>/dev/null &
 elif [ "$resp" = "d" ]; then
     use_all
-    "$dnd" "$all" "$PWD/"* &
+    "$dnd" "$all" "$PWD/"* 2>/dev/null &
 elif [ "$resp" = "r" ]; then
     true > "$selection"
-    "$dnd" --print-path --target | while read -r f
+    "$dnd" --print-path --target 2>/dev/null | while read -r f
     do
-            if printf "%s" "$f" | grep '^\(https\?\|ftps\?\|s\?ftp\):\/\/' ; then
-                    curl -LJO "$f"
-                    add_file "$PWD/$(basename "$f")"
-            elif [ -e "$f" ]; then
-                    add_file "$f"
+        if printf "%s" "$f" | grep -q '^\(https\?\|ftps\?\|s\?ftp\)://' ; then
+            if curl -fsLJO "$f"; then
+                filename="$(basename "${f%%\?*}")"
+                add_file "$PWD/$filename"
+                if [ $notify = 1 ]; then
+                    notify-send "Download Complete" "Finished downloading $filename"
+                fi
             fi
+        elif [ -e "$f" ]; then
+            add_file "$f"
+        fi
     done &
 else
     if [ -n "$1" ] && [ -e "$1" ]; then
-        "$dnd" "$1" &
+        "$dnd" "$1" 2>/dev/null &
     fi
 fi
 
