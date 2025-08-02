@@ -66,11 +66,18 @@ elif [ "$resp" = "r" ]; then
     "$dnd" --print-path --target 2>/dev/null | while read -r f
     do
         if printf "%s" "$f" | grep -q '^\(https\?\|ftps\?\|s\?ftp\)://' ; then
-            if curl -fsLJOS "$f"; then
+            output=$(curl -fsLJOS "$f" 2>&1)
+            if [ $? = 0 ]; then
                 filename="$(basename "${f%%\?*}")"
                 add_file "$PWD/$filename"
                 if [ $notify = 1 ]; then
                     notify-send "Download Complete" "Finished downloading $filename"
+                fi
+            else
+                if [ $notify = 1 ]; then
+                    notify-send "Download Failed" "$output"
+                else
+                    echo "Download Failed: $output"
                 fi
             fi
         elif [ -e "$f" ]; then
