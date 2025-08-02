@@ -66,8 +66,7 @@ elif [ "$resp" = "r" ]; then
     "$dnd" --print-path --target 2>/dev/null | while read -r f
     do
         if printf "%s" "$f" | grep -q '^\(https\?\|ftps\?\|s\?ftp\)://' ; then
-            output=$(curl -fsLJOS "$f" 2>&1)
-            if [ $? = 0 ]; then
+            if output=$(curl -fsLJOS "$f" 2>&1); then
                 filename="$(basename "${f%%\?*}")"
                 add_file "$PWD/$filename"
                 if [ $notify = 1 ]; then
