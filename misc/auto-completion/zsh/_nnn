@@ -19,7 +19,7 @@ args=(
     '(-D)-D[dirs in context color]'
     '(-e)-e[open text files in $VISUAL/$EDITOR/vi]'
     '(-E)-E[use EDITOR for undetached edits]'
-    '(-f)-f[use readline history file]'
+    '(-f)-f[use history file]'
     '(-F)-F[fifo notification mode]:mode:(( 0\:"notify as previewer" 1\:"notify as explorer" ))'
     '(-g)-g[regex filters]'
     '(-H)-H[show hidden files]'

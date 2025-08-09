@@ -3641,6 +3641,45 @@ static void addcmdtohist(char *cmd)
 		cmd_hist[++lastcmdpos] = xstrdup(cmd);
 }
 
+#ifdef NORL
+/* Reads the history file and populates command history */
+static void xread_history(const char *histpath)
+{
+	int linesread = 0;
+	size_t len = 0;
+	ssize_t read;
+	char *line = NULL;
+	FILE *fptr = fopen(histpath, "r");
+
+	/* We want to open for reading, ignore errors */
+	if (fptr) {
+		while ((linesread++ < MAX_HISTORY) && ((read = getline(&line, &len, fptr)) != -1))
+		{
+			if (line[read - 1] == NEWLINE_CHAR)
+				line[read - 1] = '\0';
+			addcmdtohist(line);
+		}
+
+		free(line);
+	}
+}
+
+/* Populates the history file from the command history */
+static void xwrite_history(const char *histpath)
+{
+	if (lastcmdpos == INVALID_POS)
+		return;
+
+	FILE *fptr = fopen(histpath, "w");
+
+	if (fptr)
+		for (uchar_t pos = 0; pos <= lastcmdpos; ++pos)
+			fprintf(fptr, "%s\n", cmd_hist[pos]);
+	else
+		xerror();
+}
+#endif
+
 /* Show a prompt with input string and return the changes */
 static char *xreadline(const char *prefill, const char *prompt)
 {
@@ -5672,7 +5711,6 @@ static bool prompt_run(void)
 
 		addcmdtohist(cmdline);
 		ret = TRUE;
-
 		len = xstrlen(cmdline);
 
 		cnt_j = 0;
@@ -8514,9 +8552,7 @@ static void usage(void)
 		" -D      dirs in context color\n"
 		" -e      text in $VISUAL/$EDITOR/vi\n"
 		" -E      internal edits in EDITOR\n"
-#ifndef NORL
-		" -f      use readline history file\n"
-#endif
+		" -f      use history file\n"
 #ifndef NOFIFO
 		" -F val  fifo mode [0:preview 1:explore]\n"
 #endif
@@ -8704,9 +8740,7 @@ int main(int argc, char *argv[])
 
 	const char * const env_opts = xgetenv(env_cfg[NNN_OPTS], NULL);
 	int env_opts_id = env_opts ? (int)xstrlen(env_opts) : -1;
-#ifndef NORL
-	bool rlhist = FALSE;
-#endif
+	bool hist_file = FALSE;
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
@@ -8746,9 +8780,7 @@ int main(int argc, char *argv[])
 			cfg.waitedit = 1;
 			break;
 		case 'f':
-#ifndef NORL
-			rlhist = TRUE;
-#endif
+			hist_file = TRUE;
 			break;
 #ifndef NOFIFO
 		case 'F':
@@ -9147,11 +9179,19 @@ int main(int argc, char *argv[])
 #else
 	rl_bind_key('\t', rl_complete);
 #endif
-	if (rlhist) {
-		mkpath(cfgpath, ".history", g_buf);
-		read_history(g_buf);
-	}
 #endif
+
+	/* Keep the history file management separate for readline and
+	 * native even if xprompt is set. The file location is the same.
+	 */
+	if (hist_file) {
+		mkpath(cfgpath, ".history", g_buf);
+#ifndef NORL
+		read_history(g_buf);
+#else
+		xread_history(g_buf);
+#endif
+	}
 
 #ifndef NOX11
 	if (cfg.x11 && !g_state.picker) {
@@ -9187,9 +9227,15 @@ int main(int argc, char *argv[])
 	exitcurses();
 
 #ifndef NORL
-	if (rlhist && !g_state.xprompt) {
+	if (hist_file && !(g_state.picker || g_state.xprompt)) {
 		mkpath(cfgpath, ".history", g_buf);
 		write_history(g_buf);
+	}
+#else
+	if (hist_file)
+	{
+		mkpath(cfgpath, ".history", g_buf);
+		xwrite_history(g_buf);
 	}
 #endif
 
