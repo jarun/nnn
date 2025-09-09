@@ -406,7 +406,7 @@ preview_file() {
 generate_preview() {
   if [ -n "$QLPATH" ] && stat "$3"; then
         f="$(wslpath -w "$3")" && "$QLPATH" "$f" &
-  elif [ -n "$NNN_PREVIEWVIDEO" ] && [[ "$4" == +(gif|video) ]]; then
+  elif [ -n "$NNN_PREVIEWVIDEO" ] && [[ "$4" == "gif" || "$4" == "video" ]]; then
     [ "$4" = "video" ] && args=(--start=10% --length=4) || args=()
     video_preview "$1" "$2" "$3" "${args[@]}" && return
   elif [ ! -f "$NNN_PREVIEWDIR/$3.jpg" ] || [ -n "$(find -L "$3" -newer "$NNN_PREVIEWDIR/$3.jpg")" ]; then
@@ -464,13 +464,13 @@ generate_preview() {
 image_preview() {
     clear
     exec >/dev/tty
-    if [ "$NNN_TERMINAL" = "kitty" ] && [[ "$NNN_PREVIEWIMGPROG" == +(|icat) ]]; then
+    if [ "$NNN_TERMINAL" = "kitty" ] && [[ "$NNN_PREVIEWIMGPROG" == "" || "$NNN_PREVIEWIMGPROG" == "icat" ]]; then
         kitty +kitten icat --silent --scale-up --place "$1"x"$2"@0x0 --transfer-mode=stream --stdin=no "$3" &
-    elif [ "$NNN_TERMINAL" = "tmux" ] && [[ -n "$KITTY_LISTEN_ON" ]] && [[ "$NNN_PREVIEWIMGPROG" == +(|icat) ]]; then
+    elif [ "$NNN_TERMINAL" = "tmux" ] && [[ -n "$KITTY_LISTEN_ON" ]] && [[ "$NNN_PREVIEWIMGPROG" == "" || "$NNN_PREVIEWIMGPROG" == "icat" ]]; then
         kitty +kitten icat --silent --scale-up --place "$(($1 - 1))x$(($2 - 1))"@0x0 --transfer-mode=memory --stdin=no "$3" &
-    elif [ "$NNN_TERMINAL" = "wezterm" ] && [[ "$NNN_PREVIEWIMGPROG" == +(|imgcat) ]]; then
+    elif [ "$NNN_TERMINAL" = "wezterm" ] && [[ "$NNN_PREVIEWIMGPROG" == "" || "$NNN_PREVIEWIMGPROG" == "imgcat" ]]; then
         wezterm imgcat "$3" &
-    elif exists ueberzug && [[ "$NNN_PREVIEWIMGPROG" == +(|ueberzug) ]]; then
+    elif exists ueberzug && [[ "$NNN_PREVIEWIMGPROG" == "" || "$NNN_PREVIEWIMGPROG" == "ueberzug" ]]; then
         ueberzug_layer "$1" "$2" "$3" && return
     elif exists "${NNN_PREVIEWIMGPROG%% *}"; then # can include command flags; only check first word
         $NNN_PREVIEWIMGPROG "$3" &
@@ -526,7 +526,7 @@ preview_fifo() {
 }
 
 if [ "$PREVIEW_MODE" -eq 1 ] 2>/dev/null; then
-    if exists ueberzug && [ "$NNN_TERMINAL" != "kitty" ] && [[ "$NNN_PREVIEWIMGPROG" == +(|ueberzug) ]]; then
+    if exists ueberzug && [ "$NNN_TERMINAL" != "kitty" ] && [[ "$NNN_PREVIEWIMGPROG" == "" || "$NNN_PREVIEWIMGPROG" == "ueberzug" ]]; then
         mkfifo "$FIFO_UEBERZUG"
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
