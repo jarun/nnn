@@ -5018,7 +5018,7 @@ static bool archive_mount(char *newpath)
 	char mntpath[PATH_MAX];
 
 	if (!getutil(cmd)) {
-		printmsg("install utility");
+		printmsg("install utility (archivemount)");
 		return FALSE;
 	}
 
