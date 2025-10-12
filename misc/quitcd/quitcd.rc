@@ -1,0 +1,11 @@
+# The behaviour is set to cd on quit (nnn checks if NNN_TMPFILE is set)
+# If NNN_TMPFILE is set to a custom path, it must be exported for nnn to see.
+# To cd on quit only on ^G, set NNN_TMPFILE after the nnn invocation, and make
+# sure not to use a custom path.
+NNN_TMPFILE='$HOME/.config/nnn/.lastd'
+
+fn n {
+    command nnn
+    eval `( cat $NNN_TEMPFILE )
+    rm -f -- $NNN_TMPFILE
+}
