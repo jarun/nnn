@@ -35,11 +35,11 @@
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
-#if defined(__linux__)
+#ifdef __linux__
 #include <sys/inotify.h>
 #define LINUX_INOTIFY
 #endif
-#if !defined(__GLIBC__)
+#ifndef __GLIBC__
 #include <sys/types.h>
 #endif
 #endif
@@ -538,7 +538,7 @@ alignas(max_align_t) static char g_pipepath[TMP_LEN_MAX];
 static runstate g_state;
 
 /* Options to identify file MIME */
-#if defined(__APPLE__)
+#ifdef __APPLE__
 #define FILE_MIME_OPTS "-bIL"
 #elif !defined(__sun) /* no MIME option for 'file' */
 #define FILE_MIME_OPTS "-biL"
@@ -585,8 +585,7 @@ static char * const utils[] = {
 	"tar",
 #ifdef __APPLE__
 	"bashlock",
-#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) \
-	|| defined(__DragonFly__)
+#elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
 	"lock",
 #elif defined __HAIKU__
 	"peaclock",
@@ -1004,7 +1003,7 @@ static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 
 static inline size_t xstrlen(const char *restrict s)
 {
-#if !defined(__GLIBC__)
+#ifndef __GLIBC__
 	return strlen(s); // NOLINT
 #else
 	return (char *)rawmemchr(s, '\0') - s; // NOLINT
@@ -4045,7 +4044,7 @@ static bool parsekvpair(kv **arr, char **envcpy, const uchar_t id, uchar_t *item
 	}
 
 	*items = i;
-	return (i != 0);
+	return ((i != 0) && (i <= 100));
 }
 
 /*
@@ -4129,7 +4128,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
 		while (len > maxcols) /* Reduce wide chars one by one till it fits */
 			len = wcswidth(wbuf, --lencount);
 
-		wbuf[lencount] = L'\0';
+		wbuf[lencount] = L'\0'; // NOLINT
 	}
 #endif
 
@@ -4164,7 +4163,7 @@ static off_t get_size(off_t size, off_t *pval, int comp)
 static char *coolsize(off_t size)
 {
 	const char * const U = "BKMGTPEZY";
-	static char size_buf[12]; /* Buffer to hold human readable size */
+	static char size_buf[16]; /* Buffer to hold human readable size */
 	off_t rem = 0;
 	size_t ret;
 	int i = 0;
@@ -4199,7 +4198,7 @@ static char *coolsize(off_t size)
 			size_buf[ret] = size_buf[ret + 1] = size_buf[ret + 2] = '0';
 			xstrsncpy(size_buf + ret + (toprint - len), frac, len + 1);
 		} else
-			xstrsncpy(size_buf + ret, frac, toprint + 1);
+			xstrsncpy(size_buf + ret, frac, 12 - ret);
 
 		ret += toprint;
 	} else {
@@ -5232,7 +5231,7 @@ static void printkeys(kv *kvarr, char *buf, uchar_t max)
 
 	for (; i < max && kvarr[i].key; ++i) {
 		buf[i << 1] = ' ';
-		buf[(i << 1) + 1] = kvarr[i].key;
+		buf[(i << 1) + 1] = kvarr[i].key; // NOLINT
 	}
 
 	buf[i << 1] = '\0';
@@ -5244,7 +5243,7 @@ static size_t handle_bookmark(const char *bmark, char *newpath)
 	size_t r;
 
 	if (maxbm || bmark) {
-		r = xstrsncpy(g_buf, messages[MSG_KEYS], CMD_LEN_MAX);
+		r = xstrsncpy(g_buf, messages[MSG_KEYS], CMD_LEN_MAX - 2); // Leave 2 chars for a marked directory
 
 		if (bmark) { /* There is a marked directory */
 			g_buf[--r] = ' ';
@@ -7067,7 +7066,7 @@ begin:
 		inotify_wd = inotify_add_watch(inotify_fd, path, INOTIFY_MASK);
 #elif defined(BSD_KQUEUE)
 	if (presel != FILTER && event_fd == -1) {
-#if defined(O_EVTONLY)
+#ifdef O_EVTONLY
 		event_fd = open(path, O_EVTONLY);
 #else
 		event_fd = open(path, O_RDONLY);
@@ -7208,7 +7207,7 @@ nochange:
 
 				currentmouse ^= 1;
 				clock_gettime(
-#if defined(CLOCK_MONOTONIC_RAW)
+#ifdef CLOCK_MONOTONIC_RAW
 				    CLOCK_MONOTONIC_RAW,
 #elif defined(CLOCK_MONOTONIC)
 				    CLOCK_MONOTONIC,
@@ -8454,7 +8453,7 @@ static char *load_input(int fd, const char *path)
 		goto malloc_1;
 	}
 
-	input[total_read] = '\0';
+	input[total_read] = '\0'; // NOLINT
 
 	paths = malloc(entries * sizeof(char *));
 	if (!paths)
@@ -8602,7 +8601,7 @@ static bool setup_config(void)
 		DPRINTF_S(xdgcfg);
 		if (tilde_is_home(xdgcfg)) {
 			r = xstrsncpy(g_buf, home, PATH_MAX);
-			xstrsncpy(g_buf + r - 1, xdgcfg + 1, PATH_MAX);
+			xstrsncpy(g_buf + r - 1, xdgcfg + 1, PATH_MAX - r);
 			xdgcfg = g_buf;
 			DPRINTF_S(xdgcfg);
 		}
