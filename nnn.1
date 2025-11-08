@@ -183,7 +183,7 @@ uses \fBxdg-open\fR (on Linux), \fBopen(1)\fR (on macOS), \fBcygstart\fR on
 (Cygwin) and \fBopen\fR on (Haiku) as the desktop opener. It's also possible
 to specify a custom opener. Refer to the \fBENVIRONMENT\fR section.
 .Sh CONTEXTS
-Open multiple locations with 4 contexts. The status is shown in the top left
+Open multiple locations with 8 contexts. The status is shown in the top left
 corner:
 .Pp
 - the current context is in reverse video
@@ -541,14 +541,14 @@ separated by \fB;\fR:
 .Bd -literal
     # 8 color numbers:
     # 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
-    export NNN_COLORS='1234'
+    export NNN_COLORS='12341234'
 
     # xterm 256 color numbers (converted to hex, 2 symbols per context):
     # see https://user-images.githubusercontent.com/1482942/93023823-46a6ba80-f5e1-11ea-9ea3-6a3c757704f4.png
-    export NNN_COLORS='#0a1b2c3d'
+    export NNN_COLORS='#0a1b2c3d0a1b2c3d'
 
     # both (256 followed by 8 as fallback, separated by ';')
-    export NNN_COLORS='#0a1b2c3d;1234'
+    export NNN_COLORS='#0a1b2c3d0a1b2c3d;12341234'
 
     NOTE: If only 256 colors are specified and the terminal doesn't support, default is used.
 .Ed

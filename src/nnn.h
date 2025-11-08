@@ -71,12 +71,10 @@ enum action {
 	SEL_CTX2,
 	SEL_CTX3,
 	SEL_CTX4,
-#ifdef CTX8
 	SEL_CTX5,
 	SEL_CTX6,
 	SEL_CTX7,
 	SEL_CTX8,
-#endif
 	SEL_MARK,
 	SEL_BMARK,
 	SEL_FLTR,
@@ -189,12 +187,10 @@ static struct key bindings[] = {
 	{ '2',            SEL_CTX2 },
 	{ '3',            SEL_CTX3 },
 	{ '4',            SEL_CTX4 },
-#ifdef CTX8
 	{ '5',            SEL_CTX5 },
 	{ '6',            SEL_CTX6 },
 	{ '7',            SEL_CTX7 },
 	{ '8',            SEL_CTX8 },
-#endif
 	/* Mark a path to visit later */
 	{ ',',            SEL_MARK },
 	/* Create a bookmark */

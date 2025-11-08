@@ -18,7 +18,6 @@ O_NOLC := 0  # no locale support
 O_NOMOUSE := 0  # no mouse support
 O_NOBATCH := 0  # no built-in batch renamer
 O_NOFIFO := 0  # no FIFO previewer support
-O_CTX8 := 0  # enable 8 contexts
 O_ICONS := 0  # support icons-in-terminal
 O_NERD := 0  # support icons-nerdfont
 O_EMOJI := 0  # support emoji
@@ -90,10 +89,6 @@ endif
 
 ifeq ($(strip $(O_NOFIFO)),1)
 	CPPFLAGS += -DNOFIFO
-endif
-
-ifeq ($(strip $(O_CTX8)),1)
-	CPPFLAGS += -DCTX8
 endif
 
 ifeq ($(strip $(O_ICONS)),1)

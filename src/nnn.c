@@ -220,11 +220,8 @@
 #define DBLCLK_INTERVAL_NS (400000000)
 #define XDELAY_INTERVAL_MS (350000) /* 350 ms delay */
 
-#ifndef CTX8
-#define CTX_MAX 4
-#else
+/* Use 8 contexts */
 #define CTX_MAX 8
-#endif
 
 #ifndef SED
 /* BSDs or Solaris or SunOS */
@@ -7519,12 +7516,10 @@ nochange:
 		case SEL_CTX2: // fallthrough
 		case SEL_CTX3: // fallthrough
 		case SEL_CTX4:
-#ifdef CTX8
 		case SEL_CTX5:
 		case SEL_CTX6:
 		case SEL_CTX7:
 		case SEL_CTX8:
-#endif
 			r = handle_context_switch(sel);
 			if (r < 0)
 				continue;
