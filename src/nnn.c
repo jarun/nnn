@@ -3683,7 +3683,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 	int x, r;
 	const int WCHAR_T_WIDTH = sizeof(wchar_t);
 	wint_t ch[1];
-	wchar_t * const buf = malloc(sizeof(wchar_t) * READLINE_MAX);
+	wchar_t * const buf = malloc(sizeof(wchar_t) * (READLINE_MAX + 1)); // 1 element extra for handling full-width characters
 
 	if (!buf)
 		errexit();
@@ -3707,8 +3707,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 
 	while (1) {
 		buf[len] = ' ';
-		if (len < (READLINE_MAX - 1))
-			buf[len + 1] = ' '; // Handle full-width characters
+		buf[len + 1] = ' '; // Handle full-width characters
 
 		attron(COLOR_PAIR(cfg.curctx + 1));
 		if (pos > (size_t)(xcols - x)) {
