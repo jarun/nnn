@@ -9,7 +9,7 @@
 <a href="https://github.com/jarun/nnn/blob/master/LICENSE"><img src="https://img.shields.io/badge/©-BSD%202--Clause-important.svg?maxAge=2592000" alt="License" /></a>
 </p>
 
-<p align="center"><a href="http://i.imgur.com/kOld6HT.gif"><img src="https://i.imgur.com/NUsSA2u.jpg"></a></p>
+<p align="center"><a href="https://github.com/user-attachments/assets/541ca36d-ae26-49fb-97da-d1f7a12d4b9a"><img src="https://github.com/user-attachments/assets/a8ee4689-1552-4fb1-997e-b16fe8ef5086"></a></p>
 
 <h3 align="center">[<a
 href="https://github.com/jarun/nnn#features">Features</a>] [<a
@@ -116,7 +116,7 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
 
 Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates and/or cycles contexts. <kbd>?</kbd> lists shortcuts.
 
-[![](https://i.imgur.com/TN3xYQz.jpg)](https://www.youtube.com/embed/-knZwdd1ScU)
+[![](https://github.com/user-attachments/assets/e93f7571-8b8d-4703-bef1-93fc804adf7d)](https://www.youtube.com/embed/-knZwdd1ScU)
 
 [![Wiki](https://img.shields.io/badge/RTFM-nnn%20Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
 
