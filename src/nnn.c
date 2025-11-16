@@ -265,6 +265,7 @@
 #define F_NOSTDIN 0x40  /* suppress stdin */
 #define F_PAGE    0x80  /* page output in run-cmd-as-plugin mode */
 #define F_TTY     0x100 /* Force stdout to go to tty if redirected to a non-tty */
+#define F_WINDOW  0x200 /* Show the contents in a floating window */
 #define F_CLI     (F_NORMAL | F_MULTI)
 #define F_SILENT  (F_CLI | F_NOTRACE)
 
@@ -4844,6 +4845,10 @@ static bool buffer_command_output(char * const cmds[], char *arg1, char *arg2, s
 	return TRUE;
 }
 
+/*
+ * Shows the content of a buffer in a floating window.
+ * Helps with navigating the entries in the directory.
+ */
 static bool show_content_in_floating_window(char *content, size_t content_len, enum action *action)
 {
 	/* Calculate window dimensions */
@@ -4883,7 +4888,7 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 	int scroll_offset = 0;
 	int hscroll_offset = 0; /* Horizontal scroll offset */
 	int max_line_width = 0; /* Maximum line width in content */
-	int ret;
+	int ret, x;
 	wint_t ch;
 	bool done = FALSE;
 
@@ -4903,7 +4908,20 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 	while (!done) {
 		werase(win);
 		box(win, 0, 0);
-		mvwaddstr(win, 0, 2, " File Statistics ");
+
+		if (ndents)
+		{
+			mvwaddch(win, 0, 2, ' ');
+			wattron(win, A_BOLD);
+			waddstr(win, xitoa(cur + 1));
+			waddch(win, '/');
+			waddstr(win, xitoa(ndents));
+			waddch(win, ' ');
+			getyx(win, ret, x); // ret is used as a dummy
+			waddnstr(win, pdents[cur].name, max_display_width - x - 1);
+			wattroff(win, A_BOLD);
+			waddch(win, ' ');
+		}
 
 		/* Skip to scroll offset */
 		char *line_start = content;
@@ -4917,7 +4935,7 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 
 		/* Display visible lines */
 		char *current = line_start;
-		int display_line = 1;
+		int display_line = 2; // Add a blank line, if possible (long file names can be multiline
 		while (display_line <= max_lines && current < content + content_len) {
 			char *next = strchr(current, '\n');
 			size_t line_len = next ? (size_t)(next - current) : content_len - (current - content);
@@ -4978,12 +4996,16 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 			done = TRUE;
 			break;
 		case 'n':
-			*action = SEL_NEXT;
-			done = TRUE;
+			if (action) {
+				*action = SEL_NEXT;
+				done = TRUE;
+			}
 			break;
 		case 'p':
-			*action = SEL_PREV;
-			done = TRUE;
+			if (action) {
+				*action = SEL_PREV;
+				done = TRUE;
+			}
 			break;
 		case KEY_UP:
 			if (scroll_offset > 0)
@@ -5011,8 +5033,7 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 			break;
 		case KEY_RIGHT:
 			if (max_line_width > max_display_width)
-				hscroll_offset = MIN(max_line_width - max_display_width,
-					hscroll_offset + 10);
+				hscroll_offset = MIN(max_line_width - max_display_width, hscroll_offset + 10);
 			break;
 #ifdef KEY_RESIZE
 		case KEY_RESIZE:
@@ -5692,7 +5713,7 @@ static void setexports(const char *path)
 	setenv("PWD", path, 1);
 }
 
-static void run_cmd_as_plugin(const char *file, uchar_t flags)
+static void run_cmd_as_plugin(const char *file, ushort_t flags, enum action *action)
 {
 	size_t len;
 
@@ -5707,7 +5728,15 @@ static void run_cmd_as_plugin(const char *file, uchar_t flags)
 
 	if (flags & F_PAGE)
 		get_output(utils[UTIL_SH_EXEC], g_buf, NULL, -1, TRUE);
-	else
+	else if (flags & F_WINDOW) {
+		char *content = NULL;
+		size_t content_len = 0;
+		char * const cmds[] = { g_buf, };
+
+		if (buffer_command_output(cmds, NULL, NULL, ELEMENTS(cmds), &content, &content_len))
+			show_content_in_floating_window(content, content_len, action);
+		free(content);
+	} else
 		spawn(utils[UTIL_SH_EXEC], g_buf, NULL, NULL, flags);
 }
 
@@ -5807,11 +5836,11 @@ static char *readpipe(int fd, char *ctxnum, char **path)
 	return nextpath;
 }
 
-static bool run_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir)
+static bool run_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir, enum action *action)
 {
 	pid_t p;
 	char ctx = 0;
-	uchar_t flags = 0;
+	ushort_t flags = 0;
 	bool cmd_as_plugin = FALSE;
 	char *nextpath;
 
@@ -5830,6 +5859,10 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 		if (*file == '|') { /* Check if output should be paged */
 			flags |= F_PAGE;
 			++file;
+		} else if (*file == '>') { /* Check if floating window should be used */
+			flags |= F_WINDOW;
+			++file;
+			*action = SEL_REDRAW;
 		} else if (*file == '&') { /* Check if GUI flags are to be used */
 			flags = F_MULTI | F_NOTRACE | F_NOWAIT;
 			++file;
@@ -5838,8 +5871,8 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 		if (!*file)
 			return FALSE;
 
-		if ((flags & F_NOTRACE) || (flags & F_PAGE)) {
-			run_cmd_as_plugin(file, flags);
+		if ((flags & F_NOTRACE) || (flags & F_PAGE) || (flags & F_WINDOW)) {
+			run_cmd_as_plugin(file, flags, action);
 			return TRUE;
 		}
 
@@ -5878,7 +5911,7 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 			} else
 				spawn(g_buf, NULL, *path, sel, 0);
 		} else
-			run_cmd_as_plugin(file, flags);
+			run_cmd_as_plugin(file, flags, NULL);
 
 		close(wfd);
 		_exit(EXIT_SUCCESS);
@@ -6615,6 +6648,22 @@ static void handle_screen_move(enum action sel)
 	}
 }
 
+static bool handle_cur_move(enum action sel)
+{
+	bool ret = TRUE;
+
+	if (sel == SEL_NEXT) {
+		if (cfg.rollover || (cur != ndents - 1))
+			move_cursor((cur + 1) % ndents, 0);
+	} else if (sel == SEL_PREV) {
+		if (cfg.rollover || cur)
+			move_cursor((cur + ndents - 1) % ndents, 0);
+	} else
+		ret = FALSE;
+
+	return ret;
+}
+
 static void handle_openwith(const char *path, const char *name, char *newpath, char *tmp)
 {
 	/* Confirm if app is CLI or GUI */
@@ -6861,7 +6910,7 @@ static void statusbar(char *path)
 
 	tolastln();
 
-	printw("%d/%s ", cur + 1, xitoa(ndents));
+	printw("%d/%d ", cur + 1, ndents);
 
 	if (g_state.selmode || nselected) {
 		attron(A_REVERSE);
@@ -7530,7 +7579,7 @@ nochange:
 					clearfilter();
 
 					if (chdir(path) == -1
-					    || !run_plugin(&path, pent->name, runfile, &lastname, &lastdir)) {
+					    || !run_plugin(&path, pent->name, runfile, &lastname, &lastdir, NULL)) {
 						DPRINTF_S("plugin failed!");
 					}
 
@@ -8361,15 +8410,26 @@ nochange:
 				} else
 					r = TRUE;
 
-				if (!run_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL),
-							 &lastname, &lastdir)) {
-					printwait(messages[MSG_FAILED], &presel);
-					goto nochange;
-				}
+				int oldpos = cur;
+				enum action action;
 
-				if (g_state.picked)
-					return EXIT_SUCCESS;
+				do {
+					action = SEL_MAX;
 
+					if (!run_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL),
+								 &lastname, &lastdir, &action)) {
+						printwait(messages[MSG_FAILED], &presel);
+						goto nochange;
+					}
+
+					if (g_state.picked)
+						return EXIT_SUCCESS;
+				} while (handle_cur_move(action));
+
+				if (action == SEL_REDRAW)
+					r = TRUE;
+
+				cur = oldpos;
 				copycurname();
 
 				if (!r) {
