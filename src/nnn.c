@@ -5759,9 +5759,9 @@ static void run_cmd_as_plugin(const char *file, ushort_t flags, enum action *act
 	else if (flags & F_WINDOW) {
 		char *content = NULL;
 		size_t content_len = 0;
-		char * const cmds[] = { g_buf, };
+		char * const cmds[] = { utils[UTIL_SH_EXEC], };
 
-		if (buffer_command_output(cmds, NULL, NULL, ELEMENTS(cmds), &content, &content_len))
+		if (buffer_command_output(cmds, g_buf, NULL, ELEMENTS(cmds), &content, &content_len))
 			show_content_in_floating_window(content, content_len, action);
 		free(content);
 	} else

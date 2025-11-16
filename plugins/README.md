@@ -189,6 +189,17 @@ Notes:
 3. (_Again_) add `!` before the command
 4. To disable directory refresh after running a _command as plugin_, prefix with `-!`
 
+#### Non-interactive command output in a floating window [`>`]
+
+To show the output of run-and-exit commands in a floating window, add `>` (right arrow) after `!`.
+
+```sh
+export NNN_PLUG='m:!>mediainfo "$nnn";t:!>tree -ps;l:!>ls -lah --group-directories-first'
+```
+
+This option is incompatible with `&` (terminal output is masked for GUI programs) and ignores `*` (output is rendered in a floating window).
+Option `-` is ignored with this option. The directory is always refreshed.
+
 #### Some useful key-command examples
 
 | Key:Command | Description |
@@ -374,7 +385,7 @@ fi
 
 #### Change directory
 
-    NNN_PLUG='c:!read -r to && [ -n "$to" ] && printf "0c%s" "${to}" > "$NNN_PIPE"*'
+    NNN_PLUG='c:!read -p "full path: " -r to && [ -n "$to" ] && printf "0c%s" "${to}" > "$NNN_PIPE"*'
 
 ## Contributing plugins
 

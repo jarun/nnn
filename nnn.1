@@ -505,6 +505,15 @@ separated by \fB;\fR:
 
         export NNN_PLUG='m:-!|mediainfo "$nnn";t:-!|tree -ps;l:-!|ls -lah --group-directories-first'
 
+    8. To show the output of run-and-exit commands in a floating window,
+       add \fB>\fR (right arrow) after \fB!\fR
+       Note: This option is incompatible with \fB&\fR (terminal output is masked
+       for GUI programs) and ignores \fB*\fR (output is rendered in a floating
+       window).
+       Option `-` is ignored with this option. The directory is always refreshed.
+
+        export NNN_PLUG='m:!>mediainfo "$nnn";t:!>tree -ps;l:!>ls -lah --group-directories-first'
+
     EXAMPLES:
     ------------------------------------ + -------------------------------------------------
                 Key:Command              |                   Description
