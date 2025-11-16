@@ -8398,6 +8398,8 @@ nochange:
 				printkeys(plug, g_buf + r - 1, maxplug);
 				printmsg(g_buf);
 				r = get_input(NULL);
+				move(xlines - 1, 0); // Clear the line
+				clrtoeol();
 			} else {
 				r = pkey;
 				pkey = '\0';
