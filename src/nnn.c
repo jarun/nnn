@@ -4928,12 +4928,12 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 		if (ndents)
 		{
 			mvwaddch(win, 0, 2, ' ');
-			wattron(win, A_BOLD);
 			waddstr(win, xitoa(cur + 1));
 			waddch(win, '/');
 			waddstr(win, xitoa(ndents));
 			waddch(win, ' ');
 			getyx(win, ret, x); // ret is used as a dummy
+			wattron(win, A_BOLD);
 			waddnstr(win, pdents[cur].name, max_display_width - x - 1);
 			wattroff(win, A_BOLD);
 			waddch(win, ' ');
