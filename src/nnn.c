@@ -4883,7 +4883,8 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 	int scroll_offset = 0;
 	int hscroll_offset = 0; /* Horizontal scroll offset */
 	int max_line_width = 0; /* Maximum line width in content */
-	int ch;
+	int ret;
+	wint_t ch;
 	bool done = FALSE;
 
 	/* Calculate maximum line width */
@@ -4967,7 +4968,10 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 		wrefresh(win);
 
 		/* Get user input from window */
-		ch = wgetch(win);
+		ret = get_wch(&ch);
+		if (ret == ERR)
+			continue;
+
 		switch (ch) {
 		case 'q':
 		case ESC:
@@ -5010,6 +5014,11 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 				hscroll_offset = MIN(max_line_width - max_display_width,
 					hscroll_offset + 10);
 			break;
+#ifdef KEY_RESIZE
+		case KEY_RESIZE:
+			done = TRUE;
+			break;
+#endif
 		}
 	}
 
