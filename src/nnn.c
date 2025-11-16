@@ -4997,7 +4997,7 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 		}
 
 		/* Show help hint */
-		mvwaddstr(win, win_height - 1, 1, "q/ESC: close  n/p: next/prev  arrows: scroll");
+		mvwaddstr(win, win_height - 1, 1, "q/ESC:close  n/j:next  p/k:prev  arrows:scroll");
 
 		wrefresh(win);
 
@@ -5011,12 +5011,14 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 		case ESC:
 			done = TRUE;
 			break;
+		case 'j':
 		case 'n':
 			if (action) {
 				*action = SEL_NEXT;
 				done = TRUE;
 			}
 			break;
+		case 'k':
 		case 'p':
 			if (action) {
 				*action = SEL_PREV;
@@ -5616,8 +5618,8 @@ static void show_help(const char *path)
 	"2(___n))\n"
 	"0\n"
 	"1NAVIGATION\n"
-	       "9Up k  Up%16PgUp ^U  Page up\n"
-	       "9Dn j  Down%14PgDn ^D  Page down\n"
+	       "9Up k  Prev%14PgUp ^U  Page up\n"
+	       "9Dn j  Next%14PgDn ^D  Page down\n"
 	       "9Lt h  Parent%12~ ` @ -  ~, /, start, prev\n"
 	   "5Ret Rt l  Open%20'  First file/match\n"
 	       "9g ^A  Top%21J  Jump to entry/offset\n"
