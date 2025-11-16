@@ -5068,7 +5068,7 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
  * Follows the stat(1) output closely
  * Displays output in a floating ncurses window
  */
-static bool show_stats(char *fpath, char *path_prefix)
+static bool show_stats(char *pathbuf, char *dir)
 {
 	char *content = NULL;
 	size_t content_len = 0;
@@ -5088,9 +5088,9 @@ static bool show_stats(char *fpath, char *path_prefix)
 	};
 
 	do {
-		mkpath(path_prefix, pdents[cur].name, fpath);
+		mkpath(dir, pdents[cur].name, pathbuf);
 
-		if (!buffer_command_output(cmds, fpath, NULL, ELEMENTS(cmds), &content, &content_len)) {
+		if (!buffer_command_output(cmds, pathbuf, NULL, ELEMENTS(cmds), &content, &content_len)) {
 			ret = FALSE;
 			break;
 		}
@@ -5107,12 +5107,27 @@ static bool show_stats(char *fpath, char *path_prefix)
 	return ret;
 }
 
-static bool xchmod(const char *fpath, mode_t *mode)
+static bool xchmod(char *pathbuf, char *dir)
 {
-	/* (Un)set (S_IXUSR | S_IXGRP | S_IXOTH) */
-	(0100 & *mode) ? (*mode &= ~0111) : (*mode |= 0111);
+	struct stat sb;
+	mode_t mode;
 
-	return (chmod(fpath, *mode) == 0);
+	mkpath(dir, pdents[cur].name, pathbuf);
+
+	if (lstat(pathbuf, &sb) == -1)
+		return FALSE;
+
+	mode = sb.st_mode;
+
+	/* (Un)set (S_IXUSR | S_IXGRP | S_IXOTH) */
+	(0100 & mode) ? (mode &= ~0111) : (mode |= 0111);
+
+	if (chmod(pathbuf, mode) == 0) {
+		pdents[cur].mode = mode;
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 static size_t get_fs_info(const char *path, uchar_t type)
@@ -7936,18 +7951,11 @@ nochange:
 			if (ndents) {
 				tmp = (listpath && xstrcmp(path, listpath) == 0) ? listroot : path;
 
-				if (sel == SEL_CHMODX)
-					mkpath(tmp, pdents[cur].name, newpath);
-
 				if ((sel == SEL_STATS && !show_stats(newpath, tmp))
-				    || (lstat(newpath, &sb) == -1)
-				    || (sel == SEL_CHMODX && !xchmod(newpath, &sb.st_mode))) {
+				    || (sel == SEL_CHMODX && !xchmod(newpath, tmp))) {
 					printwarn(&presel);
 					goto nochange;
 				}
-
-				if (sel == SEL_CHMODX)
-					pdents[cur].mode = sb.st_mode;
 			}
 			break;
 		case SEL_REDRAW: // fallthrough
