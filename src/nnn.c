@@ -856,12 +856,12 @@ static haiku_nm_h haiku_hnd;
 
 /* Forward declarations */
 static void redraw(char *path);
-static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag);
+static int spawn(char *command, char *arg1, char *arg2, char *arg3, ushort_t flag);
 static void move_cursor(int target, int ignore_scrolloff);
 static char *load_input(int fd, const char *path);
 static int set_sort_flags(int r);
 static void statusbar(char *path);
-static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page);
+static bool get_output(char *command, char *arg1, char *arg2, int fdout, bool page);
 #ifndef NOFIFO
 static void notify_fifo(bool force);
 #endif
@@ -2469,14 +2469,14 @@ static int join(pid_t p, uchar_t flag)
  * Spawns a child process. Behaviour can be controlled using flag.
  * Limited to 3 arguments to a program, flag works on bit set.
  */
-static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag)
+static int spawn(char *command, char *arg1, char *arg2, char *arg3, ushort_t flag)
 {
 	pid_t pid;
 	int status = 0, retstatus = 0xFFFF;
 	char *argv[EXEC_ARGS_MAX] = {0};
 	char *cmd = NULL;
 
-	if (!file || !*file)
+	if (!command || !*command)
 		return retstatus;
 
 	/* Swap args if the first arg is NULL and the other 2 aren't */
@@ -2490,11 +2490,11 @@ static int spawn(char *file, char *arg1, char *arg2, char *arg3, ushort_t flag)
 	}
 
 	if (flag & F_MULTI) {
-		cmd = parseargs(file, argv, &status);
+		cmd = parseargs(command, argv, &status);
 		if (!cmd)
 			return -1;
 	} else
-		argv[status++] = file;
+		argv[status++] = command;
 
 	argv[status] = arg1;
 	argv[++status] = arg2;
@@ -4681,13 +4681,13 @@ static void set_smart_ctx(int ctx, char *nextpath, char **path, char *file, char
  * This function does one of the following depending on the values of `fdout` and `page`:
  *  1) fdout == -1 && !page: Write up to CMD_LEN_MAX bytes of command output into g_buf
  *  2) fdout == -1 && page: Create a temp file, write full command output into it and show in pager.
- *  3) fdout != -1 && !page: Write full command output into the provided file.
+ *  3) fdout != -1 && !page: Write full command output into fdout.
  *  4) fdout != -1 && page: Don't use! Returns FALSE.
  *
  * g_buf is modified only in case 1.
  * g_tmpfpath is modified only in case 2.
  */
-static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page)
+static bool get_output(char *command, char *arg1, char *arg2, int fdout, bool page)
 {
 	pid_t pid;
 	int pipefd[2];
@@ -4750,7 +4750,7 @@ static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page)
 		dup2(cmd_out_fd, STDERR_FILENO);
 		close(cmd_out_fd);
 
-		spawn(file, arg1, arg2, NULL, F_MULTI);
+		spawn(command, arg1, arg2, NULL, F_MULTI);
 		_exit(EXIT_SUCCESS);
 	}
 
@@ -4783,29 +4783,16 @@ static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page)
 }
 
 /*
- * Helper function to generate stats content for a file
+ * Helper function to run numcmds commands and capture the output in a content buffer
  */
-static bool generate_file_stats(char *filepath, char **content_out, size_t *content_len_out)
+static bool buffer_command_output(char * const cmds[], char *arg1, char *arg2, size_t numcmds, char **content_out, size_t *content_len_out)
 {
-	static char * const cmds[] = {
-#ifdef FILE_MIME_OPTS
-		("file " FILE_MIME_OPTS),
-#endif
-		"file -b",
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__) || defined(__DragonFly__)
-		"stat -x",
-#else
-		"stat",
-#endif
-	};
-
-	size_t r = ELEMENTS(cmds);
 	int fd = create_tmp_file();
 	if (fd == -1)
 		return FALSE;
 
-	while (r)
-		get_output(cmds[--r], filepath, NULL, fd, FALSE);
+	while (numcmds)
+		get_output(cmds[--numcmds], arg1, arg2, fd, FALSE);
 
 	close(fd);
 
@@ -4857,18 +4844,8 @@ static bool generate_file_stats(char *filepath, char **content_out, size_t *cont
 	return TRUE;
 }
 
-/*
- * Follows the stat(1) output closely
- * Displays output in a floating ncurses window
- */
-static bool show_stats(char *fpath, enum action *action)
+static bool show_content_in_floating_window(char *content, size_t content_len, enum action *action)
 {
-	char *content = NULL;
-	size_t content_len = 0;
-
-	if (!generate_file_stats(fpath, &content, &content_len))
-		return FALSE;
-
 	/* Calculate window dimensions */
 	int win_height = MIN(20, xlines - 4);
 	int win_width = (xcols * 3) / 4; /* 75% of terminal width */
@@ -4993,7 +4970,6 @@ static bool show_stats(char *fpath, enum action *action)
 		ch = wgetch(win);
 		switch (ch) {
 		case 'q':
-		case 'Q':
 		case ESC:
 			done = TRUE;
 			break;
@@ -5006,14 +4982,10 @@ static bool show_stats(char *fpath, enum action *action)
 			done = TRUE;
 			break;
 		case KEY_UP:
-		case 'k':
-		case 'K':
 			if (scroll_offset > 0)
 				scroll_offset--;
 			break;
 		case KEY_DOWN:
-		case 'j':
-		case 'J':
 			if (scroll_offset + max_lines < line_count)
 				scroll_offset++;
 			break;
@@ -5030,14 +5002,10 @@ static bool show_stats(char *fpath, enum action *action)
 			scroll_offset = MAX(0, line_count - max_lines);
 			break;
 		case KEY_LEFT:
-		case 'h':
-		case 'H':
 			if (hscroll_offset > 0)
 				hscroll_offset = MAX(0, hscroll_offset - 10);
 			break;
 		case KEY_RIGHT:
-		case 'l':
-		case 'L':
 			if (max_line_width > max_display_width)
 				hscroll_offset = MIN(max_line_width - max_display_width,
 					hscroll_offset + 10);
@@ -5046,9 +5014,39 @@ static bool show_stats(char *fpath, enum action *action)
 	}
 
 	delwin(win);
-	free(content);
 	refresh(); /* Refresh main screen */
 	return TRUE;
+}
+
+/*
+ * Follows the stat(1) output closely
+ * Displays output in a floating ncurses window
+ */
+static bool show_stats(char *fpath, enum action *action)
+{
+	char *content = NULL;
+	size_t content_len = 0;
+	bool ret;
+
+	char * const cmds[] = {
+#ifdef FILE_MIME_OPTS
+		("file " FILE_MIME_OPTS),
+#endif
+		"file -b",
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__) || defined(__DragonFly__)
+		"stat -x",
+#else
+		"stat",
+#endif
+	};
+
+	if (!buffer_command_output(cmds, fpath, NULL, ELEMENTS(cmds), &content, &content_len))
+		return FALSE;
+
+	ret = show_content_in_floating_window(content, content_len, action);
+
+	free(content);
+	return ret;
 }
 
 static bool xchmod(const char *fpath, mode_t *mode)
