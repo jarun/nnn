@@ -4678,6 +4678,22 @@ static void set_smart_ctx(int ctx, char *nextpath, char **path, char *file, char
 	}
 }
 
+static bool handle_cur_move(enum action sel)
+{
+	bool ret = TRUE;
+
+	if (sel == SEL_NEXT) {
+		if (cfg.rollover || (cur != ndents - 1))
+			move_cursor((cur + 1) % ndents, 0);
+	} else if (sel == SEL_PREV) {
+		if (cfg.rollover || cur)
+			move_cursor((cur + ndents - 1) % ndents, 0);
+	} else
+		ret = FALSE;
+
+	return ret;
+}
+
 /*
  * This function does one of the following depending on the values of `fdout` and `page`:
  *  1) fdout == -1 && !page: Write up to CMD_LEN_MAX bytes of command output into g_buf
@@ -5052,10 +5068,11 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
  * Follows the stat(1) output closely
  * Displays output in a floating ncurses window
  */
-static bool show_stats(char *fpath, enum action *action)
+static bool show_stats(char *fpath, char *path_prefix)
 {
 	char *content = NULL;
 	size_t content_len = 0;
+	enum action action;
 	bool ret;
 
 	char * const cmds[] = {
@@ -5070,10 +5087,21 @@ static bool show_stats(char *fpath, enum action *action)
 #endif
 	};
 
-	if (!buffer_command_output(cmds, fpath, NULL, ELEMENTS(cmds), &content, &content_len))
-		return FALSE;
+	do {
+		mkpath(path_prefix, pdents[cur].name, fpath);
 
-	ret = show_content_in_floating_window(content, content_len, action);
+		if (!buffer_command_output(cmds, fpath, NULL, ELEMENTS(cmds), &content, &content_len)) {
+			ret = FALSE;
+			break;
+		}
+
+		action = SEL_MAX;
+
+		ret = show_content_in_floating_window(content, content_len, &action);
+		if (!ret)
+			break;
+
+	} while (handle_cur_move(action));
 
 	free(content);
 	return ret;
@@ -6648,22 +6676,6 @@ static void handle_screen_move(enum action sel)
 	}
 }
 
-static bool handle_cur_move(enum action sel)
-{
-	bool ret = TRUE;
-
-	if (sel == SEL_NEXT) {
-		if (cfg.rollover || (cur != ndents - 1))
-			move_cursor((cur + 1) % ndents, 0);
-	} else if (sel == SEL_PREV) {
-		if (cfg.rollover || cur)
-			move_cursor((cur + ndents - 1) % ndents, 0);
-	} else
-		ret = FALSE;
-
-	return ret;
-}
-
 static void handle_openwith(const char *path, const char *name, char *newpath, char *tmp)
 {
 	/* Confirm if app is CLI or GUI */
@@ -7922,24 +7934,19 @@ nochange:
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
 			if (ndents) {
-				enum action action = SEL_MAX;
 				tmp = (listpath && xstrcmp(path, listpath) == 0) ? listroot : path;
-				mkpath(tmp, pdents[cur].name, newpath);
 
-				if ((sel == SEL_STATS && !show_stats(newpath, &action))
+				if (sel == SEL_CHMODX)
+					mkpath(tmp, pdents[cur].name, newpath);
+
+				if ((sel == SEL_STATS && !show_stats(newpath, tmp))
 				    || (lstat(newpath, &sb) == -1)
 				    || (sel == SEL_CHMODX && !xchmod(newpath, &sb.st_mode))) {
 					printwarn(&presel);
 					goto nochange;
 				}
 
-				if (sel == SEL_STATS) {
-					if (action == SEL_NEXT || action == SEL_PREV) {
-						g_state.move = 1;
-						handle_screen_move(action);
-						presel = 'f'; // Show stats for the next file
-					}
-				} else if (sel == SEL_CHMODX)
+				if (sel == SEL_CHMODX)
 					pdents[cur].mode = sb.st_mode;
 			}
 			break;
@@ -8410,7 +8417,6 @@ nochange:
 				} else
 					r = TRUE;
 
-				int oldpos = cur;
 				enum action action;
 
 				do {
@@ -8429,7 +8435,6 @@ nochange:
 				if (action == SEL_REDRAW)
 					r = TRUE;
 
-				cur = oldpos;
 				copycurname();
 
 				if (!r) {
