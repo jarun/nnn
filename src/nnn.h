@@ -120,6 +120,7 @@ enum action {
 #ifndef NOMOUSE
 	SEL_CLICK,
 #endif
+	SEL_MAX,
 };
 
 /* Associate a pressed key to an action */

@@ -4783,9 +4783,9 @@ static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page)
 }
 
 /*
- * Follows the stat(1) output closely
+ * Helper function to generate stats content for a file
  */
-static bool show_stats(char *fpath)
+static bool generate_file_stats(char *filepath, char **content_out, size_t *content_len_out)
 {
 	static char * const cmds[] = {
 #ifdef FILE_MIME_OPTS
@@ -4805,12 +4805,249 @@ static bool show_stats(char *fpath)
 		return FALSE;
 
 	while (r)
-		get_output(cmds[--r], fpath, NULL, fd, FALSE);
+		get_output(cmds[--r], filepath, NULL, fd, FALSE);
 
 	close(fd);
 
-	spawn(pager, g_tmpfpath, NULL, NULL, F_CLI | F_TTY);
+	/* Read the temp file content */
+	FILE *fp = fopen(g_tmpfpath, "r");
+	if (!fp) {
+		unlink(g_tmpfpath);
+		return FALSE;
+	}
+
+	/* Allocate buffer for content */
+	char *content = NULL;
+	size_t content_size = 0;
+	size_t content_len = 0;
+	size_t line_len = 0;
+	char line[4096];
+
+	/* Read all content from file */
+	while (fgets(line, sizeof(line), fp)) {
+		line_len = xstrlen(line);
+		if (content_len + line_len + 1 > content_size) {
+			size_t new_size = content_size ? content_size * 2 : 8192;
+			char *new_content = realloc(content, new_size);
+			if (!new_content) {
+				free(content);
+				fclose(fp);
+				unlink(g_tmpfpath);
+				return FALSE;
+			}
+			content = new_content;
+			content_size = new_size;
+		}
+
+		if (content) {
+			xstrsncpy(content + content_len, line, content_size - content_len);
+			content_len += line_len;
+		}
+	}
+	fclose(fp);
 	unlink(g_tmpfpath);
+
+	if (!content || content_len == 0) {
+		free(content);
+		return FALSE;
+	}
+
+	*content_out = content;
+	*content_len_out = content_len;
+	return TRUE;
+}
+
+/*
+ * Follows the stat(1) output closely
+ * Displays output in a floating ncurses window
+ */
+static bool show_stats(char *fpath, enum action *action)
+{
+	char *content = NULL;
+	size_t content_len = 0;
+
+	if (!generate_file_stats(fpath, &content, &content_len))
+		return FALSE;
+
+	/* Calculate window dimensions */
+	int win_height = MIN(20, xlines - 4);
+	int win_width = (xcols * 3) / 4; /* 75% of terminal width */
+
+	/* Ensure minimum window size */
+	if (win_height < 5)
+		win_height = 5;
+	if (win_width < 20)
+		win_width = 20;
+
+	int start_y = (xlines - win_height) / 2;
+	int start_x = (xcols - win_width) / 2;
+
+	/* Create floating window */
+	WINDOW *win = newwin(win_height, win_width, start_y, start_x);
+	if (!win) {
+		free(content);
+		return FALSE;
+	}
+
+	keypad(win, TRUE); /* Enable special keys */
+
+	/* Count total lines once */
+	int line_count = 0;
+	for (size_t i = 0; i < content_len; i++) {
+		if (content[i] == '\n')
+			line_count++;
+	}
+	if (content_len > 0 && content[content_len - 1] != '\n')
+		line_count++;
+
+	/* Display content with scrolling */
+	int max_lines = win_height - 3; /* Account for border and help line */
+	int max_display_width = win_width - 2; /* Account for border */
+	int scroll_offset = 0;
+	int hscroll_offset = 0; /* Horizontal scroll offset */
+	int max_line_width = 0; /* Maximum line width in content */
+	int ch;
+	bool done = FALSE;
+
+	/* Calculate maximum line width */
+	char *line_ptr = content;
+	while (line_ptr < content + content_len) {
+		char *next = strchr(line_ptr, '\n');
+		size_t line_len = next ? (size_t)(next - line_ptr) : content_len - (line_ptr - content);
+		if (line_len > (size_t)max_line_width)
+			max_line_width = (int)line_len;
+		if (next)
+			line_ptr = next + 1;
+		else
+			break;
+	}
+
+	while (!done) {
+		werase(win);
+		box(win, 0, 0);
+		mvwaddstr(win, 0, 2, " File Statistics ");
+
+		/* Skip to scroll offset */
+		char *line_start = content;
+		for (int i = 0; i < scroll_offset && line_start < content + content_len; i++) {
+			char *next = strchr(line_start, '\n');
+			if (next)
+				line_start = next + 1;
+			else
+				break;
+		}
+
+		/* Display visible lines */
+		char *current = line_start;
+		int display_line = 1;
+		while (display_line <= max_lines && current < content + content_len) {
+			char *next = strchr(current, '\n');
+			size_t line_len = next ? (size_t)(next - current) : content_len - (current - content);
+
+			/* Apply horizontal scrolling */
+			char *display_start = current;
+			size_t display_len = line_len;
+
+			if (hscroll_offset > 0 && (size_t)hscroll_offset < line_len) {
+				display_start = current + hscroll_offset;
+				display_len = line_len - hscroll_offset;
+			}
+
+			/* Truncate if still too long for display */
+			if (display_len > (size_t)max_display_width) {
+				mvwaddnstr(win, display_line, 1, display_start, max_display_width);
+			} else {
+				mvwaddnstr(win, display_line, 1, display_start, display_len);
+			}
+
+			if (next) {
+				current = next + 1;
+				display_line++;
+			} else {
+				break;
+			}
+		}
+
+		/* Show vertical scroll indicators if needed */
+		if (line_count > max_lines) {
+			if (scroll_offset > 0)
+				mvwaddch(win, 1, win_width - 2, '^');
+			if (scroll_offset + max_lines < line_count)
+				mvwaddch(win, max_lines, win_width - 2, 'v');
+		}
+
+		/* Show horizontal scroll indicators if needed */
+		if (max_line_width > max_display_width) {
+			if (hscroll_offset > 0)
+				mvwaddch(win, max_lines + 1, 1, '<');
+			if (hscroll_offset + max_display_width < max_line_width)
+				mvwaddch(win, max_lines + 1, win_width - 2, '>');
+		}
+
+		/* Show help hint */
+		mvwaddstr(win, win_height - 1, 1, "q/ESC: close  n/p: next/prev  arrows: scroll");
+
+		wrefresh(win);
+
+		/* Get user input from window */
+		ch = wgetch(win);
+		switch (ch) {
+		case 'q':
+		case 'Q':
+		case ESC:
+			done = TRUE;
+			break;
+		case 'n':
+			*action = SEL_NEXT;
+			done = TRUE;
+			break;
+		case 'p':
+			*action = SEL_PREV;
+			done = TRUE;
+			break;
+		case KEY_UP:
+		case 'k':
+		case 'K':
+			if (scroll_offset > 0)
+				scroll_offset--;
+			break;
+		case KEY_DOWN:
+		case 'j':
+		case 'J':
+			if (scroll_offset + max_lines < line_count)
+				scroll_offset++;
+			break;
+		case KEY_PPAGE:
+			scroll_offset = MAX(0, scroll_offset - max_lines);
+			break;
+		case KEY_NPAGE:
+			scroll_offset = MIN(line_count - max_lines, scroll_offset + max_lines);
+			break;
+		case KEY_HOME:
+			scroll_offset = 0;
+			break;
+		case KEY_END:
+			scroll_offset = MAX(0, line_count - max_lines);
+			break;
+		case KEY_LEFT:
+		case 'h':
+		case 'H':
+			if (hscroll_offset > 0)
+				hscroll_offset = MAX(0, hscroll_offset - 10);
+			break;
+		case KEY_RIGHT:
+		case 'l':
+		case 'L':
+			if (max_line_width > max_display_width)
+				hscroll_offset = MIN(max_line_width - max_display_width,
+					hscroll_offset + 10);
+			break;
+		}
+	}
+
+	delwin(win);
+	free(content);
+	refresh(); /* Refresh main screen */
 	return TRUE;
 }
 
@@ -7629,17 +7866,24 @@ nochange:
 		case SEL_STATS: // fallthrough
 		case SEL_CHMODX:
 			if (ndents) {
+				enum action action = SEL_MAX;
 				tmp = (listpath && xstrcmp(path, listpath) == 0) ? listroot : path;
 				mkpath(tmp, pdents[cur].name, newpath);
 
-				if ((sel == SEL_STATS && !show_stats(newpath))
+				if ((sel == SEL_STATS && !show_stats(newpath, &action))
 				    || (lstat(newpath, &sb) == -1)
 				    || (sel == SEL_CHMODX && !xchmod(newpath, &sb.st_mode))) {
 					printwarn(&presel);
 					goto nochange;
 				}
 
-				if (sel == SEL_CHMODX)
+				if (sel == SEL_STATS) {
+					if (action == SEL_NEXT || action == SEL_PREV) {
+						g_state.move = 1;
+						handle_screen_move(action);
+						presel = 'f'; // Show stats for the next file
+					}
+				} else if (sel == SEL_CHMODX)
 					pdents[cur].mode = sb.st_mode;
 			}
 			break;
