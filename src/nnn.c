@@ -215,6 +215,7 @@
 #define ONSCREEN        (xlines - 4) /* Leave top 2 and bottom 2 lines */
 #define COLOR_256       256
 #define CREATE_NEW_KEY  (-1)
+#define SIZE_16MB       (16 * 1024 * 1024) /* 16 MB in bytes */
 
 /* Time intervals */
 #define DBLCLK_INTERVAL_NS (400000000)
@@ -4827,8 +4828,8 @@ static bool buffer_command_output(char * const cmds[], char *arg1, char *arg2, s
 	size_t line_len = 0;
 	char line[4096];
 
-	/* Read all content from file */
-	while (fgets(line, sizeof(line), fp)) {
+	/* Read upto 16 MB content from file */
+	while ((content_len < (size_t)SIZE_16MB) && fgets(line, sizeof(line), fp)) {
 		line_len = xstrlen(line);
 		if (content_len + line_len + 1 > content_size) {
 			size_t new_size = content_size ? content_size * 2 : 8192;
