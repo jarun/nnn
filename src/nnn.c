@@ -2474,33 +2474,32 @@ static int join(pid_t p, uchar_t flag)
 static int spawn(char *command, char *arg1, char *arg2, char *arg3, ushort_t flag)
 {
 	pid_t pid;
-	int status = 0, retstatus = 0xFFFF;
+	int index = 0, retstatus = 0xFFFF;
 	char *argv[EXEC_ARGS_MAX] = {0};
 	char *cmd = NULL;
 
 	if (!command || !*command)
 		return retstatus;
 
-	/* Swap args if the first arg is NULL and the other 2 aren't */
-	if (!arg1 && arg2) {
-		arg1 = arg2;
-		if (arg3) {
-			arg2 = arg3;
-			arg3 = NULL;
-		} else
-			arg2 = NULL;
-	}
-
 	if (flag & F_MULTI) {
-		cmd = parseargs(command, argv, &status);
+		cmd = parseargs(command, argv, &index);
 		if (!cmd)
 			return -1;
 	} else
-		argv[status++] = command;
+		argv[index++] = command;
 
-	argv[status] = arg1;
-	argv[++status] = arg2;
-	argv[++status] = arg3;
+	if (arg1) {
+		argv[index] = arg1;
+		++index;
+	}
+
+	if (arg2) {
+		argv[index] = arg2;
+		++index;
+	}
+
+	if (arg3)
+		argv[index] = arg3;
 
 	if (flag & F_NORMAL)
 		exitcurses();
@@ -2529,7 +2528,7 @@ static int spawn(char *command, char *arg1, char *arg2, char *arg3, ushort_t fla
 		DPRINTF_D(pid);
 
 		if ((flag & F_CONFIRM) || ((flag & F_CHKRTN) && retstatus)) {
-			status = write(STDOUT_FILENO, messages[MSG_ENTER], xstrlen(messages[MSG_ENTER]));
+			int status = write(STDOUT_FILENO, messages[MSG_ENTER], xstrlen(messages[MSG_ENTER]));
 			(void)status;
 			while ((read(STDIN_FILENO, &status, 1) > 0) && (status != '\n'));
 		}
@@ -4714,7 +4713,9 @@ static bool get_output(char *command, char *arg1, char *arg2, int fdout, bool pa
 	bool have_file = fdout != -1;
 	int cmd_in_fd = -1;
 	int cmd_out_fd = -1;
-	ssize_t len;
+
+	if (!command || !*command)
+		return ret;
 
 	/*
 	 * In this case the logic of the function dictates that we should write the output of the command
@@ -4724,15 +4725,15 @@ static bool get_output(char *command, char *arg1, char *arg2, int fdout, bool pa
 	 */
 	if (have_file && page) {
 		DPRINTF_S("invalid get_ouptput() call");
-		return FALSE;
+		return ret;
 	}
 
 	/* Setup file descriptors for child command */
-	if (!have_file && page) {
+	if (page) {
 		// Case 2
 		fdout = create_tmp_file();
 		if (fdout == -1)
-			return FALSE;
+			return ret;
 
 		cmd_in_fd = STDIN_FILENO;
 		cmd_out_fd = fdout;
@@ -4760,6 +4761,22 @@ static bool get_output(char *command, char *arg1, char *arg2, int fdout, bool pa
 		cmd_out_fd = pipefd[1];
 	}
 
+	/* Tokenize the command into an array */
+	char *argv[EXEC_ARGS_MAX] = {0};
+	char *cmd = parseargs(command, argv, &index);
+	if (!cmd)
+		return ret;
+
+	if (arg1) {
+		argv[index] = arg1;
+		++index;
+	}
+
+	if (arg2) {
+		argv[index] = arg2;
+		++index;
+	}
+
 	pid = fork();
 	if (pid == 0) {
 		/* In child */
@@ -4768,15 +4785,17 @@ static bool get_output(char *command, char *arg1, char *arg2, int fdout, bool pa
 		dup2(cmd_out_fd, STDERR_FILENO);
 		close(cmd_out_fd);
 
-		spawn(command, arg1, arg2, NULL, F_MULTI);
+		execvp(*argv, argv);
 		_exit(EXIT_SUCCESS);
 	}
 
 	/* In parent */
 	waitpid(pid, NULL, 0);
 
+	free(cmd);
+
 	/* Do what each case should do */
-	if (!have_file && page) {
+	if (page) {
 		// Case 2
 		close(fdout);
 
@@ -4787,12 +4806,10 @@ static bool get_output(char *command, char *arg1, char *arg2, int fdout, bool pa
 	}
 
 	if (have_file)
-		// Case 3
-		return TRUE;
+		return TRUE; // Case 3
 
 	// Case 1
-	len = read(pipefd[0], g_buf, CMD_LEN_MAX - 1);
-	if (len > 0)
+	if (read(pipefd[0], g_buf, CMD_LEN_MAX - 1) > 0)
 		ret = TRUE;
 
 	close(pipefd[0]);
