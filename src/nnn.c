@@ -4883,7 +4883,7 @@ static bool buffer_command_output(char * const cmds[], char *arg1, char *arg2, s
  * Shows the content of a buffer in a floating window.
  * Helps with navigating the entries in the directory.
  */
-static bool show_content_in_floating_window(char *content, size_t content_len, enum action *action)
+static bool show_content_in_floating_window(char *content, size_t content_len, enum action *action, bool perfile)
 {
 	/* Calculate window dimensions */
 	int win_height = MIN(20, xlines - 4);
@@ -4943,7 +4943,7 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 		werase(win);
 		box(win, 0, 0);
 
-		if (ndents)
+		if (perfile && ndents)
 		{
 			mvwaddch(win, 0, 2, ' ');
 			waddstr(win, xitoa(cur + 1));
@@ -5015,7 +5015,9 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 		}
 
 		/* Show help hint */
-		mvwaddstr(win, win_height - 1, 1, "q/ESC:close  n/j:next  p/k:prev  arrows:scroll");
+		mvwaddstr(win, win_height - 1, 1, "q/ESC:close  arrows:scroll");
+		if (perfile)
+			waddstr(win, "  n/j:next  p/k:prev");
 
 		wrefresh(win);
 
@@ -5031,14 +5033,14 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 			break;
 		case 'j':
 		case 'n':
-			if (action) {
+			if (perfile && action) {
 				*action = SEL_NEXT;
 				done = TRUE;
 			}
 			break;
 		case 'k':
 		case 'p':
-			if (action) {
+			if (perfile && action) {
 				*action = SEL_PREV;
 				done = TRUE;
 			}
@@ -5117,7 +5119,7 @@ static bool show_stats(char *pathbuf, char *dir)
 
 		action = SEL_MAX;
 
-		ret = show_content_in_floating_window(content, content_len, &action);
+		ret = show_content_in_floating_window(content, content_len, &action, TRUE);
 		if (!ret)
 			break;
 
@@ -5797,7 +5799,7 @@ static void run_cmd_as_plugin(const char *file, ushort_t flags, enum action *act
 		char * const cmds[] = { utils[UTIL_SH_EXEC], };
 
 		if (buffer_command_output(cmds, g_buf, NULL, ELEMENTS(cmds), &content, &content_len))
-			show_content_in_floating_window(content, content_len, action);
+			show_content_in_floating_window(content, content_len, action, strstr(g_buf, "$nnn") != NULL);
 		free(content);
 	} else
 		spawn(utils[UTIL_SH_EXEC], g_buf, NULL, NULL, flags);
