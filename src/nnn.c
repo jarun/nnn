@@ -4900,10 +4900,8 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 
 	/* Create floating window */
 	WINDOW *win = newwin(win_height, win_width, start_y, start_x);
-	if (!win) {
-		free(content);
+	if (!win)
 		return FALSE;
-	}
 
 	keypad(win, TRUE); /* Enable special keys */
 
@@ -5120,12 +5118,15 @@ static bool show_stats(char *pathbuf, char *dir)
 		action = SEL_MAX;
 
 		ret = show_content_in_floating_window(content, content_len, &action, TRUE);
+
+		free(content);
+		content = NULL;
+		content_len = 0;
+
 		if (!ret)
 			break;
-
 	} while (handle_cur_move(action));
 
-	free(content);
 	return ret;
 }
 
