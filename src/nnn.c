@@ -4959,15 +4959,15 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 		char *line_start = content;
 		for (int i = 0; i < scroll_offset && line_start < content + content_len; i++) {
 			char *next = strchr(line_start, '\n');
-			if (next)
-				line_start = next + 1;
-			else
+			if (!next)
 				break;
+			line_start = next + 1;
 		}
 
 		/* Display visible lines */
 		char *current = line_start;
 		int display_line = 2; // Add a blank line, if possible (long file names can be multiline
+
 		while (display_line <= max_lines && current < content + content_len) {
 			char *next = strchr(current, '\n');
 			size_t line_len = next ? (size_t)(next - current) : content_len - (current - content);
