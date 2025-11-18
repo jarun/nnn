@@ -5258,6 +5258,8 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 			}
 			/* Copy the new dir path to open it in smart context */
 			outdir = getcwd(NULL, 0); // NOLINT
+			if (!outdir)
+				return FALSE;
 			x_to = TRUE;
 		}
 	}
@@ -7315,6 +7317,8 @@ static bool browse(char *ipath, int pkey)
 		if (g_state.initfile) {
 			free(initpath);
 			initpath = ipath = getcwd(NULL, 0); // NOLINT
+			if (!initpath)
+				return FALSE;
 		}
 		path = g_ctx[0].c_path; /* current directory */
 
