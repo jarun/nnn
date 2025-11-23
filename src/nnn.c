@@ -216,6 +216,7 @@
 #define COLOR_256       256
 #define CREATE_NEW_KEY  (-1)
 #define SIZE_16MB       (16 * 1024 * 1024) /* 16 MB in bytes */
+#define RM_RECONFIRM    (10) /* Reconfirm rm on deleting more than these number of files */
 
 /* Time intervals */
 #define DBLCLK_INTERVAL_NS (400000000)
@@ -1597,12 +1598,19 @@ static char confirm_force(bool selection, bool use_trash)
 	/* Note: ideally we should use utils[UTIL_RM_RF] instead of the "rm -rf" string */
 	int r = snprintf(str, 20, "%s", use_trash ? utils[UTIL_GIO_TRASH] + 4 : "rm -rf");
 
-	if (selection)
+	if (selection) {
 		snprintf(str + r, 280, " %d file(s)?", nselected);
-	else
-		snprintf(str + r, 280, " '%s'?", pdents[cur].name);
+		r = get_input(str);
 
-	r = get_input(str);
+		/* Double confirm on removal of more than 10 files */
+		if (!use_trash && (nselected > RM_RECONFIRM) && (r == 'y' || r == 'Y')) {
+			snprintf(str, 300, "Are you sure?");
+			r = get_input(str);
+		}
+	} else {
+		snprintf(str + r, 280, " '%s'?", pdents[cur].name);
+		r = get_input(str);
+	}
 
 	if (r == ESC)
 		return '\0'; /* cancel */
