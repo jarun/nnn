@@ -2094,7 +2094,10 @@ static int editselection(void)
 	/* Save the last modification time */
 	if (stat(g_tmpfpath, &sb)) {
 		DPRINTF_S(strerror(errno));
-		unlink(g_tmpfpath);
+		if (unlink(g_tmpfpath)) {
+			DPRINTF_S(strerror(errno));
+			printwarn(NULL);
+		}
 		return -1;
 	}
 	mtime = sb.st_mtime;
@@ -2104,7 +2107,10 @@ static int editselection(void)
 	fd = open(g_tmpfpath, O_RDONLY);
 	if (fd == -1) {
 		DPRINTF_S(strerror(errno));
-		unlink(g_tmpfpath);
+		if (unlink(g_tmpfpath)) {
+			DPRINTF_S(strerror(errno));
+			printwarn(NULL);
+		}
 		return -1;
 	}
 
@@ -2112,13 +2118,20 @@ static int editselection(void)
 
 	if (mtime == sb.st_mtime) {
 		DPRINTF_S("selection is not modified");
-		unlink(g_tmpfpath);
+		if (unlink(g_tmpfpath)) {
+			DPRINTF_S(strerror(errno));
+			printwarn(NULL);
+			goto emptyedit;
+		}
 		return 1;
 	}
 
 	if (sb.st_size > selbufpos) {
 		DPRINTF_S("edited buffer larger than previous");
-		unlink(g_tmpfpath);
+		if (unlink(g_tmpfpath)) {
+			DPRINTF_S(strerror(errno));
+			printwarn(NULL);
+		}
 		goto emptyedit;
 	}
 
@@ -2220,7 +2233,8 @@ static void export_file_list(void)
 	spawn(editor, g_tmpfpath, NULL, NULL, F_CLI);
 
 	if (xconfirm(get_input(messages[MSG_RM_TMP])))
-		unlink(g_tmpfpath);
+		if (unlink(g_tmpfpath))
+			DPRINTF_S(strerror(errno));
 }
 
 static bool init_fcolors(void)
