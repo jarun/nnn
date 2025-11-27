@@ -2232,9 +2232,11 @@ static void export_file_list(void)
 
 	spawn(editor, g_tmpfpath, NULL, NULL, F_CLI);
 
-	if (xconfirm(get_input(messages[MSG_RM_TMP])))
-		if (unlink(g_tmpfpath))
+	if (xconfirm(get_input(messages[MSG_RM_TMP]))) {
+		if (unlink(g_tmpfpath)) {
 			DPRINTF_S(strerror(errno));
+		}
+	}
 }
 
 static bool init_fcolors(void)
