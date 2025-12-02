@@ -7473,6 +7473,11 @@ nochange:
 		if (presel)
 			presel = 0;
 
+		/* CUSTOM: treat right-arrow (SEL_NAV_IN) as edit when hovering a file,
+		 * but keep normal directory navigation when hovering a directory. */
+		if (sel == SEL_NAV_IN && ndents && !(pdents[cur].flags & DIR_OR_DIRLNK))
+			sel = SEL_EDIT;
+
 		switch (sel) {
 #ifndef NOMOUSE
 		case SEL_CLICK:
