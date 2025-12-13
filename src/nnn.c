@@ -4851,68 +4851,61 @@ static bool buffer_command_output(char * const cmds[], char *arg1, char *arg2, s
 		return FALSE;
 
 	/* Execute all commands sequentially, writing to pipe */
-	size_t cmd_idx = numcmds;
-	while (cmd_idx) {
-		char *command = cmds[--cmd_idx];
+	for (size_t i = numcmds; i > 0; --i) {
+		char *command = cmds[i - 1];
 		if (!command || !*command)
 			continue;
 
-		/* Tokenize the command into an array */
 		char *argv[EXEC_ARGS_MAX] = {0};
 		int index = 0;
 		char *cmd = parseargs(command, argv, &index);
 		if (!cmd)
 			continue;
 
-		if (arg1) {
-			argv[index] = arg1;
-			++index;
-		}
-
-		if (arg2) {
-			argv[index] = arg2;
-			++index;
-		}
+		if (arg1)
+			argv[index++] = arg1;
+		if (arg2)
+			argv[index++] = arg2;
 
 		pid_t pid = fork();
 		if (pid == 0) {
-			/* In child */
 			close(pipefd[0]);
 			dup2(pipefd[1], STDOUT_FILENO);
 			dup2(pipefd[1], STDERR_FILENO);
 			close(pipefd[1]);
-
 			execvp(*argv, argv);
 			_exit(EXIT_SUCCESS);
 		}
 
-		/* In parent */
 		if (pid > 0)
 			waitpid(pid, NULL, 0);
 		free(cmd);
 	}
 
-	/* Close write end so read end can detect EOF */
 	close(pipefd[1]);
 
-	/* Allocate buffer for content */
-	char *content = NULL;
-	size_t content_size = 0;
+	/* Read directly from pipe into buffer */
+	size_t content_size = 8192;
 	size_t content_len = 0;
 	char read_buf[8192];
 
-	/* Read directly from pipe into buffer */
+	char *content = malloc(content_size);
+	if (!content) {
+		close(pipefd[0]);
+		return FALSE;
+	}
+
 	while (content_len < (size_t)SIZE_16MB) {
 		ssize_t nread = read(pipefd[0], read_buf, sizeof(read_buf));
 		if (nread <= 0)
 			break;
 
-		/* Grow buffer if needed */
+		/* Grow buffer if needed (always reserve space for null terminator) */
 		if (content_len + nread + 1 > content_size) {
-			size_t new_size = content_size ? content_size * 2 : 8192;
-			/* Ensure new_size is large enough */
-			while (new_size < content_len + nread + 1)
+			size_t new_size = content_size;
+			do {
 				new_size *= 2;
+			} while (new_size < content_len + nread + 1);
 			char *new_content = realloc(content, new_size);
 			if (!new_content) {
 				free(content);
@@ -4923,29 +4916,18 @@ static bool buffer_command_output(char * const cmds[], char *arg1, char *arg2, s
 			content_size = new_size;
 		}
 
-		/* Append read data to buffer */
 		memcpy(content + content_len, read_buf, nread);
 		content_len += nread;
 	}
 
 	close(pipefd[0]);
 
-	if (!content || content_len == 0) {
+	if (content_len == 0) {
 		free(content);
 		return FALSE;
 	}
 
-	/* Null-terminate the buffer */
-	if (content_len + 1 > content_size) {
-		char *new_content = realloc(content, content_len + 1);
-		if (!new_content) {
-			free(content);
-			return FALSE;
-		}
-		content = new_content;
-	}
 	content[content_len] = '\0';
-
 	*content_out = content;
 	*content_len_out = content_len;
 	return TRUE;
