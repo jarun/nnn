@@ -215,6 +215,7 @@
 #define ONSCREEN        (xlines - 4) /* Leave top 2 and bottom 2 lines */
 #define COLOR_256       256
 #define CREATE_NEW_KEY  (-1)
+#define SIZE_8KB        (8 * 1024) /* 8 KB in bytes */
 #define SIZE_16MB       (16 * 1024 * 1024) /* 16 MB in bytes */
 #define RM_RECONFIRM    (10) /* Reconfirm rm on deleting more than these number of files */
 
@@ -4885,9 +4886,9 @@ static bool buffer_command_output(char * const cmds[], char *arg1, char *arg2, s
 	close(pipefd[1]);
 
 	/* Read directly from pipe into buffer */
-	size_t content_size = 8192;
+	size_t content_size = (size_t) SIZE_8KB;
 	size_t content_len = 0;
-	char read_buf[8192];
+	char read_buf[SIZE_8KB];
 
 	char *content = malloc(content_size);
 	if (!content) {
@@ -4895,7 +4896,7 @@ static bool buffer_command_output(char * const cmds[], char *arg1, char *arg2, s
 		return FALSE;
 	}
 
-	while (content_len < (size_t)SIZE_16MB) {
+	while (content_len < (size_t) SIZE_16MB) {
 		ssize_t nread = read(pipefd[0], read_buf, sizeof(read_buf));
 		if (nread <= 0)
 			break;
@@ -4906,7 +4907,9 @@ static bool buffer_command_output(char * const cmds[], char *arg1, char *arg2, s
 			do {
 				new_size *= 2;
 			} while (new_size < content_len + nread + 1);
+
 			char *new_content = realloc(content, new_size);
+
 			if (!new_content) {
 				free(content);
 				close(pipefd[0]);
@@ -4927,7 +4930,7 @@ static bool buffer_command_output(char * const cmds[], char *arg1, char *arg2, s
 		return FALSE;
 	}
 
-	content[content_len] = '\0';
+	content[content_len] = '\0'; // NOLINT
 	*content_out = content;
 	*content_len_out = content_len;
 	return TRUE;
