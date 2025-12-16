@@ -1806,7 +1806,6 @@ static void invertselbuf(const int pathlen)
 	char *found;
 	int i, nmarked = 0, prev = 0;
 	struct entry *dentp;
-	bool scan = FALSE;
 	selmark *marked = malloc(nselected * sizeof(selmark));
 
 	if (!marked) {
@@ -1818,20 +1817,11 @@ static void invertselbuf(const int pathlen)
 	for (i = 0; i < ndents; ++i) {
 		dentp = &pdents[i];
 
-		if (dentp->flags & FILE_SCANNED) {
-			if (dentp->flags & FILE_SELECTED) {
-				dentp->flags ^= FILE_SELECTED; /* Clear selection status */
-				scan = TRUE;
-			} else {
-				dentp->flags |= FILE_SELECTED;
-				alloclen += pathlen + dentp->nlen;
-			}
-		} else {
+		if (!(dentp->flags & FILE_SCANNED))
 			dentp->flags |= FILE_SCANNED;
-			scan = TRUE;
-		}
 
-		if (scan) {
+		if (dentp->flags & FILE_SELECTED) {
+			dentp->flags ^= FILE_SELECTED; /* Clear selection status */
 			len = pathlen + xstrsncpy(pbuf, dentp->name, NAME_MAX);
 			found = findinsel(findselpos, len);
 			if (found) {
@@ -1853,7 +1843,9 @@ static void invertselbuf(const int pathlen)
 				dentp->flags |= FILE_SELECTED;
 				alloclen += pathlen + dentp->nlen;
 			}
-			scan = FALSE;
+		} else {
+			dentp->flags |= FILE_SELECTED;
+			alloclen += pathlen + dentp->nlen;
 		}
 	}
 
@@ -1869,11 +1861,8 @@ static void invertselbuf(const int pathlen)
 	for (i = 1; i < nmarked; ++i) {
 		if (marked[i].startpos == marked[prev].startpos + marked[prev].len)
 			marked[prev].len += marked[i].len;
-		else {
-			++prev;
-			marked[prev].startpos = marked[i].startpos;
-			marked[prev].len = marked[i].len;
-		}
+		else
+			marked[++prev] = marked[i];
 	}
 
 	/*
