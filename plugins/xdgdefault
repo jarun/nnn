@@ -40,7 +40,8 @@ while [ -n "$dirs" ]; do
     dirs=${dirs#*:}
 done
 
-app=$(find "$@" -iname '*.desktop' -exec grep '^Name=' {} + \
+app=$(find "$@" -iname '*.desktop' -exec grep -l "MimeType=.*$ftype" {} + 2>/dev/null \
+    | xargs -I {} grep '^Name=' {} /dev/null \
     | sort -u -t ':' -k 1,1 \
     | sed -e 's;..*/\(..*desktop\):Name=\(..*\);\2:\1;' \
     | sort -t ':' -k 1,1 \
