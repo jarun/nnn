@@ -40,6 +40,8 @@ while [ -n "$dirs" ]; do
     dirs=${dirs#*:}
 done
 
+# see PR #2102
+# shellcheck disable=SC2038
 app=$(find "$@" -iname '*.desktop' -exec grep -l "MimeType=.*$ftype" {} + 2>/dev/null \
     | xargs -I {} grep '^Name=' {} /dev/null \
     | sort -u -t ':' -k 1,1 \
