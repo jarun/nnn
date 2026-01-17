@@ -188,7 +188,7 @@
 #define ISLOWER_(ch)    ((ch) >= 'a' && (ch) <= 'z')
 #define CMD_LEN_MAX     (PATH_MAX + ((NAME_MAX + 1) << 1))
 #define ALIGN_UP(x, A)  ((((x) + (A) - 1) / (A)) * (A))
-#define READLINE_MAX    256
+#define READLINE_MAX    256UL
 #define FILTER          '/'
 #define RFILTER         '\\'
 #define CASE            ':'
@@ -858,6 +858,12 @@ static haiku_nm_h haiku_hnd;
 #define ENTSORT(pdents, ndents, entrycmpfn) qsort((pdents), (ndents), sizeof(*(pdents)), (entrycmpfn))
 #endif
 
+#ifndef __GLIBC__
+#define xstrlen(s) strlen(s)
+#else
+#define xstrlen(s) ((char *)rawmemchr(s, '\0') - (s))
+#endif
+
 /* Forward declarations */
 static void redraw(char *path);
 static int spawn(char *command, char *arg1, char *arg2, char *arg3, ushort_t flag);
@@ -1002,15 +1008,6 @@ static size_t xstrsncpy(char *restrict dst, const char *restrict src, size_t n)
 	return end - dst;
 }
 
-static inline size_t xstrlen(const char *restrict s)
-{
-#ifndef __GLIBC__
-	return strlen(s); // NOLINT
-#else
-	return (char *)rawmemchr(s, '\0') - s; // NOLINT
-#endif
-}
-
 static char *xstrdup(const char *restrict s)
 {
 	size_t len = xstrlen(s) + 1;
@@ -1069,12 +1066,11 @@ static char *get_cwd_entry(const char *restrict cwdpath, char *entrypath, size_t
  * And we are NOT expecting a '/' at the end.
  * Ideally 0 < n <= xstrlen(s).
  */
+#if defined(__GLIBC__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
+#define xmemrchr(s, ch, n) memrchr(s, ch, n)
+#else
 static void *xmemrchr(uchar_t *restrict s, uchar_t ch, size_t n)
 {
-#if defined(__GLIBC__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__)
-	return memrchr(s, ch, n);
-#else
-
 	if (!s || !n)
 		return NULL;
 
@@ -1086,8 +1082,8 @@ static void *xmemrchr(uchar_t *restrict s, uchar_t ch, size_t n)
 	} while (s != ptr);
 
 	return NULL;
-#endif
 }
+#endif
 
 /* A very simplified implementation, changes path */
 static char *xdirname(char *path)
