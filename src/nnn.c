@@ -2498,15 +2498,11 @@ static int spawn(char *command, char *arg1, char *arg2, char *arg3, ushort_t fla
 	} else
 		argv[index++] = command;
 
-	if (arg1) {
-		argv[index] = arg1;
-		++index;
-	}
+	if (arg1)
+		argv[index++] = arg1;
 
-	if (arg2) {
-		argv[index] = arg2;
-		++index;
-	}
+	if (arg2)
+		argv[index++] = arg2;
 
 	if (arg3)
 		argv[index] = arg3;
@@ -4777,15 +4773,11 @@ static bool get_output(char *command, char *arg1, char *arg2, int fdout, bool pa
 	if (!cmd)
 		return ret;
 
-	if (arg1) {
-		argv[index] = arg1;
-		++index;
-	}
+	if (arg1)
+		argv[index++] = arg1;
 
-	if (arg2) {
+	if (arg2)
 		argv[index] = arg2;
-		++index;
-	}
 
 	pid = fork();
 	if (pid == 0) {
@@ -4851,7 +4843,7 @@ static bool buffer_command_output(char * const cmds[], char *arg1, char *arg2, s
 		if (arg1)
 			argv[index++] = arg1;
 		if (arg2)
-			argv[index++] = arg2;
+			argv[index] = arg2;
 
 		pid_t pid = fork();
 		if (pid == 0) {
