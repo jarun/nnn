@@ -8515,15 +8515,11 @@ nochange:
 						return EXIT_SUCCESS;
 				} while (handle_cur_move(action));
 
-				if (action == SEL_REDRAW)
-					r = TRUE;
-
+				cfg.filtermode ? presel = FILTER : statusbar(path);
 				copycurname();
 
-				if (!r) {
-					cfg.filtermode ? presel = FILTER : statusbar(path);
+				if (action != SEL_REDRAW)
 					goto nochange;
-				}
 			} else { /* 'Return/Enter' enters the plugin directory */
 				g_state.runplugin ^= 1;
 				if (!g_state.runplugin) {
