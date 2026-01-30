@@ -3328,15 +3328,14 @@ static int fill(const char *fltr, regex_t *re)
 	fltrexp_t fltrexp = { .regex = re, .str = fltr };
 #endif
 
-	for (int count = 0; count < ndents; ++count) {
-		if (filterfn(&fltrexp, pdents[count].name) == 0) {
-			if (count != --ndents) {
-				swap_ent(count, ndents);
-				--count;
-			}
+	int count = 0;
 
-			continue;
-		}
+	while (count < ndents) {
+		if (filterfn(&fltrexp, pdents[count].name) == 0) {
+			if (count != --ndents)
+				swap_ent(count, ndents);
+		} else
+			++count;
 	}
 
 	return ndents;
