@@ -5167,22 +5167,35 @@ static bool xchmod(char *pathbuf, char *dir)
 {
 	struct stat sb;
 	mode_t mode;
+	int fd;
 
 	mkpath(dir, pdents[cur].name, pathbuf);
 
-	if (lstat(pathbuf, &sb) == -1)
+#ifdef O_NOFOLLOW
+	fd = open(pathbuf, O_RDONLY | O_NOFOLLOW);
+#else
+	fd = open(pathbuf, O_RDONLY);
+#endif
+	if (fd == -1)
 		return FALSE;
+
+	if (fstat(fd, &sb) == -1) {
+		close(fd);
+		return FALSE;
+	}
 
 	mode = sb.st_mode;
 
 	/* (Un)set (S_IXUSR | S_IXGRP | S_IXOTH) */
 	(0100 & mode) ? (mode &= ~0111) : (mode |= 0111);
 
-	if (chmod(pathbuf, mode) == 0) {
+	if (fchmod(fd, mode) == 0) {
+		close(fd);
 		pdents[cur].mode = mode;
 		return TRUE;
 	}
 
+	close(fd);
 	return FALSE;
 }
 
