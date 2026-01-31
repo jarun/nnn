@@ -103,6 +103,7 @@
 #include <stddef.h>
 #include <wctype.h>
 #include <stdalign.h>
+#include <stdbool.h>
 #ifndef __USE_XOPEN_EXTENDED
 #define __USE_XOPEN_EXTENDED 1
 #endif
@@ -201,6 +202,7 @@
 #define NUL_CHAR        '\0'
 #define REGEX_MAX       48
 #define ENTRY_INCR      64 /* Number of dir 'entry' structures to allocate per shot */
+#define ENTRY_INCR_DU   1024 /* Larger increment in du mode to reduce realloc and wait-for-threads */
 #define NAMEBUF_INCR    0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
 #define DESCRIPTOR_LEN  32
 #define _ALIGNMENT      0x10 /* 16-byte alignment */
@@ -477,6 +479,7 @@ static char hostname[_POSIX_HOST_NAME_MAX + 1];
 static char *fifopath;
 #endif
 static ullong_t *ihashbmp;
+static ullong_t *dir_dispatched_bmp; /* dir inodes already dispatched (avoid double-count same subtree) */
 static struct entry *pdents;
 static blkcnt_t dir_blocks;
 static kv *bookmark;
@@ -497,14 +500,23 @@ static char curssn[NAME_MAX + 1];
 #endif
 
 /* pthread related */
-#define NUM_DU_THREADS (4) /* Can use sysconf(_SC_NPROCESSORS_ONLN) */
+#define NUM_DU_THREADS_MAX 32
 #define DU_TEST (((node->fts_info & FTS_F) && \
 		(sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino))) || node->fts_info & FTS_DP)
 
-static int threadbmp = -1; /* Has 1 in the bit position for idle threads */
+static int num_du_threads;  /* Set from sysconf(_SC_NPROCESSORS_ONLN), 2..NUM_DU_THREADS_MAX */
+static unsigned int threadbmp; /* Has 1 in the bit position for idle threads */
 static volatile int active_threads;
 static pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t du_cond = PTHREAD_COND_INITIALIZER;
+static pthread_cond_t work_cond = PTHREAD_COND_INITIALIZER;
+static volatile bool work_ready[NUM_DU_THREADS_MAX];
+static volatile bool du_shutdown;
+static pthread_t worker_tids[NUM_DU_THREADS_MAX];
+#if !defined(__GNUC__) && !defined(__clang__)
 static pthread_mutex_t hardlink_mutex = PTHREAD_MUTEX_INITIALIZER;
+#endif
+static bool first_call;
 static ullong_t *core_files;
 static blkcnt_t *core_blocks;
 static ullong_t num_files;
@@ -514,6 +526,7 @@ typedef struct {
 	int entnum;
 	ushort_t core;
 	bool mntpoint;
+	bool no_aggregate; /* same dir seen twice (e.g. symlink); fill pdents only, don't add to totals */
 } thread_data;
 
 static thread_data *core_data;
@@ -941,22 +954,40 @@ static uchar_t xchartohex(uchar_t c)
 
 /*
  * Source: https://elixir.bootlin.com/linux/latest/source/arch/alpha/include/asm/bitops.h
+ * Optimized: atomic test-and-set per word so different inodes (different words) don't contend.
  */
-static bool test_set_bit(uint_t nr)
+static inline bool test_set_bit(uint_t nr)
 {
 	nr &= HASH_BITS;
-
-	pthread_mutex_lock(&hardlink_mutex);
 	ullong_t *m = ihashbmp + (nr >> 6);
+	ullong_t bit = 1ULL << (nr & 63);
 
-	if (*m & (1 << (nr & 63))) {
+#if defined(__GNUC__) || defined(__clang__)
+	/* Relaxed ordering is sufficient: only need atomicity for this bitmap */
+	ullong_t old = __atomic_fetch_or(m, bit, __ATOMIC_RELAXED);
+	return (old & bit) == 0;
+#else
+	pthread_mutex_lock(&hardlink_mutex);
+	if (*m & bit) {
 		pthread_mutex_unlock(&hardlink_mutex);
 		return FALSE;
 	}
-
-	*m |= 1 << (nr & 63);
+	*m |= bit;
 	pthread_mutex_unlock(&hardlink_mutex);
+	return TRUE;
+#endif
+}
 
+/* Track directory (dev,ino) already dispatched; main-thread only, avoids double-counting same subtree */
+static bool test_set_bit_dir(dev_t dev, ino_t ino)
+{
+	uint_t nr = (uint_t)((ullong_t)dev ^ (ullong_t)ino) & HASH_BITS;
+	ullong_t *m = dir_dispatched_bmp + (nr >> 6);
+	ullong_t bit = 1ULL << (nr & 63);
+
+	if (*m & bit)
+		return FALSE;
+	*m |= bit;
 	return TRUE;
 }
 
@@ -6168,6 +6199,16 @@ static bool handle_cmd(enum action sel, char *path, char *newpath)
 
 static void dentfree(void)
 {
+	/* Shut down DU worker threads so they exit and we can join */
+	if (g_state.duinit) {
+		pthread_mutex_lock(&running_mutex);
+		du_shutdown = true;
+		pthread_cond_broadcast(&work_cond);
+		pthread_mutex_unlock(&running_mutex);
+		for (int i = 0; i < num_du_threads; ++i)
+			pthread_join(worker_tids[i], NULL);
+	}
+
 	free(pnamebuf);
 	free(pdents);
 	free(mark);
@@ -6178,99 +6219,150 @@ static void dentfree(void)
 	free(core_files);
 }
 
-static void *du_thread(void *p_data)
+static void *du_worker_loop(void *p_data)
 {
 	thread_data *pdata = (thread_data *)p_data;
-	char *path[2] = {pdata->path, NULL};
-	ullong_t tfiles = 0;
-	blkcnt_t tblocks = 0;
-	struct stat *sb;
-	FTS *tree = fts_open(path, FTS_PHYSICAL | FTS_XDEV | FTS_NOCHDIR, 0);
-	FTSENT *node;
+	const int core = (int)pdata->core;
+	char pathbuf[PATH_MAX];
 
-	while ((node = fts_read(tree))) {
-		if (node->fts_info & FTS_D) {
-			if (g_state.interrupt)
-				break;
-			continue;
+	for (;;) {
+		pthread_mutex_lock(&running_mutex);
+		while (!work_ready[core] && !du_shutdown)
+			pthread_cond_wait(&work_cond, &running_mutex);
+		if (du_shutdown) {
+			threadbmp |= (1U << core);
+			pthread_mutex_unlock(&running_mutex);
+			return NULL;
+		}
+		work_ready[core] = false;
+		xstrsncpy(pathbuf, pdata->path, PATH_MAX);
+		const int entnum = pdata->entnum;
+		const bool mntpoint = pdata->mntpoint;
+		const bool no_aggregate = pdata->no_aggregate;
+		pthread_mutex_unlock(&running_mutex);
+
+		/* Run FTS on this directory (same logic as former du_thread) */
+		char *path[2] = {pathbuf, NULL};
+		ullong_t tfiles = 0;
+		blkcnt_t tblocks = 0;
+		struct stat *sb;
+		FTS *tree = fts_open(path, FTS_PHYSICAL | FTS_XDEV | FTS_NOCHDIR, 0);
+		FTSENT *node;
+
+		if (tree) {
+			while ((node = fts_read(tree))) {
+				if (node->fts_info & FTS_D) {
+					if (g_state.interrupt)
+						break;
+					continue;
+				}
+
+				sb = node->fts_statp;
+
+				if (cfg.apparentsz) {
+					if (sb->st_size && DU_TEST)
+						tblocks += sb->st_size;
+				} else if (sb->st_blocks && DU_TEST)
+					tblocks += sb->st_blocks;
+
+				++tfiles;
+			}
+			fts_close(tree);
 		}
 
-		sb = node->fts_statp;
+		pthread_mutex_lock(&running_mutex);
+		if (entnum >= 0)
+			pdents[entnum].blocks = tblocks;
 
-		if (cfg.apparentsz) {
-			if (sb->st_size && DU_TEST)
-				tblocks += sb->st_size;
-		} else if (sb->st_blocks && DU_TEST)
-			tblocks += sb->st_blocks;
+		if (!no_aggregate) {
+			if (!mntpoint) {
+				core_blocks[core] += tblocks;
+				core_files[core] += tfiles;
+			} else
+				core_files[core] += 1;
+		}
 
-		++tfiles;
+		threadbmp |= (1U << core);
+		--active_threads;
+		pthread_cond_broadcast(&du_cond);
+		pthread_mutex_unlock(&running_mutex);
 	}
-
-	fts_close(tree);
-
-	if (pdata->entnum >= 0)
-		pdents[pdata->entnum].blocks = tblocks;
-
-	if (!pdata->mntpoint) {
-		core_blocks[pdata->core] += tblocks;
-		core_files[pdata->core] += tfiles;
-	} else
-		core_files[pdata->core] += 1;
-
-	pthread_mutex_lock(&running_mutex);
-	threadbmp |= (1 << pdata->core);
-	--active_threads;
-	pthread_mutex_unlock(&running_mutex);
-
+	/* not reached */
 	return NULL;
 }
 
-static void dirwalk(char *path, int entnum, bool mountpoint)
+/* Assign one subdirectory to a worker; subdirectories are scanned in parallel by the pool */
+static void dirwalk(char *path, int entnum, bool mountpoint, bool no_aggregate)
 {
-	/* Loop till any core is free */
-	while (active_threads == NUM_DU_THREADS);
-
-	if (g_state.interrupt)
-		return;
-
 	pthread_mutex_lock(&running_mutex);
-	int core = ffs(threadbmp) - 1;
+	while (active_threads == num_du_threads) {
+		pthread_cond_wait(&du_cond, &running_mutex);
+		if (g_state.interrupt) {
+			pthread_mutex_unlock(&running_mutex);
+			return;
+		}
+	}
+	if (g_state.interrupt) {
+		pthread_mutex_unlock(&running_mutex);
+		return;
+	}
 
-	threadbmp &= ~(1 << core);
+	int core = ffs((int)threadbmp) - 1;
+
+	threadbmp &= ~(1U << core);
 	++active_threads;
-	pthread_mutex_unlock(&running_mutex);
 
 	xstrsncpy(core_data[core].path, path, PATH_MAX);
 	core_data[core].entnum = entnum;
 	core_data[core].core = (ushort_t)core;
 	core_data[core].mntpoint = mountpoint;
+	core_data[core].no_aggregate = no_aggregate;
+	work_ready[core] = true;
+	pthread_cond_broadcast(&work_cond); /* wake all; only worker for this core has work */
+	pthread_mutex_unlock(&running_mutex);
 
-	pthread_t tid = 0;
-
-	pthread_create(&tid, NULL, du_thread, (void *)&(core_data[core]));
-
-	tolastln();
-	addstr(xbasename(path));
-	addstr(" [^C aborts]\n");
-	refresh();
+	if (first_call) {
+		tolastln();
+		addstr("[^C aborts]\n");
+		refresh();
+		first_call = FALSE;
+	}
 }
 
 static bool prep_threads(void)
 {
 	if (!g_state.duinit) {
-		/* drop MSB 1s */
-		threadbmp >>= (32 - NUM_DU_THREADS);
+		long n = sysconf(_SC_NPROCESSORS_ONLN);
+		num_du_threads = (n > 0 && n <= NUM_DU_THREADS_MAX) ? (int)n : 4;
+		if (num_du_threads < 2)
+			num_du_threads = 2;
+		threadbmp = (1U << num_du_threads) - 1;
+		du_shutdown = false;
+		for (int i = 0; i < num_du_threads; ++i)
+			work_ready[i] = false;
 
 		if (!core_blocks)
-			core_blocks = calloc(NUM_DU_THREADS, sizeof(blkcnt_t));
+			core_blocks = calloc((size_t)num_du_threads, sizeof(blkcnt_t));
 		if (!core_data)
-			core_data = calloc(NUM_DU_THREADS, sizeof(thread_data));
+			core_data = calloc((size_t)num_du_threads, sizeof(thread_data));
 		if (!core_files)
-			core_files = calloc(NUM_DU_THREADS, sizeof(ullong_t));
+			core_files = calloc((size_t)num_du_threads, sizeof(ullong_t));
 
 		if (!core_blocks || !core_data || !core_files) {
 			printwarn(NULL);
 			return FALSE;
+		}
+		for (int i = 0; i < num_du_threads; ++i) {
+			core_data[i].core = (ushort_t)i;
+			if (pthread_create(&worker_tids[i], NULL, du_worker_loop,
+			    (void *)&core_data[i]) != 0) {
+				du_shutdown = true;
+				pthread_cond_broadcast(&work_cond);
+				while (i--)
+					pthread_join(worker_tids[i], NULL);
+				printwarn(NULL);
+				return FALSE;
+			}
 		}
 #ifndef __APPLE__
 		/* Increase current open file descriptor limit */
@@ -6278,9 +6370,9 @@ static bool prep_threads(void)
 #endif
 		g_state.duinit = TRUE;
 	} else {
-		memset(core_blocks, 0, NUM_DU_THREADS * sizeof(blkcnt_t));
-		memset(core_data, 0, NUM_DU_THREADS * sizeof(thread_data));
-		memset(core_files, 0, NUM_DU_THREADS * sizeof(ullong_t));
+		memset(core_blocks, 0, (size_t)num_du_threads * sizeof(blkcnt_t));
+		memset(core_data, 0, (size_t)num_du_threads * sizeof(thread_data));
+		memset(core_files, 0, (size_t)num_du_threads * sizeof(ullong_t));
 	}
 	return TRUE;
 }
@@ -6313,6 +6405,7 @@ static int dentfill(char *path, struct entry **ppdents)
 	int fd = dirfd(dirp);
 
 	if (cfg.blkorder) {
+		first_call = TRUE;
 		num_files = 0;
 		dir_blocks = 0;
 		buf = g_buf;
@@ -6326,6 +6419,13 @@ static int dentfill(char *path, struct entry **ppdents)
 				goto exit;
 		} else
 			memset(ihashbmp, 0, HASH_OCTETS << 3);
+
+		if (!dir_dispatched_bmp) {
+			dir_dispatched_bmp = calloc(1, HASH_OCTETS << 3);
+			if (!dir_dispatched_bmp)
+				goto exit;
+		} else
+			memset(dir_dispatched_bmp, 0, HASH_OCTETS << 3);
 
 		if (!prep_threads())
 			goto exit;
@@ -6369,17 +6469,26 @@ static int dentfill(char *path, struct entry **ppdents)
 			if (fstatat(fd, namep, &sb, AT_SYMLINK_NOFOLLOW) == -1)
 				continue;
 
-			if (S_ISDIR(sb.st_mode)) {
-				if (sb_path.st_dev == sb.st_dev) { // NOLINT
+			/* Use resolved (dev,ino) for duplicate check (symlink-to-dir vs real dir) */
+			struct stat sb_dir_h;
+			if (S_ISLNK(sb.st_mode)) {
+				sb_dir_h.st_mode = 0;
+				fstatat(fd, namep, &sb_dir_h, 0);
+			} else
+				sb_dir_h = sb;
+
+			if (S_ISDIR(sb_dir_h.st_mode)) {
+				if (sb_path.st_dev == sb_dir_h.st_dev) { // NOLINT
 					mkpath(path, namep, buf); // NOLINT
-					dirwalk(buf, -1, FALSE);
+					bool first = test_set_bit_dir(sb_dir_h.st_dev, sb_dir_h.st_ino);
+					dirwalk(buf, -1, FALSE, !first);
 
 					if (g_state.interrupt)
 						goto exit;
 				}
 			} else {
 				/* Do not recount hard links */
-				if (sb.st_nlink <= 1 || test_set_bit((uint_t)sb.st_ino))
+				if (sb.st_size && S_ISREG(sb.st_mode) && (sb.st_nlink <= 1 || test_set_bit((uint_t)sb.st_ino)))
 					dir_blocks += (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				++num_files;
 			}
@@ -6403,10 +6512,14 @@ static int dentfill(char *path, struct entry **ppdents)
 		}
 
 		if (ndents == total_dents) {
-			if (cfg.blkorder)
-				while (active_threads);
+			if (cfg.blkorder) {
+				pthread_mutex_lock(&running_mutex);
+				while (active_threads)
+					pthread_cond_wait(&du_cond, &running_mutex);
+				pthread_mutex_unlock(&running_mutex);
+			}
 
-			total_dents += ENTRY_INCR;
+			total_dents += cfg.blkorder ? ENTRY_INCR_DU : ENTRY_INCR;
 			*ppdents = xrealloc(*ppdents, total_dents * sizeof(**ppdents));
 			if (!*ppdents) {
 				free(pnamebuf);
@@ -6500,18 +6613,27 @@ static int dentfill(char *path, struct entry **ppdents)
 		}
 
 		if (cfg.blkorder) {
-			if (S_ISDIR(sb.st_mode)) {
+			/* Use resolved (dev,ino) for duplicate check so symlink-to-dir and real dir count once when at / */
+			struct stat sb_dir;
+			if (S_ISLNK(sb.st_mode)) {
+				sb_dir.st_mode = 0;
+				fstatat(fd, namep, &sb_dir, 0);
+			} else
+				sb_dir = sb;
+
+			if (S_ISDIR(sb_dir.st_mode)) {
 				mkpath(path, namep, buf); // NOLINT
 
-				/* Need to show the disk usage of this dir */
-				dirwalk(buf, ndents, (sb_path.st_dev != sb.st_dev)); // NOLINT
+				/* Need to show the disk usage of this dir; skip adding to totals if same dir already dispatched (e.g. symlink) */
+				bool first = test_set_bit_dir(sb_dir.st_dev, sb_dir.st_ino);
+				dirwalk(buf, ndents, (sb_path.st_dev != sb_dir.st_dev), !first); // NOLINT
 
 				if (g_state.interrupt)
 					goto exit;
 			} else {
 				dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				/* Do not recount hard links */
-				if (sb.st_nlink <= 1 || test_set_bit((uint_t)sb.st_ino))
+				if (sb.st_size && S_ISREG(sb.st_mode) && (sb.st_nlink <= 1 || test_set_bit((uint_t)sb.st_ino)))
 					dir_blocks += dentp->blocks;
 				++num_files;
 			}
@@ -6538,10 +6660,13 @@ static int dentfill(char *path, struct entry **ppdents)
 
 exit:
 	if (g_state.duinit && cfg.blkorder) {
-		while (active_threads);
+		pthread_mutex_lock(&running_mutex);
+		while (active_threads)
+			pthread_cond_wait(&du_cond, &running_mutex);
+		pthread_mutex_unlock(&running_mutex);
 
 		attroff(COLOR_PAIR(cfg.curctx + 1));
-		for (int i = 0; i < NUM_DU_THREADS; ++i) {
+		for (int i = 0; i < num_du_threads; ++i) {
 			num_files += core_files[i];
 			dir_blocks += core_blocks[i];
 		}
@@ -9105,6 +9230,7 @@ static void cleanup(void)
 	free(pluginstr);
 	free(listroot);
 	free(ihashbmp);
+	free(dir_dispatched_bmp);
 	free(bookmark);
 	free(plug);
 	if (lastcmdpos != INVALID_POS)
