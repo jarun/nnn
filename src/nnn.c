@@ -7376,13 +7376,13 @@ static bool browse(char *ipath, int pkey)
 
 	newpath[0] = runfile[0] = '\0';
 
-	presel = pkey ? ((pkey == CREATE_NEW_KEY) ? 'n' : ';') : ((cfg.filtermode
+	presel = pkey ? ((pkey == CREATE_NEW_KEY) ? 'n' : ';') : (((cfg.filtermode
 #ifndef NOSSN
 			|| (curssn[0] && (g_ctx[cfg.curctx].c_fltr[0] == FILTER
 				|| g_ctx[cfg.curctx].c_fltr[0] == RFILTER)
 				&& g_ctx[cfg.curctx].c_fltr[1])
 #endif
-			) ? FILTER : 0);
+			) && !cfg.blkorder) ? FILTER : 0);
 
 	pdents = xrealloc(pdents, total_dents * sizeof(struct entry));
 	if (!pdents)
