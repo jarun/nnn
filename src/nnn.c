@@ -6219,6 +6219,111 @@ static void dentfree(void)
 	free(core_files);
 }
 
+static inline bool selforparent(const char *path);
+
+/* Walk a directory tree using readdir to reduce FTS overhead */
+static void du_walk_dir(const char *root, ullong_t *tfiles, blkcnt_t *tblocks)
+{
+	struct stat sb_root;
+	if (fstatat(AT_FDCWD, root, &sb_root, AT_SYMLINK_NOFOLLOW) == -1)
+		return;
+	if (!S_ISDIR(sb_root.st_mode))
+		return;
+
+	const dev_t root_dev = sb_root.st_dev;
+
+	/* Count root dir itself (gdu-style: constant dir size) */
+	const blkcnt_t dir_blocks_const = (blkcnt_t)((4096 + ((1U << blk_shift) - 1U)) >> blk_shift);
+	if (cfg.apparentsz)
+		*tblocks += 4096;
+	else
+		*tblocks += dir_blocks_const;
+	++(*tfiles);
+
+	size_t cap = 64;
+	size_t len = 0;
+	char **stack = malloc(cap * sizeof(char *));
+	if (!stack)
+		return;
+	stack[len++] = xstrdup(root);
+
+	while (len && !g_state.interrupt) {
+		char *dirpath = stack[--len];
+		DIR *dirp = opendir(dirpath);
+		if (!dirp) {
+			free(dirpath);
+			continue;
+		}
+
+		const int dfd = dirfd(dirp);
+		struct dirent *dp;
+		while ((dp = readdir(dirp)) && !g_state.interrupt) {
+			if (selforparent(dp->d_name))
+				continue;
+
+			const unsigned char dtype = dp->d_type;
+			bool is_dir = (dtype == DT_DIR);
+			bool is_reg = (dtype == DT_REG);
+
+			struct stat sb;
+			if (dtype == DT_UNKNOWN) {
+				if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
+					continue;
+				is_dir = S_ISDIR(sb.st_mode);
+				is_reg = S_ISREG(sb.st_mode);
+			}
+
+			/* Count blocks for regular files; dirs use constant size */
+			if (is_dir) {
+				if (cfg.apparentsz)
+					*tblocks += 4096;
+				else
+					*tblocks += dir_blocks_const;
+			} else if (is_reg) {
+				if (dtype != DT_UNKNOWN && fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
+					continue;
+				/* Do not recount hard links */
+				if (sb.st_size && (sb.st_nlink <= 1 || test_set_bit((uint_t)sb.st_ino))) {
+					if (cfg.apparentsz)
+						*tblocks += sb.st_size;
+					else if (sb.st_blocks)
+						*tblocks += sb.st_blocks;
+				}
+			}
+
+			++(*tfiles);
+
+			/* Recurse into directories on same device only */
+			if (is_dir) {
+				/* Need to stat to get device for xdev check */
+				if (dtype == DT_DIR && fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
+					continue;
+				if (sb.st_dev == root_dev) {
+					if (len == cap) {
+						cap <<= 1;
+						char **tmp = realloc(stack, cap * sizeof(char *));
+						if (!tmp)
+							break;
+						stack = tmp;
+					}
+					char childbuf[PATH_MAX];
+					mkpath(dirpath, dp->d_name, childbuf);
+					char *child = xstrdup(childbuf);
+					if (child)
+						stack[len++] = child;
+				}
+			}
+		}
+
+		closedir(dirp);
+		free(dirpath);
+	}
+
+	while (len)
+		free(stack[--len]);
+	free(stack);
+}
+
 static void *du_worker_loop(void *p_data)
 {
 	thread_data *pdata = (thread_data *)p_data;
@@ -6241,37 +6346,11 @@ static void *du_worker_loop(void *p_data)
 		const bool no_aggregate = pdata->no_aggregate;
 		pthread_mutex_unlock(&running_mutex);
 
-		/* Run FTS on this directory (same logic as former du_thread) */
-		char *path[2] = {pathbuf, NULL};
 		ullong_t tfiles = 0;
 		blkcnt_t tblocks = 0;
-		struct stat *sb;
-		FTS *tree = fts_open(path, FTS_PHYSICAL | FTS_XDEV | FTS_NOCHDIR, 0);
-		FTSENT *node;
+		du_walk_dir(pathbuf, &tfiles, &tblocks);
 
-		if (tree) {
-			while ((node = fts_read(tree))) {
-				if (node->fts_info & FTS_D) {
-					if (g_state.interrupt)
-						break;
-					continue;
-				}
-
-				sb = node->fts_statp;
-
-				if (cfg.apparentsz) {
-					if (sb->st_size && DU_TEST)
-						tblocks += sb->st_size;
-				} else if (sb->st_blocks && DU_TEST)
-					tblocks += sb->st_blocks;
-
-				/* Count files and directories (via FTS_DP) */
-				++tfiles;
-			}
-			fts_close(tree);
-		}
-
-		pthread_mutex_lock(&running_mutex);
+		/* Update results with minimal lock time */
 		if (entnum >= 0)
 			pdents[entnum].blocks = tblocks;
 
@@ -6283,9 +6362,10 @@ static void *du_worker_loop(void *p_data)
 				core_files[core] += 1;
 		}
 
+		pthread_mutex_lock(&running_mutex);
 		threadbmp |= (1U << core);
 		--active_threads;
-		pthread_cond_broadcast(&du_cond);
+		pthread_cond_signal(&du_cond); /* signal instead of broadcast for better performance */
 		pthread_mutex_unlock(&running_mutex);
 	}
 	/* not reached */
@@ -6334,7 +6414,8 @@ static bool prep_threads(void)
 {
 	if (!g_state.duinit) {
 		long n = sysconf(_SC_NPROCESSORS_ONLN);
-		num_du_threads = (n > 0 && n <= NUM_DU_THREADS_MAX) ? (int)n : 4;
+		/* Use 3x CPU cores like gdu for better parallelism */
+		num_du_threads = (n > 0 && (n * 3) <= NUM_DU_THREADS_MAX) ? (int)(n * 3) : ((n > 0 && n <= NUM_DU_THREADS_MAX) ? (int)n : 4);
 		if (num_du_threads < 2)
 			num_du_threads = 2;
 		threadbmp = (1U << num_du_threads) - 1;
