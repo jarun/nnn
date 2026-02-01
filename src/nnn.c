@@ -501,8 +501,6 @@ static char curssn[NAME_MAX + 1];
 
 /* pthread related */
 #define NUM_DU_THREADS_MAX 32
-#define DU_TEST (((node->fts_info & FTS_F) && \
-		(sb->st_nlink <= 1 || test_set_bit((uint_t)sb->st_ino))) || node->fts_info & FTS_DP)
 
 static int num_du_threads;  /* Set from sysconf(_SC_NPROCESSORS_ONLN), 2..NUM_DU_THREADS_MAX */
 static unsigned int threadbmp; /* Has 1 in the bit position for idle threads */
@@ -6264,11 +6262,13 @@ static void du_walk_dir(const char *root, ullong_t *tfiles, blkcnt_t *tblocks)
 			const unsigned char dtype = dp->d_type;
 			bool is_dir = (dtype == DT_DIR);
 			bool is_reg = (dtype == DT_REG);
+			bool sb_valid = false;
 
 			struct stat sb;
 			if (dtype == DT_UNKNOWN) {
 				if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
 					continue;
+				sb_valid = true;
 				is_dir = S_ISDIR(sb.st_mode);
 				is_reg = S_ISREG(sb.st_mode);
 			}
@@ -6280,8 +6280,12 @@ static void du_walk_dir(const char *root, ullong_t *tfiles, blkcnt_t *tblocks)
 				else
 					*tblocks += dir_blocks_const;
 			} else if (is_reg) {
-				if (dtype != DT_UNKNOWN && fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
-					continue;
+				/* Stat if we haven't already */
+				if (!sb_valid) {
+					if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
+						continue;
+					sb_valid = true;
+				}
 				/* Do not recount hard links */
 				if (sb.st_size && (sb.st_nlink <= 1 || test_set_bit((uint_t)sb.st_ino))) {
 					if (cfg.apparentsz)
@@ -6295,9 +6299,11 @@ static void du_walk_dir(const char *root, ullong_t *tfiles, blkcnt_t *tblocks)
 
 			/* Recurse into directories on same device only */
 			if (is_dir) {
-				/* Need to stat to get device for xdev check */
-				if (dtype == DT_DIR && fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
-					continue;
+				/* Stat if we haven't already to get device for xdev check */
+				if (!sb_valid) {
+					if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
+						continue;
+				}
 				if (sb.st_dev == root_dev) {
 					if (len == cap) {
 						cap <<= 1;
