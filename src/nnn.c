@@ -7478,6 +7478,9 @@ begin:
 			statusbar(path);
 		}
 
+		/* Uncomment for disk usage calculation performance profiling e.g. to run 'time nnn -T d /' and exit */
+		// return EXIT_SUCCESS;
+
 nochange:
 		/* Exit if parent has exited */
 		if (getppid() == 1)
