@@ -6265,6 +6265,7 @@ static void *du_worker_loop(void *p_data)
 				} else if (sb->st_blocks && DU_TEST)
 					tblocks += sb->st_blocks;
 
+				/* Count files and directories (via FTS_DP) */
 				++tfiles;
 			}
 			fts_close(tree);
@@ -6486,6 +6487,7 @@ static int dentfill(char *path, struct entry **ppdents)
 					if (g_state.interrupt)
 						goto exit;
 				}
+				++num_files; /* Count directories */
 			} else {
 				/* Do not recount hard links */
 				if (sb.st_size && S_ISREG(sb.st_mode) && (sb.st_nlink <= 1 || test_set_bit((uint_t)sb.st_ino)))
@@ -6630,6 +6632,7 @@ static int dentfill(char *path, struct entry **ppdents)
 
 				if (g_state.interrupt)
 					goto exit;
+				++num_files; /* Count directories */
 			} else {
 				dentp->blocks = (cfg.apparentsz ? sb.st_size : sb.st_blocks);
 				/* Do not recount hard links */
