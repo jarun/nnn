@@ -370,7 +370,8 @@ typedef struct {
 	uint_t autoenter  : 1;  /* auto-enter dir in type-to-nav mode */
 	uint_t reserved2  : 1;
 	uint_t useeditor  : 1;  /* Use VISUAL to open text files */
-	uint_t reserved3  : 3;
+	uint_t reserved3  : 2;
+	uint_t fuzzy      : 1;  /* Use fuzzy filters */
 	uint_t regex      : 1;  /* Use regex filters */
 	uint_t x11        : 1;  /* Copy to system clipboard, show notis, xterm title */
 	uint_t timetype   : 2;  /* Time sort type (0: access, 1: change, 2: modification) */
@@ -3075,6 +3076,53 @@ static int setfilter(regex_t *regex, const char *filter)
 }
 #endif
 
+/*
+ * Fuzzy match: check if all characters in filter appear in order in fname
+ * Case-sensitivity is controlled by fnstrstr function pointer
+ * Supports wide characters and Unicode
+ */
+static int fuzzy_match(const char *filter, const char *fname)
+{
+	wchar_t filter_wcs[NAME_MAX], fname_wcs[NAME_MAX];
+	wchar_t *f, *n;
+	size_t filter_len, fname_len;
+	bool case_insensitive = (fnstrstr == &strcasestr);
+
+	/* Convert multi-byte strings to wide character strings */
+	filter_len = mbstowcs(filter_wcs, filter, NAME_MAX - 1);
+	if (filter_len == (size_t)-1)
+		return 0;
+	filter_wcs[filter_len] = L'\0';
+
+	if (!filter_len)
+		return 1;
+
+	fname_len = mbstowcs(fname_wcs, fname, NAME_MAX - 1);
+	if (fname_len == (size_t)-1)
+		return 0;
+	fname_wcs[fname_len] = L'\0';
+
+	/* Convert to lowercase if case-insensitive matching */
+	if (case_insensitive) {
+		for (size_t i = 0; i < filter_len; ++i)
+			filter_wcs[i] = towlower(filter_wcs[i]);
+		for (size_t i = 0; i < fname_len; ++i)
+			fname_wcs[i] = towlower(fname_wcs[i]);
+	}
+
+	f = filter_wcs;
+	n = fname_wcs;
+
+	/* Match characters in order */
+	while (*f && *n) {
+		if (*f == *n)
+			++f;
+		++n;
+	}
+
+	return !*f;
+}
+
 static int visible_re(const fltrexp_t *fltrexp, const char *fname)
 {
 #ifdef PCRE2
@@ -3095,6 +3143,11 @@ static int visible_re(const fltrexp_t *fltrexp, const char *fname)
 static int visible_str(const fltrexp_t *fltrexp, const char *fname)
 {
 	return fnstrstr(fname, fltrexp->str) != NULL;
+}
+
+static int visible_fuzzy(const fltrexp_t *fltrexp, const char *fname)
+{
+	return fuzzy_match(fltrexp->str, fname);
 }
 
 static int (*filterfn)(const fltrexp_t *fltr, const char *fname) = &visible_str;
@@ -3344,9 +3397,11 @@ static void showfilterinfo(void)
 
 	if (cfg.fileinfo && ndents && get_output("file", "-b", pdents[cur].name, -1, FALSE))
 		mvaddstr(xlines - 2, 2, g_buf);
-	else
+	else {
+		const char *mode = cfg.regex ? "reg" : (cfg.fuzzy ? "fuzzy" : "str");
 		snprintf(info + i, REGEX_MAX - i - 1, "  %s [/], %s [:]",
-			 (cfg.regex ? "reg" : "str"), ((fnstrstr == &strcasestr) ? "ic" : "noic"));
+			 mode, ((fnstrstr == &strcasestr) ? "ic" : "noic"));
+	}
 
 	mvaddstr(xlines - 2, xcols - xstrlen(info), info);
 }
@@ -3582,12 +3637,26 @@ static int filterentries(char *path, char *lastname)
 				continue;
 			}
 
-			/* Toggle string or regex filter */
+			/* Toggle string/fuzzy/regex filter */
 			if (*ch == FILTER) {
-				ln[0] = (ln[0] == FILTER) ? RFILTER : FILTER;
+				if (cfg.regex) {
+					/* regex -> string */
+					ln[0] = FILTER;
+					cfg.regex = 0;
+					filterfn = &visible_str;
+				} else if (!cfg.fuzzy) {
+					/* string -> fuzzy */
+					ln[0] = FILTER;
+					cfg.fuzzy = 1;
+					filterfn = &visible_fuzzy;
+				} else {
+					/* fuzzy -> regex */
+					ln[0] = RFILTER;
+					cfg.regex = 1;
+					cfg.fuzzy = 0;
+					filterfn = &visible_re;
+				}
 				wln[0] = (uchar_t)ln[0];
-				cfg.regex ^= 1;
-				filterfn = cfg.regex ? &visible_re : &visible_str;
 				showfilter(ln);
 				continue;
 			}
@@ -4525,7 +4594,7 @@ static void setcfg(settings newcfg)
 	/* Synchronize the global function pointers to match the new cfg. */
 	entrycmpfn = cfg.reverse ? &reventrycmp : &entrycmp;
 	namecmpfn = cfg.version ? &xstrverscasecmp : &xstricmp;
-	filterfn = cfg.regex ? &visible_re : &visible_str;
+	filterfn = cfg.regex ? &visible_re : (cfg.fuzzy ? &visible_fuzzy : &visible_str);
 }
 
 static void savecurctx(char *path, char *curname, int nextctx)
@@ -4685,7 +4754,7 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 	*lastname = g_ctx[cfg.curctx].c_name;
 	/* Set correct sort and filter options */
 	set_sort_flags('\0');
-	filterfn = cfg.regex ? &visible_re : &visible_str;
+	filterfn = cfg.regex ? &visible_re : (cfg.fuzzy ? &visible_fuzzy : &visible_str);
 	xstrsncpy(curssn, sname ? sname : "@", NAME_MAX);
 	status = TRUE;
 
@@ -9283,6 +9352,7 @@ static void usage(void)
 #ifndef NOX11
 		" -x      notis, selection sync, xterm title\n"
 #endif
+		" -z      in order fuzzy filters\n"
 		" -0      null separator in picker mode\n"
 		" -h      show help\n\n"
 		"v%s\n%s\n", __func__, VERSION, GENERAL_INFO);
@@ -9442,7 +9512,7 @@ int main(int argc, char *argv[])
 
 	while ((opt = (env_opts_id > 0
 		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVx0h"))) != -1) {
+		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVxz0h"))) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -9491,6 +9561,8 @@ int main(int argc, char *argv[])
 			break;
 #endif
 		case 'g':
+			if (cfg.fuzzy)
+				return EXIT_FAILURE;
 			cfg.regex = 1;
 			filterfn = &visible_re;
 			break;
@@ -9589,6 +9661,12 @@ int main(int argc, char *argv[])
 			return EXIT_SUCCESS;
 		case 'x':
 			cfg.x11 = 1;
+			break;
+		case 'z':
+			if (cfg.regex)
+				return EXIT_FAILURE;
+			cfg.fuzzy = 1;
+			filterfn = &visible_fuzzy;
 			break;
 		case '0':
 			sepnul = TRUE;

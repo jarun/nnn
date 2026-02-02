@@ -6,7 +6,7 @@
 .Nd The unorthodox terminal file manager.
 .Sh SYNOPSIS
 .Nm
-.Op Ar -aAcCdDeEfgHJKnQrRSuUVxh
+.Op Ar -aAcCdDeEfgHJKnQrRSuUVxz0h
 .Op Ar -b key
 .Op Ar -F val
 .Op Ar -l val
@@ -164,6 +164,9 @@ supports the following options:
         show notifications on selection cp, mv, rm completion (requires the \fB.ntfy\fR plugin)
         copy path to system clipboard on selection (requires the \fB.cbcp\fR plugin)
         show xterm title (if non-picker mode)
+.Pp
+.Fl z
+        use fuzzy filters (fuzzy match: all characters in filter appear in order)
 .Pp
 .Fl 0
         use null separator (instead of newline) to separate file paths in picker mode outout
