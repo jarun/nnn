@@ -6303,6 +6303,15 @@ static bool du_queue_task(const char *path, du_group *group, bool count_root, bo
 	return true;
 }
 
+/* Add blocks from stat to total */
+static inline void add_blocks(blkcnt_t *tblocks, const struct stat *sb)
+{
+	if (cfg.apparentsz)
+		*tblocks += sb->st_size;
+	else if (sb->st_blocks)
+		*tblocks += sb->st_blocks;
+}
+
 static void du_walk_dir(const char *root, du_group *group, bool count_root, ullong_t *tfiles, blkcnt_t *tblocks)
 {
 	struct stat sb_root;
@@ -6315,10 +6324,7 @@ static void du_walk_dir(const char *root, du_group *group, bool count_root, ullo
 
 	/* Count root dir itself */
 	if (count_root) {
-		if (cfg.apparentsz)
-			*tblocks += sb_root.st_size;
-		else if (sb_root.st_blocks)
-			*tblocks += sb_root.st_blocks;
+		add_blocks(tblocks, &sb_root);
 		++(*tfiles);
 	}
 
@@ -6354,10 +6360,7 @@ static void du_walk_dir(const char *root, du_group *group, bool count_root, ullo
 					continue;
 				sb_valid = true;
 			}
-			if (cfg.apparentsz)
-				*tblocks += sb.st_size;
-			else if (sb.st_blocks)
-				*tblocks += sb.st_blocks;
+			add_blocks(tblocks, &sb);
 		} else if (is_reg) {
 			/* Stat if we haven't already */
 			if (!sb_valid) {
@@ -6366,12 +6369,8 @@ static void du_walk_dir(const char *root, du_group *group, bool count_root, ullo
 				sb_valid = true;
 			}
 			/* Do not recount hard links */
-			if (sb.st_size && (sb.st_nlink <= 1 || test_set_bit((uint_t)sb.st_ino))) {
-				if (cfg.apparentsz)
-					*tblocks += sb.st_size;
-				else if (sb.st_blocks)
-					*tblocks += sb.st_blocks;
-			}
+			if (sb.st_size && (sb.st_nlink <= 1 || test_set_bit((uint_t)sb.st_ino)))
+				add_blocks(tblocks, &sb);
 		}
 
 		++(*tfiles);
