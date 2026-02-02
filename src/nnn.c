@@ -203,6 +203,7 @@
 #define REGEX_MAX       48
 #define ENTRY_INCR      64 /* Number of dir 'entry' structures to allocate per shot */
 #define ENTRY_INCR_DU   1024 /* Larger increment in du mode to reduce realloc and wait-for-threads */
+#define TASK_CAP_DU     256  /* Initial number of tasks for disk usage */
 #define NAMEBUF_INCR    0x800 /* 64 dir entries at once, avg. 32 chars per file name = 64*32B = 2KB */
 #define DESCRIPTOR_LEN  32
 #define _ALIGNMENT      0x10 /* 16-byte alignment */
@@ -503,9 +504,9 @@ static char curssn[NAME_MAX + 1];
 #define NUM_DU_THREADS_MAX 32
 
 static int num_du_threads;  /* Set from sysconf(_SC_NPROCESSORS_ONLN), 2..NUM_DU_THREADS_MAX */
-static unsigned int threadbmp; /* Has 1 in the bit position for idle threads */
 static volatile int active_threads;
 static pthread_mutex_t running_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t du_count_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t du_cond = PTHREAD_COND_INITIALIZER;
 static pthread_cond_t work_cond = PTHREAD_COND_INITIALIZER;
 static volatile bool work_ready[NUM_DU_THREADS_MAX];
@@ -518,6 +519,26 @@ static bool first_call;
 static ullong_t *core_files;
 static blkcnt_t *core_blocks;
 static ullong_t num_files;
+
+typedef struct {
+	blkcnt_t blocks;
+	ullong_t files;
+	size_t pending;
+	int entnum;
+	bool mntpoint;
+	bool no_aggregate;
+} du_group;
+
+typedef struct {
+	char *path;
+	du_group *group;
+	bool count_root;
+} du_task;
+
+static du_task *du_tasks;
+static size_t du_task_len;
+static size_t du_task_cap;
+static size_t du_tasks_pending;
 
 typedef struct {
 	char path[PATH_MAX];
@@ -875,7 +896,7 @@ static haiku_nm_h haiku_hnd;
 #define xstrlen(s) ((char *)rawmemchr(s, '\0') - (s))
 #endif
 
-/* Forward declarations */
+/* Function forward declarations */
 static void redraw(char *path);
 static int spawn(char *command, char *arg1, char *arg2, char *arg3, ushort_t flag);
 static void move_cursor(int target, int ignore_scrolloff);
@@ -886,6 +907,8 @@ static bool get_output(char *command, char *arg1, char *arg2, int fdout, bool pa
 #ifndef NOFIFO
 static void notify_fifo(bool force);
 #endif
+static inline bool selforparent(const char *path);
+static void dirwalk(char *path, int entnum, bool mountpoint, bool no_aggregate);
 
 /* Functions */
 
@@ -6201,6 +6224,10 @@ static void dentfree(void)
 	if (g_state.duinit) {
 		pthread_mutex_lock(&running_mutex);
 		du_shutdown = true;
+		for (size_t i = 0; i < du_task_len; ++i)
+			free(du_tasks[i].path);
+		du_task_len = 0;
+		du_tasks_pending = 0;
 		pthread_cond_broadcast(&work_cond);
 		pthread_mutex_unlock(&running_mutex);
 		for (int i = 0; i < num_du_threads; ++i)
@@ -6215,12 +6242,68 @@ static void dentfree(void)
 	free(core_blocks);
 	free(core_data);
 	free(core_files);
+	free(du_tasks);
 }
 
-static inline bool selforparent(const char *path);
-
 /* Walk a directory tree using readdir to reduce FTS overhead */
-static void du_walk_dir(const char *root, ullong_t *tfiles, blkcnt_t *tblocks)
+static bool du_queue_task(const char *path, du_group *group, bool count_root, bool inc_pending)
+{
+	if (inc_pending) {
+		pthread_mutex_lock(&du_count_mutex);
+		++group->pending;
+		pthread_mutex_unlock(&du_count_mutex);
+	}
+
+	pthread_mutex_lock(&running_mutex);
+	if (g_state.interrupt) {
+		pthread_mutex_unlock(&running_mutex);
+		if (inc_pending) {
+			pthread_mutex_lock(&du_count_mutex);
+			--group->pending;
+			pthread_mutex_unlock(&du_count_mutex);
+		}
+		return false;
+	}
+
+	if (du_task_len == du_task_cap) {
+		size_t newcap = du_task_cap ? (du_task_cap << 1) : TASK_CAP_DU;
+		du_task *tmp = realloc(du_tasks, newcap * sizeof(*du_tasks));
+		if (!tmp) {
+			pthread_mutex_unlock(&running_mutex);
+			if (inc_pending) {
+				pthread_mutex_lock(&du_count_mutex);
+				--group->pending;
+				pthread_mutex_unlock(&du_count_mutex);
+			}
+			return false;
+		}
+		du_tasks = tmp;
+		du_task_cap = newcap;
+	}
+
+	du_tasks[du_task_len++] = (du_task){
+		.path = xstrdup(path),
+		.group = group,
+		.count_root = count_root,
+	};
+	if (!du_tasks[du_task_len - 1].path) {
+		--du_task_len;
+		pthread_mutex_unlock(&running_mutex);
+		if (inc_pending) {
+			pthread_mutex_lock(&du_count_mutex);
+			--group->pending;
+			pthread_mutex_unlock(&du_count_mutex);
+		}
+		return false;
+	}
+	++du_tasks_pending;
+	pthread_cond_signal(&work_cond);
+	pthread_mutex_unlock(&running_mutex);
+
+	return true;
+}
+
+static void du_walk_dir(const char *root, du_group *group, bool count_root, ullong_t *tfiles, blkcnt_t *tblocks)
 {
 	struct stat sb_root;
 	if (fstatat(AT_FDCWD, root, &sb_root, AT_SYMLINK_NOFOLLOW) == -1)
@@ -6231,151 +6314,147 @@ static void du_walk_dir(const char *root, ullong_t *tfiles, blkcnt_t *tblocks)
 	const dev_t root_dev = sb_root.st_dev;
 
 	/* Count root dir itself */
-	if (cfg.apparentsz)
-		*tblocks += sb_root.st_size;
-	else if (sb_root.st_blocks)
-		*tblocks += sb_root.st_blocks;
-	++(*tfiles);
+	if (count_root) {
+		if (cfg.apparentsz)
+			*tblocks += sb_root.st_size;
+		else if (sb_root.st_blocks)
+			*tblocks += sb_root.st_blocks;
+		++(*tfiles);
+	}
 
-	size_t cap = 64;
-	size_t len = 0;
-	char **stack = malloc(cap * sizeof(char *));
-	if (!stack)
+	DIR *dirp = opendir(root);
+	if (!dirp)
 		return;
-	stack[len++] = xstrdup(root);
 
-	while (len && !g_state.interrupt) {
-		char *dirpath = stack[--len];
-		DIR *dirp = opendir(dirpath);
-		if (!dirp) {
-			free(dirpath);
+	const int dfd = dirfd(dirp);
+	struct dirent *dp;
+	while ((dp = readdir(dirp)) && !g_state.interrupt) {
+		if (selforparent(dp->d_name))
 			continue;
+
+		const unsigned char dtype = dp->d_type;
+		bool is_dir = (dtype == DT_DIR);
+		bool is_reg = (dtype == DT_REG);
+		bool sb_valid = false;
+
+		struct stat sb;
+		if (dtype == DT_UNKNOWN) {
+			if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
+				continue;
+			sb_valid = true;
+			is_dir = S_ISDIR(sb.st_mode);
+			is_reg = S_ISREG(sb.st_mode);
 		}
 
-		const int dfd = dirfd(dirp);
-		struct dirent *dp;
-		while ((dp = readdir(dirp)) && !g_state.interrupt) {
-			if (selforparent(dp->d_name))
-				continue;
-
-			const unsigned char dtype = dp->d_type;
-			bool is_dir = (dtype == DT_DIR);
-			bool is_reg = (dtype == DT_REG);
-			bool sb_valid = false;
-
-			struct stat sb;
-			if (dtype == DT_UNKNOWN) {
+		/* Count blocks for directories and regular files */
+		if (is_dir) {
+			/* Stat if we haven't already */
+			if (!sb_valid) {
 				if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
 					continue;
 				sb_valid = true;
-				is_dir = S_ISDIR(sb.st_mode);
-				is_reg = S_ISREG(sb.st_mode);
 			}
-
-			/* Count blocks for directories and regular files */
-			if (is_dir) {
-				/* Stat if we haven't already */
-				if (!sb_valid) {
-					if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
-						continue;
-					sb_valid = true;
-				}
+			if (cfg.apparentsz)
+				*tblocks += sb.st_size;
+			else if (sb.st_blocks)
+				*tblocks += sb.st_blocks;
+		} else if (is_reg) {
+			/* Stat if we haven't already */
+			if (!sb_valid) {
+				if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
+					continue;
+				sb_valid = true;
+			}
+			/* Do not recount hard links */
+			if (sb.st_size && (sb.st_nlink <= 1 || test_set_bit((uint_t)sb.st_ino))) {
 				if (cfg.apparentsz)
 					*tblocks += sb.st_size;
 				else if (sb.st_blocks)
 					*tblocks += sb.st_blocks;
-			} else if (is_reg) {
-				/* Stat if we haven't already */
-				if (!sb_valid) {
-					if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
-						continue;
-					sb_valid = true;
-				}
-				/* Do not recount hard links */
-				if (sb.st_size && (sb.st_nlink <= 1 || test_set_bit((uint_t)sb.st_ino))) {
-					if (cfg.apparentsz)
-						*tblocks += sb.st_size;
-					else if (sb.st_blocks)
-						*tblocks += sb.st_blocks;
-				}
-			}
-
-			++(*tfiles);
-
-			/* Recurse into directories on same device only */
-			if (is_dir) {
-				/* Stat if we haven't already to get device for xdev check */
-				if (!sb_valid) {
-					if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
-						continue;
-				}
-				if (sb.st_dev == root_dev) {
-					if (len == cap) {
-						cap <<= 1;
-						char **tmp = realloc(stack, cap * sizeof(char *));
-						if (!tmp)
-							break;
-						stack = tmp;
-					}
-					char childbuf[PATH_MAX];
-					mkpath(dirpath, dp->d_name, childbuf);
-					char *child = xstrdup(childbuf);
-					if (child)
-						stack[len++] = child;
-				}
 			}
 		}
 
-		closedir(dirp);
-		free(dirpath);
+		++(*tfiles);
+
+		/* Add subdirectories to task queue for worker threads */
+		if (is_dir) {
+			/* Stat if we haven't already to get device for xdev check */
+			if (!sb_valid) {
+				if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
+					continue;
+			}
+			if (sb.st_dev == root_dev) {
+				char childbuf[PATH_MAX];
+				mkpath(root, dp->d_name, childbuf);
+				du_queue_task(childbuf, group, false, true);
+			}
+		}
 	}
 
-	while (len)
-		free(stack[--len]);
-	free(stack);
+	closedir(dirp);
 }
 
 static void *du_worker_loop(void *p_data)
 {
 	thread_data *pdata = (thread_data *)p_data;
 	const int core = (int)pdata->core;
-	char pathbuf[PATH_MAX];
+	du_task task = {0};
+
+#ifdef __linux__
+	/* Pin thread to specific CPU core for better cache locality and parallelism */
+	cpu_set_t cpuset;
+	CPU_ZERO(&cpuset);
+	int num_cpus = (int)sysconf(_SC_NPROCESSORS_ONLN);
+	if (num_cpus > 0)
+		CPU_SET(core % num_cpus, &cpuset);
+	pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+#endif
 
 	for (;;) {
 		pthread_mutex_lock(&running_mutex);
-		while (!work_ready[core] && !du_shutdown)
+		while (du_task_len == 0 && !du_shutdown)
 			pthread_cond_wait(&work_cond, &running_mutex);
 		if (du_shutdown) {
-			threadbmp |= (1U << core);
 			pthread_mutex_unlock(&running_mutex);
 			return NULL;
 		}
-		work_ready[core] = false;
-		xstrsncpy(pathbuf, pdata->path, PATH_MAX);
-		const int entnum = pdata->entnum;
-		const bool mntpoint = pdata->mntpoint;
-		const bool no_aggregate = pdata->no_aggregate;
+
+		task = du_tasks[--du_task_len];
+		++active_threads;
 		pthread_mutex_unlock(&running_mutex);
 
 		ullong_t tfiles = 0;
 		blkcnt_t tblocks = 0;
-		du_walk_dir(pathbuf, &tfiles, &tblocks);
+		du_walk_dir(task.path, task.group, task.count_root, &tfiles, &tblocks);
+		free(task.path);
 
-		/* Update results with minimal lock time */
-		if (entnum >= 0)
-			pdents[entnum].blocks = tblocks;
+		/* Aggregate into the shared group and finalize when done */
+		pthread_mutex_lock(&du_count_mutex);
+		task.group->blocks += tblocks;
+		task.group->files += tfiles;
+		if (task.group->pending > 0)
+			--task.group->pending;
+		bool done = (task.group->pending == 0);
+		if (done) {
+			if (task.group->entnum >= 0)
+				pdents[task.group->entnum].blocks = task.group->blocks;
 
-		if (!no_aggregate) {
-			if (!mntpoint) {
-				core_blocks[core] += tblocks;
-				core_files[core] += tfiles;
-			} else
-				core_files[core] += 1;
+			if (!task.group->no_aggregate) {
+				if (!task.group->mntpoint) {
+					core_blocks[core] += task.group->blocks;
+					core_files[core] += task.group->files;
+				} else
+					core_files[core] += 1;
+			}
 		}
+		pthread_mutex_unlock(&du_count_mutex);
+		if (done)
+			free(task.group);
 
 		pthread_mutex_lock(&running_mutex);
-		threadbmp |= (1U << core);
 		--active_threads;
+		if (du_tasks_pending > 0)
+			--du_tasks_pending;
 		pthread_cond_signal(&du_cond); /* signal instead of broadcast for better performance */
 		pthread_mutex_unlock(&running_mutex);
 	}
@@ -6386,32 +6465,21 @@ static void *du_worker_loop(void *p_data)
 /* Assign one subdirectory to a worker; subdirectories are scanned in parallel by the pool */
 static void dirwalk(char *path, int entnum, bool mountpoint, bool no_aggregate)
 {
-	pthread_mutex_lock(&running_mutex);
-	while (active_threads == num_du_threads) {
-		pthread_cond_wait(&du_cond, &running_mutex);
-		if (g_state.interrupt) {
-			pthread_mutex_unlock(&running_mutex);
-			return;
-		}
-	}
-	if (g_state.interrupt) {
-		pthread_mutex_unlock(&running_mutex);
+	if (g_state.interrupt)
+		return;
+
+	du_group *group = calloc(1, sizeof(*group));
+	if (!group)
+		return;
+	group->pending = 1;
+	group->entnum = entnum;
+	group->mntpoint = mountpoint;
+	group->no_aggregate = no_aggregate;
+
+	if (!du_queue_task(path, group, true, false)) {
+		free(group);
 		return;
 	}
-
-	int core = ffs((int)threadbmp) - 1;
-
-	threadbmp &= ~(1U << core);
-	++active_threads;
-
-	xstrsncpy(core_data[core].path, path, PATH_MAX);
-	core_data[core].entnum = entnum;
-	core_data[core].core = (ushort_t)core;
-	core_data[core].mntpoint = mountpoint;
-	core_data[core].no_aggregate = no_aggregate;
-	work_ready[core] = true;
-	pthread_cond_broadcast(&work_cond); /* wake all; only worker for this core has work */
-	pthread_mutex_unlock(&running_mutex);
 
 	if (first_call) {
 		tolastln();
@@ -6426,13 +6494,20 @@ static bool prep_threads(void)
 	if (!g_state.duinit) {
 		long n = sysconf(_SC_NPROCESSORS_ONLN);
 
+		/* Create one thread per CPU core for optimal parallelism */
 		num_du_threads = (n > 0 && n <= NUM_DU_THREADS_MAX) ? (int)n : 4;
 		if (num_du_threads < 2)
 			num_du_threads = 2;
-		threadbmp = (1U << num_du_threads) - 1;
 		du_shutdown = false;
 		for (int i = 0; i < num_du_threads; ++i)
 			work_ready[i] = false;
+		active_threads = 0;
+		du_task_len = 0;
+		du_tasks_pending = 0;
+		if (!du_task_cap)
+			du_task_cap = TASK_CAP_DU;
+		if (!du_tasks)
+			du_tasks = calloc(du_task_cap, sizeof(*du_tasks));
 
 		if (!core_blocks)
 			core_blocks = calloc((size_t)num_du_threads, sizeof(blkcnt_t));
@@ -6441,7 +6516,7 @@ static bool prep_threads(void)
 		if (!core_files)
 			core_files = calloc((size_t)num_du_threads, sizeof(ullong_t));
 
-		if (!core_blocks || !core_data || !core_files) {
+		if (!core_blocks || !core_data || !core_files || !du_tasks) {
 			printwarn(NULL);
 			return FALSE;
 		}
@@ -6466,6 +6541,12 @@ static bool prep_threads(void)
 		memset(core_blocks, 0, (size_t)num_du_threads * sizeof(blkcnt_t));
 		memset(core_data, 0, (size_t)num_du_threads * sizeof(thread_data));
 		memset(core_files, 0, (size_t)num_du_threads * sizeof(ullong_t));
+		pthread_mutex_lock(&running_mutex);
+		for (size_t i = 0; i < du_task_len; ++i)
+			free(du_tasks[i].path);
+		du_task_len = 0;
+		du_tasks_pending = 0;
+		pthread_mutex_unlock(&running_mutex);
 	}
 	return TRUE;
 }
@@ -6608,7 +6689,7 @@ static int dentfill(char *path, struct entry **ppdents)
 		if (ndents == total_dents) {
 			if (cfg.blkorder) {
 				pthread_mutex_lock(&running_mutex);
-				while (active_threads)
+				while (du_tasks_pending)
 					pthread_cond_wait(&du_cond, &running_mutex);
 				pthread_mutex_unlock(&running_mutex);
 			}
@@ -6756,7 +6837,7 @@ static int dentfill(char *path, struct entry **ppdents)
 exit:
 	if (g_state.duinit && cfg.blkorder) {
 		pthread_mutex_lock(&running_mutex);
-		while (active_threads)
+		while (du_tasks_pending)
 			pthread_cond_wait(&du_cond, &running_mutex);
 		pthread_mutex_unlock(&running_mutex);
 
