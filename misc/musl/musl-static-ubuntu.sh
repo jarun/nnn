@@ -21,8 +21,9 @@
 # Exit on first failure
 set -e
 
-# Output binary name
+# Output binary names
 BIN=nnn-musl-static
+EMOJIBIN=nnn-musl-emoji-static
 
 # Install musl
 sudo apt install -y --no-install-recommends musl musl-dev musl-tools
@@ -55,9 +56,16 @@ cd musl-fts
 ./configure
 make CC=musl-gcc CFLAGS=-O3 LDFLAGS=-static -j$(($(nproc)+1))
 
-# Compile nnn
 cd ..
-[ -e "./netbsd-curses" ] || rm -- "$BIN"
+
+# Compile nnn with Emoji
+[ -d "./netbsd-curses" ] && [ -d ./musl-fts ] || rm -- "$EMOJIBIN"
+musl-gcc -DEMOJI -std=c11 -Wall -Wextra -Wshadow -O3 -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600 -DICONS_GENERATE -o src/icons-hash-gen src/icons-hash.c
+./src/icons-hash-gen > src/icons-generated-emoji.h
+musl-gcc -O3 -DNORL -DNOMOUSE -DEMOJI -DICONS_INCLUDE=\"icons-generated-emoji.h\" -std=c11 -Wall -Wextra -Wshadow -I./netbsd-curses/libcurses -I./musl-fts -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600 -o "$EMOJIBIN"  src/nnn.c -Wl,-Bsymbolic-functions -lpthread -L./netbsd-curses/libs -lcurses -lterminfo -static -L./musl-fts/.libs -lfts
+
+# Compile nnn
+[ -d "./netbsd-curses" ] && [ -d ./musl-fts ] || rm -- "$BIN"
 musl-gcc -O3 -DNORL -DNOMOUSE -std=c11 -Wall -Wextra -Wshadow -I./netbsd-curses/libcurses -I./musl-fts -o "$BIN" src/nnn.c -Wl,-Bsymbolic-functions -lpthread -L./netbsd-curses/libs -lcurses -lterminfo -static -L./musl-fts/.libs -lfts
 strip "$BIN"
 
