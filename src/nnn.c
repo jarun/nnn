@@ -3398,7 +3398,7 @@ static void showfilterinfo(void)
 	if (cfg.fileinfo && ndents && get_output("file", "-b", pdents[cur].name, -1, FALSE))
 		mvaddstr(xlines - 2, 2, g_buf);
 	else {
-		const char *mode = cfg.regex ? "reg" : (cfg.fuzzy ? "fuzzy" : "str");
+		const char *mode = cfg.regex ? "reg" : (cfg.fuzzy ? "fzy" : "str");
 		snprintf(info + i, REGEX_MAX - i - 1, "  %s [/], %s [:]",
 			 mode, ((fnstrstr == &strcasestr) ? "ic" : "noic"));
 	}
