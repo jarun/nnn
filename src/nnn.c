@@ -3076,6 +3076,14 @@ static int setfilter(regex_t *regex, const char *filter)
 }
 #endif
 
+/* Normalize space, underscore, and hyphen to the same character for fuzzy matching */
+static inline wchar_t normalize_char(wchar_t c)
+{
+	if (c == L' ' || c == L'_' || c == L'-')
+		return L' ';
+	return c;
+}
+
 /*
  * Fuzzy match: check if all characters in filter appear in order in fname
  * Case-sensitivity is controlled by fnstrstr function pointer
@@ -3115,7 +3123,7 @@ static int fuzzy_match(const char *filter, const char *fname)
 
 	/* Match characters in order */
 	while (*f && *n) {
-		if (*f == *n)
+		if (normalize_char(*f) == normalize_char(*n))
 			++f;
 		++n;
 	}
