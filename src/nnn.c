@@ -9717,8 +9717,10 @@ int main(int argc, char *argv[])
 		/* We return to tty */
 		if (!isatty(STDOUT_FILENO)) {
 			fd = open(ctermid(NULL), O_RDONLY, 0400);
-			dup2(fd, STDIN_FILENO);
-			close(fd);
+			if (fd != -1) {
+				dup2(fd, STDIN_FILENO);
+				close(fd);
+			}
 		} else
 			dup2(STDOUT_FILENO, STDIN_FILENO);
 
@@ -9915,9 +9917,9 @@ int main(int argc, char *argv[])
 	/* Configure trash preference */
 	trashcmd = getenv(env_cfg[NNN_TRASH]);
 	if (trashcmd) {
-		if (strcmp(trashcmd, "1") == 0)
+		if ((trashcmd[0] == '1') && (trashcmd[1] == '\0'))
 			trashcmd = utils[UTIL_TRASH_CLI];
-		else if (strcmp(trashcmd, "2") == 0)
+		else if ((trashcmd[0] == '2') && (trashcmd[1] == '\0'))
 			trashcmd = utils[UTIL_GIO_TRASH];
 	}
 
