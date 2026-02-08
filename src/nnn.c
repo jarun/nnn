@@ -8593,7 +8593,7 @@ nochange:
 #endif
 				cfg.filtermode ?  presel = FILTER : statusbar(path);
 			}
-			goto nochange;
+			goto begin;
 		case SEL_CP: // fallthrough
 		case SEL_MV: // fallthrough
 		case SEL_CPMVAS: // fallthrough
