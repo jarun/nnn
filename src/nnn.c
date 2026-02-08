@@ -2107,7 +2107,7 @@ static void endselection(bool endselmode)
 }
 
 /* Returns: 1 - success, 0 - none selected, -1 - other failure */
-static int editselection(void)
+static int editselection(bool allowemptysel)
 {
 	int ret = -1;
 	int fd, lines = 0;
@@ -2115,7 +2115,7 @@ static int editselection(void)
 	struct stat sb;
 	time_t mtime;
 
-	if (!selbufpos) /* External selection is only editable at source */
+	if (!allowemptysel && !selbufpos) /* External selection is only editable at source */
 		return listselfile();
 
 	fd = create_tmp_file();
@@ -2124,7 +2124,8 @@ static int editselection(void)
 		return -1;
 	}
 
-	seltofile(fd, NULL, NEWLINE);
+	if (!allowemptysel)
+		seltofile(fd, NULL, NEWLINE);
 	if (close(fd)) {
 		DPRINTF_S(strerror(errno));
 		return -1;
@@ -2165,7 +2166,9 @@ static int editselection(void)
 		return 1;
 	}
 
-	if (sb.st_size > selbufpos) {
+	if (allowemptysel)
+		selbufrealloc(sb.st_size);
+	else if (sb.st_size > selbufpos) {
 		DPRINTF_S("edited buffer larger than previous");
 		if (unlink(g_tmpfpath)) {
 			DPRINTF_S(strerror(errno));
@@ -2211,7 +2214,7 @@ static int editselection(void)
 	/* Add a line for the last file */
 	++lines;
 
-	if (lines > nselected) {
+	if (!allowemptysel && (lines > nselected)) {
 		DPRINTF_S("files added to selection");
 		goto emptyedit;
 	}
@@ -2749,6 +2752,9 @@ finish:
 static bool cpmvrm_selection(enum action sel, char *path)
 {
 	int r;
+
+	if ((sel == SEL_CP || sel == SEL_MV) && isselfileempty())
+		editselection(TRUE);
 
 	if (isselfileempty()) {
 		if (nselected)
@@ -8576,7 +8582,7 @@ nochange:
 #endif
 			continue;
 		case SEL_SELEDIT:
-			r = editselection();
+			r = editselection(FALSE);
 			if (r <= 0) {
 				r = !r ? MSG_0_SELECTED : MSG_FAILED;
 				printwait(messages[r], &presel);
