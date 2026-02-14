@@ -1,3 +1,23 @@
+nnn v5.2 Blue Hawaii
+2026-02-14
+
+- enable 8 contexts (saved sessions may no longer be usable, users need to re-create the sessions)
+- massive [du performance improvement](https://github.com/jarun/nnn/wiki/Performance#02-feb-2026)
+- floating window
+  - render file stats (<kbd>f</kbd>) in a navigable floating window
+  - support rendering output of command run as plugin within floating window (prefix `>`)
+- support in order fuzzy search
+- with no selection, allow user input on _Copy here_ or _Move here_ e.g. to copy the system clipboard
+- double confirm when removing more than 10 selected files using `rm`
+- auto-complete hovered file name on pressing <kbd>TAB</kbd> at the end of prompt input
+- fix: scroll down arrow indicator not showing when down arrow is pressed with filter
+- fix: refresh directory after selection edits
+- support PCRE2 compile-in (`make O_PCRE2=1`), remove PCRE1 support (no longer being developed)
+- support jelliz in preview-tui
+- history file for native prompt
+
+-------------------------------------------------------------------------------
+
 nnn v5.1 Moscow Mule
 2025-03-23
 

@@ -151,7 +151,7 @@
 #endif
 
 /* Macro definitions */
-#define VERSION      "5.1"
+#define VERSION      "5.2"
 #define GENERAL_INFO "BSD 2-Clause\nhttps://github.com/jarun/nnn"
 
 #ifndef NOSSN
