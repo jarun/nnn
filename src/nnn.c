@@ -3159,7 +3159,7 @@ static int visible_str(const fltrexp_t *fltrexp, const char *fname)
 	return fnstrstr(fname, fltrexp->str) != NULL;
 }
 
-#ifndef NOHIGHLIGHT_FILTER
+#ifdef DIM_FILTERED
 /*
  * Get match positions for fuzzy matching
  * Populates matched array with 1 for matched bytes, 0 otherwise
@@ -4626,23 +4626,19 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int 
 	return C_UND;
 }
 
-#ifndef NOHIGHLIGHT_FILTER
-static void printent_name(const struct entry *ent, uint_t namecols, bool sel)
+#ifdef DIM_FILTERED
+static void printent_name(const struct entry *ent, uint_t namecols)
 {
 	char * const fltr = g_ctx[cfg.curctx].c_fltr;
 
-	/* If there's a filter string, highlight matches */
+	/* If there's a filter string, dim matching characters */
 	if (fltr[1]) {
 		uchar_t matched[NAME_MAX] = {0};
-		int match_attrs = A_BOLD; /* Default: just bold for selected entries */
-
-		/* For non-selected entries, also add reverse video to matches */
-		if (!sel)
-			match_attrs |= A_REVERSE;
+		int match_attrs = A_DIM;
 
 		/* Get match positions based on filter type */
 		if (cfg.regex) {
-			/* For regex, we don't highlight - just print normally */
+			/* For regex, we don't dim - just print normally */
 #ifndef NOLC
 			addwstr(unescape(ent->name, namecols));
 #else
@@ -4664,7 +4660,7 @@ static void printent_name(const struct entry *ent, uint_t namecols, bool sel)
 				}
 			}
 #else
-			/* Non-wide character version for fuzzy highlighting */
+			/* Non-wide character version for fuzzy dimming */
 			const char *name = unescape(ent->name, MIN(namecols, ent->nlen) + 1);
 			for (uint_t i = 0; (i < namecols) && name[i]; ++i) {
 				if (matched[i]) {
@@ -4677,7 +4673,7 @@ static void printent_name(const struct entry *ent, uint_t namecols, bool sel)
 			}
 #endif
 		} else {
-			/* String match - highlight the substring */
+			/* String match - dim the substring */
 			string_match_positions(fltr + 1, ent->name, matched);
 #ifndef NOLC
 			wchar_t * const wbuf = unescape(ent->name, namecols);
@@ -4692,7 +4688,7 @@ static void printent_name(const struct entry *ent, uint_t namecols, bool sel)
 				}
 			}
 #else
-			/* Non-wide character version for string highlighting */
+			/* Non-wide character version for string dimming */
 			const char *name = unescape(ent->name, MIN(namecols, ent->nlen) + 1);
 			for (uint_t i = 0; (i < namecols) && name[i]; ++i) {
 				if (matched[i]) {
@@ -4715,10 +4711,9 @@ static void printent_name(const struct entry *ent, uint_t namecols, bool sel)
 	}
 }
 #else
-/* Without highlight support, just print the name normally */
-static inline void printent_name(const struct entry *ent, uint_t namecols, bool sel)
+/* Without dimming support, just print the name normally */
+static inline void printent_name(const struct entry *ent, uint_t namecols)
 {
-	(void)sel; /* Suppress unused parameter warning */
 #ifndef NOLC
 	addwstr(unescape(ent->name, namecols));
 #else
@@ -4786,7 +4781,7 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
 	if (!ind)
 		++namecols;
 
-	printent_name(ent, namecols, sel);
+	printent_name(ent, namecols);
 
 	if (attrs)
 		attroff(attrs);
