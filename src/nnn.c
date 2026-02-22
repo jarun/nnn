@@ -3787,14 +3787,13 @@ static int filterentries(char *path, char *lastname)
 		 * - new matches can only be a subset of current matches.
 		 */
 		/* ndents = total; */
-#ifdef MATCHFLTR
 		r = matches(pln);
 		if (r <= 0) {
-			!r ? unget_wch(KEY_BACKSPACE) : showfilter(ln);
-#else
-		if (matches(pln) == -1) {
-			showfilter(ln);
-#endif
+			if (r == 0)
+				unget_wch(KEY_BACKSPACE);
+			attron((COLOR_PAIR(cfg.curctx + 1)) | A_REVERSE | A_STANDOUT);
+			printmsg_nc(ln);
+			attroff((COLOR_PAIR(cfg.curctx + 1)) | A_REVERSE | A_STANDOUT);
 			continue;
 		}
 
