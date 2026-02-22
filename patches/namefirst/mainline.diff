@@ -4,10 +4,10 @@
 # Author: Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index f8a2c58..9802a1f 100644
+index 19ebc2cf..42a0a6b0 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -394,6 +394,10 @@ typedef struct {
+@@ -430,6 +430,10 @@ typedef struct {
  } session_header_t;
  #endif
  
@@ -18,11 +18,12 @@ index f8a2c58..9802a1f 100644
  /* GLOBALS */
  
  /* Configuration, contexts */
-@@ -1070,10 +1074,12 @@ static char *getpwname(uid_t uid)
+@@ -1175,10 +1179,13 @@ static char *getpwname(uid_t uid)
  	static char *namecache;
  
  	if (uidcache != uid) {
-+		if (dtls.maxuidln && !dtls.printguid) dtls.printguid = 1;
++		if (dtls.maxuidln && !dtls.printguid)
++			dtls.printguid = 1;
  		struct passwd *pw = getpwuid(uid);
  
  		uidcache = uid;
@@ -31,11 +32,12 @@ index f8a2c58..9802a1f 100644
  	}
  
  	return namecache ? namecache : xitoa(uid);
-@@ -1085,10 +1091,12 @@ static char *getgrname(gid_t gid)
+@@ -1190,10 +1197,13 @@ static char *getgrname(gid_t gid)
  	static char *grpcache;
  
  	if (gidcache != gid) {
-+		if (dtls.maxgidln && !dtls.printguid) dtls.printguid = 1;
++		if (dtls.maxgidln && !dtls.printguid)
++			dtls.printguid = 1;
  		struct group *gr = getgrgid(gid);
  
  		gidcache = gid;
@@ -44,7 +46,7 @@ index f8a2c58..9802a1f 100644
  	}
  
  	return grpcache ? grpcache : xitoa(gid);
-@@ -3834,14 +3842,13 @@ static void resetdircolor(int flags)
+@@ -4346,14 +4356,13 @@ static void resetdircolor(int flags)
   * Max supported str length: NAME_MAX;
   */
  #ifdef NOLC
@@ -62,7 +64,7 @@ index f8a2c58..9802a1f 100644
  {
  	wchar_t * const wbuf = (wchar_t *)g_buf;
  	wchar_t *buf = wbuf;
-@@ -3866,7 +3873,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
+@@ -4378,7 +4387,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
  		++buf;
  	}
  
@@ -71,7 +73,107 @@ index f8a2c58..9802a1f 100644
  }
  
  static off_t get_size(off_t size, off_t *pval, int comp)
-@@ -4228,38 +4235,13 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
+@@ -4627,9 +4636,10 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int
+ }
+ 
+ #ifndef NOHIGHLIGHT_FILTER
+-static void printent_name(const struct entry *ent, uint_t namecols, bool sel)
++static size_t printent_name(const struct entry *ent, uint_t namecols, bool sel)
+ {
+ 	char * const fltr = g_ctx[cfg.curctx].c_fltr;
++	size_t namelen;
+ 
+ 	/* If there's a filter string, highlight matches */
+ 	if (fltr[1]) {
+@@ -4644,15 +4654,18 @@ static void printent_name(const struct entry *ent, uint_t namecols, bool sel)
+ 		if (cfg.regex) {
+ 			/* For regex, we don't highlight - just print normally */
+ #ifndef NOLC
+-			addwstr(unescape(ent->name, namecols));
++			namelen = unescape(ent->name, namecols);
++			addwstr((wchar_t *)g_buf);
+ #else
+-			addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
++			namelen = unescape(ent->name, MIN(namecols, ent->nlen) + 1);
++			addstr((char *)g_buf);
+ #endif
+ 		} else if (cfg.fuzzy) {
+ 			/* Get fuzzy match positions */
+ 			fuzzy_match_positions(fltr + 1, ent->name, matched);
+ #ifndef NOLC
+-			wchar_t * const wbuf = unescape(ent->name, namecols);
++			namelen = unescape(ent->name, namecols);
++			wchar_t * const wbuf = (wchar_t *)g_buf;
+ 			uint_t col = 0;
+ 			for (wchar_t *p = wbuf; *p && col < namecols; ++p, ++col) {
+ 				if (matched[col]) {
+@@ -4665,7 +4678,8 @@ static void printent_name(const struct entry *ent, uint_t namecols, bool sel)
+ 			}
+ #else
+ 			/* Non-wide character version for fuzzy highlighting */
+-			const char *name = unescape(ent->name, MIN(namecols, ent->nlen) + 1);
++			namelen = unescape(ent->name, MIN(namecols, ent->nlen) + 1);
++			const char *name = (char *)g_buf;
+ 			for (uint_t i = 0; (i < namecols) && name[i]; ++i) {
+ 				if (matched[i]) {
+ 					attron(match_attrs);
+@@ -4680,7 +4694,8 @@ static void printent_name(const struct entry *ent, uint_t namecols, bool sel)
+ 			/* String match - highlight the substring */
+ 			string_match_positions(fltr + 1, ent->name, matched);
+ #ifndef NOLC
+-			wchar_t * const wbuf = unescape(ent->name, namecols);
++			namelen = unescape(ent->name, namecols);
++			wchar_t * const wbuf = (wchar_t *)g_buf;
+ 			uint_t col = 0;
+ 			for (wchar_t *p = wbuf; *p && col < namecols; ++p, ++col) {
+ 				if (matched[col]) {
+@@ -4693,7 +4708,8 @@ static void printent_name(const struct entry *ent, uint_t namecols, bool sel)
+ 			}
+ #else
+ 			/* Non-wide character version for string highlighting */
+-			const char *name = unescape(ent->name, MIN(namecols, ent->nlen) + 1);
++			namelen = unescape(ent->name, MIN(namecols, ent->nlen) + 1);
++			const char *name = (char *)g_buf;
+ 			for (uint_t i = 0; (i < namecols) && name[i]; ++i) {
+ 				if (matched[i]) {
+ 					attron(match_attrs);
+@@ -4708,22 +4724,30 @@ static void printent_name(const struct entry *ent, uint_t namecols, bool sel)
+ 	} else {
+ 		/* No filter or filter not active - print normally */
+ #ifndef NOLC
+-		addwstr(unescape(ent->name, namecols));
++		namelen = unescape(ent->name, namecols);
++		addwstr((wchar_t *)g_buf);
+ #else
+-		addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
++		namelen = unescape(ent->name, MIN(namecols, ent->nlen) + 1);
++		addstr((char *)g_buf);
+ #endif
+ 	}
++
++	return namelen;
+ }
+ #else
+ /* Without highlight support, just print the name normally */
+-static inline void printent_name(const struct entry *ent, uint_t namecols, bool sel)
++static inline size_t printent_name(const struct entry *ent, uint_t namecols, bool sel)
+ {
+ 	(void)sel; /* Suppress unused parameter warning */
+ #ifndef NOLC
+-	addwstr(unescape(ent->name, namecols));
++	size_t namelen = unescape(ent->name, namecols);
++	addwstr((wchar_t *)g_buf);
+ #else
+-	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
++	size_t namelen = unescape(ent->name, MIN(namecols, ent->nlen) + 1);
++	addstr((char *)g_buf);
+ #endif
++
++	return namelen;
+ }
+ #endif
+ 
+@@ -4731,38 +4755,14 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
  {
  	const struct entry *ent = &pdents[pdents_index];
  	char ind = '\0';
@@ -99,7 +201,8 @@ index f8a2c58..9802a1f 100644
 -		if (attrs)
 -			attroff(attrs);
 -	}
-+	int attrs = 0, namelen;
++	int attrs = 0;
++	size_t namelen;
  
  	if (g_state.showlines) {
  		ptrdiff_t rel_num = pdents_index - cur;
@@ -111,16 +214,12 @@ index f8a2c58..9802a1f 100644
  	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
  
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
-@@ -4284,15 +4266,40 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
+@@ -4786,12 +4786,44 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
+ 	if (!ind)
  		++namecols;
  
- #ifndef NOLC
--	addwstr(unescape(ent->name, namecols));
-+	addwstr((namelen = unescape(ent->name, namecols), (wchar_t *)g_buf));
- #else
--	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
-+	addstr((namelen = unescape(ent->name, MIN(namecols, ent->nlen) + 1), (char *)g_buf));
- #endif
+-	printent_name(ent, namecols, sel);
++	namelen = printent_name(ent, namecols, sel);
  
 -	if (attrs)
 +	if (!sel && attrs)
@@ -137,9 +236,16 @@ index f8a2c58..9802a1f 100644
 +			attron(attrs);
 +		if (!g_state.oldcolor && (type == S_IFDIR || (type == S_IFLNK && ent->flags & DIR_OR_DIRLNK)))
 +			attroff(A_BOLD);
-+		int sizelen = (type == S_IFREG || type == S_IFDIR) ? xstrlen(size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size)) : 1;
-+		printw("%*c%*s%s%s", 1 + MIN(namecols, dtls.maxnameln + (uint_t)(ind ? 0 : 1)) - namelen, ' ',
-+				dtls.maxsizeln - sizelen, "", size ? size : (type = (uchar_t)get_detail_ind(ent->mode), (char *)&type), "  ");
++		int sizelen;
++		if (type == S_IFREG || type == S_IFDIR) {
++			size = coolsize(cfg.blkorder ? ent->blocks << blk_shift : ent->size);
++			sizelen = xstrlen(size);
++		} else
++			sizelen = 1;
++		printw("%*c%*s%s%s",
++			1 + MIN(namecols, dtls.maxnameln + (uint_t)(ind ? 0 : 1)) - (int)namelen, ' ',
++			dtls.maxsizeln - sizelen, "", size ? size
++			: (type = (uchar_t)get_detail_ind(ent->mode), (char *)&type), "  ");
 +#ifndef NOUG
 +		if (g_state.uidgid && dtls.printguid) {
 +			addstr(getpwname(ent->uid));
@@ -155,7 +261,7 @@ index f8a2c58..9802a1f 100644
  }
  
  /**
-@@ -6527,26 +6534,19 @@ static void statusbar(char *path)
+@@ -7670,26 +7702,19 @@ static void statusbar(char *path)
  	tocursor();
  }
  
@@ -185,7 +291,7 @@ index f8a2c58..9802a1f 100644
  	}
  
  	/* 2 columns for preceding space and indicator */
-@@ -6412,8 +6411,6 @@ static void draw_line(int ncols)
+@@ -7728,8 +7753,6 @@ static void draw_line(int ncols)
  	/* Must reset e.g. no files in dir */
  	if (dir)
  		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
@@ -194,29 +300,34 @@ index f8a2c58..9802a1f 100644
  }
  
  static void redraw(char *path)
-@@ -6521,6 +6518,21 @@ static void redraw(char *path)
- 
- 	onscreen = MIN(onscreen + curscroll, ndents);
+@@ -7837,6 +7860,26 @@ static void redraw(char *path)
+ 	int onscreen = MIN(ONSCREEN + curscroll, ndents);
+ 	int len = scanselforpath(path, FALSE);
  
 +	if (cfg.showdetail) {
 +		ushort_t lenbuf = dtls.maxnameln = dtls.maxsizeln = dtls.maxuidln = dtls.maxgidln = dtls.printguid = 0;
 +		for (i = curscroll; i < onscreen; ++i) {
-+			if ((lenbuf = pdents[i].nlen - 1) > dtls.maxnameln) dtls.maxnameln = lenbuf;
-+			if ((lenbuf = xstrlen(coolsize(cfg.blkorder ? pdents[i].blocks << blk_shift : pdents[i].size))) > dtls.maxsizeln) dtls.maxsizeln = lenbuf;
++			if ((lenbuf = pdents[i].nlen - 1) > dtls.maxnameln)
++				dtls.maxnameln = lenbuf;
++			if ((lenbuf = xstrlen(coolsize(cfg.blkorder ? pdents[i].blocks << blk_shift : pdents[i].size))) > dtls.maxsizeln)
++				dtls.maxsizeln = lenbuf;
 +#ifndef NOUG
 +			if (g_state.uidgid) {
-+				if ((getpwname(pdents[i].uid), dtls.uidln) > dtls.maxuidln) dtls.maxuidln = dtls.uidln;
-+				if ((getgrname(pdents[i].gid), dtls.gidln) > dtls.maxgidln) dtls.maxgidln = dtls.gidln;
++				if ((getpwname(pdents[i].uid), dtls.uidln) > dtls.maxuidln)
++					dtls.maxuidln = dtls.uidln;
++				if ((getgrname(pdents[i].gid), dtls.gidln) > dtls.maxgidln)
++					dtls.maxgidln = dtls.gidln;
 +			}
 +#endif
 +		}
-+		dtls.maxentln = dtls.maxnameln + dtls.maxsizeln + (dtls.printguid ? (dtls.maxuidln + dtls.maxgidln + 29) : 26);
++		dtls.maxentln = dtls.maxnameln + dtls.maxsizeln
++			+ (dtls.printguid ? (dtls.maxuidln + dtls.maxgidln + 29) : 26);
 +	}
 +
  	ncols = adjust_cols(ncols);
  
- 	int len = scanselforpath(path, FALSE);
-@@ -6551,7 +6563,7 @@ static void redraw(char *path)
+ 	/* Print listing */
+@@ -7865,7 +7908,7 @@ static void redraw(char *path)
  #endif
  	}
  
