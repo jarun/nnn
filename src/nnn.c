@@ -3159,6 +3159,105 @@ static int visible_str(const fltrexp_t *fltrexp, const char *fname)
 	return fnstrstr(fname, fltrexp->str) != NULL;
 }
 
+#ifndef NOHIGHLIGHT_FILTER
+/*
+ * Get match positions for fuzzy matching
+ * Populates matched array with 1 for matched bytes, 0 otherwise
+ */
+static void fuzzy_match_positions(const char *filter, const char *fname, uchar_t *matched)
+{
+	wchar_t filter_wcs[NAME_MAX], fname_wcs[NAME_MAX];
+	size_t filter_len, fname_len;
+	bool case_insensitive = (fnstrstr == &strcasestr);
+	size_t f_idx, n_idx;
+
+	/* Clear matched array */
+	memset(matched, 0, NAME_MAX);
+
+	/* Convert multi-byte strings to wide character strings */
+	filter_len = mbstowcs(filter_wcs, filter, NAME_MAX - 1);
+	if (filter_len == (size_t)-1)
+		return;
+	filter_wcs[filter_len] = L'\0';
+
+	if (!filter_len)
+		return;
+
+	fname_len = mbstowcs(fname_wcs, fname, NAME_MAX - 1);
+	if (fname_len == (size_t)-1)
+		return;
+	fname_wcs[fname_len] = L'\0';
+
+	/* Convert to lowercase if case-insensitive matching */
+	if (case_insensitive) {
+		for (size_t i = 0; i < filter_len; ++i)
+			filter_wcs[i] = towlower(filter_wcs[i]);
+		for (size_t i = 0; i < fname_len; ++i)
+			fname_wcs[i] = towlower(fname_wcs[i]);
+	}
+
+	f_idx = 0;
+	n_idx = 0;
+
+	/* Match characters in order and mark them */
+	while (f_idx < filter_len && n_idx < fname_len) {
+		if (normalize_char(filter_wcs[f_idx]) == normalize_char(fname_wcs[n_idx])) {
+			/* Mark this wide character position as matched */
+			matched[n_idx] = 1;
+			++f_idx;
+		}
+		++n_idx;
+	}
+}
+
+/*
+ * Get match positions for string matching (substring)
+ * Populates matched array with 1 for matched bytes, 0 otherwise
+ */
+static void string_match_positions(const char *filter, const char *fname, uchar_t *matched)
+{
+	const char *pos;
+	size_t filter_len, i;
+
+	/* Clear matched array */
+	memset(matched, 0, NAME_MAX);
+
+	filter_len = strlen(filter);
+	if (!filter_len)
+		return;
+
+	/* Find the substring */
+	pos = fnstrstr(fname, filter);
+	if (pos) {
+		/* Convert string to wide characters to track positions */
+		wchar_t fname_wcs[NAME_MAX];
+		size_t fname_wcs_len = mbstowcs(fname_wcs, fname, NAME_MAX - 1);
+		if (fname_wcs_len == (size_t)-1)
+			return;
+
+		/* Find position in wide character string */
+		size_t matched_pos = 0;
+		const char *name_ptr = fname;
+		while (name_ptr < pos && matched_pos < fname_wcs_len) {
+			int mb_len = mblen(name_ptr, MB_LEN_MAX);
+			if (mb_len <= 0)
+				break;
+			name_ptr += mb_len;
+			++matched_pos;
+		}
+
+		/* Mark matched positions */
+		wchar_t filter_wcs[NAME_MAX];
+		size_t filter_wcs_len = mbstowcs(filter_wcs, filter, NAME_MAX - 1);
+		if (filter_wcs_len == (size_t)-1)
+			return;
+
+		for (i = 0; i < filter_wcs_len && matched_pos + i < NAME_MAX; ++i)
+			matched[matched_pos + i] = 1;
+	}
+}
+#endif
+
 static int visible_fuzzy(const fltrexp_t *fltrexp, const char *fname)
 {
 	return fuzzy_match(fltrexp->str, fname);
@@ -4527,6 +4626,107 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int 
 	return C_UND;
 }
 
+#ifndef NOHIGHLIGHT_FILTER
+static void printent_name(const struct entry *ent, uint_t namecols, bool sel)
+{
+	char * const fltr = g_ctx[cfg.curctx].c_fltr;
+
+	/* If there's a filter string, highlight matches */
+	if (fltr[1]) {
+		uchar_t matched[NAME_MAX] = {0};
+		int match_attrs = A_BOLD; /* Default: just bold for selected entries */
+
+		/* For non-selected entries, also add reverse video to matches */
+		if (!sel)
+			match_attrs |= A_REVERSE;
+
+		/* Get match positions based on filter type */
+		if (cfg.regex) {
+			/* For regex, we don't highlight - just print normally */
+#ifndef NOLC
+			addwstr(unescape(ent->name, namecols));
+#else
+			addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
+#endif
+		} else if (cfg.fuzzy) {
+			/* Get fuzzy match positions */
+			fuzzy_match_positions(fltr + 1, ent->name, matched);
+#ifndef NOLC
+			wchar_t * const wbuf = unescape(ent->name, namecols);
+			uint_t col = 0;
+			for (wchar_t *p = wbuf; *p && col < namecols; ++p, ++col) {
+				if (matched[col]) {
+					attron(match_attrs);
+					addch(*p);
+					attroff(match_attrs);
+				} else {
+					addch(*p);
+				}
+			}
+#else
+			/* Non-wide character version for fuzzy highlighting */
+			const char *name = unescape(ent->name, MIN(namecols, ent->nlen) + 1);
+			for (uint_t i = 0; (i < namecols) && name[i]; ++i) {
+				if (matched[i]) {
+					attron(match_attrs);
+					addch(name[i]);
+					attroff(match_attrs);
+				} else {
+					addch(name[i]);
+				}
+			}
+#endif
+		} else {
+			/* String match - highlight the substring */
+			string_match_positions(fltr + 1, ent->name, matched);
+#ifndef NOLC
+			wchar_t * const wbuf = unescape(ent->name, namecols);
+			uint_t col = 0;
+			for (wchar_t *p = wbuf; *p && col < namecols; ++p, ++col) {
+				if (matched[col]) {
+					attron(match_attrs);
+					addch(*p);
+					attroff(match_attrs);
+				} else {
+					addch(*p);
+				}
+			}
+#else
+			/* Non-wide character version for string highlighting */
+			const char *name = unescape(ent->name, MIN(namecols, ent->nlen) + 1);
+			for (uint_t i = 0; (i < namecols) && name[i]; ++i) {
+				if (matched[i]) {
+					attron(match_attrs);
+					addch(name[i]);
+					attroff(match_attrs);
+				} else {
+					addch(name[i]);
+				}
+			}
+#endif
+		}
+	} else {
+		/* No filter or filter not active - print normally */
+#ifndef NOLC
+		addwstr(unescape(ent->name, namecols));
+#else
+		addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
+#endif
+	}
+}
+#else
+/* Without highlight support, just print the name normally */
+static inline void printent_name(const struct entry *ent, uint_t namecols, bool sel)
+{
+	(void)sel; /* Suppress unused parameter warning */
+#ifndef NOLC
+	addwstr(unescape(ent->name, namecols));
+#else
+	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
+#endif
+}
+#endif
+
 static void printent(int pdents_index, uint_t namecols, bool sel)
 {
 	const struct entry *ent = &pdents[pdents_index];
@@ -4586,11 +4786,7 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
 	if (!ind)
 		++namecols;
 
-#ifndef NOLC
-	addwstr(unescape(ent->name, namecols));
-#else
-	addstr(unescape(ent->name, MIN(namecols, ent->nlen) + 1));
-#endif
+	printent_name(ent, namecols, sel);
 
 	if (attrs)
 		attroff(attrs);
