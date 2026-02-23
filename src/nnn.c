@@ -3370,9 +3370,6 @@ static inline int handle_event(void)
  */
 static int nextsel(int presel)
 {
-#ifdef BENCH
-	return SEL_QUIT;
-#endif
 	wint_t c = presel;
 	int i = 0;
 	bool escaped = FALSE;
@@ -8051,8 +8048,10 @@ begin:
 			statusbar(path);
 		}
 
-		/* Uncomment for disk usage calculation performance profiling e.g. to run 'time nnn -T d /' and exit */
-		// return EXIT_SUCCESS;
+#ifdef BENCH
+		/* Lod and exit for performance profiling e.g. to run 'time nnn -T d /' */
+		return EXIT_SUCCESS;
+#endif
 
 nochange:
 		/* Exit if parent has exited */
