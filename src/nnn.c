@@ -3776,9 +3776,11 @@ static int filterentries(char *path, char *lastname)
 		} else if (len == REGEX_MAX - 1)
 			continue;
 
-		wln[len] = (wchar_t)*ch;
-		wln[++len] = '\0';
-		wcstombs(ln, wln, REGEX_MAX);
+		if (*ch != FILTER) {
+			wln[len] = (wchar_t)*ch;
+			wln[++len] = '\0';
+			wcstombs(ln, wln, REGEX_MAX);
+		}
 
 		/* Forward-filtering optimization:
 		 * - new matches can only be a subset of current matches.
@@ -3794,11 +3796,21 @@ static int filterentries(char *path, char *lastname)
 			continue;
 		}
 
-		/* If the only match is a dir, auto-enter and cd into it */
-		if ((ndents == 1) && cfg.autoenter && (pdents[0].flags & DIR_OR_DIRLNK)) {
-			*ch = KEY_ENTER;
-			cur = 0;
-			goto end;
+		if (cfg.autoenter) {
+			/* If the only match is a dir, cd into it */
+			if ((ndents == 1) && (pdents[0].flags & DIR_OR_DIRLNK)) {
+				*ch = KEY_ENTER;
+				cur = 0;
+				goto end;
+			} else if ((*ch == FILTER) && *pln) {
+				/* If an exactly matching dir is present and filter key pressed, cd into it */
+				r = dentfind(pln, ndents);
+				if ((xstrcmp(pln, pdents[r].name) == 0) && (pdents[r].flags & DIR_OR_DIRLNK)) {
+					*ch = KEY_ENTER;
+					cur = r;
+					goto end;
+				}
+			}
 		}
 
 		/*
