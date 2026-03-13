@@ -1866,8 +1866,8 @@ static void invertselbuf(const int pathlen)
 	for (i = 0; i < ndents; ++i) {
 		dentp = &pdents[i];
 
-		if (!(dentp->flags & FILE_SCANNED))
-			dentp->flags |= FILE_SCANNED;
+		/* Ensure off-screen entries are reconciled with selbuf before inversion. */
+		findmarkentry(pathlen, dentp);
 
 		if (dentp->flags & FILE_SELECTED) {
 			dentp->flags ^= FILE_SELECTED; /* Clear selection status */
