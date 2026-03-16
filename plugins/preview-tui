@@ -516,6 +516,7 @@ preview_fifo() {
         if [ -n "$selection" ]; then
             pidkill "$PREVIEWPID"
             [ -p "$FIFO_UEBERZUG" ] && ueberzug_remove
+            [ -n "$KITTY_LISTEN_ON" ] && kitty +kitten icat --clear --stdin=no >/dev/tty 2>/dev/null
             [ "$selection" = "close" ] && break
             preview_file "$selection"
             printf "%s" "$selection" > "$CURSEL"
