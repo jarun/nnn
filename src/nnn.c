@@ -1766,7 +1766,7 @@ static bool listselfile(void)
 	if (isselfileempty())
 		return FALSE;
 
-	snprintf(g_buf, CMD_LEN_MAX, "tr \'\\0\' \'\\n\' < %s", selpath);
+	snprintf(g_buf, CMD_LEN_MAX, "tr \'\\0\' \'\\n\' < '%s'", selpath);
 	spawn(utils[UTIL_SH_EXEC], g_buf, NULL, NULL, F_CLI | F_CONFIRM);
 
 	return TRUE;
@@ -2639,7 +2639,7 @@ static bool plugscript(const char *plugin, uchar_t flags)
 
 static void opstr(char *buf, char *op)
 {
-	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s \"$0\" \"$@\" . < /dev/tty' < %s", op, selpath);
+	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s \"$0\" \"$@\" . < /dev/tty' < '%s'", op, selpath);
 }
 
 static bool rmmulstr(char *buf, bool use_trash)
@@ -2649,10 +2649,10 @@ static bool rmmulstr(char *buf, bool use_trash)
 		return FALSE;
 
 	if (!use_trash)
-		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cvr -- \"$0\" \"$@\" < /dev/tty' < %s",
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c 'rm -%cvr -- \"$0\" \"$@\" < /dev/tty' < '%s'",
 			 r, selpath);
 	else
-		snprintf(buf, CMD_LEN_MAX, "xargs -0 %s < %s",
+		snprintf(buf, CMD_LEN_MAX, "xargs -0 %s < '%s'",
 			 trashcmd, selpath);
 
 	return TRUE;
@@ -2711,7 +2711,7 @@ static bool cpmv_rename(int choice, const char *path)
 
 	/* selsafe() returned TRUE for this to be called */
 	if (!selbufpos) {
-		snprintf(buf, sizeof(buf), "tr '\\0' '\\n' < %s > %s", selpath, g_tmpfpath);
+		snprintf(buf, sizeof(buf), "tr '\\0' '\\n' < '%s' > %s", selpath, g_tmpfpath);
 		spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
 
 		count = entries_in_file(fd, buf, sizeof(buf), NEWLINE_CHAR);
@@ -6413,8 +6413,8 @@ static bool prompt_run(void)
 	int cnt_j, cnt_J, cmd_ret;
 	size_t len;
 
-	const char *xargs_j = "xargs -0 -I{} %s < %s";
-	const char *xargs_J = "xargs -0 %s < %s";
+	const char *xargs_j = "xargs -0 -I{} %s < '%s'";
+	const char *xargs_J = "xargs -0 %s < '%s'";
 	char cmd[CMD_LEN_MAX + 32]; // 32 for xargs format strings
 
 
