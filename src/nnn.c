@@ -6106,9 +6106,11 @@ static void show_help(const char *path)
 	fprintf(f, "used:%s ", coolsize(get_fs_info(path, VFS_USED)));
 	fprintf(f, "size:%s\n\n", coolsize(get_fs_info(path, VFS_SIZE)));
 
-	if (bookmark) {
+	if (bookmark || mark) {
 		fprintf(f, "BOOKMARKS\n");
 		printkv(bookmark, f, maxbm, NNN_BMS);
+		if (mark)
+			fprintf(f, " ,: %s\n", mark);
 		fprintf(f, "\n");
 	}
 
