@@ -2897,8 +2897,20 @@ static char *get_archive_cmd(const char *archive)
 
 static void archive_selection(const char *cmd, const char *archive)
 {
-	size_t len = xstrlen(patterns[P_ARCHIVE_CMD]) + xstrlen(cmd) + xstrlen(archive)
-	            + xstrlen(selpath) + 1;
+	char esc_archive[PATH_MAX * 4 + 2];
+	char esc_sel[PATH_MAX * 4 + 2];
+
+	if (shell_escape(esc_archive, sizeof(esc_archive), archive) < 0) {
+		printwarn(NULL);
+		return;
+	}
+
+	if (shell_escape(esc_sel, sizeof(esc_sel), selpath) < 0) {
+		printwarn(NULL);
+		return;
+	}
+
+	size_t len = xstrlen(cmd) + xstrlen(esc_archive) + xstrlen(esc_sel) + 20;
 	char *buf = malloc(len);
 	if (!buf) {
 		DPRINTF_S(strerror(errno));
@@ -2906,7 +2918,7 @@ static void archive_selection(const char *cmd, const char *archive)
 		return;
 	}
 
-	snprintf(buf, len, patterns[P_ARCHIVE_CMD], cmd, archive, selpath);
+	snprintf(buf, len, "xargs -0 %s %s < %s", cmd, esc_archive, esc_sel);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI | F_CONFIRM);
 	free(buf);
 }
