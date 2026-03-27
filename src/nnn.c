@@ -3264,6 +3264,86 @@ static int visible_fuzzy(const fltrexp_t *fltrexp, const char *fname)
 }
 
 static int (*filterfn)(const fltrexp_t *fltr, const char *fname) = &visible_str;
+static int (*entrycmpfn)(const void *va, const void *vb);
+static const char *fuzzy_sort_fltr;
+
+static int fuzzy_match_score(const char *filter, const char *fname)
+{
+	wchar_t filter_wcs[NAME_MAX], fname_wcs[NAME_MAX];
+	size_t match_pos[NAME_MAX];
+	size_t filter_len, fname_len, f_idx, n_idx;
+	bool case_insensitive = (fnstrstr == &strcasestr);
+
+	filter_len = mbstowcs(filter_wcs, filter, NAME_MAX - 1);
+	if (filter_len == (size_t)-1)
+		return INT_MAX;
+	filter_wcs[filter_len] = L'\0';
+
+	if (!filter_len)
+		return 0;
+
+	fname_len = mbstowcs(fname_wcs, fname, NAME_MAX - 1);
+	if (fname_len == (size_t)-1)
+		return INT_MAX;
+	fname_wcs[fname_len] = L'\0';
+
+	if (case_insensitive) {
+		for (size_t i = 0; i < filter_len; ++i)
+			filter_wcs[i] = towlower(filter_wcs[i]);
+		for (size_t i = 0; i < fname_len; ++i)
+			fname_wcs[i] = towlower(fname_wcs[i]);
+	}
+
+	f_idx = 0;
+	n_idx = 0;
+
+	while (f_idx < filter_len && n_idx < fname_len) {
+		if (normalize_char(filter_wcs[f_idx]) == normalize_char(fname_wcs[n_idx])) {
+			match_pos[f_idx] = n_idx;
+			++f_idx;
+		}
+		++n_idx;
+	}
+
+	if (f_idx != filter_len)
+		return INT_MAX;
+
+	{
+		size_t first = match_pos[0], endpos = match_pos[filter_len - 1], span = (endpos - first) + 1;
+		size_t gaps = span - filter_len, consec = 0, word_starts = 0;
+
+		for (size_t i = 0; i < filter_len; ++i) {
+			if (i > 0 && match_pos[i] == match_pos[i - 1] + 1)
+				++consec;
+
+			if (match_pos[i] == 0 || normalize_char(fname_wcs[match_pos[i] - 1]) == L' ')
+				++word_starts;
+		}
+
+		return (int)(gaps * 1000 + first * 100 + (span - consec) * 10 - word_starts * 5);
+	}
+}
+
+static int fuzzyentrycmp(const void *va, const void *vb)
+{
+	const struct entry *pa = (const struct entry *)va;
+	const struct entry *pb = (const struct entry *)vb;
+	int sa, sb;
+
+	if ((pb->flags & DIR_OR_DIRLNK) != (pa->flags & DIR_OR_DIRLNK)) {
+		if (pb->flags & DIR_OR_DIRLNK)
+			return 1;
+		return -1;
+	}
+
+	sa = fuzzy_match_score(fuzzy_sort_fltr, pa->name);
+	sb = fuzzy_match_score(fuzzy_sort_fltr, pb->name);
+
+	if (sa != sb)
+		return cfg.reverse ? (sa < sb ? 1 : -1) : (sa < sb ? -1 : 1);
+
+	return entrycmpfn(va, vb);
+}
 
 static void clearfilter(void)
 {
@@ -3584,7 +3664,12 @@ static int matches(const char *fltr)
 		regfree(&re);
 #endif
 
-	ENTSORT(pdents, ndents, entrycmpfn);
+	if (cfg.fuzzy && fltr[0]) {
+		fuzzy_sort_fltr = fltr;
+		ENTSORT(pdents, ndents, fuzzyentrycmp);
+		fuzzy_sort_fltr = NULL;
+	} else
+		ENTSORT(pdents, ndents, entrycmpfn);
 
 	return ndents;
 }
