@@ -2615,15 +2615,12 @@ static char *xgetenv(const char * const name, char *fallback)
 /* Check if a dir exists, IS a dir, and is readable */
 static bool xdiraccess(const char *path)
 {
-	DIR *dirp = opendir(path);
+	int fd = open(path, O_RDONLY | O_DIRECTORY);
 
-	if (!dirp) {
-		printwarn(NULL);
+	if (fd < 0)
 		return FALSE;
-	}
 
-	closedir(dirp);
-	return TRUE;
+	return close(fd) == 0;
 }
 
 static bool plugscript(const char *plugin, uchar_t flags)
