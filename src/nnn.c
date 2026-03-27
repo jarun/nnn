@@ -3883,14 +3883,16 @@ static int filterentries(char *path, char *lastname)
 
 		if (cfg.autoenter) {
 			/* If the only match is a dir, cd into it */
-			if ((ndents == 1) && (pdents[0].flags & DIR_OR_DIRLNK)) {
+			if ((ndents == 1) && (pdents[0].flags & DIR_OR_DIRLNK) && xdiraccess(pdents[0].name)) {
 				*ch = KEY_ENTER;
 				cur = 0;
 				goto end;
 			} else if ((*ch == FILTER) && *pln) {
 				/* If an exactly matching dir is present and filter key pressed, cd into it */
 				r = dentfind(pln, ndents);
-				if ((xstrcmp(pln, pdents[r].name) == 0) && (pdents[r].flags & DIR_OR_DIRLNK)) {
+				if (((r > 0) || (xstrcmp(pln, pdents[r].name) == 0))
+						&& (pdents[r].flags & DIR_OR_DIRLNK)
+						&& xdiraccess(pdents[r].name)) {
 					*ch = KEY_ENTER;
 					cur = r;
 					goto end;
