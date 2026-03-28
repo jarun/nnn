@@ -3339,7 +3339,7 @@ static int fuzzyentrycmp(const void *va, const void *vb)
 	if (sa != sb)
 		return cfg.reverse ? (sa < sb ? 1 : -1) : (sa < sb ? -1 : 1);
 
-	return entrycmpfn(va, vb);
+	return cfg.reverse ? -namecmpfn(pa->name, pb->name) : namecmpfn(pa->name, pb->name);
 }
 
 static void clearfilter(void)
@@ -3637,37 +3637,38 @@ static int fill(const char *fltr, regex_t *re)
 
 static int matches(const char *fltr)
 {
-#ifdef PCRE2
-	pcre2_code *pcre2x = NULL;
-
-	/* Search filter */
-	if (cfg.regex && setfilter(&pcre2x, fltr))
-		return -1;
-
-	ndents = fill(fltr, pcre2x);
-
-	if (cfg.regex)
-		pcre2_code_free(pcre2x);
-#else
-	regex_t re;
-
-	/* Search filter */
-	if (cfg.regex && setfilter(&re, fltr))
-		return -1;
-
-	ndents = fill(fltr, &re);
-
-	if (cfg.regex)
-		regfree(&re);
-#endif
-
 	if (cfg.fuzzy && fltr[0]) {
 		fuzzy_sort_fltr = fltr;
 		ENTSORT(pdents, ndents, fuzzyentrycmp);
 		fuzzy_sort_fltr = NULL;
-	} else
-		ENTSORT(pdents, ndents, entrycmpfn);
+		return ndents;
+	}
 
+	if (cfg.regex) {
+#ifdef PCRE2
+		pcre2_code *pcre2x = NULL;
+
+		/* Search filter */
+		if (setfilter(&pcre2x, fltr))
+			return -1;
+
+		ndents = fill(fltr, pcre2x);
+
+		pcre2_code_free(pcre2x);
+#else
+		regex_t re;
+
+		/* Search filter */
+		if (setfilter(&re, fltr))
+			return -1;
+
+		ndents = fill(fltr, &re);
+
+		regfree(&re);
+#endif
+	}
+
+	ENTSORT(pdents, ndents, entrycmpfn);
 	return ndents;
 }
 
