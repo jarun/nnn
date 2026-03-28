@@ -260,6 +260,8 @@
 #define FILE_SCANNED  0x20
 #define FILE_YOUNG    0x40
 
+#define IS_DIR_OR_DIRLNK(ent) (((ent)->flags & DIR_OR_DIRLNK) != 0)
+
 /* Macros to define process spawn behaviour as flags */
 #define F_NONE    0x00  /* no flag set */
 #define F_MULTI   0x01  /* first arg can be combination of args; to be used with F_NORMAL */
@@ -3327,11 +3329,8 @@ static int fuzzyentrycmp(const void *va, const void *vb)
 	const struct entry *pb = (const struct entry *)vb;
 	int sa, sb;
 
-	if ((pb->flags & DIR_OR_DIRLNK) != (pa->flags & DIR_OR_DIRLNK)) {
-		if (pb->flags & DIR_OR_DIRLNK)
-			return 1;
-		return -1;
-	}
+	if (IS_DIR_OR_DIRLNK(pb) != IS_DIR_OR_DIRLNK(pa))
+		return IS_DIR_OR_DIRLNK(pb) ? 1 : -1;
 
 	sa = fuzzy_match_score(fuzzy_sort_fltr, pa->name);
 	sb = fuzzy_match_score(fuzzy_sort_fltr, pb->name);
@@ -3357,11 +3356,8 @@ static int entrycmp(const void *va, const void *vb)
 	const struct entry *pa = (pEntry)va;
 	const struct entry *pb = (pEntry)vb;
 
-	if ((pb->flags & DIR_OR_DIRLNK) != (pa->flags & DIR_OR_DIRLNK)) {
-		if (pb->flags & DIR_OR_DIRLNK)
-			return 1;
-		return -1;
-	}
+	if (IS_DIR_OR_DIRLNK(pb) != IS_DIR_OR_DIRLNK(pa))
+		return IS_DIR_OR_DIRLNK(pb) ? 1 : -1;
 
 	/* Sort based on specified order */
 	if (cfg.timeorder) {
@@ -3384,7 +3380,7 @@ static int entrycmp(const void *va, const void *vb)
 			return 1;
 		if (pb->blocks < pa->blocks)
 			return -1;
-	} else if (cfg.extnorder && !(pb->flags & DIR_OR_DIRLNK)) {
+	} else if (cfg.extnorder && !IS_DIR_OR_DIRLNK(pb)) {
 		char *extna = xextension(pa->name, pa->nlen - 1);
 		char *extnb = xextension(pb->name, pb->nlen - 1);
 
@@ -3407,12 +3403,8 @@ static int entrycmp(const void *va, const void *vb)
 
 static int reventrycmp(const void *va, const void *vb)
 {
-	if ((((pEntry)vb)->flags & DIR_OR_DIRLNK)
-	    != (((pEntry)va)->flags & DIR_OR_DIRLNK)) {
-		if (((pEntry)vb)->flags & DIR_OR_DIRLNK)
-			return 1;
-		return -1;
-	}
+	if (IS_DIR_OR_DIRLNK((pEntry)vb) != IS_DIR_OR_DIRLNK((pEntry)va))
+		return IS_DIR_OR_DIRLNK((pEntry)vb) ? 1 : -1;
 
 	return -entrycmp(va, vb);
 }
