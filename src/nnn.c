@@ -3338,7 +3338,7 @@ static int fuzzyentrycmp(const void *va, const void *vb)
 	if (sa != sb)
 		return cfg.reverse ? (sa < sb ? 1 : -1) : (sa < sb ? -1 : 1);
 
-	return entrycmpfn(va, vb);
+	return cfg.reverse ? -namecmpfn(pa->name, pb->name) : namecmpfn(pa->name, pb->name);
 }
 
 static void clearfilter(void)
