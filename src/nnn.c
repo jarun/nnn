@@ -3317,7 +3317,7 @@ static int fuzzy_match_score(const char *filter, const char *fname)
 				++word_starts;
 		}
 
-		return (int)(gaps * 1000 + first * 100 + (span - consec) * 10 - word_starts * 5);
+		return (int)((gaps * 1000) + (first * 100) + ((span - consec) * 10) - (word_starts * 5));
 	}
 }
 
