@@ -1399,6 +1399,15 @@ static char *bmtarget(const char *filepath, char *cwd, char *buf)
  *           buffer of at least *outlen bytes. In dynamic allocation mode, the
  *           caller is responsible for freeing the allocated memory.
  *
+ * @note The logic works correctly with Unicode. The function operates on raw bytes
+ *       (char by char), and its escaping strategy is single-quoting the entire string ('...').
+ *       Inside POSIX single quotes, every byte is treated literally — no interpretation occurs
+ *       at all. The only special case is the single quote character itself ('), which is handled.
+ *
+ *       Since UTF-8 encoded Unicode never produces a 0x27 (') byte in any multi-byte sequence
+ *       sequence (all continuation bytes have the high bit set, 0x80–0xBF), the byte-by-byte
+ *       copy in the default case faithfully preserves any UTF-8 content without corruption.
+ *
  * @outlen: Pointer to the output buffer size. When input is provided:
  *          - The caller allocates a buffer and sets *outlen to its size
  *          - The buffer must be at least 3 bytes
@@ -1411,7 +1420,7 @@ static char *bmtarget(const char *filepath, char *cwd, char *buf)
  *
  * Return value: On success, returns the length of the escaped string (not including
  *               the null terminator). On error, returns -1 and sets errno:
- *               - EINVAL: if inbuf == poutbuf or outlen < 3 (for fixed buffers)
+ *               - EINVAL: if outlen < 3 (for fixed buffers)
  *               - ENAMETOOLONG: if the output buffer is too small (for fixed buffers)
  *               - ENOMEM: if memory allocation fails (for dynamic buffers)
  *
@@ -1448,26 +1457,11 @@ static char *bmtarget(const char *filepath, char *cwd, char *buf)
 static ssize_t shell_escape(char **poutbuf, size_t *outlen, const char *inbuf)
 {
 	size_t n = xstrlen(inbuf), w = 0;
-	char *buf;
-	size_t buflen;
-	int is_dynamic = (*poutbuf == NULL);
+	char *buf = *poutbuf;
+	size_t buflen = 0;
+	bool is_dynamic = (buf == NULL);
 
-	if (inbuf == (const char *)(*poutbuf)) {
-		errno = EINVAL;
-		return -1;
-	}
-
-	/* Initialize buffer for dynamic allocation */
-	if (is_dynamic) {
-		buflen = (*outlen > 0) ? *outlen : 256; /* default 256 byte chunks */
-		buf = malloc(buflen);
-		if (!buf) {
-			errno = ENOMEM;
-			return -1;
-		}
-		*poutbuf = buf;
-		*outlen = buflen;
-	} else {
+	if (!is_dynamic) {
 		buf = *poutbuf;
 		buflen = *outlen;
 		if (buflen < 3) {
@@ -1476,13 +1470,12 @@ static ssize_t shell_escape(char **poutbuf, size_t *outlen, const char *inbuf)
 		}
 	}
 
-	buf[w++] = '\''; /* begin single quote */
-	for (size_t r = 0; r < n; ++r) {
-		/* potentially too big: 4 for the single quote case, 2 from
-		 * outside the loop */
-		if (w + 6 >= buflen) {
+	/* r=0: opening quote, r=1..n: escaped chars, r=n+1: closing quote */
+	for (size_t r = 0; r < (n + 2); ++r) {
+		/* 4 for the single quote case, 1 from NULL terminator */
+		if (w + 5 >= buflen) {
 			if (is_dynamic) {
-				/* Grow buffer by chunk size for dynamic allocation */
+				/* Grow buffer; realloc(NULL, ...) acts as malloc */
 				size_t newsize = buflen + (*outlen > 0 ? *outlen : 256);
 				char *newbuf = realloc(buf, newsize);
 				if (!newbuf) {
@@ -1501,7 +1494,12 @@ static ssize_t shell_escape(char **poutbuf, size_t *outlen, const char *inbuf)
 			}
 		}
 
-		switch (inbuf[r]) {
+		if ((r == 0) || (r == (n + 1))) {
+			buf[w++] = '\'';
+			continue;
+		}
+
+		switch (inbuf[r - 1]) {
 		/* the only thing that has special meaning inside single
 		 * quotes are single quotes themselves. */
 		case '\'':
@@ -1511,12 +1509,12 @@ static ssize_t shell_escape(char **poutbuf, size_t *outlen, const char *inbuf)
 			buf[w++] = '\''; /* start single quoting again */
 			break;
 		default:
-			buf[w++] = inbuf[r];
+			buf[w++] = inbuf[r - 1];
 			break;
 		}
 	}
-	buf[w++] = '\''; /* end single quote */
-	buf[w]   = '\0'; /* nul terminator */
+
+	buf[w] = '\0'; // NOLINT
 	return w;
 }
 
