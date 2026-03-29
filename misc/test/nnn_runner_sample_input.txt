@@ -1,0 +1,55 @@
+# Sample nnn test: basic navigation
+# Lines starting with '#' are comments
+# Lines starting with '>' send literal text
+# Lines starting with '@' are directives
+# All other lines are key names (see nnn_runner.sh header)
+
+# Verify nnn started and shows the test directory
+@assert file1.txt
+@assert dir1
+
+# Move cursor down
+j
+@sleep 100
+
+# Move cursor down again
+j
+@sleep 100
+
+# Take a snapshot of the current state
+@snapshot after-nav-down
+
+# Move cursor up
+k
+
+# Toggle detail mode
+d
+@sleep 200
+@snapshot detail-mode
+
+# Toggle detail mode off
+d
+
+# Mark offset before filter so @refute checks only filtered output
+@mark
+
+# Open filter prompt
+/
+@sleep 100
+
+# Type a filter pattern (literal text)
+>file
+@sleep 300
+@assert file1.txt
+@assert file2.txt
+@refute dir1
+@snapshot filtered
+
+# Clear filter with Escape
+Escape
+@sleep 200
+
+# Quit nnn
+q
+@sleep 300
+@snapshot after-quit
