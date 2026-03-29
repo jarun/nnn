@@ -1391,41 +1391,132 @@ static char *bmtarget(const char *filepath, char *cwd, char *buf)
 	return NULL;
 }
 
-/* wraps the argument in single quotes so it can be safely fed to shell */
-static ssize_t shell_escape(char *output, size_t outlen, const char *s)
+/**
+ * shell_escape - Escape a string for safe shell usage with single quotes
+ *
+ * @poutbuf: Pointer to output buffer pointer. If *poutbuf is NULL, memory will be
+ *           dynamically allocated. If *poutbuf is non-NULL, it must point to a
+ *           buffer of at least *outlen bytes. In dynamic allocation mode, the
+ *           caller is responsible for freeing the allocated memory.
+ *
+ * @outlen: Pointer to the output buffer size. When input is provided:
+ *          - The caller allocates a buffer and sets *outlen to its size
+ *          - The buffer must be at least 3 bytes
+ *          When poutbuf is NULL (dynamic allocation):
+ *          - Set *outlen to the desired initial chunk size (or 0 for default 256)
+ *          - It will be updated to track the allocated size
+ *          - The caller must free the memory in *poutbuf when done
+ *
+ * @inbuf: The input string to escape (must not be NULL)
+ *
+ * Return value: On success, returns the length of the escaped string (not including
+ *               the null terminator). On error, returns -1 and sets errno:
+ *               - EINVAL: if inbuf == poutbuf or outlen < 3 (for fixed buffers)
+ *               - ENAMETOOLONG: if the output buffer is too small (for fixed buffers)
+ *               - ENOMEM: if memory allocation fails (for dynamic buffers)
+ *
+ * Usage examples:
+ *
+ * Example 1: Using a fixed-size buffer (caller-allocated):
+ *     char buf[256];
+ *     size_t len = sizeof(buf);
+ *     ssize_t result = shell_escape(&buf, &len, "my file.txt");
+ *     if (result >= 0) {
+ *         printf("Escaped: %s", buf);
+ *     }
+ *
+ * Example 2: Using dynamic allocation (caller must free):
+ *     char *escaped = NULL;
+ *     size_t capacity = 0;  // 0 uses default initial size
+ *     ssize_t result = shell_escape(&escaped, &capacity, "my file.txt");
+ *     if (result >= 0) {
+ *         printf("Escaped: %s", escaped);
+ *         free(escaped);
+ *     } else {
+ *         fprintf(stderr, "Error: %s", strerror(errno));
+ *     }
+ *
+ * Example 3: Dynamic allocation with specific initial size:
+ *     char *escaped = NULL;
+ *     size_t capacity = 512;  // Start with 512 byte chunks
+ *     ssize_t result = shell_escape(&escaped, &capacity, input_path);
+ *     if (result >= 0) {
+ *         use_escaped_path(escaped);
+ *         free(escaped);
+ *     }
+ */
+static ssize_t shell_escape(char **poutbuf, size_t *outlen, const char *inbuf)
 {
-	size_t n = xstrlen(s), w = 0;
+	size_t n = xstrlen(inbuf), w = 0;
+	char *buf;
+	size_t buflen;
+	int is_dynamic = (*poutbuf == NULL);
 
-	if (s == output || outlen < 3) {
+	if (inbuf == (const char *)(*poutbuf)) {
 		errno = EINVAL;
 		return -1;
 	}
 
-	output[w++] = '\''; /* begin single quote */
+	/* Initialize buffer for dynamic allocation */
+	if (is_dynamic) {
+		buflen = (*outlen > 0) ? *outlen : 256; /* default 256 byte chunks */
+		buf = malloc(buflen);
+		if (!buf) {
+			errno = ENOMEM;
+			return -1;
+		}
+		*poutbuf = buf;
+		*outlen = buflen;
+	} else {
+		buf = *poutbuf;
+		buflen = *outlen;
+		if (buflen < 3) {
+			errno = EINVAL;
+			return -1;
+		}
+	}
+
+	buf[w++] = '\''; /* begin single quote */
 	for (size_t r = 0; r < n; ++r) {
 		/* potentially too big: 4 for the single quote case, 2 from
 		 * outside the loop */
-		if (w + 6 >= outlen) {
-			errno = ENAMETOOLONG;
-			return -1;
+		if (w + 6 >= buflen) {
+			if (is_dynamic) {
+				/* Grow buffer by chunk size for dynamic allocation */
+				size_t newsize = buflen + (*outlen > 0 ? *outlen : 256);
+				char *newbuf = realloc(buf, newsize);
+				if (!newbuf) {
+					free(buf);
+					*poutbuf = NULL;
+					errno = ENOMEM;
+					return -1;
+				}
+				buf = newbuf;
+				buflen = newsize;
+				*poutbuf = buf;
+				*outlen = buflen;
+			} else {
+				errno = ENAMETOOLONG;
+				return -1;
+			}
 		}
 
-		switch (s[r]) {
+		switch (inbuf[r]) {
 		/* the only thing that has special meaning inside single
 		 * quotes are single quotes themselves. */
 		case '\'':
-			output[w++] = '\''; /* end single quote */
-			output[w++] = '\\'; /* put \' so it's treated as literal single quote */
-			output[w++] = '\'';
-			output[w++] = '\''; /* start single quoting again */
+			buf[w++] = '\''; /* end single quote */
+			buf[w++] = '\\'; /* put \' so it's treated as literal single quote */
+			buf[w++] = '\'';
+			buf[w++] = '\''; /* start single quoting again */
 			break;
 		default:
-			output[w++] = s[r];
+			buf[w++] = inbuf[r];
 			break;
 		}
 	}
-	output[w++] = '\''; /* end single quote */
-	output[w]   = '\0'; /* nul terminator */
+	buf[w++] = '\''; /* end single quote */
+	buf[w]   = '\0'; /* nul terminator */
 	return w;
 }
 
@@ -2922,8 +3013,15 @@ static void write_lastdir(const char *curpath, const char *outfile)
 			? (tilde ? g_buf : outfile)
 			: cfgpath, O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR | S_IRUSR);
 	if (fd >= 0) {
-		memcpy(g_buf, "cd ", 3);  // NOLINT
-		ssize_t l = shell_escape(g_buf + 3, sizeof(g_buf) - 3, curpath);
+		char *bufptr = g_buf;
+		size_t buflen = sizeof(g_buf) - 3;
+
+		*bufptr++ = 'c';
+		*bufptr++ = 'd';
+		*bufptr++ = ' ';
+		*bufptr = '\0';
+
+		ssize_t l = shell_escape(&bufptr, &buflen, curpath);
 		ok = l >= 0 && write(fd, g_buf, l + 3) == l + 3;
 		close(fd);
 	}
