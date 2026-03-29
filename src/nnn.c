@@ -821,11 +821,11 @@ static const char * const toks[] = {
 #define P_ARCHIVE_CMD 4
 
 static const char * const patterns[] = {
-	SED" -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' %s",
+	SED" -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' '%s'",
 	SED" 's|^\\([^#/][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
-		"%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
+		"'%s' | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
 	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$", /* Basic formats that don't need external tools */
-	SED" -i 's|^%s\\(.*\\)$|%s\\1|' %s",
+	SED" -i 's|^%s\\(.*\\)$|%s\\1|' '%s'",
 	"xargs -0 %s %s < %s",
 };
 
@@ -2801,7 +2801,7 @@ static bool cpmv_rename(int choice, const char *path)
 
 	/* selsafe() returned TRUE for this to be called */
 	if (!selbufpos) {
-		snprintf(buf, sizeof(buf), "tr '\\0' '\\n' < '%s' > %s", selpath, g_tmpfpath);
+		snprintf(buf, sizeof(buf), "tr '\\0' '\\n' < '%s' > '%s'", selpath, g_tmpfpath);
 		spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
 
 		count = entries_in_file(fd, buf, sizeof(buf), NEWLINE_CHAR);
@@ -2900,7 +2900,7 @@ static bool batch_rename(void)
 	uint_t count = 0, lines = 0;
 	bool dir = FALSE, ret = FALSE;
 	char foriginal[TMP_LEN_MAX] = {0};
-	static const char batchrenamecmd[] = "paste -d'\n' %s %s | "SED" 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
+	static const char batchrenamecmd[] = "paste -d'\n' '%s' '%s' | "SED" 'N; /^\\(.*\\)\\n\\1$/!p;d' | "
 					     "tr '\n' '\\0' | xargs -0 -n2 sh -c 'mv -i -- \"$0\" \"$@\" <"
 					     " /dev/tty'";
 	char buf[sizeof(batchrenamecmd) + (PATH_MAX << 1)];
