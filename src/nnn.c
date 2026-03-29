@@ -826,7 +826,7 @@ static const char * const patterns[] = {
 		"%s | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
 	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$", /* Basic formats that don't need external tools */
 	SED" -i 's|^%s\\(.*\\)$|%s\\1|' %s",
-	"xargs -0 %s %s < '%s'",
+	"xargs -0 %s %s < %s",
 };
 
 /* Colors */
@@ -2987,18 +2987,35 @@ static char *get_archive_cmd(const char *archive)
 
 static void archive_selection(const char *cmd, const char *archive)
 {
-	size_t len = xstrlen(patterns[P_ARCHIVE_CMD]) + xstrlen(cmd) + xstrlen(archive)
-	            + xstrlen(selpath) + 1;
-	char *buf = malloc(len);
+	size_t archive_esc_size = 0;
+	size_t selpath_esc_size = 0;
+	char *archive_esc = NULL;
+	char *selpath_esc = NULL;
+	size_t len;
+	char *buf = NULL;
+
+	if (shell_escape(&archive_esc, &archive_esc_size, archive) < 0
+	    || shell_escape(&selpath_esc, &selpath_esc_size, selpath) < 0) {
+		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
+		goto cleanup;
+	}
+
+	len = xstrlen(patterns[P_ARCHIVE_CMD]) + xstrlen(cmd) + xstrlen(archive_esc) + xstrlen(selpath_esc) + 1;
+	buf = malloc(len);
 	if (!buf) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
-		return;
+		goto cleanup;
 	}
 
-	snprintf(buf, len, patterns[P_ARCHIVE_CMD], cmd, archive, selpath);
+	snprintf(buf, len, patterns[P_ARCHIVE_CMD], cmd, archive_esc, selpath_esc);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI | F_CONFIRM);
+
+cleanup:
 	free(buf);
+	free(archive_esc);
+	free(selpath_esc);
 }
 
 static void write_lastdir(const char *curpath, const char *outfile)
