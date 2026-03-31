@@ -4850,10 +4850,10 @@ static void printent_name(const struct entry *ent, uint_t namecols)
 			for (wchar_t *p = wbuf; *p && col < namecols; ++p, ++col) {
 				if (matched[col]) {
 					attron(match_attrs);
-					addch(*p);
+					addnwstr(p, 1);
 					attroff(match_attrs);
 				} else {
-					addch(*p);
+					addnwstr(p, 1);
 				}
 			}
 #else
@@ -4878,10 +4878,10 @@ static void printent_name(const struct entry *ent, uint_t namecols)
 			for (wchar_t *p = wbuf; *p && col < namecols; ++p, ++col) {
 				if (matched[col]) {
 					attron(match_attrs);
-					addch(*p);
+					addnwstr(p, 1);
 					attroff(match_attrs);
 				} else {
-					addch(*p);
+					addnwstr(p, 1);
 				}
 			}
 #else
