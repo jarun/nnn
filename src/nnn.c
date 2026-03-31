@@ -4184,11 +4184,17 @@ static char *xreadline(const char *prefill, const char *prompt)
 				}
 				continue;
 			case '\t':
-				if ((len == pos) && ndents && (pos < (READLINE_MAX - xstrlen(pdents[cur].name)))) {
-					buf[pos] = '\0';
-					lpos = mbstowcs(NULL, pdents[cur].name, MB_CUR_MAX);
-					pos += mbstowcs(buf + wcslen(buf), pdents[cur].name, lpos);
-					len = pos;
+				if ((len == pos) && ndents) {
+					char *escptr = g_buf;
+					size_t esclen = CMD_LEN_MAX;
+					ssize_t elen = shell_escape(&escptr, &esclen, pdents[cur].name);
+
+					if (elen > 0 && (pos < (READLINE_MAX - (size_t)elen))) {
+						buf[pos] = '\0';
+						lpos = mbstowcs(NULL, g_buf, 0);
+						pos += mbstowcs(buf + wcslen(buf), g_buf, lpos + 1);
+						len = pos;
+					}
 				}
 				continue;
 			case CONTROL('F'):
@@ -6604,7 +6610,9 @@ static bool prompt_run(void)
 	int cnt_j, cnt_J, cmd_ret;
 	size_t len;
 
+	/* Run the command once per selected file */
 	const char *xargs_j = "xargs -0 -I{} %s < '%s'";
+	/* Append all selected files as arguments at once to the command */
 	const char *xargs_J = "xargs -0 %s < '%s'";
 	char cmd[CMD_LEN_MAX + 32]; // 32 for xargs format strings
 
