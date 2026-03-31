@@ -6603,7 +6603,7 @@ static bool launch_app(char *newpath)
 }
 
 /* Returns TRUE if at least one command was run */
-static bool prompt_run(void)
+static bool prompt_run(char *path, char *lastdir)
 {
 	bool ret = FALSE;
 	char *cmdline, *next;
@@ -6669,6 +6669,63 @@ static bool prompt_run(void)
 		else if (cnt_J)
 			snprintf(cmd, CMD_LEN_MAX + 32, xargs_J, cmdline, selpath);
 
+		/* Pre-parse cd command before spawn overwrites cmdline (g_buf) */
+		bool is_cd = (!cnt_j && !cnt_J
+			      && cmdline[0] == 'c' && cmdline[1] == 'd'
+			      && (cmdline[2] == '\0' || cmdline[2] == ' '));
+		bool is_cd_dash = false;
+
+		cmd[0] = '\0';
+		if (is_cd) {
+			const char *dir = NULL;
+
+			if (cmdline[2] == '\0' || cmdline[3] == '\0'
+			    || (cmdline[3] == '~' && (cmdline[4] == '\0' || cmdline[4] == ' ')))
+				dir = home;
+			else if (cmdline[3] == '-' && (cmdline[4] == '\0' || cmdline[4] == ' ')) {
+				dir = lastdir;
+				is_cd_dash = true;
+			} else if (cmdline[3] == '~' && cmdline[4] == '/') {
+				snprintf(cmd, PATH_MAX, "%s%s", home, cmdline + 4);
+				dir = cmd;
+			} else
+				dir = cmdline + 3;
+
+			if (dir && *dir) {
+				if (is_cd_dash) {
+					xstrsncpy(cmd, dir, PATH_MAX);
+				} else {
+					/* Strip single quotes from shell-escaped path */
+					const char *s = dir;
+					size_t d = 0;
+
+					while (*s && d < PATH_MAX - 1) {
+						if (*s == '\'') {
+							++s;
+							continue;
+						}
+						if (*s == '\\' && s[1] == '\'') {
+							cmd[d++] = '\'';
+							s += 2;
+							continue;
+						}
+						cmd[d++] = *s++;
+					}
+					cmd[d] = '\0';
+				}
+			}
+		}
+
+		/* Sync nnn directory with cd */
+		if (is_cd && cmd[0]) {
+			if (realpath(cmd, g_buf) && xdiraccess(g_buf)) {
+				xstrsncpy(lastdir, path, PATH_MAX);
+				xstrsncpy(path, g_buf, PATH_MAX);
+				clearfilter();
+				break;
+			}
+		}
+
 		cmd_ret = spawn(shell, "-c", (cnt_j || cnt_J) ? cmd : cmdline, NULL, F_CLI | F_CONFIRM);
 		if ((cnt_j || cnt_J) && cmd_ret == 0)
 			clearselection();
@@ -6677,7 +6734,7 @@ static bool prompt_run(void)
 	return ret;
 }
 
-static bool handle_cmd(enum action sel, char *path, char *newpath)
+static bool handle_cmd(enum action sel, char *path, char *newpath, char *lastdir)
 {
 	endselection(FALSE);
 
@@ -6687,7 +6744,7 @@ static bool handle_cmd(enum action sel, char *path, char *newpath)
 	setexports(path);
 
 	if (sel == SEL_PROMPT)
-		return prompt_run();
+		return prompt_run(path, lastdir);
 
 	/* Set nnn nesting level */
 	char *tmp = getenv(env_cfg[NNNLVL]);
@@ -9346,7 +9403,7 @@ nochange:
 		case SEL_SHELL: // fallthrough
 		case SEL_LAUNCH: // fallthrough
 		case SEL_PROMPT:
-			r = handle_cmd(sel, path, newpath);
+			r = handle_cmd(sel, path, newpath, lastdir);
 
 			/* Continue in type-to-nav mode, if enabled */
 			if (cfg.filtermode)
