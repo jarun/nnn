@@ -1,0 +1,47 @@
+#!/usr/bin/env sh
+
+# Description: Only works inside a tmux session - Opens files in Neovim.
+#              If $NVIM is set and its server is alive, files are opened
+#              in that server. Otherwise, a new pane is split on the left
+#              and files are opened there until the nnn pane is closed.
+#
+# Dependencies: tmux neovim
+#
+# Tip: Exec nnn inside Neovim pane via a leader key
+#
+#        vim.keymap.set("n", "<Leader>n", function()
+#          if vim.env.TMUX then
+#            vim.fn.system({
+#              "tmux", "split-window", "-h",
+#              "-c", vim.fn.getcwd(),
+#              "-e", "NVIM=" .. vim.v.servername,
+#              "exec nnn"
+#            })
+#          end
+#        end)
+#
+# Shell: POSIX compliant
+# Author: 8lackfish
+
+fpath="${2:+$2/}$1"
+
+if [ -n "$TMUX" ]; then
+    if [ -S "$NVIM" ]; then
+        svname="$NVIM"
+        nvim --server "$svname" --remote "$fpath"
+    else
+        id=$(tmux display-message -p '#{pane_id}.#{window_id}.#{session_id}' | tr -d '%@$')
+        svname="${XDG_RUNTIME_DIR:-/tmp}/nvim.nnn-tnp.$id"
+        if [ -S "$svname" ]; then
+            nvim --server "$svname" --remote "$fpath"
+        else
+            tmux split-pane -bdh "nvim --listen \"${svname}\" \"${fpath}\""
+        fi
+    fi
+    until nvim --headless --server "$svname" \
+        --remote-expr "execute('%argdelete')" >/dev/null 2>&1
+    do :; done
+else
+    printf "\n'%s' only works inside a tmux session" "$(basename "$0")"
+    printf "\n\n'Enter' to return"; read -r _
+fi

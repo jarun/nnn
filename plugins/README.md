@@ -63,6 +63,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [rsynccp](rsynccp) | Gives copy-paste verbose progress percentage [✓] | sh | rsync |
 | [splitjoin](splitjoin) | Split file or join selection [✓] | sh | split, cat |
 | [suedit](suedit) | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
+| [tnp](tnp) | Opens files in a Tmux Neovim pane (Tmux session only) | sh | tmux, nvim |
 | [togglex](togglex) | Toggle executable mode for selection [✓] | sh | chmod |
 | [umounttree](umounttree) | Unmount a remote mountpoint from within | sh | fusermount |
 | [upload](upload) | Upload to Firefox Send or ix.io (text) or file.io (bin) | sh | [ffsend](https://github.com/timvisee/ffsend), curl, jq, tr |
