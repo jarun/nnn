@@ -4121,6 +4121,8 @@ static char *xreadline(const char *prefill, const char *prompt)
 	const int WCHAR_T_WIDTH = sizeof(wchar_t);
 	wint_t ch[1];
 	wchar_t * const buf = malloc(sizeof(wchar_t) * (READLINE_MAX + 1)); // 1 element extra for handling full-width characters
+	int tab_cycle = -1;   /* index into pdents for Tab cycling, -1 = inactive */
+	size_t tab_basepos = 0; /* position in buf before Tab insertion */
 
 	if (!buf)
 		errexit();
@@ -4146,6 +4148,8 @@ static char *xreadline(const char *prefill, const char *prompt)
 		buf[len] = ' ';
 		buf[len + 1] = ' '; // Handle full-width characters
 
+		move(xlines - 1, x);
+		clrtoeol();
 		attron(COLOR_PAIR(cfg.curctx + 1));
 		if (pos > (size_t)(xcols - x)) {
 			mvaddnwstr(xlines - 1, x, buf + (pos - (xcols - x) + 1), xcols - x + 1);
@@ -4159,6 +4163,9 @@ static char *xreadline(const char *prefill, const char *prompt)
 		r = get_wch(ch);
 		if (r == ERR)
 			continue;
+
+		if (!(r == OK && *ch == '\t'))
+			tab_cycle = -1;
 
 		if (r == OK) {
 			switch (*ch) {
@@ -4184,16 +4191,32 @@ static char *xreadline(const char *prefill, const char *prompt)
 				}
 				continue;
 			case '\t':
-				if ((len == pos) && ndents) {
+				if (ndents) {
+					int idx;
+
+					if (tab_cycle < 0) {
+						/* First Tab: start cycling from cur */
+						tab_basepos = pos;
+						/* Only allow appending at end */
+						if (len != pos)
+							continue;
+						idx = cur;
+					} else {
+						/* Subsequent Tab: remove previous insertion, advance */
+						len = pos = tab_basepos;
+						idx = (tab_cycle + 1) % ndents;
+					}
+
 					char *escptr = g_buf;
 					size_t esclen = CMD_LEN_MAX;
-					ssize_t elen = shell_escape(&escptr, &esclen, pdents[cur].name);
+					ssize_t elen = shell_escape(&escptr, &esclen, pdents[idx].name);
 
-					if (elen > 0 && (pos < (READLINE_MAX - (size_t)elen))) {
-						buf[pos] = '\0';
+					if (elen > 0 && (tab_basepos < (READLINE_MAX - (size_t)elen))) {
+						buf[tab_basepos] = '\0';
 						lpos = mbstowcs(NULL, g_buf, 0);
-						pos += mbstowcs(buf + wcslen(buf), g_buf, lpos + 1);
+						pos = tab_basepos + mbstowcs(buf + tab_basepos, g_buf, lpos + 1);
 						len = pos;
+						tab_cycle = idx;
 					}
 				}
 				continue;
