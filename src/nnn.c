@@ -3573,7 +3573,7 @@ try_quit:
 			i = get_wch(&c);
 			if (i != ERR) {
 				if (c == ESC)
-					c = CONTROL('L');
+					c = 'q'; /* Quit context */
 				else {
 					unget_wch(c);
 					c = ';';
@@ -6249,12 +6249,12 @@ static void show_help(const char *path)
 		"a1-4  Context%11(Sh)Tab  Cycle/new context\n"
 	    "62Esc ^Q  Quit%19^y  Next young\n"
 		 "b^G  QuitCD%18Q  Pick/err, quit\n"
-		  "cq  Quit context\n"
+	  "4q Alt+Esc  Quit context%11^L  Refresh dir\n"
 	"0\n"
 	"1FILTER & PROMPT\n"
 		  "c/  Filter%17^N  Toggle type-to-nav\n"
 		"aEsc  Exit prompt%12^L  Toggle last filter\n"
-		  "c.  Toggle hidden%05Alt+Esc  Unfilter, quit context\n"
+		  "c.  Toggle hidden\n"
 	"0\n"
 	"1FILES\n"
 	       "9o ^O  Open with%15n  Create new/link\n"
