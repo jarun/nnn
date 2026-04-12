@@ -409,7 +409,8 @@ typedef struct {
 	uint_t usebsdtar  : 1;  /* Use bsdtar as default archive utility */
 	uint_t xprompt    : 1;  /* Use native prompt instead of readline prompt */
 	uint_t showlines  : 1;  /* Show line numbers */
-	uint_t reserved   : 5;  /* Adjust when adding/removing a field */
+	uint_t plugparsed : 1;  /* Plugin kv pairs parsed */
+	uint_t reserved   : 4;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -6160,6 +6161,18 @@ static void printkv(kv *kvarr, FILE *f, uchar_t max, uchar_t id)
 		fprintf(f, " %c: %s\n", (char)kvarr[i].key, val + kvarr[i].off);
 }
 
+static bool lazy_parse_plug(void)
+{
+	if (!g_state.plugparsed) {
+		g_state.plugparsed = 1;
+		if (!parsekvpair(&plug, &pluginstr, NNN_PLUG, &maxplug)) {
+			printwait(env_cfg[NNN_PLUG], NULL);
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
 static void printkeys(kv *kvarr, char *buf, uchar_t max)
 {
 	uchar_t i = 0;
@@ -6337,6 +6350,7 @@ static void show_help(const char *path)
 		fprintf(f, "\n");
 	}
 
+	lazy_parse_plug();
 	if (plug) {
 		fprintf(f, "PLUGIN KEYS\n");
 		printkv(plug, f, maxplug, NNN_PLUG);
@@ -9426,6 +9440,7 @@ nochange:
 				goto nochange;
 			}
 
+			lazy_parse_plug();
 			if (!pkey) {
 				r = xstrsncpy(g_buf, messages[MSG_KEYS], CMD_LEN_MAX);
 				printkeys(plug, g_buf + r - 1, maxplug);
@@ -10320,12 +10335,6 @@ int main(int argc, char *argv[])
 	/* Parse bookmarks string */
 	if (!parsekvpair(&bookmark, &bmstr, NNN_BMS, &maxbm)) {
 		msg(env_cfg[NNN_BMS]);
-		return EXIT_FAILURE;
-	}
-
-	/* Parse plugins string */
-	if (!parsekvpair(&plug, &pluginstr, NNN_PLUG, &maxplug)) {
-		msg(env_cfg[NNN_PLUG]);
 		return EXIT_FAILURE;
 	}
 
