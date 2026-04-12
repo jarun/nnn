@@ -792,6 +792,17 @@ static const char * const envs[] = {
 #define T_CHANGE 1
 #define T_MOD    2
 
+/* Platform-agnostic nanosecond timestamp accessors */
+#ifdef __APPLE__
+#define NSEC_MTIME(sb) ((uint_t)(sb).st_mtimespec.tv_nsec)
+#define NSEC_ATIME(sb) ((uint_t)(sb).st_atimespec.tv_nsec)
+#define NSEC_CTIME(sb) ((uint_t)(sb).st_ctimespec.tv_nsec)
+#else
+#define NSEC_MTIME(sb) ((uint_t)(sb).st_mtim.tv_nsec)
+#define NSEC_ATIME(sb) ((uint_t)(sb).st_atim.tv_nsec)
+#define NSEC_CTIME(sb) ((uint_t)(sb).st_ctim.tv_nsec)
+#endif
+
 #define PROGRESS_CP   "cpg -giRp --"
 #define PROGRESS_MV   "mvg -gi --"
 static char cp[sizeof PROGRESS_CP] = "cp -iRp --";
@@ -2132,6 +2143,14 @@ static int scanselforpath(const char *path, bool getsize)
 }
 
 /* Finish selection procedure before an operation */
+static void rmtmpfile(void)
+{
+	if (unlink(g_tmpfpath)) {
+		DPRINTF_S(strerror(errno));
+		printwarn(NULL);
+	}
+}
+
 static void endselection(bool endselmode)
 {
 	int fd;
@@ -2165,10 +2184,7 @@ static void endselection(bool endselmode)
 	if (fd == -1) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
-		if (unlink(g_tmpfpath)) {
-			DPRINTF_S(strerror(errno));
-			printwarn(NULL);
-		}
+		rmtmpfile();
 		return;
 	}
 
@@ -2225,10 +2241,7 @@ static int editselection(bool allowemptysel)
 	/* Save the last modification time */
 	if (stat(g_tmpfpath, &sb)) {
 		DPRINTF_S(strerror(errno));
-		if (unlink(g_tmpfpath)) {
-			DPRINTF_S(strerror(errno));
-			printwarn(NULL);
-		}
+		rmtmpfile();
 		return -1;
 	}
 	mtime = sb.st_mtime;
@@ -2238,10 +2251,7 @@ static int editselection(bool allowemptysel)
 	fd = open(g_tmpfpath, O_RDONLY);
 	if (fd == -1) {
 		DPRINTF_S(strerror(errno));
-		if (unlink(g_tmpfpath)) {
-			DPRINTF_S(strerror(errno));
-			printwarn(NULL);
-		}
+		rmtmpfile();
 		return -1;
 	}
 
@@ -2261,10 +2271,7 @@ static int editselection(bool allowemptysel)
 		selbufrealloc(sb.st_size);
 	else if (sb.st_size > selbufpos) {
 		DPRINTF_S("edited buffer larger than previous");
-		if (unlink(g_tmpfpath)) {
-			DPRINTF_S(strerror(errno));
-			printwarn(NULL);
-		}
+		rmtmpfile();
 		goto emptyedit;
 	}
 
@@ -2272,10 +2279,8 @@ static int editselection(bool allowemptysel)
 	if (count < 0) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
-		if (close(fd) || unlink(g_tmpfpath)) {
-			DPRINTF_S(strerror(errno));
-			printwarn(NULL);
-		}
+		close(fd);
+		rmtmpfile();
 		goto emptyedit;
 	}
 
@@ -6968,6 +6973,17 @@ static inline void add_blocks(blkcnt_t *tblocks, const struct stat *sb)
 		*tblocks += sb->st_blocks;
 }
 
+/* Stat entry only if not already cached */
+static inline bool lazy_stat(int fd, const char *name, struct stat *sb, bool *valid)
+{
+	if (!*valid) {
+		if (fstatat(fd, name, sb, AT_SYMLINK_NOFOLLOW) == -1)
+			return false;
+		*valid = true;
+	}
+	return true;
+}
+
 static void du_walk_dir(const char *root, du_group *group, bool count_root, ullong_t *tfiles, blkcnt_t *tblocks)
 {
 	struct stat sb_root;
@@ -7010,20 +7026,12 @@ static void du_walk_dir(const char *root, du_group *group, bool count_root, ullo
 
 		/* Count blocks for directories and regular files */
 		if (is_dir) {
-			/* Stat if we haven't already */
-			if (!sb_valid) {
-				if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
-					continue;
-				sb_valid = true;
-			}
+			if (!lazy_stat(dfd, dp->d_name, &sb, &sb_valid))
+				continue;
 			add_blocks(tblocks, &sb);
 		} else if (is_reg) {
-			/* Stat if we haven't already */
-			if (!sb_valid) {
-				if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
-					continue;
-				sb_valid = true;
-			}
+			if (!lazy_stat(dfd, dp->d_name, &sb, &sb_valid))
+				continue;
 			/* Do not recount hard links */
 			if (sb.st_size && (sb.st_nlink <= 1 || test_set_bit((uint_t)sb.st_ino)))
 				add_blocks(tblocks, &sb);
@@ -7033,11 +7041,8 @@ static void du_walk_dir(const char *root, du_group *group, bool count_root, ullo
 
 		/* Add subdirectories to task queue for worker threads */
 		if (is_dir) {
-			/* Stat if we haven't already to get device for xdev check */
-			if (!sb_valid) {
-				if (fstatat(dfd, dp->d_name, &sb, AT_SYMLINK_NOFOLLOW) == -1)
-					continue;
-			}
+			if (!lazy_stat(dfd, dp->d_name, &sb, &sb_valid))
+				continue;
 			if (sb.st_dev == root_dev) {
 				char childbuf[PATH_MAX];
 				mkpath(root, dp->d_name, childbuf);
@@ -7393,25 +7398,13 @@ static int dentfill(char *path, struct entry **ppdents)
 		/* Copy other fields */
 		if (cfg.timetype == T_MOD) {
 			dentp->sec = sb.st_mtime;
-#ifdef __APPLE__
-			dentp->nsec = (uint_t)sb.st_mtimespec.tv_nsec;
-#else
-			dentp->nsec = (uint_t)sb.st_mtim.tv_nsec;
-#endif
+			dentp->nsec = NSEC_MTIME(sb);
 		} else if (cfg.timetype == T_ACCESS) {
 			dentp->sec = sb.st_atime;
-#ifdef __APPLE__
-			dentp->nsec = (uint_t)sb.st_atimespec.tv_nsec;
-#else
-			dentp->nsec = (uint_t)sb.st_atim.tv_nsec;
-#endif
+			dentp->nsec = NSEC_ATIME(sb);
 		} else {
 			dentp->sec = sb.st_ctime;
-#ifdef __APPLE__
-			dentp->nsec = (uint_t)sb.st_ctimespec.tv_nsec;
-#else
-			dentp->nsec = (uint_t)sb.st_ctim.tv_nsec;
-#endif
+			dentp->nsec = NSEC_CTIME(sb);
 		}
 
 		if ((gtimesecs - sb.st_mtime <= 300) || (gtimesecs - sb.st_ctime <= 300))
@@ -7780,6 +7773,15 @@ static int handle_context_switch(enum action sel)
 	return r;
 }
 
+static void reset_sort_flags(void)
+{
+	cfg.timeorder = 0;
+	cfg.sizeorder = 0;
+	cfg.apparentsz = 0;
+	cfg.blkorder = 0;
+	cfg.extnorder = 0;
+}
+
 static int set_sort_flags(int r)
 {
 	bool session = (r == '\0');
@@ -7842,55 +7844,44 @@ static int set_sort_flags(int r)
 		endselection(TRUE); /* We are going to reload dir */
 		break;
 	case 'c':
-		cfg.timeorder = 0;
-		cfg.sizeorder = 0;
-		cfg.apparentsz = 0;
-		cfg.blkorder = 0;
-		cfg.extnorder = 0;
+		reset_sort_flags();
 		cfg.reverse = 0;
 		cfg.version = 0;
 		entrycmpfn = &entrycmp;
 		namecmpfn = &xstricmp;
 		break;
-	case 'e': /* File extension */
-		cfg.extnorder ^= 1;
-		cfg.sizeorder = 0;
-		cfg.timeorder = 0;
-		cfg.apparentsz = 0;
-		cfg.blkorder = 0;
+	case 'e': /* File extension */ {
+		bool val = cfg.extnorder ^ 1;
+		reset_sort_flags();
+		cfg.extnorder = val;
 		cfg.reverse = 0;
 		entrycmpfn = &entrycmp;
 		break;
+	}
 	case 'r': /* Reverse sort */
 		cfg.reverse ^= 1;
 		entrycmpfn = cfg.reverse ? &reventrycmp : &entrycmp;
 		break;
-	case 's': /* File size */
-		cfg.sizeorder ^= 1;
-		cfg.timeorder = 0;
-		cfg.apparentsz = 0;
-		cfg.blkorder = 0;
-		cfg.extnorder = 0;
+	case 's': /* File size */ {
+		bool val = cfg.sizeorder ^ 1;
+		reset_sort_flags();
+		cfg.sizeorder = val;
 		cfg.reverse = 0;
 		entrycmpfn = &entrycmp;
 		break;
-	case 't': /* Time */
-		cfg.timeorder ^= 1;
-		cfg.sizeorder = 0;
-		cfg.apparentsz = 0;
-		cfg.blkorder = 0;
-		cfg.extnorder = 0;
+	}
+	case 't': /* Time */ {
+		bool val = cfg.timeorder ^ 1;
+		reset_sort_flags();
+		cfg.timeorder = val;
 		cfg.reverse = 0;
 		entrycmpfn = &entrycmp;
 		break;
+	}
 	case 'v': /* Version */
 		cfg.version ^= 1;
 		namecmpfn = cfg.version ? &xstrverscasecmp : &xstricmp;
-		cfg.timeorder = 0;
-		cfg.sizeorder = 0;
-		cfg.apparentsz = 0;
-		cfg.blkorder = 0;
-		cfg.extnorder = 0;
+		reset_sort_flags();
 		break;
 	default:
 		return 0;
