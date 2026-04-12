@@ -358,7 +358,7 @@ typedef struct {
 	uint_t blkorder   : 1;  /* Set to sort by blocks used (disk usage) */
 	uint_t extnorder  : 1;  /* Order by extension */
 	uint_t showhidden : 1;  /* Set to show hidden files */
-	uint_t reserved0  : 1;
+	uint_t preview    : 1;  /* Show preview pane */
 	uint_t showdetail : 1;  /* Clear to show lesser file info */
 	uint_t ctxactive  : 1;  /* Context active or not */
 	uint_t reverse    : 1;  /* Reverse sort */
@@ -477,6 +477,7 @@ static char *plgpath;
 static char *pnamebuf, *pselbuf, *findselpos;
 static char *mark;
 static char *trashcmd;
+static char *previewer = NULL;
 #ifndef NOX11
 static char hostname[_POSIX_HOST_NAME_MAX + 1];
 #endif
@@ -604,6 +605,7 @@ static runstate g_state;
 #define UTIL_GIO_TRASH 19
 #define UTIL_RM_RF     20
 #define UTIL_ARCHMNT   21
+#define UTIL_NPREVIEW  22
 
 /* Utilities to open files, run actions */
 static char * const utils[] = {
@@ -645,6 +647,7 @@ static char * const utils[] = {
 	"gio trash",
 	"rm -rf --",
 	"archivemount",
+	".npreview",
 };
 
 /* Common strings */
@@ -6281,9 +6284,10 @@ static void show_help(const char *path)
 	"1FILES\n"
 	       "9o ^O  Open with%15n  Create new/link\n"
 	       "9f ^F  File stats%14d  Detail mode toggle\n"
-		 "b^R  Rename/dup%14r  Batch rename\n"
-		  "cz  Archive%17e  Edit file\n"
-		  "c*  Toggle exe%14>  Export list\n"
+		 "b^R  Rename/dup%14P  Preview toggle\n"
+		  "cr  Batch rename%12e  Edit file\n"
+		  "cz  Archive%17*  Toggle exe\n"
+		  "c>  Export list\n"
 	    "6Space +  (Un)select%12m-m  Select range/clear\n"
 	          "ca  Select all%14A  Invert sel\n"
 	       "9p ^P  Copy here%12w ^W  Cp/mv sel as\n"
@@ -8064,6 +8068,272 @@ static inline void markhovered(void)
 	}
 }
 
+#define PREVIEW_BORDER_COL (xcols / 2)
+#define PREVIEW_COL        (PREVIEW_BORDER_COL + 2)
+#define PREVIEW_WIDTH      (xcols - PREVIEW_COL - 1)
+#define MIN_PREVIEW_COLS   40
+#define PREVIEW_MAX_LINE   4096
+
+/* Check if a file is likely text by reading initial bytes */
+static bool is_text_file(const char *fpath)
+{
+	int fd = open(fpath, O_RDONLY);
+	if (fd == -1)
+		return FALSE;
+
+	unsigned char buf[512];
+	ssize_t n = read(fd, buf, sizeof(buf));
+	close(fd);
+
+	if (n <= 0)
+		return FALSE;
+
+	/* Reject known binary magic signatures */
+	static const struct {
+		const unsigned char bytes[8];
+		unsigned char len;
+	} magics[] = {
+		{ { '%',  'P',  'D',  'F'              }, 4 }, /* PDF */
+		{ { 0x89, 'P',  'N',  'G'              }, 4 }, /* PNG */
+		{ { 'G',  'I',  'F',  '8'              }, 4 }, /* GIF */
+		{ { 0xFF, 0xD8, 0xFF                   }, 3 }, /* JPEG */
+		{ { 'P',  'K',  0x03, 0x04             }, 4 }, /* ZIP */
+		{ { 0x7F, 'E',  'L',  'F'              }, 4 }, /* ELF */
+		{ { 0x1F, 0x8B                         }, 2 }, /* Gzip */
+		{ { 'B',  'M'                          }, 2 }, /* BMP */
+		{ { 'R',  'I',  'F',  'F'              }, 4 }, /* RIFF */
+		{ { 'O',  'g',  'g',  'S'              }, 4 }, /* OGG */
+		{ { 'f',  'L',  'a',  'C'              }, 4 }, /* FLAC */
+		{ { 'I',  'D',  '3'                    }, 3 }, /* MP3 ID3 */
+		{ { 0xFE, 0xED, 0xFA                   }, 3 }, /* Mach-O */
+		{ { 0xFD, '7',  'z',  'X',  'Z',  0x00 }, 6 }, /* XZ */
+		{ { '7',  'z',  0xBC, 0xAF, 0x27, 0x1C }, 6 }, /* 7z */
+		{ { 'S',  'Q',  'L',  'i',  't',  'e'  }, 6 }, /* SQLite */
+	};
+
+	for (size_t i = 0; i < sizeof(magics) / sizeof(magics[0]); ++i) {
+		if (n >= magics[i].len
+		    && !memcmp(buf, magics[i].bytes, magics[i].len))
+			return FALSE;
+	}
+
+	/* MP3 sync word (needs mask check) */
+	if (n >= 2 && buf[0] == 0xFF && (buf[1] & 0xE0) == 0xE0)
+		return FALSE;
+
+	/* Check for NUL bytes and non-text control characters */
+	for (ssize_t i = 0; i < n; ++i) {
+		unsigned char c = buf[i];
+		if (c == '\0')
+			return FALSE;
+		/* Reject most control chars except common text ones */
+		if (c < 0x20 && c != '\n' && c != '\r' && c != '\t'
+		    && c != '\f' && c != '\033') /* ESC for ANSI */
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+/* Draw the preview pane for the currently hovered file */
+static void preview_pane(const char *path)
+{
+	if (!ndents || !cfg.preview)
+		return;
+
+	int previewcol = PREVIEW_BORDER_COL;
+	int previewwidth = PREVIEW_WIDTH;
+
+	if (previewwidth < MIN_PREVIEW_COLS)
+		return;
+
+	/* Draw vertical border */
+	for (int i = 0; i < xlines - 1; ++i) {
+		move(i, previewcol);
+		addch(ACS_VLINE | A_DIM);
+	}
+
+	char fpath[PATH_MAX];
+	mkpath(path, pdents[cur].name, fpath);
+
+	/* Auto-detect .npreview plugin */
+	if (!previewer) {
+		previewer = malloc(xstrlen(plgpath) + xstrlen(utils[UTIL_NPREVIEW]) + 1);
+		mkpath(plgpath, utils[UTIL_NPREVIEW], previewer);
+		if (access(previewer, X_OK)) {
+			free(previewer);
+			previewer = NULL;
+		}
+	}
+
+	if (previewer) {
+		int pipefd[2];
+		if (pipe(pipefd) == -1)
+			return;
+
+		pid_t pid = fork();
+		if (pid == 0) {
+			close(pipefd[0]);
+			dup2(pipefd[1], STDOUT_FILENO);
+			dup2(pipefd[1], STDERR_FILENO);
+			close(pipefd[1]);
+
+			char widthbuf[16], heightbuf[16];
+			snprintf(widthbuf, sizeof(widthbuf), "%d", previewwidth);
+			snprintf(heightbuf, sizeof(heightbuf), "%d", xlines - 2);
+
+			execlp(previewer, previewer, fpath,
+			       widthbuf, heightbuf,
+			       (char *)NULL);
+			_exit(EXIT_FAILURE);
+		}
+		close(pipefd[1]);
+
+		if (pid > 0) {
+			FILE *fp = fdopen(pipefd[0], "r");
+			if (fp) {
+				char line[PREVIEW_MAX_LINE];
+				int row = 1;
+				int maxrows = xlines - 2;
+
+				while (row < maxrows && fgets(line, sizeof(line), fp)) {
+					size_t len = xstrlen(line);
+					if (len > 0 && line[len - 1] == '\n')
+						line[--len] = '\0';
+					if (len > 0 && line[len - 1] == '\r')
+						line[--len] = '\0';
+
+					/* Replace tabs with spaces */
+					for (size_t i = 0; i < len; ++i)
+						if (line[i] == '\t')
+							line[i] = ' ';
+
+					/* Wrap long lines across multiple rows */
+					int off = 0;
+					do {
+						char save = '\0';
+						if ((int)(len - off) > previewwidth) {
+							save = line[off + previewwidth];
+							line[off + previewwidth] = '\0';
+						}
+						mvaddstr(row, PREVIEW_COL, line + off);
+						if (save)
+							line[off + previewwidth] = save;
+						++row;
+						off += previewwidth;
+					} while (off < (int)len && row < maxrows);
+				}
+				fclose(fp);
+			} else {
+				close(pipefd[0]);
+			}
+			waitpid(pid, NULL, 0);
+		} else {
+			close(pipefd[0]);
+		}
+		return;
+	}
+
+	struct stat sb;
+	if (lstat(fpath, &sb) == -1)
+		return;
+
+	/* For directories, show entry count */
+	if (S_ISDIR(sb.st_mode)) {
+		DIR *dirp = opendir(fpath);
+		if (!dirp)
+			return;
+
+		int count = 0;
+		struct dirent *dp;
+		char namebuf[PATH_MAX];
+		int maxlines = xlines - 4; /* Leave header and status lines */
+
+		mvaddstr(1, PREVIEW_COL, "[directory]");
+
+		while ((dp = readdir(dirp)) && count < maxlines) {
+			if (dp->d_name[0] == '.' && (!dp->d_name[1]
+			    || (dp->d_name[1] == '.' && !dp->d_name[2])))
+				continue;
+			snprintf(namebuf, sizeof(namebuf), "%.*s",
+				 previewwidth, dp->d_name);
+			mvaddstr(2 + count, PREVIEW_COL, namebuf);
+			++count;
+		}
+		closedir(dirp);
+		return;
+	}
+
+	/* For symlinks, resolve and show target */
+	if (S_ISLNK(sb.st_mode)) {
+		char target[PATH_MAX];
+		ssize_t len = readlink(fpath, target, sizeof(target) - 1);
+		if (len > 0) {
+			target[len] = '\0';
+			mvprintw(1, PREVIEW_COL, "-> %.*s", previewwidth - 3, target);
+		}
+		/* Resolve symlink for further preview */
+		if (stat(fpath, &sb) == -1)
+			return;
+		if (!S_ISREG(sb.st_mode))
+			return;
+	}
+
+	/* For regular files, show content preview if text */
+	if (S_ISREG(sb.st_mode)) {
+		if (sb.st_size == 0) {
+			mvaddstr(1, PREVIEW_COL, "[empty file]");
+			return;
+		}
+
+		if (!is_text_file(fpath)) {
+			char szbuf[32];
+			mvprintw(1, PREVIEW_COL, "[binary %s]",
+				 coolsize(sb.st_size));
+			(void)szbuf;
+			return;
+		}
+
+		FILE *fp = fopen(fpath, "r");
+		if (!fp)
+			return;
+
+		char line[PREVIEW_MAX_LINE];
+		int row = 1;
+		int maxrows = xlines - 2; /* Leave top and bottom lines */
+
+		while (row < maxrows && fgets(line, sizeof(line), fp)) {
+			/* Strip trailing newline */
+			size_t len = xstrlen(line);
+			if (len > 0 && line[len - 1] == '\n')
+				line[--len] = '\0';
+			if (len > 0 && line[len - 1] == '\r')
+				line[--len] = '\0';
+
+			/* Replace tabs with spaces for consistent display */
+			for (size_t i = 0; i < len; ++i)
+				if (line[i] == '\t')
+					line[i] = ' ';
+
+			/* Wrap long lines across multiple rows */
+			int off = 0;
+			do {
+				char save = '\0';
+				if ((int)(len - off) > previewwidth) {
+					save = line[off + previewwidth];
+					line[off + previewwidth] = '\0';
+				}
+				mvaddstr(row, PREVIEW_COL, line + off);
+				if (save)
+					line[off + previewwidth] = save;
+				++row;
+				off += previewwidth;
+			} while (off < (int)len && row < maxrows);
+		}
+		fclose(fp);
+	}
+}
+
 static int adjust_cols(int n)
 {
 	/* Calculate the number of cols available to print entry name */
@@ -8123,13 +8393,20 @@ static void redraw(char *path)
 	getmaxyx(stdscr, xlines, xcols);
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
+	/* Limit listing width when preview pane is active */
+	if (cfg.preview && xcols >= (MIN_PREVIEW_COLS * 2 + 1)) {
+		int listcols = PREVIEW_BORDER_COL;
+		if (ncols > listcols)
+			ncols = listcols;
+	}
 	int i, j = 1;
 
 	// Fast redraw
 	if (g_state.move) {
 		g_state.move = 0;
 
-		if (ndents && (last_curscroll == curscroll))
+		if (ndents && (last_curscroll == curscroll)
+		    && !cfg.preview)
 			return draw_line(ncols);
 	}
 
@@ -8252,6 +8529,9 @@ static void redraw(char *path)
 	}
 
 	markhovered();
+
+	if (cfg.preview)
+		preview_pane(path);
 }
 
 static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)
@@ -8941,6 +9221,7 @@ nochange:
 		case SEL_MFLTR: // fallthrough
 		case SEL_HIDDEN: // fallthrough
 		case SEL_DETAIL: // fallthrough
+		case SEL_PREVIEW: // fallthrough
 		case SEL_SORT:
 			switch (sel) {
 			case SEL_MFLTR:
@@ -8965,6 +9246,9 @@ nochange:
 			case SEL_DETAIL:
 				cfg.showdetail ^= 1;
 				cfg.blkorder = 0;
+				continue;
+			case SEL_PREVIEW:
+				cfg.preview ^= 1;
 				continue;
 			default: /* SEL_SORT */
 				r = set_sort_flags(get_input(messages[MSG_ORDER]));
@@ -10083,6 +10367,7 @@ static void cleanup(void)
 	free(dir_dispatched_bmp);
 	free(bookmark);
 	free(plug);
+	free(previewer);
 	if (lastcmdpos != INVALID_POS)
 		for (uchar_t pos = 0; pos <= lastcmdpos; ++pos)
 			free(cmd_hist[pos]);

@@ -1,0 +1,135 @@
+#!/usr/bin/env sh
+
+# Description: Preview plugin for nnn's built-in preview pane
+# Auto-detected from plugins dir
+# Usage: .npreview <filepath> <width> <height>
+# All dependencies optional — graceful fallback to head/file/strings
+
+set -euf
+
+F="$1"
+W="${2:-80}"
+H="${3:-25}"
+ext="${F##*.}"
+ext="$(printf "%s" "$ext" | tr '[:upper:]' '[:lower:]')"
+
+has() { type "$1" >/dev/null 2>&1; }
+hd() { head -n "$H"; }
+
+# --- Handlers ---
+
+show_dir() {
+    has tree && { tree -L 1 -n --dirsfirst --noreport "$F" | hd; return; }
+    ls -1 "$F" 2>/dev/null | hd
+}
+
+show_text() {
+    has bat && { bat --style=plain --color=never --paging=never --line-range=":${H}" -- "$F" 2>/dev/null; return; }
+    has batcat && { batcat --style=plain --color=never --paging=never --line-range=":${H}" -- "$F" 2>/dev/null; return; }
+    head -n "$H" "$F"
+}
+
+show_pdf() {
+    has pdftotext && { pdftotext -l 1 -nopgbrk -q -- "$F" - 2>/dev/null | hd; return; }
+    has mutool && { mutool draw -F txt -i -- "$F" 1 2>/dev/null | hd; return; }
+    show_meta
+}
+
+show_archive() {
+    case "$ext" in
+        rar) has unrar && { unrar lt -p- -- "$F" 2>/dev/null | hd; return; } ;;
+        7z)  has 7z && { 7z l -p -- "$F" 2>/dev/null | hd; return; } ;;
+    esac
+    has atool && { atool --list -- "$F" 2>/dev/null | hd; return; }
+    has bsdtar && { bsdtar --list --file "$F" 2>/dev/null | hd; return; }
+    has tar && { tar tf "$F" 2>/dev/null | hd; return; }
+    has unzip && [ "$ext" = "zip" ] && { unzip -l "$F" 2>/dev/null | hd; return; }
+    printf "[archive %s]\n" "$(du -h "$F" 2>/dev/null | cut -f1)"
+}
+
+show_image() {
+    has img2txt && { img2txt --gamma=0.6 --width="$W" -- "$F" 2>/dev/null | hd; return; }
+    show_meta
+}
+
+show_meta() {
+    has exiftool && { exiftool "$F" 2>/dev/null | hd; return; }
+    has mediainfo && { mediainfo "$F" 2>/dev/null | hd; return; }
+    has file && { file -b "$F"; return; }
+    printf "[no metadata tool]\n"
+}
+
+show_json() {
+    has jq && { head -c 65536 "$F" | jq --monochrome-output . 2>/dev/null | hd; return; }
+    has python3 && { head -c 65536 "$F" | python3 -m json.tool 2>/dev/null | hd; return; }
+    show_text
+}
+
+show_md() {
+    has glow && { glow -s notty "$F" 2>/dev/null | hd; return; }
+    has lowdown && { lowdown -Tterm "$F" 2>/dev/null | hd; return; }
+    show_text
+}
+
+show_html() {
+    has w3m && { w3m -dump "$F" 2>/dev/null | hd; return; }
+    has lynx && { lynx -dump -- "$F" 2>/dev/null | hd; return; }
+    show_text
+}
+
+show_elf() {
+    has readelf && { readelf -h "$F" 2>/dev/null | hd; return; }
+    has objdump && { objdump -f "$F" 2>/dev/null | hd; return; }
+    has file && file -b "$F"
+}
+
+show_doc() {
+    has odt2txt && { odt2txt "$F" 2>/dev/null | hd; return; }
+    show_meta
+}
+
+show_bin() {
+    has strings && { printf "[binary]\n"; strings "$F" 2>/dev/null | hd; return; }
+    printf "[binary %s]\n" "$(du -h "$F" 2>/dev/null | cut -f1)"
+}
+
+# --- Directory ---
+[ -d "$F" ] && { show_dir; exit 0; }
+
+# --- Dispatch by extension ---
+case "$ext" in
+    a|ace|alz|arc|arj|bz|bz2|cab|cpio|deb|gz|jar|lha|lz|lzh|lzma|lzo|\
+    rpm|rz|t7z|tar|tbz|tbz2|tgz|tlz|txz|tz|tzo|war|xpi|xz|z|zip|rar|7z|zst)
+        show_archive; exit 0 ;;
+    pdf) show_pdf; exit 0 ;;
+    md|mkd|markdown) show_md; exit 0 ;;
+    htm|html|xhtml) show_html; exit 0 ;;
+    json) show_json; exit 0 ;;
+    odt|ods|odp|sxw) show_doc; exit 0 ;;
+    torrent) has transmission-show && { transmission-show -- "$F" 2>/dev/null | hd; exit 0; } ;;
+    sqlite|sqlite3|db) has sqlite3 && { printf ".tables\n" | sqlite3 "$F" 2>/dev/null | hd; exit 0; } ;;
+    o|so|dylib) show_elf; exit 0 ;;
+    c|cc|cpp|h|hpp|rs|go|py|rb|js|ts|java|sh|bash|zsh|pl|lua|vim|el|\
+    css|scss|yaml|yml|toml|ini|conf|xml|sql|diff|patch|awk|sed|make)
+        show_text; exit 0 ;;
+esac
+
+# --- Dispatch by mime type ---
+has file || { show_text; exit 0; }
+mime="$(file -bL --mime-type -- "$F" 2>/dev/null)"
+
+case "$mime" in
+    text/*|*/xml) show_text ;;
+    application/json) show_json ;;
+    application/pdf) show_pdf ;;
+    application/zip|application/x-tar|application/x-rar*|\
+    application/x-7z*|application/x-bzip*|application/x-xz|\
+    application/x-compress*|application/gzip|application/zstd)
+        show_archive ;;
+    image/*) show_image ;;
+    audio/*|video/*) show_meta ;;
+    application/x-executable|application/x-sharedlib|application/x-pie-executable|\
+    application/x-object) show_elf ;;
+    application/vnd.openxmlformats*|application/vnd.oasis.opendocument*) show_doc ;;
+    *) show_bin ;;
+esac

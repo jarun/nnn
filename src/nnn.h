@@ -113,6 +113,7 @@ enum action {
 	SEL_SESSIONS,
 	SEL_EXPORT,
 	SEL_TIMETYPE,
+	SEL_PREVIEW,
 	SEL_QUITCTX,
 	SEL_QUITCD,
 	SEL_QUIT,
@@ -276,6 +277,8 @@ static struct key bindings[] = {
 	{ '>',            SEL_EXPORT },
 	/* Set time type */
 	{ 'T',            SEL_TIMETYPE },
+	/* Toggle preview pane */
+	{ 'P',            SEL_PREVIEW },
 	/* Quit a context */
 	{ 'q',            SEL_QUITCTX },
 	/* Change dir on quit */
