@@ -5774,7 +5774,7 @@ static size_t get_fs_info(const char *path, uchar_t type)
 }
 
 /* Create non-existent parents and a file or dir */
-static bool xmktree(char *path, bool dir)
+static bool xmktree(char *path, bool dir, bool tree)
 {
 	char *p = path;
 	char *slash = path;
@@ -5782,46 +5782,50 @@ static bool xmktree(char *path, bool dir)
 	if (!p || !*p)
 		return FALSE;
 
-	/* Skip the first '/' */
-	++p;
+	if (tree) {
+		/* Skip the first '/' */
+		++p;
 
-	while (*p != '\0') {
-		if (*p == '/') {
-			slash = p;
-			*p = '\0';
-		} else {
-			++p;
-			continue;
-		}
+		while (*p != '\0') {
+			if (*p == '/') {
+				slash = p;
+				*p = '\0';
+			} else {
+				++p;
+				continue;
+			}
 
-		/* Create folder from path to '\0' inserted at p */
-		if (mkdir(path, 0777) == -1 && errno != EEXIST) {
-#ifdef __HAIKU__
-			// XDG_CONFIG_HOME contains a directory
-			// that is read-only, but the full path
-			// is writeable.
-			// Try to continue and see what happens.
-			// TODO: Find a more robust solution.
-			if (errno == B_READ_ONLY_DEVICE)
-				goto next;
+			/* Create folder from path to '\0' inserted at p */
+			if (mkdir(path, 0777) == -1 && errno != EEXIST) {
+#ifdef _HAIKU__
+				// XDG_CONFIG_HOME contains a directory
+				// that is read-only, but the full path
+				// is writeable.
+				// Try to continue and see what happens.
+				// TODO: Find a more robust solution.
+				if (errno == B_READ_ONLY_DEVICE)
+					goto next;
 #endif
-			DPRINTF_S("mkdir1!");
-			DPRINTF_S(strerror(errno));
-			*slash = '/';
-			return FALSE;
-		}
+				DPRINTF_S("mkdir1!");
+				DPRINTF_S(path);
+				DPRINTF_S(strerror(errno));
+				*slash = '/';
+				return FALSE;
+			}
 
-#ifdef __HAIKU__
+#ifdef _HAIKU__
 next:
 #endif
-		/* Restore path */
-		*slash = '/';
-		++p;
+			/* Restore path */
+			*slash = '/';
+			++p;
+		}
 	}
 
 	if (dir) {
 		if (mkdir(path, 0777) == -1 && errno != EEXIST) {
 			DPRINTF_S("mkdir2!");
+			DPRINTF_S(path);
 			DPRINTF_S(strerror(errno));
 			return FALSE;
 		}
@@ -5856,7 +5860,7 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 		}
 		/* Do not create smart context for current dir */
 		if (!(*outdir == '.' && outdir[1] == '\0')) {
-			if (!xmktree(outdir, TRUE) || (chdir(outdir) == -1)) {
+			if (!xmktree(outdir, TRUE, TRUE) || (chdir(outdir) == -1)) {
 				printwarn(NULL);
 				return FALSE;
 			}
@@ -5976,7 +5980,7 @@ static bool archive_mount(char *newpath)
 	mkpath(mntpath, dir, newpath);
 	free(dir);
 
-	if (!xmktree(newpath, TRUE)) {
+	if (!xmktree(newpath, TRUE, TRUE)) {
 		printwarn(NULL);
 		return FALSE;
 	}
@@ -6034,7 +6038,7 @@ static bool remote_mount(char *newpath)
 	/* Create the mount point */
 	mkpath(cfgpath, toks[TOK_MNT], mntpath);
 	mkpath(mntpath, tmp, newpath);
-	if (!xmktree(newpath, TRUE)) {
+	if (!xmktree(newpath, TRUE, TRUE)) {
 		printwarn(NULL);
 		return FALSE;
 	}
@@ -9403,7 +9407,7 @@ nochange:
 
 				/* Check if it's a dir or file */
 				if (r == 'f' || r == 'd') {
-					ret = xmktree(tmp, r == 'f' ? FALSE : TRUE);
+					ret = xmktree(tmp, r == 'f' ? FALSE : TRUE, TRUE);
 				} else if (r == 's' || r == 'h') {
 					if (nselected > 1 && tmp[0] == '@' && tmp[1] == '\0')
 						tmp[0] = '\0';
@@ -9707,7 +9711,7 @@ static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
 			*slash = '\0';
 
 		if (access(tmpdir, F_OK)) /* Create directory if it doesn't exist */
-			xmktree(tmpdir, TRUE);
+			xmktree(tmpdir, TRUE, TRUE);
 
 		if (slash)
 			*slash = '/';
@@ -10004,11 +10008,17 @@ static bool setup_config(void)
 	xstrsncpy(cfgpath + r - 1, "/nnn", len - r);
 	DPRINTF_S(cfgpath);
 
+	if (!xmktree(cfgpath, TRUE, TRUE)) {
+		DPRINTF_S(cfgpath);
+		xerror();
+		return FALSE;
+	}
+
 	/* Create bookmarks, sessions, mounts and plugins directories */
 	for (r = 0; r < ELEMENTS(toks); ++r) {
 		mkpath(cfgpath, toks[r], plgpath);
 		/* The dirs are created on first run, check if they already exist */
-		if (access(plgpath, F_OK) && !xmktree(plgpath, TRUE)) {
+		if (!xmktree(plgpath, TRUE, FALSE)) {
 			DPRINTF_S(toks[r]);
 			xerror();
 			return FALSE;
@@ -10403,7 +10413,7 @@ int main(int argc, char *argv[])
 					g_state.initfile = 1;
 				}
 				if (dir || (arg != initpath)) { /* We have a directory */
-					if (!xdiraccess(initpath) && !xmktree(initpath, TRUE)) {
+					if (!xdiraccess(initpath) && !xmktree(initpath, TRUE, TRUE)) {
 						xerror(); /* Fail if directory cannot be created */
 						return EXIT_FAILURE;
 					}
