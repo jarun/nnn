@@ -10519,7 +10519,8 @@ int main(int argc, char *argv[])
 
 #ifndef NOLC
 	/* Set locale */
-	setlocale(LC_ALL, "");
+	setlocale(LC_COLLATE, "");
+	setlocale(LC_CTYPE, "");
 #ifdef PCRE2
 	tables = pcre2_maketables(NULL);
 #endif
