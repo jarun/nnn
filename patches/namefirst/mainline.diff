@@ -4,7 +4,6 @@
 # Author: Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index ff05436e..bdfd4d0a 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
 @@ -432,6 +432,10 @@ typedef struct {
@@ -260,10 +259,7 @@ index ff05436e..bdfd4d0a 100644
  }
  
  /**
-@@ -8047,26 +8079,19 @@ static void statusbar(char *path)
- 	tocursor();
- }
- 
+@@ -8063,10 +8063,2 @@ static void statusbar(char *path)
 -static inline void markhovered(void)
 -{
 -	if (cfg.showdetail && ndents) { /* Bold forward arrowhead */
@@ -272,9 +268,9 @@ index ff05436e..bdfd4d0a 100644
 -	}
 -}
 -
- static int adjust_cols(int n)
- {
- 	/* Calculate the number of cols available to print entry name */
+ #define PREVIEW_BORDER_COL (xcols / 2)
+ #define PREVIEW_COL        (PREVIEW_BORDER_COL + 2)
+@@ -8340,12 +8331,13 @@ static void preview_pane(const char *path)
  #ifdef ICONS_ENABLED
  	n -= (g_state.oldcolor ? 0 : ICON_SIZE + ICON_PADDING_LEFT_LEN + ICON_PADDING_RIGHT_LEN);
  #endif
@@ -290,7 +286,7 @@ index ff05436e..bdfd4d0a 100644
  	}
  
  	/* 2 columns for preceding space and indicator */
-@@ -8105,8 +8130,6 @@ static void draw_line(int ncols)
+@@ -8385,8 +8378,6 @@ static void draw_line(int ncols)
  	/* Must reset e.g. no files in dir */
  	if (dir)
  		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
@@ -299,7 +295,7 @@ index ff05436e..bdfd4d0a 100644
  }
  
  static void redraw(char *path)
-@@ -8214,6 +8237,26 @@ static void redraw(char *path)
+@@ -8500,6 +8491,26 @@ static void redraw(char *path)
  	int onscreen = MIN(ONSCREEN + curscroll, ndents);
  	int len = scanselforpath(path, FALSE);
  
@@ -326,12 +322,14 @@ index ff05436e..bdfd4d0a 100644
  	ncols = adjust_cols(ncols);
  
  	/* Print listing */
-@@ -8242,7 +8285,7 @@ static void redraw(char *path)
- #endif
+@@ -8531,9 +8542,9 @@ static void redraw(char *path)
  	}
  
 -	markhovered();
 +	statusbar(path);
+ 
+ 	if (cfg.preview)
+ 		preview_pane(path);
  }
  
  static bool cdprep(char *lastdir, char *lastname, char *path, char *newpath)

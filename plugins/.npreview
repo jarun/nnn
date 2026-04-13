@@ -20,7 +20,7 @@ hd() { head -n "$H"; }
 
 show_dir() {
     has tree && { tree -L 1 -n --dirsfirst --noreport "$F" | hd; return; }
-    ls -1 "$F" 2>/dev/null | hd
+    find "$F" -maxdepth 1 -print 2>/dev/null | hd
 }
 
 show_text() {

@@ -2,7 +2,7 @@ diff --git a/src/nnn.c b/src/nnn.c
 index d7c53166..bb7ff3e8 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -5149,12 +5149,12 @@ static void show_help(const char *path)
+@@ -6262,12 +6262,12 @@ static void show_help(const char *path)
  	"2(___n))\n"
  	"0\n"
  	"1NAVIGATION\n"
@@ -20,23 +20,24 @@ index d7c53166..bb7ff3e8 100644
  	      "8B (,)  Book(mark)%11b ^/  Select bookmark\n"
  		"a1-4  Context%11(Sh)Tab  Cycle/new context\n"
  	    "62Esc ^Q  Quit%19^y  Next young\n"
-@@ -5162,27 +5162,27 @@ static void show_help(const char *path)
- 		  "cq  Quit context\n"
+@@ -6279,28 +6279,28 @@ static void show_help(const char *path)
+ 	  "4q Alt+Esc  Quit context%11^L  Refresh dir\n"
  	"0\n"
  	"1FILTER & PROMPT\n"
 -		  "c/  Filter%17^N  Toggle type-to-nav\n"
 +		  "c/  Filter%17^K  Toggle type-to-nav\n"
  		"aEsc  Exit prompt%12^L  Toggle last filter\n"
- 		  "c.  Toggle hidden%05Alt+Esc  Unfilter, quit context\n"
+ 		  "c.  Toggle hidden\n"
  	"0\n"
  	"1FILES\n"
 -	       "9o ^O  Open with%15n  Create new/link\n"
 +	       "9o ^O  Open with%15c  Create new/link\n"
  	       "9f ^F  File stats%14d  Detail mode toggle\n"
- 		 "b^R  Rename/dup%14r  Batch rename\n"
--		  "cz  Archive%17e  Edit file\n"
-+		  "cz  Archive%17y  Edit file\n"
- 		  "c*  Toggle exe%14>  Export list\n"
+ 		 "b^R  Rename/dup%14P  Preview toggle\n"
+-		  "cr  Batch rename%12e  Edit file\n"
++		  "cr  Batch rename%12y  Edit file\n"
+ 		  "cz  Archive%17*  Toggle exe\n"
+ 		  "c>  Export list\n"
  	    "6Space +  (Un)select%12m-m  Select range/clear\n"
  	          "ca  Select all%14A  Invert sel\n"
  	       "9p ^P  Copy here%12w ^W  Cp/mv sel as\n"

@@ -8394,7 +8394,7 @@ static void redraw(char *path)
 
 	int ncols = (xcols <= PATH_MAX) ? xcols : PATH_MAX;
 	/* Limit listing width when preview pane is active */
-	if (cfg.preview && xcols >= (MIN_PREVIEW_COLS * 2 + 1)) {
+	if (cfg.preview && xcols >= ((MIN_PREVIEW_COLS * 2) + 1)) {
 		int listcols = PREVIEW_BORDER_COL;
 		if (ncols > listcols)
 			ncols = listcols;
