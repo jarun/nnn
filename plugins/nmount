@@ -6,7 +6,7 @@
 #
 # Dependencies: lsblk, pmount (optional), udisks2
 #
-# Usage: Runs `lsblk` on 'l', exits on 'Return`.
+# Usage: Runs `lsblk` on 'l', unmounts all USB HDDs on 'u', exits on 'Return`.
 #
 # Notes:
 #   - The script uses Linux-specific lsblk to list block devices. Alternatives:
@@ -18,7 +18,7 @@
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-prompt="device name [e.g. sdXn] ('l'ist, 'q'uit): "
+prompt="device name [e.g. sdXn] ('l'ist, 'u'nmount all USB, 'q'uit): "
 
 lsblk
 
@@ -31,6 +31,57 @@ while [ -n "$dev" ]; do
         lsblk
     elif [ "$dev" = "q" ]; then
         exit
+    elif [ "$dev" = "u" ]; then
+        usb_devs=$(lsblk -ndo NAME,TRAN | awk '$2=="usb"{print $1}')
+        if [ -z "$usb_devs" ]; then
+            echo "No USB block devices found."
+        else
+            for disk in $usb_devs; do
+                # Get only real partitions (e.g. sda1), skip device-mapper entries like luks-*
+                parts=$(lsblk -nlpo NAME,TYPE "/dev/$disk" | awk '$2=="part"{print $1}')
+                if [ -z "$parts" ]; then
+                    echo "/dev/$disk has no partitions, skipping."
+                    continue
+                fi
+                mounted=0
+                for part in $parts; do
+                    mnt=$(lsblk -n "$part" -o MOUNTPOINT | sed '/^$/d')
+                    # Check if this partition or any child (e.g. LUKS) is mounted
+                    child_mnt=$(lsblk -nro MOUNTPOINT "$part" | sed '/^$/d')
+                    if [ -z "$mnt" ] && [ -z "$child_mnt" ]; then
+                        continue
+                    fi
+                    mounted=1
+                    if type pumount >/dev/null 2>&1; then
+                        sync "$child_mnt"
+                        pumount "$part"
+                        prc=$?
+                    elif lsblk -n "$part" -o FSTYPE | grep -q "crypto_LUKS"; then
+                        dev_map=$(udisksctl info -b "$part" | grep "CleartextDevice" | grep -o "dm_2d[[:digit:]]*" | sed "s/_2d/-/")
+                        sync "$child_mnt"
+                        udisksctl unmount -b "/dev/$dev_map" --no-user-interaction >/dev/null
+                        prc=$?
+                        udisksctl lock -b "$part" --no-user-interaction >/dev/null
+                    else
+                        sync "$mnt"
+                        udisksctl unmount -b "$part" --no-user-interaction >/dev/null
+                        prc=$?
+                    fi
+                    if [ $prc -eq 0 ]; then
+                        echo "$part unmounted."
+                    else
+                        echo "Failed to unmount $part."
+                    fi
+                done
+                if [ $mounted -eq 0 ]; then
+                    echo "/dev/$disk has no mounted partitions, skipping."
+                    continue
+                fi
+                if udisksctl power-off -b "/dev/$disk" --no-user-interaction 2>/dev/null; then
+                    echo "/dev/$disk ejected."
+                fi
+            done
+        fi
     else
         # LUKS volumes mounted with udisksctl appear differently than with pmount
         if grep -qs "$dev " /proc/mounts || [ -n "$(lsblk -n "/dev/$dev" -o MOUNTPOINT)" ]; then
