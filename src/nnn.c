@@ -6821,10 +6821,8 @@ static bool handle_cmd(enum action sel, char *path, char *newpath, char *lastdir
 				"[ -f ~/.bashrc ] && . ~/.bashrc\ntrap 'pwd > \"%s\"' EXIT\n", cwdfile);
 		else if (strcmp(shellbase, "zsh") == 0)
 			len = snprintf(initscript, sizeof(initscript),
-				"ZDOTDIR=\"${ZDOTDIR_ORIG:-$HOME}\"\n"
-				"unset ZDOTDIR_ORIG\n"
-				"[ -f \"$ZDOTDIR/.zshrc\" ] && "
-				". \"$ZDOTDIR/.zshrc\"\n"
+				"[ -f \"${ZDOTDIR_ORIG:-$HOME}/.zshrc\" ] && "
+				". \"${ZDOTDIR_ORIG:-$HOME}/.zshrc\"\n"
 				"trap 'pwd > \"%s\"' EXIT\n", cwdfile);
 		else
 			len = 0;
@@ -6854,21 +6852,7 @@ static bool handle_cmd(enum action sel, char *path, char *newpath, char *lastdir
 				if (oldzdotdir)
 					xstrsncpy(savedzdotdir, oldzdotdir, PATH_MAX);
 
-				const char *origzdotdir = oldzdotdir ? oldzdotdir : home;
-
-				/* Symlink user's other zsh dotfiles into temp ZDOTDIR */
-				static const char *const zdotfiles[] = {
-					".zshenv", ".zprofile", ".zlogin", ".zlogout"
-				};
-				alignas(max_align_t) char zsrc[PATH_MAX];
-				alignas(max_align_t) char zdst[TMP_LEN_MAX + 16];
-				for (unsigned int i = 0; i < sizeof(zdotfiles) / sizeof(zdotfiles[0]); ++i) {
-					snprintf(zsrc, sizeof(zsrc), "%s/%s", origzdotdir, zdotfiles[i]);
-					snprintf(zdst, sizeof(zdst), "%s/%s", zdotdir, zdotfiles[i]);
-					(void)!symlink(zsrc, zdst); /* ignore errors; file may not exist */
-				}
-
-				setenv("ZDOTDIR_ORIG", origzdotdir, 1);
+				setenv("ZDOTDIR_ORIG", oldzdotdir ? oldzdotdir : home, 1);
 				setenv("ZDOTDIR", zdotdir, 1);
 				spawn(shell, NULL, NULL, NULL, F_CLI);
 
@@ -6879,11 +6863,6 @@ static bool handle_cmd(enum action sel, char *path, char *newpath, char *lastdir
 					unsetenv("ZDOTDIR");
 				unsetenv("ZDOTDIR_ORIG");
 
-				/* Cleanup temp ZDOTDIR */
-				for (unsigned int i = 0; i < sizeof(zdotfiles) / sizeof(zdotfiles[0]); ++i) {
-					snprintf(zdst, sizeof(zdst), "%s/%s", zdotdir, zdotfiles[i]);
-					unlink(zdst);
-				}
 				unlink(zshrc);
 				rmdir(zdotdir);
 			}
