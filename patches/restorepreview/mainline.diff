@@ -59,15 +59,13 @@ index 9a78fb55..ca4ac0f7 100644
  	"NNN_MCLICK",
  	"NNN_SEL",
  	"NNN_ARCHIVE",
-@@ -859,9 +865,9 @@ static int set_sort_flags(int r);
+@@ -859,7 +865,7 @@ static int set_sort_flags(int r);
  static void statusbar(char *path);
- static bool get_output(char *command, char *arg1, char *arg2, int fdout, bool page);
+ static bool get_output(char *file, char *arg1, char *arg2, int fdout, bool page);
  #ifndef NOFIFO
 -static void notify_fifo(bool force);
 +static void notify_fifo(bool force, bool closepreview);
  #endif
- static inline bool selforparent(const char *path);
- static void dirwalk(char *path, int entnum, bool mountpoint, bool no_aggregate);
  
  /* Functions */
 @@ -3166,7 +3172,7 @@ try_quit:
@@ -241,7 +239,7 @@ index 9a78fb55..ca4ac0f7 100644
  		case SEL_PROMPT:
 +			if (g_state.previewer)
 +				notify_fifo(FALSE, TRUE);
- 			r = handle_cmd(sel, path, newpath, lastdir);
+ 			r = handle_cmd(sel, path, newpath);
 +			if (g_state.previewer) {
 +				pkey = previewkey;
 +				goto run_plugin;
