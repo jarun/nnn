@@ -6930,6 +6930,7 @@ static void *du_worker_loop(void *p_data)
 	du_task task = {0};
 
 #ifdef __linux__
+#ifndef __TERMUX__
 	/* Pin thread to specific CPU core for better cache locality and parallelism */
 	cpu_set_t cpuset;
 	CPU_ZERO(&cpuset);
@@ -6937,6 +6938,7 @@ static void *du_worker_loop(void *p_data)
 	if (num_cpus > 0)
 		CPU_SET(core % num_cpus, &cpuset);
 	pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset);
+#endif
 #endif
 
 	for (;;) {
