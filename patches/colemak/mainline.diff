@@ -18,7 +18,7 @@ index d7c53166..bb7ff3e8 100644
 +	       "9g ^E  Top%21J  Jump to entry/offset\n"
 +	       "9G ^N  End%20^J  Toggle auto-advance on open\n"
  	      "8B (,)  Book(mark)%11b ^/  Select bookmark\n"
- 		"a1-4  Context%11(Sh)Tab  Cycle/new context\n"
+ 		"a1-8  Context%11(Sh)Tab  Cycle/new context\n"
  	    "62Esc ^Q  Quit%19^y  Next young\n"
 @@ -6277,27 +6277,27 @@ static void show_help(const char *path)
  	  "4q Alt+Esc  Quit context%12d  Detail mode toggle\n"
