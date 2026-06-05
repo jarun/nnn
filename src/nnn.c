@@ -6271,7 +6271,7 @@ static void show_help(const char *path)
 	       "9g ^A  Top%21J  Jump to entry/offset\n"
 	       "9G ^E  End%20^J  Toggle auto-advance on open\n"
 	      "8B (,)  Book(mark)%11b ^/  Select bookmark\n"
-		"a1-4  Context%11(Sh)Tab  Cycle/new context\n"
+		"a1-8  Context%11(Sh)Tab  Cycle/new context\n"
 	    "62Esc ^Q  Quit%19^y  Next young\n"
 		 "b^G  QuitCD%18Q  Pick/err, quit\n"
 	  "4q Alt+Esc  Quit context%12d  Detail mode toggle\n"
