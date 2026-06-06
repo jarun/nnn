@@ -17,10 +17,11 @@ jobs:
   lock:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/lock-threads@v5
+      - uses: dessant/lock-threads@v6
         with:
           github-token: ${{ github.token }}
           issue-inactive-days: '30'
-          issue-lock-reason: ''
+          issue-lock-reason: 'auto-locked due to 30 days of inactivity'
           pr-inactive-days: '30'
-          pr-lock-reason: ''
+          pr-lock-reason: 'auto-locked due to 30 days of inactivity'
+          exclude-any-pr-labels: 'wip'
