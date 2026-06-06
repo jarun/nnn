@@ -6556,7 +6556,7 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 		} else if (*file == '>') { /* Check if floating window should be used */
 			flags |= F_WINDOW;
 			++file;
-			*action = SEL_REDRAW;
+			//*action = SEL_REDRAW;
 		} else if (*file == '&') { /* Check if GUI flags are to be used */
 			flags = F_MULTI | F_NOTRACE | F_NOWAIT;
 			++file;
@@ -9623,9 +9623,7 @@ nochange:
 
 				if (!r) {
 					cfg.filtermode ? presel = FILTER : statusbar(path);
-
-					if (action != SEL_REDRAW)
-						goto nochange;
+					break;
 				}
 			} else { /* 'Return/Enter' enters the plugin directory */
 				g_state.runplugin ^= 1;
