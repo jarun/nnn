@@ -1,11 +1,12 @@
 #!/usr/bin/env sh
-
 # Description: Open a Drag and drop window, to drop files onto other programs.
 #              Also provides drag and drop window for files.
 #
-# Dependencies: dragon - https://github.com/mwh/dragon
+# Dependencies:
+# 	- dragon (https://github.com/mwh/dragon), or
+# 	- kitty (https://github.com/kovidgoyal/kitty)
 #
-# Notes:
+# Notes if using dragon:
 #   1. Files that are dropped will be added to nnn's selection
 #      Some web-based files will be downloaded to current dir
 #      with curl and it may overwrite some existing files
@@ -24,16 +25,18 @@ if type dragon-drag-and-drop >/dev/null 2>&1; then
     dnd="dragon-drag-and-drop"
 elif type dragon-drop >/dev/null 2>&1; then
     dnd="dragon-drop"
+elif [ "$TERM" = "xterm-kitty" ]; then
+    dnd="kitten dnd"
 else
     dnd="dragon"
 fi
 
-add_file ()
+add_file()
 {
-    printf '%s\0' "$@" >> "$selection"
+    printf '%s\0' "$@" >>"$selection"
 }
 
-use_all ()
+use_all()
 {
     printf "mark --all (a) [default=none]: "
     read -r resp
@@ -55,37 +58,58 @@ else
     fi
 fi
 
-if [ "$resp" = "s" ]; then
-    use_all
-    sed -z 's|'"$PWD/"'||g' < "$selection" | xargs -0 "$dnd" "$all" 2>/dev/null &
-elif [ "$resp" = "d" ]; then
-    use_all
-    "$dnd" "$all" "$PWD/"* 2>/dev/null &
-elif [ "$resp" = "r" ]; then
-    true > "$selection"
-    "$dnd" --print-path --target 2>/dev/null | while read -r f
-    do
-        if printf "%s" "$f" | grep -q '^\(https\?\|ftps\?\|s\?ftp\)://' ; then
-            if output=$(curl -fsLJOS "$f" 2>&1); then
-                filename="$(basename "${f%%\?*}")"
-                add_file "$PWD/$filename"
-                if [ $notify = 1 ]; then
-                    notify-send "Download Complete" "Finished downloading $filename"
-                fi
-            else
-                if [ $notify = 1 ]; then
-                    notify-send "Download Failed" "$output"
-                else
-                    echo "Download Failed: $output"
-                fi
-            fi
-        elif [ -e "$f" ]; then
-            add_file "$f"
-        fi
-    done &
+clear_tui()
+{
+    pid=$!
+    reset # nnn to dnd
+    wait $pid
+    reset # dnd to nnn
+}
+
+if [ "$dnd" = "kitten dnd" ]; then
+    if [ "$resp" = "s" ]; then
+        # shellcheck disable=SC2086
+        xargs -0 $dnd 2>/dev/null <"$selection" &
+    elif [ "$resp" = "d" ]; then
+        $dnd "$PWD/"* 2>/dev/null &
+    else # send one or receive
+        $dnd "$1" 2>/dev/null &
+    fi
+
+    clear_tui
+
+    if [ "$resp" = "s" ]; then
+        [ -p "$NNN_PIPE" ] && printf "-" >"$NNN_PIPE" # clear selection
+    fi
 else
-    if [ -n "$1" ] && [ -e "$1" ]; then
+    if [ "$resp" = "s" ]; then
+        use_all
+        sed -z 's|'"$PWD/"'||g' <"$selection" | xargs -0 "$dnd" "$all" 2>/dev/null &
+    elif [ "$resp" = "d" ]; then
+        use_all
+        "$dnd" "$all" "$PWD/"* 2>/dev/null &
+    elif [ "$resp" = "r" ]; then
+        true >"$selection"
+        "$dnd" --print-path --target 2>/dev/null | while read -r f; do
+            if printf "%s" "$f" | grep -q '^\(https\?\|ftps\?\|s\?ftp\)://'; then
+                if output=$(curl -fsLJOS "$f" 2>&1); then
+                    filename="$(basename "${f%%\?*}")"
+                    add_file "$PWD/$filename"
+                    if [ $notify = 1 ]; then
+                        notify-send "Download Complete" "Finished downloading $filename"
+                    fi
+                else
+                    if [ $notify = 1 ]; then
+                        notify-send "Download Failed" "$output"
+                    else
+                        echo "Download Failed: $output"
+                    fi
+                fi
+            elif [ -e "$f" ]; then
+                add_file "$f"
+            fi
+        done &
+    elif [ -n "$1" ] && [ -e "$1" ]; then
         "$dnd" "$1" 2>/dev/null &
     fi
 fi
-
