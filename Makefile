@@ -224,8 +224,12 @@ debug: $(BIN)
 norl: $(BIN)
 nolc: $(BIN)
 
-src/$(ICONS_INCLUDE): src/icons-hash.c src/icons.h src/icons-in-terminal.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -DICONS_GENERATE -o src/icons-hash-gen src/icons-hash.c
+ICONS_SRC = src/icons.h src/icons-in-terminal.h
+
+src/icons-hash-gen: src/icons-hash.c $(ICONS_SRC)
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -DICONS_GENERATE -o $@ $<
+
+src/$(ICONS_INCLUDE): src/icons-hash-gen $(ICONS_SRC)
 	./src/icons-hash-gen > $@
 
 install-desktop: $(DESKTOPFILE)
