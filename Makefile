@@ -162,6 +162,10 @@ CFLAGS += $(CFLAGS_CURSES)
 
 LDLIBS += $(LDLIBS_CURSES) -lpthread
 
+# For the icon hashtable generator
+HOST_CC ?= $(CC)
+HOST_CFLAGS ?= $(CFLAGS)
+
 # static compilation needs libgpm development package
 ifeq ($(strip $(O_STATIC)),1)
 	LDFLAGS += -static
@@ -225,7 +229,7 @@ norl: $(BIN)
 nolc: $(BIN)
 
 src/$(ICONS_INCLUDE): src/icons-hash.c src/icons.h src/icons-in-terminal.h
-	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -DICONS_GENERATE -o src/icons-hash-gen src/icons-hash.c
+	$(HOST_CC) $(HOST_CFLAGS) $(CPPFLAGS) -DICONS_GENERATE -o src/icons-hash-gen src/icons-hash.c
 	./src/icons-hash-gen > $@
 
 install-desktop: $(DESKTOPFILE)
