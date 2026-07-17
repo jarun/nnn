@@ -5182,16 +5182,16 @@ static bool load_session(const char *sname, char **path, char **lastdir, char **
 		= g_ctx[cfg.curctx].c_fltr[0] = g_ctx[cfg.curctx].c_fltr[1] = '\0';
 
 	for (; i < CTX_MAX; ++i)
-		if ((read(fd, &g_ctx[i].c_cfg, sizeof(settings)) != (ssize_t)sizeof(settings))
+		if ((header.nameln[i] > (NAME_MAX + 1))
+			|| (header.lastln[i] > PATH_MAX)
+			|| (header.fltrln[i] > REGEX_MAX)
+			|| (header.pathln[i] > PATH_MAX)
+			|| (read(fd, &g_ctx[i].c_cfg, sizeof(settings)) != (ssize_t)sizeof(settings))
 			|| (read(fd, &g_ctx[i].color, sizeof(uint_t)) != (ssize_t)sizeof(uint_t))
-			|| (header.nameln[i] > 0
-			    && read(fd, g_ctx[i].c_name, header.nameln[i]) != (ssize_t)header.nameln[i])
-			|| (header.lastln[i] > 0
-			    && read(fd, g_ctx[i].c_last, header.lastln[i]) != (ssize_t)header.lastln[i])
-			|| (header.fltrln[i] > 0
-			    && read(fd, g_ctx[i].c_fltr, header.fltrln[i]) != (ssize_t)header.fltrln[i])
-			|| (header.pathln[i] > 0
-			    && read(fd, g_ctx[i].c_path, header.pathln[i]) != (ssize_t)header.pathln[i]))
+			|| (read(fd, g_ctx[i].c_name, header.nameln[i]) != (ssize_t)header.nameln[i])
+			|| (read(fd, g_ctx[i].c_last, header.lastln[i]) != (ssize_t)header.lastln[i])
+			|| (read(fd, g_ctx[i].c_fltr, header.fltrln[i]) != (ssize_t)header.fltrln[i])
+			|| (read(fd, g_ctx[i].c_path, header.pathln[i]) != (ssize_t)header.pathln[i]))
 			goto END;
 
 	*path = g_ctx[cfg.curctx].c_path;
