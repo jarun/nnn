@@ -491,7 +491,8 @@ static blkcnt_t dir_blocks;
 static kv *bookmark;
 static kv *plug;
 static kv *order;
-static uchar_t tmpfplen, homelen;
+static ushort_t homelen;
+static uchar_t tmpfplen;
 static uchar_t blk_shift = BLK_SHIFT_512;
 #ifndef NOMOUSE
 static int middle_click_key;
@@ -10470,7 +10471,7 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 	DPRINTF_S(home);
-	homelen = (uchar_t)xstrlen(home);
+	homelen = (ushort_t)xstrlen(home);
 
 	if (!setup_config())
 		return EXIT_FAILURE;
