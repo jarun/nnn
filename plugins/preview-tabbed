@@ -204,7 +204,8 @@ previewer_loop () {
                 if [ -x "$NUKE" ] ; then
                     term_nuke "$XID" "$FILE"
                 else
-                    $TERMINAL "$XID" -e sh -c "file '$FILE' | $PAGER -" &
+                    SAFE_FILE=$(printf "%s" "$FILE" | sed "s/'/'\\\\''/g")
+                    $TERMINAL "$XID" -e sh -c "file '$SAFE_FILE' | $PAGER -" &
                 fi
                 ;;
         esac
