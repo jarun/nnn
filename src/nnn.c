@@ -2799,10 +2799,14 @@ static void xrmfromsel(char *path, char *fpath)
 static bool cpmv_rename(int choice, const char *path)
 {
 	int fd;
+	ssize_t path_esc_ret;
 	uint_t count = 0, lines = 0;
 	bool ret = FALSE;
+	char *path_escp;
 	char *cmd = (choice == 'c' ? cp : mv);
-	char buf[sizeof(patterns[P_CPMVRNM]) + (MAX(sizeof(cp), sizeof(mv))) + (PATH_MAX << 1)];
+	char path_esc[(PATH_MAX << 2) + 3];
+	char buf[sizeof(patterns[P_CPMVRNM]) + (MAX(sizeof(cp), sizeof(mv))) + (PATH_MAX * 5)];
+	size_t path_esc_size = sizeof(path_esc);
 
 	fd = create_tmp_file();
 	if (fd == -1)
@@ -2838,7 +2842,17 @@ static bool cpmv_rename(int choice, const char *path)
 		goto finish;
 	}
 
-	snprintf(buf, sizeof(buf), patterns[P_CPMVRNM], path, g_tmpfpath, cmd);
+	/* Escape for insertion inside an existing single-quoted shell string. */
+	path_escp = path_esc;
+	path_esc_ret = shell_escape(&path_escp, &path_esc_size, path);
+	if (path_esc_ret < 2)
+		goto finish;
+
+	/* Strip outer quotes from shell_escape(), keep interior quote breaks (e.g. '\'''). */
+	path_esc[path_esc_ret - 1] = '\0';
+	memmove(path_esc, path_esc + 1, path_esc_ret - 1);
+
+	snprintf(buf, sizeof(buf), patterns[P_CPMVRNM], path_esc, g_tmpfpath, cmd);
 	if (!spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI | F_CHKRTN))
 		ret = TRUE;
 finish:
