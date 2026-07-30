@@ -508,6 +508,10 @@ winch_handler() {
         pkill -f "tail --follow $FIFO_UEBERZUG"
         tail --follow "$FIFO_UEBERZUG" | ueberzug layer --silent --parser json &
     fi
+    # Clear sixel graphics for external image previewers
+    case "${NNN_PREVIEWIMGPROG%% *}" in
+        img2sixel|chafa|timg) printf '\033[?8015l\033[?8015h' >/dev/tty 2>/dev/null ;;
+    esac
     preview_file "$(cat "$CURSEL")"
 }
 
@@ -517,6 +521,10 @@ preview_fifo() {
             pidkill "$PREVIEWPID"
             [ -p "$FIFO_UEBERZUG" ] && ueberzug_remove
             [ -n "$KITTY_LISTEN_ON" ] && kitty +kitten icat --clear --stdin=no >/dev/tty 2>/dev/null
+            # Clear sixel graphics for external image previewers (e.g. img2sixel, chafa)
+            case "${NNN_PREVIEWIMGPROG%% *}" in
+                img2sixel|chafa|timg) printf '\033[?8015l\033[?8015h' >/dev/tty 2>/dev/null ;;
+            esac
             [ "$selection" = "close" ] && break
             preview_file "$selection"
             printf "%s" "$selection" > "$CURSEL"
