@@ -1,0 +1,71 @@
+#!/usr/bin/env sh
+
+# Description: Show file stats similar to nnn show_stats() output in a pager
+# Dependencies: file, stat, pager (PAGER/NNN_PAGER/less)
+# Shell: POSIX compliant
+
+entry=${1:-}
+dir=${2:-}
+
+if [ -z "$entry" ]; then
+    printf '%s\n' "No hovered entry provided." >&2
+    exit 1
+fi
+
+case "$entry" in
+    /*) target=$entry ;;
+    *)
+        if [ -n "$dir" ]; then
+            target=$dir/$entry
+        else
+            target=$PWD/$entry
+        fi
+        ;;
+esac
+
+os=$(uname -s 2>/dev/null || printf '%s' unknown)
+
+# Match nnn FILE_MIME_OPTS handling.
+file_mime_opts=''
+case "$os" in
+    Darwin)
+        file_mime_opts='-bIL'
+        ;;
+    SunOS)
+        file_mime_opts=''
+        ;;
+    *)
+        file_mime_opts='-biL'
+        ;;
+esac
+
+# Match nnn stat behavior.
+stat_x=0
+case "$os" in
+    FreeBSD|OpenBSD|NetBSD|Darwin|DragonFly)
+        stat_x=1
+        ;;
+esac
+
+tmpfile=$(mktemp "${TMPDIR:-/tmp}/nnn-stats.XXXXXX") || exit 1
+trap 'rm -f "$tmpfile"' EXIT HUP INT TERM
+
+{
+    if [ "$stat_x" -eq 1 ]; then
+        stat -x "$target"
+    else
+        stat "$target"
+    fi
+
+    file -b "$target"
+
+    if [ -n "$file_mime_opts" ]; then
+        file "$file_mime_opts" "$target"
+    fi
+} >"$tmpfile" 2>&1
+
+pager_cmd=${NNN_PAGER:-${PAGER:-less}}
+
+# Allow pager command with options (e.g. "less -R").
+# shellcheck disable=SC2086
+$pager_cmd "$tmpfile" || cat "$tmpfile"

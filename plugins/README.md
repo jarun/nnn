@@ -62,6 +62,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [ringtone](ringtone) | Create a variable bitrate mp3 ringtone from file | sh | date, ffmpeg |
 | [rsynccp](rsynccp) | Gives copy-paste verbose progress percentage [✓] | sh | rsync |
 | [splitjoin](splitjoin) | Split file or join selection [✓] | sh | split, cat |
+| [stats](stats) | Show file stats in a pager | sh | file, stat, pager |
 | [suedit](suedit) | Edit file using superuser permissions | sh | sudoedit/sudo/doas |
 | [tnp](tnp) | Opens files in a Tmux Neovim pane (Tmux session only) | sh | tmux, nvim |
 | [togglex](togglex) | Toggle executable mode for selection [✓] | sh | chmod |
