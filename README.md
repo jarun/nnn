@@ -78,7 +78,8 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
   - Reverse sort
   - Directory-specific ordering
 - Mimes
-  - Preview hovered files in FIFO-based previewer
+  - Built-in previewer for directory and text files
+  - Preview hovered files in FIFO-based previewer plugin
   - Open with desktop opener or specify a custom opener
   - File-specific colors (or minimal _dirs in context color_)
   - Icons and Emojis support (customize and compile-in)

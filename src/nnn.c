@@ -8004,7 +8004,11 @@ static bool is_text_file(const char *fpath)
 	return TRUE;
 }
 
-/* Draw the preview pane for the currently hovered file */
+/*
+ * Draw the preview pane for the currently hovered file
+ * If the plugin .npreview is found, it is used.
+ * Otherwise, the built-in previewer is used.
+ */
 static void preview_pane(const char *path)
 {
 	if (!ndents || !cfg.preview)
@@ -8028,10 +8032,12 @@ static void preview_pane(const char *path)
 	/* Auto-detect .npreview plugin */
 	if (!previewer) {
 		previewer = malloc(xstrlen(plgpath) + xstrlen(utils[UTIL_NPREVIEW]) + 1);
-		mkpath(plgpath, utils[UTIL_NPREVIEW], previewer);
-		if (access(previewer, X_OK)) {
-			free(previewer);
-			previewer = NULL;
+		if (previewer) {
+			mkpath(plgpath, utils[UTIL_NPREVIEW], previewer);
+			if (access(previewer, X_OK)) {
+				free(previewer);
+				previewer = NULL;
+			}
 		}
 	}
 
@@ -8097,9 +8103,8 @@ static void preview_pane(const char *path)
 				close(pipefd[0]);
 			}
 			waitpid(pid, NULL, 0);
-		} else {
+		} else
 			close(pipefd[0]);
-		}
 		return;
 	}
 
