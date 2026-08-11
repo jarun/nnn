@@ -79,7 +79,7 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
   - Directory-specific ordering
 - Mimes
   - Built-in previewer for directory and text files
-  - Preview hovered files in FIFO-based previewer plugin
+  - FIFO-based previewer plugins with extensive mime support
   - Open with desktop opener or specify a custom opener
   - File-specific colors (or minimal _dirs in context color_)
   - Icons and Emojis support (customize and compile-in)
