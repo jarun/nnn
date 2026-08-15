@@ -126,7 +126,7 @@ If the plugins list gets too long, try breaking them up into sections:
 NNN_PLUG_PERSONAL='g:personal/convert2zoom;p:personal/echo'
 NNN_PLUG_WORK='j:work/prettyjson;d:work/foobar'
 NNN_PLUG_INLINE='e:!go run "$nnn"*'
-NNN_PLUG_DEFAULT='1:ipinfo;p:preview-tui;o:fzz;b:nbak'
+NNN_PLUG_DEFAULT='1:ipinfo;p:preview-tui;o:fzz;r:!ratio | sort -nr > ratio*;b:nbak'
 NNN_PLUG="$NNN_PLUG_PERSONAL;$NNN_PLUG_WORK;$NNN_PLUG_DEFAULT;$NNN_PLUG_INLINE"
 export NNN_PLUG
 ```
