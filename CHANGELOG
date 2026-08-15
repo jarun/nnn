@@ -1,3 +1,37 @@
+nnn v5.3 Mai Tai
+2026-08-15
+
+- add native preview pane (<kbd>P</kbd>) with automatic `.npreview` support
+- fuzzy filtering improvements:
+  - scoring, ranking, character arbitration
+  - dimmed matches (works with string filtering also)
+- native prompt - cycle entries in the current directory with <kbd>TAB</kbd>
+- enter a directory that exactly matches the filter with <kbd>/</kbd>
+- support <kbd>Alt-Esc</kbd> to quit a context with or without an active filter
+- optimize ncurses rendering with `leaveok()`
+- lazy-load plugins when requested
+- disable linking libreadline by default; use `make O_NORL=0` to enable it
+- show the runtime bookmarked directory path in the help menu
+- add `O_BENCH` to exit after startup for benchmark runs
+- add `stats` plugin to show complete file information in a pager
+- add `tnp` terminal note-pad plugin
+- add Kitty drag-and-drop support to `dragdrop`
+- plugin `nmount` improvements:
+  - unmount all external USB partitions with <kbd>u</kbd>
+  - fill prompt with last input on <kbd>Up</kbd>, clear on <kbd>Down</kbd>
+- clear stale Kitty graphics placements when closing video previews in `preview-tui`
+- use `HOST_CC` and `HOST_CFLAGS` when building the icons generator
+- fix shell quoting in `preview-tabbed`
+- fix context selection and active-tab handling when cycling contexts
+- fix selection-path unescaping during selection edits
+- reconcile off-screen selections correctly before inversion
+- do not automatically enter directories without read permission
+- add safety checks for session header fields
+- support escaping name completions in the native prompt
+- handle arbitrarily long paths when escaping shell arguments
+
+-------------------------------------------------------------------------------
+
 nnn v5.2 Blue Hawaii
 2026-02-14
 
