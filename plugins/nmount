@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Description: Toggle mount status of a device using pmount
 #              If the device is not mounted, it will be mounted.
@@ -15,18 +15,34 @@
 #   - The script uses udisksctl (from udisks2) to power down devices. This is also Linux-specific.
 #     Users on non-Linux platforms can comment it and use an alternative to power-down disks.
 #
-# Shell: POSIX compliant
+# Shell: Bash
 # Author: Arun Prakash Jana
 
 prompt="device name [e.g. sdXn] ('l'ist, 'u'nmount all USB, 'q'uit): "
+previous_input=""
+
+restore_previous_input() {
+    if [ -n "$previous_input" ]; then
+        READLINE_LINE="$previous_input"
+        READLINE_POINT=${#READLINE_LINE}
+    fi
+}
+
+clear_input() {
+    READLINE_LINE=""
+    READLINE_POINT=0
+}
+
+bind -x '"\e[A":restore_previous_input'
+bind -x '"\e[B":clear_input'
 
 lsblk
 
 printf "\nEnsure you aren't still in the mounted device.\n"
-printf "%s" "$prompt"
-read -r dev
+read -r -e -p "$prompt" dev
 
 while [ -n "$dev" ]; do
+    previous_input="$dev"
     if [ "$dev" = "l" ]; then
         lsblk
     elif [ "$dev" = "q" ]; then
@@ -134,6 +150,5 @@ while [ -n "$dev" ]; do
     fi
 
     echo
-    printf "%s" "$prompt"
-    read -r dev
+    read -r -e -p "$prompt" dev
 done
