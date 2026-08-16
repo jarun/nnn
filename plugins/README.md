@@ -13,6 +13,10 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 
 | Plugin (a-z) | Description [Clears selection<sup>1</sup>] | Lang | Dependencies |
 | --- | --- | --- | --- |
+| [.cbcp](.cbcp) | **Internal**: Copy selection to system clipboard | sh | _see in-file docs_ |
+| [.nmv](.nmv) | **Internal**: Feature-rich batch renamer | bash | _see in-file docs_ |
+| [.npreview](.npreview) | **Internal**: Text-based preview handler | sh | _see in-file docs_ |
+| [.ntfy](.ntfy) | **Internal**: Notify on copy, move, remove completion | sh | _see in-file docs_ |
 | [autojump](autojump) | Navigate to dir/path | sh | [jump](https://github.com/gsamokovarov/jump)/autojump/<br>zoxide/z/[z.lua](https://github.com/skywind3000/z.lua) |
 | [boom](boom) | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs, mktemp |
@@ -75,7 +79,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 Notes:
 
 1. A plugin has to explicitly request `nnn` to clear the selection e.g. after operating on the selected files.
-2. Files starting with a dot in the `plugins` directory are internal files and should not be used as plugins.
+2. Files starting with a dot in the `plugins` directory are internal files, listed at the top of the table, and should not be used as plugins directly.
 
 ### Table of contents
 
