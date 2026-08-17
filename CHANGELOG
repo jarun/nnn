@@ -14,7 +14,7 @@ nnn v5.3 Mai Tai
 - show the runtime bookmarked directory path in the help menu
 - add `O_BENCH` to exit after startup for benchmark runs
 - add `stats` plugin to show complete file information in a pager
-- add `tnp` terminal note-pad plugin
+- add `tnp` plugin to open files in a Tmux Neovim pane
 - add Kitty drag-and-drop support to `dragdrop`
 - plugin `nmount` improvements:
   - unmount all external USB partitions with <kbd>u</kbd>
