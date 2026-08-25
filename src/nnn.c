@@ -3197,7 +3197,6 @@ static int (*namecmpfn)(const char * const s1, const char * const s2) = &xstricm
 
 static char * (*fnstrstr)(const char *haystack, const char *needle) = &strcasestr;
 #ifdef PCRE2
-static const unsigned char *tables;
 static int pcre2flags = PCRE2_NO_AUTO_CAPTURE | PCRE2_EXTENDED | PCRE2_CASELESS | PCRE2_UTF;
 #else
 static int regflags = REG_NOSUB | REG_EXTENDED | REG_ICASE;
@@ -10698,7 +10697,7 @@ int main(int argc, char *argv[])
 	setlocale(LC_COLLATE, "");
 	setlocale(LC_CTYPE, "");
 #ifdef PCRE2
-	tables = pcre2_maketables(NULL);
+	pcre2_maketables(NULL);
 #endif
 #endif
 
