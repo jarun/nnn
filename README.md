@@ -29,6 +29,8 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
 
 [_(more use cases)_](https://github.com/jarun/nnn/wiki/Basic-use-cases#the_nnn-magic)
 
+Online demo: <a href="https://build.demoshell.com/launch?snapshot=demoshell%2Ftui%3Annn"><img src="https://build.demoshell.com/v1/embed/badge.svg" alt="Live demo by Demoshell" align="absmiddle"></a>
+
 ## Features
 
 - Quality
