@@ -12,9 +12,9 @@
 <p align="center"><a href="https://github.com/user-attachments/assets/541ca36d-ae26-49fb-97da-d1f7a12d4b9a"><img src="https://github.com/user-attachments/assets/a8ee4689-1552-4fb1-997e-b16fe8ef5086"></a></p>
 
 <h3 align="center">[<a
-href="https://github.com/jarun/nnn#features">Features</a>] [<a
-href="https://github.com/jarun/nnn#quickstart">Quickstart</a>] [<a
-href="https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins">Plugins</a>] [<a
+href="https://github.com/jarun/nnn#features">Features</a>] $~~$ [<a
+href="https://github.com/jarun/nnn#quickstart">Quickstart</a>] $~~$ [<a
+href="https://github.com/jarun/nnn/tree/master/plugins#nnn-plugins">Plugins</a>] $~~$ [<a
 href="https://github.com/jarun/nnn/wiki">Wiki</a>]</h3>
 
 `nnn` (_n³_) is a full-featured terminal file manager. It's tiny (~150 KiB), [nearly 0-config](https://github.com/jarun/nnn#quickstart) and [incredibly fast](https://github.com/jarun/nnn/wiki/Performance).
@@ -29,7 +29,7 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
 
 [_(more use cases)_](https://github.com/jarun/nnn/wiki/Basic-use-cases#the_nnn-magic)
 
-Online demo: <a href="https://build.demoshell.com/launch?snapshot=demoshell%2Ftui%3Annn"><img src="https://build.demoshell.com/v1/embed/badge.svg" alt="Live demo by Demoshell" align="absmiddle"></a>
+<a href="https://build.demoshell.com/launch?snapshot=demoshell%2Ftui%3Annn"><img src="https://build.demoshell.com/v1/embed/badge.svg" alt="Live demo by Demoshell" align="absmiddle"></a>
 
 ## Features
 
@@ -133,11 +133,11 @@ Use the shell function name you chose to run `nnn` with your preferred configura
 
 Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates and/or cycles contexts. <kbd>?</kbd> lists shortcuts.
 
-[![](https://github.com/user-attachments/assets/e93f7571-8b8d-4703-bef1-93fc804adf7d)](https://www.youtube.com/embed/-knZwdd1ScU)
-
 [![Wiki](https://img.shields.io/badge/RTFM-nnn%20Wiki-crimson?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
 
 ## Videos
+
+[![](https://github.com/user-attachments/assets/e93f7571-8b8d-4703-bef1-93fc804adf7d)](https://www.youtube.com/embed/-knZwdd1ScU)
 
 - [nnn file manager on Termux (Android)](https://www.youtube.com/embed/AbaauM7gUJw)
 - [NNN File Manager](https://www.youtube.com/embed/1QXU4XSqXNo)
