@@ -3,6 +3,25 @@
 <p align="center"><img src="https://i.imgur.com/SpT0L2W.png" /></p>
 <p align="center"><i>read ebooks with plugin gutenread (Android)</i></p>
 
+### Table of contents
+
+- [Introduction](#introduction)
+- [List of plugins](#list-of-plugins)
+- [Installation](#installation)
+- [Configuration](#configuration)
+  - [Skip directory refresh after running a plugin](#skip-directory-refresh-after-running-a-plugin--)
+- [Running commands as plugin](#running-commands-as-plugin-)
+  - [Skip user confirmation after command execution](#skip-user-confirmation-after-command-execution-)
+  - [Run a GUI app as plugin](#run-a-gui-app-as-plugin-)
+  - [Page non-interactive command output](#page-non-interactive-command-output-)
+  - [Some useful key-command examples](#some-useful-key-command-examples)
+- [Access level of plugins](#access-level-of-plugins)
+- [Create your own plugins](#create-your-own-plugins)
+  - [Send data to `nnn`](#send-data-to-nnn)
+  - [Get notified on file hover](#get-notified-on-file-hover)
+- [Examples](#examples)
+- [Contributing plugins](#contributing-plugins)
+
 ## Introduction
 
 Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or binaries) `nnn` can communicate with and trigger. This mechanism fits perfectly with the fundamental design to keep the core file manager lean and fast, by delegating repetitive (but not necessarily file manager-specific) tasks to the plugins which can be run with custom hotkeys.
@@ -81,23 +100,6 @@ Notes:
 1. A plugin has to explicitly request `nnn` to clear the selection e.g. after operating on the selected files.
 2. Files starting with a dot in the `plugins` directory are internal files, listed at the top of the table, and should not be used as plugins directly.
 
-### Table of contents
-
-- [Installation](#installation)
-- [Configuration](#configuration)
-  - [Skip directory refresh after running a plugin](#skip-directory-refresh-after-running-a-plugin--)
-- [Running commands as plugin](#running-commands-as-plugin-)
-  - [Skip user confirmation after command execution](#skip-user-confirmation-after-command-execution-)
-  - [Run a GUI app as plugin](#run-a-gui-app-as-plugin-)
-  - [Page non-interactive command output](#page-non-interactive-command-output-)
-  - [Some useful key-command examples](#some-useful-key-command-examples)
-- [Access level of plugins](#access-level-of-plugins)
-- [Create your own plugins](#create-your-own-plugins)
-  - [Send data to `nnn`](#send-data-to-nnn)
-  - [Get notified on file hover](#get-notified-on-file-hover)
-- [Examples](#examples)
-- [Contributing plugins](#contributing-plugins)
-
 ## Installation
 
 The following command installs or updates (after backup) all plugins:
@@ -140,8 +142,9 @@ Note:
 - `'b:boom;b:bulknew` will result in only the first definition of *b* (`b:boom`) being used.
 - A keybinding definition of more than 1 character will prevent nnn from starting.
 
+## Plugin modifiers
 
-#### Skip directory refresh after running a plugin [`-`]
+#### [`-`] Skip directory refresh after running a plugin
 
 `nnn` refreshes the directory after running a plugin to reflect any changes by the plugin. To disable this add a `-` before the plugin name:
 
@@ -149,29 +152,15 @@ Note:
 export NNN_PLUG='p:-plugin'
 ```
 
-## Running commands as plugin [`!`]
+#### [`!`] Run commands as plugin
 
 To assign keys to arbitrary non-background cli commands and invoke like plugins, add `!` before the command.
 
 ```sh
-export NNN_PLUG='x:!chmod +x "$nnn";g:!git log;s:!smplayer "$nnn"'
+export NNN_PLUG='x:!chmod +x "$nnn";g:-!git log'
 ```
 
-Now <kbd>;x</kbd> can be used to make a file executable, <kbd>;g</kbd> can be used to the git log of a git project directory, <kbd>;s</kbd> can be used to preview a partially downloaded media file.
-
-#### Skip user confirmation after command execution [`*`]
-
-`nnn` waits for user confirmation (the prompt `Press Enter to continue`) after it executes a command as plugin (unlike plugins which can add a `read` to wait). To skip this, add a `*` after the command.
-
-```sh
-export NNN_PLUG='s:!smplayer "$nnn"*;n:-!vim /home/vaio/Dropbox/Public/synced_note*'
-```
-
-Now there will be no prompt after <kbd>;s</kbd> and <kbd>;n</kbd>.
-
-Note: Do not use `*` with programs that run and exit e.g. cat.
-
-#### Run a GUI app as plugin [`&`]
+#### [`&`] Run a GUI app as plugin
 
 To run a GUI app as plugin, add a `&` after `!`.
 
@@ -179,7 +168,7 @@ To run a GUI app as plugin, add a `&` after `!`.
 export NNN_PLUG='m:-!&mousepad "$nnn"'
 ```
 
-#### Page non-interactive command output [`|`]
+#### [`|`] Page non-interactive command output
 
 To show the output of run-and-exit commands which do not need user input, add `|` (pipe) after `!`.
 
@@ -187,15 +176,9 @@ To show the output of run-and-exit commands which do not need user input, add `|
 export NNN_PLUG='m:-!|mediainfo "$nnn";t:-!|tree -ps;l:-!|ls -lah --group-directories-first'
 ```
 
-This option is incompatible with `&` (terminal output is masked for GUI programs) and ignores `*` (output is already paged for user).
+- incompatible with `&` (terminal output is masked for GUI programs)
 
-Notes:
-1. Place `$nnn` (or exported variables) in double quotes (**`"$nnn"`**)
-2. Use single quotes for `$NNN_PLUG` so `"$nnn"` is not interpreted
-3. (_Again_) add `!` before the command
-4. To disable directory refresh after running a _command as plugin_, prefix with `-!`
-
-#### Non-interactive command output in a floating window [`>`]
+#### [`>`] Non-interactive command output in a floating window
 
 To show the output of run-and-exit commands in a floating window, add `>` (right arrow) after `!`.
 
@@ -203,10 +186,27 @@ To show the output of run-and-exit commands in a floating window, add `>` (right
 export NNN_PLUG='m:!>mediainfo "$nnn";t:!>tree -ps;l:!>ls -lah --group-directories-first'
 ```
 
-This option is incompatible with `&` (terminal output is masked for GUI programs) and ignores `*` (output is rendered in a floating window).
-Option `-` is ignored with this option. The directory is always refreshed.
+- incompatible with `&` (terminal output is masked for GUI programs)
+- ignores `-` (the directory is always refreshed)
 
-#### Some useful key-command examples
+#### [`*`] Skip user confirmation after command execution
+
+`nnn` waits for user confirmation (the prompt `Press Enter to continue`) after it executes a command as plugin (unlike plugins which can add a `read` to wait). To skip this, add a `*` after the command.
+
+```sh
+export NNN_PLUG='s:!smplayer "$nnn"*;n:-!vim /home/vaio/Dropbox/Public/synced_note*'
+```
+
+- should be placed at the end of the plugin/command string
+- ignored if `|` is used (output is already paged for user)
+- ignored if `>` is used (output is rendered in a floating window)
+- do not use `*` with programs that run and exit e.g. cat
+
+Notes:
+1. Place `$nnn` (or exported variables) in double quotes (**`"$nnn"`**)
+2. Use single quotes for `$NNN_PLUG` so that `"$nnn"` is not interpreted
+
+## Examples
 
 | Key:Command | Description |
 |---|---|

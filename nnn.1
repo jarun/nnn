@@ -463,7 +463,7 @@ separated by \fB;\fR:
     export NNN_BMS="d:$HOME/Docs;u:/home/user/Cam Uploads;D:$HOME/Downloads/"
 .Ed
 .Pp
-These bookmarks are listed in the help and config screen (key \fB?\fR).
+    These bookmarks are listed in the help and config screen (key \fB?\fR).
 .Pp
 \fBNNN_PLUG:\fR directly executable plugins as \fIkey_char:plugin\fR pairs
 separated by \fB;\fR:
@@ -471,53 +471,58 @@ separated by \fB;\fR:
     export NNN_PLUG='f:finder;o:fzopen;p:mocplay;d:diffs;t:nmount;v:imgview'
 
     NOTES:
-    1. To run a plugin directly, press \fB;\fR followed by the key.
-    2. Alternatively, combine with \fBAlt\fR (i.e. \fBAlt+key\fR).
-    3. To skip directory refresh after running a plugin, prefix with \fB-\fR.
-
-    export NNN_PLUG='p:-plugin'
+        1. To run a plugin directly, press \fB;\fR followed by the key.
+        2. Alternatively, combine with \fBAlt\fR (i.e. \fBAlt+key\fR).
+        3. To pick and run an unassigned plugin, press \fBEnter\fR at the plugin prompt.
+        4. To run a plugin at startup, use the option `-P` followed by the plugin key.
 .Ed
 .Pp
-    To assign keys to arbitrary non-background cli commands and invoke like
-    plugins, add \fB!\fR before the command.
-.Bd -literal
-    export NNN_PLUG='x:!chmod +x "$nnn";g:!git log;s:!smplayer "$nnn"'
+    \fBPLUGIN MODIFIERS\fR
 
-    To pick and run an unassigned plugin, press \fBEnter\fR at the plugin prompt.
-    To run a plugin at startup, use the option `-P` followed by the plugin key.
+    [-] To skip directory refresh after running a plugin, prefix with \fB-\fR.
 
-    NOTES:
-    1. Place $nnn (or exported variables) in double quotes (\fB"$nnn"\fR)
-    2. Use single quotes for $NNN_PLUG so "$nnn" is not interpreted
-    3. (Again) add \fB!\fR before the command
-    4. To disable directory refresh after running a \fIcommand as plugin\fR,
-       prefix with \fB-!\fR
-    5. To skip user confirmation after command execution, suffix with \fB*\fR
-       Note: Do not use \fB*\fR with programs those run and exit e.g. cat
+        export NNN_PLUG='p:-plugin'
 
-        export NNN_PLUG='y:-!sync*'
+    [!] To assign keys to arbitrary non-background cli commands and invoke like
+        plugins, add \fB!\fR before the command.
 
-    6. To run a \fIGUI app as plugin\fR, add a \fB&\fR after \fB!\fR.
+        export NNN_PLUG='x:!chmod +x "$nnn";g:-!git log'
+
+    [&] To run a \fIGUI app as plugin\fR, add a \fB&\fR after \fB!\fR.
 
         export NNN_PLUG='m:-!&mousepad "$nnn"'
 
-    7. To show the output of run-and-exit commands which do not need user input,
-       add \fB|\fR (pipe) after \fB!\fR
-       Note: This option is incompatible with \fB&\fR (terminal output is masked
-       for GUI programs) and ignores \fB*\fR (output is already paged for user).
+    [|] To show the output of run-and-exit commands which do not need user input,
+        add \fB|\fR (pipe) after \fB!\fR.
 
         export NNN_PLUG='m:-!|mediainfo "$nnn";t:-!|tree -ps;l:-!|ls -lah --group-directories-first'
 
-    8. To show the output of run-and-exit commands in a floating window,
-       add \fB>\fR (right arrow) after \fB!\fR
-       Note: This option is incompatible with \fB&\fR (terminal output is masked
-       for GUI programs) and ignores \fB*\fR (output is rendered in a floating
-       window).
-       Option `-` is ignored with this option. The directory is always refreshed.
+        * incompatible with \fB&\fR (terminal output is masked for GUI programs)
+
+    [>] To show the output of run-and-exit commands in a floating window,
+        add \fB>\fR (right arrow) after \fB!\fR
 
         export NNN_PLUG='m:!>mediainfo "$nnn";t:!>tree -ps;l:!>ls -lah --group-directories-first'
 
-    EXAMPLES:
+        * incompatible with \fB&\fR (terminal output is masked for GUI programs)
+        * ignores \fB-\fR (the directory is always refreshed)
+
+    [*] To skip user confirmation after command execution, suffix with \fB*\fR
+
+        export NNN_PLUG='y:-!sync*'
+
+        * should be placed at the end of the plugin/command string
+        * ignored if \fB|\fR is used (output is already paged for user)
+        * ignored if \fB>\fR is used (output is rendered in a floating window)
+        * do not use \fB*\fR with programs those run and exit e.g. 'cat'
+
+    NOTES:
+        1. Place $nnn (or exported variables) in double quotes (\fB"$nnn"\fR)
+        2. Use single quotes for $NNN_PLUG so "$nnn" is not interpreted
+
+    \fBEXAMPLES\fR
+
+.Bd -literal
     ------------------------------------ + -------------------------------------------------
                 Key:Command              |                   Description
     ------------------------------------ + -------------------------------------------------
@@ -543,24 +548,28 @@ separated by \fB;\fR:
 .Bd -literal
     export NNN_ORDER='t:/home/user/Downloads;S:/tmp'
 
-    NOTE: Sort keys can be a/d/e/r/s/t/v (refer to the \fBSORTING\fR section).
-          Path must be absolute.
+    NOTES:
+        1. Sort keys can be a/d/e/r/s/t/v (refer to the \fBSORTING\fR section).
+        2. Path must be absolute.
 
-          Timestamps for entries modified/created within 5 minutes are shown in reverse.
+    Timestamps of entries modified/created within 5 minutes are shown in reverse.
 .Ed
 .Pp
 \fBNNN_COLORS:\fR string of color numbers for each context, e.g.:
 .Bd -literal
     # 8 color numbers:
-    # 0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
-    export NNN_COLORS='12341234'
+      0-black, 1-red, 2-green, 3-yellow, 4-blue (default), 5-magenta, 6-cyan, 7-white
+
+        export NNN_COLORS='12341234'
 
     # xterm 256 color numbers (converted to hex, 2 symbols per context):
-    # see https://user-images.githubusercontent.com/1482942/93023823-46a6ba80-f5e1-11ea-9ea3-6a3c757704f4.png
-    export NNN_COLORS='#0a1b2c3d0a1b2c3d'
+      see https://user-images.githubusercontent.com/1482942/93023823-46a6ba80-f5e1-11ea-9ea3-6a3c757704f4.png
+
+        export NNN_COLORS='#0a1b2c3d0a1b2c3d'
 
     # both (256 followed by 8 as fallback, separated by ';')
-    export NNN_COLORS='#0a1b2c3d0a1b2c3d;12341234'
+
+        export NNN_COLORS='#0a1b2c3d0a1b2c3d;12341234'
 
     NOTE: If only 256 colors are specified and the terminal doesn't support, default is used.
 .Ed
@@ -625,11 +634,11 @@ separated by \fB;\fR:
     export NNN_TRASH=cmd
 
     NOTES:
-    1. \fBcmd\fR is the name/path of the binary that nnn will call for
-       trashing files. E.g to use macOS's native `trash' command:
-       export NNN_TRASH="trash"
-    2. Special value "1" and "2" for cmd will use trash-cli and
-       gio trash respectively.
+        1. \fBcmd\fR is the name/path of the binary that nnn will call for
+           trashing files. E.g to use macOS's native `trash' command:
+           export NNN_TRASH="trash"
+        2. Special value "1" and "2" for cmd will use 'trash-cli' and
+           'gio trash' respectively.
 .Ed
 .Pp
 \fBNNN_SEL:\fR absolute path to custom selection file.
@@ -642,9 +651,9 @@ separated by \fB;\fR:
     export NNN_FIFO='/tmp/nnn.fifo'
 
     NOTES:
-    1. Overridden by a temporary path with -a option.
-    2. If the FIFO file doesn't exist it will be created,
-       but not removed (unless it is generated by -a option).
+        1. Overridden by a temporary path with -a option.
+        2. If the FIFO file doesn't exist it will be created,
+           but not removed (unless it is generated by -a option).
 
     Online docs: https://github.com/jarun/nnn/wiki/Live-previews
 .Ed
