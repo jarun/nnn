@@ -445,7 +445,7 @@ static settings cfg = {
 
 alignas(max_align_t) static context g_ctx[CTX_MAX];
 
-static int ndents, cur, last, curscroll, last_curscroll, total_dents = ENTRY_INCR, scroll_lines = 1;
+static int ndents, cur, last, curscroll, last_curscroll, total_dents = ENTRY_INCR;
 static int nselected;
 #ifndef NOFIFO
 static int fifofd = -1;
@@ -495,6 +495,9 @@ static ushort_t homelen;
 static uchar_t tmpfplen;
 static uchar_t blk_shift = BLK_SHIFT_512;
 #ifndef NOMOUSE
+#if NCURSES_MOUSE_VERSION > 1
+static int scroll_lines=1;
+#endif
 static int middle_click_key;
 #endif
 #ifdef PCRE2
@@ -1515,19 +1518,14 @@ static ssize_t shell_escape(char **poutbuf, size_t *outlen, const char *inbuf)
 			continue;
 		}
 
-		switch (inbuf[r - 1]) {
-		/* the only thing that has special meaning inside single
-		 * quotes are single quotes themselves. */
-		case '\'':
+		/* the only thing that has special meaning inside single * quotes are single quotes themselves */
+		if (inbuf[r - 1] == '\'') {
 			buf[w++] = '\''; /* end single quote */
 			buf[w++] = '\\'; /* put \' so it's treated as literal single quote */
 			buf[w++] = '\'';
 			buf[w++] = '\''; /* start single quoting again */
-			break;
-		default:
+		} else
 			buf[w++] = inbuf[r - 1];
-			break;
-		}
 	}
 
 	buf[w] = '\0'; // NOLINT
@@ -2375,10 +2373,8 @@ static void export_file_list(void)
 
 	spawn(editor, g_tmpfpath, NULL, NULL, F_CLI);
 
-	if (xconfirm(get_input(messages[MSG_RM_TMP]))) {
-		if (unlink(g_tmpfpath)) {
-			DPRINTF_S(strerror(errno));
-		}
+	if (xconfirm(get_input(messages[MSG_RM_TMP])) && unlink(g_tmpfpath)) {
+		DPRINTF_S(strerror(errno));
 	}
 }
 
@@ -2589,7 +2585,8 @@ static pid_t xfork(uchar_t flag)
 
 			if (p > 0)
 				_exit(EXIT_SUCCESS);
-			else if (p == 0) {
+
+			if (p == 0) {
 				enable_signals();
 				setsid();
 				return p;
@@ -2687,22 +2684,22 @@ static int spawn(char *command, char *arg1, char *arg2, char *arg3, ushort_t fla
 
 		execvp(*argv, argv);
 		_exit(EXIT_SUCCESS);
-	} else {
-		retstatus = join(pid, flag);
-		DPRINTF_D(pid);
-
-		if ((flag & F_CONFIRM) || ((flag & F_CHKRTN) && retstatus)) {
-			int status = write(STDOUT_FILENO, messages[MSG_ENTER], xstrlen(messages[MSG_ENTER]));
-			(void)status;
-			while ((read(STDIN_FILENO, &status, 1) > 0) && (status != '\n'));
-		}
-
-		if (flag & F_NORMAL)
-			refresh();
-
-		free(cmd);
 	}
 
+	/* pid != 0 */
+	retstatus = join(pid, flag);
+	DPRINTF_D(pid);
+
+	if ((flag & F_CONFIRM) || ((flag & F_CHKRTN) && retstatus)) {
+		int status = write(STDOUT_FILENO, messages[MSG_ENTER], xstrlen(messages[MSG_ENTER]));
+		(void)status;
+		while ((read(STDIN_FILENO, &status, 1) > 0) && (status != '\n'));
+	}
+
+	if (flag & F_NORMAL)
+		refresh();
+
+	free(cmd);
 	return retstatus;
 }
 
@@ -5230,7 +5227,7 @@ END:
 }
 #endif
 
-static uchar_t get_free_ctx(void)
+static char get_free_ctx(void)
 {
 	uchar_t r = cfg.curctx;
 
@@ -5238,14 +5235,14 @@ static uchar_t get_free_ctx(void)
 		r = (r + 1) & ~CTX_MAX;
 	while (g_ctx[r].c_cfg.ctxactive && (r != cfg.curctx));
 
-	return r;
+	return (char)r;
 }
 
 /* ctx is absolute: 1 to 4, + for smart context */
 static void set_smart_ctx(int ctx, char *nextpath, char **path, char *file, char **lastname, char **lastdir)
 {
 	if (ctx == '+') /* Get smart context */
-		ctx = (int)(get_free_ctx() + 1);
+		ctx = get_free_ctx() + 1;
 
 	if (ctx == 0 || ctx == cfg.curctx + 1) { /* Same context */
 		clearfilter();
@@ -5689,6 +5686,8 @@ static bool show_content_in_floating_window(char *content, size_t content_len, e
 			done = TRUE;
 			break;
 #endif
+		default:
+			break;
 		}
 	}
 
@@ -6506,7 +6505,7 @@ static char *readpipe(int fd, char *ctxnum, char **path)
 	}
 
 	if (g_buf[0] == '+')
-		ctx = (char)(get_free_ctx() + 1);
+		ctx = get_free_ctx() + 1;
 	else if (g_buf[0] < '0')
 		return NULL;
 	else {
@@ -7829,7 +7828,7 @@ static void statusbar(char *path)
 
 	/* Get the file extension for regular files */
 	if (S_ISREG(pent->mode)) {
-		i = (int)(pent->nlen - 1);
+		i = (int)pent->nlen - 1;
 		ptr = xextension(pent->name, i);
 		if (ptr)
 			len = i - (ptr - pent->name);
@@ -9474,11 +9473,9 @@ nochange:
 				tmp = abspath(tmp, NULL, newpath);
 				if (!tmp)
 					continue;
-				if (access(tmp, F_OK) == 0) {
-					if (!xconfirm(get_input(messages[MSG_OVERWRITE]))) {
-						statusbar(path);
-						goto nochange;
-					}
+				if (!(access(tmp, F_OK) || xconfirm(get_input(messages[MSG_OVERWRITE])))) {
+					statusbar(path);
+					goto nochange;
 				}
 
 				(r == 's') ? archive_selection(get_archive_cmd(tmp), tmp)
@@ -9722,11 +9719,9 @@ nochange:
 					messages[MSG_SSN_NAME]);
 				if (tmp && *tmp)
 					save_session(tmp, &presel);
-			} else if (r == 'l' || r == 'r') {
-				if (load_session(NULL, &path, &lastdir, &lastname, r == 'r')) {
-					setdirwatch();
-					goto begin;
-				}
+			} else if ((r == 'l' || r == 'r') && load_session(NULL, &path, &lastdir, &lastname, r == 'r')) {
+				setdirwatch();
+				goto begin;
 			}
 
 			statusbar(path);
@@ -10339,10 +10334,14 @@ int main(int argc, char *argv[])
 		case 'K':
 			check_key_collision();
 			return EXIT_SUCCESS;
+#ifndef NOMOUSE
+#if NCURSES_MOUSE_VERSION > 1
 		case 'l':
 			if (env_opts_id < 0)
 				scroll_lines = atoi(optarg);
 			break;
+#endif
+#endif
 		case 'n':
 			cfg.filtermode = 1;
 			break;
