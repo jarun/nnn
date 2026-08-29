@@ -133,7 +133,7 @@ Use the shell function name you chose to run `nnn` with your preferred configura
 
 Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates and/or cycles contexts. <kbd>?</kbd> lists shortcuts.
 
-[![Wiki](https://img.shields.io/badge/RTFM-nnn%20Wiki-crimson?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
+[![Wiki](https://img.shields.io/badge/RTFM-nnn%20Wiki-important?maxAge=2592000)](https://github.com/jarun/nnn/wiki)
 
 ## Videos
 
