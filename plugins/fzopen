@@ -2,8 +2,7 @@
 
 # Description: Regular mode:
 #                Fuzzy find a file in directory subtree.
-#                Opens in $VISUAL or $EDITOR if text.
-#                Opens other type of files with xdg-open.
+#                Opens the selected file in nnn.
 #                Work only with a single file selected.
 #
 #              Picker mode:
@@ -12,7 +11,7 @@
 #                Leaves untouched if no file is picked.
 #                Works with single/multiple files selected.
 #
-# Dependencies: fd/find, fzf/skim, xdg-open/open (on macOS)
+# Dependencies: fd/find, fzf/skim
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
@@ -65,21 +64,9 @@ if [ "$entry" ]; then
         exit 0
     fi
 
-    # Open the file (works for a single file only)
-    cmd_file=""
-    cmd_open=""
-    if uname | grep -q "Darwin"; then
-        cmd_file="file -bIL"
-        cmd_open="open"
-    else
-        cmd_file="file -biL"
-        cmd_open="xdg-open"
-    fi
-
-    case "$($cmd_file "$entry")" in
-        *text*)
-            "${VISUAL:-$EDITOR}" "$entry" ;;
-        *)
-            $cmd_open "$entry" >/dev/null 2>&1 ;;
+    case "$entry" in
+        /*) fullpath="$entry" ;;
+        *)  fullpath="$PWD/$entry" ;;
     esac
+    printf "%s" "0o$fullpath" > "$NNN_PIPE"
 fi

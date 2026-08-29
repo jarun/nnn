@@ -6491,7 +6491,7 @@ static ssize_t read_nointr(int fd, void *buf, size_t count)
 	return len;
 }
 
-static char *readpipe(int fd, char *ctxnum, char **path)
+static char *readpipe(int fd, char *ctxnum, char **path, char *openfile)
 {
 	char ctx, *nextpath = NULL;
 
@@ -6519,14 +6519,22 @@ static char *readpipe(int fd, char *ctxnum, char **path)
 
 	char op = g_buf[0];
 
-	if (op == 'c') {
+	if (op == 'c' || op == 'o') {
 		ssize_t len = read_nointr(fd, g_buf, PATH_MAX);
 
 		if (len <= 0)
 			return NULL;
 
 		g_buf[len] = '\0'; /* Terminate the path read */
-		if (g_buf[0] == '/') {
+
+		if (op == 'o' && g_buf[0] == '/') {
+			char *base = xbasename(g_buf);
+
+			if (!*base)
+				return NULL;
+			xstrsncpy(openfile, base, NAME_MAX + 1);
+			nextpath = xdirname(g_buf);
+		} else if (op == 'c' && g_buf[0] == '/') {
 			nextpath = g_buf;
 			len = xstrlen(g_buf);
 			while (--len && (g_buf[len] == '/')) /* Trim all trailing '/' */
@@ -6548,7 +6556,16 @@ static char *readpipe(int fd, char *ctxnum, char **path)
 	return nextpath;
 }
 
-static bool run_plugin(char **path, const char *file, char *runfile, char **lastname, char **lastdir, enum action *action)
+/*
+ * path: current directory path, updated if the plugin changes context
+ * file: plugin name or command to execute
+ * runfile: file name passed to the plugin
+ * openfile: file name requested by the plugin's 'o' pipe opcode
+ * lastname, lastdir: current context state, updated on context change
+ * action: optional action requested by a command plugin
+ */
+static bool run_plugin(char **path, const char *file, char *runfile, char *openfile,
+		       char **lastname, char **lastdir, enum action *action)
 {
 	pid_t p;
 	char ctx = 0;
@@ -6635,11 +6652,19 @@ static bool run_plugin(char **path, const char *file, char *runfile, char **last
 		rfd = open(g_pipepath, O_RDONLY);
 	while (rfd == -1 && errno == EINTR);
 
-	nextpath = readpipe(rfd, &ctx, path);
-	if (nextpath)
-		set_smart_ctx(ctx, nextpath, path, runfile, lastname, lastdir);
+	openfile[0] = '\0';
+	nextpath = readpipe(rfd, &ctx, path, openfile);
+	if (nextpath) {
+		set_smart_ctx(ctx, nextpath, path, openfile[0] ? openfile : runfile,
+			      lastname, lastdir);
+		if (openfile[0])
+			xstrsncpy(*lastname, openfile, NAME_MAX + 1);
+	}
 
 	close(rfd);
+
+	if (openfile[0])
+		ungetch('\r');
 
 	/* wait for the child to finish. no zombies allowed */
 	waitpid(p, NULL, 0);
@@ -8801,7 +8826,8 @@ nochange:
 					clearfilter();
 
 					if (chdir(path) == -1
-					    || !run_plugin(&path, pent->name, runfile, &lastname, &lastdir, NULL)) {
+					    || !run_plugin(&path, pent->name, runfile, runfile,
+							   &lastname, &lastdir, NULL)) {
 						DPRINTF_S("plugin failed!");
 					}
 
@@ -9630,7 +9656,7 @@ nochange:
 				do {
 					action = SEL_MAX;
 
-					if (!run_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL),
+					if (!run_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL), runfile,
 								 &lastname, &lastdir, &action)) {
 						printwait(messages[MSG_FAILED], &presel);
 						goto nochange;
@@ -9640,7 +9666,8 @@ nochange:
 						return EXIT_SUCCESS;
 				} while (handle_cur_move(action));
 
-				copycurname();
+				if (!runfile[0])
+					copycurname();
 
 				if (!r) {
 					cfg.filtermode ? presel = FILTER : statusbar(path);

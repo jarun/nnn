@@ -268,6 +268,7 @@ The `opcode` indicates the operation type.
 |:---:| --- |
 | `c` | change directory |
 | `l` | list files in list mode |
+| `o` | open file at absolute path |
 | `p` | picker file overwritten |
 
 For convenience, we provided a helper script named `.nnn-plugin-helper` and a function named `nnn_cd` to ease this process. `nnn_cd` receives the path to change to as the first argument, and the context as an optional second argument.
