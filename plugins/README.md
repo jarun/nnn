@@ -51,7 +51,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [fixname](fixname) | Clean filename to be more shell-friendly [✓] | bash | sed |
 | [fzcd](fzcd) | Fuzzy search multiple dirs (or `$PWD`) and visit file | sh | fzf, (find) |
 | [fzhist](fzhist) | Fuzzy-select a cmd from history, edit in `$EDITOR` and run | sh | fzf, mktemp |
-| [fzopen](fzopen) | Fuzzy find file(s) in subtree to edit/open/pick | sh | fzf, xdg-open/open |
+| [fzopen](fzopen) | Fuzzy find file(s) in subtree to edit/open/pick | sh | fzf/skim, fd/find |
 | [fzplug](fzplug) | Fuzzy find, preview and run other plugins | sh | fzf |
 | [getplugs](getplugs) | Update plugins to installed `nnn` version | sh | curl |
 | [gitroot](gitroot) | Cd to the root of current git repo | sh | git |
