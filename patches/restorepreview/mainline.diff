@@ -194,9 +194,9 @@ index bb101e87..4759b5f1 100644
 +					goto run_plugin;
 +				}
 +
- 				if (cfg.filtermode) {
- 					presel = FILTER;
- 					clearfilter();
+ 				resetfilter(&presel);
+ 				continue;
+ 			}
 @@ -9229,8 +9268,14 @@ nochange:
  				copycurname();
  				goto nochange;
