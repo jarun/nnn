@@ -7968,7 +7968,11 @@ static inline void markhovered(void)
 {
 	if (cfg.showdetail && ndents) { /* Bold forward arrowhead */
 		tocursor();
+#ifdef ICONS_ENABLED
+		addstr("▌");
+#else
 		addch('>' | A_BOLD);
+#endif
 	}
 }
 
