@@ -64,7 +64,7 @@ if [ -n "$LIST" ]; then
     else
         printf "find missing"
         read -r _
-            exit 1
+        exit 1
     fi
 fi
 
