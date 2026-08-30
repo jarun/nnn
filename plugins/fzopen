@@ -2,6 +2,7 @@
 
 # Description: Regular mode:
 #                Fuzzy find a file in directory subtree.
+#                If GLOBAL_LIST is in $PWD, fuzzy find in its listed paths.
 #                Opens the selected file in nnn.
 #                Work only with a single file selected.
 #
@@ -18,22 +19,53 @@
 
 NUKE="${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins/nuke"
 USE_NUKE=0
+GLOBAL_LIST="${GLOBAL_LIST:-""}"
 
 # shellcheck disable=SC1090,SC1091
 . "$(dirname "$0")"/.nnn-plugin-helper
 
+search_global_list() {
+    use_fd=0
+    type fd >/dev/null 2>&1 && use_fd=1
+
+    while IFS= read -r path; do
+        target=""
+        if [ -d "$path" ]; then
+            target="$path"
+        elif [ -f "$path" ]; then
+            target="$(dirname "$path")"
+        fi
+
+        if [ -n "$target" ]; then
+            if [ "$use_fd" -eq 1 ]; then
+                fd -t f "$target" 2>/dev/null
+            else
+                find "$target" -type f 2>/dev/null
+            fi
+        fi
+    done < "$GLOBAL_LIST"
+}
+
 if type fzf >/dev/null 2>&1; then
-    cmd="$FZF_DEFAULT_COMMAND"
-    if type fd >/dev/null 2>&1; then
-        [ -z "$cmd" ] && cmd="fd -t f 2>/dev/null"
+    if [ -s "$GLOBAL_LIST" ] && [ "$PWD" = "$(dirname "$GLOBAL_LIST")" ]; then
+        entry="$(search_global_list | fzf -m --delimiter / --nth=-1 --with-nth=-1)"
     else
-        [ -z "$cmd" ] && cmd="find . -type f 2>/dev/null"
+        cmd="$FZF_DEFAULT_COMMAND"
+        if type fd >/dev/null 2>&1; then
+            [ -z "$cmd" ] && cmd="fd -t f 2>/dev/null"
+        else
+            [ -z "$cmd" ] && cmd="find . -type f 2>/dev/null"
+        fi
+        entry="$(eval "$cmd" | fzf -m)"
     fi
-    entry="$(eval "$cmd" | fzf -m)"
     # To show only the file name
     # entry=$(find . -type f 2>/dev/null | fzf --delimiter / --with-nth=-1 --tiebreak=begin --info=hidden)
 elif type sk >/dev/null 2>&1; then
+    if [ -s "$GLOBAL_LIST" ] && [ "$PWD" = "$(dirname "$GLOBAL_LIST")" ]; then
+        entry="$(search_global_list | sk -m --delimiter / --nth=-1 --with-nth=-1)"
+    else
 	entry=$(find . -type f 2>/dev/null | sk)
+    fi
 else
     exit 1
 fi
@@ -43,7 +75,7 @@ if [ "$3" ]; then
     if [ "$entry" ]; then
         case "$entry" in
             /*) fullpath="$entry" ;;
-            *)  fullpath="$PWD/$entry" ;;
+            *)  fullpath="$PWD/${entry#./}" ;;
         esac
         if [ "-" = "$3" ]; then
             printf "%s\n" "$fullpath"
@@ -66,7 +98,7 @@ if [ "$entry" ]; then
 
     case "$entry" in
         /*) fullpath="$entry" ;;
-        *)  fullpath="$PWD/$entry" ;;
+        *)  fullpath="$PWD/${entry#./}" ;;
     esac
     printf "%s" "0o$fullpath" > "$NNN_PIPE"
 fi
