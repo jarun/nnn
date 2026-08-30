@@ -862,7 +862,7 @@ static const char * const patterns[] = {
 #define C_SOC (C_PIP + 1)   /* Socket: MediumOrchid1 */
 #define C_UND (C_SOC + 1)   /* Unknown OR 0B regular/exe file: Red1 */
 
-static char gcolors[] = "c1e2272e006033f7c6d6abc4";
+static const char gcolors[] = "c1e2272e006033f7c6d6abc4";
 static uint_t fcolors[C_UND + 1] = {0};
 
 /* Event handling */
@@ -899,10 +899,10 @@ static haiku_nm_h haiku_hnd;
 #define setdirwatch() (cfg.filtermode ? (presel = FILTER) : (watch = TRUE))
 #define filterset() (g_ctx[cfg.curctx].c_fltr[1])
 /* We don't care about the return value from strcmp() */
-#define xstrcmp(a, b)  (*(a) != *(b) ? -1 : strcmp((a), (b)))
+#define xstrcmp(a, b) strcmp((a), (b))
 /* A faster version of xisdigit */
 #define xisdigit(c) ((unsigned int) (c) - '0' <= 9)
-#define xerror() perror(xitoa(__LINE__))
+#define xerror() xerror_func(__LINE__)
 
 #ifdef TOURBIN_QSORT
 #define ENTLESS(i, j) (entrycmpfn(pdents + (i), pdents + (j)) < 0)
@@ -912,11 +912,7 @@ static haiku_nm_h haiku_hnd;
 #define ENTSORT(pdents, ndents, entrycmpfn) qsort((pdents), (ndents), sizeof(*(pdents)), (entrycmpfn))
 #endif
 
-#ifndef __GLIBC__
 #define xstrlen(s) strlen(s)
-#else
-#define xstrlen(s) ((char *)rawmemchr(s, '\0') - (s))
-#endif
 
 /* Function forward declarations */
 static void redraw(char *path);
@@ -931,6 +927,8 @@ static void notify_fifo(bool force);
 #endif
 static inline bool selforparent(const char *path);
 static void dirwalk(char *path, int entnum, bool mountpoint, bool no_aggregate);
+static void spawn_sh_exec(char *cmd);
+static void move_cursor_next(void);
 
 /* Functions */
 
@@ -950,34 +948,19 @@ static void clean_exit_sighandler(int sig)
 
 static char *xitoa(uint_t val)
 {
-	static char dst[32] = {'\0'};
-	static const char digits[201] =
-		"0001020304050607080910111213141516171819"
-		"2021222324252627282930313233343536373839"
-		"4041424344454647484950515253545556575859"
-		"6061626364656667686970717273747576777879"
-		"8081828384858687888990919293949596979899";
-	uint_t next = 30, quo, i;
+	static char dst[32];
+	char *p = dst + 31;
+	*p = '\0';
+	do {
+		*--p = '0' + (val % 10);
+		val /= 10;
+	} while (val);
+	return p;
+}
 
-	while (val >= 100) {
-		quo = val / 100;
-		i = (val - (quo * 100)) * 2;
-		val = quo;
-		dst[next] = digits[i + 1];
-		dst[--next] = digits[i];
-		--next;
-	}
-
-	/* Handle last 1-2 digits */
-	if (val < 10)
-		dst[next] = '0' + val;
-	else {
-		i = val * 2;
-		dst[next] = digits[i + 1];
-		dst[--next] = digits[i];
-	}
-
-	return &dst[next];
+static void xerror_func(int line)
+{
+	perror(xitoa(line));
 }
 
 /* Return the integer value of a char representing HEX */
@@ -1623,11 +1606,22 @@ static inline void printmsg_nc(const char *msg)
 	clrtoeol();
 }
 
-static void printmsg(const char *msg)
+/* Shared by the several places that toggle the current context's color pair */
+static void attron_curctx(void)
 {
 	attron(COLOR_PAIR(cfg.curctx + 1));
-	printmsg_nc(msg);
+}
+
+static void attroff_curctx(void)
+{
 	attroff(COLOR_PAIR(cfg.curctx + 1));
+}
+
+static void printmsg(const char *msg)
+{
+	attron_curctx();
+	printmsg_nc(msg);
+	attroff_curctx();
 }
 
 static void printwait(const char *msg, int *presel)
@@ -2181,7 +2175,7 @@ static void endselection(bool endselmode)
 	}
 
 	snprintf(buf, sizeof(buf), patterns[P_REPLACE], listpath, listroot, g_tmpfpath);
-	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
+	spawn_sh_exec(buf);
 
 	fd = open(g_tmpfpath, O_RDONLY);
 	if (fd == -1) {
@@ -2380,7 +2374,7 @@ static void export_file_list(void)
 
 static bool init_fcolors(void)
 {
-	char *f_colors = getenv(env_cfg[NNN_FCOLORS]);
+	const char *f_colors = getenv(env_cfg[NNN_FCOLORS]);
 
 	if (!f_colors || !*f_colors)
 		f_colors = gcolors;
@@ -2733,6 +2727,20 @@ static bool plugscript(const char *plugin, uchar_t flags)
 	return FALSE;
 }
 
+static void spawn_sh_exec(char *cmd)
+{
+	spawn(utils[UTIL_SH_EXEC], cmd, NULL, NULL, F_CLI);
+}
+
+#ifndef NOX11
+/* Copy last selection/toggle result to the clipboard when X11 support is enabled */
+static void copytoclipboard(void)
+{
+	if (cfg.x11)
+		plugscript(utils[UTIL_CBCP], F_NOWAIT | F_NOTRACE);
+}
+#endif
+
 static void opstr(char *buf, char *op)
 {
 	snprintf(buf, CMD_LEN_MAX, "xargs -0 sh -c '%s \"$0\" \"$@\" . < /dev/tty' < '%s'", op, selpath);
@@ -2788,8 +2796,8 @@ static void xrmfromsel(char *path, char *fpath)
 	else
 		selected = FALSE;
 
-	if (selected && cfg.x11)
-		plugscript(utils[UTIL_CBCP], F_NOWAIT | F_NOTRACE);
+	if (selected)
+		copytoclipboard();
 #endif
 }
 
@@ -2812,7 +2820,7 @@ static bool cpmv_rename(int choice, const char *path)
 	/* selsafe() returned TRUE for this to be called */
 	if (!selbufpos) {
 		snprintf(buf, sizeof(buf), "tr '\\0' '\\n' < '%s' > '%s'", selpath, g_tmpfpath);
-		spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
+		spawn_sh_exec(buf);
 
 		count = entries_in_file(fd, buf, sizeof(buf), NEWLINE_CHAR);
 		if (!count)
@@ -2823,7 +2831,7 @@ static bool cpmv_rename(int choice, const char *path)
 	close(fd);
 
 	snprintf(buf, sizeof(buf), patterns[P_CPMVFMT], g_tmpfpath);
-	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
+	spawn_sh_exec(buf);
 
 	spawn((cfg.waitedit ? enveditor : editor), g_tmpfpath, NULL, NULL, F_CLI);
 
@@ -2974,7 +2982,7 @@ static bool batch_rename(void)
 	}
 
 	snprintf(buf, sizeof(buf), batchrenamecmd, foriginal, g_tmpfpath);
-	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI);
+	spawn_sh_exec(buf);
 	ret = TRUE;
 
 finish:
@@ -3721,10 +3729,10 @@ static void showfilterinfo(void)
 
 static void showfilter(char *str)
 {
-	attron(COLOR_PAIR(cfg.curctx + 1));
+	attron_curctx();
 	showfilterinfo();
 	printmsg_nc(str);
-	attroff(COLOR_PAIR(cfg.curctx + 1));
+	attroff_curctx();
 }
 
 static inline void swap_ent(int id1, int id2)
@@ -4174,7 +4182,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 
 		move(xlines - 1, x);
 		clrtoeol();
-		attron(COLOR_PAIR(cfg.curctx + 1));
+		attron_curctx();
 		if (pos > (size_t)(xcols - x)) {
 			mvaddnwstr(xlines - 1, x, buf + (pos - (xcols - x) + 1), xcols - x + 1);
 			move(xlines - 1, xcols - 1);
@@ -4182,7 +4190,7 @@ static char *xreadline(const char *prefill, const char *prompt)
 			mvaddnwstr(xlines - 1, x, buf, len + 2);
 			move(xlines - 1, x + wcswidth(buf, pos));
 		}
-		attroff(COLOR_PAIR(cfg.curctx + 1));
+		attroff_curctx();
 
 		r = get_wch(ch);
 		if (r == ERR)
@@ -5266,7 +5274,7 @@ static bool handle_cur_move(enum action sel)
 
 	if (sel == SEL_NEXT) {
 		if (cfg.rollover || (cur != ndents - 1))
-			move_cursor((cur + 1) % ndents, 0);
+			move_cursor_next();
 	} else if (sel == SEL_PREV) {
 		if (cfg.rollover || cur)
 			move_cursor((cur + ndents - 1) % ndents, 0);
@@ -7178,7 +7186,7 @@ static int dentfill(char *path, struct entry **ppdents)
 		if (!prep_threads())
 			goto exit;
 
-		attron(COLOR_PAIR(cfg.curctx + 1));
+		attron_curctx();
 	}
 
 #if _POSIX_C_SOURCE >= 200112L
@@ -7403,7 +7411,7 @@ exit:
 			pthread_cond_wait(&du_cond, &running_mutex);
 		pthread_mutex_unlock(&running_mutex);
 
-		attroff(COLOR_PAIR(cfg.curctx + 1));
+		attroff_curctx();
 		for (int i = 0; i < num_du_threads; ++i) {
 			num_files += core_files[i];
 			dir_blocks += core_blocks[i];
@@ -7530,12 +7538,18 @@ static void move_cursor(int target, int ignore_scrolloff)
 #endif
 }
 
+/* Move cursor to the entry following the current one, wrapping via ndents */
+static void move_cursor_next(void)
+{
+	move_cursor((cur + 1) % ndents, 0);
+}
+
 static void handle_screen_move(enum action sel)
 {
 	switch (sel) {
 	case SEL_NEXT:
 		if (cfg.rollover || (cur != ndents - 1))
-			move_cursor((cur + 1) % ndents, 0);
+			move_cursor_next();
 		break;
 	case SEL_PREV:
 		if (cfg.rollover || cur)
@@ -7862,7 +7876,7 @@ static void statusbar(char *path)
 	} else
 		ptr = "\b";
 
-	attron(COLOR_PAIR(cfg.curctx + 1));
+	attron_curctx();
 
 	if (cfg.fileinfo && get_output("file", "-b", pdents[cur].name, -1, FALSE))
 		mvaddstr(xlines - 2, 2, g_buf);
@@ -7947,7 +7961,7 @@ static void statusbar(char *path)
 		clrtoeol();
 	}
 
-	attroff(COLOR_PAIR(cfg.curctx + 1));
+	attroff_curctx();
 	/* Place HW cursor on current for Braille systems */
 	tocursor();
 }
@@ -8965,7 +8979,7 @@ nochange:
 
 			/* Move cursor to the next entry if not the last entry */
 			if (g_state.autonext && cur != ndents - 1)
-				move_cursor((cur + 1) % ndents, 0);
+				move_cursor_next();
 			if (cfg.filtermode) {
 				presel = FILTER;
 				clearfilter();
@@ -9272,8 +9286,7 @@ nochange:
 			}
 
 #ifndef NOX11
-			if (cfg.x11)
-				plugscript(utils[UTIL_CBCP], F_NOWAIT | F_NOTRACE);
+			copytoclipboard();
 #endif
 #ifndef NOMOUSE
 			if (rightclicksel)
@@ -9282,7 +9295,7 @@ nochange:
 #endif
 				/* move cursor to the next entry if this is not the last entry */
 				if (!g_state.stayonsel && (cur != ndents - 1))
-					move_cursor((cur + 1) % ndents, 0);
+					move_cursor_next();
 			break;
 		case SEL_SELMUL:
 			if (!ndents)
@@ -9343,8 +9356,7 @@ nochange:
 				? invertselbuf(r) : addtoselbuf(r, selstartid, selendid);
 
 #ifndef NOX11
-			if (cfg.x11)
-				plugscript(utils[UTIL_CBCP], F_NOWAIT | F_NOTRACE);
+			copytoclipboard();
 #endif
 			continue;
 		case SEL_SELEDIT:
@@ -9354,8 +9366,7 @@ nochange:
 				printwait(messages[r], &presel);
 			} else {
 #ifndef NOX11
-				if (cfg.x11)
-					plugscript(utils[UTIL_CBCP], F_NOWAIT | F_NOTRACE);
+				copytoclipboard();
 #endif
 				cfg.filtermode ?  presel = FILTER : statusbar(path);
 			}
