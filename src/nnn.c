@@ -890,7 +890,6 @@ static haiku_nm_h haiku_hnd;
 #define tolastln() move(xlines - 1, 0)
 #define tocursor() move(cur + 2 - curscroll, 0)
 #define exitcurses() endwin()
-#define printwarn(presel) printwait(strerror(errno), presel)
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
 #define copycurname() xstrsncpy(lastname, ndents ? pdents[cur].name : "\0", NAME_MAX + 1)
 #define settimeout() timeout(1000)
@@ -1632,6 +1631,11 @@ static void printwait(const char *msg, int *presel)
 		if (ndents)
 			xstrsncpy(g_ctx[cfg.curctx].c_name, pdents[cur].name, NAME_MAX + 1);
 	}
+}
+
+static void printwarn(int *presel)
+{
+	printwait(strerror(errno), presel);
 }
 
 /* Kill curses and display error before exiting */
