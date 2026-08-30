@@ -891,7 +891,6 @@ static haiku_nm_h haiku_hnd;
 #define tocursor() move(cur + 2 - curscroll, 0)
 #define exitcurses() endwin()
 #define istopdir(path) ((path)[1] == '\0' && (path)[0] == '/')
-#define copycurname() xstrsncpy(lastname, ndents ? pdents[cur].name : "\0", NAME_MAX + 1)
 #define settimeout() timeout(1000)
 #define cleartimeout() timeout(-1)
 #define errexit() printerr(__LINE__)
@@ -1636,6 +1635,12 @@ static void printwait(const char *msg, int *presel)
 static void printwarn(int *presel)
 {
 	printwait(strerror(errno), presel);
+}
+
+/* Save the name of the currently hovered entry, if any */
+static void copycurname(char *lastname)
+{
+	xstrsncpy(lastname, ndents ? pdents[cur].name : "\0", NAME_MAX + 1);
 }
 
 /* Kill curses and display error before exiting */
@@ -4043,7 +4048,7 @@ end:
 		ln[REGEX_MAX - 1] = ln[1];
 
 	/* Save current */
-	copycurname();
+	copycurname(lastname);
 
 	curs_set(FALSE);
 	leaveok(stdscr, TRUE);
@@ -7649,7 +7654,7 @@ static void copynextname(char *lastname)
 {
 	if (cur) {
 		cur += (cur != (ndents - 1)) ? 1 : -1;
-		copycurname();
+		copycurname(lastname);
 	} else
 		lastname[0] = '\0';
 }
@@ -8671,8 +8676,7 @@ nochange:
 					lastdir = g_ctx[r].c_last;
 					lastname = g_ctx[r].c_name;
 
-					setdirwatch();
-					goto begin;
+					goto setwatch_begin;
 				}
 			}
 #endif
@@ -8728,9 +8732,8 @@ nochange:
 
 				/* Start watching the directory */
 				watch = TRUE;
-				copycurname();
-				cd = FALSE;
-				goto begin;
+				copycurname(lastname);
+				goto cdfalse_begin;
 			}
 
 			/* Handle clicking on a file */
@@ -8776,7 +8779,7 @@ nochange:
 			} else {
 				if (cfg.filtermode || filterset())
 					presel = FILTER;
-				copycurname();
+				copycurname(lastname);
 				goto nochange;
 			}
 #endif
@@ -8801,8 +8804,7 @@ nochange:
 			/* Visit directory */
 			if (pent->flags & DIR_OR_DIRLNK) {
 				if (chdir(newpath) == -1) {
-					printwarn(&presel);
-					goto nochange;
+					goto warn_nochange;
 				}
 
 				cdprep(lastdir, lastname, path, newpath) ? (presel = FILTER) : (watch = TRUE);
@@ -8811,8 +8813,7 @@ nochange:
 
 			/* Cannot use stale data in entry, file may be missing by now */
 			if (stat(newpath, &sb) == -1) {
-				printwarn(&presel);
-				goto nochange;
+				goto warn_nochange;
 			}
 			DPRINTF_U(sb.st_mode);
 
@@ -8845,8 +8846,7 @@ nochange:
 						xstrsncpy(lastname, runfile, NAME_MAX + 1);
 						runfile[0] = '\0';
 					}
-					setdirwatch();
-					goto begin;
+					goto setwatch_begin;
 				}
 			}
 
@@ -8868,15 +8868,13 @@ nochange:
 				if (listpath && S_ISLNK(pent->mode)
 				    && is_prefix(path, listpath, xstrlen(listpath))) {
 					if (!realpath(pent->name, newpath)) {
-						printwarn(&presel);
-						goto nochange;
+						goto warn_nochange;
 					}
 
 					xdirname(newpath);
 
 					if (chdir(newpath) == -1) {
-						printwarn(&presel);
-						goto nochange;
+						goto warn_nochange;
 					}
 
 					cdprep(lastdir, NULL, path, newpath)
@@ -8933,18 +8931,15 @@ nochange:
 				if (r == 'l' || r == 'x') {
 					mkpath(path, pent->name, newpath);
 					if (!handle_archive(newpath, r)) {
-						presel = MSGWAIT;
-						goto nochange;
+						goto msgwait_nochange;
 					}
 					if (r == 'l') {
-						statusbar(path);
-						goto nochange;
+						goto statusbar_nochange;
 					}
 				}
 
 				if ((r == 'm') && !archive_mount(newpath)) {
-					presel = MSGWAIT;
-					goto nochange;
+					goto msgwait_nochange;
 				}
 
 				if (r == 'x' || r == 'm') {
@@ -8953,7 +8948,7 @@ nochange:
 							      ndents ? pdents[cur].name : NULL,
 							      &lastname, &lastdir);
 					else
-						copycurname();
+						copycurname(lastname);
 					clearfilter();
 					goto begin;
 				}
@@ -9020,8 +9015,7 @@ nochange:
 			}
 
 			if (chdir(dir) == -1) {
-				presel = MSGWAIT;
-				goto nochange;
+				goto msgwait_nochange;
 			}
 
 			/* SEL_CDLAST: dir pointing to lastdir */
@@ -9046,8 +9040,7 @@ nochange:
 			goto begin;
 		case SEL_REMOTE:
 			if ((sel == SEL_REMOTE) && !remote_mount(newpath)) {
-				presel = MSGWAIT;
-				goto nochange;
+				goto msgwait_nochange;
 			}
 
 			set_smart_ctx('+', newpath, &path,
@@ -9113,8 +9106,7 @@ nochange:
 				break;
 			}
 			if (presel == FILTER) { /* Refresh dir and filter again */
-				cd = FALSE;
-				goto begin;
+				goto cdfalse_begin;
 			}
 			goto nochange;
 		case SEL_MFLTR: // fallthrough
@@ -9138,9 +9130,8 @@ nochange:
 						presel = FILTER;
 					clearfilter();
 				}
-				copycurname();
-				cd = FALSE;
-				goto begin;
+				copycurname(lastname);
+				goto cdfalse_begin;
 			case SEL_DETAIL:
 				cfg.showdetail ^= 1;
 				cfg.blkorder = 0;
@@ -9160,7 +9151,7 @@ nochange:
 				presel = FILTER;
 
 			if (ndents) {
-				copycurname();
+				copycurname(lastname);
 
 				if (r == 'd' || r == 'a') {
 					presel = 0;
@@ -9178,8 +9169,7 @@ nochange:
 
 				if ((sel == SEL_STATS && !show_stats(newpath, tmp))
 				    || (sel == SEL_CHMODX && !xchmod(newpath, tmp))) {
-					printwarn(&presel);
-					goto nochange;
+					goto warn_nochange;
 				}
 			}
 			break;
@@ -9226,7 +9216,7 @@ nochange:
 					g_state.autonext ^= 1;
 				if (cfg.filtermode)
 					presel = FILTER;
-				copycurname();
+				copycurname(lastname);
 				goto nochange;
 			case SEL_EDIT:
 				if (!(g_state.picker || g_state.fifomode))
@@ -9246,10 +9236,9 @@ nochange:
 			}
 
 			/* Save current */
-			copycurname();
+			copycurname(lastname);
 			/* Repopulate as directory content may have changed */
-			cd = FALSE;
-			goto begin;
+			goto cdfalse_begin;
 		}
 		case SEL_SEL:
 			if (!ndents)
@@ -9291,8 +9280,7 @@ nochange:
 			g_state.rangesel ^= 1;
 
 			if (stat(path, &sb) == -1) {
-				printwarn(&presel);
-				goto nochange;
+				goto warn_nochange;
 			}
 
 			if (g_state.rangesel) { /* Range selection started */
@@ -9366,8 +9354,7 @@ nochange:
 			if ((sel == SEL_TRASH) || (sel == SEL_RM_RF)) {
 				r = get_cur_or_sel();
 				if (!r) {
-					statusbar(path);
-					goto nochange;
+					goto statusbar_nochange;
 				}
 
 				if (r == 'c') {
@@ -9383,8 +9370,7 @@ nochange:
 
 					if (cfg.filtermode || filterset())
 						presel = FILTER;
-					cd = FALSE;
-					goto begin;
+					goto cdfalse_begin;
 				}
 			}
 
@@ -9395,8 +9381,7 @@ nochange:
 			endselection(TRUE);
 
 			if (!cpmvrm_selection(sel, path)) {
-				presel = MSGWAIT;
-				goto nochange;
+				goto msgwait_nochange;
 			}
 
 			if (cfg.filtermode)
@@ -9412,9 +9397,8 @@ nochange:
 			if (newpath[0] && !access(newpath, F_OK))
 				xstrsncpy(lastname, xbasename(newpath), NAME_MAX+1);
 			else
-				copycurname();
-			cd = FALSE;
-			goto begin;
+				copycurname(lastname);
+			goto cdfalse_begin;
 		}
 		case SEL_ARCHIVE: // fallthrough
 		case SEL_OPENWITH: // fallthrough
@@ -9434,14 +9418,12 @@ nochange:
 			case SEL_ARCHIVE:
 				r = get_cur_or_sel();
 				if (!r) {
-					statusbar(path);
-					goto nochange;
+					goto statusbar_nochange;
 				}
 
 				if (r == 's') {
 					if (!selsafe()) {
-						presel = MSGWAIT;
-						goto nochange;
+						goto msgwait_nochange;
 					}
 
 					tmp = NULL;
@@ -9497,8 +9479,7 @@ nochange:
 				if (!tmp)
 					continue;
 				if (!(access(tmp, F_OK) || xconfirm(get_input(messages[MSG_OVERWRITE])))) {
-					statusbar(path);
-					goto nochange;
+					goto statusbar_nochange;
 				}
 
 				(r == 's') ? archive_selection(get_archive_cmd(tmp), tmp)
@@ -9516,15 +9497,14 @@ nochange:
 						clearfilter(); /* Archive name may not match */
 					} if (cfg.filtermode)
 						presel = FILTER;
-					cd = FALSE;
-					goto begin;
+					goto cdfalse_begin;
 				}
 				continue;
 			case SEL_OPENWITH:
 				handle_openwith(path, pdents[cur].name, newpath, tmp);
 
 				cfg.filtermode ?  presel = FILTER : statusbar(path);
-				copycurname();
+				copycurname(lastname);
 				goto nochange;
 			case SEL_RENAME:
 				r = 0;
@@ -9534,7 +9514,7 @@ nochange:
 					if (!tmp || !tmp[0] || is_bad_len_or_dir(tmp)
 					    || !strcmp(tmp, pdents[cur].name)) {
 						cfg.filtermode ?  presel = FILTER : statusbar(path);
-						copycurname();
+						copycurname(lastname);
 						goto nochange;
 					}
 					ret = 'd';
@@ -9547,8 +9527,7 @@ nochange:
 			if (!(r == 's' || r == 'h')) {
 				tmp = abspath(tmp, path, newpath);
 				if (!tmp) {
-					printwarn(&presel);
-					goto nochange;
+					goto warn_nochange;
 				}
 			}
 
@@ -9570,8 +9549,7 @@ nochange:
 				if (ret == 'd')
 					spawn("cp -rp --", pdents[cur].name, tmp, NULL, F_SILENT);
 				else if (rename(pdents[cur].name, tmp) != 0) {
-					printwarn(&presel);
-					goto nochange;
+					goto warn_nochange;
 				}
 
 				/* Check if any entry is created in the current directory */
@@ -9606,19 +9584,17 @@ nochange:
 				} else if (ndents) {
 					if (cfg.filtermode)
 						presel = FILTER;
-					copycurname();
+					copycurname(lastname);
 				}
 			}
 			clearfilter();
 
-			cd = FALSE;
-			goto begin;
+			goto cdfalse_begin;
 		}
 		case SEL_PLUGIN:
 			/* Check if directory is accessible */
 			if (!xdiraccess(plgpath)) {
-				printwarn(&presel);
-				goto nochange;
+				goto warn_nochange;
 			}
 
 			lazy_parse_plug();
@@ -9664,7 +9640,7 @@ nochange:
 				} while (handle_cur_move(action));
 
 				if (!runfile[0])
-					copycurname();
+					copycurname(lastname);
 
 				if (!r) {
 					cfg.filtermode ? presel = FILTER : statusbar(path);
@@ -9681,8 +9657,7 @@ nochange:
 						xstrsncpy(path, lastdir, PATH_MAX);
 						xstrsncpy(lastname, runfile, NAME_MAX + 1);
 						runfile[0] = '\0';
-						setdirwatch();
-						goto begin;
+						goto setwatch_begin;
 					}
 
 					/* Otherwise, initiate choosing plugin again */
@@ -9714,14 +9689,13 @@ nochange:
 				presel = FILTER;
 
 			/* Save current */
-			copycurname();
+			copycurname(lastname);
 
 			if (!r)
 				goto nochange;
 
 			/* Repopulate as directory content may have changed */
-			cd = FALSE;
-			goto begin;
+			goto cdfalse_begin;
 		case SEL_UMOUNT:
 			presel = MSG_ZERO;
 			if (!unmount((ndents ? pdents[cur].name : NULL), newpath, &presel, path)) {
@@ -9732,8 +9706,7 @@ nochange:
 
 			/* Dir removed, go to next entry */
 			copynextname(lastname);
-			cd = FALSE;
-			goto begin;
+			goto cdfalse_begin;
 #ifndef NOSSN
 		case SEL_SESSIONS:
 			r = get_input(messages[MSG_SSN_OPTS]);
@@ -9744,12 +9717,10 @@ nochange:
 				if (tmp && *tmp)
 					save_session(tmp, &presel);
 			} else if ((r == 'l' || r == 'r') && load_session(NULL, &path, &lastdir, &lastname, r == 'r')) {
-				setdirwatch();
-				goto begin;
+				goto setwatch_begin;
 			}
 
-			statusbar(path);
-			goto nochange;
+			goto statusbar_nochange;
 #endif
 		case SEL_EXPORT:
 			export_file_list();
@@ -9758,8 +9729,7 @@ nochange:
 		case SEL_TIMETYPE:
 			if (!set_time_type(&presel))
 				goto nochange;
-			cd = FALSE;
-			goto begin;
+			goto cdfalse_begin;
 		case SEL_QUITCTX: // fallthrough
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
@@ -9783,8 +9753,7 @@ nochange:
 					g_ctx[r].c_cfg.curctx = r;
 					setcfg(g_ctx[r].c_cfg);
 
-					setdirwatch();
-					goto begin;
+					goto setwatch_begin;
 				}
 			} else if (!g_state.forcequit) {
 				for (r = 0; r < CTX_MAX; ++r)
@@ -9827,10 +9796,26 @@ nochange:
 				idle = 0;
 			}
 
-			copycurname();
+			copycurname(lastname);
 			goto nochange;
 		} /* switch (sel) */
 	}
+
+cdfalse_begin:
+	cd = FALSE;
+	goto begin;
+setwatch_begin:
+	setdirwatch();
+	goto begin;
+warn_nochange:
+	printwarn(&presel);
+	goto nochange;
+msgwait_nochange:
+	presel = MSGWAIT;
+	goto nochange;
+statusbar_nochange:
+	statusbar(path);
+	goto nochange;
 }
 
 static char *make_tmp_tree(char **paths, ssize_t entries, const char *prefix)
