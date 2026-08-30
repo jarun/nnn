@@ -3231,6 +3231,39 @@ static inline wchar_t normalize_char(wchar_t c)
 	return c;
 }
 
+enum { WCS_ERROR = -1, WCS_FILTER_EMPTY = 0, WCS_OK = 1 };
+
+/*
+ * Shared by the fuzzy matchers: converts filter/fname to wide character
+ * strings and lowercases both when matching is case-insensitive.
+ */
+static int wcs_prep_filter(const char *filter, const char *fname, wchar_t *filter_wcs, wchar_t *fname_wcs,
+			    size_t *filter_len, size_t *fname_len)
+{
+	*filter_len = mbstowcs(filter_wcs, filter, NAME_MAX - 1);
+	if (*filter_len == (size_t)-1)
+		return WCS_ERROR;
+	filter_wcs[*filter_len] = L'\0';
+
+	if (!*filter_len)
+		return WCS_FILTER_EMPTY;
+
+	*fname_len = mbstowcs(fname_wcs, fname, NAME_MAX - 1);
+	if (*fname_len == (size_t)-1)
+		return WCS_ERROR;
+	fname_wcs[*fname_len] = L'\0';
+
+	/* Convert to lowercase if case-insensitive matching */
+	if (fnstrstr == &strcasestr) {
+		for (size_t i = 0; i < *filter_len; ++i)
+			filter_wcs[i] = towlower(filter_wcs[i]);
+		for (size_t i = 0; i < *fname_len; ++i)
+			fname_wcs[i] = towlower(fname_wcs[i]);
+	}
+
+	return WCS_OK;
+}
+
 /*
  * Fuzzy match: check if all characters in filter appear in order in fname
  * Case-sensitivity is controlled by fnstrstr function pointer
@@ -3241,29 +3274,10 @@ static int fuzzy_match(const char *filter, const char *fname)
 	wchar_t filter_wcs[NAME_MAX], fname_wcs[NAME_MAX];
 	wchar_t *f, *n;
 	size_t filter_len, fname_len;
-	bool case_insensitive = (fnstrstr == &strcasestr);
+	int r = wcs_prep_filter(filter, fname, filter_wcs, fname_wcs, &filter_len, &fname_len);
 
-	/* Convert multi-byte strings to wide character strings */
-	filter_len = mbstowcs(filter_wcs, filter, NAME_MAX - 1);
-	if (filter_len == (size_t)-1)
-		return 0;
-	filter_wcs[filter_len] = L'\0';
-
-	if (!filter_len)
-		return 1;
-
-	fname_len = mbstowcs(fname_wcs, fname, NAME_MAX - 1);
-	if (fname_len == (size_t)-1)
-		return 0;
-	fname_wcs[fname_len] = L'\0';
-
-	/* Convert to lowercase if case-insensitive matching */
-	if (case_insensitive) {
-		for (size_t i = 0; i < filter_len; ++i)
-			filter_wcs[i] = towlower(filter_wcs[i]);
-		for (size_t i = 0; i < fname_len; ++i)
-			fname_wcs[i] = towlower(fname_wcs[i]);
-	}
+	if (r != WCS_OK)
+		return r == WCS_FILTER_EMPTY;
 
 	f = filter_wcs;
 	n = fname_wcs;
@@ -3309,33 +3323,13 @@ static void fuzzy_match_positions(const char *filter, const char *fname, uchar_t
 {
 	wchar_t filter_wcs[NAME_MAX], fname_wcs[NAME_MAX];
 	size_t filter_len, fname_len;
-	bool case_insensitive = (fnstrstr == &strcasestr);
 	size_t f_idx, n_idx;
 
 	/* Clear matched array */
 	memset(matched, 0, NAME_MAX);
 
-	/* Convert multi-byte strings to wide character strings */
-	filter_len = mbstowcs(filter_wcs, filter, NAME_MAX - 1);
-	if (filter_len == (size_t)-1)
+	if (wcs_prep_filter(filter, fname, filter_wcs, fname_wcs, &filter_len, &fname_len) != WCS_OK)
 		return;
-	filter_wcs[filter_len] = L'\0';
-
-	if (!filter_len)
-		return;
-
-	fname_len = mbstowcs(fname_wcs, fname, NAME_MAX - 1);
-	if (fname_len == (size_t)-1)
-		return;
-	fname_wcs[fname_len] = L'\0';
-
-	/* Convert to lowercase if case-insensitive matching */
-	if (case_insensitive) {
-		for (size_t i = 0; i < filter_len; ++i)
-			filter_wcs[i] = towlower(filter_wcs[i]);
-		for (size_t i = 0; i < fname_len; ++i)
-			fname_wcs[i] = towlower(fname_wcs[i]);
-	}
 
 	f_idx = 0;
 	n_idx = 0;
@@ -3411,29 +3405,12 @@ static const char *fuzzy_sort_fltr;
 static int fuzzy_match_score(const char *filter, const char *fname)
 {
 	wchar_t filter_wcs[NAME_MAX], fname_wcs[NAME_MAX];
-	size_t match_pos[NAME_MAX];
+	size_t match_pos[NAME_MAX] = {0};
 	size_t filter_len, fname_len, f_idx, n_idx;
-	bool case_insensitive = (fnstrstr == &strcasestr);
+	int r = wcs_prep_filter(filter, fname, filter_wcs, fname_wcs, &filter_len, &fname_len);
 
-	filter_len = mbstowcs(filter_wcs, filter, NAME_MAX - 1);
-	if (filter_len == (size_t)-1)
-		return INT_MAX;
-	filter_wcs[filter_len] = L'\0';
-
-	if (!filter_len)
-		return 0;
-
-	fname_len = mbstowcs(fname_wcs, fname, NAME_MAX - 1);
-	if (fname_len == (size_t)-1)
-		return INT_MAX;
-	fname_wcs[fname_len] = L'\0';
-
-	if (case_insensitive) {
-		for (size_t i = 0; i < filter_len; ++i)
-			filter_wcs[i] = towlower(filter_wcs[i]);
-		for (size_t i = 0; i < fname_len; ++i)
-			fname_wcs[i] = towlower(fname_wcs[i]);
-	}
+	if (r != WCS_OK)
+		return r == WCS_FILTER_EMPTY ? 0 : INT_MAX;
 
 	f_idx = 0;
 	n_idx = 0;
@@ -3450,6 +3427,7 @@ static int fuzzy_match_score(const char *filter, const char *fname)
 		return INT_MAX;
 
 	{
+		/* f_idx == filter_len guarantees match_pos[0..filter_len - 1] were all set above */
 		size_t first = match_pos[0], endpos = match_pos[filter_len - 1], span = (endpos - first) + 1;
 		size_t gaps = span - filter_len, consec = 0, word_starts = 0;
 
@@ -3490,6 +3468,15 @@ static void clearfilter(void)
 	if (fltr[1]) {
 		fltr[REGEX_MAX - 1] = fltr[1];
 		fltr[1] = '\0';
+	}
+}
+
+/* Switch to filter-wait mode and clear the active filter, if any */
+static void resetfilter(int *presel)
+{
+	if (cfg.filtermode) {
+		*presel = FILTER;
+		clearfilter();
 	}
 }
 
@@ -6827,22 +6814,32 @@ static void dentfree(void)
 }
 
 /* Walk a directory tree using readdir to reduce FTS overhead */
-static bool du_queue_task(const char *path, du_group *group, bool count_root, bool inc_pending)
+static void du_pending_inc(du_group *group, bool inc_pending)
 {
 	if (inc_pending) {
 		pthread_mutex_lock(&du_count_mutex);
 		++group->pending;
 		pthread_mutex_unlock(&du_count_mutex);
 	}
+}
+
+static void du_pending_dec(du_group *group, bool inc_pending)
+{
+	if (inc_pending) {
+		pthread_mutex_lock(&du_count_mutex);
+		--group->pending;
+		pthread_mutex_unlock(&du_count_mutex);
+	}
+}
+
+static bool du_queue_task(const char *path, du_group *group, bool count_root, bool inc_pending)
+{
+	du_pending_inc(group, inc_pending);
 
 	pthread_mutex_lock(&running_mutex);
 	if (g_state.interrupt) {
 		pthread_mutex_unlock(&running_mutex);
-		if (inc_pending) {
-			pthread_mutex_lock(&du_count_mutex);
-			--group->pending;
-			pthread_mutex_unlock(&du_count_mutex);
-		}
+		du_pending_dec(group, inc_pending);
 		return false;
 	}
 
@@ -6851,11 +6848,7 @@ static bool du_queue_task(const char *path, du_group *group, bool count_root, bo
 		du_task *tmp = realloc(du_tasks, newcap * sizeof(*du_tasks));
 		if (!tmp) {
 			pthread_mutex_unlock(&running_mutex);
-			if (inc_pending) {
-				pthread_mutex_lock(&du_count_mutex);
-				--group->pending;
-				pthread_mutex_unlock(&du_count_mutex);
-			}
+			du_pending_dec(group, inc_pending);
 			return false;
 		}
 		du_tasks = tmp;
@@ -6870,11 +6863,7 @@ static bool du_queue_task(const char *path, du_group *group, bool count_root, bo
 	if (!du_tasks[du_task_len - 1].path) {
 		--du_task_len;
 		pthread_mutex_unlock(&running_mutex);
-		if (inc_pending) {
-			pthread_mutex_lock(&du_count_mutex);
-			--group->pending;
-			pthread_mutex_unlock(&du_count_mutex);
-		}
+		du_pending_dec(group, inc_pending);
 		return false;
 	}
 	++du_tasks_pending;
@@ -8913,10 +8902,7 @@ nochange:
 #endif
 			) {
 				spawn(editor, newpath, NULL, NULL, F_CLI);
-				if (cfg.filtermode) {
-					presel = FILTER;
-					clearfilter();
-				}
+				resetfilter(&presel);
 				continue;
 			}
 
@@ -8980,10 +8966,7 @@ nochange:
 			/* Move cursor to the next entry if not the last entry */
 			if (g_state.autonext && cur != ndents - 1)
 				move_cursor_next();
-			if (cfg.filtermode) {
-				presel = FILTER;
-				clearfilter();
-			}
+			resetfilter(&presel);
 			continue;
 		case SEL_NEXT: // fallthrough
 		case SEL_PREV: // fallthrough
@@ -9139,8 +9122,7 @@ nochange:
 			case SEL_MFLTR:
 				cfg.filtermode ^= 1;
 				if (cfg.filtermode) {
-					presel = FILTER;
-					clearfilter();
+					resetfilter(&presel);
 					goto nochange;
 				}
 
