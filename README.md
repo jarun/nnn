@@ -122,13 +122,13 @@ Use the shell function name you chose to run `nnn` with your preferred configura
 ### Power users
 
 1. [Install](https://github.com/jarun/nnn/wiki/Usage) `nnn` and the dependencies you need.
-2. The desktop opener is default. Use `-e` to open text files in the terminal. Optionally [open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text).
+2. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installation).
 3. Configure [cd on quit](https://github.com/jarun/nnn/wiki/Basic-use-cases#configure-cd-on-quit).
-4. [Sync subshell](https://github.com/jarun/nnn/wiki/Basic-use-cases#sync-subshell-pwd) `$PWD` to `nnn`.
-5. [Install plugins](https://github.com/jarun/nnn/tree/master/plugins#installation).
-6. Use `-x` to sync selection to clipboard, show notis on `cp`, `mv`, `rm` and set xterm title.
-7. For a CLI-only environment, set [`NNN_OPENER`](https://github.com/jarun/nnn/wiki/Usage#configuration) to [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke). Use option `-c`.
-8. Bid `ls` goodbye! `alias ls='nnn -de'` :sunglasses:
+4. The desktop opener is default. Use `-e` to open text files in the terminal. Optionally [open detached](https://github.com/jarun/nnn/wiki/Basic-use-cases#detached-text).
+5. In a CLI environment, set [`NNN_OPENER`](https://github.com/jarun/nnn/wiki/Usage#configuration) to [`nuke`](https://github.com/jarun/nnn/blob/master/plugins/nuke). Use option `-c`. For GUI apps, consider [xopen](https://github.com/jarun/xopen).
+6. [Sync subshell](https://github.com/jarun/nnn/wiki/Basic-use-cases#sync-subshell-pwd) `$PWD` to `nnn`.
+7. Use `-x` to sync selection to clipboard, show notis on `cp`, `mv`, `rm` and set xterm title.
+8. Bid `ls` goodbye! `alias l='nnn -dDe'` :sunglasses:
 9. Visit the [Live previews](https://github.com/jarun/nnn/wiki/Live-previews) and [Troubleshooting](https://github.com/jarun/nnn/wiki/Troubleshooting) Wiki pages.
 
 Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creates and/or cycles contexts. <kbd>?</kbd> lists shortcuts.
