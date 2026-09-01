@@ -229,6 +229,7 @@
 
 /* Use 8 contexts */
 #define CTX_MAX 8
+#define CTX_INVALID 0b111
 
 #ifndef SED
 /* BSDs or Solaris or SunOS */
@@ -411,7 +412,8 @@ typedef struct {
 	uint_t xprompt    : 1;  /* Use native prompt instead of readline prompt */
 	uint_t showlines  : 1;  /* Show line numbers */
 	uint_t plugparsed : 1;  /* Plugin kv pairs parsed */
-	uint_t reserved   : 4;  /* Adjust when adding/removing a field */
+	uint_t lastctx    : 3;  /* Last context number visited */
+	uint_t reserved   : 1;  /* Adjust when adding/removing a field */
 } runstate;
 
 /* Contexts or workspaces */
@@ -578,7 +580,7 @@ alignas(max_align_t) static char g_tmpfpath[TMP_LEN_MAX];
 alignas(max_align_t) static char g_pipepath[TMP_LEN_MAX];
 
 /* Non-persistent runtime states */
-static runstate g_state;
+static runstate g_state = {.lastctx = CTX_INVALID};
 
 /* Options to identify file MIME */
 #ifdef __APPLE__
@@ -5088,6 +5090,9 @@ static void savecurctx(char *path, char *curname, int nextctx)
 	settings tmpcfg = cfg;
 	context *ctxr = &g_ctx[nextctx];
 
+	/* Save the last context number before switching to the new context */
+	g_state.lastctx = cfg.curctx;
+
 	/* Save current context */
 	if (curname)
 		xstrsncpy(g_ctx[tmpcfg.curctx].c_name, curname, NAME_MAX + 1);
@@ -9067,6 +9072,7 @@ nochange:
 			r = handle_context_switch(sel);
 			if (r < 0)
 				continue;
+
 			savecurctx(path, ndents ? pdents[cur].name : NULL, r);
 
 			/* Reset the pointers */
@@ -9744,10 +9750,16 @@ nochange:
 			if (sel == SEL_QUITCTX) {
 				int ctx = cfg.curctx;
 
-				for (r = (ctx - 1) & (CTX_MAX - 1);
-				     (r != ctx) && !g_ctx[r].c_cfg.ctxactive;
-				     r = ((r - 1) & (CTX_MAX - 1))) {
-				};
+				/* Check if we have a valid last context to return to */
+				if ((g_state.lastctx != CTX_INVALID) && g_ctx[g_state.lastctx].c_cfg.ctxactive) {
+					r = g_state.lastctx;
+					g_state.lastctx = CTX_INVALID;
+				} else { /* Find previous active context */
+					for (r = (ctx - 1) & (CTX_MAX - 1);
+					     (r != ctx) && !g_ctx[r].c_cfg.ctxactive;
+					     r = ((r - 1) & (CTX_MAX - 1))) {
+					};
+				}
 
 				if (r != ctx) {
 					g_ctx[ctx].c_cfg.ctxactive = 0;
