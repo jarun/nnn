@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # Interactively configure nnn's quitcd helper and common beginner options.
+# Detect terminal background and color palette and suggest context colors.
 # Optionally install plugins and configure nuke as the opener.
 #
 # Shell: POSIX compliant
@@ -133,6 +134,41 @@ add_option()
 
     if ask_yes_no "$option: $description"; then
         options="$options $option"
+    fi
+}
+
+configure_context_colors()
+{
+    terminal_colors=$(tput colors 2>/dev/null)
+    case $terminal_colors in
+        ''|*[!0-9]*) terminal_colors=8 ;;
+    esac
+
+    terminal_background=${COLORFGBG##*;}
+    case $terminal_background in
+        7|8|9|1[0-5])
+            terminal_theme='light'
+            colors_8='41254125'
+            colors_256='#19a01c5a1e19a01c'
+            ;;
+        *)
+            terminal_theme='dark'
+            colors_8='36735673'
+            colors_256='#51e2d0c652d59f7b'
+            ;;
+    esac
+
+    if [ "$terminal_colors" -ge 256 ]; then
+        context_colors="$colors_256;$colors_8"
+        printf 'Detected a %s terminal with %s colors.\n' "$terminal_theme" "$terminal_colors"
+    else
+        context_colors=$colors_8
+        printf 'Detected a %s terminal with %s colors; using the 8-color palette.\n' \
+            "$terminal_theme" "$terminal_colors"
+    fi
+
+    if [ -z "${COLORFGBG:-}" ]; then
+        printf 'COLORFGBG is unavailable, so the terminal background is assumed dark.\n'
     fi
 }
 
@@ -275,6 +311,32 @@ configure_nuke()
     esac
 }
 
+configure_colors()
+{
+    if [ "$use_context_colors" -eq 0 ]; then
+        cat
+        return
+    fi
+
+    case $format in
+        bash|posix|zsh)
+            sed "/^[[:space:]]*export NNN_TMPFILE=/a\\    export NNN_COLORS='$context_colors'"
+            ;;
+        fish)
+            sed "/^function /a\\    set -x NNN_COLORS '$context_colors'"
+            ;;
+        csh)
+            sed "/^set NNN_TMPFILE=/a\\setenv NNN_COLORS '$context_colors'"
+            ;;
+        elvish)
+            sed "/^fn /a\\    set-env NNN_COLORS '$context_colors'"
+            ;;
+        nushell)
+            sed "/^export def --env /a\\    \$env.NNN_COLORS = '$context_colors'"
+            ;;
+    esac
+}
+
 install_plugins()
 {
     if ! ask_yes_no "$(printf '\n%s' 'Install (or update) all nnn plugins now?')"; then
@@ -313,11 +375,17 @@ add_option '-n' 'Type to navigate (filter mode always on)'
 add_option '-Q' 'Quit without a confirmation prompt'
 add_option '-R' 'Stop at the first and last entry instead of wrapping around'
 
+use_context_colors=0
+if ask_yes_no 'Detect terminal colours and set NNN_COLORS for all 8 contexts?'; then
+    use_context_colors=1
+    configure_context_colors
+fi
+
 use_nuke=0
 install_plugins
 
 download_helper
-configured_helper=$(configure_helper | rename_function | configure_nuke) || exit 1
+configured_helper=$(configure_helper | rename_function | configure_nuke | configure_colors) || exit 1
 
 printf '\nGenerated nnn function with:%s\n' "${options:- no option selected}"
 print_configuration_help
