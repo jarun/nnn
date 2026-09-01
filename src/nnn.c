@@ -94,6 +94,7 @@
 #include <regex.h>
 #endif
 #include <signal.h>
+#include <spawn.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -2704,6 +2705,31 @@ static int spawn(char *command, char *arg1, char *arg2, char *arg3, ushort_t fla
 
 	free(cmd);
 	return retstatus;
+}
+
+/* Access the global system environment variables */
+extern char **environ; // NOLINT
+
+static int spawn_redirected(char *file, char *const argv[], int inputfd, int outputfd, pid_t *pid)
+{
+	posix_spawn_file_actions_t actions;
+	int spawn_status = posix_spawn_file_actions_init(&actions);
+
+	if (spawn_status != 0)
+		return spawn_status;
+
+	spawn_status = posix_spawn_file_actions_addclose(&actions, inputfd);
+	if (spawn_status == 0)
+		spawn_status = posix_spawn_file_actions_adddup2(&actions, outputfd, STDOUT_FILENO);
+	if (spawn_status == 0)
+		spawn_status = posix_spawn_file_actions_adddup2(&actions, outputfd, STDERR_FILENO);
+	if (spawn_status == 0)
+		spawn_status = posix_spawn_file_actions_addclose(&actions, outputfd);
+	if (spawn_status == 0)
+		spawn_status = posix_spawnp(pid, file, &actions, NULL, argv, environ);
+
+	posix_spawn_file_actions_destroy(&actions);
+	return spawn_status;
 }
 
 /* Get program name from env var, else return fallback program */
@@ -5359,16 +5385,10 @@ static bool get_output(char *command, char *arg1, char *arg2, int fdout, bool pa
 	if (arg2)
 		argv[index] = arg2;
 
-	pid = fork();
-	if (pid == 0) {
-		/* In child */
-		close(cmd_in_fd);
-		dup2(cmd_out_fd, STDOUT_FILENO);
-		dup2(cmd_out_fd, STDERR_FILENO);
-		close(cmd_out_fd);
-
-		execvp(*argv, argv);
-		_exit(EXIT_SUCCESS);
+	int spawn_status = spawn_redirected(*argv, argv, cmd_in_fd, cmd_out_fd, &pid);
+	if (spawn_status != 0) {
+		free(cmd);
+		return ret;
 	}
 
 	/* In parent */
@@ -5425,17 +5445,9 @@ static bool buffer_command_output(char * const cmds[], char *arg1, char *arg2, s
 		if (arg2)
 			argv[index] = arg2;
 
-		pid_t pid = fork();
-		if (pid == 0) {
-			close(pipefd[0]);
-			dup2(pipefd[1], STDOUT_FILENO);
-			dup2(pipefd[1], STDERR_FILENO);
-			close(pipefd[1]);
-			execvp(*argv, argv);
-			_exit(EXIT_SUCCESS);
-		}
-
-		if (pid > 0)
+		pid_t pid;
+		int spawn_status = spawn_redirected(*argv, argv, pipefd[0], pipefd[1], &pid);
+		if (spawn_status == 0)
 			waitpid(pid, NULL, 0);
 		free(cmd);
 	}
@@ -8085,25 +8097,16 @@ static void preview_pane(const char *path)
 		if (pipe(pipefd) == -1)
 			return;
 
-		pid_t pid = fork();
-		if (pid == 0) {
-			close(pipefd[0]);
-			dup2(pipefd[1], STDOUT_FILENO);
-			dup2(pipefd[1], STDERR_FILENO);
-			close(pipefd[1]);
+		char widthbuf[16], heightbuf[16];
+		snprintf(widthbuf, sizeof(widthbuf), "%d", previewwidth);
+		snprintf(heightbuf, sizeof(heightbuf), "%d", xlines - 2);
 
-			char widthbuf[16], heightbuf[16];
-			snprintf(widthbuf, sizeof(widthbuf), "%d", previewwidth);
-			snprintf(heightbuf, sizeof(heightbuf), "%d", xlines - 2);
-
-			execlp(previewer, previewer, fpath,
-			       widthbuf, heightbuf,
-			       (char *)NULL);
-			_exit(EXIT_FAILURE);
-		}
+		char *argv[] = {previewer, fpath, widthbuf, heightbuf, NULL};
+		pid_t pid;
+		int spawn_status = spawn_redirected(previewer, argv, pipefd[0], pipefd[1], &pid);
 		close(pipefd[1]);
 
-		if (pid > 0) {
+		if (spawn_status == 0) {
 			FILE *fp = fdopen(pipefd[0], "r");
 			if (fp) {
 				char line[PREVIEW_MAX_LINE];
