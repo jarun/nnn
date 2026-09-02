@@ -2439,7 +2439,6 @@ static bool initcurses(void *oldmask)
 	mouseinterval(0);
 #endif
 	curs_set(FALSE); /* Hide cursor */
-	leaveok(stdscr, TRUE); /* Skip precise cursor placement during normal redraws */
 
 	char *colors = getenv(env_cfg[NNN_COLORS]);
 
@@ -3872,7 +3871,6 @@ static int filterentries(char *path, char *lastname)
 
 	cleartimeout();
 	curs_set(TRUE);
-	leaveok(stdscr, FALSE);
 	showfilter(ln);
 
 	while ((r = get_wch(ch)) != ERR) {
@@ -4079,7 +4077,6 @@ end:
 	copycurname(lastname);
 
 	curs_set(FALSE);
-	leaveok(stdscr, TRUE);
 	settimeout();
 
 	/* Return keys for navigation etc. */
@@ -4198,7 +4195,6 @@ static char *xreadline(const char *prefill, const char *prompt)
 
 	x = getcurx(stdscr);
 	curs_set(TRUE);
-	leaveok(stdscr, FALSE);
 
 	while (1) {
 		buf[len] = ' ';
@@ -4422,7 +4418,6 @@ static char *xreadline(const char *prefill, const char *prompt)
 
 END:
 	curs_set(FALSE);
-	leaveok(stdscr, TRUE);
 	settimeout();
 	printmsg("");
 
