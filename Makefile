@@ -28,6 +28,7 @@ O_NOUG := 0  # disable user, group name in status bar
 O_NOX11 := 0  # disable X11 integration
 O_NOSORT := 0  # disable sorting entries on dir load
 O_DIMFILTERED := 1  # dim characters matching filter (default: enabled)
+O_NOBRAILLE := 0  # braille support enabled by default
 
 # User patches
 O_COLEMAK := 0 # change key bindings to colemak compatible layout
@@ -144,6 +145,10 @@ endif
 
 ifeq ($(strip $(O_DIMFILTERED)),1)
 	CPPFLAGS += -DDIM_FILTERED
+endif
+
+ifeq ($(strip $(O_NOBRAILLE)),1)
+	CPPFLAGS += -DNOBRAILLE
 endif
 
 ifeq ($(shell $(PKG_CONFIG) ncursesw && echo 1),1)

@@ -2439,7 +2439,9 @@ static bool initcurses(void *oldmask)
 	mouseinterval(0);
 #endif
 	curs_set(FALSE); /* Hide cursor */
+#ifdef NOBRAILLE
 	leaveok(stdscr, TRUE); /* Skip precise cursor placement during normal redraws */
+#endif
 
 	char *colors = getenv(env_cfg[NNN_COLORS]);
 
@@ -3872,7 +3874,9 @@ static int filterentries(char *path, char *lastname)
 
 	cleartimeout();
 	curs_set(TRUE);
+#ifdef NOBRAILLE
 	leaveok(stdscr, FALSE);
+#endif
 	showfilter(ln);
 
 	while ((r = get_wch(ch)) != ERR) {
@@ -4079,7 +4083,9 @@ end:
 	copycurname(lastname);
 
 	curs_set(FALSE);
+#ifdef NOBRAILLE
 	leaveok(stdscr, TRUE);
+#endif
 	settimeout();
 
 	/* Return keys for navigation etc. */
@@ -4198,7 +4204,9 @@ static char *xreadline(const char *prefill, const char *prompt)
 
 	x = getcurx(stdscr);
 	curs_set(TRUE);
+#ifdef NOBRAILLE
 	leaveok(stdscr, FALSE);
+#endif
 
 	while (1) {
 		buf[len] = ' ';
@@ -4422,7 +4430,9 @@ static char *xreadline(const char *prefill, const char *prompt)
 
 END:
 	curs_set(FALSE);
+#ifdef NOBRAILLE
 	leaveok(stdscr, TRUE);
+#endif
 	settimeout();
 	printmsg("");
 
@@ -7985,7 +7995,7 @@ static inline void markhovered(void)
 {
 	if (cfg.showdetail && ndents) { /* Bold forward arrowhead */
 		tocursor();
-#ifdef ICONS_ENABLED
+#if defined(NOBRAILLE) && defined(ICONS_ENABLED)
 		addstr("▌");
 #else
 		addch('>' | A_BOLD);
