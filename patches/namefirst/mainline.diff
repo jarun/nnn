@@ -4,10 +4,10 @@
 # Author: Luuk van Baal
 
 diff --git a/src/nnn.c b/src/nnn.c
-index 6f1a0561..7c9ec022 100644
+index 1eac4b67..b1a7616f 100644
 --- a/src/nnn.c
 +++ b/src/nnn.c
-@@ -433,6 +433,10 @@ typedef struct {
+@@ -436,6 +436,10 @@ typedef struct {
  } session_header_t;
  #endif
  
@@ -18,7 +18,7 @@ index 6f1a0561..7c9ec022 100644
  /* GLOBALS */
  
  /* Configuration, contexts */
-@@ -1177,10 +1181,13 @@ static char *getpwname(uid_t uid)
+@@ -1180,10 +1184,13 @@ static char *getpwname(uid_t uid)
  	static char *namecache;
  
  	if (uidcache != uid) {
@@ -32,7 +32,7 @@ index 6f1a0561..7c9ec022 100644
  	}
  
  	return namecache ? namecache : xitoa(uid);
-@@ -1192,10 +1199,13 @@ static char *getgrname(gid_t gid)
+@@ -1195,10 +1202,13 @@ static char *getgrname(gid_t gid)
  	static char *grpcache;
  
  	if (gidcache != gid) {
@@ -46,7 +46,7 @@ index 6f1a0561..7c9ec022 100644
  	}
  
  	return grpcache ? grpcache : xitoa(gid);
-@@ -4601,14 +4611,13 @@ static void resetdircolor(int flags)
+@@ -4639,14 +4649,13 @@ static void resetdircolor(int flags)
   * Max supported str length: NAME_MAX;
   */
  #ifdef NOLC
@@ -64,7 +64,7 @@ index 6f1a0561..7c9ec022 100644
  {
  	wchar_t * const wbuf = (wchar_t *)g_buf;
  	wchar_t *buf = wbuf;
-@@ -4633,7 +4642,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
+@@ -4671,7 +4680,7 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
  		++buf;
  	}
  
@@ -73,7 +73,7 @@ index 6f1a0561..7c9ec022 100644
  }
  
  static off_t get_size(off_t size, off_t *pval, int comp)
-@@ -4882,9 +4891,10 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int
+@@ -4920,9 +4929,10 @@ static uchar_t get_color_pair_name_ind(const struct entry *ent, char *pind, int
  }
  
  #ifdef DIM_FILTERED
@@ -85,7 +85,7 @@ index 6f1a0561..7c9ec022 100644
  
  	/* If there's a filter string, dim matching characters */
  	if (fltr[1]) {
-@@ -4895,15 +4905,18 @@ static void printent_name(const struct entry *ent, uint_t namecols)
+@@ -4933,15 +4943,18 @@ static void printent_name(const struct entry *ent, uint_t namecols)
  		if (cfg.regex) {
  			/* For regex, we don't dim - just print normally */
  #ifndef NOLC
@@ -107,7 +107,7 @@ index 6f1a0561..7c9ec022 100644
  			uint_t col = 0;
  			for (wchar_t *p = wbuf; *p && col < namecols; ++p, ++col) {
  				if (matched[col]) {
-@@ -4916,7 +4929,8 @@ static void printent_name(const struct entry *ent, uint_t namecols)
+@@ -4954,7 +4967,8 @@ static void printent_name(const struct entry *ent, uint_t namecols)
  			}
  #else
  			/* Non-wide character version for fuzzy dimming */
@@ -117,7 +117,7 @@ index 6f1a0561..7c9ec022 100644
  			for (uint_t i = 0; (i < namecols) && name[i]; ++i) {
  				if (matched[i]) {
  					attron(match_attrs);
-@@ -4931,7 +4945,8 @@ static void printent_name(const struct entry *ent, uint_t namecols)
+@@ -4969,7 +4983,8 @@ static void printent_name(const struct entry *ent, uint_t namecols)
  			/* String match - dim the substring */
  			string_match_positions(fltr + 1, ent->name, matched);
  #ifndef NOLC
@@ -127,7 +127,7 @@ index 6f1a0561..7c9ec022 100644
  			uint_t col = 0;
  			for (wchar_t *p = wbuf; *p && col < namecols; ++p, ++col) {
  				if (matched[col]) {
-@@ -4944,7 +4959,8 @@ static void printent_name(const struct entry *ent, uint_t namecols)
+@@ -4982,7 +4997,8 @@ static void printent_name(const struct entry *ent, uint_t namecols)
  			}
  #else
  			/* Non-wide character version for string dimming */
@@ -137,7 +137,7 @@ index 6f1a0561..7c9ec022 100644
  			for (uint_t i = 0; (i < namecols) && name[i]; ++i) {
  				if (matched[i]) {
  					attron(match_attrs);
-@@ -4959,21 +4975,29 @@ static void printent_name(const struct entry *ent, uint_t namecols)
+@@ -4997,21 +5013,29 @@ static void printent_name(const struct entry *ent, uint_t namecols)
  	} else {
  		/* No filter or filter not active - print normally */
  #ifndef NOLC
@@ -172,7 +172,7 @@ index 6f1a0561..7c9ec022 100644
  }
  #endif
  
-@@ -4981,38 +5005,14 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
+@@ -5019,38 +5043,14 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
  {
  	const struct entry *ent = &pdents[pdents_index];
  	char ind = '\0';
@@ -213,7 +213,7 @@ index 6f1a0561..7c9ec022 100644
  	uchar_t color_pair = get_color_pair_name_ind(ent, &ind, &attrs);
  
  	addch((ent->flags & FILE_SELECTED) ? '+' | A_REVERSE | A_BOLD : ' ');
-@@ -5036,12 +5036,44 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
+@@ -5074,12 +5074,44 @@ static void printent(int pdents_index, uint_t namecols, bool sel)
  	if (!ind)
  		++namecols;
  
@@ -260,7 +260,7 @@ index 6f1a0561..7c9ec022 100644
  }
  
  /**
-@@ -7964,18 +7996,6 @@ static void statusbar(char *path)
+@@ -7991,18 +8023,6 @@ static void statusbar(char *path)
  	tocursor();
  }
  
@@ -268,7 +268,7 @@ index 6f1a0561..7c9ec022 100644
 -{
 -	if (cfg.showdetail && ndents) { /* Bold forward arrowhead */
 -		tocursor();
--#ifdef ICONS_ENABLED
+-#if defined(NOBRAILLE) && defined(ICONS_ENABLED)
 -		addstr("▌");
 -#else
 -		addch('>' | A_BOLD);
@@ -279,7 +279,7 @@ index 6f1a0561..7c9ec022 100644
  #define PREVIEW_BORDER_COL (xcols / 2)
  #define PREVIEW_COL        (PREVIEW_BORDER_COL + 2)
  #define PREVIEW_WIDTH      (xcols - PREVIEW_COL - 1)
-@@ -8253,12 +8273,13 @@ static int adjust_cols(int n)
+@@ -8271,12 +8291,13 @@ static int adjust_cols(int n)
  #ifdef ICONS_ENABLED
  	n -= (g_state.oldcolor ? 0 : ICON_SIZE + ICON_PADDING_LEFT_LEN + ICON_PADDING_RIGHT_LEN);
  #endif
@@ -295,7 +295,7 @@ index 6f1a0561..7c9ec022 100644
  	}
  
  	/* 2 columns for preceding space and indicator */
-@@ -8297,8 +8318,6 @@ static void draw_line(int ncols)
+@@ -8315,8 +8336,6 @@ static void draw_line(int ncols)
  	/* Must reset e.g. no files in dir */
  	if (dir)
  		attroff(COLOR_PAIR(cfg.curctx + 1) | A_BOLD);
@@ -304,7 +304,7 @@ index 6f1a0561..7c9ec022 100644
  }
  
  static void redraw(char *path)
-@@ -8413,6 +8432,26 @@ static void redraw(char *path)
+@@ -8431,6 +8450,26 @@ static void redraw(char *path)
  	int onscreen = MIN(ONSCREEN + curscroll, ndents);
  	int len = scanselforpath(path, FALSE);
  
@@ -331,7 +331,7 @@ index 6f1a0561..7c9ec022 100644
  	ncols = adjust_cols(ncols);
  
  	/* Print listing */
-@@ -8441,7 +8480,7 @@ static void redraw(char *path)
+@@ -8459,7 +8498,7 @@ static void redraw(char *path)
  #endif
  	}
  
