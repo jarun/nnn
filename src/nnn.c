@@ -4637,6 +4637,10 @@ static void resetdircolor(int flags)
  * Replace escape characters in a string with '?'
  * Adjust string length to maxcols if > 0;
  * Max supported str length: NAME_MAX;
+ *
+ * Sanitize C0/DEL before measuring display width. Raw control bytes can make
+ * wcswidth() fail or under-count, which previously truncated the printable
+ * suffix (e.g. "pre\apost" rendered as "pre" instead of "pre?post").
  */
 #ifdef NOLC
 static char *unescape(const char *str, uint_t maxcols)
@@ -4645,24 +4649,6 @@ static char *unescape(const char *str, uint_t maxcols)
 	char *buf = wbuf;
 
 	xstrsncpy(wbuf, str, maxcols);
-#else
-static wchar_t *unescape(const char *str, uint_t maxcols)
-{
-	wchar_t * const wbuf = (wchar_t *)g_buf;
-	wchar_t *buf = wbuf;
-	size_t len = mbstowcs(wbuf, str, maxcols); /* Convert multi-byte to wide char */
-
-	len = wcswidth(wbuf, len);
-
-	if (len >= maxcols) {
-		size_t lencount = maxcols;
-
-		while (len > maxcols) /* Reduce wide chars one by one till it fits */
-			len = wcswidth(wbuf, --lencount);
-
-		wbuf[lencount] = L'\0'; // NOLINT
-	}
-#endif
 
 	while (*buf) {
 		if (*buf <= '\x1f' || *buf == '\x7f')
@@ -4673,6 +4659,43 @@ static wchar_t *unescape(const char *str, uint_t maxcols)
 
 	return wbuf;
 }
+#else
+static wchar_t *unescape(const char *str, uint_t maxcols)
+{
+	wchar_t * const wbuf = (wchar_t *)g_buf;
+	wchar_t *buf = wbuf;
+	size_t len = mbstowcs(wbuf, str, maxcols); /* Convert multi-byte to wide char */
+	size_t lencount;
+
+	if (len == (size_t)-1)
+		len = 0;
+	wbuf[len] = L'\0';
+
+	/* Replace controls first so width accounting sees printable substitutes */
+	while (*buf) {
+		if (*buf <= L'\x1f' || *buf == L'\x7f')
+			*buf = L'?';
+
+		++buf;
+	}
+
+	len = wcswidth(wbuf, wcslen(wbuf));
+	if ((ssize_t)len < 0)
+		len = wcslen(wbuf);
+
+	if (len >= maxcols) {
+		lencount = maxcols;
+
+		while (len > maxcols) /* Reduce wide chars one by one till it fits */
+			len = wcswidth(wbuf, --lencount);
+
+		wbuf[lencount] = L'\0'; // NOLINT
+	}
+
+	return wbuf;
+}
+#endif
+
 
 static off_t get_size(off_t size, off_t *pval, int comp)
 {
