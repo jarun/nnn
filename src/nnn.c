@@ -702,6 +702,7 @@ static char * const utils[] = {
 #define MSG_NOCHANGE     41
 #define MSG_DIR_CHANGED  42
 #define MSG_BM_NAME      43
+#define MSG_ARCHIVE_RLTV 44
 
 static const char * const messages[] = {
 	"",
@@ -748,6 +749,7 @@ static const char * const messages[] = {
 	"unchanged",
 	"dir changed, range sel off",
 	"name: ",
+	"add files with relative path?",
 };
 
 /* Supported configuration environment variables */
@@ -3052,37 +3054,123 @@ static char *get_archive_cmd(const char *archive)
 	return archive_cmd[i];
 }
 
-static void archive_selection(const char *cmd, const char *archive)
+/* Check if all the selected paths are within dir (used to archive with paths relative to cwd) */
+static bool sel_paths_in_dir(const char *dir)
+{
+	size_t dirlen = xstrlen(dir);
+	bool isroot = (dirlen == 1); /* dir is "/" */
+	char *psel = pselbuf;
+	size_t pos = 0, len;
+
+	if (!selbufpos)
+		return FALSE;
+
+	while (pos < selbufpos) {
+		len = xstrlen(psel);
+
+		if ((len <= dirlen) || !is_prefix(psel, dir, dirlen) || (!isroot && psel[dirlen] != '/'))
+			return FALSE;
+
+		pos += len + 1;
+		psel += len + 1;
+	}
+
+	return TRUE;
+}
+
+static void archive_selection(const char *cmd, const char *archive, const char *path)
 {
 	size_t archive_esc_size = 0;
 	size_t selpath_esc_size = 0;
+	size_t path_esc_size = 0;
 	char *archive_esc = NULL;
 	char *selpath_esc = NULL;
+	char *path_esc = NULL;
 	size_t len;
 	char *buf = NULL;
+	bool relative = sel_paths_in_dir(path)
+			&& xconfirm(get_input(messages[MSG_ARCHIVE_RLTV]));
+	int fd = -1;
+
+	if (relative) {
+		size_t dirlen = xstrlen(path) + (xstrcmp(path, "/") ? 1 : 0); /* skip the trailing / too */
+		size_t lastpos = selbufpos - 1, pos = 0, plen;
+		char *psel = pselbuf;
+
+		fd = create_tmp_file();
+		if (fd == -1) {
+			printwarn(NULL);
+			return;
+		}
+
+		while (pos <= lastpos) {
+			plen = xstrlen(psel);
+
+			if (write(fd, psel + dirlen, plen - dirlen) != (ssize_t)(plen - dirlen)) {
+				DPRINTF_S(strerror(errno));
+				printwarn(NULL);
+				close(fd);
+				unlink(g_tmpfpath);
+				return;
+			}
+
+			pos += plen;
+			if (pos <= lastpos) {
+				if (write(fd, "", 1) != 1) {
+					DPRINTF_S(strerror(errno));
+					printwarn(NULL);
+					close(fd);
+					unlink(g_tmpfpath);
+					return;
+				}
+				psel += plen + 1;
+			}
+			++pos;
+		}
+
+		close(fd);
+	}
 
 	if (shell_escape(&archive_esc, &archive_esc_size, archive) < 0
-	    || shell_escape(&selpath_esc, &selpath_esc_size, selpath) < 0) {
+	    || shell_escape(&selpath_esc, &selpath_esc_size, relative ? g_tmpfpath : selpath) < 0
+	    || (relative && shell_escape(&path_esc, &path_esc_size, path) < 0)) {
 		DPRINTF_S(strerror(errno));
 		printwarn(NULL);
 		goto cleanup;
 	}
 
-	len = xstrlen(patterns[P_ARCHIVE_CMD]) + xstrlen(cmd) + xstrlen(archive_esc) + xstrlen(selpath_esc) + 1;
-	buf = malloc(len);
-	if (!buf) {
-		DPRINTF_S(strerror(errno));
-		printwarn(NULL);
-		goto cleanup;
+	if (relative) {
+		len = xstrlen("cd  && xargs -0   < ") + xstrlen(path_esc) + xstrlen(cmd)
+		      + xstrlen(archive_esc) + xstrlen(selpath_esc) + 1;
+		buf = malloc(len);
+		if (!buf) {
+			DPRINTF_S(strerror(errno));
+			printwarn(NULL);
+			goto cleanup;
+		}
+
+		snprintf(buf, len, "cd %s && xargs -0 %s %s < %s", path_esc, cmd, archive_esc, selpath_esc);
+	} else {
+		len = xstrlen(patterns[P_ARCHIVE_CMD]) + xstrlen(cmd) + xstrlen(archive_esc) + xstrlen(selpath_esc) + 1;
+		buf = malloc(len);
+		if (!buf) {
+			DPRINTF_S(strerror(errno));
+			printwarn(NULL);
+			goto cleanup;
+		}
+
+		snprintf(buf, len, patterns[P_ARCHIVE_CMD], cmd, archive_esc, selpath_esc);
 	}
 
-	snprintf(buf, len, patterns[P_ARCHIVE_CMD], cmd, archive_esc, selpath_esc);
 	spawn(utils[UTIL_SH_EXEC], buf, NULL, NULL, F_CLI | F_CONFIRM);
 
 cleanup:
+	if (relative)
+		unlink(g_tmpfpath);
 	free(buf);
 	free(archive_esc);
 	free(selpath_esc);
+	free(path_esc);
 }
 
 static void write_lastdir(const char *curpath, const char *outfile)
@@ -9505,7 +9593,7 @@ nochange:
 					goto statusbar_nochange;
 				}
 
-				(r == 's') ? archive_selection(get_archive_cmd(tmp), tmp)
+				(r == 's') ? archive_selection(get_archive_cmd(tmp), tmp, path)
 					   : spawn(get_archive_cmd(tmp), tmp, pdents[cur].name,
 						   NULL, F_CLI | F_CONFIRM);
 
