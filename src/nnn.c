@@ -848,7 +848,7 @@ static const char * const patterns[] = {
 	SED" -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' '%s'",
 	SED" 's|^\\([^#/][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
 		"'%s' | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
-	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|z|zip)$", /* Basic formats that don't need external tools */
+	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|tzst|z|zip|zst)$", /* Basic formats that don't need external tools */
 	SED" -i 's|^%s\\(.*\\)$|%s\\1|' '%s'",
 	"xargs -0 %s %s < %s",
 };
@@ -6011,7 +6011,15 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 	bool is_atool = (!g_state.usebsdtar && getutil(utils[UTIL_ATOOL]));
 
 	if (op == 'x') {
-		outdir = xreadline(is_atool ? "." : xbasename(fpath), messages[MSG_NEW_PATH]);
+		char *name = xstrdup(xbasename(fpath));
+		char *suggest = strchr(name, '.');
+
+		if (suggest && (suggest != name))
+			*suggest = '\0';
+
+		outdir = xreadline(is_atool ? "." : name, messages[MSG_NEW_PATH]);
+		free(name);
+
 		if (!outdir || !*outdir) { /* Cancelled */
 			printwait(messages[MSG_CANCEL], NULL);
 			return FALSE;
