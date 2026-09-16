@@ -250,7 +250,13 @@ uninstall-desktop:
 	$(RM) $(DESTDIR)$(DESKTOPICONPREFIX)/scalable/apps/nnn.svg
 	$(RM) $(DESTDIR)$(DESKTOPICONPREFIX)/64x64/apps/nnn.png
 
-install: all
+ifeq ($(strip $(O_DEBUG)),1)
+INSTALL_DEPS := all
+else
+INSTALL_DEPS := strip
+endif
+
+install: $(INSTALL_DEPS)
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 $(BIN) $(DESTDIR)$(PREFIX)/bin
 	$(INSTALL) -m 0755 -d $(DESTDIR)$(MANPREFIX)/man1
