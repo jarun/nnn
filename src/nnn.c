@@ -4219,8 +4219,12 @@ static void addcmdtohist(char *cmd)
 		cmd_hist[lastcmdpos] = cmd;
 	}
 
-	if (new)
-		cmd_hist[++lastcmdpos] = xstrdup(cmd);
+	if (new) {
+		char *newcmd = xstrdup(cmd);
+
+		if (newcmd)
+			cmd_hist[++lastcmdpos] = newcmd;
+	}
 }
 
 #ifdef NORL
@@ -6012,6 +6016,10 @@ static bool handle_archive(char *fpath /* in-out param */, char op)
 
 	if (op == 'x') {
 		char *name = xstrdup(xbasename(fpath));
+		if (!name) {
+			printwarn(NULL);
+			return FALSE;
+		}
 		char *suggest = strchr(name, '.');
 
 		if (suggest && (suggest != name))
@@ -9214,6 +9222,10 @@ nochange:
 		case SEL_MARK:
 			free(mark);
 			mark = xstrdup(path);
+			if (!mark) {
+				printwarn(&presel);
+				goto nochange;
+			}
 			printwait(mark, &presel);
 			goto nochange;
 		case SEL_BMARK:
