@@ -111,7 +111,7 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
 
 ### Beginners
 
-1. [Install](https://github.com/jarun/nnn/wiki/Usage#installation) `nnn`, preferbly using the package manager.
+1. [Install](https://github.com/jarun/nnn/wiki/Usage#installation) `nnn`, preferably using the package manager.
 2. Run the following command to generate (and optionally add to your rc file) a shell function to start with.
    ```sh
    sh -c "$(curl -Ls https://raw.githubusercontent.com/jarun/nnn/master/misc/quickstart.sh)"
