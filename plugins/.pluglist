@@ -1,0 +1,62 @@
+#!/usr/bin/env sh
+
+# Description: List available plugins and their installation status
+#              Reads the latest plugin table from GitHub
+#
+# Dependencies: awk, curl, mktemp, sort
+#
+# Shell: POSIX compliant
+
+plugindir=${XDG_CONFIG_HOME:-$HOME/.config}/nnn/plugins
+readme=${NNN_PLUGLIST_README:-$plugindir/README.md}
+catalog_url=${NNN_PLUGLIST_URL:-https://github.com/jarun/nnn/blob/master/plugins/README.md?raw=1}
+catalog_file=$(mktemp "${TMPDIR:-/tmp}/nnn-pluglist.XXXXXX") || exit 1
+trap 'rm -f "$catalog_file"' EXIT HUP INT TERM
+
+if ! curl -fsSL --connect-timeout 3 --max-time 10 "$catalog_url" -o "$catalog_file"; then
+	if [ -r "$readme" ]; then
+		cp "$readme" "$catalog_file" || exit 1
+	else
+		rm -f "$catalog_file"
+	printf '%s\n' "Plugin catalog unavailable: $readme"
+	printf '%s\n' 'Run getplugs to install or update the plugin catalog.'
+	exit 1
+fi
+fi
+
+catalog() {
+	awk -F '|' '
+		/^\| \[/ {
+			name = $2
+			sub(/^ *\[/, "", name)
+			sub(/\].*$/, "", name)
+			description = $3
+			gsub(/<[^>]*>/, " ", description)
+			gsub(/`|\*\*/, "", description)
+			sub(/[[:space:]]*\[[^]]*\][[:space:]]*$/, "", description)
+			gsub(/\]\([^)]*\)/, "", description)
+			gsub(/\[|\]/, "", description)
+			sub(/^ */, "", description)
+			sub(/ *$/, "", description)
+			print name "|" description
+		}
+	' "$catalog_file" | LC_ALL=C sort
+}
+
+namewidth=$(catalog | awk -F '|' '
+	BEGIN { width = length("PLUGIN") }
+	length($1) > width { width = length($1) }
+	END { print width }
+')
+
+printf '%-*s %-6s  %s\n' "$namewidth" PLUGIN STATUS DESCRIPTION
+printf '%-*s %-6s  %s\n' "$namewidth" ------ ------ -----------
+
+catalog | while IFS='|' read -r name description; do
+	if [ -x "$plugindir/$name" ]; then
+		status='✓'
+	else
+		status='✗'
+	fi
+	printf '%-*s   %s     %s\n' "$namewidth" "$name" "$status" "$description"
+done

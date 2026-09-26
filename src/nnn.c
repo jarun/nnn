@@ -6585,6 +6585,7 @@ static void run_cmd_as_plugin(const char *file, ushort_t flags, enum action *act
 	xstrsncpy(g_buf, file, PATH_MAX);
 
 	len = xstrlen(g_buf);
+
 	if (len > 1 && g_buf[len - 1] == '*') {
 		flags &= ~F_CONFIRM; /* Skip user confirmation */
 		g_buf[len - 1] = '\0'; /* Get rid of trailing no confirmation symbol */
@@ -9748,8 +9749,11 @@ nochange:
 
 			lazy_parse_plug();
 			if (!pkey) {
-				r = xstrsncpy(g_buf, messages[MSG_KEYS], CMD_LEN_MAX);
-				printkeys(plug, g_buf + r - 1, maxplug);
+				r = xstrsncpy(g_buf, messages[MSG_KEYS], CMD_LEN_MAX - 2);
+				g_buf[r - 1] = ' ';
+				g_buf[r] = '?';
+				g_buf[r + 1] = '\0';
+				printkeys(plug, g_buf + r + 1, maxplug);
 				printmsg(g_buf);
 				r = get_input(NULL);
 				move(xlines - 1, 0); // Clear the line
@@ -9761,7 +9765,11 @@ nochange:
 
 			if (r != '\r') {
 				endselection(FALSE);
-				tmp = get_kv_val(plug, NULL, r, maxplug, NNN_PLUG);
+				if (r == '?') {
+					setenv("NNN_PLUGLIST", plgpath, 1);
+					tmp = "!>\"$NNN_PLUGLIST/.pluglist\"";
+				} else
+					tmp = get_kv_val(plug, NULL, r, maxplug, NNN_PLUG);
 				if (!tmp) {
 					printwait(messages[MSG_INVALID_KEY], &presel);
 					goto nochange;
@@ -9779,7 +9787,7 @@ nochange:
 					action = SEL_MAX;
 
 					if (!run_plugin(&path, tmp, (ndents ? pdents[cur].name : NULL), runfile,
-								 &lastname, &lastdir, &action)) {
+							&lastname, &lastdir, &action)) {
 						printwait(messages[MSG_FAILED], &presel);
 						goto nochange;
 					}

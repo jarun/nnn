@@ -36,6 +36,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [.nmv](.nmv) | **Internal**: Feature-rich batch renamer | bash | _see in-file docs_ |
 | [.npreview](.npreview) | **Internal**: Text-based preview handler | sh | _see in-file docs_ |
 | [.ntfy](.ntfy) | **Internal**: Notify on copy, move, remove completion | sh | _see in-file docs_ |
+| [.pluglist](.pluglist) | **Internal**: List available plugins and their installation status | sh | awk, sort |
 | [autojump](autojump) | Navigate to dir/path | sh | [jump](https://github.com/gsamokovarov/jump)/autojump/<br>zoxide/z/[z.lua](https://github.com/skywind3000/z.lua) |
 | [boom](boom) | Play random music from dir | sh | [moc](http://moc.daper.net/) |
 | [bulknew](bulknew) | Create multiple files/dirs at once | bash | sed, xargs, mktemp |
@@ -90,7 +91,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [tnp](tnp) | Opens files in a Tmux Neovim pane (Tmux session only) | sh | tmux, nvim |
 | [togglex](togglex) | Toggle executable mode for selection [✓] | sh | chmod |
 | [umounttree](umounttree) | Unmount a remote mountpoint from within | sh | fusermount |
-| [upload](upload) | Upload to Firefox Send or ix.io (text) or file.io (bin) | sh | [ffsend](https://github.com/timvisee/ffsend), curl, jq, tr |
+| [upload](upload) | Upload text files to 0x0.st and other files to file.io | sh | curl, jq, tar, file |
 | [wallpaper](wallpaper) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 | [x2sel](x2sel) | Copy file list from system clipboard to selection | sh | _see in-file docs_ |
 | [xdgdefault](xdgdefault) | Set the default app for the hovered file type | sh | xdg-utils, fzf/dmenu |
@@ -122,7 +123,7 @@ plugin `finder` can be invoked with the keybind <kbd>;f</kbd>, `fzopen` can be r
 
 Alternatively, combine with <kbd>Alt</kbd> (i.e. <kbd>Alt+key</kbd>).
 
-To pick and run an unassigned plugin, press <kbd>Enter</kbd> (to _enter_ the plugin dir) at the plugin prompt.
+To pick and run an unassigned plugin, press <kbd>Enter</kbd> (to _enter_ the plugin dir) at the plugin prompt. Press <kbd>?</kbd> at the plugin prompt to list available plugins with their descriptions and installation status in a floating window.
 
 To run a plugin at startup, use the option `-P` followed by the plugin key.
 

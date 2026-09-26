@@ -65,6 +65,7 @@ for f in $(find . -maxdepth 1 \( ! -iname "." ! -iname "*.md" \)); do
 		cp -vRf -- "$f" ../../plugins/
 	fi
 done
+cp -f README.md ../../plugins/
 cd ../.. || exit 1
 
 rm -rf nnn-"$VER"/ nnn-"$VER".tar.gz

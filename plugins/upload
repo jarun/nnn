@@ -2,7 +2,7 @@
 
 # Description: Selections are archived into a tar file (uncompressed) and uploaded to file.io
 #              For single files:
-#              Paste contents of a text file to http://ix.io
+#              Upload contents of a text file to https://0x0.st
 #              Upload a binary file to file.io
 #
 # Dependencies: curl, jq, tar, file with `--mime-type` support
