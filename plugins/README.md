@@ -91,7 +91,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [tnp](tnp) | Opens files in a Tmux Neovim pane (Tmux session only) | sh | tmux, nvim |
 | [togglex](togglex) | Toggle executable mode for selection [✓] | sh | chmod |
 | [umounttree](umounttree) | Unmount a remote mountpoint from within | sh | fusermount |
-| [upload](upload) | Upload text files to 0x0.st and other files to file.io | sh | curl, jq, tar, file |
+| [upload](upload) | Upload text files to 0x0.st and other files to file.io or sendit.sh | sh | curl, jq, tar, file |
 | [wallpaper](wallpaper) | Set wallpaper or change colorscheme | sh | nitrogen/pywal |
 | [x2sel](x2sel) | Copy file list from system clipboard to selection | sh | _see in-file docs_ |
 | [xdgdefault](xdgdefault) | Set the default app for the hovered file type | sh | xdg-utils, fzf/dmenu |

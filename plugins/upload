@@ -4,6 +4,7 @@
 #              For single files:
 #              Upload contents of a text file to https://0x0.st
 #              Upload a binary file to file.io
+#              Set UPLOAD_SERVICE=sendit.sh to use sendit.sh for files and selections
 #
 # Dependencies: curl, jq, tar, file with `--mime-type` support
 #
@@ -13,16 +14,26 @@
 # Author: Arun Prakash Jana
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
+upload_service=${UPLOAD_SERVICE:-}
 if [ -s "$selection" ]; then
-    xargs -0 tar -c < "$selection" | \
-        curl -s -F "file=@/dev/stdin;filename=selection.tar" 'https://file.io/?expires=1w' | \
-        jq '.link' | tr -d '"'
+    if [ "$upload_service" = sendit.sh ]; then
+        xargs -0 tar -c < "$selection" | \
+            curl -s --data-binary @- https://sendit.sh/selection.tar
+    else
+        xargs -0 tar -c < "$selection" | \
+            curl -s -F "file=@/dev/stdin;filename=selection.tar" 'https://file.io/?expires=1w' | \
+            jq '.link' | tr -d '"'
+    fi
 
     # Clear selection
     printf "-" > "$NNN_PIPE"
 else
     if [ -n "$1" ] && [ -s "$1" ]; then
-        if file --mime-type "$1" | grep -q -F "text/"; then
+        if [ "$upload_service" = sendit.sh ]; then
+            filename=${1##*/}
+            filename=$(printf '%s' "$filename" | jq -sRr @uri)
+            curl -s --data-binary "@$1" "https://sendit.sh/$filename"
+        elif file --mime-type "$1" | grep -q -F "text/"; then
             curl -F "file=@$1" https://0x0.st
         else
             # Upload the file, show the download link and wait till user presses any key
