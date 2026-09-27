@@ -1,16 +1,54 @@
 #!/usr/bin/env sh
 
-# Description: List files bigger than input size by ascending access date.
+# Description: List up to N large files by ascending access date.
+# Set NNN_LARGEFILES_NONINTERACTIVE=1 to skip prompts and use the defaults.
+# Set NNN_LARGEFILES_SORT_SIZE=1 to sort by size, largest first.
 #
-# Dependencies: find sort
+# Dependencies: find sort head numfmt (optional)
 #
 # Shell: POSIX compliant
 # Author: Arun Prakash Jana
 
-printf "Min file size (MB): "
-read -r size
+max_files=${NNN_LARGEFILES_N:-20}
+min_size=${NNN_LARGEFILES_MINSIZE:-100}
+noninteractive=${NNN_LARGEFILES_NONINTERACTIVE:-}
+sort_key=1
+sort_order='access date'
+tab=$(printf '\t')
 
-find . -size +"$size"M -type f -printf '%A+ %s %p\n' | sort
+if [ -n "${NNN_LARGEFILES_SORT_SIZE:-}" ]; then
+	sort_key=2,2nr
+	sort_order='size (largest first)'
+fi
 
-echo "Press any key to exit"
-read -r _
+if [ -z "$noninteractive" ]; then
+	printf 'Maximum number of files [%s]: ' "$max_files"
+	IFS= read -r input
+	max_files=${input:-$max_files}
+
+	printf 'Minimum file size (MB) [%s]: ' "$min_size"
+	IFS= read -r input
+	min_size=${input:-$min_size}
+fi
+
+listing=$(find . -type f -size +"$min_size"M -printf '%AY-%Am-%Ad %AH:%AM\t%s\t%p\n' 2>/dev/null | sort -t "$tab" -k "$sort_key" | head -n "$max_files")
+
+if [ -z "$listing" ]; then
+	printf 'No files found\n'
+else
+	printf 'Files > %sMB (max %s), sorted by %s:\n\n' "$min_size" "$max_files" "$sort_order"
+	printf '%-16s %8s  %s\n' 'Access time' 'Size' 'Path'
+	printf '%s\n' "$listing" | while IFS="$tab" read -r access_time size path; do
+		if command -v numfmt >/dev/null 2>&1; then
+			size=$(numfmt --to=iec-i --suffix=B "$size" | sed 's/\([0-9]\)\([[:alpha:]]\)/\1 \2/')
+		else
+			size="$size B"
+		fi
+		printf '%-16s %8s  %s\n' "$access_time" "$size" "$path"
+	done
+fi
+
+if [ -z "$noninteractive" ]; then
+	printf '\nPress Enter to exit'
+	IFS= read -r _
+fi
