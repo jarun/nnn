@@ -6606,6 +6606,33 @@ static void run_cmd_as_plugin(const char *file, ushort_t flags, enum action *act
 		spawn(utils[UTIL_SH_EXEC], g_buf, NULL, NULL, flags);
 }
 
+static bool read_plugin_output(FILE *output, char **content_out, size_t *content_len_out)
+{
+	long output_len;
+	size_t content_len;
+	char *content;
+
+	if (fseek(output, 0, SEEK_END) || (output_len = ftell(output)) <= 0
+	    || fseek(output, 0, SEEK_SET))
+		return FALSE;
+
+	content_len = MIN((size_t)output_len, (size_t)SIZE_16MB);
+	content = malloc(content_len + 1);
+	if (!content)
+		return FALSE;
+
+	content_len = fread(content, 1, content_len, output);
+	if (!content_len) {
+		free(content);
+		return FALSE;
+	}
+
+	content[content_len] = '\0';
+	*content_out = content;
+	*content_len_out = content_len;
+	return TRUE;
+}
+
 static bool plctrl_init(void)
 {
 	size_t len;
@@ -6725,7 +6752,17 @@ static bool run_plugin(char **path, const char *file, char *runfile, char *openf
 	char ctx = 0;
 	ushort_t flags = 0;
 	bool cmd_as_plugin = FALSE;
+	FILE *capture = NULL;
 	char *nextpath;
+
+	if (*file == '>') {
+		++file;
+		if (!*file)
+			return FALSE;
+		capture = tmpfile();
+		if (!capture)
+			return FALSE;
+	}
 
 	if (!g_state.pluginit) {
 		plctrl_init();
@@ -6762,8 +6799,11 @@ static bool run_plugin(char **path, const char *file, char *runfile, char *openf
 		cmd_as_plugin = TRUE;
 	}
 
-	if (mkfifo(g_pipepath, 0600) != 0)
+	if (mkfifo(g_pipepath, 0600) != 0) {
+		if (capture)
+			fclose(capture);
 		return FALSE;
+	}
 
 	exitcurses();
 
@@ -6774,6 +6814,16 @@ static bool run_plugin(char **path, const char *file, char *runfile, char *openf
 
 		if (wfd == -1)
 			_exit(EXIT_FAILURE);
+		if (capture) {
+			int output_fd = fileno(capture);
+
+			if (dup2(output_fd, STDOUT_FILENO) == -1 || dup2(output_fd, STDERR_FILENO) == -1) {
+				close(wfd);
+				_exit(EXIT_FAILURE);
+			}
+			if (output_fd > STDERR_FILENO)
+				close(output_fd);
+		}
 
 		/* Restore sigpipe handler to default */
 		sigaction(SIGPIPE, &(struct sigaction){.sa_handler = SIG_DFL}, NULL);
@@ -6822,6 +6872,17 @@ static bool run_plugin(char **path, const char *file, char *runfile, char *openf
 
 	/* wait for the child to finish. no zombies allowed */
 	waitpid(p, NULL, 0);
+	if (capture) {
+		char *content = NULL;
+		size_t content_len = 0;
+
+		refresh();
+		if (read_plugin_output(capture, &content, &content_len)) {
+			show_content_in_floating_window(content, content_len, action, FALSE);
+			free(content);
+		}
+		fclose(capture);
+	}
 
 	refresh();
 

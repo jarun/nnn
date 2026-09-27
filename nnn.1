@@ -501,14 +501,20 @@ separated by \fB;\fR:
         * incompatible with \fB&\fR (terminal output is masked for GUI programs)
 
     [>] To show the output of run-and-exit commands in a floating window,
-        add \fB>\fR (right arrow) after \fB!\fR
+        add \fB>\fR (right arrow) after \fB!\fR.
 
         export NNN_PLUG='m:!>mediainfo "$nnn";t:!>tree -ps;l:!>ls -lah --group-directories-first'
 
         * incompatible with \fB&\fR (terminal output is masked for GUI programs)
         * ignores \fB-\fR (the directory is always refreshed)
 
-    [*] To skip user confirmation after command execution, suffix with \fB*\fR
+        This modifier works with regular plugin scrips too. However, use it
+        only with non-interactive plugin scripts; their stdout and stderr are
+        captured while \fBNNN_FIFO\fR communication remains available.
+
+        export NNN_PLUG='p:>myplugin'
+
+    [*] To skip user confirmation after command execution, suffix with \fB*\fR.
 
         export NNN_PLUG='y:-!sync*'
 
@@ -518,8 +524,8 @@ separated by \fB;\fR:
         * do not use \fB*\fR with programs those run and exit e.g. 'cat'
 
     NOTES:
-        1. Place $nnn (or exported variables) in double quotes (\fB"$nnn"\fR)
-        2. Use single quotes for $NNN_PLUG so "$nnn" is not interpreted
+        1. Place $nnn (or exported variables) in double quotes (\fB"$nnn"\fR).
+        2. Use single quotes for $NNN_PLUG so "$nnn" is not interpreted.
 
     \fBEXAMPLES\fR
 

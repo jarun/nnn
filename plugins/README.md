@@ -180,16 +180,17 @@ export NNN_PLUG='m:-!|mediainfo "$nnn";t:-!|tree -ps;l:-!|ls -lah --group-direct
 
 - incompatible with `&` (terminal output is masked for GUI programs)
 
-#### [`>`] Non-interactive command output in a floating window
+#### [`>`] Non-interactive command and plugin output in a floating window
 
-To show the output of run-and-exit commands in a floating window, add `>` (right arrow) after `!`.
+To show the output of run-and-exit commands in a floating window, add `>` (right arrow) after `!`. For a regular plugin script, prefix the plugin name with `>`.
 
 ```sh
-export NNN_PLUG='m:!>mediainfo "$nnn";t:!>tree -ps;l:!>ls -lah --group-directories-first'
+export NNN_PLUG='m:!>mediainfo "$nnn";t:!>tree -ps;l:!>ls -lah --group-directories-first;p:>myplugin'
 ```
 
 - incompatible with `&` (terminal output is masked for GUI programs)
 - ignores `-` (the directory is always refreshed)
+- use only with **non-interactive** plugin scripts; their stdout and stderr are captured, while `NNN_FIFO` communication remains available
 
 #### [`*`] Skip user confirmation after command execution
 
@@ -205,8 +206,8 @@ export NNN_PLUG='s:!smplayer "$nnn"*;n:-!vim /home/vaio/Dropbox/Public/synced_no
 - do not use `*` with programs that run and exit e.g. cat
 
 Notes:
-1. Place `$nnn` (or exported variables) in double quotes (**`"$nnn"`**)
-2. Use single quotes for `$NNN_PLUG` so that `"$nnn"` is not interpreted
+1. Place `$nnn` (or exported variables) in double quotes (**`"$nnn"`**).
+2. Use single quotes for `$NNN_PLUG` so that `"$nnn"` is not interpreted.
 
 ## Examples
 
