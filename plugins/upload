@@ -4,7 +4,7 @@
 #              For single files:
 #              Upload contents of a text file to https://0x0.st
 #              Upload a binary file to file.io
-#              Set UPLOAD_SERVICE=sendit.sh to use sendit.sh for files and selections
+#              Set NNN_UPLOAD_SERVICE=sendit.sh to use sendit.sh for files and selections
 #
 # Dependencies: curl, jq, tar, file with `--mime-type` support
 #
@@ -14,7 +14,7 @@
 # Author: Arun Prakash Jana
 
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
-upload_service=${UPLOAD_SERVICE:-}
+upload_service=${NNN_UPLOAD_SERVICE:-}
 if [ -s "$selection" ]; then
     if [ "$upload_service" = sendit.sh ]; then
         xargs -0 tar -c < "$selection" | \

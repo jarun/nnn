@@ -66,6 +66,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [imgview](imgview) | View (thumbnail)images, set wallpaper, [rename](https://github.com/jarun/nnn/wiki/Basic-use-cases#browse-rename-images) and [more](https://wiki.archlinux.org/index.php/Sxiv#Assigning_keyboard_shortcuts)| sh | _see in-file docs_ |
 | [ipinfo](ipinfo) | Fetch external IP address and whois information | sh | curl, whois |
 | [kdeconnect](kdeconnect) | Send selected files to an Android device [✓] | sh | kdeconnect-cli |
+| [largefiles](largefiles) | List the largest 20 files > 100MB in the dir tree | sh | find, sort,<br>numfmt (optional) |
 | [launch](launch) | GUI application launcher | sh | fzf |
 | [mimelist](mimelist) | List files by mime in subtree | sh | file/mimetype |
 | [moclyrics](moclyrics) | Show lyrics of the track playing in moc | sh | [ddgr](https://github.com/jarun/ddgr), [moc](http://moc.daper.net/) |
@@ -73,7 +74,7 @@ Plugins extend the capabilities of `nnn`. They are _executable_ scripts (or bina
 | [mp3conv](mp3conv) | Extract audio from multimedia as mp3 | sh | ffmpeg |
 | [mtpmount](mtpmount) | Toggle mount of MTP device (eg. Android) | sh | gvfs-mtp |
 | [nbak](nbak) | Backs up `nnn` config | sh | tar, awk, mktemp |
-| [nmount](nmount) | Toggle mount status of a device as normal user | bash | pmount (optional), udisks2 |
+| [nmount](nmount) | Toggle mount status of a device as normal user | bash | pmount (optional),<br>udisks2 |
 | [nuke](nuke) | Sample file opener (CLI-only by default) | sh | _see in-file docs_ |
 | [oldbigfile](oldbigfile) | List large files by access time | sh | find, sort |
 | [openall](openall) | Open selected files together or one by one [✓] | bash | - |
