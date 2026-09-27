@@ -6752,16 +6752,15 @@ static bool run_plugin(char **path, const char *file, char *runfile, char *openf
 	char ctx = 0;
 	ushort_t flags = 0;
 	bool cmd_as_plugin = FALSE;
-	FILE *capture = NULL;
+	bool capture_output = FALSE;
+	FILE *capturefile = NULL;
 	char *nextpath;
 
 	if (*file == '>') {
 		++file;
 		if (!*file)
 			return FALSE;
-		capture = tmpfile();
-		if (!capture)
-			return FALSE;
+		capture_output = TRUE;
 	}
 
 	if (!g_state.pluginit) {
@@ -6800,9 +6799,13 @@ static bool run_plugin(char **path, const char *file, char *runfile, char *openf
 	}
 
 	if (mkfifo(g_pipepath, 0600) != 0) {
-		if (capture)
-			fclose(capture);
 		return FALSE;
+	}
+
+	if (!cmd_as_plugin && capture_output) {
+		capturefile = tmpfile();
+		if (!capturefile)
+			return FALSE;
 	}
 
 	exitcurses();
@@ -6814,8 +6817,8 @@ static bool run_plugin(char **path, const char *file, char *runfile, char *openf
 
 		if (wfd == -1)
 			_exit(EXIT_FAILURE);
-		if (capture) {
-			int output_fd = fileno(capture);
+		if (capturefile) {
+			int output_fd = fileno(capturefile);
 
 			if (dup2(output_fd, STDOUT_FILENO) == -1 || dup2(output_fd, STDERR_FILENO) == -1) {
 				close(wfd);
@@ -6872,16 +6875,16 @@ static bool run_plugin(char **path, const char *file, char *runfile, char *openf
 
 	/* wait for the child to finish. no zombies allowed */
 	waitpid(p, NULL, 0);
-	if (capture) {
+	if (capturefile) {
 		char *content = NULL;
 		size_t content_len = 0;
 
 		refresh();
-		if (read_plugin_output(capture, &content, &content_len)) {
+		if (read_plugin_output(capturefile, &content, &content_len)) {
 			show_content_in_floating_window(content, content_len, action, FALSE);
 			free(content);
 		}
-		fclose(capture);
+		fclose(capturefile);
 	}
 
 	refresh();

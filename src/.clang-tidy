@@ -8,6 +8,7 @@ Checks: >
     misc-*,
     google-runtime-int,
     fuchsia-restrict-system-includes,
+    -bugprone-assignment-in-if-condition,
     -bugprone-assignment-in-selection-statement,
     -bugprone-easily-swappable-parameters,
     -bugprone-inc-dec-in-conditions,
