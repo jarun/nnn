@@ -37,14 +37,14 @@ if [ -z "$listing" ]; then
 	printf 'No files found\n'
 else
 	printf 'Files > %sMB (max %s), sorted by %s:\n\n' "$min_size" "$max_files" "$sort_order"
-	printf '%-16s %8s  %s\n' 'Access time' 'Size' 'Path'
+	printf '%-16s %10s  %s\n' 'Access time' 'Size' 'Path'
 	printf '%s\n' "$listing" | while IFS="$tab" read -r access_time size path; do
 		if command -v numfmt >/dev/null 2>&1; then
 			size=$(numfmt --to=iec-i --suffix=B "$size" | sed 's/\([0-9]\)\([[:alpha:]]\)/\1 \2/')
 		else
 			size="$size B"
 		fi
-		printf '%-16s %8s  %s\n' "$access_time" "$size" "$path"
+		printf '%-16s %10s  %s\n' "$access_time" "$size" "$path"
 	done
 fi
 
