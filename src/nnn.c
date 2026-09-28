@@ -6367,32 +6367,30 @@ static void printkeys(kv *kvarr, char *buf, uchar_t max)
 	buf[i << 1] = '\0';
 }
 
+/* Show keys and get user's preferred key as input, uses g_buf */
+static int get_kv_input(kv *kvarr, char *pref, uchar_t max)
+{
+	int r = snprintf(g_buf, CMD_LEN_MAX, "%s%s", messages[MSG_KEYS], pref);
+
+	printkeys(kvarr, g_buf + r, max);
+	return get_input(g_buf);
+}
+
 static size_t handle_bookmark(const char *bmark, char *newpath)
 {
-	int fd = '\r';
+	int key = '\r';
 	size_t r;
 
-	if (maxbm || bmark) {
-		r = xstrsncpy(g_buf, messages[MSG_KEYS], CMD_LEN_MAX - 2); // Leave 2 chars for a marked directory
-
-		if (bmark) { /* There is a marked directory */
-			g_buf[--r] = ' ';
-			g_buf[++r] = ',';
-			g_buf[++r] = '\0';
-			++r;
-		}
-		printkeys(bookmark, g_buf + r - 1, maxbm);
-		printmsg(g_buf);
-		fd = get_input(NULL);
-	}
+	if (maxbm || bmark)
+		key = get_kv_input(bookmark, bmark ? " ," : "", maxbm);
 
 	r = FALSE;
-	if (fd == ',') /* Visit marked directory */
+	if (key == ',') /* Visit marked directory */
 		bmark ? xstrsncpy(newpath, bmark, PATH_MAX) : (r = MSG_NOT_SET);
-	else if (fd == '\r') { /* Visit bookmarks directory */
+	else if (key == '\r') { /* Visit bookmarks directory */
 		mkpath(cfgpath, toks[TOK_BM], newpath);
 		g_state.selbm = 1;
-	} else if (!get_kv_val(bookmark, newpath, fd, maxbm, NNN_BMS))
+	} else if (!get_kv_val(bookmark, newpath, key, maxbm, NNN_BMS))
 		r = MSG_INVALID_KEY;
 
 	if (!r && chdir(newpath) == -1) {
@@ -9754,17 +9752,9 @@ nochange:
 			}
 
 			lazy_parse_plug();
-			if (!pkey) {
-				r = xstrsncpy(g_buf, messages[MSG_KEYS], CMD_LEN_MAX - 2);
-				g_buf[r - 1] = ' ';
-				g_buf[r] = '?';
-				g_buf[r + 1] = '\0';
-				printkeys(plug, g_buf + r + 1, maxplug);
-				printmsg(g_buf);
-				r = get_input(NULL);
-				move(xlines - 1, 0); // Clear the line
-				clrtoeol();
-			} else {
+			if (!pkey)
+				r = get_kv_input(plug, " ?", maxplug);
+			else {
 				r = pkey;
 				pkey = '\0';
 			}
