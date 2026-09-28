@@ -6756,13 +6756,6 @@ static bool run_plugin(char **path, const char *file, char *runfile, char *openf
 	FILE *capturefile = NULL;
 	char *nextpath;
 
-	if (*file == '>') {
-		++file;
-		if (!*file)
-			return FALSE;
-		capture_output = TRUE;
-	}
-
 	if (!g_state.pluginit) {
 		plctrl_init();
 		g_state.pluginit = 1;
@@ -6796,13 +6789,19 @@ static bool run_plugin(char **path, const char *file, char *runfile, char *openf
 		}
 
 		cmd_as_plugin = TRUE;
+	} else if (*file == '>') {
+		++file;
+		if (!*file)
+			return FALSE;
+		capture_output = TRUE;
 	}
+
 
 	if (mkfifo(g_pipepath, 0600) != 0) {
 		return FALSE;
 	}
 
-	if (!cmd_as_plugin && capture_output) {
+	if (capture_output) {
 		capturefile = tmpfile();
 		if (!capturefile)
 			return FALSE;
