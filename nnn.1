@@ -508,12 +508,6 @@ separated by \fB;\fR:
         * incompatible with \fB&\fR (terminal output is masked for GUI programs)
         * ignores \fB-\fR (the directory is always refreshed)
 
-        This modifier works with regular plugin scrips too. However, use it
-        only with non-interactive plugin scripts; their stdout and stderr are
-        captured while \fBNNN_FIFO\fR communication remains available.
-
-        export NNN_PLUG='p:>myplugin'
-
     [*] To skip user confirmation after command execution, suffix with \fB*\fR.
 
         export NNN_PLUG='y:-!sync*'

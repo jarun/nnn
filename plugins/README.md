@@ -179,17 +179,16 @@ export NNN_PLUG='m:-!|mediainfo "$nnn";t:-!|tree -ps;l:-!|ls -lah --group-direct
 
 - incompatible with `&` (terminal output is masked for GUI programs)
 
-#### [`>`] Non-interactive command and plugin output in a floating window
+#### [`>`] Non-interactive command output in a floating window
 
-To show the output of run-and-exit commands in a floating window, add `>` (right arrow) after `!`. For a regular plugin script, prefix the plugin name with `>`.
+To show the output of run-and-exit commands in a floating window, add `>` (right arrow) after `!`.
 
 ```sh
-export NNN_PLUG='m:!>mediainfo "$nnn";t:!>tree -ps;l:!>ls -lah --group-directories-first;p:>myplugin'
+export NNN_PLUG='m:!>mediainfo "$nnn";t:!>tree -ps;l:!>ls -lah --group-directories-first'
 ```
 
 - incompatible with `&` (terminal output is masked for GUI programs)
 - ignores `-` (the directory is always refreshed)
-- use only with **non-interactive** plugin scripts; their stdout and stderr are captured, while `NNN_FIFO` communication remains available
 
 #### [`*`] Skip user confirmation after command execution
 
