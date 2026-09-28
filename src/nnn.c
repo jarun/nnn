@@ -8685,6 +8685,37 @@ static void showselsize(const char *path)
 	printmsg(coolsize(cfg.blkorder ? sz << blk_shift : sz));
 }
 
+static bool init_browse_context(char *ipath, char **path, char **lastdir, char **lastname)
+{
+#ifndef NOSSN
+	if (curssn[0] && load_session(curssn, path, lastdir, lastname, FALSE))
+		return TRUE;
+#endif
+	g_ctx[0].c_last[0] = '\0';
+	*lastdir = g_ctx[0].c_last;
+
+	if (g_state.initfile) {
+		xstrsncpy(g_ctx[0].c_name, xbasename(ipath), sizeof(g_ctx[0].c_name));
+		xdirname(ipath);
+	} else
+		g_ctx[0].c_name[0] = '\0';
+
+	*lastname = g_ctx[0].c_name;
+
+	xstrsncpy(g_ctx[0].c_path, ipath, PATH_MAX);
+	if (g_state.initfile) {
+		free(initpath);
+		initpath = ipath = getcwd(NULL, 0); // NOLINT
+		if (!initpath)
+			return FALSE;
+	}
+	*path = g_ctx[0].c_path;
+
+	g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
+	g_ctx[0].c_cfg = cfg;
+	return TRUE;
+}
+
 static bool browse(char *ipath, int pkey)
 {
 	alignas(max_align_t) char newpath[PATH_MAX];
@@ -8709,36 +8740,8 @@ static bool browse(char *ipath, int pkey)
 
 	getmaxyx(stdscr, xlines, xcols);
 
-#ifndef NOSSN
-	/* set-up first context */
-	if (!curssn[0] || !load_session(curssn, &path, &lastdir, &lastname, FALSE)) {
-#endif
-		g_ctx[0].c_last[0] = '\0';
-		lastdir = g_ctx[0].c_last; /* last visited directory */
-
-		if (g_state.initfile) {
-			xstrsncpy(g_ctx[0].c_name, xbasename(ipath), sizeof(g_ctx[0].c_name));
-			xdirname(ipath);
-		} else
-			g_ctx[0].c_name[0] = '\0';
-
-		lastname = g_ctx[0].c_name; /* last visited file name */
-
-		xstrsncpy(g_ctx[0].c_path, ipath, PATH_MAX);
-		/* If the initial path is a file, retain a way to return to start dir */
-		if (g_state.initfile) {
-			free(initpath);
-			initpath = ipath = getcwd(NULL, 0); // NOLINT
-			if (!initpath)
-				return FALSE;
-		}
-		path = g_ctx[0].c_path; /* current directory */
-
-		g_ctx[0].c_fltr[0] = g_ctx[0].c_fltr[1] = '\0';
-		g_ctx[0].c_cfg = cfg; /* current configuration */
-#ifndef NOSSN
-	}
-#endif
+	if (!init_browse_context(ipath, &path, &lastdir, &lastname))
+		return FALSE;
 
 	newpath[0] = runfile[0] = '\0';
 
