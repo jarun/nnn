@@ -115,6 +115,7 @@ enum action {
 	SEL_TIMETYPE,
 	SEL_PREVIEW,
 	SEL_QUITCTX,
+	SEL_REOPENCTX,
 	SEL_QUITCD,
 	SEL_QUIT,
 	SEL_QUITERR,
@@ -279,6 +280,8 @@ static struct key bindings[] = {
 	{ 'T',            SEL_TIMETYPE },
 	/* Toggle preview pane */
 	{ 'P',            SEL_PREVIEW },
+	/* Reopen the last closed context */
+	{ 'R',            SEL_REOPENCTX },
 	/* Quit a context */
 	{ 'q',            SEL_QUITCTX },
 	/* Change dir on quit */

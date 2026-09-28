@@ -414,6 +414,7 @@ typedef struct {
 	uint_t plugparsed : 1;  /* Plugin kv pairs parsed */
 	uint_t lastctx    : 3;  /* Last context number visited */
 	uint_t reserved   : 1;  /* Adjust when adding/removing a field */
+	uint_t closedctx  : 3;  /* Last closed context number */
 } runstate;
 
 /* Contexts or workspaces */
@@ -580,7 +581,7 @@ alignas(max_align_t) static char g_tmpfpath[TMP_LEN_MAX];
 alignas(max_align_t) static char g_pipepath[TMP_LEN_MAX];
 
 /* Non-persistent runtime states */
-static runstate g_state = {.lastctx = CTX_INVALID};
+static runstate g_state = {.lastctx = CTX_INVALID, .closedctx = CTX_INVALID};
 
 /* Options to identify file MIME */
 #ifdef __APPLE__
@@ -5210,6 +5211,9 @@ static void savecurctx(char *path, char *curname, int nextctx)
 	settings tmpcfg = cfg;
 	context *ctxr = &g_ctx[nextctx];
 
+	if (g_state.closedctx == nextctx)
+		g_state.closedctx = CTX_INVALID;
+
 	/* Save the last context number before switching to the new context */
 	g_state.lastctx = cfg.curctx;
 
@@ -6441,16 +6445,16 @@ static void show_help(const char *path)
 	   "5Ret Rt l  Open%20'  First file/match\n"
 	       "9g ^A  Top%21J  Jump to entry/offset\n"
 	       "9G ^E  End%20^J  Toggle auto-advance on open\n"
+		  "c.  Toggle hidden%11d  Detail mode toggle\n"
 	      "8B (,)  Book(mark)%11b ^/  Select bookmark\n"
 		"a1-8  Context%11(Sh)Tab  Cycle/new context\n"
 	    "62Esc ^Q  Quit%19^y  Next young\n"
 		 "b^G  QuitCD%18Q  Pick/err, quit\n"
-	  "4q Alt+Esc  Quit context%12d  Detail mode toggle\n"
+	  "4q Alt+Esc  Quit context%12R  Reopen context\n"
 	"0\n"
 	"1FILTER & PROMPT\n"
 		  "c/  Filter%17^N  Toggle type-to-nav\n"
 		"aEsc  Exit prompt%12^L  Clear/apply filter\n"
-		  "c.  Toggle hidden\n"
 	"0\n"
 	"1FILES\n"
 	       "9o ^O  Open with%15n  Create new/link\n"
@@ -9950,6 +9954,20 @@ nochange:
 			if (!set_time_type(&presel))
 				goto nochange;
 			goto cdfalse_begin;
+		case SEL_REOPENCTX:
+			if ((g_state.closedctx != CTX_INVALID)
+			    && !g_ctx[g_state.closedctx].c_cfg.ctxactive) {
+				r = g_state.closedctx;
+				g_state.closedctx = CTX_INVALID;
+				g_ctx[r].c_cfg.ctxactive = 1;
+				g_ctx[r].c_cfg.curctx = r;
+				path = g_ctx[r].c_path;
+				lastdir = g_ctx[r].c_last;
+				lastname = g_ctx[r].c_name;
+				setcfg(g_ctx[r].c_cfg);
+				goto setwatch_begin;
+			}
+			goto statusbar_nochange;
 		case SEL_QUITCTX: // fallthrough
 		case SEL_QUITCD: // fallthrough
 		case SEL_QUIT:
@@ -9969,6 +9987,12 @@ nochange:
 				}
 
 				if (r != ctx) {
+					g_ctx[ctx].c_cfg = cfg;
+					if (ndents)
+						xstrsncpy(g_ctx[ctx].c_name, pdents[cur].name, NAME_MAX + 1);
+					else
+						g_ctx[ctx].c_name[0] = '\0';
+					g_state.closedctx = ctx;
 					g_ctx[ctx].c_cfg.ctxactive = 0;
 
 					/* Switch to next active context */
