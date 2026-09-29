@@ -33,8 +33,10 @@ clear_input() {
     READLINE_POINT=0
 }
 
-bind -x '"\e[A":restore_previous_input'
-bind -x '"\e[B":clear_input'
+if [[ $- == *i* ]]; then
+    bind -x '"\e[A":restore_previous_input'
+    bind -x '"\e[B":clear_input'
+fi
 
 lsblk
 
