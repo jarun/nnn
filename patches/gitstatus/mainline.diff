@@ -202,16 +202,16 @@ index 936e9c02..22032dcd 100644
  	free(selpath);
  	free(plgpath);
  	free(cfgpath);
-@@ -8589,7 +8696,7 @@ int main(int argc, char *argv[])
-
- 	while ((opt = (env_opts_id > 0
- 		       ? env_opts[--env_opts_id]
--		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVxz0h"))) != -1) {
-+		       : getopt(argc, argv, "aAb:BcCdDeEfF:gGHiJKl:nNop:P:QrRs:St:T:uUVxz0h"))) != -1) {
+@@ -10459,7 +10459,7 @@ static int parse_opts(int argc, char *argv[], struct optstate *st)
+ 	optind = 0; /* Full re-initialization (glibc, musl) */
+ #endif
+ 
+-	while ((opt = getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVxz0h")) != -1) {
++	while ((opt = getopt(argc, argv, "aAb:BcCdDeEfF:gGHiJKl:nNop:P:QrRs:St:T:uUVxz0h")) != -1) {
  		switch (opt) {
  #ifndef NOFIFO
  		case 'a':
-@@ -8643,6 +8750,9 @@ int main(int argc, char *argv[])
+@@ -10508,6 +10508,9 @@ static int parse_opts(int argc, char *argv[], struct optstate *st)
  			cfg.regex = 1;
  			filterfn = &visible_re;
  			break;

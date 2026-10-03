@@ -194,16 +194,16 @@
  	free(selpath);
  	free(plgpath);
  	free(cfgpath);
-@@ -9765,7 +9872,7 @@
+@@ -10459,7 +10566,7 @@
+ 	optind = 0; /* Full re-initialization (glibc, musl) */
+ #endif
  
- 	while ((opt = (env_opts_id > 0
- 		       ? env_opts[--env_opts_id]
--		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVxz0h"))) != -1) {
-+		       : getopt(argc, argv, "aAb:BcCdDeEfF:gGHiJKl:nNop:P:QrRs:St:T:uUVxz0h"))) != -1) {
+-	while ((opt = getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVxz0h")) != -1) {
++	while ((opt = getopt(argc, argv, "aAb:BcCdDeEfF:gGHiJKl:nNop:P:QrRs:St:T:uUVxz0h")) != -1) {
  		switch (opt) {
  #ifndef NOFIFO
  		case 'a':
-@@ -9819,6 +9926,9 @@
+@@ -10508,6 +10615,9 @@
  			cfg.regex = 1;
  			filterfn = &visible_re;
  			break;

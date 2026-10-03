@@ -488,6 +488,7 @@ static char hostname[_POSIX_HOST_NAME_MAX + 1];
 #ifndef NOFIFO
 static char *fifopath;
 #endif
+static char *env_optbuf; /* Backing storage for NNN_OPTS tokens */
 static ullong_t *ihashbmp;
 static ullong_t *dir_dispatched_bmp; /* dir inodes already dispatched (avoid double-count same subtree) */
 static struct entry *pdents;
@@ -10422,6 +10423,7 @@ static void cleanup(void)
 	free(bookmark);
 	free(plug);
 	free(previewer);
+	free(env_optbuf);
 	if (lastcmdpos != INVALID_POS)
 		for (uchar_t pos = 0; pos <= lastcmdpos; ++pos)
 			free(cmd_hist[pos]);
@@ -10436,27 +10438,27 @@ static void cleanup(void)
 #endif
 }
 
-int main(int argc, char *argv[])
-{
-	char *arg = NULL;
-	int fd, opt, sort = 0, pkey = '\0'; /* Plugin key */
-	bool sepnul = FALSE;
-#ifndef NOMOUSE
-	mmask_t mask;
-	char *middle_click_env = xgetenv(env_cfg[NNN_MCLICK], "\0");
+struct optstate {
+	char *arg;
+	int sort;
+	int pkey; /* Plugin key */
+	bool hist_file;
+	bool sepnul;
+};
 
-	middle_click_key = ((middle_click_env[0] == '^') && middle_click_env[1])
-			    ? CONTROL(middle_click_env[1])
-			    : (uchar_t)middle_click_env[0];
+/* Returns -1 to continue, else the exit code */
+static int parse_opts(int argc, char *argv[], struct optstate *st)
+{
+	int fd, opt;
+
+#ifdef BSD_KQUEUE
+	optind = 1;
+	optreset = 1;
+#else
+	optind = 0; /* Full re-initialization (glibc, musl) */
 #endif
 
-	const char * const env_opts = xgetenv(env_cfg[NNN_OPTS], NULL);
-	int env_opts_id = env_opts ? (int)xstrlen(env_opts) : -1;
-	bool hist_file = FALSE;
-
-	while ((opt = (env_opts_id > 0
-		       ? env_opts[--env_opts_id]
-		       : getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVxz0h"))) != -1) {
+	while ((opt = getopt(argc, argv, "aAb:BcCdDeEfF:gHiJKl:nNop:P:QrRs:St:T:uUVxz0h")) != -1) {
 		switch (opt) {
 #ifndef NOFIFO
 		case 'a':
@@ -10467,8 +10469,7 @@ int main(int argc, char *argv[])
 			cfg.autoenter = 0;
 			break;
 		case 'b':
-			if (env_opts_id < 0)
-				arg = optarg;
+			st->arg = optarg;
 			break;
 		case 'B':
 			g_state.usebsdtar = 1;
@@ -10492,16 +10493,14 @@ int main(int argc, char *argv[])
 			cfg.waitedit = 1;
 			break;
 		case 'f':
-			hist_file = TRUE;
+			st->hist_file = TRUE;
 			break;
 #ifndef NOFIFO
 		case 'F':
-			if (env_opts_id < 0) {
-				fd = atoi(optarg);
-				if ((fd < 0) || (fd > 1))
-					return EXIT_FAILURE;
-				g_state.fifomode = fd;
-			}
+			fd = atoi(optarg);
+			if ((fd < 0) || (fd > 1))
+				return EXIT_FAILURE;
+			g_state.fifomode = fd;
 			break;
 #endif
 		case 'g':
@@ -10525,8 +10524,7 @@ int main(int argc, char *argv[])
 #ifndef NOMOUSE
 #if NCURSES_MOUSE_VERSION > 1
 		case 'l':
-			if (env_opts_id < 0)
-				scroll_lines = atoi(optarg);
+			scroll_lines = atoi(optarg);
 			break;
 #endif
 #endif
@@ -10542,9 +10540,6 @@ int main(int argc, char *argv[])
 			cfg.nonavopen = 1;
 			break;
 		case 'p':
-			if (env_opts_id >= 0)
-				break;
-
 			g_state.picker = 1;
 			if (!(optarg[0] == '-' && optarg[1] == '\0')) {
 				fd = open(optarg, O_WRONLY | O_CREAT, 0600);
@@ -10554,6 +10549,7 @@ int main(int argc, char *argv[])
 				}
 
 				close(fd);
+				free(selpath);
 				selpath = abspath(optarg, NULL, NULL);
 				if (!selpath) {
 					xerror();
@@ -10564,8 +10560,8 @@ int main(int argc, char *argv[])
 			}
 			break;
 		case 'P':
-			if (env_opts_id < 0 && !optarg[1])
-				pkey = (uchar_t)optarg[0];
+			if (!optarg[1])
+				st->pkey = (uchar_t)optarg[0];
 			break;
 		case 'Q':
 			g_state.forcequit = 1;
@@ -10581,8 +10577,7 @@ int main(int argc, char *argv[])
 			break;
 #ifndef NOSSN
 		case 's':
-			if (env_opts_id < 0)
-				xstrsncpy(curssn, optarg, NAME_MAX);
+			xstrsncpy(curssn, optarg, NAME_MAX);
 			break;
 		case 'S':
 			g_state.prstssn = 1;
@@ -10591,12 +10586,10 @@ int main(int argc, char *argv[])
 			break;
 #endif
 		case 't':
-			if (env_opts_id < 0)
-				idletimeout = atoi(optarg);
+			idletimeout = atoi(optarg);
 			break;
 		case 'T':
-			if (env_opts_id < 0)
-				sort = (uchar_t)optarg[0];
+			st->sort = (uchar_t)optarg[0];
 			break;
 		case 'u':
 			cfg.prefersel = 1;
@@ -10617,7 +10610,7 @@ int main(int argc, char *argv[])
 			filterfn = &visible_fuzzy;
 			break;
 		case '0':
-			sepnul = TRUE;
+			st->sepnul = TRUE;
 			break;
 		case 'h':
 			usage();
@@ -10626,9 +10619,82 @@ int main(int argc, char *argv[])
 			usage();
 			return EXIT_FAILURE;
 		}
-		if (env_opts_id == 0)
-			env_opts_id = -1;
 	}
+
+	return -1;
+}
+
+/* Split NNN_OPTS into argv tokens; a leading '-' is added to the first if missing */
+static int parse_env_opts(const char *env_opts, struct optstate *st)
+{
+	size_t len = xstrlen(env_opts);
+	char *buf = malloc(len + 2);
+	char **av = malloc(sizeof(char *) * (len + 2));
+	int ac = 1, ret;
+
+	if (!buf || !av) {
+		free(buf);
+		free(av);
+		xerror();
+		return EXIT_FAILURE;
+	}
+
+	env_optbuf = buf; /* st->arg may point into it */
+	char *p = buf;
+
+	av[0] = "nnn";
+	for (const char *s = env_opts; *s;) {
+		while (*s && ISSPACE(*s))
+			++s;
+		if (!*s)
+			break;
+
+		av[ac++] = p;
+		if (ac == 2 && *s != '-')
+			*p++ = '-';
+		while (*s && !ISSPACE(*s))
+			*p++ = *s++;
+		*p++ = '\0';
+	}
+	av[ac] = NULL;
+
+	ret = ac > 1 ? parse_opts(ac, av, st) : -1;
+
+	/* getopt moves non-option words to the end, optind then points at the first */
+	if (ret == -1 && optind < ac) {
+		fprintf(stderr, "nnn: NNN_OPTS: unexpected '%s'\n", av[optind]);
+		ret = EXIT_FAILURE;
+	}
+
+	free(av);
+	return ret;
+}
+
+int main(int argc, char *argv[])
+{
+	char *arg = NULL;
+	int fd, ret, opt;
+	struct optstate ost = {NULL, 0, '\0', FALSE, FALSE};
+#ifndef NOMOUSE
+	mmask_t mask;
+	char *middle_click_env = xgetenv(env_cfg[NNN_MCLICK], "\0");
+
+	middle_click_key = ((middle_click_env[0] == '^') && middle_click_env[1])
+			    ? CONTROL(middle_click_env[1])
+			    : (uchar_t)middle_click_env[0];
+#endif
+
+	const char * const env_opts = xgetenv(env_cfg[NNN_OPTS], NULL);
+
+	/* NNN_OPTS first, so that program options override it */
+	if (env_opts && (ret = parse_env_opts(env_opts, &ost)) != -1)
+		return ret;
+	if ((ret = parse_opts(argc, argv, &ost)) != -1)
+		return ret;
+
+	arg = ost.arg;
+	int sort = ost.sort, pkey = ost.pkey;
+	bool hist_file = ost.hist_file, sepnul = ost.sepnul;
 
 #ifdef DEBUG
 	enabledbg();

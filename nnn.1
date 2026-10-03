@@ -445,10 +445,14 @@ The minimum file size unit is byte (B). The rest are K, M, G, T, P, E, Z, Y
 The SHELL, VISUAL (else EDITOR) and PAGER environment variables are
 used. A single combination of arguments is supported for SHELL and PAGER.
 .Pp
-\fBNNN_OPTS:\fR binary options to
+\fBNNN_OPTS:\fR options to
 .Nm
+, parsed like the command line. The leading '-' is optional. Options passed
+on the command line override NNN_OPTS.
 .Bd -literal
     export NNN_OPTS="cEnrx"
+    export NNN_OPTS="cEnrx -T t"
+    export NNN_OPTS="-HdT t"
 .Ed
 .Pp
 \fBNNN_OPENER:\fR specify a custom file opener.
