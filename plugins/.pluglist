@@ -56,7 +56,7 @@ catalog | while IFS='|' read -r name description; do
 	if [ -x "$plugindir/$name" ]; then
 		status='✓'
 	else
-		status='✗'
+		status=' '
 	fi
 	printf '%-*s   %s     %s\n' "$namewidth" "$name" "$status" "$description"
 done
