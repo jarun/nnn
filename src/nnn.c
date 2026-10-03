@@ -8222,17 +8222,12 @@ static void preview_pane(const char *path)
 
 	/* Auto-detect .npreview plugin */
 	if (!previewer) {
-		previewer = malloc(xstrlen(plgpath) + xstrlen(utils[UTIL_NPREVIEW]) + 1);
-		if (previewer) {
+		previewer = malloc(PATH_MAX); /* mkpath() needs PATH_MAX and adds a '/' */
+		if (previewer)
 			mkpath(plgpath, utils[UTIL_NPREVIEW], previewer);
-			if (access(previewer, X_OK)) {
-				free(previewer);
-				previewer = NULL;
-			}
-		}
 	}
 
-	if (previewer) {
+	if (previewer && !access(previewer, X_OK)) {
 		int pipefd[2];
 		if (pipe(pipefd) == -1)
 			return;

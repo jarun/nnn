@@ -7,6 +7,9 @@
 
 set -euf
 
+# Never read from nnn's tty
+exec </dev/null
+
 F="$1"
 W="${2:-80}"
 H="${3:-25}"
