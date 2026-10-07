@@ -43,7 +43,7 @@ Runs on the Pi, [Termux](https://www.youtube.com/embed/AbaauM7gUJw) (Android), L
   - Disk-IO sensitive (few disk reads and writes)
   - No FPU usage (all integer maths, even for file size)
   - Minimizes screen refresh with fast line redraws
-  - Tiny binary (typically around 100KB)
+  - Tiny binary (typically around 150KB)
   - 1-column mode for smaller terminals and form factors
   - Hackable - compile in/out features and dependencies
 - Portable
