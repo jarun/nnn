@@ -53,6 +53,16 @@ struct haiku_nm_t {
 		dl->Run();
 	}
 
+	~haiku_nm_t() {
+		// NOTE: 'Lock()'-ing and 'Unlock()'-ing around the 'RemoveCommonFilter()' seems to work so far.
+		dl->Lock(); // ignore retval
+		dl->RemoveCommonFilter(flt); // ignore retval
+		delete flt;
+		dl->Unlock(); // returns void
+		// This is the way of deleting a BLooper
+		dl->PostMessage(B_QUIT_REQUESTED);
+	}
+
 	DirectoryListener *dl;
 	BMessageFilter *flt;
 	node_ref nr;
@@ -63,9 +73,6 @@ haiku_nm_h haiku_init_nm() {
 }
 
 void haiku_close_nm(haiku_nm_h hnd) {
-	delete hnd->flt;
-	// This is the way of deleting a BLooper
-	hnd->dl->PostMessage(B_QUIT_REQUESTED);
 	delete hnd;
 }
 int haiku_watch_dir(haiku_nm_h hnd, const char *path) {
