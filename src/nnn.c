@@ -2188,6 +2188,9 @@ static void endselection(bool endselmode)
 		pbuf += xstrlen(pbuf) + 1;
 	}
 
+	if (!alloclen)
+		return;
+
 	buf = malloc(alloclen);
 	if (!buf)
 		errexit();
@@ -2197,7 +2200,7 @@ static void endselection(bool endselmode)
 		len = xstrlen(pbuf) + 1;
 		if (is_prefix(pbuf, listpath, initlen)
 		    && (pbuf[initlen] == '/' || pbuf[initlen] == '\0')) {
-			memcpy(dst, listroot, prefixlen);
+			memcpy(dst, listroot, prefixlen); // NOLINT
 			dst += prefixlen;
 			memcpy(dst, pbuf + initlen, len - initlen);
 			dst += len - initlen;
