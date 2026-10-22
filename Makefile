@@ -174,7 +174,9 @@ HOST_CFLAGS ?= $(CFLAGS)
 # static compilation needs libgpm development package
 ifeq ($(strip $(O_STATIC)),1)
 	LDFLAGS += -static
+ifneq ($(strip $(O_NOMOUSE)),1)
 	LDLIBS += -lgpm
+endif
 endif
 
 DISTFILES = src nnn.1 Makefile README.md LICENSE
