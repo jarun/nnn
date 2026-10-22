@@ -144,7 +144,7 @@ Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creat
 - [This Week in Linux 114 - TuxDigital](https://www.youtube.com/watch?v=5W9ja0DQjSY&t=2059s)
 - [I'M GOING TO USE THE NNN FILE BROWSER! 😮](https://www.youtube.com/embed/U2n5aGqou9E)
 - [NNN: Is This Terminal File Manager As Good As People Say?](https://www.youtube.com/embed/KuJHo-aO_FA)
-- [Checkmate, GUI users. | 4P](https://www.youtube.com/embed/5nBQshNBsV0)
+- [Checkmate, GUI users. | 4P](https://youtu.be/5nBQshNBsV0?si=0mXEzCjGXgIv0Wo9)
 
 ## Elsewhere
 
