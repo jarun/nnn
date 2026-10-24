@@ -843,15 +843,13 @@ static const char * const toks[] = {
 #define P_CPMVFMT 0
 #define P_CPMVRNM 1
 #define P_ARCHIVE 2
-#define P_REPLACE 3
-#define P_ARCHIVE_CMD 4
+#define P_ARCHIVE_CMD 3
 
 static const char * const patterns[] = {
 	SED" -i 's|^\\(\\(.*/\\)\\(.*\\)$\\)|#\\1\\n\\3|' '%s'",
 	SED" 's|^\\([^#/][^/]\\?.*\\)$|%s/\\1|;s|^#\\(/.*\\)$|\\1|' "
 		"'%s' | tr '\\n' '\\0' | xargs -0 -n2 sh -c '%s \"$0\" \"$@\" < /dev/tty'",
 	"\\.(bz|bz2|gz|tar|taz|tbz|tbz2|tgz|tzst|z|zip|zst)$", /* Basic formats that don't need external tools */
-	SED" -i 's|^%s\\(.*\\)$|%s\\1|' '%s'",
 	"xargs -0 %s %s < %s",
 };
 
@@ -2166,10 +2164,6 @@ static void rmtmpfile(void)
 
 static void endselection(bool endselmode)
 {
-	int fd;
-	ssize_t count;
-	char buf[sizeof(patterns[P_REPLACE]) + PATH_MAX + (TMP_LEN_MAX << 1)];
-
 	if (endselmode && g_state.selmode)
 		g_state.selmode = 0;
 
@@ -2177,51 +2171,49 @@ static void endselection(bool endselmode)
 	if (!listpath || !selbufpos)
 		return;
 
-	fd = create_tmp_file();
-	if (fd == -1) {
-		DPRINTF_S("couldn't create tmp file");
-		return;
-	}
+	size_t len, alloclen = 0, prefixlen = xstrlen(listroot), initlen = xstrlen(listpath);
+	char *pbuf = pselbuf, *end = pselbuf + selbufpos, *buf, *dst;
 
-	seltofile(fd, NULL, NEWLINE);
-	if (close(fd)) {
-		DPRINTF_S(strerror(errno));
-		printwarn(NULL);
-		return;
-	}
-
-	snprintf(buf, sizeof(buf), patterns[P_REPLACE], listpath, listroot, g_tmpfpath);
-	spawn_sh_exec(buf);
-
-	fd = open(g_tmpfpath, O_RDONLY);
-	if (fd == -1) {
-		DPRINTF_S(strerror(errno));
-		printwarn(NULL);
-		rmtmpfile();
-		return;
-	}
-
-	count = read(fd, pselbuf, selbuflen);
-	if (count < 0) {
-		DPRINTF_S(strerror(errno));
-		printwarn(NULL);
-		if (close(fd) || unlink(g_tmpfpath)) {
-			DPRINTF_S(strerror(errno));
+	/* Size the translated selection before replacing any paths. */
+	while (pbuf < end) {
+		len = xstrlen(pbuf) + 1;
+		if (is_prefix(pbuf, listpath, initlen)
+		    && (pbuf[initlen] == '/' || pbuf[initlen] == '\0'))
+			len = len - initlen + prefixlen;
+		if (len > UINT_MAX - alloclen) {
+			errno = ENOMEM;
+			errexit();
 		}
-		return;
+		alloclen += len;
+		pbuf += xstrlen(pbuf) + 1;
 	}
 
-	if (close(fd) || unlink(g_tmpfpath)) {
-		DPRINTF_S(strerror(errno));
-		printwarn(NULL);
+	if (!alloclen)
 		return;
+
+	buf = malloc(alloclen);
+	if (!buf)
+		errexit();
+
+	/* Keep filesystem names literal and preserve the NUL separators. */
+	for (pbuf = pselbuf, dst = buf; pbuf < end; pbuf += len) {
+		len = xstrlen(pbuf) + 1;
+		if (is_prefix(pbuf, listpath, initlen)
+		    && (pbuf[initlen] == '/' || pbuf[initlen] == '\0')) {
+			memcpy(dst, listroot, prefixlen); // NOLINT
+			dst += prefixlen;
+			memcpy(dst, pbuf + initlen, len - initlen);
+			dst += len - initlen;
+		} else {
+			memcpy(dst, pbuf, len);
+			dst += len;
+		}
 	}
 
-	selbufpos = count;
-	pselbuf[--count] = '\0';
-	for (--count; count > 0; --count)
-		if (pselbuf[count] == '\n' && pselbuf[count+1] == '/')
-			pselbuf[count] = '\0';
+	free(pselbuf);
+	pselbuf = buf;
+	selbufpos = selbuflen = alloclen;
+	findselpos = NULL;
 
 	writesel(pselbuf, selbufpos - 1);
 }
