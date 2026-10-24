@@ -3177,15 +3177,16 @@ cleanup:
 
 static void write_lastdir(const char *curpath, const char *outfile)
 {
-	bool tilde = false, ok = false;
-	if (!outfile)
-		xstrsncpy(cfgpath + xstrlen(cfgpath), "/.lastd", 8);
+	bool use_g_buf = false, ok = false;
+	if (!outfile) {
+		mkpath(cfgpath, ".lastd", g_buf);
+		use_g_buf = true;
+	}
 	else
-		tilde = convert_tilde(outfile, g_buf);
+		use_g_buf = convert_tilde(outfile, g_buf);
 
-	int fd = open(outfile
-			? (tilde ? g_buf : outfile)
-			: cfgpath, O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR | S_IRUSR);
+	int fd = open(use_g_buf ? g_buf : outfile,
+			O_CREAT | O_WRONLY | O_TRUNC, S_IWUSR | S_IRUSR);
 	if (fd >= 0) {
 		char *bufptr = g_buf;
 		size_t buflen = sizeof(g_buf) - 3;
