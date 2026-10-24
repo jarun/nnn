@@ -142,10 +142,9 @@ Don't memorize! Arrows, <kbd>/</kbd>, <kbd>q</kbd> suffice. <kbd>Tab</kbd> creat
 - [nnn file manager on Termux (Android)](https://www.youtube.com/embed/AbaauM7gUJw)
 - [NNN File Manager](https://www.youtube.com/embed/1QXU4XSqXNo)
 - [This Week in Linux 114 - TuxDigital](https://www.youtube.com/watch?v=5W9ja0DQjSY&t=2059s)
-- [nnn file manager basics - Linux](https://www.youtube.com/embed/il2Fm-KJJfM)
 - [I'M GOING TO USE THE NNN FILE BROWSER! 😮](https://www.youtube.com/embed/U2n5aGqou9E)
 - [NNN: Is This Terminal File Manager As Good As People Say?](https://www.youtube.com/embed/KuJHo-aO_FA)
-- [nnn - A File Manager (By Uoou, again.)](https://www.youtube.com/embed/cnzuzcCPYsk)
+- [Checkmate, GUI users. | 4P](https://youtu.be/5nBQshNBsV0?si=0mXEzCjGXgIv0Wo9)
 
 ## Elsewhere
 
