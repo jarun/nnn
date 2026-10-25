@@ -75,7 +75,6 @@
 #include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <fts.h>
 #include <libgen.h>
 #include <limits.h>
 #ifndef NOLC
@@ -6967,7 +6966,6 @@ static void dentfree(void)
 	free(du_tasks);
 }
 
-/* Walk a directory tree using readdir to reduce FTS overhead */
 static void du_pending_inc(du_group *group, bool inc_pending)
 {
 	if (inc_pending) {
