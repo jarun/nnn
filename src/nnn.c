@@ -2857,6 +2857,18 @@ static bool cpmv_rename(int choice, const char *path)
 		spawn_sh_exec(buf);
 
 		count = entries_in_file(fd, buf, sizeof(buf), NEWLINE_CHAR);
+		/* External selections may not end with a NUL, so tr leaves the last
+		 * path without a newline and entries_in_file() does not count it.
+		 */
+		if (lseek(fd, -1, SEEK_END) != -1) {
+			if (read(fd, buf, 1) != 1)
+				goto finish;
+			if (buf[0] != NEWLINE_CHAR) {
+				if (write(fd, NEWLINE, 1) != 1)
+					goto finish;
+				++count;
+			}
+		}
 		if (!count)
 			goto finish;
 	} else
