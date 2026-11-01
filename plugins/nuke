@@ -277,8 +277,9 @@ listimages() {
 
 load_dir() {
     abspath "$2"
-    tmp="${TMPDIR:-/tmp}/nuke_$$"
-    trap 'rm -f -- "$tmp"' EXIT
+    tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/nuke.XXXXXX") || return 1
+    tmp="$tmpdir/list"
+    trap 'rm -rf -- "$tmpdir"' EXIT
     count="$(listimages "$abs_target" | grep -a -m 1 -ZznF "$abs_target" | cut -d: -f1)"
 
     if [ -n "$count" ]; then

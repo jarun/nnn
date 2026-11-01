@@ -7596,13 +7596,35 @@ static void populate(char *path, char *lastname)
 }
 
 #ifndef NOFIFO
+static int open_fifo(void)
+{
+	int flags = O_WRONLY | O_NONBLOCK | O_CLOEXEC;
+	struct stat sb;
+
+#ifdef O_NOFOLLOW
+	flags |= O_NOFOLLOW;
+#endif
+
+	int fd = open(fifopath, flags);
+	if (fd == -1)
+		return -1;
+
+	if (fstat(fd, &sb) == -1 || !S_ISFIFO(sb.st_mode)) {
+		close(fd);
+		errno = EINVAL;
+		return -1;
+	}
+
+	return fd;
+}
+
 static void notify_fifo(bool force)
 {
 	if (!fifopath)
 		return;
 
 	if (fifofd == -1) {
-		fifofd = open(fifopath, O_WRONLY|O_NONBLOCK|O_CLOEXEC);
+		fifofd = open_fifo();
 		if (fifofd == -1) {
 			if (errno != ENXIO)
 				/* Unexpected error, the FIFO file might have been removed */
@@ -7634,14 +7656,14 @@ static void notify_fifo(bool force)
 static void send_to_explorer(int *presel)
 {
 	if (nselected) {
-		int fd = open(fifopath, O_WRONLY|O_NONBLOCK|O_CLOEXEC, 0600);
+		int fd = open_fifo();
 		if ((fd == -1) || (seltofile(fd, NULL, NEWLINE) != (size_t)(selbufpos)))
 			printwarn(presel);
 		else {
 			resetselind();
 			clearselection();
 		}
-		if (fd > 1)
+		if (fd >= 0)
 			close(fd);
 	} else
 		notify_fifo(TRUE); /* Send opened path to NNN_FIFO */
@@ -10870,7 +10892,22 @@ int main(int argc, char *argv[])
 
 	fifopath = xgetenv("NNN_FIFO", NULL);
 	if (fifopath) {
-		if (mkfifo(fifopath, 0600) != 0 && !(errno == EEXIST && access(fifopath, W_OK) == 0)) {
+		struct stat sb;
+
+		if (mkfifo(fifopath, 0600) != 0 && errno != EEXIST) {
+			xerror();
+			return EXIT_FAILURE;
+		}
+		if (lstat(fifopath, &sb) != 0) {
+			xerror();
+			return EXIT_FAILURE;
+		}
+		if (!S_ISFIFO(sb.st_mode)) {
+			errno = EINVAL;
+			xerror();
+			return EXIT_FAILURE;
+		}
+		if (access(fifopath, W_OK) != 0) {
 			xerror();
 			return EXIT_FAILURE;
 		}

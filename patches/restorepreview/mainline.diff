@@ -125,15 +125,9 @@ index bb101e87..4759b5f1 100644
  static char *readpipe(int fd, char *ctxnum, char **path, char *openfile)
  {
  	char ctx, *nextpath = NULL;
-@@ -7447,7 +7473,7 @@ static void populate(char *path, char *lastname)
- }
- 
- #ifndef NOFIFO
+@@ -7473 +7499 @@
 -static void notify_fifo(bool force)
 +static void notify_fifo(bool force, bool closepreview)
- {
- 	if (!fifopath)
- 		return;
 @@ -7463,6 +7489,12 @@ static void notify_fifo(bool force)
  		}
  	}

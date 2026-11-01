@@ -12,7 +12,9 @@
 selection=${NNN_SEL:-${XDG_CONFIG_HOME:-$HOME/.config}/nnn/.selection}
 
 if [ -s "$selection" ]; then
-    xargs -0 -I {} sh -c 'if [ -x "{}" ] ; then chmod -x "{}" ; else chmod +x "{}" ; fi' < "$selection"
+    # Keep the script literal so each filename is passed as $1.
+    # shellcheck disable=SC2016
+    xargs -0 -I {} sh -c 'file=$1; case "$file" in /*) ;; *) file=./$file;; esac; if [ -x "$file" ]; then chmod -x "$file"; else chmod +x "$file"; fi' sh {} < "$selection"
 
     # Clear selection
     if [ -p "$NNN_PIPE" ]; then

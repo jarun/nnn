@@ -6,8 +6,9 @@
 # Author: Arun Prakash Jana
 
 if [ -n "$1" ]; then
-    tmpf="$(basename "$1")"
-    tmpf="${TMPDIR:-/tmp}"/"${tmpf%.*}"
+    tmpdir=$(mktemp -d "${TMPDIR:-/tmp}/pdfread.XXXXXX") || exit 1
+    trap 'rm -rf -- "$tmpdir"' EXIT
+    tmpf="$tmpdir/output"
 
     if [ "$(head -c 4 "$1")" = "%PDF" ]; then
         # Convert using pdftotext
