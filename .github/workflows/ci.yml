@@ -2,15 +2,64 @@ name: GitHubCI
 
 on:
   push:
-    branches: [master]
+    branches: ['**']
   pull_request:
     branches: [master]
+  schedule:
+    - cron: "0 0 * * 6"
+
+permissions:
+  contents: read
 
 jobs:
+  linux-compile:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-22.04, compiler: gcc-9 }
+          - { os: ubuntu-22.04, compiler: gcc-10 }
+          - { os: ubuntu-24.04, compiler: gcc-11 }
+          - { os: ubuntu-24.04, compiler: gcc-12 }
+          - { os: ubuntu-24.04, compiler: gcc-13 }
+          - { os: ubuntu-24.04, compiler: gcc-14 }
+          - { os: ubuntu-24.04, compiler: clang-14 }
+          - { os: ubuntu-24.04, compiler: clang-15 }
+          - { os: ubuntu-24.04, compiler: clang-16 }
+          - { os: ubuntu-24.04, compiler: clang-17 }
+          - { os: ubuntu-24.04, compiler: clang-18 }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ${{ matrix.compiler }} make pkg-config libncurses-dev libreadline-dev
+      - name: Compile
+        env:
+          CC: ${{ matrix.compiler }}
+          CFLAGS: -Werror
+          CI_FORCE_TEST: "1"
+        run: make strip
+
+  linux-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends clang-tidy-18 shellcheck libncurses-dev libreadline-dev
+      - name: Run clang-tidy
+        run: clang-tidy-18 src/* -- -I/usr/include -I/usr/include/ncursesw
+      - name: Run shellcheck
+        run: find plugins/ -type f ! \( -name "*.md" -o -name "*-mac" \) -exec shellcheck {} +
+
   macOS-gcc:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
     runs-on: macOS-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Compile with gcc
         env:
           CC: gcc
@@ -20,9 +69,10 @@ jobs:
           make
           make clean
   macOS-clang:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
     runs-on: macOS-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Compile with clang
         env:
           CC: clang
@@ -39,9 +89,10 @@ jobs:
           make clean
           clang-tidy src/* -- -I/usr/include
   ubuntu-patches:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Compile patches with gcc
         env:
           CC: gcc
@@ -49,12 +100,14 @@ jobs:
           sudo apt install libreadline-dev
           make checkpatches
   ubuntu-cppcheck:
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Static analysis with cppcheck
         run: |
           sudo apt install cppcheck libreadline-dev
+          read -r -a ncurses_flags <<< "$(pkg-config --cflags ncurses)"
           cppcheck --std="c11" --error-exitcode=1 --enable=performance,portability \
                    --force --inline-suppr --max-ctu-depth=8 -j"$(nproc)" \
-                   $(pkg-config --cflags ncurses) src/nnn.c
+                   "${ncurses_flags[@]}" src/nnn.c

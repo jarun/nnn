@@ -1,0 +1,33 @@
+name: Publish GitHub release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  package-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: release-${{ github.ref }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create source archive
+        run: |
+          repo="${GITHUB_REPOSITORY##*/}"
+          tag="$GITHUB_REF_NAME"
+          mkdir -p dist
+          git archive --format=tar.gz --prefix="${repo}-${tag#v}/" -o "dist/${repo}-${tag}.tar.gz" HEAD
+      - name: Publish to GitHub
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" --notes ""
+          fi
+          gh release upload "$GITHUB_REF_NAME" dist/* --clobber
