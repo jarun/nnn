@@ -6263,7 +6263,7 @@ static bool unmount(char *name, char *newpath, int *presel, char *currentpath)
 	static bool found = FALSE;
 #endif
 	char *tmp = name;
-	struct stat sb, psb;
+	struct stat sb, psb = {0};
 	bool child = FALSE;
 	bool parent = FALSE;
 	bool hovered = FALSE;
